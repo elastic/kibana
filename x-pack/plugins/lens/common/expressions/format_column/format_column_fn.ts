@@ -23,7 +23,7 @@ function withParams(col: DatatableColumn, params: Record<string, unknown>) {
 
 export const formatColumnFn: FormatColumnExpressionFunction['fn'] = (
   input,
-  { format, columnId, decimals, suffix, parentFormat }: FormatColumnArgs
+  { format, columnId, decimals, compact, suffix, pattern, parentFormat }: FormatColumnArgs
 ) => ({
   ...input,
   columns: input.columns
@@ -32,9 +32,12 @@ export const formatColumnFn: FormatColumnExpressionFunction['fn'] = (
         if (!parentFormat) {
           if (supportedFormats[format]) {
             const serializedFormat: SerializedFieldFormat = {
-              id: supportedFormats[format].formatId,
+              id:
+                supportedFormats[format].formatId !== 'custom'
+                  ? supportedFormats[format].formatId
+                  : 'number',
               params: {
-                pattern: supportedFormats[format].decimalsToPattern(decimals),
+                pattern: pattern ?? supportedFormats[format].decimalsToPattern(decimals, compact),
                 formatOverride: true,
               },
             };
@@ -58,7 +61,7 @@ export const formatColumnFn: FormatColumnExpressionFunction['fn'] = (
 
         if (format && supportedFormats[format]) {
           const customParams = {
-            pattern: supportedFormats[format].decimalsToPattern(decimals),
+            pattern: pattern ?? supportedFormats[format].decimalsToPattern(decimals, compact),
             formatOverride: true,
           };
           // Some parent formatters are multi-fields and wrap the custom format into a "paramsPerField"

@@ -325,17 +325,18 @@ function getExpressionForLayer(
         arguments: {
           format: format ? [format.id] : [''],
           columnId: [id],
-          decimals:
-            typeof format?.params?.decimals === 'number' &&
-            !visualizationDataPreferences?.format?.disableExtraOptions
-              ? [format.params.decimals]
-              : [],
+          decimals: typeof format?.params?.decimals === 'number' ? [format.params.decimals] : [],
           suffix:
-            format?.params &&
-            'suffix' in format.params &&
-            format.params.suffix &&
-            !visualizationDataPreferences?.format?.disableExtraOptions
+            format?.params && 'suffix' in format.params && format.params.suffix
               ? [format.params.suffix]
+              : [],
+          compact:
+            format?.params && 'compact' in format.params && format.params.compact
+              ? [format.params.compact]
+              : [],
+          pattern:
+            format?.params && 'pattern' in format.params && format.params.pattern
+              ? [format.params.pattern]
               : [],
           parentFormat: parentFormat ? [JSON.stringify(parentFormat)] : [],
         },

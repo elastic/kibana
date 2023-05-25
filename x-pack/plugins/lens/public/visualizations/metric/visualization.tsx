@@ -33,15 +33,10 @@ import { GROUP_ID, LENS_METRIC_ID } from './constants';
 import { DimensionEditor, DimensionEditorAdditionalSection } from './dimension_editor';
 import { Toolbar } from './toolbar';
 import { generateId } from '../../id_generator';
-import { FormatSelectorOptions } from '../../datasources/form_based/dimension_panel/format_selector';
 import { toExpression } from './to_expression';
 import { nonNullable } from '../../utils';
 
 export const DEFAULT_MAX_COLUMNS = 3;
-
-const formatterOptions: FormatSelectorOptions = {
-  disableExtraOptions: true,
-};
 
 export const showingBar = (
   state: MetricVisualizationState
@@ -146,7 +141,6 @@ const getMetricLayerConfiguration = (
         isMetricDimension: true,
         enableDimensionEditor: true,
         enableFormatSelector: true,
-        formatSelectorOptions: formatterOptions,
         requiredMinDimensionCount: 1,
       },
       {
@@ -172,7 +166,6 @@ const getMetricLayerConfiguration = (
         isMetricDimension: true,
         enableDimensionEditor: true,
         enableFormatSelector: true,
-        formatSelectorOptions: formatterOptions,
       },
       {
         groupId: GROUP_ID.MAX,
@@ -194,7 +187,6 @@ const getMetricLayerConfiguration = (
         filterOperations: isSupportedMetric,
         enableDimensionEditor: true,
         enableFormatSelector: false,
-        formatSelectorOptions: formatterOptions,
         supportStaticValue: true,
         prioritizedOperation: 'max',
         groupTooltip: i18n.translate('xpack.lens.metric.maxTooltip', {
@@ -219,7 +211,6 @@ const getMetricLayerConfiguration = (
         filterOperations: isBucketed,
         enableDimensionEditor: true,
         enableFormatSelector: true,
-        formatSelectorOptions: formatterOptions,
       },
     ],
   };
@@ -728,8 +719,5 @@ export const getMetricVisualization = ({
         },
       ],
     };
-  },
-  getSourcePreferences() {
-    return { format: formatterOptions };
   },
 });

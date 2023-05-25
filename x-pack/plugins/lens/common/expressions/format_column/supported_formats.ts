@@ -7,29 +7,29 @@
 
 export const supportedFormats: Record<
   string,
-  { decimalsToPattern: (decimals?: number) => string; formatId: string }
+  { decimalsToPattern: (decimals?: number, compact?: boolean) => string; formatId: string }
 > = {
   number: {
     formatId: 'number',
-    decimalsToPattern: (decimals = 2) => {
+    decimalsToPattern: (decimals = 2, compact?: boolean) => {
       if (decimals === 0) {
-        return `0,0`;
+        return `0,0${compact ? 'a' : ''}`;
       }
-      return `0,0.${'0'.repeat(decimals)}`;
+      return `0,0.${'0'.repeat(decimals)}${compact ? 'a' : ''}`;
     },
   },
   percent: {
     formatId: 'percent',
-    decimalsToPattern: (decimals = 2) => {
+    decimalsToPattern: (decimals = 2, compact?: boolean) => {
       if (decimals === 0) {
-        return `0,0%`;
+        return `0,0${compact ? 'a' : ''}%`;
       }
-      return `0,0.${'0'.repeat(decimals)}%`;
+      return `0,0.${'0'.repeat(decimals)}${compact ? 'a' : ''}%`;
     },
   },
   bytes: {
     formatId: 'bytes',
-    decimalsToPattern: (decimals = 2) => {
+    decimalsToPattern: (decimals = 2, compact?: boolean) => {
       if (decimals === 0) {
         return `0,0b`;
       }
@@ -38,11 +38,15 @@ export const supportedFormats: Record<
   },
   bits: {
     formatId: 'bytes',
-    decimalsToPattern: (decimals = 2) => {
+    decimalsToPattern: (decimals = 2, compact?: boolean) => {
       if (decimals === 0) {
         return `0,0bitd`;
       }
       return `0,0.${'0'.repeat(decimals)}bitd`;
     },
+  },
+  custom: {
+    formatId: 'custom',
+    decimalsToPattern: () => '',
   },
 };

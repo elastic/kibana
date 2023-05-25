@@ -7,32 +7,62 @@
 
 import React, { useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFormRow, EuiComboBox, EuiSpacer, EuiRange, EuiFieldText } from '@elastic/eui';
+import {
+  EuiFormRow,
+  EuiComboBox,
+  EuiSpacer,
+  EuiRange,
+  EuiFieldText,
+  EuiSwitch,
+  EuiCode,
+  EuiIcon,
+  EuiLink,
+  EuiText,
+} from '@elastic/eui';
 import { useDebouncedValue } from '@kbn/visualization-ui-components/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { FORMATS_UI_SETTINGS } from '@kbn/field-formats-plugin/common';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { LensAppServices } from '../../../app_plugin/types';
 import { GenericIndexPatternColumn } from '../form_based';
 import { isColumnFormatted } from '../operations/definitions/helpers';
+import { ValueFormatConfig } from '../operations/definitions/column_types';
 
-const supportedFormats: Record<string, { title: string; defaultDecimals?: number }> = {
+const supportedFormats: Record<
+  string,
+  { title: string; defaultDecimals?: number; supportsCompact: boolean }
+> = {
   number: {
     title: i18n.translate('xpack.lens.indexPattern.numberFormatLabel', {
       defaultMessage: 'Number',
     }),
+    supportsCompact: true,
   },
   percent: {
     title: i18n.translate('xpack.lens.indexPattern.percentFormatLabel', {
       defaultMessage: 'Percent',
     }),
+    supportsCompact: true,
   },
   bytes: {
     title: i18n.translate('xpack.lens.indexPattern.bytesFormatLabel', {
       defaultMessage: 'Bytes (1024)',
     }),
+    supportsCompact: false,
   },
   bits: {
     title: i18n.translate('xpack.lens.indexPattern.bitsFormatLabel', {
       defaultMessage: 'Bits (1000)',
     }),
     defaultDecimals: 0,
+    supportsCompact: false,
+  },
+  custom: {
+    title: i18n.translate('xpack.lens.indexPattern.customFormatLabel', {
+      defaultMessage: 'Custom format',
+    }),
+    defaultDecimals: 0,
+    supportsCompact: false,
   },
 };
 
@@ -57,29 +87,29 @@ const suffixLabel = i18n.translate('xpack.lens.indexPattern.suffixLabel', {
   defaultMessage: 'Suffix',
 });
 
-export interface FormatSelectorOptions {
-  disableExtraOptions?: boolean;
-}
+const compactLabel = i18n.translate('xpack.lens.indexPattern.compactLabel', {
+  defaultMessage: 'Compact',
+});
+
+type FormatParams = NonNullable<ValueFormatConfig['params']>;
+type FormatParamsKeys = keyof FormatParams;
 
 interface FormatSelectorProps {
   selectedColumn: GenericIndexPatternColumn;
-  onChange: (newFormat?: { id: string; params?: Record<string, unknown> }) => void;
-  options?: FormatSelectorOptions;
+  onChange: (newFormat?: { id: string; params?: FormatParams }) => void;
 }
 
 const RANGE_MIN = 0;
 const RANGE_MAX = 15;
 
-export function FormatSelector(props: FormatSelectorProps) {
-  const { selectedColumn, onChange } = props;
-  const currentFormat = isColumnFormatted(selectedColumn)
-    ? selectedColumn.params?.format
-    : undefined;
-
-  const [decimals, setDecimals] = useState(currentFormat?.params?.decimals ?? 2);
-
-  const onChangeSuffix = useCallback(
-    (suffix: string) => {
+function useDebouncedInputforParam<T extends FormatParamsKeys>(
+  name: T,
+  defaultValue: FormatParams[T],
+  currentFormat: ValueFormatConfig | undefined,
+  onChange: FormatSelectorProps['onChange']
+) {
+  const onChangeParam = useCallback(
+    (value: FormatParams[T]) => {
       if (!currentFormat) {
         return;
       }
@@ -87,19 +117,54 @@ export function FormatSelector(props: FormatSelectorProps) {
         id: currentFormat.id,
         params: {
           ...currentFormat.params,
-          suffix,
-        },
+          [name]: value,
+        } as FormatParams,
       });
     },
-    [currentFormat, onChange]
+    [currentFormat, name, onChange]
   );
 
-  const { handleInputChange: setSuffix, inputValue: suffix } = useDebouncedValue(
+  const { handleInputChange: setter, inputValue: value } = useDebouncedValue(
     {
-      onChange: onChangeSuffix,
-      value: currentFormat?.params?.suffix ?? '',
+      onChange: onChangeParam,
+      value: currentFormat?.params?.[name] || defaultValue,
     },
     { allowFalsyValue: true }
+  );
+  return { setter, value };
+}
+
+export function FormatSelector(props: FormatSelectorProps) {
+  const { docLinks, uiSettings } = useKibana<LensAppServices>().services;
+  const { selectedColumn, onChange } = props;
+  const currentFormat = isColumnFormatted(selectedColumn)
+    ? selectedColumn.params?.format
+    : undefined;
+
+  const [decimals, setDecimals] = useState(currentFormat?.params?.decimals ?? 2);
+
+  const { setter: setSuffix, value: suffix } = useDebouncedInputforParam(
+    'suffix' as const,
+    '',
+    currentFormat,
+    onChange
+  );
+
+  const { setter: setCompact, value: compact } = useDebouncedInputforParam(
+    'compact' as const,
+    false,
+    currentFormat,
+    onChange
+  );
+
+  const defaultNumeralPatternInKibana = uiSettings.get(
+    FORMATS_UI_SETTINGS.FORMAT_NUMBER_DEFAULT_PATTERN
+  );
+  const { setter: setPattern, value: pattern } = useDebouncedInputforParam(
+    'pattern' as const,
+    defaultNumeralPatternInKibana,
+    currentFormat,
+    onChange
   );
 
   const selectedFormat = currentFormat?.id ? supportedFormats[currentFormat.id] : undefined;
@@ -150,7 +215,22 @@ export function FormatSelector(props: FormatSelectorProps) {
 
   return (
     <>
-      <EuiFormRow label={label} display="columnCompressed" fullWidth>
+      <EuiFormRow
+        label={label}
+        display="columnCompressed"
+        fullWidth
+        helpText={
+          currentFormat?.id === 'custom' ? (
+            <FormattedMessage
+              id="xpack.lens.indexPattern.customFormat.description"
+              defaultMessage="Numeral.js format pattern (Default: {defaultPattern})"
+              values={{
+                defaultPattern: <EuiCode>{defaultNumeralPatternInKibana}</EuiCode>,
+              }}
+            />
+          ) : null
+        }
+      >
         <div>
           <EuiComboBox
             fullWidth
@@ -163,7 +243,7 @@ export function FormatSelector(props: FormatSelectorProps) {
             selectedOptions={currentOption}
             onChange={onChangeWrapped}
           />
-          {currentFormat && !props.options?.disableExtraOptions ? (
+          {currentFormat && currentFormat.id !== 'custom' ? (
             <>
               <EuiSpacer size="s" />
               <EuiRange
@@ -206,6 +286,46 @@ export function FormatSelector(props: FormatSelectorProps) {
           ) : null}
         </div>
       </EuiFormRow>
+      {selectedFormat?.supportsCompact ? (
+        <EuiFormRow label={compactLabel} display="columnCompressedSwitch" fullWidth>
+          <EuiSwitch
+            compressed
+            showLabel={false}
+            label={compactLabel}
+            checked={Boolean(compact)}
+            onChange={() => setCompact(!compact)}
+            data-test-subj="lns-indexpattern-dimension-formatCompact"
+          />
+        </EuiFormRow>
+      ) : null}
+      {currentFormat?.id === 'custom' ? (
+        <EuiFormRow
+          display="columnCompressed"
+          label={' '}
+          hasEmptyLabelSpace
+          helpText={
+            <EuiText size="xs">
+              <EuiLink target="_blank" href={docLinks?.links.indexPatterns.fieldFormattersNumber}>
+                <FormattedMessage
+                  id="indexPatternFieldEditor.number.documentationLabel"
+                  defaultMessage="Syntax Help"
+                />
+                &nbsp;
+                <EuiIcon type="link" />
+              </EuiLink>
+            </EuiText>
+          }
+        >
+          <EuiFieldText
+            data-test-subj={'numberEditorFormatPattern'}
+            value={pattern}
+            placeholder={defaultNumeralPatternInKibana}
+            onChange={(e) => {
+              setPattern(e.target.value);
+            }}
+          />
+        </EuiFormRow>
+      ) : null}
     </>
   );
 }

@@ -43,12 +43,7 @@ import { AllowedSettingsOverrides } from '@kbn/charts-plugin/common';
 import { getOverridesFor } from '@kbn/chart-expressions-common';
 import { DEFAULT_TRENDLINE_NAME } from '../../common/constants';
 import { VisParams } from '../../common';
-import {
-  getPaletteService,
-  getThemeService,
-  getFormatService,
-  getUiSettingsService,
-} from '../services';
+import { getPaletteService, getThemeService, getFormatService } from '../services';
 import { getDataBoundsForPalette } from '../utils';
 
 export const defaultColor = euiThemeVars.euiColorLightestShade;
@@ -73,17 +68,7 @@ export const COMPACT_CUSTOM_PATTERNS_LOOKUP = {
   // bytes does not require a special compact format
 } as const;
 
-type FormatTypesWithCompactVariants = keyof typeof COMPACT_CUSTOM_PATTERNS_LOOKUP;
-
-function isBitFormat(serializedFieldFormat: SerializedFieldFormat | undefined) {
-  return (
-    serializedFieldFormat?.id === 'number' &&
-    /bitd/.test(`${serializedFieldFormat.params?.pattern || ''}`)
-  );
-}
-
 function enhanceFieldFormat(serializedFieldFormat: SerializedFieldFormat | undefined) {
-  const uiSettings = getUiSettingsService();
   const formatId = serializedFieldFormat?.id || 'number';
   if (formatId === 'duration') {
     return {
@@ -95,47 +80,6 @@ function enhanceFieldFormat(serializedFieldFormat: SerializedFieldFormat | undef
         useShortSuffix: true,
         // but if user configured something else, use it
         ...serializedFieldFormat!.params,
-      },
-    };
-  }
-  // Some formats (number, currency, percentage) should be handled carefully
-  // * if format is coming from field format and has params configured, then skip this
-  // * if format is the legacy Lens bits format then skip this
-  // * if format is coming from Lens, then override the pattern with the custom compact one
-  // * if format is falling back to the Advanced settings one, then override only if not touched
-  // * if format is not specified it's coming from text based languages, so threat is "number"
-  if (
-    formatId in COMPACT_CUSTOM_PATTERNS_LOOKUP &&
-    (!serializedFieldFormat?.params || serializedFieldFormat.params?.formatOverride) &&
-    // due to legacy configuration of lens bit formatter this was set as "number" with a custom format
-    !isBitFormat(serializedFieldFormat)
-  ) {
-    const { uiSettingsKey, patternFn, overrideCheck } =
-      COMPACT_CUSTOM_PATTERNS_LOOKUP[formatId as FormatTypesWithCompactVariants];
-    // If the format was set in Lens use the custom pattern
-    if (serializedFieldFormat?.params?.formatOverride) {
-      return {
-        ...serializedFieldFormat,
-        id: formatId,
-        params: {
-          pattern: patternFn(
-            (serializedFieldFormat.params.pattern as string) || uiSettings.get(uiSettingsKey)
-          ),
-        },
-      };
-    }
-    // otherwise if user customized it in Advanced Settings, then just return it
-    if (overrideCheck && uiSettings.isOverridden(uiSettingsKey)) {
-      return serializedFieldFormat;
-    }
-    // otherwise propose a custom compact format
-    return {
-      ...serializedFieldFormat,
-      id: formatId,
-      params: {
-        pattern: patternFn(
-          (serializedFieldFormat?.params?.pattern as string) || uiSettings.get(uiSettingsKey)
-        ),
       },
     };
   }

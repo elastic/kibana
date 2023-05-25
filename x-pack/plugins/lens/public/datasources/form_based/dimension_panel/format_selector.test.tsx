@@ -86,18 +86,4 @@ describe('FormatSelector', () => {
     component.update();
     expect(props.onChange).toBeCalledWith({ id: 'bytes', params: { suffix: 'GB' } });
   });
-  describe('options', () => {
-    it('can disable the extra options', () => {
-      const props = getDefaultProps();
-      const component = mount(
-        <FormatSelector {...props} options={{ disableExtraOptions: true }} />
-      );
-      expect(component.exists('[data-test-subj="indexPattern-dimension-formatDecimals"]')).toBe(
-        false
-      );
-      expect(component.exists('[data-test-subj="indexPattern-dimension-formatSuffix"]')).toBe(
-        false
-      );
-    });
-  });
 });
