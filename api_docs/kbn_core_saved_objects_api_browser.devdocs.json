@@ -1291,10 +1291,6 @@
                 "path": "packages/core/saved-objects/core-saved-objects-browser-mocks/src/saved_objects_service.mock.ts"
               },
               {
-                "plugin": "dataViews",
-                "path": "src/plugins/data_views/public/saved_objects_client_wrapper.ts"
-              },
-              {
                 "plugin": "savedObjects",
                 "path": "src/plugins/saved_objects/public/saved_object/helpers/create_source.ts"
               },
@@ -1643,10 +1639,6 @@
                 "path": "packages/core/saved-objects/core-saved-objects-browser-mocks/src/saved_objects_service.mock.ts"
               },
               {
-                "plugin": "dataViews",
-                "path": "src/plugins/data_views/public/saved_objects_client_wrapper.ts"
-              },
-              {
                 "plugin": "savedObjects",
                 "path": "src/plugins/saved_objects/public/saved_object/helpers/build_saved_object.ts"
               },
@@ -1900,10 +1892,6 @@
                 "path": "packages/core/saved-objects/core-saved-objects-browser-mocks/src/saved_objects_service.mock.ts"
               },
               {
-                "plugin": "dataViews",
-                "path": "src/plugins/data_views/public/saved_objects_client_wrapper.ts"
-              },
-              {
                 "plugin": "savedObjects",
                 "path": "src/plugins/saved_objects/public/saved_object/helpers/find_object_by_title.ts"
               },
@@ -1957,15 +1945,7 @@
               },
               {
                 "plugin": "synthetics",
-                "path": "x-pack/plugins/synthetics/public/apps/synthetics/components/monitors_page/common/monitor_filters/use_filters.ts"
-              },
-              {
-                "plugin": "synthetics",
                 "path": "x-pack/plugins/synthetics/public/apps/synthetics/components/settings/private_locations/hooks/use_location_monitors.ts"
-              },
-              {
-                "plugin": "synthetics",
-                "path": "x-pack/plugins/synthetics/public/apps/synthetics/components/monitor_add_edit/hooks/use_monitor_name.ts"
               },
               {
                 "plugin": "graph",
@@ -1974,14 +1954,6 @@
               {
                 "plugin": "ml",
                 "path": "x-pack/plugins/ml/public/application/services/dashboard_service.test.ts"
-              },
-              {
-                "plugin": "synthetics",
-                "path": "x-pack/plugins/synthetics/public/apps/synthetics/components/monitors_page/common/monitor_filters/use_filters.test.ts"
-              },
-              {
-                "plugin": "synthetics",
-                "path": "x-pack/plugins/synthetics/public/apps/synthetics/components/monitors_page/common/monitor_filters/use_filters.test.ts"
               },
               {
                 "plugin": "savedObjects",
@@ -2365,18 +2337,6 @@
                 "path": "x-pack/plugins/graph/public/helpers/saved_workspace_utils.ts"
               },
               {
-                "plugin": "dataViews",
-                "path": "src/plugins/data_views/public/saved_objects_client_wrapper.test.ts"
-              },
-              {
-                "plugin": "dataViews",
-                "path": "src/plugins/data_views/public/saved_objects_client_wrapper.test.ts"
-              },
-              {
-                "plugin": "dataViews",
-                "path": "src/plugins/data_views/public/saved_objects_client_wrapper.test.ts"
-              },
-              {
                 "plugin": "savedSearch",
                 "path": "src/plugins/saved_search/public/services/saved_searches/get_saved_searches.test.ts"
               },
@@ -2631,10 +2591,6 @@
                 "path": "packages/core/saved-objects/core-saved-objects-browser-mocks/src/saved_objects_service.mock.ts"
               },
               {
-                "plugin": "dataViews",
-                "path": "src/plugins/data_views/public/saved_objects_client_wrapper.ts"
-              },
-              {
                 "plugin": "savedSearch",
                 "path": "src/plugins/saved_search/public/services/saved_searches/save_saved_searches.ts"
               },
@@ -2878,22 +2834,6 @@
           {
             "plugin": "@kbn/core",
             "path": "src/core/public/index.ts"
-          },
-          {
-            "plugin": "dataViews",
-            "path": "src/plugins/data_views/common/types.ts"
-          },
-          {
-            "plugin": "dataViews",
-            "path": "src/plugins/data_views/common/types.ts"
-          },
-          {
-            "plugin": "dataViews",
-            "path": "src/plugins/data_views/public/saved_objects_client_wrapper.ts"
-          },
-          {
-            "plugin": "dataViews",
-            "path": "src/plugins/data_views/public/saved_objects_client_wrapper.ts"
           },
           {
             "plugin": "savedObjects",
@@ -3333,22 +3273,6 @@
           {
             "plugin": "@kbn/core",
             "path": "src/core/public/index.ts"
-          },
-          {
-            "plugin": "dataViews",
-            "path": "src/plugins/data_views/common/types.ts"
-          },
-          {
-            "plugin": "dataViews",
-            "path": "src/plugins/data_views/common/types.ts"
-          },
-          {
-            "plugin": "dataViews",
-            "path": "src/plugins/data_views/public/saved_objects_client_wrapper.ts"
-          },
-          {
-            "plugin": "dataViews",
-            "path": "src/plugins/data_views/public/saved_objects_client_wrapper.ts"
           }
         ],
         "children": [
@@ -3474,14 +3398,6 @@
           {
             "plugin": "@kbn/core",
             "path": "src/core/public/index.ts"
-          },
-          {
-            "plugin": "dataViews",
-            "path": "src/plugins/data_views/public/saved_objects_client_wrapper.ts"
-          },
-          {
-            "plugin": "dataViews",
-            "path": "src/plugins/data_views/public/saved_objects_client_wrapper.ts"
           },
           {
             "plugin": "savedObjects",
