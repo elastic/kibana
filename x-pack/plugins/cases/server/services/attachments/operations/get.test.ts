@@ -12,7 +12,12 @@ import type { SavedObjectsFindResponse } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
 import { createPersistableStateAttachmentTypeRegistryMock } from '../../../attachment_framework/mocks';
 import { AttachmentGetter } from './get';
-import { createAlertAttachment, createFileAttachment, createUserAttachment } from '../test_utils';
+import {
+  createAlertAttachment,
+  createErrorSO,
+  createFileAttachment,
+  createUserAttachment,
+} from '../test_utils';
 import { mockPointInTimeFinder, createSOFindResponse } from '../../test_utils';
 
 describe('AttachmentService getter', () => {
@@ -41,6 +46,16 @@ describe('AttachmentService getter', () => {
         });
 
         await expect(attachmentGetter.bulkGet(['1'])).resolves.not.toThrow();
+      });
+
+      it('does not modified the error saved objects', async () => {
+        unsecuredSavedObjectsClient.bulkGet.mockResolvedValue({
+          saved_objects: [createUserAttachment(), createErrorSO()],
+        });
+
+        const res = await attachmentGetter.bulkGet(['1', '2']);
+
+        expect(res).toStrictEqual({ saved_objects: [createUserAttachment(), createErrorSO()] });
       });
 
       it('strips excess fields', async () => {

@@ -21,7 +21,7 @@ import {
   persistableStateAttachmentAttributes,
   persistableStateAttachmentAttributesWithoutInjectedId,
 } from '../../attachment_framework/mocks';
-import { createAlertAttachment, createUserAttachment } from './test_utils';
+import { createAlertAttachment, createErrorSO, createUserAttachment } from './test_utils';
 import { CommentType } from '../../../common';
 import { createSOFindResponse } from '../test_utils';
 
@@ -290,6 +290,25 @@ describe('AttachmentService', () => {
         await expect(
           service.bulkUpdate({ comments: [{ attachmentId: '1', updatedAttributes }] })
         ).resolves.not.toThrow();
+      });
+
+      it('returns error objects unmodified', async () => {
+        const userAttachment = createUserAttachment({ foo: 'bar' });
+
+        const errorResponseObj = createErrorSO();
+
+        unsecuredSavedObjectsClient.bulkUpdate.mockResolvedValue({
+          saved_objects: [errorResponseObj, userAttachment],
+        });
+
+        const res = await service.bulkUpdate({
+          comments: [
+            { attachmentId: '1', updatedAttributes: userAttachment.attributes },
+            { attachmentId: '1', updatedAttributes: userAttachment.attributes },
+          ],
+        });
+
+        expect(res).toStrictEqual({ saved_objects: [errorResponseObj, createUserAttachment()] });
       });
 
       it('strips excess fields', async () => {

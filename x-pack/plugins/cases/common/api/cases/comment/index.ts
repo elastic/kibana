@@ -135,7 +135,7 @@ const AttributesTypeActionsRt = rt.intersection([
   CommentAttributesBasicRt,
 ]);
 
-export const AttributesTypeExternalReferenceRt = rt.intersection([
+const AttributesTypeExternalReferenceRt = rt.intersection([
   ExternalReferenceRt,
   CommentAttributesBasicRt,
 ]);

@@ -371,7 +371,7 @@ export class AttachmentService {
       const attachment = res.saved_objects[i];
 
       if (isSOError(attachment)) {
-        // Forcing the type here even though it is an error. The caller is responsible for
+        // Forcing the type here even though it is an error. The client is responsible for
         // determining what to do with the errors
         // TODO: we should fix the return type of this function so that it can return errors
         validatedAttachments.push(attachment as AttachmentSavedObjectTransformed);

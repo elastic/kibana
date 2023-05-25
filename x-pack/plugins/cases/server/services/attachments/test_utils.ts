@@ -25,6 +25,19 @@ import {
 } from '../../../common/constants';
 import { CASE_REF_NAME, EXTERNAL_REFERENCE_REF_NAME } from '../../common/constants';
 
+export const createErrorSO = () =>
+  ({
+    id: '1',
+    type: CASE_COMMENT_SAVED_OBJECT,
+    error: {
+      error: 'error',
+      message: 'message',
+      statusCode: 500,
+    },
+    references: [],
+    // casting because this complains about attributes not being there
+  } as unknown as SavedObject<AttributesTypeUser>);
+
 export const createUserAttachment = (attributes?: object): SavedObject<AttributesTypeUser> => {
   return {
     id: '1',
