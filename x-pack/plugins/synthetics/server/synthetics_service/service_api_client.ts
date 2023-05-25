@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import axios, { AxiosError, AxiosRequestConfig } from 'axios';
+import axios, { AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios';
 import { forkJoin, from as rxjsFrom, Observable, of } from 'rxjs';
 import { catchError, tap } from 'rxjs/operators';
 import * as https from 'https';
@@ -31,18 +31,18 @@ export interface ServiceData {
   license: LicenseGetLicenseInformation;
 }
 
-export interface InspectResultData {
+export interface ServicePayload {
   monitors: DataStreamConfig[];
   output: {
     hosts: string[];
     api_key: string;
   };
   stack_version: string;
-  is_edit: boolean;
+  is_edit?: boolean;
   license_level: string;
   license_issued_to: string;
-  deployment_id: string;
-  cloud_id: string;
+  deployment_id?: string;
+  cloud_id?: string;
 }
 
 export class ServiceAPIClient {
@@ -69,55 +69,6 @@ export class ServiceAPIClient {
     this.logger = logger;
     this.locations = [];
     this.server = server;
-  }
-
-  getHttpsAgent(targetUrl: string) {
-    const parsedTargetUrl = new URL(targetUrl);
-
-    const rejectUnauthorized = parsedTargetUrl.hostname !== 'localhost' || !this.server.isDev;
-    const baseHttpsAgent = new https.Agent({ rejectUnauthorized });
-
-    const config = this.config ?? {};
-
-    // If using basic-auth, ignore certificate configs
-    if (this.authorization) return baseHttpsAgent;
-
-    if (config.tls && config.tls.certificate && config.tls.key) {
-      const tlsConfig = new SslConfig(config.tls);
-
-      return new https.Agent({
-        rejectUnauthorized,
-        cert: tlsConfig.certificate,
-        key: tlsConfig.key,
-      });
-    }
-
-    return baseHttpsAgent;
-  }
-
-  async inspect(data: ServiceData) {
-    const { result } = await this.callAPI('INSPECT', data);
-    return result as InspectResultData[];
-  }
-
-  async post(data: ServiceData) {
-    return (await this.callAPI('POST', data)).pushErrors;
-  }
-
-  async put(data: ServiceData) {
-    return (await this.callAPI('PUT', data)).pushErrors;
-  }
-
-  async delete(data: ServiceData) {
-    return (await this.callAPI('DELETE', data)).pushErrors;
-  }
-
-  async runOnce(data: ServiceData) {
-    return (await this.callAPI('POST', { ...data, endpoint: 'runOnce' })).pushErrors;
-  }
-
-  async syncMonitors(data: ServiceData) {
-    return (await this.callAPI('PUT', { ...data, endpoint: 'sync' })).pushErrors;
   }
 
   addVersionHeader(req: AxiosRequestConfig) {
@@ -160,60 +111,102 @@ export class ServiceAPIClient {
     return { allowed: false, signupUrl: null };
   }
 
-  async callAPI(
-    method: 'POST' | 'PUT' | 'DELETE' | 'INSPECT',
-    { monitors: allMonitors, output, endpoint, isEdit, license }: ServiceData
-  ) {
-    if (this.username === TEST_SERVICE_USERNAME) {
-      // we don't want to call service while local integration tests are running
-      return { result: [] as InspectResultData[], pushErrors: [] };
+  getHttpsAgent(targetUrl: string) {
+    const parsedTargetUrl = new URL(targetUrl);
+
+    const rejectUnauthorized = parsedTargetUrl.hostname !== 'localhost' || !this.server.isDev;
+    const baseHttpsAgent = new https.Agent({ rejectUnauthorized });
+
+    const config = this.config ?? {};
+
+    // If using basic-auth, ignore certificate configs
+    if (this.authorization) return baseHttpsAgent;
+
+    if (config.tls && config.tls.certificate && config.tls.key) {
+      const tlsConfig = new SslConfig(config.tls);
+
+      return new https.Agent({
+        rejectUnauthorized,
+        cert: tlsConfig.certificate,
+        key: tlsConfig.key,
+      });
     }
 
-    const pushErrors: ServiceLocationErrors = [];
+    return baseHttpsAgent;
+  }
 
-    const promises: Array<Observable<unknown>> = [];
+  async inspect(data: ServiceData) {
+    const monitorsByLocation = this.processServiceData(data);
 
+    return monitorsByLocation.map(({ data: payload }) => payload);
+  }
+
+  async post(data: ServiceData) {
+    return (await this.callAPI('POST', data)).pushErrors;
+  }
+
+  async put(data: ServiceData) {
+    return (await this.callAPI('PUT', data)).pushErrors;
+  }
+
+  async delete(data: ServiceData) {
+    return (await this.callAPI('DELETE', data)).pushErrors;
+  }
+
+  async runOnce(data: ServiceData) {
+    return (await this.callAPI('POST', { ...data, endpoint: 'runOnce' })).pushErrors;
+  }
+
+  async syncMonitors(data: ServiceData) {
+    return (await this.callAPI('PUT', { ...data, endpoint: 'sync' })).pushErrors;
+  }
+
+  processServiceData({ monitors, ...restOfData }: ServiceData) {
+    // group monitors by location
+    const monitorsByLocation: Array<{
+      location: { id: string; url: string };
+      monitors: ServiceData['monitors'];
+      data: ServicePayload;
+    }> = [];
     this.locations.forEach(({ id, url }) => {
-      const locMonitors = allMonitors.filter(({ locations }) =>
+      const locMonitors = monitors.filter(({ locations }) =>
         locations?.find((loc) => loc.id === id && loc.isServiceManaged)
       );
       if (locMonitors.length > 0) {
-        const promise = this.callServiceEndpoint(
-          { monitors: locMonitors, isEdit, endpoint, output, license },
-          method,
-          url
-        );
-        promises.push(
-          rxjsFrom(promise).pipe(
-            tap((result) => {
-              if ('status' in result || 'request' in result) {
-                this.logger.debug(result.data);
-                this.logger.debug(
-                  `Successfully called service location ${url}${result.request?.path} with method ${method} with ${locMonitors.length} monitors`
-                );
-              }
-            }),
-            catchError((err: AxiosError<{ reason: string; status: number }>) => {
-              pushErrors.push({ locationId: id, error: err.response?.data! });
-              const reason = err.response?.data?.reason ?? '';
-
-              err.message = `Failed to call service location ${url}${err.request?.path} with method ${method} with ${locMonitors.length} monitors:  ${err.message}, ${reason}`;
-              this.logger.error(err);
-              sendErrorTelemetryEvents(this.logger, this.server.telemetry, {
-                reason: err.response?.data?.reason,
-                message: err.message,
-                type: 'syncError',
-                code: err.code,
-                status: err.response?.data?.status,
-                url,
-                stackVersion: this.server.stackVersion,
-              });
-              // we don't want to throw an unhandled exception here
-              return of(true);
-            })
-          )
-        );
+        const data = this.getRequestData({ ...restOfData, monitors: locMonitors });
+        monitorsByLocation.push({ location: { id, url }, monitors: locMonitors, data });
       }
+    });
+    return monitorsByLocation;
+  }
+
+  async callAPI(method: 'POST' | 'PUT' | 'DELETE', serviceData: ServiceData) {
+    const { endpoint } = serviceData;
+    if (this.username === TEST_SERVICE_USERNAME) {
+      // we don't want to call service while local integration tests are running
+      return { result: [] as ServicePayload[], pushErrors: [] };
+    }
+
+    const pushErrors: ServiceLocationErrors = [];
+    const promises: Array<Observable<unknown>> = [];
+
+    const monitorsByLocation = this.processServiceData(serviceData);
+
+    monitorsByLocation.forEach(({ location: { url, id }, monitors, data }) => {
+      const promise = this.callServiceEndpoint(data, method, url, endpoint);
+      promises.push(
+        rxjsFrom(promise).pipe(
+          tap((result) => {
+            this.logSuccessMessage(url, method, monitors.length, result);
+          }),
+          catchError((err: AxiosError<{ reason: string; status: number }>) => {
+            pushErrors.push({ locationId: id, error: err.response?.data! });
+            this.logServiceError(err, url, method, monitors.length);
+            // we don't want to throw an unhandled exception here
+            return of(true);
+          })
+        )
+      );
     });
 
     const result = await forkJoin(promises).toPromise();
@@ -222,11 +215,12 @@ export class ServiceAPIClient {
   }
 
   async callServiceEndpoint(
-    serviceData: ServiceData,
-    method: 'POST' | 'PUT' | 'DELETE' | 'INSPECT',
-    baseUrl: string
+    data: ServicePayload,
+    // INSPECT is a special case where we don't want to call the service, but just return the data
+    method: 'POST' | 'PUT' | 'DELETE',
+    baseUrl: string,
+    endpoint: string = 'monitors'
   ) {
-    const { endpoint = 'monitors' } = serviceData;
     let url = baseUrl;
     switch (endpoint) {
       case 'monitors':
@@ -241,12 +235,6 @@ export class ServiceAPIClient {
     }
 
     const authHeader = this.authorization ? { Authorization: this.authorization } : undefined;
-
-    const data = this.getRequestData(serviceData);
-
-    if (method === 'INSPECT') {
-      return data;
-    }
 
     return axios(
       this.addVersionHeader({
@@ -275,5 +263,40 @@ export class ServiceAPIClient {
       deployment_id: this.server.cloud?.deploymentId,
       cloud_id: this.server.cloud?.cloudId,
     };
+  }
+
+  logSuccessMessage(
+    url: string,
+    method: string,
+    numMonitors: number,
+    result: AxiosResponse<any> | ServicePayload
+  ) {
+    if ('status' in result || 'request' in result) {
+      this.logger.debug(result.data);
+      this.logger.debug(
+        `Successfully called service location ${url}${result.request?.path} with method ${method} with ${numMonitors} monitors`
+      );
+    }
+  }
+
+  logServiceError(
+    err: AxiosError<{ reason: string; status: number }>,
+    url: string,
+    method: string,
+    numMonitors: number
+  ) {
+    const reason = err.response?.data?.reason ?? '';
+
+    err.message = `Failed to call service location ${url}${err.request?.path} with method ${method} with ${numMonitors} monitors:  ${err.message}, ${reason}`;
+    this.logger.error(err);
+    sendErrorTelemetryEvents(this.logger, this.server.telemetry, {
+      reason: err.response?.data?.reason,
+      message: err.message,
+      type: 'syncError',
+      code: err.code,
+      status: err.response?.data?.status,
+      url,
+      stackVersion: this.server.stackVersion,
+    });
   }
 }
