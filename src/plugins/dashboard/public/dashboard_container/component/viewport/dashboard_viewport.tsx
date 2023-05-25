@@ -83,9 +83,9 @@ export const DashboardViewportComponent = () => {
         data-shared-items-count={panelCount}
       >
         {panelCount === 0 && (
-          <div className="dshDashboardEmptyScreen">
+          <>
             <DashboardEmptyScreen isEditMode={viewMode === ViewMode.EDIT} />
-          </div>
+          </>
         )}
         <DashboardGrid viewportWidth={viewportWidth} />
       </div>

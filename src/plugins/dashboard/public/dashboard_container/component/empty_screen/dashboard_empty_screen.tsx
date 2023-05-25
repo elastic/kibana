@@ -7,94 +7,109 @@
  */
 
 import React from 'react';
-import { I18nProvider } from '@kbn/i18n-react';
+import useObservable from 'react-use/lib/useObservable';
+
 import {
   EuiIcon,
   EuiSpacer,
-  EuiPageContent_Deprecated as EuiPageContent,
-  EuiPageBody,
-  EuiPage,
+  EuiPageTemplate,
   EuiImage,
   EuiText,
   EuiTitle,
+  EuiFlexGroup,
+  EuiFlexItem,
 } from '@elastic/eui';
+import { euiThemeVars } from '@kbn/ui-theme';
+import { ViewMode } from '@kbn/embeddable-plugin/public';
+
+import {
+  DASHBOARD_GRID_HEIGHT,
+  DASHBOARD_MARGIN_SIZE,
+  DEFAULT_PANEL_HEIGHT,
+} from '../../../dashboard_constants';
 import { pluginServices } from '../../../services/plugin_services';
 import { emptyScreenStrings } from '../../_dashboard_container_strings';
+import { useDashboardContainer } from '../../embeddable/dashboard_container';
 
-export interface DashboardEmptyScreenProps {
-  isEditMode?: boolean;
-}
-
-export function DashboardEmptyScreen({ isEditMode }: DashboardEmptyScreenProps) {
+export function DashboardEmptyScreen() {
   const {
     dashboardCapabilities: { showWriteControls },
     http: { basePath },
-    settings: { uiSettings },
+    settings: {
+      theme: { theme$ },
+    },
   } = pluginServices.getServices();
-  const isReadonlyMode = !showWriteControls;
+  const dashboardContainer = useDashboardContainer();
+  const isDarkTheme = useObservable(theme$)?.darkMode;
+  const isEditMode =
+    dashboardContainer.select((state) => state.explicitInput.viewMode) === ViewMode.EDIT;
 
-  const IS_DARK_THEME = uiSettings.get('theme:darkMode');
-  const emptyStateGraphicURL = IS_DARK_THEME
+  /**
+   * if the Dashboard is in edit mode, we create a fake first panel using the same size as the default panel
+   */
+  if (isEditMode) {
+    const height = Math.round(
+      DASHBOARD_GRID_HEIGHT * DEFAULT_PANEL_HEIGHT +
+        (DEFAULT_PANEL_HEIGHT - 1) * DASHBOARD_MARGIN_SIZE
+    );
+    const width = `calc(50% - ${DASHBOARD_MARGIN_SIZE}px)`;
+
+    return (
+      <div
+        className="dshEditEmptyWidget"
+        data-test-subj="emptyDashboardWidget"
+        style={{ margin: DASHBOARD_MARGIN_SIZE, height, width }}
+      >
+        <EuiFlexGroup
+          direction="column"
+          alignItems="center"
+          justifyContent="center"
+          style={{ height: '100%' }}
+        >
+          <EuiFlexItem grow={false}>
+            <EuiIcon color="subdued" size="xl" type="visAreaStacked" />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiTitle size="xs">
+              <h3>{emptyScreenStrings.getEmptyWidgetTitle()}</h3>
+            </EuiTitle>
+            <EuiSpacer size="s" />
+            <EuiText size="s" color="subdued">
+              <span>{emptyScreenStrings.getEmptyWidgetDescription()}</span>
+            </EuiText>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </div>
+    );
+  }
+
+  const emptyStateGraphicURL = isDarkTheme
     ? '/plugins/home/assets/welcome_graphic_dark_2x.png'
     : '/plugins/home/assets/welcome_graphic_light_2x.png';
 
-  const page = (mainText: string, showAdditionalParagraph?: boolean, additionalText?: string) => {
-    return (
-      <EuiPage
-        data-test-subj={isReadonlyMode ? 'dashboardEmptyReadOnly' : 'dashboardEmptyReadWrite'}
-        className="dshStartScreen"
-        restrictWidth="500px"
-      >
-        <EuiPageBody>
-          <EuiPageContent
-            verticalPosition="center"
-            horizontalPosition="center"
-            paddingSize="none"
-            className="dshStartScreen__pageContent"
-          >
-            <EuiImage url={basePath.prepend(emptyStateGraphicURL)} alt="" />
-            <EuiText size="m">
-              <p style={{ fontWeight: 'bold' }}>{mainText}</p>
-            </EuiText>
-            {additionalText ? (
-              <EuiText size="m" color="subdued">
-                {additionalText}
-              </EuiText>
-            ) : null}
-            {showAdditionalParagraph ? (
-              <React.Fragment>
-                <EuiSpacer size="m" />
-                <div className="dshStartScreen__panelDesc">
-                  <EuiText size="m" color="subdued">
-                    <p>{emptyScreenStrings.getHowToStartWorkingOnNewDashboardDescription()}</p>
-                  </EuiText>
-                </div>
-              </React.Fragment>
-            ) : null}
-          </EuiPageContent>
-        </EuiPageBody>
-      </EuiPage>
-    );
-  };
-  const readonlyMode = page(
-    emptyScreenStrings.getEmptyDashboardTitle(),
-    false,
-    emptyScreenStrings.getEmptyDashboardAdditionalPrivilege()
+  return (
+    <EuiPageTemplate
+      data-test-subj={showWriteControls ? 'dashboardEmptyReadWrite' : 'dashboardEmptyReadOnly'}
+      grow={false}
+    >
+      <EuiPageTemplate.EmptyPrompt style={{ padding: euiThemeVars.euiSizeXXL }}>
+        <EuiImage url={basePath.prepend(emptyStateGraphicURL)} alt="" />
+        <EuiText size="m">
+          <p style={{ fontWeight: 'bold' }}>
+            {showWriteControls
+              ? emptyScreenStrings.getFillDashboardTitle()
+              : emptyScreenStrings.getEmptyDashboardTitle()}
+          </p>
+        </EuiText>
+        <EuiSpacer size="m" />
+        <EuiText size="m" color="subdued">
+          <p>
+            {showWriteControls
+              ? emptyScreenStrings.getHowToStartWorkingOnNewDashboardDescription()
+              : emptyScreenStrings.getEmptyDashboardAdditionalPrivilege()}
+          </p>
+        </EuiText>
+      </EuiPageTemplate.EmptyPrompt>
+    </EuiPageTemplate>
   );
-  const viewMode = page(emptyScreenStrings.getFillDashboardTitle(), true);
-  const editMode = (
-    <div data-test-subj="emptyDashboardWidget" className="dshEmptyWidget">
-      <EuiIcon color="subdued" size="xl" type="visAreaStacked" />
-      <EuiSpacer size="s" />
-      <EuiTitle size="xs">
-        <h3>{emptyScreenStrings.getEmptyWidgetTitle()}</h3>
-      </EuiTitle>
-      <EuiSpacer size="s" />
-      <EuiText size="s" color="subdued">
-        <span>{emptyScreenStrings.getEmptyWidgetDescription()}</span>
-      </EuiText>
-    </div>
-  );
-  const actionableMode = isEditMode ? editMode : viewMode;
-  return <I18nProvider>{isReadonlyMode ? readonlyMode : actionableMode}</I18nProvider>;
 }
