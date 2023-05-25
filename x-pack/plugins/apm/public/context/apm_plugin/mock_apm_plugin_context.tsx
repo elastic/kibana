@@ -67,6 +67,8 @@ const mockConfig: ConfigSchema = {
     enabled: false,
   },
   latestAgentVersionsUrl: '',
+  serverlessOnboarding: false,
+  managedServiceUrl: '',
 };
 
 const urlService = new UrlService({

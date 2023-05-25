@@ -46,9 +46,9 @@ export function AgentConfigurationTable({
     },
   ];
 
-  const items = Object.keys(variables).map((k) => ({
-    setting: variables[k],
-    value: get(data, k), // TODO do we want default values?
+  const items = Object.entries(variables).map(([key, value]) => ({
+    setting: value,
+    value: get(data, key),
   }));
   return <EuiBasicTable items={items} columns={columns} />;
 }
