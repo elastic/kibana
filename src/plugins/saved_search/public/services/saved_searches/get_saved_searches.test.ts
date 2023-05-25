@@ -131,7 +131,6 @@ describe('getSavedSearch', () => {
           "toExpressionAst": [MockFunction],
         },
         "sharingSavedObjectProps": Object {
-          "errorJSON": undefined,
           "outcome": "exactMatch",
         },
         "sort": Array [
@@ -237,7 +236,6 @@ describe('getSavedSearch', () => {
           "toExpressionAst": [MockFunction],
         },
         "sharingSavedObjectProps": Object {
-          "errorJSON": undefined,
           "outcome": "exactMatch",
         },
         "sort": Array [
