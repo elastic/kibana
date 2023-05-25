@@ -13,15 +13,14 @@ import { ExportTypesPluginSetup, ExportTypesPluginStart } from './types';
 export class ExportTypesPlugin
   implements Plugin<{}, {}, ExportTypesPluginSetup, ExportTypesPluginStart>
 {
-  private readonly logger: Logger;
   exportTypes = [
     // new CsvExportType(),
     // new PdfExportType(),
     // new PngExportType(),
   ];
 
-  constructor(initializerContext: PluginInitializerContext<typeof ConfigSchema>) {
-    this.logger = initializerContext.logger.get();
+  constructor(initializerContext: PluginInitializerContext<typeof ConfigSchema>, logger: Logger) {
+    logger = initializerContext.logger.get();
   }
 
   public setup(core: CoreSetup, pluginsSetup: ExportTypesPluginSetup) {
