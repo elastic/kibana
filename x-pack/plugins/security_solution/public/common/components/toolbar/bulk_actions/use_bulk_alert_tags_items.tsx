@@ -11,7 +11,7 @@ import { BulkAlertTagsPanel } from './alert_bulk_tags';
 import * as i18n from './translations';
 
 interface UseBulkAlertTagsItemsProps {
-  refetch: () => void;
+  refetch?: () => void;
 }
 
 export const useBulkAlertTagsItems = ({ refetch }: UseBulkAlertTagsItemsProps) => {
@@ -31,14 +31,14 @@ export const useBulkAlertTagsItems = ({ refetch }: UseBulkAlertTagsItemsProps) =
       id: 1,
       title: i18n.ALERT_TAGS_CONTEXT_MENU_ITEM_TITLE,
       renderContent: ({
-        selectedIds,
+        alertItems,
         refresh,
         setIsBulkActionsLoading,
         clearSelection,
         closePopoverMenu,
       }: RenderContentPanelProps) => (
         <BulkAlertTagsPanel
-          alertIds={selectedIds}
+          alertItems={alertItems}
           refresh={refresh}
           refetchQuery={refetch}
           setIsLoading={setIsBulkActionsLoading}

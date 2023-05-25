@@ -583,7 +583,7 @@ interface PanelConfig {
 }
 
 export interface RenderContentPanelProps {
-  selectedIds: TimelineItem[];
+  alertItems: TimelineItem[];
   setIsBulkActionsLoading: (isLoading: boolean) => void;
   isAllSelected?: boolean;
   clearSelection?: () => void;

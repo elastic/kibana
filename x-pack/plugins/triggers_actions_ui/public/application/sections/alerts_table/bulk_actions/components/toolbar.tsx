@@ -85,7 +85,7 @@ const useBulkActionsToMenuPanelMapper = (
   const bulkActionsPanels = useMemo(() => {
     const bulkActionPanelsToReturn = [];
     for (const panel of panels) {
-      const selectedAlertIds = selectedIdsToTimelineItemMapper(alerts, rowSelection);
+      const selectedAlertItems = selectedIdsToTimelineItemMapper(alerts, rowSelection);
       if (panel.items) {
         const newItems = panel.items.map((item) => {
           const isDisabled = isAllSelected && item.disableOnQuery;
@@ -96,8 +96,8 @@ const useBulkActionsToMenuPanelMapper = (
             onClick: item.onClick
               ? () => {
                   closeIfPopoverIsOpen();
-                  item.onClick(
-                    selectedAlertIds,
+                  item.onClick?.(
+                    selectedAlertItems,
                     isAllSelected,
                     setIsBulkActionsLoading,
                     clearSelection,
@@ -112,7 +112,7 @@ const useBulkActionsToMenuPanelMapper = (
         bulkActionPanelsToReturn.push({ ...panel, items: newItems });
       } else {
         const ContentPanel = panel.renderContent({
-          selectedIds: selectedAlertIds,
+          alertItems: selectedAlertItems,
           isAllSelected,
           setIsBulkActionsLoading,
           clearSelection,

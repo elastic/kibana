@@ -79,11 +79,14 @@ const addItemsToInitalPanel = ({
   panels: BulkActionsPanelConfig[];
   items: BulkActionsConfig[];
 }) => {
-  if (panels[0].items) {
-    panels[0].items.push(...items);
+  if (panels.length > 0) {
+    if (panels[0].items) {
+      panels[0].items.push(...items);
+    }
     return panels;
+  } else {
+    return [{ id: 0, items }];
   }
-  return panels;
 };
 
 export const useBulkAddToCaseActions = ({

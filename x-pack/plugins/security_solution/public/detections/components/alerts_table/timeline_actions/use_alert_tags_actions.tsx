@@ -20,7 +20,7 @@ interface Props {
   closePopover: () => void;
   ecsRowData: Ecs;
   scopeId: string;
-  refetch: () => void;
+  refetch?: () => void;
 }
 
 export const useAlertTagsActions = ({ closePopover, ecsRowData, scopeId, refetch }: Props) => {
@@ -71,7 +71,7 @@ export const useAlertTagsActions = ({ closePopover, ecsRowData, scopeId, refetch
         const content = panel.renderContent({
           closePopoverMenu: closePopover,
           setIsBulkActionsLoading: localSetEventsLoading,
-          selectedIds: alertTagData,
+          alertItems: alertTagData,
         });
         return { title: panel.title, content, id: panel.id };
       }),

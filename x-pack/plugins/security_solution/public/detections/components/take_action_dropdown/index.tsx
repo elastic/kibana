@@ -187,7 +187,7 @@ export const TakeActionDropdown = React.memo(
 
     const { alertTagsItems, alertTagsPanels } = useAlertTagsActions({
       closePopover: closePopoverHandler,
-      ecsRowData: ecsData,
+      ecsRowData: ecsData ?? { _id: actionsData.eventId },
       scopeId,
       refetch,
     });

@@ -10,7 +10,6 @@ import { EuiPopoverTitle, EuiSelectable, EuiButton } from '@elastic/eui';
 import type { TimelineItem } from '@kbn/timelines-plugin/common';
 import React, { memo, useCallback, useMemo, useState } from 'react';
 import { TAGS } from '@kbn/rule-data-utils';
-import { intersection, union } from 'lodash';
 import type { EuiSelectableOnChangeEvent } from '@elastic/eui/src/components/selectable/selectable';
 import { getUpdateAlertsQuery } from '../../../../detections/components/alerts_table/actions';
 import { DEFAULT_ALERT_TAGS_KEY } from '../../../../../common/constants';
@@ -18,47 +17,37 @@ import { useUiSetting$ } from '../../../lib/kibana';
 import { useSetAlertTags } from './use_set_alert_tags';
 import { useAppToasts } from '../../../hooks/use_app_toasts';
 import * as i18n from './translations';
+import { createInitialTagsState } from './helpers';
 
 interface BulkAlertTagsPanelComponentProps {
-  alertIds: TimelineItem[];
-  refetchQuery: () => void;
+  alertItems: TimelineItem[];
+  refetchQuery?: () => void;
   setIsLoading: (isLoading: boolean) => void;
   refresh?: () => void;
   clearSelection?: () => void;
   closePopoverMenu: () => void;
 }
 const BulkAlertTagsPanelComponent: React.FC<BulkAlertTagsPanelComponentProps> = ({
-  alertIds,
+  alertItems,
   refresh,
   refetchQuery,
   setIsLoading,
   clearSelection,
   closePopoverMenu,
 }) => {
-  const [alertTagOptions] = useUiSetting$<string[]>(DEFAULT_ALERT_TAGS_KEY);
+  const [defaultAlertTagOptions] = useUiSetting$<string[]>(DEFAULT_ALERT_TAGS_KEY);
   const { addSuccess, addError, addWarning } = useAppToasts();
 
   const { setAlertTags } = useSetAlertTags();
-  const initalTagsState = useMemo(() => {
-    const existingTags = alertIds.map(
-      (item) => item.data.find((data) => data.field === TAGS)?.value ?? []
-    );
-    const existingTagsIntersection = intersection(...existingTags);
-    const existingTagsUnion = union(...existingTags);
-    const allTagsUnion = union(existingTagsUnion, alertTagOptions);
-    return allTagsUnion
-      .map((tag): EuiSelectableOption => {
-        return {
-          label: tag,
-          checked: existingTagsIntersection.includes(tag)
-            ? 'on'
-            : existingTagsUnion.includes(tag)
-            ? 'off'
-            : undefined,
-        };
-      })
-      .sort((a, b) => (a.checked ? a.checked < b.checked : true));
-  }, [alertIds, alertTagOptions]);
+  const existingTags = useMemo(
+    () => alertItems.map((item) => item.data.find((data) => data.field === TAGS)?.value ?? []),
+    [alertItems]
+  );
+  const initalTagsState = useMemo(
+    () => createInitialTagsState(existingTags, defaultAlertTagOptions),
+    [existingTags, defaultAlertTagOptions]
+  );
+
   const tagsToAdd: Record<string, boolean> = useMemo(() => ({}), []);
   const tagsToRemove: Record<string, boolean> = useMemo(() => ({}), []);
 
@@ -88,7 +77,7 @@ const BulkAlertTagsPanelComponent: React.FC<BulkAlertTagsPanelComponentProps> = 
 
   const onTagsUpdate = useCallback(async () => {
     closePopoverMenu();
-    const ids = alertIds.map((item) => item._id);
+    const ids = alertItems.map((item) => item._id);
     const query: Record<string, unknown> = getUpdateAlertsQuery(ids).query;
     const tagsToAddArray = Object.keys(tagsToAdd);
     const tagsToRemoveArray = Object.keys(tagsToRemove);
@@ -101,7 +90,7 @@ const BulkAlertTagsPanelComponent: React.FC<BulkAlertTagsPanelComponentProps> = 
       });
 
       setIsLoading(false);
-      refetchQuery();
+      if (refetchQuery) refetchQuery();
       if (refresh) refresh();
       if (clearSelection) clearSelection();
 
@@ -115,7 +104,7 @@ const BulkAlertTagsPanelComponent: React.FC<BulkAlertTagsPanelComponentProps> = 
     }
   }, [
     closePopoverMenu,
-    alertIds,
+    alertItems,
     tagsToAdd,
     tagsToRemove,
     setIsLoading,
