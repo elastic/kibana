@@ -159,6 +159,7 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
         validate: !Boolean(newInput.ignoreParentSettings?.ignoreValidations),
         lastReloadRequestTime: newInput.lastReloadRequestTime,
         existsSelected: newInput.existsSelected,
+        wildcardSearch: newInput.wildcardSearch,
         dataViewId: newInput.dataViewId,
         fieldName: newInput.fieldName,
         timeRange: newInput.timeRange,
@@ -183,6 +184,7 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
           this.runOptionsListQuery();
         })
     );
+
     // fetch more options when reaching the bottom of the available options
     this.subscriptions.add(
       loadMorePipe.subscribe((size) => {
