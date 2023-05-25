@@ -10,6 +10,8 @@
     "configPath": ["xpack", "apm"],
     "requiredPlugins": [
       "data",
+      "dashboard",
+      "controls",
       "embeddable",
       "features",
       "infra",

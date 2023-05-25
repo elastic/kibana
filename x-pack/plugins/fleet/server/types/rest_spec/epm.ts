@@ -24,6 +24,45 @@ export const GetPackagesRequestSchema = {
   }),
 };
 
+export const GetInstalledPackagesRequestSchema = {
+  query: schema.object({
+    dataStreamType: schema.maybe(
+      schema.oneOf([
+        schema.literal('logs'),
+        schema.literal('metrics'),
+        schema.literal('traces'),
+        schema.literal('synthetics'),
+        schema.literal('profiling'),
+      ])
+    ),
+    nameQuery: schema.maybe(schema.string()),
+    searchAfter: schema.maybe(schema.arrayOf(schema.oneOf([schema.string(), schema.number()]))),
+    perPage: schema.number({ defaultValue: 30 }),
+    sortOrder: schema.oneOf([schema.literal('asc'), schema.literal('desc')], {
+      defaultValue: 'asc',
+    }),
+  }),
+};
+
+export const GetDataStreamsRequestSchema = {
+  query: schema.object({
+    type: schema.maybe(
+      schema.oneOf([
+        schema.literal('logs'),
+        schema.literal('metrics'),
+        schema.literal('traces'),
+        schema.literal('synthetics'),
+        schema.literal('profiling'),
+      ])
+    ),
+    datasetQuery: schema.maybe(schema.string()),
+    sortOrder: schema.oneOf([schema.literal('asc'), schema.literal('desc')], {
+      defaultValue: 'asc',
+    }),
+    uncategorisedOnly: schema.boolean({ defaultValue: false }),
+  }),
+};
+
 export const GetLimitedPackagesRequestSchema = {
   query: schema.object({
     prerelease: schema.maybe(schema.boolean()),
