@@ -5,11 +5,9 @@
  * 2.0.
  */
 
-import { AppFeatureKeys } from '@kbn/security-solution-plugin/common';
-import { AppFeatureKey } from '@kbn/security-solution-plugin/common/types/app_features';
+import { AppFeatureKey, AppFeatureKeys } from '@kbn/security-solution-plugin/common';
 
 export const DEFAULT_APP_FEATURES: AppFeatureKeys = {
-  [AppFeatureKey.casesBase]: true,
-  [AppFeatureKey.rulesLoadPrepackaged]: true,
-  [AppFeatureKey.rulesResponseActions]: true,
+  [AppFeatureKey.exampleAppFeature]: true,
+  [AppFeatureKey.exampleCasesFeature]: true,
 };

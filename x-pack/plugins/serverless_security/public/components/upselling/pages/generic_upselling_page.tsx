@@ -6,29 +6,11 @@
  */
 
 import React from 'react';
-import { EuiToolTip, EuiEmptyPrompt, EuiLink } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiLink } from '@elastic/eui';
 import { ServerlessSecurityPLIs } from '../../../../common/config';
 
-export const PrebuiltRulesTooltipUpselling: React.FC = React.memo(({ children }) => {
-  return (
-    <EuiToolTip
-      content={
-        <>
-          Get <b>Endpoint Complete</b> to load prebuilt rules and Timeline templates.
-          <br />
-          <EuiLink href="#">Purchase Endpoint Complete</EuiLink>
-        </>
-      }
-      repositionOnScroll={true}
-      display="block"
-    >
-      {children as React.ReactElement}
-    </EuiToolTip>
-  );
-});
-
-export const RulesResponseActionsUpselling: React.FC<{ projectPLIs: ServerlessSecurityPLIs }> =
-  React.memo(({ projectPLIs: projectPLIs }) => {
+export const GenericUpsellingPage: React.FC<{ projectPLIs: ServerlessSecurityPLIs }> = React.memo(
+  ({ projectPLIs }) => {
     const upsellingPLI = projectPLIs.includes('cloudEssentials')
       ? 'Cloud Complete'
       : 'Endpoint Complete';
@@ -39,7 +21,7 @@ export const RulesResponseActionsUpselling: React.FC<{ projectPLIs: ServerlessSe
         title={<>This is a testing component for a Serverless upselling prompt.</>}
         body={
           <>
-            Get <EuiLink href="#">{upsellingPLI}</EuiLink> to attach Response Actions to rules
+            Get <EuiLink href="#">{upsellingPLI}</EuiLink> to enable this feature
             <br />
             <br />
             <iframe
@@ -55,4 +37,5 @@ export const RulesResponseActionsUpselling: React.FC<{ projectPLIs: ServerlessSe
         }
       />
     );
-  });
+  }
+);

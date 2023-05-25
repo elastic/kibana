@@ -39,7 +39,7 @@ export const installPrebuiltRulesAndTimelinesRoute = (router: SecuritySolutionPl
       path: PREBUILT_RULES_URL,
       validate: false,
       options: {
-        tags: ['access:securitySolution', 'access:rules_load_prepackaged'],
+        tags: ['access:securitySolution'],
         timeout: {
           // FUNFACT: If we do not add a very long timeout what will happen
           // is that Chrome which receive a 408 error and then do a retry.
