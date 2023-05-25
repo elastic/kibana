@@ -394,13 +394,22 @@ export const QueryBarTopRow = React.memo(
       if (!shouldRenderDatePicker()) {
         return null;
       }
+      let isDisabled = props.isDisabled;
+      // On text based mode the datepicker is always on when the user has unsaved changes.
+      // When the user doesn't have any changes it should be disabled if dataview doesn't have @timestamp field
+      if (Boolean(isQueryLangSelected) && !props.isDirty) {
+        const adHocDataview = props.indexPatterns?.[0];
+        if (adHocDataview && typeof adHocDataview !== 'string') {
+          isDisabled = !Boolean(adHocDataview.timeFieldName);
+        }
+      }
 
       const wrapperClasses = classNames('kbnQueryBar__datePickerWrapper');
 
       return (
         <EuiFlexItem className={wrapperClasses}>
           <SuperDatePicker
-            isDisabled={props.isDisabled}
+            isDisabled={isDisabled}
             start={props.dateRangeFrom}
             end={props.dateRangeTo}
             isPaused={props.isRefreshPaused}
