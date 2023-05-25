@@ -193,7 +193,7 @@ export const onSave = async ({
     ),
     text: ((element) =>
       render(
-        <div>
+        <p>
           <FormattedMessage
             id="xpack.lens.xyChart.annotations.saveAnnotationGroupToLibrary.successToastBody"
             defaultMessage="View or manage in the {link}"
@@ -201,7 +201,7 @@ export const onSave = async ({
               link: <a href="#">annotation library</a>,
             }}
           />
-        </div>,
+        </p>,
         element
       )) as MountPoint,
   });
