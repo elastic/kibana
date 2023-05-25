@@ -61,14 +61,20 @@ export const INSIGHTS_TEST_ID = 'securitySolutionDocumentDetailsFlyoutInsights';
 export const INSIGHTS_HEADER_TEST_ID = 'securitySolutionDocumentDetailsFlyoutInsightsHeader';
 export const ENTITIES_HEADER_TEST_ID = 'securitySolutionDocumentDetailsFlyoutEntitiesHeader';
 export const ENTITIES_CONTENT_TEST_ID = 'securitySolutionDocumentDetailsFlyoutEntitiesContent';
+export const ENTITIES_USER_CONTENT_TEST_ID =
+  'securitySolutionDocumentDetailsFlyoutEntitiesUserContent';
+export const ENTITIES_HOST_CONTENT_TEST_ID =
+  'securitySolutionDocumentDetailsFlyoutEntitiesHostContent';
 export const ENTITIES_VIEW_ALL_BUTTON_TEST_ID =
   'securitySolutionDocumentDetailsFlyoutEntitiesViewAllButton';
-export const ENTITY_PANEL_TEST_ID = 'securitySolutionDocumentDetailsFlyoutEntityPanel';
 export const ENTITY_PANEL_ICON_TEST_ID = 'securitySolutionDocumentDetailsFlyoutEntityPanelTypeIcon';
 export const ENTITY_PANEL_TOGGLE_BUTTON_TEST_ID =
   'securitySolutionDocumentDetailsFlyoutEntityPanelToggleButton';
-export const ENTITY_PANEL_HEADER_TEST_ID =
-  'securitySolutionDocumentDetailsFlyoutEntityPanelHeaderTitle';
+export const ENTITY_PANEL_HEADER_TEST_ID = 'securitySolutionDocumentDetailsFlyoutEntityPanelHeader';
+export const ENTITY_PANEL_HEADER_LEFT_SECTION_TEST_ID =
+  'securitySolutionDocumentDetailsFlyoutEntityPanelHeaderLeftSection';
+export const ENTITY_PANEL_HEADER_RIGHT_SECTION_TEST_ID =
+  'securitySolutionDocumentDetailsFlyoutEntityPanelHeaderRightSection';
 export const ENTITY_PANEL_CONTENT_TEST_ID =
   'securitySolutionDocumentDetailsFlyoutEntityPanelContent';
 export const TECHNICAL_PREVIEW_ICON_TEST_ID =
@@ -94,11 +100,20 @@ export const INSIGHTS_THREAT_INTELLIGENCE_TITLE_TEST_ID = `${INSIGHTS_THREAT_INT
 export const INSIGHTS_THREAT_INTELLIGENCE_CONTENT_TEST_ID = `${INSIGHTS_THREAT_INTELLIGENCE_TEST_ID}Content`;
 export const INSIGHTS_THREAT_INTELLIGENCE_VIEW_ALL_BUTTON_TEST_ID = `${INSIGHTS_THREAT_INTELLIGENCE_TEST_ID}ViewAllButton`;
 export const INSIGHTS_THREAT_INTELLIGENCE_LOADING_TEST_ID = `${INSIGHTS_THREAT_INTELLIGENCE_TEST_ID}Loading`;
-export const INSIGHTS_THREAT_INTELLIGENCE_ICON_TEST_ID = `${INSIGHTS_THREAT_INTELLIGENCE_TEST_ID}Icon`;
 export const INSIGHTS_THREAT_INTELLIGENCE_VALUE_TEST_ID = `${INSIGHTS_THREAT_INTELLIGENCE_TEST_ID}Value`;
-export const INSIGHTS_THREAT_INTELLIGENCE_COLOR_TEST_ID = `${INSIGHTS_THREAT_INTELLIGENCE_TEST_ID}Color`;
+
+/* Insights Correlations */
+
+export const INSIGHTS_CORRELATIONS_TEST_ID =
+  'securitySolutionDocumentDetailsFlyoutInsightsCorrelations';
+export const INSIGHTS_CORRELATIONS_TITLE_TEST_ID = `${INSIGHTS_CORRELATIONS_TEST_ID}Title`;
+export const INSIGHTS_CORRELATIONS_CONTENT_TEST_ID = `${INSIGHTS_CORRELATIONS_TEST_ID}Content`;
+export const INSIGHTS_CORRELATIONS_VIEW_ALL_BUTTON_TEST_ID = `${INSIGHTS_CORRELATIONS_TEST_ID}ViewAllButton`;
+export const INSIGHTS_CORRELATIONS_LOADING_TEST_ID = `${INSIGHTS_CORRELATIONS_TEST_ID}Loading`;
+export const INSIGHTS_CORRELATIONS_VALUE_TEST_ID = `${INSIGHTS_CORRELATIONS_TEST_ID}Value`;
 
 /* Visualizations section*/
+
 export const VISUALIZATIONS_SECTION_TEST_ID = 'securitySolutionDocumentDetailsVisualizationsTitle';
 export const VISUALIZATIONS_SECTION_HEADER_TEST_ID =
   'securitySolutionDocumentDetailsVisualizationsTitleHeader';
