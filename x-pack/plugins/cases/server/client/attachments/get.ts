@@ -5,11 +5,6 @@
  * 2.0.
  */
 
-import Boom from '@hapi/boom';
-import { pipe } from 'fp-ts/lib/pipeable';
-import { fold } from 'fp-ts/lib/Either';
-import { identity } from 'fp-ts/lib/function';
-
 import type { SavedObject } from '@kbn/core/server';
 
 import type { CasesClient } from '../client';
@@ -23,19 +18,14 @@ import type {
 } from '../../../common/api';
 import type { FindCommentsArgs, GetAllAlertsAttachToCase, GetAllArgs, GetArgs } from './types';
 
-import {
-  CASE_COMMENT_SAVED_OBJECT,
-  CASE_SAVED_OBJECT,
-  MAX_DOCS_PER_PAGE,
-} from '../../../common/constants';
+import { CASE_COMMENT_SAVED_OBJECT, CASE_SAVED_OBJECT } from '../../../common/constants';
 import {
   FindCommentsArgsRt,
   CommentType,
   CommentsRt,
   CommentRt,
   CommentsFindResponseRt,
-  excess,
-  throwErrors,
+  decodeWithExcessOrThrow,
 } from '../../../common/api';
 import {
   defaultSortField,
@@ -48,6 +38,7 @@ import { createCaseError } from '../../common/error';
 import { DEFAULT_PAGE, DEFAULT_PER_PAGE } from '../../routes/api';
 import { buildFilter, combineFilters } from '../utils';
 import { Operations } from '../../authorization';
+import { validateFindCommentsPagination } from './validators';
 
 const normalizeAlertResponse = (alerts: Array<SavedObject<AttributesTypeAlerts>>): AlertResponse =>
   alerts.reduce((acc: AlertResponse, alert) => {
@@ -57,14 +48,14 @@ const normalizeAlertResponse = (alerts: Array<SavedObject<AttributesTypeAlerts>>
       return acc;
     }
 
-    return [
-      ...acc,
+    acc.push(
       ...ids.map((id, index) => ({
         id,
         index: indices[index],
         attached_at: alert.attributes.created_at,
-      })),
-    ];
+      }))
+    );
+    return acc;
   }, []);
 
 /**
@@ -126,20 +117,9 @@ export async function find(
     authorization,
   } = clientArgs;
 
-  const { caseID, queryParams } = pipe(
-    excess(FindCommentsArgsRt).decode(data),
-    fold(throwErrors(Boom.badRequest), identity)
-  );
+  const { caseID, queryParams } = decodeWithExcessOrThrow(FindCommentsArgsRt)(data);
 
-  if (
-    queryParams?.page &&
-    queryParams?.perPage &&
-    queryParams?.page * queryParams?.perPage > MAX_DOCS_PER_PAGE
-  ) {
-    throw Boom.badRequest(
-      'The number of documents is too high. Paginating through more than 10,000 documents is not possible.'
-    );
-  }
+  validateFindCommentsPagination(queryParams);
 
   try {
     const { filter: authorizationFilter, ensureSavedObjectsAreAuthorized } =

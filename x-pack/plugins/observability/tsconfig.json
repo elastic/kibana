@@ -9,7 +9,7 @@
     "public/**/*.json",
     "server/**/*",
     "typings/**/*",
-    "../../../typings/**/*",
+    "../../../typings/**/*"
   ],
   "kbn_references": [
     "@kbn/core",
@@ -41,14 +41,11 @@
     "@kbn/std",
     "@kbn/i18n-react",
     "@kbn/utility-types",
-    "@kbn/es-types",
-    "@kbn/rison",
     "@kbn/datemath",
     "@kbn/core-ui-settings-browser",
     "@kbn/es-query",
     "@kbn/server-route-repository",
     "@kbn/ui-theme",
-    "@kbn/shared-ux-page-kibana-template-mocks",
     "@kbn/test-jest-helpers",
     "@kbn/core-http-browser",
     "@kbn/config-schema",
@@ -73,7 +70,5 @@
     "@kbn/observability-shared-plugin",
     "@kbn/exploratory-view-plugin"
   ],
-  "exclude": [
-    "target/**/*"
-  ]
+  "exclude": ["target/**/*"]
 }

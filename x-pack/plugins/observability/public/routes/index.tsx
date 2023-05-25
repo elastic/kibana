@@ -8,7 +8,7 @@
 import * as t from 'io-ts';
 import React from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
-import { DatePickerContextProvider } from '../context/date_picker_context';
+import { DatePickerContextProvider } from '../context/date_picker_context/date_picker_context';
 import { useKibana } from '../utils/kibana_react';
 import { AlertsPage } from '../pages/alerts/alerts';
 import { AlertDetails } from '../pages/alert_details/alert_details';

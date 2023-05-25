@@ -109,11 +109,11 @@ export class StatsQuery extends BaseResolverQuery {
       };
     }
 
-    const byCategory: Record<string, number> = catAgg.categories.buckets.reduce(
-      (cummulative: Record<string, number>, bucket: AggBucket) => ({
-        ...cummulative,
-        [bucket.key]: bucket.doc_count,
-      }),
+    const byCategory = catAgg.categories.buckets.reduce<Record<string, number>>(
+      (cummulative: Record<string, number>, bucket: AggBucket) => {
+        cummulative[bucket.key] = bucket.doc_count;
+        return cummulative;
+      },
       {}
     );
     return {

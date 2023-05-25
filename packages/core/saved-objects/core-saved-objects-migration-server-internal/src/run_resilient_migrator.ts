@@ -57,6 +57,7 @@ export async function runResilientMigrator({
   readyToReindex,
   doneReindexing,
   transformRawDocs,
+  coreMigrationVersionPerType,
   migrationVersionPerType,
   indexPrefix,
   migrationsConfig,
@@ -74,6 +75,7 @@ export async function runResilientMigrator({
   doneReindexing: Defer<any>;
   logger: Logger;
   transformRawDocs: TransformRawDocs;
+  coreMigrationVersionPerType: SavedObjectsMigrationVersion;
   migrationVersionPerType: SavedObjectsMigrationVersion;
   indexPrefix: string;
   migrationsConfig: SavedObjectsMigrationConfigType;
@@ -87,6 +89,7 @@ export async function runResilientMigrator({
     indexTypesMap,
     targetMappings,
     preMigrationScript,
+    coreMigrationVersionPerType,
     migrationVersionPerType,
     indexPrefix,
     migrationsConfig,
