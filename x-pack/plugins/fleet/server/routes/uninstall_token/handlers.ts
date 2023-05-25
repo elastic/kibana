@@ -7,6 +7,8 @@
 
 import type { TypeOf } from '@kbn/config-schema';
 
+import type { GetUninstallTokensResponse } from '../../../common/types/rest_spec/uninstall_tokens';
+
 import { appContextService } from '../../services';
 
 import type { FleetRequestHandler } from '../../types';
@@ -35,12 +37,12 @@ export const getUninstallTokensHandler: FleetRequestHandler<
       items = await uninstallTokenService.getAllTokens();
     }
 
-    return response.ok({
-      body: {
-        items,
-        total: Object.keys(items).length,
-      },
-    });
+    const body: GetUninstallTokensResponse = {
+      items,
+      total: Object.keys(items).length,
+    };
+
+    return response.ok({ body });
   } catch {
     return response.customError({
       statusCode: 500,
