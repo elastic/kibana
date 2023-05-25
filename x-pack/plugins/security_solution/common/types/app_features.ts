@@ -14,10 +14,6 @@ export enum AppFeatureSecurityKey {
    * Enables the ability to add response actions to rules
    */
   rulesResponseActions = 'rules_response_actions',
-  /**
-   * Enables the ability to perform the isolate hosts operation
-   */
-  isolateHost = 'isolate_host',
 }
 
 export enum AppFeatureCasesKey {
