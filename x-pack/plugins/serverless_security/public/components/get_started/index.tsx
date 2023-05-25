@@ -7,8 +7,11 @@
 
 import React from 'react';
 
+import { CoreStart } from '@kbn/core/public';
 import type { GetStartedESSComponentProps, GetStartedESSComponent } from './types';
 import { GetStarted } from './get_started';
+import { KibanaServicesProvider } from '../../services';
+import { ServerlessSecurityPluginStartDependencies } from '../../types';
 
 export const getSecurityGetStartedESSComponent = (
   core: CoreStart,
