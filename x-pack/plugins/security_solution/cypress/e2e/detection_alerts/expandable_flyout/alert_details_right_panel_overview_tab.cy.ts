@@ -35,6 +35,7 @@ import {
   DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_THREAT_INTELLIGENCE_CONTENT,
   DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_THREAT_INTELLIGENCE_VALUES,
   DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_THREAT_INTELLIGENCE_VIEW_ALL_BUTTON,
+  DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INVESTIGATION_GUIDE_BUTTON,
 } from '../../../screens/document_expandable_flyout';
 import {
   expandFirstAlertExpandableFlyout,
@@ -133,6 +134,12 @@ describe.skip(
         cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INVESTIGATION_SECTION_CONTENT).should(
           'be.visible'
         );
+      });
+
+      it('should display investigatioin guide button', () => {
+        cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INVESTIGATION_GUIDE_BUTTON)
+          .should('be.visible')
+          .and('have.text', 'Investigation guide');
       });
 
       it('should display highlighted fields', () => {

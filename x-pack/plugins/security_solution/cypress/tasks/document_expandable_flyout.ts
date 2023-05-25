@@ -15,7 +15,7 @@ import {
   DOCUMENT_DETAILS_FLYOUT_FOOTER_TAKE_ACTION_BUTTON,
   DOCUMENT_DETAILS_FLYOUT_HISTORY_TAB,
   DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB,
-  DOCUMENT_DETAILS_FLYOUT_INVESTIGATIONS_TAB,
+  DOCUMENT_DETAILS_FLYOUT_INVESTIGATION_TAB,
   DOCUMENT_DETAILS_FLYOUT_JSON_TAB,
   DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB,
   DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INVESTIGATION_SECTION_HEADER,
@@ -241,8 +241,8 @@ export const openCorrelations = () =>
 /**
  * Open the Investigations tab in the document details expandable flyout left section
  */
-export const openInvestigationsTab = () =>
-  cy.get(DOCUMENT_DETAILS_FLYOUT_INVESTIGATIONS_TAB).scrollIntoView().click();
+export const openInvestigationTab = () =>
+  cy.get(DOCUMENT_DETAILS_FLYOUT_INVESTIGATION_TAB).scrollIntoView().should('be.visible').click();
 
 /**
  * Open the History tab in the document details expandable flyout left section

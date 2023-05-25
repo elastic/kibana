@@ -17,8 +17,8 @@ import {
   DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_THREAT_INTELLIGENCE_CONTENT,
   DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_PREVALENCE_CONTENT,
   DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_CORRELATIONS_CONTENT,
-  DOCUMENT_DETAILS_FLYOUT_INVESTIGATIONS_TAB_CONTENT,
-  DOCUMENT_DETAILS_FLYOUT_INVESTIGATIONS_TAB,
+  DOCUMENT_DETAILS_FLYOUT_INVESTIGATION_TAB_CONTENT,
+  DOCUMENT_DETAILS_FLYOUT_INVESTIGATION_TAB,
   DOCUMENT_DETAILS_FLYOUT_VISUALIZE_TAB,
   DOCUMENT_DETAILS_FLYOUT_VISUALIZE_TAB_BUTTON_GROUP,
   DOCUMENT_DETAILS_FLYOUT_HISTORY_TAB_CONTENT,
@@ -33,7 +33,7 @@ import {
   openGraphAnalyzer,
   openHistoryTab,
   openInsightsTab,
-  openInvestigationsTab,
+  openInvestigationTab,
   openSessionView,
   openVisualizeTab,
   openEntities,
@@ -72,7 +72,7 @@ describe(
       cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB)
         .should('be.visible')
         .and('have.text', 'Insights');
-      cy.get(DOCUMENT_DETAILS_FLYOUT_INVESTIGATIONS_TAB)
+      cy.get(DOCUMENT_DETAILS_FLYOUT_INVESTIGATION_TAB)
         .should('be.visible')
         .and('have.text', 'Investigation');
       cy.get(DOCUMENT_DETAILS_FLYOUT_HISTORY_TAB).should('be.visible').and('have.text', 'History');
@@ -85,8 +85,8 @@ describe(
       openInsightsTab();
       cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_BUTTON_GROUP).should('be.visible');
 
-      openInvestigationsTab();
-      cy.get(DOCUMENT_DETAILS_FLYOUT_INVESTIGATIONS_TAB_CONTENT).should('be.visible');
+      openInvestigationTab();
+      cy.get(DOCUMENT_DETAILS_FLYOUT_INVESTIGATION_TAB_CONTENT).should('be.visible');
 
       openHistoryTab();
       cy.get(DOCUMENT_DETAILS_FLYOUT_HISTORY_TAB_CONTENT).should('be.visible');
@@ -130,12 +130,10 @@ describe(
           .and('have.text', 'Correlations');
       });
 
-      it.skip('should display content when switching buttons', () => {
+      it('should display content when switching buttons', () => {
         openInsightsTab();
         openEntities();
-        cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_ENTITIES_CONTENT)
-          .should('be.visible')
-          .and('have.text', 'Entities');
+        cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_ENTITIES_CONTENT).should('be.visible');
 
         openThreatIntelligence();
         cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_THREAT_INTELLIGENCE_CONTENT)
@@ -151,6 +149,13 @@ describe(
         cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_CORRELATIONS_CONTENT)
           .should('be.visible')
           .and('have.text', 'Correlations');
+      });
+    });
+
+    describe.skip('investigation tab', () => {
+      it('should display investigation guide', () => {
+        openInvestigationTab();
+        cy.get(DOCUMENT_DETAILS_FLYOUT_INVESTIGATION_TAB_CONTENT).should('be.visible');
       });
     });
   }
