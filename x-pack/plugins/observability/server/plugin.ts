@@ -41,7 +41,7 @@ import { uiSettings } from './ui_settings';
 import { registerRoutes } from './routes/register_routes';
 import { getObservabilityServerRouteRepository } from './routes/get_global_observability_server_route_repository';
 import { casesFeatureId, observabilityFeatureId, sloFeatureId } from '../common';
-import { slo, SO_SLO_TYPE } from './saved_objects';
+import { compositeSlo, slo, SO_COMPOSITE_SLO_TYPE, SO_SLO_TYPE } from './saved_objects';
 import { SLO_RULE_REGISTRATION_CONTEXT } from './common/constants';
 import { registerRuleTypes } from './lib/rules/register_rule_types';
 import { SLO_BURN_RATE_RULE_ID } from '../common/constants';
@@ -187,7 +187,7 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
           catalogue: [sloFeatureId, 'observability'],
           api: ['slo_write', 'slo_read', 'rac'],
           savedObject: {
-            all: [SO_SLO_TYPE],
+            all: [SO_SLO_TYPE, SO_COMPOSITE_SLO_TYPE],
             read: [],
           },
           alerting: {
@@ -206,7 +206,7 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
           api: ['slo_read', 'rac'],
           savedObject: {
             all: [],
-            read: [SO_SLO_TYPE],
+            read: [SO_SLO_TYPE, SO_COMPOSITE_SLO_TYPE],
           },
           alerting: {
             rule: {
@@ -222,6 +222,7 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
     });
 
     core.savedObjects.registerType(slo);
+    core.savedObjects.registerType(compositeSlo);
 
     const ruleDataClient = ruleDataService.initializeIndex({
       feature: sloFeatureId,
