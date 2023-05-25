@@ -26,6 +26,7 @@ import {
 import ReactDOM, { unmountComponentAtNode } from 'react-dom';
 import { useKibana } from '../../../common/lib/kibana';
 import { CommentType } from '../../../../common';
+import { waitFor } from '@testing-library/dom';
 
 const element = document.createElement('div');
 document.body.appendChild(element);
@@ -77,13 +78,12 @@ describe('createAddToNewCaseLensAction', () => {
   const mockOpenFlyout = jest.fn();
   const mockMount = jest.fn();
   let action: Action<ActionContext>;
-  beforeAll(() => {
+
+  beforeEach(() => {
     mockUseCasesAddToNewCaseFlyout.mockReturnValue({
       open: mockOpenFlyout,
     });
-  });
 
-  beforeEach(() => {
     (useKibana as jest.Mock).mockReturnValue({
       services: {
         application: {
@@ -152,9 +152,15 @@ describe('createAddToNewCaseLensAction', () => {
       expect(toMountPoint).toHaveBeenCalled();
       expect(mockMount).toHaveBeenCalled();
     });
+  });
 
-    describe('Add to new case flyout', () => {
-      it('should open flyout', () => {
+  describe('Add to new case flyout', () => {
+    beforeEach(async () => {
+      await action.execute(context);
+    });
+
+    it('should open flyout', async () => {
+      await waitFor(() => {
         expect(mockOpenFlyout).toHaveBeenCalledWith(
           expect.objectContaining({
             attachments: [
@@ -169,18 +175,18 @@ describe('createAddToNewCaseLensAction', () => {
           })
         );
       });
+    });
 
-      it('should have correct onClose handler', () => {
-        const onClose = mockUseCasesAddToNewCaseFlyout.mock.calls[0][0].onClose;
-        onClose();
-        expect(unmountComponentAtNode as jest.Mock).toHaveBeenCalled();
-      });
+    it('should have correct onClose handler', () => {
+      const onClose = mockUseCasesAddToNewCaseFlyout.mock.calls[0][0].onClose;
+      onClose();
+      expect(unmountComponentAtNode as jest.Mock).toHaveBeenCalled();
+    });
 
-      it('should have correct onSuccess handler', () => {
-        const onSuccess = mockUseCasesAddToNewCaseFlyout.mock.calls[0][0].onSuccess;
-        onSuccess();
-        expect(unmountComponentAtNode as jest.Mock).toHaveBeenCalled();
-      });
+    it('should have correct onSuccess handler', () => {
+      const onSuccess = mockUseCasesAddToNewCaseFlyout.mock.calls[0][0].onSuccess;
+      onSuccess();
+      expect(unmountComponentAtNode as jest.Mock).toHaveBeenCalled();
     });
   });
 });

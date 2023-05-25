@@ -26,6 +26,7 @@ import {
 } from './mocks';
 import { CommentType } from '../../../../common';
 import { useKibana } from '../../../common/lib/kibana';
+import { waitFor } from '@testing-library/dom';
 
 const element = document.createElement('div');
 document.body.appendChild(element);
@@ -79,13 +80,10 @@ describe('createAddToExistingCaseLensAction', () => {
   const mockMount = jest.fn();
   let action: Action<ActionContext>;
 
-  beforeAll(() => {
+  beforeEach(() => {
     mockUseCasesAddToExistingCaseModal.mockReturnValue({
       open: mockOpenModal,
     });
-  });
-
-  beforeEach(() => {
     (useKibana as jest.Mock).mockReturnValue({
       services: {
         application: {
@@ -151,13 +149,17 @@ describe('createAddToExistingCaseLensAction', () => {
       expect(toMountPoint).toHaveBeenCalled();
       expect(mockMount).toHaveBeenCalled();
     });
+  });
 
-    describe('Add to existing case modal', () => {
-      it('should open modal', () => {
+  describe('Add to existing case modal', () => {
+    beforeEach(async () => {
+      await action.execute(context);
+    });
+
+    it('should open modal with an attachment', async () => {
+      await waitFor(() => {
         expect(mockOpenModal).toHaveBeenCalled();
-      });
 
-      it('should open modal with an attachment', () => {
         const getAttachments = mockOpenModal.mock.calls[0][0].getAttachments;
         expect(getAttachments()).toEqual(
           expect.objectContaining([
@@ -171,30 +173,30 @@ describe('createAddToExistingCaseLensAction', () => {
           ])
         );
       });
+    });
 
-      it('should have correct onClose handler - when close modal clicked', () => {
-        const onClose = mockUseCasesAddToExistingCaseModal.mock.calls[0][0].onClose;
-        onClose();
-        expect(unmountComponentAtNode as jest.Mock).toHaveBeenCalled();
-      });
+    it('should have correct onClose handler - when close modal clicked', () => {
+      const onClose = mockUseCasesAddToExistingCaseModal.mock.calls[0][0].onClose;
+      onClose();
+      expect(unmountComponentAtNode as jest.Mock).toHaveBeenCalled();
+    });
 
-      it('should have correct onClose handler - when case selected', () => {
-        const onClose = mockUseCasesAddToExistingCaseModal.mock.calls[0][0].onClose;
-        onClose({ id: 'case-id', title: 'case-title' });
-        expect(unmountComponentAtNode as jest.Mock).toHaveBeenCalled();
-      });
+    it('should have correct onClose handler - when case selected', () => {
+      const onClose = mockUseCasesAddToExistingCaseModal.mock.calls[0][0].onClose;
+      onClose({ id: 'case-id', title: 'case-title' });
+      expect(unmountComponentAtNode as jest.Mock).toHaveBeenCalled();
+    });
 
-      it('should have correct onClose handler - when case created', () => {
-        const onClose = mockUseCasesAddToExistingCaseModal.mock.calls[0][0].onClose;
-        onClose(null, true);
-        expect(unmountComponentAtNode as jest.Mock).not.toHaveBeenCalled();
-      });
+    it('should have correct onClose handler - when case created', () => {
+      const onClose = mockUseCasesAddToExistingCaseModal.mock.calls[0][0].onClose;
+      onClose(null, true);
+      expect(unmountComponentAtNode as jest.Mock).not.toHaveBeenCalled();
+    });
 
-      it('should have correct onSuccess handler', () => {
-        const onSuccess = mockUseCasesAddToExistingCaseModal.mock.calls[0][0].onSuccess;
-        onSuccess();
-        expect(unmountComponentAtNode as jest.Mock).toHaveBeenCalled();
-      });
+    it('should have correct onSuccess handler', () => {
+      const onSuccess = mockUseCasesAddToExistingCaseModal.mock.calls[0][0].onSuccess;
+      onSuccess();
+      expect(unmountComponentAtNode as jest.Mock).toHaveBeenCalled();
     });
   });
 });
