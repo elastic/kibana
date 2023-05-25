@@ -21,3 +21,22 @@ export type HostNodeRow = HostMetadata &
   HostMetrics & {
     name: string;
   };
+
+export enum FlyoutTabIds {
+  METADATA = 'metadata',
+  PROCESSES = 'processes',
+}
+
+export type TabIds = `${FlyoutTabIds}`;
+
+export interface TabState {
+  metadataTab?: {
+    query?: string;
+    showActionsColumn?: boolean;
+  };
+  processTab?: {
+    query?: string;
+  };
+}
+
+export type TabsStateChangeFn = (state: TabState & { activeTabId?: TabIds }) => void;

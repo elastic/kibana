@@ -12,8 +12,9 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { DecorateWithKibanaContext } from './asset_details.story_decorators';
 
-import { AssetDetails, FlyoutTabIds, type AssetDetailsProps } from './asset_details';
+import { AssetDetails, type AssetDetailsProps } from './asset_details';
 import { decorateWithGlobalStorybookThemeProviders } from '../../test_utils/use_global_storybook_theme';
+import { FlyoutTabIds } from './types';
 
 export default {
   title: 'infra/Asset Details View/Asset Details Embeddable',
@@ -42,20 +43,12 @@ export default {
       memoryTotal: 34359738368,
     },
     nodeType: 'host',
-    closeFlyout: () => {},
-    onTabClick: () => {},
-    renderedTabsSet: { current: new Set(['metadata']) },
     currentTimeRange: {
       interval: '1s',
       from: 1683630468,
       to: 1683630469,
     },
-    hostFlyoutOpen: {
-      clickedItemId: 'host1-macos',
-      selectedTabId: 'metadata',
-      searchFilter: '',
-      metadataSearch: '',
-    },
+    selectedTabId: 'metadata',
     tabs: [
       {
         id: FlyoutTabIds.METADATA,
@@ -73,7 +66,7 @@ export default {
       },
     ],
     links: ['apmServices', 'uptime'],
-  },
+  } as AssetDetailsProps,
 } as Meta;
 
 const Template: Story<AssetDetailsProps> = (args) => {
@@ -91,26 +84,32 @@ const FlyoutTemplate: Story<AssetDetailsProps> = (args) => {
       >
         Open flyout
       </EuiButton>
-      <div hidden={!isOpen}>{isOpen && <AssetDetails {...args} closeFlyout={closeFlyout} />}</div>
+      <div hidden={!isOpen}>
+        {isOpen && <AssetDetails {...args} renderMode={{ showInFlyout: true, closeFlyout }} />}
+      </div>
     </div>
   );
 };
 
 export const DefaultAssetDetailsWithMetadataTabSelected = Template.bind({});
 DefaultAssetDetailsWithMetadataTabSelected.args = {
-  showActionsColumn: true,
+  overrides: {
+    metadataTab: {
+      showActionsColumn: true,
+    },
+  },
 };
 
 export const AssetDetailsWithMetadataTabSelectedWithPersistedSearch = Template.bind({});
 AssetDetailsWithMetadataTabSelectedWithPersistedSearch.args = {
-  showActionsColumn: true,
-  hostFlyoutOpen: {
-    clickedItemId: 'host1-macos',
-    selectedTabId: 'metadata',
-    searchFilter: '',
-    metadataSearch: 'ip',
+  overrides: {
+    metadataTab: {
+      showActionsColumn: true,
+      query: 'ip',
+    },
   },
-  setHostFlyoutState: () => {},
+  activeTabId: 'metadata',
+  onTabsStateChange: () => {},
 };
 
 export const AssetDetailsWithMetadataWithoutActions = Template.bind({});
@@ -120,21 +119,20 @@ export const AssetDetailsWithMetadataWithoutLinks = Template.bind({});
 AssetDetailsWithMetadataWithoutLinks.args = { links: [] };
 
 export const AssetDetailsAsFlyout = FlyoutTemplate.bind({});
-AssetDetailsAsFlyout.args = { showInFlyout: true };
+AssetDetailsAsFlyout.args = {
+  renderMode: {
+    showInFlyout: true,
+    closeFlyout: () => {},
+  },
+};
 
 export const AssetDetailsWithProcessesTabSelected = Template.bind({});
 AssetDetailsWithProcessesTabSelected.args = {
-  renderedTabsSet: { current: new Set(['processes']) },
+  activeTabId: 'processes',
   currentTimeRange: {
     interval: '1s',
     from: 1683630468,
     to: 1683630469,
-  },
-  hostFlyoutOpen: {
-    clickedItemId: 'host1-macos',
-    selectedTabId: 'processes',
-    searchFilter: '',
-    metadataSearch: '',
   },
 };
 
