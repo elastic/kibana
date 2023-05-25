@@ -103,6 +103,9 @@ export class ActionExecutor {
     if (!this.isInitialized) {
       throw new Error('ActionExecutor not initialized');
     }
+    console.log('PARAMS!!!', params);
+    console.log('request!!!', request);
+    console.log('taskInfo!!!', taskInfo);
 
     return withSpan(
       {
@@ -255,6 +258,8 @@ export class ActionExecutor {
               },
             },
           };
+          event.user = event.user || {};
+          event.user.name = 'hello world';
         }
 
         eventLogger.stopTiming(event);
