@@ -9,6 +9,8 @@
     "../../../typings/**/*"
   ],
   "kbn_references": [
+    "@kbn/core",
+    "@kbn/reporting-plugin",
   ],
   "exclude": ["target/**/*"]
 }
