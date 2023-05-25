@@ -23,6 +23,6 @@ export const INSIGHTS_TAB_CORRELATIONS_BUTTON_TEST_ID =
   'securitySolutionDocumentDetailsFlyoutInsightsTabCorrelationsButton';
 export const INSIGHTS_TAB_RESPONSES_BUTTON_TEST_ID =
   'securitySolutionDocumentDetailsFlyoutInsightsTabResponsesButton';
-export const INVESTIGATIONS_TAB_CONTENT_TEST_ID =
+export const INVESTIGATION_TAB_CONTENT_TEST_ID =
   'securitySolutionDocumentDetailsFlyoutInvestigationsTabContent';
 export const HISTORY_TAB_CONTENT_TEST_ID = 'securitySolutionDocumentDetailsFlyoutHistoryTabContent';

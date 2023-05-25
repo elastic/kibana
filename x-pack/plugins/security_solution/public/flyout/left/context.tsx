@@ -6,19 +6,20 @@
  */
 
 import React, { createContext, useContext, useMemo } from 'react';
-import { EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import { css } from '@emotion/react';
+import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
+import { EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import type { Ecs } from '@kbn/cases-plugin/common';
 import type { SearchHit } from '../../../common/search_strategy';
+import type { LeftPanelProps } from '.';
+import { useGetFieldsData } from '../../common/hooks/use_get_fields_data';
+import { useTimelineEventsDetails } from '../../timelines/containers/details';
+import { getAlertIndexAlias } from '../../timelines/components/side_panel/event_details/helpers';
+import { useSpaceId } from '../../common/hooks/use_space_id';
+import { useRouteSpy } from '../../common/utils/route/use_route_spy';
 import { SecurityPageName } from '../../../common/constants';
 import { SourcererScopeName } from '../../common/store/sourcerer/model';
 import { useSourcererDataView } from '../../common/containers/sourcerer';
-import { useTimelineEventsDetails } from '../../timelines/containers/details';
-import { useGetFieldsData } from '../../common/hooks/use_get_fields_data';
-import { useRouteSpy } from '../../common/utils/route/use_route_spy';
-import { useSpaceId } from '../../common/hooks/use_space_id';
-import { getAlertIndexAlias } from '../../timelines/components/side_panel/event_details/helpers';
-import type { LeftPanelProps } from '.';
 
 export interface LeftPanelContext {
   /**
@@ -33,6 +34,10 @@ export interface LeftPanelContext {
    * Retrieves searchHit values for the provided field
    */
   getFieldsData: (field: string) => unknown | unknown[];
+  /**
+   * An array of field objects with category and value
+   */
+  dataFormattedForFieldBrowser: TimelineEventsDetailsItem[] | null;
 
   data: SearchHit | undefined;
 
@@ -57,7 +62,7 @@ export const LeftPanelProvider = ({ id, indexName, children }: LeftPanelProvider
       ? SourcererScopeName.detections
       : SourcererScopeName.default;
   const sourcererDataView = useSourcererDataView(sourcererScope);
-  const [loading, _, searchHit, ecs] = useTimelineEventsDetails({
+  const [loading, dataFormattedForFieldBrowser, searchHit, ecs] = useTimelineEventsDetails({
     indexName: eventIndex,
     eventId: id ?? '',
     runtimeMappings: sourcererDataView.runtimeMappings,
@@ -67,8 +72,17 @@ export const LeftPanelProvider = ({ id, indexName, children }: LeftPanelProvider
 
   const contextValue = useMemo(
     () =>
-      id && indexName ? { eventId: id, indexName, getFieldsData, data: searchHit, ecs } : undefined,
-    [id, indexName, getFieldsData, searchHit, ecs]
+      id && indexName
+        ? {
+            eventId: id,
+            indexName,
+            getFieldsData,
+            data: searchHit,
+            dataFormattedForFieldBrowser,
+            ecs,
+          }
+        : undefined,
+    [id, indexName, getFieldsData, searchHit, dataFormattedForFieldBrowser, ecs]
   );
 
   if (loading) {

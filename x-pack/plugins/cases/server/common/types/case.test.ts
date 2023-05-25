@@ -46,7 +46,7 @@ describe('getPartialCaseTransformedAttributesRt', () => {
     assignees: [],
   };
   const caseTransformedAttributesProps = CaseTransformedAttributesRt.types.reduce(
-    (acc, type) => ({ ...acc, ...type.props }),
+    (acc, type) => ({ ...acc, ...type.type.props }),
     {}
   );
 

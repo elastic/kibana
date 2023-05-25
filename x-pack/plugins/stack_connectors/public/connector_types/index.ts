@@ -11,6 +11,7 @@ import { getCasesWebhookConnectorType } from './cases_webhook';
 import { getEmailConnectorType } from './email';
 import { getIndexConnectorType } from './es_index';
 import { getJiraConnectorType } from './jira';
+import { getGenerativeAiConnectorType } from './gen_ai';
 import { getOpsgenieConnectorType } from './opsgenie';
 import { getPagerDutyConnectorType } from './pagerduty';
 import { getResilientConnectorType } from './resilient';
@@ -57,6 +58,7 @@ export function registerConnectorTypes({
   connectorTypeRegistry.register(getJiraConnectorType());
   connectorTypeRegistry.register(getResilientConnectorType());
   connectorTypeRegistry.register(getOpsgenieConnectorType());
+  connectorTypeRegistry.register(getGenerativeAiConnectorType());
   connectorTypeRegistry.register(getTeamsConnectorType());
   connectorTypeRegistry.register(getTorqConnectorType());
   connectorTypeRegistry.register(getTinesConnectorType());
