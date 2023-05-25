@@ -67,16 +67,16 @@ export const riskFieldMap = {
   },
 } as const;
 
-export const ilmPolicyName = '.risk-engine-ilm-policy';
-export const mappingComponentName = 'risk_score_mappings';
+export const ilmPolicyName = '.risk-score-ilm-policy';
+export const mappingComponentName = 'risk-score-mappings';
 export const totalFieldsLimit = 1000;
 
-const riskScoreBaseIndexName = '.risk-score';
+const riskScoreBaseIndexName = 'risk-score';
 
 export const getIndexPattern = (namespace: string) => ({
-  template: `${riskScoreBaseIndexName}.${riskScoreBaseIndexName}-${namespace}-index-template`,
-  pattern: `.internal.${riskScoreBaseIndexName}${riskScoreBaseIndexName}-${namespace}-*`,
-  basePattern: `.${riskScoreBaseIndexName}${riskScoreBaseIndexName}-*`,
-  name: `.internal${riskScoreBaseIndexName}${riskScoreBaseIndexName}-${namespace}-000001`,
-  alias: `${riskScoreBaseIndexName}${riskScoreBaseIndexName}-${namespace}`,
+  template: `.${riskScoreBaseIndexName}.${riskScoreBaseIndexName}-${namespace}-index-template`,
+  alias: `${riskScoreBaseIndexName}.${riskScoreBaseIndexName}-${namespace}`,
+  pattern: '',
+  basePattern: '',
+  name: '',
 });

@@ -7,7 +7,6 @@
 import type { Metadata } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { ClusterPutComponentTemplateRequest } from '@elastic/elasticsearch/lib/api/types';
 import {
-  createConcreteWriteIndex,
   createOrUpdateComponentTemplate,
   createOrUpdateIlmPolicy,
   createOrUpdateIndexTemplate,
@@ -22,6 +21,7 @@ import {
   mappingComponentName,
   ilmPolicyName,
 } from './configurations';
+import { createConcreteWriteIndex } from './utils/create_ds';
 
 interface InitializeRiskEngineResourcesOpts {
   namespace?: string;
@@ -102,7 +102,8 @@ export class RiskEngineDataClient {
         template: {
           name: indexPatterns.template,
           body: {
-            index_patterns: [indexPatterns.pattern],
+            data_stream: { hidden: true },
+            index_patterns: [indexPatterns.alias],
             composed_of: [mappingComponentName],
             template: {
               settings: {
@@ -110,7 +111,6 @@ export class RiskEngineDataClient {
                 hidden: true,
                 'index.lifecycle': {
                   name: ilmPolicyName,
-                  rollover_alias: indexPatterns.alias,
                 },
                 'index.mapping.total_fields.limit': totalFieldsLimit,
               },
