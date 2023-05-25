@@ -14,17 +14,23 @@ import {
   EuiText,
   EuiPopoverTitle,
   useEuiTheme,
+  EuiToolTip,
 } from '@elastic/eui';
 import { ToolbarButton } from '@kbn/kibana-react-plugin/public';
 import { IconChartBarReferenceLine, IconChartBarAnnotations } from '@kbn/chart-icons';
 import { css } from '@emotion/react';
+import { euiThemeVars } from '@kbn/ui-theme';
 import type {
   VisualizationLayerHeaderContentProps,
   VisualizationLayerWidgetProps,
   VisualizationType,
 } from '../../../types';
 import { State, visualizationTypes, SeriesType, XYAnnotationLayerConfig } from '../types';
-import { isHorizontalChart, isHorizontalSeries } from '../state_helpers';
+import {
+  annotationLayerHasUnsavedChanges,
+  isHorizontalChart,
+  isHorizontalSeries,
+} from '../state_helpers';
 import { ChangeIndexPattern, StaticHeader } from '../../../shared_components';
 import { updateLayer } from '.';
 import {
@@ -46,6 +52,7 @@ export function LayerHeader(props: VisualizationLayerWidgetProps<State>) {
     return (
       <AnnotationsLayerHeader
         title={isByReferenceAnnotationsLayer(layer) ? layer.__lastSaved.title : undefined}
+        hasUnsavedChanges={annotationLayerHasUnsavedChanges(layer)}
       />
     );
   }
@@ -71,7 +78,13 @@ function ReferenceLayerHeader() {
   );
 }
 
-function AnnotationsLayerHeader({ title }: { title: string | undefined }) {
+function AnnotationsLayerHeader({
+  title,
+  hasUnsavedChanges,
+}: {
+  title: string | undefined;
+  hasUnsavedChanges: boolean;
+}) {
   return (
     <StaticHeader
       icon={IconChartBarAnnotations}
@@ -80,6 +93,24 @@ function AnnotationsLayerHeader({ title }: { title: string | undefined }) {
         i18n.translate('xpack.lens.xyChart.layerAnnotationsLabel', {
           defaultMessage: 'Annotations',
         })
+      }
+      indicator={
+        hasUnsavedChanges && (
+          <EuiToolTip
+            content={i18n.translate('xpack.lens.xyChart.unsavedChanges', {
+              defaultMessage: 'Unsaved changes',
+            })}
+          >
+            <div
+              css={css`
+                background-color: ${euiThemeVars.euiColorSuccess};
+                border-radius: 100%;
+                width: ${euiThemeVars.euiSizeS};
+                height: ${euiThemeVars.euiSizeS};
+              `}
+            />
+          </EuiToolTip>
+        )
       }
     />
   );
