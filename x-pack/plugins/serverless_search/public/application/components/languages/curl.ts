@@ -10,7 +10,7 @@ import { docLinks } from '../../../../common/doc_links';
 import { LanguageDefinition, Languages } from './types';
 
 export const curlDefinition: LanguageDefinition = {
-  buildSearchQuery: `curl -X GET "\$\{ES_URL\}/books/_search?pretty" \\
+  buildSearchQuery: `curl -X POST "\$\{ES_URL\}/books/_search?pretty" \\
   -H "Authorization: ApiKey "\$\{API_KEY\}"" \\
   -H "Content-Type: application/json" \\
   -d'
