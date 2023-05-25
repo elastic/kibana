@@ -14,6 +14,7 @@ import * as i18n from './translations';
 
 export interface Props extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
   handlePromptChange?: (value: string) => void;
+  isDisabled?: boolean;
   onPromptSubmit: (value: string) => void;
   value: string;
 }
@@ -23,7 +24,7 @@ const StyledTextArea = styled(EuiTextArea)`
 `;
 
 export const PromptTextArea = forwardRef<HTMLTextAreaElement, Props>(
-  ({ value, onPromptSubmit, handlePromptChange, ...props }, ref) => {
+  ({ isDisabled = false, value, onPromptSubmit, handlePromptChange, ...props }, ref) => {
     const [currentValue, setCurrentValue] = React.useState(value);
 
     const onChangeCallback = useCallback(
@@ -62,6 +63,7 @@ export const PromptTextArea = forwardRef<HTMLTextAreaElement, Props>(
         data-test-subj={'prompt-textarea'}
         fullWidth
         autoFocus
+        disabled={isDisabled}
         placeholder={i18n.PROMPT_PLACEHOLDER}
         value={currentValue}
         onChange={onChangeCallback}

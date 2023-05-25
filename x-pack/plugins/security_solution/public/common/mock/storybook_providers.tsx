@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { AssistantUiSettings } from '@kbn/elastic-assistant';
 import { AssistantProvider } from '@kbn/elastic-assistant';
 import { euiLightVars } from '@kbn/ui-theme';
 import React from 'react';
@@ -17,6 +16,7 @@ import type { CoreStart } from '@kbn/core/public';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import { I18nProvider } from '@kbn/i18n-react';
 import { CellActionsProvider } from '@kbn/cell-actions';
+import { actionTypeRegistryMock } from '@kbn/triggers-actions-ui-plugin/public/application/action_type_registry.mock';
 import { createStore } from '../store';
 import { mockGlobalState } from './global_state';
 import { SUB_PLUGINS_REDUCER } from './utils';
@@ -48,18 +48,6 @@ const coreMock = {
 
 const KibanaReactContext = createKibanaReactContext(coreMock);
 
-const mockApiConfig: AssistantUiSettings = {
-  virusTotal: {
-    apiKey: 'mock',
-    baseUrl: 'https://www.virustotal.com/api/v3',
-  },
-  openAI: {
-    apiKey: 'mock',
-    baseUrl:
-      'https://example.com/openai/deployments/example/chat/completions?api-version=2023-03-15-preview',
-  },
-};
-
 /**
  * A utility for wrapping components in Storybook that provides access to the most common React contexts used by security components.
  * It is a simplified version of TestProvidersComponent.
@@ -67,7 +55,8 @@ const mockApiConfig: AssistantUiSettings = {
  */
 export const StorybookProviders: React.FC = ({ children }) => {
   const store = createStore(mockGlobalState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
-  const http = httpServiceMock.createSetupContract({ basePath: '/test' });
+  const http = httpServiceMock.createStartContract({ basePath: '/test' });
+  const actionTypeRegistry = actionTypeRegistryMock.create();
 
   return (
     <I18nProvider>
@@ -76,11 +65,11 @@ export const StorybookProviders: React.FC = ({ children }) => {
           <ReduxStoreProvider store={store}>
             <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
               <AssistantProvider
-                apiConfig={mockApiConfig}
+                actionTypeRegistry={actionTypeRegistry}
                 augmentMessageCodeBlocks={jest.fn()}
-                conversations={{}}
                 getComments={jest.fn()}
-                httpFetch={http.fetch}
+                getInitialConversations={jest.fn()}
+                http={http}
                 setConversations={jest.fn()}
               >
                 {children}

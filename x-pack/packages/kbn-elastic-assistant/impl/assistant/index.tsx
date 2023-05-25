@@ -41,6 +41,9 @@ import * as i18n from './translations';
 import type { Prompt } from './types';
 import { getPromptById } from './prompt_editor/helpers';
 import { QuickPrompts } from './quick_prompts/quick_prompts';
+import { useLoadConnectors } from '../connectorland/use_load_connectors';
+import { ConnectorSetup } from '../connectorland/connector_setup';
+import { WELCOME_CONVERSATION_ID } from './use_conversation/sample_conversations';
 
 const CommentsContainer = styled.div`
   max-height: 600px;
@@ -75,11 +78,18 @@ export interface Props {
 const AssistantComponent: React.FC<Props> = ({
   promptContextId = '',
   showTitle = true,
-  conversationId = 'default',
+  conversationId = WELCOME_CONVERSATION_ID,
   shouldRefocusPrompt = false,
 }) => {
-  const { augmentMessageCodeBlocks, conversations, getComments, promptContexts, title } =
-    useAssistantContext();
+  const {
+    actionTypeRegistry,
+    augmentMessageCodeBlocks,
+    conversations,
+    getComments,
+    http,
+    promptContexts,
+    title,
+  } = useAssistantContext();
   const [selectedPromptContextIds, setSelectedPromptContextIds] = useState<string[]>([]);
 
   const { appendMessage, clearConversation, createConversation } = useConversation();
@@ -90,6 +100,13 @@ const AssistantComponent: React.FC<Props> = ({
     () => conversations[selectedConversationId] ?? createConversation({ conversationId }),
     [conversationId, conversations, createConversation, selectedConversationId]
   );
+  const welcomeConversation = useMemo(
+    () => conversations[selectedConversationId] ?? conversations.welcome,
+    [conversations, selectedConversationId]
+  );
+
+  const { data: connectors, refetch: refetchConnectors } = useLoadConnectors({ http });
+  const isWelcomeSetup = (connectors?.length ?? 0) === 0;
 
   const bottomRef = useRef<HTMLDivElement | null>(null);
   const lastCommentRef = useRef<HTMLDivElement | null>(null);
@@ -169,13 +186,19 @@ const AssistantComponent: React.FC<Props> = ({
       setSelectedPromptContextIds([]);
       setPromptTextPreview('');
 
-      const rawResponse = await sendMessages(updatedMessages);
+      const rawResponse = await sendMessages({
+        http,
+        apiConfig: currentConversation.apiConfig,
+        messages: updatedMessages,
+      });
       const responseMessage: Message = getMessageFromRawResponse(rawResponse);
       appendMessage({ conversationId: selectedConversationId, message: responseMessage });
     },
     [
       appendMessage,
+      currentConversation.apiConfig,
       currentConversation.messages.length,
+      http,
       promptContexts,
       selectedConversationId,
       selectedPromptContextIds,
@@ -236,6 +259,12 @@ const AssistantComponent: React.FC<Props> = ({
     autoPopulatedOnce,
   ]);
 
+  // TODO: Fix timeline suspense code over in x-pack/plugins/security_solution/public/timelines/components/timeline/tabs_content/index.tsx
+  // TODO: So there aren't two assistants at the same time
+  if (conversationId !== WELCOME_CONVERSATION_ID && connectors?.length === 0) {
+    return <></>;
+  }
+
   return (
     <EuiSplitPanel.Outer
       grow={false}
@@ -253,6 +282,7 @@ const AssistantComponent: React.FC<Props> = ({
                   conversationId={selectedConversationId}
                   onSelectionChange={(id) => setSelectedConversationId(id)}
                   shouldDisableKeyboardShortcut={shouldDisableConversationSelectorHotkeys}
+                  isDisabled={isWelcomeSetup}
                 />,
               ]}
               iconType="logoSecurity"
@@ -274,35 +304,50 @@ const AssistantComponent: React.FC<Props> = ({
           });
         })}
 
-        <ContextPills
-          promptContexts={promptContexts}
-          selectedPromptContextIds={selectedPromptContextIds}
-          setSelectedPromptContextIds={setSelectedPromptContextIds}
-        />
+        {!isWelcomeSetup && (
+          <ContextPills
+            promptContexts={promptContexts}
+            selectedPromptContextIds={selectedPromptContextIds}
+            setSelectedPromptContextIds={setSelectedPromptContextIds}
+          />
+        )}
 
         <EuiSpacer />
 
-        <CommentsContainer className="eui-scrollBar">
-          <StyledCommentList comments={comments} />
-          <div ref={bottomRef} />
+        {isWelcomeSetup && (
+          <ConnectorSetup
+            actionTypeRegistry={actionTypeRegistry}
+            conversation={welcomeConversation}
+            http={http}
+            refetchConnectors={refetchConnectors}
+            isConnectorConfigured={!!connectors?.length}
+          />
+        )}
 
-          <EuiSpacer />
+        {!isWelcomeSetup && (
+          <CommentsContainer className="eui-scrollBar">
+            <>
+              <StyledCommentList comments={comments} />
+              <div ref={bottomRef} />
 
-          <>
-            {(currentConversation.messages.length === 0 || selectedPromptContextIds.length > 0) && (
-              <PromptEditor
-                isNewConversation={currentConversation.messages.length === 0}
-                promptContexts={promptContexts}
-                promptTextPreview={promptTextPreview}
-                selectedPromptContextIds={selectedPromptContextIds}
-                selectedSystemPromptId={selectedSystemPromptId}
-                setSelectedPromptContextIds={setSelectedPromptContextIds}
-                setSelectedSystemPromptId={setSelectedSystemPromptId}
-                systemPrompts={systemPrompts}
-              />
-            )}
-          </>
-        </CommentsContainer>
+              <EuiSpacer />
+
+              {(currentConversation.messages.length === 0 ||
+                selectedPromptContextIds.length > 0) && (
+                <PromptEditor
+                  isNewConversation={currentConversation.messages.length === 0}
+                  promptContexts={promptContexts}
+                  promptTextPreview={promptTextPreview}
+                  selectedPromptContextIds={selectedPromptContextIds}
+                  selectedSystemPromptId={selectedSystemPromptId}
+                  setSelectedPromptContextIds={setSelectedPromptContextIds}
+                  setSelectedSystemPromptId={setSelectedSystemPromptId}
+                  systemPrompts={systemPrompts}
+                />
+              )}
+            </>
+          </CommentsContainer>
+        )}
 
         <EuiSpacer />
 
@@ -312,6 +357,7 @@ const AssistantComponent: React.FC<Props> = ({
             ref={promptTextAreaRef}
             handlePromptChange={setPromptTextPreview}
             value={suggestedUserPrompt ?? ''}
+            isDisabled={isWelcomeSetup}
           />
 
           <ChatOptionsFlexItem grow={false}>
@@ -321,6 +367,7 @@ const AssistantComponent: React.FC<Props> = ({
                   <EuiButtonIcon
                     display="base"
                     iconType="cross"
+                    isDisabled={isWelcomeSetup}
                     aria-label={i18n.CLEAR_CHAT}
                     color="danger"
                     onClick={() => {
@@ -337,6 +384,7 @@ const AssistantComponent: React.FC<Props> = ({
                   <EuiButtonIcon
                     display="base"
                     iconType="returnKey"
+                    isDisabled={isWelcomeSetup}
                     aria-label={i18n.SUBMIT_MESSAGE}
                     color="primary"
                     onClick={handleButtonSendMessage}
@@ -345,21 +393,28 @@ const AssistantComponent: React.FC<Props> = ({
                 </EuiToolTip>
               </EuiFlexItem>
               <EuiFlexItem grow={true}>
-                <SettingsPopover />
+                <SettingsPopover
+                  actionTypeRegistry={actionTypeRegistry}
+                  conversation={currentConversation}
+                  isDisabled={isWelcomeSetup}
+                  http={http}
+                />
               </EuiFlexItem>
             </EuiFlexGroup>
           </ChatOptionsFlexItem>
         </ChatContainerFlexGroup>
       </EuiSplitPanel.Inner>
-      <EuiSplitPanel.Inner
-        grow={false}
-        color="subdued"
-        css={css`
-          padding: 8px;
-        `}
-      >
-        <QuickPrompts setInput={setSuggestedUserPrompt} />
-      </EuiSplitPanel.Inner>
+      {!isWelcomeSetup && (
+        <EuiSplitPanel.Inner
+          grow={false}
+          color="subdued"
+          css={css`
+            padding: 8px;
+          `}
+        >
+          <QuickPrompts setInput={setSuggestedUserPrompt} />
+        </EuiSplitPanel.Inner>
+      )}
     </EuiSplitPanel.Outer>
   );
 };

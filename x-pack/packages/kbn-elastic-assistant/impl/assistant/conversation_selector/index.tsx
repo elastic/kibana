@@ -18,6 +18,7 @@ interface Props {
   conversationId?: string;
   onSelectionChange?: (value: string) => void;
   shouldDisableKeyboardShortcut?: () => boolean;
+  isDisabled?: boolean;
 }
 
 const getPreviousConversationId = (conversationIds: string[], selectedConversationId: string) => {
@@ -37,6 +38,7 @@ export const ConversationSelector: React.FC<Props> = React.memo(
     conversationId = 'default',
     onSelectionChange,
     shouldDisableKeyboardShortcut = () => false,
+    isDisabled = false,
   }) => {
     const [selectedConversationId, setSelectedConversationId] = useState<string>(conversationId);
 
@@ -59,7 +61,7 @@ export const ConversationSelector: React.FC<Props> = React.memo(
     // Register keyboard listener for quick conversation switching
     const onKeyDown = useCallback(
       (event: KeyboardEvent) => {
-        if (conversationIds.length <= 1) {
+        if (isDisabled || conversationIds.length <= 1) {
           return;
         }
 
@@ -80,7 +82,13 @@ export const ConversationSelector: React.FC<Props> = React.memo(
           onRightArrowClick();
         }
       },
-      [conversationIds.length, onLeftArrowClick, onRightArrowClick, shouldDisableKeyboardShortcut]
+      [
+        conversationIds.length,
+        isDisabled,
+        onLeftArrowClick,
+        onRightArrowClick,
+        shouldDisableKeyboardShortcut,
+      ]
     );
     useEvent('keydown', onKeyDown);
 
@@ -102,6 +110,7 @@ export const ConversationSelector: React.FC<Props> = React.memo(
           valueOfSelected={selectedConversationId}
           onChange={onChange}
           compressed={true}
+          disabled={isDisabled}
           aria-label="Conversation Selector"
           prepend={
             <EuiToolTip content="Previous Conversation (⌘ + ←)" display="block">
@@ -109,7 +118,7 @@ export const ConversationSelector: React.FC<Props> = React.memo(
                 iconType="arrowLeft"
                 aria-label="Previous Conversation"
                 onClick={onLeftArrowClick}
-                disabled={conversationIds.length <= 1}
+                disabled={isDisabled || conversationIds.length <= 1}
               />
             </EuiToolTip>
           }
@@ -119,7 +128,7 @@ export const ConversationSelector: React.FC<Props> = React.memo(
                 iconType="arrowRight"
                 aria-label="Next Conversation"
                 onClick={onRightArrowClick}
-                disabled={conversationIds.length <= 1}
+                disabled={isDisabled || conversationIds.length <= 1}
               />
             </EuiToolTip>
           }

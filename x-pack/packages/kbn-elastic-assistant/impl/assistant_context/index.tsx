@@ -6,10 +6,11 @@
  */
 
 import { EuiCommentProps } from '@elastic/eui';
-import type { HttpHandler } from '@kbn/core-http-browser';
+import type { HttpSetup } from '@kbn/core-http-browser';
 import { omit } from 'lodash/fp';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
+import { ActionTypeRegistryContract } from '@kbn/triggers-actions-ui-plugin/public';
 import { updatePromptContexts } from './helpers';
 import type {
   PromptContext,
@@ -17,7 +18,6 @@ import type {
   UnRegisterPromptContext,
 } from '../assistant/prompt_context/types';
 import type { Conversation } from './types';
-import { AssistantUiSettings } from '../assistant/helpers';
 import { DEFAULT_ASSISTANT_TITLE } from '../assistant/translations';
 import { CodeBlockDetails } from '../assistant/use_conversation/helpers';
 
@@ -33,10 +33,9 @@ type ShowAssistantOverlay = ({
   conversationId,
 }: ShowAssistantOverlayProps) => void;
 interface AssistantProviderProps {
-  apiConfig: AssistantUiSettings;
+  actionTypeRegistry: ActionTypeRegistryContract;
   augmentMessageCodeBlocks: (currentConversation: Conversation) => CodeBlockDetails[][];
   children: React.ReactNode;
-  conversations: Record<string, Conversation>;
   getComments: ({
     currentConversation,
     lastCommentRef,
@@ -44,13 +43,14 @@ interface AssistantProviderProps {
     currentConversation: Conversation;
     lastCommentRef: React.MutableRefObject<HTMLDivElement | null>;
   }) => EuiCommentProps[];
-  httpFetch: HttpHandler;
+  http: HttpSetup;
+  getInitialConversations: () => Record<string, Conversation>;
   setConversations: React.Dispatch<React.SetStateAction<Record<string, Conversation>>>;
   title?: string;
 }
 
 interface UseAssistantContext {
-  apiConfig: AssistantUiSettings;
+  actionTypeRegistry: ActionTypeRegistryContract;
   augmentMessageCodeBlocks: (currentConversation: Conversation) => CodeBlockDetails[][];
   conversationIds: string[];
   conversations: Record<string, Conversation>;
@@ -61,7 +61,7 @@ interface UseAssistantContext {
     currentConversation: Conversation;
     lastCommentRef: React.MutableRefObject<HTMLDivElement | null>;
   }) => EuiCommentProps[];
-  httpFetch: HttpHandler;
+  http: HttpSetup;
   promptContexts: Record<string, PromptContext>;
   registerPromptContext: RegisterPromptContext;
   setConversations: React.Dispatch<React.SetStateAction<Record<string, Conversation>>>;
@@ -74,12 +74,12 @@ interface UseAssistantContext {
 const AssistantContext = React.createContext<UseAssistantContext | undefined>(undefined);
 
 export const AssistantProvider: React.FC<AssistantProviderProps> = ({
-  apiConfig,
+  actionTypeRegistry,
   augmentMessageCodeBlocks,
   children,
-  conversations,
   getComments,
-  httpFetch,
+  http,
+  getInitialConversations,
   setConversations,
   title = DEFAULT_ASSISTANT_TITLE,
 }) => {
@@ -113,31 +113,63 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
     (showAssistant) => {}
   );
 
+  const [conversations, setConversationsInternal] = useState(getInitialConversations());
+  const conversationIds = useMemo(() => Object.keys(conversations).sort(), [conversations]);
+
+  // TODO: This is a fix for conversations not loading out of localstorage. Also re-introduces our cascading render issue (as it loops back in localstorage)
+  useEffect(() => {
+    setConversationsInternal(getInitialConversations());
+  }, [getInitialConversations]);
+
+  const onConversationsUpdated = useCallback<
+    React.Dispatch<React.SetStateAction<Record<string, Conversation>>>
+  >(
+    (
+      newConversations:
+        | Record<string, Conversation>
+        | ((prev: Record<string, Conversation>) => Record<string, Conversation>)
+    ) => {
+      if (typeof newConversations === 'function') {
+        const updater = newConversations;
+        setConversationsInternal((prevValue) => {
+          const newValue = updater(prevValue);
+          setConversations(newValue);
+          return newValue;
+        });
+      } else {
+        setConversations(newConversations);
+        setConversationsInternal(newConversations);
+      }
+    },
+    [setConversations]
+  );
+
   const value = useMemo(
     () => ({
-      apiConfig,
+      actionTypeRegistry,
       augmentMessageCodeBlocks,
-      conversationIds: Object.keys(conversations).sort(),
+      conversationIds,
       conversations,
       getComments,
-      httpFetch,
+      http,
       promptContexts,
       registerPromptContext,
-      setConversations,
+      setConversations: onConversationsUpdated,
       setShowAssistantOverlay,
       showAssistantOverlay,
       title,
       unRegisterPromptContext,
     }),
     [
-      apiConfig,
+      actionTypeRegistry,
       augmentMessageCodeBlocks,
+      conversationIds,
       conversations,
       getComments,
-      httpFetch,
+      http,
       promptContexts,
       registerPromptContext,
-      setConversations,
+      onConversationsUpdated,
       showAssistantOverlay,
       title,
       unRegisterPromptContext,

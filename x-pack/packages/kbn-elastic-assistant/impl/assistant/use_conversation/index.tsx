@@ -13,19 +13,7 @@ import { Conversation, Message } from '../../assistant_context/types';
 export const DEFAULT_CONVERSATION_STATE: Conversation = {
   id: 'default',
   messages: [],
-  apiConfig: {
-    openAI: {
-      apiKey: '',
-      baseUrl: '',
-      model: '',
-      prompt: '',
-      temperature: 0.2,
-    },
-    virusTotal: {
-      apiKey: '',
-      baseUrl: '',
-    },
-  },
+  apiConfig: {},
 };
 
 interface AppendMessageProps {
@@ -38,6 +26,15 @@ interface CreateConversationProps {
   messages?: Message[];
 }
 
+interface SetApiConfigProps {
+  conversationId: string;
+  apiConfig: Conversation['apiConfig'];
+}
+
+interface SetConversationProps {
+  conversation: Conversation;
+}
+
 interface UseConversation {
   appendMessage: ({ conversationId: string, message: Message }: AppendMessageProps) => Message[];
   clearConversation: (conversationId: string) => void;
@@ -45,6 +42,8 @@ interface UseConversation {
     conversationId,
     messages,
   }: CreateConversationProps) => Conversation | undefined;
+  setApiConfig: ({ conversationId, apiConfig }: SetApiConfigProps) => void;
+  setConversation: ({ conversation }: SetConversationProps) => void;
 }
 
 export const useConversation = (): UseConversation => {
@@ -134,5 +133,46 @@ export const useConversation = (): UseConversation => {
     [setConversations]
   );
 
-  return { appendMessage, clearConversation, createConversation };
+  /**
+   * Update the apiConfig for a given conversationId
+   */
+  const setApiConfig = useCallback(
+    ({ conversationId, apiConfig }: SetApiConfigProps): void => {
+      setConversations((prev: Record<string, Conversation>) => {
+        const prevConversation: Conversation | undefined = prev[conversationId];
+
+        if (prevConversation != null) {
+          const updatedConversation = {
+            ...prevConversation,
+            apiConfig,
+          };
+
+          return {
+            ...prev,
+            [conversationId]: updatedConversation,
+          };
+        } else {
+          return prev;
+        }
+      });
+    },
+    [setConversations]
+  );
+
+  /**
+   * Set/overwrite an existing conversation (behaves as createConversation if not already existing)
+   */
+  const setConversation = useCallback(
+    ({ conversation }: SetConversationProps): void => {
+      setConversations((prev: Record<string, Conversation>) => {
+        return {
+          ...prev,
+          [conversation.id]: conversation,
+        };
+      });
+    },
+    [setConversations]
+  );
+
+  return { appendMessage, clearConversation, createConversation, setApiConfig, setConversation };
 };

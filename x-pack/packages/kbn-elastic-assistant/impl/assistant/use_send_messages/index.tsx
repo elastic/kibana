@@ -7,37 +7,36 @@
 
 import { useCallback, useState } from 'react';
 
-import { useAssistantContext } from '../../assistant_context';
-import { Message } from '../../assistant_context/types';
+import { HttpSetup } from '@kbn/core-http-browser';
+import { Conversation, Message } from '../../assistant_context/types';
+import { fetchConnectorExecuteAction } from '../api';
+
+interface SendMessagesProps {
+  http: HttpSetup;
+  messages: Message[];
+  apiConfig: Conversation['apiConfig'];
+}
 
 interface UseSendMessages {
   isLoading: boolean;
-  sendMessages: (messages: Message[]) => Promise<string>;
+  sendMessages: ({ apiConfig, http, messages }: SendMessagesProps) => Promise<string>;
 }
 
 export const useSendMessages = (): UseSendMessages => {
-  const { apiConfig } = useAssistantContext();
   const [isLoading, setIsLoading] = useState(false);
 
-  const sendMessages = useCallback(
-    async (messages: Message[]) => {
-      setIsLoading(true);
-      try {
-        messages.filter((e) => apiConfig != null);
-        // wait 2 seconds then continue todo: add temporary assistant chat bubble loader w/ skeleton
-        await new Promise((resolve) => setTimeout(resolve, 2000));
-        return 'This string is cheaper than cloud spend!';
-        // return await fetchChatCompletion({
-        //   messages,
-        //   baseUrl: apiConfig.openAI.baseUrl,
-        //   apiKey: apiConfig.openAI.apiKey,
-        // });
-      } finally {
-        setIsLoading(false);
-      }
-    },
-    [apiConfig]
-  );
+  const sendMessages = useCallback(async ({ apiConfig, http, messages }: SendMessagesProps) => {
+    setIsLoading(true);
+    try {
+      return await fetchConnectorExecuteAction({
+        http,
+        messages,
+        apiConfig,
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
 
   return { isLoading, sendMessages };
 };

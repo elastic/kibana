@@ -51,6 +51,19 @@ export const SETTINGS_TEMPERATURE_HELP_TEXT = i18n.translate(
   }
 );
 
+export const SETTINGS_CONNECTOR_TITLE = i18n.translate(
+  'xpack.elasticAssistant.assistant.settings.connectorTitle',
+  {
+    defaultMessage: 'Connector',
+  }
+);
+export const SETTINGS_CONNECTOR_HELP_TEXT_TITLE = i18n.translate(
+  'xpack.elasticAssistant.assistant.settings.connectorHelpTextTitle',
+  {
+    defaultMessage: 'Kibana Connector to make requests with',
+  }
+);
+
 export const SETTINGS_MODEL_TITLE = i18n.translate(
   'xpack.elasticAssistant.assistant.settings.modelTitle',
   {

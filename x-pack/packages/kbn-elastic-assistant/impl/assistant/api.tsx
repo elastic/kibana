@@ -6,8 +6,11 @@
  */
 
 import axios from 'axios';
+import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/public/common';
 
+import { HttpSetup } from '@kbn/core-http-browser';
 import type { Message } from '../assistant_context/types';
+import { Conversation } from '../assistant_context/types';
 
 export const fetchOpenAlerts = async () => []; // TODO: fetch alerts via alerts API
 
@@ -58,43 +61,63 @@ export const sendFileToVirusTotal = async ({
   return response.data;
 };
 
-export interface FetchChatCompletionProps {
+export interface FetchConnectorExecuteAction {
+  apiConfig: Conversation['apiConfig'];
+  http: HttpSetup;
   messages: Message[];
-  baseUrl: string;
-  apiKey: string;
   signal?: AbortSignal | undefined;
 }
-export const fetchChatCompletion = async ({
+
+export const fetchConnectorExecuteAction = async ({
+  http,
   messages,
-  baseUrl,
-  apiKey,
+  apiConfig,
   signal,
-}: FetchChatCompletionProps): Promise<string> => {
+}: FetchConnectorExecuteAction): Promise<string> => {
   const outboundMessages = messages.map((msg) => ({
     role: msg.role,
     content: msg.content,
   }));
 
+  const body =
+    apiConfig?.provider === OpenAiProviderType.OpenAi
+      ? {
+          model: 'gpt-3.5-turbo',
+          messages: outboundMessages,
+          n: 1,
+          stop: null,
+          temperature: 0.2,
+        }
+      : {
+          messages: outboundMessages,
+        };
+
   const requestBody = {
-    messages: outboundMessages,
-    n: 1,
-    stop: null,
-    temperature: 0.2,
+    params: {
+      subActionParams: {
+        body: JSON.stringify(body),
+      },
+      subAction: 'test',
+    },
   };
 
   try {
-    const response = await fetch(baseUrl, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'api-key': apiKey,
-      },
-      body: JSON.stringify(requestBody),
-      signal,
-    });
+    // TODO: Find return type for this API
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const response = await http.fetch<any>(
+      `/api/actions/connector/${apiConfig?.connectorId}/_execute`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(requestBody),
+        signal,
+      }
+    );
 
-    const data = await response.json();
-    if (!response.ok) {
+    const data = response.data;
+    if (response.status !== 'ok') {
       return 'An error occurred while processing your request.';
     }
 

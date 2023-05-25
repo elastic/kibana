@@ -8,30 +8,20 @@
 import { renderHook } from '@testing-library/react-hooks';
 import React from 'react';
 
-import { AssistantUiSettings } from '../assistant/helpers';
 import { AssistantProvider, useAssistantContext } from '.';
+import { httpServiceMock } from '@kbn/core-http-browser-mocks';
+import { actionTypeRegistryMock } from '@kbn/triggers-actions-ui-plugin/public/application/action_type_registry.mock';
 
-const mockApiConfig: AssistantUiSettings = {
-  virusTotal: {
-    apiKey: 'mock',
-    baseUrl: 'https://www.virustotal.com/api/v3',
-  },
-  openAI: {
-    apiKey: 'mock',
-    baseUrl:
-      'https://example.com/openai/deployments/example/chat/completions?api-version=2023-03-15-preview',
-  },
-};
-
-const mockHttpFetch = jest.fn();
+const mockHttp = httpServiceMock.createStartContract({ basePath: '/test' });
+const actionTypeRegistry = actionTypeRegistryMock.create();
 
 const ContextWrapper: React.FC = ({ children }) => (
   <AssistantProvider
-    apiConfig={mockApiConfig}
+    actionTypeRegistry={actionTypeRegistry}
     augmentMessageCodeBlocks={jest.fn()}
-    conversations={{}}
+    getInitialConversations={jest.fn()}
     getComments={jest.fn()}
-    httpFetch={mockHttpFetch}
+    http={mockHttp}
     setConversations={jest.fn()}
   >
     {children}
@@ -53,11 +43,11 @@ describe('AssistantContext', () => {
 
   test('it should return the httpFetch function', async () => {
     const { result } = renderHook(useAssistantContext, { wrapper: ContextWrapper });
-    const httpFetch = await result.current.httpFetch;
+    const http = await result.current.http;
 
     const path = '/path/to/resource';
-    httpFetch(path);
+    await http.fetch(path);
 
-    expect(mockHttpFetch).toBeCalledWith(path);
+    expect(mockHttp).toBeCalledWith(path);
   });
 });

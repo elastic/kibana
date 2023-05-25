@@ -13,6 +13,7 @@ import useEvent from 'react-use/lib/useEvent';
 import styled from 'styled-components';
 import { ShowAssistantOverlayProps, useAssistantContext } from '../../assistant_context';
 import { Assistant } from '..';
+import { WELCOME_CONVERSATION_ID } from '../use_conversation/sample_conversations';
 
 const isMac = navigator.platform.toLowerCase().indexOf('mac') >= 0;
 
@@ -28,7 +29,7 @@ const StyledEuiModal = styled(EuiModal)`
  */
 export const AssistantOverlay: React.FC = React.memo(() => {
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const [conversationId, setConversationId] = useState<string | undefined>('default');
+  const [conversationId, setConversationId] = useState<string | undefined>(WELCOME_CONVERSATION_ID);
   const [promptContextId, setPromptContextId] = useState<string | undefined>();
   const { setShowAssistantOverlay } = useAssistantContext();
 
@@ -50,7 +51,7 @@ export const AssistantOverlay: React.FC = React.memo(() => {
     setShowAssistantOverlay(showOverlay);
   }, [setShowAssistantOverlay, showOverlay]);
 
-  // Register keyboard listener to show the modal when cmd + / is pressed
+  // Register keyboard listener to show the modal when cmd + ; is pressed
   const onKeyDown = useCallback(
     (event: KeyboardEvent) => {
       if (event.key === ';' && (isMac ? event.metaKey : event.ctrlKey)) {
@@ -66,8 +67,8 @@ export const AssistantOverlay: React.FC = React.memo(() => {
   const cleanupAndCloseModal = useCallback(() => {
     setIsModalVisible(false);
     setPromptContextId(undefined);
-    setConversationId('default');
-  }, [setIsModalVisible]);
+    setConversationId(conversationId);
+  }, [conversationId]);
 
   const handleCloseModal = useCallback(() => {
     cleanupAndCloseModal();

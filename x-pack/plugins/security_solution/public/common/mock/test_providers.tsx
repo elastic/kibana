@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { AssistantUiSettings } from '@kbn/elastic-assistant';
 import { AssistantProvider } from '@kbn/elastic-assistant';
 import { euiDarkVars } from '@kbn/ui-theme';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -24,6 +23,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import type { Action } from '@kbn/ui-actions-plugin/public';
 import { CellActionsProvider } from '@kbn/cell-actions';
 import { ExpandableFlyoutProvider } from '@kbn/expandable-flyout';
+import { actionTypeRegistryMock } from '@kbn/triggers-actions-ui-plugin/public/application/action_type_registry.mock';
 import { ConsoleManager } from '../../management/components/console';
 import type { State } from '../store';
 import { createStore } from '../store';
@@ -37,18 +37,6 @@ import { SUB_PLUGINS_REDUCER } from './utils';
 import { createSecuritySolutionStorageMock, localStorageMock } from './mock_local_storage';
 import { CASES_FEATURE_ID } from '../../../common/constants';
 import { UserPrivilegesProvider } from '../components/user_privileges/user_privileges_context';
-
-const mockApiConfig: AssistantUiSettings = {
-  virusTotal: {
-    apiKey: 'mock',
-    baseUrl: 'https://www.virustotal.com/api/v3',
-  },
-  openAI: {
-    apiKey: 'mock',
-    baseUrl:
-      'https://example.com/openai/deployments/example/chat/completions?api-version=2023-03-15-preview',
-  },
-};
 
 const state: State = mockGlobalState;
 
@@ -76,7 +64,8 @@ export const TestProvidersComponent: React.FC<Props> = ({
   cellActions = [],
 }) => {
   const queryClient = new QueryClient();
-  const http = httpServiceMock.createSetupContract({ basePath: '/test' });
+  const http = httpServiceMock.createStartContract({ basePath: '/test' });
+  const actionTypeRegistry = actionTypeRegistryMock.create();
 
   return (
     <I18nProvider>
@@ -84,11 +73,11 @@ export const TestProvidersComponent: React.FC<Props> = ({
         <ReduxStoreProvider store={store}>
           <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
             <AssistantProvider
-              apiConfig={mockApiConfig}
+              actionTypeRegistry={actionTypeRegistry}
               augmentMessageCodeBlocks={jest.fn()}
-              conversations={{}}
               getComments={jest.fn()}
-              httpFetch={http.fetch}
+              getInitialConversations={jest.fn()}
+              http={http}
               setConversations={jest.fn()}
             >
               <QueryClientProvider client={queryClient}>
@@ -120,7 +109,8 @@ const TestProvidersWithPrivilegesComponent: React.FC<Props> = ({
   onDragEnd = jest.fn(),
   cellActions = [],
 }) => {
-  const http = httpServiceMock.createSetupContract({ basePath: '/test' });
+  const http = httpServiceMock.createStartContract({ basePath: '/test' });
+  const actionTypeRegistry = actionTypeRegistryMock.create();
 
   return (
     <I18nProvider>
@@ -128,11 +118,11 @@ const TestProvidersWithPrivilegesComponent: React.FC<Props> = ({
         <ReduxStoreProvider store={store}>
           <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
             <AssistantProvider
-              apiConfig={mockApiConfig}
+              actionTypeRegistry={actionTypeRegistry}
               augmentMessageCodeBlocks={jest.fn()}
-              conversations={{}}
               getComments={jest.fn()}
-              httpFetch={http.fetch}
+              getInitialConversations={jest.fn()}
+              http={http}
               setConversations={jest.fn()}
             >
               <UserPrivilegesProvider

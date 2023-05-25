@@ -17,16 +17,25 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import type { ChangeEvent } from 'react';
-import React, { useCallback, useRef, useState } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 
 import type { Cancelable } from 'lodash';
 import { debounce } from 'lodash';
 import type { EqlOptionsSelected, FieldsEqlOptions } from '@kbn/timelines-plugin/common';
 
+import { ActionTypeRegistryContract } from '@kbn/triggers-actions-ui-plugin/public';
+import { Conversation } from '@kbn/elastic-assistant';
+import { HttpSetup } from '@kbn/core-http-browser';
+import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/public/common';
 import { YOU_ARE_A_HELPFUL_EXPERT_ASSISTANT } from '../content/prompts/system/translations';
 import * as i18n from './translations';
+import { ConnectorSelector } from '../connectorland/connector_selector';
 
-export interface Props {
+export interface SettingsPopoverProps {
+  actionTypeRegistry: ActionTypeRegistryContract;
+  conversation: Conversation;
+  http: HttpSetup;
+  isDisabled?: boolean;
   optionsData?: {
     models: EuiComboBoxOptionOption[];
     prompt: string;
@@ -40,17 +49,29 @@ type SizeVoidFunc = (newSize: string) => void;
 
 const singleSelection = { asPlainText: true };
 
-const defaultOptionsData: Props['optionsData'] = {
+const defaultOptionsData: SettingsPopoverProps['optionsData'] = {
   models: [{ label: 'text-davinci-003' }, { label: 'gpt-3.5-turbo' }, { label: 'gpt-4' }],
   prompt: YOU_ARE_A_HELPFUL_EXPERT_ASSISTANT,
   temperature: 0.2,
 };
 
-export const SettingsPopover: React.FC<Props> = React.memo(
-  ({ optionsData = defaultOptionsData, optionsSelected, onOptionsChange }) => {
+export const SettingsPopover: React.FC<SettingsPopoverProps> = React.memo(
+  ({
+    actionTypeRegistry,
+    conversation,
+    http,
+    isDisabled = false,
+    optionsData = defaultOptionsData,
+    optionsSelected,
+    onOptionsChange,
+  }) => {
     const [isSettingsOpen, setIsSettingsOpen] = useState(false);
     const [localSize, setLocalSize] = useState(optionsSelected?.size ?? 0.2);
     const debounceSize = useRef<Cancelable & SizeVoidFunc>();
+
+    const provider = useMemo(() => {
+      return conversation.apiConfig?.provider;
+    }, [conversation.apiConfig]);
 
     const closeSettingsHandler = useCallback(() => {
       setIsSettingsOpen(false);
@@ -80,7 +101,7 @@ export const SettingsPopover: React.FC<Props> = React.memo(
       },
       [onOptionsChange]
     );
-    const handleSizeField = useCallback(
+    const handleTempChange = useCallback(
       (evt) => {
         if (onOptionsChange) {
           setLocalSize(evt?.target?.value);
@@ -99,6 +120,7 @@ export const SettingsPopover: React.FC<Props> = React.memo(
         button={
           <EuiToolTip position="right" content={i18n.SETTINGS_TITLE}>
             <EuiButtonIcon
+              disabled={isDisabled}
               onClick={() => setIsSettingsOpen(!isSettingsOpen)}
               iconType="controlsVertical"
               aria-label={i18n.SETTINGS_TITLE}
@@ -115,30 +137,46 @@ export const SettingsPopover: React.FC<Props> = React.memo(
         <div style={{ width: '300px' }}>
           <EuiFormRow
             data-test-subj="model-field"
-            label={i18n.SETTINGS_MODEL_TITLE}
-            helpText={i18n.SETTINGS_MODEL_HELP_TEXT_TITLE}
+            label={i18n.SETTINGS_CONNECTOR_TITLE}
+            helpText={i18n.SETTINGS_CONNECTOR_HELP_TEXT_TITLE}
           >
-            <EuiComboBox
-              options={optionsData?.models}
-              selectedOptions={[optionsData?.models[0]]}
-              singleSelection={singleSelection}
-              onChange={handleEventCategoryField}
+            <ConnectorSelector
+              actionTypeRegistry={actionTypeRegistry}
+              conversation={conversation}
+              http={http}
             />
           </EuiFormRow>
 
-          <EuiFormRow
-            data-test-subj="temperature-field"
-            label={i18n.SETTINGS_TEMPERATURE_TITLE}
-            helpText={i18n.SETTINGS_TEMPERATURE_HELP_TEXT}
-          >
-            <EuiFieldNumber
-              value={localSize}
-              onChange={handleSizeField}
-              min={0}
-              max={2}
-              step={0.1}
-            />
-          </EuiFormRow>
+          {provider === OpenAiProviderType.OpenAi && (
+            <>
+              <EuiFormRow
+                data-test-subj="model-field"
+                label={i18n.SETTINGS_MODEL_TITLE}
+                helpText={i18n.SETTINGS_MODEL_HELP_TEXT_TITLE}
+              >
+                <EuiComboBox
+                  options={optionsData?.models}
+                  selectedOptions={[optionsData?.models[0]]}
+                  singleSelection={singleSelection}
+                  onChange={handleEventCategoryField}
+                />
+              </EuiFormRow>
+
+              <EuiFormRow
+                data-test-subj="temperature-field"
+                label={i18n.SETTINGS_TEMPERATURE_TITLE}
+                helpText={i18n.SETTINGS_TEMPERATURE_HELP_TEXT}
+              >
+                <EuiFieldNumber
+                  value={localSize}
+                  onChange={handleTempChange}
+                  min={0}
+                  max={2}
+                  step={0.1}
+                />
+              </EuiFormRow>
+            </>
+          )}
 
           <EuiFormRow
             data-test-subj="prompt-field"

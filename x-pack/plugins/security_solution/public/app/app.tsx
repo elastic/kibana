@@ -6,10 +6,9 @@
  */
 
 import { AssistantProvider } from '@kbn/elastic-assistant';
-import type { AssistantUiSettings } from '@kbn/elastic-assistant';
 import type { History } from 'history';
 import type { FC } from 'react';
-import React, { memo } from 'react';
+import React, { memo, useCallback } from 'react';
 import type { Store, Action } from 'redux';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 
@@ -21,7 +20,7 @@ import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { CellActionsProvider } from '@kbn/cell-actions';
 
 import { getComments } from '../assistant/get_comments';
-import { augmentMessageCodeBlocks, SECURITY_ASSISTANT_UI_SETTING_KEY } from '../assistant/helpers';
+import { augmentMessageCodeBlocks } from '../assistant/helpers';
 import { useConversationStore } from '../assistant/use_conversation_store';
 import { ManageUserInfo } from '../detections/components/user_info';
 import { DEFAULT_DARK_MODE, APP_NAME } from '../../common/constants';
@@ -57,11 +56,14 @@ const StartAppComponent: FC<StartAppComponent> = ({
     i18n,
     application: { capabilities },
     http,
+    triggersActionsUi: { actionTypeRegistry },
     uiActions,
-    uiSettings,
   } = useKibana().services;
-  const apiConfig = uiSettings.get<AssistantUiSettings>(SECURITY_ASSISTANT_UI_SETTING_KEY);
+
   const { conversations, setConversations } = useConversationStore();
+  const getInitialConversation = useCallback(() => {
+    return conversations;
+  }, [conversations]);
 
   const [darkMode] = useUiSetting$<boolean>(DEFAULT_DARK_MODE);
   return (
@@ -72,11 +74,11 @@ const StartAppComponent: FC<StartAppComponent> = ({
             <KibanaThemeProvider theme$={theme$}>
               <EuiThemeProvider darkMode={darkMode}>
                 <AssistantProvider
-                  apiConfig={apiConfig}
+                  actionTypeRegistry={actionTypeRegistry}
                   augmentMessageCodeBlocks={augmentMessageCodeBlocks}
-                  conversations={conversations}
+                  getInitialConversations={getInitialConversation}
                   getComments={getComments}
-                  httpFetch={http.fetch}
+                  http={http}
                   setConversations={setConversations}
                   title={ASSISTANT_TITLE}
                 >

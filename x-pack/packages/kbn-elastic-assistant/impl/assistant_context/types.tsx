@@ -5,27 +5,50 @@
  * 2.0.
  */
 
-import { AssistantUiSettings } from '../assistant/helpers';
+import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/gen_ai/constants';
 
 export type ConversationRole = 'system' | 'user' | 'assistant';
+
+export interface MessagePresentation {
+  delay?: number;
+  stream?: boolean;
+}
 export interface Message {
   role: ConversationRole;
   content: string;
   timestamp: string;
+  presentation?: MessagePresentation;
+}
+
+export interface ConversationTheme {
+  title: JSX.Element | string;
+  user: {
+    icon: string;
+  };
+  assistant: {
+    icon: string;
+  };
+  system: {
+    icon: string;
+  };
 }
 
 /**
  * Complete state to reconstruct a conversation instance.
- * Includes all messages, API configuration, and relevant UI state.
+ * Includes all messages, connector configured, and relevant UI state.
  *
- * Currently only conversation will be stored in localstorage, no secrets plz!
  */
 export interface Conversation {
+  apiConfig: {
+    connectorId?: string;
+    provider?: OpenAiProviderType;
+  };
   id: string;
   messages: Message[];
-  /** TODO: remove apiConfig when provider is available */
-  apiConfig?: {
-    openAI: AssistantUiSettings['openAI'];
-    virusTotal: AssistantUiSettings['virusTotal'];
-  };
+  theme?: ConversationTheme;
+}
+
+export interface OpenAIConfig {
+  temperature: number;
+  model: string;
 }

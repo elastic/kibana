@@ -6,8 +6,11 @@
  */
 
 import { Conversation } from '../../assistant_context/types';
+import * as i18n from '../../content/prompts/welcome/translations';
 
-export const ALL_QUERIES_CONVERSATION: Record<string, Conversation> = {
+export const WELCOME_CONVERSATION_ID = 'welcome';
+
+export const BASE_CONVERSATIONS: Record<string, Conversation> = {
   default: {
     id: 'default',
     messages: [
@@ -70,35 +73,61 @@ export const ALL_QUERIES_CONVERSATION: Record<string, Conversation> = {
         timestamp: '5/12/2023, 12:30:49 AM',
       },
     ],
-    apiConfig: {
-      openAI: {
-        apiKey: '',
-        baseUrl: '',
-        model: '',
-        prompt: '',
-        temperature: 0.2,
-      },
-      virusTotal: {
-        apiKey: '',
-        baseUrl: '',
-      },
-    },
+    apiConfig: {},
   },
   timeline: {
     id: 'timeline',
     messages: [],
-    apiConfig: {
-      openAI: {
-        apiKey: '',
-        baseUrl: '',
-        model: '',
-        prompt: '',
-        temperature: 0.2,
+    apiConfig: {},
+  },
+  [WELCOME_CONVERSATION_ID]: {
+    id: 'welcome',
+    theme: {
+      title: 'Elastic Assistant',
+      assistant: {
+        icon: 'logoElastic',
       },
-      virusTotal: {
-        apiKey: '',
-        baseUrl: '',
+      system: {
+        icon: 'logoElastic',
+      },
+      user: {
+        icon: 'logoElastic',
       },
     },
+    messages: [
+      {
+        role: 'assistant',
+        content: i18n.WELCOME_GENERAL,
+        timestamp: '',
+        presentation: {
+          delay: 2 * 1000,
+          stream: true,
+        },
+      },
+      {
+        role: 'assistant',
+        content: i18n.WELCOME_GENERAL_2,
+        timestamp: '',
+        presentation: {
+          delay: 1000,
+          stream: true,
+        },
+      },
+      {
+        role: 'assistant',
+        content: i18n.WELCOME_GENERAL_3,
+        timestamp: '',
+        presentation: {
+          delay: 1000,
+          stream: true,
+        },
+      },
+      // {
+      //   role: 'assistant',
+      //   content: i18n.WELCOME_NO_CONNECTOR_PRIVILEGES,
+      //   timestamp: '',
+      // },
+    ],
+    apiConfig: {},
   },
 };

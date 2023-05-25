@@ -13,7 +13,7 @@ export type {
 } from './impl/assistant/use_conversation/helpers';
 
 /** sample content */
-export { ALL_QUERIES_CONVERSATION } from './impl/assistant/use_conversation/sample_conversations';
+export { BASE_CONVERSATIONS } from './impl/assistant/use_conversation/sample_conversations';
 
 /** a helper that enriches content returned from a query with action buttons */
 export { analyzeMarkdown } from './impl/assistant/use_conversation/helpers';
