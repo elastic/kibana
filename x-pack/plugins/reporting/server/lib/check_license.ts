@@ -6,7 +6,7 @@
  */
 
 import { ILicense } from '@kbn/licensing-plugin/server';
-import { ExportTypeDefinition } from '../types';
+import { PdfExportType } from '../export_types/printable_pdf_v2/types';
 import { ExportTypesRegistry } from './export_types_registry';
 
 export interface LicenseCheckResult {
@@ -25,7 +25,7 @@ const messages = {
   },
 };
 
-const makeManagementFeature = (exportTypes: ExportTypeDefinition[]) => {
+const makeManagementFeature = (exportTypes: PdfExportType[]) => {
   return {
     id: 'management',
     checkLicense: (license?: ILicense) => {
@@ -58,7 +58,7 @@ const makeManagementFeature = (exportTypes: ExportTypeDefinition[]) => {
   };
 };
 
-const makeExportTypeFeature = (exportType: ExportTypeDefinition) => {
+const makeExportTypeFeature = (exportType: PdfExportType) => {
   return {
     id: exportType.id,
     checkLicense: (license?: ILicense) => {
@@ -74,7 +74,7 @@ const makeExportTypeFeature = (exportType: ExportTypeDefinition) => {
         return {
           showLinks: false,
           enableLinks: false,
-          message: `Your ${license.type} license does not support ${exportType.name} Reporting. Please upgrade your license.`,
+          message: `Your ${license.type} license does not support ${exportType.id} Reporting. Please upgrade your license.`,
         };
       }
 

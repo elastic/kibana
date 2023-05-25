@@ -205,6 +205,14 @@ export class PdfExportType {
     );
   }
 
+  // export type CreateJobFnFactory<CreateJobFnType> = (
+  //   reporting: ReportingCore,
+  //   logger: Logger
+  // ) => CreateJobFnType;
+  public createJobFnFactory(jobParams: JobParamsPDFV2, logger: Logger) {
+    return this.createJob(jobParams);
+  }
+
   /**
    * @param JobParamsPDFV2
    * @returns jobParams

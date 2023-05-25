@@ -9,6 +9,7 @@ import moment from 'moment';
 import Boom from '@hapi/boom';
 import { i18n } from '@kbn/i18n';
 import type { KibanaRequest, KibanaResponseFactory, Logger } from '@kbn/core/server';
+import { JobParamsPDFV2 } from '../../../common/types';
 import type { ReportingCore } from '../..';
 import { API_BASE_URL } from '../../../common/constants';
 import { checkParamsVersion, cryptoFactory } from '../../lib';
@@ -53,12 +54,12 @@ export class RequestHandler {
       throw new Error(`Export type ${exportTypeId} does not exist in the registry!`);
     }
 
-    if (!exportType.createJobFnFactory) {
+    if (!exportType.createJobFnFactory(jobParams as JobParamsPDFV2, logger)) {
       throw new Error(`Export type ${exportTypeId} is not an async job type!`);
     }
 
     const [createJob, store] = await Promise.all([
-      exportType.createJobFnFactory(reporting, logger.get(exportType.id)),
+      exportType.createJobFnFactory(jobParams as JobParamsPDFV2, logger),
       reporting.getStore(),
     ]);
 
@@ -101,7 +102,7 @@ export class RequestHandler {
     // 5. Schedule the report with Task Manager
     const task = await reporting.scheduleTask(report.toReportTaskJSON());
     logger.info(
-      `Scheduled ${exportType.name} reporting task. Task ID: task:${task.id}. Report ID: ${report._id}`
+      `Scheduled ${exportType.jobType} reporting task. Task ID: task:${task.id}. Report ID: ${report._id}`
     );
 
     // 6. Log the action with event log

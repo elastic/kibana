@@ -108,9 +108,11 @@ export class ExecuteReportTask implements ReportingTask {
     const exportTypesRegistry = reporting.getExportTypesRegistry();
     const executors = new Map<string, TaskExecutor>();
     for (const exportType of exportTypesRegistry.getAll()) {
+      const job = exportType.createJob(jobParamsType, jobPayloadType);
+
       const jobExecutor = exportType.runTask(
         exportType.jobContentEncoding,
-        reporting.getExportTypesRegistry().getAll()[0],
+        job,
         cancellationToken,
         stream
       );

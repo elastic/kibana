@@ -84,6 +84,9 @@ export function registerJobGenerationRoutes(reporting: ReportingCore, logger: Lo
         }
 
         const requestHandler = new RequestHandler(reporting, user, context, req, res, logger);
+        // console.log(req.params);
+        // { exportType: 'printablePdfV2' }
+        // printablePdfV2
         return await requestHandler.handleGenerateRequest(
           req.params.exportType,
           jobParams,
