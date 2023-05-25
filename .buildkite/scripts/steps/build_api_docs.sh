@@ -9,6 +9,7 @@ node scripts/type_check
 
 echo "--- Build API Docs"
 node --max-old-space-size=12000 scripts/build_api_docs
+echo "**** Running my cmd"
 
 if [[ "${PUBLISH_API_DOCS_CHANGES:-}" == "true" ]]; then
   echo "--- Publish API Docs"
