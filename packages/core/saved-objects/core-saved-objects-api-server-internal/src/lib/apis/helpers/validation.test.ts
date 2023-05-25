@@ -1,0 +1,93 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
+ */
+
+import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
+import { SavedObjectsType } from '@kbn/core-saved-objects-server';
+import { type SavedObjectSanitizedDoc } from '@kbn/core-saved-objects-server';
+import { ValidationHelper } from './validation';
+import { typedef, typedef1, typedef2 } from './validation_fixtures';
+import { SavedObjectTypeRegistry } from '@kbn/core-saved-objects-base-server-internal';
+
+const defaultVersion = '8.8.0';
+const typeA = 'my-typeA';
+const typeB = 'my-typeB';
+const typeC = 'my-typeC';
+
+describe('Saved Objects type validation helper', () => {
+  let helper: ValidationHelper;
+  let logger: MockedLogger;
+  let typeRegistry: SavedObjectTypeRegistry;
+
+  const createMockObject = (
+    type: string,
+    attr: Partial<SavedObjectSanitizedDoc>
+  ): SavedObjectSanitizedDoc => ({
+    type,
+    id: 'test-id',
+    references: [],
+    attributes: {},
+    ...attr,
+  });
+  const registerType = (name: string, parts: Partial<SavedObjectsType>) => {
+    typeRegistry.registerType({
+      name,
+      hidden: false,
+      namespaceType: 'single',
+      mappings: { properties: {} },
+      ...parts,
+    });
+  };
+  beforeEach(() => {
+    logger = loggerMock.create();
+    typeRegistry = new SavedObjectTypeRegistry();
+  });
+
+  afterEach(() => {
+    jest.resetAllMocks();
+  });
+
+  describe('validation helper', () => {
+    beforeEach(() => {
+      helper = new ValidationHelper({
+        logger,
+        registry: typeRegistry,
+        kibanaVersion: defaultVersion,
+      });
+      registerType(typeA, typedef);
+      registerType(typeB, typedef1);
+      registerType(typeC, typedef2);
+    });
+
+    it('should work without model versions', () => {
+      const data = createMockObject(typeA, { attributes: { foo: 'hi', count: 1 } });
+      expect(() => helper.validateObjectForCreate(typeA, data)).not.toThrowError();
+    });
+
+    it('should work with model versions when top level schema also includes new added fields', () => {
+      const data = createMockObject(typeB, { attributes: { foo: 'hi', count: 1 } });
+      expect(() => helper.validateObjectForCreate(typeB, data)).not.toThrowError();
+    });
+
+    it('should fail with model versions enabled when top level schema does not include new added fields even though model version create schema does', () => {
+      const validationError = new Error(
+        '[attributes.count]: definition for this key is missing: Bad Request'
+      );
+      const data = createMockObject(typeC, { attributes: { foo: 'hi', count: 1 } });
+      expect(() => helper.validateObjectForCreate(typeC, data)).toThrowError(validationError);
+    });
+
+    it.todo('skips validation without legacy schemas or schema declared for model versions create');
+    it.todo(
+      'skips validation when schema declared for model versions create but not legacy schemas '
+    );
+    it.todo(
+      'applies validation when schema declared as legacy schemas but not delcared in model versions create'
+    );
+    it.todo('correctly fails validation for incorrect type');
+  });
+});

@@ -22,8 +22,6 @@ import {
 import { TransformSavedObjectDocumentError } from '../core';
 import { type Transform, type TransformFn, TransformType, type TypeVersionSchema } from './types';
 
-// @TINA this is how we extract the schemas from a model_version for the document migrator
-// Question: we need this as a helper, can we move it to core-saved-objects-api-server-internal.src.lib/apis/helpers/validation ??
 export const getModelVersionSchemas = ({
   typeDefinition,
 }: {

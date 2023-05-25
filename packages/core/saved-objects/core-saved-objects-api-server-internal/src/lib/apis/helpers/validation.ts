@@ -94,7 +94,8 @@ export class ValidationHelper {
     }
     const validator = this.getTypeValidator(type);
     try {
-      validator.validate(doc, this.kibanaVersion);
+      const result = validator.validate(doc, this.kibanaVersion);
+      return result;
     } catch (error) {
       throw SavedObjectsErrorHelpers.createBadRequestError(error.message);
     }
@@ -104,7 +105,7 @@ export class ValidationHelper {
     if (!this.typeValidatorMap[type]) {
       const savedObjectType = this.registry.getType(type);
 
-      const combinedSchemas =
+      const legacySchemas =
         typeof savedObjectType!.schemas === 'function'
           ? savedObjectType!.schemas()
           : savedObjectType!.schemas ?? {};
@@ -114,6 +115,7 @@ export class ValidationHelper {
           ? savedObjectType!.modelVersions()
           : savedObjectType!.modelVersions ?? {};
 
+      const combinedSchemas = { ...legacySchemas };
       Object.entries(modelVersionsMap).reduce((map, [key, modelVersion]) => {
         const virtualVersion = modelVersionToVirtualVersion(key);
         if (modelVersion.schemas?.create) {
@@ -144,16 +146,3 @@ export class ValidationHelper {
     }
   }
 }
-
-/**
- ```typescript
- * const modelVersionMap: SavedObjectsModelVersionMap = {
- *   '1': modelVersion1,
- *   '2': modelVersion2,
- *   '3': modelVersion3,
- * }
- * where
- *  modelVersion = {
-  changes; []
- }
- */
