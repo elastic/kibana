@@ -183,7 +183,13 @@ export default function tinesTest({ getService }: FtrProviderContext) {
             });
           expect(200);
 
-          expect(Object.keys(body)).to.eql(['status', 'message', 'retry', 'connector_id']);
+          expect(Object.keys(body)).to.eql([
+            'status',
+            'message',
+            'retry',
+            'reason',
+            'connector_id',
+          ]);
           expect(body.connector_id).to.eql(tinesActionId);
           expect(body.status).to.eql('error');
         });
