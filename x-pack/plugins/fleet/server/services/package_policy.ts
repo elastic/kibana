@@ -445,6 +445,10 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     };
   }
 
+  /** Purpose of this function is to take a package policy and compile the inputs
+   This is primarily used by the Synthetics UI to display the inputs which are passed to agent
+   Purpose is to debug the inputs which are passed to the agent and also compared them to the config
+   which is passed to public service locations */
   public async inspect(
     soClient: SavedObjectsClientContract,
     packagePolicy: NewPackagePolicyWithId
@@ -454,7 +458,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     }
 
     const packageInfos = await getPackageInfoForPackagePolicies([packagePolicy], soClient);
-    const packagePolicyId = packagePolicy.id ?? uuidv4();
+    const packagePolicyId = packagePolicy.id ?? SavedObjectsUtils.generateId();
     const agentPolicyId = packagePolicy.policy_id;
 
     let inputs = getInputsWithStreamIds(packagePolicy, packagePolicyId);
