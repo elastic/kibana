@@ -5,48 +5,86 @@
  * 2.0.
  */
 import type { IImmutableCache } from '../../../../common/immutable_cache';
-import {
-  FindDataStreamsRequestQuery,
-  FindDataStreamsResponse,
-  SortOrder,
-} from '../../../../common/latest';
+import { FindDataStreamsResponse, SortOrder } from '../../../../common/latest';
 import { DataStream } from '../../../../common/data_streams';
-
-export interface DefaultDataStreamsContext {
-  cache: IImmutableCache<FindDataStreamsRequestQuery, FindDataStreamsResponse>;
-  dataStreams: DataStream[] | null;
-  error: Error | null;
-  search: FindDataStreamsRequestQuery;
-}
 
 export interface DataStreamsSearchParams {
   datasetQuery?: string;
   sortOrder?: SortOrder;
 }
 
-export type IntegrationTypestate =
+interface WithCache {
+  cache: IImmutableCache<DataStreamsSearchParams, FindDataStreamsResponse>;
+}
+
+interface WithSearch {
+  search: DataStreamsSearchParams;
+}
+
+interface WithDataStreams {
+  dataStreams: DataStream[] | null;
+}
+
+interface WithNullishDataStreams {
+  dataStreams: null;
+}
+
+interface WithError {
+  error: Error;
+}
+
+interface WithNullishError {
+  error: null;
+}
+
+interface WithTotal {
+  total: number;
+}
+
+export type DefaultDataStreamsContext = WithCache &
+  WithNullishDataStreams &
+  WithSearch &
+  WithNullishError;
+
+type LoadingDataStreamsContext = DefaultDataStreamsContext;
+
+type LoadedDataStreamsContext = WithCache &
+  WithDataStreams &
+  WithTotal &
+  WithSearch &
+  WithNullishError;
+
+type LoadingFailedDataStreamsContext = WithCache &
+  WithDataStreams &
+  Partial<WithTotal> &
+  WithSearch &
+  WithError;
+
+type SearchingDataStreamsContext = LoadedDataStreamsContext | LoadingFailedDataStreamsContext;
+
+export type DataStreamsTypestate =
   | {
       value: 'uninitialized';
       context: DefaultDataStreamsContext;
     }
   | {
       value: 'loading';
-      context: DefaultDataStreamsContext;
+      context: LoadingDataStreamsContext;
     }
   | {
       value: 'loaded';
-      context: DefaultDataStreamsContext;
+      context: LoadedDataStreamsContext;
     }
   | {
       value: 'loadingFailed';
-      context: DefaultDataStreamsContext;
+      context: LoadingFailedDataStreamsContext;
     }
   | {
       value: 'debouncingSearch';
-      context: DefaultDataStreamsContext;
+      context: SearchingDataStreamsContext;
     };
 
-export type DataStreamsContext = IntegrationTypestate['context'];
+export type DataStreamsContext = DataStreamTypestate['context'];
 
 export type DataStreamsEvent =
   | {

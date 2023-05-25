@@ -14,14 +14,14 @@ import {
   DataStreamsContext,
   DataStreamsEvent,
   DefaultDataStreamsContext,
-  IntegrationTypestate,
+  DataStreamsTypestate,
 } from './types';
 
 export const createPureDataStreamsStateMachine = (
   initialContext: DefaultDataStreamsContext = DEFAULT_CONTEXT
 ) =>
   /** @xstate-layout N4IgpgJg5mDOIC5QBECGAXVBldAnMqAtrAHQCuAdgJbXpWoA2VAXpAMQAyA8gILID6yHgBUe-LMIBKAUR4BZLAG0ADAF1EoAA4B7WFTraKGkAA9EAdgAsAVhLWAjNYBs11-fPXzADnsAaEACeiD52AL6h-miYOPhEpAzaqBA0UJy8yACSAHIA4uIAqgDChdLSyGUq6kggOnoGRtVmCFa2Ds6uDh7efoGITvYAzHbmygOWA8runj7hkRjYeATEJAlJKWl82XkAYjwZHBVqxrX6VIbGTd5OJN0ATF7KndM9QQi3yso31rMgUQuxy1WEHYWFkkkKAAlBCIxBIZPIlEdqid6hdELdrLcSABOW72LwefyvTGfDw-P4xJakYEAI20lAAxiksARcAyABZsUE8cFQoSicRSWQKSrHXSnc6NRCWbHYkh4gkPJ7dInSyxYjHk+aUuIkWn0ihMihQFmoNmckywTDoMAkVAAMxtuAAFNYPgBKNgUxa6-WM5msjmi5Hi1FS5o2OyOFxuLo+VUITEa74RX7an2AxLJY3bVBUBjsGTcPjQgVw4WIqpaUNnBqgJoYrG4-GE3oIAZ4sKp70A+JZlK5-MgsGQ0uwoUI4PVuq1tFvTE4hWt16WEbylOpijaYHwao9qlimeS+uIAC0TgT5610QzpEoNFOjBYkEPErrpkQ1geJC82Js-XMJw4xeYJbmvf4qRWftjVfMMTwQbEvFsZQRjGCYphVNtbkQuwPlGR4MJmbt017KCkhfEMj3fJpBksEhLCcAlrATFwvHo+wnE4rjuKccCdWWP1DQDM0OVg2dwyTEhlFucwBisW4gOeBMZXML4+NvMjsygQcCwgMTjw-BB1QTAYkJIJxNXCUIgA */
-  createMachine<DataStreamsContext, DataStreamsEvent, IntegrationTypestate>(
+  createMachine<DataStreamsContext, DataStreamsEvent, DataStreamsTypestate>(
     {
       context: initialContext,
       preserveActionOrder: true,
@@ -121,7 +121,7 @@ export const createPureDataStreamsStateMachine = (
   );
 
 export interface DataStreamsStateMachineDependencies {
-  initialContext?: DataStreamsContext;
+  initialContext?: DefaultDataStreamsContext;
   dataStreamsClient: IDataStreamsClient;
 }
 
