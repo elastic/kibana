@@ -20,7 +20,7 @@ import { convertSOQueriesToPackConfig } from '../routes/pack/utils';
 export const updateGlobalPacksCreateCallback = async (
   packagePolicy: NewPackagePolicy,
   packsClient: SavedObjectsClient,
-  allPacks: { saved_objects: PackSavedObject[] },
+  allPacks: PackSavedObject[],
   osqueryContext: OsqueryAppContextService
 ) => {
   const agentPolicyService = osqueryContext.getAgentPolicyService();
@@ -34,7 +34,7 @@ export const updateGlobalPacksCreateCallback = async (
     : {};
 
   const packsContainingShardForPolicy: PackSavedObject[] = [];
-  allPacks.saved_objects.map((pack) => {
+  allPacks.map((pack) => {
     const shards = convertShardsToObject(pack.shards);
 
     return map(shards, (shard, shardName) => {
@@ -49,7 +49,7 @@ export const updateGlobalPacksCreateCallback = async (
       map(packsContainingShardForPolicy, (pack) => {
         packsClient.update(
           packSavedObjectType,
-          pack.id,
+          pack.saved_object_id,
           {},
           {
             references: [

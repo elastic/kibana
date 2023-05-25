@@ -12,6 +12,7 @@ import { PACKS_ID } from './constants';
 import type { PackSavedObject } from './types';
 
 export interface UsePacksResponse {
+  total: number;
   data: PackSavedObject[];
 }
 

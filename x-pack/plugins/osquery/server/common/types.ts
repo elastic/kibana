@@ -13,6 +13,7 @@ export interface IQueryPayload {
 export type SOShard = Array<{ key: string; value: number }>;
 
 export interface PackSavedObject {
+  saved_object_id: string;
   name: string;
   description: string | undefined;
   queries: Array<{
@@ -32,6 +33,7 @@ export interface PackSavedObject {
   updated_by: string | undefined;
   policy_ids?: string[];
   shards: SOShard;
+  references: Array<{ name: string; type: string; id: string }>;
 }
 
 export interface SavedQuerySavedObject {

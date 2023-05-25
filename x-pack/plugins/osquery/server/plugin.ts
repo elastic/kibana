@@ -19,7 +19,7 @@ import type { NewPackagePolicy, UpdatePackagePolicy } from '@kbn/fleet-plugin/co
 
 import type { Subscription } from 'rxjs';
 import { upgradeIntegration } from './utils/upgrade_integration';
-import type { PackSavedObjectAttributes } from './common/types';
+import type { PackSavedObject } from './common/types';
 import { updateGlobalPacksCreateCallback } from './lib/update_global_packs';
 import { packSavedObjectType } from '../common/types';
 import { createConfig } from './create_config';
@@ -146,7 +146,7 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
             if (newPackagePolicy.package?.name === OSQUERY_INTEGRATION_NAME) {
               await this.initialize(core, dataViewsService);
 
-              const allPacks = await client.find<PackSavedObjectAttributes>({
+              const allPacks = await client.find<PackSavedObject>({
                 type: packSavedObjectType,
               });
 
@@ -154,7 +154,7 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
                 return updateGlobalPacksCreateCallback(
                   newPackagePolicy,
                   client,
-                  allPacks,
+                  allPacks: allPacks.saved_objects,
                   this.osqueryAppContextService
                 );
               }
