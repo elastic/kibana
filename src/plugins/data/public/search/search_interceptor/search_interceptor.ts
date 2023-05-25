@@ -299,7 +299,7 @@ export class SearchInterceptor {
         });
 
     const cancel = once(() => {
-      if (id && !isSavedToBackground) this.deps.http.delete(`/internal/search/${strategy}/${id}`);
+      this.deps.http.delete(`/internal/search/${strategy}/${id}`, { version: '1' });
     });
 
     return pollSearch(search, cancel, {
@@ -316,7 +316,7 @@ export class SearchInterceptor {
       }),
       catchError((e: Error) => {
         searchTracker?.error();
-        cancel();
+        if (id && !isSavedToBackground) cancel();
         return throwError(e);
       }),
       finalize(() => {
@@ -346,6 +346,7 @@ export class SearchInterceptor {
       const { executionContext, strategy, ...searchOptions } = this.getSerializableOptions(options);
       return this.deps.http
         .post(`/internal/search/${strategy}${request.id ? `/${request.id}` : ''}`, {
+          version: '1',
           signal: abortSignal,
           context: executionContext,
           body: JSON.stringify({

@@ -7,6 +7,7 @@
  */
 
 import expect from '@kbn/expect';
+import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -28,6 +29,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('should return 200 when correctly formatted searches are provided', async () => {
         const resp = await supertest
           .post(`/internal/search/sql`)
+          .set(ELASTIC_HTTP_VERSION_HEADER, '1')
           .send({
             params: {
               query: sqlQuery,
@@ -44,6 +46,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('should fetch search results by id', async () => {
         const resp1 = await supertest
           .post(`/internal/search/sql`)
+          .set(ELASTIC_HTTP_VERSION_HEADER, '1')
           .send({
             params: {
               query: sqlQuery,
@@ -53,7 +56,10 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(200);
         const id = resp1.body.id;
 
-        const resp2 = await supertest.post(`/internal/search/sql/${id}`).send({});
+        const resp2 = await supertest
+          .post(`/internal/search/sql/${id}`)
+          .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+          .send({});
 
         expect(resp2.status).to.be(200);
         expect(resp2.body.id).to.be(id);
@@ -67,6 +73,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('should delete search', async () => {
         const resp1 = await supertest
           .post(`/internal/search/sql`)
+          .set(ELASTIC_HTTP_VERSION_HEADER, '1')
           .send({
             params: {
               query: sqlQuery,
@@ -77,13 +84,25 @@ export default function ({ getService }: FtrProviderContext) {
         const id = resp1.body.id;
 
         // confirm it was saved
-        await supertest.post(`/internal/search/sql/${id}`).send({}).expect(200);
+        await supertest
+          .post(`/internal/search/sql/${id}`)
+          .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+          .send({})
+          .expect(200);
 
         // delete it
-        await supertest.delete(`/internal/search/sql/${id}`).send().expect(200);
+        await supertest
+          .delete(`/internal/search/sql/${id}`)
+          .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+          .send()
+          .expect(200);
 
         // check it was deleted
-        await supertest.post(`/internal/search/sql/${id}`).send({}).expect(404);
+        await supertest
+          .post(`/internal/search/sql/${id}`)
+          .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+          .send({})
+          .expect(404);
       });
     });
   });
