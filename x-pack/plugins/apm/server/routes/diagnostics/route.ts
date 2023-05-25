@@ -15,7 +15,7 @@ import {
 import { getDefaultApmIndexTemplateStates } from './index_templates/get_default_apm_index_templates_states';
 import { getIndicesWithStatuses } from './indices/get_indices';
 
-interface IndiciesItem {
+export interface IndiciesItem {
   index: string;
   fieldMappings: {
     isValid: boolean;
