@@ -8,6 +8,8 @@ import type { IImmutableCache } from '../../../../common/immutable_cache';
 import { SortOrder } from '../../../../common/latest';
 import { PanelId } from '../types';
 
+export type ChangePanelHandler = ({ panelId }: { panelId: string }) => void;
+
 export interface DataStreamsSelectorSearchParams {
   name?: string;
   sortOrder?: SortOrder;
@@ -31,6 +33,11 @@ export type DataStreamsSelectorTypestate =
 
 export type DataStreamsSelectorContext = DataStreamsSelectorTypestate['context'];
 
-export interface DataStreamsSelectorEvent {
-  type: 'TOGGLE';
-}
+export type DataStreamsSelectorEvent =
+  | {
+      type: 'TOGGLE';
+    }
+  | {
+      type: 'CHANGE_PANEL';
+      panelId: PanelId;
+    };

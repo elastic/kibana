@@ -55,17 +55,11 @@ export function DataStreamSelector({
   onStreamsReload,
   title,
 }: DataStreamSelectorProps) {
-  const { isOpen, togglePopover } = useDataStreamSelector();
+  const { isOpen, panelId, changePanel, togglePopover } = useDataStreamSelector();
 
   const [setSpyRef] = useIntersectionRef({ onIntersecting: onIntegrationsLoadMore });
 
-  const [currentPanel, setCurrentPanel] = useState<PanelId>(INTEGRATION_PANEL_ID);
-
-  const [search, handleSearch] = useSearchStrategy({ id: currentPanel, onSearch });
-
-  const handlePanelChange = ({ panelId }: { panelId: EuiContextMenuPanelId }) => {
-    setCurrentPanel(panelId as PanelId);
-  };
+  const [search, handleSearch] = useSearchStrategy({ id: panelId, onSearch });
 
   const handleStreamSelection = useCallback<DataStreamSelectionHandler>(
     (dataStream) => {
@@ -155,16 +149,16 @@ export function DataStreamSelector({
     >
       <EuiContextMenuPanel title={selectDatasetLabel}>
         <SearchControls
-          key={currentPanel}
+          key={panelId}
           search={search}
           onSearch={handleSearch}
           isLoading={isLoadingIntegrations || isLoadingStreams}
         />
         <EuiHorizontalRule margin="none" />
         <EuiContextMenu
-          initialPanelId={currentPanel}
+          initialPanelId={panelId}
           panels={panels}
-          onPanelChange={handlePanelChange}
+          onPanelChange={changePanel}
           className="eui-yScroll"
           css={contextMenuStyles}
         />
