@@ -32,7 +32,14 @@ export class ServerlessSecurityPlugin
   }
 
   public setup(_coreSetup: CoreSetup, pluginsSetup: ServerlessSecurityPluginSetupDependencies) {
-    pluginsSetup.securitySolution.setAppFeatures(getProjectPLIsFeatures(this.config.projectPLIs));
+    // essSecurity plugin should always be disabled when serverlessSecurity is enabled.
+    // This check is an additional layer of security to prevent double registrations when
+    // `plugins.forceEnableAllPlugins` flag is enabled).
+    const shouldRegister = pluginsSetup.essSecurity == null;
+
+    if (shouldRegister) {
+      pluginsSetup.securitySolution.setAppFeatures(getProjectPLIsFeatures(this.config.projectPLIs));
+    }
 
     return {};
   }
