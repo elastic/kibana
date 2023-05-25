@@ -18,7 +18,6 @@ import {
   EuiTitle,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiTextColor,
 } from '@elastic/eui';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { ViewMode } from '@kbn/embeddable-plugin/public';

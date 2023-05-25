@@ -84,7 +84,7 @@ export const DashboardViewportComponent = () => {
       >
         {panelCount === 0 && (
           <>
-            <DashboardEmptyScreen isEditMode={viewMode === ViewMode.EDIT} />
+            <DashboardEmptyScreen />
           </>
         )}
         <DashboardGrid viewportWidth={viewportWidth} />
