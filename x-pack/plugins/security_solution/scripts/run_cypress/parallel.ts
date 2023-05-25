@@ -38,7 +38,7 @@ import type {
 
 import { createFailError } from '@kbn/dev-cli-errors';
 import { renderSummaryTable } from './print_run';
-import { getLocalhostRealIp } from '../common/localhost_services';
+import { getLocalhostRealIp } from '../endpoint/common/localhost_services';
 
 const retrieveIntegrations = (
   specPattern: string[],
@@ -60,7 +60,7 @@ export const cli = () => {
     async () => {
       const { argv } = yargs(process.argv.slice(2));
 
-      const cypressConfigFile = await import(require.resolve(`../../../${argv.configFile}`));
+      const cypressConfigFile = await import(require.resolve(`../../${argv.configFile}`));
       const spec: string | undefined = argv?.spec as string;
       const files = retrieveIntegrations(
         spec
@@ -334,7 +334,7 @@ export const cli = () => {
 
             if (isOpen) {
               await cypress.open({
-                configFile: require.resolve(`../../../${argv.configFile}`),
+                configFile: require.resolve(`../../${argv.configFile}`),
                 config: {
                   e2e: {
                     baseUrl: `http://localhost:${kibanaPort}`,
