@@ -12,7 +12,7 @@ import {
   UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
 } from '@kbn/fleet-plugin/common';
 import { UNINSTALL_TOKEN_ROUTES } from '@kbn/fleet-plugin/common/constants';
-import { GetUninstallTokensResponse } from '@kbn/fleet-plugin/common/types/rest_spec/uninstall_tokens';
+import { GetUninstallTokensResponse } from '@kbn/fleet-plugin/common/types/rest_spec/uninstall_token';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 
 export default function (providerContext: FtrProviderContext) {

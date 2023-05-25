@@ -7,7 +7,7 @@
 
 import type { TypeOf } from '@kbn/config-schema';
 
-import type { GetUninstallTokensResponse } from '../../../common/types/rest_spec/uninstall_tokens';
+import type { GetUninstallTokensResponse } from '../../../common/types/rest_spec/uninstall_token';
 
 import { appContextService } from '../../services';
 
