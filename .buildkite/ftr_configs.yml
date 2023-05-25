@@ -53,7 +53,6 @@ disabled:
   - x-pack/plugins/profiling/e2e/ftr_config_open.ts
   - x-pack/plugins/profiling/e2e/ftr_config_runner.ts
   - x-pack/plugins/profiling/e2e/ftr_config.ts
-  - test/common/config.js
 
   # Elastic Synthetics configs
   - x-pack/plugins/synthetics/e2e/config.ts
