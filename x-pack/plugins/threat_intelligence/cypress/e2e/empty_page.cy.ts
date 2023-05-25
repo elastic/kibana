@@ -14,7 +14,7 @@ import {
 
 const THREAT_INTEL_PATH = '/app/security/threat_intelligence/';
 
-describe('Empty Page', () => {
+describe('Empty Page', { testIsolation: false }, () => {
   before(() => {
     login();
     cy.visit(THREAT_INTEL_PATH);

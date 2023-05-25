@@ -36,7 +36,7 @@ import { selectRange } from '../tasks/select_range';
 
 const THREAT_INTELLIGENCE = '/app/security/threat_intelligence/indicators';
 
-describe('Cases with invalid indicators', () => {
+describe('Cases with invalid indicators', { testIsolation: false }, () => {
   before(() => {
     esArchiverLoad('threat_intelligence/invalid_indicators_data');
     login();
