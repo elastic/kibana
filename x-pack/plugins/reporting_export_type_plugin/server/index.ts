@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { PluginInitializerContext } from '@kbn/core/server';
+import { PluginInitializerContext, Logger } from '@kbn/core/server';
 import { ExportTypesPlugin } from './plugin';
 
 //  This exports static code and TypeScript types,
 //  as well as, Kibana Platform `plugin()` initializer.
 
-export function plugin(initializerContext: PluginInitializerContext) {
-  return new ExportTypesPlugin(initializerContext);
+export function plugin(initializerContext: PluginInitializerContext, logger: Logger) {
+  return new ExportTypesPlugin(initializerContext, logger);
 }
 
 export type { ExportTypesPluginSetup, ExportTypesPluginStart } from './types';
