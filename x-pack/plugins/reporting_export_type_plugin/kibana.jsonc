@@ -12,7 +12,7 @@
       "reporting"
     ],
     "requiredPlugins": [
-    "reporting"
+      "reporting"
     ],
     "optionalPlugins": [
       "security",
