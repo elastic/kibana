@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SavedObjectsClient, SavedObjectsFindResponse } from '@kbn/core/server';
+import type { SavedObjectsClient } from '@kbn/core/server';
 import { set } from '@kbn/safer-lodash-set';
 import { has, map, mapKeys } from 'lodash';
 import type { NewPackagePolicy } from '@kbn/fleet-plugin/common';
@@ -14,14 +14,13 @@ import produce from 'immer';
 import { convertShardsToObject } from '../routes/utils';
 import { packSavedObjectType } from '../../common/types';
 import type { OsqueryAppContextService } from './osquery_app_context_services';
-import type { PackSavedObjectAttributes } from '../common/types';
-import { convertSOQueriesToPackConfig } from '../routes/pack/utils';
 import type { PackSavedObject } from '../common/types';
+import { convertSOQueriesToPackConfig } from '../routes/pack/utils';
 
 export const updateGlobalPacksCreateCallback = async (
   packagePolicy: NewPackagePolicy,
   packsClient: SavedObjectsClient,
-  allPacks: SavedObjectsFindResponse<PackSavedObjectAttributes>,
+  allPacks: { saved_objects: PackSavedObject[] },
   osqueryContext: OsqueryAppContextService
 ) => {
   const agentPolicyService = osqueryContext.getAgentPolicyService();
@@ -36,7 +35,7 @@ export const updateGlobalPacksCreateCallback = async (
 
   const packsContainingShardForPolicy: PackSavedObject[] = [];
   allPacks.saved_objects.map((pack) => {
-    const shards = convertShardsToObject(pack.attributes.shards);
+    const shards = convertShardsToObject(pack.shards);
 
     return map(shards, (shard, shardName) => {
       if (shardName === '*') {
@@ -72,9 +71,9 @@ export const updateGlobalPacksCreateCallback = async (
       }
 
       map(packsContainingShardForPolicy, (pack) => {
-        set(draft, `inputs[0].config.osquery.value.packs.${pack.attributes.name}`, {
+        set(draft, `inputs[0].config.osquery.value.packs.${pack.name}`, {
           shard: 100,
-          queries: convertSOQueriesToPackConfig(pack.attributes.queries),
+          queries: convertSOQueriesToPackConfig(pack.queries),
         });
       });
 

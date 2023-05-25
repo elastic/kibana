@@ -56,19 +56,22 @@ export const PackFieldWrapper = ({
       {submitButtonContent}
       <EuiSpacer />
 
-      {liveQueryDetails?.queries?.length || selectedPackData?.attributes?.queries?.length ? (
-        <>
-          <EuiFlexItem>
-            <PackQueriesStatusTable
-              actionId={actionId}
-              agentIds={agentIds}
-              // @ts-expect-error update types
-              data={liveQueryDetails?.queries ?? selectedPackData?.attributes?.queries}
-              showResultsHeader={showResultsHeader}
-            />
-          </EuiFlexItem>
-        </>
-      ) : null}
+      {
+        // @ts-expect-error update types
+        liveQueryDetails?.queries?.length || selectedPackData?.queries?.length ? (
+          <>
+            <EuiFlexItem>
+              <PackQueriesStatusTable
+                actionId={actionId}
+                agentIds={agentIds}
+                // @ts-expect-error update types
+                data={liveQueryDetails?.queries ?? selectedPackData?.queries}
+                showResultsHeader={showResultsHeader}
+              />
+            </EuiFlexItem>
+          </>
+        ) : null
+      }
     </>
   );
 };

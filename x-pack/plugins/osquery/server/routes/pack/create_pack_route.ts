@@ -27,7 +27,7 @@ import {
   getInitialPolicies,
 } from './utils';
 import { convertShardsToArray, getInternalSavedObjectsClient } from '../utils';
-import type { PackSavedObjectAttributes } from '../../common/types';
+import type { PackSavedObject } from '../../common/types';
 
 export const createPackRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
   router.post(
@@ -121,7 +121,7 @@ export const createPackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
         type: AGENT_POLICY_SAVED_OBJECT_TYPE,
       }));
 
-      const packSO = await savedObjectsClient.create<PackSavedObjectAttributes>(
+      const packSO = await savedObjectsClient.create<PackSavedObject>(
         packSavedObjectType,
         {
           name,
@@ -174,7 +174,7 @@ export const createPackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
 
       return response.ok({
         body: {
-          data: packSO,
+          data: { ...packSO.attributes, saved_object_id: packSO.id },
         },
       });
     }
