@@ -34,7 +34,7 @@ const THREAT_INTELLIGENCE = '/app/security/threat_intelligence/indicators';
 const BLOCK_LIST_NEW_NAME = 'new blocklist entry';
 const BLOCK_LIST_NEW_DESCRIPTION = 'the best description';
 
-describe('Block list with invalid indicators', { testIsolation: false }, () => {
+describe('Block list with invalid indicators',  () => {
   before(() => {
     esArchiverLoad('threat_intelligence/invalid_indicators_data');
     login();
@@ -58,7 +58,7 @@ describe('Block list with invalid indicators', { testIsolation: false }, () => {
   });
 });
 
-describe('Block list interactions', { testIsolation: false }, () => {
+describe('Block list interactions',  () => {
   before(() => {
     esArchiverLoad('threat_intelligence/indicators_data');
     login();

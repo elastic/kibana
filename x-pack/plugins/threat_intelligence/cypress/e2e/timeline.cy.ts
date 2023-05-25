@@ -28,7 +28,7 @@ import { selectRange } from '../tasks/select_range';
 
 const THREAT_INTELLIGENCE = '/app/security/threat_intelligence/indicators';
 
-describe('Timeline', { testIsolation: false }, () => {
+describe('Timeline',  () => {
   before(() => {
     esArchiverLoad('threat_intelligence/indicators_data');
     login();
