@@ -11,6 +11,7 @@ import fs from 'fs/promises';
 import { range } from 'lodash';
 import { type TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
 import { SavedObjectsBulkCreateObject } from '@kbn/core-saved-objects-api-server';
+import { IndexMappingMeta } from '@kbn/core-saved-objects-base-server-internal';
 import '../jest_matchers';
 import {
   getKibanaMigratorTestKit,
@@ -27,19 +28,21 @@ const v2IndexName = `.kibana_${currentVersion}_001`;
 describe('ZDT upgrades - switching from v2 algorithm', () => {
   let esServer: TestElasticsearchUtils['es'];
 
-  beforeAll(async () => {
+  beforeEach(async () => {
     await fs.unlink(logFilePath).catch(() => {});
     esServer = await startElasticsearch();
   });
 
-  afterAll(async () => {
+  afterEach(async () => {
     await esServer?.stop();
     await delay(10);
   });
 
-  const createBaseline = async () => {
-    const { runMigrations, savedObjectsRepository } = await getKibanaMigratorTestKit({
-      ...getBaseMigratorParams({ migrationAlgorithm: 'v2' }),
+  const createBaseline = async ({
+    kibanaVersion = currentVersion,
+  }: { kibanaVersion?: string } = {}) => {
+    const { runMigrations, savedObjectsRepository, client } = await getKibanaMigratorTestKit({
+      ...getBaseMigratorParams({ migrationAlgorithm: 'v2', kibanaVersion }),
       types: [getSampleAType()],
     });
     await runMigrations();
@@ -54,53 +57,94 @@ describe('ZDT upgrades - switching from v2 algorithm', () => {
     }));
 
     await savedObjectsRepository.bulkCreate(sampleAObjs);
+
+    return { client };
   };
 
-  it('it able to re-use a cluster state from the v2 algorithm', async () => {
-    await createBaseline();
+  describe('when switching from a compatible version', () => {
+    it('it able to re-use a cluster state from the v2 algorithm', async () => {
+      await createBaseline();
 
-    const typeA = getSampleAType();
+      const typeA = getSampleAType();
 
-    const { runMigrations, client, savedObjectsRepository } = await getKibanaMigratorTestKit({
-      ...getBaseMigratorParams({ migrationAlgorithm: 'zdt' }),
-      logFilePath,
-      types: [typeA],
+      const { runMigrations, client, savedObjectsRepository } = await getKibanaMigratorTestKit({
+        ...getBaseMigratorParams({ migrationAlgorithm: 'zdt' }),
+        logFilePath,
+        types: [typeA],
+      });
+
+      await runMigrations();
+
+      const indices = await client.indices.get({ index: '.kibana*' });
+      expect(Object.keys(indices)).toEqual([v2IndexName]);
+
+      const index = indices[v2IndexName];
+      const mappings = index.mappings ?? {};
+      const mappingMeta = mappings._meta ?? {};
+
+      expect(mappings.properties).toEqual(
+        expect.objectContaining({
+          sample_a: typeA.mappings,
+        })
+      );
+
+      expect(mappingMeta).toEqual({
+        docVersions: { sample_a: '10.1.0' },
+        mappingVersions: { sample_a: '10.1.0' },
+        migrationState: expect.any(Object),
+      });
+
+      const { saved_objects: sampleADocs } = await savedObjectsRepository.find({
+        type: 'sample_a',
+      });
+
+      expect(sampleADocs).toHaveLength(5);
+
+      const records = await parseLogFile(logFilePath);
+      expect(records).toContainLogEntries(
+        [
+          'INIT: current algo check result: v2-compatible',
+          'INIT -> UPDATE_INDEX_MAPPINGS',
+          'INDEX_STATE_UPDATE_DONE -> DOCUMENTS_UPDATE_INIT',
+          'Migration completed',
+        ],
+        { ordered: true }
+      );
     });
+  });
 
-    await runMigrations();
+  describe('when switching from an incompatible version', () => {
+    it('fails and throws an explicit error', async () => {
+      const { client } = await createBaseline({ kibanaVersion: '8.7.0' });
 
-    const indices = await client.indices.get({ index: '.kibana*' });
-    expect(Object.keys(indices)).toEqual([v2IndexName]);
+      // even when specifying an older version, the `indexTypeMap` will be present on the index's meta,
+      // so we have to manually remove it there.
+      const indices = await client.indices.get({
+        index: '.kibana_8.7.0_001',
+      });
+      const meta = indices['.kibana_8.7.0_001'].mappings!._meta! as IndexMappingMeta;
+      delete meta.indexTypesMap;
+      await client.indices.putMapping({
+        index: '.kibana_8.7.0_001',
+        _meta: meta,
+      });
 
-    const index = indices[v2IndexName];
-    const mappings = index.mappings ?? {};
-    const mappingMeta = mappings._meta ?? {};
+      const typeA = getSampleAType();
+      const { runMigrations } = await getKibanaMigratorTestKit({
+        ...getBaseMigratorParams({ migrationAlgorithm: 'zdt' }),
+        logFilePath,
+        types: [typeA],
+      });
 
-    expect(mappings.properties).toEqual(
-      expect.objectContaining({
-        sample_a: typeA.mappings,
-      })
-    );
+      await expect(runMigrations()).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Unable to complete saved object migrations for the [.kibana] index: Index .kibana_8.7.0_001 is using an incompatible version of the v2 algorithm."`
+      );
 
-    expect(mappingMeta).toEqual({
-      docVersions: { sample_a: '10.1.0' },
-      mappingVersions: { sample_a: '10.1.0' },
-      migrationState: expect.any(Object),
+      const records = await parseLogFile(logFilePath);
+      expect(records).toContainLogEntries(
+        ['current algo check result: v2-incompatible', 'INIT -> FATAL'],
+        { ordered: true }
+      );
     });
-
-    const { saved_objects: sampleADocs } = await savedObjectsRepository.find({ type: 'sample_a' });
-
-    expect(sampleADocs).toHaveLength(5);
-
-    const records = await parseLogFile(logFilePath);
-    expect(records).toContainLogEntries(
-      [
-        'INIT: current algo check result: v2-compatible',
-        'INIT -> UPDATE_INDEX_MAPPINGS',
-        'INDEX_STATE_UPDATE_DONE -> DOCUMENTS_UPDATE_INIT',
-        'Migration completed',
-      ],
-      { ordered: true }
-    );
   });
 });
