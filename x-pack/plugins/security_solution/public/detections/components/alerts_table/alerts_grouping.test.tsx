@@ -405,9 +405,6 @@ describe('GroupedAlertsTable', () => {
   });
 
   it('resets only most inner group pagination when its parent groups open/close', () => {
-    jest
-      .spyOn(window.localStorage, 'getItem')
-      .mockReturnValue(getMockStorageState(['kibana.alert.rule.name', 'host.name', 'user.name']));
     store = createStore(
       {
         ...mockGlobalState,
@@ -471,11 +468,22 @@ describe('GroupedAlertsTable', () => {
   });
 
   it(`resets innermost level's current page when that level's page size updates`, () => {
-    jest
-      .spyOn(window.localStorage, 'getItem')
-      .mockReturnValue(getMockStorageState(['kibana.alert.rule.name', 'host.name', 'user.name']));
+    store = createStore(
+      {
+        ...mockGlobalState,
+        groups: {
+          [testProps.tableId]: {
+            options: mockOptions,
+            activeGroups: ['kibana.alert.rule.name', 'host.name', 'user.name'],
+          },
+        },
+      },
+      SUB_PLUGINS_REDUCER,
+      kibanaObservable,
+      storage
+    );
 
-    const { getByTestId, getAllByTestId } = render(
+    const { getByTestId } = render(
       <TestProviders store={store}>
         <GroupedAlertsTable {...testProps} />
       </TestProviders>
@@ -483,12 +491,10 @@ describe('GroupedAlertsTable', () => {
 
     fireEvent.click(getByTestId('pagination-button-1'));
     fireEvent.click(within(getByTestId('level-0-group-0')).getByTestId('group-panel-toggle'));
-
     fireEvent.click(within(getByTestId('level-0-group-0')).getByTestId('pagination-button-1'));
     fireEvent.click(within(getByTestId('level-1-group-0')).getByTestId('group-panel-toggle'));
 
-    const level1 = getAllByTestId('grouping-accordion-content')[1];
-    fireEvent.click(within(level1).getByTestId('pagination-button-1'));
+    fireEvent.click(within(getByTestId('level-1-group-0')).getByTestId('pagination-button-1'));
     fireEvent.click(
       within(getByTestId('grouping-level-2')).getByTestId('tablePaginationPopoverButton')
     );
@@ -515,9 +521,20 @@ describe('GroupedAlertsTable', () => {
   });
 
   it(`resets outermost level's current page when that level's page size updates`, () => {
-    jest
-      .spyOn(window.localStorage, 'getItem')
-      .mockReturnValue(getMockStorageState(['kibana.alert.rule.name', 'host.name', 'user.name']));
+    store = createStore(
+      {
+        ...mockGlobalState,
+        groups: {
+          [testProps.tableId]: {
+            options: mockOptions,
+            activeGroups: ['kibana.alert.rule.name', 'host.name', 'user.name'],
+          },
+        },
+      },
+      SUB_PLUGINS_REDUCER,
+      kibanaObservable,
+      storage
+    );
 
     const { getByTestId, getAllByTestId } = render(
       <TestProviders store={store}>
