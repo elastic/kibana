@@ -12,4 +12,5 @@ import { VisTypeHeatmapPlugin } from './plugin';
 
 export { heatmapVisType } from './vis_type';
 
-export const plugin = (initializerContext: PluginInitializerContext<HeatmapPublicConfig>) => new VisTypeHeatmapPlugin(initializerContext);
+export const plugin = (initializerContext: PluginInitializerContext<HeatmapPublicConfig>) =>
+  new VisTypeHeatmapPlugin(initializerContext);

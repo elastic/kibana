@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { CoreSetup, PluginConfigDescriptor, PluginInitializerContext} from '@kbn/core/server';
+import { CoreSetup, PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
 import type { VisualizationsServerSetup } from '@kbn/visualizations-plugin/server';
 import { configSchema, TableConfig } from '../config';
 import { VIS_TYPE_TABLE } from '../common';

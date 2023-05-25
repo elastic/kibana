@@ -13,4 +13,5 @@ import type { PiePublicConfig } from '../config';
 export { pieVisType } from './vis_type';
 export type { Dimensions, Dimension } from './types';
 
-export const plugin = (initializerContext: PluginInitializerContext<PiePublicConfig>) => new VisTypePiePlugin(initializerContext);
+export const plugin = (initializerContext: PluginInitializerContext<PiePublicConfig>) =>
+  new VisTypePiePlugin(initializerContext);

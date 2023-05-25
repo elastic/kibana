@@ -15,7 +15,7 @@ import { tableVisTypeDefinition } from './table_vis_type';
 export const registerTableVis = async (
   core: CoreSetup<TablePluginStartDependencies>,
   { expressions, visualizations }: TablePluginSetupDependencies,
-  readOnly: boolean,
+  readOnly: boolean
 ) => {
   const [coreStart, { usageCollection }] = await core.getStartServices();
   expressions.registerFunction(createTableVisFn);

@@ -52,13 +52,13 @@ export class VisTypeXyPlugin
     setPalettesService(charts.palettes);
 
     const { readOnly } = this.initializerContext.config.get<XyPublicConfig>();
-    visTypesDefinitions.forEach((visTypeDefinition) => (
+    visTypesDefinitions.forEach((visTypeDefinition) =>
       visualizations.createBaseVisualization({
         ...visTypeDefinition,
         disableCreate: Boolean(readOnly),
         disableEdit: Boolean(readOnly),
       })
-    ));
+    );
     return {};
   }
 

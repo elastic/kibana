@@ -6,7 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { CoreSetup, CoreStart, DocLinksStart, PluginInitializerContext, ThemeServiceStart } from '@kbn/core/public';
+import {
+  CoreSetup,
+  CoreStart,
+  DocLinksStart,
+  PluginInitializerContext,
+  ThemeServiceStart,
+} from '@kbn/core/public';
 import { VisualizationsSetup } from '@kbn/visualizations-plugin/public';
 import { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';

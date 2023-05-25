@@ -17,4 +17,5 @@ export const config: PluginConfigDescriptor<XyConfig> = {
   schema: configSchema,
 };
 
-export const plugin = (initializerContext: PluginInitializerContext) => new VisTypeXYServerPlugin(initializerContext);
+export const plugin = (initializerContext: PluginInitializerContext) =>
+  new VisTypeXYServerPlugin(initializerContext);

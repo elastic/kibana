@@ -17,4 +17,5 @@ export const config: PluginConfigDescriptor<GaugeConfig> = {
   schema: configSchema,
 };
 
-export const plugin = (initializerContext: PluginInitializerContext) => new VisTypeGaugeServerPlugin(initializerContext);
+export const plugin = (initializerContext: PluginInitializerContext) =>
+  new VisTypeGaugeServerPlugin(initializerContext);

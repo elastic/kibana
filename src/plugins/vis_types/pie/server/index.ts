@@ -17,4 +17,5 @@ export const config: PluginConfigDescriptor<PieConfig> = {
   schema: configSchema,
 };
 
-export const plugin = (initializerContext: PluginInitializerContext) => new VisTypePieServerPlugin(initializerContext);
+export const plugin = (initializerContext: PluginInitializerContext) =>
+  new VisTypePieServerPlugin(initializerContext);

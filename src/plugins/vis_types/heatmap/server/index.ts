@@ -17,4 +17,5 @@ export const config: PluginConfigDescriptor<HeatmapConfig> = {
   schema: configSchema,
 };
 
-export const plugin = (initializerContext: PluginInitializerContext) => new VisTypeHeatmapServerPlugin(initializerContext);
+export const plugin = (initializerContext: PluginInitializerContext) =>
+  new VisTypeHeatmapServerPlugin(initializerContext);
