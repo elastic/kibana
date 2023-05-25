@@ -58,6 +58,7 @@ export const monitorOverviewReducer = createReducer(initialState, (builder) => {
         ...state.pageState,
         ...action.payload,
       };
+      state.loaded = false;
     })
     .addCase(setOverviewGroupByAction, (state, action) => {
       state.groupBy = {
