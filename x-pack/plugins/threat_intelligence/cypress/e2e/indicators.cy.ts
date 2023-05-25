@@ -57,7 +57,7 @@ const THREAT_INTELLIGENCE = '/app/security/threat_intelligence/indicators';
 const URL_WITH_CONTRADICTORY_FILTERS =
   '/app/security/threat_intelligence/indicators?indicators=(filterQuery:(language:kuery,query:%27%27),filters:!((%27$state%27:(store:appState),meta:(alias:!n,disabled:!f,index:%27%27,key:threat.indicator.type,negate:!f,params:(query:file),type:phrase),query:(match_phrase:(threat.indicator.type:file))),(%27$state%27:(store:appState),meta:(alias:!n,disabled:!f,index:%27%27,key:threat.indicator.type,negate:!f,params:(query:url),type:phrase),query:(match_phrase:(threat.indicator.type:url)))),timeRange:(from:now/d,to:now/d))';
 
-describe('Invalid Indicators', { testIsolation: false }, () => {
+describe('Invalid Indicators', () => {
   before(() => {
     login();
   });
@@ -156,7 +156,7 @@ describe('Indicators', () => {
     });
   });
 
-  describe('Indicators page basics', { testIsolation: true }, () => {
+  describe('Indicators page basics', { testIsolation: false }, () => {
     before(() => {
       cy.visit(THREAT_INTELLIGENCE);
       selectRange();
