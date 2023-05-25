@@ -6,18 +6,18 @@
  */
 
 import React, { createContext, useContext, useMemo } from 'react';
+import { css } from '@emotion/react';
 import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 import { EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
-import { css } from '@emotion/react';
+import type { LeftPanelProps } from '.';
+import { useGetFieldsData } from '../../common/hooks/use_get_fields_data';
+import { useTimelineEventsDetails } from '../../timelines/containers/details';
+import { getAlertIndexAlias } from '../../timelines/components/side_panel/event_details/helpers';
+import { useSpaceId } from '../../common/hooks/use_space_id';
+import { useRouteSpy } from '../../common/utils/route/use_route_spy';
 import { SecurityPageName } from '../../../common/constants';
 import { SourcererScopeName } from '../../common/store/sourcerer/model';
 import { useSourcererDataView } from '../../common/containers/sourcerer';
-import { useTimelineEventsDetails } from '../../timelines/containers/details';
-import { useGetFieldsData } from '../../common/hooks/use_get_fields_data';
-import { useRouteSpy } from '../../common/utils/route/use_route_spy';
-import { useSpaceId } from '../../common/hooks/use_space_id';
-import { getAlertIndexAlias } from '../../timelines/components/side_panel/event_details/helpers';
-import type { LeftPanelProps } from '.';
 
 export interface LeftPanelContext {
   /**
