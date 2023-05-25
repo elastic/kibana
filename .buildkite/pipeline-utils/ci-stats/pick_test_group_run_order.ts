@@ -8,14 +8,14 @@
 
 import * as Fs from 'fs';
 
-import * as globby from 'globby';
+// import * as globby from 'globby';
 import minimatch from 'minimatch';
 import { load as loadYaml } from 'js-yaml';
 
 import { BuildkiteClient, BuildkiteStep } from '../buildkite';
 import { CiStatsClient, TestGroupRunOrderResponse } from './client';
 
-import DISABLED_JEST_CONFIGS from '../../disabled_jest_configs.json';
+// import DISABLED_JEST_CONFIGS from '../../disabled_jest_configs.json';
 
 type RunGroup = TestGroupRunOrderResponse['types'][0];
 
@@ -225,6 +225,7 @@ export async function pickTestGroupRunOrder() {
           .map((t) => t.trim())
           .filter(Boolean)
       : ['build'];
+  console.log(`\n--- FTR_CONFIGS_DEPS: \n\t${FTR_CONFIGS_DEPS}`);
 
   const { defaultQueue, ftrConfigsByQueue } = getEnabledFtrConfigs(FTR_CONFIG_PATTERNS);
 
@@ -232,21 +233,23 @@ export async function pickTestGroupRunOrder() {
 
   if (!ftrConfigsIncluded) ftrConfigsByQueue.clear();
 
-  const jestUnitConfigs = LIMIT_CONFIG_TYPE.includes('unit')
-    ? globby.sync(['**/jest.config.js', '!**/__fixtures__/**'], {
-        cwd: process.cwd(),
-        absolute: false,
-        ignore: DISABLED_JEST_CONFIGS,
-      })
-    : [];
+  // const jestUnitConfigs = LIMIT_CONFIG_TYPE.includes('unit')
+  //   ? globby.sync(['**/jest.config.js', '!**/__fixtures__/**'], {
+  //       cwd: process.cwd(),
+  //       absolute: false,
+  //       ignore: DISABLED_JEST_CONFIGS,
+  //     })
+  //   : [];
+  const jestUnitConfigs: string | any[] = [];
 
-  const jestIntegrationConfigs = LIMIT_CONFIG_TYPE.includes('integration')
-    ? globby.sync(['**/jest.integration.config.js', '!**/__fixtures__/**'], {
-        cwd: process.cwd(),
-        absolute: false,
-        ignore: DISABLED_JEST_CONFIGS,
-      })
-    : [];
+  // const jestIntegrationConfigs = LIMIT_CONFIG_TYPE.includes('integration')
+  //   ? globby.sync(['**/jest.integration.config.js', '!**/__fixtures__/**'], {
+  //       cwd: process.cwd(),
+  //       absolute: false,
+  //       ignore: DISABLED_JEST_CONFIGS,
+  //     })
+  //   : [];
+  const jestIntegrationConfigs: string | any[] = [];
 
   if (!ftrConfigsByQueue.size && !jestUnitConfigs.length && !jestIntegrationConfigs.length) {
     throw new Error('unable to find any unit, integration, or FTR configs');
