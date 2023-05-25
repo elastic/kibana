@@ -8,11 +8,10 @@
 import { createReducer } from '@reduxjs/toolkit';
 import { FETCH_STATUS } from '@kbn/observability-shared-plugin/public';
 
-import { SavedObject } from '@kbn/core-saved-objects-common';
 import {
   MonitorManagementListResult,
-  SyntheticsMonitor,
   MonitorFiltersResult,
+  EncryptedSyntheticsSavedMonitor,
 } from '../../../../../common/runtime_types';
 
 import { IHttpSerializedFetchError } from '../utils/http_error';
@@ -100,12 +99,14 @@ export const monitorListReducer = createReducer(initialState, (builder) => {
         alertStatus: FETCH_STATUS.SUCCESS,
       };
       if ('updated_at' in action.payload) {
-        state.data.monitors = state.data.monitors.map((monitor) => {
-          if (monitor.id === action.payload.id) {
-            return action.payload as SavedObject<SyntheticsMonitor>;
+        state.data.monitors = state.data.monitors.map<EncryptedSyntheticsSavedMonitor>(
+          (monitor: any) => {
+            if (monitor.id === action.payload.id) {
+              return action.payload.attributes;
+            }
+            return monitor;
           }
-          return monitor;
-        });
+        );
       }
     })
     .addCase(enableMonitorAlertAction.fail, (state, action) => {

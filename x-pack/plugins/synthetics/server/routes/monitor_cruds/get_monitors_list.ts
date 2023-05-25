@@ -8,6 +8,7 @@ import { SyntheticsRestApiRouteFactory } from '../../legacy_uptime/routes';
 import { API_URLS } from '../../../common/constants';
 import { getMonitors, isMonitorsQueryFiltered, QuerySchema } from '../common';
 import { syntheticsMonitorType } from '../../../common/types/saved_objects';
+import { mapSavedObjectToMonitor } from './helper';
 
 export const getAllSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'GET',
@@ -27,18 +28,18 @@ export const getAllSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () =>
       }
     };
 
-    const [queryResult, totalCount] = await Promise.all([
+    const [queryResultSavedObjects, totalCount] = await Promise.all([
       getMonitors(routeContext),
       totalCountQuery(),
     ]);
 
-    const absoluteTotal = totalCount?.total ?? queryResult.total;
+    const absoluteTotal = totalCount?.total ?? queryResultSavedObjects.total;
 
-    const { saved_objects: monitors, per_page: perPageT, ...rest } = queryResult;
+    const { saved_objects: savedObjects, per_page: perPageT, ...rest } = queryResultSavedObjects;
 
     return {
       ...rest,
-      monitors,
+      monitors: savedObjects.map(mapSavedObjectToMonitor),
       absoluteTotal,
       perPage: perPageT,
       syncErrors: syntheticsMonitorClient.syntheticsService.syncErrors,

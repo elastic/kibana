@@ -375,18 +375,7 @@ export const MonitorDefaultsCodec = t.interface({
 export type MonitorDefaults = t.TypeOf<typeof MonitorDefaultsCodec>;
 
 export const MonitorManagementListResultCodec = t.type({
-  monitors: t.array(
-    t.intersection([
-      t.interface({
-        id: t.string,
-        attributes: EncryptedSyntheticsMonitorCodec,
-      }),
-      t.partial({
-        updated_at: t.string,
-        created_at: t.string,
-      }),
-    ])
-  ),
+  monitors: t.array(EncryptedSyntheticsSavedMonitorCodec),
   page: t.number,
   perPage: t.number,
   total: t.union([t.number, t.null]),
