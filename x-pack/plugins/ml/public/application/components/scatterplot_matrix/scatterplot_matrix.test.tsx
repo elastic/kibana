@@ -48,7 +48,7 @@ jest.mock('../../contexts/kibana', () => ({
       },
     },
   }),
-  useCurrentEuiTheme: () => ({
+  useCurrentThemeVars: () => ({
     euiTheme: mockEuiTheme,
   }),
 }));
