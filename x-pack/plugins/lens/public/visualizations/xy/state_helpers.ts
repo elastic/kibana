@@ -233,7 +233,15 @@ export function injectReferences(
     );
   }
 
-  const fallbackIndexPatternId = references.find(({ type }) => type === 'index-pattern')!.id;
+  // called on-demand since indexPattern reference won't be here on the vis if its a by-reference group
+  const getIndexPatternIdFromReferences = (annotationLayerId: string) => {
+    const fallbackIndexPatternId = references.find(({ type }) => type === 'index-pattern')!.id;
+    return (
+      references.find(({ name }) => name === getLayerReferenceName(annotationLayerId))?.id ||
+      fallbackIndexPatternId
+    );
+  };
+
   return {
     ...state,
     layers: state.layers
@@ -242,16 +250,12 @@ export function injectReferences(
           return persistedLayer as XYLayerConfig;
         }
 
-        const indexPatternIdFromReferences =
-          references.find(({ name }) => name === getLayerReferenceName(persistedLayer.layerId))
-            ?.id || fallbackIndexPatternId;
-
         let injectedLayer: XYAnnotationLayerConfig;
 
         if (isPersistedByValueAnnotationsLayer(persistedLayer)) {
           injectedLayer = {
             ...persistedLayer,
-            indexPatternId: indexPatternIdFromReferences,
+            indexPatternId: getIndexPatternIdFromReferences(persistedLayer.layerId),
           };
         } else {
           const annotationGroupId = references?.find(
@@ -291,7 +295,7 @@ export function injectReferences(
             injectedLayer = {
               ...commonProps,
               ignoreGlobalFilters: persistedLayer.ignoreGlobalFilters,
-              indexPatternId: indexPatternIdFromReferences,
+              indexPatternId: getIndexPatternIdFromReferences(persistedLayer.layerId),
               annotations: cloneDeep(persistedLayer.annotations),
             };
           }

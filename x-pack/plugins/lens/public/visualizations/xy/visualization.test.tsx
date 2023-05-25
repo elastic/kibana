@@ -3763,5 +3763,31 @@ describe('xy_visualization', () => {
         )
       ).toBeFalsy();
     });
+
+    it('does not rely on an index-pattern reference if by reference annotation layer', () => {
+      expect(() =>
+        xyVisualization.isEqual!(
+          state1,
+          [
+            {
+              name: refName1,
+              id: annotationGroupId1,
+              type: 'event-annotation-group',
+            },
+            // no index pattern reference
+          ],
+          state2,
+          [
+            {
+              name: refName2,
+              id: annotationGroupId1,
+              type: 'event-annotation-group',
+            },
+            // no index pattern reference
+          ],
+          annotationGroups
+        )
+      ).not.toThrowError();
+    });
   });
 });
