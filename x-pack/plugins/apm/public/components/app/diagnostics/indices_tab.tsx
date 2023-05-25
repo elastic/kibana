@@ -32,6 +32,19 @@ export function DiagnosticsIndices() {
     {
       field: 'dataStream',
       name: 'Data stream',
+      render: (_, { dataStream }) => {
+        if (!dataStream) {
+          return (
+            <EuiToolTip
+              content={`This index does not belong to a data stream. This will most likely cause mapping issues. Consider deleting the index and re-install the APM integration to ensure you have index templates and data streams correctly installed`}
+            >
+              <EuiIcon type="warning" />
+            </EuiToolTip>
+          );
+        }
+
+        return dataStream;
+      },
     },
     {
       field: 'fieldMappings',
@@ -56,6 +69,10 @@ export function DiagnosticsIndices() {
       field: 'ingestPipeline',
       name: 'Ingest pipelines',
       render: (_, { ingestPipeline }) => {
+        if (ingestPipeline.id === undefined) {
+          return <em>None</em>;
+        }
+
         return (
           <EuiToolTip
             content={
@@ -70,7 +87,6 @@ export function DiagnosticsIndices() {
               ) : (
                 <EuiIcon type="warning" />
               )}
-              {ingestPipeline.id === undefined && <em>None</em>}
             </>
           </EuiToolTip>
         );
