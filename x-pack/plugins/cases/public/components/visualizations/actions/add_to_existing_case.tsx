@@ -106,7 +106,9 @@ export const createAddToExistingCaseLensAction = ({
       };
 
       const onClose = (theCase?: CaseUI, isCreateCase?: boolean) => {
-        const shouldCleanup = theCase == null && !isCreateCase;
+        const closeModalClickedScenario = theCase == null && !isCreateCase;
+        const caseSelectedScenario = theCase != null;
+        const shouldCleanup = closeModalClickedScenario || caseSelectedScenario;
         cleanupDom(shouldCleanup);
       };
 
