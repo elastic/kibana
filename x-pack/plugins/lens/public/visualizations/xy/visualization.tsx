@@ -733,7 +733,7 @@ export const getXyVisualization = ({
             group: loadedGroupInfo,
           });
 
-          props.addLayer(LayerTypes.ANNOTATIONS, loadedGroupInfo);
+          props.addLayer(LayerTypes.ANNOTATIONS, loadedGroupInfo, true);
         }}
       />
     );

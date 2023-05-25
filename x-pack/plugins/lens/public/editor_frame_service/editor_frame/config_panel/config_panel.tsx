@@ -231,9 +231,9 @@ export function LayerPanels(
     [dispatchLens, props.framePublicAPI.dataViews.indexPatterns, props.indexPatternService]
   );
 
-  const addLayer: AddLayerFunction = (layerType, extraArg) => {
+  const addLayer: AddLayerFunction = (layerType, extraArg, ignoreInitialValues) => {
     const layerId = generateId();
-    dispatchLens(addLayerAction({ layerId, layerType, extraArg }));
+    dispatchLens(addLayerAction({ layerId, layerType, extraArg, ignoreInitialValues }));
     setNextFocusedLayerId(layerId);
   };
 

@@ -1002,7 +1002,11 @@ interface VisualizationStateFromContextChangeProps {
   context: VisualizeEditorContext;
 }
 
-export type AddLayerFunction<T = unknown> = (layerType: LayerType, extraArg?: T) => void;
+export type AddLayerFunction<T = unknown> = (
+  layerType: LayerType,
+  extraArg?: T,
+  ignoreInitialValues?: boolean
+) => void;
 
 export type AnnotationGroups = Record<string, EventAnnotationGroupConfig>;
 
@@ -1097,8 +1101,7 @@ export interface Visualization<T = unknown, P = T, ExtraAppendLayerArg = unknown
   /** Retrieve a list of supported layer types with initialization data */
   getSupportedLayers: (
     state?: T,
-    frame?: Pick<FramePublicAPI, 'datasourceLayers' | 'activeData'>,
-    extraArg?: ExtraAppendLayerArg // included so the visualization can decide whether initial values make sense
+    frame?: Pick<FramePublicAPI, 'datasourceLayers' | 'activeData'>
   ) => VisualizationLayerDescription[];
   /**
    * returns a list of custom actions supported by the visualization layer.
