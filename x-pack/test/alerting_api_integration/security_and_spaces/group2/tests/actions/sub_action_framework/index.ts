@@ -190,6 +190,7 @@ export default function createActionTests({ getService }: FtrProviderContext) {
           expect(resWithoutMessage).to.eql({
             status: 'error',
             retry: true,
+            reason: 'validation',
             connector_id: res.body.id,
           });
         }
