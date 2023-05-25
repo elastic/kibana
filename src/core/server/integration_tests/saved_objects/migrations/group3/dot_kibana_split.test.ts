@@ -234,6 +234,7 @@ describe('split .kibana index into multiple system indices', () => {
             "ml-module",
             "ml-trained-model",
             "monitoring-telemetry",
+            "observability-onboarding-state",
             "osquery-manager-usage-metric",
             "osquery-pack",
             "osquery-pack-asset",

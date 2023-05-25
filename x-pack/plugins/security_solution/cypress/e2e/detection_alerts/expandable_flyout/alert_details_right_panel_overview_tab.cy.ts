@@ -34,6 +34,10 @@ import {
   DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_THREAT_INTELLIGENCE_VALUES,
   DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_THREAT_INTELLIGENCE_VIEW_ALL_BUTTON,
   DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INVESTIGATION_GUIDE_BUTTON,
+  DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_CORRELATIONS_HEADER,
+  DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_CORRELATIONS_CONTENT,
+  DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_CORRELATIONS_VALUES,
+  DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_CORRELATIONS_VIEW_ALL_BUTTON,
 } from '../../../screens/document_expandable_flyout';
 import {
   expandFirstAlertExpandableFlyout,
@@ -219,6 +223,46 @@ describe.skip(
       //  and improve when we can navigate Threat Intelligence to sub tab directly
       it.skip('should navigate to left panel, entities tab when view all fields of threat intelligence is clicked', () => {
         cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_THREAT_INTELLIGENCE_VIEW_ALL_BUTTON)
+          .should('be.visible')
+          .click();
+        cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_ENTITIES_CONTENT).should('be.visible');
+      });
+
+      // TODO work on getting proper data to display in the cases, ancestry, session and source event sections
+      it.skip('should display correlations section', () => {
+        cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_CORRELATIONS_HEADER)
+          .scrollIntoView()
+          .should('be.visible')
+          .and('have.text', 'Correlations');
+        cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_CORRELATIONS_CONTENT)
+          .should('be.visible')
+          .within(() => {
+            // threat match detected
+            cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_CORRELATIONS_VALUES)
+              .eq(0)
+              .should('be.visible')
+              .and('have.text', '1 related case'); // TODO
+
+            // field with threat enrichement
+            cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_CORRELATIONS_VALUES)
+              .eq(1)
+              .should('be.visible')
+              .and('have.text', '1 alert related by ancestry'); // TODO
+            cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_CORRELATIONS_VALUES)
+              .eq(1)
+              .should('be.visible')
+              .and('have.text', '1 alert related by the same source event'); // TODO
+            cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_CORRELATIONS_VALUES)
+              .eq(1)
+              .should('be.visible')
+              .and('have.text', '1 alert related by session'); // TODO
+          });
+      });
+
+      // TODO work on getting proper data to display in the cases, ancestry, session and source event sections
+      //  and improve when we can navigate Correlations to sub tab directly
+      it.skip('should navigate to left panel, entities tab when view all fields of threat intelligence is clicked', () => {
+        cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_CORRELATIONS_VIEW_ALL_BUTTON)
           .should('be.visible')
           .click();
         cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_ENTITIES_CONTENT).should('be.visible');
