@@ -980,7 +980,7 @@ components:
     create_connector_request_genai:
       title: Create generative AI connector request
       description: |
-        The generative AI connector uses axios to send a POST request to either OpenAPIor Azure OpenAPI.
+        The generative AI connector uses axios to send a POST request to either OpenAI or Azure OpenAPI.
       type: object
       required:
         - config

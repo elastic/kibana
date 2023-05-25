@@ -1752,7 +1752,7 @@ Any modifications made to this file will be overwritten.
   </div>
   <div class="model">
     <h3><a name="create_connector_request_genai"><code>create_connector_request_genai</code> - Create generative AI connector request</a> <a class="up" href="#__Models">Up</a></h3>
-    <div class='model-description'>The generative AI connector uses axios to send a POST request to either OpenAPIor Azure OpenAPI.</div>
+    <div class='model-description'>The generative AI connector uses axios to send a POST request to either OpenAI or Azure OpenAPI.</div>
     <div class="field-items">
       <div class="param">config </div><div class="param-desc"><span class="param-type"><a href="#AnyType">map[String, oas_any_type_not_mapped]</a></span> Defines properties for connectors when type is <code>.gen-ai</code>. </div>
 <div class="param">connector_type_id </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The type of connector. </div>
