@@ -28,9 +28,50 @@ export const OptionsListStrings = {
       }),
   },
   editor: {
-    getAllowMultiselectTitle: () =>
-      i18n.translate('controls.optionsList.editor.allowMultiselectTitle', {
-        defaultMessage: 'Allow multiple selections in dropdown',
+    getSelectionOptionsTitle: () =>
+      i18n.translate('controls.optionsList.editor.selectionOptionsTitle', {
+        defaultMessage: 'Selections',
+      }),
+    selectionTypes: {
+      multi: {
+        getLabel: () =>
+          i18n.translate('controls.optionsList.editor.multiSelectLabel', {
+            defaultMessage: 'Allow  multiple selections',
+          }),
+      },
+      single: {
+        getLabel: () =>
+          i18n.translate('controls.optionsList.editor.singleSelectLabel', {
+            defaultMessage: 'Only allow a single selection',
+          }),
+      },
+    },
+    searchTypes: {
+      prefix: {
+        getLabel: () =>
+          i18n.translate('controls.optionsList.editor.prefixSearchLabel', {
+            defaultMessage: 'Prefix',
+          }),
+        getTooltip: () =>
+          i18n.translate('controls.optionsList.editor.prefixSearchTooltip', {
+            defaultMessage: 'Matches values that begin with the given search string.',
+          }),
+      },
+      contains: {
+        getLabel: () =>
+          i18n.translate('controls.optionsList.editor.containsSearchLabel', {
+            defaultMessage: 'Contains',
+          }),
+        getTooltip: () =>
+          i18n.translate('controls.optionsList.editor.containsSearchTooltip', {
+            defaultMessage:
+              'Matches values that contain the given search string. Results may take longer to populate.',
+          }),
+      },
+    },
+    getAdditionalSettingsTitle: () =>
+      i18n.translate('controls.optionsList.editor.additionalSettingsTitle', {
+        defaultMessage: `Additional settings`,
       }),
     getRunPastTimeoutTitle: () =>
       i18n.translate('controls.optionsList.editor.runPastTimeout', {

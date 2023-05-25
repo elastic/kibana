@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 
 import {
   EuiFlexGroup,
@@ -15,6 +15,7 @@ import {
   EuiIconTip,
   EuiSwitch,
   Direction,
+  EuiRadioGroup,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 
@@ -26,42 +27,19 @@ import {
 import { OptionsListStrings } from './options_list_strings';
 import { ControlEditorProps, OptionsListEmbeddableInput } from '../..';
 
-const SwitchWithTooltip = ({
-  label,
-  tooltip,
-  initialChecked,
-  onSwitchChange,
-}: {
-  label: string;
-  tooltip: string;
-  initialChecked: boolean;
-  onSwitchChange: () => void;
-}) => {
-  const [checked, setChecked] = useState(initialChecked);
-
-  return (
-    <EuiFlexGroup alignItems="center" gutterSize="xs">
-      <EuiFlexItem grow={false}>
-        <EuiSwitch
-          label={label}
-          checked={checked}
-          onChange={(event) => {
-            setChecked(event.target.checked);
-            onSwitchChange();
-          }}
-        />
-      </EuiFlexItem>
-      <EuiFlexItem
-        grow={false}
-        css={css`
-          margin-top: 0px !important;
-        `}
-      >
-        <EuiIconTip content={tooltip} position="right" />
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  );
-};
+const TooltipText = ({ label, tooltip }: { label: string; tooltip: string }) => (
+  <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
+    <EuiFlexItem grow={false}>{label}</EuiFlexItem>
+    <EuiFlexItem
+      grow={false}
+      css={css`
+        margin-top: 0px !important;
+      `}
+    >
+      <EuiIconTip content={tooltip} position="right" />
+    </EuiFlexItem>
+  </EuiFlexGroup>
+);
 
 interface OptionsListEditorState {
   sortDirection: Direction;
@@ -102,39 +80,71 @@ export const OptionsListEditorOptions = ({
     }
   }, [fieldType, onChange, state.sortBy]);
 
+  const selectionOptions = useMemo(() => {
+    return Object.keys(OptionsListStrings.editor.selectionTypes).map((type: string) => {
+      return {
+        id: type,
+        label:
+          OptionsListStrings.editor.selectionTypes[
+            type as keyof typeof OptionsListStrings.editor.selectionTypes
+          ].getLabel(),
+      };
+    });
+  }, []);
+
+  const searchOptions = useMemo(() => {
+    return Object.keys(OptionsListStrings.editor.searchTypes).map((type: string) => {
+      const searchOptionStrings =
+        OptionsListStrings.editor.searchTypes[
+          type as keyof typeof OptionsListStrings.editor.searchTypes
+        ];
+
+      return {
+        id: type,
+        label: (
+          <TooltipText
+            label={searchOptionStrings.getLabel()}
+            tooltip={searchOptionStrings.getTooltip()}
+          />
+        ),
+      };
+    });
+  }, []);
+
   return (
     <>
-      <EuiFormRow>
+      <EuiFormRow label={OptionsListStrings.editor.getSelectionOptionsTitle()}>
+        <EuiRadioGroup
+          options={selectionOptions}
+          idSelected={state.singleSelect ? 'single' : 'multi'}
+          onChange={(id) => {
+            const newSingleSelect = id === 'single';
+            onChange({ singleSelect: newSingleSelect });
+            setState((s) => ({ ...s, singleSelect: newSingleSelect }));
+          }}
+        />
+      </EuiFormRow>
+      <EuiFormRow label={'Searching'}>
+        <EuiRadioGroup
+          options={searchOptions}
+          idSelected={state.wildcardSearch ? 'contains' : 'prefix'}
+          onChange={(id) => {
+            const newWildcardSearch = id === 'contains';
+            onChange({ wildcardSearch: newWildcardSearch });
+            setState((s) => ({ ...s, wildcardSearch: newWildcardSearch }));
+          }}
+        />
+      </EuiFormRow>
+      <EuiFormRow label={OptionsListStrings.editor.getAdditionalSettingsTitle()}>
         <EuiSwitch
-          label={OptionsListStrings.editor.getAllowMultiselectTitle()}
-          checked={!state.singleSelect}
-          onChange={() => {
-            onChange({ singleSelect: !state.singleSelect });
-            setState((s) => ({ ...s, singleSelect: !s.singleSelect }));
-          }}
-          data-test-subj={'optionsListControl__allowMultipleAdditionalSetting'}
-        />
-      </EuiFormRow>
-      <EuiFormRow>
-        <SwitchWithTooltip
-          label={'Enable substring search'}
-          tooltip={
-            'By default, searching only matches on a prefix. The results might take longer to populate.'
+          label={
+            <TooltipText
+              label={OptionsListStrings.editor.getRunPastTimeoutTitle()}
+              tooltip={OptionsListStrings.editor.getRunPastTimeoutTooltip()}
+            />
           }
-          initialChecked={Boolean(state.wildcardSearch)}
-          onSwitchChange={() => {
-            onChange({ wildcardSearch: !state.wildcardSearch });
-            setState((s) => ({ ...s, wildcardSearch: !s.wildcardSearch }));
-          }}
-          data-test-subj={'optionsListControl__wildcareQueryAdditionalSetting'}
-        />
-      </EuiFormRow>
-      <EuiFormRow>
-        <SwitchWithTooltip
-          label={OptionsListStrings.editor.getRunPastTimeoutTitle()}
-          tooltip={OptionsListStrings.editor.getRunPastTimeoutTooltip()}
-          initialChecked={Boolean(state.runPastTimeout)}
-          onSwitchChange={() => {
+          checked={Boolean(state.runPastTimeout)}
+          onChange={() => {
             onChange({ runPastTimeout: !state.runPastTimeout });
             setState((s) => ({ ...s, runPastTimeout: !s.runPastTimeout }));
           }}

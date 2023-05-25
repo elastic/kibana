@@ -35,6 +35,7 @@ import {
   EuiIcon,
   EuiSwitch,
   EuiTextColor,
+  EuiDescribedFormGroup,
 } from '@elastic/eui';
 import { DataViewField } from '@kbn/data-views-plugin/common';
 import {
@@ -172,119 +173,147 @@ export const ControlEditor = ({
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody data-test-subj="control-editor-flyout">
-        <EuiForm>
-          {!editorConfig?.hideDataViewSelector && (
-            <EuiFormRow label={ControlGroupStrings.manageControl.getDataViewTitle()}>
-              <DataViewPicker
-                dataViews={dataViewListItems}
-                selectedDataViewId={selectedDataViewId}
-                onChangeDataViewId={(dataViewId) => {
-                  setLastUsedDataViewId?.(dataViewId);
-                  if (dataViewId === selectedDataViewId) return;
-                  onTypeEditorChange({ dataViewId });
-                  setSelectedField(undefined);
-                  setSelectedDataViewId(dataViewId);
+        <EuiForm fullWidth>
+          <EuiDescribedFormGroup
+            ratio="third"
+            title={<h2>{ControlGroupStrings.manageControl.dataSource.getFormGroupTitle()}</h2>}
+            description={ControlGroupStrings.manageControl.dataSource.getFormGroupDescription()}
+          >
+            {!editorConfig?.hideDataViewSelector && (
+              <EuiFormRow label={ControlGroupStrings.manageControl.dataSource.getDataViewTitle()}>
+                <DataViewPicker
+                  dataViews={dataViewListItems}
+                  selectedDataViewId={selectedDataViewId}
+                  onChangeDataViewId={(dataViewId) => {
+                    setLastUsedDataViewId?.(dataViewId);
+                    if (dataViewId === selectedDataViewId) return;
+                    onTypeEditorChange({ dataViewId });
+                    setSelectedField(undefined);
+                    setSelectedDataViewId(dataViewId);
+                  }}
+                  trigger={{
+                    label:
+                      selectedDataView?.getName() ??
+                      ControlGroupStrings.manageControl.dataSource.getSelectDataViewMessage(),
+                  }}
+                  selectableProps={{ isLoading: dataViewListLoading }}
+                />
+              </EuiFormRow>
+            )}
+            <EuiFormRow label={ControlGroupStrings.manageControl.dataSource.getFieldTitle()}>
+              <FieldPicker
+                filterPredicate={(field: DataViewField) => {
+                  const customPredicate = controlGroup.fieldFilterPredicate?.(field) ?? true;
+                  return Boolean(fieldRegistry?.[field.name]) && customPredicate;
                 }}
-                trigger={{
-                  label:
-                    selectedDataView?.getName() ??
-                    ControlGroupStrings.manageControl.getSelectDataViewMessage(),
+                selectedFieldName={selectedField}
+                dataView={selectedDataView}
+                onSelectField={(field) => {
+                  onTypeEditorChange({
+                    fieldName: field.name,
+                  });
+                  const newDefaultTitle = field.displayName ?? field.name;
+                  setDefaultTitle(newDefaultTitle);
+                  setSelectedField(field.name);
+                  if (!currentTitle || currentTitle === defaultTitle) {
+                    setCurrentTitle(newDefaultTitle);
+                    updateTitle(newDefaultTitle);
+                  }
                 }}
-                selectableProps={{ isLoading: dataViewListLoading }}
+                selectableProps={{ isLoading: dataViewListLoading || dataViewLoading }}
               />
             </EuiFormRow>
-          )}
-          <EuiFormRow label={ControlGroupStrings.manageControl.getFieldTitle()}>
-            <FieldPicker
-              filterPredicate={(field: DataViewField) => {
-                const customPredicate = controlGroup.fieldFilterPredicate?.(field) ?? true;
-                return Boolean(fieldRegistry?.[field.name]) && customPredicate;
-              }}
-              selectedFieldName={selectedField}
-              dataView={selectedDataView}
-              onSelectField={(field) => {
-                onTypeEditorChange({
-                  fieldName: field.name,
-                });
-                const newDefaultTitle = field.displayName ?? field.name;
-                setDefaultTitle(newDefaultTitle);
-                setSelectedField(field.name);
-                if (!currentTitle || currentTitle === defaultTitle) {
-                  setCurrentTitle(newDefaultTitle);
-                  updateTitle(newDefaultTitle);
-                }
-              }}
-              selectableProps={{ isLoading: dataViewListLoading || dataViewLoading }}
-            />
-          </EuiFormRow>
-          <EuiFormRow label={ControlGroupStrings.manageControl.getControlTypeTitle()}>
-            {factory ? (
-              <EuiFlexGroup alignItems="center" gutterSize="xs">
-                <EuiFlexItem grow={false}>
-                  <EuiIcon type={factory.getIconType()} />
-                </EuiFlexItem>
-                <EuiFlexItem data-test-subj="control-editor-type">
-                  {factory.getDisplayName()}
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            ) : (
-              <EuiTextColor color="subdued" data-test-subj="control-editor-type">
-                {ControlGroupStrings.manageControl.getSelectFieldMessage()}
-              </EuiTextColor>
-            )}
-          </EuiFormRow>
-          <EuiFormRow label={ControlGroupStrings.manageControl.getTitleInputTitle()}>
-            <EuiFieldText
-              data-test-subj="control-editor-title-input"
-              placeholder={defaultTitle}
-              value={currentTitle}
-              onChange={(e) => {
-                updateTitle(e.target.value || defaultTitle);
-                setCurrentTitle(e.target.value);
-              }}
-            />
-          </EuiFormRow>
-          {!editorConfig?.hideWidthSettings && (
-            <EuiFormRow label={ControlGroupStrings.manageControl.getWidthInputTitle()}>
-              <>
-                <EuiButtonGroup
-                  color="primary"
-                  legend={ControlGroupStrings.management.controlWidth.getWidthSwitchLegend()}
-                  options={CONTROL_WIDTH_OPTIONS}
-                  idSelected={currentWidth}
-                  onChange={(newWidth: string) => {
-                    setCurrentWidth(newWidth as ControlWidth);
-                    updateWidth(newWidth as ControlWidth);
-                  }}
-                />
-                {updateGrow && (
-                  <>
-                    <EuiSpacer size="s" />
-                    <EuiSwitch
-                      label={ControlGroupStrings.manageControl.getGrowSwitchTitle()}
-                      color="primary"
-                      checked={currentGrow}
-                      onChange={() => {
-                        setCurrentGrow(!currentGrow);
-                        updateGrow(!currentGrow);
-                      }}
-                      data-test-subj="control-editor-grow-switch"
-                    />
-                  </>
-                )}
-              </>
+            <EuiFormRow label={ControlGroupStrings.manageControl.dataSource.getControlTypeTitle()}>
+              {factory ? (
+                <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
+                  <EuiFlexItem grow={false}>
+                    <EuiIcon type={factory.getIconType()} />
+                  </EuiFlexItem>
+                  <EuiFlexItem data-test-subj="control-editor-type">
+                    {factory.getDisplayName()}
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              ) : (
+                <EuiTextColor color="subdued" data-test-subj="control-editor-type">
+                  {ControlGroupStrings.manageControl.dataSource.getSelectFieldMessage()}
+                </EuiTextColor>
+              )}
             </EuiFormRow>
-          )}
+          </EuiDescribedFormGroup>
+          <EuiDescribedFormGroup
+            ratio="third"
+            title={<h2>{ControlGroupStrings.manageControl.displaySettings.getFormGroupTitle()}</h2>}
+            description={ControlGroupStrings.manageControl.displaySettings.getFormGroupDescription()}
+          >
+            <EuiFormRow
+              label={ControlGroupStrings.manageControl.displaySettings.getTitleInputTitle()}
+            >
+              <EuiFieldText
+                data-test-subj="control-editor-title-input"
+                placeholder={defaultTitle}
+                value={currentTitle}
+                onChange={(e) => {
+                  updateTitle(e.target.value || defaultTitle);
+                  setCurrentTitle(e.target.value);
+                }}
+              />
+            </EuiFormRow>
+            {!editorConfig?.hideWidthSettings && (
+              <EuiFormRow
+                label={ControlGroupStrings.manageControl.displaySettings.getWidthInputTitle()}
+              >
+                <>
+                  <EuiButtonGroup
+                    color="primary"
+                    legend={ControlGroupStrings.management.controlWidth.getWidthSwitchLegend()}
+                    options={CONTROL_WIDTH_OPTIONS}
+                    idSelected={currentWidth}
+                    onChange={(newWidth: string) => {
+                      setCurrentWidth(newWidth as ControlWidth);
+                      updateWidth(newWidth as ControlWidth);
+                    }}
+                  />
+                  {updateGrow && (
+                    <>
+                      <EuiSpacer size="s" />
+                      <EuiSwitch
+                        label={ControlGroupStrings.manageControl.displaySettings.getGrowSwitchTitle()}
+                        color="primary"
+                        checked={currentGrow}
+                        onChange={() => {
+                          setCurrentGrow(!currentGrow);
+                          updateGrow(!currentGrow);
+                        }}
+                        data-test-subj="control-editor-grow-switch"
+                      />
+                    </>
+                  )}
+                </>
+              </EuiFormRow>
+            )}
+          </EuiDescribedFormGroup>
           {!editorConfig?.hideAdditionalSettings &&
             CustomSettings &&
             (factory as IEditableControlFactory).controlEditorOptionsComponent && (
-              <EuiFormRow label={ControlGroupStrings.manageControl.getControlSettingsTitle()}>
+              <EuiDescribedFormGroup
+                ratio="third"
+                title={
+                  <h2>
+                    {ControlGroupStrings.manageControl.controlTypeSettings.getFormGroupTitle(
+                      factory.getDisplayName()
+                    )}
+                  </h2>
+                }
+                description={ControlGroupStrings.manageControl.controlTypeSettings.getFormGroupDescription(
+                  factory.getDisplayName()
+                )}
+              >
                 <CustomSettings
                   onChange={onTypeEditorChange}
                   initialInput={embeddable?.getInput()}
                   fieldType={fieldRegistry?.[selectedField].field.type}
                 />
-              </EuiFormRow>
+              </EuiDescribedFormGroup>
             )}
           {removeControl && (
             <>
