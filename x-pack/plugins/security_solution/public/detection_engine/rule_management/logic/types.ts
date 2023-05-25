@@ -28,7 +28,6 @@ import {
   type,
 } from '@kbn/securitysolution-io-ts-alerting-types';
 import type { NamespaceType } from '@kbn/securitysolution-io-ts-list-types';
-import type { RuleSnoozeSettings } from '@kbn/triggers-actions-ui-plugin/public/types';
 
 import { PositiveInteger } from '@kbn/securitysolution-io-ts-types';
 import type { WarningSchema } from '../../../../common/detection_engine/schemas/response';
@@ -212,6 +211,11 @@ export const PaginationOptions = t.type({
   total: PositiveInteger,
 });
 
+export type InMemoryPaginationOptions = t.TypeOf<typeof InMemoryPaginationOptions>;
+export const InMemoryPaginationOptions = t.type({
+  pageIndex: PositiveInteger,
+});
+
 export interface FetchRulesProps {
   pagination?: Pick<PaginationOptions, 'page' | 'perPage'>;
   filterOptions?: FilterOptions;
@@ -219,13 +223,15 @@ export interface FetchRulesProps {
   signal?: AbortSignal;
 }
 
-// Rule snooze settings map keyed by rule SO's id (not ruleId) and valued by rule snooze settings
-export type RulesSnoozeSettingsMap = Record<string, RuleSnoozeSettings>;
+export interface RuleSnoozeSettings {
+  id: string;
+  muteAll: boolean;
+  snoozeSchedule?: RuleSnooze;
+  activeSnoozes?: string[];
+  isSnoozedUntil?: Date;
+}
 
 interface RuleSnoozeSettingsResponse {
-  /**
-   * Rule's SO id
-   */
   id: string;
   mute_all: boolean;
   snooze_schedule?: RuleSnooze;

@@ -8,29 +8,58 @@
 import React, { useMemo } from 'react';
 import { TabNavigation } from '../../../../common/components/navigation/tab_navigation';
 import * as i18n from '../../../../detections/pages/detection_engine/rules/translations';
+import { useRulesTableContext } from './rules_table/rules_table_context';
 
 export enum AllRulesTabs {
-  management = 'management',
+  installed = 'installed',
   monitoring = 'monitoring',
+  updates = 'updates',
 }
 
 export const RulesTableToolbar = React.memo(() => {
+  const {
+    state: {
+      pagination: { total: installedTotal },
+      rulesToUpgrade,
+    },
+  } = useRulesTableContext();
+
+  const updateTotal = rulesToUpgrade.length;
+
   const ruleTabs = useMemo(
     () => ({
-      [AllRulesTabs.management]: {
-        id: AllRulesTabs.management,
-        name: i18n.RULES_TAB,
+      [AllRulesTabs.installed]: {
+        id: AllRulesTabs.installed,
+        name: i18n.INSTALLED_RULES_TAB,
         disabled: false,
-        href: `/rules/${AllRulesTabs.management}`,
+        href: `/rules/${AllRulesTabs.installed}`,
+        isBeta: !!((installedTotal ?? 0) > 0),
+        betaOptions: {
+          text: `${installedTotal}`,
+        },
       },
       [AllRulesTabs.monitoring]: {
         id: AllRulesTabs.monitoring,
-        name: i18n.MONITORING_TAB,
+        name: i18n.RULE_MONITORING_TAB,
         disabled: false,
         href: `/rules/${AllRulesTabs.monitoring}`,
+        isBeta: !!((installedTotal ?? 0) > 0),
+        betaOptions: {
+          text: `${installedTotal}`,
+        },
+      },
+      [AllRulesTabs.updates]: {
+        id: AllRulesTabs.updates,
+        name: i18n.RULE_UPDATES_TAB,
+        disabled: false,
+        href: `/rules/${AllRulesTabs.updates}`,
+        isBeta: !!((updateTotal ?? 0) > 0),
+        betaOptions: {
+          text: `${updateTotal}`,
+        },
       },
     }),
-    []
+    [installedTotal, updateTotal]
   );
 
   return <TabNavigation navTabs={ruleTabs} />;

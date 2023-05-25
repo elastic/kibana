@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback } from 'react';
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiToolTip } from '@elastic/eui';
 
 import { APP_UI_ID } from '../../../../../common/constants';
 import { SecurityPageName } from '../../../../app/types';
@@ -24,7 +24,6 @@ import { MlJobCompatibilityCallout } from '../../../../detections/components/cal
 import { NeedAdminForUpdateRulesCallOut } from '../../../../detections/components/callouts/need_admin_for_update_callout';
 import { LoadPrePackagedRules } from '../../../../detections/components/rules/pre_packaged_rules/load_prepackaged_rules';
 import { LoadPrePackagedRulesButton } from '../../../../detections/components/rules/pre_packaged_rules/load_prepackaged_rules_button';
-import { UpdatePrePackagedRulesCallOut } from '../../../../detections/components/rules/pre_packaged_rules/update_callout';
 import { ValueListsFlyout } from '../../../../detections/components/value_lists_management_flyout';
 import { useUserData } from '../../../../detections/components/user_info';
 import { useListsConfig } from '../../../../detections/containers/detection_engine/lists/use_lists_config';
@@ -32,17 +31,21 @@ import { redirectToDetections } from '../../../../detections/pages/detection_eng
 
 import { useInvalidateFindRulesQuery } from '../../../rule_management/api/hooks/use_find_rules_query';
 import { importRules } from '../../../rule_management/logic';
-import { usePrePackagedRulesInstallationStatus } from '../../../rule_management/logic/use_pre_packaged_rules_installation_status';
-import { usePrePackagedTimelinesInstallationStatus } from '../../../rule_management/logic/use_pre_packaged_timelines_installation_status';
 
 import { AllRules } from '../../components/rules_table';
 import { RulesTableContextProvider } from '../../components/rules_table/rules_table/rules_table_context';
 
 import * as i18n from '../../../../detections/pages/detection_engine/rules/translations';
 import { useInvalidateFetchRuleManagementFiltersQuery } from '../../../rule_management/api/hooks/use_fetch_rule_management_filters_query';
+import { MiniCallout } from '../../components/mini_callout/mini_callout';
+import { usePrebuiltRulesStatus } from '../../../rule_management/logic/prebuilt_rules/use_prebuilt_rules_status';
 
 import { MaintenanceWindowCallout } from '../../components/maintenance_window_callout/maintenance_window_callout';
 import { SuperHeader } from './super_header';
+import {
+  NEW_PREBUILT_RULES_CALLOUT_TITLE,
+  UPDATE_RULES_CALLOUT_TITLE,
+} from '../../components/mini_callout/translations';
 
 const RulesPageComponent: React.FC = () => {
   const [isImportModalVisible, showImportModal, hideImportModal] = useBoolState();
@@ -54,6 +57,16 @@ const RulesPageComponent: React.FC = () => {
     invalidateFindRulesQuery();
     invalidateFetchRuleManagementFilters();
   }, [invalidateFindRulesQuery, invalidateFetchRuleManagementFilters]);
+
+  const { data: prebuiltRulesStatus } = usePrebuiltRulesStatus();
+
+  const rulesToInstallCount = prebuiltRulesStatus?.num_prebuilt_rules_installed ?? 0;
+  const rulesToUpgradeCount = prebuiltRulesStatus?.num_prebuilt_rules_to_upgrade ?? 0;
+  const rulesInstalledCount = prebuiltRulesStatus?.num_prebuilt_rules_installed ?? 0;
+
+  // Check against rulesInstalledCount since we don't want to show banners if we're showing the empty prompt
+  const shouldDisplayNewRulesCallout = rulesToInstallCount > 0 && rulesInstalledCount === 0;
+  const shouldDisplayUpdateRulesCallout = rulesToUpgradeCount > 0;
 
   const [
     {
@@ -70,8 +83,6 @@ const RulesPageComponent: React.FC = () => {
     needsConfiguration: needsListsConfiguration,
   } = useListsConfig();
   const loading = userInfoLoading || listsConfigLoading;
-  const prePackagedRuleStatus = usePrePackagedRulesInstallationStatus();
-  const prePackagedTimelineStatus = usePrePackagedTimelinesInstallationStatus();
 
   if (
     redirectToDetections(
@@ -123,25 +134,25 @@ const RulesPageComponent: React.FC = () => {
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiToolTip position="top" content={i18n.UPLOAD_VALUE_LISTS_TOOLTIP}>
-                  <EuiButton
+                  <EuiButtonEmpty
                     data-test-subj="open-value-lists-modal-button"
                     iconType="importAction"
                     isDisabled={!canWriteListsIndex || !canUserCRUD || loading}
                     onClick={showValueListFlyout}
                   >
                     {i18n.IMPORT_VALUE_LISTS}
-                  </EuiButton>
+                  </EuiButtonEmpty>
                 </EuiToolTip>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiButton
+                <EuiButtonEmpty
                   data-test-subj="rules-import-modal-button"
                   iconType="importAction"
                   isDisabled={!hasUserCRUDPermission(canUserCRUD) || loading}
                   onClick={showImportModal}
                 >
                   {i18n.IMPORT_RULE}
-                </EuiButton>
+                </EuiButtonEmpty>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <SecuritySolutionLinkButton
@@ -156,9 +167,26 @@ const RulesPageComponent: React.FC = () => {
               </EuiFlexItem>
             </EuiFlexGroup>
           </SuperHeader>
-          {(prePackagedRuleStatus === 'ruleNeedUpdate' ||
-            prePackagedTimelineStatus === 'timelineNeedUpdate') && (
-            <UpdatePrePackagedRulesCallOut data-test-subj="update-callout-button" />
+
+          {shouldDisplayUpdateRulesCallout && (
+            <MiniCallout
+              iconType={'iInCircle'}
+              data-test-subj="prebuilt-rules-update-callout"
+              title={UPDATE_RULES_CALLOUT_TITLE}
+            />
+          )}
+
+          {shouldDisplayUpdateRulesCallout && shouldDisplayNewRulesCallout && (
+            <EuiSpacer size={'s'} />
+          )}
+
+          {shouldDisplayNewRulesCallout && (
+            <MiniCallout
+              color="success"
+              data-test-subj="prebuilt-rules-new-callout"
+              iconType={'iInCircle'}
+              title={NEW_PREBUILT_RULES_CALLOUT_TITLE}
+            />
           )}
           <MaintenanceWindowCallout />
           <AllRules data-test-subj="all-rules" />
