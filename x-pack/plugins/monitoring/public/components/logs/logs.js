@@ -122,7 +122,7 @@ function getLogsUiLink(clusterUuid, nodeId, indexUuid) {
     params.push(`elasticsearch.index.name:${indexUuid}`);
   }
 
-  const base = Legacy.shims.infraLocators.logsLocator.getRedirectUrl({
+  const base = Legacy.shims.infra.locators.logsLocator.getRedirectUrl({
     logView: { logViewId: INFRA_SOURCE_ID, type: 'log-view-reference' },
     ...(params.length ? { filter: params.join(' and ') } : {}),
   });
@@ -158,7 +158,7 @@ export class Logs extends PureComponent {
   }
 
   renderCallout() {
-    const uiCapabilities = Legacy.shims.capabilities;
+    const { capabilities: uiCapabilities, infra, kibanaServices } = Legacy.shims;
     const show = uiCapabilities.logs && uiCapabilities.logs.show;
     const {
       logs: { enabled },
@@ -170,7 +170,7 @@ export class Logs extends PureComponent {
       return null;
     }
 
-    return Legacy.shims.infraLocators ? (
+    return infra ? (
       <EuiCallOut
         size="m"
         title={i18n.translate('xpack.monitoring.logs.listing.calloutTitle', {
@@ -178,7 +178,7 @@ export class Logs extends PureComponent {
         })}
         iconType="logsApp"
       >
-        <RedirectAppLinks coreStart={Legacy.shims.kibanaServices}>
+        <RedirectAppLinks coreStart={kibanaServices}>
           <FormattedMessage
             id="xpack.monitoring.logs.listing.linkText"
             defaultMessage="Visit {link} to dive deeper."

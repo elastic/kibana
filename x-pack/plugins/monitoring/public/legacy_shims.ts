@@ -74,7 +74,7 @@ export interface IShims {
   usageCollection: UsageCollectionSetup;
   kibanaServices: CoreStart & { usageCollection: UsageCollectionSetup };
   appMountParameters: AppMountParameters;
-  infraLocators?: InfraClientStartExports['locators'];
+  infra?: InfraClientStartExports;
 }
 
 export class Legacy {
@@ -146,7 +146,7 @@ export class Legacy {
         usageCollection,
       },
       appMountParameters,
-      infraLocators: infra?.locators,
+      infra,
     };
   }
 
