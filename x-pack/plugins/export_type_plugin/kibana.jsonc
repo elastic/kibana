@@ -9,7 +9,6 @@
     "browser": true,
     "configPath": [
       "xpack",
-      "reporting"
     ],
     "requiredPlugins": [
       "data",
