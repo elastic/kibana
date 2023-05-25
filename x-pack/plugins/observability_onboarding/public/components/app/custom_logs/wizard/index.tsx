@@ -27,12 +27,7 @@ interface WizardState {
     | 'service';
   uploadType?: 'log-file' | 'api-key';
   elasticAgentPlatform: 'linux-tar' | 'macos' | 'windows' | 'deb' | 'rpm';
-  alternativeShippers: {
-    filebeat: boolean;
-    fluentbit: boolean;
-    logstash: boolean;
-    fluentd: boolean;
-  };
+  apiKeyId: string;
 }
 
 const initialState: WizardState = {
@@ -41,12 +36,7 @@ const initialState: WizardState = {
   namespace: 'default',
   customConfigurations: '',
   elasticAgentPlatform: 'linux-tar',
-  alternativeShippers: {
-    filebeat: false,
-    fluentbit: false,
-    logstash: false,
-    fluentd: false,
-  },
+  apiKeyId: '',
 };
 
 const { Provider, Step, useWizard } = createWizardContext({

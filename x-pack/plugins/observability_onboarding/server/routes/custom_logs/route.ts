@@ -21,6 +21,7 @@ import {
 import { getObservabilityOnboardingState } from './get_observability_onboarding_state';
 import { findLatestObservabilityOnboardingState } from './find_latest_observability_onboarding_state';
 import { getAuthenticationAPIKey } from '../../lib/get_authentication_api_key';
+import { getLogsCount } from './get_logs_count';
 
 const createApiKeyRoute = createObservabilityOnboardingServerRoute({
   endpoint:
@@ -210,16 +211,9 @@ const customLogsExistsRoute = createObservabilityOnboardingServerRoute({
     const esClient =
       coreStart.elasticsearch.client.asScoped(request).asCurrentUser;
     try {
-      const { hits } = await esClient.search({
-        index: `logs-${dataset}-${namespace}`,
-        terminate_after: 1,
-      });
-      const total = hits.total as { value: number };
-      return { exists: total.value > 0 };
+      const logsCount = await getLogsCount({ dataset, namespace, esClient });
+      return { exists: logsCount > 0 };
     } catch (error) {
-      if (error.statusCode === 404) {
-        return { exists: false };
-      }
       throw Boom.boomify(error, {
         statusCode: error.statusCode,
         message: error.message,
@@ -248,6 +242,108 @@ const deleteStatesRoute = createObservabilityOnboardingServerRoute({
   },
 });
 
+const stepProgressResetRoute = createObservabilityOnboardingServerRoute({
+  endpoint: 'PUT /internal/observability_onboarding/custom_logs/steps/reset',
+  options: { tags: [] },
+  params: t.type({
+    body: t.type({
+      apiKeyId: t.string,
+    }),
+  }),
+  async handler(resources): Promise<object> {
+    const {
+      core,
+      params: {
+        body: { apiKeyId },
+      },
+    } = resources;
+    const coreStart = await core.start();
+    const savedObjectsClient =
+      coreStart.savedObjects.createInternalRepository();
+
+    const savedObservabilityOnboardingState =
+      await getObservabilityOnboardingState({
+        savedObjectsClient,
+        apiKeyId,
+      });
+
+    if (!savedObservabilityOnboardingState) {
+      return {
+        message:
+          'Unable to report setup progress - onboarding session not found.',
+      };
+    }
+
+    const { id, updatedAt, ...observabilityOnboardingState } =
+      savedObservabilityOnboardingState;
+    const result = await saveObservabilityOnboardingState({
+      savedObjectsClient,
+      apiKeyId,
+      observabilityOnboardingState: {
+        ...observabilityOnboardingState,
+        progress: {},
+      },
+    });
+    return { result };
+  },
+});
+
+const getProgressRoute = createObservabilityOnboardingServerRoute({
+  endpoint: 'GET /internal/observability_onboarding/custom_logs/progress',
+  options: { tags: [] },
+  params: t.type({
+    query: t.type({
+      apiKeyId: t.string,
+    }),
+  }),
+  async handler(resources): Promise<{ progress: Record<string, string> }> {
+    const {
+      params: {
+        query: { apiKeyId },
+      },
+      core,
+      request,
+    } = resources;
+    const coreStart = await core.start();
+    const savedObjectsClient =
+      coreStart.savedObjects.createInternalRepository();
+    const savedObservabilityOnboardingState =
+      (await getObservabilityOnboardingState({
+        savedObjectsClient,
+        apiKeyId,
+      })) || null;
+    const progress = { ...savedObservabilityOnboardingState?.progress };
+
+    const esClient =
+      coreStart.elasticsearch.client.asScoped(request).asCurrentUser;
+    if (savedObservabilityOnboardingState) {
+      const {
+        state: { datasetName: dataset, namespace },
+      } = savedObservabilityOnboardingState;
+      if (progress['ea-status'] === 'complete') {
+        try {
+          const logsCount = await getLogsCount({
+            dataset,
+            namespace,
+            esClient,
+          });
+          if (logsCount > 0) {
+            progress['logs-ingest'] = 'complete';
+          } else {
+            progress['logs-ingest'] = 'loading';
+          }
+        } catch (error) {
+          progress['logs-ingest'] = 'warning';
+        }
+      } else {
+        progress['logs-ingest'] = 'incomplete';
+      }
+    }
+
+    return { progress };
+  },
+});
+
 export const customLogsRouteRepository = {
   ...createApiKeyRoute,
   ...stepProgressUpdateRoute,
@@ -255,4 +351,6 @@ export const customLogsRouteRepository = {
   ...getLatestStateRoute,
   ...customLogsExistsRoute,
   ...deleteStatesRoute,
+  ...stepProgressResetRoute,
+  ...getProgressRoute,
 };

@@ -7,7 +7,7 @@
 
 import { Buffer } from 'buffer';
 import { flatten, zip } from 'lodash';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   EuiText,
   EuiButton,
@@ -27,7 +27,7 @@ import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 
 type ElasticAgentPlatform = 'linux-tar' | 'macos' | 'windows';
 export function InstallElasticAgent() {
-  const { goToStep, goBack, getState, CurrentStep } = useWizard();
+  const { goToStep, goBack, getState, setState, CurrentStep } = useWizard();
   const wizardState = getState();
   const [elasticAgentPlatform, setElasticAgentPlatform] =
     useState<ElasticAgentPlatform>('linux-tar');
@@ -77,6 +77,11 @@ export function InstallElasticAgent() {
     },
     [installShipperSetup?.apiKeyId, installShipperSetup?.apiKeyEncoded]
   );
+
+  useEffect(() => {
+    setState({ ...getState(), apiKeyId: installShipperSetup?.apiKeyId ?? '' });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [installShipperSetup?.apiKeyId]);
 
   const apiKeyEncoded = installShipperSetup?.apiKeyEncoded;
 
@@ -160,7 +165,8 @@ export function InstallElasticAgent() {
                   <EuiText color="subdued">
                     <p>
                       Copy the config below to the elastic agent.yml on the host
-                      where the Elastic Agent is installed.
+                      where the Elastic Agent is installed
+                      (/opt/Elastic/Agent/elastic-agent.yml).
                     </p>
                   </EuiText>
                   <EuiSpacer size="m" />
