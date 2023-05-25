@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { SavedObject } from '@kbn/core/server';
 import { ConfigKey, MonitorFields } from '@kbn/synthetics-plugin/common/runtime_types';
 import { API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import expect from '@kbn/expect';
@@ -28,7 +27,7 @@ export default function ({ getService }: FtrProviderContext) {
         .send(monitor)
         .expect(200);
 
-      return res.body as SavedObject<MonitorFields>;
+      return res.body as MonitorFields;
     };
 
     before(async () => {
@@ -48,19 +47,17 @@ export default function ({ getService }: FtrProviderContext) {
 
     describe('get many monitors', () => {
       it('without params', async () => {
-        const [{ id: id1, attributes: mon1 }, { id: id2, attributes: mon2 }] = await Promise.all(
-          monitors.map(saveMonitor)
-        );
+        const [mon1, mon2] = await Promise.all(monitors.map(saveMonitor));
 
         const apiResponse = await supertest
           .get(API_URLS.SYNTHETICS_MONITORS + '?perPage=1000') // 1000 to sort of load all saved monitors
           .expect(200);
 
-        const found: Array<SavedObject<MonitorFields>> = apiResponse.body.monitors.filter(
-          ({ id }: SavedObject<MonitorFields>) => [id1, id2].includes(id)
+        const found: MonitorFields[] = apiResponse.body.monitors.filter(({ id }: MonitorFields) =>
+          [mon1.id, mon2.id].includes(id)
         );
-        found.sort(({ id: a }) => (a === id2 ? 1 : a === id1 ? -1 : 0));
-        const foundMonitors = found.map(({ attributes }: SavedObject<MonitorFields>) => attributes);
+        found.sort(({ id: a }) => (a === mon2.id ? 1 : a === mon1.id ? -1 : 0));
+        const foundMonitors = found.map((fields: MonitorFields) => fields);
 
         const expected = [mon1, mon2];
 
