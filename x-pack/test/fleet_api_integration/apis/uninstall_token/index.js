@@ -4,9 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { setupTestUsers } from '../test_users';
 
-export default function loadTests({ loadTestFile }) {
+export default function loadTests({ loadTestFile, getService }) {
   describe('Uninstall Token', () => {
+    before(async () => {
+      await setupTestUsers(getService('security'));
+    });
+
     loadTestFile(require.resolve('./get'));
   });
 }

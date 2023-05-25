@@ -13,11 +13,13 @@ import {
 } from '@kbn/fleet-plugin/common';
 import { UNINSTALL_TOKEN_ROUTES } from '@kbn/fleet-plugin/common/constants';
 import { GetUninstallTokensResponse } from '@kbn/fleet-plugin/common/types/rest_spec/uninstall_token';
+import { testUsers } from '../test_users';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
   const supertest = getService('supertest');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
   const kibanaServer = getService('kibanaServer');
 
   describe('Uninstall Token API', () => {
@@ -66,6 +68,26 @@ export default function (providerContext: FtrProviderContext) {
         const body: GetUninstallTokensResponse = response.body;
         expect(body.total).to.equal(0);
         expect(body.items).to.eql({});
+      });
+    });
+
+    describe('authorization', () => {
+      it('should return 200 if the user has FLEET ALL (and INTEGRATIONS READ) privilege', async () => {
+        const { username, password } = testUsers.fleet_all_int_read;
+
+        await supertestWithoutAuth
+          .get(UNINSTALL_TOKEN_ROUTES.LIST_PATTERN)
+          .auth(username, password)
+          .expect(200);
+      });
+
+      it('should return 403 if the user does not have FLEET ALL privilige', async () => {
+        const { username, password } = testUsers.fleet_no_access;
+
+        await supertestWithoutAuth
+          .get(UNINSTALL_TOKEN_ROUTES.LIST_PATTERN)
+          .auth(username, password)
+          .expect(403);
       });
     });
   });

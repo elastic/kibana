@@ -16,7 +16,9 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     {
       path: UNINSTALL_TOKEN_ROUTES.LIST_PATTERN,
       validate: GetUninstallTokensRequestSchema,
-      // fleetAuthz todo
+      fleetAuthz: {
+        fleet: { all: true },
+      },
     },
     getUninstallTokensHandler
   );
