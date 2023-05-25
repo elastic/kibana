@@ -76,7 +76,7 @@ export const UserActionAttributesRt = rt.intersection([
 
 const UserActionRt = rt.intersection([
   UserActionAttributesRt,
-  rt.type({
+  rt.strict({
     id: rt.string,
     version: rt.string,
   }),

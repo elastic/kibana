@@ -691,10 +691,6 @@
               },
               {
                 "plugin": "synthetics",
-                "path": "x-pack/plugins/synthetics/public/apps/synthetics/components/monitor_add_edit/hooks/use_monitor_name.ts"
-              },
-              {
-                "plugin": "synthetics",
                 "path": "x-pack/plugins/synthetics/public/plugin.ts"
               },
               {
