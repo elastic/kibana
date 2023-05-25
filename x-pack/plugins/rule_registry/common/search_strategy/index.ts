@@ -7,6 +7,7 @@
 import { TechnicalRuleDataFieldName, ValidFeatureId } from '@kbn/rule-data-utils';
 import { IEsSearchRequest, IEsSearchResponse } from '@kbn/data-plugin/common';
 import type {
+  MappingRuntimeFields,
   QueryDslFieldAndFormat,
   QueryDslQueryContainer,
   SortCombinations,
@@ -18,6 +19,7 @@ export type RuleRegistrySearchRequest = IEsSearchRequest & {
   query?: Pick<QueryDslQueryContainer, 'bool' | 'ids'>;
   sort?: SortCombinations[];
   pagination?: RuleRegistrySearchRequestPagination;
+  runtimeMappings?: MappingRuntimeFields;
 };
 
 export interface RuleRegistrySearchRequestPagination {

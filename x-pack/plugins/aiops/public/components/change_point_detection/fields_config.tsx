@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import React, { type FC, useCallback } from 'react';
+import React, { type FC, useCallback, useMemo, useState } from 'react';
 import {
-  EuiAccordion,
   EuiButton,
   EuiButtonIcon,
   EuiCallOut,
@@ -16,10 +15,13 @@ import {
   EuiPanel,
   EuiProgress,
   EuiSpacer,
-  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { type FieldStatsServices } from '@kbn/unified-field-list-plugin/public';
+import { useTimefilter, useTimeRangeUpdates } from '@kbn/ml-date-picker';
+import { useDataSource } from '../../hooks/use_data_source';
+import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import { ChangePointsTable } from './change_points_table';
 import { MAX_CHANGE_POINT_CONFIGS, SPLIT_FIELD_CARDINALITY_LIMIT } from './constants';
 import { FunctionPicker } from './function_picker';
@@ -34,7 +36,7 @@ import {
 import { useChangePointResults } from './use_change_point_agg_request';
 import { useSplitFieldCardinality } from './use_split_field_cardinality';
 
-const selectControlCss = { width: '300px' };
+const selectControlCss = { width: '350px' };
 
 /**
  * Contains panels with controls and change point results.
@@ -91,6 +93,7 @@ export const FieldsConfig: FC = () => {
         return (
           <React.Fragment key={key}>
             <FieldPanel
+              data-test-subj={`aiopsChangePointPanel_${index}`}
               fieldConfig={fieldConfig}
               onChange={(value) => onChange(value, index)}
               onRemove={onRemove.bind(null, index)}
@@ -103,7 +106,11 @@ export const FieldsConfig: FC = () => {
           </React.Fragment>
         );
       })}
-      <EuiButton onClick={onAdd} disabled={fieldConfigs.length >= MAX_CHANGE_POINT_CONFIGS}>
+      <EuiButton
+        onClick={onAdd}
+        disabled={fieldConfigs.length >= MAX_CHANGE_POINT_CONFIGS}
+        data-test-subj={'aiopsChangePointAddConfig'}
+      >
         <FormattedMessage
           id="xpack.aiops.changePointDetection.addButtonLabel"
           defaultMessage="Add"
@@ -119,6 +126,7 @@ export interface FieldPanelProps {
   onChange: (update: FieldConfig) => void;
   onRemove: () => void;
   onSelectionChange: (update: SelectedChangePoint[]) => void;
+  'data-test-subj': string;
 }
 
 /**
@@ -135,10 +143,13 @@ const FieldPanel: FC<FieldPanelProps> = ({
   onRemove,
   removeDisabled,
   onSelectionChange,
+  'data-test-subj': dataTestSubj,
 }) => {
   const { combinedQuery, requestParams } = useChangePointDetectionContext();
 
   const splitFieldCardinality = useSplitFieldCardinality(fieldConfig.splitField, combinedQuery);
+
+  const [isExpanded, setIsExpanded] = useState<boolean>(true);
 
   const {
     results: annotations,
@@ -146,44 +157,59 @@ const FieldPanel: FC<FieldPanelProps> = ({
     progress,
   } = useChangePointResults(fieldConfig, requestParams, combinedQuery, splitFieldCardinality);
 
-  const accordionId = useGeneratedHtmlId({ prefix: 'fieldConfig' });
-
   return (
-    <EuiPanel paddingSize="s" hasBorder hasShadow={false}>
-      <EuiAccordion
-        id={accordionId}
-        initialIsOpen={true}
-        buttonElement={'div'}
-        buttonContent={
-          <FieldsControls fieldConfig={fieldConfig} onChange={onChange}>
-            <EuiFlexItem css={{ visibility: progress === null ? 'hidden' : 'visible' }} grow={true}>
-              <EuiProgress
-                label={
-                  <FormattedMessage
-                    id="xpack.aiops.changePointDetection.progressBarLabel"
-                    defaultMessage="Fetching change points"
-                  />
-                }
-                value={progress ?? 0}
-                max={100}
-                valueText
-                size="m"
+    <EuiPanel paddingSize="s" hasBorder hasShadow={false} data-test-subj={dataTestSubj}>
+      <EuiFlexGroup alignItems={'center'} justifyContent={'spaceBetween'} gutterSize={'s'}>
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup alignItems={'center'} gutterSize={'s'}>
+            <EuiFlexItem grow={false}>
+              <EuiButtonIcon
+                iconType={isExpanded ? 'arrowDown' : 'arrowRight'}
+                onClick={setIsExpanded.bind(null, (prevState) => !prevState)}
+                aria-label={i18n.translate('xpack.aiops.changePointDetection.expandConfigLabel', {
+                  defaultMessage: 'Expand configuration',
+                })}
               />
-              <EuiSpacer size="s" />
             </EuiFlexItem>
-          </FieldsControls>
-        }
-        extraAction={
+            <EuiFlexItem grow={false}>
+              <FieldsControls fieldConfig={fieldConfig} onChange={onChange}>
+                <EuiFlexItem
+                  css={{ visibility: progress === null ? 'hidden' : 'visible' }}
+                  grow={true}
+                >
+                  <EuiProgress
+                    label={
+                      <FormattedMessage
+                        id="xpack.aiops.changePointDetection.progressBarLabel"
+                        defaultMessage="Fetching change points"
+                      />
+                    }
+                    value={progress ?? 0}
+                    max={100}
+                    valueText
+                    size="m"
+                  />
+                  <EuiSpacer size="s" />
+                </EuiFlexItem>
+              </FieldsControls>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+
+        <EuiFlexItem grow={false}>
           <EuiButtonIcon
             disabled={removeDisabled}
-            aria-label="trash"
+            aria-label={i18n.translate('xpack.aiops.changePointDetection.removeConfigLabel', {
+              defaultMessage: 'Remove configuration',
+            })}
             iconType="trash"
             color="danger"
             onClick={onRemove}
           />
-        }
-        paddingSize="s"
-      >
+        </EuiFlexItem>
+      </EuiFlexGroup>
+
+      {isExpanded ? (
         <ChangePointResults
           fieldConfig={fieldConfig}
           isLoading={annotationsLoading}
@@ -191,7 +217,7 @@ const FieldPanel: FC<FieldPanelProps> = ({
           splitFieldCardinality={splitFieldCardinality}
           onSelectionChange={onSelectionChange}
         />
-      </EuiAccordion>
+      ) : null}
     </EuiPanel>
   );
 };
@@ -205,7 +231,25 @@ interface FieldsControlsProps {
  * Renders controls for fields selection and emits updates on change.
  */
 export const FieldsControls: FC<FieldsControlsProps> = ({ fieldConfig, onChange, children }) => {
-  const { splitFieldsOptions } = useChangePointDetectionContext();
+  const { splitFieldsOptions, combinedQuery } = useChangePointDetectionContext();
+  const { dataView } = useDataSource();
+  const { data, uiSettings, fieldFormats, charts, fieldStats } = useAiopsAppContext();
+  const timefilter = useTimefilter();
+  // required in order to trigger state updates
+  useTimeRangeUpdates();
+  const timefilterActiveBounds = timefilter.getActiveBounds();
+
+  const fieldStatsServices: FieldStatsServices = useMemo(() => {
+    return {
+      uiSettings,
+      dataViews: data.dataViews,
+      data,
+      fieldFormats,
+      charts,
+    };
+  }, [uiSettings, data, fieldFormats, charts]);
+
+  const FieldStatsFlyoutProvider = fieldStats!.FieldStatsFlyoutProvider;
 
   const onChangeFn = useCallback(
     (field: keyof FieldConfig, value: string) => {
@@ -216,27 +260,41 @@ export const FieldsControls: FC<FieldsControlsProps> = ({ fieldConfig, onChange,
   );
 
   return (
-    <EuiFlexGroup alignItems={'center'} responsive={true} wrap={true} gutterSize={'m'}>
-      <EuiFlexItem grow={false} css={{ width: '200px' }}>
-        <FunctionPicker value={fieldConfig.fn} onChange={(v) => onChangeFn('fn', v)} />
-      </EuiFlexItem>
-      <EuiFlexItem grow={true} css={selectControlCss}>
-        <MetricFieldSelector
-          value={fieldConfig.metricField!}
-          onChange={(v) => onChangeFn('metricField', v)}
-        />
-      </EuiFlexItem>
-      {splitFieldsOptions.length > 0 ? (
-        <EuiFlexItem grow={true} css={selectControlCss}>
-          <SplitFieldSelector
-            value={fieldConfig.splitField}
-            onChange={(v) => onChangeFn('splitField', v!)}
+    <FieldStatsFlyoutProvider
+      fieldStatsServices={fieldStatsServices}
+      dataView={dataView}
+      dslQuery={combinedQuery}
+      timeRangeMs={
+        timefilterActiveBounds
+          ? {
+              from: timefilterActiveBounds.min!.valueOf(),
+              to: timefilterActiveBounds.max!.valueOf(),
+            }
+          : undefined
+      }
+    >
+      <EuiFlexGroup alignItems={'center'} responsive={true} wrap={true} gutterSize={'m'}>
+        <EuiFlexItem grow={false} css={{ width: '200px' }}>
+          <FunctionPicker value={fieldConfig.fn} onChange={(v) => onChangeFn('fn', v)} />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false} css={selectControlCss}>
+          <MetricFieldSelector
+            value={fieldConfig.metricField!}
+            onChange={(v) => onChangeFn('metricField', v)}
           />
         </EuiFlexItem>
-      ) : null}
+        {splitFieldsOptions.length > 0 ? (
+          <EuiFlexItem grow={false} css={selectControlCss}>
+            <SplitFieldSelector
+              value={fieldConfig.splitField}
+              onChange={(v) => onChangeFn('splitField', v!)}
+            />
+          </EuiFlexItem>
+        ) : null}
 
-      {children}
-    </EuiFlexGroup>
+        {children}
+      </EuiFlexGroup>
+    </FieldStatsFlyoutProvider>
   );
 };
 

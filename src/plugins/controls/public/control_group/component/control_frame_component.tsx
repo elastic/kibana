@@ -6,8 +6,9 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect, useMemo, useState } from 'react';
 import classNames from 'classnames';
+import React, { useEffect, useMemo, useState } from 'react';
+
 import {
   EuiButtonEmpty,
   EuiFormControlLayout,
@@ -17,15 +18,16 @@ import {
   EuiPopover,
   EuiToolTip,
 } from '@elastic/eui';
-
 import { FormattedMessage } from '@kbn/i18n-react';
 import { Markdown } from '@kbn/kibana-react-plugin/public';
-import { useReduxEmbeddableContext, FloatingActions } from '@kbn/presentation-util-plugin/public';
-import { ControlGroupReduxState } from '../types';
+import { FloatingActions } from '@kbn/presentation-util-plugin/public';
+
+import {
+  controlGroupSelector,
+  useControlGroupContainer,
+} from '../embeddable/control_group_container';
 import { ControlGroupStrings } from '../control_group_strings';
 import { useChildEmbeddable } from '../../hooks/use_child_embeddable';
-import { controlGroupReducers } from '../state/control_group_reducers';
-import { ControlGroupContainer } from '..';
 
 interface ControlFrameErrorProps {
   error: Error;
@@ -82,16 +84,11 @@ export const ControlFrame = ({
   const embeddableRoot: React.RefObject<HTMLDivElement> = useMemo(() => React.createRef(), []);
   const [fatalError, setFatalError] = useState<Error>();
 
-  const { useEmbeddableSelector: select, embeddableInstance: controlGroup } =
-    useReduxEmbeddableContext<
-      ControlGroupReduxState,
-      typeof controlGroupReducers,
-      ControlGroupContainer
-    >();
+  const controlGroup = useControlGroupContainer();
 
-  const viewMode = select((state) => state.explicitInput.viewMode);
-  const controlStyle = select((state) => state.explicitInput.controlStyle);
-  const disabledActions = select((state) => state.explicitInput.disabledActions);
+  const controlStyle = controlGroupSelector((state) => state.explicitInput.controlStyle);
+  const viewMode = controlGroupSelector((state) => state.explicitInput.viewMode);
+  const disabledActions = controlGroupSelector((state) => state.explicitInput.disabledActions);
 
   const embeddable = useChildEmbeddable({
     untilEmbeddableLoaded: controlGroup.untilEmbeddableLoaded.bind(controlGroup),

@@ -7,9 +7,9 @@
 
 import {
   CasePostRequest,
-  CaseResponse,
+  Case,
   CasesFindResponse,
-  CommentResponse,
+  Comment,
   ConnectorTypes,
   CommentRequestUserType,
   CommentRequestAlertType,
@@ -129,7 +129,7 @@ export const fileMetadata = () => ({
   name: 'test_file',
   extension: 'png',
   mimeType: 'image/png',
-  createdAt: '2023-02-27T20:26:54.345Z',
+  created: '2023-02-27T20:26:54.345Z',
 });
 
 export const fileAttachmentMetadata: FileAttachmentMetadata = {
@@ -161,7 +161,7 @@ export const persistableStateAttachment: CommentRequestPersistableStateType = {
 export const postCaseResp = (
   id?: string | null,
   req: CasePostRequest = postCaseReq
-): Partial<CaseResponse> => ({
+): Partial<Case> => ({
   ...req,
   ...(id != null ? { id } : {}),
   comments: [],
@@ -185,7 +185,7 @@ export const commentsResp = ({
   comments,
 }: {
   comments: CommentRequestWithID[];
-}): Array<Partial<CommentResponse>> => {
+}): Array<Partial<Comment>> => {
   return comments.map(({ comment, id }) => {
     const baseFields = {
       id,

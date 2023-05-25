@@ -129,6 +129,10 @@ export class CustomizePanelAction implements Action<CustomizePanelActionContext>
       {
         size: 's',
         'data-test-subj': 'customizePanel',
+        onClose: (overlayRef) => {
+          if (overlayTracker) overlayTracker.clearOverlays();
+          overlayRef.close();
+        },
       }
     );
     overlayTracker?.openOverlay(handle);

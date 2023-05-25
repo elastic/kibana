@@ -27,6 +27,7 @@ import type {
 import { listMock } from '@kbn/lists-plugin/server/mocks';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
 import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
+import { cloudMock } from '@kbn/cloud-plugin/server/mocks';
 import type { FleetStartContract } from '@kbn/fleet-plugin/server';
 import {
   createPackagePolicyServiceMock,
@@ -34,11 +35,14 @@ import {
   createMockAgentService,
   createMockPackageService,
   createMessageSigningServiceMock,
+  createFleetFilesClientMock,
 } from '@kbn/fleet-plugin/server/mocks';
 import { createFleetAuthzMock } from '@kbn/fleet-plugin/common/mocks';
 import type { RequestFixtureOptions } from '@kbn/core-http-router-server-mocks';
 import type { ElasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { casesPluginMock } from '@kbn/cases-plugin/server/mocks';
+import { createCasesClientMock } from '@kbn/cases-plugin/server/client/mocks';
+import { createActionCreateServiceMock } from './services/actions/mocks';
 import { getEndpointAuthzInitialStateMock } from '../../common/endpoint/service/authz/mocks';
 import { xpackMocks } from '../fixtures';
 import { createMockConfig, requestContextMock } from '../lib/detection_engine/routes/__mocks__';
@@ -51,7 +55,10 @@ import type { ManifestManager } from './services/artifacts/manifest_manager/mani
 import { getManifestManagerMock } from './services/artifacts/manifest_manager/manifest_manager.mock';
 import type { EndpointAppContext } from './types';
 import type { SecuritySolutionRequestHandlerContext } from '../types';
-import { parseExperimentalConfigValue } from '../../common/experimental_features';
+import {
+  allowedExperimentalValues,
+  parseExperimentalConfigValue,
+} from '../../common/experimental_features';
 import { requestContextFactoryMock } from '../request_context_factory.mock';
 import { EndpointMetadataService } from './services/metadata';
 import { createMockClients } from '../lib/detection_engine/routes/__mocks__/request_context';
@@ -68,11 +75,14 @@ import { createFeatureUsageServiceMock } from './services/feature_usage/mocks';
 export const createMockEndpointAppContext = (
   mockManifestManager?: ManifestManager
 ): EndpointAppContext => {
+  const config = createMockConfig();
+
   return {
     logFactory: loggingSystemMock.create(),
-    config: () => Promise.resolve(createMockConfig()),
+    config: () => Promise.resolve(config),
+    serverConfig: config,
     service: createMockEndpointAppContextService(mockManifestManager),
-    experimentalFeatures: parseExperimentalConfigValue(createMockConfig().enableExperimental),
+    experimentalFeatures: parseExperimentalConfigValue(config.enableExperimental),
   };
 };
 
@@ -83,14 +93,27 @@ export const createMockEndpointAppContextService = (
   mockManifestManager?: ManifestManager
 ): jest.Mocked<EndpointAppContextService> => {
   const mockEndpointMetadataContext = createEndpointMetadataServiceTestContextMock();
+  const casesClientMock = createCasesClientMock();
+  const fleetFilesClientMock = createFleetFilesClientMock();
+
   return {
     start: jest.fn(),
     stop: jest.fn(),
-    getExperimentalFeatures: jest.fn(),
+    experimentalFeatures: {
+      ...allowedExperimentalValues,
+    },
     getManifestManager: jest.fn().mockReturnValue(mockManifestManager ?? jest.fn()),
     getEndpointMetadataService: jest.fn(() => mockEndpointMetadataContext.endpointMetadataService),
     getInternalFleetServices: jest.fn(() => mockEndpointMetadataContext.fleetServices),
-    getEndpointAuthz: jest.fn(getEndpointAuthzInitialStateMock),
+    getEndpointAuthz: jest.fn(async (_) => getEndpointAuthzInitialStateMock()),
+    getCasesClient: jest.fn().mockReturnValue(casesClientMock),
+    getActionCreateService: jest.fn().mockReturnValue(createActionCreateServiceMock()),
+    getFleetFilesClient: jest.fn(async (_) => fleetFilesClientMock),
+    setup: jest.fn(),
+    getLicenseService: jest.fn(),
+    getFeatureUsageService: jest.fn(),
+    getExceptionListsClient: jest.fn(),
+    getMessageSigningService: jest.fn(),
   } as unknown as jest.Mocked<EndpointAppContextService>;
 };
 
@@ -159,6 +182,7 @@ export const createMockEndpointAppContextServiceStartContract =
       endpointFleetServicesFactory,
       logger,
       fleetAuthzService: createFleetAuthzServiceMock(),
+      createFleetFilesClient: jest.fn((..._) => createFleetFilesClientMock()),
       manifestManager: getManifestManagerMock(),
       security,
       alerting: alertsMock.createStart(),
@@ -170,6 +194,7 @@ export const createMockEndpointAppContextServiceStartContract =
       >(),
       exceptionListsClient: listMock.getExceptionListClient(),
       cases: casesMock,
+      cloud: cloudMock.createSetup(),
       featureUsageService: createFeatureUsageServiceMock(),
       experimentalFeatures: createMockConfig().experimentalFeatures,
       messageSigningService: createMessageSigningServiceMock(),
@@ -218,6 +243,11 @@ export interface HttpApiTestSetupMock<P = any, Q = any, B = any> {
     method: keyof Pick<IRouter, 'get' | 'put' | 'post' | 'patch' | 'delete'>,
     path: string
   ) => RequestHandler;
+  /** Retrieves the route handler configuration that was registered with the router */
+  getRegisteredRouteConfig: (
+    method: keyof Pick<IRouter, 'get' | 'put' | 'post' | 'patch' | 'delete'>,
+    path: string
+  ) => RouteConfig<any, any, any, any>;
 }
 
 /**
@@ -241,7 +271,7 @@ export const createHttpApiTestSetupMock = <P = any, Q = any, B = any>(): HttpApi
     path
   ): RequestHandler => {
     const methodCalls = routerMock[method].mock.calls as Array<
-      [route: RouteConfig<unknown, unknown, unknown, 'get'>, handler: RequestHandler]
+      [route: RouteConfig<unknown, unknown, unknown, typeof method>, handler: RequestHandler]
     >;
     const handler = methodCalls.find(([routeConfig]) => routeConfig.path.startsWith(path));
 
@@ -250,6 +280,21 @@ export const createHttpApiTestSetupMock = <P = any, Q = any, B = any>(): HttpApi
     }
 
     return handler[1];
+  };
+  const getRegisteredRouteConfig: HttpApiTestSetupMock['getRegisteredRouteConfig'] = (
+    method,
+    path
+  ): RouteConfig<any, any, any, any> => {
+    const methodCalls = routerMock[method].mock.calls as Array<
+      [route: RouteConfig<unknown, unknown, unknown, typeof method>, handler: RequestHandler]
+    >;
+    const handler = methodCalls.find(([routeConfig]) => routeConfig.path.startsWith(path));
+
+    if (!handler) {
+      throw new Error(`Handler for [${method}][${path}] not found`);
+    }
+
+    return handler[0];
   };
 
   return {
@@ -275,5 +320,6 @@ export const createHttpApiTestSetupMock = <P = any, Q = any, B = any>(): HttpApi
     },
 
     getRegisteredRouteHandler,
+    getRegisteredRouteConfig,
   };
 };

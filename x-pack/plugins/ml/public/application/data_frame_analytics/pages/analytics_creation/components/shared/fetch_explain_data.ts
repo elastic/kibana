@@ -5,8 +5,9 @@
  * 2.0.
  */
 
+import { extractErrorProperties } from '@kbn/ml-error-utils';
+
 import { ml } from '../../../../../services/ml_api_service';
-import { extractErrorProperties } from '../../../../../../../common/util/errors';
 import {
   DfAnalyticsExplainResponse,
   FieldSelectionItem,

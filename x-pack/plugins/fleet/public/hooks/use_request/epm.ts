@@ -204,7 +204,9 @@ export const sendInstallPackage = (pkgName: string, pkgVersion: string, force: b
   });
 };
 
-export const sendBulkInstallPackages = (packages: string[]) => {
+export const sendBulkInstallPackages = (
+  packages: Array<string | { name: string; version: string }>
+) => {
   return sendRequest<InstallPackageResponse, FleetErrorResponse>({
     path: epmRouteService.getBulkInstallPath(),
     method: 'post',
@@ -221,6 +223,18 @@ export const sendRemovePackage = (pkgName: string, pkgVersion: string, force: bo
     body: {
       force,
     },
+  });
+};
+
+export const sendRequestReauthorizeTransforms = (
+  pkgName: string,
+  pkgVersion: string,
+  transforms: Array<{ transformId: string }>
+) => {
+  return sendRequest<InstallPackageResponse, FleetErrorResponse>({
+    path: epmRouteService.getReauthorizeTransformsPath(pkgName, pkgVersion),
+    method: 'post',
+    body: { transforms },
   });
 };
 

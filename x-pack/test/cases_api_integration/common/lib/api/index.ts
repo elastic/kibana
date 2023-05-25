@@ -10,26 +10,31 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { TransportResult } from '@elastic/elasticsearch';
 import type { Client } from '@elastic/elasticsearch';
 import { GetResponse } from '@elastic/elasticsearch/lib/api/types';
+import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server/src/saved_objects_index_pattern';
 
 import type SuperTest from 'supertest';
 import {
   CASES_INTERNAL_URL,
   CASES_URL,
+  CASE_COMMENT_SAVED_OBJECT,
+  CASE_CONFIGURE_SAVED_OBJECT,
   CASE_CONFIGURE_URL,
   CASE_REPORTERS_URL,
+  CASE_SAVED_OBJECT,
   CASE_STATUS_URL,
   CASE_TAGS_URL,
+  CASE_USER_ACTION_SAVED_OBJECT,
 } from '@kbn/cases-plugin/common/constants';
 import {
-  CasesConfigureResponse,
-  CaseResponse,
+  Configuration,
+  Case,
   CaseStatuses,
-  CasesResponse,
+  Cases,
   CasesFindResponse,
   CasesPatchRequest,
-  CasesConfigurePatch,
+  ConfigurationPatchRequest,
   CasesStatusResponse,
-  CasesConfigurationsResponse,
+  Configurations,
   AlertResponse,
   ConnectorMappings,
   CasesByAlertId,
@@ -40,9 +45,9 @@ import {
 } from '@kbn/cases-plugin/common/api';
 import { SignalHit } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/types';
 import { ActionResult } from '@kbn/actions-plugin/server/types';
-import { ESCasesConfigureAttributes } from '@kbn/cases-plugin/server/services/configure/types';
-import { ESCaseAttributes } from '@kbn/cases-plugin/server/services/cases/types';
+import { CasePersistedAttributes } from '@kbn/cases-plugin/server/common/types/case';
 import type { SavedObjectsRawDocSource } from '@kbn/core/server';
+import type { ConfigurationPersistedAttributes } from '@kbn/cases-plugin/server/common/types/configure';
 import { User } from '../authentication/types';
 import { superUser } from '../authentication/users';
 import { getSpaceUrlPrefix, setupAuth } from './helpers';
@@ -125,8 +130,8 @@ export const setStatus = async ({
 }: {
   supertest: SuperTest.SuperTest<SuperTest.Test>;
   cases: SetStatusCasesParams[];
-}): Promise<CasesResponse> => {
-  const { body }: { body: CasesResponse } = await supertest
+}): Promise<Cases> => {
+  const { body }: { body: Cases } = await supertest
     .patch(CASES_URL)
     .set('kbn-xsrf', 'true')
     .send({ cases })
@@ -190,7 +195,7 @@ export const deleteAllCaseItems = async (es: Client) => {
 
 export const deleteCasesUserActions = async (es: Client): Promise<void> => {
   await es.deleteByQuery({
-    index: '.kibana',
+    index: ALERTING_CASES_SAVED_OBJECT_INDEX,
     q: 'type:cases-user-actions',
     wait_for_completion: true,
     refresh: true,
@@ -201,7 +206,7 @@ export const deleteCasesUserActions = async (es: Client): Promise<void> => {
 
 export const deleteCasesByESQuery = async (es: Client): Promise<void> => {
   await es.deleteByQuery({
-    index: '.kibana',
+    index: ALERTING_CASES_SAVED_OBJECT_INDEX,
     q: 'type:cases',
     wait_for_completion: true,
     refresh: true,
@@ -212,7 +217,7 @@ export const deleteCasesByESQuery = async (es: Client): Promise<void> => {
 
 export const deleteComments = async (es: Client): Promise<void> => {
   await es.deleteByQuery({
-    index: '.kibana',
+    index: ALERTING_CASES_SAVED_OBJECT_INDEX,
     q: 'type:cases-comments',
     wait_for_completion: true,
     refresh: true,
@@ -223,7 +228,7 @@ export const deleteComments = async (es: Client): Promise<void> => {
 
 export const deleteConfiguration = async (es: Client): Promise<void> => {
   await es.deleteByQuery({
-    index: '.kibana',
+    index: ALERTING_CASES_SAVED_OBJECT_INDEX,
     q: 'type:cases-configure',
     wait_for_completion: true,
     refresh: true,
@@ -234,7 +239,7 @@ export const deleteConfiguration = async (es: Client): Promise<void> => {
 
 export const deleteMappings = async (es: Client): Promise<void> => {
   await es.deleteByQuery({
-    index: '.kibana',
+    index: ALERTING_CASES_SAVED_OBJECT_INDEX,
     q: 'type:cases-connector-mappings',
     wait_for_completion: true,
     refresh: true,
@@ -289,7 +294,7 @@ export const getConnectorMappingsFromES = async ({ es }: { es: Client }) => {
     unknown
   > = await es.search(
     {
-      index: '.kibana',
+      index: ALERTING_CASES_SAVED_OBJECT_INDEX,
       body: {
         query: {
           term: {
@@ -307,7 +312,7 @@ export const getConnectorMappingsFromES = async ({ es }: { es: Client }) => {
 };
 
 interface ConfigureSavedObject {
-  'cases-configure': ESCasesConfigureAttributes;
+  'cases-configure': ConfigurationPersistedAttributes;
 }
 
 /**
@@ -319,12 +324,12 @@ export const getConfigureSavedObjectsFromES = async ({ es }: { es: Client }) => 
     unknown
   > = await es.search(
     {
-      index: '.kibana',
+      index: ALERTING_CASES_SAVED_OBJECT_INDEX,
       body: {
         query: {
           term: {
             type: {
-              value: 'cases-configure',
+              value: CASE_CONFIGURE_SAVED_OBJECT,
             },
           },
         },
@@ -337,17 +342,17 @@ export const getConfigureSavedObjectsFromES = async ({ es }: { es: Client }) => 
 };
 
 export const getCaseSavedObjectsFromES = async ({ es }: { es: Client }) => {
-  const configure: TransportResult<
-    estypes.SearchResponse<{ cases: ESCaseAttributes }>,
+  const cases: TransportResult<
+    estypes.SearchResponse<{ cases: CasePersistedAttributes }>,
     unknown
   > = await es.search(
     {
-      index: '.kibana',
+      index: ALERTING_CASES_SAVED_OBJECT_INDEX,
       body: {
         query: {
           term: {
             type: {
-              value: 'cases',
+              value: CASE_SAVED_OBJECT,
             },
           },
         },
@@ -356,7 +361,53 @@ export const getCaseSavedObjectsFromES = async ({ es }: { es: Client }) => {
     { meta: true }
   );
 
-  return configure;
+  return cases;
+};
+
+export const getCaseCommentSavedObjectsFromES = async ({ es }: { es: Client }) => {
+  const comments: TransportResult<
+    estypes.SearchResponse<{ ['cases-comments']: CasePersistedAttributes }>,
+    unknown
+  > = await es.search(
+    {
+      index: ALERTING_CASES_SAVED_OBJECT_INDEX,
+      body: {
+        query: {
+          term: {
+            type: {
+              value: CASE_COMMENT_SAVED_OBJECT,
+            },
+          },
+        },
+      },
+    },
+    { meta: true }
+  );
+
+  return comments;
+};
+
+export const getCaseUserActionsSavedObjectsFromES = async ({ es }: { es: Client }) => {
+  const userActions: TransportResult<
+    estypes.SearchResponse<{ ['cases-user-actions']: CasePersistedAttributes }>,
+    unknown
+  > = await es.search(
+    {
+      index: ALERTING_CASES_SAVED_OBJECT_INDEX,
+      body: {
+        query: {
+          term: {
+            type: {
+              value: CASE_USER_ACTION_SAVED_OBJECT,
+            },
+          },
+        },
+      },
+    },
+    { meta: true }
+  );
+
+  return userActions;
 };
 
 export const updateCase = async ({
@@ -371,7 +422,7 @@ export const updateCase = async ({
   expectedHttpCode?: number;
   auth?: { user: User; space: string | null } | null;
   headers?: Record<string, unknown>;
-}): Promise<CaseResponse[]> => {
+}): Promise<Case[]> => {
   const apiCall = supertest.patch(`${getSpaceUrlPrefix(auth?.space)}${CASES_URL}`);
 
   setupAuth({ apiCall, headers, auth });
@@ -395,7 +446,7 @@ export const getConfiguration = async ({
   query?: Record<string, unknown>;
   expectedHttpCode?: number;
   auth?: { user: User; space: string | null };
-}): Promise<CasesConfigurationsResponse> => {
+}): Promise<Configurations> => {
   const { body: configuration } = await supertest
     .get(`${getSpaceUrlPrefix(auth.space)}${CASE_CONFIGURE_URL}`)
     .auth(auth.user.username, auth.user.password)
@@ -413,11 +464,11 @@ export type CreateConnectorResponse = Omit<ActionResult, 'actionTypeId'> & {
 export const updateConfiguration = async (
   supertest: SuperTest.SuperTest<SuperTest.Test>,
   id: string,
-  req: CasesConfigurePatch,
+  req: ConfigurationPatchRequest,
   expectedHttpCode: number = 200,
   auth: { user: User; space: string | null } | null = { user: superUser, space: null },
   headers: Record<string, unknown> = {}
-): Promise<CasesConfigureResponse> => {
+): Promise<Configuration> => {
   const apiCall = supertest.patch(`${getSpaceUrlPrefix(auth?.space)}${CASE_CONFIGURE_URL}/${id}`);
 
   setupAuth({ apiCall, headers, auth });
@@ -463,7 +514,7 @@ export const getCase = async ({
   includeComments?: boolean;
   expectedHttpCode?: number;
   auth?: { user: User; space: string | null };
-}): Promise<CaseResponse> => {
+}): Promise<Case> => {
   const { body: theCase } = await supertest
     .get(
       `${getSpaceUrlPrefix(auth?.space)}${CASES_URL}/${caseId}?includeComments=${includeComments}`
@@ -623,7 +674,7 @@ export const pushCase = async ({
   expectedHttpCode?: number;
   auth?: { user: User; space: string | null } | null;
   headers?: Record<string, unknown>;
-}): Promise<CaseResponse> => {
+}): Promise<Case> => {
   const apiCall = supertest.post(
     `${getSpaceUrlPrefix(auth?.space)}${CASES_URL}/${caseId}/connector/${connectorId}/_push`
   );
@@ -724,7 +775,7 @@ export const getSOFromKibanaIndex = async ({
 }) => {
   const esResponse = await es.get<SavedObjectsRawDocSource>(
     {
-      index: '.kibana',
+      index: ALERTING_CASES_SAVED_OBJECT_INDEX,
       id: `${soType}:${soId}`,
     },
     { meta: true }

@@ -7,7 +7,7 @@
  */
 
 import { AxiosError } from 'axios';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 const TELEMETRY_SO_TYPE = 'telemetry';
 const TELEMETRY_SO_ID = 'telemetry';

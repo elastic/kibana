@@ -116,11 +116,11 @@ describe('ruleType', () => {
         groupBy: 'all',
       };
 
-      expect(ruleType.validate?.params?.validate(params)).toBeTruthy();
+      expect(ruleType.validate.params.validate(params)).toBeTruthy();
     });
 
     it('validator fails with invalid es query params - threshold', async () => {
-      const paramsSchema = ruleType.validate?.params;
+      const paramsSchema = ruleType.validate.params;
       if (!paramsSchema) throw new Error('params validator not set');
 
       const params: Partial<Writable<OnlyEsQueryRuleParams>> = {
@@ -556,11 +556,11 @@ describe('ruleType', () => {
     });
 
     it('validator succeeds with valid search source params', async () => {
-      expect(ruleType.validate?.params?.validate(defaultParams)).toBeTruthy();
+      expect(ruleType.validate.params.validate(defaultParams)).toBeTruthy();
     });
 
     it('validator fails with invalid search source params - esQuery provided', async () => {
-      const paramsSchema = ruleType.validate?.params!;
+      const paramsSchema = ruleType.validate.params;
       const params: Partial<Writable<EsQueryRuleParams>> = {
         size: 100,
         timeWindowSize: 5,
@@ -713,10 +713,10 @@ async function invokeExecutor({
       tags: [],
       consumer: '',
       producer: '',
+      revision: 0,
       ruleTypeId: '',
       ruleTypeName: '',
       enabled: true,
-      revision: 0,
       schedule: {
         interval: '1h',
       },

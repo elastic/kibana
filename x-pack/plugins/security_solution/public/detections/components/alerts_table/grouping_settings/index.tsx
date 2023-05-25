@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type { GroupOption } from '@kbn/securitysolution-grouping';
-import { TableId } from '../../../../../common/types';
+import { TableId } from '@kbn/securitysolution-data-table';
 import * as i18n from '../translations';
 
 export * from './group_stats';

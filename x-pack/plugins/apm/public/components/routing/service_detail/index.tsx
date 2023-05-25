@@ -48,7 +48,7 @@ function page({
   tab: React.ComponentProps<typeof ApmServiceTemplate>['selectedTab'];
   element: React.ReactElement<any, any>;
   searchBarOptions?: {
-    showKueryBar?: boolean;
+    showUnifiedSearchBar?: boolean;
     showTransactionTypeSelector?: boolean;
     showTimeComparison?: boolean;
     hidden?: boolean;
@@ -320,7 +320,7 @@ export const serviceDetail = {
         }),
         element: <ServiceLogs />,
         searchBarOptions: {
-          showKueryBar: false,
+          showUnifiedSearchBar: false,
         },
       }),
       '/services/{serviceName}/infrastructure': {
@@ -331,7 +331,7 @@ export const serviceDetail = {
           }),
           element: <InfraOverview />,
           searchBarOptions: {
-            showKueryBar: false,
+            showUnifiedSearchBar: false,
           },
         }),
         params: t.partial({

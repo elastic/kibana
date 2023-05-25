@@ -19,9 +19,7 @@ import { useDispatch } from 'react-redux';
 import type { Filter } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
-import { TableId } from '../../../../../common/types';
-import { tableDefaults } from '../../../../common/store/data_table/defaults';
-import { dataTableSelectors } from '../../../../common/store/data_table';
+import { tableDefaults, dataTableSelectors, TableId } from '@kbn/securitysolution-data-table';
 import { AlertsByStatus } from '../../../../overview/components/detection_response/alerts_by_status';
 import { useSignalIndex } from '../../../../detections/containers/detection_engine/alerts/use_signal_index';
 import { useAlertsPrivileges } from '../../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
@@ -192,8 +190,10 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
                 }
                 title={detailName}
                 rightSideItems={[
-                  hostOverview.endpoint?.fleetAgentId && (
-                    <ResponderActionButton endpointId={hostOverview.endpoint?.fleetAgentId} />
+                  hostOverview.endpoint?.hostInfo?.metadata.elastic.agent.id && (
+                    <ResponderActionButton
+                      endpointId={hostOverview.endpoint?.hostInfo?.metadata.elastic.agent.id}
+                    />
                   ),
                 ]}
               />

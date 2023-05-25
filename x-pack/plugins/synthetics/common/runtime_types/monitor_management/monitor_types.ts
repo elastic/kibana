@@ -11,11 +11,13 @@ import { secretKeys } from '../../constants/monitor_management';
 import { ConfigKey } from './config_key';
 import { MonitorServiceLocationCodec, ServiceLocationErrors } from './locations';
 import {
+  CodeEditorModeCodec,
   DataStream,
   DataStreamCodec,
   FormMonitorTypeCodec,
   ModeCodec,
   ResponseBodyIndexPolicyCodec,
+  ResponseCheckJSONCodec,
   ScheduleUnitCodec,
   SourceTypeCodec,
   TLSVersionCodec,
@@ -73,6 +75,7 @@ export const CommonFieldsCodec = t.intersection([
     [ConfigKey.ORIGINAL_SPACE]: t.string,
     [ConfigKey.CUSTOM_HEARTBEAT_ID]: t.string,
     [ConfigKey.ALERT_CONFIG]: AlertConfigsCodec,
+    [ConfigKey.PARAMS]: t.string,
   }),
 ]);
 
@@ -94,10 +97,17 @@ export const TCPSimpleFieldsCodec = t.intersection([
 export type TCPSimpleFields = t.TypeOf<typeof TCPSimpleFieldsCodec>;
 
 // TCPAdvancedFields
-export const TCPAdvancedFieldsCodec = t.interface({
-  [ConfigKey.PROXY_URL]: t.string,
-  [ConfigKey.PROXY_USE_LOCAL_RESOLVER]: t.boolean,
-});
+export const TCPAdvancedFieldsCodec = t.intersection([
+  t.interface({
+    [ConfigKey.PROXY_URL]: t.string,
+    [ConfigKey.PROXY_USE_LOCAL_RESOLVER]: t.boolean,
+  }),
+  t.partial({
+    [ConfigKey.MODE]: ModeCodec,
+    [ConfigKey.IPV4]: t.boolean,
+    [ConfigKey.IPV6]: t.boolean,
+  }),
+]);
 
 export const TCPSensitiveAdvancedFieldsCodec = t.interface({
   [ConfigKey.RESPONSE_RECEIVE_CHECK]: t.string,
@@ -136,7 +146,18 @@ export const ICMPSimpleFieldsCodec = t.intersection([
 ]);
 
 export type ICMPSimpleFields = t.TypeOf<typeof ICMPSimpleFieldsCodec>;
-export type ICMPFields = t.TypeOf<typeof ICMPSimpleFieldsCodec>;
+
+// ICMPAdvancedFields
+export const ICMPAdvancedFieldsCodec = t.partial({
+  [ConfigKey.MODE]: ModeCodec,
+  [ConfigKey.IPV4]: t.boolean,
+  [ConfigKey.IPV6]: t.boolean,
+});
+
+// ICMPFields
+export const ICMPFieldsCodec = t.intersection([ICMPSimpleFieldsCodec, ICMPAdvancedFieldsCodec]);
+
+export type ICMPFields = t.TypeOf<typeof ICMPFieldsCodec>;
 
 // HTTPSimpleFields
 export const HTTPSimpleFieldsCodec = t.intersection([
@@ -152,23 +173,37 @@ export const HTTPSimpleFieldsCodec = t.intersection([
 export type HTTPSimpleFields = t.TypeOf<typeof HTTPSimpleFieldsCodec>;
 
 // HTTPAdvancedFields
-export const HTTPAdvancedFieldsCodec = t.interface({
-  [ConfigKey.PROXY_URL]: t.string,
-  [ConfigKey.RESPONSE_BODY_INDEX]: ResponseBodyIndexPolicyCodec,
-  [ConfigKey.RESPONSE_HEADERS_INDEX]: t.boolean,
-  [ConfigKey.RESPONSE_STATUS_CHECK]: t.array(t.string),
-  [ConfigKey.REQUEST_METHOD_CHECK]: t.string,
-});
+export const HTTPAdvancedFieldsCodec = t.intersection([
+  t.interface({
+    [ConfigKey.PROXY_URL]: t.string,
+    [ConfigKey.RESPONSE_BODY_INDEX]: ResponseBodyIndexPolicyCodec,
+    [ConfigKey.RESPONSE_HEADERS_INDEX]: t.boolean,
+    [ConfigKey.RESPONSE_STATUS_CHECK]: t.array(t.string),
+    [ConfigKey.REQUEST_METHOD_CHECK]: t.string,
+  }),
+  t.partial({
+    [ConfigKey.MODE]: ModeCodec,
+    [ConfigKey.RESPONSE_BODY_MAX_BYTES]: t.string,
+    [ConfigKey.IPV4]: t.boolean,
+    [ConfigKey.IPV6]: t.boolean,
+  }),
+]);
 
-export const HTTPSensitiveAdvancedFieldsCodec = t.interface({
-  [ConfigKey.PASSWORD]: t.string,
-  [ConfigKey.RESPONSE_BODY_CHECK_NEGATIVE]: t.array(t.string),
-  [ConfigKey.RESPONSE_BODY_CHECK_POSITIVE]: t.array(t.string),
-  [ConfigKey.RESPONSE_HEADERS_CHECK]: t.record(t.string, t.string),
-  [ConfigKey.REQUEST_BODY_CHECK]: t.interface({ value: t.string, type: ModeCodec }),
-  [ConfigKey.REQUEST_HEADERS_CHECK]: t.record(t.string, t.string),
-  [ConfigKey.USERNAME]: t.string,
-});
+export const HTTPSensitiveAdvancedFieldsCodec = t.intersection([
+  t.interface({
+    [ConfigKey.PASSWORD]: t.string,
+    [ConfigKey.RESPONSE_BODY_CHECK_NEGATIVE]: t.array(t.string),
+    [ConfigKey.RESPONSE_BODY_CHECK_POSITIVE]: t.array(t.string),
+    [ConfigKey.RESPONSE_HEADERS_CHECK]: t.record(t.string, t.string),
+    [ConfigKey.REQUEST_BODY_CHECK]: t.interface({ value: t.string, type: CodeEditorModeCodec }),
+    [ConfigKey.REQUEST_HEADERS_CHECK]: t.record(t.string, t.string),
+    [ConfigKey.USERNAME]: t.string,
+  }),
+  t.partial({
+    [ConfigKey.PROXY_HEADERS]: t.record(t.string, t.string),
+    [ConfigKey.RESPONSE_JSON_CHECK]: t.array(ResponseCheckJSONCodec),
+  }),
+]);
 
 export const HTTPAdvancedCodec = t.intersection([
   HTTPAdvancedFieldsCodec,
@@ -192,15 +227,6 @@ export const HTTPFieldsCodec = t.intersection([
 
 export type HTTPFields = t.TypeOf<typeof HTTPFieldsCodec>;
 
-// Browser Fields
-export const ThrottlingConfigKeyCodec = t.union([
-  t.literal(ConfigKey.DOWNLOAD_SPEED),
-  t.literal(ConfigKey.UPLOAD_SPEED),
-  t.literal(ConfigKey.LATENCY),
-]);
-
-export type ThrottlingConfigKey = t.TypeOf<typeof ThrottlingConfigKeyCodec>;
-
 export const EncryptedBrowserSimpleFieldsCodec = t.intersection([
   t.intersection([
     t.interface({
@@ -218,23 +244,34 @@ export const BrowserSensitiveSimpleFieldsCodec = t.intersection([
   t.interface({
     [ConfigKey.SOURCE_INLINE]: t.string,
     [ConfigKey.SOURCE_PROJECT_CONTENT]: t.string,
-    [ConfigKey.PARAMS]: t.string,
     [ConfigKey.URLS]: t.union([t.string, t.null]),
     [ConfigKey.PORT]: t.union([t.number, t.null]),
   }),
   CommonFieldsCodec,
 ]);
 
+export const ThrottlingConfigValueCodec = t.interface({
+  download: t.string,
+  upload: t.string,
+  latency: t.string,
+});
+
+export type ThrottlingConfigValue = t.TypeOf<typeof ThrottlingConfigValueCodec>;
+
+export const ThrottlingConfigCodec = t.interface({
+  value: t.union([ThrottlingConfigValueCodec, t.null]),
+  label: t.string,
+  id: t.string,
+});
+
+export type ThrottlingConfig = t.TypeOf<typeof ThrottlingConfigCodec>;
+
 export const EncryptedBrowserAdvancedFieldsCodec = t.interface({
   [ConfigKey.SCREENSHOTS]: t.string,
   [ConfigKey.JOURNEY_FILTERS_MATCH]: t.string,
   [ConfigKey.JOURNEY_FILTERS_TAGS]: t.array(t.string),
   [ConfigKey.IGNORE_HTTPS_ERRORS]: t.boolean,
-  [ConfigKey.IS_THROTTLING_ENABLED]: t.boolean,
-  [ConfigKey.DOWNLOAD_SPEED]: t.string,
-  [ConfigKey.UPLOAD_SPEED]: t.string,
-  [ConfigKey.LATENCY]: t.string,
-  [ConfigKey.THROTTLING_CONFIG]: t.string,
+  [ConfigKey.THROTTLING_CONFIG]: ThrottlingConfigCodec,
 });
 
 export const BrowserSimpleFieldsCodec = t.intersection([

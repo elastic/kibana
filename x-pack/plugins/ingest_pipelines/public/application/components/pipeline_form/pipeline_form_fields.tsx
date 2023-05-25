@@ -163,7 +163,7 @@ export const PipelineFormFields: React.FunctionComponent<Props> = ({
             path="_meta"
             component={JsonEditorField}
             componentProps={{
-              euiCodeEditorProps: {
+              codeEditorProps: {
                 'data-test-subj': 'metaEditor',
                 height: '200px',
                 'aria-label': i18n.translate('xpack.ingestPipelines.form.metaAriaLabel', {

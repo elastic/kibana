@@ -34,11 +34,12 @@ import {
   ALERT_ORIGINAL_TIME,
 } from '@kbn/security-solution-plugin/common/field_maps/field_names';
 import { RuleExecutionStatus } from '@kbn/security-solution-plugin/common/detection_engine/rule_monitoring';
+import { getMaxSignalsWarning } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/utils/utils';
 import {
   previewRule,
   getOpenSignals,
   getPreviewAlerts,
-  deleteSignalsIndex,
+  deleteAllAlerts,
   deleteAllRules,
   createRule,
 } from '../../utils';
@@ -144,7 +145,8 @@ export default ({ getService }: FtrProviderContext) => {
   /**
    * Specific api integration tests for threat matching rule type
    */
-  describe('Threat match type rules', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/155304
+  describe.skip('Threat match type rules', () => {
     before(async () => {
       // await deleteSignalsIndex(supertest, log);
       // await deleteAllAlerts(supertest, log);
@@ -153,7 +155,7 @@ export default ({ getService }: FtrProviderContext) => {
 
     after(async () => {
       await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/hosts');
-      await deleteSignalsIndex(supertest, log);
+      await deleteAllAlerts(supertest, log, es);
       await deleteAllRules(supertest, log);
     });
 
@@ -499,6 +501,12 @@ export default ({ getService }: FtrProviderContext) => {
           version: 1,
         }),
       });
+    });
+
+    it('generates max signals warning when circuit breaker is hit', async () => {
+      const rule: ThreatMatchRuleCreateProps = { ...createThreatMatchRule(), max_signals: 87 }; // Query generates 88 alerts with current esArchive
+      const { logs } = await previewRule({ supertest, rule });
+      expect(logs[0].warnings).contain(getMaxSignalsWarning());
     });
 
     it('terms and match should have the same alerts with pagination', async () => {

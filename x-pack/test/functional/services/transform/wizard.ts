@@ -771,6 +771,39 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
       );
     },
 
+    async setContinuousModeSwitchCheckState(expectedCheckState: boolean) {
+      await retry.tryForTime(5000, async () => {
+        const currentCheckState =
+          (await testSubjects.getAttribute('transformContinuousModeSwitch', 'aria-checked')) ===
+          'true';
+        if (currentCheckState !== expectedCheckState) {
+          await testSubjects.click('transformContinuousModeSwitch');
+          await this.assertContinuousModeSwitchCheckState(expectedCheckState);
+        }
+      });
+    },
+
+    async assertContinuousModeDateFieldSelectExists() {
+      await retry.tryForTime(1000, async () => {
+        await testSubjects.existOrFail(`transformContinuousDateFieldSelect`, { allowHidden: true });
+      });
+    },
+
+    async selectContinuousModeDateField(value: string) {
+      await retry.tryForTime(5000, async () => {
+        await testSubjects.selectValue('transformContinuousDateFieldSelect', value);
+        const actualSelectState = await testSubjects.getAttribute(
+          'transformContinuousDateFieldSelect',
+          'value'
+        );
+
+        expect(actualSelectState).to.eql(
+          value,
+          `Transform continuous date field should be '${value}' (got '${actualSelectState}')`
+        );
+      });
+    },
+
     async assertRetentionPolicySwitchExists() {
       await testSubjects.existOrFail(`transformRetentionPolicySwitch`, { allowHidden: true });
     },
@@ -1052,9 +1085,7 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
       await retry.tryForTime(60 * 1000, async () => {
         const allFields = await pageObjects.discover.getAllFieldNames();
         if (Array.isArray(allFields)) {
-          // For some reasons, Discover returns fields with dot (e.g '.avg') with extra space
-          const fields = allFields.map((n) => n.replace('.​', '.'));
-          expect(fields).to.contain(
+          expect(allFields).to.contain(
             field,
             `Expected Discover to contain field ${field}, got ${allFields.join()}`
           );
@@ -1087,12 +1118,15 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
       });
     },
 
-    async startTransform() {
+    // The progress bar has to exist for batch transform, not for continuous transforms.
+    async startTransform({ expectProgressbarExists } = { expectProgressbarExists: true }) {
       await testSubjects.click('transformWizardStartButton');
       await retry.tryForTime(5000, async () => {
         await this.assertDiscoverCardExists();
         await this.assertStartButtonEnabled(false);
-        await this.assertProgressbarExists();
+        if (expectProgressbarExists) {
+          await this.assertProgressbarExists();
+        }
       });
     },
 

@@ -7,12 +7,12 @@
 
 import { EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import React from 'react';
-import type { PropertyActionButtonProps } from '../../property_actions';
+import type { AttachmentAction } from '../../../client/attachment_framework/types';
 import { PropertyActions } from '../../property_actions';
 
 interface Props {
   isLoading: boolean;
-  propertyActions: PropertyActionButtonProps[];
+  propertyActions: AttachmentAction[];
   customDataTestSubj?: string;
 }
 

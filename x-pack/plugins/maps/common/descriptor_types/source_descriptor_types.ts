@@ -13,6 +13,7 @@ import { SortDirection } from '@kbn/data-plugin/common/search';
 import {
   AGG_TYPE,
   GRID_RESOLUTION,
+  MASK_OPERATOR,
   RENDER_AS,
   SCALING_TYPES,
   MVT_FIELD_TYPE,
@@ -49,6 +50,10 @@ export type AbstractESSourceDescriptor = AbstractSourceDescriptor & {
 type AbstractAggDescriptor = {
   type: AGG_TYPE;
   label?: string;
+  mask?: {
+    operator: MASK_OPERATOR;
+    value: number;
+  };
 };
 
 export type CountAggDescriptor = AbstractAggDescriptor & {
@@ -106,9 +111,18 @@ export type ESPewPewSourceDescriptor = AbstractESAggSourceDescriptor & {
   destGeoField: string;
 };
 
-export type ESTermSourceDescriptor = AbstractESAggSourceDescriptor & {
-  term: string; // term field name
+export type AbstractESJoinSourceDescriptor = AbstractESAggSourceDescriptor & {
   whereQuery?: Query;
+};
+
+export type ESDistanceSourceDescriptor = AbstractESJoinSourceDescriptor & {
+  distance: number; // km
+  geoField: string;
+  type: SOURCE_TYPES.ES_DISTANCE_SOURCE;
+};
+
+export type ESTermSourceDescriptor = AbstractESJoinSourceDescriptor & {
+  term: string; // term field name
   size?: number;
   type: SOURCE_TYPES.ES_TERM_SOURCE;
 };
@@ -178,4 +192,7 @@ export type TableSourceDescriptor = {
   term: string;
 };
 
-export type TermJoinSourceDescriptor = ESTermSourceDescriptor | TableSourceDescriptor;
+export type JoinSourceDescriptor =
+  | ESDistanceSourceDescriptor
+  | ESTermSourceDescriptor
+  | TableSourceDescriptor;

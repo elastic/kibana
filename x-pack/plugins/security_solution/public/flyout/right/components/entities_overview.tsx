@@ -12,6 +12,8 @@ import { useRightPanelContext } from '../context';
 import {
   ENTITIES_HEADER_TEST_ID,
   ENTITIES_CONTENT_TEST_ID,
+  ENTITIES_HOST_CONTENT_TEST_ID,
+  ENTITIES_USER_CONTENT_TEST_ID,
   ENTITIES_VIEW_ALL_BUTTON_TEST_ID,
 } from './test_ids';
 import { ENTITIES_TITLE, ENTITIES_TEXT, VIEW_ALL } from './translations';
@@ -28,7 +30,7 @@ const HOST_ICON = 'storage';
  * Entities section under Insights section, overview tab. It contains a preview of host and user information.
  */
 export const EntitiesOverview: React.FC = () => {
-  const { eventId, getFieldsData, indexName } = useRightPanelContext();
+  const { eventId, getFieldsData, indexName, scopeId } = useRightPanelContext();
   const { openLeftPanel } = useExpandableFlyoutContext();
   const hostName = getField(getFieldsData('host.name'));
   const userName = getField(getFieldsData('user.name'));
@@ -40,9 +42,10 @@ export const EntitiesOverview: React.FC = () => {
       params: {
         id: eventId,
         indexName,
+        scopeId,
       },
     });
-  }, [eventId, openLeftPanel, indexName]);
+  }, [eventId, openLeftPanel, indexName, scopeId]);
 
   if (!eventId || (!userName && !hostName)) {
     return null;
@@ -60,8 +63,10 @@ export const EntitiesOverview: React.FC = () => {
             <EntityPanel
               title={userName}
               iconType={USER_ICON}
-              content={<UserEntityOverview userName={userName} />}
-            />
+              data-test-subj={ENTITIES_USER_CONTENT_TEST_ID}
+            >
+              <UserEntityOverview userName={userName} />
+            </EntityPanel>
           </EuiFlexItem>
         )}
         {hostName && (
@@ -69,8 +74,10 @@ export const EntitiesOverview: React.FC = () => {
             <EntityPanel
               title={hostName}
               iconType={HOST_ICON}
-              content={<HostEntityOverview hostName={hostName} />}
-            />
+              data-test-subj={ENTITIES_HOST_CONTENT_TEST_ID}
+            >
+              <HostEntityOverview hostName={hostName} />
+            </EntityPanel>
           </EuiFlexItem>
         )}
         <EuiButtonEmpty

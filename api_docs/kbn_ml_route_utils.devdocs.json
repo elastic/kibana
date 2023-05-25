@@ -37,7 +37,14 @@
             "section": "def-common.CoreStart",
             "text": "CoreStart"
           },
-          ", name: string, id: string | undefined, type: string) => { type: string; name: string; id: string; page: string; }"
+          ", name: string, id: string | undefined, type: string) => ",
+          {
+            "pluginId": "@kbn/core-execution-context-common",
+            "scope": "common",
+            "docId": "kibKbnCoreExecutionContextCommonPluginApi",
+            "section": "def-common.KibanaExecutionContext",
+            "text": "KibanaExecutionContext"
+          }
         ],
         "path": "x-pack/packages/ml/route_utils/src/create_execution_context.ts",
         "deprecated": false,

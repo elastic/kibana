@@ -17,10 +17,12 @@ import { getTinesConnectorType } from './tines';
 import { getActionType as getTorqConnectorType } from './torq';
 import { getConnectorType as getEmailConnectorType } from './email';
 import { getConnectorType as getIndexConnectorType } from './es_index';
+import { getConnectorType as getGenerativeAiConnectorType } from './gen_ai';
 import { getConnectorType as getPagerDutyConnectorType } from './pagerduty';
 import { getConnectorType as getSwimlaneConnectorType } from './swimlane';
 import { getConnectorType as getServerLogConnectorType } from './server_log';
-import { getConnectorType as getSlackConnectorType } from './slack';
+import { getConnectorType as getSlackWebhookConnectorType } from './slack';
+import { getConnectorType as getSlackApiConnectorType } from './slack_api';
 import { getConnectorType as getWebhookConnectorType } from './webhook';
 import { getConnectorType as getXmattersConnectorType } from './xmatters';
 import { getConnectorType as getTeamsConnectorType } from './teams';
@@ -45,8 +47,10 @@ export type { ActionParamsType as PagerDutyActionParams } from './pagerduty';
 export { ConnectorTypeId as ServerLogConnectorTypeId } from './server_log';
 export type { ActionParamsType as ServerLogActionParams } from './server_log';
 export { ServiceNowITOMConnectorTypeId } from './servicenow_itom';
-export { ConnectorTypeId as SlackConnectorTypeId } from './slack';
-export type { ActionParamsType as SlackActionParams } from './slack';
+export { ConnectorTypeId as SlackWebhookConnectorTypeId } from './slack';
+export type { ActionParamsType as SlackWebhookActionParams } from './slack';
+export { SLACK_API_CONNECTOR_ID as SlackApiConnectorTypeId } from '../../common/slack_api/constants';
+export type { SlackApiActionParams as SlackApiActionParams } from '../../common/slack_api/types';
 export { ConnectorTypeId as TeamsConnectorTypeId } from './teams';
 export type { ActionParamsType as TeamsActionParams } from './teams';
 export { ConnectorTypeId as WebhookConnectorTypeId } from './webhook';
@@ -80,7 +84,8 @@ export function registerConnectorTypes({
   actions.registerType(getPagerDutyConnectorType());
   actions.registerType(getSwimlaneConnectorType());
   actions.registerType(getServerLogConnectorType());
-  actions.registerType(getSlackConnectorType({}));
+  actions.registerType(getSlackWebhookConnectorType({}));
+  actions.registerType(getSlackApiConnectorType());
   actions.registerType(getWebhookConnectorType());
   actions.registerType(getCasesWebhookConnectorType());
   actions.registerType(getXmattersConnectorType());
@@ -94,4 +99,5 @@ export function registerConnectorTypes({
 
   actions.registerSubActionConnectorType(getOpsgenieConnectorType());
   actions.registerSubActionConnectorType(getTinesConnectorType());
+  actions.registerSubActionConnectorType(getGenerativeAiConnectorType());
 }

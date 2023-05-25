@@ -14,6 +14,7 @@ import { getEmptyTagValue } from '../../../../common/components/empty_value';
 import { HostDetailsLink, UserDetailsLink } from '../../../../common/components/links';
 import { HostsTableType } from '../../../../explore/hosts/store/model';
 import { RiskScore } from '../../../../explore/components/risk_score/severity/common';
+import { CELL_ACTIONS_TELEMETRY } from '../../../../explore/components/risk_score/constants';
 import type {
   HostRiskScore,
   RiskSeverity,
@@ -46,6 +47,7 @@ export const getRiskScoreColumns = (
     name: i18n.ENTITY_NAME(riskEntity),
     truncateText: false,
     mobileOptions: { show: true },
+    className: 'inline-actions-table-cell',
     render: (entityName: string) => {
       if (entityName != null && entityName.length > 0) {
         return riskEntity === RiskScoreEntity.host ? (
@@ -64,6 +66,9 @@ export const getRiskScoreColumns = (
                 SecurityCellActionType.FILTER,
                 SecurityCellActionType.SHOW_TOP_N,
               ]}
+              metadata={{
+                telemetry: CELL_ACTIONS_TELEMETRY,
+              }}
             />
           </>
         ) : (
@@ -135,18 +140,34 @@ export const getRiskScoreColumns = (
     name: i18n.ALERTS,
     truncateText: false,
     mobileOptions: { show: true },
+    className: 'inline-actions-table-cell',
     render: (alertCount: number, risk) => (
-      <EuiLink
-        data-test-subj="risk-score-alerts"
-        disabled={alertCount === 0}
-        onClick={() =>
-          openEntityOnAlertsPage(
-            riskEntity === RiskScoreEntity.host ? risk.host.name : risk.user.name
-          )
-        }
-      >
-        <FormattedCount count={alertCount} />
-      </EuiLink>
+      <>
+        <EuiLink
+          data-test-subj="risk-score-alerts"
+          disabled={alertCount === 0}
+          onClick={() =>
+            openEntityOnAlertsPage(
+              riskEntity === RiskScoreEntity.host ? risk.host.name : risk.user.name
+            )
+          }
+        >
+          <FormattedCount count={alertCount} />
+        </EuiLink>
+        <StyledCellActions
+          field={{
+            name: riskEntity === RiskScoreEntity.host ? 'host.name' : 'user.name',
+            value: riskEntity === RiskScoreEntity.host ? risk.host.name : risk.user.name,
+            type: 'keyword',
+            aggregatable: true,
+          }}
+          mode={CellActionsMode.INLINE}
+          triggerId={SecurityCellActionsTrigger.ALERTS_COUNT}
+          metadata={{
+            andFilters: [{ field: 'kibana.alert.workflow_status', value: 'open' }],
+          }}
+        />
+      </>
     ),
   },
 ];

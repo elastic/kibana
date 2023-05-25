@@ -45,7 +45,23 @@ export const SyncJobDocumentsPanel: React.FC<SyncJobDocumentsPanelProps> = (sync
       name: i18n.translate('xpack.enterpriseSearch.content.index.syncJobs.documents.volume', {
         defaultMessage: 'Volume',
       }),
-      render: (volume: number) => new ByteSizeValue(volume).toString(),
+      render: (volume: number) =>
+        volume < 1
+          ? i18n.translate(
+              'xpack.enterpriseSearch.content.index.syncJobs.documents.volume.lessThanOneMBLabel',
+              {
+                defaultMessage: 'Less than 1mb',
+              }
+            )
+          : i18n.translate(
+              'xpack.enterpriseSearch.content.index.syncJobs.documents.volume.aboutLabel',
+              {
+                defaultMessage: 'About {volume}',
+                values: {
+                  volume: new ByteSizeValue(volume * 1024 * 1024).toString(),
+                },
+              }
+            ),
     },
   ];
   return (

@@ -18,6 +18,9 @@ export const MOCK_YAML_CONFIGURATION = `file:
     - name: nginxOnly
       containerImageName:
         - nginx
+      operation:
+        - createExecutable
+        - modifyExecutable
     - name: excludeCustomNginxBuild
       containerImageTag:
         - staging
@@ -55,8 +58,8 @@ export const MOCK_YAML_INVALID_STRING_ARRAY_CONDITION = `file:
       operation:
         - createExecutable
         - modifyExecutable
-      sessionLeaderName:
-        - reallylongsessionleadernamethatshouldnotbeallowed
+      targetFilePath:
+        - /bin/${new Array(256).fill('a').join()}
   responses:
     - match:
         - default

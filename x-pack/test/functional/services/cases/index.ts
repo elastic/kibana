@@ -9,6 +9,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 import { CasesAPIServiceProvider } from './api';
 import { CasesCommonServiceProvider } from './common';
 import { CasesCreateViewServiceProvider } from './create';
+import { CasesFilesTableServiceProvider } from './files';
 import { CasesTableServiceProvider } from './list';
 import { CasesNavigationProvider } from './navigation';
 import { CasesSingleViewServiceProvider } from './single_case_view';
@@ -21,6 +22,7 @@ export function CasesServiceProvider(context: FtrProviderContext) {
     api: CasesAPIServiceProvider(context),
     common: casesCommon,
     casesTable: CasesTableServiceProvider(context, casesCommon),
+    casesFilesTable: CasesFilesTableServiceProvider(context),
     create: CasesCreateViewServiceProvider(context, casesCommon),
     navigation: CasesNavigationProvider(context),
     singleCase: CasesSingleViewServiceProvider(context),

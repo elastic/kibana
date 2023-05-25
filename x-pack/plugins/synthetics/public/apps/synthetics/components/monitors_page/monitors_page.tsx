@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { Redirect } from 'react-router-dom';
-import { useTrackPageview } from '@kbn/observability-plugin/public';
+import { useTrackPageview } from '@kbn/observability-shared-plugin/public';
 
 import { DisabledCallout } from './management/disabled_callout';
 import { useOverviewStatus } from './hooks/use_overview_status';

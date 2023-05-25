@@ -49,6 +49,17 @@ export async function runMigrationCheck({
   ]);
 
   const hasRequiredRole = isSuperuser({ securityPluginStart, request });
+  if (!hasRequiredRole) {
+    return {
+      has_cloud_agent_policy: false,
+      has_cloud_apm_package_policy: false,
+      cloud_apm_migration_enabled: cloudApmMigrationEnabled,
+      has_required_role: false,
+      cloud_apm_package_policy: undefined,
+      has_apm_integrations: false,
+      latest_apm_package_version: '',
+    };
+  }
   const cloudAgentPolicy = hasRequiredRole
     ? await getCloudAgentPolicy({
         savedObjectsClient,
@@ -57,13 +68,14 @@ export async function runMigrationCheck({
     : undefined;
   const apmPackagePolicy = getApmPackagePolicy(cloudAgentPolicy);
   const coreStart = await core.start();
-  const packagePolicies = await getApmPackagePolicies({
-    coreStart,
-    fleetPluginStart,
-  });
   const latestApmPackage = await getLatestApmPackage({
     fleetPluginStart,
     request,
+  });
+
+  const packagePolicies = await getApmPackagePolicies({
+    coreStart,
+    fleetPluginStart,
   });
   return {
     has_cloud_agent_policy: !!cloudAgentPolicy,

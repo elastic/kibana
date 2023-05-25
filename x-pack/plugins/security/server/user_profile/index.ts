@@ -6,6 +6,7 @@
  */
 
 export { UserProfileService } from './user_profile_service';
+
 export type {
   UserProfileServiceStart,
   UserProfileServiceStartInternal,

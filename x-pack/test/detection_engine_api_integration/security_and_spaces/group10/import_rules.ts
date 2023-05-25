@@ -21,7 +21,7 @@ import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   createSignalsIndex,
   deleteAllRules,
-  deleteSignalsIndex,
+  deleteAllAlerts,
   getSimpleRule,
   getSimpleRuleAsNdjson,
   getSimpleRuleOutput,
@@ -29,6 +29,9 @@ import {
   getWebHookAction,
   removeServerGeneratedProperties,
   ruleToNdjson,
+  createLegacyRuleAction,
+  getLegacyActionSO,
+  createRule,
 } from '../../utils';
 import { deleteAllExceptions } from '../../../lists_api_integration/utils';
 import { createUserAndRole, deleteUserAndRole } from '../../../common/services/security_solution';
@@ -178,6 +181,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const log = getService('log');
   const esArchiver = getService('esArchiver');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
+  const es = getService('es');
 
   describe('import_rules', () => {
     describe('importing rules with different roles', () => {
@@ -194,7 +198,7 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       afterEach(async () => {
-        await deleteSignalsIndex(supertest, log);
+        await deleteAllAlerts(supertest, log, es);
         await deleteAllRules(supertest, log);
       });
       it('should successfully import rules without actions when user has no actions privileges', async () => {
@@ -481,7 +485,7 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       afterEach(async () => {
-        await deleteSignalsIndex(supertest, log);
+        await deleteAllAlerts(supertest, log, es);
         await deleteAllRules(supertest, log);
       });
 
@@ -716,6 +720,45 @@ export default ({ getService }: FtrProviderContext): void => {
         ruleOutput.name = 'some other name';
         ruleOutput.revision = 0;
         expect(bodyToCompare).to.eql(ruleOutput);
+      });
+
+      it('should migrate legacy actions in existing rule if overwrite is set to true', async () => {
+        const simpleRule = getSimpleRule('rule-1');
+
+        const [connector, createdRule] = await Promise.all([
+          supertest
+            .post(`/api/actions/connector`)
+            .set('kbn-xsrf', 'foo')
+            .send({
+              name: 'My action',
+              connector_type_id: '.slack',
+              secrets: {
+                webhookUrl: 'http://localhost:1234',
+              },
+            }),
+          createRule(supertest, log, simpleRule),
+        ]);
+        await createLegacyRuleAction(supertest, createdRule.id, connector.body.id);
+
+        // check for legacy sidecar action
+        const sidecarActionsResults = await getLegacyActionSO(es);
+        expect(sidecarActionsResults.hits.hits.length).to.eql(1);
+        expect(sidecarActionsResults.hits.hits[0]?._source?.references[0].id).to.eql(
+          createdRule.id
+        );
+
+        simpleRule.name = 'some other name';
+        const ndjson = ruleToNdjson(simpleRule);
+
+        await supertest
+          .post(`${DETECTION_ENGINE_RULES_URL}/_import?overwrite=true`)
+          .set('kbn-xsrf', 'true')
+          .attach('file', ndjson, 'rules.ndjson')
+          .expect(200);
+
+        // legacy sidecar action should be gone
+        const sidecarActionsPostResults = await getLegacyActionSO(es);
+        expect(sidecarActionsPostResults.hits.hits.length).to.eql(0);
       });
 
       it('should report a conflict if there is an attempt to import a rule with a rule_id that already exists, but still have some successes with other rules', async () => {

@@ -118,7 +118,9 @@ const CreateRulePageComponent: React.FC = () => {
     useListsConfig();
   const { addSuccess } = useAppToasts();
   const { navigateToApp } = useKibana().services.application;
-  const { data: dataServices } = useKibana().services;
+  const {
+    data: { dataViews },
+  } = useKibana().services;
   const loading = userInfoLoading || listsConfigLoading;
   const [activeStep, setActiveStep] = useState<RuleStep>(RuleStep.defineRule);
   const getNextStep = (step: RuleStep): RuleStep | undefined =>
@@ -212,8 +214,8 @@ const CreateRulePageComponent: React.FC = () => {
   const { starting: isStartingJobs, startMlJobs } = useStartMlJobs();
 
   useEffect(() => {
-    const fetchDataViews = async () => {
-      const dataViewsRefs = await dataServices.dataViews.getIdsWithTitle();
+    const fetchDV = async () => {
+      const dataViewsRefs = await dataViews.getIdsWithTitle();
       const dataViewIdIndexPatternMap = dataViewsRefs.reduce(
         (acc, item) => ({
           ...acc,
@@ -223,8 +225,8 @@ const CreateRulePageComponent: React.FC = () => {
       );
       setDataViewOptions(dataViewIdIndexPatternMap);
     };
-    fetchDataViews();
-  }, [dataServices.dataViews]);
+    fetchDV();
+  }, [dataViews]);
 
   const handleAccordionToggle = useCallback(
     (step: RuleStep, isOpen: boolean) =>
@@ -563,6 +565,7 @@ const CreateRulePageComponent: React.FC = () => {
                             setForm={setFormHook}
                             onSubmit={() => submitStep(RuleStep.ruleActions)}
                             actionMessageParams={actionMessageParams}
+                            summaryActionMessageParams={actionMessageParams}
                             // We need a key to make this component remount when edit/view mode is toggled
                             // https://github.com/elastic/kibana/pull/132834#discussion_r881705566
                             key={isShouldRerenderStep(RuleStep.ruleActions, activeStep)}

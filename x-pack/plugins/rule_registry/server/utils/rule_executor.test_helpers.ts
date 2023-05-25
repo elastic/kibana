@@ -39,6 +39,7 @@ export const createDefaultAlertExecutorOptions = <
   startedAt = new Date(),
   updatedAt = new Date(),
   shouldWriteAlerts = true,
+  maintenanceWindowIds,
 }: {
   alertId?: string;
   ruleName?: string;
@@ -49,6 +50,7 @@ export const createDefaultAlertExecutorOptions = <
   startedAt?: Date;
   updatedAt?: Date;
   shouldWriteAlerts?: boolean;
+  maintenanceWindowIds?: string[];
 }): RuleExecutorOptions<Params, State, InstanceState, InstanceContext, ActionGroupIds> => ({
   startedAt,
   rule: {
@@ -92,4 +94,5 @@ export const createDefaultAlertExecutorOptions = <
   executionId: 'b33f65d7-6e8b-4aae-8d20-c93613deb33f',
   logger,
   flappingSettings: DEFAULT_FLAPPING_SETTINGS,
+  ...(maintenanceWindowIds ? { maintenanceWindowIds } : {}),
 });

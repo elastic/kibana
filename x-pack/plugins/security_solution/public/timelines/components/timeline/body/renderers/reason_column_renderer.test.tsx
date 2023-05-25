@@ -14,11 +14,12 @@ import { reasonColumnRenderer } from './reason_column_renderer';
 import { plainColumnRenderer } from './plain_column_renderer';
 
 import type { ColumnHeaderOptions, RowRenderer } from '../../../../../../common/types';
-import { TableId, RowRendererId } from '../../../../../../common/types';
 
 import { render } from '@testing-library/react';
 import { TestProviders } from '@kbn/timelines-plugin/public/mock';
 import { cloneDeep } from 'lodash';
+import { RowRendererId } from '@kbn/timelines-plugin/common/types';
+import { TableId } from '@kbn/securitysolution-data-table';
 jest.mock('./plain_column_renderer');
 
 jest.mock('../../../../../common/components/link_to', () => {

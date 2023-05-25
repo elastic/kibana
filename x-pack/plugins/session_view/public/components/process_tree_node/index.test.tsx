@@ -64,7 +64,7 @@ describe('ProcessTreeNode component', () => {
       renderResult = mockedContext.render(<ProcessTreeNode {...props} isSessionLeader />);
 
       expect(renderResult.container.textContent?.replace(/\s+/g, ' ')).toEqual(
-        ' bash started by vagrant'
+        ' bash started by vagrant '
       );
     });
 

@@ -70,3 +70,6 @@ export const waitForRuleSuccess = (params: WaitForRuleStatusParams): Promise<voi
 
 export const waitForRulePartialFailure = (params: WaitForRuleStatusParams): Promise<void> =>
   waitForRuleStatus(RuleExecutionStatus['partial failure'], params);
+
+export const waitForRuleFailure = (params: WaitForRuleStatusParams): Promise<void> =>
+  waitForRuleStatus(RuleExecutionStatus.failed, params);

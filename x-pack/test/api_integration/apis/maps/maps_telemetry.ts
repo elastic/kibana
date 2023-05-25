@@ -30,8 +30,8 @@ export default function ({ getService }: FtrProviderContext) {
           return fieldStat.name === 'geo_point';
         }
       );
-      expect(geoPointFieldStats.count).to.be(39);
-      expect(geoPointFieldStats.index_count).to.be(10);
+      expect(geoPointFieldStats.count).to.be(31);
+      expect(geoPointFieldStats.index_count).to.be(9);
 
       const geoShapeFieldStats = apiResponse.cluster_stats.indices.mappings.field_types.find(
         (fieldStat: estypes.ClusterStatsFieldTypes) => {
@@ -47,7 +47,7 @@ export default function ({ getService }: FtrProviderContext) {
       expect(mapUsage).eql({
         mapsTotalCount: 27,
         basemaps: {},
-        joins: { term: { min: 1, max: 1, total: 3, avg: 0.1111111111111111 } },
+        joins: { term: { min: 1, max: 1, total: 4, avg: 0.14814814814814814 } },
         layerTypes: {
           es_docs: { min: 1, max: 2, total: 19, avg: 0.7037037037037037 },
           es_agg_grids: { min: 1, max: 1, total: 6, avg: 0.2222222222222222 },

@@ -6,20 +6,17 @@
  */
 
 import { reducerWithInitialState } from 'typescript-fsa-reducers';
-import { updateGroupSelector, updateSelectedGroup } from './actions';
+import { updateGroupSelector } from './actions';
 import type { GroupModel } from './types';
 
 export const initialGroupingState: GroupModel = {
   groupSelector: null,
-  selectedGroup: null,
 };
 
-export const groupsReducer = reducerWithInitialState(initialGroupingState)
-  .case(updateSelectedGroup, (state, { selectedGroup }) => ({
-    ...state,
-    selectedGroup,
-  }))
-  .case(updateGroupSelector, (state, { groupSelector }) => ({
+export const groupsReducer = reducerWithInitialState(initialGroupingState).case(
+  updateGroupSelector,
+  (state, { groupSelector }) => ({
     ...state,
     groupSelector,
-  }));
+  })
+);

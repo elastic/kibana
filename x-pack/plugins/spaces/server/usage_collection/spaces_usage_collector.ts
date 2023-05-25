@@ -75,18 +75,16 @@ async function getSpacesUsage(
   const count = hits?.total?.value ?? 0;
   const disabledFeatureBuckets = aggregations?.disabledFeatures?.buckets ?? [];
 
-  const initialCounts = knownFeatureIds.reduce(
-    (acc, featureId) => ({ ...acc, [featureId]: 0 }),
-    {}
-  );
+  const initialCounts = knownFeatureIds.reduce((acc, featureId) => {
+    acc[featureId] = 0;
+    return acc;
+  }, {} as Record<string, number>);
 
   const disabledFeatures: Record<string, number> = disabledFeatureBuckets.reduce(
     // eslint-disable-next-line @typescript-eslint/naming-convention
     (acc, { key, doc_count }) => {
-      return {
-        ...acc,
-        [key]: doc_count,
-      };
+      acc[key] = doc_count;
+      return acc;
     },
     initialCounts
   );
@@ -149,7 +147,7 @@ export interface UsageData extends UsageStats {
 }
 
 interface CollectorDeps {
-  kibanaIndex: string;
+  getIndexForType: (type: string) => Promise<string>;
   features: PluginsSetup['features'];
   licensing: PluginsSetup['licensing'];
   usageStatsServicePromise: Promise<UsageStatsServiceSetup>;
@@ -453,11 +451,12 @@ export function getSpacesUsageCollector(
       },
     },
     fetch: async ({ esClient }: CollectorFetchContext) => {
-      const { licensing, kibanaIndex, features, usageStatsServicePromise } = deps;
+      const { licensing, getIndexForType, features, usageStatsServicePromise } = deps;
       const license = await firstValueFrom(licensing.license$);
       const available = license.isAvailable; // some form of spaces is available for all valid licenses
 
-      const usageData = await getSpacesUsage(esClient, kibanaIndex, features, available);
+      const spaceIndex = await getIndexForType('space');
+      const usageData = await getSpacesUsage(esClient, spaceIndex, features, available);
       const usageStats = await getUsageStats(usageStatsServicePromise, available);
 
       return {

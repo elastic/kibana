@@ -39,6 +39,22 @@ function setup({
   const KibanaReactContext = createKibanaReactContext({
     usageCollection: { reportUiCounter: () => {} },
     dataViews: { get: async () => {} },
+    data: {
+      query: {
+        queryString: {
+          setQuery: () => {},
+          getQuery: () => {},
+          clearQuery: () => {},
+        },
+        timefilter: {
+          timefilter: {
+            setTime: () => {},
+            getRefreshInterval: () => {},
+            setRefreshInterval: () => {},
+          },
+        },
+      },
+    },
   } as Partial<CoreStart>);
 
   // mock transaction types

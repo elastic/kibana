@@ -12,7 +12,8 @@ import { fromKueryExpression, luceneStringToDsl, toElasticsearchQuery } from '@k
 import type { Query } from '@kbn/es-query';
 import { QueryStringInput } from '@kbn/unified-search-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import { SEARCH_QUERY_LANGUAGE, ErrorMessage } from '../../../../../common/constants/search';
+import type { QueryErrorMessage } from '@kbn/ml-error-utils';
+import { SEARCH_QUERY_LANGUAGE } from '../../../../../common/constants/search';
 import { InfluencersFilterQuery } from '../../../../../common/types/es_client';
 import { useAnomalyExplorerContext } from '../../anomaly_explorer_context';
 import { useMlKibana } from '../../../contexts/kibana';
@@ -129,7 +130,9 @@ export const ExplorerQueryBar: FC<ExplorerQueryBarProps> = ({
   const [searchInput, setSearchInput] = useState<Query>(
     getInitSearchInputState({ filterActive, queryString })
   );
-  const [errorMessage, setErrorMessage] = useState<ErrorMessage | undefined>(undefined);
+  const [queryErrorMessage, setQueryErrorMessage] = useState<QueryErrorMessage | undefined>(
+    undefined
+  );
 
   useEffect(
     function updateSearchInputFromFilter() {
@@ -160,14 +163,14 @@ export const ExplorerQueryBar: FC<ExplorerQueryBarProps> = ({
       }
     } catch (e) {
       console.log('Invalid query syntax in search bar', e); // eslint-disable-line no-console
-      setErrorMessage({ query: query.query as string, message: e.message });
+      setQueryErrorMessage({ query: query.query as string, message: e.message });
     }
   };
 
   return (
     <EuiInputPopover
       css={{ 'max-width': '100%' }}
-      closePopover={setErrorMessage.bind(null, undefined)}
+      closePopover={setQueryErrorMessage.bind(null, undefined)}
       input={
         <QueryStringInput
           bubbleSubmitEvent={false}
@@ -192,14 +195,14 @@ export const ExplorerQueryBar: FC<ExplorerQueryBarProps> = ({
           }}
         />
       }
-      isOpen={errorMessage?.query === searchInput.query && errorMessage?.message !== ''}
+      isOpen={queryErrorMessage?.query === searchInput.query && queryErrorMessage?.message !== ''}
     >
       <EuiCode>
         {i18n.translate('xpack.ml.explorer.invalidKuerySyntaxErrorMessageQueryBar', {
           defaultMessage: 'Invalid query',
         })}
         {': '}
-        {errorMessage?.message.split('\n')[0]}
+        {queryErrorMessage?.message.split('\n')[0]}
       </EuiCode>
     </EuiInputPopover>
   );

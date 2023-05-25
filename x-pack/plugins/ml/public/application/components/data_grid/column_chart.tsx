@@ -5,17 +5,40 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
-import classNames from 'classnames';
+import React, { type FC } from 'react';
+import { css } from '@emotion/react';
 
 import { BarSeries, Chart, Settings, ScaleType } from '@elastic/charts';
-import { EuiDataGridColumn } from '@elastic/eui';
+import { euiTextTruncate, type EuiDataGridColumn } from '@elastic/eui';
 
-import './column_chart.scss';
+import { euiThemeVars } from '@kbn/ui-theme';
 
 import { isUnsupportedChartData, ChartData } from '../../../../common/types/field_histograms';
 
 import { useColumnChart } from './use_column_chart';
+
+const cssHistogram = css({
+  width: '100%',
+  height: `calc(${euiThemeVars.euiSizeXL} + ${euiThemeVars.euiSizeXXL})`,
+});
+
+const cssHistogramLegend = css([
+  css`
+    ${euiTextTruncate()}
+  `,
+  {
+    color: euiThemeVars.euiColorMediumShade,
+    display: 'block',
+    overflowX: 'hidden',
+    margin: `${euiThemeVars.euiSizeXS} 0 0 0`,
+    fontSize: euiThemeVars.euiFontSizeXS,
+    fontStyle: 'italic',
+    fontWeight: 'normal',
+    textAlign: 'left',
+  },
+]);
+
+const cssHistogramLegendNumeric = css([cssHistogramLegend, { textAlign: 'right' }]);
 
 interface Props {
   chartData: ChartData;
@@ -41,6 +64,7 @@ const columnChartTheme = {
   },
   scales: { barsPadding: 0.1 },
 };
+
 export const ColumnChart: FC<Props> = ({
   chartData,
   columnType,
@@ -53,7 +77,7 @@ export const ColumnChart: FC<Props> = ({
   return (
     <div data-test-subj={dataTestSubj}>
       {!isUnsupportedChartData(chartData) && data.length > 0 && (
-        <div className="mlDataGridChart__histogram" data-test-subj={`${dataTestSubj}-histogram`}>
+        <div css={cssHistogram} data-test-subj={`${dataTestSubj}-histogram`}>
           <Chart>
             <Settings
               // TODO use the EUI charts theme see src/plugins/charts/public/services/theme/README.md
@@ -73,9 +97,7 @@ export const ColumnChart: FC<Props> = ({
         </div>
       )}
       <div
-        className={classNames('mlDataGridChart__legend', {
-          'mlDataGridChart__legend--numeric': columnType.schema === 'number',
-        })}
+        css={columnType.schema === 'number' ? cssHistogramLegendNumeric : cssHistogramLegend}
         data-test-subj={`${dataTestSubj}-legend`}
       >
         {legendText}

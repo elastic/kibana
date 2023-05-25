@@ -19,17 +19,6 @@ import type { ExceptionListClient } from '@kbn/lists-plugin/server';
 import { installPrepackagedTimelines } from '../../../../timeline/routes/prepackaged_timelines/install_prepackaged_timelines';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { getQueryRuleParams } from '../../../rule_schema/mocks';
-import { legacyMigrate } from '../../../rule_management';
-
-jest.mock('../../../rule_management/logic/rule_actions/legacy_action_migration', () => {
-  const actual = jest.requireActual(
-    '../../../rule_management/logic/rule_actions/legacy_action_migration'
-  );
-  return {
-    ...actual,
-    legacyMigrate: jest.fn(),
-  };
-});
 
 jest.mock('../../logic/rule_assets/prebuilt_rule_assets_client', () => {
   return {
@@ -104,8 +93,6 @@ describe('add_prepackaged_rules_route', () => {
       timelines_updated: 0,
       errors: [],
     });
-
-    (legacyMigrate as jest.Mock).mockResolvedValue(getRuleMock(getQueryRuleParams()));
 
     context.core.elasticsearch.client.asCurrentUser.search.mockResolvedValue(
       elasticsearchClientMock.createSuccessTransportRequestPromise(getBasicEmptySearchResponse())

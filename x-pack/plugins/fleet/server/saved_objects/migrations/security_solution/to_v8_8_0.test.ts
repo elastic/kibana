@@ -53,11 +53,11 @@ describe('8.8.0 Endpoint Package Policy migration', () => {
     };
   };
 
-  it('adds license to policy, defaulted to empty string', () => {
+  it('adds license and cloud status to policy, defaulted to empty string', () => {
     const initialDoc = policyDoc({});
 
     const migratedDoc = policyDoc({
-      meta: { license: '' },
+      meta: { license: '', cloud: false },
     });
 
     expect(migration(initialDoc, {} as SavedObjectMigrationContext)).toEqual(migratedDoc);

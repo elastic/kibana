@@ -14,6 +14,7 @@
       "charts",
       "data",
       "dataViews",
+      "discover",
       "embeddable",
       "features",
       "lens",
@@ -23,6 +24,7 @@
       "security",
       "share",
       "triggersActionsUi",
+      "uiActions",
       "unifiedSearch",
       "usageCollection",
       "visTypeTimeseries"

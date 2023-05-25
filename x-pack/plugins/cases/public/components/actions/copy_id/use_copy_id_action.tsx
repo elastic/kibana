@@ -10,13 +10,13 @@ import { EuiIcon, EuiTextColor } from '@elastic/eui';
 import * as i18n from '../../../common/translations';
 import { useCasesToast } from '../../../common/use_cases_toast';
 
-import type { Case } from '../../../../common';
+import type { CaseUI } from '../../../../common';
 import type { UseCopyIDActionProps } from '../types';
 
 export const useCopyIDAction = ({ onActionSuccess }: UseCopyIDActionProps) => {
   const { showSuccessToast } = useCasesToast();
 
-  const getAction = (selectedCase: Case) => {
+  const getAction = (selectedCase: CaseUI) => {
     return {
       name: <EuiTextColor>{i18n.COPY_ID_ACTION_LABEL}</EuiTextColor>,
       onClick: () => {

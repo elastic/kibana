@@ -16,7 +16,11 @@ export const LOGS_FEATURE_ID = 'logs';
 export type InfraFeatureId = typeof METRICS_FEATURE_ID | typeof LOGS_FEATURE_ID;
 
 export const TIMESTAMP_FIELD = '@timestamp';
+export const MESSAGE_FIELD = 'message';
 export const TIEBREAKER_FIELD = '_doc';
 export const HOST_FIELD = 'host.name';
 export const CONTAINER_FIELD = 'container.id';
 export const POD_FIELD = 'kubernetes.pod.uid';
+
+export const DISCOVER_APP_TARGET = 'discover';
+export const LOGS_APP_TARGET = 'logs-ui';

@@ -11,7 +11,7 @@ import type { SavedObjectReference } from '@kbn/core/public';
 import { isQueryAnnotationConfig } from '@kbn/event-annotation-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
-import { validateQuery } from '../../shared_components';
+import { validateQuery } from '@kbn/visualization-ui-components/public';
 import { DataViewsState } from '../../state_management';
 import type { FramePublicAPI, DatasourcePublicAPI, VisualizeEditorContext } from '../../types';
 import {

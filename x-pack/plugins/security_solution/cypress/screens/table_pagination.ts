@@ -19,3 +19,5 @@ export const TABLE_FIRST_PAGE = tablePageSelector(1);
 export const TABLE_SECOND_PAGE = tablePageSelector(2);
 
 export const TABLE_SORT_COLUMN_BTN = '[data-test-subj="tableHeaderSortButton"]';
+
+export const TABLE_SEARCH_BAR = '[data-test-subj="search-bar"]';

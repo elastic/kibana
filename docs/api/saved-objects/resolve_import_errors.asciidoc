@@ -34,6 +34,12 @@ To resolve errors, you can:
   (Optional, boolean) Creates copies of the saved objects, regenerates each object ID, and resets the origin. When enabled during the
   initial import, also enable when resolving import errors.
 
+`compatibilityMode`::
+  (Optional, boolean) Applies various adjustments to the saved objects that are being imported to maintain compatibility between different {kib}
+  versions. When enabled during the initial import, also enable when resolving import errors.
++
+NOTE: This option cannot be used with the `createNewCopies` option.
+
 [[saved-objects-api-resolve-import-errors-request-body]]
 ==== Request body
 

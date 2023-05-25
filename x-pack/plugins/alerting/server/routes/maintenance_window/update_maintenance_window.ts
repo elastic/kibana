@@ -14,7 +14,10 @@ import {
   RewriteRequestCase,
   rewritePartialMaintenanceBodyRes,
 } from '../lib';
-import { AlertingRequestHandlerContext, INTERNAL_BASE_ALERTING_API_PATH } from '../../types';
+import {
+  AlertingRequestHandlerContext,
+  INTERNAL_ALERTING_API_MAINTENANCE_WINDOW_PATH,
+} from '../../types';
 import { MaintenanceWindowSOProperties, MAINTENANCE_WINDOW_API_PRIVILEGES } from '../../../common';
 
 const paramSchema = schema.object({
@@ -49,7 +52,7 @@ export const updateMaintenanceWindowRoute = (
 ) => {
   router.post(
     {
-      path: `${INTERNAL_BASE_ALERTING_API_PATH}/rules/maintenance_window/{id}`,
+      path: `${INTERNAL_ALERTING_API_MAINTENANCE_WINDOW_PATH}/{id}`,
       validate: {
         body: bodySchema,
         params: paramSchema,
@@ -60,6 +63,8 @@ export const updateMaintenanceWindowRoute = (
     },
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
+        licenseState.ensureLicenseForMaintenanceWindow();
+
         const maintenanceWindowClient = (await context.alerting).getMaintenanceWindowClient();
         const maintenanceWindow = await maintenanceWindowClient.update({
           id: req.params.id,

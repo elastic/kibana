@@ -24,6 +24,7 @@ import { getGuidePanelStyles } from './guide_panel.styles';
 import { GuideButton } from './guide_button';
 
 import { GuidePanelFlyout } from './guide_panel_flyout';
+import { getStepLocationPath } from './get_step_location';
 
 interface GuidePanelProps {
   api: GuidedOnboardingApi;
@@ -76,7 +77,7 @@ export const GuidePanel = ({ api, application, notifications, uiSettings }: Guid
 
             if (stepConfig.location) {
               await application.navigateToApp(stepConfig.location.appID, {
-                path: stepConfig.location.path,
+                path: getStepLocationPath(stepConfig.location.path, pluginState),
               });
 
               if (stepConfig.manualCompletion?.readyToCompleteOnNavigation) {

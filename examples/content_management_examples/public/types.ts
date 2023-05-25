@@ -11,6 +11,7 @@ import {
   ContentManagementPublicStart,
 } from '@kbn/content-management-plugin/public';
 import { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
+import { SavedObjectTaggingOssPluginStart } from '@kbn/saved-objects-tagging-oss-plugin/public';
 
 export interface SetupDeps {
   contentManagement: ContentManagementPublicSetup;
@@ -19,4 +20,5 @@ export interface SetupDeps {
 
 export interface StartDeps {
   contentManagement: ContentManagementPublicStart;
+  savedObjectsTaggingOss: SavedObjectTaggingOssPluginStart;
 }

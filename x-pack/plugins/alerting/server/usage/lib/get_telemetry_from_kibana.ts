@@ -25,7 +25,7 @@ import { parseSimpleRuleTypeBucket } from './parse_simple_rule_type_bucket';
 
 interface Opts {
   esClient: ElasticsearchClient;
-  kibanaIndex: string;
+  alertIndex: string;
   logger: Logger;
 }
 
@@ -57,12 +57,12 @@ interface GetTotalCountInUseResults {
 
 export async function getTotalCountAggregations({
   esClient,
-  kibanaIndex,
+  alertIndex,
   logger,
 }: Opts): Promise<GetTotalCountsResults> {
   try {
     const query = {
-      index: kibanaIndex,
+      index: alertIndex,
       size: 0,
       body: {
         query: {
@@ -400,12 +400,12 @@ export async function getTotalCountAggregations({
 
 export async function getTotalCountInUse({
   esClient,
-  kibanaIndex,
+  alertIndex,
   logger,
 }: Opts): Promise<GetTotalCountInUseResults> {
   try {
     const query = {
-      index: kibanaIndex,
+      index: alertIndex,
       size: 0,
       body: {
         query: {

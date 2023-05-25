@@ -7,6 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { uniqBy } from 'lodash';
+import { nonNullable } from '../../../../../utils';
 import type {
   BaseIndexPatternColumn,
   FieldBasedOperationErrorMessage,
@@ -18,7 +19,7 @@ import { runASTValidation, tryToParse } from './validation';
 import { WrappedFormulaEditor } from './editor';
 import { insertOrReplaceFormulaColumn } from './parse';
 import { generateFormula } from './generate';
-import { filterByVisibleOperation, nonNullable } from './util';
+import { filterByVisibleOperation } from './util';
 import { getManagedColumnsFrom } from '../../layer_helpers';
 import { generateMissingFieldMessage, getFilter, isColumnFormatted } from '../helpers';
 

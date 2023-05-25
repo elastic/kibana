@@ -14,7 +14,7 @@ import { EmbeddableFactoryNotFoundError } from '@kbn/embeddable-plugin/public';
 import { DataControlInput, ControlEmbeddable, IEditableControlFactory } from '../../types';
 import { pluginServices } from '../../services';
 import { ControlGroupStrings } from '../control_group_strings';
-import { useControlGroupContainerContext } from '../control_group_renderer';
+import { useControlGroupContainer } from '../embeddable/control_group_container';
 import { ControlEditor } from '../editor/control_editor';
 
 export const EditControlFlyout = ({
@@ -32,17 +32,10 @@ export const EditControlFlyout = ({
     controls: { getControlFactory },
   } = pluginServices.getServices();
   // Redux embeddable container Context
-  const reduxContext = useControlGroupContainerContext();
-  const {
-    embeddableInstance: controlGroup,
-    actions: { setControlWidth, setControlGrow },
-    useEmbeddableSelector,
-    useEmbeddableDispatch,
-  } = reduxContext;
-  const dispatch = useEmbeddableDispatch();
+  const controlGroup = useControlGroupContainer();
 
   // current state
-  const panels = useEmbeddableSelector((state) => state.explicitInput.panels);
+  const panels = controlGroup.select((state) => state.explicitInput.panels);
   const panel = panels[embeddable.id];
 
   const [currentGrow, setCurrentGrow] = useState(panel.grow);
@@ -86,9 +79,9 @@ export const EditControlFlyout = ({
     }
 
     if (currentWidth !== panel.width)
-      dispatch(setControlWidth({ width: currentWidth, embeddableId: embeddable.id }));
+      controlGroup.dispatch.setControlWidth({ width: currentWidth, embeddableId: embeddable.id });
     if (currentGrow !== panel.grow)
-      dispatch(setControlGrow({ grow: currentGrow, embeddableId: embeddable.id }));
+      controlGroup.dispatch.setControlGrow({ grow: currentGrow, embeddableId: embeddable.id });
 
     closeFlyout();
     await controlGroup.replaceEmbeddable(embeddable.id, inputToReturn, type);

@@ -9,6 +9,7 @@ import {
   BrowserAdvancedFields,
   BrowserFields,
   BrowserSimpleFields,
+  CodeEditorMode,
   CommonFields,
   ConfigKey,
   DataStream,
@@ -18,7 +19,6 @@ import {
   HTTPSimpleFields,
   ICMPSimpleFields,
   Metadata,
-  Mode,
   MonitorFields,
   ResponseBodyIndexPolicy,
   ScheduleUnit,
@@ -142,7 +142,7 @@ describe('validateMonitor', () => {
       [ConfigKey.RESPONSE_HEADERS_CHECK]: {},
       [ConfigKey.RESPONSE_HEADERS_INDEX]: true,
       [ConfigKey.RESPONSE_STATUS_CHECK]: ['200', '201'],
-      [ConfigKey.REQUEST_BODY_CHECK]: { value: 'testValue', type: Mode.JSON },
+      [ConfigKey.REQUEST_BODY_CHECK]: { value: 'testValue', type: CodeEditorMode.JSON },
       [ConfigKey.REQUEST_HEADERS_CHECK]: {},
       [ConfigKey.REQUEST_METHOD_CHECK]: '',
       [ConfigKey.USERNAME]: 'test-username',
@@ -175,11 +175,15 @@ describe('validateMonitor', () => {
       [ConfigKey.JOURNEY_FILTERS_MATCH]: 'false',
       [ConfigKey.JOURNEY_FILTERS_TAGS]: testTags,
       [ConfigKey.IGNORE_HTTPS_ERRORS]: false,
-      [ConfigKey.IS_THROTTLING_ENABLED]: true,
-      [ConfigKey.DOWNLOAD_SPEED]: '5',
-      [ConfigKey.UPLOAD_SPEED]: '3',
-      [ConfigKey.LATENCY]: '20',
-      [ConfigKey.THROTTLING_CONFIG]: '5d/3u/20l',
+      [ConfigKey.THROTTLING_CONFIG]: {
+        value: {
+          download: '5',
+          upload: '3',
+          latency: '20',
+        },
+        id: 'test',
+        label: 'test',
+      },
     };
 
     testBrowserFields = {

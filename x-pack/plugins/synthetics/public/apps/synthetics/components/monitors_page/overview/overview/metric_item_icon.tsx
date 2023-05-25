@@ -27,7 +27,7 @@ import { useRef } from 'react';
 import { selectErrorPopoverState, toggleErrorPopoverOpen } from '../../../../state';
 import { useErrorDetailsLink } from '../../../common/links/error_details_link';
 import { MonitorOverviewItem, OverviewPing } from '../../../../../../../common/runtime_types';
-import { manualTestRunSelector } from '../../../../state/manual_test_runs';
+import { manualTestRunSelector, isTestRunning } from '../../../../state/manual_test_runs';
 import { useFormatTestRunAt } from '../../../../utils/monitor_test_result/test_time_formats';
 
 const Container = styled.div`
@@ -62,7 +62,7 @@ export const MetricItemIcon = ({
     dispatch(toggleErrorPopoverOpen(configIdByLocation));
   };
 
-  const inProgress = testNowRun?.status === 'in-progress' || testNowRun?.status === 'loading';
+  const inProgress = isTestRunning(testNowRun);
 
   const errorLink = useErrorDetailsLink({
     configId: monitor.configId,
@@ -75,9 +75,11 @@ export const MetricItemIcon = ({
 
   if (inProgress) {
     return (
-      <EuiToolTip position="top" content="Test is in progress">
-        <EuiLoadingSpinner />
-      </EuiToolTip>
+      <Container>
+        <EuiToolTip position="top" content={TEST_IN_PROGRESS}>
+          <EuiLoadingSpinner />
+        </EuiToolTip>
+      </Container>
     );
   }
 
@@ -103,8 +105,7 @@ export const MetricItemIcon = ({
               onMouseLeave={() => {
                 if (isPopoverOpen) {
                   return;
-                }
-                if (timer.current) {
+                } else if (timer.current) {
                   clearTimeout(timer.current);
                 }
               }}
@@ -163,6 +164,10 @@ export const MetricItemIcon = ({
 
 const ERROR_DETAILS = i18n.translate('xpack.synthetics.errorDetails.label', {
   defaultMessage: 'Error details',
+});
+
+const TEST_IN_PROGRESS = i18n.translate('xpack.synthetics.inProgress.label', {
+  defaultMessage: 'Manual test run is in progress.',
 });
 
 const StyledIcon = euiStyled.div<{ boxShadow: string }>`

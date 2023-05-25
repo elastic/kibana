@@ -50,6 +50,7 @@ export class WatcherUIPlugin implements Plugin<void, void, Dependencies, any> {
           docLinks,
           application,
           executionContext,
+          settings,
         } = coreStart;
 
         docTitle.change(pluginName);
@@ -65,6 +66,7 @@ export class WatcherUIPlugin implements Plugin<void, void, Dependencies, any> {
           toasts: notifications.toasts,
           http,
           uiSettings,
+          settings,
           docLinks,
           setBreadcrumbs,
           theme: charts.theme,

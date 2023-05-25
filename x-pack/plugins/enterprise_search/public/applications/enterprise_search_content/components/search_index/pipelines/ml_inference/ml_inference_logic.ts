@@ -9,6 +9,8 @@ import { kea, MakeLogicType } from 'kea';
 
 import { IndicesGetMappingIndexMappingRecord } from '@elastic/elasticsearch/lib/api/types';
 
+import { SUPPORTED_PYTORCH_TASKS } from '@kbn/ml-trained-models-utils';
+
 import {
   FieldMapping,
   formatPipelineName,
@@ -38,6 +40,10 @@ import {
   TrainedModelsApiLogic,
 } from '../../../../api/ml_models/ml_trained_models_logic';
 import {
+  StartTextExpansionModelApiLogic,
+  StartTextExpansionModelApiLogicActions,
+} from '../../../../api/ml_models/text_expansion/start_text_expansion_model_api_logic';
+import {
   AttachMlInferencePipelineApiLogic,
   AttachMlInferencePipelineApiLogicArgs,
   AttachMlInferencePipelineResponse,
@@ -64,6 +70,7 @@ import {
   sortModels,
   sortSourceFields,
 } from '../../../shared/ml_inference/utils';
+import { PipelinesLogic } from '../pipelines_logic';
 
 import {
   AddInferencePipelineFormErrors,
@@ -82,6 +89,10 @@ export const EMPTY_PIPELINE_CONFIGURATION: InferencePipelineConfiguration = {
   modelID: '',
   pipelineName: '',
   sourceField: '',
+};
+
+const isNotTextExpansionModel = (model: MLInferencePipelineOption): boolean => {
+  return model.modelType !== SUPPORTED_PYTORCH_TASKS.TEXT_EXPANSION;
 };
 
 const API_REQUEST_COMPLETE_STATUSES = [Status.SUCCESS, Status.ERROR];
@@ -149,6 +160,7 @@ interface MLInferenceProcessorsActions {
   setInferencePipelineConfiguration: (configuration: InferencePipelineConfiguration) => {
     configuration: InferencePipelineConfiguration;
   };
+  startTextExpansionModelSuccess: StartTextExpansionModelApiLogicActions['apiSuccess'];
 }
 
 export interface AddInferencePipelineModal {
@@ -221,6 +233,10 @@ export const MLInferenceLogic = kea<
         'apiSuccess as attachApiSuccess',
         'makeRequest as makeAttachPipelineRequest',
       ],
+      PipelinesLogic,
+      ['closeAddMlInferencePipelineModal as closeAddMlInferencePipelineModal'],
+      StartTextExpansionModelApiLogic,
+      ['apiSuccess as startTextExpansionModelSuccess'],
     ],
     values: [
       CachedFetchIndexApiLogic,
@@ -307,6 +323,10 @@ export const MLInferenceLogic = kea<
         });
       }
     },
+    startTextExpansionModelSuccess: () => {
+      // Refresh ML models list when the text expansion model is started
+      actions.makeMLModelsRequest(undefined);
+    },
   }),
   path: ['enterprise_search', 'content', 'pipelines_add_ml_inference_pipeline'],
   reducers: {
@@ -342,6 +362,20 @@ export const MLInferenceLogic = kea<
             selectedSourceFields: [],
           };
         },
+        closeAddMlInferencePipelineModal: () => ({
+          configuration: {
+            ...EMPTY_PIPELINE_CONFIGURATION,
+          },
+          indexName: '',
+          step: AddInferencePipelineSteps.Configuration,
+        }),
+        createApiSuccess: () => ({
+          configuration: {
+            ...EMPTY_PIPELINE_CONFIGURATION,
+          },
+          indexName: '',
+          step: AddInferencePipelineSteps.Configuration,
+        }),
         removeFieldFromMapping: (modal, { fieldName }) => {
           const {
             configuration: { fieldMappings },
@@ -537,7 +571,9 @@ export const MLInferenceLogic = kea<
               sourceField,
             };
           })
-          .filter((p): p is MLInferencePipelineOption => p !== undefined);
+          .filter(
+            (p): p is MLInferencePipelineOption => p !== undefined && isNotTextExpansionModel(p)
+          );
 
         return existingPipelines;
       },

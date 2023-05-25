@@ -48,7 +48,11 @@ describe('useHostTable hook', () => {
   it('should return the basic lens attributes', async () => {
     const { result, waitForNextUpdate } = renderHook(() =>
       useLensAttributes({
+        visualizationType: 'lineChart',
         type: 'load',
+        options: {
+          title: 'Injected Normalized Load',
+        },
         dataView: mockDataView,
       })
     );
@@ -57,12 +61,12 @@ describe('useHostTable hook', () => {
     const { state, title } = result.current.attributes ?? {};
     const { datasourceStates, filters } = state ?? {};
 
-    expect(title).toBe('Normalized Load');
+    expect(title).toBe('Injected Normalized Load');
     expect(datasourceStates).toEqual({
       formBased: {
         layers: {
           layer1: {
-            columnOrder: ['hosts_aggs_breakdown', 'x_date_histogram', 'y_cpu_cores_usage'],
+            columnOrder: ['hosts_aggs_breakdown', 'x_date_histogram', 'formula_accessor'],
             columns: {
               hosts_aggs_breakdown: {
                 dataType: 'string',
@@ -100,7 +104,7 @@ describe('useHostTable hook', () => {
                 scale: 'interval',
                 sourceField: '@timestamp',
               },
-              y_cpu_cores_usage: {
+              formula_accessor: {
                 customLabel: false,
                 dataType: 'number',
                 filter: undefined,
@@ -154,19 +158,36 @@ describe('useHostTable hook', () => {
         },
       },
     });
-    expect(filters).toEqual([]);
+    expect(filters).toEqual([
+      {
+        meta: {
+          index: 'mock-id',
+        },
+        query: {
+          exists: {
+            field: 'host.name',
+          },
+        },
+      },
+    ]);
   });
 
-  it('should return attributes with injected values', async () => {
+  it('should return extra actions', async () => {
     const { result, waitForNextUpdate } = renderHook(() =>
       useLensAttributes({
+        visualizationType: 'lineChart',
         type: 'load',
         dataView: mockDataView,
       })
     );
     await waitForNextUpdate();
 
-    const injectedData = {
+    const extraActions = result.current.getExtraActions({
+      timeRange: {
+        from: 'now-15m',
+        to: 'now',
+        mode: 'relative',
+      },
       query: {
         language: 'kuery',
         query: '{term: { host.name: "a"}}',
@@ -186,17 +207,8 @@ describe('useHostTable hook', () => {
           query: { range: { 'system.load.cores': { gte: 0 } } },
         },
       ],
-      title: 'Injected CPU Cores',
-    };
+    });
 
-    const injectedAttributes = result.current.injectData(injectedData);
-
-    const { state, title } = injectedAttributes ?? {};
-    const { filters, query } = state ?? {};
-
-    expect(title).toEqual(injectedData.title);
-    expect(query).toEqual(injectedData.query);
-    expect(filters).toHaveLength(1);
-    expect(filters).toContain(injectedData.filters[0]);
+    expect(extraActions.openInLens).not.toBeNull();
   });
 });

@@ -64,9 +64,14 @@ describe('Overview Grid', () => {
   const perPage = 20;
 
   it('renders correctly', async () => {
-    jest
-      .spyOn(hooks, 'useLast50DurationChart')
-      .mockReturnValue({ data: getMockChart(), averageDuration: 30000, loading: false });
+    jest.spyOn(hooks, 'useLast50DurationChart').mockReturnValue({
+      data: getMockChart(),
+      avgDuration: 30000,
+      minDuration: 0,
+      maxDuration: 50000,
+      medianDuration: 15000,
+      loading: false,
+    });
 
     const { getByText, getAllByTestId, queryByText } = render(<OverviewGrid />, {
       state: {
@@ -124,9 +129,14 @@ describe('Overview Grid', () => {
   });
 
   it('displays showing all monitors label when reaching the end of the list', async () => {
-    jest
-      .spyOn(hooks, 'useLast50DurationChart')
-      .mockReturnValue({ data: getMockChart(), averageDuration: 30000, loading: false });
+    jest.spyOn(hooks, 'useLast50DurationChart').mockReturnValue({
+      data: getMockChart(),
+      avgDuration: 30000,
+      minDuration: 0,
+      maxDuration: 50000,
+      medianDuration: 15000,
+      loading: false,
+    });
 
     const { getByText } = render(<OverviewGrid />, {
       state: {

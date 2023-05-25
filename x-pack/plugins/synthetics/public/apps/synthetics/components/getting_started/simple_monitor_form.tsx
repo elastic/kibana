@@ -142,6 +142,13 @@ export const MONITOR_SUCCESS_LABEL = i18n.translate(
   }
 );
 
+export const MONITOR_FAILURE_LABEL = i18n.translate(
+  'xpack.synthetics.monitorManagement.monitorFailureMessage',
+  {
+    defaultMessage: 'Monitor was unable to be saved. Please try again later.',
+  }
+);
+
 export const URL_REQUIRED_LABEL = i18n.translate(
   'xpack.synthetics.monitorManagement.urlRequiredLabel',
   {

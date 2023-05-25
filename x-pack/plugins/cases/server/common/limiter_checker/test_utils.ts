@@ -39,7 +39,7 @@ export const createFileRequests = ({
   const files: FileAttachmentMetadata['files'] = [...Array(numFiles).keys()].map((value) => {
     return {
       name: `${value}`,
-      createdAt: '2023-02-27T20:26:54.345Z',
+      created: '2023-02-27T20:26:54.345Z',
       extension: 'png',
       mimeType: 'image/png',
     };

@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import type { SavedObjectsModelVersion } from '@kbn/core-saved-objects-server';
 import type { IndexMappingMeta } from '@kbn/core-saved-objects-base-server-internal';
 import { generateAdditiveMappingDiff } from './generate_additive_mapping_diff';
 import { createType } from '../test_helpers';
@@ -13,20 +14,26 @@ import { createType } from '../test_helpers';
 describe('generateAdditiveMappingDiff', () => {
   const deletedTypes = ['deletedType'];
 
+  const stubMigration = jest.fn();
+  const stubModelVersion: SavedObjectsModelVersion = {
+    changes: [{ type: 'mappings_addition', addedMappings: {} }],
+  };
+
   const getTypes = () => {
     const foo = createType({
       name: 'foo',
+      switchToModelVersionAt: '8.0.0',
       modelVersions: {
-        1: { modelChange: { type: 'expansion' } },
-        2: { modelChange: { type: 'expansion' } },
+        1: stubModelVersion,
+        2: stubModelVersion,
       },
       mappings: { properties: { fooProp: { type: 'text' } } },
     });
     const bar = createType({
       name: 'bar',
-      modelVersions: {
-        1: { modelChange: { type: 'expansion' } },
-        2: { modelChange: { type: 'expansion' } },
+      migrations: {
+        '8.0.0': stubMigration,
+        '8.5.0': stubMigration,
       },
       mappings: { properties: { barProp: { type: 'text' } } },
     });
@@ -39,8 +46,8 @@ describe('generateAdditiveMappingDiff', () => {
     const types = [foo, bar];
     const meta: IndexMappingMeta = {
       mappingVersions: {
-        foo: 1,
-        bar: 1,
+        foo: '10.1.0',
+        bar: '7.9.0',
       },
     };
 
@@ -61,8 +68,8 @@ describe('generateAdditiveMappingDiff', () => {
     const types = [foo, bar];
     const meta: IndexMappingMeta = {
       mappingVersions: {
-        foo: 1,
-        bar: 2,
+        foo: '10.1.0',
+        bar: '8.5.0',
       },
     };
 
@@ -82,9 +89,9 @@ describe('generateAdditiveMappingDiff', () => {
     const types = [foo, bar];
     const meta: IndexMappingMeta = {
       mappingVersions: {
-        foo: 1,
-        bar: 1,
-        deletedType: 42,
+        foo: '10.1.0',
+        bar: '8.2.0',
+        deletedType: '10.2.0',
       },
     };
 
@@ -105,8 +112,8 @@ describe('generateAdditiveMappingDiff', () => {
     const types = [foo, bar];
     const meta: IndexMappingMeta = {
       mappingVersions: {
-        foo: 1,
-        bar: 3,
+        foo: '10.1.0',
+        bar: '10.1.0',
       },
     };
 

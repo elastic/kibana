@@ -8,13 +8,16 @@
 import { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
+import {
+  dataTableActions,
+  dataTableSelectors,
+  tableDefaults,
+  TableId,
+} from '@kbn/securitysolution-data-table';
 import { ALERTS_PATH } from '../../../../common/constants';
 import { useUpdateUrlParam } from '../../utils/global_query_string';
-import { TableId } from '../../../../common/types';
 import { useShallowEqualSelector } from '../use_selector';
 import { URL_PARAM_KEY } from '../use_url_state';
-import { dataTableActions, dataTableSelectors } from '../../store/data_table';
-import { tableDefaults } from '../../store/data_table/defaults';
 import type { FlyoutUrlState } from './types';
 
 export const useSyncFlyoutUrlParam = () => {

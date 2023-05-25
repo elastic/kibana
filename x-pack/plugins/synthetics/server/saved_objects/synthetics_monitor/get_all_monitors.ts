@@ -12,10 +12,10 @@ import {
 } from '@kbn/core-saved-objects-api-server';
 import pMap from 'p-map';
 import { intersection } from 'lodash';
+import { syntheticsMonitorType } from '../../../common/types/saved_objects';
 import { periodToMs } from '../../routes/overview_status/overview_status';
 import { UptimeServerSetup } from '../../legacy_uptime/lib/adapters';
 import { getAllLocations } from '../../synthetics_service/get_all_locations';
-import { syntheticsMonitorType } from '../../legacy_uptime/lib/saved_objects/synthetics_monitor';
 import {
   ConfigKey,
   EncryptedSyntheticsMonitor,
@@ -73,6 +73,7 @@ export const processMonitors = async (
    * latest ping for all enabled monitors.
    */
   const enabledMonitorQueryIds: string[] = [];
+  const disabledMonitorQueryIds: string[] = [];
   let disabledCount = 0;
   let disabledMonitorsCount = 0;
   let maxPeriod = 0;
@@ -116,6 +117,7 @@ export const processMonitors = async (
       );
       disabledCount += intersectingLocations.length;
       disabledMonitorsCount += 1;
+      disabledMonitorQueryIds.push(attrs[ConfigKey.MONITOR_QUERY_ID]);
     } else {
       const missingLabels = new Set<string>();
 
@@ -152,6 +154,7 @@ export const processMonitors = async (
     maxPeriod,
     allIds,
     enabledMonitorQueryIds,
+    disabledMonitorQueryIds,
     disabledCount,
     monitorLocationMap,
     disabledMonitorsCount,

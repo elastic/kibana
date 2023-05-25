@@ -30,7 +30,7 @@ import type { HostRiskScore, UserRiskScore } from '../../../../../common/search_
 import { buildEntityNameFilter, RiskScoreEntity } from '../../../../../common/search_strategy';
 import type { UsersComponentsQueryProps } from '../../../users/pages/navigation/types';
 import type { HostsComponentsQueryProps } from '../../../hosts/pages/navigation/types';
-import { useDashboardButtonHref } from '../../../../common/hooks/use_dashboard_button_href';
+import { useDashboardHref } from '../../../../common/hooks/use_dashboard_href';
 import { RiskScoresNoDataDetected } from '../risk_score_onboarding/risk_score_no_data_detected';
 
 const StyledEuiFlexGroup = styled(EuiFlexGroup)`
@@ -62,11 +62,7 @@ const RiskDetailsTabBodyComponent: React.FC<
       : usersSelectors.userRiskScoreSeverityFilterSelector()(state)
   );
 
-  const { buttonHref } = useDashboardButtonHref({
-    to: endDate,
-    from: startDate,
-    title: getDashboardTitle(riskEntity),
-  });
+  const buttonHref = useDashboardHref({ title: getDashboardTitle(riskEntity) });
 
   const timerange = useMemo(
     () => ({
@@ -182,6 +178,8 @@ const RiskDetailsTabBodyComponent: React.FC<
             isDisabled={!buttonHref}
             data-test-subj={`risky-${riskEntity}s-view-dashboard-button`}
             target="_blank"
+            iconType="popout"
+            iconSide="right"
           >
             {i18n.VIEW_DASHBOARD_BUTTON}
           </EuiButton>

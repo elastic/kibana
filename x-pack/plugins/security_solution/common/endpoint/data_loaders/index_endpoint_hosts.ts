@@ -26,6 +26,7 @@ import type {
 import {
   deleteIndexedEndpointAndFleetActions,
   indexEndpointAndFleetActionsForHost,
+  type IndexEndpointAndFleetActionsForHostOptions,
 } from './index_endpoint_fleet_actions';
 
 import type {
@@ -75,6 +76,7 @@ export interface IndexedHostsResponse
  * @param policyResponseIndex
  * @param enrollFleet
  * @param generator
+ * @param disableEndpointActionsForHost
  */
 export async function indexEndpointHostDocs({
   numDocs,
@@ -86,6 +88,8 @@ export async function indexEndpointHostDocs({
   policyResponseIndex,
   enrollFleet,
   generator,
+  withResponseActions = true,
+  numResponseActions,
 }: {
   numDocs: number;
   client: Client;
@@ -96,6 +100,8 @@ export async function indexEndpointHostDocs({
   policyResponseIndex: string;
   enrollFleet: boolean;
   generator: EndpointDocGenerator;
+  withResponseActions?: boolean;
+  numResponseActions?: IndexEndpointAndFleetActionsForHostOptions['numResponseActions'];
 }): Promise<IndexedHostsResponse> {
   const timeBetweenDocs = 6 * 3600 * 1000; // 6 hours between metadata documents
   const timestamp = new Date().getTime();
@@ -190,13 +196,18 @@ export async function indexEndpointHostDocs({
         },
       };
 
-      // Create some fleet endpoint actions and .logs-endpoint actions for this Host
-      const actionsResponse = await indexEndpointAndFleetActionsForHost(
-        client,
-        hostMetadata,
-        undefined
-      );
-      mergeAndAppendArrays(response, actionsResponse);
+      if (withResponseActions) {
+        // Create some fleet endpoint actions and .logs-endpoint actions for this Host
+        const actionsResponse = await indexEndpointAndFleetActionsForHost(
+          client,
+          hostMetadata,
+          undefined,
+          {
+            numResponseActions,
+          }
+        );
+        mergeAndAppendArrays(response, actionsResponse);
+      }
     }
 
     await client

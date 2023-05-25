@@ -13,36 +13,23 @@
       "charts",
       "data",
       "dataViews",
+      "embeddable",
+      "exploratoryView",
       "features",
       "files",
+      "guidedOnboarding",
       "inspector",
+      "lens",
+      "observabilityShared",
       "ruleRegistry",
       "triggersActionsUi",
-      "inspector",
-      "unifiedSearch",
       "security",
-      "guidedOnboarding",
-      "share"
-    ],
-    "optionalPlugins": [
-      "discover",
-      "embeddable",
-      "home",
-      "lens",
-      "licensing",
-      "spaces",
-      "usageCollection"
-    ],
-    "requiredBundles": [
+      "share",
       "unifiedSearch",
-      "data",
-      "dataViews",
-      "embeddable",
-      "kibanaReact",
-      "kibanaUtils",
-      "lens",
       "visualizations"
     ],
+    "optionalPlugins": ["discover", "home", "licensing", "spaces", "usageCollection"],
+    "requiredBundles": ["data", "kibanaReact", "kibanaUtils", "unifiedSearch"],
     "extraPublicDirs": ["common"]
   }
 }

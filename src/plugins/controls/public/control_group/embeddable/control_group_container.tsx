@@ -5,18 +5,19 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { skip, debounceTime, distinctUntilChanged } from 'rxjs/operators';
-import React from 'react';
+import { isEqual } from 'lodash';
 import ReactDOM from 'react-dom';
-import { compareFilters, COMPARE_ALL_OPTIONS, Filter, uniqFilters } from '@kbn/es-query';
+import { Provider, TypedUseSelectorHook, useSelector } from 'react-redux';
+import React, { createContext, useContext } from 'react';
 import { BehaviorSubject, merge, Subject, Subscription } from 'rxjs';
-import _ from 'lodash';
+import { skip, debounceTime, distinctUntilChanged } from 'rxjs/operators';
+import { compareFilters, COMPARE_ALL_OPTIONS, Filter, uniqFilters } from '@kbn/es-query';
 
-import { ReduxEmbeddablePackage, ReduxEmbeddableTools } from '@kbn/presentation-util-plugin/public';
 import { OverlayRef } from '@kbn/core/public';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { Container, EmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import { ReduxToolsPackage, ReduxEmbeddableTools } from '@kbn/presentation-util-plugin/public';
+
 import {
   ControlGroupInput,
   ControlGroupOutput,
@@ -25,35 +26,49 @@ import {
   ControlPanelState,
   ControlsPanels,
   CONTROL_GROUP_TYPE,
+  FieldFilterPredicate,
 } from '../types';
 import {
   cachedChildEmbeddableOrder,
   ControlGroupChainingSystems,
   controlOrdersAreEqual,
 } from './control_group_chaining_system';
-import { pluginServices } from '../../services';
-import { openAddDataControlFlyout } from '../editor/open_add_data_control_flyout';
-import { ControlGroup } from '../component/control_group_component';
-import { controlGroupReducers } from '../state/control_group_reducers';
-import { ControlEmbeddable, ControlInput, ControlOutput } from '../../types';
-import { getNextPanelOrder } from './control_group_helpers';
-import type {
-  AddDataControlProps,
-  AddOptionsListControlProps,
-  AddRangeSliderControlProps,
-} from '../control_group_input_builder';
 import {
+  type AddDataControlProps,
+  type AddOptionsListControlProps,
+  type AddRangeSliderControlProps,
   getDataControlPanelState,
   getOptionsListPanelState,
   getRangeSliderPanelState,
   getTimeSliderPanelState,
-} from '../control_group_input_builder';
+} from '../external_api/control_group_input_builder';
+import { pluginServices } from '../../services';
+import { getNextPanelOrder } from './control_group_helpers';
+import { ControlGroup } from '../component/control_group_component';
+import { controlGroupReducers } from '../state/control_group_reducers';
+import { ControlEmbeddable, ControlInput, ControlOutput } from '../../types';
+import { openAddDataControlFlyout } from '../editor/open_add_data_control_flyout';
 import { openEditControlGroupFlyout } from '../editor/open_edit_control_group_flyout';
 
 let flyoutRef: OverlayRef | undefined;
 export const setFlyoutRef = (newRef: OverlayRef | undefined) => {
   flyoutRef = newRef;
 };
+
+export const ControlGroupContainerContext = createContext<ControlGroupContainer | null>(null);
+export const controlGroupSelector = useSelector as TypedUseSelectorHook<ControlGroupReduxState>;
+export const useControlGroupContainer = (): ControlGroupContainer => {
+  const controlGroup = useContext<ControlGroupContainer | null>(ControlGroupContainerContext);
+  if (controlGroup == null) {
+    throw new Error('useControlGroupContainer must be used inside ControlGroupContainerContext.');
+  }
+  return controlGroup!;
+};
+
+type ControlGroupReduxEmbeddableTools = ReduxEmbeddableTools<
+  ControlGroupReduxState,
+  typeof controlGroupReducers
+>;
 
 export class ControlGroupContainer extends Container<
   ControlInput,
@@ -71,66 +86,27 @@ export class ControlGroupContainer extends Container<
   private relevantDataViewId?: string;
   private lastUsedDataViewId?: string;
 
-  private reduxEmbeddableTools: ReduxEmbeddableTools<
-    ControlGroupReduxState,
-    typeof controlGroupReducers
-  >;
+  // state management
+  public select: ControlGroupReduxEmbeddableTools['select'];
+  public getState: ControlGroupReduxEmbeddableTools['getState'];
+  public dispatch: ControlGroupReduxEmbeddableTools['dispatch'];
+  public onStateChange: ControlGroupReduxEmbeddableTools['onStateChange'];
+
+  private store: ControlGroupReduxEmbeddableTools['store'];
+
+  private cleanupStateTools: () => void;
 
   public onFiltersPublished$: Subject<Filter[]>;
   public onControlRemoved$: Subject<string>;
 
-  public setLastUsedDataViewId = (lastUsedDataViewId: string) => {
-    this.lastUsedDataViewId = lastUsedDataViewId;
-  };
-
-  public setRelevantDataViewId = (newRelevantDataViewId: string) => {
-    this.relevantDataViewId = newRelevantDataViewId;
-  };
-
-  public getMostRelevantDataViewId = () => {
-    const staticDataViewId =
-      this.getReduxEmbeddableTools().getState().componentState.staticDataViewId;
-    return staticDataViewId ?? this.lastUsedDataViewId ?? this.relevantDataViewId;
-  };
-
-  public getReduxEmbeddableTools = () => {
-    return this.reduxEmbeddableTools;
-  };
-
-  public closeAllFlyouts() {
-    flyoutRef?.close();
-    flyoutRef = undefined;
-  }
-
-  public async addDataControlFromField(controlProps: AddDataControlProps) {
-    const panelState = await getDataControlPanelState(this.getInput(), controlProps);
-    return this.createAndSaveEmbeddable(panelState.type, panelState);
-  }
-
-  public addOptionsListControl(controlProps: AddOptionsListControlProps) {
-    const panelState = getOptionsListPanelState(this.getInput(), controlProps);
-    return this.createAndSaveEmbeddable(panelState.type, panelState);
-  }
-
-  public addRangeSliderControl(controlProps: AddRangeSliderControlProps) {
-    const panelState = getRangeSliderPanelState(this.getInput(), controlProps);
-    return this.createAndSaveEmbeddable(panelState.type, panelState);
-  }
-
-  public addTimeSliderControl() {
-    const panelState = getTimeSliderPanelState(this.getInput());
-    return this.createAndSaveEmbeddable(panelState.type, panelState);
-  }
-
-  public openAddDataControlFlyout = openAddDataControlFlyout;
-
-  public openEditControlGroupFlyout = openEditControlGroupFlyout;
+  public fieldFilterPredicate: FieldFilterPredicate | undefined;
 
   constructor(
-    reduxEmbeddablePackage: ReduxEmbeddablePackage,
+    reduxToolsPackage: ReduxToolsPackage,
     initialInput: ControlGroupInput,
     parent?: Container,
-    settings?: ControlGroupSettings
+    settings?: ControlGroupSettings,
+    fieldFilterPredicate?: FieldFilterPredicate
   ) {
     super(
       initialInput,
@@ -145,7 +121,7 @@ export class ControlGroupContainer extends Container<
     this.onControlRemoved$ = new Subject<string>();
 
     // build redux embeddable tools
-    this.reduxEmbeddableTools = reduxEmbeddablePackage.createTools<
+    const reduxEmbeddableTools = reduxToolsPackage.createReduxEmbeddableTools<
       ControlGroupReduxState,
       typeof controlGroupReducers
     >({
@@ -154,6 +130,14 @@ export class ControlGroupContainer extends Container<
       initialComponentState: settings,
     });
 
+    this.select = reduxEmbeddableTools.select;
+    this.getState = reduxEmbeddableTools.getState;
+    this.dispatch = reduxEmbeddableTools.dispatch;
+    this.cleanupStateTools = reduxEmbeddableTools.cleanup;
+    this.onStateChange = reduxEmbeddableTools.onStateChange;
+
+    this.store = reduxEmbeddableTools.store;
+
     // when all children are ready setup subscriptions
     this.untilAllChildrenReady().then(() => {
       this.recalculateDataViews();
@@ -161,6 +145,8 @@ export class ControlGroupContainer extends Container<
       this.setupSubscriptions();
       this.initialized$.next(true);
     });
+
+    this.fieldFilterPredicate = fieldFilterPredicate;
   }
 
   private setupSubscriptions = () => {
@@ -204,6 +190,60 @@ export class ControlGroupContainer extends Container<
     );
   };
 
+  public updateInputAndReinitialize = (newInput: Partial<ControlGroupInput>) => {
+    this.subscriptions.unsubscribe();
+    this.subscriptions = new Subscription();
+    this.initialized$.next(false);
+    this.updateInput(newInput);
+    this.untilAllChildrenReady().then(() => {
+      this.recalculateDataViews();
+      this.recalculateFilters();
+      this.setupSubscriptions();
+      this.initialized$.next(true);
+    });
+  };
+
+  public setLastUsedDataViewId = (lastUsedDataViewId: string) => {
+    this.lastUsedDataViewId = lastUsedDataViewId;
+  };
+
+  public setRelevantDataViewId = (newRelevantDataViewId: string) => {
+    this.relevantDataViewId = newRelevantDataViewId;
+  };
+
+  public getMostRelevantDataViewId = () => {
+    return this.lastUsedDataViewId ?? this.relevantDataViewId;
+  };
+
+  public closeAllFlyouts() {
+    flyoutRef?.close();
+    flyoutRef = undefined;
+  }
+
+  public async addDataControlFromField(controlProps: AddDataControlProps) {
+    const panelState = await getDataControlPanelState(this.getInput(), controlProps);
+    return this.createAndSaveEmbeddable(panelState.type, panelState);
+  }
+
+  public addOptionsListControl(controlProps: AddOptionsListControlProps) {
+    const panelState = getOptionsListPanelState(this.getInput(), controlProps);
+    return this.createAndSaveEmbeddable(panelState.type, panelState);
+  }
+
+  public addRangeSliderControl(controlProps: AddRangeSliderControlProps) {
+    const panelState = getRangeSliderPanelState(this.getInput(), controlProps);
+    return this.createAndSaveEmbeddable(panelState.type, panelState);
+  }
+
+  public addTimeSliderControl() {
+    const panelState = getTimeSliderPanelState(this.getInput());
+    return this.createAndSaveEmbeddable(panelState.type, panelState);
+  }
+
+  public openAddDataControlFlyout = openAddDataControlFlyout;
+
+  public openEditControlGroupFlyout = openEditControlGroupFlyout;
+
   public getPanelCount = () => {
     return Object.keys(this.getInput().panels).length;
   };
@@ -225,7 +265,7 @@ export class ControlGroupContainer extends Container<
     // if filters are different, publish them
     if (
       !compareFilters(this.output.filters ?? [], allFilters ?? [], COMPARE_ALL_OPTIONS) ||
-      !_.isEqual(this.output.timeslice, timeslice)
+      !isEqual(this.output.timeslice, timeslice)
     ) {
       this.updateOutput({ filters: uniqFilters(allFilters), timeslice });
       this.onFiltersPublished$.next(allFilters);
@@ -337,15 +377,13 @@ export class ControlGroupContainer extends Container<
       ReactDOM.unmountComponentAtNode(this.domNode);
     }
     this.domNode = dom;
-    const ControlsServicesProvider = pluginServices.getContextProvider();
-    const { Wrapper: ControlGroupReduxWrapper } = this.reduxEmbeddableTools;
     ReactDOM.render(
       <KibanaThemeProvider theme$={pluginServices.getServices().theme.theme$}>
-        <ControlsServicesProvider>
-          <ControlGroupReduxWrapper>
+        <Provider store={this.store}>
+          <ControlGroupContainerContext.Provider value={this}>
             <ControlGroup />
-          </ControlGroupReduxWrapper>
-        </ControlsServicesProvider>
+          </ControlGroupContainerContext.Provider>
+        </Provider>
       </KibanaThemeProvider>,
       dom
     );
@@ -355,7 +393,7 @@ export class ControlGroupContainer extends Container<
     super.destroy();
     this.closeAllFlyouts();
     this.subscriptions.unsubscribe();
-    this.reduxEmbeddableTools.cleanup();
+    this.cleanupStateTools();
     if (this.domNode) ReactDOM.unmountComponentAtNode(this.domNode);
   }
 }

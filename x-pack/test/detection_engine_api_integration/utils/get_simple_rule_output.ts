@@ -40,7 +40,7 @@ export const getMockSharedResponseSchema = (
   tags: [],
   to: 'now',
   threat: [],
-  throttle: 'no_actions',
+  throttle: undefined,
   exceptions_list: [],
   version: 1,
   revision: 0,

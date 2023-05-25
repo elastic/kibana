@@ -24,8 +24,6 @@ import { readRules } from '../../../logic/crud/read_rules';
 import { patchRules } from '../../../logic/crud/patch_rules';
 import { checkDefaultRuleExceptionListReferences } from '../../../logic/exceptions/check_for_default_rule_exception_list';
 import { validateRuleDefaultExceptionList } from '../../../logic/exceptions/validate_rule_default_exception_list';
-// eslint-disable-next-line no-restricted-imports
-import { legacyMigrate } from '../../../logic/rule_actions/legacy_action_migration';
 import { getIdError } from '../../../utils/utils';
 import { transformValidate } from '../../../utils/validate';
 
@@ -83,15 +81,9 @@ export const patchRuleRoute = (router: SecuritySolutionPluginRouter, ml: SetupPl
           ruleId: params.id,
         });
 
-        const migratedRule = await legacyMigrate({
-          rulesClient,
-          savedObjectsClient,
-          rule: existingRule,
-        });
-
         const rule = await patchRules({
           rulesClient,
-          existingRule: migratedRule,
+          existingRule,
           nextParams: params,
         });
         if (rule != null && rule.enabled != null && rule.name != null) {

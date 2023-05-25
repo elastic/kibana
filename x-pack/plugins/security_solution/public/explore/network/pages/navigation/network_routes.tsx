@@ -11,6 +11,7 @@ import { Route } from '@kbn/shared-ux-router';
 
 import { EuiFlexItem, EuiSpacer } from '@elastic/eui';
 
+import { TableId } from '@kbn/securitysolution-data-table';
 import { FlowTargetSourceDest } from '../../../../../common/search_strategy/security_solution/network';
 
 import {
@@ -24,7 +25,6 @@ import { EventsQueryTabBody } from '../../../../common/components/events_tab';
 import { AnomaliesNetworkTable } from '../../../../common/components/ml/tables/anomalies_network_table';
 import { sourceOrDestinationIpExistsFilter } from '../../../../common/components/visualization_actions/utils';
 import { AnomaliesQueryTabBody } from '../../../../common/containers/anomalies/anomalies_query_tab_body';
-import { TableId } from '../../../../../common/types';
 import { ConditionalFlexGroup } from './conditional_flex_group';
 import type { NetworkRoutesProps } from './types';
 import { NetworkRouteType } from './types';

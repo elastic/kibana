@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { tableDefaults } from '../../store/data_table/defaults';
-import type { SubsetDataTableModel } from '../../store/data_table/model';
+import { tableDefaults } from '@kbn/securitysolution-data-table';
+import type { SubsetDataTableModel } from '@kbn/securitysolution-data-table';
 import { defaultEventHeaders } from './default_event_headers';
 
 export const eventsDefaultModel: SubsetDataTableModel = {

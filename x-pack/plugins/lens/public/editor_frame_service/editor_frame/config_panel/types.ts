@@ -17,6 +17,7 @@ import {
   VisualizationMap,
   UserMessagesGetter,
 } from '../../../types';
+
 export interface ConfigPanelWrapperProps {
   framePublicAPI: FramePublicAPI;
   datasourceMap: DatasourceMap;

@@ -76,7 +76,8 @@ export const convertBucketsToRows = (
     const ids = options.metrics.map((metric) => metric.id);
     const metrics = ids.reduce((acc, id) => {
       const valueObject = get(bucket, [id]);
-      return { ...acc, [id]: ValueObjectTypeRT.is(valueObject) ? getValue(valueObject) : null };
+      acc[id] = ValueObjectTypeRT.is(valueObject) ? getValue(valueObject) : null;
+      return acc;
     }, {} as Record<string, number | null | object[]>);
 
     return { timestamp: bucket.key as number, ...metrics };

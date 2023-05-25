@@ -11,7 +11,6 @@ import { i18n } from '@kbn/i18n';
 // eslint-disable-next-line no-restricted-imports
 import isEmpty from 'lodash/isEmpty';
 
-import './brace_imports';
 import {
   EuiForm,
   EuiButton,

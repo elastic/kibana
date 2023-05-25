@@ -1,0 +1,21 @@
+{
+  "extends": "../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+  },
+  "include": [
+    "../../typings/**/*",
+    "common/**/*",
+    "public/**/*",
+    "server/**/*",
+  ],
+  "kbn_references": [
+    "@kbn/text-based-editor",
+    "@kbn/kibana-react-plugin",
+    "@kbn/core",
+  ],
+  "exclude": [
+    "target/**/*",
+  ]
+}
+

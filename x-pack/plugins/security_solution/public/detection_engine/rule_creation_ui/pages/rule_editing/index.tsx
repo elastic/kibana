@@ -303,12 +303,14 @@ const EditRulePageComponent: FC = () => {
             <StepPanel loading={loading}>
               {actionsStep.data != null && (
                 <StepRuleActions
+                  ruleId={rule?.id}
                   isReadOnlyView={false}
                   isLoading={isLoading}
                   isUpdateView
                   defaultValues={actionsStep.data}
                   setForm={setFormHook}
                   actionMessageParams={actionMessageParams}
+                  summaryActionMessageParams={actionMessageParams}
                   ruleType={rule?.type}
                 />
               )}
@@ -319,6 +321,7 @@ const EditRulePageComponent: FC = () => {
       },
     ],
     [
+      rule?.id,
       rule?.immutable,
       rule?.type,
       loading,

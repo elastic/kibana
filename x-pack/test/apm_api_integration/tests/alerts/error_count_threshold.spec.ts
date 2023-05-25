@@ -8,6 +8,7 @@
 import { ApmRuleType } from '@kbn/apm-plugin/common/rules/apm_rule_types';
 import { errorCountMessage } from '@kbn/apm-plugin/common/rules/default_action_message';
 import { apm, timerange } from '@kbn/apm-synthtrace-client';
+import { getErrorGroupingKey } from '@kbn/apm-synthtrace-client/src/lib/apm/instance';
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
@@ -16,7 +17,11 @@ import {
   fetchServiceInventoryAlertCounts,
   fetchServiceTabAlertCount,
 } from './alerting_api_helper';
-import { waitForRuleStatus, waitForDocumentInIndex } from './wait_for_rule_status';
+import {
+  waitForRuleStatus,
+  waitForDocumentInIndex,
+  waitForAlertInIndex,
+} from './wait_for_rule_status';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
@@ -32,7 +37,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     let ruleId: string;
     let actionId: string | undefined;
 
-    const INDEX_NAME = 'error-count';
+    const APM_ALERTS_INDEX = '.alerts-observability.apm.alerts-default';
+    const ALERT_ACTION_INDEX_NAME = 'alert-action-error-count';
+
+    const errorMessage = '[ResponseError] index_not_found_exception';
+    const errorGroupingKey = getErrorGroupingKey(errorMessage);
 
     before(async () => {
       const opbeansJava = apm
@@ -50,11 +59,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               .timestamp(timestamp)
               .duration(100)
               .failure()
-              .errors(
-                opbeansJava
-                  .error({ message: '[ResponseError] index_not_found_exception' })
-                  .timestamp(timestamp + 50)
-              ),
+              .errors(opbeansJava.error({ message: errorMessage }).timestamp(timestamp + 50)),
             opbeansNode
               .transaction({ transactionName: 'tx-node' })
               .timestamp(timestamp)
@@ -69,8 +74,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       await synthtraceEsClient.clean();
       await supertest.delete(`/api/alerting/rule/${ruleId}`).set('kbn-xsrf', 'foo');
       await supertest.delete(`/api/actions/connector/${actionId}`).set('kbn-xsrf', 'foo');
-      await esDeleteAllIndices(INDEX_NAME);
-      await es.deleteByQuery({ index: '.alerts*', query: { match_all: {} } });
+      await esDeleteAllIndices(ALERT_ACTION_INDEX_NAME);
+      await es.deleteByQuery({
+        index: APM_ALERTS_INDEX,
+        query: { term: { 'kibana.alert.rule.uuid': ruleId } },
+      });
       await es.deleteByQuery({
         index: '.kibana-event-log-*',
         query: { term: { 'kibana.alert.rule.consumer': 'apm' } },
@@ -82,7 +90,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         actionId = await createIndexConnector({
           supertest,
           name: 'Error count API test',
-          indexName: INDEX_NAME,
+          indexName: ALERT_ACTION_INDEX_NAME,
         });
         const createdRule = await createApmRule({
           supertest,
@@ -93,13 +101,25 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             threshold: 1,
             windowSize: 1,
             windowUnit: 'h',
+            groupBy: [
+              'service.name',
+              'service.environment',
+              'transaction.name',
+              'error.grouping_key',
+            ],
           },
           actions: [
             {
               group: 'threshold_met',
               id: actionId,
               params: {
-                documents: [{ message: errorCountMessage }],
+                documents: [
+                  {
+                    message: `${errorCountMessage}
+- Transaction name: {{context.transactionName}}
+- Error grouping key: {{context.errorGroupingKey}}`,
+                  },
+                ],
               },
               frequency: {
                 notify_when: 'onActionGroupChange',
@@ -113,7 +133,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         ruleId = createdRule.id;
       });
 
-      it('checks if alert is active', async () => {
+      it('checks if rule is active', async () => {
         const executionStatus = await waitForRuleStatus({
           id: ruleId,
           expectedStatus: 'active',
@@ -125,7 +145,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       it('returns correct message', async () => {
         const resp = await waitForDocumentInIndex<{ message: string }>({
           es,
-          indexName: INDEX_NAME,
+          indexName: ALERT_ACTION_INDEX_NAME,
         });
 
         expect(resp.hits.hits[0]._source?.message).eql(
@@ -134,8 +154,23 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 - Service name: opbeans-java
 - Environment: production
 - Threshold: 1
-- Triggered value: 15 errors over the last 1 hr`
+- Triggered value: 15 errors over the last 1 hr
+- Transaction name: tx-java
+- Error grouping key: ${errorGroupingKey}`
         );
+      });
+
+      it('indexes alert document with all group-by fields', async () => {
+        const resp = await waitForAlertInIndex({
+          es,
+          indexName: APM_ALERTS_INDEX,
+          ruleId,
+        });
+
+        expect(resp.hits.hits[0]._source).property('service.name', 'opbeans-java');
+        expect(resp.hits.hits[0]._source).property('service.environment', 'production');
+        expect(resp.hits.hits[0]._source).property('transaction.name', 'tx-java');
+        expect(resp.hits.hits[0]._source).property('error.grouping_key', errorGroupingKey);
       });
 
       it('shows the correct alert count for each service on service inventory', async () => {

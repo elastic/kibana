@@ -32,6 +32,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.importExport.load(
         `x-pack/test/functional/fixtures/kbn_archiver/dashboard/with_by_value_visualizations`
       );
+      await kibanaServer.uiSettings.update({
+        'histogram:maxBars': 100,
+        'visualization:visualize:legacyHeatmapChartsLibrary': true,
+      });
 
       await retry.try(async () => {
         await PageObjects.common.navigateToApp('dashboard');
@@ -49,6 +53,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.importExport.unload(
         'x-pack/test/functional/fixtures/kbn_archiver/dashboard/with_by_value_visualizations'
       );
+      await kibanaServer.uiSettings.update({
+        'histogram:maxBars': 1000,
+        'visualization:visualize:legacyHeatmapChartsLibrary': false,
+      });
       await kibanaServer.savedObjects.cleanStandardList();
     });
 

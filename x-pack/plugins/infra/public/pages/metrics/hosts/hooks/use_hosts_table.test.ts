@@ -7,135 +7,130 @@
 
 import { useHostsTable } from './use_hosts_table';
 import { renderHook } from '@testing-library/react-hooks';
-import { SnapshotNode } from '../../../../../common/http_api';
+import { InfraAssetMetricsItem } from '../../../../../common/http_api';
+import * as useUnifiedSearchHooks from './use_unified_search';
+import * as useHostsViewHooks from './use_hosts_view';
+
+jest.mock('./use_unified_search');
+jest.mock('./use_hosts_view');
+
+const mockUseUnifiedSearchContext =
+  useUnifiedSearchHooks.useUnifiedSearchContext as jest.MockedFunction<
+    typeof useUnifiedSearchHooks.useUnifiedSearchContext
+  >;
+const mockUseHostsViewContext = useHostsViewHooks.useHostsViewContext as jest.MockedFunction<
+  typeof useHostsViewHooks.useHostsViewContext
+>;
+
+const mockHostNode: InfraAssetMetricsItem[] = [
+  {
+    metrics: [
+      {
+        name: 'rx',
+        value: 252456.92916666667,
+      },
+      {
+        name: 'tx',
+        value: 252758.425,
+      },
+      {
+        name: 'memory',
+        value: 0.94525,
+      },
+      {
+        name: 'cpu',
+        value: 0.6353277777777777,
+      },
+      {
+        name: 'memoryTotal',
+        value: 34359.738368,
+      },
+    ],
+    metadata: [
+      { name: 'host.os.name', value: null },
+      { name: 'cloud.provider', value: 'aws' },
+    ],
+    name: 'host-0',
+  },
+  {
+    metrics: [
+      {
+        name: 'rx',
+        value: 95.86339715321859,
+      },
+      {
+        name: 'tx',
+        value: 110.38566859563191,
+      },
+      {
+        name: 'memory',
+        value: 0.5400000214576721,
+      },
+      {
+        name: 'cpu',
+        value: 0.8647805555555556,
+      },
+      {
+        name: 'memoryTotal',
+        value: 9.194304,
+      },
+    ],
+    metadata: [
+      { name: 'host.os.name', value: 'macOS' },
+      { name: 'host.ip', value: '243.86.94.22' },
+    ],
+    name: 'host-1',
+  },
+];
 
 describe('useHostTable hook', () => {
-  it('it should map the nodes returned from the snapshot api to a format matching eui table items', () => {
-    const nodes: SnapshotNode[] = [
-      {
-        metrics: [
-          {
-            name: 'rx',
-            avg: 252456.92916666667,
-          },
-          {
-            name: 'tx',
-            avg: 252758.425,
-          },
-          {
-            name: 'memory',
-            avg: 0.94525,
-          },
-          {
-            name: 'cpu',
-            value: 0.6353277777777777,
-          },
-          {
-            name: 'memoryTotal',
-            avg: 34359.738368,
-          },
-        ],
-        path: [{ value: 'host-0', label: 'host-0', os: null, cloudProvider: 'aws' }],
-        name: 'host-0',
+  beforeAll(() => {
+    mockUseUnifiedSearchContext.mockReturnValue({
+      searchCriteria: {
+        dateRange: { from: 'now-15m', to: 'now' },
       },
-      {
-        metrics: [
-          {
-            name: 'rx',
-            avg: 95.86339715321859,
-          },
-          {
-            name: 'tx',
-            avg: 110.38566859563191,
-          },
-          {
-            name: 'memory',
-            avg: 0.5400000214576721,
-          },
-          {
-            name: 'cpu',
-            value: 0.8647805555555556,
-          },
-          {
-            name: 'memoryTotal',
-            avg: 9.194304,
-          },
-        ],
-        path: [
-          { value: 'host-1', label: 'host-1' },
-          { value: 'host-1', label: 'host-1', ip: '243.86.94.22', os: 'macOS' },
-        ],
-        name: 'host-1',
-      },
-    ];
+    } as ReturnType<typeof useUnifiedSearchHooks.useUnifiedSearchContext>);
 
-    const items = [
+    mockUseHostsViewContext.mockReturnValue({
+      hostNodes: mockHostNode,
+    } as ReturnType<typeof useHostsViewHooks.useHostsViewContext>);
+  });
+  it('it should map the nodes returned from the snapshot api to a format matching eui table items', () => {
+    const expected = [
       {
         name: 'host-0',
         os: '-',
         ip: '',
-        id: 'host-0-0',
+        id: 'host-0--',
         title: {
           cloudProvider: 'aws',
           name: 'host-0',
         },
-        rx: {
-          name: 'rx',
-          avg: 252456.92916666667,
-        },
-        tx: {
-          name: 'tx',
-          avg: 252758.425,
-        },
-        memory: {
-          name: 'memory',
-          avg: 0.94525,
-        },
-        cpu: {
-          name: 'cpu',
-          value: 0.6353277777777777,
-        },
-        memoryTotal: {
-          name: 'memoryTotal',
-
-          avg: 34359.738368,
-        },
+        rx: 252456.92916666667,
+        tx: 252758.425,
+        memory: 0.94525,
+        cpu: 0.6353277777777777,
+        memoryTotal: 34359.738368,
       },
       {
         name: 'host-1',
         os: 'macOS',
         ip: '243.86.94.22',
-        id: 'host-1-1',
+        id: 'host-1-macOS',
         title: {
           cloudProvider: null,
           name: 'host-1',
         },
-        rx: {
-          name: 'rx',
-          avg: 95.86339715321859,
-        },
-        tx: {
-          name: 'tx',
-          avg: 110.38566859563191,
-        },
-        memory: {
-          name: 'memory',
-          avg: 0.5400000214576721,
-        },
-        cpu: {
-          name: 'cpu',
-          value: 0.8647805555555556,
-        },
-        memoryTotal: {
-          name: 'memoryTotal',
-          avg: 9.194304,
-        },
+        rx: 95.86339715321859,
+        tx: 110.38566859563191,
+        memory: 0.5400000214576721,
+        cpu: 0.8647805555555556,
+        memoryTotal: 9.194304,
       },
     ];
-    const time = { from: 'now-15m', to: 'now', interval: '>=1m' };
 
-    const { result } = renderHook(() => useHostsTable(nodes, { time }));
+    const { result } = renderHook(() => useHostsTable());
 
-    expect(result.current.items).toStrictEqual(items);
+    expect(result.current.items).toStrictEqual(expected);
   });
 });

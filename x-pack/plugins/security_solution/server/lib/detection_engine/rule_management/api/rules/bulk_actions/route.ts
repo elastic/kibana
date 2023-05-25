@@ -8,17 +8,12 @@
 import { truncate } from 'lodash';
 import moment from 'moment';
 import { BadRequestError, transformError } from '@kbn/securitysolution-es-utils';
-import type {
-  IKibanaResponse,
-  KibanaResponseFactory,
-  Logger,
-  SavedObjectsClientContract,
-} from '@kbn/core/server';
+import type { IKibanaResponse, KibanaResponseFactory, Logger } from '@kbn/core/server';
 
 import type { RulesClient, BulkOperationError } from '@kbn/alerting-plugin/server';
-import type { SanitizedRule, BulkActionSkipResult } from '@kbn/alerting-plugin/common';
+import type { BulkActionSkipResult } from '@kbn/alerting-plugin/common';
 import { AbortError } from '@kbn/kibana-utils-plugin/common';
-import type { RuleAlertType, RuleParams } from '../../../../rule_schema';
+import type { RuleAlertType } from '../../../../rule_schema';
 import type { BulkActionsDryRunErrCode } from '../../../../../../../common/constants';
 import {
   DETECTION_ENGINE_RULES_BULK_ACTION,
@@ -52,8 +47,6 @@ import { readRules } from '../../../logic/crud/read_rules';
 import { getExportByObjectIds } from '../../../logic/export/get_export_by_object_ids';
 import { buildSiemResponse } from '../../../../routes/utils';
 import { internalRuleToAPIResponse } from '../../../normalization/rule_converters';
-// eslint-disable-next-line no-restricted-imports
-import { legacyMigrate } from '../../../logic/rule_actions/legacy_action_migration';
 import { bulkEditRules } from '../../../logic/bulk_actions/bulk_edit_rules';
 import type { DryRunError } from '../../../logic/bulk_actions/dry_run';
 import {
@@ -234,39 +227,6 @@ const fetchRulesByQueryOrIds = async ({
   };
 };
 
-/**
- * Helper method to migrate any legacy actions a rule may have. If no actions or no legacy actions
- * no migration is performed.
- * @params rulesClient
- * @params savedObjectsClient
- * @params rule - rule to be migrated
- * @returns The migrated rule
- */
-export const migrateRuleActions = async ({
-  rulesClient,
-  savedObjectsClient,
-  rule,
-}: {
-  rulesClient: RulesClient;
-  savedObjectsClient: SavedObjectsClientContract;
-  rule: RuleAlertType;
-}): Promise<SanitizedRule<RuleParams>> => {
-  const migratedRule = await legacyMigrate({
-    rulesClient,
-    savedObjectsClient,
-    rule,
-  });
-
-  // This should only be hit if `rule` passed into `legacyMigrate`
-  // is `null` or `rule.id` is null which right now, as typed, should not occur
-  // but catching if does, in which case something upstream would be breaking down
-  if (migratedRule == null) {
-    throw new Error(`An error occurred processing rule with id:${rule.id}`);
-  }
-
-  return migratedRule;
-};
-
 export const performBulkActionRoute = (
   router: SecuritySolutionPluginRouter,
   ml: SetupPlugins['ml'],
@@ -359,31 +319,10 @@ export const performBulkActionRoute = (
             mlAuthz,
           });
 
-          // migrate legacy rule actions
-          const migrationOutcome = await initPromisePool({
-            concurrency: MAX_RULES_TO_UPDATE_IN_PARALLEL,
-            items: rules,
-            executor: async (rule) => {
-              // actions only get fired when rule running, so we should be fine to migrate only enabled
-              if (rule.enabled) {
-                return migrateRuleActions({
-                  rulesClient,
-                  savedObjectsClient,
-                  rule,
-                });
-              } else {
-                return rule;
-              }
-            },
-            abortSignal: abortController.signal,
-          });
-
           return buildBulkResponse(response, {
-            updated: migrationOutcome.results
-              .filter(({ result }) => result)
-              .map(({ result }) => result),
+            updated: rules,
             skipped,
-            errors: [...errors, ...migrationOutcome.errors],
+            errors,
           });
         }
 
@@ -413,18 +352,12 @@ export const performBulkActionRoute = (
                   return rule;
                 }
 
-                const migratedRule = await migrateRuleActions({
-                  rulesClient,
-                  savedObjectsClient,
-                  rule,
-                });
-
-                if (!migratedRule.enabled) {
-                  await rulesClient.enable({ id: migratedRule.id });
+                if (!rule.enabled) {
+                  await rulesClient.enable({ id: rule.id });
                 }
 
                 return {
-                  ...migratedRule,
+                  ...rule,
                   enabled: true,
                 };
               },
@@ -446,18 +379,12 @@ export const performBulkActionRoute = (
                   return rule;
                 }
 
-                const migratedRule = await migrateRuleActions({
-                  rulesClient,
-                  savedObjectsClient,
-                  rule,
-                });
-
-                if (migratedRule.enabled) {
-                  await rulesClient.disable({ id: migratedRule.id });
+                if (rule.enabled) {
+                  await rulesClient.disable({ id: rule.id });
                 }
 
                 return {
-                  ...migratedRule,
+                  ...rule,
                   enabled: false,
                 };
               },
@@ -478,14 +405,8 @@ export const performBulkActionRoute = (
                   return null;
                 }
 
-                const migratedRule = await migrateRuleActions({
-                  rulesClient,
-                  savedObjectsClient,
-                  rule,
-                });
-
                 await deleteRules({
-                  ruleId: migratedRule.id,
+                  ruleId: rule.id,
                   rulesClient,
                 });
 
@@ -509,18 +430,16 @@ export const performBulkActionRoute = (
                 if (isDryRun) {
                   return rule;
                 }
-                const migratedRule = await migrateRuleActions({
-                  rulesClient,
-                  savedObjectsClient,
-                  rule,
-                });
+
                 let shouldDuplicateExceptions = true;
+                let shouldDuplicateExpiredExceptions = true;
                 if (body.duplicate !== undefined) {
                   shouldDuplicateExceptions = body.duplicate.include_exceptions;
+                  shouldDuplicateExpiredExceptions = body.duplicate.include_expired_exceptions;
                 }
 
                 const duplicateRuleToCreate = await duplicateRule({
-                  rule: migratedRule,
+                  rule,
                 });
 
                 const createdRule = await rulesClient.create({
@@ -532,6 +451,7 @@ export const performBulkActionRoute = (
                   ? await duplicateExceptions({
                       ruleId: rule.params.ruleId,
                       exceptionLists: rule.params.exceptionsList,
+                      includeExpiredExceptions: shouldDuplicateExpiredExceptions,
                       exceptionsClient,
                     })
                   : [];

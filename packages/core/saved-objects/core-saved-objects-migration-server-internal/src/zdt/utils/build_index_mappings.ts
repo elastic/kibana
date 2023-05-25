@@ -11,7 +11,7 @@ import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
 import {
   type IndexMapping,
   type IndexMappingMeta,
-  getModelVersionMapForTypes,
+  getVirtualVersionMap,
 } from '@kbn/core-saved-objects-base-server-internal';
 import { getBaseMappings, buildTypesMappings } from '../../core';
 
@@ -48,11 +48,11 @@ interface BuildIndexMetaOpts {
  * @param types The list of all registered SO types.
  */
 export const buildIndexMeta = ({ types }: BuildIndexMetaOpts): IndexMappingMeta => {
-  const modelVersions = getModelVersionMapForTypes(types);
+  const typeVersions = getVirtualVersionMap(types);
 
   return {
-    mappingVersions: modelVersions,
-    docVersions: modelVersions,
+    mappingVersions: typeVersions,
+    docVersions: typeVersions,
     migrationState: {
       convertingDocuments: false,
     },

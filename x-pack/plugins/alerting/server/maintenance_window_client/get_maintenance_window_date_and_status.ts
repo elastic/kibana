@@ -30,12 +30,15 @@ export const getMaintenanceWindowDateAndStatus = ({
   dateToCompare: Date;
   expirationDate: Date;
 }): MaintenanceWindowDateAndStatus => {
-  // No events, status is finished
+  // No events, status is finished or archived
   if (!events.length) {
+    const status = moment.utc(expirationDate).isBefore(dateToCompare)
+      ? MaintenanceWindowStatus.Archived
+      : MaintenanceWindowStatus.Finished;
     return {
       eventStartTime: null,
       eventEndTime: null,
-      status: MaintenanceWindowStatus.Finished,
+      status,
     };
   }
 

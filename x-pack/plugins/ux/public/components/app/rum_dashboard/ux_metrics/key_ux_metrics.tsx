@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiFlexItem, EuiStat, EuiFlexGroup, EuiIconTip } from '@elastic/eui';
 import numeral from '@elastic/numeral';
-import { UXMetrics } from '@kbn/observability-plugin/public';
+import type { UXMetrics } from '@kbn/observability-shared-plugin/public';
 import { useLongTaskMetricsQuery } from '../../../../hooks/use_long_task_metrics_query';
 import {
   DATA_UNDEFINED_LABEL,

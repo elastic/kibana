@@ -28,13 +28,7 @@ import { useTimeRange } from '../../../../hooks/use_time_range';
 import { useApmRouter } from '../../../../hooks/use_apm_router';
 import { ServiceOverviewThroughputChart } from '../../service_overview/service_overview_throughput_chart';
 import { TransactionsTable } from '../../../shared/transactions_table';
-import {
-  DEVICE_MODEL_IDENTIFIER,
-  HOST_OS_VERSION,
-  NETWORK_CONNECTION_TYPE,
-  SERVICE_VERSION,
-} from '../../../../../common/es_fields/apm';
-import { MostUsedChart } from './most_used_chart';
+import { MostUsedCharts } from './most_used_charts';
 import { GeoMap } from './geo_map';
 import { FailedTransactionRateChart } from '../../../shared/charts/failed_transaction_rate_chart';
 import { ServiceOverviewDependenciesTable } from '../../service_overview/service_overview_dependencies_table';
@@ -66,6 +60,7 @@ export function MobileServiceOverview() {
       netConnectionType,
       offset,
       comparisonEnabled,
+      transactionType,
     },
   } = useApmParams('/mobile-services/{serviceName}/overview');
 
@@ -198,73 +193,16 @@ export function MobileServiceOverview() {
                 </EuiTitle>
               </EuiFlexItem>
               <EuiSpacer size="xs" />
-              <EuiFlexGroup direction={rowDirection} gutterSize="s">
-                {/* Device */}
-                <EuiFlexItem>
-                  <MostUsedChart
-                    title={i18n.translate(
-                      'xpack.apm.serviceOverview.mostUsed.device',
-                      {
-                        defaultMessage: 'Devices',
-                      }
-                    )}
-                    metric={DEVICE_MODEL_IDENTIFIER}
-                    start={start}
-                    end={end}
-                    kuery={kueryWithMobileFilters}
-                    filters={embeddableFilters}
-                  />
-                </EuiFlexItem>
-                {/* NCT */}
-                <EuiFlexItem>
-                  <MostUsedChart
-                    title={i18n.translate(
-                      'xpack.apm.serviceOverview.mostUsed.nct',
-                      {
-                        defaultMessage: 'Network Connection Type',
-                      }
-                    )}
-                    metric={NETWORK_CONNECTION_TYPE}
-                    start={start}
-                    end={end}
-                    kuery={kueryWithMobileFilters}
-                    filters={embeddableFilters}
-                  />
-                </EuiFlexItem>
-                <EuiSpacer size="s" />
-                {/* OS version */}
-                <EuiFlexItem>
-                  <MostUsedChart
-                    title={i18n.translate(
-                      'xpack.apm.serviceOverview.mostUsed.osVersion',
-                      {
-                        defaultMessage: 'OS version',
-                      }
-                    )}
-                    metric={HOST_OS_VERSION}
-                    start={start}
-                    end={end}
-                    kuery={kueryWithMobileFilters}
-                    filters={embeddableFilters}
-                  />
-                </EuiFlexItem>
-                {/* App version */}
-                <EuiFlexItem>
-                  <MostUsedChart
-                    title={i18n.translate(
-                      'xpack.apm.serviceOverview.mostUsed.appVersion',
-                      {
-                        defaultMessage: 'App version',
-                      }
-                    )}
-                    metric={SERVICE_VERSION}
-                    start={start}
-                    end={end}
-                    kuery={kueryWithMobileFilters}
-                    filters={embeddableFilters}
-                  />
-                </EuiFlexItem>
-              </EuiFlexGroup>
+              <EuiFlexItem>
+                <MostUsedCharts
+                  kuery={kueryWithMobileFilters}
+                  start={start}
+                  end={end}
+                  environment={environment}
+                  transactionType={transactionType}
+                  serviceName={serviceName}
+                />
+              </EuiFlexItem>
             </EuiPanel>
           </EuiFlexItem>
 

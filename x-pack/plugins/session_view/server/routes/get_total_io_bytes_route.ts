@@ -7,9 +7,9 @@ import { IRouter } from '@kbn/core/server';
 import { EVENT_ACTION } from '@kbn/rule-data-utils';
 import {
   GET_TOTAL_IO_BYTES_ROUTE,
-  PROCESS_EVENTS_INDEX,
   TOTAL_BYTES_CAPTURED_PROPERTY,
   ENTRY_SESSION_ENTITY_ID_PROPERTY,
+  TIMESTAMP_PROPERTY,
 } from '../../common/constants';
 
 export const registerGetTotalIOBytesRoute = (router: IRouter) => {
@@ -18,23 +18,33 @@ export const registerGetTotalIOBytesRoute = (router: IRouter) => {
       path: GET_TOTAL_IO_BYTES_ROUTE,
       validate: {
         query: schema.object({
+          index: schema.string(),
           sessionEntityId: schema.string(),
+          sessionStartTime: schema.string(),
         }),
       },
     },
     async (context, request, response) => {
       const client = (await context.core).elasticsearch.client.asCurrentUser;
-      const { sessionEntityId } = request.query;
+      const { index, sessionEntityId, sessionStartTime } = request.query;
 
       try {
         const search = await client.search({
-          index: [PROCESS_EVENTS_INDEX],
+          index: [index],
           body: {
             query: {
               bool: {
                 must: [
                   { term: { [ENTRY_SESSION_ENTITY_ID_PROPERTY]: sessionEntityId } },
                   { term: { [EVENT_ACTION]: 'text_output' } },
+                  {
+                    range: {
+                      // optimization to prevent data before this session from being hit.
+                      [TIMESTAMP_PROPERTY]: {
+                        gte: sessionStartTime,
+                      },
+                    },
+                  },
                 ],
               },
             },

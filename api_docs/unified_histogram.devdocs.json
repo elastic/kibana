@@ -617,7 +617,15 @@
               "Theme",
               ">; readonly darkModeEnabled$: ",
               "Observable",
-              "<boolean>; useDarkMode: () => boolean; useChartsTheme: () => ",
+              "<",
+              {
+                "pluginId": "@kbn/core-theme-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreThemeBrowserPluginApi",
+                "section": "def-common.CoreTheme",
+                "text": "CoreTheme"
+              },
+              ">; useDarkMode: () => boolean; useChartsTheme: () => ",
               "RecursivePartial",
               "<",
               "Theme",
@@ -745,7 +753,7 @@
                 "section": "def-common.FieldFormatsRegistry",
                 "text": "FieldFormatsRegistry"
               },
-              ", \"register\" | \"init\"> & { deserialize: ",
+              ", \"init\" | \"register\"> & { deserialize: ",
               {
                 "pluginId": "fieldFormats",
                 "scope": "common",

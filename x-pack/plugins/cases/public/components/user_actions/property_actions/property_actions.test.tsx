@@ -11,6 +11,7 @@ import userEvent from '@testing-library/user-event';
 import type { AppMockRenderer } from '../../../common/mock';
 import { createAppMockRenderer } from '../../../common/mock';
 import { UserActionPropertyActions } from './property_actions';
+import { AttachmentActionType } from '../../../client/attachment_framework/types';
 
 describe('UserActionPropertyActions', () => {
   let appMock: AppMockRenderer;
@@ -20,6 +21,7 @@ describe('UserActionPropertyActions', () => {
     isLoading: false,
     propertyActions: [
       {
+        type: AttachmentActionType.BUTTON as const,
         iconType: 'pencil',
         label: 'Edit',
         onClick,

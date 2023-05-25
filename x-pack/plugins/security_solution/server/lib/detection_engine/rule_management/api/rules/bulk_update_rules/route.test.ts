@@ -21,18 +21,8 @@ import type { BulkError } from '../../../../routes/utils';
 import { getCreateRulesSchemaMock } from '../../../../../../../common/detection_engine/rule_schema/mocks';
 import { getQueryRuleParams } from '../../../../rule_schema/mocks';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
-// eslint-disable-next-line no-restricted-imports
-import { legacyMigrate } from '../../../logic/rule_actions/legacy_action_migration';
 
 jest.mock('../../../../../machine_learning/authz');
-
-jest.mock('../../../logic/rule_actions/legacy_action_migration', () => {
-  const actual = jest.requireActual('../../../logic/rule_actions/legacy_action_migration');
-  return {
-    ...actual,
-    legacyMigrate: jest.fn(),
-  };
-});
 
 describe('Bulk update rules route', () => {
   let server: ReturnType<typeof serverMock.create>;
@@ -50,8 +40,6 @@ describe('Bulk update rules route', () => {
 
     clients.appClient.getSignalsIndex.mockReturnValue('.siem-signals-test-index');
 
-    (legacyMigrate as jest.Mock).mockResolvedValue(getRuleMock(getQueryRuleParams()));
-
     bulkUpdateRulesRoute(server.router, ml, logger);
   });
 
@@ -66,7 +54,6 @@ describe('Bulk update rules route', () => {
 
     test('returns 200 as a response when updating a single rule that does not exist', async () => {
       clients.rulesClient.find.mockResolvedValue(getEmptyFindResult());
-      (legacyMigrate as jest.Mock).mockResolvedValue(null);
 
       const expected: BulkError[] = [
         {
@@ -130,8 +117,6 @@ describe('Bulk update rules route', () => {
 
   describe('request validation', () => {
     test('rejects payloads with no ID', async () => {
-      (legacyMigrate as jest.Mock).mockResolvedValue(null);
-
       const noIdRequest = requestMock.create({
         method: 'put',
         path: DETECTION_ENGINE_RULES_BULK_UPDATE,

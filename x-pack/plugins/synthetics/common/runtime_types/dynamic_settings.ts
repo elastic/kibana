@@ -38,6 +38,17 @@ export const DynamicSettingsSaveType = t.intersection([
   }),
 ]);
 
+export const LocationMonitorsType = t.type({
+  status: t.number,
+  payload: t.array(
+    t.type({
+      id: t.string,
+      count: t.number,
+    })
+  ),
+});
+
 export type DynamicSettings = t.TypeOf<typeof DynamicSettingsType>;
 export type DefaultEmail = t.TypeOf<typeof DefaultEmailType>;
 export type DynamicSettingsSaveResponse = t.TypeOf<typeof DynamicSettingsSaveType>;
+export type LocationMonitorsResponse = t.TypeOf<typeof LocationMonitorsType>;

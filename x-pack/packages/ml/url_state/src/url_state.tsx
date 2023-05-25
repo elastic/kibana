@@ -94,6 +94,12 @@ export const UrlStateProvider: FC = ({ children }) => {
   const history = useHistory();
   const { search: searchString } = useLocation();
 
+  const searchStringRef = useRef<string>(searchString);
+
+  useEffect(() => {
+    searchStringRef.current = searchString;
+  }, [searchString]);
+
   const setUrlState: SetUrlState = useCallback(
     (
       accessor: Accessor,
@@ -101,7 +107,8 @@ export const UrlStateProvider: FC = ({ children }) => {
       value?: any,
       replaceState?: boolean
     ) => {
-      const prevSearchString = searchString;
+      const prevSearchString = searchStringRef.current;
+
       const urlState = parseUrlState(prevSearchString);
       const parsedQueryString = parse(prevSearchString, { sort: false });
 
@@ -142,6 +149,10 @@ export const UrlStateProvider: FC = ({ children }) => {
 
         if (oldLocationSearchString !== newLocationSearchString) {
           const newSearchString = stringify(parsedQueryString, { sort: false });
+          // Another `setUrlState` call could happen before the updated
+          // `searchString` gets propagated via `useLocation` therefore
+          // we update the ref right away too.
+          searchStringRef.current = newSearchString;
           if (replaceState) {
             history.replace({ search: newSearchString });
           } else {
@@ -154,7 +165,7 @@ export const UrlStateProvider: FC = ({ children }) => {
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [searchString]
+    []
   );
 
   return <Provider value={{ searchString, setUrlState }}>{children}</Provider>;

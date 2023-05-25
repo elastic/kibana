@@ -58,6 +58,9 @@ properties:
       required:
         - name
         - enabled
+  is_protected:
+    description: Indicates whether the agent policy has tamper protection enabled. Default false.
+    type: boolean
 required:
   - id
   - status

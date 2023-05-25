@@ -14,7 +14,7 @@ import { useParams } from 'react-router-dom';
 import type { Filter } from '@kbn/es-query';
 import { isTab } from '@kbn/timelines-plugin/public';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
-import { TableId } from '../../../../common/types';
+import { dataTableSelectors, tableDefaults, TableId } from '@kbn/securitysolution-data-table';
 import { InputsModelId } from '../../../common/store/inputs/constants';
 import { SecurityPageName } from '../../../app/types';
 import type { UpdateDateRange } from '../../../common/components/charts/common';
@@ -55,9 +55,7 @@ import { useInvalidFilterQuery } from '../../../common/hooks/use_invalid_filter_
 import { ID } from '../containers/hosts';
 import { LandingPageComponent } from '../../../common/components/landing_page';
 import { fieldNameExistsFilter } from '../../../common/components/visualization_actions/utils';
-import { dataTableSelectors } from '../../../common/store/data_table';
 import { useLicense } from '../../../common/hooks/use_license';
-import { tableDefaults } from '../../../common/store/data_table/defaults';
 
 /**
  * Need a 100% height here to account for the graph/analyze tool, which sets no explicit height parameters, but fills the available space.

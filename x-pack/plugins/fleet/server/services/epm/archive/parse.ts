@@ -324,7 +324,7 @@ export function parseAndVerifyDataStreams(opts: {
       streams: manifestStreams,
       elasticsearch,
       ...restOfProps
-    } = manifest;
+    } = expandDottedObject(manifest);
 
     if (!(dataStreamTitle && type)) {
       throw new PackageInvalidArchiveError(
@@ -576,6 +576,14 @@ export function parseDataStreamElasticsearchEntry(
 
   if (expandedElasticsearch?.index_mode) {
     parsedElasticsearchEntry.index_mode = expandedElasticsearch.index_mode;
+  }
+
+  if (expandedElasticsearch?.dynamic_dataset) {
+    parsedElasticsearchEntry.dynamic_dataset = expandedElasticsearch.dynamic_dataset;
+  }
+
+  if (expandedElasticsearch?.dynamic_namespace) {
+    parsedElasticsearchEntry.dynamic_namespace = expandedElasticsearch.dynamic_namespace;
   }
 
   return parsedElasticsearchEntry;

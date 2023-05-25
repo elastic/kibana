@@ -5,50 +5,29 @@
  * 2.0.
  */
 
-import { isEmpty } from 'lodash/fp';
-import React, { useCallback, useEffect, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
-import { useDispatch } from 'react-redux';
-import { v4 as uuidv4 } from 'uuid';
+import { useDispatch, useSelector } from 'react-redux';
 import type { Filter, Query } from '@kbn/es-query';
-import { buildEsQuery } from '@kbn/es-query';
-import { getEsQueryConfig } from '@kbn/data-plugin/common';
-import type {
-  GroupingFieldTotalAggregation,
-  GroupingAggregation,
-} from '@kbn/securitysolution-grouping';
+import type { GroupOption } from '@kbn/securitysolution-grouping';
 import { isNoneGroup, useGrouping } from '@kbn/securitysolution-grouping';
-import type { AlertsGroupingAggregation } from './grouping_settings/types';
+import { isEmpty, isEqual } from 'lodash/fp';
+import type { Storage } from '@kbn/kibana-utils-plugin/public';
+import type { TableIdLiteral } from '@kbn/securitysolution-data-table';
+import { groupSelectors } from '../../../common/store/grouping';
+import type { State } from '../../../common/store';
+import { updateGroupSelector } from '../../../common/store/grouping/actions';
 import type { Status } from '../../../../common/detection_engine/schemas/common';
-import { InspectButton } from '../../../common/components/inspect';
 import { defaultUnit } from '../../../common/components/toolbar/unit';
-import { useGlobalTime } from '../../../common/containers/use_global_time';
-import { combineQueries } from '../../../common/lib/kuery';
-import type { TableIdLiteral } from '../../../../common/types';
 import { useSourcererDataView } from '../../../common/containers/sourcerer';
-import { useInvalidFilterQuery } from '../../../common/hooks/use_invalid_filter_query';
-import { useKibana } from '../../../common/lib/kibana';
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
-import { useInspectButton } from '../alerts_kpis/common/hooks';
-
-import { buildTimeRangeFilter } from './helpers';
-import * as i18n from './translations';
-import { useQueryAlerts } from '../../containers/detection_engine/alerts/use_query';
-import { ALERTS_QUERY_NAMES } from '../../containers/detection_engine/alerts/constants';
-import {
-  getAlertsGroupingQuery,
-  getDefaultGroupingOptions,
-  renderGroupPanel,
-  getStats,
-  useGroupTakeActionsItems,
-} from './grouping_settings';
-import { updateGroupSelector, updateSelectedGroup } from '../../../common/store/grouping/actions';
+import { getDefaultGroupingOptions, renderGroupPanel, getStats } from './grouping_settings';
+import { useKibana } from '../../../common/lib/kibana';
+import { GroupedSubLevel } from './alerts_sub_grouping';
 import { track } from '../../../common/lib/telemetry';
 
-const ALERTS_GROUPING_ID = 'alerts-grouping';
-
 export interface AlertsTableComponentProps {
-  currentAlertStatusFilterValue?: Status;
+  currentAlertStatusFilterValue?: Status[];
   defaultFilters?: Filter[];
   from: string;
   globalFilters: Filter[];
@@ -63,52 +42,37 @@ export interface AlertsTableComponentProps {
   to: string;
 }
 
-export const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
-  defaultFilters = [],
-  from,
-  globalFilters,
-  globalQuery,
-  hasIndexMaintenance,
-  hasIndexWrite,
-  loading,
-  tableId,
-  to,
-  runtimeMappings,
-  signalIndexName,
-  currentAlertStatusFilterValue,
-  renderChildComponent,
-}) => {
+const DEFAULT_PAGE_SIZE = 25;
+const DEFAULT_PAGE_INDEX = 0;
+const MAX_GROUPING_LEVELS = 3;
+
+const useStorage = (storage: Storage, tableId: string) =>
+  useMemo(
+    () => ({
+      getStoragePageSize: (): number[] => {
+        const pageSizes = storage.get(`grouping-table-${tableId}`);
+        if (!pageSizes) {
+          return Array(MAX_GROUPING_LEVELS).fill(DEFAULT_PAGE_SIZE);
+        }
+        return pageSizes;
+      },
+      setStoragePageSize: (pageSizes: number[]) => {
+        storage.set(`grouping-table-${tableId}`, pageSizes);
+      },
+    }),
+    [storage, tableId]
+  );
+
+const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = (props) => {
   const dispatch = useDispatch();
 
-  const { browserFields, indexPattern, selectedPatterns } = useSourcererDataView(
-    SourcererScopeName.detections
-  );
+  const { indexPattern, selectedPatterns } = useSourcererDataView(SourcererScopeName.detections);
+
   const {
-    services: { uiSettings, telemetry },
+    services: { storage, telemetry },
   } = useKibana();
 
-  const getGlobalQuery = useCallback(
-    (customFilters: Filter[]) => {
-      if (browserFields != null && indexPattern != null) {
-        return combineQueries({
-          config: getEsQueryConfig(uiSettings),
-          dataProviders: [],
-          indexPattern,
-          browserFields,
-          filters: [
-            ...(defaultFilters ?? []),
-            ...globalFilters,
-            ...customFilters,
-            ...buildTimeRangeFilter(from, to),
-          ],
-          kqlQuery: globalQuery,
-          kqlMode: globalQuery.language,
-        });
-      }
-      return null;
-    },
-    [browserFields, indexPattern, uiSettings, defaultFilters, globalFilters, from, to, globalQuery]
-  );
+  const { getStoragePageSize, setStoragePageSize } = useStorage(storage, props.tableId);
 
   const { onGroupChange, onGroupToggle } = useMemo(
     () => ({
@@ -125,153 +89,157 @@ export const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = 
     [telemetry]
   );
 
-  // create a unique, but stable (across re-renders) query id
-  const uniqueQueryId = useMemo(() => `${ALERTS_GROUPING_ID}-${uuidv4()}`, []);
-
-  const inspect = useMemo(
-    () => (
-      <InspectButton queryId={uniqueQueryId} inspectIndex={0} title={i18n.INSPECT_GROUPING_TITLE} />
-    ),
-    [uniqueQueryId]
-  );
-
-  const { groupSelector, getGrouping, selectedGroup, pagination } = useGrouping({
+  const { groupSelector, getGrouping, selectedGroups } = useGrouping({
     componentProps: {
       groupPanelRenderer: renderGroupPanel,
       groupStatsRenderer: getStats,
-      inspectButton: inspect,
       onGroupToggle,
-      renderChildComponent,
       unit: defaultUnit,
     },
-    defaultGroupingOptions: getDefaultGroupingOptions(tableId),
+    defaultGroupingOptions: getDefaultGroupingOptions(props.tableId),
     fields: indexPattern.fields,
-    groupingId: tableId,
+    groupingId: props.tableId,
+    maxGroupingLevels: MAX_GROUPING_LEVELS,
     onGroupChange,
     tracker: track,
   });
-  const resetPagination = pagination.reset;
+
+  const getGroupSelector = groupSelectors.getGroupSelector();
+
+  const groupSelectorInRedux = useSelector((state: State) => getGroupSelector(state));
+  const selectorOptions = useRef<GroupOption[]>([]);
 
   useEffect(() => {
-    dispatch(updateGroupSelector({ groupSelector }));
-  }, [dispatch, groupSelector]);
-
-  useEffect(() => {
-    dispatch(updateSelectedGroup({ selectedGroup }));
-  }, [dispatch, selectedGroup]);
-
-  useInvalidFilterQuery({
-    id: tableId,
-    filterQuery: getGlobalQuery([])?.filterQuery,
-    kqlError: getGlobalQuery([])?.kqlError,
-    query: globalQuery,
-    startDate: from,
-    endDate: to,
-  });
-
-  const { deleteQuery, setQuery } = useGlobalTime(false);
-  const additionalFilters = useMemo(() => {
-    resetPagination();
-    try {
-      return [
-        buildEsQuery(undefined, globalQuery != null ? [globalQuery] : [], [
-          ...(globalFilters?.filter((f) => f.meta.disabled === false) ?? []),
-          ...(defaultFilters ?? []),
-        ]),
-      ];
-    } catch (e) {
-      return [];
+    if (
+      isNoneGroup(selectedGroups) &&
+      groupSelector.props.options.length > 0 &&
+      (groupSelectorInRedux == null ||
+        !isEqual(selectorOptions.current, groupSelector.props.options))
+    ) {
+      selectorOptions.current = groupSelector.props.options;
+      dispatch(updateGroupSelector({ groupSelector }));
+    } else if (!isNoneGroup(selectedGroups) && groupSelectorInRedux !== null) {
+      dispatch(updateGroupSelector({ groupSelector: null }));
     }
-  }, [defaultFilters, globalFilters, globalQuery, resetPagination]);
+  }, [dispatch, groupSelector, groupSelectorInRedux, selectedGroups]);
 
-  const queryGroups = useMemo(
-    () =>
-      getAlertsGroupingQuery({
-        additionalFilters,
-        selectedGroup,
-        from,
-        runtimeMappings,
-        to,
-        pageSize: pagination.pageSize,
-        pageIndex: pagination.pageIndex,
-      }),
-    [
-      additionalFilters,
-      selectedGroup,
-      from,
-      runtimeMappings,
-      to,
-      pagination.pageSize,
-      pagination.pageIndex,
-    ]
+  const [pageIndex, setPageIndex] = useState<number[]>(
+    Array(MAX_GROUPING_LEVELS).fill(DEFAULT_PAGE_INDEX)
+  );
+  const [pageSize, setPageSize] = useState<number[]>(getStoragePageSize);
+
+  const resetAllPagination = useCallback(() => {
+    setPageIndex((curr) => curr.map(() => DEFAULT_PAGE_INDEX));
+  }, []);
+
+  const setPageVar = useCallback(
+    (newNumber: number, groupingLevel: number, pageType: 'index' | 'size') => {
+      if (pageType === 'index') {
+        setPageIndex((currentIndex) => {
+          const newArr = [...currentIndex];
+          newArr[groupingLevel] = newNumber;
+          return newArr;
+        });
+      }
+
+      if (pageType === 'size') {
+        setPageSize((currentIndex) => {
+          const newArr = [...currentIndex];
+          newArr[groupingLevel] = newNumber;
+          setStoragePageSize(newArr);
+          return newArr;
+        });
+        // set page index to 0 when page size is changed
+        setPageIndex((currentIndex) => {
+          const newArr = [...currentIndex];
+          newArr[groupingLevel] = 0;
+          return newArr;
+        });
+      }
+    },
+    [setStoragePageSize]
   );
 
-  const {
-    data: alertsGroupsData,
-    loading: isLoadingGroups,
-    refetch,
-    request,
-    response,
-    setQuery: setAlertsQuery,
-  } = useQueryAlerts<
-    {},
-    GroupingAggregation<AlertsGroupingAggregation> &
-      GroupingFieldTotalAggregation<AlertsGroupingAggregation>
-  >({
-    query: queryGroups,
-    indexName: signalIndexName,
-    queryName: ALERTS_QUERY_NAMES.ALERTS_GROUPING,
-    skip: isNoneGroup(selectedGroup),
+  const paginationResetTriggers = useRef({
+    defaultFilters: props.defaultFilters,
+    globalFilters: props.globalFilters,
+    globalQuery: props.globalQuery,
+    selectedGroups,
   });
 
   useEffect(() => {
-    if (!isNoneGroup(selectedGroup)) {
-      setAlertsQuery(queryGroups);
+    const triggers = {
+      defaultFilters: props.defaultFilters,
+      globalFilters: props.globalFilters,
+      globalQuery: props.globalQuery,
+      selectedGroups,
+    };
+    if (!isEqual(paginationResetTriggers.current, triggers)) {
+      resetAllPagination();
+      paginationResetTriggers.current = triggers;
     }
-  }, [queryGroups, selectedGroup, setAlertsQuery]);
+  }, [
+    props.defaultFilters,
+    props.globalFilters,
+    props.globalQuery,
+    resetAllPagination,
+    selectedGroups,
+  ]);
 
-  useInspectButton({
-    deleteQuery,
-    loading: isLoadingGroups,
-    response,
-    setQuery,
-    refetch,
-    request,
-    uniqueQueryId,
-  });
+  const getLevel = useCallback(
+    (level: number, selectedGroup: string, parentGroupingFilter?: string) => {
+      let rcc;
+      if (level < selectedGroups.length - 1) {
+        rcc = (groupingFilters: Filter[]) => {
+          return getLevel(
+            level + 1,
+            selectedGroups[level + 1],
+            // stringify because if the filter is passed as an object, it will cause unnecessary re-rendering
+            JSON.stringify([
+              ...groupingFilters,
+              ...(parentGroupingFilter ? JSON.parse(parentGroupingFilter) : []),
+            ])
+          );
+        };
+      } else {
+        rcc = (groupingFilters: Filter[]) => {
+          return props.renderChildComponent([
+            ...groupingFilters,
+            ...(parentGroupingFilter ? JSON.parse(parentGroupingFilter) : []),
+          ]);
+        };
+      }
 
-  const takeActionItems = useGroupTakeActionsItems({
-    indexName: indexPattern.title,
-    currentStatus: currentAlertStatusFilterValue,
-    showAlertStatusActions: hasIndexWrite && hasIndexMaintenance,
-  });
-
-  const getTakeActionItems = useCallback(
-    (groupFilters: Filter[], groupNumber: number) =>
-      takeActionItems({
-        query: getGlobalQuery([...(defaultFilters ?? []), ...groupFilters])?.filterQuery,
-        tableId,
-        groupNumber,
-        selectedGroup,
-      }),
-    [defaultFilters, getGlobalQuery, selectedGroup, tableId, takeActionItems]
-  );
-
-  const groupedAlerts = useMemo(
-    () =>
-      getGrouping({
-        data: alertsGroupsData?.aggregations,
-        isLoading: loading || isLoadingGroups,
-        takeActionItems: getTakeActionItems,
-      }),
-    [alertsGroupsData?.aggregations, getGrouping, getTakeActionItems, isLoadingGroups, loading]
+      const resetGroupChildrenPagination = (parentLevel: number) => {
+        setPageIndex((allPages) => {
+          const resetPages = allPages.splice(parentLevel + 1, allPages.length);
+          return [...allPages, ...resetPages.map(() => DEFAULT_PAGE_INDEX)];
+        });
+      };
+      return (
+        <GroupedSubLevel
+          {...props}
+          getGrouping={getGrouping}
+          groupingLevel={level}
+          onGroupClose={() => resetGroupChildrenPagination(level)}
+          pageIndex={pageIndex[level] ?? DEFAULT_PAGE_INDEX}
+          pageSize={pageSize[level] ?? DEFAULT_PAGE_SIZE}
+          parentGroupingFilter={parentGroupingFilter}
+          renderChildComponent={rcc}
+          selectedGroup={selectedGroup}
+          setPageIndex={(newIndex: number) => setPageVar(newIndex, level, 'index')}
+          setPageSize={(newSize: number) => setPageVar(newSize, level, 'size')}
+        />
+      );
+    },
+    [getGrouping, pageIndex, pageSize, props, selectedGroups, setPageVar]
   );
 
   if (isEmpty(selectedPatterns)) {
     return null;
   }
 
-  return groupedAlerts;
+  return getLevel(0, selectedGroups[0]);
 };
 
 export const GroupedAlertsTable = React.memo(GroupedAlertsTableComponent);

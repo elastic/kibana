@@ -17,6 +17,8 @@ interface ConvertedResult {
   withFormula: boolean;
 }
 
+const separator = ',';
+
 export const convertValueToString = ({
   rowIndex,
   rows,
@@ -77,7 +79,7 @@ export const convertValueToString = ({
 
       return stringify(formattedValue, disableMultiline) || '';
     })
-    .join(', ');
+    .join(`${separator} `);
 
   return {
     formattedString: formatted,
@@ -97,7 +99,11 @@ const stringify = (val: object | string, disableMultiline: boolean) => {
   return disableMultiline ? JSON.stringify(val) : JSON.stringify(val, null, 2);
 };
 
-const escapeValueFn = createEscapeValue(true, true);
+const escapeValueFn = createEscapeValue({
+  separator,
+  quoteValues: true,
+  escapeFormulaValues: true,
+});
 
 const escapeFormattedValue = (formattedValue: string): string => {
   return escapeValueFn(formattedValue);

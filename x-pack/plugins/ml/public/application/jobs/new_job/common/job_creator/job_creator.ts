@@ -11,8 +11,8 @@ import { ES_FIELD_TYPES } from '@kbn/field-types';
 import type { Query } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { addExcludeFrozenToQuery } from '@kbn/ml-query-utils';
+import { MlUrlConfig } from '@kbn/ml-anomaly-utils';
 import { SavedSearchSavedObject } from '../../../../../../common/types/kibana';
-import { UrlConfig } from '../../../../../../common/types/custom_urls';
 import { IndexPatternTitle } from '../../../../../../common/types/kibana';
 import {
   ML_JOB_AGGREGATION,
@@ -20,7 +20,7 @@ import {
   mlOnlyAggregations,
 } from '../../../../../../common/constants/aggregation_types';
 import { getQueryFromSavedSearchObject } from '../../../../util/index_utils';
-import {
+import type {
   Job,
   Datafeed,
   Detector,
@@ -29,11 +29,11 @@ import {
   BucketSpan,
   CustomSettings,
 } from '../../../../../../common/types/anomaly_detection_jobs';
-import { Aggregation, Field, RuntimeMappings } from '../../../../../../common/types/fields';
+import type { Aggregation, Field, RuntimeMappings } from '../../../../../../common/types/fields';
 import { combineFieldsAndAggs } from '../../../../../../common/util/fields_utils';
 import { createEmptyJob, createEmptyDatafeed } from './util/default_configs';
 import { mlJobService } from '../../../../services/job_service';
-import { JobRunner, ProgressSubscriber } from '../job_runner';
+import { JobRunner, type ProgressSubscriber } from '../job_runner';
 import {
   JOB_TYPE,
   CREATED_BY_LABEL,
@@ -42,7 +42,7 @@ import {
 import { collectAggs } from './util/general';
 import { filterRuntimeMappings } from './util/filter_runtime_mappings';
 import { parseInterval } from '../../../../../../common/util/parse_interval';
-import { Calendar } from '../../../../../../common/types/calendars';
+import type { Calendar } from '../../../../../../common/types/calendars';
 import { mlCalendarService } from '../../../../services/calendar_service';
 import { getDatafeedAggregations } from '../../../../../../common/util/datafeed_utils';
 import { getFirstKeyInObject } from '../../../../../../common/util/object_utils';
@@ -542,6 +542,28 @@ export class JobCreator {
     this._datafeed_config.indices = indics;
   }
 
+  public get ignoreUnavailable(): boolean {
+    return !!this._datafeed_config.indices_options?.ignore_unavailable;
+  }
+
+  public set ignoreUnavailable(ignore: boolean) {
+    if (ignore === true) {
+      if (this._datafeed_config.indices_options === undefined) {
+        this._datafeed_config.indices_options = {};
+      }
+      this._datafeed_config.indices_options.ignore_unavailable = true;
+    } else {
+      if (this._datafeed_config.indices_options !== undefined) {
+        delete this._datafeed_config.indices_options.ignore_unavailable;
+
+        // if no other properties are set, remove indices_options
+        if (Object.keys(this._datafeed_config.indices_options).length === 0) {
+          delete this._datafeed_config.indices_options;
+        }
+      }
+    }
+  }
+
   public get scriptFields(): Field[] {
     return this._scriptFields;
   }
@@ -695,12 +717,12 @@ export class JobCreator {
     return this._getCustomSetting('created_by') as CREATED_BY_LABEL | null;
   }
 
-  public set customUrls(customUrls: UrlConfig[] | null) {
+  public set customUrls(customUrls: MlUrlConfig[] | null) {
     this._setCustomSetting('custom_urls', customUrls);
   }
 
-  public get customUrls(): UrlConfig[] | null {
-    return this._getCustomSetting('custom_urls') as UrlConfig[] | null;
+  public get customUrls(): MlUrlConfig[] | null {
+    return this._getCustomSetting('custom_urls') as MlUrlConfig[] | null;
   }
 
   public get formattedJobJson() {

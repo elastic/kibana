@@ -15,6 +15,10 @@ export const APP_ICON_SOLUTION = 'logoKibana';
 export const APP_NAME = i18n.translate('xpack.maps.visTypeAlias.title', {
   defaultMessage: 'Maps',
 });
+export const MAP_EMBEDDABLE_NAME = i18n.translate('xpack.maps.embeddableDisplayName', {
+  defaultMessage: 'map',
+});
+
 export const INITIAL_LAYERS_KEY = 'initialLayers';
 
 export const MAPS_APP_PATH = `app/${APP_ID}`;
@@ -35,6 +39,8 @@ export const OPEN_LAYER_WIZARD = 'openLayerWizard';
 // Identifies centroid feature.
 // Centroids are a single point for representing lines, multiLines, polygons, and multiPolygons
 export const KBN_IS_CENTROID_FEATURE = '__kbn_is_centroid_feature__';
+
+export const GEOJSON_FEATURE_ID_PROPERTY_NAME = '__kbn__feature_id__';
 
 export function getNewMapPath() {
   return `/${MAPS_APP_PATH}/${MAP_PATH}`;
@@ -63,13 +69,16 @@ export enum SOURCE_TYPES {
   ES_GEO_LINE = 'ES_GEO_LINE',
   ES_SEARCH = 'ES_SEARCH',
   ES_PEW_PEW = 'ES_PEW_PEW',
-  ES_TERM_SOURCE = 'ES_TERM_SOURCE',
   ES_ML_ANOMALIES = 'ML_ANOMALIES',
   EMS_XYZ = 'EMS_XYZ', // identifies a custom TMS source. EMS-prefix in the name is a little unfortunate :(
   WMS = 'WMS',
   KIBANA_TILEMAP = 'KIBANA_TILEMAP',
   GEOJSON_FILE = 'GEOJSON_FILE',
   MVT_SINGLE_LAYER = 'MVT_SINGLE_LAYER',
+
+  // join sources
+  ES_DISTANCE_SOURCE = 'ES_DISTANCE_SOURCE',
+  ES_TERM_SOURCE = 'ES_TERM_SOURCE',
   TABLE_SOURCE = 'TABLE_SOURCE',
 }
 
@@ -181,10 +190,6 @@ export const GEOCENTROID_AGG_NAME = 'gridCentroid';
 
 export const TOP_TERM_PERCENTAGE_SUFFIX = '__percentage';
 export const DEFAULT_PERCENTILE = 50;
-
-export const COUNT_PROP_LABEL = i18n.translate('xpack.maps.aggs.defaultCountLabel', {
-  defaultMessage: 'count',
-});
 
 export const COUNT_PROP_NAME = 'doc_count';
 
@@ -333,6 +338,12 @@ export enum WIZARD_ID {
   MVT_VECTOR = 'mvtVector',
   WMS_LAYER = 'wmsLayer',
   TMS_LAYER = 'tmsLayer',
+  SPATIAL_JOIN = 'spatialJoin',
+}
+
+export enum MASK_OPERATOR {
+  ABOVE = 'ABOVE',
+  BELOW = 'BELOW',
 }
 
 // Maplibre does not provide any feedback when rendering is complete.

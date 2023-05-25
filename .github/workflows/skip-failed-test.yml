@@ -27,7 +27,7 @@ jobs:
         with:
           permission: admin
           teams: appex-qa
-          token: ${{secrets.GITHUB_TOKEN}}
+          token: ${{secrets.KIBANAMACHINE_TOKEN}}
 
       - name: Checkout kibana-operations
         uses: actions/checkout@v2

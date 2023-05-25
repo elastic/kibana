@@ -11,13 +11,13 @@ import { Position } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
 import { LegendSize } from '@kbn/visualizations-plugin/public';
 import { EuiIconAxisLeft, EuiIconAxisBottom } from '@kbn/chart-icons';
+import { TooltipWrapper } from '@kbn/visualization-ui-components/public';
 import type { VisualizationToolbarProps } from '../../types';
 import {
   LegendSettingsPopover,
   ToolbarPopover,
   ValueLabelsSettings,
   AxisTitleSettings,
-  TooltipWrapper,
   AxisTicksSettings,
 } from '../../shared_components';
 import type { HeatmapVisualizationState } from './types';

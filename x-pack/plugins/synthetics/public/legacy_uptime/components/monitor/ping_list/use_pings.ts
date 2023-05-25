@@ -7,7 +7,7 @@
 
 import { useDispatch, useSelector } from 'react-redux';
 import { useCallback, useContext, useEffect } from 'react';
-import { useFetcher } from '@kbn/observability-plugin/public';
+import { useFetcher } from '@kbn/observability-shared-plugin/public';
 import { selectPingList } from '../../../state/selectors';
 import { GetPingsParams, Ping } from '../../../../../common/runtime_types/ping';
 import { getPings as getPingsAction } from '../../../state/actions';

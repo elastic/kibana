@@ -55,7 +55,10 @@ describe('ESSearchSource', () => {
         const mockSearchSource = {
           setField: jest.fn(),
           getSearchRequestBody() {
-            return { foobar: 'ES_DSL_PLACEHOLDER', params: this.setField.mock.calls };
+            return {
+              scripted_fields: 'shouldNotGetAddedToTileUrl',
+              fields: this.setField.mock.calls,
+            };
           },
           setParent() {},
         };
@@ -128,7 +131,7 @@ describe('ESSearchSource', () => {
           hasLabels: 'false',
           index: 'foobar-title-*',
           requestBody:
-            "(foobar%3AES_DSL_PLACEHOLDER%2Cparams%3A('0'%3A('0'%3Aindex%2C'1'%3A(fields%3A()%2Ctitle%3A'foobar-title-*'))%2C'1'%3A('0'%3Asize%2C'1'%3A1000)%2C'2'%3A('0'%3Afilter%2C'1'%3A!())%2C'3'%3A('0'%3Aquery)%2C'4'%3A('0'%3Aindex%2C'1'%3A(fields%3A()%2Ctitle%3A'foobar-title-*'))%2C'5'%3A('0'%3Aquery%2C'1'%3A(language%3AKQL%2Cquery%3A'tooltipField%3A%20foobar'))%2C'6'%3A('0'%3AfieldsFromSource%2C'1'%3A!(_id))%2C'7'%3A('0'%3Asource%2C'1'%3A!f)%2C'8'%3A('0'%3Afields%2C'1'%3A!(tooltipField%2CstyleField))))",
+            "(fields:('0':('0':index,'1':(fields:(),title:'foobar-title-*')),'1':('0':size,'1':1000),'2':('0':filter,'1':!()),'3':('0':query),'4':('0':index,'1':(fields:(),title:'foobar-title-*')),'5':('0':query,'1':(language:KQL,query:'tooltipField: foobar')),'6':('0':fieldsFromSource,'1':!(_id)),'7':('0':source,'1':!f),'8':('0':fields,'1':!(tooltipField,styleField))))",
           token: '1234',
         });
       });
@@ -171,29 +174,27 @@ describe('ESSearchSource', () => {
     });
   });
 
-  describe('getJoinsDisabledReason', () => {
+  describe('supportsJoins', () => {
     it('limit', () => {
       const esSearchSource = new ESSearchSource({
         ...mockDescriptor,
         scalingType: SCALING_TYPES.LIMIT,
       });
-      expect(esSearchSource.getJoinsDisabledReason()).toBe(null);
+      expect(esSearchSource.supportsJoins()).toBe(true);
     });
     it('blended layer', () => {
       const esSearchSource = new ESSearchSource({
         ...mockDescriptor,
         scalingType: SCALING_TYPES.CLUSTERS,
       });
-      expect(esSearchSource.getJoinsDisabledReason()).toBe(
-        'Joins are not supported when scaling by clusters'
-      );
+      expect(esSearchSource.supportsJoins()).toBe(false);
     });
     it('mvt', () => {
       const esSearchSource = new ESSearchSource({
         ...mockDescriptor,
         scalingType: SCALING_TYPES.MVT,
       });
-      expect(esSearchSource.getJoinsDisabledReason()).toBe(null);
+      expect(esSearchSource.supportsJoins()).toBe(true);
     });
   });
 });

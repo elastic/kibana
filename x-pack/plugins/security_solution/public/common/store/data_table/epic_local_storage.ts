@@ -10,24 +10,27 @@ import { map, filter, ignoreElements, tap, withLatestFrom, delay } from 'rxjs/op
 import type { Epic } from 'redux-observable';
 import { get } from 'lodash/fp';
 
+import { dataTableActions } from '@kbn/securitysolution-data-table';
+import type { TableIdLiteral } from '@kbn/securitysolution-data-table';
 import { updateTotalCount } from '../../../timelines/store/timeline/actions';
-import type { TableIdLiteral } from '../../../../common/types';
 import { addTableInStorage } from '../../../timelines/containers/local_storage';
 
-import {
-  removeColumn,
-  upsertColumn,
-  applyDeltaToColumnWidth,
-  updateColumns,
-  updateColumnOrder,
-  updateColumnWidth,
-  updateItemsPerPage,
-  updateSort,
-  changeViewMode,
-  updateShowBuildingBlockAlertsFilter,
-  updateIsLoading,
-} from './actions';
 import type { TimelineEpicDependencies } from '../../../timelines/store/timeline/types';
+
+const {
+  applyDeltaToColumnWidth,
+  changeViewMode,
+  removeColumn,
+  toggleDetailPanel,
+  updateColumnOrder,
+  updateColumns,
+  updateColumnWidth,
+  updateIsLoading,
+  updateItemsPerPage,
+  updateShowBuildingBlockAlertsFilter,
+  updateSort,
+  upsertColumn,
+} = dataTableActions;
 
 export const isNotNull = <T>(value: T | null): value is T => value !== null;
 
@@ -44,6 +47,7 @@ const tableActionTypes = [
   updateShowBuildingBlockAlertsFilter.type,
   updateTotalCount.type,
   updateIsLoading.type,
+  toggleDetailPanel.type,
 ];
 
 export const createDataTableLocalStorageEpic =

@@ -45,6 +45,8 @@ const PackagePolicyStreamsSchema = {
             indices: schema.maybe(schema.arrayOf(schema.string())),
           })
         ),
+        dynamic_dataset: schema.maybe(schema.boolean()),
+        dynamic_namespace: schema.maybe(schema.boolean()),
       })
     ),
   }),
@@ -97,6 +99,7 @@ const PackagePolicyBaseSchema = {
   namespace: NamespaceSchema,
   policy_id: schema.string(),
   enabled: schema.boolean(),
+  is_managed: schema.maybe(schema.boolean()),
   package: schema.maybe(
     schema.object({
       name: schema.string(),
@@ -235,5 +238,12 @@ export const PackagePolicySchema = schema.object({
       ...PackagePolicyInputsSchema,
       compiled_input: schema.maybe(schema.any()),
     })
+  ),
+  secret_references: schema.maybe(
+    schema.arrayOf(
+      schema.object({
+        id: schema.string(),
+      })
+    )
   ),
 });

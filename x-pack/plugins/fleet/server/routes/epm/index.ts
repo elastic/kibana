@@ -27,6 +27,7 @@ import { splitPkgKey } from '../../services/epm/registry';
 import {
   GetCategoriesRequestSchema,
   GetPackagesRequestSchema,
+  GetInstalledPackagesRequestSchema,
   GetFileRequestSchema,
   GetInfoRequestSchema,
   GetInfoRequestSchemaDeprecated,
@@ -39,11 +40,14 @@ import {
   GetStatsRequestSchema,
   UpdatePackageRequestSchema,
   UpdatePackageRequestSchemaDeprecated,
+  ReauthorizeTransformRequestSchema,
+  GetDataStreamsRequestSchema,
 } from '../../types';
 
 import {
   getCategoriesHandler,
   getListHandler,
+  getInstalledListHandler,
   getLimitedListHandler,
   getFileHandler,
   getInfoHandler,
@@ -54,6 +58,8 @@ import {
   getStatsHandler,
   updatePackageHandler,
   getVerificationKeyIdHandler,
+  reauthorizeTransformsHandler,
+  getDataStreamsHandler,
 } from './handlers';
 
 const MAX_FILE_SIZE_BYTES = 104857600; // 100MB
@@ -79,6 +85,17 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       },
     },
     getListHandler
+  );
+
+  router.get(
+    {
+      path: EPM_API_ROUTES.INSTALLED_LIST_PATTERN,
+      validate: GetInstalledPackagesRequestSchema,
+      fleetAuthz: {
+        integrations: { readPackageInfo: true },
+      },
+    },
+    getInstalledListHandler
   );
 
   router.get(
@@ -199,6 +216,17 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     getVerificationKeyIdHandler
   );
 
+  router.get(
+    {
+      path: EPM_API_ROUTES.DATA_STREAMS_PATTERN,
+      validate: GetDataStreamsRequestSchema,
+      fleetAuthz: {
+        integrations: { readPackageInfo: true },
+      },
+    },
+    getDataStreamsHandler
+  );
+
   // deprecated since 8.0
   router.get(
     {
@@ -293,5 +321,27 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       }
       return resp;
     }
+  );
+
+  // Update transforms with es-secondary-authorization headers,
+  // append authorized_by to transform's _meta, and start transforms
+  router.post(
+    {
+      path: EPM_API_ROUTES.REAUTHORIZE_TRANSFORMS,
+      validate: ReauthorizeTransformRequestSchema,
+      fleetAuthz: {
+        integrations: { installPackages: true },
+        packagePrivileges: {
+          transform: {
+            actions: {
+              canStartStopTransform: {
+                executePackageAction: true,
+              },
+            },
+          },
+        },
+      },
+    },
+    reauthorizeTransformsHandler
   );
 };

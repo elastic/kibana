@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ErrorType } from '../util/errors';
+import type { ErrorType } from '@kbn/ml-error-utils';
 
 export interface DatafeedValidationResponse {
   valid: boolean;

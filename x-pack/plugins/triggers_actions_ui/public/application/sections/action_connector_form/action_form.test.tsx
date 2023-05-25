@@ -351,7 +351,7 @@ describe('action_form', () => {
           (initialAlert.actions[index] = {
             ...initialAlert.actions[index],
             alertsFilter: {
-              ...(initialAlert.actions[index].alertsFilter ?? { query: null, timeframe: null }),
+              ...initialAlert.actions[index].alertsFilter,
               [key]: value,
             },
           })

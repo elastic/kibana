@@ -25,19 +25,29 @@ export const GET_DEFAULT_TABLE_PROPERTIES = {
 const HOST_TABLE_PROPERTIES_URL_STATE_KEY = 'hostFlyoutOpen';
 
 type Action = rt.TypeOf<typeof ActionRT>;
-type SetNewHostFlyoutOpen = (newProps: Action) => void;
+export type SetNewHostFlyoutOpen = (newProp: Action) => void;
+type SetNewHostFlyoutClose = () => void;
 
-export const useHostFlyoutOpen = (): [HostFlyoutOpen, SetNewHostFlyoutOpen] => {
-  const [urlState, setUrlState] = useUrlState<HostFlyoutOpen>({
-    defaultState: GET_DEFAULT_TABLE_PROPERTIES,
+export const useHostFlyoutOpen = (): [
+  HostFlyoutOpen,
+  SetNewHostFlyoutOpen,
+  SetNewHostFlyoutClose
+] => {
+  const [urlState, setUrlState] = useUrlState<HostFlyoutUrl>({
+    defaultState: '',
     decodeUrlState,
     encodeUrlState,
     urlStateKey: HOST_TABLE_PROPERTIES_URL_STATE_KEY,
   });
 
-  const setHostFlyoutOpen = (newProps: Action) => setUrlState({ ...urlState, ...newProps });
+  const setHostFlyoutOpen = (newProps: Action) =>
+    typeof urlState !== 'string'
+      ? setUrlState({ ...urlState, ...newProps })
+      : setUrlState({ ...GET_DEFAULT_TABLE_PROPERTIES, ...newProps });
 
-  return [urlState, setHostFlyoutOpen];
+  const setFlyoutClosed = () => setUrlState('');
+
+  return [urlState as HostFlyoutOpen, setHostFlyoutOpen, setFlyoutClosed];
 };
 
 const FlyoutTabIdRT = rt.union([rt.literal('metadata'), rt.literal('processes')]);
@@ -74,9 +84,12 @@ const HostFlyoutOpenRT = rt.type({
   metadataSearch: SearchFilterRT,
 });
 
+const HostFlyoutUrlRT = rt.union([HostFlyoutOpenRT, rt.string]);
+
+type HostFlyoutUrl = rt.TypeOf<typeof HostFlyoutUrlRT>;
 type HostFlyoutOpen = rt.TypeOf<typeof HostFlyoutOpenRT>;
 
-const encodeUrlState = HostFlyoutOpenRT.encode;
+const encodeUrlState = HostFlyoutUrlRT.encode;
 const decodeUrlState = (value: unknown) => {
-  return pipe(HostFlyoutOpenRT.decode(value), fold(constant(undefined), identity));
+  return pipe(HostFlyoutUrlRT.decode(value), fold(constant('undefined'), identity));
 };

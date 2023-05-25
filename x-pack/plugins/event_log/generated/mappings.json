@@ -304,6 +304,13 @@
                         "flapping": {
                             "type": "boolean"
                         },
+                        "maintenance_window_ids": {
+                            "type": "keyword",
+                            "ignore_above": 1024,
+                            "meta": {
+                                "isArray": "true"
+                            }
+                        },
                         "uuid": {
                             "type": "keyword",
                             "ignore_above": 1024
@@ -390,6 +397,9 @@
                                             }
                                         }
                                     }
+                                },
+                                "revision": {
+                                    "type": "long"
                                 },
                                 "rule_type_id": {
                                     "type": "keyword",

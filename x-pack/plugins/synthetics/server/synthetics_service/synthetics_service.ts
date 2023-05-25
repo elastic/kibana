@@ -19,12 +19,11 @@ import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin
 import pMap from 'p-map';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
-import { syntheticsParamType } from '../../common/types/saved_objects';
+import { syntheticsMonitorType, syntheticsParamType } from '../../common/types/saved_objects';
 import { sendErrorTelemetryEvents } from '../routes/telemetry/monitor_upgrade_sender';
 import { UptimeServerSetup } from '../legacy_uptime/lib/adapters';
 import { installSyntheticsIndexTemplates } from '../routes/synthetics_service/install_index_templates';
 import { getAPIKeyForSyntheticsService } from './get_api_key';
-import { syntheticsMonitorType } from '../legacy_uptime/lib/saved_objects/synthetics_monitor';
 import { getEsHosts } from './get_es_hosts';
 import { ServiceConfig } from '../../common/config';
 import { ServiceAPIClient, ServiceData } from './service_api_client';
@@ -42,7 +41,7 @@ import {
   ServiceLocations,
   SyntheticsMonitorWithId,
   SyntheticsMonitorWithSecrets,
-  SyntheticsParam,
+  SyntheticsParamSO,
   ThrottlingOptions,
 } from '../../common/runtime_types';
 import { getServiceLocations } from './get_service_locations';
@@ -108,6 +107,10 @@ export class SyntheticsService {
   }
 
   public async setupIndexTemplates() {
+    if (process.env.CI && !this.config?.manifestUrl) {
+      // skip installation on CI
+      return;
+    }
     if (this.indexTemplateExists) {
       // if already installed, don't need to reinstall
       return;
@@ -154,6 +157,7 @@ export class SyntheticsService {
 
   public registerSyncTask(taskManager: TaskManagerSetupContract) {
     const service = this;
+    const interval = this.config.syncInterval ?? SYNTHETICS_SERVICE_SYNC_INTERVAL_DEFAULT;
 
     taskManager.registerTaskDefinitions({
       [SYNTHETICS_SERVICE_SYNC_MONITORS_TASK_TYPE]: {
@@ -174,7 +178,7 @@ export class SyntheticsService {
                 service.isAllowed = allowed;
                 service.signupUrl = signupUrl;
 
-                if (service.isAllowed) {
+                if (service.isAllowed && service.config.manifestUrl) {
                   service.setupIndexTemplates();
                   await service.pushConfigs();
                 }
@@ -190,7 +194,7 @@ export class SyntheticsService {
                 service.logger.error(e);
               }
 
-              return { state };
+              return { state, schedule: { interval } };
             },
             async cancel() {
               service.logger?.warn(`Task ${SYNTHETICS_SERVICE_SYNC_MONITORS_TASK_ID} timed out`);
@@ -207,7 +211,6 @@ export class SyntheticsService {
     const interval = this.config.syncInterval ?? SYNTHETICS_SERVICE_SYNC_INTERVAL_DEFAULT;
 
     try {
-      await taskManager.removeIfExists(SYNTHETICS_SERVICE_SYNC_MONITORS_TASK_ID);
       const taskInstance = await taskManager.ensureScheduled({
         id: SYNTHETICS_SERVICE_SYNC_MONITORS_TASK_ID,
         taskType: SYNTHETICS_SERVICE_SYNC_MONITORS_TASK_TYPE,
@@ -295,9 +298,13 @@ export class SyntheticsService {
     };
   }
 
-  async addConfig(config: ConfigData | ConfigData[]) {
+  async addConfigs(configs: ConfigData[]) {
     try {
-      const monitors = this.formatConfigs(Array.isArray(config) ? config : [config]);
+      if (configs.length === 0) {
+        return;
+      }
+
+      const monitors = this.formatConfigs(configs);
       const license = await this.getLicense();
 
       const output = await this.getOutput();
@@ -307,7 +314,7 @@ export class SyntheticsService {
         this.syncErrors = await this.apiClient.post({
           monitors,
           output,
-          licenseLevel: license.type,
+          license,
         });
       }
       return this.syncErrors;
@@ -316,12 +323,13 @@ export class SyntheticsService {
     }
   }
 
-  async editConfig(monitorConfig: ConfigData | ConfigData[], isEdit = true) {
+  async editConfig(monitorConfig: ConfigData[], isEdit = true) {
     try {
+      if (monitorConfig.length === 0) {
+        return;
+      }
       const license = await this.getLicense();
-      const monitors = this.formatConfigs(
-        Array.isArray(monitorConfig) ? monitorConfig : [monitorConfig]
-      );
+      const monitors = this.formatConfigs(monitorConfig);
 
       const output = await this.getOutput();
       if (output) {
@@ -329,7 +337,7 @@ export class SyntheticsService {
           monitors,
           output,
           isEdit,
-          licenseLevel: license.type,
+          license,
         };
 
         this.syncErrors = await this.apiClient.put(data);
@@ -349,7 +357,7 @@ export class SyntheticsService {
 
     subject.subscribe(async (monitors) => {
       try {
-        if (monitors.length === 0) {
+        if (monitors.length === 0 || !this.config.manifestUrl) {
           return;
         }
 
@@ -369,10 +377,10 @@ export class SyntheticsService {
 
         this.logger.debug(`${monitors.length} monitors will be pushed to synthetics service.`);
 
-        service.syncErrors = await this.apiClient.put({
+        service.syncErrors = await this.apiClient.syncMonitors({
           monitors,
           output,
-          licenseLevel: license.type,
+          license,
         });
       } catch (e) {
         sendErrorTelemetryEvents(service.logger, service.server.telemetry, {
@@ -406,7 +414,7 @@ export class SyntheticsService {
       return await this.apiClient.runOnce({
         monitors,
         output,
-        licenseLevel: license.type,
+        license,
       });
     } catch (e) {
       this.logger.error(e);
@@ -415,23 +423,30 @@ export class SyntheticsService {
   }
 
   async deleteConfigs(configs: ConfigData[]) {
-    const license = await this.getLicense();
-    const hasPublicLocations = configs.some((config) =>
-      config.monitor.locations.some(({ isServiceManaged }) => isServiceManaged)
-    );
-
-    if (hasPublicLocations) {
-      const output = await this.getOutput();
-      if (!output) {
+    try {
+      if (configs.length === 0) {
         return;
       }
+      const license = await this.getLicense();
+      const hasPublicLocations = configs.some((config) =>
+        config.monitor.locations.some(({ isServiceManaged }) => isServiceManaged)
+      );
 
-      const data = {
-        output,
-        monitors: this.formatConfigs(configs),
-        licenseLevel: license.type,
-      };
-      return await this.apiClient.delete(data);
+      if (hasPublicLocations) {
+        const output = await this.getOutput();
+        if (!output) {
+          return;
+        }
+
+        const data = {
+          output,
+          monitors: this.formatConfigs(configs),
+          license,
+        };
+        return await this.apiClient.delete(data);
+      }
+    } catch (e) {
+      this.server.logger.error(e);
     }
   }
 
@@ -453,7 +468,7 @@ export class SyntheticsService {
         const data = {
           output,
           monitors,
-          licenseLevel: license.type,
+          license,
         };
         return await this.apiClient.delete(data);
       }
@@ -555,10 +570,10 @@ export class SyntheticsService {
   async getSyntheticsParams({ spaceId }: { spaceId?: string } = {}) {
     const encryptedClient = this.server.encryptedSavedObjects.getClient();
 
-    const paramsBySpace: Record<string, Record<string, string>> = {};
+    const paramsBySpace: Record<string, Record<string, string>> = Object.create(null);
 
     const finder =
-      await encryptedClient.createPointInTimeFinderDecryptedAsInternalUser<SyntheticsParam>({
+      await encryptedClient.createPointInTimeFinderDecryptedAsInternalUser<SyntheticsParamSO>({
         type: syntheticsParamType,
         perPage: 1000,
         namespaces: spaceId ? [spaceId] : undefined,
@@ -568,7 +583,7 @@ export class SyntheticsService {
       response.saved_objects.forEach((param) => {
         param.namespaces?.forEach((namespace) => {
           if (!paramsBySpace[namespace]) {
-            paramsBySpace[namespace] = {};
+            paramsBySpace[namespace] = Object.create(null);
           }
           paramsBySpace[namespace][param.attributes.key] = param.attributes.value;
         });

@@ -163,6 +163,7 @@ export default function ({ getService }: FtrProviderContext) {
                   execution_gap_duration_s: 3000,
                 },
               },
+              revision: 0,
             },
           },
           alerting: {
@@ -259,7 +260,7 @@ export default function ({ getService }: FtrProviderContext) {
   async function fetchEvents(savedObjectType: string, savedObjectId: string) {
     log.debug(`Fetching events of Saved Object ${savedObjectId}`);
     return await supertest
-      .get(`/internal/event_log/${savedObjectType}/${savedObjectId}/_find`)
+      .get(`/_test/event_log/${savedObjectType}/${savedObjectId}/_find`)
       .set('kbn-xsrf', 'foo')
       .expect(200);
   }

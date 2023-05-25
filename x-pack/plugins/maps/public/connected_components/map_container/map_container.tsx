@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import '../../_index.scss';
 import React, { Component } from 'react';
 import classNames from 'classnames';
 import { EuiFlexGroup, EuiFlexItem, EuiCallOut } from '@elastic/eui';

@@ -56,6 +56,7 @@ const configSchema = schema.object({
   latestAgentVersionsUrl: schema.string({
     defaultValue: 'https://apm-agent-versions.elastic.co/versions.json',
   }),
+  enabled: schema.boolean({ defaultValue: true }),
 });
 
 // plugin config

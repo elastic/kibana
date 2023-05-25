@@ -9,7 +9,7 @@ import { subj as testSubjSelector } from '@kbn/test-subj-selector';
 import { DATE_RANGE_OPTION_TO_TEST_SUBJ_MAP } from '@kbn/security-solution-plugin/common/test';
 import { FtrService } from '../../../functional/ftr_provider_context';
 
-const TIMELINE_BOTTOM_BAR_CONTAINER_TEST_SUBJ = 'timeline-bottom-bar-container';
+const TIMELINE_BOTTOM_BAR_CONTAINER_TEST_SUBJ = 'flyoutBottomBar';
 const TIMELINE_CLOSE_BUTTON_TEST_SUBJ = 'close-timeline';
 const TIMELINE_MODAL_PAGE_TEST_SUBJ = 'timeline';
 const TIMELINE_TAB_QUERY_TEST_SUBJ = 'timeline-tab-content-query';

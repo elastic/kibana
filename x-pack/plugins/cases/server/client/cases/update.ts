@@ -6,9 +6,6 @@
  */
 
 import Boom from '@hapi/boom';
-import { pipe } from 'fp-ts/lib/pipeable';
-import { fold } from 'fp-ts/lib/Either';
-import { identity } from 'fp-ts/lib/function';
 
 import type {
   SavedObject,
@@ -25,19 +22,18 @@ import type {
   CaseAssignees,
   CaseAttributes,
   CasePatchRequest,
-  CaseResponse,
+  Case,
   CasesPatchRequest,
-  CasesResponse,
+  Cases,
   CommentAttributes,
   User,
 } from '../../../common/api';
 import {
   CasesPatchRequestRt,
-  CasesResponseRt,
+  CasesRt,
   CaseStatuses,
   CommentType,
-  excess,
-  throwErrors,
+  decodeWithExcessOrThrow,
 } from '../../../common/api';
 import {
   CASE_COMMENT_SAVED_OBJECT,
@@ -62,7 +58,7 @@ import { Operations } from '../../authorization';
 import { dedupAssignees, getClosedInfoForUpdate, getDurationForUpdate } from './utils';
 import { LICENSING_CASE_ASSIGNMENT_FEATURE } from '../../common/constants';
 import type { LicensingService } from '../../services/licensing';
-import type { CaseSavedObject } from '../../common/types';
+import type { CaseSavedObjectTransformed } from '../../common/types/case';
 
 /**
  * Throws an error if any of the requests attempt to update the owner of a case.
@@ -257,7 +253,7 @@ async function updateAlerts({
 }
 
 function partitionPatchRequest(
-  casesMap: Map<string, CaseSavedObject>,
+  casesMap: Map<string, CaseSavedObjectTransformed>,
   patchReqCases: CasePatchRequest[]
 ): {
   nonExistingCases: CasePatchRequest[];
@@ -292,7 +288,7 @@ function partitionPatchRequest(
 
 interface UpdateRequestWithOriginalCase {
   updateReq: CasePatchRequest;
-  originalCase: CaseSavedObject;
+  originalCase: CaseSavedObjectTransformed;
 }
 
 /**
@@ -303,7 +299,7 @@ interface UpdateRequestWithOriginalCase {
 export const update = async (
   cases: CasesPatchRequest,
   clientArgs: CasesClientArgs
-): Promise<CasesResponse> => {
+): Promise<Cases> => {
   const {
     services: {
       caseService,
@@ -317,10 +313,7 @@ export const update = async (
     authorization,
   } = clientArgs;
 
-  const query = pipe(
-    excess(CasesPatchRequestRt).decode(cases),
-    fold(throwErrors(Boom.badRequest), identity)
-  );
+  const query = decodeWithExcessOrThrow(CasesPatchRequestRt)(cases);
 
   try {
     const myCases = await caseService.getCases({
@@ -335,7 +328,7 @@ export const update = async (
     const casesMap = myCases.saved_objects.reduce((acc, so) => {
       acc.set(so.id, so);
       return acc;
-    }, new Map<string, CaseSavedObject>());
+    }, new Map<string, CaseSavedObjectTransformed>());
 
     const { nonExistingCases, conflictedCases, casesToAuthorize } = partitionPatchRequest(
       casesMap,
@@ -436,13 +429,13 @@ export const update = async (
         return flattenCases;
       }
 
-      return [
-        ...flattenCases,
+      flattenCases.push(
         flattenCaseSavedObject({
           savedObject: mergeOriginalSOWithUpdatedSO(originalCase, updatedCase),
-        }),
-      ];
-    }, [] as CaseResponse[]);
+        })
+      );
+      return flattenCases;
+    }, [] as Case[]);
 
     await userActionService.creator.bulkCreateUpdateCase({
       originalCases: myCases.saved_objects,
@@ -458,7 +451,7 @@ export const update = async (
 
     await notificationService.bulkNotifyAssignees(casesAndAssigneesToNotifyForAssignment);
 
-    return CasesResponseRt.encode(returnUpdatedCase);
+    return CasesRt.encode(returnUpdatedCase);
   } catch (error) {
     const idVersions = cases.cases.map((caseInfo) => ({
       id: caseInfo.id,
@@ -521,11 +514,11 @@ const patchCases = async ({
 
 const getCasesAndAssigneesToNotifyForAssignment = (
   updatedCases: SavedObjectsBulkUpdateResponse<CaseAttributes>,
-  casesMap: Map<string, CaseSavedObject>,
+  casesMap: Map<string, CaseSavedObjectTransformed>,
   user: CasesClientArgs['user']
 ) => {
   return updatedCases.saved_objects.reduce<
-    Array<{ assignees: CaseAssignees; theCase: CaseSavedObject }>
+    Array<{ assignees: CaseAssignees; theCase: CaseSavedObjectTransformed }>
   >((acc, updatedCase) => {
     const originalCaseSO = casesMap.get(updatedCase.id);
 
@@ -554,9 +547,9 @@ const getCasesAndAssigneesToNotifyForAssignment = (
 };
 
 const mergeOriginalSOWithUpdatedSO = (
-  originalSO: CaseSavedObject,
+  originalSO: CaseSavedObjectTransformed,
   updatedSO: SavedObjectsUpdateResponse<CaseAttributes>
-): CaseSavedObject => {
+): CaseSavedObjectTransformed => {
   return {
     ...originalSO,
     ...updatedSO,

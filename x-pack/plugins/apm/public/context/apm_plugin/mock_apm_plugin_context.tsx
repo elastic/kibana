@@ -94,7 +94,14 @@ const mockCorePlugins = {
   inspector: {},
   maps: {},
   observability: {},
+  observabilityShared: {},
   data: {},
+};
+
+const mockUnifiedSearch = {
+  ui: {
+    SearchBar: () => <div className="searchBar" />,
+  },
 };
 
 export const mockApmPluginContextValue = {
@@ -105,6 +112,10 @@ export const mockApmPluginContextValue = {
   observabilityRuleTypeRegistry: createObservabilityRuleTypeRegistryMock(),
   corePlugins: mockCorePlugins,
   deps: {},
+  unifiedSearch: mockUnifiedSearch,
+  uiActions: {
+    getTriggerCompatibleActions: () => Promise.resolve([]),
+  },
 };
 
 export function MockApmPluginContextWrapper({

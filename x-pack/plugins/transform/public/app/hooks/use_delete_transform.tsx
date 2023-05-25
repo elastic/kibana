@@ -8,6 +8,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { extractErrorMessage } from '@kbn/ml-error-utils';
 import type {
   DeleteTransformStatus,
   DeleteTransformsRequestSchema,
@@ -24,7 +25,6 @@ export const useDeleteIndexAndTargetIndex = (items: TransformListRow[]) => {
   const {
     http,
     data: { dataViews: dataViewsContract },
-    ml: { extractErrorMessage },
     application: { capabilities },
   } = useAppDependencies();
   const toastNotifications = useToastNotifications();
@@ -62,7 +62,7 @@ export const useDeleteIndexAndTargetIndex = (items: TransformListRow[]) => {
         );
       }
     },
-    [dataViewsContract, toastNotifications, extractErrorMessage]
+    [dataViewsContract, toastNotifications]
   );
 
   const checkUserIndexPermission = useCallback(async () => {

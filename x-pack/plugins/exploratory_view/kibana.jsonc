@@ -4,7 +4,7 @@
   "owner": "@elastic/uptime",
   "plugin": {
     "id": "exploratoryView",
-    "server": true,
+    "server": false,
     "browser": true,
     "configPath": ["xpack", "exploratory_view"],
     "requiredPlugins": [
@@ -18,7 +18,7 @@
       "guidedOnboarding",
       "inspector",
       "lens",
-      "observability",
+      "observabilityShared",
       "security",
       "share",
       "triggersActionsUi",
@@ -26,13 +26,12 @@
     ],
     "optionalPlugins": ["discover", "embeddable", "home", "licensing", "spaces", "usageCollection"],
     "requiredBundles": [
-      "data",
       "dataViews",
       "embeddable",
+      "data",
       "kibanaReact",
       "kibanaUtils",
       "lens",
-      "observability",
       "unifiedSearch",
       "visualizations"
     ],

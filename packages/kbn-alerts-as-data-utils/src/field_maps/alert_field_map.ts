@@ -13,6 +13,7 @@ import {
   ALERT_END,
   ALERT_FLAPPING,
   ALERT_FLAPPING_HISTORY,
+  ALERT_MAINTENANCE_WINDOW_IDS,
   ALERT_INSTANCE_ID,
   ALERT_LAST_DETECTED,
   ALERT_REASON,
@@ -29,6 +30,7 @@ import {
   ALERT_START,
   ALERT_STATUS,
   ALERT_TIME_RANGE,
+  ALERT_URL,
   ALERT_UUID,
   ALERT_WORKFLOW_STATUS,
   SPACE_IDS,
@@ -64,6 +66,11 @@ export const alertFieldMap = {
   },
   [ALERT_FLAPPING_HISTORY]: {
     type: 'boolean',
+    array: true,
+    required: false,
+  },
+  [ALERT_MAINTENANCE_WINDOW_IDS]: {
+    type: 'keyword',
     array: true,
     required: false,
   },
@@ -148,6 +155,13 @@ export const alertFieldMap = {
     format: 'epoch_millis||strict_date_optional_time',
     array: false,
     required: false,
+  },
+  [ALERT_URL]: {
+    type: 'keyword',
+    array: false,
+    index: false,
+    required: false,
+    ignore_above: 2048,
   },
   [ALERT_UUID]: {
     type: 'keyword',

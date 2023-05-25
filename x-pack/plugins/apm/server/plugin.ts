@@ -54,6 +54,7 @@ import { migrateLegacyAPMIndicesToSpaceAware } from './saved_objects/migrations/
 import { scheduleSourceMapMigration } from './routes/source_maps/schedule_source_map_migration';
 import { createApmSourceMapIndexTemplate } from './routes/source_maps/create_apm_source_map_index_template';
 import { addApiKeysToEveryPackagePolicyIfMissing } from './routes/fleet/api_keys/add_api_keys_to_policies_if_missing';
+import { getApmFeatureFlags } from '../common/apm_feature_flags';
 
 export class APMPlugin
   implements
@@ -169,6 +170,7 @@ export class APMPlugin
       },
       logger: this.logger,
       config: currentConfig,
+      featureFlags: getApmFeatureFlags(),
       repository: getGlobalApmServerRouteRepository(),
       ruleDataClient,
       plugins: resourcePlugins,

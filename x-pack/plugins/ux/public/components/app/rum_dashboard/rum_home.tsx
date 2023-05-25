@@ -25,9 +25,9 @@ export const DASHBOARD_LABEL = i18n.translate('xpack.ux.title', {
 });
 
 export function RumHome() {
-  const { docLinks, http, observability } = useKibanaServices();
+  const { docLinks, http, observabilityShared } = useKibanaServices();
 
-  const PageTemplateComponent = observability.navigation.PageTemplate;
+  const PageTemplateComponent = observabilityShared.navigation.PageTemplate;
 
   const { hasData, loading: isLoading } = useHasRumData();
 

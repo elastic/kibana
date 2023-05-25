@@ -173,6 +173,13 @@ const getTimelineFavoriteFilter = ({
 const combineFilters = (filters: Array<string | null>) =>
   filters.filter((f) => f != null).join(' and ');
 
+const getTimelinesCreatedAndUpdatedByCurrentUser = ({ request }: { request: FrameworkRequest }) => {
+  const username = request.user?.username ?? UNAUTHENTICATED_USER;
+  const updatedBy = `siem-ui-timeline.attributes.updatedBy: ${username}`;
+  const createdBy = `siem-ui-timeline.attributes.createdBy: ${username}`;
+  return combineFilters([updatedBy, createdBy]);
+};
+
 export const getExistingPrepackagedTimelines = async (
   request: FrameworkRequest,
   countsOnly?: boolean,
@@ -279,10 +286,14 @@ export const getDraftTimeline = async (
   request: FrameworkRequest,
   timelineType: TimelineTypeLiteralWithNull
 ): Promise<ResponseTimelines> => {
+  const filter = combineFilters([
+    getTimelineTypeFilter(timelineType ?? null, TimelineStatus.draft),
+    getTimelinesCreatedAndUpdatedByCurrentUser({ request }),
+  ]);
   const options: SavedObjectsFindOptions = {
     type: timelineSavedObjectType,
     perPage: 1,
-    filter: getTimelineTypeFilter(timelineType, TimelineStatus.draft),
+    filter,
     sortField: 'created',
     sortOrder: 'desc',
   };

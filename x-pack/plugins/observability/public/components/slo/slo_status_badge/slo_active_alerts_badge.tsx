@@ -8,17 +8,18 @@
 import { EuiBadge, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { SLOWithSummaryResponse } from '@kbn/slo-schema';
+
 import { paths } from '../../../config/paths';
 import { useKibana } from '../../../utils/kibana_react';
-
 import { ActiveAlerts } from '../../../hooks/slo/use_fetch_active_alerts';
-import { toAlertsPageQueryFilter } from '../../../pages/slos/helpers/alerts_page_query_filter';
 
 export interface Props {
   activeAlerts?: ActiveAlerts;
+  slo: SLOWithSummaryResponse;
 }
 
-export function SloActiveAlertsBadge({ activeAlerts }: Props) {
+export function SloActiveAlertsBadge({ slo, activeAlerts }: Props) {
   const {
     application: { navigateToUrl },
     http: { basePath },
@@ -27,9 +28,9 @@ export function SloActiveAlertsBadge({ activeAlerts }: Props) {
   const handleActiveAlertsClick = () => {
     if (activeAlerts) {
       navigateToUrl(
-        `${basePath.prepend(paths.observability.alerts)}?_a=${toAlertsPageQueryFilter(
-          activeAlerts
-        )}`
+        `${basePath.prepend(paths.observability.alerts)}?_a=(kuery:'slo.id:"${
+          slo.id
+        }"',rangeFrom:now-15m,rangeTo:now,status:active)`
       );
     }
   };

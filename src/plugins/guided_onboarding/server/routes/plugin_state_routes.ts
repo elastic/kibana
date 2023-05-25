@@ -53,6 +53,8 @@ export const registerPutPluginStateRoute = (router: IRouter) => {
                   id: schema.string(),
                 })
               ),
+              // params are dynamic values
+              params: schema.maybe(schema.object({}, { unknowns: 'allow' })),
             })
           ),
         }),

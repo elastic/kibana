@@ -21,6 +21,7 @@ import {
   startWith,
 } from 'rxjs/operators';
 import { Unsubscribe } from 'redux';
+import type { PaletteRegistry } from '@kbn/coloring';
 import type { KibanaExecutionContext } from '@kbn/core/public';
 import { EuiEmptyPrompt } from '@elastic/eui';
 import { type Filter } from '@kbn/es-query';
@@ -82,7 +83,7 @@ import {
 } from '../../common/constants';
 import { RenderToolTipContent } from '../classes/tooltips/tooltip_property';
 import {
-  getChartsPaletteServiceGetColor,
+  getCharts,
   getCoreI18n,
   getExecutionContextService,
   getHttp,
@@ -108,6 +109,24 @@ import {
   MapEmbeddableInput,
   MapEmbeddableOutput,
 } from './types';
+
+async function getChartsPaletteServiceGetColor(): Promise<((value: string) => string) | null> {
+  const chartsService = getCharts();
+  const paletteRegistry: PaletteRegistry | null = chartsService
+    ? await chartsService.palettes.getPalettes()
+    : null;
+  if (!paletteRegistry) {
+    return null;
+  }
+
+  const paletteDefinition = paletteRegistry.get('default');
+  const chartConfiguration = { syncColors: true };
+  return (value: string) => {
+    const series = [{ name: value, rankAtDepth: 0, totalSeriesAtDepth: 1 }];
+    const color = paletteDefinition.getCategoricalColor(series, chartConfiguration);
+    return color ? color : '#3d3d3d';
+  };
+}
 
 function getIsRestore(searchSessionId?: string) {
   if (!searchSessionId) {
@@ -775,7 +794,6 @@ export class MapEmbeddable
     }
 
     const hiddenLayerIds = getHiddenLayerIds(this._savedMap.getStore().getState());
-
     if (!_.isEqual(this.input.hiddenLayers, hiddenLayerIds)) {
       this.updateInput({
         hiddenLayers: hiddenLayerIds,
@@ -783,14 +801,7 @@ export class MapEmbeddable
     }
 
     const isLoading = isMapLoading(this._savedMap.getStore().getState());
-    const firstLayerWithError = getLayerList(this._savedMap.getStore().getState()).find((layer) => {
-      return layer.hasErrors();
-    });
-    const output = this.getOutput();
-    if (
-      output.loading !== isLoading ||
-      firstLayerWithError?.getErrors() !== output.error?.message
-    ) {
+    if (this.getOutput().loading !== isLoading) {
       /**
        * Maps emit rendered when the data is loaded, as we don't have feedback from the maps rendering library atm.
        * This means that the DASHBOARD_LOADED_EVENT event might be fired while a map is still rendering in some cases.
@@ -798,13 +809,10 @@ export class MapEmbeddable
        */
       this.updateOutput({
         loading: isLoading,
-        rendered: !isLoading && firstLayerWithError === undefined,
-        error: firstLayerWithError
-          ? {
-              name: 'EmbeddableError',
-              message: firstLayerWithError.getErrors(),
-            }
-          : undefined,
+        rendered: !isLoading,
+        // do not surface layer errors as output.error
+        // output.error blocks entire embeddable display and prevents map from displaying
+        // layer errors are better surfaced in legend while still keeping the map usable
       });
     }
   }

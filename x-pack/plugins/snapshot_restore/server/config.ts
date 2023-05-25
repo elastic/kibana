@@ -25,6 +25,11 @@ const schemaLatest = schema.object(
     slm_ui: schema.object({
       enabled: schema.boolean({ defaultValue: true }),
     }),
+    /**
+     * Disables the plugin.
+     * Added back in 8.8.
+     */
+    enabled: schema.boolean({ defaultValue: true }),
   },
   { defaultValue: undefined }
 );

@@ -9,10 +9,7 @@ import type { AggregationOptionsByType } from '@kbn/es-types';
 import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import {
-  METRIC_CGROUP_MEMORY_USAGE_BYTES,
   METRIC_PROCESS_CPU_PERCENT,
-  METRIC_SYSTEM_FREE_MEMORY,
-  METRIC_SYSTEM_TOTAL_MEMORY,
   SERVICE_NAME,
   SERVICE_NODE_NAME,
 } from '../../../../common/es_fields/apm';
@@ -22,8 +19,8 @@ import { environmentQuery } from '../../../../common/utils/environment_query';
 import { getBucketSize } from '../../../../common/utils/get_bucket_size';
 import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 import {
-  percentCgroupMemoryUsedScript,
-  percentSystemMemoryUsedScript,
+  systemMemory,
+  cgroupMemory,
 } from '../../metrics/by_agent/shared/memory';
 import { getOffsetInMs } from '../../../../common/utils/get_offset_in_ms';
 
@@ -82,19 +79,6 @@ export async function getServiceInstancesSystemMetricStatistics<
     numBuckets,
   });
 
-  const systemMemoryFilter = {
-    bool: {
-      filter: [
-        { exists: { field: METRIC_SYSTEM_FREE_MEMORY } },
-        { exists: { field: METRIC_SYSTEM_TOTAL_MEMORY } },
-      ],
-    },
-  };
-
-  const cgroupMemoryFilter = {
-    exists: { field: METRIC_CGROUP_MEMORY_USAGE_BYTES },
-  };
-
   const cpuUsageFilter = { exists: { field: METRIC_PROCESS_CPU_PERCENT } };
 
   function withTimeseries<TParams extends AggregationOptionsByType['avg']>(
@@ -123,12 +107,12 @@ export async function getServiceInstancesSystemMetricStatistics<
 
   const subAggs = {
     memory_usage_cgroup: {
-      filter: cgroupMemoryFilter,
-      aggs: withTimeseries({ script: percentCgroupMemoryUsedScript }),
+      filter: cgroupMemory.filter,
+      aggs: withTimeseries({ script: cgroupMemory.script }),
     },
     memory_usage_system: {
-      filter: systemMemoryFilter,
-      aggs: withTimeseries({ script: percentSystemMemoryUsedScript }),
+      filter: systemMemory.filter,
+      aggs: withTimeseries({ script: systemMemory.script }),
     },
     cpu_usage: {
       filter: cpuUsageFilter,
@@ -158,8 +142,8 @@ export async function getServiceInstancesSystemMetricStatistics<
               {
                 bool: {
                   should: [
-                    cgroupMemoryFilter,
-                    systemMemoryFilter,
+                    cgroupMemory.filter,
+                    systemMemory.filter,
                     cpuUsageFilter,
                   ],
                   minimum_should_match: 1,

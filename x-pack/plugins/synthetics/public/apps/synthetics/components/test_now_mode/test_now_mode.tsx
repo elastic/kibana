@@ -26,12 +26,13 @@ export function TestNowMode({
   testRun: TestRun;
   onDone: (testRunId: string) => void;
 }) {
-  const { hasBlockingError, blockingErrorMessage, expectPings } = useRunOnceErrors({
-    testRunId: testRun.id,
-    serviceError,
-    errors: errors ?? [],
-    locations: (testRun.monitor.locations ?? []) as Locations,
-  });
+  const { hasBlockingError, blockingErrorTitle, blockingErrorMessage, expectPings } =
+    useRunOnceErrors({
+      testRunId: testRun.id,
+      serviceError,
+      errors: errors ?? [],
+      locations: (testRun.monitor.locations ?? []) as Locations,
+    });
 
   useEffect(() => {
     if (!isPushing && (!testRun.id || hasBlockingError)) {
@@ -46,7 +47,9 @@ export function TestNowMode({
   return (
     <EuiPanel color="subdued" hasBorder={true}>
       {(hasBlockingError && !isPushing && (
-        <EuiCallOut title={blockingErrorMessage} color="danger" iconType="warning" />
+        <EuiCallOut title={blockingErrorTitle} color="danger" iconType="warning">
+          {blockingErrorMessage}
+        </EuiCallOut>
       )) ||
         null}
 

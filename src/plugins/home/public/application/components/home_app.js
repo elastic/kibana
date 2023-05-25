@@ -29,6 +29,7 @@ export function HomeApp({ directories, solutions }) {
     addBasePath,
     environmentService,
     dataViewsService,
+    guidedOnboardingService,
   } = getServices();
   const environment = environmentService.getEnvironment();
   const isCloudEnabled = environment.cloud;
@@ -69,9 +70,11 @@ export function HomeApp({ directories, solutions }) {
         <Switch>
           <Route path="/tutorial/:id" render={renderTutorial} />
           <Route path="/tutorial_directory/:tab?" render={renderTutorialDirectory} />
-          <Route path="/getting_started">
-            <GettingStarted />
-          </Route>
+          {guidedOnboardingService.isEnabled && (
+            <Route path="/getting_started">
+              <GettingStarted />
+            </Route>
+          )}
           <Route exact path="/">
             <Home
               addBasePath={addBasePath}

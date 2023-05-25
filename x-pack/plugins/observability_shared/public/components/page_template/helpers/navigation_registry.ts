@@ -6,7 +6,7 @@
  */
 
 import { combineLatest, map, Observable, ReplaySubject, scan, shareReplay, switchMap } from 'rxjs';
-import { NavigationSection } from '../page_template';
+import type { NavigationSection } from '../page_template';
 
 export interface NavigationRegistry {
   registerSections: (sections$: Observable<NavigationSection[]>) => void;

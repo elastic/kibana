@@ -96,7 +96,12 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables the `execute` endpoint response action
    */
-  responseActionExecuteEnabled: false,
+  responseActionExecuteEnabled: true,
+
+  /**
+   * Enables the `upload` endpoint response action
+   */
+  responseActionUploadEnabled: false,
 
   /**
    * Enables top charts on Alerts Page
@@ -123,6 +128,21 @@ export const allowedExperimentalValues = Object.freeze({
    *
    **/
   alertsPageFiltersEnabled: true,
+
+  /*
+   * Enables the new user details flyout displayed on the Alerts page and timeline.
+   *
+   **/
+  newUserDetailsFlyout: false,
+
+  /**
+   * Enables Protections/Detections Coverage Overview page (Epic link https://github.com/elastic/security-team/issues/2905)
+   *
+   * This flag aims to facilitate the development process as the feature may not make it to 8.9 release.
+   *
+   * The flag doesn't have to be documented and has to be removed after the feature is ready to release.
+   */
+  detectionsCoverageOverview: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

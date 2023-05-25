@@ -34,7 +34,13 @@
             "text": "PluginSetup"
           },
           ", ",
-          "PluginStart",
+          {
+            "pluginId": "securitySolution",
+            "scope": "public",
+            "docId": "kibSecuritySolutionPluginApi",
+            "section": "def-public.PluginStart",
+            "text": "PluginStart"
+          },
           ", ",
           "SetupPlugins",
           ", ",
@@ -95,7 +101,7 @@
             "label": "experimentalFeatures",
             "description": [],
             "signature": [
-              "{ readonly tGridEnabled: boolean; readonly tGridEventRenderedViewEnabled: boolean; readonly excludePoliciesInFilterEnabled: boolean; readonly kubernetesEnabled: boolean; readonly disableIsolationUIPendingStatuses: boolean; readonly pendingActionResponsesWithAck: boolean; readonly policyListEnabled: boolean; readonly policyResponseInFleetEnabled: boolean; readonly chartEmbeddablesEnabled: boolean; readonly donutChartEmbeddablesEnabled: boolean; readonly alertsPreviewChartEmbeddablesEnabled: boolean; readonly previewTelemetryUrlEnabled: boolean; readonly responseActionsConsoleEnabled: boolean; readonly insightsRelatedAlertsByProcessAncestry: boolean; readonly extendedRuleExecutionLoggingEnabled: boolean; readonly prebuiltRulesNewUpgradeAndInstallationWorkflowsEnabled: boolean; readonly socTrendsEnabled: boolean; readonly responseActionsEnabled: boolean; readonly endpointResponseActionsEnabled: boolean; readonly endpointRbacEnabled: boolean; readonly endpointRbacV1Enabled: boolean; readonly alertDetailsPageEnabled: boolean; readonly responseActionGetFileEnabled: boolean; readonly responseActionExecuteEnabled: boolean; readonly alertsPageChartsEnabled: boolean; readonly alertTypeEnabled: boolean; readonly securityFlyoutEnabled: boolean; readonly riskyHostsEnabled: boolean; readonly riskyUsersEnabled: boolean; readonly alertsPageFiltersEnabled: boolean; }"
+              "{ readonly tGridEnabled: boolean; readonly tGridEventRenderedViewEnabled: boolean; readonly excludePoliciesInFilterEnabled: boolean; readonly kubernetesEnabled: boolean; readonly disableIsolationUIPendingStatuses: boolean; readonly pendingActionResponsesWithAck: boolean; readonly policyListEnabled: boolean; readonly policyResponseInFleetEnabled: boolean; readonly chartEmbeddablesEnabled: boolean; readonly donutChartEmbeddablesEnabled: boolean; readonly alertsPreviewChartEmbeddablesEnabled: boolean; readonly previewTelemetryUrlEnabled: boolean; readonly responseActionsConsoleEnabled: boolean; readonly insightsRelatedAlertsByProcessAncestry: boolean; readonly extendedRuleExecutionLoggingEnabled: boolean; readonly prebuiltRulesNewUpgradeAndInstallationWorkflowsEnabled: boolean; readonly socTrendsEnabled: boolean; readonly responseActionsEnabled: boolean; readonly endpointResponseActionsEnabled: boolean; readonly endpointRbacEnabled: boolean; readonly endpointRbacV1Enabled: boolean; readonly alertDetailsPageEnabled: boolean; readonly responseActionGetFileEnabled: boolean; readonly responseActionExecuteEnabled: boolean; readonly responseActionUploadEnabled: boolean; readonly alertsPageChartsEnabled: boolean; readonly alertTypeEnabled: boolean; readonly securityFlyoutEnabled: boolean; readonly riskyHostsEnabled: boolean; readonly riskyUsersEnabled: boolean; readonly alertsPageFiltersEnabled: boolean; readonly newUserDetailsFlyout: boolean; readonly detectionsCoverageOverview: boolean; }"
             ],
             "path": "x-pack/plugins/security_solution/public/plugin.tsx",
             "deprecated": false,
@@ -159,7 +165,13 @@
               "<",
               "StartPluginsDependencies",
               ", ",
-              "PluginStart",
+              {
+                "pluginId": "securitySolution",
+                "scope": "public",
+                "docId": "kibSecuritySolutionPluginApi",
+                "section": "def-public.PluginStart",
+                "text": "PluginStart"
+              },
               ">, plugins: ",
               "SetupPlugins",
               ") => ",
@@ -193,7 +205,13 @@
                   "<",
                   "StartPluginsDependencies",
                   ", ",
-                  "PluginStart",
+                  {
+                    "pluginId": "securitySolution",
+                    "scope": "public",
+                    "docId": "kibSecuritySolutionPluginApi",
+                    "section": "def-public.PluginStart",
+                    "text": "PluginStart"
+                  },
                   ">"
                 ],
                 "path": "x-pack/plugins/security_solution/public/plugin.tsx",
@@ -237,7 +255,14 @@
               },
               ", plugins: ",
               "StartPlugins",
-              ") => {}"
+              ") => ",
+              {
+                "pluginId": "securitySolution",
+                "scope": "public",
+                "docId": "kibSecuritySolutionPluginApi",
+                "section": "def-public.PluginStart",
+                "text": "PluginStart"
+              }
             ],
             "path": "x-pack/plugins/security_solution/public/plugin.tsx",
             "deprecated": false,
@@ -574,7 +599,7 @@
               "determines the behavior of the KQL bar"
             ],
             "signature": [
-              "\"filter\" | \"search\""
+              "\"search\" | \"filter\""
             ],
             "path": "x-pack/plugins/security_solution/public/timelines/store/timeline/model.ts",
             "deprecated": false,
@@ -1323,6 +1348,73 @@
       ],
       "lifecycle": "setup",
       "initialIsOpen": true
+    },
+    "start": {
+      "parentPluginId": "securitySolution",
+      "id": "def-public.PluginStart",
+      "type": "Interface",
+      "tags": [],
+      "label": "PluginStart",
+      "description": [],
+      "path": "x-pack/plugins/security_solution/public/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [
+        {
+          "parentPluginId": "securitySolution",
+          "id": "def-public.PluginStart.getNavLinks$",
+          "type": "Function",
+          "tags": [],
+          "label": "getNavLinks$",
+          "description": [],
+          "signature": [
+            "() => ",
+            "Observable",
+            "<",
+            "NavigationLink",
+            "[]>"
+          ],
+          "path": "x-pack/plugins/security_solution/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [],
+          "returnComment": []
+        },
+        {
+          "parentPluginId": "securitySolution",
+          "id": "def-public.PluginStart.setIsSidebarEnabled",
+          "type": "Function",
+          "tags": [],
+          "label": "setIsSidebarEnabled",
+          "description": [],
+          "signature": [
+            "(isSidebarEnabled: boolean) => void"
+          ],
+          "path": "x-pack/plugins/security_solution/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [
+            {
+              "parentPluginId": "securitySolution",
+              "id": "def-public.PluginStart.setIsSidebarEnabled.$1",
+              "type": "boolean",
+              "tags": [],
+              "label": "isSidebarEnabled",
+              "description": [],
+              "signature": [
+                "boolean"
+              ],
+              "path": "x-pack/plugins/security_solution/public/types.ts",
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            }
+          ],
+          "returnComment": []
+        }
+      ],
+      "lifecycle": "start",
+      "initialIsOpen": true
     }
   },
   "server": {
@@ -2038,7 +2130,7 @@
         "label": "ConfigType",
         "description": [],
         "signature": [
-          "Readonly<{ prebuiltRulesPackageVersion?: string | undefined; } & { signalsIndex: string; maxRuleImportExportSize: number; maxRuleImportPayloadBytes: number; maxTimelineImportExportSize: number; maxTimelineImportPayloadBytes: number; alertMergeStrategy: \"allFields\" | \"missingFields\" | \"noFields\"; alertIgnoreFields: string[]; enableExperimental: string[]; packagerTaskInterval: string; }> & { experimentalFeatures: ",
+          "Readonly<{ prebuiltRulesPackageVersion?: string | undefined; } & { enabled: boolean; signalsIndex: string; maxRuleImportExportSize: number; maxRuleImportPayloadBytes: number; maxTimelineImportExportSize: number; maxTimelineImportPayloadBytes: number; alertMergeStrategy: \"allFields\" | \"missingFields\" | \"noFields\"; alertIgnoreFields: string[]; enableExperimental: string[]; packagerTaskInterval: string; maxUploadResponseActionFileBytes: number; }> & { experimentalFeatures: ",
           "ExperimentalFeatures",
           "; }"
         ],
@@ -2082,8 +2174,36 @@
     "classes": [],
     "functions": [],
     "interfaces": [],
-    "enums": [],
+    "enums": [
+      {
+        "parentPluginId": "securitySolution",
+        "id": "def-common.SecurityPageName",
+        "type": "Enum",
+        "tags": [],
+        "label": "SecurityPageName",
+        "description": [],
+        "path": "x-pack/plugins/security_solution/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
     "misc": [
+      {
+        "parentPluginId": "securitySolution",
+        "id": "def-common.APP_UI_ID",
+        "type": "string",
+        "tags": [],
+        "label": "APP_UI_ID",
+        "description": [],
+        "signature": [
+          "\"securitySolutionUI\""
+        ],
+        "path": "x-pack/plugins/security_solution/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "securitySolution",
         "id": "def-common.ELASTIC_SECURITY_RULE_ID",

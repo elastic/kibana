@@ -11,7 +11,7 @@ import { ML_UPGRADE_OP_TYPE } from '../../common/types';
 
 export const mlSavedObjectType: SavedObjectsType = {
   name: ML_UPGRADE_OP_TYPE,
-  hidden: false,
+  hidden: true,
   namespaceType: 'agnostic',
   mappings: {
     dynamic: false,

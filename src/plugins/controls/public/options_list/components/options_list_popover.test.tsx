@@ -13,10 +13,12 @@ import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { FieldSpec } from '@kbn/data-views-plugin/common';
 
-import { OptionsListPopover, OptionsListPopoverProps } from './options_list_popover';
-import { OptionsListComponentState, OptionsListReduxState } from '../types';
-import { mockOptionsListReduxEmbeddableTools } from '../../../common/mocks';
+import { mockOptionsListEmbeddable } from '../../../common/mocks';
 import { ControlOutput, OptionsListEmbeddableInput } from '../..';
+import { OptionsListComponentState, OptionsListReduxState } from '../types';
+import { OptionsListEmbeddableContext } from '../embeddable/options_list_embeddable';
+import { OptionsListPopover, OptionsListPopoverProps } from './options_list_popover';
+import { pluginServices } from '../../services';
 
 describe('Options list popover', () => {
   const defaultProps = {
@@ -35,16 +37,16 @@ describe('Options list popover', () => {
 
   async function mountComponent(options?: Partial<MountOptions>) {
     const compProps = { ...defaultProps, ...(options?.popoverProps ?? {}) };
-    const mockReduxEmbeddableTools = await mockOptionsListReduxEmbeddableTools({
+    const optionsListEmbeddable = await mockOptionsListEmbeddable({
       componentState: options?.componentState ?? {},
       explicitInput: options?.explicitInput ?? {},
       output: options?.output ?? {},
     } as Partial<OptionsListReduxState>);
 
     return mountWithIntl(
-      <mockReduxEmbeddableTools.Wrapper>
+      <OptionsListEmbeddableContext.Provider value={optionsListEmbeddable}>
         <OptionsListPopover {...compProps} />
-      </mockReduxEmbeddableTools.Wrapper>
+      </OptionsListEmbeddableContext.Provider>
     );
   }
 
@@ -68,7 +70,7 @@ describe('Options list popover', () => {
   });
 
   test('no available options', async () => {
-    const popover = await mountComponent({ componentState: { availableOptions: {} } });
+    const popover = await mountComponent({ componentState: { availableOptions: [] } });
     const availableOptionsDiv = findTestSubject(popover, 'optionsList-control-available-options');
     const noOptionsDiv = findTestSubject(
       availableOptionsDiv,
@@ -125,9 +127,7 @@ describe('Options list popover', () => {
         selectedOptions: ['bark', 'woof'],
       },
       componentState: {
-        availableOptions: {
-          bark: { doc_count: 75 },
-        },
+        availableOptions: [{ value: 'bark', docCount: 75 }],
         validSelections: ['bark'],
         invalidSelections: ['woof'],
       },
@@ -152,9 +152,7 @@ describe('Options list popover', () => {
     const popover = await mountComponent({
       explicitInput: { selectedOptions: ['bark', 'woof', 'meow'] },
       componentState: {
-        availableOptions: {
-          bark: { doc_count: 75 },
-        },
+        availableOptions: [{ value: 'bark', docCount: 75 }],
         validSelections: ['bark'],
         invalidSelections: ['woof', 'meow'],
       },
@@ -217,7 +215,7 @@ describe('Options list popover', () => {
 
   test('if existsSelected = false and no suggestions, then "Exists" does not show up', async () => {
     const popover = await mountComponent({
-      componentState: { availableOptions: {} },
+      componentState: { availableOptions: [] },
       explicitInput: { existsSelected: false },
     });
     const existsOption = findTestSubject(popover, 'optionsList-control-selection-exists');
@@ -290,6 +288,9 @@ describe('Options list popover', () => {
   });
 
   test('ensure warning icon shows up when testAllowExpensiveQueries = false', async () => {
+    pluginServices.getServices().optionsList.getAllowExpensiveQueries = jest.fn(() =>
+      Promise.resolve(false)
+    );
     const popover = await mountComponent({
       componentState: {
         field: { name: 'Test keyword field', type: 'keyword' } as FieldSpec,

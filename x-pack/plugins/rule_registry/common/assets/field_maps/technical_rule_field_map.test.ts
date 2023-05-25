@@ -72,6 +72,11 @@ it('matches snapshot', () => {
         "required": false,
         "type": "date",
       },
+      "kibana.alert.maintenance_window_ids": Object {
+        "array": true,
+        "required": false,
+        "type": "keyword",
+      },
       "kibana.alert.reason": Object {
         "array": false,
         "required": false,
@@ -268,6 +273,13 @@ it('matches snapshot', () => {
         "format": "epoch_millis||strict_date_optional_time",
         "required": false,
         "type": "date_range",
+      },
+      "kibana.alert.url": Object {
+        "array": false,
+        "ignore_above": 2048,
+        "index": false,
+        "required": false,
+        "type": "keyword",
       },
       "kibana.alert.uuid": Object {
         "array": false,

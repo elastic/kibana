@@ -88,7 +88,7 @@ export class PhraseSuggestorUI<T extends PhraseSuggestorProps> extends React.Com
       signal: this.abortController.signal,
       useTimeRange: timeRangeForSuggestionsOverride,
       boolFilter: buildQueryFromFilters(filtersForSuggestions, undefined).filter,
-      method: filtersForSuggestions?.length ? 'terms_agg' : 'terms_enum',
+      method: filtersForSuggestions?.length ? 'terms_agg' : undefined,
     });
 
     this.setState({ suggestions, isLoading: false });

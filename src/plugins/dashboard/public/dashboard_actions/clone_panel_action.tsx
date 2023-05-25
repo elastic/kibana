@@ -95,6 +95,7 @@ export class ClonePanelAction implements Action<ClonePanelActionContext> {
         height: panelToClone.gridData.h,
         currentPanels: dashboard.getInput().panels,
         placeBesideId: panelToClone.explicitInput.id,
+        scrollToPanel: true,
       } as IPanelPlacementBesideArgs
     );
   }

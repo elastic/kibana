@@ -72,6 +72,6 @@ describe('<ControlYamlView />', () => {
     );
 
     expect(getByTestId('cloudDefendAdditionalErrors')).toBeTruthy();
-    expect(getByText('"sessionLeaderName" values cannot exceed 16 bytes')).toBeTruthy();
+    expect(getByText('"targetFilePath" values cannot exceed 255 bytes')).toBeTruthy();
   });
 });

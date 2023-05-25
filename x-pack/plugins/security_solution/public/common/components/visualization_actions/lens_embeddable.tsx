@@ -28,16 +28,25 @@ import { getRequestsAndResponses } from './utils';
 import { SourcererScopeName } from '../../store/sourcerer/model';
 import { VisualizationActions } from './actions';
 
+const HOVER_ACTIONS_PADDING = 24;
+
 const LensComponentWrapper = styled.div<{
-  height?: string;
-  width?: string;
+  $height?: number;
+  width?: string | number;
   $addHoverActionsPadding?: boolean;
 }>`
-  height: ${({ height }) => height ?? 'auto'};
+  height: ${({ $height }) => ($height ? `${$height}px` : 'auto')};
   width: ${({ width }) => width ?? 'auto'};
   > div {
     background-color: transparent;
-    ${({ $addHoverActionsPadding }) => ($addHoverActionsPadding ? `padding: 20px 0 0 0;` : ``)}
+    ${({ $addHoverActionsPadding }) =>
+      $addHoverActionsPadding ? `padding: ${HOVER_ACTIONS_PADDING}px 0 0 0;` : ``}
+  }
+  .lnsExpressionRenderer .echLegend {
+    ${({ $height, $addHoverActionsPadding }) =>
+      $height && $height > HOVER_ACTIONS_PADDING && $addHoverActionsPadding
+        ? `height: ${$height - HOVER_ACTIONS_PADDING * 1.5}px;`
+        : ''}
   }
   .expExpressionRenderer__expression {
     padding: 2px 0 0 0 !important;
@@ -254,7 +263,7 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
     <>
       {attributes && searchSessionId && (
         <LensComponentWrapper
-          height={wrapperHeight}
+          $height={wrapperHeight}
           width={wrapperWidth}
           $addHoverActionsPadding={addHoverActionsPadding}
         >
@@ -271,6 +280,8 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
             extraActions={actions}
             searchSessionId={searchSessionId}
             showInspector={false}
+            syncTooltips={false}
+            syncCursor={false}
           />
         </LensComponentWrapper>
       )}

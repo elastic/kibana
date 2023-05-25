@@ -1,23 +1,17 @@
 {
   "description": "Security: Packetbeat - Looks for unusual DNS activity that could indicate command-and-control or data exfiltration activity.",
-  "groups": [
-    "security",
-    "packetbeat",
-    "dns"
-  ],
+  "groups": ["security", "packetbeat", "dns"],
   "analysis_config": {
     "bucket_span": "15m",
     "detectors": [
       {
-        "detector_description": "high_info_content(\"dns.question.name\") over tld",
+        "detector_description": "Detects high info content of DNS questions over a population of TLDs.",
         "function": "high_info_content",
         "field_name": "dns.question.name",
         "over_field_name": "dns.question.etld_plus_one",
         "custom_rules": [
           {
-            "actions": [
-              "skip_result"
-            ],
+            "actions": ["skip_result"],
             "conditions": [
               {
                 "applies_to": "actual",
@@ -29,12 +23,7 @@
         ]
       }
     ],
-    "influencers": [
-      "destination.ip",
-      "host.name",
-      "dns.question.etld_plus_one"
-    ],
-    "model_prune_window": "30d"
+    "influencers": ["destination.ip", "host.name", "dns.question.etld_plus_one"]
   },
   "allow_lazy_open": true,
   "analysis_limits": {
@@ -45,12 +34,8 @@
   },
   "custom_settings": {
     "created_by": "ml-module-security-packetbeat",
-    "custom_urls": [
-      {
-        "url_name": "Host Details",
-        "url_value": "security/hosts/ml-hosts/$host.name$?_g=()&timerange=(global:(linkTo:!(timeline),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')),timeline:(linkTo:!(global),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')))"
-      }
-    ],
-    "security_app_display_name": "DNS Tunneling"
+    "security_app_display_name": "DNS Tunneling",
+    "managed": true,
+    "job_revision": 4
   }
 }

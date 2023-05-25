@@ -57,6 +57,7 @@ import { PickTimeline } from '../pick_timeline';
 import { StepContentWrapper } from '../step_content_wrapper';
 import { NextStep } from '../next_step';
 import { ThresholdInput } from '../threshold_input';
+import { SuppressionInfoIcon } from '../suppression_info_icon';
 import {
   Field,
   Form,
@@ -88,7 +89,10 @@ import { defaultCustomQuery } from '../../../pages/detection_engine/rules/utils'
 import { getIsRulePreviewDisabled } from '../rule_preview/helpers';
 import { GroupByFields } from '../group_by_fields';
 import { useLicense } from '../../../../common/hooks/use_license';
-import { minimumLicenseForSuppression } from '../../../../../common/detection_engine/rule_schema';
+import {
+  minimumLicenseForSuppression,
+  AlertSuppressionMissingFieldsStrategy,
+} from '../../../../../common/detection_engine/rule_schema';
 import { DurationInput } from '../duration_input';
 
 const CommonUseField = getUseField({ component: Field });
@@ -124,6 +128,10 @@ const RuleTypeEuiFormRow = styled(EuiFormRow).attrs<{ $isVisible: boolean }>(({ 
     display: $isVisible ? 'flex' : 'none',
   },
 }))<{ $isVisible: boolean }>``;
+
+const IntendedRuleTypeEuiFormRow = styled(RuleTypeEuiFormRow)`
+  ${({ theme }) => `padding-left: ${theme.eui.euiSizeXL};`}
+`;
 
 const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   addPadding = false,
@@ -179,6 +187,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
       'groupByRadioSelection',
       'groupByDuration.value',
       'groupByDuration.unit',
+      'suppressionMissingFields',
     ],
     onChange: (data: DefineStepRule) => {
       if (onRuleDataChange) {
@@ -286,10 +295,8 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   // if 'index' is selected, use these browser fields
   // otherwise use the dataview browserfields
   const previousRuleType = usePrevious(ruleType);
-  const [isIndexPatternLoading, { browserFields, indexPatterns: initIndexPattern }] = useFetchIndex(
-    index,
-    false
-  );
+  const [isIndexPatternLoading, { browserFields, indexPatterns: initIndexPattern }] =
+    useFetchIndex(index);
   const [indexPattern, setIndexPattern] = useState<DataViewBase>(initIndexPattern);
 
   const { data } = useKibana().services;
@@ -556,6 +563,34 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
           groupByRadioSelection.setValue(id);
         }}
         data-test-subj="groupByDurationOptions"
+      />
+    ),
+    [license, groupByFields]
+  );
+
+  const AlertsSuppressionMissingFields = useCallback(
+    ({ suppressionMissingFields }) => (
+      <EuiRadioGroup
+        disabled={
+          !license.isAtLeast(minimumLicenseForSuppression) ||
+          groupByFields == null ||
+          groupByFields.length === 0
+        }
+        idSelected={suppressionMissingFields.value}
+        options={[
+          {
+            id: AlertSuppressionMissingFieldsStrategy.Suppress,
+            label: i18n.ALERT_SUPPRESSION_MISSING_FIELDS_SUPPRESS_OPTION,
+          },
+          {
+            id: AlertSuppressionMissingFieldsStrategy.DoNotSuppress,
+            label: i18n.ALERT_SUPPRESSION_MISSING_FIELDS_DO_NOT_SUPPRESS_OPTION,
+          },
+        ]}
+        onChange={(id: string) => {
+          suppressionMissingFields.setValue(id);
+        }}
+        data-test-subj="suppressionMissingFieldsOptions"
       />
     ),
     [license, groupByFields]
@@ -883,7 +918,8 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
               }}
             />
           </RuleTypeEuiFormRow>
-          <RuleTypeEuiFormRow
+
+          <IntendedRuleTypeEuiFormRow
             $isVisible={isQueryRule(ruleType)}
             data-test-subj="alertSuppressionDuration"
           >
@@ -902,7 +938,28 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
             >
               {GroupByChildren}
             </UseMultiFields>
-          </RuleTypeEuiFormRow>
+          </IntendedRuleTypeEuiFormRow>
+
+          <IntendedRuleTypeEuiFormRow
+            $isVisible={isQueryRule(ruleType)}
+            data-test-subj="alertSuppressionMissingFields"
+            label={
+              <span>
+                {i18n.ALERT_SUPPRESSION_MISSING_FIELDS_FORM_ROW_LABEL} <SuppressionInfoIcon />
+              </span>
+            }
+            fullWidth
+          >
+            <UseMultiFields
+              fields={{
+                suppressionMissingFields: {
+                  path: 'suppressionMissingFields',
+                },
+              }}
+            >
+              {AlertsSuppressionMissingFields}
+            </UseMultiFields>
+          </IntendedRuleTypeEuiFormRow>
 
           <RuleTypeEuiFormRow $isVisible={isMlRule(ruleType)} fullWidth>
             <>

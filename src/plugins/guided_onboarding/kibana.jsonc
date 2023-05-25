@@ -8,7 +8,8 @@
     "server": true,
     "browser": true,
     "optionalPlugins": [
-      "cloud"
+      "cloud",
+      "features"
     ],
     "requiredBundles": [
       "kibanaReact"

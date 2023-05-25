@@ -17,7 +17,7 @@ import { DashboardSaveModal } from './overlays/save_modal';
 import { DashboardContainer } from '../dashboard_container';
 import { showCloneModal } from './overlays/show_clone_modal';
 import { pluginServices } from '../../../services/plugin_services';
-import { DashboardContainerByValueInput } from '../../../../common';
+import { DashboardContainerInput } from '../../../../common';
 import { SaveDashboardReturn } from '../../../services/dashboard_saved_object/types';
 
 export function runSaveAs(this: DashboardContainer) {
@@ -32,14 +32,9 @@ export function runSaveAs(this: DashboardContainer) {
   } = pluginServices.getServices();
 
   const {
-    getState,
-    dispatch,
-    actions: { setStateFromSaveModal, setLastSavedInput },
-  } = this.getReduxEmbeddableTools();
-  const {
     explicitInput: currentState,
     componentState: { lastSavedId },
-  } = getState();
+  } = this.getState();
 
   return new Promise<SaveDashboardReturn | undefined>((resolve) => {
     const onSave = async ({
@@ -81,7 +76,7 @@ export function runSaveAs(this: DashboardContainer) {
         // do not save if title is duplicate and is unconfirmed
         return {};
       }
-      const stateToSave: DashboardContainerByValueInput = {
+      const stateToSave: DashboardContainerInput = {
         ...currentState,
         ...stateFromSaveModal,
       };
@@ -103,11 +98,10 @@ export function runSaveAs(this: DashboardContainer) {
       stateFromSaveModal.lastSavedId = saveResult.id;
       if (saveResult.id) {
         batch(() => {
-          dispatch(setStateFromSaveModal(stateFromSaveModal));
-          dispatch(setLastSavedInput(stateToSave));
+          this.dispatch.setStateFromSaveModal(stateFromSaveModal);
+          this.dispatch.setLastSavedInput(stateToSave);
         });
       }
-      if (newCopyOnSave || !lastSavedId) this.expectIdChange();
       resolve(saveResult);
       return saveResult;
     };
@@ -137,21 +131,16 @@ export async function runQuickSave(this: DashboardContainer) {
   } = pluginServices.getServices();
 
   const {
-    getState,
-    dispatch,
-    actions: { setLastSavedInput },
-  } = this.getReduxEmbeddableTools();
-  const {
     explicitInput: currentState,
     componentState: { lastSavedId },
-  } = getState();
+  } = this.getState();
 
   const saveResult = await saveDashboardStateToSavedObject({
     lastSavedId,
     currentState,
     saveOptions: {},
   });
-  dispatch(setLastSavedInput(currentState));
+  this.dispatch.setLastSavedInput(currentState);
 
   return saveResult;
 }
@@ -161,12 +150,7 @@ export async function runClone(this: DashboardContainer) {
     dashboardSavedObject: { saveDashboardStateToSavedObject, checkForDuplicateDashboardTitle },
   } = pluginServices.getServices();
 
-  const {
-    getState,
-    dispatch,
-    actions: { setTitle },
-  } = this.getReduxEmbeddableTools();
-  const { explicitInput: currentState } = getState();
+  const { explicitInput: currentState } = this.getState();
 
   return new Promise<SaveDashboardReturn | undefined>((resolve) => {
     const onClone = async (
@@ -190,10 +174,7 @@ export async function runClone(this: DashboardContainer) {
         saveOptions: { saveAsCopy: true },
         currentState: { ...currentState, title: newTitle },
       });
-
-      dispatch(setTitle(newTitle));
       resolve(saveResult);
-      this.expectIdChange();
       return saveResult.id ? { id: saveResult.id } : { error: saveResult.error };
     };
     showCloneModal({ onClone, title: currentState.title, onClose: () => resolve(undefined) });

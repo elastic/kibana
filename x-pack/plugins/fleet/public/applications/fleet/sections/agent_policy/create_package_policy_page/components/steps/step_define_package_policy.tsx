@@ -52,7 +52,7 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
   packageInfo: PackageInfo;
   packagePolicy: NewPackagePolicy;
   updatePackagePolicy: (fields: Partial<NewPackagePolicy>) => void;
-  validationResults: PackagePolicyValidationResults;
+  validationResults: PackagePolicyValidationResults | undefined;
   submitAttempted: boolean;
   isEditPage?: boolean;
   noAdvancedToggle?: boolean;
@@ -201,7 +201,7 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
                         },
                       });
                     }}
-                    errors={validationResults.vars![varName]}
+                    errors={validationResults?.vars?.[varName] ?? []}
                     forceShowErrors={submitAttempted}
                   />
                 </EuiFlexItem>
@@ -350,7 +350,7 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
                               },
                             });
                           }}
-                          errors={validationResults.vars![varName]}
+                          errors={validationResults?.vars?.[varName] ?? []}
                           forceShowErrors={submitAttempted}
                         />
                       </EuiFlexItem>

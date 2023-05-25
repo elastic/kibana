@@ -1,25 +1,17 @@
 {
   "description": "Security: Authentication - Looks for an unusually large spike in successful authentication events from a particular source IP address. This can be due to password spraying, user enumeration, or brute force activity.",
-  "groups": [
-    "security",
-    "authentication"
-  ],
+  "groups": ["security", "authentication"],
   "analysis_config": {
     "bucket_span": "15m",
     "detectors": [
       {
-        "detector_description": "high count of auth events for a source IP",
+        "detector_description": "Detects high count of auth events for a source IP.",
         "function": "high_non_zero_count",
         "by_field_name": "source.ip",
         "detector_index": 0
       }
     ],
-    "influencers": [
-      "source.ip",
-      "winlog.event_data.LogonType",
-      "user.name"
-    ],
-    "model_prune_window": "30d"
+    "influencers": ["source.ip", "winlog.event_data.LogonType", "user.name", "host.name"]
   },
   "allow_lazy_open": true,
   "analysis_limits": {
@@ -30,6 +22,8 @@
   },
   "custom_settings": {
     "created_by": "ml-module-security-auth",
-    "security_app_display_name": "Spike in Logon Events from a Source IP"
+    "security_app_display_name": "Spike in Logon Events from a Source IP",
+    "managed": true,
+    "job_revision": 4
   }
 }

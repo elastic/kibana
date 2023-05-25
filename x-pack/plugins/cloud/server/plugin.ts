@@ -11,7 +11,7 @@ import { registerCloudDeploymentMetadataAnalyticsContext } from '../common/regis
 import type { CloudConfigType } from './config';
 import { registerCloudUsageCollector } from './collectors';
 import { getIsCloudEnabled } from '../common/is_cloud_enabled';
-import { parseDeploymentIdFromDeploymentUrl } from './utils';
+import { parseDeploymentIdFromDeploymentUrl } from '../common/parse_deployment_id_from_deployment_url';
 import { readInstanceSizeMb } from './env';
 
 interface PluginsSetup {

@@ -36,6 +36,117 @@
           "url": "c7f66a0df8b1b52f17c28c4adb111105",
           "usage-counters": "8cc260bdceffec4ffc3ad165c97dc1b4",
           "visualization": "f819cf6636b75c9e76ba733a0c6ef355"
+        },
+        "indexTypesMap": {
+          ".kibana_task_manager": [
+            "task"
+          ],
+          ".kibana": [
+            "apm-indices",
+            "apm-server-schema",
+            "apm-service-group",
+            "apm-telemetry",
+            "app_search_telemetry",
+            "application_usage_daily",
+            "application_usage_totals",
+            "config",
+            "config-global",
+            "core-usage-stats",
+            "enterprise_search_telemetry",
+            "event_loop_delays_daily",
+            "file",
+            "file-upload-usage-collection-telemetry",
+            "fileShare",
+            "guided-onboarding-guide-state",
+            "guided-onboarding-plugin-state",
+            "infrastructure-monitoring-log-view",
+            "infrastructure-ui-source",
+            "inventory-view",
+            "legacy-url-alias",
+            "metrics-explorer-view",
+            "ml-job",
+            "ml-module",
+            "ml-trained-model",
+            "monitoring-telemetry",
+            "sample-data-telemetry",
+            "slo",
+            "space",
+            "spaces-usage-stats",
+            "synthetics-monitor",
+            "synthetics-param",
+            "synthetics-privates-locations",
+            "tag",
+            "telemetry",
+            "ui-metric",
+            "upgrade-assistant-ml-upgrade-operation",
+            "upgrade-assistant-reindex-operation",
+            "uptime-dynamic-settings",
+            "uptime-synthetics-api-key",
+            "url",
+            "usage-counters",
+            "workplace_search_telemetry"
+          ],
+          ".kibana_ingest": [
+            "epm-packages",
+            "epm-packages-assets",
+            "fleet-fleet-server-host",
+            "fleet-message-signing-keys",
+            "fleet-preconfiguration-deletion-record",
+            "fleet-proxy",
+            "ingest-agent-policies",
+            "ingest-download-sources",
+            "ingest-outputs",
+            "ingest-package-policies",
+            "ingest_manager_settings"
+          ],
+          ".kibana_security_solution": [
+            "csp-rule-template",
+            "endpoint:user-artifact-manifest",
+            "exception-list",
+            "exception-list-agnostic",
+            "osquery-manager-usage-metric",
+            "osquery-pack",
+            "osquery-pack-asset",
+            "osquery-saved-query",
+            "security-rule",
+            "security-solution-signals-migration",
+            "siem-detection-engine-rule-actions",
+            "siem-ui-timeline",
+            "siem-ui-timeline-note",
+            "siem-ui-timeline-pinned-event"
+          ],
+          ".kibana_alerting_cases": [
+            "action",
+            "action_task_params",
+            "alert",
+            "api_key_pending_invalidation",
+            "cases",
+            "cases-comments",
+            "cases-configure",
+            "cases-connector-mappings",
+            "cases-telemetry",
+            "cases-user-actions",
+            "connector_token",
+            "maintenance-window",
+            "rules-settings"
+          ],
+          ".kibana_analytics": [
+            "canvas-element",
+            "canvas-workpad",
+            "canvas-workpad-template",
+            "dashboard",
+            "graph-workspace",
+            "index-pattern",
+            "kql-telemetry",
+            "lens",
+            "lens-ui-telemetry",
+            "map",
+            "query",
+            "search",
+            "search-session",
+            "search-telemetry",
+            "visualization"
+          ]
         }
       },
       "dynamic": "strict",
@@ -464,7 +575,9 @@
         "refresh_interval": "1s",
         "routing_partition_size": "1",
         "mapping": {
-          "total_fields": { "limit": 1500 }
+          "total_fields": {
+            "limit": 1500
+          }
         }
       }
     }
