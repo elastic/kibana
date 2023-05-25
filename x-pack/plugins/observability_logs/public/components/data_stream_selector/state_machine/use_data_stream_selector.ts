@@ -7,7 +7,9 @@
 
 import { useInterpret, useSelector } from '@xstate/react';
 import { useCallback } from 'react';
+import { PanelId } from '../types';
 import { createDataStreamsSelectorStateMachine } from './state_machine';
+import { ChangePanelHandler } from './types';
 
 export const useDataStreamSelector = () => {
   const dataStreamsSelectorStateService = useInterpret(() =>
@@ -16,20 +18,33 @@ export const useDataStreamSelector = () => {
 
   const isOpen = useSelector(dataStreamsSelectorStateService, (state) => state.matches('open'));
 
+  const panelId = useSelector(dataStreamsSelectorStateService, (state) => state.context.panelId);
+
   const togglePopover = useCallback(
     () => dataStreamsSelectorStateService.send({ type: 'TOGGLE' }),
+    [dataStreamsSelectorStateService]
+  );
+
+  const changePanel = useCallback<ChangePanelHandler>(
+    (panelDetails) =>
+      dataStreamsSelectorStateService.send({
+        type: 'CHANGE_PANEL',
+        panelId: panelDetails.panelId as PanelId,
+      }),
     [dataStreamsSelectorStateService]
   );
 
   return {
     // Data
     isOpen,
+    panelId,
 
     // Failure states
 
     // Loading states
 
     // Actions
+    changePanel,
     togglePopover,
   };
 };
