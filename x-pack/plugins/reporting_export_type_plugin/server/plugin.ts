@@ -8,34 +8,33 @@
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin, Logger } from '@kbn/core/server';
 
 import { ConfigSchema } from '@kbn/reporting-plugin/server/config';
-import { ExportTypePluginPluginSetup, ExportTypePluginPluginStart } from './types';
+import { ExportTypesPluginSetup, ExportTypesPluginStart } from './types';
 
-const exportTypes = [
-  // new CsvExportType(),
-  // new PdfExportType(),
-  // new PngExportType(),
-];
-
-export class ExportTypePlugin
-  implements Plugin<ExportTypePluginPluginSetup, ExportTypePluginPluginStart>
+export class ExportTypesPlugin
+  implements Plugin<{}, {}, ExportTypesPluginSetup, ExportTypesPluginStart>
 {
   private readonly logger: Logger;
+  exportTypes = [
+    // new CsvExportType(),
+    // new PdfExportType(),
+    // new PngExportType(),
+  ];
 
   constructor(initializerContext: PluginInitializerContext<typeof ConfigSchema>) {
     this.logger = initializerContext.logger.get();
   }
 
-  public setup(core: CoreSetup, { reporting }: ExportTypePluginPluginSetup) {
-    exportTypes.forEach((eType) => {
-      reporting.getExportTypesRegistry().register(eType);
-      eType.pluginSetup(pluginsSetup, this.logger);
+  public setup(core: CoreSetup, pluginsSetup: ExportTypesPluginSetup) {
+    const { reporting } = pluginsSetup;
+    this.exportTypes.forEach((eType) => {
+      reporting.registerExportType(eType);
     });
+    return {};
   }
 
-  public start(core: CoreStart, plugins: ExportTypePluginPluginStart) {
-    exportTypes.forEach((eType) => {
-      eType.pluginStart();
-    });
+  public start(core: CoreStart, plugins: ExportTypesPluginStart) {
+    this.exportTypes.forEach((eType) => {});
+    return {};
   }
 
   public stop() {}

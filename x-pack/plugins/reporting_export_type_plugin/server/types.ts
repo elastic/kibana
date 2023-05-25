@@ -4,11 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { ReportingInternalSetup, ReportingInternalStart } from '@kbn/reporting-plugin/server/core';
+import type { ReportingSetup, ReportingStart } from '@kbn/reporting-plugin/server/types';
 
-export interface ExportTypePluginPluginSetup {
-  reporting: ReportingInternalSetup;
+export interface ExportTypesPluginSetup {
+  reporting: ReportingSetup;
 }
-export interface ExportTypePluginPluginStart {
-  reporting: ReportingInternalStart;
+export interface ExportTypesPluginStart {
+  reporting: ReportingStart;
 }
