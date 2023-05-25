@@ -82,10 +82,7 @@ const MonitorInspect = () => {
               <EuiCodeBlock language="json" fontSize="m" paddingSize="m" lineNumbers>
                 {formatContent(data.result)}
               </EuiCodeBlock>
-              {/*
-                Uncomment when a solution to show original source code is found
-                {data.decodedCode && <MonitorCode code={data.decodedCode} />}
-                */}
+              {data.decodedCode && <MonitorCode code={data.decodedCode} />}
             </>
           ) : loading && !error ? (
             <LoadingState />
