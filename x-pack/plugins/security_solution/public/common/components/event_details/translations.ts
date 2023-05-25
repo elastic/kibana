@@ -70,9 +70,12 @@ export const OSQUERY_VIEW = i18n.translate('xpack.securitySolution.eventDetails.
   defaultMessage: 'Osquery Results',
 });
 
-export const ENDPOINT_VIEW = i18n.translate('xpack.securitySolution.eventDetails.endpointView', {
-  defaultMessage: 'Endpoint Results',
-});
+export const RESPONSE_ACTIONS_VIEW = i18n.translate(
+  'xpack.securitySolution.eventDetails.responseActionsView',
+  {
+    defaultMessage: 'Response Results',
+  }
+);
 
 export const FIELD = i18n.translate('xpack.securitySolution.eventDetails.field', {
   defaultMessage: 'Field',
@@ -145,6 +148,20 @@ export const ALERT_REASON = i18n.translate('xpack.securitySolution.eventDetails.
 
 export const VIEW_ALL_FIELDS = i18n.translate('xpack.securitySolution.eventDetails.viewAllFields', {
   defaultMessage: 'View all fields in table',
+});
+
+export const ENDPOINT_COMMANDS = Object.freeze({
+  isolated: i18n.translate('xpack.securitySolution.eventDetails.responseActions.endpoint.isolate', {
+    defaultMessage: 'isolated the host',
+  }),
+  released: i18n.translate('xpack.securitySolution.eventDetails.responseActions.endpoint.release', {
+    defaultMessage: 'released the host',
+  }),
+  generic: (command: string) =>
+    i18n.translate('xpack.securitySolution.eventDetails.responseActions.endpoint.generic', {
+      values: { command },
+      defaultMessage: 'executed command {command}',
+    }),
 });
 
 export const SUMMARY_VIEW = i18n.translate('xpack.securitySolution.eventDetails.summaryView', {

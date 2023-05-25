@@ -110,7 +110,7 @@ async function enhanceEdges(
     : edges;
 }
 
-async function getHostRiskData(
+export async function getHostRiskData(
   esClient: IScopedClusterClient,
   spaceId: string,
   hostNames: string[]
