@@ -18,6 +18,7 @@ import {
   EuiTitle,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiTextColor,
 } from '@elastic/eui';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
@@ -94,7 +95,7 @@ export function DashboardEmptyScreen() {
     >
       <EuiPageTemplate.EmptyPrompt style={{ padding: euiThemeVars.euiSizeXXL }}>
         <EuiImage url={basePath.prepend(emptyStateGraphicURL)} alt="" />
-        <EuiText size="m">
+        <EuiText color="default" size="m">
           <p style={{ fontWeight: 'bold' }}>
             {showWriteControls
               ? emptyScreenStrings.getFillDashboardTitle()
