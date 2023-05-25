@@ -9,7 +9,7 @@ import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { ApmIntegrationPackageStatus } from './apm_integration_package_status';
 import { IndexTemplatesStatus } from './index_templates_status';
-import { FieldMappingStatus } from './field_mapping_status';
+import { FieldMappingStatus } from './indicies_status';
 import { DataStreamsStatus } from './data_streams_status';
 
 export function DiagnosticsSummary() {

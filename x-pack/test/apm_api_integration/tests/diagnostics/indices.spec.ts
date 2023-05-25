@@ -21,15 +21,16 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const start = new Date('2021-01-01T00:00:00.000Z').getTime();
   const end = new Date('2021-01-01T00:15:00.000Z').getTime() - 1;
 
-  registry.when('Diagnostics: Invalid field mappings', { config: 'basic', archives: [] }, () => {
+  registry.when('Diagnostics: Indices', { config: 'basic', archives: [] }, () => {
     describe('When there is no data', () => {
-      it('returns response`', async () => {
-        const { status, body } = await apmApiClient.readUser({
-          endpoint: 'GET /internal/apm/diagnostics/invalid_field_mappings',
+      it('returns empty response`', async () => {
+        const { status, body } = await apmApiClient.adminUser({
+          endpoint: 'GET /internal/apm/diagnostics/indices',
         });
 
         expect(status).to.be(200);
-        expect(body.invalidFieldMappings).to.eql([]);
+        expect(body.validItems).to.eql([]);
+        expect(body.invalidItems).to.eql([]);
       });
     });
 
@@ -56,12 +57,13 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       after(() => synthtraceEsClient.clean());
 
       it('returns empty response', async () => {
-        const { status, body } = await apmApiClient.readUser({
-          endpoint: 'GET /internal/apm/diagnostics/invalid_field_mappings',
+        const { status, body } = await apmApiClient.adminUser({
+          endpoint: 'GET /internal/apm/diagnostics/indices',
         });
 
         expect(status).to.be(200);
-        expect(body.invalidFieldMappings).to.eql([]);
+        expect(body.validItems.length).to.be.greaterThan(0);
+        expect(body.invalidItems).to.eql([]);
       });
     });
 
@@ -98,18 +100,18 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
 
       it('returns a list of items with mapping issues', async () => {
-        const { status, body } = await apmApiClient.readUser({
-          endpoint: 'GET /internal/apm/diagnostics/invalid_field_mappings',
+        const { status, body } = await apmApiClient.adminUser({
+          endpoint: 'GET /internal/apm/diagnostics/indices',
         });
 
         expect(status).to.be(200);
-        expect(body.invalidFieldMappings).to.eql([
+        expect(body.validItems.length).to.be.greaterThan(0);
+        expect(body.invalidItems).to.eql([
           {
-            aggregatable: false,
-            indices: ['traces-apm-default'],
-            metadata_field: false,
-            searchable: true,
-            type: 'text',
+            isValid: false,
+            fieldMappings: { isValid: false, invalidType: 'text' },
+            ingestPipeline: { isValid: true },
+            index: 'traces-apm-default',
           },
         ]);
       });

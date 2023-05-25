@@ -5,40 +5,42 @@
  * 2.0.
  */
 
-import { ProcessorEvent } from '@kbn/observability-plugin/common';
-import {
-  FieldCapsFieldCapability,
-  IndicesDataStream,
-} from '@elastic/elasticsearch/lib/api/types';
+import { IndicesDataStream } from '@elastic/elasticsearch/lib/api/types';
 import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
-import { SERVICE_NAME } from '../../../common/es_fields/apm';
 import {
   getMatchingIndexTemplates,
   getUniqueApmIndices,
 } from './index_templates/get_matching_index_templates';
 import { getDefaultApmIndexTemplateStates } from './index_templates/get_default_apm_index_templates_states';
+import { getIndicesWithStatuses } from './indices/get_indices';
+
+interface IndiciesItem {
+  index: string;
+  fieldMappings: {
+    isValid: boolean;
+    invalidType?: string;
+  };
+  ingestPipeline: {
+    isValid?: boolean;
+    id?: string;
+  };
+  dataStream?: string;
+  isValid: boolean;
+}
 
 const fieldMappingsRoute = createApmServerRoute({
-  endpoint: 'GET /internal/apm/diagnostics/invalid_field_mappings',
+  endpoint: 'GET /internal/apm/diagnostics/indices',
+
   options: { tags: ['access:apm'] },
   handler: async (
     resources
-  ): Promise<{ invalidFieldMappings: FieldCapsFieldCapability[] }> => {
+  ): Promise<{
+    validItems: IndiciesItem[];
+    invalidItems: IndiciesItem[];
+  }> => {
     const apmEventClient = await getApmEventClient(resources);
-
-    const res = await apmEventClient.fieldCaps('diagnostics_field_caps', {
-      apm: { events: [ProcessorEvent.metric, ProcessorEvent.transaction] },
-      fields: [SERVICE_NAME],
-      filter_path: ['fields'],
-    });
-
-    const invalidFieldMappings = Object.values(
-      res.fields[SERVICE_NAME] ?? {}
-    ).filter(({ type }): boolean => type !== 'keyword');
-
-    // const invalidFieldMappings = getInvalidFieldMappings(res);
-    return { invalidFieldMappings };
+    return await getIndicesWithStatuses({ apmEventClient });
   },
 });
 
@@ -84,7 +86,7 @@ const dataStreamRoute = createApmServerRoute({
     nonDataStreamIndices: string[];
   }> => {
     const apmEventClient = await getApmEventClient(resources);
-    const apmIndices = getUniqueApmIndices(apmEventClient.indices).join(',');
+    const apmIndices = getUniqueApmIndices(apmEventClient.indices);
 
     // fetch APM data streams
     const datastreamRes = await apmEventClient.dataStreams(

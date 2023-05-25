@@ -13,7 +13,7 @@ import { useApmRoutePath } from '../../../hooks/use_apm_route_path';
 import { DiagnosticsSummary } from './summary_tab';
 import { ApmMainTemplate } from '../../routing/templates/apm_main_template';
 import { DiagnosticsIndexTemplates } from './index_templates_tab';
-import { DiagnosticsInvalidFieldMappings } from './invalid_field_mappings_tab';
+import { DiagnosticsIndices } from './indices_tab';
 import { DiagnosticsDataStreams } from './data_stream_tab';
 
 export const diagnosticsRoute = {
@@ -30,11 +30,11 @@ export const diagnosticsRoute = {
       '/diagnostics/index-templates': {
         element: <DiagnosticsIndexTemplates />,
       },
-      '/diagnostics/invalid-field-mappings': {
-        element: <DiagnosticsInvalidFieldMappings />,
-      },
       '/diagnostics/data_streams': {
         element: <DiagnosticsDataStreams />,
+      },
+      '/diagnostics/indices': {
+        element: <DiagnosticsIndices />,
       },
     },
   },
@@ -73,11 +73,11 @@ function DiagnosticsTemplate({ children }: { children: React.ReactChild }) {
             isSelected: routePath === '/diagnostics/data_streams',
           },
           {
-            href: router.link('/diagnostics/invalid-field-mappings'),
-            label: i18n.translate('xpack.apm.diagnostics.tab.field_mappings', {
-              defaultMessage: 'Field mappings',
+            href: router.link('/diagnostics/indices'),
+            label: i18n.translate('xpack.apm.diagnostics.tab.indices', {
+              defaultMessage: 'Indices',
             }),
-            isSelected: routePath === '/diagnostics/invalid-field-mappings',
+            isSelected: routePath === '/diagnostics/indices',
           },
         ],
       }}

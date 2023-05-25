@@ -14,11 +14,10 @@ import { useFetcher } from '../../../../hooks/use_fetcher';
 export function FieldMappingStatus() {
   const router = useApmRouter();
   const { data } = useFetcher((callApmApi) => {
-    return callApmApi('GET /internal/apm/diagnostics/invalid_field_mappings');
+    return callApmApi('GET /internal/apm/diagnostics/indices');
   }, []);
 
-  const invalidCount = data?.invalidFieldMappings.length;
-  const isOk = invalidCount === 0;
+  const isOk = !data?.invalidItems.length;
 
   return (
     <EuiFlexGroup>
@@ -35,18 +34,14 @@ export function FieldMappingStatus() {
       </EuiFlexItem>
       <EuiFlexItem grow={10}>
         {isOk
-          ? 'Field mappings: Looking good!'
-          : i18n.translate('xpack.apm.diagnostics.invalid_mapping.title', {
-              defaultMessage:
-                '{invalidCount} {invalidCount, plural, one {field is} other {fields are}} mapped incorrectly',
-              values: {
-                invalidCount,
-              },
+          ? 'Indices'
+          : i18n.translate('xpack.apm.diagnostics.indices.title', {
+              defaultMessage: 'Indicies: Invalid indices were found',
             })}
 
         <EuiLink
           data-test-subj="apmFieldMappingStatusSeeDetailsLink"
-          href={router.link('/diagnostics/invalid-field-mappings')}
+          href={router.link('/diagnostics/indices')}
         >
           See details
         </EuiLink>

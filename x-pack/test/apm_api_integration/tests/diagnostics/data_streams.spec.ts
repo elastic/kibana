@@ -50,6 +50,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         const instance = apm
           .service({ name: 'synth-go', environment: 'production', agentName: 'go' })
           .instance('instance-a');
+
         await synthtraceEsClient.index(
           timerange(start, end)
             .interval('1m')

@@ -18,6 +18,7 @@ import type {
   IndicesGetIndexTemplateRequest,
   IndicesSimulateTemplateResponse,
   IndicesGetRequest,
+  IngestGetPipelineRequest,
 } from '@elastic/elasticsearch/lib/api/types';
 import { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
 import type { ESSearchRequest, InferSearchResponseOf } from '@kbn/es-types';
@@ -281,7 +282,7 @@ export class APMEventClient {
 
     return this.callAsyncWithDebug({
       operationName,
-      requestType: 'field_caps',
+      requestType: '_field_caps',
       params: requestParams,
       cb: (opts) => this.esClient.fieldCaps(requestParams, opts),
     });
@@ -300,7 +301,7 @@ export class APMEventClient {
 
     return this.callAsyncWithDebug({
       operationName,
-      requestType: 'terms_enum',
+      requestType: '_terms_enum',
       params: requestParams,
       cb: (opts) => this.esClient.termsEnum(requestParams, opts),
     });
@@ -312,7 +313,7 @@ export class APMEventClient {
   ) {
     return this.callAsyncWithDebug({
       operationName,
-      requestType: 'index_template',
+      requestType: '_index_template',
       params,
       cb: async (abortOptions) => {
         try {
@@ -341,7 +342,7 @@ export class APMEventClient {
   ) {
     return this.callAsyncWithDebug({
       operationName,
-      requestType: 'simulate_index_template',
+      requestType: '/_index_template/_simulate',
       params,
       cb: (abortOptions) => {
         return this.esClient.transport.request<IndicesSimulateTemplateResponse>(
@@ -372,9 +373,22 @@ export class APMEventClient {
   async getIndices(operationName: string, params: IndicesGetRequest) {
     return this.callAsyncWithDebug({
       operationName,
-      requestType: 'get_indices',
+      requestType: 'indices.get',
       params,
       cb: (abortOptions) => this.esClient.indices.get(params, abortOptions),
+    });
+  }
+
+  async getIngestPipeline(
+    operationName: string,
+    params: IngestGetPipelineRequest
+  ) {
+    return this.callAsyncWithDebug({
+      operationName,
+      requestType: '_ingest/pipeline',
+      params,
+      cb: (abortOptions) =>
+        this.esClient.ingest.getPipeline(params, abortOptions),
     });
   }
 }

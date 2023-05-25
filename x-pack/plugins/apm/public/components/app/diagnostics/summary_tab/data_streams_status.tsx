@@ -45,7 +45,7 @@ export function DataStreamsStatus() {
         {isLoading
           ? '...'
           : isOk
-          ? 'Data streams: No problems found'
+          ? 'Data streams'
           : hasNonDataStreamIndices
           ? 'Data streams: Non-data stream indices were found'
           : 'Data streams: Some data streams are backed by non-standard index templates'}

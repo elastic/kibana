@@ -41,7 +41,7 @@ export function IndexTemplatesStatus() {
       </EuiFlexItem>
       <EuiFlexItem grow={10}>
         {isOk
-          ? 'Index templates: No problems found'
+          ? 'Index templates'
           : isEveryDefaultApmIndexTemplateInstalled === false
           ? 'Index templates: Not all expected index templates exist'
           : 'Index templates: Non standard index templates found'}
