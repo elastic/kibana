@@ -7,11 +7,10 @@
 
 import type { TypeOf } from '@kbn/config-schema';
 
-import type { GetUninstallTokensResponse } from '../../../common/types/rest_spec/uninstall_token';
-
 import { appContextService } from '../../services';
-
+import type { UninstallTokenServiceInterface } from '../../services/security/uninstall_token_service';
 import type { FleetRequestHandler } from '../../types';
+import type { GetUninstallTokensResponse } from '../../../common/types/rest_spec/uninstall_token';
 import type { GetUninstallTokensRequestSchema } from '../../types/rest_spec/uninstall_token';
 
 export const getUninstallTokensHandler: FleetRequestHandler<
@@ -35,19 +34,19 @@ export const getUninstallTokensHandler: FleetRequestHandler<
   }
 
   try {
-    let items: Record<string, string>;
+    const uninstallTokens = await readUninstallTokens(
+      uninstallTokenService,
+      request.query.policyId
+    );
 
-    if (request.query.policyId) {
-      const token = await uninstallTokenService.getTokenForPolicyId(request.query.policyId);
-
-      items = token ? { [request.query.policyId]: token } : {};
-    } else {
-      items = await uninstallTokenService.getAllTokens();
-    }
+    const { page = 1, perPage = 20 } = request.query;
+    const items = paginateTokens(uninstallTokens, perPage, page);
 
     const body: GetUninstallTokensResponse = {
       items,
-      total: Object.keys(items).length,
+      total: Object.keys(uninstallTokens).length,
+      perPage,
+      page,
     };
 
     return response.ok({ body });
@@ -57,4 +56,32 @@ export const getUninstallTokensHandler: FleetRequestHandler<
       body: { message: 'Failed to get uninstall tokens.' },
     });
   }
+};
+
+const readUninstallTokens = async (
+  uninstallTokenService: UninstallTokenServiceInterface,
+  policyIdFilter?: string
+) => {
+  let uninstallTokens: Record<string, string>;
+
+  if (policyIdFilter) {
+    const token = await uninstallTokenService.getTokenForPolicyId(policyIdFilter);
+
+    uninstallTokens = token ? { [policyIdFilter]: token } : {};
+  } else {
+    uninstallTokens = await uninstallTokenService.getAllTokens();
+  }
+
+  return uninstallTokens;
+};
+
+const paginateTokens = (uninstallTokens: Record<string, string>, perPage: number, page: number) => {
+  const policyIds = Object.keys(uninstallTokens);
+  const items: Record<string, string> = {};
+
+  for (let i = perPage * (page - 1); i < Math.min(perPage * page, policyIds.length); i++) {
+    items[policyIds[i]] = uninstallTokens[policyIds[i]];
+  }
+
+  return items;
 };

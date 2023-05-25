@@ -8,4 +8,6 @@
 export interface GetUninstallTokensResponse {
   items: Record<string, string>;
   total: number;
+  page: number;
+  perPage: number;
 }
