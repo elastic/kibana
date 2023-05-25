@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 
 import { JOB_STATE } from '@kbn/ml-plugin/common/constants/states';
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { COMMON_REQUEST_HEADERS } from '../../../../functional/services/ml/common_api';
+import { getCommonRequestHeader } from '../../../../functional/services/ml/common_api';
 import { USER } from '../../../../functional/services/ml/security_common';
 
 export default ({ getService }: FtrProviderContext) => {
@@ -24,12 +24,12 @@ export default ({ getService }: FtrProviderContext) => {
 
   async function runRequest(space: string, expectedStatusCode: number, jobIds?: string[]) {
     const { body, status } = await supertest
-      .post(`/s/${space}/api/ml/jobs/close_jobs`)
+      .post(`/s/${space}/internal/ml/jobs/close_jobs`)
       .auth(
         USER.ML_POWERUSER_ALL_SPACES,
         ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER_ALL_SPACES)
       )
-      .set(COMMON_REQUEST_HEADERS)
+      .set(getCommonRequestHeader('1'))
       .send({ jobIds });
     ml.api.assertResponseStatusCode(expectedStatusCode, status, body);
 

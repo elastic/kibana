@@ -173,7 +173,7 @@ const DEV_PATTERNS = [
   ...DEV_FILE_PATTERNS.map((file) => `{packages,src,x-pack}/**/${file}`),
   'packages/kbn-interpreter/tasks/**/*',
   'src/dev/**/*',
-  'x-pack/{dev-tools,tasks,test,build_chromium}/**/*',
+  'x-pack/{dev-tools,tasks,test,test_serverless,build_chromium}/**/*',
   'x-pack/performance/**/*',
   'src/setup_node_env/index.js',
   'src/cli/dev.js',
@@ -602,6 +602,8 @@ module.exports = {
         'x-pack/test/ui_capabilities/*/tests/**/*',
         'x-pack/test/performance/**/*.ts',
         '**/cypress.config.{js,ts}',
+        'x-pack/test_serverless/**/config*.ts',
+        'x-pack/test_serverless/*/test_suites/**/*',
       ],
       rules: {
         'import/no-default-export': 'off',

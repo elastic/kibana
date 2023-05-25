@@ -157,6 +157,5 @@
     "@kbn/ecs",
     "@kbn/url-state",
     "@kbn/ml-anomaly-utils",
-    "@kbn/shared-ux-file-types"
   ]
 }
