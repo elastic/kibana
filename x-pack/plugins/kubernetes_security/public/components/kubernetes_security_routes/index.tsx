@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback } from 'react';
 import { Switch } from 'react-router-dom';
 import { Route } from '@kbn/shared-ux-router';
-import { useQueryClient } from '@tanstack/react-query';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import {
   EuiBetaBadge,
@@ -80,13 +79,6 @@ const KubernetesSecurityRoutesComponent = ({
       }, {} as Record<string, number>),
     []
   );
-
-  const queryClient = useQueryClient();
-
-  useEffect(() => {
-    queryClient.invalidateQueries();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [globalFilter]);
 
   const onReduceRootAggs = useCallback(
     (result: AggregateResult): Record<string, number> =>
