@@ -5,8 +5,9 @@
  * 2.0.
  */
 
+import { ConnectorMappingsAttributesPartialRt } from '../../../server/common/types/connector_mappings';
 import { decodeOrThrow } from '../runtime_types';
-import { ConnectorMappingsAttributesPartialRt, ConnectorMappingsRt } from './mappings';
+import { ConnectorMappingsRt } from './mappings';
 
 describe('mappings', () => {
   describe('ConnectorMappingsRt', () => {
