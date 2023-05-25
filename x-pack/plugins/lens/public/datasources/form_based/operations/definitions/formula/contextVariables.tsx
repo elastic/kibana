@@ -73,7 +73,7 @@ function createContextValueBasedOperation<ColumnType extends ConstantsIndexPatte
         references: [],
       } as unknown as ColumnType;
     },
-    toExpression: (layer, columnId, _, dateUtils = {}) => {
+    toExpression: (layer, columnId, _, context = {}) => {
       const column = layer.columns[columnId] as ColumnType;
       return [
         {
@@ -82,7 +82,7 @@ function createContextValueBasedOperation<ColumnType extends ConstantsIndexPatte
           arguments: {
             id: [columnId],
             name: [column.label],
-            expression: [String(getContextValue(dateUtils))],
+            expression: [String(getContextValue(context))],
           },
         },
       ];
@@ -135,7 +135,7 @@ export const nowOperation = createContextValueBasedOperation<NowIndexPatternColu
       `,
   }),
   getContextValue: ({ now }) => {
-    return now == null ? moment().unix() : +now;
+    return now == null ? moment().valueOf() : +now;
   },
 });
 
@@ -146,7 +146,7 @@ function findContextValue(column: ConstantIndexPatternColumn, context: ContextVa
       : 0;
   }
   if (column.params?.value === 'now') {
-    return context.now == null ? moment().unix() : +context.now;
+    return context.now == null ? moment().valueOf() : +context.now;
   }
 }
 
