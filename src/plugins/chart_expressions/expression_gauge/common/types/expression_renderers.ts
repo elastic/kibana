@@ -11,6 +11,7 @@ import type { PersistedState } from '@kbn/visualizations-plugin/public';
 import type { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import type { IFieldFormat, SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
 import type { AllowedSettingsOverrides } from '@kbn/charts-plugin/common';
+import type { RenderMode, Datatable } from '@kbn/expressions-plugin/common';
 import type { AllowedGaugeOverrides, GaugeExpressionProps } from './expression_functions';
 
 export type FormatFactory = (mapping?: SerializedFieldFormat) => IFieldFormat;
@@ -22,4 +23,6 @@ export type GaugeRenderProps = GaugeExpressionProps & {
   renderComplete: () => void;
   uiState: PersistedState;
   overrides?: AllowedGaugeOverrides & AllowedSettingsOverrides;
+  renderMode: RenderMode;
+  children: ((props: { datatables: Datatable[] }) => JSX.Element) | undefined;
 };

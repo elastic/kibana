@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { CustomAnnotationTooltip } from '@elastic/charts';
-import { AllowedSettingsOverrides } from '@kbn/charts-plugin/common';
+import type { CustomAnnotationTooltip } from '@elastic/charts';
+import type { AllowedSettingsOverrides } from '@kbn/charts-plugin/common';
 import {
   AvailableAnnotationIcon,
   ManualPointEventAnnotationArgs,
@@ -21,7 +21,7 @@ export interface XYChartProps {
   syncCursor: boolean;
   syncColors: boolean;
   canNavigateToLens?: boolean;
-  overrides?: AllowedXYOverrides & AllowedSettingsOverrides;
+  overrides: AllowedXYOverrides & AllowedSettingsOverrides;
 }
 
 export interface XYRender {

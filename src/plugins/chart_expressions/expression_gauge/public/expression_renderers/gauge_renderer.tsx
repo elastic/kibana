@@ -30,7 +30,7 @@ export const gaugeRenderer: (
     defaultMessage: 'Gauge',
   }),
   reuseDomNode: true,
-  render: async (domNode, config, handlers) => {
+  render: async (domNode, config, handlers, childrenFn) => {
     const { core, plugins } = getStartDeps();
 
     handlers.onDestroy(() => {
@@ -69,16 +69,17 @@ export const gaugeRenderer: (
     const { GaugeComponent } = await import('../components/gauge_component');
     render(
       <KibanaThemeProvider theme$={core.theme.theme$}>
-        <div className="gauge-container" data-test-subj="gaugeChart">
-          <GaugeComponent
-            {...config}
-            formatFactory={getFormatService().deserialize}
-            chartsThemeService={plugins.charts.theme}
-            paletteService={getPaletteService()}
-            renderComplete={renderComplete}
-            uiState={handlers.uiState as PersistedState}
-          />
-        </div>
+        <GaugeComponent
+          {...config}
+          formatFactory={getFormatService().deserialize}
+          chartsThemeService={plugins.charts.theme}
+          paletteService={getPaletteService()}
+          renderComplete={renderComplete}
+          uiState={handlers.uiState as PersistedState}
+          renderMode={handlers.getRenderMode()}
+        >
+          {childrenFn}
+        </GaugeComponent>
       </KibanaThemeProvider>,
       domNode
     );

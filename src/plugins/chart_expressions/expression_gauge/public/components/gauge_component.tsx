@@ -177,6 +177,8 @@ export const GaugeComponent: FC<GaugeRenderProps> = memo(
     chartsThemeService,
     renderComplete,
     overrides,
+    renderMode,
+    children,
   }) => {
     const {
       shape: gaugeType,
@@ -274,7 +276,11 @@ export const GaugeComponent: FC<GaugeRenderProps> = memo(
     const icon = getIcons(gaugeType);
 
     if (typeof metricValue !== 'number') {
-      return <EmptyPlaceholder icon={icon} renderComplete={onRenderChange} />;
+      return (
+        <div className="gauge-container" data-test-subj="gaugeChart">
+          <EmptyPlaceholder icon={icon} renderComplete={onRenderChange} />
+        </div>
+      );
     }
 
     const goal = accessors.goal ? getValueFromAccessor(accessors.goal, row) : undefined;
@@ -283,31 +289,35 @@ export const GaugeComponent: FC<GaugeRenderProps> = memo(
 
     if (min === max) {
       return (
-        <EmptyPlaceholder
-          icon={icon}
-          message={
-            <FormattedMessage
-              id="expressionGauge.renderer.chartCannotRenderEqual"
-              defaultMessage="Minimum and maximum values may not be equal"
-            />
-          }
-          renderComplete={onRenderChange}
-        />
+        <div className="gauge-container" data-test-subj="gaugeChart">
+          <EmptyPlaceholder
+            icon={icon}
+            message={
+              <FormattedMessage
+                id="expressionGauge.renderer.chartCannotRenderEqual"
+                defaultMessage="Minimum and maximum values may not be equal"
+              />
+            }
+            renderComplete={onRenderChange}
+          />
+        </div>
       );
     }
 
     if (min > max) {
       return (
-        <EmptyPlaceholder
-          icon={icon}
-          message={
-            <FormattedMessage
-              id="expressionGauge.renderer.chartCannotRenderMinGreaterMax"
-              defaultMessage="Minimum value may not be greater than maximum value"
-            />
-          }
-          renderComplete={onRenderChange}
-        />
+        <div className="gauge-container" data-test-subj="gaugeChart">
+          <EmptyPlaceholder
+            icon={icon}
+            message={
+              <FormattedMessage
+                id="expressionGauge.renderer.chartCannotRenderMinGreaterMax"
+                defaultMessage="Minimum value may not be greater than maximum value"
+              />
+            }
+            renderComplete={onRenderChange}
+          />
+        </div>
       );
     }
     const customMetricFormatParams = isVisDimension(args.metric) ? args.metric.format : undefined;
@@ -359,58 +369,71 @@ export const GaugeComponent: FC<GaugeRenderProps> = memo(
         }
       : {};
 
+    if (renderMode === 'dataOnly') {
+      if (children) {
+        return children({ datatables: [table] });
+      }
+      return null;
+    }
+
     return (
-      <div className="gauge__wrapper">
-        <Chart>
-          <Settings
-            noResults={<EmptyPlaceholder icon={icon} renderComplete={onRenderChange} />}
-            debugState={window._echDebugStateFlag ?? false}
-            theme={[{ background: { color: 'transparent' } }, chartTheme]}
-            baseTheme={chartBaseTheme}
-            ariaLabel={args.ariaLabel}
-            ariaUseDefaultSummary={!args.ariaLabel}
-            onRenderChange={onRenderChange}
-            {...getOverridesFor(overrides, 'settings')}
-          />
-          <Goal
-            id="goal"
-            subtype={getSubtypeByGaugeType(gaugeType)}
-            base={bands[0]}
-            target={goal && goal >= bands[0] && goal <= bands[bands.length - 1] ? goal : undefined}
-            actual={actualValue}
-            tickValueFormatter={({ value: tickValue }) => tickFormatter.convert(tickValue)}
-            tooltipValueFormatter={(tooltipValue) => tickFormatter.convert(tooltipValue)}
-            bands={bands}
-            ticks={ticks}
-            domain={{ min, max }}
-            bandFillColor={
-              colorMode === GaugeColorModes.PALETTE
-                ? (val) => {
-                    const value = getPreviousSectionValue(val.value, bands);
+      <div className="gauge-container" data-test-subj="gaugeChart">
+        <div className="gauge__wrapper">
+          <Chart>
+            <Settings
+              noResults={<EmptyPlaceholder icon={icon} renderComplete={onRenderChange} />}
+              debugState={window._echDebugStateFlag ?? false}
+              theme={[{ background: { color: 'transparent' } }, chartTheme]}
+              baseTheme={chartBaseTheme}
+              ariaLabel={args.ariaLabel}
+              ariaUseDefaultSummary={!args.ariaLabel}
+              onRenderChange={onRenderChange}
+              {...getOverridesFor(overrides, 'settings')}
+            />
+            <Goal
+              id="goal"
+              subtype={getSubtypeByGaugeType(gaugeType)}
+              base={bands[0]}
+              target={
+                goal && goal >= bands[0] && goal <= bands[bands.length - 1] ? goal : undefined
+              }
+              actual={actualValue}
+              tickValueFormatter={({ value: tickValue }) => tickFormatter.convert(tickValue)}
+              tooltipValueFormatter={(tooltipValue) => tickFormatter.convert(tooltipValue)}
+              bands={bands}
+              ticks={ticks}
+              domain={{ min, max }}
+              bandFillColor={
+                colorMode === GaugeColorModes.PALETTE
+                  ? (val) => {
+                      const value = getPreviousSectionValue(val.value, bands);
 
-                    const overridedColor = overrideColor(
-                      value,
-                      args.percentageMode ? bands : args.palette?.params?.stops ?? [],
-                      args.percentageMode ? tickFormatter : undefined
-                    );
+                      const overridedColor = overrideColor(
+                        value,
+                        args.percentageMode ? bands : args.palette?.params?.stops ?? [],
+                        args.percentageMode ? tickFormatter : undefined
+                      );
 
-                    if (overridedColor) {
-                      return overridedColor;
+                      if (overridedColor) {
+                        return overridedColor;
+                      }
+                      return args.palette
+                        ? getColor(value, args.palette, bands, args.percentageMode) ?? TRANSPARENT
+                        : TRANSPARENT;
                     }
-                    return args.palette
-                      ? getColor(value, args.palette, bands, args.percentageMode) ?? TRANSPARENT
-                      : TRANSPARENT;
-                  }
-                : () => TRANSPARENT
-            }
-            labelMajor={labelMajorTitle ? `${labelMajorTitle}${majorExtraSpaces}` : labelMajorTitle}
-            labelMinor={labelMinor ? `${labelMinor}${minorExtraSpaces}` : ''}
-            {...extraTitles}
-            {...goalConfig}
-            {...getOverridesFor(overrides, 'gauge')}
-          />
-        </Chart>
-        {commonLabel && <div className="gauge__label">{commonLabel}</div>}
+                  : () => TRANSPARENT
+              }
+              labelMajor={
+                labelMajorTitle ? `${labelMajorTitle}${majorExtraSpaces}` : labelMajorTitle
+              }
+              labelMinor={labelMinor ? `${labelMinor}${minorExtraSpaces}` : ''}
+              {...extraTitles}
+              {...goalConfig}
+              {...getOverridesFor(overrides, 'gauge')}
+            />
+          </Chart>
+          {commonLabel && <div className="gauge__label">{commonLabel}</div>}
+        </div>
       </div>
     );
   }

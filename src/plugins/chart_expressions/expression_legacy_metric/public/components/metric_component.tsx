@@ -13,9 +13,10 @@ import {
   getAccessor,
   getFormatByAccessor,
 } from '@kbn/visualizations-plugin/common/utils';
-import { Datatable } from '@kbn/expressions-plugin/public';
+import { Datatable, IInterpreterRenderHandlers } from '@kbn/expressions-plugin/public';
 import { CustomPaletteState } from '@kbn/charts-plugin/public';
 import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/public';
+import { VisualizationContainer } from '@kbn/visualizations-plugin/public';
 import { getFormatService, getPaletteService } from '../services';
 import { VisParams, MetricOptions } from '../../common/types';
 import { MetricVisValue } from './metric_value';
@@ -31,6 +32,10 @@ export interface MetricVisComponentProps {
   filterable: boolean[];
   fireEvent: (event: any) => void;
   renderComplete: () => void;
+  handlers: IInterpreterRenderHandlers;
+  children:
+    | ((props: { datatables: Datatable[]; onRenderComplete: () => void }) => JSX.Element)
+    | undefined;
 }
 
 const AutoScaleMetricVisValue = withAutoScale(MetricVisValue);
@@ -174,7 +179,26 @@ class MetricVisComponent extends Component<MetricVisComponentProps> {
       const metrics = this.processTableGroups(this.props.visData);
       metricsHtml = metrics.map(this.renderMetric);
     }
-    return metricsHtml;
+    if (this.props.handlers.getRenderMode() === 'dataOnly') {
+      if (this.props.children) {
+        return this.props.children({
+          datatables: [this.props.visData],
+          onRenderComplete: this.props.renderComplete,
+        });
+      }
+      return null;
+    }
+    return (
+      <VisualizationContainer
+        data-test-subj="legacyMtrVis"
+        className="legacyMtrVis"
+        showNoResult={!this.props.visData.rows?.length}
+        renderComplete={this.props.renderComplete}
+        handlers={this.props.handlers}
+      >
+        {metricsHtml}
+      </VisualizationContainer>
+    );
   }
 }
 

@@ -14,11 +14,16 @@ import {
 } from '@kbn/expressions-plugin/public';
 import type { KibanaExecutionContext } from '@kbn/core/public';
 import { ExecutionContextSearch } from '@kbn/data-plugin/public';
-import { DefaultInspectorAdapters, RenderMode } from '@kbn/expressions-plugin/common';
+import { Datatable, DefaultInspectorAdapters, RenderMode } from '@kbn/expressions-plugin/common';
 import classNames from 'classnames';
 import { getOriginalRequestErrorMessages } from '../editor_frame_service/error_helper';
 import { LensInspector } from '../lens_inspector_service';
 import { AddUserMessages } from '../types';
+
+export interface RenderProps {
+  datatables: Datatable[];
+  onRenderComplete?: () => void;
+}
 
 export interface ExpressionWrapperProps {
   ExpressionRenderer: ReactExpressionRendererType;
@@ -46,6 +51,7 @@ export interface ExpressionWrapperProps {
   executionContext?: KibanaExecutionContext;
   lensInspector: LensInspector;
   noPadding?: boolean;
+  children?: (props: RenderProps) => JSX.Element;
 }
 
 export function ExpressionWrapper({
@@ -71,6 +77,7 @@ export function ExpressionWrapper({
   executionContext,
   lensInspector,
   noPadding,
+  children,
 }: ExpressionWrapperProps) {
   if (!expression) return null;
   return (
@@ -108,6 +115,7 @@ export function ExpressionWrapper({
 
             return <></>; // the embeddable will take care of displaying the messages
           }}
+          renderChildren={children as Required<ReactExpressionRendererProps>['renderChildren']}
           onEvent={handleEvent}
           hasCompatibleActions={hasCompatibleActions}
           getCompatibleCellValueActions={getCompatibleCellValueActions}

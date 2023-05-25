@@ -55,7 +55,7 @@ export const getMetricVisRenderer = (
     name: EXPRESSION_METRIC_NAME,
     displayName: 'metric visualization',
     reuseDomNode: true,
-    render: async (domNode, { visData, visConfig, overrides }, handlers) => {
+    render: async (domNode, { visData, visConfig, overrides }, handlers, childrenFn) => {
       const { core, plugins } = deps.getStartDeps();
 
       handlers.onDestroy(() => {
@@ -104,7 +104,9 @@ export const getMetricVisRenderer = (
               renderMode={handlers.getRenderMode()}
               filterable={filterable}
               overrides={overrides}
-            />
+            >
+              {childrenFn}
+            </MetricVis>
           </div>
         </KibanaThemeProvider>,
         domNode

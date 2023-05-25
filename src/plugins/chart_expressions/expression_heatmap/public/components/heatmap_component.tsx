@@ -153,6 +153,8 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
     syncCursor,
     renderComplete,
     overrides,
+    renderMode,
+    children,
   }) => {
     const chartRef = useRef<Chart>(null);
     const chartTheme = chartsThemeService.useChartsTheme();
@@ -593,9 +595,15 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
 
     const xAxisTitle = args.gridConfig.xTitle ?? xAxisColumn?.name;
     const yAxisTitle = args.gridConfig.yTitle ?? yAxisColumn?.name;
+    if (renderMode === 'dataOnly') {
+      if (children) {
+        return children({ datatables: [table] });
+      }
+      return null;
+    }
 
     return (
-      <>
+      <div className="heatmap-container" data-test-subj="heatmapChart">
         {showLegend !== undefined && (
           <LegendToggle
             onClick={toggleLegend}
@@ -698,7 +706,7 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
             />
           </Chart>
         </LegendColorPickerWrapperContext.Provider>
-      </>
+      </div>
     );
   }
 );

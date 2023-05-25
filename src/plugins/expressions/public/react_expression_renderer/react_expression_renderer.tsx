@@ -24,6 +24,7 @@ export interface ReactExpressionRendererProps
     error?: ExpressionRenderError | null
   ) => React.ReactElement | React.ReactElement[];
   padding?: 'xs' | 's' | 'm' | 'l' | 'xl';
+  renderChildren?: (props: unknown) => JSX.Element;
 }
 
 export type ReactExpressionRendererType = React.ComponentType<ReactExpressionRendererProps>;

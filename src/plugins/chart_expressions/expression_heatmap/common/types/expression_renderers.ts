@@ -12,7 +12,7 @@ import type { DatatableUtilitiesService } from '@kbn/data-plugin/common';
 import type { IFieldFormat, SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
 import type { RangeSelectContext, ValueClickContext } from '@kbn/embeddable-plugin/public';
 import type { PersistedState } from '@kbn/visualizations-plugin/public';
-import { IInterpreterRenderHandlers } from '@kbn/expressions-plugin/common';
+import { Datatable, IInterpreterRenderHandlers, RenderMode } from '@kbn/expressions-plugin/common';
 import type { HeatmapExpressionProps } from './expression_functions';
 
 export interface FilterEvent {
@@ -41,4 +41,6 @@ export type HeatmapRenderProps = HeatmapExpressionProps & {
   syncTooltips: boolean;
   syncCursor: boolean;
   renderComplete: IInterpreterRenderHandlers['done'];
+  renderMode: RenderMode;
+  children: ((props: { datatables: Datatable[] }) => JSX.Element) | undefined;
 };

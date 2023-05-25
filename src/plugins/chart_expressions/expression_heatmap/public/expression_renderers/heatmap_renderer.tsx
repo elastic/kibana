@@ -41,7 +41,7 @@ export const heatmapRenderer: (
     defaultMessage: 'Heatmap',
   }),
   reuseDomNode: true,
-  render: async (domNode, config, handlers) => {
+  render: async (domNode, config, handlers, childrenFn) => {
     const { core, plugins } = getStartDeps();
 
     handlers.onDestroy(() => {
@@ -79,24 +79,25 @@ export const heatmapRenderer: (
 
     render(
       <KibanaThemeProvider theme$={core.theme.theme$}>
-        <div className="heatmap-container" data-test-subj="heatmapChart">
-          <HeatmapComponent
-            {...config}
-            onClickValue={onClickValue}
-            onSelectRange={onSelectRange}
-            timeZone={timeZone}
-            datatableUtilities={getDatatableUtilities()}
-            formatFactory={getFormatService().deserialize}
-            chartsThemeService={plugins.charts.theme}
-            paletteService={getPaletteService()}
-            renderComplete={renderComplete}
-            uiState={handlers.uiState as PersistedState}
-            interactive={isInteractive()}
-            chartsActiveCursorService={plugins.charts.activeCursor}
-            syncTooltips={config.syncTooltips}
-            syncCursor={config.syncCursor}
-          />
-        </div>
+        <HeatmapComponent
+          {...config}
+          onClickValue={onClickValue}
+          onSelectRange={onSelectRange}
+          timeZone={timeZone}
+          datatableUtilities={getDatatableUtilities()}
+          formatFactory={getFormatService().deserialize}
+          chartsThemeService={plugins.charts.theme}
+          paletteService={getPaletteService()}
+          renderComplete={renderComplete}
+          uiState={handlers.uiState as PersistedState}
+          interactive={isInteractive()}
+          chartsActiveCursorService={plugins.charts.activeCursor}
+          syncTooltips={config.syncTooltips}
+          syncCursor={config.syncCursor}
+          renderMode={handlers.getRenderMode()}
+        >
+          {childrenFn}
+        </HeatmapComponent>
       </KibanaThemeProvider>,
       domNode
     );
