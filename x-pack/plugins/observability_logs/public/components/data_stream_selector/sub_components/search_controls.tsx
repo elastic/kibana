@@ -15,7 +15,7 @@ import {
   sortOptions,
   sortOrdersLabel,
 } from '../constants';
-import { CurrentPanelId, SearchControlsParams, SearchHandler } from '../types';
+import { PanelId, SearchControlsParams, SearchHandler } from '../types';
 import { getSearchStrategy } from '../utils';
 
 type SearchControlsHandler = (params: SearchControlsParams) => void;
@@ -31,7 +31,7 @@ const initialCache = {
 
 const searchCacheReducer = (
   cache: Record<string, SearchControlsParams>,
-  update: { id: CurrentPanelId; params: SearchControlsParams }
+  update: { id: PanelId; params: SearchControlsParams }
 ) => {
   const { id, params } = update;
 
@@ -42,7 +42,7 @@ const searchCacheReducer = (
 };
 
 interface UseSearchStrategyOptions {
-  id: CurrentPanelId;
+  id: PanelId;
   onSearch: SearchHandler;
 }
 

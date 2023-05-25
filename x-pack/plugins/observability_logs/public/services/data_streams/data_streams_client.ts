@@ -6,10 +6,7 @@
  */
 
 import { HttpStart } from '@kbn/core/public';
-import { FindDataStreamsError, FindIntegrationsError } from '../../../common/data_streams/errors';
-import { decodeOrThrow } from '../../../common/runtime_types';
 import {
-  formatSearch,
   DATA_STREAMS_URL,
   FindDataStreamsRequestQuery,
   findDataStreamsRequestQueryRT,
@@ -19,9 +16,11 @@ import {
   findIntegrationsRequestQueryRT,
   FindIntegrationsResponse,
   findIntegrationsResponseRT,
+  formatSearch,
   INTEGRATIONS_URL,
 } from '../../../common';
-
+import { FindDataStreamsError, FindIntegrationsError } from '../../../common/data_streams/errors';
+import { decodeOrThrow } from '../../../common/runtime_types';
 import { IDataStreamsClient } from './types';
 
 const defaultIntegrationsParams = {

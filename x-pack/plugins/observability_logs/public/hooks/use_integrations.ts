@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { useInterpret, useSelector } from '@xstate/react';
-import createContainer from 'constate';
 import { useCallback } from 'react';
-import { SearchStrategy } from '../../common/data_streams';
-import { createIntegrationStateMachine } from '../state_machines/integrations';
-import { IDataStreamsClient } from '../services/data_streams';
+import createContainer from 'constate';
+import { useInterpret, useSelector } from '@xstate/react';
 import { FindIntegrationsRequestQuery, SortOrder } from '../../common';
+import type { SearchStrategy } from '../../common/data_streams';
+import { IDataStreamsClient } from '../services/data_streams';
+import { createIntegrationStateMachine } from '../state_machines/integrations';
 
 interface IntegrationsContextDeps {
   dataStreamsClient: IDataStreamsClient;
