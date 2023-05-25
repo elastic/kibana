@@ -7,7 +7,13 @@
 
 import { isEqual } from 'lodash';
 import React, { createContext, useCallback, useContext, useMemo, useRef, useState } from 'react';
-import type { CriteriaWithPagination, EuiInMemoryTable, EuiTableSelectionType } from '@elastic/eui';
+import {
+  CriteriaWithPagination,
+  EuiButton,
+  EuiInMemoryTable,
+  EuiSearchBarProps,
+  EuiTableSelectionType,
+} from '@elastic/eui';
 import { usePrebuiltRulesInstallReview } from '../../../../rule_management/logic/prebuilt_rules/use_prebuilt_rules_install_review';
 import { DEFAULT_RULES_TABLE_REFRESH_SETTING } from '../../../../../../common/constants';
 import { invariant } from '../../../../../../common/utils/invariant';
@@ -144,8 +150,6 @@ interface RulesTableNewContextProviderProps {
 }
 
 export const RulesTableNewContextProvider = ({ children }: RulesTableNewContextProviderProps) => {
-  const tableRef = useRef<EuiInMemoryTable<RuleInstallationInfoForReview>>(null);
-
   const [autoRefreshSettings] = useUiSetting$<{
     on: boolean;
     value: number;
@@ -183,7 +187,6 @@ export const RulesTableNewContextProvider = ({ children }: RulesTableNewContextP
   const onTableChange = ({
     page: { index },
   }: CriteriaWithPagination<RuleInstallationInfoForReview>) => {
-    debugger;
     setPagination({ pageIndex: index });
   };
 
@@ -302,6 +305,29 @@ export const RulesTableNewContextProvider = ({ children }: RulesTableNewContextP
     ]
   );
 
+  const filters: EuiSearchBarProps = useMemo(
+    () => ({
+      box: {
+        incremental: true,
+        isClearable: true,
+      },
+      filters: [
+        {
+          type: 'field_value_selection',
+          field: 'tags',
+          name: 'Tags',
+          multiSelect: true,
+          options: [...new Set(rules.flatMap((rule) => rule.tags))].map((tag) => ({
+            value: tag,
+            name: tag,
+            field: 'tags',
+          })),
+        },
+      ],
+    }),
+    [rules]
+  );
+
   const providerValue = useMemo(() => {
     return {
       state: {
@@ -312,10 +338,7 @@ export const RulesTableNewContextProvider = ({ children }: RulesTableNewContextP
           pageSizeOptions: RULES_TABLE_PAGE_SIZE_OPTIONS,
         },
         selectionValue,
-        filterOptions: {
-          ...filterOptions,
-          tags,
-        },
+        filters,
         isPreflightInProgress,
         isActionInProgress,
         isAllSelected,
@@ -341,8 +364,8 @@ export const RulesTableNewContextProvider = ({ children }: RulesTableNewContextP
   }, [
     rules,
     pagination,
+    filters,
     selectionValue,
-    filterOptions,
     tags,
     isPreflightInProgress,
     isActionInProgress,

@@ -41,7 +41,6 @@ const NO_ITEMS_MESSAGE = (
  * Table Component for displaying new rules that are available to be installed
  */
 export const RulesTableNew = React.memo<RulesTableNewProps>(() => {
-  const tableRef = useRef<EuiInMemoryTable<RuleInstallationInfoForReview>>(null);
   const [{ canUserCRUD }] = useUserData();
   const hasPermissions = hasUserCRUDPermission(canUserCRUD);
   const isUpgradingSecurityPackages = useIsUpgradingSecurityPackages();
@@ -59,6 +58,7 @@ export const RulesTableNew = React.memo<RulesTableNewProps>(() => {
       isFetched,
       isLoading,
       isRefetching,
+      filters,
       // loadingRuleIds,
       // loadingRulesAction,
       // tags,
@@ -128,11 +128,11 @@ export const RulesTableNew = React.memo<RulesTableNewProps>(() => {
       )}
       {shouldShowRulesTable && (
         <>
-          <RulesTableFilters
+          {/* <RulesTableFilters
             filterOptions={filterOptions}
             setFilterOptions={setFilterOptions}
             showRuleTypeStatusFilter={false}
-          />
+          /> */}
           {/* TODO: Still relies on old context*/}
           {/* <RulesTableUtilityBar*/}
           {/*  canBulkEdit={hasPermissions}*/}
@@ -141,9 +141,9 @@ export const RulesTableNew = React.memo<RulesTableNewProps>(() => {
           {/*  isBulkActionInProgress={false}*/}
           {/* />*/}
           <EuiInMemoryTable
-            ref={tableRef}
             items={rules}
             sorting={true}
+            search={filters}
             pagination={pagination}
             isSelectable={true}
             onTableChange={onTableChange}
