@@ -156,7 +156,7 @@ describe('Indicators', () => {
     });
   });
 
-  describe('Indicators page basics',  () => {
+  describe('Indicators page basics', () => {
     before(() => {
       cy.visit(THREAT_INTELLIGENCE);
       selectRange();
@@ -208,7 +208,7 @@ describe('Indicators', () => {
     });
   });
 
-  describe('Indicator page search',  () => {
+  describe('Indicator page search', () => {
     before(() => {
       cy.visit(THREAT_INTELLIGENCE);
       selectRange();
