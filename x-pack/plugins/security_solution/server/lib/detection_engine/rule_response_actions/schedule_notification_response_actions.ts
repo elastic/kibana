@@ -16,7 +16,7 @@ import { endpointResponseAction } from './endpoint_response_action';
 import type { AlertsWithAgentType } from './types';
 import type { ScheduleNotificationActions } from '../rule_types/types';
 
-type Alerts = Array<ParsedTechnicalFields & { agent?: { id: string } }>;
+type Alerts = Array<ParsedTechnicalFields & { agent?: { id: string; name: string } }>;
 
 interface ScheduleNotificationResponseActionsService {
   endpointAppContextService: EndpointAppContextService;
@@ -31,7 +31,7 @@ export const getScheduleNotificationResponseActionsService =
   ({ signals, responseActions }: ScheduleNotificationActions) => {
     const filteredAlerts = (signals as Alerts).filter((alert) => alert.agent?.id);
 
-    const { alerts, agentIds, alertIds }: AlertsWithAgentType = reduce(
+    const { alerts, agentIds, alertIds, hosts }: AlertsWithAgentType = reduce(
       filteredAlerts,
       (acc, alert) => {
         const agentId = alert.agent?.id;
@@ -40,11 +40,17 @@ export const getScheduleNotificationResponseActionsService =
             alerts: [...acc.alerts, alert],
             agentIds: uniq([...acc.agentIds, agentId]),
             alertIds: [...acc.alertIds, (alert as unknown as { _id: string })._id],
+            hosts: {
+              ...acc.hosts,
+              [agentId]: {
+                name: alert.agent?.name || '',
+              },
+            },
           };
         }
         return acc;
       },
-      { alerts: [], agentIds: [], alertIds: [] } as AlertsWithAgentType
+      { alerts: [], agentIds: [], alertIds: [], hosts: {} } as AlertsWithAgentType
     );
 
     each(responseActions, (responseAction) => {
@@ -63,6 +69,7 @@ export const getScheduleNotificationResponseActionsService =
           alerts,
           alertIds,
           agentIds,
+          hosts,
           ruleId: alerts[0][ALERT_RULE_UUID],
           ruleName: alerts[0][ALERT_RULE_NAME],
         });

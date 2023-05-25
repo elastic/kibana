@@ -14,7 +14,7 @@ import type { AlertsWithAgentType } from './types';
 export const osqueryResponseAction = (
   responseAction: RuleResponseOsqueryAction,
   osqueryCreateActionService: SetupPlugins['osquery']['createActionService'],
-  { alerts, alertIds, agentIds }: AlertsWithAgentType
+  { alerts, alertIds, agentIds }: Pick<AlertsWithAgentType, 'alerts' | 'alertIds' | 'agentIds'>
 ) => {
   const temporaryQueries = responseAction.params.queries?.length
     ? responseAction.params.queries
