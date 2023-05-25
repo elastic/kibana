@@ -5,31 +5,41 @@
  * 2.0.
  */
 
+import { ToolingLog } from '@kbn/tooling-log';
 import type SuperTest from 'supertest';
+import { waitFor } from './wait_for';
 
 export const executeSetupModuleRequest = async ({
   module,
   rspCode,
   supertest,
+  log,
 }: {
   module: string;
   rspCode: number;
   supertest: SuperTest.SuperTest<SuperTest.Test>;
+  log: ToolingLog;
 }) => {
-  const { body } = await supertest
-    .post(`/internal/ml/modules/setup/${module}`)
-    .set('kbn-xsrf', 'true')
-    .send({
-      prefix: '',
-      groups: ['auditbeat'],
-      indexPatternName: 'auditbeat-*',
-      startDatafeed: false,
-      useDedicatedIndex: true,
-      applyToAllSpaces: true,
-    })
-    .expect(rspCode);
+  await waitFor(
+    async () => {
+      const { body } = await supertest
+        .post(`/internal/ml/modules/setup/${module}`)
+        .set('kbn-xsrf', 'true')
+        .send({
+          prefix: '',
+          groups: ['auditbeat'],
+          indexPatternName: 'auditbeat-*',
+          startDatafeed: false,
+          useDedicatedIndex: true,
+          applyToAllSpaces: true,
+        })
+        .expect(rspCode);
 
-  return body;
+      return body;
+    },
+    'waitForModuleSetup',
+    log
+  );
 };
 
 export const forceStartDatafeeds = async ({
