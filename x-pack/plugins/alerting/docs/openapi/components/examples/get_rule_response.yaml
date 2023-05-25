@@ -23,6 +23,7 @@ value:
     timeField: "@timestamp"
     aggField: sheet.version
     termField: name.keyword
+  revision: 1
   rule_type_id: .index-threshold
   created_by: elastic
   updated_by: elastic
@@ -40,6 +41,7 @@ value:
   actions:
     - group: threshold met
       id: 1007a0c0-7a6e-11ed-89d5-abec321c0def
+      uuid: 1c7a1280-f28c-4e06-96b2-e4e5f05d1d61
       params:
         level: info
         message: "alert {{alertName}} is active for group {{context.group}}:\n\n- Value: {{context.value}}\n- Conditions Met: {{context.conditions}} over {{params.timeWindowSize}}{{params.timeWindowUnit}}\n- Timestamp: {{context.date}"
@@ -54,3 +56,4 @@ value:
     warning: null
     outcome: succeeded
   next_run: '2022-12-13T22:34:44.314Z'
+  api_key_created_by_user: false

@@ -5,11 +5,6 @@
  * 2.0.
  */
 
-import Boom from '@hapi/boom';
-import { pipe } from 'fp-ts/lib/pipeable';
-import { fold } from 'fp-ts/lib/Either';
-import { identity } from 'fp-ts/lib/function';
-
 import type { SavedObject } from '@kbn/core/server';
 
 import type { CasesClient } from '../client';
@@ -30,8 +25,7 @@ import {
   CommentsRt,
   CommentRt,
   CommentsFindResponseRt,
-  excess,
-  throwErrors,
+  decodeWithExcessOrThrow,
 } from '../../../common/api';
 import {
   defaultSortField,
@@ -54,14 +48,14 @@ const normalizeAlertResponse = (alerts: Array<SavedObject<AttributesTypeAlerts>>
       return acc;
     }
 
-    return [
-      ...acc,
+    acc.push(
       ...ids.map((id, index) => ({
         id,
         index: indices[index],
         attached_at: alert.attributes.created_at,
-      })),
-    ];
+      }))
+    );
+    return acc;
   }, []);
 
 /**
@@ -123,10 +117,7 @@ export async function find(
     authorization,
   } = clientArgs;
 
-  const { caseID, queryParams } = pipe(
-    excess(FindCommentsArgsRt).decode(data),
-    fold(throwErrors(Boom.badRequest), identity)
-  );
+  const { caseID, queryParams } = decodeWithExcessOrThrow(FindCommentsArgsRt)(data);
 
   validateFindCommentsPagination(queryParams);
 

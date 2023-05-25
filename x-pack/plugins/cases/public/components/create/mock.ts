@@ -33,73 +33,81 @@ export const sampleConnectorData = { isLoading: false, data: [] };
 
 export const useGetIncidentTypesResponse = {
   isLoading: false,
-  incidentTypes: [
-    {
-      id: 19,
-      name: 'Malware',
-    },
-    {
-      id: 21,
-      name: 'Denial of Service',
-    },
-  ],
+  data: {
+    data: [
+      {
+        id: 19,
+        name: 'Malware',
+      },
+      {
+        id: 21,
+        name: 'Denial of Service',
+      },
+    ],
+  },
 };
 
 export const useGetSeverityResponse = {
   isLoading: false,
-  severity: [
-    {
-      id: 4,
-      name: 'Low',
-    },
-    {
-      id: 5,
-      name: 'Medium',
-    },
-    {
-      id: 6,
-      name: 'High',
-    },
-  ],
+  data: {
+    data: [
+      {
+        id: 4,
+        name: 'Low',
+      },
+      {
+        id: 5,
+        name: 'Medium',
+      },
+      {
+        id: 6,
+        name: 'High',
+      },
+    ],
+  },
 };
 
 export const useGetIssueTypesResponse = {
   isLoading: false,
-  issueTypes: [
-    {
-      id: '10006',
-      name: 'Task',
-    },
-    {
-      id: '10007',
-      name: 'Bug',
-    },
-  ],
+  data: {
+    data: [
+      {
+        id: '10006',
+        name: 'Task',
+      },
+      {
+        id: '10007',
+        name: 'Bug',
+      },
+    ],
+  },
 };
 
 export const useGetFieldsByIssueTypeResponse = {
   isLoading: false,
-  fields: {
-    summary: { allowedValues: [], defaultValue: {} },
-    labels: { allowedValues: [], defaultValue: {} },
-    description: { allowedValues: [], defaultValue: {} },
-    priority: {
-      allowedValues: [
-        {
-          name: 'Medium',
-          id: '3',
-        },
-        {
-          name: 'Low',
-          id: '2',
-        },
-      ],
-      defaultValue: { name: 'Medium', id: '3' },
+  data: {
+    data: {
+      summary: { allowedValues: [], defaultValue: {} },
+      labels: { allowedValues: [], defaultValue: {} },
+      description: { allowedValues: [], defaultValue: {} },
+      priority: {
+        allowedValues: [
+          {
+            name: 'Medium',
+            id: '3',
+          },
+          {
+            name: 'Low',
+            id: '2',
+          },
+        ],
+        defaultValue: { name: 'Medium', id: '3' },
+      },
     },
   },
 };
 
 export const useGetChoicesResponse = {
   isLoading: false,
-  choices,
+  data: { data: choices },
 };

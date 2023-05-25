@@ -3035,29 +3035,13 @@
           },
           {
             "parentPluginId": "maps",
-            "id": "def-public.IVectorSource.showJoinEditor",
+            "id": "def-public.IVectorSource.supportsJoins",
             "type": "Function",
             "tags": [],
-            "label": "showJoinEditor",
+            "label": "supportsJoins",
             "description": [],
             "signature": [
               "() => boolean"
-            ],
-            "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "maps",
-            "id": "def-public.IVectorSource.getJoinsDisabledReason",
-            "type": "Function",
-            "tags": [],
-            "label": "getJoinsDisabledReason",
-            "description": [],
-            "signature": [
-              "() => string | null"
             ],
             "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
             "deprecated": false,
@@ -4137,7 +4121,7 @@
         "label": "SourceEditorArgs",
         "description": [],
         "signature": [
-          "{ currentLayerType: string; numberOfJoins: number; onChange: (...args: ",
+          "{ currentLayerType: string; hasSpatialJoins: boolean; numberOfJoins: number; onChange: (...args: ",
           "OnSourceChangeArgs",
           "[]) => Promise<void>; onStyleDescriptorChange: (styleDescriptor: ",
           "StyleDescriptor",
@@ -4609,7 +4593,7 @@
           "AbstractSourceDescriptor",
           " & { id: string; indexPatternId: string; geoField?: string | undefined; applyGlobalQuery: boolean; applyGlobalTime: boolean; applyForceRefresh: boolean; } & { metrics: ",
           "AggDescriptor",
-          "[]; } & { term: string; whereQuery?: ",
+          "[]; } & { whereQuery?: ",
           {
             "pluginId": "@kbn/es-query",
             "scope": "common",
@@ -4617,7 +4601,7 @@
             "section": "def-common.Query",
             "text": "Query"
           },
-          " | undefined; size?: number | undefined; type: ",
+          " | undefined; } & { term: string; size?: number | undefined; type: ",
           {
             "pluginId": "maps",
             "scope": "common",
@@ -4829,9 +4813,9 @@
             "section": "def-common.LAYER_TYPE",
             "text": "LAYER_TYPE"
           },
-          ".MVT_VECTOR; joins?: ",
+          ".MVT_VECTOR; joins?: Partial<",
           "JoinDescriptor",
-          "[] | undefined; style: ",
+          ">[] | undefined; style: ",
           {
             "pluginId": "maps",
             "scope": "common",
