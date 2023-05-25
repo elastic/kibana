@@ -6,25 +6,13 @@
   "plugin": {
     "id": "reportingExportTypes",
     "server": true,
-    "browser": true,
+    "browser": false,
     "configPath": [
       "xpack",
+      "reporting"
     ],
     "requiredPlugins": [
-      "data",
-      "discover",
-      "fieldFormats",
-      "esUiShared",
-      "home",
-      "management",
-      "licensing",
-      "uiActions",
-      "taskManager",
-      "embeddable",
-      "screenshotting",
-      "screenshotMode",
-      "share",
-      "features"
+    "reporting"
     ],
     "optionalPlugins": [
       "security",
