@@ -10,12 +10,11 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import { euiThemeVars } from '@kbn/ui-theme';
 import { EuiSelectable } from '@elastic/eui';
-import { useReduxEmbeddableContext } from '@kbn/presentation-util-plugin/public';
 import { EuiSelectableOption } from '@elastic/eui/src/components/selectable/selectable_option';
 
+import { MAX_OPTIONS_LIST_REQUEST_SIZE } from '../types';
 import { OptionsListStrings } from './options_list_strings';
-import { optionsListReducers } from '../options_list_reducers';
-import { MAX_OPTIONS_LIST_REQUEST_SIZE, OptionsListReduxState } from '../types';
+import { useOptionsList } from '../embeddable/options_list_embeddable';
 import { OptionsListPopoverEmptyMessage } from './options_list_popover_empty_message';
 import { OptionsListPopoverSuggestionBadge } from './options_list_popover_suggestion_badge';
 
@@ -28,34 +27,28 @@ export const OptionsListPopoverSuggestions = ({
   showOnlySelected,
   loadMoreSuggestions,
 }: OptionsListPopoverSuggestionsProps) => {
-  // Redux embeddable container Context
-  const {
-    useEmbeddableDispatch,
-    useEmbeddableSelector: select,
-    actions: { replaceSelection, deselectOption, selectOption, selectExists },
-  } = useReduxEmbeddableContext<OptionsListReduxState, typeof optionsListReducers>();
-  const dispatch = useEmbeddableDispatch();
+  const optionsList = useOptionsList();
 
-  // Select current state from Redux using multiple selectors to avoid rerenders.
-  const invalidSelections = select((state) => state.componentState.invalidSelections);
-  const availableOptions = select((state) => state.componentState.availableOptions);
-  const totalCardinality = select((state) => state.componentState.totalCardinality);
-  const searchString = select((state) => state.componentState.searchString);
+  const searchString = optionsList.select((state) => state.componentState.searchString);
+  const availableOptions = optionsList.select((state) => state.componentState.availableOptions);
+  const totalCardinality = optionsList.select((state) => state.componentState.totalCardinality);
+  const invalidSelections = optionsList.select((state) => state.componentState.invalidSelections);
 
-  const selectedOptions = select((state) => state.explicitInput.selectedOptions);
-  const existsSelected = select((state) => state.explicitInput.existsSelected);
-  const singleSelect = select((state) => state.explicitInput.singleSelect);
-  const hideExists = select((state) => state.explicitInput.hideExists);
-  const isLoading = select((state) => state.output.loading) ?? false;
-  const fieldName = select((state) => state.explicitInput.fieldName);
-  const sort = select((state) => state.explicitInput.sort);
+  const sort = optionsList.select((state) => state.explicitInput.sort);
+  const fieldName = optionsList.select((state) => state.explicitInput.fieldName);
+  const hideExists = optionsList.select((state) => state.explicitInput.hideExists);
+  const singleSelect = optionsList.select((state) => state.explicitInput.singleSelect);
+  const existsSelected = optionsList.select((state) => state.explicitInput.existsSelected);
+  const selectedOptions = optionsList.select((state) => state.explicitInput.selectedOptions);
+
+  const isLoading = optionsList.select((state) => state.output.loading) ?? false;
 
   const listRef = useRef<HTMLDivElement>(null);
 
   const canLoadMoreSuggestions = useMemo(
     () =>
       totalCardinality
-        ? Object.keys(availableOptions ?? {}).length <
+        ? (availableOptions ?? []).length <
           Math.min(totalCardinality, MAX_OPTIONS_LIST_REQUEST_SIZE)
         : false,
     [availableOptions, totalCardinality]
@@ -68,7 +61,7 @@ export const OptionsListPopoverSuggestions = ({
     [invalidSelections]
   );
   const suggestions = useMemo(() => {
-    return showOnlySelected ? selectedOptions : Object.keys(availableOptions ?? {});
+    return showOnlySelected ? selectedOptions : availableOptions ?? [];
   }, [availableOptions, selectedOptions, showOnlySelected]);
 
   const existsSelectableOption = useMemo<EuiSelectableOption | undefined>(() => {
@@ -86,19 +79,23 @@ export const OptionsListPopoverSuggestions = ({
   const [selectableOptions, setSelectableOptions] = useState<EuiSelectableOption[]>([]); // will be set in following useEffect
   useEffect(() => {
     /* This useEffect makes selectableOptions responsive to search, show only selected, and clear selections */
-    const options: EuiSelectableOption[] = (suggestions ?? []).map((key) => {
+    const options: EuiSelectableOption[] = (suggestions ?? []).map((suggestion) => {
+      if (typeof suggestion === 'string') {
+        // this means that `showOnlySelected` is true, and doc count is not known when this is the case
+        suggestion = { value: suggestion };
+      }
       return {
-        key,
-        label: key,
-        checked: selectedOptionsSet?.has(key) ? 'on' : undefined,
-        'data-test-subj': `optionsList-control-selection-${key}`,
+        key: suggestion.value,
+        label: suggestion.value,
+        checked: selectedOptionsSet?.has(suggestion.value) ? 'on' : undefined,
+        'data-test-subj': `optionsList-control-selection-${suggestion.value}`,
         className:
-          showOnlySelected && invalidSelectionsSet.has(key)
+          showOnlySelected && invalidSelectionsSet.has(suggestion.value)
             ? 'optionsList__selectionInvalid'
             : 'optionsList__validSuggestion',
         append:
-          !showOnlySelected && availableOptions?.[key] ? (
-            <OptionsListPopoverSuggestionBadge documentCount={availableOptions[key].doc_count} />
+          !showOnlySelected && suggestion?.docCount ? (
+            <OptionsListPopoverSuggestionBadge documentCount={suggestion.docCount} />
           ) : undefined,
       };
     });
@@ -173,13 +170,13 @@ export const OptionsListPopoverSuggestions = ({
             setSelectableOptions(newSuggestions);
             // the order of these checks matters, so be careful if rearranging them
             if (key === 'exists-option') {
-              dispatch(selectExists(!Boolean(existsSelected)));
+              optionsList.dispatch.selectExists(!Boolean(existsSelected));
             } else if (showOnlySelected || selectedOptionsSet.has(key)) {
-              dispatch(deselectOption(key));
+              optionsList.dispatch.deselectOption(key);
             } else if (singleSelect) {
-              dispatch(replaceSelection(key));
+              optionsList.dispatch.replaceSelection(key);
             } else {
-              dispatch(selectOption(key));
+              optionsList.dispatch.selectOption(key);
             }
           }}
         >

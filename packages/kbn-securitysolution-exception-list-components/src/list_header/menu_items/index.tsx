@@ -21,6 +21,7 @@ interface MenuItemsProps {
   onDeleteList: () => void;
   onManageRules: () => void;
   onExportList: () => void;
+  onDuplicateList: () => void;
 }
 
 const MenuItemsComponent: FC<MenuItemsProps> = ({
@@ -32,6 +33,7 @@ const MenuItemsComponent: FC<MenuItemsProps> = ({
   onDeleteList,
   onManageRules,
   onExportList,
+  onDuplicateList,
 }) => {
   const referencedLinks = useMemo(
     () =>
@@ -100,6 +102,15 @@ const MenuItemsComponent: FC<MenuItemsProps> = ({
             },
             {
               key: '2',
+              icon: 'copy',
+              label: i18n.EXCEPTION_LIST_HEADER_DUPLICATE_ACTION,
+              onClick: () => {
+                if (typeof onDuplicateList === 'function') onDuplicateList();
+              },
+              disabled: !canUserEditList,
+            },
+            {
+              key: '3',
               icon: 'trash',
               label: i18n.EXCEPTION_LIST_HEADER_DELETE_ACTION,
               onClick: () => {

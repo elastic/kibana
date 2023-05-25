@@ -13,12 +13,13 @@ import {
   deprecationsServiceMock,
 } from '@kbn/core/server/mocks';
 
+export const savedObjectsClient = savedObjectsClientMock.create();
 export const routeHandlerContextMock = {
   core: {
     elasticsearch: {
       client: elasticsearchServiceMock.createScopedClusterClient(),
     },
-    savedObjects: { client: savedObjectsClientMock.create() },
+    savedObjects: { getClient: () => savedObjectsClient },
     deprecations: { client: deprecationsServiceMock.createClient() },
   },
 } as unknown as AwaitedProperties<RequestHandlerContext>;

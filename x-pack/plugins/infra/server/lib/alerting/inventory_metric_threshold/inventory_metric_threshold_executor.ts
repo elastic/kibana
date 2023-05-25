@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ALERT_REASON, ALERT_ACTION_GROUP } from '@kbn/rule-data-utils';
+import { ALERT_REASON, ALERT_ACTION_GROUP, ALERT_EVALUATION_VALUES } from '@kbn/rule-data-utils';
 import { first, get } from 'lodash';
 import {
   ActionGroup,
@@ -65,8 +65,7 @@ type InventoryMetricThresholdAlertFactory = (
   reason: string,
   actionGroup: InventoryThrehsoldActionGroup,
   additionalContext?: AdditionalContext | null,
-  threshold?: number | undefined,
-  value?: number | undefined
+  evaluationValues?: Array<number | null>
 ) => InventoryMetricThresholdAlert;
 
 export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =>
@@ -109,13 +108,15 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
         id,
         reason,
         actionGroup,
-        additionalContext
+        additionalContext,
+        evaluationValues
       ) =>
         alertWithLifecycle({
           id,
           fields: {
             [ALERT_REASON]: reason,
             [ALERT_ACTION_GROUP]: actionGroup,
+            [ALERT_EVALUATION_VALUES]: evaluationValues,
             ...flattenAdditionalContext(additionalContext),
           },
         });
@@ -243,7 +244,18 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
             new Set([...(additionalContext.tags ?? []), ...ruleTags])
           );
 
-          const alert = alertFactory(group, reason, actionGroupId, additionalContext);
+          const evaluationValues = results.reduce((acc: Array<number | null>, result) => {
+            acc.push(result[group].currentValue);
+            return acc;
+          }, []);
+
+          const alert = alertFactory(
+            group,
+            reason,
+            actionGroupId,
+            additionalContext,
+            evaluationValues
+          );
           const indexedStartedDate = getAlertStartedDate(group) ?? startedAt.toISOString();
           const alertUuid = getAlertUuid(group);
 
@@ -360,12 +372,10 @@ const mapToConditionsLookup = (
   list: any[],
   mapFn: (value: any, index: number, array: any[]) => unknown
 ) =>
-  list
-    .map(mapFn)
-    .reduce(
-      (result: Record<string, any>, value, i) => ({ ...result, [`condition${i}`]: value }),
-      {}
-    );
+  list.map(mapFn).reduce<Record<string, any>>((result, value, i) => {
+    result[`condition${i}`] = value;
+    return result;
+  }, {});
 
 export const FIRED_ACTIONS: ActionGroup<typeof FIRED_ACTIONS_ID> = {
   id: FIRED_ACTIONS_ID,

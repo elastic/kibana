@@ -30,6 +30,7 @@ import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { casesPluginMock } from '@kbn/cases-plugin/public/mocks';
 import { DataViewSpec } from '@kbn/data-views-plugin/public';
+import { settingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
 import { rumFieldFormats } from './configurations/rum/field_formats';
 import { ExploratoryViewPublicPluginsStart } from '../../../plugin';
 import * as useAppDataViewHook from './hooks/use_app_data_view';
@@ -41,9 +42,7 @@ import {
   UrlStorageContext,
 } from './hooks/use_series_storage';
 
-import * as fetcherHook from '../../../hooks/use_fetcher';
 import * as useSeriesFilterHook from './hooks/use_series_filters';
-import * as useHasDataHook from '../../../hooks/use_has_data';
 import * as useValuesListHook from '../../../hooks/use_values_list';
 
 import dataViewData from './configurations/test_data/test_data_view.json';
@@ -129,6 +128,14 @@ export const mockCore: () => Partial<CoreStart & ExploratoryViewPublicPluginsSta
       ...defaultCore.uiSettings,
       get: getSetting,
       get$: setSetting$,
+    },
+    settings: {
+      ...settingsServiceMock.createStartContract(),
+      client: {
+        ...settingsServiceMock.createStartContract().client,
+        get: getSetting,
+        get$: setSetting$,
+      },
     },
     lens: lensPluginMock.createStartContract(),
     data: dataPluginMock.createStartContract(),
@@ -235,22 +242,6 @@ export const getHistoryFromUrl = (url: Url) => {
   return createMemoryHistory({
     initialEntries: [url.path + stringify(url.queryParams)],
   });
-};
-
-export const mockFetcher = (data: any) => {
-  return jest.spyOn(fetcherHook, 'useFetcher').mockReturnValue({
-    data,
-    status: fetcherHook.FETCH_STATUS.SUCCESS,
-    refetch: jest.fn(),
-  });
-};
-
-export const mockUseHasData = () => {
-  const onRefreshTimeRange = jest.fn();
-  const spy = jest.spyOn(useHasDataHook, 'useHasData').mockReturnValue({
-    onRefreshTimeRange,
-  } as any);
-  return { spy, onRefreshTimeRange };
 };
 
 export const mockAppDataView = (props?: Partial<DataViewContext>) => {

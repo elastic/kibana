@@ -7,7 +7,7 @@
 
 import { EuiPageHeaderProps } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { ObservabilityPageTemplateProps } from '@kbn/observability-plugin/public/components/shared/page_template/page_template';
+import { ObservabilityPageTemplateProps } from '@kbn/observability-shared-plugin/public';
 import type { KibanaPageTemplateProps } from '@kbn/shared-ux-page-kibana-template';
 import React from 'react';
 import { useLocation } from 'react-router-dom';
@@ -54,10 +54,10 @@ export function ApmMainTemplate({
   const location = useLocation();
 
   const { services } = useKibana<ApmPluginStartDeps>();
-  const { http, docLinks, observability, application } = services;
+  const { http, docLinks, observabilityShared, application } = services;
   const basePath = http?.basePath.get();
 
-  const ObservabilityPageTemplate = observability.navigation.PageTemplate;
+  const ObservabilityPageTemplate = observabilityShared.navigation.PageTemplate;
 
   const { data, status } = useFetcher((callApmApi) => {
     return callApmApi('GET /internal/apm/has_data');

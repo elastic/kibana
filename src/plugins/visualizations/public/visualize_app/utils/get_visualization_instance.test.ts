@@ -170,6 +170,10 @@ describe('getVisualizationInstanceInput', () => {
       id: 'test-id',
       description: 'description',
       title: 'title',
+      timeRange: {
+        from: 'now-7d/d',
+        to: 'now',
+      },
       savedVis: {
         title: '',
         description: '',
@@ -196,8 +200,15 @@ describe('getVisualizationInstanceInput', () => {
         },
       },
     } as unknown as VisualizeInput;
-    const { savedVis, savedSearch, vis, embeddableHandler, panelDescription, panelTitle } =
-      await getVisualizationInstanceFromInput(mockServices, input);
+    const {
+      savedVis,
+      savedSearch,
+      vis,
+      embeddableHandler,
+      panelDescription,
+      panelTitle,
+      panelTimeRange,
+    } = await getVisualizationInstanceFromInput(mockServices, input);
 
     expect(getSavedVisualization).toHaveBeenCalled();
     expect(createVisAsync).toHaveBeenCalledWith(serializedVisMock.type, input.savedVis);
@@ -216,5 +227,9 @@ describe('getVisualizationInstanceInput', () => {
     expect(savedSearch).toBeUndefined();
     expect(panelDescription).toBe('description');
     expect(panelTitle).toBe('title');
+    expect(panelTimeRange).toStrictEqual({
+      from: 'now-7d/d',
+      to: 'now',
+    });
   });
 });

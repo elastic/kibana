@@ -7,9 +7,6 @@
 
 import pMap from 'p-map';
 import Boom from '@hapi/boom';
-import { pipe } from 'fp-ts/lib/pipeable';
-import { fold } from 'fp-ts/lib/Either';
-import { identity } from 'fp-ts/lib/function';
 
 import type { SavedObject, SavedObjectsFindResponse } from '@kbn/core/server';
 import { SavedObjectsUtils } from '@kbn/core/server';
@@ -17,22 +14,21 @@ import type { FindActionResult } from '@kbn/actions-plugin/server/types';
 import type { ActionType } from '@kbn/actions-plugin/common';
 import { CasesConnectorFeatureId } from '@kbn/actions-plugin/common';
 import type {
-  CasesConfigurationsResponse,
-  CasesConfigureAttributes,
-  CasesConfigurePatch,
-  CasesConfigureRequest,
-  CasesConfigureResponse,
+  Configurations,
+  ConfigurationAttributes,
+  ConfigurationPatchRequest,
+  ConfigurationRequest,
+  Configuration,
   ConnectorMappings,
   ConnectorMappingsAttributes,
-  GetConfigureFindRequest,
+  GetConfigurationFindRequest,
 } from '../../../common/api';
 import {
-  CaseConfigurationsResponseRt,
-  CaseConfigureResponseRt,
-  CasesConfigurePatchRt,
-  excess,
-  GetConfigureFindRequestRt,
-  throwErrors,
+  ConfigurationsRt,
+  ConfigurationRt,
+  ConfigurationPatchRequestRt,
+  GetConfigurationFindRequestRt,
+  decodeWithExcessOrThrow,
 } from '../../../common/api';
 import { MAX_CONCURRENT_SEARCHES } from '../../../common/constants';
 import { createCaseError } from '../../common/error';
@@ -60,7 +56,9 @@ export interface InternalConfigureSubClient {
   getMappings(
     params: MappingsArgs
   ): Promise<SavedObjectsFindResponse<ConnectorMappings>['saved_objects']>;
+
   createMappings(params: CreateMappingsArgs): Promise<ConnectorMappingsAttributes[]>;
+
   updateMappings(params: UpdateMappingsArgs): Promise<ConnectorMappingsAttributes[]>;
 }
 
@@ -71,11 +69,12 @@ export interface ConfigureSubClient {
   /**
    * Retrieves the external connector configuration for a particular case owner.
    */
-  get(params: GetConfigureFindRequest): Promise<ICasesConfigureResponse | {}>;
+  get(params: GetConfigurationFindRequest): Promise<ICasesConfigureResponse | {}>;
   /**
    * Retrieves the valid external connectors supported by the cases plugin.
    */
   getConnectors(): Promise<FindActionResult[]>;
+
   /**
    * Updates a particular configuration with new values.
    *
@@ -86,6 +85,7 @@ export interface ConfigureSubClient {
     configurationId: string,
     configurations: ICasesConfigurePatch
   ): Promise<ICasesConfigureResponse>;
+
   /**
    * Creates a configuration if one does not already exist. If one exists it is deleted and a new one is created.
    */
@@ -121,20 +121,20 @@ export const createConfigurationSubClient = (
   casesInternalClient: CasesClientInternal
 ): ConfigureSubClient => {
   return Object.freeze({
-    get: (params: GetConfigureFindRequest) => get(params, clientArgs, casesInternalClient),
+    get: (params: GetConfigurationFindRequest) => get(params, clientArgs, casesInternalClient),
     getConnectors: () => getConnectors(clientArgs),
-    update: (configurationId: string, configuration: CasesConfigurePatch) =>
+    update: (configurationId: string, configuration: ConfigurationPatchRequest) =>
       update(configurationId, configuration, clientArgs, casesInternalClient),
-    create: (configuration: CasesConfigureRequest) =>
+    create: (configuration: ConfigurationRequest) =>
       create(configuration, clientArgs, casesInternalClient),
   });
 };
 
-async function get(
-  params: GetConfigureFindRequest,
+export async function get(
+  params: GetConfigurationFindRequest,
   clientArgs: CasesClientArgs,
   casesClientInternal: CasesClientInternal
-): Promise<CasesConfigurationsResponse> {
+): Promise<Configurations> {
   const {
     unsecuredSavedObjectsClient,
     services: { caseConfigureService },
@@ -142,10 +142,7 @@ async function get(
     authorization,
   } = clientArgs;
   try {
-    const queryParams = pipe(
-      excess(GetConfigureFindRequestRt).decode(params),
-      fold(throwErrors(Boom.badRequest), identity)
-    );
+    const queryParams = decodeWithExcessOrThrow(GetConfigurationFindRequestRt)(params);
 
     const { filter: authorizationFilter, ensureSavedObjectsAreAuthorized } =
       await authorization.getAuthorizationFilter(Operations.findConfigurations);
@@ -171,7 +168,7 @@ async function get(
 
     const configurations = await pMap(
       myCaseConfigure.saved_objects,
-      async (configuration: SavedObject<CasesConfigureAttributes>) => {
+      async (configuration: SavedObject<ConfigurationAttributes>) => {
         const { connector, ...caseConfigureWithoutConnector } = configuration?.attributes ?? {
           connector: null,
         };
@@ -201,7 +198,7 @@ async function get(
       }
     );
 
-    return CaseConfigurationsResponseRt.encode(configurations);
+    return ConfigurationsRt.encode(configurations);
   } catch (error) {
     throw createCaseError({ message: `Failed to get case configure: ${error}`, error, logger });
   }
@@ -212,10 +209,10 @@ export async function getConnectors({
   logger,
 }: CasesClientArgs): Promise<FindActionResult[]> {
   try {
-    const actionTypes = (await actionsClient.listTypes()).reduce(
-      (types, type) => ({ ...types, [type.id]: type }),
-      {}
-    );
+    const actionTypes = (await actionsClient.listTypes()).reduce((types, type) => {
+      types[type.id] = type;
+      return types;
+    }, {} as Record<string, ActionType>);
 
     return (await actionsClient.getAll()).filter((action) =>
       isConnectorSupported(action, actionTypes)
@@ -236,12 +233,12 @@ function isConnectorSupported(
   );
 }
 
-async function update(
+export async function update(
   configurationId: string,
-  req: CasesConfigurePatch,
+  req: ConfigurationPatchRequest,
   clientArgs: CasesClientArgs,
   casesClientInternal: CasesClientInternal
-): Promise<CasesConfigureResponse> {
+): Promise<Configuration> {
   const {
     services: { caseConfigureService },
     logger,
@@ -251,24 +248,9 @@ async function update(
   } = clientArgs;
 
   try {
-    const request = pipe(
-      CasesConfigurePatchRt.decode(req),
-      fold(throwErrors(Boom.badRequest), identity)
-    );
+    const request = decodeWithExcessOrThrow(ConfigurationPatchRequestRt)(req);
 
     const { version, ...queryWithoutVersion } = request;
-
-    /**
-     * Excess function does not supports union or intersection types.
-     * For that reason we need to check manually for excess properties
-     * in the partial attributes.
-     *
-     * The owner attribute should not be allowed.
-     */
-    pipe(
-      excess(CasesConfigurePatchRt.types[0]).decode(queryWithoutVersion),
-      fold(throwErrors(Boom.badRequest), identity)
-    );
 
     const configuration = await caseConfigureService.get({
       unsecuredSavedObjectsClient,
@@ -333,7 +315,7 @@ async function update(
       originalConfiguration: configuration,
     });
 
-    return CaseConfigureResponseRt.encode({
+    return ConfigurationRt.encode({
       ...configuration.attributes,
       ...patch.attributes,
       connector: patch.attributes.connector ?? configuration.attributes.connector,
@@ -352,10 +334,10 @@ async function update(
 }
 
 async function create(
-  configuration: CasesConfigureRequest,
+  configuration: ConfigurationRequest,
   clientArgs: CasesClientArgs,
   casesClientInternal: CasesClientInternal
-): Promise<CasesConfigureResponse> {
+): Promise<Configuration> {
   const {
     unsecuredSavedObjectsClient,
     services: { caseConfigureService },
@@ -395,7 +377,7 @@ async function create(
     );
 
     if (myCaseConfigure.saved_objects.length > 0) {
-      const deleteConfigurationMapper = async (c: SavedObject<CasesConfigureAttributes>) =>
+      const deleteConfigurationMapper = async (c: SavedObject<ConfigurationAttributes>) =>
         caseConfigureService.delete({
           unsecuredSavedObjectsClient,
           configurationId: c.id,
@@ -443,7 +425,7 @@ async function create(
       id: savedObjectID,
     });
 
-    return CaseConfigureResponseRt.encode({
+    return ConfigurationRt.encode({
       ...post.attributes,
       // Reserve for future implementations
       connector: post.attributes.connector,

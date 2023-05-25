@@ -13,6 +13,7 @@ import {
   IntervalSchedule,
   RuleActionAlertsFilterProperty,
 } from '@kbn/alerting-plugin/common';
+import { isEmpty } from 'lodash/fp';
 import { Rule, RuleAction } from '../../../types';
 import { DEFAULT_FREQUENCY } from '../../../common/constants';
 
@@ -237,12 +238,18 @@ export const ruleReducer = <RulePhase extends InitialRule | Rule>(
         return state;
       } else {
         const oldAction = rule.actions.splice(index, 1)[0];
+        const { alertsFilter, ...rest } = oldAction;
+        const updatedAlertsFilter = { ...alertsFilter };
+
+        if (value) {
+          updatedAlertsFilter[key] = value;
+        } else {
+          delete updatedAlertsFilter[key];
+        }
+
         const updatedAction = {
-          ...oldAction,
-          alertsFilter: {
-            ...(oldAction.alertsFilter ?? { timeframe: null, query: null }),
-            [key]: value,
-          },
+          ...rest,
+          ...(!isEmpty(updatedAlertsFilter) ? { alertsFilter: updatedAlertsFilter } : {}),
         };
         rule.actions.splice(index, 0, updatedAction);
         return {

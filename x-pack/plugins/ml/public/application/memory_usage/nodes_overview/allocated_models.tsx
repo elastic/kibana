@@ -40,6 +40,33 @@ export const AllocatedModels: FC<AllocatedModelsProps> = ({
 
   const columns: Array<EuiBasicTableColumn<AllocatedModel>> = [
     {
+      id: 'deployment_id',
+      field: 'deployment_id',
+      name: i18n.translate('xpack.ml.trainedModels.nodesList.modelsList.deploymentIdHeader', {
+        defaultMessage: 'ID',
+      }),
+      width: '150px',
+      sortable: true,
+      truncateText: false,
+      'data-test-subj': 'mlAllocatedModelsTableDeploymentId',
+    },
+    {
+      name: i18n.translate('xpack.ml.trainedModels.nodesList.modelsList.modelRoutingStateHeader', {
+        defaultMessage: 'Routing state',
+      }),
+      width: '100px',
+      'data-test-subj': 'mlAllocatedModelsTableRoutingState',
+      render: (v: AllocatedModel) => {
+        const { routing_state: routingState, reason } = v.node.routing_state;
+
+        return (
+          <EuiToolTip content={reason ? reason : ''}>
+            <EuiBadge color={reason ? 'danger' : 'hollow'}>{routingState}</EuiBadge>
+          </EuiToolTip>
+        );
+      },
+    },
+    {
       id: 'node_name',
       field: 'node.name',
       name: i18n.translate('xpack.ml.trainedModels.nodesList.modelsList.nodeNameHeader', {
@@ -193,22 +220,6 @@ export const AllocatedModels: FC<AllocatedModelsProps> = ({
         return v.node.number_of_pending_requests;
       },
     },
-    {
-      name: i18n.translate('xpack.ml.trainedModels.nodesList.modelsList.modelRoutingStateHeader', {
-        defaultMessage: 'Routing state',
-      }),
-      width: '100px',
-      'data-test-subj': 'mlAllocatedModelsTableRoutingState',
-      render: (v: AllocatedModel) => {
-        const { routing_state: routingState, reason } = v.node.routing_state;
-
-        return (
-          <EuiToolTip content={reason ? reason : ''}>
-            <EuiBadge color={reason ? 'danger' : 'hollow'}>{routingState}</EuiBadge>
-          </EuiToolTip>
-        );
-      },
-    },
   ].filter((v) => !hideColumns.includes(v.id!));
 
   return (
@@ -219,7 +230,7 @@ export const AllocatedModels: FC<AllocatedModelsProps> = ({
       isExpandable={false}
       isSelectable={false}
       items={models}
-      itemId={'model_id'}
+      itemId={'key'}
       rowProps={(item) => ({
         'data-test-subj': `mlAllocatedModelTableRow row-${item.model_id}`,
       })}

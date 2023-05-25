@@ -82,16 +82,8 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
   );
 
   const hooksForm = useHookForm<LiveQueryFormFields>();
-  const {
-    handleSubmit,
-    watch,
-    setValue,
-    resetField,
-    clearErrors,
-    getFieldState,
-    register,
-    formState: { isSubmitting },
-  } = hooksForm;
+  const { handleSubmit, watch, setValue, resetField, clearErrors, getFieldState, register } =
+    hooksForm;
 
   const canRunSingleQuery = useMemo(
     () =>
@@ -157,7 +149,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
           saved_query_id: values.savedQueryId,
           query,
           alert_ids: values.alertIds,
-          pack_id: values?.packId?.length ? values?.packId[0] : undefined,
+          pack_id: queryType === 'pack' && values?.packId?.length ? values?.packId[0] : undefined,
           ecs_mapping: values.ecs_mapping,
         },
         (value) => !isEmpty(value)
@@ -165,7 +157,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
 
       await mutateAsync(serializedData);
     },
-    [alertAttachmentContext, mutateAsync]
+    [alertAttachmentContext, mutateAsync, queryType]
   );
 
   const serializedData: SavedQuerySOFormData = useMemo(
@@ -196,7 +188,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
             <EuiButton
               id="submit-button"
               disabled={!enabled}
-              isLoading={isSubmitting}
+              isLoading={isLoading}
               onClick={handleSubmit(onSubmit)}
             >
               <FormattedMessage
@@ -215,7 +207,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
       resultsStatus,
       handleShowSaveQueryFlyout,
       enabled,
-      isSubmitting,
+      isLoading,
       handleSubmit,
       onSubmit,
     ]

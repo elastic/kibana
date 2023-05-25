@@ -6,14 +6,19 @@
  */
 
 import type { SavedObject } from '@kbn/core/server';
-import type { CaseSavedObject } from './common/types';
-import type { CasePostRequest, CommentAttributes } from '../common/api';
+import type {
+  CasePostRequest,
+  CommentAttributes,
+  CommentRequestAlertType,
+  CommentRequestUserType,
+} from '../common/api';
 import { CaseSeverity, CaseStatuses, CommentType, ConnectorTypes } from '../common/api';
 import { SECURITY_SOLUTION_OWNER } from '../common/constants';
 import type { CasesStart } from './types';
 import { createCasesClientMock } from './client/mocks';
+import type { CaseSavedObjectTransformed } from './common/types/case';
 
-export const mockCases: CaseSavedObject[] = [
+export const mockCases: CaseSavedObjectTransformed[] = [
   {
     type: 'cases',
     id: 'mock-id-1',
@@ -418,6 +423,29 @@ export const newCase: CasePostRequest = {
     syncAlerts: true,
   },
   owner: SECURITY_SOLUTION_OWNER,
+};
+
+export const comment: CommentRequestUserType = {
+  comment: 'a comment',
+  type: CommentType.user as const,
+  owner: SECURITY_SOLUTION_OWNER,
+};
+
+export const alertComment: CommentRequestAlertType = {
+  alertId: 'alert-id-1',
+  index: 'alert-index-1',
+  rule: {
+    id: 'rule-id-1',
+    name: 'rule-name-1',
+  },
+  type: CommentType.alert as const,
+  owner: SECURITY_SOLUTION_OWNER,
+};
+
+export const multipleAlert: CommentRequestAlertType = {
+  ...alertComment,
+  alertId: ['test-id-3', 'test-id-4', 'test-id-5'],
+  index: ['test-index-3', 'test-index-4', 'test-index-5'],
 };
 
 const casesClientMock = createCasesClientMock();

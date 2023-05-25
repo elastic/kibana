@@ -8,13 +8,14 @@
 import moment from 'moment';
 import { BehaviorSubject } from 'rxjs';
 import React from 'react';
+import { css } from '@emotion/react';
 
 import useObservable from 'react-use/lib/useObservable';
 
-import { euiPaletteColorBlind, EuiDataGridColumn } from '@elastic/eui';
+import { euiPaletteColorBlind, type EuiDataGridColumn } from '@elastic/eui';
 
+import { euiThemeVars } from '@kbn/ui-theme';
 import { i18n } from '@kbn/i18n';
-
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 
 import {
@@ -27,6 +28,18 @@ import {
 } from '../../../../common/types/field_histograms';
 
 import { NON_AGGREGATABLE } from './common';
+
+const cssHistogramLegendBoolean = css({
+  width: '100%',
+  // This was originally $euiButtonMinWidth, but that
+  // is no longer exported from the EUI package,
+  // so we're replicating it here inline.
+  minWidth: `calc(${euiThemeVars.euiSize} * 7)`,
+});
+
+const cssTextAlignCenter = css({
+  textAlign: 'center',
+});
 
 export const hoveredRow$ = new BehaviorSubject<any | null>(null);
 
@@ -94,11 +107,15 @@ export const getLegendText = (
 
   if (chartData.type === 'boolean') {
     return (
-      <table className="mlDataGridChart__legendBoolean">
+      <table css={cssHistogramLegendBoolean}>
         <tbody>
           <tr>
-            {chartData.data[0] !== undefined && <td>{chartData.data[0].key_as_string}</td>}
-            {chartData.data[1] !== undefined && <td>{chartData.data[1].key_as_string}</td>}
+            {chartData.data[0] !== undefined && (
+              <td css={cssTextAlignCenter}>{chartData.data[0].key_as_string}</td>
+            )}
+            {chartData.data[1] !== undefined && (
+              <td css={cssTextAlignCenter}>{chartData.data[1].key_as_string}</td>
+            )}
           </tr>
         </tbody>
       </table>

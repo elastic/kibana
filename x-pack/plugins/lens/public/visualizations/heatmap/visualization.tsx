@@ -515,7 +515,7 @@ export const getHeatmapVisualization = ({
     return suggestion;
   },
 
-  getVisualizationInfo(state: HeatmapVisualizationState) {
+  getVisualizationInfo(state, frame) {
     const dimensions = [];
     if (state.xAccessor) {
       dimensions.push({
@@ -543,6 +543,15 @@ export const getHeatmapVisualization = ({
       });
     }
 
+    const { displayStops } = getSafePaletteParams(
+      paletteService,
+      // When the active data comes from the embeddable side it might not have been indexed by layerId
+      // rather using a "default" key
+      frame?.activeData?.[state.layerId] || frame?.activeData?.default,
+      state.valueAccessor,
+      state?.palette && state.palette.accessor === state.valueAccessor ? state.palette : undefined
+    );
+
     return {
       layers: [
         {
@@ -551,6 +560,7 @@ export const getHeatmapVisualization = ({
           chartType: state.shape,
           ...this.getDescription(state),
           dimensions,
+          palette: displayStops.length ? displayStops.map(({ color }) => color) : undefined,
         },
       ],
     };

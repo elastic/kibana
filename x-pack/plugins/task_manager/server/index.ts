@@ -50,36 +50,49 @@ export const config: PluginConfigDescriptor<TaskManagerConfig> = {
   exposeToUsage: {
     max_workers: true,
   },
-  deprecations: () => [
-    (settings, fromPath, addDeprecation) => {
-      const taskManager = get(settings, fromPath);
-      if (taskManager?.index) {
-        addDeprecation({
-          level: 'critical',
-          configPath: `${fromPath}.index`,
-          documentationUrl: 'https://ela.st/kbn-remove-legacy-multitenancy',
-          message: `"${fromPath}.index" is deprecated. Multitenancy by changing "kibana.index" will not be supported starting in 8.0. See https://ela.st/kbn-remove-legacy-multitenancy for more details`,
-          correctiveActions: {
-            manualSteps: [
-              `If you rely on this setting to achieve multitenancy you should use Spaces, cross-cluster replication, or cross-cluster search instead.`,
-              `To migrate to Spaces, we encourage using saved object management to export your saved objects from a tenant into the default tenant in a space.`,
-            ],
-          },
-        });
-      }
-      if (taskManager?.max_workers > MAX_WORKERS_LIMIT) {
-        addDeprecation({
-          level: 'critical',
-          configPath: `${fromPath}.max_workers`,
-          message: `setting "${fromPath}.max_workers" (${taskManager?.max_workers}) greater than ${MAX_WORKERS_LIMIT} is deprecated.`,
-          correctiveActions: {
-            manualSteps: [
-              `Maximum allowed value of "${fromPath}.max_workers" is ${MAX_WORKERS_LIMIT}.` +
-                `Replace "${fromPath}.max_workers: ${taskManager?.max_workers}" with (${MAX_WORKERS_LIMIT}).`,
-            ],
-          },
-        });
-      }
-    },
-  ],
+  deprecations: ({ deprecate }) => {
+    return [
+      deprecate('ephemeral_tasks.enabled', 'a future version', {
+        level: 'warning',
+        message: `Configuring "xpack.task_manager.ephemeral_tasks.enabled" is deprecated and will be removed in a future version. Remove this setting to increase task execution resiliency.`,
+      }),
+      deprecate('ephemeral_tasks.request_capacity', 'a future version', {
+        level: 'warning',
+        message: `Configuring "xpack.task_manager.ephemeral_tasks.request_capacity" is deprecated and will be removed in a future version. Remove this setting to increase task execution resiliency.`,
+      }),
+      (settings, fromPath, addDeprecation) => {
+        const taskManager = get(settings, fromPath);
+        if (taskManager?.index) {
+          addDeprecation({
+            level: 'critical',
+            configPath: `${fromPath}.index`,
+            documentationUrl: 'https://ela.st/kbn-remove-legacy-multitenancy',
+            message: `"${fromPath}.index" is deprecated. Multitenancy by changing "kibana.index" will not be supported starting in 8.0. See https://ela.st/kbn-remove-legacy-multitenancy for more details`,
+            correctiveActions: {
+              manualSteps: [
+                `If you rely on this setting to achieve multitenancy you should use Spaces, cross-cluster replication, or cross-cluster search instead.`,
+                `To migrate to Spaces, we encourage using saved object management to export your saved objects from a tenant into the default tenant in a space.`,
+              ],
+            },
+          });
+        }
+      },
+      (settings, fromPath, addDeprecation) => {
+        const taskManager = get(settings, fromPath);
+        if (taskManager?.max_workers > MAX_WORKERS_LIMIT) {
+          addDeprecation({
+            level: 'critical',
+            configPath: `${fromPath}.max_workers`,
+            message: `setting "${fromPath}.max_workers" (${taskManager?.max_workers}) greater than ${MAX_WORKERS_LIMIT} is deprecated.`,
+            correctiveActions: {
+              manualSteps: [
+                `Maximum allowed value of "${fromPath}.max_workers" is ${MAX_WORKERS_LIMIT}.` +
+                  `Replace "${fromPath}.max_workers: ${taskManager?.max_workers}" with (${MAX_WORKERS_LIMIT}).`,
+              ],
+            },
+          });
+        }
+      },
+    ];
+  },
 };

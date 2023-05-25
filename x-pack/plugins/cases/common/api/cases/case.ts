@@ -9,17 +9,17 @@ import * as rt from 'io-ts';
 
 import { NumberFromString } from '../saved_object';
 import { UserRt } from '../user';
-import { CommentResponseRt } from './comment';
+import { CommentRt } from './comment';
 import { CasesStatusResponseRt, CaseStatusRt } from './status';
 import { CaseConnectorRt } from '../connectors/connector';
 import { CaseAssigneesRt } from './assignee';
 
-export const AttachmentTotalsRt = rt.type({
+export const AttachmentTotalsRt = rt.strict({
   alerts: rt.number,
   userComments: rt.number,
 });
 
-export const RelatedCaseInfoRt = rt.type({
+export const RelatedCaseInfoRt = rt.strict({
   id: rt.string,
   title: rt.string,
   description: rt.string,
@@ -30,7 +30,7 @@ export const RelatedCaseInfoRt = rt.type({
 
 export const CasesByAlertIdRt = rt.array(RelatedCaseInfoRt);
 
-export const SettingsRt = rt.type({
+export const SettingsRt = rt.strict({
   syncAlerts: rt.boolean,
 });
 
@@ -48,7 +48,7 @@ export const CaseSeverityRt = rt.union([
   rt.literal(CaseSeverity.CRITICAL),
 ]);
 
-const CaseBasicRt = rt.type({
+const CaseBasicRt = rt.strict({
   /**
    * The description of the case
    */
@@ -91,7 +91,7 @@ const CaseBasicRt = rt.type({
  * This represents the push to service UserAction. It lacks the connector_id because that is stored in a different field
  * within the user action object in the API response.
  */
-export const CaseUserActionExternalServiceRt = rt.type({
+export const CaseUserActionExternalServiceRt = rt.strict({
   connector_name: rt.string,
   external_id: rt.string,
   external_title: rt.string,
@@ -101,7 +101,7 @@ export const CaseUserActionExternalServiceRt = rt.type({
 });
 
 export const CaseExternalServiceBasicRt = rt.intersection([
-  rt.type({
+  rt.strict({
     connector_id: rt.string,
   }),
   CaseUserActionExternalServiceRt,
@@ -111,7 +111,7 @@ export const CaseFullExternalServiceRt = rt.union([CaseExternalServiceBasicRt, r
 
 export const CaseAttributesRt = rt.intersection([
   CaseBasicRt,
-  rt.type({
+  rt.strict({
     duration: rt.union([rt.number, rt.null]),
     closed_at: rt.union([rt.string, rt.null]),
     closed_by: rt.union([UserRt, rt.null]),
@@ -124,7 +124,7 @@ export const CaseAttributesRt = rt.intersection([
 ]);
 
 export const CasePostRequestRt = rt.intersection([
-  rt.type({
+  rt.strict({
     /**
      * Description of the case
      */
@@ -151,131 +151,171 @@ export const CasePostRequestRt = rt.intersection([
      */
     owner: rt.string,
   }),
-  rt.partial({
-    /**
-     * The users assigned to the case
-     */
-    assignees: CaseAssigneesRt,
-    /**
-     * The severity of the case. The severity is
-     * default it to "low" if not provided.
-     */
-    severity: CaseSeverityRt,
-  }),
+  rt.exact(
+    rt.partial({
+      /**
+       * The users assigned to the case
+       */
+      assignees: CaseAssigneesRt,
+      /**
+       * The severity of the case. The severity is
+       * default it to "low" if not provided.
+       */
+      severity: CaseSeverityRt,
+    })
+  ),
 ]);
 
-export const CasesFindRequestRt = rt.partial({
-  /**
-   * Tags to filter by
-   */
-  tags: rt.union([rt.array(rt.string), rt.string]),
-  /**
-   * The status of the case (open, closed, in-progress)
-   */
-  status: CaseStatusRt,
-  /**
-   * The severity of the case
-   */
-  severity: CaseSeverityRt,
-  /**
-   * The uids of the user profiles to filter by
-   */
-  assignees: rt.union([rt.array(rt.string), rt.string]),
-  /**
-   * The reporters to filter by
-   */
-  reporters: rt.union([rt.array(rt.string), rt.string]),
-  /**
-   * Operator to use for the `search` field
-   */
-  defaultSearchOperator: rt.union([rt.literal('AND'), rt.literal('OR')]),
-  /**
-   * The fields in the entity to return in the response
-   */
-  fields: rt.union([rt.array(rt.string), rt.string]),
-  /**
-   * A KQL date. If used all cases created after (gte) the from date will be returned
-   */
-  from: rt.string,
-  /**
-   * The page of objects to return
-   */
-  page: NumberFromString,
-  /**
-   * The number of objects to include in each page
-   */
-  perPage: NumberFromString,
-  /**
-   * An Elasticsearch simple_query_string
-   */
-  search: rt.string,
-  /**
-   * The fields to perform the simple_query_string parsed query against
-   */
-  searchFields: rt.union([rt.array(rt.string), rt.string]),
-  /**
-   * The root fields to perform the simple_query_string parsed query against
-   */
-  rootSearchFields: rt.array(rt.string),
-  /**
-   * The field to use for sorting the found objects.
-   *
-   * This only supports, `create_at`, `closed_at`, and `status`
-   */
-  sortField: rt.string,
-  /**
-   * The order to sort by
-   */
-  sortOrder: rt.union([rt.literal('desc'), rt.literal('asc')]),
-
-  /**
-   * A KQL date. If used all cases created before (lte) the to date will be returned.
-   */
-  to: rt.string,
-  /**
-   * The owner(s) to filter by. The user making the request must have privileges to retrieve cases of that
-   * ownership or they will be ignored. If no owner is included, then all ownership types will be included in the response
-   * that the user has access to.
-   */
-
-  owner: rt.union([rt.array(rt.string), rt.string]),
+const CasesFindRequestSearchFieldsRt = rt.keyof({
+  'closed_by.username': null,
+  'closed_by.full_name': null,
+  'closed_by.email': null,
+  'closed_by.profile_uid': null,
+  'created_by.username': null,
+  'created_by.full_name': null,
+  'created_by.email': null,
+  'created_by.profile_uid': null,
+  description: null,
+  'connector.name': null,
+  'connector.type': null,
+  'external_service.pushed_by.username': null,
+  'external_service.pushed_by.full_name': null,
+  'external_service.pushed_by.email': null,
+  'external_service.pushed_by.profile_uid': null,
+  'external_service.connector_name': null,
+  'external_service.external_id': null,
+  'external_service.external_title': null,
+  'external_service.external_url': null,
+  title: null,
+  'title.keyword': null,
+  'updated_by.username': null,
+  'updated_by.full_name': null,
+  'updated_by.email': null,
+  'updated_by.profile_uid': null,
 });
 
-export const CasesByAlertIDRequestRt = rt.partial({
-  /**
-   * The type of cases to retrieve given an alert ID. If no owner is provided, all cases
-   * that the user has access to will be returned.
-   */
-  owner: rt.union([rt.array(rt.string), rt.string]),
-});
+export const CasesFindRequestRt = rt.exact(
+  rt.partial({
+    /**
+     * Tags to filter by
+     */
+    tags: rt.union([rt.array(rt.string), rt.string]),
+    /**
+     * The status of the case (open, closed, in-progress)
+     */
+    status: CaseStatusRt,
+    /**
+     * The severity of the case
+     */
+    severity: CaseSeverityRt,
+    /**
+     * The uids of the user profiles to filter by
+     */
+    assignees: rt.union([rt.array(rt.string), rt.string]),
+    /**
+     * The reporters to filter by
+     */
+    reporters: rt.union([rt.array(rt.string), rt.string]),
+    /**
+     * Operator to use for the `search` field
+     */
+    defaultSearchOperator: rt.union([rt.literal('AND'), rt.literal('OR')]),
+    /**
+     * A KQL date. If used all cases created after (gte) the from date will be returned
+     */
+    from: rt.string,
+    /**
+     * The page of objects to return
+     */
+    page: NumberFromString,
+    /**
+     * The number of objects to include in each page
+     */
+    perPage: NumberFromString,
+    /**
+     * An Elasticsearch simple_query_string
+     */
+    search: rt.string,
+    /**
+     * The fields to perform the simple_query_string parsed query against
+     */
+    searchFields: rt.union([
+      rt.array(CasesFindRequestSearchFieldsRt),
+      CasesFindRequestSearchFieldsRt,
+    ]),
+    /**
+     * The root fields to perform the simple_query_string parsed query against
+     */
+    rootSearchFields: rt.array(rt.string),
+    /**
+     * The field to use for sorting the found objects.
+     *
+     * This only supports, `create_at`, `closed_at`, and `status`
+     */
+    sortField: rt.string,
+    /**
+     * The order to sort by
+     */
+    sortOrder: rt.union([rt.literal('desc'), rt.literal('asc')]),
 
-export const CaseResponseRt = rt.intersection([
+    /**
+     * A KQL date. If used all cases created before (lte) the to date will be returned.
+     */
+    to: rt.string,
+    /**
+     * The owner(s) to filter by. The user making the request must have privileges to retrieve cases of that
+     * ownership or they will be ignored. If no owner is included, then all ownership types will be included in the response
+     * that the user has access to.
+     */
+
+    owner: rt.union([rt.array(rt.string), rt.string]),
+  })
+);
+
+export const CasesByAlertIDRequestRt = rt.exact(
+  rt.partial({
+    /**
+     * The type of cases to retrieve given an alert ID. If no owner is provided, all cases
+     * that the user has access to will be returned.
+     */
+    owner: rt.union([rt.array(rt.string), rt.string]),
+  })
+);
+
+export const CaseRt = rt.intersection([
   CaseAttributesRt,
-  rt.type({
+  rt.strict({
     id: rt.string,
     totalComment: rt.number,
     totalAlerts: rt.number,
     version: rt.string,
   }),
-  rt.partial({
-    comments: rt.array(CommentResponseRt),
-  }),
+  rt.exact(
+    rt.partial({
+      comments: rt.array(CommentRt),
+    })
+  ),
 ]);
 
 export const CaseResolveResponseRt = rt.intersection([
-  rt.type({
-    case: CaseResponseRt,
+  rt.strict({
+    case: CaseRt,
     outcome: rt.union([rt.literal('exactMatch'), rt.literal('aliasMatch'), rt.literal('conflict')]),
   }),
-  rt.partial({
-    alias_target_id: rt.string,
-    alias_purpose: rt.union([rt.literal('savedObjectConversion'), rt.literal('savedObjectImport')]),
-  }),
+  rt.exact(
+    rt.partial({
+      alias_target_id: rt.string,
+      alias_purpose: rt.union([
+        rt.literal('savedObjectConversion'),
+        rt.literal('savedObjectImport'),
+      ]),
+    })
+  ),
 ]);
 
 export const CasesFindResponseRt = rt.intersection([
-  rt.type({
-    cases: rt.array(CaseResponseRt),
+  rt.strict({
+    cases: rt.array(CaseRt),
     page: rt.number,
     per_page: rt.number,
     total: rt.number,
@@ -284,64 +324,63 @@ export const CasesFindResponseRt = rt.intersection([
 ]);
 
 export const CasePatchRequestRt = rt.intersection([
-  rt.partial(CaseBasicRt.props),
+  rt.exact(rt.partial(CaseBasicRt.type.props)),
   /**
    * The saved object ID and version
    */
-  rt.type({ id: rt.string, version: rt.string }),
+  rt.strict({ id: rt.string, version: rt.string }),
 ]);
 
-export const CasesPatchRequestRt = rt.type({ cases: rt.array(CasePatchRequestRt) });
-export const CasesResponseRt = rt.array(CaseResponseRt);
+export const CasesPatchRequestRt = rt.strict({ cases: rt.array(CasePatchRequestRt) });
+export const CasesRt = rt.array(CaseRt);
 
-export const CasePushRequestParamsRt = rt.type({
+export const CasePushRequestParamsRt = rt.strict({
   case_id: rt.string,
   connector_id: rt.string,
 });
 
 export const ExternalServiceResponseRt = rt.intersection([
-  rt.type({
+  rt.strict({
     title: rt.string,
     id: rt.string,
     pushedDate: rt.string,
     url: rt.string,
   }),
-  rt.partial({
-    comments: rt.array(
-      rt.intersection([
-        rt.type({
-          commentId: rt.string,
-          pushedDate: rt.string,
-        }),
-        rt.partial({ externalCommentId: rt.string }),
-      ])
-    ),
-  }),
+  rt.exact(
+    rt.partial({
+      comments: rt.array(
+        rt.intersection([
+          rt.strict({
+            commentId: rt.string,
+            pushedDate: rt.string,
+          }),
+          rt.exact(rt.partial({ externalCommentId: rt.string })),
+        ])
+      ),
+    })
+  ),
 ]);
 
-export const AllTagsFindRequestRt = rt.partial({
-  /**
-   * The owner of the cases to retrieve the tags from. If no owner is provided the tags from all cases
-   * that the user has access to will be returned.
-   */
-  owner: rt.union([rt.array(rt.string), rt.string]),
-});
+export const AllTagsFindRequestRt = rt.exact(
+  rt.partial({
+    /**
+     * The owner of the cases to retrieve the tags from. If no owner is provided the tags from all cases
+     * that the user has access to will be returned.
+     */
+    owner: rt.union([rt.array(rt.string), rt.string]),
+  })
+);
 
 export const AllReportersFindRequestRt = AllTagsFindRequestRt;
 
-export const CasesBulkGetRequestRt = rt.intersection([
-  rt.type({
-    ids: rt.array(rt.string),
-  }),
-  rt.partial({
-    fields: rt.union([rt.undefined, rt.array(rt.string), rt.string]),
-  }),
-]);
+export const CasesBulkGetRequestRt = rt.strict({
+  ids: rt.array(rt.string),
+});
 
-export const CasesBulkGetResponseRt = rt.type({
-  cases: CasesResponseRt,
+export const CasesBulkGetResponseRt = rt.strict({
+  cases: CasesRt,
   errors: rt.array(
-    rt.type({
+    rt.strict({
       error: rt.string,
       message: rt.string,
       status: rt.union([rt.undefined, rt.number]),
@@ -353,9 +392,9 @@ export const CasesBulkGetResponseRt = rt.type({
 export type CaseAttributes = rt.TypeOf<typeof CaseAttributesRt>;
 
 export type CasePostRequest = rt.TypeOf<typeof CasePostRequestRt>;
-export type CaseResponse = rt.TypeOf<typeof CaseResponseRt>;
+export type Case = rt.TypeOf<typeof CaseRt>;
 export type CaseResolveResponse = rt.TypeOf<typeof CaseResolveResponseRt>;
-export type CasesResponse = rt.TypeOf<typeof CasesResponseRt>;
+export type Cases = rt.TypeOf<typeof CasesRt>;
 export type CasesFindRequest = rt.TypeOf<typeof CasesFindRequestRt>;
 export type CasesByAlertIDRequest = rt.TypeOf<typeof CasesByAlertIDRequestRt>;
 export type CasesFindResponse = rt.TypeOf<typeof CasesFindResponseRt>;
@@ -375,13 +414,3 @@ export type CasesByAlertId = rt.TypeOf<typeof CasesByAlertIdRt>;
 
 export type CasesBulkGetRequest = rt.TypeOf<typeof CasesBulkGetRequestRt>;
 export type CasesBulkGetResponse = rt.TypeOf<typeof CasesBulkGetResponseRt>;
-export type CasesBulkGetRequestCertainFields<
-  Field extends keyof CaseResponse = keyof CaseResponse
-> = Omit<CasesBulkGetRequest, 'fields'> & {
-  fields?: Field[];
-};
-export type CasesBulkGetResponseCertainFields<
-  Field extends keyof CaseResponse = keyof CaseResponse
-> = Omit<CasesBulkGetResponse, 'cases'> & {
-  cases: Array<Pick<CaseResponse, Field | 'id' | 'version' | 'owner'>>;
-};

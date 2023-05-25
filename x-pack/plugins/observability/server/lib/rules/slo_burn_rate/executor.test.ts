@@ -6,7 +6,12 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import { IBasePath, IUiSettingsClient, SavedObjectsClientContract } from '@kbn/core/server';
+import {
+  IBasePath,
+  IUiSettingsClient,
+  SavedObjectsClientContract,
+  SavedObjectsFindResponse,
+} from '@kbn/core/server';
 import {
   ElasticsearchClientMock,
   elasticsearchServiceMock,
@@ -26,8 +31,8 @@ import {
   ALERT_REASON,
 } from '@kbn/rule-data-utils';
 import { ALERT_ACTION, getRuleExecutor } from './executor';
-import { aStoredSLO, createSLO } from '../../../services/slo/fixtures/slo';
-import { SLO } from '../../../domain/models';
+import { createSLO } from '../../../services/slo/fixtures/slo';
+import { SLO, StoredSLO } from '../../../domain/models';
 import { SharePluginStart } from '@kbn/share-plugin/server';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import {
@@ -37,6 +42,10 @@ import {
   BurnRateRuleParams,
   AlertStates,
 } from './types';
+import { SLO_ID_FIELD, SLO_REVISION_FIELD } from '../../../../common/field_names/infra_metrics';
+import { SLONotFound } from '../../../errors';
+import { SO_SLO_TYPE } from '../../../saved_objects';
+import { sloSchema } from '@kbn/slo-schema';
 
 const commonEsResponse = {
   took: 100,
@@ -51,6 +60,21 @@ const commonEsResponse = {
     hits: [],
   },
 };
+
+function createFindResponse(sloList: SLO[]): SavedObjectsFindResponse<StoredSLO> {
+  return {
+    page: 1,
+    per_page: 25,
+    total: sloList.length,
+    saved_objects: sloList.map((slo) => ({
+      id: slo.id,
+      attributes: sloSchema.encode(slo),
+      type: SO_SLO_TYPE,
+      references: [],
+      score: 1,
+    })),
+  };
+}
 
 const BURN_RATE_THRESHOLD = 2;
 const BURN_RATE_ABOVE_THRESHOLD = BURN_RATE_THRESHOLD + 0.01;
@@ -102,12 +126,12 @@ describe('BurnRateRuleExecutor', () => {
   });
 
   it('throws when the slo is not found', async () => {
-    soClientMock.get.mockRejectedValue(new Error('NotFound'));
+    soClientMock.find.mockRejectedValue(new SLONotFound('SLO [non-existent] not found'));
     const executor = getRuleExecutor({ basePath: basePathMock });
 
     await expect(
       executor({
-        params: someRuleParams({ sloId: 'inexistent', burnRateThreshold: BURN_RATE_THRESHOLD }),
+        params: someRuleParams({ sloId: 'non-existent', burnRateThreshold: BURN_RATE_THRESHOLD }),
         startedAt: new Date(),
         services: servicesMock,
         executionId: 'irrelevant',
@@ -123,7 +147,7 @@ describe('BurnRateRuleExecutor', () => {
 
   it('returns early when the slo is disabled', async () => {
     const slo = createSLO({ objective: { target: 0.9 }, enabled: false });
-    soClientMock.get.mockResolvedValue(aStoredSLO(slo));
+    soClientMock.find.mockResolvedValueOnce(createFindResponse([slo]));
     const executor = getRuleExecutor({ basePath: basePathMock });
 
     const result = await executor({
@@ -147,7 +171,7 @@ describe('BurnRateRuleExecutor', () => {
 
   it('does not schedule an alert when both windows burn rates are below the threshold', async () => {
     const slo = createSLO({ objective: { target: 0.9 } });
-    soClientMock.get.mockResolvedValue(aStoredSLO(slo));
+    soClientMock.find.mockResolvedValueOnce(createFindResponse([slo]));
     esClientMock.search.mockResolvedValue(
       generateEsResponse(slo, BURN_RATE_BELOW_THRESHOLD, BURN_RATE_BELOW_THRESHOLD)
     );
@@ -172,7 +196,7 @@ describe('BurnRateRuleExecutor', () => {
 
   it('does not schedule an alert when the long window burn rate is below the threshold', async () => {
     const slo = createSLO({ objective: { target: 0.9 } });
-    soClientMock.get.mockResolvedValue(aStoredSLO(slo));
+    soClientMock.find.mockResolvedValueOnce(createFindResponse([slo]));
     esClientMock.search.mockResolvedValue(
       generateEsResponse(slo, BURN_RATE_ABOVE_THRESHOLD, BURN_RATE_BELOW_THRESHOLD)
     );
@@ -197,7 +221,7 @@ describe('BurnRateRuleExecutor', () => {
 
   it('does not schedule an alert when the short window burn rate is below the threshold', async () => {
     const slo = createSLO({ objective: { target: 0.9 } });
-    soClientMock.get.mockResolvedValue(aStoredSLO(slo));
+    soClientMock.find.mockResolvedValueOnce(createFindResponse([slo]));
     esClientMock.search.mockResolvedValue(
       generateEsResponse(slo, BURN_RATE_BELOW_THRESHOLD, BURN_RATE_ABOVE_THRESHOLD)
     );
@@ -222,7 +246,7 @@ describe('BurnRateRuleExecutor', () => {
 
   it('schedules an alert when both windows burn rate have reached the threshold', async () => {
     const slo = createSLO({ objective: { target: 0.9 } });
-    soClientMock.get.mockResolvedValue(aStoredSLO(slo));
+    soClientMock.find.mockResolvedValueOnce(createFindResponse([slo]));
     esClientMock.search.mockResolvedValue(
       generateEsResponse(slo, BURN_RATE_THRESHOLD, BURN_RATE_THRESHOLD)
     );
@@ -254,6 +278,8 @@ describe('BurnRateRuleExecutor', () => {
           'The burn rate for the past 1h is 2 and for the past 5m is 2. Alert when above 2 for both windows',
         [ALERT_EVALUATION_THRESHOLD]: 2,
         [ALERT_EVALUATION_VALUE]: 2,
+        [SLO_ID_FIELD]: slo.id,
+        [SLO_REVISION_FIELD]: slo.revision,
       },
     });
     expect(alertMock.scheduleActions).toBeCalledWith(
@@ -271,7 +297,7 @@ describe('BurnRateRuleExecutor', () => {
 
   it('sets the context on the recovered alerts', async () => {
     const slo = createSLO({ objective: { target: 0.9 } });
-    soClientMock.get.mockResolvedValue(aStoredSLO(slo));
+    soClientMock.find.mockResolvedValueOnce(createFindResponse([slo]));
     esClientMock.search.mockResolvedValue(
       generateEsResponse(slo, BURN_RATE_BELOW_THRESHOLD, BURN_RATE_ABOVE_THRESHOLD)
     );

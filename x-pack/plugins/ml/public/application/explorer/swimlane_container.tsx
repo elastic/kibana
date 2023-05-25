@@ -7,49 +7,50 @@
 
 import React, { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
-  EuiText,
-  EuiLoadingChart,
-  EuiResizeObserver,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLoadingChart,
+  EuiResizeObserver,
+  EuiText,
 } from '@elastic/eui';
-
 import { throttle } from 'lodash';
 import {
-  Chart,
   BrushEndListener,
-  Settings,
-  Heatmap,
-  HeatmapElementEvent,
+  Chart,
   ElementClickListener,
-  TooltipValue,
-  HeatmapSpec,
-  TooltipSettings,
+  Heatmap,
   HeatmapBrushEvent,
+  HeatmapElementEvent,
+  HeatmapSpec,
+  HeatmapStyle,
+  PartialTheme,
   Position,
   ScaleType,
-  PartialTheme,
-  HeatmapStyle,
+  Settings,
+  TooltipSettings,
+  TooltipValue,
 } from '@elastic/charts';
 import moment from 'moment';
-
 import { i18n } from '@kbn/i18n';
 import { ChartsPluginStart, useActiveCursor } from '@kbn/charts-plugin/public';
 import { css } from '@emotion/react';
+import {
+  getFormattedSeverityScore,
+  ML_ANOMALY_THRESHOLD,
+  ML_SEVERITY_COLORS,
+} from '@kbn/ml-anomaly-utils';
+import { useIsDarkTheme } from '@kbn/ml-kibana-theme';
 import { SwimLanePagination } from './swimlane_pagination';
 import { AppStateSelectedCells, OverallSwimlaneData, ViewBySwimLaneData } from './explorer_utils';
-import { ANOMALY_THRESHOLD, SEVERITY_COLORS } from '../../../common';
 import { TimeBuckets as TimeBucketsClass } from '../util/time_buckets';
 import { SWIMLANE_TYPE, SwimlaneType } from './explorer_constants';
 import { mlEscape } from '../util/string_utils';
 import { FormattedTooltip } from '../components/chart_tooltip/chart_tooltip';
 import { formatHumanReadableDateTime } from '../../../common/util/date_utils';
-
 import './_explorer.scss';
 import { EMPTY_FIELD_VALUE_LABEL } from '../timeseriesexplorer/components/entity_control/entity_control';
-import { useUiSettings } from '../contexts/kibana';
-import { Y_AXIS_LABEL_WIDTH, Y_AXIS_LABEL_PADDING } from './swimlane_annotation_container';
-import { useCurrentEuiTheme } from '../components/color_range_legend';
+import { Y_AXIS_LABEL_PADDING, Y_AXIS_LABEL_WIDTH } from './swimlane_annotation_container';
+import { useCurrentThemeVars, useMlKibana } from '../contexts/kibana';
 
 declare global {
   interface Window {
@@ -60,9 +61,6 @@ declare global {
   }
 }
 
-function getFormattedSeverityScore(score: number): string {
-  return String(parseInt(String(score), 10));
-}
 /**
  * Ignore insignificant resize, e.g. browser scrollbar appearance.
  */
@@ -190,8 +188,12 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
 }) => {
   const [chartWidth, setChartWidth] = useState<number>(0);
 
-  const isDarkTheme = !!useUiSettings().get('theme:darkMode');
-  const { euiTheme } = useCurrentEuiTheme();
+  const {
+    services: { theme: themeService },
+  } = useMlKibana();
+
+  const isDarkTheme = useIsDarkTheme(themeService);
+  const { euiTheme } = useCurrentThemeVars();
 
   // Holds the container height for previously fetched data
   const containerHeightRef = useRef<number>();
@@ -456,29 +458,29 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
                           type: 'bands',
                           bands: [
                             {
-                              start: ANOMALY_THRESHOLD.LOW,
-                              end: ANOMALY_THRESHOLD.WARNING,
-                              color: SEVERITY_COLORS.LOW,
+                              start: ML_ANOMALY_THRESHOLD.LOW,
+                              end: ML_ANOMALY_THRESHOLD.WARNING,
+                              color: ML_SEVERITY_COLORS.LOW,
                             },
                             {
-                              start: ANOMALY_THRESHOLD.WARNING,
-                              end: ANOMALY_THRESHOLD.MINOR,
-                              color: SEVERITY_COLORS.WARNING,
+                              start: ML_ANOMALY_THRESHOLD.WARNING,
+                              end: ML_ANOMALY_THRESHOLD.MINOR,
+                              color: ML_SEVERITY_COLORS.WARNING,
                             },
                             {
-                              start: ANOMALY_THRESHOLD.MINOR,
-                              end: ANOMALY_THRESHOLD.MAJOR,
-                              color: SEVERITY_COLORS.MINOR,
+                              start: ML_ANOMALY_THRESHOLD.MINOR,
+                              end: ML_ANOMALY_THRESHOLD.MAJOR,
+                              color: ML_SEVERITY_COLORS.MINOR,
                             },
                             {
-                              start: ANOMALY_THRESHOLD.MAJOR,
-                              end: ANOMALY_THRESHOLD.CRITICAL,
-                              color: SEVERITY_COLORS.MAJOR,
+                              start: ML_ANOMALY_THRESHOLD.MAJOR,
+                              end: ML_ANOMALY_THRESHOLD.CRITICAL,
+                              color: ML_SEVERITY_COLORS.MAJOR,
                             },
                             {
-                              start: ANOMALY_THRESHOLD.CRITICAL,
+                              start: ML_ANOMALY_THRESHOLD.CRITICAL,
                               end: Infinity,
-                              color: SEVERITY_COLORS.CRITICAL,
+                              color: ML_SEVERITY_COLORS.CRITICAL,
                             },
                           ],
                         }}
@@ -514,7 +516,7 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
                   {isLoading && (
                     <EuiText
                       textAlign={'center'}
-                      style={{
+                      css={{
                         position: 'absolute',
                         top: '50%',
                         left: '50%',

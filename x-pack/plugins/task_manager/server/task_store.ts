@@ -100,6 +100,7 @@ export class TaskStore {
   public readonly errors$ = new Subject<Error>();
 
   private esClient: ElasticsearchClient;
+  private esClientWithoutRetries: ElasticsearchClient;
   private definitions: TaskTypeDictionary;
   private savedObjectsRepository: ISavedObjectsRepository;
   private serializer: ISavedObjectsSerializer;
@@ -122,6 +123,11 @@ export class TaskStore {
     this.serializer = opts.serializer;
     this.savedObjectsRepository = opts.savedObjectsRepository;
     this.adHocTaskCounter = opts.adHocTaskCounter;
+    this.esClientWithoutRetries = opts.esClient.child({
+      // Timeouts are retried and make requests timeout after (requestTimeout * (1 + maxRetries))
+      // The poller doesn't need retry logic because it will try again at the next polling cycle
+      maxRetries: 0,
+    });
   }
 
   /**
@@ -406,7 +412,7 @@ export class TaskStore {
     try {
       const {
         hits: { hits: tasks },
-      } = await this.esClient.search<SavedObjectsRawDoc['_source']>({
+      } = await this.esClientWithoutRetries.search<SavedObjectsRawDoc['_source']>({
         index: this.index,
         ignore_unavailable: true,
         body: {
@@ -462,7 +468,7 @@ export class TaskStore {
     const { query } = ensureQueryOnlyReturnsTaskObjects(opts);
     try {
       const // eslint-disable-next-line @typescript-eslint/naming-convention
-        { total, updated, version_conflicts } = await this.esClient.updateByQuery({
+        { total, updated, version_conflicts } = await this.esClientWithoutRetries.updateByQuery({
           index: this.index,
           ignore_unavailable: true,
           refresh: refresh == null ? true : refresh,

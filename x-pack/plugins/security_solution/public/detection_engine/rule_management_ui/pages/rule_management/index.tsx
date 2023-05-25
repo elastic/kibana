@@ -42,6 +42,8 @@ import { RulesTableContextProvider } from '../../components/rules_table/rules_ta
 import * as i18n from '../../../../detections/pages/detection_engine/rules/translations';
 import { useInvalidateFetchRuleManagementFiltersQuery } from '../../../rule_management/api/hooks/use_fetch_rule_management_filters_query';
 
+import { MaintenanceWindowCallout } from '../../components/maintenance_window_callout/maintenance_window_callout';
+
 const RulesPageComponent: React.FC = () => {
   const [isImportModalVisible, showImportModal, hideImportModal] = useBoolState();
   const [isValueListFlyoutVisible, showValueListFlyout, hideValueListFlyout] = useBoolState();
@@ -158,6 +160,7 @@ const RulesPageComponent: React.FC = () => {
             prePackagedTimelineStatus === 'timelineNeedUpdate') && (
             <UpdatePrePackagedRulesCallOut data-test-subj="update-callout-button" />
           )}
+          <MaintenanceWindowCallout />
           <AllRules data-test-subj="all-rules" />
         </SecuritySolutionPageWrapper>
       </RulesTableContextProvider>

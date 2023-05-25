@@ -12,6 +12,7 @@ disabled:
   - test/server_integration/config.base.js
   - x-pack/test/functional_with_es_ssl/config.base.ts
   - x-pack/test/api_integration/config.ts
+  - x-pack/test/fleet_api_integration/config.base.ts
 
   # QA suites that are run out-of-band
   - x-pack/test/stack_functional_integration/configs/config.stack_functional_integration_base.js
@@ -28,6 +29,9 @@ disabled:
   - x-pack/test/defend_workflows_cypress/config.ts
   - x-pack/test/defend_workflows_cypress/endpoint_config.ts
   - x-pack/test/defend_workflows_cypress/visual_config.ts
+  - x-pack/plugins/observability_onboarding/e2e/ftr_config_open.ts
+  - x-pack/plugins/observability_onboarding/e2e/ftr_config_runner.ts
+  - x-pack/plugins/observability_onboarding/e2e/ftr_config.ts
   - x-pack/test/osquery_cypress/cli_config.ts
   - x-pack/test/osquery_cypress/config.ts
   - x-pack/test/osquery_cypress/visual_config.ts
@@ -43,7 +47,8 @@ disabled:
   - x-pack/test/threat_intelligence_cypress/visual_config.ts
   - x-pack/test/threat_intelligence_cypress/cli_config_parallel.ts
   - x-pack/test/threat_intelligence_cypress/config.ts
-  - x-pack/test/functional_enterprise_search/with_host_configured.config.ts
+  - x-pack/test/functional_enterprise_search/visual_config.ts
+  - x-pack/test/functional_enterprise_search/cli_config.ts
   - x-pack/plugins/apm/ftr_e2e/ftr_config_open.ts
   - x-pack/plugins/apm/ftr_e2e/ftr_config_run.ts
   - x-pack/plugins/apm/ftr_e2e/ftr_config.ts
@@ -73,6 +78,21 @@ disabled:
 
   # Asset Manager configs, in tech preview, will move to enabled after more stability introduced
   - x-pack/test/api_integration/apis/asset_manager/config.ts
+
+  # Serverless base config files
+  - x-pack/test_serverless/api_integration/config.base.ts
+  - x-pack/test_serverless/functional/config.base.ts
+  - x-pack/test_serverless/shared/config.base.ts
+
+  # Serverless configs, currently only for manual tests runs, CI integration planned
+  - x-pack/test_serverless/api_integration/test_suites/common/config.ts
+  - x-pack/test_serverless/api_integration/test_suites/observability/config.ts
+  - x-pack/test_serverless/api_integration/test_suites/search/config.ts
+  - x-pack/test_serverless/api_integration/test_suites/security/config.ts
+  - x-pack/test_serverless/functional/test_suites/common/config.ts
+  - x-pack/test_serverless/functional/test_suites/observability/config.ts
+  - x-pack/test_serverless/functional/test_suites/search/config.ts
+  - x-pack/test_serverless/functional/test_suites/security/config.ts
 
 defaultQueue: 'n2-4-spot'
 enabled:
@@ -184,6 +204,7 @@ enabled:
   - x-pack/test/api_integration/apis/uptime/config.ts
   - x-pack/test/api_integration/apis/watcher/config.ts
   - x-pack/test/apm_api_integration/basic/config.ts
+  - x-pack/test/apm_api_integration/cloud/config.ts
   - x-pack/test/apm_api_integration/rules/config.ts
   - x-pack/test/apm_api_integration/trial/config.ts
   - x-pack/test/banners_functional/config.ts
@@ -206,9 +227,12 @@ enabled:
   - x-pack/test/detection_engine_api_integration/security_and_spaces/group10/config.ts
   - x-pack/test/detection_engine_api_integration/security_and_spaces/rule_execution_logic/config.ts
   - x-pack/test/encrypted_saved_objects_api_integration/config.ts
-  - x-pack/test/endpoint_api_integration_no_ingest/config.ts
   - x-pack/test/examples/config.ts
-  - x-pack/test/fleet_api_integration/config.ts
+  - x-pack/test/fleet_api_integration/config.agent.ts
+  - x-pack/test/fleet_api_integration/config.agent_policy.ts
+  - x-pack/test/fleet_api_integration/config.epm.ts
+  - x-pack/test/fleet_api_integration/config.fleet.ts
+  - x-pack/test/fleet_api_integration/config.package_policy.ts
   - x-pack/test/fleet_functional/config.ts
   - x-pack/test/ftr_apis/security_and_spaces/config.ts
   - x-pack/test/functional_basic/apps/ml/permissions/config.ts
@@ -216,14 +240,13 @@ enabled:
   - x-pack/test/functional_basic/apps/ml/data_visualizer/group2/config.ts
   - x-pack/test/functional_basic/apps/ml/data_visualizer/group3/config.ts
   - x-pack/test/functional_basic/apps/transform/creation/index_pattern/config.ts
-  - x-pack/test/functional_basic/apps/transform/start_reset_delete/config.ts
+  - x-pack/test/functional_basic/apps/transform/actions/config.ts
   - x-pack/test/functional_basic/apps/transform/edit_clone/config.ts
   - x-pack/test/functional_basic/apps/transform/creation/runtime_mappings_saved_search/config.ts
   - x-pack/test/functional_basic/apps/transform/permissions/config.ts
   - x-pack/test/functional_basic/apps/transform/feature_controls/config.ts
   - x-pack/test/functional_cors/config.ts
   - x-pack/test/functional_embedded/config.ts
-  - x-pack/test/functional_enterprise_search/without_host_configured.config.ts
   - x-pack/test/functional_execution_context/config.ts
   - x-pack/test/functional_with_es_ssl/apps/cases/group1/config.ts
   - x-pack/test/functional_with_es_ssl/apps/cases/group2/config.ts
@@ -251,6 +274,9 @@ enabled:
   - x-pack/test/functional/apps/lens/group1/config.ts
   - x-pack/test/functional/apps/lens/group2/config.ts
   - x-pack/test/functional/apps/lens/group3/config.ts
+  - x-pack/test/functional/apps/lens/group4/config.ts
+  - x-pack/test/functional/apps/lens/group5/config.ts
+  - x-pack/test/functional/apps/lens/group6/config.ts
   - x-pack/test/functional/apps/lens/open_in_lens/tsvb/config.ts
   - x-pack/test/functional/apps/lens/open_in_lens/agg_based/config.ts
   - x-pack/test/functional/apps/lens/open_in_lens/dashboard/config.ts
@@ -280,7 +306,7 @@ enabled:
   - x-pack/test/functional/apps/status_page/config.ts
   - x-pack/test/functional/apps/transform/creation/index_pattern/config.ts
   - x-pack/test/functional/apps/transform/creation/runtime_mappings_saved_search/config.ts
-  - x-pack/test/functional/apps/transform/start_reset_delete/config.ts
+  - x-pack/test/functional/apps/transform/actions/config.ts
   - x-pack/test/functional/apps/transform/edit_clone/config.ts
   - x-pack/test/functional/apps/transform/permissions/config.ts
   - x-pack/test/functional/apps/transform/feature_controls/config.ts
@@ -349,7 +375,9 @@ enabled:
   - x-pack/test/security_solution_endpoint/config.ts
   - x-pack/test/session_view/basic/config.ts
   - x-pack/test/spaces_api_integration/security_and_spaces/config_basic.ts
+  - x-pack/test/spaces_api_integration/security_and_spaces/copy_to_space_config_basic.ts
   - x-pack/test/spaces_api_integration/security_and_spaces/config_trial.ts
+  - x-pack/test/spaces_api_integration/security_and_spaces/copy_to_space_config_trial.ts
   - x-pack/test/spaces_api_integration/spaces_only/config.ts
   - x-pack/test/timeline/security_and_spaces/config_trial.ts
   - x-pack/test/ui_capabilities/security_and_spaces/config.ts

@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { KueryNode, nodeBuilder } from '@kbn/es-query';
 import { SavedObjectsBulkUpdateObject } from '@kbn/core/server';
 import { withSpan } from '@kbn/apm-utils';
@@ -25,6 +24,7 @@ import {
   getAlertFromRaw,
   recoverRuleAlerts,
   updateMeta,
+  migrateLegacyActions,
 } from '../lib';
 import { BulkOptions, BulkOperationError, RulesClientContext } from '../types';
 import { tryToRemoveTasks } from '../common';
@@ -119,8 +119,22 @@ const bulkDisableRulesWithOCC = async (
               ruleNameToRuleIdMapping[rule.id] = rule.attributes.name;
             }
 
+            const migratedActions = await migrateLegacyActions(context, {
+              ruleId: rule.id,
+              actions: rule.attributes.actions,
+              references: rule.references,
+              attributes: rule.attributes,
+            });
+
             const updatedAttributes = updateMeta(context, {
               ...rule.attributes,
+              ...(migratedActions.hasLegacyActions
+                ? {
+                    actions: migratedActions.resultedActions,
+                    throttle: undefined,
+                    notifyWhen: undefined,
+                  }
+                : {}),
               enabled: false,
               scheduledTaskId:
                 rule.attributes.scheduledTaskId === rule.id
@@ -135,6 +149,9 @@ const bulkDisableRulesWithOCC = async (
               attributes: {
                 ...updatedAttributes,
               },
+              ...(migratedActions.hasLegacyActions
+                ? { references: migratedActions.resultedReferences }
+                : {}),
             });
 
             context.auditLogger?.log(

@@ -34,7 +34,7 @@ import './add_inference_pipeline_flyout.scss';
 export const TestPipeline: React.FC = () => {
   const {
     addInferencePipelineModal: {
-      configuration: { sourceField },
+      configuration: { sourceField, fieldMappings },
       indexName,
     },
     getDocumentsErr,
@@ -49,6 +49,12 @@ export const TestPipeline: React.FC = () => {
 
   const isSmallerViewport = useIsWithinMaxBreakpoint('s');
   const inputRef = useRef<HTMLInputElement>();
+  const sampleFieldValue = i18n.translate(
+    'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.test.sampleValue',
+    {
+      defaultMessage: 'REPLACE ME',
+    }
+  );
 
   return (
     <>
@@ -152,7 +158,22 @@ export const TestPipeline: React.FC = () => {
                   </p>
                 </EuiText>
                 <EuiCodeBlock fontSize="m" isCopyable language="json" paddingSize="m">
-                  {`[{"_index":"index","_id":"id","_source":{"${sourceField}":"bar"}}]`}
+                  {JSON.stringify(
+                    JSON.parse(
+                      `[{"_index":"index", "_id":"id", "_source":{${
+                        fieldMappings
+                          ? fieldMappings
+                              .map(
+                                (fieldMapping) =>
+                                  `"${fieldMapping.sourceField}": "${sampleFieldValue}"`
+                              )
+                              .join(', ')
+                          : `"${sourceField}":"${sampleFieldValue}"`
+                      }}}]`
+                    ),
+                    null,
+                    2
+                  )}
                 </EuiCodeBlock>
               </EuiFlexItem>
             </EuiFlexGroup>

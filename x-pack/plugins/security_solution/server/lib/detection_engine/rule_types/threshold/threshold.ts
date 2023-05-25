@@ -128,7 +128,7 @@ export const thresholdExecutor = async ({
     });
 
     // Look for new events over threshold
-    const { buckets, searchErrors, searchDurations } = await findThresholdSignals({
+    const { buckets, searchErrors, searchDurations, warnings } = await findThresholdSignals({
       inputIndexPattern: inputIndex,
       from: tuple.from.toISOString(),
       to: tuple.to.toISOString(),
@@ -164,6 +164,7 @@ export const thresholdExecutor = async ({
 
     result.errors.push(...previousSearchErrors);
     result.errors.push(...searchErrors);
+    result.warningMessages.push(...warnings);
     result.searchAfterTimes = searchDurations;
 
     const createdAlerts = createResult.createdItems.map((alert) => {

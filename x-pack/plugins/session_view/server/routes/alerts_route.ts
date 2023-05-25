@@ -31,15 +31,15 @@ export const registerAlertsRoute = (
       validate: {
         query: schema.object({
           sessionEntityId: schema.string(),
+          sessionStartTime: schema.string(),
           investigatedAlertId: schema.maybe(schema.string()),
           cursor: schema.maybe(schema.string()),
-          range: schema.maybe(schema.arrayOf(schema.string())),
         }),
       },
     },
     async (_context, request, response) => {
       const client = await ruleRegistry.getRacClientWithRequest(request);
-      const { sessionEntityId, investigatedAlertId, range, cursor } = request.query;
+      const { sessionEntityId, sessionStartTime, investigatedAlertId, cursor } = request.query;
 
       try {
         const body = await searchAlerts(
@@ -47,7 +47,7 @@ export const registerAlertsRoute = (
           sessionEntityId,
           ALERTS_PER_PAGE,
           investigatedAlertId,
-          range,
+          [sessionStartTime],
           cursor
         );
 

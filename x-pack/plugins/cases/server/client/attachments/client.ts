@@ -7,11 +7,11 @@
 
 import type {
   AlertResponse,
-  AllCommentsResponse,
+  Comments,
   BulkGetAttachmentsResponse,
-  CaseResponse,
-  CommentResponse,
-  CommentsResponse,
+  Case,
+  Comment,
+  CommentsFindResponse,
 } from '../../../common/api';
 import type { CasesClient } from '../client';
 
@@ -23,7 +23,7 @@ import type {
   AddArgs,
   DeleteAllArgs,
   DeleteArgs,
-  FindArgs,
+  FindCommentsArgs,
   GetAllAlertsAttachToCase,
   GetAllArgs,
   GetArgs,
@@ -45,8 +45,8 @@ export interface AttachmentsSubClient {
   /**
    * Adds an attachment to a case.
    */
-  add(params: AddArgs): Promise<CaseResponse>;
-  bulkCreate(params: BulkCreateArgs): Promise<CaseResponse>;
+  add(params: AddArgs): Promise<Case>;
+  bulkCreate(params: BulkCreateArgs): Promise<Case>;
   bulkGet(params: BulkGetArgs): Promise<BulkGetAttachmentsResponse>;
   /**
    * Deletes all attachments associated with a single case.
@@ -60,7 +60,7 @@ export interface AttachmentsSubClient {
   /**
    * Retrieves all comments matching the search criteria.
    */
-  find(findArgs: FindArgs): Promise<CommentsResponse>;
+  find(findArgs: FindCommentsArgs): Promise<CommentsFindResponse>;
   /**
    * Retrieves all alerts attach to a case given a single case ID
    */
@@ -68,17 +68,17 @@ export interface AttachmentsSubClient {
   /**
    * Gets all attachments for a single case.
    */
-  getAll(getAllArgs: GetAllArgs): Promise<AllCommentsResponse>;
+  getAll(getAllArgs: GetAllArgs): Promise<Comments>;
   /**
    * Retrieves a single attachment for a case.
    */
-  get(getArgs: GetArgs): Promise<CommentResponse>;
+  get(getArgs: GetArgs): Promise<Comment>;
   /**
    * Updates a specific attachment.
    *
    * The request must include all fields for the attachment. Even the fields that are not changing.
    */
-  update(updateArgs: UpdateArgs): Promise<CaseResponse>;
+  update(updateArgs: UpdateArgs): Promise<Case>;
 }
 
 /**

@@ -6,13 +6,14 @@
  */
 
 import React, { FC, useState, useMemo, useCallback, FormEventHandler } from 'react';
-
 import useObservable from 'react-use/lib/useObservable';
-import { FormattedMessage } from '@kbn/i18n-react';
+
 import { EuiSpacer, EuiButton, EuiTabs, EuiTab, EuiForm } from '@elastic/eui';
 
+import { FormattedMessage } from '@kbn/i18n-react';
+import { extractErrorMessage } from '@kbn/ml-error-utils';
+
 import { ErrorMessage } from '../../inference_error';
-import { extractErrorMessage } from '../../../../../../common';
 import type { InferrerType } from '..';
 import { OutputLoadingContent } from '../../output_loading';
 import { RUNNING_STATE } from '../inference_base';

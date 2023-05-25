@@ -1,7 +1,7 @@
 {
   "type": "plugin",
   "id": "@kbn/kubernetes-security-plugin",
-  "owner": "@elastic/awp-viz",
+  "owner": "@elastic/sec-cloudnative-integrations",
   "plugin": {
     "id": "kubernetesSecurity",
     "server": true,

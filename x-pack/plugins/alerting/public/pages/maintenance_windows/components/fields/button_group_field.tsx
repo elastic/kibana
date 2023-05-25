@@ -50,7 +50,6 @@ export const ButtonGroupField: React.FC<ButtonGroupFieldProps> = React.memo(
       <EuiFormRow label={field.label} {...rest} fullWidth>
         {type === 'multi' ? (
           <EuiButtonGroup
-            buttonSize="compressed"
             isFullWidth
             legend={legend}
             onChange={onChangeMulti}
@@ -60,7 +59,6 @@ export const ButtonGroupField: React.FC<ButtonGroupFieldProps> = React.memo(
           />
         ) : (
           <EuiButtonGroup
-            buttonSize="compressed"
             isFullWidth
             legend={legend}
             onChange={onChange}

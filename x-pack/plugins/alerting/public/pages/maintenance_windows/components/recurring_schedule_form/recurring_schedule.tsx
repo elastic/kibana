@@ -6,7 +6,15 @@
  */
 import React, { useMemo } from 'react';
 import moment from 'moment';
-import { EuiFormLabel, EuiHorizontalRule, EuiSplitPanel } from '@elastic/eui';
+import {
+  EuiComboBox,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormLabel,
+  EuiHorizontalRule,
+  EuiSpacer,
+  EuiSplitPanel,
+} from '@elastic/eui';
 import { getUseField, useFormData } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { Field } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import { getWeekdayInfo } from '../../helpers/get_weekday_info';
@@ -28,9 +36,11 @@ import { FormProps } from '../schema';
 const UseField = getUseField({ component: Field });
 
 export const RecurringSchedule: React.FC = React.memo(() => {
-  const [{ startDate, recurringSchedule }] = useFormData<FormProps>({
+  const [{ startDate, endDate, timezone, recurringSchedule }] = useFormData<FormProps>({
     watch: [
       'startDate',
+      'endDate',
+      'timezone',
       'recurringSchedule.frequency',
       'recurringSchedule.interval',
       'recurringSchedule.ends',
@@ -103,14 +113,43 @@ export const RecurringSchedule: React.FC = React.memo(() => {
           }}
         />
         {recurringSchedule?.ends === EndsOptions.ON_DATE ? (
-          <UseField
-            path="recurringSchedule.until"
-            component={DatePickerField}
-            componentProps={{
-              'data-test-subj': 'until-field',
-              showTimeSelect: false,
-            }}
-          />
+          <>
+            <EuiSpacer size="m" />
+            <EuiFlexGroup alignItems="flexEnd">
+              <EuiFlexItem grow={3}>
+                <UseField
+                  path="recurringSchedule.until"
+                  config={{
+                    label: '',
+                    defaultValue: moment(endDate).endOf('day').toISOString(),
+                    validations: [],
+                  }}
+                  component={DatePickerField}
+                  componentProps={{
+                    'data-test-subj': 'until-field',
+                    showTimeSelect: false,
+                  }}
+                />
+              </EuiFlexItem>
+              {timezone ? (
+                <EuiFlexItem grow={1}>
+                  <EuiComboBox
+                    data-test-subj="disabled-timezone-field"
+                    id="disabled-timezone"
+                    isDisabled
+                    singleSelection={{ asPlainText: true }}
+                    selectedOptions={[{ label: timezone[0] }]}
+                    isClearable={false}
+                    prepend={
+                      <EuiFormLabel htmlFor={'disabled-timezone'}>
+                        {i18n.CREATE_FORM_TIMEZONE}
+                      </EuiFormLabel>
+                    }
+                  />
+                </EuiFlexItem>
+              ) : null}
+            </EuiFlexGroup>
+          </>
         ) : null}
         {recurringSchedule?.ends === EndsOptions.AFTER_X ? (
           <UseField

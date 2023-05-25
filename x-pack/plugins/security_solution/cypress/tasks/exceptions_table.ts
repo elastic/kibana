@@ -14,7 +14,7 @@ import {
   EXCEPTIONS_TABLE_MODAL_CONFIRM_BTN,
   EXCEPTIONS_TABLE_EXPORT_MODAL_BTN,
   EXCEPTIONS_OVERFLOW_ACTIONS_BTN,
-  EXCEPTIONS_TABLE_EXPORT_CONFIRM_BTN,
+  EXCEPTIONS_TABLE_EXPIRED_EXCEPTION_ITEMS_MODAL_CONFIRM_BTN,
   MANAGE_EXCEPTION_CREATE_BUTTON_MENU,
   MANAGE_EXCEPTION_CREATE_LIST_BUTTON,
   CREATE_SHARED_EXCEPTION_LIST_NAME_INPUT,
@@ -26,7 +26,17 @@ import {
   EXCEPTIONS_LIST_MANAGEMENT_EDIT_MODAL_DESCRIPTION_INPUT,
   EXCEPTIONS_LIST_EDIT_DETAILS_SAVE_BTN,
   EXCEPTIONS_LIST_DETAILS_HEADER,
+  EXCEPTIONS_TABLE_DUPLICATE_BTN,
+  EXCEPTIONS_TABLE_LIST_NAME,
+  INCLUDE_EXPIRED_EXCEPTION_ITEMS_SWITCH,
+  EXCEPTION_LIST_DETAILS_CARD_ITEM_NAME,
+  exceptionsTableListManagementListContainerByListId,
+  EXCEPTIONS_TABLE_LINK_RULES_BTN,
+  RULE_ACTION_LINK_RULE_SWITCH,
+  LINKED_RULES_BADGE,
+  MANAGE_RULES_SAVE,
 } from '../screens/exceptions';
+import { assertExceptionItemsExists } from './exceptions';
 
 export const clearSearchSelection = () => {
   cy.get(EXCEPTIONS_TABLE_SEARCH_CLEAR).first().click();
@@ -36,22 +46,44 @@ export const expandExceptionActions = () => {
   cy.get(EXCEPTIONS_OVERFLOW_ACTIONS_BTN).first().click();
 };
 
-export const exportExceptionList = () => {
-  cy.get(EXCEPTIONS_OVERFLOW_ACTIONS_BTN).first().click();
+export const exportExceptionList = (listId: string) => {
+  cy.get(exceptionsTableListManagementListContainerByListId(listId))
+    .find(EXCEPTIONS_OVERFLOW_ACTIONS_BTN)
+    .click();
   cy.get(EXCEPTIONS_TABLE_EXPORT_MODAL_BTN).first().click();
-  cy.get(EXCEPTIONS_TABLE_EXPORT_CONFIRM_BTN).first().click();
+  cy.get(EXCEPTIONS_TABLE_EXPIRED_EXCEPTION_ITEMS_MODAL_CONFIRM_BTN).first().click();
 };
 
-export const deleteExceptionListWithoutRuleReference = () => {
-  cy.get(EXCEPTIONS_OVERFLOW_ACTIONS_BTN).first().click();
+export const assertNumberLinkedRules = (listId: string, numberOfRulesAsString: string) => {
+  cy.get(exceptionsTableListManagementListContainerByListId(listId))
+    .find(LINKED_RULES_BADGE)
+    .contains(numberOfRulesAsString);
+};
+
+export const linkRulesToExceptionList = (listId: string, ruleSwitch: number = 0) => {
+  cy.log(`Open link rules flyout for list_id: '${listId}'`);
+  cy.get(exceptionsTableListManagementListContainerByListId(listId))
+    .find(EXCEPTIONS_OVERFLOW_ACTIONS_BTN)
+    .click();
+  cy.get(EXCEPTIONS_TABLE_LINK_RULES_BTN).first().click();
+  cy.get(RULE_ACTION_LINK_RULE_SWITCH).eq(ruleSwitch).find('button').click();
+  cy.get(MANAGE_RULES_SAVE).first().click();
+};
+
+export const deleteExceptionListWithoutRuleReferenceByListId = (listId: string) => {
+  cy.get(exceptionsTableListManagementListContainerByListId(listId))
+    .find(EXCEPTIONS_OVERFLOW_ACTIONS_BTN)
+    .click();
   cy.get(EXCEPTIONS_TABLE_DELETE_BTN).first().click();
   cy.get(EXCEPTIONS_TABLE_MODAL).should('exist');
   cy.get(EXCEPTIONS_TABLE_MODAL_CONFIRM_BTN).first().click();
   cy.get(EXCEPTIONS_TABLE_MODAL).should('not.exist');
 };
 
-export const deleteExceptionListWithRuleReference = () => {
-  cy.get(EXCEPTIONS_OVERFLOW_ACTIONS_BTN).last().click();
+export const deleteExceptionListWithRuleReferenceByListId = (listId: string) => {
+  cy.get(exceptionsTableListManagementListContainerByListId(listId))
+    .find(EXCEPTIONS_OVERFLOW_ACTIONS_BTN)
+    .click();
   cy.get(EXCEPTIONS_TABLE_DELETE_BTN).last().click();
   cy.get(EXCEPTIONS_TABLE_MODAL).should('exist');
   cy.get(EXCEPTIONS_TABLE_MODAL_CONFIRM_BTN).first().click();
@@ -92,8 +124,40 @@ export const createSharedExceptionList = (
   }
 };
 
+export const expectToContainList = (listName: string) => {
+  cy.log(`Expecting exception lists table to contain '${listName}'`);
+  cy.get(EXCEPTIONS_TABLE_LIST_NAME).should('include.text', listName);
+};
+
+export const assertExceptionListsExists = (listNames: string[]) => {
+  for (const listName of listNames) {
+    expectToContainList(listName);
+  }
+};
+
+export const duplicateSharedExceptionListFromListsManagementPageByListId = (
+  listId: string,
+  includeExpired: boolean
+) => {
+  cy.log(`Duplicating list with list_id: '${listId}'`);
+  cy.get(exceptionsTableListManagementListContainerByListId(listId))
+    .find(EXCEPTIONS_OVERFLOW_ACTIONS_BTN)
+    .click();
+  cy.get(EXCEPTIONS_TABLE_DUPLICATE_BTN).first().click();
+  if (!includeExpired) {
+    cy.get(INCLUDE_EXPIRED_EXCEPTION_ITEMS_SWITCH).first().click();
+  }
+  cy.get(EXCEPTIONS_TABLE_EXPIRED_EXCEPTION_ITEMS_MODAL_CONFIRM_BTN).first().click();
+};
+
 export const waitForExceptionListDetailToBeLoaded = () => {
   cy.get(EXCEPTIONS_LIST_DETAILS_HEADER).should('exist');
+};
+
+export const findSharedExceptionListItemsByName = (listName: string, itemNames: string[]) => {
+  cy.contains(listName).click();
+  waitForExceptionListDetailToBeLoaded();
+  assertExceptionItemsExists(EXCEPTION_LIST_DETAILS_CARD_ITEM_NAME, itemNames);
 };
 
 export const editExceptionLisDetails = ({

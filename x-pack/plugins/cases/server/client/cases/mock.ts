@@ -6,7 +6,7 @@
  */
 
 import type {
-  CommentResponse,
+  Comment,
   CommentResponseAlertsType,
   ConnectorMappingsAttributes,
   CaseUserActionsDeprecatedResponse,
@@ -31,7 +31,7 @@ const entity = {
   updatedBy: null,
 };
 
-export const comment: CommentResponse = {
+export const comment: Comment = {
   id: 'comment-user-1',
   comment: 'Wow, good luck catching that bad meanie!',
   type: CommentType.user as const,
@@ -53,7 +53,7 @@ export const comment: CommentResponse = {
   version: 'WzEsMV0=',
 };
 
-export const isolateCommentActions: CommentResponse = {
+export const isolateCommentActions: Comment = {
   id: 'mock-action-comment-1',
   comment: 'Isolating this for investigation',
   type: CommentType.actions as const,
@@ -84,7 +84,7 @@ export const isolateCommentActions: CommentResponse = {
   version: 'WzEsMV0=',
 };
 
-export const releaseCommentActions: CommentResponse = {
+export const releaseCommentActions: Comment = {
   id: 'mock-action-comment-2',
   comment: 'Releasing this for investigation',
   type: CommentType.actions as const,
@@ -115,7 +115,7 @@ export const releaseCommentActions: CommentResponse = {
   version: 'WzEsMV0=',
 };
 
-export const isolateCommentActionsMultipleTargets: CommentResponse = {
+export const isolateCommentActionsMultipleTargets: Comment = {
   id: 'mock-action-comment-3',
   comment: 'Isolating this for investigation',
   type: CommentType.actions as const,
@@ -150,7 +150,7 @@ export const isolateCommentActionsMultipleTargets: CommentResponse = {
   version: 'WzEsMV0=',
 };
 
-export const commentAlert: CommentResponse = {
+export const commentAlert: Comment = {
   id: 'comment-alert-1',
   alertId: 'alert-id-1',
   index: 'alert-index-1',
@@ -186,7 +186,7 @@ export const commentAlertMultipleIds: CommentResponseAlertsType = {
   owner: SECURITY_SOLUTION_OWNER,
 };
 
-export const commentExternalReference: CommentResponse = {
+export const commentExternalReference: Comment = {
   id: 'comment-external-reference-1',
   type: CommentType.externalReference as const,
   externalReferenceId: 'my-id',
@@ -213,7 +213,7 @@ export const commentExternalReference: CommentResponse = {
   version: 'WzEsMV0=',
 };
 
-export const commentPersistableState: CommentResponse = {
+export const commentPersistableState: Comment = {
   id: 'comment-persistable-state-1',
   type: CommentType.persistableState,
   persistableStateAttachmentTypeId: '.test',

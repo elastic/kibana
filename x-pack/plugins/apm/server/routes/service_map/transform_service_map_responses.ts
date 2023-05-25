@@ -41,6 +41,40 @@ function getConnectionId(connection: Connection) {
   )}`;
 }
 
+function addMessagingConnections(
+  connections: Connection[],
+  discoveredServices: Array<{
+    from: ExternalConnectionNode;
+    to: ServiceConnectionNode;
+  }>
+): Connection[] {
+  const messagingDestinations = connections
+    .map((connection) => connection.destination)
+    .filter(
+      (dest) =>
+        dest['span.type'] === 'messaging' &&
+        SPAN_DESTINATION_SERVICE_RESOURCE in dest
+    );
+  const newConnections = messagingDestinations
+    .map((node) => {
+      const matchedService = discoveredServices.find(
+        ({ from }) =>
+          node[SPAN_DESTINATION_SERVICE_RESOURCE] ===
+          from[SPAN_DESTINATION_SERVICE_RESOURCE]
+      )?.to;
+      if (matchedService) {
+        return {
+          source: node,
+          destination: matchedService,
+        };
+      }
+      return undefined;
+    })
+    .filter((c) => c !== undefined) as Connection[];
+
+  return [...connections, ...newConnections];
+}
+
 export function getAllNodes(
   services: ServiceMapResponse['services'],
   connections: ServiceMapResponse['connections']
@@ -82,8 +116,11 @@ export function transformServiceMapResponses({
   response: ServiceMapResponse;
 }): TransformServiceMapResponse {
   const { discoveredServices, services, connections, anomalies } = response;
-
-  const allNodes = getAllNodes(services, connections);
+  const allConnections = addMessagingConnections(
+    connections,
+    discoveredServices
+  );
+  const allNodes = getAllNodes(services, allConnections);
   const serviceNodes = getServiceNodes(allNodes);
 
   // List of nodes that are externals
@@ -98,9 +135,17 @@ export function transformServiceMapResponses({
     if (!node.id || map[node.id]) {
       return map;
     }
-
+    const outboundConnectionExists = allConnections.some(
+      (con) =>
+        SPAN_DESTINATION_SERVICE_RESOURCE in con.source &&
+        con.source[SPAN_DESTINATION_SERVICE_RESOURCE] ===
+          node[SPAN_DESTINATION_SERVICE_RESOURCE]
+    );
     const matchedService = discoveredServices.find(({ from }) => {
-      if ('span.destination.service.resource' in node) {
+      if (
+        !outboundConnectionExists &&
+        SPAN_DESTINATION_SERVICE_RESOURCE in node
+      ) {
         return (
           node[SPAN_DESTINATION_SERVICE_RESOURCE] ===
           from[SPAN_DESTINATION_SERVICE_RESOURCE]
@@ -162,7 +207,7 @@ export function transformServiceMapResponses({
   }
 
   // Build connections with mapped nodes
-  const mappedConnections = connections
+  const mappedConnections = allConnections
     .map((connection) => {
       const sourceData = getConnectionNode(connection.source);
       const targetData = getConnectionNode(connection.destination);
@@ -200,10 +245,8 @@ export function transformServiceMapResponses({
 
   const connectionsById = mappedConnections.reduce(
     (connectionMap, connection) => {
-      return {
-        ...connectionMap,
-        [connection.id]: connection,
-      };
+      connectionMap[connection.id] = connection;
+      return connectionMap;
     },
     {} as Record<string, ConnectionWithId>
   );

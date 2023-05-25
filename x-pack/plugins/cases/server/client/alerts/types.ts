@@ -43,7 +43,7 @@ export interface UpdateAlertCasesRequest {
   caseIds: string[];
 }
 
-export interface RemoveAlertsFromCaseRequest {
+export interface RemoveCaseIdFromAlertsRequest {
   alerts: AlertInfo[];
   caseId: string;
 }

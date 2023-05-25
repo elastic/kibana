@@ -6,6 +6,7 @@
  */
 import type { Client } from '@elastic/elasticsearch';
 import expect from '@kbn/expect';
+import { INGEST_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import { Installation } from '@kbn/fleet-plugin/common';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -446,6 +447,31 @@ export default function (providerContext: FtrProviderContext) {
       expect(policy.name).to.equal(nameWithWhitespace.trim());
     });
 
+    it('should return a 200 when a package has no variables or data streams', async function () {
+      await supertest
+        .post('/api/fleet/package_policies')
+        .set('kbn-xsrf', 'xxxx')
+        .send({
+          name: 'no-variables-or-data-streams',
+          description: '',
+          namespace: 'default',
+          policy_id: agentPolicyId,
+          enabled: true,
+          inputs: [
+            {
+              enabled: true,
+              streams: [],
+              type: 'single_input',
+            },
+          ],
+          package: {
+            name: 'single_input_no_streams',
+            version: '0.1.0',
+          },
+        })
+        .expect(200);
+    });
+
     describe('input only packages', () => {
       it('should default dataset if not provided for input only pkg', async function () {
         await supertest
@@ -624,7 +650,7 @@ export default function (providerContext: FtrProviderContext) {
       const getInstallationSavedObject = async (pkg: string): Promise<Installation | undefined> => {
         const res: { _source?: { 'epm-packages': Installation } } = await es.transport.request({
           method: 'GET',
-          path: `/.kibana/_doc/epm-packages:${pkg}`,
+          path: `/${INGEST_SAVED_OBJECT_INDEX}/_doc/epm-packages:${pkg}`,
         });
 
         return res?._source?.['epm-packages'] as Installation;
@@ -677,7 +703,7 @@ export default function (providerContext: FtrProviderContext) {
           .post(`/api/fleet/package_policies`)
           .set('kbn-xsrf', 'xxxx')
           .send({
-            name: 'unverified_content-1',
+            name: 'unverified_content_' + Date.now(),
             description: '',
             namespace: 'default',
             policy_id: agentPolicyId,
@@ -713,7 +739,7 @@ export default function (providerContext: FtrProviderContext) {
           .post(`/api/fleet/package_policies`)
           .set('kbn-xsrf', 'xxxx')
           .send({
-            name: 'unverified_content-1',
+            name: 'unverified_content-' + Date.now(),
             description: '',
             namespace: 'default',
             policy_id: agentPolicyId,

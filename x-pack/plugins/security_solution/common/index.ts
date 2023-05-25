@@ -8,6 +8,7 @@
 // TODO(jbudz): should be removed when upgrading to TS@4.8
 // this is a skip for the errors created when typechecking with isolatedModules
 export {};
+export { APP_UI_ID, SecurityPageName } from './constants';
 export { ELASTIC_SECURITY_RULE_ID } from './detection_engine/constants';
 
 // Careful of exporting anything from this file as any file(s) you export here will cause your page bundle size to increase.

@@ -1,9 +1,13 @@
-[role="xpack"]
 [[alert-action-settings-kb]]
-=== Alerting and action settings in {kib}
+== Alerting and action settings in {kib}
 ++++
 <titleabbrev>Alerting and action settings</titleabbrev>
 ++++
+
+:frontmatter-description: Learn about the settings that affect {kib} {alert-features}.
+:frontmatter-tags-products: [kibana, alerting] 
+:frontmatter-tags-content-type: [reference] 
+:frontmatter-tags-user-goals: [configure]
 
 Alerting and actions are enabled by default in {kib}, but require you to configure the following:
 
@@ -15,7 +19,7 @@ You can configure the following settings in the `kibana.yml` file.
 
 [float]
 [[general-alert-action-settings]]
-==== General settings
+=== General settings
 
 `xpack.encryptedSavedObjects.encryptionKey`::
 A string of 32 or more characters used to encrypt sensitive properties on alerting rules and actions before they're stored in {es}. Third party credentials &mdash; such as the username and password used to connect to an SMTP service &mdash; are an example of encrypted properties.
@@ -29,7 +33,7 @@ Be sure to back up the encryption key value somewhere safe, as your alerting rul
 
 [float]
 [[action-settings]]
-==== Action settings
+=== Action settings
 
 `xpack.actions.allowedHosts` {ess-icon}::
 A list of hostnames that {kib} is allowed to connect to when built-in actions are triggered. It defaults to `[*]`, allowing any host, but keep in mind the potential for SSRF attacks when hosts are not explicitly added to the allowed hosts. An empty list `[]` can be used to block built-in actions from making any external connections.
@@ -71,7 +75,7 @@ xpack.actions.customHostSettings:
     ssl:
       verificationMode: 'none'
 --
-
++
 The settings in `xpack.actions.customHostSettings` can be used to override the
 global option `xpack.actions.ssl.verificationMode` and provide customized TLS
 settings on a per-server basis. Set `xpack.actions.ssl.verificationMode` to the
@@ -107,7 +111,7 @@ The options `smtp.ignoreTLS` and `smtp.requireTLS` can not both be set to true.
 Default: `false`.
 
 `xpack.actions.customHostSettings[n].ssl.rejectUnauthorized`::
-Deprecated. Use <<action-config-custom-host-verification-mode,`xpack.actions.customHostSettings.ssl.verificationMode`>> instead. A boolean value indicating whether to bypass server certificate validation.
+deprecated:[8.0.0] Use <<action-config-custom-host-verification-mode,`xpack.actions.customHostSettings.ssl.verificationMode`>> instead. A boolean value indicating whether to bypass server certificate validation.
 Overrides the general `xpack.actions.rejectUnauthorized` configuration
 for requests made for this hostname/port.
 
@@ -127,14 +131,14 @@ the files cannot be made available.
 
 [[action-config-email-domain-allowlist]] `xpack.actions.email.domain_allowlist`  {ess-icon}::
 A list of allowed email domains which can be used with the email connector. When this setting is not used, all email domains are allowed. When this setting is used, if any email is attempted to be sent that (a) includes an addressee with an email domain that is not in the allowlist, or (b) includes a from address domain that is not in the allowlist, it will fail with a message indicating the email is not allowed.
-
++
 WARNING: This feature is available in {kib} 7.17.4 and 8.3.0 onwards but is not supported in {kib} 8.0, 8.1 or 8.2. As such, this setting should be removed before upgrading from 7.17 to 8.0, 8.1 or 8.2. It is possible to configure the settings in 7.17.4 and then upgrade to 8.3.0 directly.
 
 `xpack.actions.enableFooterInEmail` {ess-icon}::
 A boolean value indicating that a footer with a relevant link should be added to emails sent as alerting actions. Default: true.
 
 `xpack.actions.enabledActionTypes` {ess-icon}::
-A list of action types that are enabled. It defaults to `[*]`, enabling all types. The names for built-in {kib} action types are prefixed with a `.` and include: `.email`, `.index`, `.jira`, `.opsgenie`, `.pagerduty`, `.resilient`, `.server-log`, `.servicenow`, .`servicenow-itom`, `.servicenow-sir`, `.slack`, `.swimlane`, `.teams`, `.tines`, `.torq`, `.xmatters`, and `.webhook`. An empty list `[]` will disable all action types.
+A list of action types that are enabled. It defaults to `[*]`, enabling all types. The names for built-in {kib} action types are prefixed with a `.` and include: `.email`, `.index`, `.jira`, `.opsgenie`, `.pagerduty`, `.resilient`, `.server-log`, `.servicenow`, .`servicenow-itom`, `.servicenow-sir`, `.slack`, `.swimlane`, `.teams`, `.tines`, `.torq`, `.xmatters`,  `.gen-ai`, and `.webhook`. An empty list `[]` will disable all action types.
 +
 Disabled action types will not appear as an option when creating new connectors, but existing connectors and actions of that type will remain in {kib} and will not function.
 
@@ -160,8 +164,6 @@ proxy in tunneling mode, and display some of the interaction between the client 
 --
 curl --verbose --proxytunnel --proxy http://localhost:8080 http://example.com
 --
-+
-
 
 `xpack.actions.proxyBypassHosts` {ess-icon}::
 Specifies hostnames which should not use the proxy, if using a proxy for actions. The value is an array of hostnames as strings.  By default, all hosts will use the proxy, but if an action's hostname is in this list, the proxy will not be used.  The settings `xpack.actions.proxyBypassHosts` and `xpack.actions.proxyOnlyHosts` cannot be used at the same time.
@@ -173,14 +175,14 @@ Specifies hostnames which should only use the proxy, if using a proxy for action
 Specifies HTTP headers for the proxy, if using a proxy for actions. Default: {}.
 
 `xpack.actions.proxyRejectUnauthorizedCertificates` {ess-icon}::
-Deprecated. Use <<action-config-proxy-verification-mode,`xpack.actions.ssl.proxyVerificationMode`>> instead. Set to `false` to bypass certificate validation for the proxy, if using a proxy for actions. Default: `true`.
+deprecated:[8.0.0] Use <<action-config-proxy-verification-mode,`xpack.actions.ssl.proxyVerificationMode`>> instead. Set to `false` to bypass certificate validation for the proxy, if using a proxy for actions. Default: `true`.
 
 [[action-config-proxy-verification-mode]]`xpack.actions.ssl.proxyVerificationMode` {ess-icon}::
 Controls the verification for the proxy server certificate that Kibana receives when making an outbound SSL/TLS connection to the proxy server. Valid values are `full`, `certificate`, and `none`.
 Use `full` to perform hostname verification, `certificate` to skip hostname verification, and `none` to skip verification. Default: `full`. <<elasticsearch-ssl-verificationMode,Equivalent {kib} setting>>.
 
 `xpack.actions.rejectUnauthorized` {ess-icon}::
-Deprecated. Use <<action-config-verification-mode,`xpack.actions.ssl.verificationMode`>> instead. Set to `false` to bypass certificate validation for actions. Default: `true`.
+deprecated:[8.0.0] Use <<action-config-verification-mode,`xpack.actions.ssl.verificationMode`>> instead. Set to `false` to bypass certificate validation for actions. Default: `true`.
 +
 As an alternative to setting `xpack.actions.rejectUnauthorized`, you can use the setting
 `xpack.actions.customHostSettings` to set SSL options for specific servers.
@@ -206,9 +208,8 @@ For example, `20m`, `24h`, `7d`, `1w`. Default: `60s`.
 Specifies the maximum number of times an action can be attempted to run. Can be minimum 1 and maximum 10.
 
 `xpack.actions.run.connectorTypeOverrides` {ess-icon}::
-Overrides the configs under `xpack.actions.run` for the connector type with the given ID. List the connector type identifier and its settings in an array of objects.
+Overrides the configs under `xpack.actions.run` for the connector type with the given ID. List the connector type identifier and its settings in an array of objects. For example:
 +
-For example:
 [source,yaml]
 --
 xpack.actions.run:
@@ -220,9 +221,10 @@ xpack.actions.run:
 
 [float]
 [[alert-settings]]
-==== Alerting settings
+=== Alerting settings
 
 `xpack.alerting.maxEphemeralActionsPerAlert` {ess-icon}::
+deprecated:[8.8.0]
 Sets the number of actions that will run ephemerally. To use this, enable
 ephemeral tasks in task manager first with
 <<task-manager-settings,`xpack.task_manager.ephemeral_tasks.enabled`>>
@@ -256,9 +258,8 @@ Specifies the default timeout for tasks associated with all types of rules. The 
 For example, `20m`, `24h`, `7d`, `1w`. Default: `5m`.
 
 `xpack.alerting.rules.run.ruleTypeOverrides` {ess-icon}::
-Overrides the configs under `xpack.alerting.rules.run` for the rule type with the given ID. List the rule identifier and its settings in an array of objects.
+Overrides the configs under `xpack.alerting.rules.run` for the rule type with the given ID. List the rule identifier and its settings in an array of objects. For example:
 +
-For example:
 [source,yaml]
 --
 xpack.alerting.rules.run:
@@ -269,9 +270,8 @@ xpack.alerting.rules.run:
 --
 
 `xpack.alerting.rules.run.actions.connectorTypeOverrides` {ess-icon}::
-Overrides the configs under `xpack.alerting.rules.run.actions` for the connector type with the given ID. List the connector type identifier and its settings in an array of objects.
+Overrides the configs under `xpack.alerting.rules.run.actions` for the connector type with the given ID. List the connector type identifier and its settings in an array of objects. For example:
 +
-For example:
 [source,yaml]
 --
 xpack.alerting.rules.run:

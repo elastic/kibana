@@ -15,6 +15,9 @@ import { useQueryTimelineByIdOnUrlChange } from './timeline/use_query_timeline_b
 import { useInitFlyoutFromUrlParam } from './flyout/use_init_flyout_url_param';
 import { useSyncFlyoutUrlParam } from './flyout/use_sync_flyout_url_param';
 
+// NOTE: the expandable flyout package url state is handled here:
+// x-pack/plugins/security_solution/public/flyout/url/use_sync_flyout_state_with_url.tsx
+
 export const useUrlState = () => {
   useSyncGlobalQueryString();
   useInitSearchBarFromUrlParams();

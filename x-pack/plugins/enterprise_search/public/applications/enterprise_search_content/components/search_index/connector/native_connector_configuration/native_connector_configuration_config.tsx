@@ -16,10 +16,10 @@ import { ConnectorStatus } from '../../../../../../../common/types/connectors';
 import { docLinks } from '../../../../../shared/doc_links';
 
 import { ConnectorConfigurationConfig } from '../connector_configuration_config';
-import { NativeConnector } from '../types';
+import { ConnectorDefinition } from '../types';
 
 interface NativeConnectorConfigurationConfigProps {
-  nativeConnector: NativeConnector;
+  nativeConnector: ConnectorDefinition;
   status: ConnectorStatus;
 }
 
@@ -33,7 +33,7 @@ export const NativeConnectorConfigurationConfig: React.FC<
           'xpack.enterpriseSearch.content.indices.configurationConnector.nativeConnector.config.encryptionWarningMessage',
           {
             defaultMessage:
-              'Encryption for data source credentials is unavailable in this beta. Your data source credentials will be stored, unencrypted, in Elasticsearch.',
+              'Encryption for data source credentials is unavailable in this version. Your data source credentials will be stored, unencrypted, in Elasticsearch.',
           }
         )}
       </EuiText>

@@ -6,16 +6,14 @@
     "id": "profiling",
     "server": true,
     "browser": true,
-    "configPath": [
-      "xpack",
-      "profiling"
-    ],
+    "configPath": ["xpack", "profiling"],
     "requiredPlugins": [
       "navigation",
       "data",
       "kibanaUtils",
       "share",
       "observability",
+      "observabilityShared",
       "features",
       "kibanaReact",
       "unifiedSearch",

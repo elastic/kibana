@@ -59,9 +59,11 @@
     "@kbn/shared-ux-prompt-not-found",
     "@kbn/shared-ux-router",
     "@kbn/shared-ux-link-redirect-app",
+    "@kbn/discover-plugin",
     "@kbn/observability-alert-details",
     "@kbn/observability-shared-plugin",
-    "@kbn/ui-theme"
+    "@kbn/ui-theme",
+    "@kbn/ml-anomaly-utils",
   ],
   "exclude": ["target/**/*"]
 }

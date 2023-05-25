@@ -49,10 +49,15 @@ export function isSearchSourceAbortError(error: Error) {
 
 export interface IESSource extends IVectorSource {
   isESSource(): true;
+
   getId(): string;
+
   getIndexPattern(): Promise<DataView>;
+
   getIndexPatternId(): string;
+
   getGeoFieldName(): string;
+
   loadStylePropsMeta({
     layerName,
     style,
@@ -408,7 +413,7 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
     if (!geoField) {
       throw new Error(
         i18n.translate('xpack.maps.source.esSource.noGeoFieldErrorMessage', {
-          defaultMessage: `Data view "{indexPatternLabel}"" no longer contains the geo field "{geoField}"`,
+          defaultMessage: `Data view "{indexPatternLabel}" no longer contains the geo field "{geoField}"`,
           values: { indexPatternLabel: indexPattern.getName(), geoField: this.getGeoFieldName() },
         })
       );
@@ -472,9 +477,12 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
     });
 
     const fieldAggRequests = await Promise.all(promises);
-    const allAggs: Record<string, any> = fieldAggRequests.reduce(
+    const allAggs = fieldAggRequests.reduce<Record<string, any>>(
       (aggs: Record<string, any>, fieldAggRequest: unknown | null) => {
-        return fieldAggRequest ? { ...aggs, ...(fieldAggRequest as Record<string, any>) } : aggs;
+        if (fieldAggRequest) {
+          Object.assign(aggs, fieldAggRequest);
+        }
+        return aggs;
       },
       {}
     );

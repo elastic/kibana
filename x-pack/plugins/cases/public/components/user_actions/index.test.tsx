@@ -92,7 +92,7 @@ describe(`UserActions`, () => {
     jest.clearAllMocks();
     useUpdateCommentMock.mockReturnValue({
       isLoadingIds: [],
-      patchComment,
+      mutate: patchComment,
     });
     useFindCaseUserActionsMock.mockReturnValue(defaultUseFindCaseUserActions);
     useInfiniteFindCaseUserActionsMock.mockReturnValue(defaultInfiniteUseFindCaseUserActions);
@@ -171,14 +171,14 @@ describe(`UserActions`, () => {
     userEvent.click(
       within(
         screen.getAllByTestId(`comment-create-action-${defaultProps.data.comments[0].id}`)[1]
-      ).getByTestId('user-action-cancel-markdown')
+      ).getByTestId('editable-cancel-markdown')
     );
 
     await waitFor(() => {
       expect(
         within(
           screen.getAllByTestId(`comment-create-action-${defaultProps.data.comments[0].id}`)[1]
-        ).queryByTestId('user-action-markdown-form')
+        ).queryByTestId('editable-markdown-form')
       ).not.toBeInTheDocument();
     });
   });
@@ -212,22 +212,25 @@ describe(`UserActions`, () => {
     userEvent.click(
       within(
         screen.getAllByTestId(`comment-create-action-${defaultProps.data.comments[0].id}`)[1]
-      ).getByTestId('user-action-save-markdown')
+      ).getByTestId('editable-save-markdown')
     );
 
     await waitFor(() => {
       expect(
         within(
           screen.getAllByTestId(`comment-create-action-${defaultProps.data.comments[0].id}`)[1]
-        ).queryByTestId('user-action-markdown-form')
+        ).queryByTestId('editable-markdown-form')
       ).not.toBeInTheDocument();
 
-      expect(patchComment).toBeCalledWith({
-        commentUpdate: sampleData.content,
-        caseId: 'case-id',
-        commentId: defaultProps.data.comments[0].id,
-        version: defaultProps.data.comments[0].version,
-      });
+      expect(patchComment).toBeCalledWith(
+        {
+          commentUpdate: sampleData.content,
+          caseId: 'case-id',
+          commentId: defaultProps.data.comments[0].id,
+          version: defaultProps.data.comments[0].version,
+        },
+        { onSuccess: expect.anything(), onError: expect.anything() }
+      );
     });
   });
 
@@ -306,14 +309,14 @@ describe(`UserActions`, () => {
     userEvent.click(
       within(
         screen.getAllByTestId(`comment-create-action-${defaultProps.data.comments[0].id}`)[1]
-      ).getByTestId('user-action-save-markdown')
+      ).getByTestId('editable-save-markdown')
     );
 
     await waitFor(() => {
       expect(
         within(
           screen.getAllByTestId(`comment-create-action-${defaultProps.data.comments[0].id}`)[1]
-        ).queryByTestId('user-action-markdown-form')
+        ).queryByTestId('editable-markdown-form')
       ).not.toBeInTheDocument();
     });
 

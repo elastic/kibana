@@ -30,6 +30,11 @@ import { StartPlugins } from '../../types';
 const apmIndexPattern = 'apm-*-transaction*';
 const apmDataStreamsPattern = 'traces-apm*';
 
+/**
+ * @deprecated use kibana data view api or EcsFlat for index fields
+ * @param getStartServices
+ * @returns
+ */
 export const indexFieldsProvider = (
   getStartServices: StartServicesAccessor<StartPlugins>
 ): ISearchStrategy<
@@ -134,7 +139,12 @@ export const requestIndexFieldSearch = async (
 
     const patternList = dataView.title.split(',');
     indicesExist = (await findExistingIndices(patternList, esUser)).reduce(
-      (acc: string[], doesIndexExist, i) => (doesIndexExist ? [...acc, patternList[i]] : acc),
+      (acc: string[], doesIndexExist, i) => {
+        if (doesIndexExist) {
+          acc.push(patternList[i]);
+        }
+        return acc;
+      },
       []
     );
 
@@ -147,7 +157,12 @@ export const requestIndexFieldSearch = async (
   } else if ('indices' in request) {
     const patternList = dedupeIndexName(request.indices);
     indicesExist = (await findExistingIndices(patternList, esUser)).reduce(
-      (acc: string[], doesIndexExist, i) => (doesIndexExist ? [...acc, patternList[i]] : acc),
+      (acc: string[], doesIndexExist, i) => {
+        if (doesIndexExist) {
+          acc.push(patternList[i]);
+        }
+        return acc;
+      },
       []
     );
     if (!request.onlyCheckIfIndicesExist) {

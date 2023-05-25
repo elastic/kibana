@@ -9,3 +9,5 @@
 export const CSV_FORMULA_CHARS = ['=', '+', '-', '@'];
 export const nonAlphaNumRE = /[^a-zA-Z0-9]/;
 export const allDoubleQuoteRE = /"/g;
+// this is a non-exhaustive list of delimiters that require to be quoted
+export const commonQuotedDelimiters = new Set([',', ';', '\t', ' ', '|']);

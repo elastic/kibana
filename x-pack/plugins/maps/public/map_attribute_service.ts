@@ -10,8 +10,7 @@ import type { ResolvedSimpleSavedObject } from '@kbn/core/public';
 import { AttributeService } from '@kbn/embeddable-plugin/public';
 import type { OnSaveProps } from '@kbn/saved-objects-plugin/public';
 import type { MapAttributes } from '../common/content_management';
-import { MAP_SAVED_OBJECT_TYPE } from '../common/constants';
-import { getMapEmbeddableDisplayName } from '../common/i18n_getters';
+import { MAP_EMBEDDABLE_NAME, MAP_SAVED_OBJECT_TYPE } from '../common/constants';
 import { getCoreOverlays, getEmbeddableService } from './kibana_services';
 import { extractReferences, injectReferences } from '../common/migrations/references';
 import { mapsClient, checkForDuplicateTitle } from './content_management';
@@ -108,7 +107,7 @@ export function getMapAttributeService(): MapAttributeService {
           copyOnSave: false,
           lastSavedTitle: '',
           isTitleDuplicateConfirmed: props.isTitleDuplicateConfirmed,
-          getDisplayName: getMapEmbeddableDisplayName,
+          getDisplayName: () => MAP_EMBEDDABLE_NAME,
           onTitleDuplicate: props.onTitleDuplicate,
         },
         {

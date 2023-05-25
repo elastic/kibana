@@ -13,10 +13,10 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { RuleStatus, useLoadRuleTypes } from '@kbn/triggers-actions-ui-plugin/public';
 import { ALERTS_FEATURE_ID } from '@kbn/alerting-plugin/common';
 import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
+import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 
 import { useKibana } from '../../utils/kibana_react';
 import { usePluginContext } from '../../hooks/use_plugin_context';
-import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { useGetFilteredRuleTypes } from '../../hooks/use_get_filtered_rule_types';
 
 export function RulesPage() {
@@ -62,14 +62,16 @@ export function RulesPage() {
     useHashQuery: false,
   });
 
-  const { lastResponse, search, status, type } = urlStateStorage.get<{
+  const { lastResponse, params, search, status, type } = urlStateStorage.get<{
     lastResponse: string[];
+    params: Record<string, string | number | object>;
     search: string;
     status: RuleStatus[];
     type: string[];
-  }>('_a') || { lastResponse: [], search: '', status: [], type: [] };
+  }>('_a') || { lastResponse: [], params: {}, search: '', status: [], type: [] };
 
   const [stateLastResponse, setLastResponse] = useState<string[]>(lastResponse);
+  const [stateParams, setParams] = useState<Record<string, string | number | object>>(params);
   const [stateSearch, setSearch] = useState<string>(search);
   const [stateStatus, setStatus] = useState<RuleStatus[]>(status);
   const [stateType, setType] = useState<string[]>(type);
@@ -80,23 +82,28 @@ export function RulesPage() {
 
   const handleStatusFilterChange = (newStatus: RuleStatus[]) => {
     setStatus(newStatus);
-    urlStateStorage.set('_a', { lastResponse, search, status: newStatus, type });
+    urlStateStorage.set('_a', { lastResponse, params, search, status: newStatus, type });
   };
 
   const handleLastRunOutcomeFilterChange = (newLastResponse: string[]) => {
     setRefresh(new Date());
     setLastResponse(newLastResponse);
-    urlStateStorage.set('_a', { lastResponse: newLastResponse, search, status, type });
+    urlStateStorage.set('_a', { lastResponse: newLastResponse, params, search, status, type });
   };
 
   const handleTypeFilterChange = (newType: string[]) => {
     setType(newType);
-    urlStateStorage.set('_a', { lastResponse, search, status, type: newType });
+    urlStateStorage.set('_a', { lastResponse, params, search, status, type: newType });
   };
 
   const handleSearchFilterChange = (newSearch: string) => {
     setSearch(newSearch);
-    urlStateStorage.set('_a', { lastResponse, search: newSearch, status, type });
+    urlStateStorage.set('_a', { lastResponse, params, search: newSearch, status, type });
+  };
+
+  const handleRuleParamFilterChange = (newParams: Record<string, string | number | object>) => {
+    setParams(newParams);
+    urlStateStorage.set('_a', { lastResponse, params: newParams, search, status, type });
   };
 
   return (
@@ -143,6 +150,7 @@ export function RulesPage() {
             refresh={stateRefresh}
             ruleDetailsRoute="alerts/rules/:ruleId"
             rulesListKey="observability_rulesListColumns"
+            ruleParamFilter={stateParams}
             showActionFilter={false}
             statusFilter={stateStatus}
             searchFilter={stateSearch}
@@ -155,6 +163,7 @@ export function RulesPage() {
               'ruleExecutionState',
             ]}
             onLastRunOutcomeFilterChange={handleLastRunOutcomeFilterChange}
+            onRuleParamFilterChange={handleRuleParamFilterChange}
             onSearchFilterChange={handleSearchFilterChange}
             onStatusFilterChange={handleStatusFilterChange}
             onTypeFilterChange={handleTypeFilterChange}

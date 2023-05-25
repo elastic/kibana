@@ -50,27 +50,22 @@ describe('api', () => {
 
   describe('bulkGetCases', () => {
     const http = httpServiceMock.createStartContract({ basePath: '' });
-    http.post.mockResolvedValue({ cases: [{ title: 'test' }], errors: [] });
+    const snakeCase = casesSnake[0];
 
-    it('should return the correct cases with a subset of fields', async () => {
-      expect(await bulkGetCases({ http, params: { ids: ['test'], fields: ['title'] } })).toEqual({
-        cases: [{ title: 'test' }],
-        errors: [],
-      });
-    });
+    http.post.mockResolvedValue({ cases: [snakeCase], errors: [] });
 
-    it('should return the correct cases with all fields', async () => {
-      http.post.mockResolvedValueOnce({ cases: casesSnake, errors: [] });
+    it('should return the correct cases ', async () => {
+      http.post.mockResolvedValueOnce({ cases: [snakeCase], errors: [] });
       expect(await bulkGetCases({ http, params: { ids: ['test'] } })).toEqual({
-        cases: casesSnake,
+        cases: [snakeCase],
         errors: [],
       });
     });
 
     it('should have been called with the correct path', async () => {
-      await bulkGetCases({ http, params: { ids: ['test'], fields: ['title'] } });
+      await bulkGetCases({ http, params: { ids: ['test'] } });
       expect(http.post).toHaveBeenCalledWith('/internal/cases/_bulk_get', {
-        body: '{"ids":["test"],"fields":["title"]}',
+        body: '{"ids":["test"]}',
       });
     });
   });

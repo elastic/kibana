@@ -8,7 +8,7 @@
 import { render } from '@testing-library/react';
 import React, { ReactNode } from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { ANOMALY_SEVERITY } from '../../../../../common/ml_constants';
+import { ML_ANOMALY_SEVERITY } from '@kbn/ml-anomaly-utils/anomaly_severity';
 import { SelectAnomalySeverity } from './select_anomaly_severity';
 
 function Wrapper({ children }: { children?: ReactNode }) {
@@ -20,7 +20,7 @@ describe('SelectAnomalySeverity', () => {
     const result = render(
       <SelectAnomalySeverity
         onChange={() => {}}
-        value={ANOMALY_SEVERITY.CRITICAL}
+        value={ML_ANOMALY_SEVERITY.CRITICAL}
       />,
       { wrapper: Wrapper }
     );

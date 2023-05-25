@@ -160,6 +160,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'telemetry.sendUsageTo (any)',
         'usageCollection.uiCounters.debug (boolean)',
         'usageCollection.uiCounters.enabled (boolean)',
+        'vis_type_timeseries.readOnly (any)',
         'vis_type_vega.enableExternalUrls (boolean)',
         'xpack.actions.email.domain_allowlist (array)',
         'xpack.apm.serviceMapEnabled (boolean)',
@@ -201,6 +202,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.graph.savePolicy (alternatives)',
         'xpack.ilm.ui.enabled (boolean)',
         'xpack.index_management.ui.enabled (boolean)',
+        'xpack.infra.logs.app_target (alternatives)',
         'xpack.infra.sources.default.fields.message (array)',
         'xpack.license_management.ui.enabled (boolean)',
         'xpack.maps.preserveDrawingBuffer (boolean)',
@@ -222,6 +224,8 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.security.loginAssistanceMessage (string)',
         'xpack.security.sameSiteCookies (alternatives)',
         'xpack.security.showInsecureClusterWarning (boolean)',
+        'xpack.security.showNavLinks (boolean)',
+        'xpack.security.ui (any)',
         'xpack.securitySolution.enableExperimental (array)',
         'xpack.securitySolution.prebuiltRulesPackageVersion (string)',
         'xpack.snapshot_restore.slm_ui.enabled (boolean)',
@@ -235,6 +239,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.observability.unsafe.alertDetails.metrics.enabled (boolean)',
         'xpack.observability.unsafe.alertDetails.logs.enabled (boolean)',
         'xpack.observability.unsafe.alertDetails.uptime.enabled (boolean)',
+        'xpack.observability_onboarding.ui.enabled (boolean)',
       ];
       // We don't assert that actualExposedConfigKeys and expectedExposedConfigKeys are equal, because test failure messages with large
       // arrays are hard to grok. Instead, we take the difference between the two arrays and assert them separately, that way it's
@@ -268,6 +273,8 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.security.loginAssistanceMessage (string)',
         'xpack.security.sameSiteCookies (alternatives)',
         'xpack.security.showInsecureClusterWarning (boolean)',
+        'xpack.security.showNavLinks (boolean)',
+        'xpack.security.ui (any)',
       ];
       // We don't assert that actualExposedConfigKeys and expectedExposedConfigKeys are equal, because test failure messages with large
       // arrays are hard to grok. Instead, we take the difference between the two arrays and assert them separately, that way it's

@@ -13,15 +13,9 @@ export interface BucketedAggregation<KeyType = string> {
   }>;
 }
 
-export interface NumberStatsResult {
-  count: number;
-  histogram: BucketedAggregation<number>;
-  topValues: BucketedAggregation<number>;
-}
-
-export interface TopValuesResult {
-  count: number;
-  topValues: BucketedAggregation<string>;
+export interface NumberSummary {
+  minValue: number | null;
+  maxValue: number | null;
 }
 
 export interface FieldStatsResponse<KeyType = unknown> {
@@ -35,4 +29,5 @@ export interface FieldStatsResponse<KeyType = unknown> {
   // Histogram and values are based on distinct values, not based on documents
   histogram?: BucketedAggregation<KeyType>;
   topValues?: BucketedAggregation<KeyType>;
+  numberSummary?: NumberSummary;
 }

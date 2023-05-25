@@ -67,6 +67,55 @@ export const elasticsearchRoleSchema = schema.object({
   ),
 
   /**
+   * An optional list of remote indices permissions entries.
+   */
+  remote_indices: schema.maybe(
+    schema.arrayOf(
+      schema.object({
+        /**
+         * Required list of remote clusters to which the permissions in this entry apply.
+         */
+        clusters: schema.arrayOf(schema.string(), { minSize: 1 }),
+
+        /**
+         * Required list of remote indices (or index name patterns) to which the permissions in this
+         * entry apply.
+         */
+        names: schema.arrayOf(schema.string(), { minSize: 1 }),
+
+        /**
+         * An optional set of the document fields that the owners of the role have read access to.
+         */
+        field_security: schema.maybe(
+          schema.recordOf(
+            schema.oneOf([schema.literal('grant'), schema.literal('except')]),
+            schema.arrayOf(schema.string())
+          )
+        ),
+
+        /**
+         * Required list of the index level privileges that the owners of the role have on the
+         * specified indices.
+         */
+        privileges: schema.arrayOf(schema.string(), { minSize: 1 }),
+
+        /**
+         * An optional search query that defines the documents the owners of the role have read access
+         * to. A document within the specified indices must match this query in order for it to be
+         * accessible by the owners of the role.
+         */
+        query: schema.maybe(schema.string()),
+
+        /**
+         * An optional flag used to indicate if index pattern wildcards or regexps should cover
+         * restricted indices.
+         */
+        allow_restricted_indices: schema.maybe(schema.boolean()),
+      })
+    )
+  ),
+
+  /**
    * An optional list of users that the owners of this role can impersonate.
    */
   run_as: schema.maybe(schema.arrayOf(schema.string())),

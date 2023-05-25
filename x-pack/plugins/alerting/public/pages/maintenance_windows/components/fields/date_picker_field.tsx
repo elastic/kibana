@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
-import { Moment } from 'moment';
+import React, { useCallback, useState } from 'react';
+import moment, { Moment } from 'moment';
 import { EuiDatePicker, EuiFormRow } from '@elastic/eui';
 import {
   useFormData,
@@ -23,10 +23,12 @@ interface DatePickerFieldProps {
 
 export const DatePickerField: React.FC<DatePickerFieldProps> = React.memo(
   ({ field, showTimeSelect = true, ...rest }) => {
+    const [today] = useState<Moment>(moment());
+
     const { setFieldValue } = useFormContext();
     const [form] = useFormData({ watch: [field.path] });
 
-    const selected = getSelected(form, field.path);
+    const { selected, utcOffset } = getSelected(form, field.path);
 
     const onChange = useCallback(
       (currentDate: Moment | null) => {
@@ -42,7 +44,8 @@ export const DatePickerField: React.FC<DatePickerFieldProps> = React.memo(
           showTimeSelect={showTimeSelect}
           selected={selected}
           onChange={onChange}
-          minDate={selected}
+          minDate={today}
+          utcOffset={utcOffset}
           fullWidth
         />
       </EuiFormRow>

@@ -13,8 +13,10 @@ import { Alert } from '../alert/alert';
 import { alertingEventLoggerMock } from '../lib/alerting_event_logger/alerting_event_logger.mock';
 import { ruleRunMetricsStoreMock } from '../lib/rule_run_metrics_store.mock';
 import { getAlertsForNotification, processAlerts } from '../lib';
+import { trimRecoveredAlerts } from '../lib/trim_recovered_alerts';
 import { logAlerts } from '../task_runner/log_alerts';
 import { DEFAULT_FLAPPING_SETTINGS } from '../../common/rules_settings';
+import { schema } from '@kbn/config-schema';
 
 const scheduleActions = jest.fn();
 const replaceState = jest.fn(() => ({ scheduleActions }));
@@ -62,6 +64,12 @@ jest.mock('../lib', () => {
   };
 });
 
+jest.mock('../lib/trim_recovered_alerts', () => {
+  return {
+    trimRecoveredAlerts: jest.fn(),
+  };
+});
+
 jest.mock('../lib/get_alerts_for_notification', () => {
   return {
     getAlertsForNotification: jest.fn(),
@@ -86,11 +94,14 @@ const ruleType: jest.Mocked<UntypedNormalizedRuleType> = {
   producer: 'alerts',
   cancelAlertsOnRuleTimeout: true,
   ruleTaskTimeout: '5m',
+  validate: {
+    params: schema.any(),
+  },
 };
 
 const testAlert1 = {
   state: { foo: 'bar' },
-  meta: { flapping: false, flappingHistory: [false, false] },
+  meta: { flapping: false, flappingHistory: [false, false], uuid: 'abc' },
 };
 const testAlert2 = {
   state: { any: 'value' },
@@ -99,6 +110,7 @@ const testAlert2 = {
       group: 'default',
       date: new Date(),
     },
+    uuid: 'def',
   },
 };
 
@@ -108,20 +120,22 @@ describe('Legacy Alerts Client', () => {
     logger = loggingSystemMock.createLogger();
   });
 
-  test('initialize() should create alert factory with given alerts', () => {
+  test('initializeExecution() should create alert factory with given alerts', async () => {
     const alertsClient = new LegacyAlertsClient({
       logger,
-      maxAlerts: 1000,
       ruleType,
     });
 
-    alertsClient.initialize(
-      {
+    await alertsClient.initializeExecution({
+      maxAlerts: 1000,
+      ruleLabel: `test: my-test-rule`,
+      flappingSettings: DEFAULT_FLAPPING_SETTINGS,
+      activeAlertsFromState: {
         '1': testAlert1,
         '2': testAlert2,
       },
-      {}
-    );
+      recoveredAlertsFromState: {},
+    });
 
     expect(createAlertFactory).toHaveBeenCalledWith({
       alerts: {
@@ -135,64 +149,70 @@ describe('Legacy Alerts Client', () => {
     });
   });
 
-  test('getExecutorServices() should call getPublicAlertFactory on alert factory', () => {
+  test('getExecutorServices() should call getPublicAlertFactory on alert factory', async () => {
     const alertsClient = new LegacyAlertsClient({
       logger,
-      maxAlerts: 1000,
       ruleType,
     });
 
-    alertsClient.initialize(
-      {
+    await alertsClient.initializeExecution({
+      maxAlerts: 1000,
+      ruleLabel: `test: my-test-rule`,
+      flappingSettings: DEFAULT_FLAPPING_SETTINGS,
+      activeAlertsFromState: {
         '1': testAlert1,
         '2': testAlert2,
       },
-      {}
-    );
+      recoveredAlertsFromState: {},
+    });
 
     alertsClient.getExecutorServices();
     expect(getPublicAlertFactory).toHaveBeenCalledWith(mockCreateAlertFactory);
   });
 
-  test('checkLimitUsage() should pass through to alert factory function', () => {
+  test('checkLimitUsage() should pass through to alert factory function', async () => {
     const alertsClient = new LegacyAlertsClient({
       logger,
-      maxAlerts: 1000,
       ruleType,
     });
 
-    alertsClient.initialize(
-      {
+    await alertsClient.initializeExecution({
+      maxAlerts: 1000,
+      ruleLabel: `test: my-test-rule`,
+      flappingSettings: DEFAULT_FLAPPING_SETTINGS,
+      activeAlertsFromState: {
         '1': testAlert1,
         '2': testAlert2,
       },
-      {}
-    );
+      recoveredAlertsFromState: {},
+    });
 
     alertsClient.checkLimitUsage();
     expect(mockCreateAlertFactory.alertLimit.checkLimitUsage).toHaveBeenCalled();
   });
 
-  test('hasReachedAlertLimit() should pass through to alert factory function', () => {
+  test('hasReachedAlertLimit() should pass through to alert factory function', async () => {
     const alertsClient = new LegacyAlertsClient({
       logger,
-      maxAlerts: 1000,
       ruleType,
     });
 
-    alertsClient.initialize(
-      {
+    await alertsClient.initializeExecution({
+      maxAlerts: 1000,
+      ruleLabel: `test: my-test-rule`,
+      flappingSettings: DEFAULT_FLAPPING_SETTINGS,
+      activeAlertsFromState: {
         '1': testAlert1,
         '2': testAlert2,
       },
-      {}
-    );
+      recoveredAlertsFromState: {},
+    });
 
     alertsClient.hasReachedAlertLimit();
     expect(mockCreateAlertFactory.hasReachedAlertLimit).toHaveBeenCalled();
   });
 
-  test('processAndLogAlerts() should call processAlerts, setFlapping and logAlerts and store results', () => {
+  test('processAndLogAlerts() should call processAlerts, trimRecoveredAlerts, getAlertsForNotification and logAlerts and store results', async () => {
     (processAlerts as jest.Mock).mockReturnValue({
       newAlerts: {},
       activeAlerts: {
@@ -201,6 +221,10 @@ describe('Legacy Alerts Client', () => {
       },
       currentRecoveredAlerts: {},
       recoveredAlerts: {},
+    });
+    (trimRecoveredAlerts as jest.Mock).mockReturnValue({
+      trimmedAlertsRecovered: {},
+      earlyRecoveredAlerts: {},
     });
     (getAlertsForNotification as jest.Mock).mockReturnValue({
       newAlerts: {},
@@ -217,25 +241,27 @@ describe('Legacy Alerts Client', () => {
     });
     const alertsClient = new LegacyAlertsClient({
       logger,
-      maxAlerts: 1000,
       ruleType,
     });
 
-    alertsClient.initialize(
-      {
+    await alertsClient.initializeExecution({
+      maxAlerts: 1000,
+      ruleLabel: `ruleLogPrefix`,
+      flappingSettings: DEFAULT_FLAPPING_SETTINGS,
+      activeAlertsFromState: {
         '1': testAlert1,
         '2': testAlert2,
       },
-      {}
-    );
+      recoveredAlertsFromState: {},
+    });
 
     alertsClient.processAndLogAlerts({
       eventLogger: alertingEventLogger,
-      ruleLabel: `ruleLogPrefix`,
       ruleRunMetricsStore,
-      shouldLogAndScheduleActionsForAlerts: true,
+      shouldLogAlerts: true,
       flappingSettings: DEFAULT_FLAPPING_SETTINGS,
       notifyWhen: RuleNotifyWhen.CHANGE,
+      maintenanceWindowIds: ['window-id1', 'window-id2'],
     });
 
     expect(processAlerts).toHaveBeenCalledWith({
@@ -252,7 +278,10 @@ describe('Legacy Alerts Client', () => {
       alertLimit: 1000,
       autoRecoverAlerts: true,
       flappingSettings: DEFAULT_FLAPPING_SETTINGS,
+      maintenanceWindowIds: ['window-id1', 'window-id2'],
     });
+
+    expect(trimRecoveredAlerts).toHaveBeenCalledWith(logger, {}, 1000);
 
     expect(getAlertsForNotification).toHaveBeenCalledWith(
       {

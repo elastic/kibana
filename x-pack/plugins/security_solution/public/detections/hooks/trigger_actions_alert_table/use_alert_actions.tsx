@@ -9,6 +9,7 @@ import type { BulkActionsConfig } from '@kbn/triggers-actions-ui-plugin/public/t
 import { useCallback } from 'react';
 import type { Filter } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
+import type { TableId } from '@kbn/securitysolution-data-table';
 import type { SourcererScopeName } from '../../../common/store/sourcerer/model';
 import { APM_USER_INTERACTIONS } from '../../../common/lib/apm/constants';
 import { useUpdateAlertsStatus } from '../../../common/components/toolbar/bulk_actions/use_update_alerts';
@@ -16,7 +17,6 @@ import { useSourcererDataView } from '../../../common/containers/sourcerer';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 import { useStartTransaction } from '../../../common/lib/apm/use_start_transaction';
 import type { AlertWorkflowStatus } from '../../../common/types';
-import type { TableId } from '../../../../common/types';
 import { FILTER_CLOSED, FILTER_OPEN, FILTER_ACKNOWLEDGED } from '../../../../common/types';
 import * as i18n from '../translations';
 import { getUpdateAlertsQuery } from '../../components/alerts_table/actions';

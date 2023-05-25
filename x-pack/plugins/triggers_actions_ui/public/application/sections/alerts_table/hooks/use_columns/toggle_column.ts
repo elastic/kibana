@@ -33,6 +33,10 @@ const insert = ({
     return [...columns.slice(0, defaultIndex), column, ...columns.slice(defaultIndex)];
   }
 
+  if (columns.length === 0) {
+    return [column];
+  }
+
   // if the column isn't shown and it's not part of the default config
   // push it into the second position. Behaviour copied by t_grid, security
   // does this to insert right after the timestamp column

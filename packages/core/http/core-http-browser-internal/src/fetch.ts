@@ -19,7 +19,10 @@ import type {
   HttpResponse,
   HttpFetchOptionsWithPath,
 } from '@kbn/core-http-browser';
-import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
+import {
+  ELASTIC_HTTP_VERSION_HEADER,
+  X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
+} from '@kbn/core-http-common';
 import { HttpFetchError } from './http_fetch_error';
 import { HttpInterceptController } from './http_intercept_controller';
 import { interceptRequest, interceptResponse } from './intercept';
@@ -131,6 +134,7 @@ export class Fetch {
         ...options.headers,
         'kbn-version': this.params.kibanaVersion,
         [ELASTIC_HTTP_VERSION_HEADER]: version,
+        [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'Kibana',
         ...(!isEmpty(context) ? new ExecutionContextContainer(context).toHeader() : {}),
       }),
     };
@@ -223,12 +227,23 @@ const validateFetchArguments = (
     );
   }
 
-  const invalidHeaders = Object.keys(fullOptions.headers ?? {}).filter((headerName) =>
+  const invalidKbnHeaders = Object.keys(fullOptions.headers ?? {}).filter((headerName) =>
     headerName.startsWith('kbn-')
   );
-  if (invalidHeaders.length) {
+  const invalidInternalOriginProducHeader = Object.keys(fullOptions.headers ?? {}).filter(
+    (headerName) => headerName.includes(X_ELASTIC_INTERNAL_ORIGIN_REQUEST)
+  );
+
+  if (invalidKbnHeaders.length) {
     throw new Error(
-      `Invalid fetch headers, headers beginning with "kbn-" are not allowed: [${invalidHeaders.join(
+      `Invalid fetch headers, headers beginning with "kbn-" are not allowed: [${invalidKbnHeaders.join(
+        ','
+      )}]`
+    );
+  }
+  if (invalidInternalOriginProducHeader.length) {
+    throw new Error(
+      `Invalid fetch headers, headers beginning with "x-elastic-internal-" are not allowed: [${invalidInternalOriginProducHeader.join(
         ','
       )}]`
     );

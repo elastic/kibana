@@ -217,14 +217,14 @@
           {
             "parentPluginId": "@kbn/core-http-browser",
             "id": "def-common.HttpFetchOptions.version",
-            "type": "Uncategorized",
+            "type": "string",
             "tags": [
               "experimental"
             ],
             "label": "version",
             "description": [],
             "signature": [
-              "`${number}` | undefined"
+              "string | undefined"
             ],
             "path": "packages/core/http/core-http-browser/src/types.ts",
             "deprecated": false,
@@ -386,7 +386,7 @@
         "tags": [],
         "label": "HttpHeadersInit",
         "description": [
-          "\nHeaders to append to the request. Any headers that begin with `kbn-` are considered private to Core and will cause\n{@link HttpHandler} to throw an error."
+          "\nHeaders to append to the request. Any headers that begin with `kbn-` are considered private to Core and will cause\n{@link HttpHandler} to throw an error.\nIncludes the required Header that validates internal requests to internal APIs"
         ],
         "path": "packages/core/http/core-http-browser/src/types.ts",
         "deprecated": false,
@@ -857,7 +857,7 @@
                 "section": "def-common.KibanaExecutionContext",
                 "text": "KibanaExecutionContext"
               },
-              " | undefined; readonly version?: `${number}` | undefined; readonly body?: BodyInit | null | undefined; readonly cache?: RequestCache | undefined; readonly credentials?: RequestCredentials | undefined; readonly integrity?: string | undefined; readonly keepalive?: boolean | undefined; readonly method?: string | undefined; readonly mode?: RequestMode | undefined; readonly redirect?: RequestRedirect | undefined; readonly referrer?: string | undefined; readonly referrerPolicy?: ReferrerPolicy | undefined; readonly signal?: AbortSignal | null | undefined; readonly window?: null | undefined; }"
+              " | undefined; readonly version?: string | undefined; readonly body?: BodyInit | null | undefined; readonly cache?: RequestCache | undefined; readonly credentials?: RequestCredentials | undefined; readonly integrity?: string | undefined; readonly keepalive?: boolean | undefined; readonly method?: string | undefined; readonly mode?: RequestMode | undefined; readonly redirect?: RequestRedirect | undefined; readonly referrer?: string | undefined; readonly referrerPolicy?: ReferrerPolicy | undefined; readonly signal?: AbortSignal | null | undefined; readonly window?: null | undefined; }"
             ],
             "path": "packages/core/http/core-http-browser/src/types.ts",
             "deprecated": false,
@@ -1234,7 +1234,7 @@
                 "section": "def-common.KibanaExecutionContext",
                 "text": "KibanaExecutionContext"
               },
-              " | undefined; readonly version?: `${number}` | undefined; readonly body?: BodyInit | null | undefined; readonly cache?: RequestCache | undefined; readonly credentials?: RequestCredentials | undefined; readonly integrity?: string | undefined; readonly keepalive?: boolean | undefined; readonly method?: string | undefined; readonly mode?: RequestMode | undefined; readonly redirect?: RequestRedirect | undefined; readonly referrer?: string | undefined; readonly referrerPolicy?: ReferrerPolicy | undefined; readonly signal?: AbortSignal | null | undefined; readonly window?: null | undefined; }"
+              " | undefined; readonly version?: string | undefined; readonly body?: BodyInit | null | undefined; readonly cache?: RequestCache | undefined; readonly credentials?: RequestCredentials | undefined; readonly integrity?: string | undefined; readonly keepalive?: boolean | undefined; readonly method?: string | undefined; readonly mode?: RequestMode | undefined; readonly redirect?: RequestRedirect | undefined; readonly referrer?: string | undefined; readonly referrerPolicy?: ReferrerPolicy | undefined; readonly signal?: AbortSignal | null | undefined; readonly window?: null | undefined; }"
             ],
             "path": "packages/core/http/core-http-browser/src/types.ts",
             "deprecated": false,

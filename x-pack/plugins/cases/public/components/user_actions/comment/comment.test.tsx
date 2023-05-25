@@ -36,6 +36,7 @@ import { useCaseViewNavigation, useCaseViewParams } from '../../../common/naviga
 import { ExternalReferenceAttachmentTypeRegistry } from '../../../client/attachment_framework/external_reference_registry';
 import { PersistableStateAttachmentTypeRegistry } from '../../../client/attachment_framework/persistable_state_registry';
 import { userProfiles } from '../../../containers/user_profiles/api.mock';
+import { AttachmentActionType } from '../../../client/attachment_framework/types';
 
 jest.mock('../../../common/lib/kibana');
 jest.mock('../../../common/navigation/hooks');
@@ -849,9 +850,27 @@ describe('createCommentUserActionBuilder', () => {
 
       const attachment = getExternalReferenceAttachment({
         getActions: () => [
-          { label: 'My primary button', isPrimary: true, iconType: 'danger', onClick },
-          { label: 'My primary 2 button', isPrimary: true, iconType: 'danger', onClick },
-          { label: 'My primary 3 button', isPrimary: true, iconType: 'danger', onClick },
+          {
+            type: AttachmentActionType.BUTTON as const,
+            label: 'My primary button',
+            isPrimary: true,
+            iconType: 'danger',
+            onClick,
+          },
+          {
+            type: AttachmentActionType.BUTTON as const,
+            label: 'My primary 2 button',
+            isPrimary: true,
+            iconType: 'danger',
+            onClick,
+          },
+          {
+            type: AttachmentActionType.BUTTON as const,
+            label: 'My primary 3 button',
+            isPrimary: true,
+            iconType: 'danger',
+            onClick,
+          },
         ],
       });
 
@@ -888,14 +907,75 @@ describe('createCommentUserActionBuilder', () => {
       expect(onClick).toHaveBeenCalledTimes(2);
     });
 
+    it('shows correctly a custom action', async () => {
+      const onClick = jest.fn();
+
+      const attachment = getExternalReferenceAttachment({
+        getActions: () => [
+          {
+            type: AttachmentActionType.CUSTOM as const,
+            isPrimary: true,
+            label: 'Test button',
+            render: () => (
+              <button type="button" onClick={onClick} data-test-subj="my-custom-button" />
+            ),
+          },
+        ],
+      });
+
+      const externalReferenceAttachmentTypeRegistry = new ExternalReferenceAttachmentTypeRegistry();
+      externalReferenceAttachmentTypeRegistry.register(attachment);
+
+      const userAction = getExternalReferenceUserAction();
+      const builder = createCommentUserActionBuilder({
+        ...builderArgs,
+        externalReferenceAttachmentTypeRegistry,
+        caseData: {
+          ...builderArgs.caseData,
+          comments: [externalReferenceAttachment],
+        },
+        userAction,
+      });
+
+      const createdUserAction = builder.build();
+
+      appMockRender.render(<EuiCommentList comments={createdUserAction} />);
+
+      const customButton = await screen.findByTestId('my-custom-button');
+
+      expect(customButton).toBeInTheDocument();
+
+      userEvent.click(customButton);
+
+      expect(onClick).toHaveBeenCalledTimes(1);
+    });
+
     it('shows correctly the non visible primary actions', async () => {
       const onClick = jest.fn();
 
       const attachment = getExternalReferenceAttachment({
         getActions: () => [
-          { label: 'My primary button', isPrimary: true, iconType: 'danger', onClick },
-          { label: 'My primary 2 button', isPrimary: true, iconType: 'danger', onClick },
-          { label: 'My primary 3 button', isPrimary: true, iconType: 'danger', onClick },
+          {
+            type: AttachmentActionType.BUTTON,
+            label: 'My primary button',
+            isPrimary: true,
+            iconType: 'danger',
+            onClick,
+          },
+          {
+            type: AttachmentActionType.BUTTON,
+            label: 'My primary 2 button',
+            isPrimary: true,
+            iconType: 'danger',
+            onClick,
+          },
+          {
+            type: AttachmentActionType.BUTTON,
+            label: 'My primary 3 button',
+            isPrimary: true,
+            iconType: 'danger',
+            onClick,
+          },
         ],
       });
 
@@ -934,16 +1014,101 @@ describe('createCommentUserActionBuilder', () => {
       expect(onClick).toHaveBeenCalled();
     });
 
+    it('hides correctly the  default actions', async () => {
+      const onClick = jest.fn();
+
+      const attachment = getExternalReferenceAttachment({
+        getActions: () => [
+          {
+            type: AttachmentActionType.BUTTON as const,
+            label: 'My primary button',
+            isPrimary: true,
+            iconType: 'danger',
+            onClick,
+          },
+          {
+            type: AttachmentActionType.BUTTON as const,
+            label: 'My button',
+            iconType: 'download',
+            onClick,
+          },
+        ],
+        hideDefaultActions: true,
+      });
+
+      const externalReferenceAttachmentTypeRegistry = new ExternalReferenceAttachmentTypeRegistry();
+      externalReferenceAttachmentTypeRegistry.register(attachment);
+
+      const userAction = getExternalReferenceUserAction();
+      const builder = createCommentUserActionBuilder({
+        ...builderArgs,
+        externalReferenceAttachmentTypeRegistry,
+        caseData: {
+          ...builderArgs.caseData,
+          comments: [externalReferenceAttachment],
+        },
+        userAction,
+      });
+
+      const createdUserAction = builder.build();
+      appMockRender.render(<EuiCommentList comments={createdUserAction} />);
+
+      expect(screen.getByTestId('comment-externalReference-.test')).toBeInTheDocument();
+      expect(screen.getByLabelText('My primary button')).toBeInTheDocument();
+      expect(screen.getByTestId('property-actions-user-action')).toBeInTheDocument();
+
+      userEvent.click(screen.getByTestId('property-actions-user-action-ellipses'));
+
+      await waitForEuiPopoverOpen();
+
+      // default "Delete attachment" action
+      expect(screen.queryByTestId('property-actions-user-action-trash')).not.toBeInTheDocument();
+      expect(screen.queryByText('Delete attachment')).not.toBeInTheDocument();
+      expect(screen.getByText('My button')).toBeInTheDocument();
+
+      userEvent.click(screen.getByText('My button'), undefined, { skipPointerEventsCheck: true });
+
+      expect(onClick).toHaveBeenCalledTimes(1);
+    });
+
     it('shows correctly the registered primary actions and non-primary actions', async () => {
       const onClick = jest.fn();
 
       const attachment = getExternalReferenceAttachment({
         getActions: () => [
-          { label: 'My button', iconType: 'trash', onClick },
-          { label: 'My button 2', iconType: 'download', onClick },
-          { label: 'My primary button', isPrimary: true, iconType: 'danger', onClick },
-          { label: 'My primary 2 button', isPrimary: true, iconType: 'danger', onClick },
-          { label: 'My primary 3 button', isPrimary: true, iconType: 'danger', onClick },
+          {
+            type: AttachmentActionType.BUTTON as const,
+            label: 'My button',
+            iconType: 'trash',
+            onClick,
+          },
+          {
+            type: AttachmentActionType.BUTTON as const,
+            label: 'My button 2',
+            iconType: 'download',
+            onClick,
+          },
+          {
+            type: AttachmentActionType.BUTTON as const,
+            label: 'My primary button',
+            isPrimary: true,
+            iconType: 'danger',
+            onClick,
+          },
+          {
+            type: AttachmentActionType.BUTTON as const,
+            label: 'My primary 2 button',
+            isPrimary: true,
+            iconType: 'danger',
+            onClick,
+          },
+          {
+            type: AttachmentActionType.BUTTON as const,
+            label: 'My primary 3 button',
+            isPrimary: true,
+            iconType: 'danger',
+            onClick,
+          },
         ],
       });
 
@@ -990,7 +1155,13 @@ describe('createCommentUserActionBuilder', () => {
 
       const attachment = getExternalReferenceAttachment({
         getActions: () => [
-          { label: 'My primary button', isPrimary: true, iconType: 'danger', onClick },
+          {
+            type: AttachmentActionType.BUTTON as const,
+            label: 'My primary button',
+            isPrimary: true,
+            iconType: 'danger',
+            onClick,
+          },
         ],
       });
 

@@ -19,7 +19,9 @@ exports[`source editor geo_grid_source should not allow editing multiple metrics
     />
     <MetricsEditor
       allowMultipleMetrics={false}
+      bucketsName="clusters"
       fields={Array []}
+      isJoin={false}
       key="12345"
       metrics={Array []}
       metricsFilter={[Function]}
@@ -77,7 +79,9 @@ exports[`source editor geo_grid_source should render editor 1`] = `
     />
     <MetricsEditor
       allowMultipleMetrics={true}
+      bucketsName="clusters"
       fields={Array []}
+      isJoin={false}
       key="12345"
       metrics={Array []}
       metricsFilter={[Function]}

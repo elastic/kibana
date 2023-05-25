@@ -26,7 +26,7 @@ import { GraphOverlay } from '.';
 import { createStore } from '../../../common/store';
 import { useStateSyncingActions } from '../../../resolver/view/use_state_syncing_actions';
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
-import { TableId } from '../../../../common/types';
+import { TableId } from '@kbn/securitysolution-data-table';
 
 jest.mock('../../../common/containers/use_full_screen', () => ({
   useGlobalFullScreen: jest.fn(),
@@ -253,7 +253,9 @@ describe('GraphOverlay', () => {
                   [timelineId]: {
                     ...mockGlobalState.timeline.timelineById[timelineId],
                     sessionViewConfig: {
+                      processIndex: 'logs-endpoint.events.process*',
                       sessionEntityId: 'testId',
+                      sessionStartTime: '2021-10-14T08:05:34.853Z',
                     },
                   },
                 },

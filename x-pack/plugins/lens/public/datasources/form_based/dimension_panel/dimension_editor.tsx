@@ -27,6 +27,7 @@ import {
   EuiButtonIcon,
 } from '@elastic/eui';
 import ReactDOM from 'react-dom';
+import { NameInput } from '@kbn/visualization-ui-components/public';
 import type { FormBasedDimensionEditorProps } from './dimension_panel';
 import type { OperationSupportMatrix } from './operation_support';
 import { deleteColumn, GenericIndexPatternColumn } from '../form_based';
@@ -68,7 +69,6 @@ import {
 } from './dimensions_editor_helpers';
 import type { TemporaryState } from './dimensions_editor_helpers';
 import { FieldInput } from './field_input';
-import { NameInput } from '../../../shared_components';
 import { ParamEditorProps } from '../operations/definitions';
 import { WrappingHelpPopover } from '../help_popover';
 import { isColumn } from '../operations/definitions/helpers';
@@ -784,6 +784,13 @@ export function DimensionEditor(props: DimensionEditorProps) {
                 incompleteColumn={
                   layer.incompleteColumns ? layer.incompleteColumns[referenceId] : undefined
                 }
+                onResetIncomplete={() => {
+                  updateLayer({
+                    ...layer,
+                    // clean up the incomplete column data for the referenced id
+                    incompleteColumns: { ...layer.incompleteColumns, [referenceId]: null },
+                  });
+                }}
                 onDeleteColumn={() => {
                   updateLayer(
                     deleteColumn({

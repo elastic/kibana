@@ -110,7 +110,11 @@ function ErrorGroupList({
         width: `${unit * 6}px`,
         render: (_, { groupId }) => {
           return (
-            <GroupIdLink serviceName={serviceName} errorGroupId={groupId}>
+            <GroupIdLink
+              serviceName={serviceName}
+              errorGroupId={groupId}
+              data-test-subj="errorGroupId"
+            >
               {groupId.slice(0, 5) || NOT_AVAILABLE_LABEL}
             </GroupIdLink>
           );

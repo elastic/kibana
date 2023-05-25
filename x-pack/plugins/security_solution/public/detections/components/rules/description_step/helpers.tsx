@@ -15,7 +15,6 @@ import {
   EuiIcon,
   EuiToolTip,
   EuiFlexGrid,
-  EuiBetaBadge,
 } from '@elastic/eui';
 import { ALERT_RISK_SCORE } from '@kbn/rule-data-utils';
 
@@ -37,7 +36,6 @@ import type {
   RequiredFieldArray,
   Threshold,
 } from '../../../../../common/detection_engine/rule_schema';
-import { minimumLicenseForSuppression } from '../../../../../common/detection_engine/rule_schema';
 
 import * as i18n from './translations';
 import type { BuildQueryBarDescription, BuildThreatDescription, ListItems } from './types';
@@ -50,8 +48,9 @@ import type {
 import { GroupByOptions } from '../../../pages/detection_engine/rules/types';
 import { defaultToEmptyTag } from '../../../../common/components/empty_value';
 import { ThreatEuiFlexGroup } from './threat_description';
+import { TechnicalPreviewBadge } from './technical_preview_badge';
 import type { LicenseService } from '../../../../../common/license';
-
+import { AlertSuppressionMissingFieldsStrategy } from '../../../../../common/detection_engine/rule_schema';
 const NoteDescriptionContainer = styled(EuiFlexItem)`
   height: 105px;
   overflow-y: hidden;
@@ -535,21 +534,7 @@ export const buildAlertSuppressionDescription = (
     </EuiFlexGroup>
   );
 
-  const title = (
-    <>
-      {label}
-      <EuiBetaBadge
-        label={i18n.ALERT_SUPPRESSION_TECHNICAL_PREVIEW}
-        style={{ verticalAlign: 'middle', marginLeft: '8px' }}
-        size="s"
-      />
-      {!license.isAtLeast(minimumLicenseForSuppression) && (
-        <EuiToolTip position="top" content={i18n.ALERT_SUPPRESSION_INSUFFICIENT_LICENSE}>
-          <EuiIcon type={'warning'} size="l" color="#BD271E" style={{ marginLeft: '8px' }} />
-        </EuiToolTip>
-      )}
-    </>
-  );
+  const title = <TechnicalPreviewBadge label={label} license={license} />;
   return [
     {
       title,
@@ -569,21 +554,30 @@ export const buildAlertSuppressionWindowDescription = (
       ? `${value.value}${value.unit}`
       : i18n.ALERT_SUPPRESSION_PER_RULE_EXECUTION;
 
-  const title = (
-    <>
-      {label}
-      <EuiBetaBadge
-        label={i18n.ALERT_SUPPRESSION_TECHNICAL_PREVIEW}
-        style={{ verticalAlign: 'middle', marginLeft: '8px' }}
-        size="s"
-      />
-      {!license.isAtLeast(minimumLicenseForSuppression) && (
-        <EuiToolTip position="top" content={i18n.ALERT_SUPPRESSION_INSUFFICIENT_LICENSE}>
-          <EuiIcon type={'warning'} size="l" color="#BD271E" style={{ marginLeft: '8px' }} />
-        </EuiToolTip>
-      )}
-    </>
-  );
+  const title = <TechnicalPreviewBadge label={label} license={license} />;
+  return [
+    {
+      title,
+      description,
+    },
+  ];
+};
+
+export const buildAlertSuppressionMissingFieldsDescription = (
+  label: string,
+  value: AlertSuppressionMissingFieldsStrategy,
+  license: LicenseService
+): ListItems[] => {
+  if (isEmpty(value)) {
+    return [];
+  }
+
+  const description =
+    value === AlertSuppressionMissingFieldsStrategy.Suppress
+      ? i18n.ALERT_SUPPRESSION_SUPPRESS_ON_MISSING_FIELDS
+      : i18n.ALERT_SUPPRESSION_DO_NOT_SUPPRESS_ON_MISSING_FIELDS;
+
+  const title = <TechnicalPreviewBadge label={label} license={license} />;
   return [
     {
       title,

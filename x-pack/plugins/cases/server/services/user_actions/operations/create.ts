@@ -5,80 +5,37 @@
  * 2.0.
  */
 
-import type {
-  SavedObject,
-  SavedObjectReference,
-  SavedObjectsBulkResponse,
-  SavedObjectsUpdateResponse,
-} from '@kbn/core/server';
+import type { SavedObject, SavedObjectsBulkResponse } from '@kbn/core/server';
 import { get, isEmpty } from 'lodash';
+import type { UserActionPersistedAttributes } from '../../../common/types/user_actions';
 import { CASE_SAVED_OBJECT, CASE_USER_ACTION_SAVED_OBJECT } from '../../../../common/constants';
-import type { CaseSavedObject } from '../../../common/types';
 import { arraysDifference } from '../../../client/utils';
 import { isUserActionType } from '../../../../common/utils/user_actions';
 import type {
   ActionTypeValues,
   CaseAssignees,
-  CaseAttributes,
   CaseUserProfile,
-  CommentRequest,
-  User,
-  UserAction as Action,
+  ActionCategory,
 } from '../../../../common/api';
 import { Actions, ActionTypes } from '../../../../common/api';
 import { BuilderFactory } from '../builder_factory';
 import type {
-  Attributes,
   BuilderParameters,
-  CommonArguments,
-  CreateUserAction,
+  BulkCreateAttachmentUserAction,
+  BulkCreateBulkUpdateCaseUserActions,
+  CommonUserActionArgs,
+  CreatePayloadFunction,
+  CreateUserActionClient,
+  CreateUserActionES,
+  GetUserActionItemByDifference,
+  PostCaseUserActionArgs,
   ServiceContext,
+  TypedUserActionDiffedItems,
   UserActionEvent,
-  UserActionParameters,
 } from '../types';
 import { isAssigneesArray, isStringArray } from '../type_guards';
 import type { IndexRefresh } from '../../types';
 import { UserActionAuditLogger } from '../audit_logger';
-
-type CommonUserActionArgs = CommonArguments;
-
-interface GetUserActionItemByDifference extends CommonUserActionArgs {
-  field: string;
-  originalValue: unknown;
-  newValue: unknown;
-}
-
-interface TypedUserActionDiffedItems<T> extends GetUserActionItemByDifference {
-  originalValue: T[];
-  newValue: T[];
-}
-
-type CreatePayloadFunction<Item, ActionType extends ActionTypeValues> = (
-  items: Item[]
-) => UserActionParameters<ActionType>['payload'];
-
-interface BulkCreateBulkUpdateCaseUserActions extends IndexRefresh {
-  originalCases: CaseSavedObject[];
-  updatedCases: Array<SavedObjectsUpdateResponse<CaseAttributes>>;
-  user: User;
-}
-
-interface BulkCreateAttachmentUserAction extends Omit<CommonUserActionArgs, 'owner'>, IndexRefresh {
-  attachments: Array<{ id: string; owner: string; attachment: CommentRequest }>;
-}
-
-type CreateUserActionClient<T extends keyof BuilderParameters> = CreateUserAction<T> &
-  CommonUserActionArgs &
-  IndexRefresh;
-
-interface CreateUserActionES<T> extends IndexRefresh {
-  attributes: T;
-  references: SavedObjectReference[];
-}
-
-interface PostCaseUserActionArgs extends IndexRefresh {
-  actions: UserActionEvent[];
-}
 
 export class UserActionPersister {
   private static readonly userActionFieldsAllowed: Set<string> = new Set(Object.keys(ActionTypes));
@@ -227,7 +184,7 @@ export class UserActionPersister {
   }: {
     commonArgs: CommonUserActionArgs;
     actionType: ActionType;
-    action: Action;
+    action: ActionCategory;
     createPayload: CreatePayloadFunction<Item, ActionType>;
     modifiedItems?: Item[] | null;
   }) {
@@ -335,7 +292,9 @@ export class UserActionPersister {
   private async bulkCreate({
     actions,
     refresh,
-  }: PostCaseUserActionArgs): Promise<SavedObjectsBulkResponse<Attributes> | undefined> {
+  }: PostCaseUserActionArgs): Promise<
+    SavedObjectsBulkResponse<UserActionPersistedAttributes> | undefined
+  > {
     if (isEmpty(actions)) {
       return;
     }
@@ -343,7 +302,7 @@ export class UserActionPersister {
     try {
       this.context.log.debug(`Attempting to POST a new case user action`);
 
-      return await this.context.unsecuredSavedObjectsClient.bulkCreate(
+      return await this.context.unsecuredSavedObjectsClient.bulkCreate<UserActionPersistedAttributes>(
         actions.map((action) => ({
           type: CASE_USER_ACTION_SAVED_OBJECT,
           ...action.parameters,
@@ -366,7 +325,7 @@ export class UserActionPersister {
     connectorId,
     attachmentId,
     refresh,
-  }: CreateUserActionClient<T>) {
+  }: CreateUserActionClient<T>): Promise<void> {
     try {
       this.context.log.debug(`Attempting to create a user action of type: ${type}`);
       const userActionBuilder = this.builderFactory.getBuilder<T>(type);
@@ -422,7 +381,7 @@ export class UserActionPersister {
     }
   }
 
-  public async bulkAuditLogCaseDeletion(caseIds: string[]) {
+  public async bulkAuditLogCaseDeletion(caseIds: string[]): Promise<void> {
     this.context.log.debug(`Attempting to log bulk case deletion`);
 
     for (const id of caseIds) {

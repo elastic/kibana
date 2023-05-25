@@ -11,6 +11,7 @@ import { Route } from '@kbn/shared-ux-router';
 
 import type { CustomIntegration } from '@kbn/custom-integrations-plugin/common';
 
+import { hasDeferredInstallations } from '../../../../../../services/has_deferred_installations';
 import { getPackageReleaseLabel } from '../../../../../../../common/services';
 
 import { installationStatuses } from '../../../../../../../common/constants';
@@ -73,6 +74,7 @@ export const mapToCard = ({
   const version = 'version' in item ? item.version || '' : '';
 
   let isUpdateAvailable = false;
+  let isReauthorizationRequired = false;
   if (item.type === 'ui_link') {
     uiInternalPathUrl = item.id.includes('language_client.')
       ? addBasePath(item.uiInternalPath)
@@ -83,6 +85,8 @@ export const mapToCard = ({
       urlVersion = item.savedObject.attributes.version || item.version;
       isUnverified = isPackageUnverified(item, packageVerificationKeyId);
       isUpdateAvailable = isPackageUpdatable(item);
+
+      isReauthorizationRequired = hasDeferredInstallations(item);
     }
 
     const url = getHref('integration_details_overview', {
@@ -107,6 +111,7 @@ export const mapToCard = ({
     version,
     release,
     categories: ((item.categories || []) as string[]).filter((c: string) => !!c),
+    isReauthorizationRequired,
     isUnverified,
     isUpdateAvailable,
   };

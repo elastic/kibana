@@ -22,16 +22,6 @@ import {
 
 import type { State } from '..';
 import { createStore } from '..';
-import {
-  removeColumn,
-  upsertColumn,
-  applyDeltaToColumnWidth,
-  updateColumnOrder,
-  updateColumns,
-  updateColumnWidth,
-  updateItemsPerPage,
-  updateSort,
-} from './actions';
 import { DefaultCellRenderer } from '../../../timelines/components/timeline/cell_rendering/default_cell_renderer';
 import type { EventsViewerProps } from '../../components/events_viewer';
 import { defaultRowRenderers } from '../../../timelines/components/timeline/body/renderers';
@@ -43,7 +33,18 @@ import { eventsDefaultModel } from '../../components/events_viewer/default_model
 import { EntityType } from '@kbn/timelines-plugin/common';
 import { getDefaultControlColumn } from '../../../timelines/components/timeline/body/control_columns';
 import { SourcererScopeName } from '../sourcerer/model';
-import { TableId } from '../../../../common/types';
+import { TableId, dataTableActions } from '@kbn/securitysolution-data-table';
+
+const {
+  applyDeltaToColumnWidth,
+  removeColumn,
+  updateColumnOrder,
+  updateColumns,
+  updateColumnWidth,
+  updateItemsPerPage,
+  updateSort,
+  upsertColumn,
+} = dataTableActions;
 
 jest.mock('../../../timelines/containers/local_storage');
 

@@ -58,12 +58,12 @@ import { INDICATOR_MATCH_ROW_RENDER, PROVIDER_BADGE } from '../../screens/timeli
 import { investigateFirstAlertInTimeline } from '../../tasks/alerts';
 import {
   duplicateFirstRule,
-  duplicateSelectedRules,
   duplicateRuleFromMenu,
   goToRuleDetails,
   selectNumberOfRules,
   checkDuplicatedRule,
   expectNumberOfRules,
+  duplicateSelectedRulesWithExceptions,
 } from '../../tasks/alerts_detection_rules';
 import { createRule } from '../../tasks/api_calls/rules';
 import { loadPrepackagedTimelineTemplates } from '../../tasks/api_calls/timelines';
@@ -544,7 +544,7 @@ describe('indicator match', () => {
 
       it("Allows the rule to be duplicated from the table's bulk actions", () => {
         selectNumberOfRules(1);
-        duplicateSelectedRules();
+        duplicateSelectedRulesWithExceptions();
         checkDuplicatedRule();
       });
 

@@ -7,7 +7,7 @@
 import React, { useEffect } from 'react';
 import { EuiFlexGroup, EuiSpacer, EuiFlexItem } from '@elastic/eui';
 import { useDispatch, useSelector } from 'react-redux';
-import { useTrackPageview } from '@kbn/observability-plugin/public';
+import { useTrackPageview } from '@kbn/observability-shared-plugin/public';
 import { Redirect, useLocation } from 'react-router-dom';
 import { DisabledCallout } from '../management/disabled_callout';
 import { FilterGroup } from '../common/monitor_filters/filter_group';
@@ -101,8 +101,8 @@ export const OverviewPage: React.FC = () => {
 
   return (
     <>
-      <AlertingCallout />
       <DisabledCallout total={absoluteTotal} />
+      <AlertingCallout />
       <EuiFlexGroup gutterSize="s" wrap={true}>
         <EuiFlexItem>
           <SearchField />
@@ -118,7 +118,7 @@ export const OverviewPage: React.FC = () => {
       {!noMonitorFound ? (
         <>
           <EuiFlexGroup gutterSize="m" wrap>
-            <EuiFlexItem grow={2}>
+            <EuiFlexItem grow={false}>
               <OverviewStatus />
             </EuiFlexItem>
             <EuiFlexItem grow={3} style={{ minWidth: 300 }}>

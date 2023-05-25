@@ -18,10 +18,6 @@ export const SECURITY_APP_ID = 'security';
 export const POLICIES_PAGE_PATH = '/administration/policy';
 
 // index patterns
-const ENDPOINT_PROCESS_EVENTS_INDEX =
-  '*:logs-endpoint.events.process*,logs-endpoint.events.process*';
-const CLOUD_DEFEND_PROCESS_EVENTS_INDEX = '*:logs-cloud_defend.process*,logs-cloud_defend.process*';
-export const PROCESS_EVENTS_INDEX = `${ENDPOINT_PROCESS_EVENTS_INDEX},${CLOUD_DEFEND_PROCESS_EVENTS_INDEX}`; // match on both cross cluster and local indices
 export const PREVIEW_ALERTS_INDEX = '.preview.alerts-security.alerts-default';
 
 // field properties

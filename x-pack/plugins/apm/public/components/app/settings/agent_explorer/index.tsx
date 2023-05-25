@@ -15,9 +15,9 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { isEmpty } from 'lodash';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
-import { isEmpty } from 'lodash';
 import {
   ElasticApmAgentLatestVersion,
   OtelAgentLatestVersion,
@@ -33,11 +33,12 @@ import { useApmParams } from '../../../../hooks/use_apm_params';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import { useProgressiveFetcher } from '../../../../hooks/use_progressive_fetcher';
 import { useTimeRange } from '../../../../hooks/use_time_range';
+import { BetaBadge } from '../../../shared/beta_badge';
 import { ApmEnvironmentFilter } from '../../../shared/environment_filter';
-import { KueryBar } from '../../../shared/kuery_bar';
+import { UnifiedSearchBar } from '../../../shared/unified_search_bar';
+
 import * as urlHelpers from '../../../shared/links/url_helpers';
 import { SuggestionsSelect } from '../../../shared/suggestions_select';
-import { TechnicalPreviewBadge } from '../../../shared/technical_preview_badge';
 import { AgentList } from './agent_list';
 
 const getOtelLatestAgentVersion = (
@@ -142,15 +143,6 @@ export function AgentExplorer() {
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
       <EuiFlexItem grow={false}>
-        <EuiText color="subdued">
-          {i18n.translate('xpack.apm.settings.agentExplorer.descriptionText', {
-            defaultMessage:
-              'Agent Explorer Technical Preview provides an inventory and details of deployed Agents.',
-          })}
-        </EuiText>
-      </EuiFlexItem>
-      <EuiSpacer size="s" />
-      <EuiFlexItem grow={false}>
         <EuiTitle>
           <EuiFlexGroup gutterSize="s" responsive={false}>
             <EuiFlexItem grow={false}>
@@ -161,14 +153,27 @@ export function AgentExplorer() {
               </h2>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <TechnicalPreviewBadge icon="beaker" />
+              <BetaBadge icon="beta" />
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiTitle>
       </EuiFlexItem>
+      <EuiSpacer size="s" />
+      <EuiFlexItem grow={false}>
+        <EuiText color="subdued">
+          {i18n.translate('xpack.apm.settings.agentExplorer.descriptionText', {
+            defaultMessage:
+              'Agent Explorer Technical Preview provides an inventory and details of deployed Agents.',
+          })}
+        </EuiText>
+      </EuiFlexItem>
       <EuiSpacer />
       <EuiFlexItem grow={false}>
-        <KueryBar />
+        <UnifiedSearchBar
+          showDatePicker={false}
+          showSubmitButton={false}
+          isClearable={false}
+        />
       </EuiFlexItem>
       <EuiSpacer size="xs" />
       <EuiFlexItem>
@@ -238,7 +243,7 @@ export function AgentExplorer() {
         <EuiCallOut
           size="s"
           title={i18n.translate('xpack.apm.agentExplorer.callout.24hoursData', {
-            defaultMessage: 'Information based on the lastest 24h',
+            defaultMessage: 'Information based on the last 24h',
           })}
           iconType="clock"
         />

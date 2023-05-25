@@ -51,6 +51,13 @@ describe('collectSavedObjects()', () => {
     attributes: { title: 'my title 2' },
     references: [{ type: 'c', id: '3', name: 'c3' }],
   };
+  const obj3 = {
+    type: 'bz',
+    id: '33',
+    attributes: { title: 'my title z' },
+    references: [{ type: 'b', id: '2', name: 'b2' }],
+    managed: true,
+  };
 
   describe('module calls', () => {
     test('limit stream with empty input stream is called with null', async () => {
@@ -63,14 +70,15 @@ describe('collectSavedObjects()', () => {
     });
 
     test('limit stream with non-empty input stream is called with all objects', async () => {
-      const readStream = createReadStream(obj1, obj2);
+      const readStream = createReadStream(obj1, obj2, obj3);
       const supportedTypes = [obj2.type];
       await collectSavedObjects({ readStream, supportedTypes, objectLimit });
 
       expect(createLimitStream).toHaveBeenCalledWith(objectLimit);
-      expect(limitStreamPush).toHaveBeenCalledTimes(3);
+      expect(limitStreamPush).toHaveBeenCalledTimes(4);
       expect(limitStreamPush).toHaveBeenNthCalledWith(1, obj1);
       expect(limitStreamPush).toHaveBeenNthCalledWith(2, obj2);
+      expect(limitStreamPush).toHaveBeenNthCalledWith(3, obj3);
       expect(limitStreamPush).toHaveBeenLastCalledWith(null);
     });
 
@@ -82,13 +90,14 @@ describe('collectSavedObjects()', () => {
     });
 
     test('get non-unique entries with non-empty input stream is called with all entries', async () => {
-      const readStream = createReadStream(obj1, obj2);
+      const readStream = createReadStream(obj1, obj2, obj3);
       const supportedTypes = [obj2.type];
       await collectSavedObjects({ readStream, supportedTypes, objectLimit });
 
       expect(getNonUniqueEntries).toHaveBeenCalledWith([
         { type: obj1.type, id: obj1.id },
         { type: obj2.type, id: obj2.id },
+        { type: obj3.type, id: obj3.id },
       ]);
     });
 
@@ -101,7 +110,7 @@ describe('collectSavedObjects()', () => {
     });
 
     test('filter with non-empty input stream is called with all objects of supported types', async () => {
-      const readStream = createReadStream(obj1, obj2);
+      const readStream = createReadStream(obj1, obj2, obj3);
       const filter = jest.fn();
       const supportedTypes = [obj2.type];
       await collectSavedObjects({ readStream, supportedTypes, objectLimit, filter });
@@ -139,8 +148,8 @@ describe('collectSavedObjects()', () => {
       const result = await collectSavedObjects({ readStream, supportedTypes, objectLimit });
 
       const collectedObjects = [
-        { ...obj1, typeMigrationVersion: '' },
-        { ...obj2, typeMigrationVersion: '' },
+        { ...obj1, typeMigrationVersion: '', managed: false },
+        { ...obj2, typeMigrationVersion: '', managed: false },
       ];
       const importStateMap = new Map([
         [`a:1`, {}], // a:1 is included because it is present in the collected objects
@@ -166,7 +175,7 @@ describe('collectSavedObjects()', () => {
       const supportedTypes = [obj1.type];
       const result = await collectSavedObjects({ readStream, supportedTypes, objectLimit });
 
-      const collectedObjects = [{ ...obj1, typeMigrationVersion: '' }];
+      const collectedObjects = [{ ...obj1, typeMigrationVersion: '', managed: false }];
       const importStateMap = new Map([
         [`a:1`, {}], // a:1 is included because it is present in the collected objects
         [`b:2`, { isOnlyReference: true }], // b:2 was filtered out due to an unsupported type; b:2 is included because a:1 has a reference to b:2, but this is marked as `isOnlyReference` because b:2 is not present in the collected objects
@@ -180,8 +189,8 @@ describe('collectSavedObjects()', () => {
 
     test('keeps the original migration versions', async () => {
       const collectedObjects = [
-        { ...obj1, migrationVersion: { a: '1.0.0' } },
-        { ...obj2, typeMigrationVersion: '2.0.0' },
+        { ...obj1, migrationVersion: { a: '1.0.0' }, managed: false },
+        { ...obj2, typeMigrationVersion: '2.0.0', managed: false },
       ];
 
       const readStream = createReadStream(...collectedObjects);
@@ -218,9 +227,10 @@ describe('collectSavedObjects()', () => {
           supportedTypes,
           objectLimit,
           filter,
+          managed: false,
         });
 
-        const collectedObjects = [{ ...obj2, typeMigrationVersion: '' }];
+        const collectedObjects = [{ ...obj2, typeMigrationVersion: '', managed: false }];
         const importStateMap = new Map([
           // a:1 was filtered out due to an unsupported type; a:1 is not included because there are no other references to a:1
           [`b:2`, {}], // b:2 is included because it is present in the collected objects

@@ -8,37 +8,39 @@
 import { SavedObjectsTypeMappingDefinition } from '@kbn/core/server';
 
 export const rulesSettingsMappings: SavedObjectsTypeMappingDefinition = {
+  dynamic: false,
   properties: {
     flapping: {
       properties: {
-        enabled: {
-          type: 'boolean',
-          index: false,
-        },
-        lookBackWindow: {
-          type: 'long',
-          index: false,
-        },
-        statusChangeThreshold: {
-          type: 'long',
-          index: false,
-        },
-        createdBy: {
-          type: 'keyword',
-          index: false,
-        },
-        updatedBy: {
-          type: 'keyword',
-          index: false,
-        },
-        createdAt: {
-          type: 'date',
-          index: false,
-        },
-        updatedAt: {
-          type: 'date',
-          index: false,
-        },
+        // NO NEED TO BE INDEXED
+        // enabled: {
+        //   type: 'boolean',
+        //   index: false,
+        // },
+        // lookBackWindow: {
+        //   type: 'long',
+        //   index: false,
+        // },
+        // statusChangeThreshold: {
+        //   type: 'long',
+        //   index: false,
+        // },
+        // createdBy: {
+        //   type: 'keyword',
+        //   index: false,
+        // },
+        // updatedBy: {
+        //   type: 'keyword',
+        //   index: false,
+        // },
+        // createdAt: {
+        //   type: 'date',
+        //   index: false,
+        // },
+        // updatedAt: {
+        //   type: 'date',
+        //   index: false,
+        // },
       },
     },
   },

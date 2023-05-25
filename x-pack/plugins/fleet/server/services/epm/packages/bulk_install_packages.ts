@@ -7,6 +7,8 @@
 
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 
+import type { HTTPAuthorizationHeader } from '../../../../common/http_authorization_header';
+
 import { appContextService } from '../../app_context';
 import * as Registry from '../registry';
 
@@ -23,6 +25,7 @@ interface BulkInstallPackagesParams {
   spaceId: string;
   preferredSource?: 'registry' | 'bundled';
   prerelease?: boolean;
+  authorizationHeader?: HTTPAuthorizationHeader | null;
 }
 
 export async function bulkInstallPackages({
@@ -32,6 +35,7 @@ export async function bulkInstallPackages({
   spaceId,
   force,
   prerelease,
+  authorizationHeader,
 }: BulkInstallPackagesParams): Promise<BulkInstallResponse[]> {
   const logger = appContextService.getLogger();
 
@@ -94,6 +98,7 @@ export async function bulkInstallPackages({
         spaceId,
         force,
         prerelease,
+        authorizationHeader,
       });
 
       if (installResult.error) {

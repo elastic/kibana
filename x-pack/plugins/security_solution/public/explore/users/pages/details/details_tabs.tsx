@@ -9,6 +9,7 @@ import React from 'react';
 import { Switch } from 'react-router-dom';
 import { Route } from '@kbn/shared-ux-router';
 
+import { TableId } from '@kbn/securitysolution-data-table';
 import { RiskDetailsTabBody } from '../../../components/risk_score/risk_details_tab_body';
 import { RiskScoreEntity } from '../../../../../common/search_strategy';
 import { UsersTableType } from '../../store/model';
@@ -16,7 +17,6 @@ import { AnomaliesUserTable } from '../../../../common/components/ml/tables/anom
 import type { UsersDetailsTabsProps } from './types';
 import { AnomaliesQueryTabBody } from '../../../../common/containers/anomalies/anomalies_query_tab_body';
 import { usersDetailsPagePath } from '../constants';
-import { TableId } from '../../../../../common/types';
 import { EventsQueryTabBody } from '../../../../common/components/events_tab';
 import { AuthenticationsQueryTabBody } from '../navigation';
 

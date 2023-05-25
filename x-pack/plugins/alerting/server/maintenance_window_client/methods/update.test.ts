@@ -9,7 +9,7 @@ import moment from 'moment-timezone';
 import { RRule } from 'rrule';
 import { update } from './update';
 import { savedObjectsClientMock, loggingSystemMock } from '@kbn/core/server/mocks';
-import { SavedObjectsUpdateResponse, SavedObject } from '@kbn/core/server';
+import { SavedObject } from '@kbn/core/server';
 import {
   MaintenanceWindowClientContext,
   MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
@@ -48,7 +48,7 @@ const mockContext: jest.Mocked<MaintenanceWindowClientContext> = {
 
 describe('MaintenanceWindowClient - update', () => {
   beforeEach(() => {
-    mockContext.getModificationMetadata.mockResolvedValueOnce(updatedMetadata);
+    mockContext.getModificationMetadata.mockResolvedValue(updatedMetadata);
   });
 
   afterEach(() => {
@@ -72,14 +72,14 @@ describe('MaintenanceWindowClient - update', () => {
       id: 'test-id',
     } as unknown as SavedObject);
 
-    savedObjectsClient.update.mockResolvedValueOnce({
+    savedObjectsClient.create.mockResolvedValueOnce({
       attributes: {
         ...mockMaintenanceWindow,
         ...updatedAttributes,
         ...updatedMetadata,
       },
       id: 'test-id',
-    } as unknown as SavedObjectsUpdateResponse);
+    } as unknown as SavedObject);
 
     jest.useFakeTimers().setSystemTime(new Date(secondTimestamp));
 
@@ -92,9 +92,8 @@ describe('MaintenanceWindowClient - update', () => {
       MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
       'test-id'
     );
-    expect(savedObjectsClient.update).toHaveBeenLastCalledWith(
+    expect(savedObjectsClient.create).toHaveBeenLastCalledWith(
       MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
-      'test-id',
       {
         ...updatedAttributes,
         events: [
@@ -102,9 +101,12 @@ describe('MaintenanceWindowClient - update', () => {
           { gte: '2023-04-01T23:00:00.000Z', lte: '2023-04-02T01:00:00.000Z' }, // Daylight savings
         ],
         expirationDate: moment(new Date(secondTimestamp)).tz('UTC').add(1, 'year').toISOString(),
-        ...updatedMetadata,
+        createdAt: '2023-02-26T00:00:00.000Z',
+        createdBy: 'test-user',
+        updatedAt: updatedMetadata.updatedAt,
+        updatedBy: updatedMetadata.updatedBy,
       },
-      { version: '123' }
+      { id: 'test-id' }
     );
     // Only these 3 properties are worth asserting since the rest come from mocks
     expect(result).toEqual(
@@ -141,25 +143,24 @@ describe('MaintenanceWindowClient - update', () => {
       id: 'test-id',
     } as unknown as SavedObject);
 
-    savedObjectsClient.update.mockResolvedValue({
+    savedObjectsClient.create.mockResolvedValue({
       attributes: {
         ...mockMaintenanceWindow,
         ...updatedAttributes,
         ...updatedMetadata,
       },
       id: 'test-id',
-    } as unknown as SavedObjectsUpdateResponse);
+    } as unknown as SavedObject);
 
     // Update without changing duration or rrule
     await update(mockContext, { id: 'test-id' });
     // Events keep the previous modified events, but adds on the new events
-    expect(savedObjectsClient.update).toHaveBeenLastCalledWith(
+    expect(savedObjectsClient.create).toHaveBeenLastCalledWith(
       MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
-      'test-id',
       expect.objectContaining({
         events: [...modifiedEvents, expect.any(Object), expect.any(Object), expect.any(Object)],
       }),
-      { version: '123' }
+      { id: 'test-id' }
     );
 
     // Update with changing rrule
@@ -173,16 +174,15 @@ describe('MaintenanceWindowClient - update', () => {
       },
     });
     // All events are regenerated
-    expect(savedObjectsClient.update).toHaveBeenLastCalledWith(
+    expect(savedObjectsClient.create).toHaveBeenLastCalledWith(
       MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
-      'test-id',
       expect.objectContaining({
         events: [
           { gte: '2023-03-26T00:00:00.000Z', lte: '2023-03-26T01:00:00.000Z' },
           { gte: '2023-04-01T23:00:00.000Z', lte: '2023-04-02T00:00:00.000Z' },
         ],
       }),
-      { version: '123' }
+      { id: 'test-id' }
     );
   });
 

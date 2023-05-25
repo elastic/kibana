@@ -77,6 +77,9 @@
     "@kbn/shared-ux-router",
     "@kbn/alerts-as-data-utils",
     "@kbn/exploratory-view-plugin",
+    "@kbn/observability-shared-plugin",
+    "@kbn/ml-error-utils",
+    "@kbn/ml-anomaly-utils",
   ],
   "exclude": [
     "target/**/*",

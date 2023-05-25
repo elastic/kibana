@@ -185,7 +185,7 @@ interface FullValidationConfig<P, Q, B> {
  * of an endpoint etc.
  * @experimental
  */
-export interface AddVersionOpts<P, Q, B, R> {
+export interface AddVersionOpts<P, Q, B> {
   /**
    * Version to assign to this route
    * @experimental
@@ -213,10 +213,8 @@ export interface VersionedRoute<
    * @returns A versioned route, allows for fluent chaining of version declarations
    * @experimental
    */
-  addVersion<P = unknown, Q = unknown, B = unknown, R = any>(
-    options: AddVersionOpts<P, Q, B, R>,
-    handler: (
-      ...params: Parameters<RequestHandler<P, Q, B, Ctx>>
-    ) => MaybePromise<IKibanaResponse<R>>
+  addVersion<P = unknown, Q = unknown, B = unknown>(
+    options: AddVersionOpts<P, Q, B>,
+    handler: (...params: Parameters<RequestHandler<P, Q, B, Ctx>>) => MaybePromise<IKibanaResponse>
   ): VersionedRoute<Method, Ctx>;
 }

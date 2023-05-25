@@ -81,7 +81,13 @@ describe('calculateStatus$', () => {
     it('is available after migrations have ran', async () => {
       await expect(
         calculateStatus$(
-          of({ status: 'completed', result: [{ status: 'skipped' }, { status: 'patched' }] }),
+          of({
+            status: 'completed',
+            result: [
+              { status: 'skipped' },
+              { status: 'patched', destIndex: '.kibana', elapsedMs: 28 },
+            ],
+          }),
           esStatus$
         )
           .pipe(take(2))

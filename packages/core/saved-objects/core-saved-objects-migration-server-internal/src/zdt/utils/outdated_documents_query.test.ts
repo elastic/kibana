@@ -11,15 +11,16 @@ import { getOutdatedDocumentsQuery } from './outdated_documents_query';
 import { createType } from '../test_helpers/saved_object_type';
 
 const dummyModelVersion: SavedObjectsModelVersion = {
-  modelChange: {
-    type: 'expansion',
-  },
+  changes: [],
 };
 
+const dummyMigration = jest.fn();
+
 describe('getOutdatedDocumentsQuery', () => {
-  it('generates the correct query', () => {
+  it('generates the correct query for types using model versions', () => {
     const fooType = createType({
       name: 'foo',
+      switchToModelVersionAt: '8.8.0',
       modelVersions: {
         1: dummyModelVersion,
         2: dummyModelVersion,
@@ -27,6 +28,7 @@ describe('getOutdatedDocumentsQuery', () => {
     });
     const barType = createType({
       name: 'bar',
+      switchToModelVersionAt: '8.8.0',
       modelVersions: {
         1: dummyModelVersion,
         2: dummyModelVersion,
@@ -50,40 +52,11 @@ describe('getOutdatedDocumentsQuery', () => {
                       "type": "foo",
                     },
                   },
+                ],
+                "must_not": Array [
                   Object {
-                    "bool": Object {
-                      "should": Array [
-                        Object {
-                          "bool": Object {
-                            "must": Object {
-                              "exists": Object {
-                                "field": "migrationVersion",
-                              },
-                            },
-                            "must_not": Object {
-                              "term": Object {
-                                "migrationVersion.foo": "10.2.0",
-                              },
-                            },
-                          },
-                        },
-                        Object {
-                          "bool": Object {
-                            "must_not": Array [
-                              Object {
-                                "exists": Object {
-                                  "field": "migrationVersion",
-                                },
-                              },
-                              Object {
-                                "term": Object {
-                                  "typeMigrationVersion": "10.2.0",
-                                },
-                              },
-                            ],
-                          },
-                        },
-                      ],
+                    "term": Object {
+                      "typeMigrationVersion": "10.2.0",
                     },
                   },
                 ],
@@ -97,40 +70,148 @@ describe('getOutdatedDocumentsQuery', () => {
                       "type": "bar",
                     },
                   },
+                ],
+                "must_not": Array [
                   Object {
-                    "bool": Object {
-                      "should": Array [
-                        Object {
-                          "bool": Object {
-                            "must": Object {
-                              "exists": Object {
-                                "field": "migrationVersion",
-                              },
-                            },
-                            "must_not": Object {
-                              "term": Object {
-                                "migrationVersion.bar": "10.3.0",
-                              },
-                            },
-                          },
-                        },
-                        Object {
-                          "bool": Object {
-                            "must_not": Array [
-                              Object {
-                                "exists": Object {
-                                  "field": "migrationVersion",
-                                },
-                              },
-                              Object {
-                                "term": Object {
-                                  "typeMigrationVersion": "10.3.0",
-                                },
-                              },
-                            ],
-                          },
-                        },
-                      ],
+                    "term": Object {
+                      "typeMigrationVersion": "10.3.0",
+                    },
+                  },
+                ],
+              },
+            },
+          ],
+        },
+      }
+    `);
+  });
+
+  it('generates the correct query for types still using old migrations', () => {
+    const fooType = createType({
+      name: 'foo',
+      migrations: {
+        '7.17.2': dummyMigration,
+        '8.5.0': dummyMigration,
+      },
+    });
+    const barType = createType({
+      name: 'bar',
+      migrations: () => ({
+        '7.15.5': dummyMigration,
+        '8.7.2': dummyMigration,
+      }),
+    });
+
+    const query = getOutdatedDocumentsQuery({
+      types: [fooType, barType],
+    });
+
+    expect(query).toMatchInlineSnapshot(`
+      Object {
+        "bool": Object {
+          "should": Array [
+            Object {
+              "bool": Object {
+                "must": Array [
+                  Object {
+                    "term": Object {
+                      "type": "foo",
+                    },
+                  },
+                ],
+                "must_not": Array [
+                  Object {
+                    "term": Object {
+                      "typeMigrationVersion": "8.5.0",
+                    },
+                  },
+                ],
+              },
+            },
+            Object {
+              "bool": Object {
+                "must": Array [
+                  Object {
+                    "term": Object {
+                      "type": "bar",
+                    },
+                  },
+                ],
+                "must_not": Array [
+                  Object {
+                    "term": Object {
+                      "typeMigrationVersion": "8.7.2",
+                    },
+                  },
+                ],
+              },
+            },
+          ],
+        },
+      }
+    `);
+  });
+
+  it('generates the correct query for mixed types', () => {
+    const fooType = createType({
+      name: 'foo',
+      migrations: {
+        '7.17.2': dummyMigration,
+        '8.5.0': dummyMigration,
+      },
+      switchToModelVersionAt: '8.8.0',
+      modelVersions: {
+        1: dummyModelVersion,
+        2: dummyModelVersion,
+      },
+    });
+    const barType = createType({
+      name: 'bar',
+      migrations: () => ({
+        '7.15.5': dummyMigration,
+        '8.7.2': dummyMigration,
+      }),
+    });
+
+    const query = getOutdatedDocumentsQuery({
+      types: [fooType, barType],
+    });
+
+    expect(query).toMatchInlineSnapshot(`
+      Object {
+        "bool": Object {
+          "should": Array [
+            Object {
+              "bool": Object {
+                "must": Array [
+                  Object {
+                    "term": Object {
+                      "type": "foo",
+                    },
+                  },
+                ],
+                "must_not": Array [
+                  Object {
+                    "term": Object {
+                      "typeMigrationVersion": "10.2.0",
+                    },
+                  },
+                ],
+              },
+            },
+            Object {
+              "bool": Object {
+                "must": Array [
+                  Object {
+                    "term": Object {
+                      "type": "bar",
+                    },
+                  },
+                ],
+                "must_not": Array [
+                  Object {
+                    "term": Object {
+                      "typeMigrationVersion": "8.7.2",
                     },
                   },
                 ],

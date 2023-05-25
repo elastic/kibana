@@ -10,7 +10,7 @@ import { EuiButton, EuiToolTip } from '@elastic/eui';
 import { useFormContext } from 'react-hook-form';
 import { i18n } from '@kbn/i18n';
 import { v4 as uuidv4 } from 'uuid';
-import { useFetcher } from '@kbn/observability-plugin/public';
+import { useFetcher } from '@kbn/observability-shared-plugin/public';
 import { TestNowModeFlyout, TestRun } from '../../test_now_mode/test_now_mode_flyout';
 import { format } from './formatter';
 import {
@@ -20,14 +20,14 @@ import {
 import { runOnceMonitor } from '../../../state/manual_test_runs/api';
 
 export const RunTestButton = () => {
-  const { watch, formState, getValues } = useFormContext();
+  const { watch, formState, getValues, handleSubmit } = useFormContext();
 
   const [inProgress, setInProgress] = useState(false);
   const [testRun, setTestRun] = useState<TestRun>();
 
   const handleTestNow = () => {
     const config = getValues() as MonitorFieldsType;
-    if (config) {
+    if (config && !Object.keys(formState.errors).length) {
       setInProgress(true);
       setTestRun({
         id: uuidv4(),
@@ -68,9 +68,7 @@ export const RunTestButton = () => {
           disabled={isDisabled}
           aria-label={TEST_NOW_ARIA_LABEL}
           iconType="play"
-          onClick={() => {
-            handleTestNow();
-          }}
+          onClick={handleSubmit(handleTestNow)}
         >
           {RUN_TEST}
         </EuiButton>
@@ -111,7 +109,7 @@ const useTooltipContent = (
 
   tooltipContent = isTestRunInProgress ? TEST_SCHEDULED_LABEL : tooltipContent;
 
-  const isDisabled = !isValid || isTestRunInProgress || !isAnyPublicLocationSelected;
+  const isDisabled = isTestRunInProgress || !isAnyPublicLocationSelected;
 
   return { tooltipContent, isDisabled };
 };

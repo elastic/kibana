@@ -208,14 +208,11 @@ export const getAggregationsBuckets = ({
 }: {
   keys: string[];
   aggs?: Record<string, unknown>;
-}): Record<string, Buckets['buckets']> =>
-  keys.reduce(
-    (acc, key) => ({
-      ...acc,
-      [key]: getBucketFromAggregation({ aggs, key }),
-    }),
-    {}
-  );
+}) =>
+  keys.reduce<Record<string, Buckets['buckets']>>((acc, key) => {
+    acc[key] = getBucketFromAggregation({ aggs, key });
+    return acc;
+  }, {});
 
 export const getAttachmentsFrameworkStats = ({
   attachmentAggregations,
@@ -230,7 +227,7 @@ export const getAttachmentsFrameworkStats = ({
     return emptyAttachmentFramework();
   }
 
-  const averageFileSize = filesAggregations?.averageSize?.value;
+  const averageFileSize = getAverageFileSize(filesAggregations);
   const topMimeTypes = filesAggregations?.topMimeTypes;
 
   return {
@@ -251,6 +248,14 @@ export const getAttachmentsFrameworkStats = ({
       }),
     },
   };
+};
+
+const getAverageFileSize = (filesAggregations?: FileAttachmentAggsResult) => {
+  if (filesAggregations?.averageSize?.value == null) {
+    return 0;
+  }
+
+  return Math.round(filesAggregations.averageSize.value);
 };
 
 const getAttachmentRegistryStats = (

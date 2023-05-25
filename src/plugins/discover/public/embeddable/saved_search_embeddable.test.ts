@@ -132,13 +132,16 @@ describe('saved search embeddable', () => {
     jest.spyOn(embeddable, 'updateOutput');
 
     embeddable.render(mountpoint);
+    expect(render).toHaveBeenCalledTimes(1);
     await waitOneTick();
+    expect(render).toHaveBeenCalledTimes(2);
 
     const searchProps = discoverComponent.find(SavedSearchEmbeddableComponent).prop('searchProps');
 
     searchProps.onAddColumn!('bytes');
     await waitOneTick();
     expect(searchProps.columns).toEqual(['message', 'extension', 'bytes']);
+    expect(render).toHaveBeenCalledTimes(4); // twice per an update to show and then hide a loading indicator
 
     searchProps.onRemoveColumn!('bytes');
     await waitOneTick();

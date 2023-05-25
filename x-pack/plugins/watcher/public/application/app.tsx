@@ -15,6 +15,7 @@ import {
   ApplicationStart,
   ExecutionContextStart,
 } from '@kbn/core/public';
+import type { SettingsStart } from '@kbn/core-ui-settings-browser';
 
 import { Router, Switch, Redirect, withRouter, RouteComponentProps } from 'react-router-dom';
 
@@ -48,6 +49,7 @@ export interface AppDeps {
   getUrlForApp: ApplicationStart['getUrlForApp'];
   executionContext: ExecutionContextStart;
   licenseManagementLocator?: LicenseManagementLocator;
+  settings: SettingsStart;
 }
 
 export const App = (deps: AppDeps) => {

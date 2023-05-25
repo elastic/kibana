@@ -372,7 +372,7 @@ export const registerEnterpriseSearchIntegrations = (
         defaultMessage: 'Add search to your website with the Enterprise Search web crawler.',
       }),
       categories: ['enterprise_search', 'app_search', 'web', 'elastic_stack', 'crawler'],
-      uiInternalPath: '/app/enterprise_search/content/search_indices/new_index?method=crawler',
+      uiInternalPath: '/app/enterprise_search/content/search_indices/new_index/crawler',
       icons: [
         {
           type: 'eui',
@@ -393,7 +393,7 @@ export const registerEnterpriseSearchIntegrations = (
       defaultMessage: "Add search to your application with Elasticsearch's robust APIs.",
     }),
     categories: ['enterprise_search', 'custom', 'elastic_stack', 'sdk_search', 'language_client'],
-    uiInternalPath: '/app/enterprise_search/content/search_indices/new_index?method=api',
+    uiInternalPath: '/app/enterprise_search/content/search_indices/new_index/api',
     icons: [
       {
         type: 'eui',
@@ -422,7 +422,7 @@ export const registerEnterpriseSearchIntegrations = (
       ),
       categories: ['enterprise_search', 'custom', 'elastic_stack', 'connector', 'native_search'],
       uiInternalPath:
-        '/app/enterprise_search/content/search_indices/new_index?method=native_connector',
+        '/app/enterprise_search/content/search_indices/new_index/connector/select_connector',
       icons: [
         {
           type: 'eui',
@@ -432,7 +432,8 @@ export const registerEnterpriseSearchIntegrations = (
       shipper: 'enterprise_search',
       isBeta: false,
     });
-
+  }
+  if (config.hasConnectors) {
     customIntegrations.registerCustomIntegration({
       id: 'mongodb',
       title: i18n.translate('xpack.enterpriseSearch.workplaceSearch.integrations.mongoDBName', {
@@ -453,7 +454,7 @@ export const registerEnterpriseSearchIntegrations = (
         'connector_client',
       ],
       uiInternalPath:
-        '/app/enterprise_search/content/search_indices/new_index?method=native_connector',
+        '/app/enterprise_search/content/search_indices/new_index/connector?service_type=mongodb',
       icons: [
         {
           type: 'svg',
@@ -484,7 +485,7 @@ export const registerEnterpriseSearchIntegrations = (
         'connector_client',
       ],
       uiInternalPath:
-        '/app/enterprise_search/content/search_indices/new_index?method=native_connector',
+        '/app/enterprise_search/content/search_indices/new_index/connector?service_type=mysql',
       icons: [
         {
           type: 'svg',
@@ -494,9 +495,6 @@ export const registerEnterpriseSearchIntegrations = (
       shipper: 'enterprise_search',
       isBeta: false,
     });
-  }
-
-  if (config.hasConnectors) {
     customIntegrations.registerCustomIntegration({
       id: 'build_a_connector',
       title: i18n.translate('xpack.enterpriseSearch.integrations.buildAConnectorName', {
@@ -509,7 +507,8 @@ export const registerEnterpriseSearchIntegrations = (
         }
       ),
       categories: ['enterprise_search', 'custom', 'elastic_stack', 'connector_client'],
-      uiInternalPath: '/app/enterprise_search/content/search_indices/new_index?method=connector',
+      uiInternalPath:
+        '/app/enterprise_search/content/search_indices/new_index/connector?service_type=custom',
       icons: [
         {
           type: 'eui',
@@ -532,7 +531,8 @@ export const registerEnterpriseSearchIntegrations = (
         }
       ),
       categories: ['enterprise_search', 'elastic_stack', 'custom', 'datastore'],
-      uiInternalPath: '/app/enterprise_search/content/search_indices/new_index?method=connector',
+      uiInternalPath:
+        '/app/enterprise_search/content/search_indices/new_index/connector?service_type=postgresql',
       icons: [
         {
           type: 'svg',
@@ -557,7 +557,8 @@ export const registerEnterpriseSearchIntegrations = (
         }
       ),
       categories: ['enterprise_search', 'elastic_stack', 'custom', 'datastore'],
-      uiInternalPath: '/app/enterprise_search/content/search_indices/new_index?method=connector',
+      uiInternalPath:
+        '/app/enterprise_search/content/search_indices/new_index/connector?service_type=oracle',
       icons: [
         {
           type: 'svg',
@@ -569,7 +570,7 @@ export const registerEnterpriseSearchIntegrations = (
     });
 
     customIntegrations.registerCustomIntegration({
-      id: 'ms_sql',
+      id: 'mssql',
       title: i18n.translate('xpack.enterpriseSearch.workplaceSearch.integrations.msSqlName', {
         defaultMessage: 'Microsoft SQL',
       }),
@@ -581,13 +582,12 @@ export const registerEnterpriseSearchIntegrations = (
         }
       ),
       categories: ['enterprise_search', 'custom', 'elastic_stack', 'datastore'],
-      uiInternalPath: '/app/enterprise_search/content/search_indices/new_index?method=connector',
+      uiInternalPath:
+        '/app/enterprise_search/content/search_indices/new_index/connector?service_type=mssql',
       icons: [
         {
           type: 'svg',
-          src: http.basePath.prepend(
-            '/plugins/enterpriseSearch/assets/source_icons/microsoft_sql.svg'
-          ),
+          src: http.basePath.prepend('/plugins/enterpriseSearch/assets/source_icons/mssql.svg'),
         },
       ],
       shipper: 'enterprise_search',
@@ -617,7 +617,8 @@ export const registerEnterpriseSearchIntegrations = (
         'connector_client',
         'connector_package',
       ],
-      uiInternalPath: '/app/enterprise_search/content/search_indices/new_index?method=connector',
+      uiInternalPath:
+        '/app/enterprise_search/content/search_indices/new_index/connector?service_type=network_drive',
       icons: [
         {
           type: 'svg',
@@ -642,11 +643,12 @@ export const registerEnterpriseSearchIntegrations = (
         }
       ),
       categories: ['enterprise_search', 'datastore', 'elastic_stack'],
-      uiInternalPath: '/app/enterprise_search/content/search_indices/new_index?method=connector',
+      uiInternalPath:
+        '/app/enterprise_search/content/search_indices/new_index/connector?service_type=s3',
       icons: [
         {
           type: 'svg',
-          src: http.basePath.prepend('/plugins/enterpriseSearch/assets/source_icons/amazon_s3.svg'),
+          src: http.basePath.prepend('/plugins/enterpriseSearch/assets/source_icons/s3.svg'),
         },
       ],
       shipper: 'enterprise_search',
@@ -666,12 +668,13 @@ export const registerEnterpriseSearchIntegrations = (
         }
       ),
       categories: ['enterprise_search', 'elastic_stack', 'custom'],
-      uiInternalPath: '/app/enterprise_search/content/search_indices/new_index?method=connector',
+      uiInternalPath:
+        '/app/enterprise_search/content/search_indices/new_index/connector?service_type=google_cloud_storage',
       icons: [
         {
           type: 'svg',
           src: http.basePath.prepend(
-            '/plugins/enterpriseSearch/assets/source_icons/google_cloud.svg'
+            '/plugins/enterpriseSearch/assets/source_icons/google_cloud_storage.svg'
           ),
         },
       ],
@@ -691,12 +694,90 @@ export const registerEnterpriseSearchIntegrations = (
         }
       ),
       categories: ['enterprise_search', 'elastic_stack', 'custom'],
-      uiInternalPath: '/app/enterprise_search/content/search_indices/new_index?method=connector',
+      uiInternalPath:
+        '/app/enterprise_search/content/search_indices/new_index/connector?service_type=azure_blob_storage',
       icons: [
         {
           type: 'svg',
           src: http.basePath.prepend(
-            '/plugins/enterpriseSearch/assets/source_icons/azure_blob.svg'
+            '/plugins/enterpriseSearch/assets/source_icons/azure_blob_storage.svg'
+          ),
+        },
+      ],
+      shipper: 'enterprise_search',
+      isBeta: false,
+    });
+    customIntegrations.registerCustomIntegration({
+      id: 'confluence_cloud_server',
+      title: i18n.translate('xpack.enterpriseSearch.integrations.connectors.confluenceTitle', {
+        defaultMessage: 'Confluence Cloud & Server',
+      }),
+      description: i18n.translate(
+        'xpack.enterpriseSearch.integrations.connectors.confluenceDescription',
+        {
+          defaultMessage:
+            'Search over your content on Confluence Cloud & Server with Enterprise Search.',
+        }
+      ),
+      categories: ['enterprise_search', 'elastic_stack', 'custom'],
+      uiInternalPath:
+        '/app/enterprise_search/content/search_indices/new_index/connector?service_type=confluence',
+      icons: [
+        {
+          type: 'svg',
+          src: http.basePath.prepend(
+            '/plugins/enterpriseSearch/assets/source_icons/confluence_cloud.svg'
+          ),
+        },
+      ],
+      shipper: 'enterprise_search',
+      isBeta: false,
+    });
+    customIntegrations.registerCustomIntegration({
+      id: 'jira_cloud_server',
+      title: i18n.translate('xpack.enterpriseSearch.integrations.connectors.jiraTitle', {
+        defaultMessage: 'Jira Cloud & Server',
+      }),
+      description: i18n.translate(
+        'xpack.enterpriseSearch.integrations.connectors.jiraDescription',
+        {
+          defaultMessage: 'Search over your content on Jira Cloud & Server with Enterprise Search.',
+        }
+      ),
+      categories: ['enterprise_search', 'elastic_stack', 'custom'],
+      uiInternalPath:
+        '/app/enterprise_search/content/search_indices/new_index/connector?service_type=jira',
+      icons: [
+        {
+          type: 'svg',
+          src: http.basePath.prepend(
+            '/plugins/enterpriseSearch/assets/source_icons/jira_cloud.svg'
+          ),
+        },
+      ],
+      shipper: 'enterprise_search',
+      isBeta: false,
+    });
+    customIntegrations.registerCustomIntegration({
+      id: 'sharepoint_online_connector',
+      title: i18n.translate('xpack.enterpriseSearch.integrations.connectors.sharepointTitle', {
+        defaultMessage: 'Sharepoint Online & Server',
+      }),
+      description: i18n.translate(
+        'xpack.enterpriseSearch.integrations.connectors.sharepointDescription',
+        {
+          defaultMessage:
+            'Search over your content on Sharepoint Online & Server with Enterprise Search.',
+        }
+      ),
+      categories: ['enterprise_search', 'elastic_stack', 'custom'],
+      uiInternalPath:
+        '/app/enterprise_search/content/search_indices/new_index/connector?service_type=sharepoint',
+      icons: [
+        {
+          type: 'svg',
+          src: http.basePath.prepend(
+            '/plugins/enterpriseSearch/assets/source_icons/sharepoint_online.svg'
           ),
         },
       ],

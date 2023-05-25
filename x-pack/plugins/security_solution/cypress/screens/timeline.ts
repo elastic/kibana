@@ -33,6 +33,8 @@ export const COMBO_BOX_INPUT = '[data-test-subj="comboBoxInput"]';
 
 export const CREATE_NEW_TIMELINE = '[data-test-subj="timeline-new"]';
 
+export const CREATE_NEW_TIMELINE_WITH_BORDER = '[data-test-subj="timeline-new-with-border"]';
+
 export const CREATE_NEW_TIMELINE_TEMPLATE = '[data-test-subj="template-timeline-new"]';
 
 export const DATA_PROVIDERS = '.field-value';
@@ -91,6 +93,8 @@ export const NOTES_CODE_BLOCK = '.euiCode';
 export const NOTES_AUTHOR = '.euiCommentEvent__headerUsername';
 
 export const NOTES_LINK = '[data-test-subj="markdown-link"]';
+
+export const DELETE_NOTE = '[data-test-subj="delete-note"]';
 
 export const MARKDOWN_INVESTIGATE_BUTTON =
   '[data-test-subj="insight-investigate-in-timeline-button"]';
@@ -207,7 +211,7 @@ export const TIMELINE_FILTER_OPERATOR = '[data-test-subj="filterOperatorList"]';
 export const TIMELINE_FILTER_VALUE =
   '[data-test-subj="filterParamsComboBox phraseParamsComboxBox"]';
 
-export const TIMELINE_FLYOUT = '[data-test-subj="eui-flyout"]';
+export const TIMELINE_FLYOUT = '[data-test-subj="timeline-flyout"]';
 
 export const TIMELINE_FLYOUT_HEADER = '[data-test-subj="query-tab-flyout-header"]';
 
@@ -315,6 +319,8 @@ export const GET_TIMELINE_GRID_CELL = (fieldName: string) =>
 export const EMPTY_DROPPABLE_DATA_PROVIDER_GROUP = `.empty-providers-group`;
 
 export const TIMELINE_DATA_PROVIDERS_CONTAINER = '[data-test-subj="dataProviders"]';
+
+export const TIMELINE_VIEW_IN_ANALYZER = '[data-test-subj="view-in-analyzer"]';
 
 export const EMPTY_DATA_PROVIDER_AREA = `.timeline-drop-area-empty`;
 

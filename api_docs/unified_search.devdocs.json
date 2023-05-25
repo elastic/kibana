@@ -359,7 +359,7 @@
             "label": "props",
             "description": [],
             "signature": [
-              "{ indexPatterns?: ",
+              "{ isClearable?: boolean | undefined; placeholder?: string | undefined; isDisabled?: boolean | undefined; isLoading?: boolean | undefined; indexPatterns?: ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -367,7 +367,7 @@
                 "section": "def-common.DataView",
                 "text": "DataView"
               },
-              "[] | undefined; placeholder?: string | undefined; query?: ",
+              "[] | undefined; query?: ",
               {
                 "pluginId": "@kbn/es-query",
                 "scope": "common",
@@ -385,7 +385,7 @@
                 "section": "def-common.Filter",
                 "text": "Filter"
               },
-              "[] | undefined; dataTestSubj?: string | undefined; isLoading?: boolean | undefined; isDisabled?: boolean | undefined; timeHistory?: ",
+              "[] | undefined; dataTestSubj?: string | undefined; timeHistory?: ",
               {
                 "pluginId": "data",
                 "scope": "public",
@@ -475,7 +475,7 @@
                 "section": "def-common.TimeRange",
                 "text": "TimeRange"
               },
-              "; }) => void) | undefined; indicateNoData?: boolean | undefined; isClearable?: boolean | undefined; nonKqlMode?: \"text\" | \"lucene\" | undefined; displayStyle?: \"inPage\" | \"detached\" | undefined; fillSubmitButton?: boolean | undefined; dataViewPickerComponentProps?: ",
+              "; }) => void) | undefined; onRefreshChange?: (((options: { isPaused: boolean; refreshInterval: number; }) => void) & ((options: { isPaused: boolean; refreshInterval: number; }) => void)) | undefined; indicateNoData?: boolean | undefined; nonKqlMode?: \"text\" | \"lucene\" | undefined; disableQueryLanguageSwitcher?: boolean | undefined; displayStyle?: \"inPage\" | \"detached\" | undefined; fillSubmitButton?: boolean | undefined; dataViewPickerComponentProps?: ",
               {
                 "pluginId": "unifiedSearch",
                 "scope": "public",
@@ -487,7 +487,7 @@
               "OnSaveTextLanguageQueryProps",
               ") => void) | undefined; showSubmitButton?: boolean | undefined; submitButtonStyle?: \"full\" | \"auto\" | \"iconOnly\" | undefined; suggestionsSize?: ",
               "SuggestionsListSize",
-              " | undefined; isScreenshotMode?: boolean | undefined; onFiltersUpdated?: ((filters: ",
+              " | undefined; isScreenshotMode?: boolean | undefined; submitOnBlur?: boolean | undefined; onFiltersUpdated?: ((filters: ",
               {
                 "pluginId": "@kbn/es-query",
                 "scope": "common",
@@ -495,7 +495,7 @@
                 "section": "def-common.Filter",
                 "text": "Filter"
               },
-              "[]) => void) | undefined; onRefreshChange?: ((options: { isPaused: boolean; refreshInterval: number; }) => void) | undefined; }"
+              "[]) => void) | undefined; }"
             ],
             "path": "src/plugins/unified_search/public/search_bar/index.tsx",
             "deprecated": false,
@@ -2019,9 +2019,9 @@
           "Omit",
           "<Omit<",
           "EuiComboBoxProps",
-          "<any>, \"options\" | \"onChange\" | \"isLoading\" | \"selectedOptions\" | \"onSearchChange\">, \"placeholder\"> & Required<Pick<Omit<",
+          "<any>, \"options\" | \"selectedOptions\" | \"onChange\" | \"isLoading\" | \"onSearchChange\">, \"placeholder\"> & Required<Pick<Omit<",
           "EuiComboBoxProps",
-          "<any>, \"options\" | \"onChange\" | \"isLoading\" | \"selectedOptions\" | \"onSearchChange\">, \"placeholder\">> & { onChange: (indexPatternId?: string | undefined) => void; indexPatternId: string; onNoIndexPatterns?: (() => void) | undefined; }"
+          "<any>, \"options\" | \"selectedOptions\" | \"onChange\" | \"isLoading\" | \"onSearchChange\">, \"placeholder\">> & { onChange: (indexPatternId?: string | undefined) => void; indexPatternId: string; onNoIndexPatterns?: (() => void) | undefined; }"
         ],
         "path": "src/plugins/unified_search/public/index_pattern_select/index_pattern_select.tsx",
         "deprecated": false,

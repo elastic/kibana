@@ -14,19 +14,13 @@ import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { asSavedObjectExecutionSource } from '@kbn/actions-plugin/server';
 import type {
   ActionConnector,
-  CaseResponse,
+  Case,
   ExternalServiceResponse,
-  CasesConfigureAttributes,
+  ConfigurationAttributes,
   CommentRequestAlertType,
   CommentAttributes,
 } from '../../../common/api';
-import {
-  CaseResponseRt,
-  CaseStatuses,
-  ActionTypes,
-  OWNER_FIELD,
-  CommentType,
-} from '../../../common/api';
+import { CaseRt, CaseStatuses, ActionTypes, OWNER_FIELD, CommentType } from '../../../common/api';
 import { CASE_COMMENT_SAVED_OBJECT, CASE_SAVED_OBJECT } from '../../../common/constants';
 
 import { createIncident, getDurationInSeconds, getUserProfiles } from './utils';
@@ -47,7 +41,7 @@ import type { ICaseResponse } from '../typedoc_interfaces';
  * Returns true if the case should be closed based on the configuration settings.
  */
 function shouldCloseByPush(
-  configureSettings: SavedObjectsFindResponse<CasesConfigureAttributes>
+  configureSettings: SavedObjectsFindResponse<ConfigurationAttributes>
 ): boolean {
   return (
     configureSettings.total > 0 &&
@@ -103,7 +97,7 @@ export const push = async (
   clientArgs: CasesClientArgs,
   casesClient: CasesClient,
   casesClientInternal: CasesClientInternal
-): Promise<CaseResponse> => {
+): Promise<Case> => {
   const {
     unsecuredSavedObjectsClient,
     services: {
@@ -282,7 +276,7 @@ export const push = async (
 
     /* End of update case with push information */
 
-    return CaseResponseRt.encode(
+    return CaseRt.encode(
       flattenCaseSavedObject({
         savedObject: {
           ...myCase,

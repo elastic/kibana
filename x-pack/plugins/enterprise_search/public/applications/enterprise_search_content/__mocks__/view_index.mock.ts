@@ -10,9 +10,11 @@ import { ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE } from '../../../../co
 import {
   SyncStatus,
   ConnectorStatus,
+  FieldType,
   FilteringPolicy,
   FilteringRuleRule,
   FilteringValidationState,
+  DisplayType,
 } from '../../../../common/types/connectors';
 
 import {
@@ -44,12 +46,18 @@ export const connectorIndex: ConnectorViewIndex = {
     api_key_id: null,
     configuration: {
       foo: {
-        display: 'textbox',
-        key: 'foo',
+        default_value: '',
+        depends_on: [],
+        display: DisplayType.TEXTBOX,
         label: 'bar',
         options: [],
         order: 1,
+        required: false,
         sensitive: false,
+        tooltip: '',
+        type: FieldType.STRING,
+        ui_restrictions: [],
+        validations: [],
         value: 'barbar',
       },
     },
@@ -154,12 +162,18 @@ export const crawlerIndex: CrawlerViewIndex = {
     api_key_id: null,
     configuration: {
       foo: {
-        display: 'textbox',
-        key: 'foo',
+        default_value: '',
+        depends_on: [],
+        display: DisplayType.TEXTBOX,
         label: 'bar',
         options: [],
         order: 1,
+        required: false,
         sensitive: false,
+        tooltip: '',
+        type: FieldType.STRING,
+        ui_restrictions: [],
+        validations: [],
         value: 'barbar',
       },
     },

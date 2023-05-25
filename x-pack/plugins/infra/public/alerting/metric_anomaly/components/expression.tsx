@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiLoadingContent, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiSkeletonText, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
@@ -15,9 +15,9 @@ import {
   RuleTypeParamsExpressionProps,
   WhenExpression,
 } from '@kbn/triggers-actions-ui-plugin/public';
+import { ML_ANOMALY_THRESHOLD } from '@kbn/ml-anomaly-utils/anomaly_threshold';
 import { useSourceContext, withSourceProvider } from '../../../containers/metrics_source';
 import { MetricAnomalyParams } from '../../../../common/alerting/metrics';
-import { ANOMALY_THRESHOLD } from '../../../../common/infra_ml';
 import { findInventoryModel } from '../../../../common/inventory_models';
 import { InventoryItemType, SnapshotMetricType } from '../../../../common/inventory_models/types';
 import { SubscriptionSplashPrompt } from '../../../components/subscription_splash_content';
@@ -43,7 +43,7 @@ type Props = Omit<
 
 export const defaultExpression = {
   metric: 'memory_usage' as MetricAnomalyParams['metric'],
-  threshold: ANOMALY_THRESHOLD.MAJOR as MetricAnomalyParams['threshold'],
+  threshold: ML_ANOMALY_THRESHOLD.MAJOR as MetricAnomalyParams['threshold'],
   nodeType: 'hosts' as MetricAnomalyParams['nodeType'],
   influencerFilter: undefined,
 };
@@ -161,7 +161,7 @@ export const Expression: React.FC<Props> = (props) => {
     }
   }, [metadata, derivedIndexPattern, defaultExpression, source, space]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  if (isLoadingMLCapabilities) return <EuiLoadingContent lines={10} />;
+  if (isLoadingMLCapabilities) return <EuiSkeletonText lines={10} />;
   if (!hasInfraMLCapabilities) return <SubscriptionSplashPrompt />;
 
   return (
@@ -220,7 +220,7 @@ export const Expression: React.FC<Props> = (props) => {
         </StyledExpression>
         <StyledExpression>
           <SeverityThresholdExpression
-            value={ruleParams.threshold ?? ANOMALY_THRESHOLD.CRITICAL}
+            value={ruleParams.threshold ?? ML_ANOMALY_THRESHOLD.CRITICAL}
             onChange={updateSeverityThreshold}
           />
         </StyledExpression>

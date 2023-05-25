@@ -54,6 +54,7 @@ Object {
               >
                 cmd test alert
               </div>
+              
             </div>
           </div>
           <div
@@ -94,6 +95,9 @@ Object {
               </span>
             </span>
           </div>
+          <div
+            class="euiFlexItem emotion-euiFlexItem-growZero"
+          />
         </div>
       </div>
     </div>
@@ -148,6 +152,7 @@ Object {
             >
               cmd test alert
             </div>
+            
           </div>
         </div>
         <div
@@ -188,6 +193,9 @@ Object {
             </span>
           </span>
         </div>
+        <div
+          class="euiFlexItem emotion-euiFlexItem-growZero"
+        />
       </div>
     </div>
   </div>,

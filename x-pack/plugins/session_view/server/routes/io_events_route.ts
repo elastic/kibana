@@ -13,8 +13,8 @@ import { EventAction, EventKind } from '../../common/types/process_tree';
 import {
   IO_EVENTS_ROUTE,
   IO_EVENTS_PER_PAGE,
-  PROCESS_EVENTS_INDEX,
   ENTRY_SESSION_ENTITY_ID_PROPERTY,
+  TIMESTAMP_PROPERTY,
   PROCESS_ENTITY_ID_PROPERTY,
   PROCESS_EVENTS_PER_PAGE,
 } from '../../common/constants';
@@ -25,7 +25,9 @@ export const registerIOEventsRoute = (router: IRouter) => {
       path: IO_EVENTS_ROUTE,
       validate: {
         query: schema.object({
+          index: schema.string(),
           sessionEntityId: schema.string(),
+          sessionStartTime: schema.string(),
           cursor: schema.maybe(schema.string()),
           pageSize: schema.maybe(schema.number()),
         }),
@@ -33,17 +35,31 @@ export const registerIOEventsRoute = (router: IRouter) => {
     },
     async (context, request, response) => {
       const client = (await context.core).elasticsearch.client.asCurrentUser;
-      const { sessionEntityId, cursor, pageSize = IO_EVENTS_PER_PAGE } = request.query;
+      const {
+        index,
+        sessionEntityId,
+        sessionStartTime,
+        cursor,
+        pageSize = IO_EVENTS_PER_PAGE,
+      } = request.query;
 
       try {
         const search = await client.search({
-          index: [PROCESS_EVENTS_INDEX],
+          index: [index],
           body: {
             query: {
               bool: {
                 must: [
                   { term: { [ENTRY_SESSION_ENTITY_ID_PROPERTY]: sessionEntityId } },
                   { term: { [EVENT_ACTION]: 'text_output' } },
+                  {
+                    range: {
+                      // optimization to prevent data before this session from being hit.
+                      [TIMESTAMP_PROPERTY]: {
+                        gte: sessionStartTime,
+                      },
+                    },
+                  },
                 ],
               },
             },
@@ -72,6 +88,7 @@ export const registerIOEventsRoute = (router: IRouter) => {
 
 export const searchProcessWithIOEvents = async (
   client: ElasticsearchClient,
+  index: string,
   sessionEntityId: string,
   range?: string[]
 ) => {
@@ -90,7 +107,7 @@ export const searchProcessWithIOEvents = async (
 
   try {
     const search = await client.search({
-      index: [PROCESS_EVENTS_INDEX],
+      index: [index],
       body: {
         query: {
           bool: {

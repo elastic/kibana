@@ -34,7 +34,7 @@
         "signature": [
           "\"Security Solution Storybook\""
         ],
-        "path": "packages/security-solution/storybook/config/constants.ts",
+        "path": "x-pack/packages/security-solution/storybook/config/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -51,7 +51,7 @@
         "signature": [
           "\"https://github.com/elastic/kibana/tree/main/packages/security_solution\""
         ],
-        "path": "packages/security-solution/storybook/config/constants.ts",
+        "path": "x-pack/packages/security-solution/storybook/config/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

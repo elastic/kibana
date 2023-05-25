@@ -42,6 +42,8 @@ interface CreateAlertEventLogRecordParams {
     ongoing: number;
     recovered: number;
   };
+  maintenanceWindowIds?: string[];
+  ruleRevision?: number;
 }
 
 export function createAlertEventLogRecordObject(params: CreateAlertEventLogRecordParams): Event {
@@ -60,6 +62,8 @@ export function createAlertEventLogRecordObject(params: CreateAlertEventLogRecor
     flapping,
     alertUuid,
     alertSummary,
+    maintenanceWindowIds,
+    ruleRevision,
   } = params;
   const alerting =
     params.instanceId || group || alertSummary
@@ -92,8 +96,10 @@ export function createAlertEventLogRecordObject(params: CreateAlertEventLogRecor
     kibana: {
       alert: {
         ...(flapping !== undefined ? { flapping } : {}),
+        ...(maintenanceWindowIds ? { maintenance_window_ids: maintenanceWindowIds } : {}),
         ...(alertUuid ? { uuid: alertUuid } : {}),
         rule: {
+          revision: ruleRevision,
           rule_type_id: ruleType.id,
           ...(consumer ? { consumer } : {}),
           ...(executionId

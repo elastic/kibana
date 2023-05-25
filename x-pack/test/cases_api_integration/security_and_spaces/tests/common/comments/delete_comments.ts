@@ -15,7 +15,7 @@ import {
 } from '../../../../common/lib/alerts';
 import {
   createSignalsIndex,
-  deleteSignalsIndex,
+  deleteAllAlerts,
   deleteAllRules,
 } from '../../../../../detection_engine_api_integration/utils';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
@@ -128,12 +128,12 @@ export default ({ getService }: FtrProviderContext): void => {
         beforeEach(async () => {
           await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
           await createSignalsIndex(supertest, log);
-          const signals = await createSecuritySolutionAlerts(supertest, log);
+          const signals = await createSecuritySolutionAlerts(supertest, log, 2);
           alerts = [signals.hits.hits[0], signals.hits.hits[1]];
         });
 
         afterEach(async () => {
-          await deleteSignalsIndex(supertest, log);
+          await deleteAllAlerts(supertest, log, es);
           await deleteAllRules(supertest, log);
           await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/hosts');
         });
@@ -214,7 +214,7 @@ export default ({ getService }: FtrProviderContext): void => {
           });
         });
 
-        it('should NOT delete case ID from the alert schema when the user does NOT have access to the alert', async () => {
+        it('should delete case ID from the alert schema when the user does NOT have access to the alert', async () => {
           await createCaseAttachAlertAndDeleteAlert({
             supertest: supertestWithoutAuth,
             totalCases: 1,
@@ -222,7 +222,7 @@ export default ({ getService }: FtrProviderContext): void => {
             owner: 'securitySolutionFixture',
             alerts,
             getAlerts,
-            expectedHttpCode: 403,
+            expectedHttpCode: 204,
             deleteCommentAuth: { user: obsSec, space: 'space1' },
           });
         });
@@ -248,6 +248,7 @@ export default ({ getService }: FtrProviderContext): void => {
         ];
 
         const getAlerts = async (_alerts: Alerts) => {
+          await es.indices.refresh({ index: '.alerts-observability.apm.alerts' });
           const updatedAlerts = await Promise.all(
             _alerts.map((alert) =>
               getAlertById({
@@ -346,12 +347,12 @@ export default ({ getService }: FtrProviderContext): void => {
           });
         });
 
-        it('should NOT delete case ID from the alert schema when the user does NOT have access to the alert', async () => {
+        it('should delete case ID from the alert schema when the user does NOT have access to the alert', async () => {
           await createCaseAttachAlertAndDeleteAlert({
             supertest: supertestWithoutAuth,
             totalCases: 1,
             indexOfCaseToDelete: 0,
-            expectedHttpCode: 403,
+            expectedHttpCode: 204,
             owner: 'observabilityFixture',
             alerts,
             getAlerts,

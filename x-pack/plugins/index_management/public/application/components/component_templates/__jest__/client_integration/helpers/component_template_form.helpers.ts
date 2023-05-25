@@ -66,14 +66,14 @@ export const getFormActions = (testBed: TestBed) => {
 
   const completeStepSettings = async (settings?: { [key: string]: any }) => {
     const { find, component } = testBed;
+    const settingsValue = JSON.stringify(settings);
+
+    if (settingsValue) {
+      find('settingsEditor').getDOMNode().setAttribute('data-currentvalue', settingsValue);
+      find('settingsEditor').simulate('change');
+    }
 
     await act(async () => {
-      if (settings) {
-        find('settingsEditor').simulate('change', {
-          jsonString: JSON.stringify(settings),
-        }); // Using mocked EuiCodeEditor
-      }
-
       clickNextButton();
     });
 
@@ -119,14 +119,14 @@ export const getFormActions = (testBed: TestBed) => {
 
   const completeStepAliases = async (aliases?: { [key: string]: any }) => {
     const { find, component } = testBed;
+    const aliasesValue = JSON.stringify(aliases);
+
+    if (aliasesValue) {
+      find('aliasesEditor').getDOMNode().setAttribute('data-currentvalue', aliasesValue);
+      find('aliasesEditor').simulate('change');
+    }
 
     await act(async () => {
-      if (aliases) {
-        find('aliasesEditor').simulate('change', {
-          jsonString: JSON.stringify(aliases),
-        }); // Using mocked EuiCodeEditor
-      }
-
       clickNextButton();
     });
 

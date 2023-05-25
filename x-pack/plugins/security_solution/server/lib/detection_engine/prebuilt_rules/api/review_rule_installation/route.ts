@@ -79,7 +79,7 @@ export const reviewRuleInstallationRoute = (router: SecuritySolutionPluginRouter
 
 const getAggregatedTags = (rules: PrebuiltRuleAsset[]): string[] => {
   const set = new Set<string>(rules.flatMap((rule) => rule.tags || []));
-  return Array.from(set.values());
+  return Array.from(set.values()).sort((a, b) => a.localeCompare(b));
 };
 
 const calculateRuleStats = (

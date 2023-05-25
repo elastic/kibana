@@ -18,8 +18,7 @@ import { cleanupAgentPolicies, unenrollAgent } from '../tasks/cleanup';
 import { getIntegrationCard } from '../screens/integrations';
 
 import {
-  FLEET_SERVER_MISSING_PRIVILEGES_TITLE,
-  FLEET_SERVER_MISSING_PRIVILEGES_MESSAGE,
+  FLEET_SERVER_MISSING_PRIVILEGES,
   ADD_AGENT_BUTTON_TOP,
   AGENT_POLICIES_TAB,
   AGENT_POLICY_SAVE_INTEGRATION,
@@ -70,8 +69,8 @@ describe('When the user has All privilege for Fleet but Read for integrations', 
   describe('When there are no agent policies', () => {
     it('If fleet server is not set up, Fleet shows a callout', () => {
       loginWithUserAndWaitForPage(FLEET, FleetAllIntegrReadUser);
-      cy.getBySel(FLEET_SERVER_MISSING_PRIVILEGES_TITLE).should('have.text', 'Permission denied');
-      cy.getBySel(FLEET_SERVER_MISSING_PRIVILEGES_MESSAGE).should(
+      cy.getBySel(FLEET_SERVER_MISSING_PRIVILEGES.TITLE).should('have.text', 'Permission denied');
+      cy.getBySel(FLEET_SERVER_MISSING_PRIVILEGES.MESSAGE).should(
         'contain',
         'Fleet Server needs to be set up.'
       );

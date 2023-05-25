@@ -7,7 +7,7 @@
 
 import { useSelector } from 'react-redux';
 import { useMemo } from 'react';
-import { useEsSearch } from '@kbn/observability-plugin/public';
+import { useEsSearch } from '@kbn/observability-shared-plugin/public';
 import { selectEncryptedSyntheticsSavedMonitors } from '../../../state';
 import { useSyntheticsRefreshContext } from '../../../contexts/synthetics_refresh_context';
 import { getInlineErrorFilters } from './use_inline_errors';

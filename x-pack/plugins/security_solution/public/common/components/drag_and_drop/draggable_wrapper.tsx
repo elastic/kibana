@@ -18,7 +18,7 @@ import { Draggable, Droppable } from 'react-beautiful-dnd';
 import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 
-import { TableId } from '../../../../common/types';
+import { TableId } from '@kbn/securitysolution-data-table';
 import { dragAndDropActions } from '../../store/drag_and_drop';
 import type { DataProvider } from '../../../timelines/components/timeline/data_providers/data_provider';
 import { ROW_RENDERER_BROWSER_EXAMPLE_TIMELINE_ID } from '../../../timelines/components/row_renderers_browser/constants';

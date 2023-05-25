@@ -49,3 +49,4 @@ export { pkgKeyFromPackageInfo } from './pkg_key_from_package_info';
 export { createExtensionRegistrationCallback } from './ui_extensions';
 export { incrementPolicyName } from './increment_policy_name';
 export { generateNewAgentPolicyWithDefaults } from './generate_new_agent_policy';
+export { getCloudFormationTemplateUrlFromPackagePolicy } from './get_cloud_formation_template_url_from_package_policy';

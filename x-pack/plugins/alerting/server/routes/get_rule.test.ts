@@ -49,6 +49,7 @@ describe('getRuleRoute', () => {
           query: {
             kql: 'name:test',
             dsl: '{"must": {"term": { "name": "test" }}}',
+            filters: [],
           },
           timeframe: {
             days: [1],

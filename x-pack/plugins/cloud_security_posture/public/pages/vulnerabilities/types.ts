@@ -77,10 +77,9 @@ export interface VulnerabilityRecord {
 }
 
 export interface Vulnerability {
-  published_at: string;
+  published_date: string;
   score: {
     version: string;
-    impact: number;
     base: number;
   };
   cwe: string[];
@@ -107,7 +106,7 @@ export interface Vulnerability {
   package: {
     version: string;
     name: string;
-    fixed_version: string;
+    fixed_version?: string;
   };
 }
 

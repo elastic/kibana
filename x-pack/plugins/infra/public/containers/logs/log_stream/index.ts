@@ -109,7 +109,7 @@ export function useLogStream({
             ...(resetOnSuccess ? INITIAL_STATE : prevState),
             entries: combined.entries,
             hasMoreAfter: combined.hasMoreAfter ?? prevState.hasMoreAfter,
-            hasMoreBefore: combined.hasMoreAfter ?? prevState.hasMoreAfter,
+            hasMoreBefore: combined.hasMoreBefore ?? prevState.hasMoreBefore,
             bottomCursor: combined.bottomCursor,
             topCursor: combined.topCursor,
             lastLoadedTime: new Date(),
@@ -151,9 +151,9 @@ export function useLogStream({
 
   const fetchPreviousEntries = useCallback<FetchPageCallback>(
     (params) => {
-      if (state.topCursor === null) {
+      if (state.topCursor === null && state.hasMoreBefore) {
         throw new Error(
-          'useLogStream: Cannot fetch previous entries. No cursor is set.\nEnsure you have called `fetchEntries` at least once.'
+          'useLogStream: Cannot fetch previous entries.\nIt seems there are more entries available, but no cursor is set.\nEnsure you have called `fetchEntries` at least once.'
         );
       }
 
@@ -161,10 +161,12 @@ export function useLogStream({
         return;
       }
 
-      fetchLogEntriesBefore(state.topCursor, {
-        size: LOG_ENTRIES_CHUNK_SIZE,
-        extendTo: params?.extendTo,
-      });
+      if (state.topCursor !== null) {
+        fetchLogEntriesBefore(state.topCursor, {
+          size: LOG_ENTRIES_CHUNK_SIZE,
+          extendTo: params?.extendTo,
+        });
+      }
     },
     [fetchLogEntriesBefore, state.topCursor, state.hasMoreBefore]
   );
@@ -198,7 +200,7 @@ export function useLogStream({
 
   const fetchNextEntries = useCallback<FetchPageCallback>(
     (params) => {
-      if (state.bottomCursor === null) {
+      if (state.bottomCursor === null && state.hasMoreAfter) {
         throw new Error(
           'useLogStream: Cannot fetch next entries. No cursor is set.\nEnsure you have called `fetchEntries` at least once.'
         );
@@ -208,10 +210,12 @@ export function useLogStream({
         return;
       }
 
-      fetchLogEntriesAfter(state.bottomCursor, {
-        size: LOG_ENTRIES_CHUNK_SIZE,
-        extendTo: params?.extendTo,
-      });
+      if (state.bottomCursor !== null) {
+        fetchLogEntriesAfter(state.bottomCursor, {
+          size: LOG_ENTRIES_CHUNK_SIZE,
+          extendTo: params?.extendTo,
+        });
+      }
     },
     [fetchLogEntriesAfter, state.bottomCursor, state.hasMoreAfter]
   );

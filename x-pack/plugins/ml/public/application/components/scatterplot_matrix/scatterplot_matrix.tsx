@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import React, { useMemo, useEffect, useState, FC, useCallback } from 'react';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import rison from '@kbn/rison';
+import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
 
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
   EuiCallOut,
   EuiComboBox,
@@ -23,20 +22,17 @@ import {
   EuiSwitch,
 } from '@elastic/eui';
 
+import rison from '@kbn/rison';
 import { i18n } from '@kbn/i18n';
 import { Query } from '@kbn/data-plugin/common/query';
-
 import { DataView } from '@kbn/data-views-plugin/public';
 import { stringHash } from '@kbn/ml-string-hash';
-import { extractErrorMessage } from '../../../../common';
+import { extractErrorMessage } from '@kbn/ml-error-utils';
 import { isRuntimeMappings } from '../../../../common/util/runtime_field_utils';
 import { RuntimeMappings } from '../../../../common/types/fields';
-import { getCombinedRuntimeMappings } from '../data_grid';
 
-import { useMlApiContext, useMlKibana } from '../../contexts/kibana';
-
-import { getProcessedFields } from '../data_grid';
-import { useCurrentEuiTheme } from '../color_range_legend';
+import { getCombinedRuntimeMappings, getProcessedFields } from '../data_grid';
+import { useCurrentThemeVars, useMlApiContext, useMlKibana } from '../../contexts/kibana';
 
 // Separate imports for lazy loadable VegaChart and related code
 import { VegaChart } from '../vega_chart';
@@ -149,7 +145,7 @@ export const ScatterplotMatrix: FC<ScatterplotMatrixProps> = ({
     { items: any[]; backgroundItems: any[]; columns: string[]; messages: string[] } | undefined
   >();
 
-  const { euiTheme } = useCurrentEuiTheme();
+  const { euiTheme } = useCurrentThemeVars();
 
   // formats the array of field names for EuiComboBox
   const fieldOptions = useMemo(

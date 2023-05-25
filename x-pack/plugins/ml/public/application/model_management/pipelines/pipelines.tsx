@@ -45,9 +45,8 @@ export const ModelPipelines: FC<ModelPipelinesProps> = ({ pipelines, ingestStats
         const pipelineDefinition = pipelines?.[pipelineName];
 
         return (
-          <>
+          <React.Fragment key={pipelineName}>
             <EuiAccordion
-              key={pipelineName}
               id={pipelineName}
               buttonContent={
                 <EuiTitle size="xs">
@@ -81,7 +80,7 @@ export const ModelPipelines: FC<ModelPipelinesProps> = ({ pipelines, ingestStats
               initialIsOpen={initialIsOpen}
             >
               <EuiFlexGrid columns={2}>
-                {ingestStats?.pipelines ? (
+                {ingestStats!.pipelines[pipelineName]?.processors ? (
                   <EuiFlexItem data-test-subj={`mlTrainedModelPipelineIngestStats_${pipelineName}`}>
                     <EuiPanel>
                       <EuiTitle size={'xxs'}>
@@ -93,7 +92,7 @@ export const ModelPipelines: FC<ModelPipelinesProps> = ({ pipelines, ingestStats
                         </h6>
                       </EuiTitle>
 
-                      <ProcessorsStats stats={ingestStats!.pipelines[pipelineName].processors} />
+                      <ProcessorsStats stats={ingestStats!.pipelines[pipelineName]?.processors} />
                     </EuiPanel>
                   </EuiFlexItem>
                 ) : null}
@@ -123,7 +122,7 @@ export const ModelPipelines: FC<ModelPipelinesProps> = ({ pipelines, ingestStats
                 ) : null}
               </EuiFlexGrid>
             </EuiAccordion>
-          </>
+          </React.Fragment>
         );
       })}
     </>

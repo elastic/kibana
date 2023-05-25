@@ -28,3 +28,4 @@ export { ConfirmForceInstallModal } from './confirm_force_install_modal';
 export { DevtoolsRequestFlyoutButton } from './devtools_request_flyout';
 export { HeaderReleaseBadge, InlineReleaseBadge } from './release_badge';
 export { WithGuidedOnboardingTour } from './with_guided_onboarding_tour';
+export { UninstallCommandFlyout } from './uninstall_command_flyout';

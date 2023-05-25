@@ -107,7 +107,7 @@ describe('SyntheticsPrivateLocation', () => {
     });
 
     try {
-      await syntheticsPrivateLocation.createMonitors(
+      await syntheticsPrivateLocation.createPackagePolicies(
         [{ config: testConfig, globalParams: {} }],
         {} as unknown as KibanaRequest,
         savedObjectsClientMock,
@@ -263,7 +263,7 @@ describe('SyntheticsPrivateLocation', () => {
         },
         'throttling.config': {
           type: 'text',
-          value: '5d/3u/20l',
+          value: JSON.stringify({ download: 5, upload: 3, latency: 20 }),
         },
         timeout: {
           type: 'text',
@@ -311,11 +311,7 @@ const dummyBrowserConfig: Partial<MonitorFields> & {
   'filter_journeys.match': '',
   'filter_journeys.tags': [],
   ignore_https_errors: false,
-  'throttling.is_enabled': true,
-  'throttling.download_speed': '5',
-  'throttling.upload_speed': '3',
-  'throttling.latency': '20',
-  'throttling.config': '5d/3u/20l',
+  throttling: { value: { download: '5', upload: '3', latency: '20' }, label: 'test', id: 'test' },
   id: '75cdd125-5b62-4459-870c-46f59bf37e89',
   config_id: '75cdd125-5b62-4459-870c-46f59bf37e89',
   fields: { config_id: '75cdd125-5b62-4459-870c-46f59bf37e89', run_once: true },

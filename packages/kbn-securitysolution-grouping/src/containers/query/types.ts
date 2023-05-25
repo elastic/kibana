@@ -6,7 +6,11 @@
  * Side Public License, v 1.
  */
 
-import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type {
+  InlineScript,
+  MappingRuntimeField,
+  MappingRuntimeFields,
+} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { BoolQuery } from '@kbn/es-query';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
@@ -23,10 +27,12 @@ export type NamedAggregation = Record<string, estypes.AggregationsAggregationCon
 export interface GroupingQueryArgs {
   additionalFilters: BoolAgg[];
   from: string;
-  groupByFields: string[];
-  pageNumber?: number;
+  groupByField: string;
   rootAggregations?: NamedAggregation[];
   runtimeMappings?: MappingRuntimeFields;
+  additionalAggregationsRoot?: NamedAggregation[];
+  pageNumber?: number;
+  uniqueValue: string;
   size?: number;
   sort?: Array<{ [category: string]: { order: 'asc' | 'desc' } }>;
   statsAggregations?: NamedAggregation[];
@@ -36,10 +42,17 @@ export interface GroupingQueryArgs {
 export interface MainAggregation extends NamedAggregation {
   groupByFields: {
     aggs: NamedAggregation;
-    multi_terms?: estypes.AggregationsAggregationContainer['multi_terms'];
-    terms?: estypes.AggregationsAggregationContainer['terms'];
+    terms: estypes.AggregationsAggregationContainer['terms'];
   };
 }
+
+export interface GroupingRuntimeField extends MappingRuntimeField {
+  script: InlineScript & {
+    params: Record<string, any>;
+  };
+}
+
+type GroupingMappingRuntimeFields = Record<'groupByField', GroupingRuntimeField>;
 
 export interface GroupingQuery extends estypes.QueryDslQueryContainer {
   aggs: MainAggregation;
@@ -48,7 +61,7 @@ export interface GroupingQuery extends estypes.QueryDslQueryContainer {
       filter: Array<BoolAgg | RangeAgg>;
     };
   };
-  runtime_mappings: MappingRuntimeFields | undefined;
+  runtime_mappings: MappingRuntimeFields & GroupingMappingRuntimeFields;
   size: number;
   _source: boolean;
 }

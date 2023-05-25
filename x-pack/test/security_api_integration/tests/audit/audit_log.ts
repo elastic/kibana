@@ -15,8 +15,7 @@ export default function ({ getService }: FtrProviderContext) {
   const retry = getService('retry');
   const { username, password } = getService('config').get('servers.kibana');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/119267
-  describe.skip('Audit Log', function () {
+  describe('Audit Log', function () {
     const logFilePath = Path.resolve(__dirname, '../../plugins/audit_log/audit.log');
     const logFile = new FileWrapper(logFilePath, retry);
 
@@ -27,12 +26,12 @@ export default function ({ getService }: FtrProviderContext) {
     it('logs audit events when reading and writing saved objects', async () => {
       await supertest.get('/audit_log?query=param').set('kbn-xsrf', 'foo').expect(204);
       await retry.waitFor('logs event in the dest file', async () => await logFile.isNotEmpty());
-
       const content = await logFile.readJSON();
 
       const httpEvent = content.find((c) => c.event.action === 'http_request');
       expect(httpEvent).to.be.ok();
       expect(httpEvent.trace.id).to.be.ok();
+
       expect(httpEvent.user.name).to.be(username);
       expect(httpEvent.kibana.space_id).to.be('default');
       expect(httpEvent.http.request.method).to.be('get');
@@ -45,7 +44,12 @@ export default function ({ getService }: FtrProviderContext) {
       expect(createEvent.user.name).to.be(username);
       expect(createEvent.kibana.space_id).to.be('default');
 
-      const findEvent = content.find((c) => c.event.action === 'saved_object_find');
+      // There are two 'saved_object_find' events in the log. One is by the fleet app for
+      // "epm - packages", the other is by the user for a dashboard (this is the one we are
+      // concerned with).
+      const findEvent = content.find(
+        (c) => c.event.action === 'saved_object_find' && c.kibana.saved_object.type === 'dashboard'
+      );
       expect(findEvent).to.be.ok();
       expect(findEvent.trace.id).to.be.ok();
       expect(findEvent.user.name).to.be(username);
@@ -65,7 +69,6 @@ export default function ({ getService }: FtrProviderContext) {
         })
         .expect(200);
       await retry.waitFor('logs event in the dest file', async () => await logFile.isNotEmpty());
-
       const content = await logFile.readJSON();
 
       const loginEvent = content.find((c) => c.event.action === 'user_login');
@@ -90,7 +93,6 @@ export default function ({ getService }: FtrProviderContext) {
         })
         .expect(401);
       await retry.waitFor('logs event in the dest file', async () => await logFile.isNotEmpty());
-
       const content = await logFile.readJSON();
 
       const loginEvent = content.find((c) => c.event.action === 'user_login');

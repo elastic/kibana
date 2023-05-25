@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import type { Subscription } from 'rxjs';
-import { Subject } from 'rxjs';
+import { BehaviorSubject, Subject } from 'rxjs';
 import { combineLatestWith } from 'rxjs/operators';
 import type * as H from 'history';
 import type {
@@ -45,6 +45,7 @@ import {
 import { getDeepLinks, registerDeepLinksUpdater } from './app/deep_links';
 import type { LinksPermissions } from './common/links';
 import { updateAppLinks } from './common/links';
+import { navLinks$ } from './common/links/nav_links';
 import { licenseService } from './common/hooks/use_license';
 import type { SecuritySolutionUiConfigType } from './common/types';
 import { ExperimentalFeaturesService } from './common/experimental_features_service';
@@ -86,6 +87,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
   private telemetry: TelemetryService;
 
   readonly experimentalFeatures: ExperimentalFeatures;
+  private isSidebarEnabled$: BehaviorSubject<boolean>;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.config = this.initializerContext.config.get<SecuritySolutionUiConfigType>();
@@ -93,7 +95,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     this.kibanaVersion = initializerContext.env.packageInfo.version;
     this.kibanaBranch = initializerContext.env.packageInfo.branch;
     this.prebuiltRulesPackageVersion = this.config.prebuiltRulesPackageVersion;
-
+    this.isSidebarEnabled$ = new BehaviorSubject<boolean>(true);
     this.telemetry = new TelemetryService();
   }
   private appUpdater$ = new Subject<AppUpdater>();
@@ -168,6 +170,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
           getPluginWrapper: () => SecuritySolutionTemplateWrapper,
         },
         savedObjectsManagement: startPluginsDeps.savedObjectsManagement,
+        isSidebarEnabled$: this.isSidebarEnabled$,
         telemetry: this.telemetry.start(),
       };
       return services;
@@ -194,7 +197,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         const subPlugins = await this.startSubPlugins(this.storage, coreStart, startPlugins);
         const store = await this.store(coreStart, startPlugins, subPlugins);
         const services = await startServices(params);
-        await this.registerActions(startPlugins, store, params.history, services);
+        await this.registerActions(store, params.history, services);
 
         const { renderApp } = await this.lazyApplicationDependencies();
         const { getSubPluginRoutesByCapabilities } = await this.lazyHelpersForRoutes();
@@ -245,7 +248,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     };
   }
 
-  public start(core: CoreStart, plugins: StartPlugins) {
+  public start(core: CoreStart, plugins: StartPlugins): PluginStart {
     KibanaServices.init({
       ...core,
       ...plugins,
@@ -306,7 +309,11 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     // Not using await to prevent blocking start execution
     this.registerAppLinks(core, plugins);
 
-    return {};
+    return {
+      getNavLinks$: () => navLinks$,
+      setIsSidebarEnabled: (isSidebarEnabled: boolean) =>
+        this.isSidebarEnabled$.next(isSidebarEnabled),
+    };
   }
 
   public stop() {
@@ -405,7 +412,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         overview: new subPluginClasses.Overview(),
         timelines: new subPluginClasses.Timelines(),
         management: new subPluginClasses.Management(),
-        landingPages: new subPluginClasses.LandingPages(),
         cloudDefend: new subPluginClasses.CloudDefend(),
         cloudSecurityPosture: new subPluginClasses.CloudSecurityPosture(),
         threatIntelligence: new subPluginClasses.ThreatIntelligence(),
@@ -432,7 +438,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       exceptions: subPlugins.exceptions.start(storage),
       explore: subPlugins.explore.start(storage),
       kubernetes: subPlugins.kubernetes.start(),
-      landingPages: subPlugins.landingPages.start(),
       management: subPlugins.management.start(core, plugins),
       overview: subPlugins.overview.start(),
       rules: subPlugins.rules.start(storage),
@@ -466,14 +471,13 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
   }
 
   private async registerActions(
-    plugins: StartPlugins,
     store: SecurityAppStore,
     history: H.History,
     services: StartServices
   ) {
     if (!this._actionsRegistered) {
       const { registerActions } = await this.lazyActions();
-      registerActions(plugins, store, history, services);
+      registerActions(store, history, services);
       this._actionsRegistered = true;
     }
   }

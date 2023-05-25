@@ -6,7 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { ALERT_EVALUATION_THRESHOLD, ALERT_EVALUATION_VALUE } from '@kbn/rule-data-utils';
+import {
+  ALERT_CONTEXT,
+  ALERT_EVALUATION_THRESHOLD,
+  ALERT_EVALUATION_VALUE,
+  ALERT_EVALUATION_VALUES,
+} from '@kbn/rule-data-utils';
 
 export const legacyExperimentalFieldMap = {
   [ALERT_EVALUATION_THRESHOLD]: {
@@ -15,6 +20,13 @@ export const legacyExperimentalFieldMap = {
     required: false,
   },
   [ALERT_EVALUATION_VALUE]: { type: 'scaled_float', scaling_factor: 100, required: false },
+  [ALERT_CONTEXT]: { type: 'object', array: false, required: false },
+  [ALERT_EVALUATION_VALUES]: {
+    type: 'scaled_float',
+    scaling_factor: 100,
+    required: false,
+    array: true,
+  },
 } as const;
 
 export type ExperimentalRuleFieldMap = typeof legacyExperimentalFieldMap;

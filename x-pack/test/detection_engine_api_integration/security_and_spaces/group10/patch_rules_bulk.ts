@@ -14,7 +14,7 @@ import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   createSignalsIndex,
   deleteAllRules,
-  deleteSignalsIndex,
+  deleteAllAlerts,
   getSimpleRule,
   getSimpleRuleOutput,
   removeServerGeneratedProperties,
@@ -22,12 +22,14 @@ import {
   removeServerGeneratedPropertiesIncludingRuleId,
   createRule,
   createLegacyRuleAction,
+  getLegacyActionSO,
 } from '../../utils';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const log = getService('log');
+  const es = getService('es');
 
   describe('patch_rules_bulk', () => {
     describe('deprecations', () => {
@@ -56,7 +58,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       afterEach(async () => {
-        await deleteSignalsIndex(supertest, log);
+        await deleteAllAlerts(supertest, log, es);
         await deleteAllRules(supertest, log);
       });
 
@@ -169,6 +171,14 @@ export default ({ getService }: FtrProviderContext) => {
           createLegacyRuleAction(supertest, rule1.id, connector.body.id),
           createLegacyRuleAction(supertest, rule2.id, connector.body.id),
         ]);
+
+        // check for legacy sidecar action
+        const sidecarActionsResults = await getLegacyActionSO(es);
+        expect(sidecarActionsResults.hits.hits.length).to.eql(2);
+        expect(
+          sidecarActionsResults.hits.hits.map((hit) => hit?._source?.references[0].id).sort()
+        ).to.eql([rule1.id, rule2.id].sort());
+
         // patch a simple rule's name
         const { body } = await supertest
           .patch(DETECTION_ENGINE_RULES_BULK_UPDATE)
@@ -178,6 +188,10 @@ export default ({ getService }: FtrProviderContext) => {
             { id: rule2.id, enabled: false },
           ])
           .expect(200);
+
+        // legacy sidecar action should be gone
+        const sidecarActionsPostResults = await getLegacyActionSO(es);
+        expect(sidecarActionsPostResults.hits.hits.length).to.eql(0);
 
         // @ts-expect-error
         body.forEach((response) => {
@@ -193,10 +207,10 @@ export default ({ getService }: FtrProviderContext) => {
                   'Hourly\nRule {{context.rule.name}} generated {{state.signals_count}} alerts',
               },
               uuid: bodyToCompare.actions[0].uuid,
+              frequency: { summary: true, throttle: '1h', notifyWhen: 'onThrottleInterval' },
             },
           ];
-          outputRule.throttle = '1h';
-          outputRule.revision = 2; // Expected revision is 2 as call to `createLegacyRuleAction()` does two separate rules updates for `notifyWhen` & `actions` field
+          outputRule.revision = 1;
           expect(bodyToCompare).to.eql(outputRule);
         });
       });

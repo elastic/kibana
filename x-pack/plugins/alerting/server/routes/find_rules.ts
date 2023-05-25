@@ -20,7 +20,7 @@ import {
   RuleTypeParams,
   AlertingRequestHandlerContext,
   BASE_ALERTING_API_PATH,
-  INTERNAL_BASE_ALERTING_API_PATH,
+  INTERNAL_ALERTING_API_FIND_RULES_PATH,
 } from '../types';
 import { trackLegacyTerminology } from './lib/track_legacy_terminology';
 
@@ -136,7 +136,7 @@ const buildFindRulesRoute = ({
       })
     )
   );
-  if (path === `${INTERNAL_BASE_ALERTING_API_PATH}/rules/_find`) {
+  if (path === INTERNAL_ALERTING_API_FIND_RULES_PATH) {
     router.post(
       {
         path,
@@ -205,7 +205,7 @@ export const findInternalRulesRoute = (
   buildFindRulesRoute({
     excludeFromPublicApi: false,
     licenseState,
-    path: `${INTERNAL_BASE_ALERTING_API_PATH}/rules/_find`,
+    path: INTERNAL_ALERTING_API_FIND_RULES_PATH,
     router,
     usageCounter,
   });

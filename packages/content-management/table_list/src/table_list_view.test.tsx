@@ -1067,4 +1067,109 @@ describe('TableListView', () => {
       expect(router?.history.location?.search).toBe('?sort=title&sortdir=desc');
     });
   });
+
+  describe('row item actions', () => {
+    const hits: UserContentCommonSchema[] = [
+      {
+        id: '123',
+        updatedAt: twoDaysAgo.toISOString(),
+        type: 'dashboard',
+        attributes: {
+          title: 'Item 1',
+          description: 'Item 1 description',
+        },
+        references: [],
+      },
+      {
+        id: '456',
+        updatedAt: yesterday.toISOString(),
+        type: 'dashboard',
+        attributes: {
+          title: 'Item 2',
+          description: 'Item 2 description',
+        },
+        references: [],
+      },
+    ];
+
+    const setupTest = async (props?: Partial<TableListViewProps>) => {
+      let testBed: TestBed | undefined;
+      const deleteItems = jest.fn();
+      await act(async () => {
+        testBed = await setup({
+          findItems: jest.fn().mockResolvedValue({ total: hits.length, hits }),
+          deleteItems,
+          ...props,
+        });
+      });
+
+      testBed!.component.update();
+      return { testBed: testBed!, deleteItems };
+    };
+
+    test('should allow select items to be deleted', async () => {
+      const {
+        testBed: { table, find, exists, component, form },
+        deleteItems,
+      } = await setupTest();
+
+      const { tableCellsValues } = table.getMetaData('itemsInMemTable');
+
+      expect(tableCellsValues).toEqual([
+        ['', 'Item 2Item 2 description', yesterdayToString], // First empty col is the "checkbox"
+        ['', 'Item 1Item 1 description', twoDaysAgoToString],
+      ]);
+
+      const selectedHit = hits[1];
+
+      expect(exists('deleteSelectedItems')).toBe(false);
+      act(() => {
+        // Select the second item
+        form.selectCheckBox(`checkboxSelectRow-${selectedHit.id}`);
+      });
+      component.update();
+      // Delete button is now visible
+      expect(exists('deleteSelectedItems')).toBe(true);
+
+      // Click delete and validate that confirm modal opens
+      expect(component.exists('.euiModal--confirmation')).toBe(false);
+      act(() => {
+        find('deleteSelectedItems').simulate('click');
+      });
+      component.update();
+      expect(component.exists('.euiModal--confirmation')).toBe(true);
+
+      await act(async () => {
+        find('confirmModalConfirmButton').simulate('click');
+      });
+      expect(deleteItems).toHaveBeenCalledWith([selectedHit]);
+    });
+
+    test('should allow to disable the "delete" action for a row', async () => {
+      const reasonMessage = 'This file cannot be deleted.';
+
+      const {
+        testBed: { find },
+      } = await setupTest({
+        rowItemActions: (obj) => {
+          if (obj.id === hits[1].id) {
+            return {
+              delete: {
+                enabled: false,
+                reason: reasonMessage,
+              },
+            };
+          }
+        },
+      });
+
+      const firstCheckBox = find(`checkboxSelectRow-${hits[0].id}`);
+      const secondCheckBox = find(`checkboxSelectRow-${hits[1].id}`);
+
+      expect(firstCheckBox.props().disabled).toBe(false);
+      expect(secondCheckBox.props().disabled).toBe(true);
+      // EUI changes the check "title" from "Select this row" to the reason to disable the checkbox
+      expect(secondCheckBox.props().title).toBe(reasonMessage);
+    });
+  });
 });

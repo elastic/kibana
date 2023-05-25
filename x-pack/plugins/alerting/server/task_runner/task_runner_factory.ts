@@ -24,6 +24,7 @@ import { IEventLogger } from '@kbn/event-log-plugin/server';
 import { PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
 import { SharePluginStart } from '@kbn/share-plugin/server';
 import {
+  RuleAlertData,
   RuleTypeParams,
   RuleTypeRegistry,
   SpaceIdToNamespaceFunction,
@@ -32,6 +33,7 @@ import {
   AlertInstanceContext,
   RulesClientApi,
   RulesSettingsClientApi,
+  MaintenanceWindowClientApi,
 } from '../types';
 import { TaskRunner } from './task_runner';
 import { NormalizedRuleType } from '../rule_type_registry';
@@ -65,6 +67,7 @@ export interface TaskRunnerContext {
   cancelAlertsOnRuleTimeout: boolean;
   usageCounter?: UsageCounter;
   getRulesSettingsClientWithRequest(request: KibanaRequest): RulesSettingsClientApi;
+  getMaintenanceWindowClientWithRequest(request: KibanaRequest): MaintenanceWindowClientApi;
 }
 
 export class TaskRunnerFactory {
@@ -86,7 +89,8 @@ export class TaskRunnerFactory {
     InstanceState extends AlertInstanceState,
     InstanceContext extends AlertInstanceContext,
     ActionGroupIds extends string,
-    RecoveryActionGroupId extends string
+    RecoveryActionGroupId extends string,
+    AlertData extends RuleAlertData
   >(
     ruleType: NormalizedRuleType<
       Params,
@@ -95,7 +99,8 @@ export class TaskRunnerFactory {
       InstanceState,
       InstanceContext,
       ActionGroupIds,
-      RecoveryActionGroupId
+      RecoveryActionGroupId,
+      AlertData
     >,
     { taskInstance }: RunContext,
     inMemoryMetrics: InMemoryMetrics
@@ -111,7 +116,8 @@ export class TaskRunnerFactory {
       InstanceState,
       InstanceContext,
       ActionGroupIds,
-      RecoveryActionGroupId
+      RecoveryActionGroupId,
+      AlertData
     >(ruleType, taskInstance, this.taskRunnerContext!, inMemoryMetrics);
   }
 }

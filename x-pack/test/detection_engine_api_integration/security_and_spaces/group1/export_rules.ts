@@ -8,13 +8,14 @@
 import expect from 'expect';
 
 import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
+import { RuleResponse } from '@kbn/security-solution-plugin/common/detection_engine/rule_schema';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   binaryToString,
   createRule,
   createSignalsIndex,
   deleteAllRules,
-  deleteSignalsIndex,
+  deleteAllAlerts,
   getSimpleRule,
   getSimpleRuleOutput,
   getWebHookAction,
@@ -26,6 +27,7 @@ import {
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const log = getService('log');
+  const es = getService('es');
 
   describe('export_rules', () => {
     describe('exporting rules', () => {
@@ -34,7 +36,7 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       afterEach(async () => {
-        await deleteSignalsIndex(supertest, log);
+        await deleteAllAlerts(supertest, log, es);
         await deleteAllRules(supertest, log);
       });
 
@@ -208,10 +210,17 @@ export default ({ getService }: FtrProviderContext): void => {
         const outputRule1: ReturnType<typeof getSimpleRuleOutput> = {
           ...getSimpleRuleOutput('rule-1'),
           actions: [
-            { ...action1, uuid: firstRule.actions[0].uuid },
-            { ...action2, uuid: firstRule.actions[1].uuid },
+            {
+              ...action1,
+              uuid: firstRule.actions[0].uuid,
+              frequency: { summary: true, throttle: null, notifyWhen: 'onActiveAlert' },
+            },
+            {
+              ...action2,
+              uuid: firstRule.actions[1].uuid,
+              frequency: { summary: true, throttle: null, notifyWhen: 'onActiveAlert' },
+            },
           ],
-          throttle: 'rule',
         };
         expect(firstRule).toEqual(outputRule1);
       });
@@ -258,13 +267,23 @@ export default ({ getService }: FtrProviderContext): void => {
 
         const outputRule1: ReturnType<typeof getSimpleRuleOutput> = {
           ...getSimpleRuleOutput('rule-2'),
-          actions: [{ ...action, uuid: firstRule.actions[0].uuid }],
-          throttle: 'rule',
+          actions: [
+            {
+              ...action,
+              uuid: firstRule.actions[0].uuid,
+              frequency: { summary: true, throttle: null, notifyWhen: 'onActiveAlert' },
+            },
+          ],
         };
         const outputRule2: ReturnType<typeof getSimpleRuleOutput> = {
           ...getSimpleRuleOutput('rule-1'),
-          actions: [{ ...action, uuid: secondRule.actions[0].uuid }],
-          throttle: 'rule',
+          actions: [
+            {
+              ...action,
+              uuid: secondRule.actions[0].uuid,
+              frequency: { summary: true, throttle: null, notifyWhen: 'onActiveAlert' },
+            },
+          ],
         };
         expect(firstRule).toEqual(outputRule1);
         expect(secondRule).toEqual(outputRule2);
@@ -437,9 +456,9 @@ export default ({ getService }: FtrProviderContext): void => {
                   message:
                     'Hourly\nRule {{context.rule.name}} generated {{state.signals_count}} alerts',
                 },
+                frequency: { summary: true, throttle: '1h', notifyWhen: 'onThrottleInterval' },
               },
             ],
-            throttle: '1h',
           };
           const firstRuleParsed = JSON.parse(body.toString().split(/\n/)[0]);
           const firstRule = removeServerGeneratedProperties(firstRuleParsed);
@@ -514,6 +533,7 @@ export default ({ getService }: FtrProviderContext): void => {
                   message:
                     'Hourly\nRule {{context.rule.name}} generated {{state.signals_count}} alerts',
                 },
+                frequency: { summary: true, throttle: '1h', notifyWhen: 'onThrottleInterval' },
               },
               {
                 group: 'default',
@@ -523,9 +543,9 @@ export default ({ getService }: FtrProviderContext): void => {
                   message:
                     'Hourly\nRule {{context.rule.name}} generated {{state.signals_count}} alerts',
                 },
+                frequency: { summary: true, throttle: '1h', notifyWhen: 'onThrottleInterval' },
               },
             ],
-            throttle: '1h',
           };
           const firstRuleParsed = JSON.parse(body.toString().split(/\n/)[0]);
           const firstRule = removeServerGeneratedProperties(firstRuleParsed);
@@ -631,6 +651,7 @@ export default ({ getService }: FtrProviderContext): void => {
                   message:
                     'Hourly\nRule {{context.rule.name}} generated {{state.signals_count}} alerts',
                 },
+                frequency: { summary: true, throttle: '1h', notifyWhen: 'onThrottleInterval' },
               },
               {
                 group: 'default',
@@ -640,9 +661,9 @@ export default ({ getService }: FtrProviderContext): void => {
                   message:
                     'Hourly\nRule {{context.rule.name}} generated {{state.signals_count}} alerts',
                 },
+                frequency: { summary: true, throttle: '1h', notifyWhen: 'onThrottleInterval' },
               },
             ],
-            throttle: '1h',
           };
 
           const outputRule2: ReturnType<typeof getSimpleRuleOutput> = {
@@ -656,6 +677,7 @@ export default ({ getService }: FtrProviderContext): void => {
                   message:
                     'Hourly\nRule {{context.rule.name}} generated {{state.signals_count}} alerts',
                 },
+                frequency: { summary: true, throttle: '1h', notifyWhen: 'onThrottleInterval' },
               },
               {
                 group: 'default',
@@ -665,9 +687,9 @@ export default ({ getService }: FtrProviderContext): void => {
                   message:
                     'Hourly\nRule {{context.rule.name}} generated {{state.signals_count}} alerts',
                 },
+                frequency: { summary: true, throttle: '1h', notifyWhen: 'onThrottleInterval' },
               },
             ],
-            throttle: '1h',
           };
           const firstRuleParsed = JSON.parse(body.toString().split(/\n/)[0]);
           const secondRuleParsed = JSON.parse(body.toString().split(/\n/)[1]);
@@ -682,7 +704,8 @@ export default ({ getService }: FtrProviderContext): void => {
   });
 };
 
-function expectToMatchRuleSchema(obj: unknown): void {
+function expectToMatchRuleSchema(obj: RuleResponse): void {
+  expect(obj.throttle).toBeUndefined();
   expect(obj).toEqual({
     id: expect.any(String),
     rule_id: expect.any(String),
@@ -718,7 +741,6 @@ function expectToMatchRuleSchema(obj: unknown): void {
     language: expect.any(String),
     index: expect.arrayContaining([]),
     query: expect.any(String),
-    throttle: expect.any(String),
     actions: expect.arrayContaining([]),
   });
 }

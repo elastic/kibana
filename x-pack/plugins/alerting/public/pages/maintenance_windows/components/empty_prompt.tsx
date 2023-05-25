@@ -30,7 +30,7 @@ export const EmptyPrompt = React.memo<EmptyPromptProps>(
           <EuiButtonEmpty
             key="documentation-button"
             target="_blank"
-            href={docLinks.alerting.guide}
+            href={docLinks.alerting.maintenanceWindows}
             iconType="help"
           >
             {i18n.EMPTY_PROMPT_DOCUMENTATION}
@@ -41,7 +41,12 @@ export const EmptyPrompt = React.memo<EmptyPromptProps>(
     }, [showCreateButton, onClickCreate, docLinks]);
 
     return (
-      <EuiPageTemplate.EmptyPrompt title={emptyTitle} body={emptyBody} actions={renderActions} />
+      <EuiPageTemplate.EmptyPrompt
+        data-test-subj="mw-empty-prompt"
+        title={emptyTitle}
+        body={emptyBody}
+        actions={renderActions}
+      />
     );
   }
 );

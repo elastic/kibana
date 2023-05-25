@@ -11,8 +11,6 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { EuiSteps } from '@elastic/eui';
-
 import { Status } from '../../../../../../common/types/api';
 
 import { NewSearchIndexTemplate } from '../new_search_index_template';
@@ -27,10 +25,9 @@ describe('MethodConnector', () => {
   });
 
   it('renders connector ingestion method tab', () => {
-    const wrapper = shallow(<MethodConnector isNative={false} />);
+    const wrapper = shallow(<MethodConnector serviceType="mongodb" />);
     const template = wrapper.find(NewSearchIndexTemplate);
 
     expect(template.prop('type')).toEqual('connector');
-    expect(template.find(EuiSteps)).toHaveLength(1);
   });
 });

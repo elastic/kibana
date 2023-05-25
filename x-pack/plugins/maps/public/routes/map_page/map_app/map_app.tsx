@@ -47,8 +47,12 @@ import { AppStateManager, startAppStateSyncing } from '../url_state';
 import { MapContainer } from '../../../connected_components/map_container';
 import { getIndexPatternsFromIds } from '../../../index_pattern_util';
 import { getTopNavConfig } from '../top_nav_config';
-import { getEditPath, getFullPath, APP_ID } from '../../../../common/constants';
-import { getMapEmbeddableDisplayName } from '../../../../common/i18n_getters';
+import {
+  getEditPath,
+  getFullPath,
+  APP_ID,
+  MAP_EMBEDDABLE_NAME,
+} from '../../../../common/constants';
 import {
   getInitialQuery,
   getInitialRefreshConfig,
@@ -432,7 +436,7 @@ export class MapApp extends React.Component<Props, State> {
       await spaces.ui.redirectLegacyUrl({
         path: newPath,
         aliasPurpose: sharingSavedObjectProps.aliasPurpose,
-        objectNoun: getMapEmbeddableDisplayName(),
+        objectNoun: MAP_EMBEDDABLE_NAME,
       });
       return;
     }
@@ -547,7 +551,7 @@ export class MapApp extends React.Component<Props, State> {
     const spaces = getSpacesApi();
     return spaces && sharingSavedObjectProps?.outcome === 'conflict'
       ? spaces.ui.components.getLegacyUrlConflict({
-          objectNoun: getMapEmbeddableDisplayName(),
+          objectNoun: MAP_EMBEDDABLE_NAME,
           currentObjectId: this.props.savedMap.getSavedObjectId()!,
           otherObjectId: sharingSavedObjectProps.aliasTargetId!,
           otherObjectPath: `${getEditPath(sharingSavedObjectProps.aliasTargetId!)}${

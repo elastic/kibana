@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { OverlayStart, SavedObjectsClientContract } from '@kbn/core/public';
+import type { OverlayStart } from '@kbn/core/public';
 import type { VisSavedObject } from '../../types';
 import { SAVE_DUPLICATE_REJECTED } from './constants';
 import { findObjectByTitle } from './find_object_by_title';
@@ -27,11 +27,10 @@ export async function checkForDuplicateTitle(
   isTitleDuplicateConfirmed: boolean,
   onTitleDuplicate: (() => void) | undefined,
   services: {
-    savedObjectsClient: SavedObjectsClientContract;
     overlays: OverlayStart;
   }
 ): Promise<boolean> {
-  const { savedObjectsClient, overlays } = services;
+  const { overlays } = services;
   // Don't check for duplicates if user has already confirmed save with duplicate title
   if (isTitleDuplicateConfirmed) {
     return true;
@@ -43,11 +42,7 @@ export async function checkForDuplicateTitle(
     return true;
   }
 
-  const duplicate = await findObjectByTitle(
-    savedObjectsClient,
-    savedObject.getEsType(),
-    savedObject.title
-  );
+  const duplicate = await findObjectByTitle(savedObject.title);
 
   if (!duplicate || duplicate.id === savedObject.id) {
     return true;

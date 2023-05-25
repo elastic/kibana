@@ -24,7 +24,7 @@ import {
   extractReferences,
   DashboardAttributes,
   convertPanelMapToSavedPanels,
-  DashboardContainerByValueInput,
+  DashboardContainerInput,
 } from '../../../../common';
 import { DashboardSavedObjectRequiredServices } from '../types';
 import { DASHBOARD_SAVED_OBJECT_TYPE } from '../../../dashboard_constants';
@@ -34,13 +34,13 @@ export type SavedDashboardSaveOpts = SavedObjectSaveOpts & { saveAsCopy?: boolea
 
 export type SaveDashboardProps = DashboardSavedObjectRequiredServices & {
   savedObjectsClient: SavedObjectsClientContract;
-  currentState: DashboardContainerByValueInput;
+  currentState: DashboardContainerInput;
   saveOptions: SavedDashboardSaveOpts;
   lastSavedId?: string;
 };
 
 export const serializeControlGroupInput = (
-  controlGroupInput: DashboardContainerByValueInput['controlGroupInput']
+  controlGroupInput: DashboardContainerInput['controlGroupInput']
 ) => {
   // only save to saved object if control group is not default
   if (

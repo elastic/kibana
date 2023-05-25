@@ -19,7 +19,7 @@ import {
 
 describe('ensureAuthorized', () => {
   function setupDependencies() {
-    const actions = new Actions('some-version');
+    const actions = new Actions();
     jest
       .spyOn(actions.savedObject, 'get')
       .mockImplementation((type: string, action: string) => `mock-saved_object:${type}/${action}`);

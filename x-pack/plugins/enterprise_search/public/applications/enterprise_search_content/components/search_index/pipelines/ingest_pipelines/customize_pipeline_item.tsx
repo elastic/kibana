@@ -18,12 +18,12 @@ import { Status } from '../../../../../../../common/types/api';
 
 import { KibanaLogic } from '../../../../../shared/kibana';
 import { LicensingLogic } from '../../../../../shared/licensing';
-import { CreateCustomPipelineApiLogic } from '../../../../api/index/create_custom_pipeline_api_logic';
-
 import {
   LicensingCallout,
   LICENSING_FEATURE,
-} from '../../../shared/licensing_callout/licensing_callout';
+} from '../../../../../shared/licensing_callout/licensing_callout';
+import { CreateCustomPipelineApiLogic } from '../../../../api/index/create_custom_pipeline_api_logic';
+
 import { IndexViewLogic } from '../../index_view_logic';
 
 import { PipelinesLogic } from '../pipelines_logic';

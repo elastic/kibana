@@ -25,23 +25,26 @@ import { hostsActions } from '../../../../explore/hosts/store';
 import { usersActions } from '../../../../explore/users/store';
 import { getTabsOnUsersUrl } from '../../../../common/components/link_to/redirect_to_users';
 import { UsersTableType } from '../../../../explore/users/store/model';
-import { useNotableAnomaliesSearch } from '../../../../common/components/ml/anomaly/use_anomalies_search';
+import { useAggregatedAnomaliesByJob } from '../../../../common/components/ml/anomaly/use_anomalies_search';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { useMlCapabilities } from '../../../../common/components/ml/hooks/use_ml_capabilities';
 import { useQueryInspector } from '../../../../common/components/page/manage_query';
 import { ENTITY_ANALYTICS_ANOMALIES_PANEL } from '../anomalies';
 import { isJobStarted } from '../../../../../common/machine_learning/helpers';
 import { FormattedCount } from '../../../../common/components/formatted_number';
+import { SEVERITY_COLOR } from '../../detection_response/utils';
+import { useGlobalFilterQuery } from '../../../../common/hooks/use_global_filter_query';
 
 const StyledEuiTitle = styled(EuiTitle)`
-  color: ${({ theme: { eui } }) => eui.euiColorDanger};
+  color: ${({ theme: { eui } }) => SEVERITY_COLOR.critical};
 `;
 
 const HOST_RISK_QUERY_ID = 'hostRiskScoreKpiQuery';
 const USER_RISK_QUERY_ID = 'userRiskScoreKpiQuery';
 
 export const EntityAnalyticsHeader = () => {
-  const { from, to } = useGlobalTime(false);
+  const { from, to } = useGlobalTime();
+  const { filterQuery } = useGlobalFilterQuery();
   const timerange = useMemo(
     () => ({
       from,
@@ -58,6 +61,7 @@ export const EntityAnalyticsHeader = () => {
   } = useRiskScoreKpi({
     timerange,
     riskEntity: RiskScoreEntity.host,
+    filterQuery,
   });
 
   const {
@@ -66,11 +70,12 @@ export const EntityAnalyticsHeader = () => {
     refetch: refetchUserRiskScore,
     inspect: inspectUserRiskScore,
   } = useRiskScoreKpi({
+    filterQuery,
     timerange,
     riskEntity: RiskScoreEntity.user,
   });
 
-  const { data } = useNotableAnomaliesSearch({ skip: false, from, to });
+  const { data } = useAggregatedAnomaliesByJob({ skip: false, from, to });
 
   const dispatch = useDispatch();
   const getSecuritySolutionLinkProps = useGetSecuritySolutionLinkProps();

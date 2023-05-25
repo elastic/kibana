@@ -26,6 +26,7 @@
     ],
     "optionalPlugins": [
       "customIntegrations",
+      "globalSearch",
       "home",
       "ml",
       "spaces",

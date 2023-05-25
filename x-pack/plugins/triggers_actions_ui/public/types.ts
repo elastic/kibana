@@ -254,6 +254,10 @@ export interface ActionTypeModel<ActionConfig = any, ActionSecrets = any, Action
   defaultRecoveredActionParams?: RecursivePartial<ActionParams>;
   customConnectorSelectItem?: CustomConnectorSelectionItem;
   isExperimental?: boolean;
+  subtype?: Array<{ id: string; name: string }>;
+  convertParamsBetweenGroups?: (params: ActionParams) => ActionParams | {};
+  hideInUi?: boolean;
+  modalWidth?: number;
 }
 
 export interface GenericValidationResult<T> {
@@ -339,6 +343,11 @@ export type SanitizedRuleType = Omit<RuleType, 'apiKey'>;
 
 export type RuleUpdates = Omit<Rule, 'id' | 'executionStatus' | 'lastRun' | 'nextRun'>;
 
+export type RuleSnoozeSettings = Pick<
+  Rule,
+  'activeSnoozes' | 'isSnoozedUntil' | 'muteAll' | 'snoozeSchedule'
+>;
+
 export interface RuleTableItem extends Rule {
   ruleType: RuleType['name'];
   index: number;
@@ -346,7 +355,6 @@ export interface RuleTableItem extends Rule {
   isEditable: boolean;
   enabledInLicense: boolean;
   showIntervalWarning?: boolean;
-  activeSnoozes?: string[];
 }
 
 export interface RuleTypeParamsExpressionProps<
@@ -373,6 +381,11 @@ export interface RuleTypeParamsExpressionProps<
   dataViews: DataViewsPublicPluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
 }
+
+export type RuleParamsForRules = Record<
+  string,
+  Array<{ label: string; value: string | number | object }>
+>;
 
 export interface RuleTypeModel<Params extends RuleTypeParams = RuleTypeParams> {
   id: string;
@@ -523,6 +536,10 @@ export type AlertsTableProps = {
   controls?: EuiDataGridToolBarAdditionalControlsOptions;
   showInspectButton?: boolean;
   toolbarVisibility?: EuiDataGridToolBarVisibilityOptions;
+  /**
+   * Allows to consumers of the table to decide to highlight a row based on the current alert.
+   */
+  shouldHighlightRow?: (alert: Alert) => boolean;
 } & Partial<Pick<EuiDataGridProps, 'gridStyle' | 'rowHeightsOptions'>>;
 
 // TODO We need to create generic type between our plugin, right now we have different one because of the old alerts table
@@ -688,13 +705,14 @@ export interface ConnectorServices {
 }
 
 export interface RulesListFilters {
-  searchText: string;
-  types: string[];
   actionTypes: string[];
   ruleExecutionStatuses: string[];
   ruleLastRunOutcomes: string[];
+  ruleParams: Record<string, string | number | object>;
   ruleStatuses: RuleStatus[];
+  searchText: string;
   tags: string[];
+  types: string[];
 }
 
 export type UpdateFiltersProps =
@@ -709,6 +727,10 @@ export type UpdateFiltersProps =
   | {
       filter: 'types' | 'actionTypes' | 'ruleExecutionStatuses' | 'ruleLastRunOutcomes' | 'tags';
       value: string[];
+    }
+  | {
+      filter: 'ruleParams';
+      value: Record<string, string | number | object>;
     };
 
 export interface RulesPageContainerState {

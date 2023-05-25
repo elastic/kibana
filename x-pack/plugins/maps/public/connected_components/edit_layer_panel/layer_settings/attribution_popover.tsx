@@ -20,6 +20,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { Attribution } from '../../../../common/descriptor_types';
+import { panelStrings } from '../../panel_strings';
 
 interface Props {
   onChange: (attribution: Attribution) => void;
@@ -128,7 +129,7 @@ export class AttributionPopover extends Component<Props, State> {
               onClick={this._onApply}
               size="s"
             >
-              <FormattedMessage id="xpack.maps.attribution.applyBtnLabel" defaultMessage="Apply" />
+              {panelStrings.apply}
             </EuiButton>
           </EuiTextAlign>
         </EuiPopoverFooter>

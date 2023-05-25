@@ -16,8 +16,11 @@ import {
 } from '../../../../common/mock/endpoint';
 import { ResponseActionsLog } from '../response_actions_log';
 import type {
+  ActionDetails,
   ActionDetailsApiResponse,
   ActionFileInfoApiResponse,
+  ResponseActionUploadOutputContent,
+  ResponseActionUploadParameters,
 } from '../../../../../common/endpoint/types';
 import { MANAGEMENT_PATH } from '../../../../../common/constants';
 import { getActionListMock } from '../mocks';
@@ -29,6 +32,8 @@ import { responseActionsHttpMocks } from '../../../mocks/response_actions_http_m
 import { waitFor } from '@testing-library/react';
 import { getEndpointAuthzInitialStateMock } from '../../../../../common/endpoint/service/authz/mocks';
 import { useGetEndpointActionList as _useGetEndpointActionList } from '../../../hooks/response_actions/use_get_endpoint_action_list';
+import { OUTPUT_MESSAGES } from '../translations';
+import { EndpointActionGenerator } from '../../../../../common/endpoint/data_generators/endpoint_action_generator';
 
 const useGetEndpointActionListMock = _useGetEndpointActionList as jest.Mock;
 
@@ -117,8 +122,6 @@ jest.mock('@kbn/kibana-react-plugin/public', () => {
 });
 
 jest.mock('../../../hooks/endpoint/use_get_endpoints_list');
-
-jest.mock('../../../../common/experimental_features_service');
 
 jest.mock('../../../../common/components/user_privileges');
 const useUserPrivilegesMock = _useUserPrivileges as jest.Mock;
@@ -291,7 +294,7 @@ describe('Response actions history', () => {
           statuses: [],
           userIds: [],
           withOutputs: [],
-          withAutomatedActions: true,
+          withAutomatedActions: false,
         },
         expect.anything()
       );
@@ -462,6 +465,65 @@ describe('Response actions history', () => {
       expect(noTrays).toEqual([]);
     });
 
+    it('should show already expanded trays on page navigation', async () => {
+      // start with two pages worth of response actions
+      // 10 on page 1, 3 on page 2
+      useGetEndpointActionListMock.mockReturnValue({
+        ...getBaseMockedActionList(),
+        data: await getActionListMock({ actionCount: 13 }),
+      });
+      render();
+      const { getByTestId, getAllByTestId } = renderResult;
+
+      // on page 1
+      expect(getByTestId(`${testPrefix}-endpointListTableTotal`)).toHaveTextContent(
+        'Showing 1-10 of 13 response actions'
+      );
+      const expandButtonsOnPage1 = getAllByTestId(`${testPrefix}-expand-button`);
+      // expand 2nd, 4th, 6th rows
+      expandButtonsOnPage1.forEach((button, i) => {
+        if ([1, 3, 5].includes(i)) {
+          userEvent.click(button);
+        }
+      });
+      // verify 3 rows are expanded
+      const traysOnPage1 = getAllByTestId(`${testPrefix}-details-tray`);
+      expect(traysOnPage1).toBeTruthy();
+      expect(traysOnPage1.length).toEqual(3);
+
+      // go to 2nd page
+      const page2 = getByTestId('pagination-button-1');
+      userEvent.click(page2);
+
+      // verify on page 2
+      expect(getByTestId(`${testPrefix}-endpointListTableTotal`)).toHaveTextContent(
+        'Showing 11-13 of 13 response actions'
+      );
+
+      // go back to 1st page
+      userEvent.click(getByTestId('pagination-button-0'));
+      // verify on page 1
+      expect(getByTestId(`${testPrefix}-endpointListTableTotal`)).toHaveTextContent(
+        'Showing 1-10 of 13 response actions'
+      );
+
+      const traysOnPage1back = getAllByTestId(`${testPrefix}-details-tray`);
+      const expandButtonsOnPage1back = getAllByTestId(`${testPrefix}-expand-button`);
+      const expandedButtons = expandButtonsOnPage1back.reduce<number[]>((acc, button, i) => {
+        // find expanded rows
+        if (button.getAttribute('aria-label') === 'Collapse') {
+          acc.push(i);
+        }
+        return acc;
+      }, []);
+
+      // verify 3 rows are expanded
+      expect(traysOnPage1back).toBeTruthy();
+      expect(traysOnPage1back.length).toEqual(3);
+      // verify 3 rows that are expanded are the ones from before
+      expect(expandedButtons).toEqual([1, 3, 5]);
+    });
+
     it('should contain relevant details in each expanded row', async () => {
       render();
       const { getAllByTestId } = renderResult;
@@ -478,6 +540,7 @@ describe('Response actions history', () => {
           'Input',
           'Parameters',
           'Comment',
+          'Hostname',
           'Output:',
         ]
       );
@@ -652,10 +715,14 @@ describe('Response actions history', () => {
       });
 
       it('should contain expected output accordions for `execute` action WITH execute operation privilege', async () => {
-        const actionDetails = await getActionListMock({ actionCount: 1, commands: ['execute'] });
+        const actionListApiResponse = await getActionListMock({
+          actionCount: 1,
+          agentIds: ['agent-a'],
+          commands: ['execute'],
+        });
         useGetEndpointActionListMock.mockReturnValue({
           ...getBaseMockedActionList(),
-          data: actionDetails,
+          data: actionListApiResponse,
         });
 
         mockUseGetFileInfo = {
@@ -669,17 +736,7 @@ describe('Response actions history', () => {
           isFetched: true,
           error: null,
           data: {
-            data: {
-              ...apiMocks.responseProvider.actionDetails({
-                path: `/api/endpoint/action/${actionDetails.data[0].id}`,
-              }).data,
-              outputs: {
-                [actionDetails.data[0].agents[0]]: {
-                  content: {},
-                  type: 'json',
-                },
-              },
-            },
+            data: actionListApiResponse.data[0],
           },
         };
 
@@ -714,7 +771,11 @@ describe('Response actions history', () => {
         });
         useGetEndpointActionListMock.mockReturnValue({
           ...getBaseMockedActionList(),
-          data: await getActionListMock({ actionCount: 1, commands: ['execute'] }),
+          data: await getActionListMock({
+            actionCount: 1,
+            commands: ['execute'],
+            agentIds: ['agent-a'],
+          }),
         });
 
         render();
@@ -723,10 +784,7 @@ describe('Response actions history', () => {
         const expandButton = getByTestId(`${testPrefix}-expand-button`);
         userEvent.click(expandButton);
 
-        const executeAccordions = getByTestId(
-          `${testPrefix}-actionsLogTray-executeResponseOutput-output`
-        );
-        expect(executeAccordions).toBeTruthy();
+        expect(getByTestId(`${testPrefix}-actionsLogTray-executeResponseOutput-output`));
       });
 
       it('should not contain full output download link in expanded row for `execute` action WITHOUT Actions Log privileges', async () => {
@@ -793,9 +851,91 @@ describe('Response actions history', () => {
         }
       );
     });
+
+    describe('`upload` action', () => {
+      let action: ActionDetails<ResponseActionUploadOutputContent, ResponseActionUploadParameters>;
+
+      beforeEach(async () => {
+        action = new EndpointActionGenerator().generateActionDetails<
+          ResponseActionUploadOutputContent,
+          ResponseActionUploadParameters
+        >({ command: 'upload' });
+
+        const actionListApiResponse = await getActionListMock({
+          actionCount: 1,
+          commands: ['upload'],
+        });
+
+        actionListApiResponse.data = [action];
+
+        useGetEndpointActionListMock.mockReturnValue({
+          ...getBaseMockedActionList(),
+          data: actionListApiResponse,
+        });
+      });
+
+      it('should display pending output if action is not complete yet', () => {
+        action.isCompleted = false;
+        const { getByTestId } = render();
+        getByTestId(`${testPrefix}-expand-button`).click();
+
+        expect(getByTestId(`${testPrefix}-details-tray-output`)).toHaveTextContent(
+          OUTPUT_MESSAGES.isPending('upload')
+        );
+      });
+
+      it('should display output for single agent', () => {
+        const { getByTestId } = render();
+        getByTestId(`${testPrefix}-expand-button`).click();
+
+        expect(getByTestId(`${testPrefix}-uploadDetails`)).toHaveTextContent(
+          'upload completed successfully' +
+            'File saved to: /path/to/uploaded/file' +
+            'Free disk space on drive: 1.18MB'
+        );
+      });
+
+      it('should display output for multiple agents', () => {
+        action.agents.push('agent-b');
+        action.hosts['agent-b'] = {
+          name: 'host b',
+        };
+        action.agentState['agent-b'] = {
+          errors: undefined,
+          wasSuccessful: true,
+          isCompleted: true,
+          completedAt: '2023-05-10T20:09:25.824Z',
+        };
+        (action.outputs = action.outputs ?? {})['agent-b'] = {
+          type: 'json',
+          content: {
+            code: 'ra_upload_file-success',
+            path: 'some/path/to/file',
+            disk_free_space: 123445,
+          },
+        };
+
+        const { getByTestId } = render();
+        getByTestId(`${testPrefix}-expand-button`).click();
+
+        expect(getByTestId(`${testPrefix}-uploadDetails`)).toHaveTextContent(
+          'upload completed successfully' +
+            'Host: Host-agent-a' +
+            'File saved to: /path/to/uploaded/file' +
+            'Free disk space on drive: 1.18MB' +
+            'Host: host b' +
+            'File saved to: some/path/to/file' +
+            'Free disk space on drive: 120.55KB'
+        );
+      });
+    });
   });
 
   describe('Action status ', () => {
+    beforeEach(() => {
+      apiMocks = responseActionsHttpMocks(mockedContext.coreStart.http);
+    });
+
     const expandRows = () => {
       const { getAllByTestId } = renderResult;
 
@@ -805,58 +945,84 @@ describe('Response actions history', () => {
       return outputs;
     };
 
-    it('shows completed status badge for successfully completed actions', async () => {
-      useGetEndpointActionListMock.mockReturnValue({
-        ...getBaseMockedActionList(),
-        data: await getActionListMock({ actionCount: 2 }),
-      });
-      render();
+    it.each(RESPONSE_ACTION_API_COMMANDS_NAMES)(
+      'shows completed status badge for successfully completed %s actions',
+      async (command) => {
+        useGetEndpointActionListMock.mockReturnValue({
+          ...getBaseMockedActionList(),
+          data: await getActionListMock({ actionCount: 2, commands: [command] }),
+        });
+        if (command === 'get-file' || command === 'execute') {
+          mockUseGetFileInfo = {
+            isFetching: false,
+            error: null,
+            data: apiMocks.responseProvider.fileInfo(),
+          };
+        }
 
-      const outputs = expandRows();
-      expect(outputs.map((n) => n.textContent)).toEqual([
-        'isolate completed successfully',
-        'isolate completed successfully',
-      ]);
-      expect(
-        renderResult.getAllByTestId(`${testPrefix}-column-status`).map((n) => n.textContent)
-      ).toEqual(['Successful', 'Successful']);
-    });
+        render();
 
-    it('shows Failed status badge for failed actions', async () => {
-      useGetEndpointActionListMock.mockReturnValue({
-        ...getBaseMockedActionList(),
-        data: await getActionListMock({ actionCount: 2, wasSuccessful: false, status: 'failed' }),
-      });
-      render();
+        const outputs = expandRows();
+        expect(outputs.map((n) => n.textContent)).toEqual([
+          expect.stringContaining(`${command} completed successfully`),
+          expect.stringContaining(`${command} completed successfully`),
+        ]);
+        expect(
+          renderResult.getAllByTestId(`${testPrefix}-column-status`).map((n) => n.textContent)
+        ).toEqual(['Successful', 'Successful']);
+      }
+    );
 
-      const outputs = expandRows();
-      expect(outputs.map((n) => n.textContent)).toEqual(['isolate failed', 'isolate failed']);
-      expect(
-        renderResult.getAllByTestId(`${testPrefix}-column-status`).map((n) => n.textContent)
-      ).toEqual(['Failed', 'Failed']);
-    });
+    it.each(RESPONSE_ACTION_API_COMMANDS_NAMES)(
+      'shows Failed status badge for failed %s actions',
+      async (command) => {
+        useGetEndpointActionListMock.mockReturnValue({
+          ...getBaseMockedActionList(),
+          data: await getActionListMock({
+            actionCount: 2,
+            commands: [command],
+            wasSuccessful: false,
+            status: 'failed',
+          }),
+        });
+        render();
 
-    it('shows Failed status badge for expired actions', async () => {
-      useGetEndpointActionListMock.mockReturnValue({
-        ...getBaseMockedActionList(),
-        data: await getActionListMock({
-          actionCount: 2,
-          isCompleted: false,
-          isExpired: true,
-          status: 'failed',
-        }),
-      });
-      render();
+        const outputs = expandRows();
+        expect(outputs.map((n) => n.textContent)).toEqual([
+          `${command} failed`,
+          `${command} failed`,
+        ]);
+        expect(
+          renderResult.getAllByTestId(`${testPrefix}-column-status`).map((n) => n.textContent)
+        ).toEqual(['Failed', 'Failed']);
+      }
+    );
 
-      const outputs = expandRows();
-      expect(outputs.map((n) => n.textContent)).toEqual([
-        'isolate failed: action expired',
-        'isolate failed: action expired',
-      ]);
-      expect(
-        renderResult.getAllByTestId(`${testPrefix}-column-status`).map((n) => n.textContent)
-      ).toEqual(['Failed', 'Failed']);
-    });
+    it.each(RESPONSE_ACTION_API_COMMANDS_NAMES)(
+      'shows Failed status badge for expired %s actions',
+      async (command) => {
+        useGetEndpointActionListMock.mockReturnValue({
+          ...getBaseMockedActionList(),
+          data: await getActionListMock({
+            actionCount: 2,
+            commands: [command],
+            isCompleted: false,
+            isExpired: true,
+            status: 'failed',
+          }),
+        });
+        render();
+
+        const outputs = expandRows();
+        expect(outputs.map((n) => n.textContent)).toEqual([
+          `${command} failed: action expired`,
+          `${command} failed: action expired`,
+        ]);
+        expect(
+          renderResult.getAllByTestId(`${testPrefix}-column-status`).map((n) => n.textContent)
+        ).toEqual(['Failed', 'Failed']);
+      }
+    );
 
     it('shows Pending status badge for pending actions', async () => {
       useGetEndpointActionListMock.mockReturnValue({
@@ -892,6 +1058,7 @@ describe('Response actions history', () => {
     });
 
     it('should show a list of actions when opened', () => {
+      mockedContext.setExperimentalFlag({ responseActionUploadEnabled: true });
       render();
       const { getByTestId, getAllByTestId } = renderResult;
 
@@ -909,6 +1076,7 @@ describe('Response actions history', () => {
         'processes',
         'get-file',
         'execute',
+        'upload',
       ]);
     });
 
@@ -974,7 +1142,7 @@ describe('Response actions history', () => {
           statuses: ['failed', 'pending'],
           userIds: [],
           withOutputs: [],
-          withAutomatedActions: true,
+          withAutomatedActions: false,
         },
         expect.anything()
       );
@@ -1176,7 +1344,7 @@ describe('Response actions history', () => {
           statuses: [],
           userIds: [],
           withOutputs: [],
-          withAutomatedActions: true,
+          withAutomatedActions: false,
         },
         expect.anything()
       );

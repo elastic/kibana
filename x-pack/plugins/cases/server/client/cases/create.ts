@@ -6,20 +6,16 @@
  */
 
 import Boom from '@hapi/boom';
-import { pipe } from 'fp-ts/lib/pipeable';
-import { fold } from 'fp-ts/lib/Either';
-import { identity } from 'fp-ts/lib/function';
 
 import { SavedObjectsUtils } from '@kbn/core/server';
 
-import type { CaseResponse, CasePostRequest } from '../../../common/api';
+import type { Case, CasePostRequest } from '../../../common/api';
 import {
-  throwErrors,
-  CaseResponseRt,
+  CaseRt,
   ActionTypes,
   CasePostRequestRt,
-  excess,
   CaseSeverity,
+  decodeWithExcessOrThrow,
 } from '../../../common/api';
 import { MAX_ASSIGNEES_PER_CASE, MAX_TITLE_LENGTH } from '../../../common/constants';
 import { isInvalidTag, areTotalAssigneesInvalid } from '../../../common/utils/validators';
@@ -35,10 +31,7 @@ import { LICENSING_CASE_ASSIGNMENT_FEATURE } from '../../common/constants';
  *
  * @ignore
  */
-export const create = async (
-  data: CasePostRequest,
-  clientArgs: CasesClientArgs
-): Promise<CaseResponse> => {
+export const create = async (data: CasePostRequest, clientArgs: CasesClientArgs): Promise<Case> => {
   const {
     services: { caseService, userActionService, licensingService, notificationService },
     user,
@@ -46,12 +39,7 @@ export const create = async (
     authorization: auth,
   } = clientArgs;
 
-  const query = pipe(
-    excess(CasePostRequestRt).decode({
-      ...data,
-    }),
-    fold(throwErrors(Boom.badRequest), identity)
-  );
+  const query = decodeWithExcessOrThrow(CasePostRequestRt)(data);
 
   if (query.title.length > MAX_TITLE_LENGTH) {
     throw Boom.badRequest(
@@ -129,7 +117,7 @@ export const create = async (
       });
     }
 
-    return CaseResponseRt.encode(flattenedCase);
+    return CaseRt.encode(flattenedCase);
   } catch (error) {
     throw createCaseError({ message: `Failed to create case: ${error}`, error, logger });
   }

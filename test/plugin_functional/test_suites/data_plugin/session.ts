@@ -106,7 +106,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
       });
 
       it('starts a session on filter change', async () => {
-        await filterBar.removeAllFilters();
+        await filterBar.removeFilter('animal');
         const sessionIds = await getSessionIds();
         expect(sessionIds.length).to.be(1);
       });

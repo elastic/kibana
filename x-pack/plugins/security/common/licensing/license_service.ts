@@ -84,6 +84,7 @@ export class SecurityLicenseService {
         allowAuditLogging: false,
         allowRoleDocumentLevelSecurity: false,
         allowRoleFieldLevelSecurity: false,
+        allowRoleRemoteIndexPrivileges: false,
         allowRbac: false,
         allowSubFeaturePrivileges: false,
         allowUserProfileCollaboration: false,
@@ -104,6 +105,7 @@ export class SecurityLicenseService {
         allowAuditLogging: false,
         allowRoleDocumentLevelSecurity: false,
         allowRoleFieldLevelSecurity: false,
+        allowRoleRemoteIndexPrivileges: false,
         allowRbac: false,
         allowSubFeaturePrivileges: false,
         allowUserProfileCollaboration: false,
@@ -124,6 +126,7 @@ export class SecurityLicenseService {
       // Only platinum and trial licenses are compliant with field- and document-level security.
       allowRoleDocumentLevelSecurity: isLicensePlatinumOrBetter,
       allowRoleFieldLevelSecurity: isLicensePlatinumOrBetter,
+      allowRoleRemoteIndexPrivileges: isLicensePlatinumOrBetter,
       allowRbac: true,
       allowUserProfileCollaboration: isLicenseStandardOrBetter,
     };

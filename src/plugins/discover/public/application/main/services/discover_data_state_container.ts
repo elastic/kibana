@@ -12,7 +12,6 @@ import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { AggregateQuery, Query } from '@kbn/es-query';
 import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
-import { ReduxLikeStateContainer } from '@kbn/kibana-utils-plugin/common';
 import { getRawRecordType } from '../utils/get_raw_record_type';
 import { DiscoverAppState } from './discover_app_state_container';
 import { DiscoverServices } from '../../../build_services';
@@ -108,17 +107,17 @@ export interface DiscoverDataStateContainer {
   /**
    * resetting all data observable to initial state
    */
-  reset: () => void;
+  reset: (savedSearch: SavedSearch) => void;
   /**
    * Available Inspector Adaptor allowing to get details about recent requests to ES
    */
-  inspectorAdapters: { requests: RequestAdapter };
+  inspectorAdapters: { requests: RequestAdapter; lensRequests?: RequestAdapter };
   /**
-   * Initial fetch status
+   * Return the initial fetch status
    *  UNINITIALIZED: data is not fetched initially, without user triggering it
    *  LOADING: data is fetched initially (when Discover is rendered, or data views are switched)
    */
-  initialFetchStatus: FetchStatus;
+  getInitialFetchStatus: () => FetchStatus;
 }
 /**
  * Container responsible for fetching of data in Discover Main
@@ -130,13 +129,11 @@ export function getDataStateContainer({
   searchSessionManager,
   getAppState,
   getSavedSearch,
-  appStateContainer,
 }: {
   services: DiscoverServices;
   searchSessionManager: DiscoverSearchSessionManager;
   getAppState: () => DiscoverAppState;
   getSavedSearch: () => SavedSearch;
-  appStateContainer: ReduxLikeStateContainer<DiscoverAppState>;
 }): DiscoverDataStateContainer {
   const { data, uiSettings, toastNotifications } = services;
   const { timefilter } = data.query.timefilter;
@@ -149,20 +146,20 @@ export function getDataStateContainer({
    * to be processed correctly
    */
   const refetch$ = new Subject<DataRefetchMsg>();
-  const shouldSearchOnPageLoad =
-    uiSettings.get<boolean>(SEARCH_ON_PAGE_LOAD_SETTING) ||
-    getSavedSearch().id !== undefined ||
-    !timefilter.getRefreshInterval().pause ||
-    searchSessionManager.hasSearchSessionIdInURL();
-  const initialFetchStatus = shouldSearchOnPageLoad
-    ? FetchStatus.LOADING
-    : FetchStatus.UNINITIALIZED;
+  const getInitialFetchStatus = () => {
+    const shouldSearchOnPageLoad =
+      uiSettings.get<boolean>(SEARCH_ON_PAGE_LOAD_SETTING) ||
+      getSavedSearch().id !== undefined ||
+      !timefilter.getRefreshInterval().pause ||
+      searchSessionManager.hasSearchSessionIdInURL();
+    return shouldSearchOnPageLoad ? FetchStatus.LOADING : FetchStatus.UNINITIALIZED;
+  };
 
   /**
    * The observables the UI (aka React component) subscribes to get notified about
    * the changes in the data fetching process (high level: fetching started, data was received)
    */
-  const initialState = { fetchStatus: initialFetchStatus, recordRawType };
+  const initialState = { fetchStatus: getInitialFetchStatus(), recordRawType };
   const dataSubjects: SavedSearchData = {
     main$: new BehaviorSubject<DataMainMsg>(initialState),
     documents$: new BehaviorSubject<DataDocumentsMsg>(initialState),
@@ -202,14 +199,13 @@ export function getDataStateContainer({
       abortController = new AbortController();
       const prevAutoRefreshDone = autoRefreshDone;
 
-      await fetchAll(dataSubjects, getSavedSearch().searchSource, reset, {
+      await fetchAll(dataSubjects, reset, {
         abortController,
-        data,
-        initialFetchStatus,
+        initialFetchStatus: getInitialFetchStatus(),
         inspectorAdapters,
         searchSessionId,
         services,
-        appStateContainer,
+        getAppState,
         savedSearch: getSavedSearch(),
         useNewFieldsApi: !uiSettings.get(SEARCH_FIELDS_FROM_SOURCE),
       });
@@ -239,7 +235,10 @@ export function getDataStateContainer({
     return refetch$;
   };
 
-  const reset = () => sendResetMsg(dataSubjects, initialFetchStatus);
+  const reset = (savedSearch: SavedSearch) => {
+    const recordType = getRawRecordType(savedSearch.searchSource.getField('query'));
+    sendResetMsg(dataSubjects, getInitialFetchStatus(), recordType);
+  };
 
   return {
     fetch: fetchQuery,
@@ -249,6 +248,6 @@ export function getDataStateContainer({
     subscribe,
     reset,
     inspectorAdapters,
-    initialFetchStatus,
+    getInitialFetchStatus,
   };
 }

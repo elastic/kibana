@@ -14,6 +14,9 @@ import type {
   ReportEntityDetailsClickedParams,
   ReportEntityAlertsClickedParams,
   ReportEntityRiskFilteredParams,
+  ReportMLJobUpdateParams,
+  ReportCellActionClickedParams,
+  ReportAnomaliesCountClickedParams,
 } from './types';
 import { TelemetryEventTypes } from './types';
 
@@ -82,5 +85,17 @@ export class TelemetryClient implements TelemetryClientStart {
       entity,
       selectedSeverity,
     });
+  };
+
+  public reportMLJobUpdate = (params: ReportMLJobUpdateParams) => {
+    this.analytics.reportEvent(TelemetryEventTypes.MLJobUpdate, params);
+  };
+
+  public reportCellActionClicked = (params: ReportCellActionClickedParams) => {
+    this.analytics.reportEvent(TelemetryEventTypes.CellActionClicked, params);
+  };
+
+  public reportAnomaliesCountClicked = (params: ReportAnomaliesCountClickedParams) => {
+    this.analytics.reportEvent(TelemetryEventTypes.AnomaliesCountClicked, params);
   };
 }
