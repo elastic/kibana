@@ -22,6 +22,7 @@ import {
   EuiLoadingSpinner,
   EuiIcon,
   EuiDataGridRefProps,
+  EuiDataGridProps,
 } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { SortOrder } from '@kbn/saved-search-plugin/public';
@@ -232,12 +233,14 @@ export const DiscoverGrid = ({
   expandedDoc,
   onAddColumn,
   filters,
+  leadingControlColumns,
   savedSearchId,
   onFilter,
   onRemoveColumn,
   onResize,
   onSetColumns,
   onSort,
+  renderCustomGridBody,
   rows,
   sampleSize,
   searchDescription,
@@ -261,7 +264,7 @@ export const DiscoverGrid = ({
   onFieldEdited,
   DocumentView,
   services,
-}: DiscoverGridProps) => {
+}: DiscoverGridProps & EuiDataGridProps) => {
   const { fieldFormats, toastNotifications, dataViewFieldEditor, uiSettings } = services;
   const { darkMode } = useObservable(services.core.theme?.theme$ ?? of(themeDefault), themeDefault);
   const dataGridRef = useRef<EuiDataGridRefProps>(null);
@@ -648,9 +651,10 @@ export const DiscoverGrid = ({
             columns={euiGridColumns}
             columnVisibility={columnsVisibility}
             data-test-subj="docTable"
-            leadingControlColumns={lead}
+            leadingControlColumns={leadingControlColumns ?? lead}
             onColumnResize={onResize}
             pagination={paginationObj}
+            renderCustomGridBody={renderCustomGridBody}
             renderCellValue={renderCellValue}
             ref={dataGridRef}
             rowCount={rowCount}
