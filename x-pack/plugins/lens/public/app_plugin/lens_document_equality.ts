@@ -40,13 +40,19 @@ export const isLensEqual = (
 
   const isEqualFromVis = visualizationMap[doc1.visualizationType]?.isEqual;
   const visualizationStateIsEqual = isEqualFromVis
-    ? isEqualFromVis(
-        doc1.state.visualization,
-        doc1.references,
-        doc2.state.visualization,
-        doc2.references,
-        annotationGroups
-      )
+    ? (() => {
+        try {
+          return isEqualFromVis(
+            doc1.state.visualization,
+            doc1.references,
+            doc2.state.visualization,
+            doc2.references,
+            annotationGroups
+          );
+        } catch (err) {
+          return false;
+        }
+      })()
     : isEqual(doc1.state.visualization, doc2.state.visualization);
   if (!visualizationStateIsEqual) {
     return false;
