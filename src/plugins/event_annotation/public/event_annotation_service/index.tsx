@@ -8,7 +8,6 @@
 
 import { CoreStart } from '@kbn/core/public';
 import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
-// import { EventAnnotationGroupConfig } from '../../common';
 import { EventAnnotationServiceType } from './types';
 
 export class EventAnnotationService {

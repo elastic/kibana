@@ -135,6 +135,15 @@ export function getEventAnnotationService(
     );
   };
 
+  const checkHasAnnotationGroups = async (): Promise<boolean> => {
+    const response = await client.find({
+      type: EVENT_ANNOTATION_GROUP_TYPE,
+      perPage: 0,
+    });
+
+    return response.total > 0;
+  };
+
   return {
     loadAnnotationGroup,
     updateAnnotationGroup,
@@ -145,6 +154,7 @@ export function getEventAnnotationService(
           http={core.http}
           uiSettings={core.uiSettings}
           savedObjectsManagement={savedObjectsManagement}
+          checkHasAnnotationGroups={checkHasAnnotationGroups}
           {...props}
         />
       );
