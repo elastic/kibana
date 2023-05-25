@@ -80,8 +80,7 @@ export const init: ModelStage<
   // compatibility before going further.
   const currentMappings = indices[currentIndex].mappings;
 
-  // TODO: we need to check if the index was managed by the v2 algo here, and if
-  // it can be reused by the zdt algo or not.
+  // Index is already present, so we check which algo was last used on it
   const currentAlgo = checkIndexCurrentAlgorithm(currentMappings);
 
   logs.push({
@@ -89,6 +88,7 @@ export const init: ModelStage<
     message: `INIT: current algo check result: ${currentAlgo}`,
   });
 
+  // incompatible (pre 8.8) v2 algo or unknown => we terminate
   if (currentAlgo === 'v2-incompatible') {
     return {
       ...state,
@@ -129,6 +129,7 @@ export const init: ModelStage<
     previousAlgorithm: currentAlgo === 'v2-compatible' ? ('v2' as const) : ('zdt' as const),
   };
 
+  // compatible (8.8+) v2 algo => we jump to update index mapping
   if (currentAlgo === 'v2-compatible') {
     const indexMappings = buildIndexMappings({ types });
     return {
@@ -139,6 +140,8 @@ export const init: ModelStage<
     };
   }
 
+  // Index was found and is already using ZDT algo. This is the standard scenario.
+  // We check the model versions compatibility before going further.
   const versionCheck = checkVersionCompatibility({
     mappings: currentMappings,
     types,

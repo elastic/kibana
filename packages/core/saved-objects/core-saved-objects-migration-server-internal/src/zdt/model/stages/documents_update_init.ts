@@ -46,6 +46,7 @@ export const documentsUpdateInit: ModelStage<
     transformRawDocs,
   };
 
+  // index was previously using the v2 algo, we skip compat check and jump to next stage
   if (state.previousAlgorithm === 'v2') {
     return {
       ...state,
