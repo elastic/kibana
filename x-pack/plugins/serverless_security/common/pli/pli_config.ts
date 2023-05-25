@@ -10,14 +10,12 @@ import type { ServerlessSecurityPLI } from '../config';
 
 export const PLI_APP_FEATURES: Record<ServerlessSecurityPLI, AppFeatureKeys> = {
   endpointEssentials: {
-    [AppFeatureKey.casesBase]: false,
-    [AppFeatureKey.rulesLoadPrepackaged]: false,
-    [AppFeatureKey.rulesResponseActions]: false,
+    [AppFeatureKey.exampleAppFeature]: false,
+    [AppFeatureKey.exampleCasesFeature]: false,
   },
 
   cloudEssentials: {
-    [AppFeatureKey.casesBase]: true,
-    [AppFeatureKey.rulesLoadPrepackaged]: true,
-    [AppFeatureKey.rulesResponseActions]: true,
+    [AppFeatureKey.exampleAppFeature]: true,
+    [AppFeatureKey.exampleCasesFeature]: true,
   },
 } as const;

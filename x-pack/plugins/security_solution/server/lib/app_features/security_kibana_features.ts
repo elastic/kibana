@@ -150,42 +150,29 @@ function getSubFeatures(experimentalFeatures: ExperimentalFeatures) {
       policyManagementSubFeature
     );
   }
-  return subFeatures;
-}
-
-// maps the AppFeatures keys to Kibana privileges
-export const getSecurityAppFeaturesConfig = (
-  experimentalFeatures: ExperimentalFeatures
-): AppFeaturesSecurityConfig => {
-  const rulesResponseActionsSubFeatures: SubFeatureConfig[] = [];
 
   if (experimentalFeatures.endpointRbacEnabled || experimentalFeatures.endpointRbacV1Enabled) {
-    rulesResponseActionsSubFeatures.push(
+    subFeatures.push(
       responseActionsHistorySubFeature,
       hostIsolationSubFeature,
       processOperationsSubFeature
     );
   }
   if (experimentalFeatures.responseActionGetFileEnabled) {
-    rulesResponseActionsSubFeatures.push(fileOperationsSubFeature);
+    subFeatures.push(fileOperationsSubFeature);
   }
   // planned for 8.8
   if (experimentalFeatures.responseActionExecuteEnabled) {
-    rulesResponseActionsSubFeatures.push(executeActionSubFeature);
+    subFeatures.push(executeActionSubFeature);
   }
 
+  return subFeatures;
+}
+
+// maps the AppFeatures keys to Kibana privileges
+export const getSecurityAppFeaturesConfig = (): AppFeaturesSecurityConfig => {
   // TODO: establish some naming convention for these api and ui capabilities
   return {
-    rules_load_prepackaged: {
-      privileges: {
-        all: {
-          api: ['rules_load_prepackaged'],
-          ui: ['rules_load_prepackaged'],
-        },
-      },
-    },
-    rules_response_actions: {
-      subFeatures: rulesResponseActionsSubFeatures,
-    },
+    example_app_feature: {},
   };
 };

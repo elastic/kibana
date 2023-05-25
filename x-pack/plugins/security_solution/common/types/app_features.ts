@@ -6,21 +6,13 @@
  */
 
 export enum AppFeatureSecurityKey {
-  /**
-   * Enables importing pre-packaged rules
-   * */
-  rulesLoadPrepackaged = 'rules_load_prepackaged',
-  /**
-   * Enables the ability to add response actions to rules
-   */
-  rulesResponseActions = 'rules_response_actions',
+  // Sample code to demonstrate how to configure app features.
+  exampleAppFeature = 'example_app_feature',
 }
 
 export enum AppFeatureCasesKey {
-  /**
-   * Enables the basic Cases feature
-   */
-  casesBase = 'cases_base',
+  // Sample code to demonstrate how to configure cases features.
+  exampleCasesFeature = 'example_cases_feature',
 }
 
 // Merges the two enums.
