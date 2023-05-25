@@ -5,21 +5,19 @@
  * 2.0.
  */
 
-import type { AppFeatureKeys } from '@kbn/security-solution-plugin/common';
+import { AppFeatureKey, AppFeatureKeys } from '@kbn/security-solution-plugin/common';
 import type { ServerlessSecurityPLI } from '../config';
 
 export const PLI_APP_FEATURES: Record<ServerlessSecurityPLI, AppFeatureKeys> = {
   endpointEssentials: {
-    cases_base: false,
-    rules_load_prepackaged: false,
-    rules_response_actions: false,
-    isolate_host: false,
+    [AppFeatureKey.casesBase]: false,
+    [AppFeatureKey.rulesLoadPrepackaged]: false,
+    [AppFeatureKey.rulesResponseActions]: false,
   },
 
   cloudEssentials: {
-    cases_base: true,
-    rules_load_prepackaged: true,
-    rules_response_actions: true,
-    isolate_host: true,
+    [AppFeatureKey.casesBase]: true,
+    [AppFeatureKey.rulesLoadPrepackaged]: true,
+    [AppFeatureKey.rulesResponseActions]: true,
   },
 } as const;

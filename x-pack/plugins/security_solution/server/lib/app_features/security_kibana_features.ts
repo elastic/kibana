@@ -187,14 +187,5 @@ export const getSecurityAppFeaturesConfig = (
     rules_response_actions: {
       subFeatures: rulesResponseActionsSubFeatures,
     },
-    isolate_host: {
-      subFeaturesPrivileges: [
-        {
-          id: 'host_isolation_all',
-          api: [`${APP_ID}-writeIsolateHost`],
-          ui: ['writeIsolateHost'],
-        },
-      ],
-    },
   };
 };
