@@ -50,7 +50,6 @@
     "@kbn/saved-search-plugin",
     "@kbn/share-plugin",
     "@kbn/ui-actions-plugin",
-    "@kbn/ui-theme",
     "@kbn/unified-field-list-plugin",
     "@kbn/unified-search-plugin",
     "@kbn/utility-types",
