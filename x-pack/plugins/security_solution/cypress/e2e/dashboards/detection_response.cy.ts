@@ -48,7 +48,7 @@ describe('Detection response view', () => {
     visit(DETECTIONS_RESPONSE_URL);
   });
 
-  context('KQL search bar', { testIsolation: false }, () => {
+  context('KQL search bar', () => {
     it(`filters out hosts with KQL search bar query`, () => {
       kqlSearch(`host.name : fakeHostName{enter}`);
 

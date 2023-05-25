@@ -26,7 +26,7 @@ import { waitForAlertsToPopulate } from '../../../tasks/create_new_rule';
 // To run the tests locally, add 'securityFlyoutEnabled' in the Cypress config.ts here https://github.com/elastic/kibana/blob/main/x-pack/test/security_solution_cypress/config.ts#L50
 describe.skip(
   'Alert details expandable flyout left panel entities',
-  { testIsolation: false },
+  { env: { ftrConfig: { enableExperimental: ['securityFlyoutEnabled'] } } },
   () => {
     before(() => {
       cleanKibana();
@@ -41,9 +41,11 @@ describe.skip(
     });
 
     it('should display analyzer graph and node list', () => {
+      // eslint-disable-next-line cypress/unsafe-to-chain-command
       cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_USER_DETAILS)
         .scrollIntoView()
         .should('be.visible');
+      // eslint-disable-next-line cypress/unsafe-to-chain-command
       cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_HOST_DETAILS)
         .scrollIntoView()
         .should('be.visible');

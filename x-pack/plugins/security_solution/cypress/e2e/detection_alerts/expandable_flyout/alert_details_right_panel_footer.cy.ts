@@ -72,7 +72,7 @@ const deleteCase = () => {
 // To run the tests locally, add 'securityFlyoutEnabled' in the Cypress config.ts here https://github.com/elastic/kibana/blob/main/x-pack/test/security_solution_cypress/config.ts#L50
 describe.skip(
   'Alert details expandable flyout right panel footer',
-  { testIsolation: false },
+  { env: { ftrConfig: { enableExperimental: ['securityFlyoutEnabled'] } } },
   () => {
     before(() => {
       cleanKibana();

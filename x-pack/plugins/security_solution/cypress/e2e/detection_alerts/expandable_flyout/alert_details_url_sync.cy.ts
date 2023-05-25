@@ -19,37 +19,41 @@ import {
 
 // Skipping these for now as the feature is protected behind a feature flag set to false by default
 // To run the tests locally, add 'securityFlyoutEnabled' in the Cypress config.ts here https://github.com/elastic/kibana/blob/main/x-pack/test/security_solution_cypress/config.ts#L50
-describe.skip('Expandable flyout state sync', { testIsolation: false }, () => {
-  const rule = getNewRule();
+describe.skip(
+  'Expandable flyout state sync',
+  { env: { ftrConfig: { enableExperimental: ['securityFlyoutEnabled'] } } },
+  () => {
+    const rule = getNewRule();
 
-  before(() => {
-    cleanKibana();
-    login();
-    createRule(rule);
-    visit(ALERTS_URL);
-    waitForAlertsToPopulate();
-    expandFirstAlertExpandableFlyout();
-  });
+    before(() => {
+      cleanKibana();
+      login();
+      createRule(rule);
+      visit(ALERTS_URL);
+      waitForAlertsToPopulate();
+      expandFirstAlertExpandableFlyout();
+    });
 
-  it('should serialize its state to url', () => {
-    cy.url().should('include', 'eventFlyout');
-    cy.get(DOCUMENT_DETAILS_FLYOUT_HEADER_TITLE).should('be.visible').and('have.text', rule.name);
-  });
+    it('should serialize its state to url', () => {
+      cy.url().should('include', 'eventFlyout');
+      cy.get(DOCUMENT_DETAILS_FLYOUT_HEADER_TITLE).should('be.visible').and('have.text', rule.name);
+    });
 
-  it('should reopen the flyout after browser refresh', () => {
-    cy.reload();
+    it('should reopen the flyout after browser refresh', () => {
+      cy.reload();
 
-    cy.url().should('include', 'eventFlyout');
-    cy.get(DOCUMENT_DETAILS_FLYOUT_HEADER_TITLE).should('be.visible').and('have.text', rule.name);
-  });
+      cy.url().should('include', 'eventFlyout');
+      cy.get(DOCUMENT_DETAILS_FLYOUT_HEADER_TITLE).should('be.visible').and('have.text', rule.name);
+    });
 
-  it('should clear the url state when flyout is closed', () => {
-    cy.reload();
+    it('should clear the url state when flyout is closed', () => {
+      cy.reload();
 
-    cy.get(DOCUMENT_DETAILS_FLYOUT_HEADER_TITLE).should('be.visible').and('have.text', rule.name);
+      cy.get(DOCUMENT_DETAILS_FLYOUT_HEADER_TITLE).should('be.visible').and('have.text', rule.name);
 
-    cy.get(DOCUMENT_DETAILS_FLYOUT_CLOSE_BUTTON).click();
+      cy.get(DOCUMENT_DETAILS_FLYOUT_CLOSE_BUTTON).click();
 
-    cy.url().should('not.include', 'eventFlyout');
-  });
-});
+      cy.url().should('not.include', 'eventFlyout');
+    });
+  }
+);

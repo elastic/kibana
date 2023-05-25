@@ -25,7 +25,7 @@ import { waitForAlertsToPopulate } from '../../../tasks/create_new_rule';
 // To run the tests locally, add 'securityFlyoutEnabled' in the Cypress config.ts here https://github.com/elastic/kibana/blob/main/x-pack/test/security_solution_cypress/config.ts#L50
 describe.skip(
   'Alert details expandable flyout right panel header',
-  { testIsolation: false },
+  { env: { ftrConfig: { enableExperimental: ['securityFlyoutEnabled'] } } },
   () => {
     const rule = getNewRule();
 
