@@ -49,4 +49,4 @@ describe.skip(
         .should('be.visible');
     });
   }
-  );
+);

@@ -79,7 +79,7 @@ describe.skip(
           .and('have.text', 'Description');
         cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_DESCRIPTION_SECTION_CONTENT).should(
           'be.visible'
-          );
+        );
       });
 
       it('should display document description and expand button', () => {
@@ -96,7 +96,7 @@ describe.skip(
         cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_DESCRIPTION_EXPAND_BUTTON).should(
           'have.text',
           'Collapse'
-          );
+        );
       });
 
       it('should display reason', () => {
@@ -135,7 +135,7 @@ describe.skip(
           .and('have.text', 'Investigation');
         cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INVESTIGATION_SECTION_CONTENT).should(
           'be.visible'
-          );
+        );
       });
 
       it('should display investigatioin guide button', () => {
@@ -150,7 +150,7 @@ describe.skip(
           .and('have.text', 'Highlighted fields');
         cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_HIGHLIGHTED_FIELDS_DETAILS).should(
           'be.visible'
-          );
+        );
       });
 
       it('should navigate to table tab when clicking on highlighted fields view button', () => {
@@ -183,10 +183,10 @@ describe.skip(
         cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_ENTITIES_CONTENT).should('be.visible');
         cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_ENTITY_PANEL_HEADER).should(
           'be.visible'
-          );
+        );
         cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_ENTITY_PANEL_CONTENT).should(
           'be.visible'
-          );
+        );
       });
 
       it('should navigate to left panel, entities tab when view all entities is clicked', () => {
@@ -280,4 +280,4 @@ describe.skip(
       });
     });
   }
-  );
+);

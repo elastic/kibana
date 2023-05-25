@@ -110,7 +110,7 @@ describe('Detection response view', () => {
                 .should(
                   'contain.text',
                   `host.name: "${hostName}"ANDkibana.alert.workflow_status: "open"`
-                  );
+                );
             });
         });
     });
@@ -131,7 +131,7 @@ describe('Detection response view', () => {
                 .should(
                   'contain.text',
                   `user.name: "${userName}"ANDkibana.alert.workflow_status: "open"`
-                  );
+                );
             });
         });
     });
@@ -151,7 +151,7 @@ describe('Detection response view', () => {
                 .should(
                   'contain.text',
                   `kibana.alert.rule.name: "${ruleName}"ANDkibana.alert.workflow_status: "open"`
-                  );
+                );
             });
         });
     });
