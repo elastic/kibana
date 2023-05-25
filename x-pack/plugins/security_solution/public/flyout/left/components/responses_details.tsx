@@ -8,6 +8,7 @@
 import React from 'react';
 import { EuiSpacer, EuiTitle } from '@elastic/eui';
 import styled from 'styled-components';
+import { RESPONSES_DETAILS_TEST_ID, RESPONSES_EMPTY_TEST_ID } from './test_ids';
 import { expandDottedObject } from '../../../../common/utils/expand_dotted';
 import type {
   ExpandedEventFieldsObject,
@@ -48,14 +49,15 @@ export const ResponsesDetails: React.FC = () => {
     ecsData: ecs,
     isTab: false,
   });
+
   return (
-    <div>
+    <div data-test-subj={RESPONSES_DETAILS_TEST_ID}>
       <EuiTitle size="xxxs">
         <h5>{i18n.RESPONSE_TITLE}</h5>
       </EuiTitle>
       <EuiSpacer size="s" />
       {!responseActions ? (
-        <InlineBlock>{i18n.RESPONSE_EMPTY}</InlineBlock>
+        <InlineBlock data-test-subj={RESPONSES_EMPTY_TEST_ID}>{i18n.RESPONSE_EMPTY}</InlineBlock>
       ) : (
         <>{endpointResponseActionsEnabled ? responseActionsTab : osqueryTab}</>
       )}

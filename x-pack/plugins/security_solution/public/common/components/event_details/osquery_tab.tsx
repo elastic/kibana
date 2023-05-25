@@ -42,12 +42,13 @@ export const useOsqueryTab = ({
   const endpointResponseActionsEnabled = useIsExperimentalFeatureEnabled(
     'endpointResponseActionsEnabled'
   );
-  const expandedEventFieldsObject = expandDottedObject(
-    (rawEventData as RawEventData).fields
-  ) as ExpandedEventFieldsObject;
+
+  const expandedEventFieldsObject = rawEventData
+    ? (expandDottedObject((rawEventData as RawEventData).fields) as ExpandedEventFieldsObject)
+    : undefined;
 
   const responseActions =
-    expandedEventFieldsObject.kibana?.alert?.rule?.parameters?.[0].response_actions;
+    expandedEventFieldsObject?.kibana?.alert?.rule?.parameters?.[0].response_actions;
 
   const shouldEarlyReturn =
     !rawEventData ||
