@@ -307,7 +307,7 @@ export function FormatSelector(props: FormatSelectorProps) {
             <EuiText size="xs">
               <EuiLink target="_blank" href={docLinks?.links.indexPatterns.fieldFormattersNumber}>
                 <FormattedMessage
-                  id="indexPatternFieldEditor.number.documentationLabel"
+                  id="xpack.lens.indexPattern.number.documentationLabel"
                   defaultMessage="Syntax Help"
                 />
                 &nbsp;
