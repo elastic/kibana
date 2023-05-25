@@ -9,7 +9,12 @@ import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { ExceptionListClient, ListsServerExtensionRegistrar } from '@kbn/lists-plugin/server';
 import type { CasesClient, CasesStart } from '@kbn/cases-plugin/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
-import type { FleetStartContract, MessageSigningServiceInterface } from '@kbn/fleet-plugin/server';
+import type {
+  FleetStartContract,
+  MessageSigningServiceInterface,
+  FleetFileClientInterface,
+  FleetFileTransferDirection,
+} from '@kbn/fleet-plugin/server';
 import type { PluginStartContract as AlertsPluginStartContract } from '@kbn/alerting-plugin/server';
 import { ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID } from '@kbn/securitysolution-list-constants';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
@@ -37,6 +42,7 @@ import type { EndpointAuthz } from '../../common/endpoint/types/authz';
 import { calculateEndpointAuthz } from '../../common/endpoint/service/authz';
 import type { FeatureUsageService } from './services/feature_usage/service';
 import type { ExperimentalFeatures } from '../../common/experimental_features';
+import type { ActionCreateService } from './services';
 import { doesArtifactHaveData } from './services';
 import type { actionCreateService } from './services/actions';
 
@@ -46,6 +52,7 @@ export interface EndpointAppContextServiceSetupContract {
 
 export interface EndpointAppContextServiceStartContract {
   fleetAuthzService?: FleetStartContract['authz'];
+  createFleetFilesClient: FleetStartContract['createFilesClient'];
   logger: Logger;
   endpointMetadataService: EndpointMetadataService;
   endpointFleetServicesFactory: EndpointFleetServicesFactoryInterface;
@@ -237,11 +244,25 @@ export class EndpointAppContextService {
     return this.startDependencies.messageSigningService;
   }
 
-  public getActionCreateService(): ReturnType<typeof actionCreateService> {
+  public getActionCreateService(): ActionCreateService {
     if (!this.startDependencies?.actionCreateService) {
       throw new EndpointAppContentServicesNotStartedError();
     }
 
     return this.startDependencies.actionCreateService;
+  }
+
+  public async getFleetFilesClient(
+    type: FleetFileTransferDirection
+  ): Promise<FleetFileClientInterface> {
+    if (!this.startDependencies?.createFleetFilesClient) {
+      throw new EndpointAppContentServicesNotStartedError();
+    }
+
+    return this.startDependencies.createFleetFilesClient(
+      'endpoint',
+      type,
+      this.startDependencies.config.maxUploadResponseActionFileBytes
+    );
   }
 }

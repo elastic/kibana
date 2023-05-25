@@ -191,7 +191,8 @@ export default function ({
       });
     });
 
-    describe('Preserve Layout', () => {
+    // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/157023
+    describe.skip('Preserve Layout', () => {
       before(async () => {
         await loadEcommerce();
       });

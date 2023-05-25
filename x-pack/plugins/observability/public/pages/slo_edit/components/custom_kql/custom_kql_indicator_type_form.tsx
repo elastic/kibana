@@ -22,7 +22,7 @@ import {
   Field,
   useFetchIndexPatternFields,
 } from '../../../../hooks/slo/use_fetch_index_pattern_fields';
-import { IndexSelection } from './index_selection';
+import { IndexSelection } from '../custom_common/index_selection';
 import { QueryBuilder } from '../common/query_builder';
 
 interface Option {
@@ -147,6 +147,7 @@ export function CustomKqlIndicatorTypeForm() {
               defaultMessage: 'Define the good events',
             }
           )}
+          required
           tooltip={
             <EuiIconTip
               content={i18n.translate(

@@ -17,7 +17,7 @@ import {
   EuiToolTip,
   EuiIcon,
   EuiProgress,
-  EuiLoadingContent,
+  EuiSkeletonText,
   EuiSpacer,
 } from '@elastic/eui';
 import { useEuiTheme } from '@elastic/eui';
@@ -256,7 +256,7 @@ function SummaryMetric({
       {loading && !hasData && (
         <>
           <EuiSpacer size="s" />
-          <EuiLoadingContent lines={2} />
+          <EuiSkeletonText lines={2} />
         </>
       )}
       {hasData && (

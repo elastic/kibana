@@ -13,7 +13,7 @@ import {
   EuiLoadingSpinner,
 } from '@elastic/eui';
 import React, { useCallback } from 'react';
-import { useTheme } from '@kbn/observability-plugin/public';
+import { useTheme } from '@kbn/observability-shared-plugin/public';
 import { useAnyOfApmParams } from '../../../../../hooks/use_apm_params';
 import {
   useFetcher,

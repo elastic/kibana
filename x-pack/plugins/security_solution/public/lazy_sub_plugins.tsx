@@ -19,7 +19,6 @@ import { Overview } from './overview';
 import { Rules } from './rules';
 import { Timelines } from './timelines';
 import { Management } from './management';
-import { LandingPages } from './landing_pages';
 import { CloudDefend } from './cloud_defend';
 import { CloudSecurityPosture } from './cloud_security_posture';
 import { ThreatIntelligence } from './threat_intelligence';
@@ -38,7 +37,6 @@ const subPluginClasses = {
   Rules,
   Timelines,
   Management,
-  LandingPages,
   Dashboards,
   CloudDefend,
   CloudSecurityPosture,

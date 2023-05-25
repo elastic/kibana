@@ -12,7 +12,8 @@ import { CaseUI } from '@kbn/cases-plugin/common';
 import { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import { CasesDeepLinkId, DRAFT_COMMENT_STORAGE_ID } from '@kbn/cases-plugin/public';
 import { observabilityFeatureId } from '@kbn/observability-shared-plugin/public';
-import { useKibana } from '../../../../utils/kibana_react';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { ObservabilityAppServices } from '../../../../application/types';
 import { AddToCaseProps } from '../header/add_to_case_action';
 
 async function addToCase(
@@ -56,7 +57,7 @@ export const useAddToCase = ({
     application: { navigateToApp },
     notifications: { toasts },
     storage,
-  } = useKibana().services;
+  } = useKibana<ObservabilityAppServices>().services;
 
   const onCaseClicked = useCallback(
     (theCase?: CaseUI) => {

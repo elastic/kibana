@@ -27,7 +27,7 @@
         "label": "Navigation",
         "description": [],
         "signature": [
-          "({ platformConfig, navigationTree, homeHref, linkToCloud, activeNavItemId: activeNavItemIdProps, }: Props) => JSX.Element"
+          "({ platformConfig, navigationTree, homeHref, linkToCloud, activeNavItemId: activeNavItemIdProps, ...props }: Props) => JSX.Element"
         ],
         "path": "packages/shared-ux/chrome/navigation/src/ui/navigation.tsx",
         "deprecated": false,
@@ -38,7 +38,7 @@
             "id": "def-common.Navigation.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  platformConfig,\n  navigationTree,\n  homeHref,\n  linkToCloud,\n  activeNavItemId: activeNavItemIdProps,\n}",
+            "label": "{\n  platformConfig,\n  navigationTree,\n  homeHref,\n  linkToCloud,\n  activeNavItemId: activeNavItemIdProps,\n  ...props\n}",
             "description": [],
             "signature": [
               "Props"
@@ -226,6 +226,45 @@
             "path": "packages/shared-ux/chrome/navigation/types/index.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-chrome-navigation",
+            "id": "def-common.ChromeNavigation.recentlyAccessedFilter",
+            "type": "Function",
+            "tags": [],
+            "label": "recentlyAccessedFilter",
+            "description": [
+              "\nFilter function to allow consumer to remove items from the recently accessed section"
+            ],
+            "signature": [
+              "((items: ",
+              "RecentItem",
+              "[]) => ",
+              "RecentItem",
+              "[]) | undefined"
+            ],
+            "path": "packages/shared-ux/chrome/navigation/types/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/shared-ux-chrome-navigation",
+                "id": "def-common.ChromeNavigation.recentlyAccessedFilter.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "items",
+                "description": [],
+                "signature": [
+                  "RecentItem",
+                  "[]"
+                ],
+                "path": "packages/shared-ux/chrome/navigation/types/index.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -486,11 +525,55 @@
           },
           {
             "parentPluginId": "@kbn/shared-ux-chrome-navigation",
-            "id": "def-common.NavigationServices.loadingCount",
-            "type": "number",
+            "id": "def-common.NavigationServices.loadingCount$",
+            "type": "Object",
             "tags": [],
-            "label": "loadingCount",
+            "label": "loadingCount$",
             "description": [],
+            "signature": [
+              "Observable",
+              "<number>"
+            ],
+            "path": "packages/shared-ux/chrome/navigation/types/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-chrome-navigation",
+            "id": "def-common.NavigationServices.recentlyAccessed$",
+            "type": "Object",
+            "tags": [],
+            "label": "recentlyAccessed$",
+            "description": [],
+            "signature": [
+              "Observable",
+              "<",
+              "RecentItem",
+              "[]>"
+            ],
+            "path": "packages/shared-ux/chrome/navigation/types/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-chrome-navigation",
+            "id": "def-common.NavigationServices.navLinks$",
+            "type": "Object",
+            "tags": [],
+            "label": "navLinks$",
+            "description": [],
+            "signature": [
+              "Observable",
+              "<readonly ",
+              {
+                "pluginId": "@kbn/core-chrome-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreChromeBrowserPluginApi",
+                "section": "def-common.ChromeNavLink",
+                "text": "ChromeNavLink"
+              },
+              "[]>"
+            ],
             "path": "packages/shared-ux/chrome/navigation/types/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -562,6 +645,52 @@
                 "trackAdoption": false
               }
             ]
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-chrome-navigation",
+            "id": "def-common.NavigationServices.onProjectNavigationChange",
+            "type": "Function",
+            "tags": [],
+            "label": "onProjectNavigationChange",
+            "description": [],
+            "signature": [
+              "(chromeProjectNavigation: ",
+              {
+                "pluginId": "@kbn/core-chrome-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreChromeBrowserPluginApi",
+                "section": "def-common.ChromeProjectNavigation",
+                "text": "ChromeProjectNavigation"
+              },
+              ") => void"
+            ],
+            "path": "packages/shared-ux/chrome/navigation/types/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/shared-ux-chrome-navigation",
+                "id": "def-common.NavigationServices.onProjectNavigationChange.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "chromeProjectNavigation",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/core-chrome-browser",
+                    "scope": "common",
+                    "docId": "kibKbnCoreChromeBrowserPluginApi",
+                    "section": "def-common.ChromeProjectNavigation",
+                    "text": "ChromeProjectNavigation"
+                  }
+                ],
+                "path": "packages/shared-ux/chrome/navigation/types/index.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false

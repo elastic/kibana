@@ -160,6 +160,7 @@ describe('Fetch', () => {
       expect(fetchMock.lastOptions()!.headers).toMatchObject({
         'content-type': 'application/json',
         'kbn-version': 'VERSION',
+        'x-elastic-internal-origin': 'Kibana',
         myheader: 'foo',
       });
     });
@@ -168,10 +169,27 @@ describe('Fetch', () => {
       fetchMock.get('*', {});
       await expect(
         fetchInstance.fetch('/my/path', {
-          headers: { myHeader: 'foo', 'kbn-version': 'CUSTOM!' },
+          headers: {
+            myHeader: 'foo',
+            'kbn-version': 'CUSTOM!',
+          },
         })
       ).rejects.toThrowErrorMatchingInlineSnapshot(
         `"Invalid fetch headers, headers beginning with \\"kbn-\\" are not allowed: [kbn-version]"`
+      );
+    });
+
+    it('should not allow overwriting of x-elastic-internal-origin header', async () => {
+      fetchMock.get('*', {});
+      await expect(
+        fetchInstance.fetch('/my/path', {
+          headers: {
+            myHeader: 'foo',
+            'x-elastic-internal-origin': 'anything',
+          },
+        })
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Invalid fetch headers, headers beginning with \\"x-elastic-internal-\\" are not allowed: [x-elastic-internal-origin]"`
       );
     });
 
@@ -310,6 +328,7 @@ describe('Fetch', () => {
         headers: {
           'content-type': 'application/json',
           'kbn-version': 'VERSION',
+          'x-elastic-internal-origin': 'Kibana',
         },
       });
     });

@@ -5,19 +5,14 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useMemo, useEffect } from 'react';
+import React, { memo, useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 
-import type { FieldHook, FieldConfig } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import {
-  UseField,
-  useFormData,
-  useFormContext,
-} from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import type { FieldConfig } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { UseField, useFormData } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import type { ActionConnector } from '../../../common/api';
 import { ConnectorSelector } from '../connector_selector/form';
 import { ConnectorFieldsForm } from '../connectors/fields_form';
-import type { FormProps } from './schema';
 import { schema } from './schema';
 import { useCaseConfigure } from '../../containers/configure/use_configure';
 import { getConnectorById, getConnectorsFormValidators } from '../utils';
@@ -30,49 +25,17 @@ interface Props {
   isLoadingConnectors: boolean;
 }
 
-interface ConnectorsFieldProps {
-  connectors: ActionConnector[];
-  field: FieldHook<FormProps['fields']>;
-  isEdit: boolean;
-  setErrors: (errors: boolean) => void;
-}
-
-const ConnectorFields = ({ connectors, isEdit, field, setErrors }: ConnectorsFieldProps) => {
-  const [{ connectorId }] = useFormData({ watch: ['connectorId'] });
-  const { setValue } = field;
-  const connector = getConnectorById(connectorId, connectors) ?? null;
-
-  return (
-    <ConnectorFieldsForm
-      connector={connector}
-      fields={field.value}
-      isEdit={isEdit}
-      onChange={setValue}
-    />
-  );
-};
-ConnectorFields.displayName = 'ConnectorFields';
-
 const ConnectorComponent: React.FC<Props> = ({ connectors, isLoading, isLoadingConnectors }) => {
-  const { getFields, setFieldValue } = useFormContext();
+  const [{ connectorId }] = useFormData({ watch: ['connectorId'] });
+  const connector = getConnectorById(connectorId, connectors) ?? null;
   const { connector: configurationConnector } = useCaseConfigure();
   const { actions } = useApplicationCapabilities();
 
-  const handleConnectorChange = useCallback(() => {
-    const { fields } = getFields();
-    fields.setValue(null);
-  }, [getFields]);
-
   const defaultConnectorId = useMemo(() => {
-    return connectors.some((connector) => connector.id === configurationConnector.id)
+    return connectors.some((c) => c.id === configurationConnector.id)
       ? configurationConnector.id
       : 'none';
   }, [configurationConnector.id, connectors]);
-
-  useEffect(
-    () => setFieldValue('connectorId', defaultConnectorId),
-    [defaultConnectorId, setFieldValue]
-  );
 
   const connectorIdConfig = getConnectorsFormValidators({
     config: schema.connectorId as FieldConfig,
@@ -97,7 +60,6 @@ const ConnectorComponent: React.FC<Props> = ({ connectors, isLoading, isLoadingC
           defaultValue={defaultConnectorId}
           componentProps={{
             connectors,
-            handleChange: handleConnectorChange,
             dataTestSubj: 'caseConnectors',
             disabled: isLoading || isLoadingConnectors,
             idAria: 'caseConnectors',
@@ -106,14 +68,7 @@ const ConnectorComponent: React.FC<Props> = ({ connectors, isLoading, isLoadingC
         />
       </EuiFlexItem>
       <EuiFlexItem>
-        <UseField
-          path="fields"
-          component={ConnectorFields}
-          componentProps={{
-            connectors,
-            isEdit: true,
-          }}
-        />
+        <ConnectorFieldsForm connector={connector} />
       </EuiFlexItem>
     </EuiFlexGroup>
   );

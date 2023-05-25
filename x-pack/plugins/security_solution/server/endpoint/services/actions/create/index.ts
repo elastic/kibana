@@ -38,6 +38,7 @@ import type {
   LogsEndpointAction,
   LogsEndpointActionResponse,
   ResponseActionsExecuteParameters,
+  EndpointActionDataParameterTypes,
 } from '../../../../../common/endpoint/types';
 import type { EndpointAppContext } from '../../../types';
 import type { FeatureKeys } from '../../feature_usage';
@@ -60,6 +61,7 @@ type CreateActionPayload = TypeOf<typeof ResponseActionBodySchema> & {
   rule_id?: string;
   rule_name?: string;
   error?: string;
+  hosts?: Record<string, { name: string }>;
 };
 
 interface CreateActionMetadata {
@@ -68,23 +70,38 @@ interface CreateActionMetadata {
   enableActionsWithErrors?: boolean;
 }
 
+export interface ActionCreateService {
+  createActionFromAlert: (payload: CreateActionPayload) => Promise<ActionDetails>;
+  createAction: <
+    TOutputContent extends object = object,
+    TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes
+  >(
+    payload: CreateActionPayload,
+    metadata: CreateActionMetadata
+  ) => Promise<ActionDetails<TOutputContent, TParameters>>;
+}
+
 export const actionCreateService = (
   esClient: ElasticsearchClient,
-  endpointContext: EndpointAppContext,
-  licenseService: LicenseService
-) => {
-  const createActionFromAlert = async (payload: CreateActionPayload) => {
+  endpointContext: EndpointAppContext
+): ActionCreateService => {
+  const createActionFromAlert = async (payload: CreateActionPayload): Promise<ActionDetails> => {
     return createAction({ ...payload }, { minimumLicenseRequired: 'enterprise' });
   };
 
-  const createAction = async (
+  const createAction = async <
+    TOutputContent extends object = object,
+    TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes
+  >(
     payload: CreateActionPayload,
     { casesClient, minimumLicenseRequired = 'basic' }: CreateActionMetadata
-  ): Promise<ActionDetails> => {
+  ): Promise<ActionDetails<TOutputContent, TParameters>> => {
     const featureKey = commandToFeatureKeyMap.get(payload.command) as FeatureKeys;
     if (featureKey) {
       endpointContext.service.getFeatureUsageService().notifyUsage(featureKey);
     }
+
+    const licenseService = endpointContext.service.getLicenseService();
 
     const logger = endpointContext.logFactory.get('hostIsolation');
 
@@ -136,6 +153,7 @@ export const actionCreateService = (
           command: payload.command,
           comment: payload.comment ?? undefined,
           ...(payload.alert_ids ? { alert_id: payload.alert_ids } : {}),
+          ...(payload.hosts ? { hosts: payload.hosts } : {}),
           parameters: getActionParameters() ?? undefined,
         },
       } as Omit<EndpointAction, 'agents' | 'user_id' | '@timestamp'>,
@@ -302,7 +320,7 @@ export const actionCreateService = (
     return {
       ...actionId,
       ...data,
-    };
+    } as ActionDetails<TOutputContent, TParameters>;
   };
 
   return {
@@ -341,11 +359,12 @@ interface CheckForAlertsArgs {
   licenseService: LicenseService;
   minimumLicenseRequired: LicenseType;
 }
+
 const checkForAlertErrors = ({
   agents,
   licenseService,
   minimumLicenseRequired = 'basic',
-}: CheckForAlertsArgs) => {
+}: CheckForAlertsArgs): string | undefined => {
   const licenseError = validateEndpointLicense(licenseService, minimumLicenseRequired);
   const agentsError = validateAgents(agents);
 

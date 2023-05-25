@@ -16,7 +16,7 @@ import {
   RedirectAppLinks,
 } from '@kbn/kibana-react-plugin/public';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
-import { InspectorContextProvider } from '@kbn/observability-plugin/public';
+import { InspectorContextProvider } from '@kbn/observability-shared-plugin/public';
 import { SyntheticsAppProps } from './contexts';
 
 import {

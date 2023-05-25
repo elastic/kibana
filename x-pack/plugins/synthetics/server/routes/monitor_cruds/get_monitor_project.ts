@@ -5,10 +5,10 @@
  * 2.0.
  */
 import { schema } from '@kbn/config-schema';
+import { syntheticsMonitorType } from '../../../common/types/saved_objects';
 import { ConfigKey } from '../../../common/runtime_types';
 import { SyntheticsRestApiRouteFactory } from '../../legacy_uptime/routes/types';
 import { API_URLS } from '../../../common/constants';
-import { syntheticsMonitorType } from '../../legacy_uptime/lib/saved_objects/synthetics_monitor';
 import { getMonitors } from '../common';
 
 const querySchema = schema.object({

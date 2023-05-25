@@ -80,7 +80,7 @@ export const CREATE_MAINTENANCE_WINDOW_DESCRIPTION = i18n.translate(
   'xpack.alerting.maintenanceWindows.create.description',
   {
     defaultMessage:
-      'Schedule a single or recurring period in which rule notifications cease and alerts are in maintenance mode.',
+      'Schedule a single or recurring period in which new alerts do not send notifications.',
   }
 );
 

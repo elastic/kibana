@@ -10,18 +10,9 @@ import { IVectorLayer } from '../../../classes/layers/vector_layer';
 import { JoinEditor } from './join_editor';
 import { shallow } from 'enzyme';
 import { JoinDescriptor } from '../../../../common/descriptor_types';
+import { SOURCE_TYPES } from '../../../../common/constants';
 
 class MockLayer {
-  private readonly _disableReason: string | null;
-
-  constructor(disableReason: string | null) {
-    this._disableReason = disableReason;
-  }
-
-  getJoinsDisabledReason() {
-    return this._disableReason;
-  }
-
   getSource() {
     return {
       isMvt: () => {
@@ -45,6 +36,7 @@ const defaultProps = {
             label: 'web logs count',
           },
         ],
+        type: SOURCE_TYPES.ES_TERM_SOURCE,
       },
     } as JoinDescriptor,
   ],
@@ -55,17 +47,7 @@ const defaultProps = {
 
 test('Should render join editor', () => {
   const component = shallow(
-    <JoinEditor {...defaultProps} layer={new MockLayer(null) as unknown as IVectorLayer} />
-  );
-  expect(component).toMatchSnapshot();
-});
-
-test('Should render callout when joins are disabled', () => {
-  const component = shallow(
-    <JoinEditor
-      {...defaultProps}
-      layer={new MockLayer('Simulated disabled reason') as unknown as IVectorLayer}
-    />
+    <JoinEditor {...defaultProps} layer={new MockLayer() as unknown as IVectorLayer} />
   );
   expect(component).toMatchSnapshot();
 });

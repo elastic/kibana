@@ -17,7 +17,7 @@ import {
   EuiComboBox,
   EuiComboBoxOptionOption,
   EuiFormRow,
-  EuiLoadingContent,
+  EuiSkeletonText,
 } from '@elastic/eui';
 
 import { Filter, Query } from '@kbn/es-query';
@@ -302,7 +302,7 @@ export const LogCategorizationPage: FC = () => {
         </>
       ) : null}
 
-      {loading === true ? <EuiLoadingContent lines={10} /> : null}
+      {loading === true ? <EuiSkeletonText lines={10} /> : null}
 
       <InformationText
         loading={loading}

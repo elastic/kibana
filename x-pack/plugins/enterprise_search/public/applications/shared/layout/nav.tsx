@@ -5,9 +5,11 @@
  * 2.0.
  */
 
+import React from 'react';
+
 import { useValues } from 'kea';
 
-import { EuiSideNavItemType } from '@elastic/eui';
+import { EuiFlexGroup, EuiIcon, EuiSideNavItemType } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import {
@@ -170,7 +172,11 @@ export const useEnterpriseSearchNav = () => {
   return navItems;
 };
 
-export const useEnterpriseSearchEngineNav = (engineName?: string, isEmptyState?: boolean) => {
+export const useEnterpriseSearchEngineNav = (
+  engineName?: string,
+  isEmptyState?: boolean,
+  hasSchemaConflicts?: boolean
+) => {
   const navItems = useEnterpriseSearchNav();
   if (!navItems) return undefined;
   if (!engineName) return navItems;
@@ -188,7 +194,7 @@ export const useEnterpriseSearchEngineNav = (engineName?: string, isEmptyState?:
           name: engineName,
           ...generateNavLink({
             shouldNotCreateHref: true,
-            shouldShowActiveForSubroutes: true,
+            shouldShowActiveForSubroutes: false,
             to: enginePath,
           }),
           items: [
@@ -204,9 +210,14 @@ export const useEnterpriseSearchEngineNav = (engineName?: string, isEmptyState?:
             },
             {
               id: 'enterpriseSearchApplicationsContent',
-              name: i18n.translate('xpack.enterpriseSearch.nav.engine.contentTitle', {
-                defaultMessage: 'Content',
-              }),
+              name: (
+                <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+                  {i18n.translate('xpack.enterpriseSearch.nav.engine.contentTitle', {
+                    defaultMessage: 'Content',
+                  })}
+                  {hasSchemaConflicts && <EuiIcon type="warning" color="danger" />}
+                </EuiFlexGroup>
+              ),
               ...generateNavLink({
                 shouldNotCreateHref: true,
                 shouldShowActiveForSubroutes: true,

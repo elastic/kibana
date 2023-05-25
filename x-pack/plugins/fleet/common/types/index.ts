@@ -43,6 +43,7 @@ export interface FleetConfigType {
     maxAgentPoliciesWithInactivityTimeout?: number;
     disableRegistryVersionCheck?: boolean;
     bundledPackageLocation?: string;
+    testSecretsIndex?: string;
   };
   internal?: {
     disableILMPolicies: boolean;

@@ -6,10 +6,10 @@
  */
 import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
+import { syntheticsMonitorType } from '../../../common/types/saved_objects';
 import { ConfigKey } from '../../../common/runtime_types';
 import { SyntheticsRestApiRouteFactory } from '../../legacy_uptime/routes/types';
 import { API_URLS } from '../../../common/constants';
-import { syntheticsMonitorType } from '../../legacy_uptime/lib/saved_objects/synthetics_monitor';
 import { getMonitors, getKqlFilter } from '../common';
 import { INSUFFICIENT_FLEET_PERMISSIONS } from '../../synthetics_service/project_monitor/project_monitor_formatter';
 import { deleteMonitorBulk } from './bulk_cruds/delete_monitor_bulk';

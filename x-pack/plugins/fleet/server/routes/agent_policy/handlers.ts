@@ -213,6 +213,7 @@ export const updateAgentPolicyHandler: FleetRequestHandler<
   const esClient = coreContext.elasticsearch.client.asInternalUser;
   const user = await appContextService.getSecurity()?.authc.getCurrentUser(request);
   const { force, ...data } = request.body;
+
   const spaceId = fleetContext.spaceId;
   try {
     const agentPolicy = await agentPolicyService.update(
