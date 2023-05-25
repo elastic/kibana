@@ -51,7 +51,7 @@ export function AddLayerButton({
       toolTipContent,
       disabled,
       name: (
-        <EuiFlexGroup gutterSize="m">
+        <EuiFlexGroup gutterSize="m" responsive={false}>
           <EuiFlexItem>
             <span className="lnsLayerAddButton__label">{label}</span>
           </EuiFlexItem>
