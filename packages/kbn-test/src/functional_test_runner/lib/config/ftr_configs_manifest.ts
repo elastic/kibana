@@ -26,8 +26,17 @@ interface FtrConfigsManifest {
 }
 let ftrConfigsManifest: FtrConfigsManifest;
 
+listAffectedDirectories(REPO_ROOT);
+
 const load = (x: string): FtrConfigsManifest => JsYaml.safeLoad(Fs.readFileSync(x, 'utf8'));
 try {
+  const ftrManifestPath = Path.resolve(REPO_ROOT, FTR_CONFIGS_MANIFEST_REL);
+  // eslint-disable-next-line no-console
+  console.log('### Loading ftr manifest...', {
+    ftrManifestPath,
+    REPO_ROOT,
+    FTR_CONFIGS_MANIFEST_REL,
+  });
   ftrConfigsManifest = load(Path.resolve(REPO_ROOT, FTR_CONFIGS_MANIFEST_REL));
 } catch (_) {
   const abnormalPath = Path.resolve(REPO_ROOT, '../kibana', FTR_CONFIGS_MANIFEST_REL);
@@ -52,3 +61,26 @@ export const FTR_CONFIGS_MANIFEST_PATHS = [
     const rel = typeof config === 'string' ? config : Object.keys(config)[0];
     return Path.resolve(REPO_ROOT, rel);
   });
+
+function listAffectedDirectories(repoRoot: string) {
+  try {
+    const buildkiteDir = Path.resolve(repoRoot, '.buildkite');
+    const buildkiteDirContents = !Fs.existsSync(buildkiteDir)
+      ? '<doesnt-exist>'
+      : Fs.readdirSync(buildkiteDir).join('; ');
+
+    const alternativeKibanaPath = Path.resolve(repoRoot, '../kibana', '.buildkite');
+    const alternativeKibanaBuildkiteDirContents = !Fs.existsSync(buildkiteDir)
+      ? '<doesnt-exist>'
+      : Fs.readdirSync(alternativeKibanaPath).join('; ');
+
+    // eslint-disable-next-line no-console
+    console.log('### Dir contents to discover structure', {
+      [buildkiteDir]: buildkiteDirContents,
+      [alternativeKibanaPath]: alternativeKibanaBuildkiteDirContents,
+    });
+  } catch (e) {
+    // eslint-disable-next-line no-console
+    console.error('### Error while listing buildkite-related directories', e);
+  }
+}
