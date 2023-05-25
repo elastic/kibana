@@ -65,15 +65,20 @@ export const strings = {
     }),
 };
 
-const getWrapperWithTooltip = (children: JSX.Element, enableTooltip: boolean, language: string) => {
-  if (enableTooltip) {
+const getWrapperWithTooltip = (
+  children: JSX.Element,
+  enableTooltip: boolean,
+  query?: Query | AggregateQuery
+) => {
+  if (enableTooltip && query && isOfAggregateQueryType(query)) {
+    const textBasedLanguage = getAggregateQueryMode(query);
     return (
       <EuiToolTip
         position="top"
         content={i18n.translate('unifiedSearch.query.queryBar.textBasedNonTimestampWarning', {
           defaultMessage:
             'Date range selection for {language} queries requires the presence of an @timestamp field in the dataset.',
-          values: { language },
+          values: { language: textBasedLanguage },
         })}
       >
         {children}
@@ -427,8 +432,7 @@ export const QueryBarTopRow = React.memo(
       }
 
       const wrapperClasses = classNames('kbnQueryBar__datePickerWrapper');
-      const query = props.query as AggregateQuery;
-      const textBasedLanguage = getAggregateQueryMode(query);
+
       const datePicker = (
         <SuperDatePicker
           isDisabled={isDisabled}
@@ -451,7 +455,7 @@ export const QueryBarTopRow = React.memo(
           compressed={shouldShowDatePickerAsBadge()}
         />
       );
-      const component = getWrapperWithTooltip(datePicker, enableTooltip, textBasedLanguage);
+      const component = getWrapperWithTooltip(datePicker, enableTooltip, props.query);
 
       return <EuiFlexItem className={wrapperClasses}>{component}</EuiFlexItem>;
     }
