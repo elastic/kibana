@@ -83,6 +83,16 @@ export const useSavedVisInstance = (
           savedVisInstance = await getVisualizationInstance(services, visualizationIdFromUrl);
         }
 
+        if (savedVisInstance.vis.type.disableEdit) {
+          throw new Error(
+            i18n.translate('visualizations.editVisualization.readOnlyErrorMessage', {
+              defaultMessage:
+                '{visTypeTitle} visualizations are read only and can not be opened in editor',
+              values: { visTypeTitle: savedVisInstance.vis.type.title },
+            })
+          );
+        }
+
         if (embeddableInput && embeddableInput.timeRange) {
           savedVisInstance.panelTimeRange = embeddableInput.timeRange;
         }
