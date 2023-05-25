@@ -42,9 +42,20 @@ export const useOsqueryTab = ({
   const endpointResponseActionsEnabled = useIsExperimentalFeatureEnabled(
     'endpointResponseActionsEnabled'
   );
+  const expandedEventFieldsObject = expandDottedObject(
+    (rawEventData as RawEventData).fields
+  ) as ExpandedEventFieldsObject;
+
+  const responseActions =
+    expandedEventFieldsObject.kibana?.alert?.rule?.parameters?.[0].response_actions;
 
   const shouldEarlyReturn =
-    !rawEventData || !responseActionsEnabled || endpointResponseActionsEnabled || !ecsData;
+    !rawEventData ||
+    !responseActionsEnabled ||
+    endpointResponseActionsEnabled ||
+    !ecsData ||
+    !responseActions?.length;
+
   const alertId = rawEventData?._id ?? '';
 
   const { OsqueryResults, fetchAllLiveQueries } = osquery;
@@ -59,14 +70,7 @@ export const useOsqueryTab = ({
     return;
   }
 
-  const expandedEventFieldsObject = expandDottedObject(
-    (rawEventData as RawEventData).fields
-  ) as ExpandedEventFieldsObject;
-
-  const responseActions =
-    expandedEventFieldsObject.kibana?.alert?.rule?.parameters?.[0].response_actions;
-
-  const osqueryResponseActions = responseActions?.filter(
+  const osqueryResponseActions = responseActions.filter(
     (responseAction) => responseAction.action_type_id === RESPONSE_ACTION_TYPES.OSQUERY
   );
 

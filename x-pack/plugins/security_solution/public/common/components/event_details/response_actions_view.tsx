@@ -38,7 +38,13 @@ export const useResponseActionsView = ({
 }) => {
   const responseActionsEnabled = useIsExperimentalFeatureEnabled('endpointResponseActionsEnabled');
 
-  const shouldEarlyReturn = !rawEventData || !responseActionsEnabled;
+  const expandedEventFieldsObject = expandDottedObject(
+    (rawEventData as RawEventData).fields
+  ) as ExpandedEventFieldsObject;
+
+  const responseActions =
+    expandedEventFieldsObject?.kibana?.alert?.rule?.parameters?.[0].response_actions;
+  const shouldEarlyReturn = !rawEventData || !responseActionsEnabled || !responseActions?.length;
 
   const alertId = rawEventData?._id ?? '';
 
@@ -48,18 +54,8 @@ export const useResponseActionsView = ({
     },
     { enabled: !shouldEarlyReturn }
   );
+
   if (shouldEarlyReturn) {
-    return;
-  }
-
-  const expandedEventFieldsObject = expandDottedObject(
-    (rawEventData as RawEventData).fields
-  ) as ExpandedEventFieldsObject;
-
-  const responseActions =
-    expandedEventFieldsObject?.kibana?.alert?.rule?.parameters?.[0].response_actions;
-
-  if (!responseActions?.length) {
     return;
   }
 
