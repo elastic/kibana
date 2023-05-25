@@ -23,8 +23,11 @@ import type {
   ConnectorMappingsSavedObjectTransformed,
   ConnectorMappingsAttributesTransformed,
 } from '../../common/types/connector_mappings';
-import { ConnectorMappingsAttributesTransformedRt } from '../../common/types/connector_mappings';
-import { decodeOrThrow, ConnectorMappingsAttributesPartialRt } from '../../../common/api';
+import {
+  ConnectorMappingsAttributesPartialRt,
+  ConnectorMappingsAttributesTransformedRt,
+} from '../../common/types/connector_mappings';
+import { decodeOrThrow } from '../../../common/api';
 
 export class ConnectorMappingsService {
   constructor(private readonly log: Logger) {}

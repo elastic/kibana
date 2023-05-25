@@ -6,20 +6,16 @@
  */
 
 import Boom from '@hapi/boom';
-import { pipe } from 'fp-ts/lib/pipeable';
-import { fold } from 'fp-ts/lib/Either';
-import { identity } from 'fp-ts/lib/function';
 
 import { SavedObjectsUtils } from '@kbn/core/server';
 
 import type { Case, CasePostRequest } from '../../../common/api';
 import {
-  throwErrors,
   CaseRt,
   ActionTypes,
   CasePostRequestRt,
-  excess,
   CaseSeverity,
+  decodeWithExcessOrThrow,
 } from '../../../common/api';
 import { MAX_ASSIGNEES_PER_CASE, MAX_TITLE_LENGTH } from '../../../common/constants';
 import { isInvalidTag, areTotalAssigneesInvalid } from '../../../common/utils/validators';
@@ -44,12 +40,7 @@ export const create = async (data: CasePostRequest, clientArgs: CasesClientArgs)
     authorization: auth,
   } = clientArgs;
 
-  const query = pipe(
-    excess(CasePostRequestRt).decode({
-      ...data,
-    }),
-    fold(throwErrors(Boom.badRequest), identity)
-  );
+  const query = decodeWithExcessOrThrow(CasePostRequestRt)(data);
 
   if (query.title.length > MAX_TITLE_LENGTH) {
     throw Boom.badRequest(

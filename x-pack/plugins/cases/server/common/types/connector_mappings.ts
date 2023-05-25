@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import * as rt from 'io-ts';
 import type { SavedObject } from '@kbn/core/server';
 import type { ConnectorMappingsAttributes } from '../../../common/api';
 import { ConnectorMappingsAttributesRt } from '../../../common/api';
@@ -23,3 +24,7 @@ export const ConnectorMappingsAttributesTransformedRt = ConnectorMappingsAttribu
 export type ConnectorMappingsAttributesTransformed = ConnectorMappingsAttributes;
 export type ConnectorMappingsSavedObjectTransformed =
   SavedObject<ConnectorMappingsAttributesTransformed>;
+
+export const ConnectorMappingsAttributesPartialRt = rt.exact(
+  rt.partial(ConnectorMappingsAttributesRt.type.props)
+);

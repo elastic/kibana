@@ -5,16 +5,10 @@
  * 2.0.
  */
 
-import Boom from '@hapi/boom';
-import { pipe } from 'fp-ts/lib/pipeable';
-import { fold } from 'fp-ts/lib/Either';
-import { identity } from 'fp-ts/lib/function';
-
 import type { CasesStatusRequest, CasesStatusResponse } from '../../../common/api';
 import {
-  excess,
   CasesStatusRequestRt,
-  throwErrors,
+  decodeWithExcessOrThrow,
   CasesStatusResponseRt,
 } from '../../../common/api';
 import type { CasesClientArgs } from '../types';
@@ -34,10 +28,7 @@ export async function getStatusTotalsByType(
   } = clientArgs;
 
   try {
-    const queryParams = pipe(
-      excess(CasesStatusRequestRt).decode(params),
-      fold(throwErrors(Boom.badRequest), identity)
-    );
+    const queryParams = decodeWithExcessOrThrow(CasesStatusRequestRt)(params);
 
     const { filter: authorizationFilter } = await authorization.getAuthorizationFilter(
       Operations.getCaseStatuses

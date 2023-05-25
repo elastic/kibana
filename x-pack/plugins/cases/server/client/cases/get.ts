@@ -4,10 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import Boom from '@hapi/boom';
-import { pipe } from 'fp-ts/lib/pipeable';
-import { fold } from 'fp-ts/lib/Either';
-import { identity } from 'fp-ts/lib/function';
 
 import type { SavedObjectsResolveResponse } from '@kbn/core/server';
 import type {
@@ -25,8 +21,7 @@ import {
   CaseRt,
   CaseResolveResponseRt,
   AllTagsFindRequestRt,
-  excess,
-  throwErrors,
+  decodeWithExcessOrThrow,
   AllReportersFindRequestRt,
   CasesByAlertIDRequestRt,
   CasesByAlertIdRt,
@@ -73,10 +68,7 @@ export const getCasesByAlertID = async (
   } = clientArgs;
 
   try {
-    const queryParams = pipe(
-      excess(CasesByAlertIDRequestRt).decode(options),
-      fold(throwErrors(Boom.badRequest), identity)
-    );
+    const queryParams = decodeWithExcessOrThrow(CasesByAlertIDRequestRt)(options);
 
     const { filter: authorizationFilter, ensureSavedObjectsAreAuthorized } =
       await authorization.getAuthorizationFilter(Operations.getCaseIDsByAlertID);
@@ -304,10 +296,7 @@ export async function getTags(
   } = clientArgs;
 
   try {
-    const queryParams = pipe(
-      excess(AllTagsFindRequestRt).decode(params),
-      fold(throwErrors(Boom.badRequest), identity)
-    );
+    const queryParams = decodeWithExcessOrThrow(AllTagsFindRequestRt)(params);
 
     const { filter: authorizationFilter } = await authorization.getAuthorizationFilter(
       Operations.findCases
@@ -341,10 +330,7 @@ export async function getReporters(
   } = clientArgs;
 
   try {
-    const queryParams = pipe(
-      excess(AllReportersFindRequestRt).decode(params),
-      fold(throwErrors(Boom.badRequest), identity)
-    );
+    const queryParams = decodeWithExcessOrThrow(AllReportersFindRequestRt)(params);
 
     const { filter: authorizationFilter } = await authorization.getAuthorizationFilter(
       Operations.getReporters

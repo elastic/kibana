@@ -16,7 +16,7 @@ import type {
   ActionConnector,
   Case,
   ExternalServiceResponse,
-  CasesConfigureAttributes,
+  ConfigurationAttributes,
   CommentRequestAlertType,
   CommentAttributes,
 } from '../../../common/api';
@@ -42,7 +42,7 @@ import { decodeOrThrow } from '../../../common/api/runtime_types';
  * Returns true if the case should be closed based on the configuration settings.
  */
 function shouldCloseByPush(
-  configureSettings: SavedObjectsFindResponse<CasesConfigureAttributes>
+  configureSettings: SavedObjectsFindResponse<ConfigurationAttributes>
 ): boolean {
   return (
     configureSettings.total > 0 &&

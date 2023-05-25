@@ -26,7 +26,7 @@ export type ActionType = rt.TypeOf<typeof ActionTypeRt>;
 export type CaseField = rt.TypeOf<typeof CaseFieldRt>;
 export type ThirdPartyField = rt.TypeOf<typeof ThirdPartyFieldRt>;
 
-const ConnectorMappingRt = rt.type({
+const ConnectorMappingRt = rt.strict({
   action_type: ActionTypeRt,
   source: CaseFieldRt,
   target: ThirdPartyFieldRt,
@@ -34,13 +34,13 @@ const ConnectorMappingRt = rt.type({
 
 export const ConnectorMappingsRt = rt.array(ConnectorMappingRt);
 
-export const ConnectorMappingsAttributesRt = rt.type({
+export const ConnectorMappingsAttributesRt = rt.strict({
   mappings: ConnectorMappingsRt,
   owner: rt.string,
 });
 
 export const ConnectorMappingsAttributesPartialRt = rt.exact(
-  rt.partial(ConnectorMappingsAttributesRt.props)
+  rt.partial(ConnectorMappingsAttributesRt.type.props)
 );
 
 export type ConnectorMappingsAttributes = rt.TypeOf<typeof ConnectorMappingsAttributesRt>;
