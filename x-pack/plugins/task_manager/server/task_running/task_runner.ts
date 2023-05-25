@@ -311,11 +311,9 @@ export class TaskManagerRunner implements TaskRunner {
         id: this.instance.task.id,
         description: 'run task',
       };
-
       const result = await this.executionContext.withContext(ctx, () =>
         withSpan({ name: 'run', type: 'task manager' }, () => this.task!.run())
       );
-
       const validatedResult = this.validateResult(result);
       const processedResult = await withSpan({ name: 'process result', type: 'task manager' }, () =>
         this.processResult(validatedResult, stopTaskTimer())

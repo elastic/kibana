@@ -733,7 +733,7 @@ export class TaskRunner<
         this.logger.debug(`Task Runner has skipped executing ${ruleId} as it has invalid params.`);
         return {
           state: originalState,
-          schedule: { interval: '0s' },
+          schedule: { interval: '1s' },
           monitoring: this.ruleMonitoring.getMonitoring(),
         };
       }

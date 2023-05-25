@@ -48,6 +48,55 @@ const rawRuleExecutionStatusSchema = schema.object({
   ),
 });
 
+const ISOWeekdaysSchema = schema.oneOf([
+  schema.literal(1),
+  schema.literal(2),
+  schema.literal(3),
+  schema.literal(4),
+  schema.literal(5),
+  schema.literal(6),
+  schema.literal(7),
+]);
+
+const rRuleSchema = schema.object({
+  dtstart: schema.string(),
+  tzid: schema.string(),
+  freq: schema.maybe(
+    schema.oneOf([
+      schema.literal(0),
+      schema.literal(1),
+      schema.literal(2),
+      schema.literal(3),
+      schema.literal(4),
+      schema.literal(5),
+      schema.literal(6),
+    ])
+  ),
+  until: schema.maybe(schema.string()),
+  count: schema.maybe(schema.number()),
+  interval: schema.maybe(schema.number()),
+  wkst: schema.maybe(
+    schema.oneOf([
+      schema.literal('MO'),
+      schema.literal('TU'),
+      schema.literal('WE'),
+      schema.literal('TH'),
+      schema.literal('FR'),
+      schema.literal('SA'),
+      schema.literal('SU'),
+    ])
+  ),
+  byweekday: schema.maybe(schema.arrayOf(schema.oneOf([schema.string(), schema.number()]))),
+  bymonth: schema.maybe(schema.number()),
+  bysetpos: schema.maybe(schema.number()),
+  bymonthday: schema.maybe(schema.number()),
+  byyearday: schema.maybe(schema.number()),
+  byweekno: schema.maybe(schema.number()),
+  byhour: schema.maybe(schema.number()),
+  byminute: schema.maybe(schema.number()),
+  bysecond: schema.maybe(schema.number()),
+});
+
 const outcome = schema.oneOf([
   schema.literal('succeeded'),
   schema.literal('warning'),
@@ -131,17 +180,7 @@ const rawRuleAlertsFilterSchema = schema.object({
   ),
   timeframe: schema.maybe(
     schema.object({
-      days: schema.arrayOf(
-        schema.oneOf([
-          schema.literal(1),
-          schema.literal(2),
-          schema.literal(3),
-          schema.literal(4),
-          schema.literal(5),
-          schema.literal(6),
-          schema.literal(7),
-        ])
-      ),
+      days: schema.arrayOf(ISOWeekdaysSchema),
       hours: schema.object({
         start: schema.string(),
         end: schema.string(),
@@ -199,10 +238,7 @@ export const rawRuleSchema = schema.object({
     schema.arrayOf(
       schema.object({
         duration: schema.number(),
-        rRule: schema.object({
-          dtstart: schema.string(),
-          tzid: schema.string(),
-        }),
+        rRule: rRuleSchema,
         id: schema.maybe(schema.string()),
         skipRecurrences: schema.maybe(schema.arrayOf(schema.string())),
       })
