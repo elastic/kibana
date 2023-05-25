@@ -59,7 +59,7 @@ export const init: ModelStage<
   const aliasMap = aliasesRes.right;
 
   const currentIndex = getCurrentIndex({
-    indices,
+    indices: Object.keys(indices),
     aliases: aliasMap,
     indexPrefix: context.indexPrefix,
   });
