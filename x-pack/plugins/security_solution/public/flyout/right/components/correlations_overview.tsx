@@ -33,9 +33,10 @@ export const CorrelationsOverview: React.FC = () => {
       params: {
         id: eventId,
         indexName,
+        scopeId,
       },
     });
-  }, [eventId, openLeftPanel, indexName]);
+  }, [eventId, scopeId, openLeftPanel, indexName]);
 
   const { loading, error, data } = useCorrelations({
     eventId,
