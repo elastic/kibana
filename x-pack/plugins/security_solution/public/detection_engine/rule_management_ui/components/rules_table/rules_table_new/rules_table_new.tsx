@@ -5,29 +5,17 @@
  * 2.0.
  */
 
-import {
-  EuiEmptyPrompt,
-  EuiInMemoryTable,
-  EuiLoadingContent,
-  EuiProgress,
-  Pagination,
-} from '@elastic/eui';
-import React, { useCallback, useMemo, useRef } from 'react';
-import type { RuleInstallationInfoForReview } from '../../../../../../common/detection_engine/prebuilt_rules/api/review_rule_installation/response_schema';
+import { EuiEmptyPrompt, EuiInMemoryTable, EuiLoadingContent, EuiProgress } from '@elastic/eui';
+import React from 'react';
 import { Loader } from '../../../../../common/components/loader';
 import { PrePackagedRulesPrompt } from '../../../../../detections/components/rules/pre_packaged_rules/load_empty_prompt';
 
 import * as i18n from '../../../../../detections/pages/detection_engine/rules/translations';
-import type { EuiBasicTableOnChange } from '../../../../../detections/pages/detection_engine/rules/types';
-import { RulesTableFilters } from '../rules_table_filters/rules_table_filters';
 import { useRulesTableNewColumns } from './use_rules_table_new_columns';
 import { useUserData } from '../../../../../detections/components/user_info';
 import { hasUserCRUDPermission } from '../../../../../common/utils/privileges';
-import { RULES_TABLE_PAGE_SIZE_OPTIONS } from '../constants';
-import type { FindRulesSortField } from '../../../../../../common/detection_engine/rule_management';
 import { useIsUpgradingSecurityPackages } from '../../../../rule_management/logic/use_upgrade_security_packages';
 import { useRulesTableNewContext } from './rules_table_new_context';
-import { useValueChanged } from '../../../../../common/hooks/use_value_changed';
 
 const INITIAL_SORT_FIELD = 'enabled';
 

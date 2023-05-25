@@ -5,12 +5,9 @@
  * 2.0.
  */
 
-import { isEqual } from 'lodash';
 import React, { createContext, useCallback, useContext, useMemo, useRef, useState } from 'react';
-import {
+import type {
   CriteriaWithPagination,
-  EuiButton,
-  EuiInMemoryTable,
   EuiSearchBarProps,
   EuiTableSelectionType,
 } from '@elastic/eui';
