@@ -12,5 +12,6 @@ import { FtrProviderContext } from '../../functional/ftr_provider_context';
 export default function ({ loadTestFile }: FtrProviderContext) {
   describe('Unified Field List Examples', () => {
     loadTestFile(require.resolve('./field_stats'));
+    loadTestFile(require.resolve('./existing_fields'));
   });
 }
