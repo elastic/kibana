@@ -132,6 +132,7 @@ export type StartServices = CoreStart &
     };
     savedObjectsManagement: SavedObjectsManagementPluginStart;
     isSidebarEnabled$: BehaviorSubject<boolean>;
+    getStartedESSComponent: GetStartedESSComponent | undefined;
     telemetry: TelemetryClientStart;
   };
 
@@ -139,9 +140,15 @@ export interface PluginSetup {
   resolver: () => Promise<ResolverPluginSetup>;
 }
 
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
+export type GetStartedESSComponentProps = {};
+
+export type GetStartedESSComponent = (props?: GetStartedESSComponentProps) => JSX.Element;
+
 export interface PluginStart {
   getNavLinks$: () => Observable<NavigationLink[]>;
   setIsSidebarEnabled: (isSidebarEnabled: boolean) => void;
+  setGetStartedPage: (getStartedESSComponent: GetStartedESSComponent) => void;
 }
 
 export interface AppObservableLibs {

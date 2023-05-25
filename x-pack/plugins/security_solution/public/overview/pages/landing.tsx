@@ -5,17 +5,23 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
+import React, { memo, useMemo } from 'react';
 import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { SecurityPageName } from '../../../common/constants';
 import { LandingPageComponent } from '../../common/components/landing_page';
+import { useKibana } from '../../common/lib/kibana';
 
 export const LandingPage = memo(() => {
+  const { getStartedESSComponent } = useKibana().services;
+  const GetStartedESSComponent = useMemo(() => getStartedESSComponent?.(), []);
   return (
-    <>
-      <LandingPageComponent />
-      <SpyRoute pageName={SecurityPageName.landing} />
-    </>
+    GetStartedESSComponent ?? (
+      <>
+        <>{'Server!!! Kibana'}</>
+        <LandingPageComponent />
+        <SpyRoute pageName={SecurityPageName.landing} />
+      </>
+    )
   );
 });
 
