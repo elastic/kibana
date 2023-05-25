@@ -137,7 +137,7 @@ describe('Invalid Indicators', { testIsolation: false }, () => {
   });
 });
 
-describe('Indicators', { testIsolation: false }, () => {
+describe('Indicators', () => {
   before(() => {
     esArchiverLoad('threat_intelligence/indicators_data');
     login();
@@ -156,7 +156,7 @@ describe('Indicators', { testIsolation: false }, () => {
     });
   });
 
-  describe('Indicators page basics', () => {
+  describe('Indicators page basics', { testIsolation: true }, () => {
     before(() => {
       cy.visit(THREAT_INTELLIGENCE);
       selectRange();
@@ -208,7 +208,7 @@ describe('Indicators', { testIsolation: false }, () => {
     });
   });
 
-  describe('Indicator page search', () => {
+  describe('Indicator page search', { testIsolation: false }, () => {
     before(() => {
       cy.visit(THREAT_INTELLIGENCE);
       selectRange();

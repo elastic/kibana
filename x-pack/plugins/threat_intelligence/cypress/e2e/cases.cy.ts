@@ -66,7 +66,7 @@ describe('Cases with invalid indicators', { testIsolation: false }, () => {
   });
 });
 
-describe('Cases interactions', () => {
+describe('Cases interactions', { testIsolation: false }, () => {
   before(() => {
     esArchiverLoad('threat_intelligence/indicators_data');
     login();
