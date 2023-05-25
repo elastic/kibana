@@ -52,6 +52,7 @@ export interface SearchBarOwnProps<QT extends AggregateQuery | Query = Query> {
   showQueryInput?: boolean;
   showFilterBar?: boolean;
   showDatePicker?: boolean;
+  isDatePickerDisabled?: boolean;
   showAutoRefreshOnly?: boolean;
   filters?: Filter[];
   filtersForSuggestions?: Filter[];

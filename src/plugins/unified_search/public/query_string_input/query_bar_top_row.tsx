@@ -44,6 +44,7 @@ import {
   DataViewPickerProps,
   OnSaveTextLanguageQueryProps,
 } from '../dataview_picker';
+import { computeTimeRange } from './compute_index_timerange';
 
 import { FilterButtonGroup } from '../filter_bar/filter_button_group/filter_button_group';
 import type { SuggestionsListSize } from '../typeahead/suggestions_component';
@@ -63,6 +64,12 @@ export const strings = {
       defaultMessage: 'Run query',
     }),
 };
+
+interface AllTimeRange {
+  from: string;
+  to: string;
+  display: string;
+}
 
 const SuperDatePicker = React.memo(
   EuiSuperDatePicker as any
@@ -96,6 +103,7 @@ export interface QueryBarTopRowProps<QT extends Query | AggregateQuery = Query> 
   showQueryInput?: boolean;
   showAddFilter?: boolean;
   showDatePicker?: boolean;
+  isDatePickerDisabled?: boolean;
   isDisabled?: boolean;
   showAutoRefreshOnly?: boolean;
   timeHistory?: TimeHistoryContract;
@@ -167,6 +175,12 @@ export const QueryBarTopRow = React.memo(
     props: QueryBarTopRowProps<QT>
   ) {
     const isMobile = useIsWithinBreakpoints(['xs', 's']);
+    const prevFullTimeRange = useRef<{ from: string; to: string }>({
+      from: '',
+      to: '',
+    });
+    const abortControllerRef = useRef<AbortController | null>(null);
+    const mountedRef = useRef<boolean>(true);
     const [isXXLarge, setIsXXLarge] = useState<boolean>(false);
     const [codeEditorIsExpanded, setCodeEditorIsExpanded] = useState<boolean>(false);
     const submitButtonStyle: QueryBarTopRowProps['submitButtonStyle'] =
@@ -193,10 +207,6 @@ export const QueryBarTopRow = React.memo(
       showAutoRefreshOnly = false,
       showSubmitButton = true,
     } = props;
-
-    const [isDateRangeInvalid, setIsDateRangeInvalid] = useState(false);
-    const [isQueryInputFocused, setIsQueryInputFocused] = useState(false);
-
     const kibana = useKibana<IUnifiedSearchPluginServices>();
 
     const {
@@ -211,6 +221,11 @@ export const QueryBarTopRow = React.memo(
       http,
       dataViews,
     } = kibana.services;
+    const [isDateRangeInvalid, setIsDateRangeInvalid] = useState(false);
+    const [isQueryInputFocused, setIsQueryInputFocused] = useState(false);
+    const [quickRanges, setQuickRanges] = useState<AllTimeRange[]>(
+      uiSettings?.get(UI_SETTINGS.TIMEPICKER_QUICK_RANGES)
+    );
 
     const isQueryLangSelected = props.query && !isOfQueryType(props.query);
 
@@ -257,19 +272,15 @@ export const QueryBarTopRow = React.memo(
       timeHistory$,
       toRecentlyUsedRanges(timeHistory?.get() ?? [])
     );
-    const [commonlyUsedRanges] = useState(() => {
-      return (
-        uiSettings
-          ?.get(UI_SETTINGS.TIMEPICKER_QUICK_RANGES)
-          ?.map(({ from, to, display }: { from: string; to: string; display: string }) => {
-            return {
-              start: from,
-              end: to,
-              label: display,
-            };
-          }) ?? []
-      );
-    });
+
+    const commonlyUsedRanges =
+      quickRanges?.map(({ from, to, display }: { from: string; to: string; display: string }) => {
+        return {
+          start: from,
+          end: to,
+          label: display,
+        };
+      }) ?? [];
 
     const onSubmit = useCallback(
       ({ query, dateRange }: { query?: Query | QT; dateRange: TimeRange }) => {
@@ -340,6 +351,61 @@ export const QueryBarTopRow = React.memo(
       },
       [propsOnChange, onSubmit]
     );
+
+    useEffect(() => {
+      async function getFullTimeRange() {
+        const dataView = props.indexPatterns?.[0];
+        const allTimeRangeExists = quickRanges.find(
+          (range) =>
+            range.from === prevFullTimeRange.current?.from &&
+            range.to === prevFullTimeRange.current?.to
+        );
+        // console.log(dataView?.isPersisted());
+        // console.log(props.query);
+        if (!allTimeRangeExists && typeof dataView !== 'string' && !dataView?.isPersisted()) {
+          abortControllerRef.current?.abort();
+          abortControllerRef.current = new AbortController();
+          const allTimeRange = await computeTimeRange({
+            dataView,
+            query: props.query,
+            services: {
+              data,
+            },
+            abortSignal: abortControllerRef.current?.signal,
+          });
+          if (allTimeRange) {
+            prevFullTimeRange.current = allTimeRange;
+            const updatedQuickRanges = [
+              ...quickRanges,
+              {
+                from: allTimeRange.from,
+                to: allTimeRange.to,
+                display: 'All time',
+              },
+            ];
+            setQuickRanges(updatedQuickRanges);
+            if (!dataView?.timeFieldName) {
+              // onTimeChange({
+              //   start: allTimeRange.from,
+              //   end: allTimeRange.to,
+              //   isInvalid: false,
+              //   isQuickSelection: false,
+              // });
+            }
+          }
+        }
+      }
+      if (Boolean(isQueryLangSelected)) {
+        getFullTimeRange();
+      }
+    }, [data, isQueryLangSelected, props.indexPatterns, props.query, quickRanges, onTimeChange]);
+
+    useEffect(() => {
+      return () => {
+        mountedRef.current = false;
+        abortControllerRef.current?.abort();
+      };
+    }, [abortControllerRef, mountedRef]);
 
     const propsOnRefresh = props.onRefresh;
     const onRefresh = useCallback(

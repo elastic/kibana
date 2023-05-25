@@ -136,7 +136,7 @@ export function Chart({
     !chart.hidden &&
     dataView.id &&
     dataView.type !== DataViewType.ROLLUP &&
-    dataView.isTimeBased()
+    (isPlainRecord || (!isPlainRecord && dataView.isTimeBased()))
   );
 
   const input$ = useMemo(
