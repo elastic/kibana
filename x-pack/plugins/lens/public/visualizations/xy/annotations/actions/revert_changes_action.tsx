@@ -106,12 +106,15 @@ export const revert = ({
 
   modal.close();
 
-  toasts.addSuccess(
-    i18n.translate('xpack.lens.xyChart.annotations.notificationReverted', {
+  toasts.addSuccess({
+    title: i18n.translate('xpack.lens.xyChart.annotations.notificationReverted', {
       defaultMessage: `Reverted "{title}"`,
       values: { title: layer.__lastSaved.title },
-    })
-  );
+    }),
+    text: i18n.translate('xpack.lens.xyChart.annotations.notificationRevertedExplanation', {
+      defaultMessage: 'The most recently saved version of this annotation group has been restored.',
+    }),
+  });
 };
 
 const RevertChangesConfirmModal = ({
