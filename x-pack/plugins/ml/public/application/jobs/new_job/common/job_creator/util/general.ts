@@ -75,7 +75,7 @@ export function getRichDetectors(
     }
 
     return {
-      agg: newJobCapsService.getAggById(d.function),
+      agg: d.function ? newJobCapsService.getAggById(d.function) : null,
       field,
       byField,
       overField,
