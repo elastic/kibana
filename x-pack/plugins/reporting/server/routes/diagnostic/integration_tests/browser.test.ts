@@ -44,7 +44,7 @@ describe('POST /diagnose/browser', () => {
     httpSetup.registerRouteHandlerContext<ReportingRequestHandlerContext, 'reporting'>(
       reportingSymbol,
       'reporting',
-      () => ({ usesUiCapabilities: () => false })
+      () => ({ usesUiCapabilities: () => false, registerExportType: jest.fn() })
     );
 
     const docLinksSetupMock = docLinksServiceMock.createSetupContract();
