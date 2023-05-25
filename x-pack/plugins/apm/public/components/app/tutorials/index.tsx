@@ -20,7 +20,7 @@ import { PrivilegeType } from '../../../../common/privilege_type';
 import { InstructionSet } from './instruction_variants';
 
 export function Tutorials() {
-  const [instructions, setInstructions] = useState<InstructionSet>();
+  const [instructions, setInstructions] = useState<InstructionSet[]>([]);
   const [apiKeyAndId, setApiKeyAndId] = useState<ApiKeyAndId>({
     apiKey: API_KEY_INSTRUCTION,
     error: false,
@@ -67,10 +67,12 @@ export function Tutorials() {
     }
   };
 
+  const instructionsExists = instructions.length > 0;
+
   useEffect(() => {
     // Here setInstructions will be called based on the condition for serverless, cloud or onPrem
     // right now we will only call the ServerlessInstruction directly
-    setInstructions(
+    setInstructions([
       serverlessInstructions(
         {
           baseUrl,
@@ -78,8 +80,8 @@ export function Tutorials() {
         },
         apiKeyAndId,
         createAgentKey
-      )
-    );
+      ),
+    ]);
   }, [apiKeyAndId, baseUrl, config]);
 
   const ObservabilityPageTemplate = observabilityShared.navigation.PageTemplate;
@@ -87,7 +89,13 @@ export function Tutorials() {
     <ObservabilityPageTemplate>
       <Introduction isBeta={false} guideLink={guideLink} />
       <EuiSpacer />
-      {instructions && <InstructionsSet instructions={instructions} />}
+      {instructionsExists &&
+        instructions.map((instruction) => (
+          <>
+            <InstructionsSet instructions={instruction} />
+            <EuiSpacer />
+          </>
+        ))}
       <Footer />
     </ObservabilityPageTemplate>
   );

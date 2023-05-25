@@ -20,8 +20,6 @@ export function AgentConfigurationTable({
     apmServerUrl?: string;
     secretToken?: string;
     apiKey?: string;
-    apmServiceName: string;
-    apmEnvironment: string;
   };
 }) {
   if (!variables) return null;

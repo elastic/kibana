@@ -35,7 +35,7 @@ export const go = `# ${i18n.translate(
     defaultMessage: 'If not specified, the executable name will be used.',
   }
 )}
-export ELASTIC_APM_SERVICE_NAME={{{apmServiceName}}}
+export ELASTIC_APM_SERVICE_NAME=my-service-name
 
 {{#apiKey}}
 # {{apiKeyHint}}
@@ -50,5 +50,5 @@ export ELASTIC_APM_SECRET_TOKEN={{{secretToken}}}
 export ELASTIC_APM_SERVER_URL={{{apmServerUrl}}}
 
 # {{serviceEnvironmentHint}}
-export ELASTIC_APM_ENVIRONMENT={{{apmEnvironment}}}
+export ELASTIC_APM_ENVIRONMENT=my-environment
 `;

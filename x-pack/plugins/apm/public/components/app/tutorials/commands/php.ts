@@ -20,7 +20,7 @@ export const phpLineNumbers = (apiKey?: string) => ({
 });
 
 export const php = `# {{serviceNameHint}}
-elastic_apm.service_name="{{{apmServiceName}}}"
+elastic_apm.service_name="my-service-name"
 
 {{#apiKey}}
 # {{apiKeyHint}}
@@ -35,4 +35,4 @@ elastic_apm.secret_token="{{{secretToken}}}"
 elastic_apm.server_url="{{{apmServerUrl}}}"
 
 # {{serviceEnvironmentHint}}
-elastic_apm.environment="{{{apmEnvironment}}}"`;
+elastic_apm.environment="my-environment"`;

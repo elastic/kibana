@@ -26,17 +26,11 @@ export function AgentConfigInstructions({
   secretToken?: string;
   apiKey?: string;
 }) {
-  const defaultValues = {
-    apmServiceName: 'my-service-name',
-    apmEnvironment: 'my-environment',
-  };
-
   const commands = getApmAgentCommands({
     variantId,
     apmServerUrl,
     secretToken,
     apiKey,
-    defaultValues,
   });
 
   const variables = getApmAgentVariables(variantId, apiKey);
@@ -48,7 +42,7 @@ export function AgentConfigInstructions({
       <EuiSpacer />
       <AgentConfigurationTable
         variables={variables}
-        data={{ apmServerUrl, secretToken, apiKey, ...defaultValues }}
+        data={{ apmServerUrl, secretToken, apiKey }}
       />
       <EuiSpacer />
 

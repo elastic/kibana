@@ -34,7 +34,7 @@ export const javaLineNumbers = (apiKey?: string) => ({
   },
 });
 export const java = `java -javaagent:/path/to/elastic-apm-agent-<version>.jar \\
--Delastic.apm.service_name={{{apmServiceName}}} \\
+-Delastic.apm.service_name=my-service-name \\
 {{#apiKey}}
 -Delastic.apm.api_key={{{apiKey}}} \\
 {{/apiKey}}
@@ -42,6 +42,6 @@ export const java = `java -javaagent:/path/to/elastic-apm-agent-<version>.jar \\
 -Delastic.apm.secret_token={{{secretToken}}} \\
 {{/apiKey}}
 -Delastic.apm.secret_token={{{apmServerUrl}}} \\
--Delastic.apm.environment={{{apmEnvironment}}} \\
+-Delastic.apm.environment=my-environment \\
 -Delastic.apm.application_packages=org.example \\
 -jar {{{apmServiceName}}}.jar`;

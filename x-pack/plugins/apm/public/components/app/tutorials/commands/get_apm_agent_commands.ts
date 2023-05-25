@@ -122,16 +122,11 @@ export function getApmAgentCommands({
   apmServerUrl,
   secretToken,
   apiKey,
-  defaultValues,
 }: {
   variantId: string;
   apmServerUrl?: string;
   secretToken?: string;
   apiKey?: string;
-  defaultValues: {
-    apmServiceName: string;
-    apmEnvironment: string;
-  };
 }) {
   const commands = apmAgentCommandsMap[variantId];
   if (!commands) {
@@ -147,7 +142,6 @@ export function getApmAgentCommands({
     serverUrlHint,
     secretTokenHint,
     apiKeyHint,
-    ...defaultValues,
   });
 }
 

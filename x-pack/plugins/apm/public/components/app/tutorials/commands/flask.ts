@@ -41,7 +41,7 @@ apm = ElasticAPM(app)
 from elasticapm.contrib.flask import ElasticAPM
 app.config['ELASTIC_APM'] = {
   # {{serviceNameHint}}
-  'SERVICE_NAME': '{{{apmServiceName}}}',
+  'SERVICE_NAME': 'my-service-name',
 
   {{#apiKey}}
   # {{apiKeyHint}}
@@ -56,7 +56,7 @@ app.config['ELASTIC_APM'] = {
   'SERVER_URL': '{{{apmServerUrl}}}',
 
   {{serviceEnvironmentHint}}
-  'ENVIRONMENT': '{{{apmEnvironment}}}',
+  'ENVIRONMENT': 'my-environment',
 }
 
 apm = ElasticAPM(app)`;

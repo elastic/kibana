@@ -36,7 +36,7 @@ var apm = require('elastic-apm-node').start({
       defaultMessage: 'Overrides the service name in package.json.',
     }
   )}
-  serviceName: '{{{apmServiceName}}}',
+  serviceName: 'my-service-name',
 
   {{#apiKey}}
   // {{apiKeyHint}}
@@ -51,5 +51,5 @@ var apm = require('elastic-apm-node').start({
   serverUrl: '{{{apmServerUrl}}}',
 
   // {{serviceEnvironmentHint}}
-  environment: '{{{apmEnvironment}}}'
+  environment: 'my-environment'
 })`;

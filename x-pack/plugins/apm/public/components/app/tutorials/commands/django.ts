@@ -35,7 +35,7 @@ export const django = `INSTALLED_APPS = (
 
 ELASTIC_APM = {
   # {{serviceNameHint}}
-  'SERVICE_NAME': '{{{apmServiceName}}}',
+  'SERVICE_NAME': 'my-service-name',
 
   {{#apiKey}}
   # {{apiKeyHint}}
@@ -50,7 +50,7 @@ ELASTIC_APM = {
   'SERVER_URL': '{{{apmServerUrl}}}',
 
   # {{serviceEnvironmentHint}}
-  'ENVIRONMENT': '{{{apmEnvironment}}}',
+  'ENVIRONMENT': 'my-environment',
 }
 
 MIDDLEWARE = (

@@ -30,7 +30,7 @@ export const rails = `# config/elastic_apm.yml:
     defaultMessage: 'Defaults to the name of your Rails app.',
   }
 )}
-service_name: '{{{apmServiceName}}}'
+service_name: 'my-service-name'
 
 {{#apiKey}}
 # {{apiKeyHint}}
@@ -45,4 +45,4 @@ secret_token: '{{{secretToken}}}'
 server_url: '{{{apmServerUrl}}}'
 
 # {{serviceEnvironmentHint}}
-environment: '{{{apmEnvironment}}}'`;
+environment: 'my-environment'`;

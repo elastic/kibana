@@ -30,7 +30,7 @@ export const dotnet = `{
         defaultMessage: 'Default is the entry assembly of the application.',
       }
     )}
-    "ServiceName": "{{{apmServiceName}}}",
+    "ServiceName": "my-service-name",
     {{#apiKey}}
     /// {{apiKeyHint}}
     "ApiKey": "{{{apiKey}}}",
@@ -42,6 +42,6 @@ export const dotnet = `{
     /// {{{serverUrlHint}}}
     "ServerUrl": "{{{apmServerUrl}}}",
     /// {{serviceEnvironmentHint}}
-    "Environment": "{{{apmEnvironment}}}",
+    "Environment": "my-environment",
   }
 }`;
