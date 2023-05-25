@@ -146,15 +146,23 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
             if (newPackagePolicy.package?.name === OSQUERY_INTEGRATION_NAME) {
               await this.initialize(core, dataViewsService);
 
-              const allPacks = await client.find<PackSavedObject>({
-                type: packSavedObjectType,
-              });
+              const allPacks = await client
+                .find<PackSavedObject>({
+                  type: packSavedObjectType,
+                })
+                .then((data) => ({
+                  ...data,
+                  saved_objects: data.saved_objects.map((pack) => ({
+                    ...pack.attributes,
+                    saved_object_id: pack.id,
+                  })),
+                }));
 
               if (allPacks.saved_objects) {
                 return updateGlobalPacksCreateCallback(
                   newPackagePolicy,
                   client,
-                  allPacks: allPacks.saved_objects,
+                  allPacks.saved_objects,
                   this.osqueryAppContextService
                 );
               }
