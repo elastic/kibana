@@ -1170,3 +1170,10 @@ export const RULE_MANAGEMENT_CONTEXT_TOOLTIP = i18n.translate(
     defaultMessage: 'Add this alert as context',
   }
 );
+
+export const INSTALL_RULE_BUTTON = i18n.translate(
+  'xpack.securitySolution.addRules.installRuleButton',
+  {
+    defaultMessage: 'Install rule',
+  }
+);

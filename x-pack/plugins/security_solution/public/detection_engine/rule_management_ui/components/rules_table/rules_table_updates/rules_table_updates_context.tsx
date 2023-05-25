@@ -238,27 +238,6 @@ export const RulesTableUpdatesContextProvider = ({
     }
   }, [selectedRuleIds, isRefreshOn]);
 
-  // // Fetch rules
-  // const {
-  //   data: { rules, total } = { rules: [], total: 0 },
-  //   refetch,
-  //   dataUpdatedAt,
-  //   isFetched,
-  //   isFetching,
-  //   isLoading,
-  //   isRefetching,
-  // } = useFindRules(
-  //   {
-  //     filterOptions,
-  //     sortingOptions,
-  //     pagination,
-  //   },
-  //   {
-  //     refetchInterval: isRefreshOn && !isActionInProgress && autoRefreshSettings.value,
-  //     keepPreviousData: true, // Use this option so that the state doesn't jump between "success" and "loading" on page change
-  //   }
-  // );
-
   const {
     data: {
       attributes: {

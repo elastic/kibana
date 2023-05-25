@@ -5,27 +5,20 @@
  * 2.0.
  */
 
-import { isEqual } from 'lodash';
+// import { isEqual } from 'lodash';
 import React, { createContext, useCallback, useContext, useMemo, useRef, useState } from 'react';
-import type { CriteriaWithPagination, EuiSearchBarProps, EuiTableSelectionType } from '@elastic/eui';
+import type {
+  CriteriaWithPagination,
+  EuiInMemoryTable,
+  EuiSearchBarProps,
+  EuiTableSelectionType,
+} from '@elastic/eui';
 import { usePrebuiltRulesInstallReview } from '../../../../rule_management/logic/prebuilt_rules/use_prebuilt_rules_install_review';
 import { DEFAULT_RULES_TABLE_REFRESH_SETTING } from '../../../../../../common/constants';
 import { invariant } from '../../../../../../common/utils/invariant';
-import { URL_PARAM_KEY } from '../../../../../common/hooks/use_url_state';
-import { useKibana, useUiSetting$ } from '../../../../../common/lib/kibana';
-import { useReplaceUrlParams } from '../../../../../common/utils/global_query_string/helpers';
-import type {
-  FilterOptions,
-  InMemoryPaginationOptions,
-  SortingOptions,
-} from '../../../../rule_management/logic';
-import { RULES_TABLE_PAGE_SIZE_OPTIONS, RULES_TABLE_STATE_STORAGE_KEY } from '../constants';
-import {
-  DEFAULT_FILTER_OPTIONS,
-  // DEFAULT_PAGE,
-  // DEFAULT_RULES_PER_PAGE,
-  DEFAULT_SORTING_OPTIONS,
-} from '../rules_table/rules_table_defaults';
+import { useUiSetting$ } from '../../../../../common/lib/kibana';
+import type { FilterOptions, InMemoryPaginationOptions } from '../../../../rule_management/logic';
+import { RULES_TABLE_INITIAL_PAGE_SIZE, RULES_TABLE_PAGE_SIZE_OPTIONS } from '../constants';
 import type { RuleInstallationInfoForReview } from '../../../../../../common/detection_engine/prebuilt_rules/api/review_rule_installation/response_schema';
 
 export interface RulesTableNewState {
@@ -34,13 +27,13 @@ export interface RulesTableNewState {
    */
   rules: RuleInstallationInfoForReview[];
   /**
-   * Currently selected table filter
-   */
-  filterOptions: FilterOptions;
-  /**
-   * Value of the currently selected table rows
+   * Value of the currently selected table rows for InMemoryTable management
    */
   selectionValue: EuiTableSelectionType<RuleInstallationInfoForReview>;
+  /**
+   * Rules selected by checkbox
+   */
+  selectedRules: RuleInstallationInfoForReview[];
   /**
    * Is true whenever a rule action is in progress, such as delete, duplicate, export, or load.
    */
@@ -90,13 +83,15 @@ export interface RulesTableNewState {
    */
   pagination: InMemoryPaginationOptions;
   /**
-   * Currently selected table sorting
-   */
-  sortingOptions: SortingOptions;
-  /**
    * Whether the state has its default value
    */
   // isDefault: boolean;
+  /**
+   * EuiSearchBarProps filters for InMemoryTable
+   */
+  filters: EuiSearchBarProps;
+  isSelectAllCalled: React.MutableRefObject<boolean>;
+  tableRef: React.MutableRefObject<EuiInMemoryTable<RuleInstallationInfoForReview> | null>;
 }
 
 export type LoadingRuleAction = 'accept' | 'dismiss' | null;
@@ -108,7 +103,6 @@ export interface LoadingRules {
 
 export interface RulesTableNewActions {
   reFetchRules: ReturnType<typeof usePrebuiltRulesInstallReview>['refetch'];
-  setFilterOptions: (newFilter: Partial<FilterOptions>) => void;
   setIsAllSelected: React.Dispatch<React.SetStateAction<boolean>>;
   setIsPreflightInProgress: React.Dispatch<React.SetStateAction<boolean>>;
   /**
@@ -116,11 +110,7 @@ export interface RulesTableNewActions {
    */
   setIsRefreshOn: React.Dispatch<React.SetStateAction<boolean>>;
   setLoadingRules: React.Dispatch<React.SetStateAction<LoadingRules>>;
-  // TODO: Handled by in-memory table? Should these be deleted?
-  // setPage: React.Dispatch<React.SetStateAction<number>>;
-  // setPerPage: React.Dispatch<React.SetStateAction<number>>;
   setSelectedRules: React.Dispatch<React.SetStateAction<RuleInstallationInfoForReview[]>>;
-  setSortingOptions: React.Dispatch<React.SetStateAction<SortingOptions>>;
   /**
    * clears rules selection on a page
    */
@@ -128,7 +118,7 @@ export interface RulesTableNewActions {
   /**
    * Clears rules table filters
    */
-  clearFilters: () => void;
+  // clearFilters: () => void;
   onTableChange: (criteria: CriteriaWithPagination<RuleInstallationInfoForReview>) => void;
 }
 
@@ -144,25 +134,13 @@ interface RulesTableNewContextProviderProps {
 }
 
 export const RulesTableNewContextProvider = ({ children }: RulesTableNewContextProviderProps) => {
+  const tableRef = useRef<EuiInMemoryTable<RuleInstallationInfoForReview> | null>(null);
   const [autoRefreshSettings] = useUiSetting$<{
     on: boolean;
     value: number;
     idleTimeout: number;
   }>(DEFAULT_RULES_TABLE_REFRESH_SETTING);
-  const { sessionStorage } = useKibana().services;
-
-  const [filterOptions, setFilterOptions] = useState<FilterOptions>({
-    filter: DEFAULT_FILTER_OPTIONS.filter,
-    tags: DEFAULT_FILTER_OPTIONS.tags,
-    showCustomRules: DEFAULT_FILTER_OPTIONS.showCustomRules,
-    showElasticRules: DEFAULT_FILTER_OPTIONS.showElasticRules,
-    enabled: true,
-  });
-  const [sortingOptions, setSortingOptions] = useState<SortingOptions>({
-    field: DEFAULT_SORTING_OPTIONS.field,
-    order: DEFAULT_SORTING_OPTIONS.order,
-  });
-
+  const [selectedRules, setSelectedRules] = useState<RuleInstallationInfoForReview[]>([]);
   const [isAllSelected, setIsAllSelected] = useState(false);
   const [isRefreshOn, setIsRefreshOn] = useState(autoRefreshSettings.on);
   const [loadingRules, setLoadingRules] = useState<LoadingRules>({
@@ -171,8 +149,6 @@ export const RulesTableNewContextProvider = ({ children }: RulesTableNewContextP
   });
   const [isPreflightInProgress, setIsPreflightInProgress] = useState(false);
   const [pagination, setPagination] = useState<{ pageIndex: number }>({ pageIndex: 0 });
-
-  const [selectedRules, setSelectedRules] = useState<RuleInstallationInfoForReview[]>([]);
 
   const isSelectAllCalled = useRef(false);
 
@@ -185,8 +161,7 @@ export const RulesTableNewContextProvider = ({ children }: RulesTableNewContextP
   };
 
   const handleFilterOptionsChange = useCallback((newFilter: Partial<FilterOptions>) => {
-    setFilterOptions((currentFilter) => ({ ...currentFilter, ...newFilter }));
-    // setPage(1);
+    // setFilterOptions((currentFilter) => ({ ...currentFilter, ...newFilter }));
     setSelectedRules([]);
     setIsAllSelected(false);
   }, []);
@@ -196,25 +171,25 @@ export const RulesTableNewContextProvider = ({ children }: RulesTableNewContextP
     setIsAllSelected(false);
   }, []);
 
-  const replaceUrlParams = useReplaceUrlParams();
-  const clearFilters = useCallback(() => {
-    setFilterOptions({
-      filter: DEFAULT_FILTER_OPTIONS.filter,
-      showElasticRules: DEFAULT_FILTER_OPTIONS.showElasticRules,
-      showCustomRules: DEFAULT_FILTER_OPTIONS.showCustomRules,
-      tags: DEFAULT_FILTER_OPTIONS.tags,
-      enabled: undefined,
-    });
-    setSortingOptions({
-      field: DEFAULT_SORTING_OPTIONS.field,
-      order: DEFAULT_SORTING_OPTIONS.order,
-    });
-    // setPage(DEFAULT_PAGE);
-    // setPerPage(DEFAULT_RULES_PER_PAGE);
+  // const replaceUrlParams = useReplaceUrlParams();
+  // const clearFilters = useCallback(() => {
+  //   setFilterOptions({
+  //     filter: DEFAULT_FILTER_OPTIONS.filter,
+  //     showElasticRules: DEFAULT_FILTER_OPTIONS.showElasticRules,
+  //     showCustomRules: DEFAULT_FILTER_OPTIONS.showCustomRules,
+  //     tags: DEFAULT_FILTER_OPTIONS.tags,
+  //     enabled: undefined,
+  //   });
+  //   setSortingOptions({
+  //     field: DEFAULT_SORTING_OPTIONS.field,
+  //     order: DEFAULT_SORTING_OPTIONS.order,
+  //   });
+  //   // setPage(DEFAULT_PAGE);
+  //   // setPerPage(DEFAULT_RULES_PER_PAGE);
 
-    replaceUrlParams({ [URL_PARAM_KEY.rulesTable]: null });
-    sessionStorage.remove(RULES_TABLE_STATE_STORAGE_KEY);
-  }, [setFilterOptions, setSortingOptions, replaceUrlParams, sessionStorage]);
+  //   replaceUrlParams({ [URL_PARAM_KEY.rulesTable]: null });
+  //   sessionStorage.remove(RULES_TABLE_STATE_STORAGE_KEY);
+  // }, [setFilterOptions, setSortingOptions, replaceUrlParams, sessionStorage]);
 
   const selectionValue: EuiTableSelectionType<RuleInstallationInfoForReview> = useMemo(
     () => ({
@@ -276,14 +251,10 @@ export const RulesTableNewContextProvider = ({ children }: RulesTableNewContextP
       setIsAllSelected,
       setIsRefreshOn,
       setLoadingRules,
-      // setPage,
-      // setPerPage,
-      onTableChange,
       setSelectedRules,
-      setSortingOptions,
+      onTableChange,
       clearRulesSelection,
       setIsPreflightInProgress,
-      clearFilters,
     }),
     [
       refetch,
@@ -292,10 +263,8 @@ export const RulesTableNewContextProvider = ({ children }: RulesTableNewContextP
       setIsRefreshOn,
       setLoadingRules,
       setSelectedRules,
-      setSortingOptions,
       clearRulesSelection,
       setIsPreflightInProgress,
-      clearFilters,
     ]
   );
 
@@ -311,7 +280,7 @@ export const RulesTableNewContextProvider = ({ children }: RulesTableNewContextP
           field: 'tags',
           name: 'Tags',
           multiSelect: true,
-          options: [...new Set(rules.flatMap((rule) => rule.tags))].map((tag) => ({
+          options: tags.map((tag) => ({
             value: tag,
             name: tag,
             field: 'tags',
@@ -319,19 +288,24 @@ export const RulesTableNewContextProvider = ({ children }: RulesTableNewContextP
         },
       ],
     }),
-    [rules]
+    [tags]
   );
 
   const providerValue = useMemo(() => {
     return {
       state: {
+        tableRef,
         rules,
         pagination: {
           ...pagination,
-          pageSize: 20,
+          pageSize: tableRef.current?.state?.pageSize ?? RULES_TABLE_INITIAL_PAGE_SIZE,
+          numberOfFilteredRules: tableRef.current?.tableRef.current?.props.items.length ?? 0,
+          initialPageSize: RULES_TABLE_INITIAL_PAGE_SIZE,
           pageSizeOptions: RULES_TABLE_PAGE_SIZE_OPTIONS,
         },
         selectionValue,
+        selectedRules,
+        isSelectAllCalled,
         filters,
         isPreflightInProgress,
         isActionInProgress,
@@ -344,8 +318,6 @@ export const RulesTableNewContextProvider = ({ children }: RulesTableNewContextP
         lastUpdated: dataUpdatedAt,
         loadingRuleIds: loadingRules.ids,
         loadingRulesAction: loadingRules.action,
-        selectedRules,
-        sortingOptions,
         // isDefault: isDefaultState(filterOptions, sortingOptions, {
         //   pagination,
         //   perPage,
@@ -373,10 +345,9 @@ export const RulesTableNewContextProvider = ({ children }: RulesTableNewContextP
     loadingRules.ids,
     loadingRules.action,
     selectedRules,
-    sortingOptions,
     actions,
   ]);
-
+  console.log({ tableRef });
   return (
     <RulesTableNewContext.Provider value={providerValue}>{children}</RulesTableNewContext.Provider>
   );

@@ -134,23 +134,13 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
   });
 
   const paginationMemo = useMemo(() => {
-    switch (selectedTab) {
-      case AllRulesTabs.updates:
-        return {
-          pageIndex: 0,
-          pageSize: 20,
-          totalItemCount: rulesToUpgrade.length,
-          pageSizeOptions: RULES_TABLE_PAGE_SIZE_OPTIONS,
-        };
-      default:
-        return {
-          pageIndex: pagination.page - 1,
-          pageSize: pagination.perPage,
-          totalItemCount: pagination.total,
-          pageSizeOptions: RULES_TABLE_PAGE_SIZE_OPTIONS,
-        };
-    }
-  }, [pagination.page, pagination.perPage, pagination.total, rulesToUpgrade.length, selectedTab]);
+    return {
+      pageIndex: pagination.page - 1,
+      pageSize: pagination.perPage,
+      totalItemCount: pagination.total,
+      pageSizeOptions: RULES_TABLE_PAGE_SIZE_OPTIONS,
+    };
+  }, [pagination.page, pagination.perPage, pagination.total]);
 
   const tableOnChangeCallback = useCallback(
     ({ page, sort }: EuiBasicTableOnChange) => {
@@ -319,7 +309,7 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
       )}
       {shouldShowRulesTable && (
         <>
-          <RulesTableFilters filterOptions={filterOptions} setFilterOptions={setFilterOptions} />
+          <RulesTableFilters />
           <RulesTableUtilityBar
             canBulkEdit={hasPermissions}
             onGetBulkItemsPopoverContent={getBulkItemsPopoverContent}

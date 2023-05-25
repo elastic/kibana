@@ -11,25 +11,20 @@ import {
   EuiSkeletonLoading,
   EuiLoadingSpinner,
   EuiProgress,
-  Pagination,
 } from '@elastic/eui';
 import React, { useCallback, useMemo, useRef } from 'react';
 import { Loader } from '../../../../../common/components/loader';
 import { PrePackagedRulesPrompt } from '../../../../../detections/components/rules/pre_packaged_rules/load_empty_prompt';
 
 import * as i18n from '../../../../../detections/pages/detection_engine/rules/translations';
-import type { EuiBasicTableOnChange } from '../../../../../detections/pages/detection_engine/rules/types';
-import { RulesTableFilters } from '../rules_table_filters/rules_table_filters';
 import { useRulesTableNewColumns } from './use_rules_table_new_columns';
 import { useUserData } from '../../../../../detections/components/user_info';
 import { hasUserCRUDPermission } from '../../../../../common/utils/privileges';
-import type { FindRulesSortField } from '../../../../../../common/detection_engine/rule_management';
 import { useIsUpgradingSecurityPackages } from '../../../../rule_management/logic/use_upgrade_security_packages';
 import { useRulesTableNewContext } from './rules_table_new_context';
+// import { AddRulesTableUtilityBar } from './add_rules_table_utility_bar';
 
 const INITIAL_SORT_FIELD = 'enabled';
-
-interface RulesTableNewProps {}
 
 const NO_ITEMS_MESSAGE = (
   <EuiEmptyPrompt title={<h3>{i18n.NO_RULES}</h3>} titleSize="xs" body={i18n.NO_RULES_BODY} />
@@ -38,7 +33,7 @@ const NO_ITEMS_MESSAGE = (
 /**
  * Table Component for displaying new rules that are available to be installed
  */
-export const RulesTableNew = React.memo<RulesTableNewProps>(() => {
+export const RulesTableNew = React.memo(() => {
   const [{ canUserCRUD }] = useUserData();
   const hasPermissions = hasUserCRUDPermission(canUserCRUD);
   const isUpgradingSecurityPackages = useIsUpgradingSecurityPackages();
@@ -47,10 +42,11 @@ export const RulesTableNew = React.memo<RulesTableNewProps>(() => {
 
   const {
     state: {
+      tableRef,
       rules,
       pagination,
       selectionValue,
-      filterOptions,
+      // isSelectAllCalled,
       isPreflightInProgress,
       // isAllSelected,
       isFetched,
@@ -62,39 +58,22 @@ export const RulesTableNew = React.memo<RulesTableNewProps>(() => {
       // tags,
     },
     actions: {
-      setFilterOptions,
+      // setFilterOptions,
       // setIsAllSelected,
-      // setPage,
-      // setPerPage,
-      // setSelectedRuleIds,
-      // setSortingOptions,
+      // setSelectedRules,
       onTableChange,
     },
   } = addRulesTableContext;
-
-  // const tableOnChangeCallback = useCallback(
-  //   ({ page, sort }: EuiBasicTableOnChange) => {
-  //     setSortingOptions({
-  //       field: (sort?.field as FindRulesSortField) ?? INITIAL_SORT_FIELD, // Narrowing EuiBasicTable sorting types
-  //       order: sort?.direction ?? 'desc',
-  //     });
-  //     setPage(page.index + 1);
-  //     setPerPage(page.size);
-  //   },
-  //   [setPage, setPerPage, setSortingOptions]
-  // );
 
   const rulesColumns = useRulesTableNewColumns({
     hasCRUDPermissions: hasPermissions,
   });
 
-  // const isSelectAllCalled = useRef(false);
-
   // const toggleSelectAll = useCallback(() => {
   //   isSelectAllCalled.current = true;
   //   setIsAllSelected(!isAllSelected);
-  //   setSelectedRuleIds(!isAllSelected ? rules.map(({ id }) => id) : []);
-  // }, [rules, isAllSelected, setIsAllSelected, setSelectedRuleIds]);
+  //   setSelectedRules(!isAllSelected ? rules : []);
+  // }, [isSelectAllCalled, setIsAllSelected, isAllSelected, setSelectedRules, rules]);
 
   const isTableEmpty = rules.length === 0;
   const shouldShowRulesTable = !isLoading && !isTableEmpty;
@@ -123,7 +102,6 @@ export const RulesTableNew = React.memo<RulesTableNewProps>(() => {
       {isTableEmpty && <PrePackagedRulesPrompt />}
       <EuiSkeletonLoading
         isLoading={!shouldShowRulesTable}
-        contentAriaLabel="Demo loading section"
         loadingContent={
           <EuiLoadingSpinner data-test-subj="loadingRulesInfoPanelAllRulesTable" size="xl" />
         }
@@ -134,14 +112,9 @@ export const RulesTableNew = React.memo<RulesTableNewProps>(() => {
                 setFilterOptions={setFilterOptions}
                 showRuleTypeStatusFilter={false}
               /> */}
-            {/* TODO: Still relies on old context*/}
-            {/* <RulesTableUtilityBar*/}
-            {/*  canBulkEdit={hasPermissions}*/}
-            {/*  onGetBulkItemsPopoverContent={undefined}*/}
-            {/*  onToggleSelectAll={undefined}*/}
-            {/*  isBulkActionInProgress={false}*/}
-            {/* />*/}
+
             <EuiInMemoryTable
+              ref={tableRef}
               items={rules}
               sorting={true}
               search={filters}
@@ -150,6 +123,14 @@ export const RulesTableNew = React.memo<RulesTableNewProps>(() => {
               onTableChange={onTableChange}
               selection={selectionValue}
               itemId="rule_id"
+              // childrenBetween={
+              //   <AddRulesTableUtilityBar
+              //     canBulkEdit={hasPermissions}
+              //     onGetBulkItemsPopoverContent={undefined}
+              //     onToggleSelectAll={toggleSelectAll}
+              //     isBulkActionInProgress={false}
+              //   />
+              // }
               {...tableProps}
             />
           </>

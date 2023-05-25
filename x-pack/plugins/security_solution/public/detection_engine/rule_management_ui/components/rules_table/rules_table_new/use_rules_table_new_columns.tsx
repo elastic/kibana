@@ -6,23 +6,19 @@
  */
 
 import type { EuiBasicTableColumn, EuiTableActionsColumnType } from '@elastic/eui';
-import { EuiBadge, EuiText, EuiToolTip } from '@elastic/eui';
+import { EuiButtonEmpty, EuiBadge, EuiText } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import {
   DEFAULT_RELATIVE_DATE_THRESHOLD,
-  SecurityPageName,
   SHOW_RELATED_INTEGRATIONS_SETTING,
 } from '../../../../../../common/constants';
 import { getEmptyTagValue } from '../../../../../common/components/empty_value';
 import { FormattedRelativePreferenceDate } from '../../../../../common/components/formatted_date';
-import { SecuritySolutionLinkAnchor } from '../../../../../common/components/links';
-import { getRuleDetailsTabUrl } from '../../../../../common/components/link_to/redirect_to_detection_engine';
 import { PopoverItems } from '../../../../../common/components/popover_items';
 import { useUiSetting$ } from '../../../../../common/lib/kibana';
 import { IntegrationsPopover } from '../../../../../detections/components/rules/related_integrations/integrations_popover';
 import { SeverityBadge } from '../../../../../detections/components/rules/severity_badge';
 import * as i18n from '../../../../../detections/pages/detection_engine/rules/translations';
-import { RuleDetailTabs } from '../../../../rule_details_ui/pages/rule_details';
 import type { Rule } from '../../../../rule_management/logic';
 import type { RuleInstallationInfoForReview } from '../../../../../../common/detection_engine/prebuilt_rules/api/review_rule_installation/response_schema';
 
@@ -34,33 +30,19 @@ interface ColumnsProps {
   hasCRUDPermissions: boolean;
 }
 
-// TODO: Shall we direct link to the docs for the rule?
-export const RuleLink = ({ name, id }: Pick<Rule, 'id' | 'name'>) => {
-  return (
-    <EuiToolTip content={name} anchorClassName="eui-textTruncate">
-      <SecuritySolutionLinkAnchor
-        data-test-subj="ruleName"
-        deepLinkId={SecurityPageName.rules}
-        path={getRuleDetailsTabUrl(id, RuleDetailTabs.alerts)}
-      >
-        {name}
-      </SecuritySolutionLinkAnchor>
-    </EuiToolTip>
-  );
-};
-
 const useRuleNameColumn = (): TableColumn => {
   return useMemo(
     () => ({
       field: 'name',
       name: i18n.COLUMN_RULE,
-      render: (
-        value: RuleInstallationInfoForReview['rule_id'],
-        item: RuleInstallationInfoForReview
-      ) => <RuleLink id={value} name={value} />,
+      render: (value: RuleInstallationInfoForReview['name']) => (
+        <EuiText id={value} size="s">
+          {value}
+        </EuiText>
+      ),
       sortable: true,
       truncateText: true,
-      width: '38%',
+      width: '40%',
     }),
     []
   );
@@ -110,12 +92,6 @@ const INTEGRATIONS_COLUMN: TableColumn = {
   truncateText: true,
 };
 
-// const useActionsColumn = (): EuiTableActionsColumnType<Rule> => {
-//   const actions = useRulesTableActions();
-//
-//   return useMemo(() => ({ actions, width: '40px' }), [actions]);
-// };
-
 export const useRulesTableNewColumns = ({ hasCRUDPermissions }: ColumnsProps): TableColumn[] => {
   const ruleNameColumn = useRuleNameColumn();
   const [showRelatedIntegrations] = useUiSetting$<boolean>(SHOW_RELATED_INTEGRATIONS_SETTING);
@@ -164,8 +140,24 @@ export const useRulesTableNewColumns = ({ hasCRUDPermissions }: ColumnsProps): T
         width: '18%',
         truncateText: true,
       },
-      // ...(hasCRUDPermissions ? [actionsColumn] : []),
+      {
+        field: 'rule_id',
+        name: '',
+        render: (value: Rule['rule_id']) => {
+          return (
+            <EuiButtonEmpty
+              size="s"
+              onClick={() => {
+                alert(value);
+              }}
+            >
+              {i18n.INSTALL_RULE_BUTTON}
+            </EuiButtonEmpty>
+          );
+        },
+        width: '10%',
+      },
     ],
-    [hasCRUDPermissions, ruleNameColumn, showRelatedIntegrations]
+    [ruleNameColumn, showRelatedIntegrations]
   );
 };

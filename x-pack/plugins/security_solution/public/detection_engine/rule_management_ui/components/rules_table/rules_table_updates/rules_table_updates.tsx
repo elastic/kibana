@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiBasicTable, EuiEmptyPrompt, EuiLoadingContent, EuiProgress } from '@elastic/eui';
+import { EuiBasicTable, EuiEmptyPrompt, EuiProgress } from '@elastic/eui';
 import React, { useCallback, useMemo, useRef } from 'react';
 import { Loader } from '../../../../../common/components/loader';
 import { PrePackagedRulesPrompt } from '../../../../../detections/components/rules/pre_packaged_rules/load_empty_prompt';
@@ -139,9 +139,9 @@ export const RulesTableUpdates = React.memo<RulesTableUpdatesProps>(({}) => {
         <Loader data-test-subj="loadingPanelAllRulesTable" overlay size="xl" />
       )}
       {isTableEmpty && <PrePackagedRulesPrompt />}
-      {isLoading && (
+      {/* {isLoading && (
         <EuiLoadingContent data-test-subj="initialLoadingPanelAllRulesTable" lines={10} />
-      )}
+      )} */}
       {shouldShowRulesTable && (
         <>
           <RulesTableFilters filterOptions={filterOptions} setFilterOptions={setFilterOptions} />
