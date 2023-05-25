@@ -38,11 +38,8 @@ export const getLocationMonitors: SyntheticsRestApiRouteFactory = () => ({
   path: SYNTHETICS_API_URLS.PRIVATE_LOCATIONS_MONITORS,
 
   validate: {},
-  handler: async ({
-    savedObjectsClient: _s,
-    uptimeEsClient: es,
-  }): Promise<IKibanaResponse<Payload>> => {
-    const locationMonitors = await _s?.find<unknown, ExpectedResponse>({
+  handler: async ({ savedObjectsClient: soClient }): Promise<IKibanaResponse<Payload>> => {
+    const locationMonitors = await soClient?.find<unknown, ExpectedResponse>({
       type: syntheticsMonitorType,
       perPage: 0,
       aggs,
