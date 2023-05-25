@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-export { ColorRangeLegend } from './color_range_legend';
-export type { EuiThemeType } from './use_color_range';
-export {
-  colorRangeOptions,
-  colorRangeScaleOptions,
-  useColorRange,
-  COLOR_RANGE,
-  COLOR_RANGE_SCALE,
-} from './use_color_range';
+import { useCurrentEuiThemeVars } from '@kbn/ml-kibana-theme';
+import { useMlKibana } from './kibana_context';
+
+export function useCurrentThemeVars() {
+  const {
+    services: { theme },
+  } = useMlKibana();
+  return useCurrentEuiThemeVars(theme);
+}

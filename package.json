@@ -477,6 +477,7 @@
     "@kbn/ml-error-utils": "link:x-pack/packages/ml/error_utils",
     "@kbn/ml-is-defined": "link:x-pack/packages/ml/is_defined",
     "@kbn/ml-is-populated-object": "link:x-pack/packages/ml/is_populated_object",
+    "@kbn/ml-kibana-theme": "link:x-pack/packages/ml/kibana_theme",
     "@kbn/ml-local-storage": "link:x-pack/packages/ml/local_storage",
     "@kbn/ml-nested-property": "link:x-pack/packages/ml/nested_property",
     "@kbn/ml-number-utils": "link:x-pack/packages/ml/number_utils",

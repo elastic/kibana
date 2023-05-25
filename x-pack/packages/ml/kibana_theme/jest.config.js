@@ -5,12 +5,8 @@
  * 2.0.
  */
 
-export { ColorRangeLegend } from './color_range_legend';
-export type { EuiThemeType } from './use_color_range';
-export {
-  colorRangeOptions,
-  colorRangeScaleOptions,
-  useColorRange,
-  COLOR_RANGE,
-  COLOR_RANGE_SCALE,
-} from './use_color_range';
+module.exports = {
+  preset: '@kbn/test/jest_node',
+  rootDir: '../../../..',
+  roots: ['<rootDir>/x-pack/packages/ml/kibana_theme'],
+};
