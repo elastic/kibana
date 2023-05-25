@@ -7,12 +7,7 @@
  */
 
 import { DataView } from '@kbn/data-views-plugin/common';
-import {
-  legacyExistingFields,
-  existingFields,
-  Field,
-  buildFieldList,
-} from './field_existing_utils';
+import { existingFields, buildFieldList } from './field_existing_utils';
 
 describe('existingFields', () => {
   it('should remove missing fields by matching names', () => {
@@ -43,89 +38,6 @@ describe('existingFields', () => {
         ]
       )
     ).toEqual(['a', 'b', 'c']);
-  });
-});
-
-describe('legacyExistingFields', () => {
-  function field(opts: string | Partial<Field>): Field {
-    const obj = typeof opts === 'object' ? opts : {};
-    const name = (typeof opts === 'string' ? opts : opts.name) || 'test';
-
-    return {
-      name,
-      isScript: false,
-      isMeta: false,
-      ...obj,
-    };
-  }
-
-  function searchResults(fields: Record<string, unknown[]> = {}) {
-    return { fields, _index: '_index', _id: '_id' };
-  }
-
-  it('should handle root level fields', () => {
-    const result = legacyExistingFields(
-      [searchResults({ foo: ['bar'] }), searchResults({ baz: [0] })],
-      [field('foo'), field('bar'), field('baz')]
-    );
-
-    expect(result).toEqual(['foo', 'baz']);
-  });
-
-  it('should handle basic arrays, ignoring empty ones', () => {
-    const result = legacyExistingFields(
-      [searchResults({ stuff: ['heyo', 'there'], empty: [] })],
-      [field('stuff'), field('empty')]
-    );
-
-    expect(result).toEqual(['stuff']);
-  });
-
-  it('should handle objects with dotted fields', () => {
-    const result = legacyExistingFields(
-      [searchResults({ 'geo.country_name': ['US'] })],
-      [field('geo.country_name')]
-    );
-
-    expect(result).toEqual(['geo.country_name']);
-  });
-
-  it('supports scripted fields', () => {
-    const result = legacyExistingFields(
-      [searchResults({ bar: ['scriptvalue'] })],
-      [field({ name: 'bar', isScript: true })]
-    );
-
-    expect(result).toEqual(['bar']);
-  });
-
-  it('supports runtime fields', () => {
-    const result = legacyExistingFields(
-      [searchResults({ runtime_foo: ['scriptvalue'] })],
-      [
-        field({
-          name: 'runtime_foo',
-          runtimeField: { type: 'long', script: { source: '2+2' } },
-        }),
-      ]
-    );
-
-    expect(result).toEqual(['runtime_foo']);
-  });
-
-  it('supports meta fields', () => {
-    const result = legacyExistingFields(
-      [
-        {
-          // @ts-expect-error _mymeta is not defined on estypes.SearchHit
-          _mymeta: 'abc',
-          ...searchResults({ bar: ['scriptvalue'] }),
-        },
-      ],
-      [field({ name: '_mymeta', isMeta: true })]
-    );
-
-    expect(result).toEqual(['_mymeta']);
   });
 });
 
