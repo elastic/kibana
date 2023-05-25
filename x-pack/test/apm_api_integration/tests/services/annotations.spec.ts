@@ -29,7 +29,7 @@ export default function annotationApiTests({ getService }: FtrProviderContext) {
   const es = getService('es');
 
   function expectContainsObj(
-    source: APIReturnType<'POST /api/apm/services/{serviceName}/annotation'>,
+    source: APIReturnType<'POST /api/apm/services/{serviceName}/annotation 2023-05-22'>,
     expected: JsonObject
   ) {
     expect(source).to.eql(
@@ -43,10 +43,10 @@ export default function annotationApiTests({ getService }: FtrProviderContext) {
   }
 
   function createAnnotation(
-    body: APIClientRequestParamsOf<'POST /api/apm/services/{serviceName}/annotation'>['params']['body']
+    body: APIClientRequestParamsOf<'POST /api/apm/services/{serviceName}/annotation 2023-05-22'>['params']['body']
   ) {
     return apmApiClient.annotationWriterUser({
-      endpoint: 'POST /api/apm/services/{serviceName}/annotation',
+      endpoint: 'POST /api/apm/services/{serviceName}/annotation 2023-05-22',
       params: {
         path: {
           serviceName: 'opbeans-java',
@@ -58,11 +58,11 @@ export default function annotationApiTests({ getService }: FtrProviderContext) {
 
   function getAnnotation(
     query: RecursivePartial<
-      APIClientRequestParamsOf<'GET /api/apm/services/{serviceName}/annotation/search'>['params']['query']
+      APIClientRequestParamsOf<'GET /api/apm/services/{serviceName}/annotation/search 2023-05-22'>['params']['query']
     >
   ) {
     return apmApiClient.readUser({
-      endpoint: 'GET /api/apm/services/{serviceName}/annotation/search',
+      endpoint: 'GET /api/apm/services/{serviceName}/annotation/search 2023-05-22',
       params: {
         path: {
           serviceName: 'opbeans-java',

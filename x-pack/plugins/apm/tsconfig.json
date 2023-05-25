@@ -91,6 +91,7 @@
     "@kbn/custom-integrations-plugin",
     "@kbn/dashboard-plugin",
     "@kbn/controls-plugin",
+    "@kbn/core-http-server",
   ],
   "exclude": [
     "target/**/*",
