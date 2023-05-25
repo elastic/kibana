@@ -12,7 +12,7 @@ import { difference } from 'lodash';
 import type { DataViewsContract, DataViewSpec } from '@kbn/data-views-plugin/public';
 import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { DataViewPersistableStateService } from '@kbn/data-views-plugin/common';
-import type { TimefilterContract } from '@kbn/data-plugin/public';
+import type { DataPublicPluginStart, TimefilterContract } from '@kbn/data-plugin/public';
 import type {
   Datasource,
   DatasourceMap,
@@ -291,6 +291,7 @@ export async function persistedStateToExpression(
     storage: IStorageWrapper;
     dataViews: DataViewsContract;
     timefilter: TimefilterContract;
+    nowProvider: DataPublicPluginStart['nowProvider'];
   }
 ): Promise<{
   ast: Ast | null;
@@ -371,6 +372,7 @@ export async function persistedStateToExpression(
       datasourceLayers,
       indexPatterns,
       dateRange: { fromDate: currentTimeRange.from, toDate: currentTimeRange.to },
+      nowInstant: services.nowProvider.get(),
     }),
     indexPatterns,
     indexPatternRefs,

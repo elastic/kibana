@@ -330,6 +330,7 @@ export class LensPlugin {
             storage: new Storage(localStorage),
             uiSettings: core.uiSettings,
             timefilter: plugins.data.query.timefilter.timefilter,
+            nowProvider: plugins.data.nowProvider,
           }),
         injectFilterReferences: data.query.filterManager.inject.bind(data.query.filterManager),
         visualizationMap,

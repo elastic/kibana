@@ -57,6 +57,7 @@ export interface EditorFramePlugins {
   uiSettings: IUiSettingsClient;
   storage: IStorageWrapper;
   timefilter: TimefilterContract;
+  nowProvider: DataPublicPluginStart['nowProvider'];
 }
 
 async function collectAsyncDefinitions<T extends { id: string }>(

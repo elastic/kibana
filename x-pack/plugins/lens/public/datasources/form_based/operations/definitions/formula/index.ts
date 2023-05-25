@@ -12,3 +12,12 @@ export { insertOrReplaceFormulaColumn } from './parse';
 
 export type { MathIndexPatternColumn } from './math';
 export { mathOperation } from './math';
+
+export type { IntervalIndexPatternColumn } from './contextVariables';
+export { intervalOperation } from './contextVariables';
+
+export type { NowIndexPatternColumn } from './contextVariables';
+export { nowOperation } from './contextVariables';
+
+export type { ConstantIndexPatternColumn } from './contextVariables';
+export { constantsOperation } from './contextVariables';

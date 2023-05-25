@@ -58,6 +58,7 @@ function getExpressionForLayer(
   indexPattern: IndexPattern,
   uiSettings: IUiSettingsClient,
   dateRange: DateRange,
+  nowInstant: Date,
   searchSessionId?: string
 ): ExpressionAstExpression | null {
   const { columnOrder } = layer;
@@ -137,7 +138,9 @@ function getExpressionForLayer(
       const col = columns[colId];
       const def = operationDefinitionMap[col.operationType];
       if (def.input === 'fullReference' || def.input === 'managedReference') {
-        expressions.push(...def.toExpression(layer, colId, indexPattern));
+        expressions.push(
+          ...def.toExpression(layer, colId, indexPattern, { dateRange, now: nowInstant })
+        );
       }
     });
 
@@ -469,6 +472,7 @@ export function toExpression(
   indexPatterns: IndexPatternMap,
   uiSettings: IUiSettingsClient,
   dateRange: DateRange,
+  nowInstant: Date,
   searchSessionId?: string
 ) {
   if (state.layers[layerId]) {
@@ -477,6 +481,7 @@ export function toExpression(
       indexPatterns[state.layers[layerId].indexPatternId],
       uiSettings,
       dateRange,
+      nowInstant,
       searchSessionId
     );
   }

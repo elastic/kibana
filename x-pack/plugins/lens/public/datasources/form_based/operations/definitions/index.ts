@@ -46,7 +46,13 @@ import {
   timeScaleOperation,
 } from './calculations';
 import { countOperation } from './count';
-import { mathOperation, formulaOperation } from './formula';
+import {
+  mathOperation,
+  formulaOperation,
+  intervalOperation,
+  nowOperation,
+  constantsOperation,
+} from './formula';
 import { staticValueOperation } from './static_value';
 import { lastValueOperation } from './last_value';
 import type {
@@ -105,7 +111,13 @@ export type {
 export type { CountIndexPatternColumn } from './count';
 export type { LastValueIndexPatternColumn } from './last_value';
 export type { RangeIndexPatternColumn } from './ranges';
-export type { FormulaIndexPatternColumn, MathIndexPatternColumn } from './formula';
+export type {
+  FormulaIndexPatternColumn,
+  MathIndexPatternColumn,
+  IntervalIndexPatternColumn,
+  NowIndexPatternColumn,
+  ConstantIndexPatternColumn,
+} from './formula';
 export type { StaticValueIndexPatternColumn } from './static_value';
 
 // List of all operation definitions registered to this data source.
@@ -139,6 +151,9 @@ const internalOperationDefinitions = [
   overallAverageOperation,
   staticValueOperation,
   timeScaleOperation,
+  intervalOperation,
+  nowOperation,
+  constantsOperation,
 ];
 
 export { termsOperation } from './terms';
@@ -344,7 +359,7 @@ interface BaseOperationDefinitionProps<
   documentation?: {
     signature: string;
     description: string;
-    section: 'elasticsearch' | 'calculation';
+    section: 'elasticsearch' | 'calculation' | 'constants';
   };
   quickFunctionDocumentation?: string;
   /**
@@ -671,7 +686,8 @@ interface ManagedReferenceOperationDefinition<C extends BaseIndexPatternColumn> 
   toExpression: (
     layer: FormBasedLayer,
     columnId: string,
-    indexPattern: IndexPattern
+    indexPattern: IndexPattern,
+    dateUtils?: { dateRange?: DateRange; now?: Date }
   ) => ExpressionAstFunction[];
   /**
    * Managed references control the IDs of their inner columns, so we need to be able to copy from the
@@ -683,6 +699,17 @@ interface ManagedReferenceOperationDefinition<C extends BaseIndexPatternColumn> 
     target: DataViewDragDropOperation,
     operationDefinitionMap: Record<string, GenericOperationDefinition>
   ) => Record<string, FormBasedLayer>;
+
+  /**
+   * Special managed columns can be used in a formula
+   */
+  usedInMath?: boolean;
+
+  /**
+   * The specification of the arguments used by the operations used for both validation,
+   * and use from external managed operations
+   */
+  operationParams?: OperationParam[];
 }
 
 interface OperationDefinitionMap<C extends BaseIndexPatternColumn, P = {}> {
