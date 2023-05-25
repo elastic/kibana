@@ -23,7 +23,7 @@ function assertMatchingSloList(compositeSlo: CompositeSLO, sloList: SLO[]) {
 
   if (!everyCombinedSloMatches) {
     throw new IllegalArgumentError(
-      'One or many combined SLOs are not matching the specified id and revision.'
+      'One or many source SLOs are not matching the specified id and revision.'
     );
   }
 }
@@ -34,7 +34,7 @@ function assertSameBudgetingMethod(compositeSlo: CompositeSLO, sloList: SLO[]) {
   );
   if (!haveSameBudgetingMethod) {
     throw new IllegalArgumentError(
-      'Invalid budgeting method. Every SLO must use the same budgeting method as the composite.'
+      'Invalid budgeting method. Every source SLO must use the same budgeting method as the composite.'
     );
   }
 }
@@ -47,7 +47,7 @@ function assertSameRollingTimeWindow(compositeSlo: CompositeSLO, sloList: SLO[])
   );
   if (!haveSameTimeWindow) {
     throw new IllegalArgumentError(
-      'Invalid time window. Every SLO must use the same time window as the composite.'
+      'Invalid time window. Every source SLO must use the same time window as the composite.'
     );
   }
 }

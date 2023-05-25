@@ -13,7 +13,7 @@ import {
 import { v1 as uuidv1 } from 'uuid';
 
 import { CompositeSLO } from '../../domain/models/composite_slo';
-import { validateCompositeSLO } from '../../domain/services/composite_slo/validate_composite_slo';
+import { validateCompositeSLO } from '../../domain/services/composite_slo';
 import { SLORepository } from '../slo/slo_repository';
 import { CompositeSLORepository } from './composite_slo_repository';
 

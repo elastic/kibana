@@ -7,11 +7,16 @@
 
 import * as t from 'io-ts';
 
-import { compositeSloSchema, compositeSloIdSchema, combinedSloSchema } from '@kbn/slo-schema';
+import {
+  compositeSloSchema,
+  compositeSloIdSchema,
+  weightedAverageSourceSchema,
+} from '@kbn/slo-schema';
 
-type CombinedSLO = t.TypeOf<typeof combinedSloSchema>;
 type CompositeSLO = t.TypeOf<typeof compositeSloSchema>;
 type CompositeSLOId = t.TypeOf<typeof compositeSloIdSchema>;
 type StoredCompositeSLO = t.OutputOf<typeof compositeSloSchema>;
 
-export type { CombinedSLO, CompositeSLO, CompositeSLOId, StoredCompositeSLO };
+type WeightedAverageSource = t.TypeOf<typeof weightedAverageSourceSchema>;
+
+export type { CompositeSLO, CompositeSLOId, StoredCompositeSLO, WeightedAverageSource };

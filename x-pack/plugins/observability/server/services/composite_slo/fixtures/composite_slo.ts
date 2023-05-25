@@ -11,10 +11,12 @@ import { SavedObject } from '@kbn/core-saved-objects-server';
 
 import { compositeSloSchema } from '@kbn/slo-schema';
 import { SO_COMPOSITE_SLO_TYPE } from '../../../saved_objects';
-import { CombinedSLO, CompositeSLO, StoredCompositeSLO } from '../../../domain/models';
+import { CompositeSLO, StoredCompositeSLO, WeightedAverageSource } from '../../../domain/models';
 import { sevenDaysRolling } from '../../slo/fixtures/time_window';
 
-export const createWeightedSourceSlo = (params: Partial<CombinedSLO> = {}): CombinedSLO => {
+export const createWeightedAverageSource = (
+  params: Partial<WeightedAverageSource> = {}
+): WeightedAverageSource => {
   return cloneDeep({
     id: uuidv1(),
     revision: 1,
@@ -31,7 +33,7 @@ const defaultCompositeSLO: Omit<CompositeSLO, 'id' | 'createdAt' | 'updatedAt'> 
     target: 0.95,
   },
   compositeMethod: 'weightedAverage',
-  sources: [createWeightedSourceSlo(), createWeightedSourceSlo()],
+  sources: [createWeightedAverageSource(), createWeightedAverageSource()],
   tags: ['critical', 'k8s'],
 };
 
