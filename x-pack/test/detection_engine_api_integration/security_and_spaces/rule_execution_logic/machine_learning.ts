@@ -71,7 +71,7 @@ export default ({ getService }: FtrProviderContext) => {
       // Order is critical here: auditbeat data must be loaded before attempting to start the ML job,
       // as the job looks for certain indices on start
       await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
-      await executeSetupModuleRequest({ module: siemModule, rspCode: 200, supertest });
+      await executeSetupModuleRequest({ module: siemModule, rspCode: 200, supertest, log });
       console.log('HERE');
       await forceStartDatafeeds({ jobId: mlJobId, rspCode: 200, supertest });
       console.log('--------HERE 2');
