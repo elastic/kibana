@@ -6,13 +6,13 @@
  */
 
 import { EuiComment, EuiErrorBoundary, EuiSpacer } from '@elastic/eui';
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FormattedRelative } from '@kbn/i18n-react';
 
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { QueryClientProvider } from '@tanstack/react-query';
-import { css } from '@emotion/react';
+import styled from 'styled-components';
 import { EmptyPrompt } from '../../routes/components/empty_prompt';
 import { useKibana } from '../../common/lib/kibana';
 import type { StartPlugins } from '../../types';
@@ -22,6 +22,13 @@ import { PackQueriesStatusTable } from '../../live_queries/form/pack_queries_sta
 import { ATTACHED_QUERY } from '../../agents/translations';
 import { useLiveQueryDetails } from '../../actions/use_live_query_details';
 import type { OsqueryActionResultProps } from './types';
+
+const StyledEuiComment = styled(EuiComment)`
+  figure {
+    background-color: ${(props: { isNewFlyout?: boolean }) =>
+      props.isNewFlyout ? 'white' : 'transparent'};
+  }
+`;
 
 const OsqueryResultComponent = React.memo<OsqueryActionResultProps>(
   ({ actionId, ruleName, startDate, ecsData, isNewFlyout }) => {
@@ -38,20 +45,11 @@ const OsqueryResultComponent = React.memo<OsqueryActionResultProps>(
       setIsLive(() => !(data?.status === 'completed'));
     }, [data?.status]);
 
-    const commentCss = useMemo(
-      () => css`
-        figure {
-          background-color: ${isNewFlyout} ? 'white' : 'transparent'
-        }
-      `,
-      [isNewFlyout]
-    );
-
     return (
       <AlertAttachmentContext.Provider value={ecsData}>
         <EuiSpacer size="s" />
-        <EuiComment
-          css={commentCss}
+        <StyledEuiComment
+          isNewFlyout={isNewFlyout}
           username={ruleName && ruleName[0]}
           timestamp={<FormattedRelative value={startDate} />}
           event={ATTACHED_QUERY}
@@ -68,7 +66,7 @@ const OsqueryResultComponent = React.memo<OsqueryActionResultProps>(
               agentIds={data?.agents}
             />
           )}
-        </EuiComment>
+        </StyledEuiComment>
         <EuiSpacer size="s" />
       </AlertAttachmentContext.Provider>
     );

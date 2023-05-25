@@ -8,7 +8,7 @@
 import { EuiComment, EuiLoadingSpinner, EuiSpacer } from '@elastic/eui';
 import { FormattedRelative } from '@kbn/i18n-react';
 import React, { useEffect, useState, useMemo } from 'react';
-import { css } from '@emotion/react/dist/emotion-react.cjs';
+import styled from 'styled-components';
 import type { LogsEndpointActionWithHosts } from '../../../../common/endpoint/types/actions';
 import { useUserPrivileges } from '../user_privileges';
 import { useGetAutomatedActionResponseList } from '../../../management/hooks/response_actions/use_get_automated_action_list';
@@ -21,6 +21,13 @@ interface EndpointResponseActionResultsProps {
   action: LogsEndpointActionWithHosts;
   isNewFlyout?: boolean;
 }
+
+const StyledEuiComment = styled(EuiComment)`
+  figure {
+    background-color: ${(props: { isNewFlyout?: boolean }) =>
+      props.isNewFlyout ? 'white' : 'transparent'};
+  }
+`;
 
 export const EndpointResponseActionResults = ({
   action,
@@ -36,14 +43,6 @@ export const EndpointResponseActionResults = ({
   const { data: expandedAction } = useGetAutomatedActionResponseList(
     { actionId, expiration, agent },
     { enabled: canReadActionsLogManagement, action, isLive }
-  );
-  const commentCss = useMemo(
-    () => css`
-        figure {
-          background-color: ${isNewFlyout} ? 'white' : 'transparent'
-        }
-      `,
-    [isNewFlyout]
   );
 
   useEffect(() => {
@@ -65,8 +64,8 @@ export const EndpointResponseActionResults = ({
   return (
     <>
       <EuiSpacer size="s" />
-      <EuiComment
-        css={commentCss}
+      <StyledEuiComment
+        isNewFlyout={isNewFlyout}
         username={rule?.name}
         timestamp={<FormattedRelative value={action['@timestamp']} />}
         event={eventText}
@@ -84,7 +83,7 @@ export const EndpointResponseActionResults = ({
         ) : (
           <ResponseActionsEmptyPrompt type="endpoint" />
         )}
-      </EuiComment>
+      </StyledEuiComment>
       <EuiSpacer size="s" />
     </>
   );
