@@ -12,6 +12,8 @@ import {
   buildIndexMappingsMock,
   generateAdditiveMappingDiffMock,
   getAliasActionsMock,
+  checkIndexCurrentAlgorithmMock,
+  getAliasesMock,
 } from './init.test.mocks';
 import * as Either from 'fp-ts/lib/Either';
 import { FetchIndexResponse } from '../../../actions';
@@ -52,6 +54,8 @@ describe('Stage: init', () => {
     });
     generateAdditiveMappingDiffMock.mockReset().mockReturnValue({});
     getAliasActionsMock.mockReset().mockReturnValue([]);
+    checkIndexCurrentAlgorithmMock.mockReset().mockReturnValue('zdt');
+    getAliasesMock.mockReset().mockReturnValue(Either.right({}));
 
     context = createContextMock({ indexPrefix: '.kibana', types: ['foo', 'bar'] });
     context.typeRegistry.registerType({
@@ -87,10 +91,17 @@ describe('Stage: init', () => {
     const fetchIndexResponse = createResponse();
     const res: StateActionResponse<'INIT'> = Either.right(fetchIndexResponse);
 
+    const aliases = { '.foo': '.bar' };
+    getAliasesMock.mockReturnValue(Either.right(aliases));
+
     init(state, res, context);
 
     expect(getCurrentIndexMock).toHaveBeenCalledTimes(1);
-    expect(getCurrentIndexMock).toHaveBeenCalledWith(fetchIndexResponse, context.indexPrefix);
+    expect(getCurrentIndexMock).toHaveBeenCalledWith({
+      indices: Object.keys(fetchIndexResponse),
+      indexPrefix: context.indexPrefix,
+      aliases,
+    });
   });
 
   it('calls checkVersionCompatibility with the correct parameters', () => {
@@ -200,9 +211,9 @@ describe('Stage: init', () => {
 
       const newState = init(state, res, context);
 
-      expect(newState.logs.map((entry) => entry.message)).toEqual([
-        `INIT: mapping version check result: greater`,
-      ]);
+      expect(newState.logs.map((entry) => entry.message)).toContain(
+        `INIT: mapping version check result: greater`
+      );
     });
   });
 
@@ -261,9 +272,9 @@ describe('Stage: init', () => {
 
       const newState = init(state, res, context);
 
-      expect(newState.logs.map((entry) => entry.message)).toEqual([
-        `INIT: mapping version check result: equal`,
-      ]);
+      expect(newState.logs.map((entry) => entry.message)).toContain(
+        `INIT: mapping version check result: equal`
+      );
     });
   });
 
@@ -296,9 +307,9 @@ describe('Stage: init', () => {
 
       const newState = init(state, res, context);
 
-      expect(newState.logs.map((entry) => entry.message)).toEqual([
-        `INIT: mapping version check result: lesser`,
-      ]);
+      expect(newState.logs.map((entry) => entry.message)).toContain(
+        `INIT: mapping version check result: lesser`
+      );
     });
   });
 
@@ -332,9 +343,9 @@ describe('Stage: init', () => {
 
       const newState = init(state, res, context);
 
-      expect(newState.logs.map((entry) => entry.message)).toEqual([
-        `INIT: mapping version check result: conflict`,
-      ]);
+      expect(newState.logs.map((entry) => entry.message)).toContain(
+        `INIT: mapping version check result: conflict`
+      );
     });
   });
 });
