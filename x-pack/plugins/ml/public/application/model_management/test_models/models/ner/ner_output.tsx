@@ -10,16 +10,14 @@ import React, { FC, ReactNode } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
-  EuiHorizontalRule,
   EuiBadge,
-  EuiToolTip,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiHorizontalRule,
   EuiIcon,
+  EuiToolTip,
 } from '@elastic/eui';
-
-import { useCurrentEuiThemeVars } from '@kbn/ml-kibana-theme';
-import { useMlKibana } from '../../../../contexts/kibana';
+import { useCurrentThemeVars } from '../../../../contexts/kibana';
 import { EuiThemeType } from '../../../../components/color_range_legend/use_color_range';
 import type { NerInference, NerResponse } from './ner_inference';
 import { INPUT_TYPE } from '../inference_base';
@@ -87,10 +85,7 @@ const NerOutput: FC<{ inferrer: NerInference }> = ({ inferrer }) => {
 };
 
 const Lines: FC<{ result: NerResponse }> = ({ result }) => {
-  const {
-    services: { theme },
-  } = useMlKibana();
-  const { euiTheme } = useCurrentEuiThemeVars(theme);
+  const { euiTheme } = useCurrentThemeVars();
   const lineSplit: JSX.Element[] = [];
   result.response.forEach(({ value, entity }) => {
     if (entity === null) {
@@ -148,10 +143,7 @@ const EntityBadge = ({
   entity: estypes.MlTrainedModelEntities;
   children: ReactNode;
 }) => {
-  const {
-    services: { theme },
-  } = useMlKibana();
-  const { euiTheme } = useCurrentEuiThemeVars(theme);
+  const { euiTheme } = useCurrentThemeVars();
   return (
     <EuiBadge
       // @ts-expect-error colors are correct in ENTITY_TYPES

@@ -7,9 +7,8 @@
 
 import React, { FC } from 'react';
 import { EuiIcon } from '@elastic/eui';
-import { RectAnnotation, LineAnnotation, AnnotationDomainType, Position } from '@elastic/charts';
-import { useCurrentEuiThemeVars } from '@kbn/ml-kibana-theme';
-import { useMlKibana } from '../../../../../../contexts/kibana';
+import { AnnotationDomainType, LineAnnotation, Position, RectAnnotation } from '@elastic/charts';
+import { useCurrentThemeVars } from '../../../../../../contexts/kibana';
 import { timeFormatter } from '../../../../../../../../common/util/date_utils';
 
 interface Props {
@@ -21,10 +20,7 @@ interface Props {
 }
 
 export const OverlayRange: FC<Props> = ({ overlayKey, start, end, color, showMarker = true }) => {
-  const {
-    services: { theme },
-  } = useMlKibana();
-  const { euiTheme } = useCurrentEuiThemeVars(theme);
+  const { euiTheme } = useCurrentThemeVars();
 
   return (
     <>

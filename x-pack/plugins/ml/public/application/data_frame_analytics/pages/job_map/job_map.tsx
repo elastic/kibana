@@ -9,9 +9,8 @@ import React, { FC, useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import { useCurrentEuiThemeVars } from '@kbn/ml-kibana-theme';
-import { Cytoscape, Controls, JobMapLegend } from './components';
-import { useMlKibana, useMlLocator } from '../../../contexts/kibana';
+import { Controls, Cytoscape, JobMapLegend } from './components';
+import { useCurrentThemeVars, useMlKibana, useMlLocator } from '../../../contexts/kibana';
 import { JOB_MAP_NODE_TYPES } from '../../../../../common/constants/data_frame_analytics';
 import { ML_PAGES } from '../../../../../common/constants/locator';
 import { EuiThemeType } from '../../../components/color_range_legend';
@@ -63,11 +62,10 @@ export const JobMap: FC<Props> = ({ analyticsId, modelId, forceRefresh }) => {
     services: {
       notifications,
       application: { navigateToUrl },
-      theme,
     },
   } = useMlKibana();
   const locator = useMlLocator()!;
-  const { euiTheme } = useCurrentEuiThemeVars(theme);
+  const { euiTheme } = useCurrentThemeVars();
   const refresh = useRefresh();
 
   const redirectToAnalyticsManagementPage = async () => {
