@@ -63,7 +63,7 @@ export const ControlGroupStrings = {
           defaultMessage: 'Please select a field',
         }),
       getFieldTitle: () =>
-        i18n.translate('controls.controlGroup.manageControl.dataSource.fielditle', {
+        i18n.translate('controls.controlGroup.manageControl.dataSource.fieldTitle', {
           defaultMessage: 'Field',
         }),
       getControlTypeTitle: () =>
@@ -96,14 +96,16 @@ export const ControlGroupStrings = {
     controlTypeSettings: {
       getFormGroupTitle: (type: string) =>
         i18n.translate('controls.controlGroup.manageControl.controlTypeSettings.formGroupTitle', {
-          defaultMessage: `${type} settings`,
+          defaultMessage: '{controlType} settings',
+          values: { controlType: type },
         }),
 
       getFormGroupDescription: (type: string) =>
         i18n.translate(
           'controls.controlGroup.manageControl.controlTypeSettings.formGroupDescription',
           {
-            defaultMessage: `Custom settings for your ${type} control.`,
+            defaultMessage: 'Custom settings for your {controlType} control.',
+            values: { controlType: type.toLocaleLowerCase() },
           }
         ),
     },
