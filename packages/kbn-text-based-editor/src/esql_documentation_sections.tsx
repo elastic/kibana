@@ -285,6 +285,29 @@ FROM employees
       ),
     },
     {
+      label: i18n.translate('textBasedEditor.query.textBasedLanguagesEditor.documentation.mvExpand', {
+        defaultMessage: 'MV_EXPAND',
+      }),
+      description: (
+        <Markdown
+          markdown={i18n.translate(
+            'textBasedEditor.query.textBasedLanguagesEditor.documentation.mvExpand.markdown',
+            {
+              defaultMessage: `### MV_EXPAND
+The \`MV_EXPAND\` processing command expands multivalued fields into one row per value, duplicating other fields:              
+\`\`\`
+ROW a=[1,2,3], b="b", j=["a","b"]
+| MV_EXPAND a
+\`\`\`
+            `,
+              description:
+                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+            }
+          )}
+        />
+      ),
+    },
+    {
       label: i18n.translate(
         'textBasedEditor.query.textBasedLanguagesEditor.documentation.project',
         {
