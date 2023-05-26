@@ -211,10 +211,17 @@ describe('execute()', () => {
           "debug": [MockFunction] {
             "calls": Array [
               Array [
+                "Warning on d3 action: Invalid JSON input",
+              ],
+              Array [
                 "response from d3 action \\"some-id\\": [HTTP 200] ",
               ],
             ],
             "results": Array [
+              Object {
+                "type": "return",
+                "value": undefined,
+              },
               Object {
                 "type": "return",
                 "value": undefined,
