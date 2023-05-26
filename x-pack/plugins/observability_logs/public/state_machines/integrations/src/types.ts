@@ -4,15 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { DoneInvokeEvent } from 'xstate';
 import type { IImmutableCache } from '../../../../common/immutable_cache';
 import { FindIntegrationsResponse, SortOrder, SearchAfter } from '../../../../common/latest';
-import { Integration, SearchStrategy } from '../../../../common/data_streams';
+import { Integration } from '../../../../common/data_streams';
 
 export interface IntegrationsSearchParams {
   nameQuery?: string;
   searchAfter?: SearchAfter;
   sortOrder?: SortOrder;
-  strategy?: SearchStrategy;
   integrationId?: string;
 }
 
@@ -65,8 +65,6 @@ type LoadingFailedIntegrationsContext = WithCache &
   WithSearch &
   WithError;
 
-type SearchingIntegrationsContext = LoadedIntegrationsContext | LoadingFailedIntegrationsContext;
-
 export type IntegrationTypestate =
   | {
       value: 'uninitialized';
@@ -85,37 +83,25 @@ export type IntegrationTypestate =
       context: LoadingFailedIntegrationsContext;
     }
   | {
-      value: 'loadingMore';
-      context: LoadingIntegrationsContext;
+      value: { loaded: 'idle' };
+      context: LoadedIntegrationsContext;
     }
   | {
-      value: 'debouncingSearch';
-      context: SearchingIntegrationsContext;
+      value: { loaded: 'loadingMore' };
+      context: LoadedIntegrationsContext;
     }
   | {
-      value: 'searchingStreams';
-      context: SearchingIntegrationsContext;
+      value: { loaded: 'debounceSearchingIntegrations' };
+      context: LoadedIntegrationsContext;
+    }
+  | {
+      value: { loaded: 'debounceSearchingIntegrationsStreams' };
+      context: LoadedIntegrationsContext;
     };
 
 export type IntegrationsContext = IntegrationTypestate['context'];
 
 export type IntegrationsEvent =
-  | {
-      type: 'LOADING_SUCCEEDED';
-      data: FindIntegrationsResponse;
-    }
-  | {
-      type: 'LOADING_FAILED';
-      error: Error;
-    }
-  | {
-      type: 'SEARCH_SUCCEEDED';
-      integrations: Integration[];
-    }
-  | {
-      type: 'SEARCH_FAILED';
-      error: Error;
-    }
   | {
       type: 'LOAD_MORE_INTEGRATIONS';
     }
@@ -123,7 +109,19 @@ export type IntegrationsEvent =
       type: 'RELOAD_INTEGRATIONS';
     }
   | {
-      type: 'SEARCH';
+      type: 'SEARCH_INTEGRATIONS';
       search: IntegrationsSearchParams;
-      delay?: number;
-    };
+    }
+  | {
+      type: 'SORT_INTEGRATIONS';
+      search: IntegrationsSearchParams;
+    }
+  | {
+      type: 'SEARCH_INTEGRATIONS_STREAMS';
+      search: IntegrationsSearchParams;
+    }
+  | {
+      type: 'SORT_INTEGRATIONS_STREAMS';
+      search: IntegrationsSearchParams;
+    }
+  | DoneInvokeEvent<any>;

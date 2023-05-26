@@ -6,10 +6,8 @@
  */
 
 import { EuiContextMenu, EuiContextMenuPanel, EuiHorizontalRule } from '@elastic/eui';
-import { EuiContextMenuPanelId } from '@elastic/eui/src/components/context_menu/context_menu';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
 import { dynamic } from '../../../common/dynamic';
-import type { DataStreamSelectionHandler } from '../../customizations/custom_data_stream_selector';
 import { useIntersectionRef } from '../../hooks/use_intersection_ref';
 import {
   contextMenuStyles,
@@ -18,13 +16,13 @@ import {
   INTEGRATION_PANEL_ID,
   selectDatasetLabel,
   uncategorizedLabel,
-  UNCATEGORIZED_STREAMS_PANEL_ID,
+  UNMANAGED_STREAMS_PANEL_ID,
 } from './constants';
 import { useDataStreamSelector } from './state_machine/use_data_stream_selector';
 import { DataStreamsPopover } from './sub_components/data_streams_popover';
 import { DataStreamSkeleton } from './sub_components/data_streams_skeleton';
-import { SearchControls, useSearchStrategy } from './sub_components/search_controls';
-import { PanelId, DataStreamSelectorProps } from './types';
+import { SearchControls } from './sub_components/search_controls';
+import { DataStreamSelectorProps } from './types';
 import { buildIntegrationsTree, setIntegrationListSpy } from './utils';
 
 /**
@@ -49,31 +47,47 @@ export function DataStreamSelector({
   isLoadingStreams,
   onIntegrationsLoadMore,
   onIntegrationsReload,
-  onSearch,
+  onIntegrationsSearch,
+  onIntegrationsSort,
+  onIntegrationsStreamsSearch,
+  onIntegrationsStreamsSort,
+  onUnmanagedStreamsSearch,
+  onUnmanagedStreamsSort,
+  onUnmanagedStreamsReload,
   onStreamSelected,
   onStreamsEntryClick,
-  onStreamsReload,
   title,
 }: DataStreamSelectorProps) {
-  const { isOpen, panelId, changePanel, togglePopover } = useDataStreamSelector();
+  const {
+    isOpen,
+    panelId,
+    search,
+    changePanel,
+    scrollToIntegrationsBottom,
+    searchByName,
+    selectDataStream,
+    sortByOrder,
+    togglePopover,
+  } = useDataStreamSelector({
+    onIntegrationsLoadMore,
+    onIntegrationsReload,
+    onIntegrationsSearch,
+    onIntegrationsSort,
+    onIntegrationsStreamsSearch,
+    onIntegrationsStreamsSort,
+    onUnmanagedStreamsSearch,
+    onUnmanagedStreamsSort,
+    onUnmanagedStreamsReload,
+    onStreamSelected,
+  });
 
-  const [setSpyRef] = useIntersectionRef({ onIntersecting: onIntegrationsLoadMore });
-
-  const [search, handleSearch] = useSearchStrategy({ id: panelId, onSearch });
-
-  const handleStreamSelection = useCallback<DataStreamSelectionHandler>(
-    (dataStream) => {
-      onStreamSelected(dataStream);
-      togglePopover();
-    },
-    [togglePopover, onStreamSelected]
-  );
+  const [setSpyRef] = useIntersectionRef({ onIntersecting: scrollToIntegrationsBottom });
 
   const { items: integrationItems, panels: integrationPanels } = useMemo(() => {
     const dataStreamsItem = {
       name: uncategorizedLabel,
       onClick: onStreamsEntryClick,
-      panel: UNCATEGORIZED_STREAMS_PANEL_ID,
+      panel: UNMANAGED_STREAMS_PANEL_ID,
     };
 
     const createIntegrationStatusItem = () => ({
@@ -96,7 +110,7 @@ export function DataStreamSelector({
 
     const { items, panels } = buildIntegrationsTree({
       integrations,
-      onStreamSelected: handleStreamSelection,
+      onStreamSelected: selectDataStream,
     });
 
     setIntegrationListSpy(items, setSpyRef);
@@ -110,7 +124,7 @@ export function DataStreamSelector({
   }, [
     integrations,
     integrationsError,
-    handleStreamSelection,
+    selectDataStream,
     onIntegrationsReload,
     onStreamsEntryClick,
     setSpyRef,
@@ -124,16 +138,16 @@ export function DataStreamSelector({
       items: integrationItems,
     },
     {
-      id: UNCATEGORIZED_STREAMS_PANEL_ID,
+      id: UNMANAGED_STREAMS_PANEL_ID,
       title: uncategorizedLabel,
       width: DATA_VIEW_POPOVER_CONTENT_WIDTH,
       content: (
         <DataStreamsList
-          onStreamClick={handleStreamSelection}
+          onStreamClick={selectDataStream}
           dataStreams={dataStreams}
           error={dataStreamsError}
           isLoading={isLoadingStreams}
-          onRetry={onStreamsReload}
+          onRetry={onUnmanagedStreamsReload}
         />
       ),
     },
@@ -151,7 +165,8 @@ export function DataStreamSelector({
         <SearchControls
           key={panelId}
           search={search}
-          onSearch={handleSearch}
+          onSearch={searchByName}
+          onSort={sortByOrder}
           isLoading={isLoadingIntegrations || isLoadingStreams}
         />
         <EuiHorizontalRule margin="none" />
