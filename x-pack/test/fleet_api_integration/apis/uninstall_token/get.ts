@@ -170,7 +170,7 @@ export default function (providerContext: FtrProviderContext) {
     for (let i = 0; i < number; i++) {
       promises.push(
         supertest
-          .post(AGENT_POLICY_API_ROUTES.LIST_PATTERN)
+          .post(AGENT_POLICY_API_ROUTES.CREATE_PATTERN)
           .set('kbn-xsrf', 'xxxx')
           .send({ name: `Agent Policy ${uuid.v4()}`, namespace: 'default' })
           .expect(200)
