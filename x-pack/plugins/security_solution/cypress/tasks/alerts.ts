@@ -45,7 +45,6 @@ import {
   ALERTS_HISTOGRAM_LEGEND,
   LEGEND_ACTIONS,
   SESSION_VIEWER_BUTTON,
-  CLOSE_OVERLAY,
 } from '../screens/alerts';
 import { LOADING_INDICATOR, REFRESH_BUTTON } from '../screens/security_header';
 import { TIMELINE_COLUMN_SPINNER } from '../screens/timeline';
@@ -117,7 +116,6 @@ export const expandFirstAlertActions = () => {
   waitForAlerts();
 
   cy.get(TIMELINE_CONTEXT_MENU_BTN).first().filter(':visible').click();
-  // cy.get(TIMELINE_CONTEXT_MENU_BTN).first().should('be.visible').click();
   cy.get(TIMELINE_CONTEXT_MENU_BTN)
     .first()
     .should('be.visible')
@@ -310,10 +308,6 @@ export const openAnalyzerForFirstAlertInTimeline = () => {
   cy.get(OPEN_ANALYZER_BTN).first().click({ force: true });
 };
 
-export const closeAnalyzer = () => {
-  cy.get(CLOSE_OVERLAY).click();
-};
-
 export const clickAlertsHistogramLegend = () => {
   cy.get(ALERTS_HISTOGRAM_LEGEND).click();
 };
@@ -452,8 +446,4 @@ export const visitAlertsPageWithCustomFilters = (pageFilters: FilterItemObj[]) =
 
 export const openSessionViewerFromAlertTable = (rowIndex: number = 0) => {
   cy.get(SESSION_VIEWER_BUTTON).eq(rowIndex).click();
-};
-
-export const closeSessionViewerFromAlertTable = () => {
-  cy.get(CLOSE_OVERLAY).click();
 };
