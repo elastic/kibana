@@ -77,6 +77,7 @@ export const createThresholdAlertType = (
           aggregatableTimestampField,
           exceptionFilter,
           unprocessedExceptions,
+          inputIndexFields,
         },
         services,
         startedAt,
@@ -100,6 +101,7 @@ export const createThresholdAlertType = (
         aggregatableTimestampField,
         exceptionFilter,
         unprocessedExceptions,
+        inputIndexFields,
       });
       return result;
     },
