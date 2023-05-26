@@ -10,13 +10,11 @@ import { getClusterSettingsStep } from './get_cluster_settings_step';
 import { getFleetPolicyStep } from './get_fleet_policy_step';
 import { getSecurityStep } from './get_security_step';
 import { getApmPackageStep } from './get_apm_package_step';
-import { getIsCloudEnabledStep } from './get_is_cloud_enabled_step';
 
 export function getProfilingSetupSteps(
   options: ProfilingSetupStepFactoryOptions
 ): ProfilingSetupStep[] {
   return [
-    getIsCloudEnabledStep(options),
     getApmPackageStep(options),
     getClusterSettingsStep(options),
     getSecurityStep(options),

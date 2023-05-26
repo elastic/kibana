@@ -36,7 +36,7 @@ export function registerSetupRoute({
   dependencies,
 }: RouteRegisterParameters) {
   const paths = getRoutePaths();
-  // Check if ES resources needed for Universal Profiling to work exist
+  // Check if Elasticsearch and Fleet are setup for Universal Profiling
   router.get(
     {
       path: paths.HasSetupESResources,
@@ -60,7 +60,11 @@ export function registerSetupRoute({
           isCloudEnabled: dependencies.setup.cloud.isCloudEnabled,
         };
 
-        logger.info('Checking if profiling ES configurations are installed');
+        logger.info('Checking if Elasticsearch and Fleet are setup for Universal Profiling');
+
+        if (!dependencies.setup.cloud.isCloudEnabled) {
+          throw new Error(`Universal Profiling is only available on Elastic Cloud.`);
+        }
 
         const initializeStep = createStepToInitializeElasticsearch(stepOptions);
         const initializeResults = await checkSteps({ steps: [initializeStep], logger });
@@ -103,7 +107,7 @@ export function registerSetupRoute({
       }
     }
   );
-  // Configure ES resources needed by Universal Profiling using the mappings
+  // Set up Elasticsearch and Fleet for Universal Profiling
   router.post(
     {
       path: paths.HasSetupESResources,
@@ -127,7 +131,11 @@ export function registerSetupRoute({
           isCloudEnabled: dependencies.setup.cloud.isCloudEnabled,
         };
 
-        logger.info('Applying initial setup of Elasticsearch resources');
+        logger.info('Setting up Elasticsearch and Fleet for Universal Profiling');
+
+        if (!dependencies.setup.cloud.isCloudEnabled) {
+          throw new Error(`Universal Profiling is only available on Elastic Cloud.`);
+        }
 
         const initializeStep = createStepToInitializeElasticsearch(stepOptions);
         const initializeResults = await checkSteps({ steps: [initializeStep], logger });
