@@ -149,7 +149,7 @@ export async function initializeDataViews(
   const adHocDataviewsIds: string[] = Object.keys(adHocDataViews || {});
 
   const usedIndexPatternsIds = getIndexPatterns(
-    Object.values(annotationGroups).map((group) => group.indexPatternId),
+    annotationGroupValues.map((group) => group.indexPatternId),
     references,
     initialContext,
     initialId,
@@ -186,15 +186,16 @@ const initializeEventAnnotationGroups = async (
 ) => {
   const annotationGroups: Record<string, EventAnnotationGroupConfig> = {};
 
-  await Promise.allSettled(
+  const annotationGroupResponses = await Promise.allSettled(
     (references || [])
       .filter((ref) => ref.type === EVENT_ANNOTATION_GROUP_TYPE)
-      .map(({ id }) =>
-        eventAnnotationService
-          .loadAnnotationGroup(id)
-          .then((group) => (annotationGroups[id] = group))
-      )
+      .map(({ id }) => eventAnnotationService.loadAnnotationGroup(id))
   );
+  for (const response of annotationGroupResponses) {
+    if (response.status === 'fulfilled') {
+      annotationGroups[response.value.id] = response.value;
+    }
+  }
 
   return annotationGroups;
 };
