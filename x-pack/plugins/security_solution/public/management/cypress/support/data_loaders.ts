@@ -47,8 +47,11 @@ import {
   indexEndpointRuleAlerts,
 } from '../../../../common/endpoint/data_loaders/index_endpoint_rule_alerts';
 import {
+  startEndpointHost,
   createAndEnrollEndpointHost,
   destroyEndpointHost,
+  getEndpointHosts,
+  stopEndpointHost,
 } from '../../../../scripts/endpoint/common/endpoint_host_services';
 
 /**
