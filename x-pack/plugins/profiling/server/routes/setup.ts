@@ -10,6 +10,7 @@ import { RouteRegisterParameters } from '.';
 import { getRoutePaths } from '../../common';
 import { getSetupInstructions } from '../lib/setup/get_setup_instructions';
 import { getProfilingSetupSteps } from '../lib/setup/steps';
+import { createStepToInitializeElasticsearch } from '../lib/setup/steps/initialize_elasticsearch';
 import { handleRouteHandlerError } from '../utils/handle_route_error_handler';
 import { hasProfilingData } from '../lib/setup/has_profiling_data';
 import { getClient } from './compat';
@@ -19,7 +20,7 @@ function checkSteps({ steps, logger }: { steps: ProfilingSetupStep[]; logger: Lo
   return Promise.all(
     steps.map(async (step) => {
       try {
-        return { name: step.name, completed: await step.hasCompleted() };
+        return { name: step.name, completed: await step.hasCompleted(), error: null };
       } catch (error) {
         logger.error(error);
         return { name: step.name, completed: false, error: error.toString() };
@@ -44,32 +45,36 @@ export function registerSetupRoute({
     async (context, request, response) => {
       try {
         const esClient = await getClient(context);
-        logger.debug('checking if profiling ES configurations are installed');
         const core = await context.core;
-
-        const steps = getProfilingSetupSteps({
-          client: createProfilingEsClient({
-            esClient,
-            request,
-            useDefaultAuth: true,
-          }),
+        const clientWithDefaultAuth = createProfilingEsClient({
+          esClient,
+          request,
+          useDefaultAuth: true,
+        });
+        const stepOptions = {
+          client: clientWithDefaultAuth,
           logger,
           packagePolicyClient: dependencies.start.fleet.packagePolicyService,
           soClient: core.savedObjects.client,
           spaceId: dependencies.setup.spaces.spacesService.getSpaceId(request),
           isCloudEnabled: dependencies.setup.cloud.isCloudEnabled,
-        });
+        };
 
-        const hasDataPromise = hasProfilingData({
+        logger.info('Checking if profiling ES configurations are installed');
+
+        const initializeStep = createStepToInitializeElasticsearch(stepOptions);
+        const initializeResults = await checkSteps({ steps: [initializeStep], logger });
+
+        if (initializeResults[0].error) {
+          return handleRouteHandlerError({ error: initializeResults[0].error, logger, response });
+        }
+
+        const hasData = await hasProfilingData({
           client: createProfilingEsClient({
             esClient,
             request,
           }),
         });
-
-        const stepCompletionResultsPromises = checkSteps({ steps, logger });
-
-        const hasData = await hasDataPromise;
 
         if (hasData) {
           return response.ok({
@@ -81,11 +86,11 @@ export function registerSetupRoute({
           });
         }
 
-        const stepCompletionResults = await stepCompletionResultsPromises;
+        const stepCompletionResults = await checkSteps({
+          steps: getProfilingSetupSteps(stepOptions),
+          logger,
+        });
 
-        // Reply to clients if we have already created all 12 events template indices.
-        // This is kind of simplistic but can be a good first step to ensure
-        // Profiling resources will be created.
         return response.ok({
           body: {
             has_setup: stepCompletionResults.every((step) => step.completed),
@@ -107,15 +112,31 @@ export function registerSetupRoute({
     async (context, request, response) => {
       try {
         const esClient = await getClient(context);
-        logger.info('Applying initial setup of Elasticsearch resources');
-        const steps = getProfilingSetupSteps({
-          client: createProfilingEsClient({ esClient, request, useDefaultAuth: true }),
+        const core = await context.core;
+        const clientWithDefaultAuth = createProfilingEsClient({
+          esClient,
+          request,
+          useDefaultAuth: true,
+        });
+        const stepOptions = {
+          client: clientWithDefaultAuth,
           logger,
           packagePolicyClient: dependencies.start.fleet.packagePolicyService,
-          soClient: (await context.core).savedObjects.client,
+          soClient: core.savedObjects.client,
           spaceId: dependencies.setup.spaces.spacesService.getSpaceId(request),
           isCloudEnabled: dependencies.setup.cloud.isCloudEnabled,
-        });
+        };
+
+        logger.info('Applying initial setup of Elasticsearch resources');
+
+        const initializeStep = createStepToInitializeElasticsearch(stepOptions);
+        const initializeResults = await checkSteps({ steps: [initializeStep], logger });
+
+        if (initializeResults[0].error) {
+          return handleRouteHandlerError({ error: initializeResults[0].error, logger, response });
+        }
+
+        const steps = getProfilingSetupSteps(stepOptions);
 
         await eachSeries(steps, (step, cb) => {
           logger.debug(`Executing step ${step.name}`);

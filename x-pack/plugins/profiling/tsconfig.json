@@ -36,7 +36,6 @@
     "@kbn/core-elasticsearch-server",
     "@kbn/fleet-plugin",
     "@kbn/shared-ux-page-no-data-types",
-    "@kbn/es-errors",
     "@kbn/core-http-request-handler-context-server",
     "@kbn/spaces-plugin",
     "@kbn/cloud-plugin",

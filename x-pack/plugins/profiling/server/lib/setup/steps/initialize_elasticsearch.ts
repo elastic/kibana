@@ -7,23 +7,28 @@
 
 import { ProfilingSetupStep, ProfilingSetupStepFactoryOptions } from '../types';
 
-const MAX_BUCKETS = 150000;
-
-export function getClusterSettingsStep({
+export function createStepToInitializeElasticsearch({
   client,
 }: ProfilingSetupStepFactoryOptions): ProfilingSetupStep {
   return {
-    name: 'cluster_settings',
+    name: 'initialize_elasticsearch',
     hasCompleted: async () => {
       const settings = await client.getEsClient().cluster.getSettings({});
-      const maxBuckets = settings.persistent.search?.max_buckets;
-      return maxBuckets === MAX_BUCKETS.toString();
+
+      const areProfilingTemplatesEnabled =
+        settings.persistent.xpack?.profiling?.templates?.enabled ?? false;
+
+      return areProfilingTemplatesEnabled;
     },
     init: async () => {
       await client.getEsClient().cluster.putSettings({
         persistent: {
-          search: {
-            max_buckets: MAX_BUCKETS,
+          xpack: {
+            profiling: {
+              templates: {
+                enabled: true,
+              },
+            },
           },
         },
       });
