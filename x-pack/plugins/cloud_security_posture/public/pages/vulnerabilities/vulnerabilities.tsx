@@ -44,7 +44,7 @@ import { FILTER_IN, FILTER_OUT, SEARCH_BAR_PLACEHOLDER, VULNERABILITIES } from '
 import {
   severitySchemaConfig,
   severitySortScript,
-  VULNERABILITY_SEVERITY_FIELD,
+  getCaseInsensitiveSortScript,
 } from './utils/custom_sort_script';
 import { useStyles } from './hooks/use_styles';
 
@@ -108,7 +108,7 @@ const VulnerabilitiesContent = ({ dataView }: { dataView: DataView }) => {
         setHighlight(true);
         setTimeout(() => {
           setHighlight(false);
-        }, 1400);
+        }, 2000);
       }
     },
     [onSort, sort]
@@ -116,8 +116,11 @@ const VulnerabilitiesContent = ({ dataView }: { dataView: DataView }) => {
 
   const multiFieldsSort = useMemo(() => {
     return sort.map(({ id, direction }: { id: string; direction: string }) => {
-      if (VULNERABILITY_SEVERITY_FIELD === id) {
+      if (id === vulnerabilitiesColumns.severity) {
         return severitySortScript(direction);
+      }
+      if (id === vulnerabilitiesColumns.package) {
+        return getCaseInsensitiveSortScript(id, direction);
       }
 
       return {
@@ -200,7 +203,9 @@ const VulnerabilitiesContent = ({ dataView }: { dataView: DataView }) => {
 
     const cellActions: EuiDataGridColumnCellAction[] = [
       ({ Component, rowIndex, columnId }) => {
-        const value = getColumnIdValue(rowIndex, columnId);
+        const rowIndexFromPage = rowIndex > pageSize - 1 ? rowIndex % pageSize : rowIndex;
+
+        const value = getColumnIdValue(rowIndexFromPage, columnId);
 
         if (!value) return null;
         return (
@@ -242,7 +247,9 @@ const VulnerabilitiesContent = ({ dataView }: { dataView: DataView }) => {
         );
       },
       ({ Component, rowIndex, columnId }) => {
-        const value = getColumnIdValue(rowIndex, columnId);
+        const rowIndexFromPage = rowIndex > pageSize - 1 ? rowIndex % pageSize : rowIndex;
+
+        const value = getColumnIdValue(rowIndexFromPage, columnId);
 
         if (!value) return null;
         return (
@@ -272,7 +279,7 @@ const VulnerabilitiesContent = ({ dataView }: { dataView: DataView }) => {
                     filters: urlQuery.filters,
                     dataView,
                     field: columnId,
-                    value: getColumnIdValue(rowIndex, columnId),
+                    value,
                     negate: true,
                   }),
                 });
@@ -286,7 +293,7 @@ const VulnerabilitiesContent = ({ dataView }: { dataView: DataView }) => {
     ];
 
     return getVulnerabilitiesColumnsGrid(cellActions);
-  }, [data?.page, dataView, setUrlQuery, urlQuery.filters]);
+  }, [data?.page, dataView, pageSize, setUrlQuery, urlQuery.filters]);
 
   const flyoutVulnerabilityIndex = urlQuery?.vulnerabilityIndex;
 
