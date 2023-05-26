@@ -14,7 +14,6 @@ import {
   EncryptedSyntheticsMonitor,
   MonitorOverviewItem,
 } from '../../../common/runtime_types';
-import { syntheticsMonitorType } from '../../../common/types/saved_objects';
 import { UMServerLibs } from '../../legacy_uptime/lib/lib';
 import { SyntheticsRestApiRouteFactory } from '../../legacy_uptime/routes/types';
 import { API_URLS, SYNTHETICS_API_URLS } from '../../../common/constants';
