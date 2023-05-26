@@ -123,8 +123,6 @@ export function openAddDataControlFlyout(
       onClose: () => {
         onCancel({});
       },
-      // @ts-ignore - TODO: Remove this once https://github.com/elastic/eui/pull/6645 lands in Kibana
-      focusTrapProps: { scrollLock: true },
     }
   );
   setFlyoutRef(flyoutInstance);

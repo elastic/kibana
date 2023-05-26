@@ -130,7 +130,6 @@ export class DashboardSaveModal extends React.Component<Props, State> {
               defaultMessage="This changes the time filter to the currently selected time each time this dashboard is loaded."
             />
           }
-          fullWidth
         >
           <EuiSwitch
             data-test-subj="storeTimeWithDashboard"
