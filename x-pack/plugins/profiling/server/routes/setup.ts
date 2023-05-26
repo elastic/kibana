@@ -128,11 +128,22 @@ export function registerSetupRoute({
         logger.info('Checking if Elasticsearch and Fleet are setup for Universal Profiling');
 
         const body = createDefaultSetupResourceResponse();
-        set(body, 'cloud.available', dependencies.setup.cloud.isCloudEnabled);
+        body.cloud.available = dependencies.setup.cloud.isCloudEnabled;
 
-        if (!dependencies.setup.cloud.isCloudEnabled) {
+        if (!body.cloud.available) {
           throw new Error(`Universal Profiling is only available on Elastic Cloud.`);
         }
+
+        const statusResponse = await clientWithDefaultAuth.profilingStatus();
+        body.resource_management.enabled = statusResponse.resource_management.enabled;
+        body.resources.created = statusResponse.resources.created;
+
+        body.data.available = await hasProfilingData({
+          client: createProfilingEsClient({
+            esClient,
+            request,
+          }),
+        });
 
         const initializeStep = createStepToInitializeElasticsearch(stepOptions);
         const initializeResult = await checkStep({ step: initializeStep, logger });
@@ -144,14 +155,7 @@ export function registerSetupRoute({
           return handleRouteHandlerError({ error: initializeResult.error, logger, response });
         }
 
-        const hasData = await hasProfilingData({
-          client: createProfilingEsClient({
-            esClient,
-            request,
-          }),
-        });
-
-        if (hasData) {
+        if (body.data.available) {
           return response.ok({
             body: {
               has_data: true,
