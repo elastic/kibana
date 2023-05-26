@@ -13,6 +13,7 @@ export enum SYNTHETICS_API_URLS {
   INDEX_SIZE = `/internal/synthetics/index_size`,
   PARAMS = `/synthetics/params`,
   PRIVATE_LOCATIONS = `/synthetics/private_locations`,
+  PRIVATE_LOCATIONS_MONITORS = `/internal/synthetics/private_locations/monitors`,
   SYNC_GLOBAL_PARAMS = `/synthetics/sync_global_params`,
   ENABLE_DEFAULT_ALERTING = `/synthetics/enable_default_alerting`,
   JOURNEY = `/internal/synthetics/journey/{checkGroup}`,

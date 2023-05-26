@@ -303,7 +303,7 @@ const getSloDiagnosisRoute = createObservabilityServerRoute({
   },
 });
 
-export const slosRouteRepository = {
+export const sloRouteRepository = {
   ...createSLORoute,
   ...deleteSLORoute,
   ...disableSLORoute,
