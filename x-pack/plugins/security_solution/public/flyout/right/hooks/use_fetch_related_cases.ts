@@ -7,6 +7,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import type { CasesByAlertId } from '@kbn/cases-plugin/common/api';
+import { useMemo } from 'react';
 import { useKibana } from '../../../common/lib/kibana';
 import { APP_ID } from '../../../../common/constants';
 
@@ -56,10 +57,13 @@ export const useFetchRelatedCases = ({
     { keepPreviousData: true }
   );
 
-  return {
-    loading: isLoading,
-    error: isError,
-    data,
-    dataCount: (data || []).length,
-  };
+  return useMemo(
+    () => ({
+      loading: isLoading,
+      error: isError,
+      data,
+      dataCount: data?.length || 0,
+    }),
+    [data, isError, isLoading]
+  );
 };

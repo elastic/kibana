@@ -7,6 +7,7 @@
 
 import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 import { find } from 'lodash/fp';
+import { useMemo } from 'react';
 import { useAlertPrevalence } from '../../../common/containers/alerts/use_alert_prevalence';
 import { isActiveTimeline } from '../../../helpers';
 
@@ -59,10 +60,13 @@ export const useFetchRelatedAlertsBySameSourceEvent = ({
     includeAlertIds: true,
   });
 
-  return {
-    loading,
-    error,
-    data: alertIds || [],
-    dataCount: count || 0,
-  };
+  return useMemo(
+    () => ({
+      loading,
+      error,
+      data: alertIds || [],
+      dataCount: count || 0,
+    }),
+    [alertIds, count, error, loading]
+  );
 };

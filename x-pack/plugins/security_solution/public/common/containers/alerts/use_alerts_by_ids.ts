@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 import { useQueryAlerts } from '../../../detections/containers/detection_engine/alerts/use_query';
 import { ALERTS_QUERY_NAMES } from '../../../detections/containers/detection_engine/alerts/constants';
@@ -25,6 +25,8 @@ interface UserAlertByIdsResult {
   data?: Hit[];
 }
 
+const DEFAULT_FIELDS = ['*'];
+
 /**
  * Fetches the alert documents associated to the ids that are passed.
  * By default it fetches all fields but they can be limited by passing
@@ -32,7 +34,7 @@ interface UserAlertByIdsResult {
  */
 export const useAlertsByIds = ({
   alertIds,
-  fields = ['*'],
+  fields = DEFAULT_FIELDS,
 }: UseAlertByIdsOptions): UserAlertByIdsResult => {
   const [initialQuery] = useState(() => generateAlertByIdsQuery(alertIds, fields));
 
@@ -47,11 +49,14 @@ export const useAlertsByIds = ({
 
   const error = !loading && data === undefined;
 
-  return {
-    loading,
-    error,
-    data: data?.hits.hits,
-  };
+  return useMemo(
+    () => ({
+      loading,
+      error,
+      data: data?.hits.hits,
+    }),
+    [data?.hits.hits, error, loading]
+  );
 };
 
 const generateAlertByIdsQuery = (alertIds: string[], fields: string[]) => {

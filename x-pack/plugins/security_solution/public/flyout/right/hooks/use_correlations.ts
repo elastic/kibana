@@ -7,6 +7,8 @@
 
 import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
+import { useEffect, useMemo, useReducer } from 'react';
+import type { CasesByAlertId } from '@kbn/cases-plugin/common/api';
 import { useFetchRelatedAlertsBySameSourceEvent } from './use_fetch_related_alerts_by_same_source_event';
 import type { InsightsSummaryPanelData } from '../components/insights_summary_panel';
 import { useShowRelatedCases } from './use_show_related_cases';
@@ -57,24 +59,37 @@ export interface UseCorrelationsResult {
   /**
    * Data ready to be consumed by the InsightsSummaryPanel component
    */
-  data: InsightsSummaryPanelData[];
+  data: readonly InsightsSummaryPanelData[];
   /**
    * Data length
    */
   dataCount: number;
+
+  alertsBySessionIds: string[];
+  sameSourceAlertsIds: string[];
+  ancestryAlertsIds: string[];
+
+  cases: CasesByAlertId;
 }
 
 /**
  * Retrieves all correlations data from custom hooks
  */
-// eslint-disable-next-line complexity
 export const useCorrelations = ({
   eventId,
   dataAsNestedObject,
   dataFormattedForFieldBrowser,
   scopeId,
-}: UseCorrelationsParams): UseCorrelationsResult => {
-  const data: InsightsSummaryPanelData[] = [];
+}: UseCorrelationsParams): Readonly<UseCorrelationsResult> => {
+  const [data, updateInsightsSummaryPanel] = useReducer(
+    (
+      currentEntries: InsightsSummaryPanelData[],
+      newEntry: { icon: string; value: number; text: string }
+    ) => {
+      return [...currentEntries, newEntry];
+    },
+    []
+  );
 
   // cases
   const showCases = useShowRelatedCases();
@@ -82,14 +97,18 @@ export const useCorrelations = ({
     loading: casesLoading,
     error: casesError,
     dataCount: casesCount,
+    data: cases,
   } = useFetchRelatedCases({ eventId });
-  if (showCases && !casesLoading && !casesError) {
-    data.push({
-      icon: 'warning',
-      value: casesCount,
-      text: casesCount <= 1 ? CORRELATIONS_RELATED_CASE : CORRELATIONS_RELATED_CASES,
-    });
-  }
+
+  useEffect(() => {
+    if (showCases && !casesLoading && !casesError) {
+      updateInsightsSummaryPanel({
+        icon: 'warning',
+        value: casesCount,
+        text: casesCount <= 1 ? CORRELATIONS_RELATED_CASE : CORRELATIONS_RELATED_CASES,
+      });
+    }
+  }, [casesCount, casesError, casesLoading, showCases]);
 
   // alerts by ancestry
   const showAlertsByAncestry = useShowRelatedAlertsByAncestry({
@@ -100,17 +119,21 @@ export const useCorrelations = ({
     loading: ancestryAlertsLoading,
     error: ancestryAlertsError,
     dataCount: ancestryAlertsCount,
+    data: ancestryAlertsIds,
   } = useFetchRelatedAlertsByAncestry({
     dataFormattedForFieldBrowser,
     scopeId,
   });
-  if (showAlertsByAncestry && !ancestryAlertsLoading && !ancestryAlertsError) {
-    data.push({
-      icon: 'warning',
-      value: ancestryAlertsCount,
-      text: ancestryAlertsCount <= 1 ? CORRELATIONS_ANCESTRY_ALERT : CORRELATIONS_ANCESTRY_ALERTS,
-    });
-  }
+
+  useEffect(() => {
+    if (showAlertsByAncestry && !ancestryAlertsLoading && !ancestryAlertsError) {
+      updateInsightsSummaryPanel({
+        icon: 'warning',
+        value: ancestryAlertsCount,
+        text: ancestryAlertsCount <= 1 ? CORRELATIONS_ANCESTRY_ALERT : CORRELATIONS_ANCESTRY_ALERTS,
+      });
+    }
+  }, [ancestryAlertsCount, ancestryAlertsError, ancestryAlertsLoading, showAlertsByAncestry]);
 
   // alerts related to same source event
   const showSameSourceAlerts = useShowRelatedAlertsBySameSourceEvent({
@@ -120,20 +143,24 @@ export const useCorrelations = ({
     loading: sameSourceAlertsLoading,
     error: sameSourceAlertsError,
     dataCount: sameSourceAlertsCount,
+    data: sameSourceAlertsIds,
   } = useFetchRelatedAlertsBySameSourceEvent({
     dataFormattedForFieldBrowser,
     scopeId,
   });
-  if (showSameSourceAlerts && !sameSourceAlertsLoading && !sameSourceAlertsError) {
-    data.push({
-      icon: 'warning',
-      value: sameSourceAlertsCount,
-      text:
-        sameSourceAlertsCount <= 1
-          ? CORRELATIONS_SAME_SOURCE_EVENT_ALERT
-          : CORRELATIONS_SAME_SOURCE_EVENT_ALERTS,
-    });
-  }
+
+  useEffect(() => {
+    if (showSameSourceAlerts && !sameSourceAlertsLoading && !sameSourceAlertsError) {
+      updateInsightsSummaryPanel({
+        icon: 'warning',
+        value: sameSourceAlertsCount,
+        text:
+          sameSourceAlertsCount <= 1
+            ? CORRELATIONS_SAME_SOURCE_EVENT_ALERT
+            : CORRELATIONS_SAME_SOURCE_EVENT_ALERTS,
+      });
+    }
+  }, [sameSourceAlertsCount, sameSourceAlertsError, sameSourceAlertsLoading, showSameSourceAlerts]);
 
   // alerts related by session
   const showAlertsBySession = useShowRelatedAlertsBySession({ dataFormattedForFieldBrowser });
@@ -141,26 +168,47 @@ export const useCorrelations = ({
     loading: alertsBySessionLoading,
     error: alertsBySessionError,
     dataCount: alertsBySessionCount,
+    data: alertsBySessionIds,
   } = useFetchRelatedAlertsBySession({
     dataFormattedForFieldBrowser,
     scopeId,
   });
-  if (showAlertsBySession && !alertsBySessionLoading && !alertsBySessionError) {
-    data.push({
-      icon: 'warning',
-      value: alertsBySessionCount,
-      text:
-        alertsBySessionCount <= 1
-          ? CORRELATIONS_SAME_SESSION_ALERT
-          : CORRELATIONS_SAME_SESSION_ALERTS,
-    });
-  }
 
-  return {
-    loading:
-      casesLoading || ancestryAlertsLoading || alertsBySessionLoading || sameSourceAlertsLoading,
-    error: data.length === 0,
-    data: data || [],
-    dataCount: data.length || 0,
-  };
+  useEffect(() => {
+    if (showAlertsBySession && !alertsBySessionLoading && !alertsBySessionError) {
+      updateInsightsSummaryPanel({
+        icon: 'warning',
+        value: alertsBySessionCount,
+        text:
+          alertsBySessionCount <= 1
+            ? CORRELATIONS_SAME_SESSION_ALERT
+            : CORRELATIONS_SAME_SESSION_ALERTS,
+      });
+    }
+  }, [alertsBySessionCount, alertsBySessionError, alertsBySessionLoading, showAlertsBySession]);
+
+  return useMemo(
+    () => ({
+      loading:
+        casesLoading || ancestryAlertsLoading || alertsBySessionLoading || sameSourceAlertsLoading,
+      error: data.length === 0,
+      data: data || [],
+      dataCount: data.length || 0,
+      alertsBySessionIds,
+      sameSourceAlertsIds,
+      ancestryAlertsIds: ancestryAlertsIds || [],
+      cases: cases || [],
+    }),
+    [
+      alertsBySessionIds,
+      alertsBySessionLoading,
+      ancestryAlertsIds,
+      ancestryAlertsLoading,
+      cases,
+      casesLoading,
+      data,
+      sameSourceAlertsIds,
+      sameSourceAlertsLoading,
+    ]
+  );
 };

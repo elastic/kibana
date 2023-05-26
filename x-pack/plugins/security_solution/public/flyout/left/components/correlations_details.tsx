@@ -16,6 +16,7 @@ import { useLeftPanelContext } from '../context';
 import { useRouteSpy } from '../../../common/utils/route/use_route_spy';
 import { SecurityPageName } from '../../../../common';
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
+import { useAlertsByIds } from '../../../common/containers/alerts/use_alerts_by_ids';
 
 export const CORRELATIONS_TAB_ID = 'correlations-details';
 
@@ -27,6 +28,7 @@ export const CorrelationsDetails: React.FC = () => {
 
   const scopeId = 'flyout'; // TODO: update to use context
 
+  // TODO: move this to a separate hook
   const [{ pageName }] = useRouteSpy();
   const sourcererScope =
     pageName === SecurityPageName.detections
@@ -35,7 +37,7 @@ export const CorrelationsDetails: React.FC = () => {
 
   const sourcererDataView = useSourcererDataView(sourcererScope);
 
-  const [isEventDataLoading, eventData, searchHit, dataAsNestedObject] = useTimelineEventsDetails({
+  const [isEventDataLoading, eventData, _searchHit, dataAsNestedObject] = useTimelineEventsDetails({
     indexName,
     eventId,
     runtimeMappings: sourcererDataView.runtimeMappings,
@@ -44,8 +46,11 @@ export const CorrelationsDetails: React.FC = () => {
 
   const {
     loading: isCorrelationsLoading,
-    error,
-    data,
+    error: correlationsError,
+    data: correlationsData,
+    ancestryAlertsIds,
+    alertsBySessionIds,
+    sameSourceAlertsIds,
   } = useCorrelations({
     eventId,
     dataAsNestedObject,
@@ -53,10 +58,25 @@ export const CorrelationsDetails: React.FC = () => {
     scopeId,
   });
 
-  console.log('correlationsData', data);
-  console.log('eventData', eventData);
+  console.log('correlationsData', { ancestryAlertsIds, alertsBySessionIds, sameSourceAlertsIds });
 
-  // TODO: get actual alerts for each of the sections
+  const {
+    data: ancestryAlerts,
+    loading: isAncestryAlertsLoading,
+    error: ancestryAlertsError,
+  } = useAlertsByIds({ alertIds: ancestryAlertsIds });
+
+  const {
+    data: sessionAlerts,
+    loading: isSessionAlertsLoading,
+    error: sessionAlertsError,
+  } = useAlertsByIds({ alertIds: alertsBySessionIds });
+
+  const {
+    data: sameSourceAlerts,
+    loading: isSameSourceAlertsLoading,
+    error: sameSourceAlertsError,
+  } = useAlertsByIds({ alertIds: sameSourceAlertsIds });
 
   return <EuiText data-test-subj={CORRELATIONS_DETAILS_TEST_ID}>{'Correlations'}</EuiText>;
 };
