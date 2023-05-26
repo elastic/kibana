@@ -25,13 +25,7 @@ import { euiThemeVars } from '@kbn/ui-theme';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 
-import {
-  DEFAULT_PANEL_HEIGHT,
-  DASHBOARD_GRID_HEIGHT,
-  DASHBOARD_MARGIN_SIZE,
-  DASHBOARD_UI_METRIC_ID,
-  DASHBOARD_APP_ID,
-} from '../../../dashboard_constants';
+import { DASHBOARD_UI_METRIC_ID, DASHBOARD_APP_ID } from '../../../dashboard_constants';
 import { pluginServices } from '../../../services/plugin_services';
 import { emptyScreenStrings } from '../../_dashboard_container_strings';
 import { useDashboardContainer } from '../../embeddable/dashboard_container';
