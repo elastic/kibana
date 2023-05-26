@@ -41,21 +41,16 @@ const TreeViewContainerComponent = ({ renderSessionsView }: TreeViewContainerCom
 
   return (
     <EuiSplitPanel.Outer direction="row" hasBorder borderRadius="m" css={styles.outerPanel}>
-      {noResults ? (
-        <EmptyState />
-      ) : (
-        <>
-          <EuiSplitPanel.Inner color="subdued" grow={false} css={styles.navPanel}>
-            <EuiText>
-              <TreeNav />
-            </EuiText>
-          </EuiSplitPanel.Inner>
-          <EuiSplitPanel.Inner css={styles.sessionsPanel}>
-            <Breadcrumb treeNavSelection={treeNavSelection} onSelect={onTreeNavSelect} />
-            {renderSessionsView(sessionViewFilter)}
-          </EuiSplitPanel.Inner>
-        </>
-      )}
+      {noResults && <EmptyState />}
+      <EuiSplitPanel.Inner hidden={noResults} color="subdued" grow={false} css={styles.navPanel}>
+        <EuiText>
+          <TreeNav />
+        </EuiText>
+      </EuiSplitPanel.Inner>
+      <EuiSplitPanel.Inner hidden={noResults} css={styles.sessionsPanel}>
+        <Breadcrumb treeNavSelection={treeNavSelection} onSelect={onTreeNavSelect} />
+        {renderSessionsView(sessionViewFilter)}
+      </EuiSplitPanel.Inner>
     </EuiSplitPanel.Outer>
   );
 };

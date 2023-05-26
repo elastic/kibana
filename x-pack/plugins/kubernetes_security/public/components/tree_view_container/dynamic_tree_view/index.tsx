@@ -93,9 +93,13 @@ export const DynamicTreeView = ({
   };
 
   useEffect(() => {
-    if (depth === 0 && data && data.pages?.[0].buckets.length === 0) {
-      setNoResults(true);
-      setTreeNavSelection({});
+    if (depth === 0 && data) {
+      const noData = data.pages?.[0].buckets.length === 0;
+      setNoResults(noData);
+
+      if (noData) {
+        setTreeNavSelection({});
+      }
     }
   }, [data, depth, setNoResults, setTreeNavSelection]);
 

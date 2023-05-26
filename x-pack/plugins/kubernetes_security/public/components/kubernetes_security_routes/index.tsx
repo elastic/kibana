@@ -9,14 +9,7 @@ import React, { useCallback } from 'react';
 import { Switch } from 'react-router-dom';
 import { Route } from '@kbn/shared-ux-router';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
-import {
-  EuiBetaBadge,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIconTip,
-  EuiText,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiText, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { euiThemeVars } from '@kbn/ui-theme';
@@ -102,10 +95,7 @@ const KubernetesSecurityRoutesComponent = ({
         <EuiFlexGroup gutterSize="none" css={styles.titleSection}>
           <EuiFlexItem>
             <EuiTitle size="l">
-              <h1 css={styles.titleText}>
-                {KUBERNETES_TITLE}
-                <EuiBetaBadge label={BETA} size="s" css={styles.betaBadge} />
-              </h1>
+              <h1 css={styles.titleText}>{KUBERNETES_TITLE}</h1>
             </EuiTitle>
           </EuiFlexItem>
           <EuiFlexItem grow={false} css={styles.titleActions}>
@@ -175,7 +165,7 @@ const KubernetesSecurityRoutesComponent = ({
                           <EuiText size="xs" css={styles.percentageChartTitle}>
                             <FormattedMessage
                               id="xpack.kubernetesSecurity.sessionChart.title"
-                              defaultMessage="Session Interactivity"
+                              defaultMessage="Session interactivity"
                             />
                           </EuiText>
                           <EuiIconTip
@@ -227,14 +217,14 @@ const KubernetesSecurityRoutesComponent = ({
                           <EuiText size="xs" css={styles.percentageChartTitle}>
                             <FormattedMessage
                               id="xpack.kubernetesSecurity.entryUserChart.title"
-                              defaultMessage="Session Entry Users"
+                              defaultMessage="Entry session users"
                             />
                           </EuiText>
                           <EuiIconTip
                             content={
                               <FormattedMessage
                                 id="xpack.kubernetesSecurity.entryUserChart.tooltip"
-                                defaultMessage="The session user is the initial Linux user associated
+                                defaultMessage="The entry session user is the initial Linux user associated
                     with the session. This user may be set from authentication of a remote
                     login or automatically for service sessions started by init."
                               />

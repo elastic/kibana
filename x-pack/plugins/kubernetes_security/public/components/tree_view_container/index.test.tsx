@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { TreeViewContainer } from '.';
+import { DEFAULT_FILTER_QUERY } from '../../../common/constants';
 import { AppContextTestRender, createAppRootMockRenderer } from '../../test';
 import * as context from './contexts';
 
@@ -18,10 +19,11 @@ describe('TreeNav component', () => {
 
   const defaultProps = {
     globalFilter: {
+      filterQuery: DEFAULT_FILTER_QUERY,
       startDate: Date.now().toString(),
       endDate: (Date.now() + 1).toString(),
     },
-    renderSessionsView: <div>Session View</div>,
+    renderSessionsView: () => <div>Session View</div>,
   } as any;
 
   beforeEach(() => {
@@ -35,6 +37,7 @@ describe('TreeNav component', () => {
     spy.mockImplementation(() => ({
       ...jest.requireActual('./contexts').useTreeViewContext,
       noResults: true,
+      treeNavSelection: {},
     }));
 
     renderResult = mockedContext.render(<TreeViewContainer {...defaultProps} />);

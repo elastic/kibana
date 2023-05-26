@@ -45,10 +45,6 @@ export const useTreeView = ({ globalFilter, indexPattern }: UseTreeViewProps) =>
     [globalFilter.filterQuery, treeNavSelection]
   );
 
-  useEffect(() => {
-    setNoResults(false);
-  }, [filterQueryWithTimeRange]);
-
   return {
     noResults,
     setNoResults,
