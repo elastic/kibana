@@ -10,6 +10,8 @@ import {
   EuiButtonEmpty,
   EuiPageHeader,
   type EuiDescriptionListProps,
+  EuiFlexGroup,
+  EuiFlexItem,
 } from '@elastic/eui';
 import { Link, useParams } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -196,7 +198,13 @@ export const ResourceFindings = ({ dataView }: FindingsBaseProps) => {
         loading={resourceFindings.isFetching}
       />
       <PageTitle>
-        <BackToResourcesButton />
+        <EuiFlexGroup justifyContent="spaceBetween">
+          <EuiFlexItem grow={false} />
+          <EuiFlexItem grow={false}>
+            <BackToResourcesButton />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+
         <PageTitleText
           title={
             <CloudPosturePageTitle
