@@ -36,7 +36,9 @@ describe('SearchEmbeddableFactory', () => {
       sort: [['message', 'asc']] as Array<[string, string]>,
       searchSource: createSearchSourceMock({ index: dataViewMock }, undefined),
     };
-    getSavedSearchMock.mockResolvedValue(savedSearchMock);
+
+    const mockGet = jest.fn().mockResolvedValue(savedSearchMock);
+    discoverServiceMock.savedSearch.get = mockGet;
 
     const factory = new SearchEmbeddableFactory(
       () => Promise.resolve({ executeTriggerActions: jest.fn() } as unknown as StartServices),
@@ -44,12 +46,13 @@ describe('SearchEmbeddableFactory', () => {
     );
     const embeddable = await factory.createFromSavedObject('saved-object-id', input);
 
-    expect(getSavedSearchMock.mock.calls[0][0]).toEqual('saved-object-id');
+    expect(mockGet.mock.calls[0][0]).toEqual('saved-object-id');
     expect(embeddable).toBeDefined();
   });
 
   it('should throw an error when saved search could not be found', async () => {
-    getSavedSearchMock.mockRejectedValue('Could not find saved search');
+    const mockGet = jest.fn().mockRejectedValue('Could not find saved search');
+    discoverServiceMock.savedSearch.get = mockGet;
 
     const factory = new SearchEmbeddableFactory(
       () => Promise.resolve({ executeTriggerActions: jest.fn() } as unknown as StartServices),
