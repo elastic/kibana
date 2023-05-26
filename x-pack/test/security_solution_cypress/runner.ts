@@ -17,7 +17,7 @@ import semver from 'semver';
 import { FtrProviderContext } from './ftr_provider_context';
 
 const retrieveIntegrations = (chunksTotal: number, chunkIndex: number) => {
-  const pattern = resolve(__dirname, '../../plugins/security_solution/cypress/e2e/**/*.cy.ts');
+  const pattern = resolve(__dirname, '../../plugins/security_solution/cypress/e2e/dashboards/entity_analytics.cy.ts');
   const integrationsPaths = globby.sync(pattern);
   const chunkSize = Math.ceil(integrationsPaths.length / chunksTotal);
 

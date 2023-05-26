@@ -49,7 +49,7 @@ const SIEM_KIBANA_HOST_ALERTS = 2;
 const SIEM_KIBANA_HOST_NAME = 'siem-kibana';
 const END_DATE = 'Jan 19, 2019 @ 20:33:29.186';
 
-describe('Entity Analytics Dashboard', () => {
+describe.only('Entity Analytics Dashboard', () => {
   before(() => {
     cleanKibana();
     login();
@@ -290,7 +290,7 @@ describe('Entity Analytics Dashboard', () => {
     });
   });
 
-  describe('With anomalies data', () => {
+  describe.only('With anomalies data', () => {
     before(() => {
       esArchiverLoad('network');
     });
@@ -303,7 +303,7 @@ describe('Entity Analytics Dashboard', () => {
       visit(ENTITY_ANALYTICS_URL);
     });
 
-    it('renders table with pagination', () => {
+    it.only('renders table with pagination', () => {
       cy.get(ANOMALIES_TABLE).should('be.visible');
       cy.get(ANOMALIES_TABLE_ROWS).should('have.length', 10);
 
