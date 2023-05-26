@@ -63,6 +63,10 @@ export const LOAD_PREBUILT_RULES_BTN = '[data-test-subj="load-prebuilt-rules"]';
 
 export const LOAD_PREBUILT_RULES_ON_PAGE_HEADER_BTN = '[data-test-subj="loadPrebuiltRulesBtn"]';
 
+export const UPDATE_PREBUILT_RULES_CALLOUT = '[data-test-subj="update-callout"]';
+
+export const UPDATE_PREBUILT_RULES_CALLOUT_BUTTON = '[data-test-subj="update-callout-button"]';
+
 export const RULES_TABLE_INITIAL_LOADING_INDICATOR =
   '[data-test-subj="initialLoadingPanelAllRulesTable"]';
 
