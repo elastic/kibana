@@ -50,10 +50,8 @@ export const getSourcererDataView = async (
     fields: dataViewData.fields,
     patternList,
     dataView: dataViewData,
-    browserFields: getDataViewStateFromIndexFields(
-      dataViewData.id ?? '',
-      dataViewData.fields != null ? dataViewData.fields : []
-    ).browserFields,
+    browserFields: getDataViewStateFromIndexFields(dataViewData.id ?? '', dataViewData.fields)
+      .browserFields,
     runtimeMappings: dataViewData.getRuntimeMappings(),
   };
 };

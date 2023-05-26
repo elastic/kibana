@@ -6,6 +6,8 @@
  */
 
 import { TableId } from '@kbn/securitysolution-data-table';
+import type { DataViewSpec } from '@kbn/data-views-plugin/public';
+import { createStubDataView } from '@kbn/data-views-plugin/common/stubs';
 import { InputsModelId } from '../store/inputs/constants';
 import {
   Direction,
@@ -48,6 +50,18 @@ import { UsersFields } from '../../../common/search_strategy/security_solution/u
 import { initialGroupingState } from '../store/grouping/reducer';
 import type { SourcererState } from '../store/sourcerer';
 
+const fieldFormatMap: DataViewSpec['fieldFormats'] = {};
+
+const mockDataView = createStubDataView({
+  spec: {
+    id: 'apm-*',
+    title: 'apm-*',
+    timeFieldName: '@timestamp',
+    fields: mockBrowserFields as DataViewSpec['fields'],
+    fieldFormats: fieldFormatMap,
+  },
+});
+
 export const mockSourcererState: SourcererState = {
   ...initialSourcererState,
   signalIndexName: `${DEFAULT_SIGNALS_INDEX}-spacename`,
@@ -56,7 +70,7 @@ export const mockSourcererState: SourcererState = {
     browserFields: mockBrowserFields,
     id: DEFAULT_DATA_VIEW_ID,
     indexFields: mockIndexFields,
-    fields: mockIndexFields,
+    fields: mockDataView.fields,
     loading: false,
     patternList: [...DEFAULT_INDEX_PATTERN, `${DEFAULT_SIGNALS_INDEX}-spacename`],
     runtimeMappings: mockRuntimeMappings,

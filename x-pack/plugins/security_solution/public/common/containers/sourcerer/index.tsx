@@ -8,6 +8,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { i18n } from '@kbn/i18n';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import { matchPath } from 'react-router-dom';
 import { sourcererActions, sourcererSelectors } from '../../store/sourcerer';
 import type {
@@ -402,7 +403,7 @@ export const useSourcererDataView = (
       patternList: fetchIndexReturn.indexes,
       indexFields: fetchIndexReturn.indexPatterns
         .fields as SelectedDataView['indexPattern']['fields'],
-      fields: fetchIndexReturn.indexPatterns.fields,
+      fields: fetchIndexReturn.dataView?.fields ?? null,
     }),
     [fetchIndexReturn, indexPatternsLoading]
   );
@@ -437,7 +438,7 @@ export const useSourcererDataView = (
   const browserFields = useCallback(() => {
     const { browserFields: dataViewBrowserFields } = getDataViewStateFromIndexFields(
       sourcererDataView.patternList.join(','),
-      sourcererDataView.fields,
+      sourcererDataView.fields as DataView['fields'],
       false
     );
     return dataViewBrowserFields;
