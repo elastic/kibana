@@ -40,7 +40,7 @@ export const emptyScreenStrings = {
       defaultMessage: 'Enter edit mode, and then start adding your visualizations.',
     }),
   getEditLinkTitle: () =>
-    i18n.translate('dashboard.howToStartWorkingOnNewDashboardEditLinkAriaLabel', {
+    i18n.translate('dashboard.emptyScreen.editDashboard', {
       defaultMessage: 'Edit dashboard',
     }),
 

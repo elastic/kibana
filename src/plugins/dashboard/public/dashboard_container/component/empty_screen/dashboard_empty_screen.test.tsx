@@ -16,6 +16,10 @@ import { pluginServices } from '../../../services/plugin_services';
 import { DashboardContainerContext } from '../../embeddable/dashboard_container';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 
+pluginServices.getServices().visualizations.getAliases = jest
+  .fn()
+  .mockReturnValue([{ name: 'lens' }]);
+
 describe('DashboardEmptyScreen', () => {
   function mountComponent(viewMode: ViewMode) {
     const dashboardContainer = buildMockDashboard({ viewMode });
