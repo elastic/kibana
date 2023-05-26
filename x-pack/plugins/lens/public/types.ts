@@ -1376,10 +1376,6 @@ export function isLensTableRowContextMenuClickEvent(
   return event.name === 'tableRowContextMenuClick';
 }
 
-export function nonNullable<T>(v: T): v is NonNullable<T> {
-  return v != null;
-}
-
 /**
  * Expression renderer handlers specifically for lens renderers. This is a narrowed down
  * version of the general render handlers, specifying supported event types. If this type is

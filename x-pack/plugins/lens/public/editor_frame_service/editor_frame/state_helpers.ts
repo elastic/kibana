@@ -8,7 +8,7 @@
 import { IUiSettingsClient, SavedObjectReference } from '@kbn/core/public';
 import { Ast } from '@kbn/interpreter';
 import { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
-import { difference, noop } from 'lodash';
+import { difference } from 'lodash';
 import type { DataViewsContract, DataViewSpec } from '@kbn/data-views-plugin/public';
 import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { DataViewPersistableStateService } from '@kbn/data-views-plugin/common';
@@ -186,13 +186,13 @@ const initializeEventAnnotationGroups = async (
 ) => {
   const annotationGroups: Record<string, EventAnnotationGroupConfig> = {};
 
-  await Promise.all(
+  await Promise.allSettled(
     (references || [])
       .filter((ref) => ref.type === EVENT_ANNOTATION_GROUP_TYPE)
       .map(({ id }) =>
         eventAnnotationService
           .loadAnnotationGroup(id)
-          .then((group) => (annotationGroups[id] = group), noop)
+          .then((group) => (annotationGroups[id] = group))
       )
   );
 
@@ -245,7 +245,7 @@ export async function initializeSources(
       defaultIndexPatternId,
       references,
       adHocDataViews,
-      annotationGroups, // TODO - is this necessary?
+      annotationGroups,
     },
     options
   );

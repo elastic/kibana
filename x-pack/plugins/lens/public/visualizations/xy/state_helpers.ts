@@ -18,7 +18,7 @@ import fastIsEqual from 'fast-deep-equal';
 import { cloneDeep } from 'lodash';
 import { validateQuery } from '@kbn/visualization-ui-components/public';
 import { DataViewsState } from '../../state_management';
-import { FramePublicAPI, DatasourcePublicAPI, nonNullable, AnnotationGroups } from '../../types';
+import { FramePublicAPI, DatasourcePublicAPI, AnnotationGroups } from '../../types';
 import {
   visualizationTypes,
   XYLayerConfig,
@@ -43,6 +43,7 @@ import {
   isPersistedByValueAnnotationsLayer,
   isPersistedAnnotationsLayer,
 } from './visualization_helpers';
+import { nonNullable } from '../../utils';
 
 export function isHorizontalSeries(seriesType: SeriesType) {
   return (
