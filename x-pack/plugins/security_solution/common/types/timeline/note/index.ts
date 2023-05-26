@@ -97,6 +97,22 @@ export const sortNoteRt = runtimeTypes.type({
 
 export type SortNote = runtimeTypes.TypeOf<typeof sortNoteRt>;
 
+export const NoteServerRepresentation = runtimeTypes.intersection([
+  runtimeTypes.type({
+    timelineId: unionWithNullType(runtimeTypes.string),
+  }),
+  runtimeTypes.partial({
+    eventId: unionWithNullType(runtimeTypes.string),
+    note: unionWithNullType(runtimeTypes.string),
+    created: unionWithNullType(runtimeTypes.number),
+    createdBy: unionWithNullType(runtimeTypes.string),
+    updated: unionWithNullType(runtimeTypes.number),
+    updatedBy: unionWithNullType(runtimeTypes.string),
+  }),
+]);
+
+export type NoteServerRepresentationType = runtimeTypes.TypeOf<typeof NoteServerRepresentation>;
+
 export interface NoteResult {
   eventId?: Maybe<string>;
 
