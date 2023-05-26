@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 
 import {
@@ -25,16 +25,10 @@ import { euiThemeVars } from '@kbn/ui-theme';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 
-import {
-  DEFAULT_PANEL_HEIGHT,
-  DASHBOARD_GRID_HEIGHT,
-  DASHBOARD_MARGIN_SIZE,
-  DASHBOARD_UI_METRIC_ID,
-  DASHBOARD_APP_ID,
-} from '../../../dashboard_constants';
 import { pluginServices } from '../../../services/plugin_services';
 import { emptyScreenStrings } from '../../_dashboard_container_strings';
 import { useDashboardContainer } from '../../embeddable/dashboard_container';
+import { DASHBOARD_UI_METRIC_ID, DASHBOARD_APP_ID } from '../../../dashboard_constants';
 
 export function DashboardEmptyScreen() {
   const {
@@ -53,10 +47,26 @@ export function DashboardEmptyScreen() {
     () => getVisTypeAliases().find(({ name }) => name === 'lens'),
     [getVisTypeAliases]
   );
-  const trackUiMetric = usageCollection.reportUiCounter?.bind(
-    usageCollection,
-    DASHBOARD_UI_METRIC_ID
-  );
+
+  const goToLens = useCallback(() => {
+    if (!lensAlias || !lensAlias.aliasPath) return;
+    const trackUiMetric = usageCollection.reportUiCounter?.bind(
+      usageCollection,
+      DASHBOARD_UI_METRIC_ID
+    );
+
+    if (trackUiMetric) {
+      trackUiMetric(METRIC_TYPE.CLICK, `${lensAlias.name}:create`);
+    }
+    getStateTransfer().navigateToEditor(lensAlias.aliasApp, {
+      path: lensAlias.aliasPath,
+      state: {
+        originatingApp: DASHBOARD_APP_ID,
+        searchSessionId: search.session.getSessionId(),
+      },
+    });
+  }, [getStateTransfer, lensAlias, search.session, usageCollection]);
+
   const dashboardContainer = useDashboardContainer();
   const isDarkTheme = useObservable(theme$)?.darkMode;
   const isEditMode =
@@ -68,36 +78,6 @@ export function DashboardEmptyScreen() {
   );
 
   if (isEditMode) {
-    const goToLens = () => {
-      if (!lensAlias || !lensAlias.aliasPath) return;
-
-      if (trackUiMetric) {
-        trackUiMetric(METRIC_TYPE.CLICK, `${lensAlias.name}:create`);
-      }
-      getStateTransfer().navigateToEditor(lensAlias.aliasApp, {
-        path: lensAlias.aliasPath,
-        state: {
-          originatingApp: DASHBOARD_APP_ID,
-          searchSessionId: search.session.getSessionId(),
-        },
-      });
-    };
-
-    const libraryButton = (
-      <EuiButtonEmpty
-        flush="left"
-        iconType="folderOpen"
-        onClick={() => dashboardContainer.addFromLibrary()}
-      >
-        {emptyScreenStrings.getAddFromLibraryButtonTitle()}
-      </EuiButtonEmpty>
-    );
-    const goToLensButton = (
-      <EuiButton iconType="lensApp" onClick={() => goToLens()}>
-        {emptyScreenStrings.getCreateVisualizationButtonTitle()}
-      </EuiButton>
-    );
-
     return (
       <EuiPageTemplate
         data-test-subj="emptyDashboardWidget"
@@ -106,29 +86,38 @@ export function DashboardEmptyScreen() {
       >
         <EuiPageTemplate.EmptyPrompt
           color="transparent"
-          className="dshEditEmptyWidgetContainer"
+          titleSize="xs"
           hasBorder={true}
-          icon={<EuiImage size="fullWidth" src={imageUrl} alt="" />}
+          className="dshEditEmptyWidgetContainer"
           style={{ padding: euiThemeVars.euiSizeXL }}
+          icon={<EuiImage size="fullWidth" src={imageUrl} alt="" />}
+          title={<h2>{emptyScreenStrings.getEditModeTitle()}</h2>}
           body={
             <EuiText size="s" color="subdued">
               <span>{emptyScreenStrings.getEditModeSubtitle()}</span>
             </EuiText>
           }
-          title={
-            <EuiTitle size="xs">
-              <h2>{emptyScreenStrings.getEditModeTitle()}</h2>
-            </EuiTitle>
-          }
           actions={
             <EuiFlexGroup justifyContent="center" gutterSize="s" alignItems="center">
-              <EuiFlexItem grow={false}>{goToLensButton}</EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButton iconType="lensApp" onClick={() => goToLens()}>
+                  {emptyScreenStrings.getCreateVisualizationButtonTitle()}
+                </EuiButton>
+              </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiText size="s" color="subdued">
                   <span>{emptyScreenStrings.orText()}</span>
                 </EuiText>
               </EuiFlexItem>
-              <EuiFlexItem grow={false}>{libraryButton}</EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty
+                  flush="left"
+                  iconType="folderOpen"
+                  onClick={() => dashboardContainer.addFromLibrary()}
+                >
+                  {emptyScreenStrings.getAddFromLibraryButtonTitle()}
+                </EuiButtonEmpty>
+              </EuiFlexItem>
             </EuiFlexGroup>
           }
         />
