@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import classNames from 'classnames';
 import { EuiButtonIcon, EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
@@ -53,6 +54,9 @@ export function FeatureEditTools(props: Props) {
         {props.pointsOnly ? null : (
           <>
             <EuiButtonIcon
+              className={classNames({
+                'mapToolbarOverlay__buttonIcon-empty': !drawLineSelected,
+              })}
               key="line"
               size="s"
               onClick={() => toggleDrawShape(DRAW_SHAPE.LINE)}
@@ -69,6 +73,9 @@ export function FeatureEditTools(props: Props) {
             />
 
             <EuiButtonIcon
+              className={classNames({
+                'mapToolbarOverlay__buttonIcon-empty': !drawPolygonSelected,
+              })}
               key="polygon"
               size="s"
               onClick={() => toggleDrawShape(DRAW_SHAPE.POLYGON)}
@@ -84,6 +91,9 @@ export function FeatureEditTools(props: Props) {
               display={drawPolygonSelected ? 'fill' : 'empty'}
             />
             <EuiButtonIcon
+              className={classNames({
+                'mapToolbarOverlay__buttonIcon-empty': !drawCircleSelected,
+              })}
               key="circle"
               size="s"
               onClick={() => toggleDrawShape(DRAW_SHAPE.DISTANCE)}
@@ -99,6 +109,9 @@ export function FeatureEditTools(props: Props) {
               display={drawCircleSelected ? 'fill' : 'empty'}
             />
             <EuiButtonIcon
+              className={classNames({
+                'mapToolbarOverlay__buttonIcon-empty': !drawBBoxSelected,
+              })}
               key="boundingBox"
               size="s"
               onClick={() => toggleDrawShape(DRAW_SHAPE.BOUNDS)}
@@ -116,6 +129,9 @@ export function FeatureEditTools(props: Props) {
           </>
         )}
         <EuiButtonIcon
+          className={classNames({
+            'mapToolbarOverlay__buttonIcon-empty': !drawPointSelected,
+          })}
           key="point"
           size="s"
           onClick={() => toggleDrawShape(DRAW_SHAPE.POINT)}
@@ -131,6 +147,9 @@ export function FeatureEditTools(props: Props) {
           display={drawPointSelected ? 'fill' : 'empty'}
         />
         <EuiButtonIcon
+          className={classNames({
+            'mapToolbarOverlay__buttonIcon-empty': !deleteSelected,
+          })}
           key="delete"
           size="s"
           onClick={() => toggleDrawShape(DRAW_SHAPE.DELETE)}
