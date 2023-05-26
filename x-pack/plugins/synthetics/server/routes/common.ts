@@ -12,6 +12,10 @@ import { EncryptedSyntheticsMonitor, ServiceLocations } from '../../common/runti
 import { monitorAttributes, syntheticsMonitorType } from '../../common/types/saved_objects';
 import { RouteContext } from '../legacy_uptime/routes';
 
+const StringOrArraySchema = schema.maybe(
+  schema.oneOf([schema.string(), schema.arrayOf(schema.string())])
+);
+
 export const QuerySchema = schema.object({
   page: schema.maybe(schema.number()),
   perPage: schema.maybe(schema.number()),
@@ -19,13 +23,12 @@ export const QuerySchema = schema.object({
   sortOrder: schema.maybe(schema.oneOf([schema.literal('desc'), schema.literal('asc')])),
   query: schema.maybe(schema.string()),
   filter: schema.maybe(schema.string()),
-  tags: schema.maybe(schema.oneOf([schema.string(), schema.arrayOf(schema.string())])),
-  monitorTypes: schema.maybe(schema.oneOf([schema.string(), schema.arrayOf(schema.string())])),
-  locations: schema.maybe(schema.oneOf([schema.string(), schema.arrayOf(schema.string())])),
-  projects: schema.maybe(schema.oneOf([schema.string(), schema.arrayOf(schema.string())])),
-  schedules: schema.maybe(schema.oneOf([schema.string(), schema.arrayOf(schema.string())])),
-  status: schema.maybe(schema.oneOf([schema.string(), schema.arrayOf(schema.string())])),
-  fields: schema.maybe(schema.arrayOf(schema.string())),
+  tags: StringOrArraySchema,
+  monitorTypes: StringOrArraySchema,
+  locations: StringOrArraySchema,
+  projects: StringOrArraySchema,
+  schedules: StringOrArraySchema,
+  status: StringOrArraySchema,
   searchAfter: schema.maybe(schema.arrayOf(schema.string())),
 });
 
@@ -34,12 +37,12 @@ export type MonitorsQuery = TypeOf<typeof QuerySchema>;
 export const OverviewStatusSchema = schema.object({
   query: schema.maybe(schema.string()),
   filter: schema.maybe(schema.string()),
-  tags: schema.maybe(schema.oneOf([schema.string(), schema.arrayOf(schema.string())])),
-  monitorTypes: schema.maybe(schema.oneOf([schema.string(), schema.arrayOf(schema.string())])),
-  locations: schema.maybe(schema.oneOf([schema.string(), schema.arrayOf(schema.string())])),
-  projects: schema.maybe(schema.oneOf([schema.string(), schema.arrayOf(schema.string())])),
-  schedules: schema.maybe(schema.oneOf([schema.string(), schema.arrayOf(schema.string())])),
-  status: schema.maybe(schema.oneOf([schema.string(), schema.arrayOf(schema.string())])),
+  tags: StringOrArraySchema,
+  monitorTypes: StringOrArraySchema,
+  locations: StringOrArraySchema,
+  projects: StringOrArraySchema,
+  schedules: StringOrArraySchema,
+  status: StringOrArraySchema,
   scopeStatusByLocation: schema.maybe(schema.boolean()),
 });
 
@@ -56,7 +59,8 @@ export const SEARCH_FIELDS = [
 ];
 
 export const getMonitors = async (
-  context: RouteContext
+  context: RouteContext<MonitorsQuery>,
+  { fields }: { fields?: string[] } = {}
 ): Promise<SavedObjectsFindResponse<EncryptedSyntheticsMonitor>> => {
   const {
     perPage = 50,
@@ -68,11 +72,10 @@ export const getMonitors = async (
     monitorTypes,
     locations,
     filter = '',
-    fields,
     searchAfter,
     projects,
     schedules,
-  } = context.request.query as MonitorsQuery;
+  } = context.request.query;
 
   const filterStr = await getMonitorFilters({
     filter,
@@ -93,8 +96,8 @@ export const getMonitors = async (
     searchFields: SEARCH_FIELDS,
     search: query ? `${query}*` : undefined,
     filter: filterStr,
-    fields,
     searchAfter,
+    fields,
   });
 };
 

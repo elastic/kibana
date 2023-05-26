@@ -266,6 +266,32 @@ describe('engines routes', () => {
 
       mockRouter.shouldThrow(request);
     });
+
+    it('returns 409 when upsert create search application throws error', async () => {
+      (mockClient.asCurrentUser.transport.request as jest.Mock).mockRejectedValueOnce({
+        meta: {
+          body: {
+            error: {
+              type: 'version_conflict_engine_exception',
+            },
+          },
+          statusCode: 409,
+        },
+        name: 'elasticsearch-js',
+      });
+      await mockRouter.callRoute({
+        params: { engine_name: 'engine-name' },
+      });
+      expect(mockRouter.response.customError).toHaveBeenCalledWith({
+        body: {
+          attributes: {
+            error_code: 'search_application_already_exists',
+          },
+          message: 'Search application name already taken. Choose another name.',
+        },
+        statusCode: 409,
+      });
+    });
   });
 
   describe('DELETE /internal/enterprise_search/engines/{engine_name}', () => {
