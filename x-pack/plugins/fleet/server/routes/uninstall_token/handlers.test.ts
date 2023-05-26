@@ -63,6 +63,8 @@ describe('getUninstallTokensHandler', () => {
       body: {
         items: { ...uninstallTokensFixture },
         total: 3,
+        page: 1,
+        perPage: 20,
       },
     });
   });
