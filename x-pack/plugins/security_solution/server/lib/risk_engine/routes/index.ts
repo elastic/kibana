@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { riskScoringRoute } from './risk_scoring_route';
+export { riskScorePreviewRoute } from './risk_score_preview_route';

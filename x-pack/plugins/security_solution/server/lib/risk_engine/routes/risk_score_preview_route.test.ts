@@ -7,7 +7,7 @@
 
 import { loggerMock } from '@kbn/logging-mocks';
 
-import { RISK_SCORES_URL } from '../../../../common/constants';
+import { RISK_SCORE_PREVIEW_URL } from '../../../../common/constants';
 import {
   serverMock,
   requestContextMock,
@@ -15,11 +15,11 @@ import {
 } from '../../detection_engine/routes/__mocks__';
 import { riskScoreService } from '../risk_score_service';
 import { riskScoreServiceMock } from '../risk_score_service.mock';
-import { riskScoringRoute } from './risk_scoring_route';
+import { riskScorePreviewRoute } from './risk_score_preview_route';
 
 jest.mock('../risk_score_service');
 
-describe('GET risk_engine/scores route', () => {
+describe('POST risk_engine/preview route', () => {
   let server: ReturnType<typeof serverMock.create>;
   let { clients, context } = requestContextMock.createTools();
   let logger: ReturnType<typeof loggerMock.create>;
@@ -36,13 +36,13 @@ describe('GET risk_engine/scores route', () => {
     clients.appClient.getAlertsIndex.mockReturnValue('default-alerts-index');
     (riskScoreService as jest.Mock).mockReturnValue(mockRiskScoreService);
 
-    riskScoringRoute(server.router, logger);
+    riskScorePreviewRoute(server.router, logger);
   });
 
   const buildRequest = (body: object = {}) =>
     requestMock.create({
       method: 'get',
-      path: RISK_SCORES_URL,
+      path: RISK_SCORE_PREVIEW_URL,
       body,
     });
 

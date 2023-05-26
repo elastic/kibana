@@ -73,7 +73,7 @@ import {
 import { registerManageExceptionsRoutes } from '../lib/exceptions/api/register_routes';
 import { registerDashboardsRoutes } from '../lib/dashboards/routes';
 import { registerTagsRoutes } from '../lib/tags/routes';
-import { riskScoringRoute } from '../lib/risk_engine/routes';
+import { riskScorePreviewRoute } from '../lib/risk_engine/routes';
 
 export const initRoutes = (
   router: SecuritySolutionPluginRouter,
@@ -172,6 +172,6 @@ export const initRoutes = (
   }
 
   if (config.experimentalFeatures.riskScoringRouteEnabled) {
-    riskScoringRoute(router, logger);
+    riskScorePreviewRoute(router, logger);
   }
 };
