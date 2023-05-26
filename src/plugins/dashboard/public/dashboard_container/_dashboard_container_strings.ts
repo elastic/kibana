@@ -12,32 +12,17 @@ import { i18n } from '@kbn/i18n';
   Empty Screen
 */
 export const emptyScreenStrings = {
-  getEmptyDashboardTitle: () =>
-    i18n.translate('dashboard.emptyDashboardTitle', {
-      defaultMessage: 'Start adding visualizations',
+  // Edit mode
+  getEditModeTitle: () =>
+    i18n.translate('dashboard.emptyScreen.editModeTitle', {
+      defaultMessage: 'This dashboard is empty. Let\u2019s fill it up!',
     }),
-  getEmptyDashboardAdditionalPrivilege: () =>
-    i18n.translate('dashboard.emptyDashboardAdditionalPrivilege', {
-      defaultMessage: 'You need additional privileges to edit this dashboard.',
-    }),
-  getHowToStartWorkingOnNewDashboardDescription: () =>
-    i18n.translate('dashboard.howToStartWorkingOnNewDashboardDescription', {
-      defaultMessage: 'To add visualizations, use edit mode.',
-    }),
-  getEditLinkTitle: () =>
-    i18n.translate('dashboard.howToStartWorkingOnNewDashboardEditLinkAriaLabel', {
-      defaultMessage: 'Edit dashboard',
-    }),
-  getEmptyWidgetTitle: () =>
-    i18n.translate('dashboard.emptyWidget.addPanelTitle', {
-      defaultMessage: 'Add your first visualization',
-    }),
-  getEmptyWidgetDescription: () =>
-    i18n.translate('dashboard.emptyWidget.addPanelDescription', {
+  getEditModeSubtitle: () =>
+    i18n.translate('dashboard.emptyScreen.editModeSubtitle', {
       defaultMessage: 'Create a visualization of your data, or add one from the Visualize Library.',
     }),
   getAddFromLibraryButtonTitle: () =>
-    i18n.translate('dashboard.emptyWidget.addFromLibrary', {
+    i18n.translate('dashboard.emptyScreen.addFromLibrary', {
       defaultMessage: 'Add from library',
     }),
   orText: () =>
@@ -45,8 +30,32 @@ export const emptyScreenStrings = {
       defaultMessage: 'or',
     }),
   getCreateVisualizationButtonTitle: () =>
-    i18n.translate('dashboard.emptyWidget.createVisualization', {
+    i18n.translate('dashboard.emptyScreen.createVisualization', {
       defaultMessage: 'Create visualization',
+    }),
+
+  // View Mode with permissions
+  getViewModeWithPermissionsTitle: () =>
+    i18n.translate('dashboard.emptyScreen.viewModeTitle', {
+      defaultMessage: 'Add visualizations to your dashboard',
+    }),
+  getViewModeWithPermissionsSubtitle: () =>
+    i18n.translate('dashboard.emptyScreen.viewModeSubtitle', {
+      defaultMessage: 'Enter edit mode, and then start adding your visualizations.',
+    }),
+  getEditLinkTitle: () =>
+    i18n.translate('dashboard.emptyScreen.editDashboard', {
+      defaultMessage: 'Edit dashboard',
+    }),
+
+  // View Mode without permissions
+  getViewModeWithoutPermissionsTitle: () =>
+    i18n.translate('dashboard.emptyScreen.noPermissionsTitle', {
+      defaultMessage: 'This dashboard is empty.',
+    }),
+  getViewModeWithoutPermissionsSubtitle: () =>
+    i18n.translate('dashboard.emptyScreen.noPermissionsSubtitle', {
+      defaultMessage: 'You need additional privileges to edit this dashboard.',
     }),
 };
 

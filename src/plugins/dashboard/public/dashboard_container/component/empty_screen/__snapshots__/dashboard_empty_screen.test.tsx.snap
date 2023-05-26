@@ -2,39 +2,101 @@
 
 exports[`DashboardEmptyScreen renders correctly with edit mode 1`] = `
 <div
-  class="dshEditEmptyWidget"
-  data-test-subj="emptyDashboardWidget"
-  style="margin: 8px; height: 412px; width: calc(50% - 8px);"
+  class="dshEditEmptyWidgetContainer"
 >
   <div
-    class="euiFlexGroup emotion-euiFlexGroup-l-center-center-column"
-    style="height: 100%;"
+    class="dshEditEmptyWidget"
+    data-test-subj="emptyDashboardWidget"
+    style="margin: 8px; height: 412px;"
   >
     <div
-      class="euiFlexItem emotion-euiFlexItem-growZero"
+      class="euiFlexGroup emotion-euiFlexGroup-l-center-center-column"
+      style="height: 100%;"
     >
-      <span
-        color="subdued"
-        data-euiicon-type="visAreaStacked"
-      />
-    </div>
-    <div
-      class="euiFlexItem emotion-euiFlexItem-growZero"
-    >
-      <h3
-        class="euiTitle emotion-euiTitle-xs"
-      >
-        Add your first visualization
-      </h3>
       <div
-        class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
-      />
-      <div
-        class="euiText emotion-euiText-s-euiTextColor-subdued"
+        class="euiFlexItem emotion-euiFlexItem-growZero"
       >
-        <span>
-          Create content that tells a story about your data.
-        </span>
+        <figure
+          class="euiImageWrapper emotion-euiImageWrapper"
+        >
+          <img
+            alt=""
+            class="euiImage emotion-euiImage-original"
+            src="/plugins/dashboard/assets/dashboards_light.svg"
+          />
+        </figure>
+      </div>
+      <div
+        class="euiFlexItem emotion-euiFlexItem-grow-1"
+      >
+        <h1
+          class="euiTitle emotion-euiTitle-xs"
+        >
+          This dashboard is empty. Let’s fill it up!
+        </h1>
+        <div
+          class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
+        />
+        <div
+          class="euiText emotion-euiText-s-euiTextColor-subdued"
+        >
+          <span>
+            Create a visualization of your data, or add one from the Visualize Library.
+          </span>
+        </div>
+      </div>
+      <div
+        class="euiFlexItem emotion-euiFlexItem-grow-1"
+      >
+        <div
+          class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
+        >
+          <div
+            class="euiFlexItem emotion-euiFlexItem-growZero"
+          >
+            <button
+              class="euiButtonEmpty css-9t7nyf-empty-primary"
+              type="button"
+            >
+              <span
+                class="euiButtonContent euiButtonEmpty__content"
+              >
+                <span
+                  class="euiButtonContent__icon"
+                  color="inherit"
+                  data-euiicon-type="folderOpen"
+                />
+                <span
+                  class="euiButtonEmpty__text"
+                >
+                  Add from library
+                </span>
+              </span>
+            </button>
+          </div>
+          <div
+            class="euiFlexItem emotion-euiFlexItem-growZero"
+          >
+            <button
+              class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-m-base-primary"
+              type="button"
+            >
+              <span
+                class="emotion-euiButtonDisplayContent"
+              >
+                <span
+                  color="inherit"
+                  data-euiicon-type="lensApp"
+                />
+                <span
+                  class="eui-textTruncate"
+                >
+                  Create visualization
+                </span>
+              </span>
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -45,7 +107,7 @@ exports[`DashboardEmptyScreen renders correctly with readonly mode 1`] = `
 <div
   class="euiPageTemplate emotion-euiPageOuter-row-grow"
   data-test-subj="dashboardEmptyReadOnly"
-  style="min-block-size: 460px; padding-block-start: 0;"
+  style="min-block-size: 460px; background-color: inherit; padding-block-start: 0;"
 >
   <main
     class="emotion-euiPageInner"
@@ -73,17 +135,15 @@ exports[`DashboardEmptyScreen renders correctly with readonly mode 1`] = `
                 <div
                   class="euiText emotion-euiText-m-euiTextColor-subdued"
                 >
-                  <figure
-                    class="euiImageWrapper emotion-euiImageWrapper"
-                  >
-                    <img
-                      alt=""
-                      class="euiImage emotion-euiImage-original"
-                      src="/plugins/home/assets/welcome_graphic_light_2x.png"
-                    />
-                  </figure>
+                  <span
+                    color="subdued"
+                    data-euiicon-type="visAreaStacked"
+                  />
                   <div
-                    class="euiText emotion-euiText-m"
+                    class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
+                  />
+                  <div
+                    class="euiText emotion-euiText-m-euiTextColor-default"
                   >
                     <p
                       style="font-weight: bold;"
@@ -92,7 +152,7 @@ exports[`DashboardEmptyScreen renders correctly with readonly mode 1`] = `
                     </p>
                   </div>
                   <div
-                    class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
+                    class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
                   />
                   <div
                     class="euiText emotion-euiText-m-euiTextColor-subdued"
@@ -116,7 +176,7 @@ exports[`DashboardEmptyScreen renders correctly with view mode 1`] = `
 <div
   class="euiPageTemplate emotion-euiPageOuter-row-grow"
   data-test-subj="dashboardEmptyReadWrite"
-  style="min-block-size: 460px; padding-block-start: 0;"
+  style="min-block-size: 460px; background-color: inherit; padding-block-start: 0;"
 >
   <main
     class="emotion-euiPageInner"
@@ -144,34 +204,53 @@ exports[`DashboardEmptyScreen renders correctly with view mode 1`] = `
                 <div
                   class="euiText emotion-euiText-m-euiTextColor-subdued"
                 >
-                  <figure
-                    class="euiImageWrapper emotion-euiImageWrapper"
-                  >
-                    <img
-                      alt=""
-                      class="euiImage emotion-euiImage-original"
-                      src="/plugins/home/assets/welcome_graphic_light_2x.png"
-                    />
-                  </figure>
+                  <span
+                    color="subdued"
+                    data-euiicon-type="visAreaStacked"
+                  />
                   <div
-                    class="euiText emotion-euiText-m"
+                    class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
+                  />
+                  <div
+                    class="euiText emotion-euiText-m-euiTextColor-default"
                   >
                     <p
                       style="font-weight: bold;"
                     >
-                      This dashboard is empty. Let’s fill it up!
+                      Add visualizations to your dashboard
                     </p>
                   </div>
                   <div
-                    class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
+                    class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
                   />
                   <div
                     class="euiText emotion-euiText-m-euiTextColor-subdued"
                   >
                     <p>
-                      Click edit in the menu bar above to start adding panels.
+                      Enter edit mode, and then start adding your visualizations.
                     </p>
                   </div>
+                  <div
+                    class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
+                  />
+                  <button
+                    class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-m-fill-primary"
+                    type="button"
+                  >
+                    <span
+                      class="emotion-euiButtonDisplayContent"
+                    >
+                      <span
+                        color="inherit"
+                        data-euiicon-type="pencil"
+                      />
+                      <span
+                        class="eui-textTruncate"
+                      >
+                        Edit dashboard
+                      </span>
+                    </span>
+                  </button>
                 </div>
               </div>
             </div>

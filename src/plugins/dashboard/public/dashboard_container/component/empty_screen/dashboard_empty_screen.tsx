@@ -67,15 +67,7 @@ export function DashboardEmptyScreen() {
     `/plugins/dashboard/assets/${isDarkTheme ? 'dashboards_dark' : 'dashboards_light'}.svg`
   );
 
-  /**
-   * if the Dashboard is in edit mode, we create a fake first panel using the same size as the default panel
-   */
   if (isEditMode) {
-    const height = Math.round(
-      DASHBOARD_GRID_HEIGHT * DEFAULT_PANEL_HEIGHT +
-        (DEFAULT_PANEL_HEIGHT - 1) * DASHBOARD_MARGIN_SIZE
-    );
-
     const goToLens = () => {
       if (!lensAlias || !lensAlias.aliasPath) return;
 
@@ -91,25 +83,7 @@ export function DashboardEmptyScreen() {
       });
     };
 
-    const Title = (
-      <EuiTitle size="xs">
-        <h1>{emptyScreenStrings.getEmptyWidgetTitle()}</h1>
-      </EuiTitle>
-    );
-
-    const Subtitle = (
-      <EuiText size="s" color="subdued">
-        <span>{emptyScreenStrings.getEmptyWidgetDescription()}</span>
-      </EuiText>
-    );
-
-    const Or = (
-      <EuiText size="s" color="subdued">
-        <span>{emptyScreenStrings.orText()}</span>
-      </EuiText>
-    );
-
-    const LibraryButton = (
+    const libraryButton = (
       <EuiButtonEmpty
         flush="left"
         iconType="folderOpen"
@@ -118,28 +92,43 @@ export function DashboardEmptyScreen() {
         {emptyScreenStrings.getAddFromLibraryButtonTitle()}
       </EuiButtonEmpty>
     );
-
-    const GoToLensButton = (
+    const goToLensButton = (
       <EuiButton iconType="lensApp" onClick={() => goToLens()}>
         {emptyScreenStrings.getCreateVisualizationButtonTitle()}
       </EuiButton>
     );
 
     return (
-      <EuiPageTemplate style={{ backgroundColor: 'inherit' }} grow={false}>
+      <EuiPageTemplate
+        data-test-subj="emptyDashboardWidget"
+        style={{ backgroundColor: 'inherit' }}
+        grow={false}
+      >
         <EuiPageTemplate.EmptyPrompt
           color="transparent"
           className="dshEditEmptyWidgetContainer"
           hasBorder={true}
           icon={<EuiImage size="fullWidth" src={imageUrl} alt="" />}
           style={{ padding: euiThemeVars.euiSizeXL }}
-          body={Subtitle}
-          title={<h2>{Title}</h2>}
+          body={
+            <EuiText size="s" color="subdued">
+              <span>{emptyScreenStrings.getEditModeSubtitle()}</span>
+            </EuiText>
+          }
+          title={
+            <EuiTitle size="xs">
+              <h2>{emptyScreenStrings.getEditModeTitle()}</h2>
+            </EuiTitle>
+          }
           actions={
             <EuiFlexGroup justifyContent="center" gutterSize="s" alignItems="center">
-              <EuiFlexItem grow={false}>{GoToLensButton}</EuiFlexItem>
-              <EuiFlexItem grow={false}>{Or}</EuiFlexItem>
-              <EuiFlexItem grow={false}>{LibraryButton}</EuiFlexItem>
+              <EuiFlexItem grow={false}>{goToLensButton}</EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiText size="s" color="subdued">
+                  <span>{emptyScreenStrings.orText()}</span>
+                </EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>{libraryButton}</EuiFlexItem>
             </EuiFlexGroup>
           }
         />
@@ -157,14 +146,18 @@ export function DashboardEmptyScreen() {
         <EuiIcon color="subdued" size="xl" type="visAreaStacked" />
         <EuiSpacer size="m" />
         <EuiText color="default" size="m">
-          <p style={{ fontWeight: 'bold' }}>{emptyScreenStrings.getEmptyDashboardTitle()}</p>
+          <p style={{ fontWeight: 'bold' }}>
+            {showWriteControls
+              ? emptyScreenStrings.getViewModeWithPermissionsTitle()
+              : emptyScreenStrings.getViewModeWithoutPermissionsTitle()}
+          </p>
         </EuiText>
         <EuiSpacer size="s" />
         <EuiText size="m" color="subdued">
           <p>
             {showWriteControls
-              ? emptyScreenStrings.getHowToStartWorkingOnNewDashboardDescription()
-              : emptyScreenStrings.getEmptyDashboardAdditionalPrivilege()}
+              ? emptyScreenStrings.getViewModeWithPermissionsSubtitle()
+              : emptyScreenStrings.getViewModeWithoutPermissionsSubtitle()}
           </p>
         </EuiText>
         {showWriteControls && (
