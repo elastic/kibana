@@ -285,9 +285,12 @@ FROM employees
       ),
     },
     {
-      label: i18n.translate('textBasedEditor.query.textBasedLanguagesEditor.documentation.mvExpand', {
-        defaultMessage: 'MV_EXPAND',
-      }),
+      label: i18n.translate(
+        'textBasedEditor.query.textBasedLanguagesEditor.documentation.mvExpand',
+        {
+          defaultMessage: 'MV_EXPAND',
+        }
+      ),
       description: (
         <Markdown
           markdown={i18n.translate(
