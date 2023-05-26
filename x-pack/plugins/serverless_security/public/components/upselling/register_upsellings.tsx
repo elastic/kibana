@@ -58,18 +58,18 @@ export const registerUpsellings = (
 // Upselling configuration for pages and sections components
 
 // TODO: lazy load these components
-const getUpsellingPages = (projectPLIs: ServerlessSecurityPLIs): UpsellingPages => [
-  // {
-  //   pageName: SecurityPageName.entityAnalytics,
-  //   feature: AppFeatureKey.exampleCasesFeature,
-  //   component: () => <GenericUpsellingPage projectPLIs={projectPLIs} />,
-  // },
+const getUpsellingPages = (projectPLIs: SecurityProductLineIds): UpsellingPages => [
+  {
+    pageName: SecurityPageName.entityAnalytics,
+    feature: AppFeatureKey.advancedInsights,
+    component: () => <GenericUpsellingPage projectPLIs={projectPLIs} />,
+  },
 ];
 
 const getUpsellingSections = (projectPLIs: ServerlessSecurityPLIs): UpsellingSections => [
   {
-    id: 'example_upselling_feature',
-    feature: AppFeatureKey.exampleAppFeature,
+    id: 'entity_analytics_panel',
+    feature: AppFeatureKey.advancedInsights,
     component: () => <GenericUpsellingSection projectPLIs={projectPLIs} />,
   },
 ];

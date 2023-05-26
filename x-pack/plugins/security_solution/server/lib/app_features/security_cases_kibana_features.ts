@@ -17,6 +17,7 @@ import {
 import type { AppFeaturesCasesConfig } from './types';
 import { APP_ID, CASES_FEATURE_ID } from '../../../common/constants';
 import { casesSubFeatureDelete } from './security_cases_kibana_sub_features';
+import { AppFeatureCasesKey } from '../../../common/types/app_features';
 
 const casesCapabilities = createCasesUICapabilities();
 const casesApiTags = getCasesApiTags(APP_ID);
@@ -67,4 +68,6 @@ export const getCasesBaseKibanaFeature = (): KibanaFeatureConfig => ({
 
 // TODO Add cases connector configuration
 // It maps the AppFeatures keys to Kibana privileges
-export const getCasesAppFeaturesConfig = (): AppFeaturesCasesConfig => ({});
+export const getCasesAppFeaturesConfig = (): AppFeaturesCasesConfig => ({
+  [AppFeatureCasesKey.exampleCasesFeature]: {},
+});

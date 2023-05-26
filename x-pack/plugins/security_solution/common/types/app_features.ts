@@ -6,8 +6,10 @@
  */
 
 export enum AppFeatureSecurityKey {
-  // Sample code to demonstrate how to configure app features.
-  exampleAppFeature = 'example_app_feature',
+  /**
+   * Enables Advanced Insights (Entity Risk, GenAI)
+   */
+  advancedInsights = 'advanced_insights',
 }
 
 export enum AppFeatureCasesKey {
