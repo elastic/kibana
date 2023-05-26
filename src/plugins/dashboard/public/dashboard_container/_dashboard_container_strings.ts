@@ -14,21 +14,17 @@ import { i18n } from '@kbn/i18n';
 export const emptyScreenStrings = {
   getEmptyDashboardTitle: () =>
     i18n.translate('dashboard.emptyDashboardTitle', {
-      defaultMessage: 'This dashboard is empty.',
+      defaultMessage: 'Start adding visualizations',
     }),
   getEmptyDashboardAdditionalPrivilege: () =>
     i18n.translate('dashboard.emptyDashboardAdditionalPrivilege', {
       defaultMessage: 'You need additional privileges to edit this dashboard.',
     }),
-  getFillDashboardTitle: () =>
-    i18n.translate('dashboard.fillDashboardTitle', {
-      defaultMessage: 'This dashboard is empty. Let\u2019s fill it up!',
-    }),
   getHowToStartWorkingOnNewDashboardDescription: () =>
     i18n.translate('dashboard.howToStartWorkingOnNewDashboardDescription', {
-      defaultMessage: 'Click edit in the menu bar above to start adding panels.',
+      defaultMessage: 'To add visualizations, use edit mode.',
     }),
-  getHowToStartWorkingOnNewDashboardEditLinkAriaLabel: () =>
+  getEditLinkTitle: () =>
     i18n.translate('dashboard.howToStartWorkingOnNewDashboardEditLinkAriaLabel', {
       defaultMessage: 'Edit dashboard',
     }),
@@ -38,7 +34,15 @@ export const emptyScreenStrings = {
     }),
   getEmptyWidgetDescription: () =>
     i18n.translate('dashboard.emptyWidget.addPanelDescription', {
-      defaultMessage: 'Create content that tells a story about your data.',
+      defaultMessage: 'Create a visualization of your data, or add one from the Visualize Library.',
+    }),
+  getAddFromLibraryButtonTitle: () =>
+    i18n.translate('dashboard.emptyWidget.addFromLibrary', {
+      defaultMessage: 'Add from library',
+    }),
+  getCreateVisualizationButtonTitle: () =>
+    i18n.translate('dashboard.emptyWidget.createVisualization', {
+      defaultMessage: 'Create visualization',
     }),
 };
 

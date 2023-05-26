@@ -18,6 +18,14 @@
   border: $euiBorderThin;
   border-style: dashed;
   border-radius: $euiBorderRadius;
-  padding: $euiSizeXXL * 2;
+  padding: $euiSizeXXL;
+  padding-top: $euiSizeM;
   text-align: center;
+}
+
+.dshEditEmptyWidgetContainer {
+  width: 50%;
+  @include euiBreakpoint('xs', 's') {
+    width: 100%;
+  }
 }

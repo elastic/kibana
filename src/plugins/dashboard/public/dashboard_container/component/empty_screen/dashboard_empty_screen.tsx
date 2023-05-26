@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 
 import {
@@ -18,14 +18,19 @@ import {
   EuiTitle,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiButton,
+  EuiButtonEmpty,
 } from '@elastic/eui';
 import { euiThemeVars } from '@kbn/ui-theme';
+import { METRIC_TYPE } from '@kbn/analytics';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 
 import {
+  DEFAULT_PANEL_HEIGHT,
   DASHBOARD_GRID_HEIGHT,
   DASHBOARD_MARGIN_SIZE,
-  DEFAULT_PANEL_HEIGHT,
+  DASHBOARD_UI_METRIC_ID,
+  DASHBOARD_APP_ID,
 } from '../../../dashboard_constants';
 import { pluginServices } from '../../../services/plugin_services';
 import { emptyScreenStrings } from '../../_dashboard_container_strings';
@@ -33,16 +38,34 @@ import { useDashboardContainer } from '../../embeddable/dashboard_container';
 
 export function DashboardEmptyScreen() {
   const {
-    dashboardCapabilities: { showWriteControls },
-    http: { basePath },
     settings: {
       theme: { theme$ },
     },
+    usageCollection,
+    data: { search },
+    http: { basePath },
+    embeddable: { getStateTransfer },
+    dashboardCapabilities: { showWriteControls },
+    visualizations: { getAliases: getVisTypeAliases },
   } = pluginServices.getServices();
+
+  const lensAlias = useMemo(
+    () => getVisTypeAliases().find(({ name }) => name === 'lens'),
+    [getVisTypeAliases]
+  );
+  const trackUiMetric = usageCollection.reportUiCounter?.bind(
+    usageCollection,
+    DASHBOARD_UI_METRIC_ID
+  );
   const dashboardContainer = useDashboardContainer();
   const isDarkTheme = useObservable(theme$)?.darkMode;
   const isEditMode =
     dashboardContainer.select((state) => state.explicitInput.viewMode) === ViewMode.EDIT;
+
+  // TODO replace these SVGs with versions from EuiIllustration as soon as it becomes available.
+  const imageUrl = basePath.prepend(
+    `/plugins/dashboard/assets/${isDarkTheme ? 'dashboards_dark' : 'dashboards_light'}.svg`
+  );
 
   /**
    * if the Dashboard is in edit mode, we create a fake first panel using the same size as the default panel
@@ -52,56 +75,92 @@ export function DashboardEmptyScreen() {
       DASHBOARD_GRID_HEIGHT * DEFAULT_PANEL_HEIGHT +
         (DEFAULT_PANEL_HEIGHT - 1) * DASHBOARD_MARGIN_SIZE
     );
-    const width = `calc(50% - ${DASHBOARD_MARGIN_SIZE}px)`;
+
+    const goToLens = () => {
+      if (!lensAlias || !lensAlias.aliasPath) return;
+
+      if (trackUiMetric) {
+        trackUiMetric(METRIC_TYPE.CLICK, `${lensAlias.name}:create`);
+      }
+      getStateTransfer().navigateToEditor(lensAlias.aliasApp, {
+        path: lensAlias.aliasPath,
+        state: {
+          originatingApp: DASHBOARD_APP_ID,
+          searchSessionId: search.session.getSessionId(),
+        },
+      });
+    };
+
+    const Title = (
+      <EuiTitle size="xs">
+        <h1>{emptyScreenStrings.getEmptyWidgetTitle()}</h1>
+      </EuiTitle>
+    );
+
+    const Subtitle = (
+      <EuiText size="s" color="subdued">
+        <span>{emptyScreenStrings.getEmptyWidgetDescription()}</span>
+      </EuiText>
+    );
+
+    const LibraryButton = (
+      <EuiButtonEmpty iconType="folderOpen" onClick={() => dashboardContainer.addFromLibrary()}>
+        {emptyScreenStrings.getAddFromLibraryButtonTitle()}
+      </EuiButtonEmpty>
+    );
+
+    const GoToLensButton = (
+      <EuiButton iconType="lensApp" onClick={() => goToLens()}>
+        {emptyScreenStrings.getCreateVisualizationButtonTitle()}
+      </EuiButton>
+    );
 
     return (
-      <div
-        className="dshEditEmptyWidget"
-        data-test-subj="emptyDashboardWidget"
-        style={{ margin: DASHBOARD_MARGIN_SIZE, height, width }}
-      >
-        <EuiFlexGroup
-          direction="column"
-          alignItems="center"
-          justifyContent="center"
-          style={{ height: '100%' }}
+      <div className="dshEditEmptyWidgetContainer">
+        <div
+          data-test-subj="emptyDashboardWidget"
+          className="dshEditEmptyWidget"
+          style={{ margin: DASHBOARD_MARGIN_SIZE, height }}
         >
-          <EuiFlexItem grow={false}>
-            <EuiIcon color="subdued" size="xl" type="visAreaStacked" />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiTitle size="xs">
-              <h3>{emptyScreenStrings.getEmptyWidgetTitle()}</h3>
-            </EuiTitle>
-            <EuiSpacer size="s" />
-            <EuiText size="s" color="subdued">
-              <span>{emptyScreenStrings.getEmptyWidgetDescription()}</span>
-            </EuiText>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+          <EuiFlexGroup
+            direction="column"
+            alignItems="center"
+            justifyContent="center"
+            style={{ height: '100%' }}
+          >
+            <EuiFlexItem grow={false}>
+              <EuiImage url={imageUrl} alt="" />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              {Title}
+              <EuiSpacer size="s" />
+              {Subtitle}
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiFlexGroup direction="row">
+                <EuiFlexItem grow={false}>{LibraryButton}</EuiFlexItem>
+                <EuiFlexItem grow={false}>{GoToLensButton}</EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </div>
       </div>
     );
   }
 
-  const emptyStateGraphicURL = isDarkTheme
-    ? '/plugins/home/assets/welcome_graphic_dark_2x.png'
-    : '/plugins/home/assets/welcome_graphic_light_2x.png';
-
   return (
     <EuiPageTemplate
       data-test-subj={showWriteControls ? 'dashboardEmptyReadWrite' : 'dashboardEmptyReadOnly'}
+      style={{ backgroundColor: 'inherit' }}
       grow={false}
     >
       <EuiPageTemplate.EmptyPrompt style={{ padding: euiThemeVars.euiSizeXXL }}>
-        <EuiImage url={basePath.prepend(emptyStateGraphicURL)} alt="" />
-        <EuiText color="default" size="m">
-          <p style={{ fontWeight: 'bold' }}>
-            {showWriteControls
-              ? emptyScreenStrings.getFillDashboardTitle()
-              : emptyScreenStrings.getEmptyDashboardTitle()}
-          </p>
-        </EuiText>
+        <EuiIcon color="subdued" size="xl" type="visAreaStacked" />
         <EuiSpacer size="m" />
+        <EuiText color="default" size="m">
+          <p style={{ fontWeight: 'bold' }}>{emptyScreenStrings.getEmptyDashboardTitle()}</p>
+        </EuiText>
+        <EuiSpacer size="s" />
         <EuiText size="m" color="subdued">
           <p>
             {showWriteControls
@@ -109,6 +168,18 @@ export function DashboardEmptyScreen() {
               : emptyScreenStrings.getEmptyDashboardAdditionalPrivilege()}
           </p>
         </EuiText>
+        {showWriteControls && (
+          <>
+            <EuiSpacer size="m" />
+            <EuiButton
+              fill
+              iconType="pencil"
+              onClick={() => dashboardContainer.dispatch.setViewMode(ViewMode.EDIT)}
+            >
+              {emptyScreenStrings.getEditLinkTitle()}
+            </EuiButton>
+          </>
+        )}
       </EuiPageTemplate.EmptyPrompt>
     </EuiPageTemplate>
   );
