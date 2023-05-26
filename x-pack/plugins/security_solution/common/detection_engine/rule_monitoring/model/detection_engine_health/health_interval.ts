@@ -8,6 +8,11 @@
 import * as t from 'io-ts';
 import { IsoDateString } from '@kbn/securitysolution-io-ts-types';
 
+/**
+ * Type of the health interval. You can specify:
+ * - a relative interval, e.g. "last_hour" = [now-1h; now] where "now" is when health request is made
+ * - a custom interval with "from" and "to" timestamps
+ */
 export enum HealthIntervalType {
   'last_hour' = 'last_hour',
   'last_day' = 'last_day',
@@ -17,6 +22,13 @@ export enum HealthIntervalType {
   'custom_range' = 'custom_range',
 }
 
+/**
+ * Granularity defines how the whole health interval will be split into smaller sub-intervals.
+ * Health stats will be calculated for the whole interval + for each sub-interval.
+ * Example: if the interval is "last_day" and the granularity is "hour", stats will be calculated:
+ * - 1 time for the last 24 hours
+ * - 24 times for each hour in that interval
+ */
 export enum HealthIntervalGranularity {
   'minute' = 'minute',
   'hour' = 'hour',
@@ -25,6 +37,10 @@ export enum HealthIntervalGranularity {
   'month' = 'month',
 }
 
+/**
+ * Time period over which we calculate health stats.
+ * This is a "raw" schema for the interval parameters that users can pass to the API.
+ */
 export type HealthIntervalParameters = t.TypeOf<typeof HealthIntervalParameters>;
 export const HealthIntervalParameters = t.union([
   t.exact(
@@ -85,10 +101,38 @@ export const HealthIntervalParameters = t.union([
   ),
 ]);
 
+/**
+ * Time period over which we calculate health stats.
+ * This interface represents a fully validated and normalized interval object.
+ */
 export interface HealthInterval {
+  /**
+   * Type of the interval. Defined by the user.
+   * @example 'last_week'
+   */
   type: HealthIntervalType;
+
+  /**
+   * Granularity of the interval. Defined by the user.
+   * @example 'day'
+   */
   granularity: HealthIntervalGranularity;
+
+  /**
+   * Start timestamp of the interval. Calculated by the app.
+   * @example '2023-05-19T14:25:19.092Z'
+   */
   from: IsoDateString;
+
+  /**
+   * End timestamp of the interval. Calculated by the app.
+   * @example '2023-05-26T14:25:19.092Z'
+   */
   to: IsoDateString;
+
+  /**
+   * Duration of the interval in the ISO format. Calculated by the app.
+   * @example 'PT168H'
+   */
   duration: string;
 }

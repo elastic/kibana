@@ -15,6 +15,9 @@ import type {
   ClusterHealthSnapshot,
 } from '../../model/detection_engine_health/cluster_health';
 
+/**
+ * Schema for the request body of the endpoint.
+ */
 export type GetClusterHealthRequestBody = t.TypeOf<typeof GetClusterHealthRequestBody>;
 export const GetClusterHealthRequestBody = t.exact(
   t.partial({
@@ -23,16 +26,46 @@ export const GetClusterHealthRequestBody = t.exact(
   })
 );
 
+/**
+ * Validated and normalized request parameters of the endpoint.
+ */
 export interface GetClusterHealthRequest {
+  /**
+   * Time period over which health stats are requested.
+   */
   interval: HealthInterval;
+
+  /**
+   * If true, the endpoint will return various debug information, such as
+   * aggregations sent to Elasticsearch and response received from Elasticsearch.
+   */
   debug: boolean;
+
+  /**
+   * Timestamp at which the route handler started executing.
+   */
   requestReceivedAt: IsoDateString;
 }
 
+/**
+ * Response body of the endpoint.
+ */
 export interface GetClusterHealthResponse {
-  // TODO: https://github.com/elastic/kibana/issues/125642 Implement and remove the property
+  // TODO: https://github.com/elastic/kibana/issues/125642 Implement the endpoint and remove the `message` property
   message: 'Not implemented';
+
+  /**
+   * Request processing times and durations.
+   */
   timings: HealthTimings;
+
+  /**
+   * Parameters of the health stats calculation.
+   */
   parameters: ClusterHealthParameters;
+
+  /**
+   * Result of the health stats calculation.
+   */
   health: ClusterHealthSnapshot;
 }

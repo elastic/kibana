@@ -50,6 +50,7 @@ export const getClusterHealthRoute = (router: SecuritySolutionPluginRouter) => {
         const clusterHealth = await healthClient.calculateClusterHealth(clusterHealthParameters);
 
         const responseBody: GetClusterHealthResponse = {
+          // TODO: https://github.com/elastic/kibana/issues/125642 Implement the endpoint and remove the `message` property
           message: 'Not implemented',
           timings: calculateHealthTimings(params.requestReceivedAt),
           parameters: clusterHealthParameters,

@@ -17,8 +17,9 @@ import type {
   RuleHealthSnapshot,
 } from '../../model/detection_engine_health/rule_health';
 
-// TODO: https://github.com/elastic/kibana/issues/125642 Add JSDoc comments
-
+/**
+ * Schema for the request body of the endpoint.
+ */
 export type GetRuleHealthRequestBody = t.TypeOf<typeof GetRuleHealthRequestBody>;
 export const GetRuleHealthRequestBody = t.exact(
   t.intersection([
@@ -32,15 +33,48 @@ export const GetRuleHealthRequestBody = t.exact(
   ])
 );
 
+/**
+ * Validated and normalized request parameters of the endpoint.
+ */
 export interface GetRuleHealthRequest {
+  /**
+   * Saved object ID of the rule to calculate health stats for.
+   */
   ruleId: string;
+
+  /**
+   * Time period over which health stats are requested.
+   */
   interval: HealthInterval;
+
+  /**
+   * If true, the endpoint will return various debug information, such as
+   * aggregations sent to Elasticsearch and response received from Elasticsearch.
+   */
   debug: boolean;
+
+  /**
+   * Timestamp at which the route handler started executing.
+   */
   requestReceivedAt: IsoDateString;
 }
 
+/**
+ * Response body of the endpoint.
+ */
 export interface GetRuleHealthResponse {
+  /**
+   * Request processing times and durations.
+   */
   timings: HealthTimings;
+
+  /**
+   * Parameters of the health stats calculation.
+   */
   parameters: RuleHealthParameters;
+
+  /**
+   * Result of the health stats calculation.
+   */
   health: RuleHealthSnapshot;
 }

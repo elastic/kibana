@@ -8,16 +8,37 @@
 import type { HealthParameters, HealthSnapshot } from './health_metadata';
 import type { RuleExecutionStats, RuleStats, StatsHistory } from './health_stats';
 
-// TODO: https://github.com/elastic/kibana/issues/125642 Implement
-
+/**
+ * Health calculation parameters for the current Kibana space.
+ */
 export type SpaceHealthParameters = HealthParameters;
 
+/**
+ * Health calculation result for the current Kibana space.
+ */
 export interface SpaceHealthSnapshot extends HealthSnapshot {
+  /**
+   * Health stats at the moment of the calculation request.
+   */
   stats_at_the_moment: SpaceHealthStatsAtTheMoment;
+
+  /**
+   * Health stats calculated over the interval specified in the health parameters.
+   */
   stats_over_interval: SpaceHealthStatsOverInterval;
+
+  /**
+   * History of change of the same health stats during the interval.
+   */
   history_over_interval: StatsHistory<SpaceHealthStatsOverInterval>;
 }
 
+/**
+ * Health stats at the moment of the calculation request.
+ */
 export type SpaceHealthStatsAtTheMoment = RuleStats;
 
+/**
+ * Health stats calculated over a given interval.
+ */
 export type SpaceHealthStatsOverInterval = RuleExecutionStats;

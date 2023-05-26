@@ -15,6 +15,9 @@ import type {
   SpaceHealthSnapshot,
 } from '../../model/detection_engine_health/space_health';
 
+/**
+ * Schema for the request body of the endpoint.
+ */
 export type GetSpaceHealthRequestBody = t.TypeOf<typeof GetSpaceHealthRequestBody>;
 export const GetSpaceHealthRequestBody = t.exact(
   t.partial({
@@ -23,14 +26,43 @@ export const GetSpaceHealthRequestBody = t.exact(
   })
 );
 
+/**
+ * Validated and normalized request parameters of the endpoint.
+ */
 export interface GetSpaceHealthRequest {
+  /**
+   * Time period over which health stats are requested.
+   */
   interval: HealthInterval;
+
+  /**
+   * If true, the endpoint will return various debug information, such as
+   * aggregations sent to Elasticsearch and response received from Elasticsearch.
+   */
   debug: boolean;
+
+  /**
+   * Timestamp at which the route handler started executing.
+   */
   requestReceivedAt: IsoDateString;
 }
 
+/**
+ * Response body of the endpoint.
+ */
 export interface GetSpaceHealthResponse {
+  /**
+   * Request processing times and durations.
+   */
   timings: HealthTimings;
+
+  /**
+   * Parameters of the health stats calculation.
+   */
   parameters: SpaceHealthParameters;
+
+  /**
+   * Result of the health stats calculation.
+   */
   health: SpaceHealthSnapshot;
 }

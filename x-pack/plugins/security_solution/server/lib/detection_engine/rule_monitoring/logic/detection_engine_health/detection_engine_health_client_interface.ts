@@ -14,10 +14,22 @@ import type {
   SpaceHealthSnapshot,
 } from '../../../../../../common/detection_engine/rule_monitoring';
 
-// TODO: https://github.com/elastic/kibana/issues/125642 Add JSDoc comments
-
+/**
+ * Calculates health of the Detection Engine overall and detection rules individually.
+ */
 export interface IDetectionEngineHealthClient {
+  /**
+   * Calculates health stats for a given rule.
+   */
   calculateRuleHealth(args: RuleHealthParameters): Promise<RuleHealthSnapshot>;
+
+  /**
+   * Calculates health stats for all rules in the current Kibana space.
+   */
   calculateSpaceHealth(args: SpaceHealthParameters): Promise<SpaceHealthSnapshot>;
+
+  /**
+   * Calculates health stats for the whole cluster.
+   */
   calculateClusterHealth(args: ClusterHealthParameters): Promise<ClusterHealthSnapshot>;
 }
