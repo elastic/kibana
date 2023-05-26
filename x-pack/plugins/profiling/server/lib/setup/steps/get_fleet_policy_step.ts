@@ -153,6 +153,6 @@ export function getFleetPolicyStep({
       await packagePolicyClient.create(soClient, esClient, symbolizerPackagePolicy, {
         force: true,
       });
-    }
+    },
   };
 }

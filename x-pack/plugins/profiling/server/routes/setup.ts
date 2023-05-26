@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { set } from 'lodash';
 import { Logger } from '@kbn/logging';
 import { RouteRegisterParameters } from '.';
 import { getRoutePaths } from '../../common';
@@ -15,6 +16,61 @@ import { handleRouteHandlerError } from '../utils/handle_route_error_handler';
 import { hasProfilingData } from '../lib/setup/has_profiling_data';
 import { getClient } from './compat';
 import { ProfilingSetupStep } from '../lib/setup/types';
+
+export interface SetupResourceResponse {
+  cloud: {
+    available: boolean;
+    required: boolean;
+  };
+  data: {
+    available: boolean;
+  };
+  packages: {
+    installed: boolean;
+  };
+  permissions: {
+    configured: boolean;
+  };
+  policies: {
+    installed: boolean;
+  };
+  resource_management: {
+    enabled: boolean;
+  };
+  resources: {
+    available: boolean;
+    configured: boolean;
+    created: boolean;
+    defined: boolean;
+    ready: boolean;
+  };
+  settings: {
+    configured: boolean;
+  };
+  errors: string[];
+}
+
+export function createDefaultSetupResourceResponse(): SetupResourceResponse {
+  const response = {} as SetupResourceResponse;
+
+  set(response, 'cloud.required', true);
+  set(response, 'cloud.available', false);
+  set(response, 'data.available', false);
+  set(response, 'packages.installed', false);
+  set(response, 'permissions.configured', false);
+  set(response, 'policies.installed', false);
+  set(response, 'resource_management.enabled', false);
+  set(response, 'resources.available', false);
+  set(response, 'resources.configured', false);
+  set(response, 'resources.created', false);
+  set(response, 'resources.defined', false);
+  set(response, 'resources.ready', false);
+  set(response, 'settings.configured', false);
+
+  response.errors = [];
+
+  return response;
+}
 
 async function checkStep({ step, logger }: { step: ProfilingSetupStep; logger: Logger }) {
   try {
@@ -70,6 +126,9 @@ export function registerSetupRoute({
         };
 
         logger.info('Checking if Elasticsearch and Fleet are setup for Universal Profiling');
+
+        const body = createDefaultSetupResourceResponse();
+        set(body, 'cloud.available', dependencies.setup.cloud.isCloudEnabled);
 
         if (!dependencies.setup.cloud.isCloudEnabled) {
           throw new Error(`Universal Profiling is only available on Elastic Cloud.`);
