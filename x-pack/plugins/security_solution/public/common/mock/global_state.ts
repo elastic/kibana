@@ -54,8 +54,8 @@ const fieldFormatMap: DataViewSpec['fieldFormats'] = {};
 
 const mockDataView = createStubDataView({
   spec: {
-    id: 'apm-*',
-    title: 'apm-*',
+    id: 'logs-*',
+    title: 'logs-*',
     timeFieldName: '@timestamp',
     fields: mockBrowserFields as DataViewSpec['fields'],
     fieldFormats: fieldFormatMap,
