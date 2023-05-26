@@ -7,3 +7,4 @@
 
 export * from './create_composite_slo';
 export * from './composite_slo_repository';
+export * from './delete_composite_slo';

@@ -12,12 +12,15 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import * as t from 'io-ts';
 
 import { CompositeSLO, StoredCompositeSLO } from '../../domain/models/composite_slo';
-import { CompositeSLOIdConflict } from '../../errors';
+import { CompositeSLOIdConflict, CompositeSLONotFound } from '../../errors';
 import { SO_COMPOSITE_SLO_TYPE } from '../../saved_objects';
 
 export interface CompositeSLORepository {
   save(compositeSlo: CompositeSLO, options?: { throwOnConflict: boolean }): Promise<CompositeSLO>;
+  deleteById(id: string): Promise<void>;
 }
+
+const SAVED_OBJECT_ATTRIBUTES_PATH = 'composite-slo.attributes';
 
 export class KibanaSavedObjectsCompositeSLORepository implements CompositeSLORepository {
   constructor(private soClient: SavedObjectsClientContract) {}
@@ -31,7 +34,7 @@ export class KibanaSavedObjectsCompositeSLORepository implements CompositeSLORep
       type: SO_COMPOSITE_SLO_TYPE,
       page: 1,
       perPage: 1,
-      filter: `composite-slo.attributes.id:(${compositeSlo.id})`,
+      filter: `${SAVED_OBJECT_ATTRIBUTES_PATH}.id:(${compositeSlo.id})`,
     });
 
     if (findResponse.total === 1) {
@@ -52,6 +55,21 @@ export class KibanaSavedObjectsCompositeSLORepository implements CompositeSLORep
     );
 
     return toCompositeSLO(createResponse.attributes);
+  }
+
+  async deleteById(id: string): Promise<void> {
+    const response = await this.soClient.find<StoredCompositeSLO>({
+      type: SO_COMPOSITE_SLO_TYPE,
+      page: 1,
+      perPage: 1,
+      filter: `${SAVED_OBJECT_ATTRIBUTES_PATH}.id:(${id})`,
+    });
+
+    if (response.total === 0) {
+      throw new CompositeSLONotFound(`Composite SLO [${id}] not found`);
+    }
+
+    await this.soClient.delete(SO_COMPOSITE_SLO_TYPE, response.saved_objects[0].id);
   }
 }
 

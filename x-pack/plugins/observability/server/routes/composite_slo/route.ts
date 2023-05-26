@@ -16,6 +16,7 @@ import {
 
 import {
   CreateCompositeSLO,
+  DeleteCompositeSLO,
   KibanaSavedObjectsCompositeSLORepository,
 } from '../../services/composite_slo';
 import { KibanaSavedObjectsSLORepository } from '../../services/slo';
@@ -39,7 +40,6 @@ const createCompositeSLORoute = createObservabilityServerRoute({
     await assertLicenseAtLeastPlatinum(context);
 
     const soClient = (await context.core).savedObjects.client;
-
     const compositeSloRepository = new KibanaSavedObjectsCompositeSLORepository(soClient);
     const sloRepository = new KibanaSavedObjectsSLORepository(soClient);
     const createCompositeSLO = new CreateCompositeSLO(compositeSloRepository, sloRepository);
@@ -69,10 +69,14 @@ const deleteCompositeSLORoute = createObservabilityServerRoute({
     tags: ['access:slo_write'],
   },
   params: deleteCompositeSLOParamsSchema,
-  handler: async ({ context }) => {
+  handler: async ({ context, params }) => {
     await assertLicenseAtLeastPlatinum(context);
 
-    throw notImplemented();
+    const soClient = (await context.core).savedObjects.client;
+    const compositeSloRepository = new KibanaSavedObjectsCompositeSLORepository(soClient);
+    const deleteCompositeSLO = new DeleteCompositeSLO(compositeSloRepository);
+
+    await deleteCompositeSLO.execute(params.path.id);
   },
 });
 

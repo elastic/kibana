@@ -10,7 +10,7 @@ import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { compositeSloSchema } from '@kbn/slo-schema';
 
 import { CompositeSLO, StoredCompositeSLO } from '../../domain/models';
-import { CompositeSLOIdConflict } from '../../errors';
+import { CompositeSLOIdConflict, CompositeSLONotFound } from '../../errors';
 import { SO_COMPOSITE_SLO_TYPE } from '../../saved_objects';
 import { KibanaSavedObjectsCompositeSLORepository } from './composite_slo_repository';
 import { aStoredCompositeSLO, createCompositeSLO } from './fixtures/composite_slo';
@@ -104,6 +104,33 @@ describe('KibanaSavedObjectsCompositeSLORepository', () => {
           overwrite: true,
         }
       );
+    });
+  });
+
+  describe('deleting a composite SLO', () => {
+    it('throws when not found', async () => {
+      soClientMock.find.mockResolvedValueOnce(createFindResponse([]));
+      const repository = new KibanaSavedObjectsCompositeSLORepository(soClientMock);
+
+      await expect(repository.deleteById('inexistant-slo-id')).rejects.toThrowError(
+        new CompositeSLONotFound('Composite SLO [inexistant-slo-id] not found')
+      );
+    });
+
+    it('deletes a composite SLO', async () => {
+      const compositeSlo = createCompositeSLO({ id: 'my-composite-id' });
+      const repository = new KibanaSavedObjectsCompositeSLORepository(soClientMock);
+      soClientMock.find.mockResolvedValueOnce(createFindResponse([compositeSlo]));
+
+      await repository.deleteById(compositeSlo.id);
+
+      expect(soClientMock.find).toHaveBeenCalledWith({
+        type: SO_COMPOSITE_SLO_TYPE,
+        page: 1,
+        perPage: 1,
+        filter: `composite-slo.attributes.id:(${compositeSlo.id})`,
+      });
+      expect(soClientMock.delete).toHaveBeenCalledWith(SO_COMPOSITE_SLO_TYPE, compositeSlo.id);
     });
   });
 });
