@@ -710,6 +710,7 @@ interface ManagedReferenceOperationDefinition<C extends BaseIndexPatternColumn> 
    * and use from external managed operations
    */
   operationParams?: OperationParam[];
+  selectionStyle?: 'hidden';
 }
 
 interface OperationDefinitionMap<C extends BaseIndexPatternColumn, P = {}> {

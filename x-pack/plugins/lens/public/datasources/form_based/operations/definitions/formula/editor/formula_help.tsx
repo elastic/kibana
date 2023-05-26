@@ -274,10 +274,10 @@ max(system.network.in.bytes, reducedTimeRange="30m")
   helpGroups.push(
     createNewSection(
       i18n.translate('xpack.lens.formulaDocumentation.constantsSection', {
-        defaultMessage: 'Constants',
+        defaultMessage: 'Kibana context',
       }),
       i18n.translate('xpack.lens.formulaDocumentation.constantsSectionDescription', {
-        defaultMessage: 'Functions used to retrieve context vairables.',
+        defaultMessage: 'Functions used to retrieve Kibana context variables.',
       }),
       constantsOperations,
       operationDefinitionMap
