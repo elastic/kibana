@@ -15,7 +15,7 @@ import { useSourcererDataView } from '../../../common/containers/sourcerer';
 
 export interface ReturnUseFetchExceptionFlyoutData {
   isLoading: boolean;
-  indexPatterns: DataView | undefined;
+  readonly indexPatterns: DataView | undefined;
 }
 
 /**
@@ -75,6 +75,13 @@ export const useFetchIndexPatterns = (rules: Rule[] | null): ReturnUseFetchExcep
 
   return {
     isLoading: isIndexPatternLoading || mlJobLoading,
-    indexPatterns: dataView,
+    indexPatterns: {
+      ...dataView,
+      // @ts-expect-error fields is the wrong type but it will take too much effort
+      // right now to fix because of how deep the type changes need to be. Since the
+      // code only relies on the properties of the fields and not any of the CRUD functions,
+      // we typecast the fields to FieldSpec and return the rest of the data view
+      fields: dataView != null ? Object.values(dataView.fields.toSpec()) : [],
+    },
   };
 };
