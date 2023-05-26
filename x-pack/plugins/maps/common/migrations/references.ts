@@ -79,6 +79,7 @@ export function extractReferences({
       const joins = vectorLayer.joins ? vectorLayer.joins : [];
       joins.forEach((join, joinIndex) => {
         if (
+          join.right &&
           'indexPatternId' in join.right &&
           !adhocDataViewIds.includes(
             (join.right as IndexPatternReferenceDescriptor).indexPatternId!
@@ -147,7 +148,7 @@ export function injectReferences({
       const vectorLayer = layer as VectorLayerDescriptor;
       const joins = vectorLayer.joins ? vectorLayer.joins : [];
       joins.forEach((join) => {
-        if ('indexPatternRefName' in join.right) {
+        if (join.right && 'indexPatternRefName' in join.right) {
           const sourceDescriptor = join.right as IndexPatternReferenceDescriptor;
           const reference = findReference(sourceDescriptor.indexPatternRefName!, references);
           sourceDescriptor.indexPatternId = reference.id;

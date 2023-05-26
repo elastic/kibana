@@ -1633,7 +1633,7 @@
         "label": "transformRule",
         "description": [],
         "signature": [
-          "({ rule_type_id: ruleTypeId, created_by: createdBy, updated_by: updatedBy, created_at: createdAt, updated_at: updatedAt, api_key_owner: apiKeyOwner, notify_when: notifyWhen, mute_all: muteAll, muted_alert_ids: mutedInstanceIds, scheduled_task_id: scheduledTaskId, execution_status: executionStatus, actions: actions, snooze_schedule: snoozeSchedule, is_snoozed_until: isSnoozedUntil, active_snoozes: activeSnoozes, last_run: lastRun, next_run: nextRun, ...rest }: any) => any"
+          "({ rule_type_id: ruleTypeId, created_by: createdBy, updated_by: updatedBy, created_at: createdAt, updated_at: updatedAt, api_key_owner: apiKeyOwner, api_key_created_by_user: apiKeyCreatedByUser, notify_when: notifyWhen, mute_all: muteAll, muted_alert_ids: mutedInstanceIds, scheduled_task_id: scheduledTaskId, execution_status: executionStatus, actions: actions, snooze_schedule: snoozeSchedule, is_snoozed_until: isSnoozedUntil, active_snoozes: activeSnoozes, last_run: lastRun, next_run: nextRun, ...rest }: any) => any"
         ],
         "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/rule_api/common_transformations.ts",
         "deprecated": false,
@@ -1644,7 +1644,7 @@
             "id": "def-public.transformRule.$1",
             "type": "Any",
             "tags": [],
-            "label": "{\n  rule_type_id: ruleTypeId,\n  created_by: createdBy,\n  updated_by: updatedBy,\n  created_at: createdAt,\n  updated_at: updatedAt,\n  api_key_owner: apiKeyOwner,\n  notify_when: notifyWhen,\n  mute_all: muteAll,\n  muted_alert_ids: mutedInstanceIds,\n  scheduled_task_id: scheduledTaskId,\n  execution_status: executionStatus,\n  actions: actions,\n  snooze_schedule: snoozeSchedule,\n  is_snoozed_until: isSnoozedUntil,\n  active_snoozes: activeSnoozes,\n  last_run: lastRun,\n  next_run: nextRun,\n  ...rest\n}",
+            "label": "{\n  rule_type_id: ruleTypeId,\n  created_by: createdBy,\n  updated_by: updatedBy,\n  created_at: createdAt,\n  updated_at: updatedAt,\n  api_key_owner: apiKeyOwner,\n  api_key_created_by_user: apiKeyCreatedByUser,\n  notify_when: notifyWhen,\n  mute_all: muteAll,\n  muted_alert_ids: mutedInstanceIds,\n  scheduled_task_id: scheduledTaskId,\n  execution_status: executionStatus,\n  actions: actions,\n  snooze_schedule: snoozeSchedule,\n  is_snoozed_until: isSnoozedUntil,\n  active_snoozes: activeSnoozes,\n  last_run: lastRun,\n  next_run: nextRun,\n  ...rest\n}",
             "description": [],
             "signature": [
               "any"

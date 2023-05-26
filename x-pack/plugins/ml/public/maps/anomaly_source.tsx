@@ -177,8 +177,7 @@ export class AnomalySource implements IVectorSource {
     return false;
   }
 
-  showJoinEditor(): boolean {
-    // Ignore, only show if joins are enabled for current configuration
+  supportsJoins(): boolean {
     return false;
   }
 

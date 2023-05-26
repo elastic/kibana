@@ -6,13 +6,14 @@
  */
 
 import { createReducer } from '@reduxjs/toolkit';
-import { FETCH_STATUS } from '@kbn/observability-plugin/public';
+import { FETCH_STATUS } from '@kbn/observability-shared-plugin/public';
 
 import { SavedObject } from '@kbn/core-saved-objects-common';
 import {
   ConfigKey,
   MonitorManagementListResult,
   SyntheticsMonitor,
+  MonitorFiltersResult,
 } from '../../../../../common/runtime_types';
 
 import { IHttpSerializedFetchError } from '../utils/http_error';
@@ -27,6 +28,7 @@ import {
   fetchUpsertMonitorAction,
   fetchUpsertSuccessAction,
   updateManagementPageStateAction,
+  fetchMonitorFiltersAction,
 } from './actions';
 
 export interface MonitorListState {
@@ -39,6 +41,7 @@ export interface MonitorListState {
   loading: boolean;
   loaded: boolean;
   error: IHttpSerializedFetchError | null;
+  monitorFilterOptions: MonitorFiltersResult | null;
 }
 
 const initialState: MonitorListState = {
@@ -53,6 +56,7 @@ const initialState: MonitorListState = {
   loading: false,
   loaded: false,
   error: null,
+  monitorFilterOptions: null,
 };
 
 export const monitorListReducer = createReducer(initialState, (builder) => {
@@ -120,6 +124,12 @@ export const monitorListReducer = createReducer(initialState, (builder) => {
     })
     .addCase(cleanMonitorListState, (state) => {
       return { ...initialState, pageState: state.pageState };
+    })
+    .addCase(fetchMonitorFiltersAction.success, (state, action) => {
+      state.monitorFilterOptions = action.payload;
+    })
+    .addCase(fetchMonitorFiltersAction.fail, (state, action) => {
+      state.error = action.payload;
     });
 });
 

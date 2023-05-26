@@ -8,14 +8,10 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import {
-  INSIGHTS_THREAT_INTELLIGENCE_COLOR_TEST_ID,
-  INSIGHTS_THREAT_INTELLIGENCE_ICON_TEST_ID,
-  INSIGHTS_THREAT_INTELLIGENCE_TEST_ID,
-  INSIGHTS_THREAT_INTELLIGENCE_VALUE_TEST_ID,
-} from './test_ids';
 import type { InsightsSummaryPanelData } from './insights_summary_panel';
 import { InsightsSummaryPanel } from './insights_summary_panel';
+
+const TEST_ID = 'testid';
 
 describe('<SummaryPanel />', () => {
   it('should render by default', () => {
@@ -30,13 +26,13 @@ describe('<SummaryPanel />', () => {
 
     const { getByTestId } = render(
       <IntlProvider locale="en">
-        <InsightsSummaryPanel data={data} data-test-subj={INSIGHTS_THREAT_INTELLIGENCE_TEST_ID} />
+        <InsightsSummaryPanel data={data} data-test-subj={TEST_ID} />
       </IntlProvider>
     );
 
-    const iconTestId = `${INSIGHTS_THREAT_INTELLIGENCE_ICON_TEST_ID}0`;
-    const valueTestId = `${INSIGHTS_THREAT_INTELLIGENCE_VALUE_TEST_ID}0`;
-    const colorTestId = `${INSIGHTS_THREAT_INTELLIGENCE_COLOR_TEST_ID}0`;
+    const iconTestId = `${TEST_ID}Icon0`;
+    const valueTestId = `${TEST_ID}Value0`;
+    const colorTestId = `${TEST_ID}Color0`;
     expect(getByTestId(iconTestId)).toBeInTheDocument();
     expect(getByTestId(valueTestId)).toHaveTextContent('1 this is a test for red');
     expect(getByTestId(colorTestId)).toBeInTheDocument();
@@ -62,11 +58,11 @@ describe('<SummaryPanel />', () => {
 
     const { getByTestId } = render(
       <IntlProvider locale="en">
-        <InsightsSummaryPanel data={data} data-test-subj={INSIGHTS_THREAT_INTELLIGENCE_TEST_ID} />
+        <InsightsSummaryPanel data={data} data-test-subj={TEST_ID} />
       </IntlProvider>
     );
 
-    const valueTestId = `${INSIGHTS_THREAT_INTELLIGENCE_VALUE_TEST_ID}0`;
+    const valueTestId = `${TEST_ID}Value0`;
     expect(getByTestId(valueTestId)).toHaveTextContent('160k this is a test for red');
   });
 
@@ -81,10 +77,10 @@ describe('<SummaryPanel />', () => {
 
     const { queryByTestId } = render(
       <IntlProvider locale="en">
-        <InsightsSummaryPanel data={data} data-test-subj={INSIGHTS_THREAT_INTELLIGENCE_TEST_ID} />
+        <InsightsSummaryPanel data={data} data-test-subj={TEST_ID} />
       </IntlProvider>
     );
 
-    expect(queryByTestId(INSIGHTS_THREAT_INTELLIGENCE_COLOR_TEST_ID)).not.toBeInTheDocument();
+    expect(queryByTestId(`${TEST_ID}Color`)).not.toBeInTheDocument();
   });
 });

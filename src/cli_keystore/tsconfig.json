@@ -7,6 +7,7 @@
     "keystore/**/*",
     "utils/**/*",
     "*.js",
+    "*.ts",
   ],
   "kbn_references": [
     { "path": "../setup_node_env/tsconfig.json" },

@@ -20,8 +20,9 @@ import type {
   NewPackagePolicyInput,
   PackagePolicyReplaceDefineStepExtensionComponentProps,
 } from '@kbn/fleet-plugin/public/types';
-import type { PackageInfo } from '@kbn/fleet-plugin/common';
+import { PackageInfo, PackagePolicy } from '@kbn/fleet-plugin/common';
 import { useParams } from 'react-router-dom';
+import { assert } from '../../../common/utils/helpers';
 import type { PostureInput, CloudSecurityPolicyTemplate } from '../../../common/types';
 import {
   CLOUDBEAT_AWS,
@@ -37,6 +38,7 @@ import {
   POSTURE_NAMESPACE,
   type NewPackagePolicyPostureInput,
   isPostureInput,
+  getMaxPackageName,
 } from './utils';
 import {
   PolicyTemplateInfo,
@@ -44,7 +46,7 @@ import {
   PolicyTemplateSelector,
   PolicyTemplateVarsForm,
 } from './policy_template_selectors';
-import { assert } from '../../../common/utils/helpers';
+import { usePackagePolicyList } from '../../common/api/use_package_policy_list';
 
 const DEFAULT_INPUT_TYPE = {
   kspm: CLOUDBEAT_VANILLA,
@@ -131,6 +133,8 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
       setTimeout(() => setIsLoading(false), 200);
     }, [validationResultsNonNullFields]);
 
+    const { data: packagePolicyList } = usePackagePolicyList(packageInfo.name);
+
     useEffect(() => {
       if (isEditPage) return;
       if (isLoading) return;
@@ -148,6 +152,15 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
       packageInfo,
       updatePolicy,
       newPolicy,
+    });
+
+    usePolicyTemplateInitialName({
+      packagePolicyList: packagePolicyList?.items,
+      isEditPage,
+      isLoading,
+      integration,
+      newPolicy,
+      updatePolicy,
     });
 
     if (isLoading) {
@@ -186,7 +199,7 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
     ];
 
     return (
-      <div data-test-subj={'test'}>
+      <>
         {isEditPage && <EditScreenStepTitle />}
         {/* Defines the enabled policy template */}
         {!integration && (
@@ -218,7 +231,7 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
         {/* Defines the vars of the enabled input of the active policy template */}
         <PolicyTemplateVarsForm input={input} newPolicy={newPolicy} updatePolicy={updatePolicy} />
         <EuiSpacer />
-      </div>
+      </>
     );
   }
 );
@@ -243,6 +256,41 @@ const useEnsureDefaultNamespace = ({
     const policy = { ...getPosturePolicy(newPolicy, input.type), namespace: POSTURE_NAMESPACE };
     updatePolicy(policy);
   }, [newPolicy, input, updatePolicy]);
+};
+const usePolicyTemplateInitialName = ({
+  isEditPage,
+  isLoading,
+  integration,
+  newPolicy,
+  packagePolicyList,
+  updatePolicy,
+}: {
+  isEditPage: boolean;
+  isLoading: boolean;
+  integration: CloudSecurityPolicyTemplate | undefined;
+  newPolicy: NewPackagePolicy;
+  packagePolicyList: PackagePolicy[] | undefined;
+  updatePolicy: (policy: NewPackagePolicy) => void;
+}) => {
+  useEffect(() => {
+    if (!integration) return;
+    if (isEditPage) return;
+    if (isLoading) return;
+
+    const packagePolicyListByIntegration = packagePolicyList?.filter(
+      (policy) => policy?.vars?.posture?.value === integration
+    );
+
+    const currentIntegrationName = getMaxPackageName(integration, packagePolicyListByIntegration);
+
+    if (newPolicy.name === currentIntegrationName) {
+      return;
+    }
+    updatePolicy({
+      ...newPolicy,
+      name: currentIntegrationName,
+    });
+  }, [isLoading, integration, isEditPage, packagePolicyList, newPolicy, updatePolicy]);
 };
 
 const getSelectedOption = (

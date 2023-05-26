@@ -6,9 +6,6 @@
  */
 
 import Boom from '@hapi/boom';
-import { pipe } from 'fp-ts/lib/pipeable';
-import { fold } from 'fp-ts/lib/Either';
-import { identity } from 'fp-ts/lib/function';
 
 import type {
   SavedObject,
@@ -36,8 +33,7 @@ import {
   CasesRt,
   CaseStatuses,
   CommentType,
-  excess,
-  throwErrors,
+  decodeWithExcessOrThrow,
 } from '../../../common/api';
 import {
   CASE_COMMENT_SAVED_OBJECT,
@@ -317,10 +313,7 @@ export const update = async (
     authorization,
   } = clientArgs;
 
-  const query = pipe(
-    excess(CasesPatchRequestRt).decode(cases),
-    fold(throwErrors(Boom.badRequest), identity)
-  );
+  const query = decodeWithExcessOrThrow(CasesPatchRequestRt)(cases);
 
   try {
     const myCases = await caseService.getCases({
@@ -436,12 +429,12 @@ export const update = async (
         return flattenCases;
       }
 
-      return [
-        ...flattenCases,
+      flattenCases.push(
         flattenCaseSavedObject({
           savedObject: mergeOriginalSOWithUpdatedSO(originalCase, updatedCase),
-        }),
-      ];
+        })
+      );
+      return flattenCases;
     }, [] as Case[]);
 
     await userActionService.creator.bulkCreateUpdateCase({
