@@ -10,6 +10,7 @@ import { withSecuritySpan } from '../../../../../utils/with_security_span';
 import { findRules } from './find_rules';
 import type { RuleAlertType } from '../../../rule_schema';
 
+export const MAX_PREBUILT_RULES_COUNT = 10_000;
 export const FILTER_NON_PREPACKED_RULES = 'alert.attributes.params.immutable: false';
 export const FILTER_PREPACKED_RULES = 'alert.attributes.params.immutable: true';
 
@@ -50,11 +51,10 @@ export const getRules = async ({
   filter: string;
 }): Promise<RuleAlertType[]> =>
   withSecuritySpan('getRules', async () => {
-    const count = await getRulesCount({ rulesClient, filter });
     const rules = await findRules({
       rulesClient,
       filter,
-      perPage: count,
+      perPage: MAX_PREBUILT_RULES_COUNT,
       page: 1,
       sortField: 'createdAt',
       sortOrder: 'desc',

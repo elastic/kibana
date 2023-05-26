@@ -7,22 +7,23 @@
  */
 
 import { SavedObjectsClientPublicToCommon } from './saved_objects_client_wrapper';
+import { ContentClient } from '@kbn/content-management-plugin/public';
 import { savedObjectsServiceMock } from '@kbn/core/public/mocks';
-
 import { DataViewSavedObjectConflictError } from '../common';
 
 describe('SavedObjectsClientPublicToCommon', () => {
   const soClient = savedObjectsServiceMock.createStartContract().client;
+  const cmClient = {} as ContentClient;
 
   test('get saved object - exactMatch', async () => {
     const mockedSavedObject = {
       version: 'abc',
     };
-    soClient.resolve = jest
+    cmClient.get = jest
       .fn()
-      .mockResolvedValue({ outcome: 'exactMatch', saved_object: mockedSavedObject });
-    const service = new SavedObjectsClientPublicToCommon(soClient);
-    const result = await service.get('index-pattern', '1');
+      .mockResolvedValue({ meta: { outcome: 'exactMatch' }, item: mockedSavedObject });
+    const service = new SavedObjectsClientPublicToCommon(cmClient, soClient);
+    const result = await service.get('1');
     expect(result).toStrictEqual(mockedSavedObject);
   });
 
@@ -30,11 +31,11 @@ describe('SavedObjectsClientPublicToCommon', () => {
     const mockedSavedObject = {
       version: 'def',
     };
-    soClient.resolve = jest
+    cmClient.get = jest
       .fn()
-      .mockResolvedValue({ outcome: 'aliasMatch', saved_object: mockedSavedObject });
-    const service = new SavedObjectsClientPublicToCommon(soClient);
-    const result = await service.get('index-pattern', '1');
+      .mockResolvedValue({ meta: { outcome: 'aliasMatch' }, item: mockedSavedObject });
+    const service = new SavedObjectsClientPublicToCommon(cmClient, soClient);
+    const result = await service.get('1');
     expect(result).toStrictEqual(mockedSavedObject);
   });
 
@@ -43,13 +44,11 @@ describe('SavedObjectsClientPublicToCommon', () => {
       version: 'ghi',
     };
 
-    soClient.resolve = jest
+    cmClient.get = jest
       .fn()
-      .mockResolvedValue({ outcome: 'conflict', saved_object: mockedSavedObject });
-    const service = new SavedObjectsClientPublicToCommon(soClient);
+      .mockResolvedValue({ meta: { outcome: 'conflict' }, item: mockedSavedObject });
+    const service = new SavedObjectsClientPublicToCommon(cmClient, soClient);
 
-    await expect(service.get('index-pattern', '1')).rejects.toThrow(
-      DataViewSavedObjectConflictError
-    );
+    await expect(service.get('1')).rejects.toThrow(DataViewSavedObjectConflictError);
   });
 });

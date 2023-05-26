@@ -174,29 +174,27 @@ describe('ESSearchSource', () => {
     });
   });
 
-  describe('getJoinsDisabledReason', () => {
+  describe('supportsJoins', () => {
     it('limit', () => {
       const esSearchSource = new ESSearchSource({
         ...mockDescriptor,
         scalingType: SCALING_TYPES.LIMIT,
       });
-      expect(esSearchSource.getJoinsDisabledReason()).toBe(null);
+      expect(esSearchSource.supportsJoins()).toBe(true);
     });
     it('blended layer', () => {
       const esSearchSource = new ESSearchSource({
         ...mockDescriptor,
         scalingType: SCALING_TYPES.CLUSTERS,
       });
-      expect(esSearchSource.getJoinsDisabledReason()).toBe(
-        'Joins are not supported when scaling by clusters'
-      );
+      expect(esSearchSource.supportsJoins()).toBe(false);
     });
     it('mvt', () => {
       const esSearchSource = new ESSearchSource({
         ...mockDescriptor,
         scalingType: SCALING_TYPES.MVT,
       });
-      expect(esSearchSource.getJoinsDisabledReason()).toBe(null);
+      expect(esSearchSource.supportsJoins()).toBe(true);
     });
   });
 });

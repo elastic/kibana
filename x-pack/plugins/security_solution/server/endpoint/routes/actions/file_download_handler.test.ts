@@ -12,23 +12,17 @@ import {
 import type { HttpApiTestSetupMock } from '../../mocks';
 import { createHttpApiTestSetupMock } from '../../mocks';
 import type { EndpointActionFileDownloadParams } from '../../../../common/endpoint/schema/actions';
-import {
-  getFileDownloadStream as _getFileDownloadStream,
-  validateActionId as _validateActionId,
-  validateActionFileId as _validateActionFileId,
-} from '../../services';
+import { validateActionId as _validateActionId } from '../../services';
 import { EndpointAuthorizationError, NotFoundError } from '../../errors';
 import { CustomHttpRequestError } from '../../../utils/custom_http_request_error';
-import stream from 'stream';
 import { ACTION_AGENT_FILE_DOWNLOAD_ROUTE } from '../../../../common/endpoint/constants';
 import { getEndpointAuthzInitialStateMock } from '../../../../common/endpoint/service/authz/mocks';
+import type { FleetFileClientInterface } from '@kbn/fleet-plugin/server';
 
 jest.mock('../../services');
 
 describe('Response Actions file download API', () => {
-  const getFileDownloadStream = _getFileDownloadStream as jest.Mock;
   const validateActionIdMock = _validateActionId as jest.Mock;
-  const validateFileIdMock = _validateActionFileId as jest.Mock;
 
   let apiTestSetup: HttpApiTestSetupMock;
   let httpRequestMock: ReturnType<
@@ -42,7 +36,7 @@ describe('Response Actions file download API', () => {
 
     ({ httpHandlerContextMock, httpResponseMock } = apiTestSetup);
     httpRequestMock = apiTestSetup.createRequestMock({
-      params: { action_id: '111', file_id: '111.222' },
+      params: { action_id: '321-654', file_id: '123-456-789' },
     });
   });
 
@@ -79,22 +73,16 @@ describe('Response Actions file download API', () => {
 
   describe('Route handler', () => {
     let fileDownloadHandler: ReturnType<typeof getActionFileDownloadRouteHandler>;
-    let esClientMock: ReturnType<HttpApiTestSetupMock['getEsClientMock']>;
+    let fleetFilesClientMock: jest.Mocked<FleetFileClientInterface>;
 
-    beforeEach(() => {
-      esClientMock = apiTestSetup.getEsClientMock();
+    beforeEach(async () => {
       fileDownloadHandler = getActionFileDownloadRouteHandler(apiTestSetup.endpointAppContextMock);
 
       validateActionIdMock.mockImplementation(async () => {});
-      validateFileIdMock.mockImplementation(async () => {});
 
-      getFileDownloadStream.mockImplementation(async () => {
-        return {
-          stream: new stream.Readable(),
-          fileName: 'test.txt',
-          mimeType: 'text/plain',
-        };
-      });
+      fleetFilesClientMock = (await apiTestSetup.endpointAppContextMock.service.getFleetFilesClient(
+        'from-host'
+      )) as jest.Mocked<FleetFileClientInterface>;
     });
 
     it('should error if action ID is invalid', async () => {
@@ -105,7 +93,8 @@ describe('Response Actions file download API', () => {
     });
 
     it('should error if file ID is invalid', async () => {
-      validateFileIdMock.mockRejectedValueOnce(new CustomHttpRequestError('invalid', 400));
+      // @ts-expect-error assignment to readonly value
+      httpRequestMock.params.file_id = 'invalid';
       await fileDownloadHandler(httpHandlerContextMock, httpRequestMock, httpResponseMock);
 
       expect(httpResponseMock.customError).toHaveBeenCalledWith({
@@ -117,11 +106,7 @@ describe('Response Actions file download API', () => {
     it('should retrieve the download Stream using correct file ID', async () => {
       await fileDownloadHandler(httpHandlerContextMock, httpRequestMock, httpResponseMock);
 
-      expect(getFileDownloadStream).toHaveBeenCalledWith(
-        esClientMock,
-        expect.anything(),
-        '111.222'
-      );
+      expect(fleetFilesClientMock.download).toHaveBeenCalledWith('123-456-789');
     });
 
     it('should respond with expected HTTP headers', async () => {
@@ -131,7 +116,7 @@ describe('Response Actions file download API', () => {
         expect.objectContaining({
           headers: {
             'cache-control': 'max-age=31536000, immutable',
-            'content-disposition': 'attachment; filename="test.txt"',
+            'content-disposition': 'attachment; filename="foo.txt"',
             'content-type': 'application/octet-stream',
             'x-content-type-options': 'nosniff',
           },

@@ -190,6 +190,7 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
         scalingType={this._descriptor.scalingType}
         filterByMapBounds={this.isFilterByMapBounds()}
         numberOfJoins={sourceEditorArgs.numberOfJoins}
+        hasSpatialJoins={sourceEditorArgs.hasSpatialJoins}
       />
     );
   }
@@ -350,10 +351,21 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
 
     const resp = await this._runEsQuery({
       requestId: this.getId(),
-      requestName: layerName,
+      requestName: i18n.translate('xpack.maps.esSearchSource.topHits.requestName', {
+        defaultMessage: '{layerName} top hits request',
+        values: { layerName },
+      }),
       searchSource,
       registerCancelCallback,
-      requestDescription: 'Elasticsearch document top hits request',
+      requestDescription: i18n.translate('xpack.maps.esSearchSource.topHits.requestDescription', {
+        defaultMessage:
+          'Get top hits from data view: {dataViewName}, entities: {entitiesFieldName}, geospatial field: {geoFieldName}',
+        values: {
+          dataViewName: indexPattern.getName(),
+          entitiesFieldName: topHitsSplitFieldName,
+          geoFieldName: this._descriptor.geoField,
+        },
+      }),
       searchSessionId: requestMeta.searchSessionId,
       executionContext: mergeExecutionContext(
         { description: 'es_search_source:top_hits' },
@@ -437,10 +449,20 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
 
     const resp = await this._runEsQuery({
       requestId: this.getId(),
-      requestName: layerName,
+      requestName: i18n.translate('xpack.maps.esSearchSource.requestName', {
+        defaultMessage: '{layerName} documents request',
+        values: { layerName },
+      }),
       searchSource,
       registerCancelCallback,
-      requestDescription: 'Elasticsearch document request',
+      requestDescription: i18n.translate('xpack.maps.esSearchSource.requestDescription', {
+        defaultMessage:
+          'Get documents from data view: {dataViewName}, geospatial field: {geoFieldName}',
+        values: {
+          dataViewName: indexPattern.getName(),
+          geoFieldName: this._descriptor.geoField,
+        },
+      }),
       searchSessionId: requestMeta.searchSessionId,
       executionContext: mergeExecutionContext(
         { description: 'es_search_source:doc_search' },
@@ -792,16 +814,9 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
     };
   }
 
-  getJoinsDisabledReason(): string | null {
-    let reason;
-    if (this._descriptor.scalingType === SCALING_TYPES.CLUSTERS) {
-      reason = i18n.translate('xpack.maps.source.esSearch.joinsDisabledReason', {
-        defaultMessage: 'Joins are not supported when scaling by clusters',
-      });
-    } else {
-      reason = null;
-    }
-    return reason;
+  supportsJoins(): boolean {
+    // can only join with features, not aggregated clusters
+    return this._descriptor.scalingType !== SCALING_TYPES.CLUSTERS;
   }
 
   async _getEditableIndex(): Promise<string> {

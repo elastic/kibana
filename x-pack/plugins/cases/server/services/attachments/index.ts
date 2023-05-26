@@ -9,14 +9,15 @@ import type {
   SavedObjectsBulkResponse,
   SavedObjectsBulkUpdateResponse,
   SavedObjectsFindResponse,
+  SavedObjectsFindResult,
   SavedObjectsUpdateResponse,
 } from '@kbn/core/server';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { CommentType } from '../../../common/api';
+import { CommentType, decodeOrThrow } from '../../../common/api';
 import { CASE_COMMENT_SAVED_OBJECT, CASE_SAVED_OBJECT } from '../../../common/constants';
 import { buildFilter, combineFilters } from '../../client/utils';
-import { defaultSortField } from '../../common/utils';
+import { defaultSortField, isSOError } from '../../common/utils';
 import type { AggregationResponse } from '../../client/metrics/types';
 import {
   extractAttachmentSORefsFromAttributes,
@@ -34,12 +35,17 @@ import type {
   DeleteAttachmentArgs,
   ServiceContext,
   UpdateAttachmentArgs,
+  UpdateArgs,
 } from './types';
 import { AttachmentGetter } from './operations/get';
 import type {
   AttachmentPersistedAttributes,
   AttachmentTransformedAttributes,
   AttachmentSavedObjectTransformed,
+} from '../../common/types/attachments';
+import {
+  AttachmentTransformedAttributesRt,
+  AttachmentPartialAttributesRt,
 } from '../../common/types/attachments';
 
 export class AttachmentService {
@@ -140,7 +146,7 @@ export class AttachmentService {
       }
 
       this.context.log.debug(`Attempting to DELETE attachments ${attachmentIds}`);
-      return await this.context.unsecuredSavedObjectsClient.bulkDelete(
+      await this.context.unsecuredSavedObjectsClient.bulkDelete(
         attachmentIds.map((id) => ({ id, type: CASE_COMMENT_SAVED_OBJECT })),
         {
           refresh,
@@ -179,10 +185,16 @@ export class AttachmentService {
           }
         );
 
-      return injectAttachmentSOAttributesFromRefs(
+      const transformedAttachment = injectAttachmentSOAttributesFromRefs(
         attachment,
         this.context.persistableStateAttachmentTypeRegistry
       );
+
+      const validatedAttributes = decodeOrThrow(AttachmentTransformedAttributesRt)(
+        transformedAttachment.attributes
+      );
+
+      return Object.assign(transformedAttachment, { attributes: validatedAttributes });
     } catch (error) {
       this.context.log.error(`Error on POST a new comment: ${error}`);
       throw error;
@@ -215,18 +227,36 @@ export class AttachmentService {
           { refresh }
         );
 
-      return {
-        saved_objects: res.saved_objects.map((so) => {
-          return injectAttachmentSOAttributesFromRefs(
-            so,
-            this.context.persistableStateAttachmentTypeRegistry
-          );
-        }),
-      };
+      return this.transformAndDecodeBulkCreateResponse(res);
     } catch (error) {
       this.context.log.error(`Error on bulk create attachments: ${error}`);
       throw error;
     }
+  }
+
+  private transformAndDecodeBulkCreateResponse(
+    res: SavedObjectsBulkResponse<AttachmentPersistedAttributes>
+  ): SavedObjectsBulkResponse<AttachmentTransformedAttributes> {
+    const validatedAttachments: AttachmentSavedObjectTransformed[] = [];
+
+    for (const so of res.saved_objects) {
+      if (isSOError(so)) {
+        validatedAttachments.push(so as AttachmentSavedObjectTransformed);
+      } else {
+        const transformedAttachment = injectAttachmentSOAttributesFromRefs(
+          so,
+          this.context.persistableStateAttachmentTypeRegistry
+        );
+
+        const validatedAttributes = decodeOrThrow(AttachmentTransformedAttributesRt)(
+          transformedAttachment.attributes
+        );
+
+        validatedAttachments.push(Object.assign(so, { attributes: validatedAttributes }));
+      }
+    }
+
+    return Object.assign(res, { saved_objects: validatedAttachments });
   }
 
   public async update({
@@ -266,11 +296,17 @@ export class AttachmentService {
           }
         );
 
-      return injectAttachmentSOAttributesFromRefsForPatch(
+      const transformedAttachment = injectAttachmentSOAttributesFromRefsForPatch(
         updatedAttributes,
         res,
         this.context.persistableStateAttachmentTypeRegistry
       );
+
+      const validatedAttributes = decodeOrThrow(AttachmentPartialAttributesRt)(
+        transformedAttachment.attributes
+      );
+
+      return Object.assign(transformedAttachment, { attributes: validatedAttributes });
     } catch (error) {
       this.context.log.error(`Error on UPDATE comment ${attachmentId}: ${error}`);
       throw error;
@@ -319,21 +355,48 @@ export class AttachmentService {
           { refresh }
         );
 
-      return {
-        saved_objects: res.saved_objects.map((so, index) => {
-          return injectAttachmentSOAttributesFromRefsForPatch(
-            comments[index].updatedAttributes,
-            so,
-            this.context.persistableStateAttachmentTypeRegistry
-          );
-        }),
-      };
+      return this.transformAndDecodeBulkUpdateResponse(res, comments);
     } catch (error) {
       this.context.log.error(
         `Error on UPDATE comments ${comments.map((c) => c.attachmentId).join(', ')}: ${error}`
       );
       throw error;
     }
+  }
+
+  private transformAndDecodeBulkUpdateResponse(
+    res: SavedObjectsBulkUpdateResponse<AttachmentPersistedAttributes>,
+    comments: UpdateArgs[]
+  ): SavedObjectsBulkUpdateResponse<AttachmentTransformedAttributes> {
+    const validatedAttachments: Array<SavedObjectsUpdateResponse<AttachmentTransformedAttributes>> =
+      [];
+
+    for (let i = 0; i < res.saved_objects.length; i++) {
+      const attachment = res.saved_objects[i];
+
+      if (isSOError(attachment)) {
+        // Forcing the type here even though it is an error. The client is responsible for
+        // determining what to do with the errors
+        // TODO: we should fix the return type of this function so that it can return errors
+        validatedAttachments.push(attachment as AttachmentSavedObjectTransformed);
+      } else {
+        const transformedAttachment = injectAttachmentSOAttributesFromRefsForPatch(
+          comments[i].updatedAttributes,
+          attachment,
+          this.context.persistableStateAttachmentTypeRegistry
+        );
+
+        const validatedAttributes = decodeOrThrow(AttachmentPartialAttributesRt)(
+          transformedAttachment.attributes
+        );
+
+        validatedAttachments.push(
+          Object.assign(transformedAttachment, { attributes: validatedAttributes })
+        );
+      }
+    }
+
+    return Object.assign(res, { saved_objects: validatedAttachments });
   }
 
   public async find({
@@ -350,20 +413,29 @@ export class AttachmentService {
           type: CASE_COMMENT_SAVED_OBJECT,
         });
 
-      return {
-        ...res,
-        saved_objects: res.saved_objects.map((so) => {
-          const injectedSO = injectAttachmentSOAttributesFromRefs(
-            so,
-            this.context.persistableStateAttachmentTypeRegistry
-          );
+      const validatedAttachments: Array<SavedObjectsFindResult<AttachmentTransformedAttributes>> =
+        [];
 
-          return {
-            ...so,
-            ...injectedSO,
-          };
-        }),
-      };
+      for (const so of res.saved_objects) {
+        const transformedAttachment = injectAttachmentSOAttributesFromRefs(
+          so,
+          this.context.persistableStateAttachmentTypeRegistry
+          // casting here because injectAttachmentSOAttributesFromRefs returns a SavedObject but we need a SavedObjectsFindResult
+          // which has the score in it. The score is returned but the type is not correct
+        ) as SavedObjectsFindResult<AttachmentTransformedAttributes>;
+
+        const validatedAttributes = decodeOrThrow(AttachmentTransformedAttributesRt)(
+          transformedAttachment.attributes
+        );
+
+        validatedAttachments.push(
+          Object.assign(transformedAttachment, {
+            attributes: validatedAttributes,
+          })
+        );
+      }
+
+      return Object.assign(res, { saved_objects: validatedAttachments });
     } catch (error) {
       this.context.log.error(`Error on find comments: ${error}`);
       throw error;

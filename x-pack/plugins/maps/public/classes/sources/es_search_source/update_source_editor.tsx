@@ -36,6 +36,7 @@ interface Props {
   sortOrder: SortDirection;
   scalingType: SCALING_TYPES;
   source: IESSource;
+  hasSpatialJoins: boolean;
   numberOfJoins: number;
   getGeoField(): Promise<DataViewField>;
   filterByMapBounds: boolean;
@@ -217,6 +218,7 @@ export class UpdateSourceEditor extends Component<Props, State> {
           scalingType={this.props.scalingType}
           supportsClustering={this.state.supportsClustering}
           clusteringDisabledReason={this.state.clusteringDisabledReason}
+          hasSpatialJoins={this.props.hasSpatialJoins}
           numberOfJoins={this.props.numberOfJoins}
         />
       </EuiPanel>
