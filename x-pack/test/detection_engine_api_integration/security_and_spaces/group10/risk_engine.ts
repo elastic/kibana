@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { ALERT_RISK_SCORE } from '@kbn/rule-data-utils';
-import { RISK_SCORES_URL } from '@kbn/security-solution-plugin/common/constants';
+import { RISK_SCORE_PREVIEW_URL } from '@kbn/security-solution-plugin/common/constants';
 import type { RiskScore } from '@kbn/security-solution-plugin/server/lib/risk_engine/types';
 import { v4 as uuidv4 } from 'uuid';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
@@ -85,7 +85,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
   const getRiskScores = async ({ body }: { body: object }): Promise<{ scores: RiskScore[] }> => {
     const { body: result } = await supertest
-      .post(RISK_SCORES_URL)
+      .post(RISK_SCORE_PREVIEW_URL)
       .set('kbn-xsrf', 'true')
       .send(body)
       .expect(200);
