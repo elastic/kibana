@@ -15,10 +15,7 @@ import type {
   SavedObjectsUpdateResponse,
 } from '@kbn/core/server';
 import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
-import type {
-  CaseAttributes,
-  CaseUserActionAttributesWithoutConnectorId,
-} from '../../../common/api';
+import type { CaseAttributes, CaseUserActionWithoutReferenceIds } from '../../../common/api';
 import { Actions, ActionTypes, CaseSeverity, CaseStatuses } from '../../../common/api';
 import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
 
@@ -1600,9 +1597,7 @@ describe('CaseUserActionService', () => {
         const pushes = [{ date: new Date(), connectorId: '123' }];
 
         describe('getConnectorFieldsBeforeLatestPush', () => {
-          const getAggregations = (
-            userAction: SavedObject<CaseUserActionAttributesWithoutConnectorId>
-          ) => {
+          const getAggregations = (userAction: SavedObject<CaseUserActionWithoutReferenceIds>) => {
             const connectors = set({}, 'servicenow.mostRecent.hits.hits', [userAction]);
 
             const aggregations = set({}, 'references.connectors.reverse.ids.buckets', connectors);
@@ -1753,8 +1748,8 @@ describe('CaseUserActionService', () => {
 
         describe('getCaseConnectorInformation', () => {
           const getAggregations = (
-            userAction: SavedObject<CaseUserActionAttributesWithoutConnectorId>,
-            pushUserAction: SavedObject<CaseUserActionAttributesWithoutConnectorId>
+            userAction: SavedObject<CaseUserActionWithoutReferenceIds>,
+            pushUserAction: SavedObject<CaseUserActionWithoutReferenceIds>
           ) => {
             const changeConnector = set({}, 'mostRecent.hits.hits', [userAction]);
             const createCase = set({}, 'mostRecent.hits.hits', []);

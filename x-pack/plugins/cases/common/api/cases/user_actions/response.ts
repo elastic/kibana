@@ -56,7 +56,7 @@ const UserActionsWithoutConnectorIdRt = rt.union([
 ]);
 
 const CaseUserActionBasicRt = rt.intersection([UserActionPayloadRt, UserActionCommonAttributesRt]);
-const CaseUserActionBasicWithoutConnectorIdRt = rt.intersection([
+export const CaseUserActionWithoutReferenceIdsRt = rt.intersection([
   UserActionsWithoutConnectorIdRt,
   UserActionCommonAttributesRt,
 ]);
@@ -86,8 +86,8 @@ export const UserActionsRt = rt.array(UserActionRt);
 export const CaseUserActionsDeprecatedResponseRt = rt.array(CaseUserActionDeprecatedResponseRt);
 export const CaseUserActionStatsResponseRt = CaseUserActionStatsRt;
 
-export type CaseUserActionAttributesWithoutConnectorId = rt.TypeOf<
-  typeof CaseUserActionBasicWithoutConnectorIdRt
+export type CaseUserActionWithoutReferenceIds = rt.TypeOf<
+  typeof CaseUserActionWithoutReferenceIdsRt
 >;
 export type CaseUserActionStatsResponse = rt.TypeOf<typeof CaseUserActionStatsRt>;
 export type UserActions = rt.TypeOf<typeof UserActionsRt>;
