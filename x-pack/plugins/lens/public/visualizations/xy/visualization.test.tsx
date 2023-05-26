@@ -3636,11 +3636,12 @@ describe('xy_visualization', () => {
               Object {
                 "data-test-subj": "lnsXY_annotationLayer_saveToLibrary",
                 "description": "Saves annotation group as separate saved object",
-                "displayName": "Save to library",
+                "displayName": "Save annotation group",
                 "execute": [Function],
                 "icon": "save",
                 "isCompatible": true,
                 "order": 100,
+                "showOutsideList": true,
               },
               Object {
                 "data-test-subj": "lnsXY_annotationLayer_unlinkFromLibrary",
