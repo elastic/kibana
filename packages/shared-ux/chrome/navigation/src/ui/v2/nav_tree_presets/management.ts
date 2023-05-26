@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
+import { NodeDefinition } from '../types';
 
-export const management: ChromeProjectNavigationNode = {
+export const management: NodeDefinition = {
   id: 'management',
   title: 'Management',
   icon: 'gear',

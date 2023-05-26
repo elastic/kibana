@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
+import { NodeDefinition } from '../types';
 
-export const devtools: ChromeProjectNavigationNode = {
+export const devtools: NodeDefinition = {
   title: 'Developer tools',
   id: 'devtools',
   icon: 'editorCodeBlock',

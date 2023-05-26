@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
+import { NodeDefinition } from '../types';
 
-export const ml: ChromeProjectNavigationNode = {
+export const ml: NodeDefinition = {
   id: 'ml',
   title: 'Machine learning',
   icon: 'indexMapping',
