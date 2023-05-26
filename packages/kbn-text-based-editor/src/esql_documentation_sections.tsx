@@ -985,6 +985,52 @@ NOTE: This function accepts all types and always returns an integer.
     },
     {
       label: i18n.translate(
+        'textBasedEditor.query.textBasedLanguagesEditor.documentation.mvJoinFunction',
+        {
+          defaultMessage: 'MV_JOIN',
+        }
+      ),
+      description: (
+        <Markdown
+          markdown={i18n.translate(
+            'textBasedEditor.query.textBasedLanguagesEditor.documentation.mvJoinFunction.markdown',
+            {
+              defaultMessage: `### MV_JOIN
+Converts a multivalued string field into a single valued field containing the concatenation of all values separated by a delimiter:
+
+\`\`\`
+ROW a=["foo", "zoo", "bar"]
+| EVAL j = MV_JOIN(a, ", ")
+\`\`\`
+
+Returning:
+
+\`\`\`
+["foo", "zoo", "bar"] | "foo, zoo, bar"
+\`\`\`
+
+If you want to join non-string fields call \`TO_STRING\` on them first:
+
+\`\`\`
+ROW a=[10, 9, 8]
+| EVAL j = MV_JOIN(TO_STRING(a), ", ")
+\`\`\`
+
+Returning:
+
+\`\`\`
+[10, 9, 8] | "10, 9, 8"
+\`\`\`
+              `,
+              description:
+                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+            }
+          )}
+        />
+      ),
+    },
+    {
+      label: i18n.translate(
         'textBasedEditor.query.textBasedLanguagesEditor.documentation.mvMaxFunction',
         {
           defaultMessage: 'MV_MAX',
