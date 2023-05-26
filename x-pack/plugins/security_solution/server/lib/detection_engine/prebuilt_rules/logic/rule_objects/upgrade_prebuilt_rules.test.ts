@@ -6,12 +6,11 @@
  */
 
 import { rulesClientMock } from '@kbn/alerting-plugin/server/mocks';
-import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import {
   getRuleMock,
   getFindResultWithSingleHit,
 } from '../../../routes/__mocks__/request_responses';
-import { updatePrebuiltRules } from './update_prebuilt_rules';
+import { upgradePrebuiltRules } from './upgrade_prebuilt_rules';
 import { patchRules } from '../../../rule_management/logic/crud/patch_rules';
 import { getPrebuiltRuleMock, getPrebuiltThreatMatchRuleMock } from '../../mocks';
 import { getThreatRuleParams } from '../../../rule_schema/mocks';
@@ -20,11 +19,9 @@ jest.mock('../../../rule_management/logic/crud/patch_rules');
 
 describe('updatePrebuiltRules', () => {
   let rulesClient: ReturnType<typeof rulesClientMock.create>;
-  let savedObjectsClient: ReturnType<typeof savedObjectsClientMock.create>;
 
   beforeEach(() => {
     rulesClient = rulesClientMock.create();
-    savedObjectsClient = savedObjectsClientMock.create();
   });
 
   it('should omit actions and enabled when calling patchRules', async () => {
@@ -39,7 +36,7 @@ describe('updatePrebuiltRules', () => {
     const prepackagedRule = getPrebuiltRuleMock();
     rulesClient.find.mockResolvedValue(getFindResultWithSingleHit());
 
-    await updatePrebuiltRules(rulesClient, savedObjectsClient, [{ ...prepackagedRule, actions }]);
+    await upgradePrebuiltRules(rulesClient, [{ ...prepackagedRule, actions }]);
 
     expect(patchRules).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -70,9 +67,7 @@ describe('updatePrebuiltRules', () => {
       data: [getRuleMock(getThreatRuleParams())],
     });
 
-    await updatePrebuiltRules(rulesClient, savedObjectsClient, [
-      { ...prepackagedRule, ...updatedThreatParams },
-    ]);
+    await upgradePrebuiltRules(rulesClient, [{ ...prepackagedRule, ...updatedThreatParams }]);
 
     expect(patchRules).toHaveBeenCalledWith(
       expect.objectContaining({

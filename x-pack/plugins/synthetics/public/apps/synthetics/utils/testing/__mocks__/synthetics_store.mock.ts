@@ -130,6 +130,7 @@ export const mockState: SyntheticsAppState = {
   },
   dynamicSettings: {
     loading: false,
+    locationMonitors: [],
   },
   defaultAlerting: {
     loading: false,

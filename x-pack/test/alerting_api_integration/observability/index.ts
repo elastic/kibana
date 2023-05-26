@@ -5,12 +5,9 @@
  * 2.0.
  */
 
-import type {
-  RuleSignatureId,
-  RuleVersion,
-} from '../../../../../../common/detection_engine/rule_schema';
-
-export interface PrebuiltRuleVersionInfo {
-  rule_id: RuleSignatureId;
-  version: RuleVersion;
+// eslint-disable-next-line import/no-default-export
+export default function ({ loadTestFile }: any) {
+  describe('MetricsUI Endpoints', () => {
+    loadTestFile(require.resolve('./metric_threshold_rule'));
+  });
 }
