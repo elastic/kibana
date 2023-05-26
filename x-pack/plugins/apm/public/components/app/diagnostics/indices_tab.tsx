@@ -47,6 +47,33 @@ export function DiagnosticsIndices() {
       },
     },
     {
+      field: 'ingestPipeline',
+      name: 'Ingest pipelines',
+      render: (_, { ingestPipeline }) => {
+        if (ingestPipeline.id === undefined) {
+          return (
+            <EuiToolTip content={`Pipeline is missing`}>
+              <EuiIcon type="warning" />
+            </EuiToolTip>
+          );
+        }
+
+        return (
+          <>
+            {ingestPipeline.isValid ? (
+              ingestPipeline.id
+            ) : (
+              <EuiToolTip
+                content={`The expected processor for "observer.version" was not found in "${ingestPipeline.id}"`}
+              >
+                <EuiIcon type="warning" />
+              </EuiToolTip>
+            )}
+          </>
+        );
+      },
+    },
+    {
       field: 'fieldMappings',
       name: 'Field mappings',
       render: (_, { fieldMappings }) => {
@@ -62,33 +89,6 @@ export function DiagnosticsIndices() {
               </EuiToolTip>
             )}
           </>
-        );
-      },
-    },
-    {
-      field: 'ingestPipeline',
-      name: 'Ingest pipelines',
-      render: (_, { ingestPipeline }) => {
-        if (ingestPipeline.id === undefined) {
-          return <em>None</em>;
-        }
-
-        return (
-          <EuiToolTip
-            content={
-              ingestPipeline.isValid
-                ? `Pipeline: ${ingestPipeline.id}`
-                : `The expected processor for "observer.version" was not found in "${ingestPipeline.id}"`
-            }
-          >
-            <>
-              {ingestPipeline.isValid ? (
-                <EuiIcon type="check" />
-              ) : (
-                <EuiIcon type="warning" />
-              )}
-            </>
-          </EuiToolTip>
         );
       },
     },

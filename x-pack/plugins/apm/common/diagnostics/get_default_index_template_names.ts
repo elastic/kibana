@@ -34,3 +34,19 @@ export function getIsValidIndexTemplateName(templateName: string) {
     templateName.startsWith(defaultName)
   );
 }
+
+export function validateIngestPipelineName(
+  dataStream: string | undefined,
+  ingestPipelineId: string | undefined
+) {
+  if (!dataStream || !ingestPipelineId) {
+    return false;
+  }
+
+  const defaultTemplateNames = getDefaultIndexTemplateNames();
+  const prefix = defaultTemplateNames.find((defaultName) =>
+    dataStream.startsWith(defaultName)
+  );
+
+  return prefix ? ingestPipelineId.startsWith(prefix) : false;
+}

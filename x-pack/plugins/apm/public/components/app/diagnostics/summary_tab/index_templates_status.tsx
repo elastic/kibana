@@ -40,12 +40,7 @@ export function IndexTemplatesStatus() {
         </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem grow={10}>
-        {isOk
-          ? 'Index templates'
-          : isEveryDefaultApmIndexTemplateInstalled === false
-          ? 'Index templates: Not all expected index templates exist'
-          : 'Index templates: Non standard index templates found'}
-
+        Index templates
         <EuiLink
           data-test-subj="apmIndexTemplatesStatusSeeDetailsLink"
           href={router.link('/diagnostics/index-templates')}

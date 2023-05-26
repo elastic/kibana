@@ -7,7 +7,6 @@
 
 import React from 'react';
 import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { useApmRouter } from '../../../../hooks/use_apm_router';
 import { useFetcher } from '../../../../hooks/use_fetcher';
 
@@ -33,12 +32,7 @@ export function FieldMappingStatus() {
         </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem grow={10}>
-        {isOk
-          ? 'Indices'
-          : i18n.translate('xpack.apm.diagnostics.indices.title', {
-              defaultMessage: 'Indicies: Invalid indices were found',
-            })}
-
+        Indices
         <EuiLink
           data-test-subj="apmFieldMappingStatusSeeDetailsLink"
           href={router.link('/diagnostics/indices')}

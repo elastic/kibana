@@ -7,14 +7,12 @@
 
 import expect from '@kbn/expect';
 import { apm, timerange } from '@kbn/apm-synthtrace-client';
-import { getDefaultIndexTemplateNames } from '@kbn/apm-plugin/common/diagnostics/get_default_index_template_names';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
   const apmApiClient = getService('apmApiClient');
   const synthtraceEsClient = getService('synthtraceEsClient');
-  const supertest = getService('supertest');
   const es = getService('es');
   const synthtraceKibanaClient = getService('synthtraceKibanaClient');
 
@@ -69,10 +67,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
     describe('When data is ingested without the necessary index templates', () => {
       before(async () => {
-        // delete APM index templates and data streams
-        await es.indices.deleteDataStream({ name: '*apm*' });
-        await es.indices.deleteIndexTemplate({ name: getDefaultIndexTemplateNames() });
-        await supertest.delete(`/api/fleet/epm/packages/apm`);
+        await es.indices.deleteDataStream({ name: 'traces-apm-*' });
+        await es.indices.deleteIndexTemplate({ name: ['traces-apm'] });
 
         const instance = apm
           .service({ name: 'synth-go', environment: 'production', agentName: 'go' })
@@ -110,10 +106,98 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           {
             isValid: false,
             fieldMappings: { isValid: false, invalidType: 'text' },
-            ingestPipeline: { isValid: true },
+            ingestPipeline: { isValid: false },
             index: 'traces-apm-default',
           },
         ]);
+      });
+    });
+
+    describe('ingest pipelines', () => {
+      before(async () => {
+        const instance = apm
+          .service({ name: 'synth-go', environment: 'production', agentName: 'go' })
+          .instance('instance-a');
+
+        await synthtraceEsClient.index(
+          timerange(start, end)
+            .interval('1m')
+            .rate(30)
+            .generator((timestamp) =>
+              instance
+                .transaction({ transactionName: 'GET /users' })
+                .timestamp(timestamp)
+                .duration(100)
+                .success()
+            )
+        );
+      });
+
+      after(async () => {
+        const latestVersion = await synthtraceKibanaClient.fetchLatestApmPackageVersion();
+        await synthtraceKibanaClient.installApmPackage(latestVersion);
+        await synthtraceEsClient.clean();
+      });
+
+      describe('an ingest pipeline is removed', () => {
+        before(async () => {
+          const datastreamToUpdate = await es.indices.getDataStream({
+            name: 'metrics-apm.internal-default',
+          });
+          await es.indices.putSettings({
+            index: datastreamToUpdate.data_streams[0].indices[0].index_name,
+            // @ts-expect-error: Allow null values in https://github.com/elastic/elasticsearch-specification/pull/2126
+            body: { index: { default_pipeline: null } },
+          });
+        });
+
+        it('returns the item without an ingest pipeline', async () => {
+          const { status, body } = await apmApiClient.adminUser({
+            endpoint: 'GET /internal/apm/diagnostics/indices',
+          });
+
+          expect(status).to.be(200);
+          expect(body.validItems.length).to.be.greaterThan(0);
+          expect(body.invalidItems).to.eql([
+            {
+              isValid: false,
+              fieldMappings: { isValid: true },
+              ingestPipeline: { isValid: false },
+              index: '.ds-metrics-apm.internal-default-2023.05.26-000001',
+              dataStream: 'metrics-apm.internal-default',
+            },
+          ]);
+        });
+      });
+
+      describe('an ingest pipeline is changed', () => {
+        before(async () => {
+          const datastreamToUpdate = await es.indices.getDataStream({
+            name: 'metrics-apm.internal-default',
+          });
+          await es.indices.putSettings({
+            index: datastreamToUpdate.data_streams[0].indices[0].index_name,
+            body: { index: { default_pipeline: 'logs-default-pipeline' } },
+          });
+        });
+
+        it('returns the item without an ingest pipeline', async () => {
+          const { status, body } = await apmApiClient.adminUser({
+            endpoint: 'GET /internal/apm/diagnostics/indices',
+          });
+
+          expect(status).to.be(200);
+          expect(body.validItems.length).to.be.greaterThan(0);
+          expect(body.invalidItems).to.eql([
+            {
+              isValid: false,
+              fieldMappings: { isValid: true },
+              ingestPipeline: { isValid: false, id: 'logs-default-pipeline' },
+              index: '.ds-metrics-apm.internal-default-2023.05.26-000001',
+              dataStream: 'metrics-apm.internal-default',
+            },
+          ]);
+        });
       });
     });
   });

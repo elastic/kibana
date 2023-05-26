@@ -7,6 +7,7 @@
 
 import { compact, uniq } from 'lodash';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import { validateIngestPipelineName } from '../../../../common/diagnostics/get_default_index_template_names';
 import { SERVICE_NAME } from '../../../../common/es_fields/apm';
 import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 import { getUniqueApmIndices } from '../index_templates/get_matching_index_templates';
@@ -59,7 +60,8 @@ export async function getIndicesWithStatuses({
 
       const isValidFieldMappings = invalidFieldMapping === undefined;
       const isValidIngestPipeline =
-        pipelineId === undefined || hasObserverVersionProcessor === true;
+        hasObserverVersionProcessor === true &&
+        validateIngestPipelineName(dataStream, pipelineId);
 
       return {
         isValid: isValidFieldMappings && isValidIngestPipeline,

@@ -42,13 +42,7 @@ export function DataStreamsStatus() {
       </EuiFlexItem>
 
       <EuiFlexItem grow={10}>
-        {isLoading
-          ? '...'
-          : isOk
-          ? 'Data streams'
-          : hasNonDataStreamIndices
-          ? 'Data streams: Non-data stream indices were found'
-          : 'Data streams: Some data streams are backed by non-standard index templates'}
+        Data streams
         <EuiLink
           data-test-subj="apmDataStreamsStatusSeeDetailsLink"
           href={router.link('/diagnostics/data_streams')}
