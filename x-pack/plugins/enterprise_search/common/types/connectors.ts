@@ -195,6 +195,7 @@ export interface Connector {
   last_sync_error: string | null;
   last_sync_scheduled_at: string | null;
   last_sync_status: SyncStatus | null;
+  last_permissions_sync_status: SyncStatus | null;
   last_synced: string | null;
   name: string;
   pipeline?: IngestPipelineParams | null;

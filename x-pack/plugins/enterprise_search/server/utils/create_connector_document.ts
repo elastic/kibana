@@ -118,6 +118,7 @@ export function createConnectorDocument({
     last_sync_error: null,
     last_sync_scheduled_at: null,
     last_sync_status: null,
+    last_permissions_sync_status: null,
     last_synced: null,
     name: indexName.startsWith('search-') ? indexName.substring(7) : indexName,
     pipeline,

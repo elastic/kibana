@@ -148,6 +148,7 @@ describe('addConnector lib function', () => {
         last_sync_error: null,
         last_sync_scheduled_at: null,
         last_sync_status: null,
+        last_permissions_sync_status: null,
         last_synced: null,
         name: 'index_name',
         pipeline: {
@@ -331,6 +332,7 @@ describe('addConnector lib function', () => {
         last_sync_error: null,
         last_sync_scheduled_at: null,
         last_sync_status: null,
+        last_permissions_sync_status: null,
         last_synced: null,
         name: 'index_name',
         pipeline: {
@@ -439,6 +441,7 @@ describe('addConnector lib function', () => {
         last_sync_error: null,
         last_sync_scheduled_at: null,
         last_sync_status: null,
+        last_permissions_sync_status: null,
         last_synced: null,
         name: 'index_name',
         pipeline: {

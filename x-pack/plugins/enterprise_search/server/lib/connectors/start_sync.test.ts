@@ -44,6 +44,7 @@ describe('startSync lib function', () => {
           last_sync_error: null,
           last_sync_scheduled_at: null,
           last_sync_status: null,
+          last_permissions_sync_status: null,
           last_synced: null,
           scheduling: { enabled: true, interval: '1 2 3 4 5' },
           service_type: null,

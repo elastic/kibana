@@ -5,25 +5,19 @@
  * 2.0.
  */
 
-import { ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE } from '../../../../common/constants';
+import {ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE} from '../../../../common/constants';
 
 import {
-  SyncStatus,
   ConnectorStatus,
+  DisplayType,
   FieldType,
   FilteringPolicy,
   FilteringRuleRule,
   FilteringValidationState,
-  DisplayType,
+  SyncStatus,
 } from '../../../../common/types/connectors';
 
-import {
-  ApiViewIndex,
-  ConnectorViewIndex,
-  CrawlerViewIndex,
-  IngestionMethod,
-  IngestionStatus,
-} from '../types';
+import {ApiViewIndex, ConnectorViewIndex, CrawlerViewIndex, IngestionMethod, IngestionStatus,} from '../types';
 
 export const apiIndex: ApiViewIndex = {
   count: 1,
@@ -132,6 +126,7 @@ export const connectorIndex: ConnectorViewIndex = {
     last_sync_error: null,
     last_sync_scheduled_at: null,
     last_sync_status: SyncStatus.COMPLETED,
+    last_permissions_sync_status: SyncStatus.COMPLETED,
     last_synced: null,
     name: 'connector',
     scheduling: {
@@ -248,6 +243,7 @@ export const crawlerIndex: CrawlerViewIndex = {
     last_sync_error: null,
     last_sync_scheduled_at: null,
     last_sync_status: SyncStatus.COMPLETED,
+    last_permissions_sync_status: SyncStatus.COMPLETED,
     last_synced: null,
     name: 'crawler',
     scheduling: {

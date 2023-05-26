@@ -132,6 +132,7 @@ describe('Setup Indices', () => {
       last_sync_error: { type: 'keyword' },
       last_sync_scheduled_at: { type: 'date' },
       last_sync_status: { type: 'keyword' },
+      last_permissions_sync_status: { type: 'keyword' },
       last_synced: { type: 'date' },
       name: { type: 'keyword' },
       pipeline: {
