@@ -26193,6 +26193,17 @@
           },
           {
             "parentPluginId": "fleet",
+            "id": "def-common.EPM_API_ROUTES.INSTALLED_LIST_PATTERN",
+            "type": "string",
+            "tags": [],
+            "label": "INSTALLED_LIST_PATTERN",
+            "description": [],
+            "path": "x-pack/plugins/fleet/common/constants/routes.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
             "id": "def-common.EPM_API_ROUTES.LIMITED_LIST_PATTERN",
             "type": "string",
             "tags": [],
@@ -26208,6 +26219,17 @@
             "type": "string",
             "tags": [],
             "label": "INFO_PATTERN",
+            "description": [],
+            "path": "x-pack/plugins/fleet/common/constants/routes.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.EPM_API_ROUTES.DATA_STREAMS_PATTERN",
+            "type": "string",
+            "tags": [],
+            "label": "DATA_STREAMS_PATTERN",
             "description": [],
             "path": "x-pack/plugins/fleet/common/constants/routes.ts",
             "deprecated": false,

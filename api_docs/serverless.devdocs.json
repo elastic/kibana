@@ -77,6 +77,52 @@
             }
           ],
           "returnComment": []
+        },
+        {
+          "parentPluginId": "serverless",
+          "id": "def-public.ServerlessPluginStart.setNavigation",
+          "type": "Function",
+          "tags": [],
+          "label": "setNavigation",
+          "description": [],
+          "signature": [
+            "(projectNavigation: ",
+            {
+              "pluginId": "@kbn/core-chrome-browser",
+              "scope": "common",
+              "docId": "kibKbnCoreChromeBrowserPluginApi",
+              "section": "def-common.ChromeProjectNavigation",
+              "text": "ChromeProjectNavigation"
+            },
+            ") => void"
+          ],
+          "path": "x-pack/plugins/serverless/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [
+            {
+              "parentPluginId": "serverless",
+              "id": "def-public.ServerlessPluginStart.setNavigation.$1",
+              "type": "Object",
+              "tags": [],
+              "label": "projectNavigation",
+              "description": [],
+              "signature": [
+                {
+                  "pluginId": "@kbn/core-chrome-browser",
+                  "scope": "common",
+                  "docId": "kibKbnCoreChromeBrowserPluginApi",
+                  "section": "def-common.ChromeProjectNavigation",
+                  "text": "ChromeProjectNavigation"
+                }
+              ],
+              "path": "x-pack/plugins/serverless/public/types.ts",
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            }
+          ],
+          "returnComment": []
         }
       ],
       "lifecycle": "start",
