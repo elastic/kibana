@@ -36,23 +36,26 @@ const getDefaultNavigationTree = (
         type: 'cloudLink',
         preset: 'deployments',
       },
+      {
+        type: 'recentlyAccessed',
+      },
       ...projectDefinition,
       {
-        type: 'group',
+        type: 'navGroup',
         ...getPresets('analytics'),
       },
       {
-        type: 'group',
+        type: 'navGroup',
         ...getPresets('ml'),
       },
     ],
     footer: [
       {
-        type: 'group',
+        type: 'navGroup',
         ...getPresets('devtools'),
       },
       {
-        type: 'group',
+        type: 'navGroup',
         ...getPresets('management'),
       },
     ],

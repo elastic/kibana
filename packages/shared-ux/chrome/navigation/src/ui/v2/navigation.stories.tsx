@@ -117,7 +117,7 @@ const simpleNavigationDefinition: ProjectNavigationDefinition = {
   homeRef: 'https://elastic.co',
   projectNavigationTree: [
     {
-      type: 'group',
+      type: 'navGroup',
       id: 'example_projet',
       title: 'Example project',
       icon: 'logoObservability',
@@ -195,7 +195,7 @@ const navigationDefinition: ProjectNavigationDefinition = {
       },
       // My custom project
       {
-        type: 'group',
+        type: 'navGroup',
         id: 'example_projet',
         title: 'Example project',
         icon: 'logoObservability',
@@ -240,7 +240,7 @@ const navigationDefinition: ProjectNavigationDefinition = {
       },
       // Add ml
       {
-        type: 'group',
+        type: 'navGroup',
         ...getPresets('ml'),
       },
     ],
@@ -250,7 +250,7 @@ const navigationDefinition: ProjectNavigationDefinition = {
         defaultIsCollapsed: true,
       },
       {
-        type: 'group',
+        type: 'navGroup',
         ...getPresets('devtools'),
       },
     ],

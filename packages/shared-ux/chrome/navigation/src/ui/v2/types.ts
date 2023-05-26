@@ -74,7 +74,7 @@ export interface CloudLinkDefinition extends CloudLinkProps {
  * A group root item definition.
  */
 export interface GroupDefinition extends NodeDefinition {
-  type: 'group';
+  type: 'navGroup';
   /** Flag to indicate if the group is initially collapsed or not. */
   defaultIsCollapsed?: boolean;
   children?: NodeDefinition[];
