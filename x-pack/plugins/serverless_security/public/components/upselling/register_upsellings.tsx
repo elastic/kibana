@@ -13,9 +13,10 @@ import type {
   UpsellingSectionId,
 } from '@kbn/security-solution-plugin/public';
 
-import type { ServerlessSecurityPLIs } from '../../../common/config';
-import { getProjectPLIsFeatures } from '../../../common/pli/pli_features';
+import type { SecurityProductLineIds } from '../../../common/config';
+import { getProductAppFeatures } from '../../../common/pli/pli_features';
 import { GenericUpsellingSection } from './pages/generic_upselling_section';
+import { GenericUpsellingPage } from './pages/generic_upselling_page';
 
 interface UpsellingsConfig {
   feature: AppFeatureKey;
@@ -27,9 +28,9 @@ type UpsellingSections = Array<UpsellingsConfig & { id: UpsellingSectionId }>;
 
 export const registerUpsellings = (
   upselling: UpsellingService,
-  projectPLIs: ServerlessSecurityPLIs
+  projectPLIs: SecurityProductLineIds
 ) => {
-  const PLIsFeatures = getProjectPLIsFeatures(projectPLIs);
+  const PLIsFeatures = getProductAppFeatures(projectPLIs);
 
   const upsellingPages = getUpsellingPages(projectPLIs).reduce<PageUpsellings>(
     (pageUpsellings, { pageName, feature, component }) => {
@@ -66,7 +67,7 @@ const getUpsellingPages = (projectPLIs: SecurityProductLineIds): UpsellingPages 
   },
 ];
 
-const getUpsellingSections = (projectPLIs: ServerlessSecurityPLIs): UpsellingSections => [
+const getUpsellingSections = (projectPLIs: SecurityProductLineIds): UpsellingSections => [
   {
     id: 'entity_analytics_panel',
     feature: AppFeatureKey.advancedInsights,

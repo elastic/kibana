@@ -7,7 +7,7 @@
 
 import { PluginInitializerContext, Plugin, CoreSetup } from '@kbn/core/server';
 import { ServerlessSecurityConfig } from './config';
-import { getProjectPLIsFeatures } from '../common/pli/pli_features';
+import { getProductAppFeatures } from '../common/pli/pli_features';
 
 import {
   ServerlessSecurityPluginSetup,
@@ -38,7 +38,9 @@ export class ServerlessSecurityPlugin
     const shouldRegister = pluginsSetup.essSecurity == null;
 
     if (shouldRegister) {
-      pluginsSetup.securitySolution.setAppFeatures(getProjectPLIsFeatures(this.config.projectPLIs));
+      pluginsSetup.securitySolution.setAppFeatures(
+        getProductAppFeatures(this.config.productLineIds)
+      );
     }
 
     return {};

@@ -7,13 +7,13 @@
 
 import { schema, TypeOf } from '@kbn/config-schema';
 
-export const projectPLI = schema.oneOf([
+export const productLineId = schema.oneOf([
   schema.literal('endpointEssentials'),
   schema.literal('cloudEssentials'),
 ]);
-export type ServerlessSecurityPLI = TypeOf<typeof projectPLI>;
+export type SecurityProductLineId = TypeOf<typeof productLineId>;
 
-export const projectPLIs = schema.arrayOf<ServerlessSecurityPLI>(projectPLI, {
+export const productLineIds = schema.arrayOf<SecurityProductLineId>(productLineId, {
   defaultValue: ['endpointEssentials'],
 });
-export type ServerlessSecurityPLIs = TypeOf<typeof projectPLIs>;
+export type SecurityProductLineIds = TypeOf<typeof productLineIds>;

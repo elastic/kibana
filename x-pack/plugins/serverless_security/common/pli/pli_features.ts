@@ -6,21 +6,21 @@
  */
 
 import type { AppFeatureKey, AppFeatureKeys } from '@kbn/security-solution-plugin/common';
-import { ServerlessSecurityPLI } from '../config';
+import { SecurityProductLineId } from '../config';
 import { PLI_APP_FEATURES } from './pli_config';
 
 /**
  * Returns the U (union) of all enabled PLIs features in a single object.
  */
-export const getProjectPLIsFeatures = (projectPLIs: ServerlessSecurityPLI[]): AppFeatureKeys =>
-  projectPLIs.reduce<AppFeatureKeys>((plisFeatures, projectPLI) => {
-    const PLIFeatures = PLI_APP_FEATURES[projectPLI];
+export const getProductAppFeatures = (productLineIds: SecurityProductLineId[]): AppFeatureKeys =>
+  productLineIds.reduce<AppFeatureKeys>((appFeatures, productLineId) => {
+    const productAppFeatures = PLI_APP_FEATURES[productLineId];
 
-    Object.entries(PLIFeatures).forEach(([featureName, enabled]) => {
+    Object.entries(productAppFeatures).forEach(([featureName, enabled]) => {
       if (enabled) {
-        plisFeatures[featureName as AppFeatureKey] = true;
+        appFeatures[featureName as AppFeatureKey] = true;
       }
     });
 
-    return PLIFeatures;
+    return productAppFeatures;
   }, {} as AppFeatureKeys);
