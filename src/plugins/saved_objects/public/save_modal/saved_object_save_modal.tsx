@@ -194,6 +194,11 @@ export class SavedObjectSaveModal extends React.Component<Props, SaveModalState>
     return (
       <EuiFormRow
         fullWidth
+        labelAppend={
+          <EuiText size="xs" color="subdued">
+            <FormattedMessage id="savedObjects.saveModal.optional" defaultMessage="Optional" />
+          </EuiText>
+        }
         label={
           <FormattedMessage
             id="savedObjects.saveModal.descriptionLabel"

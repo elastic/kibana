@@ -84,6 +84,7 @@ export const SaveModal = ({
           <savedObjectsTagging.ui.components.SavedObjectSaveModalTagSelector
             initialSelection={selectedTags}
             onTagsSelected={setSelectedTags}
+            markOptional
           />
         ) : undefined
       }
