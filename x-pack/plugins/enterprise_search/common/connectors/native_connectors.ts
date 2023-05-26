@@ -123,6 +123,23 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
           }
         ),
         options: [],
+        order: 7,
+        required: true,
+        sensitive: false,
+        tooltip: '',
+        type: FieldType.BOOLEAN,
+        ui_restrictions: [],
+        validations: [],
+        value: false,
+      },
+      document_level_security: {
+        // TODO DO NOT MERGE: This is added here for only tests
+        // TODO Feature flag
+        default_value: false,
+        depends_on: [],
+        display: DisplayType.TOGGLE,
+        label: 'Enable DLS', // TODO update this when
+        options: [],
         order: 6,
         required: true,
         sensitive: false,
