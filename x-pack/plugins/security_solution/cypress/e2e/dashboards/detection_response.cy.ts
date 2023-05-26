@@ -32,6 +32,7 @@ import { investigateDashboardItemInTimeline } from '../../tasks/dashboards/commo
 import { waitToNavigateAwayFrom } from '../../tasks/kibana_navigation';
 import { login, visit } from '../../tasks/login';
 import { clearSearchBar, kqlSearch } from '../../tasks/security_header';
+import { createNewTimeline } from '../../tasks/timeline';
 import { ALERTS_URL, DASHBOARDS_URL, DETECTIONS_RESPONSE_URL } from '../../urls/navigation';
 
 const TEST_USER_NAME = 'test';
@@ -92,7 +93,7 @@ describe('Detection response view', () => {
 
   context('Open in timeline', () => {
     afterEach(() => {
-      closeTimeline();
+      createNewTimeline();
     });
 
     it(`opens timeline with correct query count for hosts by alert severity table`, () => {
