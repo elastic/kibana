@@ -6,7 +6,9 @@
  */
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import useLocalStorage from 'react-use/lib/useLocalStorage';
 import type { KubernetesCollectionMap } from '../../types';
+import { LOCAL_STORAGE_TREE_NAV_KEY } from '../../../common/constants';
 import { addTimerangeAndDefaultFilterToQuery } from '../../utils/add_timerange_and_default_filter_to_query';
 import { addTreeNavSelectionToFilterQuery } from './helpers';
 import { IndexPattern, GlobalFilter } from '../../types';
@@ -18,8 +20,9 @@ export type UseTreeViewProps = {
 
 export const useTreeView = ({ globalFilter, indexPattern }: UseTreeViewProps) => {
   const [noResults, setNoResults] = useState(false);
-  const [treeNavSelection, setTreeNavSelection] = useState<Partial<KubernetesCollectionMap>>({});
-  const [hasSelection, setHasSelection] = useState(false);
+  const [treeNavSelection = {}, setTreeNavSelection] = useLocalStorage<
+    Partial<KubernetesCollectionMap>
+  >(LOCAL_STORAGE_TREE_NAV_KEY, {});
   const filterQueryWithTimeRange = useMemo(() => {
     return JSON.parse(
       addTimerangeAndDefaultFilterToQuery(
@@ -30,28 +33,21 @@ export const useTreeView = ({ globalFilter, indexPattern }: UseTreeViewProps) =>
     );
   }, [globalFilter.filterQuery, globalFilter.startDate, globalFilter.endDate]);
 
-  const onTreeNavSelect = useCallback((selection: Partial<KubernetesCollectionMap>) => {
-    setHasSelection(false);
-    setTreeNavSelection(selection);
-  }, []);
+  const onTreeNavSelect = useCallback(
+    (selection: Partial<KubernetesCollectionMap>) => {
+      setTreeNavSelection(selection);
+    },
+    [setTreeNavSelection]
+  );
 
   const sessionViewFilter = useMemo(
     () => addTreeNavSelectionToFilterQuery(globalFilter.filterQuery, treeNavSelection),
     [globalFilter.filterQuery, treeNavSelection]
   );
 
-  // Resetting defaults whenever filter changes
   useEffect(() => {
     setNoResults(false);
-    setTreeNavSelection({});
   }, [filterQueryWithTimeRange]);
-
-  useEffect(() => {
-    if (!!treeNavSelection.clusterId) {
-      setHasSelection(true);
-      setTreeNavSelection(treeNavSelection);
-    }
-  }, [treeNavSelection]);
 
   return {
     noResults,
@@ -59,8 +55,8 @@ export const useTreeView = ({ globalFilter, indexPattern }: UseTreeViewProps) =>
     filterQueryWithTimeRange,
     indexPattern: indexPattern?.title || '',
     onTreeNavSelect,
-    hasSelection,
     treeNavSelection,
+    setTreeNavSelection,
     sessionViewFilter,
   };
 };

@@ -37,8 +37,7 @@ export const TreeViewContainer = ({
 const TreeViewContainerComponent = ({ renderSessionsView }: TreeViewContainerComponentDeps) => {
   const styles = useStyles();
 
-  const { hasSelection, treeNavSelection, sessionViewFilter, onTreeNavSelect, noResults } =
-    useTreeViewContext();
+  const { treeNavSelection, sessionViewFilter, onTreeNavSelect, noResults } = useTreeViewContext();
 
   return (
     <EuiSplitPanel.Outer direction="row" hasBorder borderRadius="m" css={styles.outerPanel}>
@@ -53,7 +52,7 @@ const TreeViewContainerComponent = ({ renderSessionsView }: TreeViewContainerCom
           </EuiSplitPanel.Inner>
           <EuiSplitPanel.Inner css={styles.sessionsPanel}>
             <Breadcrumb treeNavSelection={treeNavSelection} onSelect={onTreeNavSelect} />
-            {hasSelection && renderSessionsView(sessionViewFilter)}
+            {renderSessionsView(sessionViewFilter)}
           </EuiSplitPanel.Inner>
         </>
       )}

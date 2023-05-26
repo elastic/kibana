@@ -38,11 +38,13 @@ const focusPreviousButton = (event: KeyboardEvent) => {
 };
 
 const DynamicTreeViewExpander = ({
+  defaultExpanded = false,
   children,
 }: {
+  defaultExpanded: boolean;
   children: (childrenProps: { isExpanded: boolean; onToggleExpand: () => void }) => JSX.Element;
 }) => {
-  const [isExpanded, setIsExpanded] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(defaultExpanded);
 
   const onToggleExpand = () => {
     setIsExpanded((e) => !e);
@@ -66,7 +68,7 @@ export const DynamicTreeView = ({
 }: DynamicTreeViewProps) => {
   const styles = useStyles(depth);
 
-  const { indexPattern, setNoResults } = useTreeViewContext();
+  const { indexPattern, setNoResults, setTreeNavSelection } = useTreeViewContext();
 
   const { data, fetchNextPage, isFetchingNextPage, hasNextPage, isLoading } =
     useFetchDynamicTreeView(query, tree[depth].key, indexPattern, expanded);
@@ -93,8 +95,9 @@ export const DynamicTreeView = ({
   useEffect(() => {
     if (depth === 0 && data && data.pages?.[0].buckets.length === 0) {
       setNoResults(true);
+      setTreeNavSelection({});
     }
-  }, [data, depth, setNoResults]);
+  }, [data, depth, setNoResults, setTreeNavSelection]);
 
   useEffect(() => {
     if (expanded) {
@@ -165,8 +168,10 @@ export const DynamicTreeView = ({
             },
           };
 
+          const defaultExpanded = selected.indexOf(aggData.key) > 0;
+
           return (
-            <DynamicTreeViewExpander key={aggData.key}>
+            <DynamicTreeViewExpander key={aggData.key} defaultExpanded={defaultExpanded}>
               {({ isExpanded, onToggleExpand }) => (
                 <DynamicTreeViewItem
                   aggData={aggData}
