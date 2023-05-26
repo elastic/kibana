@@ -200,7 +200,7 @@ const RuleSnoozeSchedulerPanel: React.FunctionComponent<PanelOpts> = ({
   );
   const selectEndDT = useCallback(
     (date) => {
-      setEndDT(date);
+      setEndDT(date.add(1, 'minutes'));
       setSelectingEndTime(true);
       setSelectingEndDate(false);
     },
@@ -210,8 +210,7 @@ const RuleSnoozeSchedulerPanel: React.FunctionComponent<PanelOpts> = ({
   const onSelectFromInline = useCallback(
     (date) => {
       const dateAsMoment = moment(date);
-      const newDateAfterStart =
-        !startDT || dateAsMoment.isAfter(startDT) || dateAsMoment.isSame(startDT);
+      const newDateAfterStart = !startDT || dateAsMoment.isSameOrAfter(startDT);
       const isEndDateTimeChange =
         dateAsMoment.isSame(endDT, 'day') && !dateAsMoment.isSame(endDT, 'minute');
       const isStartDateTimeChange =
@@ -309,7 +308,7 @@ const RuleSnoozeSchedulerPanel: React.FunctionComponent<PanelOpts> = ({
                 selected={endDT}
                 onChange={setEndDT}
                 minDate={startDT ?? minDate}
-                isInvalid={startDT?.isAfter(endDT)}
+                isInvalid={startDT?.isSameOrAfter(endDT)}
               />
             }
           />
@@ -376,7 +375,7 @@ const RuleSnoozeSchedulerPanel: React.FunctionComponent<PanelOpts> = ({
       <EuiButton
         fill
         fullWidth
-        disabled={!startDT || !endDT || startDT.isAfter(endDT) || startDT.isBefore(minDate)}
+        disabled={!startDT || !endDT || startDT.isSameOrAfter(endDT) || startDT.isBefore(minDate)}
         onClick={onClickSaveSchedule}
         isLoading={isLoading}
         data-test-subj="scheduler-saveSchedule"
