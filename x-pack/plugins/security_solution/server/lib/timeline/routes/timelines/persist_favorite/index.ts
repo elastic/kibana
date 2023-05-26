@@ -23,7 +23,7 @@ import { persistFavoriteSchema } from '../../../schemas/timelines/persist_favori
 
 export const persistFavoriteRoute = (
   router: SecuritySolutionPluginRouter,
-  config: ConfigType,
+  _: ConfigType,
   security: SetupPlugins['security']
 ) => {
   router.patch(

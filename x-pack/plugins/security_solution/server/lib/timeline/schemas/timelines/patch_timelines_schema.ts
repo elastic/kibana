@@ -7,11 +7,11 @@
 
 import * as rt from 'io-ts';
 
-import { SavedTimelineRuntimeType } from '../../../../../common/types/timeline';
+import { TimelineSOServerRepresentation } from '../../../../../common/types/timeline';
 import { unionWithNullType } from '../../../../../common/utility_types';
 
 export const patchTimelineSchema = rt.type({
-  timeline: SavedTimelineRuntimeType,
+  timeline: TimelineSOServerRepresentation,
   timelineId: unionWithNullType(rt.string),
   version: unionWithNullType(rt.string),
 });

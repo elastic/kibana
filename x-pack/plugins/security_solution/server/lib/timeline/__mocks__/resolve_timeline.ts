@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ResolvedTimelineWithOutcomeSavedObject } from '../../../../common/types/timeline';
+import type { ResolvedTimelineWithOutcomeSavedObjectResponse } from '../../../../common/types/timeline';
 import { TimelineStatus, TimelineType } from '../../../../common/types/timeline';
 
 export const mockResolvedSavedObject = {
@@ -117,7 +117,7 @@ export const mockPopulatedTimeline = {
   pinnedEventsSaveObject: [],
 };
 
-export const mockResolveTimelineResponse: ResolvedTimelineWithOutcomeSavedObject = {
+export const mockResolveTimelineResponse: ResolvedTimelineWithOutcomeSavedObjectResponse = {
   timeline: mockPopulatedTimeline,
   outcome: 'aliasMatch',
   alias_target_id: 'new-saved-object-id',

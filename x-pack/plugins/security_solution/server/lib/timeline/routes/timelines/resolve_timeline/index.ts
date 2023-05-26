@@ -19,10 +19,14 @@ import { buildSiemResponse } from '../../../../detection_engine/routes/utils';
 import { buildFrameworkRequest } from '../../../utils/common';
 import { getTimelineQuerySchema } from '../../../schemas/timelines';
 import { getTimelineTemplateOrNull, resolveTimelineOrNull } from '../../../saved_object/timelines';
+import type {
+  TimelineSOServerRepresentationType,
+  ResolvedTimelineWithOutcomeSavedObjectResponse,
+} from '../../../../../../common/types/timeline';
 
 export const resolveTimelineRoute = (
   router: SecuritySolutionPluginRouter,
-  config: ConfigType,
+  _: ConfigType,
   security: SetupPlugins['security']
 ) => {
   router.get(
@@ -41,7 +45,10 @@ export const resolveTimelineRoute = (
         const query = request.query ?? {};
         const { template_timeline_id: templateTimelineId, id } = query;
 
-        let res = null;
+        let res:
+          | TimelineSOServerRepresentationType
+          | ResolvedTimelineWithOutcomeSavedObjectResponse
+          | null = null;
 
         if (templateTimelineId != null && id == null) {
           // Template timelineId is not a SO id, so it does not need to be updated to use resolve

@@ -8,7 +8,7 @@
 import * as rt from 'io-ts';
 
 import {
-  SavedTimelineRuntimeType,
+  TimelineSOServerRepresentation,
   TimelineStatusLiteralRt,
   TimelineTypeLiteralRt,
 } from '../../../../../common/types/timeline';
@@ -16,7 +16,7 @@ import { unionWithNullType } from '../../../../../common/utility_types';
 
 export const createTimelineSchema = rt.intersection([
   rt.type({
-    timeline: SavedTimelineRuntimeType,
+    timeline: TimelineSOServerRepresentation,
   }),
   rt.partial({
     status: unionWithNullType(TimelineStatusLiteralRt),

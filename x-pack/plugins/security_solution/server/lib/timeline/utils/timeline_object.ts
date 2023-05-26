@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import type { TimelineTypeLiteral, TimelineSavedObject } from '../../../../common/types/timeline';
+import type {
+  TimelineTypeLiteral,
+  TimelineSavedObjectResponseT,
+} from '../../../../common/types/timeline';
 import { TimelineType, TimelineStatus } from '../../../../common/types/timeline';
 import type { FrameworkRequest } from '../../framework';
 import { getTimelineOrNull, getTimelineTemplateOrNull } from '../saved_object/timelines';
@@ -23,7 +26,7 @@ export class TimelineObject {
   public readonly version: string | number | null;
   private frameworkRequest: FrameworkRequest;
 
-  public data: TimelineSavedObject | null;
+  public data: TimelineSavedObjectResponse | null;
 
   constructor({
     id = null,

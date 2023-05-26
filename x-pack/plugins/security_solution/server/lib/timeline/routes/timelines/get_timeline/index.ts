@@ -19,10 +19,14 @@ import { buildSiemResponse } from '../../../../detection_engine/routes/utils';
 import { buildFrameworkRequest } from '../../../utils/common';
 import { getTimelineQuerySchema } from '../../../schemas/timelines';
 import { getTimelineTemplateOrNull, getTimelineOrNull } from '../../../saved_object/timelines';
+import type {
+  TimelineSavedObjectRuntimeResponseType,
+  ResolvedTimelineWithOutcomeSavedObjectResponse,
+} from '../../../../../../common/types/timeline';
 
 export const getTimelineRoute = (
   router: SecuritySolutionPluginRouter,
-  config: ConfigType,
+  _: ConfigType,
   security: SetupPlugins['security']
 ) => {
   router.get(
@@ -41,7 +45,10 @@ export const getTimelineRoute = (
         const query = request.query ?? {};
         const { template_timeline_id: templateTimelineId, id } = query;
 
-        let res = null;
+        let res:
+          | TimelineSavedObjectRuntimeResponseType
+          | ResolvedTimelineWithOutcomeSavedObjectResponse
+          | null = null;
 
         if (templateTimelineId != null && id == null) {
           res = await getTimelineTemplateOrNull(frameworkRequest, templateTimelineId);

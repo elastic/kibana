@@ -304,6 +304,9 @@ export const SavedTimelineRuntimeType = runtimeTypes.partial({
   updatedBy: unionWithNullType(runtimeTypes.string),
 });
 
+/**
+ * This is the actual type that is used for the saved object
+ */
 export type SavedTimeline = runtimeTypes.TypeOf<typeof SavedTimelineRuntimeType>;
 
 export type SavedTimelineWithSavedObjectId = SavedTimeline & { savedObjectId?: string | null };
@@ -325,8 +328,43 @@ export enum TimelineId {
   detectionsAlertDetailsPage = 'detections-alert-details-page',
 }
 
+/**
+ * This is the type that should be used in server responses. It's the transfer object type for `SavedTimeline`
+ */
+
+export const TimelineSOServerRepresentation = runtimeTypes.partial({
+  columns: unionWithNullType(runtimeTypes.array(SavedColumnHeaderRuntimeType)),
+  dataProviders: unionWithNullType(runtimeTypes.array(SavedDataProviderRuntimeType)),
+  dataViewId: unionWithNullType(runtimeTypes.string),
+  description: unionWithNullType(runtimeTypes.string),
+  eqlOptions: unionWithNullType(EqlOptionsRuntimeType),
+  eventType: unionWithNullType(runtimeTypes.string),
+  excludedRowRendererIds: unionWithNullType(runtimeTypes.array(RowRendererIdRuntimeType)),
+  favorite: unionWithNullType(runtimeTypes.array(SavedFavoriteRuntimeType)),
+  filters: unionWithNullType(runtimeTypes.array(SavedFilterRuntimeType)),
+  indexNames: unionWithNullType(runtimeTypes.array(runtimeTypes.string)),
+  kqlMode: unionWithNullType(runtimeTypes.string),
+  kqlQuery: unionWithNullType(SavedFilterQueryQueryRuntimeType),
+  title: unionWithNullType(runtimeTypes.string),
+  templateTimelineId: unionWithNullType(runtimeTypes.string),
+  templateTimelineVersion: unionWithNullType(runtimeTypes.number),
+  timelineType: unionWithNullType(TimelineTypeLiteralRt),
+  dateRange: unionWithNullType(SavedDateRangePickerRuntimeType),
+  savedQueryId: unionWithNullType(runtimeTypes.string),
+  sort: unionWithNullType(SavedSortRuntimeType),
+  status: unionWithNullType(TimelineStatusLiteralRt),
+  created: unionWithNullType(runtimeTypes.number),
+  createdBy: unionWithNullType(runtimeTypes.string),
+  updated: unionWithNullType(runtimeTypes.number),
+  updatedBy: unionWithNullType(runtimeTypes.string),
+});
+
+export type TimelineSOServerRepresentationType = runtimeTypes.TypeOf<
+  typeof TimelineSOServerRepresentation
+>;
+
 export const TimelineSavedToReturnObjectRuntimeType = runtimeTypes.intersection([
-  SavedTimelineRuntimeType,
+  TimelineSOServerRepresentation,
   runtimeTypes.type({
     savedObjectId: runtimeTypes.string,
     version: runtimeTypes.string,
@@ -340,7 +378,7 @@ export const TimelineSavedToReturnObjectRuntimeType = runtimeTypes.intersection(
   }),
 ]);
 
-export type TimelineSavedObject = runtimeTypes.TypeOf<
+export type TimelineSavedObjectRuntimeResponseType = runtimeTypes.TypeOf<
   typeof TimelineSavedToReturnObjectRuntimeType
 >;
 
@@ -364,7 +402,7 @@ export const ResolvedTimelineSavedObjectToReturnObjectRuntimeType = runtimeTypes
   }),
 ]);
 
-export type ResolvedTimelineWithOutcomeSavedObject = runtimeTypes.TypeOf<
+export type ResolvedTimelineWithOutcomeSavedObjectResponse = runtimeTypes.TypeOf<
   typeof ResolvedTimelineSavedObjectToReturnObjectRuntimeType
 >;
 
@@ -413,7 +451,7 @@ export interface ExportedNotes {
   globalNotes: ExportedGlobalNotes;
 }
 
-export type ExportedTimelines = TimelineSavedObject &
+export type ExportedTimelines = TimelineSavedObjectRuntimeResponseType &
   ExportedNotes & {
     pinnedEventIds: string[];
   };

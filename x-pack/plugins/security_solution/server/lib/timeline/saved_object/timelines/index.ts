@@ -13,6 +13,7 @@ import {
   SavedObjectsErrorHelpers,
 } from '@kbn/core/server';
 import type { AuthenticatedUser } from '@kbn/security-plugin/server';
+
 import { UNAUTHENTICATED_USER } from '../../../../../common/constants';
 import type { NoteSavedObject } from '../../../../../common/types/timeline/note';
 import type { PinnedEventSavedObject } from '../../../../../common/types/timeline/pinned_event';
@@ -25,12 +26,12 @@ import type {
   ResponseTimeline,
   SavedTimeline,
   SortTimeline,
-  TimelineSavedObject,
+  TimelineSavedObjectRuntimeResponseType,
   TimelineTypeLiteralWithNull,
   TimelineStatusLiteralWithNull,
   TimelineResult,
   TimelineWithoutExternalRefs,
-  ResolvedTimelineWithOutcomeSavedObject,
+  ResolvedTimelineWithOutcomeSavedObjectResponse,
 } from '../../../../../common/types/timeline';
 import { TimelineType, TimelineStatus } from '../../../../../common/types/timeline';
 import type { FrameworkRequest } from '../../../framework';
@@ -49,7 +50,7 @@ export const getTimeline = async (
   request: FrameworkRequest,
   timelineId: string,
   timelineType: TimelineTypeLiteralWithNull = TimelineType.default
-): Promise<TimelineSavedObject> => {
+): Promise<TimelineSavedObjectRuntimeResponseType> => {
   let timelineIdToUse = timelineId;
   try {
     if (timelineType === TimelineType.template) {
@@ -73,7 +74,7 @@ export const getTimeline = async (
 export const getTimelineOrNull = async (
   frameworkRequest: FrameworkRequest,
   savedObjectId: string
-): Promise<TimelineSavedObject | null> => {
+): Promise<TimelineSavedObjectRuntimeResponseType | null> => {
   let timeline = null;
   try {
     timeline = await getTimeline(frameworkRequest, savedObjectId);
@@ -85,13 +86,53 @@ export const getTimelineOrNull = async (
 export const resolveTimelineOrNull = async (
   frameworkRequest: FrameworkRequest,
   savedObjectId: string
-): Promise<ResolvedTimelineWithOutcomeSavedObject | null> => {
-  let resolvedTimeline = null;
+): Promise<ResolvedTimelineWithOutcomeSavedObjectResponse | null> => {
   try {
-    resolvedTimeline = await resolveSavedTimeline(frameworkRequest, savedObjectId);
-    // eslint-disable-next-line no-empty
-  } catch (e) {}
-  return resolvedTimeline;
+    const resolvedSavedTimeline = await resolveSavedTimeline(frameworkRequest, savedObjectId);
+
+    const response: ResolvedTimelineWithOutcomeSavedObjectResponse = {
+      alias_purpose: resolvedSavedTimeline.alias_purpose,
+      alias_target_id: resolvedSavedTimeline.alias_target_id,
+      outcome: resolvedSavedTimeline.outcome,
+      timeline: {
+        columns: resolvedSavedTimeline.timeline.columns,
+        dataProviders: resolvedSavedTimeline.timeline.dataProviders,
+        dataViewId: resolvedSavedTimeline.timeline.dataViewId,
+        description: resolvedSavedTimeline.timeline.description,
+        eqlOptions: resolvedSavedTimeline.timeline.eqlOptions,
+        eventType: resolvedSavedTimeline.timeline.eventType,
+        excludedRowRendererIds: resolvedSavedTimeline.timeline.excludedRowRendererIds,
+        favorite: resolvedSavedTimeline.timeline.favorite,
+        filters: resolvedSavedTimeline.timeline.filters,
+        indexNames: resolvedSavedTimeline.timeline.indexNames,
+        kqlMode: resolvedSavedTimeline.timeline.kqlMode,
+        kqlQuery: resolvedSavedTimeline.timeline.kqlQuery,
+        title: resolvedSavedTimeline.timeline.title,
+        templateTimelineId: resolvedSavedTimeline.timeline.templateTimelineId,
+        templateTimelineVersion: resolvedSavedTimeline.timeline.templateTimelineVersion,
+        timelineType: resolvedSavedTimeline.timeline.timelineType,
+        dateRange: resolvedSavedTimeline.timeline.dateRange,
+        savedQueryId: resolvedSavedTimeline.timeline.savedQueryId,
+        sort: resolvedSavedTimeline.timeline.sort,
+        status: resolvedSavedTimeline.timeline.status,
+        created: resolvedSavedTimeline.timeline.created,
+        createdBy: resolvedSavedTimeline.timeline.createdBy,
+        updated: resolvedSavedTimeline.timeline.updated,
+        updatedBy: resolvedSavedTimeline.timeline.updatedBy,
+        savedObjectId: resolvedSavedTimeline.timeline.savedObjectId,
+        version: resolvedSavedTimeline.timeline.version,
+        eventIdToNoteIds: resolvedSavedTimeline.timeline.eventIdToNoteIds,
+        noteIds: resolvedSavedTimeline.timeline.noteIds,
+        notes: resolvedSavedTimeline.timeline.notes,
+        pinnedEventIds: resolvedSavedTimeline.timeline.pinnedEventIds,
+        pinnedEventsSaveObject: resolvedSavedTimeline.timeline.pinnedEventsSaveObject,
+      },
+    };
+
+    return response;
+  } catch (e) {
+    return null;
+  }
 };
 
 export const getTimelineByTemplateTimelineId = async (
@@ -99,26 +140,69 @@ export const getTimelineByTemplateTimelineId = async (
   templateTimelineId: string
 ): Promise<{
   totalCount: number;
-  timeline: TimelineSavedObject[];
+  timeline: TimelineSavedObjectRuntimeResponseType[];
 }> => {
   const options: SavedObjectsFindOptions = {
     type: timelineSavedObjectType,
     filter: `siem-ui-timeline.attributes.templateTimelineId: "${templateTimelineId}"`,
   };
+
   return getAllSavedTimeline(request, options);
 };
 
 export const getTimelineTemplateOrNull = async (
   frameworkRequest: FrameworkRequest,
   templateTimelineId: string
-): Promise<TimelineSavedObject | null> => {
-  let templateTimeline = null;
+): Promise<TimelineSavedObjectRuntimeResponseType | null> => {
   try {
-    templateTimeline = await getTimelineByTemplateTimelineId(frameworkRequest, templateTimelineId);
+    const templateTimelineResponse = await getTimelineByTemplateTimelineId(
+      frameworkRequest,
+      templateTimelineId
+    );
+
+    const timeline = templateTimelineResponse?.timeline[0];
+
+    if (!timeline) {
+      return Promise.reject(new Error('Timeline not found'));
+    }
+
+    const response: TimelineSavedObjectRuntimeResponseType = {
+      columns: timeline.columns,
+      dataProviders: timeline.dataProviders,
+      dataViewId: timeline.dataViewId,
+      description: timeline.description,
+      eqlOptions: timeline.eqlOptions,
+      eventType: timeline.eventType,
+      excludedRowRendererIds: timeline.excludedRowRendererIds,
+      favorite: timeline.favorite,
+      filters: timeline.filters,
+      indexNames: timeline.indexNames,
+      kqlMode: timeline.kqlMode,
+      kqlQuery: timeline.kqlQuery,
+      title: timeline.title,
+      templateTimelineId: timeline.templateTimelineId,
+      templateTimelineVersion: timeline.templateTimelineVersion,
+      timelineType: timeline.timelineType,
+      dateRange: timeline.dateRange,
+      savedQueryId: timeline.savedQueryId,
+      sort: timeline.sort,
+      status: timeline.status,
+      created: timeline.created,
+      createdBy: timeline.createdBy,
+      updated: timeline.updated,
+      updatedBy: timeline.updatedBy,
+      savedObjectId: timeline.savedObjectId,
+      version: timeline.version,
+      eventIdToNoteIds: timeline.eventIdToNoteIds,
+      noteIds: timeline.noteIds,
+      notes: timeline.notes,
+      pinnedEventIds: timeline.pinnedEventIds,
+      pinnedEventsSaveObject: timeline.pinnedEventsSaveObject,
+    };
+    return response;
   } catch (e) {
     return null;
   }
-  return templateTimeline?.timeline[0] ?? null;
 };
 
 /** The filter here is able to handle the legacy data,
@@ -186,7 +270,7 @@ export const getExistingPrepackagedTimelines = async (
   pageInfo?: PageInfoTimeline
 ): Promise<{
   totalCount: number;
-  timeline: TimelineSavedObject[];
+  timeline: TimelineSavedObjectRuntimeResponseType[];
 }> => {
   const queryPageInfo =
     countsOnly && pageInfo == null
@@ -679,9 +763,9 @@ export const convertStringToBase64 = (text: string): string => Buffer.from(text)
 export const timelineWithReduxProperties = (
   notes: NoteSavedObject[],
   pinnedEvents: PinnedEventSavedObject[],
-  timeline: TimelineSavedObject,
+  timeline: TimelineSavedObjectRuntimeResponseType,
   userName: string
-): TimelineSavedObject => ({
+): TimelineSavedObjectRuntimeResponseType => ({
   ...timeline,
   favorite:
     timeline.favorite != null && userName != null
@@ -726,7 +810,7 @@ export const getSelectedTimelines = async (
   );
 
   const timelineObjects: {
-    timelines: TimelineSavedObject[];
+    timelines: TimelineSavedObjectRuntimeResponseType[];
     errors: ExportTimelineNotFoundError[];
   } = savedObjects.saved_objects.reduce(
     (acc, savedObject) => {
@@ -742,7 +826,7 @@ export const getSelectedTimelines = async (
       return { errors: [...acc.errors, savedObject.error], timelines: acc.timelines };
     },
     {
-      timelines: [] as TimelineSavedObject[],
+      timelines: [] as TimelineSavedObjectRuntimeResponseType[],
       errors: [] as ExportTimelineNotFoundError[],
     }
   );
