@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { eachSeries } from 'async';
+
 import { Logger } from '@kbn/logging';
 import { RouteRegisterParameters } from '.';
 import { getRoutePaths } from '../../common';
@@ -27,6 +27,15 @@ async function checkStep({ step, logger }: { step: ProfilingSetupStep; logger: L
 
 function checkSteps({ steps, logger }: { steps: ProfilingSetupStep[]; logger: Logger }) {
   return Promise.all(steps.map(async (step) => checkStep({ step, logger })));
+}
+
+async function executeStep({ step, logger }: { step: ProfilingSetupStep; logger: Logger }) {
+  logger.debug(`Executing step ${step.name}`);
+  step.init();
+}
+
+function executeSteps({ steps, logger }: { steps: ProfilingSetupStep[]; logger: Logger }) {
+  return Promise.all(steps.map(async (step) => executeStep({ step, logger })));
 }
 
 export function registerSetupRoute({
@@ -67,10 +76,13 @@ export function registerSetupRoute({
         }
 
         const initializeStep = createStepToInitializeElasticsearch(stepOptions);
-        const initializeResults = await checkStep({ step: initializeStep, logger });
+        const initializeResult = await checkStep({ step: initializeStep, logger });
 
-        if (initializeResults.error) {
-          return handleRouteHandlerError({ error: initializeResults.error, logger, response });
+        if (!initializeResult.completed) {
+          throw new Error(`Elasticsearch is not initialized for Universal Profiling`);
+        }
+        if (initializeResult.error) {
+          return handleRouteHandlerError({ error: initializeResult.error, logger, response });
         }
 
         const hasData = await hasProfilingData({
@@ -138,22 +150,18 @@ export function registerSetupRoute({
         }
 
         const initializeStep = createStepToInitializeElasticsearch(stepOptions);
-        const initializeResults = await checkStep({ step: initializeStep, logger });
+        await executeStep({ step: initializeStep, logger });
+        const initializeResult = await checkStep({ step: initializeStep, logger });
 
-        if (initializeResults.error) {
-          return handleRouteHandlerError({ error: initializeResults.error, logger, response });
+        if (!initializeResult.completed) {
+          throw new Error(`Elasticsearch is not initialized for Universal Profiling`);
+        }
+        if (initializeResult.error) {
+          return handleRouteHandlerError({ error: initializeResult.error, logger, response });
         }
 
         const steps = getProfilingSetupSteps(stepOptions);
-
-        await eachSeries(steps, (step, cb) => {
-          logger.debug(`Executing step ${step.name}`);
-          step
-            .init()
-            .then(() => cb())
-            .catch(cb);
-        });
-
+        await executeSteps({ steps, logger });
         const checkedSteps = await checkSteps({ steps, logger });
 
         if (checkedSteps.every((step) => step.completed)) {
