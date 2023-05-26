@@ -55,7 +55,7 @@ export type {
   FieldListGroups,
   FieldsGroupDetails,
   FieldTypeKnown,
-  FieldListItemTypeBase,
+  FieldListItem,
   GetCustomFieldType,
   RenderFieldItemParams,
 } from './types';

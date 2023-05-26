@@ -25,7 +25,7 @@ export enum ExistenceFetchStatus {
   unknown = 'unknown',
 }
 
-export interface FieldListItemTypeBase {
+export interface FieldListItem {
   name: DataViewField['name'];
   type?: DataViewField['type'];
   displayName?: DataViewField['displayName'];
@@ -57,13 +57,13 @@ export interface FieldsGroupDetails {
   hideIfEmpty?: boolean;
 }
 
-export interface FieldsGroup<T extends FieldListItemTypeBase> extends FieldsGroupDetails {
+export interface FieldsGroup<T extends FieldListItem> extends FieldsGroupDetails {
   fields: T[];
   fieldCount: number;
   fieldSearchHighlight?: string;
 }
 
-export type FieldListGroups<T extends FieldListItemTypeBase> = {
+export type FieldListGroups<T extends FieldListItem> = {
   [key in FieldsGroupNames]?: FieldsGroup<T>;
 };
 
@@ -72,9 +72,9 @@ export type FieldTypeKnown = Exclude<
   undefined
 >;
 
-export type GetCustomFieldType<T extends FieldListItemTypeBase> = (field: T) => FieldTypeKnown;
+export type GetCustomFieldType<T extends FieldListItem> = (field: T) => FieldTypeKnown;
 
-export interface RenderFieldItemParams<T extends FieldListItemTypeBase> {
+export interface RenderFieldItemParams<T extends FieldListItem> {
   field: T;
   hideDetails?: boolean;
   itemIndex: number;

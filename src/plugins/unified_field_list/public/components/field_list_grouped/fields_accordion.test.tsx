@@ -11,10 +11,10 @@ import { stubLogstashDataView as dataView } from '@kbn/data-views-plugin/common/
 import { EuiLoadingSpinner, EuiNotificationBadge, EuiText } from '@elastic/eui';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { FieldsAccordion, FieldsAccordionProps } from './fields_accordion';
-import { FieldListItemTypeBase, FieldsGroupNames } from '../../types';
+import { FieldListItem, FieldsGroupNames } from '../../types';
 
 describe('UnifiedFieldList <FieldsAccordion />', () => {
-  let defaultProps: FieldsAccordionProps<FieldListItemTypeBase>;
+  let defaultProps: FieldsAccordionProps<FieldListItem>;
   const paginatedFields = dataView.fields;
 
   beforeEach(() => {

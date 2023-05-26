@@ -7,11 +7,11 @@
  */
 
 import { type DataViewField } from '@kbn/data-views-plugin/common';
-import { FieldListItemTypeBase } from '../../types';
+import { FieldListItem } from '../../types';
 import { getFieldIconType } from '../../utils/field_types';
 import { type FieldIconProps } from './field_icon';
 
-export function getFieldIconProps<T extends FieldListItemTypeBase = DataViewField>(
+export function getFieldIconProps<T extends FieldListItem = DataViewField>(
   field: T
 ): FieldIconProps {
   return {

@@ -14,7 +14,7 @@ import { EuiScreenReaderOnly, EuiSpacer } from '@elastic/eui';
 import { type DataViewField } from '@kbn/data-views-plugin/common';
 import { NoFieldsCallout } from './no_fields_callout';
 import { FieldsAccordion, type FieldsAccordionProps, getFieldKey } from './fields_accordion';
-import type { FieldListGroups, FieldListItemTypeBase } from '../../types';
+import type { FieldListGroups, FieldListItem } from '../../types';
 import { ExistenceFetchStatus, FieldsGroup, FieldsGroupNames } from '../../types';
 import './field_list_grouped.scss';
 
@@ -23,7 +23,7 @@ export const LOCAL_STORAGE_KEY_SECTIONS = 'unifiedFieldList.initiallyOpenSection
 
 type InitiallyOpenSections = Record<string, boolean>;
 
-function getDisplayedFieldsLength<T extends FieldListItemTypeBase>(
+function getDisplayedFieldsLength<T extends FieldListItem>(
   fieldGroups: FieldListGroups<T>,
   accordionState: InitiallyOpenSections
 ) {
@@ -32,7 +32,7 @@ function getDisplayedFieldsLength<T extends FieldListItemTypeBase>(
     .reduce((allFieldCount, [, { fields }]) => allFieldCount + fields.length, 0);
 }
 
-export interface FieldListGroupedProps<T extends FieldListItemTypeBase> {
+export interface FieldListGroupedProps<T extends FieldListItem> {
   fieldGroups: FieldListGroups<T>;
   fieldsExistenceStatus: ExistenceFetchStatus;
   fieldsExistInIndex: boolean;
@@ -43,7 +43,7 @@ export interface FieldListGroupedProps<T extends FieldListItemTypeBase> {
   'data-test-subj'?: string;
 }
 
-function InnerFieldListGrouped<T extends FieldListItemTypeBase = DataViewField>({
+function InnerFieldListGrouped<T extends FieldListItem = DataViewField>({
   fieldGroups,
   fieldsExistenceStatus,
   fieldsExistInIndex,
@@ -312,7 +312,7 @@ const FieldListGrouped = React.memo(InnerFieldListGrouped) as GenericFieldListGr
 // eslint-disable-next-line import/no-default-export
 export default FieldListGrouped;
 
-function shouldIncludeGroupDescriptionInAria<T extends FieldListItemTypeBase>(
+function shouldIncludeGroupDescriptionInAria<T extends FieldListItem>(
   group: FieldsGroup<T> | undefined
 ): boolean {
   if (!group) {

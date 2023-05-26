@@ -18,14 +18,10 @@ import {
 } from '@elastic/eui';
 import classNames from 'classnames';
 import { type DataViewField } from '@kbn/data-views-plugin/common';
-import {
-  type FieldListItemTypeBase,
-  FieldsGroupNames,
-  type RenderFieldItemParams,
-} from '../../types';
+import { type FieldListItem, FieldsGroupNames, type RenderFieldItemParams } from '../../types';
 import './fields_accordion.scss';
 
-export interface FieldsAccordionProps<T extends FieldListItemTypeBase> {
+export interface FieldsAccordionProps<T extends FieldListItem> {
   initialIsOpen: boolean;
   onToggle: (open: boolean) => void;
   id: string;
@@ -45,7 +41,7 @@ export interface FieldsAccordionProps<T extends FieldListItemTypeBase> {
   showExistenceFetchTimeout?: boolean;
 }
 
-function InnerFieldsAccordion<T extends FieldListItemTypeBase = DataViewField>({
+function InnerFieldsAccordion<T extends FieldListItem = DataViewField>({
   initialIsOpen,
   onToggle,
   id,
@@ -173,5 +169,5 @@ function InnerFieldsAccordion<T extends FieldListItemTypeBase = DataViewField>({
 
 export const FieldsAccordion = React.memo(InnerFieldsAccordion) as typeof InnerFieldsAccordion;
 
-export const getFieldKey = (field: FieldListItemTypeBase): string =>
+export const getFieldKey = (field: FieldListItem): string =>
   `${field.name}-${field.displayName}-${field.type}`;
