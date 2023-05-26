@@ -115,11 +115,7 @@ export const prebuiltRuleAllowlistFields: AllowlistFields = {
       sha256: true,
     },
   },
-  dns: {
-    question: {
-      name: true,
-    },
-  },
+  dns: true,
   event: true,
   group: {
     name: true,

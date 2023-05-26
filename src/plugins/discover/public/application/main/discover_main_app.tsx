@@ -9,7 +9,6 @@ import React, { useCallback, useEffect } from 'react';
 import { RootDragDropProvider } from '@kbn/dom-drag-drop';
 import { useHistory } from 'react-router-dom';
 import { useUrlTracking } from './hooks/use_url_tracking';
-import { useSearchSession } from './hooks/use_search_session';
 import { DiscoverStateContainer } from './services/discover_state';
 import { DiscoverLayout } from './components/layout';
 import { setBreadcrumbsTitle } from '../../utils/breadcrumbs';
@@ -43,11 +42,6 @@ export function DiscoverMainApp(props: DiscoverMainProps) {
   );
 
   useUrlTracking(stateContainer.savedSearchState);
-
-  /**
-   * Search session logic
-   */
-  useSearchSession({ services, stateContainer });
 
   /**
    * Adhoc data views functionality

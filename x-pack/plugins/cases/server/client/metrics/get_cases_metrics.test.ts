@@ -32,6 +32,13 @@ describe('getCasesMetrics', () => {
       });
     });
 
+    it('throws with excess fields', async () => {
+      await expect(
+        // @ts-expect-error: excess attribute
+        getCasesMetrics({ features: ['mttr'], foo: 'bar' }, client, clientArgs)
+      ).rejects.toThrow('invalid keys "foo"');
+    });
+
     it('returns the mttr metric', async () => {
       const metrics = await getCasesMetrics({ features: ['mttr'] }, client, clientArgs);
       expect(metrics).toEqual({ mttr: 5 });
