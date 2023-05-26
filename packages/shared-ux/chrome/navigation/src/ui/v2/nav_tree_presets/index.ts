@@ -7,18 +7,38 @@
  */
 
 import { cloneDeep } from 'lodash';
-import { NavigationBucketPreset } from '../types';
-import { analytics } from './analytics';
-import { devtools } from './devtools';
-import { management } from './management';
-import { ml } from './ml';
+import { NavigationGroupPreset, NodeDefinition } from '../types';
+import { analytics, type ID as AnalyticsID } from './analytics';
+import { devtools, type ID as DevtoolsID } from './devtools';
+import { management, type ID as ManagementID } from './management';
+import { ml, type ID as MlID } from './ml';
 
 export { analytics } from './analytics';
 export { devtools } from './devtools';
 export { ml } from './ml';
 export { management } from './management';
 
-export const getPresets = (preset: NavigationBucketPreset | 'all') => {
+export function getPresets(preset: 'devtools'): NodeDefinition<DevtoolsID>;
+export function getPresets(preset: 'management'): NodeDefinition<ManagementID>;
+export function getPresets(preset: 'ml'): NodeDefinition<MlID>;
+export function getPresets(preset: 'analytics'): NodeDefinition<AnalyticsID>;
+export function getPresets(preset: 'all'): {
+  analytics: NodeDefinition<AnalyticsID>;
+  devtools: NodeDefinition<DevtoolsID>;
+  ml: NodeDefinition<MlID>;
+  management: NodeDefinition<ManagementID>;
+};
+export function getPresets(preset: NavigationGroupPreset | 'all'):
+  | NodeDefinition<DevtoolsID>
+  | NodeDefinition<ManagementID>
+  | NodeDefinition<MlID>
+  | NodeDefinition<AnalyticsID>
+  | {
+      analytics: NodeDefinition<AnalyticsID>;
+      devtools: NodeDefinition<DevtoolsID>;
+      ml: NodeDefinition<MlID>;
+      management: NodeDefinition<ManagementID>;
+    } {
   if (preset === 'all') {
     return {
       analytics: cloneDeep(analytics),
@@ -40,4 +60,4 @@ export const getPresets = (preset: NavigationBucketPreset | 'all') => {
     default:
       throw new Error(`Unknown preset: ${preset}`);
   }
-};
+}

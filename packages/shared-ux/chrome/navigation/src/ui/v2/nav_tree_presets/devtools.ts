@@ -8,7 +8,15 @@
 
 import { NodeDefinition } from '../types';
 
-export const devtools: NodeDefinition = {
+export type ID =
+  | 'sharedux:devtools'
+  | 'root'
+  | 'console'
+  | 'search_profiler'
+  | 'grok_debugger'
+  | 'painless_lab';
+
+export const devtools: NodeDefinition<ID> = {
   title: 'Developer tools',
   id: 'sharedux:devtools',
   icon: 'editorCodeBlock',

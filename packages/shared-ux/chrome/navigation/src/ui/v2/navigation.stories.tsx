@@ -241,7 +241,22 @@ const navigationDefinition: ProjectNavigationDefinition = {
       // Add ml
       {
         type: 'navGroup',
-        ...getPresets('ml'),
+        preset: 'ml',
+      },
+      // And specific links from analytics
+      {
+        type: 'navGroup',
+        ...getPresets('analytics'),
+        title: 'My analytics', // Change the title
+        children: [
+          ...(getPresets('analytics').children ?? [])?.map((child) => ({
+            ...child,
+            children: child.children?.filter((item) => {
+              // Hide discover and dashboard
+              return item.id !== 'discover' && item.id !== 'dashboard';
+            }),
+          })),
+        ],
       },
     ],
     footer: [

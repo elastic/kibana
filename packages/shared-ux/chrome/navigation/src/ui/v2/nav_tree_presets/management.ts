@@ -8,7 +8,48 @@
 
 import { NodeDefinition } from '../types';
 
-export const management: NodeDefinition = {
+export type ID =
+  | 'sharedux:management'
+  | 'root'
+  | 'stack_monitoring'
+  | 'integration_management'
+  | 'integrations'
+  | 'fleet'
+  | 'osquery'
+  | 'stack_management'
+  | 'ingest'
+  | 'ingest_pipelines'
+  | 'logstash_pipelines'
+  | 'data'
+  | 'index_management'
+  | 'index_lifecycle_policies'
+  | 'snapshot_and_restore'
+  | 'rollup_jobs'
+  | 'transforms'
+  | 'cross_cluster_replication'
+  | 'remote_clusters'
+  | 'alerts_and_insights'
+  | 'rules'
+  | 'cases'
+  | 'connectors'
+  | 'reporting'
+  | 'machine_learning'
+  | 'watcher'
+  | 'security'
+  | 'users'
+  | 'roles'
+  | 'role_mappings'
+  | 'api_keys'
+  | 'kibana'
+  | 'data_views'
+  | 'saved_objects'
+  | 'tags'
+  | 'search_sessions'
+  | 'spaces'
+  | 'advanced_settings'
+  | 'upgrade_assistant';
+
+export const management: NodeDefinition<ID> = {
   id: 'sharedux:management',
   title: 'Management',
   icon: 'gear',

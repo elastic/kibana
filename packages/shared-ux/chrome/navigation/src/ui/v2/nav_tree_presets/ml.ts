@@ -8,7 +8,30 @@
 
 import { NodeDefinition } from '../types';
 
-export const ml: NodeDefinition = {
+export type ID =
+  | 'sharedux:ml'
+  | 'root'
+  | 'overview'
+  | 'notifications'
+  | 'anomaly_detection'
+  | 'jobs'
+  | 'explorer'
+  | 'single_metric_viewer'
+  | 'settings'
+  | 'data_frame_analytics'
+  | 'results_explorer'
+  | 'analytics_map'
+  | 'model_management'
+  | 'trained_models'
+  | 'nodes'
+  | 'data_visualizer'
+  | 'file'
+  | 'data_view'
+  | 'aiops_labs'
+  | 'explain_log_rate_spikes'
+  | 'log_pattern_analysis';
+
+export const ml: NodeDefinition<ID> = {
   id: 'sharedux:ml',
   title: 'Machine learning',
   icon: 'indexMapping',

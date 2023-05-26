@@ -8,7 +8,9 @@
 
 import { NodeDefinition } from '../types';
 
-export const analytics: NodeDefinition = {
+export type ID = 'sharedux:analytics' | 'root' | 'discover' | 'dashboard' | 'visualize';
+
+export const analytics: NodeDefinition<ID> = {
   // Make sure we have a unique id otherwise it might override a custom id from the project
   id: 'sharedux:analytics',
   title: 'Data exploration',

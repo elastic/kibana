@@ -20,9 +20,9 @@ import type { CloudLinkProps, RecentlyAccessedProps } from './components';
  * A navigation node definition with its unique id, title, path in the tree and optional
  * deep link and children.
  */
-export interface NodeDefinition {
+export interface NodeDefinition<T extends string = string, C extends string = T> {
   /** Optional id, if not passed a "link" must be provided. */
-  id?: string;
+  id?: T;
   /** Optional title. If not provided and a "link" is provided the title will be the Deep link title */
   title?: string;
   /** App id or deeplink id */
@@ -30,7 +30,7 @@ export interface NodeDefinition {
   /** Optional icon for the navigation node. Note: not all navigation depth will render the icon */
   icon?: string;
   /** Optional children of the navigation node */
-  children?: NodeDefinition[];
+  children?: Array<NodeDefinition<C>>;
 }
 
 /**
@@ -69,7 +69,7 @@ export interface ChromeProjectNavigationNodeEnhanced extends ChromeProjectNaviga
 }
 
 /** The preset that can be pass to the NavigationBucket component */
-export type NavigationBucketPreset = 'analytics' | 'devtools' | 'ml' | 'management';
+export type NavigationGroupPreset = 'analytics' | 'devtools' | 'ml' | 'management';
 
 /**
  * @public
@@ -99,6 +99,7 @@ export interface GroupDefinition extends NodeDefinition {
   /** Flag to indicate if the group is initially collapsed or not. */
   defaultIsCollapsed?: boolean;
   children?: NodeDefinition[];
+  preset?: NavigationGroupPreset;
 }
 
 /**

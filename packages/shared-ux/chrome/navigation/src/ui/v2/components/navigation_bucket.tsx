@@ -10,9 +10,9 @@ import React, { FC, useCallback } from 'react';
 
 import { analytics, devtools, ml, management } from '../nav_tree_presets';
 import { Navigation } from './navigation';
-import type { NavigationBucketPreset, NodeDefinition } from '../types';
+import type { NavigationGroupPreset, NodeDefinition } from '../types';
 
-const navTreePresets: { [preset in NavigationBucketPreset]: NodeDefinition } = {
+const navTreePresets: { [preset in NavigationGroupPreset]: NodeDefinition } = {
   analytics,
   ml,
   devtools,
@@ -20,7 +20,7 @@ const navTreePresets: { [preset in NavigationBucketPreset]: NodeDefinition } = {
 };
 
 export interface Props {
-  preset?: NavigationBucketPreset;
+  preset?: NavigationGroupPreset;
   nodeDefinition?: NodeDefinition;
   defaultIsCollapsed?: boolean;
 }

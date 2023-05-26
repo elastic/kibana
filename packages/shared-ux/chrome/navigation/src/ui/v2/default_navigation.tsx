@@ -10,6 +10,7 @@ import React, { FC, useCallback } from 'react';
 
 import { Navigation } from './components';
 import {
+  NavigationGroupPreset,
   NavigationTreeDefinition,
   NodeDefinition,
   ProjectNavigationDefinition,
@@ -21,11 +22,13 @@ import { RecentlyAccessed } from './components/recently_accessed';
 import { NavigationFooter } from './components/navigation_footer';
 import { getPresets } from './nav_tree_presets';
 
-const isChromeProjectNavigationNode = (
-  item: RootNavigationItemDefinition | NodeDefinition
-): item is NodeDefinition => {
+type NodeDefinitionWithPreset = NodeDefinition & { preset?: NavigationGroupPreset };
+
+const isRootNavigationItemDefinition = (
+  item: RootNavigationItemDefinition | NodeDefinitionWithPreset
+): item is RootNavigationItemDefinition => {
   // Only RootNavigationItemDefinition has a "type" property
-  return (item as RootNavigationItemDefinition).type === undefined;
+  return (item as RootNavigationItemDefinition).type !== undefined;
 };
 
 const getDefaultNavigationTree = (
@@ -79,25 +82,24 @@ export const DefaultNavigation: FC<ProjectNavigationDefinition> = ({
     : navigationTree!;
 
   const renderItems = useCallback(
-    (items: Array<RootNavigationItemDefinition | NodeDefinition> = [], path: string[] = []) => {
+    (
+      items: Array<RootNavigationItemDefinition | NodeDefinitionWithPreset> = [],
+      path: string[] = []
+    ) => {
       return items.map((item) => {
-        const isNavigationNode = isChromeProjectNavigationNode(item);
-        if (!isNavigationNode) {
+        const isRootNavigationItem = isRootNavigationItemDefinition(item);
+        if (isRootNavigationItem) {
           if (item.type === 'cloudLink') {
-            return (
-              <React.Fragment key={`cloudLink-${idCounter++}`}>
-                <CloudLink {...item} />
-              </React.Fragment>
-            );
+            return <CloudLink {...item} key={`cloudLink-${idCounter++}`} />;
           }
 
           if (item.type === 'recentlyAccessed') {
-            return (
-              <React.Fragment key={`recentlyAccessed-${idCounter++}`}>
-                <RecentlyAccessed {...item} />
-              </React.Fragment>
-            );
+            return <RecentlyAccessed {...item} key={`recentlyAccessed-${idCounter++}`} />;
           }
+        }
+
+        if (item.preset) {
+          return <Navigation.Group preset={item.preset} key={item.preset} />;
         }
 
         const id = item.id ?? item.link;
