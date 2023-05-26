@@ -6,6 +6,6 @@
  */
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
-export type GetStartedESSComponentProps = {};
+export type GetStartedComponentProps = {};
 
-export type GetStartedESSComponent = (props?: GetStartedESSComponentProps) => JSX.Element;
+export type GetStartedComponent = (props?: GetStartedComponentProps) => JSX.Element;
