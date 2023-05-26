@@ -34,7 +34,6 @@ export {
   apmEnableServiceMetrics,
   apmEnableContinuousRollups,
   enableCriticalPath,
-  profilingElasticsearchPlugin,
   syntheticsThrottlingEnabled,
 } from './ui_settings_keys';
 

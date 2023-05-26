@@ -429,7 +429,14 @@ export class Plugin implements ISecuritySolutionPlugin {
       // from where authz can be derived)
       false
     );
-    const { authz, agentService, packageService, packagePolicyService, agentPolicyService } =
+    const {
+      authz,
+      agentService,
+      packageService,
+      packagePolicyService,
+      agentPolicyService,
+      createFilesClient,
+    } =
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       plugins.fleet!;
     let manifestManager: ManifestManager | undefined;
@@ -480,6 +487,7 @@ export class Plugin implements ISecuritySolutionPlugin {
 
     this.endpointAppContextService.start({
       fleetAuthzService: authz,
+      createFleetFilesClient: createFilesClient,
       endpointMetadataService: new EndpointMetadataService(
         core.savedObjects,
         agentPolicyService,

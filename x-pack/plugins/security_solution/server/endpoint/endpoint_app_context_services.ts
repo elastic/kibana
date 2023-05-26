@@ -9,7 +9,12 @@ import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { ExceptionListClient, ListsServerExtensionRegistrar } from '@kbn/lists-plugin/server';
 import type { CasesClient, CasesStart } from '@kbn/cases-plugin/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
-import type { FleetStartContract, MessageSigningServiceInterface } from '@kbn/fleet-plugin/server';
+import type {
+  FleetStartContract,
+  MessageSigningServiceInterface,
+  FleetFileClientInterface,
+  FleetFileTransferDirection,
+} from '@kbn/fleet-plugin/server';
 import type { PluginStartContract as AlertsPluginStartContract } from '@kbn/alerting-plugin/server';
 import { ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID } from '@kbn/securitysolution-list-constants';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
@@ -47,6 +52,7 @@ export interface EndpointAppContextServiceSetupContract {
 
 export interface EndpointAppContextServiceStartContract {
   fleetAuthzService?: FleetStartContract['authz'];
+  createFleetFilesClient: FleetStartContract['createFilesClient'];
   logger: Logger;
   endpointMetadataService: EndpointMetadataService;
   endpointFleetServicesFactory: EndpointFleetServicesFactoryInterface;
@@ -244,5 +250,19 @@ export class EndpointAppContextService {
     }
 
     return this.startDependencies.actionCreateService;
+  }
+
+  public async getFleetFilesClient(
+    type: FleetFileTransferDirection
+  ): Promise<FleetFileClientInterface> {
+    if (!this.startDependencies?.createFleetFilesClient) {
+      throw new EndpointAppContentServicesNotStartedError();
+    }
+
+    return this.startDependencies.createFleetFilesClient(
+      'endpoint',
+      type,
+      this.startDependencies.config.maxUploadResponseActionFileBytes
+    );
   }
 }

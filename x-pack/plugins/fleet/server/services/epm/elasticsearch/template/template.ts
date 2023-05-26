@@ -426,6 +426,11 @@ function generateDateMapping(field: Field): IndexTemplateMapping {
   if (field.date_format) {
     mapping.format = field.date_format;
   }
+
+  if (field.name === '@timestamp') {
+    mapping.ignore_malformed = false;
+  }
+
   return mapping;
 }
 
