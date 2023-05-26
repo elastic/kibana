@@ -120,6 +120,8 @@ describe('DiscoverSavedSearchContainer', () => {
         title,
       };
 
+      discoverServiceMock.savedSearch.save = jest.fn().mockResolvedValue('123');
+
       const savedSearchContainer = getSavedSearchContainer({
         services: discoverServiceMock,
       });
@@ -168,7 +170,7 @@ describe('DiscoverSavedSearchContainer', () => {
     });
 
     it('Error thrown on persistence layer bubbling up, no changes to the initial saved search ', async () => {
-      discoverServiceMock.savedSearch.get = jest.fn().mockImplementation(() => {
+      discoverServiceMock.savedSearch.save = jest.fn().mockImplementation(() => {
         throw new Error('oh-noes');
       });
 
