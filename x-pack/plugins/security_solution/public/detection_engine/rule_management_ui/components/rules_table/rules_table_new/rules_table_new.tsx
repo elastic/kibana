@@ -12,8 +12,7 @@ import {
   EuiLoadingSpinner,
   EuiProgress,
 } from '@elastic/eui';
-import React, { useCallback, useMemo, useRef } from 'react';
-import { Loader } from '../../../../../common/components/loader';
+import React from 'react';
 import { PrePackagedRulesPrompt } from '../../../../../detections/components/rules/pre_packaged_rules/load_empty_prompt';
 
 import * as i18n from '../../../../../detections/pages/detection_engine/rules/translations';
@@ -22,9 +21,6 @@ import { useUserData } from '../../../../../detections/components/user_info';
 import { hasUserCRUDPermission } from '../../../../../common/utils/privileges';
 import { useIsUpgradingSecurityPackages } from '../../../../rule_management/logic/use_upgrade_security_packages';
 import { useRulesTableNewContext } from './rules_table_new_context';
-// import { AddRulesTableUtilityBar } from './add_rules_table_utility_bar';
-
-const INITIAL_SORT_FIELD = 'enabled';
 
 const NO_ITEMS_MESSAGE = (
   <EuiEmptyPrompt title={<h3>{i18n.NO_RULES}</h3>} titleSize="xs" body={i18n.NO_RULES_BODY} />
@@ -41,39 +37,13 @@ export const RulesTableNew = React.memo(() => {
   const addRulesTableContext = useRulesTableNewContext();
 
   const {
-    state: {
-      tableRef,
-      rules,
-      pagination,
-      selectionValue,
-      // isSelectAllCalled,
-      isPreflightInProgress,
-      // isAllSelected,
-      isFetched,
-      isLoading,
-      isRefetching,
-      filters,
-      // loadingRuleIds,
-      // loadingRulesAction,
-      // tags,
-    },
-    actions: {
-      // setFilterOptions,
-      // setIsAllSelected,
-      // setSelectedRules,
-      onTableChange,
-    },
+    state: { rules, pagination, selectionValue, filters, isFetched, isLoading, isRefetching },
+    actions: { reFetchRules, onTableChange },
   } = addRulesTableContext;
 
   const rulesColumns = useRulesTableNewColumns({
     hasCRUDPermissions: hasPermissions,
   });
-
-  // const toggleSelectAll = useCallback(() => {
-  //   isSelectAllCalled.current = true;
-  //   setIsAllSelected(!isAllSelected);
-  //   setSelectedRules(!isAllSelected ? rules : []);
-  // }, [isSelectAllCalled, setIsAllSelected, isAllSelected, setSelectedRules, rules]);
 
   const isTableEmpty = rules.length === 0;
   const shouldShowRulesTable = !isLoading && !isTableEmpty;
@@ -84,7 +54,7 @@ export const RulesTableNew = React.memo(() => {
   };
 
   const shouldShowLinearProgress = (isFetched && isRefetching) || isUpgradingSecurityPackages;
-  const shouldShowLoadingOverlay = (!isFetched && isRefetching) || isPreflightInProgress;
+  const shouldShowLoadingOverlay = !isFetched && isRefetching;
 
   return (
     <>
@@ -96,43 +66,27 @@ export const RulesTableNew = React.memo(() => {
           color="accent"
         />
       )}
-      {shouldShowLoadingOverlay && (
-        <Loader data-test-subj="loadingPanelAllRulesTable" overlay size="xl" />
-      )}
-      {isTableEmpty && <PrePackagedRulesPrompt />}
+      {isFetched && isTableEmpty && <PrePackagedRulesPrompt />}
       <EuiSkeletonLoading
-        isLoading={!shouldShowRulesTable}
+        isLoading={shouldShowLoadingOverlay && !shouldShowRulesTable}
         loadingContent={
           <EuiLoadingSpinner data-test-subj="loadingRulesInfoPanelAllRulesTable" size="xl" />
         }
         loadedContent={
           <>
-            {/* <RulesTableFilters
-                filterOptions={filterOptions}
-                setFilterOptions={setFilterOptions}
-                showRuleTypeStatusFilter={false}
-              /> */}
-
-            <EuiInMemoryTable
-              ref={tableRef}
-              items={rules}
-              sorting={true}
-              search={filters}
-              pagination={pagination}
-              isSelectable={true}
-              onTableChange={onTableChange}
-              selection={selectionValue}
-              itemId="rule_id"
-              // childrenBetween={
-              //   <AddRulesTableUtilityBar
-              //     canBulkEdit={hasPermissions}
-              //     onGetBulkItemsPopoverContent={undefined}
-              //     onToggleSelectAll={toggleSelectAll}
-              //     isBulkActionInProgress={false}
-              //   />
-              // }
-              {...tableProps}
-            />
+            {!isTableEmpty ? (
+              <EuiInMemoryTable
+                items={rules}
+                sorting={true}
+                search={filters}
+                pagination={pagination}
+                isSelectable={true}
+                onTableChange={onTableChange}
+                selection={selectionValue}
+                itemId="rule_id"
+                {...tableProps}
+              />
+            ) : null}
           </>
         }
       />

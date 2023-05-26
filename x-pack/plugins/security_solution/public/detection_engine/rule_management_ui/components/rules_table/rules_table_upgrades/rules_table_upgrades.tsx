@@ -144,7 +144,7 @@ export const RulesTableUpdates = React.memo<RulesTableUpdatesProps>(({}) => {
       )} */}
       {shouldShowRulesTable && (
         <>
-          <RulesTableFilters filterOptions={filterOptions} setFilterOptions={setFilterOptions} />
+          <RulesTableFilters />
           <RulesTableUtilityBar
             canBulkEdit={hasPermissions}
             onGetBulkItemsPopoverContent={undefined}
