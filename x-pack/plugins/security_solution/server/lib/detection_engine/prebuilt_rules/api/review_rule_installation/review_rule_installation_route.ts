@@ -6,21 +6,19 @@
  */
 
 import { transformError } from '@kbn/securitysolution-es-utils';
-
-import type { PrebuiltRuleAsset } from '../../model/rule_assets/prebuilt_rule_asset';
 import { REVIEW_RULE_INSTALLATION_URL } from '../../../../../../common/detection_engine/prebuilt_rules';
 import type {
   ReviewRuleInstallationResponseBody,
   RuleInstallationInfoForReview,
   RuleInstallationStatsForReview,
 } from '../../../../../../common/detection_engine/prebuilt_rules/api/review_rule_installation/response_schema';
-
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
 import { buildSiemResponse } from '../../../routes/utils';
-
 import { convertRuleToDiffable } from '../../logic/diff/normalization/convert_rule_to_diffable';
 import { createPrebuiltRuleAssetsClient } from '../../logic/rule_assets/prebuilt_rule_assets_client';
 import { createPrebuiltRuleObjectsClient } from '../../logic/rule_objects/prebuilt_rule_objects_client';
+import { fetchRuleVersionsTriad } from '../../logic/rule_versions/fetch_rule_versions_triad';
+import type { PrebuiltRuleAsset } from '../../model/rule_assets/prebuilt_rule_asset';
 import { getVersionBuckets } from '../../model/rule_versions/get_version_buckets';
 
 export const reviewRuleInstallationRoute = (router: SecuritySolutionPluginRouter) => {
@@ -42,27 +40,15 @@ export const reviewRuleInstallationRoute = (router: SecuritySolutionPluginRouter
         const ruleAssetsClient = createPrebuiltRuleAssetsClient(soClient);
         const ruleObjectsClient = createPrebuiltRuleObjectsClient(rulesClient);
 
-        const [latestVersions, { installedVersions }] = await Promise.all([
-          ruleAssetsClient.fetchLatestVersions(),
-          ruleObjectsClient.fetchInstalledRules(),
-        ]);
-
-        const versionBuckets = getVersionBuckets({
-          latestVersions,
-          installedVersions,
+        const ruleVersionsMap = await fetchRuleVersionsTriad({
+          ruleAssetsClient,
+          ruleObjectsClient,
         });
-
-        const rulesToInstall = await ruleAssetsClient.fetchAssetsByVersionInfo(
-          versionBuckets.latestVersionsToInstall
-        );
+        const { installableRules } = getVersionBuckets(ruleVersionsMap);
 
         const body: ReviewRuleInstallationResponseBody = {
-          status_code: 200,
-          message: 'OK',
-          attributes: {
-            stats: calculateRuleStats(rulesToInstall),
-            rules: calculateRuleInfos(rulesToInstall),
-          },
+          stats: calculateRuleStats(installableRules),
+          rules: calculateRuleInfos(installableRules),
         };
 
         return response.ok({ body });

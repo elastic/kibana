@@ -5,32 +5,24 @@
  * 2.0.
  */
 
-import { pickBy } from 'lodash';
 import { transformError } from '@kbn/securitysolution-es-utils';
-
-import type { PrebuiltRuleAsset } from '../../model/rule_assets/prebuilt_rule_asset';
+import { pickBy } from 'lodash';
 import { REVIEW_RULE_UPGRADE_URL } from '../../../../../../common/detection_engine/prebuilt_rules';
 import type {
   ReviewRuleUpgradeResponseBody,
   RuleUpgradeInfoForReview,
   RuleUpgradeStatsForReview,
 } from '../../../../../../common/detection_engine/prebuilt_rules/api/review_rule_upgrade/response_schema';
-import type { PrebuiltRuleVersionInfo } from '../../model/rule_versions/prebuilt_rule_version_info';
-import type {
-  CalculateRuleDiffArgs,
-  CalculateRuleDiffResult,
-} from '../../logic/diff/calculate_rule_diff';
-import { calculateRuleDiff } from '../../logic/diff/calculate_rule_diff';
 import type { ThreeWayDiff } from '../../../../../../common/detection_engine/prebuilt_rules/model/diff/three_way_diff/three_way_diff';
-import type { RuleResponse } from '../../../../../../common/detection_engine/rule_schema';
-
+import { invariant } from '../../../../../../common/utils/invariant';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
 import { buildSiemResponse } from '../../../routes/utils';
-
+import type { CalculateRuleDiffResult } from '../../logic/diff/calculate_rule_diff';
+import { calculateRuleDiff } from '../../logic/diff/calculate_rule_diff';
 import { createPrebuiltRuleAssetsClient } from '../../logic/rule_assets/prebuilt_rule_assets_client';
 import { createPrebuiltRuleObjectsClient } from '../../logic/rule_objects/prebuilt_rule_objects_client';
+import { fetchRuleVersionsTriad } from '../../logic/rule_versions/fetch_rule_versions_triad';
 import { getVersionBuckets } from '../../model/rule_versions/get_version_buckets';
-import { invariant } from '../../../../../../common/utils/invariant';
 
 export const reviewRuleUpgradeRoute = (router: SecuritySolutionPluginRouter) => {
   router.post(
@@ -51,38 +43,21 @@ export const reviewRuleUpgradeRoute = (router: SecuritySolutionPluginRouter) => 
         const ruleAssetsClient = createPrebuiltRuleAssetsClient(soClient);
         const ruleObjectsClient = createPrebuiltRuleObjectsClient(rulesClient);
 
-        const [latestVersions, { installedVersions, installedRules }] = await Promise.all([
-          ruleAssetsClient.fetchLatestVersions(),
-          ruleObjectsClient.fetchInstalledRules(),
-        ]);
-
-        const versionBuckets = getVersionBuckets({
-          latestVersions,
-          installedVersions,
+        const ruleVersionsMap = await fetchRuleVersionsTriad({
+          ruleAssetsClient,
+          ruleObjectsClient,
         });
+        const { upgradeableRules } = getVersionBuckets(ruleVersionsMap);
 
-        const [baseRules, latestRules] = await Promise.all([
-          ruleAssetsClient.fetchAssetsByVersionInfo(versionBuckets.installedVersionsToUpgrade),
-          ruleAssetsClient.fetchAssetsByVersionInfo(versionBuckets.latestVersionsToUpgrade),
-        ]);
-
-        const ruleDiffCalculationArgs = getRuleDiffCalculationArgs(
-          versionBuckets.installedVersionsToUpgrade,
-          installedRules,
-          baseRules,
-          latestRules
-        );
-        const ruleDiffCalculationResults = ruleDiffCalculationArgs.map((args) => {
-          return calculateRuleDiff(args);
+        const ruleDiffCalculationResults = upgradeableRules.map(({ current }) => {
+          const ruleVersions = ruleVersionsMap.get(current.rule_id);
+          invariant(ruleVersions != null, 'ruleVersions not found');
+          return calculateRuleDiff(ruleVersions);
         });
 
         const body: ReviewRuleUpgradeResponseBody = {
-          status_code: 200,
-          message: 'OK',
-          attributes: {
-            stats: calculateRuleStats(ruleDiffCalculationResults),
-            rules: calculateRuleInfos(ruleDiffCalculationResults),
-          },
+          stats: calculateRuleStats(ruleDiffCalculationResults),
+          rules: calculateRuleInfos(ruleDiffCalculationResults),
         };
 
         return response.ok({ body });
@@ -97,41 +72,9 @@ export const reviewRuleUpgradeRoute = (router: SecuritySolutionPluginRouter) => 
   );
 };
 
-const getRuleDiffCalculationArgs = (
-  installedVersionsToUpgrade: PrebuiltRuleVersionInfo[],
-  installedRules: RuleResponse[],
-  baseRules: PrebuiltRuleAsset[],
-  latestRules: PrebuiltRuleAsset[]
-): CalculateRuleDiffArgs[] => {
-  const installedRulesMap = new Map(installedRules.map((r) => [r.rule_id, r]));
-  const baseRulesMap = new Map(baseRules.map((r) => [r.rule_id, r]));
-  const latestRulesMap = new Map(latestRules.map((r) => [r.rule_id, r]));
-
-  const result: CalculateRuleDiffArgs[] = [];
-
-  installedVersionsToUpgrade.forEach((versionToUpgrade) => {
-    const ruleId = versionToUpgrade.rule_id;
-    const installedRule = installedRulesMap.get(ruleId);
-    const baseRule = baseRulesMap.get(ruleId);
-    const latestRule = latestRulesMap.get(ruleId);
-
-    // baseRule can be undefined if the rule has no historical versions, but other versions should always be present
-    invariant(installedRule != null, `installedRule is not found for rule_id: ${ruleId}`);
-    invariant(latestRule != null, `latestRule is not found for rule_id: ${ruleId}`);
-
-    result.push({
-      currentVersion: installedRule,
-      baseVersion: baseRule,
-      targetVersion: latestRule,
-    });
-  });
-
-  return result;
-};
-
 const calculateRuleStats = (results: CalculateRuleDiffResult[]): RuleUpgradeStatsForReview => {
   const allTags = new Set<string>(
-    results.flatMap((result) => result.ruleVersions.input.current.tags)
+    results.flatMap((result) => result.ruleVersions.input.current?.tags ?? [])
   );
   return {
     num_rules_to_upgrade_total: results.length,
@@ -144,6 +87,7 @@ const calculateRuleInfos = (results: CalculateRuleDiffResult[]): RuleUpgradeInfo
     const { ruleDiff, ruleVersions } = result;
     const installedCurrentVersion = ruleVersions.input.current;
     const diffableCurrentVersion = ruleVersions.output.current;
+    invariant(installedCurrentVersion != null, 'installedCurrentVersion not found');
 
     return {
       id: installedCurrentVersion.id,

@@ -6,19 +6,13 @@
  */
 
 import { transformError } from '@kbn/securitysolution-es-utils';
-
 import { GET_PREBUILT_RULES_STATUS_URL } from '../../../../../../common/detection_engine/prebuilt_rules';
-import type {
-  GetPrebuiltRulesStatusResponseBody,
-  PrebuiltRulesStatusStats,
-} from '../../../../../../common/detection_engine/prebuilt_rules/api/get_prebuilt_rules_status/response_schema';
-
+import type { GetPrebuiltRulesStatusResponseBody } from '../../../../../../common/detection_engine/prebuilt_rules/api/get_prebuilt_rules_status/response_schema';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
 import { buildSiemResponse } from '../../../routes/utils';
-
 import { createPrebuiltRuleAssetsClient } from '../../logic/rule_assets/prebuilt_rule_assets_client';
 import { createPrebuiltRuleObjectsClient } from '../../logic/rule_objects/prebuilt_rule_objects_client';
-import type { VersionBuckets } from '../../model/rule_versions/get_version_buckets';
+import { fetchRuleVersionsTriad } from '../../logic/rule_versions/fetch_rule_versions_triad';
 import { getVersionBuckets } from '../../model/rule_versions/get_version_buckets';
 
 export const getPrebuiltRulesStatusRoute = (router: SecuritySolutionPluginRouter) => {
@@ -40,23 +34,18 @@ export const getPrebuiltRulesStatusRoute = (router: SecuritySolutionPluginRouter
         const ruleAssetsClient = createPrebuiltRuleAssetsClient(soClient);
         const ruleObjectsClient = createPrebuiltRuleObjectsClient(rulesClient);
 
-        const [latestVersions, { installedVersions }] = await Promise.all([
-          ruleAssetsClient.fetchLatestVersions(),
-          ruleObjectsClient.fetchInstalledRules(),
-        ]);
-
-        const versionBuckets = getVersionBuckets({
-          latestVersions,
-          installedVersions,
+        const ruleVersionsMap = await fetchRuleVersionsTriad({
+          ruleAssetsClient,
+          ruleObjectsClient,
         });
-
-        const stats = calculateRuleStats(versionBuckets);
+        const { currentRules, installableRules, upgradeableRules } =
+          getVersionBuckets(ruleVersionsMap);
 
         const body: GetPrebuiltRulesStatusResponseBody = {
-          status_code: 200,
-          message: 'OK',
-          attributes: {
-            stats,
+          stats: {
+            num_prebuilt_rules_installed: currentRules.length,
+            num_prebuilt_rules_to_install: installableRules.length,
+            num_prebuilt_rules_to_upgrade: upgradeableRules.length,
           },
         };
 
@@ -70,14 +59,4 @@ export const getPrebuiltRulesStatusRoute = (router: SecuritySolutionPluginRouter
       }
     }
   );
-};
-
-const calculateRuleStats = (buckets: VersionBuckets): PrebuiltRulesStatusStats => {
-  const { installedVersions, latestVersionsToInstall, installedVersionsToUpgrade } = buckets;
-
-  return {
-    num_prebuilt_rules_installed: installedVersions.length,
-    num_prebuilt_rules_to_install: latestVersionsToInstall.length,
-    num_prebuilt_rules_to_upgrade: installedVersionsToUpgrade.length,
-  };
 };
