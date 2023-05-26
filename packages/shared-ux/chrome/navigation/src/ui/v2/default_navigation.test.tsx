@@ -9,11 +9,16 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { type Observable, of } from 'rxjs';
-import type { ChromeNavLink, ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
+import type { ChromeNavLink } from '@kbn/core-chrome-browser';
 
 import { getServicesMock } from '../../../mocks/src/jest';
 import { NavigationProvider } from '../../services';
 import { DefaultNavigation } from './default_navigation';
+import { GroupDefinition, RootNavigationItemDefinition } from './types';
+
+const defaultProps = {
+  homeRef: 'htts://elastic.co',
+};
 
 describe('<DefaultNavigation />', () => {
   const services = getServicesMock();
@@ -32,23 +37,30 @@ describe('<DefaultNavigation />', () => {
 
       const onProjectNavigationChange = jest.fn();
 
-      const navTreeConfig: ChromeProjectNavigationNode[] = [
+      const navigationBody: RootNavigationItemDefinition[] = [
         {
-          id: 'item1',
-          title: 'Item 1',
-        },
-        {
-          id: 'item2-a',
-          link: 'item2', // Title from deeplink
-        },
-        {
-          id: 'item2-b',
-          link: 'item2',
-          title: 'Override the deeplink with props',
-        },
-        {
-          link: 'disabled',
-          title: 'Should NOT be there',
+          type: 'navGroup',
+          id: 'group1',
+          title: 'Group 1',
+          children: [
+            {
+              id: 'item1',
+              title: 'Item 1',
+            },
+            {
+              id: 'item2',
+              link: 'item2', // Title from deeplink
+            },
+            {
+              id: 'item3',
+              link: 'item2',
+              title: 'Hello', // Override title from deeplink
+            },
+            {
+              link: 'disabled',
+              title: 'Should NOT be there',
+            },
+          ],
         },
       ];
 
@@ -58,7 +70,12 @@ describe('<DefaultNavigation />', () => {
           navLinks$={navLinks$}
           onProjectNavigationChange={onProjectNavigationChange}
         >
-          <DefaultNavigation navTree={navTreeConfig} />
+          <DefaultNavigation
+            {...defaultProps}
+            navigationTree={{
+              body: navigationBody,
+            }}
+          />
         </NavigationProvider>
       );
 
@@ -68,32 +85,44 @@ describe('<DefaultNavigation />', () => {
       const [navTreeGenerated] = lastCall;
 
       expect(navTreeGenerated).toEqual({
+        homeRef: 'htts://elastic.co',
         navigationTree: [
           {
-            id: 'item1',
-            title: 'Item 1',
-          },
-          {
-            id: 'item2-a',
-            title: 'Title from deeplink!',
-            deepLink: {
-              id: 'item2',
-              title: 'Title from deeplink!',
-              baseUrl: '',
-              url: '',
-              href: '',
-            },
-          },
-          {
-            id: 'item2-b',
-            title: 'Override the deeplink with props',
-            deepLink: {
-              id: 'item2',
-              title: 'Title from deeplink!',
-              baseUrl: '',
-              url: '',
-              href: '',
-            },
+            type: 'navGroup',
+            id: 'group1',
+            title: 'Group 1',
+            path: ['group1'],
+            children: [
+              {
+                id: 'item1',
+                title: 'Item 1',
+                path: ['group1', 'item1'],
+              },
+              {
+                id: 'item2',
+                title: 'Title from deeplink!', // Title from deeplink
+                path: ['group1', 'item2'],
+                deepLink: {
+                  id: 'item2',
+                  title: 'Title from deeplink!',
+                  baseUrl: '',
+                  url: '',
+                  href: '',
+                },
+              },
+              {
+                id: 'item3',
+                title: 'Hello', // Title overriden
+                path: ['group1', 'item3'],
+                deepLink: {
+                  id: 'item2',
+                  title: 'Title from deeplink!',
+                  baseUrl: '',
+                  url: '',
+                  href: '',
+                },
+              },
+            ],
           },
         ],
       });
@@ -112,21 +141,22 @@ describe('<DefaultNavigation />', () => {
 
       const onProjectNavigationChange = jest.fn();
 
-      const navTreeConfig: ChromeProjectNavigationNode[] = [
+      const navigationBody: GroupDefinition[] = [
         {
-          id: 'item1',
-          title: 'Item 1',
+          type: 'navGroup',
+          id: 'group1',
+          title: 'My Group 1',
           children: [
             {
-              id: 'item1',
-              title: 'Item 1',
+              id: 'group1A',
+              title: 'My Group 1A',
               children: [
                 {
-                  link: 'item2', // Title from deeplink
+                  link: 'item2', // Title from deeplink & id from deeplink
                   children: [
                     {
                       id: 'item1',
-                      title: 'Item 1',
+                      title: 'My Group 1 > group 1A > Title from deeplink! > Item 1',
                     },
                   ],
                 },
@@ -142,7 +172,12 @@ describe('<DefaultNavigation />', () => {
           navLinks$={navLinks$}
           onProjectNavigationChange={onProjectNavigationChange}
         >
-          <DefaultNavigation navTree={navTreeConfig} />
+          <DefaultNavigation
+            {...defaultProps}
+            navigationTree={{
+              body: navigationBody,
+            }}
+          />
         </NavigationProvider>
       );
 
@@ -152,17 +187,22 @@ describe('<DefaultNavigation />', () => {
       const [navTreeGenerated] = lastCall;
 
       expect(navTreeGenerated).toEqual({
+        homeRef: 'htts://elastic.co',
         navigationTree: [
           {
-            id: 'item1',
-            title: 'Item 1',
+            type: 'navGroup',
+            id: 'group1',
+            title: 'My Group 1',
+            path: ['group1'],
             children: [
               {
-                id: 'item1',
-                title: 'Item 1',
+                id: 'group1A',
+                title: 'My Group 1A',
+                path: ['group1', 'group1A'],
                 children: [
                   {
                     id: 'item2',
+                    path: ['group1', 'group1A', 'item2'],
                     title: 'Title from deeplink!',
                     deepLink: {
                       id: 'item2',
@@ -174,7 +214,8 @@ describe('<DefaultNavigation />', () => {
                     children: [
                       {
                         id: 'item1',
-                        title: 'Item 1',
+                        title: 'My Group 1 > group 1A > Title from deeplink! > Item 1',
+                        path: ['group1', 'group1A', 'item2', 'item1'],
                       },
                     ],
                   },
