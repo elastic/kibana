@@ -46,8 +46,11 @@ import {
   indexEndpointRuleAlerts,
 } from '../../../../common/endpoint/data_loaders/index_endpoint_rule_alerts';
 import {
+  startEndpointHost,
   createAndEnrollEndpointHost,
   destroyEndpointHost,
+  getEndpointHosts,
+  stopEndpointHost,
 } from '../../../../scripts/endpoint/common/endpoint_host_services';
 
 /**
@@ -222,6 +225,18 @@ export const dataLoadersForRealEndpoints = (
     ): Promise<null> => {
       const { kbnClient } = await stackServicesPromise;
       return destroyEndpointHost(kbnClient, createdHost).then(() => null);
+    },
+
+    stopEndpointHost: async () => {
+      const hosts = await getEndpointHosts();
+      const hostName = hosts[0].name;
+      return stopEndpointHost(hostName);
+    },
+
+    startEndpointHost: async () => {
+      const hosts = await getEndpointHosts();
+      const hostName = hosts[0].name;
+      return startEndpointHost(hostName);
     },
   });
 };

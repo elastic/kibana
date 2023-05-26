@@ -167,4 +167,50 @@ describe('Response console', () => {
       waitForCommandToBeExecuted();
     });
   });
+
+  describe('document signing', () => {
+    let response: IndexedFleetEndpointPolicyResponse;
+    let initialAgentData: Agent;
+
+    before(() => {
+      getAgentByHostName(endpointHostname).then((agentData) => {
+        initialAgentData = agentData;
+      });
+
+      getEndpointIntegrationVersion().then((version) =>
+        createAgentPolicyTask(version).then((data) => {
+          response = data;
+        })
+      );
+    });
+
+    after(() => {
+      if (initialAgentData?.policy_id) {
+        reassignAgentPolicy(initialAgentData.id, initialAgentData.policy_id);
+      }
+      if (response) {
+        cy.task('deleteIndexedFleetEndpointPolicies', response);
+      }
+    });
+
+    it('should fail if data tampered', () => {
+      waitForEndpointListPageToBeLoaded(endpointHostname);
+      checkEndpointListForOnlyUnIsolatedHosts();
+      openResponseConsoleFromEndpointList();
+      performCommandInputChecks('isolate');
+
+      // stop host so that we ensure tamper happens before endpoint processes the action
+      cy.task('stopEndpointHost');
+      // get action doc before we submit command so we know when the new action doc is indexed
+      cy.task('getLatestActionDoc').then((previousActionDoc) => {
+        submitCommand();
+        cy.task('tamperActionDoc', previousActionDoc);
+      });
+      cy.task('startEndpointHost');
+
+      const actionValidationErrorMsg =
+        'Fleet action response error: Failed to validate action signature; check Endpoint logs for details';
+      cy.contains(actionValidationErrorMsg, { timeout: 120000 }).should('exist');
+    });
+  });
 });
