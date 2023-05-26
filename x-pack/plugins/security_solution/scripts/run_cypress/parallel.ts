@@ -14,6 +14,7 @@ import pMap from 'p-map';
 import { ToolingLog } from '@kbn/tooling-log';
 import { withProcRunner } from '@kbn/dev-proc-runner';
 import cypress from 'cypress';
+import getPort from 'get-port';
 
 import {
   EsVersion,
@@ -64,70 +65,12 @@ export const cli = () => {
       const cypressConfigFile = await import(require.resolve(`../../${argv.configFile}`));
       const spec: string | undefined = argv?.spec as string;
       const files = retrieveIntegrations(
-        spec
-          ? spec.includes(',')
-            ? spec.split(',')
-            : [spec]
-          : cypressConfigFile?.e2e?.specPattern
-          ? cypressConfigFile?.e2e?.specPattern
-          : [
-              // 'cypress/e2e/cases/creation.cy.ts',
-              // 'cypress/e2e/cases/privileges.cy.ts',
-              '**/cypress/e2e/cases/*.cy.ts',
-              '**/cypress/e2e/dashboards/*.cy.ts',
-              '**/cypress/e2e/detection_alerts/*.cy.ts',
-              // '**/cypress/e2e/detection_rules/*.cy.ts',
-            ]
+        spec ? (spec.includes(',') ? spec.split(',') : [spec]) : cypressConfigFile?.e2e?.specPattern
       );
 
       if (!files.length) {
         throw new Error('No files found');
       }
-
-      const esPorts: number[] = [9200, 9220];
-      const kibanaPorts: number[] = [5601, 5620];
-      const fleetServerPorts: number[] = [8220];
-
-      const getEsPort = <T>(): T | number => {
-        const esPort = parseInt(`92${Math.floor(Math.random() * 89) + 10}`, 10);
-        if (esPorts.includes(esPort)) {
-          return getEsPort();
-        }
-        esPorts.push(esPort);
-        return esPort;
-      };
-
-      const getKibanaPort = <T>(): T | number => {
-        const kibanaPort = parseInt(`56${Math.floor(Math.random() * 89) + 10}`, 10);
-        if (kibanaPorts.includes(kibanaPort)) {
-          return getKibanaPort();
-        }
-        kibanaPorts.push(kibanaPort);
-        return kibanaPort;
-      };
-
-      const getFleetServerPort = <T>(): T | number => {
-        const fleetServerPort = parseInt(`82${Math.floor(Math.random() * 89) + 10}`, 10);
-        if (fleetServerPorts.includes(fleetServerPort)) {
-          return getFleetServerPort();
-        }
-        fleetServerPorts.push(fleetServerPort);
-        return fleetServerPort;
-      };
-
-      const cleanupServerPorts = ({
-        esPort,
-        kibanaPort,
-        fleetServerPort,
-      }: {
-        esPort: number;
-        kibanaPort: number;
-        fleetServerPort: number;
-      }) => {
-        _.pull(esPorts, esPort);
-        _.pull(kibanaPorts, kibanaPort);
-        _.pull(fleetServerPorts, fleetServerPort);
-      };
 
       const parseTestFileConfig = (
         filePath: string
@@ -215,9 +158,16 @@ export const cli = () => {
               abortCtrl.abort();
             };
 
-            const esPort: number = getEsPort();
-            const kibanaPort: number = getKibanaPort();
-            const fleetServerPort: number = getFleetServerPort();
+            const esPort: number = await getPort({
+              port: getPort.makeRange(9201, 9299),
+            });
+            const kibanaPort: number = await getPort({
+              port: getPort.makeRange(5602, 5699),
+            });
+            const fleetServerPort: number = await getPort({
+              port: getPort.makeRange(8081, 8099),
+            });
+
             const configFromTestFile = parseTestFileConfig(filePath);
 
             const config = await readConfigFile(
@@ -232,9 +182,6 @@ export const cli = () => {
                   kibana: {
                     port: kibanaPort,
                   },
-                  // fleetserver: {
-                  //   port: fleetServerPort,
-                  // },
                 },
                 kbnTestServer: {
                   serverArgs: [
@@ -346,7 +293,6 @@ export const cli = () => {
                   },
                   env: customEnv,
                 },
-                // ...commonCypressConfig,
               });
             } else {
               try {
@@ -371,47 +317,6 @@ export const cli = () => {
 
             await procs.stop('kibana');
             shutdownEs();
-            cleanupServerPorts({ esPort, kibanaPort, fleetServerPort });
-
-            // return pRetry(
-            //   () =>
-            //     cypress
-            //       .run({
-            //         browser: 'chrome',
-            //         spec: filePath,
-            //         headed: true,
-            //         configFile: argv.configFile,
-            //         config: {
-            //           env: customEnv,
-            //           baseUrl: `http://localhost:${kibanaPort}`,
-            //         },
-            //       })
-            //       .then((results) => {
-            //         if (results.status === 'finished') {
-            //           _.forEach(results.runs, (run) => {
-            //             _.forEach(run.tests, (test) => {
-            //               _.forEach(test.attempts, (attempt) => {
-            //                 if (
-            //                   attempt.state === 'failed' &&
-            //                   attempt.error &&
-            //                   attempt.error.name !== 'AssertionError'
-            //                 ) {
-            //                   throw new Error(
-            //                     `Non AssertionError in ${filePath}, retrying test. Error message: ${attempt.error.message}`
-            //                   );
-            //                 }
-            //               });
-            //             });
-            //           });
-            //         }
-            //         return results;
-            //       }),
-            //   {
-            //     retries: 1,
-            //   }
-            // ).finally(() => {
-            //   cleanupServerPorts({ esPort, kibanaPort });
-            // });
 
             return result;
           });

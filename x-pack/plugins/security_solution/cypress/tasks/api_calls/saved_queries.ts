@@ -5,14 +5,15 @@
  * 2.0.
  */
 
+import type { SavedQuery } from '@kbn/data-plugin/public';
 import { rootRequest } from '../common';
 
-export const createSavedQuery = <T = unknown>(
+export const createSavedQuery = (
   title: string,
   query: string,
   filterKey: string = 'agent.hostname'
 ) =>
-  rootRequest<T>({
+  rootRequest<SavedQuery>({
     method: 'POST',
     url: '/api/saved_query/_create',
     body: {

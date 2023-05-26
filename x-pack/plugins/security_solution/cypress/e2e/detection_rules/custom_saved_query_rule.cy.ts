@@ -146,7 +146,7 @@ describe('Custom saved_query rules', () => {
 
       it('Allows to update saved_query rule as query rule type', () => {
         const expectedCustomTestQuery = 'random test query';
-        createSavedQuery<{ id: string }>(savedQueryName, savedQueryQuery).then((response) => {
+        createSavedQuery(savedQueryName, savedQueryQuery).then((response) => {
           cy.log(JSON.stringify(response.body, null, 2));
           createRule(getSavedQueryRule({ saved_id: response.body.id, query: undefined }));
         });
