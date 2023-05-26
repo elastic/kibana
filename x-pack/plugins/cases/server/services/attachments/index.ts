@@ -240,16 +240,20 @@ export class AttachmentService {
     const validatedAttachments: AttachmentSavedObjectTransformed[] = [];
 
     for (const so of res.saved_objects) {
-      const transformedAttachment = injectAttachmentSOAttributesFromRefs(
-        so,
-        this.context.persistableStateAttachmentTypeRegistry
-      );
+      if (isSOError(so)) {
+        validatedAttachments.push(so as AttachmentSavedObjectTransformed);
+      } else {
+        const transformedAttachment = injectAttachmentSOAttributesFromRefs(
+          so,
+          this.context.persistableStateAttachmentTypeRegistry
+        );
 
-      const validatedAttributes = decodeOrThrow(AttachmentTransformedAttributesRt)(
-        transformedAttachment.attributes
-      );
+        const validatedAttributes = decodeOrThrow(AttachmentTransformedAttributesRt)(
+          transformedAttachment.attributes
+        );
 
-      validatedAttachments.push(Object.assign(so, { attributes: validatedAttributes }));
+        validatedAttachments.push(Object.assign(so, { attributes: validatedAttributes }));
+      }
     }
 
     return Object.assign(res, { saved_objects: validatedAttachments });

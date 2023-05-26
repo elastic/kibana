@@ -180,8 +180,6 @@ export class AttachmentGetter {
     response: SavedObjectsFindResponse<AttachmentPersistedAttributes>
   ): Array<SavedObject<AttributesTypeAlerts>> {
     return response.saved_objects.map((so) => {
-      // We need a cast here because the limited attachment type conflicts with the expected result even though they
-      // should be the same
       const validatedAttributes = decodeOrThrow(AttributesTypeAlertsRt)(so.attributes);
 
       return Object.assign(so, { attributes: validatedAttributes });

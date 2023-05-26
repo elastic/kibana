@@ -101,6 +101,25 @@ describe('AttachmentService', () => {
         ).resolves.not.toThrow();
       });
 
+      it('returns error objects unmodified', async () => {
+        const userAttachment = createUserAttachment({ foo: 'bar' });
+
+        const errorResponseObj = createErrorSO();
+
+        unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
+          saved_objects: [errorResponseObj, userAttachment],
+        });
+
+        const res = await service.bulkCreate({
+          attachments: [
+            { attributes: createUserAttachment().attributes, references: [], id: '1' },
+            { attributes: createUserAttachment().attributes, references: [], id: '1' },
+          ],
+        });
+
+        expect(res).toStrictEqual({ saved_objects: [errorResponseObj, createUserAttachment()] });
+      });
+
       it('strips excess fields', async () => {
         unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
           saved_objects: [createUserAttachment({ foo: 'bar' })],
