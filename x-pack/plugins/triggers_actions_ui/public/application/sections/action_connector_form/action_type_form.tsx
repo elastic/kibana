@@ -412,20 +412,23 @@ export const ActionTypeForm = ({
             />
           </>
         )}
-        {showActionAlertsFilter && (
-          <>
-            {!hideNotifyWhen && <EuiSpacer size="xl" />}
-            <ActionAlertsFilterQuery
-              state={actionItem.alertsFilter?.query}
-              onChange={(query) => setActionAlertsFilterProperty('query', query, index)}
-            />
-            <EuiSpacer size="s" />
-            <ActionAlertsFilterTimeframe
-              state={actionItem.alertsFilter?.timeframe}
-              onChange={(timeframe) => setActionAlertsFilterProperty('timeframe', timeframe, index)}
-            />
-          </>
-        )}
+        {showActionAlertsFilter ||
+          (true && (
+            <>
+              {!hideNotifyWhen && <EuiSpacer size="xl" />}
+              <ActionAlertsFilterQuery
+                state={actionItem.alertsFilter?.query}
+                onChange={(query) => setActionAlertsFilterProperty('query', query, index)}
+              />
+              <EuiSpacer size="s" />
+              <ActionAlertsFilterTimeframe
+                state={actionItem.alertsFilter?.timeframe}
+                onChange={(timeframe) =>
+                  setActionAlertsFilterProperty('timeframe', timeframe, index)
+                }
+              />
+            </>
+          ))}
       </EuiSplitPanel.Inner>
       <EuiSplitPanel.Inner color="plain">
         {ParamsFieldsComponent ? (
