@@ -61,6 +61,69 @@ paths:
                 $ref: '#/components/schemas/4xx_response'
       servers:
         - url: https://localhost:5601
+  /s/{spaceId}/api/observability/composite_slos/{compositeSloId}:
+    put:
+      summary: Updates a composite SLO
+      operationId: updateCompositeSlo
+      description: |
+        You must have the `write` privileges for the **SLOs** feature in the **Observability** section of the Kibana feature privileges.
+      tags:
+        - composite slo
+      parameters:
+        - $ref: '#/components/parameters/kbn_xsrf'
+        - $ref: '#/components/parameters/space_id'
+        - $ref: '#/components/parameters/composite_slo_id'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/update_composite_slo_request'
+      responses:
+        '200':
+          description: Successful request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/base_composite_slo_response'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/4xx_response'
+        '401':
+          description: Unauthorized response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/4xx_response'
+    delete:
+      summary: Deletes a composite SLO
+      operationId: deleteCompositeSlo
+      description: |
+        You must have the `write` privileges for the **SLOs** feature in the **Observability** section of the Kibana feature privileges.
+      tags:
+        - composite slo
+      parameters:
+        - $ref: '#/components/parameters/kbn_xsrf'
+        - $ref: '#/components/parameters/space_id'
+        - $ref: '#/components/parameters/composite_slo_id'
+      responses:
+        '204':
+          description: Successful request
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/4xx_response'
+        '401':
+          description: Unauthorized response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/4xx_response'
   /s/{spaceId}/api/observability/slos:
     post:
       summary: Creates an SLO.
@@ -391,6 +454,14 @@ components:
       schema:
         type: string
         example: default
+    composite_slo_id:
+      in: path
+      name: compositeSloId
+      description: An identifier for the composite slo.
+      required: true
+      schema:
+        type: string
+        example: 9c235211-6834-11ea-a78c-6feb38a34414
     slo_id:
       in: path
       name: sloId
@@ -522,6 +593,61 @@ components:
         message:
           type: string
           example: "[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to authenticate user [elastics] for REST request [/_security/_authenticate]]: unable to authenticate user [elastics] for REST request [/_security/_authenticate]"
+    update_composite_slo_request:
+      title: Update composite SLO request
+      description: |
+        The update composite SLO API request body. The provided source SLOs must exists and their budgeting method and time window must match the one from the composite SLO.
+      type: object
+      properties:
+        id:
+          description: A unique identifier for the composite SLO. Must be between 8 and 36 chars
+          type: string
+          example: my-super-composite-slo-id
+        name:
+          description: A name for the composite SLO.
+          type: string
+        timeWindow:
+          $ref: '#/components/schemas/time_window_rolling'
+        budgetingMethod:
+          $ref: '#/components/schemas/budgeting_method'
+        compositeMethod:
+          $ref: '#/components/schemas/composite_method'
+        objective:
+          $ref: '#/components/schemas/composite_objective'
+        sources:
+          oneOf:
+            - $ref: '#/components/schemas/weighted_composite_sources'
+    base_composite_slo_response:
+      title: Composite SLO Response
+      type: object
+      properties:
+        id:
+          description: The identifier of the composite SLO.
+          type: string
+          example: 8853df00-ae2e-11ed-90af-09bb6422b258
+        name:
+          description: The name of the composite SLO.
+          type: string
+          example: My Service SLO
+        timeWindow:
+          $ref: '#/components/schemas/time_window_rolling'
+        budgetingMethod:
+          $ref: '#/components/schemas/budgeting_method'
+        compositeMethod:
+          $ref: '#/components/schemas/composite_method'
+        objective:
+          $ref: '#/components/schemas/composite_objective'
+        sources:
+          oneOf:
+            - $ref: '#/components/schemas/weighted_composite_sources'
+        createdAt:
+          description: The creation date
+          type: string
+          example: '2023-01-12T10:03:19.000Z'
+        updatedAt:
+          description: The last update date
+          type: string
+          example: '2023-01-12T10:03:19.000Z'
     indicator_properties_custom_kql:
       title: Custom KQL indicator type definition
       required:

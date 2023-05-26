@@ -1,0 +1,65 @@
+put:
+  summary: Updates a composite SLO
+  operationId: updateCompositeSlo
+  description: >
+    You must have the `write` privileges for the **SLOs** feature in the
+    **Observability** section of the Kibana feature privileges.
+  tags:
+    - composite slo
+  parameters:
+    - $ref: ../components/headers/kbn_xsrf.yaml
+    - $ref: ../components/parameters/space_id.yaml
+    - $ref: ../components/parameters/composite_slo_id.yaml
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '../components/schemas/update_composite_slo_request.yaml'
+  responses:
+    '200':
+      description: Successful request
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/base_composite_slo_response.yaml'
+    '400':
+      description: Bad request
+      content: 
+        application/json:
+          schema:
+            $ref: '../components/schemas/4xx_response.yaml'
+    '401':
+      description: Unauthorized response
+      content: 
+        application/json:
+          schema:
+            $ref: '../components/schemas/4xx_response.yaml'
+
+delete:
+  summary: Deletes a composite SLO
+  operationId: deleteCompositeSlo
+  description: >
+    You must have the `write` privileges for the **SLOs** feature in the
+    **Observability** section of the Kibana feature privileges.
+  tags:
+    - composite slo
+  parameters:
+    - $ref: ../components/headers/kbn_xsrf.yaml
+    - $ref: ../components/parameters/space_id.yaml
+    - $ref: ../components/parameters/composite_slo_id.yaml
+  responses:
+    '204':
+      description: Successful request
+    '400':
+      description: Bad request
+      content: 
+        application/json:
+          schema:
+            $ref: '../components/schemas/4xx_response.yaml'
+    '401':
+      description: Unauthorized response
+      content: 
+        application/json:
+          schema:
+            $ref: '../components/schemas/4xx_response.yaml'
