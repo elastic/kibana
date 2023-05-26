@@ -29,10 +29,10 @@ import { getScopedHistory, getUrlTracker } from '../../kibana_services';
 import { useAlertResultsToast } from './hooks/use_alert_results_toast';
 import { DiscoverMainProvider } from './services/discover_state_provider';
 import {
+  CustomizationCallback,
   DiscoverCustomizationProvider,
   useDiscoverCustomizationService,
-} from '../../customizations/customization_provider';
-import type { CustomizationCallback } from '../../customizations/types';
+} from '../../customizations';
 
 const DiscoverMainAppMemoized = memo(DiscoverMainApp);
 

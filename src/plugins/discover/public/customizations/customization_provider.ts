@@ -10,13 +10,13 @@ import { createContext, useContext, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { isFunction } from 'lodash';
 import useEffectOnce from 'react-use/lib/useEffectOnce';
+import type { DiscoverStateContainer } from '../application/main/services/discover_state';
+import type { CustomizationCallback } from './types';
 import {
   createCustomizationService,
   DiscoverCustomizationId,
   DiscoverCustomizationService,
-} from '.';
-import type { DiscoverStateContainer } from '../application/main/services/discover_state';
-import type { CustomizationCallback } from './types';
+} from './customization_service';
 
 const customizationContext = createContext<DiscoverCustomizationService>(
   createCustomizationService()

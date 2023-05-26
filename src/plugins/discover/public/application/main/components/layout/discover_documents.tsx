@@ -44,7 +44,7 @@ import { getRawRecordType } from '../../utils/get_raw_record_type';
 import { DiscoverGridFlyout } from '../../../../components/discover_grid/discover_grid_flyout';
 import { DocViewer } from '../../../../services/doc_views/components/doc_viewer';
 import { useSavedSearchInitial } from '../../services/discover_state_provider';
-import { useDiscoverCustomization } from '../../../../customizations/customization_provider';
+import { useDiscoverCustomization } from '../../../../customizations';
 
 const containerStyles = css`
   position: relative;

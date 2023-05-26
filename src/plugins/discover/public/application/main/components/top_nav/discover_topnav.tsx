@@ -17,7 +17,7 @@ import { getTopNavLinks } from './get_top_nav_links';
 import { getHeaderActionMenuMounter } from '../../../../kibana_services';
 import { DiscoverStateContainer } from '../../services/discover_state';
 import { onSaveSearch } from './on_save_search';
-import { useDiscoverCustomization } from '../../../../customizations/customization_provider';
+import { useDiscoverCustomization } from '../../../../customizations';
 
 export interface DiscoverTopNavProps {
   onOpenInspector: () => void;
