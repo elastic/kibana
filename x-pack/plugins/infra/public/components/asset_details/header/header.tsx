@@ -14,10 +14,12 @@ import {
   EuiTabs,
   EuiTab,
   useEuiTheme,
+  useEuiMaxBreakpoint,
+  useEuiMinBreakpoint,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
-import type { AssetDetailsProps } from '../asset_details';
+import { EuiShowFor } from '@elastic/eui';
+import type { AssetDetailsProps } from '../types';
 import { LinkToApmServices } from '../links/link_to_apm_services';
 import { LinkToUptime } from '../links/link_to_uptime';
 import { useTabSwitcherContext } from '../hooks/use_tab_switcher';
@@ -53,44 +55,61 @@ export const Header = ({ nodeType, node, tabs, links, inFlyout, onTabsStateChang
   ));
 
   const linkComponent = {
-    apmServices: (
-      <EuiFlexItem grow={false}>
-        <LinkToApmServices hostName={node.name} apmField={'host.hostname'} />
-      </EuiFlexItem>
-    ),
-    uptime: (
-      <EuiFlexItem grow={false}>
-        <LinkToUptime nodeType={nodeType} node={node} />
-      </EuiFlexItem>
-    ),
+    apmServices: <LinkToApmServices hostName={node.name} apmField={'host.hostname'} />,
+    uptime: <LinkToUptime nodeType={nodeType} node={node} />,
   };
 
-  const headerLinks = links?.map((link) => linkComponent[link]);
+  const headerLinks = links?.map((link) => (
+    <EuiFlexItem grow={false}>{linkComponent[link]}</EuiFlexItem>
+  ));
 
   return (
     <>
-      <TitleContainer>
-        <EuiTitle size={inFlyout ? 'xs' : 'l'}>
-          <h1>{node.name}</h1>
-        </EuiTitle>
-        <EuiFlexGroup
-          justifyContent="spaceBetween"
-          responsive={false}
+      <EuiFlexGroup gutterSize="m" responsive={true} justifyContent="spaceBetween">
+        {!inFlyout && (
+          <EuiShowFor sizes={['l', 'xl']}>
+            <EuiFlexItem grow={1} />
+          </EuiShowFor>
+        )}
+        <EuiFlexItem
+          grow
           css={css`
-            position: absolute;
-            top: ${euiTheme.size.xxs};
-            right: 0;
-            margin-right: ${inFlyout ? euiTheme.size.l : 0};
+            ${useEuiMaxBreakpoint('l')} {
+              align-items: flex-start;
+            }
           `}
         >
-          {headerLinks}
-        </EuiFlexGroup>
-      </TitleContainer>
+          <EuiTitle size={inFlyout ? 'xs' : 'l'}>
+            <h1>{node.name}</h1>
+          </EuiTitle>
+        </EuiFlexItem>
+        <EuiFlexItem
+          grow={inFlyout ? 0 : 1}
+          css={css`
+            align-items: flex-start;
+            ${useEuiMinBreakpoint('m')} {
+              align-items: flex-end;
+            }
+          `}
+        >
+          <EuiFlexGroup
+            gutterSize="m"
+            responsive={false}
+            justifyContent="flexEnd"
+            alignItems="center"
+            css={css`
+              margin-right: ${inFlyout ? euiTheme.size.l : 0};
+            `}
+          >
+            {headerLinks}
+          </EuiFlexGroup>
+        </EuiFlexItem>
+      </EuiFlexGroup>
       <EuiSpacer size={inFlyout ? 's' : 'l'} />
       <EuiTabs
-        bottomBorder={false}
+        bottomBorder={!inFlyout}
         css={css`
-          margin-bottom: calc((${euiTheme.size.l} + 1px) ${inFlyout ? '* -1' : ''});
+          margin-bottom: calc(${inFlyout ? '-1 *' : ''} (${euiTheme.size.l} + 1px));
         `}
         size={inFlyout ? 's' : 'l'}
       >
@@ -99,7 +118,3 @@ export const Header = ({ nodeType, node, tabs, links, inFlyout, onTabsStateChang
     </>
   );
 };
-
-const TitleContainer = euiStyled.div`
-  position: relative;
-`;

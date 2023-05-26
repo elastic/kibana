@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { InventoryItemType } from '../../../common/inventory_models/types';
 import { InfraAssetMetricType } from '../../../common/http_api';
 
 export type CloudProvider = 'gcp' | 'aws' | 'azure' | 'unknownProvider';
@@ -37,6 +38,39 @@ export interface TabState {
   processTab?: {
     query?: string;
   };
+}
+
+export interface FlyoutProps {
+  closeFlyout: () => void;
+  showInFlyout: true;
+}
+
+export interface FullPageProps {
+  showInFlyout: false;
+}
+
+export type RenderMode = FlyoutProps | FullPageProps;
+
+export interface Tab {
+  id: FlyoutTabIds;
+  name: string;
+  'data-test-subj': string;
+}
+
+export interface AssetDetailsProps {
+  node: HostNodeRow;
+  nodeType: InventoryItemType;
+  currentTimeRange: {
+    interval: string;
+    from: number;
+    to: number;
+  };
+  tabs: Tab[];
+  activeTabId?: TabIds;
+  overrides?: TabState;
+  renderMode?: RenderMode;
+  onTabsStateChange?: TabsStateChangeFn;
+  links?: Array<'uptime' | 'apmServices'>;
 }
 
 export type TabsStateChangeFn = (state: TabState & { activeTabId?: TabIds }) => void;

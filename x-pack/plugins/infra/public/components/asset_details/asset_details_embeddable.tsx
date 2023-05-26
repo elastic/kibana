@@ -14,7 +14,7 @@ import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { CoreProviders } from '../../apps/common_providers';
 import { InfraClientStartDeps, InfraClientStartExports } from '../../types';
 import { LazyAssetDetailsWrapper } from './lazy_asset_details_wrapper';
-import type { AssetDetailsProps } from './asset_details';
+import type { AssetDetailsProps } from './types';
 
 export const ASSET_DETAILS_EMBEDDABLE = 'ASSET_DETAILS_EMBEDDABLE';
 

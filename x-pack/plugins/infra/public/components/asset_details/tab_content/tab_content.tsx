@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import type { AssetDetailsProps } from '../asset_details';
+import type { AssetDetailsProps } from '../types';
 import { useTabSwitcherContext } from '../hooks/use_tab_switcher';
 import Metadata from '../tabs/metadata/metadata';
 import { Processes } from '../tabs/processes/processes';

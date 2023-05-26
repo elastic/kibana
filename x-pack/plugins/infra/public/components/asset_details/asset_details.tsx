@@ -7,42 +7,11 @@
 
 import React from 'react';
 import { EuiFlyout, EuiFlyoutHeader, EuiFlyoutBody } from '@elastic/eui';
-import type { FlyoutTabIds, HostNodeRow, TabIds, TabsStateChangeFn, TabState } from './types';
+import type { AssetDetailsProps, RenderMode } from './types';
 import type { InventoryItemType } from '../../../common/inventory_models/types';
 import { TabContent } from './tab_content/tab_content';
 import { Header } from './header/header';
 import { TabSwitcherProvider } from './hooks/use_tab_switcher';
-
-export interface Tab {
-  id: FlyoutTabIds;
-  name: string;
-  'data-test-subj': string;
-}
-
-export interface FlyoutProps {
-  closeFlyout: () => void;
-  showInFlyout: true;
-}
-
-export interface FullPageProps {
-  showInFlyout: false;
-}
-
-export interface AssetDetailsProps {
-  node: HostNodeRow;
-  nodeType: InventoryItemType;
-  currentTimeRange: {
-    interval: string;
-    from: number;
-    to: number;
-  };
-  tabs: Tab[];
-  activeTabId?: TabIds;
-  overrides?: TabState;
-  renderMode?: FlyoutProps | FullPageProps;
-  onTabsStateChange?: TabsStateChangeFn;
-  links?: Array<'uptime' | 'apmServices'>;
-}
 
 // Setting host as default as it will be the only supported type for now
 const NODE_TYPE = 'host' as InventoryItemType;
@@ -50,7 +19,7 @@ const NODE_TYPE = 'host' as InventoryItemType;
 interface ContentTemplateProps {
   header: React.ReactElement;
   body: React.ReactElement;
-  renderMode: FlyoutProps | FullPageProps;
+  renderMode: RenderMode;
 }
 
 const ContentTemplate = ({ header, body, renderMode }: ContentTemplateProps) => {

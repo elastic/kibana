@@ -6,8 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { FlyoutTabIds } from '../../../../../components/asset_details/types';
-import type { Tab } from '../../../../../components/asset_details/asset_details';
+import { FlyoutTabIds, type Tab } from '../../../../../components/asset_details/types';
 
 export const processesTab: Tab = {
   id: FlyoutTabIds.PROCESSES,

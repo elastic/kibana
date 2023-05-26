@@ -11,8 +11,8 @@ import type { Meta, Story } from '@storybook/react/types-6-0';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { DecorateWithKibanaContext } from './asset_details.story_decorators';
-
-import { AssetDetails, type AssetDetailsProps } from './asset_details';
+import type { AssetDetailsProps } from './types';
+import { AssetDetails } from './asset_details';
 import { decorateWithGlobalStorybookThemeProviders } from '../../test_utils/use_global_storybook_theme';
 import { FlyoutTabIds } from './types';
 
