@@ -7,8 +7,9 @@
 
 import { IntegrationId, SortOrder } from '../../../common';
 import { DataStream, Integration, SearchStrategy } from '../../../common/data_streams';
-import { LoadMoreIntegrations } from '../../hooks/use_integrations';
-import { INTEGRATION_PANEL_ID, UNCATEGORIZED_STREAMS_PANEL_ID } from './constants';
+import { SearchDataStreams } from '../../hooks/use_data_streams';
+import { LoadMoreIntegrations, SearchIntegrations } from '../../hooks/use_integrations';
+import { INTEGRATION_PANEL_ID, UNMANAGED_STREAMS_PANEL_ID } from './constants';
 
 export interface DataStreamSelectorProps {
   /* The human-readable name of the currently selected view */
@@ -25,8 +26,13 @@ export interface DataStreamSelectorProps {
   isLoadingIntegrations: boolean;
   /* Flag for loading/searching generic streams */
   isLoadingStreams: boolean;
-  /* Triggered when a search or sorting is performed on integrations */
-  onSearch: SearchHandler;
+  /* Triggered when a search or sorting is performed */
+  onIntegrationsSearch: SearchIntegrations;
+  onIntegrationsSort: SearchIntegrations;
+  onIntegrationsStreamsSearch: SearchIntegrations;
+  onIntegrationsStreamsSort: SearchIntegrations;
+  onUnmanagedStreamsSearch: SearchDataStreams;
+  onUnmanagedStreamsSort: SearchDataStreams;
   /* Triggered when we reach the bottom of the integration list and want to load more */
   onIntegrationsLoadMore: LoadMoreIntegrations;
   /* Triggered when we reach the bottom of the integration list and want to load more */
@@ -34,14 +40,14 @@ export interface DataStreamSelectorProps {
   /* Triggered when the uncategorized streams entry is selected */
   onStreamsEntryClick: () => void;
   /* Triggered when retrying to load the data streams */
-  onStreamsReload: () => void;
+  onUnmanagedStreamsReload: () => void;
   /* Triggered when a data stream entry is selected */
   onStreamSelected: DataStreamSelectionHandler;
 }
 
 export type PanelId =
   | typeof INTEGRATION_PANEL_ID
-  | typeof UNCATEGORIZED_STREAMS_PANEL_ID
+  | typeof UNMANAGED_STREAMS_PANEL_ID
   | IntegrationId;
 
 export interface SearchParams {
@@ -52,7 +58,5 @@ export interface SearchParams {
 }
 
 export type SearchControlsParams = Pick<SearchParams, 'name' | 'sortOrder'>;
-
-export type SearchHandler = (params: SearchParams) => void;
 
 export type DataStreamSelectionHandler = (stream: DataStream) => void;

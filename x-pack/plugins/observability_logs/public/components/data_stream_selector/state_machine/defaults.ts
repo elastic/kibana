@@ -7,13 +7,15 @@
 
 import { ImmutableCache } from '../../../../common/immutable_cache';
 import { INTEGRATION_PANEL_ID } from '../constants';
-import { DefaultDataStreamsSelectorContext } from './types';
+import { DataStreamsSelectorSearchParams, DefaultDataStreamsSelectorContext } from './types';
+
+export const defaultSearch: DataStreamsSelectorSearchParams = {
+  name: '',
+  sortOrder: 'asc',
+};
 
 export const DEFAULT_CONTEXT: DefaultDataStreamsSelectorContext = {
   searchCache: new ImmutableCache(),
   panelId: INTEGRATION_PANEL_ID,
-  search: {
-    name: '',
-    sortOrder: 'asc',
-  },
+  search: defaultSearch,
 };

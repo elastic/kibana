@@ -5,25 +5,46 @@
  * 2.0.
  */
 
+import { EuiContextMenuPanelId } from '@elastic/eui/src/components/context_menu/context_menu';
 import { useInterpret, useSelector } from '@xstate/react';
 import { useCallback } from 'react';
-import { PanelId } from '../types';
+import { DataStreamSelectionHandler, PanelId } from '../types';
 import { createDataStreamsSelectorStateMachine } from './state_machine';
-import { ChangePanelHandler } from './types';
+import { DataStreamsSelectorSearchHandler } from './types';
 
-export const useDataStreamSelector = () => {
+type ChangePanelHandler = ({ panelId }: { panelId: EuiContextMenuPanelId }) => void;
+
+export const useDataStreamSelector = ({
+  onIntegrationsLoadMore,
+  onIntegrationsReload,
+  onIntegrationsSearch,
+  onIntegrationsSort,
+  onIntegrationsStreamsSearch,
+  onIntegrationsStreamsSort,
+  onUnmanagedStreamsSearch,
+  onUnmanagedStreamsSort,
+  onStreamSelected,
+  onUnmanagedStreamsReload,
+}) => {
   const dataStreamsSelectorStateService = useInterpret(() =>
-    createDataStreamsSelectorStateMachine({})
+    createDataStreamsSelectorStateMachine({
+      onIntegrationsLoadMore,
+      onIntegrationsReload,
+      onIntegrationsSearch,
+      onIntegrationsSort,
+      onIntegrationsStreamsSearch,
+      onIntegrationsStreamsSort,
+      onUnmanagedStreamsSearch,
+      onUnmanagedStreamsSort,
+      onStreamSelected,
+      onUnmanagedStreamsReload,
+    })
   );
 
   const isOpen = useSelector(dataStreamsSelectorStateService, (state) => state.matches('open'));
 
   const panelId = useSelector(dataStreamsSelectorStateService, (state) => state.context.panelId);
-
-  const togglePopover = useCallback(
-    () => dataStreamsSelectorStateService.send({ type: 'TOGGLE' }),
-    [dataStreamsSelectorStateService]
-  );
+  const search = useSelector(dataStreamsSelectorStateService, (state) => state.context.search);
 
   const changePanel = useCallback<ChangePanelHandler>(
     (panelDetails) =>
@@ -34,20 +55,42 @@ export const useDataStreamSelector = () => {
     [dataStreamsSelectorStateService]
   );
 
+  const scrollToIntegrationsBottom = useCallback(
+    () => dataStreamsSelectorStateService.send({ type: 'SCROLL_TO_INTEGRATIONS_BOTTOM' }),
+    [dataStreamsSelectorStateService]
+  );
+
+  const searchByName = useCallback<DataStreamsSelectorSearchHandler>(
+    (params) => dataStreamsSelectorStateService.send({ type: 'SEARCH_BY_NAME', search: params }),
+    [dataStreamsSelectorStateService]
+  );
+
+  const selectDataStream = useCallback<DataStreamSelectionHandler>(
+    (dataStream) => dataStreamsSelectorStateService.send({ type: 'SELECT_STREAM', dataStream }),
+    [dataStreamsSelectorStateService]
+  );
+
+  const sortByOrder = useCallback<DataStreamsSelectorSearchHandler>(
+    (params) => dataStreamsSelectorStateService.send({ type: 'SORT_BY_ORDER', search: params }),
+    [dataStreamsSelectorStateService]
+  );
+
+  const togglePopover = useCallback(
+    () => dataStreamsSelectorStateService.send({ type: 'TOGGLE' }),
+    [dataStreamsSelectorStateService]
+  );
+
   return {
     // Data
     isOpen,
     panelId,
-
-    // Failure states
-
-    // Loading states
-
+    search,
     // Actions
     changePanel,
+    scrollToIntegrationsBottom,
+    searchByName,
+    selectDataStream,
+    sortByOrder,
     togglePopover,
   };
 };
-
-// export const [IntegrationsProvider, useIntegrationsContext] =
-//   createContainer(useDataStreamSelector);

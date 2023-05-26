@@ -9,7 +9,6 @@ import { useCallback } from 'react';
 import createContainer from 'constate';
 import { useInterpret, useSelector } from '@xstate/react';
 import { FindIntegrationsRequestQuery, SortOrder } from '../../common';
-import type { SearchStrategy } from '../../common/data_streams';
 import { IDataStreamsClient } from '../services/data_streams';
 import { createIntegrationStateMachine } from '../state_machines/integrations';
 
@@ -18,9 +17,8 @@ interface IntegrationsContextDeps {
 }
 
 export interface SearchIntegrationsParams {
-  name?: string;
-  sortOrder?: SortOrder;
-  strategy: SearchStrategy;
+  name: string;
+  sortOrder: SortOrder;
   integrationId?: string;
 }
 
@@ -36,10 +34,6 @@ const useIntegrations = ({ dataStreamsClient }: IntegrationsContextDeps) => {
 
   const integrations = useSelector(integrationsStateService, (state) => state.context.integrations);
 
-  const search = useSelector(integrationsStateService, (state) =>
-    filterSearchParams(state.context.search)
-  );
-
   const error = useSelector(integrationsStateService, (state) => state.context.error);
 
   const isUninitialized = useSelector(integrationsStateService, (state) =>
@@ -49,7 +43,10 @@ const useIntegrations = ({ dataStreamsClient }: IntegrationsContextDeps) => {
   const isLoading = useSelector(
     integrationsStateService,
     (state) =>
-      state.matches('loading') || state.matches('loadingMore') || state.matches('debouncingSearch')
+      state.matches('loading') ||
+      state.matches({ loaded: 'loadingMore' }) ||
+      state.matches({ loaded: 'debounceSearchingIntegrations' }) ||
+      state.matches({ loaded: 'debounceSearchingIntegrationsStreams' })
   );
 
   const hasFailedLoading = useSelector(integrationsStateService, (state) =>
@@ -59,16 +56,37 @@ const useIntegrations = ({ dataStreamsClient }: IntegrationsContextDeps) => {
   const searchIntegrations: SearchIntegrations = useCallback(
     (searchParams) =>
       integrationsStateService.send({
-        type: 'SEARCH',
-        delay: search.name !== searchParams.name ? 300 : 0,
-        search: {
-          nameQuery: searchParams.name,
-          strategy: searchParams.strategy,
-          sortOrder: searchParams.sortOrder,
-          integrationId: searchParams.integrationId,
-        },
+        type: 'SEARCH_INTEGRATIONS',
+        search: formatSearchParams(searchParams),
       }),
-    [integrationsStateService, search.name]
+    [integrationsStateService]
+  );
+
+  const sortIntegrations: SearchIntegrations = useCallback(
+    (searchParams) =>
+      integrationsStateService.send({
+        type: 'SORT_INTEGRATIONS',
+        search: formatSearchParams(searchParams),
+      }),
+    [integrationsStateService]
+  );
+
+  const searchIntegrationsStreams: SearchIntegrations = useCallback(
+    (searchParams) =>
+      integrationsStateService.send({
+        type: 'SEARCH_INTEGRATIONS_STREAMS',
+        search: formatSearchParams(searchParams),
+      }),
+    [integrationsStateService]
+  );
+
+  const sortIntegrationsStreams: SearchIntegrations = useCallback(
+    (searchParams) =>
+      integrationsStateService.send({
+        type: 'SORT_INTEGRATIONS_STREAMS',
+        search: formatSearchParams(searchParams),
+      }),
+    [integrationsStateService]
   );
 
   const reloadIntegrations = useCallback(
@@ -95,12 +113,14 @@ const useIntegrations = ({ dataStreamsClient }: IntegrationsContextDeps) => {
 
     // Data
     integrations,
-    search,
 
     // Actions
     loadMore,
     reloadIntegrations,
     searchIntegrations,
+    sortIntegrations,
+    searchIntegrationsStreams,
+    sortIntegrationsStreams,
   };
 };
 
@@ -109,9 +129,10 @@ export const [IntegrationsProvider, useIntegrationsContext] = createContainer(us
 /**
  * Utils
  */
-const filterSearchParams = (
-  search: FindIntegrationsRequestQuery
-): Pick<SearchIntegrationsParams, 'name' | 'sortOrder'> => ({
-  name: search.nameQuery,
-  sortOrder: search.sortOrder,
+const formatSearchParams = ({
+  name,
+  ...params
+}: SearchIntegrationsParams): FindIntegrationsRequestQuery => ({
+  nameQuery: name,
+  ...params,
 });

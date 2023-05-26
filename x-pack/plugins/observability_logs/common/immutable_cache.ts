@@ -41,6 +41,10 @@ export class ImmutableCache<KeyType, ValueType> implements IImmutableCache<KeyTy
   }
 
   private serialize(key: KeyType): string {
+    if (typeof key === 'string') {
+      return key;
+    }
+
     return JSON.stringify(key, Object.keys(key).sort());
   }
 }

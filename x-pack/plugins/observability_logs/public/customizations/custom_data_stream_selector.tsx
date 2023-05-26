@@ -5,14 +5,9 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React from 'react';
 import { DiscoverStateContainer } from '@kbn/discover-plugin/public';
-import { SearchStrategy } from '../../common/data_streams';
-import {
-  DataStreamSelectionHandler,
-  DataStreamSelector,
-  SearchHandler,
-} from '../components/data_stream_selector';
+import { DataStreamSelectionHandler, DataStreamSelector } from '../components/data_stream_selector';
 import { DataStreamsProvider, useDataStreamsContext } from '../hooks/use_data_streams';
 import { InternalStateProvider, useDataView } from '../hooks/use_data_view';
 import { IntegrationsProvider, useIntegrationsContext } from '../hooks/use_integrations';
@@ -33,6 +28,9 @@ export const CustomDataStreamSelector = withProviders(({ stateContainer }) => {
     loadMore,
     reloadIntegrations,
     searchIntegrations,
+    sortIntegrations,
+    searchIntegrationsStreams,
+    sortIntegrationsStreams,
   } = useIntegrationsContext();
 
   const {
@@ -53,17 +51,6 @@ export const CustomDataStreamSelector = withProviders(({ stateContainer }) => {
     });
   };
 
-  const handleSearch: SearchHandler = useCallback(
-    (params) => {
-      if (params.strategy === SearchStrategy.DATA_STREAMS) {
-        return searchDataStreams({ name: params.name, sortOrder: params.sortOrder });
-      } else {
-        searchIntegrations(params);
-      }
-    },
-    [searchDataStreams, searchIntegrations]
-  );
-
   return (
     <DataStreamSelector
       dataStreams={dataStreams}
@@ -74,10 +61,15 @@ export const CustomDataStreamSelector = withProviders(({ stateContainer }) => {
       isLoadingStreams={isLoadingStreams}
       onIntegrationsLoadMore={loadMore}
       onIntegrationsReload={reloadIntegrations}
-      onSearch={handleSearch}
+      onIntegrationsSearch={searchIntegrations}
+      onIntegrationsSort={sortIntegrations}
+      onIntegrationsStreamsSearch={searchIntegrationsStreams}
+      onIntegrationsStreamsSort={sortIntegrationsStreams}
+      onUnmanagedStreamsSearch={console.log}
+      onUnmanagedStreamsSort={console.log}
+      onUnmanagedStreamsReload={reloadDataStreams}
       onStreamSelected={handleStreamSelection}
       onStreamsEntryClick={loadDataStreams}
-      onStreamsReload={reloadDataStreams}
       title={dataView.getName()}
     />
   );

@@ -13,7 +13,7 @@ import { Integration, SearchStrategy } from '../../../common/data_streams';
 import {
   DATA_VIEW_POPOVER_CONTENT_WIDTH,
   INTEGRATION_PANEL_ID,
-  UNCATEGORIZED_STREAMS_PANEL_ID,
+  UNMANAGED_STREAMS_PANEL_ID,
 } from './constants';
 import { PanelId, DataStreamSelectionHandler } from './types';
 
@@ -74,7 +74,7 @@ export const setIntegrationListSpy = (
 };
 
 export const getSearchStrategy = (panelId: PanelId) => {
-  if (panelId === UNCATEGORIZED_STREAMS_PANEL_ID) return SearchStrategy.DATA_STREAMS;
+  if (panelId === UNMANAGED_STREAMS_PANEL_ID) return SearchStrategy.DATA_STREAMS;
   if (panelId === INTEGRATION_PANEL_ID) return SearchStrategy.INTEGRATIONS;
   return SearchStrategy.INTEGRATIONS_DATA_STREAMS;
 };
