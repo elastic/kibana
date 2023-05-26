@@ -48,7 +48,7 @@ export const FieldTopValues: React.FC<FieldTopValuesProps> = ({
   );
 
   return (
-    <section
+    <div
       data-test-subj={
         areExamples ? 'unifiedFieldStats-exampleValueBuckets' : 'unifiedFieldStats-topValueBuckets'
       }
@@ -102,7 +102,7 @@ export const FieldTopValues: React.FC<FieldTopValuesProps> = ({
           </>
         )}
       </div>
-    </section>
+    </div>
   );
 };
 

@@ -482,7 +482,7 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
 
     if (field.type === 'date') {
       return combineWithTitleAndFooter(
-        <section data-test-subj="unifiedFieldStats-timeDistribution">
+        <div data-test-subj="unifiedFieldStats-timeDistribution">
           <div data-test-subj={`${dataTestSubject}-histogram`}>
             <Chart size={{ height: 200, width: 300 - 32 }}>
               <Settings
@@ -524,13 +524,13 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
               />
             </Chart>
           </div>
-        </section>
+        </div>
       );
     }
 
     if (showingHistogram || !topValues || !topValues.buckets.length) {
       return combineWithTitleAndFooter(
-        <section data-test-subj="unifiedFieldStats-histogram">
+        <div data-test-subj="unifiedFieldStats-histogram">
           <Chart
             data-test-subj={`${dataTestSubject}-histogram`}
             size={{ height: 200, width: '100%' }}
@@ -558,7 +558,7 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
               yScaleType={ScaleType.Linear}
             />
           </Chart>
-        </section>
+        </div>
       );
     }
   }
