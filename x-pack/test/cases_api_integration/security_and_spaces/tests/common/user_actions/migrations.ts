@@ -27,11 +27,16 @@ export default function createGetTests({ getService }: FtrProviderContext) {
       const CASE_ID = '2ea28c10-7855-11eb-9ca6-83ec5acb735f';
 
       before(async () => {
-        await esArchiver.load('x-pack/test/functional/es_archives/cases/migrations/7.7.1');
+        await kibanaServer.importExport.load(
+          'x-pack/test/functional/fixtures/kbn_archiver/cases/7.7.1/data.json'
+        );
       });
 
       after(async () => {
-        await esArchiver.unload('x-pack/test/functional/es_archives/cases/migrations/7.7.1');
+        await kibanaServer.importExport.unload(
+          'x-pack/test/functional/fixtures/kbn_archiver/cases/7.7.1/data.json'
+        );
+        await deleteAllCaseItems(es);
       });
 
       it('migrates user actions correctly', async () => {
