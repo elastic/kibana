@@ -59,6 +59,7 @@ const NavigationWrapper: FC = ({ children }) => {
           iconType={isOpen ? 'menuLeft' : 'menuRight'}
           color={isOpen ? 'ghost' : 'text'}
           onClick={toggleOpen}
+          aria-label={isOpen ? 'Collapse navigation' : 'Expand navigation'}
         />
       </span>
     );
@@ -136,7 +137,7 @@ const simpleNavigationDefinition: ProjectNavigationDefinition = {
             },
             {
               id: 'item3',
-              title: 'Some other node',
+              title: 'Dashboards',
             },
           ],
         },
@@ -307,11 +308,11 @@ export const WithUIComponents = (args: ChromeNavigationViewModel & NavigationSer
             defaultIsCollapsed={false}
           >
             <Navigation.Group id="root">
-              <Navigation.Item id="item1" title="Get started" />
+              <Navigation.Item id="item1" link="item1" /> {/* Title will be read from deepLink */}
               <Navigation.Item id="item2" title="Alerts" />
-              <Navigation.Item id="item3" title="Some children node">
+              <Navigation.Item id="item3" title="Title in ReactNode">
                 <EuiText size="s">
-                  <EuiLink>Some children node</EuiLink>
+                  <EuiLink>Title in ReactNode</EuiLink>
                 </EuiText>
               </Navigation.Item>
             </Navigation.Group>
