@@ -66,8 +66,8 @@ export const getCasesBaseKibanaFeature = (): KibanaFeatureConfig => ({
   subFeatures: [casesSubFeatureDelete],
 });
 
-// TODO Add cases connector configuration
 // It maps the AppFeatures keys to Kibana privileges
 export const getCasesAppFeaturesConfig = (): AppFeaturesCasesConfig => ({
-  [AppFeatureCasesKey.exampleCasesFeature]: {},
+  // TODO Add cases connector configuration
+  [AppFeatureCasesKey.casesConnectors]: {},
 });
