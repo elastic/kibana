@@ -206,4 +206,3 @@ export interface D3Secrets {
 }
 
 export type D3ActionConnector = UserConfiguredActionConnector<D3Config, D3Secrets>;
-

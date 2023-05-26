@@ -1,21 +1,29 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
 import { i18n } from '@kbn/i18n';
 import axios, { AxiosError, AxiosResponse } from 'axios';
 import { schema, TypeOf } from '@kbn/config-schema';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { map, getOrElse } from 'fp-ts/lib/Option';
-import { getRetryAfterIntervalFromHeaders } from '../lib/http_response_retry_header';
-import { isOk, promiseResult, Result } from '../lib/result_type';
-import {  ActionType as ConnectorType,
-          ActionTypeExecutorOptions as ConnectorTypeExecutorOptions,
-          ActionTypeExecutorResult as ConnectorTypeExecutorResult,
-          ValidatorServices} from '@kbn/actions-plugin/server/types';
+import {
+  ActionType as ConnectorType,
+  ActionTypeExecutorOptions as ConnectorTypeExecutorOptions,
+  ActionTypeExecutorResult as ConnectorTypeExecutorResult,
+  ValidatorServices,
+} from '@kbn/actions-plugin/server/types';
 import { request } from '@kbn/actions-plugin/server/lib/axios_utils';
 import { renderMustacheString } from '@kbn/actions-plugin/server/lib/mustache_renderer';
 import {
   AlertingConnectorFeatureId,
   SecurityConnectorFeatureId,
 } from '@kbn/actions-plugin/common/types';
-
+import { isOk, promiseResult, Result } from '../lib/result_type';
+import { getRetryAfterIntervalFromHeaders } from '../lib/http_response_retry_header';
 
 // config definition
 export enum D3SecuritySeverity {
@@ -24,7 +32,6 @@ export enum D3SecuritySeverity {
   MEDIUM = 'medium',
   LOW = 'low',
 }
-
 
 export type D3SecurityConnectorType = ConnectorType<
   ConnectorTypeConfigType,
@@ -40,8 +47,8 @@ export type D3SecurityConnectorTypeExecutorOptions = ConnectorTypeExecutorOption
 
 const configSchemaProps = {
   url: schema.string(),
-  severity:  schema.string({ defaultValue: D3SecuritySeverity.EMPTY }),
-  eventtype: schema.string({ defaultValue: "" }),
+  severity: schema.string({ defaultValue: D3SecuritySeverity.EMPTY }),
+  eventtype: schema.string({ defaultValue: '' }),
 };
 const ConfigSchema = schema.object(configSchemaProps);
 export type ConnectorTypeConfigType = TypeOf<typeof ConfigSchema>;
@@ -49,15 +56,15 @@ export type ConnectorTypeConfigType = TypeOf<typeof ConfigSchema>;
 // secrets definition
 export type ConnectorTypeSecretsType = TypeOf<typeof SecretsSchema>;
 const secretSchemaProps = {
-    token: schema.nullable(schema.string()),
+  token: schema.nullable(schema.string()),
 };
 const SecretsSchema = schema.object(secretSchemaProps, {
   validate: (secrets) => {
-    if (secrets.token ) return;
-    if (!secrets.token) 
-    return i18n.translate('xpack.actions.builtin.d3security.invalidUrlToken', {
-      defaultMessage: 'token must be specified',
-    });
+    if (secrets.token) return;
+    if (!secrets.token)
+      return i18n.translate('xpack.actions.builtin.d3security.invalidUrlToken', {
+        defaultMessage: 'token must be specified',
+      });
   },
 });
 
@@ -66,7 +73,7 @@ export type ActionParamsType = TypeOf<typeof ParamsSchema>;
 const ParamsSchema = schema.object({
   body: schema.maybe(schema.string()),
   severity: schema.maybe(schema.string()),
-  eventType:  schema.maybe(schema.string())
+  eventType: schema.maybe(schema.string()),
 });
 
 export const ConnectorTypeId = '.d3security';
@@ -78,14 +85,9 @@ export function getConnectorType(): D3SecurityConnectorType {
     name: i18n.translate('xpack.stackConnectors.d3security.title', {
       defaultMessage: 'D3 Security',
     }),
-    supportedFeatureIds: [
-      AlertingConnectorFeatureId,
-      SecurityConnectorFeatureId,
-    ],
+    supportedFeatureIds: [AlertingConnectorFeatureId, SecurityConnectorFeatureId],
     validate: {
-      config: { schema: ConfigSchema,
-        customValidator: validateConnectorTypeConfig,
-      },
+      config: { schema: ConfigSchema, customValidator: validateConnectorTypeConfig },
       secrets: {
         schema: SecretsSchema,
       },
@@ -98,10 +100,13 @@ export function getConnectorType(): D3SecurityConnectorType {
   };
 }
 
-function renderParameterTemplates(params: ActionParamsType, variables: Record<string, unknown>): ActionParamsType {
-  let result = {...params};
+function renderParameterTemplates(
+  params: ActionParamsType,
+  variables: Record<string, unknown>
+): ActionParamsType {
+  let result = { ...params };
   if (params.body) {
-    result = {...params,body:renderMustacheString(params.body, variables, 'json') }
+    result = { ...params, body: renderMustacheString(params.body, variables, 'json') };
   }
   return result;
 }
@@ -143,21 +148,21 @@ function validateConnectorTypeConfig(
 export async function executor(
   execOptions: D3SecurityConnectorTypeExecutorOptions
 ): Promise<ConnectorTypeExecutorResult<unknown>> {
-  const { actionId, config, params, secrets, configurationUtilities, logger} = execOptions;
+  const { actionId, config, params, secrets, configurationUtilities, logger } = execOptions;
   const { url } = config;
   const { token } = secrets;
-  const { body:data, severity, eventType } = params;
+  const { body: data, severity, eventType } = params;
 
   const axiosInstance = axios.create();
-  const bodyData = addSeverityAndEventTypeInBody(String(data),String(severity),String(eventType));
+  const bodyData = addSeverityAndEventTypeInBody(String(data), String(severity), String(eventType));
   const result: Result<AxiosResponse, AxiosError<{ message: string }>> = await promiseResult(
     request({
       axios: axiosInstance,
-      method:'post',
+      method: 'post',
       url,
       logger,
-      headers:{"d3key":token||""},
-      data:bodyData,
+      headers: { d3key: token || '' },
+      data: bodyData,
       configurationUtilities,
     })
   );
@@ -212,25 +217,24 @@ export async function executor(
   }
 }
 
-function addSeverityAndEventTypeInBody(bodyString: string,severity: string,eventType: string){
+function addSeverityAndEventTypeInBody(bodyString: string, severity: string, eventType: string) {
   let result;
   let bodyObj = bodyString;
-  try{
+  try {
     bodyObj = JSON.parse(bodyString);
-  }catch{
-  }
-  var resultObj = JSON.parse("{}");
-  resultObj['hits'] = {};
-  resultObj['hits']['hits'] = {};
-  resultObj['hits']['hits']["_source"] = {};
-  resultObj['hits']['hits']["_source"]["rawData"] = bodyObj;
+  } catch {}
+  const resultObj = JSON.parse('{}');
+  resultObj.hits = {};
+  resultObj.hits.hits = {};
+  resultObj.hits.hits._source = {};
+  resultObj.hits.hits._source.rawData = bodyObj;
   // resultObj['hits']['hits']["_source"]["event"]={};
-  resultObj['hits']['hits']["_source"]["event.type"] = eventType;
+  resultObj.hits.hits._source['event.type'] = eventType;
   // resultObj['hits']['hits']["_source"]["kibana"] ={};
   // resultObj['hits']['hits']["_source"]["kibana"]["alert"]={};
-  resultObj['hits']['hits']["_source"]["kibana.alert.severity"] = severity;
-  result = JSON.stringify(resultObj)
-  return result
+  resultObj.hits.hits._source['kibana.alert.severity'] = severity;
+  result = JSON.stringify(resultObj);
+  return result;
 }
 // Action Executor Result w/ internationalisation
 function successResult(actionId: string, data: unknown): ConnectorTypeExecutorResult<unknown> {
@@ -241,9 +245,12 @@ function errorResultInvalid(
   actionId: string,
   serviceMessage: string
 ): ConnectorTypeExecutorResult<void> {
-  const errMessage = i18n.translate('xpack.actions.builtin.d3security.invalidResponseErrorMessage', {
-    defaultMessage: 'error calling d3security, invalid response',
-  });
+  const errMessage = i18n.translate(
+    'xpack.actions.builtin.d3security.invalidResponseErrorMessage',
+    {
+      defaultMessage: 'error calling d3security, invalid response',
+    }
+  );
   return {
     status: 'error',
     message: errMessage,

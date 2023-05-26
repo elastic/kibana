@@ -28,11 +28,7 @@ import { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/action
 import { Logger } from '@kbn/core/server';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import axios from 'axios';
-import {
-  ConnectorTypeConfigType,
-  getConnectorType,
-  D3SecurityConnectorType,
-} from '.';
+import { ConnectorTypeConfigType, getConnectorType, D3SecurityConnectorType } from '.';
 import * as utils from '@kbn/actions-plugin/server/lib/axios_utils';
 import { loggerMock } from '@kbn/logging-mocks';
 
@@ -71,13 +67,13 @@ describe('connectorType', () => {
 
 describe('config validation', () => {
   const defaultValues: Record<string, string | null> = {
-    severity:'',
-    eventtype:''
+    severity: '',
+    eventtype: '',
   };
 
   test('config validation passes when only required fields are provided', () => {
     const config: Record<string, string | boolean> = {
-      url: 'http://mylisteningserver:9200/endpoint'
+      url: 'http://mylisteningserver:9200/endpoint',
     };
     expect(validateConfig(connectorType, config, { configurationUtilities })).toEqual({
       ...defaultValues,
@@ -88,7 +84,7 @@ describe('config validation', () => {
   test('config validation passes when valid methods are provided', () => {
     ['post'].forEach((method) => {
       const config: Record<string, string | boolean> = {
-        url: 'http://mylisteningserver:9200/endpoint'
+        url: 'http://mylisteningserver:9200/endpoint',
       };
       expect(validateConfig(connectorType, config, { configurationUtilities })).toEqual({
         ...defaultValues,
@@ -99,7 +95,7 @@ describe('config validation', () => {
 
   test('config validation passes when a url is specified', () => {
     const config: Record<string, string | boolean> = {
-      url: 'http://mylisteningserver:9200/endpoint'
+      url: 'http://mylisteningserver:9200/endpoint',
     };
     expect(validateConfig(connectorType, config, { configurationUtilities })).toEqual({
       ...defaultValues,
@@ -118,12 +114,11 @@ describe('config validation', () => {
     );
   });
 
-
   test('config validation passes when kibana config url does not present in allowedHosts', () => {
     // any for testing
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const config: Record<string, any> = {
-      url: 'http://mylisteningserver.com:9200/endpoint'
+      url: 'http://mylisteningserver.com:9200/endpoint',
     };
 
     expect(validateConfig(connectorType, config, { configurationUtilities })).toEqual({
@@ -143,7 +138,7 @@ describe('config validation', () => {
     // any for testing
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const config: Record<string, any> = {
-      url: 'http://mylisteningserver.com:9200/endpoint'
+      url: 'http://mylisteningserver.com:9200/endpoint',
     };
 
     expect(() => {
@@ -190,14 +185,14 @@ describe('execute()', () => {
   test('execute with token', async () => {
     const config: ConnectorTypeConfigType = {
       url: 'https://abc.def/my-webhook',
-      severity:'low',
-      eventtype:'test'
+      severity: 'low',
+      eventtype: 'test',
     };
     await connectorType.executor({
       actionId: 'some-id',
       services,
       config,
-      secrets: { token:'token' },
+      secrets: { token: 'token' },
       params: { body: 'some data' },
       configurationUtilities,
       logger: mockedLogger,
@@ -244,8 +239,8 @@ describe('execute()', () => {
   test('execute with exception maxContentLength size exceeded should log the proper error', async () => {
     const config: ConnectorTypeConfigType = {
       url: 'https://abc.def/my-webhook',
-      severity:'low',
-      eventtype:'test'
+      severity: 'low',
+      eventtype: 'test',
     };
     requestMock.mockReset();
     requestMock.mockRejectedValueOnce({
@@ -257,7 +252,7 @@ describe('execute()', () => {
       actionId: 'some-id',
       services,
       config,
-      secrets: { token:'token'},
+      secrets: { token: 'token' },
       params: { body: 'some data' },
       configurationUtilities,
       logger: mockedLogger,
@@ -267,13 +262,12 @@ describe('execute()', () => {
     );
   });
 
-
   test('renders parameter templates as expected', async () => {
     const rogue = `double-quote:"; line-break->\n`;
 
     expect(connectorType.renderParameterTemplates).toBeTruthy();
     const paramsWithTemplates = {
-      body: '{"x": "{{rogue}}"}'
+      body: '{"x": "{{rogue}}"}',
     };
     const variables = {
       rogue,

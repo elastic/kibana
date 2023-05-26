@@ -7,7 +7,7 @@
 
 import { TypeRegistry } from '@kbn/triggers-actions-ui-plugin/public/application/type_registry';
 import { registerConnectorTypes } from '..';
-import { ActionTypeModel as ConnectorTypeModel} from '@kbn/triggers-actions-ui-plugin/public/types';
+import { ActionTypeModel as ConnectorTypeModel } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { registrationServicesMock } from '../../mocks';
 
 const CONNECTOR_TYPE_ID = '.d3security';
@@ -31,27 +31,27 @@ describe('d3security action params validation', () => {
   test('action params validation succeeds when action params is valid', async () => {
     const actionParams = {
       body: 'message {test}',
-      severity:'test severity',
-      eventType:'test type'
+      severity: 'test severity',
+      eventType: 'test type',
     };
 
     expect(await connectorTypeModel.validateParams(actionParams)).toEqual({
-      errors: { body: [] , severity:[], eventType:[]},
+      errors: { body: [], severity: [], eventType: [] },
     });
   });
 
   test('params validation fails when body is not valid', async () => {
     const actionParams = {
       body: '',
-      severity:'',
-      eventType:''
+      severity: '',
+      eventType: '',
     };
 
     expect(await connectorTypeModel.validateParams(actionParams)).toEqual({
       errors: {
         body: ['Body is required.'],
-        severity:[],
-        eventType:[]
+        severity: [],
+        eventType: [],
       },
     });
   });

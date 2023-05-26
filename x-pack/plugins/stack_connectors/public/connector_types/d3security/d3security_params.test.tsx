@@ -26,8 +26,8 @@ describe('D3SecurityParamsFields renders', () => {
   test('all params fields is rendered', () => {
     const actionParams = {
       body: 'test message',
-      severity:'test severity',
-      eventType:'test type'
+      severity: 'test severity',
+      eventType: 'test type',
     };
 
     const wrapper = mountWithIntl(

@@ -27,7 +27,7 @@ import { getTinesConnectorType } from './tines';
 import { getTorqConnectorType } from './torq';
 import { getWebhookConnectorType } from './webhook';
 import { getXmattersConnectorType } from './xmatters';
-import { getD3SecurityConnectorType } from './d3security'
+import { getD3SecurityConnectorType } from './d3security';
 
 export interface RegistrationServices {
   validateEmailAddresses: (

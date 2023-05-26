@@ -7,20 +7,18 @@
 
 import React from 'react';
 import { ActionConnectorFieldsProps } from '@kbn/triggers-actions-ui-plugin/public';
-import * as i18n from './translations';
 import {
   ConfigFieldSchema,
   SimpleConnectorForm,
   SecretsFieldSchema,
 } from '@kbn/triggers-actions-ui-plugin/public';
+import * as i18n from './translations';
 
 const configFormSchema: ConfigFieldSchema[] = [
   { id: 'url', label: i18n.D3_URL_LABEL, isUrlField: true },
 ];
 
-const secretsFormSchema: SecretsFieldSchema[] = [
-  { id: 'token', label: i18n.D3_TOKEN_LABEL }
-];
+const secretsFormSchema: SecretsFieldSchema[] = [{ id: 'token', label: i18n.D3_TOKEN_LABEL }];
 
 const D3SecurityConnectorFields: React.FC<ActionConnectorFieldsProps> = ({ readOnly, isEdit }) => {
   return (
@@ -29,7 +27,8 @@ const D3SecurityConnectorFields: React.FC<ActionConnectorFieldsProps> = ({ readO
         isEdit={isEdit}
         readOnly={readOnly}
         configFormSchema={configFormSchema}
-        secretsFormSchema={secretsFormSchema} />
+        secretsFormSchema={secretsFormSchema}
+      />
     </>
   );
 };
