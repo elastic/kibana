@@ -360,7 +360,7 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
     const config = appContextService.getConfig();
     const batchSize = config?.setup?.agentPolicySchemaUpgradeBatchSize ?? 100;
 
-    asyncForEach(chunk(policyIds, batchSize), async (policyIdsBatch) => {
+    await asyncForEach(chunk(policyIds, batchSize), async (policyIdsBatch) => {
       await this.soClient.bulkCreate<Partial<UninstallTokenSOAttributes>>(
         policyIdsBatch.map((policyId) => ({
           type: UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
