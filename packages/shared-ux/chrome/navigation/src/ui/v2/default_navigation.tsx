@@ -59,6 +59,8 @@ const getDefaultNavigationTree = (
   };
 };
 
+let idCounter = 0;
+
 export const DefaultNavigation: FC<ProjectNavigationDefinition> = ({
   homeRef,
   projectNavigationTree,
@@ -78,11 +80,19 @@ export const DefaultNavigation: FC<ProjectNavigationDefinition> = ({
         const isNavigationNode = isChromeProjectNavigationNode(item);
         if (!isNavigationNode) {
           if (item.type === 'cloudLink') {
-            return <CloudLink {...item} />;
+            return (
+              <React.Fragment key={`cloudLink-${idCounter++}`}>
+                <CloudLink {...item} />
+              </React.Fragment>
+            );
           }
 
           if (item.type === 'recentlyAccessed') {
-            return <RecentlyAccessed {...item} />;
+            return (
+              <React.Fragment key={`recentlyAccessed-${idCounter++}`}>
+                <RecentlyAccessed {...item} />
+              </React.Fragment>
+            );
           }
         }
 
