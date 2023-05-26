@@ -6,13 +6,7 @@
  * Side Public License, v 1.
  */
 
-import {
-  EuiButton,
-  EuiContextMenu,
-  EuiPopover,
-  EuiScreenReaderOnly,
-  EuiWrappingPopover,
-} from '@elastic/eui';
+import { EuiButton, EuiContextMenu, EuiPopover, EuiWrappingPopover } from '@elastic/eui';
 import type { CoreSetup, CoreStart, Plugin, SimpleSavedObject } from '@kbn/core/public';
 import type { DiscoverSetup, DiscoverStart } from '@kbn/discover-plugin/public';
 import { noop } from 'lodash';
@@ -183,41 +177,6 @@ export class DiscoverExtenderPlugin implements Plugin {
             </EuiPopover>
           );
         },
-      });
-
-      customizations.set({
-        id: 'field_popover',
-        CustomBottomButton: () => (
-          <EuiButton
-            color="success"
-            size="s"
-            iconType="machineLearningApp"
-            onClick={() => alert('Categorize flyout opened')}
-          >
-            Categorize
-          </EuiButton>
-        ),
-      });
-
-      const { MoreMenuCell } = await import('./more_menu_cell');
-
-      customizations.set({
-        id: 'data_grid',
-        defaultLeadingControlColumns: {
-          select: { disabled: true },
-        },
-        getLeadingControlColumns: () => [
-          {
-            id: 'moreMenu',
-            width: 24,
-            headerCellRender: () => (
-              <EuiScreenReaderOnly>
-                <span>More menu</span>
-              </EuiScreenReaderOnly>
-            ),
-            rowCellRender: MoreMenuCell,
-          },
-        ],
       });
 
       return () => {

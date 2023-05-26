@@ -6,7 +6,5 @@
  * Side Public License, v 1.
  */
 
-export * from './data_grid_customization';
-export * from './field_popover_customization';
 export * from './search_bar_customization';
 export * from './top_nav_customization';

@@ -44,7 +44,6 @@ import { getRawRecordType } from '../../utils/get_raw_record_type';
 import { DiscoverGridFlyout } from '../../../../components/discover_grid/discover_grid_flyout';
 import { DocViewer } from '../../../../services/doc_views/components/doc_viewer';
 import { useSavedSearchInitial } from '../../services/discover_state_provider';
-import { useDiscoverCustomization } from '../../../../customizations';
 
 const containerStyles = css`
   position: relative;
@@ -179,21 +178,6 @@ function DiscoverDocumentsComponent({
     [isPlainRecord, uiSettings, dataView.timeFieldName]
   );
 
-  const dataGridCustomization = useDiscoverCustomization('data_grid');
-  const defaultControlColumns = dataGridCustomization?.defaultLeadingControlColumns;
-
-  const controlColumnIds = useMemo(() => {
-    const ids: string[] = [];
-    if (!defaultControlColumns?.expand?.disabled) ids.push('openDetails');
-    if (!defaultControlColumns?.select?.disabled) ids.push('select');
-    return ids;
-  }, [defaultControlColumns?.expand?.disabled, defaultControlColumns?.select?.disabled]);
-
-  const customControlColumns = useMemo(
-    () => dataGridCustomization?.getLeadingControlColumns?.(),
-    [dataGridCustomization]
-  );
-
   if (isDataViewLoading || (isEmptyDataResult && isDataLoading)) {
     return (
       <div className="dscDocuments__loading">
@@ -275,8 +259,6 @@ function DiscoverDocumentsComponent({
               onFieldEdited={onFieldEdited}
               savedSearchId={savedSearch.id}
               DocumentView={DiscoverGridFlyout}
-              controlColumnIds={controlColumnIds}
-              customControlColumns={customControlColumns}
               services={services}
             />
           </div>

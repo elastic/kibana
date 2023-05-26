@@ -7,18 +7,9 @@
  */
 
 import { filter, map, Observable, startWith, Subject } from 'rxjs';
-import type {
-  DataGridCustomization,
-  FieldPopoverCustomization,
-  SearchBarCustomization,
-  TopNavCustomization,
-} from './customization_types';
+import type { SearchBarCustomization, TopNavCustomization } from './customization_types';
 
-export type DiscoverCustomization =
-  | DataGridCustomization
-  | FieldPopoverCustomization
-  | SearchBarCustomization
-  | TopNavCustomization;
+export type DiscoverCustomization = SearchBarCustomization | TopNavCustomization;
 
 export type DiscoverCustomizationId = DiscoverCustomization['id'];
 
