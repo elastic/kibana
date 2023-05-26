@@ -265,7 +265,7 @@ describe('Detection rules, bulk edit', () => {
       // check that new tags were added to tags filter
       // tags in tags filter sorted alphabetically
       const resultingTagsInFilter = [...resultingTags].sort();
-      checkTagsInTagsFilter(resultingTagsInFilter);
+      checkTagsInTagsFilter(resultingTagsInFilter, EUI_SELECTABLE_LIST_ITEM_SR_TEXT);
     });
 
     it('Display success toast after adding tags', () => {
@@ -308,7 +308,7 @@ describe('Detection rules, bulk edit', () => {
       testAllTagsBadges(tagsToOverwrite);
 
       // check that only new tags are in the tag filter
-      checkTagsInTagsFilter(tagsToOverwrite);
+      checkTagsInTagsFilter(tagsToOverwrite, EUI_SELECTABLE_LIST_ITEM_SR_TEXT);
     });
 
     it('Delete tags from custom rules', () => {
@@ -330,7 +330,7 @@ describe('Detection rules, bulk edit', () => {
       testAllTagsBadges(resultingTags);
 
       // check that tags were removed from the tag filter
-      checkTagsInTagsFilter(resultingTags);
+      checkTagsInTagsFilter(resultingTags, EUI_SELECTABLE_LIST_ITEM_SR_TEXT);
     });
   });
 

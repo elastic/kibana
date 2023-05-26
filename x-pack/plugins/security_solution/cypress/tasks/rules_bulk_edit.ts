@@ -223,7 +223,7 @@ export const selectTimelineTemplate = (timelineTitle: string) => {
  * @param tags
  * @param srOnlyText SR-only text appended by EUI
  */
-export const checkTagsInTagsFilter = (tags: string[], srOnlyText?: string) => {
+export const checkTagsInTagsFilter = (tags: string[], srOnlyText: string = '') => {
   cy.get(RULES_TAGS_FILTER_BTN).contains(`Tags${tags.length}`).click();
 
   cy.get(EUI_SELECTABLE_LIST_ITEM)
