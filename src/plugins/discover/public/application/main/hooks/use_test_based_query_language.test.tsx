@@ -23,6 +23,7 @@ import { DiscoverMainProvider } from '../services/discover_state_provider';
 import { DiscoverAppState } from '../services/discover_app_state_container';
 import { DiscoverStateContainer } from '../services/discover_state';
 import { VIEW_MODE } from '@kbn/saved-search-plugin/public';
+import { dataViewAdHoc } from '../../../__mocks__/data_view_complex';
 
 function getHookProps(
   query: AggregateQuery | Query | undefined,
@@ -341,17 +342,10 @@ describe('useTextBasedQueryLanguage', () => {
   });
 
   test('changing a text based query with an index pattern that not corresponds to a dataview should return results', async () => {
-    const dataViewsCreateMock = discoverServiceMock.dataViews.create as jest.Mock;
-    dataViewsCreateMock.mockImplementation(() => ({
-      ...dataViewMock,
-    }));
-    const dataViewsService = {
-      ...discoverServiceMock.dataViews,
-      create: dataViewsCreateMock,
-    };
-    const props = getHookProps(query, dataViewsService);
+    const props = getHookProps(query, discoverServiceMock.dataViews);
     const { stateContainer, replaceUrlState } = props;
     const documents$ = stateContainer.dataState.data$.documents$;
+    props.stateContainer.actions.setDataView(dataViewMock);
 
     renderHook(() => useTextBasedQueryLanguage(props), { wrapper: getHookContext(stateContainer) });
 
@@ -371,6 +365,7 @@ describe('useTextBasedQueryLanguage', () => {
       ],
       query: { sql: 'SELECT field1 from the-data-view-*' },
     });
+    props.stateContainer.actions.setDataView(dataViewAdHoc);
     await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(1));
 
     await waitFor(() => {
