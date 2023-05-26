@@ -7,6 +7,7 @@
 
 import path, { join, resolve } from 'path';
 import * as rt from 'io-ts';
+import type { TimelineSavedObjectRuntimeResponseType } from '../../../../common/types/timeline';
 import { TimelineSavedToReturnObjectRuntimeType } from '../../../../common/types/timeline';
 
 import type { ImportTimelinesSchema } from '../schemas/timelines/import_timelines_schema';
@@ -29,7 +30,7 @@ export type CheckTimelineStatusRt = rt.TypeOf<typeof checkTimelineStatusRt>;
 
 export const getTimelinesToUpdate = (
   timelinesFromFileSystem: ImportTimelinesSchema[],
-  installedTimelines: TimelineSavedObjectResponse[]
+  installedTimelines: TimelineSavedObjectRuntimeResponseType[]
 ): ImportTimelinesSchema[] => {
   return timelinesFromFileSystem.filter((timeline) =>
     installedTimelines.some((installedTimeline) => {
@@ -44,7 +45,7 @@ export const getTimelinesToUpdate = (
 
 export const getTimelinesToInstall = (
   timelinesFromFileSystem: ImportTimelinesSchema[],
-  installedTimelines: TimelineSavedObjectResponse[]
+  installedTimelines: TimelineSavedObjectRuntimeResponseType[]
 ): ImportTimelinesSchema[] => {
   return timelinesFromFileSystem.filter(
     (timeline) =>
@@ -62,7 +63,7 @@ export const checkTimelinesStatus = async (
   let readStream;
   let timeline: {
     totalCount: number;
-    timeline: TimelineSavedObjectResponse[];
+    timeline: TimelineSavedObjectRuntimeResponseType[];
   };
   const dir = resolve(
     join(
