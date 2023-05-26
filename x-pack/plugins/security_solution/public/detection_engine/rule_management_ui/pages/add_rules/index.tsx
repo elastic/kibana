@@ -19,8 +19,8 @@ import { useListsConfig } from '../../../../detections/containers/detection_engi
 
 import * as i18n from './translations';
 import { usePrebuiltRulesStatus } from '../../../rule_management/logic/prebuilt_rules/use_prebuilt_rules_status';
-import { RulesTableNew } from '../../components/rules_table/rules_table_new/rules_table_new';
-import { RulesTableNewContextProvider } from '../../components/rules_table/rules_table_new/rules_table_new_context';
+import { AddPrebuiltRulesTable } from '../../components/rules_table/add_prebuilt_rules_table/add_prebuilt_rules_table';
+import { AddPrebuiltRulesTableContextProvider } from '../../components/rules_table/add_prebuilt_rules_table/add_prebuilt_rules_table_context';
 
 const AddRulesPageComponent: React.FC = () => {
   const { navigateToApp } = useKibana().services.application;
@@ -69,7 +69,7 @@ const AddRulesPageComponent: React.FC = () => {
       {/* <NeedAdminForUpdateRulesCallOut />*/}
       {/* <MissingPrivilegesCallOut />*/}
 
-      <RulesTableNewContextProvider>
+      <AddPrebuiltRulesTableContextProvider>
         <SecuritySolutionPageWrapper>
           <HeaderPage title={i18n.PAGE_TITLE}>
             <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap={true}>
@@ -80,9 +80,9 @@ const AddRulesPageComponent: React.FC = () => {
               </EuiFlexItem>
             </EuiFlexGroup>
           </HeaderPage>
-          <RulesTableNew />
+          <AddPrebuiltRulesTable />
         </SecuritySolutionPageWrapper>
-      </RulesTableNewContextProvider>
+      </AddPrebuiltRulesTableContextProvider>
 
       <SpyRoute pageName={SecurityPageName.rulesAdd} />
     </>

@@ -238,16 +238,9 @@ export const RulesTableUpdatesContextProvider = ({
   }, [selectedRuleIds, isRefreshOn]);
 
   const {
-    data: {
-      attributes: {
-        rules: rulesToUpgrade = [],
-        stats: { tags },
-      },
-    } = {
-      attributes: {
-        rules: [],
-        stats: { tags: [] },
-      },
+    data: { rules: rulesToUpgrade, stats: { tags } } = {
+      rules: [],
+      stats: { tags: [] },
     },
     refetch,
     dataUpdatedAt,

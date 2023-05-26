@@ -21,7 +21,7 @@ export const useFetchPrebuiltRulesStatusQueryNew = (
     PREBUILT_RULES_STATUS_QUERY_KEY,
     async ({ signal }) => {
       const response = await getPrebuiltRulesStatus({ signal });
-      return response.attributes.stats;
+      return response.stats;
     },
     {
       ...DEFAULT_QUERY_OPTIONS,

@@ -9,7 +9,6 @@
 import React, { createContext, useContext, useMemo, useState } from 'react';
 import type {
   CriteriaWithPagination,
-  EuiInMemoryTable,
   EuiSearchBarProps,
   EuiTableSelectionType,
 } from '@elastic/eui';
@@ -21,9 +20,9 @@ import type { InMemoryPaginationOptions } from '../../../../rule_management/logi
 import { RULES_TABLE_INITIAL_PAGE_SIZE, RULES_TABLE_PAGE_SIZE_OPTIONS } from '../constants';
 import type { RuleInstallationInfoForReview } from '../../../../../../common/detection_engine/prebuilt_rules/api/review_rule_installation/response_schema';
 
-export interface RulesTableNewState {
+export interface AddPrebuiltRulesTableState {
   /**
-   * Rules to display
+   * Rules avialable to be installed
    */
   rules: RuleInstallationInfoForReview[];
   /**
@@ -31,89 +30,50 @@ export interface RulesTableNewState {
    */
   selectionValue: EuiTableSelectionType<RuleInstallationInfoForReview>;
   /**
-   * Rules selected by checkbox
-   */
-  selectedRules: RuleInstallationInfoForReview[];
-  /**
-   * Is true whenever a rule action is in progress, such as delete, duplicate, export, or load.
-   */
-  isActionInProgress: boolean;
-  /**
-   * Is true whenever all table rules are selected (with respect to the currently selected filters)
-   */
-  isAllSelected: boolean;
-  /**
-   * Will be true if the query has been fetched.
-   */
-  isFetched: boolean;
-
-  /**
    * Is true then there is no cached data and the query is currently fetching.
    */
   isLoading: boolean;
   /**
-   * Is true when a preflight request (dry-run) is in progress.
+   * Will be true if the query has been fetched.
    */
-  isPreflightInProgress: boolean;
+  isFetched: boolean;
   /**
    * Is true whenever a background refetch is in-flight, which does not include initial loading
    */
   isRefetching: boolean;
   /**
-   * Indicates whether we should refetch table data in the background
-   */
-  isRefreshOn: boolean;
-  /**
    * The timestamp for when the rules were successfully fetched
    */
   lastUpdated: number;
-  /**
-   * IDs of rules the current table action (enable, disable, delete, etc.) is affecting
-   */
-  loadingRuleIds: string[];
-  /**
-   * Indicates which rule action (accept/dismiss) is currently in progress
-   */
-  loadingRulesAction: LoadingRuleAction;
   /**
    * Currently selected page and number of rows per page
    */
   pagination: InMemoryPaginationOptions;
   /**
-   * Whether the state has its default value
-   */
-  // isDefault: boolean;
-  /**
    * EuiSearchBarProps filters for InMemoryTable
    */
   filters: EuiSearchBarProps;
-  tableRef: React.MutableRefObject<EuiInMemoryTable<RuleInstallationInfoForReview> | null>;
 }
 
-export type LoadingRuleAction = 'accept' | 'dismiss' | null;
-
-export interface LoadingRules {
-  ids: string[];
-  action: LoadingRuleAction;
-}
-
-export interface RulesTableNewActions {
+export interface AddPrebuiltRulesTableActions {
   reFetchRules: ReturnType<typeof usePrebuiltRulesInstallReview>['refetch'];
   onTableChange: (criteria: CriteriaWithPagination<RuleInstallationInfoForReview>) => void;
 }
 
-export interface RulesTableNewContextType {
-  state: RulesTableNewState;
-  actions: RulesTableNewActions;
+export interface AddPrebuiltRulesContextType {
+  state: AddPrebuiltRulesTableState;
+  actions: AddPrebuiltRulesTableActions;
 }
 
-const RulesTableNewContext = createContext<RulesTableNewContextType | null>(null);
+const AddPrebuiltRulesTableContext = createContext<AddPrebuiltRulesContextType | null>(null);
 
-interface RulesTableNewContextProviderProps {
+interface AddPrebuiltRulesTableContextProviderProps {
   children: React.ReactNode;
 }
 
-export const RulesTableNewContextProvider = ({ children }: RulesTableNewContextProviderProps) => {
+export const AddPrebuiltRulesTableContextProvider = ({
+  children,
+}: AddPrebuiltRulesTableContextProviderProps) => {
   const [autoRefreshSettings] = useUiSetting$<{
     on: boolean;
     value: number;
@@ -212,19 +172,21 @@ export const RulesTableNewContextProvider = ({ children }: RulesTableNewContextP
   ]);
 
   return (
-    <RulesTableNewContext.Provider value={providerValue}>{children}</RulesTableNewContext.Provider>
+    <AddPrebuiltRulesTableContext.Provider value={providerValue}>
+      {children}
+    </AddPrebuiltRulesTableContext.Provider>
   );
 };
 
-export const useRulesTableNewContext = (): RulesTableNewContextType => {
-  const rulesTableContext = useContext(RulesTableNewContext);
+export const useAddPrebuiltRulesTableContext = (): AddPrebuiltRulesContextType => {
+  const rulesTableContext = useContext(AddPrebuiltRulesTableContext);
   invariant(
     rulesTableContext,
-    'useRulesTableNewContext should be used inside RulesTableNewContextProvider'
+    'useAddPrebuiltRulesTableContext should be used inside AddPrebuiltRulesTableContextProvider'
   );
 
   return rulesTableContext;
 };
 
-export const useRulesTableNewContextOptional = (): RulesTableNewContextType | null =>
-  useContext(RulesTableNewContext);
+export const useAddPrebuiltRulesTableContextOptional = (): AddPrebuiltRulesContextType | null =>
+  useContext(AddPrebuiltRulesTableContext);

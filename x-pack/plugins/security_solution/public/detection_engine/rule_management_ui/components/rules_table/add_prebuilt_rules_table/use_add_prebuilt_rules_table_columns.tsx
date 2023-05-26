@@ -92,7 +92,27 @@ const INTEGRATIONS_COLUMN: TableColumn = {
   truncateText: true,
 };
 
-export const useRulesTableNewColumns = ({ hasCRUDPermissions }: ColumnsProps): TableColumn[] => {
+const INSTALL_BUTTON_COLUMN: TableColumn = {
+  field: 'rule_id',
+  name: '',
+  render: (value: Rule['rule_id']) => {
+    return (
+      <EuiButtonEmpty
+        size="s"
+        onClick={() => {
+          alert(value);
+        }}
+      >
+        {i18n.INSTALL_RULE_BUTTON}
+      </EuiButtonEmpty>
+    );
+  },
+  width: '10%',
+};
+
+export const useAddPrebuiltRulesTableColumns = ({
+  hasCRUDPermissions,
+}: ColumnsProps): TableColumn[] => {
   const ruleNameColumn = useRuleNameColumn();
   const [showRelatedIntegrations] = useUiSetting$<boolean>(SHOW_RELATED_INTEGRATIONS_SETTING);
 
@@ -140,24 +160,8 @@ export const useRulesTableNewColumns = ({ hasCRUDPermissions }: ColumnsProps): T
         width: '18%',
         truncateText: true,
       },
-      {
-        field: 'rule_id',
-        name: '',
-        render: (value: Rule['rule_id']) => {
-          return (
-            <EuiButtonEmpty
-              size="s"
-              onClick={() => {
-                alert(value);
-              }}
-            >
-              {i18n.INSTALL_RULE_BUTTON}
-            </EuiButtonEmpty>
-          );
-        },
-        width: '10%',
-      },
+      ...(hasCRUDPermissions ? [INSTALL_BUTTON_COLUMN] : []),
     ],
-    [ruleNameColumn, showRelatedIntegrations]
+    [hasCRUDPermissions, ruleNameColumn, showRelatedIntegrations]
   );
 };

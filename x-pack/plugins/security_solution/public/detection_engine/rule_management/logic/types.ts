@@ -215,8 +215,6 @@ export const PaginationOptions = t.type({
 export type InMemoryPaginationOptions = t.TypeOf<typeof InMemoryPaginationOptions>;
 export const InMemoryPaginationOptions = t.type({
   pageIndex: PositiveInteger,
-  pageSize: PositiveInteger,
-  numberOfFilteredRules: PositiveInteger,
 });
 
 export interface FetchRulesProps {
