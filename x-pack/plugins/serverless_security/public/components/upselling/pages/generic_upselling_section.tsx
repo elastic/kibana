@@ -38,3 +38,6 @@ export const GenericUpsellingSection: React.FC<{ projectPLIs: SecurityProductLin
       />
     );
   });
+
+// eslint-disable-next-line import/no-default-export
+export { GenericUpsellingSection as default };

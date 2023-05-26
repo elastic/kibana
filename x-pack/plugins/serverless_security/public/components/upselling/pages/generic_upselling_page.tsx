@@ -39,3 +39,6 @@ export const GenericUpsellingPage: React.FC<{ projectPLIs: SecurityProductLineId
     );
   }
 );
+
+// eslint-disable-next-line import/no-default-export
+export { GenericUpsellingPage as default };

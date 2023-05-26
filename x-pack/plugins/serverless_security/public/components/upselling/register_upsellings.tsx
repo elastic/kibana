@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
+import React, { lazy } from 'react';
 import type { UpsellingService } from '@kbn/security-solution-plugin/public';
 import { SecurityPageName, AppFeatureKey } from '@kbn/security-solution-plugin/common';
 import type {
@@ -15,8 +15,9 @@ import type {
 
 import type { SecurityProductLineIds } from '../../../common/config';
 import { getProductAppFeatures } from '../../../common/pli/pli_features';
-import { GenericUpsellingSection } from './pages/generic_upselling_section';
-import { GenericUpsellingPage } from './pages/generic_upselling_page';
+
+const GenericUpsellingPageLazy = lazy(() => import('./pages/generic_upselling_page'));
+const GenericUpsellingSectionLazy = lazy(() => import('./pages/generic_upselling_section'));
 
 interface UpsellingsConfig {
   feature: AppFeatureKey;
@@ -57,13 +58,11 @@ export const registerUpsellings = (
 };
 
 // Upselling configuration for pages and sections components
-
-// TODO: lazy load these components
 const getUpsellingPages = (projectPLIs: SecurityProductLineIds): UpsellingPages => [
   {
     pageName: SecurityPageName.entityAnalytics,
     feature: AppFeatureKey.advancedInsights,
-    component: () => <GenericUpsellingPage projectPLIs={projectPLIs} />,
+    component: () => <GenericUpsellingPageLazy projectPLIs={projectPLIs} />,
   },
 ];
 
@@ -71,6 +70,6 @@ const getUpsellingSections = (projectPLIs: SecurityProductLineIds): UpsellingSec
   {
     id: 'entity_analytics_panel',
     feature: AppFeatureKey.advancedInsights,
-    component: () => <GenericUpsellingSection projectPLIs={projectPLIs} />,
+    component: () => <GenericUpsellingSectionLazy projectPLIs={projectPLIs} />,
   },
 ];
