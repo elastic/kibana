@@ -92,4 +92,29 @@ describe('validateCompositeSLO', () => {
       'Invalid budgeting method. Every source SLO must use the same budgeting method as the composite.'
     );
   });
+
+  describe('happy flow', () => {
+    it('throws nothing', () => {
+      const sloOne = createSLO({
+        budgetingMethod: 'occurrences',
+        timeWindow: sevenDaysRolling(),
+        revision: 2,
+      });
+      const sloTwo = createSLO({
+        budgetingMethod: 'occurrences',
+        timeWindow: sevenDaysRolling(),
+        revision: 3,
+      });
+      const compositeSlo = createCompositeSLO({
+        budgetingMethod: 'occurrences',
+        timeWindow: sevenDaysRolling(),
+        sources: [
+          createWeightedAverageSource({ id: sloOne.id, revision: sloOne.revision }),
+          createWeightedAverageSource({ id: sloTwo.id, revision: sloTwo.revision }),
+        ],
+      });
+
+      expect(() => validateCompositeSLO(compositeSlo, [sloOne, sloTwo])).not.toThrow();
+    });
+  });
 });
