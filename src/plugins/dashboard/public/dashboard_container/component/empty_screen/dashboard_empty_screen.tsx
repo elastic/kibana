@@ -67,15 +67,7 @@ export function DashboardEmptyScreen() {
     `/plugins/dashboard/assets/${isDarkTheme ? 'dashboards_dark' : 'dashboards_light'}.svg`
   );
 
-  /**
-   * if the Dashboard is in edit mode, we create a fake first panel using the same size as the default panel
-   */
   if (isEditMode) {
-    const height = Math.round(
-      DASHBOARD_GRID_HEIGHT * DEFAULT_PANEL_HEIGHT +
-        (DEFAULT_PANEL_HEIGHT - 1) * DASHBOARD_MARGIN_SIZE
-    );
-
     const goToLens = () => {
       if (!lensAlias || !lensAlias.aliasPath) return;
 
@@ -91,18 +83,12 @@ export function DashboardEmptyScreen() {
       });
     };
 
-    const editModeTitle = (
-      <EuiTitle size="xs">
-        <h1>{emptyScreenStrings.getEditModeTitle()}</h1>
-      </EuiTitle>
-    );
-    const editModeSubtitle = (
-      <EuiText size="s" color="subdued">
-        <span>{emptyScreenStrings.getEditModeSubtitle()}</span>
-      </EuiText>
-    );
     const libraryButton = (
-      <EuiButtonEmpty iconType="folderOpen" onClick={() => dashboardContainer.addFromLibrary()}>
+      <EuiButtonEmpty
+        flush="left"
+        iconType="folderOpen"
+        onClick={() => dashboardContainer.addFromLibrary()}
+      >
         {emptyScreenStrings.getAddFromLibraryButtonTitle()}
       </EuiButtonEmpty>
     );
@@ -113,35 +99,40 @@ export function DashboardEmptyScreen() {
     );
 
     return (
-      <div className="dshEditEmptyWidgetContainer">
-        <div
-          data-test-subj="emptyDashboardWidget"
-          className="dshEditEmptyWidget"
-          style={{ margin: DASHBOARD_MARGIN_SIZE, height }}
-        >
-          <EuiFlexGroup
-            direction="column"
-            alignItems="center"
-            justifyContent="center"
-            style={{ height: '100%' }}
-          >
-            <EuiFlexItem grow={false}>
-              <EuiImage url={imageUrl} alt="" />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              {editModeTitle}
-              <EuiSpacer size="s" />
-              {editModeSubtitle}
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiFlexGroup direction="row">
-                <EuiFlexItem grow={false}>{libraryButton}</EuiFlexItem>
-                <EuiFlexItem grow={false}>{goToLensButton}</EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </div>
-      </div>
+      <EuiPageTemplate
+        data-test-subj="emptyDashboardWidget"
+        style={{ backgroundColor: 'inherit' }}
+        grow={false}
+      >
+        <EuiPageTemplate.EmptyPrompt
+          color="transparent"
+          className="dshEditEmptyWidgetContainer"
+          hasBorder={true}
+          icon={<EuiImage size="fullWidth" src={imageUrl} alt="" />}
+          style={{ padding: euiThemeVars.euiSizeXL }}
+          body={
+            <EuiText size="s" color="subdued">
+              <span>{emptyScreenStrings.getEditModeSubtitle()}</span>
+            </EuiText>
+          }
+          title={
+            <EuiTitle size="xs">
+              <h2>{emptyScreenStrings.getEditModeTitle()}</h2>
+            </EuiTitle>
+          }
+          actions={
+            <EuiFlexGroup justifyContent="center" gutterSize="s" alignItems="center">
+              <EuiFlexItem grow={false}>{goToLensButton}</EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiText size="s" color="subdued">
+                  <span>{emptyScreenStrings.orText()}</span>
+                </EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>{libraryButton}</EuiFlexItem>
+            </EuiFlexGroup>
+          }
+        />
+      </EuiPageTemplate>
     );
   }
 
