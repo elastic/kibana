@@ -10,7 +10,6 @@ import { failure } from 'io-ts/lib/PathReporter';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { map, fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
-import type { TimelineSavedObjectResponseT } from '../../../../../common/types/timeline';
 import {
   SavedTimelineRuntimeType,
   TimelineTypeLiteralWithNullRt,

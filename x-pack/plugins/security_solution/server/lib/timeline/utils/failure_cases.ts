@@ -6,10 +6,7 @@
  */
 
 import { isEmpty } from 'lodash/fp';
-import type {
-  TimelineSavedObjectResponseT,
-  TimelineTypeLiteral,
-} from '../../../../common/types/timeline';
+import type { TimelineTypeLiteral } from '../../../../common/types/timeline';
 import { TimelineStatus } from '../../../../common/types/timeline';
 
 export const UPDATE_TIMELINE_ERROR_MESSAGE =

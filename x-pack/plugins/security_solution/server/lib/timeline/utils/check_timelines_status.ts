@@ -7,7 +7,6 @@
 
 import path, { join, resolve } from 'path';
 import * as rt from 'io-ts';
-import type { TimelineSavedObjectResponseT } from '../../../../common/types/timeline';
 import { TimelineSavedToReturnObjectRuntimeType } from '../../../../common/types/timeline';
 
 import type { ImportTimelinesSchema } from '../schemas/timelines/import_timelines_schema';
