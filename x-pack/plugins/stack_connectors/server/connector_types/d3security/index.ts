@@ -62,7 +62,7 @@ const SecretsSchema = schema.object(secretSchemaProps, {
   validate: (secrets) => {
     if (secrets.token) return;
     if (!secrets.token)
-      return i18n.translate('xpack.stack_connectors.builtin.d3security.invalidUrlToken', {
+      return i18n.translate('xpack.stackConnectors.builtin.d3security.invalidUrlToken', {
         defaultMessage: 'token must be specified',
       });
   },
@@ -154,7 +154,12 @@ export async function executor(
   const { body: data, severity, eventType } = params;
 
   const axiosInstance = axios.create();
-  const bodyData = addSeverityAndEventTypeInBody(String(data), String(severity), String(eventType));
+  const bodyData = addSeverityAndEventTypeInBody(
+    String(data),
+    String(severity),
+    String(eventType),
+    logger
+  );
   const result: Result<AxiosResponse, AxiosError<{ message: string }>> = await promiseResult(
     request({
       axios: axiosInstance,
@@ -216,7 +221,12 @@ export async function executor(
   }
 }
 
-function addSeverityAndEventTypeInBody(bodyString: string, severity: string, eventType: string) {
+function addSeverityAndEventTypeInBody(
+  bodyString: string,
+  severity: string,
+  eventType: string,
+  logger: D3SecurityConnectorTypeExecutorOptions['logger']
+) {
   let bodyObj = bodyString;
   try {
     bodyObj = JSON.parse(bodyString);
@@ -242,7 +252,7 @@ function errorResultInvalid(
   serviceMessage: string
 ): ConnectorTypeExecutorResult<void> {
   const errMessage = i18n.translate(
-    'xpack.stack_connectors.builtin.d3security.invalidResponseErrorMessage',
+    'xpack.stackConnectors.builtin.d3security.invalidResponseErrorMessage',
     {
       defaultMessage: 'error calling d3security, invalid response',
     }
@@ -260,7 +270,7 @@ function errorResultRequestFailed(
   serviceMessage: string
 ): ConnectorTypeExecutorResult<unknown> {
   const errMessage = i18n.translate(
-    'xpack.stack_connectors.builtin.d3security.requestFailedErrorMessage',
+    'xpack.stackConnectors.builtin.d3security.requestFailedErrorMessage',
     {
       defaultMessage: 'error calling d3security, request failed',
     }
@@ -275,7 +285,7 @@ function errorResultRequestFailed(
 
 function errorResultUnexpectedError(actionId: string): ConnectorTypeExecutorResult<void> {
   const errMessage = i18n.translate(
-    'xpack.stack_connectors.builtin.d3security.unreachableErrorMessage',
+    'xpack.stackConnectors.builtin.d3security.unreachableErrorMessage',
     {
       defaultMessage: 'error calling d3security, unexpected error',
     }
@@ -289,7 +299,7 @@ function errorResultUnexpectedError(actionId: string): ConnectorTypeExecutorResu
 
 function retryResult(actionId: string, serviceMessage: string): ConnectorTypeExecutorResult<void> {
   const errMessage = i18n.translate(
-    'xpack.stack_connectors.builtin.d3security.invalidResponseRetryLaterErrorMessage',
+    'xpack.stackConnectors.builtin.d3security.invalidResponseRetryLaterErrorMessage',
     {
       defaultMessage: 'error calling d3security, retry later',
     }
@@ -313,7 +323,7 @@ function retryResultSeconds(
   const retry = new Date(retryEpoch);
   const retryString = retry.toISOString();
   const errMessage = i18n.translate(
-    'xpack.stack_connectors.builtin.d3security.invalidResponseRetryDateErrorMessage',
+    'xpack.stackConnectors.builtin.d3security.invalidResponseRetryDateErrorMessage',
     {
       defaultMessage: 'error calling d3security, retry at {retryString}',
       values: {
