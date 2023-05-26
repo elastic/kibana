@@ -54,7 +54,6 @@ import { getPrivateLocationsRoute } from './settings/private_locations/get_priva
 import { getSyntheticsFilters } from './filters/filters';
 import { getAllSyntheticsMonitorRoute } from './monitor_cruds/get_monitors_list';
 import { getLocationMonitors } from './settings/private_locations/get_location_monitors';
-import { getAllSyntheticsMonitorRoute } from './monitor_cruds/get_monitors_list';
 
 export const syntheticsAppRestApiRoutes: SyntheticsRestApiRouteFactory[] = [
   addSyntheticsMonitorRoute,
