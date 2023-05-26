@@ -6,13 +6,15 @@
  */
 
 import type { Client } from '@elastic/elasticsearch';
+import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import { basename } from 'path';
 import * as cborx from 'cbor-x';
-import { AGENT_ACTIONS_RESULTS_INDEX } from '@kbn/fleet-plugin/common';
+import { AGENT_ACTIONS_INDEX, AGENT_ACTIONS_RESULTS_INDEX } from '@kbn/fleet-plugin/common';
 import { FleetActionGenerator } from '../../../common/endpoint/data_generators/fleet_action_generator';
 import { EndpointActionGenerator } from '../../../common/endpoint/data_generators/endpoint_action_generator';
 import type {
   ActionDetails,
+  EndpointAction,
   EndpointActionData,
   EndpointActionResponse,
   FileUploadMetadata,
@@ -309,3 +311,54 @@ const getOutputDataIfNeeded = (action: ActionDetails): ResponseOutput => {
       return { output: undefined };
   }
 };
+
+export async function getLatestActionDoc(
+  esClient: Client
+): Promise<SearchHit<EndpointAction> | undefined> {
+  return (
+    await esClient.search<EndpointAction>({
+      index: AGENT_ACTIONS_INDEX,
+      ignore_unavailable: true,
+      query: {
+        match: {
+          type: 'INPUT_ACTION',
+        },
+      },
+      sort: {
+        '@timestamp': {
+          order: 'desc',
+        },
+      },
+      size: 1,
+    })
+  ).hits.hits.at(0);
+}
+
+export async function waitForNewActionDoc(
+  esClient: Client,
+  previousActionDoc?: SearchHit<EndpointAction>,
+  options: {
+    maxAttempts: number;
+    interval: number;
+  } = { maxAttempts: 3, interval: 10000 }
+): Promise<SearchHit<EndpointAction> | undefined> {
+  const { maxAttempts, interval } = options;
+  let attempts = 1;
+  let latestDoc = await getLatestActionDoc(esClient);
+  while ((!latestDoc || latestDoc._id === previousActionDoc?._id) && attempts <= maxAttempts) {
+    await new Promise((res) => setTimeout(res, interval));
+    latestDoc = await getLatestActionDoc(esClient);
+    attempts++;
+  }
+
+  return latestDoc;
+}
+
+export function updateActionDoc<T = unknown>(esClient: Client, id: string, doc: T) {
+  return esClient.update({
+    index: AGENT_ACTIONS_INDEX,
+    id,
+    doc,
+    refresh: true,
+  });
+}
