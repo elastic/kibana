@@ -49,6 +49,7 @@ interface IExecutionUuidKpiAggBucket extends estypes.AggregationsStringTermsBuck
     actionExecutionOutcomes: IActionExecution;
   };
 }
+
 interface IExecutionUuidAggBucket extends estypes.AggregationsStringTermsBucketKeys {
   timeoutMessage: estypes.AggregationsMultiBucketBase;
   actionExecution: {
@@ -411,18 +412,18 @@ export function formatExecutionLogResult(
 
 export function formatSortForBucketSort(sort: estypes.Sort) {
   return (sort as estypes.SortCombinations[]).map((s) =>
-    Object.keys(s).reduce(
-      (acc, curr) => ({ ...acc, [ExecutionLogSortFields[curr]]: get(s, curr) }),
-      {}
-    )
+    Object.keys(s).reduce((acc, curr) => {
+      (acc as Record<string, unknown>)[ExecutionLogSortFields[curr]] = get(s, curr);
+      return acc;
+    }, {})
   );
 }
 
 export function formatSortForTermSort(sort: estypes.Sort) {
   return (sort as estypes.SortCombinations[]).map((s) =>
-    Object.keys(s).reduce(
-      (acc, curr) => ({ ...acc, [ExecutionLogSortFields[curr]]: get(s, `${curr}.order`) }),
-      {}
-    )
+    Object.keys(s).reduce((acc, curr) => {
+      (acc as Record<string, unknown>)[ExecutionLogSortFields[curr]] = get(s, `${curr}.order`);
+      return acc;
+    }, {})
   );
 }

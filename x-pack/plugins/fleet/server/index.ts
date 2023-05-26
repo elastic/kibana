@@ -42,6 +42,14 @@ export type { PackagePolicyClient } from './services/package_policy_service';
 
 export { relativeDownloadUrlFromArtifact } from './services/artifacts/mappings';
 
+export type {
+  FleetFileTransferDirection,
+  FleetFileClientInterface,
+  FleetFile,
+  HapiReadableStream,
+  FleetFileUpdatableFields,
+} from './services/files/types';
+
 export const plugin = (initializerContext: PluginInitializerContext) => {
   return new FleetPlugin(initializerContext);
 };

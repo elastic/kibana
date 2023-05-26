@@ -1,6 +1,6 @@
 title: Update SLO request
 description: >
-  The update SLO API request body varies depending on the type of indicator, time window and budgeting method. 
+  The update SLO API request body varies depending on the type of indicator, time window and budgeting method.
   Partial update is handled.
 type: object
 properties:
@@ -15,6 +15,7 @@ properties:
       - $ref: 'indicator_properties_custom_kql.yaml'
       - $ref: 'indicator_properties_apm_availability.yaml'
       - $ref: 'indicator_properties_apm_latency.yaml'
+      - $ref: 'indicator_properties_custom_metric.yaml'
   timeWindow:
     oneOf:
       - $ref: 'time_window_rolling.yaml'

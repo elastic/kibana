@@ -8,12 +8,12 @@
 import { format } from 'url';
 import supertest from 'supertest';
 import request from 'superagent';
-import { parseEndpoint } from '@kbn/apm-plugin/common/apm_api/parse_endpoint';
 import type {
   APIReturnType,
   APIClientRequestParamsOf,
 } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
 import type { APIEndpoint } from '@kbn/apm-plugin/server';
+import { formatRequest } from '@kbn/server-route-repository';
 
 export function createApmApiClient(st: supertest.SuperTest<supertest.Test>) {
   return async <TEndpoint extends APIEndpoint>(
@@ -26,23 +26,31 @@ export function createApmApiClient(st: supertest.SuperTest<supertest.Test>) {
 
     const params = 'params' in options ? (options.params as Record<string, any>) : {};
 
-    const { method, pathname } = parseEndpoint(endpoint, params?.path);
+    const { method, pathname, version } = formatRequest(endpoint, params.path);
     const url = format({ pathname, query: params?.query });
+
+    const headers: Record<string, string> = { 'kbn-xsrf': 'foo' };
+
+    if (version) {
+      headers['Elastic-Api-Version'] = version;
+    }
 
     let res: request.Response;
     if (type === 'form-data') {
       const fields: Array<[string, any]> = Object.entries(params.body);
       const formDataRequest = st[method](url)
-        .set('kbn-xsrf', 'foo')
+        .set(headers)
         .set('Content-type', 'multipart/form-data');
+
       for (const field of fields) {
         formDataRequest.field(field[0], field[1]);
       }
+
       res = await formDataRequest;
     } else if (params.body) {
-      res = await st[method](url).send(params.body).set('kbn-xsrf', 'foo');
+      res = await st[method](url).send(params.body).set(headers);
     } else {
-      res = await st[method](url).set('kbn-xsrf', 'foo');
+      res = await st[method](url).set(headers);
     }
 
     // supertest doesn't throw on http errors
