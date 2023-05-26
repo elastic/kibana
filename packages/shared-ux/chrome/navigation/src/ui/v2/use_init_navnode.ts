@@ -79,20 +79,25 @@ export const useInitNavNode = (node: NodePropsEnhanced) => {
     {}
   );
 
+  const isMounted = useRef(false);
+
   /**
    * Flag to indicate if the current node has been registered
    */
   const isRegistered = useRef(false);
+
   /**
    * Reference to the unregister function
    */
   const unregisterRef = useRef<UnRegisterFunction>();
+
   /**
    * Map to keep track of the order of the children when they mount.
    * This allows us to keep in sync the nav tree sent to the Chrome service
    * with the order of the DOM elements
    */
   const orderChildrenRef = useRef<Record<ChromeProjectNavigationNode['id'], number>>({});
+
   /**
    * Index to keep track of the order of the children when they mount.
    */
@@ -110,13 +115,6 @@ export const useInitNavNode = (node: NodePropsEnhanced) => {
    */
   const [childrenNodesUpdated, setChildrenNodesUpdated] = useState<string[]>([]);
 
-  /**
-   * Create a stable string reference of the node path to avoid infinite loops
-   */
-  const nodePathToString = nodePath ? nodePath.join('.') : null;
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const stableNodePath = useMemo(() => nodePath, [nodePathToString]);
-
   const { navLinks$ } = useNavigationServices();
   const deepLinks = useObservable(navLinks$, []);
   const { register: registerNodeOnParent } = useRegisterTreeNode();
@@ -124,8 +122,8 @@ export const useInitNavNode = (node: NodePropsEnhanced) => {
   const id = getIdFromNavigationNode(node);
 
   const internalNavNode = useMemo(
-    () => createInternalNavNode(id, node, deepLinks, stableNodePath),
-    [node, id, deepLinks, stableNodePath]
+    () => createInternalNavNode(id, node, deepLinks, nodePath),
+    [node, id, deepLinks, nodePath]
   );
 
   // Register the node on the parent whenever its properties change or whenever
@@ -167,7 +165,7 @@ export const useInitNavNode = (node: NodePropsEnhanced) => {
 
   const registerChildNode = useCallback<RegisterFunction>(
     (childNode) => {
-      const childPath = stableNodePath ? [...stableNodePath, childNode.id] : [];
+      const childPath = nodePath ? [...nodePath, childNode.id] : [];
 
       setChildrenNodes((prev) => {
         return {
@@ -193,11 +191,15 @@ export const useInitNavNode = (node: NodePropsEnhanced) => {
         path: childPath,
       };
     },
-    [stableNodePath]
+    [nodePath]
   );
 
   /** Register when mounting and whenever the internal nav node changes */
   useEffect(() => {
+    if (!isMounted.current) {
+      return;
+    }
+
     if (internalNavNode) {
       register();
     } else {
@@ -206,15 +208,21 @@ export const useInitNavNode = (node: NodePropsEnhanced) => {
   }, [unregister, register, internalNavNode]);
 
   /** Unregister when unmounting */
-  useEffect(() => unregister, [unregister]);
+  useEffect(() => {
+    isMounted.current = true;
+    return () => {
+      isMounted.current = false;
+      unregister();
+    };
+  }, [unregister]);
 
   return useMemo(
     () => ({
       navNode: internalNavNode,
-      path: stableNodePath,
+      path: nodePath,
       registerChildNode,
       childrenNodes,
     }),
-    [internalNavNode, registerChildNode, stableNodePath, childrenNodes]
+    [internalNavNode, registerChildNode, nodePath, childrenNodes]
   );
 };
