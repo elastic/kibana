@@ -13,54 +13,35 @@ import {
   EuiScreenReaderOnly,
   EuiWrappingPopover,
 } from '@elastic/eui';
-import type { CoreStart, Plugin, SimpleSavedObject } from '@kbn/core/public';
-import type { DiscoverStart } from '@kbn/discover-plugin/public';
+import type { CoreSetup, CoreStart, Plugin, SimpleSavedObject } from '@kbn/core/public';
+import type { DiscoverSetup, DiscoverStart } from '@kbn/discover-plugin/public';
+import { noop } from 'lodash';
 import React, { useEffect, useState } from 'react';
 import ReactDOM from 'react-dom';
 import useObservable from 'react-use/lib/useObservable';
+
+export interface DiscoverExtenderSetupPlugins {
+  discover: DiscoverSetup;
+}
 
 export interface DiscoverExtenderStartPlugins {
   discover: DiscoverStart;
 }
 
 export class DiscoverExtenderPlugin implements Plugin {
-  setup() {}
+  setup(core: CoreSetup, plugins: DiscoverExtenderSetupPlugins) {
+    core.application.register({
+      id: 'discoverExtender',
+      title: 'Discover Extender',
+      mount() {
+        plugins.discover?.locator?.navigate({ profile: 'extender' });
+        return noop;
+      },
+    });
+  }
 
   start(core: CoreStart, plugins: DiscoverExtenderStartPlugins) {
     const { discover } = plugins;
-
-    discover.customize('default', ({ customizations }) => {
-      customizations.set({
-        id: 'top_nav',
-        defaultMenu: {
-          options: { order: 100 },
-          new: { order: 200 },
-          open: { order: 300 },
-          share: { order: 400 },
-          alerts: { order: 500 },
-          inspect: { order: 600 },
-          save: { order: 800 },
-        },
-        getMenuItems: () => [
-          {
-            data: {
-              id: 'logsExplorer',
-              label: 'Logs explorer',
-              iconType: 'logsApp',
-              run: () => {
-                discover.locator?.navigate({ profile: 'extender' });
-              },
-            },
-            order: 700,
-          },
-        ],
-      });
-
-      return () => {
-        // eslint-disable-next-line no-console
-        console.log('Cleaning up Document explorer customizations');
-      };
-    });
 
     let isOptionsOpen = false;
     const optionsContainer = document.createElement('div');
