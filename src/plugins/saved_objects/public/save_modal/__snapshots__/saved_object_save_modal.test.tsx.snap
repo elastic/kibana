@@ -104,7 +104,6 @@ exports[`SavedObjectSaveModal should render matching snapshot 1`] = `
       data-test-subj="confirmSaveSavedObjectButton"
       fill={true}
       form="generated-id_form"
-      isDisabled={false}
       isLoading={false}
       size="m"
       type="submit"
@@ -219,7 +218,6 @@ exports[`SavedObjectSaveModal should render matching snapshot when custom isVali
       data-test-subj="confirmSaveSavedObjectButton"
       fill={true}
       form="generated-id_form"
-      isDisabled={true}
       isLoading={false}
       size="m"
       type="submit"
@@ -334,7 +332,6 @@ exports[`SavedObjectSaveModal should render matching snapshot when custom isVali
       data-test-subj="confirmSaveSavedObjectButton"
       fill={true}
       form="generated-id_form"
-      isDisabled={false}
       isLoading={false}
       size="m"
       type="submit"
@@ -463,7 +460,6 @@ exports[`SavedObjectSaveModal should render matching snapshot when given options
       data-test-subj="confirmSaveSavedObjectButton"
       fill={true}
       form="generated-id_form"
-      isDisabled={false}
       isLoading={false}
       size="m"
       type="submit"

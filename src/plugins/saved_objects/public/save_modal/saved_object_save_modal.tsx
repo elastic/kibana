@@ -63,6 +63,7 @@ export interface SaveModalState {
   hasTitleDuplicate: boolean;
   isLoading: boolean;
   visualizationDescription: string;
+  hasAttemptedSubmit: boolean;
 }
 
 const generateId = htmlIdGenerator();
@@ -82,10 +83,11 @@ export class SavedObjectSaveModal extends React.Component<Props, SaveModalState>
     hasTitleDuplicate: false,
     isLoading: false,
     visualizationDescription: this.props.description ? this.props.description : '',
+    hasAttemptedSubmit: false,
   };
 
   public render() {
-    const { isTitleDuplicateConfirmed, hasTitleDuplicate, title } = this.state;
+    const { isTitleDuplicateConfirmed, hasTitleDuplicate, title, hasAttemptedSubmit } = this.state;
     const duplicateWarningId = generateId();
 
     const hasColumns = !!this.props.rightOptions;
@@ -102,7 +104,10 @@ export class SavedObjectSaveModal extends React.Component<Props, SaveModalState>
             data-test-subj="savedObjectTitle"
             value={title}
             onChange={this.onTitleChange}
-            isInvalid={(!isTitleDuplicateConfirmed && hasTitleDuplicate) || title.length === 0}
+            isInvalid={
+              hasAttemptedSubmit &&
+              ((!isTitleDuplicateConfirmed && hasTitleDuplicate) || title.length === 0)
+            }
             aria-describedby={this.state.hasTitleDuplicate ? duplicateWarningId : undefined}
           />
         </EuiFormRow>
@@ -258,11 +263,22 @@ export class SavedObjectSaveModal extends React.Component<Props, SaveModalState>
 
   private onFormSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    this.saveSavedObject();
+
+    const { hasAttemptedSubmit, title } = this.state;
+
+    if (!hasAttemptedSubmit) {
+      this.setState({ hasAttemptedSubmit: true });
+    }
+
+    const isValid = this.props.isValid !== undefined ? this.props.isValid : true;
+
+    if (title.length !== 0 && isValid) {
+      this.saveSavedObject();
+    }
   };
 
   private renderConfirmButton = () => {
-    const { isLoading, title } = this.state;
+    const { isLoading } = this.state;
 
     let confirmLabel: string | React.ReactNode = i18n.translate(
       'savedObjects.saveModal.saveButtonLabel',
@@ -275,14 +291,11 @@ export class SavedObjectSaveModal extends React.Component<Props, SaveModalState>
       confirmLabel = this.props.confirmButtonLabel;
     }
 
-    const isValid = this.props.isValid !== undefined ? this.props.isValid : true;
-
     return (
       <EuiButton
         fill
         data-test-subj="confirmSaveSavedObjectButton"
         isLoading={isLoading}
-        isDisabled={title.length === 0 || !isValid}
         type="submit"
         form={this.formId}
       >
