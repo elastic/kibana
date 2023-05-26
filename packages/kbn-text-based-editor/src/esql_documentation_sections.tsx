@@ -1213,5 +1213,39 @@ FROM employees
         />
       ),
     },
+    {
+      label: i18n.translate(
+        'textBasedEditor.query.textBasedLanguagesEditor.documentation.toStringFunction',
+        {
+          defaultMessage: 'TO_STRING',
+        }
+      ),
+      description: (
+        <Markdown
+          markdown={i18n.translate(
+            'textBasedEditor.query.textBasedLanguagesEditor.documentation.toStringFunction.markdown',
+            {
+              defaultMessage: `### TO_STRING
+Converts a field into a string. For example:
+
+\`\`\`
+ROW a=10
+| EVAL j = TO_STRING(a)
+\`\`\`
+
+It also works fine on multivalued fields:
+
+\`\`\`
+ROW a=[10, 9, 8]
+| EVAL j = TO_STRING(a)
+\`\`\`
+              `,
+              description:
+                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+            }
+          )}
+        />
+      ),
+    },
   ],
 };
