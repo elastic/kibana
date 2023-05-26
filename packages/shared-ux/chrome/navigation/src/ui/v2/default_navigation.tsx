@@ -10,10 +10,10 @@ import React, { FC, useCallback } from 'react';
 
 import { Navigation } from './components';
 import {
-  GroupDefinition,
   NavigationTreeDefinition,
   NodeDefinition,
   ProjectNavigationDefinition,
+  ProjectNavigationTreeDefinition,
   RootNavigationItemDefinition,
 } from './types';
 import { CloudLink } from './components/cloud_link';
@@ -29,7 +29,7 @@ const isChromeProjectNavigationNode = (
 };
 
 const getDefaultNavigationTree = (
-  projectDefinition: GroupDefinition[]
+  projectDefinition: ProjectNavigationTreeDefinition
 ): NavigationTreeDefinition => {
   return {
     body: [
@@ -40,7 +40,7 @@ const getDefaultNavigationTree = (
       {
         type: 'recentlyAccessed',
       },
-      ...projectDefinition,
+      ...projectDefinition.map((def) => ({ ...def, type: 'navGroup' as const })),
       {
         type: 'navGroup',
         ...getPresets('analytics'),

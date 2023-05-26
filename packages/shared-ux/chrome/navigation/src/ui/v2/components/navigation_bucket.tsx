@@ -7,12 +7,12 @@
  */
 
 import React, { FC, useCallback } from 'react';
-import type { ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
-import { Navigation } from './navigation';
+
 import { analytics, devtools, ml, management } from '../nav_tree_presets';
+import { Navigation } from './navigation';
 import type { NavigationBucketPreset, NodeDefinition } from '../types';
 
-const navTreePresets: { [preset in NavigationBucketPreset]: ChromeProjectNavigationNode } = {
+const navTreePresets: { [preset in NavigationBucketPreset]: NodeDefinition } = {
   analytics,
   ml,
   devtools,

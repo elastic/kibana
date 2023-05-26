@@ -7,25 +7,18 @@
  */
 
 import { ChromeNavLink, ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
-import { ReactElement, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 
 import { useNavigation as useNavigationServices } from '../../services';
-import { NodeProps, RegisterFunction, UnRegisterFunction } from './types';
+import {
+  ChromeProjectNavigationNodeEnhanced,
+  NodeProps,
+  NodePropsEnhanced,
+  RegisterFunction,
+  UnRegisterFunction,
+} from './types';
 import { useRegisterTreeNode } from './use_register_tree_node';
-
-/**
- * @private
- *
- * Internally we enhance the Props passed to the Navigation.Item component.
- */
-interface NodePropsEnhanced extends NodeProps {
-  /**
-   * This function correspond to the same "itemRender" function that can be passed to
-   * the EuiSideNavItemType (see navigation_section_ui.tsx)
-   */
-  itemRender?: () => ReactElement;
-}
 
 function getIdFromNavigationNode({ id: _id, link, title }: NodeProps): string {
   const id = _id ?? link;
@@ -50,7 +43,7 @@ function createInternalNavNode(
   _navNode: NodePropsEnhanced,
   deepLinks: Readonly<ChromeNavLink[]>,
   path: string[] | null
-): ChromeProjectNavigationNode | null {
+): ChromeProjectNavigationNodeEnhanced | null {
   const { children, link, ...navNode } = _navNode;
   const deepLink = deepLinks.find((dl) => dl.id === link);
   const isVisible = isNodeVisible({ link, deepLink });
@@ -75,9 +68,9 @@ export const useInitNavNode = (node: NodePropsEnhanced) => {
   /**
    * Map of children nodes
    */
-  const [childrenNodes, setChildrenNodes] = useState<Record<string, ChromeProjectNavigationNode>>(
-    {}
-  );
+  const [childrenNodes, setChildrenNodes] = useState<
+    Record<string, ChromeProjectNavigationNodeEnhanced>
+  >({});
 
   const isMounted = useRef(false);
 

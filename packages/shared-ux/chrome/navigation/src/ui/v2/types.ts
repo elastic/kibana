@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { ReactNode } from 'react';
+import type { ReactElement, ReactNode } from 'react';
 import type {
   ChromeProjectNavigationLink,
   ChromeProjectNavigationNode,
@@ -45,6 +45,27 @@ export interface NodeProps extends Omit<NodeDefinition, 'children'> {
    * This function will receive the
    */
   children?: ((navNode: ChromeProjectNavigationNode) => ReactNode) | ReactNode;
+}
+
+/**
+ * @private
+ *
+ * Internally we enhance the Props passed to the Navigation.Item component.
+ */
+export interface NodePropsEnhanced extends NodeProps {
+  /**
+   * This function correspond to the same "itemRender" function that can be passed to
+   * the EuiSideNavItemType (see navigation_section_ui.tsx)
+   */
+  itemRender?: () => ReactElement;
+}
+
+export interface ChromeProjectNavigationNodeEnhanced extends ChromeProjectNavigationNode {
+  /**
+   * This function correspond to the same "itemRender" function that can be passed to
+   * the EuiSideNavItemType (see navigation_section_ui.tsx)
+   */
+  itemRender?: () => ReactElement;
 }
 
 /** The preset that can be pass to the NavigationBucket component */
@@ -147,7 +168,7 @@ export type UnRegisterFunction = (id: string) => void;
  *
  * A function to register a navigation node on its parent.
  */
-export type RegisterFunction = (navNode: ChromeProjectNavigationNode) => {
+export type RegisterFunction = (navNode: ChromeProjectNavigationNodeEnhanced) => {
   /** The function to unregister the node. */
   unregister: UnRegisterFunction;
   /** The full path of the node in the navigation tree. */
