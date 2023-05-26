@@ -24,13 +24,13 @@ export type ActionType = rt.TypeOf<typeof ActionTypeRt>;
 export type CaseField = rt.TypeOf<typeof CaseFieldRt>;
 export type ThirdPartyField = rt.TypeOf<typeof ThirdPartyFieldRt>;
 
-const ConnectorMappingsAttributesRt = rt.type({
+const ConnectorMappingsAttributesRt = rt.strict({
   action_type: ActionTypeRt,
   source: CaseFieldRt,
   target: ThirdPartyFieldRt,
 });
 
-export const ConnectorMappingsRt = rt.type({
+export const ConnectorMappingsRt = rt.strict({
   mappings: rt.array(ConnectorMappingsAttributesRt),
   owner: rt.string,
 });
@@ -40,7 +40,7 @@ export type ConnectorMappings = rt.TypeOf<typeof ConnectorMappingsRt>;
 
 const FieldTypeRt = rt.union([rt.literal('text'), rt.literal('textarea')]);
 
-const ConnectorFieldRt = rt.type({
+const ConnectorFieldRt = rt.strict({
   id: rt.string,
   name: rt.string,
   required: rt.boolean,

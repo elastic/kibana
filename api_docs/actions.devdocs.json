@@ -3971,6 +3971,21 @@
       },
       {
         "parentPluginId": "actions",
+        "id": "def-common.GeneralConnectorFeatureId",
+        "type": "string",
+        "tags": [],
+        "label": "GeneralConnectorFeatureId",
+        "description": [],
+        "signature": [
+          "\"general\""
+        ],
+        "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "actions",
         "id": "def-common.IExecutionKPIResult",
         "type": "Type",
         "tags": [],
@@ -4304,6 +4319,59 @@
         "path": "x-pack/plugins/actions/common/execution_log_types.ts",
         "deprecated": false,
         "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "actions",
+        "id": "def-common.GeneralFeature",
+        "type": "Object",
+        "tags": [],
+        "label": "GeneralFeature",
+        "description": [],
+        "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "actions",
+            "id": "def-common.GeneralFeature.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "actions",
+            "id": "def-common.GeneralFeature.name",
+            "type": "Any",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "actions",
+            "id": "def-common.GeneralFeature.compatibility",
+            "type": "Any",
+            "tags": [],
+            "label": "compatibility",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
