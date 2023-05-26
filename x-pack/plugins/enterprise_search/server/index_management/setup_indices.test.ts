@@ -215,6 +215,7 @@ describe('Setup Indices', () => {
       error: { type: 'keyword' },
       indexed_document_count: { type: 'integer' },
       indexed_document_volume: { type: 'integer' },
+      job_type: { type: 'keyword' },
       last_seen: { type: 'date' },
       metadata: { type: 'object' },
       started_at: { type: 'date' },
