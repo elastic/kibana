@@ -110,12 +110,12 @@ export function Tutorials() {
       <EuiSpacer />
       {instructionsExists &&
         instructions.map((instruction) => (
-          <>
+          <div key={instruction.title}>
             <InstructionsSet instructions={instruction} />
             <EuiSpacer />
-          </>
+          </div>
         ))}
-      <Footer />
+      <Footer />;
     </ObservabilityPageTemplate>
   );
 }
