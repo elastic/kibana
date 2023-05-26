@@ -392,16 +392,24 @@ export function useModelActions({
       },
       {
         name: (model) => {
-          const enabled = !isPopulatedObject(model.pipelines);
+          const hasPipelines = isPopulatedObject(model.pipelines);
+          const hasDeployments = model.state === MODEL_STATE.STARTED;
           return (
             <EuiToolTip
               position="left"
               content={
-                enabled
-                  ? null
-                  : i18n.translate('xpack.ml.trainedModels.modelsList.deleteDisabledTooltip', {
+                hasPipelines
+                  ? i18n.translate('xpack.ml.trainedModels.modelsList.deleteDisabledTooltip', {
                       defaultMessage: 'Model has associated pipelines',
                     })
+                  : hasDeployments
+                  ? i18n.translate(
+                      'xpack.ml.trainedModels.modelsList.deleteDisabledWithDeploymentsTooltip',
+                      {
+                        defaultMessage: 'Model has started deployments',
+                      }
+                    )
+                  : null
               }
             >
               <>
