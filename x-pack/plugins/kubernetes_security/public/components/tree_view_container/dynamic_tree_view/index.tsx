@@ -172,7 +172,7 @@ export const DynamicTreeView = ({
             },
           };
 
-          const defaultExpanded = selected.indexOf(aggData.key) > 0;
+          const defaultExpanded = selected.indexOf('' + aggData.key) > 0;
 
           return (
             <DynamicTreeViewExpander key={aggData.key} defaultExpanded={defaultExpanded}>

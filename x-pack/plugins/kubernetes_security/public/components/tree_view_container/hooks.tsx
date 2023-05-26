@@ -4,8 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import type { KubernetesCollectionMap } from '../../types';
 import { LOCAL_STORAGE_TREE_NAV_KEY } from '../../../common/constants';

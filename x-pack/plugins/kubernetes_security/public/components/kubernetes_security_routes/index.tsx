@@ -39,7 +39,6 @@ import { useStyles } from './styles';
 import { TreeViewContainer } from '../tree_view_container';
 import { ChartsToggle } from '../charts_toggle';
 import {
-  BETA,
   COUNT_WIDGET_CLUSTERS,
   COUNT_WIDGET_NAMESPACE,
   COUNT_WIDGET_NODES,
