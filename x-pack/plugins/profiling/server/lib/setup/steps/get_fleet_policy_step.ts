@@ -51,7 +51,7 @@ export function getFleetPolicyStep({
       try {
         const apmPolicy = await getApmPolicy({ packagePolicyClient, soClient });
 
-        return apmPolicy && apmPolicy?.inputs[0].config?.['apm-server'].value.profiling;
+        return !!(apmPolicy && apmPolicy?.inputs[0].config?.['apm-server'].value?.profiling);
       } catch (error) {
         logger.debug('Could not fetch fleet policy');
         logger.debug(error);
