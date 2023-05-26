@@ -49,6 +49,14 @@ describe('TopN data from Elasticsearch', () => {
           },
         }) as Promise<any>
     ),
+    profilingStatus: jest.fn(
+      () =>
+        context.elasticsearch.client.asCurrentUser.transport.request({
+          method: 'GET',
+          path: encodeURI('_profiling/status'),
+          body: {},
+        }) as Promise<any>
+    ),
     getEsClient: jest.fn(() => context.elasticsearch.client.asCurrentUser),
   };
   const logger = loggerMock.create();

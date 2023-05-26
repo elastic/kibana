@@ -11,7 +11,7 @@ import type { KibanaRequest } from '@kbn/core/server';
 import { unwrapEsResponse } from '@kbn/observability-plugin/server';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { withProfilingSpan } from './with_profiling_span';
-import { StackTraceResponse } from '../../common/stack_traces';
+import { ProfilingStatusResponse, StackTraceResponse } from '../../common/stack_traces';
 
 export function cancelEsRequestOnAbort<T extends Promise<any>>(
   promise: T,
@@ -34,6 +34,7 @@ export interface ProfilingESClient {
     query: QueryDslQueryContainer;
     sampleSize: number;
   }): Promise<StackTraceResponse>;
+  profilingStatus(): Promise<ProfilingStatusResponse>;
   getEsClient(): ElasticsearchClient;
 }
 
@@ -91,6 +92,28 @@ export function createProfilingEsClient({
       });
 
       return unwrapEsResponse(promise) as Promise<StackTraceResponse>;
+    },
+    profilingStatus() {
+      const controller = new AbortController();
+
+      const promise = withProfilingSpan('_profiling/status', () => {
+        return cancelEsRequestOnAbort(
+          esClient.transport.request(
+            {
+              method: 'GET',
+              path: encodeURI('/_profiling/status'),
+            },
+            {
+              signal: controller.signal,
+              meta: true,
+            }
+          ),
+          request,
+          controller
+        );
+      });
+
+      return unwrapEsResponse(promise) as Promise<ProfilingStatusResponse>;
     },
     getEsClient() {
       return esClient;
