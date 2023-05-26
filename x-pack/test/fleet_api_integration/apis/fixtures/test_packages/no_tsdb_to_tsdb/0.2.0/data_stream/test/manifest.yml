@@ -1,6 +1,6 @@
 title: Test Dataset
 
-type: logs
+type: metrics
 
 elasticsearch:
   index_mode: time_series

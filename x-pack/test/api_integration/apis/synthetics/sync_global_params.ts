@@ -244,13 +244,37 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('delete all params and sync again', async () => {
-      await kServer.savedObjects.clean({ types: [syntheticsParamType] });
-      const apiResponseK = await supertestAPI
+      await supertestAPI
+        .post(SYNTHETICS_API_URLS.PARAMS)
+        .set('kbn-xsrf', 'true')
+        .send({ key: 'get', value: 'test' });
+      const getResponse = await supertestAPI
+        .get(SYNTHETICS_API_URLS.PARAMS)
+        .set('kbn-xsrf', 'true')
+        .expect(200);
+
+      expect(getResponse.body.data.length).eql(2);
+
+      const paramsResponse = getResponse.body.data || [];
+      const ids = paramsResponse.map((param: any) => param.id);
+
+      await supertestAPI
+        .delete(SYNTHETICS_API_URLS.PARAMS)
+        .query({ ids: JSON.stringify(ids) })
+        .set('kbn-xsrf', 'true')
+        .expect(200);
+
+      const getResponseAfterDelete = await supertestAPI
+        .get(SYNTHETICS_API_URLS.PARAMS)
+        .set('kbn-xsrf', 'true')
+        .expect(200);
+
+      expect(getResponseAfterDelete.body.data.length).eql(0);
+
+      await supertestAPI
         .get(SYNTHETICS_API_URLS.SYNC_GLOBAL_PARAMS)
         .set('kbn-xsrf', 'true')
-        .send({ key: 'test', value: 'test' });
-
-      expect(apiResponseK.status).eql(200);
+        .expect(200);
 
       const apiResponse = await supertestAPI.get(
         '/api/fleet/package_policies?page=1&perPage=2000&kuery=ingest-package-policies.package.name%3A%20synthetics'

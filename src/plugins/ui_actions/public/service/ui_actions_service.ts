@@ -162,10 +162,12 @@ export class UiActionsService {
         })
       )
     );
-    return actions.reduce(
-      (acc: Action[], action, i) => (isCompatibles[i] ? [...acc, action] : acc),
-      []
-    );
+    return actions.reduce((acc: Action[], action, i) => {
+      if (isCompatibles[i]) {
+        acc.push(action);
+      }
+      return acc;
+    }, []);
   };
 
   /**

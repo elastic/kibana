@@ -635,12 +635,53 @@ describe('DocumentMigrator', () => {
         ),
       });
       migrator.prepareMigrations();
-      expect(migrator.migrationVersion).toEqual({
+      expect(migrator.getMigrationVersion()).toEqual({
         aaa: '10.4.0',
         bbb: '3.2.3',
         ccc: '11.0.0',
         [LEGACY_URL_ALIAS_TYPE]: '0.1.2',
       });
+    });
+
+    test('extracts the latest non-deferred migration version info', () => {
+      const migrator = new DocumentMigrator({
+        ...testOpts(),
+        typeRegistry: createRegistry({
+          name: 'aaa',
+          migrations: {
+            '1.2.3': (doc: SavedObjectUnsanitizedDoc) => doc,
+            '2.2.1': (doc: SavedObjectUnsanitizedDoc) => doc,
+            '10.4.0': {
+              // @ts-expect-error
+              deferred: true,
+              transform: (doc: SavedObjectUnsanitizedDoc) => doc,
+            },
+          },
+        }),
+      });
+      migrator.prepareMigrations();
+      expect(migrator.getMigrationVersion({ includeDeferred: false })).toHaveProperty(
+        'aaa',
+        '2.2.1'
+      );
+    });
+
+    test('extracts the latest core migration version info', () => {
+      const migrator = new DocumentMigrator({
+        ...testOpts(),
+        typeRegistry: createRegistry({
+          name: 'aaa',
+          migrations: {
+            '1.2.3': (doc: SavedObjectUnsanitizedDoc) => doc,
+            '2.2.1': (doc: SavedObjectUnsanitizedDoc) => doc,
+          },
+        }),
+      });
+      migrator.prepareMigrations();
+      expect(migrator.getMigrationVersion({ migrationType: 'core' })).toHaveProperty(
+        'aaa',
+        '8.8.0'
+      );
     });
 
     describe('conversion to multi-namespace type', () => {

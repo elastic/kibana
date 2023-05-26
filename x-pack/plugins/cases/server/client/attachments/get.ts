@@ -54,14 +54,14 @@ const normalizeAlertResponse = (alerts: Array<SavedObject<AttributesTypeAlerts>>
       return acc;
     }
 
-    return [
-      ...acc,
+    acc.push(
       ...ids.map((id, index) => ({
         id,
         index: indices[index],
         attached_at: alert.attributes.created_at,
-      })),
-    ];
+      }))
+    );
+    return acc;
   }, []);
 
 /**

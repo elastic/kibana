@@ -25,14 +25,10 @@ export const decomposeIntoUnits = (time: number, units: TimeUnit[]) =>
     const value = Math.floor((time - offset) / unitMillis);
 
     if (value > 0) {
-      return [
-        ...result,
-        {
-          unit: unitMillis,
-          value,
-        },
-      ];
-    } else {
-      return result;
+      result.push({
+        unit: unitMillis,
+        value,
+      });
     }
+    return result;
   }, []);
