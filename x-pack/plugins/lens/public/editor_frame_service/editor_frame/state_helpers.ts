@@ -189,13 +189,10 @@ const initializeEventAnnotationGroups = async (
   const annotationGroupResponses = await Promise.allSettled(
     (references || [])
       .filter((ref) => ref.type === EVENT_ANNOTATION_GROUP_TYPE)
-      .map(({ id }) =>
-        eventAnnotationService
-          .loadAnnotationGroup(id)
-      )
+      .map(({ id }) => eventAnnotationService.loadAnnotationGroup(id))
   );
-  for( const response of annotationGroupResponses){
-    if(response.status === 'fulfilled'){
+  for (const response of annotationGroupResponses) {
+    if (response.status === 'fulfilled') {
       annotationGroups[response.value.id] = response.value;
     }
   }
