@@ -38,7 +38,7 @@ describe('<Navigation />', () => {
           navLinks$={navLinks$}
           onProjectNavigationChange={onProjectNavigationChange}
         >
-          <Navigation>
+          <Navigation homeRef="https://elastic.co">
             <Navigation.Item id="item1">Title in children</Navigation.Item>
             <Navigation.Item id="item2" title="Title in props" />
             {/* Title will be read from the deeplink */}
@@ -61,17 +61,21 @@ describe('<Navigation />', () => {
       const [navTree] = lastCall;
 
       expect(navTree).toEqual({
+        homeRef: 'https://elastic.co',
         navigationTree: [
           {
             id: 'item1',
-            title: 'Title in children',
+            path: ['item1'],
+            title: '',
           },
           {
             id: 'item2',
             title: 'Title in props',
+            path: ['item2'],
           },
           {
             id: 'item3-a',
+            path: ['item3-a'],
             title: 'Title from deeplink!',
             deepLink: {
               id: 'item3',
@@ -84,6 +88,7 @@ describe('<Navigation />', () => {
           {
             id: 'item3-b',
             title: 'Override the deeplink with props',
+            path: ['item3-b'],
             deepLink: {
               id: 'item3',
               title: 'Title from deeplink!',
@@ -94,7 +99,8 @@ describe('<Navigation />', () => {
           },
           {
             id: 'item3-c',
-            title: 'Override the deeplink with children',
+            path: ['item3-c'],
+            title: 'Title from deeplink!',
             deepLink: {
               id: 'item3',
               title: 'Title from deeplink!',
@@ -110,7 +116,7 @@ describe('<Navigation />', () => {
     test('should render any level of depth', async () => {
       const navLinks$: Observable<ChromeNavLink[]> = of([
         {
-          id: 'item3',
+          id: 'group1A_1',
           title: 'Title from deeplink!',
           baseUrl: '',
           url: '',
@@ -126,11 +132,11 @@ describe('<Navigation />', () => {
           navLinks$={navLinks$}
           onProjectNavigationChange={onProjectNavigationChange}
         >
-          <Navigation>
-            <Navigation.Group id="item1" title="Item 1">
-              <Navigation.Group id="item1" title="Item 1">
+          <Navigation homeRef="https://elastic.co">
+            <Navigation.Group id="group1" title="Group 1">
+              <Navigation.Group id="group1A" title="Group 1A">
                 {/* Will read the title from the deeplink */}
-                <Navigation.Group link="item3">
+                <Navigation.Group link="group1A_1">
                   <Navigation.Item id="item1" title="Item 1" />
                 </Navigation.Group>
               </Navigation.Group>
@@ -145,29 +151,34 @@ describe('<Navigation />', () => {
       const [navTree] = lastCall;
 
       expect(navTree).toEqual({
+        homeRef: 'https://elastic.co',
         navigationTree: [
           {
-            id: 'item1',
-            title: 'Item 1',
+            id: 'group1',
+            title: 'Group 1',
+            path: ['group1'],
             children: [
               {
-                id: 'item1',
-                title: 'Item 1',
+                id: 'group1A',
+                title: 'Group 1A',
+                path: ['group1', 'group1A'],
                 children: [
                   {
-                    id: 'item3',
+                    id: 'group1A_1',
+                    path: ['group1', 'group1A', 'group1A_1'],
                     title: 'Title from deeplink!',
                     deepLink: {
-                      baseUrl: '',
-                      href: '',
-                      id: 'item3',
+                      id: 'group1A_1',
                       title: 'Title from deeplink!',
+                      baseUrl: '',
                       url: '',
+                      href: '',
                     },
                     children: [
                       {
                         id: 'item1',
                         title: 'Item 1',
+                        path: ['group1', 'group1A', 'group1A_1', 'item1'],
                       },
                     ],
                   },
