@@ -30,7 +30,7 @@ export function useNavigationGroup<T extends boolean = true>(
   return context as T extends true ? Context : Context | undefined;
 }
 
-interface Props extends NodeProps {
+export interface Props extends NodeProps {
   unstyled?: boolean;
   defaultIsCollapsed?: boolean;
 }

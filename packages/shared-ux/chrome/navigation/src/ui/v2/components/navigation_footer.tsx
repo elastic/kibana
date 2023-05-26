@@ -9,7 +9,7 @@
 import React, { useEffect } from 'react';
 import { useNavigation } from './navigation';
 
-interface Props {
+export interface Props {
   children?: React.ReactNode;
 }
 

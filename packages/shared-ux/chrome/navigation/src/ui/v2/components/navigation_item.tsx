@@ -12,7 +12,7 @@ import { NodeProps } from '../types';
 import { useInitNavNode } from '../use_init_navnode';
 import { useNavigation } from './navigation';
 
-interface Props extends NodeProps {
+export interface Props extends NodeProps {
   element?: string;
   unstyled?: boolean;
 }
