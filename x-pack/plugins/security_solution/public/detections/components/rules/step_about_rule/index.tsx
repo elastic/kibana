@@ -11,7 +11,7 @@ import React, { memo, useCallback, useEffect, useState, useMemo } from 'react';
 import styled from 'styled-components';
 
 import type { DataViewBase } from '@kbn/es-query';
-import { isThreatMatchRule } from '../../../../../common/detection_engine/utils';
+import { isThreatMatchRule, isEsqlRule } from '../../../../../common/detection_engine/utils';
 import type {
   RuleStepProps,
   AboutStepRule,
@@ -95,9 +95,17 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
 
   const [severityValue, setSeverityValue] = useState<string>(initialState.severity.value);
 
+  const esqlQuery = useMemo(() => {
+    return isEsqlRule(defineRuleData?.ruleType) &&
+      typeof defineRuleData?.queryBar.query.query === 'string'
+      ? defineRuleData?.queryBar.query.query
+      : undefined;
+  }, [defineRuleData]);
+
   const { ruleIndices } = useRuleIndices(
     defineRuleData?.machineLearningJobId,
-    defineRuleData?.index
+    defineRuleData?.index,
+    esqlQuery
   );
 
   /**

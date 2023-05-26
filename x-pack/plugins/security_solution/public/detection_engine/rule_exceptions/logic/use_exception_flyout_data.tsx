@@ -7,6 +7,7 @@
 
 import { useEffect, useState, useMemo } from 'react';
 import type { DataViewBase } from '@kbn/es-query';
+import { getIndexPatternFromESQLQuery } from '@kbn/es-query';
 
 import type { Rule } from '../../rule_management/logic/types';
 import { useGetInstalledJob } from '../../../common/components/ml/hooks/use_get_jobs';
@@ -32,6 +33,10 @@ export const useFetchIndexPatterns = (rules: Rule[] | null): ReturnUseFetchExcep
     () => rules != null && isSingleRule && rules[0].type === 'machine_learning',
     [isSingleRule, rules]
   );
+  const isEsqlRule = useMemo(
+    () => rules != null && isSingleRule && rules[0].type === 'esql',
+    [isSingleRule, rules]
+  );
 
   useEffect(() => {
     const fetchAndSetActiveSpace = async () => {
@@ -52,13 +57,16 @@ export const useFetchIndexPatterns = (rules: Rule[] | null): ReturnUseFetchExcep
     [isSingleRule, rules, activeSpaceId]
   );
 
-  const memoNonDataViewIndexPatterns = useMemo(
-    () =>
-      !memoDataViewId && rules != null && isSingleRule && rules[0].index != null
-        ? rules[0].index
-        : [],
-    [memoDataViewId, isSingleRule, rules]
-  );
+  const memoNonDataViewIndexPatterns = useMemo(() => {
+    if (isEsqlRule) {
+      return getIndexPatternFromESQLQuery(rules?.[0].query)
+        .split(',')
+        .map((index) => index.trim());
+    }
+    return !memoDataViewId && rules != null && isSingleRule && rules[0].index != null
+      ? rules[0].index
+      : [];
+  }, [memoDataViewId, isSingleRule, rules, isEsqlRule]);
 
   // Index pattern logic for ML
   const memoMlJobIds = useMemo(

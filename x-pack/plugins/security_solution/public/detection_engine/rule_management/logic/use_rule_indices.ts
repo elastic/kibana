@@ -6,19 +6,28 @@
  */
 
 import { useMemo } from 'react';
+import { getIndexPatternFromESQLQuery } from '@kbn/es-query';
 import { useGetInstalledJob } from '../../../common/components/ml/hooks/use_get_jobs';
 
-export const useRuleIndices = (machineLearningJobId?: string[], defaultRuleIndices?: string[]) => {
+export const useRuleIndices = (
+  machineLearningJobId?: string[],
+  defaultRuleIndices?: string[],
+  esqlQuery?: string
+) => {
   const memoMlJobIds = useMemo(() => machineLearningJobId ?? [], [machineLearningJobId]);
   const { loading: mlJobLoading, jobs } = useGetInstalledJob(memoMlJobIds);
 
   const memoRuleIndices = useMemo(() => {
     if (jobs.length > 0) {
       return jobs[0].results_index_name ? [`.ml-anomalies-${jobs[0].results_index_name}`] : [];
+    } else if (esqlQuery) {
+      return getIndexPatternFromESQLQuery(esqlQuery)
+        .split(',')
+        .map((index) => index.trim());
     } else {
       return defaultRuleIndices ?? [];
     }
-  }, [jobs, defaultRuleIndices]);
+  }, [jobs, defaultRuleIndices, esqlQuery]);
 
   return { mlJobLoading, ruleIndices: memoRuleIndices };
 };
