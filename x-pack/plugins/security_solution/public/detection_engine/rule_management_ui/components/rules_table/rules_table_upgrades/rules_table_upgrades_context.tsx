@@ -15,6 +15,7 @@ import React, {
   useRef,
   useState,
 } from 'react';
+import { usePrebuiltRulesUpgradeReview } from '../../../../rule_management/logic/prebuilt_rules/use_prebuilt_rules_upgrade_review';
 import { useFetchRulesSnoozeSettings } from '../../../../rule_management/api/hooks/use_fetch_rules_snooze_settings';
 import { DEFAULT_RULES_TABLE_REFRESH_SETTING } from '../../../../../../common/constants';
 import { invariant } from '../../../../../../common/utils/invariant';
@@ -35,9 +36,7 @@ import {
   DEFAULT_RULES_PER_PAGE,
   DEFAULT_SORTING_OPTIONS,
 } from '../rules_table/rules_table_defaults';
-import { useFetchPrebuiltRulesUpgradeReviewQuery } from '../../../../rule_management/api/hooks/prebuilt_rules/use_fetch_prebuilt_rules_upgrade_review_query';
 import type { RuleUpgradeInfoForReview } from '../../../../../../common/detection_engine/prebuilt_rules/api/review_rule_upgrade/response_schema';
-import { usePrebuiltRulesUpgradeReview } from '@kbn/security-solution-plugin/public/detection_engine/rule_management/logic/prebuilt_rules/use_prebuilt_rules_upgrade_review';
 
 export interface RulesTableUpdatesState {
   /**

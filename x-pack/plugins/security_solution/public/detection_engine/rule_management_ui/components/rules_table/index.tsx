@@ -12,7 +12,7 @@ import { RulesManagementTour } from './rules_table/guided_onboarding/rules_manag
 import { useSyncRulesTableSavedState } from './rules_table/use_sync_rules_table_saved_state';
 import { RulesTables } from './rules_tables';
 import { AllRulesTabs, RulesTableToolbar } from './rules_table_toolbar';
-import { RulesTableUpdates } from './rules_table_updates/rules_table_updates';
+import { RulesTableUpdates } from './rules_table_upgrades/rules_table_upgrades';
 
 /**
  * Table Component for displaying all Rules for a given cluster. Provides the ability to filter

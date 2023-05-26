@@ -27,7 +27,7 @@ import type {
   FilterOptions,
   PaginationOptions,
   Rule,
-  RuleSnoozeSettings,
+  RulesSnoozeSettingsMap,
   SortingOptions,
 } from '../../../../rule_management/logic/types';
 import { useFindRules } from '../../../../rule_management/logic/use_find_rules';
@@ -47,7 +47,7 @@ interface RulesSnoozeSettings {
   /**
    * A map object using rule SO's id (not ruleId) as keys and snooze settings as values
    */
-  data: Record<string, RuleSnoozeSettings>;
+  data: RulesSnoozeSettingsMap;
   /**
    * Sets to true during the first data loading
    */
@@ -318,7 +318,7 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
 
   // Fetch rules snooze settings
   const {
-    data: rulesSnoozeSettings,
+    data: rulesSnoozeSettingsMap,
     isLoading: isSnoozeSettingsLoading,
     isFetching: isSnoozeSettingsFetching,
     isError: isSnoozeSettingsFetchError,
@@ -367,20 +367,13 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
   );
 
   const providerValue = useMemo(() => {
-    const rulesSnoozeSettingsMap =
-      rulesSnoozeSettings?.reduce((map, snoozeSettings) => {
-        map[snoozeSettings.id] = snoozeSettings;
-
-        return map;
-      }, {} as Record<string, RuleSnoozeSettings>) ?? {};
-
     return {
       state: {
         rules,
         rulesToUpgrade,
         rulesToInstall,
         rulesSnoozeSettings: {
-          data: rulesSnoozeSettingsMap,
+          data: rulesSnoozeSettingsMap ?? {},
           isLoading: isSnoozeSettingsLoading,
           isFetching: isSnoozeSettingsFetching,
           isError: isSnoozeSettingsFetchError,
@@ -413,10 +406,10 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
       actions,
     };
   }, [
-    rulesSnoozeSettings,
     rules,
     rulesToUpgrade,
     rulesToInstall,
+    rulesSnoozeSettingsMap,
     isSnoozeSettingsLoading,
     isSnoozeSettingsFetching,
     isSnoozeSettingsFetchError,
