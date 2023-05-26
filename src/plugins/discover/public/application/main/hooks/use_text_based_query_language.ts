@@ -82,21 +82,14 @@ export function useTextBasedQueryLanguage({
         }
         const indexPatternFromQuery = getIndexPatternFromSQLQuery(query.sql);
 
-        const dataViewObj = await dataViews.create({
-          title: indexPatternFromQuery,
-        });
-        stateContainer.internalState.transitions.setAdHocDataViews([dataViewObj]);
-
-        if (dataViewObj.fields.getByName('@timestamp')?.type === 'date') {
-          dataViewObj.timeFieldName = '@timestamp';
-        }
+        const dataViewObj = stateContainer.internalState.getState().dataView!;
 
         // don't set the columns on initial fetch, to prevent overwriting existing state
         const addColumnsToState = Boolean(
           nextColumns.length && (!initialFetch || !stateColumns?.length)
         );
         // no need to reset index to state if it hasn't changed
-        const addDataViewToState = Boolean(dataViewObj.id !== index);
+        const addDataViewToState = Boolean(dataViewObj?.id !== index) || initialFetch;
         const queryChanged = indexPatternFromQuery !== indexTitle.current;
         if (!addColumnsToState && !queryChanged) {
           return;

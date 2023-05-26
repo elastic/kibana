@@ -10,8 +10,10 @@ import { AutoRefreshDoneFn } from '@kbn/data-plugin/public';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
-import { AggregateQuery, Query } from '@kbn/es-query';
+import { AggregateQuery, getIndexPatternFromSQLQuery, Query } from '@kbn/es-query';
 import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
+import { DataView } from '@kbn/data-views-plugin/common';
+import { isTextBasedQuery } from '../utils/is_text_based_query';
 import { getRawRecordType } from '../utils/get_raw_record_type';
 import { DiscoverAppState } from './discover_app_state_container';
 import { DiscoverServices } from '../../../build_services';
@@ -129,11 +131,13 @@ export function getDataStateContainer({
   searchSessionManager,
   getAppState,
   getSavedSearch,
+  setDataView,
 }: {
   services: DiscoverServices;
   searchSessionManager: DiscoverSearchSessionManager;
   getAppState: () => DiscoverAppState;
   getSavedSearch: () => SavedSearch;
+  setDataView: (dataView: DataView) => void;
 }): DiscoverDataStateContainer {
   const { data, uiSettings, toastNotifications } = services;
   const { timefilter } = data.query.timefilter;
@@ -226,7 +230,24 @@ export function getDataStateContainer({
     };
   }
 
-  const fetchQuery = (resetQuery?: boolean) => {
+  const fetchQuery = async (resetQuery?: boolean) => {
+    const query = getAppState().query;
+    const currentDataView = getSavedSearch().searchSource.getField('index');
+
+    if (query && isTextBasedQuery(query)) {
+      const indexPatternFromQuery = getIndexPatternFromSQLQuery(query.sql);
+      if (indexPatternFromQuery !== currentDataView?.getIndexPattern()) {
+        const dataViewObj = await services.dataViews.create({
+          title: indexPatternFromQuery,
+        });
+
+        if (dataViewObj.fields.getByName('@timestamp')?.type === 'date') {
+          dataViewObj.timeFieldName = '@timestamp';
+        }
+        setDataView(dataViewObj);
+      }
+    }
+
     if (resetQuery) {
       refetch$.next('reset');
     } else {

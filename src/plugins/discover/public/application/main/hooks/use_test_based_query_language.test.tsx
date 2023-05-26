@@ -84,6 +84,7 @@ const renderHookWithContext = (
   appState?: DiscoverAppState
 ) => {
   const props = getHookProps(query, useDataViewsService ? getDataViewsService() : undefined);
+  props.stateContainer.actions.setDataView(dataViewMock);
   if (appState) {
     props.stateContainer.appState.getState = jest.fn(() => {
       return appState;
@@ -284,7 +285,7 @@ describe('useTextBasedQueryLanguage', () => {
       fetchStatus: FetchStatus.LOADING,
       query: { sql: 'SELECT * from the-data-view-title WHERE field1=2' },
     });
-    await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(0));
+    await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(1));
     documents$.next({
       recordRawType: RecordRawType.PLAIN,
       fetchStatus: FetchStatus.COMPLETE,
@@ -297,7 +298,7 @@ describe('useTextBasedQueryLanguage', () => {
       ],
       query: { sql: 'SELECT * from the-data-view-title WHERE field1=2' },
     });
-    await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(1));
+    await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(2));
     stateContainer.appState.getState = jest.fn(() => {
       return { columns: ['field1', 'field2'], index: 'the-data-view-id' };
     });
