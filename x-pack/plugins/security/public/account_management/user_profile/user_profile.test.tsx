@@ -310,11 +310,38 @@ describe('useUserProfileForm', () => {
       );
     });
 
-    it('should be disabled if the theme has been set in the config', () => {
+    it('should be disabled if the theme has been set to `darkMode: true` in the config', () => {
       const data: UserProfileData = {};
 
       const nonCloudUser = mockAuthenticatedUser({ elastic_cloud_user: false });
       coreStart.settings.client.get.mockReturnValueOnce(true);
+      coreStart.settings.client.isOverridden.mockReturnValueOnce(true);
+
+      const testWrapper = mount(
+        <Providers
+          services={coreStart}
+          theme$={theme$}
+          history={history}
+          authc={authc}
+          securityApiClients={{
+            userProfiles: new UserProfileAPIClient(coreStart.http),
+            users: new UserAPIClient(coreStart.http),
+          }}
+        >
+          <UserProfile user={nonCloudUser} data={data} />
+        </Providers>
+      );
+
+      const darkModeButton = testWrapper.find('EuiButtonGroup[data-test-subj="darkModeButton"]');
+      expect(darkModeButton).toBeTruthy();
+      expect(darkModeButton.getDOMNode()).toHaveProperty('disabled');
+    });
+
+    it('should be disabled if the theme has been set to `darkMode: false` in the config', () => {
+      const data: UserProfileData = {};
+
+      const nonCloudUser = mockAuthenticatedUser({ elastic_cloud_user: false });
+      coreStart.settings.client.get.mockReturnValueOnce(false);
       coreStart.settings.client.isOverridden.mockReturnValueOnce(true);
 
       const testWrapper = mount(

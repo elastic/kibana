@@ -8,6 +8,7 @@
 import type { ConsoleResponseActionCommands } from '../../../../common/endpoint/service/response_actions/constants';
 import { closeAllToasts } from './close_all_toasts';
 import { APP_ENDPOINTS_PATH } from '../../../../common/constants';
+import Chainable = Cypress.Chainable;
 
 export const waitForEndpointListPageToBeLoaded = (endpointHostname: string): void => {
   cy.visit(APP_ENDPOINTS_PATH);
@@ -64,4 +65,17 @@ export const performCommandInputChecks = (command: string) => {
   clearConsoleCommandInput();
   selectCommandFromHelpMenu(command);
   checkInputForCommandPresence(command);
+};
+
+export const checkReturnedProcessesTable = (): Chainable<JQuery<HTMLTableRowElement>> => {
+  ['USER', 'PID', 'ENTITY ID', 'COMMAND'].forEach((header) => {
+    cy.contains(header);
+  });
+
+  return cy
+    .get('tbody')
+    .find('tr')
+    .then((rows) => {
+      expect(rows.length).to.be.greaterThan(0);
+    });
 };
