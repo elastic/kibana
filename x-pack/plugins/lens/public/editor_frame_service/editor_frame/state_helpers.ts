@@ -186,16 +186,15 @@ const initializeEventAnnotationGroups = async (
 ) => {
   const annotationGroups: Record<string, EventAnnotationGroupConfig> = {};
 
-  const annotationGroupResponses = await Promise.allSettled(
+  await Promise.allSettled(
     (references || [])
       .filter((ref) => ref.type === EVENT_ANNOTATION_GROUP_TYPE)
-      .map(({ id }) => eventAnnotationService.loadAnnotationGroup(id))
+      .map(({ id }) =>
+        eventAnnotationService.loadAnnotationGroup(id).then((group) => {
+          annotationGroups[id] = group;
+        })
+      )
   );
-  for (const response of annotationGroupResponses) {
-    if (response.status === 'fulfilled') {
-      annotationGroups[response.value.id] = response.value;
-    }
-  }
 
   return annotationGroups;
 };
