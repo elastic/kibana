@@ -5,24 +5,24 @@
  * 2.0.
  */
 
+import type { FC } from 'react';
 import React, { useCallback } from 'react';
 import { EuiButtonEmpty, EuiFlexGroup, EuiPanel } from '@elastic/eui';
 import { useExpandableFlyoutContext } from '@kbn/expandable-flyout';
-import { InsightsSummaryRow } from './insights_summary_row';
-import { useCorrelations } from '../hooks/use_correlations';
-import { INSIGHTS_CORRELATIONS_TEST_ID } from './test_ids';
+import { usePrevalence } from '../hooks/use_prevalence';
+import { INSIGHTS_PREVALENCE_TEST_ID } from './test_ids';
 import { InsightsSubSection } from './insights_subsection';
 import { useRightPanelContext } from '../context';
-import { CORRELATIONS_TEXT, CORRELATIONS_TITLE, VIEW_ALL } from './translations';
+import { PREVALENCE_TEXT, PREVALENCE_TITLE, VIEW_ALL } from './translations';
 import { LeftPanelKey, LeftPanelInsightsTabPath } from '../../left';
 
 /**
- * Correlations section under Insights section, overview tab.
+ * Prevalence section under Insights section, overview tab.
  * The component fetches the necessary data, then pass it down to the InsightsSubSection component for loading and error state,
  * and the SummaryPanel component for data rendering.
  */
-export const CorrelationsOverview: React.FC = () => {
-  const { eventId, indexName, dataAsNestedObject, dataFormattedForFieldBrowser, scopeId } =
+export const PrevalenceOverview: FC = () => {
+  const { eventId, indexName, browserFields, dataFormattedForFieldBrowser, scopeId } =
     useRightPanelContext();
   const { openLeftPanel } = useExpandableFlyoutContext();
 
@@ -37,30 +37,22 @@ export const CorrelationsOverview: React.FC = () => {
     });
   }, [eventId, openLeftPanel, indexName]);
 
-  const { loading, error, data } = useCorrelations({
+  const { empty, prevalenceRows } = usePrevalence({
     eventId,
-    dataAsNestedObject,
+    browserFields,
     dataFormattedForFieldBrowser,
     scopeId,
   });
 
+  if (!eventId || !browserFields || !dataFormattedForFieldBrowser || empty) {
+    return null;
+  }
+
   return (
-    <InsightsSubSection
-      loading={loading}
-      error={error}
-      title={CORRELATIONS_TITLE}
-      data-test-subj={INSIGHTS_CORRELATIONS_TEST_ID}
-    >
+    <InsightsSubSection title={PREVALENCE_TITLE} data-test-subj={INSIGHTS_PREVALENCE_TEST_ID}>
       <EuiPanel hasShadow={false} hasBorder={true} paddingSize="s">
         <EuiFlexGroup direction="column" gutterSize="none">
-          {data.map((d) => (
-            <InsightsSummaryRow
-              icon={d.icon}
-              value={d.value}
-              text={d.text}
-              data-test-subj={INSIGHTS_CORRELATIONS_TEST_ID}
-            />
-          ))}
+          {prevalenceRows}
         </EuiFlexGroup>
       </EuiPanel>
       <EuiButtonEmpty
@@ -68,12 +60,12 @@ export const CorrelationsOverview: React.FC = () => {
         iconType="arrowStart"
         iconSide="left"
         size="s"
-        data-test-subj={`${INSIGHTS_CORRELATIONS_TEST_ID}ViewAllButton`}
+        data-test-subj={`${INSIGHTS_PREVALENCE_TEST_ID}ViewAllButton`}
       >
-        {VIEW_ALL(CORRELATIONS_TEXT)}
+        {VIEW_ALL(PREVALENCE_TEXT)}
       </EuiButtonEmpty>
     </InsightsSubSection>
   );
 };
 
-CorrelationsOverview.displayName = 'CorrelationsOverview';
+PrevalenceOverview.displayName = 'PrevalenceOverview';
