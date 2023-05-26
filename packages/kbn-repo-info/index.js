@@ -35,9 +35,11 @@ const findKibanaPackageJson = () => {
   // not be where we think but should always be a relatively close parent
   // of this directory
   const startDir = __dirname;
+  console.log('### Resolving root, startDir: ' + startDir);
   const { root: rootDir } = Path.parse(startDir);
   let cursor = startDir;
   while (true) {
+    console.log('### Resolving root, @ ' + cursor);
     const packageJsonPath = Path.resolve(cursor, 'package.json');
     const kibanaPkgJson = readKibanaPkgJson(packageJsonPath);
 
