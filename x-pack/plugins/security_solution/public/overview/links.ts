@@ -27,6 +27,7 @@ import overviewPageImg from '../common/images/overview_page.png';
 import dataQualityDashboardPageImg from '../common/images/data_quality_dashboard_page.png';
 import detectionResponsePageImg from '../common/images/detection_response_page.png';
 import entityAnalyticsDashboard from '../common/images/entity_analytics_dashboard.png';
+import { ENTITY_ANALYTICS_CAPABILITY } from '../../common/capabilities';
 
 export const overviewLinks: LinkItem = {
   id: SecurityPageName.overview,
@@ -85,7 +86,7 @@ export const entityAnalyticsLinks: LinkItem = {
       'Entity analytics, anomalies, and threats to narrow down the monitoring surface area.',
   }),
   path: ENTITY_ANALYTICS_PATH,
-  capabilities: [`${SERVER_APP_ID}.advancedInsights`],
+  capabilities: [`${SERVER_APP_ID}.${ENTITY_ANALYTICS_CAPABILITY}`],
   isBeta: false,
   globalSearchKeywords: [ENTITY_ANALYTICS],
 };

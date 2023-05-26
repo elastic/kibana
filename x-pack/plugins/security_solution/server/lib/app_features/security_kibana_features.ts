@@ -38,6 +38,7 @@ import {
 } from './security_kibana_sub_features';
 import type { AppFeaturesSecurityConfig } from './types';
 import { AppFeatureSecurityKey } from '../../../common/types/app_features';
+import { ENTITY_ANALYTICS_CAPABILITY } from '../../../common/capabilities';
 
 // Same as the plugin id defined by Cloud Security Posture
 const CLOUD_POSTURE_APP_ID = 'csp';
@@ -172,16 +173,16 @@ function getSubFeatures(experimentalFeatures: ExperimentalFeatures) {
 
 // maps the AppFeatures keys to Kibana privileges
 export const getSecurityAppFeaturesConfig = (): AppFeaturesSecurityConfig => {
-  // TODO: establish some naming convention for these api and ui capabilities
   return {
     [AppFeatureSecurityKey.advancedInsights]: {
       privileges: {
         all: {
-          ui: ['advancedInsights'],
-          // add Angela's endpoint privileges here
+          ui: [ENTITY_ANALYTICS_CAPABILITY],
+          api: [ENTITY_ANALYTICS_CAPABILITY],
         },
         read: {
-          ui: ['advancedInsights'],
+          ui: [ENTITY_ANALYTICS_CAPABILITY],
+          api: [ENTITY_ANALYTICS_CAPABILITY],
         },
       },
     },
