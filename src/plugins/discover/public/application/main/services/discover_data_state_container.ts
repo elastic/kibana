@@ -10,9 +10,10 @@ import { AutoRefreshDoneFn } from '@kbn/data-plugin/public';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
-import { AggregateQuery, getIndexPatternFromSQLQuery, Query } from '@kbn/es-query';
+import { AggregateQuery, Query } from '@kbn/es-query';
 import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import { DataView } from '@kbn/data-views-plugin/common';
+import { getDataViewByTextBasedQueryLang } from '../utils/get_data_view_by_text_based_query_lang';
 import { isTextBasedQuery } from '../utils/is_text_based_query';
 import { getRawRecordType } from '../utils/get_raw_record_type';
 import { DiscoverAppState } from './discover_app_state_container';
@@ -234,17 +235,10 @@ export function getDataStateContainer({
     const query = getAppState().query;
     const currentDataView = getSavedSearch().searchSource.getField('index');
 
-    if (query && isTextBasedQuery(query)) {
-      const indexPatternFromQuery = getIndexPatternFromSQLQuery(query.sql);
-      if (indexPatternFromQuery !== currentDataView?.getIndexPattern()) {
-        const dataViewObj = await services.dataViews.create({
-          title: indexPatternFromQuery,
-        });
-
-        if (dataViewObj.fields.getByName('@timestamp')?.type === 'date') {
-          dataViewObj.timeFieldName = '@timestamp';
-        }
-        setDataView(dataViewObj);
+    if (isTextBasedQuery(query)) {
+      const nextDataView = await getDataViewByTextBasedQueryLang(query, currentDataView, services);
+      if (nextDataView !== currentDataView) {
+        setDataView(nextDataView);
       }
     }
 

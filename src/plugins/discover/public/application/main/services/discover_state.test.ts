@@ -37,6 +37,16 @@ const startSync = (appState: DiscoverAppStateContainer) => {
 async function getState(url: string = '/', savedSearch?: SavedSearch) {
   const nextHistory = createBrowserHistory();
   nextHistory.push(url);
+
+  const dataViewsCreateMock = discoverServiceMock.dataViews.create as jest.Mock;
+  dataViewsCreateMock.mockImplementation(() => ({
+    ...dataViewMock,
+  }));
+  discoverServiceMock.dataViews = {
+    ...discoverServiceMock.dataViews,
+    create: dataViewsCreateMock,
+  };
+
   const nextState = getDiscoverStateContainer({
     services: discoverServiceMock,
     history: nextHistory,

@@ -7,7 +7,7 @@
  */
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { cloneDeep, isEqual } from 'lodash';
-import { getIndexPatternFromSQLQuery } from '@kbn/es-query';
+import { getDataViewByTextBasedQueryLang } from '../utils/get_data_view_by_text_based_query_lang';
 import { isTextBasedQuery } from '../utils/is_text_based_query';
 import { loadAndResolveDataView } from '../utils/resolve_data_view';
 import { DiscoverInternalStateContainer } from './discover_internal_state_container';
@@ -154,19 +154,8 @@ const getStateDataView = async (
   }
   const query = appState?.query;
 
-  if (query && isTextBasedQuery(query)) {
-    const indexPatternFromQuery = getIndexPatternFromSQLQuery(query.sql);
-    if (!dataView || indexPatternFromQuery !== dataView.title) {
-      const dataViewObj = await services.dataViews.create({
-        id: 'textBasedIdxPattern',
-        title: indexPatternFromQuery,
-      });
-
-      if (dataViewObj.fields.getByName('@timestamp')?.type === 'date') {
-        dataViewObj.timeFieldName = '@timestamp';
-      }
-      return dataViewObj;
-    }
+  if (isTextBasedQuery(query)) {
+    return await getDataViewByTextBasedQueryLang(query, dataView, services);
   }
 
   const result = await loadAndResolveDataView(

@@ -123,7 +123,6 @@ function DiscoverDocumentsComponent({
   // 5. this is propagated to Discover's URL and causes an unwanted change of state to an unsorted state
   // This solution switches to the loading state in this component when the URL index doesn't match the dataView.id
   const isDataViewLoading = index && dataView.id && index !== dataView.id;
-  console.log({index, id: dataView.id, isDataViewLoading});
   const isEmptyDataResult = !documentState.result || documentState.result.length === 0;
   const isPlainRecord = useMemo(() => getRawRecordType(query) === RecordRawType.PLAIN, [query]);
   const rows = useMemo(() => documentState.result || [], [documentState.result]);
