@@ -9,7 +9,7 @@ import { isEmpty, isEqual, keyBy, pick } from 'lodash/fp';
 import memoizeOne from 'memoize-one';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { BrowserField, BrowserFields, IndexField } from '@kbn/timelines-plugin/common';
-import { DataView, fieldList, FieldSpec } from '@kbn/data-views-plugin/common';
+import type { DataView, FieldSpec } from '@kbn/data-views-plugin/common';
 import { getCategory } from '@kbn/triggers-actions-ui-plugin/public';
 
 import { useKibana } from '../../lib/kibana';
@@ -164,9 +164,8 @@ export const useFetchIndex = (
             dv = await data.dataViews.create({ title: iNames.join(','), allowNoIndex: true });
             previousIndexesNameOrId.current = dv.getIndexPattern().split(',');
           }
-          // narrowing down to FieldSpec[] because we don't need
-          // the extra functions provided by IIndexPatternFieldList
-          const fields = dv.fields;
+
+          const fields = dv.fields.map((field) => field.toSpec());
           if (includeUnmapped) {
             try {
               const fieldNameConflictDescriptionsMap = (await data.dataViews
@@ -181,39 +180,14 @@ export const useFetchIndex = (
                   )
                 )) as { [x: string]: Record<string, string[]> | undefined };
 
-              console.log(
-                'WHAT IS IN FIELDNAMECONFLICTDESCRIPTIONSMAP',
-                fieldNameConflictDescriptionsMap
-              );
-
-              console.log('FIELDS', fields[0].toSpec());
-
-              dv.fields = [
+              dv.fields.replaceAll([
                 ...fields.map((field) => ({
-                  ...field.toSpec(),
+                  ...field,
                   ...(fieldNameConflictDescriptionsMap[field.name] != null
                     ? { conflictDescriptions: fieldNameConflictDescriptionsMap[field.name] }
                     : {}),
                 })),
-              ];
-
-              // fields.forEach((field) => {
-              //   dv.fields.update({
-              //     ...field,
-              //     ...(fieldNameConflictDescriptionsMap[field.name] != null
-              //       ? { conflictDescriptions: fieldNameConflictDescriptionsMap[field.name] }
-              //       : {}),
-              //   });
-              // });
-
-              // dv.fields.replaceAll([
-              //   ...fields.map((field) => ({
-              //     ...field.toSpec(),
-              //     ...(fieldNameConflictDescriptionsMap[field.name] != null
-              //       ? { conflictDescriptions: fieldNameConflictDescriptionsMap[field.name] }
-              //       : {}),
-              //   })),
-              // ]);
+              ]);
             } catch (error) {
               addWarning(error, { title: i18n.FETCH_FIELDS_WITH_UNMAPPED_DATA_ERROR });
             }
