@@ -96,8 +96,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/111076
-    describe.skip('Saved Views', () => {
+    describe('Saved Views', function () {
+      // FLAKY: https://github.com/elastic/kibana/issues/157738
+      this.tags('skipFirefox');
       before(async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs');
         await pageObjects.infraHome.goToMetricExplorer();
