@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-export const SLO_BURN_RATE_RULE_ID = 'slo.rules.burnRate';
-export const INVALID_EQUATION_REGEX = /[^A-Z|+|\-|\s|\d+|\.|\(|\)|\/|\*|>|<|=|\?|\:|&|\!|\|]+/g;
-export const ALERT_STATUS_ALL = 'all';
-
-export const ALERTS_URL_STORAGE_KEY = '_a';
+// eslint-disable-next-line import/no-default-export
+export default function ({ loadTestFile }: any) {
+  describe('MetricsUI Endpoints', () => {
+    loadTestFile(require.resolve('./metric_threshold_rule'));
+  });
+}

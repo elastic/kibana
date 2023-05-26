@@ -970,6 +970,7 @@ x-pack/plugins/cloud_integrations/cloud_full_story/server/config.ts @elastic/kib
 
 # Response Ops team
 /x-pack/test/alerting_api_integration/ @elastic/response-ops
+/x-pack/test/alerting_api_integration/observability @elastic/actionable-observability
 /x-pack/test/plugin_api_integration/test_suites/task_manager/ @elastic/response-ops
 /x-pack/test/functional_with_es_ssl/apps/triggers_actions_ui/ @elastic/response-ops
 /docs/user/alerting/ @elastic/response-ops
