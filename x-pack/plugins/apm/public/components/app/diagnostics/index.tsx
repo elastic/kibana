@@ -15,6 +15,7 @@ import { ApmMainTemplate } from '../../routing/templates/apm_main_template';
 import { DiagnosticsIndexTemplates } from './index_templates_tab';
 import { DiagnosticsIndices } from './indices_tab';
 import { DiagnosticsDataStreams } from './data_stream_tab';
+import { DiagnosticsIndexPatternSettings } from './index_pattern_settings_tab';
 
 export const diagnosticsRoute = {
   '/diagnostics': {
@@ -27,10 +28,13 @@ export const diagnosticsRoute = {
       '/diagnostics': {
         element: <DiagnosticsSummary />,
       },
+      '/diagnostics/index-pattern-settings': {
+        element: <DiagnosticsIndexPatternSettings />,
+      },
       '/diagnostics/index-templates': {
         element: <DiagnosticsIndexTemplates />,
       },
-      '/diagnostics/data_streams': {
+      '/diagnostics/data-streams': {
         element: <DiagnosticsDataStreams />,
       },
       '/diagnostics/indices': {
@@ -59,6 +63,16 @@ function DiagnosticsTemplate({ children }: { children: React.ReactChild }) {
             isSelected: routePath === '/diagnostics',
           },
           {
+            href: router.link('/diagnostics/index-pattern-settings'),
+            label: i18n.translate(
+              'xpack.apm.diagnostics.tab.index_pattern_settings',
+              {
+                defaultMessage: 'Index pattern settings',
+              }
+            ),
+            isSelected: routePath === '/diagnostics/index-pattern-settings',
+          },
+          {
             href: router.link('/diagnostics/index-templates'),
             label: i18n.translate('xpack.apm.diagnostics.tab.index_templates', {
               defaultMessage: 'Index templates',
@@ -66,11 +80,11 @@ function DiagnosticsTemplate({ children }: { children: React.ReactChild }) {
             isSelected: routePath === '/diagnostics/index-templates',
           },
           {
-            href: router.link('/diagnostics/data_streams'),
+            href: router.link('/diagnostics/data-streams'),
             label: i18n.translate('xpack.apm.diagnostics.tab.datastreams', {
               defaultMessage: 'Data streams',
             }),
-            isSelected: routePath === '/diagnostics/data_streams',
+            isSelected: routePath === '/diagnostics/data-streams',
           },
           {
             href: router.link('/diagnostics/indices'),

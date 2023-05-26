@@ -20,22 +20,24 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const start = new Date('2021-01-01T00:00:00.000Z').getTime();
   const end = new Date('2021-01-01T00:15:00.000Z').getTime() - 1;
 
-  registry.when('Diagnostics: Index Templates', { config: 'basic', archives: [] }, () => {
+  registry.when('Diagnostics: Index pattern settings', { config: 'basic', archives: [] }, () => {
     describe('When there is no data', () => {
       before(async () => {
         // delete APM index templates
         await es.indices.deleteIndexTemplate({ name: getDefaultIndexTemplateNames() });
       });
 
-      it('verifies that none of the default APM index templates exists`', async () => {
+      it('returns the built-in (non-APM) index templates`', async () => {
         const { status, body } = await apmApiClient.adminUser({
-          endpoint: 'GET /internal/apm/diagnostics/index_templates',
+          endpoint: 'GET /internal/apm/diagnostics/index_pattern_settings',
         });
         expect(status).to.be(200);
-        const noApmIndexTemplateExists = Object.values(body.defaultApmIndexTemplateStates).every(
-          ({ exists }) => exists === false
-        );
-        expect(noApmIndexTemplateExists).to.eql(true);
+
+        const templateNames = body.matchingIndexTemplates.flatMap(({ indexTemplates }) => {
+          return indexTemplates?.map(({ templateName }) => templateName);
+        });
+
+        expect(templateNames).to.eql(['logs', 'metrics']);
       });
     });
 
@@ -63,17 +65,39 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       after(() => synthtraceEsClient.clean());
 
-      it('verifies that all the default APM index templates exist', async () => {
+      it('returns APM index templates', async () => {
         const { status, body } = await apmApiClient.adminUser({
-          endpoint: 'GET /internal/apm/diagnostics/index_templates',
+          endpoint: 'GET /internal/apm/diagnostics/index_pattern_settings',
         });
         expect(status).to.be(200);
 
-        const everyApmIndexTemplateExists = Object.values(body.defaultApmIndexTemplateStates).every(
-          ({ exists }) => exists === true
-        );
+        const templateNames = body.matchingIndexTemplates.flatMap(({ indexTemplates }) => {
+          return indexTemplates?.map(({ templateName }) => templateName);
+        });
 
-        expect(everyApmIndexTemplateExists).to.eql(true);
+        expect(templateNames).to.eql([
+          'logs-apm.error',
+          'logs-apm.app',
+          'logs',
+          'metrics-apm.service_transaction.60m',
+          'metrics-apm.service_destination.10m',
+          'metrics-apm.transaction.1m',
+          'metrics-apm.service_destination.1m',
+          'metrics-apm.service_transaction.10m',
+          'metrics-apm.service_transaction.1m',
+          'metrics-apm.transaction.60m',
+          'metrics-apm.service_destination.60m',
+          'metrics-apm.service_summary.1m',
+          'metrics-apm.transaction.10m',
+          'metrics-apm.internal',
+          'metrics-apm.service_summary.10m',
+          'metrics-apm.service_summary.60m',
+          'metrics-apm.app',
+          'metrics',
+          'traces-apm',
+          'traces-apm.rum',
+          'traces-apm.sampled',
+        ]);
       });
     });
   });

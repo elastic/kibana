@@ -45,7 +45,7 @@ export function DataStreamsStatus() {
         Data streams
         <EuiLink
           data-test-subj="apmDataStreamsStatusSeeDetailsLink"
-          href={router.link('/diagnostics/data_streams')}
+          href={router.link('/diagnostics/data-streams')}
         >
           See details
         </EuiLink>

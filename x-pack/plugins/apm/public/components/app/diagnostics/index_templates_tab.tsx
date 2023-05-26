@@ -5,24 +5,17 @@
  * 2.0.
  */
 
-import { EuiLink, EuiLoadingElastic } from '@elastic/eui';
+import { EuiLoadingElastic } from '@elastic/eui';
 import {
   EuiBadge,
   EuiBasicTable,
   EuiBasicTableColumn,
-  EuiHorizontalRule,
   EuiSpacer,
   EuiText,
-  EuiTitle,
-  EuiToolTip,
 } from '@elastic/eui';
 import React from 'react';
-import { useApmRouter } from '../../../hooks/use_apm_router';
-import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
-import { APIReturnType } from '../../../services/rest/create_call_apm_api';
 
-type APIResponseType =
-  APIReturnType<'GET /internal/apm/diagnostics/index_templates'>;
+import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
 
 export function DiagnosticsIndexTemplates() {
   const { data, status } = useFetcher((callApmApi) => {
@@ -33,98 +26,6 @@ export function DiagnosticsIndexTemplates() {
     return <EuiLoadingElastic size="m" />;
   }
 
-  return (
-    <>
-      <MatchingIndexTemplates data={data} />
-      <DefaultApmIndexTemplates data={data} />
-    </>
-  );
-}
-
-function MatchingIndexTemplates({
-  data,
-}: {
-  data: APIResponseType | undefined;
-}) {
-  const router = useApmRouter();
-  const indexTemplatesByIndexPattern = data?.matchingIndexTemplates;
-
-  if (
-    !indexTemplatesByIndexPattern ||
-    indexTemplatesByIndexPattern?.length === 0
-  ) {
-    return null;
-  }
-
-  const elms = indexTemplatesByIndexPattern.map(
-    ({ indexPattern, indexTemplates }) => {
-      return (
-        <>
-          <EuiTitle size="xs">
-            <h4>{indexPattern}</h4>
-          </EuiTitle>
-
-          {!indexTemplates?.length && <em>No matching index templates</em>}
-
-          {indexTemplates?.map(
-            ({
-              isNonStandard,
-              templateName,
-              templateIndexPatterns,
-              priority,
-            }) => {
-              return (
-                <EuiToolTip
-                  content={`${templateIndexPatterns.join(
-                    ', '
-                  )} (Priority: ${priority})`}
-                >
-                  <EuiBadge
-                    color={isNonStandard ? 'warning' : 'hollow'}
-                    css={{ marginRight: '5px', marginTop: '5px' }}
-                  >
-                    {templateName}
-                  </EuiBadge>
-                </EuiToolTip>
-              );
-            }
-          )}
-
-          <EuiSpacer />
-        </>
-      );
-    }
-  );
-
-  return (
-    <>
-      <EuiTitle size="m">
-        <h2>Index patterns</h2>
-      </EuiTitle>
-
-      <EuiText>
-        This section lists the index patterns specified in{' '}
-        <EuiLink
-          data-test-subj="apmMatchingIndexTemplatesSeeDetailsLink"
-          href={router.link('/settings/apm-indices')}
-        >
-          APM Index Settings
-        </EuiLink>{' '}
-        and which index templates they match. The priority and index pattern of
-        each index template can be seen by hovering over the item.
-      </EuiText>
-      <EuiSpacer />
-      {elms}
-      <EuiHorizontalRule />
-    </>
-  );
-}
-
-function DefaultApmIndexTemplates({
-  data,
-}: {
-  data: APIResponseType | undefined;
-}) {
   const items = Object.entries(data?.defaultApmIndexTemplateStates ?? {}).map(
     ([defaultName, item]) => {
       return {
@@ -160,10 +61,6 @@ function DefaultApmIndexTemplates({
 
   return (
     <>
-      <EuiTitle size="m">
-        <h2>Index Templates</h2>
-      </EuiTitle>
-
       <EuiText>
         This section lists the names of the default APM Index Templates and
         whether it exists or not

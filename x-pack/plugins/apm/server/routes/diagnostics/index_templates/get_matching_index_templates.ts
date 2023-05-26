@@ -10,7 +10,9 @@ import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm
 
 export function getUniqueApmIndices(indices: APMEventClient['indices']) {
   return uniq(
-    Object.values(indices).flatMap((index): string[] => index.split(','))
+    [indices.error, indices.metric, indices.span, indices.transaction].flatMap(
+      (index): string[] => index.split(',')
+    )
   );
 }
 

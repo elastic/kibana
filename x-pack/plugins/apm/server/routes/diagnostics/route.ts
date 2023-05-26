@@ -44,16 +44,12 @@ const fieldMappingsRoute = createApmServerRoute({
   },
 });
 
-const indexTemplateRoute = createApmServerRoute({
-  endpoint: 'GET /internal/apm/diagnostics/index_templates',
+const indexPatternSettingsRoute = createApmServerRoute({
+  endpoint: 'GET /internal/apm/diagnostics/index_pattern_settings',
   options: { tags: ['access:apm'] },
   handler: async (
     resources
   ): Promise<{
-    defaultApmIndexTemplateStates: Record<
-      string,
-      { exists: boolean; name?: string | undefined }
-    >;
     matchingIndexTemplates: Array<{
       indexPattern: string;
       indexTemplates?: Array<{
@@ -72,7 +68,26 @@ const indexTemplateRoute = createApmServerRoute({
       defaultApmIndexTemplateStates
     );
 
-    return { matchingIndexTemplates, defaultApmIndexTemplateStates };
+    return { matchingIndexTemplates };
+  },
+});
+
+const indexTemplateRoute = createApmServerRoute({
+  endpoint: 'GET /internal/apm/diagnostics/index_templates',
+  options: { tags: ['access:apm'] },
+  handler: async (
+    resources
+  ): Promise<{
+    defaultApmIndexTemplateStates: Record<
+      string,
+      { exists: boolean; name?: string | undefined }
+    >;
+  }> => {
+    const apmEventClient = await getApmEventClient(resources);
+    const defaultApmIndexTemplateStates =
+      await getDefaultApmIndexTemplateStates(apmEventClient);
+
+    return { defaultApmIndexTemplateStates };
   },
 });
 
@@ -114,6 +129,7 @@ const dataStreamRoute = createApmServerRoute({
 });
 
 export const diagnosticsRepository = {
+  ...indexPatternSettingsRoute,
   ...fieldMappingsRoute,
   ...indexTemplateRoute,
   ...dataStreamRoute,
