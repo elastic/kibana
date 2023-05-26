@@ -156,6 +156,8 @@ export class JobCreator {
   }
 
   public get savedSearchQuery(): { query: Query; filter: any[] } | null {
+    // todo getQueryFromSavedSearchObject now expects a SavedSearch rather than a SavedSearchSavedObject
+    // @ts-expect-error
     return this._savedSearch ? getQueryFromSavedSearchObject(this._savedSearch) : null;
   }
 
