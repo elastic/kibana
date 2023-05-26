@@ -188,6 +188,56 @@ packageInfoCache.set('profiler_symbolizer-8.8.0-preview', {
     },
   },
 });
+packageInfoCache.set('profiler_collector-8.9.0-preview', {
+  format_version: '2.7.0',
+  name: 'profiler_collector',
+  title: 'Universal Profiling Collector',
+  version: '8.9.0-preview',
+  license: 'basic',
+  description:
+    'Fleet-wide, whole-system, continuous profiling with zero instrumentation. Collect profiling data.',
+  type: 'integration',
+  release: 'beta',
+  categories: ['monitoring', 'elastic_stack'],
+  icons: [
+    {
+      src: '/img/logo_profiling_symbolizer.svg',
+      title: 'logo symbolizer',
+      size: '32x32',
+      type: 'image/svg+xml',
+    },
+  ],
+  owner: { github: 'elastic/profiling' },
+  data_streams: [],
+  latestVersion: '8.9.0-preview',
+  notice: undefined,
+  status: 'not_installed',
+  assets: {
+    kibana: {
+      csp_rule_template: [],
+      dashboard: [],
+      visualization: [],
+      search: [],
+      index_pattern: [],
+      map: [],
+      lens: [],
+      security_rule: [],
+      ml_module: [],
+      tag: [],
+      osquery_pack_asset: [],
+      osquery_saved_query: [],
+    },
+    elasticsearch: {
+      component_template: [],
+      ingest_pipeline: [],
+      ilm_policy: [],
+      transform: [],
+      index_template: [],
+      data_stream_ilm_policy: [],
+      ml_model: [],
+    },
+  },
+});
 
 describe('storedPackagePoliciesToAgentPermissions()', () => {
   it('Returns `undefined` if there are no package policies', async () => {
@@ -426,6 +476,46 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
         inputs: [
           {
             type: 'pf-elastic-symbolizer',
+            enabled: true,
+            streams: [],
+          },
+        ],
+        created_at: '',
+        updated_at: '',
+        created_by: '',
+        updated_by: '',
+        revision: 1,
+        policy_id: '',
+      },
+    ];
+
+    const permissions = await storedPackagePoliciesToAgentPermissions(
+      packageInfoCache,
+      packagePolicies
+    );
+
+    expect(permissions).toMatchObject({
+      'package-policy-uuid-test-123': {
+        indices: [
+          {
+            names: ['profiling-*'],
+            privileges: UNIVERSAL_PROFILING_PERMISSIONS,
+          },
+        ],
+      },
+    });
+  });
+  it('Returns the Universal Profiling permissions for profiler_collector package', async () => {
+    const packagePolicies: PackagePolicy[] = [
+      {
+        id: 'package-policy-uuid-test-123',
+        name: 'test-policy',
+        namespace: '',
+        enabled: true,
+        package: { name: 'profiler_collector', version: '8.9.0-preview', title: 'Test Package' },
+        inputs: [
+          {
+            type: 'pf-elastic-collector',
             enabled: true,
             streams: [],
           },

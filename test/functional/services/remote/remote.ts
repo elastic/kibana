@@ -43,6 +43,10 @@ export async function RemoteProvider({ getService }: FtrProviderContext) {
     );
   }
 
+  if (Browsers.Firefox === browserType) {
+    log.info(`Geckodriver version: ${caps.get('moz:geckodriverVersion')}`);
+  }
+
   consoleLog$.subscribe({
     next({ message, level }) {
       const msg = message.replace(/\\n/g, '\n');

@@ -6,8 +6,9 @@
  * Side Public License, v 1.
  */
 
-export * from './slo';
 export * from './common';
-export * from './indicators';
+export * from './composite_slo';
 export * from './duration';
+export * from './indicators';
 export * from './time_window';
+export * from './slo';
