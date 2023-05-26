@@ -89,7 +89,7 @@ describe('getCommands', () => {
           // Set the custom APM Server URL (default: http://localhost:8200). The URL must be fully qualified, including protocol (http or https) and port.
           serverUrl: '',
 
-          // The name of the environment this service is deployed in, e.g., &quot;production&quot; or &quot;staging&quot;. Environments allow you to easily filter data on a global level in the APM UI. It&#39;s important to be consistent when naming environments across agents.
+          // The name of the environment this service is deployed in, e.g., \\"production\\" or \\"staging\\". Environments allow you to easily filter data on a global level in the APM UI. It's important to be consistent when naming environments across agents.
           environment: 'my-environment'
         })"
       `);
@@ -114,7 +114,7 @@ describe('getCommands', () => {
           // Set the custom APM Server URL (default: http://localhost:8200). The URL must be fully qualified, including protocol (http or https) and port.
           serverUrl: 'localhost:8220',
 
-          // The name of the environment this service is deployed in, e.g., &quot;production&quot; or &quot;staging&quot;. Environments allow you to easily filter data on a global level in the APM UI. It&#39;s important to be consistent when naming environments across agents.
+          // The name of the environment this service is deployed in, e.g., \\"production\\" or \\"staging\\". Environments allow you to easily filter data on a global level in the APM UI. It's important to be consistent when naming environments across agents.
           environment: 'my-environment'
         })"
       `);
@@ -140,7 +140,7 @@ describe('getCommands', () => {
           // Set the custom APM Server URL (default: http://localhost:8200). The URL must be fully qualified, including protocol (http or https) and port.
           serverUrl: 'localhost:8220',
 
-          // The name of the environment this service is deployed in, e.g., &quot;production&quot; or &quot;staging&quot;. Environments allow you to easily filter data on a global level in the APM UI. It&#39;s important to be consistent when naming environments across agents.
+          // The name of the environment this service is deployed in, e.g., \\"production\\" or \\"staging\\". Environments allow you to easily filter data on a global level in the APM UI. It's important to be consistent when naming environments across agents.
           environment: 'my-environment'
         })"
       `);
@@ -169,7 +169,7 @@ describe('getCommands', () => {
           # Set the custom APM Server URL (default: http://localhost:8200). The URL must be fully qualified, including protocol (http or https) and port.
           'SERVER_URL': '',
 
-          # The name of the environment this service is deployed in, e.g., &quot;production&quot; or &quot;staging&quot;. Environments allow you to easily filter data on a global level in the APM UI. It&#39;s important to be consistent when naming environments across agents.
+          # The name of the environment this service is deployed in, e.g., \\"production\\" or \\"staging\\". Environments allow you to easily filter data on a global level in the APM UI. It's important to be consistent when naming environments across agents.
           'ENVIRONMENT': 'my-environment',
         }
 
@@ -204,7 +204,7 @@ describe('getCommands', () => {
           # Set the custom APM Server URL (default: http://localhost:8200). The URL must be fully qualified, including protocol (http or https) and port.
           'SERVER_URL': 'localhost:8220',
 
-          # The name of the environment this service is deployed in, e.g., &quot;production&quot; or &quot;staging&quot;. Environments allow you to easily filter data on a global level in the APM UI. It&#39;s important to be consistent when naming environments across agents.
+          # The name of the environment this service is deployed in, e.g., \\"production\\" or \\"staging\\". Environments allow you to easily filter data on a global level in the APM UI. It's important to be consistent when naming environments across agents.
           'ENVIRONMENT': 'my-environment',
         }
 
@@ -240,7 +240,7 @@ describe('getCommands', () => {
           # Set the custom APM Server URL (default: http://localhost:8200). The URL must be fully qualified, including protocol (http or https) and port.
           'SERVER_URL': 'localhost:8220',
 
-          # The name of the environment this service is deployed in, e.g., &quot;production&quot; or &quot;staging&quot;. Environments allow you to easily filter data on a global level in the APM UI. It&#39;s important to be consistent when naming environments across agents.
+          # The name of the environment this service is deployed in, e.g., \\"production\\" or \\"staging\\". Environments allow you to easily filter data on a global level in the APM UI. It's important to be consistent when naming environments across agents.
           'ENVIRONMENT': 'my-environment',
         }
 
@@ -276,7 +276,7 @@ describe('getCommands', () => {
           # Set the custom APM Server URL (default: http://localhost:8200). The URL must be fully qualified, including protocol (http or https) and port.
           'SERVER_URL': '',
 
-          The name of the environment this service is deployed in, e.g., &quot;production&quot; or &quot;staging&quot;. Environments allow you to easily filter data on a global level in the APM UI. It&#39;s important to be consistent when naming environments across agents.
+          The name of the environment this service is deployed in, e.g., \\"production\\" or \\"staging\\". Environments allow you to easily filter data on a global level in the APM UI. It's important to be consistent when naming environments across agents.
           'ENVIRONMENT': 'my-environment',
         }
 
@@ -308,7 +308,7 @@ describe('getCommands', () => {
           # Set the custom APM Server URL (default: http://localhost:8200). The URL must be fully qualified, including protocol (http or https) and port.
           'SERVER_URL': 'localhost:8220',
 
-          The name of the environment this service is deployed in, e.g., &quot;production&quot; or &quot;staging&quot;. Environments allow you to easily filter data on a global level in the APM UI. It&#39;s important to be consistent when naming environments across agents.
+          The name of the environment this service is deployed in, e.g., \\"production\\" or \\"staging\\". Environments allow you to easily filter data on a global level in the APM UI. It's important to be consistent when naming environments across agents.
           'ENVIRONMENT': 'my-environment',
         }
 
@@ -341,7 +341,7 @@ describe('getCommands', () => {
           # Set the custom APM Server URL (default: http://localhost:8200). The URL must be fully qualified, including protocol (http or https) and port.
           'SERVER_URL': 'localhost:8220',
 
-          The name of the environment this service is deployed in, e.g., &quot;production&quot; or &quot;staging&quot;. Environments allow you to easily filter data on a global level in the APM UI. It&#39;s important to be consistent when naming environments across agents.
+          The name of the environment this service is deployed in, e.g., \\"production\\" or \\"staging\\". Environments allow you to easily filter data on a global level in the APM UI. It's important to be consistent when naming environments across agents.
           'ENVIRONMENT': 'my-environment',
         }
 
@@ -367,7 +367,7 @@ describe('getCommands', () => {
         # Set the custom APM Server URL (default: http://localhost:8200). The URL must be fully qualified, including protocol (http or https) and port.
         server_url: ''
 
-        # The name of the environment this service is deployed in, e.g., &quot;production&quot; or &quot;staging&quot;. Environments allow you to easily filter data on a global level in the APM UI. It&#39;s important to be consistent when naming environments across agents.
+        # The name of the environment this service is deployed in, e.g., \\"production\\" or \\"staging\\". Environments allow you to easily filter data on a global level in the APM UI. It's important to be consistent when naming environments across agents.
         environment: 'my-environment'"
       `);
     });
@@ -390,7 +390,7 @@ describe('getCommands', () => {
         # Set the custom APM Server URL (default: http://localhost:8200). The URL must be fully qualified, including protocol (http or https) and port.
         server_url: 'localhost:8220'
 
-        # The name of the environment this service is deployed in, e.g., &quot;production&quot; or &quot;staging&quot;. Environments allow you to easily filter data on a global level in the APM UI. It&#39;s important to be consistent when naming environments across agents.
+        # The name of the environment this service is deployed in, e.g., \\"production\\" or \\"staging\\". Environments allow you to easily filter data on a global level in the APM UI. It's important to be consistent when naming environments across agents.
         environment: 'my-environment'"
       `);
     });
@@ -414,7 +414,7 @@ describe('getCommands', () => {
         # Set the custom APM Server URL (default: http://localhost:8200). The URL must be fully qualified, including protocol (http or https) and port.
         server_url: 'localhost:8220'
 
-        # The name of the environment this service is deployed in, e.g., &quot;production&quot; or &quot;staging&quot;. Environments allow you to easily filter data on a global level in the APM UI. It&#39;s important to be consistent when naming environments across agents.
+        # The name of the environment this service is deployed in, e.g., \\"production\\" or \\"staging\\". Environments allow you to easily filter data on a global level in the APM UI. It's important to be consistent when naming environments across agents.
         environment: 'my-environment'"
       `);
     });
@@ -437,7 +437,7 @@ describe('getCommands', () => {
         # Set the custom APM Server URL (default: http://localhost:8200). The URL must be fully qualified, including protocol (http or https) and port.
         server_url: ''
 
-        # The name of the environment this service is deployed in, e.g., &quot;production&quot; or &quot;staging&quot;. Environments allow you to easily filter data on a global level in the APM UI. It&#39;s important to be consistent when naming environments across agents.
+        # The name of the environment this service is deployed in, e.g., \\"production\\" or \\"staging\\". Environments allow you to easily filter data on a global level in the APM UI. It's important to be consistent when naming environments across agents.
         environment: 'my-environment'"
       `);
     });
@@ -460,7 +460,7 @@ describe('getCommands', () => {
         # Set the custom APM Server URL (default: http://localhost:8200). The URL must be fully qualified, including protocol (http or https) and port.
         server_url: 'localhost:8220'
 
-        # The name of the environment this service is deployed in, e.g., &quot;production&quot; or &quot;staging&quot;. Environments allow you to easily filter data on a global level in the APM UI. It&#39;s important to be consistent when naming environments across agents.
+        # The name of the environment this service is deployed in, e.g., \\"production\\" or \\"staging\\". Environments allow you to easily filter data on a global level in the APM UI. It's important to be consistent when naming environments across agents.
         environment: 'my-environment'"
       `);
     });
@@ -484,7 +484,7 @@ describe('getCommands', () => {
         # Set the custom APM Server URL (default: http://localhost:8200). The URL must be fully qualified, including protocol (http or https) and port.
         server_url: 'localhost:8220'
 
-        # The name of the environment this service is deployed in, e.g., &quot;production&quot; or &quot;staging&quot;. Environments allow you to easily filter data on a global level in the APM UI. It&#39;s important to be consistent when naming environments across agents.
+        # The name of the environment this service is deployed in, e.g., \\"production\\" or \\"staging\\". Environments allow you to easily filter data on a global level in the APM UI. It's important to be consistent when naming environments across agents.
         environment: 'my-environment'"
       `);
     });
@@ -507,7 +507,7 @@ describe('getCommands', () => {
         # Set the custom APM Server URL (default: http://localhost:8200). The URL must be fully qualified, including protocol (http or https) and port.
         export ELASTIC_APM_SERVER_URL=
 
-        # The name of the environment this service is deployed in, e.g., &quot;production&quot; or &quot;staging&quot;. Environments allow you to easily filter data on a global level in the APM UI. It&#39;s important to be consistent when naming environments across agents.
+        # The name of the environment this service is deployed in, e.g., \\"production\\" or \\"staging\\". Environments allow you to easily filter data on a global level in the APM UI. It's important to be consistent when naming environments across agents.
         export ELASTIC_APM_ENVIRONMENT=my-environment
         "
       `);
@@ -531,7 +531,7 @@ describe('getCommands', () => {
         # Set the custom APM Server URL (default: http://localhost:8200). The URL must be fully qualified, including protocol (http or https) and port.
         export ELASTIC_APM_SERVER_URL=localhost:8220
 
-        # The name of the environment this service is deployed in, e.g., &quot;production&quot; or &quot;staging&quot;. Environments allow you to easily filter data on a global level in the APM UI. It&#39;s important to be consistent when naming environments across agents.
+        # The name of the environment this service is deployed in, e.g., \\"production\\" or \\"staging\\". Environments allow you to easily filter data on a global level in the APM UI. It's important to be consistent when naming environments across agents.
         export ELASTIC_APM_ENVIRONMENT=my-environment
         "
       `);
@@ -556,7 +556,7 @@ describe('getCommands', () => {
         # Set the custom APM Server URL (default: http://localhost:8200). The URL must be fully qualified, including protocol (http or https) and port.
         export ELASTIC_APM_SERVER_URL=localhost:8220
 
-        # The name of the environment this service is deployed in, e.g., &quot;production&quot; or &quot;staging&quot;. Environments allow you to easily filter data on a global level in the APM UI. It&#39;s important to be consistent when naming environments across agents.
+        # The name of the environment this service is deployed in, e.g., \\"production\\" or \\"staging\\". Environments allow you to easily filter data on a global level in the APM UI. It's important to be consistent when naming environments across agents.
         export ELASTIC_APM_ENVIRONMENT=my-environment
         "
       `);
@@ -577,7 +577,7 @@ describe('getCommands', () => {
             \\"SecretToken\\": \\"\\",
             /// Set the custom APM Server URL (default: http://localhost:8200). The URL must be fully qualified, including protocol (http or https) and port.
             \\"ServerUrl\\": \\"\\",
-            /// The name of the environment this service is deployed in, e.g., &quot;production&quot; or &quot;staging&quot;. Environments allow you to easily filter data on a global level in the APM UI. It&#39;s important to be consistent when naming environments across agents.
+            /// The name of the environment this service is deployed in, e.g., \\"production\\" or \\"staging\\". Environments allow you to easily filter data on a global level in the APM UI. It's important to be consistent when naming environments across agents.
             \\"Environment\\": \\"my-environment\\",
           }
         }"
@@ -599,7 +599,7 @@ describe('getCommands', () => {
             \\"SecretToken\\": \\"foobar\\",
             /// Set the custom APM Server URL (default: http://localhost:8200). The URL must be fully qualified, including protocol (http or https) and port.
             \\"ServerUrl\\": \\"localhost:8220\\",
-            /// The name of the environment this service is deployed in, e.g., &quot;production&quot; or &quot;staging&quot;. Environments allow you to easily filter data on a global level in the APM UI. It&#39;s important to be consistent when naming environments across agents.
+            /// The name of the environment this service is deployed in, e.g., \\"production\\" or \\"staging\\". Environments allow you to easily filter data on a global level in the APM UI. It's important to be consistent when naming environments across agents.
             \\"Environment\\": \\"my-environment\\",
           }
         }"
@@ -622,7 +622,7 @@ describe('getCommands', () => {
             \\"ApiKey\\": \\"myApiKey\\",
             /// Set the custom APM Server URL (default: http://localhost:8200). The URL must be fully qualified, including protocol (http or https) and port.
             \\"ServerUrl\\": \\"localhost:8220\\",
-            /// The name of the environment this service is deployed in, e.g., &quot;production&quot; or &quot;staging&quot;. Environments allow you to easily filter data on a global level in the APM UI. It&#39;s important to be consistent when naming environments across agents.
+            /// The name of the environment this service is deployed in, e.g., \\"production\\" or \\"staging\\". Environments allow you to easily filter data on a global level in the APM UI. It's important to be consistent when naming environments across agents.
             \\"Environment\\": \\"my-environment\\",
           }
         }"
@@ -645,7 +645,7 @@ describe('getCommands', () => {
         # Set the custom APM Server URL (default: http:&#x2F;&#x2F;localhost:8200). The URL must be fully qualified, including protocol (http or https) and port.
         elastic_apm.server_url=\\"\\"
 
-        # The name of the environment this service is deployed in, e.g., &quot;production&quot; or &quot;staging&quot;. Environments allow you to easily filter data on a global level in the APM UI. It&#39;s important to be consistent when naming environments across agents.
+        # The name of the environment this service is deployed in, e.g., \\"production\\" or \\"staging\\". Environments allow you to easily filter data on a global level in the APM UI. It's important to be consistent when naming environments across agents.
         elastic_apm.environment=\\"my-environment\\""
       `);
     });
@@ -666,7 +666,7 @@ describe('getCommands', () => {
         # Set the custom APM Server URL (default: http:&#x2F;&#x2F;localhost:8200). The URL must be fully qualified, including protocol (http or https) and port.
         elastic_apm.server_url=\\"localhost:8220\\"
 
-        # The name of the environment this service is deployed in, e.g., &quot;production&quot; or &quot;staging&quot;. Environments allow you to easily filter data on a global level in the APM UI. It&#39;s important to be consistent when naming environments across agents.
+        # The name of the environment this service is deployed in, e.g., \\"production\\" or \\"staging\\". Environments allow you to easily filter data on a global level in the APM UI. It's important to be consistent when naming environments across agents.
         elastic_apm.environment=\\"my-environment\\""
       `);
     });
@@ -688,7 +688,7 @@ describe('getCommands', () => {
         # Set the custom APM Server URL (default: http:&#x2F;&#x2F;localhost:8200). The URL must be fully qualified, including protocol (http or https) and port.
         elastic_apm.server_url=\\"localhost:8220\\"
 
-        # The name of the environment this service is deployed in, e.g., &quot;production&quot; or &quot;staging&quot;. Environments allow you to easily filter data on a global level in the APM UI. It&#39;s important to be consistent when naming environments across agents.
+        # The name of the environment this service is deployed in, e.g., \\"production\\" or \\"staging\\". Environments allow you to easily filter data on a global level in the APM UI. It's important to be consistent when naming environments across agents.
         elastic_apm.environment=\\"my-environment\\""
       `);
     });
