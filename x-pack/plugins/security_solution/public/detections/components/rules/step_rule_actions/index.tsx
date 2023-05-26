@@ -22,6 +22,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { ActionVariables } from '@kbn/triggers-actions-ui-plugin/public';
 import { UseArray } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
+import type { Rule } from '../../../../detection_engine/rule_management/logic';
+import { CopyRuleConfigurationsPopover } from '../../../../detection_engine/rule_creation_ui/pages/copy_configs';
 import type { RuleObjectId } from '../../../../../common/detection_engine/rule_schema';
 import { isQueryRule } from '../../../../../common/detection_engine/utils';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
@@ -44,6 +46,7 @@ interface StepRuleActionsProps extends RuleStepProps {
   actionMessageParams: ActionVariables;
   summaryActionMessageParams: ActionVariables;
   ruleType?: Type;
+  copyConfigurations?: (rule: Rule) => void;
 }
 
 export const stepActionsDefaultValue: ActionsStepRule = {
@@ -55,17 +58,28 @@ export const stepActionsDefaultValue: ActionsStepRule = {
 
 const GhostFormField = () => <></>;
 
-const DisplayActionsHeader = () => {
+const DisplayActionsHeader = ({
+  ruleId,
+  copyConfigurations,
+}: {
+  ruleId?: string;
+  copyConfigurations?: (rule: Rule) => void;
+}) => {
   return (
     <>
-      <EuiTitle size="s">
-        <h4>
-          <FormattedMessage
-            defaultMessage="Actions"
-            id="xpack.securitySolution.detectionEngine.rule.editRule.actionSectionsTitle"
-          />
-        </h4>
-      </EuiTitle>
+      <EuiFlexGroup direction="row" justifyContent="spaceBetween">
+        <EuiTitle size="s">
+          <h4>
+            <FormattedMessage
+              defaultMessage="Actions"
+              id="xpack.securitySolution.detectionEngine.rule.editRule.actionSectionsTitle"
+            />
+          </h4>
+        </EuiTitle>
+        {copyConfigurations && (
+          <CopyRuleConfigurationsPopover copyConfigurations={copyConfigurations} ruleId={ruleId} />
+        )}
+      </EuiFlexGroup>
       <EuiSpacer size="l" />
     </>
   );
@@ -83,6 +97,7 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
   actionMessageParams,
   summaryActionMessageParams,
   ruleType,
+  copyConfigurations,
 }) => {
   const {
     services: {
@@ -99,10 +114,14 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
     [application]
   );
 
-  const initialState = {
-    ...(defaultValues ?? stepActionsDefaultValue),
-    kibanaSiemAppUrl: kibanaAbsoluteUrl,
-  };
+  const initialState = useMemo(
+    () => ({
+      ...(defaultValues ?? stepActionsDefaultValue),
+      kibanaSiemAppUrl: kibanaAbsoluteUrl,
+    }),
+    [defaultValues, kibanaAbsoluteUrl]
+  );
+  const initialValues = useMemo(() => JSON.stringify(initialState), [initialState]);
 
   const schema = useMemo(() => getSchema({ actionTypeRegistry }), [actionTypeRegistry]);
   const { form } = useForm<ActionsStepRule>({
@@ -110,7 +129,11 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
     options: { stripEmptyFields: false },
     schema,
   });
-  const { getFields, getFormData, submit } = form;
+  const { getFields, getFormData, submit, reset } = form;
+
+  useEffect(() => {
+    reset({ defaultValue: JSON.parse(initialValues) });
+  }, [initialValues, reset]);
 
   const handleSubmit = useCallback(
     (enabled: boolean) => {
@@ -172,7 +195,7 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
   const displayActionsDropDown = useMemo(() => {
     return application.capabilities.actions.show ? (
       <>
-        <DisplayActionsHeader />
+        <DisplayActionsHeader copyConfigurations={copyConfigurations} ruleId={ruleId} />
         {ruleId && <RuleSnoozeSection ruleId={ruleId} />}
         {displayActionsOptions}
         {responseActionsEnabled && displayResponseActionsOptions}
@@ -190,6 +213,7 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
     displayActionsOptions,
     displayResponseActionsOptions,
     responseActionsEnabled,
+    copyConfigurations,
   ]);
 
   if (isReadOnlyView) {

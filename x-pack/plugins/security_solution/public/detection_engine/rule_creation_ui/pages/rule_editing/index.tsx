@@ -24,6 +24,7 @@ import { noop } from 'lodash';
 import type { DataViewListItem } from '@kbn/data-views-plugin/common';
 import { RulePreview } from '../../../../detections/components/rules/rule_preview';
 import type { RuleUpdateProps } from '../../../../../common/detection_engine/rule_schema';
+import type { Rule } from '../../../rule_management/logic';
 import { useRule, useUpdateRule } from '../../../rule_management/logic';
 import { useListsConfig } from '../../../../detections/containers/detection_engine/lists/use_lists_config';
 import { SecuritySolutionPageWrapper } from '../../../../common/components/page_wrapper';
@@ -213,6 +214,30 @@ const EditRulePageComponent: FC = () => {
     [defineStep.data, savedQueryBar]
   );
 
+  const copyConfigurations = useCallback(
+    (ruleToCopy: Rule) => {
+      const {
+        aboutRuleData: aboutStepData,
+        defineRuleData: defineStepData,
+        scheduleRuleData: scheduleStepData,
+        ruleActionsData: actionsStepData,
+      } = getStepsData({
+        rule: ruleToCopy,
+      });
+
+      if (activeStep === RuleStep.defineRule) {
+        setStepData(RuleStep.defineRule, defineStepData, true);
+      } else if (activeStep === RuleStep.aboutRule) {
+        setStepData(RuleStep.aboutRule, aboutStepData, true);
+      } else if (activeStep === RuleStep.scheduleRule) {
+        setStepData(RuleStep.scheduleRule, scheduleStepData, true);
+      } else {
+        setStepData(RuleStep.ruleActions, actionsStepData, true);
+      }
+    },
+    [activeStep, setStepData]
+  );
+
   const tabs = useMemo(
     () => [
       {
@@ -223,7 +248,13 @@ const EditRulePageComponent: FC = () => {
         content: (
           <>
             <EuiSpacer />
-            <StepPanel loading={loading || isSavedQueryLoading} title={ruleI18n.DEFINITION}>
+            <StepPanel
+              loading={loading || isSavedQueryLoading}
+              title={ruleI18n.DEFINITION}
+              copyConfigurations={copyConfigurations}
+              ruleType={rule?.type}
+              ruleId={rule?.id}
+            >
               {defineStepDataWithSavedQuery != null && !isSavedQueryLoading && (
                 <StepDefineRule
                   isReadOnlyView={false}
@@ -252,7 +283,12 @@ const EditRulePageComponent: FC = () => {
         content: (
           <>
             <EuiSpacer />
-            <StepPanel loading={loading} title={ruleI18n.ABOUT}>
+            <StepPanel
+              loading={loading}
+              title={ruleI18n.ABOUT}
+              copyConfigurations={copyConfigurations}
+              ruleId={rule?.id}
+            >
               {aboutStep.data != null && defineStep.data != null && (
                 <StepAboutRule
                   isReadOnlyView={false}
@@ -277,7 +313,12 @@ const EditRulePageComponent: FC = () => {
         content: (
           <>
             <EuiSpacer />
-            <StepPanel loading={loading} title={ruleI18n.SCHEDULE}>
+            <StepPanel
+              loading={loading}
+              title={ruleI18n.SCHEDULE}
+              copyConfigurations={copyConfigurations}
+              ruleId={rule?.id}
+            >
               {scheduleStep.data != null && (
                 <StepScheduleRule
                   isReadOnlyView={false}
@@ -312,6 +353,7 @@ const EditRulePageComponent: FC = () => {
                   actionMessageParams={actionMessageParams}
                   summaryActionMessageParams={actionMessageParams}
                   ruleType={rule?.type}
+                  copyConfigurations={copyConfigurations}
                 />
               )}
               <EuiSpacer />
@@ -339,6 +381,7 @@ const EditRulePageComponent: FC = () => {
       actionsStep.data,
       actionMessageParams,
       savedQuery,
+      copyConfigurations,
     ]
   );
 

@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -13,6 +13,9 @@ import type {
   ActionTypeRegistryContract,
 } from '@kbn/triggers-actions-ui-plugin/public';
 
+import { NOTIFICATION_DEFAULT_FREQUENCY } from '../../../../../../../common/constants';
+import type { Rule } from '../../../../../rule_management/logic';
+import { CopyRuleConfigurationsPopover } from '../../../../../rule_creation_ui/pages/copy_configs';
 import { transformAlertToNormalizedRuleAction } from '../../../../../../../common/detection_engine/transform_actions';
 import type { FormSchema } from '../../../../../../shared_imports';
 import {
@@ -31,7 +34,10 @@ import { bulkAddRuleActions as i18n } from '../translations';
 
 import { useKibana } from '../../../../../../common/lib/kibana';
 
-import { getAllActionMessageParams } from '../../../../../../detections/pages/detection_engine/rules/helpers';
+import {
+  getAllActionMessageParams,
+  getStepsData,
+} from '../../../../../../detections/pages/detection_engine/rules/helpers';
 
 import { RuleActionsField } from '../../../../../../detections/components/rules/rule_actions_field';
 import { debouncedValidateRuleActionsField } from '../../../../../../detections/containers/detection_engine/rules/validate_rule_actions_field';
@@ -82,6 +88,8 @@ const RuleActionsFormComponent = ({ rulesCount, onClose, onConfirm }: RuleAction
     },
   } = useKibana();
 
+  const [actionsData, setActionsData] = useState<BulkActionsRuleAction[]>([]);
+
   const formSchema = useMemo(() => getFormSchema(actionTypeRegistry), [actionTypeRegistry]);
 
   const { form } = useForm({
@@ -90,6 +98,28 @@ const RuleActionsFormComponent = ({ rulesCount, onClose, onConfirm }: RuleAction
   });
 
   const [{ overwrite }] = useFormData({ form, watch: ['overwrite', 'throttle'] });
+
+  const { reset } = form;
+  useEffect(() => {
+    reset({
+      defaultValue: {
+        actions: actionsData,
+        overwrite,
+      },
+    });
+  }, [actionsData, overwrite, reset]);
+
+  const copyConfigurations = useCallback((rule: Rule) => {
+    const { ruleActionsData } = getStepsData({
+      rule,
+    });
+    setActionsData(
+      ruleActionsData.actions.map((action) => ({
+        ...action,
+        frequency: action.frequency ?? NOTIFICATION_DEFAULT_FREQUENCY,
+      }))
+    );
+  }, []);
 
   const handleSubmit = useCallback(async () => {
     const { data, isValid } = await form.submit();
@@ -116,6 +146,7 @@ const RuleActionsFormComponent = ({ rulesCount, onClose, onConfirm }: RuleAction
     <BulkEditFormWrapper
       form={form}
       title={i18n.FORM_TITLE}
+      subTitle={<CopyRuleConfigurationsPopover copyConfigurations={copyConfigurations} />}
       onClose={onClose}
       onSubmit={handleSubmit}
       flyoutSize="l"

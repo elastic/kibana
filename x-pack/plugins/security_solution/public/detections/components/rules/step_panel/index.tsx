@@ -5,9 +5,12 @@
  * 2.0.
  */
 
-import { EuiPanel, EuiProgress } from '@elastic/eui';
+import { EuiFlexGroup, EuiPanel, EuiProgress } from '@elastic/eui';
 import React, { memo } from 'react';
 import styled from 'styled-components';
+import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
+import type { Rule } from '../../../../detection_engine/rule_management/logic';
+import { CopyRuleConfigurationsPopover } from '../../../../detection_engine/rule_creation_ui/pages/copy_configs';
 
 import { HeaderSection } from '../../../../common/components/header_section';
 
@@ -15,6 +18,9 @@ interface StepPanelProps {
   children: React.ReactNode;
   loading: boolean;
   title?: string;
+  ruleId?: string;
+  ruleType?: Type;
+  copyConfigurations?: (rule: Rule) => void;
 }
 
 const MyPanel = styled(EuiPanel)`
@@ -23,7 +29,14 @@ const MyPanel = styled(EuiPanel)`
 
 MyPanel.displayName = 'MyPanel';
 
-const StepPanelComponent: React.FC<StepPanelProps> = ({ children, loading, title }) => (
+const StepPanelComponent: React.FC<StepPanelProps> = ({
+  children,
+  loading,
+  title,
+  ruleId,
+  ruleType,
+  copyConfigurations,
+}) => (
   <MyPanel hasBorder>
     {loading && (
       <EuiProgress
@@ -33,7 +46,16 @@ const StepPanelComponent: React.FC<StepPanelProps> = ({ children, loading, title
         data-test-subj="stepPanelProgress"
       />
     )}
-    {title && <HeaderSection title={title} />}
+    {title && copyConfigurations && (
+      <EuiFlexGroup direction="row" justifyContent="spaceBetween">
+        <HeaderSection title={title} />
+        <CopyRuleConfigurationsPopover
+          copyConfigurations={copyConfigurations}
+          ruleType={ruleType}
+          ruleId={ruleId}
+        />
+      </EuiFlexGroup>
+    )}
     {children}
   </MyPanel>
 );
