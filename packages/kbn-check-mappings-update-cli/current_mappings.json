@@ -874,6 +874,26 @@
       }
     }
   },
+  "audit": {
+    "dynamic": false,
+    "properties": {
+      "timestamp": {
+        "type": "date"
+      },
+      "operation": {
+        "type": "keyword"
+      },
+      "user": {
+        "type": "keyword"
+      },
+      "subject": {
+        "type": "keyword"
+      },
+      "subjectId": {
+        "type": "keyword"
+      }
+    }
+  },
   "search": {
     "dynamic": false,
     "properties": {
