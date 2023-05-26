@@ -6,7 +6,7 @@
  */
 
 import { useMemo } from 'react';
-import type { DataView } from '@kbn/data-views-plugin/common';
+import type { DataView, FieldSpec } from '@kbn/data-views-plugin/common';
 
 import type { Rule } from '../../rule_management/logic/types';
 import { useGetInstalledJob } from '../../../common/components/ml/hooks/use_get_jobs';
@@ -15,7 +15,7 @@ import { useSourcererDataView } from '../../../common/containers/sourcerer';
 
 export interface ReturnUseFetchExceptionFlyoutData {
   isLoading: boolean;
-  readonly indexPatterns: DataView | undefined;
+  indexPatterns: (Omit<DataView, 'fields'> & { fields: FieldSpec[] }) | undefined;
 }
 
 /**
@@ -66,22 +66,13 @@ export const useFetchIndexPatterns = (rules: Rule[] | null): ReturnUseFetchExcep
     }
   }, [jobs, isMLRule, memoDataViewId, memoNonDataViewIndexPatterns]);
 
-  const [isIndexPatternLoading, { dataView }] = useFetchIndex(
-    memoRuleIndicesOrDvId,
-    false,
-    'indexFields',
-    true
-  );
+  const [isIndexPatternLoading, { dataView }] = useFetchIndex(memoRuleIndicesOrDvId, true);
 
   return {
     isLoading: isIndexPatternLoading || mlJobLoading,
     indexPatterns: {
       ...dataView,
-      // @ts-expect-error fields is the wrong type but it will take too much effort
-      // right now to fix because of how deep the type changes need to be. Since the
-      // code only relies on the properties of the fields and not any of the CRUD functions,
-      // we typecast the fields to FieldSpec and return the rest of the data view
       fields: dataView != null ? Object.values(dataView.fields.toSpec()) : [],
-    },
+    } as Omit<DataView, 'fields'> & { fields: FieldSpec[] },
   };
 };

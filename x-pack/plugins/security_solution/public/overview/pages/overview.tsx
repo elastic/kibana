@@ -48,7 +48,7 @@ const OverviewComponent = () => {
   const endpointMetadataIndex = useMemo<string[]>(() => {
     return [ENDPOINT_METADATA_INDEX];
   }, []);
-  const [, { indexExists: metadataIndexExists }] = useFetchIndex(endpointMetadataIndex, true);
+  const [, { indexExists: metadataIndexExists }] = useFetchIndex(endpointMetadataIndex);
   const { addMessage, hasMessage } = useMessagesStorage();
   const hasDismissEndpointNoticeMessage: boolean = useMemo(
     () => hasMessage('management', 'dismissEndpointNotice'),

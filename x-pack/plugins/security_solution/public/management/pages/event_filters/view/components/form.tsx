@@ -28,10 +28,7 @@ import { OperatingSystem } from '@kbn/securitysolution-utils';
 import { getExceptionBuilderComponentLazy } from '@kbn/lists-plugin/public';
 import type { OnChangeProps } from '@kbn/lists-plugin/public';
 import type { ValueSuggestionsGetFn } from '@kbn/unified-search-plugin/public/autocomplete/providers/value_suggestion_provider';
-import {
-  ENDPOINT_FIELDS_SEARCH_STRATEGY,
-  eventsIndexPattern,
-} from '../../../../../../common/endpoint/constants';
+import { eventsIndexPattern } from '../../../../../../common/endpoint/constants';
 import { useSuggestions } from '../../../../hooks/use_suggestions';
 import { useTestIdGenerator } from '../../../../hooks/use_test_id_generator';
 import type { PolicyData } from '../../../../../../common/endpoint/types';
@@ -146,11 +143,7 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
     const [hasDuplicateFields, setHasDuplicateFields] = useState<boolean>(false);
     // This value has to be memoized to avoid infinite useEffect loop on useFetchIndex
     const indexNames = useMemo(() => [eventsIndexPattern], []);
-    const [isIndexPatternLoading, { dataView }] = useFetchIndex(
-      indexNames,
-      undefined,
-      ENDPOINT_FIELDS_SEARCH_STRATEGY
-    );
+    const [isIndexPatternLoading, { dataView }] = useFetchIndex(indexNames);
 
     const [areConditionsValid, setAreConditionsValid] = useState(
       !!exception.entries.length || false
