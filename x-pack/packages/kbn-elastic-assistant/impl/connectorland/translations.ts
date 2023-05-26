@@ -41,7 +41,7 @@ export const CONNECTOR_SELECTOR_TITLE = i18n.translate(
 export const ADD_NEW_CONNECTOR = i18n.translate(
   'xpack.elasticAssistant.assistant.connectors.connectorSelector.newConnectorOptions',
   {
-    defaultMessage: 'Add New Connector',
+    defaultMessage: 'Add New Connector...',
   }
 );
 
@@ -97,6 +97,6 @@ export const CONNECTOR_SETUP_TIMESTAMP_AT = i18n.translate(
 export const CONNECTOR_SETUP_SKIP = i18n.translate(
   'xpack.elasticAssistant.assistant.connectors.setup.skipTitle',
   {
-    defaultMessage: "[ Press 'space' to skip... ]",
+    defaultMessage: "Press 'space' to skip...",
   }
 );

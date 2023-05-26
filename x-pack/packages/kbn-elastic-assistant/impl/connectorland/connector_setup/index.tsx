@@ -7,7 +7,14 @@
 
 import React, { useCallback, useRef, useState } from 'react';
 import type { EuiCommentProps } from '@elastic/eui';
-import { EuiAvatar, EuiCommentList, EuiMarkdownFormat, EuiText, EuiTextAlign } from '@elastic/eui';
+import {
+  EuiAvatar,
+  EuiBadge,
+  EuiCommentList,
+  EuiMarkdownFormat,
+  EuiText,
+  EuiTextAlign,
+} from '@elastic/eui';
 // eslint-disable-next-line @kbn/eslint/module_migration
 import styled from 'styled-components';
 import { ConnectorAddModal } from '@kbn/triggers-actions-ui-plugin/public/common/constants';
@@ -26,8 +33,9 @@ import { useLoadActionTypes } from '../use_load_action_types';
 import { StreamingText } from '../../assistant/streaming_text';
 import { ConnectorButton } from '../connector_button';
 import { useConversation } from '../../assistant/use_conversation';
-import { clearPresentationData } from './helpers';
+import { clearPresentationData, conversationHasNoPresentationData } from './helpers';
 import * as i18n from '../translations';
+import { useAssistantContext } from '../../assistant_context';
 
 const MESSAGE_INDEX_BEFORE_CONNECTOR = 2;
 
@@ -70,12 +78,18 @@ export const ConnectorSetup: React.FC<ConnectorSetupProps> = React.memo<Connecto
     onSetupComplete,
     refetchConnectors,
   }) => {
-    const { setApiConfig, setConversation } = useConversation();
+    const { appendMessage, setApiConfig, setConversation } = useConversation();
     const lastCommentRef = useRef<HTMLDivElement | null>(null);
     const bottomRef = useRef<HTMLDivElement | null>(null);
 
+    // Access all conversations so we can add connector to all on initial setup
+    const { conversations } = useAssistantContext();
+
     const [isConnectorModalVisible, setIsConnectorModalVisible] = useState<boolean>(false);
-    const [showAddConnectorButton, setShowAddConnectorButton] = useState<boolean>(false);
+    const [showAddConnectorButton, setShowAddConnectorButton] = useState<boolean>(() => {
+      // If no presentation data on messages, default to showing add connector button so it doesn't delay render and flash on screen
+      return conversationHasNoPresentationData(conversation);
+    });
     const { data: actionTypes } = useLoadActionTypes({ http });
 
     const actionType = actionTypes?.find((at) => at.id === GEN_AI_CONNECTOR_ID) ?? {
@@ -88,8 +102,16 @@ export const ConnectorSetup: React.FC<ConnectorSetupProps> = React.memo<Connecto
       enabled: true,
     };
 
+    // User constants
+    const userName = conversation.theme?.user?.name ?? i18n.CONNECTOR_SETUP_USER_YOU;
+    const assistantName =
+      conversation.theme?.assistant?.name ?? i18n.CONNECTOR_SETUP_USER_ASSISTANT;
+
     const [currentMessageIndex, setCurrentMessageIndex] = useState(
-      isConnectorConfigured ? MESSAGE_INDEX_BEFORE_CONNECTOR : 0
+      // If connector is configured or conversation has already been replayed show all messages immediately
+      isConnectorConfigured || conversationHasNoPresentationData(conversation)
+        ? MESSAGE_INDEX_BEFORE_CONNECTOR
+        : 0
     );
 
     // Register keyboard listener to show the add connector modal when SPACE is pressed
@@ -173,10 +195,9 @@ export const ConnectorSetup: React.FC<ConnectorSetupProps> = React.memo<Connecto
               .slice(0, currentMessageIndex + 1)
               .map((message, index) => {
                 const isUser = message.role === 'user';
+
                 const commentProps: EuiCommentProps = {
-                  username: isUser
-                    ? i18n.CONNECTOR_SETUP_USER_YOU
-                    : i18n.CONNECTOR_SETUP_USER_ASSISTANT,
+                  username: isUser ? userName : assistantName,
                   children: commentBody(message, index, conversation.messages.length),
                   timelineAvatar: (
                     <EuiAvatar
@@ -196,16 +217,18 @@ export const ConnectorSetup: React.FC<ConnectorSetupProps> = React.memo<Connecto
         {(showAddConnectorButton || isConnectorConfigured) && (
           <ConnectorButtonWrapper>
             <ConnectorButton
-              actionTypeRegistry={actionTypeRegistry}
-              http={http}
-              refetchConnectors={refetchConnectors}
+              setIsConnectorModalVisible={setIsConnectorModalVisible}
               connectorAdded={isConnectorConfigured}
             />
           </ConnectorButtonWrapper>
         )}
         {!showAddConnectorButton && (
           <SkipEuiText color="subdued" size={'xs'}>
-            <EuiTextAlign textAlign="center">{i18n.CONNECTOR_SETUP_SKIP}</EuiTextAlign>
+            <EuiTextAlign textAlign="center">
+              <EuiBadge color="hollow" isDisabled={true}>
+                {i18n.CONNECTOR_SETUP_SKIP}
+              </EuiBadge>
+            </EuiTextAlign>
           </SkipEuiText>
         )}
 
@@ -214,17 +237,29 @@ export const ConnectorSetup: React.FC<ConnectorSetupProps> = React.memo<Connecto
             actionType={actionType}
             onClose={() => setIsConnectorModalVisible(false)}
             postSaveEventHandler={(savedAction: ActionConnector) => {
-              setApiConfig({
-                conversationId: conversation.id,
-                apiConfig: {
-                  ...conversation.apiConfig,
-                  connectorId: savedAction.id,
-                  provider: (savedAction as ActionConnectorProps<Config, unknown>)?.config
-                    .apiProvider as OpenAiProviderType,
-                },
+              // Add connector to all conversations
+              Object.values(conversations).forEach((c) => {
+                setApiConfig({
+                  conversationId: c.id,
+                  apiConfig: {
+                    ...c.apiConfig,
+                    connectorId: savedAction.id,
+                    provider: (savedAction as ActionConnectorProps<Config, unknown>)?.config
+                      .apiProvider as OpenAiProviderType,
+                  },
+                });
               });
+
               refetchConnectors?.();
               setIsConnectorModalVisible(false);
+              appendMessage({
+                conversationId: conversation.id,
+                message: {
+                  role: 'assistant',
+                  content: 'Connector setup complete!',
+                  timestamp: '',
+                },
+              });
             }}
             actionTypeRegistry={actionTypeRegistry}
           />

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiSuperSelect, EuiText } from '@elastic/eui';
+import { EuiButtonEmpty, EuiSuperSelect, EuiText } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 
 import {
@@ -20,6 +20,7 @@ import {
   GEN_AI_CONNECTOR_ID,
   OpenAiProviderType,
 } from '@kbn/stack-connectors-plugin/public/common';
+import { css } from '@emotion/react';
 import { useLoadConnectors } from '../use_load_connectors';
 import { useConversation } from '../../assistant/use_conversation';
 import * as i18n from '../translations';
@@ -30,6 +31,7 @@ interface Props {
   actionTypeRegistry: ActionTypeRegistryContract;
   conversation: Conversation;
   http: HttpSetup;
+  onConnectorModalVisibilityChange?: (isVisible: boolean) => void;
 }
 
 interface Config {
@@ -37,7 +39,7 @@ interface Config {
 }
 
 export const ConnectorSelector: React.FC<Props> = React.memo(
-  ({ actionTypeRegistry, conversation, http }) => {
+  ({ actionTypeRegistry, conversation, http, onConnectorModalVisibilityChange }) => {
     const { setApiConfig } = useConversation();
 
     // Connector Modal State
@@ -67,7 +69,15 @@ export const ConnectorSelector: React.FC<Props> = React.memo(
         inputDisplay: i18n.ADD_NEW_CONNECTOR,
         dropdownDisplay: (
           <React.Fragment key={ADD_NEW_CONNECTOR}>
-            <strong>{i18n.ADD_NEW_CONNECTOR}</strong>
+            <EuiButtonEmpty
+              iconType="plus"
+              size="xs"
+              css={css`
+                width: 100%;
+              `}
+            >
+              {i18n.ADD_NEW_CONNECTOR}
+            </EuiButtonEmpty>
           </React.Fragment>
         ),
       };
@@ -97,9 +107,15 @@ export const ConnectorSelector: React.FC<Props> = React.memo(
       );
     }, [connectors]);
 
+    const cleanupAndCloseModal = useCallback(() => {
+      onConnectorModalVisibilityChange?.(false);
+      setIsConnectorModalVisible(false);
+    }, [onConnectorModalVisibilityChange]);
+
     const onChange = useCallback(
       (connectorId: string) => {
         if (connectorId === ADD_NEW_CONNECTOR) {
+          onConnectorModalVisibilityChange?.(true);
           setIsConnectorModalVisible(true);
           return;
         }
@@ -116,7 +132,13 @@ export const ConnectorSelector: React.FC<Props> = React.memo(
           },
         });
       },
-      [connectors, conversation.apiConfig, conversation.id, setApiConfig]
+      [
+        connectors,
+        conversation.apiConfig,
+        conversation.id,
+        setApiConfig,
+        onConnectorModalVisibilityChange,
+      ]
     );
 
     return (
@@ -132,7 +154,7 @@ export const ConnectorSelector: React.FC<Props> = React.memo(
         {isConnectorModalVisible && (
           <ConnectorAddModal
             actionType={actionType}
-            onClose={() => setIsConnectorModalVisible(false)}
+            onClose={cleanupAndCloseModal}
             postSaveEventHandler={(savedAction: ActionConnector) => {
               setApiConfig({
                 conversationId: conversation.id,
@@ -144,7 +166,7 @@ export const ConnectorSelector: React.FC<Props> = React.memo(
                 },
               });
               refetchConnectors?.();
-              setIsConnectorModalVisible(false);
+              cleanupAndCloseModal();
             }}
             actionTypeRegistry={actionTypeRegistry}
           />

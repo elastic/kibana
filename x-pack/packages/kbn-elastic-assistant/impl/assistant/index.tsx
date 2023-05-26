@@ -101,6 +101,9 @@ const AssistantComponent: React.FC<Props> = ({
     () => conversations[selectedConversationId] ?? createConversation({ conversationId }),
     [conversationId, conversations, createConversation, selectedConversationId]
   );
+
+  // Welcome conversation is a special 'setup' case when no connector exists, mostly extracted to `ConnectorSetup` component,
+  // but currently a bit of state is littered throughout the assistant component. TODO: clean up/isolate this state
   const welcomeConversation = useMemo(
     () => conversations[selectedConversationId] ?? conversations.welcome,
     [conversations, selectedConversationId]
@@ -108,6 +111,10 @@ const AssistantComponent: React.FC<Props> = ({
 
   const { data: connectors, refetch: refetchConnectors } = useLoadConnectors({ http });
   const isWelcomeSetup = (connectors?.length ?? 0) === 0;
+  const currentTitle: { title: string | JSX.Element; titleIcon: string } =
+    isWelcomeSetup && welcomeConversation.theme?.title && welcomeConversation.theme?.titleIcon
+      ? { title: welcomeConversation.theme?.title, titleIcon: welcomeConversation.theme?.titleIcon }
+      : { title, titleIcon: 'logoSecurity' };
 
   const bottomRef = useRef<HTMLDivElement | null>(null);
   const lastCommentRef = useRef<HTMLDivElement | null>(null);
@@ -277,7 +284,7 @@ const AssistantComponent: React.FC<Props> = ({
         {showTitle && (
           <>
             <EuiPageHeader
-              pageTitle={title}
+              pageTitle={currentTitle.title}
               rightSideItems={[
                 <ConversationSelector
                   conversationId={selectedConversationId}
@@ -286,7 +293,7 @@ const AssistantComponent: React.FC<Props> = ({
                   isDisabled={isWelcomeSetup}
                 />,
               ]}
-              iconType="logoSecurity"
+              iconType={currentTitle.titleIcon}
             />
             <EuiHorizontalRule margin={'m'} />
           </>
@@ -306,14 +313,15 @@ const AssistantComponent: React.FC<Props> = ({
         })}
 
         {!isWelcomeSetup && (
-          <ContextPills
-            promptContexts={promptContexts}
-            selectedPromptContextIds={selectedPromptContextIds}
-            setSelectedPromptContextIds={setSelectedPromptContextIds}
-          />
+          <>
+            <ContextPills
+              promptContexts={promptContexts}
+              selectedPromptContextIds={selectedPromptContextIds}
+              setSelectedPromptContextIds={setSelectedPromptContextIds}
+            />
+            {Object.keys(promptContexts).length > 0 && <EuiSpacer />}
+          </>
         )}
-
-        <EuiSpacer />
 
         {isWelcomeSetup && (
           <ConnectorSetup

@@ -24,3 +24,10 @@ export const clearPresentationData = (conversation: Conversation): Conversation 
     }),
   };
 };
+
+/**
+ * Returns true if the conversation has no presentation data
+ * @param conversation
+ */
+export const conversationHasNoPresentationData = (conversation: Conversation): boolean =>
+  !conversation.messages.some((message) => message.presentation !== undefined);

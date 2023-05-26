@@ -84,7 +84,9 @@ export const BASE_CONVERSATIONS: Record<string, Conversation> = {
     id: 'welcome',
     theme: {
       title: 'Elastic Assistant',
+      titleIcon: 'logoElastic',
       assistant: {
+        name: 'Elastic Assistant',
         icon: 'logoElastic',
       },
       system: {

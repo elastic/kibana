@@ -21,15 +21,19 @@ export interface Message {
 }
 
 export interface ConversationTheme {
-  title: JSX.Element | string;
-  user: {
-    icon: string;
+  title?: JSX.Element | string;
+  titleIcon?: string;
+  user?: {
+    name?: string;
+    icon?: string;
   };
-  assistant: {
-    icon: string;
+  assistant?: {
+    name?: string;
+    icon?: string;
   };
-  system: {
-    icon: string;
+  system?: {
+    name?: string;
+    icon?: string;
   };
 }
 

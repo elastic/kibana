@@ -14,6 +14,7 @@ import {
   EuiPopover,
   EuiPopoverTitle,
   EuiTextArea,
+  EuiLink,
   EuiToolTip,
 } from '@elastic/eui';
 import type { ChangeEvent } from 'react';
@@ -27,6 +28,7 @@ import { ActionTypeRegistryContract } from '@kbn/triggers-actions-ui-plugin/publ
 import { Conversation } from '@kbn/elastic-assistant';
 import { HttpSetup } from '@kbn/core-http-browser';
 import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/public/common';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { YOU_ARE_A_HELPFUL_EXPERT_ASSISTANT } from '../content/prompts/system/translations';
 import * as i18n from './translations';
 import { ConnectorSelector } from '../connectorland/connector_selector';
@@ -66,6 +68,8 @@ export const SettingsPopover: React.FC<SettingsPopoverProps> = React.memo(
     onOptionsChange,
   }) => {
     const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+    // So we can hide the settings popover when the connector modal is displayed
+    const popoverPanelRef = useRef<HTMLElement | null>(null);
     const [localSize, setLocalSize] = useState(optionsSelected?.size ?? 0.2);
     const debounceSize = useRef<Cancelable & SizeVoidFunc>();
 
@@ -115,6 +119,13 @@ export const SettingsPopover: React.FC<SettingsPopoverProps> = React.memo(
       [onOptionsChange]
     );
 
+    // Hide settings panel when modal is visible (to keep visual clutter minimal)
+    const onConnectorModalVisibilityChange = useCallback((isVisible: boolean) => {
+      if (popoverPanelRef.current) {
+        popoverPanelRef.current.style.visibility = isVisible ? 'hidden' : 'visible';
+      }
+    }, []);
+
     return (
       <EuiPopover
         button={
@@ -132,18 +143,31 @@ export const SettingsPopover: React.FC<SettingsPopoverProps> = React.memo(
         closePopover={closeSettingsHandler}
         anchorPosition="rightCenter"
         ownFocus={false}
+        panelRef={(el) => (popoverPanelRef.current = el)}
       >
         <EuiPopoverTitle>{i18n.SETTINGS_TITLE}</EuiPopoverTitle>
         <div style={{ width: '300px' }}>
           <EuiFormRow
             data-test-subj="model-field"
             label={i18n.SETTINGS_CONNECTOR_TITLE}
-            helpText={i18n.SETTINGS_CONNECTOR_HELP_TEXT_TITLE}
+            helpText={
+              <EuiLink
+                href={`${http.basePath.get()}/app/management/insightsAndAlerting/triggersActionsConnectors/connectors`}
+                target="_blank"
+                external
+              >
+                <FormattedMessage
+                  id="xpack.elasticAssistant.assistant.settings.connectorHelpTextTitle"
+                  defaultMessage="Kibana Connector to make requests with"
+                />
+              </EuiLink>
+            }
           >
             <ConnectorSelector
               actionTypeRegistry={actionTypeRegistry}
               conversation={conversation}
               http={http}
+              onConnectorModalVisibilityChange={onConnectorModalVisibilityChange}
             />
           </EuiFormRow>
 
