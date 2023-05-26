@@ -7,7 +7,7 @@
 
 import * as rt from 'io-ts';
 
-const UserWithoutProfileUidRt = rt.type({
+const UserWithoutProfileUidRt = rt.strict({
   email: rt.union([rt.undefined, rt.null, rt.string]),
   full_name: rt.union([rt.undefined, rt.null, rt.string]),
   username: rt.union([rt.undefined, rt.null, rt.string]),
@@ -15,17 +15,19 @@ const UserWithoutProfileUidRt = rt.type({
 
 export const UserRt = rt.intersection([
   UserWithoutProfileUidRt,
-  rt.partial({ profile_uid: rt.string }),
+  rt.exact(rt.partial({ profile_uid: rt.string })),
 ]);
 
 export const UserWithProfileInfoRt = rt.intersection([
-  rt.type({
+  rt.strict({
     user: UserWithoutProfileUidRt,
   }),
-  rt.partial({ uid: rt.string }),
-  rt.partial({
-    avatar: rt.partial({ initials: rt.string, color: rt.string, imageUrl: rt.string }),
-  }),
+  rt.exact(rt.partial({ uid: rt.string })),
+  rt.exact(
+    rt.partial({
+      avatar: rt.exact(rt.partial({ initials: rt.string, color: rt.string, imageUrl: rt.string })),
+    })
+  ),
 ]);
 
 export const UsersRt = rt.array(UserRt);
@@ -33,7 +35,7 @@ export const UsersRt = rt.array(UserRt);
 export type User = rt.TypeOf<typeof UserRt>;
 export type UserWithProfileInfo = rt.TypeOf<typeof UserWithProfileInfoRt>;
 
-export const GetCaseUsersResponseRt = rt.type({
+export const GetCaseUsersResponseRt = rt.strict({
   assignees: rt.array(UserWithProfileInfoRt),
   unassignedUsers: rt.array(UserWithProfileInfoRt),
   participants: rt.array(UserWithProfileInfoRt),
