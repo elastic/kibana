@@ -17,7 +17,13 @@ import {
   SyncStatus,
 } from '../../../../common/types/connectors';
 
-import {ApiViewIndex, ConnectorViewIndex, CrawlerViewIndex, IngestionMethod, IngestionStatus,} from '../types';
+import {
+  ApiViewIndex,
+  ConnectorViewIndex,
+  CrawlerViewIndex,
+  IngestionMethod,
+  IngestionStatus,
+} from '../types';
 
 export const apiIndex: ApiViewIndex = {
   count: 1,
