@@ -122,6 +122,9 @@
     "@kbn/ml-anomaly-utils",
     "@kbn/infra-forge",
     "@kbn/observability-shared-plugin",
-    "@kbn/maps-vector-tile-utils"
+    "@kbn/maps-vector-tile-utils",
+    "@kbn/server-route-repository",
+    "@kbn/core-http-common",
+    "@kbn/slo-schema"
   ]
 }
