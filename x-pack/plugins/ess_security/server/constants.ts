@@ -8,6 +8,6 @@
 import { AppFeatureKey, AppFeatureKeys } from '@kbn/security-solution-plugin/common';
 
 export const DEFAULT_APP_FEATURES: AppFeatureKeys = {
-  [AppFeatureKey.exampleAppFeature]: true,
+  [AppFeatureKey.advancedInsights]: true,
   [AppFeatureKey.exampleCasesFeature]: true,
 };

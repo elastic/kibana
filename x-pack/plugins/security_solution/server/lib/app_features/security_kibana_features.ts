@@ -37,6 +37,7 @@ import {
   trustedApplicationsSubFeature,
 } from './security_kibana_sub_features';
 import type { AppFeaturesSecurityConfig } from './types';
+import { AppFeatureSecurityKey } from '../../../common/types/app_features';
 
 // Same as the plugin id defined by Cloud Security Posture
 const CLOUD_POSTURE_APP_ID = 'csp';
@@ -173,6 +174,16 @@ function getSubFeatures(experimentalFeatures: ExperimentalFeatures) {
 export const getSecurityAppFeaturesConfig = (): AppFeaturesSecurityConfig => {
   // TODO: establish some naming convention for these api and ui capabilities
   return {
-    example_app_feature: {},
+    [AppFeatureSecurityKey.advancedInsights]: {
+      privileges: {
+        all: {
+          ui: ['advancedInsights'],
+          // add Angela's endpoint privileges here
+        },
+        read: {
+          ui: ['advancedInsights'],
+        },
+      },
+    },
   };
 };
