@@ -13,7 +13,6 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { EuiCallOut } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-import type { SavedSearch } from '@kbn/discover-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { StorageContextProvider } from '@kbn/ml-local-storage';
 import { UrlStateProvider } from '@kbn/ml-url-state';
@@ -29,19 +28,14 @@ import { AIOPS_STORAGE_KEYS } from '../../../types/storage';
 import { SpikeAnalysisTableRowStateProvider } from '../../spike_analysis_table/spike_analysis_table_row_provider';
 
 import { ExplainLogRateSpikesContent } from './explain_log_rate_spikes_content';
-import type { AiOpsIndexBasedAppState } from '../../../application/utils/url_state';
 
 const localStorage = new Storage(window.localStorage);
 
 export interface ExplainLogRateSpikesContentWrapperProps {
   /** The data view to analyze. */
   dataView: DataView;
-  /** The saved search to analyze. */
-  savedSearch: SavedSearch | null;
   /** App dependencies */
   appDependencies: AiopsAppDependencies;
-  /** Active search query/filters */
-  aiopsListState: AiOpsIndexBasedAppState;
   /** On global timefilter update */
   setGlobalState?: any;
   /** Timestamp for start of initial analysis */
@@ -53,9 +47,7 @@ export interface ExplainLogRateSpikesContentWrapperProps {
 
 export const ExplainLogRateSpikesContentWrapper: FC<ExplainLogRateSpikesContentWrapperProps> = ({
   dataView,
-  savedSearch,
   appDependencies,
-  aiopsListState,
   setGlobalState,
   initialAnalysisStart,
   timeRange,
@@ -92,14 +84,12 @@ export const ExplainLogRateSpikesContentWrapper: FC<ExplainLogRateSpikesContentW
   return (
     <AiopsAppContext.Provider value={appDependencies}>
       <UrlStateProvider>
-        <DataSourceContext.Provider value={{ dataView, savedSearch }}>
+        <DataSourceContext.Provider value={{ dataView, savedSearch: null }}>
           <SpikeAnalysisTableRowStateProvider>
             <StorageContextProvider storage={localStorage} storageKeys={AIOPS_STORAGE_KEYS}>
               <DatePickerContextProvider {...datePickerDeps}>
                 <ExplainLogRateSpikesContent
                   dataView={dataView}
-                  selectedSavedSearch={savedSearch}
-                  aiopsListState={aiopsListState}
                   setGlobalState={setGlobalState}
                   initialAnalysisStart={initialAnalysisStart}
                   timeRange={timeRange}

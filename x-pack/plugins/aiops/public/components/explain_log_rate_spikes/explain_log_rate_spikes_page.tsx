@@ -17,6 +17,7 @@ import { useDataSource } from '../../hooks/use_data_source';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import { SearchQueryLanguage } from '../../application/utils/search_utils';
 import { useData } from '../../hooks/use_data';
+import { useSearch } from '../../hooks/use_search';
 import {
   getDefaultAiOpsListState,
   type AiOpsPageUrlState,
@@ -32,14 +33,8 @@ export const ExplainLogRateSpikesPage: FC = () => {
   const { data: dataService } = useAiopsAppContext();
   const { dataView, savedSearch } = useDataSource();
 
-  const {
-    currentSelectedSignificantTerm,
-    currentSelectedGroup,
-    // setPinnedSignificantTerm,
-    // setPinnedGroup,
-    // setSelectedSignificantTerm,
-    // setSelectedGroup,
-  } = useSpikeAnalysisTableRowContext();
+  const { currentSelectedSignificantTerm, currentSelectedGroup } =
+    useSpikeAnalysisTableRowContext();
 
   const [aiopsListState, setAiopsListState] = usePageUrlState<AiOpsPageUrlState>(
     'AIOPS_INDEX_VIEWER',
@@ -79,19 +74,15 @@ export const ExplainLogRateSpikesPage: FC = () => {
     [selectedSavedSearch, aiopsListState, setAiopsListState]
   );
 
-  const {
-    // documentStats,
-    timefilter, // only needs selectedDataView param
-    // earliest,
-    // latest,
-    // These bottom 3: from aiopsListState or savedSearch (aiopsListState only gets set by search panel)
-    searchQueryLanguage,
-    searchString,
-    searchQuery,
-  } = useData(
-    { selectedDataView: dataView, selectedSavedSearch },
+  const { searchQueryLanguage, searchString, searchQuery } = useSearch(
+    { dataView, savedSearch },
+    aiopsListState
+  );
+
+  const { timefilter } = useData(
+    dataView,
     'explain_log_rage_spikes',
-    aiopsListState,
+    searchQuery,
     setGlobalState,
     currentSelectedSignificantTerm,
     currentSelectedGroup
@@ -154,9 +145,8 @@ export const ExplainLogRateSpikesPage: FC = () => {
           </EuiFlexItem>
           <ExplainLogRateSpikesContent
             dataView={dataView}
-            selectedSavedSearch={selectedSavedSearch}
-            aiopsListState={aiopsListState}
             setGlobalState={setGlobalState}
+            esSearchQuery={searchQuery}
           />
         </EuiFlexGroup>
       </EuiPageSection>

@@ -12,7 +12,6 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import type { DataView } from '@kbn/data-views-plugin/public';
-import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import type { Dictionary } from '@kbn/ml-url-state';
 import type { WindowParameters } from '@kbn/aiops-utils';
 import type { SignificantTerm } from '@kbn/ml-agg-utils';
@@ -23,7 +22,8 @@ import { DocumentCountContent } from '../../document_count_content/document_coun
 import { ExplainLogRateSpikesAnalysis } from '../explain_log_rate_spikes_analysis';
 import type { GroupTableItem } from '../../spike_analysis_table/types';
 import { useSpikeAnalysisTableRowContext } from '../../spike_analysis_table/spike_analysis_table_row_provider';
-import type { AiOpsIndexBasedAppState } from '../../../application/utils/url_state';
+
+const DEFAULT_SEARCH_QUERY = { match_all: {} };
 
 export function getDocumentCountStatsSplitLabel(
   significantTerm?: SignificantTerm,
@@ -41,9 +41,6 @@ export function getDocumentCountStatsSplitLabel(
 export interface ExplainLogRateSpikesContentProps {
   /** The data view to analyze. */
   dataView: DataView;
-  /** The saved search to analyze. */
-  selectedSavedSearch: SavedSearch | null;
-  aiopsListState: AiOpsIndexBasedAppState;
   setGlobalState?: (params: Dictionary<unknown>) => void;
   /** Timestamp for the start of the range for initial analysis */
   initialAnalysisStart?: number;
@@ -54,12 +51,10 @@ export interface ExplainLogRateSpikesContentProps {
 
 export const ExplainLogRateSpikesContent: FC<ExplainLogRateSpikesContentProps> = ({
   dataView,
-  selectedSavedSearch,
-  aiopsListState,
   setGlobalState,
   initialAnalysisStart,
   timeRange,
-  esSearchQuery,
+  esSearchQuery = DEFAULT_SEARCH_QUERY,
 }) => {
   const [windowParameters, setWindowParameters] = useState<WindowParameters | undefined>();
 
@@ -72,14 +67,13 @@ export const ExplainLogRateSpikesContent: FC<ExplainLogRateSpikesContentProps> =
     setSelectedGroup,
   } = useSpikeAnalysisTableRowContext();
 
-  const { documentStats, earliest, latest, searchQuery } = useData(
-    { selectedDataView: dataView, selectedSavedSearch },
+  const { documentStats, earliest, latest } = useData(
+    dataView,
     'explain_log_rage_spikes',
-    aiopsListState,
+    esSearchQuery,
     setGlobalState,
     currentSelectedSignificantTerm,
     currentSelectedGroup,
-    undefined,
     undefined,
     timeRange
   );
@@ -138,7 +132,7 @@ export const ExplainLogRateSpikesContent: FC<ExplainLogRateSpikesContentProps> =
                 earliest={earliest}
                 latest={latest}
                 windowParameters={windowParameters}
-                searchQuery={esSearchQuery ?? searchQuery}
+                searchQuery={esSearchQuery}
                 sampleProbability={sampleProbability}
               />
             )}
