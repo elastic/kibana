@@ -16,17 +16,17 @@ import { hasProfilingData } from '../lib/setup/has_profiling_data';
 import { getClient } from './compat';
 import { ProfilingSetupStep } from '../lib/setup/types';
 
+async function checkStep({ step, logger }: { step: ProfilingSetupStep; logger: Logger }) {
+  try {
+    return { name: step.name, completed: await step.hasCompleted(), error: null };
+  } catch (error) {
+    logger.error(error);
+    return { name: step.name, completed: false, error: error.toString() };
+  }
+}
+
 function checkSteps({ steps, logger }: { steps: ProfilingSetupStep[]; logger: Logger }) {
-  return Promise.all(
-    steps.map(async (step) => {
-      try {
-        return { name: step.name, completed: await step.hasCompleted(), error: null };
-      } catch (error) {
-        logger.error(error);
-        return { name: step.name, completed: false, error: error.toString() };
-      }
-    })
-  );
+  return Promise.all(steps.map(async (step) => checkStep({ step, logger })));
 }
 
 export function registerSetupRoute({
@@ -67,10 +67,10 @@ export function registerSetupRoute({
         }
 
         const initializeStep = createStepToInitializeElasticsearch(stepOptions);
-        const initializeResults = await checkSteps({ steps: [initializeStep], logger });
+        const initializeResults = await checkStep({ step: initializeStep, logger });
 
-        if (initializeResults[0].error) {
-          return handleRouteHandlerError({ error: initializeResults[0].error, logger, response });
+        if (initializeResults.error) {
+          return handleRouteHandlerError({ error: initializeResults.error, logger, response });
         }
 
         const hasData = await hasProfilingData({
@@ -138,10 +138,10 @@ export function registerSetupRoute({
         }
 
         const initializeStep = createStepToInitializeElasticsearch(stepOptions);
-        const initializeResults = await checkSteps({ steps: [initializeStep], logger });
+        const initializeResults = await checkStep({ step: initializeStep, logger });
 
-        if (initializeResults[0].error) {
-          return handleRouteHandlerError({ error: initializeResults[0].error, logger, response });
+        if (initializeResults.error) {
+          return handleRouteHandlerError({ error: initializeResults.error, logger, response });
         }
 
         const steps = getProfilingSetupSteps(stepOptions);
