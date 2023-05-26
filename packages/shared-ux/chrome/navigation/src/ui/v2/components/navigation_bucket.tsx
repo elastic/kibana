@@ -19,7 +19,7 @@ const navTreePresets: { [preset in NavigationBucketPreset]: NodeDefinition } = {
   management,
 };
 
-interface Props {
+export interface Props {
   preset?: NavigationBucketPreset;
   nodeDefinition?: NodeDefinition;
   defaultIsCollapsed?: boolean;

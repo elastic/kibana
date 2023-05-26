@@ -323,12 +323,12 @@ export const WithUIComponents = (args: ChromeNavigationViewModel & NavigationSer
             </Navigation.Group>
           </Navigation.Group>
 
-          <Navigation.Bucket preset="analytics" defaultIsCollapsed={false} />
-          <Navigation.Bucket preset="ml" />
+          <Navigation.Group preset="analytics" defaultIsCollapsed={false} />
+          <Navigation.Group preset="ml" />
 
           <Navigation.Footer>
-            <Navigation.Bucket preset="devtools" />
-            <Navigation.Bucket preset="management" />
+            <Navigation.Group preset="devtools" />
+            <Navigation.Group preset="management" />
           </Navigation.Footer>
         </Navigation>
       </NavigationProvider>

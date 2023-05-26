@@ -12,6 +12,7 @@ import { useInitNavNode } from '../use_init_navnode';
 import type { NodeProps, RegisterFunction } from '../types';
 import { NavigationSectionUI } from './navigation_section_ui';
 import { useNavigation } from './navigation';
+import { NavigationBucket, Props as NavigationBucketProps } from './navigation_bucket';
 
 interface Context {
   register: RegisterFunction;
@@ -34,7 +35,7 @@ interface Props extends NodeProps {
   defaultIsCollapsed?: boolean;
 }
 
-function NavigationGroupComp(props: Props) {
+function NavigationGroupInternalComp(props: Props) {
   const navigationContext = useNavigation();
   const { children, defaultIsCollapsed, ...node } = props;
   const { navNode, registerChildNode, path, childrenNodes } = useInitNavNode(node);
@@ -51,6 +52,8 @@ function NavigationGroupComp(props: Props) {
       return children;
     }
 
+    // Each "top level" group is rendered using the EuiCollapsibleNavGroup component
+    // inside the NavigationSectionUI. That's how we get the "collapsible" behavior.
     const isTopLevel = path && path.length === 1;
 
     return (
@@ -84,4 +87,14 @@ function NavigationGroupComp(props: Props) {
   );
 }
 
-export const NavigationGroup = React.memo(NavigationGroupComp);
+function NavigationGroupComp(props: Props & NavigationBucketProps) {
+  if (props.preset) {
+    const { id, title, link, icon, children, ...rest } = props;
+    return <NavigationBucket {...rest} />;
+  }
+
+  const { preset, nodeDefinition, ...rest } = props;
+  return <NavigationGroupInternalComp {...rest} />;
+}
+
+export const NavigationGroup = React.memo(NavigationGroupComp) as typeof NavigationGroupComp;
