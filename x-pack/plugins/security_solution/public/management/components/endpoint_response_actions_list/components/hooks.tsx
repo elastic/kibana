@@ -38,10 +38,20 @@ export const DEFAULT_DATE_RANGE_OPTIONS = Object.freeze({
 });
 
 export const useDateRangePicker = (isFlyout: boolean) => {
-  const { setUrlDateRangeFilters } = useActionHistoryUrlParams();
-  const [dateRangePickerState, setDateRangePickerState] = useState<DateRangePickerValues>(
-    DEFAULT_DATE_RANGE_OPTIONS
-  );
+  const {
+    setUrlDateRangeFilters,
+    startDate: startDateFromUrl,
+    endDate: endDateFromUrl,
+  } = useActionHistoryUrlParams();
+  const [dateRangePickerState, setDateRangePickerState] = useState<DateRangePickerValues>({
+    ...DEFAULT_DATE_RANGE_OPTIONS,
+    startDate: isFlyout
+      ? DEFAULT_DATE_RANGE_OPTIONS.startDate
+      : startDateFromUrl ?? DEFAULT_DATE_RANGE_OPTIONS.startDate,
+    endDate: isFlyout
+      ? DEFAULT_DATE_RANGE_OPTIONS.endDate
+      : endDateFromUrl ?? DEFAULT_DATE_RANGE_OPTIONS.endDate,
+  });
 
   const updateActionListDateRanges = useCallback(
     ({ start, end }) => {

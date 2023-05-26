@@ -22,7 +22,7 @@ import { useGetEndpointActionList } from '../../hooks';
 import { UX_MESSAGES } from './translations';
 import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
 import { ActionsLogFilters } from './components/actions_log_filters';
-import { DEFAULT_DATE_RANGE_OPTIONS, getCommandKey, useDateRangePicker } from './components/hooks';
+import { getCommandKey, useDateRangePicker } from './components/hooks';
 import { useActionHistoryUrlParams } from './components/use_action_history_url_params';
 import { useUrlPagination } from '../../hooks/use_url_pagination';
 import { ManagementPageLoader } from '../management_page_loader';
@@ -50,8 +50,6 @@ export const ResponseActionsLog = memo<
       commands: commandsFromUrl,
       hosts: agentIdsFromUrl,
       statuses: statusesFromUrl,
-      startDate: startDateFromUrl,
-      endDate: endDateFromUrl,
       users: usersFromUrl,
       withAutomatedActions: withAutomatedActionsFromUrl,
       withOutputs: withOutputsFromUrl,
@@ -115,12 +113,8 @@ export const ResponseActionsLog = memo<
     } = useGetEndpointActionList(
       {
         ...queryParams,
-        startDate: isFlyout
-          ? dateRangePickerState.startDate
-          : startDateFromUrl ?? DEFAULT_DATE_RANGE_OPTIONS.startDate,
-        endDate: isFlyout
-          ? dateRangePickerState.endDate
-          : endDateFromUrl ?? DEFAULT_DATE_RANGE_OPTIONS.endDate,
+        startDate: dateRangePickerState.startDate,
+        endDate: dateRangePickerState.endDate,
       },
       { retry: false }
     );
