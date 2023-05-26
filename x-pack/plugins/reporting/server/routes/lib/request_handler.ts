@@ -9,13 +9,14 @@ import moment from 'moment';
 import Boom from '@hapi/boom';
 import { i18n } from '@kbn/i18n';
 import type { KibanaRequest, KibanaResponseFactory, Logger } from '@kbn/core/server';
-import { JobParamsPDFV2 } from '../../../common/types';
+import { JobParamsPDFV2, LocatorParams } from '../../../common/types';
 import type { ReportingCore } from '../..';
 import { API_BASE_URL } from '../../../common/constants';
 import { checkParamsVersion, cryptoFactory } from '../../lib';
 import { Report } from '../../lib/store';
 import type { BaseParams, ReportingRequestHandlerContext, ReportingUser } from '../../types';
 import { Counters } from './get_counter';
+import { PdfExportType } from '../../export_types/printable_pdf_v2/types';
 
 export const handleUnavailable = (res: KibanaResponseFactory) => {
   return res.custom({ statusCode: 503, body: 'Not Available' });
@@ -46,25 +47,31 @@ export class RequestHandler {
   }
 
   public async enqueueJob(exportTypeId: string, jobParams: BaseParams) {
-    const { reporting, logger, context, req: request, user } = this;
+    const { reporting, logger, req: request, user, context } = this;
 
-    const exportType = reporting.getExportTypesRegistry().getById(exportTypeId);
+    const exportType =
+      exportTypeId === 'printablePdfV2'
+        ? reporting.getPluginSetupDeps().exportTypes[0]
+        : reporting.getExportTypesRegistry().getById(exportTypeId);
 
     if (exportType == null) {
       throw new Error(`Export type ${exportTypeId} does not exist in the registry!`);
     }
 
-    if (!exportType.createJobFnFactory(jobParams as JobParamsPDFV2, logger)) {
+    if (exportTypeId !== 'printablePdfV2' && !exportType.createJobFnFactory) {
       throw new Error(`Export type ${exportTypeId} is not an async job type!`);
     }
 
-    const [createJob, store] = await Promise.all([
-      exportType.createJobFnFactory(jobParams as JobParamsPDFV2, logger),
-      reporting.getStore(),
-    ]);
-
-    if (!createJob) {
-      throw new Error(`Export type ${exportTypeId} is not an async job type!`);
+    let store;
+    let createJob;
+    if (exportTypeId !== 'printablePdfV2') {
+      [createJob, store] = await Promise.all([
+        // @ts-ignore
+        exportType.createJobFnFactory(reporting, logger.get(exportType.id)),
+        reporting.getStore(),
+      ]);
+    } else {
+      [store] = await Promise.all([reporting.getStore()]);
     }
 
     // 1. ensure the incoming params have a version field (should be set by the UI)
@@ -74,7 +81,15 @@ export class RequestHandler {
     // 3. call the export type's createJobFn to create the job payload
     const [headers, job] = await Promise.all([
       this.encryptHeaders(),
-      createJob(jobParams, context, this.req),
+      exportTypeId === 'printablePdfV2'
+        ? exportType.createJob({
+            locatorParams: [
+              { id: exportType.id, version: jobParams.version, params: jobParams },
+            ] as LocatorParams[],
+            ...jobParams,
+          } as JobParamsPDFV2)
+        : // @ts-ignore will be defined for Pdf reports in the above ternary option
+          createJob(jobParams, context, this.req),
     ]);
 
     const payload = {
@@ -121,8 +136,11 @@ export class RequestHandler {
       return handleUnavailable(this.res);
     }
 
-    const licenseInfo = await this.reporting.getLicenseInfo();
-    const licenseResults = licenseInfo[exportTypeId];
+    const licenseInfo = await this.reporting.getLicenseInfoForExportTypes(
+      this.reporting.getPluginSetupDeps().exportTypes as PdfExportType[]
+    );
+
+    const licenseResults = licenseInfo![exportTypeId];
 
     if (!licenseResults) {
       return this.res.badRequest({ body: `Invalid export-type of ${exportTypeId}` });

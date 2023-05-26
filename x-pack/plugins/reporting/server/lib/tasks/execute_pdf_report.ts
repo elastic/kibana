@@ -5,50 +5,45 @@
  * 2.0.
  */
 
-import { UpdateResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { Logger } from '@kbn/core/server';
-import moment from 'moment';
-import * as Rx from 'rxjs';
-import { timeout } from 'rxjs/operators';
-import { Writable } from 'stream';
-import { finished } from 'stream/promises';
-import { setTimeout } from 'timers/promises';
-import type {
+import { UpdateResponse } from '@elastic/elasticsearch/lib/api/types';
+import { Logger } from '@kbn/core/server';
+import {
+  CancellationToken,
+  durationToNumber,
+  KibanaShuttingDownError,
+  numberToDuration,
+  QueueTimeoutError,
+  ReportingError,
+  TaskRunResult,
+} from '@kbn/reporting-common';
+import {
   RunContext,
   TaskManagerStartContract,
   TaskRunCreatorFunction,
 } from '@kbn/task-manager-plugin/server';
-import {
-  CancellationToken,
-  ReportingError,
-  QueueTimeoutError,
-  KibanaShuttingDownError,
-  TaskRunResult,
-} from '@kbn/reporting-common';
+import moment from 'moment';
+import { Writable } from 'stream';
+import { setTimeout } from 'timers/promises';
+import { timeout } from 'rxjs/operators';
+import { finished } from 'stream/promises';
+import * as Rx from 'rxjs';
+import { ReportOutput } from '../../../common/types';
 import { mapToReportingError } from '../../../common/errors/map_to_reporting_error';
-import { getContentStream } from '..';
-import type { ReportingCore } from '../..';
-import { durationToNumber, numberToDuration } from '../../../common/schema_utils';
-import type { ReportOutput } from '../../../common/types';
-import type { ReportingConfigType } from '../../config';
-import type { BasePayload, ExportTypeDefinition, RunTaskFn } from '../../types';
-import type { ReportDocument, ReportingStore } from '../store';
-import { Report, SavedReport } from '../store';
-import type { ReportFailedFields, ReportProcessingFields } from '../store/store';
 import { ReportingTask, ReportingTaskStatus, REPORTING_EXECUTE_TYPE, ReportTaskParams } from '.';
+import { ReportingCore } from '../..';
+import { ReportingConfigType } from '../../config';
+import { getContentStream } from '../content_stream';
+import { Report, ReportDocument, ReportingStore, SavedReport } from '../store';
+import { ReportFailedFields, ReportProcessingFields } from '../store/store';
 import { errorLogger } from './error_logger';
+import { PdfExportType } from '../../export_types/printable_pdf_v2/types';
+import { RunTaskFn } from '../../types';
+import { ReportingExecuteTaskInstance } from './execute_report';
 
 type CompletedReportOutput = Omit<ReportOutput, 'content'>;
 
-export interface ReportingExecuteTaskInstance {
-  state: object;
-  taskType: string;
-  params: ReportTaskParams;
-  runAt?: Date;
-}
-
-interface TaskExecutor extends Pick<ExportTypeDefinition, 'jobContentEncoding'> {
-  jobExecutor: RunTaskFn<BasePayload>;
+interface TaskExecutor extends Pick<PdfExportType, 'jobContentEncoding'> {
+  jobExecutor: RunTaskFn;
 }
 
 function isOutput(output: CompletedReportOutput | Error): output is CompletedReportOutput {
@@ -75,9 +70,8 @@ async function finishedWithNoPendingCallbacks(stream: Writable) {
   })();
 }
 
-export class ExecuteReportTask implements ReportingTask {
+export class ExecutePdfReportTask implements ReportingTask {
   public TYPE = REPORTING_EXECUTE_TYPE;
-
   private logger: Logger;
   private taskManagerStart?: TaskManagerStartContract;
   private taskExecutors?: Map<string, TaskExecutor>;
@@ -93,34 +87,38 @@ export class ExecuteReportTask implements ReportingTask {
     this.logger = logger.get('runTask');
   }
 
-  /*
-   * To be called from plugin start
-   */
   public async init(taskManager: TaskManagerStartContract) {
     this.taskManagerStart = taskManager;
+  }
 
-    const { reporting } = this;
+  public getTaskDefinition() {
+    // round up from ms to the nearest second
+    const queueTimeout = Math.ceil(numberToDuration(this.config.queue.timeout).asSeconds()) + 's';
+    const maxConcurrency = this.config.queue.pollEnabled ? 1 : 0;
 
-    const exportTypesRegistry = reporting.getExportTypesRegistry();
-    const executors = new Map<string, TaskExecutor>();
-    // exportTypesRegistry.getAll() will not include PdfExportTypes
-    for (const exportType of exportTypesRegistry.getAll()) {
-      const exportTypeLogger = this.logger.get(exportType.jobType);
-      // @ts-expect-error PdfExport type does not have runTaskFnFactory and also it's own ExecuteReportTask()
-      const jobExecutor = exportType.runTaskFnFactory(reporting, exportTypeLogger);
-      // The task will run the function with the job type as a param.
-      // This allows us to retrieve the specific export type runFn when called to run an export
-      executors.set(exportType.jobType, {
-        jobExecutor,
-        jobContentEncoding: exportType.jobContentEncoding,
-      });
+    return {
+      type: REPORTING_EXECUTE_TYPE,
+      title: 'Reporting: execute job',
+      createTaskRunner: this.getTaskRunner(),
+      maxAttempts: 1, // NOTE: not using Task Manager retries
+      timeout: queueTimeout,
+      maxConcurrency,
+    };
+  }
+
+  public getStatus() {
+    if (this.taskManagerStart) {
+      return ReportingTaskStatus.INITIALIZED;
     }
 
-    this.taskExecutors = executors;
+    return ReportingTaskStatus.UNINITIALIZED;
+  }
 
-    const { uuid, name } = reporting.getServerInfo();
-    this.kibanaId = uuid;
-    this.kibanaName = name;
+  private getTaskManagerStart() {
+    if (!this.taskManagerStart) {
+      throw new Error('Reporting task runner has not been initialized!');
+    }
+    return this.taskManagerStart;
   }
 
   /*
@@ -135,16 +133,22 @@ export class ExecuteReportTask implements ReportingTask {
     return store;
   }
 
-  private getTaskManagerStart() {
-    if (!this.taskManagerStart) {
-      throw new Error('Reporting task runner has not been initialized!');
-    }
-    return this.taskManagerStart;
-  }
-
   private getJobContentEncoding(jobType: string) {
     return this.taskExecutors?.get(jobType)?.jobContentEncoding;
   }
+  /* 
+  Report Source is handled by the request handler before the job is executed
+  export interface ReportTaskParams<JobPayloadType = BasePayload> {
+    id: string;
+    index: string;
+    payload: JobPayloadType;
+    created_at: ReportSource['created_at'];
+    created_by: ReportSource['created_by'];
+    jobtype: ReportSource['jobtype'];
+    attempts: ReportSource['attempts'];
+    meta: ReportSource['meta'];
+    }
+  **/
 
   public async _claimJob(task: ReportTaskParams): Promise<SavedReport> {
     if (this.kibanaId == null) {
@@ -270,7 +274,7 @@ export class ExecuteReportTask implements ReportingTask {
 
     // get the run_task function
     const runner = this.taskExecutors.get(task.jobtype);
-    if (!runner || task.jobtype === 'printable_pdf_v2') {
+    if (!runner) {
       throw new Error(`No defined task runner function for ${task.jobtype}!`);
     }
 
@@ -313,6 +317,19 @@ export class ExecuteReportTask implements ReportingTask {
   private async throwIfKibanaShutsDown<T>(): Promise<T> {
     await this.reporting.getKibanaShutdown$().toPromise();
     throw new KibanaShuttingDownError();
+  }
+
+  private async rescheduleTask(task: ReportTaskParams, logger: Logger) {
+    logger.info(`Rescheduling task:${task.id} to retry after error.`);
+
+    const oldTaskInstance: ReportingExecuteTaskInstance = {
+      taskType: REPORTING_EXECUTE_TYPE,
+      state: {},
+      params: task,
+    };
+    const newTask = await this.getTaskManagerStart().schedule(oldTaskInstance);
+    logger.debug(`Rescheduled task:${task.id}. New task: task:${newTask.id}`);
+    return newTask;
   }
 
   /*
@@ -477,51 +494,5 @@ export class ExecuteReportTask implements ReportingTask {
         },
       };
     };
-  }
-
-  public getTaskDefinition() {
-    // round up from ms to the nearest second
-    const queueTimeout = Math.ceil(numberToDuration(this.config.queue.timeout).asSeconds()) + 's';
-    const maxConcurrency = this.config.queue.pollEnabled ? 1 : 0;
-
-    return {
-      type: REPORTING_EXECUTE_TYPE,
-      title: 'Reporting: execute job',
-      createTaskRunner: this.getTaskRunner(),
-      maxAttempts: 1, // NOTE: not using Task Manager retries
-      timeout: queueTimeout,
-      maxConcurrency,
-    };
-  }
-
-  public async scheduleTask(params: ReportTaskParams) {
-    const taskInstance: ReportingExecuteTaskInstance = {
-      taskType: REPORTING_EXECUTE_TYPE,
-      state: {},
-      params,
-    };
-
-    return await this.getTaskManagerStart().schedule(taskInstance);
-  }
-
-  private async rescheduleTask(task: ReportTaskParams, logger: Logger) {
-    logger.info(`Rescheduling task:${task.id} to retry after error.`);
-
-    const oldTaskInstance: ReportingExecuteTaskInstance = {
-      taskType: REPORTING_EXECUTE_TYPE,
-      state: {},
-      params: task,
-    };
-    const newTask = await this.getTaskManagerStart().schedule(oldTaskInstance);
-    logger.debug(`Rescheduled task:${task.id}. New task: task:${newTask.id}`);
-    return newTask;
-  }
-
-  public getStatus() {
-    if (this.taskManagerStart) {
-      return ReportingTaskStatus.INITIALIZED;
-    }
-
-    return ReportingTaskStatus.UNINITIALIZED;
   }
 }

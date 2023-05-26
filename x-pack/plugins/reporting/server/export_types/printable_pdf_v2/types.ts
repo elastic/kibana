@@ -52,13 +52,13 @@ export type {
   TaskPayloadPDFV2,
 } from '../../../common/types/export_types/printable_pdf_v2';
 
-interface PdfExportTypeSetupDeps {
+export interface PdfExportTypeSetupDeps {
   basePath: Pick<IBasePath, 'set'>;
   spaces?: SpacesPluginSetup;
   logger: Logger;
 }
 
-interface PdfExportTypeStartupDeps {
+export interface PdfExportTypeStartupDeps {
   savedObjects: SavedObjectsServiceStart;
   uiSettings: UiSettingsServiceStart;
   screenshotting: ScreenshottingStart;
@@ -205,10 +205,6 @@ export class PdfExportType {
     );
   }
 
-  // export type CreateJobFnFactory<CreateJobFnType> = (
-  //   reporting: ReportingCore,
-  //   logger: Logger
-  // ) => CreateJobFnType;
   public createJobFnFactory(jobParams: JobParamsPDFV2, logger: Logger) {
     return this.createJob(jobParams);
   }
@@ -226,7 +222,7 @@ export class PdfExportType {
 
   async runTask(
     jobId: string,
-    job: TaskPayloadPDFV2,
+    payload: TaskPayloadPDFV2,
     cancellationToken: CancellationToken,
     stream: Writable
   ) {
@@ -240,15 +236,15 @@ export class PdfExportType {
       let apmGeneratePdf: { end: () => void } | null | undefined;
 
       const process$: Rx.Observable<TaskRunResult> = Rx.of(1).pipe(
-        mergeMap(() => decryptJobHeaders(encryptionKey, job.headers, jobLogger)),
+        mergeMap(() => decryptJobHeaders(encryptionKey, payload.headers, jobLogger)),
         mergeMap(async (headers) => {
-          const fakeRequest = this.getFakeRequest(headers, job.spaceId, jobLogger);
+          const fakeRequest = this.getFakeRequest(headers, payload.spaceId, jobLogger);
           const uiSettingsClient = await this.getUiSettingsClient(fakeRequest);
           const result = getCustomLogo(uiSettingsClient, headers);
           return result;
         }),
         mergeMap(({ logo, headers }) => {
-          const { browserTimezone, layout, title, locatorParams } = job;
+          const { browserTimezone, layout, title, locatorParams } = payload;
 
           const screenshotFn: GetScreenshotsFn = () =>
             this.getScreenshots({
@@ -266,7 +262,7 @@ export class PdfExportType {
             this.config,
             this.getServerInfo(),
             screenshotFn,
-            job,
+            payload,
             locatorParams,
             {
               format: 'pdf',

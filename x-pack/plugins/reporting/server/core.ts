@@ -27,7 +27,6 @@ import type { DiscoverServerPluginStart } from '@kbn/discover-plugin/server';
 import type { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/server';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
-import { CancellationToken } from '@kbn/reporting-common';
 import {
   PdfScreenshotResult,
   PngScreenshotResult,
@@ -47,10 +46,17 @@ import { filter, first, map, switchMap, take } from 'rxjs/operators';
 import type { ReportingSetup } from '.';
 import { REPORTING_REDIRECT_LOCATOR_STORE_KEY } from '../common/constants';
 import { createConfig, ReportingConfigType } from './config';
-import { checkLicense, getExportTypesRegistry, PassThroughStream } from './lib';
+import { PdfExportType } from './export_types/printable_pdf_v2/types';
+import { checkLicense, getExportTypesRegistry } from './lib';
+import { checkLicenseExportType } from './lib/check_license';
 import { reportingEventLoggerFactory } from './lib/event_logger/logger';
 import type { IReport, ReportingStore } from './lib/store';
-import { ExecuteReportTask, MonitorReportsTask, ReportTaskParams } from './lib/tasks';
+import {
+  ExecutePdfReportTask,
+  ExecuteReportTask,
+  MonitorReportsTask,
+  ReportTaskParams,
+} from './lib/tasks';
 import type { PdfScreenshotOptions, PngScreenshotOptions, ReportingPluginRouter } from './types';
 
 export interface ReportingInternalSetup {
@@ -64,6 +70,7 @@ export interface ReportingInternalSetup {
   logger: Logger;
   status: StatusServiceSetup;
   docLinks: DocLinksServiceSetup;
+  exportTypes: PdfExportType[];
 }
 
 export interface ReportingInternalStart {
@@ -106,6 +113,7 @@ export class ReportingCore {
   private exportTypesRegistry = getExportTypesRegistry();
   private executeTask: ExecuteReportTask;
   private monitorTask: MonitorReportsTask;
+  private executePdfTask: ExecutePdfReportTask;
   private config: ReportingConfigType;
   private executing: Set<string>;
 
@@ -125,6 +133,7 @@ export class ReportingCore {
     this.deprecatedAllowedRoles = config.roles.enabled ? config.roles.allow : false;
     this.executeTask = new ExecuteReportTask(this, config, this.logger);
     this.monitorTask = new MonitorReportsTask(this, config, this.logger);
+    this.executePdfTask = new ExecutePdfReportTask(this, config, this.logger);
 
     this.getContract = () => ({
       usesUiCapabilities: () => config.roles.enabled === false,
@@ -144,11 +153,18 @@ export class ReportingCore {
     this.pluginSetup$.next(true); // trigger the observer
     this.pluginSetupDeps = setupDeps; // cache
 
-    const { executeTask, monitorTask } = this;
-    setupDeps.taskManager.registerTaskDefinitions({
-      [executeTask.TYPE]: executeTask.getTaskDefinition(),
-      [monitorTask.TYPE]: monitorTask.getTaskDefinition(),
-    });
+    const { executeTask, executePdfTask, monitorTask } = this;
+    if (!this.getExportTypesRegistry()) {
+      setupDeps.taskManager.registerTaskDefinitions({
+        [executeTask.TYPE]: executeTask.getTaskDefinition(),
+        [monitorTask.TYPE]: monitorTask.getTaskDefinition(),
+      });
+    } else {
+      setupDeps.taskManager.registerTaskDefinitions({
+        [executePdfTask.TYPE]: executePdfTask.getTaskDefinition(),
+        [monitorTask.TYPE]: monitorTask.getTaskDefinition(),
+      });
+    }
   }
 
   /*
@@ -161,13 +177,12 @@ export class ReportingCore {
     await this.assertKibanaIsAvailable();
 
     const { taskManager } = startDeps;
-    const { executeTask, monitorTask } = this;
-    const cancellationToken = new CancellationToken();
-    const stream = new PassThroughStream();
+    const { executeTask, monitorTask, executePdfTask } = this;
     // enable this instance to generate reports and to monitor for pending reports
     await Promise.all([
-      executeTask.init(taskManager, cancellationToken, stream),
+      executeTask.init(taskManager),
       monitorTask.init(taskManager),
+      executePdfTask.init(taskManager),
     ]);
   }
 
@@ -327,6 +342,14 @@ export class ReportingCore {
 
     return await Rx.firstValueFrom(
       license$.pipe(map((license) => checkLicense(registry, license)))
+    );
+  }
+
+  public async getLicenseInfoForExportTypes(id: PdfExportType[]) {
+    const { license$ } = (await this.getPluginStartDeps()).licensing;
+    if (!id) return;
+    return await Rx.firstValueFrom(
+      license$.pipe(map((license) => checkLicenseExportType(id, license)))
     );
   }
 

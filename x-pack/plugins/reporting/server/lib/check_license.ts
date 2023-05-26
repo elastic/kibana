@@ -109,3 +109,15 @@ export function checkLicense(
     return result;
   }, {} as Record<string, LicenseCheckResult>);
 }
+
+export function checkLicenseExportType(exportTypeRegistry: PdfExportType[], license?: ILicense) {
+  const reportingFeatures = [
+    ...exportTypeRegistry.map(makeExportTypeFeature),
+    makeManagementFeature(exportTypeRegistry),
+  ];
+
+  return reportingFeatures.reduce((result, feature) => {
+    result[feature.id] = feature.checkLicense(license);
+    return result;
+  }, {} as Record<string, LicenseCheckResult>);
+}

@@ -31,7 +31,6 @@ export class ExportTypesRegistry {
     if (this._map.has(item.id)) {
       throw new Error(`'item' with id ${item.id} has already been registered`);
     }
-
     this._map.set(item.id, item);
   }
 
@@ -44,9 +43,9 @@ export class ExportTypesRegistry {
   }
 
   getById(id: string): PdfExportType {
-    if (!this._map.has(id)) {
-      throw new Error(`Unknown id ${id}`);
-    }
+    // if (!this._map.has(id)) {
+    //   throw new Error(`Unknown id ${id}`);
+    // }
 
     return this._map.get(id) as PdfExportType;
   }

@@ -78,6 +78,7 @@ export class ReportingPlugin
       router: http.createRouter<ReportingRequestHandlerContext>(),
       usageCounter,
       docLinks: core.docLinks,
+      exportTypes: [this.pdfExport],
       ...plugins,
     });
 
