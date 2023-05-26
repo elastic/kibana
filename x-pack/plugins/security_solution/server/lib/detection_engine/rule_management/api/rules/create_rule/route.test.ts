@@ -225,7 +225,7 @@ describe('Create rule route', () => {
       );
     });
     test('fails when provided with an unsupported command', async () => {
-      const wrongAction = getResponseAction('processes');
+      const wrongAction = getResponseAction('execute');
 
       const request = requestMock.create({
         method: 'post',

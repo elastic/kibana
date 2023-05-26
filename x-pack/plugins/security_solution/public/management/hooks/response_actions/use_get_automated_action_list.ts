@@ -73,7 +73,7 @@ interface GetAutomatedActionResponseListOptions {
 
 type GetAutomatedActionResponseListResponse = Pick<
   ActionDetails,
-  'completedAt' | 'isExpired' | 'wasSuccessful' | 'isCompleted' | 'status'
+  'completedAt' | 'isExpired' | 'wasSuccessful' | 'isCompleted' | 'status' | 'errors'
 > & {
   action_id: string;
 };
@@ -115,6 +115,7 @@ export const useGetAutomatedActionResponseList = (
         wasSuccessful: responseData.wasSuccessful,
         isCompleted: responseData.isCompleted,
         status: responseData.status,
+        errors: action?.error?.message ? [action.error.message] : undefined,
       };
     },
     select: (response) => combineResponse(requestAction, response),
@@ -153,6 +154,6 @@ const combineResponse = (
     wasSuccessful: !!responseData?.isCompleted,
     status: responseData.status,
     agentState: {},
-    errors: action.error ? [action.error.message as string] : undefined,
+    errors: action.error ? [action.error.message as string] : responseData.errors ?? undefined,
   };
 };
