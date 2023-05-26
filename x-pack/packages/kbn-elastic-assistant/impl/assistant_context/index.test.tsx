@@ -12,15 +12,17 @@ import { AssistantProvider, useAssistantContext } from '.';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { actionTypeRegistryMock } from '@kbn/triggers-actions-ui-plugin/public/application/action_type_registry.mock';
 
-const mockHttp = httpServiceMock.createStartContract({ basePath: '/test' });
 const actionTypeRegistry = actionTypeRegistryMock.create();
+const mockGetInitialConversations = jest.fn(() => ({}));
+const mockGetComments = jest.fn(() => []);
+const mockHttp = httpServiceMock.createStartContract({ basePath: '/test' });
 
 const ContextWrapper: React.FC = ({ children }) => (
   <AssistantProvider
     actionTypeRegistry={actionTypeRegistry}
     augmentMessageCodeBlocks={jest.fn()}
-    getInitialConversations={jest.fn()}
-    getComments={jest.fn()}
+    getInitialConversations={mockGetInitialConversations}
+    getComments={mockGetComments}
     http={mockHttp}
     setConversations={jest.fn()}
   >
@@ -29,9 +31,7 @@ const ContextWrapper: React.FC = ({ children }) => (
 );
 
 describe('AssistantContext', () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
+  beforeEach(() => jest.clearAllMocks());
 
   test('it throws an error when useAssistantContext hook is used without a SecurityAssistantContext', () => {
     const { result } = renderHook(useAssistantContext);
@@ -48,6 +48,6 @@ describe('AssistantContext', () => {
     const path = '/path/to/resource';
     await http.fetch(path);
 
-    expect(mockHttp).toBeCalledWith(path);
+    expect(mockHttp.fetch).toBeCalledWith(path);
   });
 });

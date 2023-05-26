@@ -7,6 +7,9 @@
 
 import type { ReactNode } from 'react';
 
+/**
+ * helps the Elastic Assistant display the most relevant user prompts
+ */
 export type PromptContextCategory =
   | 'alert'
   | 'alerts'
@@ -16,41 +19,47 @@ export type PromptContextCategory =
   | string;
 
 /**
- * This interface is used to pass context to the Security Assistant,
- * for the purpose of building prompts
+ * This interface is used to pass context to the Elastic Assistant,
+ * for the purpose of building prompts. Examples of context include:
+ * - a single alert
+ * - multiple alerts
+ * - a single event
+ * - multiple events
+ * - markdown
+ * - csv
+ * - anything else that the LLM can interpret
  */
 export interface PromptContext {
   /**
-   * The category of data, e.g. `alert | alerts | event | events | etc`
+   * The category of data, e.g. `alert | alerts | event | events | string`
    *
-   * `category` helps the Security Assistant display the most relevant prompts
+   * `category` helps the Elastic Assistant display the most relevant user prompts
    */
   category: PromptContextCategory;
 
   /**
-   * The Security Assistant will display this **short**, static description
-   * of the prompt context to the user
+   * The Elastic Assistant will display this **short**, static description
+   * in the context pill
    */
   description: string;
 
   /**
-   * The Security Assistant will invoke this function to retrieve the context,
-   * which will be included in a prompt
+   * The Elastic Assistant will invoke this function to retrieve the context data,
+   * which will be included in a prompt (e.g. the contents of an alert or an event)
    */
   getPromptContext: () => Promise<string>;
-
-  /**
-   * An optional user prompt that's filled in, but not sent, when the Security Assistant opens
-   */
-  suggestedUserPrompt?: string;
 
   /**
    * A unique identifier for this prompt context
    */
   id: string;
+  /**
+   * An optional user prompt that's filled in, but not sent, when the Elastic Assistant opens
+   */
+  suggestedUserPrompt?: string;
 
   /**
-   * The Security Assistant will display this tooltip content when the user hovers over the context
+   * The Elastic Assistant will display this tooltip when the user hovers over the context pill
    */
   tooltip: ReactNode;
 }

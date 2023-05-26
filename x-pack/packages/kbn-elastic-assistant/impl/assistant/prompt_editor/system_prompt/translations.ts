@@ -14,8 +14,8 @@ export const ADD_SYSTEM_PROMPT_TOOLTIP = i18n.translate(
   }
 );
 
-export const CLEAR_SYSTEM_PROMPT_TOOLTIP = i18n.translate(
-  'xpack.elasticAssistant.assistant.firstPromptEditor.clearSystemPromptTooltip',
+export const CLEAR_SYSTEM_PROMPT = i18n.translate(
+  'xpack.elasticAssistant.assistant.firstPromptEditor.clearSystemPrompt',
   {
     defaultMessage: 'Clear system prompt',
   }

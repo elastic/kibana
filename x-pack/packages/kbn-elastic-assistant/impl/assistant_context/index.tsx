@@ -86,23 +86,33 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
   /**
    * Prompt contexts are used to provide components a way to register and make their data available to the assistant.
    */
-  const [promptContexts, setQueryContexts] = useState<Record<string, PromptContext>>({});
+  const [promptContexts, setPromptContexts] = useState<Record<string, PromptContext>>({});
 
   const registerPromptContext: RegisterPromptContext = useCallback(
     (promptContext: PromptContext) => {
-      setQueryContexts((prevPromptContexts) =>
-        updatePromptContexts({
-          prevPromptContexts,
-          promptContext,
-        })
-      );
+      setPromptContexts((prevPromptContexts) => {
+        if (prevPromptContexts[promptContext.id] == null) {
+          return updatePromptContexts({
+            prevPromptContexts,
+            promptContext,
+          });
+        } else {
+          return prevPromptContexts;
+        }
+      });
     },
     []
   );
 
   const unRegisterPromptContext: UnRegisterPromptContext = useCallback(
     (queryContextId: string) =>
-      setQueryContexts((prevQueryContexts) => omit(queryContextId, prevQueryContexts)),
+      setPromptContexts((prevPromptContexts) => {
+        if (prevPromptContexts[queryContextId] == null) {
+          return prevPromptContexts;
+        } else {
+          return omit(queryContextId, prevPromptContexts);
+        }
+      }),
     []
   );
 

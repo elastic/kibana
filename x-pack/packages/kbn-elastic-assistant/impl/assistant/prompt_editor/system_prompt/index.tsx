@@ -5,24 +5,15 @@
  * 2.0.
  */
 
-import { css } from '@emotion/react';
-import {
-  EuiButtonIcon,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFormRow,
-  EuiSuperSelect,
-  EuiText,
-  EuiToolTip,
-} from '@elastic/eui';
+import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiText, EuiToolTip } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 // eslint-disable-next-line @kbn/eslint/module_migration
 import styled from 'styled-components';
 
 import { getPromptById } from '../helpers';
-import { getOptions } from './helpers';
 import * as i18n from './translations';
 import type { Prompt } from '../../types';
+import { SelectSystemPrompt } from './select_system_prompt';
 
 const SystemPromptText = styled(EuiText)`
   white-space: pre-line;
@@ -40,19 +31,10 @@ const SystemPromptComponent: React.FC<Props> = ({
   systemPrompts,
 }) => {
   const [showSelectSystemPrompt, setShowSelectSystemPrompt] = React.useState<boolean>(false);
-  const options = useMemo(() => getOptions(systemPrompts), [systemPrompts]);
 
   const selectedPrompt: Prompt | undefined = useMemo(
     () => getPromptById({ prompts: systemPrompts, id: selectedSystemPromptId ?? '' }),
     [systemPrompts, selectedSystemPromptId]
-  );
-
-  const onChange = useCallback(
-    (value) => {
-      setSelectedSystemPromptId(value);
-      setShowSelectSystemPrompt(false);
-    },
-    [setSelectedSystemPromptId]
   );
 
   const clearSystemPrompt = useCallback(() => {
@@ -62,71 +44,55 @@ const SystemPromptComponent: React.FC<Props> = ({
 
   const onShowSelectSystemPrompt = useCallback(() => setShowSelectSystemPrompt(true), []);
 
-  if (selectedPrompt == null || showSelectSystemPrompt) {
-    return (
-      <EuiFlexGroup gutterSize="none">
-        <EuiFlexItem>
-          {showSelectSystemPrompt && (
-            <EuiFormRow
-              css={css`
-                min-width: 100%;
-              `}
-            >
-              <EuiSuperSelect
-                fullWidth={true}
-                hasDividers
-                itemLayoutAlign="top"
-                onChange={onChange}
-                options={options}
-                placeholder={i18n.SELECT_A_SYSTEM_PROMPT}
-                valueOfSelected={selectedPrompt?.id}
-              />
-            </EuiFormRow>
-          )}
-        </EuiFlexItem>
-
-        <EuiFlexItem grow={false}>
-          <EuiToolTip
-            content={
-              showSelectSystemPrompt
-                ? i18n.CLEAR_SYSTEM_PROMPT_TOOLTIP
-                : i18n.ADD_SYSTEM_PROMPT_TOOLTIP
-            }
-            position="right"
-          >
-            <EuiButtonIcon
-              iconType={showSelectSystemPrompt ? 'cross' : 'plus'}
-              onClick={showSelectSystemPrompt ? clearSystemPrompt : onShowSelectSystemPrompt}
-            />
-          </EuiToolTip>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    );
-  }
-
   return (
-    <EuiFlexGroup alignItems="flexStart" gutterSize="none">
-      <EuiFlexItem grow>
-        <SystemPromptText onClick={onShowSelectSystemPrompt} color="subdued">
-          {selectedPrompt?.content ?? ''}
-        </SystemPromptText>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiFlexGroup gutterSize="none">
-          <EuiFlexItem grow={false}>
-            <EuiToolTip content={i18n.SELECT_A_SYSTEM_PROMPT} position="right">
-              <EuiButtonIcon iconType="documentEdit" onClick={onShowSelectSystemPrompt} />
-            </EuiToolTip>
+    <div data-test-subj="systemPrompt">
+      {selectedPrompt == null || showSelectSystemPrompt ? (
+        <SelectSystemPrompt
+          selectedPrompt={selectedPrompt}
+          setSelectedSystemPromptId={setSelectedSystemPromptId}
+          setShowSelectSystemPrompt={setShowSelectSystemPrompt}
+          showSelectSystemPrompt={showSelectSystemPrompt}
+          systemPrompts={systemPrompts}
+        />
+      ) : (
+        <EuiFlexGroup alignItems="flexStart" gutterSize="none">
+          <EuiFlexItem grow>
+            <SystemPromptText
+              color="subdued"
+              data-test-subj="systemPromptText"
+              onClick={onShowSelectSystemPrompt}
+            >
+              {selectedPrompt?.content ?? ''}
+            </SystemPromptText>
           </EuiFlexItem>
-
           <EuiFlexItem grow={false}>
-            <EuiToolTip content={i18n.CLEAR_SYSTEM_PROMPT_TOOLTIP} position="right">
-              <EuiButtonIcon iconType="cross" onClick={clearSystemPrompt} />
-            </EuiToolTip>
+            <EuiFlexGroup gutterSize="none">
+              <EuiFlexItem grow={false}>
+                <EuiToolTip content={i18n.SELECT_A_SYSTEM_PROMPT}>
+                  <EuiButtonIcon
+                    aria-label={i18n.SELECT_A_SYSTEM_PROMPT}
+                    data-test-subj="edit"
+                    iconType="documentEdit"
+                    onClick={onShowSelectSystemPrompt}
+                  />
+                </EuiToolTip>
+              </EuiFlexItem>
+
+              <EuiFlexItem grow={false}>
+                <EuiToolTip content={i18n.CLEAR_SYSTEM_PROMPT}>
+                  <EuiButtonIcon
+                    aria-label={i18n.CLEAR_SYSTEM_PROMPT}
+                    data-test-subj="clear"
+                    iconType="cross"
+                    onClick={clearSystemPrompt}
+                  />
+                </EuiToolTip>
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+      )}
+    </div>
   );
 };
 

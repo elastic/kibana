@@ -8,10 +8,11 @@
 import {
   EuiAccordion,
   EuiButtonIcon,
+  EuiCodeBlock,
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
-  EuiText,
+  EuiToolTip,
 } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
@@ -20,12 +21,14 @@ import styled from 'styled-components';
 
 import { SYSTEM_PROMPT_CONTEXT_NON_I18N } from '../../../content/prompts/system/translations';
 import type { PromptContext } from '../../prompt_context/types';
+import * as i18n from './translations';
 
-const PromptContextText = styled(EuiText)`
-  white-space: pre-line;
+const PromptContextContainer = styled.div`
+  max-width: 60vw;
+  overflow-x: auto;
 `;
 
-interface Props {
+export interface Props {
   isNewConversation: boolean;
   promptContexts: Record<string, PromptContext>;
   selectedPromptContextIds: string[];
@@ -43,7 +46,7 @@ const SelectedPromptContextsComponent: React.FC<Props> = ({
     [promptContexts, selectedPromptContextIds]
   );
 
-  const [accordianContent, setAccordianContent] = useState<Record<string, string>>({});
+  const [accordionContent, setAccordionContent] = useState<Record<string, string>>({});
 
   const unselectPromptContext = useCallback(
     (unselectedId: string) => {
@@ -53,17 +56,17 @@ const SelectedPromptContextsComponent: React.FC<Props> = ({
   );
 
   useEffect(() => {
-    const fetchAccordianContent = async () => {
-      const newAccordianContent = await Promise.all(
+    const fetchAccordionContent = async () => {
+      const newAccordionContent = await Promise.all(
         selectedPromptContexts.map(async ({ getPromptContext, id }) => ({
           [id]: await getPromptContext(),
         }))
       );
 
-      setAccordianContent(newAccordianContent.reduce((acc, curr) => ({ ...acc, ...curr }), {}));
+      setAccordionContent(newAccordionContent.reduce((acc, curr) => ({ ...acc, ...curr }), {}));
     };
 
-    fetchAccordianContent();
+    fetchAccordionContent();
   }, [selectedPromptContexts]);
 
   if (isEmpty(promptContexts)) {
@@ -71,28 +74,37 @@ const SelectedPromptContextsComponent: React.FC<Props> = ({
   }
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="none">
+    <EuiFlexGroup data-test-subj="selectedPromptContexts" direction="column" gutterSize="none">
       {selectedPromptContexts.map(({ description, id }) => (
-        <EuiFlexItem grow={false} key={id}>
-          {isNewConversation || selectedPromptContexts.length > 1 ? <EuiSpacer /> : null}
+        <EuiFlexItem data-test-subj={`selectedPromptContext-${id}`} grow={false} key={id}>
+          {isNewConversation || selectedPromptContexts.length > 1 ? (
+            <EuiSpacer data-test-subj="spacer" />
+          ) : null}
           <EuiAccordion
             buttonContent={description}
             extraAction={
-              <EuiButtonIcon iconType="cross" onClick={() => unselectPromptContext(id)} />
+              <EuiToolTip content={i18n.REMOVE_CONTEXT}>
+                <EuiButtonIcon
+                  aria-label={i18n.REMOVE_CONTEXT}
+                  data-test-subj={`removePromptContext-${id}`}
+                  iconType="cross"
+                  onClick={() => unselectPromptContext(id)}
+                />
+              </EuiToolTip>
             }
             id={id}
             paddingSize="s"
           >
-            <PromptContextText color="subdued">
-              {id != null && accordianContent[id] != null
-                ? SYSTEM_PROMPT_CONTEXT_NON_I18N(accordianContent[id])
-                : ''}
-            </PromptContextText>
+            <PromptContextContainer>
+              <EuiCodeBlock data-test-subj="promptCodeBlock" isCopyable>
+                {id != null && accordionContent[id] != null
+                  ? SYSTEM_PROMPT_CONTEXT_NON_I18N(accordionContent[id])
+                  : ''}
+              </EuiCodeBlock>
+            </PromptContextContainer>
           </EuiAccordion>
         </EuiFlexItem>
       ))}
-
-      {}
     </EuiFlexGroup>
   );
 };

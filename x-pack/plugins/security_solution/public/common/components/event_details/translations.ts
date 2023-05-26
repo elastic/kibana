@@ -181,7 +181,7 @@ export const ALERT_SUMMARY_CONTEXT_DESCRIPTION = (view: string) =>
 export const ALERT_SUMMARY_VIEW_CONTEXT_TOOLTIP = i18n.translate(
   'xpack.securitySolution.alertSummaryView.alertSummaryViewContextTooltip',
   {
-    defaultMessage: 'Use this alert for context',
+    defaultMessage: 'Add this alert as context',
   }
 );
 

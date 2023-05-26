@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { NewChat } from '@kbn/elastic-assistant';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { isEmpty } from 'lodash/fp';
 import {
@@ -21,7 +22,6 @@ import {
 import React from 'react';
 import styled from 'styled-components';
 
-import { NewChat } from '../../../../assistant/new_chat';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { getAlertDetailsUrl } from '../../../../common/components/link_to';
 import {
@@ -148,11 +148,9 @@ export const ExpandableEventTitle = React.memo<ExpandableEventTitleProps>(
             <EuiFlexItem grow={false}>
               <EuiFlexGroup alignItems="center" direction="row" gutterSize="none">
                 {promptContextId != null && (
-                  <>
-                    <EuiFlexItem grow={false}>
-                      <NewChat promptContextId={promptContextId} />
-                    </EuiFlexItem>
-                  </>
+                  <EuiFlexItem grow={false}>
+                    <NewChat conversationId="alertSummary" promptContextId={promptContextId} />
+                  </EuiFlexItem>
                 )}
                 {isAlert && alertDetailsLink && (
                   <EuiFlexItem grow={false}>

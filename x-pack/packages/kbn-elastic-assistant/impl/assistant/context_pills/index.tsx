@@ -49,6 +49,7 @@ const ContextPillsComponent: React.FC<Props> = ({
         <EuiFlexItem grow={false} key={id}>
           <EuiToolTip content={tooltip}>
             <PillButton
+              data-test-subj={`pillButton-${id}`}
               disabled={selectedPromptContextIds.includes(id)}
               iconSide="left"
               iconType="plus"

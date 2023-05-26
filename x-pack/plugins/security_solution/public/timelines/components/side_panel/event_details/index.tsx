@@ -5,12 +5,7 @@
  * 2.0.
  */
 
-import type { PromptContext } from '@kbn/elastic-assistant';
-import {
-  getUniquePromptContextId,
-  useAssistantContextRegistry,
-  USER_PROMPTS,
-} from '@kbn/elastic-assistant';
+import { USER_PROMPTS, useAssistantOverlay } from '@kbn/elastic-assistant';
 import { EuiSpacer, EuiFlyoutBody } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 
@@ -94,28 +89,23 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
 
   const view = useMemo(() => (isFlyoutView ? SUMMARY_VIEW : TIMELINE_VIEW), [isFlyoutView]);
 
-  const promptContextId = useMemo(() => getUniquePromptContextId(), []);
-
   const getPromptContext = useCallback(
     async () => getPromptContextFromEventDetailsItem(detailsData ?? []),
     [detailsData]
   );
 
-  const promptContext: PromptContext = useMemo(
-    () => ({
+  const { promptContextId } = useAssistantOverlay({
+    conversationId: 'alertSummary',
+    promptContext: {
       category: isAlert ? 'alert' : 'event',
       description: isAlert
         ? ALERT_SUMMARY_CONTEXT_DESCRIPTION(view)
         : EVENT_SUMMARY_CONTEXT_DESCRIPTION(view),
-      id: promptContextId,
       getPromptContext,
       suggestedUserPrompt: USER_PROMPTS.EXPLAIN_THEN_SUMMARIZE_SUGGEST_INVESTIGATION_GUIDE_NON_I18N,
       tooltip: isAlert ? ALERT_SUMMARY_VIEW_CONTEXT_TOOLTIP : EVENT_SUMMARY_VIEW_CONTEXT_TOOLTIP,
-    }),
-    [getPromptContext, isAlert, promptContextId, view]
-  );
-
-  useAssistantContextRegistry(promptContext);
+    },
+  });
 
   const header = useMemo(
     () =>

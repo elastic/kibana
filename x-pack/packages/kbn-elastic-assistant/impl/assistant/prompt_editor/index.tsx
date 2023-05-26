@@ -13,12 +13,11 @@ import styled from 'styled-components';
 import type { PromptContext } from '../prompt_context/types';
 import { SystemPrompt } from './system_prompt';
 import type { Prompt } from '../types';
-import { getPromptById } from './helpers';
 
 import * as i18n from './translations';
 import { SelectedPromptContexts } from './selected_prompt_contexts';
 
-interface Props {
+export interface Props {
   isNewConversation: boolean;
   promptContexts: Record<string, PromptContext>;
   promptTextPreview: string;
@@ -43,15 +42,6 @@ const PromptEditorComponent: React.FC<Props> = ({
   setSelectedSystemPromptId,
   systemPrompts,
 }) => {
-  const selectedSystemPrompt = useMemo(
-    () =>
-      getPromptById({
-        id: selectedSystemPromptId ?? '',
-        prompts: systemPrompts,
-      }),
-    [selectedSystemPromptId, systemPrompts]
-  );
-
   const commentBody = useMemo(
     () => (
       <>
@@ -70,8 +60,7 @@ const PromptEditorComponent: React.FC<Props> = ({
           setSelectedPromptContextIds={setSelectedPromptContextIds}
         />
 
-        <PreviewText color="subdued">
-          {selectedSystemPrompt != null && <>{'\n'}</>}
+        <PreviewText color="subdued" data-test-subj="previewText">
           {promptTextPreview}
         </PreviewText>
       </>
@@ -81,7 +70,6 @@ const PromptEditorComponent: React.FC<Props> = ({
       promptContexts,
       promptTextPreview,
       selectedPromptContextIds,
-      selectedSystemPrompt,
       selectedSystemPromptId,
       setSelectedPromptContextIds,
       setSelectedSystemPromptId,
@@ -94,11 +82,19 @@ const PromptEditorComponent: React.FC<Props> = ({
       {
         children: commentBody,
         event: (
-          <EuiText size="xs">
+          <EuiText data-test-subj="eventText" size="xs">
             <i>{i18n.EDITING_PROMPT}</i>
           </EuiText>
         ),
-        timelineAvatar: <EuiAvatar name="user" size="l" color="subdued" iconType="logoSecurity" />,
+        timelineAvatar: (
+          <EuiAvatar
+            data-test-subj="userAvatar"
+            name="user"
+            size="l"
+            color="subdued"
+            iconType="logoSecurity"
+          />
+        ),
         timelineAvatarAriaLabel: i18n.YOU,
         username: i18n.YOU,
       },
@@ -106,7 +102,7 @@ const PromptEditorComponent: React.FC<Props> = ({
     [commentBody]
   );
 
-  return <EuiCommentList comments={comments} aria-label={i18n.COMMENTS_LIST_ARIA_LABEL} />;
+  return <EuiCommentList aria-label={i18n.COMMENTS_LIST_ARIA_LABEL} comments={comments} />;
 };
 
 PromptEditorComponent.displayName = 'PromptEditorComponent';

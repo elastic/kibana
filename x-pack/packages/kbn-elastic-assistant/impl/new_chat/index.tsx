@@ -6,22 +6,27 @@
  */
 
 import { EuiButtonEmpty } from '@elastic/eui';
-import { useAssistantOverlay } from '@kbn/elastic-assistant';
 import React, { useCallback, useMemo } from 'react';
+
+import { PromptContext } from '../assistant/prompt_context/types';
+import { useAssistantOverlay } from '../assistant/use_assistant_overlay';
 
 import * as i18n from './translations';
 
 const NewChatComponent: React.FC<{
-  promptContextId: string;
-}> = ({ promptContextId }) => {
-  const { showSecurityAssistantOverlay } = useAssistantOverlay({
+  promptContext?: Omit<PromptContext, 'id'>;
+  promptContextId?: string;
+  conversationId?: string;
+}> = ({ conversationId, promptContext, promptContextId }) => {
+  const { showAssistantOverlay } = useAssistantOverlay({
+    conversationId,
     promptContextId,
-    conversationId: 'alertSummary',
+    promptContext,
   });
 
   const showOverlay = useCallback(() => {
-    showSecurityAssistantOverlay(true);
-  }, [showSecurityAssistantOverlay]);
+    showAssistantOverlay(true);
+  }, [showAssistantOverlay]);
 
   return useMemo(
     () => (

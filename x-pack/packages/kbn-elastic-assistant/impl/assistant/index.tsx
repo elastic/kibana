@@ -23,7 +23,7 @@ import styled from 'styled-components';
 import { createPortal } from 'react-dom';
 import { css } from '@emotion/react';
 
-import { getCombinedMessage, getMessageFromRawResponse } from './helpers';
+import { getMessageFromRawResponse } from './helpers';
 
 import { SettingsPopover } from './settings_popover';
 import { useAssistantContext } from '../assistant_context';
@@ -36,7 +36,7 @@ import { useSendMessages } from './use_send_messages';
 import type { Message } from '../assistant_context/types';
 import { ConversationSelector } from './conversation_selector';
 import { PromptEditor } from './prompt_editor';
-import { getDefaultSystemPrompt, getSuperheroPrompt } from './prompt/helpers';
+import { getCombinedMessage, getDefaultSystemPrompt, getSuperheroPrompt } from './prompt/helpers';
 import * as i18n from './translations';
 import type { Prompt } from './types';
 import { getPromptById } from './prompt_editor/helpers';
@@ -47,6 +47,7 @@ import { WELCOME_CONVERSATION_ID } from './use_conversation/sample_conversations
 
 const CommentsContainer = styled.div`
   max-height: 600px;
+  max-width: 100%;
   overflow-y: scroll;
 `;
 

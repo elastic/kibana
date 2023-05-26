@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 
 export const LOAD_ACTIONS_ERROR_MESSAGE = i18n.translate(
-  'xpack.securitySolution.securityAssistant.connectors.useLoadActionTypes.errorMessage',
+  'xpack.elasticAssistant.connectors.useLoadActionTypes.errorMessage',
   {
     defaultMessage:
       'Welcome to your Elastic Assistant! I am your 100% open-source portal into your Elastic Life. ',
@@ -16,7 +16,7 @@ export const LOAD_ACTIONS_ERROR_MESSAGE = i18n.translate(
 );
 
 export const LOAD_CONNECTORS_ERROR_MESSAGE = i18n.translate(
-  'xpack.securitySolution.securityAssistant.connectors.useLoadConnectors.errorMessage',
+  'xpack.elasticAssistant.connectors.useLoadConnectors.errorMessage',
   {
     defaultMessage:
       'Welcome to your Elastic Assistant! I am your 100% open-source portal into your Elastic Life. ',
@@ -24,46 +24,13 @@ export const LOAD_CONNECTORS_ERROR_MESSAGE = i18n.translate(
 );
 
 export const WELCOME_SECURITY = i18n.translate(
-  'xpack.securitySolution.securityAssistant.content.prompts.welcome.welcomeSecurityPrompt',
+  'xpack.elasticAssistant.content.prompts.welcome.welcomeSecurityPrompt',
   {
     defaultMessage:
       'Welcome to your Elastic Assistant! I am your 100% open-source portal into Elastic Security. ',
   }
 );
 
-export const THEN_SUMMARIZE_SUGGESTED_KQL_AND_EQL_QUERIES = i18n.translate(
-  'xpack.securitySolution.securityAssistant.content.prompts.user.thenSummarizeSuggestedKqlAndEqlQueries',
-  {
-    defaultMessage: 'then summarize a list of suggested Elasticsearch KQL and EQL queries',
-  }
-);
-
-export const FINALLY_SUGGEST_INVESTIGATION_GUIDE_AND_FORMAT_AS_MARKDOWN = i18n.translate(
-  'xpack.securitySolution.securityAssistant.content.prompts.user.finallySuggestInvestigationGuideAndFormatAsMarkdown',
-  {
-    defaultMessage: 'Finally, suggest an investigation guide, and format it as markdown',
-  }
-);
-
-export const UPDATE_PREPACKAGED_RULES_AND_TIMELINES_MSG = (
-  updateRules: number,
-  updateTimelines: number
-) =>
-  i18n.translate(
-    'xpack.securitySolution.detectionEngine.rules.updatePrePackagedRulesAndTimelinesMsg',
-    {
-      values: { updateRules, updateTimelines },
-      defaultMessage:
-        'You can update {updateRules} Elastic prebuilt {updateRules, plural, =1 {rule} other {rules}} and {updateTimelines} Elastic prebuilt {updateTimelines, plural, =1 {timeline} other {timelines}}. Note that this will reload deleted Elastic prebuilt rules.',
-    }
-  );
-
-export const CONNECTOR_SELECTOR_LABEL = i18n.translate(
-  'xpack.elasticAssistant.assistant.connectors.connectorSelector.labelTitle',
-  {
-    defaultMessage: 'Connector',
-  }
-);
 export const CONNECTOR_SELECTOR_TITLE = i18n.translate(
   'xpack.elasticAssistant.assistant.connectors.connectorSelector.ariaLabel',
   {
@@ -93,14 +60,14 @@ export const ADD_CONNECTOR_DESCRIPTION = i18n.translate(
 );
 
 export const CONNECTOR_ADDED_TITLE = i18n.translate(
-  'xpack.elasticAssistant.assistant.connectors.addConnectorButton.title',
+  'xpack.elasticAssistant.assistant.connectors.addConnectorButton.connectorAddedTitle',
   {
     defaultMessage: 'Generative AI Connector added!',
   }
 );
 
 export const CONNECTOR_ADDED_DESCRIPTION = i18n.translate(
-  'xpack.elasticAssistant.assistant.connectors.addConnectorButton.description',
+  'xpack.elasticAssistant.assistant.connectors.addConnectorButton.connectorAddedDescription',
   {
     defaultMessage: 'Ready to continue the conversation...',
   }

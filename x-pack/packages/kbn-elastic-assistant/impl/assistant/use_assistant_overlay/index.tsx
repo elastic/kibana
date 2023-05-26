@@ -5,52 +5,77 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
-import { EuiButtonEmpty } from '@elastic/eui';
-import { css } from '@emotion/react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 
 import { useAssistantContext } from '../../assistant_context';
+import { getUniquePromptContextId } from '../../assistant_context/helpers';
+import type { PromptContext } from '../prompt_context/types';
 
 interface Props {
+  promptContext?: Omit<PromptContext, 'id'>;
   promptContextId?: string;
   conversationId?: string;
 }
 interface UseAssistantOverlay {
-  showSecurityAssistantOverlay: (showOverlay: boolean) => void;
-  MagicButton: JSX.Element;
+  showAssistantOverlay: (show: boolean) => void;
+  promptContextId: string;
 }
 
 export const useAssistantOverlay = ({
-  promptContextId,
   conversationId,
+  promptContext,
+  promptContextId,
 }: Props): UseAssistantOverlay => {
-  const { showAssistantOverlay } = useAssistantContext();
+  // create a unique prompt context id if one is not provided:
+  const _promptContextId = useMemo(
+    () => promptContextId ?? getUniquePromptContextId(),
+    [promptContextId]
+  );
 
-  const showSecurityAssistantOverlay = useCallback(
+  const _promptContextRef = useRef<PromptContext | undefined>(
+    promptContext != null
+      ? {
+          ...promptContext,
+          id: _promptContextId,
+        }
+      : undefined
+  );
+
+  // the assistant context is used to show/hide the assistant overlay:
+  const {
+    registerPromptContext,
+    showAssistantOverlay: assistantContextShowOverlay,
+    unRegisterPromptContext,
+  } = useAssistantContext();
+
+  // proxy show / hide calls to assistant context, using our internal prompt context id:
+  const showAssistantOverlay = useCallback(
     (showOverlay: boolean) => {
-      showAssistantOverlay({ showOverlay, promptContextId, conversationId });
+      assistantContextShowOverlay({
+        showOverlay,
+        promptContextId: _promptContextId,
+        conversationId,
+      });
     },
-    [conversationId, promptContextId, showAssistantOverlay]
+    [assistantContextShowOverlay, _promptContextId, conversationId]
   );
 
-  // Button state
-  const showOverlay = useCallback(() => {
-    showSecurityAssistantOverlay(true);
-  }, [showSecurityAssistantOverlay]);
-
-  const MagicButton = useMemo(
-    () => (
-      <EuiButtonEmpty
-        onClick={showOverlay}
-        css={css`
-          font-size: 24px;
-        `}
-      >
-        {'🪄✨'}
-      </EuiButtonEmpty>
-    ),
-    [showOverlay]
+  useEffect(
+    () => () => unRegisterPromptContext(_promptContextId),
+    [_promptContextId, unRegisterPromptContext]
   );
 
-  return { MagicButton, showSecurityAssistantOverlay };
+  if (
+    promptContext != null &&
+    (_promptContextRef.current?.category !== promptContext?.category ||
+      _promptContextRef.current?.description !== promptContext?.description ||
+      _promptContextRef.current?.getPromptContext !== promptContext?.getPromptContext ||
+      _promptContextRef.current?.suggestedUserPrompt !== promptContext?.suggestedUserPrompt ||
+      _promptContextRef.current?.tooltip !== promptContext?.tooltip)
+  ) {
+    _promptContextRef.current = { ...promptContext, id: _promptContextId };
+    registerPromptContext(_promptContextRef.current);
+  }
+
+  return { promptContextId: _promptContextId, showAssistantOverlay };
 };

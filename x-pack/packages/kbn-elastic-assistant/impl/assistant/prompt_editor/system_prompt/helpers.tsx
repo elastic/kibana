@@ -30,16 +30,17 @@ export const getOptionFromPrompt = ({
         overflow: hidden;
       `}
       color="subdued"
+      data-test-subj="inputDisplay"
     >
       {content}
     </EuiText>
   ),
   dropdownDisplay: (
     <>
-      <Strong>{name}</Strong>
+      <Strong data-test-subj="name">{name}</Strong>
 
       <EuiToolTip content={content}>
-        <EuiText size="s" color="subdued">
+        <EuiText color="subdued" data-test-subj="content" size="s">
           <p>{content}</p>
         </EuiText>
       </EuiToolTip>
@@ -47,4 +48,5 @@ export const getOptionFromPrompt = ({
   ),
 });
 
-export const getOptions = (prompts: Prompt[]) => prompts.map(getOptionFromPrompt);
+export const getOptions = (prompts: Prompt[]): Array<EuiSuperSelectOption<string>> =>
+  prompts.map(getOptionFromPrompt);

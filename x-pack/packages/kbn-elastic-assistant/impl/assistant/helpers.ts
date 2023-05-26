@@ -9,10 +9,7 @@
 import crypto from 'crypto';
 
 import { fetchOpenAlerts, fetchVirusTotalAnalysis, sendFileToVirusTotal } from './api';
-import { SYSTEM_PROMPT_CONTEXT_NON_I18N } from '../content/prompts/system/translations';
-import type { PromptContext } from './prompt_context/types';
 import type { Message } from '../assistant_context/types';
-import type { Prompt } from './types';
 
 /**
  * Do it like this in your `kibana.dev.yml`, use 'overrides' as keys aren't actually defined
@@ -397,62 +394,3 @@ export const getMessageFromRawResponse = (rawResponse: string): Message => {
     };
   }
 };
-
-export const getSystemMessages = ({
-  isNewChat,
-  selectedSystemPrompt,
-}: {
-  isNewChat: boolean;
-  selectedSystemPrompt: Prompt | undefined;
-}): Message[] => {
-  if (!isNewChat || selectedSystemPrompt == null) {
-    return [];
-  }
-
-  const message: Message = {
-    content: selectedSystemPrompt.content,
-    role: 'system',
-    timestamp: new Date().toLocaleString(),
-  };
-
-  return [message];
-};
-
-export async function getCombinedMessage({
-  isNewChat,
-  promptContexts,
-  promptText,
-  selectedPromptContextIds,
-  selectedSystemPrompt,
-}: {
-  isNewChat: boolean;
-  promptContexts: Record<string, PromptContext>;
-  promptText: string;
-  selectedPromptContextIds: string[];
-  selectedSystemPrompt: Prompt | undefined;
-}): Promise<Message> {
-  const selectedPromptContexts = selectedPromptContextIds.reduce<PromptContext[]>((acc, id) => {
-    const promptContext = promptContexts[id];
-    return promptContext != null ? [...acc, promptContext] : acc;
-  }, []);
-
-  const promptContextsContent = await Promise.all(
-    selectedPromptContexts.map(async ({ getPromptContext, id }) => {
-      const promptContext = await getPromptContext();
-
-      return `\n\n${SYSTEM_PROMPT_CONTEXT_NON_I18N(promptContext)}\n\n`;
-    })
-  );
-
-  return {
-    content: `${
-      isNewChat ? `${selectedSystemPrompt?.content ?? ''}` : `${promptContextsContent}\n\n`
-    }
-
-${promptContextsContent}
-
-${promptText}`,
-    role: 'user', // we are combining the system and user messages into one message
-    timestamp: new Date().toLocaleString(),
-  };
-}

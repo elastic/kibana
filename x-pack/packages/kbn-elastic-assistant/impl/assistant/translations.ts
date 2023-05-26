@@ -37,12 +37,14 @@ export const CHAT_COMPLETION_FETCH_FAILURE = i18n.translate(
 export const SETTINGS_TITLE = i18n.translate('xpack.elasticAssistant.assistant.settingsTitle', {
   defaultMessage: 'Assistant Settings',
 });
+
 export const SETTINGS_TEMPERATURE_TITLE = i18n.translate(
   'xpack.elasticAssistant.assistant.settings.temperatureTitle',
   {
     defaultMessage: 'Temperature',
   }
 );
+
 export const SETTINGS_TEMPERATURE_HELP_TEXT = i18n.translate(
   'xpack.elasticAssistant.assistant.settings.temperatureHelpTextTitle',
   {
@@ -70,6 +72,7 @@ export const SETTINGS_MODEL_TITLE = i18n.translate(
     defaultMessage: 'Model',
   }
 );
+
 export const SETTINGS_MODEL_HELP_TEXT_TITLE = i18n.translate(
   'xpack.elasticAssistant.assistant.settings.modelHelpTextTitle',
   {
