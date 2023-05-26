@@ -21,7 +21,7 @@ export const getRiskScoreIndexStatusRoute = (router: SecuritySolutionPluginRoute
         query: buildRouteValidation(indexStatusSchema),
       },
       options: {
-        tags: ['access:securitySolution'],
+        tags: ['access:securitySolution', 'access:entity-analytics'],
       },
     },
     async (context, request, response) => {

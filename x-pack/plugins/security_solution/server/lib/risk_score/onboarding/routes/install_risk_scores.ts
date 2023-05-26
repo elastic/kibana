@@ -28,7 +28,7 @@ export const installRiskScoresRoute = (
       path: INTERNAL_RISK_SCORE_URL,
       validate: onboardingRiskScoreSchema,
       options: {
-        tags: ['access:securitySolution'],
+        tags: ['access:securitySolution', 'access:entity-analytics'],
       },
     },
     async (context, request, response) => {
