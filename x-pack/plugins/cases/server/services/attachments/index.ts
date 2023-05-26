@@ -167,9 +167,11 @@ export class AttachmentService {
     try {
       this.context.log.debug(`Attempting to POST a new comment`);
 
+      const decodedAttributes = decodeOrThrow(AttachmentTransformedAttributesRt)(attributes);
+
       const { attributes: extractedAttributes, references: extractedReferences } =
         extractAttachmentSORefsFromAttributes(
-          attributes,
+          decodedAttributes,
           references,
           this.context.persistableStateAttachmentTypeRegistry
         );
@@ -210,9 +212,13 @@ export class AttachmentService {
       const res =
         await this.context.unsecuredSavedObjectsClient.bulkCreate<AttachmentPersistedAttributes>(
           attachments.map((attachment) => {
+            const decodedAttributes = decodeOrThrow(AttachmentTransformedAttributesRt)(
+              attachment.attributes
+            );
+
             const { attributes: extractedAttributes, references: extractedReferences } =
               extractAttachmentSORefsFromAttributes(
-                attachment.attributes,
+                decodedAttributes,
                 attachment.references,
                 this.context.persistableStateAttachmentTypeRegistry
               );
@@ -267,12 +273,14 @@ export class AttachmentService {
     try {
       this.context.log.debug(`Attempting to UPDATE comment ${attachmentId}`);
 
+      const decodedAttributes = decodeOrThrow(AttachmentPartialAttributesRt)(updatedAttributes);
+
       const {
         attributes: extractedAttributes,
         references: extractedReferences,
         didDeleteOperation,
       } = extractAttachmentSORefsFromAttributes(
-        updatedAttributes,
+        decodedAttributes,
         options?.references ?? [],
         this.context.persistableStateAttachmentTypeRegistry
       );
@@ -327,12 +335,16 @@ export class AttachmentService {
       const res =
         await this.context.unsecuredSavedObjectsClient.bulkUpdate<AttachmentPersistedAttributes>(
           comments.map((c) => {
+            const decodedAttributes = decodeOrThrow(AttachmentPartialAttributesRt)(
+              c.updatedAttributes
+            );
+
             const {
               attributes: extractedAttributes,
               references: extractedReferences,
               didDeleteOperation,
             } = extractAttachmentSORefsFromAttributes(
-              c.updatedAttributes,
+              decodedAttributes,
               c.options?.references ?? [],
               this.context.persistableStateAttachmentTypeRegistry
             );
