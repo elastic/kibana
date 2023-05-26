@@ -17,8 +17,8 @@ interface DataStreamsContextDeps {
 }
 
 export interface SearchDataStreamsParams {
-  name?: string;
-  sortOrder?: SortOrder;
+  name: string;
+  sortOrder: SortOrder;
 }
 
 export type SearchDataStreams = (params: SearchDataStreamsParams) => void;
@@ -32,10 +32,6 @@ const useDataStreams = ({ dataStreamsClient }: DataStreamsContextDeps) => {
 
   const dataStreams = useSelector(dataStreamsStateService, (state) => state.context.dataStreams);
 
-  const search = useSelector(dataStreamsStateService, (state) =>
-    filterSearchParams(state.context.search)
-  );
-
   const error = useSelector(dataStreamsStateService, (state) => state.context.error);
 
   const isUninitialized = useSelector(dataStreamsStateService, (state) =>
@@ -44,7 +40,7 @@ const useDataStreams = ({ dataStreamsClient }: DataStreamsContextDeps) => {
 
   const isLoading = useSelector(
     dataStreamsStateService,
-    (state) => state.matches('loading') || state.matches('debouncingSearch')
+    (state) => state.matches('loading') || state.matches('debounceSearchingDataStreams')
   );
 
   const hasFailedLoading = useSelector(dataStreamsStateService, (state) =>
@@ -64,14 +60,19 @@ const useDataStreams = ({ dataStreamsClient }: DataStreamsContextDeps) => {
   const searchDataStreams: SearchDataStreams = useCallback(
     (searchParams) =>
       dataStreamsStateService.send({
-        type: 'SEARCH',
-        delay: search.name !== searchParams.name ? 500 : 0,
-        search: {
-          datasetQuery: searchParams.name,
-          sortOrder: searchParams.sortOrder,
-        },
+        type: 'SEARCH_DATA_STREAMS',
+        search: formatSearchParams(searchParams),
       }),
-    [dataStreamsStateService, search.name]
+    [dataStreamsStateService]
+  );
+
+  const sortDataStreams: SearchDataStreams = useCallback(
+    (searchParams) =>
+      dataStreamsStateService.send({
+        type: 'SORT_DATA_STREAMS',
+        search: formatSearchParams(searchParams),
+      }),
+    [dataStreamsStateService]
   );
 
   return {
@@ -88,12 +89,12 @@ const useDataStreams = ({ dataStreamsClient }: DataStreamsContextDeps) => {
 
     // Data
     dataStreams,
-    search,
 
     // Actions
     loadDataStreams,
     reloadDataStreams,
     searchDataStreams,
+    sortDataStreams,
   };
 };
 
@@ -102,7 +103,10 @@ export const [DataStreamsProvider, useDataStreamsContext] = createContainer(useD
 /**
  * Utils
  */
-const filterSearchParams = (search: FindDataStreamsRequestQuery): SearchDataStreamsParams => ({
-  name: search.datasetQuery,
-  sortOrder: search.sortOrder,
+const formatSearchParams = ({
+  name,
+  ...params
+}: SearchDataStreamsParams): FindDataStreamsRequestQuery => ({
+  datasetQuery: name,
+  ...params,
 });

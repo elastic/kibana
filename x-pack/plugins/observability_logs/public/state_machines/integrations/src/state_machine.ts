@@ -19,18 +19,12 @@ import {
   IntegrationTypestate,
 } from './types';
 
-/**
- * TODO
- * - Split search and sort into 2 different events
- * - Split states into UI accessible interactions, keep track of current UI state for this
- */
-
 export const createPureIntegrationsStateMachine = (
   initialContext: DefaultIntegrationsContext = DEFAULT_CONTEXT
 ) =>
   createMachine<IntegrationsContext, IntegrationsEvent, IntegrationTypestate>(
     {
-      /** @xstate-layout N4IgpgJg5mDOIC5QEkB2AXMUBOBDdAlgPaqwB0ArqgdYbgDYEBekAxANoAMAuoqAA5FYBQiT4gAHogCMATgDMZABzSATABZpANgDs8nbJ3rZAGhABPRAaVkt0nffkBWJ9KWz1AX09m0mHPjEpGT0RLgQNFCsECRgZDQAbkQA1nF+WHiiwaHhkQiJRADGgSRc3GXigsJZ4lIITqpmlghKumQKOi5Osg2yqqry3r4YGSXZYRGoUWDY2ETYZPz0+ABm8wC2ZOkBWeQ5k1D5qEnFWWUVSCBVIkG1Mlqy0mQ6Wi5KzjqcLo0WiK+KWg0nGkvWk8le0iGIG2mSCewmkHiEHoYFYABkAPIAQQAIgB9ACyGIASgBRPHIAByABVSQBxYlY6nIDGUgDKFwEQhuYkudXUnEUqj06icnE46iUTkBEqaiDFslsWk0-SlWk4WgeUJhY3h4URBGRqLZpKxxIAwgAJCk0+mM5msjk8Srcmp8xACoUisUStWqWW-erqsjaFWqEGdVRanzQkY7OEhBEQJEo1hsknUm20hlMlnszlXV23d0INRg9p9f3ycWcKUauUILTyRXNjWyWSa+RRnrauOwkh6iAGo1p00W61U7P2vNsvFs6lkrEEp28S7XN2gfmCsjC+Si8WS6X+9QNqNOZSubrqdQDJx6LS9-z98b65OG1Pp4mZyd23OOucLqay4FuuxabogSg6KeSiqGQ4LyCoLwfG4siPqMuyJq+mEHAS8yojEqBxAUqRbH2urYYi+yRLh2BgEcJxjOczprkWvLgY24btC86oOIKkqPA24KwdW6g6FG7ifKo7yDDGOoYfslETNReGsDMcwLEsqwbKRT7kQpyZUVMNF0QUpxBExq5ctUYGSDI4aKO2-SCjWdZaA2onqDusicJ0rh9NKTgycMunyUmZBDgARkQVCFGAbJgLg2CFAAFpEclwqOZpWlmv4OvmzFWTyqB3C07w7nuApgmobxOA2gXnq2WjuF20qaGh8YDhRyaRdFqCxfFiUpWlZG7KwEiwOg+BxLgKyYNgAAU1acAAlKw6Wdfp4VgFFMVxQlSWpVM62kCBrHFSWZYOZWzniq5dWPMo3m6E1fTNqoTjtc+g6Ij1u0DQdw0hXCbLoLRuDrLAmXjjlOZ5bO86LsBBWFtZbG2S0orKJ04oeEYDSaA2IJPDWtaag8Dz+qon16WFv19Xtg2HVAx2wCDYMQ2NE1TWQM1zYt4qrSzXVbTt9P-UNR0jcDoMJRDp2o+d7HdOeEpNdKRP2J0hNiXBshSjoDgPOo6p7tToW5FMABiuAECiECsGSmK4jD06OvLRUldoD0vG8HxfA0DYmyGQIgnr7ZfFTUKoEQQ7wJcLMugrJUALSmIGycaGQJPZyTkfBehCZUDQNwMMwkCJx7JYB4GBg6LY9jvcb1Z69oZsJoZUAVxu6PSKK55OMb3kCn38h7vdigD22Ymj4CoptxtSZdzZdTNoHE+53o4Z6zB88vkOb5GkvaN1HIigIboGh9MY9i1YGmicM8nxgh4dhNoCu-fQZSlGXhR+K+jrQbDgjEj5Dwe4lAQPctuCE0gNSD0CjoD+ws6b9X2hLZmUsBx-xKlKGwBgloCjsMYJs90H7uA1BAwEvFISyUwXvH621eqoMZoDAuA42ayzjoVbudR3hPFDLWSUxgxS6FPBqMgPpazdAcETPWSCO7W1tuXFiScLoeFgmea8TZIw3h+M0UUNhtB3nsLoEmehvDeCAA */
+      /** @xstate-layout N4IgpgJg5mDOIC5QEkB2AXMUBOBDdAlgPaqwB0ArqgdYbgDYEBekAxANoAMAuoqAA5FYBQiT4gAHogCMATgDMZABzSATAFZOANnWzOAFlnr9AGhABPRAHYtVsrP1LO2rbIXrV8gL5ezaTDj4xKRk9ES4EDRQrBAkYGQ0AG5EANbx-lh4oiFhEVEISUQAxkEkXNzl4oLC2eJSCB5mlghK8naqWkqqVk6q0vKGWj5+GJmlOeGRqNFg2NhE2GT89PgAZgsAtmQZgdnkuVNQBajJJdnllUgg1SLBdTKd0mQ26upKskpW-a1KTYif+jI+i0+l0XX0+lUeiUwxAOyywX2k0gCQg9DArAAMgB5ACCABEAPoAWWxACUAKKE5AAOQAKhSAOJk3F05DYmkAZUuAiEtzEV3q+k4im6A3U8k40mk+iskqsfwQsvUQK0nDcatUTnkulh8PGSIiKIIaIxnIpuLJAGEABLU+lMllsjncnhVPm1QWIYWiuWgyXS2XyxUSpRkeQgkFuDpKFRWPWjXaI0LIiCo9GsTnkun2hnM1nsrk864eu5ehBqfr2WR9DpBsG-CyIWxPQyOTpaVScDx9BMBBEkQ0QY2mzMW6122l5p2FzmEzl0ym44mu3hXG6e0BCkVkMX+qUyuWcBVNhDdOxq6Qg7ucbqeby+OGJgcTI1pk0ZrNknNTx0Fl3zouForsWG5llu-wns0qiOGQV7HhKcgxrqj76nsKZvhhhzEgsGKxKg8SFGk2zPgaWEogcUQ4dgYDHKc4wXG666lgKEEIJ2TyyC8Vg2N0OgGIq8hanBUqdse8gyl02h9mM6EHBRkxUbhrCzPMizLGsmwkf2ZHyWmlHTNRtGFGcwSMWuvI1OBkgyH0ijRmoIJyg2IbHkCjjOFYzjaBoqgyUmg7kWmw4AEZEFQRRgJyYC4NgRQABZRGhiJjpatq5n+zpFkxln8qg9wtK0u4DDqsauMCsqKrKgIOFYHxfI5bj+S+Q4oqF4WoJF0WxQlSWkXsrASLA6D4PEuCrJg2AABSSpwACUrDJYFelkO1EVRTFcWJdMS2kKBLH5eWlb2TWjn1h8jbNK8NWyg4spqPoMqyM1umpqtYBhet3VbX1Ol7Jy6A0bgGywKlE4ZfmWVzguS4gTlJZWaxNktKCyhWIYxg1q4shyIq0iaNWbhdEJMFWK86gvXJb1rZ1G09dtUC7bAANAyDg3DaNZDjZNM3OAtTNBe9n2099vU7f1iIszFIP7Yjh1sboKoGJ0XmdBCQnqHjSiApJxhtpwSidpTyYGVAABiuAEOiECsJSOIEhDM4urLeUFVeKjPDobz1d88iXf8nj2JG0hOPjEp+bCqBEMO8BXEz7pywVAC0siKknMFkN5WfZ55xuBVQNC3AwzCQAnrvlo0p42Fo9i3UoesG7YMKoRLy2KdMZebsjMqo8YHZvAMwpaIqrSAgYdXqNKejqvXeevsOECd9Z9TyKnp5aIohhE3VdkKDxFMt39JtvR+YBL0j9RyIofstp2d0eMegk2GQ6i2CK0p+4bMFz61+nt1ARlz7y2RobMMEYvhaBDjoAYKhBKuHcnVVwUohKxi4j-QWNMuqbTFozVupAgEFXrmGHe0Jjx2SsKoEMkoEGyFsAMGU6gejoJWpgumP1xZH0HFLYGsdcpd3qK0J4V5hQULcB-f2Z5tAv28rGOQ5UpTMP-hbK2pdmKJyOjWVQu4vY6BVnIRwioeiyBfu8O+IodRqmbj4IAA */
       context: initialContext,
       preserveActionOrder: true,
       predictableActionArguments: true,
@@ -49,7 +43,7 @@ export const createPureIntegrationsStateMachine = (
               target: 'loaded',
               actions: ['storeInCache', 'storeIntegrationsResponse', 'storeSearch'],
             },
-            onError: '#loadingFailed',
+            onError: 'loadingFailed',
           },
         },
 
@@ -142,8 +136,6 @@ export const createPureIntegrationsStateMachine = (
             : {}
         ),
         searchIntegrationsStreams: assign((context) => {
-          console.log('get here', context.search);
-
           if (context.integrationsSource !== null) {
             return {
               integrations: searchIntegrationStreams(context.integrationsSource, context.search),
