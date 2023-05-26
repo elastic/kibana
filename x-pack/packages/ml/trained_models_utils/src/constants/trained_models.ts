@@ -68,3 +68,5 @@ export const MODEL_STATE = {
     defaultMessage: 'downloaded',
   }),
 } as const;
+
+export type ModelState = typeof MODEL_STATE[keyof typeof MODEL_STATE];
