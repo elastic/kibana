@@ -11,5 +11,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
   describe('composite_slo', () => {
     loadTestFile(require.resolve('./create'));
     loadTestFile(require.resolve('./delete'));
+    loadTestFile(require.resolve('./update'));
   });
 }

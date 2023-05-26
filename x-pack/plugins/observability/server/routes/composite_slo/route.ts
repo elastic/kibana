@@ -18,6 +18,7 @@ import {
   CreateCompositeSLO,
   DeleteCompositeSLO,
   KibanaSavedObjectsCompositeSLORepository,
+  UpdateCompositeSLO,
 } from '../../services/composite_slo';
 import { KibanaSavedObjectsSLORepository } from '../../services/slo';
 import { ObservabilityRequestHandlerContext } from '../../types';
@@ -56,10 +57,17 @@ const updateCompositeSLORoute = createObservabilityServerRoute({
     tags: ['access:slo_write'],
   },
   params: updateCompositeSLOParamsSchema,
-  handler: async ({ context }) => {
+  handler: async ({ context, params }) => {
     await assertLicenseAtLeastPlatinum(context);
 
-    throw notImplemented();
+    const soClient = (await context.core).savedObjects.client;
+    const compositeSloRepository = new KibanaSavedObjectsCompositeSLORepository(soClient);
+    const sloRepository = new KibanaSavedObjectsSLORepository(soClient);
+    const updateCompositeSLO = new UpdateCompositeSLO(compositeSloRepository, sloRepository);
+
+    const response = await updateCompositeSLO.execute(params.path.id, params.body);
+
+    return response;
   },
 });
 
