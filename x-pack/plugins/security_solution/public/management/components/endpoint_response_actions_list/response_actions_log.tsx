@@ -226,7 +226,7 @@ export const ResponseActionsLog = memo<
           setUrlWithOutputs(actionIds.join());
         }
       },
-      [isFlyout, setUrlWithOutputs]
+      [isFlyout, setUrlWithOutputs, setQueryParams]
     );
 
     if (error?.body?.statusCode === 404 && error?.body?.message === 'index_not_found_exception') {
