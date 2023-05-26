@@ -8,7 +8,7 @@
 import { isEmpty, isError } from 'lodash';
 import { schema } from '@kbn/config-schema';
 import { Logger, LogMeta } from '@kbn/logging';
-import type { ElasticsearchClient, IBasePath, SavedObjectsClientContract } from '@kbn/core/server';
+import type { ElasticsearchClient, IBasePath } from '@kbn/core/server';
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { set } from '@kbn/safer-lodash-set';
@@ -274,44 +274,51 @@ export const getOriginalActionGroup = (
   return alertHitSource?.[ALERT_ACTION_GROUP];
 };
 
-const getSourceConfiguration = async (
-  savedObjectsClient: SavedObjectsClientContract,
-  sourceId: string
-): Promise<InfraSource> => {
-  const staticDefaultSourceConfiguration = await this.getStaticDefaultSourceConfiguration();
-  const savedSourceConfiguration = await this.getInternalSourceConfiguration(sourceId)
-    .then((internalSourceConfiguration) => ({
-      id: sourceId,
-      version: undefined,
-      updatedAt: undefined,
-      origin: 'internal' as 'internal',
-      configuration: mergeSourceConfiguration(
-        staticDefaultSourceConfiguration,
-        internalSourceConfiguration
-      ),
-    }))
-    .catch((err) =>
-      err instanceof NotFoundError
-        ? this.getSavedSourceConfiguration(savedObjectsClient, sourceId).then((result) => ({
-            ...result,
-            configuration: mergeSourceConfiguration(
-              staticDefaultSourceConfiguration,
-              result.configuration
-            ),
-          }))
-        : Promise.reject(err)
-    )
-    .catch((err) =>
-      SavedObjectsErrorHelpers.isNotFoundError(err)
-        ? Promise.resolve({
-            id: sourceId,
-            version: undefined,
-            updatedAt: undefined,
-            origin: 'fallback' as 'fallback',
-            configuration: staticDefaultSourceConfiguration,
-          })
-        : Promise.reject(err)
-    );
+const intervalUnits = ['y', 'M', 'w', 'd', 'h', 'm', 's', 'ms'];
+const INTERVAL_STRING_RE = new RegExp('^([0-9\\.]*)\\s*(' + intervalUnits.join('|') + ')$');
 
-  return savedSourceConfiguration;
+interface UnitsToSeconds {
+  [unit: string]: number;
+}
+
+const units: UnitsToSeconds = {
+  ms: 0.001,
+  s: 1,
+  m: 60,
+  h: 3600,
+  d: 86400,
+  w: 86400 * 7,
+  M: 86400 * 30,
+  y: 86400 * 356,
+};
+
+export const getIntervalInSeconds = (interval: string): number => {
+  const matches = interval.match(INTERVAL_STRING_RE);
+  if (matches) {
+    return parseFloat(matches[1]) * units[matches[2]];
+  }
+  throw new Error('Invalid interval string format.');
+};
+
+export const calculateRateTimeranges = (timerange: { to: number; from: number }) => {
+  // This is the total number of milliseconds for the entire timerange
+  const totalTime = timerange.to - timerange.from;
+  // Halfway is the to minus half the total time;
+  const halfway = Math.round(timerange.to - totalTime / 2);
+  // The interval is half the total time (divided by 1000 to convert to seconds)
+  const intervalInSeconds = Math.round(totalTime / (2 * 1000));
+
+  // The first bucket is from the beginning of the time range to the halfway point
+  const firstBucketRange = {
+    from: timerange.from,
+    to: halfway,
+  };
+
+  // The second bucket is from the halfway point to the end of the timerange
+  const secondBucketRange = {
+    from: halfway,
+    to: timerange.to,
+  };
+
+  return { firstBucketRange, secondBucketRange, intervalInSeconds };
 };

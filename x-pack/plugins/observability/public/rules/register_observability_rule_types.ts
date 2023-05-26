@@ -11,7 +11,10 @@ import { ALERT_REASON } from '@kbn/rule-data-utils';
 import { SLO_ID_FIELD } from '../../common/field_names/infra_metrics';
 import { ConfigSchema } from '../plugin';
 import { ObservabilityRuleTypeRegistry } from './create_observability_rule_type_registry';
-import { SLO_BURN_RATE_RULE_ID } from '../../common/constants';
+import {
+  OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
+  SLO_BURN_RATE_RULE_ID,
+} from '../../common/constants';
 import { validateBurnRateRule } from '../components/burn_rate_rule_editor/validation';
 
 export const registerObservabilityRuleTypes = (
@@ -47,5 +50,30 @@ export const registerObservabilityRuleTypes = (
 - View in the SLO details page: \\{\\{context.viewInAppUrl\\}\\}`,
       }
     ),
+  });
+  observabilityRuleTypeRegistry.register({
+    id: OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
+    description: i18n.translate('xpack.infra.metrics.alertFlyout.alertDescription', {
+      defaultMessage: '[NEW OBSERVABILITY] - Alert when threshold breached.',
+    }),
+    iconClass: 'bell',
+    documentationUrl(docLinks) {
+      return `${docLinks.links.observability.metricsThreshold}`;
+    },
+    ruleParamsExpression: lazy(() => import('./components/expression')),
+    validate: validateMetricThreshold,
+    defaultActionMessage: i18n.translate(
+      'xpack.infra.metrics.alerting.threshold.defaultActionMessage',
+      {
+        defaultMessage: `\\{\\{alertName\\}\\} - \\{\\{context.group\\}\\} is in a state of \\{\\{context.alertState\\}\\}
+  
+  Reason:
+  \\{\\{context.reason\\}\\}
+  `,
+      }
+    ),
+    requiresAppContext: false,
+    format: formatReason,
+    alertDetailsAppSection: lazy(() => import('./components/alert_details_app_section')),
   });
 };

@@ -41,6 +41,11 @@ const configSchema = schema.object({
       }),
     }),
   }),
+  threshold_rule: schema.object({
+    group_by_page_size: schema.number({ defaultValue: 10_000 }),
+  }),
+  group_by_page_size: schema.number({ defaultValue: 10_000 }),
+
   enabled: schema.boolean({ defaultValue: true }),
 });
 

@@ -10,7 +10,6 @@ import moment from 'moment';
 import type { Logger } from '@kbn/logging';
 import { isCustom } from './metric_expression_params';
 import { MetricExpressionParams } from '../types';
-import { InfraSource } from '../../../../../common/source_configuration/source_configuration';
 import { getIntervalInSeconds } from '../utils';
 import { CUSTOM_EQUATION_I18N, DOCUMENT_COUNT_I18N } from '../messages';
 import { createTimerange } from './create_timerange';
@@ -39,7 +38,7 @@ export type Evaluation = Omit<MetricExpressionParams, 'metric'> & {
 export const evaluateRule = async <Params extends EvaluatedRuleParams = EvaluatedRuleParams>(
   esClient: ElasticsearchClient,
   params: Params,
-  config: InfraSource['configuration'],
+  dataView: string,
   compositeSize: number,
   alertOnGroupDisappear: boolean,
   logger: Logger,
@@ -48,7 +47,7 @@ export const evaluateRule = async <Params extends EvaluatedRuleParams = Evaluate
   missingGroups: MissingGroupsRecord[] = []
 ): Promise<Array<Record<string, Evaluation>>> => {
   const { criteria, groupBy, filterQuery } = params;
-  
+
   return Promise.all(
     criteria.map(async (criterion) => {
       const interval = `${criterion.timeSize}${criterion.timeUnit}`;
@@ -64,7 +63,7 @@ export const evaluateRule = async <Params extends EvaluatedRuleParams = Evaluate
       const currentValues = await getData(
         esClient,
         criterion,
-        config.metricAlias,
+        dataView,
         groupBy,
         filterQuery,
         compositeSize,
@@ -77,7 +76,7 @@ export const evaluateRule = async <Params extends EvaluatedRuleParams = Evaluate
       const verifiedMissingGroups = await checkMissingGroups(
         esClient,
         criterion,
-        config.metricAlias,
+        dataView,
         groupBy,
         filterQuery,
         logger,

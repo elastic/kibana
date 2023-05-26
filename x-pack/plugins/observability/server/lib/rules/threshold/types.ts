@@ -7,12 +7,9 @@
 import * as rt from 'io-ts';
 import { ML_ANOMALY_THRESHOLD } from '@kbn/ml-anomaly-utils/anomaly_threshold';
 import { TimeUnitChar } from '../../../../common';
-
-export const METRIC_THRESHOLD_ALERT_TYPE_ID = 'metrics.alert.threshold';
-export const SNAPSHOT_CUSTOM_AGGREGATIONS = ['avg', 'max', 'min', 'rate'] as const;
+import { SNAPSHOT_CUSTOM_AGGREGATIONS } from './constants';
 
 export type SnapshotCustomAggregation = typeof SNAPSHOT_CUSTOM_AGGREGATIONS[number];
-
 const snapshotCustomAggregationKeys = SNAPSHOT_CUSTOM_AGGREGATIONS.reduce<
   Record<SnapshotCustomAggregation, null>
 >((acc, agg) => ({ ...acc, [agg]: null }), {} as Record<SnapshotCustomAggregation, null>);
@@ -151,3 +148,13 @@ export interface AlertExecutionDetails {
   alertId: string;
   executionId: string;
 }
+
+export const ThresholdFormatterTypeRT = rt.keyof({
+  abbreviatedNumber: null,
+  bits: null,
+  bytes: null,
+  number: null,
+  percent: null,
+  highPrecision: null,
+});
+export type ThresholdFormatterType = rt.TypeOf<typeof ThresholdFormatterTypeRT>;

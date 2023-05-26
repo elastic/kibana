@@ -6,8 +6,8 @@
  */
 
 import moment from 'moment';
+import { TIMESTAMP_FIELD } from '../constants';
 import { MetricExpressionParams } from '../types';
-import { TIMESTAMP_FIELD } from '../../../../../common/constants';
 
 export const createLastPeriod = (
   lastPeriodEnd: number,

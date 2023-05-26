@@ -13,7 +13,9 @@ import { IBasePath, Logger } from '@kbn/core/server';
 import { legacyExperimentalFieldMap } from '@kbn/alerts-as-data-utils';
 import { createLifecycleExecutor } from '@kbn/rule-registry-plugin/server';
 import { LicenseType } from '@kbn/licensing-plugin/server';
-import { Comparator, METRIC_THRESHOLD_ALERT_TYPE_ID } from './types';
+
+import { OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '../../../../common/constants';
+import { Comparator } from './types';
 
 import {
   alertDetailUrlActionVariableDescription,
@@ -46,22 +48,10 @@ import {
   NO_DATA_ACTIONS,
 } from './threshold_executor';
 import { ObservabilityConfig } from '../../..';
+import { METRIC_EXPLORER_AGGREGATIONS } from './constants';
 
-export const METRICS_RULES_ALERT_CONTEXT = 'observability.metrics';
-export const METRIC_EXPLORER_AGGREGATIONS = [
-  'avg',
-  'max',
-  'min',
-  'cardinality',
-  'rate',
-  'count',
-  'sum',
-  'p95',
-  'p99',
-  'custom',
-] as const;
 export const MetricsRulesTypeAlertDefinition: IRuleTypeAlerts = {
-  context: METRICS_RULES_ALERT_CONTEXT,
+  context: OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
   mappings: { fieldMap: legacyExperimentalFieldMap },
   useEcs: true,
   useLegacyAlerts: true,
@@ -89,7 +79,7 @@ export function thresholdRuleType(
     warningThreshold: schema.maybe(schema.arrayOf(schema.number())),
     warningComparator: schema.maybe(oneOfLiterals(Object.values(Comparator))),
   };
-  createLifecycleRuleExecutor
+
   const nonCountCriterion = schema.object({
     ...baseCriterion,
     metric: schema.string(),
@@ -141,9 +131,9 @@ export function thresholdRuleType(
   );
 
   return {
-    id: METRIC_THRESHOLD_ALERT_TYPE_ID,
-    name: i18n.translate('xpack.infra.metrics.alertName', {
-      defaultMessage: 'Metric threshold',
+    id: OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
+    name: i18n.translate('xpack.observability.threshold.alertName', {
+      defaultMessage: 'Observability threshold',
     }),
     validate: {
       params: schema.object(

@@ -7,8 +7,8 @@
 
 import moment from 'moment';
 import { isCustom, isNotCountOrCustom } from './metric_expression_params';
-import { Aggregators, MetricExpressionParams } from '../../../../../common/alerting/metrics';
-import { createCustomMetricsAggregations } from '../../../create_custom_metrics_aggregations';
+import { Aggregators, MetricExpressionParams } from '../types';
+import { createCustomMetricsAggregations } from './create_custom_metrics_aggregations';
 import {
   hasAdditionalContext,
   KUBERNETES_POD_UID,
@@ -16,7 +16,7 @@ import {
   shouldTermsAggOnContainer,
   termsAggField,
   validGroupByForContext,
-} from '../../common/utils';
+} from '../utils';
 import { createBucketSelector } from './create_bucket_selector';
 import { createPercentileAggregation } from './create_percentile_aggregation';
 import { createRateAggsBuckets, createRateAggsBucketScript } from './create_rate_aggregation';

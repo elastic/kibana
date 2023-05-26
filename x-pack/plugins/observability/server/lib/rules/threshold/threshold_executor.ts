@@ -17,14 +17,11 @@ import {
 import { Alert, RuleTypeState } from '@kbn/alerting-plugin/server';
 import { IBasePath, Logger } from '@kbn/core/server';
 import { LifecycleRuleExecutor } from '@kbn/rule-registry-plugin/server';
-import { Index, useFetchDataViews } from '../../../../public/hooks/use_fetch_data_views';
-import { useFetchIndices } from '../../../../public/hooks/use_fetch_indices';
 import { ObservabilityConfig } from '../../..';
 import { TimeUnitChar } from '../../../../common/utils/formatters/duration';
 import { getOriginalActionGroup } from './utils';
 import { AlertStates, Comparator } from './types';
-import { createFormatter } from '../../../../common/formatters';
-// import { InfraBackendLibs } from '../../infra_types';
+import { createFormatter } from './formatters';
 import {
   buildFiredAlertReason,
   buildInvalidQueryAlertReason,
@@ -188,26 +185,24 @@ export const createMetricThresholdExecutor = ({
 
     // For backwards-compatibility, interpret undefined alertOnGroupDisappear as true
     const alertOnGroupDisappear = _alertOnGroupDisappear !== false;
-
-    // TODO: Replace with DataView.
-    // const source = await libs.sources.getSourceConfiguration(
-    //   savedObjectsClient,
-    //   sourceId || 'default'
-    // );
-    // const config = source.configuration;
     const compositeSize = config.threshold_rule.group_by_page_size;
-
     const filterQueryIsSame = isEqual(state.filterQuery, params.filterQuery);
     const groupByIsSame = isEqual(state.groupBy, params.groupBy);
     const previousMissingGroups =
       alertOnGroupDisappear && filterQueryIsSame && groupByIsSame && state.missingGroups
         ? state.missingGroups
         : [];
+    // TODO: check the DATA VIEW
+    const defaultDataView = await dataViews.getDefaultDataView();
+    const dataView = defaultDataView?.getIndexPattern();
+    if (!dataView) {
+      throw new Error('No matched data view');
+    }
 
     const alertResults = await evaluateRule(
       services.scopedClusterClient.asCurrentUser,
       params as EvaluatedRuleParams,
-      config,
+      dataView,
       compositeSize,
       alertOnGroupDisappear,
       logger,

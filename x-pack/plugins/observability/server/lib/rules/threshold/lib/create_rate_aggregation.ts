@@ -6,8 +6,8 @@
  */
 
 import moment from 'moment';
-import { calculateRateTimeranges } from '../../inventory_metric_threshold/lib/calculate_rate_timeranges';
-import { TIMESTAMP_FIELD } from '../../../../../common/constants';
+import { TIMESTAMP_FIELD } from '../constants';
+import { calculateRateTimeranges } from '../utils';
 
 export const createRateAggsBucketScript = (
   timeframe: { start: number; end: number },

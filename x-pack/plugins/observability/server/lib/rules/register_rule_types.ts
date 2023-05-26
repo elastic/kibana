@@ -8,14 +8,20 @@
 import { PluginSetupContract } from '@kbn/alerting-plugin/server';
 import { IBasePath, Logger } from '@kbn/core/server';
 import { createLifecycleExecutor, IRuleDataClient } from '@kbn/rule-registry-plugin/server';
+import { ObservabilityConfig } from '../..';
 import { sloBurnRateRuleType } from './slo_burn_rate';
+import { thresholdRuleType } from './threshold/register_threshold_rule_type';
 
 export function registerRuleTypes(
   alertingPlugin: PluginSetupContract,
   logger: Logger,
   ruleDataClient: IRuleDataClient,
-  basePath: IBasePath
+  basePath: IBasePath,
+  config: ObservabilityConfig
 ) {
   const createLifecycleRuleExecutor = createLifecycleExecutor(logger.get('rules'), ruleDataClient);
   alertingPlugin.registerType(sloBurnRateRuleType(createLifecycleRuleExecutor, basePath));
+  alertingPlugin.registerType(
+    thresholdRuleType(createLifecycleRuleExecutor, basePath, config, logger)
+  );
 }

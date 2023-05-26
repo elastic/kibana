@@ -60,7 +60,6 @@ export const evaluateRule = async <Params extends EvaluatedRuleParams = Evaluate
         timeframe,
         lastPeriodEnd
       );
-
       const currentValues = await getData(
         esClient,
         criterion,
