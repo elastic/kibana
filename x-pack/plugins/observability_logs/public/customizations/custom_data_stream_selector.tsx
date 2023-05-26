@@ -40,6 +40,7 @@ export const CustomDataStreamSelector = withProviders(({ stateContainer }) => {
     loadDataStreams,
     reloadDataStreams,
     searchDataStreams,
+    sortDataStreams,
   } = useDataStreamsContext();
 
   const handleStreamSelection: DataStreamSelectionHandler = (dataStream) => {
@@ -65,8 +66,8 @@ export const CustomDataStreamSelector = withProviders(({ stateContainer }) => {
       onIntegrationsSort={sortIntegrations}
       onIntegrationsStreamsSearch={searchIntegrationsStreams}
       onIntegrationsStreamsSort={sortIntegrationsStreams}
-      onUnmanagedStreamsSearch={console.log}
-      onUnmanagedStreamsSort={console.log}
+      onUnmanagedStreamsSearch={searchDataStreams}
+      onUnmanagedStreamsSort={sortDataStreams}
       onUnmanagedStreamsReload={reloadDataStreams}
       onStreamSelected={handleStreamSelection}
       onStreamsEntryClick={loadDataStreams}

@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { DoneInvokeEvent } from 'xstate';
 import type { IImmutableCache } from '../../../../common/immutable_cache';
 import { FindDataStreamsResponse, SortOrder } from '../../../../common/latest';
 import { DataStream } from '../../../../common/data_streams';
@@ -60,8 +61,6 @@ type LoadingFailedDataStreamsContext = WithCache &
   WithSearch &
   WithError;
 
-type SearchingDataStreamsContext = LoadedDataStreamsContext | LoadingFailedDataStreamsContext;
-
 export type DataStreamsTypestate =
   | {
       value: 'uninitialized';
@@ -80,29 +79,25 @@ export type DataStreamsTypestate =
       context: LoadingFailedDataStreamsContext;
     }
   | {
-      value: 'debouncingSearch';
-      context: SearchingDataStreamsContext;
+      value: 'debounceSearchingDataStreams';
+      context: LoadedDataStreamsContext;
     };
 
-export type DataStreamsContext = DataStreamTypestate['context'];
+export type DataStreamsContext = DataStreamsTypestate['context'];
 
 export type DataStreamsEvent =
   | {
       type: 'LOAD_DATA_STREAMS';
     }
   | {
-      type: 'LOADING_SUCCEEDED';
-      data: FindDataStreamsResponse;
-    }
-  | {
-      type: 'LOADING_FAILED';
-      error: Error;
-    }
-  | {
       type: 'RELOAD_DATA_STREAMS';
     }
   | {
-      type: 'SEARCH';
+      type: 'SEARCH_DATA_STREAMS';
       search: DataStreamsSearchParams;
-      delay?: number;
-    };
+    }
+  | {
+      type: 'SORT_DATA_STREAMS';
+      search: DataStreamsSearchParams;
+    }
+  | DoneInvokeEvent<any>;

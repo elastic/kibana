@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { catchError, from, map, of } from 'rxjs';
 import { assign, createMachine } from 'xstate';
 import { FindDataStreamsResponse } from '../../../../common';
 import { IDataStreamsClient } from '../../../services/data_streams';
@@ -17,16 +16,10 @@ import {
   DataStreamsTypestate,
 } from './types';
 
-/**
- * TODO
- * - Split search and sort into 2 different events
- * - Split states into UI accessible interactions, keep track of current UI state for this
- */
-
 export const createPureDataStreamsStateMachine = (
   initialContext: DefaultDataStreamsContext = DEFAULT_CONTEXT
 ) =>
-  /** @xstate-layout N4IgpgJg5mDOIC5QBECGAXVBldAnMqAtrAHQCuAdgJbXpWoA2VAXpAMQAyA8gILID6yHgBUe-LMIBKAUR4BZLAG0ADAF1EoAA4B7WFTraKGkAA9EAdmUBGEuavKAnAGYArACYHy5QA5l5gDQgAJ6I3jYuXl4AbM7KUS5WrgC+SYFomDj4RKQM2qgQNFCcvMgAkgByAOLiAKoAwnXS0sjNKupIIDp6BkYdZgiWNnaOrh5evgHBiFGJJC6WTm4+1lHeYSlpGNh4BMQkufmFxXwV1QBiPKUcrWrGXfpUhsb95gAsbiQO5vFuVq-eUQWbkCIQQS2UtleDi+Dg8Diir3+GxA6W2WT2Bwg7CwskkdQAEm07roHk8+og3O5Pr81k5AW4nFY3iDEO4IW9oeY3N4nG9LN5kajMrtSFiAEbaSgAY0KWAIuClAAs2DieHjCbcOvces9Wa8bK9vi5XvNFuZnE4WQhER9KV4mfEXPDlG5BVthdkSOLJRQZRQoHLUArlSZYJh0GASKgAGYR3AAClV6sE0g4PAAmgBKNhCnae73S2XypVErUknXkgbWWz2ZzuTzLSag9y2iLWZxMpzKRZujJ5jF5Ar+s6oKgMdgybh8QQiMQSGTyJSarTlx69UD9SkfWFWWn0xnMqYIRbhSIeVZOBxWJZOXtokX7QeFEdj7G4gmllfdNe6sFUnd7lyB6vFaiIOCQLpuK8ygRPqPguC4UQpKkIAUNoWLwB0ubophX6kuupiIAAtFEVpES4nzQpyV4Mr8USUneHp7JQNAPIwLCQMS35khurJOiQ3gON4iI8mEglQVaYSUVRiRuOYTpREhKHYQ+mKFFx+G-g4+okG48QzN2yjvOYixWh43hzJEViwtBThrIijH9jkg6cWW3EEf0iSvCQryrPJ5rmACRlfFa8QWfqikmYkCR0o5OFemAEqFv6gbBhpFa8QgEQ2N216vE4BWdl2IFHlC5iQlRdKRIhSmbH28VqcOo7jhA6U-pW7xWnZFH0VCDguL4vlXshSRAA */
+  /** @xstate-layout N4IgpgJg5mDOIC5QBECGAXVBldAnMqAtrAHQCuAdgJbXpWoA2VAXpAMQAyA8gILID6yHgBUe-LMIBKAUR4BZLAG0ADAF1EoAA4B7WFTraKGkAA9EAdmUBWEuYCMygJwAWS1asAmOwGYANCABPRA8rZRI7c0cANisIqPjnR3MADgBfVP80TBx8IlIGbVQIGig2CEMwEhoAN20Aa0qs7DwCYhICopKEGu0AYwwqQxVVYeMdPQMjJFMLO0dbO2Tzc2dvKKSPcyt-IIRkuxJQ5WPnZKsoh3W0jJAmnNb8wuKKUrBcXG1cEk0GDAAzT6EEh3Fp5dpPLo9fqTYajabjfSDKagMwIOyLcwkDzKbwRRLKZKE847YKOea4jyOQkeTaOOwebzpTIYZq5NodCDsLCySQAYQAEoIRGIJDJ5Eo1GNdIjDMZUXYomFnFZcWtTspzLioh4SQh3DYnFFvEsPGcrC5GTcQWzHkUuVxJMIhaJxFJZAo4VppZM5YgFUqVT4ourNQqdYFEN5XCRHIHTdrks5rB5nEzbiz7mDOQAjbSUXpgLAEXC9AAWJWtDzY3J4fMFQhdovdEvU8O9SN9CFWNisyWxzjikXMDN1iQOUUi62WzmcmwuVjTlazYFz+cLxbLFYzoOIbBMsEw6EqqD+R9wAApvMcAJRsJdtHN5igFouoEvll732CekAIn3TVE3AWJxXGsTwfF1Kx7BICckhnbVnG1dZF23G1wU6F4ADFUCoBh2Bkbg+GdEU3XFH8-w7AC-QxLEcTxRwCSJKJdRTZISH2K9aVjKNEgXNMKG0Tl4GmL8pQmSiUUQABaZiIwQKSbDJJTlJUy1mWyHdSEoGhEUYFhIDEmVkRmPUjXYqllQJZQUyiJYWNCGDJxcI06UiNT0w0tCORKQz-0khAXGcGNlSjFUlJTcwWO8eYaWiFZkkcFNziWFDPIedDOQgXyJJM2ddR8NjkmUUDlX2HEtlS1l0sfNdX3fLc0rybLZSort0VsI4IkWdY7Eg6MIjg7xhzmay+PUqqwW8rCcLwrK23Elr-LsbsSApc1rI8Cc7E8FiU1W6JvGilIyS2y10iAA */
   createMachine<DataStreamsContext, DataStreamsEvent, DataStreamsTypestate>(
     {
       context: initialContext,
@@ -41,33 +34,32 @@ export const createPureDataStreamsStateMachine = (
           },
         },
         loading: {
+          id: 'loading',
           invoke: {
             src: 'loadDataStreams',
-          },
-          on: {
-            LOADING_SUCCEEDED: {
+            onDone: {
               target: 'loaded',
               actions: ['storeInCache', 'storeDataStreams', 'storeSearch'],
             },
-            LOADING_FAILED: 'loadingFailed',
+            onError: 'loadingFailed',
           },
         },
         loaded: {
           on: {
-            SEARCH: 'debouncingSearch',
+            SEARCH_DATA_STREAMS: 'debounceSearchingDataStreams',
+            SORT_DATA_STREAMS: {
+              target: 'loading',
+              actions: 'storeSearch',
+            },
           },
         },
-        debouncingSearch: {
+        debounceSearchingDataStreams: {
           entry: 'storeSearch',
           on: {
-            SEARCH: {
-              target: 'debouncingSearch',
-            },
+            SEARCH_DATA_STREAMS: 'debounceSearchingDataStreams',
           },
           after: {
-            SEARCH_DELAY: {
-              target: 'loading',
-            },
+            300: 'loading',
           },
         },
         loadingFailed: {
@@ -75,7 +67,6 @@ export const createPureDataStreamsStateMachine = (
           exit: 'clearError',
           on: {
             RELOAD_DATA_STREAMS: 'loading',
-            SEARCH: 'debouncingSearch',
           },
         },
       },
@@ -87,41 +78,17 @@ export const createPureDataStreamsStateMachine = (
           ...('search' in event && { search: event.search }),
         })),
         storeDataStreams: assign((_context, event) =>
-          'data' in event
-            ? {
-                dataStreams: event.data.items,
-              }
-            : {}
+          'data' in event ? { dataStreams: event.data.items } : {}
         ),
-        storeInCache: assign((context, event) => {
-          if (event.type !== 'LOADING_SUCCEEDED') return {};
-
-          return {
-            cache: context.cache.set(context.search, event.data),
-          };
-        }),
-        clearCache: assign((context, event) => {
-          if (event.type !== 'LOADING_FAILED') return {};
-
-          return {
-            cache: context.cache.clear(),
-          };
-        }),
-        storeError: assign((_context, event) =>
-          'error' in event
-            ? {
-                error: event.error,
-              }
-            : {}
+        storeInCache: assign((context, event) =>
+          'data' in event ? { cache: context.cache.set(context.search, event.data) } : {}
         ),
+        clearCache: assign((context) => ({
+          cache: context.cache.clear(),
+          dataStreams: null,
+        })),
+        storeError: assign((_context, event) => ('data' in event ? { error: event.data } : {})),
         clearError: assign((_context) => ({ error: null })),
-      },
-      delays: {
-        SEARCH_DELAY: (_context, event) => {
-          if (event.type !== 'SEARCH' || !event.delay) return 0;
-
-          return event.delay;
-        },
       },
     }
   );
@@ -137,28 +104,12 @@ export const createDataStreamsStateMachine = ({
 }: DataStreamsStateMachineDependencies) =>
   createPureDataStreamsStateMachine(initialContext).withConfig({
     services: {
-      loadDataStreams: (context, event) => {
-        const searchParams =
-          'search' in event ? { ...context.search, ...event.search } : context.search;
+      loadDataStreams: (context) => {
+        const searchParams = context.search;
 
-        return from(
-          context.cache.has(searchParams)
-            ? Promise.resolve(context.cache.get(searchParams) as FindDataStreamsResponse)
-            : dataStreamsClient.findDataStreams(searchParams)
-        ).pipe(
-          map(
-            (data): DataStreamsEvent => ({
-              type: 'LOADING_SUCCEEDED',
-              data,
-            })
-          ),
-          catchError((error) =>
-            of<DataStreamsEvent>({
-              type: 'LOADING_FAILED',
-              error,
-            })
-          )
-        );
+        return context.cache.has(searchParams)
+          ? Promise.resolve(context.cache.get(searchParams) as FindDataStreamsResponse)
+          : dataStreamsClient.findDataStreams(searchParams);
       },
     },
   });
