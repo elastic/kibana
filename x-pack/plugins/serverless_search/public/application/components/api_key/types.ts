@@ -5,12 +5,10 @@
  * 2.0.
  */
 
-import type {
-  RuleSignatureId,
-  RuleVersion,
-} from '../../../../../../common/detection_engine/rule_schema';
-
-export interface PrebuiltRuleVersionInfo {
-  rule_id: RuleSignatureId;
-  version: RuleVersion;
+export interface CreateApiKeyResponse {
+  id: string;
+  name: string;
+  expiration?: number;
+  api_key: string;
+  encoded?: string;
 }
