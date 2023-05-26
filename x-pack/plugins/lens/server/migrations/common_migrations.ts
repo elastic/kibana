@@ -588,14 +588,33 @@ export const commonMigrateMetricFormatter = (attributes: LensDocShape860<unknown
   )) {
     const newColumns: Record<string, Record<string, unknown>> = {};
     for (const [id, column] of Object.entries(layer.columns)) {
+      const params = column.params as Record<
+        'format',
+        Record<string, { id: string; params: Record<string, string | boolean> }>
+      >;
       if (column.isBucketed) {
         newColumns[id] = column;
       } else {
-        // Metric only support numeric values
-        newColumns[id] = {
-          ...column,
-          params: { id: 'number', compact: true, ...(column.params as Record<string, unknown>) },
-        };
+        // When value formatting is set to Default, assume nothing
+        if (!params?.format) {
+          newColumns[id] = column;
+        } else {
+          // Metric only support numeric values
+          newColumns[id] = {
+            ...column,
+            params: {
+              ...params,
+              format: {
+                id: 'number',
+                ...params?.format,
+                params: {
+                  ...params?.format?.params,
+                  compact: true,
+                },
+              },
+            },
+          };
+        }
       }
     }
     updatedLayersWithCompactFormatters[layerId] = {
