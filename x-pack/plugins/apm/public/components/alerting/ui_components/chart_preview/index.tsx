@@ -38,8 +38,8 @@ interface ChartPreviewProps {
   threshold: number;
   uiSettings?: IUiSettingsClient;
   series: Array<{ name?: string; data: Coordinate[] }>;
-  timeSize: number;
-  timeUnit: TimeUnitChar;
+  timeSize?: number;
+  timeUnit?: TimeUnitChar;
 }
 
 export function ChartPreview({
