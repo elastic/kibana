@@ -103,8 +103,18 @@ export function DashboardEmptyScreen() {
       </EuiText>
     );
 
+    const Or = (
+      <EuiText size="s" color="subdued">
+        <span>{emptyScreenStrings.orText()}</span>
+      </EuiText>
+    );
+
     const LibraryButton = (
-      <EuiButtonEmpty iconType="folderOpen" onClick={() => dashboardContainer.addFromLibrary()}>
+      <EuiButtonEmpty
+        flush="left"
+        iconType="folderOpen"
+        onClick={() => dashboardContainer.addFromLibrary()}
+      >
         {emptyScreenStrings.getAddFromLibraryButtonTitle()}
       </EuiButtonEmpty>
     );
@@ -116,35 +126,24 @@ export function DashboardEmptyScreen() {
     );
 
     return (
-      <div className="dshEditEmptyWidgetContainer">
-        <div
-          data-test-subj="emptyDashboardWidget"
-          className="dshEditEmptyWidget"
-          style={{ margin: DASHBOARD_MARGIN_SIZE, height }}
-        >
-          <EuiFlexGroup
-            direction="column"
-            alignItems="center"
-            justifyContent="center"
-            style={{ height: '100%' }}
-          >
-            <EuiFlexItem grow={false}>
-              <EuiImage url={imageUrl} alt="" />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              {Title}
-              <EuiSpacer size="s" />
-              {Subtitle}
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiFlexGroup direction="row">
-                <EuiFlexItem grow={false}>{LibraryButton}</EuiFlexItem>
-                <EuiFlexItem grow={false}>{GoToLensButton}</EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </div>
-      </div>
+      <EuiPageTemplate style={{ backgroundColor: 'inherit' }} grow={false}>
+        <EuiPageTemplate.EmptyPrompt
+          color="transparent"
+          className="dshEditEmptyWidgetContainer"
+          hasBorder={true}
+          icon={<EuiImage size="fullWidth" src={imageUrl} alt="" />}
+          style={{ padding: euiThemeVars.euiSizeXL }}
+          body={Subtitle}
+          title={<h2>{Title}</h2>}
+          actions={
+            <EuiFlexGroup justifyContent="center" gutterSize="s" alignItems="center">
+              <EuiFlexItem grow={false}>{GoToLensButton}</EuiFlexItem>
+              <EuiFlexItem grow={false}>{Or}</EuiFlexItem>
+              <EuiFlexItem grow={false}>{LibraryButton}</EuiFlexItem>
+            </EuiFlexGroup>
+          }
+        />
+      </EuiPageTemplate>
     );
   }
 

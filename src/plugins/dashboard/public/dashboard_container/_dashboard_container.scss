@@ -14,18 +14,12 @@
   align-items: center;
 }
 
-.dshEditEmptyWidget {
+.dshEditEmptyWidgetContainer {
+  padding-top: 0 !important;
   border: $euiBorderThin;
   border-style: dashed;
   border-radius: $euiBorderRadius;
-  padding: $euiSizeXXL;
-  padding-top: $euiSizeM;
-  text-align: center;
-}
-
-.dshEditEmptyWidgetContainer {
-  width: 50%;
-  @include euiBreakpoint('xs', 's') {
-    width: 100%;
+  .euiEmptyPrompt__icon {
+    margin-bottom: 0;
   }
 }
