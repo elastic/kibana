@@ -20,6 +20,7 @@ import {
   UnifiedFieldListExamplesPluginStart,
 } from './types';
 import { PLUGIN_NAME } from '../common';
+import image from './unified_field_list.png';
 
 export class UnifiedFieldListExamplesPlugin
   implements
@@ -53,7 +54,7 @@ export class UnifiedFieldListExamplesPlugin
       appId: 'unifiedFieldListExamples',
       title: 'Unified Field List Examples',
       description: `Examples of unified field list functionality.`,
-      // image: img, TODO: add a preview image
+      image,
       links: [
         {
           label: 'README',
