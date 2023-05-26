@@ -66,7 +66,6 @@ interface EditControlProps {
   onCancel: () => void;
   removeControl?: () => void;
   updateGrow?: (grow: boolean) => void;
-  updateTitle: (title?: string) => void;
   updateWidth: (newWidth: ControlWidth) => void;
   getRelevantDataViewId?: () => string | undefined;
   setLastUsedDataViewId?: (newDataViewId: string) => void;
@@ -86,7 +85,6 @@ export const ControlEditor = ({
   onCancel,
   removeControl,
   updateGrow,
-  updateTitle,
   updateWidth,
   onTypeEditorChange,
   getRelevantDataViewId,
@@ -99,7 +97,6 @@ export const ControlEditor = ({
 
   const controlGroup = useControlGroupContainer();
   const editorConfig = controlGroup.select((state) => state.componentState.editorConfig);
-
   const [defaultTitle, setDefaultTitle] = useState<string>();
   const [currentTitle, setCurrentTitle] = useState(title ?? '');
   const [currentWidth, setCurrentWidth] = useState(width);
@@ -209,16 +206,17 @@ export const ControlEditor = ({
                 selectedFieldName={selectedField}
                 dataView={selectedDataView}
                 onSelectField={(field) => {
-                  onTypeEditorChange({
+                  const newInput: Partial<DataControlInput> = {
                     fieldName: field.name,
-                  });
+                  };
                   const newDefaultTitle = field.displayName ?? field.name;
                   setDefaultTitle(newDefaultTitle);
                   setSelectedField(field.name);
                   if (!currentTitle || currentTitle === defaultTitle) {
                     setCurrentTitle(newDefaultTitle);
-                    updateTitle(newDefaultTitle);
+                    newInput.title = newDefaultTitle;
                   }
+                  onTypeEditorChange(newInput);
                 }}
                 selectableProps={{ isLoading: dataViewListLoading || dataViewLoading }}
               />
@@ -253,8 +251,10 @@ export const ControlEditor = ({
                 placeholder={defaultTitle}
                 value={currentTitle}
                 onChange={(e) => {
-                  updateTitle(e.target.value || defaultTitle);
                   setCurrentTitle(e.target.value);
+                  onTypeEditorChange({
+                    title: e.target.value === '' ? defaultTitle : e.target.value,
+                  });
                 }}
               />
             </EuiFormRow>

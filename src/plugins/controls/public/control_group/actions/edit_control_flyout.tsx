@@ -71,7 +71,6 @@ export const EditControlFlyout = ({
       closeFlyout();
       return;
     }
-
     const factory = getControlFactory(type) as IEditableControlFactory;
     if (!factory) throw new EmbeddableFactoryNotFoundError(type);
     if (factory.presaveTransformFunction) {
@@ -95,7 +94,6 @@ export const EditControlFlyout = ({
       embeddable={embeddable}
       title={embeddable.getTitle()}
       onCancel={() => onCancel()}
-      updateTitle={(newTitle) => (inputToReturn.title = newTitle)}
       setLastUsedDataViewId={(lastUsed) => controlGroup.setLastUsedDataViewId(lastUsed)}
       updateWidth={(newWidth) => setCurrentWidth(newWidth)}
       updateGrow={(newGrow) => setCurrentGrow(newGrow)}

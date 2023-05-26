@@ -73,7 +73,6 @@ export function openAddDataControlFlyout(
           isCreate={true}
           width={this.getInput().defaultControlWidth ?? DEFAULT_CONTROL_WIDTH}
           grow={this.getInput().defaultControlGrow ?? DEFAULT_CONTROL_GROW}
-          updateTitle={(newTitle) => (controlInput.title = newTitle)}
           updateWidth={(defaultControlWidth) => this.updateInput({ defaultControlWidth })}
           updateGrow={(defaultControlGrow: boolean) => this.updateInput({ defaultControlGrow })}
           onSave={async (type) => {
