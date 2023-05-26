@@ -75,7 +75,8 @@ export class MetadataEmbeddable extends Embeddable<MetadataEmbeddableInput> {
               node={this.input.node}
               nodeType={this.input.nodeType}
               showActionsColumn={this.input.showActionsColumn}
-              persistMetadataSearchToUrlState={this.input.persistMetadataSearchToUrlState}
+              onSearchChange={this.input.onSearchChange}
+              search={this.input.search}
             />
           </div>
         </EuiThemeProvider>
