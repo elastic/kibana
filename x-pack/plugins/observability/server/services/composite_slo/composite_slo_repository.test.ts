@@ -81,7 +81,7 @@ describe('KibanaSavedObjectsCompositeSLORepository', () => {
       });
     });
 
-    it('updates the existing SLO', async () => {
+    it('updates the existing composite SLO', async () => {
       const compositeSlo = createCompositeSLO({ id: 'my-composite-id' });
       soClientMock.find.mockResolvedValueOnce(createFindResponse([compositeSlo]));
       soClientMock.create.mockResolvedValueOnce(aStoredCompositeSLO(compositeSlo));
@@ -131,6 +131,39 @@ describe('KibanaSavedObjectsCompositeSLORepository', () => {
         filter: `composite-slo.attributes.id:(${compositeSlo.id})`,
       });
       expect(soClientMock.delete).toHaveBeenCalledWith(SO_COMPOSITE_SLO_TYPE, compositeSlo.id);
+    });
+  });
+
+  describe('finding a composite SLO', () => {
+    it('finds an existing composite SLO', async () => {
+      const compositeSlo = createCompositeSLO();
+      const repository = new KibanaSavedObjectsCompositeSLORepository(soClientMock);
+      soClientMock.find.mockResolvedValueOnce(createFindResponse([compositeSlo]));
+
+      const foundSLO = await repository.findById(compositeSlo.id);
+      expect(foundSLO).toEqual(compositeSlo);
+      expect(soClientMock.find).toHaveBeenCalledWith({
+        type: SO_COMPOSITE_SLO_TYPE,
+        page: 1,
+        perPage: 1,
+        filter: `composite-slo.attributes.id:(${compositeSlo.id})`,
+      });
+    });
+
+    it('throws when the composite SLO does not exist', async () => {
+      const repository = new KibanaSavedObjectsCompositeSLORepository(soClientMock);
+      soClientMock.find.mockResolvedValueOnce(createFindResponse([]));
+
+      await expect(repository.findById('inexistant-id')).rejects.toThrowError(
+        new CompositeSLONotFound('Composite SLO [inexistant-id] not found')
+      );
+
+      expect(soClientMock.find).toHaveBeenCalledWith({
+        type: SO_COMPOSITE_SLO_TYPE,
+        page: 1,
+        perPage: 1,
+        filter: 'composite-slo.attributes.id:(inexistant-id)',
+      });
     });
   });
 });

@@ -18,6 +18,7 @@ import { SO_COMPOSITE_SLO_TYPE } from '../../saved_objects';
 export interface CompositeSLORepository {
   save(compositeSlo: CompositeSLO, options?: { throwOnConflict: boolean }): Promise<CompositeSLO>;
   deleteById(id: string): Promise<void>;
+  findById(id: string): Promise<CompositeSLO>;
 }
 
 const SAVED_OBJECT_ATTRIBUTES_PATH = 'composite-slo.attributes';
@@ -70,6 +71,21 @@ export class KibanaSavedObjectsCompositeSLORepository implements CompositeSLORep
     }
 
     await this.soClient.delete(SO_COMPOSITE_SLO_TYPE, response.saved_objects[0].id);
+  }
+
+  async findById(id: string): Promise<CompositeSLO> {
+    const response = await this.soClient.find<StoredCompositeSLO>({
+      type: SO_COMPOSITE_SLO_TYPE,
+      page: 1,
+      perPage: 1,
+      filter: `${SAVED_OBJECT_ATTRIBUTES_PATH}.id:(${id})`,
+    });
+
+    if (response.total === 0) {
+      throw new CompositeSLONotFound(`Composite SLO [${id}] not found`);
+    }
+
+    return toCompositeSLO(response.saved_objects[0].attributes);
   }
 }
 
