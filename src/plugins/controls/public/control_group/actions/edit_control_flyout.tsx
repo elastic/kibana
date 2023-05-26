@@ -40,9 +40,8 @@ export const EditControlFlyout = ({
 
   const [currentGrow, setCurrentGrow] = useState(panel.grow);
   const [currentWidth, setCurrentWidth] = useState(panel.width);
-  const [inputToReturn, setInputToReturn] = useState<Partial<DataControlInput>>({});
 
-  const onCancel = () => {
+  const onCancel = (inputToReturn: Partial<DataControlInput>) => {
     if (
       isEqual(panel.explicitInput, {
         ...panel.explicitInput,
@@ -66,7 +65,7 @@ export const EditControlFlyout = ({
     });
   };
 
-  const onSave = async (type?: string) => {
+  const onSave = async (inputToReturn: Partial<DataControlInput>, type?: string) => {
     if (!type) {
       closeFlyout();
       return;
@@ -74,7 +73,7 @@ export const EditControlFlyout = ({
     const factory = getControlFactory(type) as IEditableControlFactory;
     if (!factory) throw new EmbeddableFactoryNotFoundError(type);
     if (factory.presaveTransformFunction) {
-      setInputToReturn(factory.presaveTransformFunction(inputToReturn, embeddable));
+      inputToReturn = factory.presaveTransformFunction(inputToReturn, embeddable);
     }
 
     if (currentWidth !== panel.width)
@@ -93,14 +92,11 @@ export const EditControlFlyout = ({
       grow={panel.grow}
       embeddable={embeddable}
       title={embeddable.getTitle()}
-      onCancel={() => onCancel()}
+      onCancel={onCancel}
       setLastUsedDataViewId={(lastUsed) => controlGroup.setLastUsedDataViewId(lastUsed)}
       updateWidth={(newWidth) => setCurrentWidth(newWidth)}
       updateGrow={(newGrow) => setCurrentGrow(newGrow)}
-      onTypeEditorChange={(partialInput) => {
-        setInputToReturn({ ...inputToReturn, ...partialInput });
-      }}
-      onSave={(type) => onSave(type)}
+      onSave={onSave}
       removeControl={() => {
         closeFlyout();
         removeControl();

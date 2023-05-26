@@ -14,7 +14,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import useMount from 'react-use/lib/useMount';
 import useAsync from 'react-use/lib/useAsync';
 
@@ -47,6 +47,7 @@ import {
 import { ControlGroupStrings } from '../control_group_strings';
 import {
   ControlEmbeddable,
+  ControlInput,
   ControlWidth,
   DataControlInput,
   IEditableControlFactory,
@@ -61,15 +62,14 @@ interface EditControlProps {
   isCreate: boolean;
   title?: string;
   width: ControlWidth;
-  onSave: (type?: string) => void;
+  onSave: (inputToReturn: Partial<DataControlInput>, type?: string) => void;
   grow: boolean;
-  onCancel: () => void;
+  onCancel: (inputToReturn: Partial<DataControlInput>) => void;
   removeControl?: () => void;
   updateGrow?: (grow: boolean) => void;
   updateWidth: (newWidth: ControlWidth) => void;
   getRelevantDataViewId?: () => string | undefined;
   setLastUsedDataViewId?: (newDataViewId: string) => void;
-  onTypeEditorChange: (partial: Partial<DataControlInput>) => void;
 }
 
 const FieldPicker = withSuspense(LazyFieldPicker, null);
@@ -86,7 +86,6 @@ export const ControlEditor = ({
   removeControl,
   updateGrow,
   updateWidth,
-  onTypeEditorChange,
   getRelevantDataViewId,
   setLastUsedDataViewId,
 }: EditControlProps) => {
@@ -97,15 +96,27 @@ export const ControlEditor = ({
 
   const controlGroup = useControlGroupContainer();
   const editorConfig = controlGroup.select((state) => state.componentState.editorConfig);
+
+  const [currentGrow, setCurrentGrow] = useState(grow);
+  const [currentWidth, setCurrentWidth] = useState(width);
   const [defaultTitle, setDefaultTitle] = useState<string>();
   const [currentTitle, setCurrentTitle] = useState(title ?? '');
-  const [currentWidth, setCurrentWidth] = useState(width);
-  const [currentGrow, setCurrentGrow] = useState(grow);
   const [controlEditorValid, setControlEditorValid] = useState(false);
+  const [selectedDataViewId, setSelectedDataViewId] = useState<string>();
   const [selectedField, setSelectedField] = useState<string | undefined>(
     embeddable ? embeddable.getInput().fieldName : undefined
   );
-  const [selectedDataViewId, setSelectedDataViewId] = useState<string>();
+  const [customSettings, setCustomSettings] = useState<Partial<ControlInput>>();
+
+  const currentInput: Partial<DataControlInput> = useMemo(
+    () => ({
+      fieldName: selectedField,
+      dataViewId: selectedDataViewId,
+      title: currentTitle === '' ? defaultTitle ?? selectedField : currentTitle,
+      ...customSettings,
+    }),
+    [currentTitle, defaultTitle, selectedField, selectedDataViewId, customSettings]
+  );
 
   useMount(() => {
     let mounted = true;
@@ -117,7 +128,6 @@ export const ControlEditor = ({
       const initialId =
         embeddable?.getInput().dataViewId ?? getRelevantDataViewId?.() ?? (await getDefaultId());
       if (initialId) {
-        onTypeEditorChange({ dataViewId: initialId });
         setSelectedDataViewId(initialId);
       }
     })();
@@ -153,6 +163,8 @@ export const ControlEditor = ({
     [selectedField, setControlEditorValid, selectedDataView]
   );
 
+  // useEffect(() => {}, []);
+
   const controlType =
     selectedField && fieldRegistry && fieldRegistry[selectedField].compatibleControlTypes[0];
   const factory = controlType && getControlFactory(controlType);
@@ -184,7 +196,6 @@ export const ControlEditor = ({
                   onChangeDataViewId={(dataViewId) => {
                     setLastUsedDataViewId?.(dataViewId);
                     if (dataViewId === selectedDataViewId) return;
-                    onTypeEditorChange({ dataViewId });
                     setSelectedField(undefined);
                     setSelectedDataViewId(dataViewId);
                   }}
@@ -206,17 +217,12 @@ export const ControlEditor = ({
                 selectedFieldName={selectedField}
                 dataView={selectedDataView}
                 onSelectField={(field) => {
-                  const newInput: Partial<DataControlInput> = {
-                    fieldName: field.name,
-                  };
                   const newDefaultTitle = field.displayName ?? field.name;
                   setDefaultTitle(newDefaultTitle);
                   setSelectedField(field.name);
                   if (!currentTitle || currentTitle === defaultTitle) {
                     setCurrentTitle(newDefaultTitle);
-                    newInput.title = newDefaultTitle;
                   }
-                  onTypeEditorChange(newInput);
                 }}
                 selectableProps={{ isLoading: dataViewListLoading || dataViewLoading }}
               />
@@ -252,9 +258,6 @@ export const ControlEditor = ({
                 value={currentTitle}
                 onChange={(e) => {
                   setCurrentTitle(e.target.value);
-                  onTypeEditorChange({
-                    title: e.target.value === '' ? defaultTitle : e.target.value,
-                  });
                 }}
               />
             </EuiFormRow>
@@ -309,7 +312,7 @@ export const ControlEditor = ({
                 )}
               >
                 <CustomSettings
-                  onChange={onTypeEditorChange}
+                  onChange={(settings) => setCustomSettings(settings)}
                   initialInput={embeddable?.getInput()}
                   fieldType={fieldRegistry?.[selectedField].field.type}
                 />
@@ -324,7 +327,7 @@ export const ControlEditor = ({
                 flush="left"
                 color="danger"
                 onClick={() => {
-                  onCancel();
+                  onCancel(currentInput);
                   removeControl();
                 }}
               >
@@ -341,7 +344,7 @@ export const ControlEditor = ({
               aria-label={`cancel-${title}`}
               data-test-subj="control-editor-cancel"
               iconType="cross"
-              onClick={() => onCancel()}
+              onClick={() => onCancel(currentInput)}
             >
               {ControlGroupStrings.manageControl.getCancelTitle()}
             </EuiButtonEmpty>
@@ -353,7 +356,7 @@ export const ControlEditor = ({
               iconType="check"
               color="primary"
               disabled={!controlEditorValid}
-              onClick={() => onSave(controlType)}
+              onClick={() => onSave(currentInput, controlType)}
             >
               {ControlGroupStrings.manageControl.getSaveChangesTitle()}
             </EuiButton>

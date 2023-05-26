@@ -45,8 +45,7 @@ export function openAddDataControlFlyout(
     theme: { theme$ },
   } = pluginServices.getServices();
 
-  let controlInput: Partial<DataControlInput> = {};
-  const onCancel = () => {
+  const onCancel = (controlInput: Partial<DataControlInput>) => {
     if (Object.keys(controlInput).length === 0) {
       this.closeAllFlyouts();
       return;
@@ -75,7 +74,7 @@ export function openAddDataControlFlyout(
           grow={this.getInput().defaultControlGrow ?? DEFAULT_CONTROL_GROW}
           updateWidth={(defaultControlWidth) => this.updateInput({ defaultControlWidth })}
           updateGrow={(defaultControlGrow: boolean) => this.updateInput({ defaultControlGrow })}
-          onSave={async (type) => {
+          onSave={async (controlInput, type) => {
             this.closeAllFlyouts();
             if (!type) {
               return;
@@ -114,9 +113,6 @@ export function openAddDataControlFlyout(
             }
           }}
           onCancel={onCancel}
-          onTypeEditorChange={(partialInput) =>
-            (controlInput = { ...controlInput, ...partialInput })
-          }
         />
       </ControlGroupContainerContext.Provider>,
       { theme$ }
@@ -125,7 +121,7 @@ export function openAddDataControlFlyout(
       'aria-label': ControlGroupStrings.manageControl.getFlyoutCreateTitle(),
       outsideClickCloses: false,
       onClose: () => {
-        onCancel();
+        onCancel({});
       },
       // @ts-ignore - TODO: Remove this once https://github.com/elastic/eui/pull/6645 lands in Kibana
       focusTrapProps: { scrollLock: true },
