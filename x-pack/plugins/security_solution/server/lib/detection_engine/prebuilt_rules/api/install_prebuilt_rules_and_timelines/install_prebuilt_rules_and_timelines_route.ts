@@ -5,33 +5,30 @@
  * 2.0.
  */
 
-import moment from 'moment';
-import { transformError } from '@kbn/securitysolution-es-utils';
-import { validate } from '@kbn/securitysolution-io-ts-utils';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
 import type { ExceptionListClient } from '@kbn/lists-plugin/server';
+import { transformError } from '@kbn/securitysolution-es-utils';
+import { validate } from '@kbn/securitysolution-io-ts-utils';
+import moment from 'moment';
+import {
+  InstallPrebuiltRulesAndTimelinesResponse,
+  PREBUILT_RULES_URL,
+} from '../../../../../../common/detection_engine/prebuilt_rules';
+import { importTimelineResultSchema } from '../../../../../../common/types/timeline';
 import type {
   SecuritySolutionApiRequestHandlerContext,
   SecuritySolutionPluginRouter,
 } from '../../../../../types';
-
-import {
-  PREBUILT_RULES_URL,
-  InstallPrebuiltRulesAndTimelinesResponse,
-} from '../../../../../../common/detection_engine/prebuilt_rules';
-import { importTimelineResultSchema } from '../../../../../../common/types/timeline';
-
+import { installPrepackagedTimelines } from '../../../../timeline/routes/prepackaged_timelines/install_prepackaged_timelines';
+import { buildSiemResponse } from '../../../routes/utils';
 import { getExistingPrepackagedRules } from '../../../rule_management/logic/search/get_existing_prepackaged_rules';
-import { createPrebuiltRules } from '../../logic/rule_objects/create_prebuilt_rules';
-import { updatePrebuiltRules } from '../../logic/rule_objects/update_prebuilt_rules';
 import { getRulesToInstall } from '../../logic/get_rules_to_install';
 import { getRulesToUpdate } from '../../logic/get_rules_to_update';
 import { createPrebuiltRuleAssetsClient } from '../../logic/rule_assets/prebuilt_rule_assets_client';
+import { createPrebuiltRules } from '../../logic/rule_objects/create_prebuilt_rules';
+import { upgradePrebuiltRules } from '../../logic/rule_objects/upgrade_prebuilt_rules';
 import { rulesToMap } from '../../logic/utils';
-
-import { installPrepackagedTimelines } from '../../../../timeline/routes/prepackaged_timelines/install_prepackaged_timelines';
-import { buildSiemResponse } from '../../../routes/utils';
-import { installPrebuiltRulesPackage } from './install_prebuilt_rules_package';
+import { ensureLatestRulesPackageInstalled } from '../../logic/ensure_latest_rules_package_installed';
 
 export const installPrebuiltRulesAndTimelinesRoute = (router: SecuritySolutionPluginRouter) => {
   router.put(
@@ -103,20 +100,20 @@ export const createPrepackagedRules = async (
     await exceptionsListClient.createEndpointList();
   }
 
-  let latestPrebuiltRules = await ruleAssetsClient.fetchLatestAssets();
-  if (latestPrebuiltRules.length === 0) {
-    // Seems no packages with prepackaged rules were installed, try to install the default rules package
-    await installPrebuiltRulesPackage(config, context);
-
-    // Try to get the prepackaged rules again
-    latestPrebuiltRules = await ruleAssetsClient.fetchLatestAssets();
-  }
+  const latestPrebuiltRules = await ensureLatestRulesPackageInstalled(
+    ruleAssetsClient,
+    config,
+    context
+  );
 
   const installedPrebuiltRules = rulesToMap(await getExistingPrepackagedRules({ rulesClient }));
   const rulesToInstall = getRulesToInstall(latestPrebuiltRules, installedPrebuiltRules);
   const rulesToUpdate = getRulesToUpdate(latestPrebuiltRules, installedPrebuiltRules);
 
-  await createPrebuiltRules(rulesClient, rulesToInstall);
+  const result = await createPrebuiltRules(rulesClient, rulesToInstall);
+  if (result.errors.length > 0) {
+    throw new AggregateError(result.errors, 'Error installing new prebuilt rules');
+  }
 
   const timeline = await installPrepackagedTimelines(
     maxTimelineImportExportSize,
@@ -128,7 +125,7 @@ export const createPrepackagedRules = async (
     importTimelineResultSchema
   );
 
-  await updatePrebuiltRules(rulesClient, savedObjectsClient, rulesToUpdate);
+  await upgradePrebuiltRules(rulesClient, rulesToUpdate);
 
   const prebuiltRulesOutput: InstallPrebuiltRulesAndTimelinesResponse = {
     rules_installed: rulesToInstall.length,

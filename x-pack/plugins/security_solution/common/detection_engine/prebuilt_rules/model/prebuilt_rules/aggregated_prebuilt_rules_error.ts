@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import type {
-  RuleSignatureId,
-  RuleVersion,
-} from '../../../../../../common/detection_engine/rule_schema';
-
-export interface PrebuiltRuleVersionInfo {
-  rule_id: RuleSignatureId;
-  version: RuleVersion;
+export interface AggregatedPrebuiltRuleError {
+  message: string;
+  status_code?: number;
+  rules: Array<{
+    rule_id: string;
+    name?: string;
+  }>;
 }
