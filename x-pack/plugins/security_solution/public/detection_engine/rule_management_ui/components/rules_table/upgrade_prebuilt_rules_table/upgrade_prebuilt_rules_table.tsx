@@ -16,32 +16,32 @@ import React from 'react';
 import { PrePackagedRulesPrompt } from '../../../../../detections/components/rules/pre_packaged_rules/load_empty_prompt';
 
 import * as i18n from '../../../../../detections/pages/detection_engine/rules/translations';
-import { useAddPrebuiltRulesTableColumns } from './use_add_prebuilt_rules_table_columns';
 import { useUserData } from '../../../../../detections/components/user_info';
 import { hasUserCRUDPermission } from '../../../../../common/utils/privileges';
 import { useIsUpgradingSecurityPackages } from '../../../../rule_management/logic/use_upgrade_security_packages';
-import { useAddPrebuiltRulesTableContext } from './add_prebuilt_rules_table_context';
+import { useUpgradePrebuiltRulesTableContext } from './upgrade_prebuilt_rules_table_context';
+import { useUpgradePrebuiltRulesTableColumns } from './use_upgrade_prebuilt_rules_table_columns';
 
 const NO_ITEMS_MESSAGE = (
   <EuiEmptyPrompt title={<h3>{i18n.NO_RULES}</h3>} titleSize="xs" body={i18n.NO_RULES_BODY} />
 );
 
 /**
- * Table Component for displaying new rules that are available to be installed
+ * Table Component for displaying rules that have available updates
  */
-export const AddPrebuiltRulesTable = React.memo(() => {
+export const UpgradePrebuiltRulesTable = React.memo(() => {
   const [{ canUserCRUD }] = useUserData();
   const hasPermissions = hasUserCRUDPermission(canUserCRUD);
   const isUpgradingSecurityPackages = useIsUpgradingSecurityPackages();
 
-  const addRulesTableContext = useAddPrebuiltRulesTableContext();
+  const upgradeRulesTableContext = useUpgradePrebuiltRulesTableContext();
 
   const {
     state: { rules, pagination, selectionValue, filters, isFetched, isLoading, isRefetching },
     actions: { reFetchRules, onTableChange },
-  } = addRulesTableContext;
+  } = upgradeRulesTableContext;
 
-  const rulesColumns = useAddPrebuiltRulesTableColumns({
+  const rulesColumns = useUpgradePrebuiltRulesTableColumns({
     hasCRUDPermissions: hasPermissions,
   });
 
@@ -94,4 +94,4 @@ export const AddPrebuiltRulesTable = React.memo(() => {
   );
 });
 
-AddPrebuiltRulesTable.displayName = 'AddPrebuiltRulesTable';
+UpgradePrebuiltRulesTable.displayName = 'UpgradePrebuiltRulesTable';

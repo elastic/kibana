@@ -1177,3 +1177,10 @@ export const INSTALL_RULE_BUTTON = i18n.translate(
     defaultMessage: 'Install rule',
   }
 );
+
+export const UPGRADE_RULE_BUTTON = i18n.translate(
+  'xpack.securitySolution.addRules.upgradeRuleButton',
+  {
+    defaultMessage: 'Upgrade rule',
+  }
+);
