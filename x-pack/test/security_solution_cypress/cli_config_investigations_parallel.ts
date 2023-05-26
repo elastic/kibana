@@ -8,7 +8,7 @@
 import { FtrConfigProviderContext } from '@kbn/test';
 import { FtrProviderContext } from './ftr_provider_context';
 
-import { SecuritySolutionCypressCliIvestigationsTestRunner } from './runner';
+import { SecuritySolutionCypressCliTestRunnerCI } from './runner';
 
 const cliNumber = parseInt(process.env.CLI_NUMBER ?? '1', 10);
 const cliCount = parseInt(process.env.CLI_COUNT ?? '1', 10);
@@ -20,6 +20,11 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     ...securitySolutionCypressConfig.getAll(),
 
     testRunner: (context: FtrProviderContext) =>
-      SecuritySolutionCypressCliIvestigationsTestRunner(context, cliCount, cliNumber),
+      SecuritySolutionCypressCliTestRunnerCI(
+        context,
+        cliCount,
+        cliNumber,
+        '/investigations/**/*.cy.ts'
+      ),
   };
 }
