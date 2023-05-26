@@ -10,36 +10,35 @@ import useAsync from 'react-use/lib/useAsync';
 import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 
-function useIsApmPackageInstalled() {
+function useApmPackage() {
   const { core } = useApmPluginContext();
   const { http } = core;
 
-  const { loading, value } = useAsync(async () => {
-    const res = await http.get<{
-      response: { status: 'installed' | 'not_installed' };
-    }>('/api/fleet/epm/packages/apm');
-    const isInstalled = res?.response?.status === 'installed';
-    return isInstalled;
+  const { loading, value } = useAsync(() => {
+    return http.get('/api/fleet/epm/packages/apm');
   }, []);
 
-  return { isLoadingApmPackageStatus: loading, isApmPackageInstalled: value };
+  return {
+    isLoading: loading,
+    version: value?.response.version,
+    isInstalled: value?.response?.status === 'installed',
+  };
 }
 
 export function ApmIntegrationPackageStatus() {
   const { core } = useApmPluginContext();
   const { basePath } = core.http;
 
-  const { isApmPackageInstalled, isLoadingApmPackageStatus } =
-    useIsApmPackageInstalled();
+  const { isInstalled, isLoading, version } = useApmPackage();
 
   return (
     <EuiFlexGroup>
       <EuiFlexItem grow={1}>
         <EuiFlexGroup justifyContent="flexEnd">
           <EuiFlexItem grow={false}>
-            {isLoadingApmPackageStatus ? (
+            {isLoading ? (
               <EuiBadge color="default">-</EuiBadge>
-            ) : isApmPackageInstalled ? (
+            ) : isInstalled ? (
               <EuiBadge color="green">OK</EuiBadge>
             ) : (
               <EuiBadge color="warning">Warning</EuiBadge>
@@ -49,10 +48,10 @@ export function ApmIntegrationPackageStatus() {
       </EuiFlexItem>
 
       <EuiFlexItem grow={10}>
-        {isLoadingApmPackageStatus
+        {isLoading
           ? '...'
-          : isApmPackageInstalled
-          ? 'APM integration'
+          : isInstalled
+          ? `APM integration (${version})`
           : 'APM integration: is not installed'}
 
         <EuiLink
