@@ -13,7 +13,7 @@
  * connector.id.
  */
 
-import { omit } from 'lodash';
+import { omit, unset } from 'lodash';
 import type { CaseAttributes, CaseConnector, CaseFullExternalService } from '../../../common/api';
 import { CaseSeverity, CaseStatuses } from '../../../common/api';
 import { CASE_SAVED_OBJECT } from '../../../common/constants';
@@ -2325,6 +2325,136 @@ describe('CasesService', () => {
             },
           ],
         });
+      });
+    });
+  });
+
+  describe('Decoding requests', () => {
+    describe('create case', () => {
+      beforeEach(() => {
+        unsecuredSavedObjectsClient.create.mockResolvedValue(createCaseSavedObjectResponse());
+      });
+
+      it('decodes correctly the requested attributes', async () => {
+        const attributes = createCasePostParams({ connector: createJiraConnector() });
+
+        await expect(service.postNewCase({ id: 'a', attributes })).resolves.not.toThrow();
+      });
+
+      it('throws if title is omitted', async () => {
+        const attributes = createCasePostParams({ connector: createJiraConnector() });
+        unset(attributes, 'title');
+
+        await expect(
+          service.postNewCase({
+            attributes,
+            id: '1',
+          })
+        ).rejects.toThrow(`Invalid value "undefined" supplied to "title"`);
+      });
+
+      it('remove excess fields', async () => {
+        const attributes = {
+          ...createCasePostParams({ connector: createJiraConnector() }),
+          foo: 'bar',
+        };
+
+        await expect(service.postNewCase({ id: 'a', attributes })).resolves.not.toThrow();
+
+        const persistedAttributes = unsecuredSavedObjectsClient.create.mock.calls[0][1];
+        expect(persistedAttributes).not.toHaveProperty('foo');
+      });
+    });
+
+    describe('patch case', () => {
+      beforeEach(() => {
+        unsecuredSavedObjectsClient.update.mockResolvedValue(
+          {} as SavedObjectsUpdateResponse<CasePersistedAttributes>
+        );
+      });
+
+      it('decodes correctly the requested attributes', async () => {
+        const updatedAttributes = createCasePostParams({
+          connector: createJiraConnector(),
+          status: CaseStatuses['in-progress'],
+        });
+
+        await expect(
+          service.patchCase({
+            caseId: '1',
+            updatedAttributes,
+            originalCase: {} as CaseSavedObjectTransformed,
+          })
+        ).resolves.not.toThrow();
+      });
+
+      it('remove excess fields', async () => {
+        const updatedAttributes = {
+          ...createCasePostParams({ connector: createJiraConnector() }),
+          foo: 'bar',
+        };
+
+        await expect(
+          service.patchCase({
+            caseId: '1',
+            updatedAttributes,
+            originalCase: {} as CaseSavedObjectTransformed,
+          })
+        ).resolves.not.toThrow();
+
+        const persistedAttributes = unsecuredSavedObjectsClient.update.mock.calls[0][2];
+        expect(persistedAttributes).not.toHaveProperty('foo');
+      });
+    });
+
+    describe('patch cases', () => {
+      beforeEach(() => {
+        unsecuredSavedObjectsClient.bulkUpdate.mockResolvedValue({
+          saved_objects: [createCaseSavedObjectResponse({ caseId: '1' })],
+        });
+      });
+
+      it('decodes correctly the requested attributes', async () => {
+        const updatedAttributes = createCasePostParams({
+          connector: createJiraConnector(),
+          status: CaseStatuses['in-progress'],
+        });
+
+        await expect(
+          service.patchCases({
+            cases: [
+              {
+                caseId: '1',
+                updatedAttributes,
+                originalCase: {} as CaseSavedObjectTransformed,
+              },
+            ],
+          })
+        ).resolves.not.toThrow();
+      });
+
+      it('remove excess fields', async () => {
+        const updatedAttributes = {
+          ...createCasePostParams({ connector: createJiraConnector() }),
+          foo: 'bar',
+        };
+
+        await expect(
+          service.patchCases({
+            cases: [
+              {
+                caseId: '1',
+                updatedAttributes,
+                originalCase: {} as CaseSavedObjectTransformed,
+              },
+            ],
+          })
+        ).resolves.not.toThrow();
+
+        const persistedAttributes =
+          unsecuredSavedObjectsClient.bulkUpdate.mock.calls[0][0][0].attributes;
+
+        expect(persistedAttributes).not.toHaveProperty('foo');
       });
     });
   });

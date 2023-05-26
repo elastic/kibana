@@ -553,7 +553,9 @@ export class CasesService {
   }: PostCaseArgs): Promise<CaseSavedObjectTransformed> {
     try {
       this.log.debug(`Attempting to POST a new case`);
-      const transformedAttributes = transformAttributesToESModel(attributes);
+
+      const decodedAttributes = decodeOrThrow(CaseTransformedAttributesRt)(attributes);
+      const transformedAttributes = transformAttributesToESModel(decodedAttributes);
 
       transformedAttributes.attributes.total_alerts = -1;
       transformedAttributes.attributes.total_comments = -1;
@@ -583,7 +585,13 @@ export class CasesService {
   }: PatchCaseArgs): Promise<SavedObjectsUpdateResponse<CaseTransformedAttributes>> {
     try {
       this.log.debug(`Attempting to UPDATE case ${caseId}`);
-      const transformedAttributes = transformAttributesToESModel(updatedAttributes);
+
+      const PartialCaseTransformedAttributesRt = getPartialCaseTransformedAttributesRt();
+
+      const decodedAttributes = decodeOrThrow(PartialCaseTransformedAttributesRt)(
+        updatedAttributes
+      );
+      const transformedAttributes = transformAttributesToESModel(decodedAttributes);
 
       const updatedCase = await this.unsecuredSavedObjectsClient.update<CasePersistedAttributes>(
         CASE_SAVED_OBJECT,
@@ -597,7 +605,7 @@ export class CasesService {
       );
 
       const res = transformUpdateResponseToExternalModel(updatedCase);
-      const decodeRes = decodeOrThrow(getPartialCaseTransformedAttributesRt())(res.attributes);
+      const decodeRes = decodeOrThrow(PartialCaseTransformedAttributesRt)(res.attributes);
 
       return {
         ...res,
@@ -616,8 +624,14 @@ export class CasesService {
     try {
       this.log.debug(`Attempting to UPDATE case ${cases.map((c) => c.caseId).join(', ')}`);
 
+      const PartialCaseTransformedAttributesRt = getPartialCaseTransformedAttributesRt();
+
       const bulkUpdate = cases.map(({ caseId, updatedAttributes, version, originalCase }) => {
-        const { attributes, referenceHandler } = transformAttributesToESModel(updatedAttributes);
+        const decodedAttributes = decodeOrThrow(PartialCaseTransformedAttributesRt)(
+          updatedAttributes
+        );
+
+        const { attributes, referenceHandler } = transformAttributesToESModel(decodedAttributes);
         return {
           type: CASE_SAVED_OBJECT,
           id: caseId,
@@ -639,7 +653,7 @@ export class CasesService {
         }
 
         const so = Object.assign(theCase, transformUpdateResponseToExternalModel(theCase));
-        const decodeRes = decodeOrThrow(getPartialCaseTransformedAttributesRt())(so.attributes);
+        const decodeRes = decodeOrThrow(PartialCaseTransformedAttributesRt)(so.attributes);
         const soWithDecodedRes = Object.assign(so, { attributes: decodeRes });
 
         acc.push(soWithDecodedRes);
