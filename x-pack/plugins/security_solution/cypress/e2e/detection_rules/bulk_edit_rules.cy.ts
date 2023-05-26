@@ -94,6 +94,7 @@ import { getAvailablePrebuiltRulesCount } from '../../tasks/api_calls/prebuilt_r
 import { setRowsPerPageTo } from '../../tasks/table_pagination';
 
 const RULE_NAME = 'Custom rule for bulk actions';
+const EUI_SELECTABLE_LIST_ITEM_SR_TEXT = '. To check this option, press Enter.';
 
 const prePopulatedIndexPatterns = ['index-1-*', 'index-2-*'];
 const prePopulatedTags = ['test-default-tag-1', 'test-default-tag-2'];
@@ -248,7 +249,7 @@ describe('Detection rules, bulk edit', () => {
       const resultingTags = [...prePopulatedTags, ...tagsToBeAdded];
 
       // check if only pre-populated tags exist in the tags filter
-      checkTagsInTagsFilter(prePopulatedTags);
+      checkTagsInTagsFilter(prePopulatedTags, EUI_SELECTABLE_LIST_ITEM_SR_TEXT);
 
       selectNumberOfRules(expectedNumberOfCustomRulesToBeEdited);
 
@@ -271,7 +272,7 @@ describe('Detection rules, bulk edit', () => {
       const tagsToBeAdded = ['tag-to-add-1', 'tag-to-add-2'];
 
       // check if only pre-populated tags exist in the tags filter
-      checkTagsInTagsFilter(prePopulatedTags);
+      checkTagsInTagsFilter(prePopulatedTags, EUI_SELECTABLE_LIST_ITEM_SR_TEXT);
 
       selectNumberOfRules(expectedNumberOfCustomRulesToBeEdited);
 
@@ -286,7 +287,7 @@ describe('Detection rules, bulk edit', () => {
       const tagsToOverwrite = ['overwrite-tag-1'];
 
       // check if only pre-populated tags exist in the tags filter
-      checkTagsInTagsFilter(prePopulatedTags);
+      checkTagsInTagsFilter(prePopulatedTags, EUI_SELECTABLE_LIST_ITEM_SR_TEXT);
 
       selectNumberOfRules(expectedNumberOfCustomRulesToBeEdited);
 
@@ -315,7 +316,7 @@ describe('Detection rules, bulk edit', () => {
       const resultingTags = prePopulatedTags.slice(1);
 
       // check if only pre-populated tags exist in the tags filter
-      checkTagsInTagsFilter(prePopulatedTags);
+      checkTagsInTagsFilter(prePopulatedTags, EUI_SELECTABLE_LIST_ITEM_SR_TEXT);
 
       selectNumberOfRules(expectedNumberOfCustomRulesToBeEdited);
 
