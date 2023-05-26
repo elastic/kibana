@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import type { RuleObjectId, RuleResponse } from '../../../rule_schema';
+import type { RuleResponse } from '../../../rule_schema/model/rule_schemas';
 import type { HealthParameters, HealthSnapshot } from './health_metadata';
 import type { RuleExecutionStats, StatsHistory } from './health_stats';
 
 export interface RuleHealthParameters extends HealthParameters {
-  rule_id: RuleObjectId;
+  rule_id: string;
 }
 
 export interface RuleHealthSnapshot extends HealthSnapshot {

@@ -75,7 +75,7 @@ const createBuilder = (state: BuilderState): ICorrelationIds => {
         },
       };
 
-      if (status != null && logMeta.rule.execution != null) {
+      if (status != null && logMeta.rule?.execution != null) {
         logMeta.rule.execution.status = status;
       }
 

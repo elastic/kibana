@@ -8,6 +8,9 @@
 export * from './api/rule_execution_logs/get_rule_execution_events_schemas.mock';
 export * from './api/rule_execution_logs/get_rule_execution_results_schemas.mock';
 
+export * from './model/detection_engine_health/cluster_health.mock';
+export * from './model/detection_engine_health/rule_health.mock';
+export * from './model/detection_engine_health/space_health.mock';
 export * from './model/execution_event.mock';
 export * from './model/execution_result.mock';
 export * from './model/execution_summary.mock';

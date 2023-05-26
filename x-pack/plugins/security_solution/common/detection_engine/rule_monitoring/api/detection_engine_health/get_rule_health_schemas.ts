@@ -7,8 +7,7 @@
 
 import * as t from 'io-ts';
 import type { IsoDateString } from '@kbn/securitysolution-io-ts-types';
-
-import { RuleObjectId } from '../../../rule_schema';
+import { NonEmptyString } from '@kbn/securitysolution-io-ts-types';
 
 import type { HealthInterval } from '../../model/detection_engine_health/health_interval';
 import { HealthIntervalParameters } from '../../model/detection_engine_health/health_interval';
@@ -24,7 +23,7 @@ export type GetRuleHealthRequestBody = t.TypeOf<typeof GetRuleHealthRequestBody>
 export const GetRuleHealthRequestBody = t.exact(
   t.intersection([
     t.type({
-      rule_id: RuleObjectId,
+      rule_id: NonEmptyString,
     }),
     t.partial({
       interval: HealthIntervalParameters,
@@ -34,7 +33,7 @@ export const GetRuleHealthRequestBody = t.exact(
 );
 
 export interface GetRuleHealthRequest {
-  ruleId: RuleObjectId;
+  ruleId: string;
   interval: HealthInterval;
   debug: boolean;
   requestReceivedAt: IsoDateString;

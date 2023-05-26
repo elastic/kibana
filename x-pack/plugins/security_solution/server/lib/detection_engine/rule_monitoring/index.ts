@@ -11,3 +11,4 @@ export * from './logic/detection_engine_health';
 export * from './logic/rule_execution_log';
 export * from './logic/service_interface';
 export * from './logic/service';
+export { truncateList } from './logic/utils/normalization';
