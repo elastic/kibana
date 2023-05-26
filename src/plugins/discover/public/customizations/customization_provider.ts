@@ -18,9 +18,7 @@ import {
   DiscoverCustomizationService,
 } from './customization_service';
 
-const customizationContext = createContext<DiscoverCustomizationService>(
-  createCustomizationService()
-);
+const customizationContext = createContext(createCustomizationService());
 
 export const DiscoverCustomizationProvider = customizationContext.Provider;
 
