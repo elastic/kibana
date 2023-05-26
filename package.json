@@ -17,7 +17,8 @@
   "tsdocMetadata": "./build/tsdoc-metadata.json",
   "build": {
     "number": 8467,
-    "sha": "6cb7fec4e154faa0a4a3fee4b33dfef91b9870d9"
+    "sha": "6cb7fec4e154faa0a4a3fee4b33dfef91b9870d9",
+    "date": "2023-05-15T23:12:09+0000"
   },
   "homepage": "https://www.elastic.co/products/kibana",
   "bugs": {
@@ -480,6 +481,7 @@
     "@kbn/ml-error-utils": "link:x-pack/packages/ml/error_utils",
     "@kbn/ml-is-defined": "link:x-pack/packages/ml/is_defined",
     "@kbn/ml-is-populated-object": "link:x-pack/packages/ml/is_populated_object",
+    "@kbn/ml-kibana-theme": "link:x-pack/packages/ml/kibana_theme",
     "@kbn/ml-local-storage": "link:x-pack/packages/ml/local_storage",
     "@kbn/ml-nested-property": "link:x-pack/packages/ml/nested_property",
     "@kbn/ml-number-utils": "link:x-pack/packages/ml/number_utils",
@@ -1367,7 +1369,7 @@
     "delete-empty": "^2.0.0",
     "dependency-check": "^4.1.0",
     "diff": "^4.0.1",
-    "dpdm": "3.5.0",
+    "dpdm": "3.9.0",
     "ejs": "^3.1.8",
     "enzyme": "^3.11.0",
     "enzyme-to-json": "^3.6.2",
