@@ -29,6 +29,7 @@ import {
   type SavedObjectsTypeMappingDefinitions,
   type SavedObjectsMigrationConfigType,
   type IKibanaMigrator,
+  type MigrateDocumentOptions,
   type KibanaMigratorStatus,
   type MigrationResult,
   type IndexTypesMap,
@@ -266,7 +267,10 @@ export class KibanaMigrator implements IKibanaMigrator {
     return this.activeMappings;
   }
 
-  public migrateDocument(doc: SavedObjectUnsanitizedDoc): SavedObjectUnsanitizedDoc {
-    return this.documentMigrator.migrate(doc);
+  public migrateDocument(
+    doc: SavedObjectUnsanitizedDoc,
+    { allowDowngrade = false }: MigrateDocumentOptions = {}
+  ): SavedObjectUnsanitizedDoc {
+    return this.documentMigrator.migrate(doc, { allowDowngrade });
   }
 }

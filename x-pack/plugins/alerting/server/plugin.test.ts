@@ -60,7 +60,7 @@ const generateAlertingConfig = (): AlertingConfig => ({
   },
 });
 
-const sampleRuleType: RuleType<never, never, {}, never, never, 'default'> = {
+const sampleRuleType: RuleType<never, never, {}, never, never, 'default', 'recovered', {}> = {
   id: 'test',
   name: 'test',
   minimumLicenseRequired: 'basic',
@@ -196,7 +196,7 @@ describe('Alerting Plugin', () => {
         const ruleType = {
           ...sampleRuleType,
           minimumLicenseRequired: 'basic',
-        } as RuleType<never, never, {}, never, never, 'default', never>;
+        } as RuleType<never, never, {}, never, never, 'default', never, {}>;
         await setup.registerType(ruleType);
         expect(ruleType.ruleTaskTimeout).toBe('5m');
       });
@@ -206,7 +206,7 @@ describe('Alerting Plugin', () => {
           ...sampleRuleType,
           minimumLicenseRequired: 'basic',
           ruleTaskTimeout: '20h',
-        } as RuleType<never, never, {}, never, never, 'default', never>;
+        } as RuleType<never, never, {}, never, never, 'default', never, {}>;
         await setup.registerType(ruleType);
         expect(ruleType.ruleTaskTimeout).toBe('20h');
       });
@@ -215,7 +215,7 @@ describe('Alerting Plugin', () => {
         const ruleType = {
           ...sampleRuleType,
           minimumLicenseRequired: 'basic',
-        } as RuleType<never, never, {}, never, never, 'default', never>;
+        } as RuleType<never, never, {}, never, never, 'default', never, {}>;
         await setup.registerType(ruleType);
         expect(ruleType.cancelAlertsOnRuleTimeout).toBe(true);
       });
@@ -225,7 +225,7 @@ describe('Alerting Plugin', () => {
           ...sampleRuleType,
           minimumLicenseRequired: 'basic',
           cancelAlertsOnRuleTimeout: false,
-        } as RuleType<never, never, {}, never, never, 'default', never>;
+        } as RuleType<never, never, {}, never, never, 'default', never, {}>;
         await setup.registerType(ruleType);
         expect(ruleType.cancelAlertsOnRuleTimeout).toBe(false);
       });
