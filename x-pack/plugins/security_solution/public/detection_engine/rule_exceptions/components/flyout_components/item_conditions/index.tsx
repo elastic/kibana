@@ -26,7 +26,7 @@ import type {
 } from '@kbn/securitysolution-list-utils';
 import styled, { css } from 'styled-components';
 import { ENDPOINT_LIST_ID } from '@kbn/securitysolution-list-constants';
-import type { DataView } from '@kbn/data-views-plugin/common';
+import type { DataView, FieldSpec } from '@kbn/data-views-plugin/common';
 
 import { hasEqlSequenceQuery, isEqlRule } from '../../../../../../common/detection_engine/utils';
 import type { Rule } from '../../../../rule_management/logic/types';
@@ -67,7 +67,7 @@ interface ExceptionsFlyoutConditionsComponentProps {
   /* Exception items - could be one being edited, or multiple being added */
   exceptionListItems: ExceptionsBuilderExceptionItem[];
   /* Fields used to populate the field option dropdown */
-  indexPatterns: DataView | undefined;
+  indexPatterns: (Omit<DataView, 'fields'> & { fields: FieldSpec[] }) | undefined;
   /* Exception items can be added to zero (just being added to a shared list), one or more rules */
   rules: Rule[] | null;
   /* OS options required for endpoint exceptions */
@@ -86,7 +86,7 @@ interface ExceptionsFlyoutConditionsComponentProps {
   onExceptionItemAdd: (items: ExceptionsBuilderReturnExceptionItem[]) => void;
   /* Exception item builder takes a callback used when there are updates to the item that includes information on if any form errors exist */
   onSetErrorExists: (errorExists: boolean) => void;
-  onFilterIndexPatterns: FilterEndpointFields<DataView>;
+  onFilterIndexPatterns: FilterEndpointFields<Omit<DataView, 'fields'> & { fields: FieldSpec[] }>;
 }
 
 const ExceptionsConditionsComponent: React.FC<ExceptionsFlyoutConditionsComponentProps> = ({

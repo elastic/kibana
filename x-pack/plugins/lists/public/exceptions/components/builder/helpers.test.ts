@@ -55,7 +55,7 @@ import { DataViewBase, DataViewFieldBase } from '@kbn/es-query';
 import { fields, getField } from '@kbn/data-plugin/common/mocks';
 import type { FieldSpec } from '@kbn/data-plugin/common';
 import { createStubDataView } from '@kbn/data-plugin/common/stubs';
-import type { DataView } from '@kbn/data-views-plugin/common';
+import { DataView } from '@kbn/data-views-plugin/common';
 
 import { ENTRIES_WITH_IDS } from '../../../../common/constants.mock';
 import { getEntryExistsMock } from '../../../../common/schemas/types/entry_exists.mock';
@@ -94,13 +94,13 @@ const getEntryMatchAnyWithIdMock = (): EntryMatchAny & { id: string } => ({
   id: '123',
 });
 
-const getMockIndexPattern = (): DataView => ({
-  ...createStubDataView({
-    spec: { id: '1234', title: 'logstash-*' },
-  }),
-  // @ts-expect-error fields does not contain toSpec, it's okay
-  fields,
-});
+const getMockIndexPattern = (): Omit<DataView, 'fields'> & { fields: FieldSpec[] } =>
+  ({
+    ...createStubDataView({
+      spec: { id: '1234', title: 'logstash-*' },
+    }),
+    fields,
+  } as Omit<DataView, 'fields'> & { fields: FieldSpec[] });
 
 const getMockBuilderEntry = (): FormattedBuilderEntry => ({
   correspondingKeywordField: undefined,
@@ -173,14 +173,16 @@ const mockEndpointFields = [
 export const getEndpointField = (name: string): DataViewFieldBase =>
   mockEndpointFields.find((field) => field.name === name) as DataViewFieldBase;
 
-const filterIndexPatterns: FilterEndpointFields<DataView> = (patterns, type) => {
+const filterIndexPatterns: FilterEndpointFields<
+  Omit<DataView, 'fields'> & { fields: FieldSpec[] }
+> = (patterns, type) => {
   return type === 'endpoint'
     ? ({
         ...patterns,
         fields: patterns?.fields.filter(({ name }) =>
           ['file.path.caseless', 'file.Ext.code_signature.status'].includes(name)
         ),
-      } as DataView)
+      } as Omit<DataView, 'fields'> & { fields: FieldSpec[] })
     : patterns;
 };
 
@@ -248,7 +250,6 @@ describe('Exception builder helpers', () => {
       beforeAll(() => {
         payloadIndexPattern = {
           ...payloadIndexPattern,
-          // @ts-expect-error fields does not contain toSpec, it's okay
           fields: [...payloadIndexPattern.fields, ...mockEndpointFields],
         };
       });

@@ -32,7 +32,7 @@ import {
   getDefaultNestedEmptyEntry,
   getNewExceptionItem,
 } from '@kbn/securitysolution-list-utils';
-import type { DataView } from '@kbn/data-views-plugin/common';
+import type { DataView, FieldSpec } from '@kbn/data-views-plugin/common';
 import type { AutocompleteStart } from '@kbn/unified-search-plugin/public';
 
 import { AndOrBadge } from '../and_or_badge';
@@ -81,7 +81,7 @@ export interface ExceptionBuilderProps {
   exceptionListItems: ExceptionsBuilderExceptionItem[];
   httpService: HttpStart;
   osTypes?: OsTypeArray;
-  indexPatterns: DataView | undefined;
+  indexPatterns: (Omit<DataView, 'fields'> & { fields: FieldSpec[] }) | undefined;
   isAndDisabled: boolean;
   isNestedDisabled: boolean;
   isOrDisabled: boolean;
@@ -89,7 +89,9 @@ export interface ExceptionBuilderProps {
   listId: string | undefined;
   listNamespaceType: NamespaceType | undefined;
   listType: ExceptionListType;
-  listTypeSpecificIndexPatternFilter?: FilterEndpointFields<DataView>;
+  listTypeSpecificIndexPatternFilter?: FilterEndpointFields<
+    Omit<DataView, 'fields'> & { fields: FieldSpec[] }
+  >;
   onChange: (arg: OnChangeProps) => void;
   ruleName?: string;
   isDisabled?: boolean;

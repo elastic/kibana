@@ -60,7 +60,7 @@ import {
 } from '@kbn/es-query';
 import type { AutocompleteStart } from '@kbn/unified-search-plugin/public';
 import { HttpStart } from '@kbn/core/public';
-import type { DataView } from '@kbn/data-views-plugin/common';
+import type { DataView, FieldSpec } from '@kbn/data-views-plugin/common';
 
 import { getEmptyValue } from '../../../common/empty_value';
 
@@ -76,11 +76,13 @@ export interface EntryItemProps {
   autocompleteService: AutocompleteStart;
   entry: FormattedBuilderEntry;
   httpService: HttpStart;
-  indexPattern: DataView | undefined;
+  indexPattern: (Omit<DataView, 'fields'> & { fields: FieldSpec[] }) | undefined;
   showLabel: boolean;
   osTypes?: OsTypeArray;
   listType: ExceptionListType;
-  listTypeSpecificIndexPatternFilter?: FilterEndpointFields<DataView>;
+  listTypeSpecificIndexPatternFilter?: FilterEndpointFields<
+    Omit<DataView, 'fields'> & { fields: FieldSpec[] }
+  >;
   onChange: (arg: BuilderEntry, i: number) => void;
   onlyShowListOperators?: boolean;
   setErrorsExist: (arg: EntryFieldError) => void;
@@ -100,10 +102,10 @@ export interface EntryItemProps {
  * set to add a nested field
  */
 export const getFilteredIndexPatterns = (
-  patterns: DataView | undefined,
+  patterns: (Omit<DataView, 'fields'> & { fields: FieldSpec[] }) | undefined,
   item: FormattedBuilderEntry,
   type: ExceptionListType,
-  preFilter?: FilterEndpointFields<DataView>,
+  preFilter?: FilterEndpointFields<Omit<DataView, 'fields'> & { fields: FieldSpec[] }>,
   osTypes?: OsTypeArray
 ): DataView => {
   const indexPatterns = preFilter != null ? preFilter(patterns, type, osTypes) : patterns;

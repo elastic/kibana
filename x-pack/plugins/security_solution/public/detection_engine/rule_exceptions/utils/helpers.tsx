@@ -32,7 +32,7 @@ import type {
   ExceptionsBuilderReturnExceptionItem,
 } from '@kbn/securitysolution-list-utils';
 import { getNewExceptionItem, addIdToEntries } from '@kbn/securitysolution-list-utils';
-import type { DataView } from '@kbn/data-views-plugin/common';
+import type { DataView, FieldSpec } from '@kbn/data-views-plugin/common';
 import { removeIdFromExceptionItemsEntries } from '@kbn/securitysolution-list-hooks';
 
 import type { EcsSecurityExtension as Ecs, CodeSignature } from '@kbn/securitysolution-ecs';
@@ -46,7 +46,9 @@ import exceptionableEndpointFields from './exceptionable_endpoint_fields.json';
 import { EXCEPTIONABLE_ENDPOINT_EVENT_FIELDS } from '../../../../common/endpoint/exceptions/exceptionable_endpoint_event_fields';
 import { ALERT_ORIGINAL_EVENT } from '../../../../common/field_maps/field_names';
 
-export const filterIndexPatterns: FilterEndpointFields<DataView> = (patterns, type, osTypes) => {
+export const filterIndexPatterns: FilterEndpointFields<
+  Omit<DataView, 'fields'> & { fields: FieldSpec[] }
+> = (patterns, type, osTypes) => {
   switch (type) {
     case 'endpoint':
       const osFilterForEndpoint: (name: string) => boolean = osTypes?.includes('linux')
@@ -60,7 +62,7 @@ export const filterIndexPatterns: FilterEndpointFields<DataView> = (patterns, ty
         ...patterns,
         fields:
           patterns != null ? patterns.fields.filter(({ name }) => osFilterForEndpoint(name)) : [],
-      } as DataView;
+      } as Omit<DataView, 'fields'> & { fields: FieldSpec[] };
     case 'endpoint_events':
       return {
         ...patterns,
@@ -70,7 +72,7 @@ export const filterIndexPatterns: FilterEndpointFields<DataView> = (patterns, ty
                 EXCEPTIONABLE_ENDPOINT_EVENT_FIELDS.includes(name)
               )
             : [],
-      } as DataView;
+      } as Omit<DataView, 'fields'> & { fields: FieldSpec[] };
     default:
       return patterns;
   }

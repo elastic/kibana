@@ -23,7 +23,7 @@ import {
   getFormattedBuilderEntries,
   getUpdatedEntriesOnDelete,
 } from '@kbn/securitysolution-list-utils';
-import type { DataView } from '@kbn/data-views-plugin/common';
+import type { DataView, FieldSpec } from '@kbn/data-views-plugin/common';
 
 import { BuilderAndBadgeComponent } from './and_badge';
 import { BuilderEntryDeleteButtonComponent } from './entry_delete_button';
@@ -52,11 +52,13 @@ interface BuilderExceptionListItemProps {
   exceptionItem: ExceptionsBuilderExceptionItem;
   exceptionItemIndex: number;
   osTypes?: OsTypeArray;
-  indexPattern: DataView | undefined;
+  indexPattern: (Omit<DataView, 'fields'> & { fields: FieldSpec[] }) | undefined;
   andLogicIncluded: boolean;
   isOnlyItem: boolean;
   listType: ExceptionListType;
-  listTypeSpecificIndexPatternFilter?: FilterEndpointFields<DataView>;
+  listTypeSpecificIndexPatternFilter?: FilterEndpointFields<
+    Omit<DataView, 'fields'> & { fields: FieldSpec[] }
+  >;
   onDeleteExceptionItem: (item: ExceptionsBuilderExceptionItem, index: number) => void;
   onChangeExceptionItem: (item: ExceptionsBuilderExceptionItem, index: number) => void;
   setErrorsExist: (arg: EntryFieldError) => void;
