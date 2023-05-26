@@ -149,7 +149,7 @@ export async function initializeDataViews(
   const adHocDataviewsIds: string[] = Object.keys(adHocDataViews || {});
 
   const usedIndexPatternsIds = getIndexPatterns(
-    Object.values(annotationGroups).map((group) => group.indexPatternId),
+    annotationGroupValues.map((group) => group.indexPatternId),
     references,
     initialContext,
     initialId,
