@@ -171,7 +171,7 @@ export const initRoutes = (
     telemetryDetectionRulesPreviewRoute(router, logger, previewTelemetryReceiver, telemetrySender);
   }
 
-  if (config.experimentalFeatures.riskScoringRouteEnabled) {
+  if (config.experimentalFeatures.riskScoringRoutesEnabled) {
     riskScorePreviewRoute(router, logger);
   }
 };
