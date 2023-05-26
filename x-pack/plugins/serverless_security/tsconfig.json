@@ -26,5 +26,6 @@
     "@kbn/core-chrome-browser",
     "@kbn/i18n-react",
     "@kbn/features-plugin",
+    "@kbn/ess-security",
   ]
 }
