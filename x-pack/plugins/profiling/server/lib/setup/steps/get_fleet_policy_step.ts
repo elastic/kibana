@@ -102,58 +102,57 @@ export function getFleetPolicyStep({
         inputs: modifiedPolicyInputs,
       });
 
-      // We add here the creation of the new package_policy for symbolizer.
-      // We create the new policy and bind it to the Cloud default agent policy;
-      // to do so, force s required to be set to true.
+      // We add here the creation of the new package policies for the collector
+      // and symbolizer. We create the new policies and bind them to the Cloud
+      // default agent policy; to do so requires us to set 'force' to true.
+
       const cloudAgentPolicyId = 'policy-elastic-agent-on-cloud';
-      await packagePolicyClient.create(
-        soClient,
-        esClient,
-        {
-          policy_id: cloudAgentPolicyId,
-          enabled: true,
-          package: {
-            name: 'profiler_symbolizer',
-            title: 'Universal Profiling Symbolizer',
-            version: '8.8.0-preview',
-          },
-          name: 'elastic-universal-profiling-symbolizer',
-          namespace: 'default',
-          inputs: [
-            {
-              policy_template: 'universal_profiling_symbolizer',
-              enabled: true,
-              streams: [],
-              type: 'pf-elastic-symbolizer',
-            },
-          ],
+
+      const collectorPackagePolicy = {
+        policy_id: cloudAgentPolicyId,
+        enabled: true,
+        package: {
+          name: 'profiler_collector',
+          title: 'Universal Profiling Collector',
+          version: '8.9.0-preview',
         },
-        { force: true }
-      );
-      await packagePolicyClient.create(
-        soClient,
-        esClient,
-        {
-          policy_id: cloudAgentPolicyId,
-          enabled: true,
-          package: {
-            name: 'profiler_collector',
-            title: 'Universal Profiling Collector',
-            version: '8.9.0-preview',
+        name: 'elastic-universal-profiling-collector',
+        namespace: 'default',
+        inputs: [
+          {
+            policy_template: 'universal_profiling_collector',
+            enabled: true,
+            streams: [],
+            type: 'pf-elastic-collector',
           },
-          name: 'elastic-universal-profiling-collector',
-          namespace: 'default',
-          inputs: [
-            {
-              policy_template: 'universal_profiling_collector',
-              enabled: true,
-              streams: [],
-              type: 'pf-elastic-collector',
-            },
-          ],
+        ],
+      };
+      await packagePolicyClient.create(soClient, esClient, collectorPackagePolicy, {
+        force: true,
+      });
+
+      const symbolizerPackagePolicy = {
+        policy_id: cloudAgentPolicyId,
+        enabled: true,
+        package: {
+          name: 'profiler_symbolizer',
+          title: 'Universal Profiling Symbolizer',
+          version: '8.8.0-preview',
         },
-        { force: true }
-      );
-    },
+        name: 'elastic-universal-profiling-symbolizer',
+        namespace: 'default',
+        inputs: [
+          {
+            policy_template: 'universal_profiling_symbolizer',
+            enabled: true,
+            streams: [],
+            type: 'pf-elastic-symbolizer',
+          },
+        ],
+      };
+      await packagePolicyClient.create(soClient, esClient, symbolizerPackagePolicy, {
+        force: true,
+      });
+    }
   };
 }
