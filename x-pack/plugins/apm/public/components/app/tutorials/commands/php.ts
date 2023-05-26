@@ -34,5 +34,5 @@ elastic_apm.secret_token="{{{secretToken}}}"
 # {{serverUrlHint}}
 elastic_apm.server_url="{{{apmServerUrl}}}"
 
-# {{serviceEnvironmentHint}}
+# {{{serviceEnvironmentHint}}}
 elastic_apm.environment="my-environment"`;

@@ -49,6 +49,6 @@ export ELASTIC_APM_SECRET_TOKEN={{{secretToken}}}
 # {{{serverUrlHint}}}
 export ELASTIC_APM_SERVER_URL={{{apmServerUrl}}}
 
-# {{serviceEnvironmentHint}}
+# {{{serviceEnvironmentHint}}}
 export ELASTIC_APM_ENVIRONMENT=my-environment
 `;

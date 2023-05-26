@@ -15,6 +15,7 @@ export function getNoDataConfig({
   basePath,
   hasApmData,
   hasApmIntegrations,
+  isServerless,
 }: {
   docsLink: string;
   shouldBypassNoDataScreen: boolean;
@@ -22,27 +23,39 @@ export function getNoDataConfig({
   basePath?: string;
   hasApmData?: boolean;
   hasApmIntegrations?: boolean;
+  isServerless?: boolean;
 }): NoDataConfig | undefined {
   // don't show "no data screen" when there is APM data or it should be bypassed
   if (hasApmData || shouldBypassNoDataScreen || loading) {
     return;
   }
-  const noDataConfigDetails = hasApmIntegrations
-    ? {
-        title: i18n.translate('xpack.apm.noDataConfig.addDataButtonLabel', {
-          defaultMessage: 'Add data',
-        }),
-        href: `${basePath}/app/home#/tutorial/apm`,
-      }
-    : {
-        title: i18n.translate(
-          'xpack.apm.noDataConfig.addApmIntegrationButtonLabel',
-          {
-            defaultMessage: 'Add the APM integration',
-          }
-        ),
-        href: `${basePath}/app/integrations/detail/apm/overview`,
-      };
+  let noDataConfigDetails;
+
+  if (isServerless) {
+    noDataConfigDetails = {
+      title: i18n.translate('xpack.apm.noDataConfig.addDataButtonLabel', {
+        defaultMessage: 'Add data',
+      }),
+      href: `${basePath}/app/apm/tutorials`,
+    };
+  } else {
+    noDataConfigDetails = hasApmIntegrations
+      ? {
+          title: i18n.translate('xpack.apm.noDataConfig.addDataButtonLabel', {
+            defaultMessage: 'Add data',
+          }),
+          href: `${basePath}/app/home#/tutorial/apm`,
+        }
+      : {
+          title: i18n.translate(
+            'xpack.apm.noDataConfig.addApmIntegrationButtonLabel',
+            {
+              defaultMessage: 'Add the APM integration',
+            }
+          ),
+          href: `${basePath}/app/integrations/detail/apm/overview`,
+        };
+  }
 
   return {
     solution: i18n.translate('xpack.apm.noDataConfig.solutionName', {

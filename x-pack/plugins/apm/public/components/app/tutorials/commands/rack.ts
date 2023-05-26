@@ -44,5 +44,5 @@ secret_token: '{{{secretToken}}}'
 # {{{serverUrlHint}}}
 server_url: '{{{apmServerUrl}}}'
 
-# {{serviceEnvironmentHint}}
+# {{{serviceEnvironmentHint}}}
 environment: 'my-environment'`;

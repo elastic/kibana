@@ -50,6 +50,6 @@ var apm = require('elastic-apm-node').start({
   // {{{serverUrlHint}}}
   serverUrl: '{{{apmServerUrl}}}',
 
-  // {{serviceEnvironmentHint}}
+  // {{{serviceEnvironmentHint}}}
   environment: 'my-environment'
 })`;

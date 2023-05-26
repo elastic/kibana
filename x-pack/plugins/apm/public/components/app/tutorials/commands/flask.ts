@@ -55,7 +55,7 @@ app.config['ELASTIC_APM'] = {
   # {{{serverUrlHint}}}
   'SERVER_URL': '{{{apmServerUrl}}}',
 
-  {{serviceEnvironmentHint}}
+  {{{serviceEnvironmentHint}}}
   'ENVIRONMENT': 'my-environment',
 }
 

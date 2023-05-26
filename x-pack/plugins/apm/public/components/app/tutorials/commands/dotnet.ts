@@ -41,7 +41,7 @@ export const dotnet = `{
     {{/apiKey}}
     /// {{{serverUrlHint}}}
     "ServerUrl": "{{{apmServerUrl}}}",
-    /// {{serviceEnvironmentHint}}
+    /// {{{serviceEnvironmentHint}}}
     "Environment": "my-environment",
   }
 }`;
