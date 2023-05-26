@@ -263,6 +263,19 @@ const navigationDefinition: ProjectNavigationDefinition = {
       {
         type: 'recentlyAccessed',
         defaultIsCollapsed: true,
+        // Override the default recently accessed items with our own
+        recentlyAccessed$: of([
+          {
+            label: 'My own recent item',
+            id: '1234',
+            link: '/app/example/39859',
+          },
+          {
+            label: 'I also own this',
+            id: '4567',
+            link: '/app/example/39859',
+          },
+        ]),
       },
       {
         type: 'navGroup',
