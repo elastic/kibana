@@ -6,7 +6,11 @@
  */
 
 import { EuiContextMenu, EuiContextMenuPanel, EuiHorizontalRule } from '@elastic/eui';
+<<<<<<< HEAD
 import React, { useMemo } from 'react';
+=======
+import React, { useCallback, useMemo } from 'react';
+>>>>>>> 982e6faf7008f3dd730341c4f1c8d54aa0e13977
 import { dynamic } from '../../../common/dynamic';
 import { useIntersectionRef } from '../../hooks/use_intersection_ref';
 import {
@@ -21,7 +25,11 @@ import {
 import { useDataStreamSelector } from './state_machine/use_data_stream_selector';
 import { DataStreamsPopover } from './sub_components/data_streams_popover';
 import { DataStreamSkeleton } from './sub_components/data_streams_skeleton';
+<<<<<<< HEAD
 import { SearchControls } from './sub_components/search_controls';
+=======
+import { SearchControls, useSearchStrategy } from './sub_components/search_controls';
+>>>>>>> 982e6faf7008f3dd730341c4f1c8d54aa0e13977
 import { DataStreamSelectorProps } from './types';
 import { buildIntegrationsTree, setIntegrationListSpy } from './utils';
 
