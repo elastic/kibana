@@ -571,3 +571,50 @@ export const commonMigratePartitionMetrics = (attributes: LensDocShape860<unknow
     layers: Array<{ metrics: string[] }>;
   }>;
 };
+
+export const commonMigrateMetricFormatter = (attributes: LensDocShape860<unknown>) => {
+  if (attributes.visualizationType !== 'lnsMetric') {
+    return attributes as LensDocShape860<unknown>;
+  }
+  if (!attributes.state.datasourceStates.formBased) {
+    return attributes as LensDocShape860<unknown>;
+  }
+
+  type LayersType = LensDocShape860['state']['datasourceStates']['formBased']['layers'];
+
+  const updatedLayersWithCompactFormatters: LayersType = {};
+  for (const [layerId, layer] of Object.entries(
+    attributes.state.datasourceStates.formBased.layers
+  )) {
+    const newColumns: Record<string, Record<string, unknown>> = {};
+    for (const [id, column] of Object.entries(layer.columns)) {
+      if (column.isBucketed) {
+        newColumns[id] = column;
+      } else {
+        // Metric only support numeric values
+        newColumns[id] = {
+          ...column,
+          params: { id: 'number', compact: true, ...(column.params as Record<string, unknown>) },
+        };
+      }
+    }
+    updatedLayersWithCompactFormatters[layerId] = {
+      ...layer,
+      columns: newColumns,
+    };
+  }
+
+  return {
+    ...attributes,
+    state: {
+      ...attributes.state,
+      datasourceStates: {
+        ...attributes.state.datasourceStates,
+        formBased: {
+          ...attributes.state.datasourceStates.formBased,
+          layers: updatedLayersWithCompactFormatters,
+        },
+      },
+    },
+  };
+};
