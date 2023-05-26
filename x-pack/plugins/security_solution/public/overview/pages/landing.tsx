@@ -10,16 +10,18 @@ import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { SecurityPageName } from '../../../common/constants';
 import { LandingPageComponent } from '../../common/components/landing_page';
 import { useKibana } from '../../common/lib/kibana';
+import { PluginTemplateWrapper } from '../../common/components/plugin_template_wrapper';
 
 export const LandingPage = memo(() => {
-  const { getStartedESSComponent } = useKibana().services;
-  const GetStartedESSComponent = useMemo(
-    () => getStartedESSComponent?.(),
-    [getStartedESSComponent]
-  );
+  const { getStartedComponent } = useKibana().services;
+  const GetStartedComponent = useMemo(() => getStartedComponent?.(), [getStartedComponent]);
   return (
     <>
-      {GetStartedESSComponent ?? <LandingPageComponent />}
+      {GetStartedComponent ?? (
+        <PluginTemplateWrapper>
+          <LandingPageComponent />
+        </PluginTemplateWrapper>
+      )}
       <SpyRoute pageName={SecurityPageName.landing} />
     </>
   );

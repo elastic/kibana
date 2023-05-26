@@ -13,7 +13,7 @@ import { GetStarted } from './get_started';
 import { KibanaServicesProvider } from '../../services';
 import { ServerlessSecurityPluginStartDependencies } from '../../types';
 
-export const getSecurityGetStartedESSComponent = (
+export const getSecurityGetStartedComponent = (
   core: CoreStart,
   pluginsStart: ServerlessSecurityPluginStartDependencies
 ): GetStartedESSComponent => {

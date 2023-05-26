@@ -6,7 +6,7 @@
  */
 
 import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
-import { getSecurityGetStartedESSComponent } from './components/get_started';
+import { getSecurityGetStartedComponent } from './components/get_started';
 import { getSecuritySideNavComponent } from './components/side_navigation';
 import {
   ServerlessSecurityPluginSetup,
@@ -38,7 +38,7 @@ export class ServerlessSecurityPlugin
     const { securitySolution, serverless } = startDeps;
 
     securitySolution.setIsSidebarEnabled(false);
-    securitySolution.setGetStartedPage(getSecurityGetStartedESSComponent(core, startDeps));
+    securitySolution.setGetStartedPage(getSecurityGetStartedComponent(core, startDeps));
     serverless.setSideNavComponent(getSecuritySideNavComponent(core, startDeps));
 
     return {};
