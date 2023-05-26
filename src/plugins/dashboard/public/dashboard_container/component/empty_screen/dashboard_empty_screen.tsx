@@ -11,15 +11,14 @@ import useObservable from 'react-use/lib/useObservable';
 
 import {
   EuiIcon,
-  EuiSpacer,
-  EuiPageTemplate,
-  EuiImage,
   EuiText,
-  EuiTitle,
-  EuiFlexGroup,
-  EuiFlexItem,
+  EuiImage,
   EuiButton,
+  EuiSpacer,
+  EuiFlexItem,
+  EuiFlexGroup,
   EuiButtonEmpty,
+  EuiPageTemplate,
 } from '@elastic/eui';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { METRIC_TYPE } from '@kbn/analytics';
