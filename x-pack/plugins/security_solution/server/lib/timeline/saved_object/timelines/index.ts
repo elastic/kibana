@@ -163,7 +163,7 @@ export const getTimelineTemplateOrNull = async (
     const timeline = templateTimelineResponse?.timeline[0];
 
     if (!timeline) {
-      return Promise.reject(new Error('Timeline not found'));
+      return null;
     }
 
     const response: TimelineSavedObjectRuntimeResponseType = {
