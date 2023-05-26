@@ -63,6 +63,28 @@ export const useLinkExists = (id: SecurityPageName): boolean => {
   return useMemo(() => !!normalizedLinks[id], [normalizedLinks, id]);
 };
 
+export const useLinkInfo = (id: SecurityPageName): LinkInfo | undefined => {
+  const normalizedLinks = useNormalizedAppLinks();
+  return useMemo(() => {
+    const normalizedLink = normalizedLinks[id];
+    if (!normalizedLink) {
+      return undefined;
+    }
+    // discards the parentId and creates the linkInfo copy.
+    const { parentId, ...linkInfo } = normalizedLink;
+    return linkInfo;
+  }, [normalizedLinks, id]);
+};
+
+/**
+ * Hook to check if a link exists in the application links,
+ * It can be used to know if a link access is authorized.
+ */
+export const useLinkAuthorized = (id: SecurityPageName): boolean => {
+  const linkInfo = useLinkInfo(id);
+  return useMemo(() => linkInfo != null && !linkInfo.unauthorized, [linkInfo]);
+};
+
 /**
  * Returns the `LinkInfo` from a link id parameter
  */
