@@ -223,14 +223,18 @@ export interface ConnectorFieldsBeforePushAggsResult {
   };
 }
 
+type UserActionsAggsTotal = {
+  buckets: Array<{
+    key: string;
+    doc_count: number;
+  }>;
+}
+
 export interface UserActionsStatsAggsResult {
   total: number;
-  totals: {
-    buckets: Array<{
-      key: string;
-      doc_count: number;
-    }>;
-  };
+  totals: UserActionsAggsTotal;
+  totalPersistableStateAttachments: UserActionsAggsTotal,
+  totalExternalReferenceAttachments: UserActionsAggsTotal,
 }
 
 export interface ParticipantsAggsResult {

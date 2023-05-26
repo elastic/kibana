@@ -28,6 +28,8 @@ export const getStats = async (
       caseId,
     });
 
+    console.log('getStats', totals);
+
     return CaseUserActionStatsResponseRt.encode(totals);
   } catch (error) {
     throw createCaseError({
