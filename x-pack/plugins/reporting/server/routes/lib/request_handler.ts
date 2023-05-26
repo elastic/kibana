@@ -16,7 +16,6 @@ import { checkParamsVersion, cryptoFactory } from '../../lib';
 import { Report } from '../../lib/store';
 import type { BaseParams, ReportingRequestHandlerContext, ReportingUser } from '../../types';
 import { Counters } from './get_counter';
-import { PdfExportType } from '../../export_types/printable_pdf_v2/types';
 
 export const handleUnavailable = (res: KibanaResponseFactory) => {
   return res.custom({ statusCode: 503, body: 'Not Available' });
@@ -51,7 +50,7 @@ export class RequestHandler {
 
     const exportType =
       exportTypeId === 'printablePdfV2'
-        ? reporting.getPluginSetupDeps().exportTypes[0]
+        ? reporting.pdfExportType
         : reporting.getExportTypesRegistry().getById(exportTypeId);
 
     if (exportType == null) {
@@ -136,9 +135,9 @@ export class RequestHandler {
       return handleUnavailable(this.res);
     }
 
-    const licenseInfo = await this.reporting.getLicenseInfoForExportTypes(
-      this.reporting.getPluginSetupDeps().exportTypes as PdfExportType[]
-    );
+    const licenseInfo = await this.reporting.getLicenseInfoForExportTypes([
+      this.reporting.pdfExportType!,
+    ]);
 
     const licenseResults = licenseInfo![exportTypeId];
 

@@ -36,7 +36,7 @@ import { getContentStream } from '../content_stream';
 import { Report, ReportDocument, ReportingStore, SavedReport } from '../store';
 import { ReportFailedFields, ReportProcessingFields } from '../store/store';
 import { errorLogger } from './error_logger';
-import { PdfExportType } from '../../export_types/printable_pdf_v2/types';
+import { PdfExportType, TaskPayloadPDFV2 } from '../../export_types/printable_pdf_v2/types';
 import { RunTaskFn } from '../../types';
 import { ReportingExecuteTaskInstance } from './execute_report';
 
@@ -80,11 +80,16 @@ export class ExecutePdfReportTask implements ReportingTask {
   private store?: ReportingStore;
 
   constructor(
+    private pdfExportType: PdfExportType,
     private reporting: ReportingCore,
     private config: ReportingConfigType,
     logger: Logger
   ) {
     this.logger = logger.get('runTask');
+    // const { uuid, name } = reporting.getPluginSetupDeps().exportTypes[0].getServerInfo();
+    const { uuid, name } = pdfExportType.getServerInfo();
+    this.kibanaId = uuid;
+    this.kibanaName = name;
   }
 
   public async init(taskManager: TaskManagerStartContract) {
@@ -268,21 +273,13 @@ export class ExecutePdfReportTask implements ReportingTask {
     cancellationToken: CancellationToken,
     stream: Writable
   ): Promise<TaskRunResult> {
-    if (!this.taskExecutors) {
-      throw new Error(`Task run function factories have not been called yet!`);
-    }
-
-    // get the run_task function
-    const runner = this.taskExecutors.get(task.jobtype);
-    if (!runner) {
-      throw new Error(`No defined task runner function for ${task.jobtype}!`);
-    }
-
     // run the report
     // if workerFn doesn't finish before timeout, call the cancellationToken and throw an error
     const queueTimeout = durationToNumber(this.config.queue.timeout);
+    const taskPayload = task.payload as TaskPayloadPDFV2;
+    // @ts-ignore
     return Rx.lastValueFrom(
-      Rx.from(runner.jobExecutor(task.id, task.payload, cancellationToken, stream)).pipe(
+      Rx.from(this.pdfExportType.runTask(task.id, taskPayload, cancellationToken, stream)).pipe(
         timeout(queueTimeout)
       ) // throw an error if a value is not emitted before timeout
     );

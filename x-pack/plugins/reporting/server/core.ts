@@ -7,6 +7,7 @@
 
 import type {
   CoreSetup,
+  CoreStart,
   DocLinksServiceSetup,
   FakeRawRequest,
   Headers,
@@ -70,10 +71,10 @@ export interface ReportingInternalSetup {
   logger: Logger;
   status: StatusServiceSetup;
   docLinks: DocLinksServiceSetup;
-  exportTypes: PdfExportType[];
 }
 
 export interface ReportingInternalStart {
+  core: CoreStart;
   store: ReportingStore;
   savedObjects: SavedObjectsServiceStart;
   uiSettings: UiSettingsServiceStart;
@@ -116,6 +117,8 @@ export class ReportingCore {
   private executePdfTask: ExecutePdfReportTask;
   private config: ReportingConfigType;
   private executing: Set<string>;
+  public pdfExportType?: PdfExportType;
+  private exportTypeRegistry = getExportTypesRegistry();
 
   public getContract: () => ReportingSetup;
 
@@ -129,17 +132,21 @@ export class ReportingCore {
     this.packageInfo = context.env.packageInfo;
     const config = createConfig(core, context.config.get<ReportingConfigType>(), logger);
     this.config = config;
+    this.pdfExportType = new PdfExportType(this.core, this.getConfig(), this.logger, this.context);
 
     this.deprecatedAllowedRoles = config.roles.enabled ? config.roles.allow : false;
     this.executeTask = new ExecuteReportTask(this, config, this.logger);
     this.monitorTask = new MonitorReportsTask(this, config, this.logger);
-    this.executePdfTask = new ExecutePdfReportTask(this, config, this.logger);
+    this.executePdfTask = new ExecutePdfReportTask(this.pdfExportType, this, config, this.logger);
 
     this.getContract = () => ({
       usesUiCapabilities: () => config.roles.enabled === false,
     });
 
     this.executing = new Set();
+    this.exportTypeRegistry.register(this.pdfExportType);
+
+    this.pdfExportType.setup(core, { basePath: core.http.basePath, logger: this.logger });
   }
 
   public getKibanaPackageInfo() {
@@ -178,6 +185,15 @@ export class ReportingCore {
 
     const { taskManager } = startDeps;
     const { executeTask, monitorTask, executePdfTask } = this;
+
+    if (this.pdfExportType) {
+      this.pdfExportType.start((await this.getPluginStartDeps()).core, {
+        savedObjects: (await this.getPluginStartDeps()).savedObjects,
+        uiSettings: (await this.getPluginStartDeps()).core.uiSettings,
+        screenshotting: (await this.getPluginStartDeps()).screenshotting,
+        logger: this.logger,
+      });
+    }
     // enable this instance to generate reports and to monitor for pending reports
     await Promise.all([
       executeTask.init(taskManager),
