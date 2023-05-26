@@ -17,26 +17,22 @@ import {
   openTableInspectModal,
 } from '../../tasks/inspect';
 import { login, visit } from '../../tasks/login';
-import { HOSTS_URL } from '../../urls/navigation';
-import { postDataView, waitForPageToBeLoaded } from '../../tasks/common';
+import { waitForPageToBeLoaded } from '../../tasks/common';
 import { esArchiverLoad, esArchiverUnload } from '../../tasks/es_archiver';
-import { selectDataView } from '../../tasks/sourcerer';
 
 const DATA_VIEW = 'auditbeat-*';
 
 describe('Inspect Explore pages', () => {
   before(() => {
+    esArchiverLoad('auditbeat');
     esArchiverLoad('risk_users');
     esArchiverLoad('risk_hosts');
-    login();
 
-    // Create and select data view
-    postDataView(DATA_VIEW);
-    visit(HOSTS_URL);
-    selectDataView(DATA_VIEW);
+    login();
   });
 
   after(() => {
+    esArchiverUnload('auditbeat');
     esArchiverUnload('risk_users');
     esArchiverUnload('risk_hosts');
   });
@@ -46,8 +42,11 @@ describe('Inspect Explore pages', () => {
      * Group all tests of a page into one "it" call to improve speed
      */
     it(`inspect ${pageName} page`, () => {
-      visit(url);
-      waitForPageToBeLoaded();
+      visit(url, {
+        onLoad: () => {
+          waitForPageToBeLoaded();
+        },
+      });
 
       lensVisualizations.forEach((lens) => {
         cy.log(`inspects the ${lens.title} visualization`);
