@@ -48,6 +48,7 @@ export default function ({ getService }: FtrProviderContext) {
         'actions:.d3security',
         'actions:.cases-webhook',
         'actions:.email',
+        'actions:.gen-ai',
         'actions:.index',
         'actions:.jira',
         'actions:.opsgenie',

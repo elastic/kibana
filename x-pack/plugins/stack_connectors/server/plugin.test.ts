@@ -145,6 +145,28 @@ describe('Stack Connectors Plugin', () => {
           name: 'D3 Security',
         })
       );
+      expect(actionsSetup.registerSubActionConnectorType).toHaveBeenCalledTimes(3);
+      expect(actionsSetup.registerSubActionConnectorType).toHaveBeenNthCalledWith(
+        1,
+        expect.objectContaining({
+          id: '.opsgenie',
+          name: 'Opsgenie',
+        })
+      );
+      expect(actionsSetup.registerSubActionConnectorType).toHaveBeenNthCalledWith(
+        2,
+        expect.objectContaining({
+          id: '.tines',
+          name: 'Tines',
+        })
+      );
+      expect(actionsSetup.registerSubActionConnectorType).toHaveBeenNthCalledWith(
+        3,
+        expect.objectContaining({
+          id: '.gen-ai',
+          name: 'Generative AI',
+        })
+      );
     });
   });
 });

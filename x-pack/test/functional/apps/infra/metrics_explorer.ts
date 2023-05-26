@@ -109,6 +109,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       after(() => esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs'));
 
+      beforeEach(async () => {
+        await pageObjects.infraSavedViews.clickSavedViewsButton();
+      });
+      afterEach(async () => {
+        await pageObjects.infraSavedViews.closeSavedViewsPopover();
+      });
+
       it('should render a button with the view name', async () => {
         await pageObjects.infraSavedViews.ensureViewIsLoaded('Default view');
       });
@@ -125,7 +132,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       it('should laod a clicked view from the manage views section', async () => {
-        await pageObjects.infraSavedViews.ensureViewIsLoaded('view1');
         const views = await pageObjects.infraSavedViews.getManageViewsEntries();
         await views[0].click();
         await pageObjects.infraSavedViews.ensureViewIsLoaded('Default view');
@@ -136,14 +142,20 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         expect(views.length).to.equal(2);
         await pageObjects.infraSavedViews.pressEsc();
 
+        await pageObjects.infraSavedViews.clickSavedViewsButton();
         await pageObjects.infraSavedViews.createView('view2');
         await pageObjects.infraSavedViews.ensureViewIsLoaded('view2');
+
+        await pageObjects.infraSavedViews.clickSavedViewsButton();
         views = await pageObjects.infraSavedViews.getManageViewsEntries();
         expect(views.length).to.equal(3);
         await pageObjects.infraSavedViews.pressEsc();
 
+        await pageObjects.infraSavedViews.clickSavedViewsButton();
         await pageObjects.infraSavedViews.updateView('view3');
         await pageObjects.infraSavedViews.ensureViewIsLoaded('view3');
+
+        await pageObjects.infraSavedViews.clickSavedViewsButton();
         views = await pageObjects.infraSavedViews.getManageViewsEntries();
         expect(views.length).to.equal(3);
         await pageObjects.infraSavedViews.pressEsc();
