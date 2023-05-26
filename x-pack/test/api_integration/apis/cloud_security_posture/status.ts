@@ -17,6 +17,7 @@ const VULN_LATEST_INDEX = 'logs-cloud_security_posture.vulnerabilities_latest-de
 const VULN_INDEX = 'logs-cloud_security_posture.vulnerabilities-default';
 const INDEX_ARRAY = [FINDINGS_INDEX, FINDINGS_LATEST_INDEX, VULN_LATEST_INDEX, VULN_INDEX];
 
+const UNPRIVILEGED_ROLE = 'unprivileged_test_role';
 const UNPRIVILEGED_USERNAME = 'unprivileged_test_user';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -190,9 +191,7 @@ export default function ({ getService }: FtrProviderContext) {
           });
 
         agentPolicyId = agentPolicyResponse.item.id;
-        // await index.remove();
-        // await index.add(data, FINDINGS_LATEST_INDEX);
-        // await index.add(dataVuln, VULN_LATEST_INDEX);
+
         await deleteIndex(es, INDEX_ARRAY);
         await addIndex(es, findingsMockData, FINDINGS_LATEST_INDEX);
         await addIndex(es, vulnerabilityMockData, VULN_LATEST_INDEX);
@@ -269,9 +268,24 @@ export default function ({ getService }: FtrProviderContext) {
       const createUnprivilegedUser = async () => {
         await security.user.create(UNPRIVILEGED_USERNAME, {
           password: 'changeme',
-          roles: [],
+          roles: [UNPRIVILEGED_ROLE],
           full_name: 'a reporting user',
         });
+      };
+
+      const createUnprivilegedRole = async () => {
+        await security.role.create(UNPRIVILEGED_ROLE, {
+          kibana: [
+            {
+              feature: { siem: ['read'], fleetv2: ['all'], fleet: ['read'] },
+              spaces: ['*'],
+            },
+          ],
+        });
+      };
+
+      const deleteUnprivilegedRole = async () => {
+        await security.role.delete(UNPRIVILEGED_ROLE);
       };
 
       const deleteUnprivilegedUser = async () => {
@@ -279,11 +293,13 @@ export default function ({ getService }: FtrProviderContext) {
       };
 
       before(async () => {
+        await createUnprivilegedRole();
         await createUnprivilegedUser();
       });
 
       after(async () => {
         await deleteUnprivilegedUser();
+        await deleteUnprivilegedRole();
       });
 
       beforeEach(async () => {
@@ -302,11 +318,10 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       afterEach(async () => {
-        await deleteIndex(es, INDEX_ARRAY);
         await kibanaServer.savedObjects.cleanStandardList();
         await esArchiver.unload('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
       });
-      //   NOT FINISHED, NEED TO FIGURE OUT ROLES AND PERMISSIONS
+
       it(`status should return unprivileged when users don't have enough permission`, async () => {
         await createPackagePolicy(
           supertest,
@@ -320,7 +335,7 @@ export default function ({ getService }: FtrProviderContext) {
         const { body: res }: { body: CspSetupStatus } = await supertestWithoutAuth
           .get(`/internal/cloud_security_posture/status`)
           .set('kbn-xsrf', 'xxxx')
-          .auth('unprivileged_test_user_2', 'changeme')
+          .auth(UNPRIVILEGED_USERNAME, 'changeme')
           .expect(200);
 
         expect(res.kspm.status).to.be('unprivileged');
@@ -343,9 +358,6 @@ export default function ({ getService }: FtrProviderContext) {
           });
 
         agentPolicyId = agentPolicyResponse.item.id;
-        // await index.remove();
-        // await index.add(data, FINDINGS_INDEX);
-        // await index.add(dataVuln, VULN_INDEX);
         await deleteIndex(es, INDEX_ARRAY);
         await addIndex(es, findingsMockData, FINDINGS_INDEX);
         await addIndex(es, vulnerabilityMockData, VULN_INDEX);
