@@ -6,11 +6,11 @@
  */
 
 import { GenAiConnector } from './gen_ai';
-import { GenAiBaseApiResponseSchema } from './api_schema';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
 import { GEN_AI_CONNECTOR_ID, OpenAiProviderType } from '../../../common/gen_ai/constants';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
+import { GenAiRunActionResponseSchema } from '../../../common/gen_ai/schema';
 
 describe('GenAiConnector', () => {
   const sampleBody = JSON.stringify({
@@ -48,7 +48,7 @@ describe('GenAiConnector', () => {
       expect(mockRequest).toHaveBeenCalledWith({
         url: 'https://example.com/api',
         method: 'post',
-        responseSchema: GenAiBaseApiResponseSchema,
+        responseSchema: GenAiRunActionResponseSchema,
         data: sampleBody,
         headers: {
           Authorization: 'Bearer 123',
@@ -86,7 +86,7 @@ describe('GenAiConnector', () => {
       expect(mockRequest).toHaveBeenCalledWith({
         url: 'https://example.com/api',
         method: 'post',
-        responseSchema: GenAiBaseApiResponseSchema,
+        responseSchema: GenAiRunActionResponseSchema,
         data: sampleBody,
         headers: {
           'api-key': '123',
