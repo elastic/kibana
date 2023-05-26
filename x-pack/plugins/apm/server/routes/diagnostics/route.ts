@@ -104,7 +104,7 @@ const dataStreamRoute = createApmServerRoute({
     const apmIndices = getUniqueApmIndices(apmEventClient.indices);
 
     // fetch APM data streams
-    const datastreamRes = await apmEventClient.dataStreams(
+    const datastreamRes = await apmEventClient.getDataStream(
       'diagnostics_data_streams',
       {
         name: apmIndices,

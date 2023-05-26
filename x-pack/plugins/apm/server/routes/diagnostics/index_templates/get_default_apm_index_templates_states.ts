@@ -37,7 +37,7 @@ export function transformResponse(
 export async function getDefaultApmIndexTemplateStates(
   apmEventClient: APMEventClient
 ) {
-  const existingIndexTemplates = await apmEventClient.indexTemplate(
+  const existingIndexTemplates = await apmEventClient.getIndexTemplate(
     'diagnostics_index_templates',
     { name: '*-apm.*' }
   );

@@ -77,7 +77,7 @@ async function getTemplatePriority(
   apmEventClient: APMEventClient,
   name: string
 ) {
-  const res = await apmEventClient.indexTemplate(
+  const res = await apmEventClient.getIndexTemplate(
     'get_index_template_priority',
     { name }
   );

@@ -307,7 +307,7 @@ export class APMEventClient {
     });
   }
 
-  async indexTemplate(
+  async getIndexTemplate(
     operationName: string,
     params: IndicesGetIndexTemplateRequest
   ) {
@@ -357,13 +357,13 @@ export class APMEventClient {
     });
   }
 
-  async dataStreams(
+  async getDataStream(
     operationName: string,
     params: IndicesGetDataStreamRequest
   ) {
     return this.callAsyncWithDebug({
       operationName,
-      requestType: 'data_streams',
+      requestType: '_data_stream',
       params,
       cb: (abortOptions) =>
         this.esClient.indices.getDataStream(params, abortOptions),
