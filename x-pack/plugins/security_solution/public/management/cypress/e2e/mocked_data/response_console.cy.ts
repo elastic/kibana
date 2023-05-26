@@ -227,4 +227,53 @@ describe('Response console', () => {
       cy.contains('Action completed.', { timeout: 120000 }).should('exist');
     });
   });
+
+  describe('Get file command', () => {
+    let endpointData: ReturnTypeFromChainable<typeof indexEndpointHosts>;
+    let endpointHostname: string;
+    let getFileRequestResponse: ActionDetails;
+
+    before(() => {
+      indexEndpointHosts({ withResponseActions: false, isolation: false }).then(
+        (indexEndpoints) => {
+          endpointData = indexEndpoints;
+          endpointHostname = endpointData.data.hosts[0].host.name;
+        }
+      );
+    });
+
+    after(() => {
+      if (endpointData) {
+        endpointData.cleanup();
+        // @ts-expect-error ignore setting to undefined
+        endpointData = undefined;
+      }
+    });
+
+    it('should get file from response console', () => {
+      waitForEndpointListPageToBeLoaded(endpointHostname);
+      openResponseConsoleFromEndpointList();
+      inputConsoleCommand(`get-file --path /test/path/test.txt`);
+
+      interceptActionRequests((responseBody) => {
+        getFileRequestResponse = responseBody;
+      }, 'get-file');
+      submitCommand();
+      cy.contains('Retrieving the file from host.').should('exist');
+      cy.wait('@get-file').then(() => {
+        sendActionResponse(getFileRequestResponse);
+      });
+      cy.getByTestSubj('getFileSuccess').within(() => {
+        cy.contains('File retrieved from the host.');
+        cy.contains('(ZIP file passcode: elastic)');
+        cy.contains(
+          'Files are periodically deleted to clear storage space. Download and save file locally if needed.'
+        );
+        cy.contains('Click here to download').click();
+      });
+
+      const downloadsFolder = Cypress.config('downloadsFolder');
+      cy.readFile(`${downloadsFolder}/upload.zip`);
+    });
+  });
 });
