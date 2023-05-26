@@ -42,8 +42,6 @@ export class SavedSearchesService {
       SavedSearchCrudTypes['SearchOut']
     >({
       contentTypeId: SavedSearchType,
-      // perPage: 10000,
-      // todo
       query: {},
     });
     return result.hits;

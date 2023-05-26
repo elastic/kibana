@@ -35,8 +35,7 @@ const savedSearchAttributesSchema = schema.object(
         )
       ),
     }),
-    // todo
-    hideChart: schema.maybe(schema.boolean()), // schema.maybe(schema.oneOf([schema.boolean(), schema.any()])),
+    hideChart: schema.maybe(schema.boolean()),
     isTextBasedQuery: schema.maybe(schema.boolean()),
     usesAdHocDataView: schema.maybe(schema.boolean()),
     kibanaSavedObjectMeta: schema.object({
