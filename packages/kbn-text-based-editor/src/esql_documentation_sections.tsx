@@ -950,6 +950,41 @@ NOTE: The output type is always a double and the input type can be any number.
     },
     {
       label: i18n.translate(
+        'textBasedEditor.query.textBasedLanguagesEditor.documentation.mvCountFunction',
+        {
+          defaultMessage: 'MV_COUNT',
+        }
+      ),
+      description: (
+        <Markdown
+          markdown={i18n.translate(
+            'textBasedEditor.query.textBasedLanguagesEditor.documentation.mvCountFunction.markdown',
+            {
+              defaultMessage: `### MV_COUNT
+Converts a multivalued field into a single valued field containing a count of the number of values:
+
+\`\`\`
+ROW a=["foo", "zoo", "bar"]
+| EVAL count_a = MV_COUNT(a)
+\`\`\`
+
+Returning:
+
+\`\`\`
+["foo", "zoo", "bar"] | 3
+\`\`\`
+
+NOTE: This function accepts all types and always returns an integer.
+              `,
+              description:
+                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+            }
+          )}
+        />
+      ),
+    },
+    {
+      label: i18n.translate(
         'textBasedEditor.query.textBasedLanguagesEditor.documentation.mvMaxFunction',
         {
           defaultMessage: 'MV_MAX',
