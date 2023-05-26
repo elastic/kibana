@@ -996,6 +996,52 @@ Returning:
     },
     {
       label: i18n.translate(
+        'textBasedEditor.query.textBasedLanguagesEditor.documentation.mvMedianFunction',
+        {
+          defaultMessage: 'MV_MEDIAN',
+        }
+      ),
+      description: (
+        <Markdown
+          markdown={i18n.translate(
+            'textBasedEditor.query.textBasedLanguagesEditor.documentation.mvMedianFunction.markdown',
+            {
+              defaultMessage: `### MV_MEDIAN
+Converts a multivalued field into a single valued field containing the median value. For example:
+
+\`\`\`
+ROW a=[3, 5, 1]
+| EVAL median_a = MV_MEDIAN(a)
+\`\`\`
+
+Returning:
+
+\`\`\`
+[3, 5, 1] | 3
+\`\`\`
+
+It can be used by any numeric field type and returns a value of the same type. If the row has an even number of values for a column the result will be the average of the middle two entries. If the field is not floating point then the average rounds **down**:
+
+\`\`\`
+ROW a=[3, 7, 1, 6]
+| EVAL median_a = MV_MEDIAN(a)
+\`\`\`
+
+Returning:
+
+\`\`\`
+[3, 7, 1, 6] | 4
+\`\`\`
+              `,
+              description:
+                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+            }
+          )}
+        />
+      ),
+    },
+    {
+      label: i18n.translate(
         'textBasedEditor.query.textBasedLanguagesEditor.documentation.mvMinFunction',
         {
           defaultMessage: 'MV_MIN',
