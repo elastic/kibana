@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React from 'react';
 import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
 import type { SecurityPageName } from '../../../../common';
 import { useLinkAuthorized } from '../../links';
@@ -13,7 +13,7 @@ import { NoPrivilegesPage } from '../no_privileges';
 import { useUpsellingPage } from '../../hooks/use_upselling';
 import { SpyRoute } from '../../utils/route/spy_routes';
 
-interface SecurityPageWrapperProps {
+interface SecurityRoutePageWrapperProps {
   pageName: SecurityPageName;
 }
 
@@ -22,22 +22,24 @@ interface SecurityPageWrapperProps {
  *
  * It handles application tracking and upselling.
  *
- * When using this component make sure it render bellow `SecurityPageWrapper` and that you removed the `TrackApplicationView` component.
+ * When using this component make sure it render bellow `SecurityPageWrapper` and
+ * that you removed the `TrackApplicationView` component.
  *
  * Ex:
  * ```
  * <PluginTemplateWrapper>
- *   <SecurityPage pageName={SecurityPageName.myPage}>
+ *   <SecurityRoutePageWrapper pageName={SecurityPageName.myPage}>
  *     <MyPage />
- *   </SecurityPage>
+ *   </SecurityRoutePageWrapper>
  * </PluginTemplateWrapper>
  * ```
  */
-export const SecurityPage: React.FC<SecurityPageWrapperProps> = ({ children, pageName }) => {
+export const SecurityRoutePageWrapper: React.FC<SecurityRoutePageWrapperProps> = ({
+  children,
+  pageName,
+}) => {
   const isAuthorized = useLinkAuthorized(pageName);
   const UpsellPage = useUpsellingPage(pageName);
-
-  const docLinkSelector = useCallback((docLinks) => docLinks.siem.privileges, []);
 
   if (isAuthorized) {
     return <TrackApplicationView viewId={pageName}>{children}</TrackApplicationView>;
@@ -55,7 +57,10 @@ export const SecurityPage: React.FC<SecurityPageWrapperProps> = ({ children, pag
   return (
     <>
       <SpyRoute pageName={pageName} />
-      <NoPrivilegesPage pageName={pageName} docLinkSelector={docLinkSelector} />
+      <NoPrivilegesPage
+        pageName={pageName}
+        docLinkSelector={(docLinks) => docLinks.siem.privileges}
+      />
     </>
   );
 };
