@@ -57,7 +57,13 @@ export const SaveModal = ({
       showCopyOnSave={showCopyOnSave}
       objectType={i18n.translate(
         'xpack.lens.xyChart.annotations.saveAnnotationGroupToLibrary.objectType',
-        { defaultMessage: 'annotation group' }
+        { defaultMessage: 'group' }
+      )}
+      customModalTitle={i18n.translate(
+        'xpack.lens.xyChart.annotations.saveAnnotationGroupToLibrary.modalTitle',
+        {
+          defaultMessage: 'Save annotation group to library',
+        }
       )}
       showDescription={true}
       confirmButtonLabel={

@@ -54,6 +54,7 @@ interface Props {
   description?: string;
   showDescription: boolean;
   isValid?: boolean;
+  customModalTitle?: string;
 }
 
 export interface SaveModalState {
@@ -141,11 +142,15 @@ export class SavedObjectSaveModal extends React.Component<Props, SaveModalState>
       >
         <EuiModalHeader>
           <EuiModalHeaderTitle>
-            <FormattedMessage
-              id="savedObjects.saveModal.saveTitle"
-              defaultMessage="Save {objectType}"
-              values={{ objectType: this.props.objectType }}
-            />
+            {this.props.customModalTitle ? (
+              this.props.customModalTitle
+            ) : (
+              <FormattedMessage
+                id="savedObjects.saveModal.saveTitle"
+                defaultMessage="Save {objectType}"
+                values={{ objectType: this.props.objectType }}
+              />
+            )}
           </EuiModalHeaderTitle>
         </EuiModalHeader>
 
