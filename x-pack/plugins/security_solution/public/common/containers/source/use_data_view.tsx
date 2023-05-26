@@ -11,7 +11,7 @@ import { useDispatch } from 'react-redux';
 import memoizeOne from 'memoize-one';
 import type { BrowserField } from '@kbn/timelines-plugin/common';
 import { getCategory } from '@kbn/triggers-actions-ui-plugin/public';
-import type { DataViewFieldBase } from '@kbn/es-query';
+import type { DataView } from '@kbn/data-views-plugin/public';
 
 import { useKibana } from '../../lib/kibana';
 import { sourcererActions } from '../../store/sourcerer';
@@ -48,11 +48,7 @@ interface DataViewInfo {
  * VERY mutatious on purpose to improve the performance of the transform.
  */
 export const getDataViewStateFromIndexFields = memoizeOne(
-  (
-    _title: string,
-    fields: DataViewFieldBase[],
-    _includeUnmapped: boolean = false
-  ): DataViewInfo => {
+  (_title: string, fields: DataView['fields'], _includeUnmapped: boolean = false): DataViewInfo => {
     // Adds two dangerous casts to allow for mutations within this function
     type DangerCastForMutation = Record<string, {}>;
 
@@ -66,7 +62,7 @@ export const getDataViewStateFromIndexFields = memoizeOne(
         if (acc.browserFields[category].fields == null) {
           acc.browserFields[category].fields = {};
         }
-        acc.browserFields[category].fields[field.name] = field as unknown as BrowserField;
+        acc.browserFields[category].fields[field.name] = field.spec as BrowserField;
 
         return acc;
       },
