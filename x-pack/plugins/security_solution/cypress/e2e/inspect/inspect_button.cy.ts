@@ -17,7 +17,7 @@ import {
   openTableInspectModal,
 } from '../../tasks/inspect';
 import { login, visit } from '../../tasks/login';
-import { waitForPageToBeLoaded } from '../../tasks/common';
+import { waitForPageToBeLoaded, waitForWelcomePanelToBeLoaded } from '../../tasks/common';
 import { esArchiverLoad, esArchiverUnload } from '../../tasks/es_archiver';
 
 const DATA_VIEW = 'auditbeat-*';
@@ -44,6 +44,7 @@ describe('Inspect Explore pages', () => {
     it(`inspect ${pageName} page`, () => {
       visit(url, {
         onLoad: () => {
+          waitForWelcomePanelToBeLoaded();
           waitForPageToBeLoaded();
         },
       });
