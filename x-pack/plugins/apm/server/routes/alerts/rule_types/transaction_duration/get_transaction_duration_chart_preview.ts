@@ -32,6 +32,7 @@ import { APMConfig } from '../../../..';
 import { APMEventClient } from '../../../../lib/helpers/create_es_client/create_apm_event_client';
 import { getGroupByTerms } from '../utils/get_groupby_terms';
 import { getAllGroupByFields } from '../utils/get_all_groupby_fields';
+import { getIntervalInSeconds } from '../utils/get_interval_in_seconds';
 
 export type TransactionDurationChartPreviewResponse = Array<{
   name: string;
@@ -54,7 +55,6 @@ export async function getTransactionDurationChartPreview({
     transactionType,
     transactionName,
     interval,
-    start,
     end,
     groupBy,
   } = alertParams;
@@ -63,6 +63,10 @@ export async function getTransactionDurationChartPreview({
     apmEventClient,
     kuery: '',
   });
+
+  const intervalAsSeconds = getIntervalInSeconds(interval);
+  const intervalAsMs = intervalAsSeconds * 1000;
+  const start = end - intervalAsMs;
 
   const query = {
     bool: {

@@ -22,15 +22,24 @@ import {
 import { EuiSpacer } from '@elastic/eui';
 import React from 'react';
 import { IUiSettingsClient } from '@kbn/core/public';
+import { TimeUnitChar } from '@kbn/observability-plugin/common';
 import { Coordinate } from '../../../../../typings/timeseries';
 import { useTheme } from '../../../../hooks/use_theme';
 import { getTimeZone } from '../../../shared/charts/helper/timezone';
+import {
+  TimeLabelForData,
+  NUM_BUCKETS,
+  TIME_LABELS,
+  tooltipProps,
+} from './chart_preview_helper';
 
 interface ChartPreviewProps {
   yTickFormat?: TickFormatter;
   threshold: number;
   uiSettings?: IUiSettingsClient;
   series: Array<{ name?: string; data: Coordinate[] }>;
+  timeSize: number;
+  timeUnit: TimeUnitChar;
 }
 
 export function ChartPreview({
@@ -38,6 +47,8 @@ export function ChartPreview({
   threshold,
   uiSettings,
   series,
+  timeSize = 5,
+  timeUnit = 'm',
 }: ChartPreviewProps) {
   const theme = useTheme();
   const thresholdOpacity = 0.3;
@@ -73,15 +84,17 @@ export function ChartPreview({
   const chartSize = 150;
 
   const domainYMax = () => {
-    // Make the maximum Y value either the actual max or 20% more than the threshold
     const values = series.flatMap(({ data }) => data.map((d) => d.y ?? 0));
-    return Math.max(...values, threshold * 1.2);
+    return Math.max(...values, threshold) * 1.2;
   };
 
   const domain = {
     max: domainYMax(),
     min: 0,
   };
+
+  const lookback = timeSize * NUM_BUCKETS;
+  const timeLabel = TIME_LABELS[timeUnit as keyof typeof TIME_LABELS] as string;
 
   return (
     <>
@@ -93,7 +106,7 @@ export function ChartPreview({
         data-test-subj="ChartPreview"
       >
         <Settings
-          tooltip="none"
+          tooltip={tooltipProps}
           showLegend={true}
           legendPosition={'bottom'}
           legendSize={legendSize}
@@ -138,6 +151,7 @@ export function ChartPreview({
           />
         ))}
       </Chart>
+      <TimeLabelForData lookback={lookback} timeLabel={timeLabel} />
     </>
   );
 }
