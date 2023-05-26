@@ -16,11 +16,19 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { useFetcher } from '../../../hooks/use_fetcher';
+import { useDiagnosticsReportFromSessionStorage } from './import_export_tab';
 
 export function DiagnosticsIndices() {
-  const { data } = useFetcher((callApmApi) => {
-    return callApmApi(`GET /internal/apm/diagnostics/indices`);
-  }, []);
+  const { report } = useDiagnosticsReportFromSessionStorage();
+  const { data } = useFetcher(
+    async (callApmApi) => {
+      if (report) {
+        return report.indicies;
+      }
+      return callApmApi(`GET /internal/apm/diagnostics/indices`);
+    },
+    [report]
+  );
 
   const items = data?.validItems ?? [];
   type Item = typeof items[0];

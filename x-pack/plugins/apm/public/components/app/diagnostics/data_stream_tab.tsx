@@ -18,14 +18,24 @@ import React from 'react';
 import { APIReturnType } from '../../../services/rest/create_call_apm_api';
 import { getIsValidIndexTemplateName } from '../../../../common/diagnostics/get_default_index_template_names';
 import { useFetcher } from '../../../hooks/use_fetcher';
+import { useDiagnosticsReportFromSessionStorage } from './import_export_tab';
 
 type APIResponseType =
   APIReturnType<'GET /internal/apm/diagnostics/data_streams'>;
 
 export function DiagnosticsDataStreams() {
-  const { data } = useFetcher((callApmApi) => {
-    return callApmApi(`GET /internal/apm/diagnostics/data_streams`);
-  }, []);
+  const { report } = useDiagnosticsReportFromSessionStorage();
+
+  const { data } = useFetcher(
+    async (callApmApi) => {
+      if (report) {
+        return report.dataStream;
+      }
+
+      return callApmApi(`GET /internal/apm/diagnostics/data_streams`);
+    },
+    [report]
+  );
 
   return (
     <>

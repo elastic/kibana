@@ -53,7 +53,7 @@ export function IndexTemplatesStatus() {
 }
 
 function getHasNonStandardIndexTemplates(data: APIResponseType | undefined) {
-  return data?.matchingIndexTemplates?.some(({ indexTemplates }) => {
+  return data?.indexTemplatesByIndexPattern?.some(({ indexTemplates }) => {
     return indexTemplates?.some(({ isNonStandard }) => isNonStandard);
   });
 }

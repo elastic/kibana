@@ -8,6 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { Outlet } from '@kbn/typed-react-router-config';
 import React from 'react';
+import { EuiCallOut } from '@elastic/eui';
 import { useApmRouter } from '../../../hooks/use_apm_router';
 import { useApmRoutePath } from '../../../hooks/use_apm_route_path';
 import { DiagnosticsSummary } from './summary_tab';
@@ -16,6 +17,10 @@ import { DiagnosticsIndexTemplates } from './index_templates_tab';
 import { DiagnosticsIndices } from './indices_tab';
 import { DiagnosticsDataStreams } from './data_stream_tab';
 import { DiagnosticsIndexPatternSettings } from './index_pattern_settings_tab';
+import {
+  DiagnosticsImportExport,
+  useDiagnosticsReportFromSessionStorage,
+} from './import_export_tab';
 
 export const diagnosticsRoute = {
   '/diagnostics': {
@@ -40,6 +45,9 @@ export const diagnosticsRoute = {
       '/diagnostics/indices': {
         element: <DiagnosticsIndices />,
       },
+      '/diagnostics/import-export': {
+        element: <DiagnosticsImportExport />,
+      },
     },
   },
 };
@@ -47,6 +55,7 @@ export const diagnosticsRoute = {
 function DiagnosticsTemplate({ children }: { children: React.ReactChild }) {
   const routePath = useApmRoutePath();
   const router = useApmRouter();
+
   return (
     <ApmMainTemplate
       pageTitle="Diagnostics"
@@ -54,6 +63,7 @@ function DiagnosticsTemplate({ children }: { children: React.ReactChild }) {
       showServiceGroupSaveButton={false}
       selectedNavButton="serviceGroups"
       pageHeader={{
+        description: <TemplateDescription />,
         tabs: [
           {
             href: router.link('/diagnostics'),
@@ -93,10 +103,31 @@ function DiagnosticsTemplate({ children }: { children: React.ReactChild }) {
             }),
             isSelected: routePath === '/diagnostics/indices',
           },
+          {
+            href: router.link('/diagnostics/import-export'),
+            label: i18n.translate('xpack.apm.diagnostics.tab.import_export', {
+              defaultMessage: 'Import/Export',
+            }),
+            isSelected: routePath === '/diagnostics/import-export',
+          },
         ],
       }}
     >
       {children}
     </ApmMainTemplate>
   );
+}
+
+function TemplateDescription() {
+  const { report } = useDiagnosticsReportFromSessionStorage();
+  if (report) {
+    return (
+      <EuiCallOut
+        title="Rendering from Diagnostics Report"
+        iconType="exportAction"
+      />
+    );
+  }
+
+  return null;
 }

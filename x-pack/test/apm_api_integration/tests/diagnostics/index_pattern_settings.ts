@@ -33,7 +33,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         });
         expect(status).to.be(200);
 
-        const templateNames = body.matchingIndexTemplates.flatMap(({ indexTemplates }) => {
+        const templateNames = body.indexTemplatesByIndexPattern.flatMap(({ indexTemplates }) => {
           return indexTemplates?.map(({ templateName }) => templateName);
         });
 
@@ -71,7 +71,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         });
         expect(status).to.be(200);
 
-        const templateNames = body.matchingIndexTemplates.flatMap(({ indexTemplates }) => {
+        const templateNames = body.indexTemplatesByIndexPattern.flatMap(({ indexTemplates }) => {
           return indexTemplates?.map(({ templateName }) => templateName);
         });
 

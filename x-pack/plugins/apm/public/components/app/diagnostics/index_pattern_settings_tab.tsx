@@ -16,18 +16,26 @@ import {
 import React from 'react';
 import { useApmRouter } from '../../../hooks/use_apm_router';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
+import { useDiagnosticsReportFromSessionStorage } from './import_export_tab';
 
 export function DiagnosticsIndexPatternSettings() {
   const router = useApmRouter();
-  const { data, status } = useFetcher((callApmApi) => {
-    return callApmApi(`GET /internal/apm/diagnostics/index_pattern_settings`);
-  }, []);
+  const { report } = useDiagnosticsReportFromSessionStorage();
+  const { data, status } = useFetcher(
+    async (callApmApi) => {
+      if (report) {
+        return report.indexPatternSettings;
+      }
+      return callApmApi(`GET /internal/apm/diagnostics/index_pattern_settings`);
+    },
+    [report]
+  );
 
   if (status === FETCH_STATUS.LOADING) {
     return <EuiLoadingElastic size="m" />;
   }
 
-  const indexTemplatesByIndexPattern = data?.matchingIndexTemplates;
+  const indexTemplatesByIndexPattern = data?.indexTemplatesByIndexPattern;
 
   if (
     !indexTemplatesByIndexPattern ||
@@ -39,7 +47,7 @@ export function DiagnosticsIndexPatternSettings() {
   const elms = indexTemplatesByIndexPattern.map(
     ({ indexPattern, indexTemplates }) => {
       return (
-        <>
+        <div key={indexPattern}>
           <EuiTitle size="xs">
             <h4>{indexPattern}</h4>
           </EuiTitle>
@@ -55,6 +63,7 @@ export function DiagnosticsIndexPatternSettings() {
             }) => {
               return (
                 <EuiToolTip
+                  key={templateName}
                   content={`${templateIndexPatterns.join(
                     ', '
                   )} (Priority: ${priority})`}
@@ -71,7 +80,7 @@ export function DiagnosticsIndexPatternSettings() {
           )}
 
           <EuiSpacer />
-        </>
+        </div>
       );
     }
   );

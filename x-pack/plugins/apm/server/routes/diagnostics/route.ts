@@ -50,7 +50,7 @@ const indexPatternSettingsRoute = createApmServerRoute({
   handler: async (
     resources
   ): Promise<{
-    matchingIndexTemplates: Array<{
+    indexTemplatesByIndexPattern: Array<{
       indexPattern: string;
       indexTemplates?: Array<{
         priority: number | undefined;
@@ -63,12 +63,12 @@ const indexPatternSettingsRoute = createApmServerRoute({
     const apmEventClient = await getApmEventClient(resources);
     const defaultApmIndexTemplateStates =
       await getDefaultApmIndexTemplateStates(apmEventClient);
-    const matchingIndexTemplates = await getMatchingIndexTemplates(
+    const indexTemplatesByIndexPattern = await getMatchingIndexTemplates(
       apmEventClient,
       defaultApmIndexTemplateStates
     );
 
-    return { matchingIndexTemplates };
+    return { indexTemplatesByIndexPattern };
   },
 });
 

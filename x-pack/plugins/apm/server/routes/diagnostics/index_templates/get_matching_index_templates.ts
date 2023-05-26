@@ -26,7 +26,7 @@ export async function getMatchingIndexTemplates(
   defaultApmIndexTemplateStates: DefaultApmIndexTemplateStates
 ) {
   const apmIndexPatterns = getUniqueApmIndices(apmEventClient.indices);
-  const matchingIndexTemplates = await Promise.all(
+  const indexTemplatesByIndexPattern = await Promise.all(
     apmIndexPatterns.map(async (indexPattern) => {
       const simulateResponse = await apmEventClient.simulateIndexTemplate(
         'simulate_index_template',
@@ -70,7 +70,7 @@ export async function getMatchingIndexTemplates(
     })
   );
 
-  return matchingIndexTemplates;
+  return indexTemplatesByIndexPattern;
 }
 
 async function getTemplatePriority(

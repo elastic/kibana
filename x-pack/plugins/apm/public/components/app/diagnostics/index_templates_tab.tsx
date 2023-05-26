@@ -16,11 +16,19 @@ import {
 import React from 'react';
 
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
+import { useDiagnosticsReportFromSessionStorage } from './import_export_tab';
 
 export function DiagnosticsIndexTemplates() {
-  const { data, status } = useFetcher((callApmApi) => {
-    return callApmApi(`GET /internal/apm/diagnostics/index_templates`);
-  }, []);
+  const { report } = useDiagnosticsReportFromSessionStorage();
+  const { data, status } = useFetcher(
+    async (callApmApi) => {
+      if (report) {
+        return report.indexTemplates;
+      }
+      return callApmApi(`GET /internal/apm/diagnostics/index_templates`);
+    },
+    [report]
+  );
 
   if (status === FETCH_STATUS.LOADING) {
     return <EuiLoadingElastic size="m" />;
