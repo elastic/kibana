@@ -118,7 +118,6 @@ const simpleNavigationDefinition: ProjectNavigationDefinition = {
   homeRef: 'https://elastic.co',
   projectNavigationTree: [
     {
-      type: 'navGroup',
       id: 'example_projet',
       title: 'Example project',
       icon: 'logoObservability',

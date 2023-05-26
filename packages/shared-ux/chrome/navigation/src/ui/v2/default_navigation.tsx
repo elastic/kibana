@@ -11,6 +11,7 @@ import React, { FC, useCallback } from 'react';
 import { Navigation } from './components';
 import {
   GroupDefinition,
+  NavigationTreeDefinition,
   NodeDefinition,
   ProjectNavigationDefinition,
   RootNavigationItemDefinition,
@@ -29,7 +30,7 @@ const isChromeProjectNavigationNode = (
 
 const getDefaultNavigationTree = (
   projectDefinition: GroupDefinition[]
-): Required<ProjectNavigationDefinition>['navigationTree'] => {
+): NavigationTreeDefinition => {
   return {
     body: [
       {

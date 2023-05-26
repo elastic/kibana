@@ -9,7 +9,8 @@
 import { NodeDefinition } from '../types';
 
 export const analytics: NodeDefinition = {
-  id: 'group1',
+  // Make sure we have a unique id otherwise it might override a custom id from the project
+  id: 'sharedux:analytics',
   title: 'Data exploration',
   icon: 'stats',
   children: [

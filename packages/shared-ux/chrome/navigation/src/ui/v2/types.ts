@@ -90,6 +90,26 @@ export type RootNavigationItemDefinition =
   | CloudLinkDefinition
   | GroupDefinition;
 
+export type ProjectNavigationTreeDefinition = Array<Omit<GroupDefinition, 'type'>>;
+
+/**
+ * @public
+ *
+ * Definition for the complete navigation tree, including body and footer
+ */
+export interface NavigationTreeDefinition {
+  /**
+   * Main content of the navigation. Can contain any number of "cloudLink", "recentlyAccessed"
+   * or "group" items. Be mindeful though, with great power comes great responsibility.
+   * */
+  body?: RootNavigationItemDefinition[];
+  /**
+   * Footer content of the navigation. Can contain any number of "cloudLink", "recentlyAccessed"
+   * or "group" items. Be mindeful though, with great power comes great responsibility.
+   * */
+  footer?: RootNavigationItemDefinition[];
+}
+
 /**
  * @public
  *
@@ -106,24 +126,13 @@ export interface ProjectNavigationDefinition {
    * for a project. Use it if you only need to configure your project navigation and leave
    * all the other navigation items to the default (Recently viewed items, Management, etc.)
    */
-  projectNavigationTree?: GroupDefinition[];
+  projectNavigationTree?: ProjectNavigationTreeDefinition;
   /**
    * A navigation tree structure with object items containing labels, links, and sub-items
    * that defines a complete side navigation. This configuration overrides `projectNavigationTree`
    * if both are provided.
    */
-  navigationTree?: {
-    /**
-     * Main content of the navigation. Can contain any number of "cloudLink", "recentlyAccessed"
-     * or "group" items. Be mindeful though, with great power comes great responsibility.
-     * */
-    body?: RootNavigationItemDefinition[];
-    /**
-     * Footer content of the navigation. Can contain any number of "cloudLink", "recentlyAccessed"
-     * or "group" items. Be mindeful though, with great power comes great responsibility.
-     * */
-    footer?: RootNavigationItemDefinition[];
-  };
+  navigationTree?: NavigationTreeDefinition;
 }
 
 /**

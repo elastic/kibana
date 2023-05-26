@@ -9,7 +9,7 @@
 import { NodeDefinition } from '../types';
 
 export const management: NodeDefinition = {
-  id: 'management',
+  id: 'sharedux:management',
   title: 'Management',
   icon: 'gear',
   children: [

@@ -9,7 +9,7 @@
 import { NodeDefinition } from '../types';
 
 export const ml: NodeDefinition = {
-  id: 'ml',
+  id: 'sharedux:ml',
   title: 'Machine learning',
   icon: 'indexMapping',
   children: [

@@ -10,7 +10,7 @@ import { NodeDefinition } from '../types';
 
 export const devtools: NodeDefinition = {
   title: 'Developer tools',
-  id: 'devtools',
+  id: 'sharedux:devtools',
   icon: 'editorCodeBlock',
   children: [
     {
