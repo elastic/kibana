@@ -220,7 +220,9 @@ function addSeverityAndEventTypeInBody(bodyString: string, severity: string, eve
   let bodyObj = bodyString;
   try {
     bodyObj = JSON.parse(bodyString);
-  } catch {}
+  } catch {
+    logger.debug(`Warning on d3 action: Invalid JSON input`);
+  }
   const resultObj = JSON.parse('{}');
   resultObj.hits = {};
   resultObj.hits.hits = {};
