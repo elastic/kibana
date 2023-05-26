@@ -6,8 +6,9 @@
  */
 
 import moment from 'moment';
+import { Aggregators } from '../../../../../common/threshold_rule/types';
 import { isCustom, isNotCountOrCustom } from './metric_expression_params';
-import { Aggregators, MetricExpressionParams } from '../types';
+import { MetricExpressionParams } from '../types';
 import { createCustomMetricsAggregations } from './create_custom_metrics_aggregations';
 import {
   hasAdditionalContext,

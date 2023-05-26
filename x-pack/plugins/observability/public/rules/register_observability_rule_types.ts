@@ -16,6 +16,8 @@ import {
   SLO_BURN_RATE_RULE_ID,
 } from '../../common/constants';
 import { validateBurnRateRule } from '../components/burn_rate_rule_editor/validation';
+import { validateMetricThreshold } from '../pages/threshold/components/validation';
+import { formatReason } from '../pages/threshold/rule_data_formatters';
 
 export const registerObservabilityRuleTypes = (
   config: ConfigSchema,
@@ -60,7 +62,7 @@ export const registerObservabilityRuleTypes = (
     documentationUrl(docLinks) {
       return `${docLinks.links.observability.metricsThreshold}`;
     },
-    ruleParamsExpression: lazy(() => import('./components/expression')),
+    ruleParamsExpression: lazy(() => import('../pages/threshold/components/expression')),
     validate: validateMetricThreshold,
     defaultActionMessage: i18n.translate(
       'xpack.infra.metrics.alerting.threshold.defaultActionMessage',
@@ -74,6 +76,8 @@ export const registerObservabilityRuleTypes = (
     ),
     requiresAppContext: false,
     format: formatReason,
-    alertDetailsAppSection: lazy(() => import('./components/alert_details_app_section')),
+    alertDetailsAppSection: lazy(
+      () => import('../pages/threshold/components/alert_details_app_section')
+    ),
   });
 };

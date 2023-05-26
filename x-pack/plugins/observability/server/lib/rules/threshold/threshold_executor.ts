@@ -17,10 +17,11 @@ import {
 import { Alert, RuleTypeState } from '@kbn/alerting-plugin/server';
 import { IBasePath, Logger } from '@kbn/core/server';
 import { LifecycleRuleExecutor } from '@kbn/rule-registry-plugin/server';
+import { Comparator } from '../../../../common/threshold_rule/types';
 import { ObservabilityConfig } from '../../..';
 import { TimeUnitChar } from '../../../../common/utils/formatters/duration';
 import { getOriginalActionGroup } from './utils';
-import { AlertStates, Comparator } from './types';
+import { AlertStates } from './types';
 import { createFormatter } from './formatters';
 import {
   buildFiredAlertReason,

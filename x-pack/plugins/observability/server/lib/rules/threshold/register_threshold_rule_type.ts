@@ -14,8 +14,8 @@ import { legacyExperimentalFieldMap } from '@kbn/alerts-as-data-utils';
 import { createLifecycleExecutor } from '@kbn/rule-registry-plugin/server';
 import { LicenseType } from '@kbn/licensing-plugin/server';
 
+import { Comparator } from '../../../../common/threshold_rule/types';
 import { OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '../../../../common/constants';
-import { Comparator } from './types';
 
 import {
   alertDetailUrlActionVariableDescription,
@@ -48,7 +48,7 @@ import {
   NO_DATA_ACTIONS,
 } from './threshold_executor';
 import { ObservabilityConfig } from '../../..';
-import { METRIC_EXPLORER_AGGREGATIONS } from './constants';
+import { METRIC_EXPLORER_AGGREGATIONS } from '../../../../common/threshold_rule/constants';
 
 export const MetricsRulesTypeAlertDefinition: IRuleTypeAlerts = {
   context: OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
@@ -133,7 +133,7 @@ export function thresholdRuleType(
   return {
     id: OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
     name: i18n.translate('xpack.observability.threshold.alertName', {
-      defaultMessage: 'Observability threshold',
+      defaultMessage: '🔥 Threshold',
     }),
     validate: {
       params: schema.object(
@@ -207,7 +207,7 @@ export function thresholdRuleType(
         },
       ],
     },
-    producer: 'infrastructure',
+    producer: 'observability',
     // TODO: check this one below
     // getSummarizedAlerts: libs.metricsRules.createGetSummarizedAlerts(),//T
     alerts: MetricsRulesTypeAlertDefinition,

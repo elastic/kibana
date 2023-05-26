@@ -6,55 +6,13 @@
  */
 import * as rt from 'io-ts';
 import { ML_ANOMALY_THRESHOLD } from '@kbn/ml-anomaly-utils/anomaly_threshold';
+import { Aggregators, Comparator } from '../../../../common/threshold_rule/types';
 import { TimeUnitChar } from '../../../../common';
-import { SNAPSHOT_CUSTOM_AGGREGATIONS } from './constants';
-
-export type SnapshotCustomAggregation = typeof SNAPSHOT_CUSTOM_AGGREGATIONS[number];
-const snapshotCustomAggregationKeys = SNAPSHOT_CUSTOM_AGGREGATIONS.reduce<
-  Record<SnapshotCustomAggregation, null>
->((acc, agg) => ({ ...acc, [agg]: null }), {} as Record<SnapshotCustomAggregation, null>);
-
-export const SnapshotCustomAggregationRT = rt.keyof(snapshotCustomAggregationKeys);
-
-export const SnapshotCustomMetricInputRT = rt.intersection([
-  rt.type({
-    type: rt.literal('custom'),
-    field: rt.string,
-    aggregation: SnapshotCustomAggregationRT,
-    id: rt.string,
-  }),
-  rt.partial({
-    label: rt.string,
-  }),
-]);
-export type SnapshotCustomMetricInput = rt.TypeOf<typeof SnapshotCustomMetricInputRT>;
 
 export enum InfraRuleType {
   MetricThreshold = 'metrics.alert.threshold',
   InventoryThreshold = 'metrics.alert.inventory.threshold',
   Anomaly = 'metrics.alert.anomaly',
-}
-
-export enum Comparator {
-  GT = '>',
-  LT = '<',
-  GT_OR_EQ = '>=',
-  LT_OR_EQ = '<=',
-  BETWEEN = 'between',
-  OUTSIDE_RANGE = 'outside',
-}
-
-export enum Aggregators {
-  COUNT = 'count',
-  AVERAGE = 'avg',
-  SUM = 'sum',
-  MIN = 'min',
-  MAX = 'max',
-  RATE = 'rate',
-  CARDINALITY = 'cardinality',
-  P95 = 'p95',
-  P99 = 'p99',
-  CUSTOM = 'custom',
 }
 
 export enum AlertStates {
@@ -148,13 +106,3 @@ export interface AlertExecutionDetails {
   alertId: string;
   executionId: string;
 }
-
-export const ThresholdFormatterTypeRT = rt.keyof({
-  abbreviatedNumber: null,
-  bits: null,
-  bytes: null,
-  number: null,
-  percent: null,
-  highPrecision: null,
-});
-export type ThresholdFormatterType = rt.TypeOf<typeof ThresholdFormatterTypeRT>;

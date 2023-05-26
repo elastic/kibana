@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import { ThresholdFormatterType } from '../../../../../common/threshold_rule/types';
 import { createBytesFormatter } from './bytes';
 import { formatNumber } from './number';
 import { formatPercent } from './percent';
-import { ThresholdFormatterType } from '../types';
 import { formatHighPrecision } from './high_precision';
 import { InfraWaffleMapDataFormat } from './types';
 

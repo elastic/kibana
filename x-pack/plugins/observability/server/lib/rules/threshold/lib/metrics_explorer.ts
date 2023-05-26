@@ -6,7 +6,7 @@
  */
 
 import * as rt from 'io-ts';
-import { xor } from 'lodash';
+import { metricsExplorerCustomMetricAggregationRT } from '../../../../../common/threshold_rule/metrics_explorer';
 
 export const METRIC_EXPLORER_AGGREGATIONS = [
   'avg',
@@ -30,21 +30,6 @@ const metricsExplorerAggregationKeys = METRIC_EXPLORER_AGGREGATIONS.reduce<
 >((acc, agg) => ({ ...acc, [agg]: null }), {} as Record<MetricExplorerAggregations, null>);
 
 export const metricsExplorerAggregationRT = rt.keyof(metricsExplorerAggregationKeys);
-
-export type MetricExplorerCustomMetricAggregations = Exclude<
-  MetricsExplorerAggregation,
-  'custom' | 'rate' | 'p95' | 'p99'
->;
-const metricsExplorerCustomMetricAggregationKeys = xor(
-  METRIC_EXPLORER_AGGREGATIONS,
-  OMITTED_AGGREGATIONS_FOR_CUSTOM_METRICS
-).reduce<Record<MetricExplorerCustomMetricAggregations, null>>(
-  (acc, agg) => ({ ...acc, [agg]: null }),
-  {} as Record<MetricExplorerCustomMetricAggregations, null>
-);
-export const metricsExplorerCustomMetricAggregationRT = rt.keyof(
-  metricsExplorerCustomMetricAggregationKeys
-);
 
 export const metricsExplorerMetricRequiredFieldsRT = rt.type({
   aggregation: metricsExplorerAggregationRT,
@@ -147,19 +132,13 @@ export const metricsExplorerResponseRT = rt.type({
 
 export type AfterKey = rt.TypeOf<typeof afterKeyObjectRT>;
 
-export type MetricsExplorerAggregation = rt.TypeOf<typeof metricsExplorerAggregationRT>;
-
 export type MetricsExplorerColumnType = rt.TypeOf<typeof metricsExplorerColumnTypeRT>;
-
-export type MetricsExplorerMetric = rt.TypeOf<typeof metricsExplorerMetricRT>;
 
 export type MetricsExplorerPageInfo = rt.TypeOf<typeof metricsExplorerPageInfoRT>;
 
 export type MetricsExplorerColumn = rt.TypeOf<typeof metricsExplorerColumnRT>;
 
 export type MetricsExplorerRow = rt.TypeOf<typeof metricsExplorerRowRT>;
-
-export type MetricsExplorerSeries = rt.TypeOf<typeof metricsExplorerSeriesRT>;
 
 export type MetricsExplorerRequestBody = rt.TypeOf<typeof metricsExplorerRequestBodyRT>;
 

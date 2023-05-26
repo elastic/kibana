@@ -6,7 +6,7 @@
  */
 
 import moment from 'moment';
-import { TIMESTAMP_FIELD } from '../constants';
+import { TIMESTAMP_FIELD } from '../../../../../common/threshold_rule/constants';
 import { MetricExpressionParams } from '../types';
 
 export const createLastPeriod = (
