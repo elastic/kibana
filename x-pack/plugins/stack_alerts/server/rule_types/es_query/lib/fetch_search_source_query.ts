@@ -166,39 +166,45 @@ export function updateSearchSource(
   };
 }
 
+const CLEARED_ADHOC_ID = undefined;
+
 async function generateLink(
   searchSource: ISearchSource,
   discoverLocator: LocatorPublic<DiscoverAppLocatorParams>,
   dataViews: DataViewsContract,
-  dataViewToUpdate: DataView,
+  dataView: DataView,
   dateStart: string,
   dateEnd: string,
   spacePrefix: string
 ) {
-  const prevFilters = searchSource.getField('filter') as Filter[];
-
-  // make new adhoc data view
-  const newDataView = await dataViews.create({
-    ...dataViewToUpdate.toSpec(false),
-    version: undefined,
-    id: undefined,
-  });
-  const updatedFilters = updateFilterReferences(prevFilters, dataViewToUpdate.id!, newDataView.id!);
+  const filters = searchSource.getField('filter') as Filter[];
 
   const redirectUrlParams: DiscoverAppLocatorParams = {
-    dataViewSpec: newDataView.toSpec(false),
-    filters: updatedFilters,
+    ...(dataView.isPersisted()
+      ? { dataViewId: dataView.id, filters }
+      : {
+          dataViewSpec: {
+            ...dataView.toSpec(false),
+            version: undefined,
+            fieldAttrs: undefined,
+            id: CLEARED_ADHOC_ID,
+          },
+          filters: updateFilterReferences(filters, dataView.id!, CLEARED_ADHOC_ID),
+        }),
     query: searchSource.getField('query'),
     timeRange: { from: dateStart, to: dateEnd },
     isAlertResults: true,
   };
+
+  // use `lzCompress` flag for making the link readable during debugging/testing
+  // const redirectUrl = discoverLocator!.getRedirectUrl(redirectUrlParams, { lzCompress: false });
   const redirectUrl = discoverLocator!.getRedirectUrl(redirectUrlParams);
   const [start, end] = redirectUrl.split('/app');
 
   return start + spacePrefix + '/app' + end;
 }
 
-function updateFilterReferences(filters: Filter[], fromDataView: string, toDataView: string) {
+function updateFilterReferences(filters: Filter[], fromDataView: string, toDataView?: string) {
   return (filters || []).map((filter) => {
     if (filter.meta.index === fromDataView) {
       return {
