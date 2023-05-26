@@ -971,6 +971,7 @@ x-pack/plugins/cloud_integrations/cloud_full_story/server/config.ts @elastic/kib
 
 # Response Ops team
 /x-pack/test/alerting_api_integration/ @elastic/response-ops
+/x-pack/test/alerting_api_integration/observability @elastic/actionable-observability
 /x-pack/test/plugin_api_integration/test_suites/task_manager/ @elastic/response-ops
 /x-pack/test/functional_with_es_ssl/apps/triggers_actions_ui/ @elastic/response-ops
 /docs/user/alerting/ @elastic/response-ops
@@ -1006,10 +1007,7 @@ x-pack/plugins/cloud_integrations/cloud_full_story/server/config.ts @elastic/kib
 /x-pack/plugins/security_solution/common/search_strategy/timeline @elastic/security-threat-hunting-investigations
 /x-pack/plugins/security_solution/common/types/timeline @elastic/security-threat-hunting-investigations
 
-/x-pack/plugins/security_solution/cypress/e2e/timeline_templates @elastic/security-threat-hunting-investigations
-/x-pack/plugins/security_solution/cypress/e2e/timeline @elastic/security-threat-hunting-investigations
-/x-pack/plugins/security_solution/cypress/e2e/detection_alerts @elastic/security-threat-hunting-investigations
-/x-pack/plugins/security_solution/cypress/e2e/urls @elastic/security-threat-hunting-investigations
+/x-pack/plugins/security_solution/cypress/e2e/investigations @elastic/security-threat-hunting-investigations
 
 /x-pack/plugins/security_solution/public/common/components/alerts_viewer @elastic/security-threat-hunting-investigations
 /x-pack/plugins/security_solution/public/detections/components/alerts_table/timeline_action @elastic/security-threat-hunting-investigations
@@ -1031,6 +1029,7 @@ x-pack/plugins/cloud_integrations/cloud_full_story/server/config.ts @elastic/kib
 /x-pack/plugins/security_solution/common/search_strategy/security_solution/user @elastic/security-threat-hunting-explore
 
 /x-pack/plugins/security_solution/cypress/e2e/cases @elastic/security-threat-hunting-explore
+/x-pack/plugins/security_solution/cypress/e2e/dashboards @elastic/security-threat-hunting-explore
 /x-pack/plugins/security_solution/cypress/e2e/filters @elastic/security-threat-hunting-explore
 /x-pack/plugins/security_solution/cypress/e2e/host_details @elastic/security-threat-hunting-explore
 /x-pack/plugins/security_solution/cypress/e2e/hosts @elastic/security-threat-hunting-explore
