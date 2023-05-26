@@ -6,10 +6,9 @@
  */
 
 import { useEffect, useState } from 'react';
-import type { IUiSettingsClient, SavedObjectsClientContract } from '@kbn/core/public';
+import type { IUiSettingsClient } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import type { DataViewsContract } from '@kbn/data-views-plugin/public';
-import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { getSavedSearch } from '../util/dependency_cache';
 import {
   getDataViewById,
@@ -23,10 +22,6 @@ import { useNotifications } from '../contexts/kibana';
 import { useCreateAndNavigateToMlLink } from '../contexts/kibana/use_create_url';
 import { ML_PAGES } from '../../../common/constants/locator';
 
-export interface GetSavedSearchPageDeps {
-  search: DataPublicPluginStart['search'];
-  savedObjectsClient: SavedObjectsClientContract;
-}
 /**
  * Hook to resolve route specific requirements
  * @param dataViewId optional Kibana data view id, used for wizards
