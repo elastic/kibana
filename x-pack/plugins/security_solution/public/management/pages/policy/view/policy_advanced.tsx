@@ -102,7 +102,7 @@ export const AdvancedPolicyForms = React.memo(({ isPlatinumPlus }: { isPlatinumP
         title={calloutTitle}
         color="warning"
         iconType="warning"
-        data-test-subj="advancedSettingsWarning"
+        data-test-subj="policyAdvancedSettingsWarning"
       >
         <p>{warningMessage}</p>
       </EuiCallOut>
