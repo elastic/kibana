@@ -17,6 +17,7 @@ import { createCaseError } from '../../common/error';
 import type { CasesClient } from '../client';
 import type { CasesClientArgs } from '../types';
 import { buildHandlers } from './utils';
+import { decodeOrThrow } from '../../../common/api/runtime_types';
 
 export const getCasesMetrics = async (
   params: CasesMetricsRequest,
@@ -40,7 +41,7 @@ export const getCasesMetrics = async (
       return merge(acc, metric);
     }, {}) as CasesMetricsResponse;
 
-    return CasesMetricsResponseRt.encode(mergedResults);
+    return decodeOrThrow(CasesMetricsResponseRt)(mergedResults);
   } catch (error) {
     throw createCaseError({
       logger,
