@@ -23,7 +23,7 @@ import { DataQuality } from './pages/data_quality';
 import { DetectionResponse } from './pages/detection_response';
 import { PluginTemplateWrapper } from '../common/components/plugin_template_wrapper';
 import { EntityAnalyticsPage } from './pages/entity_analytics';
-import { SecurityPage } from '../common/components/security_page';
+import { SecurityRoutePageWrapper } from '../common/components/security_route_page_wrapper';
 
 const OverviewRoutes = () => (
   <PluginTemplateWrapper>
@@ -49,9 +49,9 @@ const LandingRoutes = () => (
 
 const EntityAnalyticsRoutes = () => (
   <PluginTemplateWrapper>
-    <SecurityPage pageName={SecurityPageName.entityAnalytics}>
+    <SecurityRoutePageWrapper pageName={SecurityPageName.entityAnalytics}>
       <EntityAnalyticsPage />
-    </SecurityPage>
+    </SecurityRoutePageWrapper>
   </PluginTemplateWrapper>
 );
 
