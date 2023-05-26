@@ -24,7 +24,6 @@ describe('D3ActionConnectorFields renders', () => {
       },
       secrets: {
         Token: 'token',
-      
       },
       isDeprecated: false,
     };
@@ -61,7 +60,6 @@ describe('D3ActionConnectorFields renders', () => {
         name: 'd3security',
         config: {
           url: 'https://test.com',
-
         },
         secrets: {
           token: 'token',

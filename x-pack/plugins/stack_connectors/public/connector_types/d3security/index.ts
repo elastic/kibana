@@ -6,4 +6,3 @@
  */
 
 export { getConnectorType as getD3SecurityConnectorType } from './d3security';
-

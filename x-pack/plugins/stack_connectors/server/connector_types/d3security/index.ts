@@ -172,10 +172,8 @@ export async function executor(
       value: { status, statusText },
     } = result;
     logger.debug(`response from d3 action "${actionId}": [HTTP ${status}] ${statusText}`);
-    console.log('hello result', result);
     return successResult(actionId, data);
   } else {
-    console.log('ERROR IN D3:', result.error);
     const { error } = result;
     if (error.response) {
       const {

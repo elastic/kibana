@@ -7,24 +7,19 @@
 
 import { lazy } from 'react';
 import { i18n } from '@kbn/i18n';
-import {  ActionTypeModel as ConnectorTypeModel,
-          GenericValidationResult } from '@kbn/triggers-actions-ui-plugin/public/types';
+import {
+  ActionTypeModel as ConnectorTypeModel,
+  GenericValidationResult,
+} from '@kbn/triggers-actions-ui-plugin/public/types';
 import { D3ActionParams, D3Config, D3Secrets } from '../types';
 
-export function getConnectorType(): ConnectorTypeModel<
-  D3Config,
-  D3Secrets,
-  D3ActionParams
-> {
+export function getConnectorType(): ConnectorTypeModel<D3Config, D3Secrets, D3ActionParams> {
   return {
     id: '.d3security',
     iconClass: lazy(() => import('./logo')),
-    selectMessage: i18n.translate(
-      'xpack.stackConnectors.components.d3security.selectMessageText',
-      {
-        defaultMessage: 'Create event or trigger playbook workflow actions in D3 SOAR.',
-      }
-    ),
+    selectMessage: i18n.translate('xpack.stackConnectors.components.d3security.selectMessageText', {
+      defaultMessage: 'Create event or trigger playbook workflow actions in D3 SOAR.',
+    }),
     actionTypeTitle: i18n.translate(
       'xpack.stackConnectors.components.d3security.connectorTypeTitle',
       {
