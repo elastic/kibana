@@ -15,6 +15,7 @@ import {
 } from '@elastic/eui';
 import React, { useMemo } from 'react';
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 interface Props {}
 
 const icons = ['Kibana', 'Kibana', 'Kibana'];
