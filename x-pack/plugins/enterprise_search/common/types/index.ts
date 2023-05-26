@@ -38,6 +38,7 @@ export interface ProductAccess {
 
 export interface ProductFeatures {
   hasConnectors: boolean;
+  hasDLSEnabled: boolean;
   hasDefaultIngestPipeline: boolean;
   hasNativeConnectors: boolean;
   hasWebCrawler: boolean;

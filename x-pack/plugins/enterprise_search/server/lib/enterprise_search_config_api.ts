@@ -52,6 +52,7 @@ export const callEnterpriseSearchConfigAPI = async ({
       },
       features: {
         hasConnectors: config.hasConnectors,
+        hasDLSEnabled: config.hasDLSEnabled,
         hasDefaultIngestPipeline: config.hasDefaultIngestPipeline,
         hasNativeConnectors: config.hasNativeConnectors,
         hasWebCrawler: config.hasWebCrawler,
@@ -105,6 +106,7 @@ export const callEnterpriseSearchConfigAPI = async ({
       },
       features: {
         hasConnectors: config.hasConnectors,
+        hasDLSEnabled: config.hasDLSEnabled,
         hasDefaultIngestPipeline: config.hasDefaultIngestPipeline,
         hasNativeConnectors: config.hasNativeConnectors,
         hasWebCrawler: config.hasWebCrawler,

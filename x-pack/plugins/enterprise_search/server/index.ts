@@ -21,6 +21,7 @@ export const configSchema = schema.object({
   customHeaders: schema.maybe(schema.object({}, { unknowns: 'allow' })),
   enabled: schema.boolean({ defaultValue: true }),
   hasConnectors: schema.boolean({ defaultValue: true }),
+  hasDLSEnabled: schema.boolean({ defaultValue: true }),
   hasDefaultIngestPipeline: schema.boolean({ defaultValue: true }),
   hasNativeConnectors: schema.boolean({ defaultValue: true }),
   hasWebCrawler: schema.boolean({ defaultValue: true }),

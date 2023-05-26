@@ -33,6 +33,7 @@ export const DEFAULT_INITIAL_APP_DATA = {
   },
   features: {
     hasConnectors: true,
+    hasDLSEnabled: true,
     hasDefaultIngestPipeline: true,
     hasNativeConnectors: true,
     hasWebCrawler: true,

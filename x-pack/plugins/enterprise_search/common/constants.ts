@@ -171,6 +171,7 @@ export enum INGESTION_METHOD_IDS {
 
 export const DEFAULT_PRODUCT_FEATURES: ProductFeatures = {
   hasConnectors: true,
+  hasDLSEnabled: true,
   hasDefaultIngestPipeline: true,
   hasNativeConnectors: true,
   hasWebCrawler: true,
