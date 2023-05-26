@@ -6,16 +6,16 @@
  */
 
 import { AppFeatureKey, AppFeatureKeys } from '@kbn/security-solution-plugin/common';
-import type { ServerlessSecurityPLI } from '../config';
+import type { SecurityProductLineId } from '../config';
 
-export const PLI_APP_FEATURES: Record<ServerlessSecurityPLI, AppFeatureKeys> = {
+export const PLI_APP_FEATURES: Record<SecurityProductLineId, AppFeatureKeys> = {
   endpointEssentials: {
-    [AppFeatureKey.exampleAppFeature]: false,
+    [AppFeatureKey.advancedInsights]: false,
     [AppFeatureKey.exampleCasesFeature]: false,
   },
 
   cloudEssentials: {
-    [AppFeatureKey.exampleAppFeature]: true,
+    [AppFeatureKey.advancedInsights]: true,
     [AppFeatureKey.exampleCasesFeature]: true,
   },
 } as const;

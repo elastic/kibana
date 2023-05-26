@@ -7,9 +7,9 @@
 
 import React from 'react';
 import { EuiEmptyPrompt, EuiLink } from '@elastic/eui';
-import { ServerlessSecurityPLIs } from '../../../../common/config';
+import { SecurityProductLineIds } from '../../../../common/config';
 
-export const GenericUpsellingPage: React.FC<{ projectPLIs: ServerlessSecurityPLIs }> = React.memo(
+export const GenericUpsellingPage: React.FC<{ projectPLIs: SecurityProductLineIds }> = React.memo(
   ({ projectPLIs }) => {
     const upsellingPLI = projectPLIs.includes('cloudEssentials')
       ? 'Cloud Complete'
