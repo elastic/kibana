@@ -20,6 +20,7 @@ import { NotFoundRoute } from './not_found';
 import { DiscoverServices } from '../build_services';
 import { ViewAlertRoute } from './view_alert';
 import { CustomizationCallback, DiscoverProfileRegistry } from '../customizations';
+import { addProfile } from '../../common/customizations';
 
 interface DiscoverRoutesProps {
   prefix?: string;
@@ -78,7 +79,7 @@ const CustomDiscoverRoutes = ({ profileRegistry, ...props }: CustomDiscoverRoute
   if (customizationCallbacks) {
     return (
       <DiscoverRoutes
-        prefix={`/p/${profile}`}
+        prefix={addProfile('', profile)}
         customizationCallbacks={customizationCallbacks}
         {...props}
       />
@@ -112,7 +113,7 @@ export const DiscoverRouter = ({
         <Router history={history} data-test-subj="discover-react-router">
           <CompatRouter>
             <Switch>
-              <Route path="/p/:profile">
+              <Route path={addProfile('', ':profile')}>
                 <CustomDiscoverRoutes profileRegistry={profileRegistry} {...routeProps} />
               </Route>
               <Route path="/">

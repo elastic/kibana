@@ -7,15 +7,15 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { matchPath } from 'react-router-dom';
+import { addProfile, getProfile } from '../../common/customizations';
 import type { DiscoverServices } from '../build_services';
 
-const getRootPath = ({ history }: DiscoverServices) => {
-  const match = matchPath<{ profile?: string }>(history().location.pathname, {
-    path: '/p/:profile',
-  });
+const rootPath = '#/';
 
-  return match ? `#/p/${match.params.profile}/` : '#/';
+const getRootPath = ({ history }: DiscoverServices) => {
+  const { profile } = getProfile(history().location.pathname);
+
+  return profile ? addProfile(rootPath, profile) : rootPath;
 };
 
 export function getRootBreadcrumbs({

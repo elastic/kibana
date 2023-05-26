@@ -13,6 +13,7 @@ import type { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/public'
 import { DataViewSpec } from '@kbn/data-views-plugin/common';
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/common';
 import { VIEW_MODE } from './constants';
+import { addProfile } from './customizations';
 
 export const DISCOVER_APP_LOCATOR = 'DISCOVER_APP_LOCATOR';
 
@@ -186,7 +187,7 @@ export class DiscoverAppLocatorDefinition implements LocatorDefinition<DiscoverA
     let path = '#/';
 
     if (profile) {
-      path = `${path}p/${profile}/`;
+      path = addProfile(path, profile);
     }
 
     path = `${path}${savedSearchPath}`;

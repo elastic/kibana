@@ -12,6 +12,8 @@ import type { GlobalQueryStateFromUrl } from '@kbn/data-plugin/public';
 import type { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/public';
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
 import type { DataViewSpec } from '@kbn/data-views-plugin/public';
+import { addProfile } from '../../../../common/customizations';
+
 export const DISCOVER_CONTEXT_APP_LOCATOR = 'DISCOVER_CONTEXT_APP_LOCATOR';
 
 export interface DiscoverContextAppLocatorParams extends SerializableRecord {
@@ -66,7 +68,7 @@ export class DiscoverContextAppLocatorDefinition
     let path = '#/';
 
     if (params.profile) {
-      path = `${path}p/${params.profile}/`;
+      path = addProfile(path, params.profile);
     }
 
     path = `${path}context/${dataViewId}/${rowId}`;

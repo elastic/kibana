@@ -18,7 +18,7 @@ import type {
 } from '@kbn/share-plugin/common/url_service';
 import type { LocatorPublic } from '@kbn/share-plugin/public';
 import type { DependencyList } from 'react';
-import { matchPath } from 'react-router-dom';
+import { getProfile } from '../../common/customizations';
 import { getHistory } from '../kibana_services';
 
 export class ProfileAwareLocator<T extends { profile?: string }> implements LocatorPublic<T> {
@@ -36,15 +36,10 @@ export class ProfileAwareLocator<T extends { profile?: string }> implements Loca
     }
 
     const history = getHistory();
-    const match = matchPath<{ profile: string }>(history.location.pathname, {
-      path: '/p/:profile',
-    });
+    const { profile } = getProfile(history.location.pathname);
 
-    if (match?.params.profile) {
-      params = {
-        ...params,
-        profile: match.params.profile,
-      };
+    if (profile) {
+      params = { ...params, profile };
     }
 
     return params;

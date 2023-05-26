@@ -8,7 +8,7 @@
 
 import { useEffect } from 'react';
 import { History } from 'history';
-import { matchPath } from 'react-router-dom';
+import { getProfile } from '../../../../common/customizations';
 
 export function useUrl({
   history,
@@ -27,9 +27,9 @@ export function useUrl({
     // which could be set through pressing "New" button in top nav or go to "Discover" plugin from the sidebar
     // to reload the page in a right way
     const unlistenHistoryBasePath = history.listen(({ pathname, search, hash }) => {
-      const isProfileRoot = Boolean(matchPath(pathname, { path: '/p/:profile', exact: true }));
+      const { isProfileRootPath } = getProfile(pathname);
 
-      if ((pathname === '/' || isProfileRoot) && !search && !hash && !savedSearchId) {
+      if ((pathname === '/' || isProfileRootPath) && !search && !hash && !savedSearchId) {
         onNewUrl();
       }
     });
