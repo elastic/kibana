@@ -11,17 +11,24 @@ import { SLO } from '../../models';
 import { CompositeSLO } from '../../models/composite_slo';
 
 export function validateCompositeSLO(compositeSlo: CompositeSLO, sloList: SLO[]) {
+  assertNumberOfSourceSlo(compositeSlo);
   assertMatchingSloList(compositeSlo, sloList);
   assertSameBudgetingMethod(compositeSlo, sloList);
   assertSameRollingTimeWindow(compositeSlo, sloList);
 }
 
+function assertNumberOfSourceSlo(compositeSlo: CompositeSLO) {
+  if (compositeSlo.sources.length < 2 || compositeSlo.sources.length > 30) {
+    throw new IllegalArgumentError('A composite SLO must contain between 2 and 30 source SLOs.');
+  }
+}
+
 function assertMatchingSloList(compositeSlo: CompositeSLO, sloList: SLO[]) {
-  const everyCombinedSloMatches = compositeSlo.sources.every((sourceSlo) =>
+  const everySourceSloMatches = compositeSlo.sources.every((sourceSlo) =>
     sloList.find((slo) => sourceSlo.id === slo.id && sourceSlo.revision === slo.revision)
   );
 
-  if (!everyCombinedSloMatches) {
+  if (!everySourceSloMatches) {
     throw new IllegalArgumentError(
       'One or many source SLOs are not matching the specified id and revision.'
     );
@@ -32,6 +39,19 @@ function assertSameBudgetingMethod(compositeSlo: CompositeSLO, sloList: SLO[]) {
   const haveSameBudgetingMethod = sloList.every(
     (slo) => slo.budgetingMethod === compositeSlo.budgetingMethod
   );
+
+  if (sloList[0].budgetingMethod === 'timeslices') {
+    const firstSloTimesliceWindow = sloList[0].objective.timesliceWindow!;
+    const haveSameTimesliceWindow = sloList.every((slo) =>
+      slo.objective.timesliceWindow?.isEqual(firstSloTimesliceWindow)
+    );
+    if (!haveSameTimesliceWindow) {
+      throw new IllegalArgumentError(
+        'Invalid budgeting method. Every source SLO must use the same timeslice window.'
+      );
+    }
+  }
+
   if (!haveSameBudgetingMethod) {
     throw new IllegalArgumentError(
       'Invalid budgeting method. Every source SLO must use the same budgeting method as the composite.'

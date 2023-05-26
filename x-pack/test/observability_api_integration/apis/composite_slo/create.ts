@@ -42,11 +42,36 @@ export default function ({ getService }: FtrProviderContext) {
         });
     });
 
+    it('returns a 400 when the number of source SLOs is less than 2', async () => {
+      await supertest
+        .post(`/api/observability/composite_slos`)
+        .set('kbn-xsrf', 'foo')
+        .send(
+          createCompositeSLOInput({
+            sources: [{ id: 'f9072790-f97c-11ed-895c-170d13e61076', revision: 2, weight: 1 }],
+          })
+        )
+        .expect(400)
+        .then((resp) => {
+          expect(resp.body.error).to.eql('Bad Request');
+          expect(resp.body.message).to.contain(
+            'A composite SLO must contain between 2 and 30 source SLOs.'
+          );
+        });
+    });
+
     it('returns a 400 when the source SLOs are not found', async () => {
       await supertest
         .post(`/api/observability/composite_slos`)
         .set('kbn-xsrf', 'foo')
-        .send(createCompositeSLOInput({ sources: [{ id: 'inexistant', revision: 1, weight: 1 }] }))
+        .send(
+          createCompositeSLOInput({
+            sources: [
+              { id: 'inexistant', revision: 1, weight: 1 },
+              { id: 'inexistant2', revision: 1, weight: 1 },
+            ],
+          })
+        )
         .expect(400)
         .then((resp) => {
           expect(resp.body.error).to.eql('Bad Request');

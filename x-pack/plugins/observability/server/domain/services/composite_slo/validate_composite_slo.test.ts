@@ -9,16 +9,40 @@ import {
   createWeightedAverageSource,
   createCompositeSLO,
 } from '../../../services/composite_slo/fixtures/composite_slo';
-import { createSLO } from '../../../services/slo/fixtures/slo';
+import {
+  createSLO,
+  createSLOWithTimeslicesBudgetingMethod,
+} from '../../../services/slo/fixtures/slo';
 import {
   sevenDaysRolling,
   thirtyDaysRolling,
   weeklyCalendarAligned,
 } from '../../../services/slo/fixtures/time_window';
 import { validateCompositeSLO } from '.';
+import { fiveMinute, twoMinute } from '../../../services/slo/fixtures/duration';
 
 describe('validateCompositeSLO', () => {
-  it("throws when specified combined SLOs don't match the actual SLO revision", () => {
+  it('throws when the number of source SLOs is less than 2', () => {
+    const compositeSlo = createCompositeSLO({
+      sources: [createWeightedAverageSource()],
+    });
+    expect(() => validateCompositeSLO(compositeSlo, [])).toThrowError(
+      'A composite SLO must contain between 2 and 30 source SLOs.'
+    );
+  });
+
+  it('throws when the number of source SLOs is more than 30', () => {
+    const compositeSlo = createCompositeSLO({
+      sources: Array(31)
+        .fill(0)
+        .map((i) => createWeightedAverageSource()),
+    });
+    expect(() => validateCompositeSLO(compositeSlo, [])).toThrowError(
+      'A composite SLO must contain between 2 and 30 source SLOs.'
+    );
+  });
+
+  it("throws when specified source SLOs don't match the actual SLO revision", () => {
     const sloOne = createSLO({ revision: 3 });
     const sloTwo = createSLO({ revision: 2 });
     const compositeSlo = createCompositeSLO({
@@ -32,7 +56,7 @@ describe('validateCompositeSLO', () => {
     );
   });
 
-  it('throws when specified combined SLOs refers to a non-existant SLO', () => {
+  it('throws when specified source SLOs refers to a non-existant SLO', () => {
     const sloOne = createSLO({ revision: 3 });
     const compositeSlo = createCompositeSLO({
       sources: [
@@ -45,7 +69,7 @@ describe('validateCompositeSLO', () => {
     );
   });
 
-  it('throws when the time window is not the same accros all combined SLOs', () => {
+  it('throws when the time window is not the same accros all source SLOs', () => {
     const sloOne = createSLO({ timeWindow: sevenDaysRolling() });
     const sloTwo = createSLO({ timeWindow: weeklyCalendarAligned() });
     const compositeSlo = createCompositeSLO({
@@ -61,7 +85,7 @@ describe('validateCompositeSLO', () => {
     );
   });
 
-  it('throws when the time window duration is not the same accros all combined SLOs', () => {
+  it('throws when the time window duration is not the same accros all source SLOs', () => {
     const sloOne = createSLO({ timeWindow: sevenDaysRolling() });
     const sloTwo = createSLO({ timeWindow: thirtyDaysRolling() });
     const compositeSlo = createCompositeSLO({
@@ -77,7 +101,7 @@ describe('validateCompositeSLO', () => {
     );
   });
 
-  it('throws when the budgeting method is not the same accros all combined SLOs', () => {
+  it('throws when the budgeting method is not the same accros all source SLOs', () => {
     const sloOne = createSLO({ budgetingMethod: 'occurrences' });
     const sloTwo = createSLO({ budgetingMethod: 'timeslices' });
     const compositeSlo = createCompositeSLO({
@@ -90,6 +114,29 @@ describe('validateCompositeSLO', () => {
 
     expect(() => validateCompositeSLO(compositeSlo, [sloOne, sloTwo])).toThrowError(
       'Invalid budgeting method. Every source SLO must use the same budgeting method as the composite.'
+    );
+  });
+
+  it('throws when the timeslices window is not the same accros all source SLOs', () => {
+    const sloOne = createSLO({
+      budgetingMethod: 'timeslices',
+      objective: { target: 0.98, timesliceTarget: 0.95, timesliceWindow: twoMinute() },
+    });
+    const sloTwo = createSLO({
+      budgetingMethod: 'timeslices',
+      objective: { target: 0.98, timesliceTarget: 0.95, timesliceWindow: fiveMinute() },
+    });
+
+    const compositeSlo = createCompositeSLO({
+      budgetingMethod: 'timeslices',
+      sources: [
+        createWeightedAverageSource({ id: sloOne.id, revision: sloOne.revision }),
+        createWeightedAverageSource({ id: sloTwo.id, revision: sloTwo.revision }),
+      ],
+    });
+
+    expect(() => validateCompositeSLO(compositeSlo, [sloOne, sloTwo])).toThrowError(
+      'Invalid budgeting method. Every source SLO must use the same timeslice window.'
     );
   });
 
@@ -107,6 +154,21 @@ describe('validateCompositeSLO', () => {
       });
       const compositeSlo = createCompositeSLO({
         budgetingMethod: 'occurrences',
+        timeWindow: sevenDaysRolling(),
+        sources: [
+          createWeightedAverageSource({ id: sloOne.id, revision: sloOne.revision }),
+          createWeightedAverageSource({ id: sloTwo.id, revision: sloTwo.revision }),
+        ],
+      });
+
+      expect(() => validateCompositeSLO(compositeSlo, [sloOne, sloTwo])).not.toThrow();
+    });
+
+    it('throws nothing in case of timeslices source SLOs', () => {
+      const sloOne = createSLOWithTimeslicesBudgetingMethod();
+      const sloTwo = createSLOWithTimeslicesBudgetingMethod();
+      const compositeSlo = createCompositeSLO({
+        budgetingMethod: 'timeslices',
         timeWindow: sevenDaysRolling(),
         sources: [
           createWeightedAverageSource({ id: sloOne.id, revision: sloOne.revision }),
