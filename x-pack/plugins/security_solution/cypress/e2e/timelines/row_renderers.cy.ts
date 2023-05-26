@@ -16,7 +16,14 @@ import {
   TIMELINE_ROW_RENDERERS_SURICATA_SIGNATURE_TOOLTIP,
   TIMELINE_ROW_RENDERERS_SURICATA_LINK_TOOLTIP,
 } from '../../screens/timeline';
-import { cleanKibana, deleteTimelines } from '../../tasks/common';
+import {
+  cleanKibana,
+  deleteTimelines,
+  waitForPageToBeLoaded,
+  waitForWelcomePanelToBeLoaded,
+} from '../../tasks/common';
+import { esArchiverLoad, esArchiverUnload } from '../../tasks/es_archiver';
+import { waitForAllHostsToBeLoaded } from '../../tasks/hosts/all_hosts';
 
 import { login, visit } from '../../tasks/login';
 import { openTimelineUsingToggle } from '../../tasks/security_main';
@@ -26,16 +33,28 @@ import { HOSTS_URL } from '../../urls/navigation';
 
 describe('Row renderers', () => {
   before(() => {
+    esArchiverLoad('auditbeat');
+
     cleanKibana();
     login();
   });
   beforeEach(() => {
     deleteTimelines();
-    visit(HOSTS_URL);
+    visit(HOSTS_URL, {
+      onLoad: () => {
+        waitForWelcomePanelToBeLoaded();
+        waitForPageToBeLoaded();
+        waitForAllHostsToBeLoaded();
+      },
+    });
     openTimelineUsingToggle();
     populateTimeline();
     cy.get(TIMELINE_SHOW_ROW_RENDERERS_GEAR).should('exist');
     cy.get(TIMELINE_SHOW_ROW_RENDERERS_GEAR).first().click({ force: true });
+  });
+
+  after(() => {
+    esArchiverUnload('auditbeat');
   });
 
   afterEach(() => {
@@ -52,17 +71,27 @@ describe('Row renderers', () => {
     cy.get(TIMELINE_ROW_RENDERERS_SEARCHBOX).type('flow');
 
     // Intercepts should be before click handlers that activate them rather than afterwards or you have race conditions
-    cy.intercept('PATCH', '/api/timeline').as('updateTimeline');
+    cy.intercept('PATCH', '/api/timeline', (req) => {
+      if (req.body.timeline.excludedRowRendererIds.includes('netflow')) {
+        req.alias = 'excludedNetflow';
+      } else {
+        req.alias = 'includedNetflow';
+      }
+    });
     cy.get(TIMELINE_ROW_RENDERERS_MODAL_ITEMS_CHECKBOX).first().uncheck();
 
-    cy.wait('@updateTimeline').then((interception) => {
-      expect(interception.request.body.timeline.excludedRowRendererIds).to.contain('netflow');
+    cy.wait('@excludedNetflow').then((interception) => {
+      expect(
+        interception?.response?.body.data.persistTimeline.timeline.excludedRowRendererIds
+      ).to.contain('netflow');
     });
 
     cy.get(TIMELINE_ROW_RENDERERS_MODAL_ITEMS_CHECKBOX).first().check();
 
-    cy.wait('@updateTimeline').then((interception) => {
-      expect(interception.request.body.timeline.excludedRowRendererIds).not.to.contain('netflow');
+    cy.wait('@includedNetflow').then((interception) => {
+      expect(
+        interception?.response?.body.data.persistTimeline.timeline.excludedRowRendererIds
+      ).not.to.contain('netflow');
     });
   });
 

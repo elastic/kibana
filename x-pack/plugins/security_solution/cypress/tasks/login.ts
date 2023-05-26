@@ -355,6 +355,9 @@ export const visit = (url: string, options: Partial<Cypress.VisitOptions> = {}, 
 
       disableNewFeaturesTours(win);
     },
+    onLoad: (win) => {
+      options.onLoad?.(win);
+    },
   });
 };
 

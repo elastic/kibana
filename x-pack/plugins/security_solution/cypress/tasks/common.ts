@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { LOADING_INDICATOR } from '../screens/security_header';
+import { LOADING_INDICATOR, WELCOME_ICON } from '../screens/security_header';
 
 const primaryButton = 0;
 
@@ -199,4 +199,9 @@ export const scrollToBottom = () => cy.scrollTo('bottom');
 export const waitForPageToBeLoaded = () => {
   cy.get(LOADING_INDICATOR).should('exist');
   cy.get(LOADING_INDICATOR).should('not.exist');
+};
+
+export const waitForWelcomePanelToBeLoaded = () => {
+  cy.get(WELCOME_ICON).should('exist');
+  cy.get(WELCOME_ICON).should('not.exist');
 };
