@@ -302,17 +302,13 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
     }
   );
   const {
-    data: { attributes: { rules: rulesToUpgrade = [] } } = {
-      attributes: {
-        rules: [],
-      },
+    data: { rules: rulesToUpgrade = [] } = {
+      rules: [],
     },
   } = usePrebuiltRulesUpgradeReview();
   const {
-    data: { attributes: { rules: rulesToInstall = [] } } = {
-      attributes: {
-        rules: [],
-      },
+    data: { rules: rulesToInstall = [] } = {
+      rules: [],
     },
   } = usePrebuiltRulesInstallReview();
 

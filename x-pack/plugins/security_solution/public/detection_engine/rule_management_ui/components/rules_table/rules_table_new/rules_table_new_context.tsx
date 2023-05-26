@@ -6,7 +6,7 @@
  */
 
 // import { isEqual } from 'lodash';
-import React, { createContext, useCallback, useContext, useMemo, useRef, useState } from 'react';
+import React, { createContext, useContext, useMemo, useState } from 'react';
 import type {
   CriteriaWithPagination,
   EuiInMemoryTable,
@@ -17,7 +17,7 @@ import { usePrebuiltRulesInstallReview } from '../../../../rule_management/logic
 import { DEFAULT_RULES_TABLE_REFRESH_SETTING } from '../../../../../../common/constants';
 import { invariant } from '../../../../../../common/utils/invariant';
 import { useUiSetting$ } from '../../../../../common/lib/kibana';
-import type { FilterOptions, InMemoryPaginationOptions } from '../../../../rule_management/logic';
+import type { InMemoryPaginationOptions } from '../../../../rule_management/logic';
 import { RULES_TABLE_INITIAL_PAGE_SIZE, RULES_TABLE_PAGE_SIZE_OPTIONS } from '../constants';
 import type { RuleInstallationInfoForReview } from '../../../../../../common/detection_engine/prebuilt_rules/api/review_rule_installation/response_schema';
 
@@ -136,16 +136,9 @@ export const RulesTableNewContextProvider = ({ children }: RulesTableNewContextP
   );
 
   const {
-    data: {
-      attributes: {
-        rules,
-        stats: { tags },
-      },
-    } = {
-      attributes: {
-        rules: [],
-        stats: { tags: [] },
-      },
+    data: { rules, stats: { tags } } = {
+      rules: [],
+      stats: { tags: [] },
     },
     refetch,
     dataUpdatedAt,
