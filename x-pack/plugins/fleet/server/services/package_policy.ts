@@ -1078,6 +1078,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       }
     });
 
+    const secretsToDelete: string[] = [];
     if (idsToDelete.length > 0) {
       const { statuses } = await soClient.bulkDelete(
         idsToDelete.map((id) => ({ id, type: SAVED_OBJECT_TYPE }))
@@ -1097,6 +1098,9 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
             },
             policy_id: packagePolicy.policy_id,
           });
+          if (packagePolicy?.secret_references?.length) {
+            secretsToDelete.push(...packagePolicy.secret_references.map((s) => s.id));
+          }
         } else if (!success && error) {
           result.push({
             id,
@@ -1125,6 +1129,10 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           });
         }
       }
+    }
+
+    if (secretsToDelete.length > 0) {
+      await deleteSecrets({ esClient, soClient, ids: secretsToDelete });
     }
 
     try {

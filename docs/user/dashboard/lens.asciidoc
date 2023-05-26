@@ -175,18 +175,35 @@ Compare your real-time data to the results that are offset by a time increment. 
 For a time shift example, refer to <<compare-time-ranges>>.
 
 [float]
-[[multi-metric-partition-chart]]
-==== Build a partition chart from multiple metrics
+[[create-partition-charts-with-multiple-metrics]]
+==== Create partition charts with multiple metrics
 
-By default, partition charts (e.g. pie) are built from one or more "slice-by" dimensions to define the partitions and a single metric dimension to define their size. However, you can also build a partition chart from multiple metric dimensions.
+To create partition charts, such as pie charts, configure one or more *Slice by* dimensions to define the partitions, and a *Metric* dimension to define the size. 
+To create partition charts with multiple metrics, use the layer settings. Multiple metrics are unsupported for mosaic visualizations.
 
-. Open the layer context menu at the top right of the layer panel.
+. In the layer pane, click image:dashboard/images/lens_layerActions_8.5.0.png[Actions menu for the partition visualization layer], then select *Layer settings*.
 
-. Click *Layer settings*.
+. Select *Multiple metrics*.
 
-. Click the switch labeled *Multiple metrics*.
+. Click *X*.
 
-Note: this option is not available for mosaic charts.
+[float]
+[[improve-visualization-loading-time]]
+=== Improve visualization loading time
+
+preview::[]
+
+Data sampling allows you to improve the visualization loading time. To decrease the loading time, use a lower sampling percentage, which also decreases the accuracy. 
+Use low sampling percentages on large datasets.
+
+. In the layer pane, click image:dashboard/images/lens_layerActions_8.5.0.png[Actions menu for the partition visualization layer], then select *Layer settings*.
+
+. To select the *Sampling* percentage, use the slider.
+
+. Click *X*.
++
+When you add the visualization to dashboards, image:dashboard/images/lens_visualizationModifierPopup_8.8.0.png[Visualization modifier popup] appears, 
+which allows you to view settings changes to the visualization.
 
 [float]
 [[add-annotations]]
@@ -214,6 +231,9 @@ Create the annotation layer.
 . From the fields list, drag a field to the *Add an annotation* field.
 
 . To use global filters in the annotation, click image:dashboard/images/lens_layerActions_8.5.0.png[Actions menu for the annotations layer], then select *Keep global filters* from the dropdown.
++
+When you add the visualization to dashboards, image:dashboard/images/lens_visualizationModifierPopup_8.8.0.png[Visualization modifier popup] appears, 
+which allows you to view settings changes to the visualization.
 
 Create static annotations.
 

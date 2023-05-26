@@ -180,6 +180,10 @@ export class TaskManagerPlugin
       );
     }
 
+    if (this.config.unsafe.authenticate_background_task_utilization === false) {
+      this.logger.warn(`Disabling authentication for background task utilization API`);
+    }
+
     return {
       index: TASK_MANAGER_INDEX,
       addMiddleware: (middleware: Middleware) => {

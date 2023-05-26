@@ -12,20 +12,23 @@ import { SwimlaneConnectorType } from '../../../../common/api';
 import Fields from './case_fields';
 import * as i18n from './translations';
 import { swimlaneConnector as connector } from '../mock';
+import { MockFormWrapperComponent } from '../test_utils';
 
 const fields = {
   caseId: '123',
 };
 
-const onChange = jest.fn();
-
 describe('Swimlane Cases Fields', () => {
-  test('it does not shows the mapping error callout', () => {
-    render(<Fields connector={connector} fields={fields} onChange={onChange} />);
+  it('does not shows the mapping error callout', () => {
+    render(
+      <MockFormWrapperComponent fields={fields}>
+        <Fields connector={connector} />
+      </MockFormWrapperComponent>
+    );
     expect(screen.queryByText(i18n.EMPTY_MAPPING_WARNING_TITLE)).toBeFalsy();
   });
 
-  test('it shows the mapping error callout when mapping is invalid', () => {
+  it('shows the mapping error callout when mapping is invalid', () => {
     const invalidConnector = {
       ...connector,
       config: {
@@ -34,11 +37,15 @@ describe('Swimlane Cases Fields', () => {
       },
     };
 
-    render(<Fields connector={invalidConnector} fields={fields} onChange={onChange} />);
+    render(
+      <MockFormWrapperComponent fields={fields}>
+        <Fields connector={invalidConnector} />
+      </MockFormWrapperComponent>
+    );
     expect(screen.queryByText(i18n.EMPTY_MAPPING_WARNING_TITLE)).toBeTruthy();
   });
 
-  test('it shows the mapping error callout when the connector is of type alerts', () => {
+  it('shows the mapping error callout when the connector is of type alerts', () => {
     const invalidConnector = {
       ...connector,
       config: {
@@ -47,7 +54,11 @@ describe('Swimlane Cases Fields', () => {
       },
     };
 
-    render(<Fields connector={invalidConnector} fields={fields} onChange={onChange} />);
+    render(
+      <MockFormWrapperComponent fields={fields}>
+        <Fields connector={invalidConnector} />
+      </MockFormWrapperComponent>
+    );
     expect(screen.queryByText(i18n.EMPTY_MAPPING_WARNING_TITLE)).toBeTruthy();
   });
 });

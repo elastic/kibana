@@ -27,6 +27,7 @@ import {
   SavedObjectsErrorHelpers,
 } from '@kbn/core-saved-objects-server';
 import {
+  type IKibanaMigrator,
   LEGACY_URL_ALIAS_TYPE,
   type LegacyUrlAlias,
 } from '@kbn/core-saved-objects-base-server-internal';
@@ -59,6 +60,7 @@ const MAX_CONCURRENT_RESOLVE = 10;
  */
 export interface InternalBulkResolveParams {
   registry: ISavedObjectTypeRegistry;
+  migrator: IKibanaMigrator;
   allowedTypes: string[];
   client: RepositoryEsClient;
   serializer: ISavedObjectsSerializer;
@@ -98,6 +100,7 @@ export async function internalBulkResolve<T>(
 ): Promise<InternalSavedObjectsBulkResolveResponse<T>> {
   const {
     registry,
+    migrator,
     allowedTypes,
     client,
     serializer,
@@ -184,10 +187,12 @@ export async function internalBulkResolve<T>(
     const object = getSavedObjectFromSource<T>(registry, objectType, objectId, doc, {
       migrationVersionCompatibility,
     });
-    if (!encryptionExtension?.isEncryptableType(object.type)) {
-      return object;
+    const migrated = migrator.migrateDocument(object) as SavedObject<T>;
+
+    if (!encryptionExtension?.isEncryptableType(migrated.type)) {
+      return migrated;
     }
-    return encryptionExtension.decryptOrStripResponseAttributes(object);
+    return encryptionExtension.decryptOrStripResponseAttributes(migrated);
   }
 
   // map function for pMap below
@@ -211,28 +216,39 @@ export async function internalBulkResolve<T>(
     const { type, id } = either.value;
     let result: SavedObjectsResolveResponse<T> | null = null;
 
-    if (foundExactMatch && foundAliasMatch) {
-      result = {
-        saved_object: await getSavedObject(type, id, exactMatchDoc!),
-        outcome: 'conflict',
-        alias_target_id: aliasInfo!.targetId,
-        alias_purpose: aliasInfo!.purpose,
+    try {
+      if (foundExactMatch && foundAliasMatch) {
+        result = {
+          saved_object: await getSavedObject(type, id, exactMatchDoc!),
+          outcome: 'conflict',
+          alias_target_id: aliasInfo!.targetId,
+          alias_purpose: aliasInfo!.purpose,
+        };
+        resolveCounter.recordOutcome(REPOSITORY_RESOLVE_OUTCOME_STATS.CONFLICT);
+      } else if (foundExactMatch) {
+        result = {
+          saved_object: await getSavedObject(type, id, exactMatchDoc!),
+          outcome: 'exactMatch',
+        };
+        resolveCounter.recordOutcome(REPOSITORY_RESOLVE_OUTCOME_STATS.EXACT_MATCH);
+      } else if (foundAliasMatch) {
+        result = {
+          saved_object: await getSavedObject(type, aliasInfo!.targetId, aliasMatchDoc!),
+          outcome: 'aliasMatch',
+          alias_target_id: aliasInfo!.targetId,
+          alias_purpose: aliasInfo!.purpose,
+        };
+        resolveCounter.recordOutcome(REPOSITORY_RESOLVE_OUTCOME_STATS.ALIAS_MATCH);
+      }
+    } catch (error) {
+      return {
+        id,
+        type,
+        error: SavedObjectsErrorHelpers.decorateGeneralError(
+          error,
+          'Failed to migrate document to the latest version.'
+        ),
       };
-      resolveCounter.recordOutcome(REPOSITORY_RESOLVE_OUTCOME_STATS.CONFLICT);
-    } else if (foundExactMatch) {
-      result = {
-        saved_object: await getSavedObject(type, id, exactMatchDoc!),
-        outcome: 'exactMatch',
-      };
-      resolveCounter.recordOutcome(REPOSITORY_RESOLVE_OUTCOME_STATS.EXACT_MATCH);
-    } else if (foundAliasMatch) {
-      result = {
-        saved_object: await getSavedObject(type, aliasInfo!.targetId, aliasMatchDoc!),
-        outcome: 'aliasMatch',
-        alias_target_id: aliasInfo!.targetId,
-        alias_purpose: aliasInfo!.purpose,
-      };
-      resolveCounter.recordOutcome(REPOSITORY_RESOLVE_OUTCOME_STATS.ALIAS_MATCH);
     }
 
     if (result !== null) {

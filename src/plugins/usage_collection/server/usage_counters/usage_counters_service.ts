@@ -183,14 +183,12 @@ export class UsageCountersService {
         acc[key] = counter;
         return acc;
       }
-      return {
-        ...acc,
-        [key]: {
-          ...existingCounter,
-          ...counter,
-          incrementBy: existingCounter.incrementBy + counter.incrementBy,
-        },
+      acc[key] = {
+        ...existingCounter,
+        ...counter,
+        incrementBy: existingCounter.incrementBy + counter.incrementBy,
       };
+      return acc;
     }, {} as Record<string, UsageCounters.v1.CounterMetric>);
   };
 }

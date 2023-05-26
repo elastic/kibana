@@ -11,7 +11,7 @@ import { sortBy } from 'lodash';
 import { PutTrainedModelConfig } from '@kbn/ml-plugin/common/types/trained_models';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { USER } from '../../../../functional/services/ml/security_common';
-import { COMMON_REQUEST_HEADERS } from '../../../../functional/services/ml/common_api';
+import { getCommonRequestHeader } from '../../../../functional/services/ml/common_api';
 
 type ModelType = 'regression' | 'classification';
 
@@ -31,9 +31,9 @@ export default ({ getService }: FtrProviderContext) => {
 
   async function runRequest(user: USER, expectedStatusCode: number) {
     const { body, status } = await supertest
-      .get(`/api/ml/saved_objects/initialize`)
+      .get(`/internal/ml/saved_objects/initialize`)
       .auth(user, ml.securityCommon.getPasswordForUser(user))
-      .set(COMMON_REQUEST_HEADERS);
+      .set(getCommonRequestHeader('1'));
     ml.api.assertResponseStatusCode(expectedStatusCode, status, body);
 
     return body;

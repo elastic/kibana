@@ -178,6 +178,7 @@ export const sendEndpointActionResponse = async (
     const fileMetaDoc: FileUploadMetadata = generateFileMetadataDocumentMock({
       action_id: action.id,
       agent_id: action.agents[0],
+      upload_start: Date.now(),
       contents: [
         {
           sha256: '8d61673c9d782297b3c774ded4e3d88f31a8869a8f25cf5cdd402ba6822d1d28',

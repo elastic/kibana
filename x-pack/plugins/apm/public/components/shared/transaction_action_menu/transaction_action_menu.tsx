@@ -15,15 +15,17 @@ import {
   SectionLinks,
   SectionSubtitle,
   SectionTitle,
-} from '@kbn/observability-plugin/public';
+} from '@kbn/observability-shared-plugin/public';
 import { ObservabilityTriggerId } from '@kbn/observability-shared-plugin/common';
 import { getContextMenuItemsFromActions } from '@kbn/observability-shared-plugin/public';
 import React, { useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import useAsync from 'react-use/lib/useAsync';
+import { ApmFeatureFlagName } from '../../../../common/apm_feature_flags';
 import { Transaction } from '../../../../typings/es_schemas/ui/transaction';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { useLicenseContext } from '../../../context/license/use_license_context';
+import { useApmFeatureFlag } from '../../../hooks/use_apm_feature_flag';
 import { useApmRouter } from '../../../hooks/use_apm_router';
 import { CustomLinkMenuSection } from './custom_link_menu_section';
 import { getSections } from './sections';
@@ -91,11 +93,16 @@ function ActionMenuSections({ transaction }: { transaction?: Transaction }) {
   const location = useLocation();
   const apmRouter = useApmRouter();
 
+  const infraLinksAvailable = useApmFeatureFlag(
+    ApmFeatureFlagName.InfraUiAvailable
+  );
+
   const sections = getSections({
     transaction,
     basePath: core.http.basePath,
     location,
     apmRouter,
+    infraLinksAvailable,
   });
 
   const externalMenuItems = useAsync(() => {

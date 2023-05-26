@@ -12,6 +12,7 @@ import type {
   SavedObjectsType,
   SavedObjectUnsanitizedDoc,
 } from '@kbn/core/server';
+import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
 import { ServerShortUrlClientFactory } from '..';
 import { UrlService, LocatorDefinition } from '../../../common/url_service';
 import { LegacyShortUrlLocatorDefinition } from '../../../common/url_service/locators/legacy_short_url_locator';
@@ -101,9 +102,9 @@ describe('migrations', () => {
 
     service.locators.create(new FooLocatorDefinition());
 
-    const migrationFunction = (type.migrations as () => SavedObjectMigrationMap)()['8.0.0'];
-
-    expect(typeof migrationFunction).toBe('function');
+    const migrationFunction = SavedObjectsUtils.getMigrationFunction(
+      (type.migrations as () => SavedObjectMigrationMap)()['8.0.0']
+    );
 
     const doc1: SavedObjectUnsanitizedDoc<ShortUrlSavedObjectAttributes> = {
       id: 'foo',

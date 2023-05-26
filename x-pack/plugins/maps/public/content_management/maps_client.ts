@@ -6,31 +6,22 @@
  */
 import type { SearchQuery } from '@kbn/content-management-plugin/common';
 
-import type {
-  MapGetIn,
-  MapGetOut,
-  MapCreateIn,
-  MapCreateOut,
-  MapUpdateIn,
-  MapUpdateOut,
-  MapDeleteIn,
-  MapDeleteOut,
-  MapSearchIn,
-  MapSearchOut,
-  MapSearchOptions,
-} from '../../common/content_management';
+import type { MapCrudTypes } from '../../common/content_management';
 import { CONTENT_ID as contentTypeId } from '../../common/content_management';
 import { getContentManagement } from '../kibana_services';
 
 const get = async (id: string) => {
-  return getContentManagement().client.get<MapGetIn, MapGetOut>({
+  return getContentManagement().client.get<MapCrudTypes['GetIn'], MapCrudTypes['GetOut']>({
     contentTypeId,
     id,
   });
 };
 
-const create = async ({ data, options }: Omit<MapCreateIn, 'contentTypeId'>) => {
-  const res = await getContentManagement().client.create<MapCreateIn, MapCreateOut>({
+const create = async ({ data, options }: Omit<MapCrudTypes['CreateIn'], 'contentTypeId'>) => {
+  const res = await getContentManagement().client.create<
+    MapCrudTypes['CreateIn'],
+    MapCrudTypes['CreateOut']
+  >({
     contentTypeId,
     data,
     options,
@@ -38,8 +29,11 @@ const create = async ({ data, options }: Omit<MapCreateIn, 'contentTypeId'>) => 
   return res;
 };
 
-const update = async ({ id, data, options }: Omit<MapUpdateIn, 'contentTypeId'>) => {
-  const res = await getContentManagement().client.update<MapUpdateIn, MapUpdateOut>({
+const update = async ({ id, data, options }: Omit<MapCrudTypes['UpdateIn'], 'contentTypeId'>) => {
+  const res = await getContentManagement().client.update<
+    MapCrudTypes['UpdateIn'],
+    MapCrudTypes['UpdateOut']
+  >({
     contentTypeId,
     id,
     data,
@@ -49,14 +43,14 @@ const update = async ({ id, data, options }: Omit<MapUpdateIn, 'contentTypeId'>)
 };
 
 const deleteMap = async (id: string) => {
-  await getContentManagement().client.delete<MapDeleteIn, MapDeleteOut>({
+  await getContentManagement().client.delete<MapCrudTypes['DeleteIn'], MapCrudTypes['DeleteOut']>({
     contentTypeId,
     id,
   });
 };
 
-const search = async (query: SearchQuery = {}, options?: MapSearchOptions) => {
-  return getContentManagement().client.search<MapSearchIn, MapSearchOut>({
+const search = async (query: SearchQuery = {}, options?: MapCrudTypes['SearchOptions']) => {
+  return getContentManagement().client.search<MapCrudTypes['SearchIn'], MapCrudTypes['SearchOut']>({
     contentTypeId,
     query,
     options,
