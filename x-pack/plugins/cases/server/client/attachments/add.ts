@@ -27,8 +27,6 @@ import { validateRegisteredAttachments } from './validators';
 export const addComment = async (addArgs: AddArgs, clientArgs: CasesClientArgs): Promise<Case> => {
   const { comment, caseId } = addArgs;
 
-  const query = decodeWithExcessOrThrow(CommentRequestRt)(comment);
-
   const {
     logger,
     authorization,
@@ -37,6 +35,8 @@ export const addComment = async (addArgs: AddArgs, clientArgs: CasesClientArgs):
   } = clientArgs;
 
   try {
+    const query = decodeWithExcessOrThrow(CommentRequestRt)(comment);
+
     decodeCommentRequest(comment, externalReferenceAttachmentTypeRegistry);
 
     const savedObjectID = SavedObjectsUtils.generateId();

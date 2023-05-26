@@ -18,9 +18,9 @@ describe('get', () => {
 
     it('Invalid total items results in error', async () => {
       await expect(() =>
-        findComment({ caseID: 'mock-id', queryParams: { page: 2, perPage: 9001 } }, clientArgs)
-      ).rejects.toThrow(
-        'The number of documents is too high. Paginating through more than 10,000 documents is not possible.'
+        findComment({ caseID: 'mock-id', findQueryParams: { page: 2, perPage: 9001 } }, clientArgs)
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Failed to find comments case id: mock-id: Error: The number of documents is too high. Paginating through more than 10,000 documents is not possible."`
       );
     });
 
@@ -28,10 +28,12 @@ describe('get', () => {
       await expect(
         findComment(
           // @ts-expect-error: excess attribute
-          { caseID: 'mock-id', queryParams: { page: 2, perPage: 9001 }, foo: 'bar' },
+          { caseID: 'mock-id', findQueryParams: { page: 2, perPage: 9001, foo: 'bar' } },
           clientArgs
         )
-      ).rejects.toThrow('invalid keys "foo"');
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Failed to find comments case id: mock-id: Error: invalid keys \\"foo\\""`
+      );
     });
   });
 });
