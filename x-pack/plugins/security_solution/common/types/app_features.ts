@@ -13,8 +13,10 @@ export enum AppFeatureSecurityKey {
 }
 
 export enum AppFeatureCasesKey {
-  // Sample code to demonstrate how to configure cases features.
-  exampleCasesFeature = 'example_cases_feature',
+  /**
+   * Enables Cases Connectors
+   */
+  casesConnectors = 'cases_connectors',
 }
 
 // Merges the two enums.
