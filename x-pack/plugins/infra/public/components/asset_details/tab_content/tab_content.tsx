@@ -39,9 +39,9 @@ export const TabContent = ({
           currentTimeRange={currentTimeRange}
           node={node}
           nodeType={nodeType}
-          showActionsColumn={overrides?.metadataTab?.showActionsColumn}
-          search={overrides?.metadataTab?.query}
-          onSearchChange={(query) => onChange({ metadataTab: { query } })}
+          showActionsColumn={overrides?.metadata?.showActionsColumn}
+          search={overrides?.metadata?.query}
+          onSearchChange={(query) => onChange({ metadata: { query } })}
         />
       </TabPanel>
       <TabPanel activeWhen={FlyoutTabIds.PROCESSES}>
@@ -49,8 +49,8 @@ export const TabContent = ({
           node={node}
           nodeType={nodeType}
           currentTime={currentTimeRange.to}
-          searchFilter={overrides?.processTab?.query}
-          onSearchFilterChange={(query) => onChange({ processTab: { query } })}
+          searchFilter={overrides?.processes?.query}
+          onSearchFilterChange={(query) => onChange({ processes: { query } })}
         />
       </TabPanel>
     </>

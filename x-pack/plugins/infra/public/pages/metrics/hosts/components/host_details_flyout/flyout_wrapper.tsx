@@ -39,18 +39,18 @@ export const FlyoutWrapper = ({ node, closeFlyout }: Props) => {
       currentTimeRange={currentTimeRange}
       activeTabId={hostFlyoutOpen?.selectedTabId}
       overrides={{
-        metadataTab: {
+        metadata: {
           query: hostFlyoutOpen?.metadataSearch,
           showActionsColumn: true,
         },
-        processTab: {
+        processes: {
           query: hostFlyoutOpen?.processSearch,
         },
       }}
       onTabsStateChange={(state) =>
         setHostFlyoutOpen({
-          metadataSearch: state.metadataTab?.query,
-          processSearch: state.processTab?.query,
+          metadataSearch: state.metadata?.query,
+          processSearch: state.processes?.query,
           selectedTabId: state.activeTabId as HostFlyout['selectedTabId'],
         })
       }

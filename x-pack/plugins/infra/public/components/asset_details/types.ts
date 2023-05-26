@@ -31,11 +31,11 @@ export enum FlyoutTabIds {
 export type TabIds = `${FlyoutTabIds}`;
 
 export interface TabState {
-  metadataTab?: {
+  metadata?: {
     query?: string;
     showActionsColumn?: boolean;
   };
-  processTab?: {
+  processes?: {
     query?: string;
   };
 }

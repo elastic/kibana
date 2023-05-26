@@ -36,8 +36,8 @@ export const Metadata = ({
   node,
   currentTimeRange,
   nodeType,
-  showActionsColumn,
   search,
+  showActionsColumn = false,
   onSearchChange,
 }: MetadataProps) => {
   const nodeId = node.name;

@@ -50,7 +50,9 @@ export const AssetDetails = ({
   },
 }: AssetDetailsProps) => {
   return (
-    <TabSwitcherProvider intitalActiveTabId={activeTabId ?? 'metadata'}>
+    <TabSwitcherProvider
+      intitalActiveTabId={tabs.length > 0 ? activeTabId ?? tabs[0].id : undefined}
+    >
       <ContentTemplate
         header={
           <Header

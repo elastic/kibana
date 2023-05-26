@@ -94,7 +94,7 @@ const FlyoutTemplate: Story<AssetDetailsProps> = (args) => {
 export const DefaultAssetDetailsWithMetadataTabSelected = Template.bind({});
 DefaultAssetDetailsWithMetadataTabSelected.args = {
   overrides: {
-    metadataTab: {
+    metadata: {
       showActionsColumn: true,
     },
   },
@@ -103,7 +103,7 @@ DefaultAssetDetailsWithMetadataTabSelected.args = {
 export const AssetDetailsWithMetadataTabSelectedWithPersistedSearch = Template.bind({});
 AssetDetailsWithMetadataTabSelectedWithPersistedSearch.args = {
   overrides: {
-    metadataTab: {
+    metadata: {
       showActionsColumn: true,
       query: 'ip',
     },
