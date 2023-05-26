@@ -28,10 +28,12 @@ export function DiagnosticsIndices() {
     {
       field: 'index',
       name: 'Index name',
+      truncateText: true,
     },
     {
       field: 'dataStream',
       name: 'Data stream',
+      truncateText: true,
       render: (_, { dataStream }) => {
         if (!dataStream) {
           return (
@@ -49,6 +51,7 @@ export function DiagnosticsIndices() {
     {
       field: 'ingestPipeline',
       name: 'Ingest pipelines',
+      truncateText: true,
       render: (_, { ingestPipeline }) => {
         if (ingestPipeline.id === undefined) {
           return (
@@ -75,7 +78,9 @@ export function DiagnosticsIndices() {
     },
     {
       field: 'fieldMappings',
-      name: 'Field mappings',
+      name: 'Mappings',
+      width: '75px',
+      align: 'center',
       render: (_, { fieldMappings }) => {
         return (
           <>
