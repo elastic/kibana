@@ -66,13 +66,29 @@ exports[`SavedObjectSaveModal should render matching snapshot 1`] = `
       >
         <EuiTextArea
           data-test-subj="viewDescription"
+          fullWidth={true}
           onChange={[Function]}
           value=""
         />
       </EuiFormRow>
     </EuiForm>
   </EuiModalBody>
-  <EuiModalFooter>
+  <EuiModalFooter
+    css={
+      Object {
+        "map": undefined,
+        "name": "fy4vru",
+        "next": undefined,
+        "styles": "
+            align-items: center;
+          ",
+        "toString": [Function],
+      }
+    }
+  >
+    <EuiFlexItem
+      grow={true}
+    />
     <EuiButtonEmpty
       data-test-subj="saveCancelButton"
       onClick={[Function]}
@@ -165,13 +181,29 @@ exports[`SavedObjectSaveModal should render matching snapshot when custom isVali
       >
         <EuiTextArea
           data-test-subj="viewDescription"
+          fullWidth={true}
           onChange={[Function]}
           value=""
         />
       </EuiFormRow>
     </EuiForm>
   </EuiModalBody>
-  <EuiModalFooter>
+  <EuiModalFooter
+    css={
+      Object {
+        "map": undefined,
+        "name": "fy4vru",
+        "next": undefined,
+        "styles": "
+            align-items: center;
+          ",
+        "toString": [Function],
+      }
+    }
+  >
+    <EuiFlexItem
+      grow={true}
+    />
     <EuiButtonEmpty
       data-test-subj="saveCancelButton"
       onClick={[Function]}
@@ -264,13 +296,29 @@ exports[`SavedObjectSaveModal should render matching snapshot when custom isVali
       >
         <EuiTextArea
           data-test-subj="viewDescription"
+          fullWidth={true}
           onChange={[Function]}
           value=""
         />
       </EuiFormRow>
     </EuiForm>
   </EuiModalBody>
-  <EuiModalFooter>
+  <EuiModalFooter
+    css={
+      Object {
+        "map": undefined,
+        "name": "fy4vru",
+        "next": undefined,
+        "styles": "
+            align-items: center;
+          ",
+        "toString": [Function],
+      }
+    }
+  >
+    <EuiFlexItem
+      grow={true}
+    />
     <EuiButtonEmpty
       data-test-subj="saveCancelButton"
       onClick={[Function]}
@@ -367,6 +415,7 @@ exports[`SavedObjectSaveModal should render matching snapshot when given options
           >
             <EuiTextArea
               data-test-subj="viewDescription"
+              fullWidth={true}
               onChange={[Function]}
               value=""
             />
@@ -383,7 +432,22 @@ exports[`SavedObjectSaveModal should render matching snapshot when given options
       </EuiFlexGroup>
     </EuiForm>
   </EuiModalBody>
-  <EuiModalFooter>
+  <EuiModalFooter
+    css={
+      Object {
+        "map": undefined,
+        "name": "fy4vru",
+        "next": undefined,
+        "styles": "
+            align-items: center;
+          ",
+        "toString": [Function],
+      }
+    }
+  >
+    <EuiFlexItem
+      grow={true}
+    />
     <EuiButtonEmpty
       data-test-subj="saveCancelButton"
       onClick={[Function]}

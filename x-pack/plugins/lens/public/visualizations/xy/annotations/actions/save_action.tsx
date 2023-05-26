@@ -68,7 +68,7 @@ export const SaveModal = ({
           <div>
             {i18n.translate(
               'xpack.lens.xyChart.annotations.saveAnnotationGroupToLibrary.confirmButton',
-              { defaultMessage: 'Save annotation group' }
+              { defaultMessage: 'Save group' }
             )}
           </div>
         </>

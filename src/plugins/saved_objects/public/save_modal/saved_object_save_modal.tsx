@@ -30,6 +30,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 import { EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { css } from '@emotion/react';
 
 export interface OnSaveProps {
   newTitle: string;
@@ -153,11 +154,15 @@ export class SavedObjectSaveModal extends React.Component<Props, SaveModalState>
               </EuiText>
             )}
             {formBody}
-            {this.renderCopyOnSave()}
           </EuiForm>
         </EuiModalBody>
 
-        <EuiModalFooter>
+        <EuiModalFooter
+          css={css`
+            align-items: center;
+          `}
+        >
+          <EuiFlexItem grow>{this.renderCopyOnSave()}</EuiFlexItem>
           <EuiButtonEmpty data-test-subj="saveCancelButton" onClick={this.props.onClose}>
             <FormattedMessage
               id="savedObjects.saveModal.cancelButtonLabel"
@@ -187,6 +192,7 @@ export class SavedObjectSaveModal extends React.Component<Props, SaveModalState>
         }
       >
         <EuiTextArea
+          fullWidth
           data-test-subj="viewDescription"
           value={this.state.visualizationDescription}
           onChange={this.onDescriptionChange}
@@ -327,21 +333,18 @@ export class SavedObjectSaveModal extends React.Component<Props, SaveModalState>
     }
 
     return (
-      <>
-        <EuiSpacer />
-        <EuiSwitch
-          data-test-subj="saveAsNewCheckbox"
-          checked={this.state.copyOnSave}
-          onChange={this.onCopyOnSaveChange}
-          label={
-            <FormattedMessage
-              id="savedObjects.saveModal.saveAsNewLabel"
-              defaultMessage="Save as new {objectType}"
-              values={{ objectType: this.props.objectType }}
-            />
-          }
-        />
-      </>
+      <EuiSwitch
+        data-test-subj="saveAsNewCheckbox"
+        checked={this.state.copyOnSave}
+        onChange={this.onCopyOnSaveChange}
+        label={
+          <FormattedMessage
+            id="savedObjects.saveModal.saveAsNewLabel"
+            defaultMessage="Save as new {objectType}"
+            values={{ objectType: this.props.objectType }}
+          />
+        }
+      />
     );
   };
 }

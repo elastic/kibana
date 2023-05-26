@@ -114,8 +114,10 @@ export class DashboardSaveModal extends React.Component<Props, State> {
               defaultMessage="Description"
             />
           }
+          fullWidth
         >
           <EuiTextArea
+            fullWidth
             data-test-subj="dashboardDescription"
             value={this.state.description}
             onChange={this.onDescriptionChange}
