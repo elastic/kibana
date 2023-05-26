@@ -18,7 +18,9 @@ const configFormSchema: ConfigFieldSchema[] = [
   { id: 'url', label: i18n.D3_URL_LABEL, isUrlField: true },
 ];
 
-const secretsFormSchema: SecretsFieldSchema[] = [{ id: 'token', label: i18n.D3_TOKEN_LABEL }];
+const secretsFormSchema: SecretsFieldSchema[] = [
+  { id: 'token', label: i18n.D3_TOKEN_LABEL, isPasswordField: true },
+];
 
 const D3SecurityConnectorFields: React.FC<ActionConnectorFieldsProps> = ({ readOnly, isEdit }) => {
   return (
