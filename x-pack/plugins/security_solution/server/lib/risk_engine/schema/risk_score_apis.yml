@@ -4,10 +4,10 @@ info:
   title: Risk Scoring API
   description: These APIs allow the consumer to manage Entity Risk Scores within Entity Analytics.
 paths:
-  /scores:
+  /preview:
     post:
-      summary: Retrieve a list of Risk Scores
-      description: Retrieve a list of Risk Scores, sorted by identifier_type and risk score.
+      summary: Preview the calculation of Risk Scores
+      description: Calculates and returns a list of Risk Scores, sorted by identifier_type and risk score.
       requestBody:
         description: Details about the Risk Scores being requested
         content:
