@@ -115,7 +115,7 @@ export const closeAlerts = () => {
 export const expandFirstAlertActions = () => {
   waitForAlerts();
 
-  cy.get(TIMELINE_CONTEXT_MENU_BTN).first().filter(':visible').click();
+  cy.get(TIMELINE_CONTEXT_MENU_BTN).first().click();
   cy.get(TIMELINE_CONTEXT_MENU_BTN)
     .first()
     .should('be.visible')
