@@ -26,6 +26,7 @@ export interface BaseFlameGraph {
 
   FileID: string[];
   FrameType: number[];
+  Inline: boolean[];
   ExeFilename: string[];
   AddressOrLine: number[];
   FunctionName: string[];
@@ -47,6 +48,7 @@ export function createBaseFlameGraph(tree: CalleeTree, totalSeconds: number): Ba
 
     FileID: tree.FileID.slice(0, tree.Size),
     FrameType: tree.FrameType.slice(0, tree.Size),
+    Inline: tree.Inline.slice(0, tree.Size),
     ExeFilename: tree.ExeFilename.slice(0, tree.Size),
     AddressOrLine: tree.AddressOrLine.slice(0, tree.Size),
     FunctionName: tree.FunctionName.slice(0, tree.Size),
@@ -88,6 +90,7 @@ export function createFlameGraph(base: BaseFlameGraph): ElasticFlameGraph {
 
     FileID: base.FileID,
     FrameType: base.FrameType,
+    Inline: base.Inline,
     ExeFilename: base.ExeFilename,
     AddressOrLine: base.AddressOrLine,
     FunctionName: base.FunctionName,
@@ -137,6 +140,7 @@ export function createFlameGraph(base: BaseFlameGraph): ElasticFlameGraph {
     const metadata = createStackFrameMetadata({
       FileID: graph.FileID[i],
       FrameType: graph.FrameType[i],
+      Inline: graph.Inline[i],
       ExeFileName: graph.ExeFilename[i],
       AddressOrLine: graph.AddressOrLine[i],
       FunctionName: graph.FunctionName[i],

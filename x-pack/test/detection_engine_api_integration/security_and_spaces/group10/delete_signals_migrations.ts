@@ -14,7 +14,7 @@ import {
 } from '@kbn/security-solution-plugin/common/constants';
 import { ROLES } from '@kbn/security-solution-plugin/common/test';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
-import { createSignalsIndex, deleteSignalsIndex, getIndexNameFromLoad, waitFor } from '../../utils';
+import { createSignalsIndex, deleteAllAlerts, getIndexNameFromLoad, waitFor } from '../../utils';
 import { createUserAndRole } from '../../../common/services/security_solution';
 
 interface CreateResponse {
@@ -79,7 +79,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
     afterEach(async () => {
       await esArchiver.unload('x-pack/test/functional/es_archives/signals/outdated_signals_index');
-      await deleteSignalsIndex(supertest, log);
+      await deleteAllAlerts(supertest, log, es);
     });
 
     it('returns the deleted migration SavedObjects', async () => {
