@@ -10,4 +10,4 @@ import type { SecurityPageName } from '../../../../common';
 export type PageUpsellings = Partial<Record<SecurityPageName, React.ComponentType>>;
 export type SectionUpsellings = Partial<Record<UpsellingSectionId, React.ComponentType>>;
 
-export type UpsellingSectionId = 'example_upselling_feature';
+export type UpsellingSectionId = 'entity_analytics_panel';
