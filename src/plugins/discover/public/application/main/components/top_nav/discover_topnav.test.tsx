@@ -33,7 +33,6 @@ function getProps(savePermissions = true): DiscoverTopNavProps {
 
   return {
     stateContainer,
-    navigateTo: jest.fn(),
     query: {} as Query,
     savedQuery: '',
     updateQuery: jest.fn(),

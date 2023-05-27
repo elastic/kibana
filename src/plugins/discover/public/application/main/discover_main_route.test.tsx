@@ -63,6 +63,7 @@ describe('DiscoverMainRoute', () => {
 const mountComponent = (hasESData = true, hasUserDataView = true) => {
   const props = {
     isDev: false,
+    customizationCallbacks: [],
   };
 
   return mountWithIntl(

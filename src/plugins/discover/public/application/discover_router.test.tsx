@@ -15,16 +15,25 @@ import { DiscoverRouter } from './discover_router';
 import { DiscoverMainRoute } from './main';
 import { SingleDocRoute } from './doc';
 import { ContextAppRoute } from './context';
+import { createProfileRegistry } from '../customizations';
 
 const pathMap: Record<string, never> = {};
 
 describe('Discover router', () => {
   const props = {
     isDev: false,
+    customizationCallbacks: [],
   };
   beforeAll(() => {
     const { history } = createSearchSessionMock();
-    const component = shallow(DiscoverRouter(mockDiscoverServices, history, props.isDev));
+    const component = shallow(
+      DiscoverRouter({
+        services: mockDiscoverServices,
+        history,
+        profileRegistry: createProfileRegistry(),
+        isDev: props.isDev,
+      })
+    );
     component.find(Route).forEach((route) => {
       const routeProps = route.props() as RouteProps;
       const path = routeProps.path;
