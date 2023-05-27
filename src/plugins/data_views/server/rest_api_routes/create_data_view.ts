@@ -89,7 +89,7 @@ const registerCreateDataViewRouteFactory =
   ) => {
     router.versioned.post({ path, access: 'public' }).addVersion(
       {
-        version: '1',
+        version: '2023-10-31',
         validate: {
           request: {
             body: schema.object({
