@@ -57,6 +57,13 @@ describe('Discover url generator', () => {
     expect(_g).toEqual(undefined);
   });
 
+  test('can specify profile', async () => {
+    const { locator } = await setup();
+    const { path } = await locator.getLocation({ profile: 'test', dataViewId: '123' });
+
+    expect(path).toBe("#/p/test/?_a=(index:'123')");
+  });
+
   test('can specify specific data view', async () => {
     const { locator } = await setup();
     const { path } = await locator.getLocation({ dataViewId });

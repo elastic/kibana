@@ -76,6 +76,7 @@ import {
   CustomizationCallback,
   createProfileRegistry,
   ProfileAwareLocator,
+  createCustomizeFunction,
 } from './customizations';
 
 const DocViewerLegacyTable = React.lazy(
@@ -416,14 +417,7 @@ export class DiscoverPlugin
 
     return {
       locator: this.locator,
-      customize: (profileName: string, callback: CustomizationCallback) => {
-        const profile = this.profileRegistry.get(profileName) ?? {
-          name: profileName,
-          customizationCallbacks: [],
-        };
-        profile.customizationCallbacks.push(callback);
-        this.profileRegistry.set(profile);
-      },
+      customize: createCustomizeFunction(this.profileRegistry),
     };
   }
 

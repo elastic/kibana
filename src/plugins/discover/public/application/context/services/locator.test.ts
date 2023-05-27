@@ -72,6 +72,18 @@ describe('Discover context url generator', () => {
     expect(_g).toEqual({ filters: [] });
   });
 
+  test('can specify profile', async () => {
+    const { locator } = await setup();
+    const { path } = await locator.getLocation({
+      profile: 'test',
+      index: dataViewId,
+      rowId: 'mock-row-id',
+      referrer: 'mock-referrer',
+    });
+
+    expect(path).toBe(`#/p/test/context/${dataViewId}/mock-row-id`);
+  });
+
   test('when useHash set to false, sets data view ID in the generated URL', async () => {
     const { locator } = await setup();
     const { path } = await locator.getLocation({

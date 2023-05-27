@@ -26,3 +26,14 @@ export const createProfileRegistry = (): DiscoverProfileRegistry => {
     set: (profile) => profiles.set(profile.name.toLowerCase(), profile),
   };
 };
+
+export const createCustomizeFunction =
+  (profileRegistry: DiscoverProfileRegistry) =>
+  (profileName: string, callback: CustomizationCallback) => {
+    const profile = profileRegistry.get(profileName) ?? {
+      name: profileName,
+      customizationCallbacks: [],
+    };
+    profile.customizationCallbacks.push(callback);
+    profileRegistry.set(profile);
+  };

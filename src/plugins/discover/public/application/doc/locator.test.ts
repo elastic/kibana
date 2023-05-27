@@ -44,4 +44,17 @@ describe('Discover single doc url generator', () => {
       `"#/doc/c367b774-a4c2-11ea-bb37-0242ac130002/mock-row-index?id=id%20with%20special%20characters%3A%20%26%3F%23%2B"`
     );
   });
+  
+  test('can specify profile', async () => {
+    const { locator } = await setup();
+    const { path } = await locator.getLocation({
+      profile: 'test',
+      index: dataViewId,
+      rowId: 'mock-row-id',
+      rowIndex: 'mock-row-index',
+      referrer: 'mock-referrer',
+    });
+
+    expect(path).toBe(`${addProfile('#/', 'test')}doc/${dataViewId}/mock-row-index?id=mock-row-id`);
+  });
 });

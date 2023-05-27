@@ -13,6 +13,7 @@ import {
   savedSearchMockWithTimeFieldNew,
 } from '../../../__mocks__/saved_search';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
+import { addProfile } from '../../../../common/customizations';
 
 function prepareTest(savedSearch: SavedSearch, path: string) {
   const { history } = createSearchSessionMock();
@@ -39,8 +40,12 @@ describe('test useUrl when the url is changed to /', () => {
     const { load } = prepareTest(savedSearchMockWithTimeField, '/');
     expect(load).toHaveBeenCalledTimes(0);
   });
-  test('loadSavedSearch is triggered when a new saved search is pre-selected ', () => {
+  test('loadSavedSearch is triggered when a new saved search is pre-selected', () => {
     const { load } = prepareTest(savedSearchMockWithTimeFieldNew, '/');
+    expect(load).toHaveBeenCalledTimes(1);
+  });
+  test('loadSavedSearch is triggered when a new saved search is pre-selected with an active profile', () => {
+    const { load } = prepareTest(savedSearchMockWithTimeFieldNew, addProfile('', 'test'));
     expect(load).toHaveBeenCalledTimes(1);
   });
 });
