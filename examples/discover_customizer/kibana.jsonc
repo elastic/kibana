@@ -1,9 +1,9 @@
 {
   "type": "plugin",
-  "id": "@kbn/discover-extender-plugin",
+  "id": "@kbn/discover-customizer-plugin",
   "owner": "@elastic/kibana-data-discovery",
   "plugin": {
-    "id": "discoverExtender",
+    "id": "discoverCustomizer",
     "server": false,
     "browser": true,
     "requiredPlugins": ["discover"]

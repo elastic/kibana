@@ -14,27 +14,27 @@ import React, { useEffect, useState } from 'react';
 import ReactDOM from 'react-dom';
 import useObservable from 'react-use/lib/useObservable';
 
-export interface DiscoverExtenderSetupPlugins {
+export interface DiscoverCustomizerSetupPlugins {
   discover: DiscoverSetup;
 }
 
-export interface DiscoverExtenderStartPlugins {
+export interface DiscoverCustomizerStartPlugins {
   discover: DiscoverStart;
 }
 
-export class DiscoverExtenderPlugin implements Plugin {
-  setup(core: CoreSetup, plugins: DiscoverExtenderSetupPlugins) {
+export class DiscoverCustomizerPlugin implements Plugin {
+  setup(core: CoreSetup, plugins: DiscoverCustomizerSetupPlugins) {
     core.application.register({
-      id: 'discoverExtender',
-      title: 'Discover Extender',
+      id: 'discoverCustomizer',
+      title: 'Discover Customizer',
       mount() {
-        plugins.discover?.locator?.navigate({ profile: 'extender' });
+        plugins.discover?.locator?.navigate({ profile: 'customizer' });
         return noop;
       },
     });
   }
 
-  start(core: CoreStart, plugins: DiscoverExtenderStartPlugins) {
+  start(core: CoreStart, plugins: DiscoverCustomizerStartPlugins) {
     const { discover } = plugins;
 
     let isOptionsOpen = false;
@@ -45,7 +45,7 @@ export class DiscoverExtenderPlugin implements Plugin {
       isOptionsOpen = false;
     };
 
-    discover.customize('extender', async ({ customizations, stateContainer }) => {
+    discover.customize('customizer', async ({ customizations, stateContainer }) => {
       customizations.set({
         id: 'top_nav',
         defaultMenu: {

@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { DiscoverExtenderPlugin } from './plugin';
+import { DiscoverCustomizerPlugin } from './plugin';
 
 export function plugin() {
-  return new DiscoverExtenderPlugin();
+  return new DiscoverCustomizerPlugin();
 }
