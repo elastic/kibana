@@ -47,7 +47,7 @@ export const SimpleAlertTable = React.memo<{ alertIds: string[] }>(({ alertIds }
 
   const { loading, error, data } = useAlertsByIds({
     alertIds: sampledData,
-    fields: TABLE_FIELDS,
+    config: { fields: TABLE_FIELDS },
   });
   const mappedData = useMemo(() => {
     if (!data) {

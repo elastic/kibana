@@ -12,17 +12,21 @@ import { ALERTS_QUERY_NAMES } from '../../../detections/containers/detection_eng
 
 interface UseAlertByIdsOptions {
   alertIds: string[];
-  fields?: string[];
+  config?: {
+    fields?: string[];
+    sorting?: { field: string; direction: string };
+    pagination?: { pageIndex: number; pageSize: number };
+  };
 }
 
-interface Hit {
+export interface Hit {
   fields: Record<string, string[]>;
 }
 
 interface UserAlertByIdsResult {
   loading: boolean;
   error: boolean;
-  data?: Hit[];
+  data: Hit[];
 }
 
 const DEFAULT_FIELDS = ['*'];
@@ -34,8 +38,10 @@ const DEFAULT_FIELDS = ['*'];
  */
 export const useAlertsByIds = ({
   alertIds,
-  fields = DEFAULT_FIELDS,
+  config = {},
 }: UseAlertByIdsOptions): UserAlertByIdsResult => {
+  const { fields = DEFAULT_FIELDS } = config;
+
   const [initialQuery] = useState(() => generateAlertByIdsQuery(alertIds, fields));
 
   const { loading, data, setQuery } = useQueryAlerts<Hit, unknown>({
@@ -53,7 +59,7 @@ export const useAlertsByIds = ({
     () => ({
       loading,
       error,
-      data: data?.hits.hits,
+      data: data?.hits.hits || [],
     }),
     [data?.hits.hits, error, loading]
   );

@@ -92,7 +92,7 @@ describe('useAlertsByIds', () => {
       setQuery: jest.fn(),
     });
 
-    renderHook(() => useAlertsByIds({ alertIds, fields: testFields }));
+    renderHook(() => useAlertsByIds({ alertIds, config: { fields: testFields } }));
 
     expect(mockUseQueryAlerts).toHaveBeenCalledWith({
       queryName: ALERTS_QUERY_NAMES.BY_ID,
