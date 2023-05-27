@@ -44,7 +44,7 @@ export function registerCanvasUsageCollector(
       );
 
       return collectorResults.reduce((reduction, usage) => {
-        return { ...reduction, ...usage };
+        return Object.assign(reduction, usage);
       }, {}) as CanvasUsage; // We need the casting because `TelemetryCollector` claims it returns `Record<string, any>`
     },
     schema: { ...workpadSchema, ...customElementSchema },
