@@ -22,6 +22,7 @@ import {
   SPECIFIC_DATA_VIEW_PATH_LEGACY,
   SERVICE_KEY,
   SERVICE_KEY_LEGACY,
+  INITIAL_REST_VERSION,
 } from '../../constants';
 
 interface UpdateFieldsArgs {
@@ -108,28 +109,30 @@ const updateFieldsActionRouteFactory = (path: string, serviceKey: string) => {
     >,
     usageCollection?: UsageCounter
   ) => {
-    router.post(
+    router.versioned.post({ path, access: 'public' }).addVersion(
       {
-        path,
+        version: INITIAL_REST_VERSION,
         validate: {
-          params: schema.object(
-            {
-              id: schema.string({
-                minLength: 1,
-                maxLength: 1_000,
-              }),
-            },
-            { unknowns: 'allow' }
-          ),
-          body: schema.object({
-            fields: schema.recordOf(
-              schema.string({
-                minLength: 1,
-                maxLength: 1_000,
-              }),
-              fieldUpdateSchema
+          request: {
+            params: schema.object(
+              {
+                id: schema.string({
+                  minLength: 1,
+                  maxLength: 1_000,
+                }),
+              },
+              { unknowns: 'allow' }
             ),
-          }),
+            body: schema.object({
+              fields: schema.recordOf(
+                schema.string({
+                  minLength: 1,
+                  maxLength: 1_000,
+                }),
+                fieldUpdateSchema
+              ),
+            }),
+          },
         },
       },
       router.handleLegacyErrors(

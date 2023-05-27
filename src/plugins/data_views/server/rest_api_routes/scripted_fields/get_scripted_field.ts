@@ -14,6 +14,7 @@ import type {
   DataViewsServerPluginStart,
   DataViewsServerPluginStartDependencies,
 } from '../../types';
+import { INITIAL_REST_VERSION } from '../../constants';
 
 export const registerGetScriptedFieldRoute = (
   router: IRouter,
@@ -22,59 +23,63 @@ export const registerGetScriptedFieldRoute = (
     DataViewsServerPluginStart
   >
 ) => {
-  router.get(
-    {
-      path: '/api/index_patterns/index_pattern/{id}/scripted_field/{name}',
-      validate: {
-        params: schema.object(
-          {
-            id: schema.string({
-              minLength: 1,
-              maxLength: 1_000,
-            }),
-            name: schema.string({
-              minLength: 1,
-              maxLength: 1_000,
-            }),
+  router.versioned
+    .get({ path: '/api/index_patterns/index_pattern/{id}/scripted_field/{name}', access: 'public' })
+    .addVersion(
+      {
+        version: INITIAL_REST_VERSION,
+        validate: {
+          request: {
+            params: schema.object(
+              {
+                id: schema.string({
+                  minLength: 1,
+                  maxLength: 1_000,
+                }),
+                name: schema.string({
+                  minLength: 1,
+                  maxLength: 1_000,
+                }),
+              },
+              { unknowns: 'allow' }
+            ),
           },
-          { unknowns: 'allow' }
-        ),
+        },
       },
-    },
-    router.handleLegacyErrors(
-      handleErrors(async (ctx, req, res) => {
-        const core = await ctx.core;
-        const savedObjectsClient = core.savedObjects.client;
-        const elasticsearchClient = core.elasticsearch.client.asCurrentUser;
-        const [, , { dataViewsServiceFactory }] = await getStartServices();
-        const indexPatternsService = await dataViewsServiceFactory(
-          savedObjectsClient,
-          elasticsearchClient,
-          req
-        );
-        const id = req.params.id;
-        const name = req.params.name;
+      router.handleLegacyErrors(
+        handleErrors(async (ctx, req, res) => {
+          const core = await ctx.core;
+          const savedObjectsClient = core.savedObjects.client;
+          const elasticsearchClient = core.elasticsearch.client.asCurrentUser;
+          const [, , { dataViewsServiceFactory }] = await getStartServices();
+          const indexPatternsService = await dataViewsServiceFactory(
+            savedObjectsClient,
+            elasticsearchClient,
+            req
+          );
+          const id = req.params.id;
+          const name = req.params.name;
 
-        const indexPattern = await indexPatternsService.get(id);
-        const field = indexPattern.fields.getByName(name);
+          const indexPattern = await indexPatternsService.get(id);
+          const field = indexPattern.fields.getByName(name);
 
-        if (!field) {
-          throw new ErrorIndexPatternFieldNotFound(id, name);
-        }
+          if (!field) {
+            throw new ErrorIndexPatternFieldNotFound(id, name);
+          }
 
-        if (!field.scripted) {
-          throw new Error('Only scripted fields can be retrieved.');
-        }
+          if (!field.scripted) {
+            throw new Error('Only scripted fields can be retrieved.');
+          }
 
-        return res.ok({
-          headers: {
-            'content-type': 'application/json',
-          },
-          body: JSON.stringify({
-            field: field.toSpec(),
-          }),
-        });
-      })
-    )
-  );
+          return res.ok({
+            headers: {
+              'content-type': 'application/json',
+            },
+            body: JSON.stringify({
+              field: field.toSpec(),
+            }),
+          });
+        })
+      )
+    );
 };

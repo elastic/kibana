@@ -12,7 +12,13 @@ import { IRouter, StartServicesAccessor } from '@kbn/core/server';
 import { DataViewsService } from '../../common';
 import type { DataViewsServerPluginStartDependencies, DataViewsServerPluginStart } from '../types';
 import { handleErrors } from './util/handle_errors';
-import { SERVICE_PATH, SERVICE_PATH_LEGACY, SERVICE_KEY, SERVICE_KEY_LEGACY } from '../constants';
+import {
+  SERVICE_PATH,
+  SERVICE_PATH_LEGACY,
+  SERVICE_KEY,
+  SERVICE_KEY_LEGACY,
+  INITIAL_REST_VERSION,
+} from '../constants';
 
 interface GetDefaultArgs {
   dataViewsService: DataViewsService;
@@ -60,7 +66,7 @@ const manageDefaultIndexPatternRoutesFactory =
   ) => {
     router.versioned.get({ path, access: 'public' }).addVersion(
       {
-        version: '2023-10-31',
+        version: INITIAL_REST_VERSION,
         validate: {
           request: {},
         },

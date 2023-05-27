@@ -14,6 +14,7 @@ import type {
   DataViewsServerPluginStart,
   DataViewsServerPluginStartDependencies,
 } from '../../types';
+import { INITIAL_REST_VERSION } from '../../constants';
 
 export const registerPutScriptedFieldRoute = (
   router: IRouter,
@@ -22,70 +23,74 @@ export const registerPutScriptedFieldRoute = (
     DataViewsServerPluginStart
   >
 ) => {
-  router.put(
-    {
-      path: '/api/index_patterns/index_pattern/{id}/scripted_field',
-      validate: {
-        params: schema.object(
-          {
-            id: schema.string({
-              minLength: 1,
-              maxLength: 1_000,
+  router.versioned
+    .put({ path: '/api/index_patterns/index_pattern/{id}/scripted_field', access: 'public' })
+    .addVersion(
+      {
+        version: INITIAL_REST_VERSION,
+        validate: {
+          request: {
+            params: schema.object(
+              {
+                id: schema.string({
+                  minLength: 1,
+                  maxLength: 1_000,
+                }),
+              },
+              { unknowns: 'allow' }
+            ),
+            body: schema.object({
+              field: fieldSpecSchema,
             }),
           },
-          { unknowns: 'allow' }
-        ),
-        body: schema.object({
-          field: fieldSpecSchema,
-        }),
+        },
       },
-    },
-    router.handleLegacyErrors(
-      handleErrors(async (ctx, req, res) => {
-        const core = await ctx.core;
-        const savedObjectsClient = core.savedObjects.client;
-        const elasticsearchClient = core.elasticsearch.client.asCurrentUser;
-        const [, , { dataViewsServiceFactory }] = await getStartServices();
-        const indexPatternsService = await dataViewsServiceFactory(
-          savedObjectsClient,
-          elasticsearchClient,
-          req
-        );
-        const id = req.params.id;
-        const { field } = req.body;
+      router.handleLegacyErrors(
+        handleErrors(async (ctx, req, res) => {
+          const core = await ctx.core;
+          const savedObjectsClient = core.savedObjects.client;
+          const elasticsearchClient = core.elasticsearch.client.asCurrentUser;
+          const [, , { dataViewsServiceFactory }] = await getStartServices();
+          const indexPatternsService = await dataViewsServiceFactory(
+            savedObjectsClient,
+            elasticsearchClient,
+            req
+          );
+          const id = req.params.id;
+          const { field } = req.body;
 
-        if (!field.scripted) {
-          throw new Error('Only scripted fields can be put.');
-        }
+          if (!field.scripted) {
+            throw new Error('Only scripted fields can be put.');
+          }
 
-        const indexPattern = await indexPatternsService.get(id);
+          const indexPattern = await indexPatternsService.get(id);
 
-        const oldFieldObject = indexPattern.fields.getByName(field.name);
-        if (!!oldFieldObject) {
-          indexPattern.fields.remove(oldFieldObject);
-        }
+          const oldFieldObject = indexPattern.fields.getByName(field.name);
+          if (!!oldFieldObject) {
+            indexPattern.fields.remove(oldFieldObject);
+          }
 
-        indexPattern.fields.add({
-          ...field,
-          aggregatable: true,
-          searchable: true,
-        });
+          indexPattern.fields.add({
+            ...field,
+            aggregatable: true,
+            searchable: true,
+          });
 
-        await indexPatternsService.updateSavedObject(indexPattern);
+          await indexPatternsService.updateSavedObject(indexPattern);
 
-        const fieldObject = indexPattern.fields.getByName(field.name);
-        if (!fieldObject) throw new Error(`Could not create a field [name = ${field.name}].`);
+          const fieldObject = indexPattern.fields.getByName(field.name);
+          if (!fieldObject) throw new Error(`Could not create a field [name = ${field.name}].`);
 
-        return res.ok({
-          headers: {
-            'content-type': 'application/json',
-          },
-          body: JSON.stringify({
-            field: fieldObject.toSpec(),
-            index_pattern: indexPattern.toSpec(),
-          }),
-        });
-      })
-    )
-  );
+          return res.ok({
+            headers: {
+              'content-type': 'application/json',
+            },
+            body: JSON.stringify({
+              field: fieldObject.toSpec(),
+              index_pattern: indexPattern.toSpec(),
+            }),
+          });
+        })
+      )
+    );
 };

@@ -12,7 +12,11 @@ import { IRouter, StartServicesAccessor } from '@kbn/core/server';
 import { DataViewsService } from '../../common';
 import { handleErrors } from './util/handle_errors';
 import type { DataViewsServerPluginStartDependencies, DataViewsServerPluginStart } from '../types';
-import { SPECIFIC_DATA_VIEW_PATH, SPECIFIC_DATA_VIEW_PATH_LEGACY } from '../constants';
+import {
+  SPECIFIC_DATA_VIEW_PATH,
+  SPECIFIC_DATA_VIEW_PATH_LEGACY,
+  INITIAL_REST_VERSION,
+} from '../constants';
 
 interface DeleteDataViewArgs {
   dataViewsService: DataViewsService;
@@ -43,7 +47,7 @@ const deleteIndexPatternRouteFactory =
   ) => {
     router.versioned.delete({ path, access: 'public' }).addVersion(
       {
-        version: '2023-10-31',
+        version: INITIAL_REST_VERSION,
         validate: {
           request: {
             params: schema.object(

@@ -24,6 +24,7 @@ import {
   SERVICE_KEY,
   SERVICE_KEY_LEGACY,
   SERVICE_KEY_TYPE,
+  INITIAL_REST_VERSION,
 } from '../../constants';
 import { responseFormatter } from './response_formatter';
 
@@ -73,24 +74,26 @@ const updateRuntimeFieldRouteFactory =
     >,
     usageCollection?: UsageCounter
   ) => {
-    router.post(
+    router.versioned.post({ path, access: 'public' }).addVersion(
       {
-        path,
+        version: INITIAL_REST_VERSION,
         validate: {
-          params: schema.object({
-            id: schema.string({
-              minLength: 1,
-              maxLength: 1_000,
+          request: {
+            params: schema.object({
+              id: schema.string({
+                minLength: 1,
+                maxLength: 1_000,
+              }),
+              name: schema.string({
+                minLength: 1,
+                maxLength: 1_000,
+              }),
             }),
-            name: schema.string({
-              minLength: 1,
-              maxLength: 1_000,
+            body: schema.object({
+              name: schema.never(),
+              runtimeField: runtimeFieldSchema,
             }),
-          }),
-          body: schema.object({
-            name: schema.never(),
-            runtimeField: runtimeFieldSchema,
-          }),
+          },
         },
       },
       handleErrors(async (ctx, req, res) => {

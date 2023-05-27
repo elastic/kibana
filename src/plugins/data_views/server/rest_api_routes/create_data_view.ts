@@ -23,6 +23,7 @@ import {
   DATA_VIEW_PATH_LEGACY,
   SERVICE_KEY,
   SERVICE_KEY_LEGACY,
+  INITIAL_REST_VERSION,
 } from '../constants';
 
 interface CreateDataViewArgs {
@@ -89,7 +90,7 @@ const registerCreateDataViewRouteFactory =
   ) => {
     router.versioned.post({ path, access: 'public' }).addVersion(
       {
-        version: '2023-10-31',
+        version: INITIAL_REST_VERSION,
         validate: {
           request: {
             body: schema.object({

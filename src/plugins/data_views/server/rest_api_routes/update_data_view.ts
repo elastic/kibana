@@ -23,6 +23,7 @@ import {
   SPECIFIC_DATA_VIEW_PATH_LEGACY,
   SERVICE_KEY,
   SERVICE_KEY_LEGACY,
+  INITIAL_REST_VERSION,
 } from '../constants';
 
 const indexPatternUpdateSchema = schema.object({
@@ -152,23 +153,25 @@ const updateDataViewRouteFactory =
     >,
     usageCollection?: UsageCounter
   ) => {
-    router.post(
+    router.versioned.post({ path, access: 'public' }).addVersion(
       {
-        path,
+        version: INITIAL_REST_VERSION,
         validate: {
-          params: schema.object(
-            {
-              id: schema.string({
-                minLength: 1,
-                maxLength: 1_000,
-              }),
-            },
-            { unknowns: 'allow' }
-          ),
-          body: schema.object({
-            refresh_fields: schema.maybe(schema.boolean({ defaultValue: false })),
-            [serviceKey]: indexPatternUpdateSchema,
-          }),
+          request: {
+            params: schema.object(
+              {
+                id: schema.string({
+                  minLength: 1,
+                  maxLength: 1_000,
+                }),
+              },
+              { unknowns: 'allow' }
+            ),
+            body: schema.object({
+              refresh_fields: schema.maybe(schema.boolean({ defaultValue: false })),
+              [serviceKey]: indexPatternUpdateSchema,
+            }),
+          },
         },
       },
       router.handleLegacyErrors(

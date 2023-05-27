@@ -23,6 +23,7 @@ import {
   SERVICE_KEY,
   SERVICE_KEY_LEGACY,
   SERVICE_KEY_TYPE,
+  INITIAL_REST_VERSION,
 } from '../../constants';
 import { responseFormatter } from './response_formatter';
 
@@ -73,23 +74,25 @@ const putRuntimeFieldRouteFactory =
     >,
     usageCollection?: UsageCounter
   ) => {
-    router.put(
+    router.versioned.put({ path, access: 'public' }).addVersion(
       {
-        path,
+        version: INITIAL_REST_VERSION,
         validate: {
-          params: schema.object({
-            id: schema.string({
-              minLength: 1,
-              maxLength: 1_000,
+          request: {
+            params: schema.object({
+              id: schema.string({
+                minLength: 1,
+                maxLength: 1_000,
+              }),
             }),
-          }),
-          body: schema.object({
-            name: schema.string({
-              minLength: 1,
-              maxLength: 1_000,
+            body: schema.object({
+              name: schema.string({
+                minLength: 1,
+                maxLength: 1_000,
+              }),
+              runtimeField: runtimeFieldSchema,
             }),
-            runtimeField: runtimeFieldSchema,
-          }),
+          },
         },
       },
       handleErrors(async (ctx, req, res) => {

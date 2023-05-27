@@ -16,7 +16,11 @@ import type {
   DataViewsServerPluginStart,
   DataViewsServerPluginStartDependencies,
 } from '../../types';
-import { SPECIFIC_RUNTIME_FIELD_PATH, SPECIFIC_RUNTIME_FIELD_PATH_LEGACY } from '../../constants';
+import {
+  SPECIFIC_RUNTIME_FIELD_PATH,
+  SPECIFIC_RUNTIME_FIELD_PATH_LEGACY,
+  INITIAL_REST_VERSION,
+} from '../../constants';
 
 interface DeleteRuntimeFieldArgs {
   dataViewsService: DataViewsService;
@@ -56,20 +60,22 @@ const deleteRuntimeFieldRouteFactory =
     >,
     usageCollection?: UsageCounter
   ) => {
-    router.delete(
+    router.versioned.delete({ path, access: 'public' }).addVersion(
       {
-        path,
+        version: INITIAL_REST_VERSION,
         validate: {
-          params: schema.object({
-            id: schema.string({
-              minLength: 1,
-              maxLength: 1_000,
+          request: {
+            params: schema.object({
+              id: schema.string({
+                minLength: 1,
+                maxLength: 1_000,
+              }),
+              name: schema.string({
+                minLength: 1,
+                maxLength: 1_000,
+              }),
             }),
-            name: schema.string({
-              minLength: 1,
-              maxLength: 1_000,
-            }),
-          }),
+          },
         },
       },
       handleErrors(async (ctx, req, res) => {
