@@ -49,8 +49,8 @@ describe('Discover context url generator', () => {
     const { _a, _g } = getStatesFromKbnUrl(path, ['_a', '_g']);
 
     expect(app).toBe('discover');
-    expect(_a).toEqual({});
-    expect(_g).toEqual({});
+    expect(_a).toEqual(undefined);
+    expect(_g).toEqual(undefined);
   });
 
   test('should fill history state for context view', async () => {

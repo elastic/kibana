@@ -28,7 +28,7 @@ interface DiscoverRoutesProps {
   isDev: boolean;
 }
 
-const DiscoverRoutes = ({ prefix, ...mainRouteProps }: DiscoverRoutesProps) => {
+export const DiscoverRoutes = ({ prefix, ...mainRouteProps }: DiscoverRoutesProps) => {
   const prefixPath = useCallback(
     (path: string) => (prefix ? `${prefix}/${path}` : `/${path}`),
     [prefix]
@@ -69,7 +69,7 @@ interface CustomDiscoverRoutesProps {
   isDev: boolean;
 }
 
-const CustomDiscoverRoutes = ({ profileRegistry, ...props }: CustomDiscoverRoutesProps) => {
+export const CustomDiscoverRoutes = ({ profileRegistry, ...props }: CustomDiscoverRoutesProps) => {
   const { profile } = useParams<{ profile: string }>();
   const customizationCallbacks = useMemo(
     () => profileRegistry.get(profile)?.customizationCallbacks,
