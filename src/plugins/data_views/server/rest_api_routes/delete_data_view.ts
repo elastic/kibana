@@ -41,19 +41,21 @@ const deleteIndexPatternRouteFactory =
     >,
     usageCollection?: UsageCounter
   ) => {
-    router.delete(
+    router.versioned.delete({ path, access: 'public' }).addVersion(
       {
-        path,
+        version: '2023-10-31',
         validate: {
-          params: schema.object(
-            {
-              id: schema.string({
-                minLength: 1,
-                maxLength: 1_000,
-              }),
-            },
-            { unknowns: 'allow' }
-          ),
+          request: {
+            params: schema.object(
+              {
+                id: schema.string({
+                  minLength: 1,
+                  maxLength: 1_000,
+                }),
+              },
+              { unknowns: 'allow' }
+            ),
+          },
         },
       },
       router.handleLegacyErrors(

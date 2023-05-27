@@ -58,10 +58,12 @@ const manageDefaultIndexPatternRoutesFactory =
     >,
     usageCollection?: UsageCounter
   ) => {
-    router.get(
+    router.versioned.get({ path, access: 'public' }).addVersion(
       {
-        path,
-        validate: {},
+        version: '2023-10-31',
+        validate: {
+          request: {},
+        },
       },
       handleErrors(async (ctx, req, res) => {
         const core = await ctx.core;
@@ -88,19 +90,21 @@ const manageDefaultIndexPatternRoutesFactory =
       })
     );
 
-    router.post(
+    router.versioned.post({ path, access: 'public' }).addVersion(
       {
-        path,
+        version: '2023-10-31',
         validate: {
-          body: schema.object({
-            [`${serviceKey}_id`]: schema.nullable(
-              schema.string({
-                minLength: 1,
-                maxLength: 1_000,
-              })
-            ),
-            force: schema.boolean({ defaultValue: false }),
-          }),
+          request: {
+            body: schema.object({
+              [`${serviceKey}_id`]: schema.nullable(
+                schema.string({
+                  minLength: 1,
+                  maxLength: 1_000,
+                })
+              ),
+              force: schema.boolean({ defaultValue: false }),
+            }),
+          },
         },
       },
       handleErrors(async (ctx, req, res) => {
