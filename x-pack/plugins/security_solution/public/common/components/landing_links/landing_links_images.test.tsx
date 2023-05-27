@@ -13,6 +13,8 @@ import { TestProviders } from '../../mock';
 import { LandingLinksImages, LandingImageCards } from './landing_links_images';
 import * as telemetry from '../../lib/telemetry';
 
+const BETA = 'Beta';
+
 const DEFAULT_NAV_ITEM: NavLinkItem = {
   id: SecurityPageName.overview,
   title: 'TEST LABEL',
