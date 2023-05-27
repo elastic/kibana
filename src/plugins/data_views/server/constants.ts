@@ -76,3 +76,9 @@ export const SERVICE_KEY_LEGACY = 'index_pattern';
  * Service keys as type
  */
 export type SERVICE_KEY_TYPE = typeof SERVICE_KEY | typeof SERVICE_KEY_LEGACY;
+
+/**
+ * Initial REST version date
+ */
+
+export const INITIAL_REST_VERSION = '2023-10-31';
