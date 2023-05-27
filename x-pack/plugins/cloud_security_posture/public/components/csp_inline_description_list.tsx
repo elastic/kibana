@@ -33,6 +33,7 @@ export const CspInlineDescriptionList = ({
           color: euiTheme.colors.subduedText,
           fontSize,
           paddingRight: 0,
+          paddingInline: 0,
         },
       }}
       descriptionProps={{

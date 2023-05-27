@@ -411,6 +411,54 @@
           },
           {
             "parentPluginId": "controls",
+            "id": "def-public.ControlGroupContainer.updateInputAndReinitialize",
+            "type": "Function",
+            "tags": [],
+            "label": "updateInputAndReinitialize",
+            "description": [],
+            "signature": [
+              "(newInput: Partial<",
+              {
+                "pluginId": "controls",
+                "scope": "common",
+                "docId": "kibControlsPluginApi",
+                "section": "def-common.ControlGroupInput",
+                "text": "ControlGroupInput"
+              },
+              ">) => void"
+            ],
+            "path": "src/plugins/controls/public/control_group/embeddable/control_group_container.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "controls",
+                "id": "def-public.ControlGroupContainer.updateInputAndReinitialize.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "newInput",
+                "description": [],
+                "signature": [
+                  "Partial<",
+                  {
+                    "pluginId": "controls",
+                    "scope": "common",
+                    "docId": "kibControlsPluginApi",
+                    "section": "def-common.ControlGroupInput",
+                    "text": "ControlGroupInput"
+                  },
+                  ">"
+                ],
+                "path": "src/plugins/controls/public/control_group/embeddable/control_group_container.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "controls",
             "id": "def-public.ControlGroupContainer.setLastUsedDataViewId",
             "type": "Function",
             "tags": [],
