@@ -17,6 +17,16 @@ export class SyntheticsMonitorTestService {
     this.supertest = getService('supertest');
   }
 
+  async getMonitor(monitorId: string, decrypted: boolean = true, space?: string) {
+    let url =
+      API_URLS.GET_SYNTHETICS_MONITOR.replace('{monitorId}', monitorId) +
+      (decrypted ? '?decrypted=true' : '');
+    if (space) {
+      url = '/s/' + space + url;
+    }
+    return this.supertest.get(url).set('kbn-xsrf', 'true').expect(200);
+  }
+
   async addProjectMonitors(project: string, monitors: any) {
     const { body } = await this.supertest
       .put(API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace('{projectName}', project))

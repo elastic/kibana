@@ -198,9 +198,6 @@ describe('Response actions history', () => {
       (renderResult = mockedContext.render(
         <ResponseActionsLog data-test-subj={testPrefix} {...(props ?? {})} />
       ));
-    reactTestingLibrary.act(() => {
-      history.push(`${MANAGEMENT_PATH}/response_actions`);
-    });
 
     useGetEndpointActionListMock.mockReturnValue({
       ...getBaseMockedActionList(),
@@ -227,6 +224,29 @@ describe('Response actions history', () => {
   afterEach(() => {
     useGetEndpointActionListMock.mockReturnValue(getBaseMockedActionList());
     useUserPrivilegesMock.mockReset();
+  });
+
+  it('should call API with default date range', () => {
+    reactTestingLibrary.act(() => {
+      history.push(`${MANAGEMENT_PATH}/response_actions_history`);
+    });
+
+    render();
+    expect(useGetEndpointActionListMock).toHaveBeenCalledWith(
+      {
+        page: 1,
+        pageSize: 10,
+        agentIds: undefined,
+        commands: [],
+        statuses: [],
+        userIds: [],
+        withOutputs: [],
+        withAutomatedActions: false,
+        startDate: 'now-24h/h',
+        endDate: 'now',
+      },
+      { retry: false }
+    );
   });
 
   describe('When index does not exist yet', () => {
@@ -294,7 +314,7 @@ describe('Response actions history', () => {
           statuses: [],
           userIds: [],
           withOutputs: [],
-          withAutomatedActions: true,
+          withAutomatedActions: false,
         },
         expect.anything()
       );
@@ -540,6 +560,7 @@ describe('Response actions history', () => {
           'Input',
           'Parameters',
           'Comment',
+          'Hostname',
           'Output:',
         ]
       );
@@ -1141,7 +1162,7 @@ describe('Response actions history', () => {
           statuses: ['failed', 'pending'],
           userIds: [],
           withOutputs: [],
-          withAutomatedActions: true,
+          withAutomatedActions: false,
         },
         expect.anything()
       );
@@ -1343,7 +1364,7 @@ describe('Response actions history', () => {
           statuses: [],
           userIds: [],
           withOutputs: [],
-          withAutomatedActions: true,
+          withAutomatedActions: false,
         },
         expect.anything()
       );

@@ -13,6 +13,7 @@ import { createCaseError } from '../../common/error';
 import type { CasesClient } from '../client';
 import type { CasesClientArgs } from '../types';
 import { buildHandlers } from './utils';
+import { decodeOrThrow } from '../../../common/api/runtime_types';
 
 export const getCaseMetrics = async (
   params: SingleCaseMetricsRequest,
@@ -35,7 +36,7 @@ export const getCaseMetrics = async (
       return merge(acc, metric);
     }, {}) as SingleCaseMetricsResponse;
 
-    return SingleCaseMetricsResponseRt.encode(mergedResults);
+    return decodeOrThrow(SingleCaseMetricsResponseRt)(mergedResults);
   } catch (error) {
     throw createCaseError({
       logger,
