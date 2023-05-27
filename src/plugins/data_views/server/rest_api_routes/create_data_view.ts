@@ -87,16 +87,19 @@ const registerCreateDataViewRouteFactory =
     >,
     usageCollection?: UsageCounter
   ) => {
-    router.post(
+    router.versioned.post({ path, access: 'public' }).addVersion(
       {
-        path,
+        version: '1',
         validate: {
-          body: schema.object({
-            override: schema.maybe(schema.boolean({ defaultValue: false })),
-            refresh_fields: schema.maybe(schema.boolean({ defaultValue: false })),
-            data_view: serviceKey === SERVICE_KEY ? dataViewSpecSchema : schema.never(),
-            index_pattern: serviceKey === SERVICE_KEY_LEGACY ? dataViewSpecSchema : schema.never(),
-          }),
+          request: {
+            body: schema.object({
+              override: schema.maybe(schema.boolean({ defaultValue: false })),
+              refresh_fields: schema.maybe(schema.boolean({ defaultValue: false })),
+              data_view: serviceKey === SERVICE_KEY ? dataViewSpecSchema : schema.never(),
+              index_pattern:
+                serviceKey === SERVICE_KEY_LEGACY ? dataViewSpecSchema : schema.never(),
+            }),
+          },
         },
       },
       router.handleLegacyErrors(
