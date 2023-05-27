@@ -5,17 +5,21 @@
  * 2.0.
  */
 
-import { set } from 'lodash';
-import { Logger } from '@kbn/logging';
 import { RouteRegisterParameters } from '.';
-import { getRoutePaths } from '../../common';
-import { getSetupInstructions } from '../lib/setup/get_setup_instructions';
-import { getProfilingSetupSteps } from '../lib/setup/steps';
-import { createStepToInitializeElasticsearch } from '../lib/setup/steps/initialize_elasticsearch';
-import { handleRouteHandlerError } from '../utils/handle_route_error_handler';
-import { hasProfilingData } from '../lib/setup/has_profiling_data';
 import { getClient } from './compat';
-import { ProfilingSetupStep } from '../lib/setup/types';
+import { installLatestApmPackage, isApmPackageInstalled } from '../lib/setup/apm_package';
+import { setMaximumBuckets, validateMaximumBuckets } from '../lib/setup/cluster_settings';
+import {
+  createCollectorPackagePolicy,
+  createSymbolizerPackagePolicy,
+  updateApmPolicy,
+  validateApmPolicy,
+} from '../lib/setup/fleet_policies';
+import { getSetupInstructions } from '../lib/setup/get_setup_instructions';
+import { hasProfilingData } from '../lib/setup/has_profiling_data';
+import { setSecurityRole, validateSecurityRole } from '../lib/setup/security_role';
+import { handleRouteHandlerError } from '../utils/handle_route_error_handler';
+import { getRoutePaths } from '../../common';
 
 export interface SetupResourceResponse {
   cloud: {
@@ -38,60 +42,50 @@ export interface SetupResourceResponse {
     enabled: boolean;
   };
   resources: {
-    available: boolean;
-    configured: boolean;
     created: boolean;
-    defined: boolean;
-    ready: boolean;
   };
   settings: {
     configured: boolean;
   };
-  errors: string[];
 }
 
-export function createDefaultSetupResourceResponse(): SetupResourceResponse {
-  const response = {} as SetupResourceResponse;
-
-  set(response, 'cloud.required', true);
-  set(response, 'cloud.available', false);
-  set(response, 'data.available', false);
-  set(response, 'packages.installed', false);
-  set(response, 'permissions.configured', false);
-  set(response, 'policies.installed', false);
-  set(response, 'resource_management.enabled', false);
-  set(response, 'resources.available', false);
-  set(response, 'resources.configured', false);
-  set(response, 'resources.created', false);
-  set(response, 'resources.defined', false);
-  set(response, 'resources.ready', false);
-  set(response, 'settings.configured', false);
-
-  response.errors = [];
-
-  return response;
+function createDefaultSetupResourceResponse(): SetupResourceResponse {
+  return {
+    cloud: {
+      available: false,
+      required: true,
+    },
+    data: {
+      available: false,
+    },
+    packages: {
+      installed: false,
+    },
+    permissions: {
+      configured: false,
+    },
+    policies: {
+      installed: false,
+    },
+    resource_management: {
+      enabled: false,
+    },
+    resources: {
+      created: false,
+    },
+    settings: {
+      configured: false,
+    },
+  };
 }
 
-async function checkStep({ step, logger }: { step: ProfilingSetupStep; logger: Logger }) {
-  try {
-    return { name: step.name, completed: await step.hasCompleted(), error: null };
-  } catch (error) {
-    logger.error(error);
-    return { name: step.name, completed: false, error: error.toString() };
-  }
-}
-
-function checkSteps({ steps, logger }: { steps: ProfilingSetupStep[]; logger: Logger }) {
-  return Promise.all(steps.map(async (step) => checkStep({ step, logger })));
-}
-
-async function executeStep({ step, logger }: { step: ProfilingSetupStep; logger: Logger }) {
-  logger.debug(`Executing step ${step.name}`);
-  step.init();
-}
-
-function executeSteps({ steps, logger }: { steps: ProfilingSetupStep[]; logger: Logger }) {
-  return Promise.all(steps.map(async (step) => executeStep({ step, logger })));
+function everySetupResourceResponse(response: SetupResourceResponse): boolean {
+  return (
+    response.packages.installed &&
+    response.permissions.configured &&
+    response.policies.installed &&
+    response.settings.configured
+  );
 }
 
 export function registerSetupRoute({
@@ -116,7 +110,7 @@ export function registerSetupRoute({
           request,
           useDefaultAuth: true,
         });
-        const stepOptions = {
+        const setupOptions = {
           client: clientWithDefaultAuth,
           logger,
           packagePolicyClient: dependencies.start.fleet.packagePolicyService,
@@ -131,12 +125,26 @@ export function registerSetupRoute({
         body.cloud.available = dependencies.setup.cloud.isCloudEnabled;
 
         if (!body.cloud.available) {
-          throw new Error(`Universal Profiling is only available on Elastic Cloud.`);
+          return response.ok({
+            body: {
+              has_data: false,
+              has_setup: false,
+            },
+          });
         }
 
         const statusResponse = await clientWithDefaultAuth.profilingStatus();
         body.resource_management.enabled = statusResponse.resource_management.enabled;
         body.resources.created = statusResponse.resources.created;
+
+        if (!body.resources.created) {
+          return response.ok({
+            body: {
+              has_data: false,
+              has_setup: false,
+            },
+          });
+        }
 
         body.data.available = await hasProfilingData({
           client: createProfilingEsClient({
@@ -145,36 +153,35 @@ export function registerSetupRoute({
           }),
         });
 
-        const initializeStep = createStepToInitializeElasticsearch(stepOptions);
-        const initializeResult = await checkStep({ step: initializeStep, logger });
-
-        if (!initializeResult.completed) {
-          throw new Error(`Elasticsearch is not initialized for Universal Profiling`);
-        }
-        if (initializeResult.error) {
-          return handleRouteHandlerError({ error: initializeResult.error, logger, response });
-        }
-
         if (body.data.available) {
           return response.ok({
             body: {
               has_data: true,
               has_setup: true,
-              steps: [],
             },
           });
         }
 
-        const stepCompletionResults = await checkSteps({
-          steps: getProfilingSetupSteps(stepOptions),
-          logger,
-        });
+        const verifyFunctions = [
+          async () => {
+            body.packages.installed = await isApmPackageInstalled(setupOptions);
+          },
+          async () => {
+            body.policies.installed = await validateApmPolicy(setupOptions);
+          },
+          async () => {
+            body.settings.configured = await validateMaximumBuckets(setupOptions);
+          },
+          async () => {
+            body.permissions.configured = await validateSecurityRole(setupOptions);
+          },
+        ];
+        await Promise.all(verifyFunctions.map(async (fn) => await fn()));
 
         return response.ok({
           body: {
-            has_setup: stepCompletionResults.every((step) => step.completed),
+            has_setup: everySetupResourceResponse(body),
             has_data: false,
-            steps: stepCompletionResults,
           },
         });
       } catch (error) {
@@ -197,7 +204,7 @@ export function registerSetupRoute({
           request,
           useDefaultAuth: true,
         });
-        const stepOptions = {
+        const setupOptions = {
           client: clientWithDefaultAuth,
           logger,
           packagePolicyClient: dependencies.start.fleet.packagePolicyService,
@@ -208,26 +215,74 @@ export function registerSetupRoute({
 
         logger.info('Setting up Elasticsearch and Fleet for Universal Profiling');
 
-        if (!dependencies.setup.cloud.isCloudEnabled) {
-          throw new Error(`Universal Profiling is only available on Elastic Cloud.`);
+        const body = createDefaultSetupResourceResponse();
+        body.cloud.available = dependencies.setup.cloud.isCloudEnabled;
+
+        if (!body.cloud.available) {
+          return response.ok({
+            body: {
+              has_data: false,
+              has_setup: false,
+            },
+          });
         }
 
-        const initializeStep = createStepToInitializeElasticsearch(stepOptions);
-        await executeStep({ step: initializeStep, logger });
-        const initializeResult = await checkStep({ step: initializeStep, logger });
+        const statusResponse = await clientWithDefaultAuth.profilingStatus();
+        body.resource_management.enabled = statusResponse.resource_management.enabled;
+        body.resources.created = statusResponse.resources.created;
 
-        if (!initializeResult.completed) {
-          throw new Error(`Elasticsearch is not initialized for Universal Profiling`);
+        if (!body.resources.created) {
+          return response.ok({
+            body: {
+              has_data: false,
+              has_setup: false,
+            },
+          });
         }
-        if (initializeResult.error) {
-          return handleRouteHandlerError({ error: initializeResult.error, logger, response });
+
+        body.data.available = await hasProfilingData({
+          client: createProfilingEsClient({
+            esClient,
+            request,
+          }),
+        });
+
+        if (body.data.available) {
+          return response.ok({
+            body: {
+              has_data: true,
+              has_setup: true,
+            },
+          });
         }
 
-        const steps = getProfilingSetupSteps(stepOptions);
-        await executeSteps({ steps, logger });
-        const checkedSteps = await checkSteps({ steps, logger });
+        const executeFunctions = [
+          installLatestApmPackage,
+          updateApmPolicy,
+          createCollectorPackagePolicy,
+          createSymbolizerPackagePolicy,
+          setSecurityRole,
+          setMaximumBuckets,
+        ];
+        await Promise.all(executeFunctions.map(async (fn) => await fn(setupOptions)));
 
-        if (checkedSteps.every((step) => step.completed)) {
+        const verifyFunctions = [
+          async () => {
+            body.packages.installed = await isApmPackageInstalled(setupOptions);
+          },
+          async () => {
+            body.policies.installed = await validateApmPolicy(setupOptions);
+          },
+          async () => {
+            body.settings.configured = await validateMaximumBuckets(setupOptions);
+          },
+          async () => {
+            body.permissions.configured = await validateSecurityRole(setupOptions);
+          },
+        ];
+        await Promise.all(verifyFunctions.map(async (fn) => await fn()));
+
+        if (everySetupResourceResponse(body)) {
           return response.ok();
         }
 
@@ -235,7 +290,6 @@ export function registerSetupRoute({
           statusCode: 500,
           body: {
             message: `Failed to complete all steps`,
-            steps: checkedSteps,
           },
         });
       } catch (error) {
