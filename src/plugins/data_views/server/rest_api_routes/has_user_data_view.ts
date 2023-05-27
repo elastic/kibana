@@ -11,7 +11,7 @@ import { IRouter, StartServicesAccessor } from '@kbn/core/server';
 import { DataViewsService } from '../../common';
 import { handleErrors } from './util/handle_errors';
 import type { DataViewsServerPluginStartDependencies, DataViewsServerPluginStart } from '../types';
-import { SERVICE_PATH, SERVICE_PATH_LEGACY, INITIAL_REST_VERSION } from '../constants';
+import { SERVICE_PATH, SERVICE_PATH_LEGACY } from '../constants';
 
 interface HasUserDataViewArgs {
   dataViewsService: DataViewsService;
@@ -40,7 +40,7 @@ const hasUserDataViewRouteFactory =
   ) => {
     router.versioned.get({ path, access: 'internal' }).addVersion(
       {
-        version: INITIAL_REST_VERSION,
+        version: '1', // INITIAL_REST_VERSION,
         validate: { request: {} },
       },
       router.handleLegacyErrors(
