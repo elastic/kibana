@@ -166,7 +166,7 @@ export function updateSearchSource(
   };
 }
 
-const CLEARED_ADHOC_ID = undefined;
+const CLEARED_DATA_VIEW_ID = undefined;
 
 async function generateLink(
   searchSource: ISearchSource,
@@ -181,16 +181,16 @@ async function generateLink(
 
   const redirectUrlParams: DiscoverAppLocatorParams = {
     ...(dataView.isPersisted()
-      ? { dataViewId: dataView.id, filters }
+      ? { dataViewId: dataView.id }
       : {
           dataViewSpec: {
             ...dataView.toSpec(false),
             version: undefined,
             fieldAttrs: undefined,
-            id: CLEARED_ADHOC_ID,
+            id: CLEARED_DATA_VIEW_ID,
           },
-          filters: updateFilterReferences(filters, dataView.id!, CLEARED_ADHOC_ID),
         }),
+    filters: updateFilterReferences(filters, dataView.id!, CLEARED_DATA_VIEW_ID),
     query: searchSource.getField('query'),
     timeRange: { from: dateStart, to: dateEnd },
     isAlertResults: true,
