@@ -130,6 +130,30 @@ export function getFleetPolicyStep({
         },
         { force: true }
       );
+      await packagePolicyClient.create(
+        soClient,
+        esClient,
+        {
+          policy_id: cloudAgentPolicyId,
+          enabled: true,
+          package: {
+            name: 'profiler_collector',
+            title: 'Universal Profiling Collector',
+            version: '8.9.0-preview',
+          },
+          name: 'elastic-universal-profiling-collector',
+          namespace: 'default',
+          inputs: [
+            {
+              policy_template: 'universal_profiling_collector',
+              enabled: true,
+              streams: [],
+              type: 'pf-elastic-collector',
+            },
+          ],
+        },
+        { force: true }
+      );
     },
   };
 }
