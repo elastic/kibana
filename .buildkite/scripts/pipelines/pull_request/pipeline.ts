@@ -73,6 +73,9 @@ const uploadPipeline = (pipelineContent: string | object) => {
       GITHUB_PR_LABELS.includes('ci:all-cypress-suites')
     ) {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/security_solution.yml'));
+      pipeline.push(
+        getPipeline('.buildkite/pipelines/pull_request/security_solution_investigations.yml')
+      );
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/defend_workflows.yml'));
     }
 
