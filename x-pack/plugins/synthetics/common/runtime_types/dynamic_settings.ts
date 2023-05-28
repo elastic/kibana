@@ -41,3 +41,19 @@ export const DynamicSettingsSaveType = t.intersection([
 export type DynamicSettings = t.TypeOf<typeof DynamicSettingsType>;
 export type DefaultEmail = t.TypeOf<typeof DefaultEmailType>;
 export type DynamicSettingsSaveResponse = t.TypeOf<typeof DynamicSettingsSaveType>;
+
+// `DynamicSettingsAttributes` type helps isolate the Saved Object's attributes from API response object,
+// and it may likely be a duplicate of `DynamicSettings` initially.
+export type DynamicSettingsAttributes = t.TypeOf<typeof DynamicSettingsType>;
+
+export const LocationMonitorsType = t.type({
+  status: t.number,
+  payload: t.array(
+    t.type({
+      id: t.string,
+      count: t.number,
+    })
+  ),
+});
+
+export type LocationMonitorsResponse = t.TypeOf<typeof LocationMonitorsType>;
