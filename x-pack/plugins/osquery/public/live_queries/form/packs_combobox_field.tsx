@@ -73,7 +73,7 @@ export const PacksComboBoxField = ({
       }
 
       setSelectedOptions(newSelectedOptions);
-      onChange([newSelectedOptions[0].value?.saved_object_id]);
+      onChange([newSelectedOptions[0].value?.id]);
     },
     [onChange]
   );
