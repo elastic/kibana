@@ -6,14 +6,7 @@
  */
 
 import React, { useState, useMemo } from 'react';
-import {
-  EuiTextArea,
-  EuiFormRow,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSelectable,
-  EuiSelectableOption,
-} from '@elastic/eui';
+import { EuiTextArea, EuiFormRow, EuiSelectable, EuiSelectableOption } from '@elastic/eui';
 import './add_message_variables.scss';
 import { ActionVariable } from '@kbn/alerting-plugin/common';
 import { AddMessageVariables } from './add_message_variables';
@@ -66,8 +59,6 @@ export const TextAreaWithAutocomplete: React.FunctionComponent<Props> = ({
   };
 
   const onChangeWithMessageVariable = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    editAction(paramsProperty, e.target.value, index);
-
     const inputValue = e.target.value;
 
     const lastOpenBracketIndex = inputValue.lastIndexOf('{{');
@@ -83,6 +74,7 @@ export const TextAreaWithAutocomplete: React.FunctionComponent<Props> = ({
     } else {
       setMatches([]);
     }
+    editAction(paramsProperty, inputValue, index);
   };
 
   const onOptionPick = (newOptions: EuiSelectableOption[]) => {
@@ -106,48 +98,44 @@ export const TextAreaWithAutocomplete: React.FunctionComponent<Props> = ({
   };
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="xs">
-      <EuiFlexItem grow={false}>
-        <EuiFormRow
-          fullWidth
-          error={errors}
-          isDisabled={isDisabled}
-          isInvalid={errors && errors.length > 0 && inputTargetValue !== undefined}
-          label={label}
-          labelAppend={
-            <AddMessageVariables
-              messageVariables={messageVariables}
-              onSelectEventHandler={onSelectMessageVariable}
-              paramsProperty={paramsProperty}
-            />
-          }
-        >
-          <EuiTextArea
-            disabled={isDisabled}
-            fullWidth
-            isInvalid={errors && errors.length > 0 && inputTargetValue !== undefined}
-            name={paramsProperty}
-            value={inputTargetValue || ''}
-            data-test-subj={`${paramsProperty}TextArea`}
-            onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => onChangeWithMessageVariable(e)}
-            onFocus={(e: React.FocusEvent<HTMLTextAreaElement>) => {
-              setCurrentTextElement(e.target);
-            }}
-            onBlur={() => {
-              if (!inputTargetValue) {
-                editAction(paramsProperty, '', index);
-              }
-            }}
+    <>
+      <EuiFormRow
+        fullWidth
+        error={errors}
+        isDisabled={isDisabled}
+        isInvalid={errors && errors.length > 0 && inputTargetValue !== undefined}
+        label={label}
+        labelAppend={
+          <AddMessageVariables
+            messageVariables={messageVariables}
+            onSelectEventHandler={onSelectMessageVariable}
+            paramsProperty={paramsProperty}
           />
-        </EuiFormRow>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        {matches.length > 0 && (
-          <EuiSelectable options={optionsToShow} onChange={onOptionPick} singleSelection>
-            {(list) => list}
-          </EuiSelectable>
-        )}
-      </EuiFlexItem>
-    </EuiFlexGroup>
+        }
+      >
+        <EuiTextArea
+          disabled={isDisabled}
+          fullWidth
+          isInvalid={errors && errors.length > 0 && inputTargetValue !== undefined}
+          name={paramsProperty}
+          value={inputTargetValue || ''}
+          data-test-subj={`${paramsProperty}TextArea`}
+          onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => onChangeWithMessageVariable(e)}
+          onFocus={(e: React.FocusEvent<HTMLTextAreaElement>) => {
+            setCurrentTextElement(e.target);
+          }}
+          onBlur={() => {
+            if (!inputTargetValue) {
+              editAction(paramsProperty, '', index);
+            }
+          }}
+        />
+      </EuiFormRow>
+      {matches.length > 0 && (
+        <EuiSelectable options={optionsToShow} onChange={onOptionPick} singleSelection>
+          {(list) => list}
+        </EuiSelectable>
+      )}
+    </>
   );
 };
