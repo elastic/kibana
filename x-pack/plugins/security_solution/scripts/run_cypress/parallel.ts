@@ -404,29 +404,28 @@ export const cli = () => {
             ciBuildId: process.env.BUILDKITE_BUILD_ID ?? 'hello-currents18',
           })
         )
-      )
-        .then((results) => {
-          if (!results.length) {
-            process.exit(0);
-          }
-          if (_.some(results, ['status', 'failed']) {
-            process.exit(1);
-          }
-
-          // const overallFailed = result.totalFailed + result.totalSkipped;
-          // if (overallFailed > 0) {
-          //   process.exit(overallFailed);
-          // }
+      ).then((results) => {
+        if (!results.length) {
           process.exit(0);
-        })
-        // .catch((err) => {
-        //   // if (err instanceof ValidationError) {
-        //   //   // program.error(withError(err.toString()));
-        //   // } else {
-        //   console.error(err);
-        //   // }
-        //   process.exit(1);
-        // });
+        }
+        if (_.some(results, ['status', 'failed'])) {
+          process.exit(1);
+        }
+
+        // const overallFailed = result.totalFailed + result.totalSkipped;
+        // if (overallFailed > 0) {
+        //   process.exit(overallFailed);
+        // }
+        process.exit(0);
+      });
+      // .catch((err) => {
+      //   // if (err instanceof ValidationError) {
+      //   //   // program.error(withError(err.toString()));
+      //   // } else {
+      //   console.error(err);
+      //   // }
+      //   process.exit(1);
+      // });
     },
     {
       flags: {
