@@ -8,7 +8,7 @@
 import pMap from 'p-map';
 import Boom from '@hapi/boom';
 
-import type { SavedObject, SavedObjectsFindResponse } from '@kbn/core/server';
+import type { SavedObject } from '@kbn/core/server';
 import { SavedObjectsUtils } from '@kbn/core/server';
 import type { FindActionResult } from '@kbn/actions-plugin/server/types';
 import type { ActionType } from '@kbn/actions-plugin/common';
@@ -20,14 +20,15 @@ import type {
   ConfigurationRequest,
   Configuration,
   ConnectorMappings,
-  ConnectorMappingsAttributes,
   GetConfigurationFindRequest,
+  ConnectorMappingResponse,
 } from '../../../common/api';
 import {
   ConfigurationsRt,
-  ConfigurationRt,
   ConfigurationPatchRequestRt,
   GetConfigurationFindRequestRt,
+  ConfigurationRt,
+  FindActionConnectorResponseRt,
   decodeWithExcessOrThrow,
 } from '../../../common/api';
 import { MAX_CONCURRENT_SEARCHES } from '../../../common/constants';
@@ -46,6 +47,7 @@ import type {
   ICasesConfigureRequest,
   ICasesConfigureResponse,
 } from '../typedoc_interfaces';
+import { decodeOrThrow } from '../../../common/api/runtime_types';
 
 /**
  * Defines the internal helper functions.
@@ -53,13 +55,9 @@ import type {
  * @ignore
  */
 export interface InternalConfigureSubClient {
-  getMappings(
-    params: MappingsArgs
-  ): Promise<SavedObjectsFindResponse<ConnectorMappings>['saved_objects']>;
-
-  createMappings(params: CreateMappingsArgs): Promise<ConnectorMappingsAttributes[]>;
-
-  updateMappings(params: UpdateMappingsArgs): Promise<ConnectorMappingsAttributes[]>;
+  getMappings(params: MappingsArgs): Promise<ConnectorMappingResponse | null>;
+  createMappings(params: CreateMappingsArgs): Promise<ConnectorMappingResponse>;
+  updateMappings(params: UpdateMappingsArgs): Promise<ConnectorMappingResponse>;
 }
 
 /**
@@ -99,8 +97,7 @@ export interface ConfigureSubClient {
  * @ignore
  */
 export const createInternalConfigurationSubClient = (
-  clientArgs: CasesClientArgs,
-  casesClientInternal: CasesClientInternal
+  clientArgs: CasesClientArgs
 ): InternalConfigureSubClient => {
   const configureSubClient: InternalConfigureSubClient = {
     getMappings: (params: MappingsArgs) => getMappings(params, clientArgs),
@@ -173,7 +170,7 @@ export async function get(
           connector: null,
         };
 
-        let mappings: SavedObjectsFindResponse<ConnectorMappings>['saved_objects'] = [];
+        let mappings: ConnectorMappingResponse | null = null;
 
         if (connector != null) {
           try {
@@ -190,7 +187,7 @@ export async function get(
         return {
           ...caseConfigureWithoutConnector,
           connector,
-          mappings: mappings.length > 0 ? mappings[0].attributes.mappings : [],
+          mappings: mappings != null ? mappings.mappings : [],
           version: configuration.version ?? '',
           error,
           id: configuration.id,
@@ -198,7 +195,7 @@ export async function get(
       }
     );
 
-    return ConfigurationsRt.encode(configurations);
+    return decodeOrThrow(ConfigurationsRt)(configurations);
   } catch (error) {
     throw createCaseError({ message: `Failed to get case configure: ${error}`, error, logger });
   }
@@ -214,9 +211,11 @@ export async function getConnectors({
       return types;
     }, {} as Record<string, ActionType>);
 
-    return (await actionsClient.getAll()).filter((action) =>
+    const res = (await actionsClient.getAll()).filter((action) =>
       isConnectorSupported(action, actionTypes)
     );
+
+    return decodeOrThrow(FindActionConnectorResponseRt)(res);
   } catch (error) {
     throw createCaseError({ message: `Failed to get connectors: ${error}`, error, logger });
   }
@@ -270,7 +269,7 @@ export async function update(
 
     let error = null;
     const updateDate = new Date().toISOString();
-    let mappings: ConnectorMappingsAttributes[] = [];
+    let mappings: ConnectorMappings = [];
     const { connector, ...queryWithoutVersionAndConnector } = queryWithoutVersion;
 
     try {
@@ -278,21 +277,25 @@ export async function update(
         connector: connector != null ? connector : configuration.attributes.connector,
       });
 
-      mappings = resMappings.length > 0 ? resMappings[0].attributes.mappings : [];
+      mappings = resMappings !== null ? resMappings.mappings : [];
 
       if (connector != null) {
-        if (resMappings.length !== 0) {
-          mappings = await casesClientInternal.configuration.updateMappings({
-            connector,
-            mappingId: resMappings[0].id,
-            refresh: false,
-          });
+        if (resMappings !== null) {
+          mappings = (
+            await casesClientInternal.configuration.updateMappings({
+              connector,
+              mappingId: resMappings.id,
+              refresh: false,
+            })
+          ).mappings;
         } else {
-          mappings = await casesClientInternal.configuration.createMappings({
-            connector,
-            owner: configuration.attributes.owner,
-            refresh: false,
-          });
+          mappings = (
+            await casesClientInternal.configuration.createMappings({
+              connector,
+              owner: configuration.attributes.owner,
+              refresh: false,
+            })
+          ).mappings;
         }
       }
     } catch (e) {
@@ -315,7 +318,7 @@ export async function update(
       originalConfiguration: configuration,
     });
 
-    return ConfigurationRt.encode({
+    const res = {
       ...configuration.attributes,
       ...patch.attributes,
       connector: patch.attributes.connector ?? configuration.attributes.connector,
@@ -323,7 +326,9 @@ export async function update(
       version: patch.version ?? '',
       error,
       id: patch.id,
-    });
+    };
+
+    return decodeOrThrow(ConfigurationRt)(res);
   } catch (error) {
     throw createCaseError({
       message: `Failed to get patch configure in route: ${error}`,
@@ -398,14 +403,16 @@ async function create(
     });
 
     const creationDate = new Date().toISOString();
-    let mappings: ConnectorMappingsAttributes[] = [];
+    let mappings: ConnectorMappings = [];
 
     try {
-      mappings = await casesClientInternal.configuration.createMappings({
-        connector: configuration.connector,
-        owner: configuration.owner,
-        refresh: false,
-      });
+      mappings = (
+        await casesClientInternal.configuration.createMappings({
+          connector: configuration.connector,
+          owner: configuration.owner,
+          refresh: false,
+        })
+      ).mappings;
     } catch (e) {
       error = e.isBoom
         ? e.output.payload.message
@@ -425,7 +432,7 @@ async function create(
       id: savedObjectID,
     });
 
-    return ConfigurationRt.encode({
+    const res = {
       ...post.attributes,
       // Reserve for future implementations
       connector: post.attributes.connector,
@@ -433,7 +440,9 @@ async function create(
       version: post.version ?? '',
       error,
       id: post.id,
-    });
+    };
+
+    return decodeOrThrow(ConfigurationRt)(res);
   } catch (error) {
     throw createCaseError({
       message: `Failed to create case configuration: ${error}`,
