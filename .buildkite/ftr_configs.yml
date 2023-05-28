@@ -39,6 +39,7 @@ disabled:
   - x-pack/test/security_solution_cypress/ccs_config.ts
   - x-pack/test/security_solution_cypress/cli_config.ts
   - x-pack/test/security_solution_cypress/cli_config_parallel.ts
+  - x-pack/test/security_solution_cypress/cli_config_investigations_parallel.ts
   - x-pack/test/security_solution_cypress/config.firefox.ts
   - x-pack/test/security_solution_cypress/config.ts
   - x-pack/test/security_solution_cypress/response_ops_cli_config.ts
@@ -326,6 +327,7 @@ enabled:
   - x-pack/test/monitoring_api_integration/config.ts
   - x-pack/test/observability_api_integration/basic/config.ts
   - x-pack/test/observability_api_integration/trial/config.ts
+  - x-pack/test/observability_api_integration/apis/config.ts
   - x-pack/test/observability_functional/with_rac_write.config.ts
   - x-pack/test/plugin_api_integration/config.ts
   - x-pack/test/plugin_functional/config.ts
