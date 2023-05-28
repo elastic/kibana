@@ -10,10 +10,14 @@
   },
   "include": [
     "**/*.ts",
-      "**/*.tsx",
+    "**/*.tsx",
   ],
   "exclude": [
     "target/**/*"
   ],
-  "kbn_references": []
+  "kbn_references": [
+    "@kbn/tooling-log",
+    "@kbn/dev-proc-runner",
+    "@kbn/test",
+  ]
 }
