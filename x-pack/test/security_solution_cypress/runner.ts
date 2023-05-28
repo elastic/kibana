@@ -32,7 +32,11 @@ export async function SecuritySolutionConfigurableCypressTestRunner(
     CYPRESS_ELASTICSEARCH_PASSWORD: config.get('servers.elasticsearch.password'),
     ...envVars,
     baseUrl: Url.format(config.get('servers.kibana')),
-    BASE_URL: Url.format(config.get('servers.kibana')),
+    BASE_URL: Url.format({
+      protocol: config.get('servers.kibana.protocol'),
+      hostname: config.get('servers.kibana.hostname'),
+      port: config.get('servers.kibana.port'),
+    }),
     ELASTICSEARCH_URL: Url.format(config.get('servers.elasticsearch')),
     ELASTICSEARCH_USERNAME: config.get('servers.elasticsearch.username'),
     ELASTICSEARCH_PASSWORD: config.get('servers.elasticsearch.password'),

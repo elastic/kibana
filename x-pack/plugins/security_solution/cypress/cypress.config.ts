@@ -20,6 +20,7 @@ export default defineCypressConfig({
   viewportWidth: 1680,
   numTestsKeptInMemory: 10,
   e2e: {
+    specPattern: './cypress/e2e/**/*.cy.ts',
     experimentalRunAllSpecs: true,
     experimentalMemoryManagement: true,
   },

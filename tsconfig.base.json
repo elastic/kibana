@@ -582,6 +582,8 @@
       "@kbn/custom-branding-plugin/*": ["x-pack/plugins/custom_branding/*"],
       "@kbn/custom-integrations-plugin": ["src/plugins/custom_integrations"],
       "@kbn/custom-integrations-plugin/*": ["src/plugins/custom_integrations/*"],
+      "@kbn/cypress": ["packages/kbn-cypress"],
+      "@kbn/cypress/*": ["packages/kbn-cypress/*"],
       "@kbn/cypress-config": ["packages/kbn-cypress-config"],
       "@kbn/cypress-config/*": ["packages/kbn-cypress-config/*"],
       "@kbn/dashboard-enhanced-plugin": ["x-pack/plugins/dashboard_enhanced"],

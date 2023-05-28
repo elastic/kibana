@@ -1,0 +1,5 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/cypress",
+  "owner": "@elastic/defend-workflows"
+}
