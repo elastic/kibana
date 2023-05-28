@@ -6,11 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { IRouter } from '@kbn/core/server';
+import { IRouter, RequestHandlerContext } from '@kbn/core/server';
 import type { VersionedRoute } from '@kbn/core-http-server';
 import { getDataViews, hasUserDataView } from '../has_user_data_view';
 
-export const handler: Parameters<VersionedRoute['addVersion']>[1] = async (ctx, req, res) => {
+type Handler = Parameters<VersionedRoute<any, RequestHandlerContext>['addVersion']>[1];
+
+export const handler: Handler = async (ctx: RequestHandlerContext, req, res) => {
   // todo whats the best way to type this?
   const core = await ctx.core;
   const savedObjectsClient = core.savedObjects.client;
