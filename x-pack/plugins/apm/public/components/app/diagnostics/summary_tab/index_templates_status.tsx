@@ -10,18 +10,26 @@ import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { useApmRouter } from '../../../../hooks/use_apm_router';
 import { useFetcher } from '../../../../hooks/use_fetcher';
 
-type APIResponseType =
+type IndexTemplateAPIResponseType =
   APIReturnType<'GET /internal/apm/diagnostics/index_templates'>;
+
+type IndexPatternAPIResponseType =
+  APIReturnType<'GET /internal/apm/diagnostics/index_pattern_settings'>;
 
 export function IndexTemplatesStatus() {
   const router = useApmRouter();
-  const { data } = useFetcher((callApmApi) => {
+  const { data: indexTemplateData } = useFetcher((callApmApi) => {
     return callApmApi(`GET /internal/apm/diagnostics/index_templates`);
   }, []);
 
-  const hasNonStandardIndexTemplates = getHasNonStandardIndexTemplates(data);
+  const { data: indexPatternSettings } = useFetcher((callApmApi) => {
+    return callApmApi(`GET /internal/apm/diagnostics/index_pattern_settings`);
+  }, []);
+
+  const hasNonStandardIndexTemplates =
+    getHasNonStandardIndexTemplates(indexPatternSettings);
   const isEveryDefaultApmIndexTemplateInstalled =
-    getIsEveryDefaultApmIndexTemplateInstalled(data);
+    getIsEveryDefaultApmIndexTemplateInstalled(indexTemplateData);
 
   const isOk =
     isEveryDefaultApmIndexTemplateInstalled && !hasNonStandardIndexTemplates;
@@ -52,14 +60,16 @@ export function IndexTemplatesStatus() {
   );
 }
 
-function getHasNonStandardIndexTemplates(data: APIResponseType | undefined) {
+function getHasNonStandardIndexTemplates(
+  data: IndexPatternAPIResponseType | undefined
+) {
   return data?.indexTemplatesByIndexPattern?.some(({ indexTemplates }) => {
     return indexTemplates?.some(({ isNonStandard }) => isNonStandard);
   });
 }
 
 function getIsEveryDefaultApmIndexTemplateInstalled(
-  data: APIResponseType | undefined
+  data: IndexTemplateAPIResponseType | undefined
 ) {
   return Object.values(data?.defaultApmIndexTemplateStates ?? {}).every(
     (state) => state.exists
