@@ -14,7 +14,6 @@ import {
   createOptionsSchemas,
   updateOptionsSchema,
   createResultSchema,
-  // searchOptionsSchemas,
 } from '@kbn/content-management-utils';
 
 const sortSchema = schema.arrayOf(schema.string(), { minSize: 2, maxSize: 2 });
@@ -88,18 +87,6 @@ const savedSearchSearchOptionsSchema = schema.maybe(
     fields: schema.maybe(schema.arrayOf(schema.string())),
   })
 );
-/**
-const dataViewSearchOptionsSchema = schema.object({
-  searchFields: searchOptionsSchemas.searchFields,
-  fields: searchOptionsSchemas.fields,
-});
-
-const dataViewUpdateOptionsSchema = schema.object({
-  version: updateOptionsSchema.version,
-  refresh: updateOptionsSchema.refresh,
-  retryOnConflict: updateOptionsSchema.retryOnConflict,
-});
-*/
 
 // Content management service definition.
 // We need it for BWC support between different versions of the content

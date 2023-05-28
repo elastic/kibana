@@ -36,7 +36,6 @@ export class SavedSearchesService {
   };
   getAll = async () => {
     const { contentManagement } = this.deps;
-    // todo this is loading a list
     const result = await contentManagement.search<
       SavedSearchCrudTypes['SearchIn'],
       SavedSearchCrudTypes['SearchOut']

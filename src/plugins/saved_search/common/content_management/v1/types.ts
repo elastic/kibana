@@ -8,24 +8,21 @@
 
 import type {
   ContentManagementCrudTypes,
-  // SavedObjectCreateOptions,
+  SavedObjectCreateOptions,
   SavedObjectSearchOptions,
-  // SavedObjectUpdateOptions,
+  SavedObjectUpdateOptions,
 } from '@kbn/content-management-utils';
 import { SavedSearchAttributes } from '../../types';
 import { SavedSearchContentType } from '../../constants';
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 interface SavedSearchCreateOptions {
-  // id?: SavedObjectCreateOptions['id'];
-  // initialNamespaces?: SavedObjectCreateOptions['initialNamespaces'];
+  id?: SavedObjectCreateOptions['id'];
+  overwrite?: SavedObjectCreateOptions['overwrite'];
+  references?: SavedObjectCreateOptions['references'];
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 interface SavedSearchUpdateOptions {
-  // version?: SavedObjectUpdateOptions['version'];
-  // refresh?: SavedObjectUpdateOptions['refresh'];
-  // retryOnConflict?: SavedObjectUpdateOptions['retryOnConflict'];
+  references?: SavedObjectUpdateOptions['references'];
 }
 
 interface SavedSearchSearchOptions {

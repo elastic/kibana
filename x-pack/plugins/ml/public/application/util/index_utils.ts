@@ -18,7 +18,6 @@ export async function cacheDataViewsContract(dvc: DataViewsContract) {
 }
 
 export function loadSavedSearches() {
-  // todo restore cache
   return getSavedSearch().getAll();
 }
 

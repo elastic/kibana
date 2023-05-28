@@ -9,11 +9,7 @@
 export type { SortOrder } from '../common/types';
 export type { SavedSearch, SaveSavedSearchOptions } from './services/saved_searches';
 
-// discover, visualizations, transforms
-export {
-  getSavedSearchFullPathUrl, // - move to method
-  getSavedSearchUrl,
-} from './services/saved_searches';
+export { getSavedSearchFullPathUrl, getSavedSearchUrl } from './services/saved_searches';
 
 export { VIEW_MODE } from '../common';
 import { SavedSearchPublicPlugin } from './plugin';

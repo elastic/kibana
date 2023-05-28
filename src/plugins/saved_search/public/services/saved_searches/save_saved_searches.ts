@@ -27,7 +27,6 @@ const hasDuplicatedTitle = async (
     return;
   }
 
-  // todo use find - this is the only use in the codebase
   const response = await contentManagement.search<
     SavedSearchCrudTypes['SearchIn'],
     SavedSearchCrudTypes['SearchOut']

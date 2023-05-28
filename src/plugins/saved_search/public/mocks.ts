@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-// import { searchSourceInstanceMock } from '@kbn/data-plugin/common/search/search_source/mocks';
 import { of } from 'rxjs';
 import { SearchSource, IKibanaSearchResponse } from '@kbn/data-plugin/public';
 import { SearchSourceDependencies } from '@kbn/data-plugin/common/search';
@@ -34,11 +33,11 @@ const savedSearchStartMock = () => ({
   get: jest.fn().mockImplementation(() => ({
     id: 'savedSearch',
     title: 'savedSearchTitle',
-    searchSource: createEmptySearchSource(), // searchSourceInstanceMock,
+    searchSource: createEmptySearchSource(),
   })),
   getAll: jest.fn(),
   getNew: jest.fn().mockImplementation(() => ({
-    searchSource: createEmptySearchSource(), // searchSourceInstanceMock,
+    searchSource: createEmptySearchSource(),
   })),
   save: jest.fn(),
   find: jest.fn(),
