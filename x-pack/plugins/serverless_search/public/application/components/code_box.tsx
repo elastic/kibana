@@ -22,20 +22,33 @@ import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
 import { PLUGIN_ID } from '../../../common';
 import { useKibanaServices } from '../hooks/use_kibana';
-import { LanguageDefinition } from './languages/types';
+import { LanguageDefinition, LanguageDefinitionSnippetArguments } from './languages/types';
 import './code_box.scss';
 
 interface CodeBoxProps {
   languages: LanguageDefinition[];
   code: keyof LanguageDefinition;
+  codeArgs: LanguageDefinitionSnippetArguments;
   // overrides the language type for syntax highlighting
   languageType?: string;
   selectedLanguage: LanguageDefinition;
   setSelectedLanguage: (language: LanguageDefinition) => void;
 }
 
+const getCodeSnippet = (
+  language: LanguageDefinition,
+  key: keyof LanguageDefinition,
+  args: LanguageDefinitionSnippetArguments
+): string => {
+  const snippetVal = language[key];
+  if (snippetVal === undefined) return '';
+  if (typeof snippetVal === 'string') return snippetVal;
+  return snippetVal(args);
+};
+
 export const CodeBox: React.FC<CodeBoxProps> = ({
   code,
+  codeArgs,
   languages,
   languageType,
   selectedLanguage,
@@ -71,6 +84,7 @@ export const CodeBox: React.FC<CodeBoxProps> = ({
       </EuiButtonEmpty>
     </EuiThemeProvider>
   );
+  const codeSnippet = getCodeSnippet(selectedLanguage, code, codeArgs);
 
   return (
     <EuiThemeProvider colorMode="dark">
@@ -90,7 +104,7 @@ export const CodeBox: React.FC<CodeBoxProps> = ({
             </EuiThemeProvider>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiCopy textToCopy={selectedLanguage[code] ?? ''}>
+            <EuiCopy textToCopy={codeSnippet}>
               {(copy) => (
                 <EuiButtonEmpty color="text" iconType="copy" size="s" onClick={copy}>
                   {i18n.translate('xpack.serverlessSearch.codeBox.copyButtonLabel', {
@@ -107,7 +121,7 @@ export const CodeBox: React.FC<CodeBoxProps> = ({
           fontSize="m"
           language={languageType || selectedLanguage.languageStyling || selectedLanguage.id}
         >
-          {selectedLanguage[code]}
+          {codeSnippet}
         </EuiCodeBlock>
       </EuiPanel>
     </EuiThemeProvider>
