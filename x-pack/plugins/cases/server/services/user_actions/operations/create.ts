@@ -301,7 +301,7 @@ export class UserActionPersister {
     }
 
     try {
-      this.context.log.debug(`Attempting to POST a new case user action`);
+      this.context.log.debug(`Attempting to bulk create user actions`);
 
       return await this.context.unsecuredSavedObjectsClient.bulkCreate<UserActionPersistedAttributes>(
         actions.map((action) => {
@@ -318,7 +318,7 @@ export class UserActionPersister {
         { refresh }
       );
     } catch (error) {
-      this.context.log.error(`Error on POST a new case user action: ${error}`);
+      this.context.log.error(`Error on bulk creating user action: ${error}`);
       throw error;
     }
   }

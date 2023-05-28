@@ -16,7 +16,7 @@ import {
 } from './common';
 import { CreateCaseUserActionRt, CreateCaseUserActionWithoutConnectorIdRt } from './create_case';
 import { DescriptionUserActionRt } from './description';
-import { CommentUserActionRt } from './comment';
+import { CommentUserActionRt, CommentUserActionWithoutIdsRt } from './comment';
 import { ConnectorUserActionRt, ConnectorUserActionWithoutConnectorIdRt } from './connector';
 import { PushedUserActionRt, PushedUserActionWithoutConnectorIdRt } from './pushed';
 import { TagsUserActionRt } from './tags';
@@ -28,36 +28,42 @@ import { SeverityUserActionRt } from './severity';
 import { AssigneesUserActionRt } from './assignees';
 import { CaseUserActionStatsRt } from './stats';
 
-const CommonUserActionsRt = rt.union([
+const BasicUserActionsRt = rt.union([
   DescriptionUserActionRt,
-  CommentUserActionRt,
   TagsUserActionRt,
   TitleUserActionRt,
   SettingsUserActionRt,
   StatusUserActionRt,
   SeverityUserActionRt,
   AssigneesUserActionRt,
+  DeleteCaseUserActionRt,
+]);
+
+const CommonUserActionsWithIdsRt = rt.union([...BasicUserActionsRt.types, CommentUserActionRt]);
+
+const CommonUserActionsWithoutIdsRt = rt.union([
+  ...BasicUserActionsRt.types,
+  CommentUserActionWithoutIdsRt,
 ]);
 
 const UserActionPayloadRt = rt.union([
-  CommonUserActionsRt,
+  CommonUserActionsWithIdsRt,
   CreateCaseUserActionRt,
   ConnectorUserActionRt,
   PushedUserActionRt,
-  DeleteCaseUserActionRt,
 ]);
 
-const UserActionsWithoutConnectorIdRt = rt.union([
-  CommonUserActionsRt,
+const UserActionsWithoutIdsRt = rt.union([
+  CommonUserActionsWithoutIdsRt,
   CreateCaseUserActionWithoutConnectorIdRt,
   ConnectorUserActionWithoutConnectorIdRt,
   PushedUserActionWithoutConnectorIdRt,
-  DeleteCaseUserActionRt,
 ]);
 
 const CaseUserActionBasicRt = rt.intersection([UserActionPayloadRt, UserActionCommonAttributesRt]);
+
 export const CaseUserActionWithoutReferenceIdsRt = rt.intersection([
-  UserActionsWithoutConnectorIdRt,
+  UserActionsWithoutIdsRt,
   UserActionCommonAttributesRt,
 ]);
 
