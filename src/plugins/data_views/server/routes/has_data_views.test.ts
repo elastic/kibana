@@ -9,7 +9,7 @@
 import type { MockedKeys } from '@kbn/utility-types-jest';
 import { CoreSetup, RequestHandlerContext } from '@kbn/core/server';
 import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
-import { registerHasDataViewsRoute } from './has_data_views';
+import { registerHasDataViewsRoute, handler } from './has_data_views';
 
 describe('preview has_data_views route', () => {
   let mockCoreSetup: MockedKeys<CoreSetup>;
@@ -54,8 +54,6 @@ describe('preview has_data_views route', () => {
 
     registerHasDataViewsRoute(mockCoreSetup.http.createRouter());
 
-    const mockRouter = mockCoreSetup.http.createRouter.mock.results[0].value;
-    const handler = mockRouter.get.mock.calls[0][1];
     await handler(mockContext as unknown as RequestHandlerContext, mockRequest, mockResponse);
 
     expect(mockSOClient.find.mock.calls[0][0]).toMatchInlineSnapshot(`
