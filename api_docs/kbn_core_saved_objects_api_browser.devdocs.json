@@ -1944,10 +1944,6 @@
                 "path": "x-pack/plugins/graph/public/helpers/saved_workspace_utils.ts"
               },
               {
-                "plugin": "synthetics",
-                "path": "x-pack/plugins/synthetics/public/apps/synthetics/components/settings/private_locations/hooks/use_location_monitors.ts"
-              },
-              {
                 "plugin": "graph",
                 "path": "x-pack/plugins/graph/public/helpers/saved_workspace_utils.test.ts"
               },
