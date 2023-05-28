@@ -10,11 +10,13 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
-  EuiPageHeader,
   EuiSpacer,
+  EuiText,
+  EuiTitle,
 } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
+import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 interface Props {}
@@ -27,30 +29,42 @@ export const GetStartedComponent: React.FC<Props> = ({}) => {
       icons.map(function (item, index) {
         return (
           <EuiFlexItem key={index}>
-            <EuiCard
-              icon={<EuiIcon size="xxl" type={`logo${item}`} />}
-              title={`Elastic ${item}`}
-              isDisabled={item === 'Kibana' ? true : false}
-            />
+            <EuiCard icon={<EuiIcon size="xxl" type={`logo${item}`} />} title={`Elastic ${item}`} />
           </EuiFlexItem>
         );
       }),
     []
   );
   return (
-    <>
-      <EuiPageHeader
+    <KibanaPageTemplate restrictWidth={false}>
+      <KibanaPageTemplate.Header
         paddingSize="m"
         pageTitle={i18n.translate('xpack.serverlessSecurity.getStarted.title', {
           defaultMessage: `Welcome`,
         })}
-        description={i18n.translate('xpack.serverlessSecurity.getStarted.description', {
-          defaultMessage: `Set up your Elastic Security workspace.  Use the toggles below to curate a list of tasks that best fits your environment`,
-        })}
-      />
-      <EuiSpacer size="m" />
-      <EuiFlexGroup gutterSize="l">{cardNodes}</EuiFlexGroup>
-    </>
+        description={
+          <>
+            <EuiTitle size="xs">
+              <h3>
+                {i18n.translate('xpack.serverlessSecurity.getStarted.subTitle', {
+                  defaultMessage: `Let’s  get started`,
+                })}
+              </h3>
+            </EuiTitle>
+            <EuiText size="m">
+              {i18n.translate('xpack.serverlessSecurity.getStarted.description', {
+                defaultMessage: `Set up your Elastic Security workspace.  Use the toggles below to curate a list of tasks that best fits your environment`,
+              })}
+            </EuiText>
+          </>
+        }
+      >
+        <EuiFlexGroup gutterSize="l">{cardNodes}</EuiFlexGroup>
+      </KibanaPageTemplate.Header>
+      <KibanaPageTemplate.Section>
+        <EuiSpacer size="m" />
+      </KibanaPageTemplate.Section>
+    </KibanaPageTemplate>
   );
 };
 
