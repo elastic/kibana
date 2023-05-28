@@ -1,5 +1,13 @@
-import { Platform, ScreenshotArtifact } from "../../types";
-import { SetTestsPayload, Test } from "./test";
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
+ */
+
+import { Platform, ScreenshotArtifact } from '../../types';
+import { SetTestsPayload, Test } from './test';
 
 export interface Screenshot {
   screenshotId: string;
@@ -61,64 +69,57 @@ export interface ScreenshotUploadInstruction extends AssetUploadInstruction {
   screenshotId: string;
 }
 
-export type SetResultsTestsPayload = Pick<
-  Test,
-  "state" | "displayError" | "attempts"
-> & { clientId: string };
+export type SetResultsTestsPayload = Pick<Test, 'state' | 'displayError' | 'attempts'> & {
+  clientId: string;
+};
 
 export interface SetInstanceTestsPayload {
   config: PickedCypressConfig;
-  tests: Array<SetTestsPayload>;
-  hooks: CypressCommandLine.RunResult["hooks"];
+  tests: SetTestsPayload[];
+  hooks: CypressCommandLine.RunResult['hooks'];
 }
 
-export type PickedCypressConfig = Pick<
-  CypressConfig,
-  "video" | "videoUploadOnPasses"
->;
+export type PickedCypressConfig = Pick<CypressConfig, 'video' | 'videoUploadOnPasses'>;
 
-export type CreateInstancePayload = {
+export interface CreateInstancePayload {
   runId: string;
   groupId: string;
   machineId: string;
   platform: Platform;
-};
+}
 
 export type CreateInstanceCyPayload = CreateInstancePayload & {
   batchSize: number;
 };
-export type CreateInstanceResponse = {
+export interface CreateInstanceResponse {
   spec: string | null;
   instanceId: string | null;
   claimedInstances: number;
   totalInstances: number;
-};
+}
 
-export type InstanceResponseSpecDetails = {
+export interface InstanceResponseSpecDetails {
   spec: string;
   instanceId: string;
-};
-export type CreateInstancesResponse = {
-  specs: Array<InstanceResponseSpecDetails>;
+}
+export interface CreateInstancesResponse {
+  specs: InstanceResponseSpecDetails[];
   claimedInstances: number;
   totalInstances: number;
-};
+}
 
-export type UpdateInstanceResultsPayload = Pick<
-  InstanceResult,
-  "stats" | "exception" | "video"
-> & {
-  tests: Array<SetResultsTestsPayload> | null;
+export type UpdateInstanceResultsPayload = Pick<InstanceResult, 'stats' | 'exception' | 'video'> & {
+  tests: SetResultsTestsPayload[] | null;
 } & {
-  reporterStats: CypressCommandLine.RunResult["reporterStats"] | null;
+  reporterStats: CypressCommandLine.RunResult['reporterStats'] | null;
 } & {
   screenshots: ScreenshotArtifact[];
 };
 
-export type UpdateInstanceResultsMergedPayload = {
+export interface UpdateInstanceResultsMergedPayload {
   tests: SetInstanceTestsPayload;
   results: UpdateInstanceResultsPayload;
-};
+}
 
 export interface UpdateInstanceResultsResponse {
   videoUploadUrl?: string | null;

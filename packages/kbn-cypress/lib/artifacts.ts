@@ -1,10 +1,18 @@
-import Debug from "debug";
-import { ScreenshotArtifact, ScreenshotUploadInstruction } from "../types";
-import { updateInstanceStdout } from "./api";
-import { safe } from "./lang";
-import { warn } from "./log";
-import { uploadImage, uploadVideo } from "./upload";
-const debug = Debug("currents:artifacts");
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
+ */
+
+import Debug from 'debug';
+import { ScreenshotArtifact, ScreenshotUploadInstruction } from '../types';
+import { updateInstanceStdout } from './api';
+import { safe } from './lang';
+import { warn } from './log';
+import { uploadImage, uploadVideo } from './upload';
+const debug = Debug('currents:artifacts');
 interface UploadArtifacts {
   videoPath: string | null;
   videoUploadUrl?: string | null;
@@ -19,7 +27,7 @@ export async function uploadArtifacts({
 }: UploadArtifacts) {
   // title("blue", "Uploading  Results");
 
-  debug("uploading artifacts: %o", {
+  debug('uploading artifacts: %o', {
     videoPath,
     videoUploadUrl,
     screenshots,
@@ -36,8 +44,8 @@ export async function uploadArtifacts({
   if (videoUploadUrl && videoPath) {
     await safe(
       uploadVideo,
-      (e) => debug("failed uploading video %s. Error: %o", videoPath, e),
-      () => debug("success uploading", videoPath)
+      (e) => debug('failed uploading video %s. Error: %o', videoPath, e),
+      () => debug('success uploading', videoPath)
     )(videoPath, videoUploadUrl);
   }
   // upload screenshots
@@ -49,22 +57,17 @@ export async function uploadArtifacts({
         )?.uploadUrl;
         if (!url) {
           debug(
-            "No upload url for screenshot %o, screenshotUploadUrls: %o",
+            'No upload url for screenshot %o, screenshotUploadUrls: %o',
             screenshot,
             screenshotUploadUrls
           );
-          warn("Cannot find upload url for screenshot: %s", screenshot.path);
+          warn('Cannot find upload url for screenshot: %s', screenshot.path);
           return Promise.resolve();
         }
         return safe(
           uploadImage,
-          (e) =>
-            debug(
-              "failed uploading screenshot %s. Error: %o",
-              screenshot.path,
-              e
-            ),
-          () => debug("success uploading", screenshot.path)
+          (e) => debug('failed uploading screenshot %s. Error: %o', screenshot.path, e),
+          () => debug('success uploading', screenshot.path)
         )(screenshot.path, url);
       })
     );

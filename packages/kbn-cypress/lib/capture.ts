@@ -1,5 +1,13 @@
-import Debug from "debug";
-const debug = Debug("currents:capture");
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
+ */
+
+import Debug from 'debug';
+const debug = Debug('currents:capture');
 
 const _write = process.stdout.write;
 const _log = process.log;
@@ -13,7 +21,7 @@ export const restore = function () {
 const logs: Record<string, string[]> = {};
 
 const stdout = function () {
-  debug("capturing stdout");
+  debug('capturing stdout');
   let logs: string[] = [];
 
   // lazily backup write to enable injection
@@ -43,34 +51,34 @@ const stdout = function () {
 
   return {
     toString() {
-      return logs.join("");
+      return logs.join('');
     },
     data: logs,
     restore,
     reset: () => {
-      debug("resetting captured stdout");
+      debug('resetting captured stdout');
       logs = [];
     },
   };
 };
 
-let initialOutput: string = "";
+let initialOutput: string = '';
 let capturedOutput: null | ReturnType<typeof stdout> = null;
 
 export const initCapture = () => (capturedOutput = stdout());
 
 export const cutInitialOutput = () => {
-  if (!capturedOutput) throw new Error("capturedOutput is null");
+  if (!capturedOutput) throw new Error('capturedOutput is null');
   initialOutput = capturedOutput.toString();
   capturedOutput.reset();
 };
 export const resetCapture = () => {
-  if (!capturedOutput) throw new Error("capturedOutput is null");
+  if (!capturedOutput) throw new Error('capturedOutput is null');
   capturedOutput.reset();
 };
 
 export const getCapturedOutput = () => {
-  if (!capturedOutput) throw new Error("capturedOutput is null");
+  if (!capturedOutput) throw new Error('capturedOutput is null');
   return capturedOutput.toString();
 };
 export const getInitialOutput = () => initialOutput;

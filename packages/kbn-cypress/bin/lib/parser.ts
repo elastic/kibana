@@ -1,6 +1,14 @@
-import _ from "lodash";
-import assert from "node:assert";
-import { error } from "../../lib/log";
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
+ */
+
+import _ from 'lodash';
+import assert from 'node:assert';
+import { error } from '../../lib/log';
 
 const nestedObjectsInCurlyBracesRe = /\{(.+?)\}/g;
 const nestedArraysInSquareBracketsRe = /\[(.+?)\]/g;
@@ -14,10 +22,10 @@ export const sanitizeAndConvertNestedArgs = <T extends Record<string, unknown>>(
   if (!str) {
     return;
   }
-  assert(_.isString(argName) && argName.trim() !== "");
+  assert(_.isString(argName) && argName.trim() !== '');
 
   try {
-    if (typeof str === "object") {
+    if (typeof str === 'object') {
       return str as T;
     }
 
@@ -38,7 +46,7 @@ export const sanitizeAndConvertNestedArgs = <T extends Record<string, unknown>>(
     return _.chain(str)
       .replace(nestedObjectsInCurlyBracesRe, commasToPipes)
       .replace(nestedArraysInSquareBracketsRe, commasToPipes)
-      .split(",")
+      .split(',')
       .map((pair) => {
         return pair.split(everythingAfterFirstEqualRe);
       })
@@ -47,7 +55,7 @@ export const sanitizeAndConvertNestedArgs = <T extends Record<string, unknown>>(
       .value() as Record<string, unknown> as T;
   } catch (err) {
     error("could not parse CLI option '%s' value: %s", argName, str);
-    error("error %o", err);
+    error('error %o', err);
     return undefined;
   }
 };
@@ -61,12 +69,12 @@ const tryJSONParse = (str: string) => {
 };
 
 const commasToPipes = (match: string) => {
-  return match.split(",").join("|");
+  return match.split(',').join('|');
 };
 
 // foo=bar,version=1.2.3
 const pipesToCommas = (str: string) => {
-  return str.split("|").join(",");
+  return str.split('|').join(',');
 };
 
 const JSONOrCoerce = (str: string) => {
@@ -94,25 +102,25 @@ const JSONOrCoerce = (str: string) => {
 export const coerce = (value: any) => {
   const num = _.toNumber(value);
 
-  if (_.invoke(num, "toString") === value) {
+  if (_.invoke(num, 'toString') === value) {
     return num;
   }
 
   const bool = toBoolean(value);
 
-  if (_.invoke(bool, "toString") === value) {
+  if (_.invoke(bool, 'toString') === value) {
     return bool;
   }
 
   const obj = tryJSONParse(value);
 
-  if (obj && typeof obj === "object") {
+  if (obj && typeof obj === 'object') {
     return obj;
   }
 
   const arr = _.toArray(value);
 
-  if (_.invoke(arr, "toString") === value) {
+  if (_.invoke(arr, 'toString') === value) {
     return arr;
   }
 
@@ -121,9 +129,9 @@ export const coerce = (value: any) => {
 
 const toBoolean = (value: string) => {
   switch (value) {
-    case "true":
+    case 'true':
       return true;
-    case "false":
+    case 'false':
       return false;
     default:
       return value;

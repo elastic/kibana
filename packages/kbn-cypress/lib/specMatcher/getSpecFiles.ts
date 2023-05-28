@@ -1,10 +1,15 @@
-import {
-  CurrentsRunParameters,
-  ValidatedCurrentsParameters,
-} from "../../types";
-import { MergedConfig } from "../config/config";
-import { warn } from "../log";
-import { findSpecs } from "./specMatcher";
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
+ */
+
+import { CurrentsRunParameters, ValidatedCurrentsParameters } from '../../types';
+import { MergedConfig } from '../config/config';
+import { warn } from '../log';
+import { findSpecs } from './specMatcher';
 
 export const getSpecFiles = async ({
   config,
@@ -26,15 +31,12 @@ export const getSpecFiles = async ({
   });
   if (specs.length === 0) {
     warn(
-      "Found no spec files. Was looking for spec files that match both configSpecPattern and specPattern relative to projectRoot. Configuration: %O",
+      'Found no spec files. Was looking for spec files that match both configSpecPattern and specPattern relative to projectRoot. Configuration: %O',
       {
         projectRoot: config.projectRoot,
         specPattern,
         configSpecPattern: config.specPattern,
-        excludeSpecPattern: [
-          config.excludeSpecPattern,
-          config.additionalIgnorePattern,
-        ].flat(2),
+        excludeSpecPattern: [config.excludeSpecPattern, config.additionalIgnorePattern].flat(2),
         testingType: params.testingType,
       }
     );
@@ -43,8 +45,8 @@ export const getSpecFiles = async ({
 };
 
 function getSpecPattern(
-  configPattern: MergedConfig["specPattern"],
-  explicit?: CurrentsRunParameters["spec"]
+  configPattern: MergedConfig['specPattern'],
+  explicit?: CurrentsRunParameters['spec']
 ) {
   return explicit || configPattern;
 }

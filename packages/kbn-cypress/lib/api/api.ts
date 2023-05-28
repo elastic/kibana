@@ -1,4 +1,12 @@
-import { makeRequest } from "../httpClient";
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
+ */
+
+import { makeRequest } from '../httpClient';
 import {
   CreateInstanceCyPayload,
   CreateInstancePayload,
@@ -10,13 +18,13 @@ import {
   UpdateInstanceResultsMergedPayload,
   UpdateInstanceResultsPayload,
   UpdateInstanceResultsResponse,
-} from "./types";
-import { printWarnings } from "./warnings";
+} from './types';
+import { printWarnings } from './warnings';
 
 export const createRun = async (payload: CreateRunPayload) => {
   const response = await makeRequest<CreateRunResponse, CreateRunPayload>({
-    method: "POST",
-    url: "/runs",
+    method: 'POST',
+    url: '/runs',
     data: payload,
   });
 
@@ -33,11 +41,8 @@ export const createInstance = async ({
   machineId,
   platform,
 }: CreateInstancePayload) => {
-  const response = await makeRequest<
-    CreateInstanceResponse,
-    CreateInstancePayload
-  >({
-    method: "POST",
+  const response = await makeRequest<CreateInstanceResponse, CreateInstancePayload>({
+    method: 'POST',
     url: `runs/${runId}/instances`,
     data: {
       runId,
@@ -51,11 +56,8 @@ export const createInstance = async ({
 };
 
 export const createBatchedInstances = async (data: CreateInstanceCyPayload) => {
-  const respone = await makeRequest<
-    CreateInstancesResponse,
-    CreateInstanceCyPayload
-  >({
-    method: "POST",
+  const respone = await makeRequest<CreateInstancesResponse, CreateInstanceCyPayload>({
+    method: 'POST',
     url: `runs/${data.runId}/cy/instances`,
     data,
   });
@@ -63,22 +65,16 @@ export const createBatchedInstances = async (data: CreateInstanceCyPayload) => {
   return respone.data;
 };
 
-export const setInstanceTests = (
-  instanceId: string,
-  payload: SetInstanceTestsPayload
-) =>
+export const setInstanceTests = (instanceId: string, payload: SetInstanceTestsPayload) =>
   makeRequest<{}, SetInstanceTestsPayload>({
-    method: "POST",
+    method: 'POST',
     url: `instances/${instanceId}/tests`,
     data: payload,
   }).then((result) => result.data);
 
-export const updateInstanceResults = (
-  instanceId: string,
-  payload: UpdateInstanceResultsPayload
-) =>
+export const updateInstanceResults = (instanceId: string, payload: UpdateInstanceResultsPayload) =>
   makeRequest<UpdateInstanceResultsResponse, UpdateInstanceResultsPayload>({
-    method: "POST",
+    method: 'POST',
     url: `instances/${instanceId}/results`,
     data: payload,
   }).then((result) => result.data);
@@ -87,18 +83,15 @@ export const reportInstanceResultsMerged = (
   instanceId: string,
   payload: UpdateInstanceResultsMergedPayload
 ) =>
-  makeRequest<
-    UpdateInstanceResultsResponse,
-    UpdateInstanceResultsMergedPayload
-  >({
-    method: "POST",
+  makeRequest<UpdateInstanceResultsResponse, UpdateInstanceResultsMergedPayload>({
+    method: 'POST',
     url: `instances/${instanceId}/cy/results`,
     data: payload,
   }).then((result) => result.data);
 
 export const updateInstanceStdout = (instanceId: string, stdout: string) =>
   makeRequest<any, { stdout: string }>({
-    method: "PUT",
+    method: 'PUT',
     url: `instances/${instanceId}/stdout`,
     data: {
       stdout,

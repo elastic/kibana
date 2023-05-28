@@ -1,23 +1,27 @@
-import Debug from "debug";
-import { DetectedBrowser, Platform } from "../../types";
-import { warn } from "../log";
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
+ */
 
-const debug = Debug("currents:browser");
+import Debug from 'debug';
+import { DetectedBrowser, Platform } from '../../types';
+import { warn } from '../log';
+
+const debug = Debug('currents:browser');
 
 export function guessBrowser(
   browser: string,
   availableBrowsers: DetectedBrowser[] = []
-): Pick<Platform, "browserName" | "browserVersion"> {
-  debug(
-    "guessing browser from '%s', available browsers: %o",
-    browser,
-    availableBrowsers
-  );
+): Pick<Platform, 'browserName' | 'browserVersion'> {
+  debug("guessing browser from '%s', available browsers: %o", browser, availableBrowsers);
   // try identifying the browser by name first
   let result = availableBrowsers.find((b) => b.name === browser);
 
   if (result) {
-    debug("identified browser by name: %o", result);
+    debug('identified browser by name: %o', result);
     return {
       browserName: result.displayName,
       browserVersion: result.version,
@@ -27,18 +31,18 @@ export function guessBrowser(
   // otherwise, try identifying by the path
   result = availableBrowsers.find((b) => b.path === browser);
   if (result) {
-    debug("identified browser by path: %o", result);
+    debug('identified browser by path: %o', result);
     return {
       browserName: result.displayName ?? result.name,
       browserVersion: result.version,
     };
   }
 
-  warn("Unable to identify browser name and version");
+  warn('Unable to identify browser name and version');
 
   // otherwise, return dummy browser
   return {
-    browserName: "unknown",
-    browserVersion: "unknown",
+    browserName: 'unknown',
+    browserVersion: 'unknown',
   };
 }
