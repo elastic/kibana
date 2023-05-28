@@ -26,13 +26,10 @@ const convertToLegacyAlert = (alert: DetectionAlert) =>
   Object.entries(aadFieldConversion).reduce((acc, [legacyField, aadField]) => {
     const val = alert[aadField];
     if (val != null) {
-      return {
-        ...acc,
-        [legacyField]: val,
-      };
+      acc[legacyField] = val;
     }
     return acc;
-  }, {});
+  }, {} as Record<string, unknown>);
 
 export const normalizeAlertForNotificationActions = (alert: DetectionAlert) => {
   if (isThresholdRule(alert[ALERT_RULE_TYPE])) {
