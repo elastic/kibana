@@ -9,7 +9,6 @@ import { cloudPlugin } from '@kbn/cypress';
 import { v4 as uuid } from 'uuid';
 import { defineConfig } from 'cypress';
 import wp from '@cypress/webpack-preprocessor';
-import { defineCypressConfig } from '@kbn/cypress-config';
 
 // eslint-disable-next-line import/no-default-export
 export default defineConfig({

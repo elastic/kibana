@@ -9,39 +9,8 @@ import path from 'path';
 import { run } from '@kbn/dev-cli-runner';
 import yargs from 'yargs';
 import _ from 'lodash';
-import * as fs from 'fs';
 import globby from 'globby';
-import pMap from 'p-map';
-import { ToolingLog } from '@kbn/tooling-log';
-import { withProcRunner } from '@kbn/dev-proc-runner';
 import { run as cypressRun } from '@kbn/cypress';
-import cypress from 'cypress';
-
-import {
-  EsVersion,
-  FunctionalTestRunner,
-  readConfigFile,
-  runElasticsearch,
-  runKibanaServer,
-} from '@kbn/test';
-
-import {
-  Lifecycle,
-  ProviderCollection,
-  readProviderSpec,
-} from '@kbn/test/src/functional_test_runner/lib';
-import * as parser from '@babel/parser';
-import type {
-  ExpressionStatement,
-  Identifier,
-  ObjectExpression,
-  ObjectProperty,
-} from '@babel/types';
-
-import { createFailError } from '@kbn/dev-cli-errors';
-import pRetry from 'p-retry';
-import { renderSummaryTable } from './print_run';
-import { getLocalhostRealIp } from '../endpoint/common/localhost_services';
 
 const retrieveIntegrations = (
   specPattern: string[],

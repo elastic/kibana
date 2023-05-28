@@ -1,18 +1,26 @@
-import Debug from "debug";
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
+ */
+
+import Debug from 'debug';
 import {
   reportInstanceResultsMerged,
   setInstanceTests,
   SetInstanceTestsPayload,
   updateInstanceResults,
   UpdateInstanceResultsPayload,
-} from "../api";
-import { uploadArtifacts, uploadStdoutSafe } from "../artifacts";
-import { getInitialOutput } from "../capture";
-import { isCurrents } from "../env";
-import { warn } from "../log";
-import { setCancellationReason } from "../state";
-import { getInstanceResultPayload, getInstanceTestsPayload } from "./results";
-const debug = Debug("currents:results");
+} from '../api';
+import { uploadArtifacts, uploadStdoutSafe } from '../artifacts';
+import { getInitialOutput } from '../capture';
+import { isCurrents } from '../env';
+import { warn } from '../log';
+import { setCancellationReason } from '../state';
+import { getInstanceResultPayload, getInstanceTestsPayload } from './results';
+const debug = Debug('currents:results');
 
 export async function getUploadResultsTask({
   instanceId,
@@ -48,7 +56,7 @@ export async function processCypressResults(
 ) {
   const run = results.runs[0];
   if (!run) {
-    throw new Error("No run found in Cypress results");
+    throw new Error('No run found in Cypress results');
   }
   const instanceResults = getInstanceResultPayload(run);
   const instanceTests = getInstanceTestsPayload(run, results.config);
@@ -60,10 +68,10 @@ export async function processCypressResults(
   );
 
   if (cloud?.shouldCancel) {
-    debug("instance %s should cancel", instanceId);
+    debug('instance %s should cancel', instanceId);
     setCancellationReason(cloud.shouldCancel);
   }
-  debug("instance %s artifact upload instructions %o", instanceId, {
+  debug('instance %s artifact upload instructions %o', instanceId, {
     videoUploadUrl,
     screenshotUploadUrls,
   });
@@ -84,7 +92,7 @@ async function reportResults(
   instanceTests: SetInstanceTestsPayload,
   instanceResults: UpdateInstanceResultsPayload
 ) {
-  debug("reporting instance %s results...", instanceId);
+  debug('reporting instance %s results...', instanceId);
   if (isCurrents()) {
     return reportInstanceResultsMerged(instanceId, {
       tests: instanceTests,

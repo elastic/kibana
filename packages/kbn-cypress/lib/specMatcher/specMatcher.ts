@@ -1,19 +1,22 @@
-import Debug from "debug";
-import path from "path";
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
+ */
 
-import commonPathPrefix from "common-path-prefix";
-import globby, { GlobbyOptions } from "globby";
-import _ from "lodash";
-import os from "os";
-import {
-  FindSpecs,
-  SpecType,
-  SpecWithRelativeRoot,
-  TestingType,
-} from "../../types";
-import { toArray, toPosix } from "../utils";
+import Debug from 'debug';
+import path from 'path';
 
-const debug = Debug("currents:specs");
+import commonPathPrefix from 'common-path-prefix';
+import globby, { GlobbyOptions } from 'globby';
+import _ from 'lodash';
+import os from 'os';
+import { FindSpecs, SpecType, SpecWithRelativeRoot, TestingType } from '../../types';
+import { toArray, toPosix } from '../utils';
+
+const debug = Debug('currents:specs');
 
 type GlobPattern = string | string[];
 
@@ -37,7 +40,7 @@ export async function findSpecs({
   // exclude all specs matching e2e if in component testing
   additionalIgnorePattern = toArray(additionalIgnorePattern) || [];
 
-  debug("exploring spec files for execution %O", {
+  debug('exploring spec files for execution %O', {
     testingType,
     projectRoot,
     specPattern,
@@ -47,7 +50,7 @@ export async function findSpecs({
   });
 
   if (!specPattern || !configSpecPattern) {
-    throw Error("Could not find glob patterns for exploring specs");
+    throw Error('Could not find glob patterns for exploring specs');
   }
 
   let specAbsolutePaths = await getFilesByGlob(projectRoot, specPattern, {
@@ -67,19 +70,12 @@ export async function findSpecs({
   // cypress/videos/timers.cy.ts.mp4, so we take the intersection between specPattern
   // and --spec.
   if (!_.isEqual(specPattern, configSpecPattern)) {
-    const defaultSpecAbsolutePaths = await getFilesByGlob(
-      projectRoot,
-      configSpecPattern,
-      {
-        absolute: true,
-        ignore: [...excludeSpecPattern, ...additionalIgnorePattern],
-      }
-    );
+    const defaultSpecAbsolutePaths = await getFilesByGlob(projectRoot, configSpecPattern, {
+      absolute: true,
+      ignore: [...excludeSpecPattern, ...additionalIgnorePattern],
+    });
 
-    specAbsolutePaths = _.intersection(
-      specAbsolutePaths,
-      defaultSpecAbsolutePaths
-    );
+    specAbsolutePaths = _.intersection(specAbsolutePaths, defaultSpecAbsolutePaths);
   }
 
   return matchedSpecs({
@@ -90,16 +86,12 @@ export async function findSpecs({
   });
 }
 
-async function getFilesByGlob(
-  projectRoot: string,
-  glob: GlobPattern,
-  globOptions: GlobbyOptions
-) {
+async function getFilesByGlob(projectRoot: string, glob: GlobPattern, globOptions: GlobbyOptions) {
   const workingDirectoryPrefix = path.join(projectRoot, path.sep);
   const globs = ([] as string[])
     .concat(glob)
     .map((globPattern) =>
-      globPattern.startsWith("./") ? globPattern.replace("./", "") : globPattern
+      globPattern.startsWith('./') ? globPattern.replace('./', '') : globPattern
     )
     .map((globPattern) => {
       // If the pattern includes the working directory, we strip it from the pattern.
@@ -107,38 +99,38 @@ async function getFilesByGlob(
       // syntax (brackets, parentheses, etc.) and cause our searches to inadvertently fail.
       // We scope our search to the working directory using the `cwd` globby option.
       if (globPattern.startsWith(workingDirectoryPrefix)) {
-        return globPattern.replace(workingDirectoryPrefix, "");
+        return globPattern.replace(workingDirectoryPrefix, '');
       }
 
       return globPattern;
     });
 
-  if (os.platform() === "win32") {
+  if (os.platform() === 'win32') {
     // globby can't work with backwards slashes
     // https://github.com/sindresorhus/globby/issues/179
-    debug("updating glob patterns to POSIX");
+    debug('updating glob patterns to POSIX');
     for (const i in globs) {
       const cur = globs[i];
 
-      if (!cur) throw new Error("undefined glob received");
+      if (!cur) throw new Error('undefined glob received');
 
       globs[i] = toPosix(cur);
     }
   }
 
   try {
-    debug("globbing pattern(s): %o", globs);
-    debug("within directory: %s", projectRoot);
+    debug('globbing pattern(s): %o', globs);
+    debug('within directory: %s', projectRoot);
 
     return matchGlobs(globs, {
       onlyFiles: true,
       absolute: true,
       cwd: projectRoot,
       ...globOptions,
-      ignore: (globOptions?.ignore ?? []).concat("**/node_modules/**"),
+      ignore: (globOptions?.ignore ?? []).concat('**/node_modules/**'),
     });
   } catch (e) {
-    debug("error in getFilesByGlob %o", e);
+    debug('error in getFilesByGlob %o', e);
     return [];
   }
 }
@@ -154,14 +146,10 @@ interface MatchedSpecs {
   specPattern: string | string[];
 }
 
-function matchedSpecs({
-  projectRoot,
-  testingType,
-  specAbsolutePaths,
-}: MatchedSpecs) {
-  debug("found specs %o", specAbsolutePaths);
+function matchedSpecs({ projectRoot, testingType, specAbsolutePaths }: MatchedSpecs) {
+  debug('found specs %o', specAbsolutePaths);
 
-  let commonRoot = "";
+  let commonRoot = '';
 
   if (specAbsolutePaths.length === 1) {
     commonRoot = path.dirname(specAbsolutePaths[0]);
@@ -198,7 +186,7 @@ function transformSpec({
   platform,
   sep,
 }: TransformSpec) {
-  if (platform === "win32") {
+  if (platform === 'win32') {
     absolute = toPosix(absolute, sep);
     projectRoot = toPosix(projectRoot, sep);
   }
@@ -208,31 +196,27 @@ function transformSpec({
   const fileExtension = path.extname(absolute);
 
   const specFileExtension =
-    [".spec", ".test", "-spec", "-test", ".cy"]
+    ['.spec', '.test', '-spec', '-test', '.cy']
       .map((ext) => ext + fileExtension)
       .find((ext) => absolute.endsWith(ext)) || fileExtension;
 
   const parts = absolute.split(projectRoot);
-  let name = parts[parts.length - 1] || "";
+  let name = parts[parts.length - 1] || '';
 
-  if (name.startsWith("/")) {
+  if (name.startsWith('/')) {
     name = name.slice(1);
   }
 
   const LEADING_SLASH = /^\/|/g;
-  const relativeToCommonRoot = absolute
-    .replace(commonRoot, "")
-    .replace(LEADING_SLASH, "");
+  const relativeToCommonRoot = absolute.replace(commonRoot, '').replace(LEADING_SLASH, '');
 
   return {
     fileExtension,
     baseName: parsedFile.base,
-    fileName: parsedFile.base.replace(specFileExtension, ""),
+    fileName: parsedFile.base.replace(specFileExtension, ''),
     specFileExtension,
     relativeToCommonRoot,
-    specType: (testingType === "component"
-      ? "component"
-      : "integration") as SpecType,
+    specType: (testingType === 'component' ? 'component' : 'integration') as SpecType,
     name,
     relative,
     absolute,
