@@ -13,7 +13,7 @@ import { ValidationHelper } from './validation';
 import { typedef, typedef1, typedef2 } from './validation_fixtures';
 import { SavedObjectTypeRegistry } from '@kbn/core-saved-objects-base-server-internal';
 
-const defaultVersion = '8.8.0';
+const defaultVersion = '8.10.0';
 const typeA = 'my-typeA';
 const typeB = 'my-typeB';
 const typeC = 'my-typeC';
@@ -73,21 +73,12 @@ describe('Saved Objects type validation helper', () => {
       expect(() => helper.validateObjectForCreate(typeB, data)).not.toThrowError();
     });
 
-    it('should fail with model versions enabled when top level schema does not include new added fields even though model version create schema does', () => {
+    it('should fail with model versions enabled, when non-model schema excludes new fields', () => {
       const validationError = new Error(
         '[attributes.count]: definition for this key is missing: Bad Request'
       );
       const data = createMockObject(typeC, { attributes: { foo: 'hi', count: 1 } });
       expect(() => helper.validateObjectForCreate(typeC, data)).toThrowError(validationError);
     });
-
-    it.todo('skips validation without legacy schemas or schema declared for model versions create');
-    it.todo(
-      'skips validation when schema declared for model versions create but not legacy schemas '
-    );
-    it.todo(
-      'applies validation when schema declared as legacy schemas but not delcared in model versions create'
-    );
-    it.todo('correctly fails validation for incorrect type');
   });
 });

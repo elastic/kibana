@@ -51,6 +51,7 @@ export class SavedObjectsTypeValidator {
       document.typeMigrationVersion ??
       document.migrationVersion?.[document.type] ??
       this.defaultVersion;
+    // assume typeMigrationVersion gets updated to the relevant virtual model during write & migration.
     const schemaVersion = previousVersionWithSchema(this.orderedVersions, docVersion);
     if (!schemaVersion || !this.validationMap[schemaVersion]) {
       return;

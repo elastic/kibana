@@ -20,16 +20,16 @@ export const typedef: Partial<SavedObjectsType> = {
       },
     },
   },
-  switchToModelVersionAt: '8.8.0',
   schemas: {
-    '8.7.0': schema.object({
+    '8.9.0': schema.object({
       foo: schema.string(),
     }),
-    '8.8.0': schema.object({
+    '8.10.0': schema.object({
       foo: schema.string(),
       count: schema.number(),
     }),
   },
+  switchToModelVersionAt: '8.10.0',
 };
 
 export const typedef1: Partial<SavedObjectsType> = {
@@ -43,7 +43,16 @@ export const typedef1: Partial<SavedObjectsType> = {
       },
     },
   },
-  switchToModelVersionAt: '8.8.0',
+  schemas: {
+    '8.9.0': schema.object({
+      foo: schema.string(),
+    }),
+    '8.10.0': schema.object({
+      foo: schema.string(),
+      count: schema.number(),
+    }),
+  },
+  switchToModelVersionAt: '8.10.0',
   modelVersions: {
     '1': {
       changes: [
@@ -67,15 +76,6 @@ export const typedef1: Partial<SavedObjectsType> = {
         }),
       },
     },
-  },
-  schemas: {
-    '8.7.0': schema.object({
-      foo: schema.string(),
-    }),
-    '8.8.0': schema.object({
-      foo: schema.string(),
-      count: schema.number(),
-    }),
   },
 };
 
@@ -90,7 +90,12 @@ export const typedef2: Partial<SavedObjectsType> = {
       },
     },
   },
-  switchToModelVersionAt: '8.8.0',
+  schemas: {
+    '8.9.0': schema.object({
+      foo: schema.string(),
+    }),
+  },
+  switchToModelVersionAt: '8.10.0',
   modelVersions: {
     '1': {
       changes: [
@@ -114,10 +119,5 @@ export const typedef2: Partial<SavedObjectsType> = {
         }),
       },
     },
-  },
-  schemas: {
-    '8.7.0': schema.object({
-      foo: schema.string(),
-    }),
   },
 };
