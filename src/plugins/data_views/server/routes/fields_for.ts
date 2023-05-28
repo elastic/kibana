@@ -52,23 +52,26 @@ interface IQuery {
   fields?: string[];
 }
 
+const querySchema = schema.object({
+  pattern: schema.string(),
+  meta_fields: schema.oneOf([schema.string(), schema.arrayOf(schema.string())], {
+    defaultValue: [],
+  }),
+  type: schema.maybe(schema.string()),
+  rollup_index: schema.maybe(schema.string()),
+  allow_no_index: schema.maybe(schema.boolean()),
+  include_unmapped: schema.maybe(schema.boolean()),
+  fields: schema.maybe(schema.oneOf([schema.string(), schema.arrayOf(schema.string())])),
+});
+
 const validate: { request: RouteValidatorFullConfig<{}, IQuery, IBody> } = {
   request: {
-    query: schema.object({
-      pattern: schema.string(),
-      meta_fields: schema.oneOf([schema.string(), schema.arrayOf(schema.string())], {
-        defaultValue: [],
-      }),
-      type: schema.maybe(schema.string()),
-      rollup_index: schema.maybe(schema.string()),
-      allow_no_index: schema.maybe(schema.boolean()),
-      include_unmapped: schema.maybe(schema.boolean()),
-      fields: schema.maybe(schema.oneOf([schema.string(), schema.arrayOf(schema.string())])),
-    }),
+    query: querySchema,
     // not available to get request
     body: schema.maybe(schema.object({ index_filter: schema.any() })),
   },
 };
+
 const handler: RequestHandler<{}, IQuery, IBody> = async (context, request, response) => {
   const { asCurrentUser } = (await context.core).elasticsearch.client;
   const indexPatterns = new IndexPatternsFetcher(asCurrentUser);
@@ -143,5 +146,7 @@ export const registerFieldForWildcard = (
   // handler
   router.versioned.put({ path, access }).addVersion({ version, validate }, handler);
   router.versioned.post({ path, access }).addVersion({ version, validate }, handler);
-  router.versioned.get({ path, access }).addVersion({ version, validate }, handler);
+  router.versioned
+    .get({ path, access })
+    .addVersion({ version, validate: { request: { query: querySchema } } }, handler);
 };
