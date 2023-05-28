@@ -13,7 +13,6 @@ import { getDataViews, hasUserDataView } from '../has_user_data_view';
 type Handler = Parameters<VersionedRoute<any, RequestHandlerContext>['addVersion']>[1];
 
 export const handler: Handler = async (ctx: RequestHandlerContext, req, res) => {
-  // todo whats the best way to type this?
   const core = await ctx.core;
   const savedObjectsClient = core.savedObjects.client;
   const elasticsearchClient = core.elasticsearch.client.asCurrentUser;
