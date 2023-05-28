@@ -364,6 +364,7 @@ export const cli = () => {
       await Promise.allSettled(
         _.times(2).map(() =>
           cypressRun({
+            ...argv,
             batchSize: 1,
             projectId: 'Fjmie9',
             recordKey: 'dUqqlw5islPJL5PB',
