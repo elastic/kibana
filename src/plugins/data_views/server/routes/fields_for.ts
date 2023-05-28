@@ -38,6 +38,8 @@ export const parseFields = (fields: string | string[]): string[] => {
 };
 
 const path = '/api/index_patterns/_fields_for_wildcard';
+const version = '1';
+const access = 'internal';
 
 type IBody = { index_filter?: estypes.QueryDslQueryContainer } | undefined;
 interface IQuery {
@@ -50,20 +52,22 @@ interface IQuery {
   fields?: string[];
 }
 
-const validate: RouteValidatorFullConfig<{}, IQuery, IBody> = {
-  query: schema.object({
-    pattern: schema.string(),
-    meta_fields: schema.oneOf([schema.string(), schema.arrayOf(schema.string())], {
-      defaultValue: [],
+const validate: { request: RouteValidatorFullConfig<{}, IQuery, IBody> } = {
+  request: {
+    query: schema.object({
+      pattern: schema.string(),
+      meta_fields: schema.oneOf([schema.string(), schema.arrayOf(schema.string())], {
+        defaultValue: [],
+      }),
+      type: schema.maybe(schema.string()),
+      rollup_index: schema.maybe(schema.string()),
+      allow_no_index: schema.maybe(schema.boolean()),
+      include_unmapped: schema.maybe(schema.boolean()),
+      fields: schema.maybe(schema.oneOf([schema.string(), schema.arrayOf(schema.string())])),
     }),
-    type: schema.maybe(schema.string()),
-    rollup_index: schema.maybe(schema.string()),
-    allow_no_index: schema.maybe(schema.boolean()),
-    include_unmapped: schema.maybe(schema.boolean()),
-    fields: schema.maybe(schema.oneOf([schema.string(), schema.arrayOf(schema.string())])),
-  }),
-  // not available to get request
-  body: schema.maybe(schema.object({ index_filter: schema.any() })),
+    // not available to get request
+    body: schema.maybe(schema.object({ index_filter: schema.any() })),
+  },
 };
 const handler: RequestHandler<{}, IQuery, IBody> = async (context, request, response) => {
   const { asCurrentUser } = (await context.core).elasticsearch.client;
@@ -136,7 +140,8 @@ export const registerFieldForWildcard = (
     DataViewsServerPluginStart
   >
 ) => {
-  router.put({ path, validate }, handler);
-  router.post({ path, validate }, handler);
-  router.get({ path, validate }, handler);
+  // handler
+  router.versioned.put({ path, access }).addVersion({ version, validate }, handler);
+  router.versioned.post({ path, access }).addVersion({ version, validate }, handler);
+  router.versioned.get({ path, access }).addVersion({ version, validate }, handler);
 };

@@ -10,12 +10,12 @@ import { IRouter } from '@kbn/core/server';
 import { getDataViews, hasUserDataView } from '../has_user_data_view';
 
 export const registerHasDataViewsRoute = (router: IRouter): void => {
-  router.get(
-    {
+  router.versioned
+    .get({
       path: '/internal/data_views/has_data_views',
-      validate: {},
-    },
-    async (ctx, req, res) => {
+      access: 'internal',
+    })
+    .addVersion({ version: '1', validate: {} }, async (ctx, req, res) => {
       const core = await ctx.core;
       const savedObjectsClient = core.savedObjects.client;
       const elasticsearchClient = core.elasticsearch.client.asCurrentUser;
@@ -35,6 +35,5 @@ export const registerHasDataViewsRoute = (router: IRouter): void => {
         hasUserDataView: hasUserDataViewResult,
       };
       return res.ok({ body: response });
-    }
-  );
+    });
 };
