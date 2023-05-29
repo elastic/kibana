@@ -163,8 +163,6 @@ export const ControlEditor = ({
     [selectedField, setControlEditorValid, selectedDataView]
   );
 
-  // useEffect(() => {}, []);
-
   const controlType =
     selectedField && fieldRegistry && fieldRegistry[selectedField].compatibleControlTypes[0];
   const factory = controlType && getControlFactory(controlType);

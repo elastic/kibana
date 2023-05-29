@@ -99,7 +99,6 @@ export const ControlGroupStrings = {
           defaultMessage: '{controlType} settings',
           values: { controlType: type },
         }),
-
       getFormGroupDescription: (type: string) =>
         i18n.translate(
           'controls.controlGroup.manageControl.controlTypeSettings.formGroupDescription',

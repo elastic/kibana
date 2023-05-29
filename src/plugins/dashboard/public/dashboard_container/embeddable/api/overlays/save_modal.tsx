@@ -104,6 +104,7 @@ export class DashboardSaveModal extends React.Component<Props, State> {
         }}
       />
     ) : undefined;
+
     return (
       <Fragment>
         <EuiFormRow
