@@ -14,7 +14,7 @@ import { getIndexTemplate } from './get_index_template';
 export function getApmIndexPatterns(indices: ApmIndicesConfig) {
   return uniq(
     [indices.error, indices.metric, indices.span, indices.transaction].flatMap(
-      (index): string[] => index.split(',')
+      (index) => index.split(',')
     )
   );
 }
