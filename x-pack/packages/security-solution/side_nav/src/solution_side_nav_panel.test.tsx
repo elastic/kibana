@@ -43,6 +43,7 @@ const mockItems: SolutionSideNavItem[] = [
     label: 'Kubernetes',
     href: '/kubernetes',
     description: 'Kubernetes description',
+    isBeta: true,
   },
 ];
 
