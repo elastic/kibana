@@ -46,6 +46,10 @@ export const OptionsListStrings = {
           }),
       },
     },
+    getSearchOptionsTitle: () =>
+      i18n.translate('controls.optionsList.editor.searchOptionsTitle', {
+        defaultMessage: `Searching`,
+      }),
     searchTypes: {
       prefix: {
         getLabel: () =>
@@ -57,13 +61,13 @@ export const OptionsListStrings = {
             defaultMessage: 'Matches values that begin with the given search string.',
           }),
       },
-      contains: {
+      wildcard: {
         getLabel: () =>
-          i18n.translate('controls.optionsList.editor.containsSearchLabel', {
+          i18n.translate('controls.optionsList.editor.wildcardSearchLabel', {
             defaultMessage: 'Contains',
           }),
         getTooltip: () =>
-          i18n.translate('controls.optionsList.editor.containsSearchTooltip', {
+          i18n.translate('controls.optionsList.editor.wildcardSearchTooltip', {
             defaultMessage:
               'Matches values that contain the given search string. Results may take longer to populate.',
           }),

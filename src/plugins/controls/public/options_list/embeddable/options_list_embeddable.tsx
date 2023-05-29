@@ -159,7 +159,7 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
         validate: !Boolean(newInput.ignoreParentSettings?.ignoreValidations),
         lastReloadRequestTime: newInput.lastReloadRequestTime,
         existsSelected: newInput.existsSelected,
-        wildcardSearch: newInput.wildcardSearch,
+        searchTechnique: newInput.searchTechnique,
         dataViewId: newInput.dataViewId,
         fieldName: newInput.fieldName,
         timeRange: newInput.timeRange,
@@ -288,7 +288,7 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
 
     const {
       componentState: { searchString, allowExpensiveQueries },
-      explicitInput: { selectedOptions, runPastTimeout, existsSelected, sort, wildcardSearch },
+      explicitInput: { selectedOptions, runPastTimeout, existsSelected, sort, searchTechnique },
     } = this.getState();
     this.dispatch.setLoading(true);
     if (searchString.valid) {
@@ -320,7 +320,7 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
           filters,
           dataView,
           timeRange,
-          wildcardSearch,
+          searchTechnique,
           runPastTimeout,
           selectedOptions,
           allowExpensiveQueries,

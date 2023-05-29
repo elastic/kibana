@@ -29,6 +29,7 @@ import {
 } from '../../../common/options_list/suggestions_sorting';
 import { OptionsListStrings } from './options_list_strings';
 import { ControlEditorProps, OptionsListEmbeddableInput } from '../..';
+import { OptionsListSearchTechnique } from '../../../common/options_list/types';
 
 const TooltipText = ({ label, tooltip }: { label: string; tooltip: string }) => (
   <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
@@ -47,7 +48,7 @@ const TooltipText = ({ label, tooltip }: { label: string; tooltip: string }) => 
 interface OptionsListEditorState {
   sortDirection: Direction;
   runPastTimeout?: boolean;
-  wildcardSearch?: boolean;
+  searchTechnique?: OptionsListSearchTechnique;
   singleSelect?: boolean;
   hideExclude?: boolean;
   hideExists?: boolean;
@@ -63,8 +64,8 @@ export const OptionsListEditorOptions = ({
   const [state, setState] = useState<OptionsListEditorState>({
     sortDirection: initialInput?.sort?.direction ?? OPTIONS_LIST_DEFAULT_SORT.direction,
     sortBy: initialInput?.sort?.by ?? OPTIONS_LIST_DEFAULT_SORT.by,
+    searchTechnique: initialInput?.searchTechnique,
     runPastTimeout: initialInput?.runPastTimeout,
-    wildcardSearch: initialInput?.wildcardSearch,
     singleSelect: initialInput?.singleSelect,
     hideExclude: initialInput?.hideExclude,
     hideExists: initialInput?.hideExists,
@@ -101,24 +102,29 @@ export const OptionsListEditorOptions = ({
     });
   }, []);
 
-  const searchOptions = useMemo(() => {
-    return Object.keys(OptionsListStrings.editor.searchTypes).map((type: string) => {
-      const searchOptionStrings =
-        OptionsListStrings.editor.searchTypes[
-          type as keyof typeof OptionsListStrings.editor.searchTypes
-        ];
-
-      return {
-        id: type,
+  const searchOptions = useMemo(
+    () => [
+      {
+        id: 'prefix',
         label: (
           <TooltipText
-            label={searchOptionStrings.getLabel()}
-            tooltip={searchOptionStrings.getTooltip()}
+            label={OptionsListStrings.editor.searchTypes.prefix.getLabel()}
+            tooltip={OptionsListStrings.editor.searchTypes.prefix.getTooltip()}
           />
         ),
-      };
-    });
-  }, []);
+      },
+      {
+        id: 'wildcard',
+        label: (
+          <TooltipText
+            label={OptionsListStrings.editor.searchTypes.wildcard.getLabel()}
+            tooltip={OptionsListStrings.editor.searchTypes.wildcard.getTooltip()}
+          />
+        ),
+      },
+    ],
+    []
+  );
 
   return (
     <>
@@ -140,14 +146,14 @@ export const OptionsListEditorOptions = ({
       ) : (
         allowExpensiveQueries &&
         fieldType !== 'ip' && (
-          <EuiFormRow label={'Searching'}>
+          <EuiFormRow label={OptionsListStrings.editor.getSearchOptionsTitle()}>
             <EuiRadioGroup
               options={searchOptions}
-              idSelected={state.wildcardSearch ? 'contains' : 'prefix'}
+              idSelected={state.searchTechnique ?? 'prefix'}
               onChange={(id) => {
-                const newWildcardSearch = id === 'contains';
-                onChange({ wildcardSearch: newWildcardSearch });
-                setState((s) => ({ ...s, wildcardSearch: newWildcardSearch }));
+                const searchTechnique = id as OptionsListSearchTechnique;
+                onChange({ searchTechnique });
+                setState((s) => ({ ...s, searchTechnique }));
               }}
             />
           </EuiFormRow>

@@ -38,7 +38,7 @@ const expensiveSuggestionAggSubtypes: { [key: string]: OptionsListSuggestionAggr
    */
   textOrKeywordOrNested: {
     buildAggregation: ({
-      wildcardSearch,
+      searchTechnique,
       searchString,
       fieldName,
       fieldSpec,
@@ -65,9 +65,12 @@ const expensiveSuggestionAggSubtypes: { [key: string]: OptionsListSuggestionAggr
         textOrKeywordQuery = {
           filteredSuggestions: {
             filter: {
-              [wildcardSearch ? 'wildcard' : 'prefix']: {
+              [(searchTechnique as string) ?? 'prefix']: {
                 [fieldName]: {
-                  value: wildcardSearch ? `*${getEscapedQuery(searchString)}*` : searchString,
+                  value:
+                    searchTechnique === 'wildcard'
+                      ? `*${getEscapedQuery(searchString)}*`
+                      : searchString,
                   case_insensitive: true,
                 },
               },
