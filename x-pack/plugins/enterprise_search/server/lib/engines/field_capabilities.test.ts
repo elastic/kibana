@@ -15,6 +15,7 @@ import { fetchEngineFieldCapabilities, parseFieldsCapabilities } from './field_c
 describe('engines field_capabilities', () => {
   const mockClient = {
     asCurrentUser: {
+      cat: { indices: jest.fn() },
       fieldCaps: jest.fn(),
       indices: { exists: jest.fn() },
     },
@@ -25,6 +26,15 @@ describe('engines field_capabilities', () => {
     name: 'unit-test-engine',
     updated_at_millis: 2202018295,
   };
+
+  const catIndexResponse = [
+    {
+      health: 'GREEN',
+      index: 'index-001',
+      status: 'open',
+      uuid: 'YOLLiZ_mSRiDYDk0DJ-p8B',
+    },
+  ];
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -46,6 +56,9 @@ describe('engines field_capabilities', () => {
       };
 
       mockClient.asCurrentUser.indices.exists.mockResolvedValueOnce(true);
+      mockClient.asCurrentUser.cat.indices.mockImplementation(() => {
+        return catIndexResponse;
+      });
       mockClient.asCurrentUser.fieldCaps.mockResolvedValueOnce(fieldCapsResponse);
       await expect(
         fetchEngineFieldCapabilities(mockClient as unknown as IScopedClusterClient, mockEngine)

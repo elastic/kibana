@@ -11,10 +11,23 @@ export const availableIndices = async (
   client: IScopedClusterClient,
   indices: string[]
 ): Promise<string[]> => {
-  if (await client.asCurrentUser.indices.exists({ index: indices })) return indices;
+  const closedIndicesList = await closedIndices(client);
 
-  const indicesAndExists: Array<[string, boolean]> = await Promise.all(
-    indices.map(async (index) => [index, await client.asCurrentUser.indices.exists({ index })])
+  const indicesExistsAndOpen: Array<[string, boolean]> = await Promise.all(
+    indices.map(async (index) => [
+      index,
+      (await client.asCurrentUser.indices.exists({ index })) && !closedIndicesList.includes(index),
+    ])
   );
-  return indicesAndExists.flatMap(([index, exists]) => (exists ? [index] : []));
+
+  return indicesExistsAndOpen.flatMap(([index, exists]) => (exists ? [index] : []));
+};
+
+const closedIndices = async (client: IScopedClusterClient): Promise<string[]> => {
+  const indices = await client.asCurrentUser.cat.indices({
+    format: 'json',
+  });
+  return indices
+    .filter((indexData) => indexData?.status === 'close')
+    .map((indexData) => indexData?.index ?? '');
 };
