@@ -14,6 +14,7 @@ import type { ChromeNavLink } from '@kbn/core-chrome-browser';
 import { getServicesMock } from '../../../../mocks/src/jest';
 import { NavigationProvider } from '../../../services';
 import { Navigation } from './navigation';
+import { defaultNavigationTree } from '../default_navigation.test.helpers';
 
 describe('<Navigation />', () => {
   const services = getServicesMock();
@@ -352,6 +353,80 @@ describe('<Navigation />', () => {
           },
         ],
       });
+    });
+
+    test('should render group preset (analytics, ml...)', async () => {
+      const onProjectNavigationChange = jest.fn();
+
+      render(
+        <NavigationProvider {...services} onProjectNavigationChange={onProjectNavigationChange}>
+          <Navigation homeRef="https://elastic.co">
+            <Navigation.Group preset="analytics" />
+            <Navigation.Group preset="ml" />
+            <Navigation.Group preset="devtools" />
+            <Navigation.Group preset="management" />
+          </Navigation>
+        </NavigationProvider>
+      );
+
+      expect(onProjectNavigationChange).toHaveBeenCalled();
+      const lastCall =
+        onProjectNavigationChange.mock.calls[onProjectNavigationChange.mock.calls.length - 1];
+      const [navTree] = lastCall;
+
+      expect(navTree).toEqual({
+        homeRef: 'https://elastic.co',
+        navigationTree: defaultNavigationTree.map(({ type, ...rest }) => rest),
+      });
+    });
+
+    test('should render cloud link', async () => {
+      const onProjectNavigationChange = jest.fn();
+
+      const { findByTestId } = render(
+        <NavigationProvider {...services} onProjectNavigationChange={onProjectNavigationChange}>
+          <Navigation homeRef="https://elastic.co">
+            <Navigation.Group id="root">
+              <Navigation.Group id="group1">
+                <Navigation.CloudLink preset="deployments" />
+                <Navigation.CloudLink preset="projects" />
+                <Navigation.CloudLink href="https://foo.com" icon="myIcon" title="Custom link" />
+              </Navigation.Group>
+            </Navigation.Group>
+          </Navigation>
+        </NavigationProvider>
+      );
+
+      expect(await findByTestId('nav-header-link-to-projects')).toBeVisible();
+      expect(await findByTestId('nav-header-link-to-deployments')).toBeVisible();
+      expect(await findByTestId('nav-header-link-to-cloud')).toBeVisible();
+      expect(await (await findByTestId('nav-header-link-to-cloud')).textContent).toBe(
+        'Custom link'
+      );
+    });
+
+    test('should render recently accessed items', async () => {
+      const recentlyAccessed$ = of([
+        { label: 'This is an example', link: '/app/example/39859', id: '39850' },
+        { label: 'Another example', link: '/app/example/5235', id: '5235' },
+      ]);
+
+      const { findByTestId } = render(
+        <NavigationProvider {...services} recentlyAccessed$={recentlyAccessed$}>
+          <Navigation homeRef="https://elastic.co">
+            <Navigation.Group id="root">
+              <Navigation.Group id="group1">
+                <Navigation.RecentlyAccessed />
+              </Navigation.Group>
+            </Navigation.Group>
+          </Navigation>
+        </NavigationProvider>
+      );
+
+      expect(await findByTestId('nav-bucket-recentlyAccessed')).toBeVisible();
+      expect(await (await findByTestId('nav-bucket-recentlyAccessed')).textContent).toBe(
+        'RecentThis is an exampleAnother example'
+      );
     });
   });
 });

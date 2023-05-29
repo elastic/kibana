@@ -245,6 +245,72 @@ describe('<DefaultNavigation />', () => {
         ],
       });
     });
+
+    test('should render cloud link', async () => {
+      const navigationBody: RootNavigationItemDefinition[] = [
+        {
+          type: 'cloudLink',
+          preset: 'deployments',
+        },
+        {
+          type: 'cloudLink',
+          preset: 'projects',
+        },
+        {
+          type: 'cloudLink',
+          href: 'https://foo.com',
+          icon: 'myIcon',
+          title: 'Custom link',
+        },
+      ];
+
+      const { findByTestId } = render(
+        <NavigationProvider {...services}>
+          <DefaultNavigation
+            {...defaultProps}
+            navigationTree={{
+              body: navigationBody,
+            }}
+          />
+        </NavigationProvider>
+      );
+
+      expect(await findByTestId('nav-header-link-to-projects')).toBeVisible();
+      expect(await findByTestId('nav-header-link-to-deployments')).toBeVisible();
+      expect(await findByTestId('nav-header-link-to-cloud')).toBeVisible();
+      expect(await (await findByTestId('nav-header-link-to-cloud')).textContent).toBe(
+        'Custom link'
+      );
+    });
+
+    test('should render recently accessed items', async () => {
+      const recentlyAccessed$ = of([
+        { label: 'This is an example', link: '/app/example/39859', id: '39850' },
+        { label: 'Another example', link: '/app/example/5235', id: '5235' },
+      ]);
+
+      const navigationBody: RootNavigationItemDefinition[] = [
+        {
+          type: 'recentlyAccessed',
+        },
+      ];
+
+      const { findByTestId } = render(
+        <NavigationProvider {...services} recentlyAccessed$={recentlyAccessed$}>
+          <DefaultNavigation
+            {...defaultProps}
+            navigationTree={{
+              body: navigationBody,
+            }}
+          />
+        </NavigationProvider>
+      );
+
+      expect(await findByTestId('nav-bucket-recentlyAccessed')).toBeVisible();
+      expect(await (await findByTestId('nav-bucket-recentlyAccessed')).textContent).toBe(
+        'RecentThis is an exampleAnother example'
+      );
+    });
   });
 
   describe('builds the full navigation tree when only custom project is provided', () => {
