@@ -55,7 +55,7 @@ const SecretsSchema = schema.object(secretSchemaProps, {
   validate: (secrets) => {
     if (secrets.token ) return;
     if (!secrets.token) 
-    return i18n.translate('xpack.actions.builtin.d3security.invalidUrlToken', {
+    return i18n.translate('xpack.stackConnectors.d3.invalidUrlToken', {
       defaultMessage: 'token must be specified',
     });
   },
@@ -75,7 +75,7 @@ export function getConnectorType(): D3SecurityConnectorType {
   return {
     id: ConnectorTypeId,
     minimumLicenseRequired: 'gold',
-    name: i18n.translate('xpack.stackConnectors.d3security.title', {
+    name: i18n.translate('xpack.stackConnectors.d3.title', {
       defaultMessage: 'D3 Security',
     }),
     supportedFeatureIds: [
@@ -243,7 +243,7 @@ function errorResultInvalid(
   actionId: string,
   serviceMessage: string
 ): ConnectorTypeExecutorResult<void> {
-  const errMessage = i18n.translate('xpack.actions.builtin.d3security.invalidResponseErrorMessage', {
+  const errMessage = i18n.translate('xpack.stackConnectors.d3.invalidResponseErrorMessage', {
     defaultMessage: 'error calling d3security, invalid response',
   });
   return {
@@ -258,7 +258,7 @@ function errorResultRequestFailed(
   actionId: string,
   serviceMessage: string
 ): ConnectorTypeExecutorResult<unknown> {
-  const errMessage = i18n.translate('xpack.actions.builtin.d3security.requestFailedErrorMessage', {
+  const errMessage = i18n.translate('xpack.stackConnectors.d3.requestFailedErrorMessage', {
     defaultMessage: 'error calling d3security, request failed',
   });
   return {
@@ -270,7 +270,7 @@ function errorResultRequestFailed(
 }
 
 function errorResultUnexpectedError(actionId: string): ConnectorTypeExecutorResult<void> {
-  const errMessage = i18n.translate('xpack.actions.builtin.d3security.unreachableErrorMessage', {
+  const errMessage = i18n.translate('xpack.stackConnectors.d3.unreachableErrorMessage', {
     defaultMessage: 'error calling d3security, unexpected error',
   });
   return {
@@ -282,7 +282,7 @@ function errorResultUnexpectedError(actionId: string): ConnectorTypeExecutorResu
 
 function retryResult(actionId: string, serviceMessage: string): ConnectorTypeExecutorResult<void> {
   const errMessage = i18n.translate(
-    'xpack.actions.builtin.d3security.invalidResponseRetryLaterErrorMessage',
+    'xpack.stackConnectors.d3.invalidResponseRetryLaterErrorMessage',
     {
       defaultMessage: 'error calling d3security, retry later',
     }
@@ -306,7 +306,7 @@ function retryResultSeconds(
   const retry = new Date(retryEpoch);
   const retryString = retry.toISOString();
   const errMessage = i18n.translate(
-    'xpack.actions.builtin.d3security.invalidResponseRetryDateErrorMessage',
+    'xpack.stackConnectors.d3.invalidResponseRetryDateErrorMessage',
     {
       defaultMessage: 'error calling d3security, retry at {retryString}',
       values: {
