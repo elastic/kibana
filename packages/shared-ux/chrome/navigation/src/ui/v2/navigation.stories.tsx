@@ -335,8 +335,14 @@ export const WithUIComponents = (args: ChromeNavigationViewModel & NavigationSer
             defaultIsCollapsed={false}
           >
             <Navigation.Group id="root">
-              <Navigation.Item id="item1" link="item1" /> {/* Title will be read from deepLink */}
-              <Navigation.Item id="item2" title="Alerts" />
+              <Navigation.Item id="item1" link="item1" />
+              <Navigation.Item id="item2" title="Alerts">
+                {(navNode) => {
+                  return (
+                    <EuiText size="s">{`Render prop: ${navNode.id} - ${navNode.title}`}</EuiText>
+                  );
+                }}
+              </Navigation.Item>
               <Navigation.Item id="item3" title="Title in ReactNode">
                 <EuiText size="s">
                   <EuiLink>Title in ReactNode</EuiLink>
