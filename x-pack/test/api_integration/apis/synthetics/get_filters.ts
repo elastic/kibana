@@ -21,7 +21,7 @@ export default function ({ getService }: FtrProviderContext) {
       await kibanaServer.savedObjects.clean({ types: [syntheticsMonitorType] });
     });
 
-    beforeEach(async () => {
+    before(async () => {
       await kibanaServer.savedObjects.clean({ types: [syntheticsMonitorType] });
     });
 

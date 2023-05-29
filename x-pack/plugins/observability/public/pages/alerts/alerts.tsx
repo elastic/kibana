@@ -15,6 +15,7 @@ import { loadRuleAggregations } from '@kbn/triggers-actions-ui-plugin/public';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 
+import { ALERTS_URL_STORAGE_KEY } from '../../../common/constants';
 import { useHasData } from '../../hooks/use_has_data';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { useTimeBuckets } from '../../hooks/use_time_buckets';
@@ -35,7 +36,6 @@ import type { ObservabilityAppServices } from '../../application/types';
 const ALERTS_SEARCH_BAR_ID = 'alerts-search-bar-o11y';
 const ALERTS_PER_PAGE = 50;
 const ALERTS_TABLE_ID = 'xpack.observability.alerts.alert.table';
-const URL_STORAGE_KEY = '_a';
 
 const DEFAULT_INTERVAL = '60s';
 const DEFAULT_DATE_FORMAT = 'YYYY-MM-DD HH:mm';
@@ -58,7 +58,7 @@ function InternalAlertsPage() {
     },
   } = useKibana<ObservabilityAppServices>().services;
   const { ObservabilityPageTemplate, observabilityRuleTypeRegistry } = usePluginContext();
-  const alertSearchBarStateProps = useAlertSearchBarStateContainer(URL_STORAGE_KEY, {
+  const alertSearchBarStateProps = useAlertSearchBarStateContainer(ALERTS_URL_STORAGE_KEY, {
     replace: false,
   });
 

@@ -55,6 +55,7 @@ import {
   SanitizedRule,
   AlertsFilter,
   AlertsFilterTimeframe,
+  RuleAlertData,
 } from '../common';
 import { PublicAlertFactory } from './alert/create_alert_factory';
 import { RulesSettingsFlappingProperties } from '../common/rules_settings';
@@ -87,7 +88,8 @@ export type AlertingRouter = IRouter<AlertingRequestHandlerContext>;
 export interface RuleExecutorServices<
   State extends AlertInstanceState = AlertInstanceState,
   Context extends AlertInstanceContext = AlertInstanceContext,
-  ActionGroupIds extends string = never
+  ActionGroupIds extends string = never,
+  AlertData extends RuleAlertData = RuleAlertData
 > {
   searchSourceClient: ISearchStartSearchSource;
   savedObjectsClient: SavedObjectsClientContract;
@@ -107,14 +109,15 @@ export interface RuleExecutorOptions<
   State extends RuleTypeState = never,
   InstanceState extends AlertInstanceState = never,
   InstanceContext extends AlertInstanceContext = never,
-  ActionGroupIds extends string = never
+  ActionGroupIds extends string = never,
+  AlertData extends RuleAlertData = never
 > {
   executionId: string;
   logger: Logger;
   params: Params;
   previousStartedAt: Date | null;
   rule: SanitizedRuleConfig;
-  services: RuleExecutorServices<InstanceState, InstanceContext, ActionGroupIds>;
+  services: RuleExecutorServices<InstanceState, InstanceContext, ActionGroupIds, AlertData>;
   spaceId: string;
   startedAt: Date;
   state: State;
@@ -133,9 +136,17 @@ export type ExecutorType<
   State extends RuleTypeState = never,
   InstanceState extends AlertInstanceState = never,
   InstanceContext extends AlertInstanceContext = never,
-  ActionGroupIds extends string = never
+  ActionGroupIds extends string = never,
+  AlertData extends RuleAlertData = never
 > = (
-  options: RuleExecutorOptions<Params, State, InstanceState, InstanceContext, ActionGroupIds>
+  options: RuleExecutorOptions<
+    Params,
+    State,
+    InstanceState,
+    InstanceContext,
+    ActionGroupIds,
+    AlertData
+  >
 ) => Promise<{ state: State }>;
 
 export interface RuleTypeParamsValidator<Params extends RuleTypeParams> {
@@ -204,6 +215,15 @@ export interface IRuleTypeAlerts {
   mappings: ComponentTemplateSpec;
 
   /**
+   * Optional flag to opt into writing alerts as data. When not specified
+   * defaults to false. We need this because we needed all previous rule
+   * registry rules to register with the framework in order to install
+   * Elasticsearch assets but we don't want to migrate them to using
+   * the framework for writing alerts as data until all the pieces are ready
+   */
+  shouldWrite?: boolean;
+
+  /**
    * Optional flag to include a reference to the ECS component template.
    */
   useEcs?: boolean;
@@ -235,7 +255,8 @@ export interface RuleType<
   InstanceState extends AlertInstanceState = never,
   InstanceContext extends AlertInstanceContext = never,
   ActionGroupIds extends string = never,
-  RecoveryActionGroupId extends string = never
+  RecoveryActionGroupId extends string = never,
+  AlertData extends RuleAlertData = never
 > {
   id: string;
   name: string;
@@ -254,7 +275,8 @@ export interface RuleType<
      * Ensure that the reserved ActionGroups (such as `Recovered`) are not
      * available for scheduling in the Executor
      */
-    WithoutReservedActionGroups<ActionGroupIds, RecoveryActionGroupId>
+    WithoutReservedActionGroups<ActionGroupIds, RecoveryActionGroupId>,
+    AlertData
   >;
   producer: string;
   actionVariables?: {
