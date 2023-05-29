@@ -73,6 +73,7 @@
     "@kbn/object-versioning",
     "@kbn/config-schema",
     "@kbn/core-saved-objects-utils-server",
+    "@kbn/core-lifecycle-browser-mocks",
   ],
   "exclude": [
     "target/**/*",
