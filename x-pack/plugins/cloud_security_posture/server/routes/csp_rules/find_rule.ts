@@ -30,7 +30,6 @@ import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../benchmarks/benchmarks';
 // check sort fields optional values
 // test pageintion
 // add fields as input to the request
-// update the usage
 // tests
 
 const findCspRuleTemplateHandler = async (
@@ -53,12 +52,10 @@ const findCspRuleTemplateHandler = async (
     filter: getBenchmarkTypeFilter(benchmarkId),
   });
 
-  console.log({ cspRulesTemplatesSo });
-
   const cspRulesTemplates = await pMap(
     cspRulesTemplatesSo.saved_objects,
     async (cspRuleTemplate) => {
-      return { ...cspRuleTemplate, updatedAt: cspRuleTemplate.updated_at };
+      return { ...cspRuleTemplate.attributes };
     },
     { concurrency: 50 }
   );

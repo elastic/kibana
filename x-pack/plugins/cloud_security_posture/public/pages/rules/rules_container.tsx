@@ -7,25 +7,20 @@
 import React, { useState, useMemo } from 'react';
 import { EuiPanel, EuiSpacer } from '@elastic/eui';
 import { useParams } from 'react-router-dom';
-import { extractErrorMessage, isNonNullable } from '../../../common/utils/helpers';
+import { CspRuleTemplate } from '../../../common/schemas';
+import { extractErrorMessage } from '../../../common/utils/helpers';
 import { RulesTable } from './rules_table';
 import { RulesTableHeader } from './rules_table_header';
-import {
-  useFindCspRuleTemplates,
-  type RuleSavedObject,
-  type RulesQuery,
-  type RulesQueryResult,
-} from './use_csp_rules';
+import { useFindCspRuleTemplates, type RulesQuery, type RulesQueryResult } from './use_csp_rules';
 import * as TEST_SUBJECTS from './test_subjects';
 import { RuleFlyout } from './rules_flyout';
 import { LOCAL_STORAGE_PAGE_SIZE_RULES_KEY } from '../../common/constants';
 import { usePageSize } from '../../common/hooks/use_page_size';
-import { CspRuleTemplate } from '@kbn/cloud-security-posture-plugin/common/schemas';
 
 interface RulesPageData {
   rules_page: CspRuleTemplate[];
   all_rules: CspRuleTemplate[];
-  rules_map: Map<string, CspRuleTemplate['metadata']>;
+  rules_map: Map<string, CspRuleTemplate>;
   total: number;
   error?: string;
   loading: boolean;
@@ -38,14 +33,14 @@ const getRulesPageData = (
   query: RulesQuery
 ): RulesPageData => {
   const rules = data?.items || ([] as CspRuleTemplate[]);
+
   const page = getPage(rules, query);
+
   return {
     loading: status === 'loading',
     error: error ? extractErrorMessage(error) : undefined,
     all_rules: [...rules],
-    rules_map: new Map(
-      rules.map((rule) => [rule.attributes.metadata.id, rule.attributes.metadata])
-    ),
+    rules_map: new Map(rules.map((rule) => [rule.metadata.id, rule])),
     rules_page: page,
     total: data?.total || 0,
   };
@@ -63,7 +58,6 @@ export const RulesContainer = () => {
   const [selectedRuleId, setSelectedRuleId] = useState<string | null>(null);
   const { pageSize, setPageSize } = usePageSize(LOCAL_STORAGE_PAGE_SIZE_RULES_KEY);
   const [rulesQuery, setRulesQuery] = useState<RulesQuery>({
-    filter: '',
     search: '',
     page: 0,
     perPage: pageSize || 10,
@@ -71,7 +65,6 @@ export const RulesContainer = () => {
 
   const { data, status, error } = useFindCspRuleTemplates(
     {
-      filter: rulesQuery.filter,
       search: rulesQuery.search,
       page: 1,
       perPage: MAX_ITEMS_PER_PAGE,
@@ -86,7 +79,6 @@ export const RulesContainer = () => {
     [data, error, status, rulesQuery]
   );
 
-  console.log({ rulesPageData });
   return (
     <div data-test-subj={TEST_SUBJECTS.CSP_RULES_CONTAINER}>
       <EuiPanel hasBorder={false} hasShadow={false}>
