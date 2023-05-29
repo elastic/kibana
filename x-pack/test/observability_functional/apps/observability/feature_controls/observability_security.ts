@@ -36,7 +36,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await kibanaServer.uiSettings.update(config.get('uiSettings.defaults'));
     });
 
-    describe('observability cases all privileges', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/155090
+    describe.skip('observability cases all privileges', () => {
       before(async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs');
         await observability.users.setTestUserRole(
