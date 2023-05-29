@@ -19,6 +19,39 @@ export interface CompositeSLORepository {
   save(compositeSlo: CompositeSLO, options?: { throwOnConflict: boolean }): Promise<CompositeSLO>;
   deleteById(id: string): Promise<void>;
   findById(id: string): Promise<CompositeSLO>;
+  find(sort: Sort, pagination: Pagination): Promise<Paginated<CompositeSLO>>;
+}
+
+export interface Pagination {
+  page: number;
+  perPage: number;
+}
+
+export const SortDirection = {
+  Asc: 'Asc',
+  Desc: 'Desc',
+} as const;
+
+type ObjectValues<T> = T[keyof T];
+type SortDirection = ObjectValues<typeof SortDirection>;
+
+export const SortField = {
+  CreationTime: 'CreationTime',
+  IndicatorType: 'IndicatorType',
+};
+
+type SortField = ObjectValues<typeof SortField>;
+
+export interface Sort {
+  field: SortField;
+  direction: SortDirection;
+}
+
+export interface Paginated<T> {
+  page: number;
+  perPage: number;
+  total: number;
+  results: T[];
 }
 
 const SAVED_OBJECT_ATTRIBUTES_PATH = 'composite-slo.attributes';
@@ -87,6 +120,24 @@ export class KibanaSavedObjectsCompositeSLORepository implements CompositeSLORep
 
     return toCompositeSLO(response.saved_objects[0].attributes);
   }
+
+  async find(sort: Sort, pagination: Pagination): Promise<Paginated<CompositeSLO>> {
+    const { sortField, sortOrder } = buildSortQuery(sort);
+    const response = await this.soClient.find<StoredCompositeSLO>({
+      type: SO_COMPOSITE_SLO_TYPE,
+      page: pagination.page,
+      perPage: pagination.perPage,
+      sortField,
+      sortOrder,
+    });
+
+    return {
+      total: response.total,
+      page: response.page,
+      perPage: response.per_page,
+      results: response.saved_objects.map((so) => toCompositeSLO(so.attributes)),
+    };
+  }
 }
 
 function toStoredCompositeSLO(compositeSlo: CompositeSLO): StoredCompositeSLO {
@@ -100,4 +151,19 @@ function toCompositeSLO(storedCompositeSlo: StoredCompositeSLO): CompositeSLO {
       throw new Error(`Invalid stored composite SLO [${storedCompositeSlo.id}]`);
     }, t.identity)
   );
+}
+
+function buildSortQuery(sort: Sort): { sortField: string; sortOrder: 'asc' | 'desc' } {
+  let sortField: string;
+  switch (sort.field) {
+    case SortField.CreationTime:
+    default:
+      sortField = 'created_at';
+      break;
+  }
+
+  return {
+    sortField,
+    sortOrder: sort.direction === SortDirection.Desc ? 'desc' : 'asc',
+  };
 }

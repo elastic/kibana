@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { badRequest, notImplemented } from '@hapi/boom';
+import { badRequest } from '@hapi/boom';
 import {
   createCompositeSLOParamsSchema,
   deleteCompositeSLOParamsSchema,
@@ -18,6 +18,7 @@ import {
   CreateCompositeSLO,
   DefaultSummaryClient,
   DeleteCompositeSLO,
+  FindCompositeSLO,
   KibanaSavedObjectsCompositeSLORepository,
   UpdateCompositeSLO,
 } from '../../services/composite_slo';
@@ -118,10 +119,18 @@ const findCompositeSLORoute = createObservabilityServerRoute({
     tags: ['access:slo_read'],
   },
   params: findCompositeSLOParamsSchema,
-  handler: async ({ context }) => {
+  handler: async ({ context, params }) => {
     await assertLicenseAtLeastPlatinum(context);
 
-    throw notImplemented();
+    const soClient = (await context.core).savedObjects.client;
+    const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+    const repository = new KibanaSavedObjectsCompositeSLORepository(soClient);
+    const summaryClient = new DefaultSummaryClient(esClient);
+    const findCompositeSlo = new FindCompositeSLO(repository, summaryClient);
+
+    const response = await findCompositeSlo.execute(params?.query ?? {});
+
+    return response;
   },
 });
 
