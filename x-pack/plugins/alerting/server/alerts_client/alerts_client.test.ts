@@ -118,7 +118,7 @@ describe('Alerts Client', () => {
             meta: {
               flapping: false,
               flappingHistory: [true, false],
-              lastScheduledActions: { group: 'default', date: new Date() },
+              lastScheduledActions: { group: 'default', date: new Date().toISOString() },
               uuid: 'abc',
             },
           }),
@@ -127,7 +127,7 @@ describe('Alerts Client', () => {
             meta: {
               flapping: false,
               flappingHistory: [true, false, false],
-              lastScheduledActions: { group: 'default', date: new Date() },
+              lastScheduledActions: { group: 'default', date: new Date().toISOString() },
               uuid: 'def',
             },
           }),
@@ -192,7 +192,7 @@ describe('Alerts Client', () => {
             meta: {
               flapping: false,
               flappingHistory: [true, false],
-              lastScheduledActions: { group: 'default', date: new Date() },
+              lastScheduledActions: { group: 'default', date: new Date().toISOString() },
               uuid: id,
             },
           });
@@ -238,7 +238,7 @@ describe('Alerts Client', () => {
             meta: {
               flapping: false,
               flappingHistory: [true, false],
-              lastScheduledActions: { group: 'default', date: new Date() },
+              lastScheduledActions: { group: 'default', date: new Date().toISOString() },
               uuid: 'abc',
             },
           }),
@@ -487,7 +487,7 @@ describe('Alerts Client', () => {
               flapping: false,
               flappingHistory: [true],
               maintenanceWindowIds: [],
-              lastScheduledActions: { group: 'default', date: new Date() },
+              lastScheduledActions: { group: 'default', date: new Date().toISOString() },
               uuid: 'abc',
             },
           },
@@ -719,7 +719,7 @@ describe('Alerts Client', () => {
               flapping: false,
               flappingHistory: [true],
               maintenanceWindowIds: [],
-              lastScheduledActions: { group: 'default', date: new Date() },
+              lastScheduledActions: { group: 'default', date: new Date().toISOString() },
               uuid: 'abc',
             },
           },
@@ -729,7 +729,7 @@ describe('Alerts Client', () => {
               flapping: false,
               flappingHistory: [true, false],
               maintenanceWindowIds: [],
-              lastScheduledActions: { group: 'default', date: new Date() },
+              lastScheduledActions: { group: 'default', date: new Date().toISOString() },
               uuid: 'def',
             },
           },
