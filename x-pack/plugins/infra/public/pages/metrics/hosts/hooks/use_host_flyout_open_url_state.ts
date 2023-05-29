@@ -25,7 +25,7 @@ export const GET_DEFAULT_TABLE_PROPERTIES = {
 const HOST_TABLE_PROPERTIES_URL_STATE_KEY = 'hostFlyoutOpen';
 
 type Action = rt.TypeOf<typeof ActionRT>;
-type SetNewHostFlyoutOpen = (newProp: Action) => void;
+export type SetNewHostFlyoutOpen = (newProp: Action) => void;
 type SetNewHostFlyoutClose = () => void;
 
 export const useHostFlyoutOpen = (): [

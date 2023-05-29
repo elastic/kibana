@@ -8,7 +8,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
-  EuiLoadingContent,
+  EuiSkeletonText,
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
@@ -63,7 +63,7 @@ const EnrichmentSection: React.FC<{
           {loading && (
             <>
               <EuiSpacer size="m" />
-              <EuiLoadingContent data-test-subj="loading-enrichments" lines={4} />
+              <EuiSkeletonText data-test-subj="loading-enrichments" lines={4} />
             </>
           )}
         </>

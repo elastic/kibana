@@ -93,6 +93,7 @@ export async function getIndicesInfo({
       '*.data_stream',
     ],
     features: ['settings'],
+    expand_wildcards: 'all',
   });
 
   return indicesInfo;

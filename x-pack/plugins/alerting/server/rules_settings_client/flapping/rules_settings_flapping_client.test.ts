@@ -29,9 +29,9 @@ const getMockRulesSettings = (): RulesSettings => {
       lookBackWindow: DEFAULT_FLAPPING_SETTINGS.lookBackWindow,
       statusChangeThreshold: DEFAULT_FLAPPING_SETTINGS.statusChangeThreshold,
       createdBy: 'test name',
+      createdAt: '2023-03-24T00:00:00.000Z',
       updatedBy: 'test name',
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
+      updatedAt: '2023-03-24T00:00:00.000Z',
     },
   };
 };
@@ -50,7 +50,17 @@ const rulesSettingsFlappingClientParams: jest.Mocked<RulesSettingsFlappingClient
     savedObjectsClient,
   };
 
+const updatedMetadata = {
+  createdAt: '2023-03-26T00:00:00.000Z',
+  updatedAt: '2023-03-26T00:00:00.000Z',
+  createdBy: 'updated-user',
+  updatedBy: 'updated-user',
+};
+
 describe('RulesSettingsFlappingClient', () => {
+  beforeEach(() =>
+    rulesSettingsFlappingClientParams.getModificationMetadata.mockResolvedValue(updatedMetadata)
+  );
   beforeAll(() => {
     jest.useFakeTimers();
     jest.setSystemTime(new Date(mockDateString));
@@ -115,10 +125,10 @@ describe('RulesSettingsFlappingClient', () => {
           enabled: false,
           lookBackWindow: 19,
           statusChangeThreshold: 3,
+          updatedAt: '2023-03-26T00:00:00.000Z',
+          updatedBy: 'updated-user',
           createdBy: 'test name',
-          updatedBy: 'test name',
-          createdAt: expect.any(String),
-          updatedAt: expect.any(String),
+          createdAt: '2023-03-24T00:00:00.000Z',
         }),
       },
       { version: '123' }

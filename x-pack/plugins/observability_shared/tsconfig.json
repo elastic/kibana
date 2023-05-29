@@ -29,6 +29,8 @@
     "@kbn/spaces-plugin",
     "@kbn/core-application-browser",
     "@kbn/datemath",
+    "@kbn/rison",
+    "@kbn/kibana-utils-plugin",
   ],
   "exclude": ["target/**/*"]
 }

@@ -6,7 +6,10 @@
  */
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import type { IndicesIndexSettings } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type {
+  IndicesIndexSettings,
+  MappingTypeMapping,
+} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import type { Field, Fields } from '../../fields/field';
 import type {
@@ -423,6 +426,11 @@ function generateDateMapping(field: Field): IndexTemplateMapping {
   if (field.date_format) {
     mapping.format = field.date_format;
   }
+
+  if (field.name === '@timestamp') {
+    mapping.ignore_malformed = false;
+  }
+
   return mapping;
 }
 
@@ -642,7 +650,20 @@ const updateExistingDataStream = async ({
   esClient: ElasticsearchClient;
   logger: Logger;
 }) => {
+  const existingDs = await esClient.indices.get({
+    index: dataStreamName,
+  });
+
+  const existingDsConfig = Object.values(existingDs);
+  const currentBackingIndexConfig = existingDsConfig.at(-1);
+
+  const currentIndexMode = currentBackingIndexConfig?.settings?.index?.mode;
+  // @ts-expect-error Property 'mode' does not exist on type 'MappingSourceField'
+  const currentSourceType = currentBackingIndexConfig.mappings?._source?.mode;
+
   let settings: IndicesIndexSettings;
+  let mappings: MappingTypeMapping;
+
   try {
     const simulateResult = await retryTransientEsErrors(() =>
       esClient.indices.simulateTemplate({
@@ -651,7 +672,8 @@ const updateExistingDataStream = async ({
     );
 
     settings = simulateResult.template.settings;
-    const mappings = simulateResult.template.mappings;
+    mappings = simulateResult.template.mappings;
+
     // for now, remove from object so as not to update stream or data stream properties of the index until type and name
     // are added in https://github.com/elastic/kibana/issues/66551.  namespace value we will continue
     // to skip updating and assume the value in the index mapping is correct
@@ -659,6 +681,8 @@ const updateExistingDataStream = async ({
       delete mappings.properties.stream;
       delete mappings.properties.data_stream;
     }
+
+    logger.debug(`Updating mappings for ${dataStreamName}`);
     await retryTransientEsErrors(
       () =>
         esClient.indices.putMapping({
@@ -668,16 +692,38 @@ const updateExistingDataStream = async ({
         }),
       { logger }
     );
-    // if update fails, rollover data stream
+
+    // if update fails, rollover data stream and bail out
   } catch (err) {
+    logger.error(`Mappings update for ${dataStreamName} failed`);
+    logger.error(err);
+
     await rolloverDataStream(dataStreamName, esClient);
     return;
   }
+
+  // Trigger a rollover if the index mode or source type has changed
+  if (
+    currentIndexMode !== settings?.index?.mode ||
+    // @ts-expect-error Property 'mode' does not exist on type 'MappingSourceField'
+    currentSourceType !== mappings?._source?.mode
+  ) {
+    logger.info(
+      `Index mode or source type has changed for ${dataStreamName}, triggering a rollover`
+    );
+    await rolloverDataStream(dataStreamName, esClient);
+  }
+
   // update settings after mappings was successful to ensure
   // pointing to the new pipeline is safe
   // for now, only update the pipeline
-  if (!settings?.index?.default_pipeline) return;
+  if (!settings?.index?.default_pipeline) {
+    return;
+  }
+
   try {
+    logger.debug(`Updating settings for ${dataStreamName}`);
+
     await retryTransientEsErrors(
       () =>
         esClient.indices.putSettings({

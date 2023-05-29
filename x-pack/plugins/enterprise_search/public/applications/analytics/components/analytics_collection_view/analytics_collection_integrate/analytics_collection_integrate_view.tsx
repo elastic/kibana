@@ -74,7 +74,8 @@ const CORSStep = (): EuiContainedStepProps => ({
           </p>
 
           <EuiCodeBlock language="yaml" isCopyable>
-            {`http.cors.allow-origin: "*"
+            {`# http.cors.allow-origin: "https://my-website-domain.example"
+http.cors.allow-origin: "*"
 http.cors.enabled: true
 http.cors.allow-credentials: true
 http.cors.allow-methods: OPTIONS, POST

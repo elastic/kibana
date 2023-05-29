@@ -178,15 +178,22 @@ export function validateMaxSelectorsAndResponses(selectors: Selector[], response
   return errors;
 }
 
-export function validateStringValuesForCondition(condition: SelectorCondition, values: string[]) {
+export function validateStringValuesForCondition(condition: SelectorCondition, values?: string[]) {
   const errors: string[] = [];
   const maxValueBytes =
     SelectorConditionsMap[condition].maxValueBytes || MAX_CONDITION_VALUE_LENGTH_BYTES;
 
   const { pattern, patternError } = SelectorConditionsMap[condition];
 
-  values.forEach((value) => {
-    if (pattern && !new RegExp(pattern).test(value)) {
+  values?.forEach((value) => {
+    if (value?.length === 0) {
+      errors.push(
+        i18n.translate('xpack.cloudDefend.errorGenericEmptyValue', {
+          defaultMessage: '"{condition}" values cannot be empty',
+          values: { condition },
+        })
+      );
+    } else if (pattern && !new RegExp(pattern).test(value)) {
       if (patternError) {
         errors.push(patternError);
       } else {
