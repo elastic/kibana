@@ -13,16 +13,15 @@ import { DiscoverGridFlyout, DiscoverGridFlyoutProps } from './discover_grid_fly
 import { esHits } from '../../__mocks__/es_hits';
 import { createFilterManagerMock } from '@kbn/data-plugin/public/query/filter_manager/filter_manager.mock';
 import { dataViewMock } from '../../__mocks__/data_view';
-import { DiscoverServices } from '../../build_services';
-import { DocViewsRegistry } from '../../services/doc_views/doc_views_registry';
-import { setDocViewsRegistry } from '../../kibana_services';
 import { dataViewWithTimefieldMock } from '../../__mocks__/data_view_with_timefield';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import type { DataTableRecord, EsHitRecord } from '../../types';
-import { buildDataTableRecord } from '../../utils/build_data_record';
+import { buildDataTableRecord } from '@kbn/unified-discover';
 import { act } from 'react-dom/test-utils';
 import { ReactWrapper } from 'enzyme';
+import type { DataTableRecord, EsHitRecord } from '@kbn/unified-discover';
+import { DocViewsRegistry, setDocViewsRegistry} from "@kbn/unified-doc-viewer-plugin/public/services";
+import { DiscoverServices } from "@kbn/unified-discover/src";
 
 const waitNextTick = () => new Promise((resolve) => setTimeout(resolve, 0));
 

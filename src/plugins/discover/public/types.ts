@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { type DatatableColumn } from '@kbn/expressions-plugin/common';
-import type { DataTableRecord } from '@kbn/unified-doc-viewer-plugin/public/types';
+import {type DatatableColumn} from '@kbn/expressions-plugin/common';
+import type { DataTableRecord } from "@kbn/unified-discover";
 
 export type ValueToStringConverter = (
   rowIndex: number,

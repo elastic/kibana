@@ -8,7 +8,6 @@
     "@kbn/core",
     "@kbn/data-plugin",
     "@kbn/data-views-plugin",
-    "@kbn/discover-plugin",
     "@kbn/es-types",
     "@kbn/i18n",
     "@kbn/i18n-react",
@@ -17,7 +16,8 @@
     "@kbn/react-field",
     "@kbn/test-jest-helpers",
     "@kbn/unified-doc-viewer",
-    "@kbn/unified-field-list-plugin"
+    "@kbn/unified-field-list-plugin",
+    "@kbn/unified-discover"
   ],
   "exclude": [
     "target/**/*",

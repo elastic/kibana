@@ -20,7 +20,6 @@
     "@kbn/test-jest-helpers",
     "@kbn/kibana-react-plugin",
     "@kbn/data-views-plugin",
-    "@kbn/discover-plugin",
     "@kbn/i18n",
     "@kbn/i18n-react",
     "@kbn/core-ui-settings-browser",
@@ -29,6 +28,6 @@
     "@kbn/kibana-utils-plugin",
     "@kbn/field-types",
     "@kbn/es-query",
-    "@kbn/unified-doc-viewer-plugin",
+    "@kbn/unified-discover",
   ]
 }

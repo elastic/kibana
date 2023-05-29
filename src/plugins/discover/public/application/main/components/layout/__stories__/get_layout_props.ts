@@ -20,7 +20,7 @@ import {
   DataTotalHits$,
   RecordRawType,
 } from '../../../services/discover_data_state_container';
-import { buildDataTableRecordList } from '../../../../../utils/build_data_record';
+import { buildDataTableRecordList } from '@kbn/unified-discover';
 import { esHits } from '../../../../../__mocks__/es_hits';
 import { SavedSearch } from '../../../../..';
 import { DiscoverLayoutProps } from '../discover_layout';

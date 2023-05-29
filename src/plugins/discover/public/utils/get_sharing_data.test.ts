@@ -8,7 +8,6 @@
 
 import { Capabilities, IUiSettingsClient } from '@kbn/core/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import type { DiscoverServices } from '../build_services';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { createSearchSourceMock } from '@kbn/data-plugin/common/search/search_source/mocks';
 import {
@@ -18,6 +17,7 @@ import {
 } from '../../common';
 import { dataViewMock } from '../__mocks__/data_view';
 import { getSharingData, showPublicUrlSwitch } from './get_sharing_data';
+import type { DiscoverServices } from "@kbn/unified-discover";
 
 describe('getSharingData', () => {
   let services: DiscoverServices;

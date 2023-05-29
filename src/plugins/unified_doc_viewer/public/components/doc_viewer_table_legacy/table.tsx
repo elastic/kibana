@@ -11,14 +11,13 @@ import React, { useCallback, useMemo } from 'react';
 import { EuiInMemoryTable } from '@elastic/eui';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { getFieldIconType } from '@kbn/unified-field-list-plugin/public';
+import { getShouldShowFieldHandler } from '@kbn/unified-discover';
+import { formatFieldValue, DataTableRecord} from '@kbn/unified-discover';
 import {
-  formatFieldValue,
   getIgnoredReason,
-  getShouldShowFieldHandler,
   isNestedFieldParent,
 } from '@kbn/unified-doc-viewer/public';
 import type {
-  DataTableRecord,
   DocViewFilterFn,
   FieldRecordLegacy,
 } from '@kbn/unified-doc-viewer/public/types';

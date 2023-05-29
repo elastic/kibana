@@ -10,9 +10,9 @@ import ReactDOM from 'react-dom/server';
 import { formatRow, formatTopLevelObject } from './row_formatter';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
-import { DiscoverServices } from '../../../build_services';
 import { stubbedSavedObjectIndexPattern } from '@kbn/data-plugin/common/stubs';
-import { buildDataTableRecord } from '../../../utils/build_data_record';
+import { buildDataTableRecord } from '@kbn/unified-discover';
+import {DiscoverServices} from "@kbn/unified-discover/src";
 
 describe('Row formatter', () => {
   let services: DiscoverServices;

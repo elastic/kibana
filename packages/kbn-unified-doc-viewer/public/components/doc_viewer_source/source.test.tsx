@@ -13,7 +13,7 @@ import * as useUiSettingHook from '@kbn/kibana-react-plugin/public/ui_settings/u
 import { CodeEditor, KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { useEsDocSearch } from '@kbn/unified-doc-viewer-plugin/public';
-import { buildDataTableRecord } from '@kbn/discover-plugin/public/utils/build_data_record';
+import { buildDataTableRecord } from '@kbn/unified-discover';
 import { ElasticRequestState, JsonCodeEditorCommon } from '../..';
 import { DocViewerSource } from './source';
 

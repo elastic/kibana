@@ -12,11 +12,11 @@ import type { TopNavMenuData } from '@kbn/navigation-plugin/public';
 import type { DiscoverAppLocatorParams } from '../../../../../common';
 import { showOpenSearchPanel } from './show_open_search_panel';
 import { getSharingData, showPublicUrlSwitch } from '../../../../utils/get_sharing_data';
-import { DiscoverServices } from '../../../../build_services';
 import { onSaveSearch } from './on_save_search';
 import { DiscoverStateContainer } from '../../services/discover_state';
 import { openOptionsPopover } from './open_options_popover';
 import { openAlertsPopover } from './open_alerts_popover';
+import {DiscoverServices} from "@kbn/unified-discover";
 
 /**
  * Helper function to build the top nav links

@@ -13,8 +13,8 @@ import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { getRenderCellValueFn } from './get_render_cell_value';
 import { dataViewMock } from '../../__mocks__/data_view';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { buildDataTableRecord } from '../../utils/build_data_record';
-import { EsHitRecord } from '../../types';
+import { buildDataTableRecord } from '@kbn/unified-discover';
+import {EsHitRecord} from "@kbn/unified-discover";
 
 const mockServices = {
   settings: {

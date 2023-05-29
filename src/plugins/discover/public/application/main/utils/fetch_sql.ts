@@ -14,7 +14,8 @@ import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { Datatable } from '@kbn/expressions-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { textBasedQueryStateToAstWithValidation } from '@kbn/data-plugin/common';
-import type { RecordsFetchResponse, DataTableRecord } from '../../../types';
+import type { RecordsFetchResponse } from '../../../types';
+import {DataTableRecord} from "@kbn/unified-discover";
 
 interface SQLErrorResponse {
   error: {

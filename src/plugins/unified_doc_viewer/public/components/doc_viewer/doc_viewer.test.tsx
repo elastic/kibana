@@ -10,16 +10,14 @@ import React from 'react';
 import { mount, shallow } from 'enzyme';
 import { DocViewer } from './doc_viewer';
 import { findTestSubject } from '@elastic/eui/lib/test';
-import { getDocViewsRegistry } from '../../../../kibana_services';
-import { DocViewRenderProps } from '../../doc_views_types';
-import { buildDataTableRecord } from '../../../../utils/build_data_record';
+import { buildDataTableRecord } from '@kbn/unified-discover';
+import { getDocViewsRegistry } from '@kbn/unified-doc-viewer-plugin/public/services';
+import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/public/types';
 
 jest.mock('../../../../kibana_services', () => {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let registry: any[] = [];
   return {
     getDocViewsRegistry: () => ({
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       addDocView(view: any) {
         registry.push(view);
       },
@@ -33,18 +31,7 @@ jest.mock('../../../../kibana_services', () => {
   };
 });
 
-jest.mock('../../../../hooks/use_discover_services', () => {
-  return {
-    useDiscoverServices: {
-      uiSettings: {
-        get: jest.fn(),
-      },
-    },
-  };
-});
-
 beforeEach(() => {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   (getDocViewsRegistry() as any).resetRegistry();
   jest.clearAllMocks();
 });

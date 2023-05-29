@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 import type { Filter } from '@kbn/es-query';
+import type { DataTableRecord } from "@kbn/unified-discover";
 import { DataView } from '@kbn/data-views-plugin/public';
 import { DataPublicPluginStart, ISearchSource } from '@kbn/data-plugin/public';
 import { reverseSortDir, SortDirection } from '../utils/sorting';
@@ -14,7 +15,6 @@ import { fetchHitsInInterval } from '../utils/fetch_hits_in_interval';
 import { generateIntervals } from '../utils/generate_intervals';
 import { getEsQuerySearchAfter } from '../utils/get_es_query_search_after';
 import { getEsQuerySort } from '../utils/get_es_query_sort';
-import { DataTableRecord } from '../../../types';
 
 export enum SurrDocType {
   SUCCESSORS = 'successors',

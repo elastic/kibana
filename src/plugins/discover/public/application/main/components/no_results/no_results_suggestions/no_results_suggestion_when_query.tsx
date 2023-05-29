@@ -12,8 +12,8 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiLink } from '@elastic/eui';
 import { SyntaxExamples, SyntaxSuggestionsPopover } from './syntax_suggestions_popover';
-import { type DiscoverServices } from '../../../../../build_services';
 import { useDiscoverServices } from '../../../../../hooks/use_discover_services';
+import {DiscoverServices} from "@kbn/unified-discover";
 
 const getExamples = (
   querySyntax: string | undefined,

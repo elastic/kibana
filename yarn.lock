@@ -5526,6 +5526,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/unified-discover@link:packages/kbn-unified-discover":
+  version "0.0.0"
+  uid ""
+
 "@kbn/unified-field-list-plugin@link:src/plugins/unified_field_list":
   version "0.0.0"
   uid ""

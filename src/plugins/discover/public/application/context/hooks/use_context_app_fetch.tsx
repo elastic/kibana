@@ -22,7 +22,7 @@ import {
 import { AppState } from '../services/context_state';
 import { getFirstSortableField } from '../utils/sorting';
 import { useDiscoverServices } from '../../../hooks/use_discover_services';
-import type { DataTableRecord } from '../../../types';
+import {DataTableRecord} from "@kbn/unified-discover";
 
 const createError = (statusKey: string, reason: FailureReason, error?: Error) => ({
   [statusKey]: { value: LoadingStatus.FAILED, error, reason },

@@ -1390,6 +1390,8 @@
       "@kbn/ui-shared-deps-src/*": ["packages/kbn-ui-shared-deps-src/*"],
       "@kbn/ui-theme": ["packages/kbn-ui-theme"],
       "@kbn/ui-theme/*": ["packages/kbn-ui-theme/*"],
+      "@kbn/unified-discover": ["packages/kbn-unified-discover"],
+      "@kbn/unified-discover/*": ["packages/kbn-unified-discover/*"],
       "@kbn/unified-doc-viewer": ["packages/kbn-unified-doc-viewer"],
       "@kbn/unified-doc-viewer/*": ["packages/kbn-unified-doc-viewer/*"],
       "@kbn/unified-doc-viewer-plugin": ["src/plugins/unified_doc_viewer"],

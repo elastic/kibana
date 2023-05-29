@@ -15,7 +15,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { DataView } from '@kbn/data-plugin/common';
 import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { DiscoverStateContainer } from '../../services/discover_state';
-import { DiscoverServices } from '../../../../build_services';
+import {DiscoverServices} from "@kbn/unified-discover";
 
 const container = document.createElement('div');
 let isOpen = false;

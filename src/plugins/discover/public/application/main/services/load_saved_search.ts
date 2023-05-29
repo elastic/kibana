@@ -21,7 +21,7 @@ import {
   DiscoverAppStateContainer,
   getInitialState,
 } from './discover_app_state_container';
-import { DiscoverServices } from '../../../build_services';
+import {DiscoverServices} from "@kbn/unified-discover";
 
 interface LoadSavedSearchDeps {
   appStateContainer: DiscoverAppStateContainer;

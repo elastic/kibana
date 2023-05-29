@@ -24,7 +24,7 @@ import {
 } from '../../../common';
 import { SIDEBAR_CLOSED_KEY } from '../../application/main/components/layout/discover_layout';
 import { LocalStorageMock } from '../local_storage_mock';
-import { DiscoverServices } from '../../build_services';
+import type { DiscoverServices } from "@kbn/unified-discover";
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { Plugin as NavigationPublicPlugin } from '@kbn/navigation-plugin/public';
 import { SearchBar, UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';

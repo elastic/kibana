@@ -51,7 +51,8 @@
     "@kbn/url-forwarding-plugin",
     "@kbn/usage-collection-plugin",
     "@kbn/utility-types",
-    "@kbn/unified-doc-viewer"
+    "@kbn/unified-doc-viewer",
+    "@kbn/unified-discover"
   ],
   "exclude": [
     "target/**/*",

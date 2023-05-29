@@ -14,9 +14,9 @@ import {
   DocumentExplorerUpdateCallout,
 } from './document_explorer_update_callout';
 import { LocalStorageMock } from '../../../../__mocks__/local_storage_mock';
-import { DiscoverServices } from '../../../../build_services';
 import { discoverServiceMock } from '../../../../__mocks__/services';
 import { DiscoverTourProvider } from '../../../../components/discover_tour';
+import {DiscoverServices} from "@kbn/unified-discover";
 
 const defaultServices = {
   ...discoverServiceMock,

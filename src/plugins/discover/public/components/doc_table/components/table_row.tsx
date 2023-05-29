@@ -5,24 +5,25 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import type {
-  DataTableRecord,
-  DocViewFilterFn,
-  DocViewRenderProps,
-} from '@kbn/unified-doc-viewer-plugin/public/types';
+import classNames from 'classnames';
+import React, { Fragment, useCallback, useMemo, useState } from 'react';
 import { EuiButtonEmpty, EuiIcon } from '@elastic/eui';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { Filter } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
-import { formatFieldValue } from '@kbn/unified-doc-viewer-plugin/public';
-import classNames from 'classnames';
-import React, { Fragment, useCallback, useMemo, useState } from 'react';
-import { TableRowDetails } from './table_row_details';
+import { formatFieldValue } from '@kbn/unified-discover';
+import { DataTableRecord, EsHitRecord } from '@kbn/unified-discover';
 import { TableCell } from './table_row/table_cell';
 import { formatRow, formatTopLevelObject } from '../utils/row_formatter';
+import { TableRowDetails } from './table_row_details';
 import { useDiscoverServices } from '../../../hooks/use_discover_services';
 import { DOC_HIDE_TIME_COLUMN_SETTING, MAX_DOC_FIELDS_DISPLAYED } from '../../../../common';
+import type { DocViewFilterFn, DocViewRenderProps } from '@kbn/unified-doc-viewer/public/types';
+
+
+export type DocTableRow = EsHitRecord & {
+  isAnchor?: boolean;
+};
 
 export interface TableRowProps {
   columns: string[];

@@ -7,7 +7,7 @@
  */
 
 import { dataViewMock } from '../../../__mocks__/data_view';
-import { buildDataTableRecord } from '../../../utils/build_data_record';
+import { buildDataTableRecord } from '@kbn/unified-discover';
 
 export const mockAnchorHit = buildDataTableRecord(
   {

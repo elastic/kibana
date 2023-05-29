@@ -22,8 +22,8 @@ import {
 import { fetchDocuments } from './fetch_documents';
 import { FetchStatus } from '../../types';
 import { DataMsg, RecordRawType, SavedSearchData } from '../services/discover_data_state_container';
-import { DiscoverServices } from '../../../build_services';
 import { fetchSql } from './fetch_sql';
+import {DiscoverServices} from "@kbn/unified-discover";
 
 export interface FetchDeps {
   abortController: AbortController;

@@ -10,8 +10,8 @@ import './row_formatter.scss';
 import React, { Fragment } from 'react';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import type { DataTableRecord } from '@kbn/unified-doc-viewer-plugin/public/types';
-import { formatHit } from '../../../utils/format_hit';
+import { formatHit } from '@kbn/unified-discover';
+import type { DataTableRecord } from '@kbn/unified-discover';
 
 interface Props {
   defPairs: Array<readonly [string, string]>;

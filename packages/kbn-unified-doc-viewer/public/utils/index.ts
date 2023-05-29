@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-export * from './format_value';
+export * from '@kbn/unified-discover/src/format_value';
 export * from './get_ignored_reason';
-export * from './get_should_show_field_handler';
+export * from '@kbn/unified-discover/src/get_should_show_field_handler';
 export * from './nested_fields';

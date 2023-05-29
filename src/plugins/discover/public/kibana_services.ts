@@ -11,7 +11,7 @@ import { createHashHistory } from 'history';
 import type { ScopedHistory, AppMountParameters } from '@kbn/core/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { createGetterSetter } from '@kbn/kibana-utils-plugin/public';
-import { HistoryLocationState } from './build_services';
+import {HistoryLocationState} from "@kbn/unified-discover/src";
 
 let uiActions: UiActionsStart;
 export interface UrlTracker {

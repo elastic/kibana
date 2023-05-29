@@ -17,11 +17,11 @@ import { FetchStatus } from '../../../types';
 import { DiscoverDocuments, onResize } from './discover_documents';
 import { dataViewMock } from '../../../../__mocks__/data_view';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { buildDataTableRecord } from '../../../../utils/build_data_record';
-import { EsHitRecord } from '../../../../types';
+import { buildDataTableRecord } from '@kbn/unified-discover';
 import { DiscoverMainProvider } from '../../services/discover_state_provider';
 import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
 import { DiscoverAppState } from '../../services/discover_app_state_container';
+import type { EsHitRecord } from "@kbn/unified-discover";
 
 setHeaderActionMenuMounter(jest.fn());
 

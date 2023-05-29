@@ -14,7 +14,7 @@ import { mockTopNavMenu } from './__mocks__/top_nav_menu';
 import { ContextAppContent } from './context_app_content';
 import { dataViewMock } from '../../__mocks__/data_view';
 import { ContextApp } from './context_app';
-import { DiscoverServices } from '../../build_services';
+import type { DiscoverServices, HistoryLocationState } from "@kbn/unified-discover";
 import { dataViewsMock } from '../../__mocks__/data_views';
 import { act } from 'react-dom/test-utils';
 import { uiSettingsMock } from '../../__mocks__/ui_settings';
@@ -22,7 +22,6 @@ import { themeServiceMock } from '@kbn/core/public/mocks';
 import { LocalStorageMock } from '../../__mocks__/local_storage_mock';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
-import type { HistoryLocationState } from '../../build_services';
 
 const mockFilterManager = createFilterManagerMock();
 const mockNavigationPlugin = {

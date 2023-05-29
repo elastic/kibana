@@ -8,7 +8,8 @@
 
 import React from 'react';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import type { DataTableRecord, DocViewFilterFn } from '@kbn/unified-doc-viewer-plugin/public/types';
+import type { DataTableRecord } from '@kbn/unified-discover';
+import type { DocViewFilterFn } from '@kbn/unified-doc-viewer';
 import type { ValueToStringConverter } from '../../types';
 
 export interface GridContext {

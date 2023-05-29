@@ -7,7 +7,7 @@
  */
 import type { EsQuerySearchAfter } from '@kbn/data-plugin/common';
 import { SurrDocType } from '../services/context';
-import type { DataTableRecord } from '../../../types';
+import {DataTableRecord} from "@kbn/unified-discover";
 
 /**
  * Get the searchAfter query value for elasticsearch

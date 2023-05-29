@@ -10,7 +10,6 @@ import React from 'react';
 import { act, renderHook } from '@testing-library/react-hooks';
 import { createFilterManagerMock } from '@kbn/data-plugin/public/query/filter_manager/filter_manager.mock';
 import { CONTEXT_TIE_BREAKER_FIELDS_SETTING } from '../../../../common';
-import { DiscoverServices } from '../../../build_services';
 import { FailureReason, LoadingStatus } from '../services/context_query_state';
 import { ContextAppFetchProps, useContextAppFetch } from './use_context_app_fetch';
 import {
@@ -23,6 +22,7 @@ import { createContextSearchSourceStub } from '../services/_stubs';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { themeServiceMock } from '@kbn/core/public/mocks';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import {DiscoverServices} from "@kbn/unified-discover";
 
 const mockFilterManager = createFilterManagerMock();
 

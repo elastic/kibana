@@ -9,11 +9,12 @@
 import React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { findTestSubject } from '@elastic/eui/lib/test';
-import { DocViewerTableLegacy } from './table';
+import { DocViewerTableLegacy, DocViewRenderProps } from './table';
 import { DataView } from '@kbn/data-views-plugin/public';
-import type { DocViewRenderProps, UnifiedDocViewerServices } from '../../types';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { buildDataTableRecord } from '@kbn/discover-plugin/public/utils/build_data_record';
+import { buildDataTableRecord } from '@kbn/unified-discover';
+import type { UnifiedDocViewerServices } from '@kbn/unified-doc-viewer';
+import {DiscoverServices} from "@kbn/unified-discover/src";
 
 const services = {
   uiSettings: {

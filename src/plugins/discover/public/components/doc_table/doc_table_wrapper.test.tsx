@@ -13,7 +13,7 @@ import { dataViewMock } from '../../__mocks__/data_view';
 import { DocTableWrapper, DocTableWrapperProps } from './doc_table_wrapper';
 import { discoverServiceMock } from '../../__mocks__/services';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { buildDataTableRecord } from '../../utils/build_data_record';
+import { buildDataTableRecord } from '@kbn/unified-discover';
 import { DocViewer } from '@kbn/unified-doc-viewer-plugin/public';
 
 describe('Doc table component', () => {

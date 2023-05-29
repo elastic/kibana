@@ -5,12 +5,11 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import type { DataTableRecord } from '@kbn/unified-doc-viewer-plugin/public/types';
+import type { DataTableRecord } from '@kbn/unified-discover';
 import { cellHasFormulas, createEscapeValue } from '@kbn/data-plugin/common';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import { formatFieldValue } from '@kbn/unified-doc-viewer-plugin/public';
+import { formatFieldValue } from '@kbn/unified-discover';
 
 interface ConvertedResult {
   formattedString: string;

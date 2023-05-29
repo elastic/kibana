@@ -10,7 +10,7 @@ import { DataView } from '@kbn/data-views-plugin/common';
 import { cloneDeep } from 'lodash';
 import { isTextBasedQuery } from './is_text_based_query';
 import { DiscoverAppState } from '../services/discover_app_state_container';
-import { DiscoverServices } from '../../../build_services';
+import {DiscoverServices} from "@kbn/unified-discover";
 
 /**
  * Updates the saved search with a given data view & Appstate

@@ -22,13 +22,14 @@ import {
 } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { SortOrder } from '@kbn/saved-search-plugin/public';
-import type { DataTableRecord, DocViewFilterFn } from '@kbn/unified-doc-viewer-plugin/public/types';
+import type { DataTableRecord } from '@kbn/unified-discover';
 import type { HttpStart, IUiSettingsClient, ToastsStart } from '@kbn/core/public';
 import type { DataViewFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
 import type { Filter } from '@kbn/es-query';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { getShouldShowFieldHandler } from '@kbn/unified-doc-viewer-plugin/public';
+import { getShouldShowFieldHandler } from '@kbn/unified-discover';
+import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/public/types';
 import { useRowHeightsOptions } from '../../hooks/use_row_heights_options';
 import { ValueToStringConverter } from '../../types';
 import { convertValueToString } from '../../utils/convert_value_to_string';

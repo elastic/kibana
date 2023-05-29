@@ -13,7 +13,7 @@ import { discoverServiceMock } from '../../../__mocks__/services';
 import { useTextBasedQueryLanguage } from './use_text_based_query_language';
 import { FetchStatus } from '../../types';
 import { RecordRawType } from '../services/discover_data_state_container';
-import { DataTableRecord } from '../../../types';
+import type { DataTableRecord } from '@kbn/unified-discover';
 import { AggregateQuery, Query } from '@kbn/es-query';
 import { dataViewMock } from '../../../__mocks__/data_view';
 import { DataViewListItem } from '@kbn/data-views-plugin/common';
@@ -23,6 +23,7 @@ import { DiscoverMainProvider } from '../services/discover_state_provider';
 import { DiscoverAppState } from '../services/discover_app_state_container';
 import { DiscoverStateContainer } from '../services/discover_state';
 import { VIEW_MODE } from '@kbn/saved-search-plugin/public';
+
 
 function getHookProps(
   query: AggregateQuery | Query | undefined,

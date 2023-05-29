@@ -26,8 +26,9 @@ import {
   keys,
 } from '@elastic/eui';
 import { Filter } from '@kbn/es-query';
+import type { DataTableRecord } from '@kbn/unified-discover';
+import type { DocViewFilterFn } from '@kbn/unified-doc-viewer';
 import { DocViewer } from '@kbn/unified-doc-viewer-plugin/public';
-import type { DataTableRecord, DocViewFilterFn } from '@kbn/unified-doc-viewer-plugin/public/types';
 import { useNavigationProps } from '../../hooks/use_navigation_props';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 

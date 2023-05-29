@@ -8,10 +8,10 @@
 
 import { SortOrder } from '@kbn/saved-search-plugin/public';
 import { DataView } from '@kbn/data-views-plugin/common';
+import type { DiscoverServices } from '@kbn/unified-discover';
 import { DiscoverInternalStateContainer } from '../../services/discover_internal_state_container';
 import { DiscoverAppStateContainer } from '../../services/discover_app_state_container';
 import { addLog } from '../../../../utils/add_log';
-import { DiscoverServices } from '../../../../build_services';
 import { getDataViewAppState } from '../../utils/get_switch_data_view_app_state';
 import { MODIFY_COLUMNS_ON_SWITCH, SORT_DEFAULT_ORDER_SETTING } from '../../../../../common';
 

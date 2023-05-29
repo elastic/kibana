@@ -5,9 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+import { buildDataTableRecord } from '@kbn/unified-discover';
 import { calcFieldCounts } from './calc_field_counts';
-import { buildDataTableRecord } from '../../../utils/build_data_record';
 
 describe('calcFieldCounts', () => {
   test('returns valid field count data', async () => {

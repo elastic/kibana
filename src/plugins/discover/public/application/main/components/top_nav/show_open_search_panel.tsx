@@ -11,8 +11,8 @@ import ReactDOM from 'react-dom';
 import { CoreTheme, I18nStart } from '@kbn/core/public';
 import { Observable } from 'rxjs';
 import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
-import { DiscoverServices } from '../../../../build_services';
 import { OpenSearchPanel } from './open_search_panel';
+import {DiscoverServices} from "@kbn/unified-discover";
 
 let isOpen = false;
 

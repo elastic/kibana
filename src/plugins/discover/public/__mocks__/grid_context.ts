@@ -14,8 +14,8 @@ import { esHitsComplex } from './es_hits_complex';
 import { discoverServiceMock } from './services';
 import { GridContext } from '../components/discover_grid/discover_grid_context';
 import { convertValueToString } from '../utils/convert_value_to_string';
-import { buildDataTableRecord } from '../utils/build_data_record';
-import { EsHitRecord } from '../types';
+import { buildDataTableRecord } from '@kbn/unified-discover';
+import { EsHitRecord } from '@kbn/unified-discover';
 
 const buildGridContext = (dataView: DataView, rows: EsHitRecord[]): GridContext => {
   const usedRows = rows.map((row) => {

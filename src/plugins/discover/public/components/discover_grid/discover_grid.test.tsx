@@ -16,9 +16,8 @@ import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { DiscoverGrid, DiscoverGridProps } from './discover_grid';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { discoverServiceMock } from '../../__mocks__/services';
-import { buildDataTableRecord } from '../../utils/build_data_record';
-import { getDocId } from '../../utils/get_doc_id';
-import { EsHitRecord } from '../../types';
+import { buildDataTableRecord, getDocId } from '@kbn/unified-discover';
+import type { EsHitRecord } from '@kbn/unified-discover';
 
 function getProps() {
   const services = discoverServiceMock;

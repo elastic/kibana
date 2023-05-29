@@ -17,8 +17,7 @@
   "tsdocMetadata": "./build/tsdoc-metadata.json",
   "build": {
     "number": 8467,
-    "sha": "6cb7fec4e154faa0a4a3fee4b33dfef91b9870d9",
-    "date": "2023-05-15T23:12:09+0000"
+    "sha": "6cb7fec4e154faa0a4a3fee4b33dfef91b9870d9"
   },
   "homepage": "https://www.elastic.co/products/kibana",
   "bugs": {
@@ -687,6 +686,7 @@
     "@kbn/ui-shared-deps-npm": "link:packages/kbn-ui-shared-deps-npm",
     "@kbn/ui-shared-deps-src": "link:packages/kbn-ui-shared-deps-src",
     "@kbn/ui-theme": "link:packages/kbn-ui-theme",
+    "@kbn/unified-discover": "link:packages/kbn-unified-discover",
     "@kbn/unified-doc-viewer": "link:packages/kbn-unified-doc-viewer",
     "@kbn/unified-doc-viewer-plugin": "link:src/plugins/unified_doc_viewer",
     "@kbn/unified-field-list-plugin": "link:src/plugins/unified_field_list",

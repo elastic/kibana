@@ -11,8 +11,8 @@ import {
   createStateContainerReactHelpers,
   ReduxLikeStateContainer,
 } from '@kbn/kibana-utils-plugin/common';
-import { DataView, DataViewListItem } from '@kbn/data-views-plugin/common';
-import { DataTableRecord } from '../../../types';
+import type { DataView, DataViewListItem } from '@kbn/data-views-plugin/common';
+import type { DataTableRecord } from '@kbn/unified-discover';
 
 export interface InternalState {
   dataView: DataView | undefined;

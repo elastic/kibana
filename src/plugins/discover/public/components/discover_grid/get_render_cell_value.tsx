@@ -9,6 +9,7 @@
 import React, { Fragment, useContext, useEffect, useMemo } from 'react';
 import classnames from 'classnames';
 import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
+import { DataTableRecord, formatFieldValue, formatHit } from '@kbn/unified-discover';
 import { i18n } from '@kbn/i18n';
 import { euiLightVars as themeLight, euiDarkVars as themeDark } from '@kbn/ui-theme';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
@@ -22,13 +23,10 @@ import {
   EuiFlexItem,
 } from '@elastic/eui';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import { JsonCodeEditor } from '@kbn/unified-doc-viewer/public';
 import { CodeEditor } from '@kbn/kibana-react-plugin/public';
-import { formatFieldValue } from '@kbn/unified-doc-viewer-plugin/public';
-import type { DataTableRecord } from '@kbn/unified-doc-viewer/public/types';
+import { JsonCodeEditor } from '@kbn/unified-doc-viewer';
 import { DiscoverGridContext } from './discover_grid_context';
 import { defaultMonacoEditorWidth } from './constants';
-import { formatHit } from '../../utils/format_hit';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { MAX_DOC_FIELDS_DISPLAYED } from '../../../common';
 

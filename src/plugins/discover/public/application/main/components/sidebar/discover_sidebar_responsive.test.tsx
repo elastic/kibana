@@ -18,7 +18,6 @@ import {
   DiscoverSidebarResponsive,
   DiscoverSidebarResponsiveProps,
 } from './discover_sidebar_responsive';
-import { DiscoverServices } from '../../../../build_services';
 import { FetchStatus } from '../../../types';
 import {
   AvailableFields$,
@@ -34,8 +33,8 @@ import * as ExistingFieldsServiceApi from '@kbn/unified-field-list-plugin/public
 import { resetExistingFieldsCache } from '@kbn/unified-field-list-plugin/public/hooks/use_existing_fields';
 import { createDiscoverServicesMock } from '../../../../__mocks__/services';
 import type { AggregateQuery, Query } from '@kbn/es-query';
-import { buildDataTableRecord } from '../../../../utils/build_data_record';
-import { type DataTableRecord } from '../../../../types';
+import { buildDataTableRecord } from '@kbn/unified-discover';
+import type { DataTableRecord, DiscoverServices} from '@kbn/unified-discover';
 
 jest.mock('@kbn/unified-field-list-plugin/public/services/field_stats', () => ({
   loadFieldStats: jest.fn().mockResolvedValue({

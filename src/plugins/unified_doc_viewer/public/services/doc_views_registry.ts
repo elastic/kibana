@@ -7,15 +7,11 @@
  */
 
 import { createGetterSetter } from '@kbn/kibana-utils-plugin/common';
-import type {
-  DataTableRecord,
-  DocView,
-  DocViewInput,
-  DocViewInputFn,
-} from '@kbn/unified-doc-viewer/public/types';
+import type { DocView, DocViewInput, DocViewInputFn } from '@kbn/unified-doc-viewer/public/types';
 
 export const [getDocViewsRegistry, setDocViewsRegistry] =
   createGetterSetter<DocViewsRegistry>('DocViewsRegistry');
+import { DataTableRecord } from '@kbn/unified-discover';
 
 export class DocViewsRegistry {
   private docViews: DocView[] = [];

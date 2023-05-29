@@ -7,6 +7,7 @@
  */
 
 import { Redirect, Router, Switch } from 'react-router-dom';
+import type { DiscoverServices } from '@kbn/unified-discover';
 import { Route } from '@kbn/shared-ux-router';
 import React from 'react';
 import { History } from 'history';
@@ -16,7 +17,6 @@ import { ContextAppRoute } from './context';
 import { SingleDocRoute } from './doc';
 import { DiscoverMainRoute } from './main';
 import { NotFoundRoute } from './not_found';
-import { DiscoverServices } from '../build_services';
 import { ViewAlertRoute } from './view_alert';
 
 export const discoverRouter = (services: DiscoverServices, history: History, isDev: boolean) => (

@@ -13,13 +13,14 @@ import {
   StateContainer,
   withNotifyOnErrors,
 } from '@kbn/kibana-utils-plugin/public';
-import {
+import type {
   DataPublicPluginStart,
   noSearchSessionStorageCapabilityMessage,
   QueryState,
   SearchSessionInfoProvider,
 } from '@kbn/data-plugin/public';
-import { DataView, DataViewSpec, DataViewType } from '@kbn/data-views-plugin/public';
+import type { DiscoverServices } from '@kbn/unified-discover';
+import type { DataView, DataViewSpec, DataViewType } from '@kbn/data-views-plugin/public';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { v4 as uuidv4 } from 'uuid';
 import { merge } from 'rxjs';
@@ -44,7 +45,6 @@ import {
   DiscoverInternalStateContainer,
   getInternalStateContainer,
 } from './discover_internal_state_container';
-import { DiscoverServices } from '../../../build_services';
 import {
   getDefaultAppState,
   getSavedSearchContainer,

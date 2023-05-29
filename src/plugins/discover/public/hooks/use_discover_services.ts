@@ -7,6 +7,6 @@
  */
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { DiscoverServices } from '../build_services';
+import type { DiscoverServices } from '@kbn/unified-discover/src';
 
 export const useDiscoverServices = () => useKibana<DiscoverServices>().services;
