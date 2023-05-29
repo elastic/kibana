@@ -101,6 +101,7 @@ export class ValidationHelper {
     }
   }
 
+  // adds validation schemas per model to validationMap with virtual model version as key.
   private getTypeValidator(type: string): SavedObjectsTypeValidator {
     if (!this.typeValidatorMap[type]) {
       const savedObjectType = this.registry.getType(type);

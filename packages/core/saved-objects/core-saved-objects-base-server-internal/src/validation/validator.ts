@@ -44,14 +44,13 @@ export class SavedObjectsTypeValidator {
     this.validationMap = typeof validationMap === 'function' ? validationMap() : validationMap;
     this.orderedVersions = Object.keys(this.validationMap).sort(Semver.compare);
   }
-
+  // uses index meta's mappingVersions & docVersions -> virtualVersion to allow keeping track of mixed stack and model versions per type.
   public validate(document: SavedObjectSanitizedDoc, version?: string): void {
     const docVersion =
       version ??
       document.typeMigrationVersion ??
       document.migrationVersion?.[document.type] ??
       this.defaultVersion;
-    // assume typeMigrationVersion gets updated to the relevant virtual model during write & migration.
     const schemaVersion = previousVersionWithSchema(this.orderedVersions, docVersion);
     if (!schemaVersion || !this.validationMap[schemaVersion]) {
       return;
