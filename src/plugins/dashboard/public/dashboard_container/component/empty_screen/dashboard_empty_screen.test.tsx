@@ -67,4 +67,19 @@ describe('DashboardEmptyScreen', () => {
     const editingPanel = findTestSubject(component, 'emptyDashboardWidget');
     expect(editingPanel.length).toBe(0);
   });
+
+  // even when in edit mode, readonly users should not have access to the editing buttons in the empty prompt.
+  test('renders correctly with readonly and edit mode', () => {
+    pluginServices.getServices().dashboardCapabilities.showWriteControls = false;
+
+    const component = mountComponent(ViewMode.EDIT);
+    expect(component.render()).toMatchSnapshot();
+
+    const emptyReadWrite = findTestSubject(component, 'dashboardEmptyReadWrite');
+    expect(emptyReadWrite.length).toBe(0);
+    const emptyReadOnly = findTestSubject(component, 'dashboardEmptyReadOnly');
+    expect(emptyReadOnly.length).toBe(1);
+    const editingPanel = findTestSubject(component, 'emptyDashboardWidget');
+    expect(editingPanel.length).toBe(0);
+  });
 });

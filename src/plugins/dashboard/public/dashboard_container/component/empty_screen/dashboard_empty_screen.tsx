@@ -76,7 +76,7 @@ export function DashboardEmptyScreen() {
     `/plugins/dashboard/assets/${isDarkTheme ? 'dashboards_dark' : 'dashboards_light'}.svg`
   );
 
-  if (isEditMode) {
+  if (showWriteControls && isEditMode) {
     return (
       <EuiPageTemplate
         data-test-subj="emptyDashboardWidget"
