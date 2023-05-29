@@ -142,7 +142,7 @@ export const convertMathToFormulaColumn = (
   }
 
   // now replace the _interval with the new interval() formula
-  if (/params._interval/.test(script)) {
+  if (script.includes('params._interval')) {
     script = script.replaceAll('params._interval', 'interval()');
   }
 
