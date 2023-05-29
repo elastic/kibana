@@ -17,7 +17,7 @@ describe('engines field_capabilities', () => {
     asCurrentUser: {
       cat: { indices: jest.fn() },
       fieldCaps: jest.fn(),
-      indices: { exists: jest.fn() },
+      indices: { exists: jest.fn(), get: jest.fn() },
     },
     asInternalUser: {},
   };
@@ -27,14 +27,9 @@ describe('engines field_capabilities', () => {
     updated_at_millis: 2202018295,
   };
 
-  const catIndexResponse = [
-    {
-      health: 'GREEN',
-      index: 'index-001',
-      status: 'open',
-      uuid: 'YOLLiZ_mSRiDYDk0DJ-p8B',
-    },
-  ];
+  const getIndexResponse = {
+    'test-index-name-1': { settings: { index: { verified_before_close: 'true' } } },
+  };
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -56,8 +51,8 @@ describe('engines field_capabilities', () => {
       };
 
       mockClient.asCurrentUser.indices.exists.mockResolvedValueOnce(true);
-      mockClient.asCurrentUser.cat.indices.mockImplementation(() => {
-        return catIndexResponse;
+      mockClient.asCurrentUser.indices.get.mockImplementation(() => {
+        return getIndexResponse;
       });
       mockClient.asCurrentUser.fieldCaps.mockResolvedValueOnce(fieldCapsResponse);
       await expect(

@@ -24,10 +24,20 @@ export const availableIndices = async (
 };
 
 const closedIndices = async (client: IScopedClusterClient): Promise<string[]> => {
+<<<<<<< HEAD
   const indices = await client.asCurrentUser.cat.indices({
     format: 'json',
   });
   return indices
     .filter((indexData) => indexData?.status === 'close')
     .map((indexData) => indexData?.index ?? '');
+=======
+  const indexDataResult = await client.asCurrentUser.indices.get({
+    expand_wildcards: ['closed'],
+    features: ['aliases', 'settings'],
+    filter_path: ['*.settings.index.verified_before_close'],
+    index: '*',
+  });
+  return Object.keys(indexDataResult);
+>>>>>>> fe92052f140 (Use GET api to fetch closed indices)
 };
