@@ -16,8 +16,14 @@ import { withProcRunner } from '@kbn/dev-proc-runner';
 import semver from 'semver';
 import { FtrProviderContext } from './ftr_provider_context';
 
-const retrieveIntegrations = (chunksTotal: number, chunkIndex: number) => {
-  const pattern = resolve(__dirname, '../../plugins/security_solution/cypress/e2e/**/*.cy.ts');
+const BASE_PATH = '../../plugins/security_solution';
+
+const retrieveIntegrations = (
+  chunksTotal: number,
+  chunkIndex: number,
+  specPattern = '/{,!(investigations)/**/}*.cy.ts'
+) => {
+  const pattern = resolve(__dirname, BASE_PATH + '/cypress/e2e' + specPattern);
   const integrationsPaths = globby.sync(pattern);
   const chunkSize = Math.ceil(integrationsPaths.length / chunksTotal);
 
@@ -39,7 +45,7 @@ export async function SecuritySolutionConfigurableCypressTestRunner(
     await procs.run('cypress', {
       cmd: 'yarn',
       args: [command],
-      cwd: resolve(__dirname, '../../plugins/security_solution'),
+      cwd: resolve(__dirname, BASE_PATH),
       env: {
         FORCE_COLOR: '1',
         CYPRESS_BASE_URL: Url.format(config.get('servers.kibana')),
@@ -66,9 +72,10 @@ export async function SecuritySolutionConfigurableCypressTestRunner(
 export async function SecuritySolutionCypressCliTestRunnerCI(
   context: FtrProviderContext,
   totalCiJobs: number,
-  ciJobNumber: number
+  ciJobNumber: number,
+  specPattern?: string
 ) {
-  const integrations = retrieveIntegrations(totalCiJobs, ciJobNumber);
+  const integrations = retrieveIntegrations(totalCiJobs, ciJobNumber, specPattern);
   return SecuritySolutionConfigurableCypressTestRunner(context, 'cypress:run:spec', {
     SPEC_LIST: integrations.join(','),
   });

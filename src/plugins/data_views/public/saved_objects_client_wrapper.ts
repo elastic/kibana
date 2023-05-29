@@ -6,13 +6,9 @@
  * Side Public License, v 1.
  */
 
-import {
-  SavedObjectsClientContract,
-  SavedObjectsCreateOptions,
-  SavedObjectsUpdateOptions,
-  SimpleSavedObject,
-} from '@kbn/core/public';
-import { omit } from 'lodash';
+import type { ContentClient } from '@kbn/content-management-plugin/public';
+import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/common';
+import type { SavedObjectsClientContract } from '@kbn/core/public';
 import { DataViewSavedObjectConflictError } from '../common/errors';
 import {
   DataViewAttributes,
@@ -21,53 +17,113 @@ import {
   SavedObjectsClientCommonFindArgs,
 } from '../common/types';
 
-type SOClient = Pick<
-  SavedObjectsClientContract,
-  'find' | 'resolve' | 'update' | 'create' | 'delete'
->;
+import type { DataViewCrudTypes } from '../common/content_management';
 
-const simpleSavedObjectToSavedObject = <T>(simpleSavedObject: SimpleSavedObject): SavedObject<T> =>
-  ({
-    version: simpleSavedObject._version,
-    ...omit(simpleSavedObject, '_version'),
-  } as SavedObject<T>);
+import { DataViewSOType } from '../common/content_management';
+
+type SOClient = Pick<SavedObjectsClientContract, 'resolve'>;
 
 export class SavedObjectsClientPublicToCommon implements SavedObjectsClientCommon {
+  private contentManagementClient: ContentClient;
   private savedObjectClient: SOClient;
 
-  constructor(savedObjectClient: SOClient) {
+  constructor(contentManagementClient: ContentClient, savedObjectClient: SOClient) {
+    this.contentManagementClient = contentManagementClient;
     this.savedObjectClient = savedObjectClient;
   }
 
-  async find<T = unknown>(options: SavedObjectsClientCommonFindArgs) {
-    const response = (await this.savedObjectClient.find<T>(options)).savedObjects;
-    return response.map<SavedObject<T>>(simpleSavedObjectToSavedObject);
+  async find(options: SavedObjectsClientCommonFindArgs) {
+    const results = await this.contentManagementClient.search<
+      DataViewCrudTypes['SearchIn'],
+      DataViewCrudTypes['SearchOut']
+    >({
+      contentTypeId: DataViewSOType,
+      query: {
+        text: options.search,
+        limit: options.perPage,
+      },
+      options: {
+        searchFields: options.searchFields,
+        fields: options.fields,
+      },
+    });
+    return results.hits;
   }
 
-  async get<T = unknown>(type: string, id: string) {
-    const response = await this.savedObjectClient.resolve<T>(type, id);
+  async get(id: string) {
+    let response: DataViewCrudTypes['GetOut'];
+    try {
+      response = await this.contentManagementClient.get<
+        DataViewCrudTypes['GetIn'],
+        DataViewCrudTypes['GetOut']
+      >({
+        contentTypeId: DataViewSOType,
+        id,
+      });
+    } catch (e) {
+      if (e.body?.statusCode === 404) {
+        throw new SavedObjectNotFound('data view', id, 'management/kibana/dataViews');
+      } else {
+        throw e;
+      }
+    }
+
+    if (response.meta.outcome === 'conflict') {
+      throw new DataViewSavedObjectConflictError(id);
+    }
+
+    return response.item;
+  }
+
+  async getSavedSearch(id: string) {
+    const response = await this.savedObjectClient.resolve('search', id);
+
     if (response.outcome === 'conflict') {
       throw new DataViewSavedObjectConflictError(id);
     }
-    return simpleSavedObjectToSavedObject<T>(response.saved_object);
+    return response.saved_object;
   }
 
   async update(
-    type: string,
     id: string,
     attributes: DataViewAttributes,
-    options: SavedObjectsUpdateOptions<unknown>
+    options: DataViewCrudTypes['UpdateOptions']
   ) {
-    const response = await this.savedObjectClient.update(type, id, attributes, options);
-    return simpleSavedObjectToSavedObject(response);
+    const response = await this.contentManagementClient.update<
+      DataViewCrudTypes['UpdateIn'],
+      DataViewCrudTypes['UpdateOut']
+    >({
+      contentTypeId: DataViewSOType,
+      id,
+      data: attributes,
+      options,
+    });
+
+    // cast is necessary since its the full object and not just the changes
+    return response.item as SavedObject<DataViewAttributes>;
   }
 
-  async create(type: string, attributes: DataViewAttributes, options?: SavedObjectsCreateOptions) {
-    const response = await this.savedObjectClient.create(type, attributes, options);
-    return simpleSavedObjectToSavedObject(response);
+  async create(attributes: DataViewAttributes, options: DataViewCrudTypes['CreateOptions']) {
+    const result = await this.contentManagementClient.create<
+      DataViewCrudTypes['CreateIn'],
+      DataViewCrudTypes['CreateOut']
+    >({
+      contentTypeId: DataViewSOType,
+      data: attributes,
+      options,
+    });
+
+    return result.item;
   }
 
-  delete(type: string, id: string) {
-    return this.savedObjectClient.delete(type, id, { force: true });
+  async delete(id: string) {
+    await this.contentManagementClient.delete<
+      DataViewCrudTypes['DeleteIn'],
+      DataViewCrudTypes['DeleteOut']
+    >({
+      contentTypeId: DataViewSOType,
+      id,
+      options: { force: true },
+    });
   }
 }

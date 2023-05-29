@@ -7,7 +7,7 @@
 
 import { LogicMounter } from '../../../__mocks__/kea_logic';
 
-import { Status } from '../../../../../common/types/api';
+import { HttpError, Status } from '../../../../../common/types/api';
 
 import { KibanaLogic } from '../../../shared/kibana';
 import { CreateEngineApiLogic } from '../../api/engines/create_engine_api_logic';
@@ -47,7 +47,7 @@ describe('CreateEngineLogic', () => {
   });
 
   describe('listeners', () => {
-    it('createEngine makes expected request action', () => {
+    it('createEngine makes expected request action with VALID_ENGINE_NAME', () => {
       jest.spyOn(CreateEngineLogic.actions, 'createEngineRequest');
 
       CreateEngineLogic.actions.setEngineName(VALID_ENGINE_NAME);
@@ -61,6 +61,35 @@ describe('CreateEngineLogic', () => {
         indices: ['search-index-01'],
       });
     });
+
+    it('createEngine makes expected request action with INVALID_ENGINE_NAME', () => {
+      jest.spyOn(CreateEngineLogic.actions, 'createEngineRequest');
+
+      CreateEngineLogic.actions.setEngineName(INVALID_ENGINE_NAME);
+      CreateEngineLogic.actions.setSelectedIndices(VALID_INDICES_DATA);
+
+      CreateEngineLogic.actions.createEngine();
+
+      expect(CreateEngineLogic.actions.createEngineRequest).toHaveBeenCalledTimes(1);
+      expect(CreateEngineLogic.actions.createEngineRequest).toHaveBeenCalledWith({
+        engineName: INVALID_ENGINE_NAME,
+        indices: ['search-index-01'],
+      });
+    });
+    it('createEngine returns error when duplicate search application is created', () => {
+      const httpError: HttpError = {
+        body: {
+          error: 'search_application_already_exists',
+          message: 'Search application name already taken. Choose another name.',
+          statusCode: 409,
+        },
+        fetchOptions: {},
+        request: {},
+      } as HttpError;
+      CreateEngineApiLogic.actions.apiError(httpError);
+      expect(CreateEngineLogic.values.createEngineError).toEqual(httpError);
+    });
+
     it('engineCreated is handled and is navigated to Search application list page', () => {
       jest.spyOn(CreateEngineLogic.actions, 'fetchEngines');
       jest
@@ -84,10 +113,9 @@ describe('CreateEngineLogic', () => {
 
         expect(CreateEngineLogic.values.engineNameStatus).toEqual('complete');
       });
-      it('returns warning for invalid engine name', () => {
+      it('returns complete with invalid engine name', () => {
         CreateEngineLogic.actions.setEngineName(INVALID_ENGINE_NAME);
-
-        expect(CreateEngineLogic.values.engineNameStatus).toEqual('warning');
+        expect(CreateEngineLogic.values.engineNameStatus).toEqual('complete');
       });
     });
     describe('indicesStatus', () => {
@@ -106,11 +134,11 @@ describe('CreateEngineLogic', () => {
 
         expect(CreateEngineLogic.values.createDisabled).toEqual(false);
       });
-      it('true with invalid data', () => {
+      it('false with invalid data', () => {
         CreateEngineLogic.actions.setSelectedIndices(VALID_INDICES_DATA);
         CreateEngineLogic.actions.setEngineName(INVALID_ENGINE_NAME);
 
-        expect(CreateEngineLogic.values.createDisabled).toEqual(true);
+        expect(CreateEngineLogic.values.createDisabled).toEqual(false);
       });
     });
     describe('formDisabled', () => {

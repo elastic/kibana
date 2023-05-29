@@ -46,6 +46,10 @@ export function SettingsTemplate({ children, selectedTab }: Props) {
   const agentConfigurationAvailable = useApmFeatureFlag(
     ApmFeatureFlagName.AgentConfigurationAvailable
   );
+  const schemaAvailable = useApmFeatureFlag(ApmFeatureFlagName.SchemaAvailable);
+  const indicesAvailable = useApmFeatureFlag(
+    ApmFeatureFlagName.ConfigurableIndicesAvailable
+  );
 
   const tabs = getTabs({
     core,
@@ -53,6 +57,8 @@ export function SettingsTemplate({ children, selectedTab }: Props) {
     router,
     defaultEnvironment,
     agentConfigurationAvailable,
+    schemaAvailable,
+    indicesAvailable,
   });
 
   return (
@@ -76,12 +82,16 @@ function getTabs({
   router,
   defaultEnvironment,
   agentConfigurationAvailable,
+  schemaAvailable,
+  indicesAvailable,
 }: {
   core: CoreStart;
   selectedTab: Tab['key'];
   router: ApmRouter;
   defaultEnvironment: Environment;
   agentConfigurationAvailable: boolean;
+  schemaAvailable: boolean;
+  indicesAvailable: boolean;
 }) {
   const canReadMlJobs = !!core.application.capabilities.ml?.canGetJobs;
 
@@ -147,20 +157,29 @@ function getTabs({
       }),
       href: router.link('/settings/custom-links'),
     },
-    {
-      key: 'apm-indices',
-      label: i18n.translate('xpack.apm.settings.indices', {
-        defaultMessage: 'Indices',
-      }),
-      href: router.link('/settings/apm-indices'),
-    },
-    {
-      key: 'schema',
-      label: i18n.translate('xpack.apm.settings.schema', {
-        defaultMessage: 'Schema',
-      }),
-      href: router.link('/settings/schema'),
-    },
+    ...(indicesAvailable
+      ? [
+          {
+            key: 'apm-indices' as const,
+            label: i18n.translate('xpack.apm.settings.indices', {
+              defaultMessage: 'Indices',
+            }),
+            href: router.link('/settings/apm-indices'),
+          },
+        ]
+      : []),
+
+    ...(schemaAvailable
+      ? [
+          {
+            key: 'schema' as const,
+            label: i18n.translate('xpack.apm.settings.schema', {
+              defaultMessage: 'Schema',
+            }),
+            href: router.link('/settings/schema'),
+          },
+        ]
+      : []),
   ];
 
   return tabs

@@ -18,7 +18,7 @@ import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   createSignalsIndex,
   deleteAllRules,
-  deleteSignalsIndex,
+  deleteAllAlerts,
   createRule,
   waitForRuleSuccess,
   waitForSignalsToBePresent,
@@ -54,7 +54,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       afterEach(async () => {
-        await deleteSignalsIndex(supertest, log);
+        await deleteAllAlerts(supertest, log, es);
         await deleteAllRules(supertest, log);
         await esArchiver.unload(
           'x-pack/test/functional/es_archives/security_solution/timestamp_in_seconds'
@@ -131,7 +131,7 @@ export default ({ getService }: FtrProviderContext) => {
      */
     describe('Signals generated from events with timestamp override field', async () => {
       beforeEach(async () => {
-        await deleteSignalsIndex(supertest, log);
+        await deleteAllAlerts(supertest, log, es);
         await createSignalsIndex(supertest, log);
         await esArchiver.load(
           'x-pack/test/functional/es_archives/security_solution/timestamp_override_1'
@@ -148,7 +148,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       afterEach(async () => {
-        await deleteSignalsIndex(supertest, log);
+        await deleteAllAlerts(supertest, log, es);
         await deleteAllRules(supertest, log);
         await esArchiver.unload(
           'x-pack/test/functional/es_archives/security_solution/timestamp_override_1'
@@ -361,7 +361,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       afterEach(async () => {
-        await deleteSignalsIndex(supertest, log);
+        await deleteAllAlerts(supertest, log, es);
         await deleteAllRules(supertest, log);
       });
 
