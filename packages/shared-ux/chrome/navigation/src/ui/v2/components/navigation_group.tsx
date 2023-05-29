@@ -65,6 +65,9 @@ function NavigationGroupInternalComp(props: Props) {
             defaultIsCollapsed={defaultIsCollapsed}
           />
         )}
+        {/* We render the children so they mount and can register themselves but
+        visually they don't appear here in the DOM. They are rendered inside the
+        <EuiSideNav />  "items" prop (see <NavigationSectionUI />) */}
         {children}
       </>
     );
