@@ -24,6 +24,10 @@ export default {
       options: [null, { message: 'Failed to fetch data streams' }],
       control: { type: 'radio' },
     },
+    integrationsError: {
+      options: [null, { message: 'Failed to fetch data integrations' }],
+      control: { type: 'radio' },
+    },
   },
 };
 
@@ -59,13 +63,17 @@ const DataStreamSelectorTemplate: Story<DataStreamSelectorProps> = (args) => {
   return (
     <DataStreamSelector
       {...args}
-      key={title}
       dataStreams={sortedDataStreams}
       integrations={sortedIntegrations}
-      title={title}
       onIntegrationsLoadMore={onIntegrationsLoadMore}
+      onIntegrationsSearch={setSearch}
+      onIntegrationsSort={setSearch}
+      onIntegrationsStreamsSearch={setSearch}
+      onIntegrationsStreamsSort={setSearch}
       onStreamSelected={onStreamSelected}
-      onSearch={setSearch}
+      onUnmanagedStreamsSearch={setSearch}
+      onUnmanagedStreamsSort={setSearch}
+      title={title}
     />
   );
 };
@@ -73,10 +81,12 @@ const DataStreamSelectorTemplate: Story<DataStreamSelectorProps> = (args) => {
 export const Basic = DataStreamSelectorTemplate.bind({});
 Basic.args = {
   dataStreamsError: null,
+  integrationsError: null,
   isLoadingIntegrations: false,
   isLoadingStreams: false,
+  onIntegrationsReload: () => alert('Reload integrations...'),
   onStreamsEntryClick: () => console.log('Load uncategorized streams...'),
-  onStreamsReload: () => alert('Reloading streams...'),
+  onUnmanagedStreamsReload: () => alert('Reloading streams...'),
 };
 
 const mockIntegrations: Integration[] = [

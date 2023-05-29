@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { dynamic } from '../../common/dynamic';
-import type { CustomDataStreamSelectorBuilderProps } from './custom_data_stream_selector';
+import { CustomDataStreamSelectorBuilderProps } from './custom_data_stream_selector';
 
 const LazyCustomDataStreamSelector = dynamic(() => import('./custom_data_stream_selector'));
 

@@ -36,17 +36,9 @@ const useDataStreams = ({ dataStreamsClient }: DataStreamsContextDeps) => {
 
   const error = useSelector(dataStreamsStateService, (state) => state.context.error);
 
-  const isUninitialized = useSelector(dataStreamsStateService, (state) =>
-    state.matches('uninitialized')
-  );
-
   const isLoading = useSelector(
     dataStreamsStateService,
     (state) => state.matches('loading') || state.matches('debounceSearchingDataStreams')
-  );
-
-  const hasFailedLoading = useSelector(dataStreamsStateService, (state) =>
-    state.matches('loadingFailed')
   );
 
   const loadDataStreams = useCallback(
@@ -83,10 +75,8 @@ const useDataStreams = ({ dataStreamsClient }: DataStreamsContextDeps) => {
 
     // Failure states
     error,
-    hasFailedLoading,
 
     // Loading states
-    isUninitialized,
     isLoading,
 
     // Data

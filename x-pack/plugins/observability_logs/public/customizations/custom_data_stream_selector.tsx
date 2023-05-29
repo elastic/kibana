@@ -20,7 +20,7 @@ interface CustomDataStreamSelectorProps {
 export const CustomDataStreamSelector = withProviders(({ stateContainer }) => {
   // Container component, here goes all the state management and custom logic usage to keep the DataStreamSelector presentational.
   const dataView = useDataView();
-  console.log('render');
+
   const {
     error: integrationsError,
     integrations,
