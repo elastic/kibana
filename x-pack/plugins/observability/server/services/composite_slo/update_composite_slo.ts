@@ -10,7 +10,7 @@ import {
   UpdateCompositeSLOResponse,
   updateCompositeSLOResponseSchema,
 } from '@kbn/slo-schema';
-import { CompositeSLO } from '../../domain/models';
+import { CompositeSLO, CompositeSLOId } from '../../domain/models';
 import { validateCompositeSLO } from '../../domain/services/composite_slo';
 import { SLORepository } from '../slo';
 import { CompositeSLORepository } from './composite_slo_repository';
@@ -22,7 +22,7 @@ export class UpdateCompositeSLO {
   ) {}
 
   public async execute(
-    compositeSloId: string,
+    compositeSloId: CompositeSLOId,
     params: UpdateCompositeSLOParams
   ): Promise<UpdateCompositeSLOResponse> {
     const originalCompositeSlo = await this.compositeSloRepository.findById(compositeSloId);
