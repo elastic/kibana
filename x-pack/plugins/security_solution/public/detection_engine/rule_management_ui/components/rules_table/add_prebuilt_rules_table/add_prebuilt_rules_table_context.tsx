@@ -12,6 +12,11 @@ import type {
   EuiSearchBarProps,
   EuiTableSelectionType,
 } from '@elastic/eui';
+import { useUserData } from '../../../../../detections/components/user_info';
+import {
+  usePerformInstallAllRules,
+  usePerformInstallSpecificRules,
+} from '../../../../rule_management/logic/prebuilt_rules/use_perform_rule_install';
 import { usePrebuiltRulesInstallReview } from '../../../../rule_management/logic/prebuilt_rules/use_prebuilt_rules_install_review';
 import { DEFAULT_RULES_TABLE_REFRESH_SETTING } from '../../../../../../common/constants';
 import { invariant } from '../../../../../../common/utils/invariant';
@@ -19,10 +24,12 @@ import { useUiSetting$ } from '../../../../../common/lib/kibana';
 import type { InMemoryPaginationOptions } from '../../../../rule_management/logic';
 import { RULES_TABLE_INITIAL_PAGE_SIZE, RULES_TABLE_PAGE_SIZE_OPTIONS } from '../constants';
 import type { RuleInstallationInfoForReview } from '../../../../../../common/detection_engine/prebuilt_rules/api/review_rule_installation/response_schema';
-
+import { hasUserCRUDPermission } from '../../../../../common/utils/privileges';
+import type { TableColumn } from './use_add_prebuilt_rules_table_columns';
+import { useAddPrebuiltRulesTableColumns } from './use_add_prebuilt_rules_table_columns';
 export interface AddPrebuiltRulesTableState {
   /**
-   * Rules avialable to be installed
+   * Rules available to be installed
    */
   rules: RuleInstallationInfoForReview[];
   /**
@@ -53,11 +60,21 @@ export interface AddPrebuiltRulesTableState {
    * EuiSearchBarProps filters for InMemoryTable
    */
   filters: EuiSearchBarProps;
+  /**
+   * Columns for Add Rules Table
+   */
+  rulesColumns: TableColumn[];
+  /**
+   * Columns for Add Rules Table
+   */
+  selectedRules: RuleInstallationInfoForReview[];
 }
 
 export interface AddPrebuiltRulesTableActions {
   reFetchRules: ReturnType<typeof usePrebuiltRulesInstallReview>['refetch'];
   onTableChange: (criteria: CriteriaWithPagination<RuleInstallationInfoForReview>) => void;
+  installAllRules: ReturnType<typeof usePerformInstallAllRules>['mutateAsync'];
+  installSpecificRules: ReturnType<typeof usePerformInstallSpecificRules>['mutateAsync'];
 }
 
 export interface AddPrebuiltRulesContextType {
@@ -80,6 +97,7 @@ export const AddPrebuiltRulesTableContextProvider = ({
     idleTimeout: number;
   }>(DEFAULT_RULES_TABLE_REFRESH_SETTING);
   const [pagination, setPagination] = useState<{ pageIndex: number }>({ pageIndex: 0 });
+  const [selectedRules, setSelectedRules] = useState<RuleInstallationInfoForReview[]>([]);
 
   const onTableChange = ({
     page: { index },
@@ -90,6 +108,7 @@ export const AddPrebuiltRulesTableContextProvider = ({
   const selectionValue: EuiTableSelectionType<RuleInstallationInfoForReview> = useMemo(
     () => ({
       selectable: () => true,
+      onSelectionChange: (newSelectedRules) => setSelectedRules(newSelectedRules),
       initialSelected: [],
     }),
     []
@@ -110,12 +129,26 @@ export const AddPrebuiltRulesTableContextProvider = ({
     keepPreviousData: true, // Use this option so that the state doesn't jump between "success" and "loading" on page change
   });
 
+  const { mutateAsync: installAllRules, isLoading: isInstallAllRulesLoading } =
+    usePerformInstallAllRules();
+  const { mutateAsync: installSpecificRules, isLoading: isInstallSpecificRulesLoading } =
+    usePerformInstallSpecificRules();
+
+  const [{ canUserCRUD }] = useUserData();
+  const hasPermissions = hasUserCRUDPermission(canUserCRUD);
+  const rulesColumns = useAddPrebuiltRulesTableColumns({
+    installSpecificRules,
+    hasCRUDPermissions: hasPermissions,
+  });
+
   const actions = useMemo(
     () => ({
       reFetchRules: refetch,
       onTableChange,
+      installAllRules,
+      installSpecificRules,
     }),
-    [refetch]
+    [installAllRules, installSpecificRules, refetch]
   );
 
   const filters: EuiSearchBarProps = useMemo(
@@ -155,6 +188,8 @@ export const AddPrebuiltRulesTableContextProvider = ({
         isFetched,
         isLoading,
         isRefetching,
+        rulesColumns,
+        selectedRules,
         lastUpdated: dataUpdatedAt,
       },
       actions,
@@ -162,11 +197,13 @@ export const AddPrebuiltRulesTableContextProvider = ({
   }, [
     rules,
     pagination,
-    filters,
     selectionValue,
+    filters,
     isFetched,
     isLoading,
     isRefetching,
+    rulesColumns,
+    selectedRules,
     dataUpdatedAt,
     actions,
   ]);

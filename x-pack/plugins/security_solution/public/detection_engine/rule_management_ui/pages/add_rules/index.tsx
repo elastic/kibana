@@ -18,20 +18,12 @@ import { useUserData } from '../../../../detections/components/user_info';
 import { useListsConfig } from '../../../../detections/containers/detection_engine/lists/use_lists_config';
 
 import * as i18n from './translations';
-import { usePrebuiltRulesStatus } from '../../../rule_management/logic/prebuilt_rules/use_prebuilt_rules_status';
 import { AddPrebuiltRulesTable } from '../../components/rules_table/add_prebuilt_rules_table/add_prebuilt_rules_table';
 import { AddPrebuiltRulesTableContextProvider } from '../../components/rules_table/add_prebuilt_rules_table/add_prebuilt_rules_table_context';
+import { AddPrebuiltRulesHeaderButtons } from '../../components/rules_table/add_prebuilt_rules_table/add_prebuilt_rules_header_buttons';
 
 const AddRulesPageComponent: React.FC = () => {
   const { navigateToApp } = useKibana().services.application;
-  // const invalidateFindRulesQuery = useInvalidateFindRulesQuery();
-  // const invalidateFetchRuleManagementFilters = useInvalidateFetchRuleManagementFiltersQuery();
-  // const invalidateRules = useCallback(() => {
-  //   invalidateFindRulesQuery();
-  //   invalidateFetchRuleManagementFilters();
-  // }, [invalidateFindRulesQuery, invalidateFetchRuleManagementFilters]);
-
-  const { data: preBuiltRulesStatus } = usePrebuiltRulesStatus();
 
   const [
     {
@@ -72,13 +64,7 @@ const AddRulesPageComponent: React.FC = () => {
       <AddPrebuiltRulesTableContextProvider>
         <SecuritySolutionPageWrapper>
           <HeaderPage title={i18n.PAGE_TITLE}>
-            <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap={true}>
-              <EuiFlexItem grow={false}>
-                <EuiButton fill iconType="plusInCircle">
-                  {i18n.INSTALL_ALL}
-                </EuiButton>
-              </EuiFlexItem>
-            </EuiFlexGroup>
+            <AddPrebuiltRulesHeaderButtons />
           </HeaderPage>
           <AddPrebuiltRulesTable />
         </SecuritySolutionPageWrapper>

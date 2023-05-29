@@ -8,6 +8,7 @@
 import type { EuiBasicTableColumn, EuiTableActionsColumnType } from '@elastic/eui';
 import { EuiButtonEmpty, EuiBadge, EuiText } from '@elastic/eui';
 import React, { useMemo } from 'react';
+import type { usePerformInstallSpecificRules } from '../../../../rule_management/logic/prebuilt_rules/use_perform_rule_install';
 import {
   DEFAULT_RELATIVE_DATE_THRESHOLD,
   SHOW_RELATED_INTEGRATIONS_SETTING,
@@ -27,6 +28,7 @@ export type TableColumn =
   | EuiTableActionsColumnType<RuleInstallationInfoForReview>;
 
 interface ColumnsProps {
+  installSpecificRules: ReturnType<typeof usePerformInstallSpecificRules>['mutateAsync'];
   hasCRUDPermissions: boolean;
 }
 
@@ -52,7 +54,7 @@ const TAGS_COLUMN: TableColumn = {
   field: 'tags',
   name: null,
   align: 'center',
-  render: (tags: Rule['tags']) => {
+  render: (tags: RuleInstallationInfoForReview['tags']) => {
     if (tags == null || tags.length === 0) {
       return null;
     }
@@ -81,7 +83,7 @@ const INTEGRATIONS_COLUMN: TableColumn = {
   field: 'related_integrations',
   name: null,
   align: 'center',
-  render: (integrations: Rule['related_integrations']) => {
+  render: (integrations: RuleInstallationInfoForReview['related_integrations']) => {
     if (integrations == null || integrations.length === 0) {
       return null;
     }
@@ -92,29 +94,45 @@ const INTEGRATIONS_COLUMN: TableColumn = {
   truncateText: true,
 };
 
-const INSTALL_BUTTON_COLUMN: TableColumn = {
+type InstallRowRule = (
+  value: RuleInstallationInfoForReview['rule_id'],
+  item: RuleInstallationInfoForReview
+) => void;
+
+const createInstallButtonColumn = (installRowRule: InstallRowRule): TableColumn => ({
   field: 'rule_id',
   name: '',
-  render: (value: Rule['rule_id']) => {
+  render: (
+    value: RuleInstallationInfoForReview['rule_id'],
+    item: RuleInstallationInfoForReview
+  ) => {
     return (
-      <EuiButtonEmpty
-        size="s"
-        onClick={() => {
-          alert(value);
-        }}
-      >
+      <EuiButtonEmpty size="s" onClick={() => installRowRule(value, item)}>
         {i18n.INSTALL_RULE_BUTTON}
       </EuiButtonEmpty>
     );
   },
   width: '10%',
-};
+});
 
 export const useAddPrebuiltRulesTableColumns = ({
+  installSpecificRules,
   hasCRUDPermissions,
 }: ColumnsProps): TableColumn[] => {
   const ruleNameColumn = useRuleNameColumn();
   const [showRelatedIntegrations] = useUiSetting$<boolean>(SHOW_RELATED_INTEGRATIONS_SETTING);
+
+  const installRowRule = useMemo(
+    () => (value: RuleInstallationInfoForReview['rule_id'], item: RuleInstallationInfoForReview) => {
+      installSpecificRules([
+        {
+          rule_id: value,
+          version: item.version,
+        },
+      ]);
+    },
+    [installSpecificRules]
+  );
 
   return useMemo(
     () => [
@@ -160,8 +178,8 @@ export const useAddPrebuiltRulesTableColumns = ({
         width: '18%',
         truncateText: true,
       },
-      ...(hasCRUDPermissions ? [INSTALL_BUTTON_COLUMN] : []),
+      ...(hasCRUDPermissions ? [createInstallButtonColumn(installRowRule)] : []),
     ],
-    [hasCRUDPermissions, ruleNameColumn, showRelatedIntegrations]
+    [hasCRUDPermissions, installRowRule, ruleNameColumn, showRelatedIntegrations]
   );
 };

@@ -13,6 +13,8 @@ import { INTERNAL_ALERTING_API_FIND_RULES_PATH } from '@kbn/alerting-plugin/comm
 import type { BulkInstallPackagesResponse } from '@kbn/fleet-plugin/common';
 import { epmRouteService } from '@kbn/fleet-plugin/common';
 import type { InstallPackageResponse } from '@kbn/fleet-plugin/common/types';
+import type { InstallSpecificRulesRequest } from '../../../../common/detection_engine/prebuilt_rules/api/perform_rule_installation/perform_rule_installation_request_schema';
+import type { PerformRuleInstallationResponseBody } from '../../../../common/detection_engine/prebuilt_rules/api/perform_rule_installation/perform_rule_installation_response_schema';
 import type { GetPrebuiltRulesStatusResponseBody } from '../../../../common/detection_engine/prebuilt_rules/api/get_prebuilt_rules_status/response_schema';
 import type { RuleManagementFiltersResponse } from '../../../../common/detection_engine/rule_management/api/rules/filters/response_schema';
 import { RULE_MANAGEMENT_FILTERS_URL } from '../../../../common/detection_engine/rule_management/api/urls';
@@ -70,8 +72,6 @@ import type {
 import { convertRulesFilterToKQL } from '../logic/utils';
 import type { ReviewRuleUpgradeResponseBody } from '../../../../common/detection_engine/prebuilt_rules/api/review_rule_upgrade/response_schema';
 import type { ReviewRuleInstallationResponseBody } from '../../../../common/detection_engine/prebuilt_rules/api/review_rule_installation/response_schema';
-
-// TODO: Can we just go ahead and generate this file plz?
 
 /**
  * Create provided Rule
@@ -674,9 +674,21 @@ export const reviewRuleInstall = async ({
  *
  * @throws An error if response is not OK
  */
-// TODO: Add return Promise<PerformRuleInstallationResponseBody> when API added
-export const performRuleInstall = async ({ signal }: { signal: AbortSignal | undefined }) =>
+export const performInstallAllRules = async (): Promise<PerformRuleInstallationResponseBody> =>
   KibanaServices.get().http.fetch(PERFORM_RULE_INSTALLATION_URL, {
     method: 'POST',
-    signal,
+    body: JSON.stringify({
+      mode: 'ALL_RULES',
+    }),
+  });
+
+export const performInstallSpecificRules = async (
+  rules: InstallSpecificRulesRequest['rules']
+): Promise<PerformRuleInstallationResponseBody> =>
+  KibanaServices.get().http.fetch(PERFORM_RULE_INSTALLATION_URL, {
+    method: 'POST',
+    body: JSON.stringify({
+      mode: 'SPECIFIC_RULES',
+      rules,
+    }),
   });
