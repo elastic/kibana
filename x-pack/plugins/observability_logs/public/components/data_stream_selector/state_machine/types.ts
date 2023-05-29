@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiContextMenuPanelId } from '@elastic/eui/src/components/context_menu/context_menu';
 import { ReloadDataStreams, SearchDataStreams } from '../../../hooks/use_data_streams';
 import {
   LoadMoreIntegrations,
@@ -13,17 +12,7 @@ import {
 } from '../../../hooks/use_integrations';
 import { DataStream } from '../../../../common/data_streams';
 import type { IImmutableCache } from '../../../../common/immutable_cache';
-import { SortOrder } from '../../../../common/latest';
-import { DataStreamSelectionHandler, PanelId } from '../types';
-
-export interface DataStreamsSelectorSearchParams {
-  name: string;
-  sortOrder: SortOrder;
-}
-
-export type DataStreamsSelectorSearchHandler = (params: DataStreamsSelectorSearchParams) => void;
-
-export type ChangePanelHandler = ({ panelId }: { panelId: EuiContextMenuPanelId }) => void;
+import { DataStreamSelectionHandler, DataStreamsSelectorSearchParams, PanelId } from '../types';
 
 export interface DefaultDataStreamsSelectorContext {
   panelId: PanelId;
@@ -91,8 +80,8 @@ export interface DataStreamsSelectorStateMachineDependencies {
   onIntegrationsSort: SearchIntegrations;
   onIntegrationsStreamsSearch: SearchIntegrations;
   onIntegrationsStreamsSort: SearchIntegrations;
-  onUnmanagedStreamsSearch: SearchDataStreams;
-  onUnmanagedStreamsSort: SearchDataStreams;
   onStreamSelected: DataStreamSelectionHandler;
   onUnmanagedStreamsReload: ReloadDataStreams;
+  onUnmanagedStreamsSearch: SearchDataStreams;
+  onUnmanagedStreamsSort: SearchDataStreams;
 }

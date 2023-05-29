@@ -6,17 +6,32 @@
  */
 
 import React from 'react';
-import { EuiButton, EuiPopover, EuiPopoverProps, useIsWithinBreakpoints } from '@elastic/eui';
-import { POPOVER_ID } from '../constants';
+import {
+  EuiButton,
+  EuiHorizontalRule,
+  EuiPanel,
+  EuiPopover,
+  EuiPopoverProps,
+  EuiTitle,
+  useIsWithinBreakpoints,
+} from '@elastic/eui';
+import styled from '@emotion/styled';
+import { DATA_VIEW_POPOVER_CONTENT_WIDTH, POPOVER_ID, selectDatasetLabel } from '../constants';
 import { getPopoverButtonStyles } from '../utils';
 
+const panelStyle = { width: DATA_VIEW_POPOVER_CONTENT_WIDTH };
 interface DataStreamsPopoverProps extends Omit<EuiPopoverProps, 'button'> {
+  children: React.ReactNode;
   onClick: () => void;
   title: string;
-  children: React.ReactNode;
 }
 
-export const DataStreamsPopover = ({ title, onClick, ...props }: DataStreamsPopoverProps) => {
+export const DataStreamsPopover = ({
+  children,
+  onClick,
+  title,
+  ...props
+}: DataStreamsPopoverProps) => {
   const isMobile = useIsWithinBreakpoints(['xs', 's']);
 
   const buttonStyles = getPopoverButtonStyles({ fullWidth: isMobile });
@@ -39,6 +54,19 @@ export const DataStreamsPopover = ({ title, onClick, ...props }: DataStreamsPopo
       buffer={8}
       {...(isMobile && { display: 'block' })}
       {...props}
-    />
+    >
+      <EuiPanel paddingSize="none" hasShadow={false} css={panelStyle}>
+        <Title size="xxs">
+          <span>{selectDatasetLabel}</span>
+        </Title>
+        <EuiHorizontalRule margin="none" />
+        {children}
+      </EuiPanel>
+    </EuiPopover>
   );
 };
+
+const Title = styled(EuiTitle)`
+  padding: 12px;
+  display: block;
+`;

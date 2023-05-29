@@ -7,7 +7,8 @@
 
 import { ImmutableCache } from '../../../../common/immutable_cache';
 import { INTEGRATION_PANEL_ID } from '../constants';
-import { DataStreamsSelectorSearchParams, DefaultDataStreamsSelectorContext } from './types';
+import { DataStreamsSelectorSearchParams } from '../types';
+import { DefaultDataStreamsSelectorContext } from './types';
 
 export const defaultSearch: DataStreamsSelectorSearchParams = {
   name: '',

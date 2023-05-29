@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { EuiContextMenu, EuiContextMenuPanel, EuiHorizontalRule } from '@elastic/eui';
 import React, { useMemo } from 'react';
+import { EuiContextMenu, EuiHorizontalRule } from '@elastic/eui';
 import { dynamic } from '../../../common/dynamic';
 import { useIntersectionRef } from '../../hooks/use_intersection_ref';
 import {
@@ -14,7 +14,6 @@ import {
   DATA_VIEW_POPOVER_CONTENT_WIDTH,
   integrationsLabel,
   INTEGRATION_PANEL_ID,
-  selectDatasetLabel,
   uncategorizedLabel,
   UNMANAGED_STREAMS_PANEL_ID,
 } from './constants';
@@ -46,11 +45,11 @@ export function DataStreamSelector({
   onIntegrationsSort,
   onIntegrationsStreamsSearch,
   onIntegrationsStreamsSort,
-  onUnmanagedStreamsSearch,
-  onUnmanagedStreamsSort,
-  onUnmanagedStreamsReload,
   onStreamSelected,
   onStreamsEntryClick,
+  onUnmanagedStreamsReload,
+  onUnmanagedStreamsSearch,
+  onUnmanagedStreamsSort,
   title,
 }: DataStreamSelectorProps) {
   const {
@@ -157,23 +156,21 @@ export function DataStreamSelector({
       closePopover={togglePopover}
       onClick={togglePopover}
     >
-      <EuiContextMenuPanel title={selectDatasetLabel}>
-        <SearchControls
-          key={panelId}
-          search={search}
-          onSearch={searchByName}
-          onSort={sortByOrder}
-          isLoading={isLoadingIntegrations || isLoadingStreams}
-        />
-        <EuiHorizontalRule margin="none" />
-        <EuiContextMenu
-          initialPanelId={panelId}
-          panels={panels}
-          onPanelChange={changePanel}
-          className="eui-yScroll"
-          css={contextMenuStyles}
-        />
-      </EuiContextMenuPanel>
+      <SearchControls
+        key={panelId}
+        search={search}
+        onSearch={searchByName}
+        onSort={sortByOrder}
+        isLoading={isLoadingIntegrations || isLoadingStreams}
+      />
+      <EuiHorizontalRule margin="none" />
+      <EuiContextMenu
+        initialPanelId={panelId}
+        panels={panels}
+        onPanelChange={changePanel}
+        className="eui-yScroll"
+        css={contextMenuStyles}
+      />
     </DataStreamsPopover>
   );
 }

@@ -196,7 +196,7 @@ export const createDataStreamsSelectorStateMachine = ({
       },
       sortUnmanagedStreams: (_context, event) => {
         if ('search' in event) {
-          onUnmanagedStreamsSearch(event.search);
+          onUnmanagedStreamsSort(event.search);
         }
       },
     },
