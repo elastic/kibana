@@ -6,9 +6,12 @@
  */
 
 import { SavedObjectMigrationFn } from '@kbn/core/server';
-import { DynamicSettings } from '../../../../common/runtime_types';
+import { DynamicSettingsAttributes } from '../../../../common/runtime_types';
 
-export const add820Indices: SavedObjectMigrationFn<DynamicSettings, DynamicSettings> = (doc) => {
+export const add820Indices: SavedObjectMigrationFn<
+  DynamicSettingsAttributes,
+  DynamicSettingsAttributes
+> = (doc) => {
   const heartbeatIndices = doc.attributes?.heartbeatIndices;
 
   const indicesArr = !heartbeatIndices ? [] : heartbeatIndices.split(',');

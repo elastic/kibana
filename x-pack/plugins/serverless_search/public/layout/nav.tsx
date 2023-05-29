@@ -13,6 +13,7 @@ import {
 } from '@kbn/shared-ux-chrome-navigation';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
+import { ServerlessPluginStart } from '@kbn/serverless/public';
 
 const NAVIGATION_PLATFORM_CONFIG = {
   analytics: { enabled: false },
@@ -99,6 +100,7 @@ const navItems: ChromeNavigationNodeViewModel[] = [
         title: i18n.translate('xpack.serverlessSearch.nav.content.indices', {
           defaultMessage: 'Indices',
         }),
+        // TODO: this will be updated to a new Indices page
         href: '/app/management/data/index_management/indices',
       },
       {
@@ -106,7 +108,16 @@ const navItems: ChromeNavigationNodeViewModel[] = [
         title: i18n.translate('xpack.serverlessSearch.nav.content.transforms', {
           defaultMessage: 'Transforms',
         }),
-        href: '/app/management/data/transform',
+        // TODO: this will be updated to a new Transforms page
+        href: '/app/management/ingest/ingest_pipelines',
+      },
+      {
+        id: 'content_indexing_api',
+        title: i18n.translate('xpack.serverlessSearch.nav.content.indexingApi', {
+          defaultMessage: 'Indexing API',
+        }),
+        // TODO: this page does not exist yet, linking to getting started for now
+        href: '/app/elasticsearch',
       },
     ],
   },
@@ -125,27 +136,30 @@ const navItems: ChromeNavigationNodeViewModel[] = [
   },
 ];
 
-export const createServerlessSearchSideNavComponent = (core: CoreStart) => () => {
-  // Currently, this allows the "Search" section of the side nav to render as pre-expanded.
-  // This will soon be powered from state received from core.chrome
-  const activeNavItemId = 'search_project_nav.search_getting_started';
+export const createServerlessSearchSideNavComponent =
+  (core: CoreStart, { serverless }: { serverless: ServerlessPluginStart }) =>
+  () => {
+    // Currently, this allows the "Search" section of the side nav to render as pre-expanded.
+    // This will soon be powered from state received from core.chrome
+    const activeNavItemId = 'search_project_nav.search_getting_started';
 
-  return (
-    <NavigationKibanaProvider core={core}>
-      <Navigation
-        platformConfig={NAVIGATION_PLATFORM_CONFIG}
-        navigationTree={[
-          {
-            id: 'search_project_nav',
-            items: navItems,
-            title: 'Elasticsearch',
-            icon: 'logoElasticsearch',
-          },
-        ]}
-        activeNavItemId={activeNavItemId}
-        homeHref="/app/elasticsearch"
-        linkToCloud="projects"
-      />
-    </NavigationKibanaProvider>
-  );
-};
+    return (
+      <NavigationKibanaProvider core={core} serverless={serverless}>
+        <Navigation
+          platformConfig={NAVIGATION_PLATFORM_CONFIG}
+          navigationTree={[
+            {
+              id: 'search_project_nav',
+              items: navItems,
+              title: 'Elasticsearch',
+              icon: 'logoElasticsearch',
+            },
+          ]}
+          activeNavItemId={activeNavItemId}
+          homeHref="/app/elasticsearch"
+          linkToCloud="projects"
+          dataTestSubj="svlSearchSideNav"
+        />
+      </NavigationKibanaProvider>
+    );
+  };

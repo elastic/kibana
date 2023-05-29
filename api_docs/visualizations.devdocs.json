@@ -294,10 +294,21 @@
           },
           {
             "parentPluginId": "visualizations",
-            "id": "def-public.BaseVisType.hidden",
+            "id": "def-public.BaseVisType.disableCreate",
             "type": "boolean",
             "tags": [],
-            "label": "hidden",
+            "label": "disableCreate",
+            "description": [],
+            "path": "src/plugins/visualizations/public/vis_types/base_vis_type.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-public.BaseVisType.disableEdit",
+            "type": "boolean",
+            "tags": [],
+            "label": "disableEdit",
             "description": [],
             "path": "src/plugins/visualizations/public/vis_types/base_vis_type.ts",
             "deprecated": false,
@@ -4508,10 +4519,24 @@
           },
           {
             "parentPluginId": "visualizations",
-            "id": "def-public.VisTypeAlias.hidden",
+            "id": "def-public.VisTypeAlias.disableCreate",
             "type": "CompoundType",
             "tags": [],
-            "label": "hidden",
+            "label": "disableCreate",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-public.VisTypeAlias.disableEdit",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "disableEdit",
             "description": [],
             "signature": [
               "boolean | undefined"
@@ -5416,10 +5441,24 @@
           },
           {
             "parentPluginId": "visualizations",
-            "id": "def-public.VisTypeDefinition.hidden",
+            "id": "def-public.VisTypeDefinition.disableCreate",
             "type": "CompoundType",
             "tags": [],
-            "label": "hidden",
+            "label": "disableCreate",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/visualizations/public/vis_types/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-public.VisTypeDefinition.disableEdit",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "disableEdit",
             "description": [],
             "signature": [
               "boolean | undefined"
@@ -6289,21 +6328,6 @@
       },
       {
         "parentPluginId": "visualizations",
-        "id": "def-public.VISUALIZE_ENABLE_LABS_SETTING",
-        "type": "string",
-        "tags": [],
-        "label": "VISUALIZE_ENABLE_LABS_SETTING",
-        "description": [],
-        "signature": [
-          "\"visualize:enableLabs\""
-        ],
-        "path": "src/plugins/visualizations/common/constants.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "visualizations",
         "id": "def-public.VisualizeEmbeddableContract",
         "type": "Type",
         "tags": [],
@@ -6643,8 +6667,6 @@
             "section": "def-public.VisualizeEmbeddable",
             "text": "VisualizeEmbeddable"
           },
-          " | ",
-          "DisabledLabEmbeddable",
           " | undefined>; readonly type: \"visualization\"; inject: (_state: ",
           {
             "pluginId": "embeddable",
@@ -6741,8 +6763,6 @@
             "section": "def-public.VisualizeEmbeddable",
             "text": "VisualizeEmbeddable"
           },
-          " | ",
-          "DisabledLabEmbeddable",
           ">; readonly savedObjectMetaData: ",
           {
             "pluginId": "savedObjectsFinder",
@@ -6911,7 +6931,7 @@
           "section": "def-public.VisTypeAlias",
           "text": "VisTypeAlias"
         },
-        ") => void; hideTypes: (typeNames: string[]) => void; } & { visEditorsRegistry: { registerDefault: (editor: ",
+        ") => void; } & { visEditorsRegistry: { registerDefault: (editor: ",
         "VisEditorConstructor",
         "<",
         {
@@ -7045,44 +7065,61 @@
     "functions": [],
     "interfaces": [],
     "enums": [],
-    "misc": [
-      {
-        "parentPluginId": "visualizations",
-        "id": "def-server.VISUALIZE_ENABLE_LABS_SETTING",
-        "type": "string",
-        "tags": [],
-        "label": "VISUALIZE_ENABLE_LABS_SETTING",
-        "description": [],
-        "signature": [
-          "\"visualize:enableLabs\""
-        ],
-        "path": "src/plugins/visualizations/common/constants.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      }
-    ],
+    "misc": [],
     "objects": [],
     "setup": {
       "parentPluginId": "visualizations",
-      "id": "def-server.VisualizationsPluginSetup",
+      "id": "def-server.VisualizationsServerSetup",
       "type": "Interface",
       "tags": [],
-      "label": "VisualizationsPluginSetup",
+      "label": "VisualizationsServerSetup",
       "description": [],
       "path": "src/plugins/visualizations/server/types.ts",
       "deprecated": false,
       "trackAdoption": false,
-      "children": [],
+      "children": [
+        {
+          "parentPluginId": "visualizations",
+          "id": "def-server.VisualizationsServerSetup.registerReadOnlyVisType",
+          "type": "Function",
+          "tags": [],
+          "label": "registerReadOnlyVisType",
+          "description": [],
+          "signature": [
+            "(visType: string) => void"
+          ],
+          "path": "src/plugins/visualizations/server/types.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [
+            {
+              "parentPluginId": "visualizations",
+              "id": "def-server.VisualizationsServerSetup.registerReadOnlyVisType.$1",
+              "type": "string",
+              "tags": [],
+              "label": "visType",
+              "description": [],
+              "signature": [
+                "string"
+              ],
+              "path": "src/plugins/visualizations/server/types.ts",
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            }
+          ],
+          "returnComment": []
+        }
+      ],
       "lifecycle": "setup",
       "initialIsOpen": true
     },
     "start": {
       "parentPluginId": "visualizations",
-      "id": "def-server.VisualizationsPluginStart",
+      "id": "def-server.VisualizationsServerStart",
       "type": "Interface",
       "tags": [],
-      "label": "VisualizationsPluginStart",
+      "label": "VisualizationsServerStart",
       "description": [],
       "path": "src/plugins/visualizations/server/types.ts",
       "deprecated": false,
