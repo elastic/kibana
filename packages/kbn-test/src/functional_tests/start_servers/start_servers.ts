@@ -18,6 +18,7 @@ import { getTimeReporter } from '@kbn/ci-stats-reporter';
 import { readConfigFile } from '../../functional_test_runner';
 import { runElasticsearch } from '../lib/run_elasticsearch';
 import { runKibanaServer } from '../lib/run_kibana_server';
+import { Config } from '../../functional_test_runner/lib/config';
 import { StartServerOptions } from './flags';
 
 const FTR_SCRIPT_PATH = Path.resolve(REPO_ROOT, 'scripts/functional_test_runner');
@@ -25,10 +26,9 @@ const FTR_SCRIPT_PATH = Path.resolve(REPO_ROOT, 'scripts/functional_test_runner'
 export async function startServers(log: ToolingLog, options: StartServerOptions) {
   const runStartTime = Date.now();
   const reportTime = getTimeReporter(log, 'scripts/functional_tests_server');
+  const config = await readConfigFile(log, options.esVersion, options.config);
 
-  await withProcRunner(log, async (procs) => {
-    const config = await readConfigFile(log, options.esVersion, options.config);
-
+  await withProcRunner(log, async function startEsAndKbnServers(procs): Promise<void> {
     const shutdownEs = await runElasticsearch({
       config,
       log,
@@ -51,25 +51,27 @@ export async function startServers(log: ToolingLog, options: StartServerOptions)
     // wait for 5 seconds of silence before logging the
     // success message so that it doesn't get buried
     await silence(log, 5000);
-
-    const installDirFlag = options.installDir ? ` --kibana-install-dir=${options.installDir}` : '';
-    const rel = Path.relative(process.cwd(), config.module.path);
-    const pathsMessage = ` --${config.module.type}=${rel}`;
-
-    log.success(
-      '\n\n' +
-        dedent`
-          Elasticsearch and Kibana are ready for functional testing. Start the functional tests
-          in another terminal session by running this command from this directory:
-
-              node ${Path.relative(process.cwd(), FTR_SCRIPT_PATH)}${installDirFlag}${pathsMessage}
-        ` +
-        '\n\n'
-    );
+    success(log, options, config);
 
     await procs.waitForAllToStop();
     await shutdownEs();
   });
+}
+
+function success(log: ToolingLog, options: StartServerOptions, config: Config) {
+  const installDirFlag = options.installDir ? ` --kibana-install-dir=${options.installDir}` : '';
+  const rel = Path.relative(process.cwd(), config.module.path);
+  const pathsMessage = ` --${config.module.type}=${rel}`;
+  log.success(
+    '\n\n' +
+      dedent`
+        Elasticsearch and Kibana are ready for functional testing. Start the functional tests
+        in another terminal session by running this command from this directory:
+
+            node ${Path.relative(process.cwd(), FTR_SCRIPT_PATH)}${installDirFlag}${pathsMessage}
+      ` +
+      '\n\n'
+  );
 }
 
 async function silence(log: ToolingLog, milliseconds: number) {
