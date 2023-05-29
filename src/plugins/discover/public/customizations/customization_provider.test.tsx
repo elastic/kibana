@@ -7,7 +7,7 @@
  */
 
 import { act, renderHook } from '@testing-library/react-hooks';
-import React, { useContext } from 'react';
+import React from 'react';
 import { getDiscoverStateMock } from '../__mocks__/discover_state.mock';
 import {
   DiscoverCustomizationProvider,
@@ -21,7 +21,6 @@ import {
   DiscoverCustomizationId,
   DiscoverCustomizationService,
 } from './customization_service';
-import { CustomizationCallback } from './types';
 
 describe('useDiscoverCustomizationService', () => {
   it('should provide customization service', async () => {
