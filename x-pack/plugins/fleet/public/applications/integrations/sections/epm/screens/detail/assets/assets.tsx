@@ -15,6 +15,7 @@ import type {
   AssetSOObject,
   SimpleSOAssetType,
 } from '../../../../../../../../common';
+import { allowedAssetTypes } from '../../../../../../../../common/constants';
 
 import { Error, ExtensionWrapper, Loading } from '../../../../../components';
 
@@ -33,7 +34,6 @@ import { sendGetBulkAssets } from '../../../../../hooks';
 
 import { DeferredAssetsSection } from './deferred_assets_accordion';
 
-import { allowedAssetTypes } from './constants';
 import { AssetsAccordion } from './assets_accordion';
 
 interface AssetsPanelProps {

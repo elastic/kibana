@@ -8,7 +8,7 @@
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 // // Follow pattern from https://github.com/elastic/kibana/pull/52447
 // // TODO: Update when https://github.com/elastic/kibana/issues/53021 is closed
-import type { SavedObject } from '@kbn/core/public'; // DEPRECATION
+import type { SavedObject, SavedObjectAttributes } from '@kbn/core/public';
 
 import type {
   ASSETS_SAVED_OBJECT_TYPE,
@@ -434,7 +434,6 @@ export interface EpmPackageAdditions {
 type Merge<FirstType, SecondType> = Omit<FirstType, Extract<keyof FirstType, keyof SecondType>> &
   SecondType;
 
-// TODO: depend on SavedObject
 // Managers public HTTP response types
 export type PackageList = PackageListItem[];
 export type PackageListItem = Installable<RegistrySearchResult> & {
@@ -445,7 +444,6 @@ export type PackagesGroupedByStatus = Record<ValueOf<InstallationStatus>, Packag
 export type PackageInfo =
   | Installable<Merge<RegistryPackage, EpmPackageAdditions>>
   | Installable<Merge<ArchivePackage, EpmPackageAdditions>>;
-// TODO: end of dependency on SavedObject
 
 export type PackageVerificationStatus = 'verified' | 'unverified' | 'unknown';
 
@@ -461,7 +459,7 @@ export interface ExperimentalDataStreamFeature {
   features: Partial<Record<ExperimentalIndexingFeature, boolean>>;
 }
 
-export interface Installation {
+export interface Installation extends SavedObjectAttributes {
   installed_kibana: KibanaAssetReference[];
   installed_es: EsAssetReference[];
   package_assets?: PackageAssetReference[];
@@ -488,7 +486,6 @@ export interface PackageUsageStats {
   agent_policy_count: number;
 }
 
-// TODO: the following depend on SavedObject type
 export type Installable<T> =
   | InstallStatusExcluded<T>
   | InstalledRegistry<T>
@@ -518,9 +515,6 @@ export type InstallFailed<T = {}> = T & {
   status: InstallationStatus['InstallFailed'];
 };
 
-// end of dependendcies on SavedObject type
-
-// TODO: the following `reference` types should live under /server but they' re used in public/epm/assets
 export type AssetReference = KibanaAssetReference | EsAssetReference;
 
 export interface KibanaAssetReference {
@@ -538,7 +532,6 @@ export interface PackageAssetReference {
   type: typeof ASSETS_SAVED_OBJECT_TYPE;
 }
 
-// TODO: Move all the following to only used in server
 export interface IndexTemplateMappings {
   properties: any;
   dynamic_templates?: any;
