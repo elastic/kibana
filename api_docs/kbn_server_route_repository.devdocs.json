@@ -118,7 +118,7 @@
         "label": "formatRequest",
         "description": [],
         "signature": [
-          "(endpoint: string, pathParams: Record<string, any>) => { method: Method; pathname: string; }"
+          "(endpoint: string, pathParams: Record<string, any>) => { method: Method; pathname: string; version: string; }"
         ],
         "path": "packages/kbn-server-route-repository/src/format_request.ts",
         "deprecated": false,
@@ -166,7 +166,7 @@
         "label": "parseEndpoint",
         "description": [],
         "signature": [
-          "(endpoint: string) => { method: Method; pathname: string; }"
+          "(endpoint: string) => { method: Method; pathname: string; version: string; }"
         ],
         "path": "packages/kbn-server-route-repository/src/parse_endpoint.ts",
         "deprecated": false,
@@ -232,17 +232,9 @@
         "label": "ClientRequestParamsOf",
         "description": [],
         "signature": [
-          "TServerRouteRepository[TEndpoint] extends ",
-          {
-            "pluginId": "@kbn/server-route-repository",
-            "scope": "common",
-            "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-common.ServerRoute",
-            "text": "ServerRoute"
-          },
-          "<any, infer TRouteParamsRT, any, any, ",
+          "TServerRouteRepository[TEndpoint] extends { endpoint: any; params?: infer TRouteParamsRT | undefined; handler: ({}: any) => Promise<any>; } & ",
           "ServerRouteCreateOptions",
-          "> ? TRouteParamsRT extends ",
+          " ? TRouteParamsRT extends ",
           {
             "pluginId": "@kbn/server-route-repository",
             "scope": "common",
@@ -265,17 +257,9 @@
         "label": "DecodedRequestParamsOf",
         "description": [],
         "signature": [
-          "TServerRouteRepository[TEndpoint] extends ",
-          {
-            "pluginId": "@kbn/server-route-repository",
-            "scope": "common",
-            "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-common.ServerRoute",
-            "text": "ServerRoute"
-          },
-          "<any, infer TRouteParamsRT, any, any, ",
+          "TServerRouteRepository[TEndpoint] extends { endpoint: any; params?: infer TRouteParamsRT | undefined; handler: ({}: any) => Promise<any>; } & ",
           "ServerRouteCreateOptions",
-          "> ? TRouteParamsRT extends ",
+          " ? TRouteParamsRT extends ",
           {
             "pluginId": "@kbn/server-route-repository",
             "scope": "common",
@@ -313,17 +297,9 @@
         "label": "ReturnOf",
         "description": [],
         "signature": [
-          "TServerRouteRepository[TEndpoint] extends ",
-          {
-            "pluginId": "@kbn/server-route-repository",
-            "scope": "common",
-            "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-common.ServerRoute",
-            "text": "ServerRoute"
-          },
-          "<any, any, any, infer TReturnType, ",
+          "TServerRouteRepository[TEndpoint] extends { endpoint: any; params?: any; handler: ({}: any) => Promise<infer TReturnType>; } & ",
           "ServerRouteCreateOptions",
-          "> ? TReturnType : never"
+          " ? TReturnType : never"
         ],
         "path": "packages/kbn-server-route-repository/src/typings.ts",
         "deprecated": false,
@@ -446,7 +422,7 @@
         "label": "ServerRoute",
         "description": [],
         "signature": [
-          "{ endpoint: TEndpoint; params?: TRouteParamsRT | undefined; handler: ({}: TRouteHandlerResources & (TRouteParamsRT extends ",
+          "ValidateEndpoint<TEndpoint> extends true ? { endpoint: TEndpoint; params?: TRouteParamsRT | undefined; handler: ({}: TRouteHandlerResources & (TRouteParamsRT extends ",
           {
             "pluginId": "@kbn/server-route-repository",
             "scope": "common",
@@ -454,7 +430,7 @@
             "section": "def-common.RouteParamsRT",
             "text": "RouteParamsRT"
           },
-          " ? DecodedRequestParamsOfType<TRouteParamsRT> : {})) => Promise<TReturnType>; } & TRouteCreateOptions"
+          " ? DecodedRequestParamsOfType<TRouteParamsRT> : {})) => Promise<TReturnType>; } & TRouteCreateOptions : never"
         ],
         "path": "packages/kbn-server-route-repository/src/typings.ts",
         "deprecated": false,
@@ -469,15 +445,7 @@
         "label": "ServerRouteRepository",
         "description": [],
         "signature": [
-          "{ [x: string]: ",
-          {
-            "pluginId": "@kbn/server-route-repository",
-            "scope": "common",
-            "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-common.ServerRoute",
-            "text": "ServerRoute"
-          },
-          "<string, ",
+          "{ [x: string]: { endpoint: string; params?: ",
           {
             "pluginId": "@kbn/server-route-repository",
             "scope": "common",
@@ -485,7 +453,7 @@
             "section": "def-common.RouteParamsRT",
             "text": "RouteParamsRT"
           },
-          " | undefined, any, any, Record<string, any>>; }"
+          " | undefined; handler: ({}: any) => Promise<any>; } & Record<string, any>; }"
         ],
         "path": "packages/kbn-server-route-repository/src/typings.ts",
         "deprecated": false,

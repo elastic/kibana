@@ -85,7 +85,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     sourcemap: SourceMap;
   }) {
     const response = await apmApiClient.writeUser({
-      endpoint: 'POST /api/apm/sourcemaps',
+      endpoint: 'POST /api/apm/sourcemaps 2023-05-22',
       type: 'form-data',
       params: {
         body: {
@@ -107,7 +107,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
   async function deleteSourcemap(id: string) {
     await apmApiClient.writeUser({
-      endpoint: 'DELETE /api/apm/sourcemaps/{id}',
+      endpoint: 'DELETE /api/apm/sourcemaps/{id} 2023-05-22',
       params: { path: { id } },
     });
   }
@@ -116,7 +116,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     const query = page && perPage ? { page, perPage } : {};
 
     const response = await apmApiClient.readUser({
-      endpoint: 'GET /api/apm/sourcemaps',
+      endpoint: 'GET /api/apm/sourcemaps 2023-05-22',
       params: { query },
     });
     return response.body;
@@ -136,11 +136,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       }
     }
 
-    let resp: APIReturnType<'POST /api/apm/sourcemaps'>;
+    let resp: APIReturnType<'POST /api/apm/sourcemaps 2023-05-22'>;
     describe('upload source map', () => {
       after(async () => {
         await apmApiClient.writeUser({
-          endpoint: 'DELETE /api/apm/sourcemaps/{id}',
+          endpoint: 'DELETE /api/apm/sourcemaps/{id} 2023-05-22',
           params: { path: { id: resp.id } },
         });
       });
