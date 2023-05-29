@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import useAsync from 'react-use/lib/useAsync';
 import React, { useEffect, useMemo, useState } from 'react';
 
 import {
@@ -16,13 +17,15 @@ import {
   EuiSwitch,
   Direction,
   EuiRadioGroup,
+  EuiLoadingSpinner,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 
+import { pluginServices } from '../../services';
 import {
+  OptionsListSortBy,
   getCompatibleSortingTypes,
   OPTIONS_LIST_DEFAULT_SORT,
-  OptionsListSortBy,
 } from '../../../common/options_list/suggestions_sorting';
 import { OptionsListStrings } from './options_list_strings';
 import { ControlEditorProps, OptionsListEmbeddableInput } from '../..';
@@ -67,6 +70,12 @@ export const OptionsListEditorOptions = ({
     hideExists: initialInput?.hideExists,
     hideSort: initialInput?.hideSort,
   });
+
+  const { loading: waitingForAllowExpensiveQueries, value: allowExpensiveQueries } =
+    useAsync(async () => {
+      const { optionsList: optionsListService } = pluginServices.getServices();
+      return optionsListService.getAllowExpensiveQueries();
+    }, []);
 
   useEffect(() => {
     // when field type changes, ensure that the selected sort type is still valid
@@ -124,17 +133,26 @@ export const OptionsListEditorOptions = ({
           }}
         />
       </EuiFormRow>
-      <EuiFormRow label={'Searching'}>
-        <EuiRadioGroup
-          options={searchOptions}
-          idSelected={state.wildcardSearch ? 'contains' : 'prefix'}
-          onChange={(id) => {
-            const newWildcardSearch = id === 'contains';
-            onChange({ wildcardSearch: newWildcardSearch });
-            setState((s) => ({ ...s, wildcardSearch: newWildcardSearch }));
-          }}
-        />
-      </EuiFormRow>
+      {waitingForAllowExpensiveQueries ? (
+        <EuiFormRow>
+          <EuiLoadingSpinner size="l" />
+        </EuiFormRow>
+      ) : (
+        allowExpensiveQueries &&
+        fieldType !== 'ip' && (
+          <EuiFormRow label={'Searching'}>
+            <EuiRadioGroup
+              options={searchOptions}
+              idSelected={state.wildcardSearch ? 'contains' : 'prefix'}
+              onChange={(id) => {
+                const newWildcardSearch = id === 'contains';
+                onChange({ wildcardSearch: newWildcardSearch });
+                setState((s) => ({ ...s, wildcardSearch: newWildcardSearch }));
+              }}
+            />
+          </EuiFormRow>
+        )
+      )}
       <EuiFormRow label={OptionsListStrings.editor.getAdditionalSettingsTitle()}>
         <EuiSwitch
           label={

@@ -12,7 +12,11 @@ import { getFieldSubtypeNested } from '@kbn/data-views-plugin/common';
 import { OptionsListRequestBody, OptionsListSuggestions } from '../../common/options_list/types';
 import { getIpRangeQuery, type IpRangeQuery } from '../../common/options_list/ip_search';
 import { EsBucket, OptionsListSuggestionAggregationBuilder } from './types';
-import { getIpBuckets, getSortType } from './options_list_suggestion_query_helpers';
+import {
+  getEscapedQuery,
+  getIpBuckets,
+  getSortType,
+} from './options_list_suggestion_query_helpers';
 
 /**
  * Suggestion aggregations
@@ -63,7 +67,7 @@ const expensiveSuggestionAggSubtypes: { [key: string]: OptionsListSuggestionAggr
             filter: {
               [wildcardSearch ? 'wildcard' : 'prefix']: {
                 [fieldName]: {
-                  value: wildcardSearch ? `*${searchString}*` : searchString,
+                  value: wildcardSearch ? `*${getEscapedQuery(searchString)}*` : searchString,
                   case_insensitive: true,
                 },
               },
