@@ -12,7 +12,7 @@ import { mountWithIntl } from '@kbn/test-jest-helpers';
 import * as useUiSettingHook from '@kbn/kibana-react-plugin/public/ui_settings/use_ui_setting';
 import { CodeEditor, KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import {buildDataTableRecord, EsHitRecord} from '@kbn/unified-discover';
+import { buildDataTableRecord, EsHitRecord } from '@kbn/unified-discover';
 import { ElasticRequestState, JsonCodeEditorCommon, useEsDocSearch } from '../..';
 import { DocViewerSource } from './source';
 
@@ -97,7 +97,9 @@ describe('Source Viewer component', () => {
         _underscore: 123,
       },
     });
-    jest.spyOn(hooks, 'useEsDocSearch').mockImplementation(() => [2, mockHit as unknown as EsHitRecord, () => {}]);
+    jest
+      .spyOn(hooks, 'useEsDocSearch')
+      .mockImplementation(() => [2, mockHit as unknown as EsHitRecord, () => {}]);
     jest.spyOn(useUiSettingHook, 'useUiSetting').mockImplementation(() => {
       return false;
     });

@@ -10,7 +10,7 @@ import React, { Suspense } from 'react';
 import { CoreSetup, Plugin } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { EuiSkeletonText } from '@elastic/eui';
-import { useUnifiedDocViewerServices } from '../../../../packages/kbn-unified-doc-viewer/public/hooks';
+import { useUnifiedDocViewerServices } from '@kbn/unified-doc-viewer/public/hooks';
 import { DocViewsRegistry, setDocViewsRegistry } from './services';
 import { DeferredSpinner } from './components';
 

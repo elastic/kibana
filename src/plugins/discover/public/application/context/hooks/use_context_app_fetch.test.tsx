@@ -17,7 +17,7 @@ import {
   mockPredecessorHits,
   mockSuccessorHits,
 } from '../__mocks__/use_context_app_fetch';
-import { dataViewWithTimefieldMock } from '../../../../../../../packages/kbn-unified-discover/src/__mocks__/data_view_with_timefield';
+import { dataViewWithTimefieldMock } from '@kbn/unified-discover/src/__mocks__/data_view_with_timefield';
 import { createContextSearchSourceStub } from '../services/_stubs';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { themeServiceMock } from '@kbn/core/public/mocks';

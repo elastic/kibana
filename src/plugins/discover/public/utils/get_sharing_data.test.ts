@@ -15,7 +15,7 @@ import {
   SORT_DEFAULT_ORDER_SETTING,
   SEARCH_FIELDS_FROM_SOURCE,
 } from '../../common';
-import { dataViewMock } from '../../../../../packages/kbn-unified-discover/src/__mocks__/data_view';
+import { dataViewMock } from '@kbn/unified-discover/src/__mocks__/data_view';
 import { getSharingData, showPublicUrlSwitch } from './get_sharing_data';
 import type { DiscoverServices } from '@kbn/unified-discover';
 

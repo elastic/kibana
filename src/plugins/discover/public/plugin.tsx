@@ -39,6 +39,14 @@ import type { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-manag
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
+import {
+  DiscoverContextAppLocator,
+  DiscoverContextAppLocatorDefinition,
+} from '@kbn/unified-discover/src/context/locator';
+import {
+  DiscoverSingleDocLocator,
+  DiscoverSingleDocLocatorDefinition,
+} from '@kbn/unified-discover/src/doc/locator';
 import { PLUGIN_ID } from '../common';
 import {
   setHeaderActionMenuMounter,
@@ -54,14 +62,6 @@ import { ViewSavedSearchAction } from './embeddable/view_saved_search_action';
 import { injectTruncateStyles } from './utils/truncate_styles';
 import { TRUNCATE_MAX_HEIGHT } from '../common';
 import { initializeKbnUrlTracking } from './utils/initialize_kbn_url_tracking';
-import {
-  DiscoverContextAppLocator,
-  DiscoverContextAppLocatorDefinition,
-} from '@kbn/unified-discover/src/context/locator';
-import {
-  DiscoverSingleDocLocator,
-  DiscoverSingleDocLocatorDefinition,
-} from '@kbn/unified-discover/src/doc/locator';
 import { DiscoverAppLocator, DiscoverAppLocatorDefinition } from '../common';
 
 /**

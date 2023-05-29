@@ -21,6 +21,7 @@ import {
   GroupedFieldsParams,
   useGroupedFields,
 } from '@kbn/unified-field-list-plugin/public';
+import { VIEW_MODE } from '@kbn/unified-discover';
 import { useAppStateSelector } from '../../services/discover_app_state_container';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { DiscoverField } from './discover_field';
@@ -34,7 +35,6 @@ import {
 import { DiscoverSidebarResponsiveProps } from './discover_sidebar_responsive';
 import { getRawRecordType } from '../../utils/get_raw_record_type';
 import { RecordRawType } from '../../services/discover_data_state_container';
-import {VIEW_MODE} from "@kbn/unified-discover";
 
 export interface DiscoverSidebarProps extends DiscoverSidebarResponsiveProps {
   /**

@@ -33,7 +33,6 @@ export const SEARCH_EMBEDDABLE_TYPE = 'search';
 export const HIDE_ANNOUNCEMENTS = 'hideAnnouncements';
 export const ENABLE_SQL = 'discover:enableSql';
 
-
 /**
  * Local storage key for sidebar persistence state
  */

@@ -10,7 +10,7 @@ import React from 'react';
 import { EuiTourStep, EuiButton } from '@elastic/eui';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { discoverServiceMock } from '../../../../../../packages/kbn-unified-discover/src/__mocks__/services';
+import { discoverServiceMock } from '@kbn/unified-discover/src/__mocks__/services';
 import { DiscoverTourProvider } from './discover_tour_provider';
 import { useDiscoverTourContext } from './discover_tour_context';
 import { DISCOVER_TOUR_STEP_ANCHORS } from './discover_tour_anchors';

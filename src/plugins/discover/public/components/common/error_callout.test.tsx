@@ -11,7 +11,7 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { findTestSubject } from '@kbn/test-jest-helpers';
 import { mount } from 'enzyme';
 import React, { ReactNode } from 'react';
-import { discoverServiceMock } from '../../../../../../packages/kbn-unified-discover/src/__mocks__/services';
+import { discoverServiceMock } from '@kbn/unified-discover/src/__mocks__/services';
 import { ErrorCallout } from './error_callout';
 
 const mockGetSearchErrorOverrideDisplay = jest.fn();

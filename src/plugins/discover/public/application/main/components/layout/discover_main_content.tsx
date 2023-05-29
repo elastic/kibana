@@ -13,6 +13,7 @@ import { DataView } from '@kbn/data-views-plugin/common';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
 import { VIEW_MODE } from '@kbn/unified-discover';
+import { DocViewFilterFn } from '@kbn/unified-doc-viewer';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { DocumentViewModeToggle } from '../../../../components/view_mode_toggle';
 import { DiscoverStateContainer } from '../../services/discover_state';
@@ -21,7 +22,6 @@ import { DiscoverDocuments } from './discover_documents';
 import { DOCUMENTS_VIEW_CLICK, FIELD_STATISTICS_VIEW_CLICK } from '../field_stats_table/constants';
 import { ErrorCallout } from '../../../../components/common/error_callout';
 import { useDataState } from '../../hooks/use_data_state';
-import {DocViewFilterFn} from "@kbn/unified-doc-viewer";
 
 const DROP_PROPS = {
   value: {

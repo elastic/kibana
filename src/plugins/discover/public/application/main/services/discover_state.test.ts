@@ -19,13 +19,16 @@ import {
   savedSearchMock,
   savedSearchMockWithTimeField,
   savedSearchMockWithTimeFieldNew,
-} from '../../../../../../../packages/kbn-unified-discover/src/__mocks__/saved_search';
-import { discoverServiceMock } from '../../../../../../../packages/kbn-unified-discover/src/__mocks__/services';
-import { dataViewMock } from '../../../../../../../packages/kbn-unified-discover/src/__mocks__/data_view';
+} from '@kbn/unified-discover/src/__mocks__/saved_search';
+import { discoverServiceMock } from '@kbn/unified-discover/src/__mocks__/services';
+import { dataViewMock } from '@kbn/unified-discover/src/__mocks__/data_view';
 import { DiscoverAppStateContainer } from './discover_app_state_container';
 import { waitFor } from '@testing-library/react';
 import { FetchStatus } from '../../types';
-import { dataViewAdHoc, dataViewComplexMock } from '../../../../../../../packages/kbn-unified-discover/src/__mocks__/data_view_complex';
+import {
+  dataViewAdHoc,
+  dataViewComplexMock,
+} from '@kbn/unified-discover/src/__mocks__/data_view_complex';
 import { copySavedSearch } from './discover_saved_search_container';
 
 const startSync = (appState: DiscoverAppStateContainer) => {

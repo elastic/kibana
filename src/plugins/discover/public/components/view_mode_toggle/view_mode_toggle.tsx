@@ -11,9 +11,9 @@ import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
+import { VIEW_MODE } from '@kbn/unified-discover';
 import { SHOW_FIELD_STATISTICS } from '../../../common';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
-import {VIEW_MODE} from "@kbn/unified-discover";
 
 export const DocumentViewModeToggle = ({
   viewMode,

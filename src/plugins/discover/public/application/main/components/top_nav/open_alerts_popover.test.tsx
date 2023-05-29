@@ -11,9 +11,9 @@ import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { AlertsPopover } from './open_alerts_popover';
-import { discoverServiceMock } from '../../../../../../../../packages/kbn-unified-discover/src/__mocks__/services';
-import { dataViewWithTimefieldMock } from '../../../../../../../../packages/kbn-unified-discover/src/__mocks__/data_view_with_timefield';
-import { dataViewMock } from '../../../../../../../../packages/kbn-unified-discover/src/__mocks__/data_view';
+import { discoverServiceMock } from '@kbn/unified-discover/src/__mocks__/services';
+import { dataViewWithTimefieldMock } from '@kbn/unified-discover/src/__mocks__/data_view_with_timefield';
+import { dataViewMock } from '@kbn/unified-discover/src/__mocks__/data_view';
 import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
 
 const Context = ({ children }: { children: ReactNode }) => <>{children}</>;

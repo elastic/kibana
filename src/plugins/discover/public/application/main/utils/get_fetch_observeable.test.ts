@@ -12,7 +12,10 @@ import { FetchStatus } from '../../types';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { createSearchSessionMock } from '../../../__mocks__/search_session';
 import { DataRefetch$ } from '../services/discover_data_state_container';
-import { savedSearchMock, savedSearchMockWithTimeField } from '../../../../../../../packages/kbn-unified-discover/src/__mocks__/saved_search';
+import {
+  savedSearchMock,
+  savedSearchMockWithTimeField,
+} from '@kbn/unified-discover/src/__mocks__/saved_search';
 
 function createDataMock(
   queryString$: Subject<unknown>,

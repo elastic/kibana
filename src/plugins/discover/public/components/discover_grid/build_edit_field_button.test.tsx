@@ -10,8 +10,8 @@ import { EuiListGroupItem, EuiListGroupItemProps } from '@elastic/eui';
 import { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
-import { buildDataViewMock } from '../../../../../../packages/kbn-unified-discover/src/__mocks__/data_view';
-import { discoverServiceMock } from '../../../../../../packages/kbn-unified-discover/src/__mocks__/services';
+import { buildDataViewMock } from '@kbn/unified-discover/src/__mocks__/data_view';
+import { discoverServiceMock } from '@kbn/unified-discover/src/__mocks__/services';
 import { buildEditFieldButton } from './build_edit_field_button';
 
 const dataView = buildDataViewMock({

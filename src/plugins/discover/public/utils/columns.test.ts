@@ -7,8 +7,8 @@
  */
 
 import { getDisplayedColumns } from './columns';
-import { dataViewWithTimefieldMock } from '../../../../../packages/kbn-unified-discover/src/__mocks__/data_view_with_timefield';
-import { dataViewMock } from '../../../../../packages/kbn-unified-discover/src/__mocks__/data_view';
+import { dataViewWithTimefieldMock } from '@kbn/unified-discover/src/__mocks__/data_view_with_timefield';
+import { dataViewMock } from '@kbn/unified-discover/src/__mocks__/data_view';
 
 describe('getDisplayedColumns', () => {
   test('returns default columns given a data view without timefield', async () => {

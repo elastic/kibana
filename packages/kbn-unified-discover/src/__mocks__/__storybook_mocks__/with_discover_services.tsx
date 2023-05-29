@@ -14,7 +14,16 @@ import { FieldFormat } from '@kbn/field-formats-plugin/common';
 import { identity } from 'lodash';
 import { CoreStart, IUiSettingsClient, PluginInitializerContext } from '@kbn/core/public';
 import { LocalStorageMock } from '../local_storage_mock';
-import {DEFAULT_COLUMNS_SETTING, DOC_TABLE_LEGACY, MAX_DOC_FIELDS_DISPLAYED,ROW_HEIGHT_OPTION,SAMPLE_SIZE_SETTING, SEARCH_FIELDS_FROM_SOURCE, SHOW_MULTIFIELDS, SIDEBAR_CLOSED_KEY } from '../../constants';
+import {
+  DEFAULT_COLUMNS_SETTING,
+  DOC_TABLE_LEGACY,
+  MAX_DOC_FIELDS_DISPLAYED,
+  ROW_HEIGHT_OPTION,
+  SAMPLE_SIZE_SETTING,
+  SEARCH_FIELDS_FROM_SOURCE,
+  SHOW_MULTIFIELDS,
+  SIDEBAR_CLOSED_KEY,
+} from '../../constants';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { Plugin as NavigationPublicPlugin } from '@kbn/navigation-plugin/public';
 import { SearchBar, UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';

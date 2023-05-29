@@ -19,10 +19,13 @@ jest.mock('@kbn/saved-search-plugin/public', () => {
 });
 import { getSavedSearchContainer, isEqualSavedSearch } from './discover_saved_search_container';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
-import { discoverServiceMock } from '../../../../../../../packages/kbn-unified-discover/src/__mocks__/services';
-import { savedSearchMock, savedSearchMockWithTimeField } from '../../../../../../../packages/kbn-unified-discover/src/__mocks__/saved_search';
-import { dataViewMock } from '../../../../../../../packages/kbn-unified-discover/src/__mocks__/data_view';
-import { dataViewComplexMock } from '../../../../../../../packages/kbn-unified-discover/src/__mocks__/data_view_complex';
+import { discoverServiceMock } from '@kbn/unified-discover/src/__mocks__/services';
+import {
+  savedSearchMock,
+  savedSearchMockWithTimeField,
+} from '@kbn/unified-discover/src/__mocks__/saved_search';
+import { dataViewMock } from '@kbn/unified-discover/src/__mocks__/data_view';
+import { dataViewComplexMock } from '@kbn/unified-discover/src/__mocks__/data_view_complex';
 
 describe('DiscoverSavedSearchContainer', () => {
   const savedSearch = savedSearchMock;

@@ -9,8 +9,8 @@ import { DataView } from '@kbn/data-views-plugin/public';
 import { SortDirection } from '@kbn/data-plugin/public';
 import { createSearchSourceStub } from './_stubs';
 import { fetchAnchor, updateSearchSource } from './anchor';
-import { dataViewMock } from '../../../../../../../packages/kbn-unified-discover/src/__mocks__/data_view';
-import { savedSearchMock } from '../../../../../../../packages/kbn-unified-discover/src/__mocks__/saved_search';
+import { dataViewMock } from '@kbn/unified-discover/src/__mocks__/data_view';
+import { savedSearchMock } from '@kbn/unified-discover/src/__mocks__/saved_search';
 
 describe('context app', function () {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

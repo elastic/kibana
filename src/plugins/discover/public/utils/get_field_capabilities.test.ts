@@ -7,7 +7,7 @@
  */
 
 import { DataViewField } from '@kbn/data-views-plugin/common';
-import { buildDataViewMock } from '../../../../../packages/kbn-unified-discover/src/__mocks__/data_view';
+import { buildDataViewMock } from '@kbn/unified-discover/src/__mocks__/data_view';
 import { getFieldCapabilities } from './get_field_capabilities';
 import { DataView } from '@kbn/data-views-plugin/public';
 
