@@ -105,6 +105,11 @@ describe('autocomplete_listener', () => {
     testSuggestions('from a | limit 4 ', ['|']);
   });
 
+  describe('mv_expand', () => {
+    testSuggestions('from a | mv_expand ', ['FieldIdentifier']);
+    testSuggestions('from a | mv_expand a ', ['|']);
+  });
+
   describe('stats', () => {
     testSuggestions('from a | stats ', ['var0']);
     testSuggestions('from a | stats a ', ['=']);
@@ -144,6 +149,7 @@ describe('autocomplete_listener', () => {
       'to_string',
       'date_format',
       'date_trunc',
+      'date_parse',
       'auto_bucket',
       'is_finite',
       'is_infinite',

@@ -176,6 +176,20 @@ export const mathCommandDefinition: AutocompleteCommandDefinition[] = [
     sortText: 'C',
   },
   {
+    label: 'date_parse',
+    insertText: 'date_parse',
+    kind: 1,
+    detail: i18n.translate('monaco.esql.autocomplete.dateParseDoc', {
+      defaultMessage: `Parse dates from strings.`,
+    }),
+    documentation: {
+      value: buildDocumentation('substring(grouped[T]): aggregated[T]', [
+        `from index where field="value" | eval year_hired = date_parse(hire_date, yyyy-MM-dd'T'HH:mm:ss.SSS'Z')`,
+      ]),
+    },
+    sortText: 'C',
+  },
+  {
     label: 'auto_bucket',
     insertText: 'auto_bucket',
     kind: 1,

@@ -55,6 +55,7 @@ import {
   RenameCommandContext,
   DissectCommandContext,
   GrokCommandContext,
+  MvExpandCommandContext,
 } from '../../antlr/esql_parser';
 
 export class AutocompleteListener implements ESQLParserListener {
@@ -217,6 +218,13 @@ export class AutocompleteListener implements ESQLParserListener {
     const qn = ctx.qualifiedNames();
     const pattern = ctx.string();
     if (qn && qn.text && pattern && pattern.text && pattern.text !== '<missing STRING>') {
+      this.suggestions = this.getEndCommandSuggestions();
+    }
+  }
+
+  exitMvExpandCommand?(ctx: MvExpandCommandContext) {
+    const qn = ctx.qualifiedNames();
+    if (qn && qn.text) {
       this.suggestions = this.getEndCommandSuggestions();
     }
   }
