@@ -70,11 +70,14 @@ export const enhancedEsSearchStrategyProvider = (
             { ...params, id },
             { ...options.transport, signal: options.abortSignal, meta: true }
           )
-        : await client.asyncSearch.submit(params, {
-            ...options.transport,
-            signal: options.abortSignal,
-            meta: true,
-          });
+        : await client.asyncSearch.submit(
+            { ...params, wait_for_completion_timeout: '500ms' },
+            {
+              ...options.transport,
+              signal: options.abortSignal,
+              meta: true,
+            }
+          );
 
       const response = shimHitsTotal(body.response, options);
 

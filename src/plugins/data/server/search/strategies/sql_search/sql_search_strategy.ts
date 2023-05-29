@@ -64,6 +64,7 @@ export const sqlSearchStrategyProvider = (
             format: params.format ?? 'json',
             ...getDefaultAsyncSubmitParams(searchConfig, options),
             ...params,
+            wait_for_completion_timeout: '500ms',
           },
           { ...options.transport, signal: options.abortSignal, meta: true }
         ));
