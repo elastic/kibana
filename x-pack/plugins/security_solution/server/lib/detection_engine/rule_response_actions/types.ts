@@ -11,17 +11,44 @@ export interface AlertAgent {
   id: string;
   name: string;
 }
+
+export type ResponseActionsAlerts = Record<
+  string, // agentId
+  {
+    agent: {
+      id: string;
+      name: string;
+    };
+    alert: AlertWithAgent;
+    pids?: Record<
+      string,
+      {
+        alertIds: string[];
+        agentId: string;
+        hosts: Record<string, { name: string }>;
+        parameters: Record<string, unknown>;
+      }
+    >;
+    alertIds: string[];
+    hosts: Record<string, { name: string }>;
+  }
+>;
+
 export type Alert = ParsedTechnicalFields & {
   _id: string;
   agent?: AlertAgent;
   process?: { pid: string };
 };
 
-export interface AlertsWithAgentType {
-  alerts: Alert[];
+export interface AlertWithAgent extends Alert {
+  agent: AlertAgent;
+}
+
+export interface ResponseActionAlerts {
+  alerts: AlertWithAgent[];
+}
+
+export interface OsqueryResponseActionAlert extends ResponseActionAlerts {
   agentIds: string[];
   alertIds: string[];
-  ruleId?: string;
-  ruleName?: string;
-  hosts: Record<string, { name: string }>;
 }

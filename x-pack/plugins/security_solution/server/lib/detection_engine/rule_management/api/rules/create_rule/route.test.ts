@@ -237,7 +237,7 @@ describe('Create rule route', () => {
       });
       const result = await server.validate(request);
       expect(result.badRequest).toHaveBeenCalledWith(
-        'Invalid value "processes" supplied to "response_actions,params,command"'
+        'Invalid value "execute" supplied to "response_actions,params,command"'
       );
     });
   });

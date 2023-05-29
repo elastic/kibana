@@ -154,6 +154,6 @@ const combineResponse = (
     wasSuccessful: !!responseData?.isCompleted,
     status: responseData.status,
     agentState: {},
-    errors: action.error ? [action.error.message as string] : responseData.errors ?? undefined,
+    errors: action.error?.message ? [action.error.message] : responseData.errors ?? undefined,
   };
 };
