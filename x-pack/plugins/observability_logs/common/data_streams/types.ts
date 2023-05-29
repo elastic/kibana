@@ -34,9 +34,3 @@ export const integrationRT = rt.type({
 
 export type DataStream = rt.TypeOf<typeof dataStreamRT>;
 export type Integration = rt.TypeOf<typeof integrationRT>;
-
-export enum SearchStrategy {
-  DATA_STREAMS = 'dataStreams',
-  INTEGRATIONS = 'integrations',
-  INTEGRATIONS_DATA_STREAMS = 'integrationDataStreams',
-}

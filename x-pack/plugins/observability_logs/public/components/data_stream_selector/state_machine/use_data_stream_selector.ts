@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import { EuiContextMenuPanelId } from '@elastic/eui/src/components/context_menu/context_menu';
 import { useInterpret, useSelector } from '@xstate/react';
 import { useCallback } from 'react';
 import { DataStreamSelectionHandler, PanelId } from '../types';
 import { createDataStreamsSelectorStateMachine } from './state_machine';
-import { DataStreamsSelectorSearchHandler } from './types';
-
-type ChangePanelHandler = ({ panelId }: { panelId: EuiContextMenuPanelId }) => void;
+import {
+  ChangePanelHandler,
+  DataStreamsSelectorSearchHandler,
+  DataStreamsSelectorStateMachineDependencies,
+} from './types';
 
 export const useDataStreamSelector = ({
   onIntegrationsLoadMore,
@@ -25,7 +26,7 @@ export const useDataStreamSelector = ({
   onUnmanagedStreamsSort,
   onStreamSelected,
   onUnmanagedStreamsReload,
-}) => {
+}: DataStreamsSelectorStateMachineDependencies) => {
   const dataStreamsSelectorStateService = useInterpret(() =>
     createDataStreamsSelectorStateMachine({
       onIntegrationsLoadMore,

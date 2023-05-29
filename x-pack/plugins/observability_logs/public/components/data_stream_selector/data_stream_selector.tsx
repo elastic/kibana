@@ -33,11 +33,6 @@ const DataStreamsList = dynamic(() => import('./sub_components/data_streams_list
 });
 const IntegrationsListStatus = dynamic(() => import('./sub_components/integrations_list_status'));
 
-/**
- * TODO
- * - Refactor internal state management to work as a SM
- */
-
 export function DataStreamSelector({
   dataStreams,
   dataStreamsError,
@@ -113,6 +108,7 @@ export function DataStreamSelector({
       onStreamSelected: selectDataStream,
     });
 
+    // Set the last item to be a spy for infinite scroll loading
     setIntegrationListSpy(items, setSpyRef);
 
     if (items.length === 0) items.push(createIntegrationStatusItem());
@@ -143,11 +139,11 @@ export function DataStreamSelector({
       width: DATA_VIEW_POPOVER_CONTENT_WIDTH,
       content: (
         <DataStreamsList
-          onStreamClick={selectDataStream}
           dataStreams={dataStreams}
           error={dataStreamsError}
           isLoading={isLoadingStreams}
           onRetry={onUnmanagedStreamsReload}
+          onStreamClick={selectDataStream}
         />
       ),
     },
