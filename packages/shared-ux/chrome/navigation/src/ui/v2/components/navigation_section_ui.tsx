@@ -48,13 +48,13 @@ const navigationNodeToEuiItem = (
   };
 };
 
-interface TopLevelProps {
+interface Props {
   navNode: ChromeProjectNavigationNodeEnhanced;
   items?: ChromeProjectNavigationNodeEnhanced[];
   defaultIsCollapsed?: boolean;
 }
 
-export const NavigationSectionUI: FC<TopLevelProps> = ({
+export const NavigationSectionUI: FC<Props> = ({
   navNode,
   items = [],
   defaultIsCollapsed = true,
