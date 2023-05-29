@@ -7,7 +7,7 @@
  */
 
 import { isEqual } from 'lodash';
-import React, { useState } from 'react';
+import React from 'react';
 
 import { EmbeddableFactoryNotFoundError } from '@kbn/embeddable-plugin/public';
 
