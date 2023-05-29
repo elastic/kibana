@@ -11,7 +11,7 @@ import { CasesPermissions } from '@kbn/cases-plugin/common';
 import { IndicatorsPage } from '../modules/indicators/pages';
 import { IntegrationsGuard } from './integrations_guard/integrations_guard';
 import { SecuritySolutionPluginTemplateWrapper } from './security_solution_plugin_template_wrapper';
-import { useKibana } from '../hooks';
+import { useKibana } from '../hooks/use_kibana';
 
 export const APP_ID = 'securitySolution';
 

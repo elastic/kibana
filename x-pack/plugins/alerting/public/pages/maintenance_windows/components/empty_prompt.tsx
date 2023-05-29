@@ -41,7 +41,12 @@ export const EmptyPrompt = React.memo<EmptyPromptProps>(
     }, [showCreateButton, onClickCreate, docLinks]);
 
     return (
-      <EuiPageTemplate.EmptyPrompt title={emptyTitle} body={emptyBody} actions={renderActions} />
+      <EuiPageTemplate.EmptyPrompt
+        data-test-subj="mw-empty-prompt"
+        title={emptyTitle}
+        body={emptyBody}
+        actions={renderActions}
+      />
     );
   }
 );

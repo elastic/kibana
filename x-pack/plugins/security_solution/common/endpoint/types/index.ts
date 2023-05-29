@@ -703,6 +703,7 @@ export type SafeEndpointEvent = Partial<{
   }>;
   event: Partial<{
     category: ECSField<string>;
+    outcome: ECSField<string>;
     type: ECSField<string>;
     id: ECSField<string>;
     kind: ECSField<string>;
@@ -771,6 +772,7 @@ export type SafeEndpointEvent = Partial<{
       entity_id: ECSField<string>;
       name: ECSField<string>;
       pid: ECSField<number>;
+      start: ECSField<string[]>;
     }>;
     group_leader: Partial<{
       entity_id: ECSField<string>;

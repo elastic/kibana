@@ -57,7 +57,7 @@ export interface SecurityCellActions {
   filterIn?: CellActionFactory;
   filterOut?: CellActionFactory;
   addToTimeline?: CellActionFactory;
-  addToNewTimeline?: CellActionFactory;
+  investigateInNewTimeline?: CellActionFactory;
   showTopN?: CellActionFactory;
   copyToClipboard?: CellActionFactory;
   toggleColumn?: CellActionFactory;

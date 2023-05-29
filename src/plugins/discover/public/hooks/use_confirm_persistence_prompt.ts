@@ -7,15 +7,12 @@
  */
 
 import { useCallback } from 'react';
-import { v4 as uuidv4 } from 'uuid';
 import { i18n } from '@kbn/i18n';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { useDiscoverServices } from './use_discover_services';
 import { showConfirmPanel } from './show_confirm_panel';
-import { persistSavedSearch } from '../application/main/utils/persist_saved_search';
 import { DiscoverStateContainer } from '../application/main/services/discover_state';
-import { updateFiltersReferences } from '../application/main/utils/update_filter_references';
 
 export const useConfirmPersistencePrompt = (stateContainer: DiscoverStateContainer) => {
   const services = useDiscoverServices();
@@ -23,16 +20,7 @@ export const useConfirmPersistencePrompt = (stateContainer: DiscoverStateContain
   const persistDataView: (adHocDataView: DataView) => Promise<DataView> = useCallback(
     async (adHocDataView) => {
       try {
-        const persistedDataView = await services.dataViews.createAndSave({
-          ...adHocDataView.toSpec(),
-          id: uuidv4(),
-        });
-        services.dataViews.clearInstanceCache(adHocDataView.id);
-
-        updateFiltersReferences(adHocDataView, persistedDataView);
-
-        stateContainer.actions.removeAdHocDataViewById(adHocDataView.id!);
-        await stateContainer.appState.update({ index: persistedDataView.id }, true);
+        const persistedDataView = await stateContainer.actions.persistAdHocDataView(adHocDataView);
 
         const message = i18n.translate('discover.dataViewPersist.message', {
           defaultMessage: "Saved '{dataViewName}'",
@@ -50,7 +38,7 @@ export const useConfirmPersistencePrompt = (stateContainer: DiscoverStateContain
         throw new Error(error);
       }
     },
-    [services.dataViews, services.toastNotifications, stateContainer]
+    [services.toastNotifications, stateContainer]
   );
 
   const openConfirmSavePrompt: (dataView: DataView) => Promise<DataView | undefined> = useCallback(
@@ -99,17 +87,15 @@ export const useConfirmPersistencePrompt = (stateContainer: DiscoverStateContain
   );
 
   const updateSavedSearch = useCallback(
-    ({ savedSearch, dataView, state }) => {
-      return persistSavedSearch(savedSearch, {
-        dataView,
-        onSuccess: () => onUpdateSuccess(savedSearch),
-        onError: (error) => onUpdateError(error, savedSearch),
-        state,
-        saveOptions: {},
-        services,
-      });
+    async ({ savedSearch }) => {
+      try {
+        await stateContainer.savedSearchState.persist(savedSearch);
+        onUpdateSuccess(savedSearch);
+      } catch (e) {
+        onUpdateError(e, savedSearch);
+      }
     },
-    [onUpdateError, onUpdateSuccess, services]
+    [onUpdateError, onUpdateSuccess, stateContainer.savedSearchState]
   );
 
   return { openConfirmSavePrompt, updateSavedSearch };

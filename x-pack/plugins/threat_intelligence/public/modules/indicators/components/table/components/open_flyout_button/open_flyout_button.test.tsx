@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
-import { OpenIndicatorFlyoutButton } from '.';
+import { OpenIndicatorFlyoutButton } from './open_flyout_button';
 import { generateMockIndicator } from '../../../../../../../common/types/indicator';
 import { TestProvidersComponent } from '../../../../../../common/mocks/test_providers';
 import { BUTTON_TEST_ID } from './test_ids';

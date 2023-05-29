@@ -8,7 +8,7 @@
 import React, { useMemo, VFC } from 'react';
 import { Indicator, RawIndicatorFieldId } from '../../../../../../../common/types/indicator';
 import { unwrapValue } from '../../../../utils';
-import { IndicatorFieldsTable } from '../../fields_table';
+import { IndicatorFieldsTable } from '../../fields_table/fields_table';
 
 /**
  * Pick indicator fields starting with the indicator type

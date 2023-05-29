@@ -31,7 +31,7 @@ export function SlosPage() {
   const { hasWriteCapabilities } = useCapabilities();
   const { hasAtLeast } = useLicense();
 
-  const { isInitialLoading, isLoading, sloList } = useFetchSloList();
+  const { isInitialLoading, isLoading, isError, sloList } = useFetchSloList();
 
   const { total } = sloList || {};
 
@@ -46,6 +46,12 @@ export function SlosPage() {
     },
   ]);
 
+  useEffect(() => {
+    if ((!isLoading && total === 0) || hasAtLeast('platinum') === false || isError) {
+      navigateToUrl(basePath.prepend(paths.observability.slosWelcome));
+    }
+  }, [basePath, hasAtLeast, isError, isLoading, navigateToUrl, total]);
+
   const handleClickCreateSlo = () => {
     navigateToUrl(basePath.prepend(paths.observability.sloCreate));
   };
@@ -53,12 +59,6 @@ export function SlosPage() {
   const handleToggleAutoRefresh = () => {
     setIsAutoRefreshing(!isAutoRefreshing);
   };
-
-  useEffect(() => {
-    if ((!isLoading && total === 0) || hasAtLeast('platinum') === false) {
-      navigateToUrl(basePath.prepend(paths.observability.slosWelcome));
-    }
-  }, [basePath, hasAtLeast, isLoading, navigateToUrl, total]);
 
   if (isInitialLoading) {
     return null;

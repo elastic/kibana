@@ -37,8 +37,8 @@ export const getMigrationHash = (soType: SavedObjectsType): SavedObjectTypeMigra
 const serializeModelVersion = (modelVersion: ModelVersionSummary): string => {
   return [
     modelVersion.version,
-    modelVersion.changeType,
-    modelVersion.hasMigration,
+    modelVersion.changeTypes.join(','),
+    modelVersion.hasTransformation,
     ...modelVersion.newMappings,
   ].join('|');
 };

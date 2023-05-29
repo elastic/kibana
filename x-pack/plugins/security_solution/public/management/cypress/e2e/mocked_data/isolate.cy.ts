@@ -7,7 +7,7 @@
 
 import { getEndpointListPath } from '../../../common/routing';
 import {
-  checkEndpointListForOnlyIsolatedHosts,
+  checkEndpointIsIsolated,
   checkFlyoutEndpointIsolation,
   filterOutIsolatedHosts,
   interceptActionRequests,
@@ -30,8 +30,10 @@ import { indexEndpointRuleAlerts } from '../../tasks/index_endpoint_rule_alerts'
 
 describe('Isolate command', () => {
   describe('from Manage', () => {
-    let endpointData: ReturnTypeFromChainable<typeof indexEndpointHosts>;
-    let isolatedEndpointData: ReturnTypeFromChainable<typeof indexEndpointHosts>;
+    let endpointData: ReturnTypeFromChainable<typeof indexEndpointHosts> | undefined;
+    let isolatedEndpointData: ReturnTypeFromChainable<typeof indexEndpointHosts> | undefined;
+    let isolatedEndpointHostnames: [string, string];
+    let endpointHostnames: [string, string];
 
     before(() => {
       indexEndpointHosts({
@@ -40,6 +42,10 @@ describe('Isolate command', () => {
         isolation: false,
       }).then((indexEndpoints) => {
         endpointData = indexEndpoints;
+        endpointHostnames = [
+          endpointData.data.hosts[0].host.name,
+          endpointData.data.hosts[1].host.name,
+        ];
       });
 
       indexEndpointHosts({
@@ -48,64 +54,68 @@ describe('Isolate command', () => {
         isolation: true,
       }).then((indexEndpoints) => {
         isolatedEndpointData = indexEndpoints;
+        isolatedEndpointHostnames = [
+          isolatedEndpointData.data.hosts[0].host.name,
+          isolatedEndpointData.data.hosts[1].host.name,
+        ];
       });
     });
 
     after(() => {
       if (endpointData) {
         endpointData.cleanup();
-        // @ts-expect-error ignore setting to undefined
         endpointData = undefined;
       }
 
       if (isolatedEndpointData) {
         isolatedEndpointData.cleanup();
-        // @ts-expect-error ignore setting to undefined
         isolatedEndpointData = undefined;
       }
     });
+
     beforeEach(() => {
       login();
     });
+
     it('should allow filtering endpoint by Isolated status', () => {
       cy.visit(APP_PATH + getEndpointListPath({ name: 'endpointList' }));
       closeAllToasts();
       filterOutIsolatedHosts();
-      cy.contains('Showing 2 endpoints');
-      checkEndpointListForOnlyIsolatedHosts();
+      isolatedEndpointHostnames.forEach(checkEndpointIsIsolated);
+      endpointHostnames.forEach((hostname) => {
+        cy.contains(hostname).should('not.exist');
+      });
     });
   });
 
   describe('from Alerts', () => {
-    let endpointData: ReturnTypeFromChainable<typeof indexEndpointHosts>;
-    let alertData: ReturnTypeFromChainable<typeof indexEndpointRuleAlerts>;
+    let endpointData: ReturnTypeFromChainable<typeof indexEndpointHosts> | undefined;
+    let alertData: ReturnTypeFromChainable<typeof indexEndpointRuleAlerts> | undefined;
     let hostname: string;
 
     before(() => {
-      indexEndpointHosts({ withResponseActions: false, isolation: false })
-        .then((indexEndpoints) => {
+      indexEndpointHosts({ withResponseActions: false, isolation: false }).then(
+        (indexEndpoints) => {
           endpointData = indexEndpoints;
           hostname = endpointData.data.hosts[0].host.name;
-        })
-        .then(() => {
+
           return indexEndpointRuleAlerts({
             endpointAgentId: endpointData.data.hosts[0].agent.id,
             endpointHostname: endpointData.data.hosts[0].host.name,
             endpointIsolated: false,
           });
-        });
+        }
+      );
     });
 
     after(() => {
       if (endpointData) {
         endpointData.cleanup();
-        // @ts-expect-error ignore setting to undefined
         endpointData = undefined;
       }
 
       if (alertData) {
         alertData.cleanup();
-        // @ts-expect-error ignore setting to undefined
         alertData = undefined;
       }
     });
@@ -180,9 +190,9 @@ describe('Isolate command', () => {
   });
 
   describe('from Cases', () => {
-    let endpointData: ReturnTypeFromChainable<typeof indexEndpointHosts>;
-    let caseData: ReturnTypeFromChainable<typeof indexNewCase>;
-    let alertData: ReturnTypeFromChainable<typeof indexEndpointRuleAlerts>;
+    let endpointData: ReturnTypeFromChainable<typeof indexEndpointHosts> | undefined;
+    let caseData: ReturnTypeFromChainable<typeof indexNewCase> | undefined;
+    let alertData: ReturnTypeFromChainable<typeof indexEndpointRuleAlerts> | undefined;
     let caseAlertActions: ReturnType<typeof addAlertsToCase>;
     let alertId: string;
     let caseUrlPath: string;
@@ -198,41 +208,39 @@ describe('Isolate command', () => {
         .then((indexEndpoints) => {
           endpointData = indexEndpoints;
           hostname = endpointData.data.hosts[0].host.name;
-        })
-        .then(() => {
+
           return indexEndpointRuleAlerts({
             endpointAgentId: endpointData.data.hosts[0].agent.id,
             endpointHostname: endpointData.data.hosts[0].host.name,
             endpointIsolated: false,
-          }).then((indexedAlert) => {
-            alertData = indexedAlert;
-            alertId = alertData.alerts[0]._id;
           });
         })
-        .then(() => {
-          caseAlertActions = addAlertsToCase({
-            caseId: caseData.data.id,
-            alertIds: [alertId],
-          });
+        .then((indexedAlert) => {
+          alertData = indexedAlert;
+          alertId = alertData.alerts[0]._id;
+
+          if (caseData) {
+            caseAlertActions = addAlertsToCase({
+              caseId: caseData.data.id,
+              alertIds: [alertId],
+            });
+          }
         });
     });
 
     after(() => {
       if (caseData) {
         caseData.cleanup();
-        // @ts-expect-error ignore setting to undefined
         caseData = undefined;
       }
 
       if (endpointData) {
         endpointData.cleanup();
-        // @ts-expect-error ignore setting to undefined
         endpointData = undefined;
       }
 
       if (alertData) {
         alertData.cleanup();
-        // @ts-expect-error ignore setting to undefined
         alertData = undefined;
       }
     });

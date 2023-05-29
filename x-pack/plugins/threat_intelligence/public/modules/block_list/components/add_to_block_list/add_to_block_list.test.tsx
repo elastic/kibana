@@ -7,11 +7,13 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
-import { AddToBlockListContextMenu } from '.';
+import { AddToBlockListContextMenu } from './add_to_block_list';
 import { BlockListProvider } from '../../../indicators/containers/block_list_provider';
 import { SecuritySolutionContext } from '../../../../containers/security_solution_context';
 import { SecuritySolutionPluginContext } from '../../../..';
 import { getSecuritySolutionContextMock } from '../../../../common/mocks/mock_security_context';
+
+const TEST_ID = 'test';
 
 describe('<AddToBlockListContextMenu />', () => {
   it('should render an EuiContextMenuItem', () => {
@@ -20,15 +22,20 @@ describe('<AddToBlockListContextMenu />', () => {
     const mockIndicatorFileHashValue: string = 'abc';
     const mockOnClick: () => void = () => window.alert('clicked!');
 
-    const component = render(
+    const { getByTestId, getAllByText } = render(
       <SecuritySolutionContext.Provider value={mockSecurityContext}>
         <BlockListProvider>
-          <AddToBlockListContextMenu data={mockIndicatorFileHashValue} onClick={mockOnClick} />
+          <AddToBlockListContextMenu
+            data={mockIndicatorFileHashValue}
+            onClick={mockOnClick}
+            data-test-subj={TEST_ID}
+          />
         </BlockListProvider>
       </SecuritySolutionContext.Provider>
     );
 
-    expect(component).toMatchSnapshot();
+    expect(getByTestId(TEST_ID)).toBeInTheDocument();
+    expect(getAllByText('Add blocklist entry')).toHaveLength(1);
   });
 
   it('should render a disabled EuiContextMenuItem if data is null', () => {
@@ -37,15 +44,19 @@ describe('<AddToBlockListContextMenu />', () => {
     const mockIndicatorFileHashValue = null;
     const mockOnClick: () => void = () => window.alert('clicked!');
 
-    const component = render(
+    const { getByTestId } = render(
       <SecuritySolutionContext.Provider value={mockSecurityContext}>
         <BlockListProvider>
-          <AddToBlockListContextMenu data={mockIndicatorFileHashValue} onClick={mockOnClick} />
+          <AddToBlockListContextMenu
+            data={mockIndicatorFileHashValue}
+            onClick={mockOnClick}
+            data-test-subj={TEST_ID}
+          />
         </BlockListProvider>
       </SecuritySolutionContext.Provider>
     );
 
-    expect(component).toMatchSnapshot();
+    expect(getByTestId(TEST_ID)).toHaveAttribute('disabled');
   });
 
   it('should render a disabled EuiContextMenuItem if no write blocklist privilege', () => {
@@ -55,14 +66,18 @@ describe('<AddToBlockListContextMenu />', () => {
     const mockIndicatorFileHashValue: string = 'abc';
     const mockOnClick: () => void = () => window.alert('clicked!');
 
-    const component = render(
+    const { getByTestId } = render(
       <SecuritySolutionContext.Provider value={mockSecurityContext}>
         <BlockListProvider>
-          <AddToBlockListContextMenu data={mockIndicatorFileHashValue} onClick={mockOnClick} />
+          <AddToBlockListContextMenu
+            data={mockIndicatorFileHashValue}
+            onClick={mockOnClick}
+            data-test-subj={TEST_ID}
+          />
         </BlockListProvider>
       </SecuritySolutionContext.Provider>
     );
 
-    expect(component).toMatchSnapshot();
+    expect(getByTestId(TEST_ID)).toHaveAttribute('disabled');
   });
 });

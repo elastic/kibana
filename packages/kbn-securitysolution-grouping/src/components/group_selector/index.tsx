@@ -10,7 +10,7 @@ import type {
   EuiContextMenuPanelDescriptor,
   EuiContextMenuPanelItemDescriptor,
 } from '@elastic/eui';
-import { EuiBetaBadge, EuiFlexGroup, EuiFlexItem, EuiPopover } from '@elastic/eui';
+import { EuiPopover } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 import type { FieldSpec } from '@kbn/data-views-plugin/common';
 import { CustomFieldPanel } from './custom_field_panel';
@@ -47,26 +47,7 @@ const GroupSelectorComponent = ({
     () => [
       {
         id: 'firstPanel',
-        title: (
-          <EuiFlexGroup
-            component="span"
-            justifyContent="spaceBetween"
-            gutterSize="none"
-            style={{ lineHeight: 1 }}
-          >
-            <EuiFlexItem grow={false} component="p" style={{ lineHeight: 1.5 }}>
-              {i18n.SELECT_FIELD(maxGroupingLevels)}
-            </EuiFlexItem>
-            <EuiFlexItem grow={false} component="span">
-              <EuiBetaBadge
-                label={i18n.BETA}
-                size="s"
-                tooltipContent={i18n.BETA_TOOL_TIP}
-                tooltipPosition="left"
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        ),
+        title: i18n.SELECT_FIELD(maxGroupingLevels),
         items: [
           {
             'data-test-subj': 'panel-none',

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { KibanaContext } from '../../../../hooks';
+import { KibanaContext } from '../../../../hooks/use_kibana';
 import { render } from '@testing-library/react';
 import React from 'react';
 import { generateMockFileIndicator, Indicator } from '../../../../../common/types/indicator';
@@ -13,6 +13,7 @@ import { TestProvidersComponent } from '../../../../common/mocks/test_providers'
 import { AddToNewCase } from './add_to_new_case';
 import { casesPluginMock } from '@kbn/cases-plugin/public/mocks';
 
+const TEST_ID = 'test';
 const indicator: Indicator = generateMockFileIndicator();
 const onClick = () => window.alert('clicked');
 const casesServiceMock = casesPluginMock.createStartContract();
@@ -32,14 +33,15 @@ describe('AddToNewCase', () => {
       },
     };
 
-    const component = render(
+    const { getByTestId, getAllByText } = render(
       <TestProvidersComponent>
         <KibanaContext.Provider value={{ services: mockedServices } as any}>
-          <AddToNewCase indicator={indicator} onClick={onClick} />
+          <AddToNewCase indicator={indicator} onClick={onClick} data-test-subj={TEST_ID} />
         </KibanaContext.Provider>
       </TestProvidersComponent>
     );
-    expect(component).toMatchSnapshot();
+    expect(getByTestId(TEST_ID)).toBeInTheDocument();
+    expect(getAllByText('Add to new case')).toHaveLength(1);
   });
 
   it('should render the EuiContextMenuItem disabled if indicator is missing name', () => {
@@ -63,14 +65,18 @@ describe('AddToNewCase', () => {
       fields,
     };
 
-    const component = render(
+    const { getByTestId } = render(
       <TestProvidersComponent>
         <KibanaContext.Provider value={{ services: mockedServices } as any}>
-          <AddToNewCase indicator={indicatorMissingName} onClick={onClick} />
+          <AddToNewCase
+            indicator={indicatorMissingName}
+            onClick={onClick}
+            data-test-subj={TEST_ID}
+          />
         </KibanaContext.Provider>
       </TestProvidersComponent>
     );
-    expect(component).toMatchSnapshot();
+    expect(getByTestId(TEST_ID)).toHaveAttribute('disabled');
   });
 
   it('should render the EuiContextMenuItem disabled if user have no create permission', () => {
@@ -87,13 +93,13 @@ describe('AddToNewCase', () => {
       },
     };
 
-    const component = render(
+    const { getByTestId } = render(
       <TestProvidersComponent>
         <KibanaContext.Provider value={{ services: mockedServices } as any}>
-          <AddToNewCase indicator={indicator} onClick={onClick} />
+          <AddToNewCase indicator={indicator} onClick={onClick} data-test-subj={TEST_ID} />
         </KibanaContext.Provider>
       </TestProvidersComponent>
     );
-    expect(component).toMatchSnapshot();
+    expect(getByTestId(TEST_ID)).toHaveAttribute('disabled');
   });
 });

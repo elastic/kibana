@@ -11,6 +11,7 @@ import { Controller, FieldPath, useFormContext } from 'react-hook-form';
 import { CreateSLOInput } from '@kbn/slo-schema';
 import { i18n } from '@kbn/i18n';
 
+import { debounce } from 'lodash';
 import {
   Suggestion,
   useFetchApmSuggestions,
@@ -48,6 +49,8 @@ export function FieldSelector({
     search,
     serviceName,
   });
+
+  const debouncedSearch = debounce((value) => setSearch(value), 200);
 
   const options = (
     allowAllOption
@@ -99,9 +102,7 @@ export function FieldSelector({
 
                 field.onChange('');
               }}
-              onSearchChange={(value: string) => {
-                setSearch(value);
-              }}
+              onSearchChange={(value: string) => debouncedSearch(value)}
               options={options}
               placeholder={placeholder}
               selectedOptions={

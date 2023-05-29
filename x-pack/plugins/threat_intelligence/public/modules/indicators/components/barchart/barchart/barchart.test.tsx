@@ -10,8 +10,9 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import { TimeRangeBounds } from '@kbn/data-plugin/common';
 import { TestProvidersComponent } from '../../../../../common/mocks/test_providers';
-import { IndicatorsBarChart } from '.';
+import { IndicatorsBarChart } from './barchart';
 import { ChartSeries } from '../../../services';
+import { EuiComboBoxOptionOption } from '@elastic/eui';
 
 moment.suppressDeprecationWarnings = true;
 moment.tz.setDefault('UTC');
@@ -45,9 +46,12 @@ describe('<IndicatorsBarChart />', () => {
       min: moment(validDate),
       max: moment(validDate).add(1, 'days'),
     };
-    const mockField: string = 'threat.indicator.ip';
+    const mockField: EuiComboBoxOptionOption<string> = {
+      label: 'threat.indicator.ip',
+      value: 'ip',
+    };
 
-    const component = render(
+    const { container } = render(
       <TestProvidersComponent>
         <IndicatorsBarChart
           indicators={mockIndicators}
@@ -57,6 +61,29 @@ describe('<IndicatorsBarChart />', () => {
       </TestProvidersComponent>
     );
 
-    expect(component).toMatchSnapshot();
+    expect(container).toMatchInlineSnapshot(`
+      <div>
+        <div
+          class="echChart"
+          style="width: 100%; height: 200px;"
+        >
+          <div
+            class="echChartBackground"
+            style="background-color: transparent;"
+          />
+          <div
+            class="echChartStatus"
+            data-ech-render-complete="false"
+            data-ech-render-count="0"
+          />
+          <div
+            class="echChartResizer"
+          />
+          <div
+            class="echContainer"
+          />
+        </div>
+      </div>
+    `);
   });
 });

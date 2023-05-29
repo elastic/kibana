@@ -19,7 +19,6 @@ import { extractErrorMessage } from '@kbn/ml-error-utils';
 import { isRuntimeMappings } from '../../../../../../common/util/runtime_field_utils';
 import { RuntimeMappings } from '../../../../../../common/types/fields';
 import { DEFAULT_SAMPLER_SHARD_SIZE } from '../../../../../../common/constants/field_histograms';
-import { newJobCapsServiceAnalytics } from '../../../../services/new_job_capabilities/new_job_capabilities_service_analytics';
 
 import { DataLoader } from '../../../../datavisualizer/index_based/data_loader';
 
@@ -60,7 +59,7 @@ function getRuntimeFieldColumns(runtimeMappings: RuntimeMappings) {
 }
 
 function getIndexPatternColumns(indexPattern: DataView, fieldsFilter: string[]) {
-  const { fields } = newJobCapsServiceAnalytics;
+  const { fields } = indexPattern;
 
   return fields
     .filter((field) => fieldsFilter.includes(field.name))
@@ -117,9 +116,9 @@ export const useIndexData = (
 
         // Get all field names for each returned doc and flatten it
         // to a list of unique field names used across all docs.
-        const allKibanaIndexPatternFields = getFieldsFromKibanaIndexPattern(indexPattern);
+        const allDataViewFields = getFieldsFromKibanaIndexPattern(indexPattern);
         const populatedFields = [...new Set(docs.map(Object.keys).flat(1))]
-          .filter((d) => allKibanaIndexPatternFields.includes(d))
+          .filter((d) => allDataViewFields.includes(d))
           .sort();
 
         setStatus(INDEX_STATUS.LOADED);

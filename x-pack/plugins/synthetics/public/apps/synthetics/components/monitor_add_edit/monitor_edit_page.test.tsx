@@ -11,7 +11,7 @@ import { render } from '../../utils/testing/rtl_helpers';
 import { MonitorEditPage } from './monitor_edit_page';
 import { ConfigKey } from '../../../../../common/runtime_types';
 
-import * as observabilityPublic from '@kbn/observability-plugin/public';
+import * as observabilityPublic from '@kbn/observability-shared-plugin/public';
 import {
   PROFILE_VALUES_ENUM,
   PROFILES_MAP,
@@ -19,7 +19,7 @@ import {
 
 mockGlobals();
 
-jest.mock('@kbn/observability-plugin/public');
+jest.mock('@kbn/observability-shared-plugin/public');
 
 jest.mock('@kbn/kibana-react-plugin/public', () => {
   const original = jest.requireActual('@kbn/kibana-react-plugin/public');

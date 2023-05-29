@@ -6,12 +6,14 @@
  */
 
 import type { TypeOf } from '@kbn/config-schema';
+import type { EcsError } from '@kbn/ecs';
 import type { FileJSON, BaseFileMetadata, FileCompression } from '@kbn/files-plugin/common';
 import type {
   ActionStatusRequestSchema,
   NoParametersRequestSchema,
   ResponseActionBodySchema,
   KillOrSuspendProcessRequestSchema,
+  UploadActionApiRequestBody,
 } from '../schema/actions';
 import type {
   ResponseActionStatus,
@@ -91,14 +93,6 @@ export const ActivityLogItemTypes = {
   FLEET_ACTION: 'fleetAction' as const,
   FLEET_RESPONSE: 'fleetResponse' as const,
 };
-
-interface EcsError {
-  code?: string;
-  id?: string;
-  message: string;
-  stack_trace?: string;
-  type?: string;
-}
 
 interface EndpointActionFields<
   TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes,
@@ -183,7 +177,8 @@ export type EndpointActionDataParameterTypes =
   | undefined
   | ResponseActionParametersWithPidOrEntityId
   | ResponseActionsExecuteParameters
-  | ResponseActionGetFileParameters;
+  | ResponseActionGetFileParameters
+  | ResponseActionUploadParameters;
 
 export interface EndpointActionData<
   TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes,
@@ -321,6 +316,13 @@ export interface PendingActionsResponse {
 
 export type PendingActionsRequestQuery = TypeOf<typeof ActionStatusRequestSchema.query>;
 
+export interface ActionDetailsAgentState {
+  isCompleted: boolean;
+  wasSuccessful: boolean;
+  errors: undefined | string[];
+  completedAt: string | undefined;
+}
+
 export interface ActionDetails<
   TOutputContent extends object = object,
   TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes
@@ -365,15 +367,7 @@ export interface ActionDetails<
    * A map by Agent ID holding information about the action for the specific agent.
    * Helpful when action is sent to multiple agents
    */
-  agentState: Record<
-    string,
-    {
-      isCompleted: boolean;
-      wasSuccessful: boolean;
-      errors: undefined | string[];
-      completedAt: string | undefined;
-    }
-  >;
+  agentState: Record<string, ActionDetailsAgentState>;
   /**  action status */
   status: ResponseActionStatus;
   /** user that created the action */
@@ -474,4 +468,25 @@ export type UploadedFileInfo = Pick<
 
 export interface ActionFileInfoApiResponse {
   data: UploadedFileInfo;
+}
+
+/**
+ * The parameters that are sent to the Endpoint.
+ *
+ * NOTE: Most of the parameters below are NOT accepted via the API. They are inserted into
+ * the action's parameters via the API route handler
+ */
+export type ResponseActionUploadParameters = UploadActionApiRequestBody['parameters'] & {
+  file_sha256: string;
+  file_size: number;
+  file_name: string;
+  file_id: string;
+};
+
+export interface ResponseActionUploadOutputContent {
+  code: string;
+  /** Full path to the file on the host machine where it was saved */
+  path: string;
+  /** The free space available (after saving the file) of the drive where the file was saved to, In Bytes  */
+  disk_free_space: number;
 }

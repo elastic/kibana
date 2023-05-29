@@ -43,7 +43,6 @@
     "@kbn/utility-types",
     "@kbn/es-types",
     "@kbn/rison",
-    "@kbn/analytics",
     "@kbn/datemath",
     "@kbn/core-ui-settings-browser",
     "@kbn/es-query",

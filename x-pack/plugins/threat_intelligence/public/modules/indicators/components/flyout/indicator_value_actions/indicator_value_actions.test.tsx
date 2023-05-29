@@ -11,6 +11,15 @@ import { render } from '@testing-library/react';
 import { IndicatorValueActions } from './indicator_value_actions';
 import { IndicatorsFlyoutContext } from '../context';
 import { TestProvidersComponent } from '../../../../../common/mocks/test_providers';
+import {
+  COPY_TO_CLIPBOARD_BUTTON_TEST_ID,
+  FILTER_IN_BUTTON_TEST_ID,
+  FILTER_OUT_BUTTON_TEST_ID,
+  POPOVER_BUTTON_TEST_ID,
+  TIMELINE_BUTTON_TEST_ID,
+} from './test_ids';
+
+const TEST_ID = 'test';
 
 describe('IndicatorValueActions', () => {
   const indicator: Indicator = generateMockFileIndicator();
@@ -20,12 +29,12 @@ describe('IndicatorValueActions', () => {
     const context = {
       kqlBarIntegration: true,
     };
-    const component = render(
+    const { container } = render(
       <IndicatorsFlyoutContext.Provider value={context}>
         <IndicatorValueActions indicator={indicator} field={field} />
       </IndicatorsFlyoutContext.Provider>
     );
-    expect(component).toMatchSnapshot();
+    expect(container).toBeEmptyDOMElement();
   });
 
   it('should only render add to timeline and copy to clipboard', () => {
@@ -33,14 +42,18 @@ describe('IndicatorValueActions', () => {
     const context = {
       kqlBarIntegration: true,
     };
-    const component = render(
+    const { getByTestId } = render(
       <TestProvidersComponent>
         <IndicatorsFlyoutContext.Provider value={context}>
-          <IndicatorValueActions indicator={indicator} field={field} />
+          <IndicatorValueActions indicator={indicator} field={field} data-test-subj={TEST_ID} />
         </IndicatorsFlyoutContext.Provider>
       </TestProvidersComponent>
     );
-    expect(component).toMatchSnapshot();
+
+    const addToTimelineTestId = `${TEST_ID}${TIMELINE_BUTTON_TEST_ID}`;
+    const copyToClipboardTestId = `${TEST_ID}${COPY_TO_CLIPBOARD_BUTTON_TEST_ID}`;
+    expect(getByTestId(addToTimelineTestId)).toBeInTheDocument();
+    expect(getByTestId(copyToClipboardTestId)).toBeInTheDocument();
   });
 
   it('should render filter in/out and dropdown for add to timeline and copy to clipboard', () => {
@@ -48,13 +61,18 @@ describe('IndicatorValueActions', () => {
     const context = {
       kqlBarIntegration: false,
     };
-    const component = render(
+    const { getByTestId } = render(
       <TestProvidersComponent>
         <IndicatorsFlyoutContext.Provider value={context}>
-          <IndicatorValueActions indicator={indicator} field={field} />
+          <IndicatorValueActions indicator={indicator} field={field} data-test-subj={TEST_ID} />
         </IndicatorsFlyoutContext.Provider>
       </TestProvidersComponent>
     );
-    expect(component).toMatchSnapshot();
+    const filterInTestId = `${TEST_ID}${FILTER_IN_BUTTON_TEST_ID}`;
+    const filterOutTestId = `${TEST_ID}${FILTER_OUT_BUTTON_TEST_ID}`;
+    const popoverTestId = `${TEST_ID}${POPOVER_BUTTON_TEST_ID}`;
+    expect(getByTestId(filterInTestId)).toBeInTheDocument();
+    expect(getByTestId(filterOutTestId)).toBeInTheDocument();
+    expect(getByTestId(popoverTestId)).toBeInTheDocument();
   });
 });

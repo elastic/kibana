@@ -45,7 +45,11 @@ import type {
 } from '../../common/types';
 import { packageToPackagePolicy } from '../../common/services';
 
-import { FleetError, PackagePolicyIneligibleForUpgradeError } from '../errors';
+import {
+  FleetError,
+  PackagePolicyIneligibleForUpgradeError,
+  PackagePolicyValidationError,
+} from '../errors';
 
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../constants';
 
@@ -168,6 +172,7 @@ jest.mock('./epm/packages', () => {
   return {
     getPackageInfo: jest.fn().mockImplementation(mockedGetPackageInfo),
     getInstallation: mockedGetInstallation,
+    ensureInstalledPackage: jest.fn(),
   };
 });
 
@@ -210,6 +215,7 @@ const mockAgentPolicyGet = () => {
         updated_at: new Date().toISOString(),
         updated_by: 'test',
         revision: 1,
+        is_protected: false,
       });
     }
   );
@@ -251,6 +257,11 @@ describe('Package policy service', () => {
           enabled: true,
           policy_id: 'test',
           inputs: [],
+          package: {
+            name: 'test',
+            title: 'Test',
+            version: '0.0.1',
+          },
         },
         // Skipping unique name verification just means we have to less mocking/setup
         { id: 'test-package-policy', skipUniqueNameVerification: true }
@@ -1725,32 +1736,47 @@ describe('Package policy service', () => {
         ],
       });
 
-      savedObjectsClient.update.mockImplementation(
+      savedObjectsClient.bulkUpdate.mockImplementation(
         async (
-          type: string,
-          id: string,
-          attrs: any
-        ): Promise<SavedObjectsUpdateResponse<PackagePolicySOAttributes>> => {
-          savedObjectsClient.get.mockResolvedValue({
+          objs: Array<{
+            type: string;
+            id: string;
+            attributes: any;
+          }>
+        ) => {
+          const newObjs = objs.map((obj) => ({
             id: 'test',
             type: 'abcd',
             references: [],
             version: 'test',
-            attributes: attrs,
+            attributes: obj.attributes,
+          }));
+          savedObjectsClient.bulkGet.mockResolvedValue({
+            saved_objects: newObjs,
           });
-          return attrs;
+          return {
+            saved_objects: newObjs,
+          };
         }
       );
+
       const elasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
 
-      const res = packagePolicyService.bulkUpdate(
+      const toUpdate = { ...mockPackagePolicy, inputs: inputsUpdate };
+
+      const res = await packagePolicyService.bulkUpdate(
         savedObjectsClient,
         elasticsearchClient,
 
-        [{ ...mockPackagePolicy, inputs: inputsUpdate }]
+        [toUpdate]
       );
 
-      await expect(res).rejects.toThrow('cat is a frozen variable and cannot be modified');
+      expect(res.failedPolicies).toHaveLength(1);
+      expect(res.updatedPolicies).toHaveLength(0);
+      expect(res.failedPolicies[0].packagePolicy).toEqual(toUpdate);
+      expect(res.failedPolicies[0].error).toEqual(
+        new PackagePolicyValidationError(`cat is a frozen variable and cannot be modified`)
+      );
     });
 
     it('should allow to update input vars that are frozen with the force flag', async () => {
@@ -1882,7 +1908,11 @@ describe('Package policy service', () => {
         { force: true }
       );
 
-      const [modifiedInput] = result![0].inputs;
+      expect(result.updatedPolicies).toHaveLength(1);
+
+      const updatedPolicy = result.updatedPolicies?.[0]!;
+
+      const [modifiedInput] = updatedPolicy.inputs;
       expect(modifiedInput.enabled).toEqual(true);
       expect(modifiedInput.vars!.dog.value).toEqual('labrador');
       expect(modifiedInput.vars!.cat.value).toEqual('tabby');
@@ -2016,7 +2046,11 @@ describe('Package policy service', () => {
         [{ ...mockPackagePolicy, inputs: inputsUpdate }]
       );
 
-      const [modifiedInput] = result![0].inputs;
+      expect(result.updatedPolicies).toHaveLength(1);
+
+      const updatedPolicy = result.updatedPolicies?.[0]!;
+
+      const [modifiedInput] = updatedPolicy.inputs;
       expect(modifiedInput.enabled).toEqual(true);
       expect(modifiedInput.vars!.dog.value).toEqual('labrador');
       expect(modifiedInput.vars!.cat.value).toEqual('siamese');
@@ -2082,13 +2116,15 @@ describe('Package policy service', () => {
 
       const elasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
 
-      const result = await packagePolicyService.bulkUpdate(
+      const { updatedPolicies } = await packagePolicyService.bulkUpdate(
         savedObjectsClient,
         elasticsearchClient,
         [{ ...mockPackagePolicy, inputs: [] }]
       );
 
-      expect(result![0].elasticsearch).toMatchObject({ privileges: { cluster: ['monitor'] } });
+      expect(updatedPolicies![0].elasticsearch).toMatchObject({
+        privileges: { cluster: ['monitor'] },
+      });
     });
 
     it('should not mutate packagePolicyUpdate object when trimming whitespace', async () => {
@@ -2138,7 +2174,7 @@ describe('Package policy service', () => {
 
       const elasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
 
-      const result = await packagePolicyService.bulkUpdate(
+      const { updatedPolicies } = await packagePolicyService.bulkUpdate(
         savedObjectsClient,
         elasticsearchClient,
         // this mimics the way that OSQuery plugin create immutable objects
@@ -2150,7 +2186,7 @@ describe('Package policy service', () => {
         ]
       );
 
-      expect(result![0].name).toEqual('test');
+      expect(updatedPolicies![0].name).toEqual('test');
     });
 
     it('should send telemetry event when upgrading a package policy', async () => {

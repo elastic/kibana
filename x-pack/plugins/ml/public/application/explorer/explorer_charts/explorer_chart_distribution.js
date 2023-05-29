@@ -24,7 +24,7 @@ import {
   getFormattedSeverityScore,
   getSeverityColor,
   getSeverityWithLow,
-} from '../../../../common/util/anomaly_utils';
+} from '@kbn/ml-anomaly-utils';
 import {
   getChartType,
   getTickValues,

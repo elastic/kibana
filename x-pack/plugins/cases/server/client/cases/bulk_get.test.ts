@@ -5,9 +5,6 @@
  * 2.0.
  */
 
-import type { Case } from '../../../common/api';
-import { getTypeProps, CaseRt } from '../../../common/api';
-import { mockCases } from '../../mocks';
 import { createCasesClientMockArgs } from '../mocks';
 import { bulkGet } from './bulk_get';
 
@@ -24,49 +21,6 @@ describe('bulkGet', () => {
 
       await expect(bulkGet({ ids }, clientArgs)).rejects.toThrow(
         'Maximum request limit of 1000 cases reached'
-      );
-    });
-  });
-
-  describe('throwErrorIfFieldsAreInvalid', () => {
-    const caseSO = mockCases[0];
-    const clientArgs = createCasesClientMockArgs();
-    clientArgs.services.caseService.getCases.mockResolvedValue({ saved_objects: [caseSO] });
-    clientArgs.services.attachmentService.getter.getCaseCommentStats.mockResolvedValue(new Map());
-
-    clientArgs.authorization.getAndEnsureAuthorizedEntities.mockResolvedValue({
-      authorized: [caseSO],
-      unauthorized: [],
-    });
-
-    const typeProps = getTypeProps(CaseRt) ?? {};
-    const validFields = Object.keys(typeProps) as Array<keyof Case>;
-
-    beforeEach(() => {
-      jest.clearAllMocks();
-    });
-
-    it.each(validFields)('supports valid field: %s', async (field) => {
-      const ids = ['test'];
-
-      await expect(bulkGet({ ids, fields: [field] }, clientArgs)).resolves.not.toThrow();
-    });
-
-    it('throws if the requested field is not valid', async () => {
-      const ids = ['test'];
-
-      // @ts-expect-error
-      await expect(bulkGet({ ids, fields: ['not-valid'] }, clientArgs)).rejects.toThrow(
-        'Failed to bulk get cases: test: Error: Field: not-valid is not supported'
-      );
-    });
-
-    it('throws for nested fields', async () => {
-      const ids = ['test'];
-
-      // @ts-expect-error
-      await expect(bulkGet({ ids, fields: ['created_by.username'] }, clientArgs)).rejects.toThrow(
-        'Failed to bulk get cases: test: Error: Field: created_by.username is not supported'
       );
     });
   });

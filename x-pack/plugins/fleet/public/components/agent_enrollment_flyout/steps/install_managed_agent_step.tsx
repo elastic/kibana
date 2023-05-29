@@ -46,15 +46,18 @@ export const InstallManagedAgentStep = ({
     title: i18n.translate('xpack.fleet.agentEnrollment.stepEnrollAndRunAgentTitle', {
       defaultMessage: 'Install Elastic Agent on your host',
     }),
-    children: selectedApiKeyId && apiKeyData && (
-      <InstallSection
-        installCommand={installCommand}
-        isK8s={isK8s}
-        enrollToken={enrollToken}
-        onCopy={onCopy}
-        fullCopyButton={fullCopyButton}
-        cloudFormationTemplateUrl={cloudFormationTemplateUrl}
-      />
-    ),
+    children:
+      selectedApiKeyId && apiKeyData ? (
+        <InstallSection
+          installCommand={installCommand}
+          isK8s={isK8s}
+          enrollToken={enrollToken}
+          onCopy={onCopy}
+          fullCopyButton={fullCopyButton}
+          cloudFormationTemplateUrl={cloudFormationTemplateUrl}
+        />
+      ) : (
+        <React.Fragment />
+      ),
   };
 };

@@ -4508,6 +4508,20 @@
           },
           {
             "parentPluginId": "visualizations",
+            "id": "def-public.VisTypeAlias.hidden",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "hidden",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "visualizations",
             "id": "def-public.VisTypeAlias.isDeprecated",
             "type": "CompoundType",
             "tags": [],
@@ -6352,7 +6366,15 @@
             "section": "def-public.VisualizeInput",
             "text": "VisualizeInput"
           },
-          ">) => void; render: (domNode: HTMLElement) => Promise<void>; reportsEmbeddableLoad: () => boolean; getVis: () => ",
+          ">) => void; render: (domNode: HTMLElement) => Promise<void>; getFilters: () => Promise<",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Filter",
+            "text": "Filter"
+          },
+          "[]>; reportsEmbeddableLoad: () => boolean; getVis: () => ",
           {
             "pluginId": "visualizations",
             "scope": "public",
@@ -6368,15 +6390,7 @@
             "section": "def-common.VisParams",
             "text": "VisParams"
           },
-          ">; getFilters: () => Promise<",
-          {
-            "pluginId": "@kbn/es-query",
-            "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
-            "section": "def-common.Filter",
-            "text": "Filter"
-          },
-          "[]>; getInspectorAdapters: () => ",
+          ">; getInspectorAdapters: () => ",
           {
             "pluginId": "inspector",
             "scope": "common",
@@ -12096,98 +12110,147 @@
       },
       {
         "parentPluginId": "visualizations",
-        "id": "def-common.VisualizationSavedObjectAttributes",
+        "id": "def-common.VisualizationSavedObject",
         "type": "Interface",
         "tags": [],
-        "label": "VisualizationSavedObjectAttributes",
+        "label": "VisualizationSavedObject",
         "description": [],
-        "signature": [
-          {
-            "pluginId": "visualizations",
-            "scope": "common",
-            "docId": "kibVisualizationsPluginApi",
-            "section": "def-common.VisualizationSavedObjectAttributes",
-            "text": "VisualizationSavedObjectAttributes"
-          },
-          " extends ",
-          {
-            "pluginId": "@kbn/core-saved-objects-common",
-            "scope": "common",
-            "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
-            "section": "def-common.SavedObjectAttributes",
-            "text": "SavedObjectAttributes"
-          }
-        ],
-        "path": "src/plugins/visualizations/common/types.ts",
+        "path": "src/plugins/visualizations/common/content_management/v1/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "visualizations",
-            "id": "def-common.VisualizationSavedObjectAttributes.description",
+            "id": "def-common.VisualizationSavedObject.id",
             "type": "string",
             "tags": [],
-            "label": "description",
+            "label": "id",
             "description": [],
-            "path": "src/plugins/visualizations/common/types.ts",
+            "path": "src/plugins/visualizations/common/content_management/v1/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
-            "id": "def-common.VisualizationSavedObjectAttributes.kibanaSavedObjectMeta",
-            "type": "Object",
-            "tags": [],
-            "label": "kibanaSavedObjectMeta",
-            "description": [],
-            "signature": [
-              "{ searchSourceJSON: string; }"
-            ],
-            "path": "src/plugins/visualizations/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "visualizations",
-            "id": "def-common.VisualizationSavedObjectAttributes.title",
+            "id": "def-common.VisualizationSavedObject.type",
             "type": "string",
             "tags": [],
-            "label": "title",
+            "label": "type",
             "description": [],
-            "path": "src/plugins/visualizations/common/types.ts",
+            "path": "src/plugins/visualizations/common/content_management/v1/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
-            "id": "def-common.VisualizationSavedObjectAttributes.version",
-            "type": "number",
+            "id": "def-common.VisualizationSavedObject.version",
+            "type": "string",
             "tags": [],
             "label": "version",
             "description": [],
-            "path": "src/plugins/visualizations/common/types.ts",
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/visualizations/common/content_management/v1/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
-            "id": "def-common.VisualizationSavedObjectAttributes.visState",
+            "id": "def-common.VisualizationSavedObject.updatedAt",
             "type": "string",
             "tags": [],
-            "label": "visState",
+            "label": "updatedAt",
             "description": [],
-            "path": "src/plugins/visualizations/common/types.ts",
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/visualizations/common/content_management/v1/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
-            "id": "def-common.VisualizationSavedObjectAttributes.uiStateJSON",
+            "id": "def-common.VisualizationSavedObject.createdAt",
             "type": "string",
             "tags": [],
-            "label": "uiStateJSON",
+            "label": "createdAt",
             "description": [],
-            "path": "src/plugins/visualizations/common/types.ts",
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/visualizations/common/content_management/v1/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-common.VisualizationSavedObject.attributes",
+            "type": "Object",
+            "tags": [],
+            "label": "attributes",
+            "description": [],
+            "signature": [
+              "{ title: string; description?: string | undefined; kibanaSavedObjectMeta?: { searchSourceJSON?: string | undefined; } | undefined; version?: string | undefined; visState?: string | undefined; uiStateJSON?: string | undefined; savedSearchRefName?: string | undefined; }"
+            ],
+            "path": "src/plugins/visualizations/common/content_management/v1/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-common.VisualizationSavedObject.references",
+            "type": "Array",
+            "tags": [],
+            "label": "references",
+            "description": [],
+            "signature": [
+              "Reference",
+              "[]"
+            ],
+            "path": "src/plugins/visualizations/common/content_management/v1/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-common.VisualizationSavedObject.namespaces",
+            "type": "Array",
+            "tags": [],
+            "label": "namespaces",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "src/plugins/visualizations/common/content_management/v1/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-common.VisualizationSavedObject.originId",
+            "type": "string",
+            "tags": [],
+            "label": "originId",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/visualizations/common/content_management/v1/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-common.VisualizationSavedObject.error",
+            "type": "Object",
+            "tags": [],
+            "label": "error",
+            "description": [],
+            "signature": [
+              "{ error: string; message: string; statusCode: number; metadata?: Record<string, unknown> | undefined; } | undefined"
+            ],
+            "path": "src/plugins/visualizations/common/content_management/v1/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -15068,6 +15131,21 @@
           "\"m\" | \"s\" | \"d\" | \"h\""
         ],
         "path": "src/plugins/visualizations/common/convert_to_lens/types/common.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "visualizations",
+        "id": "def-common.VisualizationSavedObjectAttributes",
+        "type": "Type",
+        "tags": [],
+        "label": "VisualizationSavedObjectAttributes",
+        "description": [],
+        "signature": [
+          "{ title: string; description?: string | undefined; kibanaSavedObjectMeta?: { searchSourceJSON?: string | undefined; } | undefined; version?: string | undefined; visState?: string | undefined; uiStateJSON?: string | undefined; savedSearchRefName?: string | undefined; }"
+        ],
+        "path": "src/plugins/visualizations/common/content_management/v1/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

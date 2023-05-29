@@ -13,7 +13,7 @@ import type { SavedObjectReference } from '@kbn/core/public';
 import { SaveModal } from './save_modal';
 import type { LensAppProps, LensAppServices } from './types';
 import type { SaveProps } from './app';
-import { Document, checkForDuplicateTitle } from '../persistence';
+import { Document, checkForDuplicateTitle, SavedObjectIndexStore } from '../persistence';
 import type { LensByReferenceInput, LensEmbeddableInput } from '../embeddable';
 import { APP_ID, getFullPath, LENS_EMBEDDABLE_TYPE } from '../../common/constants';
 import type { LensAppState } from '../state_management';
@@ -121,6 +121,7 @@ export function SaveModalContainer({
           originatingApp,
           getIsByValueMode: () => false,
           onAppLeave: () => {},
+          savedObjectStore: lensServices.savedObjectStore,
         },
         saveProps,
         options
@@ -209,6 +210,7 @@ export const runSaveLensVisualization = async (
     originatingApp?: string;
     textBasedLanguageSave?: boolean;
     switchDatasource?: () => void;
+    savedObjectStore: SavedObjectIndexStore;
   } & ExtraProps &
     LensAppServices,
   saveProps: SaveProps,
@@ -219,7 +221,6 @@ export const runSaveLensVisualization = async (
     initialInput,
     lastKnownDoc,
     persistedDoc,
-    savedObjectsClient,
     overlays,
     notifications,
     stateTransfer,
@@ -233,6 +234,7 @@ export const runSaveLensVisualization = async (
     textBasedLanguageSave,
     switchDatasource,
     application,
+    savedObjectStore,
   } = props;
 
   if (!lastKnownDoc) {
@@ -282,7 +284,7 @@ export const runSaveLensVisualization = async (
         },
         saveProps.onTitleDuplicate,
         {
-          savedObjectsClient,
+          client: savedObjectStore,
           overlays,
         }
       );

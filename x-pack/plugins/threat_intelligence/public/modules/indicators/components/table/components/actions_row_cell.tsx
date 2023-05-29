@@ -8,10 +8,10 @@
 import React, { useContext, VFC } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { MoreActions } from './more_actions/more_actions';
-import { InvestigateInTimelineButtonIcon } from '../../../../timeline';
+import { InvestigateInTimelineButtonIcon } from '../../../../timeline/components/investigate_in_timeline/investigate_in_timeline';
 import { Indicator } from '../../../../../../common/types/indicator';
-import { OpenIndicatorFlyoutButton } from './open_flyout_button';
-import { IndicatorsTableContext } from '../contexts';
+import { OpenIndicatorFlyoutButton } from './open_flyout_button/open_flyout_button';
+import { IndicatorsTableContext } from '../contexts/context';
 import { INVESTIGATE_IN_TIMELINE_TEST_ID } from './test_ids';
 
 export const ActionsRowCell: VFC<{ indicator: Indicator }> = ({ indicator }) => {

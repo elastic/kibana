@@ -8,7 +8,7 @@
 import React, { VFC } from 'react';
 import { EuiButtonIcon, EuiContextMenuItem, EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useInvestigateInTimeline } from '../../hooks';
+import { useInvestigateInTimeline } from '../../hooks/use_investigate_in_timeline';
 import { Indicator } from '../../../../../common/types/indicator';
 import { BUTTON_ICON_LABEL } from './translations';
 
@@ -42,7 +42,7 @@ export const InvestigateInTimelineContextMenu: VFC<InvestigateInTimelineProps> =
 }) => {
   const { investigateInTimelineFn } = useInvestigateInTimeline({ indicator: data });
   if (!investigateInTimelineFn) {
-    return <></>;
+    return null;
   }
 
   const menuItemClicked = () => {
@@ -78,7 +78,7 @@ export const InvestigateInTimelineButtonIcon: VFC<InvestigateInTimelineProps> = 
 }) => {
   const { investigateInTimelineFn } = useInvestigateInTimeline({ indicator: data });
   if (!investigateInTimelineFn) {
-    return <></>;
+    return null;
   }
 
   return (

@@ -1,0 +1,3 @@
+xpack.observability_onboarding.ui.enabled: true
+
+xpack.cloud.id: 'foo'

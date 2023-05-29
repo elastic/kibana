@@ -15,12 +15,15 @@ import {
   EuiFlexItem,
   EuiToolTip,
 } from '@elastic/eui';
-import { generateDataProvider } from '../../utils';
-import { fieldAndValueValid, getIndicatorFieldAndValue } from '../../../indicators';
+import { generateDataProvider } from '../../utils/data_provider';
+import {
+  fieldAndValueValid,
+  getIndicatorFieldAndValue,
+} from '../../../indicators/utils/field_value';
 import { Indicator } from '../../../../../common/types/indicator';
-import { useKibana } from '../../../../hooks';
+import { useKibana } from '../../../../hooks/use_kibana';
 import { useStyles } from './styles';
-import { useAddToTimeline } from '../../hooks';
+import { useAddToTimeline } from '../../hooks/use_add_to_timeline';
 import { TITLE } from './translations';
 
 const ICON_TYPE = 'timeline';
@@ -65,7 +68,7 @@ export const AddToTimelineButtonIcon: VFC<AddToTimelineProps> = ({
 
   const { addToTimelineProps } = useAddToTimeline({ indicator: data, field });
   if (!addToTimelineProps) {
-    return <></>;
+    return null;
   }
 
   return (
@@ -101,7 +104,7 @@ export const AddToTimelineButtonEmpty: VFC<AddToTimelineProps> = ({
     typeof data === 'string' ? { key: field, value: data } : getIndicatorFieldAndValue(data, field);
 
   if (!fieldAndValueValid(key, value)) {
-    return <></>;
+    return null;
   }
 
   const dataProvider: DataProvider[] = [generateDataProvider(key, value as string)];
@@ -160,7 +163,7 @@ export const AddToTimelineContextMenu: VFC<AddToTimelineProps> = ({
     typeof data === 'string' ? { key: field, value: data } : getIndicatorFieldAndValue(data, field);
 
   if (!fieldAndValueValid(key, value)) {
-    return <></>;
+    return null;
   }
 
   const dataProvider: DataProvider[] = [generateDataProvider(key, value as string)];
@@ -211,7 +214,7 @@ export const AddToTimelineCellAction: VFC<AddToTimelineCellActionProps> = ({
 
   const { addToTimelineProps } = useAddToTimeline({ indicator: data, field });
   if (!addToTimelineProps) {
-    return <></>;
+    return null;
   }
   addToTimelineProps.Component = Component;
 

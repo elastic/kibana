@@ -14,7 +14,7 @@ export interface Case {
   title: string;
   description: string;
   status: CaseStatuses;
-  totalComment: number;
+  totalComments: number;
   created_at: string;
   created_by: {
     email: string | null | undefined;
@@ -40,7 +40,7 @@ export interface CasesBulkGetResponse {
 
 export const bulkGetCases = async (
   http: HttpStart,
-  params: { ids: string[]; fields: string[] },
+  params: { ids: string[] },
   signal?: AbortSignal
 ): Promise<CasesBulkGetResponse> => {
   const res = await http.post<CasesBulkGetResponse>(INTERNAL_BULK_GET_CASES_URL, {

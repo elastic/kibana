@@ -562,6 +562,10 @@ export const ActionForm = ({
           actionType={actionTypesIndex[activeActionItem.actionTypeId]}
           onClose={closeAddConnectorModal}
           postSaveEventHandler={(savedAction: ActionConnector) => {
+            // TODO: fix in https://github.com/elastic/kibana/issues/155993
+            // actionTypes with subtypes need to be updated in case they switched to a
+            // subtype that is not the default one
+            actions[0].actionTypeId = savedAction.actionTypeId;
             connectors.push(savedAction);
             const indicesToUpdate = activeActionItem.indices || [];
             indicesToUpdate.forEach((index: number) => setActionIdByIndex(savedAction.id, index));

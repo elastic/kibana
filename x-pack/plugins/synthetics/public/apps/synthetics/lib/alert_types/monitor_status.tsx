@@ -41,7 +41,7 @@ export const initMonitorStatusAlertType: AlertTypeInitializer = ({
   ruleParamsExpression: (paramProps: RuleTypeParamsExpressionProps<StatusRuleParams>) => (
     <MonitorStatusAlert core={core} plugins={plugins} params={paramProps} />
   ),
-  validate: (ruleParams: StatusRuleParams) => {
+  validate: (_ruleParams: StatusRuleParams) => {
     return { errors: {} };
   },
   defaultActionMessage,

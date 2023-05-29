@@ -13,6 +13,7 @@
 
 import { BehaviorSubject } from 'rxjs';
 import Semver from 'semver';
+import type { NodeRoles } from '@kbn/core-node-server';
 import type { Logger } from '@kbn/logging';
 import type { DocLinksServiceStart } from '@kbn/core-doc-links-server';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
@@ -52,6 +53,7 @@ export interface KibanaMigratorOptions {
   docLinks: DocLinksServiceStart;
   waitForMigrationCompletion: boolean;
   defaultIndexTypesMap?: IndexTypesMap;
+  nodeRoles: NodeRoles;
 }
 
 /**
@@ -74,6 +76,7 @@ export class KibanaMigrator implements IKibanaMigrator {
   private readonly docLinks: DocLinksServiceStart;
   private readonly waitForMigrationCompletion: boolean;
   private readonly defaultIndexTypesMap: IndexTypesMap;
+  private readonly nodeRoles: NodeRoles;
   public readonly kibanaVersion: string;
 
   /**
@@ -89,6 +92,7 @@ export class KibanaMigrator implements IKibanaMigrator {
     docLinks,
     defaultIndexTypesMap = DEFAULT_INDEX_TYPES_MAP,
     waitForMigrationCompletion,
+    nodeRoles,
   }: KibanaMigratorOptions) {
     this.client = client;
     this.kibanaIndex = kibanaIndex;
@@ -105,6 +109,7 @@ export class KibanaMigrator implements IKibanaMigrator {
       log: this.log,
     });
     this.waitForMigrationCompletion = waitForMigrationCompletion;
+    this.nodeRoles = nodeRoles;
     // Building the active mappings (and associated md5sums) is an expensive
     // operation so we cache the result
     this.activeMappings = buildActiveMappings(this.mappingProperties);
@@ -159,6 +164,7 @@ export class KibanaMigrator implements IKibanaMigrator {
       docLinks: this.docLinks,
       serializer: this.serializer,
       elasticsearchClient: this.client,
+      nodeRoles: this.nodeRoles,
     });
   }
 

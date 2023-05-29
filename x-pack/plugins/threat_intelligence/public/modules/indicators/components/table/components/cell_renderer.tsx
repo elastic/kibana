@@ -9,11 +9,11 @@ import { EuiDataGridCellValueElementProps } from '@elastic/eui';
 import React, { useContext, useEffect } from 'react';
 import { euiDarkVars as themeDark, euiLightVars as themeLight } from '@kbn/ui-theme';
 import { useStyles } from './styles';
-import { useKibana } from '../../../../../hooks';
+import { useKibana } from '../../../../../hooks/use_kibana';
 import { Indicator } from '../../../../../../common/types/indicator';
-import { IndicatorFieldValue } from '../../field_value';
-import { IndicatorsTableContext } from '../contexts';
-import { ActionsRowCell } from '.';
+import { IndicatorFieldValue } from '../../field_value/field_value';
+import { IndicatorsTableContext } from '../contexts/context';
+import { ActionsRowCell } from './actions_row_cell';
 
 export const cellRendererFactory = (from: number) => {
   return ({ rowIndex, columnId, setCellProps }: EuiDataGridCellValueElementProps) => {

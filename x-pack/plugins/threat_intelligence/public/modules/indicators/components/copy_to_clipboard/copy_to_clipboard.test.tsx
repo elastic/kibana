@@ -11,35 +11,38 @@ import {
   CopyToClipboardButtonEmpty,
   CopyToClipboardButtonIcon,
   CopyToClipboardContextMenu,
-} from '.';
+} from './copy_to_clipboard';
 
 const mockValue: string = 'Text copied';
+const TEST_ID: string = 'test';
 
-const mockTestId: string = 'abc';
-
-describe('<CopyToClipboardButtonEmpty /> <CopyToClipboardContextMenu />', () => {
+describe('<CopyToClipboardButtonEmpty /> <CopyToClipboardContextMenu /> <CopyToClipboardButtonIcon />', () => {
   it('should render one EuiButtonEmtpy', () => {
-    const component = render(
-      <CopyToClipboardButtonEmpty value={mockValue} data-test-subj={mockTestId} />
+    const { getByTestId, getAllByText } = render(
+      <CopyToClipboardButtonEmpty value={mockValue} data-test-subj={TEST_ID} />
     );
 
-    expect(component.getByTestId(mockTestId)).toBeInTheDocument();
-    expect(component).toMatchSnapshot();
+    expect(getByTestId(TEST_ID)).toBeInTheDocument();
+    expect(getByTestId(TEST_ID)).toHaveClass('euiButtonEmpty');
+    expect(getAllByText('Copy to clipboard')).toHaveLength(1);
   });
 
   it('should render one EuiContextMenuItem (for EuiContextMenu use)', () => {
-    const component = render(
-      <CopyToClipboardContextMenu value={mockValue} data-test-subj={mockTestId} />
+    const { getByTestId, getAllByText } = render(
+      <CopyToClipboardContextMenu value={mockValue} data-test-subj={TEST_ID} />
     );
 
-    expect(component).toMatchSnapshot();
+    expect(getByTestId(TEST_ID)).toBeInTheDocument();
+    expect(getByTestId(TEST_ID)).toHaveClass('euiContextMenuItem');
+    expect(getAllByText('Copy to clipboard')).toHaveLength(1);
   });
 
   it('should render one EuibuttonIcon', () => {
-    const component = render(
-      <CopyToClipboardButtonIcon value={mockValue} data-test-subj={mockTestId} />
+    const { getByTestId } = render(
+      <CopyToClipboardButtonIcon value={mockValue} data-test-subj={TEST_ID} />
     );
 
-    expect(component).toMatchSnapshot();
+    expect(getByTestId(TEST_ID)).toBeInTheDocument();
+    expect(getByTestId(TEST_ID)).toHaveClass('euiButtonIcon');
   });
 });

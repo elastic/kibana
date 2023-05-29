@@ -8,7 +8,7 @@
 import React from 'react';
 import { Story } from '@storybook/react';
 import { StoryProvidersComponent } from '../../../../../common/mocks/story_providers';
-import { IndicatorEmptyPrompt } from '.';
+import { IndicatorEmptyPrompt } from './empty_prompt';
 
 export default {
   component: IndicatorEmptyPrompt,

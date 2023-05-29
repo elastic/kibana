@@ -13,10 +13,11 @@ import {
   INDICATOR_NAME_TEST_ID,
   INDICATOR_TYPE_TEST_ID,
 } from './comment_children';
-import { AttachmentMetadata } from '../../../utils';
+import { AttachmentMetadata } from '../../../utils/attachments';
 import { TestProvidersComponent } from '../../../../../common/mocks/test_providers';
-import { useIndicatorById } from '../../../hooks';
+import { useIndicatorById } from '../../../hooks/use_indicator_by_id';
 import { generateMockFileIndicator, Indicator } from '../../../../../../common/types/indicator';
+import { LOADING_LOGO_TEST_ID } from './test_ids';
 
 jest.mock('../../../hooks/use_indicator_by_id');
 
@@ -57,11 +58,11 @@ describe('attachment_children initComponent', () => {
       isLoading: true,
     });
 
-    const component = render(
+    const { getByTestId } = render(
       <TestProvidersComponent>
         <CommentChildren id={id} metadata={metadata} />
       </TestProvidersComponent>
     );
-    expect(component).toMatchSnapshot();
+    expect(getByTestId(LOADING_LOGO_TEST_ID)).toBeInTheDocument();
   });
 });

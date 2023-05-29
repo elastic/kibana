@@ -34,12 +34,14 @@ interface Props {
   kibanaVersion: string;
   application: InternalApplicationStart;
   navControlsRight$: Observable<ChromeNavControl[]>;
+  children: React.ReactNode;
 }
 
 export const ProjectHeader = ({
   application,
   kibanaDocLink,
   kibanaVersion,
+  children,
   ...observables
 }: Props) => {
   const renderLogo = () => (
@@ -53,7 +55,7 @@ export const ProjectHeader = ({
 
   return (
     <>
-      <EuiHeader position="fixed">
+      <EuiHeader position="fixed" data-test-subj="kibanaProjectHeader">
         <EuiHeaderSection grow={false}>
           <EuiHeaderSectionItem border="right">{renderLogo()}</EuiHeaderSectionItem>
           <EuiHeaderSectionItem>
@@ -81,9 +83,7 @@ export const ProjectHeader = ({
         </EuiHeaderSection>
       </EuiHeader>
       <Router history={application.history}>
-        <ProjectNavigation>
-          <span />
-        </ProjectNavigation>
+        <ProjectNavigation>{children}</ProjectNavigation>
       </Router>
     </>
   );

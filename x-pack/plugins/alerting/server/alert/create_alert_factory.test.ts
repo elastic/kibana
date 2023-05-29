@@ -31,6 +31,7 @@ describe('createAlertFactory()', () => {
       logger,
       maxAlerts: 1000,
       autoRecoverAlerts: true,
+      maintenanceWindowIds: [],
     });
     const result = alertFactory.create('1');
     expect(result).toMatchObject({
@@ -58,6 +59,7 @@ describe('createAlertFactory()', () => {
       logger,
       maxAlerts: 1000,
       autoRecoverAlerts: true,
+      maintenanceWindowIds: [],
     });
     const result = alertFactory.create('1');
     expect(result).toMatchObject({
@@ -82,6 +84,7 @@ describe('createAlertFactory()', () => {
       logger,
       maxAlerts: 1000,
       autoRecoverAlerts: true,
+      maintenanceWindowIds: [],
     });
     alertFactory.create('1');
     expect(alerts).toMatchObject({
@@ -103,6 +106,7 @@ describe('createAlertFactory()', () => {
       logger,
       maxAlerts: 3,
       autoRecoverAlerts: true,
+      maintenanceWindowIds: [],
     });
 
     expect(alertFactory.hasReachedAlertLimit()).toBe(false);
@@ -123,6 +127,7 @@ describe('createAlertFactory()', () => {
       logger,
       maxAlerts: 1000,
       autoRecoverAlerts: true,
+      maintenanceWindowIds: [],
     });
     const result = alertFactory.create('1');
     expect(result).toMatchObject({
@@ -166,6 +171,7 @@ describe('createAlertFactory()', () => {
       canSetRecoveryContext: true,
       maxAlerts: 1000,
       autoRecoverAlerts: true,
+      maintenanceWindowIds: ['test-id-1'],
     });
     const result = alertFactory.create('1');
     expect(result).toMatchObject({
@@ -184,6 +190,11 @@ describe('createAlertFactory()', () => {
     const recoveredAlerts = getRecoveredAlertsFn!();
     expect(Array.isArray(recoveredAlerts)).toBe(true);
     expect(recoveredAlerts.length).toEqual(2);
+    expect(processAlerts).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        maintenanceWindowIds: ['test-id-1'],
+      })
+    );
   });
 
   test('returns empty array if no recovered alerts', () => {
@@ -194,6 +205,7 @@ describe('createAlertFactory()', () => {
       maxAlerts: 1000,
       canSetRecoveryContext: true,
       autoRecoverAlerts: true,
+      maintenanceWindowIds: [],
     });
     const result = alertFactory.create('1');
     expect(result).toMatchObject({
@@ -221,6 +233,7 @@ describe('createAlertFactory()', () => {
       maxAlerts: 1000,
       canSetRecoveryContext: true,
       autoRecoverAlerts: true,
+      maintenanceWindowIds: [],
     });
     const result = alertFactory.create('1');
     expect(result).toMatchObject({
@@ -247,6 +260,7 @@ describe('createAlertFactory()', () => {
       maxAlerts: 1000,
       canSetRecoveryContext: false,
       autoRecoverAlerts: true,
+      maintenanceWindowIds: [],
     });
     const result = alertFactory.create('1');
     expect(result).toMatchObject({
@@ -275,6 +289,7 @@ describe('createAlertFactory()', () => {
       logger,
       maxAlerts: 1000,
       autoRecoverAlerts: true,
+      maintenanceWindowIds: [],
     });
 
     const limit = alertFactory.alertLimit.getValue();
@@ -293,6 +308,7 @@ describe('createAlertFactory()', () => {
       logger,
       maxAlerts: 1000,
       autoRecoverAlerts: true,
+      maintenanceWindowIds: [],
     });
 
     const limit = alertFactory.alertLimit.getValue();
@@ -308,6 +324,7 @@ describe('createAlertFactory()', () => {
       logger,
       maxAlerts: 1000,
       autoRecoverAlerts: true,
+      maintenanceWindowIds: [],
     });
 
     const limit = alertFactory.alertLimit.getValue();
@@ -324,11 +341,13 @@ describe('createAlertFactory()', () => {
       maxAlerts: 1000,
       canSetRecoveryContext: true,
       autoRecoverAlerts: false,
+      maintenanceWindowIds: [],
     });
     const result = alertFactory.create('1');
     expect(result).toEqual({
       meta: {
         flappingHistory: [],
+        maintenanceWindowIds: [],
         uuid: expect.any(String),
       },
       state: {},
@@ -354,6 +373,7 @@ describe('getPublicAlertFactory', () => {
       logger,
       maxAlerts: 1000,
       autoRecoverAlerts: true,
+      maintenanceWindowIds: [],
     });
 
     expect(alertFactory.create).toBeDefined();

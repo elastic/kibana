@@ -396,14 +396,14 @@ export const ControlGeneralViewSelector = ({
         <EuiFlexGroup alignItems="center" gutterSize="none">
           <div>
             {accordionState === 'closed' && (
-              <>
+              <div data-test-subj="cloud-defend-conditions-count">
                 <EuiText css={styles.conditionsBadge} size="xs">
                   <b>{i18n.conditions}</b>
                 </EuiText>
                 <EuiBadge title={conditionsAdded.join(',')} color="hollow">
                   {conditionsAdded.length}
                 </EuiBadge>
-              </>
+              </div>
             )}
             {!usedByResponse && (
               <EuiBadge title={i18n.unusedSelectorHelp} color="warning">

@@ -6,6 +6,7 @@
  */
 
 import type { RegistryRelease, ExperimentalDataStreamFeature } from './epm';
+import type { PolicySecretReference } from './secret';
 
 export interface PackagePolicyPackage {
   name: string;
@@ -97,6 +98,7 @@ export interface PackagePolicy extends Omit<NewPackagePolicy, 'inputs'> {
   version?: string;
   agents?: number;
   revision: number;
+  secret_references?: PolicySecretReference[];
   updated_at: string;
   updated_by: string;
   created_at: string;

@@ -54,11 +54,11 @@ export const valueTypeToSelectedType = (value: unknown): RuntimePrimitiveTypes =
   return 'keyword';
 };
 
-const scriptEditorValidationSelector = (state: PreviewState) => state.scriptEditorValidation;
 const documentsSelector = (state: PreviewState) => {
   const currentDocument = state.documents[state.currentIdx];
   return {
     currentDocument,
+    totalDocs: state.documents.length,
     currentDocIndex: currentDocument?._index,
     currentDocId: currentDocument?._id,
   };
@@ -82,10 +82,11 @@ export const FieldPreviewProvider: FunctionComponent<{ controller: PreviewContro
   /** The parameters required for the Painless _execute API */
   const [params, setParams] = useState<Params>(defaultParams);
 
-  const scriptEditorValidation = useStateSelector(
-    controller.state$,
-    scriptEditorValidationSelector
-  );
+  const [scriptEditorValidation, setScriptEditorValidation] = useState<{
+    isValidating: boolean;
+    isValid: boolean;
+    message: string | null;
+  }>({ isValidating: false, isValid: true, message: null });
 
   const { currentDocument, currentDocIndex, currentDocId } = useStateSelector(
     controller.state$,
@@ -120,7 +121,7 @@ export const FieldPreviewProvider: FunctionComponent<{ controller: PreviewContro
       documentId: currentDocId,
     });
 
-    const currentApiCall = controller.incrementPreviewCount();
+    const currentApiCall = controller.incrementPreviewCount(); // ++previewCount.current;
 
     const previewScript = (parentName && dataView.getRuntimeField(parentName)?.script) || script!;
 
@@ -208,6 +209,10 @@ export const FieldPreviewProvider: FunctionComponent<{ controller: PreviewContro
         value: params,
         update: updateParams,
       },
+      validation: {
+        // todo do this next
+        setScriptEditorValidation,
+      },
     }),
     [controller, fieldPreview$, params, updateParams]
   );
@@ -294,7 +299,6 @@ export const FieldPreviewProvider: FunctionComponent<{ controller: PreviewContro
     if (script?.source === undefined) {
       // Whenever the source is not defined ("Set value" is toggled off or the
       // script is empty) we clear the error and update the params cache.
-      // lastExecutePainlessRequestParams.current.script = undefined;
       controller.setLastExecutePainlessRequestParams({ script: undefined });
       controller.setPreviewError(null);
     }

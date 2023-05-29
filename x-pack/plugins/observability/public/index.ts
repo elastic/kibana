@@ -24,6 +24,7 @@ export type {
   ObservabilityPublicPluginsStart,
 };
 export {
+  syntheticsThrottlingEnabled,
   enableInspectEsQueries,
   enableComparisonByDefault,
   apmServiceGroupMaxNumberOfServices,
@@ -58,14 +59,6 @@ export {
 } from './components/shared';
 
 export type { LazyObservabilityPageTemplateProps } from './components/shared';
-
-export type { UiTracker, TrackMetricOptions } from './hooks/use_track_metric';
-export {
-  useTrackPageview,
-  useUiTracker,
-  useTrackMetric,
-  METRIC_TYPE,
-} from './hooks/use_track_metric';
 
 export const LazyAlertsFlyout = lazy(() => import('./components/alerts_flyout'));
 export { useFetcher, FETCH_STATUS } from './hooks/use_fetcher';

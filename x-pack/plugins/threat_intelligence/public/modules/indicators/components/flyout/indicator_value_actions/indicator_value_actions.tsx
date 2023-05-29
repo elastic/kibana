@@ -15,10 +15,17 @@ import {
 } from '@elastic/eui';
 import { useIndicatorsFlyoutContext } from '../use_context';
 import { Indicator } from '../../../../../../common/types/indicator';
-import { FilterInButtonIcon, FilterOutButtonIcon } from '../../../../query_bar';
-import { AddToTimelineButtonIcon, AddToTimelineContextMenu } from '../../../../timeline';
+import { FilterInButtonIcon } from '../../../../query_bar/components/filter_in/filter_in';
+import { FilterOutButtonIcon } from '../../../../query_bar/components/filter_out/filter_out';
+import {
+  AddToTimelineButtonIcon,
+  AddToTimelineContextMenu,
+} from '../../../../timeline/components/add_to_timeline/add_to_timeline';
 import { fieldAndValueValid, getIndicatorFieldAndValue } from '../../../utils';
-import { CopyToClipboardButtonIcon, CopyToClipboardContextMenu } from '../../copy_to_clipboard';
+import {
+  CopyToClipboardButtonIcon,
+  CopyToClipboardContextMenu,
+} from '../../copy_to_clipboard/copy_to_clipboard';
 import {
   COPY_TO_CLIPBOARD_BUTTON_TEST_ID,
   FILTER_IN_BUTTON_TEST_ID,

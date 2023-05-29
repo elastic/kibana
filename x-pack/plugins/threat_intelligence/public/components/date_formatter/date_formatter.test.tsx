@@ -8,7 +8,7 @@
 import moment from 'moment-timezone';
 import React from 'react';
 import { render } from '@testing-library/react';
-import { DateFormatter } from '.';
+import { DateFormatter } from './date_formatter';
 import { useDateFormat, useTimeZone } from '../../hooks/use_kibana_ui_settings';
 
 const mockValidStringDate = '1 Jan 2022 00:00:00 GMT';
@@ -30,30 +30,50 @@ describe('<DateFormatter />', () => {
   });
 
   it(`should return date string in ${dateFormat} format for valid string date`, () => {
-    const component = render(<DateFormatter date={mockValidStringDate} />);
-    expect(component).toMatchSnapshot();
+    const { asFragment } = render(<DateFormatter date={mockValidStringDate} />);
+    expect(asFragment()).toMatchInlineSnapshot(`
+      <DocumentFragment>
+        Jan 1, 2022 @ 00:00:00.000
+      </DocumentFragment>
+    `);
   });
 
   it(`should return date string in ${dateFormat} format for valid moment date`, () => {
-    const component = render(<DateFormatter date={moment(mockValidStringDate)} />);
-    expect(component).toMatchSnapshot();
+    const { asFragment } = render(<DateFormatter date={moment(mockValidStringDate)} />);
+    expect(asFragment()).toMatchInlineSnapshot(`
+      <DocumentFragment>
+        Jan 1, 2022 @ 00:00:00.000
+      </DocumentFragment>
+    `);
   });
 
   it(`should return date string with custom format`, () => {
     const customDateFormat = 'MMM Do YY';
-    const component = render(
+    const { asFragment } = render(
       <DateFormatter date={mockValidStringDate} dateFormat={customDateFormat} />
     );
-    expect(component).toMatchSnapshot();
+    expect(asFragment()).toMatchInlineSnapshot(`
+      <DocumentFragment>
+        Jan 1st 22
+      </DocumentFragment>
+    `);
   });
 
   it('should return EMPTY_VALUE for invalid string date', () => {
-    const component = render(<DateFormatter date={mockInvalidStringDate} />);
-    expect(component).toMatchSnapshot();
+    const { asFragment } = render(<DateFormatter date={mockInvalidStringDate} />);
+    expect(asFragment()).toMatchInlineSnapshot(`
+      <DocumentFragment>
+        -
+      </DocumentFragment>
+    `);
   });
 
   it('should return EMPTY_VALUE for invalid moment date', () => {
-    const component = render(<DateFormatter date={moment(mockInvalidStringDate)} />);
-    expect(component).toMatchSnapshot();
+    const { asFragment } = render(<DateFormatter date={moment(mockInvalidStringDate)} />);
+    expect(asFragment()).toMatchInlineSnapshot(`
+      <DocumentFragment>
+        -
+      </DocumentFragment>
+    `);
   });
 });

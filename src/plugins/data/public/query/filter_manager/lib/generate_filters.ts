@@ -7,7 +7,6 @@
  */
 
 import _ from 'lodash';
-import moment from 'moment';
 import {
   Filter,
   isExistsFilter,
@@ -28,8 +27,6 @@ import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import type { Serializable } from '@kbn/utility-types';
 
 import { FilterManager } from '../filter_manager';
-
-const DATE_FORMAT = 'YYYY-MM-DDTHH:mm:ss.SSSZ';
 
 function getExistingFilter(
   appFilters: Filter[],
@@ -103,7 +100,7 @@ export function generateFilters(
         index,
         fieldObj,
         FILTERS.RANGE_FROM_VALUE,
-        false,
+        negate,
         false,
         value,
         null,
@@ -131,17 +128,23 @@ export function generateFilters(
     );
   }
 
-  function castValue(value: unknown) {
+  /**
+   * When filtering on a date, instead of simply creating a "match_phrase" or "match" query (which isn't useful when
+   * specific date formats are involved), we create a range query that only includes this date.
+   * NOTE: This assumes that the value passed in is already in an appropriate format (such as date_time or
+   * strict_date_optional_time_nanos).
+   * @param value
+   */
+  function castValue(value: unknown): unknown | RangeFilterParams {
     if (fieldObj.type === KBN_FIELD_TYPES.DATE && typeof value === 'string') {
-      const parsedValue = moment(value);
-
-      return parsedValue.isValid()
-        ? ({
-            format: 'date_time',
-            gte: parsedValue.format(DATE_FORMAT),
-            lte: parsedValue.format(DATE_FORMAT),
-          } as RangeFilterParams)
-        : value;
+      const format = fieldObj.esTypes?.includes('date_nanos')
+        ? 'strict_date_optional_time_nanos'
+        : 'date_time';
+      return {
+        format,
+        gte: value,
+        lte: value,
+      };
     }
 
     return value;

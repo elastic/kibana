@@ -25,10 +25,10 @@ import { IndicatorsFlyoutContext } from './context';
 import { TakeAction } from './take_action/take_action';
 import { DateFormatter } from '../../../../components/date_formatter/date_formatter';
 import { Indicator, RawIndicatorFieldId } from '../../../../../common/types/indicator';
-import { IndicatorsFlyoutJson } from './json_tab';
-import { IndicatorsFlyoutTable } from './table_tab';
+import { IndicatorsFlyoutJson } from './json_tab/json_tab';
+import { IndicatorsFlyoutTable } from './table_tab/table_tab';
 import { unwrapValue } from '../../utils';
-import { IndicatorsFlyoutOverview } from './overview_tab';
+import { IndicatorsFlyoutOverview } from './overview_tab/overview_tab';
 import {
   INDICATORS_FLYOUT_TABS_TEST_ID,
   INDICATORS_FLYOUT_TITLE_TEST_ID,

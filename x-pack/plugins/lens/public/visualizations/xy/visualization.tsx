@@ -556,13 +556,27 @@ export const getXyVisualization = ({
     render(
       <KibanaThemeProvider theme$={kibanaTheme.theme$}>
         <I18nProvider>
-          <LayerHeaderContent
-            {...otherProps}
-            onChangeIndexPattern={(indexPatternId) => {
-              // TODO: should it trigger an action as in the datasource?
-              onChangeIndexPattern(indexPatternId);
+          <KibanaContextProvider
+            services={{
+              appName: 'lens',
+              storage,
+              uiSettings: core.uiSettings,
+              data,
+              fieldFormats,
+              savedObjects: core.savedObjects,
+              docLinks: core.docLinks,
+              http: core.http,
+              unifiedSearch,
             }}
-          />
+          >
+            <LayerHeaderContent
+              {...otherProps}
+              onChangeIndexPattern={(indexPatternId) => {
+                // TODO: should it trigger an action as in the datasource?
+                onChangeIndexPattern(indexPatternId);
+              }}
+            />
+          </KibanaContextProvider>
         </I18nProvider>
       </KibanaThemeProvider>,
       domElement

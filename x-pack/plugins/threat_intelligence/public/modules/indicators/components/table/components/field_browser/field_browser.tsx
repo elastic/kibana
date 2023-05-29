@@ -7,7 +7,7 @@
 
 import { BrowserField } from '@kbn/rule-registry-plugin/common';
 import { VFC } from 'react';
-import { useKibana } from '../../../../../../hooks';
+import { useKibana } from '../../../../../../hooks/use_kibana';
 
 export interface IndicatorsFieldBrowserProps {
   browserFields: Readonly<Record<string, Partial<BrowserField>>>;

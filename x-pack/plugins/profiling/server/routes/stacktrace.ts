@@ -31,8 +31,6 @@ import {
 import { runLengthDecodeBase64Url } from '../../common/run_length_encoding';
 import { ProfilingESClient } from '../utils/create_profiling_es_client';
 import { withProfilingSpan } from '../utils/with_profiling_span';
-import { DownsampledEventsIndex } from './downsampling';
-import { ProjectTimeQuery } from './query';
 
 const BASE64_FRAME_ID_LENGTH = 32;
 
@@ -93,65 +91,6 @@ export function decodeStackTrace(input: EncodedStackTrace): StackTrace {
     FrameIDs: frameIDs,
     Types: typeIDs,
   } as StackTrace;
-}
-
-export async function searchEventsGroupByStackTrace({
-  logger,
-  client,
-  index,
-  filter,
-}: {
-  logger: Logger;
-  client: ProfilingESClient;
-  index: DownsampledEventsIndex;
-  filter: ProjectTimeQuery;
-}) {
-  const resEvents = await client.search('get_events_group_by_stack_trace', {
-    index: index.name,
-    track_total_hits: false,
-    query: filter,
-    aggs: {
-      group_by: {
-        terms: {
-          // 'size' should be max 100k, but might be slightly more. Better be on the safe side.
-          size: 150000,
-          field: ProfilingESField.StacktraceID,
-          // 'execution_hint: map' skips the slow building of ordinals that we don't need.
-          // Especially with high cardinality fields, this makes aggregations really slow.
-          // E.g. it reduces the latency from 70s to 0.7s on our 8.1. MVP cluster (as of 28.04.2022).
-          execution_hint: 'map',
-        },
-        aggs: {
-          count: {
-            sum: {
-              field: ProfilingESField.StacktraceCount,
-            },
-          },
-        },
-      },
-      total_count: {
-        sum: {
-          field: ProfilingESField.StacktraceCount,
-        },
-      },
-    },
-    pre_filter_shard_size: 1,
-    filter_path:
-      'aggregations.group_by.buckets.key,aggregations.group_by.buckets.count,aggregations.total_count,_shards.failures',
-  });
-
-  const totalCount = resEvents.aggregations?.total_count.value ?? 0;
-  const stackTraceEvents = new Map<StackTraceID, number>();
-
-  resEvents.aggregations?.group_by?.buckets.forEach((item) => {
-    const traceid: StackTraceID = String(item.key);
-    stackTraceEvents.set(traceid, item.count.value ?? 0);
-  });
-
-  logger.info('events total count: ' + totalCount);
-  logger.info('unique stacktraces: ' + stackTraceEvents.size);
-
-  return { totalCount, stackTraceEvents };
 }
 
 function summarizeCacheAndQuery(

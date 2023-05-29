@@ -6,7 +6,7 @@
  */
 
 import type { agentPolicyStatuses } from '../../constants';
-import type { MonitoringType, ValueOf } from '..';
+import type { MonitoringType, PolicySecretReference, ValueOf } from '..';
 
 import type { PackagePolicy, PackagePolicyPackage } from './package_policy';
 import type { Output } from './output';
@@ -33,6 +33,7 @@ export interface NewAgentPolicy {
   fleet_server_host_id?: string | null;
   schema_version?: string;
   agent_features?: Array<{ name: string; enabled: boolean }>;
+  is_protected?: boolean;
 }
 
 export interface AgentPolicy extends Omit<NewAgentPolicy, 'id'> {
@@ -44,6 +45,7 @@ export interface AgentPolicy extends Omit<NewAgentPolicy, 'id'> {
   updated_by: string;
   revision: number;
   agents?: number;
+  is_protected: boolean;
 }
 
 export type AgentPolicySOAttributes = Omit<AgentPolicy, 'id'>;
@@ -120,6 +122,7 @@ export interface FullAgentPolicy {
       signing_key: string;
     };
   };
+  secret_references?: PolicySecretReference[];
   signed?: {
     data: string;
     signature: string;

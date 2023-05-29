@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
 import { matchPath, useLocation } from 'react-router-dom';
 import useObservable from 'react-use/lib/useObservable';
-import type { Observable } from 'rxjs';
+import type { BehaviorSubject, Observable } from 'rxjs';
 import type { ApplicationStart } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
@@ -85,9 +85,13 @@ export interface ObservabilityPageTemplateDependencies {
   navigationSections$: Observable<NavigationSection[]>;
   getPageTemplateServices: () => KibanaPageTemplateKibanaDependencies;
   guidedOnboardingApi: GuidedOnboardingPluginStart['guidedOnboardingApi'];
+  isSidebarEnabled$: BehaviorSubject<boolean>;
 }
 
-export type ObservabilityPageTemplateProps = ObservabilityPageTemplateDependencies &
+export type ObservabilityPageTemplateProps = Omit<
+  ObservabilityPageTemplateDependencies,
+  'isSidebarEnabled$'
+> &
   WrappedPageTemplateProps;
 
 export function ObservabilityPageTemplate({

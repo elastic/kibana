@@ -138,9 +138,7 @@ export default ({ getService }: FtrProviderContext) => {
             references: [],
             namespaces: [spaceId],
             originId: 'c364e1e0-2615-11ec-811e-db7211397897',
-            migrationVersion: {
-              alert: '8.0.0',
-            },
+            typeMigrationVersion: '8.0.0',
             coreMigrationVersion: '8.0.0',
             updated_at: '2021-10-05T19:52:56.014Z',
           },

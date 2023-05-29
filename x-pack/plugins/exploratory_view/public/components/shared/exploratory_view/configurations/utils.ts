@@ -28,9 +28,7 @@ export function createExploratoryViewRoutePath({
 }) {
   const allShortSeries: AllShortSeries = allSeries.map((series) => convertToShortUrl(series));
 
-  return `/exploratory-view/#?reportType=${reportType}&sr=${encodeUriIfNeeded(
-    rison.encode(allShortSeries)
-  )}`;
+  return `#?reportType=${reportType}&sr=${encodeUriIfNeeded(rison.encode(allShortSeries))}`;
 }
 
 export function buildPhraseFilter(field: string, value: string, dataView?: DataView) {

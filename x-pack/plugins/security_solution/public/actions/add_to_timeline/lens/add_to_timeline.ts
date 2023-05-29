@@ -10,15 +10,16 @@ import { isErrorEmbeddable, isFilterableEmbeddable } from '@kbn/embeddable-plugi
 import { createAction } from '@kbn/ui-actions-plugin/public';
 import { KibanaServices } from '../../../common/lib/kibana';
 import type { SecurityAppStore } from '../../../common/store/types';
-import { addProvider, showTimeline } from '../../../timelines/store/timeline/actions';
+import { addProvider } from '../../../timelines/store/timeline/actions';
 import type { DataProvider } from '../../../../common/types';
-import { TimelineId } from '../../../../common/types';
+import { EXISTS_OPERATOR, TimelineId } from '../../../../common/types';
 import { fieldHasCellActions, isInSecurityApp, isLensEmbeddable } from '../../utils';
 import {
   ADD_TO_TIMELINE,
   ADD_TO_TIMELINE_FAILED_TEXT,
   ADD_TO_TIMELINE_FAILED_TITLE,
   ADD_TO_TIMELINE_ICON,
+  ADD_TO_TIMELINE_SUCCESS_TITLE,
 } from '../constants';
 import { createDataProviders } from '../data_provider';
 
@@ -37,6 +38,26 @@ function isDataColumnsFilterable(data?: CellValueContext['data']): boolean {
     )
   );
 }
+
+export const getInvestigatedValue = (dataProviders: DataProvider[]) => {
+  const dataValue = dataProviders.reduce<string[]>(
+    (acc, { queryMatch: { value, operator, field } }) => {
+      if (value != null) {
+        // This is the case when value is a number, and queried by fieldName: *
+        if (operator === EXISTS_OPERATOR) {
+          acc.push(field);
+        } else {
+          const fieldValue = Array.isArray(value) ? value.join(', ') : value.toString();
+          acc.push(fieldValue);
+        }
+      }
+
+      return acc;
+    },
+    []
+  );
+  return dataValue.join(', ');
+};
 
 export const createAddToTimelineLensAction = ({
   store,
@@ -84,7 +105,13 @@ export const createAddToTimelineLensAction = ({
 
       if (dataProviders.length > 0) {
         store.dispatch(addProvider({ id: TimelineId.active, providers: dataProviders }));
-        store.dispatch(showTimeline({ id: TimelineId.active, show: true }));
+
+        const investigatedValue = getInvestigatedValue(dataProviders);
+        if (investigatedValue.length > 0) {
+          toastsService.addSuccess({
+            title: ADD_TO_TIMELINE_SUCCESS_TITLE(investigatedValue),
+          });
+        }
       } else {
         toastsService.addWarning({
           title: ADD_TO_TIMELINE_FAILED_TITLE,

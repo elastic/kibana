@@ -28,7 +28,7 @@ describe('<IndicatorsPage />', () => {
     ).mockReturnValue({
       dateRange: { min: moment(), max: moment() },
       series: [],
-      selectedField: '',
+      selectedField: { label: 'threat.feed.name', value: 'string' },
       onFieldChange: () => {},
       query: {
         id: 'chart',

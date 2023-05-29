@@ -10,12 +10,7 @@ import React, { Fragment, memo, useEffect, useRef, useMemo, useCallback } from '
 import './context_app.scss';
 import classNames from 'classnames';
 import { FormattedMessage } from '@kbn/i18n-react';
-import {
-  EuiText,
-  EuiPageContent_Deprecated as EuiPageContent,
-  EuiPage,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiText, EuiPage, EuiPageBody, EuiSpacer } from '@elastic/eui';
 import { cloneDeep } from 'lodash';
 import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
@@ -199,7 +194,12 @@ export const ContextApp = ({ dataView, anchorId, referrer }: ContextAppProps) =>
           </h1>
           <TopNavMenu {...getNavBarProps()} />
           <EuiPage className={classNames({ dscDocsPage: !isLegacy })}>
-            <EuiPageContent paddingSize="s" className="dscDocsContent">
+            <EuiPageBody
+              panelled
+              paddingSize="s"
+              className="dscDocsContent"
+              panelProps={{ role: 'main' }}
+            >
               <EuiSpacer size="s" />
               <EuiText data-test-subj="contextDocumentSurroundingHeader">
                 <strong>
@@ -230,7 +230,7 @@ export const ContextApp = ({ dataView, anchorId, referrer }: ContextAppProps) =>
                 predecessorsStatus={fetchedState.predecessorsStatus.value}
                 successorsStatus={fetchedState.successorsStatus.value}
               />
-            </EuiPageContent>
+            </EuiPageBody>
           </EuiPage>
         </Fragment>
       )}

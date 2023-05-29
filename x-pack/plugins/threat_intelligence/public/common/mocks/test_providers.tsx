@@ -20,16 +20,16 @@ import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { MemoryRouter } from 'react-router-dom';
 import { casesPluginMock } from '@kbn/cases-plugin/public/mocks';
-import { KibanaContext } from '../../hooks';
+import { KibanaContext } from '../../hooks/use_kibana';
 import { SecuritySolutionPluginContext } from '../../types';
 import { getSecuritySolutionContextMock } from './mock_security_context';
 import { mockUiSetting } from './mock_kibana_ui_settings_service';
 import { SecuritySolutionContext } from '../../containers/security_solution_context';
-import { IndicatorsFiltersContext } from '../../modules/indicators';
+import { IndicatorsFiltersContext } from '../../modules/indicators/containers/filters/context';
 import { mockIndicatorsFiltersContext } from './mock_indicators_filters_context';
 import { FieldTypesContext } from '../../containers/field_types_provider';
 import { generateFieldTypeMap } from './mock_field_type_map';
-import { InspectorContext } from '../../containers/inspector';
+import { InspectorContext } from '../../containers/inspector/inspector';
 
 export const localStorageMock = (): IStorage => {
   let store: Record<string, unknown> = {};
@@ -107,6 +107,7 @@ const core = coreMock.createStart();
 const coreServiceMock = {
   ...core,
   uiSettings: { get: jest.fn().mockImplementation(mockUiSetting) },
+  settings: { client: { get: jest.fn().mockImplementation(mockUiSetting) } },
 };
 
 const mockSecurityContext: SecuritySolutionPluginContext = getSecuritySolutionContextMock();

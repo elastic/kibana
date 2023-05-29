@@ -13,7 +13,7 @@ import { mockIndicatorsFiltersContext } from '../../../../../common/mocks/mock_i
 import { mockUiSettingsService } from '../../../../../common/mocks/mock_kibana_ui_settings_service';
 import { mockKibanaTimelinesService } from '../../../../../common/mocks/mock_kibana_timelines_service';
 import { generateMockIndicator, Indicator } from '../../../../../../common/types/indicator';
-import { IndicatorsFlyoutTable } from '.';
+import { IndicatorsFlyoutTable } from './table_tab';
 import { IndicatorsFiltersContext } from '../../../containers/filters';
 import { IndicatorsFlyoutContext } from '../context';
 

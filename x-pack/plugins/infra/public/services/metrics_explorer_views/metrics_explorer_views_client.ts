@@ -73,7 +73,7 @@ export class MetricsExplorerViewsClient implements IMetricsExplorerViewsClient {
       })
       .catch((error) => {
         throw new UpsertMetricsExplorerViewError(
-          `Failed to create new metrics explorer view: ${error}`
+          `Failed to create new metrics explorer view: ${error.body?.message ?? error.message}`
         );
       });
 
@@ -102,7 +102,9 @@ export class MetricsExplorerViewsClient implements IMetricsExplorerViewsClient {
       })
       .catch((error) => {
         throw new UpsertMetricsExplorerViewError(
-          `Failed to update metrics explorer view "${metricsExplorerViewId}": ${error}`
+          `Failed to update metrics explorer view "${metricsExplorerViewId}": ${
+            error.body?.message ?? error.message
+          }`
         );
       });
 

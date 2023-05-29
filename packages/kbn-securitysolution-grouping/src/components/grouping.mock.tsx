@@ -15,7 +15,7 @@ export const mockGroupingProps = {
   activePage: 0,
   data: {
     groupsCount: {
-      value: 2,
+      value: 3,
     },
     groupByFields: {
       doc_count_error_upper_bound: 0,
@@ -24,6 +24,7 @@ export const mockGroupingProps = {
         {
           key: [host1Name],
           key_as_string: `${host1Name}`,
+          selectedGroup: 'host.name',
           doc_count: 1,
           hostsCountAggregation: {
             value: 1,
@@ -56,6 +57,7 @@ export const mockGroupingProps = {
         {
           key: [host2Name],
           key_as_string: `${host2Name}`,
+          selectedGroup: 'host.name',
           doc_count: 1,
           hostsCountAggregation: {
             value: 1,
@@ -88,6 +90,7 @@ export const mockGroupingProps = {
         {
           key: ['-'],
           key_as_string: `-`,
+          selectedGroup: 'host.name',
           isNullGroup: true,
           doc_count: 11,
           hostsCountAggregation: {
@@ -121,7 +124,10 @@ export const mockGroupingProps = {
       ],
     },
     unitsCount: {
-      value: 3,
+      value: 14,
+    },
+    unitsCountWithoutNull: {
+      value: 14,
     },
   },
   groupingId: 'test-grouping-id',

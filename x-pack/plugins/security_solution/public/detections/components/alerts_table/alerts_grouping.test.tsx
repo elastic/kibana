@@ -27,19 +27,29 @@ import { createStore } from '../../../common/store';
 import { useKibana as mockUseKibana } from '../../../common/lib/kibana/__mocks__';
 import { createTelemetryServiceMock } from '../../../common/lib/telemetry/telemetry_service.mock';
 import { useQueryAlerts } from '../../containers/detection_engine/alerts/use_query';
-import { groupingSearchResponse } from './grouping_settings/mock';
+import { getQuery, groupingSearchResponse } from './grouping_settings/mock';
 
 jest.mock('../../containers/detection_engine/alerts/use_query');
 jest.mock('../../../common/containers/sourcerer');
 jest.mock('../../../common/utils/normalize_time_range');
-jest.mock('../../../common/containers/use_global_time', () => ({
-  useGlobalTime: jest.fn().mockReturnValue({
-    from: '2020-07-07T08:20:18.966Z',
-    isInitializing: false,
-    to: '2020-07-08T08:20:18.966Z',
-    setQuery: jest.fn(),
-  }),
+jest.mock('uuid', () => ({
+  v4: jest.fn().mockReturnValue('test-uuid'),
 }));
+
+const mockDate = {
+  from: '2020-07-07T08:20:18.966Z',
+  to: '2020-07-08T08:20:18.966Z',
+};
+
+const mockUseGlobalTime = jest
+  .fn()
+  .mockReturnValue({ ...mockDate, setQuery: jest.fn(), deleteQuery: jest.fn() });
+
+jest.mock('../../../common/containers/use_global_time', () => {
+  return {
+    useGlobalTime: (...props: unknown[]) => mockUseGlobalTime(...props),
+  };
+});
 
 const mockOptions = [
   { label: 'ruleName', key: 'kibana.alert.rule.name' },
@@ -105,8 +115,8 @@ const sourcererDataView = {
 const renderChildComponent = (groupingFilters: Filter[]) => <p data-test-subj="alerts-table" />;
 
 const testProps: AlertsTableComponentProps = {
+  ...mockDate,
   defaultFilters: [],
-  from: '2020-07-07T08:20:18.966Z',
   globalFilters: [],
   globalQuery: {
     query: 'query',
@@ -119,7 +129,6 @@ const testProps: AlertsTableComponentProps = {
   runtimeMappings: {},
   signalIndexName: 'test',
   tableId: TableId.test,
-  to: '2020-07-08T08:20:18.966Z',
 };
 
 const mockUseQueryAlerts = useQueryAlerts as jest.Mock;
@@ -220,51 +229,7 @@ describe('GroupedAlertsTable', () => {
     );
     expect(mockUseQueryAlerts).toHaveBeenLastCalledWith({
       indexName: 'test',
-      query: {
-        _source: false,
-        aggs: {
-          groupByFields: {
-            aggs: {
-              bucket_truncate: {
-                bucket_sort: { from: 0, size: 25, sort: [{ unitsCount: { order: 'desc' } }] },
-              },
-              countSeveritySubAggregation: { cardinality: { field: 'kibana.alert.severity' } },
-              hostsCountAggregation: { cardinality: { field: 'host.name' } },
-              description: { terms: { field: 'kibana.alert.rule.description', size: 1 } },
-              ruleTags: { terms: { field: 'kibana.alert.rule.tags' } },
-              severitiesSubAggregation: { terms: { field: 'kibana.alert.severity' } },
-              unitsCount: { cardinality: { field: 'kibana.alert.uuid' } },
-              usersCountAggregation: { cardinality: { field: 'user.name' } },
-            },
-            multi_terms: {
-              size: 10000,
-              terms: [
-                { field: 'kibana.alert.rule.name', missing: '-' },
-                { field: 'kibana.alert.rule.name', missing: '--' },
-              ],
-            },
-          },
-          groupsCount: { cardinality: { field: 'kibana.alert.rule.name' } },
-          unitsCount: { value_count: { field: 'kibana.alert.rule.name' } },
-        },
-        query: {
-          bool: {
-            filter: [
-              { bool: { filter: [], must: [], must_not: [], should: [] } },
-              {
-                range: {
-                  '@timestamp': {
-                    gte: '2020-07-07T08:20:18.966Z',
-                    lte: '2020-07-08T08:20:18.966Z',
-                  },
-                },
-              },
-            ],
-          },
-        },
-        runtime_mappings: {},
-        size: 0,
-      },
+      query: getQuery('kibana.alert.rule.name', 'SuperUniqueValue-test-uuid', mockDate),
       queryName: 'securitySolutionUI fetchAlerts grouping',
       skip: false,
     });

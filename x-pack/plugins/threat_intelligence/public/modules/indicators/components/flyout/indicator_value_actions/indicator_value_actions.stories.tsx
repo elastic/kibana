@@ -9,7 +9,7 @@ import React from 'react';
 import { Story } from '@storybook/react';
 import { StoryProvidersComponent } from '../../../../../common/mocks/story_providers';
 import { generateMockFileIndicator, Indicator } from '../../../../../../common/types/indicator';
-import { IndicatorValueActions } from '.';
+import { IndicatorValueActions } from './indicator_value_actions';
 import { IndicatorsFlyoutContext } from '../context';
 
 export default {

@@ -7,9 +7,10 @@
 
 import { EuiLoadingLogo } from '@elastic/eui';
 import React, { FC } from 'react';
-import { useIntegrations } from '../../hooks';
-import { EmptyPage } from '../../modules/empty_page';
-import { useIndicatorsTotalCount } from '../../modules/indicators';
+import { LOADING_LOGO_TEST_ID } from './test_ids';
+import { useIntegrations } from '../../hooks/use_integrations';
+import { EmptyPage } from '../../modules/empty_page/empty_page';
+import { useIndicatorsTotalCount } from '../../modules/indicators/hooks/use_total_count';
 import { SecuritySolutionPluginTemplateWrapper } from '../security_solution_plugin_template_wrapper';
 
 /**
@@ -27,7 +28,7 @@ export const IntegrationsGuard: FC = ({ children }) => {
   if (integrationLoading || indicatorsTotalCountLoading) {
     return (
       <SecuritySolutionPluginTemplateWrapper isEmptyState>
-        <EuiLoadingLogo logo="logoSecurity" size="xl" />
+        <EuiLoadingLogo data-test-subj={LOADING_LOGO_TEST_ID} logo="logoSecurity" size="xl" />
       </SecuritySolutionPluginTemplateWrapper>
     );
   }

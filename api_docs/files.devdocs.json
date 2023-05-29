@@ -744,6 +744,41 @@
         ],
         "returnComment": [],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "files",
+        "id": "def-server.createFileHashTransform",
+        "type": "Function",
+        "tags": [],
+        "label": "createFileHashTransform",
+        "description": [
+          "\nCreates a `Transform` that will calculate a Hash based on the data provided by a Readable"
+        ],
+        "signature": [
+          "(algorithm?: \"sha256\" | \"md5\" | \"sha1\" | \"sha512\") => FileHashTransform"
+        ],
+        "path": "src/plugins/files/server/file_client/stream_transforms/file_hash_transform/file_hash_transform.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "files",
+            "id": "def-server.createFileHashTransform.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "algorithm",
+            "description": [],
+            "signature": [
+              "\"sha256\" | \"md5\" | \"sha1\" | \"sha512\""
+            ],
+            "path": "src/plugins/files/server/file_client/stream_transforms/file_hash_transform/file_hash_transform.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
       }
     ],
     "interfaces": [
@@ -900,9 +935,7 @@
               "TransportRequestOptions",
               " | undefined): Promise<",
               "WriteResponseBase",
-              ">; }; helpers: ",
-              "default",
-              "; search: { <TDocument = unknown, TAggregations = Record<string, ",
+              ">; }; search: { <TDocument = unknown, TAggregations = Record<string, ",
               "AggregationsAggregate",
               ">>(this: That, params?: ",
               "SearchRequest",
@@ -934,7 +967,9 @@
               "TransportRequestOptions",
               " | undefined): Promise<",
               "SearchResponse",
-              "<TDocument, TAggregations>>; }; name: string | symbol; security: ",
+              "<TDocument, TAggregations>>; }; helpers: ",
+              "default",
+              "; name: string | symbol; security: ",
               "default",
               "; monitoring: ",
               "default",
@@ -5503,7 +5538,7 @@
             "tags": [],
             "label": "update",
             "description": [
-              "\nUpdate a file object's metadatathat can be updated.\n"
+              "\nUpdate a file object's metadata that can be updated.\n"
             ],
             "signature": [
               "(attr: Partial<",
@@ -5570,7 +5605,9 @@
               "Readable",
               ", abort$?: ",
               "Observable",
-              "<unknown> | undefined) => Promise<",
+              "<unknown> | undefined, options?: Partial<Pick<",
+              "UploadOptions",
+              ", \"transforms\">> | undefined) => Promise<",
               {
                 "pluginId": "files",
                 "scope": "common",
@@ -5613,6 +5650,25 @@
                 "signature": [
                   "Observable",
                   "<unknown> | undefined"
+                ],
+                "path": "src/plugins/files/common/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              },
+              {
+                "parentPluginId": "files",
+                "id": "def-common.File.uploadContent.$3",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [
+                  "- additional options."
+                ],
+                "signature": [
+                  "Partial<Pick<",
+                  "UploadOptions",
+                  ", \"transforms\">> | undefined"
                 ],
                 "path": "src/plugins/files/common/types.ts",
                 "deprecated": false,
@@ -6029,6 +6085,22 @@
             ],
             "signature": [
               "{ name?: string | undefined; id?: string | undefined; } | undefined"
+            ],
+            "path": "packages/shared-ux/file/types/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "files",
+            "id": "def-common.FileJSON.hash",
+            "type": "Object",
+            "tags": [],
+            "label": "hash",
+            "description": [
+              "\nFile hash information"
+            ],
+            "signature": [
+              "{ [hashName: string]: string | undefined; md5?: string | undefined; sha1?: string | undefined; sha256?: string | undefined; sha384?: string | undefined; sha512?: string | undefined; ssdeep?: string | undefined; tlsh?: string | undefined; } | undefined"
             ],
             "path": "packages/shared-ux/file/types/index.ts",
             "deprecated": false,

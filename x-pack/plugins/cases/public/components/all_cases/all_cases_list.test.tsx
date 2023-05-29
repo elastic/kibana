@@ -34,7 +34,6 @@ import { triggersActionsUiMock } from '@kbn/triggers-actions-ui-plugin/public/mo
 import { registerConnectorsToMockActionRegistry } from '../../common/mock/register_connectors';
 import { createStartServicesMock } from '../../common/lib/kibana/kibana_react.mock';
 import { waitForComponentToUpdate } from '../../common/test_utils';
-import { useCreateAttachments } from '../../containers/use_create_attachments';
 import { useGetSupportedActionConnectors } from '../../containers/configure/use_get_supported_action_connectors';
 import { useGetTags } from '../../containers/use_get_tags';
 import { useUpdateCase } from '../../containers/use_update_case';
@@ -45,7 +44,6 @@ import { useBulkGetUserProfiles } from '../../containers/user_profiles/use_bulk_
 import { useLicense } from '../../common/use_license';
 import * as api from '../../containers/api';
 
-jest.mock('../../containers/use_create_attachments');
 jest.mock('../../containers/use_get_cases');
 jest.mock('../../containers/use_get_action_license');
 jest.mock('../../containers/use_get_tags');
@@ -66,7 +64,6 @@ const useGetCurrentUserProfileMock = useGetCurrentUserProfile as jest.Mock;
 const useBulkGetUserProfilesMock = useBulkGetUserProfiles as jest.Mock;
 const useKibanaMock = useKibana as jest.MockedFunction<typeof useKibana>;
 const useGetConnectorsMock = useGetSupportedActionConnectors as jest.Mock;
-const useCreateAttachmentsMock = useCreateAttachments as jest.Mock;
 const useUpdateCaseMock = useUpdateCase as jest.Mock;
 const useLicenseMock = useLicense as jest.Mock;
 
@@ -88,10 +85,6 @@ describe.skip('AllCasesListGeneric', () => {
   const updateCaseProperty = jest.fn();
 
   const emptyTag = getEmptyTagValue().props.children;
-  useCreateAttachmentsMock.mockReturnValue({
-    status: { isLoading: false },
-    createAttachments: jest.fn(),
-  });
 
   const defaultGetCases = {
     ...useGetCasesMockState,
@@ -125,7 +118,7 @@ describe.skip('AllCasesListGeneric', () => {
     useGetCurrentUserProfileMock.mockReturnValue({ data: userProfiles[0], isLoading: false });
     useBulkGetUserProfilesMock.mockReturnValue({ data: userProfilesMap });
     useGetConnectorsMock.mockImplementation(() => ({ data: connectorsMock, isLoading: false }));
-    useUpdateCaseMock.mockReturnValue({ updateCaseProperty });
+    useUpdateCaseMock.mockReturnValue({ mutate: updateCaseProperty });
     useLicenseMock.mockReturnValue({ isAtLeastPlatinum: () => false });
     mockKibana();
     moment.tz.setDefault('UTC');

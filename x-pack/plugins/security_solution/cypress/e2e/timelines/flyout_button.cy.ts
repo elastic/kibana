@@ -61,7 +61,8 @@ describe('timeline flyout button', () => {
     cy.get(TIMELINE_BOTTOM_BAR_TOGGLE_BUTTON).should('have.focus');
   });
 
-  it('the `(+)` button popover menu owns focus', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/153771
+  it.skip('the `(+)` button popover menu owns focus', () => {
     cy.get(TIMELINE_SETTINGS_ICON).filter(':visible').click({ force: true });
     cy.get(`${CREATE_NEW_TIMELINE}`)
       .pipe(($el) => $el.trigger('focus'))

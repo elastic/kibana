@@ -57,15 +57,12 @@ interface ExtractionRulesActions {
   hideDeleteModal: () => void;
   openEditRuleFlyout({
     fieldRule,
-    fieldRuleIndex,
     isNewRule,
   }: {
     fieldRule?: ExtractionRuleFieldRule;
-    fieldRuleIndex?: number;
     isNewRule: boolean;
   }): {
     fieldRule: ExtractionRuleFieldRule;
-    fieldRuleIndex?: number;
     isNewRule: boolean;
   };
   fetchDomainData: CrawlerDomainDetailActions['fetchDomainData'];
@@ -101,7 +98,6 @@ interface ExtractionRulesValues {
   fieldRuleFlyoutVisible: boolean;
   fieldRuleToDelete: { extractionRuleId?: string; fieldRuleIndex?: number };
   fieldRuleToEdit: ExtractionRuleFieldRule | null;
-  fieldRuleToEditIndex: number | null;
   fieldRuleToEditIsNew: boolean;
   indexName: string;
   isLoading: boolean;
@@ -287,13 +283,6 @@ export const ExtractionRulesLogic = kea<
       {
         closeEditRuleFlyout: () => null,
         openEditRuleFlyout: (_, { fieldRule }) => fieldRule ?? null,
-      },
-    ],
-    fieldRuleToEditIndex: [
-      null,
-      {
-        closeEditRuleFlyout: () => null,
-        openEditRuleFlyout: (_, { fieldRuleIndex }) => fieldRuleIndex ?? null,
       },
     ],
     fieldRuleToEditIsNew: [

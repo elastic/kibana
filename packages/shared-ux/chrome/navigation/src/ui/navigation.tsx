@@ -13,25 +13,43 @@ import {
   EuiHeaderLogo,
   EuiLink,
   EuiLoadingSpinner,
+  EuiSideNav,
+  EuiSideNavItemType,
   EuiSpacer,
   useEuiTheme,
 } from '@elastic/eui';
 import React from 'react';
-import { getI18nStrings } from './i18n_strings';
-import { NavigationBucketProps, NavigationProps } from '../../types';
+import useObservable from 'react-use/lib/useObservable';
+import type { ChromeNavigationViewModel } from '../../types';
 import { NavigationModel } from '../model';
 import { useNavigation } from '../services';
+import { navigationStyles as styles } from '../styles';
 import { ElasticMark } from './elastic_mark';
 import './header_logo.scss';
-import { NavigationBucket } from './navigation_bucket';
+import { getI18nStrings } from './i18n_strings';
+import { NavigationBucket, type Props as NavigationBucketProps } from './navigation_bucket';
 
-export const Navigation = (props: NavigationProps) => {
-  const { loadingCount, activeNavItemId, ...services } = useNavigation();
+interface Props extends ChromeNavigationViewModel {
+  /**
+   * ID of sections to highlight
+   */
+  activeNavItemId?: string;
+}
+
+export const Navigation = ({
+  platformConfig,
+  navigationTree,
+  homeHref,
+  linkToCloud,
+  activeNavItemId: activeNavItemIdProps,
+  ...props
+}: Props) => {
+  const { activeNavItemId } = useNavigation();
   const { euiTheme } = useEuiTheme();
 
-  const activeNav = activeNavItemId ?? props.activeNavItemId;
+  const activeNav = activeNavItemId ?? activeNavItemIdProps;
 
-  const nav = new NavigationModel(services, props.platformConfig, props.solutions, activeNav);
+  const nav = new NavigationModel(platformConfig, navigationTree);
 
   const solutions = nav.getSolutions();
   const { analytics, ml, devTools, management } = nav.getPlatform();
@@ -39,10 +57,12 @@ export const Navigation = (props: NavigationProps) => {
   const strings = getI18nStrings();
 
   const NavHeader = () => {
-    const homeUrl = services.basePath.prepend(props.homeHref);
+    const { basePath, navIsOpen, navigateToUrl, loadingCount$ } = useNavigation();
+    const loadingCount = useObservable(loadingCount$, 0);
+    const homeUrl = basePath.prepend(homeHref);
     const navigateHome = (event: React.MouseEvent) => {
       event.preventDefault();
-      services.navigateToUrl(homeUrl);
+      navigateToUrl(homeUrl);
     };
     const logo =
       loadingCount === 0 ? (
@@ -66,15 +86,13 @@ export const Navigation = (props: NavigationProps) => {
     return (
       <>
         {logo}
-        {services.navIsOpen ? (
-          <ElasticMark className="chrHeaderLogo__mark" aria-hidden={true} />
-        ) : null}
+        {navIsOpen ? <ElasticMark className="chrHeaderLogo__mark" aria-hidden={true} /> : null}
       </>
     );
   };
 
   const LinkToCloud = () => {
-    switch (props.linkToCloud) {
+    switch (linkToCloud) {
       case 'projects':
         return (
           <EuiLink
@@ -100,6 +118,45 @@ export const Navigation = (props: NavigationProps) => {
     }
   };
 
+  const RecentlyAccessed = () => {
+    const { recentlyAccessed$ } = useNavigation();
+    const recentlyAccessed = useObservable(recentlyAccessed$, []);
+
+    // consumer may filter objects from recent that are not applicable to the project
+    let filteredRecent = recentlyAccessed;
+    if (props.recentlyAccessedFilter) {
+      filteredRecent = props.recentlyAccessedFilter(recentlyAccessed);
+    }
+
+    if (filteredRecent.length > 0) {
+      const navItems: Array<EuiSideNavItemType<unknown>> = [
+        {
+          name: '', // no list header title
+          id: 'recents_root',
+          items: filteredRecent.map(({ id, label, link }) => ({
+            id,
+            name: label,
+            href: link,
+          })),
+        },
+      ];
+
+      return (
+        <EuiCollapsibleNavGroup
+          title={strings.recentlyAccessed}
+          iconType="clock"
+          isCollapsible={true}
+          initialIsOpen={true}
+          data-test-subj={`nav-bucket-recentlyAccessed`}
+        >
+          <EuiSideNav items={navItems} css={styles.euiSideNavItems} />
+        </EuiCollapsibleNavGroup>
+      );
+    }
+
+    return null;
+  };
+
   // higher-order-component to keep the common props DRY
   const NavigationBucketHoc = (outerProps: Omit<NavigationBucketProps, 'activeNavItemId'>) => (
     <NavigationBucket {...outerProps} activeNavItemId={activeNav} />
@@ -114,12 +171,14 @@ export const Navigation = (props: NavigationProps) => {
 
         <LinkToCloud />
 
-        {solutions.map((solutionBucket, idx) => {
-          return <NavigationBucketHoc {...solutionBucket} key={`solution${idx}`} />;
+        <RecentlyAccessed />
+
+        {solutions.map((navTree, idx) => {
+          return <NavigationBucketHoc navigationTree={navTree} key={`solution${idx}`} />;
         })}
 
-        {nav.isEnabled('analytics') ? <NavigationBucketHoc {...analytics} /> : null}
-        {nav.isEnabled('ml') ? <NavigationBucketHoc {...ml} /> : null}
+        {nav.isEnabled('analytics') ? <NavigationBucketHoc navigationTree={analytics} /> : null}
+        {nav.isEnabled('ml') ? <NavigationBucketHoc navigationTree={ml} /> : null}
       </EuiFlexItem>
 
       <EuiFlexItem grow={true}>
@@ -127,8 +186,8 @@ export const Navigation = (props: NavigationProps) => {
       </EuiFlexItem>
 
       <EuiFlexItem grow={false}>
-        {nav.isEnabled('devTools') ? <NavigationBucketHoc {...devTools} /> : null}
-        {nav.isEnabled('management') ? <NavigationBucketHoc {...management} /> : null}
+        {nav.isEnabled('devTools') ? <NavigationBucketHoc navigationTree={devTools} /> : null}
+        {nav.isEnabled('management') ? <NavigationBucketHoc navigationTree={management} /> : null}
       </EuiFlexItem>
     </EuiFlexGroup>
   );

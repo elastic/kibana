@@ -68,13 +68,14 @@ import {
   MULTIPLE_RULE_TITLE,
 } from '../../rules_list/translations';
 import { useBulkOperationToast } from '../../../hooks/use_bulk_operation_toast';
+import { RefreshToken } from './types';
 
 export type RuleDetailsProps = {
   rule: Rule;
   ruleType: RuleType;
   actionTypes: ActionType[];
   requestRefresh: () => Promise<void>;
-  refreshToken?: number;
+  refreshToken?: RefreshToken;
 } & Pick<
   BulkOperationsComponentOpts,
   'bulkDisableRules' | 'bulkEnableRules' | 'bulkDeleteRules' | 'snoozeRule' | 'unsnoozeRule'

@@ -8,8 +8,8 @@
 import React, { useMemo } from 'react';
 import { EuiButtonIcon, EuiDataGridColumn, EuiText } from '@elastic/eui';
 import { BrowserField } from '@kbn/rule-registry-plugin/common';
-import { useInspector } from '../../../../../hooks';
-import { IndicatorsFieldBrowser } from '../components';
+import { useInspector } from '../../../../../hooks/use_inspector';
+import { IndicatorsFieldBrowser } from '../components/field_browser/field_browser';
 import { INSPECT_BUTTON_TEST_ID } from './test_ids';
 import { INSPECT_BUTTON_TITLE } from './translations';
 
@@ -61,6 +61,7 @@ export const useToolbarOptions = ({
         },
         right: (
           <EuiButtonIcon
+            aria-label={INSPECT_BUTTON_TITLE}
             iconType="inspect"
             title={INSPECT_BUTTON_TITLE}
             data-test-subj={INSPECT_BUTTON_TEST_ID}

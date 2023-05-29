@@ -12,7 +12,7 @@ import { IKibanaSearchResponse } from '@kbn/data-plugin/common';
 import { generateMockFileIndicator } from '../../../../../../common/types/indicator';
 import { CommentChildren } from './comment_children';
 import { StoryProvidersComponent } from '../../../../../common/mocks/story_providers';
-import { AttachmentMetadata } from '../../../utils';
+import { AttachmentMetadata } from '../../../utils/attachments';
 
 export default {
   title: 'CommentChildren',

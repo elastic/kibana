@@ -63,4 +63,34 @@ describe('find', () => {
       expect(call.caseOptions).not.toHaveProperty('rootSearchFields');
     });
   });
+
+  describe('searchFields errors', () => {
+    const clientArgs = createCasesClientMockArgs();
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it('invalid searchFields with array', async () => {
+      const searchFields = ['foobar'];
+
+      // @ts-expect-error
+      const findRequest = createCasesClientMockFindRequest({ searchFields });
+
+      await expect(find(findRequest, clientArgs)).rejects.toThrow(
+        'Error: Invalid value "foobar" supplied to "searchFields"'
+      );
+    });
+
+    it('invalid searchFields with single string', async () => {
+      const searchFields = 'foobar';
+
+      // @ts-expect-error
+      const findRequest = createCasesClientMockFindRequest({ searchFields });
+
+      await expect(find(findRequest, clientArgs)).rejects.toThrow(
+        'Error: Invalid value "foobar" supplied to "searchFields"'
+      );
+    });
+  });
 });

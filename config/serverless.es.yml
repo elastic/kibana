@@ -9,7 +9,7 @@ enterpriseSearch.enabled: true
 xpack.serverless.search.enabled: true
 
 ## Set the home route
-uiSettings.overrides.defaultRoute: /app/enterprise_search/content/search_indices
+uiSettings.overrides.defaultRoute: /app/elasticsearch
 
 ## Set the dev project switcher current type
 xpack.serverless.plugin.developer.projectSwitcher.currentType: 'search'

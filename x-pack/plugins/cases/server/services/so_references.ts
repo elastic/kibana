@@ -12,8 +12,8 @@ import type {
 } from '@kbn/core/server';
 import { isEqual, uniqWith } from 'lodash';
 import type {
-  CommentAttributesNoSO,
   CommentAttributes,
+  CommentAttributesNoSO,
   CommentPatchAttributes,
 } from '../../common/api';
 import type { PersistableStateAttachmentTypeRegistry } from '../attachment_framework/persistable_state_registry';
@@ -25,6 +25,8 @@ import { EXTERNAL_REFERENCE_REF_NAME } from '../common/constants';
 import type {
   AttachmentPersistedAttributes,
   AttachmentRequestAttributes,
+  AttachmentTransformedAttributes,
+  AttachmentSavedObjectTransformed,
 } from '../common/types/attachments';
 import { isCommentRequestTypeExternalReferenceSO } from './type_guards';
 import type { PartialField } from '../types';
@@ -56,11 +58,11 @@ type OptionalAttributes<T> = PartialField<SavedObject<T>, 'attributes'>;
 export const injectAttachmentAttributesAndHandleErrors = (
   savedObject: OptionalAttributes<AttachmentPersistedAttributes>,
   persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry
-): OptionalAttributes<CommentAttributes> => {
+): OptionalAttributes<AttachmentTransformedAttributes> => {
   if (!hasAttributes(savedObject)) {
     // we don't actually have an attributes field here so the type doesn't matter, this cast is to get the types to stop
     // complaining though
-    return savedObject as OptionalAttributes<CommentAttributes>;
+    return savedObject as OptionalAttributes<AttachmentTransformedAttributes>;
   }
 
   return injectAttachmentSOAttributesFromRefs(savedObject, persistableStateAttachmentTypeRegistry);
@@ -73,9 +75,9 @@ const hasAttributes = <T>(savedObject: OptionalAttributes<T>): savedObject is Sa
 export const injectAttachmentSOAttributesFromRefs = (
   savedObject: SavedObject<AttachmentPersistedAttributes>,
   persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry
-): SavedObject<CommentAttributes> => {
+): AttachmentSavedObjectTransformed => {
   const soExtractor = getAttachmentSOExtractor(savedObject.attributes);
-  const so = soExtractor.populateFieldsFromReferences<CommentAttributes>(savedObject);
+  const so = soExtractor.populateFieldsFromReferences<AttachmentTransformedAttributes>(savedObject);
   const injectedAttributes = injectPersistableReferencesToSO(so.attributes, so.references, {
     persistableStateAttachmentTypeRegistry,
   });
@@ -87,9 +89,9 @@ export const injectAttachmentSOAttributesFromRefsForPatch = (
   updatedAttributes: CommentPatchAttributes,
   savedObject: SavedObjectsUpdateResponse<AttachmentPersistedAttributes>,
   persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry
-): SavedObjectsUpdateResponse<CommentAttributes> => {
+): SavedObjectsUpdateResponse<AttachmentTransformedAttributes> => {
   const soExtractor = getAttachmentSOExtractor(savedObject.attributes);
-  const so = soExtractor.populateFieldsFromReferencesForPatch<CommentAttributes>({
+  const so = soExtractor.populateFieldsFromReferencesForPatch<AttachmentTransformedAttributes>({
     dataBeforeRequest: updatedAttributes,
     dataReturnedFromRequest: savedObject,
   });
@@ -105,7 +107,7 @@ export const injectAttachmentSOAttributesFromRefsForPatch = (
   return {
     ...so,
     attributes: { ...so.attributes, ...injectedAttributes },
-  } as SavedObjectsUpdateResponse<CommentAttributes>;
+  } as SavedObjectsUpdateResponse<AttachmentTransformedAttributes>;
 };
 
 interface ExtractionResults {

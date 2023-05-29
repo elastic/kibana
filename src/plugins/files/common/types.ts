@@ -18,6 +18,7 @@ import type {
   FileKindBase,
   FileShareJSONWithToken,
 } from '@kbn/shared-ux-file-types';
+import type { UploadOptions } from '../server/blob_storage_service';
 import type { ES_FIXED_SIZE_INDEX_BLOB_STORE } from './constants';
 
 export type {
@@ -179,7 +180,7 @@ export interface File<Meta = unknown> {
    */
   data: FileJSON<Meta>;
   /**
-   * Update a file object's metadatathat can be updated.
+   * Update a file object's metadata that can be updated.
    *
    * @param attr - The of attributes to update.
    */
@@ -190,8 +191,13 @@ export interface File<Meta = unknown> {
    *
    * @param content - The content to stream to storage.
    * @param abort$ - An observable that can be used to abort the upload at any time.
+   * @param options - additional options.
    */
-  uploadContent(content: Readable, abort$?: Observable<unknown>): Promise<File<Meta>>;
+  uploadContent(
+    content: Readable,
+    abort$?: Observable<unknown>,
+    options?: Partial<Pick<UploadOptions, 'transforms'>>
+  ): Promise<File<Meta>>;
 
   /**
    * Stream file content from storage.

@@ -8,4 +8,10 @@
 
 export { NavigationKibanaProvider, NavigationProvider } from './src/services';
 export { Navigation } from './src/ui/navigation';
-export type { NavigationProps, NavigationServices, NavItemProps } from './types';
+export type {
+  ChromeNavigation,
+  ChromeNavigationViewModel,
+  NavigationServices,
+  ChromeNavigationNode,
+  ChromeNavigationNodeViewModel,
+} from './types';

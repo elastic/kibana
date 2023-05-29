@@ -301,7 +301,7 @@ export const createLifecycleExecutor =
           [VERSION]: ruleDataClient.kibanaVersion,
           [ALERT_FLAPPING]: flapping,
           ...(isRecovered ? { [ALERT_END]: commonRuleFields[TIMESTAMP] } : {}),
-          ...(maintenanceWindowIds?.length
+          ...(isNew && maintenanceWindowIds?.length
             ? { [ALERT_MAINTENANCE_WINDOW_IDS]: maintenanceWindowIds }
             : {}),
         };

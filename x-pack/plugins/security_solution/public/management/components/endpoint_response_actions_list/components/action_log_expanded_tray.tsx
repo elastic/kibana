@@ -8,6 +8,7 @@
 import React, { memo, useMemo } from 'react';
 import { EuiCodeBlock, EuiFlexGroup, EuiFlexItem, EuiDescriptionList } from '@elastic/eui';
 import { css, euiStyled } from '@kbn/kibana-react-plugin/common';
+import { EndpointUploadActionResult } from '../../endpoint_upload_action_result';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { OUTPUT_MESSAGES } from '../translations';
 import { getUiCommand } from './hooks';
@@ -16,6 +17,10 @@ import { ResponseActionFileDownloadLink } from '../../response_action_file_downl
 import { ExecuteActionHostResponse } from '../../endpoint_execute_action';
 import { getEmptyValue } from '../../../../common/components/empty_value';
 
+import type {
+  ResponseActionUploadOutputContent,
+  ResponseActionUploadParameters,
+} from '../../../../../common/endpoint/types';
 import { type ActionDetails, type MaybeImmutable } from '../../../../../common/endpoint/types';
 
 const emptyValue = getEmptyValue();
@@ -75,6 +80,12 @@ const StyledEuiFlexGroup = euiStyled(EuiFlexGroup).attrs({
   overflow-y: auto;
 `;
 
+const isUploadAction = (
+  action: MaybeImmutable<ActionDetails>
+): action is ActionDetails<ResponseActionUploadOutputContent, ResponseActionUploadParameters> => {
+  return action.command === 'upload';
+};
+
 const OutputContent = memo<{ action: MaybeImmutable<ActionDetails>; 'data-test-subj'?: string }>(
   ({ action, 'data-test-subj': dataTestSubj }) => {
     const getTestId = useTestIdGenerator(dataTestSubj);
@@ -85,7 +96,18 @@ const OutputContent = memo<{ action: MaybeImmutable<ActionDetails>; 'data-test-s
       canAccessEndpointActionsLogManagement,
     } = useUserPrivileges().endpointPrivileges;
 
-    const { command, isCompleted, isExpired, wasSuccessful } = action;
+    const { command, isCompleted, isExpired, wasSuccessful, errors } = action;
+
+    if (errors) {
+      return (
+        // TODO: temporary solution, waiting for UI
+        <>
+          {errors.map((error) => (
+            <EuiFlexItem>{error}</EuiFlexItem>
+          ))}
+        </>
+      );
+    }
 
     if (isExpired) {
       return <>{OUTPUT_MESSAGES.hasExpired(command)}</>;
@@ -130,6 +152,20 @@ const OutputContent = memo<{ action: MaybeImmutable<ActionDetails>; 'data-test-s
               />
             </div>
           ))}
+        </EuiFlexGroup>
+      );
+    }
+
+    if (isUploadAction(action)) {
+      return (
+        <EuiFlexGroup direction="column" data-test-subj={getTestId('uploadDetails')}>
+          <p>{OUTPUT_MESSAGES.wasSuccessful(command)}</p>
+
+          <EndpointUploadActionResult
+            action={action}
+            data-test-subj={getTestId('uploadOutput')}
+            textSize="xs"
+          />
         </EuiFlexGroup>
       );
     }

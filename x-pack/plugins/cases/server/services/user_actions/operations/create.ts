@@ -15,7 +15,7 @@ import type {
   ActionTypeValues,
   CaseAssignees,
   CaseUserProfile,
-  UserAction as Action,
+  ActionCategory,
 } from '../../../../common/api';
 import { Actions, ActionTypes } from '../../../../common/api';
 import { BuilderFactory } from '../builder_factory';
@@ -184,7 +184,7 @@ export class UserActionPersister {
   }: {
     commonArgs: CommonUserActionArgs;
     actionType: ActionType;
-    action: Action;
+    action: ActionCategory;
     createPayload: CreatePayloadFunction<Item, ActionType>;
     modifiedItems?: Item[] | null;
   }) {

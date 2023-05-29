@@ -66,6 +66,7 @@ export default ({ getService }: FtrProviderContext) => {
           },
           referer: 'test',
           kibanaVersion,
+          internalOrigin: 'Kibana',
           options: {
             featureIds: [AlertConsumers.LOGS],
           },
@@ -87,6 +88,7 @@ export default ({ getService }: FtrProviderContext) => {
           },
           referer: 'test',
           kibanaVersion,
+          internalOrigin: 'Kibana',
           options: {
             featureIds: [AlertConsumers.LOGS],
             pagination: {
@@ -142,6 +144,7 @@ export default ({ getService }: FtrProviderContext) => {
           },
           referer: 'test',
           kibanaVersion,
+          internalOrigin: 'Kibana',
           options: {
             featureIds: [AlertConsumers.SIEM],
           },
@@ -163,6 +166,7 @@ export default ({ getService }: FtrProviderContext) => {
           },
           referer: 'test',
           kibanaVersion,
+          internalOrigin: 'Kibana',
           options: {
             featureIds: [AlertConsumers.SIEM, AlertConsumers.LOGS],
           },
@@ -172,6 +176,38 @@ export default ({ getService }: FtrProviderContext) => {
         expect(result.message).to.be(
           `The privateRuleRegistryAlertsSearchStrategy search strategy is unable to accommodate requests containing multiple feature IDs and one of those IDs is SIEM.`
         );
+      });
+
+      it('should be able to handle runtime fields on alerts from siem rules', async () => {
+        const runtimeFieldValue = 'hello world';
+        const runtimeFieldKey = 'hello_world';
+        const result = await secureBsearch.send<RuleRegistrySearchResponse>({
+          supertestWithoutAuth,
+          auth: {
+            username: obsOnlySpacesAllEsRead.username,
+            password: obsOnlySpacesAllEsRead.password,
+          },
+          referer: 'test',
+          kibanaVersion,
+          internalOrigin: 'Kibana',
+          options: {
+            featureIds: [AlertConsumers.SIEM],
+            runtimeMappings: {
+              [runtimeFieldKey]: {
+                type: 'keyword',
+                script: {
+                  source: `emit('${runtimeFieldValue}')`,
+                },
+              },
+            },
+          },
+          strategy: 'privateRuleRegistryAlertsSearchStrategy',
+        });
+        expect(result.rawResponse.hits.total).to.eql(1);
+        const runtimeFields = result.rawResponse.hits.hits.map(
+          (hit) => hit.fields?.[runtimeFieldKey]
+        );
+        expect(runtimeFields.every((field) => field === runtimeFieldValue));
       });
     });
 
@@ -192,6 +228,7 @@ export default ({ getService }: FtrProviderContext) => {
           },
           referer: 'test',
           kibanaVersion,
+          internalOrigin: 'Kibana',
           options: {
             featureIds: [AlertConsumers.APM],
           },
@@ -216,6 +253,7 @@ export default ({ getService }: FtrProviderContext) => {
           },
           referer: 'test',
           kibanaVersion,
+          internalOrigin: 'Kibana',
           options: {
             featureIds: [],
           },

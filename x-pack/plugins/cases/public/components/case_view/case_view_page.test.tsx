@@ -125,7 +125,7 @@ const userActionsStats = {
 };
 
 describe('CaseViewPage', () => {
-  const updateCaseProperty = defaultUpdateCaseState.updateCaseProperty;
+  const updateCaseProperty = defaultUpdateCaseState.mutate;
   const pushCaseToExternalService = jest.fn();
   const data = caseProps.caseData;
   let appMockRenderer: AppMockRenderer;
@@ -140,7 +140,10 @@ describe('CaseViewPage', () => {
     useFindCaseUserActionsMock.mockReturnValue(defaultUseFindCaseUserActions);
     useInfiniteFindCaseUserActionsMock.mockReturnValue(defaultInfiniteUseFindCaseUserActions);
     useGetCaseUserActionsStatsMock.mockReturnValue({ data: userActionsStats, isLoading: false });
-    usePostPushToServiceMock.mockReturnValue({ isLoading: false, pushCaseToExternalService });
+    usePostPushToServiceMock.mockReturnValue({
+      isLoading: false,
+      mutateAsync: pushCaseToExternalService,
+    });
     useGetCaseConnectorsMock.mockReturnValue({
       isLoading: false,
       data: caseConnectors,
@@ -221,40 +224,6 @@ describe('CaseViewPage', () => {
       expect(updateCaseProperty).toHaveBeenCalledTimes(1);
       expect(updateObject.updateKey).toEqual('status');
       expect(updateObject.updateValue).toEqual('closed');
-    });
-  });
-
-  it('should display EditableTitle isLoading', async () => {
-    useUpdateCaseMock.mockImplementation(() => ({
-      ...defaultUpdateCaseState,
-      isLoading: true,
-      updateKey: 'title',
-    }));
-    const result = appMockRenderer.render(<CaseViewPage {...caseProps} />);
-
-    await waitFor(() => {
-      expect(result.getByTestId('editable-title-loading')).toBeInTheDocument();
-      expect(result.queryByTestId('editable-title-edit-icon')).not.toBeInTheDocument();
-    });
-  });
-
-  it('should display tags isLoading', async () => {
-    useUpdateCaseMock.mockImplementation(() => ({
-      ...defaultUpdateCaseState,
-      isLoading: true,
-      updateKey: 'tags',
-    }));
-
-    const result = appMockRenderer.render(<CaseViewPage {...caseProps} />);
-
-    await waitFor(() => {
-      expect(
-        within(result.getByTestId('case-view-tag-list')).getByTestId('tag-list-loading')
-      ).toBeInTheDocument();
-    });
-
-    await waitFor(() => {
-      expect(result.queryByTestId('tag-list-edit')).not.toBeInTheDocument();
     });
   });
 

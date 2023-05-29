@@ -10,7 +10,7 @@ import { ComponentStory } from '@storybook/react';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import { mockUiSettingsService } from '../../../../../../common/mocks/mock_kibana_ui_settings_service';
 import { generateMockIndicator, Indicator } from '../../../../../../../common/types/indicator';
-import { OpenIndicatorFlyoutButton } from '.';
+import { OpenIndicatorFlyoutButton } from './open_flyout_button';
 
 export default {
   component: OpenIndicatorFlyoutButton,

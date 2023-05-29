@@ -136,9 +136,11 @@ export class PreviewController {
     }
   };
 
+  /* disabled while investigating issues with painless script editor
   setScriptEditorValidation = (scriptEditorValidation: PreviewState['scriptEditorValidation']) => {
     this.updateState({ scriptEditorValidation });
   };
+  */
 
   setPreviewError = (error: PreviewState['previewResponse']['error']) => {
     this.updateState({
@@ -159,7 +161,7 @@ export class PreviewController {
     // load document if id is present
     this.setIsFetchingDocument(!!customDocIdToLoad);
     if (customDocIdToLoad) {
-      debounce(() => this.loadDocument(customDocIdToLoad), 500, { leading: true })();
+      this.debouncedLoadDocument(customDocIdToLoad);
     }
   };
 
@@ -341,7 +343,6 @@ export class PreviewController {
       return;
     }
 
-    // lastExecutePainlessRequestParams.current.documentId = undefined;
     this.setLastExecutePainlessRequestParams({ documentId: undefined });
     this.setIsFetchingDocument(true);
 
@@ -405,6 +406,8 @@ export class PreviewController {
       this.setIsLoadingPreview(false);
     }
   };
+
+  debouncedLoadDocument = debounce(this.loadDocument, 500, { leading: true });
 
   reset = () => {
     this.previewCount = 0;
@@ -494,7 +497,6 @@ export class PreviewController {
       // ...and sort alphabetically
       .sort((a, b) => a.key.localeCompare(b.key));
 
-    // fieldPreview$.current.next(fields);
     onNext(fields);
     this.setPreviewResponse({
       fields,

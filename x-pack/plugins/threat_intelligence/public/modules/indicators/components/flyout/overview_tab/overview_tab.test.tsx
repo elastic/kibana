@@ -9,8 +9,8 @@ import { TestProvidersComponent } from '../../../../../common/mocks/test_provide
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 import { generateMockIndicator, Indicator } from '../../../../../../common/types/indicator';
-import { IndicatorsFlyoutOverview } from '.';
-import { EMPTY_PROMPT_TEST_ID } from '../empty_prompt';
+import { IndicatorsFlyoutOverview } from './overview_tab';
+import { EMPTY_PROMPT_TEST_ID } from '../empty_prompt/empty_prompt';
 import { IndicatorsFlyoutContext } from '../context';
 import {
   INDICATORS_FLYOUT_OVERVIEW_HIGH_LEVEL_BLOCKS,

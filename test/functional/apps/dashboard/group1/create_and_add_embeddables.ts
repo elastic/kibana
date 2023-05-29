@@ -205,7 +205,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           const originalPanelCount = await PageObjects.dashboard.getPanelCount();
           expect(originalPanelCount).to.eql(0);
           await dashboardVisualizations.createAndEmbedMetric('Embedding Vis Test');
-          await PageObjects.dashboard.waitForRenderComplete();
           await dashboardExpect.metricValuesExist(['0']);
           const panelCount = await PageObjects.dashboard.getPanelCount();
           expect(panelCount).to.eql(1);
@@ -217,7 +216,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             name: 'Embedding Markdown Test',
             markdown: 'Nice to meet you, markdown is my name',
           });
-          await PageObjects.dashboard.waitForRenderComplete();
           await dashboardExpect.markdownWithValuesExists(['Nice to meet you, markdown is my name']);
           const panelCount = await PageObjects.dashboard.getPanelCount();
           expect(panelCount).to.eql(2);

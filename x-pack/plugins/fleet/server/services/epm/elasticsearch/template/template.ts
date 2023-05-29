@@ -101,10 +101,6 @@ export function getTemplate({
   return template;
 }
 
-interface GenerateMappingsOptions {
-  isIndexModeTimeSeries?: boolean;
-}
-
 /**
  * Generate mapping takes the given nested fields array and creates the Elasticsearch
  * mapping properties out of it.
@@ -113,44 +109,37 @@ interface GenerateMappingsOptions {
  *
  * @param fields
  */
-export function generateMappings(
-  fields: Field[],
-  options?: GenerateMappingsOptions
-): IndexTemplateMappings {
+export function generateMappings(fields: Field[]): IndexTemplateMappings {
   const dynamicTemplates: Array<Record<string, Properties>> = [];
   const dynamicTemplateNames = new Set<string>();
 
-  const { properties } = _generateMappings(
-    fields,
-    {
-      addDynamicMapping: (dynamicMapping: {
-        path: string;
-        matchingType: string;
-        pathMatch: string;
-        properties: string;
-      }) => {
-        const name = dynamicMapping.path;
-        if (dynamicTemplateNames.has(name)) {
-          return;
-        }
+  const { properties } = _generateMappings(fields, {
+    addDynamicMapping: (dynamicMapping: {
+      path: string;
+      matchingType: string;
+      pathMatch: string;
+      properties: string;
+    }) => {
+      const name = dynamicMapping.path;
+      if (dynamicTemplateNames.has(name)) {
+        return;
+      }
 
-        const dynamicTemplate: Properties = {
-          mapping: dynamicMapping.properties,
-        };
+      const dynamicTemplate: Properties = {
+        mapping: dynamicMapping.properties,
+      };
 
-        if (dynamicMapping.matchingType) {
-          dynamicTemplate.match_mapping_type = dynamicMapping.matchingType;
-        }
+      if (dynamicMapping.matchingType) {
+        dynamicTemplate.match_mapping_type = dynamicMapping.matchingType;
+      }
 
-        if (dynamicMapping.pathMatch) {
-          dynamicTemplate.path_match = dynamicMapping.pathMatch;
-        }
-        dynamicTemplateNames.add(name);
-        dynamicTemplates.push({ [dynamicMapping.path]: dynamicTemplate });
-      },
+      if (dynamicMapping.pathMatch) {
+        dynamicTemplate.path_match = dynamicMapping.pathMatch;
+      }
+      dynamicTemplateNames.add(name);
+      dynamicTemplates.push({ [dynamicMapping.path]: dynamicTemplate });
     },
-    options
-  );
+  });
 
   return dynamicTemplates.length
     ? {
@@ -173,8 +162,7 @@ function _generateMappings(
   ctx: {
     addDynamicMapping: any;
     groupFieldName?: string;
-  },
-  options?: GenerateMappingsOptions
+  }
 ): {
   properties: IndexTemplateMappings['properties'];
   hasNonDynamicTemplateMappings: boolean;
@@ -234,16 +222,12 @@ function _generateMappings(
 
         switch (type) {
           case 'group':
-            const mappings = _generateMappings(
-              field.fields!,
-              {
-                ...ctx,
-                groupFieldName: ctx.groupFieldName
-                  ? `${ctx.groupFieldName}.${field.name}`
-                  : field.name,
-              },
-              options
-            );
+            const mappings = _generateMappings(field.fields!, {
+              ...ctx,
+              groupFieldName: ctx.groupFieldName
+                ? `${ctx.groupFieldName}.${field.name}`
+                : field.name,
+            });
             if (!mappings.hasNonDynamicTemplateMappings) {
               return;
             }
@@ -255,16 +239,12 @@ function _generateMappings(
             break;
           case 'group-nested':
             fieldProps = {
-              properties: _generateMappings(
-                field.fields!,
-                {
-                  ...ctx,
-                  groupFieldName: ctx.groupFieldName
-                    ? `${ctx.groupFieldName}.${field.name}`
-                    : field.name,
-                },
-                options
-              ).properties,
+              properties: _generateMappings(field.fields!, {
+                ...ctx,
+                groupFieldName: ctx.groupFieldName
+                  ? `${ctx.groupFieldName}.${field.name}`
+                  : field.name,
+              }).properties,
               ...generateNestedProps(field),
               type: 'nested',
             };
@@ -352,10 +332,10 @@ function _generateMappings(
           }
         }
 
-        if (options?.isIndexModeTimeSeries && 'metric_type' in field) {
+        if ('metric_type' in field) {
           fieldProps.time_series_metric = field.metric_type;
         }
-        if (options?.isIndexModeTimeSeries && field.dimension) {
+        if (field.dimension) {
           fieldProps.time_series_dimension = field.dimension;
         }
 

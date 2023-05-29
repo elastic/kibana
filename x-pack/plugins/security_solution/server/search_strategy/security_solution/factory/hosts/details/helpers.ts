@@ -202,12 +202,6 @@ export const getHostEndpoint = async (
 
     return {
       hostInfo: endpointData,
-      endpointPolicy: endpointData.metadata.Endpoint.policy.applied.name,
-      policyStatus: endpointData.metadata.Endpoint.policy.applied.status,
-      sensorVersion: endpointData.metadata.agent.version,
-      elasticAgentStatus: endpointData.host_status,
-      isolation: endpointData.metadata.Endpoint.state?.isolation ?? false,
-      fleetAgentId: endpointData.metadata.elastic.agent.id,
       pendingActions,
     };
   } catch (err) {

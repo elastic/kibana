@@ -40,7 +40,7 @@ const initialCaseValue: FormProps = {
 interface Props {
   afterCaseCreated?: (
     theCase: CaseUI,
-    createAttachments: UseCreateAttachments['createAttachments']
+    createAttachments: UseCreateAttachments['mutateAsync']
   ) => Promise<void>;
   children?: JSX.Element | JSX.Element[];
   onSuccess?: (theCase: CaseUI) => void;
@@ -60,8 +60,8 @@ export const FormContext: React.FC<Props> = ({
   const { owner, appId } = useCasesContext();
   const { isSyncAlertsEnabled } = useCasesFeatures();
   const { mutateAsync: postCase } = usePostCase();
-  const { createAttachments } = useCreateAttachments();
-  const { pushCaseToExternalService } = usePostPushToService();
+  const { mutateAsync: createAttachments } = useCreateAttachments();
+  const { mutateAsync: pushCaseToExternalService } = usePostPushToService();
   const { startTransaction } = useCreateCaseWithAttachmentsTransaction();
 
   const submitCase = useCallback(
@@ -98,7 +98,7 @@ export const FormContext: React.FC<Props> = ({
           await createAttachments({
             caseId: theCase.id,
             caseOwner: theCase.owner,
-            data: attachments,
+            attachments,
           });
         }
 

@@ -40,6 +40,12 @@ const DefaultGridStyle: EuiDataGridStyle = {
   fontSize: 's',
 };
 
+const getCellActionsStub = {
+  getCellActions: () => null,
+  visibleCellActions: undefined,
+  disabledCellActions: [],
+};
+
 const basicRenderCellValue = ({
   data,
   columnId,
@@ -379,7 +385,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
         dataGridRef,
         pageSize: pagination.pageSize,
       })
-    : { getCellActions: () => null, visibleCellActions: undefined, disabledCellActions: [] };
+    : getCellActionsStub;
 
   const columnsWithCellActions = useMemo(() => {
     if (getCellActions) {

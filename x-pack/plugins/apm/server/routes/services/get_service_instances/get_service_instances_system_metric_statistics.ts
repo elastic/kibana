@@ -19,10 +19,8 @@ import { environmentQuery } from '../../../../common/utils/environment_query';
 import { getBucketSize } from '../../../../common/utils/get_bucket_size';
 import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 import {
-  percentCgroupMemoryUsedScript,
-  percentSystemMemoryUsedScript,
-  systemMemoryFilter,
-  cgroupMemoryFilter,
+  systemMemory,
+  cgroupMemory,
 } from '../../metrics/by_agent/shared/memory';
 import { getOffsetInMs } from '../../../../common/utils/get_offset_in_ms';
 
@@ -109,12 +107,12 @@ export async function getServiceInstancesSystemMetricStatistics<
 
   const subAggs = {
     memory_usage_cgroup: {
-      filter: cgroupMemoryFilter,
-      aggs: withTimeseries({ script: percentCgroupMemoryUsedScript }),
+      filter: cgroupMemory.filter,
+      aggs: withTimeseries({ script: cgroupMemory.script }),
     },
     memory_usage_system: {
-      filter: systemMemoryFilter,
-      aggs: withTimeseries({ script: percentSystemMemoryUsedScript }),
+      filter: systemMemory.filter,
+      aggs: withTimeseries({ script: systemMemory.script }),
     },
     cpu_usage: {
       filter: cpuUsageFilter,
@@ -144,8 +142,8 @@ export async function getServiceInstancesSystemMetricStatistics<
               {
                 bool: {
                   should: [
-                    cgroupMemoryFilter,
-                    systemMemoryFilter,
+                    cgroupMemory.filter,
+                    systemMemory.filter,
                     cpuUsageFilter,
                   ],
                   minimum_should_match: 1,

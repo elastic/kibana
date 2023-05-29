@@ -6685,7 +6685,7 @@
               },
               " | undefined; bumpRevision?: boolean | undefined; force?: true | undefined; authorizationHeader?: ",
               "HTTPAuthorizationHeader",
-              " | null | undefined; } | undefined) => Promise<",
+              " | null | undefined; } | undefined) => Promise<{ created: ",
               {
                 "pluginId": "fleet",
                 "scope": "common",
@@ -6693,7 +6693,23 @@
                 "section": "def-common.PackagePolicy",
                 "text": "PackagePolicy"
               },
-              "[]>"
+              "[]; failed: { packagePolicy: ",
+              {
+                "pluginId": "fleet",
+                "scope": "common",
+                "docId": "kibFleetPluginApi",
+                "section": "def-common.NewPackagePolicy",
+                "text": "NewPackagePolicy"
+              },
+              "; error?: Error | ",
+              {
+                "pluginId": "@kbn/core-saved-objects-common",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                "section": "def-common.SavedObjectError",
+                "text": "SavedObjectError"
+              },
+              " | undefined; }[]; }>"
             ],
             "path": "x-pack/plugins/fleet/server/services/package_policy_service.ts",
             "deprecated": false,
@@ -6861,15 +6877,15 @@
                 "section": "def-common.ElasticsearchClient",
                 "text": "ElasticsearchClient"
               },
-              ", packagePolicyUpdates: (",
+              ", packagePolicyUpdates: ",
               {
                 "pluginId": "fleet",
                 "scope": "common",
                 "docId": "kibFleetPluginApi",
-                "section": "def-common.NewPackagePolicy",
-                "text": "NewPackagePolicy"
+                "section": "def-common.UpdatePackagePolicy",
+                "text": "UpdatePackagePolicy"
               },
-              " & { version?: string | undefined; id: string; })[], options?: { user?: ",
+              "[], options?: { user?: ",
               {
                 "pluginId": "security",
                 "scope": "common",
@@ -6877,7 +6893,7 @@
                 "section": "def-common.AuthenticatedUser",
                 "text": "AuthenticatedUser"
               },
-              " | undefined; force?: boolean | undefined; } | undefined, currentVersion?: string | undefined) => Promise<",
+              " | undefined; force?: boolean | undefined; } | undefined, currentVersion?: string | undefined) => Promise<{ updatedPolicies: ",
               {
                 "pluginId": "fleet",
                 "scope": "common",
@@ -6885,7 +6901,17 @@
                 "section": "def-common.PackagePolicy",
                 "text": "PackagePolicy"
               },
-              "[] | null>"
+              "[] | null; failedPolicies: { packagePolicy: ",
+              "NewPackagePolicyWithId",
+              "; error: Error | ",
+              {
+                "pluginId": "@kbn/core-saved-objects-common",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                "section": "def-common.SavedObjectError",
+                "text": "SavedObjectError"
+              },
+              "; }[]; }>"
             ],
             "path": "x-pack/plugins/fleet/server/services/package_policy_service.ts",
             "deprecated": false,
@@ -6941,15 +6967,14 @@
                 "label": "packagePolicyUpdates",
                 "description": [],
                 "signature": [
-                  "(",
                   {
                     "pluginId": "fleet",
                     "scope": "common",
                     "docId": "kibFleetPluginApi",
-                    "section": "def-common.NewPackagePolicy",
-                    "text": "NewPackagePolicy"
+                    "section": "def-common.UpdatePackagePolicy",
+                    "text": "UpdatePackagePolicy"
                   },
-                  " & { version?: string | undefined; id: string; })[]"
+                  "[]"
                 ],
                 "path": "x-pack/plugins/fleet/server/services/package_policy_service.ts",
                 "deprecated": false,
@@ -9381,9 +9406,7 @@
               "TransportRequestOptions",
               " | undefined): Promise<",
               "WriteResponseBase",
-              ">; }; helpers: ",
-              "default",
-              "; search: { <TDocument = unknown, TAggregations = Record<string, ",
+              ">; }; search: { <TDocument = unknown, TAggregations = Record<string, ",
               "AggregationsAggregate",
               ">>(this: That, params?: ",
               "SearchRequest",
@@ -9415,7 +9438,9 @@
               "TransportRequestOptions",
               " | undefined): Promise<",
               "SearchResponse",
-              "<TDocument, TAggregations>>; }; name: string | symbol; security: ",
+              "<TDocument, TAggregations>>; }; helpers: ",
+              "default",
+              "; name: string | symbol; security: ",
               "default",
               "; monitoring: ",
               "default",
@@ -10716,9 +10741,7 @@
               "TransportRequestOptions",
               " | undefined): Promise<",
               "WriteResponseBase",
-              ">; }; helpers: ",
-              "default",
-              "; search: { <TDocument = unknown, TAggregations = Record<string, ",
+              ">; }; search: { <TDocument = unknown, TAggregations = Record<string, ",
               "AggregationsAggregate",
               ">>(this: That, params?: ",
               "SearchRequest",
@@ -10750,7 +10773,9 @@
               "TransportRequestOptions",
               " | undefined): Promise<",
               "SearchResponse",
-              "<TDocument, TAggregations>>; }; name: string | symbol; security: ",
+              "<TDocument, TAggregations>>; }; helpers: ",
+              "default",
+              "; name: string | symbol; security: ",
               "default",
               "; monitoring: ",
               "default",
@@ -12064,9 +12089,7 @@
               "TransportRequestOptions",
               " | undefined): Promise<",
               "WriteResponseBase",
-              ">; }; helpers: ",
-              "default",
-              "; search: { <TDocument = unknown, TAggregations = Record<string, ",
+              ">; }; search: { <TDocument = unknown, TAggregations = Record<string, ",
               "AggregationsAggregate",
               ">>(this: That, params?: ",
               "SearchRequest",
@@ -12098,7 +12121,9 @@
               "TransportRequestOptions",
               " | undefined): Promise<",
               "SearchResponse",
-              "<TDocument, TAggregations>>; }; name: string | symbol; security: ",
+              "<TDocument, TAggregations>>; }; helpers: ",
+              "default",
+              "; name: string | symbol; security: ",
               "default",
               "; monitoring: ",
               "default",
@@ -13409,9 +13434,7 @@
               "TransportRequestOptions",
               " | undefined): Promise<",
               "WriteResponseBase",
-              ">; }; helpers: ",
-              "default",
-              "; search: { <TDocument = unknown, TAggregations = Record<string, ",
+              ">; }; search: { <TDocument = unknown, TAggregations = Record<string, ",
               "AggregationsAggregate",
               ">>(this: That, params?: ",
               "SearchRequest",
@@ -13443,7 +13466,9 @@
               "TransportRequestOptions",
               " | undefined): Promise<",
               "SearchResponse",
-              "<TDocument, TAggregations>>; }; name: string | symbol; security: ",
+              "<TDocument, TAggregations>>; }; helpers: ",
+              "default",
+              "; name: string | symbol; security: ",
               "default",
               "; monitoring: ",
               "default",
@@ -14757,9 +14782,7 @@
               "TransportRequestOptions",
               " | undefined): Promise<",
               "WriteResponseBase",
-              ">; }; helpers: ",
-              "default",
-              "; search: { <TDocument = unknown, TAggregations = Record<string, ",
+              ">; }; search: { <TDocument = unknown, TAggregations = Record<string, ",
               "AggregationsAggregate",
               ">>(this: That, params?: ",
               "SearchRequest",
@@ -14791,7 +14814,9 @@
               "TransportRequestOptions",
               " | undefined): Promise<",
               "SearchResponse",
-              "<TDocument, TAggregations>>; }; name: string | symbol; security: ",
+              "<TDocument, TAggregations>>; }; helpers: ",
+              "default",
+              "; name: string | symbol; security: ",
               "default",
               "; monitoring: ",
               "default",
@@ -16173,6 +16198,20 @@
           "path": "x-pack/plugins/fleet/server/plugin.ts",
           "deprecated": false,
           "trackAdoption": false
+        },
+        {
+          "parentPluginId": "fleet",
+          "id": "def-server.FleetStartContract.uninstallTokenService",
+          "type": "Object",
+          "tags": [],
+          "label": "uninstallTokenService",
+          "description": [],
+          "signature": [
+            "UninstallTokenServiceInterface"
+          ],
+          "path": "x-pack/plugins/fleet/server/plugin.ts",
+          "deprecated": false,
+          "trackAdoption": false
         }
       ],
       "lifecycle": "start",
@@ -16618,6 +16657,17 @@
             "signature": [
               "number | undefined"
             ],
+            "path": "x-pack/plugins/fleet/common/types/models/agent_policy.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.AgentPolicy.is_protected",
+            "type": "boolean",
+            "tags": [],
+            "label": "is_protected",
+            "description": [],
             "path": "x-pack/plugins/fleet/common/types/models/agent_policy.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -17930,7 +17980,8 @@
               "\nComponents array"
             ],
             "signature": [
-              "FleetServerAgentComponent[] | undefined"
+              "FleetServerAgentComponent",
+              "[] | undefined"
             ],
             "path": "x-pack/plugins/fleet/common/types/models/agent.ts",
             "deprecated": false,
@@ -18128,6 +18179,21 @@
             "description": [],
             "signature": [
               "{ monitoring: { namespace?: string | undefined; use_output?: string | undefined; enabled: boolean; metrics: boolean; logs: boolean; }; download: { sourceURI: string; }; features: Record<string, { enabled: boolean; }>; protection?: { enabled: boolean; uninstall_token_hash: string; signing_key: string; } | undefined; } | undefined"
+            ],
+            "path": "x-pack/plugins/fleet/common/types/models/agent_policy.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.FullAgentPolicy.secret_references",
+            "type": "Array",
+            "tags": [],
+            "label": "secret_references",
+            "description": [],
+            "signature": [
+              "PolicySecretReference",
+              "[] | undefined"
             ],
             "path": "x-pack/plugins/fleet/common/types/models/agent_policy.ts",
             "deprecated": false,
@@ -19738,6 +19804,20 @@
             "path": "x-pack/plugins/fleet/common/types/models/agent_policy.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.NewAgentPolicy.is_protected",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "is_protected",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/plugins/fleet/common/types/models/agent_policy.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -20454,6 +20534,21 @@
             "tags": [],
             "label": "revision",
             "description": [],
+            "path": "x-pack/plugins/fleet/common/types/models/package_policy.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.PackagePolicy.secret_references",
+            "type": "Array",
+            "tags": [],
+            "label": "secret_references",
+            "description": [],
+            "signature": [
+              "PolicySecretReference",
+              "[] | undefined"
+            ],
             "path": "x-pack/plugins/fleet/common/types/models/package_policy.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -21960,7 +22055,7 @@
             "label": "[RegistryVarsEntryKeys.type]",
             "description": [],
             "signature": [
-              "\"string\" | \"text\" | \"integer\" | \"select\" | \"textarea\" | \"password\" | \"bool\" | \"yaml\""
+              "\"string\" | \"text\" | \"integer\" | \"select\" | \"textarea\" | \"bool\" | \"password\" | \"yaml\""
             ],
             "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
             "deprecated": false,
@@ -21972,6 +22067,20 @@
             "type": "CompoundType",
             "tags": [],
             "label": "[RegistryVarsEntryKeys.required]",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.RegistryVarsEntry.RegistryVarsEntryKeys.secret",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "[RegistryVarsEntryKeys.secret]",
             "description": [],
             "signature": [
               "boolean | undefined"
@@ -23899,6 +24008,21 @@
           "10000"
         ],
         "path": "x-pack/plugins/fleet/common/constants/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "fleet",
+        "id": "def-common.UNINSTALL_TOKENS_SAVED_OBJECT_TYPE",
+        "type": "string",
+        "tags": [],
+        "label": "UNINSTALL_TOKENS_SAVED_OBJECT_TYPE",
+        "description": [],
+        "signature": [
+          "\"fleet-uninstall-tokens\""
+        ],
+        "path": "x-pack/plugins/fleet/common/constants/uninstall_tokens.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

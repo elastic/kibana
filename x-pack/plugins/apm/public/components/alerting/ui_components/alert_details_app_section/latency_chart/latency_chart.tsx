@@ -45,7 +45,6 @@ function LatencyChart({
   comparisonEnabled,
   offset,
   timeZone,
-  setLatencyMaxY,
 }: {
   alert: TopAlert;
   transactionType: string;
@@ -58,7 +57,6 @@ function LatencyChart({
   comparisonEnabled: boolean;
   offset: string;
   timeZone: string;
-  setLatencyMaxY: React.Dispatch<React.SetStateAction<number>>;
 }) {
   const preferred = usePreferredDataSourceAndBucketSize({
     start,
@@ -150,7 +148,6 @@ function LatencyChart({
     comparisonEnabled && isTimeComparison(offset) ? previousPeriod : undefined,
   ].filter(filterNil);
   const latencyMaxY = getMaxY(timeseriesLatency);
-  setLatencyMaxY(latencyMaxY);
   const latencyFormatter = getDurationFormatter(latencyMaxY);
   return (
     <EuiFlexItem>

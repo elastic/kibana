@@ -11,7 +11,10 @@ import {
   ElasticsearchClientMock,
   elasticsearchClientMock,
 } from '@kbn/core-elasticsearch-client-server-mocks';
-import { SavedObjectTypeRegistry } from '@kbn/core-saved-objects-base-server-internal';
+import {
+  SavedObjectTypeRegistry,
+  type SavedObjectsMigrationConfigType,
+} from '@kbn/core-saved-objects-base-server-internal';
 import { serializerMock } from '@kbn/core-saved-objects-base-server-mocks';
 import { docLinksServiceMock } from '@kbn/core-doc-links-server-mocks';
 import type { MigratorContext } from '../context';
@@ -22,6 +25,23 @@ export type MockedMigratorContext = Omit<MigratorContext, 'elasticsearchClient'>
   typeRegistry: SavedObjectTypeRegistry;
 };
 
+export const createMigrationConfigMock = (
+  parts: Partial<SavedObjectsMigrationConfigType> = {}
+): SavedObjectsMigrationConfigType => ({
+  algorithm: 'zdt',
+  batchSize: 1000,
+  maxBatchSizeBytes: new ByteSizeValue(1e8),
+  pollInterval: 0,
+  scrollDuration: '0s',
+  skip: false,
+  retryAttempts: 5,
+  zdt: {
+    metaPickupSyncDelaySec: 120,
+    runOnNonMigratorNodes: false,
+  },
+  ...parts,
+});
+
 export const createContextMock = (
   parts: Partial<MockedMigratorContext> = {}
 ): MockedMigratorContext => {
@@ -31,23 +51,12 @@ export const createContextMock = (
     kibanaVersion: '8.7.0',
     indexPrefix: '.kibana',
     types: ['foo', 'bar'],
-    typeModelVersions: {
-      foo: 1,
-      bar: 2,
+    typeVirtualVersions: {
+      foo: '10.1.0',
+      bar: '10.2.0',
     },
     documentMigrator: createDocumentMigrator(),
-    migrationConfig: {
-      algorithm: 'zdt',
-      batchSize: 1000,
-      maxBatchSizeBytes: new ByteSizeValue(1e8),
-      pollInterval: 0,
-      scrollDuration: '0s',
-      skip: false,
-      retryAttempts: 5,
-      zdt: {
-        metaPickupSyncDelaySec: 120,
-      },
-    },
+    migrationConfig: createMigrationConfigMock(),
     elasticsearchClient: elasticsearchClientMock.createElasticsearchClient(),
     maxRetryAttempts: 15,
     migrationDocLinks: docLinksServiceMock.createSetupContract().links.kibanaUpgradeSavedObjects,
@@ -55,6 +64,7 @@ export const createContextMock = (
     serializer: serializerMock.create(),
     deletedTypes: ['deleted-type'],
     discardCorruptObjects: false,
+    nodeRoles: { migrator: true, ui: false, backgroundTasks: false },
     ...parts,
   };
 };

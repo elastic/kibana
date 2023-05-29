@@ -9,23 +9,22 @@
 import { EuiAccordion, EuiFlexGroup, EuiFlexItem, EuiTitle, EuiIconTip } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
-import { firstNonNullValue } from '../../helpers';
-import type { RawBucket } from '../types';
-import { createGroupFilter, getNullGroupFilter } from './helpers';
+import type { GroupingBucket } from '../types';
+import { createGroupFilter, getNullGroupFilter } from '../../containers/query/helpers';
 
 interface GroupPanelProps<T> {
   customAccordionButtonClassName?: string;
   customAccordionClassName?: string;
   extraAction?: React.ReactNode;
   forceState?: 'open' | 'closed';
-  groupBucket: RawBucket<T>;
+  groupBucket: GroupingBucket<T>;
   groupPanelRenderer?: JSX.Element;
   groupingLevel?: number;
   isLoading: boolean;
   isNullGroup?: boolean;
   nullGroupMessage?: string;
   onGroupClose: () => void;
-  onToggleGroup?: (isOpen: boolean, groupBucket: RawBucket<T>) => void;
+  onToggleGroup?: (isOpen: boolean, groupBucket: GroupingBucket<T>) => void;
   renderChildComponent: (groupFilter: Filter[]) => React.ReactElement;
   selectedGroup: string;
 }
@@ -41,9 +40,11 @@ const DefaultGroupPanelRenderer = ({
 }) => (
   <div>
     <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-      <EuiFlexItem grow={false}>
+      <EuiFlexItem grow={false} className="eui-textTruncate">
         <EuiTitle size="xs" className="euiAccordionForm__title">
-          <h4 className="eui-textTruncate">{title}</h4>
+          <h4 className="eui-textTruncate" title={title}>
+            {title}
+          </h4>
         </EuiTitle>
       </EuiFlexItem>
       {isNullGroup && nullGroupMessage && (
@@ -81,15 +82,23 @@ const GroupPanelComponent = <T,>({
       lastForceState.current = 'open';
     }
   }, [onGroupClose, forceState, selectedGroup]);
-
-  const groupFieldValue = useMemo(() => firstNonNullValue(groupBucket.key), [groupBucket.key]);
+  const groupFieldValue = useMemo<{ asString: string | null; asArray: string[] | null }>(
+    () =>
+      groupBucket.selectedGroup === selectedGroup
+        ? {
+            asString: groupBucket.key_as_string,
+            asArray: groupBucket.key,
+          }
+        : { asString: null, asArray: null },
+    [groupBucket.key, groupBucket.key_as_string, groupBucket.selectedGroup, selectedGroup]
+  );
 
   const groupFilters = useMemo(
     () =>
       isNullGroup
         ? getNullGroupFilter(selectedGroup)
-        : createGroupFilter(selectedGroup, groupFieldValue),
-    [groupFieldValue, isNullGroup, selectedGroup]
+        : createGroupFilter(selectedGroup, groupFieldValue.asArray),
+    [groupFieldValue.asArray, isNullGroup, selectedGroup]
   );
 
   const onToggle = useCallback(
@@ -101,14 +110,14 @@ const GroupPanelComponent = <T,>({
     [groupBucket, onToggleGroup]
   );
 
-  return !groupFieldValue ? null : (
+  return !groupFieldValue.asString ? null : (
     <EuiAccordion
       buttonClassName={customAccordionButtonClassName}
       buttonContent={
         <div data-test-subj="group-panel-toggle" className="groupingPanelRenderer">
           {groupPanelRenderer ?? (
             <DefaultGroupPanelRenderer
-              title={groupFieldValue}
+              title={groupFieldValue.asString}
               isNullGroup={isNullGroup}
               nullGroupMessage={nullGroupMessage}
             />
@@ -121,7 +130,7 @@ const GroupPanelComponent = <T,>({
       extraAction={extraAction}
       forceState={forceState}
       isLoading={isLoading}
-      id={`group${groupingLevel}-${groupFieldValue}`}
+      id={`group${groupingLevel}-${groupFieldValue.asString}`}
       onToggle={onToggle}
       paddingSize="m"
     >

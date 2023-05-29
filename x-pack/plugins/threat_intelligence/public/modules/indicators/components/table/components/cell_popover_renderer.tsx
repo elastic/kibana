@@ -13,8 +13,9 @@ import {
 } from '@elastic/eui';
 import React from 'react';
 import { CopyToClipboardButtonEmpty } from '../../copy_to_clipboard/copy_to_clipboard';
-import { FilterInButtonEmpty, FilterOutButtonEmpty } from '../../../../query_bar';
-import { AddToTimelineButtonEmpty } from '../../../../timeline';
+import { FilterInButtonEmpty } from '../../../../query_bar/components/filter_in/filter_in';
+import { FilterOutButtonEmpty } from '../../../../query_bar/components/filter_out/filter_out';
+import { AddToTimelineButtonEmpty } from '../../../../timeline/components/add_to_timeline/add_to_timeline';
 import { fieldAndValueValid, getIndicatorFieldAndValue } from '../../../utils/field_value';
 import { Indicator } from '../../../../../../common/types/indicator';
 import { Pagination } from '../../../services/fetch_indicators';
@@ -40,7 +41,7 @@ export const cellPopoverRendererFactory =
     const indicator = indicators[rowIndex % pagination.pageSize];
     const { key, value } = getIndicatorFieldAndValue(indicator, columnId);
     if (!fieldAndValueValid(key, value)) {
-      return <></>;
+      return null;
     }
 
     return (

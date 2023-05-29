@@ -8,11 +8,22 @@
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { Readable } from 'stream';
 import type { FileClient } from '@kbn/files-plugin/server';
-import { createEsFileClient } from '@kbn/files-plugin/server';
+import { createEsFileClient, createFileHashTransform } from '@kbn/files-plugin/server';
 import { errors } from '@elastic/elasticsearch';
 import type { SearchTotalHits } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { v4 as uuidV4 } from 'uuid';
+import type { FileJSON } from '@kbn/shared-ux-file-types';
+import assert from 'assert';
+import type { File } from '@kbn/files-plugin/common';
+import type { HapiReadableStream } from '../../../types';
 import { CustomHttpRequestError } from '../../../utils/custom_http_request_error';
-import type { FileUploadMetadata, UploadedFileInfo } from '../../../../common/endpoint/types';
+import type {
+  ActionDetails,
+  FileUploadMetadata,
+  UploadedFileInfo,
+  ResponseActionUploadParameters,
+  ResponseActionUploadOutputContent,
+} from '../../../../common/endpoint/types';
 import { NotFoundError } from '../../errors';
 import {
   FILE_STORAGE_DATA_INDEX,
@@ -20,13 +31,18 @@ import {
 } from '../../../../common/endpoint/constants';
 import { EndpointError } from '../../../../common/endpoint/errors';
 
-const getFileClient = (esClient: ElasticsearchClient, logger: Logger): FileClient => {
+const getFileClient = (
+  esClient: ElasticsearchClient,
+  logger: Logger,
+  maxSizeBytes?: number
+): FileClient => {
   return createEsFileClient({
     metadataIndex: FILE_STORAGE_METADATA_INDEX,
     blobStorageIndex: FILE_STORAGE_DATA_INDEX,
     elasticsearchClient: esClient,
     logger,
     indexIsAlias: true,
+    maxSizeBytes,
   });
 };
 
@@ -182,4 +198,120 @@ export const validateActionFileId = async (
   if (fileInfo.actionId !== actionId) {
     throw new CustomHttpRequestError(`Invalid file id [${fileId}] for action [${actionId}]`, 400);
   }
+};
+
+interface UploadFileInternalStorageMeta {
+  target_agents: string[];
+  action_id: string;
+}
+
+interface UploadedFile {
+  file: Pick<
+    Required<FileJSON<UploadFileInternalStorageMeta>>,
+    'id' | 'created' | 'updated' | 'name' | 'mimeType' | 'extension' | 'meta' | 'status'
+  > & { size: number; hash: { sha256: string } };
+}
+
+export const createFile = async ({
+  esClient,
+  logger,
+  fileStream,
+  maxFileBytes,
+  agents,
+}: {
+  esClient: ElasticsearchClient;
+  logger: Logger;
+  fileStream: HapiReadableStream;
+  maxFileBytes: number;
+  agents: string[];
+}): Promise<UploadedFile> => {
+  const fileClient = getFileClient(esClient, logger, maxFileBytes);
+
+  const uploadedFile = await fileClient.create<UploadFileInternalStorageMeta>({
+    id: uuidV4(),
+    metadata: {
+      name: fileStream.hapi.filename ?? 'unknown_file_name',
+      mime: fileStream.hapi.headers['content-type'] ?? 'application/octet-stream',
+      meta: {
+        target_agents: agents,
+        action_id: '', // Populated later once we have the action is created
+      },
+    },
+  });
+
+  await uploadedFile.uploadContent(fileStream, undefined, {
+    transforms: [createFileHashTransform()],
+  });
+
+  assert(uploadedFile.data.hash && uploadedFile.data.hash.sha256, 'File hash was not generated!');
+
+  return toUploadedFileInterface(uploadedFile);
+};
+
+const toUploadedFileInterface = (file: File<UploadFileInternalStorageMeta>): UploadedFile => {
+  const { name, created, meta, id, mimeType, size, status, extension, hash, updated } =
+    file.toJSON();
+
+  return {
+    file: {
+      name,
+      created,
+      updated,
+      meta,
+      id,
+      mimeType,
+      status,
+      extension,
+      size: size ?? 0,
+      hash: { sha256: hash?.sha256 ?? '' },
+    },
+  };
+};
+
+/**
+ * Deletes a file by ID
+ * @param esClient
+ * @param logger
+ * @param fileId
+ */
+export const deleteFile = async (
+  esClient: ElasticsearchClient,
+  logger: Logger,
+  fileId: string
+): Promise<void> => {
+  const fileClient = getFileClient(esClient, logger);
+
+  await fileClient.delete({ id: fileId, hasContent: true });
+};
+
+/**
+ * Sets the `meta.action_id` on the file associated with the `upload` action
+ * @param esClient
+ * @param logger
+ * @param action
+ */
+export const setFileActionId = async (
+  esClient: ElasticsearchClient,
+  logger: Logger,
+  action: ActionDetails<ResponseActionUploadOutputContent, ResponseActionUploadParameters>
+): Promise<UploadedFile> => {
+  assert(
+    action.parameters?.file_id,
+    `Action [${action.id}] has no 'parameters.file_id' defined. Unable to set action id on file metadata record`
+  );
+
+  const fileClient = getFileClient(esClient, logger);
+  const file = await fileClient.get<UploadFileInternalStorageMeta>({
+    id: action.parameters?.file_id,
+  });
+
+  await file.update({
+    meta: {
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      ...file.data.meta!,
+      action_id: action.id,
+    },
+  });
+
+  return toUploadedFileInterface(file);
 };

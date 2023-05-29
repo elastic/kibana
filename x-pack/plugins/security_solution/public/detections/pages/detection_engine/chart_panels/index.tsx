@@ -6,7 +6,6 @@
  */
 
 import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 import type { Filter, Query } from '@kbn/es-query';
 import { EuiFlexItem, EuiLoadingContent } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
@@ -30,11 +29,11 @@ import {
 } from '../../../components/alerts_kpis/common/config';
 import { AlertsCountPanel } from '../../../components/alerts_kpis/alerts_count_panel';
 import { GROUP_BY_LABEL } from '../../../components/alerts_kpis/common/translations';
-import { RESET_GROUP_BY_FIELDS } from '../../../../common/components/chart_settings_popover/configurations/default/translations';
 import { useQueryToggle } from '../../../../common/containers/query_toggle';
 import type { AddFilterProps } from '../../../components/alerts_kpis/common/types';
+import { createResetGroupByFieldAction } from '../../../components/alerts_kpis/alerts_histogram_panel/helpers';
 
-const TREND_CHART_HEIGHT = 280; // px
+const TREND_CHART_HEIGHT = 240; // px
 const CHART_PANEL_HEIGHT = 375; // px
 
 const DETECTIONS_ALERTS_CHARTS_PANEL_ID = 'detection-alerts-charts-panel';
@@ -124,33 +123,18 @@ const ChartPanelsComponent: React.FC<Props> = ({
     onResetStackByField1();
   }, [onResetStackByField0, onResetStackByField1]);
 
+  const handleResetGroupByFieldAction = useCallback(() => {
+    onReset();
+    updateCommonStackBy0(DEFAULT_STACK_BY_FIELD);
+
+    if (updateCommonStackBy1 != null) {
+      updateCommonStackBy1(DEFAULT_STACK_BY_FIELD1);
+    }
+  }, [onReset, updateCommonStackBy0, updateCommonStackBy1]);
+
   const resetGroupByFieldAction = useMemo(
-    () => [
-      {
-        id: 'resetGroupByField',
-
-        getDisplayName(context: ActionExecutionContext<object>): string {
-          return RESET_GROUP_BY_FIELDS;
-        },
-        getIconType(context: ActionExecutionContext<object>): string | undefined {
-          return 'editorRedo';
-        },
-        type: 'actionButton',
-        async isCompatible(context: ActionExecutionContext<object>): Promise<boolean> {
-          return true;
-        },
-        async execute(context: ActionExecutionContext<object>): Promise<void> {
-          onReset();
-          updateCommonStackBy0(DEFAULT_STACK_BY_FIELD);
-
-          if (updateCommonStackBy1 != null) {
-            updateCommonStackBy1(DEFAULT_STACK_BY_FIELD1);
-          }
-        },
-        order: 5,
-      },
-    ],
-    [onReset, updateCommonStackBy0, updateCommonStackBy1]
+    () => [createResetGroupByFieldAction({ callback: handleResetGroupByFieldAction, order: 5 })],
+    [handleResetGroupByFieldAction]
   );
 
   const chartOptionsContextMenu = useCallback(

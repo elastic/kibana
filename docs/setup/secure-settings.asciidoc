@@ -36,6 +36,8 @@ bin/kibana-keystore list
 [[add-string-to-keystore]]
 === Add string settings
 
+NOTE: Your input will be JSON-parsed to allow for object/array input configurations. To enforce string values, use "double quotes" around your input.
+
 Sensitive string settings, like authentication credentials for Elasticsearch
 can be added using the `add` command:
 

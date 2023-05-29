@@ -36,9 +36,13 @@ import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 import { ChartsPluginStart, useActiveCursor } from '@kbn/charts-plugin/public';
 import { css } from '@emotion/react';
+import {
+  getFormattedSeverityScore,
+  ML_ANOMALY_THRESHOLD,
+  ML_SEVERITY_COLORS,
+} from '@kbn/ml-anomaly-utils';
 import { SwimLanePagination } from './swimlane_pagination';
 import { AppStateSelectedCells, OverallSwimlaneData, ViewBySwimLaneData } from './explorer_utils';
-import { ANOMALY_THRESHOLD, SEVERITY_COLORS } from '../../../common';
 import { TimeBuckets as TimeBucketsClass } from '../util/time_buckets';
 import { SWIMLANE_TYPE, SwimlaneType } from './explorer_constants';
 import { mlEscape } from '../util/string_utils';
@@ -60,9 +64,6 @@ declare global {
   }
 }
 
-function getFormattedSeverityScore(score: number): string {
-  return String(parseInt(String(score), 10));
-}
 /**
  * Ignore insignificant resize, e.g. browser scrollbar appearance.
  */
@@ -456,29 +457,29 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
                           type: 'bands',
                           bands: [
                             {
-                              start: ANOMALY_THRESHOLD.LOW,
-                              end: ANOMALY_THRESHOLD.WARNING,
-                              color: SEVERITY_COLORS.LOW,
+                              start: ML_ANOMALY_THRESHOLD.LOW,
+                              end: ML_ANOMALY_THRESHOLD.WARNING,
+                              color: ML_SEVERITY_COLORS.LOW,
                             },
                             {
-                              start: ANOMALY_THRESHOLD.WARNING,
-                              end: ANOMALY_THRESHOLD.MINOR,
-                              color: SEVERITY_COLORS.WARNING,
+                              start: ML_ANOMALY_THRESHOLD.WARNING,
+                              end: ML_ANOMALY_THRESHOLD.MINOR,
+                              color: ML_SEVERITY_COLORS.WARNING,
                             },
                             {
-                              start: ANOMALY_THRESHOLD.MINOR,
-                              end: ANOMALY_THRESHOLD.MAJOR,
-                              color: SEVERITY_COLORS.MINOR,
+                              start: ML_ANOMALY_THRESHOLD.MINOR,
+                              end: ML_ANOMALY_THRESHOLD.MAJOR,
+                              color: ML_SEVERITY_COLORS.MINOR,
                             },
                             {
-                              start: ANOMALY_THRESHOLD.MAJOR,
-                              end: ANOMALY_THRESHOLD.CRITICAL,
-                              color: SEVERITY_COLORS.MAJOR,
+                              start: ML_ANOMALY_THRESHOLD.MAJOR,
+                              end: ML_ANOMALY_THRESHOLD.CRITICAL,
+                              color: ML_SEVERITY_COLORS.MAJOR,
                             },
                             {
-                              start: ANOMALY_THRESHOLD.CRITICAL,
+                              start: ML_ANOMALY_THRESHOLD.CRITICAL,
                               end: Infinity,
-                              color: SEVERITY_COLORS.CRITICAL,
+                              color: ML_SEVERITY_COLORS.CRITICAL,
                             },
                           ],
                         }}

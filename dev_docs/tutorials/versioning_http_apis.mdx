@@ -238,7 +238,7 @@ Core exposes a versioned router that ensures your endpoint's behaviour and forma
     })
     .addVersion(
       {
-        version: '2023-01-01', // The public version of this API
+        version: '2023-10-31', // The public version of this API
         validate: {
           request: {
             query: schema.object({
@@ -264,7 +264,7 @@ Core exposes a versioned router that ensures your endpoint's behaviour and forma
     // BREAKING CHANGE: { foo: string } => { fooString: string } in response body
     .addVersion(
       {
-        version: '2023-02-01',
+        version: '2024-10-31',
         validate: {
           request: {
             query: schema.object({
@@ -290,7 +290,7 @@ Core exposes a versioned router that ensures your endpoint's behaviour and forma
     // BREAKING CHANGES: Enforce min/max length on fooString
     .addVersion(
       {
-        version: '2023-03-01',
+        version: '2025-03-01',
         validate: {
           request: {
             query: schema.object({
@@ -314,5 +314,25 @@ Core exposes a versioned router that ensures your endpoint's behaviour and forma
       }
 ```
 
+#### Use `http.fetch` to send a version
+
+Core's `http.fetch` (and helpers like `http.get`) accept an optional `version` parameter. The `version` parameter can be used to send your request to the corresponding handler of the route.
+
+```ts
+import type { CoreSetup, Plugin } from '@kbn/core/public';
+
+export class MyPlugin implements Plugin {
+  setup(core: CoreSetup): FilesSetup {
+    // Example call using core's http.fetch
+    core.http.post('/api/my-app/foo/1', {
+      version: '2023-10-31',
+      headers: { 'content-type': 'application/json' },
+      query: { name: 'example' },
+      body: JSON.stringify({ fooString: 'string' }),
+    });
+  }
+}
+```
+
 #### Additional reading
-For a more details on the versioning specification see [this document](https://docs.google.com/document/d/1YpF6hXIHZaHvwNaQAxWFzexUF1nbqACTtH2IfDu0ldA/edit?usp=sharing).
+For more details on the versioning specification see [this document](https://docs.google.com/document/d/1YpF6hXIHZaHvwNaQAxWFzexUF1nbqACTtH2IfDu0ldA/edit?usp=sharing).

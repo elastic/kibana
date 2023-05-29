@@ -396,6 +396,7 @@ export enum RegistryVarsEntryKeys {
   options = 'options',
   default = 'default',
   os = 'os',
+  secret = 'secret',
 }
 
 // EPR types this as `[]map[string]interface{}`
@@ -407,6 +408,7 @@ export interface RegistryVarsEntry {
   [RegistryVarsEntryKeys.description]?: string;
   [RegistryVarsEntryKeys.type]: RegistryVarType;
   [RegistryVarsEntryKeys.required]?: boolean;
+  [RegistryVarsEntryKeys.secret]?: boolean;
   [RegistryVarsEntryKeys.show_user]?: boolean;
   [RegistryVarsEntryKeys.multi]?: boolean;
   [RegistryVarsEntryKeys.options]?: Array<{ value: string; text: string }>;
@@ -581,7 +583,7 @@ export interface TemplateMapEntry {
         mappings: NonNullable<RegistryElasticsearch['index_template.mappings']>;
       }
     | {
-        settings: NonNullable<RegistryElasticsearch['index_template.settings']> | object;
+        settings: NonNullable<RegistryElasticsearch['index_template.settings']>;
       };
 }
 

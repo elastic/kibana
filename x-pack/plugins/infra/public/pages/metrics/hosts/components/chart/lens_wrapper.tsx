@@ -19,7 +19,7 @@ export interface LensWrapperProps {
   id: string;
   attributes: LensAttributes | null;
   dateRange: TimeRange;
-  query: Query;
+  query?: Query;
   filters: Filter[];
   extraActions: Action[];
   lastReloadRequestTime?: number;

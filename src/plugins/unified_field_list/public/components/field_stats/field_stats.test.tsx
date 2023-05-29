@@ -99,6 +99,18 @@ describe('UnifiedFieldList <FieldStats />', () => {
           aggregatable: true,
           searchable: true,
         },
+        {
+          name: 'bytes_counter',
+          timeSeriesMetric: 'counter',
+          type: 'number',
+          esTypes: ['long'],
+          aggregatable: true,
+          searchable: true,
+          count: 10,
+          readFromDocValues: true,
+          scripted: false,
+          isMapped: true,
+        },
       ],
       getFormatterForField: jest.fn(() => ({
         convert: jest.fn((s: unknown) => JSON.stringify(s)),
@@ -753,5 +765,67 @@ describe('UnifiedFieldList <FieldStats />', () => {
 
     expect(wrapper.find(EuiProgress)).toHaveLength(2);
     expect(wrapper.find(EuiProgress).first().props()).toHaveProperty('color', 'accent');
+  });
+
+  it('should render a number summary for some fields (time series metric counter)', async () => {
+    let resolveFunction: (arg: unknown) => void;
+
+    (loadFieldStats as jest.Mock).mockImplementation(() => {
+      return new Promise((resolve) => {
+        resolveFunction = resolve;
+      });
+    });
+
+    const field = dataView.fields.find((f) => f.name === 'bytes_counter')!;
+
+    const wrapper = await mountComponent(
+      <FieldStats
+        {...defaultProps}
+        field={field}
+        query={{ language: 'kuery', query: '' }}
+        filters={[]}
+        fromDate="now-1h"
+        toDate="now"
+      />
+    );
+
+    expect(loadFieldStats).toHaveBeenCalledWith({
+      abortController: new AbortController(),
+      services: { data: mockedServices.data },
+      dataView,
+      fromDate: 'now-1h',
+      toDate: 'now',
+      dslQuery: {
+        bool: {
+          must: [],
+          filter: [],
+          should: [],
+          must_not: [],
+        },
+      },
+      field,
+    });
+
+    expect(wrapper.find(EuiLoadingSpinner)).toHaveLength(1);
+
+    await act(async () => {
+      resolveFunction!({
+        numberSummary: {
+          maxValue: 36821994,
+          minValue: 29674,
+        },
+        sampledDocuments: 5000,
+        sampledValues: 5000,
+        totalDocuments: 6460,
+      });
+    });
+
+    await wrapper.update();
+
+    expect(wrapper.find(EuiLoadingSpinner)).toHaveLength(0);
+
+    expect(loadFieldStats).toHaveBeenCalledTimes(1);
+
+    expect(wrapper.text()).toBe('Summarymin29674max36821994Calculated from 5000 sample records.');
   });
 });

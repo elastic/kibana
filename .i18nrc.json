@@ -75,6 +75,7 @@
     "navigation": "src/plugins/navigation",
     "newsfeed": "src/plugins/newsfeed",
     "presentationUtil": "src/plugins/presentation_util",
+    "randomSampling": "x-pack/packages/kbn-random-sampling",
     "reporting": "packages/kbn-reporting/common",
     "savedObjects": "src/plugins/saved_objects",
     "savedObjectsFinder": "src/plugins/saved_objects_finder",

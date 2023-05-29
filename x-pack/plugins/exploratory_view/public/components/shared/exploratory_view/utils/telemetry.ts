@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { TrackEvent, METRIC_TYPE } from '../../../../hooks/use_track_metric';
+import { TrackEvent, METRIC_TYPE } from '@kbn/observability-shared-plugin/public';
 import type { SeriesUrl } from '../types';
 
 export const trackTelemetryOnApply = (

@@ -13,65 +13,65 @@ import {
   Indicator,
 } from '../../../../../common/types/indicator';
 import { TestProvidersComponent } from '../../../../common/mocks/test_providers';
-import { InvestigateInTimelineContextMenu, InvestigateInTimelineButtonIcon } from '.';
+import {
+  InvestigateInTimelineContextMenu,
+  InvestigateInTimelineButtonIcon,
+} from './investigate_in_timeline';
 import { EMPTY_VALUE } from '../../../../common/constants';
 
-describe('<InvestigateInTimeline />', () => {
-  describe('<InvestigateInTimelineButton />', () => {
-    it('should render button when Indicator data is correct', () => {
-      const mockData: Indicator = generateMockUrlIndicator();
-      const mockId = 'mockId';
+const TEST_ID = 'test';
 
-      const component = render(
-        <TestProvidersComponent>
-          <InvestigateInTimelineContextMenu data={mockData} data-test-subj={mockId} />
-        </TestProvidersComponent>
-      );
+describe('<InvestigateInTimelineContextMenu /> <InvestigateInTimelineButtonIcon />', () => {
+  it('should render EuiContextMenuItem when Indicator data is correct', () => {
+    const mockData: Indicator = generateMockUrlIndicator();
 
-      expect(component.getByTestId(mockId)).toBeInTheDocument();
-      expect(component).toMatchSnapshot();
-    });
+    const { getByTestId, getAllByText } = render(
+      <TestProvidersComponent>
+        <InvestigateInTimelineContextMenu data={mockData} data-test-subj={TEST_ID} />
+      </TestProvidersComponent>
+    );
 
-    it('should render empty component when Indicator data is incorrect', () => {
-      const mockData: Indicator = generateMockIndicator();
-      mockData.fields['threat.indicator.first_seen'] = [''];
-
-      const component = render(
-        <TestProvidersComponent>
-          <InvestigateInTimelineContextMenu data={mockData} />
-        </TestProvidersComponent>
-      );
-
-      expect(component).toMatchSnapshot();
-    });
+    expect(getByTestId(TEST_ID)).toBeInTheDocument();
+    expect(getByTestId(TEST_ID)).toHaveClass('euiContextMenuItem');
+    expect(getAllByText('Investigate in Timeline')).toHaveLength(1);
   });
 
-  describe('<InvestigateInTimelineButtonIcon />', () => {
-    it('should render button icon when Indicator data is correct', () => {
-      const mockData: Indicator = generateMockUrlIndicator();
-      const mockId = 'mockId';
+  it('should render empty component when Indicator data is incorrect', () => {
+    const mockData: Indicator = generateMockIndicator();
+    mockData.fields['threat.indicator.first_seen'] = [''];
 
-      const component = render(
-        <TestProvidersComponent>
-          <InvestigateInTimelineButtonIcon data={mockData} data-test-subj={mockId} />
-        </TestProvidersComponent>
-      );
+    const { container } = render(
+      <TestProvidersComponent>
+        <InvestigateInTimelineContextMenu data={mockData} />
+      </TestProvidersComponent>
+    );
 
-      expect(component.getByTestId(mockId)).toBeInTheDocument();
-      expect(component).toMatchSnapshot();
-    });
+    expect(container).toBeEmptyDOMElement();
+  });
 
-    it(`should render empty component when calculated value is ${EMPTY_VALUE}`, () => {
-      const mockData: Indicator = generateMockIndicator();
-      mockData.fields['threat.indicator.first_seen'] = [''];
+  it('should render EuiButtonIcon when Indicator data is correct', () => {
+    const mockData: Indicator = generateMockUrlIndicator();
 
-      const component = render(
-        <TestProvidersComponent>
-          <InvestigateInTimelineButtonIcon data={mockData} />
-        </TestProvidersComponent>
-      );
+    const { getByTestId } = render(
+      <TestProvidersComponent>
+        <InvestigateInTimelineButtonIcon data={mockData} data-test-subj={TEST_ID} />
+      </TestProvidersComponent>
+    );
 
-      expect(component).toMatchSnapshot();
-    });
+    expect(getByTestId(TEST_ID)).toBeInTheDocument();
+    expect(getByTestId(TEST_ID)).toHaveClass('euiButtonIcon');
+  });
+
+  it(`should render empty component when calculated value is ${EMPTY_VALUE}`, () => {
+    const mockData: Indicator = generateMockIndicator();
+    mockData.fields['threat.indicator.first_seen'] = [''];
+
+    const { container } = render(
+      <TestProvidersComponent>
+        <InvestigateInTimelineButtonIcon data={mockData} />
+      </TestProvidersComponent>
+    );
+
+    expect(container).toBeEmptyDOMElement();
   });
 });

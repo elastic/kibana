@@ -8,6 +8,7 @@
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { i18n } from '@kbn/i18n';
 import {
+  ALERT_CONTEXT,
   ALERT_EVALUATION_THRESHOLD,
   ALERT_EVALUATION_VALUE,
   ALERT_REASON,
@@ -86,7 +87,7 @@ export type LogThresholdAlertFactory = (
   value: number,
   threshold: number,
   actions?: Array<{ actionGroup: LogThresholdActionGroups; context: AlertContext }>,
-  additionalContext?: AdditionalContext
+  rootLevelContext?: AdditionalContext
 ) => LogThresholdAlert;
 export type LogThresholdAlertLimit = RuleExecutorServices<
   LogThresholdAlertState,
@@ -134,15 +135,21 @@ export const createLogThresholdExecutor = (libs: InfraBackendLibs) =>
       value,
       threshold,
       actions,
-      additionalContext
+      rootLevelContext
     ) => {
+      const alertContext =
+        actions != null
+          ? actions.reduce((next, action) => ({ ...next, ...action.context }), {})
+          : {};
+
       const alert = alertWithLifecycle({
         id,
         fields: {
           [ALERT_EVALUATION_THRESHOLD]: threshold,
           [ALERT_EVALUATION_VALUE]: value,
           [ALERT_REASON]: reason,
-          ...flattenAdditionalContext(additionalContext),
+          [ALERT_CONTEXT]: alertContext,
+          ...flattenAdditionalContext(rootLevelContext),
         },
       });
 

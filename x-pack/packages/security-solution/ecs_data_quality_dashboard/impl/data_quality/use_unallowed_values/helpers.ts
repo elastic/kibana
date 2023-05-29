@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { HttpHandler } from '@kbn/core-http-browser';
 import * as i18n from '../translations';
 import type {
   Bucket,
@@ -65,28 +66,28 @@ export const getUnallowedValues = ({
 
 export async function fetchUnallowedValues({
   abortController,
+  httpFetch,
   indexName,
   requestItems,
 }: {
   abortController: AbortController;
+  httpFetch: HttpHandler;
   indexName: string;
   requestItems: UnallowedValueRequestItem[];
 }): Promise<UnallowedValueSearchResult[]> {
-  const response = await fetch(UNALLOWED_VALUES_API_ROUTE, {
-    body: JSON.stringify(requestItems),
-    headers: { 'Content-Type': 'application/json', 'kbn-xsrf': 'xsrf' },
-    method: 'POST',
-    signal: abortController.signal,
-  });
-
-  if (response.ok) {
-    return response.json();
+  try {
+    return await httpFetch<UnallowedValueSearchResult[]>(UNALLOWED_VALUES_API_ROUTE, {
+      body: JSON.stringify(requestItems),
+      headers: { 'Content-Type': 'application/json' },
+      method: 'POST',
+      signal: abortController.signal,
+    });
+  } catch (e) {
+    throw new Error(
+      i18n.ERROR_LOADING_UNALLOWED_VALUES({
+        details: e.message,
+        indexName,
+      })
+    );
   }
-
-  throw new Error(
-    i18n.ERROR_LOADING_UNALLOWED_VALUES({
-      details: response.statusText,
-      indexName,
-    })
-  );
 }

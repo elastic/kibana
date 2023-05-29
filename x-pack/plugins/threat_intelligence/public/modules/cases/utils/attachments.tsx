@@ -15,7 +15,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { CASE_ATTACHMENT_TYPE_ID } from '../../../../common/constants';
 import { EMPTY_VALUE } from '../../../common/constants';
 import { Indicator, RawIndicatorFieldId } from '../../../../common/types/indicator';
-import { getIndicatorFieldAndValue } from '../../indicators';
+import { getIndicatorFieldAndValue } from '../../indicators/utils/field_value';
 
 /**
  * Indicator name, type, feed name and first seen values,

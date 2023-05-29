@@ -25,13 +25,6 @@ get:
         type: string
         default: OR
       example: OR
-    - name: fields
-      in: query
-      description: The fields in the entity to return in the response.
-      schema:
-        type: array
-        items:
-          type: string
     - name: from
       in: query
       description: >
@@ -79,10 +72,10 @@ get:
       description: The fields to perform the simple_query_string parsed query against.
       schema:
         oneOf:
-          - type: string
+          - $ref: '../components/parameters/search_fields.yaml'
           - type: array
             items:
-              type: string
+              $ref: '../components/parameters/search_fields.yaml'
     - $ref: '../components/parameters/severity.yaml'
     - name: sortField
       in: query

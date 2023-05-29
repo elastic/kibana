@@ -37,7 +37,7 @@ const ClearAllTagsFilterItem = styled(EuiFilterSelectItem)`
   padding: ${(props) => props.theme.eui.euiSizeS};
 `;
 
-export const SearchAndFilterBar: React.FunctionComponent<{
+export interface SearchAndFilterBarProps {
   agentPolicies: AgentPolicy[];
   draftKuery: string;
   onDraftKueryChange: (kuery: string) => void;
@@ -62,7 +62,9 @@ export const SearchAndFilterBar: React.FunctionComponent<{
   visibleAgents: Agent[];
   onClickAgentActivity: () => void;
   showAgentActivityTour: { isOpen: boolean };
-}> = ({
+}
+
+export const SearchAndFilterBar: React.FunctionComponent<SearchAndFilterBarProps> = ({
   agentPolicies,
   draftKuery,
   onDraftKueryChange,

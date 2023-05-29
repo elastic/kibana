@@ -21,7 +21,6 @@ export interface NavigationModelDeps {
  * @public
  */
 export enum Platform {
-  Recents = 'recents',
   Analytics = 'analytics',
   MachineLearning = 'ml',
   DevTools = 'devTools',
