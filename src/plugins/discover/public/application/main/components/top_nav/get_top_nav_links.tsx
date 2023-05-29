@@ -9,6 +9,7 @@
 import { i18n } from '@kbn/i18n';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { TopNavMenuData } from '@kbn/navigation-plugin/public';
+import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
 import type { DiscoverAppLocatorParams } from '../../../../../common';
 import { showOpenSearchPanel } from './show_open_search_panel';
 import { getSharingData, showPublicUrlSwitch } from '../../../../utils/get_sharing_data';
@@ -159,9 +160,21 @@ export const getTopNavLinks = ({
       const shareableUrl = link.href;
 
       // Share -> Get links -> Saved object
-      const shareableUrlForSavedObject = await locator.getUrl(
+      let shareableUrlForSavedObject = await locator.getUrl(
         { savedSearchId: savedSearch.id },
         { absolute: true }
+      );
+
+      // UrlPanelContent forces a '_g' parameter in the saved object URL:
+      // https://github.com/elastic/kibana/blob/a30508153c1467b1968fb94faf1debc5407f61ea/src/plugins/share/public/components/url_panel_content.tsx#L230
+      // Since our locator doesn't add the '_g' parameter if it's not needed, UrlPanelContent
+      // will interpret it as undefined and add '?_g=' to the URL, which is invalid in Discover,
+      // so instead we add an empty object for the '_g' parameter to the URL.
+      shareableUrlForSavedObject = setStateToKbnUrl(
+        '_g',
+        {},
+        undefined,
+        shareableUrlForSavedObject
       );
 
       services.share.toggleShareContextMenu({
