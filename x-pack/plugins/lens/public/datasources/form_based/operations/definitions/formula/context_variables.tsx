@@ -8,13 +8,45 @@
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import { calcAutoIntervalNear, UI_SETTINGS } from '@kbn/data-plugin/common';
+import { partition } from 'lodash';
 import type { DateHistogramIndexPatternColumn, FormBasedLayer } from '../../../../..';
 import type { DateRange } from '../../../../../../common/types';
 import type { GenericOperationDefinition, OperationDefinition } from '..';
-import type { ReferenceBasedIndexPatternColumn, ValueFormatConfig } from '../column_types';
-import { getColumnOrder } from '../../layer_helpers';
+import type {
+  GenericIndexPatternColumn,
+  ReferenceBasedIndexPatternColumn,
+  ValueFormatConfig,
+} from '../column_types';
 import { IndexPattern } from '../../../../../types';
-import { isColumnOfType } from '../helpers';
+
+// copied over from layer_helpers
+// TODO: split layer_helpers util into pure/non-pure functions to avoid issues with tests
+export function getColumnOrder(layer: FormBasedLayer): string[] {
+  const entries = Object.entries(layer.columns);
+  entries.sort(([idA], [idB]) => {
+    const indexA = layer.columnOrder.indexOf(idA);
+    const indexB = layer.columnOrder.indexOf(idB);
+    if (indexA > -1 && indexB > -1) {
+      return indexA - indexB;
+    } else if (indexA > -1) {
+      return -1;
+    } else {
+      return 1;
+    }
+  });
+
+  const [aggregations, metrics] = partition(entries, ([, col]) => col.isBucketed);
+
+  return aggregations.map(([id]) => id).concat(metrics.map(([id]) => id));
+}
+
+// Copied over from helpers
+export function isColumnOfType<C extends GenericIndexPatternColumn>(
+  type: C['operationType'],
+  column: GenericIndexPatternColumn
+): column is C {
+  return column.operationType === type;
+}
 
 export interface ContextValues {
   dateRange?: DateRange;
@@ -247,9 +279,21 @@ function getConstantsErrorMessage(
   layer: FormBasedLayer,
   columnId: string,
   indexPattern: IndexPattern,
-  dateRange?: DateRange | undefined
+  dateRange?: DateRange | undefined,
+  operationDefinitionMap?: Record<string, GenericOperationDefinition> | undefined,
+  targetBars?: number
 ) {
   const column = layer.columns[columnId] as ConstantIndexPatternColumn;
+  if (column.params?.value && !['time_range', 'now', 'interval'].includes(column.params.value)) {
+    return [
+      i18n.translate('xpack.lens.indexPattern.constant.variableNotFound', {
+        defaultMessage: 'The "{constant}" constant not available',
+        values: {
+          constant: column.params.value,
+        },
+      }),
+    ];
+  }
   if (column.params?.value === 'time_range') {
     return getTimeRangeErrorMessages(layer, columnId, indexPattern, dateRange);
   }
@@ -257,7 +301,14 @@ function getConstantsErrorMessage(
     return getNowErrorMessage();
   }
   if (column.params?.value === 'interval') {
-    return getIntervalErrorMessages(layer, columnId, indexPattern);
+    return getIntervalErrorMessages(
+      layer,
+      columnId,
+      indexPattern,
+      dateRange,
+      operationDefinitionMap,
+      targetBars
+    );
   }
   return [];
 }
