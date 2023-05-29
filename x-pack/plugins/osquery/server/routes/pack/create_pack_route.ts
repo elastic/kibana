@@ -29,6 +29,8 @@ import {
 import { convertShardsToArray, getInternalSavedObjectsClient } from '../utils';
 import type { PackSavedObject } from '../../common/types';
 
+type PackSavedObjectLimited = Omit<PackSavedObject, 'saved_object_id' | 'references'>;
+
 export const createPackRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
   router.post(
     {
@@ -121,7 +123,7 @@ export const createPackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
         type: AGENT_POLICY_SAVED_OBJECT_TYPE,
       }));
 
-      const packSO = await savedObjectsClient.create<PackSavedObject>(
+      const packSO = await savedObjectsClient.create<PackSavedObjectLimited>(
         packSavedObjectType,
         {
           name,
