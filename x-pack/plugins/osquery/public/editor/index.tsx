@@ -45,6 +45,8 @@ const OsqueryEditorComponent: React.FC<OsqueryEditorProps> = ({
     () => ({
       theme: 'osquery',
       automaticLayout: true,
+      // wordBasedSuggestions: true,
+      // parameterHints: { enabled: true },
     }),
     []
   );

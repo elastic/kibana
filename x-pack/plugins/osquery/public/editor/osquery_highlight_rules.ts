@@ -6,9 +6,10 @@
  */
 
 import { monaco } from '@kbn/monaco';
-import { getOsqueryTableNames } from './osquery_tables';
+import { map } from 'lodash';
+import { getOsqueryTableNames, osqueryTablesRecord } from './osquery_tables';
 
-export const osqueryTables = getOsqueryTableNames();
+export const osqueryTableNames = getOsqueryTableNames();
 
 export const keywords = [
   'select',
@@ -117,7 +118,7 @@ const theme = {
   base: 'vs' as const,
   inherit: false,
   rules: [
-    { token: 'osquery-token' },
+    { token: 'osquery' },
     { token: 'support.function', foreground: '4271AE' },
     { token: 'keyword', foreground: '8959A8' },
     { token: 'storage.type', foreground: '8959A8' },
@@ -137,18 +138,23 @@ export const initializeOsqueryEditor = () => {
     disposable = monaco.languages.onLanguage('sql', () => {
       monaco.languages.setMonarchTokensProvider('sql', {
         ignoreCase: true,
-        osqueryTables,
+        // defaultToken: 'identifier',
+        osqueryTableNames,
         builtinFunctions,
         keywords,
         builtinConstants,
         dataTypes,
+        brackets: [
+          { open: '[', close: ']', token: 'delimiter.square' },
+          { open: '(', close: ')', token: 'delimiter.parenthesis' },
+        ],
         tokenizer: {
           root: [
             [
               '[a-zA-Z_$][a-zA-Z0-9_$]*\\b',
               {
                 cases: {
-                  '@osqueryTables': 'osquery-token',
+                  '@osqueryTableNames': 'osquery',
                   '@builtinFunctions': 'support.function',
                   '@keywords': 'keyword',
                   '@builtinConstants': 'constant.language',
@@ -156,11 +162,11 @@ export const initializeOsqueryEditor = () => {
                 },
               },
             ],
-            ['[a-zA-Z_$][a-zA-Z0-9_$]*\\b', 'identifier'],
             ['--.*$', 'comment'],
             ['/\\*.*\\*/', 'comment'],
             ['".*?"', 'string'],
             ["'.*?'", 'string'],
+            [/[ \t\r\n]+/, { token: 'whitespace' }],
             ['[+-]?\\d+(?:(?:\\.\\d*)?(?:[eE][+-]?\\d+)?)?\\b', 'constant.numeric'],
             ['\\+|\\-|\\/|\\/\\/|%|<@>|@>|<@|&|\\^|~|<|>|<=|=>|==|!=|<>|=', 'keyword.operator'],
             ['[\\(]', 'paren.lparen'],
@@ -172,7 +178,19 @@ export const initializeOsqueryEditor = () => {
       monaco?.editor.defineTheme('osquery', theme);
       monaco?.languages.registerCompletionItemProvider('sql', {
         provideCompletionItems: (model: monaco.editor.ITextModel, position: monaco.Position) => {
+          const tokens = monaco.editor.tokenize(model.getValue(), 'sql'); // ВЕСЬ текст редактора
+          const findOsqueryToken = tokens[0].find((token) => token.type === 'osquery.sql');
+
+          const osqueryTable = model.getWordAtPosition({
+            lineNumber: position.lineNumber,
+            column: (findOsqueryToken?.offset || 0) + 1,
+          });
+
+          const value = model.getValue();
+          const lastCharacterBeforeSuggestion = value.charAt(position.column - 3);
+
           const word = model.getWordUntilPosition(position);
+
           const range = {
             startLineNumber: position.lineNumber,
             endLineNumber: position.lineNumber,
@@ -180,7 +198,11 @@ export const initializeOsqueryEditor = () => {
             endColumn: word.endColumn,
           };
 
-          return getEditorAutoCompleteSuggestion(range);
+          return getEditorAutoCompleteSuggestion(
+            range,
+            lastCharacterBeforeSuggestion === '.',
+            osqueryTable?.word
+          );
         },
       });
     });
@@ -190,7 +212,9 @@ export const initializeOsqueryEditor = () => {
 };
 
 export const getEditorAutoCompleteSuggestion = (
-  range: Range
+  range: Range,
+  isDot: boolean,
+  name?: string
 ): monaco.languages.ProviderResult<monaco.languages.CompletionList> => {
   const suggestionsFromDefaultKeywords = keywords.map((kw) => ({
     label: `${kw.toUpperCase()}`,
@@ -199,7 +223,18 @@ export const getEditorAutoCompleteSuggestion = (
     insertText: `${kw.toUpperCase()} `,
     range,
   }));
-  const tableNameKeywords = osqueryTables.map((tableName: string) => ({
+
+  const osqueryColumns = name
+    ? map(osqueryTablesRecord[name]?.columns, ({ name: columnName }) => ({
+        label: columnName,
+        kind: monaco.languages.CompletionItemKind.Folder,
+        detail: `${name} column`,
+        insertText: columnName,
+        range,
+      }))
+    : [];
+
+  const tableNameKeywords = osqueryTableNames.map((tableName: string) => ({
     label: tableName,
     kind: monaco.languages.CompletionItemKind.Folder,
     detail: 'Osquery',
@@ -229,12 +264,19 @@ export const getEditorAutoCompleteSuggestion = (
   }));
 
   return {
-    suggestions: [
-      ...suggestionsFromDefaultKeywords,
-      ...tableNameKeywords,
-      ...builtinConstantsKeywords,
-      ...builtinFunctionsKeywords,
-      ...dataTypesKeywords,
-    ],
+    suggestions:
+      // first word has to be an SQL keyword
+      range.startColumn === 1
+        ? suggestionsFromDefaultKeywords
+        : // if last char is === '.' it means we are joining so we want to present just specific osquery table suggestions
+        isDot
+        ? osqueryColumns
+        : [
+            ...suggestionsFromDefaultKeywords,
+            ...tableNameKeywords,
+            ...builtinConstantsKeywords,
+            ...builtinFunctionsKeywords,
+            ...dataTypesKeywords,
+          ],
   };
 };
