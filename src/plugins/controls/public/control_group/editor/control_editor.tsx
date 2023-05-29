@@ -49,6 +49,7 @@ import {
   ControlEmbeddable,
   ControlInput,
   ControlWidth,
+  DataControlEditorChanges,
   DataControlInput,
   IEditableControlFactory,
 } from '../../types';
@@ -62,12 +63,10 @@ interface EditControlProps {
   isCreate: boolean;
   title?: string;
   width: ControlWidth;
-  onSave: (inputToReturn: Partial<DataControlInput>, type?: string) => void;
+  onSave: (changes: DataControlEditorChanges, type?: string) => void;
   grow: boolean;
-  onCancel: (inputToReturn: Partial<DataControlInput>) => void;
+  onCancel: (changes: DataControlEditorChanges) => void;
   removeControl?: () => void;
-  updateGrow?: (grow: boolean) => void;
-  updateWidth: (newWidth: ControlWidth) => void;
   getRelevantDataViewId?: () => string | undefined;
   setLastUsedDataViewId?: (newDataViewId: string) => void;
 }
@@ -84,8 +83,6 @@ export const ControlEditor = ({
   onSave,
   onCancel,
   removeControl,
-  updateGrow,
-  updateWidth,
   getRelevantDataViewId,
   setLastUsedDataViewId,
 }: EditControlProps) => {
@@ -254,9 +251,7 @@ export const ControlEditor = ({
                 data-test-subj="control-editor-title-input"
                 placeholder={defaultTitle}
                 value={currentTitle}
-                onChange={(e) => {
-                  setCurrentTitle(e.target.value);
-                }}
+                onChange={(e) => setCurrentTitle(e.target.value)}
               />
             </EuiFormRow>
             {!editorConfig?.hideWidthSettings && (
@@ -269,26 +264,16 @@ export const ControlEditor = ({
                     legend={ControlGroupStrings.management.controlWidth.getWidthSwitchLegend()}
                     options={CONTROL_WIDTH_OPTIONS}
                     idSelected={currentWidth}
-                    onChange={(newWidth: string) => {
-                      setCurrentWidth(newWidth as ControlWidth);
-                      updateWidth(newWidth as ControlWidth);
-                    }}
+                    onChange={(newWidth: string) => setCurrentWidth(newWidth as ControlWidth)}
                   />
-                  {updateGrow && (
-                    <>
-                      <EuiSpacer size="s" />
-                      <EuiSwitch
-                        label={ControlGroupStrings.manageControl.displaySettings.getGrowSwitchTitle()}
-                        color="primary"
-                        checked={currentGrow}
-                        onChange={() => {
-                          setCurrentGrow(!currentGrow);
-                          updateGrow(!currentGrow);
-                        }}
-                        data-test-subj="control-editor-grow-switch"
-                      />
-                    </>
-                  )}
+                  <EuiSpacer size="s" />
+                  <EuiSwitch
+                    label={ControlGroupStrings.manageControl.displaySettings.getGrowSwitchTitle()}
+                    color="primary"
+                    checked={currentGrow}
+                    onChange={() => setCurrentGrow(!currentGrow)}
+                    data-test-subj="control-editor-grow-switch"
+                  />
                 </>
               </EuiFormRow>
             )}
@@ -325,7 +310,7 @@ export const ControlEditor = ({
                 flush="left"
                 color="danger"
                 onClick={() => {
-                  onCancel(currentInput);
+                  onCancel({ input: currentInput, grow: currentGrow, width: currentWidth });
                   removeControl();
                 }}
               >
@@ -342,7 +327,9 @@ export const ControlEditor = ({
               aria-label={`cancel-${title}`}
               data-test-subj="control-editor-cancel"
               iconType="cross"
-              onClick={() => onCancel(currentInput)}
+              onClick={() =>
+                onCancel({ input: currentInput, grow: currentGrow, width: currentWidth })
+              }
             >
               {ControlGroupStrings.manageControl.getCancelTitle()}
             </EuiButtonEmpty>
@@ -354,7 +341,9 @@ export const ControlEditor = ({
               iconType="check"
               color="primary"
               disabled={!controlEditorValid}
-              onClick={() => onSave(currentInput, controlType)}
+              onClick={() =>
+                onSave({ input: currentInput, grow: currentGrow, width: currentWidth }, controlType)
+              }
             >
               {ControlGroupStrings.manageControl.getSaveChangesTitle()}
             </EuiButton>
