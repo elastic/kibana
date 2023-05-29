@@ -35,8 +35,13 @@ import { getMarkdownComment } from '../index_properties/markdown/helpers';
 import { getFillColor } from './summary_tab/helpers';
 import * as i18n from '../index_properties/translations';
 import { SummaryTab } from './summary_tab';
-import type { EnrichedFieldMetadata, IlmPhase, PartitionedFieldMetadata } from '../../types';
-import { getSizeInBytes } from '../../helpers';
+import type {
+  EnrichedFieldMetadata,
+  IlmPhase,
+  OnInValidValueUpdateCallback,
+  PartitionedFieldMetadata,
+} from '../../types';
+import { getIndexTemplate, getSizeInBytes } from '../../helpers';
 
 export const getMissingTimestampComment = (): string =>
   getMarkdownComment({
@@ -73,6 +78,7 @@ export const getTabs = ({
   setSelectedTabId,
   stats,
   theme,
+  onInValidValueUpdateCallback,
 }: {
   addSuccessToast: (toast: { title: string }) => void;
   addToNewCaseDisabled: boolean;
@@ -101,6 +107,7 @@ export const getTabs = ({
   setSelectedTabId: (tabId: string) => void;
   stats: Record<string, IndicesStatsIndicesStats> | null;
   theme: Theme;
+  onInValidValueUpdateCallback?: OnInValidValueUpdateCallback;
 }) => [
   {
     content: (
@@ -140,10 +147,12 @@ export const getTabs = ({
         formatNumber={formatNumber}
         ilmPhase={ilmPhase}
         indexName={indexName}
+        indexTemplate={getIndexTemplate({ indexName, stats })}
         onAddToNewCase={onAddToNewCase}
         partitionedFieldMetadata={partitionedFieldMetadata}
         patternDocsCount={patternDocsCount}
         sizeInBytes={getSizeInBytes({ indexName, stats })}
+        onInValidValueUpdateCallback={onInValidValueUpdateCallback}
       />
     ),
     id: INCOMPATIBLE_TAB_ID,

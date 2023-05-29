@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import type {
-  IlmExplainLifecycleLifecycleExplain,
-  IndicesStatsIndicesStats,
-} from '@elastic/elasticsearch/lib/api/types';
+import type { IlmExplainLifecycleLifecycleExplain } from '@elastic/elasticsearch/lib/api/types';
 import { has, sortBy } from 'lodash/fp';
 import { getIlmPhase } from './data_quality_panel/pattern/helpers';
 import { getFillColor } from './data_quality_panel/tabs/summary_tab/helpers';
@@ -20,10 +17,12 @@ import type {
   EcsMetadata,
   EnrichedFieldMetadata,
   ErrorSummary,
+  IndicesStatsWithDataStream,
   PartitionedFieldMetadata,
   PartitionedFieldMetadataStats,
   PatternRollup,
   UnallowedValueCount,
+  UnallowedValueDoc,
 } from './types';
 
 const EMPTY_INDEX_NAMES: string[] = [];
@@ -35,7 +34,7 @@ export const getIndexNames = ({
 }: {
   ilmExplain: Record<string, IlmExplainLifecycleLifecycleExplain> | null;
   ilmPhases: string[];
-  stats: Record<string, IndicesStatsIndicesStats> | null;
+  stats: IndicesStatsWithDataStream | null;
 }): string[] => {
   if (ilmExplain != null && stats != null) {
     const allIndexNames = Object.keys(stats);
@@ -164,13 +163,16 @@ export const getEnrichedFieldMetadata = ({
   ecsMetadata,
   fieldMetadata,
   unallowedValues,
+  unallowedValuesDocs,
 }: {
   ecsMetadata: Record<string, EcsMetadata>;
   fieldMetadata: FieldType;
   unallowedValues: Record<string, UnallowedValueCount[]>;
+  unallowedValuesDocs: Record<string, UnallowedValueDoc[]>;
 }): EnrichedFieldMetadata => {
   const { field, type } = fieldMetadata;
   const indexInvalidValues = unallowedValues[field] ?? [];
+  const indexInvalidDocs = unallowedValuesDocs[field] ?? [];
 
   if (has(fieldMetadata.field, ecsMetadata)) {
     const ecsExpectedType = ecsMetadata[field].type;
@@ -183,6 +185,7 @@ export const getEnrichedFieldMetadata = ({
       indexFieldName: field,
       indexFieldType: type,
       indexInvalidValues,
+      indexInvalidDocs,
       hasEcsMetadata: true,
       isEcsCompliant,
       isInSameFamily,
@@ -192,6 +195,7 @@ export const getEnrichedFieldMetadata = ({
       indexFieldName: field,
       indexFieldType: type,
       indexInvalidValues,
+      indexInvalidDocs,
       hasEcsMetadata: false,
       isEcsCompliant: false,
       isInSameFamily: false, // custom fields are never in the same family
@@ -205,6 +209,7 @@ export const getMissingTimestampFieldMetadata = (): EnrichedFieldMetadata => ({
   indexFieldName: '@timestamp',
   indexFieldType: '-',
   indexInvalidValues: [],
+  indexInvalidDocs: [],
   isEcsCompliant: false,
   isInSameFamily: false, // `date` is not a member of any families
   type: 'date',
@@ -252,7 +257,7 @@ export const getDocsCount = ({
   stats,
 }: {
   indexName: string;
-  stats: Record<string, IndicesStatsIndicesStats> | null;
+  stats: IndicesStatsWithDataStream | null;
 }): number => (stats && stats[indexName]?.primaries?.docs?.count) ?? 0;
 
 export const getSizeInBytes = ({
@@ -260,15 +265,31 @@ export const getSizeInBytes = ({
   stats,
 }: {
   indexName: string;
-  stats: Record<string, IndicesStatsIndicesStats> | null;
+  stats: IndicesStatsWithDataStream | null;
 }): number => (stats && stats[indexName]?.primaries?.store?.size_in_bytes) ?? 0;
+
+export const getDataStream = ({
+  indexName,
+  stats,
+}: {
+  indexName: string;
+  stats: IndicesStatsWithDataStream | null;
+}): string | null => (stats && stats[indexName]?.data_stream) ?? null;
+
+export const getIndexTemplate = ({
+  indexName,
+  stats,
+}: {
+  indexName: string;
+  stats: IndicesStatsWithDataStream | null;
+}): string | null => (stats && stats[indexName]?.index_template) ?? null;
 
 export const getTotalDocsCount = ({
   indexNames,
   stats,
 }: {
   indexNames: string[];
-  stats: Record<string, IndicesStatsIndicesStats> | null;
+  stats: IndicesStatsWithDataStream | null;
 }): number =>
   indexNames.reduce(
     (acc: number, indexName: string) => acc + getDocsCount({ stats, indexName }),
@@ -280,7 +301,7 @@ export const getTotalSizeInBytes = ({
   stats,
 }: {
   indexNames: string[];
-  stats: Record<string, IndicesStatsIndicesStats> | null;
+  stats: IndicesStatsWithDataStream | null;
 }): number =>
   indexNames.reduce(
     (acc: number, indexName: string) => acc + getSizeInBytes({ stats, indexName }),

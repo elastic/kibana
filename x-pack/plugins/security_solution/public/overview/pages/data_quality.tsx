@@ -40,6 +40,7 @@ import { DEFAULT_BYTES_FORMAT, DEFAULT_NUMBER_FORMAT } from '../../../common/con
 import { useSourcererDataView } from '../../common/containers/sourcerer';
 import {
   KibanaServices,
+  useAppUrl,
   useGetUserCasesPermissions,
   useKibana,
   useToasts,
@@ -143,7 +144,7 @@ const DataQualityComponent: React.FC = () => {
   const [selectedOptions, setSelectedOptions] = useState<EuiComboBoxOptionOption[]>(defaultOptions);
   const { indicesExist, loading: isSourcererLoading, selectedPatterns } = useSourcererDataView();
   const { signalIndexName, loading: isSignalIndexNameLoading } = useSignalIndex();
-
+  const { getAppUrl } = useAppUrl();
   const alertsAndSelectedPatterns = useMemo(
     () =>
       signalIndexName != null ? [signalIndexName, ...selectedPatterns] : [...selectedPatterns],
@@ -234,12 +235,14 @@ const DataQualityComponent: React.FC = () => {
             defaultNumberFormat={defaultNumberFormat}
             getGroupByFieldsOnClick={getGroupByFieldsOnClick}
             httpFetch={httpFetch}
+            getAppUrl={getAppUrl}
             ilmPhases={ilmPhases}
             lastChecked={lastChecked}
             openCreateCaseFlyout={openCreateCaseFlyout}
             patterns={alertsAndSelectedPatterns}
             setLastChecked={setLastChecked}
             theme={theme}
+            toasts={toasts}
           />
         </SecuritySolutionPageWrapper>
       ) : (

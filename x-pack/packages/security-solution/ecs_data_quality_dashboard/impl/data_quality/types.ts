@@ -39,11 +39,21 @@ export interface EcsMetadata {
   type?: string;
 }
 
+export interface UnallowedValueDocTableItems {
+  indexFieldName: string;
+  allowedValues: AllowedValue[] | undefined;
+  _index: string;
+  _id: string;
+  '@timestamp': string;
+  updatedFieldValues: string;
+}
+
 export type EnrichedFieldMetadata = EcsMetadata & {
   hasEcsMetadata: boolean;
   indexFieldName: string;
   indexFieldType: string;
   indexInvalidValues: UnallowedValueCount[];
+  indexInvalidDocs: UnallowedValueDoc[];
   isEcsCompliant: boolean;
   isInSameFamily: boolean;
 };
@@ -76,6 +86,12 @@ export interface Bucket {
 export interface UnallowedValueCount {
   fieldName: string;
   count: number;
+}
+
+export interface UnallowedValueDoc {
+  _id: string;
+  _index: string;
+  _source: Record<string, unknown>;
 }
 
 export interface UnallowedValueSearchResult {
@@ -115,7 +131,7 @@ export interface PatternRollup {
   pattern: string;
   results: Record<string, DataQualityCheckResult> | undefined;
   sizeInBytes: number | undefined;
-  stats: Record<string, IndicesStatsIndicesStats> | null;
+  stats: IndicesStatsWithDataStream | null;
 }
 
 export interface CheckIndexRequest {
@@ -174,3 +190,18 @@ export interface SelectedIndex {
   indexName: string;
   pattern: string;
 }
+
+export type OnInValidValueUpdateCallback = () => void;
+
+export interface IndexInfo {
+  name: string;
+  data_stream: string;
+  aliases: string;
+}
+
+export interface DataStream {
+  data_stream?: string;
+  index_template?: string;
+}
+
+export type IndicesStatsWithDataStream = Record<string, IndicesStatsIndicesStats & DataStream>;

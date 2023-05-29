@@ -111,6 +111,13 @@ export const SIZE = i18n.translate(
   }
 );
 
+export const DATA_STREAM = i18n.translate(
+  'securitySolutionPackages.ecsDataQualityDashboard.summaryTable.dataStreamColumn',
+  {
+    defaultMessage: 'Data stream',
+  }
+);
+
 export const THIS_INDEX_HAS_NOT_BEEN_CHECKED = i18n.translate(
   'securitySolutionPackages.ecsDataQualityDashboard.summaryTable.thisIndexHasNotBeenCheckedTooltip',
   {

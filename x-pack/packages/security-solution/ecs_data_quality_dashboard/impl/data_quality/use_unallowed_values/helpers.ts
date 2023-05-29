@@ -12,6 +12,7 @@ import type {
   UnallowedValueCount,
   UnallowedValueRequestItem,
   UnallowedValueSearchResult,
+  UnallowedValueDoc,
 } from '../types';
 
 const UNALLOWED_VALUES_API_ROUTE = '/internal/ecs_data_quality_dashboard/unallowed_field_values';
@@ -33,35 +34,57 @@ export const getUnallowedValues = ({
 }: {
   requestItems: UnallowedValueRequestItem[];
   searchResults: UnallowedValueSearchResult[] | null;
-}): Record<string, UnallowedValueCount[]> => {
+}): {
+  buckets: Record<string, UnallowedValueCount[]>;
+  docs: Record<string, UnallowedValueDoc[]>;
+} => {
   if (searchResults == null || !Array.isArray(searchResults)) {
-    return {};
+    return { buckets: {}, docs: {} };
   }
 
-  return requestItems.reduce((acc, { indexFieldName }) => {
-    const searchResult = searchResults.find(
-      (x) =>
-        typeof x.aggregations === 'object' && Array.isArray(x.aggregations[indexFieldName]?.buckets)
-    );
+  return requestItems.reduce(
+    (acc, { indexFieldName }) => {
+      const searchResult = searchResults.find(
+        (x) =>
+          typeof x.aggregations === 'object' &&
+          Array.isArray(x.aggregations[indexFieldName]?.buckets)
+      );
 
-    if (
-      searchResult != null &&
-      searchResult.aggregations != null &&
-      searchResult.aggregations[indexFieldName] != null
-    ) {
-      const buckets = searchResult.aggregations[indexFieldName]?.buckets;
+      if (
+        searchResult != null &&
+        searchResult.aggregations != null &&
+        searchResult.aggregations[indexFieldName] != null
+      ) {
+        const buckets = searchResult.aggregations[indexFieldName]?.buckets;
+        const docs = searchResult?.hits?.hits ?? [];
 
-      return {
-        ...acc,
-        [indexFieldName]: buckets?.flatMap((x) => (isBucket(x) ? getUnallowedValueCount(x) : [])),
-      };
-    } else {
-      return {
-        ...acc,
-        [indexFieldName]: [],
-      };
-    }
-  }, {});
+        return {
+          buckets: {
+            ...acc.buckets,
+            [indexFieldName]: buckets?.flatMap((x) =>
+              isBucket(x) ? getUnallowedValueCount(x) : []
+            ),
+          },
+          docs: {
+            ...acc.docs,
+            [indexFieldName]: docs,
+          },
+        };
+      } else {
+        return {
+          buckets: {
+            ...acc.buckets,
+            [indexFieldName]: [],
+          },
+          docs: {
+            ...acc.docs,
+            [indexFieldName]: [],
+          },
+        };
+      }
+    },
+    { buckets: {}, docs: {} }
+  );
 };
 
 export async function fetchUnallowedValues({
@@ -70,7 +93,7 @@ export async function fetchUnallowedValues({
   indexName,
   requestItems,
 }: {
-  abortController: AbortController;
+  abortController?: AbortController;
   httpFetch: HttpHandler;
   indexName: string;
   requestItems: UnallowedValueRequestItem[];
@@ -80,7 +103,7 @@ export async function fetchUnallowedValues({
       body: JSON.stringify(requestItems),
       headers: { 'Content-Type': 'application/json' },
       method: 'POST',
-      signal: abortController.signal,
+      signal: abortController?.signal,
     });
   } catch (e) {
     throw new Error(

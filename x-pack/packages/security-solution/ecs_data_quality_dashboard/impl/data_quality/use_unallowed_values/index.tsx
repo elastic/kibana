@@ -5,16 +5,18 @@
  * 2.0.
  */
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 import { useDataQualityContext } from '../data_quality_panel/data_quality_context';
 import { fetchUnallowedValues, getUnallowedValues } from './helpers';
-import type { UnallowedValueCount, UnallowedValueRequestItem } from '../types';
+import type { UnallowedValueCount, UnallowedValueRequestItem, UnallowedValueDoc } from '../types';
 
 export interface UseUnallowedValues {
   unallowedValues: Record<string, UnallowedValueCount[]> | null;
+  unallowedValuesDocs: Record<string, UnallowedValueDoc[]> | null;
   error: string | null;
   loading: boolean;
+  refetchUnallowedValue: (abortController?: AbortController | undefined) => Promise<void>;
 }
 
 export const useUnallowedValues = ({
@@ -28,18 +30,16 @@ export const useUnallowedValues = ({
     string,
     UnallowedValueCount[]
   > | null>(null);
+  const [unallowedValuesDocs, setUnallowedValuesDocs] = useState<Record<
+    string,
+    UnallowedValueDoc[]
+  > | null>(null);
+
   const { httpFetch } = useDataQualityContext();
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
-
-  useEffect(() => {
-    if (requestItems.length === 0) {
-      return;
-    }
-
-    const abortController = new AbortController();
-
-    async function fetchData() {
+  const fetchData = useCallback(
+    async (abortController?: AbortController) => {
       try {
         const searchResults = await fetchUnallowedValues({
           abortController,
@@ -48,31 +48,40 @@ export const useUnallowedValues = ({
           requestItems,
         });
 
-        const unallowedValuesMap = getUnallowedValues({
+        const { buckets: unallowedValuesMap, docs: unallowedValuesDocuments } = getUnallowedValues({
           requestItems,
           searchResults,
         });
 
-        if (!abortController.signal.aborted) {
+        if (!abortController?.signal.aborted) {
           setUnallowedValues(unallowedValuesMap);
+          setUnallowedValuesDocs(unallowedValuesDocuments);
         }
       } catch (e) {
-        if (!abortController.signal.aborted) {
+        if (!abortController?.signal.aborted) {
           setError(e.message);
         }
       } finally {
-        if (!abortController.signal.aborted) {
+        if (!abortController?.signal.aborted) {
           setLoading(false);
         }
       }
+    },
+    [httpFetch, indexName, requestItems]
+  );
+  useEffect(() => {
+    if (requestItems.length === 0) {
+      return;
     }
 
-    fetchData();
+    const abortController = new AbortController();
+
+    fetchData(abortController);
 
     return () => {
       abortController.abort();
     };
-  }, [httpFetch, indexName, requestItems, setError]);
+  }, [fetchData, httpFetch, indexName, requestItems, setError]);
 
-  return { unallowedValues, error, loading };
+  return { unallowedValues, unallowedValuesDocs, error, loading, refetchUnallowedValue: fetchData };
 };

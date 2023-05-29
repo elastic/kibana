@@ -17,7 +17,12 @@ import {
   getMissingTimestampFieldMetadata,
   getPartitionedFieldMetadata,
 } from '../../helpers';
-import type { EcsMetadata, PartitionedFieldMetadata, UnallowedValueCount } from '../../types';
+import type {
+  EcsMetadata,
+  PartitionedFieldMetadata,
+  UnallowedValueCount,
+  UnallowedValueDoc,
+} from '../../types';
 
 export const ALL_TAB_ID = 'allTab';
 export const ECS_COMPLIANT_TAB_ID = 'ecsCompliantTab';
@@ -37,13 +42,20 @@ export const getSortedPartitionedFieldMetadata = ({
   loadingMappings,
   mappingsProperties,
   unallowedValues,
+  unallowedValuesDocs,
 }: {
   ecsMetadata: Record<string, EcsMetadata> | null;
   loadingMappings: boolean;
   mappingsProperties: Record<string, MappingProperty> | null | undefined;
   unallowedValues: Record<string, UnallowedValueCount[]> | null;
+  unallowedValuesDocs: Record<string, UnallowedValueDoc[]> | null;
 }): PartitionedFieldMetadata | null => {
-  if (loadingMappings || ecsMetadata == null || unallowedValues == null) {
+  if (
+    loadingMappings ||
+    ecsMetadata == null ||
+    unallowedValues == null ||
+    unallowedValuesDocs == null
+  ) {
     return null;
   }
 
@@ -59,7 +71,7 @@ export const getSortedPartitionedFieldMetadata = ({
   const enrichedFieldMetadata = sortBy(
     'indexFieldName',
     fieldTypes.map((fieldMetadata) =>
-      getEnrichedFieldMetadata({ ecsMetadata, fieldMetadata, unallowedValues })
+      getEnrichedFieldMetadata({ ecsMetadata, fieldMetadata, unallowedValues, unallowedValuesDocs })
     )
   );
 

@@ -131,6 +131,21 @@ export const ERROR_LOADING_UNALLOWED_VALUES = ({
     }
   );
 
+export const ERROR_UPDATING_UNALLOWED_VALUES = ({ details }: { details: string }) =>
+  i18n.translate(
+    'securitySolutionPackages.ecsDataQualityDashboard.errorLoadingUnallowedValuesLabel',
+    {
+      values: { details },
+      defaultMessage: 'Error updating unallowed values: {details}',
+    }
+  );
+
+export const ERROR_FETCHING_INDICES_DATA = ({ details }: { details: string }) =>
+  i18n.translate('securitySolutionPackages.ecsDataQualityDashboard.errorFetchingIndicesDataLabel', {
+    values: { details },
+    defaultMessage: 'Error fetching indices data: {details}',
+  });
+
 export const FIELDS = i18n.translate(
   'securitySolutionPackages.ecsDataQualityDashboard.fieldsLabel',
   {

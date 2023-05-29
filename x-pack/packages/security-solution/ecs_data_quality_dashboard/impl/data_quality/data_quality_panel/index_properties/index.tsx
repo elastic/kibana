@@ -32,7 +32,13 @@ import { getIndexPropertiesContainerId } from '../pattern/helpers';
 import { getTabs } from '../tabs/helpers';
 import { getAllIncompatibleMarkdownComments } from '../tabs/incompatible_tab/helpers';
 import * as i18n from './translations';
-import type { EcsMetadata, IlmPhase, PartitionedFieldMetadata, PatternRollup } from '../../types';
+import type {
+  EcsMetadata,
+  IlmPhase,
+  OnInValidValueUpdateCallback,
+  PartitionedFieldMetadata,
+  PatternRollup,
+} from '../../types';
 import { useAddToNewCase } from '../../use_add_to_new_case';
 import { useMappings } from '../../use_mappings';
 import { useUnallowedValues } from '../../use_unallowed_values';
@@ -60,6 +66,7 @@ export interface Props {
   };
   ilmPhase: IlmPhase | undefined;
   indexName: string;
+  indexTemplate?: string;
   openCreateCaseFlyout: ({
     comments,
     headerContent,
@@ -71,6 +78,7 @@ export interface Props {
   patternRollup: PatternRollup | undefined;
   theme: Theme;
   updatePatternRollup: (patternRollup: PatternRollup) => void;
+  onInValidValueUpdateCallback?: OnInValidValueUpdateCallback;
 }
 
 const IndexPropertiesComponent: React.FC<Props> = ({
@@ -82,11 +90,13 @@ const IndexPropertiesComponent: React.FC<Props> = ({
   getGroupByFieldsOnClick,
   ilmPhase,
   indexName,
+  indexTemplate,
   openCreateCaseFlyout,
   pattern,
   patternRollup,
   theme,
   updatePatternRollup,
+  onInValidValueUpdateCallback,
 }) => {
   const { error: mappingsError, indexes, loading: loadingMappings } = useMappings(indexName);
 
@@ -103,7 +113,14 @@ const IndexPropertiesComponent: React.FC<Props> = ({
     error: unallowedValuesError,
     loading: loadingUnallowedValues,
     unallowedValues,
+    unallowedValuesDocs,
+    refetchUnallowedValue,
   } = useUnallowedValues({ indexName, requestItems });
+
+  const refetchOnInValidValueUpdate = useCallback(async () => {
+    await onInValidValueUpdateCallback?.();
+    await refetchUnallowedValue();
+  }, [onInValidValueUpdateCallback, refetchUnallowedValue]);
 
   const mappingsProperties = useMemo(
     () =>
@@ -121,8 +138,9 @@ const IndexPropertiesComponent: React.FC<Props> = ({
         loadingMappings,
         mappingsProperties,
         unallowedValues,
+        unallowedValuesDocs,
       }),
-    [loadingMappings, mappingsProperties, unallowedValues]
+    [loadingMappings, mappingsProperties, unallowedValues, unallowedValuesDocs]
   );
 
   const { disabled: addToNewCaseDisabled, onAddToNewCase } = useAddToNewCase({
@@ -144,6 +162,7 @@ const IndexPropertiesComponent: React.FC<Props> = ({
         getGroupByFieldsOnClick,
         ilmPhase,
         indexName,
+        indexTemplate,
         onAddToNewCase,
         partitionedFieldMetadata: partitionedFieldMetadata ?? EMPTY_METADATA,
         pattern,
@@ -151,22 +170,25 @@ const IndexPropertiesComponent: React.FC<Props> = ({
         setSelectedTabId,
         stats: patternRollup?.stats ?? null,
         theme,
+        onInValidValueUpdateCallback: refetchOnInValidValueUpdate,
       }),
     [
       addSuccessToast,
       addToNewCaseDisabled,
-      docsCount,
       formatBytes,
       formatNumber,
+      docsCount,
       getGroupByFieldsOnClick,
       ilmPhase,
       indexName,
+      indexTemplate,
       onAddToNewCase,
       partitionedFieldMetadata,
       pattern,
       patternRollup?.docsCount,
       patternRollup?.stats,
       theme,
+      refetchOnInValidValueUpdate,
     ]
   );
 

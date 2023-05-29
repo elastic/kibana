@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
   EuiBadge,
   EuiButtonIcon,
@@ -15,6 +14,8 @@ import {
   EuiStat,
   EuiToolTip,
   RIGHT_ALIGNMENT,
+  EuiBasicTableColumn,
+  EuiLink,
 } from '@elastic/eui';
 import React from 'react';
 import styled from 'styled-components';
@@ -41,6 +42,7 @@ export interface IndexSummaryTableItem {
   pattern: string;
   patternDocsCount: number;
   sizeInBytes: number;
+  dataStream: string;
 }
 
 export const getResultToolTip = (incompatible: number | undefined): string => {
@@ -98,12 +100,19 @@ export const getToggleButtonId = ({
 export const getSummaryTableColumns = ({
   formatBytes,
   formatNumber,
+  getAppUrl,
   itemIdToExpandedRowMap,
   pattern,
   toggleExpanded,
 }: {
   formatBytes: (value: number | undefined) => string;
   formatNumber: (value: number | undefined) => string;
+  getAppUrl: (param: {
+    appId?: string;
+    deepLinkId?: string;
+    path?: string;
+    absolute?: boolean;
+  }) => string;
   itemIdToExpandedRowMap: Record<string, React.ReactNode>;
   pattern: string;
   toggleExpanded: (indexName: string) => void;
@@ -223,6 +232,28 @@ export const getSummaryTableColumns = ({
         <span data-test-subj="sizeInBytes">{formatBytes(sizeInBytes)}</span>
       </EuiToolTip>
     ),
+    sortable: true,
+    truncateText: false,
+  },
+  {
+    field: 'dataStream',
+    name: i18n.DATA_STREAM,
+    render: (_, { dataStream }) =>
+      dataStream ? (
+        <EuiLink
+          href={getAppUrl({
+            appId: 'management',
+            path: `data/index_management/data_streams/${dataStream}`,
+          })}
+          external={false}
+          target="_blank"
+          data-test-subj="viewDataStreamLink"
+        >
+          <span data-test-subj="dataStream">{dataStream}</span>
+        </EuiLink>
+      ) : (
+        <span>{EMPTY_STAT}</span>
+      ),
     sortable: true,
     truncateText: false,
   },

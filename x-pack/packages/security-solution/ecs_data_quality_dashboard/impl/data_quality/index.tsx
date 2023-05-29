@@ -27,6 +27,12 @@ interface Props {
   canUserCreateAndReadCases: () => boolean;
   defaultNumberFormat: string;
   defaultBytesFormat: string;
+  getAppUrl: (param: {
+    appId?: string;
+    deepLinkId?: string;
+    path?: string;
+    absolute?: boolean;
+  }) => string;
   getGroupByFieldsOnClick: (
     elements: Array<
       | FlameElementEvent
@@ -53,6 +59,7 @@ interface Props {
   patterns: string[];
   setLastChecked: (lastChecked: string) => void;
   theme: Theme;
+  toasts: IToasts;
 }
 
 /** Renders the `Data Quality` dashboard content */
@@ -61,6 +68,7 @@ const DataQualityPanelComponent: React.FC<Props> = ({
   canUserCreateAndReadCases,
   defaultBytesFormat,
   defaultNumberFormat,
+  getAppUrl,
   getGroupByFieldsOnClick,
   httpFetch,
   ilmPhases,
@@ -69,6 +77,7 @@ const DataQualityPanelComponent: React.FC<Props> = ({
   patterns,
   setLastChecked,
   theme,
+  toasts,
 }) => {
   const formatBytes = useCallback(
     (value: number | undefined): string =>
@@ -83,7 +92,7 @@ const DataQualityPanelComponent: React.FC<Props> = ({
   );
 
   return (
-    <DataQualityProvider httpFetch={httpFetch}>
+    <DataQualityProvider httpFetch={httpFetch} getAppUrl={getAppUrl} toasts={toasts}>
       <Body
         addSuccessToast={addSuccessToast}
         canUserCreateAndReadCases={canUserCreateAndReadCases}
