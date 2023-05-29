@@ -46,7 +46,6 @@ export function openAddDataControlFlyout(
   } = pluginServices.getServices();
 
   const onCancel = (changes: DataControlEditorChanges) => {
-    console.log('changes.input', changes.input);
     if (Object.keys(changes.input).length === 0) {
       this.closeAllFlyouts();
       return;
@@ -81,7 +80,6 @@ export function openAddDataControlFlyout(
     }
 
     let newControl;
-
     switch (type) {
       case OPTIONS_LIST_CONTROL:
         newControl = await this.addOptionsListControl(controlInput as AddOptionsListControlProps);
@@ -96,6 +94,7 @@ export function openAddDataControlFlyout(
     if (onSave && !isErrorEmbeddable(newControl)) {
       onSave(newControl.id);
     }
+    this.updateInput({ defaultControlGrow: changes.grow, defaultControlWidth: changes.width });
   };
 
   const flyoutInstance = openFlyout(

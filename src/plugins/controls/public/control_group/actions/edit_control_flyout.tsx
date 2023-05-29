@@ -79,10 +79,16 @@ export const EditControlFlyout = ({
       inputToReturn = factory.presaveTransformFunction(inputToReturn, embeddable);
     }
 
-    if (changes.width !== panel.width)
-      controlGroup.dispatch.setControlWidth({ width: changes.width, embeddableId: embeddable.id });
-    if (changes.grow !== panel.grow)
-      controlGroup.dispatch.setControlGrow({ grow: changes.grow, embeddableId: embeddable.id });
+    if (changes.width && changes.width !== panel.width)
+      controlGroup.dispatch.setControlWidth({
+        width: changes.width,
+        embeddableId: embeddable.id,
+      });
+    if (changes.grow && changes.grow !== panel.grow)
+      controlGroup.dispatch.setControlGrow({
+        grow: changes.grow,
+        embeddableId: embeddable.id,
+      });
 
     closeFlyout();
     await controlGroup.replaceEmbeddable(embeddable.id, inputToReturn, type);

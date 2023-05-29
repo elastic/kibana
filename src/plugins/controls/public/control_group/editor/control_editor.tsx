@@ -331,9 +331,8 @@ export const ControlEditor = ({
               data-test-subj="control-editor-cancel"
               iconType="cross"
               onClick={() => {
-                const inputToReturn = deepEqual(startingInput.current, currentInput)
-                  ? {}
-                  : currentInput;
+                const inputToReturn =
+                  isCreate && deepEqual(startingInput.current, currentInput) ? {} : currentInput;
                 onCancel({
                   input: inputToReturn,
                   grow: currentGrow,
