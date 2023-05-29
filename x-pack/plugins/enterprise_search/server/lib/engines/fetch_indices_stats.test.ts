@@ -11,6 +11,9 @@ import { fetchIndicesStats } from './fetch_indices_stats';
 describe('fetchIndicesStats lib function', () => {
   const mockClient = {
     asCurrentUser: {
+      cat: {
+        indices: jest.fn(),
+      },
       indices: {
         exists: jest.fn(),
         stats: jest.fn(),
@@ -19,7 +22,28 @@ describe('fetchIndicesStats lib function', () => {
     asInternalUser: {},
   };
   const indices = ['test-index-name-1', 'test-index-name-2', 'test-index-name-3'];
-  const indexStats = {
+  const catIndexResponse = [
+    {
+      health: 'GREEN',
+      index: 'test-index-name-1',
+      status: 'open',
+      uuid: 'YOLLiZ_mSRiDYDk0DJ-p8B',
+    },
+    {
+      health: 'yellow',
+      index: 'test-index-name-2',
+      status: 'close',
+      uuid: 'QOLLiZ_mGRiDYD30D2-p8B',
+    },
+    {
+      health: 'RED',
+      index: 'test-index-name-3',
+      status: 'open',
+      uuid: 'QYLLiZ_fGRiDYD3082-e7',
+    },
+  ];
+
+  const openIndicesStats = {
     indices: {
       'test-index-name-1': {
         health: 'GREEN',
@@ -37,23 +61,6 @@ describe('fetchIndicesStats lib function', () => {
           },
         },
         uuid: 'YOLLiZ_mSRiDYDk0DJ-p8B',
-      },
-      'test-index-name-2': {
-        health: 'YELLOW',
-        primaries: {
-          docs: {
-            count: 0,
-            deleted: 0,
-          },
-        },
-        status: 'closed',
-        total: {
-          docs: {
-            count: 0,
-            deleted: 0,
-          },
-        },
-        uuid: 'QOLLiZ_mGRiDYD30D2-p8B',
       },
       'test-index-name-3': {
         health: 'RED',
@@ -81,8 +88,8 @@ describe('fetchIndicesStats lib function', () => {
       name: 'test-index-name-1',
     },
     {
-      count: 0,
-      health: 'YELLOW',
+      count: null,
+      health: 'unknown',
       name: 'test-index-name-2',
     },
     {
@@ -96,9 +103,10 @@ describe('fetchIndicesStats lib function', () => {
     jest.clearAllMocks();
   });
 
-  it('should return hydrated indices', async () => {
+  it('should return hydrated indices for all open indices', async () => {
     mockClient.asCurrentUser.indices.exists.mockImplementationOnce(() => true);
-    mockClient.asCurrentUser.indices.stats.mockImplementationOnce(() => indexStats);
+    mockClient.asCurrentUser.cat.indices.mockImplementationOnce(() => catIndexResponse);
+    mockClient.asCurrentUser.indices.stats.mockImplementationOnce(() => openIndicesStats);
 
     await expect(
       fetchIndicesStats(mockClient as unknown as IScopedClusterClient, indices)
