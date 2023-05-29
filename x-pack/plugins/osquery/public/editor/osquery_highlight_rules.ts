@@ -6,7 +6,7 @@
  */
 
 import { monaco } from '@kbn/monaco';
-import { map } from 'lodash';
+import { findLast, map, uniqBy } from 'lodash';
 import { getOsqueryTableNames, osqueryTablesRecord } from './osquery_tables';
 
 export const osqueryTableNames = getOsqueryTableNames();
@@ -177,19 +177,26 @@ export const initializeOsqueryEditor = () => {
       });
       monaco?.editor.defineTheme('osquery', theme);
       monaco?.languages.registerCompletionItemProvider('sql', {
+        triggerCharacters: ['.'],
         provideCompletionItems: (model: monaco.editor.ITextModel, position: monaco.Position) => {
           const tokens = monaco.editor.tokenize(model.getValue(), 'sql'); // ВЕСЬ текст редактора
-          const findOsqueryToken = tokens[0].find((token) => token.type === 'osquery.sql');
+          const findOsqueryToken = findLast(
+            tokens[position.lineNumber - 1],
+            (token) => token.type === 'osquery.sql'
+          );
 
           const osqueryTable = model.getWordAtPosition({
             lineNumber: position.lineNumber,
             column: (findOsqueryToken?.offset || 0) + 1,
           });
 
-          const value = model.getValue();
-          const lastCharacterBeforeSuggestion = value.charAt(position.column - 3);
+          const lineContent = model.getLineContent(position.lineNumber);
 
           const word = model.getWordUntilPosition(position);
+
+          const isDot =
+            lineContent.charAt(lineContent.length - 1) === '.' ||
+            lineContent.charAt(lineContent.length - 2) === '.';
 
           const range = {
             startLineNumber: position.lineNumber,
@@ -198,11 +205,7 @@ export const initializeOsqueryEditor = () => {
             endColumn: word.endColumn,
           };
 
-          return getEditorAutoCompleteSuggestion(
-            range,
-            lastCharacterBeforeSuggestion === '.',
-            osqueryTable?.word
-          );
+          return getEditorAutoCompleteSuggestion(range, lineContent, isDot, osqueryTable?.word);
         },
       });
     });
@@ -213,9 +216,18 @@ export const initializeOsqueryEditor = () => {
 
 export const getEditorAutoCompleteSuggestion = (
   range: Range,
+  lineContent: string,
   isDot: boolean,
   name?: string
 ): monaco.languages.ProviderResult<monaco.languages.CompletionList> => {
+  const localKeywords = lineContent.split(/\s+/).map((kw) => ({
+    label: kw,
+    kind: monaco.languages.CompletionItemKind.Snippet,
+    detail: 'Local',
+    insertText: kw,
+    range,
+  }));
+
   const suggestionsFromDefaultKeywords = keywords.map((kw) => ({
     label: `${kw.toUpperCase()}`,
     kind: monaco.languages.CompletionItemKind.Keyword,
@@ -271,12 +283,16 @@ export const getEditorAutoCompleteSuggestion = (
         : // if last char is === '.' it means we are joining so we want to present just specific osquery table suggestions
         isDot
         ? osqueryColumns
-        : [
-            ...suggestionsFromDefaultKeywords,
-            ...tableNameKeywords,
-            ...builtinConstantsKeywords,
-            ...builtinFunctionsKeywords,
-            ...dataTypesKeywords,
-          ],
+        : uniqBy(
+            [
+              ...suggestionsFromDefaultKeywords,
+              ...tableNameKeywords,
+              ...builtinConstantsKeywords,
+              ...builtinFunctionsKeywords,
+              ...dataTypesKeywords,
+              ...localKeywords,
+            ],
+            (word) => word.label.toLowerCase()
+          ),
   };
 };
