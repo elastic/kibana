@@ -22,13 +22,11 @@ export const selectAllAgents = () => {
   cy.contains('2 agents selected.');
 };
 
-export const clearInputQuery = () =>
-  cy.get(LIVE_QUERY_EDITOR).click().type(`{selectall}{backspace}`);
-
 export const inputQuery = (query: string, options?: { parseSpecialCharSequences: boolean }) =>
   cy.get(LIVE_QUERY_EDITOR).type(query, options);
 
 export const submitQuery = () => {
+  // eslint-disable-next-line cypress/no-unnecessary-waiting
   cy.wait(1000); // wait for the validation to trigger - cypress is way faster than users ;)
   cy.contains('Submit').click();
 };
@@ -82,7 +80,6 @@ export const findAndClickButton = (text: string) => {
 
 export const toggleRuleOffAndOn = (ruleName: string) => {
   cy.visit('/app/security/rules');
-  cy.wait(2000);
   cy.contains(ruleName)
     .parents('tr')
     .within(() => {
@@ -159,7 +156,6 @@ export const takeOsqueryActionWithParams = () => {
   cy.contains('Advanced').click();
   typeInECSFieldInput('tags{downArrow}{enter}');
   cy.getBySel('osqueryColumnValueSelect').type('platform_like{downArrow}{enter}');
-  cy.wait(1000);
   submitQuery();
   cy.getBySel('dataGridHeader').should('contain', 'tags', { timeout: 6000000 });
 };

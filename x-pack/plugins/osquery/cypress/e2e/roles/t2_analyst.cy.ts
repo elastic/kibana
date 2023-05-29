@@ -80,7 +80,6 @@ describe('T2 Analyst - READ + Write Live/Saved + runSavedQueries ', () => {
     cy.contains('New live query').click();
     selectAllAgents();
     inputQuery('select * from uptime;');
-    cy.wait(500);
     // checking submit by clicking cmd+enter
     inputQuery(cmd);
     checkResults();
@@ -131,6 +130,8 @@ describe('T2 Analyst - READ + Write Live/Saved + runSavedQueries ', () => {
         cy.react('EuiButtonIcon', { props: { iconType: 'trash' } }).click();
       });
     cy.react('EuiButton').contains('Update query').click();
+
+    // eslint-disable-next-line cypress/no-unnecessary-waiting
     cy.wait(5000);
 
     cy.react('CustomItemAction', {

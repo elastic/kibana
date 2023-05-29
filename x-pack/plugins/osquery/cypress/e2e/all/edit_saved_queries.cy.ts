@@ -69,6 +69,7 @@ describe('ALL - Edit saved query', () => {
 
     cy.react('EuiButton').contains('Update query').click();
 
+    // eslint-disable-next-line cypress/no-unnecessary-waiting
     cy.wait(5000);
 
     cy.react('CustomItemAction', {

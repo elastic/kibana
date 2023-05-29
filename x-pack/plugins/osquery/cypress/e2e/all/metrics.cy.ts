@@ -51,7 +51,6 @@ describe('ALL - Inventory', () => {
     cy.contains('Osquery').click();
 
     cy.getBySel('comboBoxInput').first().click();
-    cy.wait(500);
     cy.getBySel('comboBoxInput').first().type(`${savedQueryName}{downArrow}{enter}`);
 
     submitQuery();

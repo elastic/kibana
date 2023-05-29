@@ -117,19 +117,18 @@ export function closeToastIfVisible() {
 
 export const deleteIntegrations = async (integrationName: string) => {
   const ids: string[] = [];
-  cy.contains(integrationName)
-    .each(($a) => {
-      const href = $a.attr('href') as string;
-      ids.push(href.substr(href.lastIndexOf('/') + 1));
-    })
-    .then(() => {
-      cy.request({
-        url: `/api/fleet/package_policies/delete`,
-        headers: { 'kbn-xsrf': 'cypress' },
-        body: `{ "packagePolicyIds": ${JSON.stringify(ids)} }`,
-        method: 'POST',
-      });
+  cy.contains(integrationName).each(($a) => {
+    const href = $a.attr('href') as string;
+    ids.push(href.substr(href.lastIndexOf('/') + 1));
+  });
+  cy.contains(integrationName).then(() => {
+    cy.request({
+      url: `/api/fleet/package_policies/delete`,
+      headers: { 'kbn-xsrf': 'cypress' },
+      body: `{ "packagePolicyIds": ${JSON.stringify(ids)} }`,
+      method: 'POST',
     });
+  });
 };
 
 export const installPackageWithVersion = (integration: string, version: string) => {

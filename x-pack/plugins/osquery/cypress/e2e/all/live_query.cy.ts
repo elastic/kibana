@@ -122,7 +122,6 @@ describe('ALL - Live Query', () => {
     cy.contains('New live query').click();
     selectAllAgents();
     inputQuery('select * from uptime;');
-    cy.wait(500);
     // checking submit by clicking cmd+enter
     inputQuery(cmd);
     checkResults();
@@ -163,7 +162,6 @@ describe('ALL - Live Query', () => {
     selectAllAgents();
     cy.react('SavedQueriesDropdown').type(`${savedQueryName}{downArrow}{enter}`);
     inputQuery('{selectall}{backspace}select * from users;');
-    cy.wait(1000);
     submitQuery();
     checkResults();
     navigateTo('/app/osquery');
@@ -187,7 +185,8 @@ describe('ALL - Live Query', () => {
     cy.contains('New live query').click();
     cy.contains('Run a set of queries in a pack.').click();
     cy.get(LIVE_QUERY_EDITOR).should('not.exist');
-    cy.getBySel('select-live-pack').click().type(`${packName}{downArrow}{enter}`);
+    cy.getBySel('select-live-pack').click();
+    cy.getBySel('select-live-pack').type(`${packName}{downArrow}{enter}`);
     cy.contains('This table contains 3 rows.');
     cy.contains('system_memory_linux_elastic');
     cy.contains('system_info_elastic');
@@ -240,10 +239,9 @@ describe('ALL - Live Query', () => {
       'limit 1000;';
     cy.contains('New live query').click();
     cy.react('ReactAce').invoke('height').and('be.gt', 99).and('be.lt', 110);
-    cy.get(LIVE_QUERY_EDITOR).click().invoke('val', multilineQuery);
+    cy.get(LIVE_QUERY_EDITOR).invoke('val', multilineQuery);
 
     inputQuery(multilineQuery);
-    cy.wait(2000);
     cy.react('ReactAce').invoke('height').should('be.gt', 220).and('be.lt', 300);
     selectAllAgents();
     submitQuery();
@@ -252,11 +250,9 @@ describe('ALL - Live Query', () => {
     // check if it get's bigger when we add more lines
     cy.react('ReactAce').invoke('height').should('be.gt', 220).and('be.lt', 300);
     inputQuery(multilineQuery);
-    cy.wait(2000);
     cy.react('ReactAce').invoke('height').should('be.gt', 350).and('be.lt', 500);
 
     inputQuery('{selectall}{backspace}{selectall}{backspace}');
-    cy.wait(2000);
     // not sure if this is how it used to work when I implemented the functionality, but let's leave it like this for now
     cy.react('ReactAce').invoke('height').should('be.gt', 350).and('be.lt', 500);
   });

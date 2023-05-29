@@ -74,7 +74,6 @@ describe('Alert Test', () => {
 
       cy.visit('/app/security/rules');
       cy.contains(ruleName).click();
-      cy.wait(2000);
       cy.getBySel('ruleSwitch').should('have.attr', 'aria-checked', 'true');
       cy.getBySel('ruleSwitch').click();
       cy.getBySel('ruleSwitch').should('have.attr', 'aria-checked', 'false');
@@ -96,7 +95,6 @@ describe('Alert Test', () => {
       cy.visit(`/app/security/rules/id/${ruleId}/alerts`);
       cy.getBySel('expand-event').first().click();
 
-      cy.wait(500);
       cy.contains('Get processes').click();
     });
 

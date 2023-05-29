@@ -138,9 +138,11 @@ describe('ALL - Saved queries', () => {
 
       cy.react('EuiComboBox', {
         props: { placeholder: 'Search for a query to run, or write a new query below' },
-      })
-        .click()
-        .type('users_elastic{downArrow} {enter}');
+      }).click();
+
+      cy.react('EuiComboBox', {
+        props: { placeholder: 'Search for a query to run, or write a new query below' },
+      }).type('users_elastic{downArrow} {enter}');
       inputQuery('where name=1');
       cy.getBySel('resultsTypeField').click();
       cy.contains('Differential (Ignore removals)').click();

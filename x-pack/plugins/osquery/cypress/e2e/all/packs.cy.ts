@@ -141,7 +141,6 @@ describe('ALL - Packs', () => {
         cy.contains('Attach next query');
         getIdFormField().type('Query1');
         inputQuery('select * from uptime;');
-        cy.wait(500); // wait for the validation to trigger - cypress is way faster than users ;)
         cy.react('EuiFlyoutFooter').react('EuiButton').contains('Save').click();
         findAndClickButton('Add query');
         cy.contains('Attach next query');
@@ -150,7 +149,6 @@ describe('ALL - Packs', () => {
 
         cy.getBySel('resultsTypeField').click();
         cy.contains('Differential').click();
-        cy.wait(500); // wait for the validation to trigger - cypress is way faster than users ;)
 
         cy.react('EuiFlyoutFooter').react('EuiButton').contains('Save').click();
         findAndClickButton('Add query');
@@ -159,7 +157,6 @@ describe('ALL - Packs', () => {
         inputQuery('select * from uptime;');
         cy.getBySel('resultsTypeField').click();
         cy.contains('Differential (Ignore removals)').click();
-        cy.wait(500); // wait for the validation to trigger - cypress is way faster than users ;)
 
         cy.react('EuiFlyoutFooter').react('EuiButton').contains('Save').click();
         findAndClickButton('Save pack');
@@ -260,10 +257,9 @@ describe('ALL - Packs', () => {
         findAndClickButton('Add query');
         cy.contains('Attach next query');
         getSavedQueriesDropdown().type(`${savedQueryName}{downArrow}{enter}`);
-        cy.react('EuiFormRow', { props: { label: 'Interval (s)' } })
-          .click()
-          .clear()
-          .type('5');
+        cy.react('EuiFormRow', { props: { label: 'Interval (s)' } }).click();
+        cy.react('EuiFormRow', { props: { label: 'Interval (s)' } }).clear();
+        cy.react('EuiFormRow', { props: { label: 'Interval (s)' } }).type('5');
         cy.react('EuiFlyoutFooter').react('EuiButton').contains('Save').click();
         cy.react('EuiTableRow').contains(savedQueryName);
         findAndClickButton('Save pack');
@@ -689,7 +685,6 @@ describe('ALL - Packs', () => {
       navigateTo('app/osquery/packs');
       cy.contains(REMOVING_PACK).click();
       cy.contains(`${REMOVING_PACK} details`).should('exist');
-      cy.wait(1000);
       findAndClickButton('Edit');
       cy.react('EuiComboBoxInput', { props: { value: '' } }).should('exist');
     });
@@ -710,7 +705,6 @@ describe('ALL - Packs', () => {
     it('should load prebuilt packs', () => {
       cy.contains('Load Elastic prebuilt packs').click();
       cy.contains('Load Elastic prebuilt packs').should('not.exist');
-      cy.wait(1000);
       cy.react('EuiTableRow').should('have.length.above', 5);
     });
 
@@ -759,7 +753,8 @@ describe('ALL - Packs', () => {
       cy.contains('New live query').click();
       cy.contains('Run a set of queries in a pack.').click();
       cy.get(LIVE_QUERY_EDITOR).should('not.exist');
-      cy.getBySel('select-live-pack').click().type('osquery-monitoring{downArrow}{enter}');
+      cy.getBySel('select-live-pack').click();
+      cy.getBySel('select-live-pack').type('osquery-monitoring{downArrow}{enter}');
       selectAllAgents();
       submitQuery();
       cy.getBySel('live-query-loading').should('exist');

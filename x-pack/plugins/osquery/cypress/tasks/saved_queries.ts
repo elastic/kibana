@@ -59,7 +59,8 @@ export const getSavedQueriesComplexTest = () =>
         cy.contains(/Hide column$/).click();
         cy.contains('columns hidden').should('exist');
         // change pagination
-        cy.getBySel('pagination-button-next').click().wait(500).click();
+        cy.getBySel('pagination-button-next').click();
+        cy.getBySel('pagination-button-next').click();
         cy.contains('columns hidden').should('exist');
 
         cy.getBySel(RESULTS_TABLE_BUTTON).trigger('mouseover');
