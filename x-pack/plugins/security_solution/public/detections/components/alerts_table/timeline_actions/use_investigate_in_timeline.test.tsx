@@ -67,7 +67,7 @@ const renderContextMenu = (items: AlertTableContextMenuItem[]) => {
       closePopover={() => {}}
       button={<></>}
     >
-      <EuiContextMenu size="s" panels={panels} />
+      <EuiContextMenu size="s" initialPanelId={0} panels={panels} />
     </EuiPopover>
   );
 };
