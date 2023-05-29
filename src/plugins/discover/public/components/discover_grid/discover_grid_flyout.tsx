@@ -25,7 +25,8 @@ import {
   EuiHideFor,
   keys,
 } from '@elastic/eui';
-import { Filter } from '@kbn/es-query';
+import type { Filter, Query, AggregateQuery } from '@kbn/es-query';
+import { isOfAggregateQueryType } from '@kbn/es-query';
 import { DocViewer } from '../../services/doc_views/components/doc_viewer/doc_viewer';
 import { DocViewFilterFn } from '../../services/doc_views/doc_views_types';
 import { useNavigationProps } from '../../hooks/use_navigation_props';
@@ -35,6 +36,7 @@ import type { DataTableRecord } from '../../types';
 export interface DiscoverGridFlyoutProps {
   savedSearchId?: string;
   filters?: Filter[];
+  query?: Query | AggregateQuery;
   columns: string[];
   hit: DataTableRecord;
   hits?: DataTableRecord[];
@@ -61,6 +63,7 @@ export function DiscoverGridFlyout({
   columns,
   savedSearchId,
   filters,
+  query,
   onFilter,
   onClose,
   onRemoveColumn,
@@ -236,6 +239,7 @@ export function DiscoverGridFlyout({
                 })
               );
             }}
+            textBasedHits={query && isOfAggregateQueryType(query) ? hits : undefined}
           />
         </EuiFlyoutBody>
       </EuiFlyout>
