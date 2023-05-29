@@ -286,6 +286,32 @@ FROM employees
     },
     {
       label: i18n.translate(
+        'textBasedEditor.query.textBasedLanguagesEditor.documentation.mvExpand',
+        {
+          defaultMessage: 'MV_EXPAND',
+        }
+      ),
+      description: (
+        <Markdown
+          markdown={i18n.translate(
+            'textBasedEditor.query.textBasedLanguagesEditor.documentation.mvExpand.markdown',
+            {
+              defaultMessage: `### MV_EXPAND
+The \`MV_EXPAND\` processing command expands multivalued fields into one row per value, duplicating other fields:              
+\`\`\`
+ROW a=[1,2,3], b="b", j=["a","b"]
+| MV_EXPAND a
+\`\`\`
+            `,
+              description:
+                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+            }
+          )}
+        />
+      ),
+    },
+    {
+      label: i18n.translate(
         'textBasedEditor.query.textBasedLanguagesEditor.documentation.project',
         {
           defaultMessage: 'PROJECT',
@@ -927,6 +953,87 @@ NOTE: The output type is always a double and the input type can be any number.
     },
     {
       label: i18n.translate(
+        'textBasedEditor.query.textBasedLanguagesEditor.documentation.mvCountFunction',
+        {
+          defaultMessage: 'MV_COUNT',
+        }
+      ),
+      description: (
+        <Markdown
+          markdown={i18n.translate(
+            'textBasedEditor.query.textBasedLanguagesEditor.documentation.mvCountFunction.markdown',
+            {
+              defaultMessage: `### MV_COUNT
+Converts a multivalued field into a single valued field containing a count of the number of values:
+
+\`\`\`
+ROW a=["foo", "zoo", "bar"]
+| EVAL count_a = MV_COUNT(a)
+\`\`\`
+
+Returning:
+
+\`\`\`
+["foo", "zoo", "bar"] | 3
+\`\`\`
+
+NOTE: This function accepts all types and always returns an integer.
+              `,
+              description:
+                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+            }
+          )}
+        />
+      ),
+    },
+    {
+      label: i18n.translate(
+        'textBasedEditor.query.textBasedLanguagesEditor.documentation.mvJoinFunction',
+        {
+          defaultMessage: 'MV_JOIN',
+        }
+      ),
+      description: (
+        <Markdown
+          markdown={i18n.translate(
+            'textBasedEditor.query.textBasedLanguagesEditor.documentation.mvJoinFunction.markdown',
+            {
+              defaultMessage: `### MV_JOIN
+Converts a multivalued string field into a single valued field containing the concatenation of all values separated by a delimiter:
+
+\`\`\`
+ROW a=["foo", "zoo", "bar"]
+| EVAL j = MV_JOIN(a, ", ")
+\`\`\`
+
+Returning:
+
+\`\`\`
+["foo", "zoo", "bar"] | "foo, zoo, bar"
+\`\`\`
+
+If you want to join non-string fields call \`TO_STRING\` on them first:
+
+\`\`\`
+ROW a=[10, 9, 8]
+| EVAL j = MV_JOIN(TO_STRING(a), ", ")
+\`\`\`
+
+Returning:
+
+\`\`\`
+[10, 9, 8] | "10, 9, 8"
+\`\`\`
+              `,
+              description:
+                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+            }
+          )}
+        />
+      ),
+    },
+    {
+      label: i18n.translate(
         'textBasedEditor.query.textBasedLanguagesEditor.documentation.mvMaxFunction',
         {
           defaultMessage: 'MV_MAX',
@@ -962,6 +1069,52 @@ Returning:
 
 \`\`\`
 ["foo", "zoo", "bar"] | "zoo"
+\`\`\`
+              `,
+              description:
+                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+            }
+          )}
+        />
+      ),
+    },
+    {
+      label: i18n.translate(
+        'textBasedEditor.query.textBasedLanguagesEditor.documentation.mvMedianFunction',
+        {
+          defaultMessage: 'MV_MEDIAN',
+        }
+      ),
+      description: (
+        <Markdown
+          markdown={i18n.translate(
+            'textBasedEditor.query.textBasedLanguagesEditor.documentation.mvMedianFunction.markdown',
+            {
+              defaultMessage: `### MV_MEDIAN
+Converts a multivalued field into a single valued field containing the median value. For example:
+
+\`\`\`
+ROW a=[3, 5, 1]
+| EVAL median_a = MV_MEDIAN(a)
+\`\`\`
+
+Returning:
+
+\`\`\`
+[3, 5, 1] | 3
+\`\`\`
+
+It can be used by any numeric field type and returns a value of the same type. If the row has an even number of values for a column the result will be the average of the middle two entries. If the field is not floating point then the average rounds **down**:
+
+\`\`\`
+ROW a=[3, 7, 1, 6]
+| EVAL median_a = MV_MEDIAN(a)
+\`\`\`
+
+Returning:
+
+\`\`\`
+[3, 7, 1, 6] | 4
 \`\`\`
               `,
               description:
@@ -1204,6 +1357,40 @@ If length is omitted, substring returns the remainder of the string. This exampl
 FROM employees
 | PROJECT last_name
 | EVAL ln_sub = SUBSTRING(last_name, 2)
+\`\`\`
+              `,
+              description:
+                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+            }
+          )}
+        />
+      ),
+    },
+    {
+      label: i18n.translate(
+        'textBasedEditor.query.textBasedLanguagesEditor.documentation.toStringFunction',
+        {
+          defaultMessage: 'TO_STRING',
+        }
+      ),
+      description: (
+        <Markdown
+          markdown={i18n.translate(
+            'textBasedEditor.query.textBasedLanguagesEditor.documentation.toStringFunction.markdown',
+            {
+              defaultMessage: `### TO_STRING
+Converts a field into a string. For example:
+
+\`\`\`
+ROW a=10
+| EVAL j = TO_STRING(a)
+\`\`\`
+
+It also works fine on multivalued fields:
+
+\`\`\`
+ROW a=[10, 9, 8]
+| EVAL j = TO_STRING(a)
 \`\`\`
               `,
               description:
