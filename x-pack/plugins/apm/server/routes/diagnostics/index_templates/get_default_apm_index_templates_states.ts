@@ -5,13 +5,19 @@
  * 2.0.
  */
 
-import { IndicesGetIndexTemplateResponse } from '@elastic/elasticsearch/lib/api/types';
+import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { getDefaultIndexTemplateNames } from '../../../../common/diagnostics/get_default_index_template_names';
-import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
+import { getIndexTemplate } from './get_index_template';
 
-export function transformResponse(
-  existingIndexTemplates: IndicesGetIndexTemplateResponse
-) {
+export async function getDefaultApmIndexTemplateStates({
+  esClient,
+}: {
+  esClient: ElasticsearchClient;
+}) {
+  const existingIndexTemplates = await getIndexTemplate(esClient, {
+    name: '*-apm.*',
+  });
+
   const defaultIndexTemplateNames = getDefaultIndexTemplateNames();
   const existingIndexTemplatesNames =
     existingIndexTemplates.index_templates.map(
@@ -32,15 +38,4 @@ export function transformResponse(
     };
     return acc;
   }, {});
-}
-
-export async function getDefaultApmIndexTemplateStates(
-  apmEventClient: APMEventClient
-) {
-  const existingIndexTemplates = await apmEventClient.getIndexTemplate(
-    'diagnostics_index_templates',
-    { name: '*-apm.*' }
-  );
-
-  return transformResponse(existingIndexTemplates);
 }

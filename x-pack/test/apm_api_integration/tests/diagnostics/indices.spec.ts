@@ -7,6 +7,7 @@
 
 import expect from '@kbn/expect';
 import { apm, timerange } from '@kbn/apm-synthtrace-client';
+import { omit } from 'lodash';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
@@ -158,15 +159,14 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
           expect(status).to.be(200);
           expect(body.validItems.length).to.be.greaterThan(0);
-          expect(body.invalidItems).to.eql([
-            {
-              isValid: false,
-              fieldMappings: { isValid: true },
-              ingestPipeline: { isValid: false },
-              index: '.ds-metrics-apm.internal-default-2023.05.26-000001',
-              dataStream: 'metrics-apm.internal-default',
-            },
-          ]);
+          expect(body.invalidItems.length).to.be(1);
+
+          expect(omit(body.invalidItems[0], 'index')).to.eql({
+            isValid: false,
+            fieldMappings: { isValid: true },
+            ingestPipeline: { isValid: false },
+            dataStream: 'metrics-apm.internal-default',
+          });
         });
       });
 
@@ -188,15 +188,13 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
           expect(status).to.be(200);
           expect(body.validItems.length).to.be.greaterThan(0);
-          expect(body.invalidItems).to.eql([
-            {
-              isValid: false,
-              fieldMappings: { isValid: true },
-              ingestPipeline: { isValid: false, id: 'logs-default-pipeline' },
-              index: '.ds-metrics-apm.internal-default-2023.05.26-000001',
-              dataStream: 'metrics-apm.internal-default',
-            },
-          ]);
+          expect(body.invalidItems.length).to.be(1);
+          expect(omit(body.invalidItems[0], 'index')).to.eql({
+            isValid: false,
+            fieldMappings: { isValid: true },
+            ingestPipeline: { isValid: false, id: 'logs-default-pipeline' },
+            dataStream: 'metrics-apm.internal-default',
+          });
         });
       });
     });

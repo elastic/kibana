@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { Outlet } from '@kbn/typed-react-router-config';
 import React from 'react';
-import { EuiCallOut } from '@elastic/eui';
+import { EuiButton, EuiCallOut } from '@elastic/eui';
 import { useApmRouter } from '../../../hooks/use_apm_router';
 import { useApmRoutePath } from '../../../hooks/use_apm_route_path';
 import { DiagnosticsSummary } from './summary_tab';
@@ -63,6 +63,14 @@ function DiagnosticsTemplate({ children }: { children: React.ReactChild }) {
       showServiceGroupSaveButton={false}
       selectedNavButton="serviceGroups"
       pageHeader={{
+        rightSideItems: [
+          <EuiButton
+            data-test-subj="apmDiagnosticsTemplateAddSomethingButton"
+            fill
+          >
+            Refresh
+          </EuiButton>,
+        ],
         description: <TemplateDescription />,
         tabs: [
           {

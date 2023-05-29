@@ -33,7 +33,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         expect(status).to.be(200);
         expect(body.dataStreams).to.eql(undefined);
       });
-      it('returns non-data stream indicies`', async () => {
+      it('returns non-data stream indices`', async () => {
         const { status, body } = await apmApiClient.readUser({
           endpoint: 'GET /internal/apm/diagnostics/data_streams',
         });
@@ -87,7 +87,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         ]);
       });
 
-      it('returns non data stream indicies', async () => {
+      it('returns non data stream indices', async () => {
         const { status, body } = await apmApiClient.readUser({
           endpoint: 'GET /internal/apm/diagnostics/data_streams',
         });

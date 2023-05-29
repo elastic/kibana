@@ -6,14 +6,14 @@
  */
 
 import { IndicesDataStream } from '@elastic/elasticsearch/lib/api/types';
-import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import {
   getMatchingIndexTemplates,
-  getUniqueApmIndices,
+  getApmIndexPatterns,
 } from './index_templates/get_matching_index_templates';
 import { getDefaultApmIndexTemplateStates } from './index_templates/get_default_apm_index_templates_states';
 import { getIndicesWithStatuses } from './indices/get_indices';
+import { getApmIndices } from '../settings/apm_indices/get_apm_indices';
 
 export interface IndiciesItem {
   index: string;
@@ -39,8 +39,14 @@ const fieldMappingsRoute = createApmServerRoute({
     validItems: IndiciesItem[];
     invalidItems: IndiciesItem[];
   }> => {
-    const apmEventClient = await getApmEventClient(resources);
-    return await getIndicesWithStatuses({ apmEventClient });
+    const coreContext = await resources.context.core;
+    const { asCurrentUser: esClient } = coreContext.elasticsearch.client;
+    const apmIndices = await getApmIndices({
+      savedObjectsClient: coreContext.savedObjects.client,
+      config: resources.config,
+    });
+
+    return await getIndicesWithStatuses({ esClient, apmIndices });
   },
 });
 
@@ -60,13 +66,20 @@ const indexPatternSettingsRoute = createApmServerRoute({
       }>;
     }>;
   }> => {
-    const apmEventClient = await getApmEventClient(resources);
+    const coreContext = await resources.context.core;
+    const { asCurrentUser: esClient } = coreContext.elasticsearch.client;
+    const apmIndices = await getApmIndices({
+      savedObjectsClient: coreContext.savedObjects.client,
+      config: resources.config,
+    });
+
     const defaultApmIndexTemplateStates =
-      await getDefaultApmIndexTemplateStates(apmEventClient);
-    const indexTemplatesByIndexPattern = await getMatchingIndexTemplates(
-      apmEventClient,
-      defaultApmIndexTemplateStates
-    );
+      await getDefaultApmIndexTemplateStates({ esClient });
+    const indexTemplatesByIndexPattern = await getMatchingIndexTemplates({
+      apmIndices,
+      esClient,
+      defaultApmIndexTemplateStates,
+    });
 
     return { indexTemplatesByIndexPattern };
   },
@@ -83,9 +96,10 @@ const indexTemplateRoute = createApmServerRoute({
       { exists: boolean; name?: string | undefined }
     >;
   }> => {
-    const apmEventClient = await getApmEventClient(resources);
+    const coreContext = await resources.context.core;
+    const { asCurrentUser: esClient } = coreContext.elasticsearch.client;
     const defaultApmIndexTemplateStates =
-      await getDefaultApmIndexTemplateStates(apmEventClient);
+      await getDefaultApmIndexTemplateStates({ esClient });
 
     return { defaultApmIndexTemplateStates };
   },
@@ -100,31 +114,35 @@ const dataStreamRoute = createApmServerRoute({
     dataStreams: IndicesDataStream[];
     nonDataStreamIndices: string[];
   }> => {
-    const apmEventClient = await getApmEventClient(resources);
-    const apmIndices = getUniqueApmIndices(apmEventClient.indices);
-
-    // fetch APM data streams
-    const datastreamRes = await apmEventClient.getDataStream(
-      'diagnostics_data_streams',
-      {
-        name: apmIndices,
-        filter_path: ['data_streams.name', 'data_streams.template'],
-      }
+    const coreContext = await resources.context.core;
+    const { asCurrentUser } = coreContext.elasticsearch.client;
+    const apmIndexPatterns = getApmIndexPatterns(
+      await getApmIndices({
+        savedObjectsClient: coreContext.savedObjects.client,
+        config: resources.config,
+      })
     );
 
+    // fetch APM data streams
+    const { data_streams: dataStreams } =
+      await asCurrentUser.indices.getDataStream({
+        name: apmIndexPatterns,
+        filter_path: ['data_streams.name', 'data_streams.template'],
+      });
+
     // fetch non-data stream indices
-    const indicesRes = await apmEventClient.getIndices('get_indices', {
-      index: apmIndices,
+    const nonDataStreamIndicesResponse = await asCurrentUser.indices.get({
+      index: apmIndexPatterns,
       filter_path: ['*.data_stream', '*.settings.index.uuid'],
     });
 
-    const nonDataStreamIndices = Object.entries(indicesRes)
+    const nonDataStreamIndices = Object.entries(nonDataStreamIndicesResponse)
       .filter(
         ([indexName, { data_stream: dataStream }]): boolean => !dataStream
       )
       .map(([indexName]): string => indexName);
 
-    return { dataStreams: datastreamRes.data_streams, nonDataStreamIndices };
+    return { dataStreams, nonDataStreamIndices };
   },
 });
 

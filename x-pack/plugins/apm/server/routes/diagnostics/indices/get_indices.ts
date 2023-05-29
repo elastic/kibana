@@ -6,40 +6,61 @@
  */
 
 import { compact, uniq } from 'lodash';
-import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { validateIngestPipelineName } from '../../../../common/diagnostics/get_default_index_template_names';
 import { SERVICE_NAME } from '../../../../common/es_fields/apm';
-import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
-import { getUniqueApmIndices } from '../index_templates/get_matching_index_templates';
+import { ApmIndicesConfig } from '../../settings/apm_indices/get_apm_indices';
+
+function flattenIndices(indices: string[]) {
+  return uniq(indices.flatMap((index): string[] => index.split(',')));
+}
 
 export async function getIndicesWithStatuses({
-  apmEventClient,
+  esClient,
+  apmIndices,
 }: {
-  apmEventClient: APMEventClient;
+  esClient: ElasticsearchClient;
+  apmIndices: ApmIndicesConfig;
 }) {
-  const indicesWithPipelineId = await getIndicesWithPipelineId({
-    apmEventClient,
+  const indicesRes = await esClient.indices.get({
+    index: flattenIndices([
+      apmIndices.error,
+      apmIndices.metric,
+      apmIndices.span,
+      apmIndices.transaction,
+    ]),
+    filter_path: [
+      '*.settings.index.default_pipeline',
+      '*.data_stream',
+      '*.settings.index.provided_name',
+    ],
   });
+
+  const indicesWithPipelineId = Object.entries(indicesRes).map(
+    ([key, value]) => ({
+      index: key,
+      dataStream: value.data_stream,
+      pipelineId: value.settings?.index?.default_pipeline,
+    })
+  );
+
   const pipelineIds = compact(
     uniq(indicesWithPipelineId.map(({ pipelineId }) => pipelineId))
   );
 
-  const ingestPipelines = await apmEventClient.getIngestPipeline(
-    'get_ingest_pipeline',
-    {
-      id: pipelineIds.join(','),
-      filter_path: ['*.processors.grok.field', '*.processors.grok.patterns'],
-    }
-  );
+  const ingestPipelines = await esClient.ingest.getPipeline({
+    id: pipelineIds.join(','),
+    filter_path: ['*.processors.grok.field', '*.processors.grok.patterns'],
+  });
 
-  const res = await apmEventClient.fieldCaps('diagnostics_field_caps', {
-    apm: { events: [ProcessorEvent.metric, ProcessorEvent.transaction] },
+  const fieldCapsRes = await esClient.fieldCaps({
+    index: flattenIndices([apmIndices.metric, apmIndices.transaction]),
     fields: [SERVICE_NAME],
     filter_path: ['fields'],
   });
 
   const invalidFieldMappings = Object.values(
-    res.fields[SERVICE_NAME] ?? {}
+    fieldCapsRes.fields[SERVICE_NAME] ?? {}
   ).filter(({ type }): boolean => type !== 'keyword');
 
   const items = indicesWithPipelineId.map(
@@ -83,28 +104,4 @@ export async function getIndicesWithStatuses({
   const validItems = items.filter((item) => item.isValid);
 
   return { invalidItems, validItems };
-}
-
-async function getIndicesWithPipelineId({
-  apmEventClient,
-}: {
-  apmEventClient: APMEventClient;
-}) {
-  const apmIndices = getUniqueApmIndices(apmEventClient.indices);
-
-  // get indices settings
-  const res = await apmEventClient.getIndices('get_apm_indices', {
-    index: apmIndices,
-    filter_path: [
-      '*.settings.index.default_pipeline',
-      '*.data_stream',
-      '*.settings.index.provided_name',
-    ],
-  });
-
-  return Object.entries(res).map(([key, value]) => ({
-    index: key,
-    dataStream: value.data_stream,
-    pipelineId: value.settings?.index?.default_pipeline,
-  }));
 }

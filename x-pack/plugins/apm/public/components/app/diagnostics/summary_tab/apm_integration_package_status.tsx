@@ -52,7 +52,7 @@ export function ApmIntegrationPackageStatus() {
           ? '...'
           : isInstalled
           ? `APM integration (${version})`
-          : 'APM integration: is not installed'}
+          : 'APM integration: not installed'}
 
         <EuiLink
           data-test-subj="apmDiagnosticsSummaryFasLink"

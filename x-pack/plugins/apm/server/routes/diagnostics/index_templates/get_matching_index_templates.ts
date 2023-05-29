@@ -5,10 +5,13 @@
  * 2.0.
  */
 
+import { IndicesSimulateTemplateResponse } from '@elastic/elasticsearch/lib/api/types';
+import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { orderBy, uniq } from 'lodash';
-import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
+import { ApmIndicesConfig } from '../../settings/apm_indices/get_apm_indices';
+import { getIndexTemplate } from './get_index_template';
 
-export function getUniqueApmIndices(indices: APMEventClient['indices']) {
+export function getApmIndexPatterns(indices: ApmIndicesConfig) {
   return uniq(
     [indices.error, indices.metric, indices.span, indices.transaction].flatMap(
       (index): string[] => index.split(',')
@@ -21,17 +24,24 @@ type DefaultApmIndexTemplateStates = Record<
   { exists: boolean; name?: string | undefined }
 >;
 
-export async function getMatchingIndexTemplates(
-  apmEventClient: APMEventClient,
-  defaultApmIndexTemplateStates: DefaultApmIndexTemplateStates
-) {
-  const apmIndexPatterns = getUniqueApmIndices(apmEventClient.indices);
+export async function getMatchingIndexTemplates({
+  esClient,
+  apmIndices,
+  defaultApmIndexTemplateStates,
+}: {
+  esClient: ElasticsearchClient;
+  apmIndices: ApmIndicesConfig;
+  defaultApmIndexTemplateStates: DefaultApmIndexTemplateStates;
+}) {
+  const apmIndexPatterns = getApmIndexPatterns(apmIndices);
   const indexTemplatesByIndexPattern = await Promise.all(
     apmIndexPatterns.map(async (indexPattern) => {
-      const simulateResponse = await apmEventClient.simulateIndexTemplate(
-        'simulate_index_template',
-        { index_patterns: [indexPattern] }
-      );
+      const simulateResponse =
+        await esClient.transport.request<IndicesSimulateTemplateResponse>({
+          method: 'POST',
+          path: '/_index_template/_simulate',
+          body: { index_patterns: [indexPattern] },
+        });
 
       const indexTemplates = await Promise.all(
         (simulateResponse.overlapping ?? []).map(
@@ -39,11 +49,7 @@ export async function getMatchingIndexTemplates(
             index_patterns: templateIndexPatterns,
             name: templateName,
           }) => {
-            const priority = await getTemplatePriority(
-              apmEventClient,
-              templateName
-            );
-
+            const priority = await getTemplatePriority(esClient, templateName);
             const isNonStandard = getIsNonStandardIndexTemplate(
               defaultApmIndexTemplateStates,
               templateName
@@ -74,15 +80,11 @@ export async function getMatchingIndexTemplates(
 }
 
 async function getTemplatePriority(
-  apmEventClient: APMEventClient,
+  esClient: ElasticsearchClient,
   name: string
 ) {
-  const res = await apmEventClient.getIndexTemplate(
-    'get_index_template_priority',
-    { name }
-  );
-
-  return res.index_templates[0].index_template.priority;
+  const res = await getIndexTemplate(esClient, { name });
+  return res.index_templates[0]?.index_template?.priority;
 }
 
 function getIsNonStandardIndexTemplate(
@@ -90,10 +92,10 @@ function getIsNonStandardIndexTemplate(
   templateName: string
 ) {
   const defaultApmIndexTemplates = Object.keys(defaultApmIndexTemplateStates);
-  const defaultXpackIndexTemplates = ['logs', 'metrics'];
+  const defaultStackIndexTemplates = ['logs', 'metrics'];
   const isNonStandard = [
     ...defaultApmIndexTemplates,
-    ...defaultXpackIndexTemplates,
+    ...defaultStackIndexTemplates,
   ].every((defaultApmIndexTemplate) => {
     const notMatch = !templateName.startsWith(defaultApmIndexTemplate);
     return notMatch;

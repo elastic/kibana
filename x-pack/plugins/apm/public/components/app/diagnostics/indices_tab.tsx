@@ -23,7 +23,7 @@ export function DiagnosticsIndices() {
   const { data } = useFetcher(
     async (callApmApi) => {
       if (report) {
-        return report.indicies;
+        return report.indices;
       }
       return callApmApi(`GET /internal/apm/diagnostics/indices`);
     },

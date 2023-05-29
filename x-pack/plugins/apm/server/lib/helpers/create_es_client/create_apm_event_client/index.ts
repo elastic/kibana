@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { errors } from '@elastic/elasticsearch';
 import type {
   EqlSearchRequest,
   FieldCapsRequest,
@@ -14,11 +13,6 @@ import type {
   MsearchMultisearchHeader,
   TermsEnumResponse,
   TermsEnumRequest,
-  IndicesGetDataStreamRequest,
-  IndicesGetIndexTemplateRequest,
-  IndicesSimulateTemplateResponse,
-  IndicesGetRequest,
-  IngestGetPipelineRequest,
 } from '@elastic/elasticsearch/lib/api/types';
 import { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
 import type { ESSearchRequest, InferSearchResponseOf } from '@kbn/es-types';
@@ -304,91 +298,6 @@ export class APMEventClient {
       requestType: '_terms_enum',
       params: requestParams,
       cb: (opts) => this.esClient.termsEnum(requestParams, opts),
-    });
-  }
-
-  async getIndexTemplate(
-    operationName: string,
-    params: IndicesGetIndexTemplateRequest
-  ) {
-    return this.callAsyncWithDebug({
-      operationName,
-      requestType: '_index_template',
-      params,
-      cb: async (abortOptions) => {
-        try {
-          return await this.esClient.indices.getIndexTemplate(
-            params,
-            abortOptions
-          );
-        } catch (e) {
-          if (e instanceof errors.ResponseError && e.statusCode === 404) {
-            return {
-              body: e.body,
-            };
-          }
-
-          throw e;
-        }
-      },
-    });
-  }
-
-  async simulateIndexTemplate(
-    operationName: string,
-    params: {
-      index_patterns: string[];
-    }
-  ) {
-    return this.callAsyncWithDebug({
-      operationName,
-      requestType: '/_index_template/_simulate',
-      params,
-      cb: (abortOptions) => {
-        return this.esClient.transport.request<IndicesSimulateTemplateResponse>(
-          {
-            method: 'POST',
-            path: '/_index_template/_simulate',
-            body: params,
-          },
-          abortOptions
-        );
-      },
-    });
-  }
-
-  async getDataStream(
-    operationName: string,
-    params: IndicesGetDataStreamRequest
-  ) {
-    return this.callAsyncWithDebug({
-      operationName,
-      requestType: '_data_stream',
-      params,
-      cb: (abortOptions) =>
-        this.esClient.indices.getDataStream(params, abortOptions),
-    });
-  }
-
-  async getIndices(operationName: string, params: IndicesGetRequest) {
-    return this.callAsyncWithDebug({
-      operationName,
-      requestType: 'indices.get',
-      params,
-      cb: (abortOptions) => this.esClient.indices.get(params, abortOptions),
-    });
-  }
-
-  async getIngestPipeline(
-    operationName: string,
-    params: IngestGetPipelineRequest
-  ) {
-    return this.callAsyncWithDebug({
-      operationName,
-      requestType: '_ingest/pipeline',
-      params,
-      cb: (abortOptions) =>
-        this.esClient.ingest.getPipeline(params, abortOptions),
     });
   }
 }

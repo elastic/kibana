@@ -41,7 +41,7 @@ async function getDiagnosticsReport() {
     opts
   );
 
-  const [dataStream, indexPatternSettings, indexTemplates, indicies] =
+  const [dataStream, indexPatternSettings, indexTemplates, indices] =
     await Promise.all([
       dataStreamsPromise,
       indexPatternSettingsPromise,
@@ -49,7 +49,7 @@ async function getDiagnosticsReport() {
       indicesPromise,
     ]);
 
-  return { dataStream, indexPatternSettings, indexTemplates, indicies };
+  return { dataStream, indexPatternSettings, indexTemplates, indices };
 }
 
 export function DiagnosticsImportExport() {
