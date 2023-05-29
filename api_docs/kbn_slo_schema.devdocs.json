@@ -229,6 +229,52 @@
           },
           {
             "parentPluginId": "@kbn/slo-schema",
+            "id": "def-common.Duration.isEqual",
+            "type": "Function",
+            "tags": [],
+            "label": "isEqual",
+            "description": [],
+            "signature": [
+              "(other: ",
+              {
+                "pluginId": "@kbn/slo-schema",
+                "scope": "common",
+                "docId": "kibKbnSloSchemaPluginApi",
+                "section": "def-common.Duration",
+                "text": "Duration"
+              },
+              ") => boolean"
+            ],
+            "path": "packages/kbn-slo-schema/src/models/duration.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/slo-schema",
+                "id": "def-common.Duration.isEqual.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "other",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/slo-schema",
+                    "scope": "common",
+                    "docId": "kibKbnSloSchemaPluginApi",
+                    "section": "def-common.Duration",
+                    "text": "Duration"
+                  }
+                ],
+                "path": "packages/kbn-slo-schema/src/models/duration.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/slo-schema",
             "id": "def-common.Duration.format",
             "type": "Function",
             "tags": [],
