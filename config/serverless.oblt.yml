@@ -5,6 +5,8 @@ enterpriseSearch.enabled: false
 xpack.cloudSecurityPosture.enabled: false
 xpack.securitySolution.enabled: false
 
+xpack.spaces.enabled: false
+
 ## Enable the Serverless Obsersability plugin
 xpack.serverless.observability.enabled: true
 
