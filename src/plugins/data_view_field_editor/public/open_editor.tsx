@@ -162,6 +162,8 @@ export const getFieldEditorOpener =
           // Runtime field
           field = {
             name: fieldNameToEdit!,
+            customLabel: dataViewField.customLabel,
+            popularity: dataViewField.count,
             format: dataView.getFormatterForFieldNoDefault(fieldNameToEdit!)?.toJSON(),
             ...dataView.getRuntimeField(fieldNameToEdit!)!,
           };
