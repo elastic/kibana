@@ -90,9 +90,7 @@ describe('links', () => {
     expect(filteredLinks).toEqual(links);
   });
 
-  it('should not return any endpoint management link for user with all sub-feature privileges but no user authz', async () => {
-    (calculateEndpointAuthz as jest.Mock).mockReturnValue(getEndpointAuthzInitialStateMock());
-
+  it('should not return any endpoint management link for user with all sub-feature privileges when no user authz', async () => {
     const filteredLinks = await getManagementFilteredLinks(
       coreMockStarted,
       getPlugins([], {}, true)
