@@ -166,31 +166,31 @@ export function updateSearchSource(
   };
 }
 
-const CLEARED_DATA_VIEW_ID = undefined;
-
 async function generateLink(
   searchSource: ISearchSource,
   discoverLocator: LocatorPublic<DiscoverAppLocatorParams>,
   dataViews: DataViewsContract,
-  dataView: DataView,
+  dataViewToUpdate: DataView,
   dateStart: string,
   dateEnd: string,
   spacePrefix: string
 ) {
-  const filters = searchSource.getField('filter') as Filter[];
+  const prevFilters = searchSource.getField('filter') as Filter[];
+
+  // make new adhoc data view
+  const newDataView = await dataViews.create({
+    ...dataViewToUpdate.toSpec(false),
+    version: undefined,
+    id: undefined,
+  });
+  const updatedFilters = updateFilterReferences(prevFilters, dataViewToUpdate.id!, newDataView.id!);
 
   const redirectUrlParams: DiscoverAppLocatorParams = {
-    ...(dataView.isPersisted()
-      ? { dataViewId: dataView.id }
-      : {
-          dataViewSpec: {
-            ...dataView.toSpec(false),
-            version: undefined,
-            fieldAttrs: undefined,
-            id: CLEARED_DATA_VIEW_ID,
-          },
-        }),
-    filters: updateFilterReferences(filters, dataView.id!, CLEARED_DATA_VIEW_ID),
+    dataViewSpec: {
+      ...newDataView.toSpec(false),
+      fieldAttrs: undefined,
+    },
+    filters: updatedFilters,
     query: searchSource.getField('query'),
     timeRange: { from: dateStart, to: dateEnd },
     isAlertResults: true,
@@ -204,7 +204,7 @@ async function generateLink(
   return start + spacePrefix + '/app' + end;
 }
 
-function updateFilterReferences(filters: Filter[], fromDataView: string, toDataView?: string) {
+function updateFilterReferences(filters: Filter[], fromDataView: string, toDataView: string) {
   return (filters || []).map((filter) => {
     if (filter.meta.index === fromDataView) {
       return {
