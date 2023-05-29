@@ -71,6 +71,7 @@ export const monitorListReducer = createReducer(initialState, (builder) => {
     .addCase(fetchMonitorListAction.success, (state, action) => {
       state.loading = false;
       state.loaded = true;
+      state.error = null;
       state.data = action.payload;
     })
     .addCase(fetchMonitorListAction.fail, (state, action) => {
