@@ -207,7 +207,7 @@ describe('execute()', () => {
     expect(requestMock.mock.calls[0][0]).toMatchInlineSnapshot(`
       Object {
         "axios": undefined,
-        "data": "{\\"hits\\":{\\"hits\\":{\\"_source\\":{\\"rawData\\":\\"some data\\",\\"event\\":{\\"type\\":\\"undefined\\"},\\"kibana\\":{\\"alert\\":{\\"severity\\":\\"undefined\\"}}}}}}",
+        "data": "{\\"hits\\":{\\"hits\\":{\\"_source\\":{\\"rawData\\":\\"some data\\",\\"event.type\\":\\"undefined\\",\\"kibana.alert.severity\\":\\"undefined\\"}}}}",
         "headers": Object {
           "d3key": "token",
         },

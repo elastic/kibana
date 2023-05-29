@@ -13,13 +13,13 @@ export const D3_URL_LABEL = i18n.translate(
     defaultMessage: 'URL',
   }
 );
-export const D3_EventType_LABEL = i18n.translate(
+export const D3_EVENTTYPE_LABEL = i18n.translate(
   'xpack.stackConnectors.components.d3security.eventTypeFieldLabel',
   {
     defaultMessage: 'Event Type',
   }
 );
-export const D3_Severity_LABEL = i18n.translate(
+export const D3_SEVERITY_LABEL = i18n.translate(
   'xpack.stackConnectors.components.d3security.severityFieldLabel',
   {
     defaultMessage: 'Severity',
