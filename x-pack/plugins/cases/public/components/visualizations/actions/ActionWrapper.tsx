@@ -1,0 +1,87 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { PropsWithChildren } from 'react';
+import React from 'react';
+import { Router } from 'react-router-dom';
+import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
+
+import { SECURITY_SOLUTION_OWNER } from '../../../../common';
+import type { CaseUIActionProps } from './types';
+import { KibanaContextProvider, useKibana } from '../../../common/lib/kibana';
+import CasesProvider from '../../cases_context';
+import { getCaseOwner, getCasePermissions } from './utils';
+
+export const DEFAULT_DARK_MODE = 'theme:darkMode' as const;
+
+interface Props {
+  caseContextProps: CaseUIActionProps['caseContextProps'];
+  currentAppId?: string;
+}
+
+const ActionWrapperWithContext: React.FC<PropsWithChildren<Props>> = ({
+  children,
+  caseContextProps,
+  currentAppId,
+}) => {
+  const { application } = useKibana().services;
+
+  const owner = getCaseOwner(currentAppId);
+  const casePermissions = getCasePermissions(application.capabilities, owner);
+
+  // TODO: Remove when https://github.com/elastic/kibana/issues/143201 is developed
+  const syncAlerts = owner.includes(SECURITY_SOLUTION_OWNER) ? true : false;
+
+  return (
+    <CasesProvider
+      value={{
+        ...caseContextProps,
+        owner,
+        permissions: casePermissions,
+        features: { alerts: { sync: syncAlerts } },
+      }}
+    >
+      {children}
+    </CasesProvider>
+  );
+};
+
+ActionWrapperWithContext.displayName = 'ActionWrapperWithContext';
+
+type ActionWrapperComponentProps = PropsWithChildren<CaseUIActionProps & { currentAppId?: string }>;
+
+const ActionWrapperComponent: React.FC<ActionWrapperComponentProps> = ({
+  core,
+  plugins,
+  storage,
+  history,
+  children,
+  caseContextProps,
+  currentAppId,
+}) => {
+  return (
+    <KibanaContextProvider
+      services={{
+        ...core,
+        ...plugins,
+        storage,
+      }}
+    >
+      <EuiThemeProvider darkMode={core.uiSettings.get(DEFAULT_DARK_MODE)}>
+        <Router history={history}>
+          <ActionWrapperWithContext caseContextProps={caseContextProps} currentAppId={currentAppId}>
+            {children}
+          </ActionWrapperWithContext>
+        </Router>
+      </EuiThemeProvider>
+    </KibanaContextProvider>
+  );
+};
+
+ActionWrapperComponent.displayName = 'ActionWrapper';
+
+export const ActionWrapper = React.memo(ActionWrapperComponent);

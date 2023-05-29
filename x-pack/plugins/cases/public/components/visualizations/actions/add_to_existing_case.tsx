@@ -6,12 +6,10 @@
  */
 import React, { useEffect, useMemo } from 'react';
 import { unmountComponentAtNode } from 'react-dom';
-import { Router } from 'react-router-dom';
 
 import { createAction } from '@kbn/ui-actions-plugin/public';
 import { isErrorEmbeddable } from '@kbn/embeddable-plugin/public';
 
-import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 
 import type { CaseUI } from '../../../../common';
@@ -23,12 +21,11 @@ import {
   getCaseOwner,
   getCasePermissions,
 } from './utils';
-import { KibanaContextProvider } from '../../../common/lib/kibana';
 
-import CasesProvider from '../../cases_context';
 import type { ActionContext, CaseUIActionProps, DashboardVisualizationEmbeddable } from './types';
 import { useCasesAddToExistingCaseModal } from '../../all_cases/selector_modal/use_cases_add_to_existing_case_modal';
 import { ADD_TO_EXISTING_CASE_DISPLAYNAME } from './translations';
+import { ActionWrapper } from './ActionWrapper';
 
 export const ACTION_ID = 'embeddable_addToExistingCase';
 export const DEFAULT_DARK_MODE = 'theme:darkMode' as const;
@@ -74,8 +71,10 @@ export const createAddToExistingCaseLensAction = ({
   history,
   caseContextProps,
 }: CaseUIActionProps) => {
-  const { application: applicationService, theme, uiSettings } = core;
+  const { application: applicationService, theme } = core;
+
   let currentAppId: string | undefined;
+
   applicationService?.currentAppId$.subscribe((appId) => {
     currentAppId = appId;
   });
@@ -113,31 +112,20 @@ export const createAddToExistingCaseLensAction = ({
         cleanupDom(true);
       };
       const mount = toMountPoint(
-        <KibanaContextProvider
-          services={{
-            ...core,
-            ...plugins,
-            storage,
-          }}
+        <ActionWrapper
+          core={core}
+          caseContextProps={caseContextProps}
+          storage={storage}
+          plugins={plugins}
+          history={history}
+          currentAppId={currentAppId}
         >
-          <EuiThemeProvider darkMode={uiSettings.get(DEFAULT_DARK_MODE)}>
-            <Router history={history}>
-              <CasesProvider
-                value={{
-                  ...caseContextProps,
-                  owner,
-                  permissions: casePermissions,
-                }}
-              >
-                <AddExistingCaseModalWrapper
-                  embeddable={embeddable}
-                  onClose={onClose}
-                  onSuccess={onSuccess}
-                />
-              </CasesProvider>
-            </Router>
-          </EuiThemeProvider>
-        </KibanaContextProvider>,
+          <AddExistingCaseModalWrapper
+            embeddable={embeddable}
+            onClose={onClose}
+            onSuccess={onSuccess}
+          />
+        </ActionWrapper>,
         { theme$: theme.theme$ }
       );
 

@@ -6,27 +6,18 @@
  */
 import React, { useEffect, useMemo } from 'react';
 import { unmountComponentAtNode } from 'react-dom';
-import { Router } from 'react-router-dom';
 
 import { createAction } from '@kbn/ui-actions-plugin/public';
 import { isErrorEmbeddable } from '@kbn/embeddable-plugin/public';
 
-import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { CommentType } from '../../../../common';
-import {
-  getCaseOwner,
-  getCasePermissions,
-  hasCasePermissions,
-  hasInput,
-  isLensEmbeddable,
-} from './utils';
-import { KibanaContextProvider } from '../../../common/lib/kibana';
+import { getCasePermissions, hasCasePermissions, hasInput, isLensEmbeddable } from './utils';
 
 import type { ActionContext, CaseUIActionProps, DashboardVisualizationEmbeddable } from './types';
-import CasesProvider from '../../cases_context';
 import { ADD_TO_CASE_SUCCESS, ADD_TO_NEW_CASE_DISPLAYNAME } from './translations';
 import { useCasesAddToNewCaseFlyout } from '../../create/flyout/use_cases_add_to_new_case_flyout';
+import { ActionWrapper } from './ActionWrapper';
 
 export const ACTION_ID = 'embeddable_addToNewCase';
 export const DEFAULT_DARK_MODE = 'theme:darkMode' as const;
@@ -74,14 +65,15 @@ export const createAddToNewCaseLensAction = ({
   history,
   caseContextProps,
 }: CaseUIActionProps) => {
-  const { application: applicationService, theme, uiSettings } = core;
+  const { application: applicationService, theme } = core;
+
   let currentAppId: string | undefined;
+
   applicationService?.currentAppId$.subscribe((appId) => {
     currentAppId = appId;
   });
 
-  const owner = getCaseOwner(currentAppId);
-  const casePermissions = getCasePermissions(applicationService.capabilities, owner);
+  const casePermissions = getCasePermissions(applicationService.capabilities, []);
 
   return createAction<ActionContext>({
     id: ACTION_ID,
@@ -107,31 +99,20 @@ export const createAddToNewCaseLensAction = ({
       };
 
       const mount = toMountPoint(
-        <KibanaContextProvider
-          services={{
-            ...core,
-            ...plugins,
-            storage,
-          }}
+        <ActionWrapper
+          core={core}
+          caseContextProps={caseContextProps}
+          storage={storage}
+          plugins={plugins}
+          history={history}
+          currentAppId={currentAppId}
         >
-          <EuiThemeProvider darkMode={uiSettings.get(DEFAULT_DARK_MODE)}>
-            <Router history={history}>
-              <CasesProvider
-                value={{
-                  ...caseContextProps,
-                  owner,
-                  permissions: casePermissions,
-                }}
-              >
-                <AddToNewCaseFlyoutWrapper
-                  embeddable={embeddable}
-                  onClose={onFlyoutClose}
-                  onSuccess={onFlyoutClose}
-                />
-              </CasesProvider>
-            </Router>
-          </EuiThemeProvider>
-        </KibanaContextProvider>,
+          <AddToNewCaseFlyoutWrapper
+            embeddable={embeddable}
+            onClose={onFlyoutClose}
+            onSuccess={onFlyoutClose}
+          />
+        </ActionWrapper>,
         { theme$: theme.theme$ }
       );
 
