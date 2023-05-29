@@ -7,8 +7,8 @@
  */
 import { i18n } from '@kbn/i18n';
 import { toMountPoint, wrapWithTheme } from '@kbn/kibana-react-plugin/public';
+import { DiscoverServices } from '@kbn/unified-discover';
 import { discoverRouter } from './discover_router';
-import {DiscoverServices} from "@kbn/unified-discover";
 
 export const renderApp = (element: HTMLElement, services: DiscoverServices, isDev: boolean) => {
   const { history: getHistory, capabilities, chrome, data, core } = services;

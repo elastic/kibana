@@ -14,7 +14,7 @@ import { mockTopNavMenu } from './__mocks__/top_nav_menu';
 import { ContextAppContent } from './context_app_content';
 import { dataViewMock } from '../../__mocks__/data_view';
 import { ContextApp } from './context_app';
-import type { DiscoverServices, HistoryLocationState } from "@kbn/unified-discover";
+import type { DiscoverServices, HistoryLocationState } from '@kbn/unified-discover';
 import { dataViewsMock } from '../../__mocks__/data_views';
 import { act } from 'react-dom/test-utils';
 import { uiSettingsMock } from '../../__mocks__/ui_settings';

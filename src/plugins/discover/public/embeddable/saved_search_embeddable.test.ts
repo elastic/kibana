@@ -21,7 +21,7 @@ import { SHOW_FIELD_STATISTICS } from '../../common';
 import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import { SavedSearchEmbeddableComponent } from './saved_search_embeddable_component';
 import { VIEW_MODE } from '../../common/constants';
-import {DiscoverServices} from "@kbn/unified-discover/src";
+import { DiscoverServices } from '@kbn/unified-discover/src';
 
 let discoverComponent: ReactWrapper;
 

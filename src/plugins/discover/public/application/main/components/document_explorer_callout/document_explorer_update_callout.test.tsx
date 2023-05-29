@@ -16,7 +16,7 @@ import {
 import { LocalStorageMock } from '../../../../__mocks__/local_storage_mock';
 import { discoverServiceMock } from '../../../../__mocks__/services';
 import { DiscoverTourProvider } from '../../../../components/discover_tour';
-import {DiscoverServices} from "@kbn/unified-discover";
+import { DiscoverServices } from '@kbn/unified-discover';
 
 const defaultServices = {
   ...discoverServiceMock,

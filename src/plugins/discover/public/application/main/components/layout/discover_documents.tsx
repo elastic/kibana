@@ -19,7 +19,7 @@ import { css } from '@emotion/react';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { SortOrder } from '@kbn/saved-search-plugin/public';
 import { DocViewer } from '@kbn/unified-doc-viewer-plugin/public';
-import type { DataTableRecord } from "@kbn/unified-discover";
+import type { DataTableRecord } from '@kbn/unified-discover';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer';
 import { useInternalStateSelector } from '../../services/discover_internal_state_container';
 import { useAppStateSelector } from '../../services/discover_app_state_container';

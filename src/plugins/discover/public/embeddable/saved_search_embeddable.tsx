@@ -37,6 +37,7 @@ import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { buildDataTableRecord } from '@kbn/unified-discover';
 import type { DataTableRecord, EsHitRecord } from '@kbn/unified-discover';
+import { DiscoverServices } from '@kbn/unified-discover/src';
 import { VIEW_MODE } from '../../common/constants';
 import { getSortForEmbeddable, SortPair } from '../utils/sorting';
 import { ISearchEmbeddable, SearchInput, SearchOutput } from './types';
@@ -61,7 +62,6 @@ import { isTextBasedQuery } from '../application/main/utils/is_text_based_query'
 import { getValidViewMode } from '../application/main/utils/get_valid_view_mode';
 import { fetchSql } from '../application/main/utils/fetch_sql';
 import { ADHOC_DATA_VIEW_RENDER_EVENT } from '../constants';
-import {DiscoverServices} from "@kbn/unified-discover/src";
 
 export type SearchProps = Partial<DiscoverGridProps> &
   Partial<DocTableProps> & {

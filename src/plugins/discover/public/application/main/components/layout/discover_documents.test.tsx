@@ -21,7 +21,7 @@ import { buildDataTableRecord } from '@kbn/unified-discover';
 import { DiscoverMainProvider } from '../../services/discover_state_provider';
 import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
 import { DiscoverAppState } from '../../services/discover_app_state_container';
-import type { EsHitRecord } from "@kbn/unified-discover";
+import type { EsHitRecord } from '@kbn/unified-discover';
 
 setHeaderActionMenuMounter(jest.fn());
 

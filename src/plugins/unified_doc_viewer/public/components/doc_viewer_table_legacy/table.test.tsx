@@ -14,7 +14,7 @@ import { DataView } from '@kbn/data-views-plugin/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { buildDataTableRecord } from '@kbn/unified-discover';
 import type { UnifiedDocViewerServices } from '@kbn/unified-doc-viewer';
-import {DiscoverServices} from "@kbn/unified-discover/src";
+import { DiscoverServices } from '@kbn/unified-discover/src';
 
 const services = {
   uiSettings: {

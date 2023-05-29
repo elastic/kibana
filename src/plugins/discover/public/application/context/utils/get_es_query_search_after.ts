@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 import type { EsQuerySearchAfter } from '@kbn/data-plugin/common';
+import { DataTableRecord } from '@kbn/unified-discover';
 import { SurrDocType } from '../services/context';
-import {DataTableRecord} from "@kbn/unified-discover";
 
 /**
  * Get the searchAfter query value for elasticsearch

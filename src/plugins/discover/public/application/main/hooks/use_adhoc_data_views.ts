@@ -8,7 +8,7 @@
 
 import { useEffect } from 'react';
 import { METRIC_TYPE } from '@kbn/analytics';
-import type { DiscoverServices } from "@kbn/unified-discover";
+import type { DiscoverServices } from '@kbn/unified-discover';
 import { useSavedSearch } from '../services/discover_state_provider';
 import { isTextBasedQuery } from '../utils/is_text_based_query';
 import { useAppStateSelector } from '../services/discover_app_state_container';

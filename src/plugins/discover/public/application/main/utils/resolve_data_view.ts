@@ -10,8 +10,8 @@ import { i18n } from '@kbn/i18n';
 import type { DataView, DataViewListItem, DataViewSpec } from '@kbn/data-views-plugin/public';
 import type { ToastsStart } from '@kbn/core/public';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
+import { DiscoverServices } from '@kbn/unified-discover';
 import { DiscoverInternalStateContainer } from '../services/discover_internal_state_container';
-import {DiscoverServices} from "@kbn/unified-discover";
 interface DataViewData {
   /**
    * List of existing data views

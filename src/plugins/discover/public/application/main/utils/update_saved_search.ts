@@ -8,9 +8,9 @@
 import { SavedSearch, SortOrder } from '@kbn/saved-search-plugin/public';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { cloneDeep } from 'lodash';
+import { DiscoverServices } from '@kbn/unified-discover';
 import { isTextBasedQuery } from './is_text_based_query';
 import { DiscoverAppState } from '../services/discover_app_state_container';
-import {DiscoverServices} from "@kbn/unified-discover";
 
 /**
  * Updates the saved search with a given data view & Appstate

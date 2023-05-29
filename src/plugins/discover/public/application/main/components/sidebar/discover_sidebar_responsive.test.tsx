@@ -34,7 +34,7 @@ import { resetExistingFieldsCache } from '@kbn/unified-field-list-plugin/public/
 import { createDiscoverServicesMock } from '../../../../__mocks__/services';
 import type { AggregateQuery, Query } from '@kbn/es-query';
 import { buildDataTableRecord } from '@kbn/unified-discover';
-import type { DataTableRecord, DiscoverServices} from '@kbn/unified-discover';
+import type { DataTableRecord, DiscoverServices } from '@kbn/unified-discover';
 
 jest.mock('@kbn/unified-field-list-plugin/public/services/field_stats', () => ({
   loadFieldStats: jest.fn().mockResolvedValue({

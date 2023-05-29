@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import type { Filter } from '@kbn/es-query';
-import type { DataTableRecord } from "@kbn/unified-discover";
+import type { DataTableRecord } from '@kbn/unified-discover';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { DataPublicPluginStart, ISearchSource } from '@kbn/data-plugin/public';
 import { reverseSortDir, SortDirection } from '../utils/sorting';

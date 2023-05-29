@@ -13,13 +13,12 @@ import { Filter } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { formatFieldValue } from '@kbn/unified-discover';
 import { DataTableRecord, EsHitRecord } from '@kbn/unified-discover';
+import type { DocViewFilterFn, DocViewRenderProps } from '@kbn/unified-doc-viewer/public/types';
 import { TableCell } from './table_row/table_cell';
 import { formatRow, formatTopLevelObject } from '../utils/row_formatter';
 import { TableRowDetails } from './table_row_details';
 import { useDiscoverServices } from '../../../hooks/use_discover_services';
 import { DOC_HIDE_TIME_COLUMN_SETTING, MAX_DOC_FIELDS_DISPLAYED } from '../../../../common';
-import type { DocViewFilterFn, DocViewRenderProps } from '@kbn/unified-doc-viewer/public/types';
-
 
 export type DocTableRow = EsHitRecord & {
   isAnchor?: boolean;

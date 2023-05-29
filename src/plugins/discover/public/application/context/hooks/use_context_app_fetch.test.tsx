@@ -22,7 +22,7 @@ import { createContextSearchSourceStub } from '../services/_stubs';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { themeServiceMock } from '@kbn/core/public/mocks';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import {DiscoverServices} from "@kbn/unified-discover";
+import { DiscoverServices } from '@kbn/unified-discover';
 
 const mockFilterManager = createFilterManagerMock();
 

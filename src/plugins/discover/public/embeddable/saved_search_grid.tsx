@@ -10,7 +10,7 @@ import { DiscoverGrid, DiscoverGridProps } from '../components/discover_grid/dis
 import './saved_search_grid.scss';
 import { DiscoverGridFlyout } from '../components/discover_grid/discover_grid_flyout';
 import { SavedSearchEmbeddableBase } from './saved_search_embeddable_base';
-import {DataTableRecord} from "@kbn/unified-discover";
+import { DataTableRecord } from '@kbn/unified-discover';
 
 export interface DiscoverGridEmbeddableProps extends DiscoverGridProps {
   totalHitCount: number;

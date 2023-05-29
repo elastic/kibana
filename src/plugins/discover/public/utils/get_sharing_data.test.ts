@@ -17,7 +17,7 @@ import {
 } from '../../common';
 import { dataViewMock } from '../__mocks__/data_view';
 import { getSharingData, showPublicUrlSwitch } from './get_sharing_data';
-import type { DiscoverServices } from "@kbn/unified-discover";
+import type { DiscoverServices } from '@kbn/unified-discover';
 
 describe('getSharingData', () => {
   let services: DiscoverServices;

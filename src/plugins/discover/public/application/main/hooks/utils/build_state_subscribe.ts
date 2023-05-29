@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import { isEqual } from 'lodash';
-import { DiscoverServices } from "@kbn/unified-discover";
+import { DiscoverServices } from '@kbn/unified-discover';
 import type { DiscoverInternalStateContainer } from '../../services/discover_internal_state_container';
 import type { DiscoverSavedSearchContainer } from '../../services/discover_saved_search_container';
 import type { DiscoverDataStateContainer } from '../../services/discover_data_state_container';

@@ -21,10 +21,10 @@ import {
   getSavedSearchUrl,
   throwErrorOnSavedSearchUrlConflict,
 } from '@kbn/saved-search-plugin/public';
+import { DiscoverServices } from '@kbn/unified-discover/src';
 import { SearchInput, SearchOutput } from './types';
 import { SEARCH_EMBEDDABLE_TYPE } from './constants';
 import { SavedSearchEmbeddable } from './saved_search_embeddable';
-import {DiscoverServices} from "@kbn/unified-discover/src";
 
 export interface StartServices {
   executeTriggerActions: UiActionsStart['executeTriggerActions'];

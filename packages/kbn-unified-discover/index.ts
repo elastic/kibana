@@ -14,4 +14,9 @@ export {
   getShouldShowFieldHandler,
   getDocId,
 } from './src';
-export type { DataTableRecord, EsHitRecord, DiscoverServices, HistoryLocationState } from './src/types';
+export type {
+  DataTableRecord,
+  EsHitRecord,
+  DiscoverServices,
+  HistoryLocationState,
+} from './src/types';

@@ -7,7 +7,7 @@
  */
 import { DataView } from '@kbn/data-views-plugin/common';
 import { useEffect, useMemo, useState } from 'react';
-import type { DiscoverServices } from "@kbn/unified-discover";
+import type { DiscoverServices } from '@kbn/unified-discover';
 import { CONTEXT_DEFAULT_SIZE_SETTING } from '../../../../common';
 import { AppState, getState, GlobalState } from '../services/context_state';
 

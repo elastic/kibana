@@ -12,15 +12,9 @@ import { EuiInMemoryTable } from '@elastic/eui';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { getFieldIconType } from '@kbn/unified-field-list-plugin/public';
 import { getShouldShowFieldHandler } from '@kbn/unified-discover';
-import { formatFieldValue, DataTableRecord} from '@kbn/unified-discover';
-import {
-  getIgnoredReason,
-  isNestedFieldParent,
-} from '@kbn/unified-doc-viewer/public';
-import type {
-  DocViewFilterFn,
-  FieldRecordLegacy,
-} from '@kbn/unified-doc-viewer/public/types';
+import { formatFieldValue, DataTableRecord } from '@kbn/unified-discover';
+import { getIgnoredReason, isNestedFieldParent } from '@kbn/unified-doc-viewer/public';
+import type { DocViewFilterFn, FieldRecordLegacy } from '@kbn/unified-doc-viewer/public/types';
 import { useUnifiedDocViewerServices } from '../../hooks';
 import { ACTIONS_COLUMN, MAIN_COLUMNS } from './table_columns';
 

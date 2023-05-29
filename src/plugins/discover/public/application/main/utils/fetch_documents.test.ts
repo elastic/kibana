@@ -15,7 +15,7 @@ import { IKibanaSearchResponse } from '@kbn/data-plugin/public';
 import { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import { FetchDeps } from './fetch_all';
 import { dataViewMock } from '../../../__mocks__/data_view';
-import {EsHitRecord} from "@kbn/unified-discover";
+import { EsHitRecord } from '@kbn/unified-discover';
 
 const getDeps = () =>
   ({

@@ -24,7 +24,6 @@ import { DiscoverAppState } from '../services/discover_app_state_container';
 import { DiscoverStateContainer } from '../services/discover_state';
 import { VIEW_MODE } from '@kbn/saved-search-plugin/public';
 
-
 function getHookProps(
   query: AggregateQuery | Query | undefined,
   dataViewsService?: DataViewsContract,

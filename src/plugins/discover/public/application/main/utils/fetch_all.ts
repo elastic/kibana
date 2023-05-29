@@ -8,6 +8,7 @@
 import { Adapters } from '@kbn/inspector-plugin/common';
 import type { SavedSearch, SortOrder } from '@kbn/saved-search-plugin/public';
 import { BehaviorSubject, filter, firstValueFrom, map, merge, scan } from 'rxjs';
+import { DiscoverServices } from '@kbn/unified-discover';
 import { DiscoverAppState } from '../services/discover_app_state_container';
 import { updateVolatileSearchSource } from './update_search_source';
 import { getRawRecordType } from './get_raw_record_type';
@@ -23,7 +24,6 @@ import { fetchDocuments } from './fetch_documents';
 import { FetchStatus } from '../../types';
 import { DataMsg, RecordRawType, SavedSearchData } from '../services/discover_data_state_container';
 import { fetchSql } from './fetch_sql';
-import {DiscoverServices} from "@kbn/unified-discover";
 
 export interface FetchDeps {
   abortController: AbortController;

@@ -10,6 +10,7 @@ import { cloneDeep, isEqual } from 'lodash';
 import { IUiSettingsClient } from '@kbn/core/public';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { getChartHidden } from '@kbn/unified-histogram-plugin/public';
+import { DiscoverServices } from '@kbn/unified-discover';
 import { DiscoverAppState } from '../services/discover_app_state_container';
 import { getDefaultSort, getSortArray } from '../../../utils/sorting';
 import {
@@ -20,7 +21,6 @@ import {
 } from '../../../../common';
 import { isTextBasedQuery } from './is_text_based_query';
 import { getValidViewMode } from './get_valid_view_mode';
-import {DiscoverServices} from "@kbn/unified-discover";
 
 function getDefaultColumns(savedSearch: SavedSearch, uiSettings: IUiSettingsClient) {
   if (savedSearch.columns && savedSearch.columns.length > 0) {

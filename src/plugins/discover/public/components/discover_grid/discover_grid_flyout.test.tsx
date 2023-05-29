@@ -20,8 +20,11 @@ import { buildDataTableRecord } from '@kbn/unified-discover';
 import { act } from 'react-dom/test-utils';
 import { ReactWrapper } from 'enzyme';
 import type { DataTableRecord, EsHitRecord } from '@kbn/unified-discover';
-import { DocViewsRegistry, setDocViewsRegistry} from "@kbn/unified-doc-viewer-plugin/public/services";
-import { DiscoverServices } from "@kbn/unified-discover/src";
+import {
+  DocViewsRegistry,
+  setDocViewsRegistry,
+} from '@kbn/unified-doc-viewer-plugin/public/services';
+import { DiscoverServices } from '@kbn/unified-discover/src';
 
 const waitNextTick = () => new Promise((resolve) => setTimeout(resolve, 0));
 

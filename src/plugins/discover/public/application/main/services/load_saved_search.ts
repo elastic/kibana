@@ -7,6 +7,7 @@
  */
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { cloneDeep, isEqual } from 'lodash';
+import { DiscoverServices } from '@kbn/unified-discover';
 import { isTextBasedQuery } from '../utils/is_text_based_query';
 import { loadAndResolveDataView } from '../utils/resolve_data_view';
 import { DiscoverInternalStateContainer } from './discover_internal_state_container';
@@ -21,7 +22,6 @@ import {
   DiscoverAppStateContainer,
   getInitialState,
 } from './discover_app_state_container';
-import {DiscoverServices} from "@kbn/unified-discover";
 
 interface LoadSavedSearchDeps {
   appStateContainer: DiscoverAppStateContainer;
