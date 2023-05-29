@@ -57,6 +57,7 @@ import { filterByVisibleOperation } from '../util';
 import { getColumnTimeShiftWarnings, getDateHistogramInterval } from '../../../../time_shift_utils';
 import { getDocumentationSections } from './formula_help';
 import { nonNullable } from '../../../../../../utils';
+import { UI_SETTINGS } from '@kbn/data-plugin/public';
 
 function tableHasData(
   activeData: ParamEditorProps<FormulaIndexPatternColumn>['activeData'],
@@ -109,6 +110,7 @@ export function FormulaEditor({
   dateHistogramInterval,
   hasData,
   dateRange,
+  uiSettings,
 }: Omit<ParamEditorProps<FormulaIndexPatternColumn>, 'activeData'> & {
   dateHistogramInterval: ReturnType<typeof getDateHistogramInterval>;
   hasData: boolean;
@@ -356,7 +358,8 @@ export function FormulaEditor({
                   id,
                   indexPattern,
                   dateRange,
-                  visibleOperationsMap
+                  visibleOperationsMap,
+                  uiSettings.get(UI_SETTINGS.HISTOGRAM_BAR_TARGET)
                 );
                 if (messages) {
                   const startPosition = offsetToRowColumn(text, locations[id].min);

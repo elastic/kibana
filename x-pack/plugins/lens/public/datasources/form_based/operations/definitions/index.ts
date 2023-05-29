@@ -49,8 +49,9 @@ import { countOperation } from './count';
 import {
   mathOperation,
   formulaOperation,
-  intervalOperation,
+  timeRangeOperation,
   nowOperation,
+  intervalOperation,
   constantsOperation,
 } from './formula';
 import { staticValueOperation } from './static_value';
@@ -114,8 +115,9 @@ export type { RangeIndexPatternColumn } from './ranges';
 export type {
   FormulaIndexPatternColumn,
   MathIndexPatternColumn,
-  IntervalIndexPatternColumn,
+  TimeRangeIndexPatternColumn,
   NowIndexPatternColumn,
+  IntervalIndexPatternColumn,
   ConstantIndexPatternColumn,
 } from './formula';
 export type { StaticValueIndexPatternColumn } from './static_value';
@@ -151,8 +153,9 @@ const internalOperationDefinitions = [
   overallAverageOperation,
   staticValueOperation,
   timeScaleOperation,
-  intervalOperation,
+  timeRangeOperation,
   nowOperation,
+  intervalOperation,
   constantsOperation,
 ];
 
@@ -329,7 +332,8 @@ interface BaseOperationDefinitionProps<
     columnId: string,
     indexPattern: IndexPattern,
     dateRange?: DateRange,
-    operationDefinitionMap?: Record<string, GenericOperationDefinition>
+    operationDefinitionMap?: Record<string, GenericOperationDefinition>,
+    targetBars?: number
   ) => FieldBasedOperationErrorMessage[] | undefined;
 
   /*
@@ -687,7 +691,7 @@ interface ManagedReferenceOperationDefinition<C extends BaseIndexPatternColumn> 
     layer: FormBasedLayer,
     columnId: string,
     indexPattern: IndexPattern,
-    dateUtils?: { dateRange?: DateRange; now?: Date }
+    context?: { dateRange?: DateRange; now?: Date; targetBars?: number }
   ) => ExpressionAstFunction[];
   /**
    * Managed references control the IDs of their inner columns, so we need to be able to copy from the

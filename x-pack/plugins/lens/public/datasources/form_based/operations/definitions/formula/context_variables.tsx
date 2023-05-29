@@ -7,44 +7,166 @@
 
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
+import { calcAutoIntervalNear, UI_SETTINGS } from '@kbn/data-plugin/common';
+import type { DateHistogramIndexPatternColumn, FormBasedLayer } from '../../../../..';
 import type { DateRange } from '../../../../../../common/types';
-import type { OperationDefinition } from '..';
+import type { GenericOperationDefinition, OperationDefinition } from '..';
 import type { ReferenceBasedIndexPatternColumn, ValueFormatConfig } from '../column_types';
 import { getColumnOrder } from '../../layer_helpers';
+import { IndexPattern } from '../../../../../types';
+import { isColumnOfType } from '../helpers';
 
 export interface ContextValues {
   dateRange?: DateRange;
   now?: Date;
+  targetBars?: number;
 }
 
-export interface ConstantIndexPatternColumn extends ReferenceBasedIndexPatternColumn {
-  operationType: 'constant';
-  params?: {
-    format?: ValueFormatConfig;
-    value: 'interval' | 'now';
-  };
+export interface TimeRangeIndexPatternColumn extends ReferenceBasedIndexPatternColumn {
+  operationType: 'time_range';
 }
 
-export interface IntervalIndexPatternColumn extends ReferenceBasedIndexPatternColumn {
-  operationType: 'interval';
+function getTimeRangeFromContext({ dateRange }: ContextValues) {
+  return dateRange ? moment(dateRange.toDate).diff(moment(dateRange.fromDate)) : 0;
 }
+
+function getTimeRangeErrorMessages(
+  layer: FormBasedLayer,
+  columnId: string,
+  indexPattern: IndexPattern,
+  dateRange?: DateRange | undefined
+) {
+  if (!indexPattern.timeFieldName) {
+    return [
+      i18n.translate('xpack.lens.indexPattern.dateRange.dataViewNoTimeBased', {
+        defaultMessage: 'The current dataView is not time based',
+      }),
+    ];
+  }
+  if (!dateRange) {
+    return [
+      i18n.translate('xpack.lens.indexPattern.dateRange.noTimeRange', {
+        defaultMessage: 'The current time range interval is not available',
+      }),
+    ];
+  }
+  return undefined;
+}
+
+export const timeRangeOperation = createContextValueBasedOperation<TimeRangeIndexPatternColumn>({
+  type: 'time_range',
+  label: 'Time range',
+  description: i18n.translate('xpack.lens.indexPattern.timeRange.documentation.markdown', {
+    defaultMessage: `
+The current time range expressed in milliseconds (ms).
+    `,
+  }),
+  getContextValue: getTimeRangeFromContext,
+  getErrorMessage: getTimeRangeErrorMessages,
+});
 
 export interface NowIndexPatternColumn extends ReferenceBasedIndexPatternColumn {
   operationType: 'now';
 }
 
-type ConstantsIndexPatternColumn = IntervalIndexPatternColumn | NowIndexPatternColumn;
+function getNowFromContext({ now }: ContextValues) {
+  return now == null ? moment().valueOf() : +now;
+}
+function getNowErrorMessage() {
+  return undefined;
+}
+
+export const nowOperation = createContextValueBasedOperation<NowIndexPatternColumn>({
+  type: 'now',
+  label: 'Current now',
+  description: i18n.translate('xpack.lens.indexPattern.now.documentation.markdown', {
+    defaultMessage: `
+  The current now moment used in Kibana expressed in milliseconds (ms).
+      `,
+  }),
+  getContextValue: getNowFromContext,
+  getErrorMessage: getNowErrorMessage,
+});
+
+export interface IntervalIndexPatternColumn extends ReferenceBasedIndexPatternColumn {
+  operationType: 'interval';
+}
+
+function getIntervalFromContext(context: ContextValues) {
+  return context.dateRange && context.targetBars
+    ? calcAutoIntervalNear(context.targetBars, getTimeRangeFromContext(context)).asMilliseconds()
+    : 0;
+}
+
+function getIntervalErrorMessages(
+  layer: FormBasedLayer,
+  columnId: string,
+  indexPattern: IndexPattern,
+  dateRange?: DateRange | undefined,
+  operationDefinitionMap?: Record<string, GenericOperationDefinition> | undefined,
+  targetBars?: number
+) {
+  const errors = [];
+  if (!targetBars) {
+    errors.push(
+      i18n.translate('xpack.lens.indexPattern.interval.noTargetBars', {
+        defaultMessage: `Missing "{uiSettingVar}" value`,
+        values: {
+          uiSettingVar: UI_SETTINGS.HISTOGRAM_BAR_TARGET,
+        },
+      })
+    );
+  }
+  if (
+    !Object.values(layer.columns).some((column) =>
+      isColumnOfType<DateHistogramIndexPatternColumn>('date_histogram', column)
+    )
+  ) {
+    errors.push(
+      i18n.translate('xpack.lens.indexPattern.interval.noDateHistogramColumn', {
+        defaultMessage: 'Cannot compute an interval without a date histogram column configured',
+      })
+    );
+  }
+  if (!dateRange) {
+    errors.push(
+      i18n.translate('xpack.lens.indexPattern.interval.noTimeRange', {
+        defaultMessage: 'The current time range interval is not available',
+      })
+    );
+  }
+  return errors?.length ? errors : undefined;
+}
+
+export const intervalOperation = createContextValueBasedOperation<IntervalIndexPatternColumn>({
+  type: 'interval',
+  label: 'Date histogram interval',
+  description: i18n.translate('xpack.lens.indexPattern.interval.documentation.markdown', {
+    defaultMessage: `
+  The current date histogram interval bucket expressed in milliseconds (ms).
+      `,
+  }),
+  getContextValue: getIntervalFromContext,
+  getErrorMessage: getIntervalErrorMessages,
+});
+
+type ConstantsIndexPatternColumn =
+  | IntervalIndexPatternColumn
+  | TimeRangeIndexPatternColumn
+  | NowIndexPatternColumn;
 
 function createContextValueBasedOperation<ColumnType extends ConstantsIndexPatternColumn>({
   label,
   type,
   getContextValue,
+  getErrorMessage,
   description,
 }: {
   label: string;
   type: ColumnType['operationType'];
   description: string;
   getContextValue: (context: ContextValues) => number;
+  getErrorMessage: OperationDefinition<ColumnType, 'managedReference'>['getErrorMessage'];
 }): OperationDefinition<ColumnType, 'managedReference'> {
   return {
     type,
@@ -57,6 +179,7 @@ function createContextValueBasedOperation<ColumnType extends ConstantsIndexPatte
     getDisabledStatus() {
       return undefined;
     },
+    getErrorMessage,
     getPossibleOperation() {
       return {
         dataType: 'number',
@@ -89,9 +212,7 @@ function createContextValueBasedOperation<ColumnType extends ConstantsIndexPatte
       ];
     },
     createCopy(layers, source, target) {
-      const currentColumn = layers[source.layerId].columns[
-        source.columnId
-      ] as IntervalIndexPatternColumn;
+      const currentColumn = layers[source.layerId].columns[source.columnId] as ColumnType;
       const targetLayer = layers[target.layerId];
       const columns = {
         ...targetLayer.columns,
@@ -114,40 +235,42 @@ function createContextValueBasedOperation<ColumnType extends ConstantsIndexPatte
   };
 }
 
-export const intervalOperation = createContextValueBasedOperation<IntervalIndexPatternColumn>({
-  type: 'interval',
-  label: 'Time range interval',
-  description: i18n.translate('xpack.lens.indexPattern.interval.documentation.markdown', {
-    defaultMessage: `
-The current time range expressed in milliseconds (ms).
-    `,
-  }),
-  getContextValue: ({ dateRange }) => {
-    return dateRange ? moment(dateRange.toDate).diff(moment(dateRange.fromDate)) : 0;
-  },
-});
+export interface ConstantIndexPatternColumn extends ReferenceBasedIndexPatternColumn {
+  operationType: 'constant';
+  params?: {
+    format?: ValueFormatConfig;
+    value: 'time_range' | 'interval' | 'now';
+  };
+}
 
-export const nowOperation = createContextValueBasedOperation<NowIndexPatternColumn>({
-  type: 'now',
-  label: 'Current now',
-  description: i18n.translate('xpack.lens.indexPattern.now.documentation.markdown', {
-    defaultMessage: `
-  The current now moment used in Kibana expressed in milliseconds (ms).
-      `,
-  }),
-  getContextValue: ({ now }) => {
-    return now == null ? moment().valueOf() : +now;
-  },
-});
-
-function findContextValue(column: ConstantIndexPatternColumn, context: ContextValues) {
-  if (column.params?.value === 'interval') {
-    return context.dateRange
-      ? moment(context.dateRange.toDate).diff(moment(context.dateRange.fromDate))
-      : 0;
+function getConstantsErrorMessage(
+  layer: FormBasedLayer,
+  columnId: string,
+  indexPattern: IndexPattern,
+  dateRange?: DateRange | undefined
+) {
+  const column = layer.columns[columnId] as ConstantIndexPatternColumn;
+  if (column.params?.value === 'time_range') {
+    return getTimeRangeErrorMessages(layer, columnId, indexPattern, dateRange);
   }
   if (column.params?.value === 'now') {
-    return context.now == null ? moment().valueOf() : +context.now;
+    return getNowErrorMessage();
+  }
+  if (column.params?.value === 'interval') {
+    return getIntervalErrorMessages(layer, columnId, indexPattern);
+  }
+  return [];
+}
+
+function findContextValue(column: ConstantIndexPatternColumn, context: ContextValues) {
+  if (column.params?.value === 'time_range') {
+    return getTimeRangeFromContext(context);
+  }
+  if (column.params?.value === 'now') {
+    return getNowFromContext(context);
+  }
+  if (column.params?.value === 'interval') {
+    return getIntervalFromContext(context);
   }
 }
 
@@ -160,12 +283,13 @@ export const constantsOperation: OperationDefinition<
   input: 'managedReference',
   selectionStyle: 'hidden',
   usedInMath: true,
-  operationParams: [{ name: 'value', type: 'string', required: true, defaultValue: 'interval' }],
+  operationParams: [{ name: 'value', type: 'string', required: true, defaultValue: 'time_range' }],
   getDefaultLabel: () => 'Constants',
   isTransferable: () => true,
   getDisabledStatus() {
     return undefined;
   },
+  getErrorMessage: getConstantsErrorMessage,
   getPossibleOperation() {
     return {
       dataType: 'number',
@@ -181,7 +305,7 @@ export const constantsOperation: OperationDefinition<
       isBucketed: false,
       scale: 'ratio',
       params: {
-        value: columnParams?.value || 'interval',
+        value: columnParams?.value || 'time_range',
       },
       references: [],
     };
@@ -203,7 +327,7 @@ export const constantsOperation: OperationDefinition<
   createCopy(layers, source, target) {
     const currentColumn = layers[source.layerId].columns[
       source.columnId
-    ] as IntervalIndexPatternColumn;
+    ] as ConstantIndexPatternColumn;
     const targetLayer = layers[target.layerId];
     const columns = {
       ...targetLayer.columns,
@@ -221,11 +345,12 @@ export const constantsOperation: OperationDefinition<
   documentation: {
     section: 'constants',
     signature: i18n.translate('xpack.lens.indexPattern.constants.signature', {
-      defaultMessage: '[value: "interval" | "now"]',
+      defaultMessage: '[value: "time_range" | "now" | "interval"]',
     }),
     description: i18n.translate('xpack.lens.indexPattern.constants.documentation.markdown', {
       defaultMessage: `
-  The requested context token value returned as number. Date values (like \`"interval"\` or \`"now"\`) are expressed in milliseconds (ms).
+  The requested context value returned as number. Date values (like \`"time_range"\`) are expressed in milliseconds (ms).
+  The \`"interval"\` value requires a date histogram column to be retrieved.
       `,
     }),
   },

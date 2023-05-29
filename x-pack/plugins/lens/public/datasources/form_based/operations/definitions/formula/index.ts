@@ -14,8 +14,14 @@ export type { MathIndexPatternColumn } from './math';
 export { mathOperation } from './math';
 
 export type {
-  IntervalIndexPatternColumn,
+  TimeRangeIndexPatternColumn,
   NowIndexPatternColumn,
   ConstantIndexPatternColumn,
+  IntervalIndexPatternColumn,
 } from './context_variables';
-export { intervalOperation, nowOperation, constantsOperation } from './context_variables';
+export {
+  timeRangeOperation,
+  nowOperation,
+  constantsOperation,
+  intervalOperation,
+} from './context_variables';
