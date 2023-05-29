@@ -14,9 +14,10 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import useMount from 'react-use/lib/useMount';
 import useAsync from 'react-use/lib/useAsync';
+import deepEqual from 'fast-deep-equal';
 
 import {
   EuiFlyoutHeader,
@@ -114,6 +115,7 @@ export const ControlEditor = ({
     }),
     [currentTitle, defaultTitle, selectedField, selectedDataViewId, customSettings]
   );
+  const startingInput = useRef(currentInput);
 
   useMount(() => {
     let mounted = true;
@@ -126,6 +128,7 @@ export const ControlEditor = ({
         embeddable?.getInput().dataViewId ?? getRelevantDataViewId?.() ?? (await getDefaultId());
       if (initialId) {
         setSelectedDataViewId(initialId);
+        startingInput.current = { ...startingInput.current, dataViewId: initialId };
       }
     })();
     return () => {
@@ -327,9 +330,16 @@ export const ControlEditor = ({
               aria-label={`cancel-${title}`}
               data-test-subj="control-editor-cancel"
               iconType="cross"
-              onClick={() =>
-                onCancel({ input: currentInput, grow: currentGrow, width: currentWidth })
-              }
+              onClick={() => {
+                const inputToReturn = deepEqual(startingInput.current, currentInput)
+                  ? {}
+                  : currentInput;
+                onCancel({
+                  input: inputToReturn,
+                  grow: currentGrow,
+                  width: currentWidth,
+                });
+              }}
             >
               {ControlGroupStrings.manageControl.getCancelTitle()}
             </EuiButtonEmpty>

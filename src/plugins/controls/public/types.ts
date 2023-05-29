@@ -76,8 +76,8 @@ export interface DataControlFieldRegistry {
 
 export interface DataControlEditorChanges {
   input: Partial<DataControlInput>;
-  width: ControlWidth;
-  grow: boolean;
+  width?: ControlWidth;
+  grow?: boolean;
 }
 
 /**
