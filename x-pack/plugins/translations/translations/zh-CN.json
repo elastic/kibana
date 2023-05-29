@@ -1248,7 +1248,6 @@
     "dashboard.topNav.cloneModal.enterNewNameForDashboardDescription": "请为您的仪表板输入新的名称。",
     "dashboard.topNav.labsButtonAriaLabel": "实验",
     "dashboard.topNav.labsConfigDescription": "实验",
-    "dashboard.topNav.saveModal.descriptionFormRowLabel": "描述",
     "dashboard.topNav.saveModal.objectType": "仪表板",
     "dashboard.topNav.saveModal.storeTimeWithDashboardFormRowHelpText": "每次加载此仪表板时，都会将时间筛选更改为当前选定的时间。",
     "dashboard.topNav.saveModal.storeTimeWithDashboardFormRowLabel": "将时间随仪表板保存",
