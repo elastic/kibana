@@ -11,8 +11,8 @@ import { buildDataTableRecord } from '@kbn/unified-discover';
 import { reduce } from 'rxjs/operators';
 import { SearchSource } from '@kbn/data-plugin/public';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
-import { savedSearchMock } from '../../../__mocks__/saved_search';
-import { discoverServiceMock } from '../../../__mocks__/services';
+import { savedSearchMock } from '../../../../../../../packages/kbn-unified-discover/src/__mocks__/saved_search';
+import { discoverServiceMock } from '../../../../../../../packages/kbn-unified-discover/src/__mocks__/services';
 import { fetchAll } from './fetch_all';
 import {
   DataAvailableFieldsMsg,
@@ -24,7 +24,7 @@ import {
 } from '../services/discover_data_state_container';
 import { fetchDocuments } from './fetch_documents';
 import { fetchSql } from './fetch_sql';
-import { dataViewMock } from '../../../__mocks__/data_view';
+import { dataViewMock } from '../../../../../../../packages/kbn-unified-discover/src/__mocks__/data_view';
 jest.mock('./fetch_documents', () => ({
   fetchDocuments: jest.fn().mockResolvedValue([]),
 }));

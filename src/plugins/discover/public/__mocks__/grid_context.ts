@@ -7,11 +7,11 @@
  */
 
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { dataViewMock } from './data_view';
-import { dataViewComplexMock } from './data_view_complex';
-import { esHits } from './es_hits';
-import { esHitsComplex } from './es_hits_complex';
-import { discoverServiceMock } from './services';
+import { dataViewMock } from '@kbn/unified-discover/src/__mocks__/data_view';
+import { dataViewComplexMock } from '@kbn/unified-discover/src/__mocks__/data_view_complex';
+import { esHits } from '@kbn/unified-discover/src/__mocks__/es_hits';
+import { esHitsComplex } from '@kbn/unified-discover/src/__mocks__/es_hits_complex';
+import { discoverServiceMock } from '@kbn/unified-discover/src/__mocks__/services';
 import { GridContext } from '../components/discover_grid/discover_grid_context';
 import { convertValueToString } from '../utils/convert_value_to_string';
 import { buildDataTableRecord } from '@kbn/unified-discover';

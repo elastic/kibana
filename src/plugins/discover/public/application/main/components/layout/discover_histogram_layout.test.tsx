@@ -9,9 +9,9 @@
 import React from 'react';
 import { BehaviorSubject, of } from 'rxjs';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { esHits } from '../../../../__mocks__/es_hits';
-import { dataViewMock } from '../../../../__mocks__/data_view';
-import { savedSearchMock } from '../../../../__mocks__/saved_search';
+import { esHits } from '../../../../../../../../packages/kbn-unified-discover/src/__mocks__/es_hits';
+import { dataViewMock } from '../../../../../../../../packages/kbn-unified-discover/src/__mocks__/data_view';
+import { savedSearchMock } from '../../../../../../../../packages/kbn-unified-discover/src/__mocks__/saved_search';
 import {
   AvailableFields$,
   DataDocuments$,
@@ -19,7 +19,7 @@ import {
   DataTotalHits$,
   RecordRawType,
 } from '../../services/discover_data_state_container';
-import { discoverServiceMock } from '../../../../__mocks__/services';
+import { discoverServiceMock } from '../../../../../../../../packages/kbn-unified-discover/src/__mocks__/services';
 import { FetchStatus } from '../../../types';
 import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { buildDataTableRecord } from '@kbn/unified-discover';

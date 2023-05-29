@@ -7,11 +7,11 @@
  */
 
 import { EuiTab } from '@elastic/eui';
-import { VIEW_MODE } from '../../../common/constants';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
 import { DocumentViewModeToggle } from './view_mode_toggle';
+import {VIEW_MODE} from "@kbn/unified-discover";
 
 describe('Document view mode toggle component', () => {
   const mountComponent = ({

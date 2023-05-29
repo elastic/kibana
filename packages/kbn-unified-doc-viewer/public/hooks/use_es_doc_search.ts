@@ -11,7 +11,7 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import type { ESSearchRequest } from '@kbn/es-types';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { lastValueFrom } from 'rxjs';
-import { DocProps, ElasticRequestState } from '@kbn/unified-doc-viewer/public/types';
+import { DocProps, ElasticRequestState } from '../types';
 import { useUnifiedDocViewerServices } from './use_doc_view_services';
 
 type RequestBody = Pick<ESSearchRequest, 'body'>;

@@ -9,8 +9,8 @@
 import { createKbnUrlStateStorage, withNotifyOnErrors } from '@kbn/kibana-utils-plugin/public';
 import { History } from 'history';
 
-import { savedSearchMock } from '../../../__mocks__/saved_search';
-import { discoverServiceMock } from '../../../__mocks__/services';
+import { savedSearchMock } from '../../../../../../../packages/kbn-unified-discover/src/__mocks__/saved_search';
+import { discoverServiceMock } from '../../../../../../../packages/kbn-unified-discover/src/__mocks__/services';
 import {
   DiscoverAppStateContainer,
   getDiscoverAppStateContainer,

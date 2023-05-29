@@ -13,14 +13,15 @@ import {
   StateContainer,
   withNotifyOnErrors,
 } from '@kbn/kibana-utils-plugin/public';
-import type {
-  DataPublicPluginStart,
+import {
+  type DataPublicPluginStart,
   noSearchSessionStorageCapabilityMessage,
-  QueryState,
-  SearchSessionInfoProvider,
+  type QueryState,
+  type SearchSessionInfoProvider,
 } from '@kbn/data-plugin/public';
 import type { DiscoverServices } from '@kbn/unified-discover';
-import type { DataView, DataViewSpec, DataViewType } from '@kbn/data-views-plugin/public';
+import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/public';
+import { DataViewType } from '@kbn/data-views-plugin/public';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { v4 as uuidv4 } from 'uuid';
 import { merge } from 'rxjs';

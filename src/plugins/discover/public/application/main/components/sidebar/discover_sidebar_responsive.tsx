@@ -27,7 +27,6 @@ import {
   useExistingFieldsFetcher,
   useQuerySubscriber,
 } from '@kbn/unified-field-list-plugin/public';
-import { VIEW_MODE } from '../../../../../common/constants';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { DiscoverSidebar } from './discover_sidebar';
 import {
@@ -46,6 +45,7 @@ import {
   DiscoverSidebarReducerActionType,
   DiscoverSidebarReducerStatus,
 } from './lib/sidebar_reducer';
+import {VIEW_MODE} from "@kbn/unified-discover";
 
 const EMPTY_FIELD_COUNTS = {};
 

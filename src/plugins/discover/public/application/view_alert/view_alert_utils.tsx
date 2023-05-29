@@ -16,7 +16,7 @@ import { ISearchSource, SerializedSearchSourceFields, getTime } from '@kbn/data-
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { MarkdownSimple, toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { Filter } from '@kbn/es-query';
-import { DiscoverAppLocatorParams } from '../../../common/locator';
+import { DiscoverAppLocatorParams } from '@kbn/unified-discover/src/locator';
 
 export interface SearchThresholdAlertParams extends RuleTypeParams {
   searchConfiguration: SerializedSearchSourceFields;

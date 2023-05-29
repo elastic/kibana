@@ -19,6 +19,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { METRIC_TYPE } from '@kbn/analytics';
+import { VIEW_MODE, SIDEBAR_CLOSED_KEY } from '@kbn/unified-discover';
 import classNames from 'classnames';
 import { generateFilters } from '@kbn/data-plugin/public';
 import { DragContext } from '@kbn/dom-drag-drop';
@@ -26,7 +27,6 @@ import type { DocViewFilterFn } from '@kbn/unified-doc-viewer';
 import { DataViewField, DataViewType } from '@kbn/data-views-plugin/public';
 import { useSavedSearchInitial } from '../../services/discover_state_provider';
 import { DiscoverStateContainer } from '../../services/discover_state';
-import { VIEW_MODE } from '../../../../../common/constants';
 import { useInternalStateSelector } from '../../services/discover_internal_state_container';
 import { useAppStateSelector } from '../../services/discover_app_state_container';
 import { useInspector } from '../../hooks/use_inspector';
@@ -47,11 +47,6 @@ import { getRawRecordType } from '../../utils/get_raw_record_type';
 import { SavedSearchURLConflictCallout } from '../../../../components/saved_search_url_conflict_callout/saved_search_url_conflict_callout';
 import { DiscoverHistogramLayout } from './discover_histogram_layout';
 import { ErrorCallout } from '../../../../components/common/error_callout';
-
-/**
- * Local storage key for sidebar persistence state
- */
-export const SIDEBAR_CLOSED_KEY = 'discover:sidebarClosed';
 
 const SidebarMemoized = React.memo(DiscoverSidebarResponsive);
 const TopNavMemoized = React.memo(DiscoverTopNav);

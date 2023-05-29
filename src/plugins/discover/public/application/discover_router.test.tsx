@@ -10,7 +10,7 @@ import { shallow } from 'enzyme';
 import { RouteProps } from 'react-router-dom';
 import { Route } from '@kbn/shared-ux-router';
 import { createSearchSessionMock } from '../__mocks__/search_session';
-import { discoverServiceMock as mockDiscoverServices } from '../__mocks__/services';
+import { discoverServiceMock as mockDiscoverServices } from '../../../../../packages/kbn-unified-discover/src/__mocks__/services';
 import { discoverRouter } from './discover_router';
 import { DiscoverMainRoute } from './main';
 import { SingleDocRoute } from './doc';

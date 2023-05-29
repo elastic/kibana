@@ -12,9 +12,8 @@ import { mountWithIntl } from '@kbn/test-jest-helpers';
 import * as useUiSettingHook from '@kbn/kibana-react-plugin/public/ui_settings/use_ui_setting';
 import { CodeEditor, KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { useEsDocSearch } from '@kbn/unified-doc-viewer-plugin/public';
-import { buildDataTableRecord } from '@kbn/unified-discover';
-import { ElasticRequestState, JsonCodeEditorCommon } from '../..';
+import {buildDataTableRecord, EsHitRecord} from '@kbn/unified-discover';
+import { ElasticRequestState, JsonCodeEditorCommon, useEsDocSearch } from '../..';
 import { DocViewerSource } from './source';
 
 const hooks = { useEsDocSearch };
@@ -98,7 +97,7 @@ describe('Source Viewer component', () => {
         _underscore: 123,
       },
     });
-    jest.spyOn(hooks, 'useEsDocSearch').mockImplementation(() => [2, mockHit, () => {}]);
+    jest.spyOn(hooks, 'useEsDocSearch').mockImplementation(() => [2, mockHit as unknown as EsHitRecord, () => {}]);
     jest.spyOn(useUiSettingHook, 'useUiSetting').mockImplementation(() => {
       return false;
     });
@@ -110,7 +109,7 @@ describe('Source Viewer component', () => {
           hasLineNumbers={true}
           useDocExplorer={false}
           requestState={ElasticRequestState.Found}
-          hit={mockHit}
+          hit={mockHit as unknown as EsHitRecord}
           onRefresh={() => {}}
         />
       </KibanaContextProvider>

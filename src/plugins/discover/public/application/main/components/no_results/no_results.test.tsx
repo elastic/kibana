@@ -19,7 +19,7 @@ import {
 } from '@kbn/data-views-plugin/common/data_view.stub';
 import { type Filter } from '@kbn/es-query';
 import { DiscoverNoResults, DiscoverNoResultsProps } from './no_results';
-import { createDiscoverServicesMock } from '../../../../__mocks__/services';
+import { createDiscoverServicesMock } from '../../../../../../../../packages/kbn-unified-discover/src/__mocks__/services';
 
 jest.spyOn(RxApi, 'lastValueFrom').mockImplementation(async () => ({
   rawResponse: {

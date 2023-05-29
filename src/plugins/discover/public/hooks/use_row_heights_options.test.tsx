@@ -10,8 +10,8 @@ import React, { ReactNode } from 'react';
 import { renderHook } from '@testing-library/react-hooks';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { DiscoverServices } from '@kbn/unified-discover';
-import { LocalStorageMock } from '../__mocks__/local_storage_mock';
-import { uiSettingsMock } from '../__mocks__/ui_settings';
+import { LocalStorageMock } from '../../../../../packages/kbn-unified-discover/src/__mocks__/local_storage_mock';
+import { uiSettingsMock } from '../../../../../packages/kbn-unified-discover/src/__mocks__/ui_settings';
 import { useRowHeightsOptions } from './use_row_heights_options';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 

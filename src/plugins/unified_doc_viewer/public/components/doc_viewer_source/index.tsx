@@ -10,7 +10,7 @@ import React from 'react';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { DocViewerSource } from '@kbn/unified-doc-viewer/public';
 import { CodeEditor } from '@kbn/kibana-react-plugin/public';
-import { useEsDocSearch } from '../../hooks';
+import { useEsDocSearch } from '../../../../../../packages/kbn-unified-doc-viewer/public/hooks';
 
 export interface SourceViewerProps {
   id: string;

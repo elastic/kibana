@@ -10,9 +10,9 @@ import React from 'react';
 import { mountWithIntl, findTestSubject } from '@kbn/test-jest-helpers';
 import { TableRow, TableRowProps } from './table_row';
 import { createFilterManagerMock } from '@kbn/data-plugin/public/query/filter_manager/filter_manager.mock';
-import { dataViewWithTimefieldMock } from '../../../__mocks__/data_view_with_timefield';
+import { dataViewWithTimefieldMock } from '../../../../../../../packages/kbn-unified-discover/src/__mocks__/data_view_with_timefield';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { discoverServiceMock } from '../../../__mocks__/services';
+import { discoverServiceMock } from '../../../../../../../packages/kbn-unified-discover/src/__mocks__/services';
 
 import { DOC_HIDE_TIME_COLUMN_SETTING, MAX_DOC_FIELDS_DISPLAYED } from '../../../../common';
 import { buildDataTableRecord } from '@kbn/unified-discover';

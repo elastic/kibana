@@ -10,9 +10,9 @@ import { ContactCardEmbeddable } from '@kbn/embeddable-plugin/public/lib/test_sa
 
 import { ViewSavedSearchAction } from './view_saved_search_action';
 import { SavedSearchEmbeddable } from './saved_search_embeddable';
-import { createStartContractMock } from '../__mocks__/start_contract';
-import { savedSearchMock } from '../__mocks__/saved_search';
-import { discoverServiceMock } from '../__mocks__/services';
+import { createStartContractMock } from '../../../../../packages/kbn-unified-discover/src/__mocks__/start_contract';
+import { savedSearchMock } from '../../../../../packages/kbn-unified-discover/src/__mocks__/saved_search';
+import { discoverServiceMock } from '../../../../../packages/kbn-unified-discover/src/__mocks__/services';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { createFilterManagerMock } from '@kbn/data-plugin/public/query/filter_manager/filter_manager.mock';
 import { ViewMode } from '@kbn/embeddable-plugin/public';

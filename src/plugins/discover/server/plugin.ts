@@ -12,7 +12,7 @@ import type { HomeServerPluginSetup } from '@kbn/home-plugin/server';
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/common';
 import type { SharePluginSetup } from '@kbn/share-plugin/server';
 import type { DiscoverServerPluginStart, DiscoverServerPluginStartDeps } from '.';
-import { DiscoverAppLocatorDefinition } from '../common/locator';
+import { DiscoverAppLocatorDefinition } from '@kbn/unified-discover/src/locator';
 import { capabilitiesProvider } from './capabilities_provider';
 import { initializeLocatorServices } from './locator';
 import { registerSampleData } from './sample_data';

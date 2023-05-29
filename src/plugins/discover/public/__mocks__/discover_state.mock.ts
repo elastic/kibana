@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 import { createBrowserHistory } from 'history';
-import { getDiscoverStateContainer } from '../application/main/services/discover_state';
-import { savedSearchMockWithTimeField, savedSearchMock } from './saved_search';
-import { discoverServiceMock } from './services';
+import { savedSearchMockWithTimeField, savedSearchMock } from '@kbn/unified-discover/src/__mocks__/saved_search';
+import { discoverServiceMock } from '@kbn/unified-discover/src/__mocks__/services';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
+import { getDiscoverStateContainer } from '../application/main/services/discover_state';
 
 export function getDiscoverStateMock({
   isTimeBased = true,

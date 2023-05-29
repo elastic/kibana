@@ -13,7 +13,7 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { useEsDocSearch } from '@kbn/unified-doc-viewer-plugin/public';
 import { DocViewer } from '@kbn/unified-doc-viewer-plugin/public';
-import { buildDataTableRecord } from '@kbn/unified-discover';
+import {buildDataTableRecord, EsHitRecord} from '@kbn/unified-discover';
 import { getRootBreadcrumbs } from '../../../utils/breadcrumbs';
 import { ElasticRequestState } from '../types';
 import { useDiscoverServices } from '../../../hooks/use_discover_services';
@@ -136,7 +136,7 @@ export function Doc(props: DocProps) {
         {reqState === ElasticRequestState.Found && hit !== null && dataView && (
           <div data-test-subj="doc-hit">
             {/* TODO: Clean up use of hit/datatable record */}
-            <DocViewer hit={buildDataTableRecord(hit)} dataView={dataView} />
+            <DocViewer hit={buildDataTableRecord(hit as EsHitRecord)} dataView={dataView} />
           </div>
         )}
       </EuiPageBody>

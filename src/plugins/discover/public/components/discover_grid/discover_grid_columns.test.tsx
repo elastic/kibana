@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { dataViewMock } from '../../__mocks__/data_view';
+import { dataViewMock } from '../../../../../../packages/kbn-unified-discover/src/__mocks__/data_view';
 import { getEuiGridColumns } from './discover_grid_columns';
-import { dataViewWithTimefieldMock } from '../../__mocks__/data_view_with_timefield';
+import { dataViewWithTimefieldMock } from '../../../../../../packages/kbn-unified-discover/src/__mocks__/data_view_with_timefield';
 import { discoverGridContextMock } from '../../__mocks__/grid_context';
-import { discoverServiceMock } from '../../__mocks__/services';
+import { discoverServiceMock } from '../../../../../../packages/kbn-unified-discover/src/__mocks__/services';
 
 describe('Discover grid columns', function () {
   it('returns eui grid columns without time column', async () => {
@@ -317,7 +317,7 @@ describe('Discover grid columns', function () {
             >
               <React.Fragment>
                 timestamp
-                 
+
                 <EuiIcon
                   type="clock"
                 />

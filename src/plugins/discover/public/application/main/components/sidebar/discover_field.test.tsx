@@ -17,7 +17,7 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { stubDataView } from '@kbn/data-views-plugin/common/data_view.stub';
 import { DiscoverAppStateProvider } from '../../services/discover_app_state_container';
 import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
-import { createDiscoverServicesMock } from '../../../../__mocks__/services';
+import { createDiscoverServicesMock } from '../../../../../../../../packages/kbn-unified-discover/src/__mocks__/services';
 import { FieldItemButton } from '@kbn/unified-field-list-plugin/public';
 
 jest.mock('@kbn/unified-field-list-plugin/public/services/field_stats', () => ({

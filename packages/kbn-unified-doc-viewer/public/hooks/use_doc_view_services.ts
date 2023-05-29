@@ -5,3 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type { UnifiedDocViewerServices } from '../types';
+
+export const useUnifiedDocViewerServices = () => useKibana<UnifiedDocViewerServices>().services;

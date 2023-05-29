@@ -6,9 +6,11 @@
  * Side Public License, v 1.
  */
 
-export { formatHit } from './format_hit';
-export { formatFieldValue } from './format_value';
-export * from './get_doc_id';
-export * from './get_should_show_field_handler';
+export { formatHit } from './utils/format_hit';
+export { formatFieldValue } from './utils/format_value';
+export * from './utils/get_doc_id';
+export * from './utils/get_should_show_field_handler';
 export * from './types';
-export { buildDataTableRecord, buildDataTableRecordList } from './build_data_record';
+export * from './locator';
+export * from './constants';
+export { buildDataTableRecord, buildDataTableRecordList } from './utils/build_data_record';

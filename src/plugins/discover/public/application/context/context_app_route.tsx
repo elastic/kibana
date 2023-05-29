@@ -14,7 +14,7 @@ import { ContextApp } from './context_app';
 import { LoadingIndicator } from '../../components/common/loading_indicator';
 import { getScopedHistory } from '../../kibana_services';
 import { useDataView } from '../../hooks/use_data_view';
-import type { ContextHistoryLocationState } from './services/locator';
+import type { ContextHistoryLocationState } from '@kbn/unified-discover/src/context/locator';
 
 export interface ContextUrlParams {
   dataViewId: string;

@@ -17,18 +17,18 @@ import {
   DiscoverSidebarProps,
 } from './discover_sidebar';
 import type { AggregateQuery, Query } from '@kbn/es-query';
-import { createDiscoverServicesMock } from '../../../../__mocks__/services';
+import { createDiscoverServicesMock } from '../../../../../../../../packages/kbn-unified-discover/src/__mocks__/services';
 import { stubLogstashDataView } from '@kbn/data-plugin/common/stubs';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { BehaviorSubject } from 'rxjs';
 import { FetchStatus } from '../../../types';
 import { AvailableFields$, DataDocuments$ } from '../../services/discover_data_state_container';
 import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
-import { VIEW_MODE } from '../../../../../common/constants';
 import { DiscoverMainProvider } from '../../services/discover_state_provider';
 import * as ExistingFieldsHookApi from '@kbn/unified-field-list-plugin/public/hooks/use_existing_fields';
 import { ExistenceFetchStatus } from '@kbn/unified-field-list-plugin/public';
 import { getDataViewFieldList } from './lib/get_field_list';
+import {VIEW_MODE} from "@kbn/unified-discover";
 
 const mockGetActions = jest.fn<Promise<Array<Action<object>>>, [string, { fieldName: string }]>(
   () => Promise.resolve([])

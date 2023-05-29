@@ -9,6 +9,7 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 import { JsonCodeEditor } from './json_code_editor';
+import { CodeEditor } from '@kbn/kibana-react-plugin/public';
 
 it('returns the `JsonCodeEditor` component', () => {
   const value = {
@@ -18,5 +19,5 @@ it('returns the `JsonCodeEditor` component', () => {
     _score: 1,
     _source: { test: 123 },
   };
-  expect(shallow(<JsonCodeEditor json={value} />)).toMatchSnapshot();
+  expect(shallow(<JsonCodeEditor CodeEditor={CodeEditor} json={value} />)).toMatchSnapshot();
 });

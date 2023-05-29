@@ -9,6 +9,7 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 import { JsonCodeEditorCommon } from './json_code_editor_common';
+import { CodeEditor } from '@kbn/kibana-react-plugin/public';
 
 it('returns the `JsonCodeEditorCommon` component', () => {
   const value = JSON.stringify({
@@ -21,6 +22,7 @@ it('returns the `JsonCodeEditorCommon` component', () => {
   expect(
     shallow(
       <JsonCodeEditorCommon
+        CodeEditor={CodeEditor}
         jsonValue={value}
         height={300}
         width={500}

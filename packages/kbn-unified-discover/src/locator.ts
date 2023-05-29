@@ -10,10 +10,9 @@ import type { SerializableRecord } from '@kbn/utility-types';
 import type { Filter, TimeRange, Query, AggregateQuery } from '@kbn/es-query';
 import type { GlobalQueryStateFromUrl, RefreshInterval } from '@kbn/data-plugin/public';
 import type { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/public';
-import { DataViewSpec } from '@kbn/data-views-plugin/common';
+import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/common';
 import { VIEW_MODE } from './constants';
-
 export const DISCOVER_APP_LOCATOR = 'DISCOVER_APP_LOCATOR';
 
 export interface DiscoverAppLocatorParams extends SerializableRecord {

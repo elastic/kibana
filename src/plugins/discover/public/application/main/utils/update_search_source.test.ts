@@ -8,9 +8,9 @@
 
 import { updateVolatileSearchSource } from './update_search_source';
 import { createSearchSourceMock } from '@kbn/data-plugin/common/search/search_source/mocks';
-import { dataViewMock } from '../../../__mocks__/data_view';
+import { dataViewMock } from '../../../../../../../packages/kbn-unified-discover/src/__mocks__/data_view';
 import type { SortOrder } from '@kbn/saved-search-plugin/public';
-import { discoverServiceMock } from '../../../__mocks__/services';
+import { discoverServiceMock } from '../../../../../../../packages/kbn-unified-discover/src/__mocks__/services';
 import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 
 const getUiSettingsMock = (value: boolean) => {

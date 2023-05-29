@@ -8,7 +8,6 @@
     "@kbn/core",
     "@kbn/data-plugin",
     "@kbn/data-views-plugin",
-    "@kbn/es-types",
     "@kbn/i18n",
     "@kbn/i18n-react",
     "@kbn/kibana-react-plugin",

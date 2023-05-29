@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { DiscoverContextAppLocator, DiscoverContextAppLocatorParams } from '../services/locator';
+import { DiscoverContextAppLocator, DiscoverContextAppLocatorParams } from '@kbn/unified-discover/src/context/locator';
 
 export const replaceContextLocation = (
   contextLocator: DiscoverContextAppLocator,

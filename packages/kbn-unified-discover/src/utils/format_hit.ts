@@ -10,7 +10,7 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { i18n } from '@kbn/i18n';
-import type { DataTableRecord } from './types';
+import type { DataTableRecord } from '../types';
 import { formatFieldValue } from './format_value';
 
 const formattedHitCache = new WeakMap<estypes.SearchHit, FormattedHit>();

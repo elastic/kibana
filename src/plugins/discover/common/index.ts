@@ -8,27 +8,30 @@
 
 export const PLUGIN_ID = 'discover';
 export const APP_ICON = 'discoverApp';
-export const DEFAULT_COLUMNS_SETTING = 'defaultColumns';
-export const SAMPLE_SIZE_SETTING = 'discover:sampleSize';
-export const SAMPLE_ROWS_PER_PAGE_SETTING = 'discover:sampleRowsPerPage';
-export const SORT_DEFAULT_ORDER_SETTING = 'discover:sort:defaultOrder';
-export const SEARCH_ON_PAGE_LOAD_SETTING = 'discover:searchOnPageLoad';
-export const DOC_HIDE_TIME_COLUMN_SETTING = 'doc_table:hideTimeColumn';
-export const FIELDS_LIMIT_SETTING = 'fields:popularLimit';
-export const CONTEXT_DEFAULT_SIZE_SETTING = 'context:defaultSize';
-export const CONTEXT_STEP_SETTING = 'context:step';
-export const CONTEXT_TIE_BREAKER_FIELDS_SETTING = 'context:tieBreakerFields';
-export const DOC_TABLE_LEGACY = 'doc_table:legacy';
-export const MODIFY_COLUMNS_ON_SWITCH = 'discover:modifyColumnsOnSwitch';
-export const SEARCH_FIELDS_FROM_SOURCE = 'discover:searchFieldsFromSource';
-export const MAX_DOC_FIELDS_DISPLAYED = 'discover:maxDocFieldsDisplayed';
-export const SHOW_FIELD_STATISTICS = 'discover:showFieldStatistics';
-export const SHOW_MULTIFIELDS = 'discover:showMultiFields';
-export const TRUNCATE_MAX_HEIGHT = 'truncate:maxHeight';
-export const ROW_HEIGHT_OPTION = 'discover:rowHeightOption';
-export const SEARCH_EMBEDDABLE_TYPE = 'search';
-export const HIDE_ANNOUNCEMENTS = 'hideAnnouncements';
-export const ENABLE_SQL = 'discover:enableSql';
 
-export { DISCOVER_APP_LOCATOR, DiscoverAppLocatorDefinition } from './locator';
-export type { DiscoverAppLocator, DiscoverAppLocatorParams } from './locator';
+export {
+  DEFAULT_COLUMNS_SETTING,
+  SAMPLE_SIZE_SETTING,
+  SAMPLE_ROWS_PER_PAGE_SETTING,
+  SORT_DEFAULT_ORDER_SETTING,
+  SEARCH_ON_PAGE_LOAD_SETTING,
+  DOC_HIDE_TIME_COLUMN_SETTING,
+  FIELDS_LIMIT_SETTING,
+  CONTEXT_DEFAULT_SIZE_SETTING,
+  CONTEXT_STEP_SETTING,
+  CONTEXT_TIE_BREAKER_FIELDS_SETTING,
+  DOC_TABLE_LEGACY,
+  MODIFY_COLUMNS_ON_SWITCH,
+  SEARCH_FIELDS_FROM_SOURCE,
+  MAX_DOC_FIELDS_DISPLAYED,
+  SHOW_FIELD_STATISTICS,
+  SHOW_MULTIFIELDS,
+  TRUNCATE_MAX_HEIGHT,
+  ROW_HEIGHT_OPTION,
+  SEARCH_EMBEDDABLE_TYPE,
+  HIDE_ANNOUNCEMENTS,
+  ENABLE_SQL,
+} from '@kbn/unified-discover';
+
+export { DISCOVER_APP_LOCATOR, DiscoverAppLocatorDefinition } from '@kbn/unified-discover';
+export type { DiscoverAppLocator, DiscoverAppLocatorParams } from '@kbn/unified-discover';

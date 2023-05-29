@@ -13,8 +13,8 @@ import { createBrowserHistory, History } from 'history';
 import { FilterManager } from '@kbn/data-plugin/public';
 import { coreMock } from '@kbn/core/public/mocks';
 import { SEARCH_FIELDS_FROM_SOURCE } from '../../../../common';
-import { discoverServiceMock } from '../../../__mocks__/services';
-import { dataViewMock } from '../../../__mocks__/data_view';
+import { discoverServiceMock } from '../../../../../../../packages/kbn-unified-discover/src/__mocks__/services';
+import { dataViewMock } from '../../../../../../../packages/kbn-unified-discover/src/__mocks__/data_view';
 
 discoverServiceMock.data.query.filterManager.getAppFilters = jest.fn(() => []);
 discoverServiceMock.data.query.filterManager.getGlobalFilters = jest.fn(() => []);

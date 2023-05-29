@@ -7,8 +7,8 @@
  */
 import { Subject } from 'rxjs';
 import { waitFor } from '@testing-library/react';
-import { discoverServiceMock } from '../../../__mocks__/services';
-import { savedSearchMockWithSQL } from '../../../__mocks__/saved_search';
+import { discoverServiceMock } from '../../../../../../../packages/kbn-unified-discover/src/__mocks__/services';
+import { savedSearchMockWithSQL } from '../../../../../../../packages/kbn-unified-discover/src/__mocks__/saved_search';
 import { FetchStatus } from '../../types';
 import { setUrlTracker } from '../../../kibana_services';
 import { urlTrackerMock } from '../../../__mocks__/url_tracker.mock';

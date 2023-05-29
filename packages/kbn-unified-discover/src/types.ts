@@ -34,14 +34,14 @@ import { HttpStart } from '@kbn/core-http-browser';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { SpacesApi } from '@kbn/spaces-plugin/public';
 import { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
-import { DiscoverAppLocator } from '@kbn/discover-plugin/common';
-import { DiscoverContextAppLocator } from '@kbn/discover-plugin/public/application/context/services/locator';
-import { DiscoverSingleDocLocator } from '@kbn/discover-plugin/public/application/doc/locator';
 import { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
 import { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { LensPublicStart } from '@kbn/lens-plugin/public';
+import { DiscoverAppLocator } from './locator';
+import { DiscoverContextAppLocator } from './context/locator';
+import { DiscoverSingleDocLocator } from './doc/locator';
 
 export interface EsHitRecord extends Omit<estypes.SearchHit, '_source'> {
   _source?: Record<string, unknown>;

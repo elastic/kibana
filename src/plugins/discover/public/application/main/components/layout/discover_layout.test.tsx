@@ -11,16 +11,16 @@ import { BehaviorSubject, of } from 'rxjs';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import type { Query, AggregateQuery } from '@kbn/es-query';
 import { setHeaderActionMenuMounter } from '../../../../kibana_services';
-import { DiscoverLayout, SIDEBAR_CLOSED_KEY } from './discover_layout';
-import { esHits } from '../../../../__mocks__/es_hits';
-import { dataViewMock } from '../../../../__mocks__/data_view';
-import { savedSearchMock } from '../../../../__mocks__/saved_search';
+import { DiscoverLayout } from './discover_layout';
+import { esHits } from '@kbn/unified-discover/src/__mocks__/es_hits';
+import { dataViewMock } from '@kbn/unified-discover/src/__mocks__/data_view';
+import { savedSearchMock } from '@kbn/unified-discover/src/__mocks__/saved_search';
 import {
   createSearchSourceMock,
   searchSourceInstanceMock,
 } from '@kbn/data-plugin/common/search/search_source/mocks';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { dataViewWithTimefieldMock } from '../../../../__mocks__/data_view_with_timefield';
+import { dataViewWithTimefieldMock } from '@kbn/unified-discover/src/__mocks__/data_view_with_timefield';
 import {
   AvailableFields$,
   DataDocuments$,
@@ -28,13 +28,17 @@ import {
   DataTotalHits$,
   RecordRawType,
 } from '../../services/discover_data_state_container';
-import { createDiscoverServicesMock } from '../../../../__mocks__/services';
+import { createDiscoverServicesMock } from '@kbn/unified-discover/src/__mocks__/services';
 import { FetchStatus } from '../../../types';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { DiscoverSidebar } from '../sidebar/discover_sidebar';
-import { LocalStorageMock } from '../../../../__mocks__/local_storage_mock';
+import { LocalStorageMock } from '@kbn/unified-discover/src/__mocks__/local_storage_mock';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { type DiscoverServices, buildDataTableRecord } from '@kbn/unified-discover';
+import {
+  type DiscoverServices,
+  buildDataTableRecord,
+  SIDEBAR_CLOSED_KEY,
+} from '@kbn/unified-discover';
 import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
 import { createSearchSessionMock } from '../../../../__mocks__/search_session';
 import { getSessionServiceMock } from '@kbn/data-plugin/public/search/session/mocks';

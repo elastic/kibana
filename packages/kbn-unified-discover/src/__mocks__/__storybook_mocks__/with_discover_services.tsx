@@ -13,23 +13,14 @@ import { LIGHT_THEME } from '@elastic/charts';
 import { FieldFormat } from '@kbn/field-formats-plugin/common';
 import { identity } from 'lodash';
 import { CoreStart, IUiSettingsClient, PluginInitializerContext } from '@kbn/core/public';
-import {
-  DEFAULT_COLUMNS_SETTING,
-  DOC_TABLE_LEGACY,
-  MAX_DOC_FIELDS_DISPLAYED,
-  ROW_HEIGHT_OPTION,
-  SAMPLE_SIZE_SETTING,
-  SEARCH_FIELDS_FROM_SOURCE,
-  SHOW_MULTIFIELDS,
-} from '../../../common';
-import { SIDEBAR_CLOSED_KEY } from '../../application/main/components/layout/discover_layout';
 import { LocalStorageMock } from '../local_storage_mock';
-import type { DiscoverServices } from '@kbn/unified-discover';
+import {DEFAULT_COLUMNS_SETTING, DOC_TABLE_LEGACY, MAX_DOC_FIELDS_DISPLAYED,ROW_HEIGHT_OPTION,SAMPLE_SIZE_SETTING, SEARCH_FIELDS_FROM_SOURCE, SHOW_MULTIFIELDS, SIDEBAR_CLOSED_KEY } from '../../constants';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { Plugin as NavigationPublicPlugin } from '@kbn/navigation-plugin/public';
 import { SearchBar, UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { SavedQuery } from '@kbn/data-plugin/public';
 import { BehaviorSubject, Observable } from 'rxjs';
+import { DiscoverServices } from '../../types';
 
 const NavigationPlugin = new NavigationPublicPlugin({} as PluginInitializerContext);
 

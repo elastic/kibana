@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { discoverServiceMock } from '../__mocks__/services';
+import { discoverServiceMock } from '../../../../../packages/kbn-unified-discover/src/__mocks__/services';
 import { SAMPLE_ROWS_PER_PAGE_SETTING } from '../../common';
 import { getRowsPerPageOptions, getDefaultRowsPerPage } from './rows_per_page';
 

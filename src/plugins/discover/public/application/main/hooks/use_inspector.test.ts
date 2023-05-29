@@ -7,7 +7,7 @@
  */
 
 import { act, renderHook } from '@testing-library/react-hooks';
-import { discoverServiceMock } from '../../../__mocks__/services';
+import { discoverServiceMock } from '../../../../../../../packages/kbn-unified-discover/src/__mocks__/services';
 import { useInspector } from './use_inspector';
 import { Adapters, RequestAdapter } from '@kbn/inspector-plugin/common';
 import { OverlayRef } from '@kbn/core/public';

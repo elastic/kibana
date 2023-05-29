@@ -7,7 +7,7 @@
  */
 
 import { discoverGridContextComplexMock } from '../__mocks__/grid_context';
-import { discoverServiceMock } from '../__mocks__/services';
+import { discoverServiceMock } from '../../../../../packages/kbn-unified-discover/src/__mocks__/services';
 import {
   copyValueToClipboard,
   copyColumnNameToClipboard,

@@ -10,7 +10,7 @@ import React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { CALLOUT_STATE_KEY, DocumentExplorerCallout } from './document_explorer_callout';
-import { LocalStorageMock } from '../../../../__mocks__/local_storage_mock';
+import { LocalStorageMock } from '../../../../../../../../packages/kbn-unified-discover/src/__mocks__/local_storage_mock';
 import { DiscoverServices } from '@kbn/unified-discover';
 
 const defaultServices = {

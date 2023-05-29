@@ -11,28 +11,11 @@ import { mount, shallow } from 'enzyme';
 import { DocViewer } from './doc_viewer';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { buildDataTableRecord } from '@kbn/unified-discover';
-import { getDocViewsRegistry } from '../../services';
+import { DocViewsRegistry, getDocViewsRegistry, setDocViewsRegistry } from '../../services';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/public/types';
 
-jest.mock('../../../../kibana_services', () => {
-  let registry: any[] = [];
-  return {
-    getDocViewsRegistry: () => ({
-      addDocView(view: any) {
-        registry.push(view);
-      },
-      getDocViewsSorted() {
-        return registry;
-      },
-      resetRegistry: () => {
-        registry = [];
-      },
-    }),
-  };
-});
-
 beforeEach(() => {
-  (getDocViewsRegistry() as any).resetRegistry();
+  setDocViewsRegistry(new DocViewsRegistry());
   jest.clearAllMocks();
 });
 

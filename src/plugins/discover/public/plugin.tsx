@@ -57,11 +57,11 @@ import { initializeKbnUrlTracking } from './utils/initialize_kbn_url_tracking';
 import {
   DiscoverContextAppLocator,
   DiscoverContextAppLocatorDefinition,
-} from './application/context/services/locator';
+} from '@kbn/unified-discover/src/context/locator';
 import {
   DiscoverSingleDocLocator,
   DiscoverSingleDocLocatorDefinition,
-} from './application/doc/locator';
+} from '@kbn/unified-discover/src/doc/locator';
 import { DiscoverAppLocator, DiscoverAppLocatorDefinition } from '../common';
 
 /**

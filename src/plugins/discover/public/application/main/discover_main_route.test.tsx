@@ -10,7 +10,7 @@ import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { waitFor } from '@testing-library/react';
 import { setHeaderActionMenuMounter, setScopedHistory } from '../../kibana_services';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { discoverServiceMock } from '../../__mocks__/services';
+import { discoverServiceMock } from '../../../../../../packages/kbn-unified-discover/src/__mocks__/services';
 import { DiscoverMainRoute } from './discover_main_route';
 import { MemoryRouter } from 'react-router-dom';
 import { DiscoverMainApp } from './discover_main_app';

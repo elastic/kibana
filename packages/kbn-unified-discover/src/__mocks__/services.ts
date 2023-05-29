@@ -20,7 +20,7 @@ import {
   SORT_DEFAULT_ORDER_SETTING,
   HIDE_ANNOUNCEMENTS,
   SEARCH_ON_PAGE_LOAD_SETTING,
-} from '../../common';
+} from '../constants';
 import {
   UI_SETTINGS,
   calculateBounds,
@@ -35,7 +35,7 @@ import { LocalStorageMock } from './local_storage_mock';
 import { createDiscoverDataViewsMock } from './data_views';
 import { SearchSourceDependencies } from '@kbn/data-plugin/common';
 import { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
-import { DiscoverServices } from '@kbn/unified-discover';
+import { DiscoverServices } from '../types';
 
 export function createDiscoverServicesMock(): DiscoverServices {
   const dataPlugin = dataPluginMock.createStartContract();

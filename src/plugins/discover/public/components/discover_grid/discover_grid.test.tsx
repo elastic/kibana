@@ -10,12 +10,12 @@ import { ReactWrapper } from 'enzyme';
 import { EuiCopy } from '@elastic/eui';
 import { act } from 'react-dom/test-utils';
 import { findTestSubject } from '@elastic/eui/lib/test';
-import { esHits } from '../../__mocks__/es_hits';
-import { dataViewMock } from '../../__mocks__/data_view';
+import { esHits } from '../../../../../../packages/kbn-unified-discover/src/__mocks__/es_hits';
+import { dataViewMock } from '../../../../../../packages/kbn-unified-discover/src/__mocks__/data_view';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { DiscoverGrid, DiscoverGridProps } from './discover_grid';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { discoverServiceMock } from '../../__mocks__/services';
+import { discoverServiceMock } from '../../../../../../packages/kbn-unified-discover/src/__mocks__/services';
 import { buildDataTableRecord, getDocId } from '@kbn/unified-discover';
 import type { EsHitRecord } from '@kbn/unified-discover';
 

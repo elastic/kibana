@@ -10,7 +10,7 @@ import { UnifiedDocViewerPlugin } from './plugin';
 
 export { DocViewer, DocViewerSource, DocViewerTable, DocViewerTableLegacy } from './components';
 
-export { useEsDocSearch, usePager } from './hooks';
+export { useEsDocSearch, usePager } from '../../../../packages/kbn-unified-doc-viewer/public/hooks';
 
 export {
   formatFieldValue,

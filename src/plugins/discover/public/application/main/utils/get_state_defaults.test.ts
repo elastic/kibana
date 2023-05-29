@@ -9,10 +9,10 @@
 import { getStateDefaults } from './get_state_defaults';
 import { createSearchSourceMock } from '@kbn/data-plugin/public/mocks';
 import { VIEW_MODE } from '@kbn/saved-search-plugin/common';
-import { dataViewWithTimefieldMock } from '../../../__mocks__/data_view_with_timefield';
-import { savedSearchMock, savedSearchMockWithSQL } from '../../../__mocks__/saved_search';
-import { dataViewMock } from '../../../__mocks__/data_view';
-import { discoverServiceMock } from '../../../__mocks__/services';
+import { dataViewWithTimefieldMock } from '../../../../../../../packages/kbn-unified-discover/src/__mocks__/data_view_with_timefield';
+import { savedSearchMock, savedSearchMockWithSQL } from '../../../../../../../packages/kbn-unified-discover/src/__mocks__/saved_search';
+import { dataViewMock } from '../../../../../../../packages/kbn-unified-discover/src/__mocks__/data_view';
+import { discoverServiceMock } from '../../../../../../../packages/kbn-unified-discover/src/__mocks__/services';
 
 describe('getStateDefaults', () => {
   test('data view with timefield', () => {

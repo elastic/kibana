@@ -9,7 +9,7 @@
 import React from 'react';
 import { mount } from 'enzyme';
 import { DocViewRenderTab } from './doc_viewer_render_tab';
-import type { DocViewRenderProps } from '../../types';
+import { DocViewRenderProps } from '../doc_viewer_table_legacy/table';
 
 test('Mounting and unmounting DocViewerRenderTab', () => {
   const unmountFn = jest.fn();
