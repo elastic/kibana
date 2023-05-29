@@ -6581,7 +6581,7 @@
         "tags": [],
         "label": "SavedObjectMigrationMap",
         "description": [
-          "\nA map of {@link SavedObjectMigrationFn | migration functions} to be used for a given type.\nThe map's keys must be valid semver versions, and they cannot exceed the current Kibana version.\n\nFor a given document, only migrations with a higher version number than that of the document will be applied.\nMigrations are executed in order, starting from the lowest version and ending with the highest one.\n"
+          "\nA map of {@link SavedObjectMigration | migrations} to be used for a given type.\nThe map's keys must be valid semver versions, and they cannot exceed the current Kibana version.\n\nFor a given document, only migrations with a higher version number than that of the document will be applied.\nMigrations are executed in order, starting from the lowest version and ending with the highest one.\n"
         ],
         "path": "packages/core/saved-objects/core-saved-objects-server/src/migration.ts",
         "deprecated": false,
@@ -6592,7 +6592,7 @@
             "id": "def-common.SavedObjectMigrationMap.Unnamed",
             "type": "IndexSignature",
             "tags": [],
-            "label": "[version: string]: SavedObjectMigrationFn<any, any>",
+            "label": "[version: string]: SavedObjectMigration<any, any>",
             "description": [],
             "signature": [
               "[version: string]:  ",
@@ -6600,14 +6600,143 @@
                 "pluginId": "@kbn/core-saved-objects-server",
                 "scope": "common",
                 "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-                "section": "def-common.SavedObjectMigrationFn",
-                "text": "SavedObjectMigrationFn"
+                "section": "def-common.SavedObjectMigration",
+                "text": "SavedObjectMigration"
               },
               "<any, any>"
             ],
             "path": "packages/core/saved-objects/core-saved-objects-server/src/migration.ts",
             "deprecated": false,
             "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-server",
+        "id": "def-common.SavedObjectMigrationParams",
+        "type": "Interface",
+        "tags": [],
+        "label": "SavedObjectMigrationParams",
+        "description": [
+          "\nSaved Objects migration with parameters."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/core-saved-objects-server",
+            "scope": "common",
+            "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+            "section": "def-common.SavedObjectMigrationParams",
+            "text": "SavedObjectMigrationParams"
+          },
+          "<InputAttributes, MigratedAttributes>"
+        ],
+        "path": "packages/core/saved-objects/core-saved-objects-server/src/migration.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-common.SavedObjectMigrationParams.deferred",
+            "type": "boolean",
+            "tags": [
+              "default"
+            ],
+            "label": "deferred",
+            "description": [
+              "\nA flag that can defer the migration until either an object is accessed (read) or if there is another non-deferred migration with a higher version."
+            ],
+            "signature": [
+              "false | undefined"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/migration.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-common.SavedObjectMigrationParams.transform",
+            "type": "Function",
+            "tags": [],
+            "label": "transform",
+            "description": [
+              "{@inheritDoc SavedObjectMigrationFn}"
+            ],
+            "signature": [
+              "(doc: ",
+              {
+                "pluginId": "@kbn/core-saved-objects-server",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                "section": "def-common.SavedObjectUnsanitizedDoc",
+                "text": "SavedObjectUnsanitizedDoc"
+              },
+              "<InputAttributes>, context: ",
+              {
+                "pluginId": "@kbn/core-saved-objects-server",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                "section": "def-common.SavedObjectMigrationContext",
+                "text": "SavedObjectMigrationContext"
+              },
+              ") => ",
+              {
+                "pluginId": "@kbn/core-saved-objects-server",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                "section": "def-common.SavedObjectUnsanitizedDoc",
+                "text": "SavedObjectUnsanitizedDoc"
+              },
+              "<MigratedAttributes>"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/migration.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-saved-objects-server",
+                "id": "def-common.SavedObjectMigrationParams.transform.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "doc",
+                "description": [],
+                "signature": [
+                  "SavedObjectDoc<InputAttributes> & { references?: ",
+                  {
+                    "pluginId": "@kbn/core-saved-objects-common",
+                    "scope": "common",
+                    "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                    "section": "def-common.SavedObjectReference",
+                    "text": "SavedObjectReference"
+                  },
+                  "[] | undefined; }"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-server/src/migration.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/core-saved-objects-server",
+                "id": "def-common.SavedObjectMigrationParams.transform.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "context",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/core-saved-objects-server",
+                    "scope": "common",
+                    "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                    "section": "def-common.SavedObjectMigrationContext",
+                    "text": "SavedObjectMigrationContext"
+                  }
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-server/src/migration.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
           }
         ],
         "initialIsOpen": false
@@ -10150,27 +10279,27 @@
             "references": [
               {
                 "plugin": "@kbn/core-saved-objects-migration-server-internal",
-                "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/document_migrator/internal_transforms.ts"
-              },
-              {
-                "plugin": "@kbn/core-saved-objects-migration-server-internal",
-                "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/document_migrator/internal_transforms.ts"
-              },
-              {
-                "plugin": "@kbn/core-saved-objects-migration-server-internal",
-                "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/document_migrator/internal_transforms.ts"
-              },
-              {
-                "plugin": "@kbn/core-saved-objects-migration-server-internal",
-                "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/document_migrator/validate_migrations.ts"
-              },
-              {
-                "plugin": "@kbn/core-saved-objects-migration-server-internal",
-                "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/document_migrator/validate_migrations.ts"
-              },
-              {
-                "plugin": "@kbn/core-saved-objects-migration-server-internal",
                 "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/document_migrator/utils.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-migration-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/document_migrator/internal_transforms.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-migration-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/document_migrator/internal_transforms.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-migration-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/document_migrator/internal_transforms.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-migration-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/document_migrator/validate_migrations.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-migration-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/document_migrator/validate_migrations.ts"
               },
               {
                 "plugin": "actions",
@@ -10339,10 +10468,6 @@
               {
                 "plugin": "@kbn/core-saved-objects-migration-server-internal",
                 "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/document_migrator/document_migrator.test.ts"
-              },
-              {
-                "plugin": "@kbn/core-saved-objects-migration-server-internal",
-                "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/document_migrator/validate_migration.test.ts"
               },
               {
                 "plugin": "@kbn/core-saved-objects-migration-server-internal",
@@ -11073,6 +11198,38 @@
           " | null | undefined"
         ],
         "path": "packages/core/saved-objects/core-saved-objects-common/src/server_types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-server",
+        "id": "def-common.SavedObjectMigration",
+        "type": "Type",
+        "tags": [],
+        "label": "SavedObjectMigration",
+        "description": [
+          "\nSaved Objects migration.\nIt can be either a {@link SavedObjectMigrationFn | migration function} or a {@link SavedObjectMigrationParams | migration object}."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/core-saved-objects-server",
+            "scope": "common",
+            "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+            "section": "def-common.SavedObjectMigrationFn",
+            "text": "SavedObjectMigrationFn"
+          },
+          "<InputAttributes, MigratedAttributes> | ",
+          {
+            "pluginId": "@kbn/core-saved-objects-server",
+            "scope": "common",
+            "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+            "section": "def-common.SavedObjectMigrationParams",
+            "text": "SavedObjectMigrationParams"
+          },
+          "<InputAttributes, MigratedAttributes>"
+        ],
+        "path": "packages/core/saved-objects/core-saved-objects-server/src/migration.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

@@ -88,6 +88,8 @@
     "@kbn/shared-ux-prompt-not-found",
     "@kbn/ui-actions-plugin",
     "@kbn/observability-alert-details",
+    "@kbn/dashboard-plugin",
+    "@kbn/controls-plugin",
   ],
   "exclude": [
     "target/**/*",

@@ -57,7 +57,6 @@
     "@kbn/dev-cli-runner",
     "@kbn/telemetry-plugin",
     "@kbn/actions-plugin",
-    "@kbn/usage-collection-plugin",
     "@kbn/features-plugin",
     "@kbn/task-manager-plugin",
     "@kbn/data-views-plugin",
