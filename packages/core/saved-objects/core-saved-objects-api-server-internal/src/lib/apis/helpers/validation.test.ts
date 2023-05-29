@@ -63,17 +63,17 @@ describe('Saved Objects type validation helper', () => {
       registerType(typeC, typedef2);
     });
 
-    it('should work without model versions', () => {
+    it('should validate objects against stack versions', () => {
       const data = createMockObject(typeA, { attributes: { foo: 'hi', count: 1 } });
       expect(() => helper.validateObjectForCreate(typeA, data)).not.toThrowError();
     });
 
-    it('should work with model versions when top level schema also includes new added fields', () => {
+    it('should validate objects against model versions', () => {
       const data = createMockObject(typeB, { attributes: { foo: 'hi', count: 1 } });
       expect(() => helper.validateObjectForCreate(typeB, data)).not.toThrowError();
     });
 
-    it('should fail with model versions enabled, when non-model schema excludes new fields', () => {
+    it('should fail validation against invalid objects', () => {
       const validationError = new Error(
         '[attributes.count]: definition for this key is missing: Bad Request'
       );

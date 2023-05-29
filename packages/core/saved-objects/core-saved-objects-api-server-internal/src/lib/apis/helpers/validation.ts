@@ -94,30 +94,28 @@ export class ValidationHelper {
     }
     const validator = this.getTypeValidator(type);
     try {
-      const result = validator.validate(doc, this.kibanaVersion);
-      return result;
+      validator.validate(doc, this.kibanaVersion);
     } catch (error) {
       throw SavedObjectsErrorHelpers.createBadRequestError(error.message);
     }
   }
 
-  // adds validation schemas per model to validationMap with virtual model version as key.
   private getTypeValidator(type: string): SavedObjectsTypeValidator {
     if (!this.typeValidatorMap[type]) {
       const savedObjectType = this.registry.getType(type);
 
-      const legacySchemas =
+      const stackVersionSchemas =
         typeof savedObjectType!.schemas === 'function'
           ? savedObjectType!.schemas()
           : savedObjectType!.schemas ?? {};
 
-      const modelVersionsMap =
+      const modelVersionCreateSchemas =
         typeof savedObjectType!.modelVersions === 'function'
           ? savedObjectType!.modelVersions()
           : savedObjectType!.modelVersions ?? {};
 
-      const combinedSchemas = { ...legacySchemas };
-      Object.entries(modelVersionsMap).reduce((map, [key, modelVersion]) => {
+      const combinedSchemas = { ...stackVersionSchemas };
+      Object.entries(modelVersionCreateSchemas).reduce((map, [key, modelVersion]) => {
         const virtualVersion = modelVersionToVirtualVersion(key);
         if (modelVersion.schemas?.create) {
           combinedSchemas[virtualVersion] = modelVersion.schemas!.create!;
