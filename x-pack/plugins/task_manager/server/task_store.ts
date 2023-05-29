@@ -8,6 +8,8 @@
 /*
  * This module contains helpers for managing the task manager storage layer.
  */
+import murmurhash from 'murmurhash';
+import uuid from 'uuid';
 import { Subject } from 'rxjs';
 import { omit, defaults, get } from 'lodash';
 import { SavedObjectError } from '@kbn/core-saved-objects-common';
@@ -72,6 +74,7 @@ export interface UpdateByQueryOpts extends SearchOpts {
 
 export interface FetchResult {
   docs: ConcreteTaskInstance[];
+  searchAfter?: estypes.SortResults;
 }
 
 export type BulkUpdateResult = Result<
@@ -87,6 +90,10 @@ export interface UpdateByQueryResult {
   updated: number;
   version_conflicts: number;
   total: number;
+}
+
+interface SerializedConcreteTaskInstanceWithPartition extends SerializedConcreteTaskInstance {
+  partition: number;
 }
 
 /**
@@ -150,11 +157,16 @@ export class TaskStore {
 
     let savedObject;
     try {
-      savedObject = await this.savedObjectsRepository.create<SerializedConcreteTaskInstance>(
-        'task',
-        taskInstanceToAttributes(taskInstance),
-        { id: taskInstance.id, refresh: false }
-      );
+      const id = taskInstance.id || uuid.v4();
+      savedObject =
+        await this.savedObjectsRepository.create<SerializedConcreteTaskInstanceWithPartition>(
+          'task',
+          {
+            ...taskInstanceToAttributes(taskInstance),
+            partition: murmurhash.v3(id) % 360,
+          },
+          { id, refresh: false }
+        );
       if (get(taskInstance, 'schedule.interval', null) == null) {
         this.adHocTaskCounter.increment();
       }
@@ -174,19 +186,24 @@ export class TaskStore {
   public async bulkSchedule(taskInstances: TaskInstance[]): Promise<ConcreteTaskInstance[]> {
     const objects = taskInstances.map((taskInstance) => {
       this.definitions.ensureHas(taskInstance.taskType);
+      const id = taskInstance.id || uuid.v4();
       return {
         type: 'task',
-        attributes: taskInstanceToAttributes(taskInstance),
-        id: taskInstance.id,
+        attributes: {
+          ...taskInstanceToAttributes(taskInstance),
+          partition: murmurhash.v3(id) % 360,
+        },
+        id,
       };
     });
 
     let savedObjects;
     try {
-      savedObjects = await this.savedObjectsRepository.bulkCreate<SerializedConcreteTaskInstance>(
-        objects,
-        { refresh: false }
-      );
+      savedObjects =
+        await this.savedObjectsRepository.bulkCreate<SerializedConcreteTaskInstanceWithPartition>(
+          objects,
+          { refresh: false }
+        );
       this.adHocTaskCounter.increment(
         taskInstances.filter((task) => {
           return get(task, 'schedule.interval', null) == null;
@@ -391,7 +408,7 @@ export class TaskStore {
     }
   }
 
-  private async search(opts: SearchOpts = {}): Promise<FetchResult> {
+  public async search(opts: SearchOpts = {}, partitions?: number[]): Promise<FetchResult> {
     const { query } = ensureQueryOnlyReturnsTaskObjects(opts);
 
     try {
@@ -406,7 +423,16 @@ export class TaskStore {
         },
       });
 
+      if (partitions) {
+        for (const task of tasks) {
+          if (!partitions.includes(task._source!.task!.partition!)) {
+            throw new Error(`Retrieved task from the wrong partition`);
+          }
+        }
+      }
+
       return {
+        searchAfter: tasks.length === 0 ? undefined : tasks[tasks.length - 1].sort,
         docs: tasks
           // @ts-expect-error @elastic/elasticsearch _source is optional
           .filter((doc) => this.serializer.isRawSavedObject(doc))

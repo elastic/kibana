@@ -137,6 +137,15 @@ export const configSchema = schema.object(
       exclude_task_types: schema.arrayOf(schema.string(), { defaultValue: [] }),
       authenticate_background_task_utilization: schema.boolean({ defaultValue: true }),
     }),
+    k8s_task_partitioning_enabled: schema.boolean({
+      defaultValue: false,
+    }),
+    claim_eager_search_multiplier: schema.number({
+      defaultValue: 4,
+    }),
+    prune_stale_docs: schema.boolean({
+      defaultValue: true,
+    }),
   },
   {
     validate: (config) => {

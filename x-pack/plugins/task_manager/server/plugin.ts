@@ -34,6 +34,7 @@ import { EphemeralTask, ConcreteTaskInstance } from './task';
 import { registerTaskManagerUsageCollector } from './usage';
 import { TASK_MANAGER_INDEX } from './constants';
 import { AdHocTaskCounter } from './lib/adhoc_task_counter';
+import { TaskPartitioner } from './task_partitioner';
 
 export interface TaskManagerSetupContract {
   /**
@@ -223,6 +224,12 @@ export class TaskManagerPlugin
 
     // Only poll for tasks if configured to run tasks
     if (this.shouldRunBackgroundTasks) {
+      // TODO: Pass the namespace and selectors in the config
+      const taskPartitioner = new TaskPartitioner(
+        this.config.k8s_task_partitioning_enabled,
+        'serverless',
+        'kibana.k8s.elastic.co/name=kb'
+      );
       this.taskPollingLifecycle = new TaskPollingLifecycle({
         config: this.config!,
         definitions: this.definitions,
@@ -233,6 +240,7 @@ export class TaskManagerPlugin
         usageCounter: this.usageCounter,
         middleware: this.middleware,
         elasticsearchAndSOAvailability$: this.elasticsearchAndSOAvailability$!,
+        taskPartitioner,
         ...managedConfiguration,
       });
 

@@ -41,6 +41,7 @@ import { BufferedTaskStore } from './buffered_task_store';
 import { TaskTypeDictionary } from './task_type_dictionary';
 import { delayOnClaimConflicts } from './polling';
 import { TaskClaiming, ClaimOwnershipResult } from './queries/task_claiming';
+import { TaskPartitioner } from './task_partitioner';
 
 export type TaskPollingLifecycleOpts = {
   logger: Logger;
@@ -52,6 +53,7 @@ export type TaskPollingLifecycleOpts = {
   elasticsearchAndSOAvailability$: Observable<boolean>;
   executionContext: ExecutionContextStart;
   usageCounter?: UsageCounter;
+  taskPartitioner: TaskPartitioner;
 } & ManagedConfiguration;
 
 export type TaskLifecycleEvent =
@@ -102,6 +104,7 @@ export class TaskPollingLifecycle {
     unusedTypes,
     executionContext,
     usageCounter,
+    taskPartitioner,
   }: TaskPollingLifecycleOpts) {
     this.logger = logger;
     this.middleware = middleware;
@@ -131,6 +134,9 @@ export class TaskPollingLifecycle {
       definitions,
       unusedTypes,
       logger: this.logger,
+      taskPartitioner,
+      claimEagerSearchMultiplier: config.claim_eager_search_multiplier,
+      pruneStaleDocs: config.prune_stale_docs,
       getCapacity: (taskType?: string) =>
         taskType && this.definitions.get(taskType)?.maxConcurrency
           ? Math.max(
