@@ -21,6 +21,8 @@ export const FLYOUT_HEADER_RISK_SCORE_TITLE_TEST_ID =
   'securitySolutionAlertDetailsFlyoutHeaderRiskScoreTitle';
 export const FLYOUT_HEADER_RISK_SCORE_VALUE_TEST_ID =
   'securitySolutionAlertDetailsFlyoutHeaderRiskScoreValue';
+export const FLYOUT_HEADER_SHARE_BUTTON_TEST_ID =
+  'securitySolutionAlertDetailsFlyoutHeaderShareButton';
 
 /* Description section */
 
