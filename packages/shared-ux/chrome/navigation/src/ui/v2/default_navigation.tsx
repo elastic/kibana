@@ -9,7 +9,8 @@
 import React, { FC, useCallback } from 'react';
 
 import { Navigation } from './components';
-import {
+import type {
+  GroupDefinition,
   NavigationGroupPreset,
   NavigationTreeDefinition,
   NodeDefinition,
@@ -110,14 +111,16 @@ export const DefaultNavigation: FC<ProjectNavigationDefinition> = ({
           );
         }
 
+        const { type, ...rest } = item as GroupDefinition;
+
         return (
           <React.Fragment key={id}>
-            {item.children ? (
-              <Navigation.Group {...item}>
-                {renderItems(item.children, [...path, id])}
+            {rest.children ? (
+              <Navigation.Group {...rest}>
+                {renderItems(rest.children, [...path, id])}
               </Navigation.Group>
             ) : (
-              <Navigation.Item {...item} />
+              <Navigation.Item {...rest} />
             )}
           </React.Fragment>
         );
