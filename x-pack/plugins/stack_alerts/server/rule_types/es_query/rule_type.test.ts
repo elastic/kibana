@@ -537,7 +537,6 @@ describe('ruleType', () => {
       toSpec: () => {
         return { id: 'test-id', title: 'test-title', timeFieldName: 'time-field' };
       },
-      isPersisted: jest.fn(() => true),
     };
     const defaultParams: OnlySearchSourceRuleParams = {
       size: 100,
