@@ -56,7 +56,7 @@ export const StatusPopoverButton = React.memo<StatusPopoverButtonProps>(
       refetch: refetchGlobalQuery,
     });
 
-    const panels = [{ id: 0, items: actionItems }];
+    const panels = useMemo(() => [{ id: 0, items: actionItems }], [actionItems]);
 
     // statusPopoverVisible includes the logic for the visibility of the popover in
     // case actionItems is an empty array ( ex, when user has read access ).
@@ -96,7 +96,11 @@ export const StatusPopoverButton = React.memo<StatusPopoverButtonProps>(
         data-test-subj="alertStatus"
       >
         <EuiPopoverTitle paddingSize="m">{CHANGE_ALERT_STATUS}</EuiPopoverTitle>
-        <EuiContextMenu panels={panels} data-test-subj="event-details-alertStatusPopover" />
+        <EuiContextMenu
+          panels={panels}
+          initialPanelId={0}
+          data-test-subj="event-details-alertStatusPopover"
+        />
       </EuiPopover>
     );
   }
