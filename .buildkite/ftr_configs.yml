@@ -167,6 +167,7 @@ enabled:
   - x-pack/test/alerting_api_integration/spaces_only/tests/alerting/group4/config.ts
   - x-pack/test/alerting_api_integration/spaces_only/tests/actions/config.ts
   - x-pack/test/alerting_api_integration/spaces_only/tests/action_task_params/config.ts
+  - x-pack/test/alerting_api_integration/observability/config.ts
   - x-pack/test/api_integration_basic/config.ts
   - x-pack/test/api_integration/config_security_basic.ts
   - x-pack/test/api_integration/config_security_trial.ts
@@ -323,6 +324,7 @@ enabled:
   - x-pack/test/monitoring_api_integration/config.ts
   - x-pack/test/observability_api_integration/basic/config.ts
   - x-pack/test/observability_api_integration/trial/config.ts
+  - x-pack/test/observability_api_integration/apis/config.ts
   - x-pack/test/observability_functional/with_rac_write.config.ts
   - x-pack/test/plugin_api_integration/config.ts
   - x-pack/test/plugin_functional/config.ts

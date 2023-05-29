@@ -118,6 +118,16 @@ export const INSIGHTS_TITLE = i18n.translate(
   { defaultMessage: 'Insights' }
 );
 
+export const CORRELATIONS_TITLE = i18n.translate(
+  'xpack.securitySolution.flyout.documentDetails.correlationsTitle',
+  { defaultMessage: 'Correlations' }
+);
+
+export const PREVALENCE_TITLE = i18n.translate(
+  'xpack.securitySolution.flyout.documentDetails.prevalenceTitle',
+  { defaultMessage: 'Prevalence' }
+);
+
 export const TECHNICAL_PREVIEW_TITLE = i18n.translate(
   'xpack.securitySolution.flyout.documentDetails.technicalPreviewTitle',
   { defaultMessage: 'Technical Preview' }
@@ -170,6 +180,80 @@ export const THREAT_ENRICHMENTS = i18n.translate(
   'xpack.securitySolution.flyout.documentDetails.overviewTab.threatIntelligence.threatEnrichments',
   {
     defaultMessage: `fields enriched with threat intelligence`,
+  }
+);
+
+export const CORRELATIONS_TEXT = i18n.translate(
+  'xpack.securitySolution.flyout.documentDetails.overviewTab.correlationsText',
+  {
+    defaultMessage: 'fields of correlation',
+  }
+);
+
+export const CORRELATIONS_ANCESTRY_ALERT = i18n.translate(
+  'xpack.securitySolution.flyout.documentDetails.overviewTab.correlations.ancestryAlert',
+  {
+    defaultMessage: 'alert related by ancestry',
+  }
+);
+
+export const CORRELATIONS_ANCESTRY_ALERTS = i18n.translate(
+  'xpack.securitySolution.flyout.documentDetails.overviewTab.correlations.ancestryAlerts',
+  {
+    defaultMessage: 'alerts related by ancestry',
+  }
+);
+export const CORRELATIONS_SAME_SOURCE_EVENT_ALERT = i18n.translate(
+  'xpack.securitySolution.flyout.documentDetails.overviewTab.correlations.sameSourceEventAlert',
+  {
+    defaultMessage: 'alert related by the same source event',
+  }
+);
+
+export const CORRELATIONS_SAME_SOURCE_EVENT_ALERTS = i18n.translate(
+  'xpack.securitySolution.flyout.documentDetails.overviewTab.correlations.sameSourceEventAlerts',
+  {
+    defaultMessage: 'alerts related by the same source event',
+  }
+);
+export const CORRELATIONS_SAME_SESSION_ALERT = i18n.translate(
+  'xpack.securitySolution.flyout.documentDetails.overviewTab.correlations.sameSessionAlert',
+  {
+    defaultMessage: 'alert related by session',
+  }
+);
+
+export const CORRELATIONS_SAME_SESSION_ALERTS = i18n.translate(
+  'xpack.securitySolution.flyout.documentDetails.overviewTab.correlations.sameSessionAlerts',
+  {
+    defaultMessage: 'alerts related by session',
+  }
+);
+export const CORRELATIONS_RELATED_CASE = i18n.translate(
+  'xpack.securitySolution.flyout.documentDetails.overviewTab.correlations.relatedCase',
+  {
+    defaultMessage: 'related case',
+  }
+);
+
+export const CORRELATIONS_RELATED_CASES = i18n.translate(
+  'xpack.securitySolution.flyout.documentDetails.overviewTab.correlations.relatedCases',
+  {
+    defaultMessage: 'related cases',
+  }
+);
+
+export const PREVALENCE_TEXT = i18n.translate(
+  'xpack.securitySolution.flyout.documentDetails.overviewTab.prevalenceText',
+  {
+    defaultMessage: 'fields of prevalence',
+  }
+);
+
+export const PREVALENCE_ROW_UNCOMMON = i18n.translate(
+  'xpack.securitySolution.flyout.documentDetails.overviewTab.prevalenceRowText',
+  {
+    defaultMessage: 'is uncommon',
   }
 );
 

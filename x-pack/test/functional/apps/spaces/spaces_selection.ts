@@ -22,7 +22,6 @@ export default function spaceSelectorFunctionalTests({
   ]);
   const spacesService = getService('spaces');
 
-  // Failing: See https://github.com/elastic/kibana/issues/142155
   describe('Spaces', function () {
     const testSpacesIds = ['another-space', ...Array.from('123456789', (idx) => `space-${idx}`)];
     before(async () => {
@@ -95,7 +94,8 @@ export default function spaceSelectorFunctionalTests({
       });
     });
 
-    describe('Search spaces in popover', () => {
+    describe('Search spaces in popover', function () {
+      this.tags('skipFirefox');
       const spaceId = 'default';
       before(async () => {
         await PageObjects.security.forceLogout();
@@ -127,7 +127,8 @@ export default function spaceSelectorFunctionalTests({
       });
     });
 
-    describe('Spaces Data', () => {
+    describe('Spaces Data', function () {
+      this.tags('skipFirefox');
       const spaceId = 'another-space';
       const sampleDataHash = '/tutorial_directory/sampleData';
 
