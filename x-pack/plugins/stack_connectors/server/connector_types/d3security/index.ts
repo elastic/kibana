@@ -213,7 +213,6 @@ export async function executor(
 }
 
 function addSeverityAndEventTypeInBody(bodyString: string,severity: string,eventType: string){
-  let result;
   let bodyObj = bodyString;
   try{
     bodyObj = JSON.parse(bodyString);
@@ -232,7 +231,7 @@ function addSeverityAndEventTypeInBody(bodyString: string,severity: string,event
   resultObj['hits']['hits']["_source"]["rawData"] = bodyObj;
   resultObj['hits']['hits']["_source"]["event.type"] = eventType;
   resultObj['hits']['hits']["_source"]["kibana.alert.severity"] = severity;
-  result = JSON.stringify(resultObj)
+  const result = JSON.stringify(resultObj)
   return result
 }
 // Action Executor Result w/ internationalisation
