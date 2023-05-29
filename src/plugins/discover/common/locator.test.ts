@@ -15,6 +15,7 @@ import { mockStorage } from '@kbn/kibana-utils-plugin/public/storage/hashed_item
 import { FilterStateStore } from '@kbn/es-query';
 import { DiscoverAppLocatorDefinition } from './locator';
 import { SerializableRecord } from '@kbn/utility-types';
+import { addProfile } from './customizations';
 
 const dataViewId: string = 'c367b774-a4c2-11ea-bb37-0242ac130002';
 const savedSearchId: string = '571aaf70-4c88-11e8-b3d7-01146121b73d';
@@ -61,7 +62,7 @@ describe('Discover url generator', () => {
     const { locator } = await setup();
     const { path } = await locator.getLocation({ profile: 'test', dataViewId: '123' });
 
-    expect(path).toBe("#/p/test/?_a=(index:'123')");
+    expect(path).toBe(`${addProfile('#/', 'test')}?_a=(index:'123')`);
   });
 
   test('can specify specific data view', async () => {

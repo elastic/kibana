@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { addProfile } from '../../../common/customizations';
 import { DiscoverSingleDocLocatorDefinition } from './locator';
 
 const dataViewId: string = 'c367b774-a4c2-11ea-bb37-0242ac130002';
