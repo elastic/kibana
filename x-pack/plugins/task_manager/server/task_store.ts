@@ -150,9 +150,10 @@ export class TaskStore {
 
     let savedObject;
     try {
+      const validatedTaskInstance = this.getValidatedTaskInstance(taskInstance, 'forbid');
       savedObject = await this.savedObjectsRepository.create<SerializedConcreteTaskInstance>(
         'task',
-        taskInstanceToAttributes(taskInstance, this.definitions),
+        taskInstanceToAttributes(validatedTaskInstance),
         { id: taskInstance.id, refresh: false }
       );
       if (get(taskInstance, 'schedule.interval', null) == null) {
@@ -163,7 +164,8 @@ export class TaskStore {
       throw e;
     }
 
-    return savedObjectToConcreteTaskInstance(savedObject, this.definitions);
+    const result = savedObjectToConcreteTaskInstance(savedObject);
+    return this.getValidatedTaskInstance(result, 'ignore');
   }
 
   /**
@@ -174,9 +176,10 @@ export class TaskStore {
   public async bulkSchedule(taskInstances: TaskInstance[]): Promise<ConcreteTaskInstance[]> {
     const objects = taskInstances.map((taskInstance) => {
       this.definitions.ensureHas(taskInstance.taskType);
+      const validatedTaskInstance = this.getValidatedTaskInstance(taskInstance, 'forbid');
       return {
         type: 'task',
-        attributes: taskInstanceToAttributes(taskInstance, this.definitions),
+        attributes: taskInstanceToAttributes(validatedTaskInstance),
         id: taskInstance.id,
       };
     });
@@ -197,9 +200,10 @@ export class TaskStore {
       throw e;
     }
 
-    return savedObjects.saved_objects.map((so) =>
-      savedObjectToConcreteTaskInstance(so, this.definitions)
-    );
+    return savedObjects.saved_objects.map((so) => {
+      const taskInstance = savedObjectToConcreteTaskInstance(so);
+      return this.getValidatedTaskInstance(taskInstance, 'ignore');
+    });
   }
 
   /**
@@ -225,7 +229,8 @@ export class TaskStore {
    * @returns {Promise<TaskDoc>}
    */
   public async update(doc: ConcreteTaskInstance): Promise<ConcreteTaskInstance> {
-    const attributes = taskInstanceToAttributes(doc, this.definitions);
+    const validatedTaskInstance = this.getValidatedTaskInstance(doc, 'forbid');
+    const attributes = taskInstanceToAttributes(validatedTaskInstance);
 
     let updatedSavedObject;
     try {
@@ -243,14 +248,14 @@ export class TaskStore {
       throw e;
     }
 
-    return savedObjectToConcreteTaskInstance(
+    const taskInstance = savedObjectToConcreteTaskInstance(
       // The SavedObjects update api forces a Partial on the `attributes` on the response,
       // but actually returns the whole object that is passed to it, so as we know we're
       // passing in the whole object, this is safe to do.
       // This is far from ideal, but unless we change the SavedObjectsClient this is the best we can do
-      { ...updatedSavedObject, attributes: defaults(updatedSavedObject.attributes, attributes) },
-      this.definitions
+      { ...updatedSavedObject, attributes: defaults(updatedSavedObject.attributes, attributes) }
     );
+    return this.getValidatedTaskInstance(taskInstance, 'ignore');
   }
 
   /**
@@ -262,7 +267,8 @@ export class TaskStore {
    */
   public async bulkUpdate(docs: ConcreteTaskInstance[]): Promise<BulkUpdateResult[]> {
     const attributesByDocId = docs.reduce((attrsById, doc) => {
-      attrsById.set(doc.id, taskInstanceToAttributes(doc, this.definitions));
+      const validatedTaskInstance = this.getValidatedTaskInstance(doc, 'forbid');
+      attrsById.set(doc.id, taskInstanceToAttributes(validatedTaskInstance));
       return attrsById;
     }, new Map());
 
@@ -286,24 +292,22 @@ export class TaskStore {
     }
 
     return updatedSavedObjects.map((updatedSavedObject) => {
-      return updatedSavedObject.error !== undefined
-        ? asErr({
-            type: 'task',
-            id: updatedSavedObject.id,
-            error: updatedSavedObject.error,
-          })
-        : asOk(
-            savedObjectToConcreteTaskInstance(
-              {
-                ...updatedSavedObject,
-                attributes: defaults(
-                  updatedSavedObject.attributes,
-                  attributesByDocId.get(updatedSavedObject.id)!
-                ),
-              },
-              this.definitions
-            )
-          );
+      if (updatedSavedObject.error !== undefined) {
+        return asErr({
+          type: 'task',
+          id: updatedSavedObject.id,
+          error: updatedSavedObject.error,
+        });
+      }
+
+      const taskInstance = savedObjectToConcreteTaskInstance({
+        ...updatedSavedObject,
+        attributes: defaults(
+          updatedSavedObject.attributes,
+          attributesByDocId.get(updatedSavedObject.id)!
+        ),
+      });
+      return asOk(this.getValidatedTaskInstance(taskInstance, 'ignore'));
     });
   }
 
@@ -352,7 +356,8 @@ export class TaskStore {
       this.errors$.next(e);
       throw e;
     }
-    return savedObjectToConcreteTaskInstance(result, this.definitions);
+    const taskInstance = savedObjectToConcreteTaskInstance(result);
+    return this.getValidatedTaskInstance(taskInstance, 'ignore');
   }
 
   /**
@@ -375,7 +380,9 @@ export class TaskStore {
       if (task.error) {
         return asErr({ id: task.id, type: task.type, error: task.error });
       }
-      return asOk(savedObjectToConcreteTaskInstance(task, this.definitions));
+      const taskInstance = savedObjectToConcreteTaskInstance(task);
+      const validatedTaskInstance = this.getValidatedTaskInstance(taskInstance, 'ignore');
+      return asOk(validatedTaskInstance);
     });
   }
 
@@ -419,7 +426,8 @@ export class TaskStore {
           // @ts-expect-error @elastic/elasticsearch _source is optional
           .map((doc) => this.serializer.rawToSavedObject(doc))
           .map((doc) => omit(doc, 'namespace') as SavedObject<SerializedConcreteTaskInstance>)
-          .map((doc) => savedObjectToConcreteTaskInstance(doc, this.definitions)),
+          .map((doc) => savedObjectToConcreteTaskInstance(doc))
+          .map((doc) => this.getValidatedTaskInstance(doc, 'ignore')),
       };
     } catch (e) {
       this.errors$.next(e);
@@ -487,6 +495,16 @@ export class TaskStore {
       throw e;
     }
   }
+
+  private getValidatedTaskInstance<T extends TaskInstance>(
+    task: T,
+    unknowns: 'forbid' | 'ignore'
+  ): T {
+    return {
+      ...task,
+      state: getValidateStateSchema(task.state, task.taskType, this.definitions, unknowns),
+    };
+  }
 }
 
 /**
@@ -508,35 +526,44 @@ export function correctVersionConflictsForContinuation(
   return maxDocs && versionConflicts + updated > maxDocs ? maxDocs - updated : versionConflicts;
 }
 
-function taskInstanceToAttributes(
-  doc: TaskInstance,
-  definitions: TaskTypeDictionary
-): SerializedConcreteTaskInstance {
-  let state = doc.state || {};
-  if (!isEmpty(state)) {
-    const hasTypeDef = definitions.has(doc.taskType);
-    const taskTypeDef = hasTypeDef ? definitions.get(doc.taskType) : null;
-    if (!hasTypeDef || !taskTypeDef?.stateSchemaByVersion) {
-      throw new Error(
-        `[taskInstanceToAttributes] stateSchemaByVersion not defined for task type: ${doc.taskType}`
-      );
-    } else if (taskTypeDef?.stateSchemaByVersion) {
-      const versions = Array.from(taskTypeDef?.stateSchemaByVersion.keys());
-      const latest = max(versions);
-      if (latest !== undefined) {
-        // TODO: Don't extendsDeep all the time
-        state = taskTypeDef.stateSchemaByVersion
-          .get(latest)
-          .extendsDeep({ unknowns: 'forbid' })
-          .validate(state);
-      }
-    }
+function getValidateStateSchema(
+  state: ConcreteTaskInstance['state'],
+  taskType: ConcreteTaskInstance['taskType'],
+  definitions: TaskTypeDictionary,
+  unknowns: 'forbid' | 'ignore'
+): ConcreteTaskInstance['state'] {
+  if (isEmpty(state)) {
+    return {};
   }
 
+  const hasTypeDef = definitions.has(taskType);
+  const taskTypeDef = hasTypeDef ? definitions.get(taskType) : null;
+
+  if (!hasTypeDef) {
+    return state;
+  }
+
+  if (!taskTypeDef?.stateSchemaByVersion) {
+    throw new Error(
+      `[validateStateSchema] stateSchemaByVersion not defined for task type: ${taskType}`
+    );
+  }
+
+  const versions = Array.from(taskTypeDef.stateSchemaByVersion.keys());
+  const latest = max(versions);
+  if (latest !== undefined) {
+    // TODO: Don't extendsDeep all the time
+    return taskTypeDef.stateSchemaByVersion.get(latest).extendsDeep({ unknowns }).validate(state);
+  }
+
+  return state;
+}
+
+function taskInstanceToAttributes(doc: TaskInstance): SerializedConcreteTaskInstance {
   return {
     ...omit(doc, 'id', 'version'),
     params: JSON.stringify(doc.params || {}),
-    state: JSON.stringify(state),
+    state: JSON.stringify(doc.state || {}),
     attempts: (doc as ConcreteTaskInstance).attempts || 0,
     scheduledAt: (doc.scheduledAt || new Date()).toISOString(),
     startedAt: (doc.startedAt && doc.startedAt.toISOString()) || null,
@@ -547,41 +574,17 @@ function taskInstanceToAttributes(
 }
 
 export function savedObjectToConcreteTaskInstance(
-  savedObject: Omit<SavedObject<SerializedConcreteTaskInstance>, 'references'>,
-  definitions: TaskTypeDictionary
+  savedObject: Omit<SavedObject<SerializedConcreteTaskInstance>, 'references'>
 ): ConcreteTaskInstance {
-  let state = parseJSONField(savedObject.attributes.state, 'state', savedObject.id);
-  if (!isEmpty(state)) {
-    const hasTypeDef = definitions.has(savedObject.attributes.taskType);
-    const taskTypeDef = hasTypeDef ? definitions.get(savedObject.attributes.taskType) : null;
-    if (!hasTypeDef) {
-      state = {};
-    } else if (!taskTypeDef) {
-      throw new Error(
-        `[savedObjectToConcreteTaskInstance] stateSchemaByVersion not defined for task type: ${savedObject.attributes.taskType}`
-      );
-    } else if (taskTypeDef?.stateSchemaByVersion) {
-      const versions = Array.from(taskTypeDef?.stateSchemaByVersion.keys());
-      const latest = max(versions);
-      if (latest !== undefined) {
-        // TODO: Don't extendsDeep all the time
-        state = taskTypeDef.stateSchemaByVersion
-          .get(latest)
-          .extendsDeep({ unknowns: 'ignore' })
-          .validate(state);
-      }
-    }
-  }
-
   return {
     ...savedObject.attributes,
-    state,
     id: savedObject.id,
     version: savedObject.version,
     scheduledAt: new Date(savedObject.attributes.scheduledAt),
     runAt: new Date(savedObject.attributes.runAt),
     startedAt: savedObject.attributes.startedAt ? new Date(savedObject.attributes.startedAt) : null,
     retryAt: savedObject.attributes.retryAt ? new Date(savedObject.attributes.retryAt) : null,
+    state: parseJSONField(savedObject.attributes.state, 'state', savedObject.id),
     params: parseJSONField(savedObject.attributes.params, 'params', savedObject.id),
   };
 }
