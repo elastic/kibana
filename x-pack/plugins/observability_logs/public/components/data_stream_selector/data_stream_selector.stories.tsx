@@ -9,13 +9,13 @@
 
 import React, { useState } from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
-import { Story } from '@storybook/react';
+import type { Meta, Story } from '@storybook/react';
 import { IndexPatternType } from '@kbn/io-ts-utils';
 import { DataStream, Integration } from '../../../common/data_streams';
 import { DataStreamSelector } from './data_stream_selector';
-import { DataStreamSelectorProps, SearchControlsParams } from './types';
+import { DataStreamSelectorProps, DataStreamsSelectorSearchParams } from './types';
 
-export default {
+const meta: Meta<typeof DataStreamSelector> = {
   component: DataStreamSelector,
   title: 'observability_logs/DataStreamSelector',
   decorators: [(wrappedStory) => <I18nProvider>{wrappedStory()}</I18nProvider>],
@@ -30,10 +30,14 @@ export default {
     },
   },
 };
+export default meta;
 
 const DataStreamSelectorTemplate: Story<DataStreamSelectorProps> = (args) => {
   const [title, setTitle] = useState(mockIntegrations[0].dataStreams[0].title as string);
-  const [search, setSearch] = useState<SearchControlsParams>({ sortOrder: 'asc', name: '' });
+  const [search, setSearch] = useState<DataStreamsSelectorSearchParams>({
+    sortOrder: 'asc',
+    name: '',
+  });
   const [integrations, setIntegrations] = useState(() => mockIntegrations.slice(0, 10));
 
   const onIntegrationsLoadMore = () => {

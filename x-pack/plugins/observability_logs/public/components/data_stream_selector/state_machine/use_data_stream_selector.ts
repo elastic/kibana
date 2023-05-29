@@ -5,15 +5,16 @@
  * 2.0.
  */
 
-import { useInterpret, useSelector } from '@xstate/react';
 import { useCallback } from 'react';
-import { DataStreamSelectionHandler, PanelId } from '../types';
-import { createDataStreamsSelectorStateMachine } from './state_machine';
+import { useInterpret, useSelector } from '@xstate/react';
 import {
   ChangePanelHandler,
+  DataStreamSelectionHandler,
   DataStreamsSelectorSearchHandler,
-  DataStreamsSelectorStateMachineDependencies,
-} from './types';
+  PanelId,
+} from '../types';
+import { createDataStreamsSelectorStateMachine } from './state_machine';
+import { DataStreamsSelectorStateMachineDependencies } from './types';
 
 export const useDataStreamSelector = ({
   onIntegrationsLoadMore,

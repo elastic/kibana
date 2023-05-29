@@ -8,6 +8,7 @@
 import React from 'react';
 import { EuiButton, EuiContextMenuItem, EuiEmptyPrompt, EuiText, EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { ReloadDataStreams } from '../../../hooks/use_data_streams';
 import {
   errorLabel,
   noDataStreamsDescriptionLabel,
@@ -22,16 +23,16 @@ interface DataStreamListProps {
   dataStreams: DataStream[] | null;
   error: Error | null;
   isLoading: boolean;
+  onRetry: ReloadDataStreams;
   onStreamClick: DataStreamSelectionHandler;
-  onRetry: () => void;
 }
 
 export const DataStreamsList = ({
   dataStreams,
   error,
   isLoading,
-  onStreamClick,
   onRetry,
+  onStreamClick,
 }: DataStreamListProps) => {
   const isEmpty = dataStreams == null || dataStreams.length <= 0;
   const hasError = error !== null;

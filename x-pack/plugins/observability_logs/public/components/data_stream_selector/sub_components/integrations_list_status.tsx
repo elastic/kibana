@@ -5,10 +5,11 @@
  * 2.0.
  */
 
+import React from 'react';
 import { EuiButton, EuiEmptyPrompt, EuiText, EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React from 'react';
 import { Integration } from '../../../../common/data_streams';
+import { ReloadIntegrations } from '../../../hooks/use_integrations';
 import {
   errorLabel,
   noDataRetryLabel,
@@ -16,13 +17,17 @@ import {
   noIntegrationsLabel,
 } from '../constants';
 
-interface DataStreamListProps {
+interface IntegrationsListStatus {
   integrations: Integration[] | null;
   error: Error | null;
-  onRetry: () => void;
+  onRetry: ReloadIntegrations;
 }
 
-export const IntegrationsListStatus = ({ integrations, error, onRetry }: DataStreamListProps) => {
+export const IntegrationsListStatus = ({
+  integrations,
+  error,
+  onRetry,
+}: IntegrationsListStatus) => {
   const isEmpty = integrations == null || integrations.length <= 0;
   const hasError = error !== null;
 

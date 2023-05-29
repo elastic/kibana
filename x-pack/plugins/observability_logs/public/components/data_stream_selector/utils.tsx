@@ -27,6 +27,14 @@ interface IntegrationsTree {
   panels: EuiContextMenuPanelDescriptor[];
 }
 
+/**
+ * The `EuiContextMenu` component receives a list of panels,
+ * each one with a pointer id which is used as a reference for the items to know
+ * what panel they refer to.
+ * This helper function, starting from a list of integrations,
+ * generate the necessary item entries for each integration,
+ * and also create a related panel that render the list of data streams for the integration.
+ */
 export const buildIntegrationsTree = ({
   integrations,
   onStreamSelected,
@@ -59,6 +67,10 @@ export const buildIntegrationsTree = ({
   );
 };
 
+/**
+ * Take a list of EuiContextMenuPanelItemDescriptor and, if exists,
+ * attach the passed reference to the last item.
+ */
 export const setIntegrationListSpy = (
   items: EuiContextMenuPanelItemDescriptor[],
   spyRef: RefCallback<HTMLButtonElement>

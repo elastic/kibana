@@ -9,10 +9,7 @@ import React from 'react';
 import { EuiButtonGroup, EuiFieldSearch, EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import { SortOrder } from '../../../../common';
 import { DATA_VIEW_POPOVER_CONTENT_WIDTH, sortOptions, sortOrdersLabel } from '../constants';
-import {
-  DataStreamsSelectorSearchHandler,
-  DataStreamsSelectorSearchParams,
-} from '../state_machine';
+import { DataStreamsSelectorSearchHandler, DataStreamsSelectorSearchParams } from '../types';
 
 interface SearchControlsProps {
   isLoading: boolean;
@@ -34,6 +31,7 @@ export const SearchControls = ({ search, onSearch, onSort, isLoading }: SearchCo
     const newSearch = { ...search, sortOrder: id as DataStreamsSelectorSearchParams['sortOrder'] };
     onSort(newSearch);
   };
+
   return (
     <EuiPanel paddingSize="s" hasShadow={false} css={{ width: DATA_VIEW_POPOVER_CONTENT_WIDTH }}>
       <EuiFlexGroup gutterSize="xs" responsive={false}>
