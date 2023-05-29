@@ -11,12 +11,13 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import {
   EuiButton,
+  EuiButtonGroup,
   EuiCallOut,
   EuiEmptyPrompt,
+  EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
   EuiSpacer,
-  EuiSwitch,
   EuiText,
 } from '@elastic/eui';
 
@@ -44,7 +45,7 @@ import { FieldFilterPopover } from './field_filter_popover';
 const groupResultsMessage = i18n.translate(
   'xpack.aiops.spikeAnalysisTable.groupedSwitchLabel.groupResults',
   {
-    defaultMessage: 'Group results',
+    defaultMessage: 'Smart grouping',
   }
 );
 const groupResultsHelpMessage = i18n.translate(
@@ -53,6 +54,20 @@ const groupResultsHelpMessage = i18n.translate(
     defaultMessage: 'Items which are unique to a group are marked by an asterisk (*).',
   }
 );
+const groupResultsOffMessage = i18n.translate(
+  'xpack.aiops.spikeAnalysisTable.groupedSwitchLabel.groupResults',
+  {
+    defaultMessage: 'Off',
+  }
+);
+const groupResultsOnMessage = i18n.translate(
+  'xpack.aiops.spikeAnalysisTable.groupedSwitchLabel.groupResults',
+  {
+    defaultMessage: 'On',
+  }
+);
+const resultsGroupedOffId = 'aiopsExplainLogRateSpikesGroupingOff';
+const resultsGroupedOnId = 'aiopsExplainLogRateSpikesGroupingOn';
 
 /**
  * ExplainLogRateSpikes props require a data view.
@@ -95,9 +110,11 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
     ApiExplainLogRateSpikes['body']['overrides'] | undefined
   >(undefined);
   const [shouldStart, setShouldStart] = useState(false);
+  const [toggleIdSelected, setToggleIdSelected] = useState(resultsGroupedOffId);
 
-  const onGroupResultsToggle = (e: { target: { checked: React.SetStateAction<boolean> } }) => {
-    setGroupResults(e.target.checked);
+  const onGroupResultsToggle = (optionId: string) => {
+    setToggleIdSelected(optionId);
+    setGroupResults(optionId === resultsGroupedOnId);
 
     // When toggling the group switch, clear all row selections
     clearAllRowState();
@@ -174,6 +191,7 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
     // Reset grouping to false and clear all row selections when restarting the analysis.
     if (resetGroupButton) {
       setGroupResults(false);
+      setToggleIdSelected(resultsGroupedOffId);
       clearAllRowState();
     }
 
@@ -221,6 +239,17 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
   // the toggle wasn't enabled already and no fields were selected to be skipped.
   const disabledGroupResultsSwitch = !foundGroups && !groupResults && groupSkipFields.length === 0;
 
+  const toggleButtons = [
+    {
+      id: resultsGroupedOffId,
+      label: groupResultsOffMessage,
+    },
+    {
+      id: resultsGroupedOnId,
+      label: groupResultsOnMessage,
+    },
+  ];
+
   return (
     <div data-test-subj="aiopsExplainLogRateSpikesAnalysis">
       <ProgressControls
@@ -233,17 +262,21 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
       >
         <EuiFlexItem grow={false}>
           <EuiFormRow display="columnCompressedSwitch">
-            <EuiSwitch
-              data-test-subj={`aiopsExplainLogRateSpikesGroupSwitch${
-                groupResults ? ' checked' : ''
-              }`}
-              disabled={disabledGroupResultsSwitch}
-              showLabel={true}
-              label={groupResultsMessage}
-              checked={groupResults}
-              onChange={onGroupResultsToggle}
-              compressed
-            />
+            <EuiFlexGroup gutterSize="s" alignItems="center">
+              <EuiFlexItem grow={false}>
+                <EuiText size="xs">{groupResultsMessage}</EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButtonGroup
+                  buttonSize="s"
+                  isDisabled={disabledGroupResultsSwitch}
+                  legend="Smart grouping"
+                  options={toggleButtons}
+                  idSelected={toggleIdSelected}
+                  onChange={onGroupResultsToggle}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </EuiFormRow>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
