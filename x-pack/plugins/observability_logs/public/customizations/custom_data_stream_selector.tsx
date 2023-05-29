@@ -20,7 +20,7 @@ interface CustomDataStreamSelectorProps {
 export const CustomDataStreamSelector = withProviders(({ stateContainer }) => {
   // Container component, here goes all the state management and custom logic usage to keep the DataStreamSelector presentational.
   const dataView = useDataView();
-
+  console.log('render');
   const {
     error: integrationsError,
     integrations,
@@ -28,8 +28,8 @@ export const CustomDataStreamSelector = withProviders(({ stateContainer }) => {
     loadMore,
     reloadIntegrations,
     searchIntegrations,
-    sortIntegrations,
     searchIntegrationsStreams,
+    sortIntegrations,
     sortIntegrationsStreams,
   } = useIntegrationsContext();
 
@@ -66,11 +66,11 @@ export const CustomDataStreamSelector = withProviders(({ stateContainer }) => {
       onIntegrationsSort={sortIntegrations}
       onIntegrationsStreamsSearch={searchIntegrationsStreams}
       onIntegrationsStreamsSort={sortIntegrationsStreams}
-      onUnmanagedStreamsSearch={searchDataStreams}
-      onUnmanagedStreamsSort={sortDataStreams}
-      onUnmanagedStreamsReload={reloadDataStreams}
       onStreamSelected={handleStreamSelection}
       onStreamsEntryClick={loadDataStreams}
+      onUnmanagedStreamsReload={reloadDataStreams}
+      onUnmanagedStreamsSearch={searchDataStreams}
+      onUnmanagedStreamsSort={sortDataStreams}
       title={dataView.getName()}
     />
   );

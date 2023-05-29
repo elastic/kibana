@@ -23,6 +23,7 @@ export interface SearchIntegrationsParams {
 }
 
 export type SearchIntegrations = (params: SearchIntegrationsParams) => void;
+export type ReloadIntegrations = () => void;
 export type LoadMoreIntegrations = () => void;
 
 const useIntegrations = ({ dataStreamsClient }: IntegrationsContextDeps) => {

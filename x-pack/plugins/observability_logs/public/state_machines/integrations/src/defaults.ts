@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { SearchStrategy } from '../../../../common/data_streams';
 import { ImmutableCache } from '../../../../common/immutable_cache';
 import { DefaultIntegrationsContext } from './types';
 
@@ -17,6 +16,5 @@ export const DEFAULT_CONTEXT: DefaultIntegrationsContext = {
   search: {
     nameQuery: '',
     sortOrder: 'asc',
-    strategy: SearchStrategy.INTEGRATIONS,
   },
 };

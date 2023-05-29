@@ -22,6 +22,8 @@ export interface SearchDataStreamsParams {
 }
 
 export type SearchDataStreams = (params: SearchDataStreamsParams) => void;
+export type LoadDataStreams = () => void;
+export type ReloadDataStreams = () => void;
 
 const useDataStreams = ({ dataStreamsClient }: DataStreamsContextDeps) => {
   const dataStreamsStateService = useInterpret(() =>

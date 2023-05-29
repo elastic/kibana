@@ -4,10 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { EuiContextMenuPanelId } from '@elastic/eui/src/components/context_menu/context_menu';
+import { ReloadDataStreams, SearchDataStreams } from '../../../hooks/use_data_streams';
+import {
+  LoadMoreIntegrations,
+  ReloadIntegrations,
+  SearchIntegrations,
+} from '../../../hooks/use_integrations';
 import { DataStream } from '../../../../common/data_streams';
 import type { IImmutableCache } from '../../../../common/immutable_cache';
 import { SortOrder } from '../../../../common/latest';
-import { PanelId } from '../types';
+import { DataStreamSelectionHandler, PanelId } from '../types';
 
 export interface DataStreamsSelectorSearchParams {
   name: string;
@@ -15,6 +22,8 @@ export interface DataStreamsSelectorSearchParams {
 }
 
 export type DataStreamsSelectorSearchHandler = (params: DataStreamsSelectorSearchParams) => void;
+
+export type ChangePanelHandler = ({ panelId }: { panelId: EuiContextMenuPanelId }) => void;
 
 export interface DefaultDataStreamsSelectorContext {
   panelId: PanelId;
@@ -32,7 +41,7 @@ export type DataStreamsSelectorTypestate =
       context: DefaultDataStreamsSelectorContext;
     }
   | {
-      value: 'restorePanel';
+      value: { open: 'hist' };
       context: DefaultDataStreamsSelectorContext;
     }
   | {
@@ -73,3 +82,17 @@ export type DataStreamsSelectorEvent =
       type: 'SORT_BY_ORDER';
       search: DataStreamsSelectorSearchParams;
     };
+
+export interface DataStreamsSelectorStateMachineDependencies {
+  initialContext?: DefaultDataStreamsSelectorContext;
+  onIntegrationsLoadMore: LoadMoreIntegrations;
+  onIntegrationsReload: ReloadIntegrations;
+  onIntegrationsSearch: SearchIntegrations;
+  onIntegrationsSort: SearchIntegrations;
+  onIntegrationsStreamsSearch: SearchIntegrations;
+  onIntegrationsStreamsSort: SearchIntegrations;
+  onUnmanagedStreamsSearch: SearchDataStreams;
+  onUnmanagedStreamsSort: SearchDataStreams;
+  onStreamSelected: DataStreamSelectionHandler;
+  onUnmanagedStreamsReload: ReloadDataStreams;
+}

@@ -6,9 +6,17 @@
  */
 
 import { IntegrationId, SortOrder } from '../../../common';
-import { DataStream, Integration, SearchStrategy } from '../../../common/data_streams';
-import { SearchDataStreams } from '../../hooks/use_data_streams';
-import { LoadMoreIntegrations, SearchIntegrations } from '../../hooks/use_integrations';
+import { DataStream, Integration } from '../../../common/data_streams';
+import {
+  LoadDataStreams,
+  ReloadDataStreams,
+  SearchDataStreams,
+} from '../../hooks/use_data_streams';
+import {
+  LoadMoreIntegrations,
+  ReloadIntegrations,
+  SearchIntegrations,
+} from '../../hooks/use_integrations';
 import { INTEGRATION_PANEL_ID, UNMANAGED_STREAMS_PANEL_ID } from './constants';
 
 export interface DataStreamSelectorProps {
@@ -36,11 +44,11 @@ export interface DataStreamSelectorProps {
   /* Triggered when we reach the bottom of the integration list and want to load more */
   onIntegrationsLoadMore: LoadMoreIntegrations;
   /* Triggered when we reach the bottom of the integration list and want to load more */
-  onIntegrationsReload: LoadMoreIntegrations;
+  onIntegrationsReload: ReloadIntegrations;
   /* Triggered when the uncategorized streams entry is selected */
-  onStreamsEntryClick: () => void;
+  onStreamsEntryClick: LoadDataStreams;
   /* Triggered when retrying to load the data streams */
-  onUnmanagedStreamsReload: () => void;
+  onUnmanagedStreamsReload: ReloadDataStreams;
   /* Triggered when a data stream entry is selected */
   onStreamSelected: DataStreamSelectionHandler;
 }
@@ -54,7 +62,6 @@ export interface SearchParams {
   integrationId?: PanelId;
   name?: string;
   sortOrder?: SortOrder;
-  strategy: SearchStrategy;
 }
 
 export type SearchControlsParams = Pick<SearchParams, 'name' | 'sortOrder'>;
