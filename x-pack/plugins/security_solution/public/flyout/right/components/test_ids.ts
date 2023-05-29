@@ -21,6 +21,8 @@ export const FLYOUT_HEADER_RISK_SCORE_TITLE_TEST_ID =
   'securitySolutionAlertDetailsFlyoutHeaderRiskScoreTitle';
 export const FLYOUT_HEADER_RISK_SCORE_VALUE_TEST_ID =
   'securitySolutionAlertDetailsFlyoutHeaderRiskScoreValue';
+export const FLYOUT_HEADER_SHARE_BUTTON_TEST_ID =
+  'securitySolutionAlertDetailsFlyoutHeaderShareButton';
 
 /* Description section */
 
@@ -112,7 +114,16 @@ export const INSIGHTS_CORRELATIONS_VIEW_ALL_BUTTON_TEST_ID = `${INSIGHTS_CORRELA
 export const INSIGHTS_CORRELATIONS_LOADING_TEST_ID = `${INSIGHTS_CORRELATIONS_TEST_ID}Loading`;
 export const INSIGHTS_CORRELATIONS_VALUE_TEST_ID = `${INSIGHTS_CORRELATIONS_TEST_ID}Value`;
 
-/* Visualizations section*/
+/* Insights Prevalence */
+
+export const INSIGHTS_PREVALENCE_TEST_ID =
+  'securitySolutionDocumentDetailsFlyoutInsightsPrevalence';
+export const INSIGHTS_PREVALENCE_TITLE_TEST_ID = `${INSIGHTS_PREVALENCE_TEST_ID}Title`;
+export const INSIGHTS_PREVALENCE_CONTENT_TEST_ID = `${INSIGHTS_PREVALENCE_TEST_ID}Content`;
+export const INSIGHTS_PREVALENCE_VIEW_ALL_BUTTON_TEST_ID = `${INSIGHTS_PREVALENCE_TEST_ID}ViewAllButton`;
+export const INSIGHTS_PREVALENCE_VALUE_TEST_ID = `${INSIGHTS_PREVALENCE_TEST_ID}Value`;
+
+/* Visualizations section */
 
 export const VISUALIZATIONS_SECTION_TEST_ID = 'securitySolutionDocumentDetailsVisualizationsTitle';
 export const VISUALIZATIONS_SECTION_HEADER_TEST_ID =
