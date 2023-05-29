@@ -5,36 +5,44 @@
  * 2.0.
  */
 
-import React, { FC, useMemo, useReducer } from 'react';
+import React, { type FC, useMemo, useReducer, useCallback } from 'react';
 import {
-  Criteria,
+  type Criteria,
   EuiBasicTable,
-  EuiInMemoryTable,
-  EuiTableSortingType,
-  EuiText,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLoadingSpinner,
+  EuiSpacer,
+  formatDate,
 } from '@elastic/eui';
+import { useQuery } from '@tanstack/react-query';
+import { isCompleteResponse, isErrorResponse } from '@kbn/data-plugin/public';
+import type { AggregationsAggregate, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { SearchHit } from '@kbn/es-types';
 import { useTimelineEventsDetails } from '../../../timelines/containers/details';
 import { useSourcererDataView } from '../../../common/containers/sourcerer';
-import { CORRELATIONS_DETAILS_TEST_ID } from './test_ids';
 
 import { useCorrelations } from '../../right/hooks/use_correlations';
 import { useLeftPanelContext } from '../context';
 import { useRouteSpy } from '../../../common/utils/route/use_route_spy';
 import { SecurityPageName } from '../../../../common';
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
-import { Hit, useAlertsByIds } from '../../../common/containers/alerts/use_alerts_by_ids';
 import { EntityPanel } from '../../right/components/entity_panel';
+import { useKibana } from '../../../common/lib/kibana';
 
 interface AlertsTableProps {
-  data: Hit[];
-  loading: boolean;
+  alertIds: string[];
 }
+
+export const TIMESTAMP_DATE_FORMAT = 'MMM D, YYYY @ HH:mm:ss.SSS';
 
 const columns = [
   {
     field: '@timestamp',
     name: 'Timestamp',
     truncateText: true,
+    dataType: 'date',
+    render: (value: string) => formatDate(value, TIMESTAMP_DATE_FORMAT),
   },
   {
     field: 'kibana.alert.rule.name',
@@ -53,50 +61,167 @@ const columns = [
   },
 ];
 
-const pagination = {
-  pageIndex: 0,
-  pageSize: 5,
-  totalItemCount: 100,
-  pageSizeOptions: [3, 5, 8],
+export interface UseAlertsQueryParams {
+  alertIds: string[];
+  from: number;
+  size: number;
+  sort?: Array<Record<string, 'asc' | 'desc'>>;
+}
+
+export interface UseAlertsQueryResult {
+  error: boolean;
+  loading: boolean;
+  totalItemCount: number;
+  // TODO: fix this type
+  data: any;
+}
+
+/**
+ * Returns the number of cases related to a document id (and the loading, error statuses as well as the cases count)
+ */
+export const useFetchAlerts = ({
+  alertIds,
+  from,
+  size,
+  sort,
+}: UseAlertsQueryParams): UseAlertsQueryResult => {
+  const QUERY_KEY = `useFetchAlerts`;
+
+  const {
+    services: { data: dataService },
+  } = useKibana();
+
+  const { data, isLoading, isError } = useQuery<
+    SearchResponse<SearchHit, Record<string, AggregationsAggregate>>,
+    unknown
+  >(
+    [QUERY_KEY, alertIds, from, size, sort],
+    async ({ signal }) => {
+      return new Promise((resolve, reject) => {
+        const $subscription = dataService.search
+          .search(
+            {
+              params: {
+                body: {
+                  query: {
+                    ids: { values: alertIds },
+                  },
+                  from,
+                  size,
+                  sort,
+                  fields: ['*'],
+                  _source: false,
+                },
+              },
+            },
+            { abortSignal: signal }
+          )
+          .subscribe((response) => {
+            if (isCompleteResponse(response)) {
+              $subscription.unsubscribe();
+              resolve(response.rawResponse);
+            } else if (isErrorResponse(response)) {
+              $subscription.unsubscribe();
+              reject(new Error(`Error while loading alerts`));
+            }
+          });
+      });
+    },
+    {
+      keepPreviousData: true,
+    }
+  );
+
+  return useMemo(
+    () => ({
+      loading: isLoading,
+      error: isError,
+      data: data?.hits?.hits || [],
+      totalItemCount: (data?.hits?.total as number) || 0,
+    }),
+    [data, isError, isLoading]
+  );
 };
 
-const sorting: EuiTableSortingType<Record<string, unknown>> = {
+interface PaginationState {
+  pageIndex: number;
+  pageSize: number;
+}
+
+const initialPagination: PaginationState = { pageIndex: 0, pageSize: 5 };
+
+const paginationReducer = (state: PaginationState, action: PaginationState): PaginationState => {
+  return action;
+};
+
+interface SortingState {
+  enableAllColumns: boolean;
+  sort: {
+    field: string;
+    direction: 'asc' | 'desc';
+  };
+}
+
+const initialSorting: SortingState = {
   sort: {
     field: '@timestamp',
     direction: 'desc',
   },
   enableAllColumns: true,
-  readOnly: true,
 };
 
-const AlertsTable: FC<AlertsTableProps> = ({ data, loading }) => {
-  // const [sorting, setSorting] = useReducer(() => {
-  //   return {};
-  // }, {});
-  //
-  // const [pagination, setPagination] = useReducer(() => {
-  //   return {};
-  // }, {});
+const sortingReducer = (state: SortingState, action: SortingState['sort']): SortingState => {
+  return {
+    ...state,
+    sort: action,
+  };
+};
 
-  const onTableChange = ({ page, sort }: Criteria<Record<string, unknown>>) => {
+const AlertsTable: FC<AlertsTableProps> = ({ alertIds }) => {
+  const [sorting, setSorting] = useReducer(sortingReducer, initialSorting);
+  const [pagination, setPagination] = useReducer(paginationReducer, initialPagination);
+
+  const sortConfig = useMemo(() => {
+    return [
+      {
+        [sorting.sort.field]: sorting.sort.direction,
+      },
+    ];
+  }, [sorting.sort.direction, sorting.sort.field]);
+
+  const { data, totalItemCount, loading, error } = useFetchAlerts({
+    alertIds,
+    from: pagination.pageIndex * pagination.pageSize,
+    size: pagination.pageSize,
+    sort: sortConfig,
+  });
+
+  const paginationConfig = useMemo(
+    () => ({
+      ...pagination,
+      totalItemCount,
+      pageSizeOptions: [3, 5, 8],
+    }),
+    [pagination, totalItemCount]
+  );
+
+  const onTableChange = useCallback(({ page, sort }: Criteria<Record<string, unknown>>) => {
     if (page) {
       const { index: pageIndex, size: pageSize } = page;
-      // setPageIndex(pageIndex);
-      // setPageSize(pageSize);
+      setPagination({ pageIndex, pageSize });
     }
+
     if (sort) {
-      const { field: sortField, direction: sortDirection } = sort;
-      // setSortField(sortField);
-      // setSortDirection(sortDirection);
+      setSorting(sort);
     }
-  };
+  }, []);
 
   const mappedData = useMemo(() => {
     return data
       .map((hit) => hit.fields)
-      .map((fields) =>
+      .map((fields = {}) =>
         Object.keys(fields).reduce((result, fieldName) => {
-          result[fieldName] = fields[fieldName]?.[0] || fields[fieldName];
+          result[fieldName] = fields?.[fieldName]?.[0] || fields?.[fieldName];
           return result;
         }, {} as Record<string, unknown>)
       );
@@ -108,7 +233,7 @@ const AlertsTable: FC<AlertsTableProps> = ({ data, loading }) => {
       tableCaption="Demo for EuiBasicTable with sorting"
       items={mappedData}
       columns={columns}
-      pagination={pagination}
+      pagination={paginationConfig}
       sorting={sorting}
       onChange={onTableChange}
     />
@@ -144,7 +269,6 @@ export const CorrelationsDetails: React.FC = () => {
   const {
     loading: isCorrelationsLoading,
     error: correlationsError,
-    data: correlationsData,
     ancestryAlertsIds,
     alertsBySessionIds,
     sameSourceAlertsIds,
@@ -155,38 +279,51 @@ export const CorrelationsDetails: React.FC = () => {
     scopeId,
   });
 
-  console.log('correlationsData', { ancestryAlertsIds, alertsBySessionIds, sameSourceAlertsIds });
+  // TODO: handle errors
 
-  const {
-    data: ancestryAlerts,
-    loading: isAncestryAlertsLoading,
-    error: ancestryAlertsError,
-  } = useAlertsByIds({ alertIds: ancestryAlertsIds });
+  const topLevelLoading = isEventDataLoading || isCorrelationsLoading;
 
-  const {
-    data: sessionAlerts,
-    loading: isSessionAlertsLoading,
-    error: sessionAlertsError,
-  } = useAlertsByIds({ alertIds: alertsBySessionIds });
-
-  const {
-    data: sameSourceAlerts,
-    loading: isSameSourceAlertsLoading,
-    error: sameSourceAlertsError,
-  } = useAlertsByIds({ alertIds: sameSourceAlertsIds });
+  if (topLevelLoading) {
+    return (
+      <EuiFlexGroup justifyContent="spaceAround">
+        <EuiFlexItem grow={false}>
+          <EuiLoadingSpinner size="m" />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  }
 
   return (
     <>
-      <EntityPanel title={'Ancestry'} iconType={''} expandable={true}>
-        <AlertsTable loading={isAncestryAlertsLoading} data={ancestryAlerts} />
+      <EntityPanel
+        title={`${ancestryAlertsIds.length} alerts related by ancestry`}
+        iconType={'warning'}
+        expandable={true}
+        expanded={true}
+      >
+        <AlertsTable alertIds={ancestryAlertsIds} />
       </EntityPanel>
 
-      <EntityPanel title={'Ancestry'} iconType={''}>
-        <AlertsTable loading={isSameSourceAlertsLoading} data={sameSourceAlerts} />
+      <EuiSpacer />
+
+      <EntityPanel
+        title={`${sameSourceAlertsIds.length} alerts related by source event`}
+        iconType={'warning'}
+        expandable={true}
+        expanded={true}
+      >
+        <AlertsTable alertIds={sameSourceAlertsIds} />
       </EntityPanel>
 
-      <EntityPanel title={'Ancestry'} iconType={''}>
-        <AlertsTable loading={isSessionAlertsLoading} data={sessionAlerts} />
+      <EuiSpacer />
+
+      <EntityPanel
+        title={`${alertsBySessionIds.length} alerts related by session`}
+        iconType={'warning'}
+        expandable={true}
+        expanded={false}
+      >
+        <AlertsTable alertIds={alertsBySessionIds} />
       </EntityPanel>
     </>
   );
