@@ -22,10 +22,11 @@ import { getRuleList } from '../configurations/findings_flyout/rule_tab';
 import { getRemediationList } from '../configurations/findings_flyout/overview_tab';
 import type { RuleSavedObject } from './use_csp_rules';
 import * as TEST_SUBJECTS from './test_subjects';
+import { CspRuleTemplate } from '@kbn/cloud-security-posture-plugin/common/schemas';
 
 interface RuleFlyoutProps {
   onClose(): void;
-  rule: RuleSavedObject;
+  rule: CspRuleTemplate;
 }
 
 const tabs = [

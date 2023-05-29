@@ -20,15 +20,15 @@ import * as TEST_SUBJECTS from './test_subjects';
 import { RuleFlyout } from './rules_flyout';
 import { LOCAL_STORAGE_PAGE_SIZE_RULES_KEY } from '../../common/constants';
 import { usePageSize } from '../../common/hooks/use_page_size';
+import { CspRuleTemplate } from '@kbn/cloud-security-posture-plugin/common/schemas';
 
 interface RulesPageData {
-  rules_page: RuleSavedObject[];
-  all_rules: RuleSavedObject[];
-  rules_map: Map<string, RuleSavedObject>;
+  rules_page: CspRuleTemplate[];
+  all_rules: CspRuleTemplate[];
+  rules_map: Map<string, CspRuleTemplate['metadata']>;
   total: number;
   error?: string;
   loading: boolean;
-  lastModified: string | null;
 }
 
 export type RulesState = RulesPageData & RulesQuery;
@@ -37,26 +37,21 @@ const getRulesPageData = (
   { status, data, error }: Pick<RulesQueryResult, 'data' | 'status' | 'error'>,
   query: RulesQuery
 ): RulesPageData => {
-  const rules = data?.savedObjects || [];
+  const rules = data?.items || ([] as CspRuleTemplate[]);
   const page = getPage(rules, query);
   return {
     loading: status === 'loading',
     error: error ? extractErrorMessage(error) : undefined,
-    all_rules: rules,
-    rules_map: new Map(rules.map((rule) => [rule.id, rule])),
+    all_rules: [...rules],
+    rules_map: new Map(
+      rules.map((rule) => [rule.attributes.metadata.id, rule.attributes.metadata])
+    ),
     rules_page: page,
     total: data?.total || 0,
-    lastModified: getLastModified(rules) || null,
   };
 };
 
-const getLastModified = (data: RuleSavedObject[]): string | undefined =>
-  data
-    .map((v) => v.updatedAt)
-    .filter(isNonNullable)
-    .sort((a, b) => new Date(b).getTime() - new Date(a).getTime())[0];
-
-const getPage = (data: readonly RuleSavedObject[], { page, perPage }: RulesQuery) =>
+const getPage = (data: CspRuleTemplate[], { page, perPage }: RulesQuery) =>
   data.slice(page * perPage, (page + 1) * perPage);
 
 const MAX_ITEMS_PER_PAGE = 10000;
@@ -84,11 +79,14 @@ export const RulesContainer = () => {
     params.packagePolicyId
   );
 
+  // console.log({ status });
+
   const rulesPageData = useMemo(
     () => getRulesPageData({ data, error, status }, rulesQuery),
     [data, error, status, rulesQuery]
   );
 
+  console.log({ rulesPageData });
   return (
     <div data-test-subj={TEST_SUBJECTS.CSP_RULES_CONTAINER}>
       <EuiPanel hasBorder={false} hasShadow={false}>
