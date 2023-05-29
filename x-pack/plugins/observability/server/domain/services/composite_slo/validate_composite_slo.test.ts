@@ -5,10 +5,12 @@
  * 2.0.
  */
 
+import { validateCompositeSLO } from '.';
 import {
-  createWeightedAverageSource,
   createCompositeSLO,
+  createWeightedAverageSource,
 } from '../../../services/composite_slo/fixtures/composite_slo';
+import { fiveMinute, twoMinute } from '../../../services/slo/fixtures/duration';
 import {
   createSLO,
   createSLOWithTimeslicesBudgetingMethod,
@@ -18,8 +20,6 @@ import {
   thirtyDaysRolling,
   weeklyCalendarAligned,
 } from '../../../services/slo/fixtures/time_window';
-import { validateCompositeSLO } from '.';
-import { fiveMinute, twoMinute } from '../../../services/slo/fixtures/duration';
 
 describe('validateCompositeSLO', () => {
   it('throws when the number of source SLOs is less than 2', () => {
@@ -117,6 +117,32 @@ describe('validateCompositeSLO', () => {
     );
   });
 
+  it('throws when the timeslices window is not defined on the composite SLO', () => {
+    const sloOne = createSLO({
+      budgetingMethod: 'timeslices',
+      objective: { target: 0.98, timesliceTarget: 0.95, timesliceWindow: fiveMinute() },
+    });
+    const sloTwo = createSLO({
+      budgetingMethod: 'timeslices',
+      objective: { target: 0.98, timesliceTarget: 0.95, timesliceWindow: fiveMinute() },
+    });
+
+    const compositeSlo = createCompositeSLO({
+      budgetingMethod: 'timeslices',
+      objective: {
+        target: 0.9,
+      },
+      sources: [
+        createWeightedAverageSource({ id: sloOne.id, revision: sloOne.revision }),
+        createWeightedAverageSource({ id: sloTwo.id, revision: sloTwo.revision }),
+      ],
+    });
+
+    expect(() => validateCompositeSLO(compositeSlo, [sloOne, sloTwo])).toThrowError(
+      'Invalid timeslices objective. A timeslice window must be set and equal to all source SLO.'
+    );
+  });
+
   it('throws when the timeslices window is not the same accros all source SLOs', () => {
     const sloOne = createSLO({
       budgetingMethod: 'timeslices',
@@ -129,6 +155,11 @@ describe('validateCompositeSLO', () => {
 
     const compositeSlo = createCompositeSLO({
       budgetingMethod: 'timeslices',
+      objective: {
+        target: 0.9,
+        timesliceTarget: 0.95,
+        timesliceWindow: fiveMinute(),
+      },
       sources: [
         createWeightedAverageSource({ id: sloOne.id, revision: sloOne.revision }),
         createWeightedAverageSource({ id: sloTwo.id, revision: sloTwo.revision }),
@@ -169,6 +200,11 @@ describe('validateCompositeSLO', () => {
       const sloTwo = createSLOWithTimeslicesBudgetingMethod();
       const compositeSlo = createCompositeSLO({
         budgetingMethod: 'timeslices',
+        objective: {
+          target: 0.98,
+          timesliceTarget: 0.95,
+          timesliceWindow: twoMinute(),
+        },
         timeWindow: sevenDaysRolling(),
         sources: [
           createWeightedAverageSource({ id: sloOne.id, revision: sloOne.revision }),

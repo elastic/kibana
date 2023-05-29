@@ -40,10 +40,14 @@ function assertSameBudgetingMethod(compositeSlo: CompositeSLO, sloList: SLO[]) {
     (slo) => slo.budgetingMethod === compositeSlo.budgetingMethod
   );
 
-  if (sloList[0].budgetingMethod === 'timeslices') {
-    const firstSloTimesliceWindow = sloList[0].objective.timesliceWindow!;
+  if (compositeSlo.budgetingMethod === 'timeslices') {
+    if (compositeSlo.objective.timesliceWindow === undefined) {
+      throw new IllegalArgumentError(
+        'Invalid timeslices objective. A timeslice window must be set and equal to all source SLO.'
+      );
+    }
     const haveSameTimesliceWindow = sloList.every((slo) =>
-      slo.objective.timesliceWindow?.isEqual(firstSloTimesliceWindow)
+      slo.objective.timesliceWindow?.isEqual(compositeSlo.objective.timesliceWindow!)
     );
     if (!haveSameTimesliceWindow) {
       throw new IllegalArgumentError(

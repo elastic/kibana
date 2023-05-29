@@ -119,6 +119,7 @@ type UpdateCompositeSLOParams = t.TypeOf<typeof updateCompositeSLOParamsSchema.p
 type UpdateCompositeSLOResponse = t.OutputOf<typeof updateCompositeSLOResponseSchema>;
 
 export {
+  compositeSLOResponseSchema,
   createCompositeSLOParamsSchema,
   deleteCompositeSLOParamsSchema,
   findCompositeSLOParamsSchema,

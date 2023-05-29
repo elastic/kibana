@@ -16,10 +16,12 @@ import {
 
 import {
   CreateCompositeSLO,
+  DefaultSummaryClient,
   DeleteCompositeSLO,
   KibanaSavedObjectsCompositeSLORepository,
   UpdateCompositeSLO,
 } from '../../services/composite_slo';
+import { GetCompositeSLO } from '../../services/composite_slo/get_composite_slo';
 import { KibanaSavedObjectsSLORepository } from '../../services/slo';
 import { ObservabilityRequestHandlerContext } from '../../types';
 import { createObservabilityServerRoute } from '../create_observability_server_route';
@@ -94,10 +96,19 @@ const getCompositeSLORoute = createObservabilityServerRoute({
     tags: ['access:slo_read'],
   },
   params: getCompositeSLOParamsSchema,
-  handler: async ({ context }) => {
+  handler: async ({ context, params }) => {
     await assertLicenseAtLeastPlatinum(context);
 
-    throw notImplemented();
+    const soClient = (await context.core).savedObjects.client;
+    const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+
+    const compositeSloRepository = new KibanaSavedObjectsCompositeSLORepository(soClient);
+    const summaryClient = new DefaultSummaryClient(esClient);
+    const getCompositeSlo = new GetCompositeSLO(compositeSloRepository, summaryClient);
+
+    const response = await getCompositeSlo.execute(params.path.id);
+
+    return response;
   },
 });
 

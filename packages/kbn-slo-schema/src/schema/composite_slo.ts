@@ -9,7 +9,7 @@
 import * as t from 'io-ts';
 
 import { dateType } from './common';
-import { budgetingMethodSchema, sloIdSchema, tagsSchema, targetSchema } from './slo';
+import { budgetingMethodSchema, objectiveSchema, sloIdSchema, tagsSchema } from './slo';
 import { rollingTimeWindowSchema } from './time_window';
 
 const compositeSloIdSchema = t.string;
@@ -27,7 +27,7 @@ const compositeSloSchema = t.type({
   timeWindow: rollingTimeWindowSchema,
   budgetingMethod: budgetingMethodSchema,
   compositeMethod: weightedAverageCompositeMethodSchema,
-  objective: targetSchema,
+  objective: objectiveSchema,
   sources: t.array(weightedAverageSourceSchema),
   tags: tagsSchema,
   createdAt: dateType,
