@@ -13,7 +13,6 @@ import {
   EuiButtonEmpty,
   EuiContextMenuItem,
   EuiContextMenuPanel,
-  EuiFlexGrid,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
