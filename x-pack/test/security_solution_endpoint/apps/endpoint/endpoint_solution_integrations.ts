@@ -63,6 +63,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       let timeline: TimelineResponse;
 
       before(async () => {
+        log.info(
+          `Creating timeline for events from host: ${indexedData.hosts[0].host.hostname} (agent id: ${indexedData.hosts[0].agent.id})`
+        );
         timeline = await timelineTestService.createTimelineForEndpointAlerts(
           'endpoint in timeline',
           {
@@ -83,7 +86,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           timeline.data.persistTimeline.timeline.savedObjectId
         );
         await pageObjects.timeline.setDateRange('Last 1 year');
-        await pageObjects.timeline.waitForEvents(60_000);
+        await pageObjects.timeline.waitForEvents(60_000 * 2);
       });
 
       after(async () => {
