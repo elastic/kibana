@@ -7,7 +7,7 @@
 
 import { LogicMounter } from '../../../__mocks__/kea_logic';
 
-import { Status } from '../../../../../common/types/api';
+import { HttpError, Status } from '../../../../../common/types/api';
 
 import { KibanaLogic } from '../../../shared/kibana';
 import { CreateEngineApiLogic } from '../../api/engines/create_engine_api_logic';
@@ -75,6 +75,19 @@ describe('CreateEngineLogic', () => {
         engineName: INVALID_ENGINE_NAME,
         indices: ['search-index-01'],
       });
+    });
+    it('createEngine returns error when duplicate search application is created', () => {
+      const httpError: HttpError = {
+        body: {
+          error: 'search_application_already_exists',
+          message: 'Search application name already taken. Choose another name.',
+          statusCode: 409,
+        },
+        fetchOptions: {},
+        request: {},
+      } as HttpError;
+      CreateEngineApiLogic.actions.apiError(httpError);
+      expect(CreateEngineLogic.values.createEngineError).toEqual(httpError);
     });
 
     it('engineCreated is handled and is navigated to Search application list page', () => {
