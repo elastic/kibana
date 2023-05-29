@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { FC, useState, useEffect, useCallback, useRef } from 'react';
+import React, { FC, useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import type { SavedSearch } from '@kbn/discover-plugin/public';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import { i18n } from '@kbn/i18n';
@@ -60,12 +60,15 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
     uiSettings,
   } = useAiopsAppContext();
   const { euiTheme } = useEuiTheme();
+  const { filters, query } = useMemo(() => getState(), [getState]);
 
   const mounted = useRef(false);
   const { runCategorizeRequest, cancelRequest, randomSampler } = useCategorizeRequest();
-  const [aiopsListState, setAiopsListState] = usePageUrlState<AiOpsPageUrlState>(
+  const [aiopsListState] = usePageUrlState<AiOpsPageUrlState>(
     'AIOPS_INDEX_VIEWER',
-    getDefaultAiOpsListState()
+    getDefaultAiOpsListState({
+      searchQuery: createMergedEsQuery(query, filters, dataView, uiSettings),
+    })
   );
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
   const [selectedSavedSearch /* , setSelectedSavedSearch*/] = useState(savedSearch);
@@ -108,16 +111,6 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
     BAR_TARGET,
     true
   );
-
-  useEffect(() => {
-    const { filters, query } = getState();
-
-    setAiopsListState({
-      ...aiopsListState,
-      searchQuery: createMergedEsQuery(query, filters, dataView, uiSettings),
-    });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   const loadCategories = useCallback(async () => {
     const { title: index, timeFieldName: timeField } = dataView;

@@ -3,7 +3,7 @@
 ## Disable APM and Uptime, enable Enterprise Search
 xpack.apm.enabled: false
 xpack.uptime.enabled: false
-enterpriseSearch.enabled: true
+enterpriseSearch.enabled: false
 
 ## Enable the Serverless Search plugin
 xpack.serverless.search.enabled: true

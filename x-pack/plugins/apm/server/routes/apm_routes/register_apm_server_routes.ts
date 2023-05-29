@@ -7,7 +7,11 @@
 
 import Boom from '@hapi/boom';
 import * as t from 'io-ts';
-import { KibanaRequest, RouteRegistrar } from '@kbn/core/server';
+import {
+  KibanaRequest,
+  KibanaResponseFactory,
+  RouteRegistrar,
+} from '@kbn/core/server';
 import { errors } from '@elastic/elasticsearch';
 import agent from 'elastic-apm-node';
 import { ServerRouteRepository } from '@kbn/server-route-repository';
@@ -20,6 +24,7 @@ import {
 import { jsonRt, mergeRt } from '@kbn/io-ts-utils';
 import { InspectResponse } from '@kbn/observability-plugin/typings/common';
 import apm from 'elastic-apm-node';
+import { VersionedRouteRegistrar } from '@kbn/core-http-server';
 import { pickKeys } from '../../../common/utils/pick_keys';
 import { APMRouteHandlerResources, TelemetryUsageCounter } from '../typings';
 import type { ApmPluginRequestHandlerContext } from '../typings';
@@ -70,130 +75,157 @@ export function registerRoutes({
   routes.forEach((route) => {
     const { params, endpoint, options, handler } = route;
 
-    const { method, pathname } = parseEndpoint(endpoint);
+    const { method, pathname, version } = parseEndpoint(endpoint);
 
-    (
-      router[method] as RouteRegistrar<
-        typeof method,
-        ApmPluginRequestHandlerContext
-      >
-    )(
-      {
-        path: pathname,
-        options,
-        validate: routeValidationObject,
-      },
-      async (context, request, response) => {
-        if (agent.isStarted()) {
-          agent.addLabels({
-            plugin: 'apm',
+    const wrappedHandler = async (
+      context: ApmPluginRequestHandlerContext,
+      request: KibanaRequest,
+      response: KibanaResponseFactory
+    ) => {
+      if (agent.isStarted()) {
+        agent.addLabels({
+          plugin: 'apm',
+        });
+      }
+
+      // init debug queries
+      inspectableEsQueriesMap.set(request, []);
+
+      try {
+        const runtimeType = params ? mergeRt(params, inspectRt) : inspectRt;
+
+        const validatedParams = decodeRequestParams(
+          pickKeys(request, 'params', 'body', 'query'),
+          runtimeType
+        );
+
+        const { aborted, data } = await Promise.race([
+          handler({
+            request,
+            context,
+            config,
+            featureFlags,
+            logger,
+            core,
+            plugins,
+            telemetryUsageCounter,
+            params: merge(
+              {
+                query: {
+                  _inspect: false,
+                },
+              },
+              validatedParams
+            ),
+            ruleDataClient,
+            kibanaVersion,
+          }).then((value: Record<string, any> | undefined | null) => {
+            return {
+              aborted: false,
+              data: value,
+            };
+          }),
+          request.events.aborted$.toPromise().then(() => {
+            return {
+              aborted: true,
+              data: undefined,
+            };
+          }),
+        ]);
+
+        if (aborted) {
+          return response.custom(CLIENT_CLOSED_REQUEST);
+        }
+
+        if (Array.isArray(data)) {
+          throw new Error('Return type cannot be an array');
+        }
+
+        const body = validatedParams.query?._inspect
+          ? {
+              ...data,
+              _inspect: inspectableEsQueriesMap.get(request),
+            }
+          : { ...data };
+
+        if (!options.disableTelemetry && telemetryUsageCounter) {
+          telemetryUsageCounter.incrementCounter({
+            counterName: `${method.toUpperCase()} ${pathname}`,
+            counterType: 'success',
           });
         }
 
-        // init debug queries
-        inspectableEsQueriesMap.set(request, []);
+        return response.ok({ body });
+      } catch (error) {
+        logger.error(error);
 
-        try {
-          const runtimeType = params ? mergeRt(params, inspectRt) : inspectRt;
-
-          const validatedParams = decodeRequestParams(
-            pickKeys(request, 'params', 'body', 'query'),
-            runtimeType
-          );
-
-          const { aborted, data } = await Promise.race([
-            handler({
-              request,
-              context,
-              config,
-              featureFlags,
-              logger,
-              core,
-              plugins,
-              telemetryUsageCounter,
-              params: merge(
-                {
-                  query: {
-                    _inspect: false,
-                  },
-                },
-                validatedParams
-              ),
-              ruleDataClient,
-              kibanaVersion,
-            }).then((value: Record<string, any> | undefined | null) => {
-              return {
-                aborted: false,
-                data: value,
-              };
-            }),
-            request.events.aborted$.toPromise().then(() => {
-              return {
-                aborted: true,
-                data: undefined,
-              };
-            }),
-          ]);
-
-          if (aborted) {
-            return response.custom(CLIENT_CLOSED_REQUEST);
-          }
-
-          if (Array.isArray(data)) {
-            throw new Error('Return type cannot be an array');
-          }
-
-          const body = validatedParams.query?._inspect
-            ? {
-                ...data,
-                _inspect: inspectableEsQueriesMap.get(request),
-              }
-            : { ...data };
-
-          if (!options.disableTelemetry && telemetryUsageCounter) {
-            telemetryUsageCounter.incrementCounter({
-              counterName: `${method.toUpperCase()} ${pathname}`,
-              counterType: 'success',
-            });
-          }
-
-          return response.ok({ body });
-        } catch (error) {
-          logger.error(error);
-
-          if (!options.disableTelemetry && telemetryUsageCounter) {
-            telemetryUsageCounter.incrementCounter({
-              counterName: `${method.toUpperCase()} ${pathname}`,
-              counterType: 'error',
-            });
-          }
-          const opts = {
-            statusCode: 500,
-            body: {
-              message: error.message,
-              attributes: {
-                _inspect: inspectableEsQueriesMap.get(request),
-              },
-            },
-          };
-
-          if (error instanceof errors.RequestAbortedError) {
-            return response.custom(merge(opts, CLIENT_CLOSED_REQUEST));
-          }
-
-          if (Boom.isBoom(error)) {
-            opts.statusCode = error.output.statusCode;
-          }
-
-          // capture error with APM node agent
-          apm.captureError(error);
-
-          return response.custom(opts);
-        } finally {
-          // cleanup
-          inspectableEsQueriesMap.delete(request);
+        if (!options.disableTelemetry && telemetryUsageCounter) {
+          telemetryUsageCounter.incrementCounter({
+            counterName: `${method.toUpperCase()} ${pathname}`,
+            counterType: 'error',
+          });
         }
+        const opts = {
+          statusCode: 500,
+          body: {
+            message: error.message,
+            attributes: {
+              _inspect: inspectableEsQueriesMap.get(request),
+            },
+          },
+        };
+
+        if (error instanceof errors.RequestAbortedError) {
+          return response.custom(merge(opts, CLIENT_CLOSED_REQUEST));
+        }
+
+        if (Boom.isBoom(error)) {
+          opts.statusCode = error.output.statusCode;
+        }
+
+        // capture error with APM node agent
+        apm.captureError(error);
+
+        return response.custom(opts);
+      } finally {
+        // cleanup
+        inspectableEsQueriesMap.delete(request);
       }
-    );
+    };
+
+    if (!version) {
+      (
+        router[method] as RouteRegistrar<
+          typeof method,
+          ApmPluginRequestHandlerContext
+        >
+      )(
+        {
+          path: pathname,
+          options,
+          validate: routeValidationObject,
+        },
+        wrappedHandler
+      );
+    } else {
+      (
+        router.versioned[method] as VersionedRouteRegistrar<
+          typeof method,
+          ApmPluginRequestHandlerContext
+        >
+      )({
+        path: pathname,
+        access: pathname.includes('/internal/apm') ? 'internal' : 'public',
+        options,
+      }).addVersion(
+        {
+          version,
+          validate: {
+            request: routeValidationObject,
+          },
+        },
+        wrappedHandler
+      );
+    }
   });
 }

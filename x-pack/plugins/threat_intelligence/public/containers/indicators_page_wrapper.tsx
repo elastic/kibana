@@ -8,8 +8,8 @@
 import React, { VFC } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { CasesPermissions } from '@kbn/cases-plugin/common';
-import { IndicatorsPage } from '../modules/indicators/pages';
-import { IntegrationsGuard } from './integrations_guard/integrations_guard';
+import { IndicatorsPage } from '../modules/indicators/pages/indicators';
+import { IntegrationsGuard } from './integrations_guard';
 import { SecuritySolutionPluginTemplateWrapper } from './security_solution_plugin_template_wrapper';
 import { useKibana } from '../hooks/use_kibana';
 

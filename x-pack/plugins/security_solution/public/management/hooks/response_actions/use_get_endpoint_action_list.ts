@@ -10,10 +10,7 @@ import type { IHttpFetchError } from '@kbn/core-http-browser';
 import { useQuery } from '@tanstack/react-query';
 import type { EndpointActionListRequestQuery } from '../../../../common/endpoint/schema/actions';
 import { useHttp } from '../../../common/lib/kibana';
-import {
-  BASE_ENDPOINT_ACTION_ALERTS_ROUTE,
-  BASE_ENDPOINT_ACTION_ROUTE,
-} from '../../../../common/endpoint/constants';
+import { BASE_ENDPOINT_ACTION_ROUTE } from '../../../../common/endpoint/constants';
 import type { ActionListApiResponse } from '../../../../common/endpoint/types';
 
 interface ErrorType {
@@ -35,13 +32,12 @@ export const useGetEndpointActionList = (
     userIds = query.userIds.map((userId) => `*${userId}*`);
   }
 
-  // TODO: Temporary solution until we decide on how RBAC should look like for Actions in Alerts
-  const path = query.alertId ? BASE_ENDPOINT_ACTION_ALERTS_ROUTE : BASE_ENDPOINT_ACTION_ROUTE;
   return useQuery<ActionListApiResponse, IHttpFetchError<ErrorType>>({
     queryKey: ['get-action-list', query],
     ...options,
+    keepPreviousData: true,
     queryFn: async () => {
-      return http.get<ActionListApiResponse>(path, {
+      return http.get<ActionListApiResponse>(BASE_ENDPOINT_ACTION_ROUTE, {
         query: {
           agentIds: query.agentIds,
           commands: query.commands,

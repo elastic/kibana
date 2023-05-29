@@ -8,7 +8,7 @@
 import React from 'react';
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { useTheme } from '@kbn/observability-plugin/public';
+import { useTheme } from '@kbn/observability-shared-plugin/public';
 import { ReportTypes } from '@kbn/exploratory-view-plugin/public';
 
 import { useRefreshedRange } from '../../../../hooks';

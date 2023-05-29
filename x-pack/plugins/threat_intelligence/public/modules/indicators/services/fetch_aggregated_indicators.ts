@@ -13,7 +13,7 @@ import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import moment from 'moment';
 import { BARCHART_AGGREGATION_NAME, FactoryQueryType } from '../../../../common/constants';
 import { RawIndicatorFieldId } from '../../../../common/types/indicator';
-import { dateFormatter } from '../../../common/utils/dates';
+import { dateFormatter } from '../../../utils/dates';
 import { search } from '../../../utils/search';
 import { getIndicatorQueryParams } from '../utils/get_indicator_query_params';
 
