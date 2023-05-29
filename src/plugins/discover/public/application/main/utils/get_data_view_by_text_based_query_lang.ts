@@ -17,7 +17,10 @@ export async function getDataViewByTextBasedQueryLang(
   const text = 'sql' in query ? query.sql : undefined;
 
   const indexPatternFromQuery = getIndexPatternFromSQLQuery(text);
-  if (indexPatternFromQuery !== currentDataView?.getIndexPattern()) {
+  if (
+    currentDataView?.isPersisted() ||
+    indexPatternFromQuery !== currentDataView?.getIndexPattern()
+  ) {
     const dataViewObj = await services.dataViews.create({
       title: indexPatternFromQuery,
     });

@@ -49,8 +49,11 @@ export const DiscoverTopNav = ({
   const savedDataViews = useInternalStateSelector((state) => state.savedDataViews);
   const savedSearch = useSavedSearchInitial();
   const showDatePicker = useMemo(() => {
-    if (isPlainRecord) return true;
-    return dataView.isTimeBased() && dataView.type !== DataViewType.ROLLUP;
+    // always show the timepicker for text based languages
+    return (
+      isPlainRecord ||
+      (!isPlainRecord && dataView.isTimeBased() && dataView.type !== DataViewType.ROLLUP)
+    );
   }, [dataView, isPlainRecord]);
   const services = useDiscoverServices();
   const { dataViewEditor, navigation, dataViewFieldEditor, data, uiSettings, dataViews } = services;
