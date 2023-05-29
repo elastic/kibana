@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import React, { RefCallback } from 'react';
 import { EuiContextMenuPanelDescriptor, EuiContextMenuPanelItemDescriptor } from '@elastic/eui';
 import { PackageIcon } from '@kbn/fleet-plugin/public';
-import React, { RefCallback } from 'react';
 import { getIntegrationId } from '../../../common';
 import { Integration } from '../../../common/data_streams';
 import { DATA_VIEW_POPOVER_CONTENT_WIDTH } from './constants';
-import { PanelId, DataStreamSelectionHandler } from './types';
+import { DataStreamSelectionHandler, PanelId } from './types';
 
 export const getPopoverButtonStyles = ({ fullWidth }: { fullWidth?: boolean }) => ({
   maxWidth: fullWidth ? undefined : DATA_VIEW_POPOVER_CONTENT_WIDTH,

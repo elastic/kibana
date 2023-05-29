@@ -37,10 +37,6 @@ const useIntegrations = ({ dataStreamsClient }: IntegrationsContextDeps) => {
 
   const error = useSelector(integrationsStateService, (state) => state.context.error);
 
-  const isUninitialized = useSelector(integrationsStateService, (state) =>
-    state.matches('uninitialized')
-  );
-
   const isLoading = useSelector(
     integrationsStateService,
     (state) =>
@@ -48,10 +44,6 @@ const useIntegrations = ({ dataStreamsClient }: IntegrationsContextDeps) => {
       state.matches({ loaded: 'loadingMore' }) ||
       state.matches({ loaded: 'debounceSearchingIntegrations' }) ||
       state.matches({ loaded: 'debounceSearchingIntegrationsStreams' })
-  );
-
-  const hasFailedLoading = useSelector(integrationsStateService, (state) =>
-    state.matches('loadingFailed')
   );
 
   const searchIntegrations: SearchIntegrations = useCallback(
@@ -106,10 +98,8 @@ const useIntegrations = ({ dataStreamsClient }: IntegrationsContextDeps) => {
 
     // Failure states
     error,
-    hasFailedLoading,
 
     // Loading states
-    isUninitialized,
     isLoading,
 
     // Data

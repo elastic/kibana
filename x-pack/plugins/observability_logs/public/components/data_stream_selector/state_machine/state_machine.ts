@@ -19,7 +19,7 @@ import {
 export const createPureDataStreamsSelectorStateMachine = (
   initialContext: DefaultDataStreamsSelectorContext = DEFAULT_CONTEXT
 ) =>
-  /** @xstate-layout N4IgpgJg5mDOIC5QBECGAXVBldAnMqAtrFmADZgDG6A9rgHSVk2yQDEAKgPIDiPAMgFEA2gAYAuolAAHFgEt0cmgDspIAB6IArACYANCACeiABwBGeloC+Vg2kw58REuSq0GNaWGWdeAkRJqsrAKSqpIGohmZgDMAJyWZloAbDpaBsYIKRaiqda2IPbYeATEpBTUdPSe3vRkcrCKylAAksroYFC4GGGwbADCABIAggByPIIA+gAKY4L8YpIRwaEqapoIACybFiYxWnExAOzpRohxRyb0x-l2GMVOZa6VHl7KdQ1Nre2d3YoqfSGYwmMzmCzMSxk8n+4VAG22u32hxOGW0yQSuTSNjuDhKznKbiqNXe9UacmabQ6XR6ALYWH6ACUuPx+JNuJMWqMOIIeAzhhwWlxRlhJgAhLgcbgAWUWQWhYXWpiOqIQl029GSRzMJhO2MK90cpRcFXc1TeHzJFJ+1JhfSwgmGDKGYoAmpNRsMpQFISAVjDFQgkur0WZNpjTplkskLDpkiksQUiob8c9TcSLV9Kb8aco7VwGRxXZN88hBAzZct5WsIhszKl6HsdKIYmY0iqtMcGwcbnqk3iniaiebSZnrX8wsniAMRuMprNRvMK1CQv6a4hkvt6GY4h3WxHtNrLHlewb+8bCa9aiPyd8qeOVJO7fNBP1C1gOAyHTLApWVwq14GsQJFoSR5Cq0YWPGtz6rijzni8ZpXp8N5ZjaE5nnSDpOoMRYel6S6+lWsKRAgJibFoGp7N2KJnAg8TqqBCY4g8RoEgh6bXlad45o+dL5oWopuiWZYEX6-5wqYHb0JsOjajRmQ6Ecoj0LqiannBbFpsOyHNAAqsohCoMoqAwBAvFArOoILgsP7LqsxEbBuFHbruba0XEikNqpzGPppQ5IZaUD6YZxmmbx9pCK+kzvp+nqiURAbRPEiRQSqO5HA2cRkT2amwaxqb+SSOlBQZRkmZA4VYc6gnup63pyn+1YSaR5HSTESI3CqJjNtJyQ6tBfYaQVl5FYFwVlWFGFYPxRbCeWtmEY1DmSTE9A6DEJg6OYbmRt19DhjYBTKDQEBwGog35YOuANfZAYALRxCqd3JCeeUpldjDMKwEA3auzWxMljH7lkfX0HEe6vSx70XohxFiU1JHxCq2qrUxMFQwOMPpgAFp8v3iSR0QWKG5EtjtiCbEcyRdsiA3qZdWPaYFqH3rm+MI7W0RbtsrnAyYJjUxDuUY-BWkBaO3Ewo+7PLaRZgZXEfXydoOg6EeaMXdD7FM1842hRVZ4ywG5gK0rwOHLsqk2EAA */
+  /** @xstate-layout N4IgpgJg5mDOIC5QBECGAXVBldAnMqAtrFmADZgDG6A9rgHSVk2yQDEAKgPIDiPAMgFEA2gAYAuolAAHFgEt0cmgDspIAB6IAjACYALAFZ6WgGyitBkzoMAaEAE9te+qIDsenVoAcrgwF8-OzRMHHwiEnIqWgYaaTBlTl4BEQk1WVgFJVUkDW03LXoTPS89AGZfO0cEPQBOHXoarRq6718AoIxsPAJiUgpqOnpY+PoyOVhFZSgASWV0MChcDCzYNgBhAAkAQQA5HkEAfQAFXcF+MUkc9MyVNU0ELXdCy2tKxAMvUvodGpMff0CIGCXTCvUiAxicWUo3GkxmcwWS0UKlWm12+2Op3OWkuMnkyOyoHunmcekev3+b2qWgKNVqnn+7SBnVCPQi-WiQyhMImcims3mi2WKLYWDWACUuPx+AduAdpjsOIIeOKthxplwdlgDgAhLgcbgAWQuaXxWTuiAAtNYCq5RKVdLYHIgdF4ag1fqIauUAR0Qt1wn0ooNhtCxrz+QihQTVlhBFtxZtdQBNA47LaGlK4kDXAkWhCWx71LyiNxeR1UgwGVz0Axlx1M4GswPgzmhnlwgWI4XKWNccUcFMHfvIQTik1XM23HL3S0Okz0XyucuvZ3VPSiWtkjdWX3M-2g9nByEjcOdqNIrLN4jrbZ7Q4nHZnCd4jJ5mcunRfEyuVpOqr6F49AlnofxtICTYBmCHIhtyZ58vCgqXio16xmcghrIOWAcOK8bGqkk5vuaH4PKI1jGDUBgOquAE6KIjYslBR4Qlyp6wghXbRleTGivGiYbEO6aZi+OZToSuQIHaRh0i0lJriWxiMhBjGHkGLHtvBkZIT2qGiv2g46qmI5jiJubEUSiBkjWxReK6FbyZuf4MQebJqW2cHsVMACqyiEKgyioDAEC6Wi96Yk+5wEa+NzicSX6FL+clVK4JhGKYO7WM5IKua2sFsRGUA+X5AVBbpcZCJhBzYbhGamWJ+ZaGRaWUdR-6IO4XylKIXgGN64F+tlLYwSeYaeYVvn+YFkBlXxSaGWmGZZqaRHThZkkeMBv5ej6VI+PU+hmH1e6QapuUjR2CFFZNpU8Vg+lDsZ45RaJK2xZZ+j0Hohitbtrj7aB23gYCyg0BAcBqCdOXDctMX5paZL1EuK5tQWpj1I81bI1lqFuYMTAsJAMPvmtjrfolFRrsUXw1KIoFKQNONnax4lmatElzkUi6Y-ZVSWk8P7c5lykuUNx7M-QAAWsJE+Z7OPDWFhfmUFNVLowH6Ay-X7oN0FixpY2cchvYy2zs40u6RQlDta6lJRxhFKIu7Y0xuPnZpiHdgSqEm29CBUZulgO7uVJNO6XV01rkOi+pHkFVdJXTUxPv5lWRh6ClLwo399QmFopR2ULARAA */
   createMachine<DataStreamsSelectorContext, DataStreamsSelectorEvent, DataStreamsSelectorTypestate>(
     {
       context: initialContext,
@@ -160,24 +160,44 @@ export const createDataStreamsSelectorStateMachine = ({
 }: DataStreamsSelectorStateMachineDependencies) =>
   createPureDataStreamsSelectorStateMachine(initialContext).withConfig({
     actions: {
-      selectStream: (_context, event) =>
-        'dataStream' in event && onStreamSelected(event.dataStream),
+      selectStream: (_context, event) => {
+        if ('dataStream' in event) {
+          return onStreamSelected(event.dataStream);
+        }
+      },
       loadMoreIntegrations: onIntegrationsLoadMore,
       relaodIntegrations: onIntegrationsReload,
-      // Search actions
-      searchIntegrations: (_context, event) =>
-        'search' in event && onIntegrationsSearch(event.search),
-      sortIntegrations: (_context, event) => 'search' in event && onIntegrationsSort(event.search),
-      searchIntegrationsStreams: (context, event) =>
-        'search' in event &&
-        onIntegrationsStreamsSearch({ ...event.search, integrationId: context.panelId }),
-      sortIntegrationsStreams: (context, event) =>
-        'search' in event &&
-        onIntegrationsStreamsSort({ ...event.search, integrationId: context.panelId }),
-      searchUnmanagedStreams: (_context, event) =>
-        'search' in event && onUnmanagedStreamsSearch(event.search),
-      sortUnmanagedStreams: (_context, event) =>
-        'search' in event && onUnmanagedStreamsSort(event.search),
       reloadUnmanagedStreams: onUnmanagedStreamsReload,
+      // Search actions
+      searchIntegrations: (_context, event) => {
+        if ('search' in event) {
+          onIntegrationsSearch(event.search);
+        }
+      },
+      sortIntegrations: (_context, event) => {
+        if ('search' in event) {
+          onIntegrationsSort(event.search);
+        }
+      },
+      searchIntegrationsStreams: (context, event) => {
+        if ('search' in event) {
+          onIntegrationsStreamsSearch({ ...event.search, integrationId: context.panelId });
+        }
+      },
+      sortIntegrationsStreams: (context, event) => {
+        if ('search' in event) {
+          onIntegrationsStreamsSort({ ...event.search, integrationId: context.panelId });
+        }
+      },
+      searchUnmanagedStreams: (_context, event) => {
+        if ('search' in event) {
+          onUnmanagedStreamsSearch(event.search);
+        }
+      },
+      sortUnmanagedStreams: (_context, event) => {
+        if ('search' in event) {
+          onUnmanagedStreamsSearch(event.search);
+        }
+      },
     },
   });
