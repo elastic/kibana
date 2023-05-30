@@ -233,6 +233,7 @@ const indices: IndexDefinition[] = [
               },
             },
             service_type: { type: 'keyword' },
+            sync_cursor: { type: 'object' },
           },
         },
         created_at: { type: 'date' },
