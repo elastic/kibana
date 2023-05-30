@@ -14,11 +14,11 @@ import omitBy from 'lodash/omitBy';
 import { FlyoutTabIds } from '../../../../components/asset_details/types';
 import { useUrlState } from '../../../../utils/use_url_state';
 
-export const DEFAULT_STATE = {
+export const DEFAULT_STATE: HostFlyout = {
   clickedItemId: '',
   selectedTabId: FlyoutTabIds.METADATA,
-  processSearch: null,
-  metadataSearch: null,
+  processSearch: undefined,
+  metadataSearch: undefined,
 };
 const HOST_FLYOUT_URL_STATE_KEY = 'hostFlyoutOpen';
 
@@ -49,12 +49,16 @@ const FlyoutTabIdRT = rt.union([
   rt.literal(FlyoutTabIds.PROCESSES),
 ]);
 
-const HostFlyoutStateRT = rt.type({
-  clickedItemId: rt.string,
-  selectedTabId: FlyoutTabIdRT,
-  processSearch: rt.union([rt.string, rt.null]),
-  metadataSearch: rt.union([rt.string, rt.null]),
-});
+const HostFlyoutStateRT = rt.intersection([
+  rt.type({
+    clickedItemId: rt.string,
+    selectedTabId: FlyoutTabIdRT,
+  }),
+  rt.partial({
+    processSearch: rt.string,
+    metadataSearch: rt.string,
+  }),
+]);
 
 const HostFlyoutUrlRT = rt.union([HostFlyoutStateRT, rt.null]);
 
