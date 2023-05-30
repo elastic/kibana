@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { lazy } from 'react';
 import { RuleTypeParams } from '@kbn/alerting-plugin/common';
-import { ObservabilityRuleTypeModel } from '@kbn/observability-plugin/public';
+import { ObservabilityRuleTypeModel } from '../..';
 import {
   MetricExpressionParams,
   METRIC_THRESHOLD_ALERT_TYPE_ID,

@@ -7,8 +7,8 @@
 
 import { Meta, Story } from '@storybook/react/types-6-0';
 import React, { useCallback, useEffect, useState } from 'react';
-import { TimeUnitChar } from '@kbn/observability-plugin/common';
 import { IErrorObject } from '@kbn/triggers-actions-ui-plugin/public';
+import { TimeUnitChar } from '../../../../../common';
 import {
   Aggregators,
   Comparator,
