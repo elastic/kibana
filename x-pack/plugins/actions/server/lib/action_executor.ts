@@ -65,6 +65,7 @@ export interface ExecuteOptions<Source = unknown> {
   executionId?: string;
   consumer?: string;
   relatedSavedObjects?: RelatedSavedObjects;
+  username?: string;
 }
 
 export type ActionExecutorContract = PublicMethodsOf<ActionExecutor>;
@@ -99,14 +100,11 @@ export class ActionExecutor {
     consumer,
     relatedSavedObjects,
     actionExecutionId,
+    username,
   }: ExecuteOptions): Promise<ActionTypeExecutorResult<unknown>> {
     if (!this.isInitialized) {
       throw new Error('ActionExecutor not initialized');
     }
-    console.log('PARAMS!!!', params);
-    console.log('request!!!', request);
-    console.log('taskInfo!!!', taskInfo);
-
     return withSpan(
       {
         name: `execute_action`,
@@ -259,7 +257,7 @@ export class ActionExecutor {
             },
           };
           event.user = event.user || {};
-          event.user.name = 'hello world';
+          event.user.name = username;
         }
 
         eventLogger.stopTiming(event);
