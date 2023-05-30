@@ -226,7 +226,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     await PageObjects.discover.waitUntilSearchingHasFinished();
 
     const link = await getResultsLink();
-    log.debug(link);
     await filterBar.removeFilter('alert_id'); // clear filter bar
 
     // follow url provided by alert to see documents triggered the alert

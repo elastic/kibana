@@ -7,8 +7,11 @@
 
 import { OnlySearchSourceRuleParams } from '../types';
 import { createSearchSourceMock } from '@kbn/data-plugin/common/search/search_source/mocks';
-import { updateSearchSource } from './fetch_search_source_query';
-import { stubbedSavedObjectIndexPattern } from '@kbn/data-views-plugin/common/data_view.stub';
+import { updateSearchSource, getSmallerDataViewSpec } from './fetch_search_source_query';
+import {
+  createStubDataView,
+  stubbedSavedObjectIndexPattern,
+} from '@kbn/data-views-plugin/common/data_view.stub';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 import { Comparator } from '../../../../common/comparator_types';
@@ -278,6 +281,150 @@ describe('fetchSearchSourceQuery', () => {
               "buckets_path": "groupAgg._count",
             },
           },
+        }
+      `);
+    });
+  });
+
+  describe('getSmallerDataViewSpec', () => {
+    it('should remove counts', async () => {
+      const fieldsMap = {
+        test1: {
+          name: 'test1',
+          type: 'keyword',
+          aggregatable: true,
+          searchable: true,
+          readFromDocValues: false,
+        },
+        test2: {
+          name: 'test2',
+          type: 'keyword',
+          aggregatable: true,
+          searchable: true,
+          readFromDocValues: false,
+        },
+      };
+      expect(
+        getSmallerDataViewSpec(
+          createStubDataView({
+            spec: {
+              id: 'test',
+              title: 'test*',
+              fields: fieldsMap,
+              fieldAttrs: undefined,
+            },
+          })
+        )
+      ).toMatchInlineSnapshot(`
+        Object {
+          "allowNoIndex": false,
+          "fieldAttrs": undefined,
+          "fieldFormats": Object {},
+          "id": "test",
+          "name": "",
+          "runtimeFieldMap": Object {},
+          "sourceFilters": Array [],
+          "title": "test*",
+          "version": "1",
+        }
+      `);
+      expect(
+        getSmallerDataViewSpec(
+          createStubDataView({
+            spec: {
+              id: 'test',
+              title: 'test*',
+              fields: fieldsMap,
+              fieldAttrs: {
+                test1: {
+                  count: 11,
+                },
+                test2: {
+                  count: 12,
+                },
+              },
+            },
+          })
+        )
+      ).toMatchInlineSnapshot(`
+        Object {
+          "allowNoIndex": false,
+          "fieldAttrs": undefined,
+          "fieldFormats": Object {},
+          "id": "test",
+          "name": "",
+          "runtimeFieldMap": Object {},
+          "sourceFilters": Array [],
+          "title": "test*",
+          "version": "1",
+        }
+      `);
+      expect(
+        getSmallerDataViewSpec(
+          createStubDataView({
+            spec: {
+              id: 'test',
+              title: 'test*',
+              fields: fieldsMap,
+              fieldAttrs: {
+                test1: {
+                  count: 11,
+                  customLabel: 'test11',
+                },
+                test2: {
+                  count: 12,
+                },
+              },
+            },
+          })
+        )
+      ).toMatchInlineSnapshot(`
+        Object {
+          "allowNoIndex": false,
+          "fieldAttrs": Object {
+            "test1": Object {
+              "customLabel": "test11",
+            },
+          },
+          "fieldFormats": Object {},
+          "id": "test",
+          "name": "",
+          "runtimeFieldMap": Object {},
+          "sourceFilters": Array [],
+          "title": "test*",
+          "version": "1",
+        }
+      `);
+      expect(
+        getSmallerDataViewSpec(
+          createStubDataView({
+            spec: {
+              id: 'test',
+              title: 'test*',
+              fields: fieldsMap,
+              fieldAttrs: {
+                test2: {
+                  customLabel: 'test12',
+                },
+              },
+            },
+          })
+        )
+      ).toMatchInlineSnapshot(`
+        Object {
+          "allowNoIndex": false,
+          "fieldAttrs": Object {
+            "test2": Object {
+              "customLabel": "test12",
+            },
+          },
+          "fieldFormats": Object {},
+          "id": "test",
+          "name": "",
+          "runtimeFieldMap": Object {},
+          "sourceFilters": Array [],
+          "title": "test*",
+          "version": "1",
         }
       `);
     });
