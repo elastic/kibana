@@ -17,7 +17,7 @@ export interface InfraConfig {
   inventory: {
     compositeSize: number;
   };
-  logs?: {
+  logs: {
     app_target: 'logs-ui' | 'discover';
   };
   sources?: {

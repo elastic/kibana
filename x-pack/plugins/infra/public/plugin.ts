@@ -73,7 +73,7 @@ export class Plugin implements InfraClientPluginClass {
     });
     this.metricsExplorerViews = new MetricsExplorerViewsService();
     this.telemetry = new TelemetryService();
-    this.appTarget = this.config.logs?.app_target ?? LOGS_APP_TARGET;
+    this.appTarget = this.config.logs.app_target;
   }
 
   setup(core: InfraClientCoreSetup, pluginsSetup: InfraClientSetupDeps) {

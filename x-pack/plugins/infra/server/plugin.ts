@@ -78,7 +78,10 @@ export const config: PluginConfigDescriptor<InfraConfig> = {
           { defaultValue: LOGS_APP_TARGET }
         ),
       }),
-      schema.never()
+      schema.never(),
+      {
+        defaultValue: { app_target: LOGS_APP_TARGET },
+      }
     ),
     alerting: schema.object({
       inventory_threshold: schema.object({
