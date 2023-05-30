@@ -80,7 +80,7 @@ export interface FindCommentsArgs {
   /**
    * Optional parameters for filtering the returned attachments
    */
-  queryParams?: FindCommentsQueryParams;
+  findQueryParams?: FindCommentsQueryParams;
 }
 
 /**
