@@ -24,7 +24,7 @@ export const createPureIntegrationsStateMachine = (
 ) =>
   createMachine<IntegrationsContext, IntegrationsEvent, IntegrationTypestate>(
     {
-      /** @xstate-layout N4IgpgJg5mDOIC5QEkB2AXMUBOBDdAlgPaqwB0ArqgdYbgDYEBekAxANoAMAuoqAA5FYBQiT4gAHogCMATgDMZABzSATAFZOANnWzOAFlnr9AGhABPRAHYtVsrP1LO2rbIXrV8gL5ezaTDj4xKRk9ES4EDRQrBAkYGQ0AG5EANbx-lh4oiFhEVEISUQAxkEkXNzl4oLC2eJSCB5mlghK8naqWkqqVk6q0vKGWj5+GJmlOeGRqNFg2NhE2GT89PgAZgsAtmQZgdnkuVNQBajJJdnllUgg1SLBdTKd0mQ26upKskpW-a1KTYif+jI+i0+l0XX0+lUeiUwxAOyywX2k0gCQg9DArAAMgB5ACCABEAPoAWWxACUAKKE5AAOQAKhSAOJk3F05DYmkAZUuAiEtzEV3q+k4im6A3U8k40mk+iskqsfwQsvUQK0nDcatUTnkulh8PGSIiKIIaIxnIpuLJAGEABLU+lMllsjncnhVPm1QWIYWiuWgyXS2XyxUSpRkeQgkFuDpKFRWPWjXaI0LIiCo9GsTnkun2hnM1nsrk864eu5ehBqfr2WR9DpBsG-CyIWxPQyOTpaVScDx9BMBBEkQ0QY2mzMW6122l5p2FzmEzl0ym44mu3hXG6e0BCkVkMX+qUyuWcBVNhDdOxq6Qg7ucbqeby+OGJgcTI1pk0ZrNknNTx0Fl3zouForsWG5llu-wns0qiOGQV7HhKcgxrqj76nsKZvhhhzEgsGKxKg8SFGk2zPgaWEogcUQ4dgYDHKc4wXG666lgKEEIJ2TyyC8Vg2N0OgGIq8hanBUqdse8gyl02h9mM6EHBRkxUbhrCzPMizLGsmwkf2ZHyWmlHTNRtGFGcwSMWuvI1OBkgyH0ijRmoIJyg2IbHkCjjOFYzjaBoqgyUmg7kWmw4AEZEFQRRgJyYC4NgRQABZRGhiJjpatq5n+zpFkxln8qg9wtK0u4DDqsauMCsqKrKgIOFYHxfI5bj+S+Q4oqF4WoJF0WxQlSWkXsrASLA6D4PEuCrJg2AABSSpwACUrDJYFelkO1EVRTFcWJdMS2kKBLH5eWlb2TWjn1h8jbNK8NWyg4spqPoMqyM1umpqtYBhet3VbX1Ol7Jy6A0bgGywKlE4ZfmWVzguS4gTlJZWaxNktKCyhWIYxg1q4shyIq0iaNWbhdEJMFWK86gvXJb1rZ1G09dtUC7bAANAyDg3DaNZDjZNM3OAtTNBe9n2099vU7f1iIszFIP7Yjh1sboKoGJ0XmdBCQnqHjSiApJxhtpwSidpTyYGVAABiuAEOiECsJSOIEhDM4urLeUFVeKjPDobz1d88iXf8nj2JG0hOPjEp+bCqBEMO8BXEz7pywVAC0siKknMFkN5WfZ55xuBVQNC3AwzCQAnrvlo0p42Fo9i3UoesG7YMKoRLy2KdMZebsjMqo8YHZvAMwpaIqrSAgYdXqNKejqvXeevsOECd9Z9TyKnp5aIohhE3VdkKDxFMt39JtvR+YBL0j9RyIofstp2d0eMegk2GQ6i2CK0p+4bMFz61+nt1ARlz7y2RobMMEYvhaBDjoAYKhBKuHcnVVwUohKxi4j-QWNMuqbTFozVupAgEFXrmGHe0Jjx2SsKoEMkoEGyFsAMGU6gejoJWpgumP1xZH0HFLYGsdcpd3qK0J4V5hQULcB-f2Z5tAv28rGOQ5UpTMP-hbK2pdmKJyOjWVQu4vY6BVnIRwioeiyBfu8O+IodRqmbj4IAA */
+      /** @xstate-layout N4IgpgJg5mDOIC5QEkB2AXMUBOBDdAlgPaqwB0ArqgdYbgDYEBekAxANoAMAuoqAA5FYBQiT4gAHogCMAJmkB2Mp1kKAzGukBWDQE5ZWgDQgAnol0AWC2QAc0-Vtm7tANheOAvh+NpMOfMSkZPREuBA0UKwQJGBkNABuRADWsb5YeKJBIWERCAlEAMYBJFzcpeKCwpniUggAtHJkljpyRqbmCjZk9hb2LtIWLjZqshZePhjpxVmh4aiRYNjYRNhk-PT4AGYrALZkaf6Z5NlzUHmoiUWZpeVIIJUigTUy0tKcZGpaipwKWgrNFjUxjMCBcFi0ZEBAwsqhsqk4al04xABwygWOs0gcQg9DArAAMgB5ACCABEAPoAWUJACUAKLk5AAOQAKnSAOI04ks5CEpkAZVuAiEjzEd1qiNkZE6XxcPxcul0nRcwMQkqaFhsnE4Ni+StkLmRqOmGLCWIIOLx-LpxJpAGEABKM1kcrk8vmCngVEXVcWIA1S2R2EZqTpvA0KVUIOG6aWfYYWfQKBT2I2TQ7o4KYiDY3Gsfm0lnOtmc7m8gVC+4+p5+hAG94uX42cGyTiK9S6KNglzdThQ8HDA1gtN+NEkU0Qc2W-M2+1O5klt3l-nk-ks+nEyme3h3B6+0C1OoGNSQmxwhSNtTa+SAqPyKUDThDTRuaRa2SyEdTI5Zs05i15gWNJFgurplh6q7rjaW6VnuNYHog-y2Fouihm0IKjNIZAuBomoaAiF5PmM3goumY4zH+v6nJSKx4tEqCxPkKT7GRJpUViJwRDR2BgOclzTDcXq7tWYoIQgiJdBYF7uMqzYGjYKrtAg4JKJwridAoUlfGoX4ZuO7E5px8zcXiizLKs6xbLsLGjmxJwcbMXG0XxhQCTwsEiagzzRroEIxlowzaFoXxRloT4aloUK-G+gzERMtk-vZOaTgARkQVAFGA-JgLg2AFAAFhExpHDOtqOsWYHuhWQnClU8GSIgfwQm+vwBfKWpqVGmldI2PwqP0mnyAounkROWKpelqCZdluUFUVrElRIsDoPgsS4JsmDYAAFFenAAJSsMVmZJWQE0ZVlOV5YV8xHeOHl1aJDUIKhWHBR+bhaEMrzuFGMbdAoPzJp9-wKnFpEJcd2anWAaXnTNV3zRD478ugPG4DssClXOFWllVK5rhuME1VWD1ebWdQKpCuhyh+iY2CmF5RoitiNq2YbNs2Ulg7dFGTslMOTdNl1zTdC3oijaMY6wS0rZgZDrZtO3agdPNjfzsNTRds3XVAqsSzlGP3aKZNiXUIyxkqbYtW8-z0xYTNqU0YL6KzPyONII12Y58wAGK4AQuIQKw9JEmSONLh6Rv7k9rTWO4LgGihuoKtIXWathAMAwaigwooXgkagRCTvAdyq96pPeXUMIQpbzj0zbuh21GDSfN0Iz-PIdhfMFOkkarlDULQBAMMwkDl8b3mvM43Rgk+BhRuGWHfW2OpyMGHt92L+lGVA4-R7UryKGQwVSa22ruJqXWKmQH5XsGnB-BJnuJdme-1YeoZKLX1s-I3mnN1JbC7d9Bvm0EFA0z9IaUQAmAN+j0D4KRvoMHU1NfI2EVGeJmF4PiKh+OgkYOEGaQO3lDHeJk4EmyemCE8uoe6oUGLoJ8nYlJSSwgpVsYVqEIgGMQ3m40BZw2FjrMuwkK61mCu8TS-R0FaV6AqX6fZ-o-DPmeGEqheFq2hhrIW2tEbfnFqjA2JdaoT3Jm8HsBhkyJlBpYemikQRvGsLIK8nCdC2M+p+TeSNeYRD9gHMeojTFiUPjQ6Q7g4RqVznIKM4JYxfCsBYFQdM+z5w8EAA */
       context: initialContext,
       preserveActionOrder: true,
       predictableActionArguments: true,
@@ -34,9 +34,9 @@ export const createPureIntegrationsStateMachine = (
         uninitialized: {
           always: 'loading',
         },
-
         loading: {
           id: 'loading',
+
           invoke: {
             src: 'loadIntegrations',
             onDone: {
@@ -46,7 +46,6 @@ export const createPureIntegrationsStateMachine = (
             onError: 'loadingFailed',
           },
         },
-
         loaded: {
           id: 'loaded',
           initial: 'idle',
@@ -102,10 +101,9 @@ export const createPureIntegrationsStateMachine = (
             },
           },
         },
-
         loadingFailed: {
           id: 'loadingFailed',
-          entry: ['clearCache', 'storeError'],
+          entry: ['clearCache', 'clearData', 'storeError'],
           exit: 'clearError',
           on: {
             RELOAD_INTEGRATIONS: '#loading',
@@ -146,11 +144,6 @@ export const createPureIntegrationsStateMachine = (
         storeInCache: assign((context, event) =>
           'data' in event ? { cache: context.cache.set(context.search, event.data) } : {}
         ),
-        clearCache: assign((context) => ({
-          cache: context.cache.clear(),
-          integrationsSource: null,
-          integrations: null,
-        })),
         appendIntegrations: assign((context, event) =>
           'data' in event
             ? {
@@ -161,6 +154,8 @@ export const createPureIntegrationsStateMachine = (
             : {}
         ),
         storeError: assign((_context, event) => ('data' in event ? { error: event.data } : {})),
+        clearCache: assign((context) => ({ cache: context.cache.clear() })),
+        clearData: assign((_context) => ({ integrationsSource: null, integrations: null })),
         clearError: assign((_context) => ({ error: null })),
       },
       guards: {

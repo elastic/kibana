@@ -39,6 +39,9 @@ function stringifyByProp(
   return mapValues(obj, (val, key) => (props.includes(key) ? JSON.stringify(val) : val));
 }
 
+/**
+ * Format the integrations and data streams search request into the required API format
+ */
 export const formatSearch = (
   search: FindIntegrationsRequestQuery | FindDataStreamsRequestQuery
 ) => {

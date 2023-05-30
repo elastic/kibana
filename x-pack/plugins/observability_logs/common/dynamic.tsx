@@ -13,6 +13,12 @@ interface DynamicOptions {
   fallback?: React.ReactNode;
 }
 
+/**
+ * Lazy load and wrap with Suspense any component.
+ *
+ * @example
+ * const Header = dynamic(() => import('./components/header'))
+ */
 export function dynamic(loader: LoadableComponent, options: DynamicOptions = {}) {
   const Component = lazy(loader);
 

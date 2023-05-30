@@ -19,7 +19,7 @@ import {
 export const createPureDataStreamsStateMachine = (
   initialContext: DefaultDataStreamsContext = DEFAULT_CONTEXT
 ) =>
-  /** @xstate-layout N4IgpgJg5mDOIC5QBECGAXVBldAnMqAtrAHQCuAdgJbXpWoA2VAXpAMQAyA8gILID6yHgBUe-LMIBKAUR4BZLAG0ADAF1EoAA4B7WFTraKGkAA9EAdmUBWEuYCMygJxWAHABYrdqwDYANCABPRAAmK2USO3NHczcXb1d3R2VvAF8U-zRMHHwiUgZtVAgaKDYIQzASGgA3bQBrCszsPAJiEnzC4oRq7QBjDCpDFVUh4x09AyMkUws7R1s7FxdQxxXlF3N-IIQXOxIw5QPgtyi7AGY7I7SMjCac1vaiihKwXFxtXBJNBgwAM3fCEiNbItPIFR5QLoUGp9CZDEZTMb6AaTUBmBB2BbmEjBZSnI6uOzeI4XTYhFYkc6nXHmYKnbzeFyOdZXEBA5q5Npg9hYWSSADCAAlBCIxBIZPIlGpRrokYZjGjCeEPOdggtlMFzJr3KSEFY9SQnN43MEjo5vE5PCy2XdQYVuVxJMJhaJxFJZAp4VoZRN5YhFSRlRc1RqtW4dadjiRnOcrG5nBr3Kl0qybsCORAwAAjbSUHpgLAEXA9AAWxWtILYPJ4-KFQhdYvdkvUCO9yN9CDcpxsrhxYSspySji8YcCiDju28UUsk6HVmidjcVtT7NaGezufzhZLZeXNrYJlgmHQFVQP2PuAAFFTlABKNjl9NZnMUPMF1BF0tPB-ET0gRE+qY0UsGx7AtdxPB8HUrHsEgZ3MPEB0Jc07CXLIV1tcEADFUCoBh2Bkbg+GdUU3QlX9-zbQC-UxbFcXxHYiTcElRwQI4XBIHYqROXFHCY8wk2TChtAzeApm-USvXGSjUUQABaPwWPk1DbhBchqFoegmFYCBpSkuUqN1bxTg4pk3HNYJnG8DENhY0Jwjg5RLAxLx3BcZS03uMFil02UUWmBBeLcKMPDcdUmM8RkdVpOYTXnHjoKiE13PQzk7R0ls9L8tFjR1M52JcZRjkiY4pwXNzk3Ekg12fV8t0-KBxJ8gCZI7DFbDjFZQljCyXCsKDI0iaJYlVaJgiM5KbVSrCcLw9LJN89sFy7CkLlcIbYgXEcthNIKByM3qdn7KyBJSIA */
+  /** @xstate-layout N4IgpgJg5mDOIC5QBECGAXVBldAnMqAtrAHQCuAdgJbXpWoA2VAXpAMQAyA8gILID6yHgBUe-LMIBKAUR4BZLAG0ADAF1EoAA4B7WFTraKGkAA9EAdmUBWEuYCMygJwBmc1YA0IAJ6IATFeUSO3NHewAOZWCrczC7XwBfeM80TBx8IlIGbVQIGig2CEMwEhoAN20Aa2KU7DwCYhIsnLyEMu0AYwwqQxVVXuMdPQMjJFMLO0dbOzC3Tx8EWJIA5WVnayiYuMTkjFr0hqbcinywXFxtXBJNBgwAMwvCEhq0+szso6hWinLO4d7+0aDfTdEagMwIOzTcwkXyrOIebx+RyTZx2NZWNEBRyQgAsVm2IGedQyjXe7CwskkAGEABKCERiCQyeRKNQDXTAwzGcF2ABsgTxqP8c0QVjFJCcvOcYRxvJlvhxOMcBKJ+zeOXJXEkwnponEUlkCgBWg5w25iD5AqsQoR82cOOhjmtdjFGLcmxVuxeJIgYAARtpKO0wFgCLh2gALPKq15sCk8al0oR6pmG1nqQGmkHmhA45w2KxhWE2kW57EkXkhcKRd2xT2pYkNX0BoMhsOR6NexuwNgmWCYdDFVC3Qe4AAUa2UAEo2DGff7AxRg6HUOGo8c58RjSAgWbRuDLDZ7E5XLbRfYK1XpjXonWkoSu2rSc1jgAxVBUBjsGTcPi6xkGiy267tm+4WlCMJwsKiIIAqYQkLE6KYk4uJhIk94UNovrwKMm44SaQygWCiAALS8qWZH1nsrzkNQtD0EwrAQOyhFcmBCBWFKCGODKp6lv4gSVqE14bLECT3nhz4fCxnKgmMCCOIqJCKc60HzL4ziTL4vjCREol2DiVHegcZLMZmrFyeCOK+KWaLwREDoibWWwSY+NHNouy7tuuUB4TJe7EbmkK2GeHEOkEV56c5RndlJeTvp+kD+UR8kGfmJAljBvgurYOnVvphnoUAA */
   createMachine<DataStreamsContext, DataStreamsEvent, DataStreamsTypestate>(
     {
       context: initialContext,
@@ -63,7 +63,7 @@ export const createPureDataStreamsStateMachine = (
           },
         },
         loadingFailed: {
-          entry: ['clearCache', 'storeError'],
+          entry: ['clearCache', 'clearData', 'storeError'],
           exit: 'clearError',
           on: {
             RELOAD_DATA_STREAMS: 'loading',
@@ -83,11 +83,9 @@ export const createPureDataStreamsStateMachine = (
         storeInCache: assign((context, event) =>
           'data' in event ? { cache: context.cache.set(context.search, event.data) } : {}
         ),
-        clearCache: assign((context) => ({
-          cache: context.cache.clear(),
-          dataStreams: null,
-        })),
         storeError: assign((_context, event) => ('data' in event ? { error: event.data } : {})),
+        clearCache: assign((context) => ({ cache: context.cache.clear() })),
+        clearData: assign((_context) => ({ dataStreams: null })),
         clearError: assign((_context) => ({ error: null })),
       },
     }
