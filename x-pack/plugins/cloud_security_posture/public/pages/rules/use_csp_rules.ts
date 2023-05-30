@@ -5,18 +5,15 @@
  * 2.0.
  */
 import { useQuery } from '@tanstack/react-query';
+import { GetCspRuleTemplateRequest, GetCspRuleTemplateResponse } from '../../../common/types';
 import { useKibana } from '../../common/hooks/use_kibana';
 
-import {
-  GetCspRuleTemplateHTTPBody,
-  GetCspRuleTemplateHTTPResponse,
-} from '../../../common/schemas/csp_rule_template_api/get_csp_rule_template';
 import {
   CSP_RULE_TEMPLATE_SAVED_OBJECT_TYPE,
   FIND_CSP_RULE_TEMPLATE_ROUTE_PATH,
 } from '../../../common/constants';
 
-export type RulesQuery = Required<Pick<GetCspRuleTemplateHTTPBody, 'search' | 'page' | 'perPage'>>;
+export type RulesQuery = Required<Pick<GetCspRuleTemplateRequest, 'search' | 'page' | 'perPage'>>;
 export type RulesQueryResult = ReturnType<typeof useFindCspRuleTemplates>;
 
 export const useFindCspRuleTemplates = (
@@ -28,7 +25,7 @@ export const useFindCspRuleTemplates = (
   return useQuery(
     [CSP_RULE_TEMPLATE_SAVED_OBJECT_TYPE, { search, page, perPage, packagePolicyId }],
     () => {
-      return http.get<GetCspRuleTemplateHTTPResponse>(FIND_CSP_RULE_TEMPLATE_ROUTE_PATH, {
+      return http.get<GetCspRuleTemplateResponse>(FIND_CSP_RULE_TEMPLATE_ROUTE_PATH, {
         query: { packagePolicyId, page, perPage },
       });
     }

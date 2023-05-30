@@ -39,7 +39,7 @@ const getRulesPageData = (
   return {
     loading: status === 'loading',
     error: error ? extractErrorMessage(error) : undefined,
-    all_rules: [...rules],
+    all_rules: rules,
     rules_map: new Map(rules.map((rule) => [rule.metadata.id, rule])),
     rules_page: page,
     total: data?.total || 0,

@@ -9,6 +9,7 @@ import type { PackagePolicy, AgentPolicy } from '@kbn/fleet-plugin/common';
 import { CspFinding } from './schemas/csp_finding';
 import { SUPPORTED_CLOUDBEAT_INPUTS, SUPPORTED_POLICY_TEMPLATES } from './constants';
 import { CspRuleTemplateMetadata } from './schemas/csp_rule_template_metadata';
+import { CspRuleTemplate } from './schemas';
 
 export type Evaluation = 'passed' | 'failed' | 'NA';
 
@@ -110,6 +111,25 @@ export type PosturePolicyTemplate = Extract<CloudSecurityPolicyTemplate, 'kspm' 
 
 export interface BenchmarkResponse {
   items: Benchmark[];
+  total: number;
+  page: number;
+  perPage: number;
+}
+
+export interface GetCspRuleTemplateRequest {
+  search?: string;
+  page: number;
+  perPage: number;
+  fields?: string[];
+  sortField: string;
+  searchFields: string[];
+  sortOrder: string;
+  benchmarkId?: string; // cis_k8s / cis_eks / cis_aws
+  packagePolicyId?: string;
+}
+
+export interface GetCspRuleTemplateResponse {
+  items: CspRuleTemplate[];
   total: number;
   page: number;
   perPage: number;

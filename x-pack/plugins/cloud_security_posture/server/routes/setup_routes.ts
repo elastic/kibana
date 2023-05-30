@@ -16,7 +16,7 @@ import { PLUGIN_ID } from '../../common';
 import { defineGetComplianceDashboardRoute } from './compliance_dashboard/compliance_dashboard';
 import { defineGetBenchmarksRoute } from './benchmarks/benchmarks';
 import { defineGetCspStatusRoute } from './status/status';
-import { defineFindCspRuleTemplateRoute } from './csp_rules/find_rule';
+import { defineFindCspRuleTemplateRoute } from './csp_rule_template/get_csp_rule_template';
 
 /**
  * 1. Registers routes

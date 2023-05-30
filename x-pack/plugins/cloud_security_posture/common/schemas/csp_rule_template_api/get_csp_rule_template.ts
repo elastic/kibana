@@ -6,7 +6,6 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { CspRuleTemplate } from '../csp_rule_template';
 
 // this pages follows versioning interface strategy https://docs.elastic.dev/kibana-dev-docs/versioning-interfaces
 
@@ -32,6 +31,11 @@ export const findCspRuleTemplateRequest = schema.object({
    *  Fields to retrieve from CspRuleTemplate saved object
    */
   fields: schema.maybe(schema.arrayOf(schema.string())),
+
+  /**
+   *  The fields to perform the parsed query against
+   */
+  searchFields: schema.arrayOf(schema.string(), { defaultValue: ['metadata.name.text'] }),
 
   /**
    *  Sort Field
@@ -63,45 +67,14 @@ export const findCspRuleTemplateRequest = schema.object({
   /**
    * benchmark id
    */
-  benchmarkId: schema.maybe(schema.string()),
+  benchmarkId: schema.oneOf([
+    schema.literal('cis_k8s'),
+    schema.literal('cis_eks'),
+    schema.literal('cis_aws'),
+  ]),
 
   /**
    * package_policy_id
    */
   packagePolicyId: schema.maybe(schema.string()),
 });
-
-// export type BenchmarksQueryParams = TypeOf<typeof benchmarksQueryParamsSchema>;
-
-export interface GetCspRuleTemplateHTTPBody {
-  // An Elasticsearch simple_query_string
-  search?: string;
-
-  // The page of objects to return
-  page: number;
-
-  // The number of objects to include in each page
-  perPage: number;
-
-  // Field to retrieve
-  fields?: string[];
-
-  // Field for sorting the found objects
-  sortField: string;
-
-  // The order to sort by
-  sortOrder: string;
-
-  // benchmark id
-  benchmarkId?: string;
-
-  // package policy id
-  packagePolicyId?: string;
-}
-
-export interface GetCspRuleTemplateHTTPResponse {
-  items: CspRuleTemplate[];
-  total: number;
-  page: number;
-  perPage: number;
-}

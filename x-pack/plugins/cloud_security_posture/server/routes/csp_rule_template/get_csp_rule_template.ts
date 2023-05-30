@@ -8,12 +8,10 @@
 import { NewPackagePolicy } from '@kbn/fleet-plugin/common';
 import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import pMap from 'p-map';
+import { transformError } from '@kbn/securitysolution-es-utils';
+import { GetCspRuleTemplateRequest, GetCspRuleTemplateResponse } from '../../../common/types';
 import { CspRuleTemplate } from '../../../common/schemas';
-import {
-  GetCspRuleTemplateHTTPBody,
-  GetCspRuleTemplateHTTPResponse,
-  findCspRuleTemplateRequest,
-} from '../../../common/schemas/csp_rule_template_api/get_csp_rule_template';
+import { findCspRuleTemplateRequest } from '../../../common/schemas/csp_rule_template_api/get_csp_rule_template';
 import {
   getBenchmarkFromPackagePolicy,
   getBenchmarkTypeFilter,
@@ -39,10 +37,13 @@ const getBenchmarkId = async (
 
 const findCspRuleTemplateHandler = async (
   soClient: SavedObjectsClientContract,
-  options: GetCspRuleTemplateHTTPBody
-): Promise<GetCspRuleTemplateHTTPResponse> => {
-  if (!options.packagePolicyId && !options.benchmarkId) {
-    throw new Error('One of benchmarkId or packagePolicyId is required');
+  options: GetCspRuleTemplateRequest
+): Promise<GetCspRuleTemplateResponse> => {
+  if (
+    (!options.packagePolicyId && !options.benchmarkId) ||
+    (options.packagePolicyId && options.benchmarkId)
+  ) {
+    throw new Error('Please provide either benchmarkId or packagePolicyId, but not both');
   }
 
   const benchmarkId = options.benchmarkId
@@ -51,7 +52,7 @@ const findCspRuleTemplateHandler = async (
 
   const cspRulesTemplatesSo = await soClient.find<CspRuleTemplate>({
     type: CSP_RULE_TEMPLATE_SAVED_OBJECT_TYPE,
-    searchFields: ['metadata.name.text'],
+    searchFields: options.searchFields,
     search: options.search ? `"${options.search}"*` : '',
     page: options.page,
     perPage: options.perPage,
@@ -96,13 +97,22 @@ export const defineFindCspRuleTemplateRoute = (router: CspRouter) =>
           return response.forbidden();
         }
 
-        const requestBody: GetCspRuleTemplateHTTPBody = request.query;
+        const requestBody: GetCspRuleTemplateRequest = request.query;
         const cspContext = await context.csp;
 
-        const cspRulesTemplates: GetCspRuleTemplateHTTPResponse = await findCspRuleTemplateHandler(
-          cspContext.soClient,
-          requestBody
-        );
-        return response.ok({ body: cspRulesTemplates });
+        try {
+          const cspRulesTemplates: GetCspRuleTemplateResponse = await findCspRuleTemplateHandler(
+            cspContext.soClient,
+            requestBody
+          );
+          return response.ok({ body: cspRulesTemplates });
+        } catch (err) {
+          const error = transformError(err);
+          cspContext.logger.error(`Failed to fetch csp rules templates ${err}`);
+          return response.customError({
+            body: { message: error.message },
+            statusCode: error.statusCode,
+          });
+        }
       }
     );
