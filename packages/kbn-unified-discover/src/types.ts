@@ -6,42 +6,42 @@
  * Side Public License, v 1.
  */
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { ApplicationStart } from '@kbn/core-application-browser';
-import { Capabilities } from '@kbn/core-capabilities-common';
-import { ChromeStart } from '@kbn/core-chrome-browser';
-import { CoreStart } from '@kbn/core-lifecycle-browser';
-import {
+import type { ApplicationStart } from '@kbn/core-application-browser';
+import type { Capabilities } from '@kbn/core-capabilities-common';
+import type { ChromeStart } from '@kbn/core-chrome-browser';
+import type { CoreStart } from '@kbn/core-lifecycle-browser';
+import type {
   DataPublicPluginStart,
   DataViewsContract,
   FilterManager,
   TimefilterContract,
 } from '@kbn/data-plugin/public';
-import { DocLinksStart } from '@kbn/core-doc-links-browser';
-import { EmbeddableStart } from '@kbn/embeddable-plugin/public';
-import { History } from 'history';
-import { ChartsPluginStart } from '@kbn/charts-plugin/public';
-import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import { Start as InspectorPublicPluginStart } from '@kbn/inspector-plugin/public';
-import { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
-import { SharePluginStart } from '@kbn/share-plugin/public';
-import { UrlForwardingStart } from '@kbn/url-forwarding-plugin/public';
-import { NotificationsStart, ToastsStart } from '@kbn/core-notifications-browser';
-import { IUiSettingsClient, SettingsStart } from '@kbn/core-ui-settings-browser';
-import { UiCounterMetricType } from '@kbn/analytics';
-import { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
-import { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
-import { HttpStart } from '@kbn/core-http-browser';
-import { Storage } from '@kbn/kibana-utils-plugin/public';
-import { SpacesApi } from '@kbn/spaces-plugin/public';
-import { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
-import { ExpressionsStart } from '@kbn/expressions-plugin/public';
-import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
-import { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
-import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
-import { LensPublicStart } from '@kbn/lens-plugin/public';
-import { DiscoverAppLocator } from './locator';
-import { DiscoverContextAppLocator } from './context/locator';
-import { DiscoverSingleDocLocator } from './doc/locator';
+import type { DocLinksStart } from '@kbn/core-doc-links-browser';
+import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
+import type { History } from 'history';
+import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type { Start as InspectorPublicPluginStart } from '@kbn/inspector-plugin/public';
+import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
+import type { UrlForwardingStart } from '@kbn/url-forwarding-plugin/public';
+import type { NotificationsStart, ToastsStart } from '@kbn/core-notifications-browser';
+import type { IUiSettingsClient, SettingsStart } from '@kbn/core-ui-settings-browser';
+import type { UiCounterMetricType } from '@kbn/analytics';
+import type { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
+import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
+import type { HttpStart } from '@kbn/core-http-browser';
+import type { Storage } from '@kbn/kibana-utils-plugin/public';
+import type { SpacesApi } from '@kbn/spaces-plugin/public';
+import type { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
+import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
+import type { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
+import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
+import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import type { LensPublicStart } from '@kbn/lens-plugin/public';
+import type { DiscoverAppLocator } from './locator';
+import type { DiscoverContextAppLocator } from './context/locator';
+import type { DiscoverSingleDocLocator } from './doc/locator';
 
 export interface EsHitRecord extends Omit<estypes.SearchHit, '_source'> {
   _source?: Record<string, unknown>;
