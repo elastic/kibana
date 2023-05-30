@@ -14,7 +14,12 @@ const chance = new Chance();
 
 describe('getSecuritySolutionLink', () => {
   it('gets the correct link properties', () => {
-    const cspPage = chance.pickone<CspPage>(['dashboard', 'findings', 'benchmarks']);
+    const cspPage = chance.pickone<CspPage>([
+      'dashboard',
+      'findings',
+      'benchmarks',
+      'vulnerability_dashboard',
+    ]);
 
     const link = getSecuritySolutionLink(cspPage);
 
@@ -26,7 +31,12 @@ describe('getSecuritySolutionLink', () => {
 
 describe('getSecuritySolutionNavTab', () => {
   it('gets the correct nav tab properties', () => {
-    const cspPage = chance.pickone<CspPage>(['dashboard', 'findings', 'benchmarks']);
+    const cspPage = chance.pickone<CspPage>([
+      'dashboard',
+      'findings',
+      'benchmarks',
+      'vulnerability_dashboard',
+    ]);
     const basePath = chance.word();
 
     const navTab = getSecuritySolutionNavTab(cspPage, basePath);

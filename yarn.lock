@@ -1515,10 +1515,10 @@
     "@elastic/transport" "^8.3.1"
     tslib "^2.4.0"
 
-"@elastic/elasticsearch@npm:@elastic/elasticsearch-canary@8.6.0-canary.3":
-  version "8.6.0-canary.3"
-  resolved "https://registry.yarnpkg.com/@elastic/elasticsearch-canary/-/elasticsearch-canary-8.6.0-canary.3.tgz#dc518f5ae4bb502b08ff70e4d86fa7b859b3cbe3"
-  integrity sha512-NvTZrRT/d5mJZ46pDlbgdKVIhA7ac504IGVaf7OV/7wHDmXjm8d/cG2UeQd8v37zMplGq2/853uFWGlXXjD0lQ==
+"@elastic/elasticsearch@npm:@elastic/elasticsearch-canary@8.8.0-canary.2":
+  version "8.8.0-canary.2"
+  resolved "https://registry.yarnpkg.com/@elastic/elasticsearch-canary/-/elasticsearch-canary-8.8.0-canary.2.tgz#10b5699541d644797b33c7e24058d2e55367d88d"
+  integrity sha512-UxH8YUxcsqHXGh4t2PjuL0q03XunF9vCLHPAs9r+fQcaPXpNbEuv9jbNGXv/9TLyeAKYEgcq9Xm0p0Nk/Mh0lQ==
   dependencies:
     "@elastic/transport" "^8.3.1"
     tslib "^2.4.0"
