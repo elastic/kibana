@@ -9,7 +9,7 @@ Usage Collection (also known as Telemetry) is enabled by default. This allows us
 Refer to our https://www.elastic.co/legal/product-privacy-statement[Privacy Statement] to learn more.
 
 You can control whether this data is sent from the {kib} servers, or if it should be sent
-from the user's browser, in case a firewall is blocking the connections from the server. Additionally, you can decide to completely disable this feature either in the config file or in {kib} via *Management > Kibana > Advanced Settings > Usage Data*.
+from the user's browser, in case a firewall is blocking the connections from the server. Additionally, you can decide to completely disable this feature either in the config file or in {kib} via *Management > Kibana > Advanced Settings > Usage Collection*.
 
 [float]
 [[telemetry-general-settings]]
