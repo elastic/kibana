@@ -7,12 +7,13 @@
 
 import { APM_INDICES, LOGS_INDICES, METRICS_INDICES } from '../../../constants';
 import { Asset } from '../../../../common/types_api';
-import { CollectorOptions } from '.';
+import { CollectorOptions, QUERY_MAX_SIZE } from '.';
+import { withSpan } from './helpers';
 
-export async function collectPods({ client, from }: CollectorOptions) {
+export async function collectPods({ client, from, transaction }: CollectorOptions) {
   const dsl = {
     index: [APM_INDICES, LOGS_INDICES, METRICS_INDICES],
-    size: 1000,
+    size: QUERY_MAX_SIZE,
     collapse: {
       field: 'kubernetes.pod.uid',
     },
@@ -46,32 +47,34 @@ export async function collectPods({ client, from }: CollectorOptions) {
 
   const esResponse = await client.search(dsl);
 
-  const pods = esResponse.hits.hits.reduce<Asset[]>((acc: Asset[], hit: any) => {
-    const { fields = {} } = hit;
-    const podUid = fields['kubernetes.pod.uid'];
-    const nodeName = fields['kubernetes.node.name'];
-    const clusterName = fields['orchestrator.cluster.name'];
+  const pods = withSpan({ transaction, name: 'processing_response' }, () => {
+    return esResponse.hits.hits.reduce<Asset[]>((acc: Asset[], hit: any) => {
+      const { fields = {} } = hit;
+      const podUid = fields['kubernetes.pod.uid'];
+      const nodeName = fields['kubernetes.node.name'];
+      const clusterName = fields['orchestrator.cluster.name'];
 
-    const pod: Asset = {
-      '@timestamp': new Date().toISOString(),
-      'asset.kind': 'pod',
-      'asset.id': podUid,
-      'asset.ean': `pod:${podUid}`,
-      'asset.parents': [`host:${nodeName}`],
-    };
+      const pod: Asset = {
+        '@timestamp': new Date().toISOString(),
+        'asset.kind': 'pod',
+        'asset.id': podUid,
+        'asset.ean': `pod:${podUid}`,
+        'asset.parents': [`host:${nodeName}`],
+      };
 
-    if (fields['cloud.provider']) {
-      pod['cloud.provider'] = fields['cloud.provider'];
-    }
+      if (fields['cloud.provider']) {
+        pod['cloud.provider'] = fields['cloud.provider'];
+      }
 
-    if (clusterName) {
-      pod['orchestrator.cluster.name'] = clusterName;
-    }
+      if (clusterName) {
+        pod['orchestrator.cluster.name'] = clusterName;
+      }
 
-    acc.push(pod);
+      acc.push(pod);
 
-    return acc;
-  }, []);
+      return acc;
+    }, []);
+  });
 
   return pods;
 }
