@@ -62,6 +62,7 @@ export const createMockPluginStart = async (
   config: ReportingConfigType
 ): Promise<ReportingInternalStart> => {
   return {
+    core: coreMock,
     esClient: elasticsearchServiceMock.createClusterClient(),
     savedObjects: { getScopedClient: jest.fn() },
     uiSettings: { asScopedToClient: () => ({ get: jest.fn() }) },

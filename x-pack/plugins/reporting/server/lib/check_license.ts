@@ -7,6 +7,7 @@
 
 import { ILicense } from '@kbn/licensing-plugin/server';
 import { PdfExportType } from '../export_types/printable_pdf_v2/types';
+import { ExportTypeDefinition } from '../types';
 import { ExportTypesRegistry } from './export_types_registry';
 
 export interface LicenseCheckResult {
@@ -25,7 +26,7 @@ const messages = {
   },
 };
 
-const makeManagementFeature = (exportTypes: PdfExportType[]) => {
+const makeManagementFeature = (exportTypes: PdfExportType[] | ExportTypeDefinition[]) => {
   return {
     id: 'management',
     checkLicense: (license?: ILicense) => {
@@ -45,15 +46,22 @@ const makeManagementFeature = (exportTypes: PdfExportType[]) => {
         };
       }
 
-      const validJobTypes = exportTypes
-        .filter((exportType) => exportType.validLicenses.includes(license.type || ''))
-        .map((exportType) => exportType.jobType);
-
       return {
-        showLinks: validJobTypes.length > 0,
-        enableLinks: validJobTypes.length > 0,
-        jobTypes: validJobTypes,
+        showLinks: true,
+        enableLinks: true,
+        jobTypes: ['printable_pdf_v2'],
       };
+      // const validJobTypes = exportTypes
+      //   .filter((exportType: ExportTypeDefinition | PdfExportType) =>
+      //     exportType.validLicenses.includes(license.type || '')
+      //   )
+      //   .map((exportType: ExportTypeDefinition | PdfExportType) => exportType.jobType);
+      // console.log('make it here');
+      // return {
+      //   showLinks: validJobTypes.length > 0,
+      //   enableLinks: validJobTypes.length > 0,
+      //   jobTypes: validJobTypes,
+      // };
     },
   };
 };

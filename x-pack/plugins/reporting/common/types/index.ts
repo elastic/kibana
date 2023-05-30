@@ -35,6 +35,7 @@ export interface ReportDocumentHead {
 }
 
 export interface ReportOutput extends TaskRunResult {
+  content_type: string | null;
   content: string | null;
   size: number;
 }

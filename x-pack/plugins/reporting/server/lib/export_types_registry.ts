@@ -57,19 +57,22 @@ export class ExportTypesRegistry {
         continue; // try next value
       }
       const foundResult: PdfExportType = value;
+      return foundResult;
 
-      if (result) {
-        throw new Error('Found multiple items matching predicate.');
-      }
+      // if (result) {
+      //   throw new Error('Found multiple items matching predicate.');
+      // }
 
-      result = foundResult;
+      // result = foundResult;
+      // return result;
+      // }
+
+      // if (!result) {
+      //   throw new Error('Found no items matching predicate');
+      // }
+
+      // return foundResult;
     }
-
-    if (!result) {
-      throw new Error('Found no items matching predicate');
-    }
-
-    return result;
   }
 }
 

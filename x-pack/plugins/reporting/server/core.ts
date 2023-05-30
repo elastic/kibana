@@ -52,12 +52,7 @@ import { checkLicense, getExportTypesRegistry } from './lib';
 import { checkLicenseExportType } from './lib/check_license';
 import { reportingEventLoggerFactory } from './lib/event_logger/logger';
 import type { IReport, ReportingStore } from './lib/store';
-import {
-  ExecutePdfReportTask,
-  ExecuteReportTask,
-  MonitorReportsTask,
-  ReportTaskParams,
-} from './lib/tasks';
+import { ExecuteReportTask, MonitorReportsTask, ReportTaskParams } from './lib/tasks';
 import type { PdfScreenshotOptions, PngScreenshotOptions, ReportingPluginRouter } from './types';
 
 export interface ReportingInternalSetup {
@@ -114,7 +109,6 @@ export class ReportingCore {
   private exportTypesRegistry = getExportTypesRegistry();
   private executeTask: ExecuteReportTask;
   private monitorTask: MonitorReportsTask;
-  private executePdfTask: ExecutePdfReportTask;
   private config: ReportingConfigType;
   private executing: Set<string>;
   public pdfExportType?: PdfExportType;
@@ -137,7 +131,6 @@ export class ReportingCore {
     this.deprecatedAllowedRoles = config.roles.enabled ? config.roles.allow : false;
     this.executeTask = new ExecuteReportTask(this, config, this.logger);
     this.monitorTask = new MonitorReportsTask(this, config, this.logger);
-    this.executePdfTask = new ExecutePdfReportTask(this.pdfExportType, this, config, this.logger);
 
     this.getContract = () => ({
       usesUiCapabilities: () => config.roles.enabled === false,
@@ -160,18 +153,11 @@ export class ReportingCore {
     this.pluginSetup$.next(true); // trigger the observer
     this.pluginSetupDeps = setupDeps; // cache
 
-    const { executeTask, executePdfTask, monitorTask } = this;
-    if (!this.getExportTypesRegistry()) {
-      setupDeps.taskManager.registerTaskDefinitions({
-        [executeTask.TYPE]: executeTask.getTaskDefinition(),
-        [monitorTask.TYPE]: monitorTask.getTaskDefinition(),
-      });
-    } else {
-      setupDeps.taskManager.registerTaskDefinitions({
-        [executePdfTask.TYPE]: executePdfTask.getTaskDefinition(),
-        [monitorTask.TYPE]: monitorTask.getTaskDefinition(),
-      });
-    }
+    const { executeTask, monitorTask } = this;
+    setupDeps.taskManager.registerTaskDefinitions({
+      [executeTask.TYPE]: executeTask.getTaskDefinition(),
+      [monitorTask.TYPE]: monitorTask.getTaskDefinition(),
+    });
   }
 
   /*
@@ -184,7 +170,7 @@ export class ReportingCore {
     await this.assertKibanaIsAvailable();
 
     const { taskManager } = startDeps;
-    const { executeTask, monitorTask, executePdfTask } = this;
+    const { monitorTask, executeTask } = this;
 
     if (this.pdfExportType) {
       this.pdfExportType.start((await this.getPluginStartDeps()).core, {
@@ -198,7 +184,7 @@ export class ReportingCore {
     await Promise.all([
       executeTask.init(taskManager),
       monitorTask.init(taskManager),
-      executePdfTask.init(taskManager),
+      // executePdfTask.init(taskManager),
     ]);
   }
 

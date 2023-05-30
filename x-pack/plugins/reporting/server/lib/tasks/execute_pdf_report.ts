@@ -72,6 +72,7 @@ async function finishedWithNoPendingCallbacks(stream: Writable) {
 
 export class ExecutePdfReportTask implements ReportingTask {
   public TYPE = REPORTING_EXECUTE_TYPE;
+
   private logger: Logger;
   private taskManagerStart?: TaskManagerStartContract;
   private taskExecutors?: Map<string, TaskExecutor>;
@@ -86,14 +87,18 @@ export class ExecutePdfReportTask implements ReportingTask {
     logger: Logger
   ) {
     this.logger = logger.get('runTask');
-    // const { uuid, name } = reporting.getPluginSetupDeps().exportTypes[0].getServerInfo();
-    const { uuid, name } = pdfExportType.getServerInfo();
-    this.kibanaId = uuid;
-    this.kibanaName = name;
   }
 
   public async init(taskManager: TaskManagerStartContract) {
     this.taskManagerStart = taskManager;
+    const { reporting } = this;
+    const { uuid, name } = reporting.getServerInfo();
+    const exportType = reporting.pdfExportType;
+    this.taskExecutors = new Set(exportType.runTask);
+    // const { uuid, name } = this.pdfExportType.getServerInfo();
+    console.log(uuid, name);
+    this.kibanaId = uuid;
+    this.kibanaName = name;
   }
 
   public getTaskDefinition() {
@@ -302,7 +307,6 @@ export class ExecutePdfReportTask implements ReportingTask {
       output: docOutput,
     };
     docId = `/${report._index}/_doc/${report._id}`;
-
     const resp = await store.setReportCompleted(report, doc);
     this.logger.info(`Saved ${report.jobtype} job ${docId}`);
     report._seq_no = resp._seq_no;

@@ -37,6 +37,7 @@ import { Report, SavedReport } from '../store';
 import type { ReportFailedFields, ReportProcessingFields } from '../store/store';
 import { ReportingTask, ReportingTaskStatus, REPORTING_EXECUTE_TYPE, ReportTaskParams } from '.';
 import { errorLogger } from './error_logger';
+import { PdfExportType } from '../../export_types/printable_pdf_v2/types';
 
 type CompletedReportOutput = Omit<ReportOutput, 'content'>;
 
@@ -45,10 +46,6 @@ export interface ReportingExecuteTaskInstance {
   taskType: string;
   params: ReportTaskParams;
   runAt?: Date;
-}
-
-interface TaskExecutor extends Pick<ExportTypeDefinition, 'jobContentEncoding'> {
-  jobExecutor: RunTaskFn<BasePayload>;
 }
 
 function isOutput(output: CompletedReportOutput | Error): output is CompletedReportOutput {
@@ -80,7 +77,7 @@ export class ExecuteReportTask implements ReportingTask {
 
   private logger: Logger;
   private taskManagerStart?: TaskManagerStartContract;
-  private taskExecutors?: Map<string, TaskExecutor>;
+  private taskExecutors?: Map<string, PdfExportType>;
   private kibanaId?: string;
   private kibanaName?: string;
   private store?: ReportingStore;
@@ -101,22 +98,23 @@ export class ExecuteReportTask implements ReportingTask {
 
     const { reporting } = this;
 
-    const exportTypesRegistry = reporting.getExportTypesRegistry();
-    const executors = new Map<string, TaskExecutor>();
-    // exportTypesRegistry.getAll() will not include PdfExportTypes
-    for (const exportType of exportTypesRegistry.getAll()) {
-      const exportTypeLogger = this.logger.get(exportType.jobType);
-      // @ts-expect-error PdfExport type does not have runTaskFnFactory and also it's own ExecuteReportTask()
-      const jobExecutor = exportType.runTaskFnFactory(reporting, exportTypeLogger);
-      // The task will run the function with the job type as a param.
-      // This allows us to retrieve the specific export type runFn when called to run an export
-      executors.set(exportType.jobType, {
-        jobExecutor,
-        jobContentEncoding: exportType.jobContentEncoding,
-      });
-    }
+    // const exportTypesRegistry = reporting.pdfExportType;
+    // const executors = new Map<string, TaskExecutor>();
+    // // exportTypesRegistry.getAll() will not include PdfExportTypes
+    // for (const exportType of exportTypesRegistry.getAll()) {
+    //   const exportTypeLogger = this.logger.get(exportType.jobType);
+    //   // @ts-expect-error PdfExport type does not have runTaskFnFactory and also it's own ExecuteReportTask()
+    //   const jobExecutor = exportType.runTaskFnFactory(reporting, exportTypeLogger);
+    //   // The task will run the function with the job type as a param.
+    //   // This allows us to retrieve the specific export type runFn when called to run an export
+    //   executors.set(exportType.jobType, {
+    //     jobExecutor,
+    //     jobContentEncoding: exportType.,
+    //   });
+    // }
 
-    this.taskExecutors = executors;
+    // @ts-ignore
+    // this.taskExecutors = new Map(reporting.pdfExportType);
 
     const { uuid, name } = reporting.getServerInfo();
     this.kibanaId = uuid;
@@ -140,10 +138,6 @@ export class ExecuteReportTask implements ReportingTask {
       throw new Error('Reporting task runner has not been initialized!');
     }
     return this.taskManagerStart;
-  }
-
-  private getJobContentEncoding(jobType: string) {
-    return this.taskExecutors?.get(jobType)?.jobContentEncoding;
   }
 
   public async _claimJob(task: ReportTaskParams): Promise<SavedReport> {
@@ -241,7 +235,7 @@ export class ExecuteReportTask implements ReportingTask {
     const unknownMime = null;
 
     if (isOutput(output)) {
-      docOutput.content_type = output.content_type || unknownMime;
+      docOutput.content_type = output.content_type ?? 'application/pdf';
       docOutput.max_size_reached = output.max_size_reached;
       docOutput.csv_contains_formulas = output.csv_contains_formulas;
       docOutput.size = output.size;
@@ -264,24 +258,27 @@ export class ExecuteReportTask implements ReportingTask {
     cancellationToken: CancellationToken,
     stream: Writable
   ): Promise<TaskRunResult> {
-    if (!this.taskExecutors) {
-      throw new Error(`Task run function factories have not been called yet!`);
-    }
-
+    // if (!this.taskExecutors) {
+    //   throw new Error(`Task run function factories have not been called yet!`);
+    // }
     // get the run_task function
-    const runner = this.taskExecutors.get(task.jobtype);
-    if (!runner || task.jobtype === 'printable_pdf_v2') {
+    const runner = this.taskExecutors?.get(task.jobtype) || this.reporting.pdfExportType!.runTask;
+    if (!runner && task.jobtype !== 'printable_pdf_v2') {
       throw new Error(`No defined task runner function for ${task.jobtype}!`);
     }
 
-    // run the report
-    // if workerFn doesn't finish before timeout, call the cancellationToken and throw an error
+    // run the report - if workerFn doesn't finish before timeout, call the cancellationToken and throw an error
     const queueTimeout = durationToNumber(this.config.queue.timeout);
     return Rx.lastValueFrom(
-      Rx.from(runner.jobExecutor(task.id, task.payload, cancellationToken, stream)).pipe(
-        timeout(queueTimeout)
-      ) // throw an error if a value is not emitted before timeout
+      Rx.from(
+        this.reporting.pdfExportType!.runTask(task.id, task.payload, cancellationToken, stream)
+      ).pipe(timeout(queueTimeout))
     );
+    // return Rx.lastValueFrom(
+    //   Rx.from(runner.jobExecutor(task.id, task.payload, cancellationToken, stream)).pipe(
+    //     timeout(queueTimeout)
+    //   ) // throw an error if a value is not emitted before timeout
+    // );
   }
 
   public async _completeJob(
@@ -372,7 +369,6 @@ export class ExecuteReportTask implements ReportingTask {
           );
 
           try {
-            const jobContentEncoding = this.getJobContentEncoding(jobType);
             const stream = await getContentStream(
               this.reporting,
               {
@@ -382,7 +378,7 @@ export class ExecuteReportTask implements ReportingTask {
                 if_seq_no: report._seq_no,
               },
               {
-                encoding: jobContentEncoding === 'base64' ? 'base64' : 'raw',
+                encoding: 'base64',
               }
             );
 
@@ -409,6 +405,7 @@ export class ExecuteReportTask implements ReportingTask {
               this.logger.debug(`Job output size: ${stream.bytesWritten} bytes.`);
               report = await this._completeJob(report, {
                 ...output,
+                content_type: output.content_type ?? 'application/pdf',
                 size: stream.bytesWritten,
               });
             }

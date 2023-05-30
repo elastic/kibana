@@ -60,8 +60,10 @@ export function getDocumentPayloadFactory(reporting: ReportingCore) {
     jobtype: jobType,
     payload: { title },
   }: Required<ReportApiJSON>): Promise<Payload> {
-    const exportType = exportTypesRegistry.get((item: PdfExportType) => item.jobType === jobType);
-    const encoding = exportType.jobContentEncoding === 'base64' ? 'base64' : 'raw';
+    const exportType =
+      reporting.pdfExportType ??
+      exportTypesRegistry.get((item: PdfExportType) => item.jobType === jobType);
+    const encoding = exportType?.jobContentEncoding === 'base64' ? 'base64' : 'raw';
     const content = await getContentStream(reporting, { id, index }, { encoding });
     const filename = getTitle(exportType, title);
     const headers = getReportingHeaders(output, exportType);
