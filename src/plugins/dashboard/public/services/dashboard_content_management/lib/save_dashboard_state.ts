@@ -15,29 +15,23 @@ import {
   controlGroupInputToRawControlGroupAttributes,
 } from '@kbn/controls-plugin/common';
 import { isFilterPinned } from '@kbn/es-query';
-import { SavedObjectsClientContract } from '@kbn/core/public';
-import { SavedObjectAttributes } from '@kbn/core-saved-objects-common';
-import { SavedObjectSaveOpts } from '@kbn/saved-objects-plugin/public';
+import { SOWithMetadataPartial } from '@kbn/content-management-utils';
 import { extractSearchSourceReferences, RefreshInterval } from '@kbn/data-plugin/public';
 
 import {
   extractReferences,
-  DashboardAttributes,
-  convertPanelMapToSavedPanels,
   DashboardContainerInput,
+  convertPanelMapToSavedPanels,
 } from '../../../../common';
-import { DashboardSavedObjectRequiredServices } from '../types';
-import { DASHBOARD_SAVED_OBJECT_TYPE } from '../../../dashboard_constants';
+import {
+  SaveDashboardProps,
+  SaveDashboardReturn,
+  DashboardContentManagementRequiredServices,
+} from '../types';
+import { DashboardStartDependencies } from '../../../plugin';
+import { DASHBOARD_CONTENT_ID } from '../../../dashboard_constants';
+import { DashboardCrudTypes, DashboardAttributes } from '../../../../common/content_management';
 import { dashboardSaveToastStrings } from '../../../dashboard_container/_dashboard_container_strings';
-
-export type SavedDashboardSaveOpts = SavedObjectSaveOpts & { saveAsCopy?: boolean };
-
-export type SaveDashboardProps = DashboardSavedObjectRequiredServices & {
-  savedObjectsClient: SavedObjectsClientContract;
-  currentState: DashboardContainerInput;
-  saveOptions: SavedDashboardSaveOpts;
-  lastSavedId?: string;
-};
 
 export const serializeControlGroupInput = (
   controlGroupInput: DashboardContainerInput['controlGroupInput']
@@ -62,24 +56,28 @@ export const convertTimeToUTCString = (time?: string | Moment): undefined | stri
   }
 };
 
-export interface SaveDashboardReturn {
-  id?: string;
-  error?: string;
-  redirectRequired?: boolean;
-}
+type SaveDashboardStateProps = SaveDashboardProps & {
+  data: DashboardContentManagementRequiredServices['data'];
+  contentManagement: DashboardStartDependencies['contentManagement'];
+  embeddable: DashboardContentManagementRequiredServices['embeddable'];
+  notifications: DashboardContentManagementRequiredServices['notifications'];
+  initializerContext: DashboardContentManagementRequiredServices['initializerContext'];
+  savedObjectsTagging: DashboardContentManagementRequiredServices['savedObjectsTagging'];
+  dashboardSessionStorage: DashboardContentManagementRequiredServices['dashboardSessionStorage'];
+};
 
-export const saveDashboardStateToSavedObject = async ({
+export const saveDashboardState = async ({
   data,
   embeddable,
   lastSavedId,
   saveOptions,
   currentState,
-  savedObjectsClient,
+  contentManagement,
   savedObjectsTagging,
   dashboardSessionStorage,
   notifications: { toasts },
   initializerContext: { kibanaVersion },
-}: SaveDashboardProps): Promise<SaveDashboardReturn> => {
+}: SaveDashboardStateProps): Promise<SaveDashboardReturn> => {
   const {
     search: dataSearchService,
     query: {
@@ -167,7 +165,7 @@ export const saveDashboardStateToSavedObject = async ({
    */
   const { attributes, references: dashboardReferences } = extractReferences(
     {
-      attributes: rawDashboardAttributes as unknown as SavedObjectAttributes,
+      attributes: rawDashboardAttributes,
       references: searchSourceReferences,
     },
     { embeddablePersistableStateService: embeddable }
@@ -177,15 +175,28 @@ export const saveDashboardStateToSavedObject = async ({
     : dashboardReferences;
 
   /**
-   * Save the saved object using the saved objects client
+   * Save the saved object using the content management
    */
   const idToSaveTo = saveOptions.saveAsCopy ? undefined : lastSavedId;
   try {
-    const { id: newId } = await savedObjectsClient.create(DASHBOARD_SAVED_OBJECT_TYPE, attributes, {
-      id: idToSaveTo,
-      overwrite: true,
-      references,
-    });
+    let result: { item: SOWithMetadataPartial<DashboardAttributes> };
+    if (idToSaveTo) {
+      result = await contentManagement.client.update<
+        DashboardCrudTypes['UpdateIn'],
+        DashboardCrudTypes['UpdateOut']
+      >({
+        id: idToSaveTo,
+        data: attributes,
+        options: { references },
+        contentTypeId: DASHBOARD_CONTENT_ID,
+      });
+    } else {
+      result = await contentManagement.client.create<
+        DashboardCrudTypes['CreateIn'],
+        DashboardCrudTypes['CreateOut']
+      >({ contentTypeId: DASHBOARD_CONTENT_ID, data: attributes, options: { references } });
+    }
+    const newId = result.item.id;
 
     if (newId) {
       toasts.addSuccess({

@@ -12,7 +12,7 @@ import { SavedObjectReference } from '@kbn/core/server';
 import type {
   GridData,
   DashboardAttributes as CurrentDashboardAttributes, // Dashboard attributes from common are the source of truth for the current version.
-} from '../../../../common';
+} from '../../../../common/content_management';
 
 interface SavedObjectAttributes {
   kibanaSavedObjectMeta: {

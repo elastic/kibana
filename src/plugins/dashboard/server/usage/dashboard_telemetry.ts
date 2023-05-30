@@ -7,16 +7,18 @@
  */
 
 import { isEmpty } from 'lodash';
-import { SavedObjectAttributes } from '@kbn/core/server';
-import { EmbeddablePersistableStateService } from '@kbn/embeddable-plugin/common';
+
 import {
   type ControlGroupTelemetry,
   CONTROL_GROUP_TYPE,
   RawControlGroupAttributes,
 } from '@kbn/controls-plugin/common';
-import { initializeControlGroupTelemetry } from '@kbn/controls-plugin/server';
+import { SavedObjectAttributes } from '@kbn/core/server';
 import { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
-import type { SavedDashboardPanel } from '../../common';
+import { initializeControlGroupTelemetry } from '@kbn/controls-plugin/server';
+import { EmbeddablePersistableStateService } from '@kbn/embeddable-plugin/common';
+
+import { SavedDashboardPanel } from '../../common/content_management';
 import { TASK_ID, DashboardTelemetryTaskState } from './dashboard_telemetry_collection_task';
 export interface DashboardCollectorData {
   panels: {

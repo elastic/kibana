@@ -6,10 +6,9 @@
  * Side Public License, v 1.
  */
 
-import type { SavedObjectsClientContract } from '@kbn/core/public';
-
-import { DashboardAttributes } from '../../../../common';
-import { DASHBOARD_SAVED_OBJECT_TYPE } from '../../../dashboard_constants';
+import { DashboardStartDependencies } from '../../../plugin';
+import { DASHBOARD_CONTENT_ID } from '../../../dashboard_constants';
+import { DashboardCrudTypes } from '../../../../common/content_management';
 
 export interface DashboardDuplicateTitleCheckProps {
   title: string;
@@ -32,7 +31,7 @@ export async function checkForDuplicateDashboardTitle(
     onTitleDuplicate,
     isTitleDuplicateConfirmed,
   }: DashboardDuplicateTitleCheckProps,
-  savedObjectsClient: SavedObjectsClientContract
+  contentManagement: DashboardStartDependencies['contentManagement']
 ): Promise<boolean> {
   // Don't check for duplicates if user has already confirmed save with duplicate title
   if (isTitleDuplicateConfirmed) {
@@ -44,16 +43,19 @@ export async function checkForDuplicateDashboardTitle(
   if (title === lastSavedTitle && !copyOnSave) {
     return true;
   }
-  const response = await savedObjectsClient.find<DashboardAttributes>({
-    perPage: 10,
-    fields: ['title'],
-    search: `"${title}"`,
-    searchFields: ['title'],
-    type: DASHBOARD_SAVED_OBJECT_TYPE,
+
+  const { hits } = await contentManagement.client.search<
+    DashboardCrudTypes['SearchIn'],
+    DashboardCrudTypes['SearchOut']
+  >({
+    contentTypeId: DASHBOARD_CONTENT_ID,
+    query: {
+      text: title ? `${title}*` : undefined,
+      limit: 10,
+    },
+    options: { onlyTitle: true },
   });
-  const duplicate = response.savedObjects.find(
-    (obj) => obj.get('title').toLowerCase() === title.toLowerCase()
-  );
+  const duplicate = hits.find((hit) => hit.attributes.title.toLowerCase() === title.toLowerCase());
   if (!duplicate) {
     return true;
   }

@@ -8,11 +8,6 @@
 import { v4 as uuidv4 } from 'uuid';
 import { has } from 'lodash';
 
-import {
-  ResolvedSimpleSavedObject,
-  SavedObjectAttributes,
-  SavedObjectsClientContract,
-} from '@kbn/core/public';
 import { Filter, Query } from '@kbn/es-query';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { cleanFiltersForSerialize } from '@kbn/presentation-util-plugin/public';
@@ -20,14 +15,13 @@ import { rawControlGroupAttributesToControlGroupInput } from '@kbn/controls-plug
 import { parseSearchSourceJSON, injectSearchSourceReferences } from '@kbn/data-plugin/public';
 
 import {
-  convertSavedPanelsToPanelMap,
-  DashboardContainerInput,
-  DashboardAttributes,
-  DashboardOptions,
   injectReferences,
+  type DashboardOptions,
+  convertSavedPanelsToPanelMap,
 } from '../../../../common';
-import { DashboardSavedObjectRequiredServices } from '../types';
-import { DASHBOARD_SAVED_OBJECT_TYPE, DEFAULT_DASHBOARD_INPUT } from '../../../dashboard_constants';
+import { DashboardCrudTypes } from '../../../../common/content_management';
+import type { LoadDashboardFromSavedObjectProps, LoadDashboardReturn } from '../types';
+import { DASHBOARD_CONTENT_ID, DEFAULT_DASHBOARD_INPUT } from '../../../dashboard_constants';
 
 export function migrateLegacyQuery(query: Query | { [key: string]: any } | string): Query {
   // Lucene was the only option before, so language-less queries are all lucene
@@ -38,25 +32,13 @@ export function migrateLegacyQuery(query: Query | { [key: string]: any } | strin
   return query as Query;
 }
 
-export type LoadDashboardFromSavedObjectProps = DashboardSavedObjectRequiredServices & {
-  id?: string;
-  savedObjectsClient: SavedObjectsClientContract;
-};
-
-export interface LoadDashboardFromSavedObjectReturn {
-  dashboardFound: boolean;
-  dashboardId?: string;
-  resolveMeta?: Omit<ResolvedSimpleSavedObject, 'saved_object'>;
-  dashboardInput: DashboardContainerInput;
-}
-
-export const loadDashboardStateFromSavedObject = async ({
-  savedObjectsTagging,
-  savedObjectsClient,
-  embeddable,
-  data,
+export const loadDashboardState = async ({
   id,
-}: LoadDashboardFromSavedObjectProps): Promise<LoadDashboardFromSavedObjectReturn> => {
+  data,
+  embeddable,
+  contentManagement,
+  savedObjectsTagging,
+}: LoadDashboardFromSavedObjectProps): Promise<LoadDashboardReturn> => {
   const {
     search: dataSearchService,
     query: { queryString },
@@ -73,29 +55,31 @@ export const loadDashboardStateFromSavedObject = async ({
   if (!savedObjectId) return { dashboardInput: newDashboardState, dashboardFound: true };
 
   /**
-   * Load the saved object
+   * Load the saved object from Content Management
    */
-  const { saved_object: rawDashboardSavedObject, ...resolveMeta } =
-    await savedObjectsClient.resolve<DashboardAttributes>(
-      DASHBOARD_SAVED_OBJECT_TYPE,
-      savedObjectId
-    );
-  if (!rawDashboardSavedObject._version) {
-    return { dashboardInput: newDashboardState, dashboardFound: false, dashboardId: savedObjectId };
+  const { item: rawDashboardContent, meta: resolveMeta } = await contentManagement.client.get<
+    DashboardCrudTypes['GetIn'],
+    DashboardCrudTypes['GetOut']
+  >({ contentTypeId: DASHBOARD_CONTENT_ID, id });
+  if (!rawDashboardContent.version) {
+    return {
+      dashboardInput: newDashboardState,
+      dashboardFound: false,
+      dashboardId: savedObjectId,
+    };
   }
-
   /**
    * Inject saved object references back into the saved object attributes
    */
-  const { references, attributes: rawAttributes } = rawDashboardSavedObject;
+  const { references, attributes: rawAttributes } = rawDashboardContent;
   const attributes = (() => {
     if (!references || references.length === 0) return rawAttributes;
     return injectReferences(
-      { references, attributes: rawAttributes as unknown as SavedObjectAttributes },
+      { references, attributes: rawAttributes },
       {
         embeddablePersistableStateService: embeddable,
       }
-    ) as unknown as DashboardAttributes;
+    );
   })();
 
   /**

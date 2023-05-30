@@ -14,24 +14,22 @@ import {
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 import { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
+
 import {
   controlsCollectorFactory,
   collectPanelsByType,
   getEmptyDashboardData,
   DashboardCollectorData,
 } from './dashboard_telemetry';
-import { injectReferences, SavedDashboardPanel } from '../../common';
+import { injectReferences } from '../../common';
+import { DashboardAttributesAndReferences } from '../../common/types';
+import { SavedDashboardPanel } from '../../common/content_management';
 
 // This task is responsible for running daily and aggregating all the Dashboard telemerty data
 // into a single document. This is an effort to make sure the load of fetching/parsing all of the
 // dashboards will only occur once per day
 const TELEMETRY_TASK_TYPE = 'dashboard_telemetry';
 export const TASK_ID = `Dashboard-${TELEMETRY_TASK_TYPE}`;
-
-interface SavedObjectAttributesAndReferences {
-  attributes: SavedObjectAttributes;
-  references: SavedObjectReference[];
-}
 
 export interface DashboardTelemetryTaskState {
   runs: number;
@@ -92,7 +90,7 @@ export function dashboardTaskRunner(logger: Logger, core: CoreSetup, embeddable:
       async run() {
         let dashboardData = getEmptyDashboardData();
         const controlsCollector = controlsCollectorFactory(embeddable);
-        const processDashboards = (dashboards: SavedObjectAttributesAndReferences[]) => {
+        const processDashboards = (dashboards: DashboardAttributesAndReferences[]) => {
           for (const dashboard of dashboards) {
             const attributes = injectReferences(dashboard, {
               embeddablePersistableStateService: embeddable,
@@ -148,8 +146,8 @@ export function dashboardTaskRunner(logger: Logger, core: CoreSetup, embeddable:
                 }
                 return undefined;
               })
-              .filter<SavedObjectAttributesAndReferences>(
-                (s): s is SavedObjectAttributesAndReferences => s !== undefined
+              .filter<DashboardAttributesAndReferences>(
+                (s): s is DashboardAttributesAndReferences => s !== undefined
               )
           );
 
@@ -167,8 +165,8 @@ export function dashboardTaskRunner(logger: Logger, core: CoreSetup, embeddable:
                   }
                   return undefined;
                 })
-                .filter<SavedObjectAttributesAndReferences>(
-                  (s): s is SavedObjectAttributesAndReferences => s !== undefined
+                .filter<DashboardAttributesAndReferences>(
+                  (s): s is DashboardAttributesAndReferences => s !== undefined
                 )
             );
           }

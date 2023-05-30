@@ -1,7 +1,7 @@
 {
   "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "target/types",
+    "outDir": "target/types"
   },
   "include": ["*.ts", ".storybook/**/*.ts", "common/**/*", "public/**/*", "server/**/*"],
   "kbn_references": [
@@ -33,6 +33,8 @@
     "@kbn/unified-search-plugin",
     "@kbn/shared-ux-page-analytics-no-data",
     "@kbn/content-management-table-list",
+    "@kbn/content-management-plugin",
+    "@kbn/content-management-utils",
     "@kbn/i18n-react",
     "@kbn/expressions-plugin",
     "@kbn/field-formats-plugin",
@@ -56,9 +58,7 @@
     "@kbn/saved-objects-finder-plugin",
     "@kbn/saved-objects-management-plugin",
     "@kbn/shared-ux-button-toolbar",
-    "@kbn/core-saved-objects-server",
+    "@kbn/core-saved-objects-server"
   ],
-  "exclude": [
-    "target/**/*",
-  ]
+  "exclude": ["target/**/*"]
 }

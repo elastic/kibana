@@ -105,7 +105,7 @@ export const controlGroupInputToRawControlGroupAttributes = (
 
 export const rawControlGroupAttributesToControlGroupInput = (
   rawControlGroupAttributes: RawControlGroupAttributes
-): Omit<ControlGroupInput, 'id'> | undefined => {
+): PersistableControlGroupInput | undefined => {
   const defaultControlGroupInput = getDefaultControlGroupInput();
   const { chainingSystem, controlStyle, ignoreParentSettingsJSON, panelsJSON } =
     rawControlGroupAttributes;

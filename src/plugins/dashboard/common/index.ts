@@ -6,12 +6,7 @@
  * Side Public License, v 1.
  */
 
-export type {
-  GridData,
-  DashboardOptions,
-  DashboardCapabilities,
-  SharedDashboardState,
-} from './types';
+export type { DashboardOptions, DashboardCapabilities, SharedDashboardState } from './types';
 
 export type {
   DashboardPanelMap,
@@ -19,12 +14,6 @@ export type {
   DashboardContainerInput,
   DashboardContainerByReferenceInput,
 } from './dashboard_container/types';
-
-export type {
-  DashboardAttributes,
-  ParsedDashboardAttributes,
-  SavedDashboardPanel,
-} from './dashboard_saved_object/types';
 
 export {
   injectReferences,

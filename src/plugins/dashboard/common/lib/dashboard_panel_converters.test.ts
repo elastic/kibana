@@ -10,9 +10,9 @@ import {
   convertSavedDashboardPanelToPanelState,
   convertPanelStateToSavedDashboardPanel,
 } from './dashboard_panel_converters';
-import { EmbeddableInput } from '@kbn/embeddable-plugin/common/types';
-import { SavedDashboardPanel } from '../dashboard_saved_object/types';
+import { SavedDashboardPanel } from '../content_management';
 import { DashboardPanelState } from '../dashboard_container/types';
+import { EmbeddableInput } from '@kbn/embeddable-plugin/common/types';
 
 test('convertSavedDashboardPanelToPanelState', () => {
   const savedDashboardPanel: SavedDashboardPanel = {

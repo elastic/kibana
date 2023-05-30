@@ -20,7 +20,6 @@ import {
   AppMountParameters,
   DEFAULT_APP_CATEGORIES,
   PluginInitializerContext,
-  SavedObjectsClientContract,
 } from '@kbn/core/public';
 import type {
   ScreenshotModePluginSetup,
@@ -45,6 +44,7 @@ import type { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/publ
 import type { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import type { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { UrlForwardingSetup, UrlForwardingStart } from '@kbn/url-forwarding-plugin/public';
 import type { SavedObjectTaggingOssPluginStart } from '@kbn/saved-objects-tagging-oss-plugin/public';
@@ -64,7 +64,7 @@ import {
 } from './dashboard_constants';
 import { DashboardMountContextProps } from './dashboard_app/types';
 import { PlaceholderEmbeddableFactory } from './placeholder_embeddable';
-import type { FindDashboardsService } from './services/dashboard_saved_object/types';
+import type { FindDashboardsService } from './services/dashboard_content_management/types';
 
 export interface DashboardFeatureFlagConfig {
   allowByValueEmbeddables: boolean;
@@ -90,7 +90,7 @@ export interface DashboardStartDependencies {
   navigation: NavigationPublicPluginStart;
   presentationUtil: PresentationUtilPluginStart;
   savedObjects: SavedObjectsStart;
-  savedObjectsClient: SavedObjectsClientContract;
+  contentManagement: ContentManagementPublicStart;
   savedObjectsManagement: SavedObjectsManagementPluginStart;
   savedObjectsTaggingOss?: SavedObjectTaggingOssPluginStart;
   screenshotMode: ScreenshotModePluginStart;
@@ -153,12 +153,9 @@ export class DashboardPlugin
           getDashboardFilterFields: async (dashboardId: string) => {
             const { pluginServices } = await import('./services/plugin_services');
             const {
-              dashboardSavedObject: { loadDashboardStateFromSavedObject },
+              dashboardContentManagement: { loadDashboardState },
             } = pluginServices.getServices();
-            return (
-              (await loadDashboardStateFromSavedObject({ id: dashboardId })).dashboardInput
-                ?.filters ?? []
-            );
+            return (await loadDashboardState({ id: dashboardId })).dashboardInput?.filters ?? [];
           },
         })
       );
@@ -317,7 +314,7 @@ export class DashboardPlugin
       findDashboardsService: async () => {
         const { pluginServices } = await import('./services/plugin_services');
         const {
-          dashboardSavedObject: { findDashboards },
+          dashboardContentManagement: { findDashboards },
         } = pluginServices.getServices();
         return findDashboards;
       },

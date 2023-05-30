@@ -15,7 +15,6 @@ import { replaceUrlHashQuery } from '@kbn/kibana-utils-plugin/common';
 
 import {
   DashboardPanelMap,
-  SavedDashboardPanel,
   SharedDashboardState,
   convertSavedPanelsToPanelMap,
   DashboardContainerInput,
@@ -24,7 +23,8 @@ import { DashboardAPI } from '../../dashboard_container';
 import { pluginServices } from '../../services/plugin_services';
 import { getPanelTooOldErrorString } from '../_dashboard_app_strings';
 import { DASHBOARD_STATE_STORAGE_KEY } from '../../dashboard_constants';
-import { migrateLegacyQuery } from '../../services/dashboard_saved_object/lib/load_dashboard_state_from_saved_object';
+import { SavedDashboardPanel } from '../../../common/content_management';
+import { migrateLegacyQuery } from '../../services/dashboard_content_management/lib/load_dashboard_state';
 
 /**
  * We no longer support loading panels from a version older than 7.3 in the URL.

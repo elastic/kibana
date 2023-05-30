@@ -17,22 +17,23 @@ import {
 } from '@kbn/content-management-table-list';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
+import { SOWithMetadata } from '@kbn/content-management-utils';
+import type { SavedObjectsFindOptionsReference } from '@kbn/core/public';
 import { toMountPoint, useExecutionContext } from '@kbn/kibana-react-plugin/public';
-import type { SavedObjectsFindOptionsReference, SimpleSavedObject } from '@kbn/core/public';
 
 import {
+  DASHBOARD_CONTENT_ID,
   SAVED_OBJECT_DELETE_TIME,
   SAVED_OBJECT_LOADED_TIME,
-  DASHBOARD_SAVED_OBJECT_TYPE,
 } from '../dashboard_constants';
 import {
   dashboardListingTableStrings,
   dashboardListingErrorStrings,
 } from './_dashboard_listing_strings';
-import { DashboardAttributes } from '../../common';
 import { pluginServices } from '../services/plugin_services';
 import { confirmCreateWithUnsaved } from './confirm_overlays';
 import { DashboardUnsavedListing } from './dashboard_unsaved_listing';
+import { DashboardAttributes } from '../../common/content_management';
 import { DashboardApplicationService } from '../services/application/types';
 import { DashboardListingEmptyPrompt } from './dashboard_listing_empty_prompt';
 
@@ -54,14 +55,14 @@ interface DashboardSavedObjectUserContent extends UserContentCommonSchema {
 }
 
 const toTableListViewSavedObject = (
-  savedObject: SimpleSavedObject<DashboardAttributes>
+  hit: SOWithMetadata<DashboardAttributes>
 ): DashboardSavedObjectUserContent => {
-  const { title, description, timeRestore } = savedObject.attributes;
+  const { title, description, timeRestore } = hit.attributes;
   return {
     type: 'dashboard',
-    id: savedObject.id,
-    updatedAt: savedObject.updatedAt!,
-    references: savedObject.references,
+    id: hit.id,
+    updatedAt: hit.updatedAt!,
+    references: hit.references,
     attributes: {
       title,
       description,
@@ -95,7 +96,7 @@ export const DashboardListing = ({
     notifications: { toasts },
     coreContext: { executionContext },
     dashboardCapabilities: { showWriteControls },
-    dashboardSavedObject: { findDashboards, savedObjectsClient },
+    dashboardContentManagement: { findDashboards, deleteDashboards },
   } = pluginServices.getServices();
 
   const [unsavedDashboardIds, setUnsavedDashboardIds] = useState<string[]>(
@@ -134,7 +135,7 @@ export const DashboardListing = ({
     ) => {
       const searchStartTime = window.performance.now();
       return findDashboards
-        .findSavedObjects({
+        .search({
           search: searchTerm,
           size: listingLimit,
           hasReference: references,
@@ -147,7 +148,7 @@ export const DashboardListing = ({
             eventName: SAVED_OBJECT_LOADED_TIME,
             duration: searchDuration,
             meta: {
-              saved_object_type: DASHBOARD_SAVED_OBJECT_TYPE,
+              saved_object_type: DASHBOARD_CONTENT_ID,
             },
           });
           return {
@@ -164,19 +165,14 @@ export const DashboardListing = ({
       try {
         const deleteStartTime = window.performance.now();
 
-        await Promise.all(
-          dashboardsToDelete.map(({ id }) => {
-            dashboardSessionStorage.clearState(id);
-            return savedObjectsClient.delete(DASHBOARD_SAVED_OBJECT_TYPE, id);
-          })
-        );
+        await deleteDashboards(dashboardsToDelete.map(({ id }) => id));
 
         const deleteDuration = window.performance.now() - deleteStartTime;
         reportPerformanceMetricEvent(pluginServices.getServices().analytics, {
           eventName: SAVED_OBJECT_DELETE_TIME,
           duration: deleteDuration,
           meta: {
-            saved_object_type: DASHBOARD_SAVED_OBJECT_TYPE,
+            saved_object_type: DASHBOARD_CONTENT_ID,
             total: dashboardsToDelete.length,
           },
         });
@@ -188,7 +184,7 @@ export const DashboardListing = ({
 
       setUnsavedDashboardIds(dashboardSessionStorage.getDashboardIdsWithUnsavedChanges());
     },
-    [savedObjectsClient, dashboardSessionStorage, toasts]
+    [dashboardSessionStorage, deleteDashboards, toasts]
   );
 
   const editItem = useCallback(
