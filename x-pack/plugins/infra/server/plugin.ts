@@ -16,6 +16,7 @@ import {
 import { handleEsError } from '@kbn/es-ui-shared-plugin/server';
 import { i18n } from '@kbn/i18n';
 import { Logger } from '@kbn/logging';
+import { alertsLocatorID } from '@kbn/observability-plugin/common';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import {
   DISCOVER_APP_TARGET,
@@ -203,6 +204,7 @@ export class InfraServerPlugin
       getAlertDetailsConfig: () => plugins.observability.getAlertDetailsConfig(),
       logger: this.logger,
       basePath: core.http.basePath,
+      alertsLocator: plugins.share.url.locators.get(alertsLocatorID),
     };
 
     plugins.features.registerKibanaFeature(METRICS_FEATURE);

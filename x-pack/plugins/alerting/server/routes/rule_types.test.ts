@@ -90,7 +90,7 @@ describe('ruleTypesRoute', () => {
         has_get_summarized_alerts: true,
       },
     ];
-    rulesClient.listAlertTypes.mockResolvedValueOnce(new Set(listTypes));
+    rulesClient.listRuleTypes.mockResolvedValueOnce(new Set(listTypes));
 
     const [context, req, res] = mockHandlerArguments({ rulesClient }, {}, ['ok']);
 
@@ -129,7 +129,7 @@ describe('ruleTypesRoute', () => {
       }
     `);
 
-    expect(rulesClient.listAlertTypes).toHaveBeenCalledTimes(1);
+    expect(rulesClient.listRuleTypes).toHaveBeenCalledTimes(1);
 
     expect(res.ok).toHaveBeenCalledWith({
       body: expectedResult,
@@ -170,7 +170,7 @@ describe('ruleTypesRoute', () => {
       } as RegistryAlertTypeWithAuth,
     ];
 
-    rulesClient.listAlertTypes.mockResolvedValueOnce(new Set(listTypes));
+    rulesClient.listRuleTypes.mockResolvedValueOnce(new Set(listTypes));
 
     const [context, req, res] = mockHandlerArguments(
       { rulesClient },
@@ -223,7 +223,7 @@ describe('ruleTypesRoute', () => {
       } as RegistryAlertTypeWithAuth,
     ];
 
-    rulesClient.listAlertTypes.mockResolvedValueOnce(new Set(listTypes));
+    rulesClient.listRuleTypes.mockResolvedValueOnce(new Set(listTypes));
 
     const [context, req, res] = mockHandlerArguments(
       { rulesClient },

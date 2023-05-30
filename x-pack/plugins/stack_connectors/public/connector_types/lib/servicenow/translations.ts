@@ -360,6 +360,20 @@ export const USER_IDENTIFIER_REQUIRED = i18n.translate(
   }
 );
 
+export const PASSWORD_REQUIRED = i18n.translate(
+  'xpack.stackConnectors.components.serviceNow.requiredPasswordTextField',
+  {
+    defaultMessage: 'Password is required.',
+  }
+);
+
+export const CLIENTSECRET_REQUIRED = i18n.translate(
+  'xpack.stackConnectors.components.serviceNow.requiredClientSecretTextField',
+  {
+    defaultMessage: 'Client Secret is required.',
+  }
+);
+
 export const IS_OAUTH = i18n.translate('xpack.stackConnectors.components.serviceNow.useOAuth', {
   defaultMessage: 'Use OAuth authentication',
 });
