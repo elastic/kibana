@@ -10,13 +10,7 @@ import { UnifiedDocViewerPlugin } from './plugin';
 
 export { DocViewer, DocViewerSource, DocViewerTable, DocViewerTableLegacy } from './components';
 
-export { useEsDocSearch, usePager } from '@kbn/unified-doc-viewer/public/hooks';
-
-export {
-  formatFieldValue,
-  getShouldShowFieldHandler,
-  isNestedFieldParent,
-} from '@kbn/unified-doc-viewer/public';
+export { useEsDocSearch, usePager, isNestedFieldParent } from '@kbn/unified-doc-viewer';
 
 export function plugin() {
   return new UnifiedDocViewerPlugin();
