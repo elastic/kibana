@@ -45,7 +45,7 @@ describe('POST /diagnose/screenshot', () => {
     httpSetup.registerRouteHandlerContext<ReportingRequestHandlerContext, 'reporting'>(
       reportingSymbol,
       'reporting',
-      () => ({ usesUiCapabilities: () => false, registerExportType: jest.fn() })
+      () => ({ usesUiCapabilities: () => false, registerExportTypes: jest.fn() })
     );
 
     core = await createMockReportingCore(

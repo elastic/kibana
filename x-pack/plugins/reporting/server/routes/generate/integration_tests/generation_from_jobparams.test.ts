@@ -45,7 +45,7 @@ describe('POST /api/reporting/generate', () => {
     httpSetup.registerRouteHandlerContext<ReportingRequestHandlerContext, 'reporting'>(
       reportingSymbol,
       'reporting',
-      () => ({ usesUiCapabilities: jest.fn(), registerExportType: jest.fn() })
+      () => ({ usesUiCapabilities: jest.fn(), registerExportTypes: jest.fn() })
     );
 
     const mockSetupDeps = createMockPluginSetup({

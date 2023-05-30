@@ -44,7 +44,7 @@ export interface ReportingSetup {
    * Used to inform plugins if Reporting config is compatible with UI Capabilities / Application Sub-Feature Controls
    */
   usesUiCapabilities: () => boolean;
-  registerExportType: ExportTypesRegistry['register'];
+  registerExportTypes: ExportTypesRegistry['register'];
 }
 
 /**

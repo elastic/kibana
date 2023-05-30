@@ -26,7 +26,7 @@ export class ExportTypesPlugin
   public setup(core: CoreSetup, pluginsSetup: ExportTypesPluginSetup) {
     const { reporting } = pluginsSetup;
     this.exportTypes.forEach((eType) => {
-      reporting.registerExportType(eType);
+      reporting.registerExportTypes(eType);
     });
     return {};
   }
