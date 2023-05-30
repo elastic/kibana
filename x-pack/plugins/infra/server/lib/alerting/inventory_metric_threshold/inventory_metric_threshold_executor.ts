@@ -35,7 +35,7 @@ import {
   AdditionalContext,
   createScopedLogger,
   flattenAdditionalContext,
-  getAlertDetailsUrl,
+  getAlertUrl,
   getContextForRecoveredAlerts,
   getViewInInventoryAppUrl,
   UNGROUPED_FACTORY_KEY,
@@ -130,12 +130,18 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
           const actionGroupId = FIRED_ACTIONS.id; // Change this to an Error action group when able
           const reason = buildInvalidQueryAlertReason(params.filterQueryText);
           const alert = alertFactory(UNGROUPED_FACTORY_KEY, reason, actionGroupId);
-          const indexedStartedDate =
+          const indexedStartedAt =
             getAlertStartedDate(UNGROUPED_FACTORY_KEY) ?? startedAt.toISOString();
           const alertUuid = getAlertUuid(UNGROUPED_FACTORY_KEY);
 
           alert.scheduleActions(actionGroupId, {
-            alertDetailsUrl: getAlertDetailsUrl(libs.basePath, spaceId, alertUuid),
+            alertDetailsUrl: await getAlertUrl(
+              alertUuid,
+              spaceId,
+              indexedStartedAt,
+              libs.alertsLocator,
+              libs.basePath.publicBaseUrl
+            ),
             alertState: stateToAlertMessage[AlertStates.ERROR],
             group: UNGROUPED_FACTORY_KEY,
             metric: mapToConditionsLookup(criteria, (c) => c.metric),
@@ -146,7 +152,7 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
               basePath: libs.basePath,
               criteria,
               nodeType,
-              timestamp: indexedStartedDate,
+              timestamp: indexedStartedAt,
               spaceId,
             }),
           });
@@ -256,13 +262,19 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
             additionalContext,
             evaluationValues
           );
-          const indexedStartedDate = getAlertStartedDate(group) ?? startedAt.toISOString();
+          const indexedStartedAt = getAlertStartedDate(group) ?? startedAt.toISOString();
           const alertUuid = getAlertUuid(group);
 
           scheduledActionsCount++;
 
           const context = {
-            alertDetailsUrl: getAlertDetailsUrl(libs.basePath, spaceId, alertUuid),
+            alertDetailsUrl: await getAlertUrl(
+              alertUuid,
+              spaceId,
+              indexedStartedAt,
+              libs.alertsLocator,
+              libs.basePath.publicBaseUrl
+            ),
             alertState: stateToAlertMessage[nextState],
             group,
             reason,
@@ -276,7 +288,7 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
               basePath: libs.basePath,
               criteria,
               nodeType,
-              timestamp: indexedStartedDate,
+              timestamp: indexedStartedAt,
               spaceId,
             }),
             ...additionalContext,
@@ -290,14 +302,20 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
 
       for (const alert of recoveredAlerts) {
         const recoveredAlertId = alert.getId();
-        const indexedStartedDate = getAlertStartedDate(recoveredAlertId) ?? startedAt.toISOString();
+        const indexedStartedAt = getAlertStartedDate(recoveredAlertId) ?? startedAt.toISOString();
         const alertUuid = getAlertUuid(recoveredAlertId);
         const alertHits = alertUuid ? await getAlertByAlertUuid(alertUuid) : undefined;
         const additionalContext = getContextForRecoveredAlerts(alertHits);
         const originalActionGroup = getOriginalActionGroup(alertHits);
 
         alert.setContext({
-          alertDetailsUrl: getAlertDetailsUrl(libs.basePath, spaceId, alertUuid),
+          alertDetailsUrl: await getAlertUrl(
+            alertUuid,
+            spaceId,
+            indexedStartedAt,
+            libs.alertsLocator,
+            libs.basePath.publicBaseUrl
+          ),
           alertState: stateToAlertMessage[AlertStates.OK],
           group: recoveredAlertId,
           metric: mapToConditionsLookup(criteria, (c) => c.metric),
@@ -307,7 +325,7 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
             basePath: libs.basePath,
             criteria,
             nodeType,
-            timestamp: indexedStartedDate,
+            timestamp: indexedStartedAt,
             spaceId,
           }),
           originalAlertState: translateActionGroupToAlertState(originalActionGroup),

@@ -19,7 +19,6 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ApiKey } from '@kbn/security-plugin/common';
 import { useMutation } from '@tanstack/react-query';
 import React, { useState } from 'react';
 import {
@@ -35,10 +34,11 @@ import { isApiError } from '../../../utils/api';
 import { BasicSetupForm, DEFAULT_EXPIRES_VALUE } from './basic_setup_form';
 import { MetadataForm } from './metadata_form';
 import { SecurityPrivilegesForm } from './security_privileges_form';
+import { CreateApiKeyResponse } from './types';
 
 interface CreateApiKeyFlyoutProps {
   onClose: () => void;
-  setApiKey: (apiKey: ApiKey) => void;
+  setApiKey: (apiKey: CreateApiKeyResponse) => void;
   username: string;
 }
 
@@ -126,7 +126,7 @@ export const CreateApiKeyFlyout: React.FC<CreateApiKeyFlyoutProps> = ({
 
   const { isLoading, isError, error, mutate } = useMutation({
     mutationFn: async (input: CreateAPIKeyArgs) => {
-      const result = await http.post<ApiKey>(CREATE_API_KEY_PATH, {
+      const result = await http.post<CreateApiKeyResponse>(CREATE_API_KEY_PATH, {
         body: JSON.stringify(input),
       });
       return result;
