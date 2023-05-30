@@ -52,12 +52,16 @@ import type { SourcererState } from '../store/sourcerer';
 
 const fieldFormatMap: DataViewSpec['fieldFormats'] = {};
 
+const mockFieldMap: DataViewSpec['fields'] = Object.fromEntries(
+  mockIndexFields.map((field) => [field.name, field])
+);
+
 const mockDataView = createStubDataView({
   spec: {
     id: 'logs-*',
     title: 'logs-*',
     timeFieldName: '@timestamp',
-    fields: mockBrowserFields as DataViewSpec['fields'],
+    fields: mockFieldMap,
     fieldFormats: fieldFormatMap,
   },
 });
