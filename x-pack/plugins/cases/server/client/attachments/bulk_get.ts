@@ -24,6 +24,7 @@ import type { BulkOptionalAttributes, OptionalAttributes } from '../../services/
 import type { CasesClient } from '../client';
 import type { AttachmentSavedObject, SOWithErrors } from '../../common/types';
 import { partitionByCaseAssociation } from '../../common/partitioning';
+import { decodeOrThrow } from '../../../common/api/runtime_types';
 
 type AttachmentSavedObjectWithErrors = Array<SOWithErrors<CommentAttributes>>;
 
@@ -67,10 +68,12 @@ export async function bulkGet(
       caseId: caseID,
     });
 
-    return BulkGetAttachmentsResponseRt.encode({
+    const res = {
       attachments: flattenCommentSavedObjects(authorizedAttachments),
       errors,
-    });
+    };
+
+    return decodeOrThrow(BulkGetAttachmentsResponseRt)(res);
   } catch (error) {
     throw createCaseError({
       message: `Failed to bulk get attachments for case id: ${caseID}: ${error}`,
