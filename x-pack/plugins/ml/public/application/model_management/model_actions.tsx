@@ -40,7 +40,7 @@ export function useModelActions({
 }: {
   isLoading: boolean;
   onTestAction: (model: ModelItem) => void;
-  onModelsDeleteRequest: (modelsIds: string[]) => void;
+  onModelsDeleteRequest: (models: ModelItem[]) => void;
   onLoading: (isLoading: boolean) => void;
   fetchModels: () => Promise<void>;
   modelAndDeploymentIds: string[];
@@ -67,6 +67,8 @@ export function useModelActions({
   const canStartStopTrainedModels = capabilities.ml.canStartStopTrainedModels as boolean;
   const canTestTrainedModels = capabilities.ml.canTestTrainedModels as boolean;
   const canDeleteTrainedModels = capabilities.ml.canDeleteTrainedModels as boolean;
+
+  const canManageIngestPipelines = capabilities.management.ingest.ingest_pipelines;
 
   const getUserConfirmation = useMemo(
     () => getUserConfirmationProvider(overlays, theme),
@@ -398,11 +400,7 @@ export function useModelActions({
             <EuiToolTip
               position="left"
               content={
-                hasPipelines
-                  ? i18n.translate('xpack.ml.trainedModels.modelsList.deleteDisabledTooltip', {
-                      defaultMessage: 'Model has associated pipelines',
-                    })
-                  : hasDeployments
+                hasDeployments
                   ? i18n.translate(
                       'xpack.ml.trainedModels.modelsList.deleteDisabledWithDeploymentsTooltip',
                       {
@@ -429,14 +427,16 @@ export function useModelActions({
         color: 'danger',
         isPrimary: false,
         onClick: (model) => {
-          onModelsDeleteRequest([model.model_id]);
+          onModelsDeleteRequest([model]);
         },
         available: (item) =>
-          canDeleteTrainedModels && !isBuiltInModel(item) && !item.putModelConfig,
+          canDeleteTrainedModels &&
+          !isBuiltInModel(item) &&
+          !item.putModelConfig &&
+          (Object.keys(item.pipelines ?? {}).length === 0 || canManageIngestPipelines),
         enabled: (item) => {
-          // TODO check for permissions to delete ingest pipelines.
           // ATM undefined means pipelines fetch failed server-side.
-          return item.state !== MODEL_STATE.STARTED && !isPopulatedObject(item.pipelines);
+          return item.state !== MODEL_STATE.STARTED;
         },
       },
       {
@@ -474,6 +474,7 @@ export function useModelActions({
       isBuiltInModel,
       onTestAction,
       canTestTrainedModels,
+      canManageIngestPipelines,
     ]
   );
 }
