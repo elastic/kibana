@@ -72,8 +72,6 @@ export const RulesContainer = () => {
     params.packagePolicyId
   );
 
-  // console.log({ status });
-
   const rulesPageData = useMemo(
     () => getRulesPageData({ data, error, status }, rulesQuery),
     [data, error, status, rulesQuery]

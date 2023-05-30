@@ -26,10 +26,24 @@ export const findCspRuleTemplateRequest = schema.object({
    */
   perPage: schema.number({ defaultValue: DEFAULT_RULES_TEMPLATE_PER_PAGE, min: 0 }),
   /**
-   *  Field for sorting the found objects
+   *  Fields to retrieve from CspRuleTemplate saved object
+   */
+  fields: schema.maybe(schema.arrayOf(schema.string())),
+  /**
+   *  Sort Field
    */
   sortField: schema.oneOf(
-    [schema.literal('rule.name'), schema.literal('rule.section'), schema.literal('metadata.name')],
+    [
+      schema.literal('metadata.name'),
+      schema.literal('metadata.section'),
+      schema.literal('metadata.id'),
+      schema.literal('metadata.version'),
+      schema.literal('metadata.benchmark.id'),
+      schema.literal('metadata.benchmark.name'),
+      schema.literal('metadata.benchmark.posture_type'),
+      schema.literal('metadata.benchmark.version'),
+      schema.literal('metadata.benchmark.rule_number'),
+    ],
     {
       defaultValue: 'metadata.name',
     }
@@ -57,6 +71,10 @@ export interface GetCspRuleTemplateHTTPBody {
 
   // The number of objects to include in each page
   perPage: number;
+
+  // Field to retrieve
+
+  fields?: string[];
 
   // Field for sorting the found objects
   sortField: string;

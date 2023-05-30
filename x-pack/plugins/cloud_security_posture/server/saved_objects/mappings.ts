@@ -21,11 +21,32 @@ export const cspRuleTemplateSavedObjectMapping: SavedObjectsTypeMappingDefinitio
             },
           },
         },
+        id: {
+          type: 'keyword',
+        },
+        section: {
+          type: 'keyword',
+        },
+        version: {
+          type: 'keyword',
+        },
         benchmark: {
           type: 'object',
           properties: {
             id: {
               // Needed for filtering rule templates by benchmark.id
+              type: 'keyword',
+            },
+            name: {
+              type: 'keyword',
+            },
+            posture_type: {
+              type: 'keyword',
+            },
+            version: {
+              type: 'keyword',
+            },
+            rule_number: {
               type: 'keyword',
             },
           },

@@ -26,12 +26,6 @@ import {
 import { CspRouter } from '../../types';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../benchmarks/benchmarks';
 
-// TODO:
-// check sort fields optional values
-// test pageintion
-// add fields as input to the request
-// tests
-
 const findCspRuleTemplateHandler = async (
   soClient: SavedObjectsClientContract,
   options: GetCspRuleTemplateHTTPBody
@@ -48,7 +42,8 @@ const findCspRuleTemplateHandler = async (
     search: options.search ? `"${options.search}"*` : '',
     page: options.page,
     perPage: options.perPage,
-    sortField: 'metadata.name',
+    sortField: options.sortField,
+    fields: options.fields ? options.fields : undefined,
     filter: getBenchmarkTypeFilter(benchmarkId),
   });
 
