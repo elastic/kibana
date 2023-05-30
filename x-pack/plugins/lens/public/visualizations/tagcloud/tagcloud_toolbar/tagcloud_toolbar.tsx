@@ -13,11 +13,12 @@
  */
 
 import React from 'react';
-import { EuiDualRange, EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { VisualizationToolbarProps } from '../../../types';
 import { ToolbarPopover } from '../../../shared_components';
 import type { TagcloudState } from './types';
+import { FontSizeInput } from './font_size_input';
 
 export function TagcloudToolbar(props: VisualizationToolbarProps<TagcloudState>) {
   return (
@@ -39,20 +40,16 @@ export function TagcloudToolbar(props: VisualizationToolbarProps<TagcloudState>)
               })}
               fullWidth
             >
-              <EuiDualRange
-                id="tagCloudFontSizeSlider"
-                min={5}
-                max={120}
-                step={1}
-                value={[props.state.minFontSize, props.state.maxFontSize]}
-                onChange={(value) => {
+              <FontSizeInput
+                minFontSize={props.state.minFontSize}
+                maxFontSize={props.state.maxFontSize}
+                onChange={(minFontSize: number, maxFontSize: number) => {
                   props.setState({
                     ...props.state,
-                    minFontSize: value[0],
-                    maxFontSize: value[1],
+                    minFontSize,
+                    maxFontSize,
                   });
                 }}
-                aria-label="Tag cloud font size slider"
               />
             </EuiFormRow>
           </ToolbarPopover>
