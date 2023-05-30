@@ -48,6 +48,15 @@ const TabComponent = (props: TabProps) => {
     setTextQuery(e.target.value);
   }, []);
 
+  const logsUrl = useMemo(() => {
+    return locators.nodeLogsLocator.getRedirectUrl({
+      nodeType,
+      nodeId: node.id,
+      time: startTimestamp,
+      filter: textQueryDebounced,
+    });
+  }, [locators.nodeLogsLocator, node.id, nodeType, startTimestamp, textQueryDebounced]);
+
   return (
     <TabContent>
       <EuiFlexGroup gutterSize={'m'} alignItems={'center'} responsive={false}>
@@ -70,12 +79,7 @@ const TabComponent = (props: TabProps) => {
               size={'xs'}
               flush={'both'}
               iconType={'popout'}
-              href={locators.nodeLogsLocator.getRedirectUrl({
-                nodeType,
-                nodeId: node.id,
-                time: startTimestamp,
-                filter: textQueryDebounced,
-              })}
+              href={logsUrl}
             >
               <FormattedMessage
                 id="xpack.infra.nodeDetails.logs.openLogsLink"
