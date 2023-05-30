@@ -7,6 +7,8 @@
  */
 
 import React from 'react';
+import { batch } from 'react-redux';
+
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { isErrorEmbeddable } from '@kbn/embeddable-plugin/public';
 
@@ -29,7 +31,7 @@ import { ControlEditor } from './control_editor';
 import { DataControlEditorChanges, IEditableControlFactory } from '../../types';
 import { ControlInputTransform } from '../../../common/types';
 import { ControlGroupStrings } from '../control_group_strings';
-import { DataControlInput, OPTIONS_LIST_CONTROL, RANGE_SLIDER_CONTROL } from '../..';
+import { OPTIONS_LIST_CONTROL, RANGE_SLIDER_CONTROL } from '../..';
 
 export function openAddDataControlFlyout(
   this: ControlGroupContainer,
@@ -79,22 +81,35 @@ export function openAddDataControlFlyout(
       controlInput = controlInputTransform({ ...controlInput }, type);
     }
 
+    const dataControlInput = {
+      grow: changes.grow,
+      width: changes.width,
+      ...controlInput,
+    };
     let newControl;
     switch (type) {
       case OPTIONS_LIST_CONTROL:
-        newControl = await this.addOptionsListControl(controlInput as AddOptionsListControlProps);
+        newControl = await this.addOptionsListControl(
+          dataControlInput as AddOptionsListControlProps
+        );
         break;
       case RANGE_SLIDER_CONTROL:
-        newControl = await this.addRangeSliderControl(controlInput as AddRangeSliderControlProps);
+        newControl = await this.addRangeSliderControl(
+          dataControlInput as AddRangeSliderControlProps
+        );
         break;
       default:
-        newControl = await this.addDataControlFromField(controlInput as AddDataControlProps);
+        newControl = await this.addDataControlFromField(dataControlInput as AddDataControlProps);
     }
 
     if (onSave && !isErrorEmbeddable(newControl)) {
       onSave(newControl.id);
     }
-    this.updateInput({ defaultControlGrow: changes.grow, defaultControlWidth: changes.width });
+
+    batch(() => {
+      this.dispatch.setDefaultControlGrow(changes.grow);
+      this.dispatch.setDefaultControlWidth(changes.width);
+    });
   };
 
   const flyoutInstance = openFlyout(
