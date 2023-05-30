@@ -1,0 +1,31 @@
+# @kbn-doc-linker partial
+
+params_property_apm_anomaly:
+  required:
+    - windowSize
+    - windowUnit
+    - environment
+    - anomalySeverityType
+  properties:
+    serviceName:
+      type: string
+    transactionType:
+      type: string
+    windowSize:
+      type: number
+      value: 6
+    windowUnit:
+      type: string
+      enum:
+        - "m"
+        - "h"
+        - "d"
+    environment:
+      type: string
+    anomalySeverityType:
+      type: string
+      enum:
+        - critical
+        - major
+        - minor
+        - warning

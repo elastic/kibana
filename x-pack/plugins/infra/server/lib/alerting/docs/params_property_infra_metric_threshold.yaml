@@ -1,7 +1,5 @@
 # @kbn-doc-linker partial
 
-
-
 params_property_infra_metric_threshold:
   properties:
     criteria:
@@ -178,4 +176,3 @@ params_property_infra_metric_threshold:
       type: boolean
     alertOnGroupDisappear:
       type: boolean
-  

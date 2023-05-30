@@ -162,5 +162,3 @@ params_property_log_threshold:
           type: array
           items:
             type: string
-
-    
