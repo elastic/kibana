@@ -8,21 +8,20 @@
 import React from 'react';
 import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
 import { useApmRouter } from '../../../../hooks/use_apm_router';
-import { getIsValidIndexTemplateName } from '../../../../../common/diagnostics/get_default_index_template_names';
-import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
+import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
+import { useDiagnosticsContext } from '../context/use_diagnostics';
+import { getIsValidIndexTemplateName } from '../helpers';
 
 export function DataStreamsStatus() {
-  const { data, status } = useFetcher((callApmApi) => {
-    return callApmApi(`GET /internal/apm/diagnostics/data_streams`);
-  }, []);
-
+  const { diagnosticsBundle, status } = useDiagnosticsContext();
   const router = useApmRouter();
   const isLoading = status === FETCH_STATUS.LOADING;
-  const isEveryTemplateNameValid = (data?.dataStreams ?? []).every((ds) =>
-    getIsValidIndexTemplateName(ds.template)
+  const isEveryTemplateNameValid = (diagnosticsBundle?.dataStreams ?? []).every(
+    (ds) => getIsValidIndexTemplateName(ds.template)
   );
 
-  const hasNonDataStreamIndices = data?.nonDataStreamIndices.length;
+  const hasNonDataStreamIndices =
+    diagnosticsBundle?.nonDataStreamIndices.length;
   const isOk = !hasNonDataStreamIndices && isEveryTemplateNameValid;
 
   return (

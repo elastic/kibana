@@ -6,10 +6,10 @@
  */
 
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { ApmIndicesConfig } from '../../settings/apm_indices/get_apm_indices';
+import { ApmIndicesConfig } from '@kbn/observability-plugin/common/typings';
 import { getApmIndexPatterns } from '../indices/get_indices';
 
-export async function getDataStreams({
+export async function getNonDataStreamIndices({
   esClient,
   apmIndices,
 }: {
@@ -23,11 +23,15 @@ export async function getDataStreams({
     apmIndices.transaction,
   ]);
 
-  // fetch APM data streams
-  const { data_streams: dataStreams } = await esClient.indices.getDataStream({
-    name: apmIndexPatterns,
-    filter_path: ['data_streams.name', 'data_streams.template'],
+  // fetch non-data stream indices
+  const nonDataStreamIndicesResponse = await esClient.indices.get({
+    index: apmIndexPatterns,
+    filter_path: ['*.data_stream', '*.settings.index.uuid'],
   });
 
-  return dataStreams;
+  const nonDataStreamIndices = Object.entries(nonDataStreamIndicesResponse)
+    .filter(([indexName, { data_stream: dataStream }]): boolean => !dataStream)
+    .map(([indexName]): string => indexName);
+
+  return nonDataStreamIndices;
 }

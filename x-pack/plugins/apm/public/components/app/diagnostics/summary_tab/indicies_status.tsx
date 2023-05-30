@@ -8,15 +8,14 @@
 import React from 'react';
 import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
 import { useApmRouter } from '../../../../hooks/use_apm_router';
-import { useFetcher } from '../../../../hooks/use_fetcher';
+import { useDiagnosticsContext } from '../context/use_diagnostics';
+import { getIndicesItems } from '../indices_tab';
 
 export function FieldMappingStatus() {
   const router = useApmRouter();
-  const { data } = useFetcher((callApmApi) => {
-    return callApmApi('GET /internal/apm/diagnostics/indices');
-  }, []);
+  const { diagnosticsBundle, status } = useDiagnosticsContext();
 
-  const isOk = !data?.invalidItems.length;
+  const isOk = getIndicesItems(diagnosticsBundle).invalidItems.length === 0;
 
   return (
     <EuiFlexGroup>

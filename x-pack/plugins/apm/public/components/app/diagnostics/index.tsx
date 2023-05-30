@@ -17,17 +17,18 @@ import { DiagnosticsIndexTemplates } from './index_templates_tab';
 import { DiagnosticsIndices } from './indices_tab';
 import { DiagnosticsDataStreams } from './data_stream_tab';
 import { DiagnosticsIndexPatternSettings } from './index_pattern_settings_tab';
-import {
-  DiagnosticsImportExport,
-  useDiagnosticsReportFromSessionStorage,
-} from './import_export_tab';
+import { DiagnosticsImportExport } from './import_export_tab';
+import { DiagnosticsContextProvider } from './context/diagnostics_context';
+import { useDiagnosticsContext } from './context/use_diagnostics';
 
 export const diagnosticsRoute = {
   '/diagnostics': {
     element: (
-      <DiagnosticsTemplate>
-        <Outlet />
-      </DiagnosticsTemplate>
+      <DiagnosticsContextProvider>
+        <DiagnosticsTemplate>
+          <Outlet />
+        </DiagnosticsTemplate>
+      </DiagnosticsContextProvider>
     ),
     children: {
       '/diagnostics': {
@@ -63,14 +64,8 @@ function DiagnosticsTemplate({ children }: { children: React.ReactChild }) {
       showServiceGroupSaveButton={false}
       selectedNavButton="serviceGroups"
       pageHeader={{
-        rightSideItems: [
-          <EuiButton
-            data-test-subj="apmDiagnosticsTemplateAddSomethingButton"
-            fill
-          >
-            Refresh
-          </EuiButton>,
-        ],
+        iconType: 'magnifyWithExclamation',
+        rightSideItems: [<RefreshButton />],
         description: <TemplateDescription />,
         tabs: [
           {
@@ -127,15 +122,29 @@ function DiagnosticsTemplate({ children }: { children: React.ReactChild }) {
 }
 
 function TemplateDescription() {
-  const { report } = useDiagnosticsReportFromSessionStorage();
-  if (report) {
+  const { isUploaded } = useDiagnosticsContext();
+  if (isUploaded) {
     return (
       <EuiCallOut
-        title="Rendering from Diagnostics Report"
+        title="Displaying results from the uploaded diagnostics report"
         iconType="exportAction"
       />
     );
   }
 
   return null;
+}
+
+function RefreshButton() {
+  const { isUploaded, refetch } = useDiagnosticsContext();
+  return (
+    <EuiButton
+      isDisabled={isUploaded}
+      data-test-subj="apmDiagnosticsTemplateAddSomethingButton"
+      fill
+      onClick={refetch}
+    >
+      Refresh
+    </EuiButton>
+  );
 }

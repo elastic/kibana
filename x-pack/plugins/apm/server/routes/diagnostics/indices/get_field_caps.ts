@@ -6,23 +6,22 @@
  */
 
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import { SERVICE_NAME } from '../../../../common/es_fields/apm';
 import { ApmIndicesConfig } from '../../settings/apm_indices/get_apm_indices';
-import { getDefaultApmIndexTemplateStates } from './get_default_apm_index_templates_states';
-import { getMatchingIndexTemplates } from './get_matching_index_templates';
+import { getApmIndexPatterns } from './get_indices';
 
-export async function getIndexTemplatesByIndexPattern({
+export function getFieldCaps({
   esClient,
   apmIndices,
 }: {
   esClient: ElasticsearchClient;
   apmIndices: ApmIndicesConfig;
 }) {
-  const defaultApmIndexTemplateStates = await getDefaultApmIndexTemplateStates({
-    esClient,
-  });
-  return getMatchingIndexTemplates({
-    apmIndices,
-    esClient,
-    defaultApmIndexTemplateStates,
+  return esClient.fieldCaps({
+    index: getApmIndexPatterns([apmIndices.metric, apmIndices.transaction]),
+    fields: [SERVICE_NAME],
+    filter_path: ['fields'],
+    filters: '-parent',
+    include_unmapped: true,
   });
 }

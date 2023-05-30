@@ -16,62 +16,48 @@ import {
 } from '@elastic/eui';
 import React from 'react';
 import { APIReturnType } from '../../../services/rest/create_call_apm_api';
-import { getIsValidIndexTemplateName } from '../../../../common/diagnostics/get_default_index_template_names';
-import { useFetcher } from '../../../hooks/use_fetcher';
-import { useDiagnosticsReportFromSessionStorage } from './import_export_tab';
+import { useDiagnosticsContext } from './context/use_diagnostics';
+import { getIsValidIndexTemplateName } from './helpers';
 
-type APIResponseType =
-  APIReturnType<'GET /internal/apm/diagnostics/data_streams'>;
+type DiagnosticsBundle = APIReturnType<'GET /internal/apm/diagnostics'>;
 
 export function DiagnosticsDataStreams() {
-  const { report } = useDiagnosticsReportFromSessionStorage();
-
-  const { data } = useFetcher(
-    async (callApmApi) => {
-      if (report) {
-        return report.dataStream;
-      }
-
-      return callApmApi(`GET /internal/apm/diagnostics/data_streams`);
-    },
-    [report]
-  );
+  const { diagnosticsBundle, status } = useDiagnosticsContext();
 
   return (
     <>
-      <NonDataStreamIndicesCallout data={data} />
+      <NonDataStreamIndicesCallout data={diagnosticsBundle} />
 
       <EuiText>
         This section shows the APM data streams and their underlying index
         template.
       </EuiText>
       <EuiSpacer />
-      <DataStreamsTable data={data} />
+      <DataStreamsTable data={diagnosticsBundle} />
     </>
   );
 }
 
-function NonDataStreamIndicesCallout({ data }: { data?: APIResponseType }) {
+function NonDataStreamIndicesCallout({ data }: { data?: DiagnosticsBundle }) {
   if (!data?.nonDataStreamIndices.length) {
     return null;
   }
 
   return (
     <>
-      <EuiCallOut
-        title="Non-data stream indices"
-        color="warning"
-        iconType="help"
-      >
-        The following indices are not backed by a data stream:{' '}
-        {data?.nonDataStreamIndices.join(', ')}
+      <EuiCallOut title="Legacy indices" color="warning" iconType="warning">
+        The following indices are not backed by a data stream and should
+        possibly be deleted:{' '}
+        {data?.nonDataStreamIndices.map((name) => (
+          <EuiBadge>{name}</EuiBadge>
+        ))}
       </EuiCallOut>
       <EuiSpacer />
     </>
   );
 }
 
-function DataStreamsTable({ data }: { data?: APIResponseType }) {
+function DataStreamsTable({ data }: { data?: DiagnosticsBundle }) {
   const columns: Array<EuiBasicTableColumn<IndicesDataStream>> = [
     {
       field: 'name',

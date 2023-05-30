@@ -8,28 +8,20 @@ import React from 'react';
 import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
 import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { useApmRouter } from '../../../../hooks/use_apm_router';
-import { useFetcher } from '../../../../hooks/use_fetcher';
 
-type IndexTemplateAPIResponseType =
-  APIReturnType<'GET /internal/apm/diagnostics/index_templates'>;
+import { useDiagnosticsContext } from '../context/use_diagnostics';
+import { getIsNonStandardIndexTemplate } from '../index_pattern_settings_tab';
+import { getIndexTemplateItems } from '../index_templates_tab';
 
-type IndexPatternAPIResponseType =
-  APIReturnType<'GET /internal/apm/diagnostics/index_pattern_settings'>;
+type DiagnosticsBundle = APIReturnType<'GET /internal/apm/diagnostics'>;
 
 export function IndexTemplatesStatus() {
   const router = useApmRouter();
-  const { data: indexTemplateData } = useFetcher((callApmApi) => {
-    return callApmApi(`GET /internal/apm/diagnostics/index_templates`);
-  }, []);
-
-  const { data: indexPatternSettings } = useFetcher((callApmApi) => {
-    return callApmApi(`GET /internal/apm/diagnostics/index_pattern_settings`);
-  }, []);
-
+  const { diagnosticsBundle, status } = useDiagnosticsContext();
   const hasNonStandardIndexTemplates =
-    getHasNonStandardIndexTemplates(indexPatternSettings);
+    getHasNonStandardIndexTemplates(diagnosticsBundle);
   const isEveryDefaultApmIndexTemplateInstalled =
-    getIsEveryDefaultApmIndexTemplateInstalled(indexTemplateData);
+    getIsEveryDefaultApmIndexTemplateInstalled(diagnosticsBundle);
 
   const isOk =
     isEveryDefaultApmIndexTemplateInstalled && !hasNonStandardIndexTemplates;
@@ -61,17 +53,21 @@ export function IndexTemplatesStatus() {
 }
 
 function getHasNonStandardIndexTemplates(
-  data: IndexPatternAPIResponseType | undefined
+  diagnosticsBundle: DiagnosticsBundle | undefined
 ) {
-  return data?.indexTemplatesByIndexPattern?.some(({ indexTemplates }) => {
-    return indexTemplates?.some(({ isNonStandard }) => isNonStandard);
-  });
+  return diagnosticsBundle?.indexTemplatesByIndexPattern?.some(
+    ({ indexTemplates }) => {
+      return indexTemplates?.some(({ templateName }) =>
+        getIsNonStandardIndexTemplate(templateName)
+      );
+    }
+  );
 }
 
 function getIsEveryDefaultApmIndexTemplateInstalled(
-  data: IndexTemplateAPIResponseType | undefined
+  diagnosticsBundle: DiagnosticsBundle | undefined
 ) {
-  return Object.values(data?.defaultApmIndexTemplateStates ?? {}).every(
-    (state) => state.exists
+  return getIndexTemplateItems(diagnosticsBundle).every(
+    ({ matchingIndexTemplate }) => matchingIndexTemplate !== undefined
   );
 }

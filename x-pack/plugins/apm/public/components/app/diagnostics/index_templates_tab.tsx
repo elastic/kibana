@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiLoadingElastic } from '@elastic/eui';
+import { EuiCallOut, EuiLoadingElastic } from '@elastic/eui';
 import {
   EuiBadge,
   EuiBasicTable,
@@ -14,50 +14,37 @@ import {
   EuiText,
 } from '@elastic/eui';
 import React from 'react';
+import { APIReturnType } from '../../../services/rest/create_call_apm_api';
+import { FETCH_STATUS } from '../../../hooks/use_fetcher';
+import { useDiagnosticsContext } from './context/use_diagnostics';
+import { getApmIndexTemplatePrefixes } from './helpers';
+import { getIsNonStandardIndexTemplate } from './index_pattern_settings_tab';
 
-import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
-import { useDiagnosticsReportFromSessionStorage } from './import_export_tab';
+type DiagnosticsBundle = APIReturnType<'GET /internal/apm/diagnostics'>;
 
 export function DiagnosticsIndexTemplates() {
-  const { report } = useDiagnosticsReportFromSessionStorage();
-  const { data, status } = useFetcher(
-    async (callApmApi) => {
-      if (report) {
-        return report.indexTemplates;
-      }
-      return callApmApi(`GET /internal/apm/diagnostics/index_templates`);
-    },
-    [report]
-  );
+  const { diagnosticsBundle, status } = useDiagnosticsContext();
 
   if (status === FETCH_STATUS.LOADING) {
     return <EuiLoadingElastic size="m" />;
   }
 
-  const items = Object.entries(data?.defaultApmIndexTemplateStates ?? {}).map(
-    ([defaultName, item]) => {
-      return {
-        ...item,
-        defaultName,
-      };
-    }
-  );
-  type Item = typeof items[0];
+  const items = getIndexTemplateItems(diagnosticsBundle);
 
-  const columns: Array<EuiBasicTableColumn<Item>> = [
+  const columns: Array<EuiBasicTableColumn<typeof items[0]>> = [
     {
       name: 'Index template name',
       field: 'name',
       render: (_, item) => {
-        return item.name || item.defaultName;
+        return item.matchingIndexTemplate?.name || item.prefix;
       },
       truncateText: true,
     },
     {
       name: 'Exists',
       field: 'exists',
-      render: (_, { exists }) => {
-        return exists ? (
+      render: (_, { matchingIndexTemplate }) => {
+        return matchingIndexTemplate ? (
           <EuiBadge color="green">OK</EuiBadge>
         ) : (
           <EuiBadge color="danger">Not found</EuiBadge>
@@ -69,6 +56,7 @@ export function DiagnosticsIndexTemplates() {
 
   return (
     <>
+      <NonStandardIndexTemplateCalout diagnosticsBundle={diagnosticsBundle} />
       <EuiText>
         This section lists the names of the default APM Index Templates and
         whether it exists or not
@@ -82,6 +70,63 @@ export function DiagnosticsIndexTemplates() {
         rowHeader="firstName"
         columns={columns}
       />
+    </>
+  );
+}
+
+export function getIndexTemplateItems(diagnosticsBundle?: DiagnosticsBundle) {
+  const apmIndexTemplatePrefix = getApmIndexTemplatePrefixes();
+  return apmIndexTemplatePrefix.map((indexTemplatePrefix) => {
+    const matchingIndexTemplate =
+      diagnosticsBundle?.existingIndexTemplates.index_templates.find(
+        ({ name }) => name.startsWith(indexTemplatePrefix)
+      );
+
+    return {
+      prefix: indexTemplatePrefix,
+      matchingIndexTemplate,
+    };
+  });
+}
+
+function getNonStandardIndexTemplates(diagnosticsBundle?: DiagnosticsBundle) {
+  return diagnosticsBundle?.indexTemplatesByIndexPattern?.flatMap(
+    ({ indexTemplates }) => {
+      return indexTemplates
+        ?.filter(({ templateName }) =>
+          getIsNonStandardIndexTemplate(templateName)
+        )
+        .map(({ templateName }) => templateName);
+    }
+  );
+}
+
+function NonStandardIndexTemplateCalout({
+  diagnosticsBundle,
+}: {
+  diagnosticsBundle?: DiagnosticsBundle;
+}) {
+  const nonStandardIndexTemplates =
+    getNonStandardIndexTemplates(diagnosticsBundle);
+
+  if (!nonStandardIndexTemplates?.length) {
+    return null;
+  }
+
+  return (
+    <>
+      <EuiCallOut
+        title="Non-standard index templates"
+        color="warning"
+        iconType="warning"
+      >
+        The following index templates do not follow the recommended naming
+        scheme:{' '}
+        {nonStandardIndexTemplates.map((name) => (
+          <EuiBadge>{name}</EuiBadge>
+        ))}
+      </EuiCallOut>
+      <EuiSpacer />
     </>
   );
 }

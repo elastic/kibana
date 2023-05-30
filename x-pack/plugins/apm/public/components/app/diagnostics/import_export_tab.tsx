@@ -14,43 +14,10 @@ import {
   EuiFlexItem,
   EuiFilePicker,
 } from '@elastic/eui';
-import useSessionStorage from 'react-use/lib/useSessionStorage';
-import { callApmApi } from '../../../services/rest/create_call_apm_api';
+import { APIReturnType } from '../../../services/rest/create_call_apm_api';
+import { useDiagnosticsContext } from './context/use_diagnostics';
 
-export type DiagnosticsReport = Awaited<
-  ReturnType<typeof getDiagnosticsReport>
->;
-
-async function getDiagnosticsReport() {
-  const opts = { signal: null };
-
-  const dataStreamsPromise = callApmApi(
-    `GET /internal/apm/diagnostics/data_streams`,
-    opts
-  );
-  const indexPatternSettingsPromise = callApmApi(
-    `GET /internal/apm/diagnostics/index_pattern_settings`,
-    opts
-  );
-  const indexTemplatesPromise = callApmApi(
-    `GET /internal/apm/diagnostics/index_templates`,
-    opts
-  );
-  const indicesPromise = callApmApi(
-    `GET /internal/apm/diagnostics/indices`,
-    opts
-  );
-
-  const [dataStream, indexPatternSettings, indexTemplates, indices] =
-    await Promise.all([
-      dataStreamsPromise,
-      indexPatternSettingsPromise,
-      indexTemplatesPromise,
-      indicesPromise,
-    ]);
-
-  return { dataStream, indexPatternSettings, indexTemplates, indices };
-}
+type DiagnosticsBundle = APIReturnType<'GET /internal/apm/diagnostics'>;
 
 export function DiagnosticsImportExport() {
   return (
@@ -66,31 +33,33 @@ export function DiagnosticsImportExport() {
 }
 
 function DownloadCard() {
+  const { diagnosticsBundle, isUploaded } = useDiagnosticsContext();
+
   return (
     <EuiCard
+      isDisabled={isUploaded}
       icon={<EuiIcon size="xxl" type="importAction" />}
       title="Download"
       description="Download the diagnostics report in order to provide it to Elastic Support"
       footer={
         <div>
           <EuiButton
+            isDisabled={isUploaded}
             data-test-subj="apmDiagnosticsImportExportGoForItButton"
             aria-label="Download diagnostics report"
             onClick={() => {
-              getDiagnosticsReport().then((diagnosticsReport) => {
-                const blob = new Blob(
-                  [JSON.stringify(diagnosticsReport, null, 2)],
-                  {
-                    type: 'text/plain',
-                  }
-                );
-                const fileURL = URL.createObjectURL(blob);
+              const blob = new Blob(
+                [JSON.stringify(diagnosticsBundle, null, 2)],
+                {
+                  type: 'text/plain',
+                }
+              );
+              const fileURL = URL.createObjectURL(blob);
 
-                const link = document.createElement('a');
-                link.href = fileURL;
-                link.download = 'diagnostics.json';
-                link.click();
-              });
+              const link = document.createElement('a');
+              link.href = fileURL;
+              link.download = 'diagnostics.json';
+              link.click();
             }}
           >
             Download
@@ -102,7 +71,8 @@ function DownloadCard() {
 }
 
 function UploadCard() {
-  const { report, setReport } = useDiagnosticsReportFromSessionStorage();
+  const { setUploadedDiagnosticsBundle, isUploaded: isUploaded } =
+    useDiagnosticsContext();
   return (
     <EuiCard
       icon={<EuiIcon size="xxl" type="exportAction" />}
@@ -110,11 +80,10 @@ function UploadCard() {
       description="Upload a diagnostics report in order to view the results in the UI"
       footer={
         <div>
-          {report ? (
+          {isUploaded ? (
             <EuiButton
               onClick={() => {
-                setReport(undefined);
-                location.reload();
+                setUploadedDiagnosticsBundle(undefined);
               }}
               data-test-subj="apmUploadCardRemoveReportButton"
               color="danger"
@@ -135,9 +104,8 @@ function UploadCard() {
                       const content = JSON.parse(
                         // @ts-ignore
                         evt?.target?.result
-                      ) as DiagnosticsReport;
-                      setReport(content);
-                      location.reload();
+                      ) as DiagnosticsBundle;
+                      setUploadedDiagnosticsBundle(content);
                     } catch (e) {
                       console.error(
                         `Could not parse file ${file.name}. ${e.message}`
@@ -154,11 +122,4 @@ function UploadCard() {
       }
     />
   );
-}
-
-export function useDiagnosticsReportFromSessionStorage() {
-  const [report, setReport] = useSessionStorage<DiagnosticsReport | undefined>(
-    'diagnostics_report'
-  );
-  return { report, setReport };
 }

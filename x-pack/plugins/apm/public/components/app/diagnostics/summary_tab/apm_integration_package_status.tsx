@@ -6,30 +6,21 @@
  */
 
 import React from 'react';
-import useAsync from 'react-use/lib/useAsync';
+
 import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
+
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
-
-function useApmPackage() {
-  const { core } = useApmPluginContext();
-  const { http } = core;
-
-  const { loading, value } = useAsync(() => {
-    return http.get('/api/fleet/epm/packages/apm');
-  }, []);
-
-  return {
-    isLoading: loading,
-    version: value?.response.version,
-    isInstalled: value?.response?.status === 'installed',
-  };
-}
+import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
+import { useDiagnosticsContext } from '../context/use_diagnostics';
 
 export function ApmIntegrationPackageStatus() {
+  const { diagnosticsBundle, status } = useDiagnosticsContext();
   const { core } = useApmPluginContext();
   const { basePath } = core.http;
 
-  const { isInstalled, isLoading, version } = useApmPackage();
+  const isLoading = status === FETCH_STATUS.LOADING;
+  const isInstalled = diagnosticsBundle?.packageInfo.isInstalled;
+  const packageVersion = diagnosticsBundle?.packageInfo.version;
 
   return (
     <EuiFlexGroup>
@@ -51,7 +42,7 @@ export function ApmIntegrationPackageStatus() {
         {isLoading
           ? '...'
           : isInstalled
-          ? `APM integration (${version})`
+          ? `APM integration (${packageVersion})`
           : 'APM integration: not installed'}
 
         <EuiLink

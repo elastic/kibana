@@ -15,27 +15,20 @@ import {
 } from '@elastic/eui';
 import React from 'react';
 import { useApmRouter } from '../../../hooks/use_apm_router';
-import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
-import { useDiagnosticsReportFromSessionStorage } from './import_export_tab';
+import { FETCH_STATUS } from '../../../hooks/use_fetcher';
+import { useDiagnosticsContext } from './context/use_diagnostics';
+import { getApmIndexTemplatePrefixes } from './helpers';
 
 export function DiagnosticsIndexPatternSettings() {
   const router = useApmRouter();
-  const { report } = useDiagnosticsReportFromSessionStorage();
-  const { data, status } = useFetcher(
-    async (callApmApi) => {
-      if (report) {
-        return report.indexPatternSettings;
-      }
-      return callApmApi(`GET /internal/apm/diagnostics/index_pattern_settings`);
-    },
-    [report]
-  );
+  const { diagnosticsBundle, status } = useDiagnosticsContext();
 
   if (status === FETCH_STATUS.LOADING) {
     return <EuiLoadingElastic size="m" />;
   }
 
-  const indexTemplatesByIndexPattern = data?.indexTemplatesByIndexPattern;
+  const indexTemplatesByIndexPattern =
+    diagnosticsBundle?.indexTemplatesByIndexPattern;
 
   if (
     !indexTemplatesByIndexPattern ||
@@ -55,12 +48,9 @@ export function DiagnosticsIndexPatternSettings() {
           {!indexTemplates?.length && <em>No matching index templates</em>}
 
           {indexTemplates?.map(
-            ({
-              isNonStandard,
-              templateName,
-              templateIndexPatterns,
-              priority,
-            }) => {
+            ({ templateName, templateIndexPatterns, priority }) => {
+              const isNonStandard = getIsNonStandardIndexTemplate(templateName);
+
               return (
                 <EuiToolTip
                   key={templateName}
@@ -102,4 +92,18 @@ export function DiagnosticsIndexPatternSettings() {
       {elms}
     </>
   );
+}
+
+export function getIsNonStandardIndexTemplate(templateName: string) {
+  const apmIndexTemplatePrefixes = getApmIndexTemplatePrefixes();
+  const stackIndexTemplatePrefixes = ['logs', 'metrics'];
+  const isNonStandard = [
+    ...apmIndexTemplatePrefixes,
+    ...stackIndexTemplatePrefixes,
+  ].every((prefix) => {
+    const notMatch = !templateName.startsWith(prefix);
+    return notMatch;
+  });
+
+  return isNonStandard;
 }

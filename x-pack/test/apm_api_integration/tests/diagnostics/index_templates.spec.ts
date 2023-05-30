@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { apm, timerange } from '@kbn/apm-synthtrace-client';
-import { getDefaultIndexTemplateNames } from '@kbn/apm-plugin/common/diagnostics/get_default_index_template_names';
+import { getApmIndexTemplatePrefixes } from '@kbn/apm-plugin/common/diagnostics/get_default_index_template_names';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
@@ -24,7 +24,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     describe('When there is no data', () => {
       before(async () => {
         // delete APM index templates
-        await es.indices.deleteIndexTemplate({ name: getDefaultIndexTemplateNames() });
+        await es.indices.deleteIndexTemplate({ name: getApmIndexTemplatePrefixes() });
       });
 
       it('verifies that none of the default APM index templates exists`', async () => {
