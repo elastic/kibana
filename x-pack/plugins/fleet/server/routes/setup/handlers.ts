@@ -23,9 +23,8 @@ export const getFleetStatusHandler: FleetRequestHandler = async (context, reques
       coreContext.elasticsearch.client.asInternalUser
     ));
 
-    const isNotFleetServerStandalone = !(
-      appContextService.getConfig()?.internal?.fleetServerStandalone ?? false
-    );
+    const isFleetServerStandalone =
+      appContextService.getConfig()?.internal?.fleetServerStandalone ?? false;
     const missingRequirements: GetFleetStatusResponse['missing_requirements'] = [];
     const missingOptionalFeatures: GetFleetStatusResponse['missing_optional_features'] = [];
 
@@ -33,7 +32,7 @@ export const getFleetStatusHandler: FleetRequestHandler = async (context, reques
       missingRequirements.push('api_keys');
     }
 
-    if (isNotFleetServerStandalone && isFleetServerMissing) {
+    if (!isFleetServerStandalone && isFleetServerMissing) {
       missingRequirements.push('fleet_server');
     }
 
