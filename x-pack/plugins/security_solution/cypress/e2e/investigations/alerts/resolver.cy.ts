@@ -20,10 +20,11 @@ import { ALERTS_URL } from '../../../urls/navigation';
 describe('Analyze events view for alerts', () => {
   before(() => {
     cleanKibana();
-    login();
     createRule(getNewRule());
   });
+
   beforeEach(() => {
+    login();
     visit(ALERTS_URL);
     waitForAlertsToPopulate();
   });
@@ -33,8 +34,7 @@ describe('Analyze events view for alerts', () => {
     cy.get(ANALYZER_NODE).first().should('be.visible');
   });
 
-  it(`should display
-   a toast indicating the date range of found events when a time range has 0 events in it`, () => {
+  it('should display a toast indicating the date range of found events when a time range has 0 events in it', () => {
     const dateContainingZeroEvents = 'Jul 27, 2022 @ 00:00:00.000';
     setStartDate(dateContainingZeroEvents);
     waitForAlertsToPopulate();
