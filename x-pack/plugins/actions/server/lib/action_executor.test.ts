@@ -19,7 +19,6 @@ import {
   asHttpRequestExecutionSource,
   asSavedObjectExecutionSource,
 } from './action_execution_source';
-import { GEN_AI_CONNECTOR_ID } from '@kbn/stack-connectors-plugin/common/gen_ai/constants';
 
 const actionExecutor = new ActionExecutor({ isESOCanEncrypt: true });
 const services = actionsMock.createServices();
@@ -1281,7 +1280,7 @@ test('writes to event log for execute and execute start when consumer and relate
 });
 
 test('writes usage data to event log for gen ai events', async () => {
-  const executorMock = setupActionExecutorMock(GEN_AI_CONNECTOR_ID);
+  const executorMock = setupActionExecutorMock('.gen-ai');
   const mockGenAi = {
     id: 'chatcmpl-7LztF5xsJl2z5jcNpJKvaPm4uWt8x',
     object: 'chat.completion',
@@ -1341,7 +1340,7 @@ test('writes usage data to event log for gen ai events', async () => {
           namespace: 'some-namespace',
           rel: 'primary',
           type: 'action',
-          type_id: GEN_AI_CONNECTOR_ID,
+          type_id: '.gen-ai',
         },
       ],
       space_ids: ['some-namespace'],

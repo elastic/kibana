@@ -12,8 +12,6 @@ import { withSpan } from '@kbn/apm-utils';
 import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 import { SpacesServiceStart } from '@kbn/spaces-plugin/server';
 import { IEventLogger, SAVED_OBJECT_REL_PRIMARY } from '@kbn/event-log-plugin/server';
-import { GEN_AI_CONNECTOR_ID } from '@kbn/stack-connectors-plugin/common/gen_ai/constants';
-import { GenAiRunActionResponse } from '@kbn/stack-connectors-plugin/common/gen_ai/types';
 import {
   validateParams,
   validateConfig,
@@ -255,8 +253,8 @@ export class ActionExecutor {
         event.event = event.event || {};
 
         // add meta and user.name to event log when GenerativeAi Connector is executed
-        if (result.status === 'ok' && actionTypeId === GEN_AI_CONNECTOR_ID) {
-          const data = result.data as unknown as GenAiRunActionResponse;
+        if (result.status === 'ok' && actionTypeId === '.gen-ai') {
+          const data = result.data as unknown as { usage: {} };
           event.kibana = event.kibana || {};
           event.kibana = {
             ...event.kibana,
