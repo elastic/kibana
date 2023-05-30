@@ -151,7 +151,9 @@ export function ChartPreview({
           />
         ))}
       </Chart>
-      <TimeLabelForData lookback={lookback} timeLabel={timeLabel} />
+      {series.length > 0 && (
+        <TimeLabelForData lookback={lookback} timeLabel={timeLabel} />
+      )}
     </>
   );
 }
