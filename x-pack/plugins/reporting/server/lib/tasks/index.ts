@@ -14,7 +14,6 @@ export const REPORTING_MONITOR_TYPE = 'reports:monitor';
 
 export { ExecuteReportTask } from './execute_report';
 export { MonitorReportsTask } from './monitor_reports';
-export { ExecutePdfReportTask } from './execute_pdf_report';
 
 export interface ReportTaskParams<JobPayloadType = BasePayload> {
   id: string;

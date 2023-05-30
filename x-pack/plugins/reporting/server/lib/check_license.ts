@@ -26,7 +26,40 @@ const messages = {
   },
 };
 
-const makeManagementFeature = (exportTypes: PdfExportType[] | ExportTypeDefinition[]) => {
+const makeManagementFeature = (exportTypes: ExportTypeDefinition[]) => {
+  return {
+    id: 'management',
+    checkLicense: (license?: ILicense) => {
+      if (!license || !license.type) {
+        return {
+          showLinks: true,
+          enableLinks: false,
+          message: messages.getUnavailable(),
+        };
+      }
+
+      if (!license.isActive) {
+        return {
+          showLinks: true,
+          enableLinks: false,
+          message: messages.getExpired(license),
+        };
+      }
+
+      const validJobTypes = exportTypes
+        .filter((exportType) => exportType.validLicenses.includes(license.type || ''))
+        .map((exportType) => exportType.jobType);
+
+      return {
+        showLinks: validJobTypes.length > 0,
+        enableLinks: validJobTypes.length > 0,
+        jobTypes: validJobTypes,
+      };
+    },
+  };
+};
+
+const makeManagementFeaturePdf = (exportTypes: PdfExportType[]) => {
   return {
     id: 'management',
     checkLicense: (license?: ILicense) => {
@@ -51,22 +84,47 @@ const makeManagementFeature = (exportTypes: PdfExportType[] | ExportTypeDefiniti
         enableLinks: true,
         jobTypes: ['printable_pdf_v2'],
       };
-      // const validJobTypes = exportTypes
-      //   .filter((exportType: ExportTypeDefinition | PdfExportType) =>
-      //     exportType.validLicenses.includes(license.type || '')
-      //   )
-      //   .map((exportType: ExportTypeDefinition | PdfExportType) => exportType.jobType);
-      // console.log('make it here');
-      // return {
-      //   showLinks: validJobTypes.length > 0,
-      //   enableLinks: validJobTypes.length > 0,
-      //   jobTypes: validJobTypes,
-      // };
     },
   };
 };
 
-const makeExportTypeFeature = (exportType: PdfExportType) => {
+const makeExportTypeFeaturePdf = (exportType: PdfExportType) => {
+  return {
+    id: exportType.id,
+    checkLicense: (license?: ILicense) => {
+      if (!license || !license.type) {
+        return {
+          showLinks: true,
+          enableLinks: false,
+          message: messages.getUnavailable(),
+        };
+      }
+
+      if (!exportType.validLicenses.includes(license.type)) {
+        return {
+          showLinks: false,
+          enableLinks: false,
+          message: `Your ${license.type} license does not support ${exportType.id} Reporting. Please upgrade your license.`,
+        };
+      }
+
+      if (!license.isActive) {
+        return {
+          showLinks: true,
+          enableLinks: false,
+          message: messages.getExpired(license),
+        };
+      }
+
+      return {
+        showLinks: true,
+        enableLinks: true,
+      };
+    },
+  };
+};
+
+const makeExportTypeFeature = (exportType: ExportTypeDefinition) => {
   return {
     id: exportType.id,
     checkLicense: (license?: ILicense) => {
@@ -120,8 +178,8 @@ export function checkLicense(
 
 export function checkLicenseExportType(exportTypeRegistry: PdfExportType[], license?: ILicense) {
   const reportingFeatures = [
-    ...exportTypeRegistry.map(makeExportTypeFeature),
-    makeManagementFeature(exportTypeRegistry),
+    ...exportTypeRegistry.map(makeExportTypeFeaturePdf),
+    makeManagementFeaturePdf(exportTypeRegistry),
   ];
 
   return reportingFeatures.reduce((result, feature) => {

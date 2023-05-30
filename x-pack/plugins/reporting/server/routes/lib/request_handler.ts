@@ -135,9 +135,14 @@ export class RequestHandler {
       return handleUnavailable(this.res);
     }
 
-    const licenseInfo = await this.reporting.getLicenseInfoForExportTypes([
-      this.reporting.pdfExportType!,
-    ]);
+    const isPdfReport =
+      this.reporting.pdfExportType !== undefined ? [this.reporting.pdfExportType] : [];
+    const checkLicense =
+      this.reporting.pdfExportType !== undefined
+        ? await this.reporting.getLicenseInfoForExportTypes(isPdfReport)
+        : await this.reporting.getLicenseInfo();
+
+    const licenseInfo = checkLicense;
 
     const licenseResults = licenseInfo![exportTypeId];
 

@@ -49,9 +49,16 @@ export function registerJobInfoRoutes(reporting: ReportingCore) {
           return handleUnavailable(res);
         }
 
+        const pdfReports = reporting.pdfExportType ? [reporting.pdfExportType] : [];
+        const getLicense = reporting.pdfExportType
+          ? await reporting.getLicenseInfoForExportTypes(pdfReports)
+          : await reporting.getLicenseInfo();
+
         const {
+          // @ts-ignore above checks will catch undefined
           management: { jobTypes = [] },
-        } = await reporting.getLicenseInfo();
+        } = getLicense;
+
         const { page: queryPage = '0', size: querySize = '10', ids: queryIds = null } = req.query;
         const page = parseInt(queryPage, 10) || 0;
         const size = Math.min(100, parseInt(querySize, 10) || 10);
@@ -87,9 +94,16 @@ export function registerJobInfoRoutes(reporting: ReportingCore) {
           return handleUnavailable(res);
         }
 
+        const isPdfReports = reporting.pdfExportType ? [reporting.pdfExportType] : [];
+
+        const licenseInfo = reporting.pdfExportType
+          ? await reporting.getLicenseInfoForExportTypes(isPdfReports)
+          : await reporting.getLicenseInfo();
+
         const {
+          // @ts-ignore previous checks confirm value isn't undefined
           management: { jobTypes = [] },
-        } = await reporting.getLicenseInfo();
+        } = licenseInfo;
 
         const count = await jobsQuery.count(jobTypes, user);
 

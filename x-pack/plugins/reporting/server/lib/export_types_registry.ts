@@ -16,14 +16,14 @@ import { getExportType as getTypePrintablePdf } from '../export_types/printable_
 import { CreateJobFn, ExportTypeDefinition } from '../types';
 import { PdfExportType } from '../export_types/printable_pdf_v2/types';
 
-type GetCallbackFn = (item: PdfExportType) => boolean;
+type GetCallbackFn = (item: ExportTypeDefinition | PdfExportType) => boolean;
 
 export class ExportTypesRegistry {
-  private _map: Map<string, PdfExportType> = new Map();
+  private _map: Map<string, ExportTypeDefinition | PdfExportType> = new Map();
 
   constructor() {}
 
-  register(item: PdfExportType): void {
+  register(item: ExportTypeDefinition | PdfExportType): void {
     if (!isString(item.id)) {
       throw new Error(`'item' must have a String 'id' property `);
     }
@@ -31,6 +31,7 @@ export class ExportTypesRegistry {
     if (this._map.has(item.id)) {
       throw new Error(`'item' with id ${item.id} has already been registered`);
     }
+
     this._map.set(item.id, item);
   }
 
@@ -42,37 +43,34 @@ export class ExportTypesRegistry {
     return this._map.size;
   }
 
-  getById(id: string): PdfExportType {
-    // if (!this._map.has(id)) {
-    //   throw new Error(`Unknown id ${id}`);
-    // }
+  getById(id: string): ExportTypeDefinition | PdfExportType {
+    if (!this._map.has(id)) {
+      throw new Error(`Unknown id ${id}`);
+    }
 
-    return this._map.get(id) as PdfExportType;
+    return this._map.get(id) as ExportTypeDefinition | PdfExportType;
   }
 
-  get(findType: GetCallbackFn): PdfExportType {
+  get(findType: GetCallbackFn): ExportTypeDefinition | PdfExportType {
     let result;
     for (const value of this._map.values()) {
       if (!findType(value)) {
         continue; // try next value
       }
-      const foundResult: PdfExportType = value;
-      return foundResult;
+      const foundResult: ExportTypeDefinition | PdfExportType = value;
 
-      // if (result) {
-      //   throw new Error('Found multiple items matching predicate.');
-      // }
+      if (result) {
+        throw new Error('Found multiple items matching predicate.');
+      }
 
-      // result = foundResult;
-      // return result;
-      // }
-
-      // if (!result) {
-      //   throw new Error('Found no items matching predicate');
-      // }
-
-      // return foundResult;
+      result = foundResult;
     }
+
+    if (!result) {
+      throw new Error('Found no items matching predicate');
+    }
+
+    return result;
   }
 }
 
@@ -95,9 +93,10 @@ export function getExportTypesRegistry(): ExportTypesRegistry {
     getTypePng,
     getTypePngV2,
     getTypePrintablePdf,
+    // getTypePrintablePdfV2,
   ];
   getTypeFns.forEach((getType) => {
-    // registry.register(getType());
+    registry.register(getType());
   });
   return registry;
 }
