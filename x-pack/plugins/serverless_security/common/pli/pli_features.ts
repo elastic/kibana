@@ -22,5 +22,5 @@ export const getProductAppFeatures = (productLineIds: SecurityProductLineId[]): 
       }
     });
 
-    return productAppFeatures;
+    return appFeatures;
   }, {} as AppFeatureKeys);
