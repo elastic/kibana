@@ -24,7 +24,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       require.resolve('./apps/search_profiler'),
       require.resolve('./apps/painless_lab'),
       // https://github.com/elastic/kibana/issues/153601
-      require.resolve('./apps/uptime'),
+      // require.resolve('./apps/uptime'),
       require.resolve('./apps/spaces'),
       require.resolve('./apps/advanced_settings'),
       require.resolve('./apps/dashboard_panel_options'),

@@ -19,7 +19,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const es = getService('es');
   const toasts = getService('toasts');
 
-  describes.skip('uptime Accessibility', () => {
+  describe('uptime Accessibility', () => {
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/uptime/blank');
       await makeChecks(es, A11Y_TEST_MONITOR_ID, 150, 1, 1000, {
@@ -64,7 +64,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await a11y.testAppSnapshot();
     });
 
-    it.skip('overview alert popover controls nested content', async () => {
+    it('overview alert popover controls nested content', async () => {
       await uptimeService.overview.navigateToNestedPopover();
       await a11y.testAppSnapshot();
     });
