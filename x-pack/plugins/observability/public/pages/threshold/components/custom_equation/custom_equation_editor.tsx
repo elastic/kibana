@@ -17,12 +17,13 @@ import { omit, range, first, xor, debounce } from 'lodash';
 import { IErrorObject } from '@kbn/triggers-actions-ui-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { DataViewBase } from '@kbn/es-query';
-import { OMITTED_AGGREGATIONS_FOR_CUSTOM_METRICS } from '../../../../../common/http_api';
+import { OMITTED_AGGREGATIONS_FOR_CUSTOM_METRICS } from '../../../../../common/threshold_rule/metrics_explorer';
 import {
   Aggregators,
   CustomMetricAggTypes,
   MetricExpressionCustomMetric,
-} from '../../../../../common/alerting/metrics';
+} from '../../../../../common/threshold_rule/types';
+
 import { MetricExpression } from '../../types';
 import { CustomMetrics, AggregationTypes, NormalizedFields } from './types';
 import { MetricRowWithAgg } from './metric_row_with_agg';
@@ -49,14 +50,14 @@ const CHAR_CODE_FOR_A = 65;
 const CHAR_CODE_FOR_Z = CHAR_CODE_FOR_A + MAX_VARIABLES;
 const VAR_NAMES = range(CHAR_CODE_FOR_A, CHAR_CODE_FOR_Z).map((c) => String.fromCharCode(c));
 
-export const CustomEquationEditor = ({
+export function CustomEquationEditor({
   onChange,
   expression,
   fields,
   aggregationTypes,
   errors,
   dataView,
-}: CustomEquationEditorProps) => {
+}: CustomEquationEditorProps) {
   const [customMetrics, setCustomMetrics] = useState<CustomMetrics>(
     expression?.customMetrics ?? [NEW_METRIC]
   );
@@ -218,4 +219,4 @@ export const CustomEquationEditor = ({
       </EuiFlexGroup>
     </div>
   );
-};
+}

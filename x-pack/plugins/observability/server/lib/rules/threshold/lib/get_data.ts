@@ -9,8 +9,12 @@ import { SearchResponse, AggregationsAggregate } from '@elastic/elasticsearch/li
 import { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common/search_strategy';
-import { Aggregators, Comparator } from '../../../../../common/threshold_rule/types';
-import { MetricExpressionParams } from '../types';
+import {
+  Aggregators,
+  Comparator,
+  MetricExpressionParams,
+} from '../../../../../common/threshold_rule/types';
+
 import {
   AdditionalContext,
   doFieldsExist,

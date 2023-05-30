@@ -8,8 +8,8 @@
 import { ElasticsearchClient } from '@kbn/core/server';
 import moment from 'moment';
 import type { Logger } from '@kbn/logging';
+import { MetricExpressionParams } from '../../../../../common/threshold_rule/types';
 import { isCustom } from './metric_expression_params';
-import { MetricExpressionParams } from '../types';
 import { getIntervalInSeconds } from '../utils';
 import { CUSTOM_EQUATION_I18N, DOCUMENT_COUNT_I18N } from '../messages';
 import { createTimerange } from './create_timerange';

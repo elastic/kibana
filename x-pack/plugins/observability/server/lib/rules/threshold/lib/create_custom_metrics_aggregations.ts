@@ -7,7 +7,7 @@
 
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import { isEmpty } from 'lodash';
-import { MetricExpressionCustomMetric } from '../types';
+import { MetricExpressionCustomMetric } from '../../../../../common/threshold_rule/types';
 import { MetricsExplorerCustomMetric } from './metrics_explorer';
 
 const isMetricExpressionCustomMetric = (

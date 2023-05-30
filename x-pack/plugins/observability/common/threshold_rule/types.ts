@@ -228,7 +228,7 @@ export enum Aggregators {
   CUSTOM = 'custom',
 }
 
-const metricsExplorerOptionsMetricRT = t.intersection([
+const metricsExplorerOptionsMetricRT = rt.intersection([
   metricsExplorerMetricRT,
   rt.partial({
     rate: rt.boolean,

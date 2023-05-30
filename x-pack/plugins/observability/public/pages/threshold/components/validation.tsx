@@ -16,7 +16,7 @@ import {
   FilterQuery,
   MetricExpressionParams,
   QUERY_INVALID,
-} from '../../../../common/alerting/metrics';
+} from '../../../../common/threshold_rule/types';
 
 export const EQUATION_REGEX = /[^A-Z|+|\-|\s|\d+|\.|\(|\)|\/|\*|>|<|=|\?|\:|&|\!|\|]+/g;
 

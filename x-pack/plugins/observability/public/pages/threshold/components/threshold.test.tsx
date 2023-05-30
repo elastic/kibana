@@ -7,10 +7,11 @@
 
 import { LIGHT_THEME } from '@elastic/charts';
 import { EUI_CHARTS_THEME_LIGHT } from '@elastic/eui/dist/eui_charts_theme';
-import { Comparator } from '../../../../common/alerting/metrics';
+
 import { render } from '@testing-library/react';
 import { Props, Threshold } from './threshold';
 import React from 'react';
+import { Comparator } from '../../../../common/threshold_rule/types';
 
 describe('Threshold', () => {
   const renderComponent = (props: Partial<Props> = {}) => {

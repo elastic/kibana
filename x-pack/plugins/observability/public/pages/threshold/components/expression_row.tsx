@@ -30,16 +30,10 @@ import {
 import { DataViewBase } from '@kbn/es-query';
 import useToggle from 'react-use/lib/useToggle';
 import { Aggregators, Comparator } from '../../../../common/threshold_rule/types';
-import {
-  AGGREGATION_TYPES,
-  DerivedIndexPattern,
-  InventoryMetricConditions,
-  MetricExpression,
-  SnapshotMetricType,
-} from '../types';
+import { AGGREGATION_TYPES, DerivedIndexPattern, MetricExpression } from '../types';
 import { CustomEquationEditor } from './custom_equation';
 import { CUSTOM_EQUATION } from '../i18n_strings';
-import { pctToDecimal } from '../helpers/corrected_percent_convert';
+import { decimalToPct, pctToDecimal } from '../helpers/corrected_percent_convert';
 
 const customComparators = {
   ...builtInComparators,
@@ -79,7 +73,8 @@ const StyledHealth = euiStyled(EuiHealth)`
   margin-left: 4px;
 `;
 
-export function ExpressionRow(props: ExpressionRowProps) {
+// eslint-disable-next-line react/function-component-definition
+export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
   const [isExpanded, toggle] = useToggle(true);
 
   const {
@@ -369,16 +364,22 @@ export function ExpressionRow(props: ExpressionRowProps) {
       <EuiSpacer size={'s'} />
     </>
   );
-}
+};
+
 const ThresholdElement: React.FC<{
   updateComparator: (c?: string) => void;
   updateThreshold: (t?: number[]) => void;
-  threshold: InventoryMetricConditions['threshold'];
-  comparator: InventoryMetricConditions['comparator'];
+  threshold: MetricExpression['threshold'];
+  isMetricPct: boolean;
+  comparator: MetricExpression['comparator'];
   errors: IErrorObject;
-  metric?: SnapshotMetricType;
   // eslint-disable-next-line react/function-component-definition
-}> = ({ updateComparator, updateThreshold, threshold, metric, comparator, errors }) => {
+}> = ({ updateComparator, updateThreshold, threshold, isMetricPct, comparator, errors }) => {
+  const displayedThreshold = useMemo(() => {
+    if (isMetricPct) return threshold.map((v) => decimalToPct(v));
+    return threshold;
+  }, [threshold, isMetricPct]);
+
   return (
     <>
       <StyledExpression>

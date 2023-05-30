@@ -46,15 +46,6 @@ export interface MetricAnomalyParams {
 
 // Types for the executor
 
-export interface MetricThresholdParams {
-  criteria: MetricExpressionParams[];
-  filterQuery?: string;
-  filterQueryText?: string;
-  sourceId?: string;
-  alertOnNoData?: boolean;
-  alertOnGroupDisappear?: boolean;
-}
-
 interface BaseMetricExpressionParams {
   timeSize: number;
   timeUnit: TimeUnitChar;
@@ -78,29 +69,6 @@ export type CustomMetricAggTypes = Exclude<
   Aggregators,
   Aggregators.CUSTOM | Aggregators.RATE | Aggregators.P95 | Aggregators.P99
 >;
-
-export interface MetricExpressionCustomMetric {
-  name: string;
-  aggType: CustomMetricAggTypes;
-  field?: string;
-  filter?: string;
-}
-
-export interface CustomMetricExpressionParams extends BaseMetricExpressionParams {
-  aggType: Aggregators.CUSTOM;
-  customMetrics: MetricExpressionCustomMetric[];
-  equation?: string;
-  label?: string;
-}
-
-export type MetricExpressionParams =
-  | NonCountMetricExpressionParams
-  | CountMetricExpressionParams
-  | CustomMetricExpressionParams;
-
-export const QUERY_INVALID: unique symbol = Symbol('QUERY_INVALID');
-
-export type FilterQuery = string | typeof QUERY_INVALID;
 
 export interface AlertExecutionDetails {
   alertId: string;

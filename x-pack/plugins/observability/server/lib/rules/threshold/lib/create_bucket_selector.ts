@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { Aggregators, Comparator, MetricExpressionParams } from '../types';
+import {
+  Aggregators,
+  Comparator,
+  MetricExpressionParams,
+} from '../../../../../common/threshold_rule/types';
 import { createConditionScript } from './create_condition_script';
 import { createLastPeriod } from './wrap_in_period';
 

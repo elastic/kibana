@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { Comparator } from '../types';
+
+import { Comparator } from '../../../../../common/threshold_rule/types';
 
 export const createConditionScript = (threshold: number[], comparator: Comparator) => {
   if (comparator === Comparator.BETWEEN && threshold.length === 2) {
