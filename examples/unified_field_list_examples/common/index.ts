@@ -7,4 +7,4 @@
  */
 
 export const PLUGIN_ID = 'unifiedFieldListExamples';
-export const PLUGIN_NAME = 'UnifiedFieldList Examples';
+export const PLUGIN_NAME = 'Unified Field List Examples';

@@ -19,7 +19,7 @@ import {
   UnifiedFieldListExamplesPluginSetup,
   UnifiedFieldListExamplesPluginStart,
 } from './types';
-import { PLUGIN_NAME } from '../common';
+import { PLUGIN_ID, PLUGIN_NAME } from '../common';
 import image from './unified_field_list.png';
 
 export class UnifiedFieldListExamplesPlugin
@@ -37,7 +37,7 @@ export class UnifiedFieldListExamplesPlugin
   ): UnifiedFieldListExamplesPluginSetup {
     // Register an application into the side navigation menu
     core.application.register({
-      id: 'unifiedFieldListExamples',
+      id: PLUGIN_ID,
       title: PLUGIN_NAME,
       navLinkStatus: AppNavLinkStatus.hidden,
       mount: async (params: AppMountParameters) => {
@@ -51,8 +51,8 @@ export class UnifiedFieldListExamplesPlugin
     });
 
     developerExamples.register({
-      appId: 'unifiedFieldListExamples',
-      title: 'Unified Field List Examples',
+      appId: PLUGIN_ID,
+      title: PLUGIN_NAME,
       description: `Examples of unified field list functionality.`,
       image,
       links: [
