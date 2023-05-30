@@ -49,12 +49,12 @@ export const OptInMessage: React.FC<OptInMessageProps> = ({
             >
               <FormattedMessage
                 id="telemetry.dataManagementDisclaimerPrivacyLink"
-                defaultMessage="Privacy Statement."
+                defaultMessage="Privacy Statement"
               />
             </EuiLink>
           ),
         }}
-      />
+      />{' '}
       {renderTelemetryEnabledOrDisabledText(telemetryService, addBasePath, onClick)}
     </React.Fragment>
   );
