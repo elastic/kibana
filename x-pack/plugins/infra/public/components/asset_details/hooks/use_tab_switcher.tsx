@@ -10,12 +10,12 @@ import createContainer from 'constate';
 import { useLazyRef } from '../../../hooks/use_lazy_ref';
 import type { TabIds } from '../types';
 
-export function useTabSwitcher({ intitalActiveTabId }: { intitalActiveTabId?: TabIds }) {
-  const [activeTabId, setActiveTabId] = useState<TabIds | undefined>(intitalActiveTabId);
+export function useTabSwitcher({ initialActiveTabId }: { initialActiveTabId?: TabIds }) {
+  const [activeTabId, setActiveTabId] = useState<TabIds | undefined>(initialActiveTabId);
 
   // This set keeps track of which tabs content have been rendered the first time.
   // We need it in order to load a tab content only if it gets clicked, and then keep it in the DOM for performance improvement.
-  const renderedTabsSet = useLazyRef(() => new Set([intitalActiveTabId]));
+  const renderedTabsSet = useLazyRef(() => new Set([initialActiveTabId]));
 
   const showTab = (tabId: TabIds) => {
     renderedTabsSet.current.add(tabId); // On a tab click, mark the tab content as allowed to be rendered
