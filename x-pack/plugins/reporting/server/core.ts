@@ -151,7 +151,7 @@ export class ReportingCore {
 
     const { executeTask, monitorTask } = this;
     setupDeps.taskManager.registerTaskDefinitions({
-      [executeTask.TYPE]: executeTask.getTaskDefinition(),
+      [executeTask.TYPE]: executeTask.getTaskDefinition(this.pdfExport),
       [monitorTask.TYPE]: monitorTask.getTaskDefinition(),
     });
   }

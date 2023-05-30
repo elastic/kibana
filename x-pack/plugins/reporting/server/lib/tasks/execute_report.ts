@@ -29,7 +29,7 @@ import { mapToReportingError } from '../../../common/errors/map_to_reporting_err
 import { getContentStream } from '..';
 import type { ReportingCore } from '../..';
 import { durationToNumber, numberToDuration } from '../../../common/schema_utils';
-import type { ReportOutput } from '../../../common/types';
+import type { BasePayload, ReportOutput } from '../../../common/types';
 import type { ReportingConfigType } from '../../config';
 import type { ReportDocument, ReportingStore } from '../store';
 import { Report, SavedReport } from '../store';
@@ -37,6 +37,7 @@ import type { ReportFailedFields, ReportProcessingFields } from '../store/store'
 import { ReportingTask, ReportingTaskStatus, REPORTING_EXECUTE_TYPE, ReportTaskParams } from '.';
 import { errorLogger } from './error_logger';
 import { PdfExportType } from '../../export_types/printable_pdf_v2/types';
+import { ExportTypeDefinition, RunTaskFn } from '../../types';
 
 type CompletedReportOutput = Omit<ReportOutput, 'content'>;
 
@@ -45,6 +46,10 @@ export interface ReportingExecuteTaskInstance {
   taskType: string;
   params: ReportTaskParams;
   runAt?: Date;
+}
+
+interface TaskExecutor extends Pick<ExportTypeDefinition, 'jobContentEncoding'> {
+  jobExecutor: RunTaskFn<BasePayload>;
 }
 
 function isOutput(output: CompletedReportOutput | Error): output is CompletedReportOutput {
@@ -76,7 +81,7 @@ export class ExecuteReportTask implements ReportingTask {
 
   private logger: Logger;
   private taskManagerStart?: TaskManagerStartContract;
-  private taskExecutors?: Map<string, PdfExportType>;
+  private taskExecutors?: Map<string, PdfExportType | TaskRunResult>;
   private kibanaId?: string;
   private kibanaName?: string;
   private store?: ReportingStore;
@@ -97,23 +102,22 @@ export class ExecuteReportTask implements ReportingTask {
 
     const { reporting } = this;
 
-    // const exportTypesRegistry = reporting.pdfExportType;
-    // const executors = new Map<string, TaskExecutor>();
-    // // exportTypesRegistry.getAll() will not include PdfExportTypes
-    // for (const exportType of exportTypesRegistry.getAll()) {
-    //   const exportTypeLogger = this.logger.get(exportType.jobType);
-    //   // @ts-expect-error PdfExport type does not have runTaskFnFactory and also it's own ExecuteReportTask()
-    //   const jobExecutor = exportType.runTaskFnFactory(reporting, exportTypeLogger);
-    //   // The task will run the function with the job type as a param.
-    //   // This allows us to retrieve the specific export type runFn when called to run an export
-    //   executors.set(exportType.jobType, {
-    //     jobExecutor,
-    //     jobContentEncoding: exportType.,
-    //   });
-    // }
+    const exportTypesRegistry = reporting.getExportTypesRegistry();
+    const executors = new Map<string, TaskExecutor>();
+    // exportTypesRegistry.getAll() will not include PdfExportTypes
+    for (const exportType of exportTypesRegistry.getAll()) {
+      const exportTypeLogger = this.logger.get(exportType.jobType);
+      // @ts-expect-error PdfExport type does not have runTaskFnFactory and also it's own ExecuteReportTask()
+      const jobExecutor = exportType.runTaskFnFactory(reporting, exportTypeLogger);
+      // The task will run the function with the job type as a param.
+      // This allows us to retrieve the specific export type runFn when called to run an export
+      executors.set(exportType.jobType, {
+        jobExecutor,
+        jobContentEncoding: exportType.jobContentEncoding,
+      });
+    }
 
-    // @ts-ignore
-    // this.taskExecutors = new Map(reporting.pdfExportType);
+    // this.taskExecutors = pdfExport !== undefined ? new Map(pdfExport) : executors;
 
     const { uuid, name } = reporting.getServerInfo();
     this.kibanaId = uuid;
@@ -255,29 +259,37 @@ export class ExecuteReportTask implements ReportingTask {
   public async _performJob(
     task: ReportTaskParams,
     cancellationToken: CancellationToken,
-    stream: Writable
+    stream: Writable,
+    pdfExport?: PdfExportType[]
   ): Promise<TaskRunResult> {
-    // if (!this.taskExecutors) {
-    //   throw new Error(`Task run function factories have not been called yet!`);
-    // }
+    if (!this.taskExecutors && task.jobtype !== 'printable_pdf_v2') {
+      throw new Error(`Task run function factories have not been called yet!`);
+    }
+
+    console.log('\n\n\n\n pdf export type', pdfExport);
+
     // get the run_task function
-    const runner = this.taskExecutors?.get(task.jobtype) || this.reporting.pdfExportType!.runTask;
+    const runner =
+      task.jobtype !== 'printable_pdf_v2'
+        ? this.taskExecutors?.get(task.jobtype)
+        : pdfExport![0].runTask;
     if (!runner && task.jobtype !== 'printable_pdf_v2') {
       throw new Error(`No defined task runner function for ${task.jobtype}!`);
     }
 
     // run the report - if workerFn doesn't finish before timeout, call the cancellationToken and throw an error
     const queueTimeout = durationToNumber(this.config.queue.timeout);
-    return Rx.lastValueFrom(
-      Rx.from(
-        this.reporting.pdfExportType!.runTask(task.id, task.payload, cancellationToken, stream)
-      ).pipe(timeout(queueTimeout))
-    );
-    // return Rx.lastValueFrom(
-    //   Rx.from(runner.jobExecutor(task.id, task.payload, cancellationToken, stream)).pipe(
-    //     timeout(queueTimeout)
-    //   ) // throw an error if a value is not emitted before timeout
-    // );
+    return task.jobtype === 'printable_pdf_v2'
+      ? Rx.lastValueFrom(
+          Rx.from(pdfExport[0].runTask(task.id, task.payload, cancellationToken, stream)).pipe(
+            timeout(queueTimeout)
+          )
+        )
+      : Rx.lastValueFrom(
+          Rx.from(runner.jobExecutor(task.id, task.payload, cancellationToken, stream)).pipe(
+            timeout(queueTimeout)
+          ) // throw an error if a value is not emitted before timeout
+        );
   }
 
   public async _completeJob(
@@ -314,7 +326,7 @@ export class ExecuteReportTask implements ReportingTask {
   /*
    * Provides a TaskRunner for Task Manager
    */
-  private getTaskRunner(): TaskRunCreatorFunction {
+  private getTaskRunner(pdfExport?: PdfExportType[]): TaskRunCreatorFunction {
     // Keep a separate local stack for each task run
     return (context: RunContext) => {
       let jobId: string;
@@ -384,7 +396,7 @@ export class ExecuteReportTask implements ReportingTask {
             eventLog.logExecutionStart();
 
             const output = await Promise.race<TaskRunResult>([
-              this._performJob(task, cancellationToken, stream),
+              this._performJob(task, cancellationToken, stream, pdfExport),
               this.throwIfKibanaShutsDown(),
             ]);
 
@@ -475,7 +487,7 @@ export class ExecuteReportTask implements ReportingTask {
     };
   }
 
-  public getTaskDefinition() {
+  public getTaskDefinition(pdfExport?: PdfExportType[]) {
     // round up from ms to the nearest second
     const queueTimeout = Math.ceil(numberToDuration(this.config.queue.timeout).asSeconds()) + 's';
     const maxConcurrency = this.config.queue.pollEnabled ? 1 : 0;
@@ -483,7 +495,7 @@ export class ExecuteReportTask implements ReportingTask {
     return {
       type: REPORTING_EXECUTE_TYPE,
       title: 'Reporting: execute job',
-      createTaskRunner: this.getTaskRunner(),
+      createTaskRunner: this.getTaskRunner(pdfExport),
       maxAttempts: 1, // NOTE: not using Task Manager retries
       timeout: queueTimeout,
       maxConcurrency,

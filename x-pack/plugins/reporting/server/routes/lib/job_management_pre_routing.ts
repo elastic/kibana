@@ -10,6 +10,7 @@ import { IKibanaResponse, kibanaResponseFactory } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import { jobsQueryFactory } from '.';
 import { ReportingCore } from '../..';
+import { PdfExportType } from '../../export_types/printable_pdf_v2/types';
 import { ReportApiJSON } from '../../lib/store/report';
 import { ReportingUser } from '../../types';
 import type { Counters } from './get_counter';
@@ -28,13 +29,13 @@ export const jobManagementPreRouting = async (
   docId: string,
   user: ReportingUser,
   counters: Counters,
-  cb: JobManagementResponseHandler
+  cb: JobManagementResponseHandler,
+  pdfExport?: PdfExportType[]
 ) => {
-  const ifPdf = reporting.getExportTypesRegistry().getAll().includes('printablePDFV2')
-    ? [reporting.pdfExportType]
-    : [];
-  const licenseInfo = await reporting.getLicenseInfoForExportTypes([reporting.pdfExportType!]);
-  // : await reporting.getLicenseInfo();
+  const licenseInfo =
+    pdfExport !== undefined
+      ? await reporting.getLicenseInfoForExportTypes(pdfExport)
+      : await reporting.getLicenseInfo();
 
   const {
     // @ts-ignore will be caught in the checks above that it's not undefined

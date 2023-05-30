@@ -141,13 +141,20 @@ export function registerJobInfoRoutes(reporting: ReportingCore) {
         }
 
         const { docId } = req.params;
-        return jobManagementPreRouting(reporting, res, docId, user, counters, async (doc) =>
-          res.ok({
-            body: doc,
-            headers: {
-              'content-type': 'application/json',
-            },
-          })
+        return jobManagementPreRouting(
+          reporting,
+          res,
+          docId,
+          user,
+          counters,
+          async (doc) =>
+            res.ok({
+              body: doc,
+              headers: {
+                'content-type': 'application/json',
+              },
+            }),
+          reporting.pdfExport
         );
       })
     );
