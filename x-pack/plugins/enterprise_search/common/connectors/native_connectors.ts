@@ -123,7 +123,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
           }
         ),
         options: [],
-        order: 7,
+        order: 6,
         required: true,
         sensitive: false,
         tooltip: '',
