@@ -16,6 +16,7 @@ import { ReportingCore } from '.';
 import { PLUGIN_ID } from '../common/constants';
 import { registerUiSettings, ReportingConfigType } from './config';
 import { registerDeprecations } from './deprecations';
+import { PdfExportType } from './export_types/printable_pdf_v2/types';
 import { ReportingStore } from './lib';
 import { registerRoutes } from './routes';
 import { setFieldFormats } from './services';
@@ -36,6 +37,7 @@ export class ReportingPlugin
 {
   private logger: Logger;
   private reportingCore?: ReportingCore;
+  public pdfExport?: PdfExportType;
 
   constructor(private initContext: PluginInitializerContext<ReportingConfigType>) {
     this.logger = initContext.logger.get();
@@ -45,6 +47,13 @@ export class ReportingPlugin
     const { http, status } = core;
     const reportingCore = new ReportingCore(core, this.logger, this.initContext);
     this.reportingCore = reportingCore;
+
+    this.pdfExport = new PdfExportType(
+      core,
+      this.reportingCore.getConfig(),
+      this.logger,
+      this.initContext
+    );
 
     // prevent throwing errors in route handlers about async deps not being initialized
     // @ts-expect-error null is not assignable to object. use a boolean property to ensure reporting API is enabled.
@@ -67,6 +76,7 @@ export class ReportingPlugin
       router: http.createRouter<ReportingRequestHandlerContext>(),
       usageCounter,
       docLinks: core.docLinks,
+      pdfExport: [this.pdfExport],
       ...plugins,
     });
 

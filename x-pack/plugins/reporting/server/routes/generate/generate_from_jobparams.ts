@@ -17,7 +17,7 @@ const BASE_GENERATE = `${API_BASE_URL}/generate`;
 
 export function registerJobGenerationRoutes(reporting: ReportingCore, logger: Logger) {
   const setupDeps = reporting.getPluginSetupDeps();
-  const { router } = setupDeps;
+  const { router, pdfExport } = setupDeps;
 
   // TODO: find a way to abstract this using ExportTypeRegistry: it needs a new
   // public method to return this array
@@ -87,7 +87,8 @@ export function registerJobGenerationRoutes(reporting: ReportingCore, logger: Lo
         return await requestHandler.handleGenerateRequest(
           req.params.exportType,
           jobParams,
-          counters
+          counters,
+          pdfExport
         );
       })
     );

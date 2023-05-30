@@ -66,6 +66,7 @@ export interface ReportingInternalSetup {
   logger: Logger;
   status: StatusServiceSetup;
   docLinks: DocLinksServiceSetup;
+  pdfExport: PdfExportType[];
 }
 
 export interface ReportingInternalStart {
@@ -111,12 +112,11 @@ export class ReportingCore {
   private monitorTask: MonitorReportsTask;
   private config: ReportingConfigType;
   private executing: Set<string>;
-  public pdfExportType?: PdfExportType;
-  private exportTypeRegistry = getExportTypesRegistry();
 
   public getContract: () => ReportingSetup;
 
   private kibanaShuttingDown$ = new Rx.ReplaySubject<void>(1);
+  pdfExport?: ReportingInternalSetup['pdfExport'];
 
   constructor(
     private core: CoreSetup,
@@ -126,7 +126,6 @@ export class ReportingCore {
     this.packageInfo = context.env.packageInfo;
     const config = createConfig(core, context.config.get<ReportingConfigType>(), logger);
     this.config = config;
-    this.pdfExportType = new PdfExportType(this.core, this.getConfig(), this.logger, this.context);
 
     this.deprecatedAllowedRoles = config.roles.enabled ? config.roles.allow : false;
     this.executeTask = new ExecuteReportTask(this, config, this.logger);
@@ -137,9 +136,6 @@ export class ReportingCore {
     });
 
     this.executing = new Set();
-    this.exportTypeRegistry.register(this.pdfExportType);
-
-    this.pdfExportType.setup(core, { basePath: core.http.basePath, logger: this.logger });
   }
 
   public getKibanaPackageInfo() {
@@ -172,20 +168,8 @@ export class ReportingCore {
     const { taskManager } = startDeps;
     const { monitorTask, executeTask } = this;
 
-    if (this.pdfExportType) {
-      this.pdfExportType.start((await this.getPluginStartDeps()).core, {
-        savedObjects: (await this.getPluginStartDeps()).savedObjects,
-        uiSettings: (await this.getPluginStartDeps()).core.uiSettings,
-        screenshotting: (await this.getPluginStartDeps()).screenshotting,
-        logger: this.logger,
-      });
-    }
     // enable this instance to generate reports and to monitor for pending reports
-    await Promise.all([
-      executeTask.init(taskManager),
-      monitorTask.init(taskManager),
-      // executePdfTask.init(taskManager),
-    ]);
+    await Promise.all([executeTask.init(taskManager), monitorTask.init(taskManager)]);
   }
 
   public pluginStop() {

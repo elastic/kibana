@@ -30,14 +30,11 @@ export const jobManagementPreRouting = async (
   counters: Counters,
   cb: JobManagementResponseHandler
 ) => {
-  console.log(reporting.getExportTypesRegistry().getAll());
   const ifPdf = reporting.getExportTypesRegistry().getAll().includes('printablePDFV2')
     ? [reporting.pdfExportType]
     : [];
-  const licenseInfo =
-    reporting.pdfExportType !== undefined
-      ? await reporting.getLicenseInfoForExportTypes(ifPdf)
-      : await reporting.getLicenseInfo();
+  const licenseInfo = await reporting.getLicenseInfoForExportTypes([reporting.pdfExportType!]);
+  // : await reporting.getLicenseInfo();
 
   const {
     // @ts-ignore will be caught in the checks above that it's not undefined

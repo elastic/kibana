@@ -16,6 +16,7 @@ import { checkParamsVersion, cryptoFactory } from '../../lib';
 import { Report } from '../../lib/store';
 import type { BaseParams, ReportingRequestHandlerContext, ReportingUser } from '../../types';
 import { Counters } from './get_counter';
+import { PdfExportType } from '../../export_types/printable_pdf_v2/types';
 
 export const handleUnavailable = (res: KibanaResponseFactory) => {
   return res.custom({ statusCode: 503, body: 'Not Available' });
@@ -45,12 +46,12 @@ export class RequestHandler {
     return await crypto.encrypt(this.req.headers);
   }
 
-  public async enqueueJob(exportTypeId: string, jobParams: BaseParams) {
+  public async enqueueJob(exportTypeId: string, jobParams: BaseParams, pdfExport: PdfExportType[]) {
     const { reporting, logger, req: request, user, context } = this;
 
     const exportType =
       exportTypeId === 'printablePdfV2'
-        ? reporting.pdfExportType
+        ? (pdfExport[0] as PdfExportType)
         : reporting.getExportTypesRegistry().getById(exportTypeId);
 
     if (exportType == null) {
@@ -78,10 +79,13 @@ export class RequestHandler {
 
     // 2. encrypt request headers for the running report job to authenticate itself with Kibana
     // 3. call the export type's createJobFn to create the job payload
+
     const [headers, job] = await Promise.all([
       this.encryptHeaders(),
+      // is exportTypeId set to 'printablePdfV2' for all reports?
       exportTypeId === 'printablePdfV2'
-        ? exportType.createJob({
+        ? // @ts-ignore createJob exists on PdfExportTypes checked above
+          exportType.createJob({
             locatorParams: [
               { id: exportType.id, version: jobParams.version, params: jobParams },
             ] as LocatorParams[],
@@ -128,23 +132,20 @@ export class RequestHandler {
   public async handleGenerateRequest(
     exportTypeId: string,
     jobParams: BaseParams,
-    counters: Counters
+    counters: Counters,
+    exportType: PdfExportType[]
   ) {
     // ensure the async dependencies are loaded
     if (!this.context.reporting) {
       return handleUnavailable(this.res);
     }
 
-    const isPdfReport =
-      this.reporting.pdfExportType !== undefined ? [this.reporting.pdfExportType] : [];
     const checkLicense =
-      this.reporting.pdfExportType !== undefined
-        ? await this.reporting.getLicenseInfoForExportTypes(isPdfReport)
+      exportTypeId === 'printablePdfV2'
+        ? await this.reporting.getLicenseInfoForExportTypes(exportType)
         : await this.reporting.getLicenseInfo();
 
-    const licenseInfo = checkLicense;
-
-    const licenseResults = licenseInfo![exportTypeId];
+    const licenseResults = checkLicense![exportTypeId];
 
     if (!licenseResults) {
       return this.res.badRequest({ body: `Invalid export-type of ${exportTypeId}` });
@@ -162,7 +163,7 @@ export class RequestHandler {
 
     let report: Report | undefined;
     try {
-      report = await this.enqueueJob(exportTypeId, jobParams);
+      report = await this.enqueueJob(exportTypeId, jobParams, exportType);
 
       // return task manager's task information and the download URL
       const downloadBaseUrl = getDownloadBaseUrl(this.reporting);

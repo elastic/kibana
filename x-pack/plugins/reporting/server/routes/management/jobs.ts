@@ -49,9 +49,10 @@ export function registerJobInfoRoutes(reporting: ReportingCore) {
           return handleUnavailable(res);
         }
 
-        const pdfReports = reporting.pdfExportType ? [reporting.pdfExportType] : [];
-        const getLicense = reporting.pdfExportType
-          ? await reporting.getLicenseInfoForExportTypes(pdfReports)
+        const pdfReports = reporting.pdfExport !== undefined;
+        const getLicense = pdfReports
+          ? // @ts-ignore undefined check above
+            await reporting.getLicenseInfoForExportTypes(reporting.pdfExport)
           : await reporting.getLicenseInfo();
 
         const {
@@ -94,11 +95,10 @@ export function registerJobInfoRoutes(reporting: ReportingCore) {
           return handleUnavailable(res);
         }
 
-        const isPdfReports = reporting.pdfExportType ? [reporting.pdfExportType] : [];
-
-        const licenseInfo = reporting.pdfExportType
-          ? await reporting.getLicenseInfoForExportTypes(isPdfReports)
-          : await reporting.getLicenseInfo();
+        const licenseInfo =
+          reporting.pdfExport !== undefined
+            ? await reporting.getLicenseInfoForExportTypes(reporting.pdfExport)
+            : await reporting.getLicenseInfo();
 
         const {
           // @ts-ignore previous checks confirm value isn't undefined

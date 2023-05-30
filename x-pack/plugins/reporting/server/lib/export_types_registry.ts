@@ -93,7 +93,7 @@ export function getExportTypesRegistry(): ExportTypesRegistry {
     getTypePng,
     getTypePngV2,
     getTypePrintablePdf,
-    // getTypePrintablePdfV2,
+    // getTypePrintablePdfV2, want to use the class instance of this vs the export type registry with the generics ExportTypeDefinition
   ];
   getTypeFns.forEach((getType) => {
     registry.register(getType());

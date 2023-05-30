@@ -161,12 +161,15 @@ const makeExportTypeFeature = (exportType: ExportTypeDefinition) => {
 };
 
 export function checkLicense(
-  exportTypesRegistry: ExportTypesRegistry,
+  exportTypesRegistry: ExportTypesRegistry | PdfExportType,
   license: ILicense | undefined
 ) {
+  // @ts-ignore don't need to conform to PdfExportType
   const exportTypes = Array.from(exportTypesRegistry.getAll());
   const reportingFeatures = [
+    // @ts-ignore don't need to conform to PdfExportType
     ...exportTypes.map(makeExportTypeFeature),
+    // @ts-ignore don't need to conform to PdfExportType
     makeManagementFeature(exportTypes),
   ];
 
