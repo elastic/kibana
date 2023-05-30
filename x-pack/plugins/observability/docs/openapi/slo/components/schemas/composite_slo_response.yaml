@@ -1,4 +1,4 @@
-title: Composite SLO response
+title: Composite SLO with summary response
 type: object
 properties:
   id:
@@ -20,6 +20,8 @@ properties:
   sources:
     oneOf:
       - $ref: 'weighted_composite_sources.yaml'
+  summary:
+    $ref: 'summary.yaml'
   createdAt:
     description: The creation date
     type: string

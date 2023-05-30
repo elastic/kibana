@@ -59,9 +59,99 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/4xx_response'
-      servers:
-        - url: https://localhost:5601
+    get:
+      summary: Retrieves a paginated list of composite SLOs with summary
+      operationId: findCompositeSlo
+      description: |
+        You must have the `read` privileges for the **SLOs** feature in the **Observability** section of the Kibana feature privileges.
+      tags:
+        - composite slo
+      parameters:
+        - $ref: '#/components/parameters/kbn_xsrf'
+        - $ref: '#/components/parameters/space_id'
+        - name: page
+          in: query
+          description: The page number to return
+          schema:
+            type: integer
+            default: 1
+          example: 1
+        - name: perPage
+          in: query
+          description: The number of SLOs to return per page
+          schema:
+            type: integer
+            default: 25
+          example: 20
+        - name: sortBy
+          in: query
+          description: Sort by field
+          schema:
+            type: string
+            enum:
+              - creationTime
+            default: creationTime
+          example: creationTime
+        - name: sortDirection
+          in: query
+          description: Sort order
+          schema:
+            type: string
+            enum:
+              - asc
+              - desc
+            default: asc
+          example: asc
+      responses:
+        '200':
+          description: Successful request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/find_composite_slo_response'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/4xx_response'
+        '401':
+          description: Unauthorized response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/4xx_response'
   /s/{spaceId}/api/observability/composite_slos/{compositeSloId}:
+    get:
+      summary: Retrieves a composite SLO
+      operationId: getCompositeSlo
+      description: |
+        You must have the `read` privileges for the **SLOs** feature in the **Observability** section of the Kibana feature privileges.
+      tags:
+        - composite slo
+      parameters:
+        - $ref: '#/components/parameters/kbn_xsrf'
+        - $ref: '#/components/parameters/space_id'
+        - $ref: '#/components/parameters/composite_slo_id'
+      responses:
+        '200':
+          description: Successful request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/composite_slo_response'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/4xx_response'
+        '401':
+          description: Unauthorized response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/4xx_response'
     put:
       summary: Updates a composite SLO
       operationId: updateCompositeSlo
@@ -472,7 +562,7 @@ components:
         example: 9c235211-6834-11ea-a78c-6feb38a34414
   schemas:
     time_window_rolling:
-      title: Rolling time window definition
+      title: Rolling
       required:
         - duration
         - isRolling
@@ -490,7 +580,7 @@ components:
     budgeting_method:
       title: Budgeting method
       type: string
-      description: The budgeting method to use
+      description: The budgeting method to use when computing the rollup data.
       enum:
         - occurrences
         - timeslices
@@ -498,23 +588,31 @@ components:
     composite_method:
       title: Composite method
       type: string
-      description: The composite method to use.
+      description: The composite method to use for the composite SLO.
       enum:
         - weightedAverage
       example: weightedAverage
-    composite_objective:
-      title: Objective definition
+    objective:
+      title: Objective
       required:
         - target
-      description: Defines properties for objective
+      description: Defines properties for the SLO objective
       type: object
       properties:
         target:
           description: the target objective between 0 and 1 excluded
           type: number
-          example: 0.95
+          example: 0.99
+        timeslicesTarget:
+          description: the target objective for each slice when using a timeslices budgeting method
+          type: number
+          example: 0.995
+        timeslicesWindow:
+          description: the duration of each slice when using a timeslices budgeting method, as {duraton}{unit}
+          type: string
+          example: 5m
     weighted_composite_sources:
-      title: Weighted composite sources
+      title: Weighted sources
       description: An array of source SLO to use for the weighted average composite.
       type: array
       items:
@@ -536,8 +634,114 @@ components:
             description: The weight to apply to this SLO.
             type: number
             example: 3
+    error_budget:
+      title: Error budget
+      type: object
+      properties:
+        initial:
+          type: number
+          description: The initial error budget, as 1 - objective
+          example: 0.02
+        consumed:
+          type: number
+          description: The error budget consummed, as a percentage of the initial value.
+          example: 0.8
+        remaining:
+          type: number
+          description: The error budget remaining, as a percentage of the initial value.
+          example: 0.2
+        isEstimated:
+          type: boolean
+          description: Only for SLO defined with occurrences budgeting method and calendar aligned time window.
+          example: true
+    summary:
+      title: Summary
+      type: object
+      description: The SLO computed data
+      properties:
+        status:
+          type: string
+          enum:
+            - NO_DATA
+            - HEALTHY
+            - DEGRADING
+            - VIOLATED
+          example: HEALTHY
+        sliValue:
+          type: number
+          example: 0.9836
+        errorBudget:
+          $ref: '#/components/schemas/error_budget'
+    composite_slo_response:
+      title: Composite SLO with summary response
+      type: object
+      properties:
+        id:
+          description: The identifier of the composite SLO.
+          type: string
+          example: 8853df00-ae2e-11ed-90af-09bb6422b258
+        name:
+          description: The name of the composite SLO.
+          type: string
+          example: My Service SLO
+        timeWindow:
+          $ref: '#/components/schemas/time_window_rolling'
+        budgetingMethod:
+          $ref: '#/components/schemas/budgeting_method'
+        compositeMethod:
+          $ref: '#/components/schemas/composite_method'
+        objective:
+          $ref: '#/components/schemas/objective'
+        sources:
+          oneOf:
+            - $ref: '#/components/schemas/weighted_composite_sources'
+        summary:
+          $ref: '#/components/schemas/summary'
+        createdAt:
+          description: The creation date
+          type: string
+          example: '2023-01-12T10:03:19.000Z'
+        updatedAt:
+          description: The last update date
+          type: string
+          example: '2023-01-12T10:03:19.000Z'
+    find_composite_slo_response:
+      title: Find composite SLO response
+      description: A paginated response of composite SLOs matching the query.
+      type: object
+      properties:
+        page:
+          type: number
+          example: 1
+        perPage:
+          type: number
+          example: 25
+        total:
+          type: number
+          example: 34
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/composite_slo_response'
+    4xx_response:
+      title: Bad response
+      type: object
+      required:
+        - statusCode
+        - error
+        - message
+      properties:
+        statusCode:
+          type: number
+          example: 401
+        error:
+          type: string
+          example: Unauthorized
+        message:
+          type: string
+          example: "[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to authenticate user [elastics] for REST request [/_security/_authenticate]]: unable to authenticate user [elastics] for REST request [/_security/_authenticate]"
     create_composite_slo_request:
-      title: Create Composite SLO request
+      title: Create composite SLO request
       description: |
         The create Composite SLO API request body. The provided source SLOs must exists and their budgeting method and time window must match the one from the composite SLO.
       type: object
@@ -563,12 +767,12 @@ components:
         compositeMethod:
           $ref: '#/components/schemas/composite_method'
         objective:
-          $ref: '#/components/schemas/composite_objective'
+          $ref: '#/components/schemas/objective'
         sources:
           oneOf:
             - $ref: '#/components/schemas/weighted_composite_sources'
     create_composite_slo_response:
-      title: Create Composite SLO response
+      title: Create composite SLO response
       type: object
       required:
         - id
@@ -576,23 +780,6 @@ components:
         id:
           type: string
           example: 8853df00-ae2e-11ed-90af-09bb6422b258
-    4xx_response:
-      title: Bad response
-      type: object
-      required:
-        - statusCode
-        - error
-        - message
-      properties:
-        statusCode:
-          type: number
-          example: 401
-        error:
-          type: string
-          example: Unauthorized
-        message:
-          type: string
-          example: "[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to authenticate user [elastics] for REST request [/_security/_authenticate]]: unable to authenticate user [elastics] for REST request [/_security/_authenticate]"
     update_composite_slo_request:
       title: Update composite SLO request
       description: |
@@ -613,12 +800,12 @@ components:
         compositeMethod:
           $ref: '#/components/schemas/composite_method'
         objective:
-          $ref: '#/components/schemas/composite_objective'
+          $ref: '#/components/schemas/objective'
         sources:
           oneOf:
             - $ref: '#/components/schemas/weighted_composite_sources'
     base_composite_slo_response:
-      title: Composite SLO Response
+      title: Composite SLO response
       type: object
       properties:
         id:
@@ -636,7 +823,7 @@ components:
         compositeMethod:
           $ref: '#/components/schemas/composite_method'
         objective:
-          $ref: '#/components/schemas/composite_objective'
+          $ref: '#/components/schemas/objective'
         sources:
           oneOf:
             - $ref: '#/components/schemas/weighted_composite_sources'
@@ -649,7 +836,7 @@ components:
           type: string
           example: '2023-01-12T10:03:19.000Z'
     indicator_properties_custom_kql:
-      title: Custom KQL indicator type definition
+      title: Custom KQL
       required:
         - type
         - params
@@ -690,7 +877,7 @@ components:
           type: string
           example: sli.kql.custom
     indicator_properties_apm_availability:
-      title: APM availability indicator type definition
+      title: APM availability
       required:
         - type
         - params
@@ -737,7 +924,7 @@ components:
           type: string
           example: sli.apm.transactionDuration
     indicator_properties_apm_latency:
-      title: APM latency indicator type definition
+      title: APM latency
       required:
         - type
         - params
@@ -789,7 +976,7 @@ components:
           type: string
           example: sli.apm.transactionDuration
     indicator_properties_custom_metric:
-      title: Custom metric indicator type definition
+      title: Custom metric
       required:
         - type
         - params
@@ -898,7 +1085,7 @@ components:
           type: string
           example: sli.metric.custom
     time_window_calendar_aligned:
-      title: Calendar aligned time window definition
+      title: Calendar aligned
       required:
         - duration
         - isCalendar
@@ -913,28 +1100,9 @@ components:
           description: Indicates a calendar aligned time window
           type: boolean
           example: true
-    objective:
-      title: Objective definition
-      required:
-        - target
-      description: Defines properties for objective
-      type: object
-      properties:
-        target:
-          description: the target objective between 0 and 1 excluded
-          type: number
-          example: 0.99
-        timeslicesTarget:
-          description: the target objective for each slice when using a timeslices budgeting method
-          type: number
-          example: 0.995
-        timeslicesWindow:
-          description: the duration of each slice when using a timeslices budgeting method, as {duraton}{unit}
-          type: string
-          example: 5m
     settings:
-      title: Settings definition
-      description: Defines properties for settings.
+      title: Settings
+      description: Defines properties for SLO settings.
       type: object
       properties:
         syncDelay:
@@ -945,45 +1113,8 @@ components:
           description: Configure how often the transform runs, default 1m
           type: string
           example: 5m
-    error_budget:
-      title: Error budget definition
-      type: object
-      properties:
-        initial:
-          type: number
-          description: The initial error budget, as 1 - objective
-          example: 0.02
-        consumed:
-          type: number
-          description: The error budget consummed, as a percentage of the initial value.
-          example: 0.8
-        remaining:
-          type: number
-          description: The error budget remaining, as a percentage of the initial value.
-          example: 0.2
-        isEstimated:
-          type: boolean
-          description: Only for SLO defined with occurrences budgeting method and calendar aligned time window.
-          example: true
-    summary:
-      title: Summary definition
-      type: object
-      properties:
-        status:
-          type: string
-          enum:
-            - NO_DATA
-            - HEALTHY
-            - DEGRADING
-            - VIOLATED
-          example: HEALTHY
-        sliValue:
-          type: number
-          example: 0.9836
-        errorBudget:
-          $ref: '#/components/schemas/error_budget'
     slo_response:
-      title: SLO Response
+      title: SLO response
       type: object
       properties:
         id:
