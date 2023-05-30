@@ -148,14 +148,14 @@ const handleProcessInterruptions = async <T>(
 ): Promise<T> => {
   const eventNames = ['SIGINT', 'exit', 'uncaughtException', 'unhandledRejection'];
   const stopListeners = () => {
-    eventNames.forEach((eventName) => {
+    for (const eventName of eventNames) {
       process.off(eventName, cleanup);
-    });
+    }
   };
 
-  eventNames.forEach((eventName) => {
+  for (const eventName of eventNames) {
     process.on(eventName, cleanup);
-  });
+  }
 
   let runnerResponse: T | Promise<T>;
 
