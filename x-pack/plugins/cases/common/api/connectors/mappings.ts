@@ -12,6 +12,7 @@ const ActionTypeRt = rt.union([
   rt.literal('nothing'),
   rt.literal('overwrite'),
 ]);
+
 const CaseFieldRt = rt.union([
   rt.literal('title'),
   rt.literal('description'),
@@ -20,35 +21,31 @@ const CaseFieldRt = rt.union([
 ]);
 
 const ThirdPartyFieldRt = rt.union([rt.string, rt.literal('not_mapped')]);
+
 export type ActionType = rt.TypeOf<typeof ActionTypeRt>;
 export type CaseField = rt.TypeOf<typeof CaseFieldRt>;
 export type ThirdPartyField = rt.TypeOf<typeof ThirdPartyFieldRt>;
 
-const ConnectorMappingsAttributesRt = rt.strict({
+const ConnectorMappingRt = rt.strict({
   action_type: ActionTypeRt,
   source: CaseFieldRt,
   target: ThirdPartyFieldRt,
 });
 
-export const ConnectorMappingsRt = rt.strict({
-  mappings: rt.array(ConnectorMappingsAttributesRt),
+export const ConnectorMappingsRt = rt.array(ConnectorMappingRt);
+
+export const ConnectorMappingsAttributesRt = rt.strict({
+  mappings: ConnectorMappingsRt,
   owner: rt.string,
 });
 
 export type ConnectorMappingsAttributes = rt.TypeOf<typeof ConnectorMappingsAttributesRt>;
 export type ConnectorMappings = rt.TypeOf<typeof ConnectorMappingsRt>;
 
-const FieldTypeRt = rt.union([rt.literal('text'), rt.literal('textarea')]);
-
-const ConnectorFieldRt = rt.strict({
+export const ConnectorMappingResponseRt = rt.strict({
   id: rt.string,
-  name: rt.string,
-  required: rt.boolean,
-  type: FieldTypeRt,
+  version: rt.string,
+  mappings: ConnectorMappingsRt,
 });
 
-export type ConnectorField = rt.TypeOf<typeof ConnectorFieldRt>;
-
-const GetDefaultMappingsResponseRt = rt.array(ConnectorMappingsAttributesRt);
-
-export type GetDefaultMappingsResponse = rt.TypeOf<typeof GetDefaultMappingsResponseRt>;
+export type ConnectorMappingResponse = rt.TypeOf<typeof ConnectorMappingResponseRt>;
