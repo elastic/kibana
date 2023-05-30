@@ -5,13 +5,14 @@
  * 2.0.
  */
 
+import type { AlertsLocatorParams } from '@kbn/observability-plugin/common';
+import { LocatorPublic } from '@kbn/share-plugin/common';
 import { Observable } from 'rxjs';
 import { IBasePath, Logger } from '@kbn/core/server';
 import {
   PluginSetupContract as AlertingPluginSetupContract,
   type IRuleTypeAlerts,
 } from '@kbn/alerting-plugin/server';
-import { ObservabilityPluginSetup } from '@kbn/observability-plugin/server';
 import { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import { MlPluginSetup } from '@kbn/ml-plugin/server';
 import { legacyExperimentalFieldMap } from '@kbn/alerts-as-data-utils';
@@ -87,8 +88,8 @@ export interface RegisterRuleDependencies {
   config$: Observable<APMConfig>;
   logger: Logger;
   ml?: MlPluginSetup;
-  observability: ObservabilityPluginSetup;
   ruleDataClient: IRuleDataClient;
+  alertsLocator?: LocatorPublic<AlertsLocatorParams>;
 }
 
 export function registerApmRuleTypes(dependencies: RegisterRuleDependencies) {

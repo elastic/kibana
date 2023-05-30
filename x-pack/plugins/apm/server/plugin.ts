@@ -18,6 +18,7 @@ import { isEmpty, mapValues } from 'lodash';
 import { Dataset } from '@kbn/rule-registry-plugin/server';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import { mappingFromFieldMap } from '@kbn/alerting-plugin/common';
+import { alertsLocatorID } from '@kbn/observability-plugin/common';
 import { APMConfig, APM_SERVER_FEATURE_ID } from '.';
 import { APM_FEATURE, registerFeaturesUsage } from './feature';
 import {
@@ -185,8 +186,8 @@ export class APMPlugin
         config$,
         logger: this.logger!.get('rule'),
         ml: plugins.ml,
-        observability: plugins.observability,
         ruleDataClient,
+        alertsLocator: plugins.share.url.locators.get(alertsLocatorID),
       });
     }
 

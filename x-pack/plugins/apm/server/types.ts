@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { SharePluginSetup } from '@kbn/share-plugin/server';
 import { Observable } from 'rxjs';
 import { KibanaRequest } from '@kbn/core/server';
 import {
@@ -76,6 +77,7 @@ export interface APMPluginSetupDependencies {
   ruleRegistry: RuleRegistryPluginSetupContract;
   infra: InfraPluginSetup;
   dataViews: {};
+  share: SharePluginSetup;
 
   // optional dependencies
   actions?: ActionsPlugin['setup'];
