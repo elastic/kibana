@@ -15,8 +15,8 @@ describe('ALL - Edit saved query', () => {
 
   before(() => {
     loadSavedQuery().then((data) => {
-      savedQueryId = data.id;
-      savedQueryName = data.attributes.id;
+      savedQueryId = data.saved_object_id;
+      savedQueryName = data.id;
     });
   });
 
@@ -31,7 +31,7 @@ describe('ALL - Edit saved query', () => {
 
   it('by changing ecs mappings and platforms', () => {
     cy.react('CustomItemAction', {
-      props: { index: 1, item: { attributes: { id: savedQueryName } } },
+      props: { index: 1, item: { id: savedQueryName } },
     }).click();
     cy.contains('Custom key/value pairs.').should('exist');
     cy.contains('Hours of uptime').should('exist');
@@ -72,7 +72,7 @@ describe('ALL - Edit saved query', () => {
     cy.wait(5000);
 
     cy.react('CustomItemAction', {
-      props: { index: 1, item: { attributes: { id: savedQueryName } } },
+      props: { index: 1, item: { id: savedQueryName } },
     }).click();
     cy.contains('Custom key/value pairs').should('not.exist');
     cy.contains('Hours of uptime').should('not.exist');
