@@ -7,7 +7,7 @@
  */
 
 import { discoverGridContextComplexMock, discoverGridContextMock } from '../__mocks__/grid_context';
-import { discoverServiceMock } from '../../../../../packages/kbn-unified-discover/src/__mocks__/services';
+import { discoverServiceMock } from '@kbn/unified-discover/src/__mocks__/services';
 import { convertValueToString, convertNameToString } from './convert_value_to_string';
 
 describe('convertValueToString', () => {

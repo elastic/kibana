@@ -9,13 +9,13 @@
 import * as savedObjectsPlugin from '@kbn/saved-objects-plugin/public';
 jest.mock('@kbn/saved-objects-plugin/public');
 import type { DataView } from '@kbn/data-views-plugin/common';
-import { dataViewMock } from '../../../../../../../../packages/kbn-unified-discover/src/__mocks__/data_view';
-import { dataViewWithTimefieldMock } from '../../../../../../../../packages/kbn-unified-discover/src/__mocks__/data_view_with_timefield';
+import { dataViewMock } from '@kbn/unified-discover/src/__mocks__/data_view';
+import { dataViewWithTimefieldMock } from '@kbn/unified-discover/src/__mocks__/data_view_with_timefield';
 import { onSaveSearch } from './on_save_search';
-import { savedSearchMock } from '../../../../../../../../packages/kbn-unified-discover/src/__mocks__/saved_search';
+import { savedSearchMock } from '@kbn/unified-discover/src/__mocks__/saved_search';
 import { getDiscoverStateContainer } from '../../services/discover_state';
 import { ReactElement } from 'react';
-import { discoverServiceMock } from '../../../../../../../../packages/kbn-unified-discover/src/__mocks__/services';
+import { discoverServiceMock } from '@kbn/unified-discover/src/__mocks__/services';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { createBrowserHistory } from 'history';
 

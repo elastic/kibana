@@ -37,7 +37,7 @@ import {
   getShouldShowFieldHandler,
   isNestedFieldParent,
 } from '@kbn/unified-doc-viewer/public';
-import { usePager, useUnifiedDocViewerServices } from '../../../../../../packages/kbn-unified-doc-viewer/public/hooks';
+import { usePager, useUnifiedDocViewerServices } from '@kbn/unified-doc-viewer/public/hooks';
 import { FieldName } from '../field_name';
 import { TableFieldValue } from './table_cell_value';
 import { TableActions } from './table_cell_actions';

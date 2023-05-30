@@ -8,9 +8,9 @@
 
 import { renderHook } from '@testing-library/react-hooks';
 import { useColumns } from './use_data_grid_columns';
-import { dataViewMock } from '../../../../../packages/kbn-unified-discover/src/__mocks__/data_view';
-import { configMock } from '../../../../../packages/kbn-unified-discover/src/__mocks__/config';
-import { dataViewsMock } from '../../../../../packages/kbn-unified-discover/src/__mocks__/data_views';
+import { dataViewMock } from '@kbn/unified-discover/src/__mocks__/data_view';
+import { configMock } from '@kbn/unified-discover/src/__mocks__/config';
+import { dataViewsMock } from '@kbn/unified-discover/src/__mocks__/data_views';
 import { Capabilities } from '@kbn/core/types';
 
 describe('useColumns', () => {

@@ -9,9 +9,9 @@
 import React from 'react';
 import { EuiIcon, EuiLoadingSpinner } from '@elastic/eui';
 import { findTestSubject, mountWithIntl } from '@kbn/test-jest-helpers';
-import { dataViewMock } from '../../../../../../packages/kbn-unified-discover/src/__mocks__/data_view';
+import { dataViewMock } from '@kbn/unified-discover/src/__mocks__/data_view';
 import { DocTableWrapper, DocTableWrapperProps } from './doc_table_wrapper';
-import { discoverServiceMock } from '../../../../../../packages/kbn-unified-discover/src/__mocks__/services';
+import { discoverServiceMock } from '@kbn/unified-discover/src/__mocks__/services';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { buildDataTableRecord } from '@kbn/unified-discover';
 import { DocViewer } from '@kbn/unified-doc-viewer-plugin/public';

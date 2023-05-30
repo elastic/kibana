@@ -11,10 +11,10 @@ import { memoize } from 'lodash';
 import { CoreStart, PluginInitializerContext } from '@kbn/core/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { DiscoverServices } from '@kbn/unified-discover';
-import { getHistory } from './kibana_services';
-import { DiscoverStartPlugins } from './plugin';
 import { DiscoverContextAppLocator } from '@kbn/unified-discover/src/context/locator';
 import { DiscoverSingleDocLocator } from '@kbn/unified-discover/src/doc/locator';
+import { getHistory } from './kibana_services';
+import { DiscoverStartPlugins } from './plugin';
 import { DiscoverAppLocator } from '../common';
 
 export const buildServices = memoize(function (

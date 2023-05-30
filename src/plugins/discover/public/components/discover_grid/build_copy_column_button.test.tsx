@@ -9,7 +9,7 @@
 import React from 'react';
 import { EuiButton } from '@elastic/eui';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { discoverServiceMock } from '../../../../../../packages/kbn-unified-discover/src/__mocks__/services';
+import { discoverServiceMock } from '@kbn/unified-discover/src/__mocks__/services';
 import { discoverGridContextMock } from '../../__mocks__/grid_context';
 import { buildCopyColumnNameButton, buildCopyColumnValuesButton } from './build_copy_column_button';
 

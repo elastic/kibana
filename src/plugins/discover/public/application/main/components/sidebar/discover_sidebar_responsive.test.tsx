@@ -30,9 +30,9 @@ import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock'
 import { DiscoverAppStateProvider } from '../../services/discover_app_state_container';
 import * as ExistingFieldsServiceApi from '@kbn/unified-field-list-plugin/public/services/field_existing/load_field_existing';
 import { resetExistingFieldsCache } from '@kbn/unified-field-list-plugin/public/hooks/use_existing_fields';
-import { createDiscoverServicesMock } from '../../../../../../../../packages/kbn-unified-discover/src/__mocks__/services';
+import { createDiscoverServicesMock } from '@kbn/unified-discover/src/__mocks__/services';
 import type { AggregateQuery, Query } from '@kbn/es-query';
-import {buildDataTableRecord, VIEW_MODE} from '@kbn/unified-discover';
+import { buildDataTableRecord, VIEW_MODE } from '@kbn/unified-discover';
 import type { DataTableRecord, DiscoverServices } from '@kbn/unified-discover';
 
 jest.mock('@kbn/unified-field-list-plugin/public/services/field_stats', () => ({

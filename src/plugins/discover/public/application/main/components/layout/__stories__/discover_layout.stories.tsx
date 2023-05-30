@@ -9,10 +9,10 @@
 import React, { useState } from 'react';
 import { storiesOf } from '@storybook/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import { getDataViewMock } from '@kbn/unified-discover/src/__mocks__/__storybook_mocks__/get_data_view_mock';
+import { withDiscoverServices } from '@kbn/unified-discover/src/__mocks__/__storybook_mocks__/with_discover_services';
 import { DiscoverMainProvider } from '../../../services/discover_state_provider';
 import { DiscoverAppState } from '../../../services/discover_app_state_container';
-import { getDataViewMock } from '../../../../../../../../../packages/kbn-unified-discover/src/__mocks__/__storybook_mocks__/get_data_view_mock';
-import { withDiscoverServices } from '../../../../../../../../../packages/kbn-unified-discover/src/__mocks__/__storybook_mocks__/with_discover_services';
 import { getDocumentsLayoutProps, getPlainRecordLayoutProps } from './get_layout_props';
 import { DiscoverLayout, DiscoverLayoutProps } from '../discover_layout';
 import { setHeaderActionMenuMounter } from '../../../../../kibana_services';

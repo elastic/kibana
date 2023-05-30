@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 import { buildStateSubscribe } from './build_state_subscribe';
-import { savedSearchMock } from '../../../../../../../../packages/kbn-unified-discover/src/__mocks__/saved_search';
+import { savedSearchMock } from '@kbn/unified-discover/src/__mocks__/saved_search';
 import { FetchStatus } from '../../../types';
-import { dataViewComplexMock } from '../../../../../../../../packages/kbn-unified-discover/src/__mocks__/data_view_complex';
+import { dataViewComplexMock } from '@kbn/unified-discover/src/__mocks__/data_view_complex';
 import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
-import { discoverServiceMock } from '../../../../../../../../packages/kbn-unified-discover/src/__mocks__/services';
+import { discoverServiceMock } from '@kbn/unified-discover/src/__mocks__/services';
 
 describe('buildStateSubscribe', () => {
   const savedSearch = savedSearchMock;

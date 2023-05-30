@@ -9,12 +9,12 @@ import { fetchDocuments } from './fetch_documents';
 import { throwError as throwErrorRx, of } from 'rxjs';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { buildDataTableRecord } from '@kbn/unified-discover';
-import { savedSearchMock } from '../../../../../../../packages/kbn-unified-discover/src/__mocks__/saved_search';
-import { discoverServiceMock } from '../../../../../../../packages/kbn-unified-discover/src/__mocks__/services';
+import { savedSearchMock } from '@kbn/unified-discover/src/__mocks__/saved_search';
+import { discoverServiceMock } from '@kbn/unified-discover/src/__mocks__/services';
 import { IKibanaSearchResponse } from '@kbn/data-plugin/public';
 import { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import { FetchDeps } from './fetch_all';
-import { dataViewMock } from '../../../../../../../packages/kbn-unified-discover/src/__mocks__/data_view';
+import { dataViewMock } from '@kbn/unified-discover/src/__mocks__/data_view';
 import { EsHitRecord } from '@kbn/unified-discover';
 
 const getDeps = () =>

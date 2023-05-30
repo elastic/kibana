@@ -13,6 +13,8 @@ import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { action } from '@storybook/addon-actions';
 import { createHashHistory } from 'history';
 import { buildDataTableRecordList } from '@kbn/unified-discover';
+import { esHits } from '@kbn/unified-discover/src/__mocks__/es_hits';
+import { services } from '@kbn/unified-discover/src/__mocks__/__storybook_mocks__/with_discover_services';
 import { FetchStatus } from '../../../../types';
 import {
   AvailableFields$,
@@ -21,14 +23,12 @@ import {
   DataTotalHits$,
   RecordRawType,
 } from '../../../services/discover_data_state_container';
-import { esHits } from '../../../../../../../../../packages/kbn-unified-discover/src/__mocks__/es_hits';
 import { SavedSearch } from '../../../../..';
 import { DiscoverLayoutProps } from '../discover_layout';
 import {
   DiscoverStateContainer,
   getDiscoverStateContainer,
 } from '../../../services/discover_state';
-import { services } from '../../../../../../../../../packages/kbn-unified-discover/src/__mocks__/__storybook_mocks__/with_discover_services';
 
 const documentObservables = {
   main$: new BehaviorSubject({

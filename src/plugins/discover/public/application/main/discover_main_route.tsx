@@ -16,9 +16,9 @@ import {
 } from '@kbn/shared-ux-page-analytics-no-data';
 import { getSavedSearchFullPathUrl } from '@kbn/saved-search-plugin/public';
 import useObservable from 'react-use/lib/useObservable';
+import { MainHistoryLocationState } from '@kbn/unified-discover/src/locator';
 import { useUrl } from './hooks/use_url';
 import { useSingleton } from './hooks/use_singleton';
-import { MainHistoryLocationState } from '@kbn/unified-discover/src/locator';
 import { DiscoverStateContainer, getDiscoverStateContainer } from './services/discover_state';
 import { DiscoverMainApp } from './discover_main_app';
 import { getRootBreadcrumbs, getSavedSearchBreadcrumbs } from '../../utils/breadcrumbs';

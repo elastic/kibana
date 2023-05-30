@@ -7,8 +7,8 @@
  */
 
 import { loadDataView } from './resolve_data_view';
-import { dataViewMock } from '../../../../../../../packages/kbn-unified-discover/src/__mocks__/data_view';
-import { discoverServiceMock as services } from '../../../../../../../packages/kbn-unified-discover/src/__mocks__/services';
+import { dataViewMock } from '@kbn/unified-discover/src/__mocks__/data_view';
+import { discoverServiceMock as services } from '@kbn/unified-discover/src/__mocks__/services';
 
 describe('Resolve data view tests', () => {
   test('returns valid data for an existing data view', async () => {

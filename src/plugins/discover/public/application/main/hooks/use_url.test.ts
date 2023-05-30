@@ -11,7 +11,7 @@ import { useUrl } from './use_url';
 import {
   savedSearchMockWithTimeField,
   savedSearchMockWithTimeFieldNew,
-} from '../../../../../../../packages/kbn-unified-discover/src/__mocks__/saved_search';
+} from '@kbn/unified-discover/src/__mocks__/saved_search';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
 
 function prepareTest(savedSearch: SavedSearch, path: string) {

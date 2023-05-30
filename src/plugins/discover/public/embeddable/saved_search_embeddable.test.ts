@@ -10,8 +10,8 @@ import { ReactElement } from 'react';
 import { FilterManager } from '@kbn/data-plugin/public';
 import { createFilterManagerMock } from '@kbn/data-plugin/public/query/filter_manager/filter_manager.mock';
 import { getSavedSearchUrl, SearchInput } from '..';
-import { dataViewMock } from '../../../../../packages/kbn-unified-discover/src/__mocks__/data_view';
-import { discoverServiceMock } from '../../../../../packages/kbn-unified-discover/src/__mocks__/services';
+import { dataViewMock } from '@kbn/unified-discover/src/__mocks__/data_view';
+import { discoverServiceMock } from '@kbn/unified-discover/src/__mocks__/services';
 import { SavedSearchEmbeddable, SearchEmbeddableConfig } from './saved_search_embeddable';
 import { render } from 'react-dom';
 import { createSearchSourceMock } from '@kbn/data-plugin/public/mocks';
@@ -21,7 +21,7 @@ import { SHOW_FIELD_STATISTICS } from '../../common';
 import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import { SavedSearchEmbeddableComponent } from './saved_search_embeddable_component';
 import { DiscoverServices } from '@kbn/unified-discover/src';
-import {VIEW_MODE} from "@kbn/unified-discover";
+import { VIEW_MODE } from '@kbn/unified-discover';
 
 let discoverComponent: ReactWrapper;
 

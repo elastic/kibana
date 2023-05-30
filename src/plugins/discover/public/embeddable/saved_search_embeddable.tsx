@@ -35,7 +35,7 @@ import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { METRIC_TYPE } from '@kbn/analytics';
-import {buildDataTableRecord, VIEW_MODE} from '@kbn/unified-discover';
+import { buildDataTableRecord, VIEW_MODE } from '@kbn/unified-discover';
 import type { DataTableRecord, EsHitRecord } from '@kbn/unified-discover';
 import { DiscoverServices } from '@kbn/unified-discover/src';
 import { getSortForEmbeddable, SortPair } from '../utils/sorting';

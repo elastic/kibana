@@ -15,7 +15,7 @@ import { getShouldShowFieldHandler } from '@kbn/unified-discover';
 import { formatFieldValue, DataTableRecord } from '@kbn/unified-discover';
 import { getIgnoredReason, isNestedFieldParent } from '@kbn/unified-doc-viewer/public';
 import type { DocViewFilterFn, FieldRecordLegacy } from '@kbn/unified-doc-viewer/public/types';
-import { useUnifiedDocViewerServices } from '../../../../../../packages/kbn-unified-doc-viewer/public/hooks';
+import { useUnifiedDocViewerServices } from '@kbn/unified-doc-viewer/public/hooks';
 import { ACTIONS_COLUMN, MAIN_COLUMNS } from './table_columns';
 
 export interface DocViewRenderProps {

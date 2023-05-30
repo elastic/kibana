@@ -7,10 +7,10 @@
  */
 
 import { changeDataView } from './change_data_view';
-import { savedSearchMock } from '../../../../../../../../packages/kbn-unified-discover/src/__mocks__/saved_search';
-import { discoverServiceMock } from '../../../../../../../../packages/kbn-unified-discover/src/__mocks__/services';
+import { savedSearchMock } from '@kbn/unified-discover/src/__mocks__/saved_search';
+import { discoverServiceMock } from '@kbn/unified-discover/src/__mocks__/services';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import { dataViewComplexMock } from '../../../../../../../../packages/kbn-unified-discover/src/__mocks__/data_view_complex';
+import { dataViewComplexMock } from '@kbn/unified-discover/src/__mocks__/data_view_complex';
 import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
 
 const setupTestParams = (dataView: DataView | undefined) => {

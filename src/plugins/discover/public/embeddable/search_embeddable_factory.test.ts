@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { discoverServiceMock } from '../../../../../packages/kbn-unified-discover/src/__mocks__/services';
+import { discoverServiceMock } from '@kbn/unified-discover/src/__mocks__/services';
 import { SearchEmbeddableFactory, type StartServices } from './search_embeddable_factory';
 import { getSavedSearch } from '@kbn/saved-search-plugin/public';
 import { createSearchSourceMock } from '@kbn/data-plugin/public/mocks';
-import { dataViewMock } from '../../../../../packages/kbn-unified-discover/src/__mocks__/data_view';
+import { dataViewMock } from '@kbn/unified-discover/src/__mocks__/data_view';
 import { ErrorEmbeddable } from '@kbn/embeddable-plugin/public';
 
 jest.mock('@kbn/saved-search-plugin/public', () => {
