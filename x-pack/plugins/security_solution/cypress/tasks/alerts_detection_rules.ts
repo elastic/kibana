@@ -102,13 +102,12 @@ export const duplicateFirstRule = () => {
  * flake.
  */
 export const duplicateRuleFromMenu = () => {
-  const click = ($el: Cypress.ObjectLike) => cy.wrap($el).click();
   cy.get(LOADING_INDICATOR).should('not.exist');
-  cy.get(ALL_ACTIONS).pipe(click);
+  cy.get(ALL_ACTIONS).click({ force: true });
   cy.get(DUPLICATE_RULE_MENU_PANEL_BTN).should('be.visible');
 
   // Because of a fade effect and fast clicking this can produce more than one click
-  cy.get(DUPLICATE_RULE_MENU_PANEL_BTN).pipe(click);
+  cy.get(DUPLICATE_RULE_MENU_PANEL_BTN).click({ force: true });
   cy.get(CONFIRM_DUPLICATE_RULE).click();
 };
 
