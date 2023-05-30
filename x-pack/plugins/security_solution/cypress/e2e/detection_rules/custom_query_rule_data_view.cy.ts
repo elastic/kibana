@@ -124,7 +124,7 @@ describe('Custom query rules', () => {
         });
         getDetails(TAGS_DETAILS).should('have.text', expectedTags);
       });
-      cy.get(INVESTIGATION_NOTES_TOGGLE).click({ force: true });
+      cy.get(INVESTIGATION_NOTES_TOGGLE).click();
       cy.get(ABOUT_INVESTIGATION_NOTES).should('have.text', INVESTIGATION_NOTES_MARKDOWN);
       cy.get(DEFINITION_DETAILS).within(() => {
         getDetails(DATA_VIEW_DETAILS).should('have.text', rule.data_view_id);
@@ -153,17 +153,17 @@ describe('Custom query rules', () => {
     it('Creates and edits a new rule with a data view', function () {
       visit(RULE_CREATION);
       fillDefineCustomRuleAndContinue(rule);
-      cy.get(RULE_NAME_INPUT).clear({ force: true }).type(rule.name, { force: true });
-      cy.get(RULE_DESCRIPTION_INPUT).clear({ force: true }).type(rule.description, { force: true });
+      cy.get(RULE_NAME_INPUT).clear().type(rule.name);
+      cy.get(RULE_DESCRIPTION_INPUT).clear().type(rule.description);
 
-      cy.get(ABOUT_CONTINUE_BTN).should('exist').click({ force: true });
+      cy.get(ABOUT_CONTINUE_BTN).should('exist').click();
 
       fillScheduleRuleAndContinue(rule);
       createRuleWithoutEnabling();
 
       goToRuleDetails();
 
-      cy.get(EDIT_RULE_SETTINGS_LINK).click({ force: true });
+      cy.get(EDIT_RULE_SETTINGS_LINK).click();
 
       cy.get(RULE_NAME_HEADER).should('contain', 'Edit rule settings');
     });
