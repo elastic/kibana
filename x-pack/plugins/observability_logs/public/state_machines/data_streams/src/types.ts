@@ -23,7 +23,7 @@ interface WithSearch {
 }
 
 interface WithDataStreams {
-  dataStreams: DataStream[] | null;
+  dataStreams: DataStream[];
 }
 
 interface WithNullishDataStreams {
@@ -38,10 +38,6 @@ interface WithNullishError {
   error: null;
 }
 
-interface WithTotal {
-  total: number;
-}
-
 export type DefaultDataStreamsContext = WithCache &
   WithNullishDataStreams &
   WithSearch &
@@ -49,17 +45,9 @@ export type DefaultDataStreamsContext = WithCache &
 
 type LoadingDataStreamsContext = DefaultDataStreamsContext;
 
-type LoadedDataStreamsContext = WithCache &
-  WithDataStreams &
-  WithTotal &
-  WithSearch &
-  WithNullishError;
+type LoadedDataStreamsContext = WithCache & WithDataStreams & WithSearch & WithNullishError;
 
-type LoadingFailedDataStreamsContext = WithCache &
-  WithDataStreams &
-  Partial<WithTotal> &
-  WithSearch &
-  WithError;
+type LoadingFailedDataStreamsContext = WithCache & WithNullishDataStreams & WithSearch & WithError;
 
 export type DataStreamsTypestate =
   | {

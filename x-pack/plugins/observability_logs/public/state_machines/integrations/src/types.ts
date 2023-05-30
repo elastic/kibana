@@ -25,8 +25,8 @@ interface WithSearch {
 }
 
 interface WithIntegrations {
-  integrationsSource: Integration[] | null;
-  integrations: Integration[] | null;
+  integrationsSource: Integration[];
+  integrations: Integration[];
 }
 
 interface WithNullishIntegrations {
@@ -60,7 +60,7 @@ type LoadedIntegrationsContext = WithCache &
   WithNullishError;
 
 type LoadingFailedIntegrationsContext = WithCache &
-  WithIntegrations &
+  WithNullishIntegrations &
   Partial<WithTotal> &
   WithSearch &
   WithError;
@@ -75,12 +75,12 @@ export type IntegrationTypestate =
       context: LoadingIntegrationsContext;
     }
   | {
-      value: 'loaded';
-      context: LoadedIntegrationsContext;
-    }
-  | {
       value: 'loadingFailed';
       context: LoadingFailedIntegrationsContext;
+    }
+  | {
+      value: 'loaded';
+      context: LoadedIntegrationsContext;
     }
   | {
       value: { loaded: 'idle' };

@@ -18,7 +18,7 @@ export class ObservabilityLogsPlugin implements ObservabilityLogsClientPluginCla
     this.dataStreamsService = new DataStreamsService();
   }
 
-  public setup() {}
+  public setup() { }
 
   public start(core: CoreStart, plugins: ObservabilityLogsStartDeps) {
     const { discover } = plugins;
@@ -31,12 +31,12 @@ export class ObservabilityLogsPlugin implements ObservabilityLogsClientPluginCla
       dataStreamsService,
     };
 
-    /**
-     * Replace the DataViewPicker with a custom DataStreamSelector to access only integrations streams
-     */
     discover.customize(
       OBSERVABILITY_LOGS_PROFILE_ID,
       async ({ customizations, stateContainer }) => {
+        /**
+         * Replace the DataViewPicker with a custom `DataStreamSelector` to pick integrations streams
+         */
         customizations.set({
           id: 'search_bar',
           CustomDataViewPicker: createLazyCustomDataStreamSelector({
