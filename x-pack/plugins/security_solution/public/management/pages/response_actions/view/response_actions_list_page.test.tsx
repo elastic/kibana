@@ -137,7 +137,7 @@ describe('Response actions history page', () => {
     ({ history } = mockedContext);
     render = () => (renderResult = mockedContext.render(<ResponseActionsListPage />));
     reactTestingLibrary.act(() => {
-      history.push(`${MANAGEMENT_PATH}/response_actions`);
+      history.push(`${MANAGEMENT_PATH}/response_actions_history`);
     });
 
     mockUseGetEndpointActionList = {
@@ -168,7 +168,7 @@ describe('Response actions history page', () => {
   describe('Hide/Show header', () => {
     it('should show header when data is in', () => {
       reactTestingLibrary.act(() => {
-        history.push('/administration/response_actions_history?page=3&pageSize=20');
+        history.push(`${MANAGEMENT_PATH}/response_actions_history?page=3&pageSize=20`);
       });
       render();
       const { getByTestId } = renderResult;
@@ -177,7 +177,7 @@ describe('Response actions history page', () => {
 
     it('should not show header when there is no actions index', () => {
       reactTestingLibrary.act(() => {
-        history.push('/administration/response_actions_history?page=3&pageSize=20');
+        history.push(`${MANAGEMENT_PATH}/response_actions_history?page=3&pageSize=20`);
       });
       mockUseGetEndpointActionList = {
         ...baseMockedActionList,
@@ -194,7 +194,7 @@ describe('Response actions history page', () => {
   describe('Read from URL params', () => {
     it('should read and set paging values from URL params', () => {
       reactTestingLibrary.act(() => {
-        history.push('/administration/response_actions_history?page=3&pageSize=20');
+        history.push(`${MANAGEMENT_PATH}/response_actions_history?page=3&pageSize=20`);
       });
       render();
       const { getByTestId } = renderResult;
@@ -207,7 +207,7 @@ describe('Response actions history page', () => {
     it('should read and set command filter values from URL params', () => {
       const filterPrefix = 'actions-filter';
       reactTestingLibrary.act(() => {
-        history.push('/administration/response_actions_history?commands=release,processes');
+        history.push(`${MANAGEMENT_PATH}/response_actions_history?commands=release,processes`);
       });
 
       render();
@@ -247,7 +247,7 @@ describe('Response actions history page', () => {
       const filterPrefix = 'hosts-filter';
       reactTestingLibrary.act(() => {
         history.push(
-          '/administration/response_actions_history?hosts=agent-id-1,agent-id-2,agent-id-4,agent-id-5'
+          `${MANAGEMENT_PATH}/response_actions_history?hosts=agent-id-1,agent-id-2,agent-id-4,agent-id-5`
         );
       });
 
@@ -277,7 +277,7 @@ describe('Response actions history page', () => {
     it('should read and set status filter values from URL params', () => {
       const filterPrefix = 'statuses-filter';
       reactTestingLibrary.act(() => {
-        history.push('/administration/response_actions_history?statuses=pending,failed');
+        history.push(`${MANAGEMENT_PATH}/response_actions_history?statuses=pending,failed`);
       });
 
       render();
@@ -303,7 +303,7 @@ describe('Response actions history page', () => {
     it('should set selected users search input strings to URL params ', () => {
       const filterPrefix = 'users-filter';
       reactTestingLibrary.act(() => {
-        history.push('/administration/response_actions_history?users=userX,userY');
+        history.push(`${MANAGEMENT_PATH}/response_actions_history?users=userX,userY`);
       });
 
       render();
@@ -315,7 +315,9 @@ describe('Response actions history page', () => {
 
     it('should read and set relative date ranges filter values from URL params', () => {
       reactTestingLibrary.act(() => {
-        history.push('/administration/response_actions_history?startDate=now-23m&endDate=now-1m');
+        history.push(
+          `${MANAGEMENT_PATH}/response_actions_history?startDate=now-23m&endDate=now-1m`
+        );
       });
 
       render();
@@ -335,7 +337,7 @@ describe('Response actions history page', () => {
       const endDate = '2022-09-12T11:30:33.000Z';
       reactTestingLibrary.act(() => {
         history.push(
-          `/administration/response_actions_history?startDate=${startDate}&endDate=${endDate}`
+          `${MANAGEMENT_PATH}/response_actions_history?startDate=${startDate}&endDate=${endDate}`
         );
       });
 
@@ -357,7 +359,7 @@ describe('Response actions history page', () => {
       reactTestingLibrary.act(() => {
         // load page 1 but with expanded actions.
         history.push(
-          `/administration/response_actions_history?withOutputs=${actionIdsWithDetails.join(
+          `${MANAGEMENT_PATH}/response_actions_history?withOutputs=${actionIdsWithDetails.join(
             ','
           )}&page=1&pageSize=10`
         );

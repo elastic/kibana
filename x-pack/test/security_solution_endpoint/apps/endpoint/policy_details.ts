@@ -24,6 +24,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const policyTestResources = getService('policyTestResources');
   const endpointTestResources = getService('endpointTestResources');
+  const retry = getService('retry');
 
   describe('When on the Endpoint Policy Details Page', function () {
     let indexedData: IndexedHostsAndAlertsResponse;
@@ -47,8 +48,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/154182
-    describe.skip('with a valid policy id', () => {
+    describe('with a valid policy id', () => {
       let policyInfo: PolicyTestResourceInfo;
 
       before(async () => {
@@ -63,6 +63,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('should display policy view', async () => {
+        this.timeout(150_000);
+        await retry.waitForWithTimeout('policy title is not empty', 120_000, async () => {
+          return (await testSubjects.getVisibleText('header-page-title')) !== '';
+        });
         expect(await testSubjects.getVisibleText('header-page-title')).to.equal(
           policyInfo.packagePolicy.name
         );
