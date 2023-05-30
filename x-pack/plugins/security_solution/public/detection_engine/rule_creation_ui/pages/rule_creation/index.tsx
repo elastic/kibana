@@ -668,10 +668,7 @@ const CreateRulePageComponent: React.FC = () => {
                               display: activeStep === RuleStep.ruleActions ? 'none' : undefined,
                             }}
                           >
-                            <StepRuleActionsReadOnly
-                              addPadding
-                              defaultValues={actionsStepData}
-                            />
+                            <StepRuleActionsReadOnly addPadding defaultValues={actionsStepData} />
                           </div>
                         </EuiAccordion>
                       </MyEuiPanel>
