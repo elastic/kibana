@@ -153,15 +153,6 @@ export function registerSetupRoute({
           }),
         });
 
-        if (body.data.available) {
-          return response.ok({
-            body: {
-              has_data: true,
-              has_setup: true,
-            },
-          });
-        }
-
         const verifyFunctions = [
           async () => {
             body.packages.installed = await isApmPackageInstalled(setupOptions);
@@ -181,7 +172,7 @@ export function registerSetupRoute({
         return response.ok({
           body: {
             has_setup: everySetupResourceResponse(body),
-            has_data: false,
+            has_data: body.data.available,
           },
         });
       } catch (error) {
