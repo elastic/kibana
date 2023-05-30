@@ -40,7 +40,13 @@ export {
   enableInfrastructureHostsView,
   enableAgentExplorerView,
 } from '../common/ui_settings_keys';
-export { uptimeOverviewLocatorID } from '../common';
+export {
+  alertsLocatorID,
+  ruleDetailsLocatorID,
+  rulesLocatorID,
+  sloDetailsLocatorID,
+  uptimeOverviewLocatorID,
+} from '../common';
 
 export type { UXMetrics } from './components/core_web_vitals/core_vitals';
 export { getCoreVitalsComponent } from './components/core_web_vitals/get_core_web_vitals_lazy';

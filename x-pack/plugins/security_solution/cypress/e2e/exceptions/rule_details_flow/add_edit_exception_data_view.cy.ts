@@ -79,6 +79,7 @@ describe('Add exception using data views from rule details', () => {
         rule_id: 'rule_testing',
       })
     );
+    login();
     visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
     goToRuleDetails();
     waitForAlertsToPopulate();

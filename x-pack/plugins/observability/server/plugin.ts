@@ -22,6 +22,7 @@ import {
   createUICapabilities as createCasesUICapabilities,
   getApiTags as getCasesApiTags,
 } from '@kbn/cases-plugin/common';
+import { SharePluginSetup } from '@kbn/share-plugin/server';
 import { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
 import type { GuidedOnboardingPluginSetup } from '@kbn/guided-onboarding-plugin/server';
 
@@ -41,8 +42,9 @@ import { uiSettings } from './ui_settings';
 import { registerRoutes } from './routes/register_routes';
 import { getObservabilityServerRouteRepository } from './routes/get_global_observability_server_route_repository';
 import { casesFeatureId, observabilityFeatureId, sloFeatureId } from '../common';
-import { slo, SO_SLO_TYPE } from './saved_objects';
+import { compositeSlo, slo, SO_COMPOSITE_SLO_TYPE, SO_SLO_TYPE } from './saved_objects';
 import { SLO_RULE_REGISTRATION_CONTEXT } from './common/constants';
+import { AlertsLocatorDefinition } from '../common/locators/alerts';
 import { registerRuleTypes } from './lib/rules/register_rule_types';
 import { SLO_BURN_RATE_RULE_ID } from '../common/constants';
 import { registerSloUsageCollector } from './lib/collectors/register';
@@ -56,6 +58,7 @@ interface PluginSetup {
   features: FeaturesSetup;
   guidedOnboarding: GuidedOnboardingPluginSetup;
   ruleRegistry: RuleRegistryPluginSetupContract;
+  share: SharePluginSetup;
   spaces?: SpacesPluginSetup;
   usageCollection?: UsageCollectionSetup;
 }
@@ -77,6 +80,8 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
     const casesApiTags = getCasesApiTags(observabilityFeatureId);
 
     const config = this.initContext.config.get<ObservabilityConfig>();
+
+    const alertsLocator = plugins.share.url.locators.create(new AlertsLocatorDefinition());
 
     plugins.features.registerKibanaFeature({
       id: casesFeatureId,
@@ -188,7 +193,7 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
           catalogue: [sloFeatureId, 'observability'],
           api: ['slo_write', 'slo_read', 'rac'],
           savedObject: {
-            all: [SO_SLO_TYPE],
+            all: [SO_SLO_TYPE, SO_COMPOSITE_SLO_TYPE],
             read: [],
           },
           alerting: {
@@ -207,7 +212,7 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
           api: ['slo_read', 'rac'],
           savedObject: {
             all: [],
-            read: [SO_SLO_TYPE],
+            read: [SO_SLO_TYPE, SO_COMPOSITE_SLO_TYPE],
           },
           alerting: {
             rule: {
@@ -223,6 +228,7 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
     });
 
     core.savedObjects.registerType(slo);
+    core.savedObjects.registerType(compositeSlo);
 
     const ruleDataClient = ruleDataService.initializeIndex({
       feature: sloFeatureId,
@@ -273,6 +279,7 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
       getOpenAIClient() {
         return openAIService?.client;
       },
+      alertsLocator,
     };
   }
 

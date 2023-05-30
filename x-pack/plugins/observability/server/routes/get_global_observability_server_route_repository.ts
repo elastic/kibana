@@ -5,14 +5,16 @@
  * 2.0.
  */
 
+import { compositeSloRouteRepository } from './composite_slo/route';
 import { observabilityCoPilotRouteRepository } from './copilot/route';
 import { rulesRouteRepository } from './rules/route';
-import { slosRouteRepository } from './slo/route';
+import { sloRouteRepository } from './slo/route';
 
 export function getObservabilityServerRouteRepository() {
   const repository = {
     ...rulesRouteRepository,
-    ...slosRouteRepository,
+    ...sloRouteRepository,
+    ...compositeSloRouteRepository,
     ...observabilityCoPilotRouteRepository,
   };
   return repository;
