@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { MappingRuntimeFieldType } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { DEFAULT_INDEX_PATTERN } from '../../../../common/constants';
 import type { BrowserFields } from '../../../../common/search_strategy/index_fields';
 
@@ -577,11 +577,11 @@ export const mockBrowserFields: BrowserFields = {
   },
 };
 
-export const mockRuntimeMappings: MappingRuntimeFields = {
+export const mockRuntimeMappings = {
   '@a.runtime.field': {
     script: {
       source: 'emit("Radical dude: " + doc[\'host.name\'].value)',
     },
-    type: 'keyword',
+    type: 'keyword' as MappingRuntimeFieldType,
   },
 };

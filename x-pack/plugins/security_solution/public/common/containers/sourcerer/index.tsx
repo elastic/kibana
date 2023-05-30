@@ -8,13 +8,13 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { i18n } from '@kbn/i18n';
-import type { DataView } from '@kbn/data-views-plugin/public';
 import { matchPath } from 'react-router-dom';
 import { sourcererActions, sourcererSelectors } from '../../store/sourcerer';
 import type {
   SelectedDataView,
   SourcererDataView,
   SourcererUrlState,
+  RunTimeMappings,
 } from '../../store/sourcerer/model';
 import { SourcererScopeName } from '../../store/sourcerer/model';
 import { useUserInfo } from '../../../detections/components/user_info';
@@ -396,14 +396,14 @@ export const useSourcererDataView = (
     () => ({
       ...fetchIndexReturn,
       dataView: fetchIndexReturn.dataView,
-      runtimeMappings: fetchIndexReturn.dataView?.getRuntimeMappings() ?? {},
-      title: fetchIndexReturn.dataView?.getIndexPattern() ?? '',
+      runtimeMappings: (fetchIndexReturn.dataView?.runtimeFieldMap as RunTimeMappings) ?? {},
+      title: fetchIndexReturn.dataView?.title ?? '',
       id: fetchIndexReturn.dataView?.id ?? null,
       loading: indexPatternsLoading,
       patternList: fetchIndexReturn.indexes,
       indexFields: fetchIndexReturn.indexPatterns
         .fields as SelectedDataView['indexPattern']['fields'],
-      fields: fetchIndexReturn.dataView?.fields ?? null,
+      fields: fetchIndexReturn.dataView?.fields,
     }),
     [fetchIndexReturn, indexPatternsLoading]
   );
@@ -438,7 +438,7 @@ export const useSourcererDataView = (
   const browserFields = useCallback(() => {
     const { browserFields: dataViewBrowserFields } = getDataViewStateFromIndexFields(
       sourcererDataView.patternList.join(','),
-      sourcererDataView.fields as DataView['fields'],
+      sourcererDataView.fields,
       false
     );
     return dataViewBrowserFields;
