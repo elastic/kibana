@@ -458,10 +458,9 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     }
 
     const packageInfos = await getPackageInfoForPackagePolicies([packagePolicy], soClient);
-    const packagePolicyId = packagePolicy.id ?? SavedObjectsUtils.generateId();
     const agentPolicyId = packagePolicy.policy_id;
 
-    let inputs = getInputsWithStreamIds(packagePolicy, packagePolicyId);
+    let inputs = getInputsWithStreamIds(packagePolicy, packagePolicy.id);
     const { id, ...pkgPolicyWithoutId } = packagePolicy;
 
     let elasticsearch: PackagePolicy['elasticsearch'];
@@ -478,6 +477,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     }
 
     return {
+      id: packagePolicy.id,
       ...pkgPolicyWithoutId,
       ...(packagePolicy.package
         ? { package: omit(packagePolicy.package, 'experimental_data_stream_features') }
