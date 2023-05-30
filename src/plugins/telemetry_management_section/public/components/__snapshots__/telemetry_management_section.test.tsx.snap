@@ -12,7 +12,7 @@ exports[`TelemetryManagementSectionComponent renders as expected 1`] = `
         <EuiTitle>
           <h2>
             <FormattedMessage
-              defaultMessage="Usage Data"
+              defaultMessage="Usage Collection"
               id="telemetry.usageDataTitle"
               values={Object {}}
             />
@@ -57,13 +57,13 @@ exports[`TelemetryManagementSectionComponent renders as expected 1`] = `
           loading={false}
           setting={
             Object {
-              "ariaName": "Provide usage data",
+              "ariaName": "Share usage with Elastic",
               "category": Array [],
               "defVal": true,
               "description": <React.Fragment>
                 <p>
                   <FormattedMessage
-                    defaultMessage="Enabling data usage collection helps us manage and improve our products and services. See our {privacyStatementLink} for more details."
+                    defaultMessage="Enabling usage collection (also known as Telemetry) allows us to learn what our users are most interested in, so we can improve our products and services. Refer to our {privacyStatementLink} for more details."
                     id="telemetry.telemetryConfigAndLinkDescription"
                     values={
                       Object {
@@ -113,7 +113,7 @@ exports[`TelemetryManagementSectionComponent renders as expected 1`] = `
                   />
                 </p>
               </React.Fragment>,
-              "displayName": "Provide usage data",
+              "displayName": "Share usage with Elastic",
               "isCustom": true,
               "isOverridden": false,
               "name": "telemetry:enabled",
