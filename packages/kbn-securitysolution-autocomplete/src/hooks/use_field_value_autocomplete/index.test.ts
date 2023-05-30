@@ -172,7 +172,7 @@ describe('use_field_value_autocomplete', () => {
           indexPattern: stubIndexPatternWithFields,
           operatorType: OperatorTypeEnum.MATCH,
           query: '',
-          selectedField: { ...selectedField, name: 'child' },
+          selectedField,
         })
       );
       // Note: initial `waitForNextUpdate` is hook initialization
