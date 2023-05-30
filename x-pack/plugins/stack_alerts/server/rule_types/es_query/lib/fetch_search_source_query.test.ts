@@ -287,7 +287,7 @@ describe('fetchSearchSourceQuery', () => {
   });
 
   describe('getSmallerDataViewSpec', () => {
-    it('should remove counts', async () => {
+    it('should remove "count"s but keep other props like "customLabel"', async () => {
       const fieldsMap = {
         test1: {
           name: 'test1',
