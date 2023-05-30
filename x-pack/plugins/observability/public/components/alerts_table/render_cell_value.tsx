@@ -20,8 +20,8 @@ import type { CellValueElementProps, TimelineNonEcsData } from '@kbn/timelines-p
 
 import { asDuration } from '../../../common/utils/formatters';
 import { AlertSeverityBadge } from '../alert_severity_badge';
-import { AlertStatusIndicator } from '../shared/alert_status_indicator';
-import { TimestampTooltip } from '../shared/timestamp_tooltip';
+import { AlertStatusIndicator } from '../alert_status_indicator';
+import { TimestampTooltip } from './timestamp_tooltip';
 import { parseAlert } from '../../pages/alerts/helpers/parse_alert';
 import type { ObservabilityRuleTypeRegistry } from '../../rules/create_observability_rule_type_registry';
 import type { TopAlert } from '../../typings/alerts';

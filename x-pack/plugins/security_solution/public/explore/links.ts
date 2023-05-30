@@ -6,8 +6,15 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { HOSTS_PATH, NETWORK_PATH, SecurityPageName, USERS_PATH } from '../../common/constants';
-import { HOSTS, NETWORK, USERS } from '../app/translations';
+import {
+  HOSTS_PATH,
+  NETWORK_PATH,
+  USERS_PATH,
+  EXPLORE_PATH,
+  SERVER_APP_ID,
+  SecurityPageName,
+} from '../../common/constants';
+import { EXPLORE, HOSTS, NETWORK, USERS } from '../app/translations';
 import type { LinkItem } from '../common/links/types';
 import hostsPageImg from '../common/images/hosts_page.png';
 import userPageImg from '../common/images/users_page.png';
@@ -169,4 +176,17 @@ const hostsLinks: LinkItem = {
   ],
 };
 
-export const exploreLinks = [hostsLinks, networkLinks, usersLinks];
+export const exploreLinks: LinkItem = {
+  id: SecurityPageName.exploreLanding,
+  title: EXPLORE,
+  path: EXPLORE_PATH,
+  globalNavPosition: 6,
+  capabilities: [`${SERVER_APP_ID}.show`],
+  globalSearchKeywords: [
+    i18n.translate('xpack.securitySolution.appLinks.explore', {
+      defaultMessage: 'Explore',
+    }),
+  ],
+  links: [hostsLinks, networkLinks, usersLinks],
+  skipUrlState: true,
+};

@@ -1,7 +1,7 @@
 {
   "type": "plugin",
   "id": "@kbn/observability-shared-plugin",
-  "owner": "@elastic/actionable-observability",
+  "owner": "@elastic/observability-ui",
   "plugin": {
     "id": "observabilityShared",
     "server": false,
@@ -9,7 +9,7 @@
     "configPath": ["xpack", "observability_shared"],
     "requiredPlugins": ["cases", "guidedOnboarding", "uiActions"],
     "optionalPlugins": [],
-    "requiredBundles": ["data", "inspector", "kibanaReact"],
+    "requiredBundles": ["data", "inspector", "kibanaReact", "kibanaUtils"],
     "extraPublicDirs": ["common"]
   }
 }

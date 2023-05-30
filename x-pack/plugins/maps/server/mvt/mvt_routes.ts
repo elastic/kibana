@@ -71,7 +71,7 @@ export function initMVTRoutes({
       try {
         tileRequest = getHitsTileRequest({
           buffer: 'buffer' in query ? parseInt(query.buffer, 10) : 5,
-          encodedRequestBody: query.requestBody as string,
+          risonRequestBody: query.requestBody as string,
           geometryFieldName: query.geometryFieldName as string,
           hasLabels: query.hasLabels as boolean,
           index: query.index as string,
@@ -142,7 +142,7 @@ export function initMVTRoutes({
       try {
         tileRequest = getAggsTileRequest({
           buffer: 'buffer' in query ? parseInt(query.buffer, 10) : 5,
-          encodedRequestBody: query.requestBody as string,
+          risonRequestBody: query.requestBody as string,
           geometryFieldName: query.geometryFieldName as string,
           gridPrecision: parseInt(query.gridPrecision, 10),
           hasLabels: query.hasLabels as boolean,

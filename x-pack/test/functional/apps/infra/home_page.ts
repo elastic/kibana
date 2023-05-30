@@ -22,6 +22,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');
 
   // Failing: See https://github.com/elastic/kibana/issues/157713
+  // Fails on both Chrome and Firefox
   describe.skip('Home page', function () {
     this.tags('includeFirefox');
     before(async () => {
@@ -193,7 +194,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
     });
 
-    describe('alerts flyouts', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/157711
+    describe.skip('alerts flyouts', () => {
       before(async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs');
         await pageObjects.common.navigateToApp('infraOps');

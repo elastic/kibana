@@ -50,15 +50,7 @@ export const fillUpNewRule = (name = 'Test', description = 'Test') => {
 export const visitRuleActions = (ruleId: string) => {
   cy.visit(`app/security/rules/id/${ruleId}/edit`);
   cy.getByTestSubj('edit-rule-actions-tab').should('exist');
-  // strange rerendering behaviour. the following make sure the test doesn't fail
-  cy.get('body').then(($body) => {
-    if ($body.find('[data-test-subj="globalLoadingIndicator"]').length) {
-      cy.getByTestSubj('globalLoadingIndicator').should('exist');
-      cy.getByTestSubj('globalLoadingIndicator').should('not.exist');
-    }
-    cy.getByTestSubj('globalLoadingIndicator').should('not.exist');
-  });
-
+  cy.getByTestSubj('globalLoadingIndicator').should('not.exist');
   cy.getByTestSubj('edit-rule-actions-tab').click();
 };
 export const tryAddingDisabledResponseAction = (itemNumber = 0) => {

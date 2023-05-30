@@ -10,15 +10,26 @@ import ReactDOM from 'react-dom';
 import { CoreStart } from '@kbn/core/public';
 import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { I18nProvider } from '@kbn/i18n-react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
+import { ServerlessSearchContext } from './hooks/use_kibana';
 
-export async function renderApp(element: HTMLElement, core: CoreStart) {
+export async function renderApp(
+  element: HTMLElement,
+  core: CoreStart,
+  { cloud, userProfile }: ServerlessSearchContext
+) {
   const { ElasticsearchOverview } = await import('./components/overview');
+  const queryClient = new QueryClient();
   ReactDOM.render(
     <KibanaThemeProvider theme$={core.theme.theme$}>
-      <KibanaContextProvider services={core}>
-        <I18nProvider>
-          <ElasticsearchOverview />
-        </I18nProvider>
+      <KibanaContextProvider services={{ ...core, cloud, userProfile }}>
+        <QueryClientProvider client={queryClient}>
+          <ReactQueryDevtools initialIsOpen={false} />
+          <I18nProvider>
+            <ElasticsearchOverview />
+          </I18nProvider>
+        </QueryClientProvider>
       </KibanaContextProvider>
     </KibanaThemeProvider>,
     element

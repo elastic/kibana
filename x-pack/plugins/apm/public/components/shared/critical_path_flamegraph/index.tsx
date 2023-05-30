@@ -12,7 +12,7 @@ import {
   euiPaletteColorBlind,
 } from '@elastic/eui';
 import { css } from '@emotion/css';
-import { useChartTheme } from '@kbn/observability-plugin/public';
+import { useChartTheme } from '@kbn/observability-shared-plugin/public';
 import { uniqueId } from 'lodash';
 import React, { useMemo, useRef } from 'react';
 import {

@@ -53,10 +53,10 @@ export class DefaultHistoricalSummaryClient implements HistoricalSummaryClient {
   constructor(private esClient: ElasticsearchClient) {}
 
   async fetch(sloList: SLO[]): Promise<Record<SLOId, HistoricalSummary[]>> {
-    const dateRangeBySlo: Record<SLOId, DateRange> = sloList.reduce(
-      (acc, slo) => ({ [slo.id]: getDateRange(slo), ...acc }),
-      {}
-    );
+    const dateRangeBySlo = sloList.reduce<Record<SLOId, DateRange>>((acc, slo) => {
+      acc[slo.id] = getDateRange(slo);
+      return acc;
+    }, {});
 
     const searches = sloList.flatMap((slo) => [
       { index: `${SLO_DESTINATION_INDEX_NAME}*` },
@@ -286,9 +286,8 @@ function generateSearchQuery(slo: SLO, dateRange: DateRange): MsearchMultisearch
 }
 
 function getDateRange(slo: SLO) {
-  const unit = toMomentUnitOfTime(slo.timeWindow.duration.unit);
-
   if (rollingTimeWindowSchema.is(slo.timeWindow)) {
+    const unit = toMomentUnitOfTime(slo.timeWindow.duration.unit);
     const now = moment();
     return {
       from: now
