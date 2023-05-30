@@ -88,15 +88,15 @@ export const ExplainLogRateSpikesContent: FC<ExplainLogRateSpikesContentProps> =
     setSelectedSignificantTerm(null);
     setSelectedGroup(null);
   }
-
+  // Note: Temporarily removed height and disabled sticky histogram until we can fix the scrolling issue in a follow up
   return (
-    <EuiResizableContainer style={{ height: '400px' }} direction="vertical">
+    <EuiResizableContainer direction="vertical">
       {(EuiResizablePanel, EuiResizableButton) => (
         <>
           <EuiResizablePanel
             mode={'collapsible'}
-            initialSize={60}
-            minSize="40%"
+            initialSize={40}
+            minSize={'20%'}
             tabIndex={0}
             paddingSize="s"
           >
@@ -122,8 +122,8 @@ export const ExplainLogRateSpikesContent: FC<ExplainLogRateSpikesContentProps> =
           <EuiResizablePanel
             paddingSize="s"
             mode={'main'}
-            initialSize={80}
-            minSize="50px"
+            initialSize={60}
+            minSize={'40%'}
             tabIndex={0}
           >
             {earliest !== undefined && latest !== undefined && windowParameters !== undefined && (
