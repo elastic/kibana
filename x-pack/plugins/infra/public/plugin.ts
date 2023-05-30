@@ -65,6 +65,7 @@ export class Plugin implements InfraClientPluginClass {
 
   constructor(context: PluginInitializerContext<InfraPublicConfig>) {
     this.config = context.config.get();
+
     this.inventoryViews = new InventoryViewsService();
     this.logViews = new LogViewsService({
       messageFields:
@@ -72,7 +73,7 @@ export class Plugin implements InfraClientPluginClass {
     });
     this.metricsExplorerViews = new MetricsExplorerViewsService();
     this.telemetry = new TelemetryService();
-    this.appTarget = this.config.logs.app_target;
+    this.appTarget = this.config.logs?.app_target ?? LOGS_APP_TARGET;
   }
 
   setup(core: InfraClientCoreSetup, pluginsSetup: InfraClientSetupDeps) {
