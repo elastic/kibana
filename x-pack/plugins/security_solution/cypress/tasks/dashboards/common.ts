@@ -8,6 +8,6 @@
 import { DASHBOARD_INVESTIGATE_IN_TIMELINE_CELL_ACTION } from '../../screens/dashboards/common';
 
 export const investigateDashboardItemInTimeline = (selector: string, itemIndex: number = 0) => {
-  cy.get(selector).eq(itemIndex).trigger('mouseover');
-  cy.get(DASHBOARD_INVESTIGATE_IN_TIMELINE_CELL_ACTION).should('be.visible').trigger('click');
+  cy.get(selector).eq(itemIndex).realHover();
+  cy.get(DASHBOARD_INVESTIGATE_IN_TIMELINE_CELL_ACTION).click();
 };
