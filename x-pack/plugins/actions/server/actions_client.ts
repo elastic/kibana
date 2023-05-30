@@ -687,7 +687,8 @@ export class ActionsClient {
     } else {
       trackLegacyRBACExemption('execute', this.usageCounter);
     }
-    const { username } = await this.scopedClusterClient.asCurrentUser.security.authenticate();
+    const { username } =
+      (await this.scopedClusterClient.asCurrentUser.security.authenticate()) ?? {};
 
     return this.actionExecutor.execute({
       actionId,

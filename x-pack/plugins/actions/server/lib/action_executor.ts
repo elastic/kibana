@@ -244,8 +244,18 @@ export class ActionExecutor {
           }
         }
 
-        if (rawResult.status === 'ok' && actionTypeId === GEN_AI_CONNECTOR_ID) {
-          const data = rawResult.data as unknown as GenAiRunActionResponse;
+        eventLogger.stopTiming(event);
+
+        // allow null-ish return to indicate success
+        const result = rawResult || {
+          actionId,
+          status: 'ok',
+        };
+
+        event.event = event.event || {};
+
+        if (result.status === 'ok' && actionTypeId === GEN_AI_CONNECTOR_ID) {
+          const data = result.data as unknown as GenAiRunActionResponse;
           event.kibana = event.kibana || {};
           event.kibana = {
             ...event.kibana,
@@ -259,16 +269,6 @@ export class ActionExecutor {
           event.user = event.user || {};
           event.user.name = username;
         }
-
-        eventLogger.stopTiming(event);
-
-        // allow null-ish return to indicate success
-        const result = rawResult || {
-          actionId,
-          status: 'ok',
-        };
-
-        event.event = event.event || {};
 
         if (result.status === 'ok') {
           span?.setOutcome('success');

@@ -19,6 +19,7 @@ import {
   asHttpRequestExecutionSource,
   asSavedObjectExecutionSource,
 } from './action_execution_source';
+import { GEN_AI_CONNECTOR_ID } from '@kbn/stack-connectors-plugin/common/gen_ai/constants';
 
 const actionExecutor = new ActionExecutor({ isESOCanEncrypt: true });
 const services = actionsMock.createServices();
@@ -1279,7 +1280,79 @@ test('writes to event log for execute and execute start when consumer and relate
   });
 });
 
-function setupActionExecutorMock() {
+test('writes usage data to event log for gen ai events', async () => {
+  jest.clearAllMocks();
+  const executorMock = setupActionExecutorMock(GEN_AI_CONNECTOR_ID);
+  const mockGenAi = {
+    id: 'chatcmpl-7LztF5xsJl2z5jcNpJKvaPm4uWt8x',
+    object: 'chat.completion',
+    created: 1685477149,
+    model: 'gpt-3.5-turbo-0301',
+    usage: {
+      prompt_tokens: 10,
+      completion_tokens: 9,
+      total_tokens: 19,
+    },
+    choices: [
+      {
+        message: {
+          role: 'assistant',
+          content: 'Hello! How can I assist you today?',
+        },
+        finish_reason: 'stop',
+        index: 0,
+      },
+    ],
+  };
+  executorMock.mockResolvedValue({
+    actionId: '1',
+    status: 'ok',
+    // @ts-ignore
+    data: mockGenAi,
+  });
+  await actionExecutor.execute({ ...executeParams, username: 'coolguy' });
+  expect(eventLogger.logEvent).toHaveBeenCalledTimes(2);
+  expect(eventLogger.logEvent).toHaveBeenNthCalledWith(2, {
+    event: {
+      action: 'execute',
+      kind: 'action',
+      outcome: 'success',
+    },
+    kibana: {
+      action: {
+        execution: {
+          uuid: '2',
+        },
+        name: 'action-1',
+        id: '1',
+        meta: {
+          usage: mockGenAi.usage,
+        },
+      },
+      alert: {
+        rule: {
+          execution: {
+            uuid: '123abc',
+          },
+        },
+      },
+      saved_objects: [
+        {
+          id: '1',
+          namespace: 'some-namespace',
+          rel: 'primary',
+          type: 'action',
+          type_id: GEN_AI_CONNECTOR_ID,
+        },
+      ],
+      space_ids: ['some-namespace'],
+    },
+    message: 'action executed: .gen-ai:1: action-1',
+    user: { name: 'coolguy' },
+  });
+});
+
+function setupActionExecutorMock(actionTypeId = 'test') {
   const actionType: jest.Mocked<ActionType> = {
     id: 'test',
     name: 'Test',
@@ -1297,7 +1370,7 @@ function setupActionExecutorMock() {
     type: 'action',
     attributes: {
       name: 'action-1',
-      actionTypeId: 'test',
+      actionTypeId,
       config: {
         bar: true,
       },
