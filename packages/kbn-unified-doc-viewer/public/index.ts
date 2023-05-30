@@ -14,11 +14,5 @@ export {
 } from './components';
 export { ElasticRequestState } from './types';
 export type { DocViewFilterFn, UnifiedDocViewerServices } from './types';
-export {
-  IgnoredReason,
-  getIgnoredReason,
-  getShouldShowFieldHandler,
-  formatFieldValue,
-  isNestedFieldParent,
-} from './utils';
+export { IgnoredReason, getIgnoredReason, isNestedFieldParent } from './utils';
 export * from './hooks';
