@@ -10,7 +10,7 @@ import memoizeOne from 'memoize-one';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { DataViewBase } from '@kbn/es-query';
 import type { BrowserField, BrowserFields, IndexField } from '@kbn/timelines-plugin/common';
-import type { DataView, FieldSpec } from '@kbn/data-views-plugin/common';
+import type { DataView, IIndexPatternFieldList } from '@kbn/data-views-plugin/common';
 import { getCategory } from '@kbn/triggers-actions-ui-plugin/public';
 
 import { useKibana } from '../../lib/kibana';
@@ -42,7 +42,11 @@ export const getAllFieldsByName = (
   keyBy('name', getAllBrowserFields(browserFields));
 
 export const getIndexFields = memoizeOne(
-  (title: string, fields: FieldSpec[], _includeUnmapped: boolean = false): DataViewBase =>
+  (
+    title: string,
+    fields: IIndexPatternFieldList,
+    _includeUnmapped: boolean = false
+  ): DataViewBase =>
     fields && fields.length > 0
       ? {
           fields: fields.map((field) =>
@@ -136,7 +140,7 @@ export const useFetchIndex = (
     dataView: undefined,
     loading: false,
   });
-  const { addError, addWarning } = useAppToasts();
+  const { addError } = useAppToasts();
 
   const indexFieldsSearch = useCallback(
     (iNames) => {
@@ -150,34 +154,6 @@ export const useFetchIndex = (
             dv.fields,
             includeUnmapped
           );
-
-          const fields = dv.fields.map((field) => field.toSpec());
-          if (includeUnmapped) {
-            try {
-              const fieldNameConflictDescriptionsMap = (await data.dataViews
-                .getFieldsForIndexPattern(dv, {
-                  pattern: '',
-                  includeUnmapped: true,
-                })
-                .then((fieldsToReduce) => {
-                  return fieldsToReduce.reduce(
-                    (acc, f) => ({ ...acc, [f.name]: f.conflictDescriptions }),
-                    {} as { [x: string]: Record<string, string[]> | undefined }
-                  );
-                })) as { [x: string]: Record<string, string[]> | undefined };
-
-              dv.fields.replaceAll([
-                ...fields.map((field) => ({
-                  ...field,
-                  ...(fieldNameConflictDescriptionsMap[field.name] != null
-                    ? { conflictDescriptions: fieldNameConflictDescriptionsMap[field.name] }
-                    : {}),
-                })),
-              ]);
-            } catch (error) {
-              addWarning(error, { title: i18n.FETCH_FIELDS_WITH_UNMAPPED_DATA_ERROR });
-            }
-          }
 
           previousIndexesName.current = dv.getIndexPattern().split(',');
 
@@ -204,7 +180,7 @@ export const useFetchIndex = (
 
       asyncSearch();
     },
-    [addError, addWarning, data.dataViews, includeUnmapped, indexNames, state]
+    [addError, data.dataViews, includeUnmapped, indexNames, state]
   );
 
   useEffect(() => {

@@ -12,7 +12,7 @@ import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 import type { Rule } from '../../rule_management/logic/types';
 import { useGetInstalledJob } from '../../../common/components/ml/hooks/use_get_jobs';
 import { useKibana } from '../../../common/lib/kibana';
-import { getIndexFields, useFetchIndex } from '../../../common/containers/source';
+import { useFetchIndex } from '../../../common/containers/source';
 
 import * as i18n from '../../../common/containers/source/translations';
 
@@ -101,33 +101,20 @@ export const useFetchIndexPatterns = (rules: Rule[] | null): ReturnUseFetchExcep
       if (activeSpaceId !== '' && memoDataViewId) {
         setDataViewLoading(true);
         const dv = await data.dataViews.get(memoDataViewId);
-        const fields = dv.fields.map((field) => field.toSpec());
+        let fieldsWithUnmappedInfo = null;
         try {
-          const fieldNameConflictDescriptionsMap = (await data.dataViews
-            .getFieldsForIndexPattern(dv, {
-              pattern: '',
-              includeUnmapped: true,
-            })
-            .then((fieldsToReduce) => {
-              return fieldsToReduce.reduce(
-                (acc, f) => ({ ...acc, [f.name]: f.conflictDescriptions }),
-                {} as { [x: string]: Record<string, string[]> | undefined }
-              );
-            })) as { [x: string]: Record<string, string[]> | undefined };
-
-          dv.fields.replaceAll([
-            ...fields.map((field) => ({
-              ...field,
-              ...(fieldNameConflictDescriptionsMap[field.name] != null
-                ? { conflictDescriptions: fieldNameConflictDescriptionsMap[field.name] }
-                : {}),
-            })),
-          ]);
+          fieldsWithUnmappedInfo = await data.dataViews.getFieldsForIndexPattern(dv, {
+            pattern: '',
+            includeUnmapped: true,
+          });
         } catch (error) {
           addWarning(error, { title: i18n.FETCH_FIELDS_WITH_UNMAPPED_DATA_ERROR });
         }
         setDataViewLoading(false);
-        setDataViewIndexPatterns(getIndexFields(dv.getIndexPattern(), dv.fields, true));
+        setDataViewIndexPatterns({
+          ...dv,
+          ...(fieldsWithUnmappedInfo ? { fields: fieldsWithUnmappedInfo } : {}),
+        });
       }
     };
 

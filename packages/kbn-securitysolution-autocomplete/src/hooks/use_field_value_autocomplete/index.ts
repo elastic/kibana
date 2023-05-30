@@ -72,7 +72,7 @@ export const useFieldValueAutocomplete = ({
             const field = subTypeNested
               ? {
                   ...fieldSelected,
-                  name: fieldSelected.name,
+                  name: `${subTypeNested.nested.path}.${fieldSelected.name}`,
                 }
               : fieldSelected;
 
