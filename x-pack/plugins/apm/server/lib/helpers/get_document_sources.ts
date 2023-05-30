@@ -79,7 +79,7 @@ export async function getDocumentSources({
     const docTypeConfig = getConfigForDocumentType(documentType);
 
     return (
-      enableContinuousRollups
+      enableContinuousRollupsƒƒƒ
         ? docTypeConfig.rollupIntervals
         : [RollupInterval.OneMinute]
     ).flatMap((rollupInterval) => {

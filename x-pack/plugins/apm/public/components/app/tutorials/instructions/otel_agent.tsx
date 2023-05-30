@@ -21,8 +21,7 @@ import { ValuesType } from 'utility-types';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { AgentApiKey } from '../api_keys';
 import { AgentInstructions } from '../instruction_variants';
-import { ApiKeySuccessCallout } from './api_key_success_callout';
-import { ApiKeyErrorCallout } from './api_key_error_callout';
+import { ApiKeyCallout } from './api_key_callout';
 
 export const createOpenTelemetryAgentInstructions = (
   commonOptions: AgentInstructions
@@ -79,15 +78,14 @@ export const createOpenTelemetryAgentInstructions = (
               <EuiSpacer />
             </>
           )}
-          {apiKeyDetails?.displayApiKeySuccessCallout && (
+          {(apiKeyDetails?.displayApiKeySuccessCallout ||
+            apiKeyDetails?.displayApiKeyErrorCallout) && (
             <>
-              <ApiKeySuccessCallout />
-              <EuiSpacer />
-            </>
-          )}
-          {apiKeyDetails?.displayApiKeyErrorCallout && (
-            <>
-              <ApiKeyErrorCallout errorMessage={apiKeyDetails?.errorMessage} />
+              <ApiKeyCallout
+                isError={apiKeyDetails?.displayApiKeyErrorCallout}
+                isSuccess={apiKeyDetails?.displayApiKeySuccessCallout}
+                errorMessage={apiKeyDetails?.errorMessage}
+              />
               <EuiSpacer />
             </>
           )}

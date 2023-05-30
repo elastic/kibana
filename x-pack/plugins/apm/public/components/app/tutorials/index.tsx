@@ -8,7 +8,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { EuiSpacer } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { AgentApiKey, API_KEY_INSTRUCTION } from './api_keys';
 import { callApmApi } from '../../../services/rest/create_call_apm_api';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
@@ -27,7 +26,7 @@ export function Tutorials() {
     error: false,
   });
   const [loading, setLoading] = useState(false);
-  const { services, notifications } = useKibana<ApmPluginStartDeps>();
+  const { services } = useKibana<ApmPluginStartDeps>();
   const { config } = useApmPluginContext();
   const { docLinks, observabilityShared } = services;
   const guideLink =
@@ -63,23 +62,6 @@ export function Tutorials() {
         error: false,
       });
     } catch (error) {
-      notifications.toasts.danger({
-        title: i18n.translate('xpack.apm.tutorial.apiKey.error.title', {
-          defaultMessage: 'Error while creating API Key',
-        }),
-
-        body: (
-          <div>
-            <h5>
-              {i18n.translate('xpack.apm.tutorial.apiKey.error.status', {
-                defaultMessage: `Error`,
-              })}
-            </h5>
-
-            {error.body?.message || error.message}
-          </div>
-        ),
-      });
       setAgentApiKey({
         apiKey: API_KEY_INSTRUCTION,
         error: true,
@@ -88,7 +70,7 @@ export function Tutorials() {
     } finally {
       setLoading(false);
     }
-  }, [notifications.toasts]);
+  }, []);
 
   const instructionsExists = instructions.length > 0;
 

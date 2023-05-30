@@ -14,13 +14,12 @@ import {
 } from '@elastic/eui';
 import { EuiStepProps } from '@elastic/eui/src/components/steps/step';
 import React from 'react';
-import { ApiKeyErrorCallout } from './api_key_error_callout';
 import { AgentConfigInstructions } from '../agent_config_instructions';
 import {
   INSTRUCTION_VARIANT,
   AgentInstructions,
 } from '../instruction_variants';
-import { ApiKeySuccessCallout } from './api_key_success_callout';
+import { ApiKeyCallout } from './api_key_callout';
 
 export const createGoAgentInstructions = (
   commonOptions: AgentInstructions
@@ -89,15 +88,14 @@ file name, or the `ELASTIC_APM_SERVICE_NAME` environment variable.',
               <EuiSpacer />
             </>
           )}
-          {apiKeyDetails?.displayApiKeySuccessCallout && (
+          {(apiKeyDetails?.displayApiKeySuccessCallout ||
+            apiKeyDetails?.displayApiKeyErrorCallout) && (
             <>
-              <ApiKeySuccessCallout />
-              <EuiSpacer />
-            </>
-          )}
-          {apiKeyDetails?.displayApiKeyErrorCallout && (
-            <>
-              <ApiKeyErrorCallout errorMessage={apiKeyDetails?.errorMessage} />
+              <ApiKeyCallout
+                isError={apiKeyDetails?.displayApiKeyErrorCallout}
+                isSuccess={apiKeyDetails?.displayApiKeySuccessCallout}
+                errorMessage={apiKeyDetails?.errorMessage}
+              />
               <EuiSpacer />
             </>
           )}

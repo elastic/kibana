@@ -20,8 +20,7 @@ import {
   INSTRUCTION_VARIANT,
   AgentInstructions,
 } from '../instruction_variants';
-import { ApiKeySuccessCallout } from './api_key_success_callout';
-import { ApiKeyErrorCallout } from './api_key_error_callout';
+import { ApiKeyCallout } from './api_key_callout';
 
 export const createDotNetAgentInstructions = (
   commonOptions: AgentInstructions
@@ -128,15 +127,14 @@ export const createDotNetAgentInstructions = (
               <EuiSpacer />
             </>
           )}
-          {apiKeyDetails?.displayApiKeySuccessCallout && (
+          {(apiKeyDetails?.displayApiKeySuccessCallout ||
+            apiKeyDetails?.displayApiKeyErrorCallout) && (
             <>
-              <ApiKeySuccessCallout />
-              <EuiSpacer />
-            </>
-          )}
-          {apiKeyDetails?.displayApiKeyErrorCallout && (
-            <>
-              <ApiKeyErrorCallout errorMessage={apiKeyDetails?.errorMessage} />
+              <ApiKeyCallout
+                isError={apiKeyDetails?.displayApiKeyErrorCallout}
+                isSuccess={apiKeyDetails?.displayApiKeySuccessCallout}
+                errorMessage={apiKeyDetails?.errorMessage}
+              />
               <EuiSpacer />
             </>
           )}
