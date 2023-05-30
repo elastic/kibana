@@ -303,6 +303,13 @@ describe('fetchSearchSourceQuery', () => {
           searchable: true,
           readFromDocValues: false,
         },
+        test3: {
+          name: 'test3',
+          type: 'keyword',
+          aggregatable: true,
+          searchable: true,
+          readFromDocValues: false,
+        },
       };
       expect(
         getSmallerDataViewSpec(
@@ -314,20 +321,8 @@ describe('fetchSearchSourceQuery', () => {
               fieldAttrs: undefined,
             },
           })
-        )
-      ).toMatchInlineSnapshot(`
-        Object {
-          "allowNoIndex": false,
-          "fieldAttrs": undefined,
-          "fieldFormats": Object {},
-          "id": "test",
-          "name": "",
-          "runtimeFieldMap": Object {},
-          "sourceFilters": Array [],
-          "title": "test*",
-          "version": "1",
-        }
-      `);
+        )?.fieldAttrs
+      ).toBeUndefined();
       expect(
         getSmallerDataViewSpec(
           createStubDataView({
@@ -345,20 +340,8 @@ describe('fetchSearchSourceQuery', () => {
               },
             },
           })
-        )
-      ).toMatchInlineSnapshot(`
-        Object {
-          "allowNoIndex": false,
-          "fieldAttrs": undefined,
-          "fieldFormats": Object {},
-          "id": "test",
-          "name": "",
-          "runtimeFieldMap": Object {},
-          "sourceFilters": Array [],
-          "title": "test*",
-          "version": "1",
-        }
-      `);
+        )?.fieldAttrs
+      ).toBeUndefined();
       expect(
         getSmallerDataViewSpec(
           createStubDataView({
@@ -377,22 +360,12 @@ describe('fetchSearchSourceQuery', () => {
               },
             },
           })
-        )
+        )?.fieldAttrs
       ).toMatchInlineSnapshot(`
         Object {
-          "allowNoIndex": false,
-          "fieldAttrs": Object {
-            "test1": Object {
-              "customLabel": "test11",
-            },
+          "test1": Object {
+            "customLabel": "test11",
           },
-          "fieldFormats": Object {},
-          "id": "test",
-          "name": "",
-          "runtimeFieldMap": Object {},
-          "sourceFilters": Array [],
-          "title": "test*",
-          "version": "1",
         }
       `);
       expect(
@@ -403,28 +376,28 @@ describe('fetchSearchSourceQuery', () => {
               title: 'test*',
               fields: fieldsMap,
               fieldAttrs: {
+                test1: {
+                  count: 11,
+                  customLabel: 'test11',
+                },
                 test2: {
                   customLabel: 'test12',
+                },
+                test3: {
+                  count: 30,
                 },
               },
             },
           })
-        )
+        )?.fieldAttrs
       ).toMatchInlineSnapshot(`
         Object {
-          "allowNoIndex": false,
-          "fieldAttrs": Object {
-            "test2": Object {
-              "customLabel": "test12",
-            },
+          "test1": Object {
+            "customLabel": "test11",
           },
-          "fieldFormats": Object {},
-          "id": "test",
-          "name": "",
-          "runtimeFieldMap": Object {},
-          "sourceFilters": Array [],
-          "title": "test*",
-          "version": "1",
+          "test2": Object {
+            "customLabel": "test12",
+          },
         }
       `);
     });
