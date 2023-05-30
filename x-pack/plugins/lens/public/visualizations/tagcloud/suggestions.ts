@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { partition } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import type { SuggestionRequest, VisualizationSuggestion } from '../../types';
 import type { TagcloudState } from './types';
@@ -25,41 +26,32 @@ export function suggestions({
     return [];
   }
 
-  // do not offer suggestions for tables with date split
-  const dateSplit = table.columns.find(col => {
-    return col.operation.dataType === 'date';
-  });
-  if (dateSplit) {
+  const [buckets, metrics] = partition(table.columns, (col) => col.operation.isBucketed);
+
+  if (buckets.length !== 1 || metrics.length !== 1) {
     return [];
   }
 
-  const groups = table.columns.filter(
-    (col) => col.operation.isBucketed && col.operation.dataType === 'string'
-  );
-  const metrics = table.columns.filter(
-    (col) => !col.operation.isBucketed && col.operation.dataType === 'number'
-  );
-
-  if (groups.length === 0 || metrics.length === 0) {
-    return [];
-  }
-
-  return groups.map((group) => {
-    return {
-      title: i18n.translate('xpack.maps.lens.choroplethChart.suggestionLabel', {
-        defaultMessage: '{groupLabel} tag cloud',
-        values: {
-          groupLabel: group.operation.label,
+  return buckets
+    .filter((bucket) => {
+      return bucket.operation.dataType !== 'date';
+    })
+    .map((bucket) => {
+      return {
+        title: i18n.translate('xpack.maps.lens.choroplethChart.suggestionLabel', {
+          defaultMessage: '{bucketLabel} tag cloud',
+          values: {
+            bucketLabel: bucket.operation.label,
+          },
+        }),
+        score: 0.6,
+        state: {
+          layerId: table.layerId,
+          tagAccessor: bucket.columnId,
+          valueAccessor: metrics[0].columnId,
+          maxFontSize: 72,
+          minFontSize: 18,
         },
-      }),
-      score: 0.6,
-      state: {
-        layerId: table.layerId,
-        tagAccessor: group.columnId,
-        valueAccessor: metrics[0].columnId,
-        maxFontSize: 72,
-        minFontSize: 18,
-      },
-    };
-  });
+      };
+    });
 }
