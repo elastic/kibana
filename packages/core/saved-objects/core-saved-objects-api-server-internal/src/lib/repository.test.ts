@@ -148,7 +148,13 @@ describe('SavedObjectsRepository', () => {
 
   const expectMigrationArgs = (args: unknown, contains = true, n = 1) => {
     const obj = contains ? expect.objectContaining(args) : expect.not.objectContaining(args);
-    expect(migrator.migrateDocument).toHaveBeenNthCalledWith(n, obj);
+    expect(migrator.migrateDocument).toHaveBeenNthCalledWith(
+      n,
+      obj,
+      expect.objectContaining({
+        allowDowngrade: expect.any(Boolean),
+      })
+    );
   };
 
   beforeEach(() => {
@@ -1406,8 +1412,8 @@ describe('SavedObjectsRepository', () => {
           'migrated',
         ]);
         expect(migrator.migrateDocument).toHaveBeenCalledTimes(2);
-        expect(migrator.migrateDocument).nthCalledWith(1, expect.objectContaining({ id: obj1.id }));
-        expect(migrator.migrateDocument).nthCalledWith(2, expect.objectContaining({ id: obj2.id }));
+        expectMigrationArgs({ id: obj1.id }, true, 1);
+        expectMigrationArgs({ id: obj2.id }, true, 2);
       });
     });
   });
@@ -3992,15 +3998,13 @@ describe('SavedObjectsRepository', () => {
         expect(migrator.migrateDocument).toHaveBeenCalledTimes(
           noNamespaceSearchResults.hits.hits.length
         );
-        expect(migrator.migrateDocument).toHaveBeenCalledWith(
-          expect.objectContaining({
-            type,
-            id: noNamespaceSearchResults.hits.hits[0]._id.replace(
-              /(index-pattern|config|globalType)\:/,
-              ''
-            ),
-          })
-        );
+        expectMigrationArgs({
+          type,
+          id: noNamespaceSearchResults.hits.hits[0]._id.replace(
+            /(index-pattern|config|globalType)\:/,
+            ''
+          ),
+        });
       });
     });
 
@@ -4360,12 +4364,10 @@ describe('SavedObjectsRepository', () => {
       );
       await expect(getSuccess(client, repository, registry, type, id)).resolves.toBe('migrated');
       expect(migrator.migrateDocument).toHaveBeenCalledTimes(1);
-      expect(migrator.migrateDocument).toHaveBeenCalledWith(
-        expect.objectContaining({
-          id,
-          type,
-        })
-      );
+      expectMigrationArgs({
+        id,
+        type,
+      });
     });
   });
 
