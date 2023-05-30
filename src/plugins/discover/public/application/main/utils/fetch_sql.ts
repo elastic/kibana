@@ -28,7 +28,7 @@ export function fetchSql(
   dataView: DataView,
   data: DataPublicPluginStart,
   expressions: ExpressionsStart,
-  inspectorAdapters?: Adapters,
+  inspectorAdapters: Adapters,
   filters?: Filter[],
   inputQuery?: Query
 ): Promise<RecordsFetchResponse> {
