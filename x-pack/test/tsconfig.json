@@ -125,5 +125,6 @@
     "@kbn/maps-vector-tile-utils",
     "@kbn/core-http-common",
     "@kbn/server-route-repository"
+    "@kbn/slo-schema"
   ]
 }
