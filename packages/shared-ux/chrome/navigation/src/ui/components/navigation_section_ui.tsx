@@ -14,9 +14,9 @@ import {
   EuiSideNavItemType,
   EuiText,
 } from '@elastic/eui';
-import type { BasePathService, NavigateToUrlFn } from '../../../../types/internal';
-import { navigationStyles as styles } from '../../../styles';
-import { useNavigation as useServices } from '../../../services';
+import type { BasePathService, NavigateToUrlFn } from '../../../types/internal';
+import { navigationStyles as styles } from '../../styles';
+import { useNavigation as useServices } from '../../services';
 import { ChromeProjectNavigationNodeEnhanced } from '../types';
 
 const navigationNodeToEuiItem = (

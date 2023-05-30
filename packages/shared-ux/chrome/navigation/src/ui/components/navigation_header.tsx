@@ -9,9 +9,9 @@
 import React, { FC } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiHeaderLogo, EuiLoadingSpinner } from '@elastic/eui';
 import useObservable from 'react-use/lib/useObservable';
-import { useNavigation as useServices } from '../../../services';
-import { ElasticMark } from '../../elastic_mark';
-import { getI18nStrings } from '../../i18n_strings';
+import { useNavigation as useServices } from '../../services';
+import { ElasticMark } from '../elastic_mark';
+import { getI18nStrings } from '../i18n_strings';
 
 import '../../header_logo.scss';
 

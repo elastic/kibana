@@ -18,7 +18,7 @@ import React, {
 } from 'react';
 import type { ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
 
-import { useNavigation as useNavigationServices } from '../../../services';
+import { useNavigation as useNavigationServices } from '../../services';
 import { RegisterFunction, UnRegisterFunction } from '../types';
 import { CloudLink } from './cloud_link';
 import { NavigationFooter } from './navigation_footer';
@@ -53,9 +53,10 @@ interface Props {
    * If set to true, the children will be rendered as is.
    */
   unstyled?: boolean;
+  dataTestSubj?: string;
 }
 
-export function Navigation({ children, homeRef, unstyled = false }: Props) {
+export function Navigation({ children, homeRef, unstyled = false, dataTestSubj }: Props) {
   const { onProjectNavigationChange } = useNavigationServices();
 
   // We keep a reference of the order of the children that register themselves when mounting.
@@ -119,7 +120,12 @@ export function Navigation({ children, homeRef, unstyled = false }: Props) {
 
   return (
     <NavigationContext.Provider value={contextValue}>
-      <NavigationUI homeRef={homeRef} footerChildren={footerChildren} unstyled={unstyled}>
+      <NavigationUI
+        homeRef={homeRef}
+        footerChildren={footerChildren}
+        unstyled={unstyled}
+        dataTestSubj={dataTestSubj}
+      >
         {children}
       </NavigationUI>
     </NavigationContext.Provider>

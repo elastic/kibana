@@ -54,7 +54,7 @@ export interface NodeProps extends Omit<NodeDefinition, 'children'> {
 }
 
 /**
- * @private
+ * @internal
  *
  * Internally we enhance the Props passed to the Navigation.Item component.
  */
@@ -66,6 +66,9 @@ export interface NodePropsEnhanced extends NodeProps {
   renderItem?: () => ReactElement;
 }
 
+/**
+ * @internal
+ */
 export interface ChromeProjectNavigationNodeEnhanced extends ChromeProjectNavigationNode {
   /**
    * This function correspond to the same "itemRender" function that can be passed to
@@ -164,7 +167,7 @@ export interface ProjectNavigationDefinition {
 }
 
 /**
- * @private
+ * @internal
  *
  * Function to unregister a navigation node from its parent.
  */
