@@ -601,7 +601,23 @@
               "GetResponse",
               "<unknown>>; delete: (deleteParams: { id: string; }) => Promise<",
               "WriteResponseBase",
-              ">; } | undefined>; }; start: () => Promise<undefined>; }; ruleRegistry: { setup: ",
+              ">; } | undefined>; alertsLocator: ",
+              {
+                "pluginId": "share",
+                "scope": "common",
+                "docId": "kibSharePluginApi",
+                "section": "def-common.LocatorPublic",
+                "text": "LocatorPublic"
+              },
+              "<",
+              {
+                "pluginId": "observability",
+                "scope": "common",
+                "docId": "kibObservabilityPluginApi",
+                "section": "def-common.AlertsLocatorParams",
+                "text": "AlertsLocatorParams"
+              },
+              ">; }; start: () => Promise<undefined>; }; ruleRegistry: { setup: ",
               {
                 "pluginId": "ruleRegistry",
                 "scope": "server",

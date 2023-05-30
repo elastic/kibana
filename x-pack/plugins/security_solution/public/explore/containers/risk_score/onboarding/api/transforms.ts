@@ -26,7 +26,7 @@ import type {
   StopTransformsResult,
 } from './types';
 
-const TRANSFORM_API_BASE_PATH = `/api/transform`;
+const TRANSFORM_API_BASE_PATH = `/internal/transform`;
 const toastLifeTimeMs = 600000;
 
 const getErrorToastMessage = ({
