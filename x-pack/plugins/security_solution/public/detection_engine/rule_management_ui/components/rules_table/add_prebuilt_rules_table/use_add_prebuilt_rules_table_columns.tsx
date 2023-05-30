@@ -123,14 +123,18 @@ export const useAddPrebuiltRulesTableColumns = ({
   const [showRelatedIntegrations] = useUiSetting$<boolean>(SHOW_RELATED_INTEGRATIONS_SETTING);
 
   const installRowRule = useMemo(
-    () => (value: RuleInstallationInfoForReview['rule_id'], item: RuleInstallationInfoForReview) => {
-      installSpecificRules([
-        {
-          rule_id: value,
-          version: item.version,
-        },
-      ]);
-    },
+    () =>
+      async (
+        value: RuleInstallationInfoForReview['rule_id'],
+        item: RuleInstallationInfoForReview
+      ) => {
+        await installSpecificRules([
+          {
+            rule_id: value,
+            version: item.version,
+          },
+        ]);
+      },
     [installSpecificRules]
   );
 

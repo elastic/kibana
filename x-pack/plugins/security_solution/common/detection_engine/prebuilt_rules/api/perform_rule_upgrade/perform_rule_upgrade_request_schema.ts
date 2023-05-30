@@ -41,6 +41,7 @@ export const RuleUpgradeSpecifier = t.exact(
 );
 export type RuleUpgradeSpecifier = t.TypeOf<typeof RuleUpgradeSpecifier>;
 
+export type UpgradeSpecificRulesRequest = t.TypeOf<typeof UpgradeSpecificRulesRequest>;
 export const UpgradeSpecificRulesRequest = t.exact(
   t.intersection([
     t.type({

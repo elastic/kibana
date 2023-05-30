@@ -49,6 +49,14 @@ export interface AddPrebuiltRulesTableState {
    */
   isRefetching: boolean;
   /**
+   * Is true whenever mutation to install all available rules is in-flight
+   */
+  isInstallAllRulesLoading: boolean;
+  /**
+   * Is true whenever mutation to install specific rules is in-flight
+   */
+  isInstallSpecificRulesLoading: boolean;
+  /**
    * The timestamp for when the rules were successfully fetched
    */
   lastUpdated: number;
@@ -187,6 +195,8 @@ export const AddPrebuiltRulesTableContextProvider = ({
         filters,
         isFetched,
         isLoading,
+        isInstallAllRulesLoading,
+        isInstallSpecificRulesLoading,
         isRefetching,
         rulesColumns,
         selectedRules,
@@ -201,6 +211,8 @@ export const AddPrebuiltRulesTableContextProvider = ({
     filters,
     isFetched,
     isLoading,
+    isInstallAllRulesLoading,
+    isInstallSpecificRulesLoading,
     isRefetching,
     rulesColumns,
     selectedRules,

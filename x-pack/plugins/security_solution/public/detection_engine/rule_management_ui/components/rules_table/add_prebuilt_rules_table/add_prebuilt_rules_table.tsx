@@ -86,7 +86,9 @@ export const AddPrebuiltRulesTable = React.memo(() => {
                 itemId="rule_id"
                 {...tableProps}
               />
-            ) : null}
+            ) : (
+              NO_ITEMS_MESSAGE
+            )}
           </>
         }
       />

@@ -12,6 +12,11 @@ import type {
   EuiSearchBarProps,
   EuiTableSelectionType,
 } from '@elastic/eui';
+import { useUserData } from '../../../../../detections/components/user_info';
+import {
+  usePerformUpgradeAllRules,
+  usePerformUpgradeSpecificRules,
+} from '../../../../rule_management/logic/prebuilt_rules/use_perform_rule_upgrade';
 import { usePrebuiltRulesUpgradeReview } from '../../../../rule_management/logic/prebuilt_rules/use_prebuilt_rules_upgrade_review';
 import type { RuleUpgradeInfoForReview } from '../../../../../../common/detection_engine/prebuilt_rules/api/review_rule_upgrade/response_schema';
 import { DEFAULT_RULES_TABLE_REFRESH_SETTING } from '../../../../../../common/constants';
@@ -19,6 +24,9 @@ import { invariant } from '../../../../../../common/utils/invariant';
 import { useUiSetting$ } from '../../../../../common/lib/kibana';
 import type { InMemoryPaginationOptions } from '../../../../rule_management/logic';
 import { RULES_TABLE_INITIAL_PAGE_SIZE, RULES_TABLE_PAGE_SIZE_OPTIONS } from '../constants';
+import { hasUserCRUDPermission } from '../../../../../common/utils/privileges';
+import type { TableColumn } from './use_upgrade_prebuilt_rules_table_columns';
+import { useUpgradePrebuiltRulesTableColumns } from './use_upgrade_prebuilt_rules_table_columns';
 
 export interface UpgradePrebuiltRulesTableState {
   /**
@@ -42,6 +50,15 @@ export interface UpgradePrebuiltRulesTableState {
    */
   isRefetching: boolean;
   /**
+   * Is true whenever mutation to upgrade all available rules is in-flight
+   */
+  isUpgradeAllRulesLoading: boolean;
+  /**
+   * Is true whenever mutation to upgrade specific rules is in-flight
+   */
+  isUpgradeSpecificRulesLoading: boolean;
+  /**
+  /**
    * The timestamp for when the rules were successfully fetched
    */
   lastUpdated: number;
@@ -53,6 +70,10 @@ export interface UpgradePrebuiltRulesTableState {
    * EuiSearchBarProps filters for InMemoryTable
    */
   filters: EuiSearchBarProps;
+  /**
+   * Columns for the Upgrade Rules Table
+   */
+  rulesColumns: TableColumn[];
 }
 
 export interface UpgradePrebuiltRulesTableActions {
@@ -110,12 +131,26 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
     keepPreviousData: true, // Use this option so that the state doesn't jump between "success" and "loading" on page change
   });
 
+  const { mutateAsync: upgradeAllRules, isLoading: isUpgradeAllRulesLoading } =
+    usePerformUpgradeAllRules();
+  const { mutateAsync: upgradeSpecificRules, isLoading: isUpgradeSpecificRulesLoading } =
+    usePerformUpgradeSpecificRules();
+
+  const [{ canUserCRUD }] = useUserData();
+  const hasPermissions = hasUserCRUDPermission(canUserCRUD);
+  const rulesColumns = useUpgradePrebuiltRulesTableColumns({
+    upgradeSpecificRules,
+    hasCRUDPermissions: hasPermissions,
+  });
+
   const actions = useMemo(
     () => ({
       reFetchRules: refetch,
       onTableChange,
+      upgradeAllRules,
+      upgradeSpecificRules,
     }),
-    [refetch]
+    [refetch, upgradeAllRules, upgradeSpecificRules]
   );
 
   const filters: EuiSearchBarProps = useMemo(
@@ -155,6 +190,9 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
         isFetched,
         isLoading,
         isRefetching,
+        rulesColumns,
+        isUpgradeAllRulesLoading,
+        isUpgradeSpecificRulesLoading,
         lastUpdated: dataUpdatedAt,
       },
       actions,
@@ -162,11 +200,14 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
   }, [
     rules,
     pagination,
-    filters,
     selectionValue,
+    filters,
     isFetched,
     isLoading,
     isRefetching,
+    isUpgradeAllRulesLoading,
+    isUpgradeSpecificRulesLoading,
+    rulesColumns,
     dataUpdatedAt,
     actions,
   ]);

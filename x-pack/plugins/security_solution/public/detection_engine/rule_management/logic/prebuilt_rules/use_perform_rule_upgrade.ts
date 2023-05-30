@@ -7,22 +7,22 @@
 import { useIsMutating } from '@tanstack/react-query';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import {
-  PERFORM_ALL_RULES_INSTALLATION_KEY,
-  usePerformAllRulesInstallMutation,
-} from '../../api/hooks/prebuilt_rules/use_perform_all_rules_install_mutation';
+  PERFORM_ALL_RULES_UPGRADE_KEY,
+  usePerformAllRulesUpgradeMutation,
+} from '../../api/hooks/prebuilt_rules/use_perform_all_rules_upgrade_mutation';
 import {
-  PERFORM_SPECIFIC_RULES_INSTALLATION_KEY,
-  usePerformSpecificRulesInstallMutation,
-} from '../../api/hooks/prebuilt_rules/use_perform_specific_rules_install_mutation';
+  PERFORM_SPECIFIC_RULES_UPGRADE_KEY,
+  usePerformSpecificRulesUpgradeMutation,
+} from '../../api/hooks/prebuilt_rules/use_perform_specific_rules_upgrade_mutation';
 
 // import * as i18n from './translations';
 
-export const usePerformInstallAllRules = () => {
+export const usePerformUpgradeAllRules = () => {
   const { addError, addSuccess } = useAppToasts();
 
-  return usePerformAllRulesInstallMutation({
+  return usePerformAllRulesUpgradeMutation({
     onError: (err) => {
-      addError(err, { title: 'Failed to install rules' });
+      addError(err, { title: 'Failed to upgrade rules' });
     },
     onSuccess: (result) => {
       addSuccess(getSuccessToastMessage(result));
@@ -30,12 +30,12 @@ export const usePerformInstallAllRules = () => {
   });
 };
 
-export const usePerformInstallSpecificRules = () => {
+export const usePerformUpgradeSpecificRules = () => {
   const { addError, addSuccess } = useAppToasts();
 
-  return usePerformSpecificRulesInstallMutation({
+  return usePerformSpecificRulesUpgradeMutation({
     onError: (err) => {
-      addError(err, { title: 'Failed to install selected rules' });
+      addError(err, { title: 'Failed to upgrade selected rules' });
     },
     onSuccess: (result) => {
       addSuccess(getSuccessToastMessage(result));
@@ -43,13 +43,13 @@ export const usePerformInstallSpecificRules = () => {
   });
 };
 
-export const useIsPerformingAllRulesInstall = () => {
-  const mutationsCount = useIsMutating(PERFORM_ALL_RULES_INSTALLATION_KEY);
+export const useIsPerformingAllRulesUpgrade = () => {
+  const mutationsCount = useIsMutating(PERFORM_ALL_RULES_UPGRADE_KEY);
   return mutationsCount > 0;
 };
 
-export const useIsPerformingSpecificRulesInstall = () => {
-  const mutationsCount = useIsMutating(PERFORM_SPECIFIC_RULES_INSTALLATION_KEY);
+export const useIsPerformingSpecificRulesUpgrade = () => {
+  const mutationsCount = useIsMutating(PERFORM_SPECIFIC_RULES_UPGRADE_KEY);
   return mutationsCount > 0;
 };
 
@@ -66,13 +66,13 @@ const getSuccessToastMessage = (result: {
     summary: { succeeded, skipped, failed },
   } = result;
   if (succeeded > 0) {
-    toastMessage += `${succeeded} rules installed successfully.`;
+    toastMessage += `${succeeded} rules upgraded successfully.`;
   }
   if (skipped > 0) {
-    toastMessage += ` ${skipped} rules installation skipped.`;
+    toastMessage += ` ${skipped} rules upgrade skipped.`;
   }
   if (failed > 0) {
-    toastMessage += ` ${failed} rules installation failed.`;
+    toastMessage += ` ${failed} rules upgrade failed.`;
   }
   return toastMessage;
 };

@@ -8,6 +8,7 @@
 import type { EuiBasicTableColumn, EuiTableActionsColumnType } from '@elastic/eui';
 import { EuiButtonEmpty, EuiBadge, EuiText } from '@elastic/eui';
 import React, { useMemo } from 'react';
+import type { usePerformUpgradeSpecificRules } from '../../../../rule_management/logic/prebuilt_rules/use_perform_rule_upgrade';
 import type { RuleUpgradeInfoForReview } from '../../../../../../common/detection_engine/prebuilt_rules/api/review_rule_upgrade/response_schema';
 import {
   DEFAULT_RELATIVE_DATE_THRESHOLD,
@@ -27,6 +28,7 @@ export type TableColumn =
   | EuiTableActionsColumnType<RuleUpgradeInfoForReview>;
 
 interface ColumnsProps {
+  upgradeSpecificRules: ReturnType<typeof usePerformUpgradeSpecificRules>['mutateAsync'];
   hasCRUDPermissions: boolean;
 }
 
@@ -92,29 +94,43 @@ const INTEGRATIONS_COLUMN: TableColumn = {
   truncateText: true,
 };
 
-const INSTALL_BUTTON_COLUMN: TableColumn = {
+type UpgradeRowRule = (
+  value: RuleUpgradeInfoForReview['rule_id'],
+  item: RuleUpgradeInfoForReview
+) => void;
+
+const createUpgradelButtonColumn = (upgradeRowRule: UpgradeRowRule): TableColumn => ({
   field: 'rule_id',
   name: '',
-  render: (value: Rule['rule_id']) => {
+  render: (value: RuleUpgradeInfoForReview['rule_id'], item: RuleUpgradeInfoForReview) => {
     return (
-      <EuiButtonEmpty
-        size="s"
-        onClick={() => {
-          alert(value);
-        }}
-      >
+      <EuiButtonEmpty size="s" onClick={() => upgradeRowRule(value, item)}>
         {i18n.UPGRADE_RULE_BUTTON}
       </EuiButtonEmpty>
     );
   },
   width: '10%',
-};
+});
 
 export const useUpgradePrebuiltRulesTableColumns = ({
+  upgradeSpecificRules,
   hasCRUDPermissions,
 }: ColumnsProps): TableColumn[] => {
   const ruleNameColumn = useRuleNameColumn();
   const [showRelatedIntegrations] = useUiSetting$<boolean>(SHOW_RELATED_INTEGRATIONS_SETTING);
+
+  const upgradeRowRule = useMemo(
+    () => async (value: RuleUpgradeInfoForReview['rule_id'], item: RuleUpgradeInfoForReview) => {
+      await upgradeSpecificRules([
+        {
+          rule_id: value,
+          version: item.rule.version,
+          revision: item.rule.version,
+        },
+      ]);
+    },
+    [upgradeSpecificRules]
+  );
 
   return useMemo(
     () => [
@@ -160,8 +176,8 @@ export const useUpgradePrebuiltRulesTableColumns = ({
         width: '18%',
         truncateText: true,
       },
-      ...(hasCRUDPermissions ? [INSTALL_BUTTON_COLUMN] : []),
+      ...(hasCRUDPermissions ? [createUpgradelButtonColumn(upgradeRowRule)] : []),
     ],
-    [hasCRUDPermissions, ruleNameColumn, showRelatedIntegrations]
+    [hasCRUDPermissions, ruleNameColumn, showRelatedIntegrations, upgradeRowRule]
   );
 };

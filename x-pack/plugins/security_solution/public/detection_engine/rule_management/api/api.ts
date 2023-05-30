@@ -13,6 +13,7 @@ import { INTERNAL_ALERTING_API_FIND_RULES_PATH } from '@kbn/alerting-plugin/comm
 import type { BulkInstallPackagesResponse } from '@kbn/fleet-plugin/common';
 import { epmRouteService } from '@kbn/fleet-plugin/common';
 import type { InstallPackageResponse } from '@kbn/fleet-plugin/common/types';
+import type { PerformRuleUpgradeResponseBody } from '../../../../common/detection_engine/prebuilt_rules/api/perform_rule_upgrade/perform_rule_upgrade_response_schema';
 import type { InstallSpecificRulesRequest } from '../../../../common/detection_engine/prebuilt_rules/api/perform_rule_installation/perform_rule_installation_request_schema';
 import type { PerformRuleInstallationResponseBody } from '../../../../common/detection_engine/prebuilt_rules/api/perform_rule_installation/perform_rule_installation_response_schema';
 import type { GetPrebuiltRulesStatusResponseBody } from '../../../../common/detection_engine/prebuilt_rules/api/get_prebuilt_rules_status/response_schema';
@@ -637,20 +638,6 @@ export const reviewRuleUpgrade = async ({
   });
 
 /**
- * Perform prebuilt rules upgrade
- *
- * @param signal AbortSignal for cancelling request
- *
- * @throws An error if response is not OK
- */
-// TODO: Add return Promise<PerformRuleUpgradeResponseBody> when API added
-export const performRuleUpgrade = async ({ signal }: { signal: AbortSignal | undefined }) =>
-  KibanaServices.get().http.fetch(PERFORM_RULE_UPGRADE_URL, {
-    method: 'POST',
-    signal,
-  });
-
-/**
  * Review prebuilt rules install (new rules)
  *
  * @param signal AbortSignal for cancelling request
@@ -690,5 +677,33 @@ export const performInstallSpecificRules = async (
     body: JSON.stringify({
       mode: 'SPECIFIC_RULES',
       rules,
+    }),
+  });
+
+/**
+ * Perform prebuilt rules upgrade
+ *
+ * @param signal AbortSignal for cancelling request
+ *
+ * @throws An error if response is not OK
+ */
+export const performUpgradeAllRules = async (): Promise<PerformRuleUpgradeResponseBody> =>
+  KibanaServices.get().http.fetch(PERFORM_RULE_UPGRADE_URL, {
+    method: 'POST',
+    body: JSON.stringify({
+      mode: 'ALL_RULES',
+      pick_version: 'TARGET',
+    }),
+  });
+
+export const performUpgradeSpecificRules = async (
+  rules: InstallSpecificRulesRequest['rules']
+): Promise<PerformRuleUpgradeResponseBody> =>
+  KibanaServices.get().http.fetch(PERFORM_RULE_INSTALLATION_URL, {
+    method: 'POST',
+    body: JSON.stringify({
+      mode: 'SPECIFIC_RULES',
+      rules,
+      pick_version: 'TARGET', // Setting 'TARGET' only for Milestone 2
     }),
   });

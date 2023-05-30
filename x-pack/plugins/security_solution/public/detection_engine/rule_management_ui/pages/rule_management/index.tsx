@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiToolTip } from '@elastic/eui';
 
 import { APP_UI_ID } from '../../../../../common/constants';
@@ -46,6 +46,7 @@ import {
   NEW_PREBUILT_RULES_CALLOUT_TITLE,
   UPDATE_RULES_CALLOUT_TITLE,
 } from '../../components/mini_callout/translations';
+import { useInvalidateFetchPrebuiltRulesStatusQueryNew } from '../../../rule_management/api/hooks/prebuilt_rules/use_fetch_prebuilt_rules_status_query_new';
 
 const RulesPageComponent: React.FC = () => {
   const [isImportModalVisible, showImportModal, hideImportModal] = useBoolState();
@@ -53,6 +54,7 @@ const RulesPageComponent: React.FC = () => {
   const { navigateToApp } = useKibana().services.application;
   const invalidateFindRulesQuery = useInvalidateFindRulesQuery();
   const invalidateFetchRuleManagementFilters = useInvalidateFetchRuleManagementFiltersQuery();
+  const invalidateRuleStatuses = useInvalidateFetchPrebuiltRulesStatusQueryNew();
   const invalidateRules = useCallback(() => {
     invalidateFindRulesQuery();
     invalidateFetchRuleManagementFilters();
@@ -62,11 +64,16 @@ const RulesPageComponent: React.FC = () => {
 
   const rulesToInstallCount = prebuiltRulesStatus?.num_prebuilt_rules_installed ?? 0;
   const rulesToUpgradeCount = prebuiltRulesStatus?.num_prebuilt_rules_to_upgrade ?? 0;
-  const rulesInstalledCount = prebuiltRulesStatus?.num_prebuilt_rules_installed ?? 0;
 
   // Check against rulesInstalledCount since we don't want to show banners if we're showing the empty prompt
-  const shouldDisplayNewRulesCallout = rulesToInstallCount > 0 && rulesInstalledCount === 0;
+  const shouldDisplayNewRulesCallout = rulesToInstallCount > 0;
   const shouldDisplayUpdateRulesCallout = rulesToUpgradeCount > 0;
+
+  // Invalidate rule statuses to fetch available rules for installation and upgrade
+  // when navigating to the installed rules tab after installing or upgrading rules
+  useEffect(() => {
+    invalidateRuleStatuses();
+  }, [invalidateRuleStatuses]);
 
   const [
     {

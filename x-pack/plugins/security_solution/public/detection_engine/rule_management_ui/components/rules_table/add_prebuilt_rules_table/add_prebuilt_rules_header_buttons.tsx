@@ -12,13 +12,19 @@ import { useAddPrebuiltRulesTableContext } from './add_prebuilt_rules_table_cont
 
 export const AddPrebuiltRulesHeaderButtons = () => {
   const {
-    state: { selectedRules },
-    actions: { installAllRules },
+    state: { selectedRules, isInstallSpecificRulesLoading, isInstallAllRulesLoading },
+    actions: { installAllRules, installSpecificRules },
   } = useAddPrebuiltRulesTableContext();
 
-  const installRules = useCallback(() => {
-    installAllRules();
+  const installRules = useCallback(async () => {
+    await installAllRules();
   }, [installAllRules]);
+
+  const installSelectedRules = useCallback(async () => {
+    await installSpecificRules(
+      selectedRules.map((rule) => ({ rule_id: rule.rule_id, version: rule.version }))
+    );
+  }, [installSpecificRules, selectedRules]);
 
   const numberOfSelectedRules = selectedRules.length ?? 0;
   const shouldDisplayInstallSelectedRulesButton = numberOfSelectedRules > 0;
@@ -27,11 +33,21 @@ export const AddPrebuiltRulesHeaderButtons = () => {
     <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap={true}>
       {shouldDisplayInstallSelectedRulesButton ? (
         <EuiFlexItem grow={false}>
-          <EuiButton>{i18n.INSTALL_SELECTED_RULES(numberOfSelectedRules)}</EuiButton>
+          <EuiButton
+            onClick={installSelectedRules}
+            disabled={isInstallSpecificRulesLoading || isInstallAllRulesLoading}
+          >
+            {i18n.INSTALL_SELECTED_RULES(numberOfSelectedRules)}
+          </EuiButton>
         </EuiFlexItem>
       ) : null}
       <EuiFlexItem grow={false}>
-        <EuiButton fill iconType="plusInCircle" onClick={installRules}>
+        <EuiButton
+          fill
+          iconType="plusInCircle"
+          onClick={installRules}
+          disabled={isInstallAllRulesLoading}
+        >
           {i18n.INSTALL_ALL}
         </EuiButton>
       </EuiFlexItem>

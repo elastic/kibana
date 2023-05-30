@@ -16,11 +16,8 @@ import React from 'react';
 import { PrePackagedRulesPrompt } from '../../../../../detections/components/rules/pre_packaged_rules/load_empty_prompt';
 
 import * as i18n from '../../../../../detections/pages/detection_engine/rules/translations';
-import { useUserData } from '../../../../../detections/components/user_info';
-import { hasUserCRUDPermission } from '../../../../../common/utils/privileges';
 import { useIsUpgradingSecurityPackages } from '../../../../rule_management/logic/use_upgrade_security_packages';
 import { useUpgradePrebuiltRulesTableContext } from './upgrade_prebuilt_rules_table_context';
-import { useUpgradePrebuiltRulesTableColumns } from './use_upgrade_prebuilt_rules_table_columns';
 
 const NO_ITEMS_MESSAGE = (
   <EuiEmptyPrompt title={<h3>{i18n.NO_RULES}</h3>} titleSize="xs" body={i18n.NO_RULES_BODY} />
@@ -30,26 +27,29 @@ const NO_ITEMS_MESSAGE = (
  * Table Component for displaying rules that have available updates
  */
 export const UpgradePrebuiltRulesTable = React.memo(() => {
-  const [{ canUserCRUD }] = useUserData();
-  const hasPermissions = hasUserCRUDPermission(canUserCRUD);
   const isUpgradingSecurityPackages = useIsUpgradingSecurityPackages();
 
   const upgradeRulesTableContext = useUpgradePrebuiltRulesTableContext();
 
   const {
-    state: { rules, pagination, selectionValue, filters, isFetched, isLoading, isRefetching },
+    state: {
+      rules,
+      pagination,
+      selectionValue,
+      filters,
+      isFetched,
+      isLoading,
+      isRefetching,
+      rulesColumns,
+    },
     actions: { reFetchRules, onTableChange },
   } = upgradeRulesTableContext;
-
-  const rulesColumns = useUpgradePrebuiltRulesTableColumns({
-    hasCRUDPermissions: hasPermissions,
-  });
 
   const isTableEmpty = rules.length === 0;
   const shouldShowRulesTable = !isLoading && !isTableEmpty;
 
   const tableProps = {
-    'data-test-subj': 'rules-updates-table',
+    'data-test-subj': 'rules-upgrades-table',
     columns: rulesColumns,
   };
 
@@ -86,7 +86,9 @@ export const UpgradePrebuiltRulesTable = React.memo(() => {
                 itemId="rule_id"
                 {...tableProps}
               />
-            ) : null}
+            ) : (
+              NO_ITEMS_MESSAGE
+            )}
           </>
         }
       />
