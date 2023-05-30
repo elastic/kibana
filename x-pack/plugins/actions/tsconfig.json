@@ -36,6 +36,7 @@
     "@kbn/core-http-server-mocks",
     "@kbn/tinymath",
     "@kbn/core-saved-objects-utils-server",
+    "@kbn/stack-connectors-plugin",
   ],
   "exclude": [
     "target/**/*",
