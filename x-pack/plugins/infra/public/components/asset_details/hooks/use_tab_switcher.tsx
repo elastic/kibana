@@ -8,12 +8,12 @@
 import { useState } from 'react';
 import createContainer from 'constate';
 import { useLazyRef } from '../../../hooks/use_lazy_ref';
-import { TabIds } from '../types';
+import type { TabIds } from '../types';
 
 export function useTabSwitcher({ intitalActiveTabId }: { intitalActiveTabId?: TabIds }) {
   const [activeTabId, setActiveTabId] = useState<TabIds | undefined>(intitalActiveTabId);
 
-  // This map allow to keep track of which tabs content have been rendered the first time.
+  // This set keeps track of which tabs content have been rendered the first time.
   // We need it in order to load a tab content only if it gets clicked, and then keep it in the DOM for performance improvement.
   const renderedTabsSet = useLazyRef(() => new Set([intitalActiveTabId]));
 

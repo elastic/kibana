@@ -5,16 +5,15 @@
  * 2.0.
  */
 
+import React from 'react';
 import { EuiButton, EuiCard } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { Meta, Story } from '@storybook/react/types-6-0';
-import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { DecorateWithKibanaContext } from './asset_details.story_decorators';
-import type { AssetDetailsProps } from './types';
 import { AssetDetails } from './asset_details';
 import { decorateWithGlobalStorybookThemeProviders } from '../../test_utils/use_global_storybook_theme';
-import { FlyoutTabIds } from './types';
+import { FlyoutTabIds, type AssetDetailsProps } from './types';
 
 export default {
   title: 'infra/Asset Details View/Asset Details Embeddable',

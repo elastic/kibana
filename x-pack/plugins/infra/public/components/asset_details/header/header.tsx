@@ -23,15 +23,15 @@ import type { AssetDetailsProps } from '../types';
 import { LinkToApmServices } from '../links/link_to_apm_services';
 import { LinkToUptime } from '../links/link_to_uptime';
 import { useTabSwitcherContext } from '../hooks/use_tab_switcher';
-import { TabIds } from '../types';
+import type { TabIds } from '../types';
 type Props = Pick<
   AssetDetailsProps,
   'node' | 'nodeType' | 'links' | 'tabs' | 'onTabsStateChange'
 > & {
-  inFlyout: boolean;
+  compact: boolean;
 };
 
-export const Header = ({ nodeType, node, tabs, links, inFlyout, onTabsStateChange }: Props) => {
+export const Header = ({ nodeType, node, tabs, links, compact, onTabsStateChange }: Props) => {
   const { euiTheme } = useEuiTheme();
   const { showTab, activeTabId } = useTabSwitcherContext();
 
@@ -65,8 +65,8 @@ export const Header = ({ nodeType, node, tabs, links, inFlyout, onTabsStateChang
 
   return (
     <>
-      <EuiFlexGroup gutterSize="m" responsive={true} justifyContent="spaceBetween">
-        {!inFlyout && (
+      <EuiFlexGroup gutterSize="m" justifyContent="spaceBetween">
+        {!compact && (
           <EuiShowFor sizes={['l', 'xl']}>
             <EuiFlexItem grow={1} />
           </EuiShowFor>
@@ -79,12 +79,12 @@ export const Header = ({ nodeType, node, tabs, links, inFlyout, onTabsStateChang
             }
           `}
         >
-          <EuiTitle size={inFlyout ? 'xs' : 'l'}>
+          <EuiTitle size={compact ? 'xs' : 'l'}>
             <h1>{node.name}</h1>
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem
-          grow={inFlyout ? 0 : 1}
+          grow={compact ? 0 : 1}
           css={css`
             align-items: flex-start;
             ${useEuiMinBreakpoint('m')} {
@@ -98,20 +98,20 @@ export const Header = ({ nodeType, node, tabs, links, inFlyout, onTabsStateChang
             justifyContent="flexEnd"
             alignItems="center"
             css={css`
-              margin-right: ${inFlyout ? euiTheme.size.l : 0};
+              margin-right: ${compact ? euiTheme.size.l : 0};
             `}
           >
             {headerLinks}
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiSpacer size={inFlyout ? 's' : 'l'} />
+      <EuiSpacer size={compact ? 's' : 'l'} />
       <EuiTabs
-        bottomBorder={!inFlyout}
+        bottomBorder={!compact}
         css={css`
-          margin-bottom: calc(${inFlyout ? '-1 *' : ''} (${euiTheme.size.l} + 1px));
+          margin-bottom: calc(${compact ? '-1 *' : ''} (${euiTheme.size.l} + 1px));
         `}
-        size={inFlyout ? 's' : 'l'}
+        size={compact ? 's' : 'l'}
       >
         {tabEntries}
       </EuiTabs>

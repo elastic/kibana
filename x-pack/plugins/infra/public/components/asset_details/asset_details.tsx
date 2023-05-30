@@ -58,7 +58,7 @@ export const AssetDetails = ({
           <Header
             node={node}
             nodeType={nodeType}
-            inFlyout={renderMode.showInFlyout}
+            compact={renderMode.showInFlyout}
             tabs={tabs}
             links={links}
             onTabsStateChange={onTabsStateChange}
