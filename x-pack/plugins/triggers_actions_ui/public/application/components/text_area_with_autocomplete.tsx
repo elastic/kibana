@@ -48,6 +48,28 @@ const convertArrayToObject = (arr?: string[]) => {
   return result;
 };
 
+const filterSuggestions = (obj: Record<string, unknown>, propertyPath: string) => {
+  const keys = propertyPath.split('.');
+
+  if (keys.length === 1) {
+    return Object.keys(obj).filter((suggestion) =>
+      suggestion.toLowerCase().startsWith(keys[0].toLowerCase())
+    );
+  }
+  let currentObj: Record<string, unknown> = obj;
+
+  for (const key of keys.slice(0, -1)) {
+    currentObj = currentObj[key] as Record<string, unknown>;
+
+    if (!currentObj) {
+      return [];
+    }
+  }
+  return Object.keys(currentObj).filter((suggestion) =>
+    suggestion.toLowerCase().startsWith(keys[keys.length - 1].toLowerCase())
+  );
+};
+
 export const TextAreaWithAutocomplete: React.FunctionComponent<Props> = ({
   messageVariables,
   paramsProperty,
@@ -98,28 +120,6 @@ export const TextAreaWithAutocomplete: React.FunctionComponent<Props> = ({
       setMatches([]);
     }
     editAction(paramsProperty, inputValue, index);
-  };
-
-  const filterSuggestions = (obj: Record<string, unknown>, propertyPath: string) => {
-    const keys = propertyPath.split('.');
-
-    if (keys.length === 1) {
-      return Object.keys(obj).filter((suggestion) =>
-        suggestion.toLowerCase().startsWith(keys[0].toLowerCase())
-      );
-    }
-    let currentObj: Record<string, unknown> = obj;
-
-    for (const key of keys.slice(0, -1)) {
-      currentObj = currentObj[key] as Record<string, unknown>;
-
-      if (!currentObj) {
-        return [];
-      }
-    }
-    return Object.keys(currentObj).filter((suggestion) =>
-      suggestion.toLowerCase().startsWith(keys[keys.length - 1].toLowerCase())
-    );
   };
 
   const onOptionPick = (newOptions: EuiSelectableOption[]) => {
