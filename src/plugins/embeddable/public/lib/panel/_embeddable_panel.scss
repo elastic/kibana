@@ -19,6 +19,9 @@
     flex: 1 1 100%;
     z-index: 1;
     min-height: 0; // Absolute must for Firefox to scroll contents
+    border-bottom-left-radius: $euiBorderRadius;
+    border-bottom-right-radius: $euiBorderRadius;
+    overflow: hidden;
 
     &[data-error] {
       display: none;

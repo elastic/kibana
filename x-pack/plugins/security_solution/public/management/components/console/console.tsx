@@ -77,6 +77,7 @@ const ConsoleWindow = styled.div`
     &-historyViewport {
       height: 100%;
       overflow-x: hidden;
+      white-space: pre-wrap;
     }
 
     // min-width setting is needed for flex items to ensure that overflow works as expected

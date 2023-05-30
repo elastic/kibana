@@ -1,7 +1,7 @@
 {
   "type": "plugin",
   "id": "@kbn/serverless-search",
-  "owner": "@elastic/appex-sharedux",
+  "owner": "@elastic/enterprise-search-frontend",
   "description": "Serverless customizations for search.",
   "plugin": {
     "id": "serverlessSearch",
@@ -14,10 +14,20 @@
     ],
     "requiredPlugins": [
       "serverless",
-      "enterpriseSearch",
-      "management"
+      "cloud",
+      "management",
+      "security",
+      "share",
+      "devTools",
+      "console",
+      "searchprofiler",
+      "grokdebugger",
+      "painlessLab",
+      "discover",
+      "dashboard",
+      "visualizations",
     ],
     "optionalPlugins": [],
-    "requiredBundles": []
+    "requiredBundles": ["kibanaReact"]
   }
 }

@@ -18,7 +18,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useContext, useEffect, useMemo, useRef, useState, FC } from 'react';
 import useIntersection from 'react-use/lib/useIntersection';
-import { useFetcher } from '@kbn/observability-plugin/public';
+import { useFetcher } from '@kbn/observability-shared-plugin/public';
 import {
   isScreenshotRef as isAScreenshotRef,
   ScreenshotRefImageData,

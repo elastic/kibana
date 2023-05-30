@@ -13,9 +13,8 @@ import type {
   AllTagsFindRequest,
   AllReportersFindRequest,
   CasesByAlertId,
-  Case,
-  CasesBulkGetRequestCertainFields,
-  CasesBulkGetResponseCertainFields,
+  CasesBulkGetRequest,
+  CasesBulkGetResponse,
 } from '../../../common/api';
 import type { CasesClient } from '../client';
 import type { CasesClientInternal } from '../client_internal';
@@ -65,9 +64,7 @@ export interface CasesSubClient {
   /**
    * Retrieves multiple cases with the specified IDs.
    */
-  bulkGet<Field extends keyof Case = keyof Case>(
-    params: CasesBulkGetRequestCertainFields<Field>
-  ): Promise<CasesBulkGetResponseCertainFields<Field>>;
+  bulkGet(params: CasesBulkGetRequest): Promise<CasesBulkGetResponse>;
   /**
    * Pushes a specific case to an external system.
    */
@@ -112,7 +109,7 @@ export const createCasesSubClient = (
     get: (params: GetParams) => get(params, clientArgs),
     resolve: (params: GetParams) => resolve(params, clientArgs),
     bulkGet: (params) => bulkGet(params, clientArgs),
-    push: (params: PushParams) => push(params, clientArgs, casesClient, casesClientInternal),
+    push: (params: PushParams) => push(params, clientArgs, casesClient),
     update: (cases: CasesPatchRequest) => update(cases, clientArgs),
     delete: (ids: string[]) => deleteCases(ids, clientArgs),
     getTags: (params: AllTagsFindRequest) => getTags(params, clientArgs),

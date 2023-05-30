@@ -7,28 +7,31 @@
 
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
-import type { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient, SavedObject } from '@kbn/core/server';
 
-import type { InstallablePackage } from '../../../../common';
+import type { InstallablePackage, Installation } from '../../../../common';
 import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../../common';
 
 import { sendTelemetryEvents } from '../../upgrade_sender';
 import { licenseService } from '../../license';
 import { auditLoggingService } from '../../audit_logging';
+import { appContextService } from '../../app_context';
+import { ConcurrentInstallOperationError, FleetError } from '../../../errors';
 
 import * as Registry from '../registry';
 
-import { createInstallation, installPackage } from './install';
+import { createInstallation, handleInstallPackageFailure, installPackage } from './install';
 import * as install from './_install_package';
 import { getBundledPackages } from './bundled_packages';
 
 import * as obj from '.';
 
 jest.mock('../../app_context', () => {
+  const logger = { error: jest.fn(), debug: jest.fn(), warn: jest.fn(), info: jest.fn() };
   return {
     appContextService: {
       getLogger: jest.fn(() => {
-        return { error: jest.fn(), debug: jest.fn(), warn: jest.fn() };
+        return logger;
       }),
       getTelemetryEventsSender: jest.fn(),
       getSavedObjects: jest.fn(() => ({
@@ -70,8 +73,8 @@ jest.mock('../archive', () => {
 });
 jest.mock('../../audit_logging');
 
-const mockGetBundledPackages = getBundledPackages as jest.MockedFunction<typeof getBundledPackages>;
-const mockedAuditLoggingService = auditLoggingService as jest.Mocked<typeof auditLoggingService>;
+const mockGetBundledPackages = jest.mocked(getBundledPackages);
+const mockedAuditLoggingService = jest.mocked(auditLoggingService);
 
 describe('createInstallation', () => {
   const soClient = savedObjectsClientMock.create();
@@ -240,9 +243,7 @@ describe('install', () => {
     });
 
     it('should send telemetry on install failure, async error', async () => {
-      jest
-        .spyOn(install, '_installPackage')
-        .mockImplementation(() => Promise.reject(new Error('error')));
+      jest.mocked(install._installPackage).mockRejectedValue(new Error('error'));
       jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
       await installPackage({
         spaceId: DEFAULT_SPACE_ID,
@@ -382,9 +383,7 @@ describe('install', () => {
     });
 
     it('should send telemetry on install failure, async error', async () => {
-      jest
-        .spyOn(install, '_installPackage')
-        .mockImplementation(() => Promise.reject(new Error('error')));
+      jest.mocked(install._installPackage).mockRejectedValue(new Error('error'));
       await installPackage({
         spaceId: DEFAULT_SPACE_ID,
         installSource: 'upload',
@@ -405,5 +404,149 @@ describe('install', () => {
         status: 'failure',
       });
     });
+  });
+});
+describe('handleInstallPackageFailure', () => {
+  const mockedLogger = jest.mocked(appContextService.getLogger());
+  beforeEach(() => {
+    jest.mocked(install._installPackage).mockClear();
+    jest.mocked(install._installPackage).mockResolvedValue({} as any);
+    mockedLogger.error.mockClear();
+    mockGetBundledPackages.mockResolvedValue([]);
+    jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
+    jest.spyOn(Registry, 'splitPkgKey').mockImplementation((pkgKey: string) => {
+      const [pkgName, pkgVersion] = pkgKey.split('-');
+      return { pkgName, pkgVersion };
+    });
+    jest
+      .spyOn(Registry, 'pkgToPkgKey')
+      .mockImplementation((pkg: { name: string; version: string }) => {
+        return `${pkg.name}-${pkg.version}`;
+      });
+    jest
+      .spyOn(Registry, 'fetchFindLatestPackageOrThrow')
+      .mockImplementation(() => Promise.resolve({ version: '2.0.0' } as any));
+    jest.spyOn(Registry, 'getPackage').mockImplementation((pkgName: string, pkgVersion: string) =>
+      Promise.resolve({
+        packageInfo: { name: pkgName, version: pkgVersion },
+      } as any)
+    );
+  });
+  const pkgName = 'test_package';
+
+  it('should do nothing if error is ', async () => {
+    const savedObjectsClient = savedObjectsClientMock.create();
+
+    const installedPkg: SavedObject<Installation> = {
+      id: 'test-package',
+      references: [],
+      attributes: {
+        name: pkgName,
+        version: '1.0.0',
+        install_version: '1.0.0',
+        format_version: '1.0.0',
+        title: 'Test Package',
+        description: 'A package for testing',
+        owner: {
+          github: 'elastic',
+        },
+      },
+    } as any;
+    await handleInstallPackageFailure({
+      savedObjectsClient,
+      error: new ConcurrentInstallOperationError('test 123'),
+      esClient: {} as ElasticsearchClient,
+      installedPkg,
+      pkgName,
+      pkgVersion: '2.0.0',
+      spaceId: 'default',
+    });
+
+    expect(mockedLogger.error).not.toBeCalled();
+    expect(install._installPackage).not.toBeCalled();
+  });
+
+  it('Should rollback on upgrade on FleetError', async () => {
+    const savedObjectsClient = savedObjectsClientMock.create();
+
+    const installedPkg: SavedObject<Installation> = {
+      id: 'test-package',
+      references: [],
+      attributes: {
+        name: pkgName,
+        version: '1.0.0',
+        install_version: '1.0.0',
+        format_version: '1.0.0',
+        title: 'Test Package',
+        description: 'A package for testing',
+        owner: {
+          github: 'elastic',
+        },
+      },
+    } as any;
+    await handleInstallPackageFailure({
+      savedObjectsClient,
+      error: new FleetError('test 123'),
+      esClient: {} as ElasticsearchClient,
+      installedPkg,
+      pkgName,
+      pkgVersion: '2.0.0',
+      spaceId: 'default',
+    });
+
+    expect(mockedLogger.error).toBeCalledTimes(1);
+    expect(mockedLogger.error).toBeCalledWith(
+      'rolling back to test_package-1.0.0 after error installing test_package-2.0.0'
+    );
+    expect(install._installPackage).toBeCalledTimes(1);
+    expect(install._installPackage).toBeCalledWith(
+      expect.objectContaining({
+        packageInfo: expect.objectContaining({ name: pkgName, version: '1.0.0' }),
+      })
+    );
+  });
+
+  it('Should update the installation status to: install_failed on rollback error', async () => {
+    const savedObjectsClient = savedObjectsClientMock.create();
+
+    jest.mocked(install._installPackage).mockRejectedValue(new Error('test error'));
+
+    const installedPkg: SavedObject<Installation> = {
+      id: 'test-package',
+      references: [],
+      attributes: {
+        name: pkgName,
+        version: '1.0.0',
+        install_version: '1.0.0',
+        format_version: '1.0.0',
+        title: 'Test Package',
+        description: 'A package for testing',
+        owner: {
+          github: 'elastic',
+        },
+      },
+    } as any;
+    await handleInstallPackageFailure({
+      savedObjectsClient,
+      error: new Error('test 123'),
+      esClient: {} as ElasticsearchClient,
+      installedPkg,
+      pkgName,
+      pkgVersion: '2.0.0',
+      spaceId: 'default',
+    });
+
+    expect(mockedLogger.error).toBeCalledWith(
+      'rolling back to test_package-1.0.0 after error installing test_package-2.0.0'
+    );
+    expect(mockedLogger.error).toBeCalledWith(
+      expect.stringMatching(/failed to uninstall or rollback package after installation error/)
+    );
+    expect(install._installPackage).toBeCalledTimes(1);
+    expect(install._installPackage).toBeCalledWith(
+      expect.objectContaining({
+        packageInfo: expect.objectContaining({ name: pkgName, version: '1.0.0' }),
+      })
+    );
   });
 });

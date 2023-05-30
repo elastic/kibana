@@ -57,7 +57,7 @@ import { registerEndpointRoutes } from './endpoint/routes/metadata';
 import { registerPolicyRoutes } from './endpoint/routes/policy';
 import { registerActionRoutes } from './endpoint/routes/actions';
 import { registerEndpointSuggestionsRoutes } from './endpoint/routes/suggestions';
-import { actionCreateService, EndpointArtifactClient, ManifestManager } from './endpoint/services';
+import { EndpointArtifactClient, ManifestManager } from './endpoint/services';
 import { EndpointAppContextService } from './endpoint/endpoint_app_context_services';
 import type { EndpointAppContext } from './endpoint/types';
 import { initUsageCollectors } from './usage';
@@ -101,6 +101,7 @@ import type {
 } from './plugin_contract';
 import { EndpointFleetServicesFactory } from './endpoint/services/fleet';
 import { featureUsageService } from './endpoint/services/feature_usage';
+import { actionCreateService } from './endpoint/services/actions';
 import { setIsElasticCloudDeployment } from './lib/telemetry/helpers';
 import { artifactService } from './lib/telemetry/artifact';
 import { endpointFieldsProvider } from './search_strategy/endpoint_fields';
@@ -129,8 +130,10 @@ export class Plugin implements ISecuritySolutionPlugin {
   private endpointContext: EndpointAppContext;
 
   constructor(context: PluginInitializerContext) {
+    const serverConfig = createConfig(context);
+
     this.pluginContext = context;
-    this.config = createConfig(context);
+    this.config = serverConfig;
     this.logger = context.logger.get();
     this.appClientFactory = new AppClientFactory();
 
@@ -144,6 +147,9 @@ export class Plugin implements ISecuritySolutionPlugin {
       logFactory: this.pluginContext.logger,
       service: this.endpointAppContextService,
       config: (): Promise<ConfigType> => Promise.resolve(this.config),
+      get serverConfig() {
+        return serverConfig;
+      },
       experimentalFeatures: this.config.experimentalFeatures,
     };
   }
@@ -246,7 +252,7 @@ export class Plugin implements ISecuritySolutionPlugin {
     const queryRuleAdditionalOptions: CreateQueryRuleAdditionalOptions = {
       scheduleNotificationResponseActionsService: getScheduleNotificationResponseActionsService({
         endpointAppContextService: this.endpointAppContextService,
-        osqueryCreateAction: plugins.osquery.osqueryCreateAction,
+        osqueryCreateActionService: plugins.osquery.createActionService,
       }),
     };
 
@@ -423,7 +429,14 @@ export class Plugin implements ISecuritySolutionPlugin {
       // from where authz can be derived)
       false
     );
-    const { authz, agentService, packageService, packagePolicyService, agentPolicyService } =
+    const {
+      authz,
+      agentService,
+      packageService,
+      packagePolicyService,
+      agentPolicyService,
+      createFilesClient,
+    } =
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       plugins.fleet!;
     let manifestManager: ManifestManager | undefined;
@@ -474,6 +487,7 @@ export class Plugin implements ISecuritySolutionPlugin {
 
     this.endpointAppContextService.start({
       fleetAuthzService: authz,
+      createFleetFilesClient: createFilesClient,
       endpointMetadataService: new EndpointMetadataService(
         core.savedObjects,
         agentPolicyService,
@@ -505,8 +519,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       messageSigningService: plugins.fleet?.messageSigningService,
       actionCreateService: actionCreateService(
         core.elasticsearch.client.asInternalUser,
-        this.endpointContext,
-        licenseService
+        this.endpointContext
       ),
     });
 

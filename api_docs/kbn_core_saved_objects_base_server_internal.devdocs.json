@@ -154,6 +154,63 @@
     "functions": [
       {
         "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
+        "id": "def-common.aggregateMappingAdditions",
+        "type": "Function",
+        "tags": [],
+        "label": "aggregateMappingAdditions",
+        "description": [
+          "\nMerge the added mappings from the given list of model changes.\nNote: only changes of the `mappings_addition` type have mapping addition."
+        ],
+        "signature": [
+          "(changes: ",
+          {
+            "pluginId": "@kbn/core-saved-objects-server",
+            "scope": "common",
+            "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+            "section": "def-common.SavedObjectsModelChange",
+            "text": "SavedObjectsModelChange"
+          },
+          "[]) => ",
+          {
+            "pluginId": "@kbn/core-saved-objects-server",
+            "scope": "common",
+            "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+            "section": "def-common.SavedObjectsMappingProperties",
+            "text": "SavedObjectsMappingProperties"
+          }
+        ],
+        "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/model_version/aggregate_model_changes.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
+            "id": "def-common.aggregateMappingAdditions.$1",
+            "type": "Array",
+            "tags": [],
+            "label": "changes",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-saved-objects-server",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                "section": "def-common.SavedObjectsModelChange",
+                "text": "SavedObjectsModelChange"
+              },
+              "[]"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/model_version/aggregate_model_changes.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
         "id": "def-common.assertValidModelVersion",
         "type": "Function",
         "tags": [],
@@ -179,6 +236,64 @@
               "string | number"
             ],
             "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/model_version/conversion.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
+        "id": "def-common.buildModelVersionTransformFn",
+        "type": "Function",
+        "tags": [],
+        "label": "buildModelVersionTransformFn",
+        "description": [
+          "\nBuild the transform function  for given model version, by chaining the transformations from its model changes."
+        ],
+        "signature": [
+          "(modelChanges: ",
+          {
+            "pluginId": "@kbn/core-saved-objects-server",
+            "scope": "common",
+            "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+            "section": "def-common.SavedObjectsModelChange",
+            "text": "SavedObjectsModelChange"
+          },
+          "[]) => ",
+          {
+            "pluginId": "@kbn/core-saved-objects-server",
+            "scope": "common",
+            "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+            "section": "def-common.SavedObjectModelTransformationFn",
+            "text": "SavedObjectModelTransformationFn"
+          },
+          "<unknown, unknown>"
+        ],
+        "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/model_version/build_transform_fn.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
+            "id": "def-common.buildModelVersionTransformFn.$1",
+            "type": "Array",
+            "tags": [],
+            "label": "modelChanges",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-saved-objects-server",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                "section": "def-common.SavedObjectsModelChange",
+                "text": "SavedObjectsModelChange"
+              },
+              "[]"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/model_version/build_transform_fn.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -233,6 +348,55 @@
               }
             ],
             "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/model_version/version_compare.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
+        "id": "def-common.convertModelVersionBackwardConversionSchema",
+        "type": "Function",
+        "tags": [],
+        "label": "convertModelVersionBackwardConversionSchema",
+        "description": [],
+        "signature": [
+          "(schema: ",
+          {
+            "pluginId": "@kbn/core-saved-objects-server",
+            "scope": "common",
+            "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+            "section": "def-common.SavedObjectModelVersionForwardCompatibilitySchema",
+            "text": "SavedObjectModelVersionForwardCompatibilitySchema"
+          },
+          "<unknown, unknown>) => ",
+          "ConvertedSchema"
+        ],
+        "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/model_version/backward_conversion_schema.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
+            "id": "def-common.convertModelVersionBackwardConversionSchema.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "schema",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-saved-objects-server",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                "section": "def-common.SavedObjectModelVersionForwardCompatibilitySchema",
+                "text": "SavedObjectModelVersionForwardCompatibilitySchema"
+              },
+              "<unknown, unknown>"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/model_version/backward_conversion_schema.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1328,6 +1492,23 @@
           "\"conflict\" | \"greater\" | \"lesser\" | \"equal\""
         ],
         "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/model_version/version_compare.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
+        "id": "def-common.globalSwitchToModelVersionAt",
+        "type": "string",
+        "tags": [],
+        "label": "globalSwitchToModelVersionAt",
+        "description": [
+          "\nThe stack version where all types will be forced to switch to using the model version system."
+        ],
+        "signature": [
+          "\"8.10.0\""
+        ],
+        "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/model_version/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

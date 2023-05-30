@@ -13,7 +13,7 @@ import { i18n } from '@kbn/i18n';
 import { RiskScoreEntity } from '../../../../../common/search_strategy';
 import * as savedObjectsToCreate from '../saved_object';
 import type { BulkCreateSavedObjectsResult, SavedObjectTemplate } from '../types';
-import { findOrCreateRiskScoreTag } from './find_or_create_tag';
+import { createRiskScoreTag } from './create_risk_score_tag';
 
 export const bulkCreateSavedObjects = async <T = SavedObjectTemplate>({
   logger,
@@ -31,7 +31,7 @@ export const bulkCreateSavedObjects = async <T = SavedObjectTemplate>({
   const riskScoreEntity =
     savedObjectTemplate === 'userRiskScoreDashboards' ? RiskScoreEntity.user : RiskScoreEntity.host;
 
-  const tagResponse = await findOrCreateRiskScoreTag({
+  const tagResponse = await createRiskScoreTag({
     riskScoreEntity,
     logger,
     savedObjectsClient,

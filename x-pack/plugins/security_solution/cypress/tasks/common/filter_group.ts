@@ -49,6 +49,12 @@ export const editFilterGroupControls = () => {
   cy.get(FILTER_GROUP_CONTEXT_EDIT_CONTROLS).trigger('click');
 };
 
+export const cancelFieldEditing = () => {
+  cy.get(FILTER_GROUP_EDIT_CONTROLS_PANEL).should('be.visible');
+  cy.get(FILTER_GROUP_EDIT_CONTROL_PANEL_ITEMS.CANCEL).should('be.visible').trigger('click');
+  cy.get(FILTER_GROUP_EDIT_CONTROLS_PANEL).should('not.exist');
+};
+
 export const saveFilterGroupControls = () => {
   cy.get(FILTER_GROUP_SAVE_CHANGES).trigger('click');
   cy.get(FILTER_GROUP_SAVE_CHANGES).should('not.exist');

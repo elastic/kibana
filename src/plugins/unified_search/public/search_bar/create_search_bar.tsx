@@ -56,13 +56,22 @@ const defaultFiltersUpdated = (
 };
 
 // Respond to user changing the refresh settings
-const defaultOnRefreshChange = (queryService: QueryStart) => {
+const defaultOnRefreshChange = (
+  queryService: QueryStart,
+  onRefreshChange?: (payload: { isPaused: boolean; refreshInterval: number }) => void
+) => {
   const { timefilter } = queryService.timefilter;
   return (options: { isPaused: boolean; refreshInterval: number }) => {
     timefilter.setRefreshInterval({
       value: options.refreshInterval,
       pause: options.isPaused,
     });
+    if (onRefreshChange) {
+      onRefreshChange({
+        refreshInterval: options.refreshInterval,
+        isPaused: options.isPaused,
+      });
+    }
   };
 };
 
@@ -218,9 +227,10 @@ export function createSearchBar({
             filters={filters}
             query={query}
             onFiltersUpdated={defaultFiltersUpdated(data.query, props.onFiltersUpdated)}
-            onRefreshChange={defaultOnRefreshChange(data.query)}
+            onRefreshChange={defaultOnRefreshChange(data.query, props.onRefreshChange)}
             savedQuery={savedQuery}
             onQuerySubmit={defaultOnQuerySubmit(props, data.query, query)}
+            onRefresh={props.onRefresh}
             onClearSavedQuery={defaultOnClearSavedQuery(props, clearSavedQuery)}
             onSavedQueryUpdated={defaultOnSavedQueryUpdated(props, setSavedQuery)}
             onSaved={defaultOnSavedQueryUpdated(props, setSavedQuery)}

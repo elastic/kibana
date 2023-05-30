@@ -23,13 +23,14 @@ import {
   QueryDslQueryContainer,
   SearchTotalHits,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { AlertsFilter } from '@kbn/alerting-plugin/common';
+import { AlertsFilter, ISO_WEEKDAYS } from '@kbn/alerting-plugin/common';
 import { AlertHit, SummarizedAlerts } from '@kbn/alerting-plugin/server/types';
 import { ParsedTechnicalFields } from '../../common';
 import { ParsedExperimentalFields } from '../../common/parse_experimental_fields';
 import { IRuleDataClient, IRuleDataReader } from '../rule_data_client';
 
 const MAX_ALERT_DOCS_TO_RETURN = 100;
+
 export type AlertDocument = Partial<ParsedTechnicalFields & ParsedExperimentalFields>;
 
 interface CreateGetSummarizedAlertsFnOpts {
@@ -586,7 +587,10 @@ const generateAlertsFilterDSL = (alertsFilter: AlertsFilter): QueryDslQueryConta
             source:
               'params.days.contains(doc[params.datetimeField].value.withZoneSameInstant(ZoneId.of(params.timezone)).dayOfWeek.getValue())',
             params: {
-              days: alertsFilter.timeframe.days,
+              days:
+                alertsFilter.timeframe.days.length === 0
+                  ? ISO_WEEKDAYS
+                  : alertsFilter.timeframe.days,
               timezone: alertsFilter.timeframe.timezone,
               datetimeField: TIMESTAMP,
             },

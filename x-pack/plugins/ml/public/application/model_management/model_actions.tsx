@@ -394,16 +394,24 @@ export function useModelActions({
       },
       {
         name: (model) => {
-          const enabled = !isPopulatedObject(model.pipelines);
+          const hasPipelines = isPopulatedObject(model.pipelines);
+          const hasDeployments = model.state === MODEL_STATE.STARTED;
           return (
             <EuiToolTip
               position="left"
               content={
-                enabled
-                  ? null
-                  : i18n.translate('xpack.ml.trainedModels.modelsList.deleteDisabledTooltip', {
+                hasPipelines
+                  ? i18n.translate('xpack.ml.trainedModels.modelsList.deleteDisabledTooltip', {
                       defaultMessage: 'Model has associated pipelines',
                     })
+                  : hasDeployments
+                  ? i18n.translate(
+                      'xpack.ml.trainedModels.modelsList.deleteDisabledWithDeploymentsTooltip',
+                      {
+                        defaultMessage: 'Model has started deployments',
+                      }
+                    )
+                  : null
               }
             >
               <>
@@ -430,7 +438,7 @@ export function useModelActions({
         enabled: (item) => {
           // TODO check for permissions to delete ingest pipelines.
           // ATM undefined means pipelines fetch failed server-side.
-          return !isPopulatedObject(item.pipelines);
+          return item.state !== MODEL_STATE.STARTED && !isPopulatedObject(item.pipelines);
         },
       },
       {

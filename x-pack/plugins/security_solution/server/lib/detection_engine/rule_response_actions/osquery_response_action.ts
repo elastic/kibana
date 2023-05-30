@@ -13,8 +13,8 @@ import type { AlertsWithAgentType } from './types';
 
 export const osqueryResponseAction = (
   responseAction: RuleResponseOsqueryAction,
-  osqueryCreateAction: SetupPlugins['osquery']['osqueryCreateAction'],
-  { alerts, alertIds, agentIds }: AlertsWithAgentType
+  osqueryCreateActionService: SetupPlugins['osquery']['createActionService'],
+  { alerts, alertIds, agentIds }: Pick<AlertsWithAgentType, 'alerts' | 'alertIds' | 'agentIds'>
 ) => {
   const temporaryQueries = responseAction.params.queries?.length
     ? responseAction.params.queries
@@ -27,7 +27,7 @@ export const osqueryResponseAction = (
   const { savedQueryId, packId, queries, ecsMapping, ...rest } = responseAction.params;
 
   if (!containsDynamicQueries) {
-    return osqueryCreateAction({
+    return osqueryCreateActionService.create({
       ...rest,
       queries,
       ecs_mapping: ecsMapping,
@@ -37,7 +37,7 @@ export const osqueryResponseAction = (
     });
   }
   each(alerts, (alert) => {
-    return osqueryCreateAction(
+    return osqueryCreateActionService.create(
       {
         ...rest,
         queries,

@@ -53,7 +53,6 @@ describe('GetSLO', () => {
             service: 'irrelevant',
             transactionName: 'irrelevant',
             transactionType: 'irrelevant',
-            goodStatusCodes: ['2xx', '3xx', '4xx'],
             index: 'metrics-apm*',
           },
           type: 'sli.apm.transactionErrorRate',
