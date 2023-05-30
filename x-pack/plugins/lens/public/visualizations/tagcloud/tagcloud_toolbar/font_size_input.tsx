@@ -24,7 +24,10 @@ interface Props {
 }
 
 export function FontSizeInput(props: Props) {
-  const [fontSize, setFontSize] = useState<[number, number]>([props.minFontSize, props.maxFontSize]);
+  const [fontSize, setFontSize] = useState<[number, number]>([
+    props.minFontSize,
+    props.maxFontSize,
+  ]);
   const propagateOnChange = debounce((minFontSize: number, maxFontSize: number) => {
     props.onChange(minFontSize, maxFontSize);
   }, 150);
