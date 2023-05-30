@@ -97,7 +97,7 @@ const PageOverlayGlobalStyles = createGlobalStyle<{ theme: EuiTheme }>`
   // need to be adjusted slightly so that it still display below the header
   //-------------------------------------------------------------------------------------------
   body.kbnBody.kbnBody--projectLayout:not(.${PAGE_OVERLAY_DOCUMENT_BODY_FULLSCREEN_CLASSNAME}) .${PAGE_OVERLAY_CSS_CLASSNAME} {
-    top: calc((${({ theme: { eui } }) => eui.euiHeaderHeightCompensation}));
+    top: ${({ theme: { eui } }) => eui.euiHeaderHeightCompensation};
     height: calc(100% - (${({ theme: { eui } }) => eui.euiHeaderHeightCompensation}));
   }
 
