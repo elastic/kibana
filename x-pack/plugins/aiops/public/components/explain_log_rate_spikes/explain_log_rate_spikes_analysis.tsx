@@ -55,13 +55,13 @@ const groupResultsHelpMessage = i18n.translate(
   }
 );
 const groupResultsOffMessage = i18n.translate(
-  'xpack.aiops.spikeAnalysisTable.groupedSwitchLabel.groupResults',
+  'xpack.aiops.spikeAnalysisTable.groupedSwitchLabel.groupResultsOff',
   {
     defaultMessage: 'Off',
   }
 );
 const groupResultsOnMessage = i18n.translate(
-  'xpack.aiops.spikeAnalysisTable.groupedSwitchLabel.groupResults',
+  'xpack.aiops.spikeAnalysisTable.groupedSwitchLabel.groupResultsOn',
   {
     defaultMessage: 'On',
   }
@@ -243,10 +243,12 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
     {
       id: resultsGroupedOffId,
       label: groupResultsOffMessage,
+      'data-test-subj': 'aiopsExplainLogRateSpikesGroupSwitchOff',
     },
     {
       id: resultsGroupedOnId,
       label: groupResultsOnMessage,
+      'data-test-subj': 'aiopsExplainLogRateSpikesGroupSwitchOn',
     },
   ];
 
@@ -268,6 +270,9 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiButtonGroup
+                  data-test-subj={`aiopsExplainLogRateSpikesGroupSwitch${
+                    groupResults ? ' checked' : ''
+                  }`}
                   buttonSize="s"
                   isDisabled={disabledGroupResultsSwitch}
                   legend="Smart grouping"

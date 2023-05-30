@@ -95,7 +95,7 @@ export const ProgressControls: FC<ProgressControlProps> = ({
             <EuiFlexItem grow={false}>
               <EuiIcon type="checkInCircleFilled" color={euiTheme.colors.success} />
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>
+            <EuiFlexItem grow={false} data-test-subj="aiopsAnalysisComplete">
               <small>
                 {i18n.translate('xpack.aiops.analysisCompleteLabel', {
                   defaultMessage: 'Analysis complete',
