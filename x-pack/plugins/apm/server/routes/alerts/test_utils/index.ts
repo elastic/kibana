@@ -70,6 +70,11 @@ export const createRuleTypeMocks = () => {
       ruleDataClient: ruleRegistryMocks.createRuleDataClient(
         '.alerts-observability.apm.alerts'
       ) as IRuleDataClient,
+      alertsLocator: {
+        getLocation: jest.fn().mockImplementation(() => ({
+          path: 'mockedAlertsLocator > getLocation',
+        })),
+      },
     },
     services,
     scheduleActions,

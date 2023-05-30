@@ -186,6 +186,7 @@ export class APMPlugin
         config$,
         logger: this.logger!.get('rule'),
         ml: plugins.ml,
+        observability: plugins.observability,
         ruleDataClient,
         alertsLocator: plugins.share.url.locators.get(alertsLocatorID),
       });
