@@ -24,13 +24,10 @@ import {
   SelectField,
   TextField,
   ToggleField,
+  PasswordField,
 } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import type { ActionConnectorFieldsProps } from '@kbn/triggers-actions-ui-plugin/public';
-import {
-  PasswordField,
-  useConnectorContext,
-  useKibana,
-} from '@kbn/triggers-actions-ui-plugin/public';
+import { useConnectorContext, useKibana } from '@kbn/triggers-actions-ui-plugin/public';
 import { AdditionalEmailServices } from '../../../common';
 import { getEmailServices } from './email';
 import { useEmailConfig } from './use_email_config';
@@ -297,11 +294,20 @@ export const EmailActionConnectorFields: React.FunctionComponent<ActionConnector
                   />
                 </EuiFlexItem>
                 <EuiFlexItem>
-                  <PasswordField
+                  <UseField
                     path="secrets.password"
-                    label={i18n.PASSWORD_LABEL}
-                    readOnly={readOnly}
-                    data-test-subj="emailPasswordInput"
+                    config={{
+                      label: i18n.PASSWORD_LABEL,
+                      validations: [
+                        {
+                          validator: emptyField(i18n.PASSWORD_REQUIRED),
+                        },
+                      ],
+                    }}
+                    component={PasswordField}
+                    componentProps={{
+                      euiFieldProps: { readOnly, 'data-test-subj': 'emailPasswordInput' },
+                    }}
                   />
                 </EuiFlexItem>
               </EuiFlexGroup>
