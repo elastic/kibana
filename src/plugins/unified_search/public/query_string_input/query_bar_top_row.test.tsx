@@ -309,7 +309,7 @@ describe('QueryBarTopRowTopRow', () => {
 
     expect(component.find(QUERY_INPUT_SELECTOR).length).toBe(0);
     expect(component.find(TEXT_BASED_EDITOR).length).toBe(1);
-    expect(component.find(TEXT_BASED_EDITOR).prop('filtersByDate')).toBe(true);
+    expect(component.find(TEXT_BASED_EDITOR).prop('detectTimestamp')).toBe(true);
   });
 });
 

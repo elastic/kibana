@@ -29,11 +29,20 @@ describe('getDataViewByTextBasedQueryLang', () => {
     const query = { sql: 'Select * from the-data-view-title' };
     const dataView = await getDataViewByTextBasedQueryLang(query, dataViewMock, services);
     expect(dataView.isPersisted()).toEqual(false);
+    expect(dataView.timeFieldName).toBe('@timestamp');
   });
 
   it('creates an adhoc dataview if the current dataview is ad hoc and query has changed', async () => {
+    discoverServiceMock.dataViews.create = jest.fn().mockReturnValue({
+      ...dataViewAdHoc,
+      isPersisted: () => false,
+      id: 'ad-hoc-id-1',
+      title: 'test-1',
+      timeFieldName: undefined,
+    });
     const query = { sql: 'Select * from the-data-view-title' };
     const dataView = await getDataViewByTextBasedQueryLang(query, dataViewAdHoc, services);
     expect(dataView.isPersisted()).toEqual(false);
+    expect(dataView.timeFieldName).toBeUndefined();
   });
 });

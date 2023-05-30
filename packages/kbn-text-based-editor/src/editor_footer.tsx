@@ -32,7 +32,7 @@ interface EditorFooterProps {
   lines: number;
   containerCSS: Interpolation<Theme>;
   errors?: MonacoError[];
-  filtersByDate: boolean;
+  detectTimestamp: boolean;
   onErrorClick: (error: MonacoError) => void;
   refreshErrors: () => void;
 }
@@ -41,7 +41,7 @@ export const EditorFooter = memo(function EditorFooter({
   lines,
   containerCSS,
   errors,
-  filtersByDate,
+  detectTimestamp,
   onErrorClick,
   refreshErrors,
 }: EditorFooterProps) {
@@ -74,7 +74,7 @@ export const EditorFooter = memo(function EditorFooter({
               <EuiFlexItem grow={false}>
                 <EuiText size="xs" color="subdued" data-test-subj="TextBasedLangEditor-date-info">
                   <p>
-                    {filtersByDate
+                    {detectTimestamp
                       ? i18n.translate(
                           'textBasedEditor.query.textBasedLanguagesEditor.timestampDetected',
                           {

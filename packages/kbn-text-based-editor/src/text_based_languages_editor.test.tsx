@@ -76,11 +76,11 @@ describe('TextBasedLanguagesEditor', () => {
     });
   });
 
-  it('should render the date info with @timestamp detected if filtersByDate is true', async () => {
+  it('should render the date info with @timestamp detected if detectTimestamp is true', async () => {
     const newProps = {
       ...props,
       isCodeEditorExpanded: true,
-      filtersByDate: true,
+      detectTimestamp: true,
     };
     await act(async () => {
       const component = mount(renderTextBasedLanguagesEditorComponent({ ...newProps }));

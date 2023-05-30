@@ -86,21 +86,19 @@ export async function getStateFromAggregateQuery(
     const dataView = await dataViews.create({
       title: indexPattern,
     });
-    if (!dataView.isPersisted()) {
-      if (dataView && dataView.id) {
-        if (dataView?.fields?.getByName('@timestamp')?.type === 'date') {
-          dataView.timeFieldName = '@timestamp';
-        }
-        dataViewId = dataView?.id;
-        indexPatternRefs = [
-          ...indexPatternRefs,
-          {
-            id: dataView.id,
-            title: dataView.name,
-            timeField: dataView.timeFieldName,
-          },
-        ];
+    if (dataView && dataView.id) {
+      if (dataView?.fields?.getByName('@timestamp')?.type === 'date') {
+        dataView.timeFieldName = '@timestamp';
       }
+      dataViewId = dataView?.id;
+      indexPatternRefs = [
+        ...indexPatternRefs,
+        {
+          id: dataView.id,
+          title: dataView.name,
+          timeField: dataView.timeFieldName,
+        },
+      ];
     }
     timeFieldName = dataView.timeFieldName;
     const table = await fetchDataFromAggregateQuery(query, dataView, data, expressions);
