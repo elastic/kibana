@@ -16,7 +16,6 @@ import type {
   FleetFileTransferDirection,
 } from '@kbn/fleet-plugin/server';
 import type { PluginStartContract as AlertsPluginStartContract } from '@kbn/alerting-plugin/server';
-import { ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID } from '@kbn/securitysolution-list-constants';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import {
   getPackagePolicyCreateCallback,
@@ -43,7 +42,6 @@ import { calculateEndpointAuthz } from '../../common/endpoint/service/authz';
 import type { FeatureUsageService } from './services/feature_usage/service';
 import type { ExperimentalFeatures } from '../../common/experimental_features';
 import type { ActionCreateService } from './services';
-import { doesArtifactHaveData } from './services';
 import type { actionCreateService } from './services/actions';
 
 export interface EndpointAppContextServiceSetupContract {
@@ -164,19 +162,12 @@ export class EndpointAppContextService {
     const fleetAuthz = await this.getFleetAuthzService().fromRequest(request);
     const userRoles = this.security?.authc.getCurrentUser(request)?.roles ?? [];
     const { endpointRbacEnabled, endpointRbacV1Enabled } = this.experimentalFeatures;
-    const isPlatinumPlus = this.getLicenseService().isPlatinumPlus();
-    const listClient = this.getExceptionListsClient();
-
-    const hasExceptionsListItems = !isPlatinumPlus
-      ? await doesArtifactHaveData(listClient, ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID)
-      : true;
 
     return calculateEndpointAuthz(
       this.getLicenseService(),
       fleetAuthz,
       userRoles,
-      endpointRbacEnabled || endpointRbacV1Enabled,
-      hasExceptionsListItems
+      endpointRbacEnabled || endpointRbacV1Enabled
     );
   }
 

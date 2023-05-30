@@ -8,7 +8,6 @@
 import type { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 
-import { hasKibanaPrivilege } from '../../common/endpoint/service/authz/authz';
 import { checkArtifactHasData } from './services/exceptions_list/check_artifact_has_data';
 import {
   calculateEndpointAuthz,
@@ -249,32 +248,9 @@ export const getManagementFilteredLinks = async (
 
   const currentUser = await plugins.security.authc.getCurrentUser();
 
-  const isPlatinumPlus = licenseService.isPlatinumPlus();
-  let hasHostIsolationExceptions: boolean = isPlatinumPlus;
-
-  // If not Platinum+ license and user has read permissions to security solution
-  // then check if Host Isolation Exceptions exist.
-  // *** IT IS IMPORTANT *** that  this HTTP call only be made if the user has access to the
-  // Lists plugin, else non-security solution users, especially when license is not Platinum,
-  // may see failed HTTP requests in the browser console. This is the reason that
-  // `hasKibanaPrivilege()` is used below.
-  if (
-    !isPlatinumPlus &&
-    fleetAuthz &&
-    hasKibanaPrivilege(
-      fleetAuthz,
-      isEndpointRbacEnabled,
-      currentUser.roles.includes('superuser'),
-      'readHostIsolationExceptions'
-    )
-  ) {
-    hasHostIsolationExceptions = await checkArtifactHasData(
-      HostIsolationExceptionsApiClient.getInstance(core.http)
-    );
-  }
-
   const {
     canReadActionsLogManagement,
+    canWriteHostIsolationExceptions,
     canReadHostIsolationExceptions,
     canReadEndpointList,
     canReadTrustedApplications,
@@ -282,14 +258,14 @@ export const getManagementFilteredLinks = async (
     canReadBlocklist,
     canReadPolicyManagement,
   } = fleetAuthz
-    ? calculateEndpointAuthz(
-        licenseService,
-        fleetAuthz,
-        currentUser.roles,
-        isEndpointRbacEnabled,
-        hasHostIsolationExceptions
-      )
+    ? calculateEndpointAuthz(licenseService, fleetAuthz, currentUser.roles, isEndpointRbacEnabled)
     : getEndpointAuthzInitialState();
+
+  // show host isolation only when user can write or when user can read and there is data
+  const showHostIsolationExceptions =
+    canWriteHostIsolationExceptions ||
+    (canReadHostIsolationExceptions &&
+      (await checkArtifactHasData(HostIsolationExceptionsApiClient.getInstance(core.http))));
 
   if (!canReadEndpointList) {
     linksToExclude.push(SecurityPageName.endpoints);
@@ -303,7 +279,7 @@ export const getManagementFilteredLinks = async (
     linksToExclude.push(SecurityPageName.responseActionsHistory);
   }
 
-  if (!canReadHostIsolationExceptions) {
+  if (!showHostIsolationExceptions) {
     linksToExclude.push(SecurityPageName.hostIsolationExceptions);
   }
 
