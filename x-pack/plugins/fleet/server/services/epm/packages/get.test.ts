@@ -11,7 +11,8 @@ import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 
 import { PACKAGES_SAVED_OBJECT_TYPE, PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../../../common';
-import type { PackagePolicySOAttributes, RegistryPackage } from '../../../../common/types';
+import type { RegistryPackage } from '../../../../common/types';
+import type { PackagePolicySOAttributes } from '../../../types';
 
 import { createAppContextStartContractMock } from '../../../mocks';
 import { appContextService } from '../../app_context';
@@ -22,7 +23,7 @@ import { auditLoggingService } from '../../audit_logging';
 
 import * as Registry from '../registry';
 
-import { getPackageInfo, getPackages, getPackageUsageStats } from './get';
+import { getInstalledPackages, getPackageInfo, getPackages, getPackageUsageStats } from './get';
 
 jest.mock('../registry');
 jest.mock('../../settings');
@@ -337,6 +338,170 @@ owner: elastic`,
         action: 'get',
         id: 'elasticsearch',
         savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
+      });
+    });
+  });
+
+  describe('getInstalledPackages', () => {
+    it('Passes the correct parameters to the SavedObjects client', async () => {
+      const soClient = savedObjectsClientMock.create();
+
+      soClient.find.mockResolvedValue({
+        saved_objects: [
+          {
+            type: 'epm-packages',
+            id: 'elastic_agent',
+            attributes: {
+              es_index_patterns: {
+                apm_server_logs: 'logs-elastic_agent.apm_server-*',
+                apm_server_metrics: 'metrics-elastic_agent.apm_server-*',
+              },
+              name: 'elastic_agent',
+              version: '1.7.0',
+              install_status: 'installed',
+            },
+            references: [],
+          },
+        ],
+      } as any);
+
+      await getInstalledPackages({
+        savedObjectsClient: soClient,
+        dataStreamType: 'logs',
+        nameQuery: 'nginx',
+        searchAfter: ['system'],
+        perPage: 10,
+        sortOrder: 'asc',
+      });
+      expect(soClient.find).toHaveBeenCalledWith({
+        filter: {
+          arguments: [
+            {
+              arguments: [
+                {
+                  isQuoted: false,
+                  type: 'literal',
+                  value: 'epm-packages.attributes.install_status',
+                },
+                {
+                  isQuoted: false,
+                  type: 'literal',
+                  value: 'installed',
+                },
+              ],
+              function: 'is',
+              type: 'function',
+            },
+            {
+              arguments: [
+                {
+                  isQuoted: false,
+                  type: 'literal',
+                  value: 'epm-packages.attributes.installed_es',
+                },
+                {
+                  arguments: [
+                    {
+                      isQuoted: false,
+                      type: 'literal',
+                      value: 'type',
+                    },
+                    {
+                      isQuoted: false,
+                      type: 'literal',
+                      value: 'index_template',
+                    },
+                  ],
+                  function: 'is',
+                  type: 'function',
+                },
+              ],
+              function: 'nested',
+              type: 'function',
+            },
+            {
+              arguments: [
+                {
+                  isQuoted: false,
+                  type: 'literal',
+                  value: 'epm-packages.attributes.installed_es',
+                },
+                {
+                  arguments: [
+                    {
+                      isQuoted: false,
+                      type: 'literal',
+                      value: 'id',
+                    },
+                    {
+                      type: 'wildcard',
+                      value: 'logs-@kuery-wildcard@',
+                    },
+                  ],
+                  function: 'is',
+                  type: 'function',
+                },
+              ],
+              function: 'nested',
+              type: 'function',
+            },
+          ],
+          function: 'and',
+          type: 'function',
+        },
+        perPage: 10,
+        search: 'nginx* | nginx',
+        searchAfter: ['system'],
+        searchFields: ['name'],
+        sortField: 'name',
+        sortOrder: 'asc',
+        type: 'epm-packages',
+      });
+    });
+    it('Formats items correctly', async () => {
+      const soClient = savedObjectsClientMock.create();
+
+      soClient.find.mockResolvedValue({
+        total: 5,
+        saved_objects: [
+          {
+            type: 'epm-packages',
+            id: 'elastic_agent',
+            attributes: {
+              es_index_patterns: {
+                apm_server_logs: 'logs-elastic_agent.apm_server-*',
+                apm_server_metrics: 'metrics-elastic_agent.apm_server-*',
+              },
+              name: 'elastic_agent',
+              version: '1.7.0',
+              install_status: 'installed',
+            },
+            references: [],
+            sort: ['elastic_agent'],
+          },
+        ],
+      } as any);
+
+      const results = await getInstalledPackages({
+        savedObjectsClient: soClient,
+        dataStreamType: 'logs',
+        nameQuery: 'nginx',
+        searchAfter: ['system'],
+        perPage: 10,
+        sortOrder: 'asc',
+      });
+
+      expect(results).toEqual({
+        items: [
+          {
+            dataStreams: [{ name: 'logs-elastic_agent.apm_server-*', title: 'apm_server_logs' }],
+            name: 'elastic_agent',
+            status: 'installed',
+            version: '1.7.0',
+          },
+        ],
+        searchAfter: ['elastic_agent'],
+        total: 5,
       });
     });
   });

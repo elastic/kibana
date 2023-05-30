@@ -6,9 +6,12 @@
  * Side Public License, v 1.
  */
 
-import './discover_grid.scss';
-import classnames from 'classnames';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import classnames from 'classnames';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { of } from 'rxjs';
+import useObservable from 'react-use/lib/useObservable';
+import './discover_grid.scss';
 import {
   EuiDataGrid,
   EuiDataGridRefProps,
@@ -22,23 +25,26 @@ import {
 } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { SortOrder } from '@kbn/saved-search-plugin/public';
-import type { DataTableRecord, DocViewFilterFn } from '@kbn/unified-doc-viewer-plugin/public/types';
-import type { HttpStart, IUiSettingsClient, ToastsStart } from '@kbn/core/public';
+import type { DataTableRecord, DocViewFilterFn } from '@kbn/unified-doc-viewer/public/types';
+import type { CoreStart, HttpStart, IUiSettingsClient, ToastsStart } from '@kbn/core/public';
 import type { DataViewFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
 import type { Filter } from '@kbn/es-query';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { getShouldShowFieldHandler } from '@kbn/unified-doc-viewer-plugin/public';
 import { useRowHeightsOptions } from '../../hooks/use_row_heights_options';
 import { ValueToStringConverter } from '../../types';
 import { convertValueToString } from '../../utils/convert_value_to_string';
 import { getDefaultRowsPerPage, getRowsPerPageOptions } from '../../utils/rows_per_page';
+import { getSchemaDetectors } from './discover_grid_schema';
+import { DiscoverGridFlyout } from './discover_grid_flyout';
+import { DiscoverGridContext } from './discover_grid_context';
+import { getRenderCellValueFn } from './get_render_cell_value';
+import type { DiscoverGridSettings } from './types';
 import {
   getEuiGridColumns,
   getLeadControlColumns,
   getVisibleColumns,
 } from './discover_grid_columns';
-import { DiscoverGridContext } from './discover_grid_context';
 import { GRID_STYLE, toolbarVisibility as toolbarVisibilityDefaults } from './constants';
 import { getDisplayedColumns } from '../../utils/columns';
 import {
@@ -47,10 +53,8 @@ import {
   SHOW_MULTIFIELDS,
 } from '../../../common';
 import { DiscoverGridDocumentToolbarBtn } from './discover_grid_document_selection';
-import { DiscoverGridFlyout } from './discover_grid_flyout';
-import { getSchemaDetectors } from './discover_grid_schema';
-import { getRenderCellValueFn } from './get_render_cell_value';
-import type { DiscoverGridSettings } from './types';
+
+const themeDefault = { darkMode: false };
 
 interface SortObj {
   id: string;
@@ -199,6 +203,7 @@ export interface DiscoverGridProps {
    * Service dependencies
    */
   services: {
+    core: CoreStart;
     fieldFormats: FieldFormatsStart;
     addBasePath: HttpStart['basePath']['prepend'];
     uiSettings: IUiSettingsClient;
@@ -249,6 +254,7 @@ export const DiscoverGrid = ({
   services,
 }: DiscoverGridProps) => {
   const { fieldFormats, toastNotifications, dataViewFieldEditor, uiSettings } = services;
+  const { darkMode } = useObservable(services.core.theme?.theme$ ?? of(themeDefault), themeDefault);
   const dataGridRef = useRef<EuiDataGridRefProps>(null);
   const [selectedDocs, setSelectedDocs] = useState<string[]>([]);
   const [isFilterActive, setIsFilterActive] = useState(false);
@@ -571,7 +577,7 @@ export const DiscoverGrid = ({
         rows: displayedRows,
         onFilter,
         dataView,
-        isDarkMode: services.uiSettings.get('theme:darkMode'),
+        isDarkMode: darkMode,
         selectedDocs: usedSelectedDocs,
         setSelectedDocs: (newSelectedDocs) => {
           setSelectedDocs(newSelectedDocs);

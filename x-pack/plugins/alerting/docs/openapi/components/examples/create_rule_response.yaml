@@ -3,6 +3,7 @@ value:
   actions:
     - group: threshold met
       id: dceeb5d0-6b41-11eb-802b-85b0c1bc8ba2
+      uuid: 07aef2a0-9eed-4ef9-94ec-39ba58eb609d
       frequency:
         notify_when: onActionGroupChange
         summary: false
@@ -38,6 +39,7 @@ value:
     timeField: "@timestamp"
     aggField: sheet.version
     termField: name.keyword
+  revision: 0
   rule_type_id: .index-threshold
   running: false
   schedule:

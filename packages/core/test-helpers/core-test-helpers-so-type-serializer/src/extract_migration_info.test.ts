@@ -202,12 +202,18 @@ describe('extractMigrationInfo', () => {
           changeTypes: ['data_backfill'],
           hasTransformation: true,
           newMappings: [],
+          schemas: {
+            forwardCompatibility: false,
+          },
         },
         {
           version: '2',
           changeTypes: ['mappings_addition'],
           hasTransformation: false,
           newMappings: ['foo.type'],
+          schemas: {
+            forwardCompatibility: false,
+          },
         },
       ]);
     });
@@ -245,12 +251,18 @@ describe('extractMigrationInfo', () => {
           changeTypes: ['data_backfill'],
           hasTransformation: true,
           newMappings: [],
+          schemas: {
+            forwardCompatibility: false,
+          },
         },
         {
           version: '2',
           changeTypes: ['mappings_addition'],
           hasTransformation: false,
           newMappings: ['foo.type'],
+          schemas: {
+            forwardCompatibility: false,
+          },
         },
       ]);
     });
@@ -262,6 +274,32 @@ describe('extractMigrationInfo', () => {
       const output = extractMigrationInfo(type);
 
       expect(output.modelVersions).toEqual([]);
+    });
+
+    it('returns the correct values for schemas', () => {
+      const type = createType({
+        switchToModelVersionAt: '8.8.0',
+        modelVersions: {
+          1: {
+            changes: [],
+            schemas: {
+              forwardCompatibility: jest.fn(),
+            },
+          },
+          2: {
+            changes: [],
+            schemas: {},
+          },
+        },
+      });
+      const output = extractMigrationInfo(type);
+
+      expect(output.modelVersions[0].schemas).toEqual({
+        forwardCompatibility: true,
+      });
+      expect(output.modelVersions[1].schemas).toEqual({
+        forwardCompatibility: false,
+      });
     });
   });
 
@@ -310,12 +348,18 @@ describe('extractMigrationInfo', () => {
               changeTypes: ['data_backfill'],
               hasTransformation: true,
               newMappings: [],
+              schemas: {
+                forwardCompatibility: false,
+              },
             },
             {
               version: '2',
               changeTypes: ['mappings_addition'],
               hasTransformation: false,
               newMappings: ['foo.type'],
+              schemas: {
+                forwardCompatibility: false,
+              },
             },
           ],
         })

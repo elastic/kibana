@@ -57,7 +57,9 @@ function GroupSelection(props: GroupSelectionProps) {
         [
           ...props.visTypesRegistry.getAliases(),
           ...props.visTypesRegistry.getByGroup(VisGroups.PROMOTED),
-        ],
+        ].filter((visDefinition) => {
+          return !Boolean(visDefinition.disableCreate);
+        }),
         ['promotion', 'title'],
         ['asc', 'asc']
       ),
@@ -217,7 +219,7 @@ const ToolsGroup = ({ visType, onVisTypeSelected, showExperimental }: VisCardPro
   }, [onVisTypeSelected, visType]);
   // hide both the hidden visualizations and, if lab mode is not enabled, the experimental visualizations
   // TODO: Remove the showExperimental logic as part of https://github.com/elastic/kibana/issues/152833
-  if (visType.hidden || (!showExperimental && visType.stage === 'experimental')) {
+  if (visType.disableCreate || (!showExperimental && visType.stage === 'experimental')) {
     return null;
   }
   return (
