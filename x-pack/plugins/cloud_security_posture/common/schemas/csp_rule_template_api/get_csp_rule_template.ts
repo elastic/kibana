@@ -17,18 +17,22 @@ export const findCspRuleTemplateRequest = schema.object({
    * An Elasticsearch simple_query_string
    */
   search: schema.maybe(schema.string()),
+
   /**
    * The page of objects to return
    */
   page: schema.number({ defaultValue: 1, min: 1 }),
+
   /**
    * The number of objects to include in each page
    */
   perPage: schema.number({ defaultValue: DEFAULT_RULES_TEMPLATE_PER_PAGE, min: 0 }),
+
   /**
    *  Fields to retrieve from CspRuleTemplate saved object
    */
   fields: schema.maybe(schema.arrayOf(schema.string())),
+
   /**
    *  Sort Field
    */
@@ -48,16 +52,23 @@ export const findCspRuleTemplateRequest = schema.object({
       defaultValue: 'metadata.name',
     }
   ),
+
   /**
    * The order to sort by
    */
   sortOrder: schema.oneOf([schema.literal('asc'), schema.literal('desc')], {
     defaultValue: 'asc',
   }),
+
+  /**
+   * benchmark id
+   */
+  benchmarkId: schema.maybe(schema.string()),
+
   /**
    * package_policy_id
    */
-  packagePolicyId: schema.string(),
+  packagePolicyId: schema.maybe(schema.string()),
 });
 
 // export type BenchmarksQueryParams = TypeOf<typeof benchmarksQueryParamsSchema>;
@@ -73,7 +84,6 @@ export interface GetCspRuleTemplateHTTPBody {
   perPage: number;
 
   // Field to retrieve
-
   fields?: string[];
 
   // Field for sorting the found objects
@@ -82,8 +92,11 @@ export interface GetCspRuleTemplateHTTPBody {
   // The order to sort by
   sortOrder: string;
 
-  // package_policy_id
-  packagePolicyId: string;
+  // benchmark id
+  benchmarkId?: string;
+
+  // package policy id
+  packagePolicyId?: string;
 }
 
 export interface GetCspRuleTemplateHTTPResponse {

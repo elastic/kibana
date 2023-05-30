@@ -26,15 +26,28 @@ import {
 import { CspRouter } from '../../types';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../benchmarks/benchmarks';
 
+const getBenchmarkId = async (
+  soClient: SavedObjectsClientContract,
+  packagePolicyId: string
+): Promise<string> => {
+  const res = await soClient.get<NewPackagePolicy>(
+    PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+    packagePolicyId
+  );
+  return getBenchmarkFromPackagePolicy(res.attributes.inputs);
+};
+
 const findCspRuleTemplateHandler = async (
   soClient: SavedObjectsClientContract,
   options: GetCspRuleTemplateHTTPBody
 ): Promise<GetCspRuleTemplateHTTPResponse> => {
-  const res = await soClient.get<NewPackagePolicy>(
-    PACKAGE_POLICY_SAVED_OBJECT_TYPE,
-    options.packagePolicyId
-  );
-  const benchmarkId = getBenchmarkFromPackagePolicy(res.attributes.inputs);
+  if (!options.packagePolicyId && !options.benchmarkId) {
+    throw new Error('One of benchmarkId or packagePolicyId is required');
+  }
+
+  const benchmarkId = options.benchmarkId
+    ? options.benchmarkId
+    : await getBenchmarkId(soClient, options.packagePolicyId!);
 
   const cspRulesTemplatesSo = await soClient.find<CspRuleTemplate>({
     type: CSP_RULE_TEMPLATE_SAVED_OBJECT_TYPE,
