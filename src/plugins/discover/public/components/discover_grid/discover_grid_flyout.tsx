@@ -71,6 +71,7 @@ export function DiscoverGridFlyout({
   setExpandedDoc,
 }: DiscoverGridFlyoutProps) {
   const services = useDiscoverServices();
+  const isPlainRecord = query && isOfAggregateQueryType(query);
   // Get actual hit with updated highlighted searches
   const actualHit = useMemo(() => hits?.find(({ id }) => id === hit?.id) || hit, [hit, hits]);
   const pageCount = useMemo<number>(() => (hits ? hits.length : 0), [hits]);
@@ -123,9 +124,13 @@ export function DiscoverGridFlyout({
             data-test-subj="docTableRowDetailsTitle"
           >
             <h2>
-              {i18n.translate('discover.grid.tableRow.detailHeading', {
-                defaultMessage: 'Expanded document',
-              })}
+              {isPlainRecord
+                ? i18n.translate('discover.grid.tableRow.textBasedDetailHeading', {
+                    defaultMessage: 'Expanded row',
+                  })
+                : i18n.translate('discover.grid.tableRow.detailHeading', {
+                    defaultMessage: 'Expanded document',
+                  })}
             </h2>
           </EuiTitle>
 
@@ -239,7 +244,7 @@ export function DiscoverGridFlyout({
                 })
               );
             }}
-            textBasedHits={query && isOfAggregateQueryType(query) ? hits : undefined}
+            textBasedHits={isPlainRecord ? hits : undefined}
           />
         </EuiFlyoutBody>
       </EuiFlyout>
