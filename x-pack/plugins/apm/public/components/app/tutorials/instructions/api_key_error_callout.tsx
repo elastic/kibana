@@ -22,7 +22,7 @@ export function ApiKeyErrorCallout({
       color="danger"
       iconType="error"
     >
-      {i18n.translate('xpack.apm.tutorial.apiKey.success.calloutMessage', {
+      {i18n.translate('xpack.apm.tutorial.apiKey.error.calloutMessage', {
         defaultMessage: 'Error: {errorMessage}',
         values: {
           errorMessage,
