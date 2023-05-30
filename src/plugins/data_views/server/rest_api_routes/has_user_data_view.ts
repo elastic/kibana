@@ -40,7 +40,7 @@ const hasUserDataViewRouteFactory =
   ) => {
     router.versioned.get({ path, access: 'internal' }).addVersion(
       {
-        version: '1', // INITIAL_REST_VERSION,
+        version: '1',
         validate: { request: {} },
       },
       router.handleLegacyErrors(
