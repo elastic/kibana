@@ -1,0 +1,30 @@
+# @kbn-doc-linker partial
+
+params_property_apm_error_count:
+  required:
+    - windowSize
+    - windowUnit
+    - threshold
+    - environment
+  properties:
+    serviceName:
+      type: string
+    windowSize:
+      type: number
+      value: 6
+    windowUnit:
+      type: string
+      enum:
+        - "m"
+        - "h"
+        - "d"
+    environment:
+      type: string
+    threshold:
+      type: number
+    groupBy:
+      type: array
+      items:
+        type: string
+    errorGroupingKey:
+      type: string
