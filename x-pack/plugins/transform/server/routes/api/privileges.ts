@@ -47,7 +47,6 @@ export function registerPrivilegesRoute({ router, license }: RouteDependencies) 
         const esClusterPrivilegesReq: Promise<SecurityHasPrivilegesResponse> =
           esClient.asCurrentUser.security.hasPrivileges({
             body: {
-              // @ts-expect-error SecurityClusterPrivilege doesn’t contain all the priviledges
               cluster: APP_CLUSTER_PRIVILEGES,
             },
           });
