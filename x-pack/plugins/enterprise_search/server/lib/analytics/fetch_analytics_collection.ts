@@ -12,23 +12,14 @@ import { ErrorCode } from '../../../common/types/error_codes';
 
 import { isResourceNotFoundException } from '../../utils/identify_exceptions';
 
-interface CollectionsListResponse {
-  [name: string]: {
-    event_data_stream: {
-      name: string;
-    };
-  };
-}
-
 export const fetchAnalyticsCollections = async (
   client: IScopedClusterClient,
   query: string = ''
 ): Promise<AnalyticsCollection[]> => {
   try {
-    const collections: CollectionsListResponse =
-      await client.asCurrentUser.searchApplication.getBehavioralAnalytics({
-        name: query,
-      });
+    const collections = await client.asCurrentUser.searchApplication.getBehavioralAnalytics({
+      name: query,
+    });
 
     return Object.keys(collections).map((value) => {
       const entry = collections[value];
