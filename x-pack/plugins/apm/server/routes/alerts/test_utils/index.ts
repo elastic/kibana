@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-import { IBasePath, Logger } from '@kbn/core/server';
 import { of } from 'rxjs';
+import { IBasePath, Logger } from '@kbn/core/server';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import type { AlertsLocatorParams } from '@kbn/observability-plugin/common';
+import { LocatorPublic } from '@kbn/share-plugin/common';
 import { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import { ruleRegistryMocks } from '@kbn/rule-registry-plugin/server/mocks';
 import { PluginSetupContract as AlertingPluginSetupContract } from '@kbn/alerting-plugin/server';
@@ -74,7 +76,7 @@ export const createRuleTypeMocks = () => {
         getLocation: jest.fn().mockImplementation(() => ({
           path: 'mockedAlertsLocator > getLocation',
         })),
-      },
+      } as any as LocatorPublic<AlertsLocatorParams>,
     },
     services,
     scheduleActions,
