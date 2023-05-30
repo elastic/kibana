@@ -194,7 +194,7 @@ const CreateRulePageComponent: React.FC = () => {
     [RuleStep.scheduleRule]: false,
     [RuleStep.ruleActions]: false,
   });
-  const { mutateAsync: createRule, isLoading } = useCreateRule();
+  const { mutateAsync: createRule, isLoading: isCreateRuleLoading } = useCreateRule();
   const ruleType = defineStepData.ruleType;
   const actionMessageParams = useMemo(() => getActionMessageParams(ruleType), [ruleType]);
   const [dataViewOptions, setDataViewOptions] = useState<{ [x: string]: DataViewListItem }>({});
@@ -205,15 +205,9 @@ const CreateRulePageComponent: React.FC = () => {
 
   useEffect(() => {
     if (prevRuleType !== ruleType) {
-      if (isThreatMatchRuleValue) {
-        aboutStepForm.updateFieldValues({
-          threatIndicatorPath: DEFAULT_INDICATOR_SOURCE_PATH,
-        });
-      } else {
-        aboutStepForm.updateFieldValues({
-          threatIndicatorPath: undefined,
-        });
-      }
+      aboutStepForm.updateFieldValues({
+        threatIndicatorPath: isThreatMatchRuleValue ? DEFAULT_INDICATOR_SOURCE_PATH : undefined,
+      });
       scheduleStepForm.updateFieldValues(
         isThreatMatchRuleValue ? defaultThreatMatchSchedule : defaultSchedule
       );
@@ -423,7 +417,7 @@ const CreateRulePageComponent: React.FC = () => {
                           text: i18n.BACK_TO_RULES,
                           pageId: SecurityPageName.rules,
                         }}
-                        isLoading={isLoading || loading}
+                        isLoading={isCreateRuleLoading || loading}
                         title={i18n.PAGE_TITLE}
                       >
                         <EuiButton
@@ -467,7 +461,7 @@ const CreateRulePageComponent: React.FC = () => {
                             }}
                           >
                             <StepDefineRule
-                              isLoading={isLoading || loading}
+                              isLoading={isCreateRuleLoading || loading}
                               kibanaDataViews={dataViewOptions}
                               indicesConfig={indicesConfig}
                               threatIndicesConfig={threatIndicesConfig}
@@ -482,7 +476,7 @@ const CreateRulePageComponent: React.FC = () => {
                             <NextStep
                               dataTestSubj="define-continue"
                               onClick={() => submitStep(RuleStep.defineRule)}
-                              isDisabled={isLoading}
+                              isDisabled={isCreateRuleLoading}
                             />
                           </div>
                           <div
@@ -491,7 +485,7 @@ const CreateRulePageComponent: React.FC = () => {
                             }}
                           >
                             <StepDefineRuleReadOnly
-                              addPadding={true}
+                              addPadding
                               defaultValues={defineStepData}
                               descriptionColumns="singleSplit"
                               indexPattern={indexPattern}
@@ -530,14 +524,14 @@ const CreateRulePageComponent: React.FC = () => {
                             <StepAboutRule
                               defaultValues={aboutStepData}
                               defineRuleData={defineStepData}
-                              isLoading={isLoading || loading}
+                              isLoading={isCreateRuleLoading || loading}
                               form={aboutStepForm}
                             />
 
                             <NextStep
                               dataTestSubj="about-continue"
                               onClick={() => submitStep(RuleStep.aboutRule)}
-                              isDisabled={isLoading}
+                              isDisabled={isCreateRuleLoading}
                             />
                           </div>
                           <div
@@ -546,7 +540,7 @@ const CreateRulePageComponent: React.FC = () => {
                             }}
                           >
                             <StepAboutRuleReadOnly
-                              addPadding={true}
+                              addPadding
                               defaultValues={aboutStepData}
                               descriptionColumns="singleSplit"
                             />
@@ -581,13 +575,13 @@ const CreateRulePageComponent: React.FC = () => {
                             }}
                           >
                             <StepScheduleRule
-                              isLoading={isLoading || loading}
+                              isLoading={isCreateRuleLoading || loading}
                               form={scheduleStepForm}
                             />
                             <NextStep
                               dataTestSubj="schedule-continue"
                               onClick={() => submitStep(RuleStep.scheduleRule)}
-                              isDisabled={isLoading}
+                              isDisabled={isCreateRuleLoading}
                             />
                           </div>
                           <div
@@ -596,7 +590,7 @@ const CreateRulePageComponent: React.FC = () => {
                             }}
                           >
                             <StepScheduleRuleReadOnly
-                              addPadding={true}
+                              addPadding
                               descriptionColumns="singleSplit"
                               defaultValues={scheduleStepData}
                             />
@@ -631,7 +625,7 @@ const CreateRulePageComponent: React.FC = () => {
                             }}
                           >
                             <StepRuleActions
-                              isLoading={isLoading || loading || isStartingJobs}
+                              isLoading={isCreateRuleLoading || loading || isStartingJobs}
                               actionMessageParams={actionMessageParams}
                               summaryActionMessageParams={actionMessageParams}
                               ruleType={ruleType}
@@ -648,8 +642,8 @@ const CreateRulePageComponent: React.FC = () => {
                               <EuiFlexItem grow={false}>
                                 <EuiButton
                                   fill={false}
-                                  isDisabled={isLoading}
-                                  isLoading={isLoading}
+                                  isDisabled={isCreateRuleLoading}
+                                  isLoading={isCreateRuleLoading}
                                   onClick={() => submitRule(RuleStep.ruleActions, false)}
                                   data-test-subj="create-enabled-false"
                                 >
@@ -659,8 +653,8 @@ const CreateRulePageComponent: React.FC = () => {
                               <EuiFlexItem grow={false}>
                                 <EuiButton
                                   fill
-                                  isDisabled={isLoading}
-                                  isLoading={isLoading}
+                                  isDisabled={isCreateRuleLoading}
+                                  isLoading={isCreateRuleLoading}
                                   onClick={() => submitRule(RuleStep.ruleActions, true)}
                                   data-test-subj="create-enable"
                                 >
@@ -675,7 +669,7 @@ const CreateRulePageComponent: React.FC = () => {
                             }}
                           >
                             <StepRuleActionsReadOnly
-                              addPadding={true}
+                              addPadding
                               defaultValues={actionsStepData}
                             />
                           </div>

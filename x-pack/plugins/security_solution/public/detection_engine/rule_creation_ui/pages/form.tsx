@@ -143,10 +143,8 @@ export const useRuleIndexPattern = ({
   // when we select new dataView
   // when we choose some other dataSourceType
   useEffect(() => {
-    if (dataSourceType === DataSourceType.IndexPatterns) {
-      if (!isIndexPatternLoading) {
+    if (dataSourceType === DataSourceType.IndexPatterns && !isIndexPatternLoading) {
         setIndexPattern(initIndexPattern);
-      }
     }
 
     if (dataSourceType === DataSourceType.DataView) {
