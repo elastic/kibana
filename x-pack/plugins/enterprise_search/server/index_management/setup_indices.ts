@@ -139,6 +139,7 @@ const connectorMappingsProperties: Record<string, MappingProperty> = {
   },
   service_type: { type: 'keyword' },
   status: { type: 'keyword' },
+  sync_cursor: { type: 'object' },
   sync_now: { type: 'boolean' },
 };
 
@@ -239,6 +240,7 @@ const indices: IndexDefinition[] = [
         error: { type: 'keyword' },
         indexed_document_count: { type: 'integer' },
         indexed_document_volume: { type: 'integer' },
+        job_type: { type: 'keyword' },
         last_seen: { type: 'date' },
         metadata: { type: 'object' },
         started_at: { type: 'date' },
