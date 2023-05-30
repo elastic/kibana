@@ -17,6 +17,8 @@ import {
   SHOW_DATES_BUTTON,
   DATE_PICKER_START_DATE_POPOVER_BUTTON_TIMELINE,
   DATE_PICKER_SHOW_DATE_POPOVER_BUTTON,
+  DATE_PICKER_NOW_TAB,
+  DATE_PICKER_NOW_BUTTON,
 } from '../screens/date_picker';
 
 export const setEndDate = (date: string) => {
@@ -25,6 +27,14 @@ export const setEndDate = (date: string) => {
   cy.get(DATE_PICKER_ABSOLUTE_TAB).first().click({ force: true });
 
   cy.get(DATE_PICKER_ABSOLUTE_INPUT).click().clear().type(date);
+};
+
+export const setEndDateNow = () => {
+  cy.get(DATE_PICKER_END_DATE_POPOVER_BUTTON).click({ force: true });
+
+  cy.get(DATE_PICKER_NOW_TAB).first().click({ force: true });
+
+  cy.get(DATE_PICKER_NOW_BUTTON).click();
 };
 
 export const setStartDate = (date: string) => {

@@ -19,7 +19,7 @@ import supertest from 'supertest';
 import { serviceApiKeyPrivileges } from '@kbn/synthetics-plugin/server/synthetics_service/get_api_key';
 import { syntheticsMonitorType } from '@kbn/synthetics-plugin/common/types/saved_objects';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { getFixtureJson } from '../uptime/rest/helper/get_fixture_json';
+import { getFixtureJson } from './helper/get_fixture_json';
 
 export default function ({ getService }: FtrProviderContext) {
   describe('AddNewMonitors', function () {
