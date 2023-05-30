@@ -150,7 +150,7 @@ export function initIndexingRoutes({
           const resp = await coreContext.elasticsearch.client.asCurrentUser.delete({
             index: request.body.index,
             id: request.params.featureId,
-            refresh: true,
+            refresh: 'wait_for',
           });
           // @ts-expect-error always false
           if (resp.result === 'Error') {
