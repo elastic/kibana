@@ -93,7 +93,7 @@ export class CoreVersionedRoute implements VersionedRoute {
     return resolvers[this.router.defaultHandlerResolutionStrategy]([...this.handlers.keys()]);
   }
 
-  private getAvailableVersionsMessage(): string {
+  private versionsToString(): string {
     return this.handlers.size ? '[' + [...this.handlers.keys()].join(', ') + ']' : '<none>';
   }
 
@@ -111,7 +111,7 @@ export class CoreVersionedRoute implements VersionedRoute {
 
     if (!this.hasVersion(req) && (this.isInternal || this.router.isDev)) {
       return res.badRequest({
-        body: `Please specify a version. Available versions: ${this.getAvailableVersionsMessage()}`,
+        body: `Please specify a version. Available versions: ${this.versionsToString()}`,
       });
     }
 
@@ -127,7 +127,7 @@ export class CoreVersionedRoute implements VersionedRoute {
       return res.badRequest({
         body: `No version "${version}" available for [${this.method}] [${
           this.path
-        }]. Available versions are: ${this.getAvailableVersionsMessage()}`,
+        }]. Available versions are: ${this.versionsToString()}`,
       });
     }
 
