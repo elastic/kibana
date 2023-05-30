@@ -18,7 +18,7 @@ import {
   EuiHorizontalRule,
 } from '@elastic/eui';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
-import type { ProcessListAPIResponse } from '../../../../common/http_api';
+import type { ProcessListAPIResponse } from '../../../../../common/http_api';
 import { STATE_NAMES } from './states';
 
 interface Props {

@@ -21,22 +21,22 @@ import { parseSearchString } from './parse_search_string';
 import { ProcessesTable } from './processes_table';
 import { STATE_NAMES } from './states';
 import { SummaryTable } from './summary_table';
-import { TabContent } from '../../../pages/metrics/inventory_view/components/node_details/tabs/shared';
+import { TabContent } from '../../../../pages/metrics/inventory_view/components/node_details/tabs/shared';
 import {
   SortBy,
   useProcessList,
   ProcessListContextProvider,
-} from '../../../pages/metrics/inventory_view/hooks/use_process_list';
-import { getFieldByType } from '../../../../common/inventory_models';
-import type { HostNodeRow } from '../types';
-import type { InventoryItemType } from '../../../../common/inventory_models/types';
+} from '../../../../pages/metrics/inventory_view/hooks/use_process_list';
+import { getFieldByType } from '../../../../../common/inventory_models';
+import type { HostNodeRow } from '../../types';
+import type { InventoryItemType } from '../../../../../common/inventory_models/types';
 
 export interface ProcessesProps {
   node: HostNodeRow;
   nodeType: InventoryItemType;
   currentTime: number;
   searchFilter?: string;
-  setSearchFilter?: (searchFilter: { searchFilter: string }) => void;
+  onSearchFilterChange?: (searchFilter: string) => void;
 }
 
 const options = Object.entries(STATE_NAMES).map(([value, view]: [string, string]) => ({
@@ -49,7 +49,7 @@ export const Processes = ({
   node,
   nodeType,
   searchFilter,
-  setSearchFilter,
+  onSearchFilterChange,
 }: ProcessesProps) => {
   const [searchText, setSearchText] = useState(searchFilter ?? '');
   const [searchBarState, setSearchBarState] = useState<Query>(() =>
@@ -75,12 +75,12 @@ export const Processes = ({
 
   const debouncedSearchOnChange = useMemo(() => {
     return debounce<(queryText: string) => void>((queryText) => {
-      if (setSearchFilter) {
-        setSearchFilter({ searchFilter: queryText });
+      if (onSearchFilterChange) {
+        onSearchFilterChange(queryText);
       }
       setSearchText(queryText);
     }, 500);
-  }, [setSearchFilter]);
+  }, [onSearchFilterChange]);
 
   const searchBarOnChange = useCallback(
     ({ query, queryText }) => {
@@ -92,11 +92,11 @@ export const Processes = ({
 
   const clearSearchBar = useCallback(() => {
     setSearchBarState(Query.MATCH_ALL);
-    if (setSearchFilter) {
-      setSearchFilter({ searchFilter: '' });
+    if (onSearchFilterChange) {
+      onSearchFilterChange('');
     }
     setSearchText('');
-  }, [setSearchFilter]);
+  }, [onSearchFilterChange]);
 
   return (
     <TabContent>

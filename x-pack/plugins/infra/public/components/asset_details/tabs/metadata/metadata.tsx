@@ -9,14 +9,14 @@ import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiCallOut, EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { InventoryItemType } from '../../../../common/inventory_models/types';
-import { findInventoryModel } from '../../../../common/inventory_models';
-import type { MetricsTimeInput } from '../../../pages/metrics/metric_detail/hooks/use_metrics_time';
-import { useMetadata } from '../hooks/use_metadata';
-import { useSourceContext } from '../../../containers/metrics_source';
+import type { InventoryItemType } from '../../../../../common/inventory_models/types';
+import { findInventoryModel } from '../../../../../common/inventory_models';
+import type { MetricsTimeInput } from '../../../../pages/metrics/metric_detail/hooks/use_metrics_time';
+import { useMetadata } from '../../hooks/use_metadata';
+import { useSourceContext } from '../../../../containers/metrics_source';
 import { Table } from './table';
 import { getAllFields } from './utils';
-import type { HostNodeRow } from '../types';
+import type { HostNodeRow } from '../../types';
 
 export interface MetadataSearchUrlState {
   metadataSearchUrlState: string;
@@ -28,15 +28,17 @@ export interface MetadataProps {
   node: HostNodeRow;
   nodeType: InventoryItemType;
   showActionsColumn?: boolean;
-  persistMetadataSearchToUrlState?: MetadataSearchUrlState;
+  search?: string;
+  onSearchChange?: (query: string) => void;
 }
 
 export const Metadata = ({
   node,
   currentTimeRange,
   nodeType,
-  showActionsColumn,
-  persistMetadataSearchToUrlState,
+  search,
+  showActionsColumn = false,
+  onSearchChange,
 }: MetadataProps) => {
   const nodeId = node.name;
   const inventoryModel = findInventoryModel(nodeType);
@@ -81,7 +83,8 @@ export const Metadata = ({
 
   return (
     <Table
-      persistMetadataSearchToUrlState={persistMetadataSearchToUrlState}
+      search={search}
+      onSearchChange={onSearchChange}
       showActionsColumn={showActionsColumn}
       rows={fields}
       loading={metadataLoading}

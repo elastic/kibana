@@ -11,8 +11,8 @@ import ReactDOM from 'react-dom';
 import { Subscription } from 'rxjs';
 import { Embeddable, EmbeddableInput, IContainer } from '@kbn/embeddable-plugin/public';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
-import { CoreProviders } from '../../../apps/common_providers';
-import { InfraClientStartDeps, InfraClientStartExports } from '../../../types';
+import { CoreProviders } from '../../../../apps/common_providers';
+import { InfraClientStartDeps, InfraClientStartExports } from '../../../../types';
 import { LazyMetadataWrapper } from './lazy_metadata_wrapper';
 import type { MetadataProps } from './metadata';
 
@@ -75,7 +75,8 @@ export class MetadataEmbeddable extends Embeddable<MetadataEmbeddableInput> {
               node={this.input.node}
               nodeType={this.input.nodeType}
               showActionsColumn={this.input.showActionsColumn}
-              persistMetadataSearchToUrlState={this.input.persistMetadataSearchToUrlState}
+              onSearchChange={this.input.onSearchChange}
+              search={this.input.search}
             />
           </div>
         </EuiThemeProvider>
