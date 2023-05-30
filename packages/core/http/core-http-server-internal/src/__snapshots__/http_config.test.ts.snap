@@ -82,7 +82,7 @@ Object {
   "securityResponseHeaders": Object {
     "crossOriginOpenerPolicy": "same-origin",
     "disableEmbedding": false,
-    "permissionsPolicy": "camera=(), display-capture=(), fullscreen=(self), geolocation=(), microphone=(), web-share=()",
+    "permissionsPolicy": "camera=(), display-capture=(self), fullscreen=(self), geolocation=(), microphone=(), web-share=()",
     "referrerPolicy": "no-referrer-when-downgrade",
     "strictTransportSecurity": null,
     "xContentTypeOptions": "nosniff",
