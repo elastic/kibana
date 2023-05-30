@@ -298,9 +298,11 @@ export class SearchInterceptor {
           isSavedToBackground = true;
         });
 
-    const cancel = once(() => {
+    const sendCancelRequest = once(() => {
       this.deps.http.delete(`/internal/search/${strategy}/${id}`, { version: '1' });
     });
+
+    const cancel = () => id && !isSavedToBackground && sendCancelRequest();
 
     return pollSearch(search, cancel, {
       pollInterval: this.deps.searchConfig.asyncSearch.pollInterval,
@@ -316,7 +318,7 @@ export class SearchInterceptor {
       }),
       catchError((e: Error) => {
         searchTracker?.error();
-        if (id && !isSavedToBackground) cancel();
+        cancel();
         return throwError(e);
       }),
       finalize(() => {
