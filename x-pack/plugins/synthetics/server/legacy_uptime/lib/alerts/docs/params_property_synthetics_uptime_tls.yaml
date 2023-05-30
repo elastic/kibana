@@ -1,0 +1,10 @@
+# @kbn-doc-linker partial
+
+params_property_synthetics_uptime_tls:
+  properties:
+    search:
+      type: string
+    certExpirationThreshold:
+      type: number
+    certAgeThreshold:
+      type: number
