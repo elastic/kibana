@@ -101,6 +101,13 @@ const registerCreateDataViewRouteFactory =
                 serviceKey === SERVICE_KEY_LEGACY ? dataViewSpecSchema : schema.never(),
             }),
           },
+          response: {
+            200: {
+              body: schema.object({
+                dataView: dataViewSpecSchema,
+              }),
+            },
+          },
         },
       },
       router.handleLegacyErrors(
