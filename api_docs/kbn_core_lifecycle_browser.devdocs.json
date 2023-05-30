@@ -670,10 +670,6 @@
                 "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/components/collect_config_container.tsx"
               },
               {
-                "plugin": "graph",
-                "path": "x-pack/plugins/graph/public/plugin.ts"
-              },
-              {
                 "plugin": "monitoring",
                 "path": "x-pack/plugins/monitoring/public/application/pages/elasticsearch/ingest_pipeline_modal.tsx"
               },
