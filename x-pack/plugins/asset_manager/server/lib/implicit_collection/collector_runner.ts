@@ -5,9 +5,14 @@
  * 2.0.
  */
 
+import apm from 'elastic-apm-node';
+
 import { ImplicitCollectionOptions } from '.';
-import { Collector } from './collectors';
+import { Collector, QUERY_MAX_SIZE } from './collectors';
 import { Asset } from '../../../common/types_api';
+
+const TRANSACTION_TYPE = 'asset_manager-implicit_collection';
+const transactionName = (collectorName: string) => `asset_manager-collector_${collectorName}`;
 
 export class CollectorRunner {
   private collectors: Array<{ name: string; collector: Collector }> = [];
@@ -19,14 +24,18 @@ export class CollectorRunner {
   }
 
   async run() {
-    const collectorOptions = {
-      client: this.options.inputClient,
-      from: Date.now() - this.options.intervalMs,
-    };
+    const now = Date.now();
 
     for (let i = 0; i < this.collectors.length; i++) {
       const { name, collector } = this.collectors[i];
       this.options.logger.info(`Collector '${name}' started`);
+
+      const transaction = apm.startTransaction(transactionName(name), TRANSACTION_TYPE);
+      const collectorOptions = {
+        from: now - this.options.intervalMs,
+        client: this.options.inputClient,
+        transaction,
+      };
 
       const assets = await collector(collectorOptions)
         .then((collectedAssets) => {
@@ -37,6 +46,12 @@ export class CollectorRunner {
           this.options.logger.error(`Collector '${name}' execution failure: ${err}`);
           return [];
         });
+
+      transaction?.addLabels({
+        assets_count: assets.length,
+        interval_ms: this.options.intervalMs,
+        page_size: QUERY_MAX_SIZE,
+      });
 
       if (assets.length) {
         const bulkBody = assets.flatMap((asset: Asset) => {
@@ -58,6 +73,8 @@ export class CollectorRunner {
             );
           });
       }
+
+      transaction?.end();
     }
   }
 }

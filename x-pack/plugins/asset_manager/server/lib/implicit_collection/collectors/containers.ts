@@ -7,12 +7,13 @@
 
 import { APM_INDICES, LOGS_INDICES, METRICS_INDICES } from '../../../constants';
 import { Asset } from '../../../../common/types_api';
-import { CollectorOptions } from '.';
+import { CollectorOptions, QUERY_MAX_SIZE } from '.';
+import { withSpan } from './helpers';
 
-export async function collectContainers({ client, from }: CollectorOptions) {
+export async function collectContainers({ client, from, transaction }: CollectorOptions) {
   const dsl = {
     index: [APM_INDICES, LOGS_INDICES, METRICS_INDICES],
-    size: 1000,
+    size: QUERY_MAX_SIZE,
     collapse: {
       field: 'container.id',
     },
@@ -48,30 +49,32 @@ export async function collectContainers({ client, from }: CollectorOptions) {
 
   const esResponse = await client.search(dsl);
 
-  const containers = esResponse.hits.hits.reduce<Asset[]>((acc: Asset[], hit: any) => {
-    const { fields = {} } = hit;
-    const containerId = fields['container.id'];
-    const podUid = fields['kubernetes.pod.uid'];
-    const nodeName = fields['kubernetes.node.name'];
+  const containers = withSpan({ transaction, name: 'processing_response' }, () => {
+    return esResponse.hits.hits.reduce<Asset[]>((acc: Asset[], hit: any) => {
+      const { fields = {} } = hit;
+      const containerId = fields['container.id'];
+      const podUid = fields['kubernetes.pod.uid'];
+      const nodeName = fields['kubernetes.node.name'];
 
-    const parentEan = podUid ? `pod:${podUid}` : `host:${fields['host.hostname']}`;
+      const parentEan = podUid ? `pod:${podUid}` : `host:${fields['host.hostname']}`;
 
-    const container: Asset = {
-      '@timestamp': new Date().toISOString(),
-      'asset.kind': 'container',
-      'asset.id': containerId,
-      'asset.ean': `container:${containerId}`,
-      'asset.parents': [parentEan],
-    };
+      const container: Asset = {
+        '@timestamp': new Date().toISOString(),
+        'asset.kind': 'container',
+        'asset.id': containerId,
+        'asset.ean': `container:${containerId}`,
+        'asset.parents': [parentEan],
+      };
 
-    if (nodeName) {
-      container['asset.references'] = [`host:${nodeName}`];
-    }
+      if (nodeName) {
+        container['asset.references'] = [`host:${nodeName}`];
+      }
 
-    acc.push(container);
+      acc.push(container);
 
-    return acc;
-  }, []);
+      return acc;
+    }, []);
+  });
 
   return containers;
 }
