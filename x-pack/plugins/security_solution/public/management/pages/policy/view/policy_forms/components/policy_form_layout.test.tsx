@@ -211,7 +211,7 @@ describe('Policy Form Layout', () => {
         showHideAdvancedSettingsButton.simulate('click');
 
         expect(
-          policyFormLayoutView.find('div[data-test-subj="advancedSettingsWarning"]').text()
+          policyFormLayoutView.find('div[data-test-subj="policyAdvancedSettingsWarning"]').text()
         ).toContain(
           `This section contains policy values that support advanced use cases. If not configured
     properly, these values can cause unpredictable behavior. Please consult documentation
