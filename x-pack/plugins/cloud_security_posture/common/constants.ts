@@ -9,6 +9,8 @@ import { PostureTypes } from './types';
 
 export const STATUS_ROUTE_PATH = '/internal/cloud_security_posture/status';
 export const STATS_ROUTE_PATH = '/internal/cloud_security_posture/stats/{policy_template}';
+export const VULNERABILITIES_STATS_ROUTE_PATH =
+  '/internal/cloud_security_posture/vulnerabilities_stats';
 export const BENCHMARKS_ROUTE_PATH = '/internal/cloud_security_posture/benchmarks';
 
 export const CLOUD_SECURITY_POSTURE_PACKAGE_NAME = 'cloud_security_posture';

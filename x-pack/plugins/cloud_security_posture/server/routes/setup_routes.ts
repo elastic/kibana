@@ -14,6 +14,7 @@ import type {
 } from '../types';
 import { PLUGIN_ID } from '../../common';
 import { defineGetComplianceDashboardRoute } from './compliance_dashboard/compliance_dashboard';
+import { defineGetVulnerabilitiesDashboardRoute } from './vulnerabilities_dashboard/vulnerabilities_dashboard';
 import { defineGetBenchmarksRoute } from './benchmarks/benchmarks';
 import { defineGetCspStatusRoute } from './status/status';
 
@@ -32,6 +33,7 @@ export function setupRoutes({
 }) {
   const router = core.http.createRouter<CspRequestHandlerContext>();
   defineGetComplianceDashboardRoute(router);
+  defineGetVulnerabilitiesDashboardRoute(router);
   defineGetBenchmarksRoute(router);
   defineGetCspStatusRoute(router);
 
