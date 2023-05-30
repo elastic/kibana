@@ -96,7 +96,7 @@ export const EditorMenu = ({ createNewVisType, createNewEmbeddable }: Props) => 
         }
         return 0;
       })
-      .filter(({ hidden, stage }: BaseVisType) => !hidden);
+      .filter(({ disableCreate, stage }: BaseVisType) => !disableCreate);
 
   const promotedVisTypes = getSortedVisTypesByGroup(VisGroups.PROMOTED);
   const aggsBasedVisTypes = getSortedVisTypesByGroup(VisGroups.AGGBASED);
