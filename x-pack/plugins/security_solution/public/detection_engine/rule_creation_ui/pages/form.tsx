@@ -21,7 +21,7 @@ import { schema as defineRuleSchema } from '../../../detections/components/rules
 import type { EqlOptionsSelected } from '../../../../common/search_strategy';
 import {
   schema as aboutRuleSchema,
-  threatIndicatorPathRequiredSchemaValue,
+  threatMatchAboutSchema,
 } from '../../../detections/components/rules/step_about_rule/schema';
 import { schema as scheduleRuleSchema } from '../../../detections/components/rules/step_schedule_rule/schema';
 import { getSchema as getActionsRuleSchema } from '../../../detections/components/rules/step_rule_actions/get_schema';
@@ -63,16 +63,12 @@ export const useRuleForms = ({
       : defineStepDefault;
 
   // ABOUT STEP FORM
-  const isThreatMatchRuleValue = useMemo(
-    () => isThreatMatchRule(defineStepData.ruleType),
-    [defineStepData.ruleType]
-  );
   const typeDependentAboutRuleSchema = useMemo(
     () =>
-      isThreatMatchRuleValue
-        ? { ...aboutRuleSchema, threatIndicatorPath: threatIndicatorPathRequiredSchemaValue }
+      isThreatMatchRule(defineStepData.ruleType)
+        ? threatMatchAboutSchema
         : aboutRuleSchema,
-    [isThreatMatchRuleValue]
+    [defineStepData.ruleType]
   );
   const { form: aboutStepForm } = useForm<AboutStepRule>({
     defaultValue: aboutStepDefault,
