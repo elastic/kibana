@@ -8,10 +8,11 @@
 import React, { Component, Fragment } from 'react';
 import _ from 'lodash';
 import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule } from '@elastic/eui';
-import { RangedStyleLegendRow } from '../../../components/ranged_style_legend_row';
-import { VECTOR_STYLES } from '../../../../../../common/constants';
-import { CircleIcon } from './circle_icon';
-import { IDynamicStyleProperty } from '../../properties/dynamic_style_property';
+import { RangedStyleLegendRow } from '../../../../components/ranged_style_legend_row';
+import { VECTOR_STYLES } from '../../../../../../../common/constants';
+import { CircleIcon } from '../circle_icon';
+import { IDynamicStyleProperty } from '../../../properties/dynamic_style_property';
+import { getMaxLabel, getMinLabel } from './get_ordinal_label';
 
 function getLineWidthIcons() {
   const defaultStyle = {
@@ -130,12 +131,18 @@ export class OrdinalLegend extends Component<Props, State> {
     let maxLabel: string | number = EMPTY_VALUE;
     if (fieldMeta) {
       const min = this._formatValue(_.get(fieldMeta, 'min', EMPTY_VALUE));
-      minLabel =
-        this.props.style.isFieldMetaEnabled() && fieldMeta.isMinOutsideStdRange ? `< ${min}` : min;
+      minLabel = getMinLabel(
+        this.props.style.isFieldMetaEnabled(),
+        Boolean(fieldMeta.isMinOutsideStdRange),
+        min
+      );
 
       const max = this._formatValue(_.get(fieldMeta, 'max', EMPTY_VALUE));
-      maxLabel =
-        this.props.style.isFieldMetaEnabled() && fieldMeta.isMaxOutsideStdRange ? `> ${max}` : max;
+      maxLabel = getMaxLabel(
+        this.props.style.isFieldMetaEnabled(),
+        Boolean(fieldMeta.isMaxOutsideStdRange),
+        max
+      );
     }
 
     const options = this.props.style.getOptions();
