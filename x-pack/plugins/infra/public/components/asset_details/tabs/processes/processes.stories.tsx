@@ -12,7 +12,7 @@ import React from 'react';
 import { DecorateWithKibanaContext } from './processes.story_decorators';
 
 import { Processes, type ProcessesProps } from './processes';
-import { decorateWithGlobalStorybookThemeProviders } from '../../../test_utils/use_global_storybook_theme';
+import { decorateWithGlobalStorybookThemeProviders } from '../../../../test_utils/use_global_storybook_theme';
 
 export default {
   title: 'infra/Asset Details View/Components/Processes',

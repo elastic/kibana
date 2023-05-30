@@ -12,7 +12,7 @@ import React from 'react';
 import { useParameter } from '@storybook/addons';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { SourceProvider } from '../../../containers/metrics_source';
+import { SourceProvider } from '../../../../containers/metrics_source';
 
 export const DecorateWithKibanaContext = <StoryFnReactReturnType extends React.ReactNode>(
   wrappedStory: () => StoryFnReactReturnType,

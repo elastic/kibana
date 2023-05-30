@@ -21,7 +21,6 @@ import useToggle from 'react-use/lib/useToggle';
 import { debounce } from 'lodash';
 import { Query } from '@elastic/eui';
 import { AddMetadataFilterButton } from './add_metadata_filter_button';
-import { MetadataSearchUrlState } from './metadata';
 
 interface Row {
   name: string;
@@ -32,7 +31,8 @@ export interface Props {
   rows: Row[];
   loading: boolean;
   showActionsColumn?: boolean;
-  persistMetadataSearchToUrlState?: MetadataSearchUrlState;
+  search?: string;
+  onSearchChange?: (query: string) => void;
 }
 
 interface SearchErrorType {
@@ -65,10 +65,9 @@ const LOADING = i18n.translate('xpack.infra.metadataEmbeddable.loading', {
   defaultMessage: 'Loading...',
 });
 
-export const Table = (props: Props) => {
-  const { rows, loading, showActionsColumn } = props;
+export const Table = ({ loading, rows, onSearchChange, search, showActionsColumn }: Props) => {
   const [searchError, setSearchError] = useState<SearchErrorType | null>(null);
-  const [metadataSearch, setMetadataSearch] = useState('');
+  const [metadataSearch, setMetadataSearch] = useState(search);
 
   const defaultColumns = useMemo(
     () => [
@@ -93,13 +92,12 @@ export const Table = (props: Props) => {
   const debouncedSearchOnChange = useMemo(
     () =>
       debounce<(queryText: string) => void>((queryText) => {
-        return props.persistMetadataSearchToUrlState
-          ? props.persistMetadataSearchToUrlState.setMetadataSearchUrlState({
-              metadataSearch: String(queryText) ?? '',
-            })
-          : setMetadataSearch(String(queryText) ?? '');
+        if (onSearchChange) {
+          onSearchChange(queryText);
+        }
+        setMetadataSearch(queryText);
       }, 500),
-    [props.persistMetadataSearchToUrlState]
+    [onSearchChange]
   );
 
   const searchBarOnChange = useCallback(
@@ -114,7 +112,7 @@ export const Table = (props: Props) => {
     [debouncedSearchOnChange]
   );
 
-  const search: EuiSearchBarProps = {
+  const searchBar: EuiSearchBarProps = {
     onChange: searchBarOnChange,
     box: {
       'data-test-subj': 'infraHostMetadataSearchBarInput',
@@ -122,13 +120,7 @@ export const Table = (props: Props) => {
       schema: true,
       placeholder: SEARCH_PLACEHOLDER,
     },
-    query: props.persistMetadataSearchToUrlState
-      ? props.persistMetadataSearchToUrlState.metadataSearchUrlState
-        ? Query.parse(props.persistMetadataSearchToUrlState.metadataSearchUrlState)
-        : Query.MATCH_ALL
-      : metadataSearch
-      ? Query.parse(metadataSearch)
-      : Query.MATCH_ALL,
+    query: metadataSearch ? Query.parse(metadataSearch) : Query.MATCH_ALL,
   };
 
   const columns = useMemo(
@@ -159,7 +151,7 @@ export const Table = (props: Props) => {
       columns={columns}
       items={rows}
       rowProps={{ className: 'euiTableRow-hasActions' }}
-      search={search}
+      search={searchBar}
       loading={loading}
       error={searchError ? `${searchError.message}` : ''}
       message={
