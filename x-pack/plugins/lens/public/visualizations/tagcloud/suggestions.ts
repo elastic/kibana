@@ -51,6 +51,7 @@ export function suggestions({
           valueAccessor: metrics[0].columnId,
           maxFontSize: 72,
           minFontSize: 18,
+          showLabel: true,
         },
       };
     });

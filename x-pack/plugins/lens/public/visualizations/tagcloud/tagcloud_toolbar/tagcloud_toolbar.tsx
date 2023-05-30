@@ -13,7 +13,7 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSwitch, EuiSwitchEvent } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { VisualizationToolbarProps } from '../../../types';
 import { ToolbarPopover } from '../../../shared_components';
@@ -48,6 +48,20 @@ export function TagcloudToolbar(props: VisualizationToolbarProps<TagcloudState>)
                     ...props.state,
                     minFontSize,
                     maxFontSize,
+                  });
+                }}
+              />
+            </EuiFormRow>
+            <EuiFormRow>
+              <EuiSwitch
+                label={i18n.translate('xpack.lens.label.tagcloud.showLabel', {
+                  defaultMessage: 'Show label',
+                })}
+                checked={props.state.showLabel}
+                onChange={(event: EuiSwitchEvent) => {
+                  props.setState({
+                    ...props.state,
+                    showLabel: event.target.checked,
                   });
                 }}
               />

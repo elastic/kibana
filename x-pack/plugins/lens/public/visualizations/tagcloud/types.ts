@@ -13,6 +13,7 @@ export interface TagcloudState {
   valueAccessor?: string;
   maxFontSize: number;
   minFontSize: number;
+  showLabel: boolean;
 }
 
 export interface TagcloudConfig extends TagcloudState {
