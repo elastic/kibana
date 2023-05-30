@@ -411,7 +411,7 @@ responses to the client from the {kib} server, and specifies what value is used.
 [[server-securityResponseHeaders-permissionsPolicy]] `server.securityResponseHeaders.permissionsPolicy`::
 experimental[] Controls whether the https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Permissions-Policy[`Permissions-Policy`] header
 is used in all responses to the client from the {kib} server, and specifies what value is used. Allowed values are any text value or `null`.
-Refer to documentation for options and text value format. To disable, set to `null`.
+Refer to documentation for defined directives, values, and text format. To disable, set to `null`.
 *Default:* `camera=(), display-capture=(), fullscreen=(), geolocation=(), microphone=(), web-share=()`
 
 [[server-securityResponseHeaders-disableEmbedding]]`server.securityResponseHeaders.disableEmbedding`::
