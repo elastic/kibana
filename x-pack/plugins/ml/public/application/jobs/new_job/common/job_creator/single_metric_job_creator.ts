@@ -59,7 +59,7 @@ export class SingleMetricJobCreator extends JobCreator {
   // overriding set means we need to override get too
   // JS doesn't do inheritance very well
   public get bucketSpan(): BucketSpan {
-    return this._job_config.analysis_config.bucket_span;
+    return this._job_config.analysis_config.bucket_span!;
   }
 
   // aggregations need to be recreated whenever the detector or bucket_span change
