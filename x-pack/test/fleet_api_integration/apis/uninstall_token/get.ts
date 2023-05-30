@@ -56,6 +56,19 @@ export default function (providerContext: FtrProviderContext) {
         policyIds.forEach((policyId) => expect(receivedPolicyIds).to.contain(policyId));
       });
 
+      it('should return token with creation date', async () => {
+        const response = await supertest.get(UNINSTALL_TOKEN_ROUTES.LIST_PATTERN).expect(200);
+
+        const body: GetUninstallTokensResponse = response.body;
+        expect(body.items[policyIds[0]]).to.have.property('token');
+        expect(body.items[policyIds[0]]).to.have.property('created_at');
+
+        const createdAt = new Date(body.items[policyIds[0]].created_at!).getTime();
+        const thirtyMinutesAgo = new Date(Date.now() - 30 * 60 * 1000).getTime();
+
+        expect(createdAt).to.lessThan(Date.now()).greaterThan(thirtyMinutesAgo);
+      });
+
       it('should return default perPage number of tokens if total is above default perPage', async () => {
         policyIds = [...policyIds, ...(await generatePolicies(1))];
 

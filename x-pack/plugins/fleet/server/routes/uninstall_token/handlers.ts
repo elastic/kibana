@@ -7,6 +7,8 @@
 
 import type { TypeOf } from '@kbn/config-schema';
 
+import type { PolicyUninstallTokenMap } from '../../../common/types/models/uninstall_token';
+
 import { appContextService } from '../../services';
 import type { UninstallTokenServiceInterface } from '../../services/security/uninstall_token_service';
 import type { FleetRequestHandler } from '../../types';
@@ -62,7 +64,7 @@ const readUninstallTokens = async (
   uninstallTokenService: UninstallTokenServiceInterface,
   policyIdFilter?: string
 ) => {
-  let uninstallTokens: Record<string, string>;
+  let uninstallTokens: PolicyUninstallTokenMap;
 
   if (policyIdFilter) {
     const token = await uninstallTokenService.getTokenForPolicyId(policyIdFilter);
@@ -75,9 +77,13 @@ const readUninstallTokens = async (
   return uninstallTokens;
 };
 
-const paginateTokens = (uninstallTokens: Record<string, string>, perPage: number, page: number) => {
+const paginateTokens = (
+  uninstallTokens: PolicyUninstallTokenMap,
+  perPage: number,
+  page: number
+) => {
   const policyIds = Object.keys(uninstallTokens);
-  const items: Record<string, string> = {};
+  const items: PolicyUninstallTokenMap = {};
 
   for (let i = perPage * (page - 1); i < Math.min(perPage * page, policyIds.length); i++) {
     items[policyIds[i]] = uninstallTokens[policyIds[i]];

@@ -10,6 +10,7 @@ import type { KibanaRequest } from '@kbn/core-http-server';
 import { httpServerMock, coreMock } from '@kbn/core/server/mocks';
 
 import type { FleetRequestHandlerContext } from '../..';
+import type { PolicyUninstallTokenMap } from '../../../common/types/models/uninstall_token';
 
 import type { MockedFleetAppContext } from '../../mocks';
 import { createAppContextStartContractMock, xpackMocks } from '../../mocks';
@@ -25,10 +26,10 @@ describe('getUninstallTokensHandler', () => {
   let appContextStartContractMock: MockedFleetAppContext;
   let getAllTokensMock: jest.Mock;
 
-  const uninstallTokensFixture = {
-    'policy-id-1': '123456',
-    'policy-id-2': 'abcdef',
-    'policy-id-3': '9876543210',
+  const uninstallTokensFixture: PolicyUninstallTokenMap = {
+    'policy-id-1': { token: '123456' },
+    'policy-id-2': { token: 'abcdef' },
+    'policy-id-3': { token: '9876543210' },
   };
 
   beforeEach(async () => {

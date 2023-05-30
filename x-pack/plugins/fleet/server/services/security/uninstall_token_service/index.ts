@@ -24,6 +24,11 @@ import type { KibanaRequest } from '@kbn/core-http-server';
 import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 import { asyncForEach } from '@kbn/std';
 
+import type {
+  PolicyUninstallTokenMap,
+  UninstallToken,
+} from '../../../../common/types/models/uninstall_token';
+
 import { UNINSTALL_TOKENS_SAVED_OBJECT_TYPE, SO_SEARCH_LIMIT } from '../../../constants';
 import { appContextService } from '../../app_context';
 import { agentPolicyService } from '../../agent_policy';
@@ -44,11 +49,11 @@ interface UninstallTokenSOAggregation {
 }
 
 export interface UninstallTokenServiceInterface {
-  getTokenForPolicyId(policyId: string): Promise<string>;
+  getTokenForPolicyId(policyId: string): Promise<UninstallToken>;
 
-  getTokensForPolicyIds(policyIds: string[]): Promise<Record<string, string>>;
+  getTokensForPolicyIds(policyIds: string[]): Promise<PolicyUninstallTokenMap>;
 
-  getAllTokens(): Promise<Record<string, string>>;
+  getAllTokens(): Promise<PolicyUninstallTokenMap>;
 
   getHashedTokenForPolicyId(policyId: string): Promise<string>;
 
@@ -74,9 +79,9 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
    * gets uninstall token for given policy id
    *
    * @param policyId agent policy id
-   * @returns token
+   * @returns uninstall token
    */
-  public async getTokenForPolicyId(policyId: string): Promise<string> {
+  public async getTokenForPolicyId(policyId: string): Promise<UninstallToken> {
     return (await this.getTokensForPolicyIds([policyId]))[policyId];
   }
 
@@ -84,9 +89,9 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
    * gets uninstall tokens for given policy ids
    *
    * @param policyIds agent policy ids
-   * @returns Record<policyId, token>
+   * @returns PolicyId-Token map
    */
-  public async getTokensForPolicyIds(policyIds: string[]): Promise<Record<string, string>> {
+  public async getTokensForPolicyIds(policyIds: string[]): Promise<PolicyUninstallTokenMap> {
     let filter = policyIds
       .map((policyId) => `${UNINSTALL_TOKENS_SAVED_OBJECT_TYPE}.attributes.policy_id: ${policyId}`)
       .join(' or ');
@@ -155,26 +160,29 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
     }
     tokensFinder.close();
 
-    const tokensMap = tokenObjects.reduce((acc, { attributes }) => {
+    const tokensMap = tokenObjects.reduce((acc, { attributes, created_at: createdAt }) => {
       const policyId = attributes.policy_id;
       const token = attributes.token || attributes.token_plain;
       if (!policyId || !token) {
         return acc;
       }
 
-      acc[policyId] = token;
+      acc[policyId] = {
+        token,
+        ...(createdAt ? { created_at: createdAt } : {}),
+      };
+
       return acc;
-    }, {} as Record<string, string>);
+    }, {} as PolicyUninstallTokenMap);
 
     return tokensMap;
   }
 
   /**
    * gets uninstall tokens for all policies
-   *
-   * @returns Record<policyId, token>
+   * @returns PolicyId-Token map
    */
-  public async getAllTokens(): Promise<Record<string, string>> {
+  public async getAllTokens(): Promise<PolicyUninstallTokenMap> {
     const policyIds = await this.getAllPolicyIds();
     return this.getTokensForPolicyIds(policyIds);
   }
@@ -197,7 +205,7 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
    */
   public async getHashedTokensForPolicyIds(policyIds: string[]): Promise<Record<string, string>> {
     const tokensMap = await this.getTokensForPolicyIds(policyIds);
-    return Object.entries(tokensMap).reduce((acc, [policyId, token]) => {
+    return Object.entries(tokensMap).reduce((acc, [policyId, { token }]) => {
       if (policyId && token) {
         acc[policyId] = this.hashToken(token);
       }
@@ -243,7 +251,15 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
       return {};
     }
 
-    const existingTokens = force ? {} : await this.getTokensForPolicyIds(policyIds);
+    const existingTokens = force
+      ? {}
+      : Object.entries(await this.getTokensForPolicyIds(policyIds)).reduce(
+          (acc, [policyId, { token }]) => {
+            acc[policyId] = token;
+            return acc;
+          },
+          {} as Record<string, string>
+        );
     const missingTokenPolicyIds = force
       ? policyIds
       : policyIds.filter((policyId) => !existingTokens[policyId]);
