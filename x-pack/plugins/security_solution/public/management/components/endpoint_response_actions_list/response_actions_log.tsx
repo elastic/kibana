@@ -50,8 +50,6 @@ export const ResponseActionsLog = memo<
       commands: commandsFromUrl,
       hosts: agentIdsFromUrl,
       statuses: statusesFromUrl,
-      startDate: startDateFromUrl,
-      endDate: endDateFromUrl,
       users: usersFromUrl,
       withAutomatedActions: withAutomatedActionsFromUrl,
       withOutputs: withOutputsFromUrl,
@@ -115,8 +113,8 @@ export const ResponseActionsLog = memo<
     } = useGetEndpointActionList(
       {
         ...queryParams,
-        startDate: isFlyout ? dateRangePickerState.startDate : startDateFromUrl,
-        endDate: isFlyout ? dateRangePickerState.endDate : endDateFromUrl,
+        startDate: dateRangePickerState.startDate,
+        endDate: dateRangePickerState.endDate,
       },
       { retry: false }
     );
