@@ -23,6 +23,31 @@ interface Props {
   errors?: string[];
 }
 
+const convertArrayToObject = (arr?: string[]) => {
+  if (!arr) return {};
+  const result: any = {};
+
+  for (const item of arr) {
+    let currentObj = result;
+    const keys = item.split('.');
+
+    for (let i = 0; i < keys.length - 1; i++) {
+      const key = keys[i];
+
+      if (!currentObj[key]) {
+        currentObj[key] = {};
+      }
+
+      currentObj = currentObj[key];
+    }
+
+    const lastKey = keys[keys.length - 1];
+    currentObj[lastKey] = {};
+  }
+
+  return result;
+};
+
 export const TextAreaWithAutocomplete: React.FunctionComponent<Props> = ({
   messageVariables,
   paramsProperty,
@@ -34,7 +59,7 @@ export const TextAreaWithAutocomplete: React.FunctionComponent<Props> = ({
   errors,
 }) => {
   const [currentTextElement, setCurrentTextElement] = useState<HTMLTextAreaElement | null>(null);
-  const suggestions = ['banan', 'melon', 'kiwi', 'citron'];
+  const suggestions = convertArrayToObject(messageVariables?.map(({ name }) => name));
   const [matches, setMatches] = useState<string[]>([]);
 
   const optionsToShow: EuiSelectableOption[] = useMemo(() => {
@@ -58,8 +83,8 @@ export const TextAreaWithAutocomplete: React.FunctionComponent<Props> = ({
     editAction(paramsProperty, newValue, index);
   };
 
-  const onChangeWithMessageVariable = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    const inputValue = e.target.value;
+  const onChangeWithMessageVariable = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const inputValue = event.target.value;
 
     const lastOpenBracketIndex = inputValue.lastIndexOf('{{');
     const lastCloseBracketIndex = inputValue.lastIndexOf('}}');
@@ -67,14 +92,34 @@ export const TextAreaWithAutocomplete: React.FunctionComponent<Props> = ({
 
     if (lastBracketIndex !== -1 && lastOpenBracketIndex === lastBracketIndex) {
       const lastWord = inputValue.slice(lastBracketIndex + 2).trim();
-      const filteredMatches = suggestions.filter((suggestion) =>
-        suggestion.toLowerCase().startsWith(lastWord.toLowerCase())
-      );
+      const filteredMatches = filterSuggestions(suggestions, lastWord);
       setMatches(filteredMatches);
     } else {
       setMatches([]);
     }
     editAction(paramsProperty, inputValue, index);
+  };
+
+  const filterSuggestions = (obj: Record<string, unknown>, propertyPath: string) => {
+    const keys = propertyPath.split('.');
+
+    if (keys.length === 1) {
+      return Object.keys(obj).filter((suggestion) =>
+        suggestion.toLowerCase().startsWith(keys[0].toLowerCase())
+      );
+    }
+    let currentObj: Record<string, unknown> = obj;
+
+    for (const key of keys.slice(0, -1)) {
+      currentObj = currentObj[key] as Record<string, unknown>;
+
+      if (!currentObj) {
+        return [];
+      }
+    }
+    return Object.keys(currentObj).filter((suggestion) =>
+      suggestion.toLowerCase().startsWith(keys[keys.length - 1].toLowerCase())
+    );
   };
 
   const onOptionPick = (newOptions: EuiSelectableOption[]) => {
@@ -87,11 +132,12 @@ export const TextAreaWithAutocomplete: React.FunctionComponent<Props> = ({
       inputTargetValue
         ?.slice(lastBracketIndex + 2)
         .trim()
-        .split(' ') || [];
+        .split('.') || [];
+
     const checkedElement = newOptions.find(({ checked }) => checked === 'on');
     if (checkedElement) {
       words[words.length - 1] = checkedElement.label;
-      const newInputText = start + words.join(' ') + '}}';
+      const newInputText = start + words.join('.') + '}}';
       editAction(paramsProperty, newInputText, index);
       setMatches([]);
     }
