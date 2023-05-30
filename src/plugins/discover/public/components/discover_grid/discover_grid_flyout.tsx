@@ -136,72 +136,76 @@ export function DiscoverGridFlyout({
 
           <EuiSpacer size="s" />
           <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
-            <EuiHideFor sizes={['xs', 's', 'm']}>
-              <EuiFlexItem grow={false}>
-                <EuiText size="s">
-                  <strong>
-                    {i18n.translate('discover.grid.tableRow.viewText', {
-                      defaultMessage: 'View:',
-                    })}
-                  </strong>
-                </EuiText>
-              </EuiFlexItem>
-            </EuiHideFor>
-            <EuiFlexItem grow={false}>
-              {/*  eslint-disable-next-line @elastic/eui/href-or-on-click */}
-              <EuiButtonEmpty
-                size="s"
-                iconSize="s"
-                iconType="document"
-                flush="left"
-                data-test-subj="docTableRowAction"
-                href={singleDocHref}
-                onClick={onOpenSingleDoc}
-              >
-                {i18n.translate('discover.grid.tableRow.viewSingleDocumentLinkTextSimple', {
-                  defaultMessage: 'Single document',
-                })}
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-            {dataView.isTimeBased() && dataView.id && (
-              <EuiFlexGroup alignItems="center" responsive={false} gutterSize="none">
+            {!isPlainRecord && (
+              <>
+                <EuiHideFor sizes={['xs', 's', 'm']}>
+                  <EuiFlexItem grow={false}>
+                    <EuiText size="s">
+                      <strong>
+                        {i18n.translate('discover.grid.tableRow.viewText', {
+                          defaultMessage: 'View:',
+                        })}
+                      </strong>
+                    </EuiText>
+                  </EuiFlexItem>
+                </EuiHideFor>
                 <EuiFlexItem grow={false}>
                   {/*  eslint-disable-next-line @elastic/eui/href-or-on-click */}
                   <EuiButtonEmpty
                     size="s"
                     iconSize="s"
-                    iconType="documents"
+                    iconType="document"
                     flush="left"
-                    onClick={onOpenContextView}
-                    href={contextViewHref}
                     data-test-subj="docTableRowAction"
+                    href={singleDocHref}
+                    onClick={onOpenSingleDoc}
                   >
-                    {i18n.translate(
-                      'discover.grid.tableRow.viewSurroundingDocumentsLinkTextSimple',
-                      {
-                        defaultMessage: 'Surrounding documents',
-                      }
-                    )}
+                    {i18n.translate('discover.grid.tableRow.viewSingleDocumentLinkTextSimple', {
+                      defaultMessage: 'Single document',
+                    })}
                   </EuiButtonEmpty>
                 </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiIconTip
-                    content={i18n.translate(
-                      'discover.grid.tableRow.viewSurroundingDocumentsHover',
-                      {
-                        defaultMessage:
-                          'Inspect documents that occurred before and after this document. Only pinned filters remain active in the Surrounding documents view.',
-                      }
-                    )}
-                    type="questionInCircle"
-                    color="subdued"
-                    position="right"
-                    iconProps={{
-                      className: 'eui-alignTop',
-                    }}
-                  />
-                </EuiFlexItem>
-              </EuiFlexGroup>
+                {dataView.isTimeBased() && dataView.id && (
+                  <EuiFlexGroup alignItems="center" responsive={false} gutterSize="none">
+                    <EuiFlexItem grow={false}>
+                      {/*  eslint-disable-next-line @elastic/eui/href-or-on-click */}
+                      <EuiButtonEmpty
+                        size="s"
+                        iconSize="s"
+                        iconType="documents"
+                        flush="left"
+                        onClick={onOpenContextView}
+                        href={contextViewHref}
+                        data-test-subj="docTableRowAction"
+                      >
+                        {i18n.translate(
+                          'discover.grid.tableRow.viewSurroundingDocumentsLinkTextSimple',
+                          {
+                            defaultMessage: 'Surrounding documents',
+                          }
+                        )}
+                      </EuiButtonEmpty>
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <EuiIconTip
+                        content={i18n.translate(
+                          'discover.grid.tableRow.viewSurroundingDocumentsHover',
+                          {
+                            defaultMessage:
+                              'Inspect documents that occurred before and after this document. Only pinned filters remain active in the Surrounding documents view.',
+                          }
+                        )}
+                        type="questionInCircle"
+                        color="subdued"
+                        position="right"
+                        iconProps={{
+                          className: 'eui-alignTop',
+                        }}
+                      />
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                )}
+              </>
             )}
             {activePage !== -1 && (
               <EuiFlexItem data-test-subj={`dscDocNavigationPage-${activePage}`}>
