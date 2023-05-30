@@ -559,10 +559,10 @@ export class DashboardPageControls extends FtrService {
     });
   }
 
-  public async controlEditorCancel(confirm?: boolean) {
+  public async controlEditorCancel() {
     this.log.debug(`Canceling changes in control editor`);
     await this.testSubjects.click(`control-editor-cancel`);
-    if (confirm) {
+    if (await this.testSubjects.exists('confirmModalTitleText')) {
       await this.common.clickConfirmOnModal();
     }
   }
@@ -605,7 +605,7 @@ export class DashboardPageControls extends FtrService {
     }
     const dataViewName = (await this.testSubjects.find('open-data-view-picker')).getVisibleText();
     if (openAndCloseFlyout) {
-      await this.controlEditorCancel(true);
+      await this.controlEditorCancel();
     }
     return dataViewName;
   }
