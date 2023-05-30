@@ -12,7 +12,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { debounce } from 'lodash';
 import { EuiDualRange } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -28,13 +28,19 @@ export function FontSizeInput(props: Props) {
     props.minFontSize,
     props.maxFontSize,
   ]);
-  const propagateOnChange = debounce((minFontSize: number, maxFontSize: number) => {
-    props.onChange(minFontSize, maxFontSize);
-  }, 150);
+
+  // Storing propagateOnChange in ref 
+  // so there is one instance per component 
+  // instead of one instance per execution cycle.
+  const propagateOnChangeRef = useRef({
+      onChange: debounce((minFontSize: number, maxFontSize: number) => {
+        props.onChange(minFontSize, maxFontSize);
+      }, 150),
+  });
 
   useEffect(() => {
     return () => {
-      propagateOnChange.cancel();
+      propagateOnChangeRef.current.onChange.cancel();
     };
   }, []);
 
@@ -47,7 +53,7 @@ export function FontSizeInput(props: Props) {
       value={fontSize}
       onChange={(value) => {
         setFontSize(value);
-        propagateOnChange(value[0], value[1]);
+        propagateOnChangeRef.current.onChange(value[0], value[1]);
       }}
       aria-label={i18n.translate('xpack.lens.label.tagcloud.fontSizeLabel', {
         defaultMessage: 'Font size',
