@@ -7,14 +7,16 @@
 
 import { ServiceParams, SubActionConnector } from '@kbn/actions-plugin/server';
 import type { AxiosError } from 'axios';
-import { GenAiRunActionParamsSchema } from '../../../common/gen_ai/schema';
+import {
+  GenAiRunActionParamsSchema,
+  GenAiRunActionResponseSchema,
+} from '../../../common/gen_ai/schema';
 import type {
   GenAiConfig,
   GenAiSecrets,
   GenAiRunActionParams,
   GenAiRunActionResponse,
 } from '../../../common/gen_ai/types';
-import { GenAiBaseApiResponseSchema } from './api_schema';
 import { OpenAiProviderType, SUB_ACTION } from '../../../common/gen_ai/constants';
 
 export class GenAiConnector extends SubActionConnector<GenAiConfig, GenAiSecrets> {
@@ -60,7 +62,7 @@ export class GenAiConnector extends SubActionConnector<GenAiConfig, GenAiSecrets
     const response = await this.request({
       url: this.url,
       method: 'post',
-      responseSchema: GenAiBaseApiResponseSchema,
+      responseSchema: GenAiRunActionResponseSchema,
       data: body,
       headers: {
         ...(this.provider === OpenAiProviderType.OpenAi
