@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { NodeDefinition } from '../types';
+import type { NodeDefinitionWithChildren } from '.';
 
 export type ID = 'sharedux:analytics' | 'root' | 'discover' | 'dashboard' | 'visualize';
 
-export const analytics: NodeDefinition<ID> = {
+export const analytics: NodeDefinitionWithChildren<ID> = {
   // Make sure we have a unique id otherwise it might override a custom id from the project
   id: 'sharedux:analytics',
   title: 'Data exploration',

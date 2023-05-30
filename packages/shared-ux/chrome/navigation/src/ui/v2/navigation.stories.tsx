@@ -248,15 +248,13 @@ const navigationDefinition: ProjectNavigationDefinition = {
         type: 'navGroup',
         ...getPresets('analytics'),
         title: 'My analytics', // Change the title
-        children: [
-          ...(getPresets('analytics').children ?? [])?.map((child) => ({
-            ...child,
-            children: child.children?.filter((item) => {
-              // Hide discover and dashboard
-              return item.id !== 'discover' && item.id !== 'dashboard';
-            }),
-          })),
-        ],
+        children: getPresets('analytics').children.map((child) => ({
+          ...child,
+          children: child.children?.filter((item) => {
+            // Hide discover and dashboard
+            return item.id !== 'discover' && item.id !== 'dashboard';
+          }),
+        })),
       },
     ],
     footer: [

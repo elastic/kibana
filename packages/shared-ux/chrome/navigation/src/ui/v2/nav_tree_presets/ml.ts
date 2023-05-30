@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { NodeDefinition } from '../types';
+import type { NodeDefinitionWithChildren } from '.';
 
 export type ID =
   | 'sharedux:ml'
@@ -31,7 +31,7 @@ export type ID =
   | 'explain_log_rate_spikes'
   | 'log_pattern_analysis';
 
-export const ml: NodeDefinition<ID> = {
+export const ml: NodeDefinitionWithChildren<ID> = {
   id: 'sharedux:ml',
   title: 'Machine learning',
   icon: 'indexMapping',

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { NodeDefinition } from '../types';
+import type { NodeDefinitionWithChildren } from '.';
 
 export type ID =
   | 'sharedux:management'
@@ -49,7 +49,7 @@ export type ID =
   | 'advanced_settings'
   | 'upgrade_assistant';
 
-export const management: NodeDefinition<ID> = {
+export const management: NodeDefinitionWithChildren<ID> = {
   id: 'sharedux:management',
   title: 'Management',
   icon: 'gear',

@@ -18,26 +18,30 @@ export { devtools } from './devtools';
 export { ml } from './ml';
 export { management } from './management';
 
-export function getPresets(preset: 'devtools'): NodeDefinition<DevtoolsID>;
-export function getPresets(preset: 'management'): NodeDefinition<ManagementID>;
-export function getPresets(preset: 'ml'): NodeDefinition<MlID>;
-export function getPresets(preset: 'analytics'): NodeDefinition<AnalyticsID>;
+export type NodeDefinitionWithChildren<ID extends string = string> = NodeDefinition<ID> & {
+  children: Required<NodeDefinition<ID>>['children'];
+};
+
+export function getPresets(preset: 'devtools'): NodeDefinitionWithChildren<DevtoolsID>;
+export function getPresets(preset: 'management'): NodeDefinitionWithChildren<ManagementID>;
+export function getPresets(preset: 'ml'): NodeDefinitionWithChildren<MlID>;
+export function getPresets(preset: 'analytics'): NodeDefinitionWithChildren<AnalyticsID>;
 export function getPresets(preset: 'all'): {
-  analytics: NodeDefinition<AnalyticsID>;
-  devtools: NodeDefinition<DevtoolsID>;
-  ml: NodeDefinition<MlID>;
-  management: NodeDefinition<ManagementID>;
+  analytics: NodeDefinitionWithChildren<AnalyticsID>;
+  devtools: NodeDefinitionWithChildren<DevtoolsID>;
+  ml: NodeDefinitionWithChildren<MlID>;
+  management: NodeDefinitionWithChildren<ManagementID>;
 };
 export function getPresets(preset: NavigationGroupPreset | 'all'):
-  | NodeDefinition<DevtoolsID>
-  | NodeDefinition<ManagementID>
-  | NodeDefinition<MlID>
-  | NodeDefinition<AnalyticsID>
+  | NodeDefinitionWithChildren<DevtoolsID>
+  | NodeDefinitionWithChildren<ManagementID>
+  | NodeDefinitionWithChildren<MlID>
+  | NodeDefinitionWithChildren<AnalyticsID>
   | {
-      analytics: NodeDefinition<AnalyticsID>;
-      devtools: NodeDefinition<DevtoolsID>;
-      ml: NodeDefinition<MlID>;
-      management: NodeDefinition<ManagementID>;
+      analytics: NodeDefinitionWithChildren<AnalyticsID>;
+      devtools: NodeDefinitionWithChildren<DevtoolsID>;
+      ml: NodeDefinitionWithChildren<MlID>;
+      management: NodeDefinitionWithChildren<ManagementID>;
     } {
   if (preset === 'all') {
     return {

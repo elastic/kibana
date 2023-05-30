@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { NodeDefinition } from '../types';
+import type { NodeDefinitionWithChildren } from '.';
 
 export type ID =
   | 'sharedux:devtools'
@@ -16,7 +16,7 @@ export type ID =
   | 'grok_debugger'
   | 'painless_lab';
 
-export const devtools: NodeDefinition<ID> = {
+export const devtools: NodeDefinitionWithChildren<ID> = {
   title: 'Developer tools',
   id: 'sharedux:devtools',
   icon: 'editorCodeBlock',
