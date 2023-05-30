@@ -1,0 +1,77 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Should render legend 1`] = `
+<RangedStyleLegendRow
+  fieldLabel="bytes"
+  header={
+    <EuiFlexGroup
+      alignItems="center"
+      gutterSize="xs"
+      justifyContent="spaceBetween"
+    >
+      <React.Fragment>
+        <EuiFlexItem
+          grow={false}
+        >
+          <CircleIcon
+            style={
+              Object {
+                "fill": "none",
+                "stroke": "grey",
+                "strokeWidth": "1px",
+                "width": "12px",
+              }
+            }
+          />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiHorizontalRule
+            margin="xs"
+          />
+        </EuiFlexItem>
+      </React.Fragment>
+      <React.Fragment>
+        <EuiFlexItem
+          grow={false}
+        >
+          <CircleIcon
+            style={
+              Object {
+                "fill": "none",
+                "stroke": "grey",
+                "strokeWidth": "2px",
+                "width": "12px",
+              }
+            }
+          />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiHorizontalRule
+            margin="xs"
+          />
+        </EuiFlexItem>
+      </React.Fragment>
+      <React.Fragment>
+        <EuiFlexItem
+          grow={false}
+        >
+          <CircleIcon
+            style={
+              Object {
+                "fill": "none",
+                "stroke": "grey",
+                "strokeWidth": "3px",
+                "width": "12px",
+              }
+            }
+          />
+        </EuiFlexItem>
+      </React.Fragment>
+    </EuiFlexGroup>
+  }
+  invert={false}
+  maxLabel="19KB"
+  minLabel="0KB"
+  propertyLabel="Border width"
+/>
+`;
