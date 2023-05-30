@@ -218,19 +218,17 @@ function addSeverityAndEventTypeInBody(bodyString: string,severity: string,event
     bodyObj = JSON.parse(bodyString);
   }catch{
   }
-  var resultObj = JSON.parse("{}");
-  resultObj['hits'] = {
-    // empty
-  };
-  resultObj['hits']['hits'] = {
-    // empty
-  };
-  resultObj['hits']['hits']["_source"] = {
-    // empty
-  };
-  resultObj['hits']['hits']["_source"]["rawData"] = bodyObj;
-  resultObj['hits']['hits']["_source"]["event.type"] = eventType;
-  resultObj['hits']['hits']["_source"]["kibana.alert.severity"] = severity;
+  const resultObj = {
+    hits: {
+      hits: {
+        '_source': {
+          'rawData': bodyObj,
+          'event.type': eventType,
+          'kibana.alert.severity': severity
+        }
+      }
+    }
+  }
   const result = JSON.stringify(resultObj)
   return result
 }
