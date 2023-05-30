@@ -19,7 +19,6 @@ export default function ({ getService }: FtrProviderContext) {
     let agentPolicyId: string;
 
     beforeEach(async () => {
-      // before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
       await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
 
