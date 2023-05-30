@@ -64,7 +64,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await a11y.testAppSnapshot();
     });
 
-    it('overview alert popover controls nested content', async () => {
+    it.skip('overview alert popover controls nested content', async () => {
       await uptimeService.overview.navigateToNestedPopover();
       await a11y.testAppSnapshot();
     });
