@@ -91,7 +91,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         // here Lens suggests a heatmap so it is rendered
         expect(await testSubjects.exists('unifiedHistogramChart')).to.be(true);
         expect(await testSubjects.exists('heatmapChart')).to.be(true);
-        const cell = await dataGrid.getCellElement(0, 3);
+        const cell = await dataGrid.getCellElement(0, 4);
         expect(await cell.getVisibleText()).to.be('2269');
       });
 
