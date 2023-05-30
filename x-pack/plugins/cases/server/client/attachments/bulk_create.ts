@@ -21,7 +21,7 @@ import type { BulkCreateArgs } from './types';
 import { validateRegisteredAttachments } from './validators';
 
 /**
- * Create an attachment to a case.
+ * Bulk create attachments to a case.
  *
  * @ignore
  */

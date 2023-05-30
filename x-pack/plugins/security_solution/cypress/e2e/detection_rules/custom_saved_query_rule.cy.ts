@@ -74,7 +74,7 @@ describe('Custom saved_query rules', () => {
       getCustomQueryInput().should('have.value', savedQueryQuery).should('be.disabled');
       cy.get(QUERY_BAR).should('contain', savedQueryFilterKey);
 
-      cy.get(DEFINE_CONTINUE_BUTTON).should('exist').click({ force: true });
+      cy.get(DEFINE_CONTINUE_BUTTON).should('exist').click();
       cy.get(DEFINE_CONTINUE_BUTTON).should('not.exist');
 
       fillAboutRuleAndContinue(rule);
