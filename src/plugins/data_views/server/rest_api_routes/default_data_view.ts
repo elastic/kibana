@@ -98,7 +98,7 @@ const manageDefaultIndexPatternRoutesFactory =
 
     router.versioned.post({ path, access: 'public' }).addVersion(
       {
-        version: '2023-10-31',
+        version: INITIAL_REST_VERSION,
         validate: {
           request: {
             body: schema.object({
