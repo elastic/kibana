@@ -37,7 +37,6 @@ import {
   LicensingPluginStart,
 } from '@kbn/licensing-plugin/server';
 import { MlPluginSetup, MlPluginStart } from '@kbn/ml-plugin/server';
-import { ObservabilityPluginSetup } from '@kbn/observability-plugin/server';
 import {
   SecurityPluginSetup,
   SecurityPluginStart,
@@ -73,7 +72,6 @@ export interface APMPluginSetupDependencies {
   data: DataPluginSetup;
   features: FeaturesPluginSetup;
   licensing: LicensingPluginSetup;
-  observability: ObservabilityPluginSetup;
   ruleRegistry: RuleRegistryPluginSetupContract;
   infra: InfraPluginSetup;
   dataViews: {};
@@ -97,10 +95,10 @@ export interface APMPluginStartDependencies {
   data: DataPluginStart;
   features: FeaturesPluginStart;
   licensing: LicensingPluginStart;
-  observability: undefined;
   ruleRegistry: RuleRegistryPluginStartContract;
   infra: InfraPluginStart;
   dataViews: DataViewsServerPluginStart;
+  share: undefined;
 
   // optional dependencies
   actions?: ActionsPlugin['start'];
