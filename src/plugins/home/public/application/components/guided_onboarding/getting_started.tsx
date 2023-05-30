@@ -59,7 +59,8 @@ export const GettingStarted = () => {
       return false;
     }
 
-    if (useCase instanceof Array) {
+    // if (useCase instanceof Array) {
+    if (false) {
       return filterValues.includes(useCase[0]);
     }
 
