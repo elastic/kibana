@@ -119,9 +119,9 @@ const defaultRuleData = {
 describe('Detection rules, bulk edit', () => {
   before(() => {
     cleanKibana();
-    login();
   });
   beforeEach(() => {
+    login();
     // Make sure persisted rules table state is cleared
     resetRulesTableState();
     deleteAlertsAndRules();
