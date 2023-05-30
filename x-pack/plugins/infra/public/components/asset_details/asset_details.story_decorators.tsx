@@ -9,6 +9,7 @@ import type { StoryContext } from '@storybook/react';
 import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { of } from 'rxjs';
 import { SourceProvider } from '../../containers/metrics_source';
 
 export const DecorateWithKibanaContext = <StoryFnReactReturnType extends React.ReactNode>(
@@ -172,7 +173,7 @@ export const DecorateWithKibanaContext = <StoryFnReactReturnType extends React.R
 
   const mockServices = {
     application: {
-      currentAppId$: { title: 'infra', subscribe: () => {} },
+      currentAppId$: of('infra'),
       navigateToUrl: () => {},
     },
     dataViews: { create: () => {} },

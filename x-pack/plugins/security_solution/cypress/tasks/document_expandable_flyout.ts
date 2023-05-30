@@ -37,6 +37,8 @@ import {
   DOCUMENT_DETAILS_FLYOUT_FOOTER_TAKE_ACTION_BUTTON_DROPDOWN,
   KIBANA_NAVBAR_ALERTS_PAGE,
   KIBANA_NAVBAR_CASES_PAGE,
+  DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_THREAT_INTELLIGENCE_VIEW_ALL_BUTTON,
+  DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_PREVALENCE_VIEW_ALL_BUTTON,
 } from '../screens/document_expandable_flyout';
 import { EXPAND_ALERT_BTN } from '../screens/alerts';
 import { getClassSelector } from '../helpers/common';
@@ -307,3 +309,21 @@ export const clearFilters = () =>
   cy.get(DOCUMENT_DETAILS_FLYOUT_BODY).within(() => {
     cy.get(DOCUMENT_DETAILS_FLYOUT_TABLE_TAB_ROW_CELL_FILTER_OUT).first().click();
   });
+
+/**
+ * Click on the view all button under the right section, Insights, Threat Intelligence
+ */
+export const clickThreatIntelligenceViewAllButton = () => {
+  cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_THREAT_INTELLIGENCE_VIEW_ALL_BUTTON)
+    .should('be.visible')
+    .click();
+};
+
+/**
+ * Click on the view all button under the right section, Insights, Prevalence
+ */
+export const clickPrevalenceViewAllButton = () => {
+  cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_PREVALENCE_VIEW_ALL_BUTTON)
+    .should('be.visible')
+    .click();
+};
