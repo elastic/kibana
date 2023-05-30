@@ -703,11 +703,7 @@ const updateExistingDataStream = async ({
   }
 
   // Trigger a rollover if the index mode or source type has changed
-  if (
-    currentIndexMode !== settings?.index?.mode ||
-    // @ts-expect-error Property 'mode' does not exist on type 'MappingSourceField'
-    currentSourceType !== mappings?._source?.mode
-  ) {
+  if (currentIndexMode !== settings?.index?.mode || currentSourceType !== mappings?._source?.mode) {
     logger.info(
       `Index mode or source type has changed for ${dataStreamName}, triggering a rollover`
     );
