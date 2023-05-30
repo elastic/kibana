@@ -11,10 +11,10 @@ import fs from 'fs/promises';
 import { Root } from '@kbn/core-root-server-internal';
 import {
   createRootWithCorePlugins,
-  createTestServers,
   type TestElasticsearchUtils,
 } from '@kbn/core-test-helpers-kbn-server';
 import { delay } from '../test_utils';
+import { startElasticsearch } from '../kibana_migrator_test_kit';
 
 const logFilePath = Path.join(__dirname, 'read_batch_size.log');
 
@@ -24,6 +24,9 @@ describe('migration v2 - read batch size', () => {
   let logs: string;
 
   beforeEach(async () => {
+    esServer = await startElasticsearch({
+      dataArchive: Path.join(__dirname, '..', 'archives', '8.4.0_with_sample_data_logs.zip'),
+    });
     await fs.unlink(logFilePath).catch(() => {});
   });
 
@@ -34,18 +37,7 @@ describe('migration v2 - read batch size', () => {
   });
 
   it('reduces the read batchSize in half if a batch exceeds maxReadBatchSizeBytes', async () => {
-    const { startES } = createTestServers({
-      adjustTimeout: (t: number) => jest.setTimeout(t),
-      settings: {
-        es: {
-          license: 'basic',
-          dataArchive: Path.join(__dirname, '..', 'archives', '8.4.0_with_sample_data_logs.zip'),
-        },
-      },
-    });
-
     root = createRoot({ maxReadBatchSizeBytes: 15000 });
-    esServer = await startES();
     await root.preboot();
     await root.setup();
     await root.start();
@@ -54,24 +46,13 @@ describe('migration v2 - read batch size', () => {
     logs = await fs.readFile(logFilePath, 'utf-8');
 
     expect(logs).toMatch(
-      'Read a batch that exceeds migrations.maxReadBatchSizeBytes, retrying by reducing the batch size in half to 15'
+      /Read a batch with a response content length of \d+ bytes which exceeds migrations\.maxReadBatchSizeBytes, retrying by reducing the batch size in half to 15/
     );
     expect(logs).toMatch('[.kibana] Migration completed');
   });
 
   it('does not reduce the read batchSize in half if no batches exceeded maxReadBatchSizeBytes', async () => {
-    const { startES } = createTestServers({
-      adjustTimeout: (t: number) => jest.setTimeout(t),
-      settings: {
-        es: {
-          license: 'basic',
-          dataArchive: Path.join(__dirname, '..', 'archives', '8.4.0_with_sample_data_logs.zip'),
-        },
-      },
-    });
-
     root = createRoot({ maxReadBatchSizeBytes: 50000 });
-    esServer = await startES();
     await root.preboot();
     await root.setup();
     await root.start();
@@ -79,9 +60,7 @@ describe('migration v2 - read batch size', () => {
     // Check for migration steps present in the logs
     logs = await fs.readFile(logFilePath, 'utf-8');
 
-    expect(logs).not.toMatch(
-      'Read a batch that exceeds migrations.maxReadBatchSizeBytes, retrying by reducing the batch size in half to .'
-    );
+    expect(logs).not.toMatch('retrying by reducing the batch size in half to');
     expect(logs).toMatch('[.kibana] Migration completed');
   });
 });
