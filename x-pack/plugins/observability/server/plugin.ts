@@ -22,6 +22,7 @@ import {
   createUICapabilities as createCasesUICapabilities,
   getApiTags as getCasesApiTags,
 } from '@kbn/cases-plugin/common';
+import { SharePluginSetup } from '@kbn/share-plugin/server';
 import { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
 import type { GuidedOnboardingPluginSetup } from '@kbn/guided-onboarding-plugin/server';
 
@@ -43,6 +44,7 @@ import { getObservabilityServerRouteRepository } from './routes/get_global_obser
 import { casesFeatureId, observabilityFeatureId, sloFeatureId } from '../common';
 import { compositeSlo, slo, SO_COMPOSITE_SLO_TYPE, SO_SLO_TYPE } from './saved_objects';
 import { SLO_RULE_REGISTRATION_CONTEXT } from './common/constants';
+import { AlertsLocatorDefinition } from '../common/locators/alerts';
 import { registerRuleTypes } from './lib/rules/register_rule_types';
 import { SLO_BURN_RATE_RULE_ID } from '../common/constants';
 import { registerSloUsageCollector } from './lib/collectors/register';
@@ -55,6 +57,7 @@ interface PluginSetup {
   features: FeaturesSetup;
   guidedOnboarding: GuidedOnboardingPluginSetup;
   ruleRegistry: RuleRegistryPluginSetupContract;
+  share: SharePluginSetup;
   spaces?: SpacesPluginSetup;
   usageCollection?: UsageCollectionSetup;
 }
@@ -76,6 +79,8 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
     const casesApiTags = getCasesApiTags(observabilityFeatureId);
 
     const config = this.initContext.config.get<ObservabilityConfig>();
+
+    const alertsLocator = plugins.share.url.locators.create(new AlertsLocatorDefinition());
 
     plugins.features.registerKibanaFeature({
       id: casesFeatureId,
@@ -267,6 +272,7 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
         const api = await annotationsApiPromise;
         return api?.getScopedAnnotationsClient(...args);
       },
+      alertsLocator,
     };
   }
 

@@ -19,6 +19,7 @@ export const GenAiSecretsSchema = schema.object({ apiKey: schema.string() });
 export const GenAiRunActionParamsSchema = schema.object({
   body: schema.string(),
 });
+
 export const GenAiRunActionResponseSchema = schema.object(
   {
     id: schema.string(),

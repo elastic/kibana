@@ -49,6 +49,7 @@ describe('Artifact pages', () => {
 
   beforeEach(() => {
     login();
+    cy.visit(APP_ENDPOINTS_PATH);
   });
 
   after(() => {
@@ -58,8 +59,6 @@ describe('Artifact pages', () => {
   for (const testData of getArtifactsListTestsData()) {
     describe(`${testData.title}`, () => {
       it(`should update Endpoint Policy on Endpoint when adding ${testData.artifactName}`, () => {
-        cy.visit(APP_ENDPOINTS_PATH);
-
         cy.getByTestSubj('policyListRevNo')
           .first()
           .invoke('text')
