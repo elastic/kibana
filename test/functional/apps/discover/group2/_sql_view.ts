@@ -104,7 +104,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await monacoEditor.setCodeEditorValue(testQuery);
         await testSubjects.click('querySubmitButton');
         await PageObjects.header.waitUntilLoadingHasFinished();
-        let cell = await dataGrid.getCellElement(0, 3);
+        let cell = await dataGrid.getCellElement(0, 4);
         expect(await cell.getVisibleText()).to.be('2269');
         await PageObjects.timePicker.setAbsoluteRange(
           'Sep 19, 2015 @ 06:31:44.000',
@@ -114,7 +114,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await testSubjects.exists('discoverNoResults')).to.be(true);
         await PageObjects.timePicker.setDefaultAbsoluteRange();
         await PageObjects.header.waitUntilLoadingHasFinished();
-        cell = await dataGrid.getCellElement(0, 3);
+        cell = await dataGrid.getCellElement(0, 4);
         expect(await cell.getVisibleText()).to.be('2269');
       });
 
@@ -129,7 +129,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await testSubjects.click('querySubmitButton');
         await PageObjects.header.waitUntilLoadingHasFinished();
 
-        const cell = await dataGrid.getCellElement(0, 3);
+        const cell = await dataGrid.getCellElement(0, 4);
         expect(await cell.getVisibleText()).to.be('2269');
       });
     });
