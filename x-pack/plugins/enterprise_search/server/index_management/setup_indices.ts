@@ -116,6 +116,7 @@ const connectorMappingsProperties: Record<string, MappingProperty> = {
   is_native: { type: 'boolean' },
   language: { type: 'keyword' },
   last_deleted_document_count: { type: 'long' },
+  last_incremental_sync_scheduled_at: { type: 'date' },
   last_indexed_document_count: { type: 'long' },
   last_seen: { type: 'date' },
   last_sync_error: { type: 'keyword' },
