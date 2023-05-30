@@ -168,6 +168,74 @@ describe('Response console', () => {
     });
   });
 
+  describe('User journey for Get file command', () => {
+    let response: IndexedFleetEndpointPolicyResponse;
+    let initialAgentData: Agent;
+
+    const fileContent = 'This is a test file for the get-file command.';
+    const filePath = `/home/ubuntu/test_file.txt`;
+
+    before(() => {
+      getAgentByHostName(endpointHostname).then((agentData) => {
+        initialAgentData = agentData;
+      });
+
+      getEndpointIntegrationVersion().then((version) =>
+        createAgentPolicyTask(version).then((data) => {
+          response = data;
+        })
+      );
+
+      cy.task('installPackagesOnEndpoint', { hostname: endpointHostname, packages: ['unzip'] });
+
+      cy.task('createFileOnEndpoint', {
+        hostname: endpointHostname,
+        path: filePath,
+        content: fileContent,
+      });
+    });
+
+    after(() => {
+      if (initialAgentData?.policy_id) {
+        reassignAgentPolicy(initialAgentData.id, initialAgentData.policy_id);
+      }
+      if (response) {
+        cy.task('deleteIndexedFleetEndpointPolicies', response);
+      }
+    });
+
+    it('"get-file --path" - should retrieve a file', () => {
+      waitForEndpointListPageToBeLoaded(endpointHostname);
+      openResponseConsoleFromEndpointList();
+      inputConsoleCommand(`get-file --path ${filePath}`);
+      submitCommand();
+      cy.getByTestSubj('getFileSuccess', { timeout: 60000 }).within(() => {
+        cy.contains('File retrieved from the host.');
+        cy.contains('(ZIP file passcode: elastic)');
+        cy.contains(
+          'Files are periodically deleted to clear storage space. Download and save file locally if needed.'
+        );
+        cy.contains('Click here to download').click();
+        const downloadsFolder = Cypress.config('downloadsFolder');
+        cy.readFile(`${downloadsFolder}/upload.zip`);
+
+        cy.task('uploadFileToEndpoint', {
+          hostname: endpointHostname,
+          srcPath: `${downloadsFolder}/upload.zip`,
+          destPath: '/home/ubuntu/upload.zip',
+        });
+
+        cy.task('readZippedFileContentOnEndpoint', {
+          hostname: endpointHostname,
+          path: '/home/ubuntu/upload.zip',
+          password: 'elastic',
+        }).then((unzippedFileContent) => {
+          expect(unzippedFileContent).to.equal(fileContent);
+        });
+      });
+    });
+  });
+
   describe('document signing', () => {
     let response: IndexedFleetEndpointPolicyResponse;
     let initialAgentData: Agent;
