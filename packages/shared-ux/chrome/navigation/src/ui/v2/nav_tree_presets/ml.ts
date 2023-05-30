@@ -41,12 +41,14 @@ export const ml: NodeDefinitionWithChildren<ID> = {
       id: 'root',
       children: [
         {
-          title: 'Overview',
           id: 'overview',
+          title: 'Overview',
+          href: '/app/ml/overview',
         },
         {
-          title: 'Notifications',
           id: 'notifications',
+          title: 'Notifications',
+          href: '/app/ml/notifications',
         },
       ],
     },
@@ -55,80 +57,93 @@ export const ml: NodeDefinitionWithChildren<ID> = {
       id: 'anomaly_detection',
       children: [
         {
-          title: 'Jobs',
           id: 'jobs',
+          title: 'Jobs',
+          href: '/app/ml/jobs',
         },
         {
-          title: 'Anomaly explorer',
           id: 'explorer',
+          title: 'Anomaly explorer',
+          href: '/app/ml/explorer',
         },
         {
-          title: 'Single metric viewer',
           id: 'single_metric_viewer',
+          title: 'Single metric viewer',
+          href: '/app/ml/timeseriesexplorer',
         },
         {
-          title: 'Settings',
           id: 'settings',
+          title: 'Settings',
+          href: '/app/ml/settings',
         },
       ],
     },
     {
-      title: 'Data frame analytics',
       id: 'data_frame_analytics',
+      title: 'Data frame analytics',
       children: [
         {
-          title: 'Jobs',
           id: 'jobs',
+          title: 'Jobs',
+          href: '/app/ml/data_frame_analytics',
         },
         {
-          title: 'Results explorer',
           id: 'results_explorer',
+          title: 'Results explorer',
+          href: '/app/ml/data_frame_analytics/exploration',
         },
         {
-          title: 'Analytics map',
           id: 'analytics_map',
+          title: 'Analytics map',
+          href: '/app/ml/data_frame_analytics/map',
         },
       ],
     },
     {
-      title: 'Model management',
       id: 'model_management',
+      title: 'Model management',
       children: [
         {
-          title: 'Trained models',
           id: 'trained_models',
+          title: 'Trained models',
+          href: '/app/ml/trained_models',
         },
         {
-          title: 'Nodes',
           id: 'nodes',
+          title: 'Nodes',
+          href: '/app/ml/nodes',
         },
       ],
     },
     {
-      title: 'Data visualizer',
       id: 'data_visualizer',
+      title: 'Data visualizer',
       children: [
         {
-          title: 'File',
           id: 'file',
+          title: 'File',
+          href: '/app/ml/filedatavisualizer',
         },
         {
-          title: 'Data view',
           id: 'data_view',
+          title: 'Data view',
+          href: '/app/ml/datavisualizer_index_select',
         },
       ],
     },
     {
-      title: 'AIOps labs',
       id: 'aiops_labs',
+      title: 'AIOps labs',
       children: [
         {
-          title: 'Explain log rate spikes',
           id: 'explain_log_rate_spikes',
+          title: 'Explain log rate spikes',
+          href: '/app/ml/aiops/explain_log_rate_spikes_index_select',
         },
         {
-          title: 'Log pattern analysis',
           id: 'log_pattern_analysis',
+          title: 'Log pattern analysis',
+          href: '/app/ml/aiops/log_categorization_index_select',
         },
       ],
     },

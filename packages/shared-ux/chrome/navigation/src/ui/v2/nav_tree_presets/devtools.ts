@@ -25,20 +25,24 @@ export const devtools: NodeDefinitionWithChildren<ID> = {
       id: 'root',
       children: [
         {
-          title: 'Console',
           id: 'console',
+          title: 'Console',
+          href: '/app/dev_tools#/console',
         },
         {
-          title: 'Search profiler',
           id: 'search_profiler',
+          title: 'Search profiler',
+          href: '/app/dev_tools#/searchprofiler',
         },
         {
-          title: 'Grok debugger',
           id: 'grok_debugger',
+          title: 'Grok debugger',
+          href: '/app/dev_tools#/grokdebugger',
         },
         {
-          title: 'Painless lab',
           id: 'painless_lab',
+          title: 'Painless lab',
+          href: '/app/dev_tools#/painless_lab',
         },
       ],
     },
