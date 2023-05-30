@@ -19,7 +19,7 @@ describe('parseRawSecurityResponseHeadersConfig', () => {
     expect(result.securityResponseHeaders).toMatchInlineSnapshot(`
       Object {
         "Cross-Origin-Opener-Policy": "same-origin",
-        "Permissions-Policy": "camera=(), display-capture=(), fullscreen=(), geolocation=(), microphone=(), web-share=()",
+        "Permissions-Policy": "camera=(), display-capture=(), fullscreen=(self), geolocation=(), microphone=(), web-share=()",
         "Referrer-Policy": "no-referrer-when-downgrade",
         "X-Content-Type-Options": "nosniff",
       }
