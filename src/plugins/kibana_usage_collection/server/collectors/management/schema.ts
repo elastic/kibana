@@ -19,11 +19,8 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     _meta: { description: 'Default value of the setting was changed.' },
   },
   'securitySolution:alertTags': {
-    type: 'array',
-    items: {
-      type: 'keyword',
-      _meta: { description: 'Default value of the setting was changed.' },
-    },
+    type: 'keyword',
+    _meta: { description: 'Default value of the setting was changed.' },
   },
   'securitySolution:newsFeedUrl': {
     type: 'keyword',

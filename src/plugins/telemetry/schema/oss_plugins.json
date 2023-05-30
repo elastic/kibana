@@ -8684,10 +8684,9 @@
           }
         },
         "securitySolution:alertTags": {
-          "type": "array",
-          "items": {
-            "type": "keyword",
-            "_meta": { "description": "Default value of the setting was changed." }
+          "type": "keyword",
+          "_meta": {
+            "description": "Default value of the setting was changed."
           }
         },
         "search:includeFrozen": {
