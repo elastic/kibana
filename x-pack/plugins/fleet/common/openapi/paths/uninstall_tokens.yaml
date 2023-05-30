@@ -1,0 +1,47 @@
+get:
+  summary: List uninstall tokens for agent policies
+  tags:
+    - Uninstall tokens
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              items:
+                type: object
+                additionalProperties:
+                  type: object
+                  properties:
+                    token:
+                      type: string
+                    created_at:
+                      type: string
+                  required:
+                    - token
+              total:
+                type: number
+              page:
+                type: number
+              perPage:
+                type: number
+            required:
+              - items
+              - total
+              - page
+              - perPage
+    '400':
+      $ref: ../components/responses/error.yaml
+  operationId: get-uninstall-tokens
+  parameters:
+    - $ref: ../components/parameters/page_size.yaml
+    - $ref: ../components/parameters/page_index.yaml
+    - name: policyId
+      in: query
+      required: false
+      schema:
+        type: string
+  security:
+    - basicAuth: []

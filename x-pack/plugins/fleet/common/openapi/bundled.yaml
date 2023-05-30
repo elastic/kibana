@@ -3334,6 +3334,54 @@ paths:
           name: enrolToken
           in: query
           required: false
+  /uninstall_tokens:
+    get:
+      summary: List uninstall tokens for agent policies
+      tags:
+        - Uninstall tokens
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: object
+                    additionalProperties:
+                      type: object
+                      properties:
+                        token:
+                          type: string
+                        created_at:
+                          type: string
+                      required:
+                        - token
+                  total:
+                    type: number
+                  page:
+                    type: number
+                  perPage:
+                    type: number
+                required:
+                  - items
+                  - total
+                  - page
+                  - perPage
+        '400':
+          $ref: '#/components/responses/error'
+      operationId: get-uninstall-tokens
+      parameters:
+        - $ref: '#/components/parameters/page_size'
+        - $ref: '#/components/parameters/page_index'
+        - name: policyId
+          in: query
+          required: false
+          schema:
+            type: string
+      security:
+        - basicAuth: []
 components:
   securitySchemes:
     basicAuth:
@@ -4433,9 +4481,13 @@ components:
         agent:
           type: string
           nullable: true
-        download_source_id:
-          type: string
-          nullable: true
+        secret_references:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
       required:
         - id
         - outputs
