@@ -25,13 +25,13 @@ import {
   RIGHT_ALIGNMENT,
 } from '@elastic/eui';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
-import { FORMATTERS } from '../../../../common/formatters';
-import type { SortBy } from '../../../pages/metrics/inventory_view/hooks/use_process_list';
+import { FORMATTERS } from '../../../../../common/formatters';
+import type { SortBy } from '../../../../pages/metrics/inventory_view/hooks/use_process_list';
 import type { Process } from './types';
-import { ProcessRow } from '../../../pages/metrics/inventory_view/components/node_details/tabs/processes/process_row';
+import { ProcessRow } from '../../../../pages/metrics/inventory_view/components/node_details/tabs/processes/process_row';
 import { StateBadge } from './state_badge';
 import { STATE_ORDER } from './states';
-import type { ProcessListAPIResponse } from '../../../../common/http_api';
+import type { ProcessListAPIResponse } from '../../../../../common/http_api';
 
 interface TableProps {
   processList: ProcessListAPIResponse['processList'];

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { MetricsExplorerSeries } from '../../../../common/http_api';
+import type { MetricsExplorerSeries } from '../../../../../common/http_api';
 import { STATE_NAMES } from './states';
 
 export interface Process {

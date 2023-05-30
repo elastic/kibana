@@ -5,8 +5,5 @@
  * 2.0.
  */
 
-import { GenericFtrProviderContext } from '@kbn/test';
-
-import { services } from './services';
-
-export type FtrProviderContext = GenericFtrProviderContext<typeof services, {}>;
+require('../../../../src/setup_node_env');
+require('./run_cypress/parallel').cli();

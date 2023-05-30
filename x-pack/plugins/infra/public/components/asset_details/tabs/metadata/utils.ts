@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { InfraMetadata } from '../../../../common/http_api';
+import type { InfraMetadata } from '../../../../../common/http_api';
 
 export const getAllFields = (metadata: InfraMetadata | null) => {
   if (!metadata?.info) return [];
