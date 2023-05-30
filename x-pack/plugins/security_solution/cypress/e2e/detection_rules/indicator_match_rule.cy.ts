@@ -123,6 +123,9 @@ describe('indicator match', () => {
       cleanKibana();
       esArchiverLoad('threat_indicator');
       esArchiverLoad('suspicious_source_event');
+    });
+
+    beforeEach(() => {
       login();
     });
 
@@ -134,6 +137,7 @@ describe('indicator match', () => {
     describe('Creating new indicator match rules', () => {
       describe('Index patterns', () => {
         beforeEach(() => {
+          login();
           visitWithoutDateRange(RULE_CREATION);
           selectIndicatorMatchType();
         });
@@ -157,6 +161,7 @@ describe('indicator match', () => {
 
       describe('Indicator index patterns', () => {
         beforeEach(() => {
+          login();
           visitWithoutDateRange(RULE_CREATION);
           selectIndicatorMatchType();
         });
@@ -178,6 +183,7 @@ describe('indicator match', () => {
 
       describe('custom query input', () => {
         beforeEach(() => {
+          login();
           visitWithoutDateRange(RULE_CREATION);
           selectIndicatorMatchType();
         });
@@ -194,6 +200,7 @@ describe('indicator match', () => {
 
       describe('custom indicator query input', () => {
         beforeEach(() => {
+          login();
           visitWithoutDateRange(RULE_CREATION);
           selectIndicatorMatchType();
         });
@@ -210,6 +217,7 @@ describe('indicator match', () => {
 
       describe('Indicator mapping', () => {
         beforeEach(() => {
+          login();
           const rule = getNewThreatIndicatorRule();
           visitWithoutDateRange(RULE_CREATION);
           selectIndicatorMatchType();
@@ -405,6 +413,7 @@ describe('indicator match', () => {
 
       describe('Schedule', () => {
         it('IM rule has 1h time interval and lookback by default', () => {
+          login();
           visitWithoutDateRange(RULE_CREATION);
           selectIndicatorMatchType();
           fillDefineIndicatorMatchRuleAndContinue(getNewThreatIndicatorRule());
@@ -420,6 +429,7 @@ describe('indicator match', () => {
 
     describe('Generating signals', () => {
       beforeEach(() => {
+        login();
         deleteAlertsAndRules();
       });
 
@@ -458,7 +468,7 @@ describe('indicator match', () => {
           });
           getDetails(TAGS_DETAILS).should('have.text', expectedTags);
         });
-        cy.get(INVESTIGATION_NOTES_TOGGLE).click({ force: true });
+        cy.get(INVESTIGATION_NOTES_TOGGLE).click();
         cy.get(ABOUT_INVESTIGATION_NOTES).should('have.text', INVESTIGATION_NOTES_MARKDOWN);
 
         cy.get(DEFINITION_DETAILS).within(() => {
@@ -530,6 +540,7 @@ describe('indicator match', () => {
 
     describe('Duplicates the indicator rule', () => {
       beforeEach(() => {
+        login();
         deleteAlertsAndRules();
         createRule(getNewThreatIndicatorRule({ rule_id: 'rule_testing', enabled: true }));
         visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);

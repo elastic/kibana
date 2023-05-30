@@ -10,12 +10,13 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { Meta, Story } from '@storybook/react/types-6-0';
 import React from 'react';
+import { of } from 'rxjs';
 import { decorateWithGlobalStorybookThemeProviders } from '../../../test_utils/use_global_storybook_theme';
 import { LinkToApmServices, type LinkToApmServicesProps } from './link_to_apm_services';
 
 const mockServices = {
   application: {
-    currentAppId$: { title: 'infra', subscribe: () => {} },
+    currentAppId$: of('infra'),
     navigateToUrl: () => {},
   },
   http: {
