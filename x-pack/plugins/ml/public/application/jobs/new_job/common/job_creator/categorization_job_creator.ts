@@ -7,7 +7,7 @@
 
 import { isEqual } from 'lodash';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { SavedSearchSavedObject } from '../../../../../../common/types/kibana';
+import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { JobCreator } from './job_creator';
 import { Field, Aggregation, mlCategory } from '../../../../../../common/types/fields';
 import { Job, Datafeed, Detector } from '../../../../../../common/types/anomaly_detection_jobs';
@@ -47,7 +47,7 @@ export class CategorizationJobCreator extends JobCreator {
   private _partitionFieldName: string | null = null;
   private _ccsVersionFailure: boolean = false;
 
-  constructor(indexPattern: DataView, savedSearch: SavedSearchSavedObject | null, query: object) {
+  constructor(indexPattern: DataView, savedSearch: SavedSearch | null, query: object) {
     super(indexPattern, savedSearch, query);
     this.createdBy = CREATED_BY_LABEL.CATEGORIZATION;
     this._examplesLoader = new CategorizationExamplesLoader(this, indexPattern, query);

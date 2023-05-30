@@ -12,7 +12,7 @@ import type { Query } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { addExcludeFrozenToQuery } from '@kbn/ml-query-utils';
 import { MlUrlConfig } from '@kbn/ml-anomaly-utils';
-import { SavedSearchSavedObject } from '../../../../../../common/types/kibana';
+import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { IndexPatternTitle } from '../../../../../../common/types/kibana';
 import {
   ML_JOB_AGGREGATION,
@@ -51,7 +51,7 @@ import { ml } from '../../../../services/ml_api_service';
 export class JobCreator {
   protected _type: JOB_TYPE = JOB_TYPE.SINGLE_METRIC;
   protected _indexPattern: DataView;
-  protected _savedSearch: SavedSearchSavedObject | null;
+  protected _savedSearch: SavedSearch | null;
   protected _indexPatternTitle: IndexPatternTitle = '';
   protected _indexPatternDisplayName: string = '';
   protected _job_config: Job;
@@ -79,7 +79,7 @@ export class JobCreator {
   protected _wizardInitialized$ = new BehaviorSubject<boolean>(false);
   public wizardInitialized$ = this._wizardInitialized$.asObservable();
 
-  constructor(indexPattern: DataView, savedSearch: SavedSearchSavedObject | null, query: object) {
+  constructor(indexPattern: DataView, savedSearch: SavedSearch | null, query: object) {
     this._indexPattern = indexPattern;
     this._savedSearch = savedSearch;
 
@@ -107,7 +107,7 @@ export class JobCreator {
     return this._type;
   }
 
-  public get savedSearch(): SavedSearchSavedObject | null {
+  public get savedSearch(): SavedSearch | null {
     return this._savedSearch;
   }
 
@@ -156,8 +156,6 @@ export class JobCreator {
   }
 
   public get savedSearchQuery(): { query: Query; filter: any[] } | null {
-    // todo getQueryFromSavedSearchObject now expects a SavedSearch rather than a SavedSearchSavedObject
-    // @ts-expect-error
     return this._savedSearch ? getQueryFromSavedSearchObject(this._savedSearch) : null;
   }
 
