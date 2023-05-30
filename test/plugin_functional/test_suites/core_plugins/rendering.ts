@@ -202,7 +202,6 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.graph.savePolicy (alternatives)',
         'xpack.ilm.ui.enabled (boolean)',
         'xpack.index_management.ui.enabled (boolean)',
-        'xpack.infra.logs.app_target (alternatives)',
         'xpack.infra.sources.default.fields.message (array)',
         'xpack.license_management.ui.enabled (boolean)',
         'xpack.maps.preserveDrawingBuffer (boolean)',
