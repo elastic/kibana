@@ -16,6 +16,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiImage,
+  EuiLink,
 } from '@elastic/eui';
 import { FormattedHTMLMessage, FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -108,6 +109,40 @@ const CnvmIntegrationNotInstalledEmptyPrompt = ({
     />
   );
 };
+
+const CnvmIndexTimeout = () => (
+  <EuiEmptyPrompt
+    data-test-subj={NO_VULNERABILITIES_STATUS_TEST_SUBJ.INDEX_TIMEOUT}
+    color="plain"
+    icon={<EuiLoadingLogo logo="logoSecurity" size="xl" />}
+    title={
+      <h2>
+        <FormattedMessage
+          id="xpack.csp.noVulnerabilitiesStates.indexTimeout.indexTimeoutTitle"
+          defaultMessage="Findings Delayed"
+        />
+      </h2>
+    }
+    body={
+      <p>
+        <FormattedMessage
+          id="xpack.csp.noVulnerabilitiesStates.indexTimeout.indexTimeoutDescription"
+          defaultMessage="Scanning workloads is taking longer than expected. Please check {docs}"
+          values={{
+            docs: (
+              <EuiLink href="https://ela.st/cnvm-faq" target="_blank">
+                <FormattedMessage
+                  id="xpack.csp.noVulnerabilitiesStates.indexTimeout.indexTimeoutDocLink"
+                  defaultMessage="CNVM FAQ"
+                />
+              </EuiLink>
+            ),
+          }}
+        />
+      </p>
+    }
+  />
+);
 
 const Unprivileged = ({ unprivilegedIndices }: { unprivilegedIndices: string[] }) => (
   <EuiEmptyPrompt
@@ -218,8 +253,9 @@ export const NoVulnerabilitiesStates = () => {
       .sort((a, b) => a.localeCompare(b));
 
   const render = () => {
-    if (status === 'indexing' || status === 'waiting_for_results' || status === 'index-timeout')
+    if (status === 'indexing' || status === 'waiting_for_results')
       return <ScanningVulnerabilitiesEmptyPrompt />; // integration installed, but no agents added// agent added, index timeout has passed
+    if (status === 'index-timeout') return <CnvmIndexTimeout />;
     if (status === 'not-installed')
       return (
         <CnvmIntegrationNotInstalledEmptyPrompt vulnMgmtIntegrationLink={vulnMgmtIntegrationLink} />

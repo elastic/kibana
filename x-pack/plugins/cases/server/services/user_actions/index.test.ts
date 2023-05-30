@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { set, omit } from 'lodash';
+import { set, omit, unset } from 'lodash';
 import { loggerMock } from '@kbn/logging-mocks';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import type {
@@ -28,7 +28,6 @@ import {
   externalService,
   originalCases,
   updatedCases,
-  comment,
   attachments,
   updatedAssigneesCases,
   originalCasesWithAssignee,
@@ -43,6 +42,7 @@ import {
   createUserActionSO,
   pushConnectorUserAction,
 } from './test_utils';
+import { comment } from '../../mocks';
 
 describe('CaseUserActionService', () => {
   const persistableStateAttachmentTypeRegistry = createPersistableStateAttachmentTypeRegistryMock();
@@ -1599,6 +1599,60 @@ describe('CaseUserActionService', () => {
 
         const pushes = [{ date: new Date(), connectorId: '123' }];
 
+        describe('getAll', () => {
+          it('does not throw when the required fields are present', async () => {
+            unsecuredSavedObjectsClient.find.mockResolvedValue(
+              createSOFindResponse([{ ...createUserActionSO(), score: 0 }])
+            );
+
+            await expect(service.getAll('1')).resolves.not.toThrow();
+          });
+
+          it('throws when payload does not exist', async () => {
+            const findMockReturn = createSOFindResponse([{ ...createUserActionSO(), score: 0 }]);
+            unset(findMockReturn, 'saved_objects[0].attributes.payload');
+
+            unsecuredSavedObjectsClient.find.mockResolvedValue(findMockReturn);
+
+            await expect(service.getAll('1')).rejects.toThrowErrorMatchingInlineSnapshot(
+              `"Invalid value \\"undefined\\" supplied to \\"payload\\""`
+            );
+          });
+
+          it('strips excess fields', async () => {
+            unsecuredSavedObjectsClient.find.mockResolvedValue(
+              createSOFindResponse([
+                {
+                  ...createUserActionSO({
+                    attributesOverrides: {
+                      // @ts-expect-error foo is not a valid field for attributesOverrides
+                      foo: 'bar',
+                    },
+                  }),
+                  score: 0,
+                },
+              ])
+            );
+
+            const res = await service.getAll('1');
+            expect(res).toStrictEqual(
+              createSOFindResponse([
+                {
+                  ...createUserActionSO({
+                    attributesOverrides: {
+                      // @ts-expect-error these fields are populated by the legacy transformation logic but aren't valid for the override type
+                      action_id: '100',
+                      case_id: '1',
+                      comment_id: null,
+                    },
+                  }),
+                  score: 0,
+                },
+              ])
+            );
+          });
+        });
+
         describe('getConnectorFieldsBeforeLatestPush', () => {
           const getAggregations = (
             userAction: SavedObject<CaseUserActionAttributesWithoutConnectorId>
@@ -1677,7 +1731,7 @@ describe('CaseUserActionService', () => {
             );
           });
 
-          it.skip('strips out excess attributes', async () => {
+          it('strips out excess attributes', async () => {
             const userAction = createUserActionSO();
             const attributes = { ...userAction.attributes, 'not-exists': 'not-exists' };
             const userActionWithExtraAttributes = { ...userAction, attributes, score: 0 };
@@ -1687,9 +1741,38 @@ describe('CaseUserActionService', () => {
             unsecuredSavedObjectsClient.find.mockResolvedValue({ ...soFindRes, aggregations });
             soSerializerMock.rawToSavedObject.mockReturnValue(userActionWithExtraAttributes);
 
-            await expect(service.getConnectorFieldsBeforeLatestPush('1', pushes)).resolves.toEqual({
-              attributes: userAction.attributes,
-            });
+            await expect(service.getConnectorFieldsBeforeLatestPush('1', pushes)).resolves
+              .toMatchInlineSnapshot(`
+              Map {
+                "servicenow" => Object {
+                  "attributes": Object {
+                    "action": "create",
+                    "comment_id": null,
+                    "created_at": "abc",
+                    "created_by": Object {
+                      "email": "a",
+                      "full_name": "abc",
+                      "username": "b",
+                    },
+                    "owner": "securitySolution",
+                    "payload": Object {
+                      "title": "a new title",
+                    },
+                    "type": "title",
+                  },
+                  "id": "100",
+                  "references": Array [
+                    Object {
+                      "id": "1",
+                      "name": "associated-cases",
+                      "type": "cases",
+                    },
+                  ],
+                  "score": 0,
+                  "type": "cases-user-actions",
+                },
+              }
+            `);
           });
         });
 
@@ -1738,16 +1821,41 @@ describe('CaseUserActionService', () => {
             );
           });
 
-          // TODO: Unskip when all types are converted to strict
-          it.skip('strips out excess attributes', async () => {
+          it('strips out excess attributes', async () => {
             const userAction = createUserActionSO();
             const attributes = { ...userAction.attributes, 'not-exists': 'not-exists' };
             const soFindRes = createSOFindResponse([{ ...userAction, attributes, score: 0 }]);
             unsecuredSavedObjectsClient.find.mockResolvedValue(soFindRes);
 
-            await expect(service.getMostRecentUserAction('123')).resolves.toEqual({
-              attributes: userAction.attributes,
-            });
+            await expect(service.getMostRecentUserAction('123')).resolves.toMatchInlineSnapshot(`
+              Object {
+                "attributes": Object {
+                  "action": "create",
+                  "comment_id": null,
+                  "created_at": "abc",
+                  "created_by": Object {
+                    "email": "a",
+                    "full_name": "abc",
+                    "username": "b",
+                  },
+                  "owner": "securitySolution",
+                  "payload": Object {
+                    "title": "a new title",
+                  },
+                  "type": "title",
+                },
+                "id": "100",
+                "references": Array [
+                  Object {
+                    "id": "1",
+                    "name": "associated-cases",
+                    "type": "cases",
+                  },
+                ],
+                "score": 0,
+                "type": "cases-user-actions",
+              }
+            `);
           });
         });
 
@@ -1840,7 +1948,7 @@ describe('CaseUserActionService', () => {
               );
             });
 
-            it.skip('strips out excess attributes', async () => {
+            it('strips out excess attributes', async () => {
               const userAction = createUserActionSO();
               const pushUserAction = pushConnectorUserAction();
               const attributes = { ...userAction.attributes, 'not-exists': 'not-exists' };
@@ -1851,9 +1959,97 @@ describe('CaseUserActionService', () => {
               unsecuredSavedObjectsClient.find.mockResolvedValue({ ...soFindRes, aggregations });
               soSerializerMock.rawToSavedObject.mockReturnValue(userActionWithExtraAttributes);
 
-              await expect(service.getCaseConnectorInformation('1')).resolves.toEqual({
-                attributes: userAction.attributes,
-              });
+              await expect(service.getCaseConnectorInformation('1')).resolves
+                .toMatchInlineSnapshot(`
+                Array [
+                  Object {
+                    "connectorId": undefined,
+                    "fields": Object {
+                      "attributes": Object {
+                        "action": "create",
+                        "comment_id": null,
+                        "created_at": "abc",
+                        "created_by": Object {
+                          "email": "a",
+                          "full_name": "abc",
+                          "username": "b",
+                        },
+                        "owner": "securitySolution",
+                        "payload": Object {
+                          "title": "a new title",
+                        },
+                        "type": "title",
+                      },
+                      "id": "100",
+                      "references": Array [
+                        Object {
+                          "id": "1",
+                          "name": "associated-cases",
+                          "type": "cases",
+                        },
+                      ],
+                      "score": 0,
+                      "type": "cases-user-actions",
+                    },
+                    "push": Object {
+                      "mostRecent": Object {
+                        "attributes": Object {
+                          "action": "create",
+                          "comment_id": null,
+                          "created_at": "abc",
+                          "created_by": Object {
+                            "email": "a",
+                            "full_name": "abc",
+                            "username": "b",
+                          },
+                          "owner": "securitySolution",
+                          "payload": Object {
+                            "title": "a new title",
+                          },
+                          "type": "title",
+                        },
+                        "id": "100",
+                        "references": Array [
+                          Object {
+                            "id": "1",
+                            "name": "associated-cases",
+                            "type": "cases",
+                          },
+                        ],
+                        "score": 0,
+                        "type": "cases-user-actions",
+                      },
+                      "oldest": Object {
+                        "attributes": Object {
+                          "action": "create",
+                          "comment_id": null,
+                          "created_at": "abc",
+                          "created_by": Object {
+                            "email": "a",
+                            "full_name": "abc",
+                            "username": "b",
+                          },
+                          "owner": "securitySolution",
+                          "payload": Object {
+                            "title": "a new title",
+                          },
+                          "type": "title",
+                        },
+                        "id": "100",
+                        "references": Array [
+                          Object {
+                            "id": "1",
+                            "name": "associated-cases",
+                            "type": "cases",
+                          },
+                        ],
+                        "score": 0,
+                        "type": "cases-user-actions",
+                      },
+                    },
+                  },
+                ]
+              `);
             });
           });
 
@@ -1945,21 +2141,143 @@ describe('CaseUserActionService', () => {
               );
             });
 
-            it.skip('strips out excess attributes', async () => {
+            it('strips out excess attributes', async () => {
               const userAction = createUserActionSO();
               const pushUserAction = pushConnectorUserAction();
               const attributes = { ...pushUserAction.attributes, 'not-exists': 'not-exists' };
-              const pushActionWithExtraAttributes = { ...userAction, attributes, score: 0 };
+              const pushActionWithExtraAttributes = { ...pushUserAction, attributes, score: 0 };
               const aggregations = getAggregations(userAction, pushActionWithExtraAttributes);
               const soFindRes = createSOFindResponse([{ ...userAction, score: 0 }]);
 
               unsecuredSavedObjectsClient.find.mockResolvedValue({ ...soFindRes, aggregations });
               soSerializerMock.rawToSavedObject.mockReturnValueOnce(userAction);
               soSerializerMock.rawToSavedObject.mockReturnValueOnce(pushActionWithExtraAttributes);
+              soSerializerMock.rawToSavedObject.mockReturnValueOnce(pushActionWithExtraAttributes);
 
-              await expect(service.getCaseConnectorInformation('1')).resolves.toEqual({
-                attributes: userAction.attributes,
-              });
+              await expect(service.getCaseConnectorInformation('1')).resolves
+                .toMatchInlineSnapshot(`
+                Array [
+                  Object {
+                    "connectorId": undefined,
+                    "fields": Object {
+                      "attributes": Object {
+                        "action": "create",
+                        "comment_id": null,
+                        "created_at": "abc",
+                        "created_by": Object {
+                          "email": "a",
+                          "full_name": "abc",
+                          "username": "b",
+                        },
+                        "owner": "securitySolution",
+                        "payload": Object {
+                          "title": "a new title",
+                        },
+                        "type": "title",
+                      },
+                      "id": "100",
+                      "references": Array [
+                        Object {
+                          "id": "1",
+                          "name": "associated-cases",
+                          "type": "cases",
+                        },
+                      ],
+                      "type": "cases-user-actions",
+                    },
+                    "push": Object {
+                      "mostRecent": Object {
+                        "attributes": Object {
+                          "action": "push_to_service",
+                          "comment_id": null,
+                          "created_at": "abc",
+                          "created_by": Object {
+                            "email": "a",
+                            "full_name": "abc",
+                            "username": "b",
+                          },
+                          "owner": "securitySolution",
+                          "payload": Object {
+                            "externalService": Object {
+                              "connector_id": "100",
+                              "connector_name": ".jira",
+                              "external_id": "100",
+                              "external_title": "awesome",
+                              "external_url": "http://www.google.com",
+                              "pushed_at": "2019-11-25T21:54:48.952Z",
+                              "pushed_by": Object {
+                                "email": "testemail@elastic.co",
+                                "full_name": "elastic",
+                                "username": "elastic",
+                              },
+                            },
+                          },
+                          "type": "pushed",
+                        },
+                        "id": "100",
+                        "references": Array [
+                          Object {
+                            "id": "1",
+                            "name": "associated-cases",
+                            "type": "cases",
+                          },
+                          Object {
+                            "id": "100",
+                            "name": "pushConnectorId",
+                            "type": "action",
+                          },
+                        ],
+                        "score": 0,
+                        "type": "cases-user-actions",
+                      },
+                      "oldest": Object {
+                        "attributes": Object {
+                          "action": "push_to_service",
+                          "comment_id": null,
+                          "created_at": "abc",
+                          "created_by": Object {
+                            "email": "a",
+                            "full_name": "abc",
+                            "username": "b",
+                          },
+                          "owner": "securitySolution",
+                          "payload": Object {
+                            "externalService": Object {
+                              "connector_id": "100",
+                              "connector_name": ".jira",
+                              "external_id": "100",
+                              "external_title": "awesome",
+                              "external_url": "http://www.google.com",
+                              "pushed_at": "2019-11-25T21:54:48.952Z",
+                              "pushed_by": Object {
+                                "email": "testemail@elastic.co",
+                                "full_name": "elastic",
+                                "username": "elastic",
+                              },
+                            },
+                          },
+                          "type": "pushed",
+                        },
+                        "id": "100",
+                        "references": Array [
+                          Object {
+                            "id": "1",
+                            "name": "associated-cases",
+                            "type": "cases",
+                          },
+                          Object {
+                            "id": "100",
+                            "name": "pushConnectorId",
+                            "type": "action",
+                          },
+                        ],
+                        "score": 0,
+                        "type": "cases-user-actions",
+                      },
+                    },
+                  },
+                ]
+              `);
             });
           });
         });
