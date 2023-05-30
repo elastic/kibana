@@ -62,6 +62,8 @@ import {
   MESSAGE_SIGNING_KEYS_SAVED_OBJECT_TYPE,
   INTEGRATIONS_PLUGIN_ID,
   UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
+  getFileMetadataIndexName,
+  getFileDataIndexName,
 } from '../common';
 import { parseExperimentalConfigValue } from '../common/experimental_features';
 
@@ -233,7 +235,6 @@ export interface FleetStartContract {
     /**
      * Client to interact with files that will be sent to a host.
      * @param packageName
-     * @param type
      * @param maxSizeBytes
      */
     toHost: (
@@ -246,8 +247,6 @@ export interface FleetStartContract {
     /**
      * Client to interact with files that were sent from the host
      * @param packageName
-     * @param type
-     * @param maxSizeBytes
      */
     fromHost: (
       /** The integration package name */
@@ -610,7 +609,8 @@ export class FleetPlugin
           return new FleetFromHostFilesClient(
             core.elasticsearch.client.asInternalUser,
             this.initializerContext.logger.get('fleetFiles', packageName),
-            packageName
+            getFileMetadataIndexName(packageName),
+            getFileDataIndexName(packageName)
           );
         },
 
@@ -618,7 +618,9 @@ export class FleetPlugin
           return new FleetToHostFilesClient(
             core.elasticsearch.client.asInternalUser,
             this.initializerContext.logger.get('fleetFiles', packageName),
-            packageName,
+            // FIXME:PT define once we have new index patterns (defend workflows team issue #6553)
+            getFileMetadataIndexName(packageName),
+            getFileDataIndexName(packageName),
             maxFileBytes
           );
         },

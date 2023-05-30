@@ -23,6 +23,8 @@ import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
 
 import type { File } from '@kbn/files-plugin/common';
 
+import { getFileDataIndexName, getFileMetadataIndexName } from '../../../common';
+
 import type { HapiReadableStream } from '../..';
 
 import { FleetToHostFilesClient } from './client_to_host';
@@ -50,7 +52,13 @@ describe('FleetToHostFilesClient', () => {
   const getFleetFilesInstance = (): FleetToHostFilesClient => {
     loggerMock = loggingSystemMock.createLogger();
 
-    return new FleetToHostFilesClient(esClientMock, loggerMock, 'foo', 12345);
+    return new FleetToHostFilesClient(
+      esClientMock,
+      loggerMock,
+      getFileMetadataIndexName('foo'),
+      getFileDataIndexName('foo'),
+      12345
+    );
   };
 
   beforeEach(async () => {

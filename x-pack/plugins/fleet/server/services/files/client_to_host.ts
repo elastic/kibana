@@ -7,15 +7,9 @@
 
 import assert from 'assert';
 
-import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-
-import type { Logger } from '@kbn/logging';
-
-import { createEsFileClient, createFileHashTransform } from '@kbn/files-plugin/server';
+import { createFileHashTransform } from '@kbn/files-plugin/server';
 
 import { v4 as uuidV4 } from 'uuid';
-
-import { getFileDataIndexName, getFileMetadataIndexName } from '../../../common';
 
 import { FleetFilesClientError } from '../../errors';
 
@@ -29,28 +23,6 @@ export class FleetToHostFilesClient
   extends FleetFromHostFilesClient
   implements FleetToHostFileClientInterface
 {
-  constructor(
-    esClient: ElasticsearchClient,
-    logger: Logger,
-    packageName: string,
-    maxSizeBytes?: number
-  ) {
-    super(esClient, logger, packageName);
-
-    // FIXME:PT define once we have new index patterns (defend workflows team issue #6553)
-    this.fileMetaIndex = getFileMetadataIndexName(packageName);
-    this.fileDataIndex = getFileDataIndexName(packageName);
-
-    this.esFileClient = createEsFileClient({
-      metadataIndex: this.fileMetaIndex,
-      blobStorageIndex: this.fileDataIndex,
-      elasticsearchClient: esClient,
-      logger,
-      indexIsAlias: true,
-      maxSizeBytes,
-    });
-  }
-
   async get(fileId: string): Promise<FleetFile> {
     const esFile = await this.esFileClient.get<FileCustomMeta>({ id: fileId });
     const file = this.mapIndexedDocToFleetFile(esFile);

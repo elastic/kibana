@@ -22,6 +22,8 @@ import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
 
 import type { File } from '@kbn/files-plugin/common';
 
+import { getFileDataIndexName, getFileMetadataIndexName } from '../../../common';
+
 import type { FileCustomMeta } from './types';
 
 import { createFromHostEsSearchResponseMock } from './mocks';
@@ -45,7 +47,12 @@ describe('FleetFromHostFilesClient', () => {
   const getFleetFilesInstance = (): FleetFromHostFilesClient => {
     loggerMock = loggingSystemMock.createLogger();
 
-    return new FleetFromHostFilesClient(esClientMock, loggerMock, 'foo');
+    return new FleetFromHostFilesClient(
+      esClientMock,
+      loggerMock,
+      getFileMetadataIndexName('foo'),
+      getFileDataIndexName('foo')
+    );
   };
 
   beforeEach(async () => {

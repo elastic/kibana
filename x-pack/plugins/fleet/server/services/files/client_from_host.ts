@@ -17,8 +17,6 @@ import type { File } from '@kbn/files-plugin/common';
 
 import moment from 'moment';
 
-import { getFileDataIndexName, getFileMetadataIndexName } from '../../../common';
-
 import { FleetFileNotFound, FleetFilesClientError } from '../../errors';
 
 import type {
@@ -34,27 +32,21 @@ import type {
  */
 export class FleetFromHostFilesClient implements FleetFromHostFileClientInterface {
   protected esFileClient: FileClient;
-  protected fileMetaIndex: string;
-  protected fileDataIndex: string;
 
   constructor(
     protected esClient: ElasticsearchClient,
     protected logger: Logger,
-    packageName: string
+    protected fileMetaIndex: string,
+    protected fileDataIndex: string,
+    maxSizeBytes?: number
   ) {
-    if (!packageName) {
-      throw new FleetFilesClientError('packageName is required');
-    }
-
-    this.fileMetaIndex = getFileMetadataIndexName(packageName);
-    this.fileDataIndex = getFileDataIndexName(packageName);
-
     this.esFileClient = createEsFileClient({
       metadataIndex: this.fileMetaIndex,
       blobStorageIndex: this.fileDataIndex,
       elasticsearchClient: esClient,
       logger,
       indexIsAlias: true,
+      maxSizeBytes,
     });
   }
 
