@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiSpacer, EuiTitle } from '@elastic/eui';
 
-export interface InsightsSectionProps {
+export interface InsightsSubSectionProps {
   /**
    * Renders a loading spinner if true
    */
@@ -35,16 +35,15 @@ export interface InsightsSectionProps {
  * Presentational component to handle loading and error in the subsections of the Insights section.
  * Should be used for Entities, Threat Intelligence, Prevalence, Correlations and Results
  */
-export const InsightsSubSection: React.FC<InsightsSectionProps> = ({
+export const InsightsSubSection: React.FC<InsightsSubSectionProps> = ({
   loading = false,
   error = false,
   title,
   'data-test-subj': dataTestSubj,
   children,
 }) => {
+  // showing the loading in this component as well as in SummaryPanel because we're hiding the entire section if no data
   const loadingDataTestSubj = `${dataTestSubj}Loading`;
-  // showing the loading in this component instead of SummaryPanel because we're hiding the entire section if no data
-
   if (loading) {
     return (
       <EuiFlexGroup justifyContent="center">

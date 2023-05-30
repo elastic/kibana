@@ -31,6 +31,9 @@ export interface ModelVersionSummary {
   changeTypes: string[];
   hasTransformation: boolean;
   newMappings: string[];
+  schemas: {
+    forwardCompatibility: boolean;
+  };
 }
 
 /**
@@ -53,13 +56,16 @@ export const extractMigrationInfo = (soType: SavedObjectsType): SavedObjectTypeM
       ? soType.modelVersions()
       : soType.modelVersions ?? {};
   const modelVersionIds = Object.keys(modelVersionMap);
-  const modelVersions = modelVersionIds.map((version) => {
+  const modelVersions = modelVersionIds.map<ModelVersionSummary>((version) => {
     const entry = modelVersionMap[version];
     return {
       version,
       changeTypes: entry.changes.map((change) => change.type),
       hasTransformation: hasTransformation(entry.changes),
       newMappings: Object.keys(getFlattenedObject(aggregateMappingAdditions(entry.changes))),
+      schemas: {
+        forwardCompatibility: !!entry.schemas?.forwardCompatibility,
+      },
     };
   });
 
