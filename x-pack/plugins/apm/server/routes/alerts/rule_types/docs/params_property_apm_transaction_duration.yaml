@@ -1,0 +1,39 @@
+# @kbn-doc-linker partial
+
+params_property_apm_transaction_duration:
+  required:
+    - windowSize
+    - windowUnit
+    - threshold
+    - environment
+    - aggregationType
+  properties:
+    serviceName:
+      type: string
+    transactionType:
+      type: string
+    transactionName:
+      type: string
+    windowSize:
+      type: number
+      value: 6
+    windowUnit:
+      type: string
+      enum:
+        - "m"
+        - "h"
+        - "d"
+    environment:
+      type: string
+    threshold:
+      type: number
+    groupBy:
+      type: array
+      items:
+        type: string
+    aggregationType:
+      type: string
+      enum:
+        - avg
+        - 95th
+        - 99th
