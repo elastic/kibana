@@ -14,7 +14,8 @@ import { SECURITY_SOLUTION_OWNER } from '../../../../common';
 import type { CaseUIActionProps } from './types';
 import { KibanaContextProvider, useKibana } from '../../../common/lib/kibana';
 import CasesProvider from '../../cases_context';
-import { getCaseOwner, getCasePermissions } from './utils';
+import { getCaseOwnerByAppId } from '../../../../common/utils/owner';
+import { canUseCases } from '../../../client/helpers/can_use_cases';
 
 export const DEFAULT_DARK_MODE = 'theme:darkMode' as const;
 
@@ -30,17 +31,16 @@ const ActionWrapperWithContext: React.FC<PropsWithChildren<Props>> = ({
 }) => {
   const { application } = useKibana().services;
 
-  const owner = getCaseOwner(currentAppId);
-  const casePermissions = getCasePermissions(application.capabilities, owner);
-
+  const owner = getCaseOwnerByAppId(currentAppId);
+  const casePermissions = canUseCases(application.capabilities)(owner ? [owner] : undefined);
   // TODO: Remove when https://github.com/elastic/kibana/issues/143201 is developed
-  const syncAlerts = owner.includes(SECURITY_SOLUTION_OWNER) ? true : false;
+  const syncAlerts = owner === SECURITY_SOLUTION_OWNER;
 
   return (
     <CasesProvider
       value={{
         ...caseContextProps,
-        owner,
+        owner: owner ? [owner] : [],
         permissions: casePermissions,
         features: { alerts: { sync: syncAlerts } },
       }}

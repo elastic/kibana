@@ -6,28 +6,11 @@
  */
 import type { IEmbeddable } from '@kbn/embeddable-plugin/public';
 import { LENS_EMBEDDABLE_TYPE, type Embeddable as LensEmbeddable } from '@kbn/lens-plugin/public';
-import type { ApplicationStart } from '@kbn/core/public';
-import { OWNER_INFO } from '../../../../common/constants';
-import { canUseCases } from '../../../client/helpers/can_use_cases';
 import type { DashboardVisualizationEmbeddable } from './types';
-import type { CasesPermissions } from '../../../../common';
 
 export const isLensEmbeddable = (embeddable: IEmbeddable): embeddable is LensEmbeddable => {
   return embeddable.type === LENS_EMBEDDABLE_TYPE;
 };
-
-export const getCaseOwner = (currentAppId?: string) =>
-  Object.values(OWNER_INFO)
-    .filter((info) => info.appId === currentAppId)
-    .map((i) => i.id);
-
-export const getCasePermissions = (
-  capabilities: ApplicationStart['capabilities'],
-  owner: Array<'cases' | 'observability' | 'securitySolution'>
-) => canUseCases(capabilities)(owner.length > 0 ? owner : undefined);
-
-export const hasCasePermissions = (casePermissions: CasesPermissions) =>
-  casePermissions.update && casePermissions.read;
 
 export const hasInput = (embeddable: DashboardVisualizationEmbeddable) => {
   const { attributes, timeRange } = embeddable.getInput();

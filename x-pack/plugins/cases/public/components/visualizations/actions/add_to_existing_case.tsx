@@ -14,18 +14,14 @@ import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 
 import type { CaseUI } from '../../../../common';
 import { CommentType } from '../../../../common';
-import {
-  hasCasePermissions,
-  isLensEmbeddable,
-  hasInput,
-  getCaseOwner,
-  getCasePermissions,
-} from './utils';
+import { isLensEmbeddable, hasInput } from './utils';
 
 import type { ActionContext, CaseUIActionProps, DashboardVisualizationEmbeddable } from './types';
 import { useCasesAddToExistingCaseModal } from '../../all_cases/selector_modal/use_cases_add_to_existing_case_modal';
 import { ADD_TO_EXISTING_CASE_DISPLAYNAME } from './translations';
-import { ActionWrapper } from './ActionWrapper';
+import { ActionWrapper } from './action_wrapper';
+import { canUseCases } from '../../../client/helpers/can_use_cases';
+import { getCaseOwnerByAppId } from '../../../../common/utils/owner';
 
 export const ACTION_ID = 'embeddable_addToExistingCase';
 export const DEFAULT_DARK_MODE = 'theme:darkMode' as const;
@@ -79,8 +75,8 @@ export const createAddToExistingCaseLensAction = ({
     currentAppId = appId;
   });
 
-  const owner = getCaseOwner(currentAppId);
-  const casePermissions = getCasePermissions(applicationService.capabilities, owner);
+  const owner = getCaseOwnerByAppId(currentAppId);
+  const casePermissions = canUseCases(applicationService.capabilities)(owner ? [owner] : undefined);
 
   return createAction<ActionContext>({
     id: ACTION_ID,
@@ -90,7 +86,8 @@ export const createAddToExistingCaseLensAction = ({
     isCompatible: async ({ embeddable }) =>
       !isErrorEmbeddable(embeddable) &&
       isLensEmbeddable(embeddable) &&
-      hasCasePermissions(casePermissions) &&
+      casePermissions.update &&
+      casePermissions.create &&
       hasInput(embeddable),
     execute: async ({ embeddable }) => {
       const targetDomElement = document.createElement('div');
@@ -104,6 +101,10 @@ export const createAddToExistingCaseLensAction = ({
       const onClose = (theCase?: CaseUI, isCreateCase?: boolean) => {
         const closeModalClickedScenario = theCase == null && !isCreateCase;
         const caseSelectedScenario = theCase != null;
+        // When `Creating` a case from the `add to existing case modal`,
+        // we close the modal and then open the flyout.
+        // If we clean up dom when closing the modal, then the flyout won't open.
+        // Thus we do not clean up dom when `Creating` a case.
         const shouldCleanup = closeModalClickedScenario || caseSelectedScenario;
         cleanupDom(shouldCleanup);
       };

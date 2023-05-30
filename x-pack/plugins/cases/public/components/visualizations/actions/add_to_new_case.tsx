@@ -12,12 +12,13 @@ import { isErrorEmbeddable } from '@kbn/embeddable-plugin/public';
 
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { CommentType } from '../../../../common';
-import { getCasePermissions, hasCasePermissions, hasInput, isLensEmbeddable } from './utils';
+import { hasInput, isLensEmbeddable } from './utils';
 
 import type { ActionContext, CaseUIActionProps, DashboardVisualizationEmbeddable } from './types';
 import { ADD_TO_CASE_SUCCESS, ADD_TO_NEW_CASE_DISPLAYNAME } from './translations';
 import { useCasesAddToNewCaseFlyout } from '../../create/flyout/use_cases_add_to_new_case_flyout';
-import { ActionWrapper } from './ActionWrapper';
+import { ActionWrapper } from './action_wrapper';
+import { canUseCases } from '../../../client/helpers/can_use_cases';
 
 export const ACTION_ID = 'embeddable_addToNewCase';
 export const DEFAULT_DARK_MODE = 'theme:darkMode' as const;
@@ -73,7 +74,7 @@ export const createAddToNewCaseLensAction = ({
     currentAppId = appId;
   });
 
-  const casePermissions = getCasePermissions(applicationService.capabilities, []);
+  const casePermissions = canUseCases(applicationService.capabilities)([]);
 
   return createAction<ActionContext>({
     id: ACTION_ID,
@@ -83,7 +84,7 @@ export const createAddToNewCaseLensAction = ({
     isCompatible: async ({ embeddable }) =>
       !isErrorEmbeddable(embeddable) &&
       isLensEmbeddable(embeddable) &&
-      hasCasePermissions(casePermissions) &&
+      casePermissions.create &&
       hasInput(embeddable),
     execute: async ({ embeddable }) => {
       const targetDomElement = document.createElement('div');

@@ -13,7 +13,6 @@ import ReactDOM, { unmountComponentAtNode } from 'react-dom';
 import { createAddToExistingCaseLensAction } from './add_to_existing_case';
 import type { ActionContext, DashboardVisualizationEmbeddable } from './types';
 import { useCasesAddToExistingCaseModal } from '../../all_cases/selector_modal/use_cases_add_to_existing_case_modal';
-import { getCasePermissions } from './utils';
 import React from 'react';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import {
@@ -27,6 +26,7 @@ import {
 import { CommentType } from '../../../../common';
 import { useKibana } from '../../../common/lib/kibana';
 import { waitFor } from '@testing-library/dom';
+import { canUseCases } from '../../../client/helpers/can_use_cases';
 
 const element = document.createElement('div');
 document.body.appendChild(element);
@@ -35,11 +35,11 @@ jest.mock('../../all_cases/selector_modal/use_cases_add_to_existing_case_modal',
   useCasesAddToExistingCaseModal: jest.fn(),
 }));
 
-jest.mock('./utils', () => {
-  const actual = jest.requireActual('./utils');
+jest.mock('../../../client/helpers/can_use_cases', () => {
+  const actual = jest.requireActual('../../../client/helpers/can_use_cases');
   return {
     ...actual,
-    getCasePermissions: jest.fn(),
+    canUseCases: jest.fn(),
   };
 });
 
@@ -79,7 +79,7 @@ describe('createAddToExistingCaseLensAction', () => {
   const mockOpenModal = jest.fn();
   const mockMount = jest.fn();
   let action: Action<ActionContext>;
-
+  const mockCasePermissions = jest.fn();
   beforeEach(() => {
     mockUseCasesAddToExistingCaseModal.mockReturnValue({
       open: mockOpenModal,
@@ -92,7 +92,9 @@ describe('createAddToExistingCaseLensAction', () => {
         },
       },
     });
-    (getCasePermissions as jest.Mock).mockReturnValue({ update: true, read: true });
+    (canUseCases as jest.Mock).mockReturnValue(
+      mockCasePermissions.mockReturnValue({ create: true, update: true })
+    );
     (toMountPoint as jest.Mock).mockImplementation((node) => {
       ReactDOM.render(node, element);
       return mockMount;
@@ -131,7 +133,7 @@ describe('createAddToExistingCaseLensAction', () => {
     });
 
     it('should return false if no permission', async () => {
-      (getCasePermissions as jest.Mock).mockReturnValue({ update: false, read: false });
+      mockCasePermissions.mockReturnValue({ create: false, update: false });
       expect(await action.isCompatible(context)).toEqual(true);
     });
 
