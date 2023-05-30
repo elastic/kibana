@@ -307,17 +307,21 @@ export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization)
           },
         },
       },
-      routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
+      routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response, client }) => {
         try {
           const { modelId } = request.params;
           const { with_pipelines: withPipelines, force } = request.query;
+
+          if (withPipelines) {
+            // first we need to delete pipelines, otherwise ml api return an error
+            await modelsProvider(client).deleteModelPipelines(modelId.split(','));
+          }
+
           const body = await mlClient.deleteTrainedModel({
             model_id: modelId,
             force,
           });
-          if (withPipelines) {
-            // TODO
-          }
+
           return response.ok({
             body,
           });

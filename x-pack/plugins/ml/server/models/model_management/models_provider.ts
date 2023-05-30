@@ -57,9 +57,10 @@ export function modelsProvider(client: IScopedClusterClient) {
      * @param modelIds
      */
     async deleteModelPipelines(modelIds: string[]) {
-      const pipelines = this.getModelsPipelines(modelIds);
-      const body = await client.asCurrentUser.ingest.deletePipeline({
-        id: '',
+      const pipelines = await this.getModelsPipelines(modelIds);
+      const id = [...pipelines.values()].flatMap((v) => Object.keys(v!)).join(',');
+      await client.asCurrentUser.ingest.deletePipeline({
+        id,
       });
     },
   };
