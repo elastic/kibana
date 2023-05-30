@@ -78,3 +78,6 @@ export { calculateTimeRangeBucketSize } from './pages/overview/helpers/calculate
 
 export { convertTo } from '../common/utils/formatters/duration';
 export { formatAlertEvaluationValue } from './utils/format_alert_evaluation_value';
+
+export { CoPilotPrompt } from './components/co_pilot_prompt';
+export { useCoPilot } from './hooks/use_co_pilot';

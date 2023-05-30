@@ -26,9 +26,11 @@ import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { ObservabilityTriggerId } from '@kbn/observability-shared-plugin/common';
 import { getContextMenuItemsFromActions } from '@kbn/observability-shared-plugin/public';
 import { first } from 'lodash';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import useAsync from 'react-use/lib/useAsync';
+import { CoPilotPrompt, useCoPilot } from '@kbn/observability-plugin/public';
+import { OpenAIPromptId } from '@kbn/observability-plugin/common';
 import { ERROR_GROUP_ID } from '../../../../../common/es_fields/apm';
 import { TraceSearchType } from '../../../../../common/trace_explorer';
 import { APMError } from '../../../../../typings/es_schemas/ui/apm_error';
@@ -139,6 +141,31 @@ export function ErrorSampleDetails({
       },
     });
   }, [error, transaction, uiActions]);
+
+  const coPilot = useCoPilot();
+
+  const promptParams = useMemo(() => {
+    return {
+      serviceName: error.service.name,
+      runtimeName: error.service.runtime?.name ?? '',
+      runtimeVersion: error.service.runtime?.version ?? '',
+      transactionName: transaction?.transaction.name ?? '',
+      exceptionMessage: error.error.exception?.[0].message ?? '',
+      errorStackTrace:
+        error.error.exception
+          ?.map((exception) => {
+            return `${exception.message ?? ''}
+          ${exception.stacktrace
+            ?.map(
+              (frame) =>
+                `at ${frame.classname}.${frame.function}(${frame.filename}:${frame.line})`
+            )
+            .join('\n')}
+        `;
+          })
+          .join('\n\n') ?? '',
+    };
+  }, [error, transaction]);
 
   if (!error && errorSampleIds?.length === 0 && isSucceded) {
     return (
@@ -339,6 +366,23 @@ export function ErrorSampleDetails({
       ) : (
         <SampleSummary error={error} />
       )}
+
+      {coPilot && promptParams ? (
+        <>
+          <EuiFlexItem>
+            <CoPilotPrompt
+              coPilot={coPilot}
+              title={i18n.translate(
+                'xpack.apm.errorGroupDetails.explainErrorTitle',
+                { defaultMessage: 'Explain error' }
+              )}
+              promptId={OpenAIPromptId.ApmExplainError}
+              params={promptParams}
+            />
+          </EuiFlexItem>
+          <EuiSpacer size="s" />
+        </>
+      ) : undefined}
 
       <EuiTabs>
         {tabs.map(({ key, label }) => {

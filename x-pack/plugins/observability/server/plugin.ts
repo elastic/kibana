@@ -47,6 +47,7 @@ import { registerRuleTypes } from './lib/rules/register_rule_types';
 import { SLO_BURN_RATE_RULE_ID } from '../common/constants';
 import { registerSloUsageCollector } from './lib/collectors/register';
 import { sloRuleFieldMap } from './lib/rules/slo_burn_rate/field_map';
+import { OpenAIService } from './services/openai';
 
 export type ObservabilityPluginSetup = ReturnType<ObservabilityPlugin['setup']>;
 
@@ -241,12 +242,15 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
     registerRuleTypes(plugins.alerting, this.logger, ruleDataClient, core.http.basePath);
     registerSloUsageCollector(plugins.usageCollection);
 
+    const openAIService = config.coPilot ? new OpenAIService(config.coPilot) : undefined;
+
     core.getStartServices().then(([coreStart, pluginStart]) => {
       registerRoutes({
         core,
         dependencies: {
           ruleDataService,
           getRulesClientWithRequest: pluginStart.alerting.getRulesClientWithRequest,
+          getOpenAIClient: () => openAIService?.client,
         },
         logger: this.logger,
         repository: getObservabilityServerRouteRepository(),
@@ -265,6 +269,9 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
       getScopedAnnotationsClient: async (...args: Parameters<ScopedAnnotationsClientFactory>) => {
         const api = await annotationsApiPromise;
         return api?.getScopedAnnotationsClient(...args);
+      },
+      getOpenAIClient() {
+        return openAIService?.client;
       },
     };
   }

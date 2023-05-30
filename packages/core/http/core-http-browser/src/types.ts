@@ -281,6 +281,8 @@ export interface HttpFetchOptions extends HttpRequestInit {
    */
   asResponse?: boolean;
 
+  awaitResponse?: boolean;
+
   context?: KibanaExecutionContext;
 
   /** @experimental */
