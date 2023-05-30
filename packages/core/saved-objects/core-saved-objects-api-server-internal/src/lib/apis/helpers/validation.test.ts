@@ -80,6 +80,11 @@ describe('Saved Objects type validation helper', () => {
     });
 
     it('should fail validation against invalid objects when version requested does not support a field', () => {
+      helper = new ValidationHelper({
+        logger,
+        registry: typeRegistry,
+        kibanaVersion: defaultVersion,
+      });
       const validationError = new Error(
         '[attributes.count]: definition for this key is missing: Bad Request'
       );
