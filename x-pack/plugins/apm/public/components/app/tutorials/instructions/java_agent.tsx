@@ -9,23 +9,18 @@ import { i18n } from '@kbn/i18n';
 import { EuiButton, EuiMarkdownFormat, EuiSpacer } from '@elastic/eui';
 import { EuiStepProps } from '@elastic/eui/src/components/steps/step';
 import React from 'react';
+import { ApiKeyErrorCallout } from './api_key_error_callout';
 import { AgentConfigInstructions } from '../agent_config_instructions';
 import {
   INSTRUCTION_VARIANT,
   AgentInstructions,
 } from '../instruction_variants';
+import { ApiKeySuccessCallout } from './api_key_success_callout';
 
 export const createJavaAgentInstructions = (
   commonOptions: AgentInstructions
 ): EuiStepProps[] => {
-  const {
-    baseUrl,
-    apmServerUrl,
-    createAgentKey,
-    apiKeyAndId,
-    displayCreateApiKeyAction,
-    loading,
-  } = commonOptions;
+  const { baseUrl, apmServerUrl, apiKeyDetails, loading } = commonOptions;
   return [
     {
       title: i18n.translate('xpack.apm.tutorial.java.download.title', {
@@ -68,12 +63,12 @@ export const createJavaAgentInstructions = (
           </EuiMarkdownFormat>
           <EuiSpacer />
 
-          {displayCreateApiKeyAction && (
+          {apiKeyDetails?.displayCreateApiKeyAction && (
             <>
               <EuiButton
                 data-test-subj="createApiKeyAndId"
                 fill
-                onClick={createAgentKey}
+                onClick={apiKeyDetails?.createAgentKey}
                 isLoading={loading}
               >
                 {i18n.translate('xpack.apm.tutorial.apiKey.create', {
@@ -83,10 +78,22 @@ export const createJavaAgentInstructions = (
               <EuiSpacer />
             </>
           )}
+          {apiKeyDetails?.displayApiKeySuccessCallout && (
+            <>
+              <ApiKeySuccessCallout />
+              <EuiSpacer />
+            </>
+          )}
+          {apiKeyDetails?.displayApiKeyErrorCallout && (
+            <>
+              <ApiKeyErrorCallout errorMessage={apiKeyDetails?.errorMessage} />
+              <EuiSpacer />
+            </>
+          )}
           <AgentConfigInstructions
             variantId={INSTRUCTION_VARIANT.JAVA}
             apmServerUrl={apmServerUrl}
-            apiKey={apiKeyAndId?.apiKey}
+            apiKey={apiKeyDetails?.apiKey}
           />
           <EuiSpacer />
           <EuiMarkdownFormat>

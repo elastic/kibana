@@ -19,20 +19,15 @@ import { EuiStepProps } from '@elastic/eui/src/components/steps/step';
 import React from 'react';
 import { ValuesType } from 'utility-types';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { ApiKeyAndId } from '../api_keys';
+import { AgentApiKey } from '../api_keys';
 import { AgentInstructions } from '../instruction_variants';
+import { ApiKeySuccessCallout } from './api_key_success_callout';
+import { ApiKeyErrorCallout } from './api_key_error_callout';
 
 export const createOpenTelemetryAgentInstructions = (
   commonOptions: AgentInstructions
 ): EuiStepProps[] => {
-  const {
-    baseUrl,
-    apmServerUrl,
-    createAgentKey,
-    apiKeyAndId,
-    displayCreateApiKeyAction,
-    loading,
-  } = commonOptions;
+  const { baseUrl, apmServerUrl, apiKeyDetails, loading } = commonOptions;
   return [
     {
       title: i18n.translate('xpack.apm.tutorial.otel.download.title', {
@@ -69,12 +64,12 @@ export const createOpenTelemetryAgentInstructions = (
             })}
           </EuiMarkdownFormat>
           <EuiSpacer />
-          {displayCreateApiKeyAction && (
+          {apiKeyDetails?.displayCreateApiKeyAction && (
             <>
               <EuiButton
                 data-test-subj="createApiKeyAndId"
                 fill
-                onClick={createAgentKey}
+                onClick={apiKeyDetails?.createAgentKey}
                 isLoading={loading}
               >
                 {i18n.translate('xpack.apm.tutorial.apiKey.create', {
@@ -84,10 +79,24 @@ export const createOpenTelemetryAgentInstructions = (
               <EuiSpacer />
             </>
           )}
+          {apiKeyDetails?.displayApiKeySuccessCallout && (
+            <>
+              <ApiKeySuccessCallout />
+              <EuiSpacer />
+            </>
+          )}
+          {apiKeyDetails?.displayApiKeyErrorCallout && (
+            <>
+              <ApiKeyErrorCallout errorMessage={apiKeyDetails?.errorMessage} />
+              <EuiSpacer />
+            </>
+          )}
           <OpenTelemetryInstructions
             apmServerUrl={apmServerUrl}
-            apiKeyAndId={apiKeyAndId}
-            displayCreateApiKeyAction={displayCreateApiKeyAction}
+            apiKeyDetails={apiKeyDetails}
+            displayCreateApiKeyAction={
+              !!apiKeyDetails?.displayCreateApiKeyAction
+            }
           />
           <EuiSpacer />
           <EuiMarkdownFormat>
@@ -108,12 +117,12 @@ export const createOpenTelemetryAgentInstructions = (
 export function OpenTelemetryInstructions({
   apmServerUrl,
   secretToken,
-  apiKeyAndId,
+  apiKeyDetails,
   displayCreateApiKeyAction,
 }: {
   apmServerUrl: string;
   secretToken?: string;
-  apiKeyAndId?: ApiKeyAndId;
+  apiKeyDetails?: AgentApiKey;
   displayCreateApiKeyAction: boolean;
 }) {
   let authHeaderValue;
@@ -123,8 +132,8 @@ export function OpenTelemetryInstructions({
   } else {
     authHeaderValue = `${
       !displayCreateApiKeyAction
-        ? `Authorization=ApiKey ${apiKeyAndId?.encodedKey}`
-        : apiKeyAndId?.apiKey
+        ? `Authorization=ApiKey ${apiKeyDetails?.encodedKey}`
+        : apiKeyDetails?.apiKey
     }`;
   }
   const items = [

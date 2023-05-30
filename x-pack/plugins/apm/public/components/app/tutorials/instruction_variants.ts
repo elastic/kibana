@@ -6,7 +6,7 @@
  */
 
 import { EuiStepProps } from '@elastic/eui/src/components/steps/step';
-import { ApiKeyAndId } from './api_keys';
+import { AgentApiKey } from './api_keys';
 
 export enum INSTRUCTION_VARIANT {
   NODE = 'node',
@@ -51,9 +51,12 @@ export function getDisplayText(id: INSTRUCTION_VARIANT) {
 export interface AgentInstructions {
   baseUrl: string;
   apmServerUrl: string;
-  apiKeyAndId?: ApiKeyAndId;
+  apiKeyDetails?: AgentApiKey & {
+    displayCreateApiKeyAction: boolean;
+    displayApiKeySuccessCallout: boolean;
+    displayApiKeyErrorCallout: boolean;
+    createAgentKey: () => void;
+  };
   secretToken?: string;
-  createAgentKey?: () => void;
-  displayCreateApiKeyAction: boolean;
   loading: boolean;
 }

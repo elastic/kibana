@@ -20,18 +20,13 @@ import {
   INSTRUCTION_VARIANT,
   AgentInstructions,
 } from '../instruction_variants';
+import { ApiKeySuccessCallout } from './api_key_success_callout';
+import { ApiKeyErrorCallout } from './api_key_error_callout';
 
 export const createDotNetAgentInstructions = (
   commonOptions: AgentInstructions
 ): EuiStepProps[] => {
-  const {
-    baseUrl,
-    apmServerUrl,
-    createAgentKey,
-    apiKeyAndId,
-    displayCreateApiKeyAction,
-    loading,
-  } = commonOptions;
+  const { baseUrl, apmServerUrl, apiKeyDetails, loading } = commonOptions;
   const codeBlock = `public class Startup
 {
   public void Configure(IApplicationBuilder app, IHostingEnvironment env)
@@ -118,12 +113,12 @@ export const createDotNetAgentInstructions = (
       }),
       children: (
         <>
-          {displayCreateApiKeyAction && (
+          {apiKeyDetails?.displayCreateApiKeyAction && (
             <>
               <EuiButton
                 data-test-subj="createApiKeyAndId"
                 fill
-                onClick={createAgentKey}
+                onClick={apiKeyDetails?.createAgentKey}
                 isLoading={loading}
               >
                 {i18n.translate('xpack.apm.tutorial.apiKey.create', {
@@ -133,10 +128,22 @@ export const createDotNetAgentInstructions = (
               <EuiSpacer />
             </>
           )}
+          {apiKeyDetails?.displayApiKeySuccessCallout && (
+            <>
+              <ApiKeySuccessCallout />
+              <EuiSpacer />
+            </>
+          )}
+          {apiKeyDetails?.displayApiKeyErrorCallout && (
+            <>
+              <ApiKeyErrorCallout errorMessage={apiKeyDetails?.errorMessage} />
+              <EuiSpacer />
+            </>
+          )}
           <AgentConfigInstructions
             variantId={INSTRUCTION_VARIANT.DOTNET}
             apmServerUrl={apmServerUrl}
-            apiKey={apiKeyAndId?.apiKey}
+            apiKey={apiKeyDetails?.apiKey}
           />
           <EuiSpacer />
           <EuiMarkdownFormat>

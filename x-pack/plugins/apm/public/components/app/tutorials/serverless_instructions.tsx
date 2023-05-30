@@ -20,7 +20,7 @@ import {
   createPhpAgentInstructions,
   createOpenTelemetryAgentInstructions,
 } from './instructions';
-import { isApiKeyGenerated, ApiKeyAndId } from './api_keys';
+import { isApiKeyGenerated, AgentApiKey } from './api_keys';
 
 export function serverlessInstructions(
   {
@@ -31,16 +31,24 @@ export function serverlessInstructions(
     config: ConfigSchema;
   },
   loading: boolean,
-  apiKeyAndId: ApiKeyAndId,
+  apiKeyDetails: AgentApiKey,
   createAgentKey: () => void
 ) {
-  const displayCreateApiKeyAction = !isApiKeyGenerated(apiKeyAndId.apiKey);
+  const { apiKey, error, errorMessage } = apiKeyDetails;
+  const displayCreateApiKeyAction = !isApiKeyGenerated(apiKey);
+  const displayApiKeySuccessCallout =
+    Boolean(apiKey) && isApiKeyGenerated(apiKey) && !error;
+  const displayApiKeyErrorCallout = error && Boolean(errorMessage);
   const commonOptions: AgentInstructions = {
     baseUrl,
     apmServerUrl: config.managedServiceUrl,
-    apiKeyAndId,
-    createAgentKey,
-    displayCreateApiKeyAction,
+    apiKeyDetails: {
+      ...apiKeyDetails,
+      displayCreateApiKeyAction,
+      displayApiKeySuccessCallout,
+      displayApiKeyErrorCallout,
+      createAgentKey,
+    },
     loading,
   };
 

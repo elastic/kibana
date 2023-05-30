@@ -9,7 +9,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ApiKeyAndId, API_KEY_INSTRUCTION } from './api_keys';
+import { AgentApiKey, API_KEY_INSTRUCTION } from './api_keys';
 import { callApmApi } from '../../../services/rest/create_call_apm_api';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { ApmPluginStartDeps } from '../../../plugin';
@@ -22,7 +22,7 @@ import { InstructionSet } from './instruction_variants';
 
 export function Tutorials() {
   const [instructions, setInstructions] = useState<InstructionSet[]>([]);
-  const [apiKeyAndId, setApiKeyAndId] = useState<ApiKeyAndId>({
+  const [agentApiKey, setAgentApiKey] = useState<AgentApiKey>({
     apiKey: API_KEY_INSTRUCTION,
     error: false,
   });
@@ -56,7 +56,7 @@ export function Tutorials() {
         }
       );
 
-      setApiKeyAndId({
+      setAgentApiKey({
         apiKey: agentKey.api_key,
         encodedKey: agentKey.encoded,
         id: agentKey.id,
@@ -80,6 +80,11 @@ export function Tutorials() {
           </div>
         ),
       });
+      setAgentApiKey({
+        apiKey: API_KEY_INSTRUCTION,
+        error: true,
+        errorMessage: error.body?.message || error.message,
+      });
     } finally {
       setLoading(false);
     }
@@ -97,11 +102,11 @@ export function Tutorials() {
           config,
         },
         loading,
-        apiKeyAndId,
+        agentApiKey,
         createAgentKey
       ),
     ]);
-  }, [apiKeyAndId, baseUrl, config, createAgentKey, loading]);
+  }, [agentApiKey, baseUrl, config, createAgentKey, loading]);
 
   const ObservabilityPageTemplate = observabilityShared.navigation.PageTemplate;
   return (

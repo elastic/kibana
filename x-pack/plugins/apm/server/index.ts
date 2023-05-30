@@ -117,7 +117,6 @@ export const config: PluginConfigDescriptor<APMConfig> = {
     serviceMapEnabled: true,
     ui: true,
     latestAgentVersionsUrl: true,
-    serverlessOnboarding: true,
     managedServiceUrl: true,
   },
   schema: configSchema,

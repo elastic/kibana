@@ -19,18 +19,13 @@ import {
   INSTRUCTION_VARIANT,
   AgentInstructions,
 } from '../instruction_variants';
+import { ApiKeySuccessCallout } from './api_key_success_callout';
+import { ApiKeyErrorCallout } from './api_key_error_callout';
 
 export const createFlaskAgentInstructions = (
   commonOptions: AgentInstructions
 ): EuiStepProps[] => {
-  const {
-    baseUrl,
-    apmServerUrl,
-    createAgentKey,
-    apiKeyAndId,
-    displayCreateApiKeyAction,
-    loading,
-  } = commonOptions;
+  const { baseUrl, apmServerUrl, apiKeyDetails, loading } = commonOptions;
   return [
     {
       title: i18n.translate('xpack.apm.tutorial.flask.install.title', {
@@ -65,12 +60,12 @@ APM services are created programmatically based on the `SERVICE_NAME`.',
             })}
           </EuiMarkdownFormat>
           <EuiSpacer />
-          {displayCreateApiKeyAction && (
+          {apiKeyDetails?.displayCreateApiKeyAction && (
             <>
               <EuiButton
                 data-test-subj="createApiKeyAndId"
                 fill
-                onClick={createAgentKey}
+                onClick={apiKeyDetails?.createAgentKey}
                 isLoading={loading}
               >
                 {i18n.translate('xpack.apm.tutorial.apiKey.create', {
@@ -80,10 +75,23 @@ APM services are created programmatically based on the `SERVICE_NAME`.',
               <EuiSpacer />
             </>
           )}
+          {apiKeyDetails?.displayApiKeySuccessCallout && (
+            <>
+              <ApiKeySuccessCallout />
+              <EuiSpacer />
+            </>
+          )}
+          {apiKeyDetails?.displayApiKeyErrorCallout && (
+            <>
+              <ApiKeyErrorCallout errorMessage={apiKeyDetails?.errorMessage} />
+              <EuiSpacer />
+            </>
+          )}
+
           <AgentConfigInstructions
             variantId={INSTRUCTION_VARIANT.FLASK}
             apmServerUrl={apmServerUrl}
-            apiKey={apiKeyAndId?.apiKey}
+            apiKey={apiKeyDetails?.apiKey}
           />
           <EuiSpacer />
           <EuiMarkdownFormat>

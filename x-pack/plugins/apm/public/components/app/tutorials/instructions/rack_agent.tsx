@@ -14,23 +14,18 @@ import {
 } from '@elastic/eui';
 import { EuiStepProps } from '@elastic/eui/src/components/steps/step';
 import React from 'react';
+import { ApiKeyErrorCallout } from './api_key_error_callout';
 import { AgentConfigInstructions } from '../agent_config_instructions';
 import {
   INSTRUCTION_VARIANT,
   AgentInstructions,
 } from '../instruction_variants';
+import { ApiKeySuccessCallout } from './api_key_success_callout';
 
 export const createRackAgentInstructions = (
   commonOptions: AgentInstructions
 ): EuiStepProps[] => {
-  const {
-    baseUrl,
-    apmServerUrl,
-    createAgentKey,
-    apiKeyAndId,
-    displayCreateApiKeyAction,
-    loading,
-  } = commonOptions;
+  const { baseUrl, apmServerUrl, apiKeyDetails, loading } = commonOptions;
   const codeBlock = `# config.ru
   require 'sinatra/base'
 
@@ -110,12 +105,12 @@ export const createRackAgentInstructions = (
           </EuiMarkdownFormat>
           <EuiSpacer />
 
-          {displayCreateApiKeyAction && (
+          {apiKeyDetails?.displayCreateApiKeyAction && (
             <>
               <EuiButton
                 data-test-subj="createApiKeyAndId"
                 fill
-                onClick={createAgentKey}
+                onClick={apiKeyDetails?.createAgentKey}
                 isLoading={loading}
               >
                 {i18n.translate('xpack.apm.tutorial.apiKey.create', {
@@ -125,10 +120,22 @@ export const createRackAgentInstructions = (
               <EuiSpacer />
             </>
           )}
+          {apiKeyDetails?.displayApiKeySuccessCallout && (
+            <>
+              <ApiKeySuccessCallout />
+              <EuiSpacer />
+            </>
+          )}
+          {apiKeyDetails?.displayApiKeyErrorCallout && (
+            <>
+              <ApiKeyErrorCallout errorMessage={apiKeyDetails?.errorMessage} />
+              <EuiSpacer />
+            </>
+          )}
           <AgentConfigInstructions
             variantId={INSTRUCTION_VARIANT.RACK}
             apmServerUrl={apmServerUrl}
-            apiKey={apiKeyAndId?.apiKey}
+            apiKey={apiKeyDetails?.apiKey}
           />
           <EuiSpacer />
           <EuiMarkdownFormat>

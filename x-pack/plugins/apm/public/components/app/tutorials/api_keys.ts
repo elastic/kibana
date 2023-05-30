@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-export interface ApiKeyAndId {
+export interface AgentApiKey {
   apiKey: string;
   id?: string;
   encodedKey?: string;

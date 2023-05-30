@@ -14,23 +14,18 @@ import {
 } from '@elastic/eui';
 import { EuiStepProps } from '@elastic/eui/src/components/steps/step';
 import React from 'react';
+import { ApiKeyErrorCallout } from './api_key_error_callout';
 import { AgentConfigInstructions } from '../agent_config_instructions';
 import {
   INSTRUCTION_VARIANT,
   AgentInstructions,
 } from '../instruction_variants';
+import { ApiKeySuccessCallout } from './api_key_success_callout';
 
 export const createGoAgentInstructions = (
   commonOptions: AgentInstructions
 ): EuiStepProps[] => {
-  const {
-    baseUrl,
-    apmServerUrl,
-    createAgentKey,
-    apiKeyAndId,
-    displayCreateApiKeyAction,
-    loading,
-  } = commonOptions;
+  const { baseUrl, apmServerUrl, apiKeyDetails, loading } = commonOptions;
   const codeBlock = `\
 import (
   "net/http"
@@ -79,12 +74,12 @@ file name, or the `ELASTIC_APM_SERVICE_NAME` environment variable.',
           </EuiMarkdownFormat>
           <EuiSpacer />
 
-          {displayCreateApiKeyAction && (
+          {apiKeyDetails?.displayCreateApiKeyAction && (
             <>
               <EuiButton
                 data-test-subj="createApiKeyAndId"
                 fill
-                onClick={createAgentKey}
+                onClick={apiKeyDetails?.createAgentKey}
                 isLoading={loading}
               >
                 {i18n.translate('xpack.apm.tutorial.apiKey.create', {
@@ -94,11 +89,23 @@ file name, or the `ELASTIC_APM_SERVICE_NAME` environment variable.',
               <EuiSpacer />
             </>
           )}
+          {apiKeyDetails?.displayApiKeySuccessCallout && (
+            <>
+              <ApiKeySuccessCallout />
+              <EuiSpacer />
+            </>
+          )}
+          {apiKeyDetails?.displayApiKeyErrorCallout && (
+            <>
+              <ApiKeyErrorCallout errorMessage={apiKeyDetails?.errorMessage} />
+              <EuiSpacer />
+            </>
+          )}
 
           <AgentConfigInstructions
             variantId={INSTRUCTION_VARIANT.GO}
             apmServerUrl={apmServerUrl}
-            apiKey={apiKeyAndId?.apiKey}
+            apiKey={apiKeyDetails?.apiKey}
           />
           <EuiSpacer />
           <EuiMarkdownFormat>
