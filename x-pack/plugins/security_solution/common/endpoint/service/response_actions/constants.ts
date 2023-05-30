@@ -63,6 +63,7 @@ export type ConsoleResponseActionCommands = typeof CONSOLE_RESPONSE_ACTION_COMMA
 
 export type ResponseConsoleRbacControls =
   | 'writeHostIsolation'
+  | 'writeHostIsolationRelease'
   | 'writeProcessOperations'
   | 'writeFileOperations'
   | 'writeExecuteOperations';
@@ -75,7 +76,7 @@ export const RESPONSE_CONSOLE_ACTION_COMMANDS_TO_RBAC_FEATURE_CONTROL: Record<
   ResponseConsoleRbacControls
 > = Object.freeze({
   isolate: 'writeHostIsolation',
-  release: 'writeHostIsolation',
+  release: 'writeHostIsolationRelease',
   'kill-process': 'writeProcessOperations',
   'suspend-process': 'writeProcessOperations',
   processes: 'writeProcessOperations',

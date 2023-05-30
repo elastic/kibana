@@ -72,6 +72,12 @@ export const ENDPOINT_PRIVILEGES: Record<string, PrivilegeMapObject> = deepFreez
     privilegeType: 'api',
     privilegeName: 'readHostIsolationExceptions',
   },
+  deleteHostIsolationExceptions: {
+    appId: DEFAULT_APP_CATEGORIES.security.id,
+    privilegeSplit: '-',
+    privilegeType: 'api',
+    privilegeName: 'deleteHostIsolationExceptions',
+  },
   writeBlocklist: {
     appId: DEFAULT_APP_CATEGORIES.security.id,
     privilegeSplit: '-',
@@ -125,6 +131,12 @@ export const ENDPOINT_PRIVILEGES: Record<string, PrivilegeMapObject> = deepFreez
     privilegeSplit: '-',
     privilegeType: 'api',
     privilegeName: 'writeHostIsolation',
+  },
+  writeHostIsolationRelease: {
+    appId: DEFAULT_APP_CATEGORIES.security.id,
+    privilegeSplit: '-',
+    privilegeType: 'api',
+    privilegeName: 'writeHostIsolationRelease',
   },
   writeProcessOperations: {
     appId: DEFAULT_APP_CATEGORIES.security.id,

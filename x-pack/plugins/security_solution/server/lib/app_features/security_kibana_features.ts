@@ -186,5 +186,19 @@ export const getSecurityAppFeaturesConfig = (): AppFeaturesSecurityConfig => {
         },
       },
     },
+    [AppFeatureSecurityKey.endpointResponseActions]: {
+      subFeaturesPrivileges: [
+        {
+          id: 'host_isolation_all',
+          api: [`${APP_ID}-writeHostIsolation`],
+          ui: ['writeHostIsolation'],
+        },
+        {
+          id: 'host_isolation_exceptions_all',
+          api: [`${APP_ID}-writeHostIsolationExceptions`],
+          ui: ['writeHostIsolationExceptions'],
+        },
+      ],
+    },
   };
 };

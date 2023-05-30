@@ -26,16 +26,11 @@ import type { MaybeImmutable } from '../../types';
 export function hasKibanaPrivilege(
   fleetAuthz: FleetAuthz,
   isEndpointRbacEnabled: boolean,
-  isSuperuser: boolean,
+  isSuperuser: boolean, // TODO: remove this param
   privilege: keyof typeof ENDPOINT_PRIVILEGES
 ): boolean {
-  // user is superuser, always return true
-  if (isSuperuser) {
-    return true;
-  }
-
   // not superuser and FF not enabled, no access
-  if (!isEndpointRbacEnabled) {
+  if (!isSuperuser && !isEndpointRbacEnabled) {
     return false;
   }
 
@@ -125,6 +120,12 @@ export const calculateEndpointAuthz = (
     hasEndpointManagementAccess,
     'writeHostIsolation'
   );
+  const canUnisolateHost = hasKibanaPrivilege(
+    fleetAuthz,
+    isEndpointRbacEnabled,
+    hasEndpointManagementAccess,
+    'writeHostIsolationRelease'
+  );
   const canWriteProcessOperations = hasKibanaPrivilege(
     fleetAuthz,
     isEndpointRbacEnabled,
@@ -152,31 +153,33 @@ export const calculateEndpointAuthz = (
     hasEndpointManagementAccess,
     'writeHostIsolationExceptions'
   );
+  const hasDeleteHostIsolationExceptionsPermission = hasKibanaPrivilege(
+    fleetAuthz,
+    isEndpointRbacEnabled,
+    hasEndpointManagementAccess,
+    'deleteHostIsolationExceptions'
+  );
+  const hasReadHostIsolationExceptionsPermission = hasKibanaPrivilege(
+    fleetAuthz,
+    isEndpointRbacEnabled,
+    hasEndpointManagementAccess,
+    'readHostIsolationExceptions'
+  );
+
   const canWriteHostIsolationExceptions =
     hasWriteHostIsolationExceptionsPermission && isPlatinumPlusLicense;
 
-  const hasReadHostIsolationExceptionsPermission =
-    hasWriteHostIsolationExceptionsPermission ||
-    hasKibanaPrivilege(
-      fleetAuthz,
-      isEndpointRbacEnabled,
-      hasEndpointManagementAccess,
-      'readHostIsolationExceptions'
-    );
   // Calculate the Host Isolation Exceptions Authz. Some of these authz properties could be
   // set to `true` in cases where license was downgraded, but entries still exist.
   const canReadHostIsolationExceptions =
     canWriteHostIsolationExceptions ||
-    (hasReadHostIsolationExceptionsPermission &&
-      // We still allow `read` if not Platinum license, but entries exists for HIE
-      (isPlatinumPlusLicense || hasHostIsolationExceptionsItems));
+    // We still allow `read` if not Platinum license, but entries exists for HIE
+    (hasReadHostIsolationExceptionsPermission && hasHostIsolationExceptionsItems);
 
   const canDeleteHostIsolationExceptions =
     canWriteHostIsolationExceptions ||
     // Should be able to delete if host isolation exceptions exists and license is not platinum+
-    (hasWriteHostIsolationExceptionsPermission &&
-      !isPlatinumPlusLicense &&
-      hasHostIsolationExceptionsItems);
+    (hasDeleteHostIsolationExceptionsPermission && hasHostIsolationExceptionsItems);
 
   const canWriteBlocklist = hasKibanaPrivilege(
     fleetAuthz,
@@ -235,7 +238,7 @@ export const calculateEndpointAuthz = (
     canAccessEndpointActionsLogManagement: canReadActionsLogManagement && isPlatinumPlusLicense,
     // Response Actions
     canIsolateHost: canIsolateHost && isPlatinumPlusLicense,
-    canUnIsolateHost: canIsolateHost,
+    canUnIsolateHost: canUnisolateHost,
     canKillProcess: canWriteProcessOperations && isEnterpriseLicense,
     canSuspendProcess: canWriteProcessOperations && isEnterpriseLicense,
     canGetRunningProcesses: canWriteProcessOperations && isEnterpriseLicense,
@@ -275,7 +278,7 @@ export const getEndpointAuthzInitialState = (): EndpointAuthz => {
     canWriteActionsLogManagement: false,
     canReadActionsLogManagement: false,
     canIsolateHost: false,
-    canUnIsolateHost: true,
+    canUnIsolateHost: false,
     canKillProcess: false,
     canSuspendProcess: false,
     canGetRunningProcesses: false,

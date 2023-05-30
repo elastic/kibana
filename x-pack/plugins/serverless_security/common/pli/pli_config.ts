@@ -11,11 +11,13 @@ import type { SecurityProductLineId } from '../config';
 export const PLI_APP_FEATURES: Record<SecurityProductLineId, AppFeatureKeys> = {
   endpointEssentials: {
     [AppFeatureKey.advancedInsights]: false,
+    [AppFeatureKey.endpointResponseActions]: false,
     [AppFeatureKey.casesConnectors]: false,
   },
 
   cloudEssentials: {
     [AppFeatureKey.advancedInsights]: true,
+    [AppFeatureKey.endpointResponseActions]: true,
     [AppFeatureKey.casesConnectors]: true,
   },
 } as const;

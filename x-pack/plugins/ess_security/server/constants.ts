@@ -9,5 +9,6 @@ import { AppFeatureKey, AppFeatureKeys } from '@kbn/security-solution-plugin/com
 
 export const DEFAULT_APP_FEATURES: AppFeatureKeys = {
   [AppFeatureKey.advancedInsights]: true,
+  [AppFeatureKey.endpointResponseActions]: true,
   [AppFeatureKey.casesConnectors]: true,
 };

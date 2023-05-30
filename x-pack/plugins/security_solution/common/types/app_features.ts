@@ -10,6 +10,7 @@ export enum AppFeatureSecurityKey {
    * Enables Advanced Insights (Entity Risk, GenAI)
    */
   advancedInsights = 'advanced_insights',
+  endpointResponseActions = 'endpoint_response_actions',
 }
 
 export enum AppFeatureCasesKey {
