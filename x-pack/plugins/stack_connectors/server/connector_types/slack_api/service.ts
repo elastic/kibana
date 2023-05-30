@@ -144,7 +144,7 @@ export const createExternalService = (
       const result: AxiosResponse<PostMessageResponse> = await request({
         axios: axiosInstance,
         method: 'post',
-        url: internalGetSlackApiURL() + '/chat.postMessage',
+        url: internalGetSlackApiURL() + 'chat.postMessage',
         logger,
         data: { channel: channels[0], text },
         configurationUtilities,

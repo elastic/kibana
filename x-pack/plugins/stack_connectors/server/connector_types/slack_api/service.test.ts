@@ -158,7 +158,7 @@ describe('Slack API service', () => {
         logger,
         configurationUtilities,
         method: 'post',
-        url: 'chat.postMessage',
+        url: 'https://slack.com/api/chat.postMessage',
         data: { channel: 'general', text: 'a message' },
       });
     });
