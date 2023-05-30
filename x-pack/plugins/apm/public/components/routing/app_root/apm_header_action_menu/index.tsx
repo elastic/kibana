@@ -19,7 +19,6 @@ import { getLegacyApmHref } from '../../../shared/links/apm/apm_link';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { AlertingPopoverAndFlyout } from './alerting_popover_flyout';
 import { AnomalyDetectionSetupLink } from './anomaly_detection_setup_link';
-import { useServiceName } from '../../../../hooks/use_service_name';
 import { InspectorHeaderLink } from './inspector_header_link';
 import { Labs } from './labs';
 import { useApmFeatureFlag } from '../../../../hooks/use_apm_feature_flag';
@@ -27,7 +26,6 @@ import { ApmFeatureFlagName } from '../../../../../common/apm_feature_flags';
 
 export function ApmHeaderActionMenu() {
   const { core, plugins } = useApmPluginContext();
-  const serviceName = useServiceName();
   const { search } = window.location;
   const { application, http } = core;
   const { basePath } = http;
@@ -76,11 +74,9 @@ export function ApmHeaderActionMenu() {
       {canCreateMlJobs && <AnomalyDetectionSetupLink />}
       {isAlertingAvailable && (
         <AlertingPopoverAndFlyout
-          basePath={basePath}
           canReadAlerts={canReadAlerts}
           canSaveAlerts={canSaveApmAlerts}
           canReadMlJobs={canReadMlJobs}
-          includeTransactionDuration={serviceName !== undefined}
         />
       )}
       <EuiHeaderLink
