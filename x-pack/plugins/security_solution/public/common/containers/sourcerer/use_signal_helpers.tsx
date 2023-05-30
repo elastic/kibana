@@ -24,7 +24,7 @@ export const useSignalHelpers = (): {
   /* when false, signal index has been initiated */
   signalIndexNeedsInit: boolean;
 } => {
-  const { indicesExist, dataViewId } = useSourcererDataView(SourcererScopeName.detections);
+  const { indicesExist, dataViewId, loading } = useSourcererDataView(SourcererScopeName.detections);
   const { indexFieldsSearch } = useDataView();
   const dispatch = useDispatch();
   const { addError } = useAppToasts();
@@ -45,8 +45,8 @@ export const useSignalHelpers = (): {
   const defaultDataView = useDeepEqualSelector(getDefaultDataViewSelector);
 
   const signalIndexNeedsInit = useMemo(
-    () => !defaultDataView.title.includes(`${signalIndexNameSourcerer}`),
-    [defaultDataView.title, signalIndexNameSourcerer]
+    () => loading === false && !defaultDataView.title.includes(`${signalIndexNameSourcerer}`),
+    [defaultDataView.title, signalIndexNameSourcerer, loading]
   );
   const shouldWePollForIndex = useMemo(
     () => !indicesExist && !signalIndexNeedsInit,

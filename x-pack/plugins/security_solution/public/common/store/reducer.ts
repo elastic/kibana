@@ -24,10 +24,7 @@ import type { SecuritySubPlugins } from '../../app/types';
 import type { ManagementPluginReducer } from '../../management';
 import type { State } from './types';
 import type { AppAction } from './actions';
-import type { SourcererModel } from './sourcerer/model';
-import { initDataView, SourcererScopeName } from './sourcerer/model';
 import type { ExperimentalFeatures } from '../../../common/experimental_features';
-import { getScopePatternListSelection } from './sourcerer/helpers';
 import { globalUrlParamReducer, initialGlobalUrlParam } from './global_url_param';
 import { groupsReducer } from './grouping/reducer';
 import type { GroupState } from './grouping/types';
@@ -46,69 +43,19 @@ export const createInitialState = (
     'app' | 'dragAndDrop' | 'inputs' | 'sourcerer' | 'globalUrlParam'
   >,
   {
-    defaultDataView,
-    kibanaDataViews,
-    signalIndexName,
     enableExperimental,
   }: {
-    defaultDataView: SourcererModel['defaultDataView'];
-    kibanaDataViews: SourcererModel['kibanaDataViews'];
-    signalIndexName: SourcererModel['signalIndexName'];
     enableExperimental: ExperimentalFeatures;
   },
   dataTableState: DataTableState,
   groupsState: GroupState
 ): State => {
-  const initialPatterns = {
-    [SourcererScopeName.default]: getScopePatternListSelection(
-      defaultDataView,
-      SourcererScopeName.default,
-      signalIndexName,
-      true
-    ),
-    [SourcererScopeName.detections]: getScopePatternListSelection(
-      defaultDataView,
-      SourcererScopeName.detections,
-      signalIndexName,
-      true
-    ),
-    [SourcererScopeName.timeline]: getScopePatternListSelection(
-      defaultDataView,
-      SourcererScopeName.timeline,
-      signalIndexName,
-      true
-    ),
-  };
-
   const preloadedState: State = {
     ...pluginsInitState,
     app: { ...initialAppState, enableExperimental },
     dragAndDrop: initialDragAndDropState,
     inputs: createInitialInputsState(enableExperimental.socTrendsEnabled),
-    sourcerer: {
-      ...sourcererModel.initialSourcererState,
-      sourcererScopes: {
-        ...sourcererModel.initialSourcererState.sourcererScopes,
-        [SourcererScopeName.default]: {
-          ...sourcererModel.initialSourcererState.sourcererScopes.default,
-          selectedDataViewId: defaultDataView.id,
-          selectedPatterns: initialPatterns[SourcererScopeName.default],
-        },
-        [SourcererScopeName.detections]: {
-          ...sourcererModel.initialSourcererState.sourcererScopes.detections,
-          selectedDataViewId: defaultDataView.id,
-          selectedPatterns: initialPatterns[SourcererScopeName.detections],
-        },
-        [SourcererScopeName.timeline]: {
-          ...sourcererModel.initialSourcererState.sourcererScopes.timeline,
-          selectedDataViewId: defaultDataView.id,
-          selectedPatterns: initialPatterns[SourcererScopeName.timeline],
-        },
-      },
-      defaultDataView,
-      kibanaDataViews: kibanaDataViews.map((dataView) => ({ ...initDataView, ...dataView })),
-      signalIndexName,
-    },
+    sourcerer: sourcererModel.initialSourcererState,
     globalUrlParam: initialGlobalUrlParam,
     dataTable: dataTableState.dataTable,
     groups: groupsState.groups,

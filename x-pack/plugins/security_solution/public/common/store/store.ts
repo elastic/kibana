@@ -27,12 +27,6 @@ import reduceReducers from 'reduce-reducers';
 import { dataTableSelectors } from '@kbn/securitysolution-data-table';
 import { initialGroupingState } from './grouping/reducer';
 import type { GroupState } from './grouping/types';
-import {
-  DEFAULT_DATA_VIEW_ID,
-  DEFAULT_INDEX_KEY,
-  DETECTION_ENGINE_INDEX_URL,
-  SERVER_APP_ID,
-} from '../../../common/constants';
 import { telemetryMiddleware } from '../lib/telemetry';
 import { appSelectors } from './app';
 import { timelineSelectors } from '../../timelines/store/timeline';
@@ -44,11 +38,10 @@ import type { AppAction } from './actions';
 import type { Immutable } from '../../../common/endpoint/types';
 import type { State } from './types';
 import type { TimelineEpicDependencies, TimelineState } from '../../timelines/store/timeline/types';
-import type { KibanaDataView, SourcererModel } from './sourcerer/model';
-import { initDataView } from './sourcerer/model';
 import type { AppObservableLibs, StartedSubPlugins, StartPlugins } from '../../types';
 import type { ExperimentalFeatures } from '../../../common/experimental_features';
-import { createSourcererDataView } from '../containers/sourcerer/create_sourcerer_data_view';
+import { sourcererMiddlewareFactory } from './sourcerer/middleware';
+import { appInitialized } from './sourcerer/actions';
 
 type ComposeType = typeof compose;
 declare global {
@@ -65,42 +58,6 @@ export const createStoreFactory = async (
   storage: Storage,
   enableExperimental: ExperimentalFeatures
 ): Promise<Store<State, Action>> => {
-  let signal: { name: string | null } = { name: null };
-  try {
-    if (coreStart.application.capabilities[SERVER_APP_ID].show === true) {
-      signal = await coreStart.http.fetch(DETECTION_ENGINE_INDEX_URL, {
-        method: 'GET',
-      });
-    }
-  } catch {
-    signal = { name: null };
-  }
-
-  const configPatternList = coreStart.uiSettings.get(DEFAULT_INDEX_KEY);
-  let defaultDataView: SourcererModel['defaultDataView'];
-  let kibanaDataViews: SourcererModel['kibanaDataViews'];
-  try {
-    // check for/generate default Security Solution Kibana data view
-    const sourcererDataViews = await createSourcererDataView({
-      body: {
-        patternList: [...configPatternList, ...(signal.name != null ? [signal.name] : [])],
-      },
-      dataViewService: startPlugins.data.dataViews,
-      dataViewId: `${DEFAULT_DATA_VIEW_ID}-${(await startPlugins.spaces?.getActiveSpace())?.id}`,
-    });
-
-    if (sourcererDataViews === undefined) {
-      throw new Error('');
-    }
-    defaultDataView = { ...initDataView, ...sourcererDataViews.defaultDataView };
-    kibanaDataViews = sourcererDataViews.kibanaDataViews.map((dataView: KibanaDataView) => ({
-      ...initDataView,
-      ...dataView,
-    }));
-  } catch (error) {
-    defaultDataView = { ...initDataView, error };
-    kibanaDataViews = [];
-  }
   const appLibs: AppObservableLibs = { kibana: coreStart };
   const libs$ = new BehaviorSubject(appLibs);
 
@@ -128,7 +85,7 @@ export const createStoreFactory = async (
       },
     },
   };
-
+  const sourcerMiddleware = sourcererMiddlewareFactory({ coreStart, startPlugins });
   const groupsInitialState: GroupState = {
     groups: initialGroupingState,
   };
@@ -146,9 +103,6 @@ export const createStoreFactory = async (
       ...subPlugins.management.store.initialState,
     },
     {
-      defaultDataView,
-      kibanaDataViews,
-      signalIndexName: signal.name,
       enableExperimental,
     },
     dataTableInitialState,
@@ -163,6 +117,7 @@ export const createStoreFactory = async (
 
   return createStore(initialState, rootReducer, libs$.pipe(pluck('kibana')), storage, [
     ...(subPlugins.management.store.middleware ?? []),
+    sourcerMiddleware,
   ]);
 };
 
@@ -203,7 +158,7 @@ export const createStore = (
   );
 
   epicMiddleware.run(createRootEpic<CombinedState<State>>());
-
+  store.dispatch(appInitialized());
   return store;
 };
 

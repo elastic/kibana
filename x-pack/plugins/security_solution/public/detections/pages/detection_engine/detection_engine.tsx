@@ -162,8 +162,8 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
   const { showBuildingBlockAlerts, showOnlyThreatIndicatorAlerts } = useDataTableFilters(
     TableId.alertsOnAlertsPage
   );
+  const loading = userInfoLoading || listsConfigLoading || isLoadingIndexPattern;
 
-  const loading = userInfoLoading || listsConfigLoading;
   const {
     application: { navigateToUrl },
     timelines: timelinesUi,
