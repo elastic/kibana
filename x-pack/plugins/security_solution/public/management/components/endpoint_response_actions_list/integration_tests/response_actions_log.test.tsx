@@ -238,7 +238,8 @@ describe('Response actions history', () => {
         statuses: [],
         userIds: [],
         withOutputs: [],
-        withAutomatedActions: false,
+        // should be `false` by default but went out as `true` in 8.8
+        withAutomatedActions: true,
         startDate: 'now-24h/h',
         endDate: 'now',
       },
@@ -311,6 +312,7 @@ describe('Response actions history', () => {
           statuses: [],
           userIds: [],
           withOutputs: [],
+          // should be `false` by default but went out as `true` in 8.8
           withAutomatedActions: true,
         },
         expect.anything()
@@ -1078,6 +1080,7 @@ describe('Response actions history', () => {
           statuses: ['failed', 'pending'],
           userIds: [],
           withOutputs: [],
+          // should be `false` by default but went out as `true` in 8.8
           withAutomatedActions: true,
         },
         expect.anything()
@@ -1280,6 +1283,7 @@ describe('Response actions history', () => {
           statuses: [],
           userIds: [],
           withOutputs: [],
+          // should be `false` by default but went out as `true` in 8.8
           withAutomatedActions: true,
         },
         expect.anything()
