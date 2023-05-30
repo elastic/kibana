@@ -49,7 +49,9 @@ describe('Higher version doc conversion', () => {
           },
         ],
         schemas: {
-          forwardCompatibility: (attrs: any) => ({ ...attrs }),
+          forwardCompatibility: (attrs: any) => {
+            return pick(attrs, 'text', 'bool', 'newField');
+          },
         },
       };
     }

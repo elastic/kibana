@@ -13,7 +13,7 @@ import type { IKibanaMigrator } from '@kbn/core-saved-objects-base-server-intern
 export type IMigrationHelper = PublicMethodsOf<MigrationHelper>;
 
 /**
- * Helper for document migrations.
+ * Repository helper for document migrations.
  */
 export class MigrationHelper {
   private migrator: IKibanaMigrator;
@@ -23,9 +23,9 @@ export class MigrationHelper {
   }
 
   /**
-   * Migrate the given SO document, throwing if a downgrade if required.
-   * This function is meant to be used by write-access APIs (create...) for documents provided as input.
-   * before storing it in the index. It will therefor throw if the document is in a higher / unknown version.
+   * Migrate the given SO document, throwing if a downgrade is required.
+   * This function is meant to be used by write APIs (create, update) for documents provided as input.
+   * before storing it in the index. It will therefore throw if the document is in a higher / unknown version.
    */
   migrateInputDocument(document: SavedObjectUnsanitizedDoc): SavedObjectUnsanitizedDoc {
     return this.migrator.migrateDocument(document, { allowDowngrade: false });
@@ -33,8 +33,8 @@ export class MigrationHelper {
 
   /**
    * Migrate the given SO document, accepting downgrades.
-   * This function is meant to be used by read-access APIs (get, search...) for documents fetched from the index.
-   * before returning it from the API. It will therefor accept downgrading the document.
+   * This function is meant to be used by read APIs (get, find) for documents fetched from the index.
+   * It will therefore accept downgrading the document before returning it from the API.
    */
   migrateStorageDocument(document: SavedObjectUnsanitizedDoc): SavedObjectUnsanitizedDoc {
     return this.migrator.migrateDocument(document, { allowDowngrade: true });
