@@ -51,13 +51,12 @@ export const RulesTableToolbar = React.memo(() => {
       [AllRulesTabs.updates]: {
         id: AllRulesTabs.updates,
         name: i18n.RULE_UPDATES_TAB,
-        disabled: updateTotal === 0,
+        disabled: false,
         href: `/rules/${AllRulesTabs.updates}`,
         isBeta: !!((updateTotal ?? 0) > 0),
         betaOptions: {
           text: `${updateTotal}`,
         },
-        title: updateTotal === 0 ? 'All rules are up to date' : '',
       },
     }),
     [installedTotal, updateTotal]

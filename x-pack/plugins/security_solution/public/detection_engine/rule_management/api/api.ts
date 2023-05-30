@@ -13,6 +13,7 @@ import { INTERNAL_ALERTING_API_FIND_RULES_PATH } from '@kbn/alerting-plugin/comm
 import type { BulkInstallPackagesResponse } from '@kbn/fleet-plugin/common';
 import { epmRouteService } from '@kbn/fleet-plugin/common';
 import type { InstallPackageResponse } from '@kbn/fleet-plugin/common/types';
+import type { UpgradeSpecificRulesRequest } from '../../../../common/detection_engine/prebuilt_rules/api/perform_rule_upgrade/perform_rule_upgrade_request_schema';
 import type { PerformRuleUpgradeResponseBody } from '../../../../common/detection_engine/prebuilt_rules/api/perform_rule_upgrade/perform_rule_upgrade_response_schema';
 import type { InstallSpecificRulesRequest } from '../../../../common/detection_engine/prebuilt_rules/api/perform_rule_installation/perform_rule_installation_request_schema';
 import type { PerformRuleInstallationResponseBody } from '../../../../common/detection_engine/prebuilt_rules/api/perform_rule_installation/perform_rule_installation_response_schema';
@@ -697,9 +698,9 @@ export const performUpgradeAllRules = async (): Promise<PerformRuleUpgradeRespon
   });
 
 export const performUpgradeSpecificRules = async (
-  rules: InstallSpecificRulesRequest['rules']
+  rules: UpgradeSpecificRulesRequest['rules']
 ): Promise<PerformRuleUpgradeResponseBody> =>
-  KibanaServices.get().http.fetch(PERFORM_RULE_INSTALLATION_URL, {
+  KibanaServices.get().http.fetch(PERFORM_RULE_UPGRADE_URL, {
     method: 'POST',
     body: JSON.stringify({
       mode: 'SPECIFIC_RULES',

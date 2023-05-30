@@ -73,7 +73,7 @@ export interface AddPrebuiltRulesTableState {
    */
   rulesColumns: TableColumn[];
   /**
-   * Columns for Add Rules Table
+   * Rule rows selected in EUI InMemory Table
    */
   selectedRules: RuleInstallationInfoForReview[];
 }

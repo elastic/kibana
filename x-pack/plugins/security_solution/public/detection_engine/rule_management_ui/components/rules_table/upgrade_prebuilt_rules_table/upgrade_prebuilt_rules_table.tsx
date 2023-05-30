@@ -13,14 +13,17 @@ import {
   EuiProgress,
 } from '@elastic/eui';
 import React from 'react';
-import { PrePackagedRulesPrompt } from '../../../../../detections/components/rules/pre_packaged_rules/load_empty_prompt';
 
 import * as i18n from '../../../../../detections/pages/detection_engine/rules/translations';
 import { useIsUpgradingSecurityPackages } from '../../../../rule_management/logic/use_upgrade_security_packages';
 import { useUpgradePrebuiltRulesTableContext } from './upgrade_prebuilt_rules_table_context';
 
 const NO_ITEMS_MESSAGE = (
-  <EuiEmptyPrompt title={<h3>{i18n.NO_RULES}</h3>} titleSize="xs" body={i18n.NO_RULES_BODY} />
+  <EuiEmptyPrompt
+    title={<h3>{i18n.NO_RULES_AVAILABLE_FOR_UPGRADE}</h3>}
+    titleSize="s"
+    body={i18n.NO_RULES_AVAILABLE_FOR_UPGRADE_BODY}
+  />
 );
 
 /**
@@ -66,7 +69,6 @@ export const UpgradePrebuiltRulesTable = React.memo(() => {
           color="accent"
         />
       )}
-      {isFetched && isTableEmpty && <PrePackagedRulesPrompt />}
       <EuiSkeletonLoading
         isLoading={shouldShowLoadingOverlay && !shouldShowRulesTable}
         loadingContent={

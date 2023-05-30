@@ -27,6 +27,7 @@ import { RULES_TABLE_INITIAL_PAGE_SIZE, RULES_TABLE_PAGE_SIZE_OPTIONS } from '..
 import { hasUserCRUDPermission } from '../../../../../common/utils/privileges';
 import type { TableColumn } from './use_upgrade_prebuilt_rules_table_columns';
 import { useUpgradePrebuiltRulesTableColumns } from './use_upgrade_prebuilt_rules_table_columns';
+import { UpgradePrebuiltRulesTableButton } from './upgrade_prebuilts_rules_table_buttons';
 
 export interface UpgradePrebuiltRulesTableState {
   /**
@@ -74,11 +75,17 @@ export interface UpgradePrebuiltRulesTableState {
    * Columns for the Upgrade Rules Table
    */
   rulesColumns: TableColumn[];
+  /**
+   * Rule rows selected in EUI InMemory Table
+   */
+  selectedRules: RuleUpgradeInfoForReview[];
 }
 
 export interface UpgradePrebuiltRulesTableActions {
   reFetchRules: ReturnType<typeof usePrebuiltRulesUpgradeReview>['refetch'];
   onTableChange: (criteria: CriteriaWithPagination<RuleUpgradeInfoForReview>) => void;
+  upgradeAllRules: ReturnType<typeof usePerformUpgradeAllRules>['mutateAsync'];
+  upgradeSpecificRules: ReturnType<typeof usePerformUpgradeSpecificRules>['mutateAsync'];
 }
 
 export interface UpgradePrebuiltRulesContextType {
@@ -103,6 +110,7 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
     idleTimeout: number;
   }>(DEFAULT_RULES_TABLE_REFRESH_SETTING);
   const [pagination, setPagination] = useState<{ pageIndex: number }>({ pageIndex: 0 });
+  const [selectedRules, setSelectedRules] = useState<RuleUpgradeInfoForReview[]>([]);
 
   const onTableChange = ({ page: { index } }: CriteriaWithPagination<RuleUpgradeInfoForReview>) => {
     setPagination({ pageIndex: index });
@@ -111,6 +119,7 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
   const selectionValue: EuiTableSelectionType<RuleUpgradeInfoForReview> = useMemo(
     () => ({
       selectable: () => true,
+      onSelectionChange: (newSelectedRules) => setSelectedRules(newSelectedRules),
       initialSelected: [],
     }),
     []
@@ -159,6 +168,7 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
         incremental: true,
         isClearable: true,
       },
+      toolsRight: [<UpgradePrebuiltRulesTableButton />],
       filters: [
         {
           type: 'field_value_selection',
@@ -191,6 +201,7 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
         isLoading,
         isRefetching,
         rulesColumns,
+        selectedRules,
         isUpgradeAllRulesLoading,
         isUpgradeSpecificRulesLoading,
         lastUpdated: dataUpdatedAt,
@@ -208,6 +219,7 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
     isUpgradeAllRulesLoading,
     isUpgradeSpecificRulesLoading,
     rulesColumns,
+    selectedRules,
     dataUpdatedAt,
     actions,
   ]);

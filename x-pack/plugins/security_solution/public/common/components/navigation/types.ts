@@ -41,5 +41,4 @@ export interface NavTab {
   betaOptions?: {
     text: string;
   };
-  title?: string;
 }

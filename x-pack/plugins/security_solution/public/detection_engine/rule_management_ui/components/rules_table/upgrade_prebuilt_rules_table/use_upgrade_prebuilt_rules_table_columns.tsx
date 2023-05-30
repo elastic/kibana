@@ -124,7 +124,7 @@ export const useUpgradePrebuiltRulesTableColumns = ({
       await upgradeSpecificRules([
         {
           rule_id: value,
-          version: item.rule.version,
+          version: item.diff.fields.version?.target_version ?? item.rule.version,
           revision: item.rule.version,
         },
       ]);

@@ -12,7 +12,7 @@ import { useAddPrebuiltRulesTableContext } from './add_prebuilt_rules_table_cont
 
 export const AddPrebuiltRulesHeaderButtons = () => {
   const {
-    state: { selectedRules, isInstallSpecificRulesLoading, isInstallAllRulesLoading },
+    state: { rules, selectedRules, isInstallSpecificRulesLoading, isInstallAllRulesLoading },
     actions: { installAllRules, installSpecificRules },
   } = useAddPrebuiltRulesTableContext();
 
@@ -26,6 +26,7 @@ export const AddPrebuiltRulesHeaderButtons = () => {
     );
   }, [installSpecificRules, selectedRules]);
 
+  const isRulesAvailableForInstall = rules.length > 0;
   const numberOfSelectedRules = selectedRules.length ?? 0;
   const shouldDisplayInstallSelectedRulesButton = numberOfSelectedRules > 0;
 
@@ -46,7 +47,7 @@ export const AddPrebuiltRulesHeaderButtons = () => {
           fill
           iconType="plusInCircle"
           onClick={installRules}
-          disabled={isInstallAllRulesLoading}
+          disabled={!isRulesAvailableForInstall || isInstallAllRulesLoading}
         >
           {i18n.INSTALL_ALL}
         </EuiButton>

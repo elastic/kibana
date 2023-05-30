@@ -686,6 +686,33 @@ export const NO_RULES_BODY = i18n.translate(
   }
 );
 
+export const NO_RULES_AVAILABLE_FOR_INSTALL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.addRules.noRulesTitle',
+  {
+    defaultMessage: 'No Elastic rules available for installation',
+  }
+);
+
+export const NO_RULES_AVAILABLE_FOR_INSTALL_BODY = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.addRules.noRulesBodyTitle',
+  {
+    defaultMessage: 'You are up to date with all Elastic rules.',
+  }
+);
+export const NO_RULES_AVAILABLE_FOR_UPGRADE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.upgradeRules.noRulesTitle',
+  {
+    defaultMessage: 'All Elastic rules are up to date',
+  }
+);
+
+export const NO_RULES_AVAILABLE_FOR_UPGRADE_BODY = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.upgradeRules.noRulesBodyTitle',
+  {
+    defaultMessage: 'There are currently no available updates to your installed Elastic rules.',
+  }
+);
+
 export const DEFINE_RULE = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.defineRuleTitle',
   {
