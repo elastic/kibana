@@ -78,9 +78,21 @@ export const prebuiltRuleAllowlistFields: AllowlistFields = {
   agent: {
     id: true,
   },
-  destination: {
-    port: true,
+  cloud: {
+    availability_zone: true,
+    provider: true,
+    region: true,
   },
+  cloud_defend: true,
+  container: {
+    id: true,
+    image: {
+      name: true,
+      tag: true,
+      hash: true,
+    },
+  },
+  destination: true,
   dll: {
     Ext: {
       relative_file_creation_time: true,
@@ -101,11 +113,7 @@ export const prebuiltRuleAllowlistFields: AllowlistFields = {
       sha256: true,
     },
   },
-  dns: {
-    question: {
-      name: true,
-    },
-  },
+  dns: true,
   event: true,
   group: {
     name: true,
@@ -125,12 +133,15 @@ export const prebuiltRuleAllowlistFields: AllowlistFields = {
     },
   },
   message: true,
-  network: {
-    bytes: true,
-    direction: true,
-    protocol: true,
-    transport: true,
-    type: true,
+  network: true,
+  orchestrator: {
+    namespace: true,
+    resource: {
+      parent: {
+        type: true,
+      },
+      type: true,
+    },
   },
   process: {
     args: true,
@@ -140,8 +151,11 @@ export const prebuiltRuleAllowlistFields: AllowlistFields = {
       trusted: true,
     },
     command_line: true,
+    end: true,
     entity_id: true,
+    entry_leader: true,
     executable: true,
+    exit_code: true,
     Ext: {
       api: {
         name: true,
@@ -154,6 +168,8 @@ export const prebuiltRuleAllowlistFields: AllowlistFields = {
         integrity_level_name: true,
       },
     },
+    group: true,
+    interactive: true,
     name: true,
     parent: {
       args: true,
@@ -172,6 +188,10 @@ export const prebuiltRuleAllowlistFields: AllowlistFields = {
       },
     },
     pid: true,
+    session_leader: true,
+    start: true,
+    user: true,
+    tty: true,
     working_directory: true,
   },
   registry: {
@@ -184,20 +204,14 @@ export const prebuiltRuleAllowlistFields: AllowlistFields = {
   rule: {
     name: true,
   },
-  source: {
-    port: true,
-  },
+  source: true,
   tls: {
     server: {
       hash: true,
     },
   },
   type: true,
-  url: {
-    extension: true,
-    full: true,
-    path: true,
-  },
+  url: true,
   user_agent: {
     original: true,
   },

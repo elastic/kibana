@@ -1097,7 +1097,7 @@
       "post": {
         "summary": "Mutes an alert.",
         "operationId": "muteAlert",
-        "description": "You must have `all` privileges for the appropriate Kibana features, depending on the `consumer` and `rule_type_id` of the rule. For example, the **Management > Stack Rules** feature, **Analytics > Discover** and **Machine Learning** features, **Observability**, and **Security** features. If the rule has actions, you must also have `read` privileges for the **Management > Actions and Connectors** feature. \n",
+        "description": "You must have `all` privileges for the appropriate Kibana features, depending on the `consumer` and `rule_type_id` of the rule. For example, the **Management > Stack Rules** feature, **Analytics > Discover** and **Machine Learning** features, **Observability**, and **Security** features. If the rule has actions, you must also have `read` privileges for the **Management > Actions and Connectors** feature.\n",
         "tags": [
           "alerting"
         ],
@@ -1146,7 +1146,7 @@
       "post": {
         "summary": "Unmutes an alert.",
         "operationId": "unmuteAlert",
-        "description": "You must have `all` privileges for the appropriate Kibana features, depending on the `consumer` and `rule_type_id` of the rule. For example, the **Management > Stack Rules** feature, **Analytics > Discover** and **Machine Learning** features, **Observability**, and **Security** features. If the rule has actions, you must also have `read` privileges for the **Management > Actions and Connectors** feature. \n",
+        "description": "You must have `all` privileges for the appropriate Kibana features, depending on the `consumer` and `rule_type_id` of the rule. For example, the **Management > Stack Rules** feature, **Analytics > Discover** and **Machine Learning** features, **Observability**, and **Security** features. If the rule has actions, you must also have `read` privileges for the **Management > Actions and Connectors** feature.\n",
         "tags": [
           "alerting"
         ],
@@ -2516,6 +2516,11 @@
               "type": "object",
               "description": "The parameters for the action, which are sent to the connector. The `params` are handled as Mustache templates and passed a default set of context.",
               "additionalProperties": true
+            },
+            "uuid": {
+              "type": "string",
+              "description": "A universally unique identifier (UUID) for the action.",
+              "example": "1c7a1280-f28c-4e06-96b2-e4e5f05d1d61"
             }
           }
         }
@@ -2565,8 +2570,14 @@
           "actions": {
             "$ref": "#/components/schemas/actions"
           },
+          "api_key_created_by_user": {
+            "type": "boolean",
+            "description": "Indicates whether the API key that is associated with the rule was created by the user.",
+            "example": false
+          },
           "api_key_owner": {
             "type": "string",
+            "description": "The owner of the API key that is associated with the rule and used to run background tasks.\n",
             "nullable": true,
             "example": "elastic"
           },
@@ -2680,6 +2691,10 @@
             "type": "object",
             "description": "The parameters for the rule.",
             "additionalProperties": true
+          },
+          "revision": {
+            "type": "integer",
+            "description": "The rule revision number."
           },
           "rule_type_id": {
             "type": "string",
@@ -2995,6 +3010,7 @@
             "aggField": "sheet.version",
             "termField": "name.keyword"
           },
+          "revision": 1,
           "rule_type_id": ".index-threshold",
           "created_by": "elastic",
           "updated_by": "elastic",
@@ -3014,6 +3030,7 @@
             {
               "group": "threshold met",
               "id": "1007a0c0-7a6e-11ed-89d5-abec321c0def",
+              "uuid": "1c7a1280-f28c-4e06-96b2-e4e5f05d1d61",
               "params": {
                 "level": "info",
                 "message": "alert {{alertName}} is active for group {{context.group}}:\n\n- Value: {{context.value}}\n- Conditions Met: {{context.conditions}} over {{params.timeWindowSize}}{{params.timeWindowUnit}}\n- Timestamp: {{context.date}",
@@ -3032,7 +3049,8 @@
             "warning": null,
             "outcome": "succeeded"
           },
-          "next_run": "2022-12-13T22:34:44.314Z"
+          "next_run": "2022-12-13T22:34:44.314Z",
+          "api_key_created_by_user": false
         }
       },
       "update_rule_request": {
@@ -3086,6 +3104,7 @@
           "name": "new name",
           "enabled": true,
           "throttle": null,
+          "revision": 1,
           "running": false,
           "schedule": {
             "interval": "10m"
@@ -3129,6 +3148,7 @@
                 "message": "alert {{alertName}} is active for group {{context.group}}:\n\n- Value: {{context.value}}\n- Conditions Met: {{context.conditions}} over {{params.timeWindowSize}}{{params.timeWindowUnit}}\n- Timestamp: {{context.date}"
               },
               "id": "96b668d0-a1b6-11ed-afdf-d39a49596974",
+              "uuid": "07aef2a0-9eed-4ef9-94ec-39ba58eb609d",
               "connector_type_id": ".server-log",
               "frequency": {
                 "summary": false,
@@ -3148,7 +3168,8 @@
             "warning": null,
             "outcome": "succeeded"
           },
-          "next_run": "2023-01-31T23:49:42.432Z"
+          "next_run": "2023-01-31T23:49:42.432Z",
+          "api_key_created_by_user": false
         }
       },
       "create_rule_request": {
@@ -3203,6 +3224,7 @@
             {
               "group": "threshold met",
               "id": "dceeb5d0-6b41-11eb-802b-85b0c1bc8ba2",
+              "uuid": "07aef2a0-9eed-4ef9-94ec-39ba58eb609d",
               "frequency": {
                 "notify_when": "onActionGroupChange",
                 "summary": false,
@@ -3214,6 +3236,7 @@
               }
             }
           ],
+          "api_key_created_by_user": false,
           "api_key_owner": "elastic",
           "consumer": "alerts",
           "created_at": "2022-06-08T17:20:31.632Z",
@@ -3245,6 +3268,7 @@
             "aggField": "sheet.version",
             "termField": "name.keyword"
           },
+          "revision": 0,
           "rule_type_id": ".index-threshold",
           "running": false,
           "schedule": {
@@ -3295,6 +3319,7 @@
                 "aggField": "sheet.version",
                 "termField": "name.keyword"
               },
+              "revision": 1,
               "rule_type_id": ".index-threshold",
               "created_by": "elastic",
               "updated_by": "elastic",
@@ -3314,6 +3339,7 @@
                 {
                   "id": "9dca3e00-74f5-11ed-9801-35303b735aef",
                   "group": "threshold met",
+                  "uuid": "1c7a1280-f28c-4e06-96b2-e4e5f05d1d61",
                   "params": {
                     "level": "info",
                     "message": "alert {{alertName}} is active for group {{context.group}}:\n\n- Value: {{context.value}}\n- Conditions Met: {{context.conditions}} over {{params.timeWindowSize}}{{params.timeWindowUnit}}\n- Timestamp: {{context.date}}",
@@ -3332,7 +3358,8 @@
                 "warning": null,
                 "outcome": "succeeded"
               },
-              "next_run": "2022-12-06T01:45:23.912Z"
+              "next_run": "2022-12-06T01:45:23.912Z",
+              "api_key_created_by_user": false
             }
           ]
         }

@@ -19,6 +19,7 @@ import { licenseMock } from '../../common/licensing/index.mock';
 import type { SecurityLicenseFeatures } from '../../common/licensing/license_features';
 import { securityMock } from '../mocks';
 import { apiKeysManagementApp } from './api_keys';
+import type { ManagementAppConfigType } from './management_service';
 import { ManagementService } from './management_service';
 import { roleMappingsManagementApp } from './role_mappings';
 import { rolesManagementApp } from './roles';
@@ -78,6 +79,66 @@ describe('ManagementService', () => {
         title: 'Role Mappings',
       });
     });
+
+    it('Users, Roles, and Role Mappings are not registered when their UI config settings are set to false', () => {
+      const mockSectionWithConfig = createManagementSectionMock();
+      const { fatalErrors, getStartServices } = coreMock.createSetup();
+      const { authc } = securityMock.createSetup();
+      const license = licenseMock.create();
+
+      const managementSetup: ManagementSetup = {
+        sections: {
+          register: jest.fn(() => mockSectionWithConfig),
+          section: {
+            security: mockSectionWithConfig,
+          } as DefinedSections,
+        },
+        locator: {} as any,
+      };
+
+      const uiConfig: ManagementAppConfigType = {
+        userManagementEnabled: false,
+        roleManagementEnabled: false,
+        roleMappingManagementEnabled: false,
+      };
+
+      const service = new ManagementService();
+      service.setup({
+        getStartServices: getStartServices as any,
+        license,
+        fatalErrors,
+        authc,
+        management: managementSetup,
+        uiConfig,
+      });
+
+      // Only API Keys app should be registered
+      expect(mockSectionWithConfig.registerApp).toHaveBeenCalledTimes(1);
+      expect(mockSectionWithConfig.registerApp).not.toHaveBeenCalledWith({
+        id: 'users',
+        mount: expect.any(Function),
+        order: 10,
+        title: 'Users',
+      });
+      expect(mockSectionWithConfig.registerApp).not.toHaveBeenCalledWith({
+        id: 'roles',
+        mount: expect.any(Function),
+        order: 20,
+        title: 'Roles',
+      });
+      expect(mockSectionWithConfig.registerApp).toHaveBeenCalledWith({
+        id: 'api_keys',
+        mount: expect.any(Function),
+        order: 30,
+        title: 'API keys',
+      });
+      expect(mockSectionWithConfig.registerApp).not.toHaveBeenCalledWith({
+        id: 'role_mappings',
+        mount: expect.any(Function),
+        order: 40,
+        title: 'Role Mappings',
+      });
+    });
   });
 
   describe('start()', () => {
@@ -105,12 +166,19 @@ describe('ManagementService', () => {
         locator: {} as any,
       };
 
+      const uiConfig: ManagementAppConfigType = {
+        userManagementEnabled: true,
+        roleManagementEnabled: true,
+        roleMappingManagementEnabled: true,
+      };
+
       service.setup({
         getStartServices: getStartServices as any,
         license,
         fatalErrors,
         authc: securityMock.createSetup().authc,
         management: managementSetup,
+        uiConfig,
       });
 
       const getMockedApp = (id: string) => {
@@ -150,6 +218,7 @@ describe('ManagementService', () => {
           navLinks: {},
           catalogue: {},
         },
+        uiConfig,
       });
 
       return {

@@ -33,27 +33,30 @@ import {
   ANOMALIES_TABLE_ENABLE_JOB_LOADER,
   ANOMALIES_TABLE_COUNT_COLUMN,
 } from '../../screens/entity_analytics';
-import { openRiskTableFilterAndSelectTheLowOption } from '../../tasks/host_risk';
+import { openRiskTableFilterAndSelectTheLowOption, removeLowFilter } from '../../tasks/host_risk';
 import { createRule } from '../../tasks/api_calls/rules';
 import { waitForAlertsToPopulate } from '../../tasks/create_new_rule';
 import { getNewRule } from '../../objects/rule';
 import { clickOnFirstHostsAlerts, clickOnFirstUsersAlerts } from '../../tasks/risk_scores';
 import { OPTION_LIST_LABELS, OPTION_LIST_VALUES } from '../../screens/common/filter_group';
 import { setRowsPerPageTo } from '../../tasks/table_pagination';
+import { clearSearchBar, kqlSearch } from '../../tasks/security_header';
+import { setEndDate, setEndDateNow, updateDates } from '../../tasks/date_picker';
 
 const TEST_USER_ALERTS = 2;
 const TEST_USER_NAME = 'test';
 const SIEM_KIBANA_HOST_ALERTS = 2;
 const SIEM_KIBANA_HOST_NAME = 'siem-kibana';
+const END_DATE = 'Jan 19, 2019 @ 20:33:29.186';
 
 describe('Entity Analytics Dashboard', () => {
   before(() => {
     cleanKibana();
-    login();
   });
 
   describe('Without data', () => {
     beforeEach(() => {
+      login();
       visit(ENTITY_ANALYTICS_URL);
     });
 
@@ -73,6 +76,7 @@ describe('Entity Analytics Dashboard', () => {
     });
 
     beforeEach(() => {
+      login();
       visit(ENTITY_ANALYTICS_URL);
     });
 
@@ -97,6 +101,7 @@ describe('Entity Analytics Dashboard', () => {
     });
 
     beforeEach(() => {
+      login();
       visit(ENTITY_ANALYTICS_URL);
     });
 
@@ -120,6 +125,7 @@ describe('Entity Analytics Dashboard', () => {
     });
 
     beforeEach(() => {
+      login();
       visit(ENTITY_ANALYTICS_URL);
     });
 
@@ -145,6 +151,17 @@ describe('Entity Analytics Dashboard', () => {
 
       cy.get(HOSTS_DONUT_CHART).should('include.text', '1Total');
       cy.get(HOSTS_TABLE_ROWS).should('have.length', 1);
+
+      removeLowFilter();
+    });
+
+    it('filters the host risk table with KQL search bar query', () => {
+      kqlSearch(`host.name : ${SIEM_KIBANA_HOST_NAME}{enter}`);
+
+      cy.get(HOSTS_DONUT_CHART).should('include.text', '1Total');
+      cy.get(HOSTS_TABLE_ROWS).should('have.length', 1);
+
+      clearSearchBar();
     });
 
     describe('With alerts data', () => {
@@ -153,6 +170,7 @@ describe('Entity Analytics Dashboard', () => {
       });
 
       beforeEach(() => {
+        login();
         visit(ALERTS_URL);
         waitForAlertsToPopulate();
         visit(ENTITY_ANALYTICS_URL);
@@ -164,6 +182,17 @@ describe('Entity Analytics Dashboard', () => {
 
       it('populates alerts column', () => {
         cy.get(HOSTS_TABLE_ALERT_CELL).first().should('include.text', SIEM_KIBANA_HOST_ALERTS);
+      });
+
+      it('filters the alerts count with time range', () => {
+        setEndDate(END_DATE);
+        updateDates();
+
+        cy.get(HOSTS_TABLE_ALERT_CELL).first().should('include.text', 0);
+
+        // CLEAR DATES
+        setEndDateNow();
+        updateDates();
       });
 
       it('opens alerts page when alerts count is clicked', () => {
@@ -184,6 +213,7 @@ describe('Entity Analytics Dashboard', () => {
     });
 
     beforeEach(() => {
+      login();
       visit(ENTITY_ANALYTICS_URL);
     });
 
@@ -209,6 +239,17 @@ describe('Entity Analytics Dashboard', () => {
 
       cy.get(USERS_DONUT_CHART).should('include.text', '2Total');
       cy.get(USERS_TABLE_ROWS).should('have.length', 2);
+
+      removeLowFilter();
+    });
+
+    it('filters the host risk table with KQL search bar query', () => {
+      kqlSearch(`user.name : ${TEST_USER_NAME}{enter}`);
+
+      cy.get(USERS_DONUT_CHART).should('include.text', '1Total');
+      cy.get(USERS_TABLE_ROWS).should('have.length', 1);
+
+      clearSearchBar();
     });
 
     describe('With alerts data', () => {
@@ -217,6 +258,7 @@ describe('Entity Analytics Dashboard', () => {
       });
 
       beforeEach(() => {
+        login();
         visit(ALERTS_URL);
         waitForAlertsToPopulate();
         visit(ENTITY_ANALYTICS_URL);
@@ -228,6 +270,17 @@ describe('Entity Analytics Dashboard', () => {
 
       it('populates alerts column', () => {
         cy.get(USERS_TABLE_ALERT_CELL).first().should('include.text', TEST_USER_ALERTS);
+      });
+
+      it('filters the alerts count with time range', () => {
+        setEndDate(END_DATE);
+        updateDates();
+
+        cy.get(USERS_TABLE_ALERT_CELL).first().should('include.text', 0);
+
+        // CLEAR DATES
+        setEndDateNow();
+        updateDates();
       });
 
       it('opens alerts page when alerts count is clicked', () => {
@@ -253,6 +306,7 @@ describe('Entity Analytics Dashboard', () => {
     });
 
     beforeEach(() => {
+      login();
       visit(ENTITY_ANALYTICS_URL);
     });
 

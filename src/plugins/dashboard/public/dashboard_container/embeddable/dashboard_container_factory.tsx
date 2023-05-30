@@ -34,9 +34,9 @@ export type DashboardContainerFactory = EmbeddableFactory<
 >;
 
 export interface DashboardCreationOptions {
-  initialInput?: Partial<DashboardContainerInput>;
+  getInitialInput?: () => Partial<DashboardContainerInput>;
 
-  incomingEmbeddable?: EmbeddablePackageState;
+  getIncomingEmbeddable?: () => EmbeddablePackageState | undefined;
 
   useSearchSessionsIntegration?: boolean;
   searchSessionSettings?: {
@@ -98,7 +98,7 @@ export class DashboardContainerFactoryDefinition
     const { createDashboard } = await import('./create/create_dashboard');
     try {
       return Promise.resolve(
-        createDashboard(initialInput.id, creationOptions, dashboardCreationStartTime, savedObjectId)
+        createDashboard(creationOptions, dashboardCreationStartTime, savedObjectId)
       );
     } catch (e) {
       return new ErrorEmbeddable(e.text, { id: e.id });

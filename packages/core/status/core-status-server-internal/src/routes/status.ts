@@ -88,7 +88,7 @@ export const registerStatusRoute = ({
       },
     },
     async (context, req, res) => {
-      const { version, buildSha, buildNum } = config.packageInfo;
+      const { version, buildSha, buildNum, buildDate } = config.packageInfo;
       const versionWithoutSnapshot = version.replace(SNAPSHOT_POSTFIX, '');
       const [overall, coreOverall, core, plugins] = await firstValueFrom(combinedStatus$);
 
@@ -121,6 +121,7 @@ export const registerStatusRoute = ({
           build_hash: buildSha,
           build_number: buildNum,
           build_snapshot: SNAPSHOT_POSTFIX.test(version),
+          build_date: buildDate.toISOString(),
         },
         status: statusInfo,
         metrics: {

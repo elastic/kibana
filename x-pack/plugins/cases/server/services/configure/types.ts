@@ -6,7 +6,7 @@
  */
 
 import type { SavedObject, SavedObjectsClientContract } from '@kbn/core/server';
-import type { CasesConfigureAttributes } from '../../../common/api';
+import type { ConfigurationAttributes } from '../../../common/api';
 import type { IndexRefresh } from '../types';
 import type { SavedObjectFindOptionsKueryNode } from '../../common/types';
 
@@ -25,12 +25,12 @@ export interface FindCaseConfigureArgs extends ClientArgs {
 }
 
 export interface PostCaseConfigureArgs extends ClientArgs, IndexRefresh {
-  attributes: CasesConfigureAttributes;
+  attributes: ConfigurationAttributes;
   id: string;
 }
 
 export interface PatchCaseConfigureArgs extends ClientArgs, IndexRefresh {
   configurationId: string;
-  updatedAttributes: Partial<CasesConfigureAttributes>;
-  originalConfiguration: SavedObject<CasesConfigureAttributes>;
+  updatedAttributes: Partial<ConfigurationAttributes>;
+  originalConfiguration: SavedObject<ConfigurationAttributes>;
 }

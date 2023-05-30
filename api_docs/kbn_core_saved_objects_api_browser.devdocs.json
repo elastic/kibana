@@ -1127,66 +1127,6 @@
             "path": "x-pack/plugins/canvas/public/services/platform.ts"
           },
           {
-            "plugin": "graph",
-            "path": "x-pack/plugins/graph/public/services/save_modal.tsx"
-          },
-          {
-            "plugin": "graph",
-            "path": "x-pack/plugins/graph/public/services/save_modal.tsx"
-          },
-          {
-            "plugin": "graph",
-            "path": "x-pack/plugins/graph/public/helpers/saved_workspace_utils.ts"
-          },
-          {
-            "plugin": "graph",
-            "path": "x-pack/plugins/graph/public/helpers/saved_workspace_utils.ts"
-          },
-          {
-            "plugin": "graph",
-            "path": "x-pack/plugins/graph/public/helpers/saved_workspace_utils.ts"
-          },
-          {
-            "plugin": "graph",
-            "path": "x-pack/plugins/graph/public/helpers/saved_workspace_utils.ts"
-          },
-          {
-            "plugin": "graph",
-            "path": "x-pack/plugins/graph/public/helpers/saved_workspace_utils.ts"
-          },
-          {
-            "plugin": "graph",
-            "path": "x-pack/plugins/graph/public/state_management/store.ts"
-          },
-          {
-            "plugin": "graph",
-            "path": "x-pack/plugins/graph/public/state_management/store.ts"
-          },
-          {
-            "plugin": "graph",
-            "path": "x-pack/plugins/graph/public/helpers/use_workspace_loader.ts"
-          },
-          {
-            "plugin": "graph",
-            "path": "x-pack/plugins/graph/public/helpers/use_workspace_loader.ts"
-          },
-          {
-            "plugin": "graph",
-            "path": "x-pack/plugins/graph/public/application.tsx"
-          },
-          {
-            "plugin": "graph",
-            "path": "x-pack/plugins/graph/public/application.tsx"
-          },
-          {
-            "plugin": "graph",
-            "path": "x-pack/plugins/graph/public/state_management/mocks.ts"
-          },
-          {
-            "plugin": "graph",
-            "path": "x-pack/plugins/graph/public/state_management/mocks.ts"
-          },
-          {
             "plugin": "lens",
             "path": "x-pack/plugins/lens/public/persistence/saved_objects_utils/find_object_by_title.test.ts"
           },
@@ -1291,10 +1231,6 @@
                 "path": "packages/core/saved-objects/core-saved-objects-browser-mocks/src/saved_objects_service.mock.ts"
               },
               {
-                "plugin": "dataViews",
-                "path": "src/plugins/data_views/public/saved_objects_client_wrapper.ts"
-              },
-              {
                 "plugin": "savedObjects",
                 "path": "src/plugins/saved_objects/public/saved_object/helpers/create_source.ts"
               },
@@ -1325,14 +1261,6 @@
               {
                 "plugin": "dashboard",
                 "path": "src/plugins/dashboard/public/dashboard_actions/clone_panel_action.tsx"
-              },
-              {
-                "plugin": "graph",
-                "path": "x-pack/plugins/graph/public/helpers/saved_workspace_utils.ts"
-              },
-              {
-                "plugin": "graph",
-                "path": "x-pack/plugins/graph/public/helpers/saved_workspace_utils.test.ts"
               },
               {
                 "plugin": "savedObjects",
@@ -1643,10 +1571,6 @@
                 "path": "packages/core/saved-objects/core-saved-objects-browser-mocks/src/saved_objects_service.mock.ts"
               },
               {
-                "plugin": "dataViews",
-                "path": "src/plugins/data_views/public/saved_objects_client_wrapper.ts"
-              },
-              {
                 "plugin": "savedObjects",
                 "path": "src/plugins/saved_objects/public/saved_object/helpers/build_saved_object.ts"
               },
@@ -1657,10 +1581,6 @@
               {
                 "plugin": "dashboard",
                 "path": "src/plugins/dashboard/public/dashboard_listing/dashboard_listing.tsx"
-              },
-              {
-                "plugin": "graph",
-                "path": "x-pack/plugins/graph/public/helpers/saved_workspace_utils.ts"
               },
               {
                 "plugin": "@kbn/core-saved-objects-browser-internal",
@@ -1788,10 +1708,6 @@
                 "path": "packages/core/saved-objects/core-saved-objects-browser-mocks/src/saved_objects_service.mock.ts"
               },
               {
-                "plugin": "synthetics",
-                "path": "x-pack/plugins/synthetics/public/apps/synthetics/components/settings/global_params/delete_param.tsx"
-              },
-              {
                 "plugin": "@kbn/core-saved-objects-browser-internal",
                 "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/saved_objects_client.ts"
               },
@@ -1904,10 +1820,6 @@
                 "path": "packages/core/saved-objects/core-saved-objects-browser-mocks/src/saved_objects_service.mock.ts"
               },
               {
-                "plugin": "dataViews",
-                "path": "src/plugins/data_views/public/saved_objects_client_wrapper.ts"
-              },
-              {
                 "plugin": "savedObjects",
                 "path": "src/plugins/saved_objects/public/saved_object/helpers/find_object_by_title.ts"
               },
@@ -1956,36 +1868,8 @@
                 "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/components/collect_config_container.tsx"
               },
               {
-                "plugin": "graph",
-                "path": "x-pack/plugins/graph/public/helpers/saved_workspace_utils.ts"
-              },
-              {
-                "plugin": "synthetics",
-                "path": "x-pack/plugins/synthetics/public/apps/synthetics/components/monitors_page/common/monitor_filters/use_filters.ts"
-              },
-              {
-                "plugin": "synthetics",
-                "path": "x-pack/plugins/synthetics/public/apps/synthetics/components/settings/private_locations/hooks/use_location_monitors.ts"
-              },
-              {
-                "plugin": "synthetics",
-                "path": "x-pack/plugins/synthetics/public/apps/synthetics/components/monitor_add_edit/hooks/use_monitor_name.ts"
-              },
-              {
-                "plugin": "graph",
-                "path": "x-pack/plugins/graph/public/helpers/saved_workspace_utils.test.ts"
-              },
-              {
                 "plugin": "ml",
                 "path": "x-pack/plugins/ml/public/application/services/dashboard_service.test.ts"
-              },
-              {
-                "plugin": "synthetics",
-                "path": "x-pack/plugins/synthetics/public/apps/synthetics/components/monitors_page/common/monitor_filters/use_filters.test.ts"
-              },
-              {
-                "plugin": "synthetics",
-                "path": "x-pack/plugins/synthetics/public/apps/synthetics/components/monitors_page/common/monitor_filters/use_filters.test.ts"
               },
               {
                 "plugin": "savedObjects",
@@ -2365,22 +2249,6 @@
                 "path": "src/plugins/dashboard/public/services/dashboard_saved_object/lib/load_dashboard_state_from_saved_object.ts"
               },
               {
-                "plugin": "graph",
-                "path": "x-pack/plugins/graph/public/helpers/saved_workspace_utils.ts"
-              },
-              {
-                "plugin": "dataViews",
-                "path": "src/plugins/data_views/public/saved_objects_client_wrapper.test.ts"
-              },
-              {
-                "plugin": "dataViews",
-                "path": "src/plugins/data_views/public/saved_objects_client_wrapper.test.ts"
-              },
-              {
-                "plugin": "dataViews",
-                "path": "src/plugins/data_views/public/saved_objects_client_wrapper.test.ts"
-              },
-              {
                 "plugin": "savedSearch",
                 "path": "src/plugins/saved_search/public/services/saved_searches/get_saved_searches.test.ts"
               },
@@ -2635,10 +2503,6 @@
                 "path": "packages/core/saved-objects/core-saved-objects-browser-mocks/src/saved_objects_service.mock.ts"
               },
               {
-                "plugin": "dataViews",
-                "path": "src/plugins/data_views/public/saved_objects_client_wrapper.ts"
-              },
-              {
                 "plugin": "savedSearch",
                 "path": "src/plugins/saved_search/public/services/saved_searches/save_saved_searches.ts"
               },
@@ -2884,22 +2748,6 @@
             "path": "src/core/public/index.ts"
           },
           {
-            "plugin": "dataViews",
-            "path": "src/plugins/data_views/common/types.ts"
-          },
-          {
-            "plugin": "dataViews",
-            "path": "src/plugins/data_views/common/types.ts"
-          },
-          {
-            "plugin": "dataViews",
-            "path": "src/plugins/data_views/public/saved_objects_client_wrapper.ts"
-          },
-          {
-            "plugin": "dataViews",
-            "path": "src/plugins/data_views/public/saved_objects_client_wrapper.ts"
-          },
-          {
             "plugin": "savedObjects",
             "path": "src/plugins/saved_objects/public/saved_object/helpers/save_with_confirmation.ts"
           },
@@ -2914,6 +2762,14 @@
           {
             "plugin": "visualizations",
             "path": "src/plugins/visualizations/public/utils/saved_objects_utils/save_with_confirmation.ts"
+          },
+          {
+            "plugin": "graph",
+            "path": "x-pack/plugins/graph/public/helpers/saved_objects_utils/save_with_confirmation.ts"
+          },
+          {
+            "plugin": "graph",
+            "path": "x-pack/plugins/graph/public/helpers/saved_objects_utils/save_with_confirmation.ts"
           },
           {
             "plugin": "savedObjects",
@@ -3337,22 +3193,6 @@
           {
             "plugin": "@kbn/core",
             "path": "src/core/public/index.ts"
-          },
-          {
-            "plugin": "dataViews",
-            "path": "src/plugins/data_views/common/types.ts"
-          },
-          {
-            "plugin": "dataViews",
-            "path": "src/plugins/data_views/common/types.ts"
-          },
-          {
-            "plugin": "dataViews",
-            "path": "src/plugins/data_views/public/saved_objects_client_wrapper.ts"
-          },
-          {
-            "plugin": "dataViews",
-            "path": "src/plugins/data_views/public/saved_objects_client_wrapper.ts"
           }
         ],
         "children": [
@@ -3480,14 +3320,6 @@
             "path": "src/core/public/index.ts"
           },
           {
-            "plugin": "dataViews",
-            "path": "src/plugins/data_views/public/saved_objects_client_wrapper.ts"
-          },
-          {
-            "plugin": "dataViews",
-            "path": "src/plugins/data_views/public/saved_objects_client_wrapper.ts"
-          },
-          {
             "plugin": "savedObjects",
             "path": "src/plugins/saved_objects/public/saved_object/helpers/find_object_by_title.ts"
           },
@@ -3614,6 +3446,14 @@
           {
             "plugin": "synthetics",
             "path": "x-pack/plugins/synthetics/common/types/synthetics_monitor.ts"
+          },
+          {
+            "plugin": "graph",
+            "path": "x-pack/plugins/graph/public/helpers/saved_objects_utils/find_object_by_title.test.ts"
+          },
+          {
+            "plugin": "graph",
+            "path": "x-pack/plugins/graph/public/helpers/saved_objects_utils/find_object_by_title.test.ts"
           },
           {
             "plugin": "lens",
