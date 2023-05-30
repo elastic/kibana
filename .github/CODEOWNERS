@@ -1111,6 +1111,7 @@ x-pack/plugins/cloud_integrations/cloud_full_story/server/config.ts @elastic/kib
 
 /x-pack/plugins/security_solution/public/detection_engine/rule_creation_ui @elastic/security-detection-engine
 /x-pack/plugins/security_solution/public/detections/pages/alerts @elastic/security-detection-engine
+/x-pack/plugins/security_solution/public/detections/pages/detection_engine @elastic/security-detection-engine
 
 /x-pack/plugins/security_solution/server/lib/detection_engine/migrations @elastic/security-detection-engine
 /x-pack/plugins/security_solution/server/lib/detection_engine/rule_preview @elastic/security-detection-engine
@@ -1134,6 +1135,11 @@ x-pack/plugins/cloud_integrations/cloud_full_story/server/config.ts @elastic/kib
 /x-pack/plugins/security_solution/server/lib/detection_engine/rule_actions_legacy @elastic/security-detection-engine
 /x-pack/plugins/security_solution/server/lib/detection_engine/rule_exceptions @elastic/security-detection-engine
 /x-pack/plugins/security_solution/server/lib/sourcerer @elastic/security-detection-engine
+/x-pack/plugins/security_solution/public/common/store/sourcerer @elastic/security-detection-engine
+/x-pack/plugins/security_solution/public/common/containers/sourcerer @elastic/security-detection-engine
+/x-pack/plugins/security_solution/common/utils/sourcerer* @elastic/security-detection-engine
+/x-pack/plugins/security_solution/cypress/screens/sourcerer* @elastic/security-detection-engine
+/x-pack/plugins/security_solution/cypress/tasks/sourcerer* @elastic/security-detection-engine
 
 ## Security Threat Intelligence - Under Security Platform
 /x-pack/plugins/security_solution/public/common/components/threat_match @elastic/security-detection-engine
