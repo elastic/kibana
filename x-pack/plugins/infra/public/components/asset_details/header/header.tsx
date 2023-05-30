@@ -59,8 +59,10 @@ export const Header = ({ nodeType, node, tabs, links, compact, onTabsStateChange
     uptime: <LinkToUptime nodeType={nodeType} node={node} />,
   };
 
-  const headerLinks = links?.map((link) => (
-    <EuiFlexItem grow={false}>{linkComponent[link]}</EuiFlexItem>
+  const headerLinks = links?.map((link, index) => (
+    <EuiFlexItem key={index} grow={false}>
+      {linkComponent[link]}
+    </EuiFlexItem>
   ));
 
   return (
