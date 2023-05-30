@@ -22,7 +22,7 @@
 
 // Import commands.js using ES2015 syntax:
 import './commands';
-import 'cypress-pipe';
+import 'cypress-real-events/support';
 
 Cypress.on('uncaught:exception', () => {
   return false;

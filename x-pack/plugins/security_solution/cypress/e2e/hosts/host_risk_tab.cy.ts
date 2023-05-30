@@ -25,11 +25,11 @@ import { clearSearchBar, kqlSearch } from '../../tasks/security_header';
 describe('risk tab', () => {
   before(() => {
     cleanKibana();
-    esArchiverLoad('users');
-    login();
+    esArchiverLoad('risk_hosts');
   });
 
   beforeEach(() => {
+    login();
     visit(HOSTS_URL);
     navigateToHostRiskDetailTab();
   });

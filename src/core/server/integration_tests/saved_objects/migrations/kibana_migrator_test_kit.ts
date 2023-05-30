@@ -87,12 +87,14 @@ export interface KibanaMigratorTestKit {
 export const startElasticsearch = async ({
   basePath,
   dataArchive,
+  timeout,
 }: {
   basePath?: string;
   dataArchive?: string;
+  timeout?: number;
 } = {}) => {
   const { startES } = createTestServers({
-    adjustTimeout: (t: number) => jest.setTimeout(t),
+    adjustTimeout: (t: number) => jest.setTimeout(t + (timeout ?? 0)),
     settings: {
       es: {
         license: 'basic',
@@ -164,9 +166,11 @@ export const getKibanaMigratorTestKit = async ({
     }
     hasRun = true;
     migrator.prepareMigrations();
-    const migrationResults = await migrator.runMigrations();
-    await loggingSystem.stop();
-    return migrationResults;
+    try {
+      return await migrator.runMigrations();
+    } finally {
+      await loggingSystem.stop();
+    }
   };
 
   const savedObjectsRepository = SavedObjectsRepository.createRepository(

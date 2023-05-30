@@ -5,23 +5,15 @@
  * 2.0.
  */
 
-import LRUCache from 'lru-cache';
 import { DedotObject, ProfilingESField } from '../../common/elasticsearch';
 import {
-  Executable,
-  FileID,
   getAddressFromStackFrameID,
   getFileIDFromStackFrameID,
-  StackFrame,
-  StackFrameID,
   StackTrace,
 } from '../../common/profiling';
 import { runLengthDecodeBase64Url } from '../../common/run_length_encoding';
 
 const BASE64_FRAME_ID_LENGTH = 32;
-
-const CACHE_MAX_ITEMS = 100000;
-const CACHE_TTL_MILLISECONDS = 1000 * 60 * 5;
 
 export type EncodedStackTrace = DedotObject<{
   // This field is a base64-encoded byte string. The string represents a
@@ -77,28 +69,4 @@ export function decodeStackTrace(input: EncodedStackTrace): StackTrace {
     FrameIDs: frameIDs,
     Types: typeIDs,
   } as StackTrace;
-}
-
-const frameLRU = new LRUCache<StackFrameID, StackFrame>({
-  max: CACHE_MAX_ITEMS,
-  maxAge: CACHE_TTL_MILLISECONDS,
-});
-
-// clearStackFrameCache clears the entire cache and returns the number of deleted items
-export function clearStackFrameCache(): number {
-  const numDeleted = frameLRU.length;
-  frameLRU.reset();
-  return numDeleted;
-}
-
-const executableLRU = new LRUCache<FileID, Executable>({
-  max: CACHE_MAX_ITEMS,
-  maxAge: CACHE_TTL_MILLISECONDS,
-});
-
-// clearExecutableCache clears the entire cache and returns the number of deleted items
-export function clearExecutableCache(): number {
-  const numDeleted = executableLRU.length;
-  executableLRU.reset();
-  return numDeleted;
 }

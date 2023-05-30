@@ -41,8 +41,10 @@ export type {
   SavedObjectsMappingProperties,
 } from './src/mapping_definition';
 export type {
+  SavedObjectMigration,
   SavedObjectMigrationMap,
   SavedObjectMigrationContext,
+  SavedObjectMigrationParams,
   SavedObjectsMigrationLogger,
   SavedObjectMigrationFn,
 } from './src/migration';
@@ -133,7 +135,8 @@ export type {
   SavedObjectModelTransformationResult,
   SavedObjectModelDataBackfillFn,
   SavedObjectsModelVersionSchemaDefinitions,
-  SavedObjectModelVersionCreateSchema,
+  SavedObjectModelVersionForwardCompatibilityFn,
+  SavedObjectModelVersionForwardCompatibilitySchema,
 } from './src/model_version';
 
 // We re-export the SavedObject types here for convenience.
