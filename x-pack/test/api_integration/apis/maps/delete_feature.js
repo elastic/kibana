@@ -5,14 +5,17 @@
  * 2.0.
  */
 
+import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
+
 export default function ({ getService }) {
   const supertest = getService('supertest');
 
   describe('doc feature deletion', () => {
     it('should delete a valid feature document', async () => {
       await supertest
-        .delete(`/api/maps/feature/999`)
+        .delete(`/internal/maps/feature/999`)
         .set('kbn-xsrf', 'kibana')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
         .send({
           index: 'drawing_data',
         })
@@ -21,8 +24,9 @@ export default function ({ getService }) {
 
     it('previously deleted document no longer exists in index', async () => {
       await supertest
-        .delete(`/api/maps/feature/999`)
+        .delete(`/internal/maps/feature/999`)
         .set('kbn-xsrf', 'kibana')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
         .send({
           index: 'drawing_data',
         })
@@ -31,8 +35,9 @@ export default function ({ getService }) {
 
     it('should fail if not a valid document', async () => {
       await supertest
-        .delete(`/api/maps/feature/998`)
+        .delete(`/internal/maps/feature/998`)
         .set('kbn-xsrf', 'kibana')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
         .send({
           index: 'drawing_data',
         })
