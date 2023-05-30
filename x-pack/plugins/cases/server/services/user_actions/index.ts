@@ -667,13 +667,16 @@ export class CaseUserActionService {
 
     result.total_other_actions = result.total - result.total_comments;
 
-    response.aggregations?.totalPersistableStateAttachments.buckets.forEach(({ key, doc_count: docCount }) => {
-      if (key.startsWith('ml')) {
-        result.total_artifacts.ml += docCount;
+    response.aggregations?.totalPersistableStateAttachments.buckets.forEach(
+      ({ key, doc_count: docCount }) => {
+        if (key.startsWith('ml')) {
+          result.total_artifacts.ml += docCount;
+        }
       }
-    });
+    );
 
-    result.total_artifacts.osQuery = response.aggregations?.totalExternalReferenceAttachments.buckets.length ?? 0;
+    result.total_artifacts.osQuery =
+      response.aggregations?.totalExternalReferenceAttachments.buckets.length ?? 0;
 
     return result;
   }
@@ -693,13 +696,13 @@ export class CaseUserActionService {
         terms: {
           field: `${CASE_USER_ACTION_SAVED_OBJECT}.attributes.payload.comment.persistableStateAttachmentTypeId`,
           size: 50,
-        }
+        },
       },
       totalExternalReferenceAttachments: {
         terms: {
           field: `${CASE_USER_ACTION_SAVED_OBJECT}.attributes.payload.comment.externalReferenceAttachmentTypeId`,
           size: 50,
-        }
+        },
       },
     };
   }

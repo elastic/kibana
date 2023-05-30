@@ -223,7 +223,7 @@ export interface ConnectorFieldsBeforePushAggsResult {
   };
 }
 
-type UserActionsAggsTotal = {
+interface UserActionsAggsTotal {
   buckets: Array<{
     key: string;
     doc_count: number;
@@ -233,8 +233,8 @@ type UserActionsAggsTotal = {
 export interface UserActionsStatsAggsResult {
   total: number;
   totals: UserActionsAggsTotal;
-  totalPersistableStateAttachments: UserActionsAggsTotal,
-  totalExternalReferenceAttachments: UserActionsAggsTotal,
+  totalPersistableStateAttachments: UserActionsAggsTotal;
+  totalExternalReferenceAttachments: UserActionsAggsTotal;
 }
 
 export interface ParticipantsAggsResult {
