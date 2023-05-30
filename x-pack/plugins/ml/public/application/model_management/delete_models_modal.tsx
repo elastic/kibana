@@ -18,6 +18,7 @@ import {
   EuiModalFooter,
   EuiModalHeader,
   EuiModalHeaderTitle,
+  EuiSpacer,
 } from '@elastic/eui';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { type WithRequired } from '../../../common/types/common';
@@ -37,6 +38,7 @@ export const DeleteModelsModal: FC<DeleteModelsModalProps> = ({ models, onClose 
 
   const [canDeleteModel, setCanDeleteModel] = useState(false);
   const [deletePipelines, setDeletePipelines] = useState<boolean>(false);
+  const [forceDelete, setForceDelete] = useState<boolean>(false);
 
   const modelIds = models.map((m) => m.model_id);
 
@@ -47,7 +49,12 @@ export const DeleteModelsModal: FC<DeleteModelsModalProps> = ({ models, onClose 
   const deleteModels = useCallback(async () => {
     try {
       await Promise.all(
-        modelIds.map((modelId) => trainedModelsApiService.deleteTrainedModel(modelId))
+        modelIds.map((modelId) =>
+          trainedModelsApiService.deleteTrainedModel(modelId, {
+            with_pipelines: deletePipelines,
+            force: forceDelete,
+          })
+        )
       );
       displaySuccessToast(
         i18n.translate('xpack.ml.trainedModels.modelsList.successfullyDeletedMessage', {
@@ -72,7 +79,7 @@ export const DeleteModelsModal: FC<DeleteModelsModalProps> = ({ models, onClose 
     }
     onClose(true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [modelIds, trainedModelsApiService]);
+  }, [modelIds, trainedModelsApiService, deletePipelines, forceDelete]);
 
   return canDeleteModel ? (
     <EuiModal
@@ -135,6 +142,25 @@ export const DeleteModelsModal: FC<DeleteModelsModalProps> = ({ models, onClose 
               })}
             </ul>
           </EuiCallOut>
+
+          <EuiSpacer size="m" />
+
+          <EuiCheckbox
+            id={'force-delete'}
+            label={
+              <FormattedMessage
+                id="xpack.ml.trainedModels.modelsList.deleteModal.forceDeleteLabel"
+                defaultMessage="Force delete?"
+                values={{
+                  pipelinesCount: modelsWithPipelines.reduce((acc, curr) => {
+                    return acc + Object.keys(curr.pipelines).length;
+                  }, 0),
+                }}
+              />
+            }
+            checked={forceDelete}
+            onChange={setForceDelete.bind(null, (prev) => !prev)}
+          />
         </EuiModalBody>
       ) : null}
 

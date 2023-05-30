@@ -11,6 +11,7 @@ import { ML_INTERNAL_BASE_PATH } from '../../common/constants/app';
 import { RouteInitialization } from '../types';
 import { wrapError } from '../client/error_wrapper';
 import {
+  deleteTrainedModelQuerySchema,
   getInferenceQuerySchema,
   inferTrainedModelBody,
   inferTrainedModelQuery,
@@ -22,7 +23,6 @@ import {
   threadingParamsSchema,
   updateDeploymentParamsSchema,
 } from './schemas/inference_schema';
-
 import { TrainedModelConfigResponse } from '../../common/types/trained_models';
 import { mlLog } from '../lib/log';
 import { forceQuerySchema } from './schemas/anomaly_detectors_schema';
@@ -303,15 +303,21 @@ export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization)
         validate: {
           request: {
             params: modelIdSchema,
+            query: deleteTrainedModelQuerySchema,
           },
         },
       },
       routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
         try {
           const { modelId } = request.params;
+          const { with_pipelines: withPipelines, force } = request.query;
           const body = await mlClient.deleteTrainedModel({
             model_id: modelId,
+            force,
           });
+          if (withPipelines) {
+            // TODO
+          }
           return response.ok({
             body,
           });
