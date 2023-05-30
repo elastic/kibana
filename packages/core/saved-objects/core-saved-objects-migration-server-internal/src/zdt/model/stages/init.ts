@@ -88,7 +88,7 @@ export const init: ModelStage<
     message: `INIT: current algo check result: ${currentAlgo}`,
   });
 
-  // incompatible (pre 8.8) v2 algo or unknown => we terminate
+  // incompatible (pre 8.8/index-split https://github.com/elastic/kibana/pull/154888) v2 algo => we terminate
   if (currentAlgo === 'v2-incompatible') {
     return {
       ...state,
@@ -97,6 +97,7 @@ export const init: ModelStage<
       reason: `Index ${currentIndex} is using an incompatible version of the v2 algorithm`,
     };
   }
+  // unknown algo => we terminate
   if (currentAlgo === 'unknown') {
     return {
       ...state,
