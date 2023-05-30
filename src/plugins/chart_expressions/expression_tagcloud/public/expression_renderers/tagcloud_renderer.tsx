@@ -52,8 +52,6 @@ export const tagcloudRenderer: (
       unmountComponentAtNode(domNode);
     });
 
-    console.log(config);
-
     const renderComplete = () => {
       const executionContext = handlers.getExecutionContext();
       const containerType = extractContainerType(executionContext);

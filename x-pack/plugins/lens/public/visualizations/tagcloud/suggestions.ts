@@ -25,6 +25,14 @@ export function suggestions({
     return [];
   }
 
+  // do not offer suggestions for tables with date split
+  const dateSplit = table.columns.find(col => {
+    return col.operation.dataType === 'date';
+  });
+  if (dateSplit) {
+    return [];
+  }
+
   const groups = table.columns.filter(
     (col) => col.operation.isBucketed && col.operation.dataType === 'string'
   );
