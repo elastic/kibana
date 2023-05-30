@@ -32,12 +32,14 @@ import {
   DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_THREAT_INTELLIGENCE_HEADER,
   DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_THREAT_INTELLIGENCE_CONTENT,
   DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_THREAT_INTELLIGENCE_VALUES,
-  DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_THREAT_INTELLIGENCE_VIEW_ALL_BUTTON,
   DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INVESTIGATION_GUIDE_BUTTON,
   DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_CORRELATIONS_HEADER,
   DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_CORRELATIONS_CONTENT,
   DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_CORRELATIONS_VALUES,
   DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_CORRELATIONS_VIEW_ALL_BUTTON,
+  DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_PREVALENCE_HEADER,
+  DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_PREVALENCE_CONTENT,
+  DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_PREVALENCE_VALUES,
 } from '../../../../screens/document_expandable_flyout';
 import {
   expandFirstAlertExpandableFlyout,
@@ -46,6 +48,8 @@ import {
   toggleOverviewTabInvestigationSection,
   toggleOverviewTabInsightsSection,
   toggleOverviewTabVisualizationsSection,
+  clickThreatIntelligenceViewAllButton,
+  clickPrevalenceViewAllButton,
 } from '../../../../tasks/document_expandable_flyout';
 import { cleanKibana } from '../../../../tasks/common';
 import { login, visit } from '../../../../tasks/login';
@@ -138,7 +142,7 @@ describe.skip(
         );
       });
 
-      it('should display investigatioin guide button', () => {
+      it('should display investigation guide button', () => {
         cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INVESTIGATION_GUIDE_BUTTON)
           .should('be.visible')
           .and('have.text', 'Investigation guide');
@@ -222,9 +226,7 @@ describe.skip(
       // TODO work on getting proper IoC data to make the threat intelligence section work here
       //  and improve when we can navigate Threat Intelligence to sub tab directly
       it.skip('should navigate to left panel, entities tab when view all fields of threat intelligence is clicked', () => {
-        cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_THREAT_INTELLIGENCE_VIEW_ALL_BUTTON)
-          .should('be.visible')
-          .click();
+        clickThreatIntelligenceViewAllButton();
         cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_ENTITIES_CONTENT).should('be.visible');
       });
 
@@ -261,10 +263,33 @@ describe.skip(
 
       // TODO work on getting proper data to display in the cases, ancestry, session and source event sections
       //  and improve when we can navigate Correlations to sub tab directly
-      it.skip('should navigate to left panel, entities tab when view all fields of threat intelligence is clicked', () => {
+      it.skip('should navigate to left panel, entities tab when view all fields of correlations is clicked', () => {
         cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_CORRELATIONS_VIEW_ALL_BUTTON)
           .should('be.visible')
           .click();
+        cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_ENTITIES_CONTENT).should('be.visible');
+      });
+
+      // TODO work on getting proper data to make the prevalence section work here
+      //  we need to generate enough data to have at least one field with prevalence
+      it.skip('should display prevalence section', () => {
+        cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_PREVALENCE_HEADER)
+          .scrollIntoView()
+          .should('be.visible')
+          .and('have.text', 'Prevalence');
+        cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_PREVALENCE_CONTENT)
+          .should('be.visible')
+          .within(() => {
+            cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_PREVALENCE_VALUES)
+              .should('be.visible')
+              .and('have.text', 'is uncommon');
+          });
+      });
+
+      // TODO work on getting proper data to make the prevalence section work here
+      //  we need to generate enough data to have at least one field with prevalence
+      it.skip('should navigate to left panel, entities tab when view all fields of prevalence is clicked', () => {
+        clickPrevalenceViewAllButton();
         cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_ENTITIES_CONTENT).should('be.visible');
       });
     });

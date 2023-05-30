@@ -3470,6 +3470,21 @@
     "misc": [
       {
         "parentPluginId": "observability",
+        "id": "def-public.alertsLocatorID",
+        "type": "string",
+        "tags": [],
+        "label": "alertsLocatorID",
+        "description": [],
+        "signature": [
+          "\"ALERTS_LOCATOR\""
+        ],
+        "path": "x-pack/plugins/observability/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
         "id": "def-public.apmServiceGroupMaxNumberOfServices",
         "type": "string",
         "tags": [],
@@ -3786,6 +3801,51 @@
           " | undefined; list: () => string[]; }"
         ],
         "path": "x-pack/plugins/observability/public/rules/create_observability_rule_type_registry.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
+        "id": "def-public.ruleDetailsLocatorID",
+        "type": "string",
+        "tags": [],
+        "label": "ruleDetailsLocatorID",
+        "description": [],
+        "signature": [
+          "\"RULE_DETAILS_LOCATOR\""
+        ],
+        "path": "x-pack/plugins/observability/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
+        "id": "def-public.rulesLocatorID",
+        "type": "string",
+        "tags": [],
+        "label": "rulesLocatorID",
+        "description": [],
+        "signature": [
+          "\"RULES_LOCATOR\""
+        ],
+        "path": "x-pack/plugins/observability/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
+        "id": "def-public.sloDetailsLocatorID",
+        "type": "string",
+        "tags": [],
+        "label": "sloDetailsLocatorID",
+        "description": [],
+        "signature": [
+          "\"SLO_DETAILS_LOCATOR\""
+        ],
+        "path": "x-pack/plugins/observability/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -7521,7 +7581,7 @@
             "section": "def-common.Duration",
             "text": "Duration"
           },
-          "; isRolling: boolean; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; }; compositeMethod: \"weightedAverage\"; sources: { id: string; revision: number; weight: number; }[]; } & { id?: string | undefined; tags?: string[] | undefined; }; }; }) => Promise<never>; } & ",
+          "; isRolling: boolean; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; }; compositeMethod: \"weightedAverage\"; sources: { id: string; revision: number; weight: number; }[]; } & { id?: string | undefined; tags?: string[] | undefined; }; }; }) => Promise<{ id: string; }>; } & ",
           {
             "pluginId": "observability",
             "scope": "server",
@@ -8589,7 +8649,7 @@
             "section": "def-common.Duration",
             "text": "Duration"
           },
-          "; isRolling: boolean; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; }; compositeMethod: \"weightedAverage\"; sources: { id: string; revision: number; weight: number; }[]; } & { id?: string | undefined; tags?: string[] | undefined; }; }; }) => Promise<never>; } & ",
+          "; isRolling: boolean; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; }; compositeMethod: \"weightedAverage\"; sources: { id: string; revision: number; weight: number; }[]; } & { id?: string | undefined; tags?: string[] | undefined; }; }; }) => Promise<{ id: string; }>; } & ",
           {
             "pluginId": "observability",
             "scope": "server",
@@ -11551,7 +11611,23 @@
         "GetResponse",
         "<unknown>>; delete: (deleteParams: { id: string; }) => Promise<",
         "WriteResponseBase",
-        ">; } | undefined>; }"
+        ">; } | undefined>; alertsLocator: ",
+        {
+          "pluginId": "share",
+          "scope": "common",
+          "docId": "kibSharePluginApi",
+          "section": "def-common.LocatorPublic",
+          "text": "LocatorPublic"
+        },
+        "<",
+        {
+          "pluginId": "observability",
+          "scope": "common",
+          "docId": "kibObservabilityPluginApi",
+          "section": "def-common.AlertsLocatorParams",
+          "text": "AlertsLocatorParams"
+        },
+        ">; }"
       ],
       "path": "x-pack/plugins/observability/server/plugin.ts",
       "deprecated": false,
@@ -11939,7 +12015,118 @@
         "initialIsOpen": false
       }
     ],
-    "interfaces": [],
+    "interfaces": [
+      {
+        "parentPluginId": "observability",
+        "id": "def-common.AlertsLocatorParams",
+        "type": "Interface",
+        "tags": [],
+        "label": "AlertsLocatorParams",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "observability",
+            "scope": "common",
+            "docId": "kibObservabilityPluginApi",
+            "section": "def-common.AlertsLocatorParams",
+            "text": "AlertsLocatorParams"
+          },
+          " extends ",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.SerializableRecord",
+            "text": "SerializableRecord"
+          }
+        ],
+        "path": "x-pack/plugins/observability/common/locators/alerts.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "observability",
+            "id": "def-common.AlertsLocatorParams.baseUrl",
+            "type": "string",
+            "tags": [],
+            "label": "baseUrl",
+            "description": [],
+            "path": "x-pack/plugins/observability/common/locators/alerts.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-common.AlertsLocatorParams.spaceId",
+            "type": "string",
+            "tags": [],
+            "label": "spaceId",
+            "description": [],
+            "path": "x-pack/plugins/observability/common/locators/alerts.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-common.AlertsLocatorParams.rangeFrom",
+            "type": "string",
+            "tags": [],
+            "label": "rangeFrom",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/observability/common/locators/alerts.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-common.AlertsLocatorParams.rangeTo",
+            "type": "string",
+            "tags": [],
+            "label": "rangeTo",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/observability/common/locators/alerts.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-common.AlertsLocatorParams.kuery",
+            "type": "string",
+            "tags": [],
+            "label": "kuery",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/observability/common/locators/alerts.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-common.AlertsLocatorParams.status",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "status",
+            "description": [],
+            "signature": [
+              "AlertStatus",
+              " | undefined"
+            ],
+            "path": "x-pack/plugins/observability/common/locators/alerts.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
     "enums": [
       {
         "parentPluginId": "observability",
@@ -11967,6 +12154,21 @@
       }
     ],
     "misc": [
+      {
+        "parentPluginId": "observability",
+        "id": "def-common.alertsLocatorID",
+        "type": "string",
+        "tags": [],
+        "label": "alertsLocatorID",
+        "description": [],
+        "signature": [
+          "\"ALERTS_LOCATOR\""
+        ],
+        "path": "x-pack/plugins/observability/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "observability",
         "id": "def-common.apmAWSLambdaPriceFactor",
