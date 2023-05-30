@@ -151,13 +151,29 @@ export const useFetchIndex = (
             includeUnmapped
           );
 
-          let fieldsWithUnmappedInfo = null;
+          const fields = dv.fields.map((field) => field.toSpec());
           if (includeUnmapped) {
             try {
-              fieldsWithUnmappedInfo = await data.dataViews.getFieldsForIndexPattern(dv, {
-                pattern: '',
-                includeUnmapped: true,
-              });
+              const fieldNameConflictDescriptionsMap = (await data.dataViews
+                .getFieldsForIndexPattern(dv, {
+                  pattern: '',
+                  includeUnmapped: true,
+                })
+                .then((fieldsToReduce) => {
+                  return fieldsToReduce.reduce(
+                    (acc, f) => ({ ...acc, [f.name]: f.conflictDescriptions }),
+                    {} as { [x: string]: Record<string, string[]> | undefined }
+                  );
+                })) as { [x: string]: Record<string, string[]> | undefined };
+
+              dv.fields.replaceAll([
+                ...fields.map((field) => ({
+                  ...field,
+                  ...(fieldNameConflictDescriptionsMap[field.name] != null
+                    ? { conflictDescriptions: fieldNameConflictDescriptionsMap[field.name] }
+                    : {}),
+                })),
+              ]);
             } catch (error) {
               addWarning(error, { title: i18n.FETCH_FIELDS_WITH_UNMAPPED_DATA_ERROR });
             }
@@ -171,11 +187,7 @@ export const useFetchIndex = (
             browserFields,
             indexes: dv.getIndexPattern().split(','),
             indexExists: dv.getIndexPattern().split(',').length > 0,
-            indexPatterns: getIndexFields(
-              dv.getIndexPattern(),
-              fieldsWithUnmappedInfo ?? dv.fields,
-              includeUnmapped
-            ),
+            indexPatterns: getIndexFields(dv.getIndexPattern(), dv.fields, includeUnmapped),
           });
         } catch (exc) {
           setState({
