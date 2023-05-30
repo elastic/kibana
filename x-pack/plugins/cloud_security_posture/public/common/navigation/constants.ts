@@ -19,6 +19,10 @@ const NAV_ITEMS_NAMES = {
   DASHBOARD: i18n.translate('xpack.csp.navigation.dashboardNavItemLabel', {
     defaultMessage: 'Cloud Security Posture',
   }),
+  VULNERABILITY_DASHBOARD: i18n.translate(
+    'xpack.csp.navigation.vulnerabilityDashboardNavItemLabel',
+    { defaultMessage: 'Cloud Native Vulnerability Management' }
+  ),
   FINDINGS: i18n.translate('xpack.csp.navigation.findingsNavItemLabel', {
     defaultMessage: 'Findings',
   }),
@@ -38,6 +42,11 @@ export const cloudPosturePages: Record<CspPage, CspPageNavigationItem> = {
     name: NAV_ITEMS_NAMES.DASHBOARD,
     path: `${CLOUD_SECURITY_POSTURE_BASE_PATH}/dashboard`,
     id: 'cloud_security_posture-dashboard',
+  },
+  vulnerability_dashboard: {
+    name: NAV_ITEMS_NAMES.VULNERABILITY_DASHBOARD,
+    path: `${CLOUD_SECURITY_POSTURE_BASE_PATH}/vulnerability_dashboard`,
+    id: 'cloud_security_posture-vulnerability_dashboard',
   },
   findings: {
     name: NAV_ITEMS_NAMES.FINDINGS,

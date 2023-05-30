@@ -61,7 +61,7 @@ const CaseUserActionBasicWithoutConnectorIdRt = rt.intersection([
   UserActionCommonAttributesRt,
 ]);
 
-const CaseUserActionDeprecatedResponseRt = rt.intersection([
+export const CaseUserActionDeprecatedResponseRt = rt.intersection([
   CaseUserActionBasicRt,
   CaseUserActionInjectedDeprecatedIdsRt,
 ]);
@@ -76,7 +76,7 @@ export const UserActionAttributesRt = rt.intersection([
 
 const UserActionRt = rt.intersection([
   UserActionAttributesRt,
-  rt.type({
+  rt.strict({
     id: rt.string,
     version: rt.string,
   }),
