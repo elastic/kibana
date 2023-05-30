@@ -19,8 +19,8 @@ export const configSchema = schema.object({
   ),
 });
 
-export type TagcloudConfig = TypeOf<typeof configSchema>;
+export type VislibConfig = TypeOf<typeof configSchema>;
 
-export interface TagcloudPublicConfig {
+export interface VislibPublicConfig {
   readOnly?: boolean;
 }

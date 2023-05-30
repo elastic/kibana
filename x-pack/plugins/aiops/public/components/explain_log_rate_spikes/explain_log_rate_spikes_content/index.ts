@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-export * from './group_stats';
-export * from './group_panel_renderers';
-export * from './group_take_action_items';
-export * from './query_builder';
+import { ExplainLogRateSpikesContentWrapper } from './explain_log_rate_spikes_content_wrapper';
+
+// required for dynamic import using React.lazy()
+// eslint-disable-next-line import/no-default-export
+export default ExplainLogRateSpikesContentWrapper;
