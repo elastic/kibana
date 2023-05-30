@@ -51,10 +51,7 @@ export const NavigationBucket: FC<Props> = ({
           <React.Fragment key={id}>
             {item.children ? (
               <Navigation.Group
-                id={item.id}
-                link={item.link}
-                title={item.title}
-                icon={item.icon}
+                {...item}
                 defaultIsCollapsed={
                   isRoot && defaultIsCollapsed !== undefined ? defaultIsCollapsed : undefined
                 }
@@ -62,7 +59,7 @@ export const NavigationBucket: FC<Props> = ({
                 {renderItems(item.children)}
               </Navigation.Group>
             ) : (
-              <Navigation.Item id={item.id} link={item.link} title={item.title} />
+              <Navigation.Item {...item} />
             )}
           </React.Fragment>
         );
