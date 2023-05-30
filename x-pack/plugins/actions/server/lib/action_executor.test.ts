@@ -1281,7 +1281,6 @@ test('writes to event log for execute and execute start when consumer and relate
 });
 
 test('writes usage data to event log for gen ai events', async () => {
-  jest.clearAllMocks();
   const executorMock = setupActionExecutorMock(GEN_AI_CONNECTOR_ID);
   const mockGenAi = {
     id: 'chatcmpl-7LztF5xsJl2z5jcNpJKvaPm4uWt8x',
