@@ -49,30 +49,6 @@ export const EmptyContainer: React.FC = ({ children }) => (
   </div>
 );
 
-export const ChartContainer: React.FC = ({ children }) => (
-  <div
-    style={{
-      width: '100%',
-      height: 150,
-    }}
-  >
-    {children}
-  </div>
-);
-
-export function NoDataState() {
-  return (
-    <EmptyContainer>
-      <EuiText color="subdued" data-test-subj="noChartData">
-        <FormattedMessage
-          id="xpack.apm.alerts.charts.noDataMessage"
-          defaultMessage="No chart data available"
-        />
-      </EuiText>
-    </EmptyContainer>
-  );
-}
-
 export function LoadingState() {
   return (
     <EmptyContainer>
