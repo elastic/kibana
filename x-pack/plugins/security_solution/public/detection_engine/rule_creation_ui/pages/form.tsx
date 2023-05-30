@@ -64,10 +64,7 @@ export const useRuleForms = ({
 
   // ABOUT STEP FORM
   const typeDependentAboutRuleSchema = useMemo(
-    () =>
-      isThreatMatchRule(defineStepData.ruleType)
-        ? threatMatchAboutSchema
-        : aboutRuleSchema,
+    () => (isThreatMatchRule(defineStepData.ruleType) ? threatMatchAboutSchema : aboutRuleSchema),
     [defineStepData.ruleType]
   );
   const { form: aboutStepForm } = useForm<AboutStepRule>({
