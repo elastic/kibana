@@ -62,6 +62,18 @@ exports[`SavedObjectSaveModal should render matching snapshot 1`] = `
             values={Object {}}
           />
         }
+        labelAppend={
+          <EuiText
+            color="subdued"
+            size="xs"
+          >
+            <FormattedMessage
+              defaultMessage="Optional"
+              id="savedObjects.saveModal.optional"
+              values={Object {}}
+            />
+          </EuiText>
+        }
         labelType="label"
       >
         <EuiTextArea
@@ -176,6 +188,18 @@ exports[`SavedObjectSaveModal should render matching snapshot when custom isVali
             values={Object {}}
           />
         }
+        labelAppend={
+          <EuiText
+            color="subdued"
+            size="xs"
+          >
+            <FormattedMessage
+              defaultMessage="Optional"
+              id="savedObjects.saveModal.optional"
+              values={Object {}}
+            />
+          </EuiText>
+        }
         labelType="label"
       >
         <EuiTextArea
@@ -289,6 +313,18 @@ exports[`SavedObjectSaveModal should render matching snapshot when custom isVali
             id="savedObjects.saveModal.descriptionLabel"
             values={Object {}}
           />
+        }
+        labelAppend={
+          <EuiText
+            color="subdued"
+            size="xs"
+          >
+            <FormattedMessage
+              defaultMessage="Optional"
+              id="savedObjects.saveModal.optional"
+              values={Object {}}
+            />
+          </EuiText>
         }
         labelType="label"
       >
@@ -407,6 +443,18 @@ exports[`SavedObjectSaveModal should render matching snapshot when given options
                 id="savedObjects.saveModal.descriptionLabel"
                 values={Object {}}
               />
+            }
+            labelAppend={
+              <EuiText
+                color="subdued"
+                size="xs"
+              >
+                <FormattedMessage
+                  defaultMessage="Optional"
+                  id="savedObjects.saveModal.optional"
+                  values={Object {}}
+                />
+              </EuiText>
             }
             labelType="label"
           >
