@@ -24,15 +24,13 @@ import type { ExtraAppendLayerArg } from './visualization';
 
 interface AddLayerButtonProps {
   supportedLayers: VisualizationLayerDescription[];
-  addLayer: AddLayerFunction;
-  onAddLayerFromAnnotationGroup: (arg: ExtraAppendLayerArg) => void;
+  addLayer: AddLayerFunction<ExtraAppendLayerArg>;
   eventAnnotationService: EventAnnotationServiceType;
 }
 
 export function AddLayerButton({
   supportedLayers,
   addLayer,
-  onAddLayerFromAnnotationGroup,
   eventAnnotationService,
 }: AddLayerButtonProps) {
   const [showLayersChoice, toggleLayersChoice] = useState(false);
@@ -164,7 +162,9 @@ export function AddLayerButton({
           isLoadLibraryVisible={isLoadLibraryVisible}
           setLoadLibraryFlyoutVisible={setLoadLibraryFlyoutVisible}
           eventAnnotationService={eventAnnotationService}
-          addLayer={onAddLayerFromAnnotationGroup}
+          addLayer={(extraArg) => {
+            addLayer(LayerTypes.ANNOTATIONS, extraArg);
+          }}
         />
       )}
     </>

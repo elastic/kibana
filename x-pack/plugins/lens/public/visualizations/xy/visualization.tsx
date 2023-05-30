@@ -723,17 +723,19 @@ export const getXyVisualization = ({
       <AddLayerButton
         {...props}
         eventAnnotationService={eventAnnotationService}
-        onAddLayerFromAnnotationGroup={async (loadedGroupInfo) => {
-          await props.ensureIndexPattern(
-            loadedGroupInfo.dataViewSpec ?? loadedGroupInfo.indexPatternId
-          );
+        addLayer={async (type, loadedGroupInfo) => {
+          if (type === LayerTypes.ANNOTATIONS && loadedGroupInfo) {
+            await props.ensureIndexPattern(
+              loadedGroupInfo.dataViewSpec ?? loadedGroupInfo.indexPatternId
+            );
 
-          props.registerLibraryAnnotationGroup({
-            id: loadedGroupInfo.annotationGroupId,
-            group: loadedGroupInfo,
-          });
+            props.registerLibraryAnnotationGroup({
+              id: loadedGroupInfo.annotationGroupId,
+              group: loadedGroupInfo,
+            });
+          }
 
-          props.addLayer(LayerTypes.ANNOTATIONS, loadedGroupInfo, true);
+          props.addLayer(type, loadedGroupInfo, !!loadedGroupInfo);
         }}
       />
     );

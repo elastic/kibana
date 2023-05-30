@@ -32,5 +32,6 @@ export interface EventAnnotationServiceType {
       fullName: string;
       savedObject: SavedObjectCommon<unknown>;
     }) => void;
+    onCreateNew: () => void;
   }) => JSX.Element;
 }

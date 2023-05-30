@@ -21,7 +21,7 @@ export function LoadAnnotationLibraryFlyout({
   isLoadLibraryVisible: boolean;
   setLoadLibraryFlyoutVisible: (visible: boolean) => void;
   eventAnnotationService: EventAnnotationServiceType;
-  addLayer: (argument: ExtraAppendLayerArg) => void;
+  addLayer: (argument?: ExtraAppendLayerArg) => void;
 }) {
   const {
     renderEventAnnotationGroupSavedObjectFinder: EventAnnotationGroupSavedObjectFinder,
@@ -65,16 +65,18 @@ export function LoadAnnotationLibraryFlyout({
         return true;
       }}
     >
-      <div className="lnsIndexPatternDimensionEditor--padded">
-        <EventAnnotationGroupSavedObjectFinder
-          onChoose={({ id }) => {
-            loadAnnotationGroup(id).then((loadedGroup) => {
-              addLayer({ ...loadedGroup, annotationGroupId: id });
-              setLoadLibraryFlyoutVisible(false);
-            });
-          }}
-        />
-      </div>
+      <EventAnnotationGroupSavedObjectFinder
+        onChoose={({ id }) => {
+          loadAnnotationGroup(id).then((loadedGroup) => {
+            addLayer({ ...loadedGroup, annotationGroupId: id });
+            setLoadLibraryFlyoutVisible(false);
+          });
+        }}
+        onCreateNew={() => {
+          addLayer();
+          setLoadLibraryFlyoutVisible(false);
+        }}
+      />
     </FlyoutContainer>
   );
 }

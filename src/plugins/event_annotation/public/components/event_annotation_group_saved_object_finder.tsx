@@ -14,7 +14,15 @@ import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import type { SavedObjectCommon } from '@kbn/saved-objects-finder-plugin/common';
 import { SavedObjectFinder } from '@kbn/saved-objects-finder-plugin/public';
 import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
-import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiEmptyPrompt,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLoadingSpinner,
+  EuiText,
+} from '@elastic/eui';
+import { css } from '@emotion/react';
 import { EVENT_ANNOTATION_GROUP_TYPE } from '../../common';
 
 export const EventAnnotationGroupSavedObjectFinder = ({
@@ -24,6 +32,7 @@ export const EventAnnotationGroupSavedObjectFinder = ({
   fixedPageSize = 10,
   checkHasAnnotationGroups,
   onChoose,
+  onCreateNew,
 }: {
   uiSettings: IUiSettingsClient;
   http: CoreStart['http'];
@@ -36,6 +45,7 @@ export const EventAnnotationGroupSavedObjectFinder = ({
     fullName: string;
     savedObject: SavedObjectCommon<unknown>;
   }) => void;
+  onCreateNew: () => void;
 }) => {
   const [hasAnnotationGroups, setHasAnnotationGroups] = useState<boolean | undefined>();
 
@@ -50,14 +60,43 @@ export const EventAnnotationGroupSavedObjectFinder = ({
       </EuiFlexItem>
     </EuiFlexGroup>
   ) : hasAnnotationGroups === false ? (
-    <EuiEmptyPrompt
-      title={
-        <FormattedMessage
-          id="eventAnnotation.eventAnnotationGroup.savedObjectFinder.emptyPrompt"
-          defaultMessage="No library annotation groups found."
-        />
-      }
-    />
+    <EuiFlexGroup
+      css={css`
+        height: 100%;
+      `}
+      direction="column"
+      justifyContent="center"
+    >
+      <EuiEmptyPrompt
+        titleSize="xs"
+        title={
+          <h2>
+            <FormattedMessage
+              id="eventAnnotation.eventAnnotationGroup.savedObjectFinder.emptyPromptTitle"
+              defaultMessage="Start by adding an annotation layer"
+            />
+          </h2>
+        }
+        body={
+          <EuiText size="s">
+            <p>
+              <FormattedMessage
+                id="eventAnnotation.eventAnnotationGroup.savedObjectFinder.emptyPromptDescription"
+                defaultMessage="There are currently no annotations available to select from the library. Create a new layer to add annotations."
+              />
+            </p>
+          </EuiText>
+        }
+        actions={
+          <EuiButton onClick={() => onCreateNew()} size="s">
+            <FormattedMessage
+              id="eventAnnotation.eventAnnotationGroup.savedObjectFinder.emptyCTA"
+              defaultMessage="Create annotation layer"
+            />
+          </EuiButton>
+        }
+      />
+    </EuiFlexGroup>
   ) : (
     <SavedObjectFinder
       key="searchSavedObjectFinder"
