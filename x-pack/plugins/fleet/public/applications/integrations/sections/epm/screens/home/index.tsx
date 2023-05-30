@@ -18,7 +18,10 @@ import { hasDeferredInstallations } from '../../../../../../services/has_deferre
 import { getPackageReleaseLabel } from '../../../../../../../common/services';
 
 import { installationStatuses } from '../../../../../../../common/constants';
-import type { PackageSpecIcon } from '../../../../../../../common/types';
+import type {
+  PackageSpecIcon,
+  IntegrationCardReleaseLabel,
+} from '../../../../../../../common/types';
 
 import type { DynamicPage, DynamicPagePathValues, StaticPage } from '../../../../constants';
 import { INTEGRATIONS_ROUTING_PATHS, INTEGRATIONS_SEARCH_QUERYPARAM } from '../../../../constants';
@@ -39,7 +42,6 @@ export interface CategoryParams {
   subcategory?: string;
 }
 
-export type IntegrationCardReleaseLabel = 'beta' | 'preview' | 'ga' | 'rc';
 export interface IntegrationCardItem {
   url: string;
   release?: IntegrationCardReleaseLabel;
@@ -99,8 +101,8 @@ export const mapToCard = ({
       : item.uiExternalLink || getAbsolutePath(item.uiInternalPath);
   } else {
     let urlVersion = item.version;
-    if ('savedObject' in item) {
-      urlVersion = item.savedObject.attributes.version || item.version;
+    if (item?.attributes?.version) {
+      urlVersion = item.attributes.version || item.version;
       isUnverified = isPackageUnverified(item, packageVerificationKeyId);
       isUpdateAvailable = isPackageUpdatable(item);
 
@@ -148,7 +150,8 @@ export const EPMHomePage: React.FC = () => {
   );
 
   const unverifiedPackageCount = installedPackages.filter(
-    (pkg) => 'savedObject' in pkg && pkg.savedObject.attributes.verification_status === 'unverified'
+    (pkg) =>
+      pkg?.attributes?.verification_status && pkg.attributes.verification_status === 'unverified'
   ).length;
 
   const upgradeablePackageCount = installedPackages.filter(isPackageUpdatable).length;

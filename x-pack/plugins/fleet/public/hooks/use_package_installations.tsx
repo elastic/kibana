@@ -43,8 +43,7 @@ export const usePackageInstallationsQuery = () => {
   const updatablePackages = useMemo(
     () =>
       allInstalledPackages.filter(
-        (item) =>
-          'savedObject' in item && semverLt(item.savedObject.attributes.version, item.version)
+        (item) => item?.attributes?.version && semverLt(item.attributes.version, item.version)
       ),
     [allInstalledPackages]
   );
@@ -56,16 +55,15 @@ export const usePackageInstallationsQuery = () => {
           if (!pkgPolicy.package) return false;
           const { name, version } = pkgPolicy.package;
           const installedPackage = allInstalledPackages.find(
-            (installedPkg) =>
-              'savedObject' in installedPkg && installedPkg.savedObject.attributes.name === name
+            (installedPkg) => installedPkg?.attributes?.name === name
           );
           if (
             installedPackage &&
-            'savedObject' in installedPackage &&
-            semverLt(version, installedPackage.savedObject.attributes.version)
+            installedPackage?.attributes?.version &&
+            semverLt(version, installedPackage.attributes.version)
           ) {
             const packageData = result.get(name) ?? {
-              currentVersion: installedPackage.savedObject.attributes.version,
+              currentVersion: installedPackage.attributes.version,
               policiesToUpgrade: [],
             };
             packageData.policiesToUpgrade.push({

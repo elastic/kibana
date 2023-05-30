@@ -6,9 +6,6 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-// // Follow pattern from https://github.com/elastic/kibana/pull/52447
-// // TODO: Update when https://github.com/elastic/kibana/issues/53021 is closed
-import type { SavedObject, SavedObjectAttributes } from '@kbn/core/public';
 
 import type {
   ASSETS_SAVED_OBJECT_TYPE,
@@ -429,6 +426,9 @@ export interface EpmPackageAdditions {
   notice?: string;
   licensePath?: string;
   keepPoliciesUpToDate?: boolean;
+  savedObject?: {
+    attributes?: InstallAttributes;
+  };
 }
 
 type Merge<FirstType, SecondType> = Omit<FirstType, Extract<keyof FirstType, keyof SecondType>> &
@@ -437,13 +437,16 @@ type Merge<FirstType, SecondType> = Omit<FirstType, Extract<keyof FirstType, key
 // Managers public HTTP response types
 export type PackageList = PackageListItem[];
 export type PackageListItem = Installable<RegistrySearchResult> & {
-  integration?: string;
   id: string;
+  integration?: string;
+  attributes?: InstallAttributes;
 };
 export type PackagesGroupedByStatus = Record<ValueOf<InstallationStatus>, PackageList>;
 export type PackageInfo =
   | Installable<Merge<RegistryPackage, EpmPackageAdditions>>
   | Installable<Merge<ArchivePackage, EpmPackageAdditions>>;
+
+export type IntegrationCardReleaseLabel = 'beta' | 'preview' | 'ga' | 'rc';
 
 export type PackageVerificationStatus = 'verified' | 'unverified' | 'unknown';
 
@@ -459,7 +462,7 @@ export interface ExperimentalDataStreamFeature {
   features: Partial<Record<ExperimentalIndexingFeature, boolean>>;
 }
 
-export interface Installation extends SavedObjectAttributes {
+export interface Installation {
   installed_kibana: KibanaAssetReference[];
   installed_es: EsAssetReference[];
   package_assets?: PackageAssetReference[];
@@ -481,6 +484,7 @@ export interface Installation extends SavedObjectAttributes {
     features: Partial<Record<ExperimentalIndexingFeature, boolean>>;
   }>;
 }
+export type InstallAttributes = Installation;
 
 export interface PackageUsageStats {
   agent_policy_count: number;
@@ -499,12 +503,10 @@ export type InstallStatusExcluded<T = {}> = T & {
 
 export type InstalledRegistry<T = {}> = T & {
   status: InstallationStatus['Installed'];
-  savedObject: SavedObject<Installation>;
 };
 
 export type Installing<T = {}> = T & {
   status: InstallationStatus['Installing'];
-  savedObject: SavedObject<Installation>;
 };
 
 export type NotInstalled<T = {}> = T & {

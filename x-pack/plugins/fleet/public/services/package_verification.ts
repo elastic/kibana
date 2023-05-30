@@ -7,7 +7,7 @@
 
 import type { FleetErrorResponse } from '../../common';
 
-import type { PackageInfo, PackageListItem } from '../types';
+import type { PackageInfo, PackageListItem, InstallAttributes } from '../types';
 
 import type { RequestError } from '../hooks';
 
@@ -17,10 +17,12 @@ export function isPackageUnverified(
   pkg: PackageInfo | PackageListItem,
   packageVerificationKeyId?: string
 ) {
-  if (!('savedObject' in pkg)) return false;
+  // @ts-ignore-next-line
+  const packageAttributes: InstallAttributes = pkg?.savedObject?.attributes || pkg?.attributes;
+  if (!packageAttributes) return false;
 
   const { verification_status: verificationStatus, verification_key_id: verificationKeyId } =
-    pkg.savedObject.attributes;
+    packageAttributes;
 
   const { packageVerification: isPackageVerificationEnabled } = ExperimentalFeaturesService.get();
   const isKeyOutdated = !!verificationKeyId && verificationKeyId !== packageVerificationKeyId;

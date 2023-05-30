@@ -134,6 +134,7 @@ export type {
   PostRetrieveAgentsByActionsResponse,
   GetBulkAssetsRequest,
   GetBulkAssetsResponse,
+  InstallAttributes,
 } from '../../common/types';
 export {
   entries,
