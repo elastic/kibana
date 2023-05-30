@@ -7,7 +7,6 @@
 
 import {
   IUiSettingsClient,
-  SavedObjectsClientContract,
   HttpSetup,
   CoreStart,
 } from '@kbn/core/public';
@@ -189,7 +188,6 @@ export interface ParamEditorProps<
   indexPattern: IndexPattern;
   uiSettings: IUiSettingsClient;
   storage: IStorageWrapper;
-  savedObjectsClient: SavedObjectsClientContract;
   http: HttpSetup;
   dateRange: DateRange;
   data: DataPublicPluginStart;
