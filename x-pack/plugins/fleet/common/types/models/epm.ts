@@ -416,10 +416,26 @@ export interface RegistryVarsEntry {
     };
   };
 }
+
+// Saved object type - this should be removed
+// TODO: add Ticket number
+
 export interface InstallSavedObject {
   type?: string;
   id?: string;
   attributes?: Installation;
+  references?: SOReference[];
+  created_at?: string;
+  updated_at?: string;
+  version?: string;
+  coreMigrationVersion?: string;
+  namespaces?: string[];
+}
+
+interface SOReference {
+  name: string;
+  type: string;
+  id: string;
 }
 
 // some properties are optional in Registry responses but required in EPM

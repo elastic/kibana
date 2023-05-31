@@ -33,6 +33,7 @@ const createPackage = ({
   savedObject: {
     id: '1234',
     type: 'epm-package',
+    references: [],
     attributes: {
       installed_kibana: [],
       installed_es: [],
