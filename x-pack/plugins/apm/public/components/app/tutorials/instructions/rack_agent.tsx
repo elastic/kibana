@@ -111,7 +111,7 @@ export const createRackAgentInstructions = (
             </>
           )}
           <AgentConfigInstructions
-            variantId={INSTRUCTION_VARIANT.NODE}
+            variantId={INSTRUCTION_VARIANT.RACK}
             apmServerUrl={apmServerUrl}
             apiKey={apiKeyDetails?.apiKey}
             createApiKey={apiKeyDetails?.createAgentKey}

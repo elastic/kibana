@@ -67,7 +67,7 @@ APM services are created programmatically based on the `SERVICE_NAME`.',
             </>
           )}
           <AgentConfigInstructions
-            variantId={INSTRUCTION_VARIANT.NODE}
+            variantId={INSTRUCTION_VARIANT.DJANGO}
             apmServerUrl={apmServerUrl}
             apiKey={apiKeyDetails?.apiKey}
             createApiKey={apiKeyDetails?.createAgentKey}

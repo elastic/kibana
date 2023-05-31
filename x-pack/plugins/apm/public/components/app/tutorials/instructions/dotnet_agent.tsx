@@ -119,7 +119,7 @@ export const createDotNetAgentInstructions = (
             </>
           )}
           <AgentConfigInstructions
-            variantId={INSTRUCTION_VARIANT.NODE}
+            variantId={INSTRUCTION_VARIANT.DOTNET}
             apmServerUrl={apmServerUrl}
             apiKey={apiKeyDetails?.apiKey}
             createApiKey={apiKeyDetails?.createAgentKey}

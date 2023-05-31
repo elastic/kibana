@@ -94,7 +94,7 @@ export const createPhpAgentInstructions = (
             </>
           )}
           <AgentConfigInstructions
-            variantId={INSTRUCTION_VARIANT.NODE}
+            variantId={INSTRUCTION_VARIANT.PHP}
             apmServerUrl={apmServerUrl}
             apiKey={apiKeyDetails?.apiKey}
             createApiKey={apiKeyDetails?.createAgentKey}

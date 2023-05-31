@@ -81,7 +81,7 @@ file name, or the `ELASTIC_APM_SERVICE_NAME` environment variable.',
           )}
 
           <AgentConfigInstructions
-            variantId={INSTRUCTION_VARIANT.NODE}
+            variantId={INSTRUCTION_VARIANT.GO}
             apmServerUrl={apmServerUrl}
             apiKey={apiKeyDetails?.apiKey}
             createApiKey={apiKeyDetails?.createAgentKey}
