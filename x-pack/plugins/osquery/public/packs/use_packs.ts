@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import type { SavedObjectsFindResponse } from '@kbn/core/public';
 import { useQuery } from '@tanstack/react-query';
 
 import { useKibana } from '../common/lib/kibana';
 import { PACKS_ID } from './constants';
 import type { PackSavedObject } from './types';
 
-export type UsePacksResponse = Omit<SavedObjectsFindResponse, 'savedObjects'> & {
+export interface UsePacksResponse {
+  total: number;
   data: PackSavedObject[];
-};
+}
 
 export const usePacks = ({
   isLive = false,

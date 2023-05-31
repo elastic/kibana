@@ -42,6 +42,7 @@ describe('Inspect Explore pages', () => {
      * Group all tests of a page into one "it" call to improve speed
      */
     it(`inspect ${pageName} page`, () => {
+      login();
       visit(url, {
         onLoad: () => {
           waitForWelcomePanelToBeLoaded();

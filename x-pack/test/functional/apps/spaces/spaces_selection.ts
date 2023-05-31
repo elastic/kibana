@@ -59,7 +59,8 @@ export default function spaceSelectorFunctionalTests({
       });
     });
 
-    describe('Space Navigation Menu', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/157760
+    describe.skip('Space Navigation Menu', () => {
       before(async () => {
         await PageObjects.security.forceLogout();
         await PageObjects.security.login(undefined, undefined, {
