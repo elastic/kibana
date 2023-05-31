@@ -522,10 +522,12 @@ export type InstallStatusExcluded<T = {}> = T & {
 
 export type InstalledRegistry<T = {}> = T & {
   status: InstallationStatus['Installed'];
+  savedObject?: InstallSavedObject;
 };
 
 export type Installing<T = {}> = T & {
   status: InstallationStatus['Installing'];
+  savedObject?: InstallSavedObject;
 };
 
 export type NotInstalled<T = {}> = T & {

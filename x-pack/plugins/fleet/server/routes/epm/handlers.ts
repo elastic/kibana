@@ -10,10 +10,7 @@ import path from 'path';
 import type { TypeOf } from '@kbn/config-schema';
 import mime from 'mime-types';
 import semverValid from 'semver/functions/valid';
-import { SavedObjectsUtils } from '@kbn/core/server';
 import type { ResponseHeaders, KnownHeaders, HttpResponseOptions } from '@kbn/core/server';
-
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
 
 import { HTTPAuthorizationHeader } from '../../../common/http_authorization_header';
 import { generateTransformSecondaryAuthHeaders } from '../../services/api_keys/transform_api_keys';
@@ -313,14 +310,10 @@ export const getBulkAssetsHandler: FleetRequestHandler<
     const allowedAssetTypesLookup = new Set<string>(allowedAssetTypes);
 
     const savedObjectsClient = (await context.fleet).internalSoClient;
-    const { objects, options } = request.body;
-    const { spaceId } = options;
-    const namespace = SavedObjectsUtils.namespaceStringToId(spaceId || DEFAULT_SPACE_ID);
+    const { objects } = request.body;
 
     const { resolved_objects: resolvedObjects } =
-      await savedObjectsClient.bulkResolve<SimpleSOAssetAttributes>(objects, {
-        namespace,
-      });
+      await savedObjectsClient.bulkResolve<SimpleSOAssetAttributes>(objects);
     const res: SimpleSOAssetType[] = resolvedObjects
       .map(({ saved_object: savedObject }) => savedObject)
       .filter(
