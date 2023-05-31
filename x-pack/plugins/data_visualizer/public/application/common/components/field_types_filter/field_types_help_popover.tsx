@@ -22,7 +22,7 @@ import React, { FC, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FieldIcon } from '@kbn/react-field';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { getFieldTypeDescription } from '@kbn/unified-field-list-plugin/public';
+import { getFieldTypeDescription } from '@kbn/unified-field-list';
 import { useDataVisualizerKibana } from '../../../kibana_context';
 
 interface FieldTypeTableItem {

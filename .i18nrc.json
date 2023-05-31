@@ -113,7 +113,7 @@
     "visualizations": "src/plugins/visualizations",
     "visualizationUiComponents": "src/plugins/visualization_ui_components",
     "unifiedSearch": "src/plugins/unified_search",
-    "unifiedFieldList": "src/plugins/unified_field_list",
+    "unifiedFieldList": "packages/kbn-unified-field-list",
     "unifiedHistogram": "src/plugins/unified_histogram"
   },
   "translations": []

@@ -20,7 +20,7 @@ import {
   FieldsGroupNames,
   GroupedFieldsParams,
   useGroupedFields,
-} from '@kbn/unified-field-list-plugin/public';
+} from '@kbn/unified-field-list';
 import { VIEW_MODE } from '../../../../../common/constants';
 import { useAppStateSelector } from '../../services/discover_app_state_container';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';

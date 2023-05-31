@@ -14,7 +14,7 @@ import {
   FieldPopoverHeader,
   FieldStatsServices,
   FieldStatsProps,
-} from '@kbn/unified-field-list-plugin/public';
+} from '@kbn/unified-field-list';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { TimeRange as TimeRangeMs } from '@kbn/ml-date-picker';
 import { useEuiTheme } from '../../hooks/use_eui_theme';

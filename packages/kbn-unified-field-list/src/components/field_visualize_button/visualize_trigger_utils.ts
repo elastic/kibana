@@ -15,7 +15,7 @@ import {
 } from '@kbn/ui-actions-plugin/public';
 import type { AggregateQuery } from '@kbn/es-query';
 import type { DataViewField, DataView } from '@kbn/data-views-plugin/public';
-import { KBN_FIELD_TYPES } from '@kbn/data-plugin/public';
+import { KBN_FIELD_TYPES } from '@kbn/data-plugin/common';
 
 export function getTriggerConstant(type: string) {
   return type === KBN_FIELD_TYPES.GEO_POINT || type === KBN_FIELD_TYPES.GEO_SHAPE

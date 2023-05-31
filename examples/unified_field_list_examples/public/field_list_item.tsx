@@ -28,7 +28,7 @@ import {
   hasQuerySubscriberData,
   RenderFieldItemParams,
   useQuerySubscriber,
-} from '@kbn/unified-field-list-plugin/public';
+} from '@kbn/unified-field-list';
 import { generateFilters } from '@kbn/data-plugin/public';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import type { AppPluginStartDependencies } from './types';

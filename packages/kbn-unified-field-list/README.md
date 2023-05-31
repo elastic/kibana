@@ -1,6 +1,6 @@
-# unifiedFieldList
+# @kbn/unified-field-list
 
-This Kibana plugin contains components and services for field list UI (as in fields sidebar on Discover and Lens pages).
+This Kibana package contains components and services for field list UI (as in fields sidebar on Discover and Lens pages).
 
 ---
 

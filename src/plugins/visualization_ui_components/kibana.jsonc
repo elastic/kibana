@@ -8,7 +8,6 @@
     "browser": true,
     "requiredBundles": [
       "unifiedSearch",
-      "unifiedFieldList"
     ]
   }
 }

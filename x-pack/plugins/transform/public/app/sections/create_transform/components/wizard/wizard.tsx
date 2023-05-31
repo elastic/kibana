@@ -19,7 +19,7 @@ import { UrlStateProvider } from '@kbn/ml-url-state';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import { toMountPoint, wrapWithTheme } from '@kbn/kibana-react-plugin/public';
 
-import { FieldStatsServices } from '@kbn/unified-field-list-plugin/public';
+import { FieldStatsServices } from '@kbn/unified-field-list';
 import type { TransformConfigUnion } from '../../../../../../common/types/transform';
 
 import { getCreateTransformRequestBody } from '../../../../common';

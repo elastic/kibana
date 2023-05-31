@@ -12,7 +12,7 @@ import {
   FieldStatsProps,
   useQuerySubscriber,
   hasQuerySubscriberData,
-} from '@kbn/unified-field-list-plugin/public';
+} from '@kbn/unified-field-list';
 import type { DataViewField, DataView } from '@kbn/data-views-plugin/public';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 
