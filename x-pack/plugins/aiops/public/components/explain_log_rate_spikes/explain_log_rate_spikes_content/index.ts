@@ -5,4 +5,8 @@
  * 2.0.
  */
 
-export * from '../../../test/common/services';
+import { ExplainLogRateSpikesContentWrapper } from './explain_log_rate_spikes_content_wrapper';
+
+// required for dynamic import using React.lazy()
+// eslint-disable-next-line import/no-default-export
+export default ExplainLogRateSpikesContentWrapper;
