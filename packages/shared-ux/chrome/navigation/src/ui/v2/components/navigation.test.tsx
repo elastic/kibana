@@ -332,7 +332,7 @@ describe('<Navigation />', () => {
                     id: 'item1',
                     path: ['root', 'group1', 'item1'],
                     title: 'Title from deeplink',
-                    itemRender: expect.any(Function),
+                    renderItem: expect.any(Function),
                     deepLink: {
                       id: 'item1',
                       title: 'Title from deeplink',
@@ -345,7 +345,7 @@ describe('<Navigation />', () => {
                     id: 'item2',
                     path: ['root', 'group1', 'item2'],
                     title: 'Children prop',
-                    itemRender: expect.any(Function),
+                    renderItem: expect.any(Function),
                   },
                 ],
               },

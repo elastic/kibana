@@ -8,7 +8,7 @@
 
 import React, { createContext, useCallback, useMemo, useContext } from 'react';
 
-import { useInitNavNode } from '../use_init_navnode';
+import { useInitNavNode } from '../hooks';
 import type { NodeProps, RegisterFunction } from '../types';
 import { NavigationSectionUI } from './navigation_section_ui';
 import { useNavigation } from './navigation';

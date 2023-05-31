@@ -37,7 +37,7 @@ const navigationNodeToEuiItem = (
           }
         : undefined,
     href,
-    renderItem: item.itemRender,
+    renderItem: item.renderItem,
     items: item.children?.map((_item) =>
       navigationNodeToEuiItem(_item, { navigateToUrl, basePath })
     ),

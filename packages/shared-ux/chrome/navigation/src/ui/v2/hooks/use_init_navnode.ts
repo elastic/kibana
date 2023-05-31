@@ -10,14 +10,14 @@ import { ChromeNavLink, ChromeProjectNavigationNode } from '@kbn/core-chrome-bro
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 
-import { useNavigation as useNavigationServices } from '../../services';
+import { useNavigation as useNavigationServices } from '../../../services';
 import {
   ChromeProjectNavigationNodeEnhanced,
   NodeProps,
   NodePropsEnhanced,
   RegisterFunction,
   UnRegisterFunction,
-} from './types';
+} from '../types';
 import { useRegisterTreeNode } from './use_register_tree_node';
 
 function getIdFromNavigationNode({ id: _id, link, title }: NodeProps): string {

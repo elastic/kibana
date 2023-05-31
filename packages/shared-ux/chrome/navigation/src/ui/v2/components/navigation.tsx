@@ -44,12 +44,18 @@ const NavigationContext = createContext<Context>({
 
 interface Props {
   children: ReactNode;
+  /**
+   * Href to the home page
+   */
   homeRef: string;
+  /**
+   * Flag to indicate if the Navigation should not be styled with EUI components.
+   * If set to true, the children will be rendered as is.
+   */
   unstyled?: boolean;
-  onRootItemRemove?: (id: string) => void;
 }
 
-export function Navigation({ children, homeRef, onRootItemRemove, unstyled = false }: Props) {
+export function Navigation({ children, homeRef, unstyled = false }: Props) {
   const { onProjectNavigationChange } = useNavigationServices();
 
   // We keep a reference of the order of the children that register themselves when mounting.
@@ -63,20 +69,13 @@ export function Navigation({ children, homeRef, onRootItemRemove, unstyled = fal
   >({});
   const [footerChildren, setFooterChildren] = useState<ReactNode>(null);
 
-  const unregister: UnRegisterFunction = useCallback(
-    (id: string) => {
-      if (onRootItemRemove) {
-        onRootItemRemove(id);
-      }
-
-      setNavigationItems((prevItems) => {
-        const updatedItems = { ...prevItems };
-        delete updatedItems[id];
-        return updatedItems;
-      });
-    },
-    [onRootItemRemove]
-  );
+  const unregister: UnRegisterFunction = useCallback((id: string) => {
+    setNavigationItems((prevItems) => {
+      const updatedItems = { ...prevItems };
+      delete updatedItems[id];
+      return updatedItems;
+    });
+  }, []);
 
   const register = useCallback(
     (navNode: ChromeProjectNavigationNode) => {

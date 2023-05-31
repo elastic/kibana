@@ -36,13 +36,13 @@ export interface NodeDefinition<T extends string = string, C extends string = T>
 /**
  * @public
  *
- * A navigation node definition with its unique id, title, path in the tree and optional.
+ * A navigation node definition with its unique id, title, path in the tree and optional deep link.
  * Those are the props that can be passed to the Navigation.Group and Navigation.Item components.
  */
 export interface NodeProps extends Omit<NodeDefinition, 'children'> {
   /**
    * Children of the node. For Navigation.Item (only) it allows a function to be set.
-   * This function will receive the
+   * This function will receive the ChromeProjectNavigationNode object
    */
   children?: ((navNode: ChromeProjectNavigationNode) => ReactNode) | ReactNode;
 }
@@ -57,7 +57,7 @@ export interface NodePropsEnhanced extends NodeProps {
    * This function correspond to the same "itemRender" function that can be passed to
    * the EuiSideNavItemType (see navigation_section_ui.tsx)
    */
-  itemRender?: () => ReactElement;
+  renderItem?: () => ReactElement;
 }
 
 export interface ChromeProjectNavigationNodeEnhanced extends ChromeProjectNavigationNode {
@@ -65,7 +65,7 @@ export interface ChromeProjectNavigationNodeEnhanced extends ChromeProjectNaviga
    * This function correspond to the same "itemRender" function that can be passed to
    * the EuiSideNavItemType (see navigation_section_ui.tsx)
    */
-  itemRender?: () => ReactElement;
+  renderItem?: () => ReactElement;
 }
 
 /** The preset that can be pass to the NavigationBucket component */

@@ -9,7 +9,7 @@
 import React, { Fragment, ReactElement, ReactNode, useEffect } from 'react';
 
 import type { ChromeProjectNavigationNodeEnhanced, NodeProps } from '../types';
-import { useInitNavNode } from '../use_init_navnode';
+import { useInitNavNode } from '../hooks';
 import { useNavigation } from './navigation';
 
 export interface Props extends NodeProps {
@@ -28,14 +28,14 @@ function NavigationItemComp(props: Props) {
   const { element, children, ...node } = props;
   const unstyled = props.unstyled ?? navigationContext.unstyled;
 
-  let itemRender: (() => ReactElement) | undefined;
+  let renderItem: (() => ReactElement) | undefined;
 
   if (!unstyled && children && (typeof children === 'function' || isReactElement(children))) {
-    itemRender =
+    renderItem =
       typeof children === 'function' ? () => children(navNodeRef.current) : () => children;
   }
 
-  const { navNode } = useInitNavNode({ ...node, children, itemRender });
+  const { navNode } = useInitNavNode({ ...node, children, renderItem });
 
   useEffect(() => {
     navNodeRef.current = navNode;
