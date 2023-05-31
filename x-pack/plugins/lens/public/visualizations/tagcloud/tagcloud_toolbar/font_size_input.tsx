@@ -22,13 +22,13 @@ export function FontSizeInput(props: Props) {
     props.maxFontSize,
   ]);
 
-  // Storing propagateOnChange in ref 
-  // so there is one instance per component 
+  // Storing propagateOnChange in ref
+  // so there is one instance per component
   // instead of one instance per execution cycle.
   const propagateOnChangeRef = useRef({
-      onChange: debounce((minFontSize: number, maxFontSize: number) => {
-        props.onChange(minFontSize, maxFontSize);
-      }, 150),
+    onChange: debounce((minFontSize: number, maxFontSize: number) => {
+      props.onChange(minFontSize, maxFontSize);
+    }, 150),
   });
 
   useEffect(() => {

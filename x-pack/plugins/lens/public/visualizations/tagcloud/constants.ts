@@ -18,4 +18,4 @@ export const DEFAULT_STATE = {
   minFontSize: 18,
   orientation: Orientation.SINGLE as $Values<typeof Orientation>,
   showLabel: true,
-}
+};

@@ -19,7 +19,7 @@ import {
   ExpressionFunctionTheme,
 } from '@kbn/expressions-plugin/common';
 import { PaletteRegistry } from '@kbn/coloring';
- import { SystemPaletteExpressionFunctionDefinition } from '@kbn/charts-plugin/common';
+import { SystemPaletteExpressionFunctionDefinition } from '@kbn/charts-plugin/common';
 import type { OperationMetadata, Visualization } from '../..';
 import type { TagcloudState } from './types';
 import { suggestions } from './suggestions';
@@ -106,8 +106,8 @@ export const getTagcloudVisualization = ({
                   palette: paletteService
                     .get(state.palette?.name || 'default')
                     .getCategoricalColors(10, state.palette?.params),
-                }
-              ] 
+                },
+              ]
             : [],
           supportsMoreColumns: !state.tagAccessor,
           filterOperations: (op: OperationMetadata) => op.isBucketed && op.dataType === 'string',
@@ -160,27 +160,29 @@ export const getTagcloudVisualization = ({
       type: 'expression',
       chain: [
         ...(datasourceExpression ? datasourceExpression.chain : []),
-        buildExpressionFunction<ExpressionTagcloudFunctionDefinition>(
-          'tagcloud',
-          {
-            bucket: state.tagAccessor,
-            metric: state.valueAccessor,
-            maxFontSize: state.maxFontSize,
-            minFontSize: state.minFontSize,
-            orientation: state.orientation,
-            palette: buildExpression([
-              state.palette
-                ? buildExpressionFunction<ExpressionFunctionTheme>('theme', {
-                    variable: 'palette',
-                    default: [paletteService.get(state.palette.name).toExpression(state.palette.params)],
-                  })
-                : buildExpressionFunction<SystemPaletteExpressionFunctionDefinition>('system_palette', {
+        buildExpressionFunction<ExpressionTagcloudFunctionDefinition>('tagcloud', {
+          bucket: state.tagAccessor,
+          metric: state.valueAccessor,
+          maxFontSize: state.maxFontSize,
+          minFontSize: state.minFontSize,
+          orientation: state.orientation,
+          palette: buildExpression([
+            state.palette
+              ? buildExpressionFunction<ExpressionFunctionTheme>('theme', {
+                  variable: 'palette',
+                  default: [
+                    paletteService.get(state.palette.name).toExpression(state.palette.params),
+                  ],
+                })
+              : buildExpressionFunction<SystemPaletteExpressionFunctionDefinition>(
+                  'system_palette',
+                  {
                     name: 'default',
-                  })
-            ]).toAst(),
-            showLabel: state.showLabel,
-          }
-        ).toAst(),
+                  }
+                ),
+          ]).toAst(),
+          showLabel: state.showLabel,
+        }).toAst(),
       ],
     };
   },
