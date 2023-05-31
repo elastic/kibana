@@ -9,10 +9,10 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { EuiDataGridSorting, EuiDataGridColumn } from '@elastic/eui';
 
+import { INDEX_STATUS } from '@kbn/ml-data-frame-analytics-utils';
+
 import { ES_CLIENT_TOTAL_HITS_RELATION } from '../../../../common/types/es_client';
 import { ChartData } from '../../../../common/types/field_histograms';
-
-import { INDEX_STATUS } from '../../data_frame_analytics/common';
 
 import { ColumnChart } from './column_chart';
 import { COLUMN_CHART_DEFAULT_VISIBILITY_ROWS_THRESHOLD, INIT_MAX_COLUMNS } from './common';

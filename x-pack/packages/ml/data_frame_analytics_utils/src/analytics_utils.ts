@@ -5,33 +5,57 @@
  * 2.0.
  */
 
-import {
+import { ANALYSIS_CONFIG_TYPE } from './constants';
+import type {
   AnalysisConfig,
   ClassificationAnalysis,
   OutlierAnalysis,
   RegressionAnalysis,
-} from '../types/data_frame_analytics';
-import { ANALYSIS_CONFIG_TYPE } from '../constants/data_frame_analytics';
-import { DataFrameAnalysisConfigType } from '../types/data_frame_analytics';
+  DataFrameAnalysisConfigType,
+} from './types';
 
-export const isOutlierAnalysis = (arg: any): arg is OutlierAnalysis => {
+/**
+ * Type guard for DFA outlier analysis configurations
+ *
+ * @param {unknown} arg The config to identify
+ * @returns {arg is OutlierAnalysis}
+ */
+export const isOutlierAnalysis = (arg: unknown): arg is OutlierAnalysis => {
   if (typeof arg !== 'object' || arg === null) return false;
   const keys = Object.keys(arg);
   return keys.length === 1 && keys[0] === ANALYSIS_CONFIG_TYPE.OUTLIER_DETECTION;
 };
 
-export const isRegressionAnalysis = (arg: any): arg is RegressionAnalysis => {
+/**
+ * Type guard for DFA regression analysis configurations
+ *
+ * @param {unknown} arg The config to identify
+ * @returns {arg is RegressionAnalysis}
+ */
+export const isRegressionAnalysis = (arg: unknown): arg is RegressionAnalysis => {
   if (typeof arg !== 'object' || arg === null) return false;
   const keys = Object.keys(arg);
   return keys.length === 1 && keys[0] === ANALYSIS_CONFIG_TYPE.REGRESSION;
 };
 
-export const isClassificationAnalysis = (arg: any): arg is ClassificationAnalysis => {
+/**
+ * Type guard for DFA classification analysis configurations
+ *
+ * @param {unknown} arg The config to identify
+ * @returns {arg is ClassificationAnalysis}
+ */
+export const isClassificationAnalysis = (arg: unknown): arg is ClassificationAnalysis => {
   if (typeof arg !== 'object' || arg === null) return false;
   const keys = Object.keys(arg);
   return keys.length === 1 && keys[0] === ANALYSIS_CONFIG_TYPE.CLASSIFICATION;
 };
 
+/**
+ * Helper function to get the dependent variable of a DFA configuration
+ *
+ * @param {AnalysisConfig} analysis The analysis configuration
+ * @returns {(| RegressionAnalysis['regression']['dependent_variable'] | ClassificationAnalysis['classification']['dependent_variable'])}
+ */
 export const getDependentVar = (
   analysis: AnalysisConfig
 ):
@@ -49,6 +73,12 @@ export const getDependentVar = (
   return depVar;
 };
 
+/**
+ * Helper function to get the prediction field name of a DFA configuration
+ *
+ * @param {AnalysisConfig} analysis The analysis configuration
+ * @returns {(| RegressionAnalysis['regression']['prediction_field_name'] | ClassificationAnalysis['classification']['prediction_field_name'])}
+ */
 export const getPredictionFieldName = (
   analysis: AnalysisConfig
 ):
@@ -67,9 +97,24 @@ export const getPredictionFieldName = (
   return predictionFieldName;
 };
 
+/**
+ * Helper function to get the default prediction field name
+ *
+ * @param {AnalysisConfig} analysis The analysis configuration
+ * @returns {string}
+ */
 export const getDefaultPredictionFieldName = (analysis: AnalysisConfig) => {
   return `${getDependentVar(analysis)}_prediction`;
 };
+
+/**
+ * Helper function to get the predicted field name
+ *
+ * @param {string} resultsField
+ * @param {AnalysisConfig} analysis The analysis configuration
+ * @param {?boolean} [forSort]
+ * @returns {string}
+ */
 export const getPredictedFieldName = (
   resultsField: string,
   analysis: AnalysisConfig,
@@ -83,6 +128,12 @@ export const getPredictedFieldName = (
   return predictedField;
 };
 
+/**
+ * Helper function to get the analysis type of a DFA configuration
+ *
+ * @param {AnalysisConfig} analysis The analysis configuration
+ * @returns {(DataFrameAnalysisConfigType | 'unknown')}
+ */
 export const getAnalysisType = (
   analysis: AnalysisConfig
 ): DataFrameAnalysisConfigType | 'unknown' => {
@@ -93,4 +144,28 @@ export const getAnalysisType = (
   }
 
   return 'unknown';
+};
+
+/**
+ * Helper function to get the training percent of a DFA configuration
+ *
+ * @param {AnalysisConfig} analysis The analysis configuration
+ * @returns {(| RegressionAnalysis['regression']['training_percent'] | ClassificationAnalysis['classification']['training_percent'] | undefined)}
+ */
+export const getTrainingPercent = (
+  analysis: AnalysisConfig
+):
+  | RegressionAnalysis['regression']['training_percent']
+  | ClassificationAnalysis['classification']['training_percent']
+  | undefined => {
+  let trainingPercent;
+
+  if (isRegressionAnalysis(analysis)) {
+    trainingPercent = analysis.regression.training_percent;
+  }
+
+  if (isClassificationAnalysis(analysis)) {
+    trainingPercent = analysis.classification.training_percent;
+  }
+  return trainingPercent;
 };
