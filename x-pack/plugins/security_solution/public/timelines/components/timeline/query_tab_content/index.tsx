@@ -414,9 +414,6 @@ export const QueryTabContentComponent: React.FC<Props> = ({
     [ACTION_BUTTON_COUNT, browserFields, discoverGridRows, sort, timelineId]
   );
 
-  const [autoHeight, setAutoHeight] = useState(true);
-  const [showRowDetails, setShowRowDetails] = useState(false);
-
   // Column visibility
   const [visibleColumns, setVisibleColumns] = useState(() => columns.map(({ id }) => id));
 
@@ -441,7 +438,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
   const { euiTheme } = useEuiTheme();
 
   const renderCustomGridBody: EuiDataGridProps['renderCustomGridBody'] = useCallback(
-    ({ visibleColumns, visibleRowData, Cell, setCustomGridBodyProps }) => {
+    ({ Cell, visibleColumns, visibleRowData, setCustomGridBodyProps }) => {
       // Ensure we're displaying correctly-paginated rows
       const visibleRows = discoverGridRows.slice(visibleRowData.startRow, visibleRowData.endRow);
 
@@ -486,17 +483,14 @@ export const QueryTabContentComponent: React.FC<Props> = ({
                       />
                     );
                   }
-                  return null;
                 })}
               </div>
-              {
-                <div css={styles.rowDetailsWrapper}>
-                  <Cell
-                    colIndex={visibleColumns.length - 1} // If the row is being shown, it should always be the last index
-                    visibleRowIndex={rowIndex}
-                  />
-                </div>
-              }
+              <div css={styles.rowDetailsWrapper}>
+                <Cell
+                  colIndex={visibleColumns.length - 1} // If the row is being shown, it should always be the last index
+                  visibleRowIndex={rowIndex}
+                />
+              </div>
             </div>
           ))}
         </>
@@ -568,6 +562,20 @@ export const QueryTabContentComponent: React.FC<Props> = ({
     },
   ];
 
+  const RenderFooterCellValue: EuiDataGridProps['renderFooterCellValue'] = ({
+    columnId,
+    setCellProps,
+  }) => {
+    const value = footerCellValues[columnId];
+
+    useEffect(() => {
+      // Turn off the cell expansion button if the footer cell is empty
+      if (!value) setCellProps({ isExpandable: false });
+    }, [value, setCellProps, columnId]);
+
+    return value || null;
+  };
+
   return (
     <>
       <InPortal node={timelineEventsCountPortalNode}>
@@ -637,11 +645,13 @@ export const QueryTabContentComponent: React.FC<Props> = ({
                     columnVisibility={{ visibleColumns, setVisibleColumns }}
                     dataView={sourcererDataView}
                     leadingControlColumns={leadingControlColumns}
-                    trailingControlColumns={[...trailingControlColumns, ...rowDetails]}
+                    trailingControlColumns={rowDetails}
                     sorting={{ columns: sortingColumns, onSort }}
                     inMemory={{ level: 'sorting' }}
                     rows={discoverGridRows}
-                    renderCellValue={({ rowIndex, columnId }) => discoverGridRows[rowIndex]}
+                    renderCellValue={({ rowIndex, columnId }) =>
+                      discoverGridRows[rowIndex][columnId]
+                    }
                     renderCustomGridBody={renderCustomGridBody}
                     ariaLabelledBy={''}
                     sort={[]}
@@ -664,9 +674,9 @@ export const QueryTabContentComponent: React.FC<Props> = ({
                     onSetColumns={() => {
                       console.log('onSetColumns called');
                     }}
+                    renderFooterCellValue={RenderFooterCellValue}
                     rowCount={discoverGridRows.length}
                     sampleSize={0}
-                    height={autoHeight ? undefined : 400}
                     gridStyle={{ border: 'none', header: 'underline' }}
                     showTimeCol={true}
                     useNewFieldsApi={false}

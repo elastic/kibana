@@ -241,6 +241,7 @@ export const DiscoverGrid = ({
   onSetColumns,
   onSort,
   renderCustomGridBody,
+  trailingControlColumns,
   rows,
   sampleSize,
   searchDescription,
@@ -656,6 +657,7 @@ export const DiscoverGrid = ({
             pagination={paginationObj}
             renderCustomGridBody={renderCustomGridBody}
             renderCellValue={renderCellValue}
+            trailingControlColumns={trailingControlColumns}
             ref={dataGridRef}
             rowCount={rowCount}
             schemaDetectors={schemaDetectors}
