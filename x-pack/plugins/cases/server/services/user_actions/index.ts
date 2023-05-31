@@ -675,19 +675,21 @@ export class CaseUserActionService {
       }
     );
 
-    response.aggregations?.totalExternalReferenceAttachments.buckets.forEach(({ key, doc_count: docCount }) => {
-      if (key === '.osquery') {
-        result.total_artifacts.osQuery += docCount;
-      }
+    response.aggregations?.totalExternalReferenceAttachments.buckets.forEach(
+      ({ key, doc_count: docCount }) => {
+        if (key === '.osquery') {
+          result.total_artifacts.osQuery += docCount;
+        }
 
-      if (key === '.lens') {
-        result.total_artifacts.lens += docCount;
-      }
+        if (key === '.lens') {
+          result.total_artifacts.lens += docCount;
+        }
 
-      if (key === '.timeline') {
-        result.total_artifacts.timeline += docCount;
+        if (key === '.timeline') {
+          result.total_artifacts.timeline += docCount;
+        }
       }
-    });
+    );
 
     return result;
   }
