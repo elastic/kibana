@@ -3931,6 +3931,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/data-service@link:packages/kbn-data-service":
+  version "0.0.0"
+  uid ""
+
 "@kbn/data-view-editor-plugin@link:src/plugins/data_view_editor":
   version "0.0.0"
   uid ""

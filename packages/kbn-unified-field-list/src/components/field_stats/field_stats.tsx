@@ -7,13 +7,9 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import {
-  type DataView,
-  type DataViewField,
-  ES_FIELD_TYPES,
-  getEsQueryConfig,
-  KBN_FIELD_TYPES,
-} from '@kbn/data-plugin/common';
+import type { DataView, DataViewField } from '@kbn/data-plugin/common';
+import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
+import { getEsQueryConfig } from '@kbn/data-service';
 import type { IUiSettingsClient } from '@kbn/core/public';
 import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';

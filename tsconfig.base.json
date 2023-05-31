@@ -592,6 +592,8 @@
       "@kbn/data-plugin/*": ["src/plugins/data/*"],
       "@kbn/data-search-plugin": ["test/plugin_functional/plugins/data_search"],
       "@kbn/data-search-plugin/*": ["test/plugin_functional/plugins/data_search/*"],
+      "@kbn/data-service": ["packages/kbn-data-service"],
+      "@kbn/data-service/*": ["packages/kbn-data-service/*"],
       "@kbn/data-view-editor-plugin": ["src/plugins/data_view_editor"],
       "@kbn/data-view-editor-plugin/*": ["src/plugins/data_view_editor/*"],
       "@kbn/data-view-field-editor-example-plugin": ["examples/data_view_field_editor_example"],

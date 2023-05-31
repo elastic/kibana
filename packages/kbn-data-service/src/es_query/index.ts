@@ -6,6 +6,4 @@
  * Side Public License, v 1.
  */
 
-export * from '@kbn/data-views-plugin/common/field.stub';
-export * from '@kbn/data-views-plugin/common/data_view.stub';
-export * from '@kbn/data-service/src/es_query/stubs';
+export { getEsQueryConfig } from './get_es_query_config';
