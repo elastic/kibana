@@ -20,7 +20,7 @@ const strings = {
   help: i18n.translate('expressionTagcloud.functions.tagcloudHelpText', {
     defaultMessage: 'Tagcloud visualization.',
   }),
-  args: {
+  argHelp: {
     scale: i18n.translate('expressionTagcloud.functions.tagcloud.args.scaleHelpText', {
       defaultMessage: 'Scale to determine font size of a word',
     }),
@@ -47,6 +47,9 @@ const strings = {
     }),
     ariaLabel: i18n.translate('expressionTagcloud.functions.tagcloud.args.ariaLabelHelpText', {
       defaultMessage: 'Specifies the aria label of the tagcloud',
+    }),
+    isPreview: i18n.translate('expressionTagcloud.functions.tagcloud.args.isPreviewHelpText', {
+      defaultMessage: 'Set isPreview to true to avoid showing out of room warnings',
     }),
   },
   dimension: {
@@ -81,7 +84,7 @@ export const errors = {
 };
 
 export const tagcloudFunction: ExpressionTagcloudFunction = () => {
-  const { help, args: argHelp, dimension } = strings;
+  const { help, argHelp, dimension } = strings;
 
   return {
     name: EXPRESSION_NAME,
@@ -139,7 +142,7 @@ export const tagcloudFunction: ExpressionTagcloudFunction = () => {
       },
       isPreview: {
         types: ['boolean'],
-        help: 'Set isPreview to true to avoid showing out of room warnings',
+        help: argHelp.isPreview,
         default: false,
         required: false,
       },

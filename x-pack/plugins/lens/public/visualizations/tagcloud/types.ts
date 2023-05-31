@@ -5,9 +5,10 @@
  * 2.0.
  */
 
+import { $Values } from '@kbn/utility-types';
 import { Datatable } from '@kbn/expressions-plugin/common';
 import type { PaletteOutput } from '@kbn/coloring';
-import type { Orientation } from '@kbn/expression-tagcloud-plugin/common';
+import { Orientation } from '@kbn/expression-tagcloud-plugin/common';
 
 export interface TagcloudState {
   layerId: string;
@@ -15,7 +16,7 @@ export interface TagcloudState {
   valueAccessor?: string;
   maxFontSize: number;
   minFontSize: number;
-  orientation: Orientation;
+  orientation: $Values<typeof Orientation>;
   palette?: PaletteOutput;
   showLabel: boolean;
 }

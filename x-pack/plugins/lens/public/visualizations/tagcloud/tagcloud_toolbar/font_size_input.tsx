@@ -45,8 +45,8 @@ export function FontSizeInput(props: Props) {
       step={1}
       value={fontSize}
       onChange={(value) => {
-        setFontSize(value);
-        propagateOnChangeRef.current.onChange(value[0], value[1]);
+        setFontSize(value as [number, number]);
+        propagateOnChangeRef.current.onChange(value[0] as number, value[1] as number);
       }}
       aria-label={i18n.translate('xpack.lens.label.tagcloud.fontSizeLabel', {
         defaultMessage: 'Font size',

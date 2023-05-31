@@ -215,7 +215,7 @@ export const TagCloudChart = ({
               {label}
             </div>
           )}
-          {!Boolean(visParams.isPreview) && warning && (
+          {!visParams.isPreview && warning && (
             <div className="tgcChart__warning">
               <EuiIconTip
                 type="warning"
@@ -229,7 +229,7 @@ export const TagCloudChart = ({
               />
             </div>
           )}
-          {!Boolean(visParams.isPreview) && tagCloudData.length > MAX_TAG_COUNT && (
+          {!visParams.isPreview && tagCloudData.length > MAX_TAG_COUNT && (
             <div className="tgcChart__warning">
               <EuiIconTip
                 type="warning"

@@ -11,7 +11,7 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { render } from 'react-dom';
 import { ThemeServiceStart } from '@kbn/core/public';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
-import type { Orientation } from '@kbn/expression-tagcloud-plugin';
+import type { ExpressionTagcloudFunctionDefinition } from '@kbn/expression-tagcloud-plugin/common';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import {
   buildExpression,
@@ -19,12 +19,13 @@ import {
   ExpressionFunctionTheme,
 } from '@kbn/expressions-plugin/common';
 import { PaletteRegistry } from '@kbn/coloring';
+ import { SystemPaletteExpressionFunctionDefinition } from '@kbn/charts-plugin/common';
 import type { OperationMetadata, Visualization } from '../..';
 import type { TagcloudState } from './types';
 import { suggestions } from './suggestions';
 import { TagcloudToolbar } from './tagcloud_toolbar';
 import { TagsDimensionEditor } from './tags_dimension_editor';
-import { TAGCLOUD_LABEL } from './constants';
+import { DEFAULT_STATE, TAGCLOUD_LABEL } from './constants';
 
 const TAG_GROUP_ID = 'tags';
 const METRIC_GROUP_ID = 'metric';
@@ -41,7 +42,7 @@ export const getTagcloudVisualization = ({
   visualizationTypes: [
     {
       id: 'lnsTagcloud',
-      icon: null,
+      icon: 'visTagCloud',
       label: TAGCLOUD_LABEL,
       groupLabel: i18n.translate('xpack.lens.pie.groupLabel', {
         defaultMessage: 'Proportion',
@@ -55,14 +56,13 @@ export const getTagcloudVisualization = ({
   },
 
   clearLayer(state) {
-    const newState = { ...state };
+    const newState = {
+      ...state,
+      ...DEFAULT_STATE,
+    };
     delete newState.tagAccessor;
     delete newState.valueAccessor;
-    delete newState.maxFontSize;
-    delete newState.minFontSize;
-    delete newState.orientation;
     delete newState.palette;
-    delete newState.showLabel;
     return newState;
   },
 
@@ -72,7 +72,7 @@ export const getTagcloudVisualization = ({
 
   getDescription() {
     return {
-      icon: null,
+      icon: 'visTagCloud',
       label: TAGCLOUD_LABEL,
     };
   },
@@ -84,10 +84,7 @@ export const getTagcloudVisualization = ({
       state || {
         layerId: addNewLayer(),
         layerType: LayerTypes.DATA,
-        maxFontSize: 72,
-        minFontSize: 18,
-        orientation: Orientation.SINGLE,
-        showLabel: true,
+        ...DEFAULT_STATE,
       }
     );
   },
@@ -163,7 +160,7 @@ export const getTagcloudVisualization = ({
       type: 'expression',
       chain: [
         ...(datasourceExpression ? datasourceExpression.chain : []),
-        buildExpressionFunction<unknown>(
+        buildExpressionFunction<ExpressionTagcloudFunctionDefinition>(
           'tagcloud',
           {
             bucket: state.tagAccessor,
@@ -215,7 +212,7 @@ export const getTagcloudVisualization = ({
   },
 
   setDimension({ columnId, groupId, prevState }) {
-    const update: Partial<ChoroplethChartState> = {};
+    const update: Partial<TagcloudState> = {};
     if (groupId === TAG_GROUP_ID) {
       update.tagAccessor = columnId;
     } else if (groupId === METRIC_GROUP_ID) {

@@ -17,7 +17,7 @@ import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
 import { EXPRESSION_NAME, ScaleOptions, Orientation } from '../constants';
 
 interface TagCloudCommonParams {
-  scale: $Values<typeof ScaleOptions>;
+  scale?: $Values<typeof ScaleOptions>;
   orientation: $Values<typeof Orientation>;
   minFontSize: number;
   maxFontSize: number;
@@ -28,12 +28,15 @@ interface TagCloudCommonParams {
 export interface TagCloudVisConfig extends TagCloudCommonParams {
   metric: ExpressionValueVisDimension | string;
   bucket?: ExpressionValueVisDimension | string;
+  palette: PaletteOutput;
+  isPreview?: boolean;
 }
 
 export interface TagCloudRendererParams extends TagCloudCommonParams {
   palette: PaletteOutput;
   metric: ExpressionValueVisDimension | string;
   bucket?: ExpressionValueVisDimension | string;
+  isPreview: boolean;
 }
 
 export interface TagcloudRendererConfig {
@@ -43,13 +46,49 @@ export interface TagcloudRendererConfig {
   syncColors: boolean;
 }
 
-interface Arguments extends TagCloudVisConfig {
-  palette: PaletteOutput;
+/*
+
+interface VisCommonParams {
+  addTooltip: boolean;
+  legendDisplay: LegendDisplay;
+  legendPosition: Position;
+  truncateLegend: boolean;
+  maxLegendLines: number;
+  legendSize?: LegendSize;
+  ariaLabel?: string;
 }
 
-export type ExpressionTagcloudFunction = () => ExpressionFunctionDefinition<
-  'tagcloud',
+export interface PieVisConfig extends VisCommonConfig {
+  partitionByColumn?: boolean;
+  isDonut: boolean;
+  emptySizeRatio?: EmptySizeRatios;
+  respectSourceOrder?: boolean;
+  startFromSecondLargestSlice?: boolean;
+  distinctColors?: boolean;
+  nestedLegend: boolean;
+}
+
+export interface PartitionChartProps {
+  visData: Datatable;
+  visType: ChartTypes;
+  visConfig: PartitionVisParams;
+  syncColors: boolean;
+  canNavigateToLens?: boolean;
+  overrides?: AllowedPartitionOverrides & AllowedSettingsOverrides;
+}
+
+export type PieVisExpressionFunctionDefinition = ExpressionFunctionDefinition<
+  typeof PIE_VIS_EXPRESSION_NAME,
   Datatable,
-  Arguments,
+  PieVisConfig,
+  ExpressionValueRender<PartitionChartProps>
+>;*/
+
+export type ExpressionTagcloudFunctionDefinition = ExpressionFunctionDefinition<
+  typeof EXPRESSION_NAME,
+  Datatable,
+  TagCloudVisConfig,
   ExpressionValueRender<TagcloudRendererConfig>
 >;
+
+export type ExpressionTagcloudFunction = () => ExpressionTagcloudFunctionDefinition;

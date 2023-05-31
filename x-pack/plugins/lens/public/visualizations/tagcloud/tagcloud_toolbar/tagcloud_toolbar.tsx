@@ -15,10 +15,11 @@
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiRadioGroup, EuiSwitch, EuiSwitchEvent } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { $Values } from '@kbn/utility-types';
 import { Orientation } from '@kbn/expression-tagcloud-plugin/common';
 import type { VisualizationToolbarProps } from '../../../types';
 import { ToolbarPopover } from '../../../shared_components';
-import type { TagcloudState } from './types';
+import type { TagcloudState } from '../types';
 import { FontSizeInput } from './font_size_input';
 
 const ORIENTATION_OPTIONS = [
@@ -84,7 +85,7 @@ export function TagcloudToolbar(props: VisualizationToolbarProps<TagcloudState>)
                 onChange={(id) => {
                   props.setState({
                     ...props.state,
-                    orientation: id,
+                    orientation: id as $Values<typeof Orientation>,
                   });
                 }}
               />

@@ -6,10 +6,9 @@
  */
 
 import { partition } from 'lodash';
-import { Orientation } from '@kbn/expression-tagcloud-plugin/common';
 import type { SuggestionRequest, VisualizationSuggestion } from '../../types';
 import type { TagcloudState } from './types';
-import { TAGCLOUD_LABEL } from './constants';
+import { DEFAULT_STATE, TAGCLOUD_LABEL } from './constants';
 
 export function suggestions({
   table,
@@ -39,16 +38,14 @@ export function suggestions({
     })
     .map((bucket) => {
       return {
+        previewIcon: 'visTagCloud',
         title: TAGCLOUD_LABEL,
         score: 0.6,
         state: {
           layerId: table.layerId,
           tagAccessor: bucket.columnId,
           valueAccessor: metrics[0].columnId,
-          maxFontSize: 72,
-          minFontSize: 18,
-          orientation: Orientation.SINGLE,
-          showLabel: true,
+          ...DEFAULT_STATE,
         },
       };
     });
