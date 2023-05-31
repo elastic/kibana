@@ -10,12 +10,14 @@ import { useActions, useValues } from 'kea';
 
 import {
   EuiButton,
-  EuiContextMenuItem,
-  EuiContextMenuPanel,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingSpinner,
   EuiPopover,
+  EuiContextMenu,
+  EuiContextMenuProps,
+  EuiIcon,
+  EuiText,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -58,6 +60,123 @@ export const SyncsContextMenu: React.FC = () => {
   };
 
   const syncLoading = (isSyncing || isWaitingForSync) && ingestionStatus !== IngestionStatus.ERROR;
+  const panels: EuiContextMenuProps['panels'] = [
+    {
+      id: 0,
+      items: [
+        ...(syncLoading
+          ? []
+          : [
+              {
+                // @ts-ignore - data-* attributes are applied but doesn't exist on types
+                'data-telemetry-id': `entSearchContent-${ingestionMethod}-header-sync-startSync`,
+                'data-test-subj': `entSearchContent-${ingestionMethod}-header-sync-startSync`,
+                disabled: ingestionStatus === IngestionStatus.INCOMPLETE,
+                icon: 'play',
+                name: getSyncButtonText(),
+                onClick: () => {
+                  closePopover();
+                  startSync();
+                },
+              },
+              {
+                // @ts-ignore - data-* attributes are applied but doesn't exist on types
+                'data-telemetry-id': `entSearchContent-${ingestionMethod}-header-sync-moreSyncs`,
+                icon: 'play',
+                name: i18n.translate('xpack.enterpriseSearch.index.header.moreSyncsTitle', {
+                  defaultMessage: 'More syncs',
+                }),
+                panel: 1,
+              },
+            ]),
+        {
+          // @ts-ignore - data-* attributes are applied but doesn't exist on types
+          'data-telemetry-id': `entSearchContent-${ingestionMethod}-header-sync-cancelSync`,
+          disabled:
+            (isCanceling && ingestionStatus !== IngestionStatus.ERROR) || status === Status.LOADING,
+          icon: <EuiIcon type="cross" size="m" color="danger" />,
+          name: (
+            <EuiText color="danger" size="s">
+              <p>
+                {i18n.translate('xpack.enterpriseSearch.index.header.cancelSyncsTitle', {
+                  defaultMessage: 'Cancel Syncs',
+                })}
+              </p>
+            </EuiText>
+          ),
+          onClick: () => {
+            closePopover();
+            cancelSyncs();
+          },
+        },
+      ],
+      title: 'Sync',
+    },
+    {
+      id: 1,
+      items: [
+        {
+          // @ts-ignore - data-* attributes are applied but doesn't exist on types
+          'data-telemetry-id':
+            'entSearchContent-${ingestionMethod}-header-sync-more-fullContentSync',
+          'data-test-subj': 'entSearchContent-${ingestionMethod}-header-sync-more-fullContentSync',
+          icon: 'play',
+          name: i18n.translate('xpack.enterpriseSearch.index.header.more.fullContentSync', {
+            defaultMessage: 'Full content',
+          }),
+          onClick: () => {
+            closePopover();
+            startSync();
+          },
+        },
+        {
+          // @ts-ignore - data-* attributes are applied but doesn't exist on types
+          'data-telemetry-id':
+            'entSearchContent-${ingestionMethod}-header-sync-more-incrementalSync',
+          'data-test-subj': 'entSearchContent-${ingestionMethod}-header-sync-more-incrementalSync',
+          icon: 'play',
+          name: i18n.translate('xpack.enterpriseSearch.index.header.more.incrementalSync', {
+            defaultMessage: 'Incremental content',
+          }),
+          onClick: () => {
+            closePopover();
+            startSync(); // TODO DO NOT MERGE / REPLACE WITH PROPER SYNC
+          },
+        },
+        {
+          // @ts-ignore - data-* attributes are applied but doesn't exist on types
+          'data-telemetry-id':
+            'entSearchContent-${ingestionMethod}-header-sync-more-accessControlSync',
+          'data-test-subj':
+            'entSearchContent-${ingestionMethod}-header-sync-more-accessControlSync',
+          icon: 'play',
+          name: i18n.translate('xpack.enterpriseSearch.index.header.more.accessControlSync', {
+            defaultMessage: 'Access Control',
+          }),
+          onClick: () => {
+            closePopover();
+            startSync(); // TODO DO NOT MERGE / REPLACE WITH PROPER SYNC
+          },
+        },
+        {
+          // @ts-ignore - data-* attributes are applied but doesn't exist on types
+          'data-telemetry-id': 'entSearchContent-${ingestionMethod}-header-sync-more-allSync',
+          'data-test-subj': 'entSearchContent-${ingestionMethod}-header-sync-more-allSync',
+          icon: 'play',
+          name: i18n.translate('xpack.enterpriseSearch.index.header.more.allSync', {
+            defaultMessage: 'All',
+          }),
+          onClick: () => {
+            closePopover();
+            startSync(); // TODO DO NOT MERGE / REPLACE WITH PROPER SYNC
+          },
+        },
+      ],
+      title: i18n.translate('xpack.enterpriseSearch.index.header.syncMenuTitle', {
+        defaultMessage: 'Sync',
+      }),
+    },
+  ];
 
   return (
     <EuiPopover
@@ -84,46 +203,9 @@ export const SyncsContextMenu: React.FC = () => {
       isOpen={isPopoverOpen}
       closePopover={closePopover}
       panelPaddingSize="none"
-      anchorPosition="downLeft"
+      anchorPosition="downCenter"
     >
-      <EuiContextMenuPanel
-        items={[
-          ...(syncLoading
-            ? []
-            : [
-                <EuiContextMenuItem
-                  data-test-subj={`entSearchContent-${ingestionMethod}-header-sync-startSync`}
-                  data-telemetry-id={`entSearchContent-${ingestionMethod}-header-sync-startSync`}
-                  disabled={ingestionStatus === IngestionStatus.INCOMPLETE}
-                  key="Sync"
-                  onClick={() => {
-                    closePopover();
-                    startSync();
-                  }}
-                  icon="play"
-                >
-                  {getSyncButtonText()}
-                </EuiContextMenuItem>,
-              ]),
-          <EuiContextMenuItem
-            data-telemetry-id={`entSearchContent-${ingestionMethod}-header-sync-cancelSync`}
-            disabled={
-              (isCanceling && ingestionStatus !== IngestionStatus.ERROR) ||
-              status === Status.LOADING
-            }
-            key="Cancel sync"
-            onClick={() => {
-              closePopover();
-              cancelSyncs();
-            }}
-            icon="trash"
-          >
-            {i18n.translate('xpack.enterpriseSearch.index.header.cancelSyncsTitle', {
-              defaultMessage: 'Cancel Syncs',
-            })}
-          </EuiContextMenuItem>,
-        ]}
-      />
+      <EuiContextMenu initialPanelId={0} panels={panels} />
     </EuiPopover>
   );
 };
