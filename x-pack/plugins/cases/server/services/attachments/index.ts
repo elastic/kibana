@@ -14,7 +14,7 @@ import type {
 } from '@kbn/core/server';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { CommentType, decodeOrThrow } from '../../../common/api';
+import { CommentAttributesRt, CommentType, decodeOrThrow } from '../../../common/api';
 import { CASE_COMMENT_SAVED_OBJECT, CASE_SAVED_OBJECT } from '../../../common/constants';
 import { buildFilter, combineFilters } from '../../client/utils';
 import { defaultSortField, isSOError } from '../../common/utils';
@@ -167,7 +167,7 @@ export class AttachmentService {
     try {
       this.context.log.debug(`Attempting to POST a new comment`);
 
-      const decodedAttributes = decodeOrThrow(AttachmentTransformedAttributesRt)(attributes);
+      const decodedAttributes = decodeOrThrow(CommentAttributesRt)(attributes);
 
       const { attributes: extractedAttributes, references: extractedReferences } =
         extractAttachmentSORefsFromAttributes(
@@ -212,9 +212,7 @@ export class AttachmentService {
       const res =
         await this.context.unsecuredSavedObjectsClient.bulkCreate<AttachmentPersistedAttributes>(
           attachments.map((attachment) => {
-            const decodedAttributes = decodeOrThrow(AttachmentTransformedAttributesRt)(
-              attachment.attributes
-            );
+            const decodedAttributes = decodeOrThrow(CommentAttributesRt)(attachment.attributes);
 
             const { attributes: extractedAttributes, references: extractedReferences } =
               extractAttachmentSORefsFromAttributes(

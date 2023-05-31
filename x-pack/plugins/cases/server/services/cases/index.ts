@@ -72,6 +72,8 @@ import type {
 import type { AttachmentTransformedAttributes } from '../../common/types/attachments';
 import { bulkDecodeSOAttributes } from '../utils';
 
+const PartialCaseTransformedAttributesRt = getPartialCaseTransformedAttributesRt();
+
 export class CasesService {
   private readonly log: Logger;
   private readonly unsecuredSavedObjectsClient: SavedObjectsClientContract;
@@ -586,8 +588,6 @@ export class CasesService {
     try {
       this.log.debug(`Attempting to UPDATE case ${caseId}`);
 
-      const PartialCaseTransformedAttributesRt = getPartialCaseTransformedAttributesRt();
-
       const decodedAttributes = decodeOrThrow(PartialCaseTransformedAttributesRt)(
         updatedAttributes
       );
@@ -623,8 +623,6 @@ export class CasesService {
   }: PatchCasesArgs): Promise<SavedObjectsBulkUpdateResponse<CaseTransformedAttributes>> {
     try {
       this.log.debug(`Attempting to UPDATE case ${cases.map((c) => c.caseId).join(', ')}`);
-
-      const PartialCaseTransformedAttributesRt = getPartialCaseTransformedAttributesRt();
 
       const bulkUpdate = cases.map(({ caseId, updatedAttributes, version, originalCase }) => {
         const decodedAttributes = decodeOrThrow(PartialCaseTransformedAttributesRt)(

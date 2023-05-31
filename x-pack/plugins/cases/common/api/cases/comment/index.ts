@@ -192,10 +192,10 @@ const BasicCommentRequestRt = rt.union([
   PersistableStateAttachmentRt,
 ]);
 
-export const CommentRequestRt = rt.union([...BasicCommentRequestRt.types, ExternalReferenceSORt]);
+export const CommentRequestRt = rt.union([BasicCommentRequestRt, ExternalReferenceSORt]);
 
 export const CommentRequestWithoutRefsRt = rt.union([
-  ...BasicCommentRequestRt.types,
+  BasicCommentRequestRt,
   ExternalReferenceSOWithoutRefsRt,
 ]);
 

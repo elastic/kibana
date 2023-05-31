@@ -77,7 +77,7 @@ describe('UserActionPersister', () => {
         await expect(persister.createUserAction(getRequest())).resolves.not.toThrow();
       });
 
-      it('throws if closure_type is omitted', async () => {
+      it('throws if fields is omitted', async () => {
         const req = getRequest();
         unset(req, 'payload.connector.fields');
 
@@ -119,7 +119,7 @@ describe('UserActionPersister', () => {
         ).resolves.not.toThrow();
       });
 
-      it('throws if closure_type is omitted', async () => {
+      it('throws if owner is omitted', async () => {
         const req = getBulkCreateAttachmentRequest();
         unset(req, 'attachments[0].owner');
 

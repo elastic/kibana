@@ -39,12 +39,9 @@ const BasicUserActionsRt = rt.union([
   DeleteCaseUserActionRt,
 ]);
 
-const CommonUserActionsWithIdsRt = rt.union([...BasicUserActionsRt.types, CommentUserActionRt]);
+const CommonUserActionsWithIdsRt = rt.union([BasicUserActionsRt, CommentUserActionRt]);
 
-const CommonUserActionsWithoutIdsRt = rt.union([
-  ...BasicUserActionsRt.types,
-  CommentUserActionWithoutIdsRt,
-]);
+const CommonUserActionsWithoutIdsRt = rt.union([BasicUserActionsRt, CommentUserActionWithoutIdsRt]);
 
 const UserActionPayloadRt = rt.union([
   CommonUserActionsWithIdsRt,
