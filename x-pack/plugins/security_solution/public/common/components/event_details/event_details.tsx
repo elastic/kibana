@@ -432,15 +432,13 @@ const EventDetailsComponent: React.FC<Props> = ({
     }),
     [rawEventData]
   );
-  const responseActionsTab = useResponseActionsView<EuiTabbedContentTab>({
+  const responseActionsTab = useResponseActionsView({
     rawEventData: rawEventData as RawEventData,
     ...(detailsEcsData !== null ? { ecsData: detailsEcsData } : {}),
-    isNewFlyout: false,
   });
-  const osqueryTab = useOsqueryTab<EuiTabbedContentTab>({
+  const osqueryTab = useOsqueryTab({
     rawEventData: rawEventData as RawEventData,
     ...(detailsEcsData !== null ? { ecsData: detailsEcsData } : {}),
-    isNewFlyout: false,
   });
 
   const responseActionsTabs = useMemo(() => {

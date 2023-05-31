@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { EuiTabbedContentTab } from '@elastic/eui';
 import { EuiNotificationBadge, EuiSpacer } from '@elastic/eui';
 import React from 'react';
 import styled from 'styled-components';
@@ -26,15 +27,13 @@ const TabContentWrapper = styled.div`
   position: relative;
 `;
 
-export const useOsqueryTab = <T extends object = JSX.Element>({
+export const useOsqueryTab = ({
   rawEventData,
   ecsData,
-  isNewFlyout,
 }: {
   rawEventData?: SearchHit | undefined;
   ecsData?: Ecs | null;
-  isNewFlyout: boolean;
-}): T | undefined => {
+}): EuiTabbedContentTab | undefined => {
   const {
     services: { osquery },
   } = useKibana();
@@ -90,18 +89,15 @@ export const useOsqueryTab = <T extends object = JSX.Element>({
     </TabContentWrapper>
   );
 
-  if (!isNewFlyout) {
-    return {
-      id: EventsViewType.osqueryView,
-      'data-test-subj': 'osqueryViewTab',
-      name: i18n.OSQUERY_VIEW,
-      append: (
-        <EuiNotificationBadge data-test-subj="osquery-actions-notification">
-          {actionItems.length}
-        </EuiNotificationBadge>
-      ),
-      content,
-    } as T;
-  }
-  return content as T;
+  return {
+    id: EventsViewType.osqueryView,
+    'data-test-subj': 'osqueryViewTab',
+    name: i18n.OSQUERY_VIEW,
+    append: (
+      <EuiNotificationBadge data-test-subj="osquery-actions-notification">
+        {actionItems.length}
+      </EuiNotificationBadge>
+    ),
+    content,
+  };
 };

@@ -47,7 +47,6 @@ export const ResponseDetails: React.FC = () => {
   const osqueryView = useOsqueryTab({
     rawEventData: data,
     ecsData: ecs,
-    isNewFlyout: true,
   });
 
   return (
@@ -59,7 +58,7 @@ export const ResponseDetails: React.FC = () => {
       {!responseActions ? (
         <InlineBlock data-test-subj={RESPONSE_EMPTY_TEST_ID}>{i18n.RESPONSE_EMPTY}</InlineBlock>
       ) : (
-        <>{endpointResponseActionsEnabled ? responseActionsView : osqueryView}</>
+        <>{endpointResponseActionsEnabled ? responseActionsView?.content : osqueryView?.content}</>
       )}
     </div>
   );

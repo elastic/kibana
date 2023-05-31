@@ -7,6 +7,7 @@
 
 import React from 'react';
 import styled from 'styled-components';
+import type { EuiTabbedContentTab } from '@elastic/eui';
 import { EuiNotificationBadge, EuiSpacer } from '@elastic/eui';
 import type { Ecs } from '@kbn/cases-plugin/common';
 import type { SearchHit } from '../../../../common/search_strategy';
@@ -35,7 +36,7 @@ export const useResponseActionsView = <T extends object = JSX.Element>({
   ecsData?: Ecs | null;
   rawEventData: SearchHit | undefined;
   isNewFlyout?: boolean;
-}): T | undefined => {
+}): EuiTabbedContentTab | undefined => {
   const responseActionsEnabled = useIsExperimentalFeatureEnabled('endpointResponseActionsEnabled');
 
   const expandedEventFieldsObject = rawEventData
@@ -79,18 +80,15 @@ export const useResponseActionsView = <T extends object = JSX.Element>({
     </>
   );
 
-  if (!isNewFlyout) {
-    return {
-      id: EventsViewType.responseActionsView,
-      'data-test-subj': 'responseActionsViewTab',
-      name: i18n.RESPONSE_ACTIONS_VIEW,
-      append: (
-        <EuiNotificationBadge data-test-subj="response-actions-notification">
-          {totalItemCount}
-        </EuiNotificationBadge>
-      ),
-      content,
-    } as T;
-  }
-  return content as T;
+  return {
+    id: EventsViewType.responseActionsView,
+    'data-test-subj': 'responseActionsViewTab',
+    name: i18n.RESPONSE_ACTIONS_VIEW,
+    append: (
+      <EuiNotificationBadge data-test-subj="response-actions-notification">
+        {totalItemCount}
+      </EuiNotificationBadge>
+    ),
+    content,
+  };
 };
