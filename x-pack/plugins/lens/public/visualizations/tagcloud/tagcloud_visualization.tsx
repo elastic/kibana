@@ -62,6 +62,7 @@ export const getTagcloudVisualization = ({
     delete newState.valueAccessor;
     delete newState.maxFontSize;
     delete newState.minFontSize;
+    delete newState.palette;
     delete newState.showLabel;
     return newState;
   },
