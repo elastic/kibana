@@ -20,7 +20,7 @@ exports[`DashboardEmptyScreen renders correctly with edit mode 1`] = `
           class="emotion-euiPageSection__content-l-center"
         >
           <div
-            class="euiPanel euiPanel--transparent euiEmptyPrompt euiEmptyPrompt--vertical euiEmptyPrompt--paddingLarge dshEmptyWidgetContainer dshEmptyEditWidgetContainer emotion-euiPanel-m-transparent"
+            class="euiPanel euiPanel--transparent euiEmptyPrompt euiEmptyPrompt--vertical euiEmptyPrompt--paddingLarge dshEmptyWidgetContainer emotion-euiPanel-m-transparent"
           >
             <div
               class="euiEmptyPrompt__main"
