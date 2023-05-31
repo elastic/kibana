@@ -16,7 +16,8 @@
     "@kbn/test-jest-helpers",
     "@kbn/unified-doc-viewer",
     "@kbn/unified-field-list-plugin",
-    "@kbn/unified-discover"
+    "@kbn/unified-discover",
+    "@kbn/es-types"
   ],
   "exclude": [
     "target/**/*",

@@ -29,6 +29,5 @@
     "@kbn/field-types",
     "@kbn/es-query",
     "@kbn/unified-discover",
-    "@kbn/es-types",
   ]
 }
