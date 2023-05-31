@@ -21,7 +21,7 @@ import {
   ISearchOptions,
 } from '@kbn/data-plugin/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { getLogViewResponsePayloadRT } from '../../../common/http_api/log_views';
+import { getLogViewResponsePayloadRT } from '../../../common/http_api/latest';
 import { defaultLogViewAttributes } from '../../../common/log_views';
 import {
   LogEntriesSearchResponsePayload,
@@ -144,7 +144,7 @@ export const decorateWithKibanaContext = <StoryFnReactReturnType extends React.R
   };
 
   const overlays = {
-    openFlyout: () => {},
+    openFlyout: () => { },
   };
 
   return (
