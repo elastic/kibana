@@ -25,7 +25,7 @@ describe('Stack Connectors Plugin', () => {
     it('should register built in connector types', () => {
       const actionsSetup = actionsMock.createSetup();
       plugin.setup(coreSetup, { actions: actionsSetup });
-      expect(actionsSetup.registerType).toHaveBeenCalledTimes(18);
+      expect(actionsSetup.registerType).toHaveBeenCalledTimes(17);
       expect(actionsSetup.registerType).toHaveBeenNthCalledWith(
         1,
         expect.objectContaining({
@@ -138,14 +138,7 @@ describe('Stack Connectors Plugin', () => {
           name: 'Torq',
         })
       );
-      expect(actionsSetup.registerType).toHaveBeenNthCalledWith(
-        18,
-        expect.objectContaining({
-          id: '.d3security',
-          name: 'D3 Security',
-        })
-      );
-      expect(actionsSetup.registerSubActionConnectorType).toHaveBeenCalledTimes(3);
+      expect(actionsSetup.registerSubActionConnectorType).toHaveBeenCalledTimes(4);
       expect(actionsSetup.registerSubActionConnectorType).toHaveBeenNthCalledWith(
         1,
         expect.objectContaining({
@@ -165,6 +158,13 @@ describe('Stack Connectors Plugin', () => {
         expect.objectContaining({
           id: '.gen-ai',
           name: 'Generative AI',
+        })
+      );
+      expect(actionsSetup.registerSubActionConnectorType).toHaveBeenNthCalledWith(
+        4,
+        expect.objectContaining({
+          id: '.d3security',
+          name: 'D3 Security',
         })
       );
     });

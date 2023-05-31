@@ -33,7 +33,7 @@ describe('D3SecurityConnector', () => {
     const connector = new D3SecurityConnector({
       configurationUtilities: actionsConfigMock.create(),
       connector: { id: '1', type: D3_SECURITY_CONNECTOR_ID },
-      config: { url: 'https://example.com/api', eventType: '', severity: '' },
+      config: { url: 'https://example.com/api' },
       secrets: { token: '123' },
       logger: loggingSystemMock.createLogger(),
       services: actionsMock.createServices(),
