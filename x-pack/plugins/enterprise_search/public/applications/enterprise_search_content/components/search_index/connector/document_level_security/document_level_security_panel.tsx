@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { EuiSplitPanel, EuiText, EuiSpacer } from '@elastic/eui';
+import { EuiSplitPanel, EuiText, EuiTitle, EuiSpacer } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
@@ -21,14 +21,14 @@ export const DocumentLevelSecurityPanel: React.FC<DocumentLevelSecurityPanelProp
   return (
     <EuiSplitPanel.Outer hasBorder hasShadow={false}>
       <EuiSplitPanel.Inner>
-        <EuiText>
+        <EuiTitle>
           <h4>
             {i18n.translate(
               'xpack.enterpriseSearch.connector.documentLevelSecurity.enablePanel.heading',
               { defaultMessage: 'Document Level Security' }
             )}
           </h4>
-        </EuiText>
+        </EuiTitle>
         <EuiSpacer />
         <EuiText size="s">
           <p>
