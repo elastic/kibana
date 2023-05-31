@@ -10352,6 +10352,10 @@
                 "path": "x-pack/plugins/saved_objects_tagging/server/saved_objects/tag.ts"
               },
               {
+                "plugin": "visualizations",
+                "path": "src/plugins/visualizations/server/saved_objects/visualization.ts"
+              },
+              {
                 "plugin": "savedSearch",
                 "path": "src/plugins/saved_search/server/saved_objects/search.ts"
               },
@@ -10394,10 +10398,6 @@
               {
                 "plugin": "dashboard",
                 "path": "src/plugins/dashboard/server/dashboard_saved_object/dashboard_saved_object.ts"
-              },
-              {
-                "plugin": "visualizations",
-                "path": "src/plugins/visualizations/server/saved_objects/visualization.ts"
               },
               {
                 "plugin": "@kbn/core-test-helpers-so-type-serializer",
@@ -10795,7 +10795,7 @@
                 "section": "def-common.SavedObject",
                 "text": "SavedObject"
               },
-              "<Attributes>) => { path: string; uiCapabilitiesPath: string; }) | undefined"
+              "<Attributes>) => { path: string; uiCapabilitiesPath: string; } | undefined) | undefined"
             ],
             "path": "packages/core/saved-objects/core-saved-objects-server/src/saved_objects_management.ts",
             "deprecated": false,
@@ -10825,7 +10825,7 @@
               }
             ],
             "returnComment": [
-              "an object containing a `path` and `uiCapabilitiesPath` properties. the `path` is the path to\nthe object page, relative to the base path. `uiCapabilitiesPath` is the path to check in the\n{@link Capabilities | uiCapabilities} to check if the user has permission to access the object."
+              "undefined or an object containing a `path` and `uiCapabilitiesPath` properties. the `path` is the path to\nthe object page, relative to the base path. `uiCapabilitiesPath` is the path to check in the\n{@link Capabilities | uiCapabilities} to check if the user has permission to access the object."
             ]
           },
           {
