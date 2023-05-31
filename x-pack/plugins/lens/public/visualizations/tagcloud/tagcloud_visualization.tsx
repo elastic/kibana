@@ -99,7 +99,17 @@ export const getTagcloudVisualization = ({
             defaultMessage: 'Tags',
           }),
           layerId: state.layerId,
-          accessors: state.tagAccessor ? [{ columnId: state.tagAccessor }] : [],
+          accessors: state.tagAccessor
+            ? [
+                {
+                  columnId: state.tagAccessor,
+                  triggerIconType: 'colorBy',
+                  palette: paletteService
+                    .get(state.palette?.name || 'default')
+                    .getCategoricalColors(10, state.palette?.params),
+                }
+              ] 
+            : [],
           supportsMoreColumns: !state.tagAccessor,
           filterOperations: (op: OperationMetadata) => op.isBucketed && op.dataType === 'string',
           enableDimensionEditor: true,
