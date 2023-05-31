@@ -9,7 +9,7 @@
 import { uiActionsPluginMock } from '../mocks';
 import { createHelloWorldAction } from './test_samples';
 import { ActionDefinition } from '../actions';
-import { Trigger } from '../triggers';
+import type { Trigger } from '@kbn/ui-actions-browser';
 import { OverlayStart } from '@kbn/core/public';
 
 let action: ActionDefinition<{ name: string }>;
