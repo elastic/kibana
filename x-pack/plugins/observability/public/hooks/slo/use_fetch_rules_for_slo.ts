@@ -51,11 +51,8 @@ export function useFetchRulesForSlo({ sloIds }: Params): UseFetchRulesForSloResp
       queryFn: async () => {
         try {
           const body = JSON.stringify({
-            filter: `${sloIds?.reduce((acc, sloId, index, array) => {
-              return `${acc}alert.attributes.params.sloId:${sloId}${
-                index < array.length - 1 ? ' or ' : ''
-              }`;
-            }, '')}`,
+            filter:
+              sloIds?.map((sloId) => `alert.attributes.params.sloId:${sloId}`).join(' or ') ?? '',
             fields: ['params.sloId', 'name'],
             per_page: 1000,
           });
