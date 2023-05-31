@@ -2,16 +2,15 @@
 
 set -euo pipefail
 
-source .buildkite/scripts/common/util.sh
-
-.buildkite/scripts/bootstrap.sh
-node scripts/build_kibana_platform_plugins.js
+source .buildkite/scripts/steps/functional/common.sh
 
 export JOB=kibana-defend-workflows-cypress
+export KIBANA_INSTALL_DIR=${KIBANA_BUILD_LOCATION}
+
+Xvfb -screen 0 1680x946x24 :99 &
+
+export DISPLAY=:99
 
 echo "--- Defend Workflows Cypress tests"
 
-node scripts/functional_tests \
-  --debug --bail \
-  --config x-pack/test/defend_workflows_cypress/cli_config.ts
-
+yarn --cwd x-pack/plugins/security_solution cypress:dw:run

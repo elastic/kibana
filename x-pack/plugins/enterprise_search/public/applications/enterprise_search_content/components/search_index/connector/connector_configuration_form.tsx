@@ -25,6 +25,7 @@ import { i18n } from '@kbn/i18n';
 
 import { Status } from '../../../../../../common/types/api';
 import { DisplayType } from '../../../../../../common/types/connectors';
+import { KibanaLogic } from '../../../../shared/kibana';
 
 import { ConnectorConfigurationApiLogic } from '../../../api/connector/update_connector_configuration_api_logic';
 
@@ -32,6 +33,7 @@ import { ConnectorConfigurationField } from './connector_configuration_field';
 import { ConnectorConfigurationLogic } from './connector_configuration_logic';
 
 export const ConnectorConfigurationForm = () => {
+  const { productFeatures } = useValues(KibanaLogic);
   const { status } = useValues(ConnectorConfigurationApiLogic);
 
   const { localConfigView } = useValues(ConnectorConfigurationLogic);
@@ -57,6 +59,10 @@ export const ConnectorConfigurationForm = () => {
           tooltip,
           validation_errors: validationErrors,
         } = configEntry;
+
+        if (key === 'document_level_security' && !productFeatures.hasDocumentLevelSecurityEnabled) {
+          return null;
+        }
         const helpText = defaultValue
           ? i18n.translate(
               'xpack.enterpriseSearch.content.indices.configurationConnector.config.defaultValue',
