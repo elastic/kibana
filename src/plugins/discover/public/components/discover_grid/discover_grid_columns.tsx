@@ -65,6 +65,7 @@ function buildEuiGridColumn({
   dataView,
   defaultColumns,
   isSortEnabled,
+  isPlainRecord,
   toastNotifications,
   hasEditDataViewPermission,
   valueToStringConverter,
@@ -77,6 +78,7 @@ function buildEuiGridColumn({
   dataView: DataView;
   defaultColumns: boolean;
   isSortEnabled: boolean;
+  isPlainRecord: boolean;
   toastNotifications: ToastsStart;
   hasEditDataViewPermission: () => boolean;
   valueToStringConverter: ValueToStringConverter;
@@ -99,7 +101,7 @@ function buildEuiGridColumn({
   const column: EuiDataGridColumn = {
     id: columnName,
     schema: getSchemaByKbnType(dataViewField?.type),
-    isSortable: isSortEnabled && dataViewField?.sortable === true,
+    isSortable: isSortEnabled && (isPlainRecord || dataViewField?.sortable === true),
     displayAsText: columnDisplayName,
     actions: {
       showHide:
@@ -176,6 +178,7 @@ export function getEuiGridColumns({
   showTimeCol,
   defaultColumns,
   isSortEnabled,
+  isPlainRecord,
   services,
   hasEditDataViewPermission,
   valueToStringConverter,
@@ -189,6 +192,7 @@ export function getEuiGridColumns({
   showTimeCol: boolean;
   defaultColumns: boolean;
   isSortEnabled: boolean;
+  isPlainRecord: boolean;
   services: {
     uiSettings: IUiSettingsClient;
     toastNotifications: ToastsStart;
@@ -213,6 +217,7 @@ export function getEuiGridColumns({
       dataView,
       defaultColumns,
       isSortEnabled,
+      isPlainRecord,
       toastNotifications: services.toastNotifications,
       hasEditDataViewPermission,
       valueToStringConverter,
