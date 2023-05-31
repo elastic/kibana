@@ -618,9 +618,8 @@ export class FleetPlugin
           return new FleetToHostFilesClient(
             core.elasticsearch.client.asInternalUser,
             this.initializerContext.logger.get('fleetFiles', packageName),
-            // FIXME:PT define once we have new index patterns (defend workflows team issue #6553)
-            getFileMetadataIndexName(packageName),
-            getFileDataIndexName(packageName),
+            getFileMetadataIndexName(packageName, true),
+            getFileDataIndexName(packageName, true),
             maxFileBytes
           );
         },
