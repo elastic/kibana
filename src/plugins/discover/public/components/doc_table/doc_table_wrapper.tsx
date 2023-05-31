@@ -12,7 +12,7 @@ import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import type { SortOrder } from '@kbn/saved-search-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { Filter } from '@kbn/es-query';
-import  { getShouldShowFieldHandler,  type DataTableRecord } from '@kbn/unified-discover';
+import { getShouldShowFieldHandler, type DataTableRecord } from '@kbn/unified-discover';
 import { DocViewFilterFn } from '@kbn/unified-doc-viewer';
 import { DocViewRenderProps } from '@kbn/unified-doc-viewer/src/types';
 import { TableHeader } from './components/table_header/table_header';
