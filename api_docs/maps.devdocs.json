@@ -3291,29 +3291,13 @@
           },
           {
             "parentPluginId": "maps",
-            "id": "def-public.IVectorSource.getDefaultFields",
-            "type": "Function",
-            "tags": [],
-            "label": "getDefaultFields",
-            "description": [],
-            "signature": [
-              "() => Promise<Record<string, Record<string, string>>>"
-            ],
-            "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "maps",
             "id": "def-public.IVectorSource.addFeature",
             "type": "Function",
             "tags": [],
             "label": "addFeature",
             "description": [],
             "signature": [
-              "(geometry: GeoJSON.Geometry | GeoJSON.Position[], defaultFields: Record<string, Record<string, string>>) => Promise<void>"
+              "(geometry: GeoJSON.Geometry | GeoJSON.Position[]) => Promise<void>"
             ],
             "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
             "deprecated": false,
@@ -3328,21 +3312,6 @@
                 "description": [],
                 "signature": [
                   "GeoJSON.Geometry | GeoJSON.Position[]"
-                ],
-                "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "maps",
-                "id": "def-public.IVectorSource.addFeature.$2",
-                "type": "Object",
-                "tags": [],
-                "label": "defaultFields",
-                "description": [],
-                "signature": [
-                  "Record<string, Record<string, string>>"
                 ],
                 "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
                 "deprecated": false,
