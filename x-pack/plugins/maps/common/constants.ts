@@ -23,17 +23,16 @@ export const INITIAL_LAYERS_KEY = 'initialLayers';
 
 export const MAPS_APP_PATH = `app/${APP_ID}`;
 export const MAP_PATH = 'map';
-export const GIS_API_PATH = `api/${APP_ID}`;
-export const INDEX_SETTINGS_API_PATH = `${GIS_API_PATH}/indexSettings`;
-export const FONTS_API_PATH = `${GIS_API_PATH}/fonts`;
-export const INDEX_SOURCE_API_PATH = `${GIS_API_PATH}/docSource`;
-export const API_ROOT_PATH = `/${GIS_API_PATH}`;
-export const INDEX_FEATURE_PATH = `/${GIS_API_PATH}/feature`;
-export const GET_MATCHING_INDEXES_PATH = `/${GIS_API_PATH}/getMatchingIndexes`;
-export const CHECK_IS_DRAWING_INDEX = `/${GIS_API_PATH}/checkIsDrawingIndex`;
+export const GIS_INTERNAL_PATH = `internal/${APP_ID}`;
+export const INDEX_SETTINGS_API_PATH = `${GIS_INTERNAL_PATH}/indexSettings`;
+export const FONTS_API_PATH = `${GIS_INTERNAL_PATH}/fonts`;
+export const INDEX_SOURCE_API_PATH = `${GIS_INTERNAL_PATH}/docSource`;
+export const INDEX_FEATURE_PATH = `/${GIS_INTERNAL_PATH}/feature`;
+export const GET_MATCHING_INDEXES_PATH = `/${GIS_INTERNAL_PATH}/getMatchingIndexes`;
+export const CHECK_IS_DRAWING_INDEX = `/${GIS_INTERNAL_PATH}/checkIsDrawingIndex`;
+export const MVT_GETTILE_API_PATH = `/${GIS_INTERNAL_PATH}/mvt/getTile`;
+export const MVT_GETGRIDTILE_API_PATH = `/${GIS_INTERNAL_PATH}/mvt/getGridTile`;
 
-export const MVT_GETTILE_API_PATH = 'mvt/getTile';
-export const MVT_GETGRIDTILE_API_PATH = 'mvt/getGridTile';
 export const OPEN_LAYER_WIZARD = 'openLayerWizard';
 
 // Identifies centroid feature.
