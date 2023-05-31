@@ -5,6 +5,8 @@
  * 2.0.
  */
 import { type TypeOf, schema } from '@kbn/config-schema';
+import { Benchmark } from '../types';
+import { PackagePolicy } from '@kbn/fleet-plugin/common';
 
 export const DEFAULT_BENCHMARKS_PER_PAGE = 20;
 export const BENCHMARK_PACKAGE_POLICY_PREFIX = 'package_policy.';
@@ -56,7 +58,14 @@ export const benchmarksQueryParamsSchema = schema.object({
   /**
    * Benchmark filter
    */
-  benchmark_name: schema.maybe(schema.string()),
+  package_policy_name: schema.maybe(schema.string()),
 });
 
 export type BenchmarksQueryParams = TypeOf<typeof benchmarksQueryParamsSchema>;
+
+export interface GetBenchmarkResponse {
+  items: Benchmark[];
+  total: number;
+  page: number;
+  perPage: number;
+}

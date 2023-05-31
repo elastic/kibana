@@ -31,7 +31,7 @@ export const useCspBenchmarkIntegrations = ({
 }: UseCspBenchmarkIntegrationsProps) => {
   const { http } = useKibana().services;
   const query: BenchmarksQueryParams = {
-    benchmark_name: name,
+    package_policy_name: name,
     per_page: perPage,
     page,
     sort_field: sortField,

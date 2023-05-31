@@ -78,15 +78,15 @@ describe('benchmarks API', () => {
       });
     });
 
-    it('expect to find benchmark_name', async () => {
+    it('expect to find package_policy_name', async () => {
       const validatedQuery = benchmarksQueryParamsSchema.validate({
-        benchmark_name: 'my_cis_benchmark',
+        package_policy_name: 'my_cis_benchmark',
       });
 
       expect(validatedQuery).toMatchObject({
         page: 1,
         per_page: DEFAULT_BENCHMARKS_PER_PAGE,
-        benchmark_name: 'my_cis_benchmark',
+        package_policy_name: 'my_cis_benchmark',
       });
     });
 

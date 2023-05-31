@@ -14,7 +14,10 @@ import {
   CLOUD_SECURITY_POSTURE_PACKAGE_NAME,
   POSTURE_TYPE_ALL,
 } from '../../../common/constants';
-import { benchmarksQueryParamsSchema } from '../../../common/schemas/benchmark';
+import {
+  GetBenchmarkResponse,
+  benchmarksQueryParamsSchema,
+} from '../../../common/schemas/benchmark';
 import type { Benchmark } from '../../../common/types';
 import {
   getBenchmarkFromPackagePolicy,
@@ -128,11 +131,13 @@ export const defineGetBenchmarksRoute = (router: CspRouter): void =>
           cspPackagePolicies.items
         );
 
+        const getBenchmarkResponse: GetBenchmarkResponse = {
+          ...cspPackagePolicies,
+          items: benchmarks,
+        };
+
         return response.ok({
-          body: {
-            ...cspPackagePolicies,
-            items: benchmarks,
-          },
+          body: getBenchmarkResponse,
         });
       } catch (err) {
         const error = transformError(err);
