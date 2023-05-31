@@ -28,11 +28,13 @@ const SAVED_QUERY_ATTRS_CONFIG = schema.object({
 export function registerSavedQueryRoutes({ http }: CoreSetup): void {
   const router = http.createRouter<SavedQueryRouteHandlerContext>();
 
-  router.post(
+  router.versioned.post({ path: `${SAVED_QUERY_PATH}/_create`, access: 'internal' }).addVersion(
     {
-      path: `${SAVED_QUERY_PATH}/_create`,
+      version: '1',
       validate: {
-        body: SAVED_QUERY_ATTRS_CONFIG,
+        request: {
+          body: SAVED_QUERY_ATTRS_CONFIG,
+        },
       },
     },
     async (context, request, response) => {
@@ -47,12 +49,14 @@ export function registerSavedQueryRoutes({ http }: CoreSetup): void {
     }
   );
 
-  router.put(
+  router.versioned.put({ path: `${SAVED_QUERY_PATH}/{id}`, access: 'internal' }).addVersion(
     {
-      path: `${SAVED_QUERY_PATH}/{id}`,
+      version: '1',
       validate: {
-        params: SAVED_QUERY_ID_CONFIG,
-        body: SAVED_QUERY_ATTRS_CONFIG,
+        request: {
+          params: SAVED_QUERY_ID_CONFIG,
+          body: SAVED_QUERY_ATTRS_CONFIG,
+        },
       },
     },
     async (context, request, response) => {
@@ -68,11 +72,13 @@ export function registerSavedQueryRoutes({ http }: CoreSetup): void {
     }
   );
 
-  router.get(
+  router.versioned.get({ path: `${SAVED_QUERY_PATH}/{id}`, access: 'internal' }).addVersion(
     {
-      path: `${SAVED_QUERY_PATH}/{id}`,
+      version: '1',
       validate: {
-        params: SAVED_QUERY_ID_CONFIG,
+        request: {
+          params: SAVED_QUERY_ID_CONFIG,
+        },
       },
     },
     async (context, request, response) => {
@@ -88,10 +94,12 @@ export function registerSavedQueryRoutes({ http }: CoreSetup): void {
     }
   );
 
-  router.get(
+  router.versioned.get({ path: `${SAVED_QUERY_PATH}/_count`, access: 'internal' }).addVersion(
     {
-      path: `${SAVED_QUERY_PATH}/_count`,
-      validate: {},
+      version: '1',
+      validate: {
+        request: {},
+      },
     },
     async (context, request, response) => {
       try {
@@ -105,15 +113,17 @@ export function registerSavedQueryRoutes({ http }: CoreSetup): void {
     }
   );
 
-  router.post(
+  router.versioned.post({ path: `${SAVED_QUERY_PATH}/_find`, access: 'internal' }).addVersion(
     {
-      path: `${SAVED_QUERY_PATH}/_find`,
+      version: '1',
       validate: {
-        body: schema.object({
-          search: schema.string({ defaultValue: '' }),
-          perPage: schema.number({ defaultValue: 50 }),
-          page: schema.number({ defaultValue: 1 }),
-        }),
+        request: {
+          body: schema.object({
+            search: schema.string({ defaultValue: '' }),
+            perPage: schema.number({ defaultValue: 50 }),
+            page: schema.number({ defaultValue: 1 }),
+          }),
+        },
       },
     },
     async (context, request, response) => {
@@ -128,10 +138,12 @@ export function registerSavedQueryRoutes({ http }: CoreSetup): void {
     }
   );
 
-  router.post(
+  router.versioned.post({ path: `${SAVED_QUERY_PATH}/_all`, access: 'internal' }).addVersion(
     {
-      path: `${SAVED_QUERY_PATH}/_all`,
-      validate: {},
+      version: '1',
+      validate: {
+        request: {},
+      },
     },
     async (context, request, response) => {
       try {
@@ -145,11 +157,13 @@ export function registerSavedQueryRoutes({ http }: CoreSetup): void {
     }
   );
 
-  router.delete(
+  router.versioned.delete({ path: `${SAVED_QUERY_PATH}/{id}`, access: 'internal' }).addVersion(
     {
-      path: `${SAVED_QUERY_PATH}/{id}`,
+      version: '1',
       validate: {
-        params: SAVED_QUERY_ID_CONFIG,
+        request: {
+          params: SAVED_QUERY_ID_CONFIG,
+        },
       },
     },
     async (context, request, response) => {
