@@ -5,19 +5,71 @@
  * 2.0.
  */
 
-// Use any of the following 3 options to show the assistant overlay:
-/** OPTION1: an icon button that shows the assistant overlay */
-export { MagicButton } from './impl/magic_button';
+// To integrate the assistant into a Kibana app, perform the following three steps:
 
-/** OPTION2: an icon button with text that shows the assistant overlay */
+// Step 1: Wrap your Kibana app in the `AssistantProvider` component. This typically
+// happens in the root of your app. Optionally provide a custom title for the assistant:
+
+/** provides context (from the app) to the assistant, and injects Kibana services, like `http` */
+export { AssistantProvider } from './impl/assistant_context';
+
+// Step 2: Add the `AssistantOverlay` component to your app. This component displays the assistant
+// overlay in a modal, bound to a shortcut key:
+
+/** modal overlay for Elastic Assistant conversations */
+export { AssistantOverlay } from './impl/assistant/assistant_overlay';
+
+// In addition to the `AssistantOverlay`, or as an alternative, you may use the `Assistant` component
+// to display the assistant without the modal overlay:
+
+/** this component renders the Assistant without the modal overlay to, for example, render it in a Timeline tab */
+export { Assistant } from './impl/assistant';
+
+// Step 3: Wherever you want to bring context into the assistant, use the any combination of the following
+// components and hooks:
+// - `NewChat` component
+// - `NewChatById` component
+// - `useAssistantOverlay` hook
+
+/**
+ * `NewChat` displays a _New chat_ icon button, providing all the context
+ * necessary to start a new chat. You may optionally style the button icon,
+ * or override the default _New chat_ text with custom content, like `🪄✨`
+ *
+ * USE THIS WHEN: All the data necessary to start a new chat is available
+ * in the same part of the React tree as the _New chat_ button.
+ */
 export { NewChat } from './impl/new_chat';
 
-/** OPTION3: this hook shows the assistant overlay */
+/**
+ * `NewChatByID` displays a _New chat_ icon button by providing only the `promptContextId`
+ * of a context that was (already) registered by the `useAssistantOverlay` hook. You may
+ * optionally style the button icon, or override the default _New chat_ text with custom
+ * content, like {'🪄✨'}
+ *
+ * USE THIS WHEN: all the data necessary to start a new chat is NOT available
+ * in the same part of the React tree as the _New chat_ button. When paired
+ * with the `useAssistantOverlay` hook, this option enables context to be be
+ * registered where the data is available, and then the _New chat_ button can be displayed
+ * in another part of the tree.
+ */
+export { NewChatById } from './impl/new_chat_by_id';
+
+/**
+ * `useAssistantOverlay` is a hook that registers context with the assistant overlay, and
+ * returns an optional `showAssistantOverlay` function to display the assistant overlay.
+ * As an alterative to using the `showAssistantOverlay` returned from this hook, you may
+ * use the `NewChatById` component and pass it the `promptContextId` returned by this hook.
+ *
+ * USE THIS WHEN: You want to register context in one part of the tree, and then show
+ * a _New chat_ button in another part of the tree without passing around the data, or when
+ * you want to build a custom `New chat` button with features not not provided by the
+ * `NewChat` component.
+ */
 export { useAssistantOverlay } from './impl/assistant/use_assistant_overlay';
 
-// Use the following component to embed the assistant directly in a page, with no overlay:
-/** this component renders the Assistant without the overlay to, for example, render it in a Timeline tab */
-export { Assistant } from './impl/assistant';
+/** a helper that enriches content returned from a query with action buttons */
+export { analyzeMarkdown } from './impl/assistant/use_conversation/helpers';
 
 // Sample content is exported with the following:
 /** sample content */
@@ -29,9 +81,6 @@ export * as SYSTEM_PROMPTS from './impl/content/prompts/system/translations';
 /** i18n translations of user prompts */
 export * as USER_PROMPTS from './impl/content/prompts/user/translations';
 
-/** a helper that enriches content returned from a query with action buttons */
-export { analyzeMarkdown } from './impl/assistant/use_conversation/helpers';
-
 export type {
   /** for rendering results in a code block */
   CodeBlockDetails,
@@ -39,16 +88,21 @@ export type {
   QueryType,
 } from './impl/assistant/use_conversation/helpers';
 
-/** modal container for Security Assistant conversations */
-export { AssistantOverlay } from './impl/assistant/assistant_overlay';
-
-/** provides context (from the app) to the assistant */
-export { AssistantProvider } from './impl/assistant_context';
-
 /** provides configuration to the assistant */
 export type { AssistantUiSettings } from './impl/assistant/helpers';
 
 /** serialized conversations */
 export type { Conversation, Message } from './impl/assistant_context/types';
 
+/**
+ * This interface is used to pass context to the assistant,
+ * for the purpose of building prompts. Examples of context include:
+ * - a single alert
+ * - multiple alerts
+ * - a single event
+ * - multiple events
+ * - markdown
+ * - csv
+ * - anything else that the LLM can interpret
+ */
 export type { PromptContext } from './impl/assistant/prompt_context/types';

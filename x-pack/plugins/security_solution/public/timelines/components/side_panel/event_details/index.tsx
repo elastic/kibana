@@ -25,8 +25,10 @@ import { useSpaceId } from '../../../../common/hooks/use_space_id';
 import { EndpointIsolateSuccess } from '../../../../common/components/endpoint/host_isolation';
 import { HostIsolationPanel } from '../../../../detections/components/host_isolation';
 import {
+  ALERT_SUMMARY_CONVERSATION_ID,
   ALERT_SUMMARY_CONTEXT_DESCRIPTION,
   ALERT_SUMMARY_VIEW_CONTEXT_TOOLTIP,
+  EVENT_SUMMARY_CONVERSATION_ID,
   EVENT_SUMMARY_CONTEXT_DESCRIPTION,
   EVENT_SUMMARY_VIEW_CONTEXT_TOOLTIP,
   SUMMARY_VIEW,
@@ -94,18 +96,15 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
     [detailsData]
   );
 
-  const { promptContextId } = useAssistantOverlay({
-    conversationId: 'alertSummary',
-    promptContext: {
-      category: isAlert ? 'alert' : 'event',
-      description: isAlert
-        ? ALERT_SUMMARY_CONTEXT_DESCRIPTION(view)
-        : EVENT_SUMMARY_CONTEXT_DESCRIPTION(view),
-      getPromptContext,
-      suggestedUserPrompt: USER_PROMPTS.EXPLAIN_THEN_SUMMARIZE_SUGGEST_INVESTIGATION_GUIDE_NON_I18N,
-      tooltip: isAlert ? ALERT_SUMMARY_VIEW_CONTEXT_TOOLTIP : EVENT_SUMMARY_VIEW_CONTEXT_TOOLTIP,
-    },
-  });
+  const { promptContextId } = useAssistantOverlay(
+    isAlert ? 'alert' : 'event',
+    isAlert ? ALERT_SUMMARY_CONVERSATION_ID : EVENT_SUMMARY_CONVERSATION_ID,
+    isAlert ? ALERT_SUMMARY_CONTEXT_DESCRIPTION(view) : EVENT_SUMMARY_CONTEXT_DESCRIPTION(view),
+    getPromptContext,
+    null,
+    USER_PROMPTS.EXPLAIN_THEN_SUMMARIZE_SUGGEST_INVESTIGATION_GUIDE_NON_I18N,
+    isAlert ? ALERT_SUMMARY_VIEW_CONTEXT_TOOLTIP : EVENT_SUMMARY_VIEW_CONTEXT_TOOLTIP
+  );
 
   const header = useMemo(
     () =>

@@ -5,41 +5,84 @@
  * 2.0.
  */
 
-import { useCallback, useEffect, useMemo, useRef } from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
 
 import { useAssistantContext } from '../../assistant_context';
 import { getUniquePromptContextId } from '../../assistant_context/helpers';
 import type { PromptContext } from '../prompt_context/types';
 
-interface Props {
-  promptContext?: Omit<PromptContext, 'id'>;
-  promptContextId?: string;
-  conversationId?: string;
-}
 interface UseAssistantOverlay {
   showAssistantOverlay: (show: boolean) => void;
   promptContextId: string;
 }
 
-export const useAssistantOverlay = ({
-  conversationId,
-  promptContext,
-  promptContextId,
-}: Props): UseAssistantOverlay => {
-  // create a unique prompt context id if one is not provided:
-  const _promptContextId = useMemo(
-    () => promptContextId ?? getUniquePromptContextId(),
-    [promptContextId]
-  );
+/**
+ * `useAssistantOverlay` is a hook that registers context with the assistant overlay, and
+ * returns an optional `showAssistantOverlay` function to display the assistant overlay.
+ * As an alterative to using the `showAssistantOverlay` returned from this hook, you may
+ * use the `NewChatById` component and pass it the `promptContextId` returned by this hook.
+ *
+ * USE THIS WHEN: You want to register context in one part of the tree, and then show
+ * a _New chat_ button in another part of the tree without passing around the data, or when
+ * you want to build a custom `New chat` button with features not not provided by the
+ * `NewChat` component.
+ */
+export const useAssistantOverlay = (
+  /**
+   * The category of data, e.g. `alert | alerts | event | events | string`
+   *
+   * `category` helps the assistant display the most relevant user prompts
+   */
+  category: PromptContext['category'],
 
-  const _promptContextRef = useRef<PromptContext | undefined>(
-    promptContext != null
-      ? {
-          ...promptContext,
-          id: _promptContextId,
-        }
-      : undefined
+  /**
+   * optionally automatically add this context to a specific conversation when the assistant is displayed
+   */
+  conversationId: string | null,
+
+  /**
+   * The assistant will display this **short**, static description
+   * in the context pill
+   */
+  description: PromptContext['description'],
+
+  /**
+   * The assistant will invoke this function to retrieve the context data,
+   * which will be included in a prompt (e.g. the contents of an alert or an event)
+   */
+  getPromptContext: PromptContext['getPromptContext'],
+
+  /**
+   * Optionally provide a unique identifier for this prompt context, or accept the uuid default.
+   */
+  id: PromptContext['id'] | null,
+
+  /**
+   * An optional user prompt that's filled in, but not sent, when the Elastic Assistant opens
+   */
+  suggestedUserPrompt: PromptContext['suggestedUserPrompt'] | null,
+
+  /**
+   * The assistant will display this tooltip when the user hovers over the context pill
+   */
+  tooltip: PromptContext['tooltip']
+): UseAssistantOverlay => {
+  // memoize the props so that we can use them in the effect below:
+  const _category: PromptContext['category'] = useMemo(() => category, [category]);
+  const _description: PromptContext['description'] = useMemo(() => description, [description]);
+  const _getPromptContext: PromptContext['getPromptContext'] = useMemo(
+    () => getPromptContext,
+    [getPromptContext]
   );
+  const promptContextId: PromptContext['id'] = useMemo(
+    () => id ?? getUniquePromptContextId(),
+    [id]
+  );
+  const _suggestedUserPrompt: PromptContext['suggestedUserPrompt'] = useMemo(
+    () => suggestedUserPrompt ?? undefined,
+    [suggestedUserPrompt]
+  );
+  const _tooltip = useMemo(() => tooltip, [tooltip]);
 
   // the assistant context is used to show/hide the assistant overlay:
   const {
@@ -51,31 +94,42 @@ export const useAssistantOverlay = ({
   // proxy show / hide calls to assistant context, using our internal prompt context id:
   const showAssistantOverlay = useCallback(
     (showOverlay: boolean) => {
-      assistantContextShowOverlay({
-        showOverlay,
-        promptContextId: _promptContextId,
-        conversationId,
-      });
+      if (promptContextId != null) {
+        assistantContextShowOverlay({
+          showOverlay,
+          promptContextId,
+          conversationId: conversationId ?? undefined,
+        });
+      }
     },
-    [assistantContextShowOverlay, _promptContextId, conversationId]
+    [assistantContextShowOverlay, conversationId, promptContextId]
   );
 
-  useEffect(
-    () => () => unRegisterPromptContext(_promptContextId),
-    [_promptContextId, unRegisterPromptContext]
-  );
+  useEffect(() => {
+    unRegisterPromptContext(promptContextId); // a noop if the current prompt context id is not registered
 
-  if (
-    promptContext != null &&
-    (_promptContextRef.current?.category !== promptContext?.category ||
-      _promptContextRef.current?.description !== promptContext?.description ||
-      _promptContextRef.current?.getPromptContext !== promptContext?.getPromptContext ||
-      _promptContextRef.current?.suggestedUserPrompt !== promptContext?.suggestedUserPrompt ||
-      _promptContextRef.current?.tooltip !== promptContext?.tooltip)
-  ) {
-    _promptContextRef.current = { ...promptContext, id: _promptContextId };
-    registerPromptContext(_promptContextRef.current);
-  }
+    const newContext: PromptContext = {
+      category: _category,
+      description: _description,
+      getPromptContext: _getPromptContext,
+      id: promptContextId,
+      suggestedUserPrompt: _suggestedUserPrompt,
+      tooltip: _tooltip,
+    };
 
-  return { promptContextId: _promptContextId, showAssistantOverlay };
+    registerPromptContext(newContext);
+
+    return () => unRegisterPromptContext(promptContextId);
+  }, [
+    _category,
+    _description,
+    _getPromptContext,
+    _suggestedUserPrompt,
+    _tooltip,
+    promptContextId,
+    registerPromptContext,
+    unRegisterPromptContext,
+  ]);
+
+  return { promptContextId, showAssistantOverlay };
 };

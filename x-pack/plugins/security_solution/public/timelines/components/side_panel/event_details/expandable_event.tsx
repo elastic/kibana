@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { NewChat } from '@kbn/elastic-assistant';
+import { NewChatById } from '@kbn/elastic-assistant';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { isEmpty } from 'lodash/fp';
 import {
@@ -33,6 +33,10 @@ import type { BrowserFields } from '../../../../common/containers/source';
 import { EventDetails } from '../../../../common/components/event_details/event_details';
 import type { TimelineEventsDetailsItem } from '../../../../../common/search_strategy/timeline';
 import * as i18n from './translations';
+import {
+  ALERT_SUMMARY_CONVERSATION_ID,
+  EVENT_SUMMARY_CONVERSATION_ID,
+} from '../../../../common/components/event_details/translations';
 import { PreferenceFormattedDate } from '../../../../common/components/formatted_date';
 import { SecurityPageName } from '../../../../../common/constants';
 import { useGetAlertDetailsFlyoutLink } from './use_get_alert_details_flyout_link';
@@ -149,7 +153,12 @@ export const ExpandableEventTitle = React.memo<ExpandableEventTitleProps>(
               <EuiFlexGroup alignItems="center" direction="row" gutterSize="none">
                 {promptContextId != null && (
                   <EuiFlexItem grow={false}>
-                    <NewChat conversationId="alertSummary" promptContextId={promptContextId} />
+                    <NewChatById
+                      conversationId={
+                        isAlert ? ALERT_SUMMARY_CONVERSATION_ID : EVENT_SUMMARY_CONVERSATION_ID
+                      }
+                      promptContextId={promptContextId}
+                    />
                   </EuiFlexItem>
                 )}
                 {isAlert && alertDetailsLink && (

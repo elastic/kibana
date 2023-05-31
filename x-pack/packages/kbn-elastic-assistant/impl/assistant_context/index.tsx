@@ -91,7 +91,7 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
   const registerPromptContext: RegisterPromptContext = useCallback(
     (promptContext: PromptContext) => {
       setPromptContexts((prevPromptContexts) => {
-        if (prevPromptContexts[promptContext.id] == null) {
+        if (promptContext != null && prevPromptContexts[promptContext.id] == null) {
           return updatePromptContexts({
             prevPromptContexts,
             promptContext,

@@ -172,6 +172,13 @@ export const TIMELINE_VIEW = i18n.translate('xpack.securitySolution.eventDetails
   defaultMessage: 'Timeline',
 });
 
+export const ALERT_SUMMARY_CONVERSATION_ID = i18n.translate(
+  'xpack.securitySolution.alertSummaryView.alertSummaryViewConversationId',
+  {
+    defaultMessage: 'Alert summary',
+  }
+);
+
 export const ALERT_SUMMARY_CONTEXT_DESCRIPTION = (view: string) =>
   i18n.translate('xpack.securitySolution.alertSummaryView.alertSummaryViewContextDescription', {
     defaultMessage: 'Alert (from {view})',
@@ -185,6 +192,13 @@ export const ALERT_SUMMARY_VIEW_CONTEXT_TOOLTIP = i18n.translate(
   }
 );
 
+export const EVENT_SUMMARY_CONVERSATION_ID = i18n.translate(
+  'xpack.securitySolution.alertSummaryView.eventSummaryViewConversationId',
+  {
+    defaultMessage: 'Event summary',
+  }
+);
+
 export const EVENT_SUMMARY_CONTEXT_DESCRIPTION = (view: string) =>
   i18n.translate('xpack.securitySolution.alertSummaryView.eventSummaryViewContextDescription', {
     defaultMessage: 'Event (from {view})',
@@ -194,6 +208,6 @@ export const EVENT_SUMMARY_CONTEXT_DESCRIPTION = (view: string) =>
 export const EVENT_SUMMARY_VIEW_CONTEXT_TOOLTIP = i18n.translate(
   'xpack.securitySolution.alertSummaryView.eventSummaryViewContextTooltip',
   {
-    defaultMessage: 'Use this event for context',
+    defaultMessage: 'Add this event as context',
   }
 );

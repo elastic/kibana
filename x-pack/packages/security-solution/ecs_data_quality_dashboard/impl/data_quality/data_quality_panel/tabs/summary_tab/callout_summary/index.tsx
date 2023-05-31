@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { NewChat } from '@kbn/elastic-assistant';
 import { copyToClipboard, EuiButton, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 
@@ -15,8 +16,14 @@ import { getMarkdownComments } from '../helpers';
 import { showInvalidCallout } from '../../incompatible_tab/helpers';
 import { CopyToClipboardButton } from '../../styles';
 import * as i18n from '../../../index_properties/translations';
-import { COPIED_RESULTS_TOAST_TITLE } from '../../../../translations';
+import {
+  COPIED_RESULTS_TOAST_TITLE,
+  DATA_QUALITY_PROMPT_CONTEXT_PILL,
+  DATA_QUALITY_PROMPT_CONTEXT_PILL_TOOLTIP,
+  DATA_QUALITY_SUGGESTED_USER_PROMPT,
+} from '../../../../translations';
 import type { IlmPhase, PartitionedFieldMetadata } from '../../../../types';
+import { DATA_QUALITY_DASHBOARD_CONVERSATION_ID } from './translations';
 
 interface Props {
   addSuccessToast: (toast: { title: string }) => void;
@@ -86,6 +93,8 @@ const CalloutSummaryComponent: React.FC<Props> = ({
     });
   }, [addSuccessToast, markdownComments]);
 
+  const getPromptContext = useCallback(async () => markdownComments.join('\n'), [markdownComments]);
+
   const showActions =
     showInvalidCallout(partitionedFieldMetadata.incompatible) ||
     showMissingTimestampCallout(partitionedFieldMetadata.ecsCompliant);
@@ -121,6 +130,17 @@ const CalloutSummaryComponent: React.FC<Props> = ({
               <CopyToClipboardButton aria-label={i18n.COPY_TO_CLIPBOARD} onClick={onCopy}>
                 {i18n.COPY_TO_CLIPBOARD}
               </CopyToClipboardButton>
+            </EuiFlexItem>
+
+            <EuiFlexItem grow={false}>
+              <NewChat
+                conversationId={DATA_QUALITY_DASHBOARD_CONVERSATION_ID}
+                category="data-quality-dashboard"
+                description={DATA_QUALITY_PROMPT_CONTEXT_PILL(indexName)}
+                getPromptContext={getPromptContext}
+                suggestedUserPrompt={DATA_QUALITY_SUGGESTED_USER_PROMPT}
+                tooltip={DATA_QUALITY_PROMPT_CONTEXT_PILL_TOOLTIP}
+              />
             </EuiFlexItem>
           </EuiFlexGroup>
 

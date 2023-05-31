@@ -1156,9 +1156,16 @@ export const EXPLAIN_THEN_SUMMARIZE_RULE_DETAILS = i18n.translate(
   }
 );
 
+export const DETECTION_RULES_CONVERSATION_ID = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleManagement.detectionRulesConversationId',
+  {
+    defaultMessage: 'Detection Rules',
+  }
+);
+
 export const RULE_MANAGEMENT_CONTEXT_TOOLTIP = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleManagement.ruleManagementContextTooltip',
   {
-    defaultMessage: 'Use this alert for context',
+    defaultMessage: 'Add this alert as context',
   }
 );

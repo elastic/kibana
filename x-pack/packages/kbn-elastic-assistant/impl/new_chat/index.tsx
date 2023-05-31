@@ -13,31 +13,67 @@ import { useAssistantOverlay } from '../assistant/use_assistant_overlay';
 
 import * as i18n from './translations';
 
-const NewChatComponent: React.FC<{
-  promptContext?: Omit<PromptContext, 'id'>;
-  promptContextId?: string;
+export type Props = Omit<PromptContext, 'id'> & {
+  children?: React.ReactNode;
+  /** Optionally automatically add this context to a conversation when the assistant is shown */
   conversationId?: string;
-}> = ({ conversationId, promptContext, promptContextId }) => {
-  const { showAssistantOverlay } = useAssistantOverlay({
-    conversationId,
-    promptContextId,
-    promptContext,
-  });
+  /** Defaults to `discuss`. If null, the button will not have an icon */
+  iconType?: string | null;
+  /** Optionally specify a well known ID, or default to a UUID */
+  promptContextId?: string;
+};
+
+const NewChatComponent: React.FC<Props> = ({
+  category,
+  children = i18n.NEW_CHAT,
+  conversationId,
+  description,
+  getPromptContext,
+  iconType,
+  promptContextId,
+  suggestedUserPrompt,
+  tooltip,
+}) => {
+  const { showAssistantOverlay } = useAssistantOverlay(
+    category,
+    conversationId ?? null,
+    description,
+    getPromptContext,
+    promptContextId ?? null,
+    suggestedUserPrompt,
+    tooltip
+  );
 
   const showOverlay = useCallback(() => {
     showAssistantOverlay(true);
   }, [showAssistantOverlay]);
 
+  const icon = useMemo(() => {
+    if (iconType === null) {
+      return undefined;
+    }
+
+    return iconType ?? 'discuss';
+  }, [iconType]);
+
   return useMemo(
     () => (
-      <EuiButtonEmpty onClick={showOverlay} iconType="discuss">
-        {i18n.NEW_CHAT}
+      <EuiButtonEmpty data-test-subj="newChat" onClick={showOverlay} iconType={icon}>
+        {children}
       </EuiButtonEmpty>
     ),
-    [showOverlay]
+    [children, icon, showOverlay]
   );
 };
 
 NewChatComponent.displayName = 'NewChatComponent';
 
+/**
+ * `NewChat` displays a _New chat_ icon button, providing all the context
+ * necessary to start a new chat. You may optionally style the button icon,
+ * or override the default _New chat_ text with custom content, like `🪄✨`
+ *
+ * USE THIS WHEN: All the data necessary to start a new chat is available
+ * in the same part of the React tree as the _New chat_ button.
+ */
 export const NewChat = React.memo(NewChatComponent);

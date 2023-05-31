@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { MagicButton } from '@kbn/elastic-assistant';
+import { NewChat } from '@kbn/elastic-assistant';
 import React, { useCallback, useMemo } from 'react';
 
 import { useRulesTableContext } from '../../components/rules_table/rules_table/rules_table_context';
@@ -37,16 +37,17 @@ export const SuperHeader: React.FC<{ children: React.ReactNode }> = React.memo((
         <>
           {i18n.PAGE_TITLE}{' '}
           {selectedRules.length > 0 && (
-            <MagicButton
-              conversationId="detectionRules"
-              promptContext={{
-                category: 'detection-rules',
-                description: i18n.RULE_MANAGEMENT_CONTEXT_DESCRIPTION,
-                getPromptContext,
-                suggestedUserPrompt: i18n.EXPLAIN_THEN_SUMMARIZE_RULE_DETAILS,
-                tooltip: i18n.RULE_MANAGEMENT_CONTEXT_TOOLTIP,
-              }}
-            />
+            <NewChat
+              category="detection-rules"
+              conversationId={i18n.DETECTION_RULES_CONVERSATION_ID}
+              description={i18n.RULE_MANAGEMENT_CONTEXT_DESCRIPTION}
+              getPromptContext={getPromptContext}
+              iconType={null}
+              suggestedUserPrompt={i18n.EXPLAIN_THEN_SUMMARIZE_RULE_DETAILS}
+              tooltip={i18n.RULE_MANAGEMENT_CONTEXT_TOOLTIP}
+            >
+              {'🪄✨'}
+            </NewChat>
           )}
         </>
       }

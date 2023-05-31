@@ -19,6 +19,9 @@ export interface CodeBlockDetails {
 export type QueryType = 'eql' | 'kql' | 'dsl' | 'json' | 'no-type';
 
 /**
+ * `analyzeMarkdown` is a helper that enriches content returned from a query
+ * with action buttons
+ *
  * Returns a list of code block details for each code block in the markdown,
  * including the type of code block and the content of the code block.
  *
