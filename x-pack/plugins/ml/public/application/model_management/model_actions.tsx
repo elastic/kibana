@@ -394,7 +394,6 @@ export function useModelActions({
       },
       {
         name: (model) => {
-          const hasPipelines = isPopulatedObject(model.pipelines);
           const hasDeployments = model.state === MODEL_STATE.STARTED;
           return (
             <EuiToolTip

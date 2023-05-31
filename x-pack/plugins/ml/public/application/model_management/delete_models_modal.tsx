@@ -151,11 +151,6 @@ export const DeleteModelsModal: FC<DeleteModelsModalProps> = ({ models, onClose 
               <FormattedMessage
                 id="xpack.ml.trainedModels.modelsList.deleteModal.forceDeleteLabel"
                 defaultMessage="Force delete?"
-                values={{
-                  pipelinesCount: modelsWithPipelines.reduce((acc, curr) => {
-                    return acc + Object.keys(curr.pipelines).length;
-                  }, 0),
-                }}
               />
             }
             checked={forceDelete}
