@@ -10,16 +10,7 @@ import * as pliConfig from './pli_config';
 describe('getProductAppFeatures', () => {
   it('returns the union of all enabled PLIs features', () => {
     // @ts-ignore reassigning readonly value for testing
-    pliConfig.PLI_APP_FEATURES = {
-      securityEssentials: {
-        foo: true,
-        bar: false,
-      },
-      securityComplete: {
-        baz: true,
-        qux: false,
-      },
-    };
+    pliConfig.PLI_APP_FEATURES = { securityEssentials: ['foo'], securityComplete: ['baz'] };
 
     expect(getProductAppFeatures(['securityEssentials', 'securityComplete'])).toEqual({
       foo: true,
@@ -29,14 +20,7 @@ describe('getProductAppFeatures', () => {
 
   it('returns a single PLI when only one is enabled', () => {
     // @ts-ignore reassigning readonly value for testing
-    pliConfig.PLI_APP_FEATURES = {
-      securityEssentials: {
-        foo: false,
-      },
-      securityComplete: {
-        foo: true,
-      },
-    };
+    pliConfig.PLI_APP_FEATURES = { securityEssentials: [], securityComplete: ['foo'] };
     expect(getProductAppFeatures(['securityEssentials', 'securityComplete'])).toEqual({
       foo: true,
     });
