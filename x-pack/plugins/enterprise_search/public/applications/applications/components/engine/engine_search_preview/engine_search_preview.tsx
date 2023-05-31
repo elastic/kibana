@@ -138,7 +138,7 @@ const ConfigurationPopover: React.FC<ConfigurationPopOverProps> = ({
         closePopover={setCloseConfiguration}
         button={
           <EuiFlexGroup alignItems="center" gutterSize="xs">
-            {hasSchemaConflicts ? <EuiIcon type="alert" color="danger" /> : <></>}
+            {hasSchemaConflicts && <EuiIcon type="alert" color="danger" />}
             <EuiButtonEmpty
               color="primary"
               iconType="arrowDown"
