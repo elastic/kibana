@@ -15,6 +15,7 @@ import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { InfraClientStartExports } from '@kbn/infra-plugin/public';
 import { ApmPluginSetupDeps } from '../../plugin';
 import { ConfigSchema } from '../..';
 
@@ -26,6 +27,7 @@ export interface ApmPluginContextValue {
   plugins: ApmPluginSetupDeps & { maps?: MapsStartApi };
   observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry;
   observability: ObservabilityPublicStart;
+  infra: InfraClientStartExports;
   dataViews: DataViewsPublicPluginStart;
   data: DataPublicPluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;

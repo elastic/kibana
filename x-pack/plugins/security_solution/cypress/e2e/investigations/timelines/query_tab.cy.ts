@@ -42,6 +42,7 @@ describe('Timeline query tab', () => {
           // This cy.wait is here because we cannot do a pipe on a timeline as that will introduce multiple URL
           // request responses and indeterminism since on clicks to activates URL's.
           .then(() => cy.wrap(timelineId).as('timelineId'))
+          // eslint-disable-next-line cypress/no-unnecessary-waiting
           .then(() => cy.wait(1000))
           .then(() =>
             addNoteToTimeline(getTimeline().notes, timelineId).should((response) =>
@@ -57,6 +58,7 @@ describe('Timeline query tab', () => {
 
   describe('Query tab', () => {
     beforeEach(function () {
+      login();
       visitWithoutDateRange(TIMELINES_URL);
       openTimelineById(this.timelineId).then(() => addFilter(getTimeline().filter));
     });

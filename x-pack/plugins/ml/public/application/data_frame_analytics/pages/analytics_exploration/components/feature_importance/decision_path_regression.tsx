@@ -13,7 +13,7 @@ import type {
   FeatureImportance,
   FeatureImportanceBaseline,
   TopClasses,
-} from '../../../../../../../common/types/feature_importance';
+} from '@kbn/ml-data-frame-analytics-utils';
 import { useDecisionPathData, isDecisionPathData } from './use_classification_path_data';
 import { DecisionPathChart } from './decision_path_chart';
 import { MissingDecisionPathCallout } from './missing_decision_path_callout';

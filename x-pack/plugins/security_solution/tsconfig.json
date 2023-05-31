@@ -158,6 +158,7 @@
     "@kbn/ecs",
     "@kbn/url-state",
     "@kbn/ml-anomaly-utils",
+    "@kbn/dev-proc-runner",
     "@kbn/core-http-browser-mocks"
   ]
 }

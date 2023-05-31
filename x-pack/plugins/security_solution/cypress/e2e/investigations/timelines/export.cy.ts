@@ -39,6 +39,11 @@ describe('Export timelines', () => {
     visitWithoutDateRange(TIMELINES_URL);
   });
 
+  beforeEach(() => {
+    login();
+    visitWithoutDateRange(TIMELINES_URL);
+  });
+
   it('Exports custom timeline(s)', function () {
     cy.log('Export a custom timeline via timeline actions');
 
