@@ -5,18 +5,52 @@
  * 2.0.
  */
 
-import React from 'react';
-import { EuiButton } from '@elastic/eui';
+import React, { useEffect, useState } from 'react';
+import { EuiButton, EuiFlexGroup, EuiSwitch, type EuiSwitchEvent, EuiFlexItem } from '@elastic/eui';
 import type { Meta, Story } from '@storybook/react/types-6-0';
 import { i18n } from '@kbn/i18n';
+import { useArgs } from '@storybook/addons';
+import { DecoratorFn } from '@storybook/react';
 import { AssetDetails } from './asset_details';
 import { decorateWithGlobalStorybookThemeProviders } from '../../test_utils/use_global_storybook_theme';
 import { FlyoutTabIds, type AssetDetailsProps } from './types';
 import { DecorateWithKibanaContext } from './__stories__/decorator';
 
+const links: AssetDetailsProps['links'] = ['apmServices', 'uptime'];
+
+const AssetDetailsDecorator: DecoratorFn = (story) => {
+  const [_, updateArgs] = useArgs();
+  const [checked, setChecked] = React.useState(true);
+
+  useEffect(() => {
+    if (checked) {
+      updateArgs({ links });
+    } else {
+      updateArgs({ links: [] });
+    }
+  }, [updateArgs, checked]);
+
+  const onChange = (e: EuiSwitchEvent) => {
+    setChecked(e.target.checked);
+  };
+
+  return (
+    <EuiFlexGroup direction="column">
+      <EuiFlexItem>
+        <EuiSwitch label="With Links" checked={checked} onChange={(e) => onChange(e)} />
+      </EuiFlexItem>
+      <EuiFlexItem>{story()}</EuiFlexItem>
+    </EuiFlexGroup>
+  );
+};
+
 const stories: Meta<AssetDetailsProps> = {
   title: 'infra/Asset Details View',
-  decorators: [decorateWithGlobalStorybookThemeProviders, DecorateWithKibanaContext],
+  decorators: [
+    decorateWithGlobalStorybookThemeProviders,
+    DecorateWithKibanaContext,
+    AssetDetailsDecorator,
+  ],
   component: AssetDetails,
   args: {
     node: {
@@ -46,7 +80,7 @@ const stories: Meta<AssetDetailsProps> = {
       from: 1683630468,
       to: 1683630469,
     },
-    selectedTabId: 'metadata',
+    activeTabId: 'metadata',
     tabs: [
       {
         id: FlyoutTabIds.METADATA,
@@ -63,16 +97,17 @@ const stories: Meta<AssetDetailsProps> = {
         'data-test-subj': 'hostsView-flyout-tabs-processes',
       },
     ],
-    links: ['apmServices', 'uptime'],
-  } as AssetDetailsProps,
-} as Meta;
+
+    links,
+  },
+};
 
 const PageTemplate: Story<AssetDetailsProps> = (args) => {
   return <AssetDetails {...args} />;
 };
 
 const FlyoutTemplate: Story<AssetDetailsProps> = (args) => {
-  const [isOpen, setIsOpen] = React.useState(false);
+  const [isOpen, setIsOpen] = useState(false);
   const closeFlyout = () => setIsOpen(false);
   return (
     <div>
