@@ -70,6 +70,7 @@ export const getDocumentCountStatsRequest = (
     includeSelectedSignificantTerm,
     selectedGroup
   );
+  console.log(`--@@filterCriteria`, filterCriteria);
 
   const rawAggs: Record<string, estypes.AggregationsAggregationContainer> = {
     eventRate: {

@@ -12,6 +12,9 @@ import { extractErrorMessage } from '@kbn/ml-error-utils';
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
+import type { Query } from '@kbn/data-plugin/common';
+import { merge } from 'lodash';
+import { SearchQueryLanguage } from '../../application/utils/search_utils';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import {
   NUMERIC_TYPE_LABEL,
@@ -78,11 +81,14 @@ export const computeChi2PValue = (
       ...normalizedBaselineTerms.map((term) => term.key.toString()),
       ...normalizedDriftedTerms.map((term) => term.key.toString()),
     ])
-  ).sort();
+  ).slice(0, 100);
 
   // Calculate the chi-squared statistic and degrees of freedom
   let chiSquared: number = 0;
   const degreesOfFreedom: number = allKeys.length - 1;
+
+  if (degreesOfFreedom === 0) return 1;
+
   allKeys.forEach((key) => {
     const baselineTerm = normalizedBaselineTerms.find((term) => term.key === key);
     const driftedTerm = normalizedDriftedTerms.find((term) => term.key === key);
@@ -141,6 +147,7 @@ const normalizeTerms = (
   const normalizedTerms: Array<Histogram & { relative_drift?: number }> = keys.map((term) => ({
     ...term,
     doc_count: 0,
+    percentage: 0,
   }));
 
   // Iterate over the original array and update the doc_count of each term in the new array
@@ -217,7 +224,7 @@ const processDataDriftResult = (
         }
         return {
           key,
-          relative_drift: Infinity,
+          relative_drift: 0,
         };
       })
       .sort((s1, s2) => s2.relative_drift - s1.relative_drift);
@@ -254,10 +261,15 @@ export const useFetchDataDriftResult = ({
   fields,
   currentDataView,
   timeRanges,
+  searchQuery,
+  searchString,
 }: {
   fields?: DataDriftField[];
   currentDataView?: DataView;
   timeRanges?: { reference: TimeRange; production: TimeRange };
+  searchQuery?: Query['query'];
+  searchString?: Query['query'];
+  searchQueryLanguage?: SearchQueryLanguage;
 } = {}) => {
   const dataSearch = useDataSearch();
   const [result, setResult] = useState<Result<Feature[]>>({
@@ -305,16 +317,38 @@ export const useFetchDataDriftResult = ({
             },
           };
         }
+        const query = searchQuery;
+        if (isPopulatedObject(query, ['match_all'])) {
+          delete query.match_all;
+        }
+        //
+        // const query =
+        //   (isPopulatedObject(searchQuery) &&
+        //     (searchQuery.match_all ||
+        //       (Array.isArray(searchQuery.bool.must) &&
+        //         searchQuery.bool.must.find((o: object) => isDefined(o.match_all))))) ? searchQuery
+        //   {};
+        // console.log(
+        //   `--@@searchQuery`,
+        //   searchQuery,
+        //
+        //   '\n--@@merged',
+        //   merge(query, { bool: { filter: [refRangeFilter] } })
+        // );
 
         try {
           const baselineRequest = {
             index: referenceIndex,
             body: {
               size: 0,
-              ...(refRangeFilter ? { query: { bool: { filter: [refRangeFilter] } } } : {}),
+              // @Todo: merge with searchQuery
+              ...(refRangeFilter
+                ? { query: merge(query, { bool: { filter: [refRangeFilter] } }) }
+                : { query }),
               aggs: {} as Record<string, estypes.AggregationsAggregationContainer>,
             },
           };
+          console.log(`--@@baselineRequest`, baselineRequest);
 
           // for each field with type "numeric", add a percentiles agg to the request
           for (const { field, type } of fields) {
@@ -343,9 +377,11 @@ export const useFetchDataDriftResult = ({
             }
           }
 
+          console.log(`--@@baselineResponse`, baselineRequest);
           const baselineResponse = await dataSearch(baselineRequest, signal);
 
-          if (!baselineResponse.aggregations) {
+          console.log(`--@@baselineResponse`, baselineResponse);
+          if (!baselineResponse?.aggregations) {
             setResult({
               data: undefined,
               status: FETCH_STATUS.FAILURE,
@@ -374,17 +410,22 @@ export const useFetchDataDriftResult = ({
             index: productionIndex,
             body: {
               size: 0,
-              ...(prodRangeFilter ? { query: { bool: { filter: [prodRangeFilter] } } } : {}),
+              ...(prodRangeFilter
+                ? { query: merge(query, { bool: { filter: [prodRangeFilter] } }) }
+                : { query }),
               aggs: {} as Record<string, estypes.AggregationsAggregationContainer>,
             },
           };
 
           // retrieve p-values for each numeric field
           for (const { field, type } of fields) {
-            if (type === DATA_DRIFT_TYPE.NUMERIC) {
+            if (
+              isPopulatedObject(baselineResponse?.aggregations, [`${field}_percentiles`]) &&
+              type === DATA_DRIFT_TYPE.NUMERIC
+            ) {
               // create ranges based on percentiles
               const percentiles = Object.values<number>(
-                baselineResponse.aggregations.numeric_unchangeable_percentiles?.values
+                baselineResponse.aggregations[`${field}_percentiles`].values
               );
               // Result is
               const ranges: Array<{ from?: number; to?: number }> = [];
@@ -443,7 +484,11 @@ export const useFetchDataDriftResult = ({
             index: referenceIndex,
             body: {
               size: 0,
-              ...(refRangeFilter ? { query: { bool: { filter: [refRangeFilter] } } } : {}),
+              ...(refRangeFilter
+                ? { query: merge(query, { bool: { filter: [refRangeFilter] } }) }
+                : { query }),
+
+              // ...(refRangeFilter ? { query: { bool: { filter: [refRangeFilter] } } } : {}),
               aggs: {} as Record<string, estypes.AggregationsAggregationContainer>,
             },
           };
@@ -452,7 +497,9 @@ export const useFetchDataDriftResult = ({
             index: productionIndex,
             body: {
               size: 0,
-              ...(prodRangeFilter ? { query: { bool: { filter: [prodRangeFilter] } } } : {}),
+              ...(prodRangeFilter
+                ? { query: merge(query, { bool: { filter: [prodRangeFilter] } }) }
+                : { query }),
               aggs: {} as Record<string, estypes.AggregationsAggregationContainer>,
             },
           };
@@ -472,6 +519,10 @@ export const useFetchDataDriftResult = ({
                 driftedResp.aggregations[`${field}_stats`].max
               );
               const interval = (max - min) / numBins;
+
+              if (interval === 0) {
+                continue;
+              }
               const offset = min;
               fieldRange[field] = { min, max, interval };
               referenceHistogramRequest.body.aggs[`${field}_histogram`] = {
@@ -499,8 +550,13 @@ export const useFetchDataDriftResult = ({
             }
           }
 
-          const productionHistogramResponse = await dataSearch(productionHistogramRequest, signal);
+          const [productionHistogramResponse, referenceHistogramResponse] = await Promise.all([
+            dataSearch(productionHistogramRequest, signal),
+            dataSearch(referenceHistogramRequest, signal),
+          ]);
+          console.log(`--@@productionHistogramRequest`, productionHistogramRequest);
 
+          console.log(`--@@productionHistogramResponse`, productionHistogramResponse);
           if (!productionHistogramResponse.aggregations) {
             setResult({
               data: undefined,
@@ -510,7 +566,11 @@ export const useFetchDataDriftResult = ({
             return;
           }
 
-          const referenceHistogramResponse = await dataSearch(referenceHistogramRequest, signal);
+          // const referenceHistogramResponse = await dataSearch(referenceHistogramRequest, signal);
+
+          console.log(`--@@referenceHistogramResponse`, referenceHistogramResponse);
+
+          console.log(`--@@referenceHistogramResponse`, referenceHistogramResponse);
 
           if (!referenceHistogramResponse.aggregations) {
             setResult({
@@ -531,9 +591,9 @@ export const useFetchDataDriftResult = ({
                 pValue: driftedResp.aggregations[`${field}_ks_test`].two_sided,
                 range: fieldRange[field],
                 referenceHistogram:
-                  referenceHistogramResponse.aggregations[`${field}_histogram`].buckets,
+                  referenceHistogramResponse.aggregations[`${field}_histogram`]?.buckets ?? [],
                 productionHistogram:
-                  productionHistogramResponse.aggregations[`${field}_histogram`].buckets,
+                  productionHistogramResponse.aggregations[`${field}_histogram`]?.buckets ?? [],
               };
             }
             if (type === DATA_DRIFT_TYPE.CATEGORICAL) {
@@ -554,6 +614,7 @@ export const useFetchDataDriftResult = ({
             status: FETCH_STATUS.SUCCESS,
           });
         } catch (e) {
+          console.log(`--@@e`, e);
           setResult({
             data: undefined,
             status: FETCH_STATUS.FAILURE,
@@ -569,7 +630,7 @@ export const useFetchDataDriftResult = ({
       };
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [dataSearch, JSON.stringify({ fields, timeRanges }), currentDataView?.id]
+    [dataSearch, JSON.stringify({ fields, timeRanges }), currentDataView?.id, searchString]
   );
   return result;
 };

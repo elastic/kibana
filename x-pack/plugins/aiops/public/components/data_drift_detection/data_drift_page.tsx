@@ -88,6 +88,10 @@ export const DataDriftDetectionPage: FC = () => {
       queryLanguage: SearchQueryLanguage;
       filters: Filter[];
     }) => {
+      console.log(`--@@searchParams`, searchParams);
+      // console.log(`--@@queryLanguage`, queryLanguage);
+      // console.log(`--@@filters`, filters);
+
       // When the user loads a saved search and then clears or modifies the query
       // we should remove the saved search and replace it with the index pattern id
       if (selectedSavedSearch !== null) {
@@ -110,10 +114,16 @@ export const DataDriftDetectionPage: FC = () => {
     'data_drift',
     aiopsListState,
     setGlobalState,
-    currentSelectedSignificantTerm,
-    currentSelectedGroup
+    undefined,
+    undefined
   );
 
+  console.log(
+    `--@@searchQueryLanguage, searchString, searchQuery`,
+    searchQueryLanguage,
+    searchString,
+    searchQuery
+  );
   const { sampleProbability, totalCount, documentCountStats, documentCountStatsCompare } =
     documentStats;
 
@@ -204,7 +214,13 @@ export const DataDriftDetectionPage: FC = () => {
 
           <EuiFlexItem>
             <EuiPanel paddingSize="m">
-              <DataDriftView windowParameters={windowParameters} dataView={dataView} />
+              <DataDriftView
+                windowParameters={windowParameters}
+                dataView={dataView}
+                searchString={searchString ?? ''}
+                searchQuery={searchQuery}
+                searchQueryLanguage={searchQueryLanguage}
+              />
             </EuiPanel>
           </EuiFlexItem>
         </EuiFlexGroup>

@@ -111,6 +111,16 @@ export const useData = (
       _timeBuckets.setInterval('auto');
       _timeBuckets.setBounds(timefilterActiveBounds);
       _timeBuckets.setBarTarget(barTarget);
+
+      console.log(
+        `--@@earliest timefilterActiveBounds.min?.valueOf()`,
+        timefilterActiveBounds.min?.valueOf()
+      );
+      console.log(
+        `--@@latest timefilterActiveBounds.max?.valueOf()`,
+        timefilterActiveBounds.max?.valueOf()
+      );
+
       return {
         earliest: timefilterActiveBounds.min?.valueOf(),
         latest: timefilterActiveBounds.max?.valueOf(),

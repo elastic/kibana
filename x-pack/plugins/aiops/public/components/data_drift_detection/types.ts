@@ -21,7 +21,7 @@ export interface ComparisionHistogram extends Histogram {
 // Show the overview table
 export interface Feature {
   featureName: string;
-  featureType: string;
+  featureType: DataDriftField['type'];
   driftDetected: boolean;
   similarityTestPValue: number;
   productionHistogram: Histogram[];
