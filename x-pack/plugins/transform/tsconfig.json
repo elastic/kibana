@@ -52,7 +52,6 @@
     "@kbn/ml-query-utils",
     "@kbn/charts-plugin",
     "@kbn/field-formats-plugin",
-    "@kbn/unified-field-list-plugin",
     "@kbn/shared-ux-router",
     "@kbn/saved-objects-management-plugin",
     "@kbn/saved-objects-finder-plugin",
@@ -62,6 +61,7 @@
     "@kbn/core-ui-settings-browser-mocks",
     "@kbn/core-ui-settings-browser",
     "@kbn/ml-error-utils",
+    "@kbn/unified-field-list",
   ],
   "exclude": [
     "target/**/*",

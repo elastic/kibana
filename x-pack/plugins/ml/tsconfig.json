@@ -85,12 +85,12 @@
     "@kbn/triggers-actions-ui-plugin",
     "@kbn/ui-actions-plugin",
     "@kbn/ui-theme",
-    "@kbn/unified-field-list-plugin",
     "@kbn/unified-search-plugin",
     "@kbn/usage-collection-plugin",
     "@kbn/utility-types",
     "@kbn/ml-error-utils",
     "@kbn/ml-anomaly-utils",
     "@kbn/ml-kibana-theme",
+    "@kbn/unified-field-list",
   ],
 }
