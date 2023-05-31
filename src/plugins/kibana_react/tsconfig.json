@@ -12,6 +12,8 @@
     "@kbn/test-jest-helpers",
     "@kbn/i18n",
     "@kbn/i18n-react",
+    "@kbn/react-kibana-context",
+    "@kbn/react-kibana-mount",
   ],
   "exclude": [
     "target/**/*",

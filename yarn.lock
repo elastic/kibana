@@ -4779,6 +4779,14 @@
   version "0.0.0"
   uid ""
 
+"@kbn/react-kibana-context@link:packages/react/kibana_context":
+  version "0.0.0"
+  uid ""
+
+"@kbn/react-kibana-mount@link:packages/react/kibana_mount":
+  version "0.0.0"
+  uid ""
+
 "@kbn/remote-clusters-plugin@link:x-pack/plugins/remote_clusters":
   version "0.0.0"
   uid ""

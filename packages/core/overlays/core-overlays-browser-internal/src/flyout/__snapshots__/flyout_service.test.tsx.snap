@@ -68,6 +68,10 @@ Array [
                       />
                     </EuiFlyout>
                   </CoreThemeProvider>,
+                  "globalStyles": false,
+                  "theme$": Observable {
+                    "_subscribe": [Function],
+                  },
                 },
                 Object {},
               ],
@@ -141,6 +145,10 @@ Array [
                       />
                     </EuiFlyout>
                   </CoreThemeProvider>,
+                  "globalStyles": false,
+                  "theme$": Observable {
+                    "_subscribe": [Function],
+                  },
                 },
                 Object {},
               ],

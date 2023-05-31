@@ -16,6 +16,8 @@
     "@kbn/ui-shared-deps-src",
     "@kbn/repo-info",
     "@kbn/dev-cli-runner",
+    "@kbn/react-kibana-context",
+    "@kbn/core-theme-browser",
   ],
   "exclude": [
     "target/**/*",

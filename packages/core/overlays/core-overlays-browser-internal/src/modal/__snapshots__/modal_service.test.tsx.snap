@@ -35,6 +35,10 @@ Array [
                       />
                     </EuiModal>
                   </CoreThemeProvider>,
+                  "globalStyles": false,
+                  "theme$": Observable {
+                    "_subscribe": [Function],
+                  },
                 },
                 Object {},
               ],
@@ -194,6 +198,10 @@ Array [
                       />
                     </EuiModal>
                   </CoreThemeProvider>,
+                  "globalStyles": false,
+                  "theme$": Observable {
+                    "_subscribe": [Function],
+                  },
                 },
                 Object {},
               ],
@@ -219,6 +227,10 @@ Array [
                       />
                     </EuiConfirmModal>
                   </CoreThemeProvider>,
+                  "globalStyles": false,
+                  "theme$": Observable {
+                    "_subscribe": [Function],
+                  },
                 },
                 Object {},
               ],
@@ -394,6 +406,10 @@ Array [
                       />
                     </EuiModal>
                   </CoreThemeProvider>,
+                  "globalStyles": false,
+                  "theme$": Observable {
+                    "_subscribe": [Function],
+                  },
                 },
                 Object {},
               ],
@@ -419,6 +435,10 @@ Array [
                       />
                     </EuiConfirmModal>
                   </CoreThemeProvider>,
+                  "globalStyles": false,
+                  "theme$": Observable {
+                    "_subscribe": [Function],
+                  },
                 },
                 Object {},
               ],
@@ -441,6 +461,10 @@ Array [
                       Some message
                     </EuiConfirmModal>
                   </CoreThemeProvider>,
+                  "globalStyles": false,
+                  "theme$": Observable {
+                    "_subscribe": [Function],
+                  },
                 },
                 Object {},
               ],
@@ -557,6 +581,10 @@ Array [
                       />
                     </EuiModal>
                   </CoreThemeProvider>,
+                  "globalStyles": false,
+                  "theme$": Observable {
+                    "_subscribe": [Function],
+                  },
                 },
                 Object {},
               ],
@@ -582,6 +610,10 @@ Array [
                       />
                     </EuiConfirmModal>
                   </CoreThemeProvider>,
+                  "globalStyles": false,
+                  "theme$": Observable {
+                    "_subscribe": [Function],
+                  },
                 },
                 Object {},
               ],
@@ -604,6 +636,10 @@ Array [
                       Some message
                     </EuiConfirmModal>
                   </CoreThemeProvider>,
+                  "globalStyles": false,
+                  "theme$": Observable {
+                    "_subscribe": [Function],
+                  },
                 },
                 Object {},
               ],
@@ -725,6 +761,10 @@ Array [
                       />
                     </EuiModal>
                   </CoreThemeProvider>,
+                  "globalStyles": false,
+                  "theme$": Observable {
+                    "_subscribe": [Function],
+                  },
                 },
                 Object {},
               ],
@@ -750,6 +790,10 @@ Array [
                       />
                     </EuiConfirmModal>
                   </CoreThemeProvider>,
+                  "globalStyles": false,
+                  "theme$": Observable {
+                    "_subscribe": [Function],
+                  },
                 },
                 Object {},
               ],
@@ -772,6 +816,10 @@ Array [
                       Some message
                     </EuiConfirmModal>
                   </CoreThemeProvider>,
+                  "globalStyles": false,
+                  "theme$": Observable {
+                    "_subscribe": [Function],
+                  },
                 },
                 Object {},
               ],
@@ -888,6 +936,10 @@ Array [
                       />
                     </EuiModal>
                   </CoreThemeProvider>,
+                  "globalStyles": false,
+                  "theme$": Observable {
+                    "_subscribe": [Function],
+                  },
                 },
                 Object {},
               ],
@@ -913,6 +965,10 @@ Array [
                       />
                     </EuiConfirmModal>
                   </CoreThemeProvider>,
+                  "globalStyles": false,
+                  "theme$": Observable {
+                    "_subscribe": [Function],
+                  },
                 },
                 Object {},
               ],
@@ -935,6 +991,10 @@ Array [
                       Some message
                     </EuiConfirmModal>
                   </CoreThemeProvider>,
+                  "globalStyles": false,
+                  "theme$": Observable {
+                    "_subscribe": [Function],
+                  },
                 },
                 Object {},
               ],
@@ -1118,6 +1178,10 @@ Array [
                       />
                     </EuiModal>
                   </CoreThemeProvider>,
+                  "globalStyles": false,
+                  "theme$": Observable {
+                    "_subscribe": [Function],
+                  },
                 },
                 Object {},
               ],
@@ -1191,6 +1255,10 @@ Array [
                       />
                     </EuiModal>
                   </CoreThemeProvider>,
+                  "globalStyles": false,
+                  "theme$": Observable {
+                    "_subscribe": [Function],
+                  },
                 },
                 Object {},
               ],
@@ -1269,6 +1337,10 @@ Array [
                       />
                     </EuiModal>
                   </CoreThemeProvider>,
+                  "globalStyles": false,
+                  "theme$": Observable {
+                    "_subscribe": [Function],
+                  },
                 },
                 Object {},
               ],
@@ -1342,6 +1414,10 @@ Array [
                       />
                     </EuiModal>
                   </CoreThemeProvider>,
+                  "globalStyles": false,
+                  "theme$": Observable {
+                    "_subscribe": [Function],
+                  },
                 },
                 Object {},
               ],
