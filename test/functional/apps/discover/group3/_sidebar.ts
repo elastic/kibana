@@ -414,7 +414,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
 
-        expect(await PageObjects.discover.getSidebarAriaDescription()).to.be(
+        expect(await PageObjects.unifiedFieldList.getSidebarAriaDescription()).to.be(
           '53 available fields. 0 empty fields. 3 meta fields.'
         );
       });
