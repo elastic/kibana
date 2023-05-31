@@ -10,6 +10,7 @@ import { useQuery } from '@tanstack/react-query';
 import { lastValueFrom } from 'rxjs';
 
 import { compact, map } from 'lodash';
+import { expandDottedObject } from '../../../../common/utils/expand_dotted';
 import type { ActionDetails, LogsEndpointActionWithHosts } from '../../../../common/endpoint/types';
 import { SortOrder } from '../../../../common/search_strategy/security_solution/response_actions/types';
 import type {
@@ -28,7 +29,6 @@ import type {
 interface GetAutomatedActionsListOptions {
   enabled: boolean;
 }
-
 export const useGetAutomatedActionList = (
   query: EndpointAutomatedActionListRequestQuery,
   { enabled }: GetAutomatedActionsListOptions
@@ -55,9 +55,15 @@ export const useGetAutomatedActionList = (
         )
       );
 
+      const items = map(responseData.edges, (edge) => {
+        if (edge.fields) {
+          return expandDottedObject(edge.fields, true);
+        }
+      });
+
       return {
         ...responseData,
-        items: compact(map(responseData.edges, '_source')),
+        items: compact(items),
       };
     },
     enabled,

@@ -18,7 +18,11 @@ export const endpointResponseAction = (
   Promise.all(
     each(agentIds, async (agent) =>
       endpointAppContextService.getActionCreateService().createActionFromAlert({
-        hosts,
+        hosts: {
+          [agent]: {
+            name: hosts[agent].name,
+          },
+        },
         endpoint_ids: [agent],
         alert_ids: alertIds,
         comment: responseAction.params.comment,

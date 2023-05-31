@@ -35,13 +35,16 @@ import { setWith } from 'lodash';
  *     },
  *   }
  */
-export const expandDottedObject = (dottedObj: object) => {
+export const expandDottedObject = (dottedObj: object, changeArrayOfLengthOneToString = false) => {
   if (Array.isArray(dottedObj)) {
     return dottedObj;
   }
   const returnObj = {};
   Object.entries(dottedObj).forEach(([key, value]) => {
-    setWith(returnObj, key, value, Object);
+    const isOneElementArray =
+      changeArrayOfLengthOneToString && Array.isArray(value) && value.length === 1;
+
+    setWith(returnObj, key, isOneElementArray ? value[0] : value, Object);
   });
   return returnObj;
 };
