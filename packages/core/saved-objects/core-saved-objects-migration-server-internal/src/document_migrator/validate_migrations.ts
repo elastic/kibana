@@ -64,42 +64,44 @@ export function validateTypeMigrations({
     const modelVersionMap =
       typeof type.modelVersions === 'function' ? type.modelVersions() : type.modelVersions ?? {};
 
-    if (Object.keys(modelVersionMap).length > 0 && !type.switchToModelVersionAt) {
-      throw new Error(
-        `Type ${type.name}: Uusing modelVersions requires to specify switchToModelVersionAt`
+    if (Object.keys(modelVersionMap).length > 0) {
+      if (!type.switchToModelVersionAt) {
+        throw new Error(
+          `Type ${type.name}: Using modelVersions requires to specify switchToModelVersionAt`
+        );
+      }
+
+      Object.entries(modelVersionMap).forEach(([version, definition]) => {
+        assertValidModelVersion(version);
+      });
+
+      const { min: minVersion, max: maxVersion } = Object.keys(modelVersionMap).reduce(
+        (minMax, rawVersion) => {
+          const version = Number.parseInt(rawVersion, 10);
+          minMax.min = Math.min(minMax.min, version);
+          minMax.max = Math.max(minMax.max, version);
+          return minMax;
+        },
+        { min: Infinity, max: -Infinity }
       );
-    }
 
-    Object.entries(modelVersionMap).forEach(([version, definition]) => {
-      assertValidModelVersion(version);
-    });
-
-    const { min: minVersion, max: maxVersion } = Object.keys(modelVersionMap).reduce(
-      (minMax, rawVersion) => {
-        const version = Number.parseInt(rawVersion, 10);
-        minMax.min = Math.min(minMax.min, version);
-        minMax.max = Math.max(minMax.max, version);
-        return minMax;
-      },
-      { min: Infinity, max: -Infinity }
-    );
-
-    if (minVersion > 1) {
-      throw new Error(`Type ${type.name}: model versioning must start with version 1`);
-    }
-    const missingVersions = getMissingVersions(
-      minVersion,
-      maxVersion,
-      Object.keys(modelVersionMap).map((v) => Number.parseInt(v, 10))
-    );
-    if (missingVersions.length) {
-      throw new Error(
-        `Type ${
-          type.name
-        }: gaps between model versions aren't allowed (missing versions: ${missingVersions.join(
-          ','
-        )})`
+      if (minVersion > 1) {
+        throw new Error(`Type ${type.name}: model versioning must start with version 1`);
+      }
+      const missingVersions = getMissingVersions(
+        minVersion,
+        maxVersion,
+        Object.keys(modelVersionMap).map((v) => Number.parseInt(v, 10))
       );
+      if (missingVersions.length) {
+        throw new Error(
+          `Type ${
+            type.name
+          }: gaps between model versions aren't allowed (missing versions: ${missingVersions.join(
+            ','
+          )})`
+        );
+      }
     }
   }
 
