@@ -102,7 +102,7 @@ describe('createConnectorDocument', () => {
       scheduling: {
         access_control: { enabled: false, interval: '0 0 0 * * ?' },
         incremental: { enabled: false, interval: '0 0 0 * * ?' },
-        full: { enabled: false, interval: '0 0 0 * * ?' }
+        full: { enabled: false, interval: '0 0 0 * * ?' },
       },
       service_type: null,
       status: ConnectorStatus.CREATED,
