@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import React, { useState, useMemo } from 'react';
+import React, { useState } from 'react';
 import {
-  EuiToolTip,
   EuiButton,
   EuiPopover,
   EuiIcon,
@@ -19,45 +18,25 @@ import {
 import { i18n } from '@kbn/i18n';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
-import { Visualization } from '../..';
-import { AddLayerFunction, FramePublicAPI } from '../../types';
+import { AddLayerFunction, VisualizationLayerDescription } from '../../types';
 import { LoadAnnotationLibraryFlyout } from './load_annotation_library_flyout';
 import type { ExtraAppendLayerArg } from './visualization';
 
 interface AddLayerButtonProps {
-  visualization: Visualization;
-  visualizationState: unknown;
-  addLayer: AddLayerFunction;
-  onAddLayerFromAnnotationGroup: (arg: ExtraAppendLayerArg) => void;
-  layersMeta: Pick<FramePublicAPI, 'datasourceLayers' | 'activeData'>;
+  supportedLayers: VisualizationLayerDescription[];
+  addLayer: AddLayerFunction<ExtraAppendLayerArg>;
   eventAnnotationService: EventAnnotationServiceType;
 }
 
-// this is a very generic implementation and some of the edgecases don't apply to the xy chart... We might want to clean up
 export function AddLayerButton({
-  visualization,
-  visualizationState,
+  supportedLayers,
   addLayer,
-  onAddLayerFromAnnotationGroup,
-  layersMeta,
   eventAnnotationService,
 }: AddLayerButtonProps) {
   const [showLayersChoice, toggleLayersChoice] = useState(false);
 
   const [isLoadLibraryVisible, setLoadLibraryFlyoutVisible] = useState(false);
 
-  const supportedLayers = useMemo(() => {
-    if (!visualization.appendLayer || !visualizationState) {
-      return null;
-    }
-    return visualization
-      .getSupportedLayers?.(visualizationState, layersMeta)
-      ?.filter(({ canAddViaMenu: hideFromMenu }) => !hideFromMenu);
-  }, [visualization, visualizationState, layersMeta]);
-
-  if (supportedLayers == null || !supportedLayers.length) {
-    return null;
-  }
   const annotationPanel = ({
     type,
     label,
@@ -70,7 +49,7 @@ export function AddLayerButton({
       toolTipContent,
       disabled,
       name: (
-        <EuiFlexGroup gutterSize="m">
+        <EuiFlexGroup gutterSize="m" responsive={false}>
           <EuiFlexItem>
             <span className="lnsLayerAddButton__label">{label}</span>
           </EuiFlexItem>
@@ -89,37 +68,7 @@ export function AddLayerButton({
       ['data-test-subj']: `lnsLayerAddButton-${type}`,
     };
   };
-  if (supportedLayers.length === 1) {
-    return (
-      <EuiToolTip
-        display="block"
-        title={i18n.translate('xpack.lens.xyChart.addLayer', {
-          defaultMessage: 'Add a layer',
-        })}
-        content={i18n.translate('xpack.lens.xyChart.addLayerTooltip', {
-          defaultMessage:
-            'Use multiple layers to combine visualization types or visualize different data views.',
-        })}
-        position="bottom"
-      >
-        <EuiButton
-          fullWidth
-          data-test-subj="lnsLayerAddButton"
-          aria-label={i18n.translate('xpack.lens.configPanel.addLayerButton', {
-            defaultMessage: 'Add layer',
-          })}
-          fill
-          color="text"
-          onClick={() => addLayer(supportedLayers[0].type)}
-          iconType="layers"
-        >
-          {i18n.translate('xpack.lens.configPanel.addLayerButton', {
-            defaultMessage: 'Add layer',
-          })}
-        </EuiButton>
-      </EuiToolTip>
-    );
-  }
+
   return (
     <>
       <EuiPopover
@@ -185,7 +134,7 @@ export function AddLayerButton({
                   name: i18n.translate('xpack.lens.configPanel.newAnnotation', {
                     defaultMessage: 'New annotation',
                   }),
-                  icon: 'plusInCircleFilled',
+                  icon: 'plusInCircle',
                   onClick: () => {
                     addLayer(LayerTypes.ANNOTATIONS);
                     toggleLayersChoice(false);
@@ -213,7 +162,9 @@ export function AddLayerButton({
           isLoadLibraryVisible={isLoadLibraryVisible}
           setLoadLibraryFlyoutVisible={setLoadLibraryFlyoutVisible}
           eventAnnotationService={eventAnnotationService}
-          addLayer={onAddLayerFromAnnotationGroup}
+          addLayer={(extraArg) => {
+            addLayer(LayerTypes.ANNOTATIONS, extraArg);
+          }}
         />
       )}
     </>

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+/* eslint-disable cypress/unsafe-to-chain-command */
+
 import {
   DOCUMENT_DETAILS_FLYOUT_BODY,
   DOCUMENT_DETAILS_FLYOUT_COLLAPSE_DETAILS_BUTTON,
@@ -13,7 +15,7 @@ import {
   DOCUMENT_DETAILS_FLYOUT_FOOTER_TAKE_ACTION_BUTTON,
   DOCUMENT_DETAILS_FLYOUT_HISTORY_TAB,
   DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB,
-  DOCUMENT_DETAILS_FLYOUT_INVESTIGATIONS_TAB,
+  DOCUMENT_DETAILS_FLYOUT_INVESTIGATION_TAB,
   DOCUMENT_DETAILS_FLYOUT_JSON_TAB,
   DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB,
   DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INVESTIGATION_SECTION_HEADER,
@@ -37,6 +39,8 @@ import {
   DOCUMENT_DETAILS_FLYOUT_FOOTER_TAKE_ACTION_BUTTON_DROPDOWN,
   KIBANA_NAVBAR_ALERTS_PAGE,
   KIBANA_NAVBAR_CASES_PAGE,
+  DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_THREAT_INTELLIGENCE_VIEW_ALL_BUTTON,
+  DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_PREVALENCE_VIEW_ALL_BUTTON,
 } from '../screens/document_expandable_flyout';
 import { EXPAND_ALERT_BTN } from '../screens/alerts';
 import { getClassSelector } from '../helpers/common';
@@ -45,34 +49,34 @@ import { getClassSelector } from '../helpers/common';
  * Navigates to the alerts page by clicking on the Kibana sidenav entry
  */
 export const navigateToAlertsPage = () => {
-  cy.get(KIBANA_NAVBAR_ALERTS_PAGE).should('be.visible').click();
+  cy.get(KIBANA_NAVBAR_ALERTS_PAGE).click();
 };
 
 /**
  * Navigates to the cases page by clicking on the Kibana sidenav entry
  */
 export const navigateToCasesPage = () => {
-  cy.get(KIBANA_NAVBAR_CASES_PAGE).should('be.visible').click();
+  cy.get(KIBANA_NAVBAR_CASES_PAGE).click();
 };
 
 /**
  * Find the first alert row in the alerts table then click on the expand icon button to open the flyout
  */
 export const expandFirstAlertExpandableFlyout = () => {
-  cy.get(EXPAND_ALERT_BTN).first().should('be.visible').click();
+  cy.get(EXPAND_ALERT_BTN).first().click();
 };
 
 /**
  * Expand the left section of the document details expandable flyout by clicking on the Find the first alert row in the alerts table then click on the expand icon button to open the flyout
  */
 export const expandDocumentDetailsExpandableFlyoutLeftSection = () =>
-  cy.get(DOCUMENT_DETAILS_FLYOUT_EXPAND_DETAILS_BUTTON).should('be.visible').click();
+  cy.get(DOCUMENT_DETAILS_FLYOUT_EXPAND_DETAILS_BUTTON).click();
 
 /**
  * Expand the left section of the document details expandable flyout by clicking on the Find the first alert row in the alerts table then click on the expand icon button to open the flyout
  */
 export const collapseDocumentDetailsExpandableFlyoutLeftSection = () =>
-  cy.get(DOCUMENT_DETAILS_FLYOUT_COLLAPSE_DETAILS_BUTTON).should('be.visible').click();
+  cy.get(DOCUMENT_DETAILS_FLYOUT_COLLAPSE_DETAILS_BUTTON).click();
 
 /**
  * Scroll to x-y positions within the right section of the document details expandable flyout
@@ -96,7 +100,7 @@ export const openTakeActionButton = () => {
   cy.get(DOCUMENT_DETAILS_FLYOUT_FOOTER)
     .scrollIntoView()
     .within(() => {
-      cy.get(DOCUMENT_DETAILS_FLYOUT_FOOTER_TAKE_ACTION_BUTTON).should('be.visible').click();
+      cy.get(DOCUMENT_DETAILS_FLYOUT_FOOTER_TAKE_ACTION_BUTTON).click();
     });
 };
 
@@ -113,7 +117,7 @@ export const selectTakeActionItem = (option: string) => {
  * Open the Overview tab in the document details expandable flyout right section
  */
 export const openOverviewTab = () =>
-  cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB).scrollIntoView().should('be.visible').click();
+  cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB).scrollIntoView().click();
 
 /**
  * Toggle the Overview tab investigation section in the document details expandable flyout right section
@@ -159,19 +163,18 @@ export const toggleOverviewTabVisualizationsSection = () =>
  * Open the Table tab in the document details expandable flyout right section
  */
 export const openTableTab = () =>
-  cy.get(DOCUMENT_DETAILS_FLYOUT_TABLE_TAB).scrollIntoView().should('be.visible').click();
+  cy.get(DOCUMENT_DETAILS_FLYOUT_TABLE_TAB).scrollIntoView().click();
 
 /**
  * Open the Json tab in the document details expandable flyout right section
  */
-export const openJsonTab = () =>
-  cy.get(DOCUMENT_DETAILS_FLYOUT_JSON_TAB).scrollIntoView().should('be.visible').click();
+export const openJsonTab = () => cy.get(DOCUMENT_DETAILS_FLYOUT_JSON_TAB).scrollIntoView().click();
 
 /**
  * Open the Visualize tab in the document details expandable flyout left section
  */
 export const openVisualizeTab = () =>
-  cy.get(DOCUMENT_DETAILS_FLYOUT_VISUALIZE_TAB).scrollIntoView().should('be.visible').click();
+  cy.get(DOCUMENT_DETAILS_FLYOUT_VISUALIZE_TAB).scrollIntoView().click();
 
 /**
  * Open the Session View under the Visualize tab in the document details expandable flyout left section
@@ -197,7 +200,7 @@ export const openGraphAnalyzer = () =>
  * Open the Insights tab in the document details expandable flyout left section
  */
 export const openInsightsTab = () =>
-  cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB).scrollIntoView().should('be.visible').click();
+  cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB).scrollIntoView().click();
 
 /**
  * Open the Entities tab under the Insights tab in the document details expandable flyout left section
@@ -240,14 +243,14 @@ export const openCorrelations = () =>
 /**
  * Open the Investigations tab in the document details expandable flyout left section
  */
-export const openInvestigationsTab = () =>
-  cy.get(DOCUMENT_DETAILS_FLYOUT_INVESTIGATIONS_TAB).scrollIntoView().should('be.visible').click();
+export const openInvestigationTab = () =>
+  cy.get(DOCUMENT_DETAILS_FLYOUT_INVESTIGATION_TAB).scrollIntoView().should('be.visible').click();
 
 /**
  * Open the History tab in the document details expandable flyout left section
  */
 export const openHistoryTab = () =>
-  cy.get(DOCUMENT_DETAILS_FLYOUT_HISTORY_TAB).scrollIntoView().should('be.visible').click();
+  cy.get(DOCUMENT_DETAILS_FLYOUT_HISTORY_TAB).scrollIntoView().click();
 
 /**
  * Filter table under the Table tab in the alert details expandable flyout right section
@@ -307,3 +310,21 @@ export const clearFilters = () =>
   cy.get(DOCUMENT_DETAILS_FLYOUT_BODY).within(() => {
     cy.get(DOCUMENT_DETAILS_FLYOUT_TABLE_TAB_ROW_CELL_FILTER_OUT).first().click();
   });
+
+/**
+ * Click on the view all button under the right section, Insights, Threat Intelligence
+ */
+export const clickThreatIntelligenceViewAllButton = () => {
+  cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_THREAT_INTELLIGENCE_VIEW_ALL_BUTTON)
+    .should('be.visible')
+    .click();
+};
+
+/**
+ * Click on the view all button under the right section, Insights, Prevalence
+ */
+export const clickPrevalenceViewAllButton = () => {
+  cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_PREVALENCE_VIEW_ALL_BUTTON)
+    .should('be.visible')
+    .click();
+};

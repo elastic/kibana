@@ -24,6 +24,7 @@ import { OverlayRef } from '@kbn/core-mount-utils-browser';
 import { IToasts } from '@kbn/core-notifications-browser';
 import type { LayerAction, StateSetter } from '../../../../types';
 import type { XYState, XYByReferenceAnnotationLayerConfig } from '../../types';
+import { annotationLayerHasUnsavedChanges } from '../../state_helpers';
 
 export const getRevertChangesAction = ({
   state,
@@ -62,13 +63,16 @@ export const getRevertChangesAction = ({
         ),
         {
           'data-test-subj': 'lnsAnnotationLayerRevertModal',
+          maxWidth: 600,
         }
       );
       await modal.onClose;
     },
     icon: 'editorUndo',
     isCompatible: true,
+    disabled: !annotationLayerHasUnsavedChanges(layer),
     'data-test-subj': 'lnsXY_annotationLayer_revertChanges',
+    order: 200,
   };
 };
 
@@ -104,12 +108,15 @@ export const revert = ({
 
   modal.close();
 
-  toasts.addSuccess(
-    i18n.translate('xpack.lens.xyChart.annotations.notificationReverted', {
+  toasts.addSuccess({
+    title: i18n.translate('xpack.lens.xyChart.annotations.notificationReverted', {
       defaultMessage: `Reverted "{title}"`,
       values: { title: layer.__lastSaved.title },
-    })
-  );
+    }),
+    text: i18n.translate('xpack.lens.xyChart.annotations.notificationRevertedExplanation', {
+      defaultMessage: 'The most recently saved version of this annotation group has been restored.',
+    }),
+  });
 };
 
 const RevertChangesConfirmModal = ({

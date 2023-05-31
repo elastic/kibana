@@ -20,7 +20,8 @@ import {
 } from '@elastic/charts';
 import { EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { getChartTheme } from '../../../../utils/get_chart_theme';
+import { useIsDarkMode } from '../../../../hooks/use_is_dark_mode';
 import { PersistedLogViewReference } from '../../../../../common/log_views';
 import { ExecutionTimeRange } from '../../../../types';
 import {
@@ -32,7 +33,6 @@ import {
   getDomain,
   tooltipProps,
   useDateFormatter,
-  getChartTheme,
   yAxisFormatter,
   NUM_BUCKETS,
 } from '../../../common/criterion_preview_chart/criterion_preview_chart';
@@ -142,8 +142,7 @@ const CriterionPreviewChart: React.FC<ChartProps> = ({
   annotations,
   filterSeriesByGroupName,
 }) => {
-  const { uiSettings } = useKibana().services;
-  const isDarkMode = uiSettings?.get('theme:darkMode') || false;
+  const isDarkMode = useIsDarkMode();
   const timezone = useKibanaTimeZoneSetting();
 
   const {

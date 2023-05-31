@@ -557,9 +557,8 @@ describe('<ControlGeneralViewSelector />', () => {
 
     const count = getByTestId('cloud-defend-conditions-count');
     expect(count).toBeTruthy();
-    expect(count.childNodes[0]).toHaveTextContent('Conditions:');
-    expect(count.childNodes[1]).toHaveTextContent('1');
-    expect(count.querySelector(`[title^='operation']`)).toBeTruthy();
+    expect(count).toHaveTextContent('1');
+    expect(count.title).toEqual('operation');
 
     act(() => title.click());
 

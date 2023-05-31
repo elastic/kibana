@@ -13,8 +13,8 @@ import {
   UPDATE_FILTER_REFERENCES_ACTION,
   UPDATE_FILTER_REFERENCES_TRIGGER,
 } from '@kbn/unified-search-plugin/public';
-import type { IndexPattern, IndexPatternMap, IndexPatternRef } from '../types';
-import { ensureIndexPattern, loadIndexPatternRefs, loadIndexPatterns } from './loader';
+import type { IndexPattern, IndexPatternMap } from '../types';
+import { ensureIndexPattern, loadIndexPatterns } from './loader';
 import type { DataViewsState } from '../state_management';
 import { generateId } from '../id_generator';
 
@@ -52,15 +52,6 @@ export interface IndexPatternServiceAPI {
     cache: IndexPatternMap;
     onIndexPatternRefresh?: () => void;
   }) => Promise<IndexPatternMap>;
-
-  /**
-   * Takes a data view spec and creates the both the data view and the Lens index pattern
-   * and adds everything to the caches.
-   */
-  addIndexPatternFromDataViewSpec: (
-    spec: DataViewSpec,
-    cache: IndexPatternMap | undefined
-  ) => Promise<void>;
 
   /**
    * Ensure an indexPattern is loaded in the cache, usually used in conjuction with a indexPattern change action.
@@ -105,48 +96,6 @@ export const createIndexPatternService = ({
       return loadIndexPatterns({
         dataViews,
         ...args,
-      });
-    },
-    addIndexPatternFromDataViewSpec: async (
-      spec: DataViewSpec,
-      cache: IndexPatternMap | undefined
-    ) => {
-      // TODO - extract this routine into a function and unit test?
-      if (!spec.id) {
-        showLoadingDataViewError(
-          new Error(
-            i18n.translate('xpack.lens.indexPattern.noIdError', {
-              defaultMessage: 'Tried to use data view spec without an ID',
-            })
-          )
-        );
-        return;
-      }
-      const dataView = await dataViews.create(spec);
-      const indexPatterns = await ensureIndexPattern({
-        id: dataView.id!,
-        onError: showLoadingDataViewError,
-        dataViews,
-        cache,
-      });
-
-      if (!indexPatterns) {
-        return;
-      }
-
-      const refs = await loadIndexPatternRefs(dataViews);
-
-      const newIndexPattern = indexPatterns[dataView.id!];
-
-      const newRef: IndexPatternRef = {
-        id: newIndexPattern.id!,
-        name: newIndexPattern.name,
-        title: newIndexPattern.title,
-      };
-
-      updateIndexPatterns({
-        indexPatterns,
-        indexPatternRefs: [...refs, newRef],
       });
     },
     replaceDataViewId: async (dataView: DataView) => {

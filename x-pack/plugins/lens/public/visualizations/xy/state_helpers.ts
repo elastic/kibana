@@ -14,18 +14,11 @@ import {
 import { v4 as uuidv4 } from 'uuid';
 import { isQueryAnnotationConfig } from '@kbn/event-annotation-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import fastIsEqual from 'fast-deep-equal';
 import { cloneDeep } from 'lodash';
 import { validateQuery } from '@kbn/visualization-ui-components/public';
 import { DataViewsState } from '../../state_management';
-import {
-  FramePublicAPI,
-  DatasourcePublicAPI,
-  VisualizeEditorContext,
-  nonNullable,
-  AnnotationGroups,
-} from '../../types';
+import { FramePublicAPI, DatasourcePublicAPI, AnnotationGroups } from '../../types';
 import {
   visualizationTypes,
   XYLayerConfig,
@@ -50,6 +43,7 @@ import {
   isPersistedByValueAnnotationsLayer,
   isPersistedAnnotationsLayer,
 } from './visualization_helpers';
+import { nonNullable } from '../../utils';
 
 export function isHorizontalSeries(seriesType: SeriesType) {
   return (
@@ -199,8 +193,13 @@ export function getPersistableState(state: XYState) {
             annotations: layer.annotations,
             ignoreGlobalFilters: layer.ignoreGlobalFilters,
           };
-
           persistableLayers.push(persistableLayer);
+
+          savedObjectReferences.push({
+            type: 'index-pattern',
+            id: layer.indexPatternId,
+            name: getLayerReferenceName(layer.layerId),
+          });
         }
       } else {
         const { indexPatternId, ...persistableLayer } = layer;
@@ -223,8 +222,7 @@ export function isPersistedState(state: XYPersistedState | XYState): state is XY
 export function injectReferences(
   state: XYPersistedState,
   annotationGroups?: AnnotationGroups,
-  references?: SavedObjectReference[],
-  initialContext?: VisualizeFieldContext | VisualizeEditorContext
+  references?: SavedObjectReference[]
 ): XYState {
   if (!references || !references.length) {
     return state as XYState;
@@ -236,7 +234,15 @@ export function injectReferences(
     );
   }
 
-  const fallbackIndexPatternId = references.find(({ type }) => type === 'index-pattern')!.id;
+  // called on-demand since indexPattern reference won't be here on the vis if its a by-reference group
+  const getIndexPatternIdFromReferences = (annotationLayerId: string) => {
+    const fallbackIndexPatternId = references.find(({ type }) => type === 'index-pattern')!.id;
+    return (
+      references.find(({ name }) => name === getLayerReferenceName(annotationLayerId))?.id ||
+      fallbackIndexPatternId
+    );
+  };
+
   return {
     ...state,
     layers: state.layers
@@ -245,18 +251,12 @@ export function injectReferences(
           return persistedLayer as XYLayerConfig;
         }
 
-        const indexPatternIdFromReferences =
-          references.find(({ name }) => name === getLayerReferenceName(persistedLayer.layerId))
-            ?.id || fallbackIndexPatternId;
-
         let injectedLayer: XYAnnotationLayerConfig;
 
         if (isPersistedByValueAnnotationsLayer(persistedLayer)) {
           injectedLayer = {
             ...persistedLayer,
-            indexPatternId:
-              // getIndexPatternIdFromInitialContext(persistedLayer, initialContext) || TODO - was this doing anything?
-              indexPatternIdFromReferences,
+            indexPatternId: getIndexPatternIdFromReferences(persistedLayer.layerId),
           };
         } else {
           const annotationGroupId = references?.find(
@@ -296,7 +296,7 @@ export function injectReferences(
             injectedLayer = {
               ...commonProps,
               ignoreGlobalFilters: persistedLayer.ignoreGlobalFilters,
-              indexPatternId: indexPatternIdFromReferences,
+              indexPatternId: getIndexPatternIdFromReferences(persistedLayer.layerId),
               annotations: cloneDeep(persistedLayer.annotations),
             };
           }
@@ -307,16 +307,6 @@ export function injectReferences(
       .filter(nonNullable),
   };
 }
-
-// TODO - was this doing anything?
-// function getIndexPatternIdFromInitialContext(
-//   layer: XYPersistedByValueAnnotationLayerConfig,
-//   initialContext?: VisualizeFieldContext | VisualizeEditorContext
-// ) {
-//   if (initialContext && 'isVisualizeAction' in initialContext) {
-//     return layer && 'indexPatternId' in layer ? layer.indexPatternId : undefined;
-//   }
-// }
 
 export function getAnnotationLayerErrors(
   layer: XYAnnotationLayerConfig,

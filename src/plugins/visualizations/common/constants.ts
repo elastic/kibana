@@ -8,7 +8,6 @@
 
 import { METRIC_TYPES, BUCKET_TYPES } from '@kbn/data-plugin/common';
 
-export const VISUALIZE_ENABLE_LABS_SETTING = 'visualize:enableLabs';
 export const SAVED_OBJECTS_LIMIT_SETTING = 'savedObjects:listingLimit';
 export const SAVED_OBJECTS_PER_PAGE_SETTING = 'savedObjects:perPage';
 export const VISUALIZE_EMBEDDABLE_TYPE = 'visualization';

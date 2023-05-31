@@ -13,7 +13,6 @@ import {
   UPDATE_FILTER_REFERENCES_ACTION,
   UPDATE_FILTER_REFERENCES_TRIGGER,
 } from '@kbn/unified-search-plugin/public';
-import { DataViewSpec } from '@kbn/data-views-plugin/common';
 import { changeIndexPattern, removeDimension } from '../../../state_management/lens_slice';
 import { AddLayerFunction, Visualization } from '../../../types';
 import { LayerPanel } from './layer_panel';
@@ -32,6 +31,7 @@ import {
   setToggleFullscreen,
   useLensSelector,
   selectVisualization,
+  registerLibraryAnnotationGroup,
 } from '../../../state_management';
 import { getRemoveOperation } from '../../../utils';
 
@@ -231,9 +231,9 @@ export function LayerPanels(
     [dispatchLens, props.framePublicAPI.dataViews.indexPatterns, props.indexPatternService]
   );
 
-  const addLayer: AddLayerFunction = (layerType, extraArg) => {
+  const addLayer: AddLayerFunction = (layerType, extraArg, ignoreInitialValues) => {
     const layerId = generateId();
-    dispatchLens(addLayerAction({ layerId, layerType, extraArg }));
+    dispatchLens(addLayerAction({ layerId, layerType, extraArg, ignoreInitialValues }));
     setNextFocusedLayerId(layerId);
   };
 
@@ -315,17 +315,43 @@ export function LayerPanels(
         );
       })}
       {!hideAddLayerButton &&
-        activeVisualization.getAddLayerButtonComponent &&
-        activeVisualization.getAddLayerButtonComponent({
-          visualization: activeVisualization,
-          visualizationState: visualization.state,
-          layersMeta: props.framePublicAPI,
+        activeVisualization?.getAddLayerButtonComponent?.({
+          supportedLayers: activeVisualization.getSupportedLayers(
+            visualization.state,
+            props.framePublicAPI
+          ),
           addLayer,
-          addIndexPatternFromDataViewSpec: (spec: DataViewSpec) =>
-            props.indexPatternService.addIndexPatternFromDataViewSpec(
-              spec,
-              props.framePublicAPI.dataViews.indexPatterns
-            ),
+          ensureIndexPattern: async (specOrId) => {
+            let indexPatternId;
+
+            if (typeof specOrId === 'string') {
+              indexPatternId = specOrId;
+            } else {
+              const dataView = await props.dataViews.create(specOrId);
+
+              if (!dataView.id) {
+                return;
+              }
+
+              indexPatternId = dataView.id;
+            }
+
+            const newIndexPatterns = await indexPatternService.ensureIndexPattern({
+              id: indexPatternId,
+              cache: props.framePublicAPI.dataViews.indexPatterns,
+            });
+
+            dispatchLens(
+              changeIndexPattern({
+                dataViews: { indexPatterns: newIndexPatterns },
+                datasourceIds: Object.keys(datasourceStates),
+                visualizationIds: visualization.activeId ? [visualization.activeId] : [],
+                indexPatternId,
+              })
+            );
+          },
+          registerLibraryAnnotationGroup: (groupInfo) =>
+            dispatchLens(registerLibraryAnnotationGroup(groupInfo)),
         })}
     </EuiForm>
   );

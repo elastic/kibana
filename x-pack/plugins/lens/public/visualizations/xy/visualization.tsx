@@ -26,7 +26,6 @@ import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
 import { EventAnnotationGroupConfig } from '@kbn/event-annotation-plugin/common';
-import { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import { isEqual } from 'lodash';
 import { type AccessorConfig, DimensionTrigger } from '@kbn/visualization-ui-components/public';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
@@ -51,7 +50,6 @@ import type {
   Suggestion,
   UserMessage,
   AnnotationGroups,
-  VisualizeEditorContext,
 } from '../../types';
 import type { FormBasedPersistedState } from '../../datasources/form_based/types';
 import {
@@ -246,12 +244,11 @@ export const getXyVisualization = ({
     state,
     _mainPalette?,
     annotationGroups?: AnnotationGroups,
-    references?: SavedObjectReference[],
-    initialContext?: VisualizeFieldContext | VisualizeEditorContext
+    references?: SavedObjectReference[]
   ) {
     const finalState =
       state && isPersistedState(state)
-        ? injectReferences(state, annotationGroups!, references, initialContext)
+        ? injectReferences(state, annotationGroups!, references)
         : state;
     return (
       finalState || {
@@ -277,10 +274,10 @@ export const getXyVisualization = ({
     return state?.layers.find(({ layerId: id }) => id === layerId)?.layerType;
   },
 
-  getSupportedLayers(state, frame, extraArg) {
+  getSupportedLayers(state, frame) {
     return [
       supportedDataLayer,
-      getAnnotationsSupportedLayer(Boolean(extraArg), state, frame),
+      getAnnotationsSupportedLayer(state, frame),
       getReferenceSupportedLayer(state, frame),
     ];
   },
@@ -731,11 +728,19 @@ export const getXyVisualization = ({
       <AddLayerButton
         {...props}
         eventAnnotationService={eventAnnotationService}
-        onAddLayerFromAnnotationGroup={async (loadedGroupInfo) => {
-          if (loadedGroupInfo.dataViewSpec) {
-            await props.addIndexPatternFromDataViewSpec(loadedGroupInfo.dataViewSpec);
+        addLayer={async (type, loadedGroupInfo) => {
+          if (type === LayerTypes.ANNOTATIONS && loadedGroupInfo) {
+            await props.ensureIndexPattern(
+              loadedGroupInfo.dataViewSpec ?? loadedGroupInfo.indexPatternId
+            );
+
+            props.registerLibraryAnnotationGroup({
+              id: loadedGroupInfo.annotationGroupId,
+              group: loadedGroupInfo,
+            });
           }
-          props.addLayer(LayerTypes.ANNOTATIONS, loadedGroupInfo);
+
+          props.addLayer(type, loadedGroupInfo, !!loadedGroupInfo);
         }}
       />
     );
@@ -980,10 +985,9 @@ export const getXyVisualization = ({
   },
 
   isEqual(state1, references1, state2, references2, annotationGroups) {
-    return isEqual(
-      injectReferences(state1, annotationGroups, references1),
-      injectReferences(state2, annotationGroups, references2)
-    );
+    const injected1 = injectReferences(state1, annotationGroups, references1);
+    const injected2 = injectReferences(state2, annotationGroups, references2);
+    return isEqual(injected1, injected2);
   },
 
   getVisualizationInfo(state, frame) {

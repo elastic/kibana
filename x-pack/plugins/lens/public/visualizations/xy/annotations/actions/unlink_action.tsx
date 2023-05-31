@@ -58,5 +58,6 @@ export const getUnlinkLayerAction = ({
     isCompatible: true,
     icon: 'unlink',
     'data-test-subj': 'lnsXY_annotationLayer_unlinkFromLibrary',
+    order: 300,
   };
 };

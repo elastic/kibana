@@ -11,6 +11,7 @@ import { mapValues, uniq } from 'lodash';
 import { Query } from '@kbn/es-query';
 import { History } from 'history';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
+import { EventAnnotationGroupConfig } from '@kbn/event-annotation-plugin/common';
 import { LensEmbeddableInput } from '..';
 import { TableInspectorAdapter } from '../editor_frame_service/types';
 import type {
@@ -215,6 +216,7 @@ export const addLayer = createAction<{
   layerId: string;
   layerType: LayerType;
   extraArg: unknown;
+  ignoreInitialValues?: boolean;
 }>('lens/addLayer');
 
 export const setLayerDefaultDimension = createAction<{
@@ -241,6 +243,10 @@ export const removeDimension = createAction<{
   columnId: string;
   datasourceId?: string;
 }>('lens/removeDimension');
+export const registerLibraryAnnotationGroup = createAction<{
+  group: EventAnnotationGroupConfig;
+  id: string;
+}>('lens/registerLibraryAnnotationGroup');
 
 export const lensActions = {
   setState,
@@ -275,6 +281,7 @@ export const lensActions = {
   changeIndexPattern,
   removeDimension,
   syncLinkedDimensions,
+  registerLibraryAnnotationGroup,
 };
 
 export const makeLensReducer = (storeDeps: LensStoreDeps) => {
@@ -1035,12 +1042,13 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
     [addLayer.type]: (
       state,
       {
-        payload: { layerId, layerType, extraArg },
+        payload: { layerId, layerType, extraArg, ignoreInitialValues },
       }: {
         payload: {
           layerId: string;
           layerType: LayerType;
           extraArg: unknown;
+          ignoreInitialValues: boolean;
         };
       }
     ) => {
@@ -1066,7 +1074,7 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
 
       const { noDatasource } =
         activeVisualization
-          .getSupportedLayers(visualizationState, framePublicAPI, extraArg)
+          .getSupportedLayers(visualizationState, framePublicAPI)
           .find(({ type }) => type === layerType) || {};
 
       const layersToLinkTo =
@@ -1081,16 +1089,17 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
             )
           : state.datasourceStates[state.activeDatasourceId].state;
 
-      const { activeDatasourceState, activeVisualizationState } = addInitialValueIfAvailable({
-        datasourceState,
-        visualizationState,
-        framePublicAPI,
-        activeVisualization,
-        activeDatasource,
-        layerId,
-        layerType,
-        extraArg,
-      });
+      const { activeDatasourceState, activeVisualizationState } = ignoreInitialValues
+        ? { activeDatasourceState: datasourceState, activeVisualizationState: visualizationState }
+        : addInitialValueIfAvailable({
+            datasourceState,
+            visualizationState,
+            framePublicAPI,
+            activeVisualization,
+            activeDatasource,
+            layerId,
+            layerType,
+          });
 
       state.visualization.state = activeVisualizationState;
       state.datasourceStates[state.activeDatasourceId].state = activeDatasourceState;
@@ -1134,7 +1143,6 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
         layerType,
         columnId,
         groupId,
-        extraArg: undefined,
       });
 
       state.visualization.state = activeVisualizationState;
@@ -1206,6 +1214,16 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
           remove({ columnId: linkedDimension.columnId, layerId: linkedDimension.layerId })
       );
     },
+    [registerLibraryAnnotationGroup.type]: (
+      state,
+      {
+        payload: { group, id },
+      }: {
+        payload: { group: EventAnnotationGroupConfig; id: string };
+      }
+    ) => {
+      state.annotationGroups[id] = group;
+    },
   });
 };
 
@@ -1219,7 +1237,6 @@ function addInitialValueIfAvailable({
   layerId,
   columnId,
   groupId,
-  extraArg,
 }: {
   framePublicAPI: FramePublicAPI;
   visualizationState: unknown;
@@ -1230,11 +1247,10 @@ function addInitialValueIfAvailable({
   layerType: string;
   columnId?: string;
   groupId?: string;
-  extraArg: unknown;
 }) {
   const { initialDimensions, noDatasource } =
     activeVisualization
-      .getSupportedLayers(visualizationState, framePublicAPI, extraArg)
+      .getSupportedLayers(visualizationState, framePublicAPI)
       .find(({ type }) => type === layerType) || {};
 
   if (initialDimensions) {

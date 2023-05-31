@@ -34,12 +34,13 @@ export interface EventAnnotationServiceType {
     >;
   }) => ExpressionAstExpression[];
   renderEventAnnotationGroupSavedObjectFinder: (props: {
-    fixedPageSize: number;
+    fixedPageSize?: number;
     onChoose: (value: {
       id: string;
       type: string;
       fullName: string;
       savedObject: SavedObjectCommon<unknown>;
     }) => void;
+    onCreateNew: () => void;
   }) => JSX.Element;
 }

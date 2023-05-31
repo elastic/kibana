@@ -39,11 +39,7 @@ import { updateBasicSoAttributes } from '../../utils/saved_objects_utils/update_
 import { checkForDuplicateTitle } from '../../utils/saved_objects_utils/check_for_duplicate_title';
 import { showNewVisModal } from '../../wizard';
 import { getTypes } from '../../services';
-import {
-  VISUALIZE_ENABLE_LABS_SETTING,
-  SAVED_OBJECTS_LIMIT_SETTING,
-  SAVED_OBJECTS_PER_PAGE_SETTING,
-} from '../..';
+import { SAVED_OBJECTS_LIMIT_SETTING, SAVED_OBJECTS_PER_PAGE_SETTING } from '../..';
 import type { VisualizationListItem } from '../..';
 import type { VisualizeServices } from '../types';
 import { VisualizeConstants } from '../../../common/constants';
@@ -58,6 +54,7 @@ interface VisualizeUserContent extends VisualizationListItem, UserContentCommonS
     description?: string;
     editApp: string;
     editUrl: string;
+    readOnly: boolean;
     error?: string;
   };
 }
@@ -81,13 +78,20 @@ const toTableListViewSavedObject = (savedObject: Record<string, unknown>): Visua
       description: savedObject.description as string,
       editApp: savedObject.editApp as string,
       editUrl: savedObject.editUrl as string,
+      readOnly: savedObject.readOnly as boolean,
       error: savedObject.error as string,
     },
   };
 };
 type CustomTableViewProps = Pick<
   TableListViewProps<VisualizeUserContent>,
-  'createItem' | 'findItems' | 'deleteItems' | 'editItem' | 'contentEditor' | 'emptyPrompt'
+  | 'createItem'
+  | 'findItems'
+  | 'deleteItems'
+  | 'editItem'
+  | 'contentEditor'
+  | 'emptyPrompt'
+  | 'showEditActionForItem'
 >;
 
 const useTableListViewProps = (
@@ -98,7 +102,6 @@ const useTableListViewProps = (
     services: {
       application,
       history,
-      uiSettings,
       savedObjects,
       savedObjectsTagging,
       overlays,
@@ -138,7 +141,6 @@ const useTableListViewProps = (
         referencesToExclude?: SavedObjectReference[];
       } = {}
     ) => {
-      const isLabsEnabled = uiSettings.get(VISUALIZE_ENABLE_LABS_SETTING);
       return findListItems(
         getTypes(),
         searchTerm,
@@ -146,9 +148,7 @@ const useTableListViewProps = (
         references,
         referencesToExclude
       ).then(({ total, hits }: { total: number; hits: Array<Record<string, unknown>> }) => {
-        const content = hits
-          .filter((result: any) => isLabsEnabled || result.type?.stage !== 'experimental')
-          .map(toTableListViewSavedObject);
+        const content = hits.map(toTableListViewSavedObject);
 
         visualizedUserContent.current = content;
 
@@ -158,7 +158,7 @@ const useTableListViewProps = (
         };
       });
     },
-    [listingLimit, uiSettings]
+    [listingLimit]
   );
 
   const onContentEditorSave = useCallback(
@@ -249,6 +249,8 @@ const useTableListViewProps = (
     editItem,
     emptyPrompt: noItemsFragment,
     createItem: createNewVis,
+    showEditActionForItem: ({ attributes: { readOnly } }) =>
+      visualizeCapabilities.save && !readOnly,
   };
 
   return props;

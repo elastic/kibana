@@ -18,7 +18,6 @@ import {
   SavedObjectsFindOptionsReference,
   SimpleSavedObject,
 } from '@kbn/core/public';
-import type { SavedObjectCommon } from '@kbn/saved-objects-finder-plugin/common';
 import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
 import { DataViewPersistableStateService } from '@kbn/data-views-plugin/common';
 import { defaultAnnotationLabel } from '../../common/manual_event_annotation';
@@ -205,26 +204,28 @@ export function getEventAnnotationService(
     });
   };
 
+  const checkHasAnnotationGroups = async (): Promise<boolean> => {
+    const response = await client.find({
+      type: EVENT_ANNOTATION_GROUP_TYPE,
+      perPage: 0,
+    });
+
+    return response.total > 0;
+  };
+
   return {
     loadAnnotationGroup,
-    findAnnotationGroupContent,
     updateAnnotationGroup,
     createAnnotationGroup,
     deleteAnnotationGroups,
-    renderEventAnnotationGroupSavedObjectFinder: (props: {
-      fixedPageSize: number;
-      onChoose: (value: {
-        id: string;
-        type: string;
-        fullName: string;
-        savedObject: SavedObjectCommon<unknown>;
-      }) => void;
-    }) => {
+    findAnnotationGroupContent,
+    renderEventAnnotationGroupSavedObjectFinder: (props) => {
       return (
         <EventAnnotationGroupSavedObjectFinder
           http={core.http}
           uiSettings={core.uiSettings}
           savedObjectsManagement={savedObjectsManagement}
+          checkHasAnnotationGroups={checkHasAnnotationGroups}
           {...props}
         />
       );

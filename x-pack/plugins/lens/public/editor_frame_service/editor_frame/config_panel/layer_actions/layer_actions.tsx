@@ -17,6 +17,9 @@ import {
   EuiText,
   EuiOutsideClickDetector,
   useEuiTheme,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiToolTip,
 } from '@elastic/eui';
 import type { CoreStart } from '@kbn/core/public';
 import { css } from '@emotion/react';
@@ -130,6 +133,7 @@ const InContextMenuActions = (props: LayerActionsProps) => {
               data-test-subj={i['data-test-subj']}
               aria-label={i.displayName}
               title={i.displayName}
+              disabled={i.disabled}
               onClick={() => {
                 closePopover();
                 i.execute(props.mountingPoint);
@@ -159,20 +163,46 @@ export const LayerActions = (props: LayerActionsProps) => {
     return null;
   }
 
-  if (props.actions.length > 1) {
-    return <InContextMenuActions {...props} />;
-  }
-  const [{ displayName, execute, icon, color, 'data-test-subj': dataTestSubj }] = props.actions;
+  const sortedActions = [...props.actions].sort(
+    ({ order: order1 }, { order: order2 }) => order1 - order2
+  );
+
+  const outsideListAction =
+    sortedActions.length === 1
+      ? sortedActions[0]
+      : sortedActions.find((action) => action.showOutsideList);
+
+  const listActions = sortedActions.filter((action) => action !== outsideListAction);
 
   return (
-    <EuiButtonIcon
-      size="xs"
-      iconType={icon}
-      color={color}
-      data-test-subj={dataTestSubj}
-      aria-label={displayName}
-      title={displayName}
-      onClick={() => execute?.(props.mountingPoint)}
-    />
+    <EuiFlexGroup
+      css={css`
+        gap: 0;
+      `}
+      responsive={false}
+      alignItems="center"
+      direction="row"
+      justifyContent="flexEnd"
+    >
+      {outsideListAction && (
+        <EuiFlexItem grow={false}>
+          <EuiToolTip content={outsideListAction.displayName}>
+            <EuiButtonIcon
+              size="xs"
+              iconType={outsideListAction.icon}
+              color={outsideListAction.color ?? 'text'}
+              data-test-subj={outsideListAction['data-test-subj']}
+              aria-label={outsideListAction.displayName}
+              title={outsideListAction.displayName}
+              disabled={outsideListAction.disabled}
+              onClick={() => outsideListAction.execute?.(props.mountingPoint)}
+            />
+          </EuiToolTip>
+        </EuiFlexItem>
+      )}
+      <EuiFlexItem grow={false}>
+        <InContextMenuActions {...props} actions={listActions} />
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 };

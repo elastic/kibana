@@ -8,7 +8,7 @@
 import { IUiSettingsClient, SavedObjectReference } from '@kbn/core/public';
 import { Ast } from '@kbn/interpreter';
 import { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
-import { difference, noop } from 'lodash';
+import { difference } from 'lodash';
 import type { DataViewsContract, DataViewSpec } from '@kbn/data-views-plugin/public';
 import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { DataViewPersistableStateService } from '@kbn/data-views-plugin/common';
@@ -123,7 +123,8 @@ export async function initializeDataViews(
     })
   );
 
-  for (const group of Object.values(annotationGroups)) {
+  const annotationGroupValues = Object.values(annotationGroups);
+  for (const group of annotationGroupValues) {
     if (group.dataViewSpec?.id) {
       adHocDataViews[group.dataViewSpec.id] = group.dataViewSpec;
     }
@@ -148,7 +149,7 @@ export async function initializeDataViews(
   const adHocDataviewsIds: string[] = Object.keys(adHocDataViews || {});
 
   const usedIndexPatternsIds = getIndexPatterns(
-    Object.values(annotationGroups).map((group) => group.indexPatternId),
+    annotationGroupValues.map((group) => group.indexPatternId),
     references,
     initialContext,
     initialId,
@@ -185,13 +186,13 @@ const initializeEventAnnotationGroups = async (
 ) => {
   const annotationGroups: Record<string, EventAnnotationGroupConfig> = {};
 
-  await Promise.all(
+  await Promise.allSettled(
     (references || [])
       .filter((ref) => ref.type === EVENT_ANNOTATION_GROUP_TYPE)
       .map(({ id }) =>
-        eventAnnotationService
-          .loadAnnotationGroup(id)
-          .then((group) => (annotationGroups[id] = group), noop)
+        eventAnnotationService.loadAnnotationGroup(id).then((group) => {
+          annotationGroups[id] = group;
+        })
       )
   );
 
@@ -244,7 +245,7 @@ export async function initializeSources(
       defaultIndexPatternId,
       references,
       adHocDataViews,
-      annotationGroups, // TODO - is this necessary?
+      annotationGroups,
     },
     options
   );
@@ -275,7 +276,6 @@ export function initializeVisualization({
   visualizationMap,
   visualizationState,
   references,
-  initialContext,
   annotationGroups,
 }: {
   visualizationState: VisualizationState;
@@ -291,8 +291,7 @@ export function initializeVisualization({
         visualizationState.state,
         undefined,
         annotationGroups,
-        references,
-        initialContext
+        references
       ) ?? visualizationState.state
     );
   }

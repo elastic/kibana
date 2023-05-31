@@ -117,7 +117,7 @@ pageLoadAssetSize:
   securitySolution: 66738
   serverless: 16573
   serverlessObservability: 30000
-  serverlessSearch: 25600
+  serverlessSearch: 30000
   serverlessSecurity: 41807
   sessionView: 77750
   share: 71239
@@ -128,6 +128,7 @@ pageLoadAssetSize:
   synthetics: 40958
   telemetry: 51957
   telemetryManagementSection: 38586
+  textBasedLanguages: 37000
   threatIntelligence: 44299
   timelines: 327300
   transform: 41007

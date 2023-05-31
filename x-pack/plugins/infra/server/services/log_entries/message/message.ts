@@ -22,13 +22,10 @@ export function compileFormattingRules(
   return {
     requiredFields: Array.from(
       new Set(
-        compiledRules.reduce(
-          (combinedRequiredFields, { requiredFields }) => [
-            ...combinedRequiredFields,
-            ...requiredFields,
-          ],
-          [] as string[]
-        )
+        compiledRules.reduce((combinedRequiredFields, { requiredFields }) => {
+          combinedRequiredFields.push(...requiredFields);
+          return combinedRequiredFields;
+        }, [] as string[])
       )
     ),
     format(fields, highlights): LogMessagePart[] {
@@ -247,16 +244,20 @@ export interface Highlights {
 
 export interface CompiledLogMessageFormattingRule {
   requiredFields: string[];
+
   fulfillsCondition(fields: Fields): boolean;
+
   format(fields: Fields, highlights: Highlights): LogMessagePart[];
 }
 
 export interface CompiledLogMessageFormattingCondition {
   conditionFields: string[];
+
   fulfillsCondition(fields: Fields): boolean;
 }
 
 export interface CompiledLogMessageFormattingInstruction {
   formattingFields: string[];
+
   format(fields: Fields, highlights: Highlights): LogMessagePart[];
 }

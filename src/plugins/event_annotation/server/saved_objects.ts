@@ -23,9 +23,9 @@ export function setupSavedObjects(coreSetup: CoreSetup) {
     name: EVENT_ANNOTATION_GROUP_TYPE,
     indexPattern: ANALYTICS_SAVED_OBJECT_INDEX,
     hidden: false,
-    namespaceType: 'multiple', // TODO double-check type
+    namespaceType: 'multiple',
     management: {
-      icon: 'questionInCircle',
+      icon: 'flag',
       defaultSearchField: 'title',
       importableAndExportable: true,
       getTitle: (obj: { attributes: EventAnnotationGroupAttributes }) => obj.attributes.title,

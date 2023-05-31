@@ -57,7 +57,13 @@ export const SaveModal = ({
       showCopyOnSave={showCopyOnSave}
       objectType={i18n.translate(
         'xpack.lens.xyChart.annotations.saveAnnotationGroupToLibrary.objectType',
-        { defaultMessage: 'annotation group' }
+        { defaultMessage: 'group' }
+      )}
+      customModalTitle={i18n.translate(
+        'xpack.lens.xyChart.annotations.saveAnnotationGroupToLibrary.modalTitle',
+        {
+          defaultMessage: 'Save annotation group to library',
+        }
       )}
       showDescription={true}
       confirmButtonLabel={
@@ -68,7 +74,7 @@ export const SaveModal = ({
           <div>
             {i18n.translate(
               'xpack.lens.xyChart.annotations.saveAnnotationGroupToLibrary.confirmButton',
-              { defaultMessage: 'Save annotation group' }
+              { defaultMessage: 'Save group' }
             )}
           </div>
         </>
@@ -78,6 +84,7 @@ export const SaveModal = ({
           <savedObjectsTagging.ui.components.SavedObjectSaveModalTagSelector
             initialSelection={selectedTags}
             onTagsSelected={setSelectedTags}
+            markOptional
           />
         ) : undefined
       }
@@ -195,7 +202,7 @@ export const onSave = async ({
     ),
     text: ((element) =>
       render(
-        <div>
+        <p>
           <FormattedMessage
             id="xpack.lens.xyChart.annotations.saveAnnotationGroupToLibrary.successToastBody"
             defaultMessage="View or manage in the {link}."
@@ -215,7 +222,7 @@ export const onSave = async ({
               ),
             }}
           />
-        </div>,
+        </p>,
         element
       )) as MountPoint,
   });
@@ -242,10 +249,15 @@ export const getSaveLayerAction = ({
 }): LayerAction => {
   const neverSaved = !isByReferenceAnnotationsLayer(layer);
 
+  const displayName = i18n.translate(
+    'xpack.lens.xyChart.annotations.saveAnnotationGroupToLibrary',
+    {
+      defaultMessage: 'Save annotation group',
+    }
+  );
+
   return {
-    displayName: i18n.translate('xpack.lens.xyChart.annotations.saveAnnotationGroupToLibrary', {
-      defaultMessage: 'Save to library',
-    }),
+    displayName,
     description: i18n.translate(
       'xpack.lens.xyChart.annotations.addAnnotationGroupToLibraryDescription',
       { defaultMessage: 'Saves annotation group as separate saved object' }
@@ -280,5 +292,7 @@ export const getSaveLayerAction = ({
     icon: 'save',
     isCompatible: true,
     'data-test-subj': 'lnsXY_annotationLayer_saveToLibrary',
+    order: 100,
+    showOutsideList: true,
   };
 };

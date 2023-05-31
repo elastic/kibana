@@ -7,7 +7,7 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import { EuiText, EuiLink, EuiTitle, EuiSpacer, EuiHighlight } from '@elastic/eui';
+import { EuiText, EuiLink, EuiSpacer, EuiHighlight } from '@elastic/eui';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 
 import type { Tag } from '../types';
@@ -104,9 +104,9 @@ export function ItemDetails<T extends UserContentCommonSchema>({
 
   return (
     <div>
-      <EuiTitle size="xs">{renderTitle()}</EuiTitle>
+      <EuiText size="s">{renderTitle()}</EuiText>
       {Boolean(description) && (
-        <EuiText size="s">
+        <EuiText size="s" color="subdued">
           <p>
             <EuiHighlight highlightAll search={escapeRegExp(searchTerm)}>
               {description!}

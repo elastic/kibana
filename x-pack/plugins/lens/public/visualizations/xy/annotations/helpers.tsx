@@ -95,7 +95,6 @@ export function getStaticDate(dataLayers: XYDataLayerConfig[], frame: FramePubli
 }
 
 export const getAnnotationsSupportedLayer = (
-  isAddingLibraryAnnotationGroup: boolean,
   state?: XYState,
   frame?: Pick<FramePublicAPI, 'datasourceLayers' | 'activeData'>
 ) => {
@@ -104,7 +103,7 @@ export const getAnnotationsSupportedLayer = (
   const hasDateHistogram = isDateHistogram(dataLayers, frame);
 
   const initialDimensions =
-    state && hasDateHistogram && !isAddingLibraryAnnotationGroup
+    state && hasDateHistogram
       ? [
           {
             groupId: 'xAnnotations',

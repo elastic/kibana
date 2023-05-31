@@ -60,6 +60,7 @@ describe('split .kibana index into multiple system indices', () => {
     beforeAll(async () => {
       esServer = await startElasticsearch({
         dataArchive: Path.join(__dirname, '..', 'archives', '7.3.0_xpack_sample_saved_objects.zip'),
+        timeout: 60000,
       });
     });
 
@@ -190,6 +191,7 @@ describe('split .kibana index into multiple system indices', () => {
             "cases-connector-mappings",
             "cases-telemetry",
             "cases-user-actions",
+            "composite-slo",
             "config",
             "config-global",
             "connector_token",
@@ -234,6 +236,7 @@ describe('split .kibana index into multiple system indices', () => {
             "ml-module",
             "ml-trained-model",
             "monitoring-telemetry",
+            "observability-onboarding-state",
             "osquery-manager-usage-metric",
             "osquery-pack",
             "osquery-pack-asset",

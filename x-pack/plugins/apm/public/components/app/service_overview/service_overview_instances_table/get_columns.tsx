@@ -12,7 +12,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { ReactNode } from 'react';
-import { ActionMenu } from '@kbn/observability-plugin/public';
+import { ActionMenu } from '@kbn/observability-shared-plugin/public';
 import { isTimeComparison } from '../../../shared/time_comparison/get_comparison_options';
 import { isJavaAgentName } from '../../../../../common/agent_name';
 import { LatencyAggregationType } from '../../../../../common/latency_aggregation_types';
