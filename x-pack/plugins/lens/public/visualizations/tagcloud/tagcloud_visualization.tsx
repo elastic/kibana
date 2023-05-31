@@ -12,6 +12,12 @@ import { render } from 'react-dom';
 import { ThemeServiceStart } from '@kbn/core/public';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
+import {
+  buildExpression,
+  buildExpressionFunction,
+  ExpressionFunctionTheme,
+} from '@kbn/expressions-plugin/common';
+import { PaletteRegistry } from '@kbn/coloring';
 import type { OperationMetadata, Visualization } from '../..';
 import type { TagcloudState } from './types';
 import { suggestions } from './suggestions';
@@ -25,8 +31,10 @@ const TAGCLOUD_LABEL = i18n.translate('xpack.lens.tagcloud.label', {
 });
 
 export const getTagcloudVisualization = ({
+  paletteService,
   theme,
 }: {
+  paletteService: PaletteRegistry;
   theme: ThemeServiceStart;
 }): Visualization<TagcloudState> => ({
   id: 'lnsTagcloud',
@@ -143,17 +151,22 @@ export const getTagcloudVisualization = ({
       type: 'expression',
       chain: [
         ...(datasourceExpression ? datasourceExpression.chain : []),
-        {
-          type: 'function',
-          function: 'tagcloud',
-          arguments: {
-            bucket: [state.tagAccessor],
-            metric: [state.valueAccessor],
-            maxFontSize: [state.maxFontSize],
-            minFontSize: [state.minFontSize],
-            showLabel: [state.showLabel],
-          },
-        },
+        buildExpressionFunction<unknown>(
+          'tagcloud',
+          {
+            bucket: state.tagAccessor,
+            metric: state.valueAccessor,
+            maxFontSize: state.maxFontSize,
+            minFontSize: state.minFontSize,
+            palette: buildExpression([
+              buildExpressionFunction<ExpressionFunctionTheme>('theme', {
+                variable: 'palette',
+                default: [paletteService.get('positive').toExpression()],
+              })
+            ]).toAst(),
+            showLabel: state.showLabel,
+          }
+        ).toAst(),
       ],
     };
   },

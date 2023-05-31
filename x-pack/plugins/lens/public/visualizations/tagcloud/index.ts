@@ -6,17 +6,20 @@
  */
 
 import type { CoreSetup } from '@kbn/core/public';
+import type { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import type { EditorFrameSetup } from '../../types';
 
 export interface TagcloudVisualizationPluginSetupPlugins {
   editorFrame: EditorFrameSetup;
+  charts: ChartsPluginSetup;
 }
 
 export class TagcloudVisualization {
-  setup(core: CoreSetup, { editorFrame }: TagcloudVisualizationPluginSetupPlugins) {
+  setup(core: CoreSetup, { editorFrame, charts }: TagcloudVisualizationPluginSetupPlugins) {
     editorFrame.registerVisualization(async () => {
       const { getTagcloudVisualization } = await import('../../async_services');
-      return getTagcloudVisualization({ theme: core.theme });
+      const palettes = await charts.palettes.getPalettes();
+      return getTagcloudVisualization({ paletteService: palettes, theme: core.theme });
     });
   }
 }
