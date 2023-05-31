@@ -244,6 +244,7 @@ export const getManagementFilteredLinks = async (
     canReadActionsLogManagement,
     canWriteHostIsolationExceptions,
     canReadHostIsolationExceptions,
+    canDeleteHostIsolationExceptions,
     canReadEndpointList,
     canReadTrustedApplications,
     canReadEventFilters,
@@ -255,8 +256,11 @@ export const getManagementFilteredLinks = async (
       : getEndpointAuthzInitialState();
 
   const showHostIsolationExceptions =
-    canWriteHostIsolationExceptions || // has read-write isolate host payment feature
-    (canReadHostIsolationExceptions && // no payment feature enables the link if there is data to allow user to unisolate hosts
+    canWriteHostIsolationExceptions || // full host isolation exceptions payment feature, always show the link.
+    // read and delete host isolation exceptions are not part of the payment feature to allow releasing hosts after a downgrade scenario.
+    // however, in this scenario we only allow access when there is data, otherwise the link won't exist.
+    (canReadHostIsolationExceptions &&
+      canDeleteHostIsolationExceptions &&
       (await checkArtifactHasData(HostIsolationExceptionsApiClient.getInstance(core.http))));
 
   const linksToExclude: SecurityPageName[] = [];

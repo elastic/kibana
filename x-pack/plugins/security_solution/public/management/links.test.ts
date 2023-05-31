@@ -113,6 +113,7 @@ describe('links', () => {
       (calculateEndpointAuthz as jest.Mock).mockReturnValue(
         getEndpointAuthzInitialStateMock({
           canReadActionsLogManagement: false,
+          canDeleteHostIsolationExceptions: false,
         })
       );
       fakeHttpServices.get.mockResolvedValue({ total: 0 });
@@ -126,69 +127,6 @@ describe('links', () => {
   });
 
   describe('Host Isolation Exception', () => {
-    it('should NOT return HIE if the user has no read or write permission', async () => {
-      (calculateEndpointAuthz as jest.Mock).mockReturnValue(
-        getEndpointAuthzInitialStateMock({
-          canWriteHostIsolationExceptions: false,
-          canReadHostIsolationExceptions: false,
-        })
-      );
-
-      const filteredLinks = await getManagementFilteredLinks(
-        coreMockStarted,
-        getPlugins(['superuser'])
-      );
-
-      expect(filteredLinks).toEqual(getLinksWithout(SecurityPageName.hostIsolationExceptions));
-      expect(fakeHttpServices.get).not.toHaveBeenCalled();
-    });
-
-    it('should NOT return HIE if user has read only permission (no license) and NO HIE entries exist', async () => {
-      (calculateEndpointAuthz as jest.Mock).mockReturnValue(
-        getEndpointAuthzInitialStateMock({
-          canWriteHostIsolationExceptions: false,
-          canReadHostIsolationExceptions: true,
-        })
-      );
-
-      fakeHttpServices.get.mockResolvedValue({ total: 0 });
-
-      const filteredLinks = await getManagementFilteredLinks(
-        coreMockStarted,
-        getPlugins(['superuser'])
-      );
-
-      expect(filteredLinks).toEqual(getLinksWithout(SecurityPageName.hostIsolationExceptions));
-      expect(fakeHttpServices.get).toHaveBeenCalledWith('/api/exception_lists/items/_find', {
-        query: expect.objectContaining({
-          list_id: [ENDPOINT_ARTIFACT_LISTS.hostIsolationExceptions.id],
-        }),
-      });
-    });
-
-    it('should return HIE if user has read only permission (no license) but HIE entries exist', async () => {
-      (calculateEndpointAuthz as jest.Mock).mockReturnValue(
-        getEndpointAuthzInitialStateMock({
-          canWriteHostIsolationExceptions: false,
-          canReadHostIsolationExceptions: true,
-        })
-      );
-
-      fakeHttpServices.get.mockResolvedValue({ total: 100 });
-
-      const filteredLinks = await getManagementFilteredLinks(
-        coreMockStarted,
-        getPlugins(['superuser'])
-      );
-
-      expect(filteredLinks).toEqual(links);
-      expect(fakeHttpServices.get).toHaveBeenCalledWith('/api/exception_lists/items/_find', {
-        query: expect.objectContaining({
-          list_id: [ENDPOINT_ARTIFACT_LISTS.hostIsolationExceptions.id],
-        }),
-      });
-    });
-
     it('should return HIE if user has write permission (licensed)', async () => {
       (calculateEndpointAuthz as jest.Mock).mockReturnValue(
         getEndpointAuthzInitialStateMock({ canWriteHostIsolationExceptions: true })
@@ -203,6 +141,72 @@ describe('links', () => {
 
       expect(filteredLinks).toEqual(links);
       expect(fakeHttpServices.get).not.toHaveBeenCalled();
+    });
+
+    it('should NOT return HIE if the user has no HIE permission', async () => {
+      (calculateEndpointAuthz as jest.Mock).mockReturnValue(
+        getEndpointAuthzInitialStateMock({
+          canWriteHostIsolationExceptions: false,
+          canReadHostIsolationExceptions: false,
+          canDeleteHostIsolationExceptions: false,
+        })
+      );
+
+      const filteredLinks = await getManagementFilteredLinks(
+        coreMockStarted,
+        getPlugins(['superuser'])
+      );
+
+      expect(filteredLinks).toEqual(getLinksWithout(SecurityPageName.hostIsolationExceptions));
+      expect(fakeHttpServices.get).not.toHaveBeenCalled();
+    });
+
+    it('should NOT return HIE if user has read and delete permissions (no license) and NO HIE entries exist', async () => {
+      (calculateEndpointAuthz as jest.Mock).mockReturnValue(
+        getEndpointAuthzInitialStateMock({
+          canWriteHostIsolationExceptions: false,
+          canReadHostIsolationExceptions: true,
+          canDeleteHostIsolationExceptions: true,
+        })
+      );
+
+      fakeHttpServices.get.mockResolvedValue({ total: 0 });
+
+      const filteredLinks = await getManagementFilteredLinks(
+        coreMockStarted,
+        getPlugins(['superuser'])
+      );
+
+      expect(filteredLinks).toEqual(getLinksWithout(SecurityPageName.hostIsolationExceptions));
+      expect(fakeHttpServices.get).toHaveBeenCalledWith('/api/exception_lists/items/_find', {
+        query: expect.objectContaining({
+          list_id: [ENDPOINT_ARTIFACT_LISTS.hostIsolationExceptions.id],
+        }),
+      });
+    });
+
+    it('should return HIE if user has read and delete permission∫ (no license) but HIE entries exist', async () => {
+      (calculateEndpointAuthz as jest.Mock).mockReturnValue(
+        getEndpointAuthzInitialStateMock({
+          canWriteHostIsolationExceptions: false,
+          canReadHostIsolationExceptions: true,
+          canDeleteHostIsolationExceptions: true,
+        })
+      );
+
+      fakeHttpServices.get.mockResolvedValue({ total: 100 });
+
+      const filteredLinks = await getManagementFilteredLinks(
+        coreMockStarted,
+        getPlugins(['superuser'])
+      );
+
+      expect(filteredLinks).toEqual(links);
+      expect(fakeHttpServices.get).toHaveBeenCalledWith('/api/exception_lists/items/_find', {
+        query: expect.objectContaining({
+          list_id: [ENDPOINT_ARTIFACT_LISTS.hostIsolationExceptions.id],
+        }),
+      });
     });
   });
 
