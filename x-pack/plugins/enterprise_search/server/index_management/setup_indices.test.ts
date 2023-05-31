@@ -48,6 +48,25 @@ describe('Setup Indices', () => {
         properties: {
           filtering_advanced_config: { type: 'boolean' },
           filtering_rules: { type: 'boolean' },
+          incremental_sync: {
+            properties: {
+              enabled: { type: 'boolean' },
+            },
+          },
+          sync_rules: {
+            properties: {
+              basic: {
+                properties: {
+                  enabled: { type: 'boolean' },
+                },
+              },
+              advanced: {
+                properties: {
+                  enabled: { type: 'boolean' },
+                },
+              },
+            },
+          },
         },
       },
       filtering: {
