@@ -72,6 +72,7 @@ describe('format_column', () => {
       params: {
         suffixString: 'ABC',
         id: 'number',
+        formatOverride: true,
         params: { formatOverride: true, pattern: '0,0.00000' },
       },
     });
@@ -167,6 +168,7 @@ describe('format_column', () => {
         id: 'suffix',
         params: {
           suffixString: 'abc',
+          formatOverride: true,
           id: 'wrapper',
           params: {
             wrapperParam: 123,
