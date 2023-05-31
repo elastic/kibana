@@ -22,7 +22,6 @@ export function TagsDimensionEditor(props: Props) {
       palettes={props.paletteService}
       activePalette={props.state.palette}
       setPalette={(newPalette) => {
-        console.log('newPalette', newPalette);
         props.setState({
           ...props.state,
           palette: newPalette
