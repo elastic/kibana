@@ -124,7 +124,11 @@ export function createConnectorDocument({
     last_synced: null,
     name: indexName.startsWith('search-') ? indexName.substring(7) : indexName,
     pipeline,
-    scheduling: { enabled: false, interval: '0 0 0 * * ?' },
+    scheduling: {
+      access_control: { enabled: false, interval: '0 0 0 * * ?' },
+      incremental: { enabled: false, interval: '0 0 0 * * ?' },
+      full: { enabled: false, interval: '0 0 0 * * ?' },
+    },
     service_type: serviceType || null,
     status: ConnectorStatus.CREATED,
     sync_now: false,
