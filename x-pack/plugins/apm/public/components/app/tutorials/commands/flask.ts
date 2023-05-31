@@ -17,7 +17,7 @@ export const flaskVariables = (secretToken?: string) => ({
 
 export const flaskHighlightLang = 'py';
 
-export const flaskLineNumbers = (apiKey?: string) => ({
+export const flaskLineNumbers = () => ({
   start: 1,
   highlight: '2-4, 7-8, 10, 13, 16, 19-22',
 });

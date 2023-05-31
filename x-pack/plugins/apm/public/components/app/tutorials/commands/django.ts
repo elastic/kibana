@@ -17,7 +17,7 @@ export const djangoVariables = (secretToken?: string) => ({
 
 export const djangoHighlightLang = 'py';
 
-export const djangoLineNumbers = (apiKey?: string) => ({
+export const djangoLineNumbers = () => ({
   start: 1,
   highlight: '1, 3, 5, 7, 9, 12, 15, 18-19,  21, 23, 25',
 });

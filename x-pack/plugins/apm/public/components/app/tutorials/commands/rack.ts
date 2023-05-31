@@ -17,7 +17,7 @@ export const rackVariables = (secretToken?: string) => ({
 
 export const rackHighlightLang = 'rb';
 
-export const rackLineNumbers = (apiKey?: string) => ({
+export const rackLineNumbers = () => ({
   start: 1,
   highlight: '4, 7, 10, 13',
 });

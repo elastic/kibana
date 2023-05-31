@@ -92,17 +92,17 @@ interface LineNumbers {
 }
 
 const apmAgentLineNumbersMap: (
-  apiKey?: string
-) => Record<string, LineNumbers> = (apiKey?: string) => ({
+  apiKey?: string | null
+) => Record<string, LineNumbers> = (apiKey?: string | null) => ({
   java: javaLineNumbers(apiKey),
-  node: nodeLineNumbers(apiKey),
-  django: djangoLineNumbers(apiKey),
-  flask: flaskLineNumbers(apiKey),
-  rails: railsLineNumbers(apiKey),
-  rack: rackLineNumbers(apiKey),
-  go: goLineNumbers(apiKey),
-  dotnet: dotnetLineNumbers(apiKey),
-  php: phpLineNumbers(apiKey),
+  node: nodeLineNumbers(),
+  django: djangoLineNumbers(),
+  flask: flaskLineNumbers(),
+  rails: railsLineNumbers(),
+  rack: rackLineNumbers(),
+  go: goLineNumbers(),
+  dotnet: dotnetLineNumbers(),
+  php: phpLineNumbers(),
 });
 
 const apmAgentHighlightLangMap: Record<string, string> = {

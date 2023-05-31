@@ -17,7 +17,7 @@ export const railsVariables = (secretToken?: string) => ({
 
 export const railsHighlightLang = 'rb';
 
-export const railsLineNumbers = (apiKey?: string) => ({
+export const railsLineNumbers = () => ({
   start: 1,
   highlight: '4, 7, 10, 13',
 });

@@ -17,7 +17,7 @@ export const dotnetVariables = (secretToken?: string) => ({
 
 export const dotnetHighlightLang = 'dotnet';
 
-export const dotnetLineNumbers = (apiKey?: string) => ({
+export const dotnetLineNumbers = () => ({
   start: 1,
   highlight: '1-2, 4, 6, 8, 10-12',
 });

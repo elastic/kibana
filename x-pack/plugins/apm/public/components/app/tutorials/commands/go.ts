@@ -17,7 +17,7 @@ export const goVariables = (secretToken?: string) => ({
 
 export const goHighlightLang = 'go';
 
-export const goLineNumbers = (apiKey?: string) => ({
+export const goLineNumbers = () => ({
   start: 1,
   highlight: '4, 7, 10, 13',
 });

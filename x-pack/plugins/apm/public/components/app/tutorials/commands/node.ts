@@ -16,7 +16,7 @@ export const nodeVariables = (secretToken?: string) => ({
 
 export const nodeHighlightLang = 'js';
 
-export const nodeLineNumbers = (apiKey?: string) => ({
+export const nodeLineNumbers = () => ({
   start: 1,
   highlight: '2, 5, 8, 11, 14-15',
 });

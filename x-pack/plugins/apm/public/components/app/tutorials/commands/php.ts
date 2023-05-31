@@ -14,7 +14,7 @@ export const phpVariables = (secretToken?: string) => ({
 
 export const phpHighlightLang = 'php';
 
-export const phpLineNumbers = (apiKey?: string) => ({
+export const phpLineNumbers = () => ({
   start: 1,
   highlight: '2, 5, 8, 11',
 });

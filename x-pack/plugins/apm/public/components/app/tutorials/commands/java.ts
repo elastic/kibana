@@ -23,7 +23,7 @@ export const javaVariables = (secretToken?: string) => ({
 
 export const javaHighlightLang = 'java';
 
-export const javaLineNumbers = (apiKey?: string) => ({
+export const javaLineNumbers = (apiKey?: string | null) => ({
   start: 1,
   highlight: '',
   annotations: {
