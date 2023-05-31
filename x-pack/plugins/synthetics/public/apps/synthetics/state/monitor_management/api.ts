@@ -31,10 +31,14 @@ export interface MonitorInspectResponse {
 
 export const inspectMonitorAPI = async ({
   monitor,
+  hideParams,
 }: {
+  hideParams?: boolean;
   monitor: SyntheticsMonitor | EncryptedSyntheticsMonitor;
 }): Promise<{ result: MonitorInspectResponse; decodedCode: string }> => {
-  return await apiService.post(API_URLS.SYNTHETICS_MONITOR_INSPECT, monitor);
+  return await apiService.post(API_URLS.SYNTHETICS_MONITOR_INSPECT, monitor, undefined, {
+    hideParams,
+  });
 };
 
 export const updateMonitorAPI = async ({

@@ -587,8 +587,9 @@ export class SyntheticsService {
 
   async getSyntheticsParams({
     spaceId,
+    hideParams = false,
     canSave = true,
-  }: { spaceId?: string; canSave?: boolean } = {}) {
+  }: { spaceId?: string; canSave?: boolean; hideParams?: boolean } = {}) {
     if (!canSave) {
       return Object.create(null);
     }
@@ -609,7 +610,9 @@ export class SyntheticsService {
           if (!paramsBySpace[namespace]) {
             paramsBySpace[namespace] = Object.create(null);
           }
-          paramsBySpace[namespace][param.attributes.key] = param.attributes.value;
+          paramsBySpace[namespace][param.attributes.key] = hideParams
+            ? '*******'
+            : param.attributes.value;
         });
       });
     }

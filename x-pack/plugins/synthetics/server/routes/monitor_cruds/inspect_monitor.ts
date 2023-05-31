@@ -27,6 +27,7 @@ export const inspectSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () =
     query: schema.object({
       id: schema.maybe(schema.string()),
       preserve_namespace: schema.maybe(schema.boolean()),
+      hideParams: schema.maybe(schema.boolean()),
     }),
   },
   writeAccess: true,
@@ -34,7 +35,7 @@ export const inspectSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () =
     const { savedObjectsClient, server, syntheticsMonitorClient, request, spaceId, response } =
       routeContext;
     // usually id is auto generated, but this is useful for testing
-    const { id } = request.query;
+    const { id, hideParams = true } = request.query;
 
     const monitor: SyntheticsMonitor = request.body as SyntheticsMonitor;
     const monitorType = monitor[ConfigKey.MONITOR_TYPE];
@@ -76,6 +77,7 @@ export const inspectSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () =
         savedObjectsClient,
         privateLocations,
         spaceId,
+        hideParams,
         canSave
       );
 

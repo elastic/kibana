@@ -369,10 +369,15 @@ export class SyntheticsMonitorClient {
     savedObjectsClient: SavedObjectsClientContract,
     allPrivateLocations: PrivateLocation[],
     spaceId: string,
+    hideParams: boolean,
     canSave: boolean
   ) {
     const privateConfigs: PrivateConfig[] = [];
-    const paramsBySpace = await this.syntheticsService.getSyntheticsParams({ spaceId, canSave });
+    const paramsBySpace = await this.syntheticsService.getSyntheticsParams({
+      spaceId,
+      canSave,
+      hideParams,
+    });
 
     const { formattedConfig, params, config } = await this.formatConfigWithParams(
       monitorObj,

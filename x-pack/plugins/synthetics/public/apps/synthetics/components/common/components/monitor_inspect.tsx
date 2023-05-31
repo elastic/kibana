@@ -22,6 +22,7 @@ import {
   EuiSpacer,
   EuiFlyoutBody,
   EuiToolTip,
+  EuiSwitch,
 } from '@elastic/eui';
 
 import { ClientPluginsStart } from '../../../../../plugin';
@@ -43,6 +44,9 @@ export const MonitorInspectWrapper = () => {
 };
 
 const MonitorInspect = () => {
+  const { isDev } = useSyntheticsSettingsContext();
+
+  const [hideParams, setHideParams] = useState(() => !isDev);
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
 
   const closeFlyout = () => {
@@ -61,10 +65,11 @@ const MonitorInspect = () => {
   const { data, loading, error } = useFetcher(() => {
     if (isInspecting) {
       return inspectMonitorAPI({
+        hideParams,
         monitor: getValues() as SyntheticsMonitor,
       });
     }
-  }, [isInspecting]);
+  }, [isInspecting, hideParams]);
 
   let flyout;
 
@@ -77,6 +82,12 @@ const MonitorInspect = () => {
           </EuiTitle>
         </EuiFlyoutHeader>
         <EuiFlyoutBody>
+          <EuiSwitch
+            label={HIDE_PARAMS}
+            checked={hideParams}
+            onChange={(e) => setHideParams(e.target.checked)}
+          />
+          <EuiSpacer size="m" />
           {!loading && data ? (
             <>
               <EuiCodeBlock language="json" fontSize="m" paddingSize="m" lineNumbers>
@@ -182,3 +193,7 @@ export const INSPECT_MONITOR_LABEL = i18n.translate(
     defaultMessage: 'Inspect configuration',
   }
 );
+
+const HIDE_PARAMS = i18n.translate('xpack.synthetics.monitorInspect.hideParams', {
+  defaultMessage: 'Hide params values',
+});
