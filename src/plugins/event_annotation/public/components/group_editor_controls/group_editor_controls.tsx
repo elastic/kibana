@@ -19,7 +19,7 @@ import { EventAnnotationConfig, EventAnnotationGroupConfig } from '../../../comm
 import { AnnotationEditorControls } from '../annotation_editor_controls';
 import { AnnotationList } from './annotation_list';
 
-const ENABLE_INDIVIDUAL_ANNOTATION_EDITING = false;
+export const ENABLE_INDIVIDUAL_ANNOTATION_EDITING = false;
 
 export const GroupEditorControls = ({
   group,

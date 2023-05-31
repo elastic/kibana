@@ -15,7 +15,7 @@ import { EuiSelectProps, EuiTextAreaProps, EuiTextProps } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { act } from 'react-dom/test-utils';
 import type { QueryInputServices } from '@kbn/visualization-ui-components/public';
-import { AnnotationEditorControls } from '..';
+import { AnnotationEditorControls, ENABLE_INDIVIDUAL_ANNOTATION_EDITING } from '..';
 
 jest.mock('@elastic/eui', () => {
   return {
@@ -194,54 +194,63 @@ describe('event annotation group editor', () => {
     `);
   });
 
-  it('adds a new annotation group', () => {
-    act(() => {
-      wrapper.find('button[data-test-subj="addAnnotation"]').simulate('click');
-    });
-
-    expect(updateMock).toHaveBeenCalledTimes(2);
-    const newAnnotations = (updateMock.mock.calls[0][0] as EventAnnotationGroupConfig).annotations;
-    expect(newAnnotations.length).toBe(group.annotations.length + 1);
-    expect(wrapper.exists(AnnotationEditorControls)); // annotation controls opened
-  });
-
-  it('incorporates annotation updates into group', () => {
-    const annotations = [getDefaultManualAnnotation('1', ''), getDefaultManualAnnotation('2', '')];
-
-    act(() => {
-      wrapper.setProps({
-        selectedAnnotation: annotations[0],
-        group: { ...group, annotations },
+  if (ENABLE_INDIVIDUAL_ANNOTATION_EDITING) {
+    it('adds a new annotation group', () => {
+      act(() => {
+        wrapper.find('button[data-test-subj="addAnnotation"]').simulate('click');
       });
+
+      expect(updateMock).toHaveBeenCalledTimes(2);
+      const newAnnotations = (updateMock.mock.calls[0][0] as EventAnnotationGroupConfig)
+        .annotations;
+      expect(newAnnotations.length).toBe(group.annotations.length + 1);
+      expect(wrapper.exists(AnnotationEditorControls)); // annotation controls opened
     });
 
-    wrapper.find(AnnotationEditorControls).prop('onAnnotationChange')({
-      ...annotations[0],
-      color: 'newColor',
-    });
+    it('incorporates annotation updates into group', () => {
+      const annotations = [
+        getDefaultManualAnnotation('1', ''),
+        getDefaultManualAnnotation('2', ''),
+      ];
 
-    expect(updateMock).toHaveBeenCalledTimes(1);
-    expect(updateMock.mock.calls[0][0].annotations[0].color).toBe('newColor');
-    expect(setSelectedAnnotationMock).toHaveBeenCalledTimes(1);
-  });
-
-  it('removes an annotation from a group', () => {
-    const annotations = [getDefaultManualAnnotation('1', ''), getDefaultManualAnnotation('2', '')];
-
-    act(() => {
-      wrapper.setProps({
-        group: { ...group, annotations },
+      act(() => {
+        wrapper.setProps({
+          selectedAnnotation: annotations[0],
+          group: { ...group, annotations },
+        });
       });
+
+      wrapper.find(AnnotationEditorControls).prop('onAnnotationChange')({
+        ...annotations[0],
+        color: 'newColor',
+      });
+
+      expect(updateMock).toHaveBeenCalledTimes(1);
+      expect(updateMock.mock.calls[0][0].annotations[0].color).toBe('newColor');
+      expect(setSelectedAnnotationMock).toHaveBeenCalledTimes(1);
     });
 
-    act(() => {
-      wrapper
-        .find('button[data-test-subj="indexPattern-dimension-remove"]')
-        .last()
-        .simulate('click');
-    });
+    it('removes an annotation from a group', () => {
+      const annotations = [
+        getDefaultManualAnnotation('1', ''),
+        getDefaultManualAnnotation('2', ''),
+      ];
 
-    expect(updateMock).toHaveBeenCalledTimes(1);
-    expect(updateMock.mock.calls[0][0].annotations).toEqual(annotations.slice(0, 1));
-  });
+      act(() => {
+        wrapper.setProps({
+          group: { ...group, annotations },
+        });
+      });
+
+      act(() => {
+        wrapper
+          .find('button[data-test-subj="indexPattern-dimension-remove"]')
+          .last()
+          .simulate('click');
+      });
+
+      expect(updateMock).toHaveBeenCalledTimes(1);
+      expect(updateMock.mock.calls[0][0].annotations).toEqual(annotations.slice(0, 1));
+    });
+  }
 });
