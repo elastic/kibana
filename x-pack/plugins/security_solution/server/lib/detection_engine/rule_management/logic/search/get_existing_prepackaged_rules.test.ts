@@ -48,16 +48,6 @@ describe('get_existing_prepackaged_rules', () => {
       result3.params.immutable = true;
       result3.id = 'f3e1bf0b-b95f-43da-b1de-5d2f0af2287a';
 
-      // first result mock which is for returning the total
-      rulesClient.find.mockResolvedValueOnce(
-        getFindResultWithMultiHits({
-          data: [result1],
-          perPage: 1,
-          page: 1,
-          total: 3,
-        })
-      );
-
       // second mock which will return all the data on a single page
       rulesClient.find.mockResolvedValueOnce(
         getFindResultWithMultiHits({
@@ -90,16 +80,6 @@ describe('get_existing_prepackaged_rules', () => {
       const result2 = getRuleMock(getQueryRuleParams());
       result2.id = '5baa53f8-96da-44ee-ad58-41bccb7f9f3d';
 
-      // first result mock which is for returning the total
-      rulesClient.find.mockResolvedValueOnce(
-        getFindResultWithMultiHits({
-          data: [result1],
-          perPage: 1,
-          page: 1,
-          total: 2,
-        })
-      );
-
       // second mock which will return all the data on a single page
       rulesClient.find.mockResolvedValueOnce(
         getFindResultWithMultiHits({ data: [result1, result2], perPage: 2, page: 1, total: 2 })
@@ -120,16 +100,6 @@ describe('get_existing_prepackaged_rules', () => {
 
       const result3 = getRuleMock(getQueryRuleParams());
       result3.id = 'f3e1bf0b-b95f-43da-b1de-5d2f0af2287a';
-
-      // first result mock which is for returning the total
-      rulesClient.find.mockResolvedValueOnce(
-        getFindResultWithMultiHits({
-          data: [result1],
-          perPage: 3,
-          page: 1,
-          total: 3,
-        })
-      );
 
       // second mock which will return all the data on a single page
       rulesClient.find.mockResolvedValueOnce(
@@ -162,16 +132,6 @@ describe('get_existing_prepackaged_rules', () => {
 
       const result2 = getRuleMock(getQueryRuleParams());
       result2.id = '5baa53f8-96da-44ee-ad58-41bccb7f9f3d';
-
-      // first result mock which is for returning the total
-      rulesClient.find.mockResolvedValueOnce(
-        getFindResultWithMultiHits({
-          data: [result1],
-          perPage: 1,
-          page: 1,
-          total: 2,
-        })
-      );
 
       // second mock which will return all the data on a single page
       rulesClient.find.mockResolvedValueOnce(
