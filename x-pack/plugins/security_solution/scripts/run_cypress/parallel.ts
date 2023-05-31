@@ -219,9 +219,9 @@ export const cli = () => {
                   kibana: {
                     port: kibanaPort,
                   },
-                  // fleetserver: {
-                  //   port: fleetServerPort,
-                  // },
+                  fleetserver: {
+                    port: fleetServerPort,
+                  },
                 },
                 kbnTestServer: {
                   serverArgs: [
