@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE } from '../../../../common/constants';
+import {ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE} from '../../../../common/constants';
 
 import {
   ConnectorStatus,
@@ -17,13 +17,7 @@ import {
   SyncStatus,
 } from '../../../../common/types/connectors';
 
-import {
-  ApiViewIndex,
-  ConnectorViewIndex,
-  CrawlerViewIndex,
-  IngestionMethod,
-  IngestionStatus,
-} from '../types';
+import {ApiViewIndex, ConnectorViewIndex, CrawlerViewIndex, IngestionMethod, IngestionStatus,} from '../types';
 
 export const apiIndex: ApiViewIndex = {
   count: 1,
@@ -128,11 +122,11 @@ export const connectorIndex: ConnectorViewIndex = {
     index_name: 'connector',
     is_native: false,
     language: 'en',
-    last_access_control_sync_status: SyncStatus.COMPLETED,
     last_seen: null,
     last_sync_error: null,
     last_sync_scheduled_at: null,
     last_sync_status: SyncStatus.COMPLETED,
+    last_permissions_sync_status: SyncStatus.COMPLETED,
     last_synced: null,
     name: 'connector',
     scheduling: {
@@ -245,11 +239,11 @@ export const crawlerIndex: CrawlerViewIndex = {
     index_name: 'crawler',
     is_native: true,
     language: 'en',
-    last_access_control_sync_status: SyncStatus.COMPLETED,
     last_seen: null,
     last_sync_error: null,
     last_sync_scheduled_at: null,
     last_sync_status: SyncStatus.COMPLETED,
+    last_permissions_sync_status: SyncStatus.COMPLETED,
     last_synced: null,
     name: 'crawler',
     scheduling: {
