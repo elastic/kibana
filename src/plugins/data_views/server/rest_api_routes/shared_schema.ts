@@ -6,7 +6,15 @@
  * Side Public License, v 1.
  */
 
-const dataViewSpecSchema = schema.object({
+import { schema } from '@kbn/config-schema';
+
+import {
+  fieldSpecSchema,
+  runtimeFieldSchema,
+  serializedFieldFormatSchema,
+} from '../../common/schemas';
+
+export const dataViewSpecSchema = schema.object({
   title: schema.string(),
   version: schema.maybe(schema.string()),
   id: schema.maybe(schema.string()),
