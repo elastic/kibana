@@ -229,22 +229,6 @@ export function registerSetupRoute({
           });
         }
 
-        body.data.available = await hasProfilingData({
-          client: createProfilingEsClient({
-            esClient,
-            request,
-          }),
-        });
-
-        if (body.data.available) {
-          return response.ok({
-            body: {
-              has_data: true,
-              has_setup: true,
-            },
-          });
-        }
-
         const executeFunctions = [
           installLatestApmPackage,
           updateApmPolicy,
