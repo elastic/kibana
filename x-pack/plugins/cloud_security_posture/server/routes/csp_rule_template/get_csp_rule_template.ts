@@ -24,7 +24,7 @@ import {
 import { CspRouter } from '../../types';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../benchmarks/benchmarks';
 
-const getBenchmarkId = async (
+const getBenchmarkIdFromPackagePolicyId = async (
   soClient: SavedObjectsClientContract,
   packagePolicyId: string
 ): Promise<string> => {
@@ -48,7 +48,7 @@ const findCspRuleTemplateHandler = async (
 
   const benchmarkId = options.benchmarkId
     ? options.benchmarkId
-    : await getBenchmarkId(soClient, options.packagePolicyId!);
+    : await getBenchmarkIdFromPackagePolicyId(soClient, options.packagePolicyId!);
 
   const cspRulesTemplatesSo = await soClient.find<CspRuleTemplate>({
     type: CSP_RULE_TEMPLATE_SAVED_OBJECT_TYPE,
@@ -57,7 +57,7 @@ const findCspRuleTemplateHandler = async (
     page: options.page,
     perPage: options.perPage,
     sortField: options.sortField,
-    fields: options.fields ? options.fields : undefined,
+    fields: options?.fields,
     filter: getBenchmarkTypeFilter(benchmarkId),
   });
 

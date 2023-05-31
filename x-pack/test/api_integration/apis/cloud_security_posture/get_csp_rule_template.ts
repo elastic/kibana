@@ -73,7 +73,7 @@ export default function ({ getService }: FtrProviderContext) {
         .set('kbn-xsrf', 'xxxx')
         .query({
           packagePolicyId: 'your-package-policy-id',
-          benchmarkId: 'your-benchmark-id',
+          benchmarkId: 'cis_aws',
         })
         .expect(500);
 
