@@ -8,7 +8,6 @@
 
 import { getKbnServerError, reportServerError } from '@kbn/kibana-utils-plugin/server';
 import { CoreSetup } from '@kbn/core/server';
-import { errors } from '@elastic/elasticsearch';
 
 export const setupOptionsListClusterSettingsRoute = ({ http }: CoreSetup) => {
   const router = http.createRouter();
