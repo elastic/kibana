@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useRef, useState } from 'react';
+import React from 'react';
 import { PaletteRegistry } from '@kbn/coloring';
 import type { TagcloudState } from './types';
 import { PalettePicker } from '../../shared_components';
@@ -24,10 +24,9 @@ export function TagsDimensionEditor(props: Props) {
       setPalette={(newPalette) => {
         props.setState({
           ...props.state,
-          palette: newPalette
+          palette: newPalette,
         });
       }}
     />
   );
 }
-
