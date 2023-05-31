@@ -96,9 +96,11 @@ describe('Saved Objects type validator', () => {
         '2.0.0': createStubSpec(), // version keys have to be valid kibana versions. These are not
         '2.7.0': createStubSpec(),
         '3.0.0': createStubSpec(),
-        '3.5.0': createStubSpec(),
+        '3.5.0': createStubSpec(), // higher than default, should fall back to default
         '4.0.0': createStubSpec(),
         '4.3.0': createStubSpec(),
+        '10.1.0': createStubSpec(),
+        '11.1.4': createStubSpec(),
       };
       validator = new SavedObjectsTypeValidator({ logger, type, validationMap, defaultVersion });
     });
@@ -131,35 +133,67 @@ describe('Saved Objects type validator', () => {
     });
 
     it('should use the correct schema for documents with typeMigrationVersion', () => {
-      let data = createMockObject({ typeMigrationVersion: '3.2.0' });
+      const data = createMockObject({ typeMigrationVersion: '3.2.0' });
       validator.validate(data);
-      expect(getCalledVersion()).toEqual('3.0.0');
-
-      jest.clearAllMocks();
-
-      data = createMockObject({ typeMigrationVersion: '3.5.0' });
-      validator.validate(data);
-      expect(getCalledVersion()).toEqual('3.5.0');
+      expect(getCalledVersion()).toEqual('3.0.0'); // falls back to most recent since 3.2.0
     });
 
-    it('should use the correct schema for documents with migrationVersion', () => {
+    it('should use the correct schema for documents with typeMigrationVersion higher than default when not a valid virtual model version', () => {
+      const data = createMockObject({ typeMigrationVersion: '3.5.0' }); // should fall back to most recent since 3.5.0 > default && not a virtual model
+      validator.validate(data);
+      expect(getCalledVersion()).toEqual('3.0.0');
+    });
+
+    it('should use the fall back schema for documents with migrationVersion', () => {
       let data = createMockObject({
         migrationVersion: {
           [type]: '4.6.0',
         },
       });
       validator.validate(data);
-      expect(getCalledVersion()).toEqual('4.3.0');
+      expect(getCalledVersion()).toEqual('3.0.0');
 
       jest.clearAllMocks();
 
       data = createMockObject({
         migrationVersion: {
-          [type]: '4.0.0',
+          [type]: '3.0.0',
         },
       });
       validator.validate(data);
-      expect(getCalledVersion()).toEqual('4.0.0');
+      expect(getCalledVersion()).toEqual('3.0.0');
+    });
+
+    it('should use the correct schema for documents with migrationVersion higher than default when not a valid virtual model version', () => {
+      let data = createMockObject({
+        migrationVersion: {
+          [type]: '4.6.0',
+        },
+      });
+      validator.validate(data);
+      expect(getCalledVersion()).toEqual('3.0.0');
+
+      jest.clearAllMocks();
+
+      data = createMockObject({
+        migrationVersion: {
+          [type]: '3.0.0',
+        },
+      });
+      validator.validate(data);
+      expect(getCalledVersion()).toEqual('3.0.0');
+    });
+
+    it('should use the correct schema for documents with virtualModelVersion', () => {
+      const data = createMockObject({ typeMigrationVersion: '10.1.0' }); // allowed
+      validator.validate(data);
+      expect(getCalledVersion()).toEqual('10.1.0');
+    });
+
+    it('should use the correct schema for documents with with virtualModelVersion higher than default when not a valid virtual model version', () => {
+      const data = createMockObject({ typeMigrationVersion: '11.1.4' }); // not allowed
+      validator.validate(data);
+      expect(getCalledVersion()).toEqual('3.0.0');
     });
 
     it('should use the correct schema for documents without a version specified', () => {
