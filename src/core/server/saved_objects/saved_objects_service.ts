@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Subject, Observable } from 'rxjs';
+import { Subject, Observable, of } from 'rxjs';
 import { first, filter, take, switchMap } from 'rxjs/operators';
 import { CoreService } from '../../types';
 import {
@@ -335,9 +335,13 @@ export class SavedObjectsService
 
     registerCoreObjectTypes(this.typeRegistry);
 
+    const skipMigration = this.config.migration.skip;
+
     return {
       status$: calculateStatus$(
-        this.migrator$.pipe(switchMap((migrator) => migrator.getStatus$())),
+        skipMigration
+          ? of({ status: 'completed' })
+          : this.migrator$.pipe(switchMap((migrator) => migrator.getStatus$())),
         elasticsearch.status$
       ),
       setClientFactoryProvider: (provider) => {

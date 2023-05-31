@@ -144,7 +144,8 @@ export default function ({
       });
     });
 
-    describe('PNG Layout', () => {
+    // FAILING FORWARD ES COMPATIBILITY: https://github.com/elastic/kibana/issues/157038
+    describe.skip('PNG Layout', () => {
       before(async () => {
         await loadEcommerce();
       });
@@ -212,7 +213,8 @@ export default function ({
       });
     });
 
-    describe('Preserve Layout', () => {
+    // FAILING FORWARD ES COMPATIBILITY: https://github.com/elastic/kibana/issues/157050
+    describe.skip('Preserve Layout', () => {
       before(async () => {
         await loadEcommerce();
       });

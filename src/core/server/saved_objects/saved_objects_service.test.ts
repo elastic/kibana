@@ -19,6 +19,7 @@ import {
   deleteIndexTemplatesMock,
 } from './saved_objects_service.test.mocks';
 import { BehaviorSubject } from 'rxjs';
+import { take } from 'rxjs/operators';
 import { RawPackageInfo } from '@kbn/config';
 import { ByteSizeValue } from '@kbn/config-schema';
 import { REPO_ROOT } from '@kbn/dev-utils';
@@ -242,6 +243,21 @@ describe('SavedObjectsService', () => {
         const { getTypeRegistry } = await soService.setup(createSetupDeps());
 
         expect(getTypeRegistry()).toBe(typeRegistryInstanceMock);
+      });
+    });
+
+    describe('status$', () => {
+      it('return correct value when migration is skipped', async () => {
+        const coreContext = createCoreContext({ skipMigration: true });
+        const soService = new SavedObjectsService(coreContext);
+        const setup = await soService.setup(createSetupDeps());
+        await soService.start(createStartDeps(false));
+
+        const serviceStatus = await setup.status$.pipe(take(2)).toPromise();
+        expect(serviceStatus.level.toString()).toEqual('available');
+        expect(serviceStatus.summary).toEqual(
+          'SavedObjects service has completed migrations and is available'
+        );
       });
     });
   });
