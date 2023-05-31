@@ -59,7 +59,6 @@ import { IconHostIsolation } from './icons/host_isolation';
 import { IconSiemRules } from './icons/siem_rules';
 import { IconTrustedApplications } from './icons/trusted_applications';
 import { HostIsolationExceptionsApiClient } from './pages/host_isolation_exceptions/host_isolation_exceptions_api_client';
-import { ExperimentalFeaturesService } from '../common/experimental_features_service';
 
 const categories = [
   {
@@ -240,14 +239,7 @@ export const getManagementFilteredLinks = async (
   plugins: StartPlugins
 ): Promise<LinkItem> => {
   const fleetAuthz = plugins.fleet?.authz;
-
-  const { endpointRbacEnabled, endpointRbacV1Enabled } = ExperimentalFeaturesService.get();
-  const isEndpointRbacEnabled = endpointRbacEnabled || endpointRbacV1Enabled;
-
-  const linksToExclude: SecurityPageName[] = [];
-
   const currentUser = await plugins.security.authc.getCurrentUser();
-
   const {
     canReadActionsLogManagement,
     canWriteHostIsolationExceptions,
@@ -258,14 +250,16 @@ export const getManagementFilteredLinks = async (
     canReadBlocklist,
     canReadPolicyManagement,
   } = fleetAuthz
-    ? calculateEndpointAuthz(licenseService, fleetAuthz, currentUser.roles, isEndpointRbacEnabled)
+    ? calculateEndpointAuthz(licenseService, fleetAuthz, currentUser.roles)
     : getEndpointAuthzInitialState();
 
-  // show host isolation only when user can write or when user can read and there is data
+  // show host isolation link only when user can write or when user can read and there is data, exclude link otherwise
   const showHostIsolationExceptions =
     canWriteHostIsolationExceptions ||
     (canReadHostIsolationExceptions &&
       (await checkArtifactHasData(HostIsolationExceptionsApiClient.getInstance(core.http))));
+
+  const linksToExclude: SecurityPageName[] = [];
 
   if (!canReadEndpointList) {
     linksToExclude.push(SecurityPageName.endpoints);

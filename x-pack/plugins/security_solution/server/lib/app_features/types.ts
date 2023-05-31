@@ -10,7 +10,7 @@ import type { AppFeatureKey } from '../../../common';
 import type { AppFeatureSecurityKey, AppFeatureCasesKey } from '../../../common/types/app_features';
 import type { RecursivePartial } from '../../../common/utility_types';
 
-export type SubFeaturesPrivileges = RecursivePartial<SubFeaturePrivilegeConfig>;
+export type SubFeaturesPrivileges = RecursivePartial<SubFeaturePrivilegeConfig> & { id: string };
 export type AppFeatureKibanaConfig = RecursivePartial<KibanaFeatureConfig> & {
   subFeaturesPrivileges?: SubFeaturesPrivileges[];
 };

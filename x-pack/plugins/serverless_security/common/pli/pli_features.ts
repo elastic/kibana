@@ -16,10 +16,8 @@ export const getProductAppFeatures = (productLineIds: SecurityProductLineId[]): 
   productLineIds.reduce<AppFeatureKeys>((appFeatures, productLineId) => {
     const productAppFeatures = PLI_APP_FEATURES[productLineId];
 
-    Object.entries(productAppFeatures).forEach(([featureName, enabled]) => {
-      if (enabled) {
-        appFeatures[featureName as AppFeatureKey] = true;
-      }
+    productAppFeatures.forEach((featureName) => {
+      appFeatures[featureName as AppFeatureKey] = true;
     });
 
     return appFeatures;

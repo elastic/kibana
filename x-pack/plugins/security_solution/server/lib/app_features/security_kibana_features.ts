@@ -135,43 +135,30 @@ export const getSecurityBaseKibanaFeature = (
       ui: ['show'],
     },
   },
-  subFeatures: getSubFeatures(experimentalFeatures),
+  subFeatures: getBaseSubFeatures(experimentalFeatures),
 });
 
-function getSubFeatures(experimentalFeatures: ExperimentalFeatures) {
-  const subFeatures: SubFeatureConfig[] = [];
+const getBaseSubFeatures = (_experimentalFeatures: ExperimentalFeatures): SubFeatureConfig[] => [
+  endpointListSubFeature,
+  hostIsolationExceptionsSubFeature,
+  eventFiltersSubFeature,
+  policyManagementSubFeature,
+  responseActionsHistorySubFeature,
+  hostIsolationSubFeature,
+];
 
-  if (experimentalFeatures.endpointRbacEnabled) {
-    subFeatures.push(
-      endpointListSubFeature,
-      trustedApplicationsSubFeature,
-      hostIsolationExceptionsSubFeature,
-      blocklistSubFeature,
-      eventFiltersSubFeature,
-      policyManagementSubFeature
-    );
-  }
-
-  if (experimentalFeatures.endpointRbacEnabled || experimentalFeatures.endpointRbacV1Enabled) {
-    subFeatures.push(
-      responseActionsHistorySubFeature,
-      hostIsolationSubFeature,
-      processOperationsSubFeature
-    );
-  }
-  if (experimentalFeatures.responseActionGetFileEnabled) {
-    subFeatures.push(fileOperationsSubFeature);
-  }
-  // planned for 8.8
-  if (experimentalFeatures.responseActionExecuteEnabled) {
-    subFeatures.push(executeActionSubFeature);
-  }
-
-  return subFeatures;
-}
-
-// maps the AppFeatures keys to Kibana privileges
-export const getSecurityAppFeaturesConfig = (): AppFeaturesSecurityConfig => {
+/**
+ * Maps the AppFeatures keys to Kibana privileges that will be merged
+ * into the base privileges config for the Security app.
+ *
+ * Privileges can be added in different ways:
+ * - `privileges`: the privileges that will be added directly into the main Security feature.
+ * - `subFeatures`: the entire sub-feature configs that will be added into the Security subFeatures entry.
+ * - `subFeaturesPrivileges`: the privileges that will be added into the Security subFeature with the `id` specified.
+ */
+export const getSecurityAppFeaturesConfig = (
+  experimentalFeatures: ExperimentalFeatures
+): AppFeaturesSecurityConfig => {
   return {
     [AppFeatureSecurityKey.advancedInsights]: {
       privileges: {
@@ -185,7 +172,13 @@ export const getSecurityAppFeaturesConfig = (): AppFeaturesSecurityConfig => {
         },
       },
     },
+
     [AppFeatureSecurityKey.endpointResponseActions]: {
+      subFeatures: [
+        processOperationsSubFeature,
+        ...(experimentalFeatures.responseActionGetFileEnabled ? [fileOperationsSubFeature] : []),
+        ...(experimentalFeatures.responseActionExecuteEnabled ? [executeActionSubFeature] : []), // planned for 8.8
+      ],
       subFeaturesPrivileges: [
         {
           id: 'host_isolation_all',
@@ -194,7 +187,9 @@ export const getSecurityAppFeaturesConfig = (): AppFeaturesSecurityConfig => {
         },
       ],
     },
+
     [AppFeatureSecurityKey.endpointExceptions]: {
+      subFeatures: [trustedApplicationsSubFeature, blocklistSubFeature],
       subFeaturesPrivileges: [
         {
           id: 'host_isolation_exceptions_all',

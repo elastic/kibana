@@ -19,7 +19,6 @@ import {
   getEndpointAuthzInitialState,
 } from '../../../../../common/endpoint/service/authz';
 import { useSecuritySolutionStartDependencies } from './security_solution_start_dependencies';
-import { useIsExperimentalFeatureEnabled } from '../../../hooks/use_experimental_features';
 
 /**
  * Retrieve the endpoint privileges for the current user.
@@ -44,34 +43,17 @@ export const useEndpointPrivileges = (): Immutable<EndpointPrivileges> => {
   const [userRolesCheckDone, setUserRolesCheckDone] = useState<boolean>(false);
   const [userRoles, setUserRoles] = useState<MaybeImmutable<string[]>>([]);
 
-  const isEndpointRbacEnabled = useIsExperimentalFeatureEnabled('endpointRbacEnabled');
-  const isEndpointRbacV1Enabled = useIsExperimentalFeatureEnabled('endpointRbacV1Enabled');
-
   const privileges = useMemo(() => {
     const loading = !userRolesCheckDone || !user;
 
     const privilegeList: EndpointPrivileges = Object.freeze({
       loading,
       ...(!loading && fleetAuthz
-        ? calculateEndpointAuthz(
-            licenseService,
-            fleetAuthz,
-            userRoles,
-            isEndpointRbacEnabled || isEndpointRbacV1Enabled
-          )
+        ? calculateEndpointAuthz(licenseService, fleetAuthz, userRoles)
         : getEndpointAuthzInitialState()),
     });
-
     return privilegeList;
-  }, [
-    userRolesCheckDone,
-    user,
-    fleetAuthz,
-    licenseService,
-    userRoles,
-    isEndpointRbacEnabled,
-    isEndpointRbacV1Enabled,
-  ]);
+  }, [userRolesCheckDone, user, fleetAuthz, licenseService, userRoles]);
 
   // get user roles
   useEffect(() => {
