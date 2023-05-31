@@ -6,5 +6,6 @@
  */
 
 export * from './inventory_views/v1';
+export * from './log_entries/v1';
 export * from './log_views/v1';
 export * from './metrics_explorer_views/v1';

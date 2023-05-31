@@ -6,9 +6,9 @@
  */
 
 import * as rt from 'io-ts';
-import { logEntryCursorRT, logEntryRT } from '../../log_entry';
-import { logViewColumnConfigurationRT } from '../../log_views';
-import { logViewReferenceRT } from '../../log_views';
+import { logEntryCursorRT, logEntryRT } from '../../../log_entry';
+import { logViewColumnConfigurationRT } from '../../../log_views';
+import { logViewReferenceRT } from '../../../log_views';
 
 export const LOG_ENTRIES_HIGHLIGHTS_PATH = '/api/log_entries/highlights';
 

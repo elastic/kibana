@@ -10,10 +10,7 @@ import { HttpStart } from '@kbn/core/public';
 import { ISearchGeneric } from '@kbn/data-plugin/public';
 import { DataViewsContract } from '@kbn/data-views-plugin/public';
 import { lastValueFrom } from 'rxjs';
-import {
-  getLogViewResponsePayloadRT,
-  putLogViewRequestPayloadRT,
-} from '../../../common/http_api/latest';
+import { getLogViewResponsePayloadRT, putLogViewRequestPayloadRT } from '../../../common/http_api';
 import { getLogViewUrl } from '../../../common/http_api/log_views';
 import {
   FetchLogViewError,
