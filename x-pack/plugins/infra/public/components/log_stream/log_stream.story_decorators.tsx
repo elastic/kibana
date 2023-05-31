@@ -144,7 +144,7 @@ export const decorateWithKibanaContext = <StoryFnReactReturnType extends React.R
   };
 
   const overlays = {
-    openFlyout: () => { },
+    openFlyout: () => {},
   };
 
   return (
