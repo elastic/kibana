@@ -80,7 +80,6 @@ const OsqueryEditorComponent: React.FC<OsqueryEditorProps> = ({
     [commands]
   );
 
-  //
   return (
     <CodeEditor
       languageId={'sql'}

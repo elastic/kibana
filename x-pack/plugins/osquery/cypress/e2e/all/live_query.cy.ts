@@ -172,9 +172,7 @@ describe('ALL - Live Query', () => {
       .should('be.visible')
       .click();
 
-    cy.get(LIVE_QUERY_EDITOR).within(() => {
-      cy.contains('select * from users;');
-    });
+    cy.get(LIVE_QUERY_EDITOR).contains('select * from users;');
   });
 
   it('should open query details by clicking the details icon', () => {
