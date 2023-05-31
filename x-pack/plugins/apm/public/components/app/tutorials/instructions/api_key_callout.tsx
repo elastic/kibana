@@ -40,9 +40,10 @@ export function ApiKeyCallout({
   }
 
   const regex = /missing the following requested privilege\(s\)/;
-  const isWarning = isError && regex.test(errorMessage || '');
+  const isInsufficientPermissionsError =
+    isError && regex.test(errorMessage || '');
 
-  if (isWarning) {
+  if (isInsufficientPermissionsError) {
     return (
       <EuiCallOut
         title={i18n.translate(

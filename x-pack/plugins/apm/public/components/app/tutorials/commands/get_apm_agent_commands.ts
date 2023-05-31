@@ -73,18 +73,18 @@ interface Variables {
   [key: string]: string;
 }
 
-const apmAgentVariablesMap: (apiKey?: string) => Record<string, Variables> = (
-  apiKey?: string
-) => ({
-  java: javaVariables(apiKey),
-  node: nodeVariables(apiKey),
-  django: djangoVariables(apiKey),
-  flask: flaskVariables(apiKey),
-  rails: railsVariables(apiKey),
-  rack: rackVariables(apiKey),
-  go: goVariables(apiKey),
-  dotnet: dotnetVariables(apiKey),
-  php: phpVariables(apiKey),
+const apmAgentVariablesMap: (
+  secretToken?: string
+) => Record<string, Variables> = (secretToken?: string) => ({
+  java: javaVariables(secretToken),
+  node: nodeVariables(secretToken),
+  django: djangoVariables(secretToken),
+  flask: flaskVariables(secretToken),
+  rails: railsVariables(secretToken),
+  rack: rackVariables(secretToken),
+  go: goVariables(secretToken),
+  dotnet: dotnetVariables(secretToken),
+  php: phpVariables(secretToken),
 });
 
 interface LineNumbers {
@@ -126,7 +126,7 @@ export function getApmAgentCommands({
   variantId: string;
   apmServerUrl?: string;
   secretToken?: string;
-  apiKey?: string;
+  apiKey?: string | null;
 }) {
   const commands = apmAgentCommandsMap[variantId];
   if (!commands) {
@@ -145,11 +145,14 @@ export function getApmAgentCommands({
   });
 }
 
-export function getApmAgentVariables(variantId: string, apiKey?: string) {
-  return apmAgentVariablesMap(apiKey)[variantId];
+export function getApmAgentVariables(variantId: string, secretToken?: string) {
+  return apmAgentVariablesMap(secretToken)[variantId];
 }
 
-export function getApmAgentLineNumbers(variantId: string, apiKey?: string) {
+export function getApmAgentLineNumbers(
+  variantId: string,
+  apiKey?: string | null
+) {
   return apmAgentLineNumbersMap(apiKey)[variantId];
 }
 

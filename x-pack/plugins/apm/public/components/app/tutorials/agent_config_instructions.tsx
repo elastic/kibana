@@ -26,7 +26,7 @@ export function AgentConfigInstructions({
   variantId: string;
   apmServerUrl: string;
   secretToken?: string;
-  apiKey?: string;
+  apiKey?: string | null;
   createApiKey?: () => void;
   createApiKeyLoading?: boolean;
 }) {
@@ -37,7 +37,7 @@ export function AgentConfigInstructions({
     apiKey,
   });
 
-  const variables = getApmAgentVariables(variantId, apiKey);
+  const variables = getApmAgentVariables(variantId, secretToken);
   const lineNumbers = getApmAgentLineNumbers(variantId, apiKey);
   const highlightLang = getApmAgentHighlightLang(variantId);
 

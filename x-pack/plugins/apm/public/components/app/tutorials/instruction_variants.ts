@@ -6,7 +6,6 @@
  */
 
 import { EuiStepProps } from '@elastic/eui/src/components/steps/step';
-import { AgentApiKey } from './api_keys';
 
 export enum INSTRUCTION_VARIANT {
   NODE = 'node',
@@ -46,6 +45,14 @@ const DISPLAY_MAP = {
 
 export function getDisplayText(id: INSTRUCTION_VARIANT) {
   return id in DISPLAY_MAP ? DISPLAY_MAP[id] : id;
+}
+
+export interface AgentApiKey {
+  apiKey: string | null;
+  id?: string;
+  encodedKey?: string;
+  error: boolean;
+  errorMessage?: string;
 }
 
 export type AgentApiDetails = AgentApiKey & {

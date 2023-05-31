@@ -8,7 +8,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { EuiSpacer } from '@elastic/eui';
-import { AgentApiKey, API_KEY_INSTRUCTION } from './api_keys';
 import { callApmApi } from '../../../services/rest/create_call_apm_api';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { ApmPluginStartDeps } from '../../../plugin';
@@ -17,12 +16,12 @@ import { InstructionsSet } from './instructions_set';
 import { serverlessInstructions } from './serverless_instructions';
 import { Footer } from './footer';
 import { PrivilegeType } from '../../../../common/privilege_type';
-import { InstructionSet } from './instruction_variants';
+import { AgentApiKey, InstructionSet } from './instruction_variants';
 
 export function Tutorials() {
   const [instructions, setInstructions] = useState<InstructionSet[]>([]);
   const [agentApiKey, setAgentApiKey] = useState<AgentApiKey>({
-    apiKey: API_KEY_INSTRUCTION,
+    apiKey: null,
     error: false,
   });
   const [apiKeyLoading, setApiKeyLoading] = useState(false);
@@ -63,7 +62,7 @@ export function Tutorials() {
       });
     } catch (error) {
       setAgentApiKey({
-        apiKey: API_KEY_INSTRUCTION,
+        apiKey: null,
         error: true,
         errorMessage: error.body?.message || error.message,
       });

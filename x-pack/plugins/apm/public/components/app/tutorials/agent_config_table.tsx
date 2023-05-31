@@ -15,7 +15,6 @@ import {
   EuiButton,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { isApiKeyGenerated } from './api_keys';
 
 function ConfigurationValueColumn({
   columnKey,
@@ -24,12 +23,12 @@ function ConfigurationValueColumn({
   createApiKeyLoading,
 }: {
   columnKey: string;
-  value: string;
+  value: string | null;
   createApiKey?: () => void;
   createApiKeyLoading?: boolean;
 }) {
   const shouldRenderCreateApiKeyButton =
-    columnKey === 'apiKey' && !isApiKeyGenerated(value);
+    columnKey === 'apiKey' && value === null;
 
   if (shouldRenderCreateApiKeyButton) {
     return (
@@ -63,7 +62,7 @@ export function AgentConfigurationTable({
   data: {
     apmServerUrl?: string;
     secretToken?: string;
-    apiKey?: string;
+    apiKey?: string | null;
   };
   createApiKey?: () => void;
   createApiKeyLoading?: boolean;

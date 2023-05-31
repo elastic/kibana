@@ -13,10 +13,10 @@ import {
   apiKeyHint,
 } from './shared_hints';
 
-export const javaVariables = (apiKey?: string) => ({
+export const javaVariables = (secretToken?: string) => ({
   apmServiceName: 'Delastic.apm.service_name',
-  ...(!apiKey && { secretToken: 'Delastic.apm.secret_token' }),
-  ...(apiKey && { apiKey: 'Delastic.apm.api_key' }),
+  ...(secretToken && { secretToken: 'Delastic.apm.secret_token' }),
+  ...(!secretToken && { apiKey: 'Delastic.apm.api_key' }),
   apmServerUrl: 'Delastic.apm.server_url',
   apmEnvironment: 'Delastic.apm.environment',
 });
@@ -35,12 +35,12 @@ export const javaLineNumbers = (apiKey?: string) => ({
 });
 export const java = `java -javaagent:/path/to/elastic-apm-agent-<version>.jar \\
 -Delastic.apm.service_name=my-service-name \\
-{{#apiKey}}
+{{^secretToken}}
 -Delastic.apm.api_key={{{apiKey}}} \\
-{{/apiKey}}
-{{^apiKey}}
+{{/secretToken}}
+{{#secretToken}}
 -Delastic.apm.secret_token={{{secretToken}}} \\
-{{/apiKey}}
+{{/secretToken}}
 -Delastic.apm.server_url={{{apmServerUrl}}} \\
 -Delastic.apm.environment=my-environment \\
 -Delastic.apm.application_packages=org.example \\

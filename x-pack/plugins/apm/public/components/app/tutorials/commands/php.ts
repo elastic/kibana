@@ -4,10 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-export const phpVariables = (apiKey?: string) => ({
+export const phpVariables = (secretToken?: string) => ({
   apmServiceName: 'elastic_apm.service_name',
-  ...(!apiKey && { secretToken: 'elastic_apm.secret_token' }),
-  ...(apiKey && { apiKey: 'elastic_apm.api_key' }),
+  ...(secretToken && { secretToken: 'elastic_apm.secret_token' }),
+  ...(!secretToken && { apiKey: 'elastic_apm.api_key' }),
   apmServerUrl: 'elastic_apm.server_url',
   apmEnvironment: 'elastic_apm.environment',
 });
@@ -22,14 +22,14 @@ export const phpLineNumbers = (apiKey?: string) => ({
 export const php = `# {{serviceNameHint}}
 elastic_apm.service_name="my-service-name"
 
-{{#apiKey}}
+{{^secretToken}}
 # {{apiKeyHint}}
 elastic_apm.api_key="{{{apiKey}}}"
-{{/apiKey}}
-{{^apiKey}}
+{{/secretToken}}
+{{#secretToken}}
 # {{secretTokenHint}}
 elastic_apm.secret_token="{{{secretToken}}}"
-{{/apiKey}}
+{{/secretToken}}
 
 # {{serverUrlHint}}
 elastic_apm.server_url="{{{apmServerUrl}}}"

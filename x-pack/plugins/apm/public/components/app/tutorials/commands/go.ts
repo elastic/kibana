@@ -7,10 +7,10 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const goVariables = (apiKey?: string) => ({
+export const goVariables = (secretToken?: string) => ({
   apmServiceName: 'ELASTIC_APM_SERVICE_NAME',
-  ...(!apiKey && { secretToken: 'ELASTIC_APM_SECRET_TOKEN' }),
-  ...(apiKey && { apiKey: 'ELASTIC_APM_API_KEY' }),
+  ...(secretToken && { secretToken: 'ELASTIC_APM_SECRET_TOKEN' }),
+  ...(!secretToken && { apiKey: 'ELASTIC_APM_API_KEY' }),
   apmServerUrl: 'ELASTIC_APM_SERVER_URL',
   apmEnvironment: 'ELASTIC_APM_ENVIRONMENT',
 });
@@ -37,14 +37,14 @@ export const go = `# ${i18n.translate(
 )}
 export ELASTIC_APM_SERVICE_NAME=my-service-name
 
-{{#apiKey}}
+{{^secretToken}}
 # {{apiKeyHint}}
 export ELASTIC_APM_API_KEY={{{apiKey}}}
-{{/apiKey}}
-{{^apiKey}}
+{{/secretToken}}
+{{#secretToken}}
 # {{secretTokenHint}}
 export ELASTIC_APM_SECRET_TOKEN={{{secretToken}}}
-{{/apiKey}}
+{{/secretToken}}
 
 # {{{serverUrlHint}}}
 export ELASTIC_APM_SERVER_URL={{{apmServerUrl}}}

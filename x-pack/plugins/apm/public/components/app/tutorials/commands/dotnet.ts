@@ -7,10 +7,10 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const dotnetVariables = (apiKey?: string) => ({
+export const dotnetVariables = (secretToken?: string) => ({
   apmServiceName: 'ServiceName',
-  ...(!apiKey && { secretToken: 'SecretToken' }),
-  ...(apiKey && { apiKey: 'ApiKey' }),
+  ...(secretToken && { secretToken: 'SecretToken' }),
+  ...(!secretToken && { apiKey: 'ApiKey' }),
   apmServerUrl: 'ServerUrl',
   apmEnvironment: 'Environment',
 });
@@ -31,14 +31,14 @@ export const dotnet = `{
       }
     )}
     "ServiceName": "my-service-name",
-    {{#apiKey}}
+    {{^secretToken}}
     /// {{apiKeyHint}}
     "ApiKey": "{{{apiKey}}}",
-    {{/apiKey}}
-    {{^apiKey}}
+    {{/secretToken}}
+    {{#secretToken}}
     /// {{secretTokenHint}}
     "SecretToken": "{{{secretToken}}}",
-    {{/apiKey}}
+    {{/secretToken}}
     /// {{{serverUrlHint}}}
     "ServerUrl": "{{{apmServerUrl}}}",
     /// {{{serviceEnvironmentHint}}}

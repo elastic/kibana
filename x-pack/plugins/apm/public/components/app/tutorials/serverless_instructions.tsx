@@ -7,7 +7,11 @@
 
 import { i18n } from '@kbn/i18n';
 import { ConfigSchema } from '../../..';
-import { INSTRUCTION_VARIANT, AgentInstructions } from './instruction_variants';
+import {
+  INSTRUCTION_VARIANT,
+  AgentInstructions,
+  AgentApiKey,
+} from './instruction_variants';
 import {
   createJavaAgentInstructions,
   createNodeAgentInstructions,
@@ -20,7 +24,6 @@ import {
   createPhpAgentInstructions,
   createOpenTelemetryAgentInstructions,
 } from './instructions';
-import { isApiKeyGenerated, AgentApiKey } from './api_keys';
 
 export function serverlessInstructions(
   {
@@ -35,8 +38,7 @@ export function serverlessInstructions(
   createAgentKey: () => void
 ) {
   const { apiKey, error, errorMessage } = apiKeyDetails;
-  const displayApiKeySuccessCallout =
-    Boolean(apiKey) && isApiKeyGenerated(apiKey) && !error;
+  const displayApiKeySuccessCallout = Boolean(apiKey) && !error;
   const displayApiKeyErrorCallout = error && Boolean(errorMessage);
   const commonOptions: AgentInstructions = {
     baseUrl,

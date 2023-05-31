@@ -19,7 +19,6 @@ import { EuiStepProps } from '@elastic/eui/src/components/steps/step';
 import React from 'react';
 import { ValuesType } from 'utility-types';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { isApiKeyGenerated } from '../api_keys';
 import { AgentApiDetails, AgentInstructions } from '../instruction_variants';
 import { ApiKeyCallout } from './api_key_callout';
 
@@ -105,10 +104,10 @@ function ConfigurationValueColumn({
   value: string;
   createApiKey?: () => void;
   createApiKeyLoading?: boolean;
-  apiKey?: string;
+  apiKey?: string | null;
 }) {
   const shouldRenderCreateApiKeyButton =
-    setting === 'OTEL_EXPORTER_OTLP_HEADERS' && !isApiKeyGenerated(apiKey);
+    setting === 'OTEL_EXPORTER_OTLP_HEADERS' && apiKey === null;
 
   if (shouldRenderCreateApiKeyButton) {
     return (

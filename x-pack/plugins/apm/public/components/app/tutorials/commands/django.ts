@@ -7,10 +7,10 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const djangoVariables = (apiKey?: string) => ({
+export const djangoVariables = (secretToken?: string) => ({
   apmServiceName: 'SERVICE_NAME',
-  ...(!apiKey && { secretToken: 'SECRET_TOKEN' }),
-  ...(apiKey && { apiKey: 'API_KEY' }),
+  ...(secretToken && { secretToken: 'SECRET_TOKEN' }),
+  ...(!secretToken && { apiKey: 'API_KEY' }),
   apmServerUrl: 'SERVER_URL',
   apmEnvironment: 'ENVIRONMENT',
 });
@@ -37,14 +37,14 @@ ELASTIC_APM = {
   # {{serviceNameHint}}
   'SERVICE_NAME': 'my-service-name',
 
-  {{#apiKey}}
+  {{^secretToken}}
   # {{apiKeyHint}}
   'API_KEY': '{{{apiKey}}}',
-  {{/apiKey}}
-  {{^apiKey}}
+  {{/secretToken}}
+  {{#secretToken}}
   # {{secretTokenHint}}
   'SECRET_TOKEN': '{{{secretToken}}}',
-  {{/apiKey}}
+  {{/secretToken}}
 
   # {{{serverUrlHint}}}
   'SERVER_URL': '{{{apmServerUrl}}}',

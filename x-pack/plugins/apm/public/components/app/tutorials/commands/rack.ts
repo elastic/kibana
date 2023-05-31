@@ -7,10 +7,10 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const rackVariables = (apiKey?: string) => ({
+export const rackVariables = (secretToken?: string) => ({
   apmServiceName: 'service_name',
-  ...(!apiKey && { secretToken: 'secret_token' }),
-  ...(apiKey && { apiKey: 'api_key' }),
+  ...(secretToken && { secretToken: 'secret_token' }),
+  ...(!secretToken && { apiKey: 'api_key' }),
   apmServerUrl: 'server_url',
   apmEnvironment: 'environment',
 });
@@ -32,14 +32,14 @@ export const rack = `# config/elastic_apm.yml:
 )}
 service_name: 'my-service-name'
 
-{{#apiKey}}
+{{^secretToken}}
 # {{apiKeyHint}}
 api_key: '{{{apiKey}}}'
-{{/apiKey}}
-{{^apiKey}}
+{{/secretToken}}
+{{#secretToken}}
 # {{secretTokenHint}}
 secret_token: '{{{secretToken}}}'
-{{/apiKey}}
+{{/secretToken}}
 
 # {{{serverUrlHint}}}
 server_url: '{{{apmServerUrl}}}'

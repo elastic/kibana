@@ -6,10 +6,10 @@
  */
 import { i18n } from '@kbn/i18n';
 
-export const nodeVariables = (apiKey?: string) => ({
+export const nodeVariables = (secretToken?: string) => ({
   apmServiceName: 'serviceName',
-  ...(!apiKey && { secretToken: 'secretToken' }),
-  ...(apiKey && { apiKey: 'apiKey' }),
+  ...(secretToken && { secretToken: 'secretToken' }),
+  ...(!secretToken && { apiKey: 'apiKey' }),
   apmServerUrl: 'serverUrl',
   apmEnvironment: 'environment',
 });
@@ -38,14 +38,14 @@ var apm = require('elastic-apm-node').start({
   )}
   serviceName: 'my-service-name',
 
-  {{#apiKey}}
+  {{^secretToken}}
   // {{apiKeyHint}}
   apiKey: '{{{apiKey}}}',
-  {{/apiKey}}
-  {{^apiKey}}
+  {{/secretToken}}
+  {{#secretToken}}
   // {{secretTokenHint}}
   secretToken: '{{{secretToken}}}',
-  {{/apiKey}}
+  {{/secretToken}}
 
   // {{{serverUrlHint}}}
   serverUrl: '{{{apmServerUrl}}}',
