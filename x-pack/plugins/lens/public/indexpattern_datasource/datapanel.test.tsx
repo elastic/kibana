@@ -26,6 +26,7 @@ import { fieldFormatsServiceMock } from '../../../../../src/plugins/field_format
 import { indexPatternFieldEditorPluginMock } from '../../../../../src/plugins/index_pattern_field_editor/public/mocks';
 import { getFieldByNameFactory } from './pure_helpers';
 import { uiActionsPluginMock } from '../../../../../src/plugins/ui_actions/public/mocks';
+import { TermsIndexPatternColumn } from './operations';
 
 const fieldsOne = [
   {
@@ -173,7 +174,7 @@ const initialState: IndexPatternPrivateState = {
               type: 'alphabetical',
             },
           },
-        },
+        } as TermsIndexPatternColumn,
         col2: {
           label: 'My Op',
           dataType: 'number',
@@ -200,7 +201,7 @@ const initialState: IndexPatternPrivateState = {
               type: 'alphabetical',
             },
           },
-        },
+        } as TermsIndexPatternColumn,
         col2: {
           label: 'My Op',
           dataType: 'number',

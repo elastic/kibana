@@ -20,7 +20,11 @@ import {
   tinymathFunctions,
 } from './util';
 
-import type { OperationDefinition, IndexPatternColumn, GenericOperationDefinition } from '../index';
+import type {
+  OperationDefinition,
+  GenericIndexPatternColumn,
+  GenericOperationDefinition,
+} from '../index';
 import type { IndexPattern, IndexPatternLayer } from '../../../types';
 import type { TinymathNodeTypes } from './types';
 import { parseTimeShift } from '../../../../../../../../src/plugins/data/common';
@@ -482,8 +486,8 @@ function checkSingleQuery(namedArguments: TinymathNamedArgument[] | undefined) {
 function validateNameArguments(
   node: TinymathFunction,
   nodeOperation:
-    | OperationDefinition<IndexPatternColumn, 'field'>
-    | OperationDefinition<IndexPatternColumn, 'fullReference'>,
+    | OperationDefinition<GenericIndexPatternColumn, 'field'>
+    | OperationDefinition<GenericIndexPatternColumn, 'fullReference'>,
   namedArguments: TinymathNamedArgument[] | undefined,
   indexPattern: IndexPattern
 ) {
@@ -749,16 +753,16 @@ function runFullASTValidation(
 
 export function canHaveParams(
   operation:
-    | OperationDefinition<IndexPatternColumn, 'field'>
-    | OperationDefinition<IndexPatternColumn, 'fullReference'>
+    | OperationDefinition<GenericIndexPatternColumn, 'field'>
+    | OperationDefinition<GenericIndexPatternColumn, 'fullReference'>
 ) {
   return Boolean((operation.operationParams || []).length) || operation.filterable;
 }
 
 export function getInvalidParams(
   operation:
-    | OperationDefinition<IndexPatternColumn, 'field'>
-    | OperationDefinition<IndexPatternColumn, 'fullReference'>,
+    | OperationDefinition<GenericIndexPatternColumn, 'field'>
+    | OperationDefinition<GenericIndexPatternColumn, 'fullReference'>,
   params: TinymathNamedArgument[] = []
 ) {
   return validateParams(operation, params).filter(
@@ -768,8 +772,8 @@ export function getInvalidParams(
 
 export function getMissingParams(
   operation:
-    | OperationDefinition<IndexPatternColumn, 'field'>
-    | OperationDefinition<IndexPatternColumn, 'fullReference'>,
+    | OperationDefinition<GenericIndexPatternColumn, 'field'>
+    | OperationDefinition<GenericIndexPatternColumn, 'fullReference'>,
   params: TinymathNamedArgument[] = []
 ) {
   return validateParams(operation, params).filter(
@@ -779,8 +783,8 @@ export function getMissingParams(
 
 export function getWrongTypeParams(
   operation:
-    | OperationDefinition<IndexPatternColumn, 'field'>
-    | OperationDefinition<IndexPatternColumn, 'fullReference'>,
+    | OperationDefinition<GenericIndexPatternColumn, 'field'>
+    | OperationDefinition<GenericIndexPatternColumn, 'fullReference'>,
   params: TinymathNamedArgument[] = []
 ) {
   return validateParams(operation, params).filter(
@@ -789,7 +793,7 @@ export function getWrongTypeParams(
 }
 
 function getReturnedType(
-  operation: OperationDefinition<IndexPatternColumn, 'field'>,
+  operation: OperationDefinition<GenericIndexPatternColumn, 'field'>,
   indexPattern: IndexPattern,
   firstArg: TinymathAST
 ) {
@@ -822,8 +826,8 @@ function getDuplicateParams(params: TinymathNamedArgument[] = []) {
 
 export function validateParams(
   operation:
-    | OperationDefinition<IndexPatternColumn, 'field'>
-    | OperationDefinition<IndexPatternColumn, 'fullReference'>,
+    | OperationDefinition<GenericIndexPatternColumn, 'field'>
+    | OperationDefinition<GenericIndexPatternColumn, 'fullReference'>,
   params: TinymathNamedArgument[] = []
 ) {
   const paramsObj = getOperationParams(operation, params);
