@@ -54,7 +54,10 @@ const getDataViewsRouteFactory =
     router.versioned.get({ path, access: 'public' }).addVersion(
       {
         version: INITIAL_REST_VERSION,
-        validate: { request: {}, response: { 200: { body: dataViewListSchema } } },
+        validate: {
+          request: {},
+          response: { 200: { body: schema.object({ [serviceKey]: dataViewListSchema }) } },
+        },
       },
       router.handleLegacyErrors(
         handleErrors(async (ctx, req, res) => {
