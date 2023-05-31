@@ -7,6 +7,9 @@
   "kbn_references": [
     "@kbn/core",
     "@kbn/es-query",
+    "@kbn/data-views-plugin",
+    "@kbn/field-formats-plugin",
+    "@kbn/expressions-plugin",
   ],
   "exclude": ["target/**/*"]
 }
