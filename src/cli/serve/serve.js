@@ -78,13 +78,12 @@ const configPathCollector = pathCollector();
 const pluginPathCollector = pathCollector();
 
 /**
- * @param {string} name The config file name
+ * @param {string} filePath Path to the config file
  * @returns {boolean} Whether the file exists
  */
-function configFileExists(name) {
-  const path = resolve(getConfigDirectory(), name);
+function fileExists(filePath) {
   try {
-    return statSync(path).isFile();
+    return statSync(filePath).isFile();
   } catch (err) {
     if (err.code === 'ENOENT') {
       return false;
@@ -95,49 +94,52 @@ function configFileExists(name) {
 }
 
 /**
- * @param {string} name
- * @param {string[]} configs
- * @param {'push' | 'unshift'} method
+ * @param {string} fileName Name of the config within the config directory
+ * @returns {string | null} The resolved path to the config, if it exists, null otherwise
  */
-function maybeAddConfig(name, configs, method) {
-  if (configFileExists(name)) {
-    configs[method](resolve(getConfigDirectory(), name));
+function resolveConfig(fileName) {
+  const filePath = resolve(getConfigDirectory(), fileName);
+  if (fileExists(filePath)) {
+    return filePath;
+  } else {
+    return null;
   }
 }
 
+function configFromObj(obj) {
+  return Object.keys(obj).reduce((config, key) => {
+    const value = obj[key];
+    if (typeof value !== 'undefined') {
+      config += `${key}: ${value}\n`;
+    }
+    return config;
+  }, '');
+}
+
 /**
- * @param {string} file
+ * @param {string} fileName
  * @param {'es' | 'security' | 'oblt' | true} projectType
  * @param {boolean} isDevMode
- * @param {string[]} configs
- * @param {'push' | 'unshift'} method
  */
-function maybeSetRecentConfig(file, projectType, isDevMode, configs, method) {
-  const path = resolve(getConfigDirectory(), file);
+function writeServerlessConfig(fileName, projectType, isDevMode) {
+  function writeServerlessMode(selectedProjectType, path) {
+    const configContent = configFromObj({
+      'xpack.serverless.plugin.developer.projectSwitcher.enabled': isDevMode ? true : undefined,
+      serverless: selectedProjectType,
+    });
 
-  function writeMode(selectedProjectType) {
-    writeFileSync(
-      path,
-      `${
-        isDevMode ? 'xpack.serverless.plugin.developer.projectSwitcher.enabled: true\n' : ''
-      }serverless: ${selectedProjectType}\n`
-    );
+    writeFileSync(path, configContent);
   }
 
-  try {
-    if (!existsSync(path)) {
-      writeMode(projectType === true ? 'es' : projectType);
-    } else if (typeof projectType === 'string') {
-      const data = readFileSync(path, 'utf-8');
-      const match = data.match(/serverless: (\w+)\n/);
-      if (!match || match[1] !== projectType) {
-        writeMode(projectType);
-      }
+  const path = resolve(getConfigDirectory(), fileName);
+  if (!existsSync(path)) {
+    writeServerlessMode(projectType === true ? 'es' : projectType, path);
+  } else if (typeof projectType === 'string') {
+    const data = readFileSync(path, 'utf-8');
+    const match = data.match(/serverless: (\w+)\n/);
+    if (!match || match[1] !== projectType) {
+      writeServerlessMode(projectType, path);
     }
-
-    configs[method](path);
-  } catch (err) {
-    throw err;
   }
 }
 
@@ -305,22 +307,26 @@ export default function (program) {
   }
 
   command.action(async function (opts) {
+    let configs = [getConfigPath(), ...getEnvConfigs(), ...(opts.config || [])];
     const unknownOptions = this.getUnknownOptions();
-    const configs = [getConfigPath(), ...getEnvConfigs(), ...(opts.config || [])];
     const serverlessMode = getServerlessProjectMode(opts);
 
     if (serverlessMode) {
-      maybeSetRecentConfig('serverless.recent.yml', serverlessMode, opts.dev, configs, 'push');
+      writeServerlessConfig('serverless.recent.yml', serverlessMode, opts.dev);
+      configs.push(resolveConfig('serverless.recent.yml'));
     }
 
     // .dev. configs are "pushed" so that they override all other config files
     if (opts.dev && opts.devConfig !== false) {
-      maybeAddConfig('kibana.dev.yml', configs, 'push');
+      configs.push(resolveConfig('kibana.dev.yml'));
       if (serverlessMode) {
-        maybeAddConfig(`serverless.dev.yml`, configs, 'push');
-        maybeAddConfig('serverless.recent.dev.yml', configs, 'push');
+        configs.push(resolveConfig('serverless.dev.yml'));
+        configs.push(resolveConfig('serverless.recent.dev.yml'));
       }
     }
+
+    // Filtering out all config paths that didn't exist
+    configs = configs.filter(Boolean);
 
     const cliArgs = {
       dev: !!opts.dev,
