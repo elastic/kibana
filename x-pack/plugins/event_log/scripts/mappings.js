@@ -286,6 +286,7 @@ exports.EcsPropertiesToGenerate = [
   'log.logger',
   'rule',
   'user.name',
+  'user.id',
   'kibana',
 ];
 

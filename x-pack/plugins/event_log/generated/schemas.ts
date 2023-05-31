@@ -97,6 +97,7 @@ export const EventSchema = schema.maybe(
     user: schema.maybe(
       schema.object({
         name: ecsString(),
+        id: ecsString(),
       })
     ),
     kibana: schema.maybe(

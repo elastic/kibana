@@ -2448,43 +2448,6 @@ describe('execute()', () => {
       actionExecutionId,
     });
   });
-
-  test('calls the actionExecutor with a username when one exists', async () => {
-    const mockRealm = { name: 'default_native', type: 'native' };
-    scopedClusterClient.asCurrentUser.security.authenticate.mockResponse({
-      authentication_realm: mockRealm,
-      authentication_type: 'realm',
-      enabled: true,
-      lookup_realm: mockRealm,
-      metadata: {},
-      roles: ['superuser'],
-      username: 'coolguy',
-    });
-
-    const actionId = uuidv4();
-    const actionExecutionId = uuidv4();
-    actionExecutor.execute.mockResolvedValue({ status: 'ok', actionId });
-    await expect(
-      actionsClient.execute({
-        actionId,
-        params: {
-          name: 'my name',
-        },
-        source: asHttpRequestExecutionSource(request),
-      })
-    ).resolves.toMatchObject({ status: 'ok', actionId });
-
-    expect(actionExecutor.execute).toHaveBeenCalledWith({
-      actionId,
-      request,
-      params: {
-        name: 'my name',
-      },
-      actionExecutionId,
-      source: asHttpRequestExecutionSource(request),
-      username: 'coolguy',
-    });
-  });
 });
 
 describe('enqueueExecution()', () => {
