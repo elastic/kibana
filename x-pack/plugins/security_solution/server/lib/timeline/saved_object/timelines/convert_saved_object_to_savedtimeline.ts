@@ -16,7 +16,7 @@ import {
   TimelineType,
   TimelineStatus,
 } from '../../../../../common/types/timeline';
-import type { TimelineSavedObjectRuntimeResponseType } from '../../../../../common/types/timeline';
+import type { TimelineSavedObjectRuntimeResponseType } from '../../../../../common/types/timeline/api';
 
 // TODO: Added to support legacy TimelineType.draft, can be removed in 7.10
 const TimelineSavedObjectWithDraftRuntime = intersection([

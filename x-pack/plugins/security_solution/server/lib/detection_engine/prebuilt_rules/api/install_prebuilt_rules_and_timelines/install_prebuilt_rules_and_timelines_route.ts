@@ -21,6 +21,8 @@ import type {
 } from '../../../../../types';
 import { installPrepackagedTimelines } from '../../../../timeline/routes/prepackaged_timelines/install_prepackaged_timelines';
 import { buildSiemResponse } from '../../../routes/utils';
+import { importTimelineResultSchema } from '../../../../../../common/types/timeline/api';
+
 import { getExistingPrepackagedRules } from '../../../rule_management/logic/search/get_existing_prepackaged_rules';
 import { getRulesToInstall } from '../../logic/get_rules_to_install';
 import { getRulesToUpdate } from '../../logic/get_rules_to_update';

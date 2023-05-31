@@ -12,7 +12,7 @@ import type {
   ExportedTimelines,
   ExportedNotes,
   ExportTimelineNotFoundError,
-} from '../../../../../../common/types/timeline';
+} from '../../../../../../common/types/timeline/api';
 import type { NoteSavedObject } from '../../../../../../common/types/timeline/note';
 import type { PinnedEventSavedObject } from '../../../../../../common/types/timeline/pinned_event';
 

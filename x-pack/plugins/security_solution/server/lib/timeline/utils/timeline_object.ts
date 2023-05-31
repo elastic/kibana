@@ -8,7 +8,7 @@
 import type {
   TimelineSavedObjectRuntimeResponseType,
   TimelineTypeLiteral,
-} from '../../../../common/types/timeline';
+} from '../../../../common/types/timeline/api';
 import { TimelineType, TimelineStatus } from '../../../../common/types/timeline';
 import type { FrameworkRequest } from '../../framework';
 import { getTimelineOrNull, getTimelineTemplateOrNull } from '../saved_object/timelines';

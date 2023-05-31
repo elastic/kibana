@@ -19,12 +19,12 @@ import {
 import { convertSavedObjectToSavedTimeline } from './convert_saved_object_to_savedtimeline';
 import { getNotesByTimelineId } from '../notes/saved_object';
 import { getAllPinnedEventsByTimelineId } from '../pinned_events';
+import type { SavedTimeline } from '../../../../../common/types/timeline';
 import { TimelineType } from '../../../../../common/types/timeline';
 import type {
   AllTimelinesResponse,
   ResolvedTimelineWithOutcomeSavedObjectResponse,
-  SavedTimeline,
-} from '../../../../../common/types/timeline';
+} from '../../../../../common/types/timeline/api';
 import {
   mockResolvedSavedObject,
   mockResolvedTimeline,

@@ -6,7 +6,7 @@
  */
 
 import { defaultHeaders } from './default_timeline_headers';
-import type { TimelineSOServerRepresentationType } from '../../../../common/types/timeline';
+import type { TimelineSOServerRepresentationType } from '../../../../common/types/timeline/api';
 import { TimelineType, TimelineStatus } from '../../../../common/types/timeline';
 import { Direction } from '../../../../common/search_strategy';
 

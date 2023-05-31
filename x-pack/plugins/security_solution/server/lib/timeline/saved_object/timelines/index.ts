@@ -24,14 +24,16 @@ import type {
   ResponseTimelines,
   ResponseFavoriteTimeline,
   ResponseTimeline,
-  SavedTimeline,
   SortTimeline,
+  TimelineResult,
   TimelineSavedObjectRuntimeResponseType,
   TimelineTypeLiteralWithNull,
   TimelineStatusLiteralWithNull,
-  TimelineResult,
-  TimelineWithoutExternalRefs,
   ResolvedTimelineWithOutcomeSavedObjectResponse,
+} from '../../../../../common/types/timeline/api';
+import type {
+  SavedTimeline,
+  TimelineWithoutExternalRefs,
 } from '../../../../../common/types/timeline';
 import { TimelineType, TimelineStatus } from '../../../../../common/types/timeline';
 import type { FrameworkRequest } from '../../../framework';
@@ -407,7 +409,7 @@ export const persistFavorite = async (
         ...savedTimeline
       } = await getBasicSavedTimeline(request, timelineId);
       timelineId = savedObjectId; // eslint-disable-line no-param-reassign
-      timeline = savedTimeline;
+      timeline = savedTimeline as Partial<TimelineSavedObjectRuntimeResponseType>;
     }
 
     const userFavoriteTimeline = {

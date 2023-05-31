@@ -22,7 +22,7 @@ import { getTimelineTemplateOrNull, getTimelineOrNull } from '../../../saved_obj
 import type {
   TimelineSavedObjectRuntimeResponseType,
   ResolvedTimelineWithOutcomeSavedObjectResponse,
-} from '../../../../../../common/types/timeline';
+} from '../../../../../../common/types/timeline/api';
 
 export const getTimelineRoute = (
   router: SecuritySolutionPluginRouter,

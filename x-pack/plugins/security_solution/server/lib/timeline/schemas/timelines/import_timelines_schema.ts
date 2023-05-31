@@ -7,14 +7,14 @@
 
 import * as rt from 'io-ts';
 
-import { SavedTimelineRuntimeType } from '../../../../../common/types/timeline';
+import { TimelineSOServerRepresentation } from '../../../../../common/types/timeline/api';
 import { unionWithNullType } from '../../../../../common/utility_types';
 
 import { eventNotes, globalNotes } from '../notes';
 import { pinnedEventIds } from '../pinned_events';
 
 export const ImportTimelinesSchemaRt = rt.intersection([
-  SavedTimelineRuntimeType,
+  TimelineSOServerRepresentation,
   rt.type({
     savedObjectId: unionWithNullType(rt.string),
     version: unionWithNullType(rt.string),

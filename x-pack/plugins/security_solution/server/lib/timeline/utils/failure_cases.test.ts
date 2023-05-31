@@ -25,7 +25,7 @@ import {
   NOT_ALLOW_UPDATE_STATUS_ERROR_MESSAGE,
   TEMPLATE_TIMELINE_VERSION_CONFLICT_MESSAGE,
 } from './failure_cases';
-import type { TimelineSavedObjectRuntimeResponseType } from '../../../../common/types/timeline';
+import type { TimelineSavedObjectRuntimeResponseType } from '../../../../common/types/timeline/api';
 import { TimelineStatus, TimelineType } from '../../../../common/types/timeline';
 import { mockGetTimelineValue, mockGetTemplateTimelineValue } from '../__mocks__/import_timelines';
 

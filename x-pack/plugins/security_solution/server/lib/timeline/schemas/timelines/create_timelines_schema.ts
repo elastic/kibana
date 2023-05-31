@@ -11,7 +11,7 @@ import {
   TimelineSOServerRepresentation,
   TimelineStatusLiteralRt,
   TimelineTypeLiteralRt,
-} from '../../../../../common/types/timeline';
+} from '../../../../../common/types/timeline/api';
 import { unionWithNullType } from '../../../../../common/utility_types';
 
 export const createTimelineSchema = rt.intersection([
