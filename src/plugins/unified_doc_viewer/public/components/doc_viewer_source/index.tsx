@@ -9,8 +9,8 @@
 import React from 'react';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { CodeEditor } from '@kbn/kibana-react-plugin/public';
-import { useEsDocSearch } from '../../hooks';
 import { DocViewerSource } from '@kbn/unified-doc-viewer';
+import { useEsDocSearch } from '../../hooks';
 
 export interface SourceViewerProps {
   id: string;
