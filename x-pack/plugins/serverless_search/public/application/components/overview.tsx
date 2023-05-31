@@ -44,10 +44,10 @@ export const ElasticsearchOverview = () => {
     useState<LanguageDefinition>(javascriptDefinition);
   const [clientApiKey, setClientApiKey] = useState<string>(API_KEY_PLACEHOLDER);
   const {
+    application: { navigateToApp },
     cloud,
     http,
     userProfile,
-    application: { navigateToApp },
   } = useKibanaServices();
   const cloudId = cloud.cloudId ?? '';
   const elasticsearchURL = useMemo(() => {
@@ -56,7 +56,6 @@ export const ElasticsearchOverview = () => {
     return decodedCloudId?.elasticsearchUrl ?? ELASTICSEARCH_URL_PLACEHOLDER;
   }, [cloudId]);
   const assetBasePath = http.basePath.prepend(`/plugins/${PLUGIN_ID}/assets/`);
-
   const codeSnippetArguments: LanguageDefinitionSnippetArguments = {
     url: elasticsearchURL,
     apiKey: clientApiKey,
