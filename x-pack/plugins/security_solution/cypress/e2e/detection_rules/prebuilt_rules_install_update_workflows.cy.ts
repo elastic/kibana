@@ -32,9 +32,10 @@ import { SECURITY_DETECTIONS_RULES_URL } from '../../urls/navigation';
 describe('Detection rules, Prebuilt Rules Installation and Update workflow', () => {
   before(() => {
     cleanKibana();
-    login();
   });
+
   beforeEach(() => {
+    login();
     resetRulesTableState();
     deleteAlertsAndRules();
     esArchiverResetKibana();
@@ -52,7 +53,9 @@ describe('Detection rules, Prebuilt Rules Installation and Update workflow', () 
 
       /* Assert that the package in installed from Fleet by checking that
       /* the installSource is "registry", as opposed to "bundle" */
-      cy.wait('@installPackage').then(({ response }) => {
+      cy.wait('@installPackage', {
+        timeout: 60000,
+      }).then(({ response }) => {
         cy.wrap(response?.statusCode).should('eql', 200);
 
         const packages = response?.body.items.map(({ name, result }: BulkInstallPackageInfo) => ({
@@ -71,7 +74,9 @@ describe('Detection rules, Prebuilt Rules Installation and Update workflow', () 
       cy.intercept('POST', '/api/fleet/epm/packages/_bulk*').as('installPackage');
 
       /* Retrieve how many rules were installed from the Fleet package */
-      cy.wait('@installPackage').then(() => {
+      cy.wait('@installPackage', {
+        timeout: 60000,
+      }).then(() => {
         getRuleAssets().then((response) => {
           const ruleIds = response.body.hits.hits.map(
             (hit: { _source: { ['security-rule']: Rule } }) => hit._source['security-rule'].rule_id
@@ -160,6 +165,7 @@ describe('Detection rules, Prebuilt Rules Installation and Update workflow', () 
       /* Create a second version of the rule, making it available for update */
       createNewRuleAsset({ rule: UPDATED_RULE });
       waitForRulesTableToBeLoaded();
+      cy.reload();
     });
 
     it('should update rule succesfully when user clicks on update callout', () => {
