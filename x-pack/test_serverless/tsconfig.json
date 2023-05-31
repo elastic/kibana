@@ -3,7 +3,7 @@
   "compilerOptions": {
     "outDir": "target/types",
     "rootDirs": [".", "../test"],
-    "types": ["node", "@kbn/ambient-ftr-types"],
+    "types": ["node", "@kbn/ambient-ftr-types", "cypress", "cypress-file-upload", "cypress-real-events", "cypress-recurs"],
   },
   "include": [
     "**/*",
@@ -20,5 +20,7 @@
     { "path": "../test/tsconfig.json" },
     "@kbn/expect",
     "@kbn/test",
+    "@kbn/cypress-config",
+    "@kbn/dev-proc-runner",
   ]
 }
