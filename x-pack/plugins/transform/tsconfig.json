@@ -63,6 +63,7 @@
     "@kbn/core-ui-settings-browser",
     "@kbn/ml-error-utils",
     "@kbn/saved-search-plugin",
+    "@kbn/ml-data-frame-analytics-utils"
   ],
   "exclude": [
     "target/**/*",
