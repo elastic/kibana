@@ -102,13 +102,12 @@ export const duplicateFirstRule = () => {
  * flake.
  */
 export const duplicateRuleFromMenu = () => {
-  const click = ($el: Cypress.ObjectLike) => cy.wrap($el).click();
   cy.get(LOADING_INDICATOR).should('not.exist');
-  cy.get(ALL_ACTIONS).pipe(click);
+  cy.get(ALL_ACTIONS).click({ force: true });
   cy.get(DUPLICATE_RULE_MENU_PANEL_BTN).should('be.visible');
 
   // Because of a fade effect and fast clicking this can produce more than one click
-  cy.get(DUPLICATE_RULE_MENU_PANEL_BTN).pipe(click);
+  cy.get(DUPLICATE_RULE_MENU_PANEL_BTN).click({ force: true });
   cy.get(CONFIRM_DUPLICATE_RULE).click();
 };
 
@@ -140,12 +139,11 @@ export const deleteRuleFromDetailsPage = () => {
   // increase the cy.wait(). The reason we cannot use cypress pipe is because multiple clicks on ALL_ACTIONS
   // causes the pop up to show and then the next click for it to hide. Multiple clicks can cause
   // the DOM to queue up and once we detect that the element is visible it can then become invisible later
+  // eslint-disable-next-line cypress/no-unnecessary-waiting
   cy.wait(1000);
   cy.get(ALL_ACTIONS).click();
-  cy.get(RULE_DETAILS_DELETE_BTN).should('be.visible');
-  cy.get(RULE_DETAILS_DELETE_BTN)
-    .pipe(($el) => $el.trigger('click'))
-    .should(($el) => expect($el).to.be.not.visible);
+  cy.get(RULE_DETAILS_DELETE_BTN).click();
+  cy.get(RULE_DETAILS_DELETE_BTN).should('not.be.visible');
 };
 
 export const duplicateSelectedRulesWithoutExceptions = () => {
@@ -194,7 +192,8 @@ export const exportRule = (name: string) => {
 
 export const filterBySearchTerm = (term: string) => {
   cy.log(`Filter rules by search term: "${term}"`);
-  cy.get(RULE_SEARCH_FIELD).type(term).trigger('search');
+  cy.get(RULE_SEARCH_FIELD).type(term, { force: true });
+  cy.get(RULE_SEARCH_FIELD).trigger('search', { waitForAnimations: true });
 };
 
 export const filterByTags = (tags: string[]) => {
@@ -246,10 +245,9 @@ export const goToTheRuleDetailsOf = (ruleName: string) => {
 export const loadPrebuiltDetectionRules = () => {
   cy.log('load prebuilt detection rules');
   waitTillPrebuiltRulesReadyToInstall();
-  cy.get(LOAD_PREBUILT_RULES_BTN, { timeout: 300000 })
-    .should('be.enabled')
-    .pipe(($el) => $el.trigger('click'))
-    .should('be.disabled');
+  cy.get(LOAD_PREBUILT_RULES_BTN, { timeout: 300000 }).should('be.enabled');
+  cy.get(LOAD_PREBUILT_RULES_BTN).click();
+  cy.get(LOAD_PREBUILT_RULES_BTN).should('be.disabled');
 };
 
 /**
@@ -258,7 +256,8 @@ export const loadPrebuiltDetectionRules = () => {
 export const loadPrebuiltDetectionRulesFromHeaderBtn = () => {
   cy.log('load prebuilt detection rules from header');
   waitTillPrebuiltRulesReadyToInstall();
-  cy.get(LOAD_PREBUILT_RULES_ON_PAGE_HEADER_BTN, { timeout: 300000 }).click().should('not.exist');
+  cy.get(LOAD_PREBUILT_RULES_ON_PAGE_HEADER_BTN, { timeout: 300000 }).click();
+  cy.get(LOAD_PREBUILT_RULES_ON_PAGE_HEADER_BTN, { timeout: 300000 }).should('not.exist');
 };
 
 export const openIntegrationsPopover = () => {
@@ -278,19 +277,14 @@ export const reloadDeletedRules = () => {
  */
 export const selectNumberOfRules = (numberOfRules: number) => {
   for (let i = 0; i < numberOfRules; i++) {
-    cy.get(RULE_CHECKBOX)
-      .eq(i)
-      .pipe(($el) => $el.trigger('click'))
-      .should('be.checked');
+    cy.get(RULE_CHECKBOX).eq(i).check();
+    cy.get(RULE_CHECKBOX).eq(i).should('be.checked');
   }
 };
 
 export const unselectRuleByName = (ruleName: string) => {
-  cy.contains(RULE_NAME, ruleName)
-    .parents(RULES_ROW)
-    .find(EUI_CHECKBOX)
-    .click()
-    .should('not.be.checked');
+  cy.contains(RULE_NAME, ruleName).parents(RULES_ROW).find(EUI_CHECKBOX).uncheck();
+  cy.contains(RULE_NAME, ruleName).parents(RULES_ROW).find(EUI_CHECKBOX).should('not.be.checked');
 };
 
 /**
@@ -301,11 +295,9 @@ export const unselectRuleByName = (ruleName: string) => {
  */
 export const unselectNumberOfRules = (numberOfRules: number) => {
   for (let i = 0; i < numberOfRules; i++) {
-    cy.get(RULE_CHECKBOX)
-      .eq(i)
-      .should('be.checked')
-      .pipe(($el) => $el.trigger('click'))
-      .should('not.be.checked');
+    cy.get(RULE_CHECKBOX).eq(i).should('be.checked');
+    cy.get(RULE_CHECKBOX).eq(i).uncheck();
+    cy.get(RULE_CHECKBOX).eq(i).should('not.be.checked');
   }
 };
 
@@ -357,7 +349,6 @@ export const waitForRulesTableToShow = () => {
  */
 export const waitForRulesTableToBeLoaded = () => {
   // Wait up to 5 minutes for the rules to load as in CI containers this can be very slow
-  cy.get(RULES_TABLE_INITIAL_LOADING_INDICATOR, { timeout: 300000 }).should('exist');
   cy.get(RULES_TABLE_INITIAL_LOADING_INDICATOR, { timeout: 300000 }).should('not.exist');
 };
 
@@ -392,9 +383,10 @@ export const checkAutoRefresh = (ms: number, condition: string) => {
 
 export const importRules = (rulesFile: string) => {
   cy.get(RULE_IMPORT_MODAL).click();
-  cy.get(INPUT_FILE).should('exist');
-  cy.get(INPUT_FILE).trigger('click').selectFile(rulesFile).trigger('change');
-  cy.get(RULE_IMPORT_MODAL_BUTTON).last().click();
+  cy.get(INPUT_FILE).click({ force: true });
+  cy.get(INPUT_FILE).selectFile(rulesFile);
+  cy.get(INPUT_FILE).trigger('change');
+  cy.get(RULE_IMPORT_MODAL_BUTTON).last().click({ force: true });
   cy.get(INPUT_FILE).should('not.exist');
 };
 
@@ -485,9 +477,8 @@ export const expectToContainRule = (
 };
 
 const selectOverwriteRulesImport = () => {
-  cy.get(RULE_IMPORT_OVERWRITE_CHECKBOX)
-    .pipe(($el) => $el.trigger('click'))
-    .should('be.checked');
+  cy.get(RULE_IMPORT_OVERWRITE_CHECKBOX).check({ force: true });
+  cy.get(RULE_IMPORT_OVERWRITE_CHECKBOX).should('be.checked');
 };
 
 export const expectManagementTableRules = (ruleNames: string[]): void => {
@@ -499,19 +490,20 @@ export const expectManagementTableRules = (ruleNames: string[]): void => {
 };
 
 const selectOverwriteExceptionsRulesImport = () => {
-  cy.get(RULE_IMPORT_OVERWRITE_EXCEPTIONS_CHECKBOX)
-    .pipe(($el) => $el.trigger('click'))
-    .should('be.checked');
+  cy.get(RULE_IMPORT_OVERWRITE_EXCEPTIONS_CHECKBOX).check({ force: true });
+  cy.get(RULE_IMPORT_OVERWRITE_EXCEPTIONS_CHECKBOX).should('be.checked');
 };
+
 const selectOverwriteConnectorsRulesImport = () => {
-  cy.get(RULE_IMPORT_OVERWRITE_CONNECTORS_CHECKBOX)
-    .pipe(($el) => $el.trigger('click'))
-    .should('be.checked');
+  cy.get(RULE_IMPORT_OVERWRITE_CONNECTORS_CHECKBOX).check({ force: true });
+  cy.get(RULE_IMPORT_OVERWRITE_CONNECTORS_CHECKBOX).should('be.checked');
 };
+
 export const importRulesWithOverwriteAll = (rulesFile: string) => {
   cy.get(RULE_IMPORT_MODAL).click();
-  cy.get(INPUT_FILE).should('exist');
-  cy.get(INPUT_FILE).trigger('click').selectFile(rulesFile).trigger('change');
+  cy.get(INPUT_FILE).click({ force: true });
+  cy.get(INPUT_FILE).selectFile(rulesFile);
+  cy.get(INPUT_FILE).trigger('change');
   selectOverwriteRulesImport();
   selectOverwriteExceptionsRulesImport();
   selectOverwriteConnectorsRulesImport();

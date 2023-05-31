@@ -8,14 +8,14 @@
 import React from 'react';
 import { Metadata, type MetadataProps } from './metadata';
 
-import { useMetadata } from '../hooks/use_metadata';
-import { useSourceContext } from '../../../containers/metrics_source';
+import { useMetadata } from '../../hooks/use_metadata';
+import { useSourceContext } from '../../../../containers/metrics_source';
 import { render } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 
-jest.mock('../../../containers/metrics_source');
-jest.mock('../hooks/use_metadata');
+jest.mock('../../../../containers/metrics_source');
+jest.mock('../../hooks/use_metadata');
 
 const metadataProps: MetadataProps = {
   currentTimeRange: {
