@@ -11,12 +11,8 @@ import { htmlIdGenerator } from '@elastic/eui';
 import { BehaviorSubject } from 'rxjs';
 import { CoreStart } from '@kbn/core/public';
 import type { AggregateQuery, EsQueryConfig, Filter, Query } from '@kbn/es-query';
-import {
-  DataPublicPluginStart,
-  DataViewsContract,
-  getEsQueryConfig,
-} from '@kbn/data-plugin/public';
-import { type DataView } from '@kbn/data-plugin/common';
+import { type DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { type DataView, DataViewsContract, getEsQueryConfig } from '@kbn/data-plugin/common';
 import { loadFieldExisting } from '../services/field_existing';
 import { ExistenceFetchStatus } from '../types';
 

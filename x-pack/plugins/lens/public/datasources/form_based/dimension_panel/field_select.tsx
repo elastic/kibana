@@ -10,7 +10,7 @@ import { partition } from 'lodash';
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiComboBoxOptionOption, EuiComboBoxProps } from '@elastic/eui';
-import { useExistingFieldsReader } from '@kbn/unified-field-list-plugin/public';
+import { useExistingFieldsReader } from '@kbn/unified-field-list';
 import {
   FieldOption,
   FieldOptionValue,

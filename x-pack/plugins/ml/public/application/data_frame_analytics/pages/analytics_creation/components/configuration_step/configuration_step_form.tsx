@@ -20,7 +20,7 @@ import { debounce, cloneDeep } from 'lodash';
 
 import { Query } from '@kbn/data-plugin/common/query';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
-import { FieldStatsServices } from '@kbn/unified-field-list-plugin/public';
+import { FieldStatsServices } from '@kbn/unified-field-list';
 import { useMlKibana } from '../../../../../contexts/kibana';
 import {
   EuiComboBoxWithFieldStats,

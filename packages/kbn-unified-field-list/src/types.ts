@@ -7,11 +7,32 @@
  */
 
 import type { DataViewField } from '@kbn/data-views-plugin/common';
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface UnifiedFieldListPluginSetup {}
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface UnifiedFieldListPluginStart {}
+export interface BucketedAggregation<KeyType = string> {
+  buckets: Array<{
+    key: KeyType;
+    count: number;
+  }>;
+}
+
+export interface NumberSummary {
+  minValue: number | null;
+  maxValue: number | null;
+}
+
+export interface FieldStatsResponse<KeyType = unknown> {
+  // Total count of documents
+  totalDocuments?: number;
+  // If sampled, the exact number of matching documents
+  sampledDocuments?: number;
+  // If sampled, the exact number of values sampled. Can be higher than documents
+  // because Elasticsearch supports arrays for all fields
+  sampledValues?: number;
+  // Histogram and values are based on distinct values, not based on documents
+  histogram?: BucketedAggregation<KeyType>;
+  topValues?: BucketedAggregation<KeyType>;
+  numberSummary?: NumberSummary;
+}
 
 export type AddFieldFilterHandler = (
   field: DataViewField | '_exists_',

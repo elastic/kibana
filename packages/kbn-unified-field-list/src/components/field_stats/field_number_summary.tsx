@@ -17,7 +17,7 @@ import {
 import { DataView, DataViewField } from '@kbn/data-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
-import type { NumberSummary } from '../../../common/types';
+import type { NumberSummary } from '../../types';
 
 interface SummaryTableItem {
   key: string;

@@ -6,4 +6,8 @@
  * Side Public License, v 1.
  */
 
-export type { FieldStatsResponse, BucketedAggregation, NumberSummary } from './stats';
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: '../..',
+  roots: ['<rootDir>/packages/kbn-unified-field-list'],
+};

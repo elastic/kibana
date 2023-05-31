@@ -30,14 +30,14 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
 import { DiscoverAppStateProvider } from '../../services/discover_app_state_container';
 import { VIEW_MODE } from '../../../../../common/constants';
-import * as ExistingFieldsServiceApi from '@kbn/unified-field-list-plugin/public/services/field_existing/load_field_existing';
-import { resetExistingFieldsCache } from '@kbn/unified-field-list-plugin/public/hooks/use_existing_fields';
+import * as ExistingFieldsServiceApi from '@kbn/unified-field-list/src/services/field_existing/load_field_existing';
+import { resetExistingFieldsCache } from '@kbn/unified-field-list/src/hooks/use_existing_fields';
 import { createDiscoverServicesMock } from '../../../../__mocks__/services';
 import type { AggregateQuery, Query } from '@kbn/es-query';
 import { buildDataTableRecord } from '../../../../utils/build_data_record';
 import { type DataTableRecord } from '../../../../types';
 
-jest.mock('@kbn/unified-field-list-plugin/public/services/field_stats', () => ({
+jest.mock('@kbn/unified-field-list/src/services/field_stats', () => ({
   loadFieldStats: jest.fn().mockResolvedValue({
     totalDocuments: 1624,
     sampledDocuments: 1624,

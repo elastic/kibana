@@ -15,12 +15,12 @@ import {
   FieldStatsServices,
   FieldStatsProps,
   FieldStatsState,
-} from '@kbn/unified-field-list-plugin/public';
+} from '@kbn/unified-field-list';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
-import { FieldTopValuesBucket } from '@kbn/unified-field-list-plugin/public';
+import { FieldTopValuesBucket } from '@kbn/unified-field-list';
 
-import type { FieldTopValuesBucketParams } from '@kbn/unified-field-list-plugin/public';
+import type { FieldTopValuesBucketParams } from '@kbn/unified-field-list';
 import {
   EuiHorizontalRule,
   EuiText,

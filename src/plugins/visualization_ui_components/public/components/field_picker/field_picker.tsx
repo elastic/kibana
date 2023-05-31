@@ -11,7 +11,7 @@ import React, { useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import useEffectOnce from 'react-use/lib/useEffectOnce';
 import { EuiComboBox, EuiComboBoxProps, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { FieldIcon } from '@kbn/unified-field-list-plugin/public';
+import { FieldIcon } from '@kbn/unified-field-list';
 import classNames from 'classnames';
 import type { DataType } from './types';
 import { TruncatedLabel } from './truncated_label';

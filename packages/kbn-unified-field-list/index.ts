@@ -6,24 +6,22 @@
  * Side Public License, v 1.
  */
 
-import { UnifiedFieldListPlugin } from './plugin';
-export type { FieldStatsResponse, BucketedAggregation, NumberSummary } from '../common/types';
-export { FieldList, type FieldListProps } from './components/field_list';
-export { FieldListGrouped, type FieldListGroupedProps } from './components/field_list_grouped';
-export { FieldListFilters, type FieldListFiltersProps } from './components/field_list_filters';
-export { FieldIcon, type FieldIconProps, getFieldIconProps } from './components/field_icon';
-export { FieldItemButton, type FieldItemButtonProps } from './components/field_item_button';
+export { FieldList, type FieldListProps } from './src/components/field_list';
+export { FieldListGrouped, type FieldListGroupedProps } from './src/components/field_list_grouped';
+export { FieldListFilters, type FieldListFiltersProps } from './src/components/field_list_filters';
+export { FieldIcon, type FieldIconProps, getFieldIconProps } from './src/components/field_icon';
+export { FieldItemButton, type FieldItemButtonProps } from './src/components/field_item_button';
 export type {
   FieldTopValuesBucketProps,
   FieldTopValuesBucketParams,
-} from './components/field_stats';
-export { FieldTopValuesBucket } from './components/field_stats';
+} from './src/components/field_stats';
+export { FieldTopValuesBucket } from './src/components/field_stats';
 export type {
   FieldStatsProps,
   FieldStatsServices,
   FieldStatsState,
-} from './components/field_stats';
-export { FieldStats } from './components/field_stats';
+} from './src/components/field_stats';
+export { FieldStats } from './src/components/field_stats';
 export {
   FieldPopover,
   type FieldPopoverProps,
@@ -31,7 +29,7 @@ export {
   type FieldPopoverHeaderProps,
   FieldPopoverFooter,
   type FieldPopoverFooterProps,
-} from './components/field_popover';
+} from './src/components/field_popover';
 export {
   FieldVisualizeButton,
   type FieldVisualizeButtonProps,
@@ -39,18 +37,14 @@ export {
   triggerVisualizeActions,
   triggerVisualizeActionsTextBasedLanguages,
   type VisualizeInformation,
-} from './components/field_visualize_button';
-export { loadFieldStats } from './services/field_stats';
-export { loadFieldExisting } from './services/field_existing';
+} from './src/components/field_visualize_button';
+export { loadFieldStats } from './src/services/field_stats';
+export { loadFieldExisting } from './src/services/field_existing';
 
-// This exports static code and TypeScript types,
-// as well as, Kibana Platform `plugin()` initializer.
-export function plugin() {
-  return new UnifiedFieldListPlugin();
-}
 export type {
-  UnifiedFieldListPluginSetup,
-  UnifiedFieldListPluginStart,
+  FieldStatsResponse,
+  BucketedAggregation,
+  NumberSummary,
   AddFieldFilterHandler,
   FieldListGroups,
   FieldsGroupDetails,
@@ -58,8 +52,8 @@ export type {
   FieldListItem,
   GetCustomFieldType,
   RenderFieldItemParams,
-} from './types';
-export { ExistenceFetchStatus, FieldsGroupNames } from './types';
+} from './src/types';
+export { ExistenceFetchStatus, FieldsGroupNames } from './src/types';
 
 export {
   useExistingFieldsFetcher,
@@ -69,26 +63,26 @@ export {
   type ExistingFieldsFetcherParams,
   type ExistingFieldsFetcher,
   type ExistingFieldsReader,
-} from './hooks/use_existing_fields';
+} from './src/hooks/use_existing_fields';
 
 export {
   useGroupedFields,
   type GroupedFieldsParams,
   type GroupedFieldsResult,
-} from './hooks/use_grouped_fields';
+} from './src/hooks/use_grouped_fields';
 
 export {
   useFieldFilters,
   type FieldFiltersParams,
   type FieldFiltersResult,
-} from './hooks/use_field_filters';
+} from './src/hooks/use_field_filters';
 
 export {
   useQuerySubscriber,
   hasQuerySubscriberData,
   type QuerySubscriberResult,
   type QuerySubscriberParams,
-} from './hooks/use_query_subscriber';
+} from './src/hooks/use_query_subscriber';
 
 export {
   getFieldTypeName,
@@ -96,4 +90,4 @@ export {
   KNOWN_FIELD_TYPES,
   getFieldType,
   getFieldIconType,
-} from './utils/field_types';
+} from './src/utils/field_types';

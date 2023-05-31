@@ -23,7 +23,7 @@ import {
   QueryPointEventAnnotationConfig,
 } from '@kbn/event-annotation-plugin/common';
 import moment from 'moment';
-import { useExistingFieldsReader } from '@kbn/unified-field-list-plugin/public';
+import { useExistingFieldsReader } from '@kbn/unified-field-list';
 import {
   IconSelectSetting,
   FieldOption,

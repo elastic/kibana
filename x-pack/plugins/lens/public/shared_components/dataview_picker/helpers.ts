@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type ExistingFieldsReader } from '@kbn/unified-field-list-plugin/public';
+import { type ExistingFieldsReader } from '@kbn/unified-field-list';
 import { IndexPattern } from '../../types';
 
 /**

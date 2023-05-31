@@ -26,7 +26,7 @@ import {
   useExistingFieldsFetcher,
   useGroupedFields,
   useQuerySubscriber,
-} from '@kbn/unified-field-list-plugin/public';
+} from '@kbn/unified-field-list';
 import { FieldListItem, FieldListItemProps } from './field_list_item';
 
 export interface FieldListSidebarProps {

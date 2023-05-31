@@ -11,7 +11,7 @@ import type { CoreStart } from '@kbn/core/public';
 import { buildEsQuery } from '@kbn/es-query';
 import { getEsQueryConfig, DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
-import { FieldStatsResponse, loadFieldStats } from '@kbn/unified-field-list-plugin/public';
+import { FieldStatsResponse, loadFieldStats } from '@kbn/unified-field-list';
 import { GenericIndexPatternColumn, operationDefinitionMap } from '..';
 import { defaultLabel } from '../filters';
 import { isReferenced } from '../../layer_helpers';

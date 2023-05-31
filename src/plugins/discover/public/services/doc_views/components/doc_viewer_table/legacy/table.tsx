@@ -9,7 +9,7 @@
 import '../table.scss';
 import React, { useCallback, useMemo } from 'react';
 import { EuiInMemoryTable } from '@elastic/eui';
-import { getFieldIconType } from '@kbn/unified-field-list-plugin/public';
+import { getFieldIconType } from '@kbn/unified-field-list';
 import { useDiscoverServices } from '../../../../../hooks/use_discover_services';
 import { SHOW_MULTIFIELDS } from '../../../../../../common';
 import { DocViewRenderProps, FieldRecordLegacy } from '../../../doc_views_types';

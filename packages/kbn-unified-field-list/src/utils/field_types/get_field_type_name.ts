@@ -7,7 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { KBN_FIELD_TYPES } from '@kbn/data-plugin/public';
+import { KBN_FIELD_TYPES } from '@kbn/data-plugin/common';
 import { KNOWN_FIELD_TYPES } from './field_types';
 
 /**

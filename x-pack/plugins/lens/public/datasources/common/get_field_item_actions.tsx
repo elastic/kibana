@@ -6,7 +6,7 @@
  */
 
 import { type DragDropIdentifier } from '@kbn/dom-drag-drop';
-import type { FieldItemButtonProps, FieldListItem } from '@kbn/unified-field-list-plugin/public';
+import type { FieldItemButtonProps, FieldListItem } from '@kbn/unified-field-list';
 import { i18n } from '@kbn/i18n';
 import { type DataViewField } from '@kbn/data-views-plugin/common';
 

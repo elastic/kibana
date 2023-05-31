@@ -36,7 +36,7 @@ import { i18n } from '@kbn/i18n';
 import { buildEsQuery, Query, Filter, AggregateQuery } from '@kbn/es-query';
 import { showExamplesForField } from '../../services/field_stats/field_examples_calculator';
 import { OverrideFieldTopValueBarCallback } from './field_top_values_bucket';
-import type { BucketedAggregation, NumberSummary } from '../../../common/types';
+import type { BucketedAggregation, NumberSummary } from '../../types';
 import {
   canProvideStatsForField,
   canProvideNumberSummaryForField,
