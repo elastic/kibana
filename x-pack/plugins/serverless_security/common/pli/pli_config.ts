@@ -8,11 +8,8 @@
 import { AppFeatureKey, AppFeatureKeys } from '@kbn/security-solution-plugin/common';
 import type { SecurityProductLineId } from '../config';
 
-export const PLI_APP_FEATURES: Record<SecurityProductLineId, AppFeatureKeys> = {
-  securityEssentials: {
-    [AppFeatureKey.advancedInsights]: false,
-    [AppFeatureKey.casesConnectors]: false,
-  },
+export const PLI_APP_FEATURES: Record<SecurityProductLineId, Partial<AppFeatureKeys>> = {
+  securityEssentials: {},
 
   securityComplete: {
     [AppFeatureKey.advancedInsights]: true,
