@@ -7,6 +7,7 @@
 
 import { partition } from 'lodash';
 import { i18n } from '@kbn/i18n';
+import { Orientation } from '@kbn/expression-tagcloud-plugin/common';
 import type { SuggestionRequest, VisualizationSuggestion } from '../../types';
 import type { TagcloudState } from './types';
 
@@ -51,6 +52,7 @@ export function suggestions({
           valueAccessor: metrics[0].columnId,
           maxFontSize: 72,
           minFontSize: 18,
+          orientation: Orientation.SINGLE,
           showLabel: true,
         },
       };

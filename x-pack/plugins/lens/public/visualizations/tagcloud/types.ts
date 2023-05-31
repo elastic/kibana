@@ -7,6 +7,7 @@
 
 import { Datatable } from '@kbn/expressions-plugin/common';
 import type { PaletteOutput } from '@kbn/coloring';
+import type { Orientation } from '@kbn/expression-tagcloud-plugin/common';
 
 export interface TagcloudState {
   layerId: string;
@@ -14,8 +15,9 @@ export interface TagcloudState {
   valueAccessor?: string;
   maxFontSize: number;
   minFontSize: number;
-  showLabel: boolean;
+  orientation: Orientation;
   palette?: PaletteOutput;
+  showLabel: boolean;
 }
 
 export interface TagcloudConfig extends TagcloudState {

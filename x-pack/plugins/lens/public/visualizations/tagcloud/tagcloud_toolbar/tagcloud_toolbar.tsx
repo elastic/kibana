@@ -13,12 +13,34 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSwitch, EuiSwitchEvent } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiRadioGroup, EuiSwitch, EuiSwitchEvent } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { Orientation } from '@kbn/expression-tagcloud-plugin/common';
 import type { VisualizationToolbarProps } from '../../../types';
 import { ToolbarPopover } from '../../../shared_components';
 import type { TagcloudState } from './types';
 import { FontSizeInput } from './font_size_input';
+
+const ORIENTATION_OPTIONS = [
+  {
+    id: Orientation.SINGLE,
+    label: i18n.translate('xpack.lens.label.tagcloud.orientation.single', {
+      defaultMessage: 'Single',
+    }),
+  },
+  {
+    id: Orientation.RIGHT_ANGLED,
+    label: i18n.translate('xpack.lens.label.tagcloud.orientation.rightAngled', {
+      defaultMessage: 'Right angled',
+    }),
+  },
+  {
+    id: Orientation.MULTIPLE,
+    label: i18n.translate('xpack.lens.label.tagcloud.orientation.multiple', {
+      defaultMessage: 'Multiple',
+    }),
+  },
+];
 
 export function TagcloudToolbar(props: VisualizationToolbarProps<TagcloudState>) {
   return (
@@ -31,14 +53,12 @@ export function TagcloudToolbar(props: VisualizationToolbarProps<TagcloudState>)
             })}
             type="visualOptions"
             buttonDataTestSubj="lnsVisualOptionsButton"
-            panelClassName="lnsTagcloudToolbar__popover"
           >
             <EuiFormRow
               display="columnCompressed"
               label={i18n.translate('xpack.lens.label.tagcloud.fontSizeLabel', {
                 defaultMessage: 'Font size',
               })}
-              fullWidth
             >
               <FontSizeInput
                 minFontSize={props.state.minFontSize}
@@ -48,6 +68,23 @@ export function TagcloudToolbar(props: VisualizationToolbarProps<TagcloudState>)
                     ...props.state,
                     minFontSize,
                     maxFontSize,
+                  });
+                }}
+              />
+            </EuiFormRow>
+            <EuiFormRow
+              display="columnCompressed"
+              label={i18n.translate('xpack.lens.label.tagcloud.orientationLabel', {
+                defaultMessage: 'Orientation',
+              })}
+            >
+              <EuiRadioGroup
+                options={ORIENTATION_OPTIONS}
+                idSelected={props.state.orientation}
+                onChange={(id) => {
+                  props.setState({
+                    ...props.state,
+                    orientation: id,
                   });
                 }}
               />

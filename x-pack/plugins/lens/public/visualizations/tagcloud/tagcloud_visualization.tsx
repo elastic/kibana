@@ -11,6 +11,7 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { render } from 'react-dom';
 import { ThemeServiceStart } from '@kbn/core/public';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import type { Orientation } from '@kbn/expression-tagcloud-plugin';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import {
   buildExpression,
@@ -62,6 +63,7 @@ export const getTagcloudVisualization = ({
     delete newState.valueAccessor;
     delete newState.maxFontSize;
     delete newState.minFontSize;
+    delete newState.orientation;
     delete newState.palette;
     delete newState.showLabel;
     return newState;
@@ -87,6 +89,7 @@ export const getTagcloudVisualization = ({
         layerType: LayerTypes.DATA,
         maxFontSize: 72,
         minFontSize: 18,
+        orientation: Orientation.SINGLE,
         showLabel: true,
       }
     );
@@ -170,6 +173,7 @@ export const getTagcloudVisualization = ({
             metric: state.valueAccessor,
             maxFontSize: state.maxFontSize,
             minFontSize: state.minFontSize,
+            orientation: state.orientation,
             palette: buildExpression([
               state.palette
                 ? buildExpressionFunction<ExpressionFunctionTheme>('theme', {
