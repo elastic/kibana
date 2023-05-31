@@ -19,14 +19,14 @@ import { EuiStepProps } from '@elastic/eui/src/components/steps/step';
 import React from 'react';
 import { ValuesType } from 'utility-types';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { AgentApiKey } from '../api_keys';
-import { AgentInstructions } from '../instruction_variants';
+import { isApiKeyGenerated } from '../api_keys';
+import { AgentApiDetails, AgentInstructions } from '../instruction_variants';
 import { ApiKeyCallout } from './api_key_callout';
 
 export const createOpenTelemetryAgentInstructions = (
   commonOptions: AgentInstructions
 ): EuiStepProps[] => {
-  const { baseUrl, apmServerUrl, apiKeyDetails, loading } = commonOptions;
+  const { baseUrl, apmServerUrl, apiKeyDetails } = commonOptions;
   return [
     {
       title: i18n.translate('xpack.apm.tutorial.otel.download.title', {
@@ -63,21 +63,6 @@ export const createOpenTelemetryAgentInstructions = (
             })}
           </EuiMarkdownFormat>
           <EuiSpacer />
-          {apiKeyDetails?.displayCreateApiKeyAction && (
-            <>
-              <EuiButton
-                data-test-subj="createApiKeyAndId"
-                fill
-                onClick={apiKeyDetails?.createAgentKey}
-                isLoading={loading}
-              >
-                {i18n.translate('xpack.apm.tutorial.apiKey.create', {
-                  defaultMessage: 'Create API Key',
-                })}
-              </EuiButton>
-              <EuiSpacer />
-            </>
-          )}
           {(apiKeyDetails?.displayApiKeySuccessCallout ||
             apiKeyDetails?.displayApiKeyErrorCallout) && (
             <>
@@ -92,9 +77,6 @@ export const createOpenTelemetryAgentInstructions = (
           <OpenTelemetryInstructions
             apmServerUrl={apmServerUrl}
             apiKeyDetails={apiKeyDetails}
-            displayCreateApiKeyAction={
-              !!apiKeyDetails?.displayCreateApiKeyAction
-            }
           />
           <EuiSpacer />
           <EuiMarkdownFormat>
@@ -112,27 +94,59 @@ export const createOpenTelemetryAgentInstructions = (
   ];
 };
 
+function ConfigurationValueColumn({
+  setting,
+  value,
+  createApiKey,
+  createApiKeyLoading,
+  apiKey,
+}: {
+  setting: string;
+  value: string;
+  createApiKey?: () => void;
+  createApiKeyLoading?: boolean;
+  apiKey?: string;
+}) {
+  const shouldRenderCreateApiKeyButton =
+    setting === 'OTEL_EXPORTER_OTLP_HEADERS' && !isApiKeyGenerated(apiKey);
+
+  if (shouldRenderCreateApiKeyButton) {
+    return (
+      <EuiButton
+        data-test-subj="createApiKeyAndId"
+        fill
+        onClick={createApiKey}
+        isLoading={createApiKeyLoading}
+      >
+        {i18n.translate('xpack.apm.tutorial.apiKey.create', {
+          defaultMessage: 'Create API Key',
+        })}
+      </EuiButton>
+    );
+  }
+
+  return (
+    <EuiText size="s" color="accent">
+      {value}
+    </EuiText>
+  );
+}
+
 export function OpenTelemetryInstructions({
   apmServerUrl,
   secretToken,
   apiKeyDetails,
-  displayCreateApiKeyAction,
 }: {
   apmServerUrl: string;
   secretToken?: string;
-  apiKeyDetails?: AgentApiKey;
-  displayCreateApiKeyAction: boolean;
+  apiKeyDetails?: AgentApiDetails;
 }) {
   let authHeaderValue;
 
   if (secretToken) {
     authHeaderValue = `Authorization=Bearer ${secretToken}`;
   } else {
-    authHeaderValue = `${
-      !displayCreateApiKeyAction
-        ? `Authorization=ApiKey ${apiKeyDetails?.encodedKey}`
-        : apiKeyDetails?.apiKey
-    }`;
+    authHeaderValue = `Authorization=ApiKey ${apiKeyDetails?.encodedKey}`;
   }
   const items = [
     {
@@ -142,6 +156,7 @@ export function OpenTelemetryInstructions({
     {
       setting: 'OTEL_EXPORTER_OTLP_HEADERS',
       value: authHeaderValue,
+      apiKey: apiKeyDetails?.apiKey,
     },
     {
       setting: 'OTEL_METRICS_EXPORTER',
@@ -178,10 +193,14 @@ export function OpenTelemetryInstructions({
           defaultMessage: 'Configuration value',
         }
       ),
-      render: (_, { value }) => (
-        <EuiText size="s" color="accent">
-          {value}
-        </EuiText>
+      render: (_, { value, setting, apiKey }) => (
+        <ConfigurationValueColumn
+          setting={setting}
+          value={value}
+          createApiKey={apiKeyDetails?.createAgentKey}
+          createApiKeyLoading={apiKeyDetails?.createApiKeyLoading}
+          apiKey={apiKeyDetails?.apiKey}
+        />
       ),
     },
     {

@@ -22,6 +22,6 @@ export const API_KEY_INSTRUCTION = i18n.translate(
   }
 );
 
-export function isApiKeyGenerated(key: string) {
+export function isApiKeyGenerated(key?: string) {
   return key !== API_KEY_INSTRUCTION;
 }

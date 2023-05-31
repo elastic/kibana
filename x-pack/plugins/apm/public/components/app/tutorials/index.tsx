@@ -25,7 +25,7 @@ export function Tutorials() {
     apiKey: API_KEY_INSTRUCTION,
     error: false,
   });
-  const [loading, setLoading] = useState(false);
+  const [apiKeyLoading, setApiKeyLoading] = useState(false);
   const { services } = useKibana<ApmPluginStartDeps>();
   const { config } = useApmPluginContext();
   const { docLinks, observabilityShared } = services;
@@ -37,7 +37,7 @@ export function Tutorials() {
 
   const createAgentKey = useCallback(async () => {
     try {
-      setLoading(true);
+      setApiKeyLoading(true);
       const privileges: PrivilegeType[] = [PrivilegeType.EVENT];
 
       const { agentKey } = await callApmApi(
@@ -68,7 +68,7 @@ export function Tutorials() {
         errorMessage: error.body?.message || error.message,
       });
     } finally {
-      setLoading(false);
+      setApiKeyLoading(false);
     }
   }, []);
 
@@ -83,12 +83,12 @@ export function Tutorials() {
           baseUrl,
           config,
         },
-        loading,
+        apiKeyLoading,
         agentApiKey,
         createAgentKey
       ),
     ]);
-  }, [agentApiKey, baseUrl, config, createAgentKey, loading]);
+  }, [agentApiKey, baseUrl, config, createAgentKey, apiKeyLoading]);
 
   const ObservabilityPageTemplate = observabilityShared.navigation.PageTemplate;
   return (

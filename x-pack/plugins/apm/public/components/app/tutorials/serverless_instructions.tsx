@@ -30,12 +30,11 @@ export function serverlessInstructions(
     baseUrl: string;
     config: ConfigSchema;
   },
-  loading: boolean,
+  apiKeyLoading: boolean,
   apiKeyDetails: AgentApiKey,
   createAgentKey: () => void
 ) {
   const { apiKey, error, errorMessage } = apiKeyDetails;
-  const displayCreateApiKeyAction = !isApiKeyGenerated(apiKey);
   const displayApiKeySuccessCallout =
     Boolean(apiKey) && isApiKeyGenerated(apiKey) && !error;
   const displayApiKeyErrorCallout = error && Boolean(errorMessage);
@@ -44,12 +43,11 @@ export function serverlessInstructions(
     apmServerUrl: config.managedServiceUrl,
     apiKeyDetails: {
       ...apiKeyDetails,
-      displayCreateApiKeyAction,
       displayApiKeySuccessCallout,
       displayApiKeyErrorCallout,
       createAgentKey,
+      createApiKeyLoading: apiKeyLoading,
     },
-    loading,
   };
 
   return {

@@ -6,12 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import {
-  EuiButton,
-  EuiCodeBlock,
-  EuiMarkdownFormat,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiCodeBlock, EuiMarkdownFormat, EuiSpacer } from '@elastic/eui';
 import { EuiStepProps } from '@elastic/eui/src/components/steps/step';
 import React from 'react';
 
@@ -25,7 +20,7 @@ import { ApiKeyCallout } from './api_key_callout';
 export const createDotNetAgentInstructions = (
   commonOptions: AgentInstructions
 ): EuiStepProps[] => {
-  const { baseUrl, apmServerUrl, apiKeyDetails, loading } = commonOptions;
+  const { baseUrl, apmServerUrl, apiKeyDetails } = commonOptions;
   const codeBlock = `public class Startup
 {
   public void Configure(IApplicationBuilder app, IHostingEnvironment env)
@@ -112,21 +107,6 @@ export const createDotNetAgentInstructions = (
       }),
       children: (
         <>
-          {apiKeyDetails?.displayCreateApiKeyAction && (
-            <>
-              <EuiButton
-                data-test-subj="createApiKeyAndId"
-                fill
-                onClick={apiKeyDetails?.createAgentKey}
-                isLoading={loading}
-              >
-                {i18n.translate('xpack.apm.tutorial.apiKey.create', {
-                  defaultMessage: 'Create API Key',
-                })}
-              </EuiButton>
-              <EuiSpacer />
-            </>
-          )}
           {(apiKeyDetails?.displayApiKeySuccessCallout ||
             apiKeyDetails?.displayApiKeyErrorCallout) && (
             <>
@@ -139,9 +119,11 @@ export const createDotNetAgentInstructions = (
             </>
           )}
           <AgentConfigInstructions
-            variantId={INSTRUCTION_VARIANT.DOTNET}
+            variantId={INSTRUCTION_VARIANT.NODE}
             apmServerUrl={apmServerUrl}
             apiKey={apiKeyDetails?.apiKey}
+            createApiKey={apiKeyDetails?.createAgentKey}
+            createApiKeyLoading={apiKeyDetails?.createApiKeyLoading}
           />
           <EuiSpacer />
           <EuiMarkdownFormat>

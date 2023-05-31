@@ -8,12 +8,56 @@
 import React from 'react';
 import type { ValuesType } from 'utility-types';
 import { get } from 'lodash';
-import { EuiBasicTable, EuiText, EuiBasicTableColumn } from '@elastic/eui';
+import {
+  EuiBasicTable,
+  EuiText,
+  EuiBasicTableColumn,
+  EuiButton,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { isApiKeyGenerated } from './api_keys';
+
+function ConfigurationValueColumn({
+  columnKey,
+  value,
+  createApiKey,
+  createApiKeyLoading,
+}: {
+  columnKey: string;
+  value: string;
+  createApiKey?: () => void;
+  createApiKeyLoading?: boolean;
+}) {
+  const shouldRenderCreateApiKeyButton =
+    columnKey === 'apiKey' && !isApiKeyGenerated(value);
+
+  if (shouldRenderCreateApiKeyButton) {
+    return (
+      <EuiButton
+        data-test-subj="createApiKeyAndId"
+        fill
+        onClick={createApiKey}
+        isLoading={createApiKeyLoading}
+      >
+        {i18n.translate('xpack.apm.tutorial.apiKey.create', {
+          defaultMessage: 'Create API Key',
+        })}
+      </EuiButton>
+    );
+  }
+
+  return (
+    <EuiText size="s" color="accent">
+      {value}
+    </EuiText>
+  );
+}
 
 export function AgentConfigurationTable({
   variables,
   data,
+  createApiKey,
+  createApiKeyLoading,
 }: {
   variables: { [key: string]: string };
   data: {
@@ -21,6 +65,8 @@ export function AgentConfigurationTable({
     secretToken?: string;
     apiKey?: string;
   };
+  createApiKey?: () => void;
+  createApiKeyLoading?: boolean;
 }) {
   if (!variables) return null;
 
@@ -41,10 +87,13 @@ export function AgentConfigurationTable({
       name: i18n.translate('xpack.apm.tutorial.agent.column.configValue', {
         defaultMessage: 'Configuration value',
       }),
-      render: (_, { value }) => (
-        <EuiText size="s" color="accent">
-          {value}
-        </EuiText>
+      render: (_, { value, key }) => (
+        <ConfigurationValueColumn
+          columnKey={key}
+          value={value}
+          createApiKey={createApiKey}
+          createApiKeyLoading={createApiKeyLoading}
+        />
       ),
     },
   ];
@@ -52,6 +101,7 @@ export function AgentConfigurationTable({
   const items = Object.entries(variables).map(([key, value]) => ({
     setting: value,
     value: get({ ...data, ...defaultValues }, key),
+    key,
   }));
   return <EuiBasicTable items={items} columns={columns} />;
 }

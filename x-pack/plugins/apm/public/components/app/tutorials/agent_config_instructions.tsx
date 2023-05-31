@@ -20,11 +20,15 @@ export function AgentConfigInstructions({
   apmServerUrl,
   secretToken,
   apiKey,
+  createApiKey,
+  createApiKeyLoading,
 }: {
   variantId: string;
   apmServerUrl: string;
   secretToken?: string;
   apiKey?: string;
+  createApiKey?: () => void;
+  createApiKeyLoading?: boolean;
 }) {
   const commands = getApmAgentCommands({
     variantId,
@@ -43,6 +47,8 @@ export function AgentConfigInstructions({
       <AgentConfigurationTable
         variables={variables}
         data={{ apmServerUrl, secretToken, apiKey }}
+        createApiKey={createApiKey}
+        createApiKeyLoading={createApiKeyLoading}
       />
       <EuiSpacer />
 

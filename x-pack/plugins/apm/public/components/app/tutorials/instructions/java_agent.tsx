@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { EuiButton, EuiMarkdownFormat, EuiSpacer } from '@elastic/eui';
+import { EuiMarkdownFormat, EuiSpacer } from '@elastic/eui';
 import { EuiStepProps } from '@elastic/eui/src/components/steps/step';
 import React from 'react';
 import { AgentConfigInstructions } from '../agent_config_instructions';
@@ -19,7 +19,7 @@ import { ApiKeyCallout } from './api_key_callout';
 export const createJavaAgentInstructions = (
   commonOptions: AgentInstructions
 ): EuiStepProps[] => {
-  const { baseUrl, apmServerUrl, apiKeyDetails, loading } = commonOptions;
+  const { baseUrl, apmServerUrl, apiKeyDetails } = commonOptions;
   return [
     {
       title: i18n.translate('xpack.apm.tutorial.java.download.title', {
@@ -62,21 +62,6 @@ export const createJavaAgentInstructions = (
           </EuiMarkdownFormat>
           <EuiSpacer />
 
-          {apiKeyDetails?.displayCreateApiKeyAction && (
-            <>
-              <EuiButton
-                data-test-subj="createApiKeyAndId"
-                fill
-                onClick={apiKeyDetails?.createAgentKey}
-                isLoading={loading}
-              >
-                {i18n.translate('xpack.apm.tutorial.apiKey.create', {
-                  defaultMessage: 'Create API Key',
-                })}
-              </EuiButton>
-              <EuiSpacer />
-            </>
-          )}
           {(apiKeyDetails?.displayApiKeySuccessCallout ||
             apiKeyDetails?.displayApiKeyErrorCallout) && (
             <>
@@ -89,9 +74,11 @@ export const createJavaAgentInstructions = (
             </>
           )}
           <AgentConfigInstructions
-            variantId={INSTRUCTION_VARIANT.JAVA}
+            variantId={INSTRUCTION_VARIANT.NODE}
             apmServerUrl={apmServerUrl}
             apiKey={apiKeyDetails?.apiKey}
+            createApiKey={apiKeyDetails?.createAgentKey}
+            createApiKeyLoading={apiKeyDetails?.createApiKeyLoading}
           />
           <EuiSpacer />
           <EuiMarkdownFormat>

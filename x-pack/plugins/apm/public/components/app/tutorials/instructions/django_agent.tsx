@@ -6,12 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import {
-  EuiButton,
-  EuiCodeBlock,
-  EuiMarkdownFormat,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiCodeBlock, EuiMarkdownFormat, EuiSpacer } from '@elastic/eui';
 import { EuiStepProps } from '@elastic/eui/src/components/steps/step';
 import React from 'react';
 import { AgentConfigInstructions } from '../agent_config_instructions';
@@ -24,7 +19,7 @@ import { ApiKeyCallout } from './api_key_callout';
 export const createDjangoAgentInstructions = (
   commonOptions: AgentInstructions
 ): EuiStepProps[] => {
-  const { baseUrl, apmServerUrl, apiKeyDetails, loading } = commonOptions;
+  const { baseUrl, apmServerUrl, apiKeyDetails } = commonOptions;
   return [
     {
       title: i18n.translate('xpack.apm.tutorial.django.install.title', {
@@ -60,21 +55,6 @@ APM services are created programmatically based on the `SERVICE_NAME`.',
           </EuiMarkdownFormat>
           <EuiSpacer />
 
-          {apiKeyDetails?.displayCreateApiKeyAction && (
-            <>
-              <EuiButton
-                data-test-subj="createApiKeyAndId"
-                fill
-                onClick={apiKeyDetails?.createAgentKey}
-                isLoading={loading}
-              >
-                {i18n.translate('xpack.apm.tutorial.apiKey.create', {
-                  defaultMessage: 'Create API Key',
-                })}
-              </EuiButton>
-              <EuiSpacer />
-            </>
-          )}
           {(apiKeyDetails?.displayApiKeySuccessCallout ||
             apiKeyDetails?.displayApiKeyErrorCallout) && (
             <>
@@ -87,9 +67,11 @@ APM services are created programmatically based on the `SERVICE_NAME`.',
             </>
           )}
           <AgentConfigInstructions
-            variantId={INSTRUCTION_VARIANT.DJANGO}
+            variantId={INSTRUCTION_VARIANT.NODE}
             apmServerUrl={apmServerUrl}
             apiKey={apiKeyDetails?.apiKey}
+            createApiKey={apiKeyDetails?.createAgentKey}
+            createApiKeyLoading={apiKeyDetails?.createApiKeyLoading}
           />
           <EuiSpacer />
           <EuiMarkdownFormat>

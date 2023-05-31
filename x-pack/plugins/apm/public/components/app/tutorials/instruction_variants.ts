@@ -48,15 +48,16 @@ export function getDisplayText(id: INSTRUCTION_VARIANT) {
   return id in DISPLAY_MAP ? DISPLAY_MAP[id] : id;
 }
 
+export type AgentApiDetails = AgentApiKey & {
+  displayApiKeySuccessCallout: boolean;
+  displayApiKeyErrorCallout: boolean;
+  createAgentKey: () => void;
+  createApiKeyLoading: boolean;
+};
+
 export interface AgentInstructions {
   baseUrl: string;
   apmServerUrl: string;
-  apiKeyDetails?: AgentApiKey & {
-    displayCreateApiKeyAction: boolean;
-    displayApiKeySuccessCallout: boolean;
-    displayApiKeyErrorCallout: boolean;
-    createAgentKey: () => void;
-  };
+  apiKeyDetails?: AgentApiDetails;
   secretToken?: string;
-  loading: boolean;
 }
