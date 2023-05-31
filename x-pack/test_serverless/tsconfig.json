@@ -3,7 +3,7 @@
   "compilerOptions": {
     "outDir": "target/types",
     "rootDirs": [".", "../test"],
-    "types": ["node", "@kbn/ambient-ftr-types", "cypress", "cypress-file-upload", "cypress-real-events", "cypress-recurs"],
+    "types": ["node", "@kbn/ambient-ftr-types", "cypress", "cypress-file-upload", "cypress-real-events", "cypress-recurse"],
   },
   "include": [
     "**/*",
