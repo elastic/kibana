@@ -9,12 +9,12 @@ import { EuiSpacer, EuiFlyoutBody } from '@elastic/eui';
 import React, { useMemo } from 'react';
 
 import deepEqual from 'fast-deep-equal';
-import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { EntityType } from '@kbn/timelines-plugin/common';
 import type { BrowserFields } from '../../../../common/containers/source';
 import { ExpandableEvent, ExpandableEventTitle } from './expandable_event';
 import { useTimelineEventsDetails } from '../../../containers/details';
 import type { TimelineTabs } from '../../../../../common/types/timeline';
+import type { RunTimeMappings } from '../../../../common/store/sourcerer/model';
 import { useHostIsolationTools } from './use_host_isolation_tools';
 import { FlyoutBody, FlyoutHeader, FlyoutFooter } from './flyout';
 import { useBasicDataFromDetailsData, getAlertIndexAlias } from './helpers';
@@ -33,7 +33,7 @@ interface EventDetailsPanelProps {
   handleOnEventClosed: () => void;
   isDraggable?: boolean;
   isFlyoutView?: boolean;
-  runtimeMappings: MappingRuntimeFields;
+  runtimeMappings: RunTimeMappings;
   tabType: TimelineTabs;
   scopeId: string;
   isReadOnly?: boolean;
