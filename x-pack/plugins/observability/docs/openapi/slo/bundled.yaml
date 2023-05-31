@@ -2,19 +2,65 @@ openapi: 3.0.1
 info:
   title: SLOs
   description: OpenAPI schema for SLOs endpoints
-  version: '0.1'
+  version: '1.0'
   contact:
     name: Actionable Observability Team
   license:
     name: Elastic License 2.0
     url: https://www.elastic.co/licensing/elastic-license
 tags:
-  - name: slos
+  - name: slo
     description: SLO APIs enable you to define, manage and track service-level objectives
+  - name: composite slo
+    description: Composite SLO APIs enable you to define, manage and track a group of SLOs.
 servers:
   - url: http://localhost:5601
     description: local
 paths:
+  /s/{spaceId}/api/observability/composite_slos:
+    post:
+      summary: Creates a Composite SLO
+      operationId: createCompositeSlo
+      description: |
+        You must have `all` privileges for the **SLOs** feature in the **Observability** section of the Kibana feature privileges.
+      tags:
+        - composite slo
+      parameters:
+        - $ref: '#/components/parameters/kbn_xsrf'
+        - $ref: '#/components/parameters/space_id'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/create_composite_slo_request'
+      responses:
+        '200':
+          description: Successful request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/create_composite_slo_response'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/4xx_response'
+        '401':
+          description: Unauthorized response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/4xx_response'
+        '409':
+          description: Conflict - The Composite SLO id already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/4xx_response'
+      servers:
+        - url: https://localhost:5601
   /s/{spaceId}/api/observability/slos:
     post:
       summary: Creates an SLO.
@@ -22,7 +68,7 @@ paths:
       description: |
         You must have `all` privileges for the **SLOs** feature in the **Observability** section of the Kibana feature privileges.
       tags:
-        - slos
+        - slo
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
         - $ref: '#/components/parameters/space_id'
@@ -65,7 +111,7 @@ paths:
       description: |
         You must have the `read` privileges for the **SLOs** feature in the **Observability** section of the Kibana feature privileges.
       tags:
-        - slos
+        - slo
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
         - $ref: '#/components/parameters/space_id'
@@ -106,8 +152,8 @@ paths:
             enum:
               - creationTime
               - indicatorType
-            default: name
-          example: name
+            default: creationTime
+          example: creationTime
         - name: sortDirection
           in: query
           description: Sort order
@@ -144,7 +190,7 @@ paths:
       description: |
         You must have the `read` privileges for the **SLOs** feature in the **Observability** section of the Kibana feature privileges.
       tags:
-        - slos
+        - slo
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
         - $ref: '#/components/parameters/space_id'
@@ -174,7 +220,7 @@ paths:
       description: |
         You must have the `write` privileges for the **SLOs** feature in the **Observability** section of the Kibana feature privileges.
       tags:
-        - slos
+        - slo
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
         - $ref: '#/components/parameters/space_id'
@@ -210,7 +256,7 @@ paths:
       description: |
         You must have the `write` privileges for the **SLOs** feature in the **Observability** section of the Kibana feature privileges.
       tags:
-        - slos
+        - slo
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
         - $ref: '#/components/parameters/space_id'
@@ -237,7 +283,7 @@ paths:
       description: |
         You must have the `write` privileges for the **SLOs** feature in the **Observability** section of the Kibana feature privileges.
       tags:
-        - slos
+        - slo
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
         - $ref: '#/components/parameters/space_id'
@@ -264,7 +310,7 @@ paths:
       description: |
         You must have the `write` privileges for the **SLOs** feature in the **Observability** section of the Kibana feature privileges.
       tags:
-        - slos
+        - slo
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
         - $ref: '#/components/parameters/space_id'
@@ -291,7 +337,7 @@ paths:
       description: |
         You must have the `read` privileges for the **SLOs** feature in the **Observability** section of the Kibana feature privileges.
       tags:
-        - slos
+        - slo
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
         - $ref: '#/components/parameters/space_id'
@@ -354,6 +400,128 @@ components:
         type: string
         example: 9c235211-6834-11ea-a78c-6feb38a34414
   schemas:
+    time_window_rolling:
+      title: Rolling time window definition
+      required:
+        - duration
+        - isRolling
+      description: Defines properties for rolling time window
+      type: object
+      properties:
+        duration:
+          description: the duration formatted as {duration}{unit}
+          type: string
+          example: 28d
+        isRolling:
+          description: Indicates a rolling time window
+          type: boolean
+          example: true
+    budgeting_method:
+      title: Budgeting method
+      type: string
+      description: The budgeting method to use
+      enum:
+        - occurrences
+        - timeslices
+      example: occurrences
+    composite_method:
+      title: Composite method
+      type: string
+      description: The composite method to use.
+      enum:
+        - weightedAverage
+      example: weightedAverage
+    composite_objective:
+      title: Objective definition
+      required:
+        - target
+      description: Defines properties for objective
+      type: object
+      properties:
+        target:
+          description: the target objective between 0 and 1 excluded
+          type: number
+          example: 0.95
+    weighted_composite_sources:
+      title: Weighted composite sources
+      description: An array of source SLO to use for the weighted average composite.
+      type: array
+      items:
+        type: object
+        required:
+          - id
+          - revision
+          - weight
+        properties:
+          id:
+            description: The id of the SLO.
+            type: string
+            example: 8853df00-ae2e-11ed-90af-09bb6422b258
+          revision:
+            description: The revision number of the SLO.
+            type: number
+            example: 2
+          weight:
+            description: The weight to apply to this SLO.
+            type: number
+            example: 3
+    create_composite_slo_request:
+      title: Create Composite SLO request
+      description: |
+        The create Composite SLO API request body. The provided source SLOs must exists and their budgeting method and time window must match the one from the composite SLO.
+      type: object
+      required:
+        - name
+        - timeWindow
+        - budgetingMethod
+        - compositeMethod
+        - objective
+        - sources
+      properties:
+        id:
+          description: A unique identifier for the composite SLO. Must be between 8 and 36 chars
+          type: string
+          example: my-super-composite-slo-id
+        name:
+          description: A name for the composite SLO.
+          type: string
+        timeWindow:
+          $ref: '#/components/schemas/time_window_rolling'
+        budgetingMethod:
+          $ref: '#/components/schemas/budgeting_method'
+        compositeMethod:
+          $ref: '#/components/schemas/composite_method'
+        objective:
+          $ref: '#/components/schemas/composite_objective'
+        sources:
+          oneOf:
+            - $ref: '#/components/schemas/weighted_composite_sources'
+    create_composite_slo_response:
+      title: Create Composite SLO response
+      type: object
+      required:
+        - id
+      properties:
+        id:
+          type: string
+          example: 8853df00-ae2e-11ed-90af-09bb6422b258
+    4xx_response:
+      title: Bad response
+      type: object
+      required:
+        - statusCode
+        - error
+        - message
+      properties:
+        statusCode:
+          type: number
+          example: 401
+        error:
+          type: string
+          example: Unauthorized
+        message:
+          type: string
+          example: "[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to authenticate user [elastics] for REST request [/_security/_authenticate]]: unable to authenticate user [elastics] for REST request [/_security/_authenticate]"
     indicator_properties_custom_kql:
       title: Custom KQL indicator type definition
       required:
@@ -388,7 +556,7 @@ components:
               example: ''
             timestampField:
               description: |
-                The timestamp field used in the source indice. If not specified, @timestamp will be used.
+                The timestamp field used in the source indice.
               type: string
               example: timestamp
         type:
@@ -494,22 +662,115 @@ components:
           description: The type of indicator.
           type: string
           example: sli.apm.transactionDuration
-    time_window_rolling:
-      title: Rolling time window definition
+    indicator_properties_custom_metric:
+      title: Custom metric indicator type definition
       required:
-        - duration
-        - isRolling
-      description: Defines properties for rolling time window
+        - type
+        - params
+      description: Defines properties for a custom metric indicator type
       type: object
       properties:
-        duration:
-          description: the duration formatted as {duration}{unit}
+        params:
+          description: An object containing the indicator parameters.
+          type: object
+          nullable: false
+          required:
+            - index
+            - timestampField
+            - good
+            - total
+          properties:
+            index:
+              description: The index or index pattern to use
+              type: string
+              example: my-service-*
+            filter:
+              description: the KQL query to filter the documents with.
+              type: string
+              example: 'field.environment : "production" and service.name : "my-service"'
+            timestampField:
+              description: |
+                The timestamp field used in the source indice.
+              type: string
+              example: timestamp
+            good:
+              description: |
+                An object defining the "good" metrics and equation
+              type: object
+              required:
+                - metrics
+                - equation
+              properties:
+                metrics:
+                  description: List of metrics with their name, aggregation type, and field.
+                  type: array
+                  items:
+                    type: object
+                    required:
+                      - name
+                      - aggregation
+                      - field
+                    properties:
+                      name:
+                        description: The name of the metric. Only valid options are A-Z
+                        type: string
+                        example: A
+                        pattern: ^[A-Z]$
+                      aggregation:
+                        description: The aggregation type of the metric. Only valid option is "sum"
+                        type: string
+                        example: sum
+                        enum:
+                          - sum
+                      field:
+                        description: The field of the metric.
+                        type: string
+                        example: processor.processed
+                equation:
+                  description: The equation to calculate the "good" metric.
+                  type: string
+                  example: A
+            total:
+              description: |
+                An object defining the "total" metrics and equation
+              type: object
+              required:
+                - metrics
+                - equation
+              properties:
+                metrics:
+                  description: List of metrics with their name, aggregation type, and field.
+                  type: array
+                  items:
+                    type: object
+                    required:
+                      - name
+                      - aggregation
+                      - field
+                    properties:
+                      name:
+                        description: The name of the metric. Only valid options are A-Z
+                        type: string
+                        example: A
+                        pattern: ^[A-Z]$
+                      aggregation:
+                        description: The aggregation type of the metric. Only valid option is "sum"
+                        type: string
+                        example: sum
+                        enum:
+                          - sum
+                      field:
+                        description: The field of the metric.
+                        type: string
+                        example: processor.processed
+                equation:
+                  description: The equation to calculate the "total" metric.
+                  type: string
+                  example: A
+        type:
+          description: The type of indicator.
           type: string
-          example: 28d
-        isRolling:
-          description: Indicates a rolling time window
-          type: boolean
-          example: true
+          example: sli.metric.custom
     time_window_calendar_aligned:
       title: Calendar aligned time window definition
       required:
@@ -526,14 +787,6 @@ components:
           description: Indicates a calendar aligned time window
           type: boolean
           example: true
-    budgeting_method:
-      title: Budgeting method
-      type: string
-      description: The budgeting method to use
-      enum:
-        - occurrences
-        - timeslices
-      example: occurrences
     objective:
       title: Objective definition
       required:
@@ -624,6 +877,7 @@ components:
             - $ref: '#/components/schemas/indicator_properties_custom_kql'
             - $ref: '#/components/schemas/indicator_properties_apm_availability'
             - $ref: '#/components/schemas/indicator_properties_apm_latency'
+            - $ref: '#/components/schemas/indicator_properties_custom_metric'
         timeWindow:
           oneOf:
             - $ref: '#/components/schemas/time_window_rolling'
@@ -671,23 +925,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/slo_response'
-    4xx_response:
-      title: Bad response
-      type: object
-      required:
-        - statusCode
-        - error
-        - message
-      properties:
-        statusCode:
-          type: number
-          example: 401
-        error:
-          type: string
-          example: Unauthorized
-        message:
-          type: string
-          example: "[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to authenticate user [elastics] for REST request [/_security/_authenticate]]: unable to authenticate user [elastics] for REST request [/_security/_authenticate]"
     create_slo_request:
       title: Create SLO request
       description: |
@@ -716,6 +953,7 @@ components:
             - $ref: '#/components/schemas/indicator_properties_custom_kql'
             - $ref: '#/components/schemas/indicator_properties_apm_availability'
             - $ref: '#/components/schemas/indicator_properties_apm_latency'
+            - $ref: '#/components/schemas/indicator_properties_custom_metric'
         timeWindow:
           oneOf:
             - $ref: '#/components/schemas/time_window_rolling'
@@ -738,7 +976,7 @@ components:
     update_slo_request:
       title: Update SLO request
       description: |
-        The update SLO API request body varies depending on the type of indicator, time window and budgeting method.  Partial update is handled.
+        The update SLO API request body varies depending on the type of indicator, time window and budgeting method. Partial update is handled.
       type: object
       properties:
         name:
@@ -752,6 +990,7 @@ components:
             - $ref: '#/components/schemas/indicator_properties_custom_kql'
             - $ref: '#/components/schemas/indicator_properties_apm_availability'
             - $ref: '#/components/schemas/indicator_properties_apm_latency'
+            - $ref: '#/components/schemas/indicator_properties_custom_metric'
         timeWindow:
           oneOf:
             - $ref: '#/components/schemas/time_window_rolling'

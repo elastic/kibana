@@ -373,6 +373,9 @@ export const AllTagsFindRequestRt = rt.exact(
 
 export const AllReportersFindRequestRt = AllTagsFindRequestRt;
 
+export const GetTagsResponseRt = rt.array(rt.string);
+export const GetReportersResponseRt = rt.array(UserRt);
+
 export const CasesBulkGetRequestRt = rt.strict({
   ids: rt.array(rt.string),
 });

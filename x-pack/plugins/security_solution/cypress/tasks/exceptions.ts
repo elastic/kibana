@@ -65,7 +65,7 @@ export const searchExceptionEntryFieldWithPrefix = (fieldPrefix: string, index =
 };
 
 export const showFieldConflictsWarningTooltipWithMessage = (message: string, index = 0) => {
-  cy.get(EXCEPTION_FIELD_MAPPING_CONFLICTS_ICON).eq(index).trigger('mouseover');
+  cy.get(EXCEPTION_FIELD_MAPPING_CONFLICTS_ICON).eq(index).realHover();
   cy.get(EXCEPTION_FIELD_MAPPING_CONFLICTS_TOOLTIP).should('be.visible');
   cy.get(EXCEPTION_FIELD_MAPPING_CONFLICTS_TOOLTIP).should('have.text', message);
 };
@@ -118,19 +118,14 @@ export const addExceptionFlyoutItemName = (name: string) => {
   cy.get(EXCEPTION_ITEM_NAME_INPUT).scrollIntoView();
   cy.get(EXCEPTION_ITEM_NAME_INPUT).should('be.visible');
   cy.get(EXCEPTION_ITEM_NAME_INPUT).first().focus();
-  cy.get(EXCEPTION_ITEM_NAME_INPUT)
-    .type(`${name}{enter}`, { force: true })
-    .should('have.value', name);
+  cy.get(EXCEPTION_ITEM_NAME_INPUT).type(`${name}{enter}`, { force: true });
+  cy.get(EXCEPTION_ITEM_NAME_INPUT).should('have.value', name);
 };
 
 export const editExceptionFlyoutItemName = (name: string) => {
-  cy.root()
-    .pipe(($el) => {
-      return $el.find(EXCEPTION_ITEM_NAME_INPUT);
-    })
-    .clear()
-    .type(`${name}{enter}`)
-    .should('have.value', name);
+  cy.get(EXCEPTION_ITEM_NAME_INPUT).clear();
+  cy.get(EXCEPTION_ITEM_NAME_INPUT).type(`${name}{enter}`);
+  cy.get(EXCEPTION_ITEM_NAME_INPUT).should('have.value', name);
 };
 
 export const selectBulkCloseAlerts = () => {
@@ -143,11 +138,7 @@ export const selectCloseSingleAlerts = () => {
 };
 
 export const addExceptionConditions = (exception: Exception) => {
-  cy.root()
-    .pipe(($el) => {
-      return $el.find(FIELD_INPUT);
-    })
-    .type(`${exception.field}{downArrow}{enter}`);
+  cy.get(FIELD_INPUT).type(`${exception.field}{downArrow}{enter}`);
   cy.get(OPERATOR_INPUT).type(`${exception.operator}{enter}`);
   exception.values.forEach((value) => {
     cy.get(VALUES_INPUT).type(`${value}{enter}`);
@@ -171,9 +162,7 @@ export const selectAddToRuleRadio = () => {
 export const selectSharedListToAddExceptionTo = (numListsToCheck = 1) => {
   cy.get(ADD_TO_SHARED_LIST_RADIO_LABEL).click();
   for (let i = 0; i < numListsToCheck; i++) {
-    cy.get(SHARED_LIST_SWITCH)
-      .eq(i)
-      .pipe(($el) => $el.trigger('click'));
+    cy.get(SHARED_LIST_SWITCH).eq(i).click();
   }
 };
 

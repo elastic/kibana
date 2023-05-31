@@ -16,8 +16,12 @@ import {
   EuiSearchBarProps,
   EuiSpacer,
 } from '@elastic/eui';
-import { ANALYSIS_CONFIG_TYPE } from '../../../../../../../common/constants/data_frame_analytics';
-import { DataFrameAnalyticsId, useRefreshAnalyticsList } from '../../../../common';
+import {
+  ANALYSIS_CONFIG_TYPE,
+  DATA_FRAME_TASK_STATE,
+  type DataFrameAnalyticsId,
+} from '@kbn/ml-data-frame-analytics-utils';
+import { useRefreshAnalyticsList } from '../../../../common';
 import { checkPermission } from '../../../../../capabilities/check_capabilities';
 import { useNavigateToPath } from '../../../../../contexts/kibana';
 import { ML_PAGES } from '../../../../../../../common/constants/locator';
@@ -26,7 +30,6 @@ import {
   DataFrameAnalyticsListColumn,
   DataFrameAnalyticsListRow,
   ItemIdToExpandedRowMap,
-  DATA_FRAME_TASK_STATE,
 } from './common';
 import { getAnalyticsFactory } from '../../services/analytics_service';
 import { getTaskStateBadge, getJobTypeBadge, useColumns } from './use_columns';

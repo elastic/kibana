@@ -30,10 +30,8 @@ import {
 
 describe('value lists', () => {
   describe('management modal', () => {
-    before(() => {
-      login();
-    });
     beforeEach(() => {
+      login();
       createListsIndex();
       visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
       waitForListsIndex();
