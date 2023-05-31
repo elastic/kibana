@@ -12,7 +12,7 @@ import { mountWithIntl } from '@kbn/test-jest-helpers';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { FieldTopValues, FieldTopValuesProps } from './field_top_values';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
-import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/data-plugin/common';
+import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
 
 describe('UnifiedFieldList <FieldTopValues />', () => {
   let defaultProps: FieldTopValuesProps;

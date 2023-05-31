@@ -15,7 +15,8 @@ import { ActionInternal } from '@kbn/ui-actions-plugin/public';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import { getFieldCategorizeButton } from './field_categorize_button';
 import { ACTION_CATEGORIZE_FIELD, CategorizeFieldContext } from '@kbn/ui-actions-plugin/public';
-import { CATEGORIZE_FIELD_TRIGGER, TriggerContract } from '@kbn/ui-actions-plugin/public/triggers';
+import { TriggerContract } from '@kbn/ui-actions-plugin/public/triggers';
+import { CATEGORIZE_FIELD_TRIGGER } from '@kbn/ui-actions-browser';
 
 const ORIGINATING_APP = 'test';
 const mockExecuteAction = jest.fn();
