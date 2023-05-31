@@ -23,19 +23,16 @@ interface TagCloudCommonParams {
   maxFontSize: number;
   showLabel: boolean;
   ariaLabel?: string;
-}
-
-export interface TagCloudVisConfig extends TagCloudCommonParams {
   metric: ExpressionValueVisDimension | string;
   bucket?: ExpressionValueVisDimension | string;
   palette: PaletteOutput;
+}
+
+export interface TagCloudVisConfig extends TagCloudCommonParams {
   isPreview?: boolean;
 }
 
 export interface TagCloudRendererParams extends TagCloudCommonParams {
-  palette: PaletteOutput;
-  metric: ExpressionValueVisDimension | string;
-  bucket?: ExpressionValueVisDimension | string;
   isPreview: boolean;
 }
 
