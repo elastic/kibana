@@ -6,10 +6,10 @@
  */
 
 import { partition } from 'lodash';
-import { i18n } from '@kbn/i18n';
 import { Orientation } from '@kbn/expression-tagcloud-plugin/common';
 import type { SuggestionRequest, VisualizationSuggestion } from '../../types';
 import type { TagcloudState } from './types';
+import { TAGCLOUD_LABEL } from './constants';
 
 export function suggestions({
   table,
@@ -39,12 +39,7 @@ export function suggestions({
     })
     .map((bucket) => {
       return {
-        title: i18n.translate('xpack.maps.lens.choroplethChart.suggestionLabel', {
-          defaultMessage: '{bucketLabel} tag cloud',
-          values: {
-            bucketLabel: bucket.operation.label,
-          },
-        }),
+        title: TAGCLOUD_LABEL,
         score: 0.6,
         state: {
           layerId: table.layerId,

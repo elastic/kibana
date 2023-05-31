@@ -24,13 +24,10 @@ import type { TagcloudState } from './types';
 import { suggestions } from './suggestions';
 import { TagcloudToolbar } from './tagcloud_toolbar';
 import { TagsDimensionEditor } from './tags_dimension_editor';
+import { TAGCLOUD_LABEL } from './constants';
 
 const TAG_GROUP_ID = 'tags';
 const METRIC_GROUP_ID = 'metric';
-
-const TAGCLOUD_LABEL = i18n.translate('xpack.lens.tagcloud.label', {
-  defaultMessage: 'Tag cloud',
-});
 
 export const getTagcloudVisualization = ({
   paletteService,
