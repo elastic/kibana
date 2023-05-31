@@ -14,12 +14,10 @@ import {
 } from '@kbn/rule-registry-plugin/server';
 import { mappingFromFieldMap } from '@kbn/alerting-plugin/common';
 import { legacyExperimentalFieldMap } from '@kbn/alerts-as-data-utils';
+import { OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '../../../common/constants';
 import { sloFeatureId, thresholdFeatureId } from '../../../common';
 import { ObservabilityConfig } from '../..';
-import {
-  SLO_RULE_REGISTRATION_CONTEXT,
-  THRESHOLD_RULE_REGISTRATION_CONTEXT,
-} from '../../common/constants';
+import { SLO_RULE_REGISTRATION_CONTEXT } from '../../common/constants';
 import { sloBurnRateRuleType } from './slo_burn_rate';
 import { thresholdRuleType } from './threshold/register_threshold_rule_type';
 import { sloRuleFieldMap } from './slo_burn_rate/field_map';
@@ -57,7 +55,7 @@ export function registerRuleTypes(
   // Threshold RULE
   const ruleDataClientThreshold = ruleDataService.initializeIndex({
     feature: thresholdFeatureId,
-    registrationContext: THRESHOLD_RULE_REGISTRATION_CONTEXT,
+    registrationContext: OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
     dataset: Dataset.alerts,
     componentTemplateRefs: [],
     componentTemplates: [
