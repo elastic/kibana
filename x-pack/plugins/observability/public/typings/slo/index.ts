@@ -29,7 +29,7 @@ interface BurnRateRuleParams extends RuleTypeParams {
   maxBurnRateThreshold?: number;
   longWindow?: Duration;
   shortWindow?: Duration;
-  windows: WindowSchema[];
+  windows?: WindowSchema[];
 }
 
 interface ChartData {
