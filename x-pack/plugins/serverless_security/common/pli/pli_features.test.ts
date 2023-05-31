@@ -11,17 +11,17 @@ describe('getProductAppFeatures', () => {
   it('returns the union of all enabled PLIs features', () => {
     // @ts-ignore reassigning readonly value for testing
     pliConfig.PLI_APP_FEATURES = {
-      endpointEssentials: {
+      securityEssentials: {
         foo: true,
         bar: false,
       },
-      cloudEssentials: {
+      securityComplete: {
         baz: true,
         qux: false,
       },
     };
 
-    expect(getProductAppFeatures(['endpointEssentials', 'cloudEssentials'])).toEqual({
+    expect(getProductAppFeatures(['securityEssentials', 'securityComplete'])).toEqual({
       foo: true,
       baz: true,
     });
@@ -30,14 +30,14 @@ describe('getProductAppFeatures', () => {
   it('returns a single PLI when only one is enabled', () => {
     // @ts-ignore reassigning readonly value for testing
     pliConfig.PLI_APP_FEATURES = {
-      endpointEssentials: {
+      securityEssentials: {
         foo: false,
       },
-      cloudEssentials: {
+      securityComplete: {
         foo: true,
       },
     };
-    expect(getProductAppFeatures(['endpointEssentials', 'cloudEssentials'])).toEqual({
+    expect(getProductAppFeatures(['securityEssentials', 'securityComplete'])).toEqual({
       foo: true,
     });
   });
