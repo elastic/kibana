@@ -11,7 +11,7 @@ import DateMath from '@kbn/datemath';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import type { ESSearchResponse } from '@kbn/es-types';
 import { FieldFormat } from '@kbn/field-formats-plugin/common';
-import type { FieldStatsResponse } from '../types';
+import type { FieldStatsResponse } from '../../../common/types';
 import {
   getFieldExampleBuckets,
   canProvideExamplesForField,

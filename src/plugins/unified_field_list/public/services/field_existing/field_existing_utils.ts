@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import Boom from '@hapi/boom';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { RuntimeField } from '@kbn/data-views-plugin/common';
 import type { DataViewsContract, DataView, FieldSpec } from '@kbn/data-views-plugin/common';
@@ -119,36 +118,4 @@ export function existingFields(filteredFields: FieldSpec[], allFields: Field[]):
   return allFields
     .filter((field) => field.isScript || field.runtimeField || filteredFieldsSet.has(field.name))
     .map((f) => f.name);
-}
-
-/**
- * Exported only for unit tests.
- */
-export function legacyExistingFields(docs: estypes.SearchHit[], fields: Field[]): string[] {
-  const missingFields = new Set(fields);
-
-  for (const doc of docs) {
-    if (missingFields.size === 0) {
-      break;
-    }
-
-    missingFields.forEach((field) => {
-      let fieldStore = doc.fields!;
-      if (field.isMeta) {
-        fieldStore = doc;
-      }
-      const value = fieldStore[field.name];
-      if (Array.isArray(value) && value.length) {
-        missingFields.delete(field);
-      } else if (!Array.isArray(value) && value) {
-        missingFields.delete(field);
-      }
-    });
-  }
-
-  return fields.filter((field) => !missingFields.has(field)).map((f) => f.name);
-}
-
-export function isBoomError(error: { isBoom?: boolean }): error is Boom.Boom {
-  return error.isBoom === true;
 }
