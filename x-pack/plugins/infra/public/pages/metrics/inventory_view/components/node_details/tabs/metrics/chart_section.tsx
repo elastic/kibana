@@ -15,9 +15,9 @@ import {
   TickFormatter,
   TooltipValue,
 } from '@elastic/charts';
-import { useUiSetting } from '@kbn/kibana-react-plugin/public';
 import moment from 'moment';
 import React from 'react';
+import { useIsDarkMode } from '../../../../../../../hooks/use_is_dark_mode';
 import { MetricsExplorerSeries } from '../../../../../../../../common/http_api';
 import { getTimelineChartTheme } from '../../../../../../../utils/get_chart_theme';
 import { MetricExplorerSeriesChart } from '../../../../../metrics_explorer/components/series_chart';
@@ -57,7 +57,7 @@ export const ChartSection = ({
   domain,
   stack = false,
 }: Props) => {
-  const isDarkMode = useUiSetting<boolean>('theme:darkMode');
+  const isDarkMode = useIsDarkMode();
   const metrics = series.map((chartSeries) => chartSeries.metric);
   const tooltipProps = {
     headerFormatter: (tooltipValue: TooltipValue) =>

@@ -1051,8 +1051,7 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
 
   async addFeature(geometry: Geometry | Position[]) {
     const layerSource = this.getSource();
-    const defaultFields = await layerSource.getDefaultFields();
-    await layerSource.addFeature(geometry, defaultFields);
+    await layerSource.addFeature(geometry);
   }
 
   async deleteFeature(featureId: string) {

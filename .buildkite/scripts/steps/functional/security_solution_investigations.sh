@@ -5,12 +5,13 @@ set -euo pipefail
 source .buildkite/scripts/steps/functional/common.sh
 
 export JOB=kibana-security-solution-chrome
-export CLI_NUMBER=${CLI_NUMBER:-$((BUILDKITE_PARALLEL_JOB+1))}
-export CLI_COUNT=${CLI_COUNT:-$BUILDKITE_PARALLEL_JOB_COUNT}
+export KIBANA_INSTALL_DIR=${KIBANA_BUILD_LOCATION}
 
-echo "--- Security Solution tests (Chrome)"
 
-node scripts/functional_tests \
-  --debug --bail \
-  --kibana-install-dir "$KIBANA_BUILD_LOCATION" \
-  --config x-pack/test/security_solution_cypress/cli_config_investigations_parallel.ts
+Xvfb :99 -screen 0 1600x1200x24 &
+
+export DISPLAY=:99
+
+echo "--- Investigations Cypress Tests on Security Solution"
+
+yarn --cwd x-pack/plugins/security_solution cypress:investigations:run
