@@ -5,127 +5,58 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
-import { validateDurationSchema, RuleTypeDisabledError } from '../lib';
-import { CreateOptions } from '../rules_client';
+import { omit } from 'lodash';
+import { RuleTypeDisabledError } from '../lib';
 import {
-  RewriteRequestCase,
-  RewriteResponseCase,
-  rewriteActionsReq,
-  rewriteActionsRes,
+  rewriteRule,
   handleDisabledApiKeysError,
   verifyAccessAndContext,
   countUsageOfPredefinedIds,
-  actionsSchema,
-  rewriteRuleLastRun,
 } from './lib';
-import {
-  SanitizedRule,
-  validateNotifyWhenType,
-  RuleTypeParams,
-  BASE_ALERTING_API_PATH,
-} from '../types';
+import { BASE_ALERTING_API_PATH } from '../types';
 import { RouteOptions } from '.';
+import { ruleV1, createRuleV1 } from '../../common/types/api';
 
-export const bodySchema = schema.object({
-  name: schema.string(),
-  rule_type_id: schema.string(),
-  enabled: schema.boolean({ defaultValue: true }),
-  consumer: schema.string(),
-  tags: schema.arrayOf(schema.string(), { defaultValue: [] }),
-  throttle: schema.maybe(schema.nullable(schema.string({ validate: validateDurationSchema }))),
-  params: schema.recordOf(schema.string(), schema.any(), { defaultValue: {} }),
-  schedule: schema.object({
-    interval: schema.string({ validate: validateDurationSchema }),
-  }),
-  actions: actionsSchema,
-  notify_when: schema.maybe(
-    schema.nullable(
-      schema.oneOf(
-        [
-          schema.literal('onActionGroupChange'),
-          schema.literal('onActiveAlert'),
-          schema.literal('onThrottleInterval'),
-        ],
-        { validate: validateNotifyWhenType }
-      )
-    )
-  ),
-});
+export const rewriteActionsReq = (
+  actions: createRuleV1.CreateRuleActionRequestBody[]
+): createRuleV1.CreateRuleActionData[] => {
+  return actions.map(({ frequency, alerts_filter: alertsFilter, ...action }) => {
+    return {
+      ...action,
+      ...(frequency
+        ? {
+            frequency: {
+              ...omit(frequency, 'notify_when'),
+              notifyWhen: frequency.notify_when,
+            },
+          }
+        : {}),
+      ...(alertsFilter ? { alertsFilter } : {}),
+    };
+  });
+};
 
-const rewriteBodyReq: RewriteRequestCase<CreateOptions<RuleTypeParams>['data']> = ({
+const rewriteBodyReq = ({
   rule_type_id: alertTypeId,
   notify_when: notifyWhen,
   actions,
   ...rest
-}): CreateOptions<RuleTypeParams>['data'] => ({
+}: createRuleV1.CreateRuleRequestBody): createRuleV1.RulesClientCreateData => ({
   ...rest,
   alertTypeId,
   notifyWhen,
   actions: rewriteActionsReq(actions),
 });
 
-const rewriteBodyRes: RewriteResponseCase<SanitizedRule<RuleTypeParams>> = ({
-  actions,
-  alertTypeId,
-  scheduledTaskId,
-  createdBy,
-  updatedBy,
-  createdAt,
-  updatedAt,
-  apiKeyOwner,
-  apiKeyCreatedByUser,
-  notifyWhen,
-  muteAll,
-  mutedInstanceIds,
-  snoozeSchedule,
-  lastRun,
-  nextRun,
-  executionStatus: { lastExecutionDate, lastDuration, ...executionStatus },
-  ...rest
-}) => ({
-  ...rest,
-  rule_type_id: alertTypeId,
-  scheduled_task_id: scheduledTaskId,
-  snooze_schedule: snoozeSchedule,
-  created_by: createdBy,
-  updated_by: updatedBy,
-  created_at: createdAt,
-  updated_at: updatedAt,
-  api_key_owner: apiKeyOwner,
-  notify_when: notifyWhen,
-  mute_all: muteAll,
-  muted_alert_ids: mutedInstanceIds,
-  execution_status: {
-    ...executionStatus,
-    last_execution_date: lastExecutionDate,
-    last_duration: lastDuration,
-  },
-  actions: rewriteActionsRes(actions),
-  ...(lastRun ? { last_run: rewriteRuleLastRun(lastRun) } : {}),
-  ...(nextRun ? { next_run: nextRun } : {}),
-  ...(apiKeyCreatedByUser !== undefined ? { api_key_created_by_user: apiKeyCreatedByUser } : {}),
-});
-
 export const createRuleRoute = ({ router, licenseState, usageCounter }: RouteOptions) => {
   router.post(
-    {
-      path: `${BASE_ALERTING_API_PATH}/rule/{id?}`,
-      validate: {
-        params: schema.maybe(
-          schema.object({
-            id: schema.maybe(schema.string()),
-          })
-        ),
-        body: bodySchema,
-      },
-    },
+    { path: `${BASE_ALERTING_API_PATH}/rule/{id?}`, validate: {} },
     handleDisabledApiKeysError(
       router.handleLegacyErrors(
         verifyAccessAndContext(licenseState, async function (context, req, res) {
           const rulesClient = (await context.alerting).getRulesClient();
-          const rule = req.body;
-          const params = req.params;
+          const rule = req.body as createRuleV1.CreateRuleRequestBody;
+          const params = req.params as createRuleV1.CreateRuleRequestParams;
 
           countUsageOfPredefinedIds({
             predefinedId: params?.id,
@@ -134,13 +65,12 @@ export const createRuleRoute = ({ router, licenseState, usageCounter }: RouteOpt
           });
 
           try {
-            const createdRule: SanitizedRule<RuleTypeParams> =
-              await rulesClient.create<RuleTypeParams>({
-                data: rewriteBodyReq(rule),
-                options: { id: params?.id },
-              });
+            const createdRule: ruleV1.SanitizedRule = await rulesClient.create({
+              data: rewriteBodyReq(rule),
+              options: { id: params?.id },
+            });
             return res.ok({
-              body: rewriteBodyRes(createdRule),
+              body: rewriteRule(createdRule),
             });
           } catch (e) {
             if (e instanceof RuleTypeDisabledError) {

@@ -140,6 +140,4 @@ export function ruleExecutionStatusFromRaw(
 export const getRuleExecutionStatusPending = (lastExecutionDate: string) => ({
   status: 'pending' as RuleExecutionStatuses,
   lastExecutionDate,
-  error: null,
-  warning: null,
 });

@@ -6,10 +6,10 @@
  */
 import Semver from 'semver';
 import Boom from '@hapi/boom';
-import { SavedObjectsUtils } from '@kbn/core/server';
+import { SavedObject, SavedObjectsUtils } from '@kbn/core/server';
 import { withSpan } from '@kbn/apm-utils';
 import { parseDuration } from '../../../common/parse_duration';
-import { RawRule, SanitizedRule, RuleTypeParams, Rule } from '../../types';
+import { RawRule, RuleTypeParams } from '../../types';
 import { WriteOperations, AlertingAuthorizationEntity } from '../../authorization';
 import { validateRuleTypeParams, getRuleNotifyWhenType, getDefaultMonitoring } from '../../lib';
 import { getRuleExecutionStatusPending } from '../../lib/rule_execution_status';
@@ -18,45 +18,41 @@ import {
   extractReferences,
   validateActions,
   addGeneratedActionValues,
+  transformRuleToEs,
+  transformEsToRule,
 } from '../lib';
-import { generateAPIKeyName, getMappedParams, apiKeyAsAlertAttributes } from '../common';
+import { generateAPIKeyName, apiKeyAsAlertAttributes } from '../common';
 import { ruleAuditEvent, RuleAuditAction } from '../common/audit_events';
-import { NormalizedAlertAction, RulesClientContext } from '../types';
+import { RulesClientContext } from '../types';
+import {
+  Rule,
+  SanitizedRule,
+  RulesClientCreateData,
+  RulesClientCreateOptions,
+  rulesClientCreateDataSchema,
+  rulesClientCreateOptionsSchema,
+} from '../../../common/types/api';
+import { RuleAttributes } from '../../common/types';
 
-interface SavedObjectOptions {
-  id?: string;
-  migrationVersion?: Record<string, string>;
-}
-
-export interface CreateOptions<Params extends RuleTypeParams> {
-  data: Omit<
-    Rule<Params>,
-    | 'id'
-    | 'createdBy'
-    | 'updatedBy'
-    | 'createdAt'
-    | 'updatedAt'
-    | 'apiKey'
-    | 'apiKeyOwner'
-    | 'apiKeyCreatedByUser'
-    | 'muteAll'
-    | 'mutedInstanceIds'
-    | 'actions'
-    | 'executionStatus'
-    | 'snoozeSchedule'
-    | 'isSnoozedUntil'
-    | 'lastRun'
-    | 'nextRun'
-    | 'revision'
-  > & { actions: NormalizedAlertAction[] };
-  options?: SavedObjectOptions;
+export interface CreateParams {
+  data: RulesClientCreateData;
+  options?: RulesClientCreateOptions;
   allowMissingConnectorSecrets?: boolean;
 }
 
 export async function create<Params extends RuleTypeParams = never>(
   context: RulesClientContext,
-  { data: initialData, options, allowMissingConnectorSecrets }: CreateOptions<Params>
+  createParams: CreateParams
 ): Promise<SanitizedRule<Params>> {
+  const { data: initialData, options, allowMissingConnectorSecrets } = createParams;
+
+  try {
+    rulesClientCreateDataSchema.validate(initialData);
+    rulesClientCreateOptionsSchema.validate(options);
+  } catch (e) {
+    throw Boom.badRequest(`Failed to validate input schema - ${e.message}`);
+  }
+
   const data = { ...initialData, actions: addGeneratedActionValues(initialData.actions) };
 
   const id = options?.id || SavedObjectsUtils.generateId();
@@ -139,40 +135,61 @@ export async function create<Params extends RuleTypeParams = never>(
   const notifyWhen = getRuleNotifyWhenType(data.notifyWhen ?? null, data.throttle ?? null);
   const throttle = data.throttle ?? null;
 
-  const rawRule: RawRule = {
-    ...data,
-    ...apiKeyAsAlertAttributes(createdAPIKey, username, isAuthTypeApiKey),
-    legacyId,
-    actions,
-    createdBy: username,
-    updatedBy: username,
-    createdAt: new Date(createTime).toISOString(),
-    updatedAt: new Date(createTime).toISOString(),
-    snoozeSchedule: [],
-    params: updatedParams as RawRule['params'],
-    muteAll: false,
-    mutedInstanceIds: [],
-    notifyWhen,
-    throttle,
-    executionStatus: getRuleExecutionStatusPending(lastRunTimestamp.toISOString()),
-    monitoring: getDefaultMonitoring(lastRunTimestamp.toISOString()),
-    revision: 0,
-    running: false,
-  };
-
-  const mappedParams = getMappedParams(updatedParams);
-
-  if (Object.keys(mappedParams).length) {
-    rawRule.mapped_params = mappedParams;
-  }
-
-  return await withSpan({ name: 'createRuleSavedObject', type: 'rules' }, () =>
-    createRuleSavedObject(context, {
-      intervalInMs,
-      rawRule,
-      references,
-      ruleId: id,
-      options,
-    })
+  // Convert domain rule object to ES rule attributes
+  const esRule = transformRuleToEs(
+    {
+      ...data,
+      ...apiKeyAsAlertAttributes(createdAPIKey, username, isAuthTypeApiKey),
+      id,
+      createdBy: username,
+      updatedBy: username,
+      createdAt: new Date(createTime).toISOString(),
+      updatedAt: new Date(createTime).toISOString(),
+      snoozeSchedule: [],
+      muteAll: false,
+      mutedInstanceIds: [],
+      notifyWhen,
+      throttle,
+      executionStatus: getRuleExecutionStatusPending(
+        lastRunTimestamp.toISOString()
+      ) as Rule['executionStatus'],
+      monitoring: getDefaultMonitoring(lastRunTimestamp.toISOString()) as Rule['monitoring'],
+      revision: 0,
+      running: false,
+    },
+    {
+      legacyId,
+      actionsWithRefs: actions as RuleAttributes['actions'],
+      paramsWithRefs: updatedParams,
+    }
   );
+
+  // Save the rule with the es attributes, returns a RawRule, this should be RulesAttribute
+  // but I'm holding off changing it to that for now since we need to change a lot of
+  // references to RawRule
+  const createdRuleSavedObject: SavedObject<RawRule> = await withSpan(
+    { name: 'createRuleSavedObject', type: 'rules' },
+    () =>
+      createRuleSavedObject(context, {
+        intervalInMs,
+        rawRule: esRule as RawRule,
+        references,
+        ruleId: id,
+        options,
+      })
+  );
+
+  // Convert ES RuleAttributes back to domain rule object
+  const rule: Rule<Params> = transformEsToRule<Params>(
+    createdRuleSavedObject.attributes as RuleAttributes,
+    {
+      id: createdRuleSavedObject.id,
+      logger: context.logger,
+      ruleType: context.ruleTypeRegistry.get(createdRuleSavedObject.attributes.alertTypeId),
+      references,
+      excludeFromPublicApi: true,
+    }
+  );
+
+  return rule as SanitizedRule<Params>;
 }

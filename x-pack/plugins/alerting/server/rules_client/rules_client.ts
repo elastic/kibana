@@ -10,7 +10,7 @@ import { parseDuration } from '../../common/parse_duration';
 import { RulesClientContext, BulkOptions, MuteOptions } from './types';
 
 import { clone, CloneArguments } from './methods/clone';
-import { create, CreateOptions } from './methods/create';
+import { create, CreateParams } from './methods/create';
 import { get, GetParams } from './methods/get';
 import { resolve, ResolveParams } from './methods/resolve';
 import { getAlertState, GetAlertStateParams } from './methods/get_alert_state';
@@ -106,7 +106,7 @@ export class RulesClient {
     aggregate<T>(this.context, params);
   public clone = <Params extends RuleTypeParams = never>(...args: CloneArguments) =>
     clone<Params>(this.context, ...args);
-  public create = <Params extends RuleTypeParams = never>(params: CreateOptions<Params>) =>
+  public create = <Params extends RuleTypeParams = never>(params: CreateParams) =>
     create<Params>(this.context, params);
   public delete = (params: { id: string }) => deleteRule(this.context, params);
   public find = <Params extends RuleTypeParams = never>(params?: FindParams) =>

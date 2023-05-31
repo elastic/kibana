@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { RuleNotifyWhenType } from '../types';
+import { RuleNotifyWhen } from '../../common/types/api';
 
 export function getRuleNotifyWhenType(
-  notifyWhen: RuleNotifyWhenType | null,
+  notifyWhen: RuleNotifyWhen | null,
   throttle: string | null
-): RuleNotifyWhenType | null {
+): RuleNotifyWhen | null {
   // We allow notifyWhen to be null for backwards compatibility. If it is null, determine its
   // value based on whether the throttle is set to a value or null
-  return notifyWhen ? notifyWhen! : throttle ? 'onThrottleInterval' : null;
+  return notifyWhen ? notifyWhen! : throttle ? RuleNotifyWhen.THROTTLE : null;
 }

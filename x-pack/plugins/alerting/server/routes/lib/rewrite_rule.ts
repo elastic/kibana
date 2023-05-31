@@ -5,10 +5,9 @@
  * 2.0.
  */
 import { omit } from 'lodash';
+import { SanitizedRule, LastRun } from '../../../common/types/api';
 
-import { RuleTypeParams, SanitizedRule, RuleLastRun } from '../../types';
-
-export const rewriteRuleLastRun = (lastRun: RuleLastRun) => {
+export const rewriteRuleLastRun = (lastRun: LastRun) => {
   const { outcomeMsg, outcomeOrder, alertsCount, ...rest } = lastRun;
   return {
     alerts_count: alertsCount,
@@ -37,8 +36,9 @@ export const rewriteRule = ({
   activeSnoozes,
   lastRun,
   nextRun,
+  viewInAppRelativeUrl,
   ...rest
-}: SanitizedRule<RuleTypeParams> & { activeSnoozes?: string[] }) => ({
+}: SanitizedRule & { activeSnoozes?: string[] }) => ({
   ...rest,
   rule_type_id: alertTypeId,
   created_by: createdBy,
@@ -75,6 +75,7 @@ export const rewriteRule = ({
     ...(uuid && { uuid }),
     ...(alertsFilter && { alerts_filter: alertsFilter }),
   })),
+  ...(viewInAppRelativeUrl ? { view_in_app_relative_url: viewInAppRelativeUrl } : {}),
   ...(lastRun ? { last_run: rewriteRuleLastRun(lastRun) } : {}),
   ...(nextRun ? { next_run: nextRun } : {}),
   ...(apiKeyCreatedByUser !== undefined ? { api_key_created_by_user: apiKeyCreatedByUser } : {}),
