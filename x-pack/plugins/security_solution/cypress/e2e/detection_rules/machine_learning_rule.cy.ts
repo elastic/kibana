@@ -63,6 +63,9 @@ describe('Detection rules, machine learning', () => {
 
   before(() => {
     cleanKibana();
+  });
+
+  beforeEach(() => {
     login();
     visitWithoutDateRange(RULE_CREATION);
   });

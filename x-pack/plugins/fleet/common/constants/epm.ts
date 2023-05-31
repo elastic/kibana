@@ -19,6 +19,7 @@ export const FLEET_APM_PACKAGE = 'apm';
 export const FLEET_SYNTHETICS_PACKAGE = 'synthetics';
 export const FLEET_KUBERNETES_PACKAGE = 'kubernetes';
 export const FLEET_UNIVERSAL_PROFILING_SYMBOLIZER_PACKAGE = 'profiler_symbolizer';
+export const FLEET_UNIVERSAL_PROFILING_COLLECTOR_PACKAGE = 'profiler_collector';
 export const FLEET_CLOUD_SECURITY_POSTURE_PACKAGE = 'cloud_security_posture';
 export const FLEET_CLOUD_SECURITY_POSTURE_KSPM_POLICY_TEMPLATE = 'kspm';
 export const FLEET_CLOUD_SECURITY_POSTURE_CSPM_POLICY_TEMPLATE = 'cspm';

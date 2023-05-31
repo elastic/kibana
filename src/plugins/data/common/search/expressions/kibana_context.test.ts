@@ -46,6 +46,7 @@ describe('kibanaContextFn', () => {
         delete: jest.fn(),
         find: jest.fn(),
         get: jest.fn(),
+        getSavedSearch: jest.fn(),
         update: jest.fn(),
       },
     };
@@ -53,7 +54,7 @@ describe('kibanaContextFn', () => {
 
   it('merges and deduplicates queries from different sources', async () => {
     const { fn } = kibanaContextFn;
-    startServicesMock.savedObjectsClient.get.mockResolvedValue({
+    startServicesMock.savedObjectsClient.getSavedSearch.mockResolvedValue({
       attributes: {
         kibanaSavedObjectMeta: {
           searchSourceJSON: JSON.stringify({
