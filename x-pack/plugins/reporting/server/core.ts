@@ -133,6 +133,7 @@ export class ReportingCore {
 
     this.getContract = () => ({
       usesUiCapabilities: () => config.roles.enabled === false,
+      registerExportTypes: (id) => id,
     });
 
     this.executing = new Set();
