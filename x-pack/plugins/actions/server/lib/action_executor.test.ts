@@ -19,6 +19,7 @@ import {
   asHttpRequestExecutionSource,
   asSavedObjectExecutionSource,
 } from './action_execution_source';
+import { securityMock } from '@kbn/security-plugin/server/mocks';
 
 const actionExecutor = new ActionExecutor({ isESOCanEncrypt: true });
 const services = actionsMock.createServices();
@@ -40,10 +41,12 @@ const executeParams = {
 const spacesMock = spacesServiceMock.createStartContract();
 const loggerMock: ReturnType<typeof loggingSystemMock.createLogger> =
   loggingSystemMock.createLogger();
+const securityMockStart = securityMock.createStart();
 
 actionExecutor.initialize({
   logger: loggerMock,
   spaces: spacesMock,
+  security: securityMockStart,
   getServices: () => services,
   actionTypeRegistry,
   encryptedSavedObjectsClient,
@@ -69,6 +72,18 @@ beforeEach(() => {
   jest.resetAllMocks();
   spacesMock.getSpaceId.mockReturnValue('some-namespace');
   loggerMock.get.mockImplementation(() => loggerMock);
+  const mockRealm = { name: 'default_native', type: 'native' };
+  securityMockStart.authc.getCurrentUser.mockImplementation(() => ({
+    authentication_realm: mockRealm,
+    authentication_provider: mockRealm,
+    authentication_type: 'realm',
+    lookup_realm: mockRealm,
+    elastic_cloud_user: true,
+    enabled: true,
+    profile_uid: '123',
+    roles: ['superuser'],
+    username: 'coolguy',
+  }));
 });
 
 test('successfully executes', async () => {
@@ -203,6 +218,10 @@ test('successfully executes', async () => {
             ],
           },
           "message": "action executed: test:1: 1",
+          "user": Object {
+            "id": "123",
+            "name": "coolguy",
+          },
         },
       ],
     ]
@@ -346,6 +365,10 @@ test('successfully executes when http_request source is specified', async () => 
             ],
           },
           "message": "action executed: test:1: 1",
+          "user": Object {
+            "id": "123",
+            "name": "coolguy",
+          },
         },
       ],
     ]
@@ -492,6 +515,10 @@ test('successfully executes when saved_object source is specified', async () => 
             ],
           },
           "message": "action executed: test:1: 1",
+          "user": Object {
+            "id": "123",
+            "name": "coolguy",
+          },
         },
       ],
     ]
@@ -613,6 +640,10 @@ test('successfully executes with preconfigured connector', async () => {
             ],
           },
           "message": "action executed: test:preconfigured: Preconfigured",
+          "user": Object {
+            "id": "123",
+            "name": "coolguy",
+          },
         },
       ],
     ]
@@ -1063,6 +1094,10 @@ test('should not throw error if action is preconfigured and isESOCanEncrypt is f
             ],
           },
           "message": "action executed: test:preconfigured: Preconfigured",
+          "user": Object {
+            "id": "123",
+            "name": "coolguy",
+          },
         },
       ],
     ]
@@ -1308,7 +1343,7 @@ test('writes usage data to event log for gen ai events', async () => {
     // @ts-ignore
     data: mockGenAi,
   });
-  await actionExecutor.execute({ ...executeParams, username: 'coolguy' });
+  await actionExecutor.execute(executeParams);
   expect(eventLogger.logEvent).toHaveBeenCalledTimes(2);
   expect(eventLogger.logEvent).toHaveBeenNthCalledWith(2, {
     event: {
@@ -1346,7 +1381,7 @@ test('writes usage data to event log for gen ai events', async () => {
       space_ids: ['some-namespace'],
     },
     message: 'action executed: .gen-ai:1: action-1',
-    user: { name: 'coolguy' },
+    user: { name: 'coolguy', id: '123' },
   });
 });
 

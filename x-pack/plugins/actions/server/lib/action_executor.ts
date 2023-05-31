@@ -253,7 +253,7 @@ export class ActionExecutor {
 
         event.event = event.event || {};
 
-        // add meta and user.name to event log when GenerativeAi Connector is executed
+        // add meta to event log when GenerativeAi Connector is executed
         if (result.status === 'ok' && actionTypeId === '.gen-ai') {
           const data = result.data as unknown as { usage: {} };
           event.kibana = event.kibana || {};
@@ -266,11 +266,11 @@ export class ActionExecutor {
               },
             },
           };
-          event.user = event.user || {};
-          const currentUser = await security?.authc.getCurrentUser(request);
-          event.user.name = currentUser?.username;
-          event.user.id = currentUser?.profile_uid;
         }
+        const currentUser = await security?.authc.getCurrentUser(request);
+        event.user = event.user || {};
+        event.user.name = currentUser?.username;
+        event.user.id = currentUser?.profile_uid;
 
         if (result.status === 'ok') {
           span?.setOutcome('success');
