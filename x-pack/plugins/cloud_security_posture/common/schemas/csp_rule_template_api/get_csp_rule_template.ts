@@ -33,9 +33,13 @@ export const findCspRuleTemplateRequest = schema.object({
   fields: schema.maybe(schema.arrayOf(schema.string())),
 
   /**
-   *  The fields to perform the parsed query against
+   *  The fields to perform the parsed query against.
+   * Valid fields are fields which mapped to 'text' in cspRuleTemplateSavedObjectMapping
    */
-  searchFields: schema.arrayOf(schema.string(), { defaultValue: ['metadata.name.text'] }),
+  searchFields: schema.arrayOf(
+    schema.oneOf([schema.literal('metadata.name.text'), schema.literal('metadata.section.text')]),
+    { defaultValue: ['metadata.name.text'] }
+  ),
 
   /**
    *  Sort Field

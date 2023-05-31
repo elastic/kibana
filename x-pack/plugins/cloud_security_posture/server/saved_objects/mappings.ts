@@ -26,6 +26,11 @@ export const cspRuleTemplateSavedObjectMapping: SavedObjectsTypeMappingDefinitio
         },
         section: {
           type: 'keyword',
+          fields: {
+            text: {
+              type: 'text',
+            },
+          },
         },
         version: {
           type: 'keyword',
