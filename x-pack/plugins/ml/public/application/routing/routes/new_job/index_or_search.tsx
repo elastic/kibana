@@ -236,7 +236,6 @@ const PageWrapper: FC<IndexOrSearchPageProps> = ({ nextStepPath, deps, mode }) =
     undefined,
     deps.config,
     deps.dataViewsContract,
-    deps.getSavedSearchDeps,
     mode === MODE.NEW_JOB ? newJobResolvers : dataVizResolvers
   );
   return (

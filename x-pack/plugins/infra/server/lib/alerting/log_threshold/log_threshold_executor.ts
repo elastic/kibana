@@ -7,6 +7,7 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { i18n } from '@kbn/i18n';
+import { AlertsLocatorParams } from '@kbn/observability-plugin/common';
 import {
   ALERT_CONTEXT,
   ALERT_EVALUATION_THRESHOLD,
@@ -23,7 +24,9 @@ import {
   RuleExecutorServices,
   RuleTypeState,
 } from '@kbn/alerting-plugin/server';
+import { LocatorPublic } from '@kbn/share-plugin/common';
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
+import { asyncForEach } from '@kbn/std';
 
 import { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
 import { ParsedExperimentalFields } from '@kbn/rule-registry-plugin/common/parse_experimental_fields';
@@ -57,7 +60,7 @@ import { InfraBackendLibs } from '../../infra_types';
 import {
   AdditionalContext,
   flattenAdditionalContext,
-  getAlertDetailsUrl,
+  getAlertUrl,
   getContextForRecoveredAlerts,
   getGroupByObject,
   unflattenObject,
@@ -127,7 +130,7 @@ export const createLogThresholdExecutor = (libs: InfraBackendLibs) =>
       getAlertUuid,
       getAlertByAlertUuid,
     } = services;
-    const { basePath } = libs;
+    const { basePath, alertsLocator } = libs;
 
     const alertFactory: LogThresholdAlertFactory = (
       id,
@@ -168,7 +171,7 @@ export const createLogThresholdExecutor = (libs: InfraBackendLibs) =>
           viewInAppUrl,
         };
 
-        actions.forEach((actionSet) => {
+        asyncForEach(actions, async (actionSet) => {
           const { actionGroup, context } = actionSet;
 
           const alertInstanceId = (context.group || id) as string;
@@ -178,7 +181,13 @@ export const createLogThresholdExecutor = (libs: InfraBackendLibs) =>
           alert.scheduleActions(actionGroup, {
             ...sharedContext,
             ...context,
-            alertDetailsUrl: getAlertDetailsUrl(libs.basePath, spaceId, alertUuid),
+            alertDetailsUrl: await getAlertUrl(
+              alertUuid,
+              spaceId,
+              indexedStartedAt,
+              libs.alertsLocator,
+              libs.basePath.publicBaseUrl
+            ),
           });
         });
       }
@@ -234,6 +243,7 @@ export const createLogThresholdExecutor = (libs: InfraBackendLibs) =>
         startedAt,
         validatedParams,
         getAlertByAlertUuid,
+        alertsLocator,
       });
     } catch (e) {
       throw new Error(e);
@@ -997,6 +1007,7 @@ const processRecoveredAlerts = async ({
   startedAt,
   validatedParams,
   getAlertByAlertUuid,
+  alertsLocator,
 }: {
   basePath: IBasePath;
   getAlertStartedDate: (alertId: string) => string | null;
@@ -1008,6 +1019,7 @@ const processRecoveredAlerts = async ({
   getAlertByAlertUuid: (
     alertUuid: string
   ) => Promise<Partial<ParsedTechnicalFields & ParsedExperimentalFields> | null> | null;
+  alertsLocator?: LocatorPublic<AlertsLocatorParams>;
 }) => {
   const groupByKeysObjectForRecovered = getGroupByObject(
     validatedParams.groupBy,
@@ -1024,7 +1036,13 @@ const processRecoveredAlerts = async ({
     const viewInAppUrl = addSpaceIdToPath(basePath.publicBaseUrl, spaceId, relativeViewInAppUrl);
 
     const baseContext = {
-      alertDetailsUrl: getAlertDetailsUrl(basePath, spaceId, alertUuid),
+      alertDetailsUrl: await getAlertUrl(
+        alertUuid,
+        spaceId,
+        indexedStartedAt,
+        alertsLocator,
+        basePath.publicBaseUrl
+      ),
       group: hasGroupBy(validatedParams) ? recoveredAlertId : null,
       groupByKeys: groupByKeysObjectForRecovered[recoveredAlertId],
       timestamp: startedAt.toISOString(),

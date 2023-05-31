@@ -14,8 +14,7 @@ export default function ({ getService }: FtrProviderContext) {
   const ml = getService('ml');
   const editedDescription = 'Edited description';
 
-  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/153798
-  describe.skip('classification creation', function () {
+  describe('classification creation', function () {
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/bm_classification');
       await ml.testResources.createIndexPatternIfNeeded('ft_bank_marketing');
