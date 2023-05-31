@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '@kbn/react';
 import { useParams } from 'react-router-dom';
 import { ReportTypes } from '@kbn/exploratory-view-plugin/public';
 import { EuiSpacer, EuiTitle } from '@elastic/eui';

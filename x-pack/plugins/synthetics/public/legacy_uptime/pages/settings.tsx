@@ -8,7 +8,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiForm, EuiSpacer } from '@elastic/eui';
 import { useDispatch, useSelector } from 'react-redux';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '@kbn/react';
 import { selectDynamicSettings } from '../state/selectors';
 import { getDynamicSettings, setDynamicSettings } from '../state/actions/dynamic_settings';
 import { DynamicSettings } from '../../../common/runtime_types';

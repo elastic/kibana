@@ -27,7 +27,7 @@ import {
   EuiSelect,
   EuiSpacer,
 } from '@elastic/eui';
-import { toMountPoint, wrapWithTheme } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint, wrapWithTheme } from '@kbn/react';
 import type { Observable } from 'rxjs';
 import type { CoreTheme, OverlayStart } from '@kbn/core/public';
 import { css } from '@emotion/react';

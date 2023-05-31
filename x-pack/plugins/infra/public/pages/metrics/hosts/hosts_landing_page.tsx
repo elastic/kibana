@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { EuiButton, EuiCallOut } from '@elastic/eui';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '@kbn/react';
 import { EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -61,7 +61,7 @@ export const HostsLandingPage = () => {
             {i18n.translate(
               'xpack.infra.hostsViewPage.landing.calloutReachOutToYourKibanaAdministrator',
               {
-                defaultMessage: `Your user role doesn’t have sufficient privileges to enable this feature - please 
+                defaultMessage: `Your user role doesn’t have sufficient privileges to enable this feature - please
                 reach out to your Kibana Administrator and ask them to visit this page to enable this feature.`,
               }
             )}

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '@kbn/react';
 import React, { useMemo } from 'react';
 import { useEuiTheme } from '@elastic/eui';
 import { ERRORS_LABEL } from './monitor_errors_count';

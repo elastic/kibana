@@ -11,7 +11,7 @@ import { Observable } from 'rxjs';
 import { UiCounterMetricType } from '@kbn/analytics';
 import { I18nProvider } from '@kbn/i18n-react';
 import { ApplicationStart, CoreTheme, CoreStart, Plugin } from '@kbn/core/public';
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaThemeProvider } from '@kbn/react';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { GlobalSearchPluginStart } from '@kbn/global-search-plugin/public';
 import { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';

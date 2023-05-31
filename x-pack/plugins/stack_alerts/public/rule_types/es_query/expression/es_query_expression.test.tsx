@@ -19,7 +19,7 @@ import {
   IKibanaSearchResponse,
   ISearchStart,
 } from '@kbn/data-plugin/public';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '@kbn/react';
 import { EsQueryRuleParams, SearchType } from '../types';
 import { EsQueryExpression } from './es_query_expression';
 

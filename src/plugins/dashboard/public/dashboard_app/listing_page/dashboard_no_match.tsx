@@ -12,7 +12,7 @@ import { RouteComponentProps } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { EuiCallOut } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint } from '@kbn/react';
 
 import { LANDING_PAGE_PATH } from '../../dashboard_constants';
 import { pluginServices } from '../../services/plugin_services';

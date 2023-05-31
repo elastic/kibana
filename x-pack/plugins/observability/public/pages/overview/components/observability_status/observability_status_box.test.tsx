@@ -10,7 +10,7 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { ObservabilityStatusBox } from './observability_status_box';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { applicationServiceMock } from '@kbn/core/public/mocks';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider } from '@kbn/react';
 
 const application = applicationServiceMock.createStartContract();
 

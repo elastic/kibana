@@ -32,8 +32,6 @@ export {
   useGlobalUiSetting$,
 } from './ui_settings';
 
-export { useExecutionContext } from './use_execution_context';
-
 export type { ToolbarButtonProps } from './toolbar_button';
 /** @deprecated ToolbarButton - use `ToolbarButton` from `@kbn/shared-ux-button-toolbar` */
 export { POSITIONS, WEIGHTS, TOOLBAR_BUTTON_SIZES, ToolbarButton } from './toolbar_button';
@@ -69,7 +67,25 @@ export { Markdown, MarkdownSimple } from './markdown';
 /** @deprecated Use `RedirectAppLinks` from `@kbn/shared-ux-link-redirect-app` */
 export { RedirectAppLinks } from './app_links';
 
-export { wrapWithTheme, KibanaThemeProvider } from './theme';
+export type { KibanaReactContext, KibanaReactContextValue, KibanaServices } from '@kbn/react';
+export {
+  context,
+  createKibanaReactContext,
+  KibanaContextProvider,
+  useKibana,
+  withKibana,
+} from '@kbn/react';
+
+export type { KibanaReactOverlays } from '@kbn/react';
+export { createReactOverlays } from '@kbn/react';
+
+export type { ToastInput, KibanaReactNotifications } from '@kbn/react';
+export { createNotifications } from '@kbn/react';
+
+export { toMountPoint, MountPointPortal } from '@kbn/react';
+export type { ToMountPointOptions } from '@kbn/react';
+export { KibanaThemeProvider, wrapWithTheme } from '@kbn/react';
+export { useExecutionContext } from '@kbn/react';
 
 /** dummy plugin, we just want kibanaReact to have its own bundle */
 export function plugin() {

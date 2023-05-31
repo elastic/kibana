@@ -7,7 +7,7 @@
 
 import React from 'react';
 import '@kbn/es-ui-shared-plugin/public/components/code_editor/jest_mock';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider } from '@kbn/react';
 import { ModalProvider, OnDoneLoadJsonHandler } from './modal_provider';
 
 import { uiSettingsServiceMock } from '@kbn/core/public/mocks';

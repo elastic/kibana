@@ -10,7 +10,7 @@ import React from 'react';
 
 import { DecoratorFn } from '@storybook/react';
 import { I18nProvider } from '@kbn/i18n-react';
-import { KibanaContextProvider as KibanaReactProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider as KibanaReactProvider } from '@kbn/react';
 import { pluginServices } from '../public/services';
 import { PresentationUtilServices } from '../public/services/types';
 import { providers, StorybookParams } from '../public/services/plugin_services.story';

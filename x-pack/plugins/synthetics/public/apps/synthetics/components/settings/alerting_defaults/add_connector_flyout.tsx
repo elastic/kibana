@@ -10,7 +10,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { useDispatch } from 'react-redux';
 import { EuiButtonEmpty } from '@elastic/eui';
 import { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '@kbn/react';
 import { getConnectorsAction } from '../../../state/settings/actions';
 
 interface Props {

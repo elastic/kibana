@@ -14,8 +14,7 @@ import {
   RouteProps,
   useRouteMatch,
 } from 'react-router-dom';
-import { useKibana } from '@kbn/react';
-import { useExecutionContext } from '../use_execution_context';
+import { useKibana, useExecutionContext } from '@kbn/react';
 
 /**
  * It's a wrapper around the react-router-dom Route component that inserts

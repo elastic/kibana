@@ -13,7 +13,7 @@ import { Route } from '@kbn/shared-ux-router';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { coreMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider } from '@kbn/react';
 import { fleetMock } from '@kbn/fleet-plugin/public/mocks';
 import type { CloudDefendPluginStartDeps } from '../types';
 import './__mocks__/worker';

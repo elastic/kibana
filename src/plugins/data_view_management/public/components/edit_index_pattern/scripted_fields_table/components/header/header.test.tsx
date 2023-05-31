@@ -11,7 +11,7 @@ import { mount } from 'enzyme';
 import { RouteComponentProps } from 'react-router-dom';
 import { ScopedHistory } from '@kbn/core/public';
 import { scopedHistoryMock } from '@kbn/core/public/mocks';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider } from '@kbn/react';
 import { mockManagementPlugin } from '../../../../../mocks';
 
 import { Header } from './header';

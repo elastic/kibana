@@ -9,7 +9,7 @@
 import React, { useEffect, useState } from 'react';
 
 import { QueryStringInput, QueryStringInputProps } from '@kbn/unified-search-plugin/public';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '@kbn/react';
 import type { IndexPatternValue } from '../../../common/types';
 
 import { getDataViewsStart } from '../../services';

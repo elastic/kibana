@@ -6,7 +6,7 @@
  */
 
 import React, { useMemo } from 'react';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '@kbn/react';
 import type {
   Rule,
   TriggersAndActionsUIPublicPluginStart,

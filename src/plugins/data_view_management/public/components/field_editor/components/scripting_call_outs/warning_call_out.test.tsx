@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { mount } from 'enzyme';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider } from '@kbn/react';
 import { mockManagementPlugin } from '../../../../mocks';
 import { ScriptingWarningCallOut } from './warning_call_out';
 

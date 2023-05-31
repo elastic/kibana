@@ -8,7 +8,7 @@
 import { EuiContextMenuItem } from '@elastic/eui';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '@kbn/react';
 import { InfraClientStartDeps } from '../../../types';
 
 export const ManageAlertsContextMenuItem = () => {

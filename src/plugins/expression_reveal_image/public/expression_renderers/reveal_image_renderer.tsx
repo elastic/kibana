@@ -17,7 +17,7 @@ import {
 } from '@kbn/expressions-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { CoreSetup } from '@kbn/core/public';
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaThemeProvider } from '@kbn/react';
 import { defaultTheme$ } from '@kbn/presentation-util-plugin/common';
 import { RevealImageRendererConfig } from '../../common/types';
 

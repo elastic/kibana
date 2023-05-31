@@ -10,7 +10,7 @@ import React, { useCallback } from 'react';
 import { EuiPanel } from '@elastic/eui';
 
 import { VisEditorOptionsProps } from '@kbn/visualizations-plugin/public';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider } from '@kbn/react';
 
 import { TimelionVisParams } from './timelion_vis_fn';
 import { TimelionInterval, TimelionExpressionInput } from './components';

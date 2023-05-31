@@ -8,7 +8,7 @@
 import { LazyObservabilityPageTemplateProps } from '@kbn/observability-shared-plugin/public';
 import React from 'react';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '@kbn/react';
 
 import { ClientPluginsStart } from '../../../../../plugin';
 

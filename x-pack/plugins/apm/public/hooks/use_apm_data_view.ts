@@ -7,7 +7,7 @@
 
 import { DataView } from '@kbn/data-views-plugin/common';
 import { i18n } from '@kbn/i18n';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '@kbn/react';
 import { useEffect, useState } from 'react';
 import { ApmPluginStartDeps } from '../plugin';
 import { callApmApi } from '../services/rest/create_call_apm_api';

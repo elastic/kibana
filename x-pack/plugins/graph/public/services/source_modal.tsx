@@ -7,7 +7,7 @@
 
 import { CoreStart } from '@kbn/core/public';
 import React from 'react';
-import { KibanaReactOverlays } from '@kbn/kibana-react-plugin/public';
+import { KibanaReactOverlays } from '@kbn/react';
 import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
 import { SourceModal } from '../components/source_modal';
 import { IndexPatternSavedObject } from '../types';

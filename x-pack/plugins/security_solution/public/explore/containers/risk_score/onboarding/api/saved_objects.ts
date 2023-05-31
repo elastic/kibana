@@ -6,7 +6,7 @@
  */
 
 import type { HttpSetup, NotificationsStart, ThemeServiceStart } from '@kbn/core/public';
-import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint } from '@kbn/react';
 import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 import {
   RISKY_HOSTS_DASHBOARD_TITLE,

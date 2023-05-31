@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { EuiLink } from '@elastic/eui';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '@kbn/react';
 import { ClientPluginsStart } from '../../../../../plugin';
 import { ToggleFlyoutTranslations } from '../../alerts/hooks/translations';
 

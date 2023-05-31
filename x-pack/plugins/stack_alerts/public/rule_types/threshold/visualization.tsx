@@ -31,7 +31,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '@kbn/react';
 import { AggregationType, Comparator } from '@kbn/triggers-actions-ui-plugin/public';
 import { parseDuration } from '@kbn/alerting-plugin/common/parse_duration';
 import {

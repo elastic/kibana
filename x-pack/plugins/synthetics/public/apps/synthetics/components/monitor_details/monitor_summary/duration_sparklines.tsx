@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '@kbn/react';
 import { ReportTypes } from '@kbn/exploratory-view-plugin/public';
 import { useTheme } from '@kbn/observability-shared-plugin/public';
 import { MEDIAN_DURATION_LABEL } from './duration_panel';

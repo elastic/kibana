@@ -14,7 +14,7 @@ import type { Query } from '@kbn/es-query';
 import { IAggConfig } from '@kbn/data-plugin/public';
 import { QueryStringInput } from '@kbn/unified-search-plugin/public';
 
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '@kbn/react';
 
 import type { VisDefaultEditorKibanaServices } from '../../types';
 interface FilterRowProps {

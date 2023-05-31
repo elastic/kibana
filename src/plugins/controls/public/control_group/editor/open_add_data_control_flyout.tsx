@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint } from '@kbn/react';
 import { isErrorEmbeddable } from '@kbn/embeddable-plugin/public';
 
 import {

@@ -17,7 +17,7 @@ import {
   AnnotationDomainType,
 } from '@elastic/charts';
 import React, { ReactElement, useEffect, useMemo } from 'react';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '@kbn/react';
 import { ExecutionTimeRange } from '../../../../../types';
 import { decodeOrThrow } from '../../../../../../common/runtime_types';
 import {

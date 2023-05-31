@@ -9,7 +9,7 @@
 import { i18n } from '@kbn/i18n';
 import { ThemeServiceSetup } from '@kbn/core/public';
 import type { IEmbeddable } from '@kbn/embeddable-plugin/public';
-import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint } from '@kbn/react';
 import { IncompatibleActionError, UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
 // for cleanup esFilters need to fix the issue https://github.com/elastic/kibana/issues/131292
 import { FilterManager, TimefilterContract } from '@kbn/data-plugin/public';

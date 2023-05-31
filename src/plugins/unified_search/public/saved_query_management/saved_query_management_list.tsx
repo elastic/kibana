@@ -26,7 +26,7 @@ import { i18n } from '@kbn/i18n';
 import React, { useCallback, useEffect, useState, useRef } from 'react';
 import { css } from '@emotion/react';
 import { sortBy } from 'lodash';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '@kbn/react';
 import { SavedQuery, SavedQueryService } from '@kbn/data-plugin/public';
 import type { SavedQueryAttributes } from '@kbn/data-plugin/common';
 import './saved_query_management_list.scss';

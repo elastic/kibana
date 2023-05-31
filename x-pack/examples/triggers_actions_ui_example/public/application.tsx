@@ -12,7 +12,7 @@ import { Route } from '@kbn/shared-ux-router';
 import { EuiPage, EuiTitle, EuiText, EuiSpacer } from '@elastic/eui';
 import { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider } from '@kbn/react';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { TriggersActionsUiExamplePublicStartDeps } from './plugin';

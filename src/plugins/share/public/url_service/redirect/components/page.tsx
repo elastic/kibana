@@ -10,7 +10,7 @@ import * as React from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { EuiPageTemplate_Deprecated as EuiPageTemplate } from '@elastic/eui';
 import { ThemeServiceSetup } from '@kbn/core/public';
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaThemeProvider } from '@kbn/react';
 import { CustomBrandingStart } from '@kbn/core-custom-branding-browser';
 import { Error } from './error';
 import { RedirectManager } from '../redirect_manager';

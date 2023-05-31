@@ -37,7 +37,7 @@ import { ALERTS_FEATURE_ID, RuleExecutionStatusErrorReasons } from '@kbn/alertin
 import { Query, BoolQuery } from '@kbn/es-query';
 import { ValidFeatureId } from '@kbn/rule-data-utils';
 import { RuleDefinitionProps } from '@kbn/triggers-actions-ui-plugin/public';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '@kbn/react';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 import { fromQuery, toQuery } from '../../utils/url';
 import {

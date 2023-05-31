@@ -13,7 +13,7 @@ import { EuiErrorBoundary, EuiLoadingChart } from '@elastic/eui';
 
 import { Vis, VisualizeEmbeddableContract } from '@kbn/visualizations-plugin/public';
 import { IEditorController, EditorRenderProps } from '@kbn/visualizations-plugin/public';
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaThemeProvider } from '@kbn/react';
 import { getTheme } from './services';
 
 // @ts-ignore

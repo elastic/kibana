@@ -25,7 +25,7 @@ import { i18n } from '@kbn/i18n';
 import { Query, buildEsQuery } from '@kbn/es-query';
 import { getEsQueryConfig } from '@kbn/data-plugin/public';
 import { DataView } from '@kbn/data-views-plugin/public';
-import { context as contextType } from '@kbn/kibana-react-plugin/public';
+import { context as contextType } from '@kbn/react';
 import { IndexPatternManagmentContextValue } from '../../../../types';
 import { ExecuteScript } from '../../types';
 

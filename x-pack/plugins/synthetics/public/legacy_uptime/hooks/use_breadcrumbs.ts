@@ -9,7 +9,7 @@ import { ChromeBreadcrumb } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { MouseEvent, useEffect } from 'react';
 import { EuiBreadcrumb } from '@elastic/eui';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '@kbn/react';
 import { stringifyUrlParams } from '../lib/helper/url_params/stringify_url_params';
 import { UptimeUrlParams } from '../lib/helper';
 import { useUrlParams } from '.';

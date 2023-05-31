@@ -7,7 +7,7 @@
 
 import React, { FunctionComponent } from 'react';
 
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider } from '@kbn/react';
 import { coreMock } from '@kbn/core/public/mocks';
 const startMock = coreMock.createStart();
 

@@ -12,7 +12,7 @@ import {
   CustomAssetsAccordionProps,
   CustomAssetsAccordion,
 } from '@kbn/fleet-plugin/public';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '@kbn/react';
 import { ApmPluginStartDeps } from '../../plugin';
 
 export function ApmCustomAssetsExtension() {

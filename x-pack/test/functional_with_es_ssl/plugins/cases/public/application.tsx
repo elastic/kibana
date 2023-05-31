@@ -20,7 +20,7 @@ import { Router } from 'react-router-dom';
 import { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { CasesUiStart } from '@kbn/cases-plugin/public';
 import { CommentType } from '@kbn/cases-plugin/common';
-import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/react';
 import { EuiThemeProvider as StyledComponentsThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { EuiErrorBoundary } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';

@@ -9,7 +9,7 @@
 import { i18n } from '@kbn/i18n';
 import * as React from 'react';
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
-import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint } from '@kbn/react';
 import { SharePluginStart } from '@kbn/share-plugin/public';
 import { InspectorViewRegistry } from './view_registry';
 import { InspectorOptions, InspectorSession } from './types';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React, { useEffect, useState } from 'react';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '@kbn/react';
 import { EuiText, EuiLink, EuiEmptyPrompt } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useFetcher } from '@kbn/observability-shared-plugin/public';

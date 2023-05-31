@@ -12,7 +12,7 @@ import React from 'react';
 
 import { IEmbeddable } from '@kbn/embeddable-plugin/public';
 import { createAction } from '@kbn/ui-actions-plugin/public';
-import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint } from '@kbn/react';
 
 export const SAMPLE_PANEL_ACTION = 'samplePanelAction';
 

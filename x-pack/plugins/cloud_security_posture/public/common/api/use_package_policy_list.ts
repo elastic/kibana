@@ -12,7 +12,7 @@ import {
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
 } from '@kbn/fleet-plugin/common';
 import { useQuery } from '@tanstack/react-query';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '@kbn/react';
 import { CoreStart } from '@kbn/core/public';
 
 interface PackagePolicyListData {

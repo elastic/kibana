@@ -9,7 +9,7 @@ import { EuiComboBoxOptionOption } from '@elastic/eui';
 import { Meta, Story } from '@storybook/react';
 import React from 'react';
 import { CoreStart } from '@kbn/core/public';
-import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
+import { createKibanaReactContext } from '@kbn/react';
 import { createCallApmApi } from '../../../services/rest/create_call_apm_api';
 import { SuggestionsSelect } from '.';
 

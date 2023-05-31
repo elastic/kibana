@@ -8,7 +8,7 @@
 import { useFetcher } from '@kbn/observability-shared-plugin/public';
 import { useDispatch } from 'react-redux';
 import { useEffect, useMemo, useState } from 'react';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '@kbn/react';
 import { Rule } from '@kbn/triggers-actions-ui-plugin/public';
 import { setAlertFlyoutVisible } from '../../../state';
 import { enableDefaultAlertingAPI } from '../../../state/alert_rules/api';

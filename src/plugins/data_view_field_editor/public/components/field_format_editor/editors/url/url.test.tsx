@@ -11,7 +11,7 @@ import type { FieldFormat } from '@kbn/field-formats-plugin/common';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { UrlFormatEditor, UrlFormatEditorFormatParams } from './url';
 import { coreMock } from '@kbn/core/public/mocks';
-import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
+import { createKibanaReactContext } from '@kbn/react';
 import { render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { Serializable } from '@kbn/utility-types';

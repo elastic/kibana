@@ -16,7 +16,7 @@ import type { NotificationsStart } from '@kbn/core/public';
 import type { Observable } from 'rxjs';
 import type { CoreTheme } from '@kbn/core/public';
 
-import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint } from '@kbn/react';
 
 import type { PackageInfo } from '../../../types';
 import { sendInstallPackage, sendRemovePackage, useLink } from '../../../hooks';

@@ -10,7 +10,7 @@ import ReactDOM from 'react-dom';
 import { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { Subject } from 'rxjs';
-import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/react';
 import { Embeddable, IContainer } from '@kbn/embeddable-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { EmbeddableAnomalyChartsContainer } from './embeddable_anomaly_charts_container_lazy';

@@ -7,7 +7,7 @@
 import React, { useContext, useState, useCallback, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { find } from 'lodash';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '@kbn/react';
 import { ElasticsearchTemplate } from './elasticsearch_template';
 import { GlobalStateContext } from '../../contexts/global_state_context';
 import { ExternalConfigContext } from '../../contexts/external_config_context';

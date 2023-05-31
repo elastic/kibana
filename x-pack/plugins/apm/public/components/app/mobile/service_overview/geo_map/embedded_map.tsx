@@ -18,7 +18,7 @@ import {
   ViewMode,
   isErrorEmbeddable,
 } from '@kbn/embeddable-plugin/public';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '@kbn/react';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { EuiText } from '@elastic/eui';

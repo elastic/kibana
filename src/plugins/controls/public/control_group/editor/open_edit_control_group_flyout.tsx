@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { OverlayRef } from '@kbn/core-mount-utils-browser';
-import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint } from '@kbn/react';
 
 import { pluginServices } from '../../services';
 import { ControlGroupEditor } from './control_group_editor';

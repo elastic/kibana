@@ -18,7 +18,7 @@ import {
   builtInComparators,
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { Chart, LineAnnotation, LineSeries } from '@elastic/charts';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '@kbn/react';
 
 jest.mock('@kbn/kibana-react-plugin/public');
 jest.mock('./index_threshold_api', () => ({

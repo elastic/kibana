@@ -9,7 +9,7 @@ import React, { useCallback, useContext, useState } from 'react';
 import { Redirect } from 'react-router-dom';
 
 import { i18n } from '@kbn/i18n';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '@kbn/react';
 import { NoData } from '../../../components/no_data';
 import { PageTemplate } from '../page_template';
 import { CODE_PATH_LICENSE, STANDALONE_CLUSTER_CLUSTER_UUID } from '../../../../common/constants';

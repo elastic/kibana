@@ -20,7 +20,7 @@ import {
   IUiSettingsClient,
 } from '@kbn/core/public';
 
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaThemeProvider } from '@kbn/react';
 
 import { PLUGIN_FEATURE } from '../common/constants';
 import type {

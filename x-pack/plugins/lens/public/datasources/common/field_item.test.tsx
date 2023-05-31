@@ -18,7 +18,7 @@ import { IndexPattern } from '../../types';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { documentField } from '../form_based/document_field';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider } from '@kbn/react';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { DataView, DataViewField } from '@kbn/data-views-plugin/common';

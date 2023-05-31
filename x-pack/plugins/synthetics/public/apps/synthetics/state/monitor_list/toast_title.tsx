@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint } from '@kbn/react';
 import React from 'react';
 
 export function toastTitle({ title, testAttribute }: { title: string; testAttribute?: string }) {

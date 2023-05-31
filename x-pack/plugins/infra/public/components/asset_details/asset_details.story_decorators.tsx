@@ -8,7 +8,7 @@
 import type { StoryContext } from '@storybook/react';
 import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider } from '@kbn/react';
 import { SourceProvider } from '../../containers/metrics_source';
 
 export const DecorateWithKibanaContext = <StoryFnReactReturnType extends React.ReactNode>(

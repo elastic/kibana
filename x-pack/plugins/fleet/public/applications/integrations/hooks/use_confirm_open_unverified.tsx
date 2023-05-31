@@ -6,7 +6,7 @@
  */
 
 import type { DocLinksStart, OverlayStart } from '@kbn/core/public';
-import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint } from '@kbn/react';
 
 import React, { useCallback } from 'react';
 

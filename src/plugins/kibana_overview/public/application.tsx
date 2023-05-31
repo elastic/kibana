@@ -10,7 +10,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { i18n } from '@kbn/i18n';
 import { I18nProvider } from '@kbn/i18n-react';
-import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/react';
 import { NewsfeedApiEndpoint } from '@kbn/newsfeed-plugin/public';
 import { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { AppPluginStartDependencies } from './types';

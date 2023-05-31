@@ -10,7 +10,7 @@ import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import { i18n } from '@kbn/i18n';
 import type { TimeRange } from '@kbn/es-query';
 import { EuiBreadcrumb, EuiConfirmModal } from '@elastic/eui';
-import { useExecutionContext, useKibana } from '@kbn/kibana-react-plugin/public';
+import { useExecutionContext, useKibana } from '@kbn/react';
 import { OnSaveProps } from '@kbn/saved-objects-plugin/public';
 import type { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import type { LensAppLocatorParams } from '../../common/locator/locator';

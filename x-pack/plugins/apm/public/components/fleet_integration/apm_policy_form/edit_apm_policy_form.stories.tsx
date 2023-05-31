@@ -7,7 +7,7 @@
 import React, { useState } from 'react';
 import { Meta, Story } from '@storybook/react';
 import { CoreStart } from '@kbn/core/public';
-import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
+import { createKibanaReactContext } from '@kbn/react';
 import { EditAPMPolicyForm } from './edit_apm_policy_form';
 import { NewPackagePolicy, PackagePolicy } from './typings';
 

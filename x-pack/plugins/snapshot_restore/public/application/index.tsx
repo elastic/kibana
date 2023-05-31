@@ -9,7 +9,7 @@ import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Router } from 'react-router-dom';
 import { ScopedHistory } from '@kbn/core/public';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider } from '@kbn/react';
 
 import { App } from './app';
 import { AppProviders } from './app_providers';

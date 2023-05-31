@@ -10,7 +10,7 @@ import React from 'react';
 import { notificationServiceMock, scopedHistoryMock } from '@kbn/core/public/mocks';
 
 import { LocationDescriptorObject } from 'history';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider } from '@kbn/react';
 import { ProcessorsEditorContextProvider, Props, PipelineEditor } from '..';
 
 import {

@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import ReactDOM from 'react-dom';
 
 import { I18nProvider } from '@kbn/i18n-react';
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaThemeProvider } from '@kbn/react';
 
 import { DashboardCloneModal } from './clone_modal';
 import { pluginServices } from '../../../../services/plugin_services';

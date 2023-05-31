@@ -7,7 +7,7 @@
 
 import { EuiHeaderLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '@kbn/react';
 import React from 'react';
 
 export function SyntheticsAddData() {

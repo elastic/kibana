@@ -11,7 +11,7 @@ import { Router, useParams } from 'react-router-dom';
 
 import type { StartServicesAccessor } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/react';
 import type { RegisterManagementAppArgs } from '@kbn/management-plugin/public';
 import { Route } from '@kbn/shared-ux-router';
 

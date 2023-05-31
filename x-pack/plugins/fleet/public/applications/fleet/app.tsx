@@ -21,7 +21,7 @@ import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 
 import type { TopNavMenuData } from '@kbn/navigation-plugin/public';
 
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaThemeProvider } from '@kbn/react';
 
 import { KibanaContextProvider, RedirectAppLinks } from '@kbn/kibana-react-plugin/public';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';

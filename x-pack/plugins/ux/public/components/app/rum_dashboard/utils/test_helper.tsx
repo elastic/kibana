@@ -13,7 +13,7 @@ import { createMemoryHistory } from 'history';
 import { Router } from 'react-router-dom';
 import { MemoryHistory } from 'history';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider } from '@kbn/react';
 import { UrlParamsProvider } from '../../../../context/url_params_context/url_params_context';
 
 export const core = {

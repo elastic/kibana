@@ -15,7 +15,7 @@ import { i18n } from '@kbn/i18n';
 import { Store } from 'redux';
 import { Provider } from 'react-redux';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaThemeProvider } from '@kbn/react';
 import {
   disableAutoApply,
   enableAutoApply,

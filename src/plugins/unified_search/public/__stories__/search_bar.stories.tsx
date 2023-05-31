@@ -11,7 +11,7 @@ import { action } from '@storybook/addon-actions';
 import type { DataViewBase, Query } from '@kbn/es-query';
 import { storiesOf } from '@storybook/react';
 import { I18nProvider } from '@kbn/i18n-react';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider } from '@kbn/react';
 import type { DataView, DataViewsContract } from '@kbn/data-views-plugin/public';
 import { buildExistsFilter } from '@kbn/es-query';
 import { SearchBar, SearchBarProps } from '../search_bar';

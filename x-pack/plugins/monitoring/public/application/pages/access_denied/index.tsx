@@ -11,7 +11,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiPanel, EuiCallOut, EuiButton } from '@elastic/eui';
 import useInterval from 'react-use/lib/useInterval';
 import { Redirect } from 'react-router-dom';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '@kbn/react';
 import { ComponentProps } from '../../route_init';
 import { MonitoringStartPluginDependencies } from '../../../types';
 import { ExternalConfigContext } from '../../contexts/external_config_context';

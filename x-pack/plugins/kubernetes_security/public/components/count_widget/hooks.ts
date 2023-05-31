@@ -7,7 +7,7 @@
 
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { CoreStart } from '@kbn/core/public';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '@kbn/react';
 import { QUERY_KEY_COUNT_WIDGET, COUNT_ROUTE } from '../../../common/constants';
 
 export const useFetchCountWidgetData = (

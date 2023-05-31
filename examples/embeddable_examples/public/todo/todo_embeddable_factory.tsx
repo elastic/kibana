@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { OverlayStart } from '@kbn/core/public';
 import { EuiFieldText } from '@elastic/eui';
 import { EuiButton } from '@elastic/eui';
-import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint } from '@kbn/react';
 import {
   IContainer,
   EmbeddableFactoryDefinition,

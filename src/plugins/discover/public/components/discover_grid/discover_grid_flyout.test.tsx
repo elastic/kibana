@@ -17,7 +17,7 @@ import { DiscoverServices } from '../../build_services';
 import { DocViewsRegistry } from '../../services/doc_views/doc_views_registry';
 import { setDocViewsRegistry } from '../../kibana_services';
 import { dataViewWithTimefieldMock } from '../../__mocks__/data_view_with_timefield';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider } from '@kbn/react';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { DataTableRecord, EsHitRecord } from '../../types';
 import { buildDataTableRecord } from '../../utils/build_data_record';

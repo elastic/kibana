@@ -6,7 +6,7 @@
  */
 
 import { AppMountParameters, CoreSetup, CoreStart } from '@kbn/core/public';
-import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/react';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { RouteRenderer, RouterProvider } from '@kbn/typed-react-router-config';

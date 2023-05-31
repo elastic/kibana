@@ -6,7 +6,7 @@
  */
 
 import { createElement as h } from 'react';
-import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint } from '@kbn/react';
 import { Plugin, CoreSetup, CoreStart, AppNavLinkStatus } from '@kbn/core/public';
 import { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
 import {

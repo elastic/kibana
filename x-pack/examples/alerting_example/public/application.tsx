@@ -13,7 +13,7 @@ import { EuiPage } from '@elastic/eui';
 import { AppMountParameters, CoreStart } from '@kbn/core/public';
 
 import { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider } from '@kbn/react';
 import { Page } from './components/page';
 import { DocumentationPage } from './components/documentation';
 import { ViewAlertPage } from './components/view_alert';

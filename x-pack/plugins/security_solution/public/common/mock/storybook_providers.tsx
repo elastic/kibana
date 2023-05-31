@@ -11,7 +11,7 @@ import { Provider as ReduxStoreProvider } from 'react-redux';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { ThemeProvider } from 'styled-components';
 import type { CoreStart } from '@kbn/core/public';
-import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
+import { createKibanaReactContext } from '@kbn/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { CellActionsProvider } from '@kbn/cell-actions';
 import { createStore } from '../store';

@@ -6,7 +6,7 @@
  */
 
 import { useMemo } from 'react';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '@kbn/react';
 import type { CoreStart } from '@kbn/core/public';
 import type { StartPlugins } from '../types';
 

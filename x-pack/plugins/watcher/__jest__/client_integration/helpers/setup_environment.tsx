@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { HttpSetup } from '@kbn/core/public';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider } from '@kbn/react';
 
 import { init as initHttpRequests } from './http_requests';
 import { mockContextValue } from './app_context.mock';

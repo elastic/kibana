@@ -6,7 +6,7 @@
  */
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '@kbn/react';
 import { includes } from 'lodash';
 import { DashboardStart } from '@kbn/dashboard-plugin/public';
 import { FleetStart } from '@kbn/fleet-plugin/public';

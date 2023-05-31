@@ -14,7 +14,8 @@ import type { Rule } from '@kbn/alerting-plugin/common';
 import type { RuleTypeParams } from '@kbn/alerting-plugin/common';
 import { ISearchSource, SerializedSearchSourceFields, getTime } from '@kbn/data-plugin/common';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { MarkdownSimple, toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { MarkdownSimple } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint } from '@kbn/react';
 import { Filter } from '@kbn/es-query';
 import { DiscoverAppLocatorParams } from '../../../common/locator';
 

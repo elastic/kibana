@@ -9,7 +9,7 @@ import React, { CSSProperties } from 'react';
 import ReactDOM from 'react-dom';
 import { CoreTheme } from '@kbn/core/public';
 import { Observable } from 'rxjs';
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaThemeProvider } from '@kbn/react';
 import { defaultTheme$ } from '@kbn/presentation-util-plugin/common';
 import { Markdown } from '@kbn/kibana-react-plugin/public';
 import { StartInitializer } from '../../plugin';

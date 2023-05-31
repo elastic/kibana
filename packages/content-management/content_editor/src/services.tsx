@@ -64,7 +64,7 @@ export interface ContentEditorKibanaDependencies {
    * Handler from the '@kbn/kibana-react-plugin/public' Plugin
    *
    * ```
-   * import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+   * import { toMountPoint } from '@kbn/react';
    * ```
    */
   toMountPoint: (

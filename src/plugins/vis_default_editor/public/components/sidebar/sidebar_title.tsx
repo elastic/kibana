@@ -27,7 +27,7 @@ import { i18n } from '@kbn/i18n';
 import { Vis } from '@kbn/visualizations-plugin/public';
 import { SavedSearch, getSavedSearchUrl } from '@kbn/discover-plugin/public';
 import { ApplicationStart } from '@kbn/core/public';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '@kbn/react';
 
 interface LinkedSearchProps {
   savedSearch: SavedSearch;

@@ -1010,6 +1010,8 @@
       "@kbn/profiling-plugin/*": ["x-pack/plugins/profiling/*"],
       "@kbn/random-sampling": ["x-pack/packages/kbn-random-sampling"],
       "@kbn/random-sampling/*": ["x-pack/packages/kbn-random-sampling/*"],
+      "@kbn/react": ["packages/kbn-react"],
+      "@kbn/react/*": ["packages/kbn-react/*"],
       "@kbn/react-field": ["packages/kbn-react-field"],
       "@kbn/react-field/*": ["packages/kbn-react-field/*"],
       "@kbn/remote-clusters-plugin": ["x-pack/plugins/remote_clusters"],

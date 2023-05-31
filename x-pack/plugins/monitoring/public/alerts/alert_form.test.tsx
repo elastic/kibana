@@ -26,7 +26,7 @@ import { RuleForm } from '@kbn/triggers-actions-ui-plugin/public/application/sec
 import ActionForm from '@kbn/triggers-actions-ui-plugin/public/application/sections/action_connector_form/action_form';
 import { Legacy } from '../legacy_shims';
 import { I18nProvider } from '@kbn/i18n-react';
-import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
+import { createKibanaReactContext } from '@kbn/react';
 
 interface AlertAction {
   group: string;

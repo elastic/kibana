@@ -10,7 +10,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { CoreTheme, I18nStart } from '@kbn/core/public';
 import { Observable } from 'rxjs';
-import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/react';
 import { DiscoverServices } from '../../../../build_services';
 import { OpenSearchPanel } from './open_search_panel';
 

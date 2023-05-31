@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint } from '@kbn/react';
 import {
   INGEST_PIPELINE_CREATION_ERROR_MESSAGE,
   INGEST_PIPELINE_DELETION_ERROR_MESSAGE,

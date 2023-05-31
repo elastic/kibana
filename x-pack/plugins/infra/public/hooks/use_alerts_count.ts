@@ -10,7 +10,7 @@ import useAsyncFn from 'react-use/lib/useAsyncFn';
 
 import { BASE_RAC_ALERTS_API_PATH } from '@kbn/rule-registry-plugin/common/constants';
 import { estypes } from '@elastic/elasticsearch';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '@kbn/react';
 import type { HttpSetup } from '@kbn/core/public';
 import { ALERT_STATUS_ACTIVE, ALERT_STATUS_RECOVERED, ValidFeatureId } from '@kbn/rule-data-utils';
 

@@ -13,7 +13,7 @@ import { CoreTheme } from '@kbn/core/public';
 import { ExpressionRenderDefinition } from '@kbn/expressions-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { CoreSetup } from '@kbn/core/public';
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaThemeProvider } from '@kbn/react';
 import { withSuspense } from '@kbn/presentation-util-plugin/public';
 import { defaultTheme$ } from '@kbn/presentation-util-plugin/common';
 import { LazyDebugRenderComponent } from '../components';

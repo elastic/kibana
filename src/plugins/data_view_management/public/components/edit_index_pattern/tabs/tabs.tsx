@@ -35,7 +35,7 @@ import {
   SavedObjectRelation,
   SavedObjectManagementTypeInfo,
 } from '@kbn/saved-objects-management-plugin/public';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '@kbn/react';
 import { IndexPatternManagmentContext } from '../../../types';
 import { createEditIndexPatternPageStateContainer } from '../edit_index_pattern_state_container';
 import {

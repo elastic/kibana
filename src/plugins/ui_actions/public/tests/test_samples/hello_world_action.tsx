@@ -9,7 +9,7 @@
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiBadge, EuiFlyoutBody } from '@elastic/eui';
 import { CoreStart } from '@kbn/core/public';
-import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint } from '@kbn/react';
 import { ActionDefinition } from '../../actions';
 
 const MenuItem: React.FC = () => {

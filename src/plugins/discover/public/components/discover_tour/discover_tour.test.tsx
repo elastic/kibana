@@ -9,7 +9,7 @@
 import React from 'react';
 import { EuiTourStep, EuiButton } from '@elastic/eui';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider } from '@kbn/react';
 import { discoverServiceMock } from '../../__mocks__/services';
 import { DiscoverTourProvider } from './discover_tour_provider';
 import { useDiscoverTourContext } from './discover_tour_context';

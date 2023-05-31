@@ -12,7 +12,7 @@ import { Router } from 'react-router-dom';
 import { I18nProvider } from '@kbn/i18n-react';
 import { Provider } from 'react-redux';
 import type { Store } from 'redux';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider } from '@kbn/react';
 import type { CoreStart } from '@kbn/core/public';
 import type { ResolverState, SideEffectSimulator, ResolverProps } from '../../types';
 import type { ResolverAction } from '../../store/actions';

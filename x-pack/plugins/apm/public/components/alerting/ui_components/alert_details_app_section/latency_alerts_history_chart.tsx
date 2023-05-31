@@ -27,7 +27,7 @@ import { AlertConsumers } from '@kbn/rule-data-utils';
 import moment from 'moment';
 import React, { useMemo } from 'react';
 import { useAlertsHistory } from '@kbn/observability-alert-details';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '@kbn/react';
 import { ApmDocumentType } from '../../../../../common/document_type';
 import { LatencyAggregationType } from '../../../../../common/latency_aggregation_types';
 import { getDurationFormatter } from '../../../../../common/utils/formatters';

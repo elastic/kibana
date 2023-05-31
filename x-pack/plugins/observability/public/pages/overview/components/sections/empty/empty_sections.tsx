@@ -8,7 +8,7 @@
 import { EuiFlexGrid, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import React, { useContext } from 'react';
 import { ThemeContext } from 'styled-components';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '@kbn/react';
 import { i18n } from '@kbn/i18n';
 import { HttpSetup } from '@kbn/core/public';
 import { FETCH_STATUS } from '@kbn/observability-shared-plugin/public';

@@ -11,9 +11,9 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { EuiButton } from '@elastic/eui';
 import { Form, useForm, FormData } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { act } from 'react-dom/test-utils';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider } from '@kbn/react';
 import { render as reactRender, RenderOptions, RenderResult } from '@testing-library/react';
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaThemeProvider } from '@kbn/react';
 
 import { ConnectorServices } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { TriggersAndActionsUiServices } from '@kbn/triggers-actions-ui-plugin/public';

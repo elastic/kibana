@@ -10,7 +10,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFieldText, EuiFormRow, EuiLink } from '@elastic/eui';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '@kbn/react';
 import { FORMATS_UI_SETTINGS } from '@kbn/field-formats-plugin/common';
 import { SwitchOption } from './switch';
 

@@ -24,7 +24,7 @@ import {
 } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
-import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint } from '@kbn/react';
 
 import { DISCOVER_APP_LOCATOR } from '@kbn/discover-plugin/common';
 

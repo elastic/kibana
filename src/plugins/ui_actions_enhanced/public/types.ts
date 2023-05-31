@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { KibanaReactOverlays } from '@kbn/kibana-react-plugin/public';
+import { KibanaReactOverlays } from '@kbn/react';
 import { ActionFactory } from './dynamic_actions';
 
 export interface CommonlyUsedRange {

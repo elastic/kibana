@@ -10,7 +10,7 @@ import { EuiFormRow, EuiColorPicker } from '@elastic/eui';
 import { render } from 'react-dom';
 import { Ast } from '@kbn/interpreter';
 import { ThemeServiceStart } from '@kbn/core/public';
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaThemeProvider } from '@kbn/react';
 import { Visualization, OperationMetadata } from '@kbn/lens-plugin/public';
 import { layerTypes } from '@kbn/lens-plugin/public';
 import type { RotatingNumberState } from '../common/types';

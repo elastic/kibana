@@ -16,7 +16,7 @@ import { IAggType } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 
 import { DocLinksStart } from '@kbn/core/public';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '@kbn/react';
 import { ComboBoxGroupedOptions } from '../utils';
 import { AGG_TYPE_ACTION_KEYS, AggTypeAction } from './agg_params_state';
 

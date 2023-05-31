@@ -10,7 +10,7 @@ import type { Story } from '@storybook/react';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 import { configureStore } from '@reduxjs/toolkit';
 import { MemoryRouter } from 'react-router-dom';
-import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
+import { createKibanaReactContext } from '@kbn/react';
 import type { CoreStart } from '@kbn/core/public';
 import { sourcererReducer } from '../../../common/store/sourcerer';
 import { inputsReducer } from '../../../common/store/inputs';

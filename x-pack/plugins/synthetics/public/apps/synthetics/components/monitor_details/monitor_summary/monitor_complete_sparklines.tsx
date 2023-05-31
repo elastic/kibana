@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '@kbn/react';
 import React from 'react';
 import { useEuiTheme } from '@elastic/eui';
 import { SUCCESSFUL_LABEL } from './monitor_complete_count';

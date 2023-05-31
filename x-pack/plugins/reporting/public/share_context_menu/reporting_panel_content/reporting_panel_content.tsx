@@ -20,7 +20,7 @@ import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n-react';
 import React, { Component, ReactElement } from 'react';
 import { IUiSettingsClient, ThemeServiceSetup, ToastsSetup } from '@kbn/core/public';
 import url from 'url';
-import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint } from '@kbn/react';
 import {
   CSV_REPORT_TYPE,
   PDF_REPORT_TYPE,

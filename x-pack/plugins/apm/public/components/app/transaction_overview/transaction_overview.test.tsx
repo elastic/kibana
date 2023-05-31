@@ -9,7 +9,7 @@ import { queryByLabelText } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
 import { CoreStart } from '@kbn/core/public';
 import React from 'react';
-import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
+import { createKibanaReactContext } from '@kbn/react';
 import { MockApmPluginContextWrapper } from '../../../context/apm_plugin/mock_apm_plugin_context';
 import { ApmServiceContextProvider } from '../../../context/apm_service/apm_service_context';
 import { UrlParamsProvider } from '../../../context/url_params_context/url_params_context';

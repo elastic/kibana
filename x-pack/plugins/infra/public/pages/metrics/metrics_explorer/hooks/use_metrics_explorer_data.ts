@@ -8,7 +8,7 @@
 import { DataViewBase } from '@kbn/es-query';
 import { useInfiniteQuery } from '@tanstack/react-query';
 
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '@kbn/react';
 import { MetricsSourceConfigurationProperties } from '../../../../../common/metrics_sources';
 import {
   MetricsExplorerResponse,

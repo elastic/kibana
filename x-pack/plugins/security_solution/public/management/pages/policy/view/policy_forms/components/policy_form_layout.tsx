@@ -21,7 +21,7 @@ import { i18n } from '@kbn/i18n';
 import { useDispatch } from 'react-redux';
 import { useLocation } from 'react-router-dom';
 import type { ApplicationStart } from '@kbn/core/public';
-import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint } from '@kbn/react';
 import { useIsExperimentalFeatureEnabled } from '../../../../../../common/hooks/use_experimental_features';
 import { useShowEditableFormFields, usePolicyDetailsSelector } from '../../policy_hooks';
 import {

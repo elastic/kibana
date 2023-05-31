@@ -10,12 +10,8 @@ import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { ScopedHistory, CoreStart, CoreTheme } from '@kbn/core/public';
 import { Observable } from 'rxjs';
-import {
-  KibanaContextProvider,
-  KibanaThemeProvider,
-  RedirectAppLinks,
-} from '@kbn/kibana-react-plugin/public';
-
+import { RedirectAppLinks } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/react';
 import { SampleDataTabKibanaProvider } from '@kbn/home-sample-data-tab';
 
 // @ts-ignore

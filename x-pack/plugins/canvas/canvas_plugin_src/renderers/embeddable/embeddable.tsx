@@ -9,7 +9,7 @@ import React, { FC } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import ReactDOM from 'react-dom';
 import { CoreStart } from '@kbn/core/public';
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaThemeProvider } from '@kbn/react';
 import {
   IEmbeddable,
   EmbeddableFactory,

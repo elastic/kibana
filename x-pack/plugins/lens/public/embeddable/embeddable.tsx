@@ -36,7 +36,7 @@ import { DefaultInspectorAdapters, ErrorLike, RenderMode } from '@kbn/expression
 import { map, distinctUntilChanged, skip, debounceTime } from 'rxjs/operators';
 import fastIsEqual from 'fast-deep-equal';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaThemeProvider } from '@kbn/react';
 import {
   ExpressionRendererEvent,
   ReactExpressionRendererType,

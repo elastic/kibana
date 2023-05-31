@@ -11,7 +11,7 @@ import React from 'react';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { useParameter } from '@storybook/addons';
 import { I18nProvider } from '@kbn/i18n-react';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider } from '@kbn/react';
 import { SourceProvider } from '../../../containers/metrics_source';
 
 export const DecorateWithKibanaContext = <StoryFnReactReturnType extends React.ReactNode>(

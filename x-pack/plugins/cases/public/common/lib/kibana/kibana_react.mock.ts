@@ -13,7 +13,7 @@ import { BehaviorSubject } from 'rxjs';
 import type { PublicAppInfo } from '@kbn/core/public';
 import type { RecursivePartial } from '@elastic/eui/src/components/common';
 import { coreMock } from '@kbn/core/public/mocks';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider } from '@kbn/react';
 import type { ILicense } from '@kbn/licensing-plugin/public';
 import type { StartServices } from '../../../types';
 import type { EuiTheme } from '@kbn/kibana-react-plugin/common';

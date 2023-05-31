@@ -16,7 +16,7 @@ import { Router } from 'react-router-dom';
 
 import { themeServiceMock } from '@kbn/core/public/mocks';
 
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider } from '@kbn/react';
 import type { ScopedHistory } from '@kbn/core/public';
 import { CoreScopedHistory } from '@kbn/core/public';
 

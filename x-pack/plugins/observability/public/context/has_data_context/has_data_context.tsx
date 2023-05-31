@@ -9,7 +9,7 @@ import { isEmpty, uniqueId } from 'lodash';
 import React, { createContext, useEffect, useState } from 'react';
 import { useRouteMatch } from 'react-router-dom';
 import { asyncForEach } from '@kbn/std';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '@kbn/react';
 import { FETCH_STATUS } from '@kbn/observability-shared-plugin/public';
 import {
   ALERT_APP,

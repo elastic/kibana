@@ -8,7 +8,7 @@
 import React, { useCallback } from 'react';
 import { EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint } from '@kbn/react';
 import { useKibana } from '../../lib/kibana';
 import { DEFAULT_INDEX_KEY } from '../../../../common/constants';
 import * as i18n from './translations';

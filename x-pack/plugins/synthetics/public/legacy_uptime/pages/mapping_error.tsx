@@ -11,7 +11,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import React from 'react';
 
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '@kbn/react';
 import { useTrackPageview } from '@kbn/observability-shared-plugin/public';
 import { useBreadcrumbs } from '../hooks/use_breadcrumbs';
 

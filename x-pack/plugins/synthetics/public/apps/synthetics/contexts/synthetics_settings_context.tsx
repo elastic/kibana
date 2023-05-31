@@ -13,7 +13,7 @@ import {
   I18nStart,
 } from '@kbn/core/public';
 import React, { createContext, useContext, useMemo } from 'react';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '@kbn/react';
 import { ClientPluginsSetup, ClientPluginsStart } from '../../../plugin';
 import { CLIENT_DEFAULTS, CONTEXT_DEFAULTS } from '../../../../common/constants';
 import { useGetUrlParams } from '../hooks';

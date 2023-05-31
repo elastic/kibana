@@ -7,7 +7,7 @@
 
 import React, { useMemo } from 'react';
 
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '@kbn/react';
 import { useTheme } from '@kbn/observability-shared-plugin/public';
 
 import { useRefreshedRange } from '../../../../hooks';

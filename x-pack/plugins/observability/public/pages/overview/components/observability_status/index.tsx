@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '@kbn/react';
 import { useHasData } from '../../../../hooks/use_has_data';
 import { ObservabilityStatusBoxes } from './observability_status_boxes';
 import { getContent } from './content';

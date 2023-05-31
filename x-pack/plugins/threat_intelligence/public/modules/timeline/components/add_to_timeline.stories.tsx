@@ -8,7 +8,7 @@
 import React from 'react';
 import { Story } from '@storybook/react';
 import { CoreStart } from '@kbn/core/public';
-import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
+import { createKibanaReactContext } from '@kbn/react';
 import { EuiContextMenuPanel } from '@elastic/eui';
 import { mockKibanaTimelinesService } from '../../../mocks/mock_kibana_timelines_service';
 import { generateMockIndicator, Indicator } from '../../../../common/types/indicator';

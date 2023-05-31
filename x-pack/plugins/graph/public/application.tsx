@@ -34,7 +34,7 @@ import './index.scss';
 import('./font_awesome');
 import { SavedObjectsStart } from '@kbn/saved-objects-plugin/public';
 import { SpacesApi } from '@kbn/spaces-plugin/public';
-import { KibanaThemeProvider, toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { KibanaThemeProvider, toMountPoint } from '@kbn/react';
 import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
 import { GraphSavePolicy } from './types';
 import { graphRouter } from './router';

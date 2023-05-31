@@ -13,7 +13,7 @@ import { DiscoverServices } from '../build_services';
 import { LocalStorageMock } from '../__mocks__/local_storage_mock';
 import { uiSettingsMock } from '../__mocks__/ui_settings';
 import { useRowHeightsOptions } from './use_row_heights_options';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider } from '@kbn/react';
 
 const CONFIG_ROW_HEIGHT = 3;
 

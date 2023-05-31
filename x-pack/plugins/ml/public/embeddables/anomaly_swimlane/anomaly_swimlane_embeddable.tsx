@@ -10,7 +10,7 @@ import ReactDOM from 'react-dom';
 import { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { Subject } from 'rxjs';
-import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/react';
 import { Embeddable, IContainer } from '@kbn/embeddable-plugin/public';
 import { EmbeddableSwimLaneContainer } from './embeddable_swim_lane_container_lazy';
 import type { JobId } from '../../../common/types/anomaly_detection_jobs';

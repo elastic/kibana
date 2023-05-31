@@ -15,7 +15,7 @@ import { i18n } from '@kbn/i18n';
 import { I18nProvider } from '@kbn/i18n-react';
 import { StartServicesAccessor } from '@kbn/core/public';
 
-import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/react';
 import { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import {
   IndexPatternTableWithRouter,

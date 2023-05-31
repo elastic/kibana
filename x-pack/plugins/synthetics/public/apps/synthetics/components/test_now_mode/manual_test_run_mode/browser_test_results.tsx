@@ -7,7 +7,7 @@
 
 import React, { Fragment, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
-import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint } from '@kbn/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { kibanaService } from '../../../../../utils/kibana_service';
 import { useBrowserRunOnceMonitors } from '../hooks/use_browser_run_once_monitors';

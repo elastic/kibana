@@ -7,7 +7,7 @@
 
 import { EuiPageHeader, EuiSuperDatePicker, OnRefreshChangeProps } from '@elastic/eui';
 import React, { useContext, useCallback, useMemo } from 'react';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '@kbn/react';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import { useMonitoringTimeContainerContext } from '../../application/hooks/use_monitoring_time';
 import { GlobalStateContext } from '../../application/contexts/global_state_context';

@@ -10,7 +10,7 @@ import React, { Component } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 import { get } from 'lodash';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider } from '@kbn/react';
 import {
   Capabilities,
   OverlayStart,

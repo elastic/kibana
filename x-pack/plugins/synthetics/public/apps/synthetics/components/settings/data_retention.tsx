@@ -19,7 +19,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '@kbn/react';
 import { PolicyLink, PolicyNameLabel } from './policy_link';
 import { useGetIlmPolicies } from './hooks/use_get_ilm_policies';
 

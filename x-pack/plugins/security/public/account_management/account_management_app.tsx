@@ -22,7 +22,7 @@ import type {
 import { AppNavLinkStatus } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { I18nProvider } from '@kbn/i18n-react';
-import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/react';
 
 import type { AuthenticationServiceSetup } from '../authentication';
 import type { SecurityApiClients } from '../components';

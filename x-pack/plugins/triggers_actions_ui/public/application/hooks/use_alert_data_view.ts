@@ -6,7 +6,7 @@
  */
 
 import { DataView } from '@kbn/data-views-plugin/common';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '@kbn/react';
 import { BASE_RAC_ALERTS_API_PATH } from '@kbn/rule-registry-plugin/common';
 import type { ValidFeatureId } from '@kbn/rule-data-utils';
 import useAsync from 'react-use/lib/useAsync';

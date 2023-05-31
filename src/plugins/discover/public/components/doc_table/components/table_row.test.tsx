@@ -13,7 +13,7 @@ import { setDocViewsRegistry } from '../../../kibana_services';
 import { createFilterManagerMock } from '@kbn/data-plugin/public/query/filter_manager/filter_manager.mock';
 import { dataViewWithTimefieldMock } from '../../../__mocks__/data_view_with_timefield';
 import { DocViewsRegistry } from '../../../services/doc_views/doc_views_registry';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider } from '@kbn/react';
 import { discoverServiceMock } from '../../../__mocks__/services';
 import { DocViewer } from '../../../services/doc_views/components/doc_viewer';
 

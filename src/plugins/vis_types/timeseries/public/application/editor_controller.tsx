@@ -15,7 +15,7 @@ import type {
   IEditorController,
   EditorRenderProps,
 } from '@kbn/visualizations-plugin/public';
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaThemeProvider } from '@kbn/react';
 import { getUISettings, getI18n, getCoreStart, getDataViewsStart } from '../services';
 import { VisEditor } from './components/vis_editor_lazy';
 import type { TimeseriesVisParams } from '../types';

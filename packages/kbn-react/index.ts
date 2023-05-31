@@ -23,3 +23,7 @@ export { createNotifications } from './src/notifications';
 
 export { toMountPoint, MountPointPortal } from './src/util';
 export type { ToMountPointOptions } from './src/util';
+
+export { wrapWithTheme, KibanaThemeProvider } from './src/theme';
+
+export { useExecutionContext } from './src/use_execution_context';

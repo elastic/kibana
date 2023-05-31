@@ -6,7 +6,7 @@
  */
 import { EuiTabbedContentProps } from '@elastic/eui';
 import { useMemo } from 'react';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '@kbn/react';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import React from 'react';
 import { EuiSpacer } from '@elastic/eui';

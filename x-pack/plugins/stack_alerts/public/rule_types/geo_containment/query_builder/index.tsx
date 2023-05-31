@@ -14,7 +14,7 @@ import type { RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plu
 import type { DataView, DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { Query } from '@kbn/es-query';
 import { QueryStringInput } from '@kbn/unified-search-plugin/public';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '@kbn/react';
 import type { HttpSetup } from '@kbn/core-http-browser';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-server';

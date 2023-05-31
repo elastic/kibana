@@ -23,7 +23,7 @@ import {
 } from '@elastic/eui';
 import './open_options_popover.scss';
 import { Observable } from 'rxjs';
-import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/react';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { DiscoverServices } from '../../../../build_services';
 import { DOC_TABLE_LEGACY } from '../../../../../common';

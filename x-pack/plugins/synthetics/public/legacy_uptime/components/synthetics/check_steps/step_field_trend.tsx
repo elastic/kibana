@@ -12,7 +12,7 @@ import moment from 'moment';
 import { useSelector } from 'react-redux';
 import { AllSeries, createExploratoryViewUrl } from '@kbn/exploratory-view-plugin/public';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '@kbn/react';
 import { JourneyStep } from '../../../../../common/runtime_types';
 import { useUptimeStartPlugins } from '../../../contexts/uptime_startup_plugins_context';
 import { selectDynamicSettings } from '../../../state/selectors';

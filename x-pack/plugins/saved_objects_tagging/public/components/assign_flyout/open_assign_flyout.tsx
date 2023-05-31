@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiDelayRender, EuiLoadingSpinner } from '@elastic/eui';
 import { NotificationsStart, OverlayStart, ThemeServiceStart, OverlayRef } from '@kbn/core/public';
-import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint } from '@kbn/react';
 import { ITagAssignmentService, ITagsCache } from '../../services';
 
 export interface GetAssignFlyoutOpenerOptions {

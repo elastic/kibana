@@ -44,7 +44,7 @@ import {
 } from '@kbn/core/public';
 
 import { BatchedFunc, BfetchPublicSetup, DISABLE_BFETCH } from '@kbn/bfetch-plugin/public';
-import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint } from '@kbn/react';
 import { AbortError, KibanaServerError } from '@kbn/kibana-utils-plugin/public';
 import {
   ENHANCED_ES_SEARCH_STRATEGY,

@@ -10,7 +10,7 @@ import { useReducer, useCallback } from 'react';
 import { EventEmitter } from 'events';
 
 import { Vis } from '@kbn/visualizations-plugin/public';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '@kbn/react';
 import { createEditorStateReducer, initEditorState, EditorVisState } from './reducers';
 import { EditorStateActionTypes } from './constants';
 import { EditorAction } from './actions';

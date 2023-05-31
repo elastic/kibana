@@ -17,7 +17,7 @@ import type {
   IBasePath,
 } from '@kbn/core/public';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaThemeProvider } from '@kbn/react';
 
 import { parseNext } from '../../../common/parse_next';
 import { AuthenticationStatePage } from '../components';

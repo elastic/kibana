@@ -9,7 +9,7 @@ import { render } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
 import { CoreStart } from '@kbn/core/public';
 import React, { ReactNode } from 'react';
-import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
+import { createKibanaReactContext } from '@kbn/react';
 import { License } from '@kbn/licensing-plugin/common/license';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { MockApmPluginContextWrapper } from '../../../context/apm_plugin/mock_apm_plugin_context';

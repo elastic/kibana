@@ -6,7 +6,7 @@
  */
 import { CoreStart } from '@kbn/core/public';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
-import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
+import { createKibanaReactContext } from '@kbn/react';
 import { MlLocatorDefinition } from '@kbn/ml-plugin/public';
 import { UrlService } from '@kbn/share-plugin/common/url_service';
 import React, { ReactNode } from 'react';

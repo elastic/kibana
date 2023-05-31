@@ -10,7 +10,7 @@ import { useEffect } from 'react';
 
 import type { ChromeBadge } from '@kbn/core-chrome-browser';
 import type { CoreStart } from '@kbn/core/public';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '@kbn/react';
 
 export type { ChromeBadge };
 

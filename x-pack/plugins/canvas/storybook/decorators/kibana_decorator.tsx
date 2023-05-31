@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider } from '@kbn/react';
 
 const settings = new Map();
 settings.set('darkMode', true);

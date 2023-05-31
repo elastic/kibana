@@ -12,7 +12,7 @@ import { findTestSubject } from '@elastic/eui/lib/test';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { getRenderCellValueFn } from './get_render_cell_value';
 import { dataViewMock } from '../../__mocks__/data_view';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider } from '@kbn/react';
 import { buildDataTableRecord } from '../../utils/build_data_record';
 import { EsHitRecord } from '../../types';
 

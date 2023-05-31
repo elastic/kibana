@@ -9,7 +9,7 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 import { coreMock } from '@kbn/core/public/mocks';
-import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
+import { createKibanaReactContext } from '@kbn/react';
 import { FieldFormat } from '@kbn/field-formats-plugin/common';
 
 import { PercentFormatEditor } from './percent';

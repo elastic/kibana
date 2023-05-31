@@ -21,7 +21,7 @@ import {
   EUI_MODAL_CANCEL_BUTTON,
 } from '@elastic/eui';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
-import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint } from '@kbn/react';
 
 import { pluginServices } from '../services/plugin_services';
 import { createConfirmStrings, resetConfirmStrings } from './_dashboard_listing_strings';

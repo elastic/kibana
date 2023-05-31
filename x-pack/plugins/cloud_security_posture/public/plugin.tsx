@@ -6,7 +6,7 @@
  */
 import React, { lazy, Suspense } from 'react';
 import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider } from '@kbn/react';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { CspLoadingState } from './components/csp_loading_state';
 import type { CspRouterProps } from './application/csp_router';

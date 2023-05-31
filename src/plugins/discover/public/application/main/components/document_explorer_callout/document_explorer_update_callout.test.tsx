@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { mountWithIntl, findTestSubject } from '@kbn/test-jest-helpers';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider } from '@kbn/react';
 import {
   CALLOUT_STATE_KEY,
   DocumentExplorerUpdateCallout,

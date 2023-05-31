@@ -15,7 +15,7 @@ import {
   DefaultEditorAggParams as PureDefaultEditorAggParams,
   DefaultEditorAggParamsProps,
 } from './agg_params';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider } from '@kbn/react';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { EditorVisState } from './sidebar/state/reducers';
 

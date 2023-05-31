@@ -7,7 +7,7 @@
 
 import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '@kbn/react';
 import {
   EuiContextMenu,
   EuiContextMenuPanelDescriptor,

@@ -224,7 +224,7 @@
             "tags": [],
             "label": "toMountPoint",
             "description": [
-              "\nHandler from the '@kbn/kibana-react-plugin/public' Plugin\n\n```\nimport { toMountPoint } from '@kbn/kibana-react-plugin/public';\n```"
+              "\nHandler from the '@kbn/kibana-react-plugin/public' Plugin\n\n```\nimport { toMountPoint } from '@kbn/react';\n```"
             ],
             "signature": [
               "(node: React.ReactNode, options?: { theme$: ",

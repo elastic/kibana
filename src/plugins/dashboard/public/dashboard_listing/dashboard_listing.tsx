@@ -17,7 +17,8 @@ import {
 } from '@kbn/content-management-table-list';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
-import { toMountPoint, useExecutionContext } from '@kbn/kibana-react-plugin/public';
+import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint } from '@kbn/react';
 import type { SavedObjectsFindOptionsReference, SimpleSavedObject } from '@kbn/core/public';
 
 import {

@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { defaults, map, omit } from 'lodash';
 import React, { useCallback, useEffect } from 'react';
 import { CoreStart } from '@kbn/core/public';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '@kbn/react';
 import {
   ForLastExpression,
   TIME_UNITS,

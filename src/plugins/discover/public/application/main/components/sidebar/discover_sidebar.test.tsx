@@ -19,7 +19,7 @@ import {
 import type { AggregateQuery, Query } from '@kbn/es-query';
 import { createDiscoverServicesMock } from '../../../../__mocks__/services';
 import { stubLogstashDataView } from '@kbn/data-plugin/common/stubs';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider } from '@kbn/react';
 import { BehaviorSubject } from 'rxjs';
 import { FetchStatus } from '../../../types';
 import { AvailableFields$, DataDocuments$ } from '../../services/discover_data_state_container';

@@ -15,7 +15,7 @@ import useMount from 'react-use/lib/useMount';
 import type { Query } from '@kbn/es-query';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { IUiSettingsClient } from '@kbn/core/public';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '@kbn/react';
 import { FilterRow } from './filter';
 import { AggParamEditorProps } from '../agg_param_props';
 

@@ -8,7 +8,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { useHistory } from 'react-router-dom';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '@kbn/react';
 import {
   createKbnUrlStateStorage,
   withNotifyOnErrors,

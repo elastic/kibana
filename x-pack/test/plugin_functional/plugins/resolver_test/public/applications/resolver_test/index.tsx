@@ -13,7 +13,7 @@ import { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { useMemo } from 'react';
 import styled from 'styled-components';
 import { I18nProvider } from '@kbn/i18n-react';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider } from '@kbn/react';
 import {
   DataAccessLayer,
   ResolverPluginSetup,

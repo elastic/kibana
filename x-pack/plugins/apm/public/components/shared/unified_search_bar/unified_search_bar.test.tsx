@@ -8,7 +8,7 @@
 import { createMemoryHistory, MemoryHistory } from 'history';
 import React from 'react';
 import { Router, useLocation } from 'react-router-dom';
-import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
+import { createKibanaReactContext } from '@kbn/react';
 import { MockApmPluginContextWrapper } from '../../../context/apm_plugin/mock_apm_plugin_context';
 import * as useFetcherHook from '../../../hooks/use_fetcher';
 import * as useApmDataViewHook from '../../../hooks/use_apm_data_view';

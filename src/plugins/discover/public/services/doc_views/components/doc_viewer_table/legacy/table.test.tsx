@@ -12,7 +12,7 @@ import { findTestSubject } from '@elastic/eui/lib/test';
 import { DocViewerLegacyTable } from './table';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { DocViewRenderProps } from '../../../doc_views_types';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider } from '@kbn/react';
 import { DiscoverServices } from '../../../../../build_services';
 import { buildDataTableRecord } from '../../../../../utils/build_data_record';
 

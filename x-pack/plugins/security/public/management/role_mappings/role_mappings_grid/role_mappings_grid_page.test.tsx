@@ -11,7 +11,7 @@ import React from 'react';
 
 import type { CoreStart } from '@kbn/core/public';
 import { coreMock, scopedHistoryMock } from '@kbn/core/public/mocks';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider } from '@kbn/react';
 import { findTestSubject, mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 
 import { rolesAPIClientMock } from '../../roles/index.mock';

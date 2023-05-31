@@ -5,7 +5,7 @@
  * 2.0.
  */
 import moment from 'moment';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '@kbn/react';
 import { useParams, generatePath } from 'react-router-dom';
 import { useSelectedLocation } from '../../monitor_details/hooks/use_selected_location';
 import { TEST_RUN_DETAILS_ROUTE } from '../../../../../../common/constants/ui';

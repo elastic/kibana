@@ -8,7 +8,7 @@
 import React from 'react';
 import { Provider as ReduxProvider } from 'react-redux';
 import { CoreStart } from '@kbn/core/public';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider } from '@kbn/react';
 import { store } from '../../../state';
 import { ClientPluginsStart } from '../../../../plugin';
 import { kibanaService } from '../../../state/kibana_service';

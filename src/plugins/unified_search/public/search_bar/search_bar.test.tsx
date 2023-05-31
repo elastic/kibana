@@ -9,7 +9,7 @@
 import React from 'react';
 import SearchBar from './search_bar';
 
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider } from '@kbn/react';
 import { indexPatternEditorPluginMock as dataViewEditorPluginMock } from '@kbn/data-view-editor-plugin/public/mocks';
 import { I18nProvider } from '@kbn/i18n-react';
 

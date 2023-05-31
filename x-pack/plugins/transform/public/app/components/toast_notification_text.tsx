@@ -21,7 +21,7 @@ import { i18n } from '@kbn/i18n';
 
 import { CoreStart } from '@kbn/core/public';
 
-import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint } from '@kbn/react';
 
 const MAX_SIMPLE_MESSAGE_LENGTH = 140;
 

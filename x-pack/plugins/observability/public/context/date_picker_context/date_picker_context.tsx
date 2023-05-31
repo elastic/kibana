@@ -9,7 +9,7 @@ import React, { createContext, useState, useMemo, useCallback } from 'react';
 import useMount from 'react-use/lib/useMount';
 import { useLocation, useHistory } from 'react-router-dom';
 import { parse } from 'query-string';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '@kbn/react';
 import { fromQuery, ObservabilityPublicPluginsStart, toQuery } from '../..';
 import { getAbsoluteTime } from '../../utils/date';
 

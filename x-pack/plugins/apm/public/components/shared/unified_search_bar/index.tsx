@@ -15,7 +15,7 @@ import {
 } from '@kbn/es-query';
 import { useHistory, useLocation } from 'react-router-dom';
 import deepEqual from 'fast-deep-equal';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '@kbn/react';
 import { EuiSkeletonRectangle } from '@elastic/eui';
 import qs from 'query-string';
 import { DataView, UI_SETTINGS } from '@kbn/data-plugin/common';

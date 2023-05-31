@@ -10,7 +10,7 @@ import React from 'react';
 import { OverlayStart } from '@kbn/core/public';
 import { EuiFieldText, EuiModalBody, EuiButton } from '@elastic/eui';
 import { useState } from 'react';
-import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint } from '@kbn/react';
 import {
   ActionExecutionContext,
   createAction,

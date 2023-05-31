@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '@kbn/react';
 import { DiscoverServices } from '../build_services';
 
 export const useDiscoverServices = () => useKibana<DiscoverServices>().services;

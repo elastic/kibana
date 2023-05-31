@@ -8,7 +8,7 @@
 
 import React from 'react';
 
-import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint } from '@kbn/react';
 
 import { pluginServices } from '../../../services/plugin_services';
 import { DashboardSettings } from '../../component/settings/settings_flyout';

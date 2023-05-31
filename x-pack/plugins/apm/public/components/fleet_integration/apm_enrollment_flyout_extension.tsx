@@ -10,7 +10,7 @@ import { EuiButton, EuiText, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { AgentEnrollmentFlyoutFinalStepExtension } from '@kbn/fleet-plugin/public';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '@kbn/react';
 import { ApmPluginStartDeps } from '../../plugin';
 
 function StepComponent() {

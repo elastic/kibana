@@ -6,7 +6,7 @@
  */
 
 import { useState, useEffect } from 'react';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '@kbn/react';
 import { AuthenticatedUser } from '@kbn/security-plugin/common/model';
 import { ApmPluginStartDeps } from '../plugin';
 

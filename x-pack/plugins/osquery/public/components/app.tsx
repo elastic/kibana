@@ -14,7 +14,7 @@ import {
   EuiPageContent_Deprecated as EuiPageContent,
 } from '@elastic/eui';
 
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '@kbn/react';
 import useObservable from 'react-use/lib/useObservable';
 import { of } from 'rxjs';
 import { Container, Wrapper } from './layouts';

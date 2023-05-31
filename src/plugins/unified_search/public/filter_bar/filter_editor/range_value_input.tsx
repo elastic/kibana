@@ -11,7 +11,7 @@ import { EuiFormControlLayoutDelimited } from '@elastic/eui';
 import { InjectedIntl, injectI18n } from '@kbn/i18n-react';
 import { get } from 'lodash';
 import React from 'react';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '@kbn/react';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
 import { ValueInputType } from './value_input_type';
 

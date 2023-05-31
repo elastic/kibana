@@ -61,6 +61,7 @@
     "@kbn/core-http-server",
     "@kbn/core-http-server-mocks",
     "@kbn/core-user-settings-server",
+    "@kbn/react",
   ],
   "exclude": [
     "target/**/*",

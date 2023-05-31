@@ -8,7 +8,7 @@
 import React, { createContext, useContext, Context, useState, useCallback, useMemo } from 'react';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '@kbn/react';
 import { DataViewInsufficientAccessError } from '@kbn/data-views-plugin/common';
 import { AppDataType } from '../types';
 import { ExploratoryViewPublicPluginsStart } from '../../../../plugin';

@@ -21,7 +21,7 @@ import {
 import { EuiTitle } from '@elastic/eui';
 import { RangeFilterParams } from '@kbn/es-query';
 
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '@kbn/react';
 import { useActiveCursor } from '@kbn/charts-plugin/public';
 
 import type { IInterpreterRenderHandlers } from '@kbn/expressions-plugin/common';

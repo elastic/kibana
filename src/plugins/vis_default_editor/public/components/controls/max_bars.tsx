@@ -10,7 +10,7 @@ import React, { useCallback, useEffect } from 'react';
 import { EuiFormRow, EuiFieldNumber, EuiFieldNumberProps, EuiIconTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '@kbn/react';
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import { AggParamEditorProps } from '../agg_param_props';
 

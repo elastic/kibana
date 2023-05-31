@@ -10,7 +10,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiSuperDatePicker } from '@elastic/eui';
 import type { IUnifiedSearchPluginServices } from '@kbn/unified-search-plugin/public';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import type { EuiSuperDatePickerRecentRange } from '@elastic/eui';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '@kbn/react';
 import type {
   DurationRange,
   OnRefreshChangeProps,

@@ -7,7 +7,7 @@
 import React, { useCallback, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFlexGroup, EuiFlexItem, EuiButton } from '@elastic/eui';
-import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint } from '@kbn/react';
 import type { BulkOperationError } from '@kbn/alerting-plugin/server';
 import { useKibana } from '../../common/lib/kibana';
 import {

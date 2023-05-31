@@ -15,7 +15,7 @@ import useObservable from 'react-use/lib/useObservable';
 import { I18nProvider } from '@kbn/i18n-react';
 import { CoreStart } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider } from '@kbn/react';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 
 type UiRender = (ui: React.ReactElement, options?: RenderOptions) => RenderResult;

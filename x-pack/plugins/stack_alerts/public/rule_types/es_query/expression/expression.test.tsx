@@ -25,7 +25,7 @@ import { Subject } from 'rxjs';
 import { ISearchSource } from '@kbn/data-plugin/common';
 import { IUiSettingsClient } from '@kbn/core/public';
 import { findTestSubject } from '@elastic/eui/lib/test';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider } from '@kbn/react';
 import { act } from 'react-dom/test-utils';
 import { indexPatternEditorPluginMock as dataViewEditorPluginMock } from '@kbn/data-view-editor-plugin/public/mocks';
 import { ReactWrapper } from 'enzyme';

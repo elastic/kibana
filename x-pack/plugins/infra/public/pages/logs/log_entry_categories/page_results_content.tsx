@@ -12,7 +12,7 @@ import moment from 'moment';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import useInterval from 'react-use/lib/useInterval';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '@kbn/react';
 import { MLJobsAwaitingNodeWarning, ML_PAGES, useMlHref } from '@kbn/ml-plugin/public';
 import { useTrackPageview } from '@kbn/observability-shared-plugin/public';
 import { TimeRange } from '../../../../common/time/time_range';

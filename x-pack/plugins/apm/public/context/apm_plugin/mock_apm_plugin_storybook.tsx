@@ -6,7 +6,7 @@
  */
 import { CoreStart } from '@kbn/core/public';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
-import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
+import { createKibanaReactContext } from '@kbn/react';
 import { MlLocatorDefinition } from '@kbn/ml-plugin/public';
 import { enableInspectEsQueries } from '@kbn/observability-plugin/common';
 import { UI_SETTINGS } from '@kbn/observability-shared-plugin/public/hooks/use_kibana_ui_settings';

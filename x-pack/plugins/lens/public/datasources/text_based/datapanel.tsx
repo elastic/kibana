@@ -14,7 +14,7 @@ import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { DatatableColumn, ExpressionsStart } from '@kbn/expressions-plugin/public';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider } from '@kbn/react';
 import {
   FieldList,
   FieldListFilters,

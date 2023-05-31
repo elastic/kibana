@@ -9,7 +9,7 @@ import React, { useMemo, useState } from 'react';
 import { EuiBadge, EuiBadgeGroup, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useHistory } from 'react-router-dom';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '@kbn/react';
 import { Ping } from '../../../../common/runtime_types/ping';
 import { MonitorSummary } from '../../../../common/runtime_types/monitor';
 import { useFilterUpdate } from '../../hooks/use_filter_update';

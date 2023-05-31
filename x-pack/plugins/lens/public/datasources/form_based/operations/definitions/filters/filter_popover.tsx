@@ -13,7 +13,7 @@ import type { Query } from '@kbn/es-query';
 // Need to keep it separate to make it work Jest mocks in dimension_panel tests
 // import { QueryInput } from '../../../../shared_components/query_input';
 import { isQueryValid, QueryInput } from '@kbn/visualization-ui-components/public';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '@kbn/react';
 import { LENS_APP_NAME } from '../../../../../../common/constants';
 import { IndexPattern } from '../../../../../types';
 import { FilterValue, defaultLabel } from '.';

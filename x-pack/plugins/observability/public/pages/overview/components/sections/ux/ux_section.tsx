@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '@kbn/react';
 import { AllSeries } from '@kbn/exploratory-view-plugin/public';
 import { SERVICE_NAME, TRANSACTION_DURATION } from '@kbn/observability-shared-plugin/common';
 import { FETCH_STATUS, useFetcher } from '@kbn/observability-shared-plugin/public';

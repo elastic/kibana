@@ -7,7 +7,7 @@
 
 import { AppMountParameters, CoreStart, CoreTheme, MountPoint } from '@kbn/core/public';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
-import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/react';
 import React, { useMemo } from 'react';
 import ReactDOM from 'react-dom';
 import { Redirect, Router, Switch } from 'react-router-dom';

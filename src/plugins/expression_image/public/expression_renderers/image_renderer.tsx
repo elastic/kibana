@@ -15,7 +15,7 @@ import { i18n } from '@kbn/i18n';
 import { Observable } from 'rxjs';
 import { CoreTheme } from '@kbn/core/public';
 import { CoreSetup } from '@kbn/core/public';
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaThemeProvider } from '@kbn/react';
 import { getElasticLogo, defaultTheme$, isValidUrl } from '@kbn/presentation-util-plugin/common';
 import { ImageRendererConfig } from '../../common/types';
 
