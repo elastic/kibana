@@ -58,7 +58,6 @@
     "@kbn/shared-ux-button-toolbar",
     "@kbn/core-saved-objects-server",
     "@kbn/core-saved-objects-utils-server",
-    "@kbn/ui-theme",
   ],
   "exclude": [
     "target/**/*",
