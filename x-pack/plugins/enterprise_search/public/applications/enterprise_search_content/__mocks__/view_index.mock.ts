@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import {ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE} from '../../../../common/constants';
+import { ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE } from '../../../../common/constants';
 
 import {
   ConnectorStatus,
@@ -17,7 +17,13 @@ import {
   SyncStatus,
 } from '../../../../common/types/connectors';
 
-import {ApiViewIndex, ConnectorViewIndex, CrawlerViewIndex, IngestionMethod, IngestionStatus,} from '../types';
+import {
+  ApiViewIndex,
+  ConnectorViewIndex,
+  CrawlerViewIndex,
+  IngestionMethod,
+  IngestionStatus,
+} from '../types';
 
 export const apiIndex: ApiViewIndex = {
   count: 1,
