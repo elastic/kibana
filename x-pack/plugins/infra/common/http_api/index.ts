@@ -20,4 +20,5 @@ export * from './infra';
  */
 export * from './latest';
 export * as inventoryViewsV1 from './inventory_views/v1';
+export * as logViewsV1 from './log_views/v1';
 export * as metricsExplorerViewsV1 from './metrics_explorer_views/v1';

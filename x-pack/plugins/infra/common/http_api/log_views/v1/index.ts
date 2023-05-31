@@ -5,6 +5,5 @@
  * 2.0.
  */
 
-export * from './inventory_views/v1';
-export * from './log_views/v1';
-export * from './metrics_explorer_views/v1';
+export * from './get_log_view';
+export * from './put_log_view';

@@ -6,12 +6,14 @@
  */
 
 import * as rt from 'io-ts';
-import { logViewRT } from '../../log_views';
+import { logViewRT } from '../../../log_views';
 
 export const getLogViewRequestParamsRT = rt.type({
   // the id of the log view
   logViewId: rt.string,
 });
+
+export type GetLogViewRequestParams = rt.TypeOf<typeof getLogViewRequestParamsRT>;
 
 export const getLogViewResponsePayloadRT = rt.type({
   data: logViewRT,

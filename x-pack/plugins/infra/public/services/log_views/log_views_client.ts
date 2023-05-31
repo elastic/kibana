@@ -12,9 +12,9 @@ import { DataViewsContract } from '@kbn/data-views-plugin/public';
 import { lastValueFrom } from 'rxjs';
 import {
   getLogViewResponsePayloadRT,
-  getLogViewUrl,
   putLogViewRequestPayloadRT,
-} from '../../../common/http_api/log_views';
+} from '../../../common/http_api/latest';
+import { getLogViewUrl } from '../../../common/http_api/log_views';
 import {
   FetchLogViewError,
   FetchLogViewStatusError,
