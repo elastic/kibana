@@ -46,8 +46,8 @@ function NonDataStreamIndicesCallout({ data }: { data?: DiagnosticsBundle }) {
   return (
     <>
       <EuiCallOut title="Legacy indices" color="warning" iconType="warning">
-        The following indices are not backed by a data stream and should
-        possibly be deleted:{' '}
+        The following indices are not backed by a data stream. Please consider
+        deleting them to resolve any potential issues
         {data?.nonDataStreamIndices.map((name) => (
           <EuiBadge>{name}</EuiBadge>
         ))}
