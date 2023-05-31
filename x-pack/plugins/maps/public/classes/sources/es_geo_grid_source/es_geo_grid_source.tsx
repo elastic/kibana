@@ -25,7 +25,6 @@ import {
   ES_GEO_FIELD_TYPE,
   GEOCENTROID_AGG_NAME,
   GEOTILE_GRID_AGG_NAME,
-  GIS_API_PATH,
   GRID_RESOLUTION,
   MVT_GETGRIDTILE_API_PATH,
   RENDER_AS,
@@ -574,7 +573,7 @@ export class ESGeoGridSource extends AbstractESAggSource implements IMvtVectorSo
     searchSource.setField('aggs', this.getValueAggsDsl(dataView));
 
     const mvtUrlServicePath = getHttp().basePath.prepend(
-      `/${GIS_API_PATH}/${MVT_GETGRIDTILE_API_PATH}/{z}/{x}/{y}.pbf`
+      `${MVT_GETGRIDTILE_API_PATH}/{z}/{x}/{y}.pbf`
     );
 
     const tileUrlParams = getTileUrlParams({
