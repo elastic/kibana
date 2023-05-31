@@ -19,11 +19,11 @@ params_property_slo_burn_rate:
       type: object
       properties:
         value:
-          description: the duration value
+          description: The duration value
           type: number
           example: 6
         unit:
-          description: the duration unit
+          description: The duration unit
           type: string
           example: 'h'
     shortWindow:
@@ -31,10 +31,10 @@ params_property_slo_burn_rate:
       type: object
       properties:
         value:
-          description: the duration value
+          description: The duration value
           type: number
           example: 30
         unit:
-          description: the duration unit
+          description: The duration unit
           type: string
           example: 'm'
