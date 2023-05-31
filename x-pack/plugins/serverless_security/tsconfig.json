@@ -25,6 +25,8 @@
     "@kbn/kibana-react-plugin",
     "@kbn/core-chrome-browser",
     "@kbn/i18n-react",
+    "@kbn/i18n",
+    "@kbn/shared-ux-page-kibana-template",
     "@kbn/features-plugin",
     "@kbn/ess-security",
   ]

@@ -8,12 +8,14 @@
 import { schema, TypeOf } from '@kbn/config-schema';
 
 export const productLineId = schema.oneOf([
+  schema.literal('securityEssentials'),
+  schema.literal('securityComplete'),
   schema.literal('endpointEssentials'),
-  schema.literal('cloudEssentials'),
+  schema.literal('endpointComplete'),
 ]);
 export type SecurityProductLineId = TypeOf<typeof productLineId>;
 
 export const productLineIds = schema.arrayOf<SecurityProductLineId>(productLineId, {
-  defaultValue: ['endpointEssentials'],
+  defaultValue: ['securityEssentials'],
 });
 export type SecurityProductLineIds = TypeOf<typeof productLineIds>;

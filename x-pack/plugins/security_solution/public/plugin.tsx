@@ -29,6 +29,7 @@ import type {
   SubPlugins,
   StartedSubPlugins,
   StartPluginsDependencies,
+  GetStartedComponent,
 } from './types';
 import { initTelemetry, TelemetryService } from './common/lib/telemetry';
 import { KibanaServices } from './common/lib/kibana/services';
@@ -90,6 +91,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
   readonly experimentalFeatures: ExperimentalFeatures;
   private upsellingService: UpsellingService;
   private isSidebarEnabled$: BehaviorSubject<boolean>;
+  private getStartedComponent?: GetStartedComponent;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.config = this.initializerContext.config.get<SecuritySolutionUiConfigType>();
@@ -174,6 +176,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         },
         savedObjectsManagement: startPluginsDeps.savedObjectsManagement,
         isSidebarEnabled$: this.isSidebarEnabled$,
+        getStartedComponent: this.getStartedComponent,
         upselling: this.upsellingService,
         telemetry: this.telemetry.start(),
       };
@@ -319,6 +322,9 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       getNavLinks$: () => navLinks$,
       setIsSidebarEnabled: (isSidebarEnabled: boolean) =>
         this.isSidebarEnabled$.next(isSidebarEnabled),
+      setGetStartedPage: (getStartedComponent: GetStartedComponent) => {
+        this.getStartedComponent = getStartedComponent;
+      },
     };
   }
 

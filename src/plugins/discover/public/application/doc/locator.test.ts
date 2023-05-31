@@ -31,4 +31,17 @@ describe('Discover single doc url generator', () => {
       `"#/doc/c367b774-a4c2-11ea-bb37-0242ac130002/mock-row-index?id=mock-row-id"`
     );
   });
+
+  it('should URL encode rowId', async () => {
+    const { locator } = setup();
+    const { path } = await locator.getLocation({
+      index: dataViewId,
+      rowId: 'id with special characters: &?#+',
+      rowIndex: 'mock-row-index',
+      referrer: 'mock-referrer',
+    });
+    expect(path).toMatchInlineSnapshot(
+      `"#/doc/c367b774-a4c2-11ea-bb37-0242ac130002/mock-row-index?id=id%20with%20special%20characters%3A%20%26%3F%23%2B"`
+    );
+  });
 });
