@@ -6,8 +6,5 @@
  * Side Public License, v 1.
  */
 
-export * from './trigger_contract';
-export * from './trigger_internal';
-export * from './row_click_trigger';
-export * from './default_trigger';
-export * from '../../common/triggers';
+export { TriggerContract } from './trigger_contract';
+export { TriggerInternal } from './trigger_internal';

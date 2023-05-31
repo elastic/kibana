@@ -23,7 +23,7 @@ export type {
   Presentable as UiActionsPresentable,
   PresentableGrouping as UiActionsPresentableGrouping,
 } from '@kbn/ui-actions-browser';
-export type { Trigger, RowClickContext } from './triggers';
+export type { Trigger, RowClickContext } from '@kbn/ui-actions-browser';
 export {
   VISUALIZE_FIELD_TRIGGER,
   visualizeFieldTrigger,
@@ -33,7 +33,7 @@ export {
   rowClickTrigger,
   CATEGORIZE_FIELD_TRIGGER,
   categorizeFieldTrigger,
-} from './triggers';
+} from '@kbn/ui-actions-browser';
 export type { VisualizeFieldContext, CategorizeFieldContext } from './types';
 export {
   ACTION_VISUALIZE_FIELD,
