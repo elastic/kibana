@@ -59,7 +59,7 @@ const makeManagementFeature = (exportTypes: ExportTypeDefinition[]) => {
   };
 };
 
-const makeManagementFeaturePdf = (exportTypes: PdfExportType[]) => {
+const makeManagementFeaturePdf = () => {
   return {
     id: 'management',
     checkLicense: (license?: ILicense) => {
@@ -124,7 +124,7 @@ const makeExportTypeFeaturePdf = (exportType: PdfExportType) => {
   };
 };
 
-const makeExportTypeFeature = (exportType: ExportTypeDefinition) => {
+const makeExportTypeFeature = (exportType: ExportTypeDefinition | PdfExportType) => {
   return {
     id: exportType.id,
     checkLicense: (license?: ILicense) => {
@@ -167,9 +167,7 @@ export function checkLicense(
   // @ts-ignore don't need to conform to PdfExportType
   const exportTypes = Array.from(exportTypesRegistry.getAll());
   const reportingFeatures = [
-    // @ts-ignore don't need to conform to PdfExportType
     ...exportTypes.map(makeExportTypeFeature),
-    // @ts-ignore don't need to conform to PdfExportType
     makeManagementFeature(exportTypes),
   ];
 
@@ -182,7 +180,7 @@ export function checkLicense(
 export function checkLicenseExportType(exportTypeRegistry: PdfExportType[], license?: ILicense) {
   const reportingFeatures = [
     ...exportTypeRegistry.map(makeExportTypeFeaturePdf),
-    makeManagementFeaturePdf(exportTypeRegistry),
+    makeManagementFeaturePdf(),
   ];
 
   return reportingFeatures.reduce((result, feature) => {

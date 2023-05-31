@@ -266,8 +266,6 @@ export class ExecuteReportTask implements ReportingTask {
       throw new Error(`Task run function factories have not been called yet!`);
     }
 
-    console.log('\n\n\n\n pdf export type', pdfExport);
-
     // get the run_task function
     const runner =
       task.jobtype !== 'printable_pdf_v2'
@@ -281,7 +279,7 @@ export class ExecuteReportTask implements ReportingTask {
     const queueTimeout = durationToNumber(this.config.queue.timeout);
     return task.jobtype === 'printable_pdf_v2'
       ? Rx.lastValueFrom(
-          Rx.from(pdfExport[0].runTask(task.id, task.payload, cancellationToken, stream)).pipe(
+          Rx.from(pdfExport[0]!.runTask(task.id, task.payload, cancellationToken, stream)).pipe(
             timeout(queueTimeout)
           )
         )
@@ -394,6 +392,8 @@ export class ExecuteReportTask implements ReportingTask {
             );
 
             eventLog.logExecutionStart();
+
+            console.log('pdfExport', pdfExport);
 
             const output = await Promise.race<TaskRunResult>([
               this._performJob(task, cancellationToken, stream, pdfExport),

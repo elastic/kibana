@@ -116,7 +116,6 @@ export class ReportingCore {
   public getContract: () => ReportingSetup;
 
   private kibanaShuttingDown$ = new Rx.ReplaySubject<void>(1);
-  pdfExport?: ReportingInternalSetup['pdfExport'];
 
   constructor(
     private core: CoreSetup,
@@ -134,6 +133,7 @@ export class ReportingCore {
     this.getContract = () => ({
       usesUiCapabilities: () => config.roles.enabled === false,
       registerExportTypes: (id) => id,
+      getConfig: () => this.getConfig(),
     });
 
     this.executing = new Set();
@@ -152,7 +152,7 @@ export class ReportingCore {
 
     const { executeTask, monitorTask } = this;
     setupDeps.taskManager.registerTaskDefinitions({
-      [executeTask.TYPE]: executeTask.getTaskDefinition(this.pdfExport),
+      [executeTask.TYPE]: executeTask.getTaskDefinition(this.getPluginSetupDeps().pdfExport),
       [monitorTask.TYPE]: monitorTask.getTaskDefinition(),
     });
   }
