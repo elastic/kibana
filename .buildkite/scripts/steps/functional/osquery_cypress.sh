@@ -15,4 +15,4 @@ export JOB=kibana-osquery-cypress
 
 echo "--- Osquery Cypress tests"
 
-yarn --cwd x-pack/plugins/security_solution cypress:run
+yarn --cwd x-pack/plugins/osquery cypress:run
