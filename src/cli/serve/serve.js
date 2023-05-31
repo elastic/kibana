@@ -8,12 +8,13 @@
 
 import { set as lodashSet } from '@kbn/safer-lodash-set';
 import _ from 'lodash';
-import { statSync, existsSync, readFileSync, writeFileSync } from 'fs';
+import { statSync, existsSync, writeFileSync } from 'fs';
 import { resolve } from 'path';
 import url from 'url';
 
 import { getConfigPath, getConfigDirectory } from '@kbn/utils';
 import { isKibanaDistributable } from '@kbn/repo-info';
+import { getConfigFromFiles } from '@kbn/config';
 import { readKeystore } from '../keystore/read_keystore';
 
 /** @typedef {'es' | 'oblt' | 'security'} ServerlessProjectMode */
@@ -22,20 +23,34 @@ const VALID_SERVERLESS_PROJECT_MODE = ['es', 'oblt', 'security'];
 
 /**
  * @param {Record<string, unknown>} opts
- * @returns {ServerlessProjectMode | true | null}
+ * @returns {ServerlessProjectMode | null}
  */
-function getServerlessProjectMode(opts) {
+function getServerlessModeFromOpts(opts) {
   if (!opts.serverless) {
     return null;
   }
 
-  if (VALID_SERVERLESS_PROJECT_MODE.includes(opts.serverless) || opts.serverless === true) {
+  if (opts.serverless === true) {
+    return 'es';
+  }
+
+  if (VALID_SERVERLESS_PROJECT_MODE.includes(opts.serverless)) {
     return opts.serverless;
   }
 
   throw new Error(
     `invalid --serverless value, must be one of ${VALID_SERVERLESS_PROJECT_MODE.join(', ')}`
   );
+}
+
+/**
+ * @param {string[]} configs List of configuration file paths
+ * @returns {ServerlessProjectMode|undefined} The serverless mode in the summed configs
+ */
+function getServerlessModeFromCfg(configs) {
+  const config = getConfigFromFiles(configs);
+
+  return config.serverless;
 }
 
 function canRequire(path) {
@@ -106,40 +121,13 @@ function resolveConfig(fileName) {
   }
 }
 
-function configFromObj(obj) {
-  return Object.keys(obj).reduce((config, key) => {
-    const value = obj[key];
-    if (typeof value !== 'undefined') {
-      config += `${key}: ${value}\n`;
-    }
-    return config;
-  }, '');
-}
-
 /**
  * @param {string} fileName
- * @param {'es' | 'security' | 'oblt' | true} projectType
- * @param {boolean} isDevMode
  */
-function writeServerlessConfig(fileName, projectType, isDevMode) {
-  function writeServerlessMode(selectedProjectType, path) {
-    const configContent = configFromObj({
-      'xpack.serverless.plugin.developer.projectSwitcher.enabled': isDevMode ? true : undefined,
-      serverless: selectedProjectType,
-    });
-
-    writeFileSync(path, configContent);
-  }
-
+function writeProjectSwitcherConfig(fileName) {
   const path = resolve(getConfigDirectory(), fileName);
   if (!existsSync(path)) {
-    writeServerlessMode(projectType === true ? 'es' : projectType, path);
-  } else if (typeof projectType === 'string') {
-    const data = readFileSync(path, 'utf-8');
-    const match = data.match(/serverless: (\w+)\n/);
-    if (!match || match[1] !== projectType) {
-      writeServerlessMode(projectType, path);
-    }
+    writeFileSync(path, `xpack.serverless.plugin.developer.projectSwitcher.enabled: true\n`);
   }
 }
 
@@ -309,23 +297,28 @@ export default function (program) {
   command.action(async function (opts) {
     let configs = [getConfigPath(), ...getEnvConfigs(), ...(opts.config || [])];
     const unknownOptions = this.getUnknownOptions();
-    const serverlessMode = getServerlessProjectMode(opts);
-
-    if (serverlessMode) {
-      writeServerlessConfig('serverless.recent.yml', serverlessMode, opts.dev);
-      configs.push(resolveConfig('serverless.recent.yml'));
-    }
 
     // .dev. configs are "pushed" so that they override all other config files
     if (opts.dev && opts.devConfig !== false) {
       configs.push(resolveConfig('kibana.dev.yml'));
-      if (serverlessMode) {
+    }
+
+    // Filtering out all config paths that didn't exist
+    configs = configs.filter(Boolean);
+
+    const serverlessMode = getServerlessModeFromOpts(opts) || getServerlessModeFromCfg(configs);
+    if (serverlessMode) {
+      configs.unshift(resolveConfig(`serverless.${serverlessMode}.yml`));
+      configs.unshift(resolveConfig('serverless.yml'));
+
+      if (opts.dev) {
         configs.push(resolveConfig('serverless.dev.yml'));
+
+        writeProjectSwitcherConfig('serverless.recent.dev.yml');
         configs.push(resolveConfig('serverless.recent.dev.yml'));
       }
     }
 
-    // Filtering out all config paths that didn't exist
     configs = configs.filter(Boolean);
 
     const cliArgs = {
@@ -346,6 +339,7 @@ export default function (program) {
       oss: !!opts.oss,
       cache: !!opts.cache,
       dist: !!opts.dist,
+      serverless: !!serverlessMode,
     };
 
     // In development mode, the main process uses the @kbn/dev-cli-mode
