@@ -22,6 +22,7 @@ import { buildEmptyFilter, Filter } from '@kbn/es-query';
 
 import { usePageUrlState } from '@kbn/ml-url-state';
 import { useData } from '../../hooks/use_data';
+import { useSearch } from '../../hooks/use_search';
 import { useCategorizeRequest } from './use_categorize_request';
 import type { EventRate, Category, SparkLinesPerCategory } from './use_categorize_request';
 import { CategoryTable } from './category_table';
@@ -91,25 +92,20 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
     [cancelRequest, mounted]
   );
 
-  const {
-    documentStats,
-    timefilter,
-    earliest,
-    latest,
-    searchQueryLanguage,
-    searchString,
-    searchQuery,
-    intervalMs,
-    forceRefresh,
-  } = useData(
-    { selectedDataView: dataView, selectedSavedSearch },
-    'log_categorization',
+  const { searchQueryLanguage, searchString, searchQuery } = useSearch(
+    { dataView, savedSearch: selectedSavedSearch },
     aiopsListState,
-    undefined,
-    undefined,
-    undefined,
-    BAR_TARGET,
     true
+  );
+
+  const { documentStats, timefilter, earliest, latest, intervalMs, forceRefresh } = useData(
+    dataView,
+    'log_categorization',
+    searchQuery,
+    undefined,
+    undefined,
+    undefined,
+    BAR_TARGET
   );
 
   const loadCategories = useCallback(async () => {
