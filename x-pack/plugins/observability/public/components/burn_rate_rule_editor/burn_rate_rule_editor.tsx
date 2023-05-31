@@ -7,7 +7,6 @@
 
 import { RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
 import React, { useEffect, useState } from 'react';
-import { i18n } from '@kbn/i18n';
 import { SLOResponse } from '@kbn/slo-schema';
 
 import { EuiSpacer, EuiTitle } from '@elastic/eui';
@@ -132,11 +131,3 @@ export function BurnRateRuleEditor(props: Props) {
     </>
   );
 }
-
-const getErrorBudgetExhaustionText = (formattedHours: string) =>
-  i18n.translate('xpack.observability.slo.rules.errorBudgetExhaustion.text', {
-    defaultMessage: '{formatedHours} hours until error budget exhaustion.',
-    values: {
-      formatedHours: formattedHours,
-    },
-  });
