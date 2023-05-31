@@ -577,11 +577,13 @@ export const mockBrowserFields: BrowserFields = {
   },
 };
 
+const runTimeType: MappingRuntimeFieldType = 'keyword' as const;
+
 export const mockRuntimeMappings = {
   '@a.runtime.field': {
     script: {
       source: 'emit("Radical dude: " + doc[\'host.name\'].value)',
     },
-    type: 'keyword' as MappingRuntimeFieldType,
+    type: runTimeType,
   },
 };

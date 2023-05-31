@@ -86,7 +86,6 @@ export const useDataView = (): {
   const searchSubscription$ = useRef<Record<string, Subscription>>({});
   const dispatch = useDispatch();
   const { addError } = useAppToasts();
-
   const setLoading = useCallback(
     ({ id, loading }: { id: string; loading: boolean }) => {
       dispatch(sourcererActions.setDataViewLoading({ id, loading }));
@@ -110,7 +109,6 @@ export const useDataView = (): {
           setLoading({ id: dataViewId, loading: true });
 
           const dataView = await getSourcererDataView(dataViewId, data.dataViews, cleanCache);
-
           if (needToBeInit && scopeId && !skipScopeUpdate) {
             dispatch(
               sourcererActions.setSelectedDataView({

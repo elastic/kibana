@@ -46,8 +46,8 @@ describe('source/index.tsx', () => {
           data: {
             dataViews: {
               ...useKibana().services.data.dataViews,
-              get: async (dataViewId: string, displayErrors?: boolean, refreshFields = false) =>
-                Promise.resolve({
+              get: async (dataViewId: string, displayErrors?: boolean, refreshFields = false) => {
+                const dataViewMock = {
                   id: dataViewId,
                   matchedIndices: refreshFields
                     ? ['hello', 'world', 'refreshed']
@@ -60,7 +60,12 @@ describe('source/index.tsx', () => {
                       type: 'keyword',
                     },
                   }),
-                }),
+                };
+                return Promise.resolve({
+                  toSpec: () => dataViewMock,
+                  ...dataViewMock,
+                });
+              },
               getFieldsForWildcard: async () => Promise.resolve(),
             },
             search: {
@@ -150,7 +155,6 @@ describe('source/index.tsx', () => {
       const {
         payload: { patternList: newPatternList },
       } = mockDispatch.mock.calls[1][0];
-
       expect(patternList).not.toBe(newPatternList);
       expect(patternList).not.toContain('refreshed*');
       expect(newPatternList).toContain('refreshed*');
