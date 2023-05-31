@@ -6,13 +6,7 @@
  * Side Public License, v 1.
  */
 import { isEqual } from 'lodash';
-import {
-  isOfAggregateQueryType,
-  getIndexPatternFromSQLQuery,
-  getIndexPatternFromESQLQuery,
-  AggregateQuery,
-  Query,
-} from '@kbn/es-query';
+import { isOfAggregateQueryType, AggregateQuery, Query } from '@kbn/es-query';
 import { useCallback, useEffect, useRef } from 'react';
 import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 import { VIEW_MODE } from '@kbn/saved-search-plugin/public';
@@ -22,6 +16,7 @@ import { getValidViewMode } from '../utils/get_valid_view_mode';
 import { FetchStatus } from '../../types';
 
 const MAX_NUM_OF_COLUMNS = 50;
+const TRANSFORMATIONAL_COMMANDS = ['stats', 'project'];
 
 /**
  * Hook to take care of text based query language state transformations when a new result is returned
@@ -38,7 +33,6 @@ export function useTextBasedQueryLanguage({
     columns: [],
     query: undefined,
   });
-  const indexTitle = useRef<string>('');
   const savedSearch = useSavedSearchInitial();
 
   const cleanup = useCallback(() => {
@@ -66,44 +60,52 @@ export function useTextBasedQueryLanguage({
         ('sql' in query || 'esql' in query);
       const hasResults = next.result?.length && next.fetchStatus === FetchStatus.COMPLETE;
       const initialFetch = !prev.current.columns.length;
-
+      let queryHasTransformationalCommands = 'sql' in query;
+      if ('esql' in query) {
+        TRANSFORMATIONAL_COMMANDS.forEach((command: string) => {
+          if (query.esql.toLowerCase().includes(command)) {
+            queryHasTransformationalCommands = true;
+            return;
+          }
+        });
+      }
       if (isTextBasedQueryLang) {
         if (hasResults) {
           // check if state needs to contain column transformation due to a different columns in the resultset
           const firstRow = next.result![0];
           const firstRowColumns = Object.keys(firstRow.raw).slice(0, MAX_NUM_OF_COLUMNS);
-          if (
-            !isEqual(firstRowColumns, prev.current.columns) &&
-            !isEqual(query, prev.current.query)
-          ) {
-            prev.current = { columns: firstRowColumns, query };
-            nextColumns = firstRowColumns;
-          }
+          if (!queryHasTransformationalCommands) {
+            prev.current = { columns: [], query };
+            nextColumns = [];
+          } else {
+            if (
+              !isEqual(firstRowColumns, prev.current.columns) &&
+              !isEqual(query, prev.current.query)
+            ) {
+              prev.current = { columns: firstRowColumns, query };
+              nextColumns = firstRowColumns;
+            }
 
-          if (firstRowColumns && initialFetch) {
-            prev.current = { columns: firstRowColumns, query };
+            if (firstRowColumns && initialFetch) {
+              prev.current = { columns: firstRowColumns, query };
+            }
           }
         }
-        const indexPatternFromQuery =
-          'sql' in query
-            ? getIndexPatternFromSQLQuery(query.sql)
-            : getIndexPatternFromESQLQuery(query.esql);
 
         const dataViewObj = stateContainer.internalState.getState().dataView!;
 
         // don't set the columns on initial fetch, to prevent overwriting existing state
         const addColumnsToState = Boolean(
-          nextColumns.length && (!initialFetch || !stateColumns?.length)
+          (nextColumns.length &&
+            (!initialFetch || !stateColumns?.length) &&
+            queryHasTransformationalCommands) ||
+            !queryHasTransformationalCommands
         );
         // no need to reset index to state if it hasn't changed
         const addDataViewToState = Boolean(dataViewObj?.id !== index) || initialFetch;
-        const queryChanged = indexPatternFromQuery !== indexTitle.current;
-        if (!addColumnsToState && !queryChanged) {
+        const columnsHaveChanged = !isEqual(stateColumns, nextColumns);
+        if (!addDataViewToState && !columnsHaveChanged) {
           return;
-        }
-
-        if (queryChanged) {
-          indexTitle.current = indexPatternFromQuery;
         }
 
         const nextState = {
