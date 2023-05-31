@@ -21,6 +21,7 @@ disabled:
   - x-pack/test/functional/config.edge.js
 
   # Cypress configs, for now these are still run manually
+  - x-pack/test/security_solution_cypress/cli_config_explore_parallel.ts
   - x-pack/test/fleet_cypress/cli_config.ts
   - x-pack/test/fleet_cypress/config.ts
   - x-pack/test/fleet_cypress/visual_config.ts
