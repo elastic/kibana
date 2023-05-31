@@ -23,6 +23,7 @@
     "@kbn/es-types",
     "@kbn/field-types",
     "@kbn/ui-actions-browser",
+    "@kbn/data-service",
   ],
   "exclude": ["target/**/*"]
 }
