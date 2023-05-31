@@ -143,6 +143,7 @@ const mockOptions = (): RunResilientMigratorParams => {
       retryAttempts: 20,
       zdt: {
         metaPickupSyncDelaySec: 120,
+        runOnNonMigratorNodes: true,
       },
     },
     typeRegistry: savedObjectTypeRegistryMock,
