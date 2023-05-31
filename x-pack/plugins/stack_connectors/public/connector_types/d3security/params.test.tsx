@@ -6,9 +6,10 @@
  */
 
 import React from 'react';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { fireEvent, render } from '@testing-library/react';
 import D3ParamsFields from './params';
 import { MockCodeEditor } from '@kbn/triggers-actions-ui-plugin/public/application/code_editor.mock';
+import { SUB_ACTION } from '../../../common/d3security/constants';
 
 const kibanaReactPath = '../../../../../../src/plugins/kibana_react/public';
 
@@ -21,16 +22,25 @@ jest.mock(kibanaReactPath, () => {
     },
   };
 });
-
+const messageVariables = [
+  {
+    name: 'myVar',
+    description: 'My variable description',
+    useWithTripleBracesInTemplates: true,
+  },
+];
 describe('D3SecurityParamsFields renders', () => {
-  test('all params fields is rendered', () => {
+  it('all params fields is rendered', () => {
     const actionParams = {
-      body: 'test message',
-      severity: 'test severity',
-      eventType: 'test type',
+      subAction: SUB_ACTION.RUN,
+      subActionParams: {
+        body: 'test message',
+        severity: 'test severity',
+        eventType: 'test type',
+      },
     };
 
-    const wrapper = mountWithIntl(
+    const { getByTestId } = render(
       <D3ParamsFields
         actionParams={actionParams}
         errors={{ body: [] }}
@@ -45,10 +55,73 @@ describe('D3SecurityParamsFields renders', () => {
         ]}
       />
     );
-    expect(wrapper.find('[data-test-subj="bodyJsonEditor"]').length > 0).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="bodyJsonEditor"]').first().prop('value')).toStrictEqual(
-      'test message'
+    expect(getByTestId('bodyJsonEditor')).toBeInTheDocument();
+    expect(getByTestId('bodyJsonEditor')).toHaveProperty('value', 'test message');
+    expect(getByTestId('bodyAddVariableButton')).toBeInTheDocument();
+  });
+
+  it('calls editAction function with the correct arguments ', () => {
+    const actionParams = {
+      subAction: SUB_ACTION.RUN,
+      subActionParams: {
+        body: '{"key": "value"}',
+      },
+    };
+    const editAction = jest.fn();
+    const errors = {};
+    const { getByTestId, rerender } = render(
+      <D3ParamsFields
+        actionParams={actionParams}
+        editAction={editAction}
+        index={0}
+        messageVariables={messageVariables}
+        errors={errors}
+      />
     );
-    expect(wrapper.find('[data-test-subj="bodyAddVariableButton"]').length > 0).toBeTruthy();
+    const jsonEditor = getByTestId('bodyJsonEditor');
+    fireEvent.change(jsonEditor, { target: { value: '{"new_key": "new_value"}' } });
+    expect(editAction).toHaveBeenCalledWith(
+      'subActionParams',
+      { body: '{"new_key": "new_value"}' },
+      0
+    );
+    rerender(
+      <D3ParamsFields
+        actionParams={{ ...actionParams, subActionParams: { body: '{"new_key": "new_value"}' } }}
+        editAction={editAction}
+        index={0}
+        messageVariables={messageVariables}
+        errors={errors}
+      />
+    );
+    fireEvent.change(getByTestId('severityInput'), { target: { value: 'cool rad' } });
+    expect(editAction).toHaveBeenNthCalledWith(
+      2,
+      'subActionParams',
+      { body: '{"new_key": "new_value"}', severity: 'cool rad' },
+      0
+    );
+  });
+
+  it('handles the case when subAction only is undefined', () => {
+    const actionParams = {
+      subAction: undefined,
+      subActionParams: {
+        body: '{"key": "value"}',
+      },
+    };
+    const editAction = jest.fn();
+    const errors = {};
+    render(
+      <D3ParamsFields
+        actionParams={actionParams}
+        editAction={editAction}
+        index={0}
+        messageVariables={messageVariables}
+        errors={errors}
+      />
+    );
+    expect(editAction).toHaveBeenCalledTimes(1);
+    expect(editAction).toHaveBeenCalledWith('subAction', SUB_ACTION.RUN, 0);
   });
 });

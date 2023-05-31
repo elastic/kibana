@@ -18,7 +18,7 @@ import type {
   D3SecurityRunActionParams,
   D3SecurityRunActionResponse,
 } from '../../../common/d3security/types';
-import { SUB_ACTION } from '../../../common/d3security/constants';
+import { D3SecuritySeverity, SUB_ACTION } from '../../../common/d3security/constants';
 
 export class D3SecurityConnector extends SubActionConnector<D3SecurityConfig, D3SecuritySecrets> {
   private url;
@@ -66,7 +66,11 @@ export class D3SecurityConnector extends SubActionConnector<D3SecurityConfig, D3
       url: this.url,
       method: 'post',
       responseSchema: D3SecurityRunActionResponseSchema,
-      data: addSeverityAndEventTypeInBody(String(body), String(severity), String(eventType)),
+      data: addSeverityAndEventTypeInBody(
+        body ?? '',
+        severity ?? D3SecuritySeverity.EMPTY,
+        eventType ?? ''
+      ),
       headers: { d3key: this.token || '' },
     });
     return response.data;

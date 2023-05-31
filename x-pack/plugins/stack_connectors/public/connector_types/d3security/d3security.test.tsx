@@ -9,6 +9,7 @@ import { TypeRegistry } from '@kbn/triggers-actions-ui-plugin/public/application
 import { registerConnectorTypes } from '..';
 import { ActionTypeModel as ConnectorTypeModel } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { registrationServicesMock } from '../../mocks';
+import { SUB_ACTION } from '../../../common/d3security/constants';
 
 const CONNECTOR_TYPE_ID = '.d3security';
 let connectorTypeModel: ConnectorTypeModel;
@@ -30,28 +31,60 @@ describe('actionTypeRegistry.get() works', () => {
 describe('d3security action params validation', () => {
   test('action params validation succeeds when action params is valid', async () => {
     const actionParams = {
-      body: 'message {test}',
-      severity: 'test severity',
-      eventType: 'test type',
+      subAction: SUB_ACTION.RUN,
+      subActionParams: {
+        body: 'message {test}',
+        severity: 'test severity',
+        eventType: 'test type',
+      },
     };
 
     expect(await connectorTypeModel.validateParams(actionParams)).toEqual({
-      errors: { body: [], severity: [], eventType: [] },
+      errors: { body: [], subAction: [] },
     });
   });
 
   test('params validation fails when body is not valid', async () => {
     const actionParams = {
-      body: '',
-      severity: '',
-      eventType: '',
+      subAction: SUB_ACTION.RUN,
+      subActionParams: {
+        body: '',
+        severity: '',
+        eventType: '',
+      },
     };
 
     expect(await connectorTypeModel.validateParams(actionParams)).toEqual({
       errors: {
         body: ['Body is required.'],
-        severity: [],
-        eventType: [],
+        subAction: [],
+      },
+    });
+  });
+
+  test('params validation fails when subAction is missing', async () => {
+    const actionParams = {
+      subActionParams: { body: '{"message": "test"}' },
+    };
+
+    expect(await connectorTypeModel.validateParams(actionParams)).toEqual({
+      errors: {
+        body: [],
+        subAction: ['Action is required.'],
+      },
+    });
+  });
+
+  test('params validation fails when subActionParams is missing', async () => {
+    const actionParams = {
+      subAction: SUB_ACTION.RUN,
+      subActionParams: {},
+    };
+
+    expect(await connectorTypeModel.validateParams(actionParams)).toEqual({
+      errors: {
+        body: ['Body is required.'],
+        subAction: [],
       },
     });
   });
