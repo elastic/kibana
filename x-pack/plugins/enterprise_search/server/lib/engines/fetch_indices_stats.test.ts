@@ -61,7 +61,7 @@ describe('fetchIndicesStats lib function', () => {
     jest.clearAllMocks();
   });
 
-  it('should return hydrated indices when all indices are available and open', async () => {
+  it('should return hydrated indices for all available and open indices', async () => {
     mockClient.asCurrentUser.indices.exists.mockImplementationOnce(() => true);
     mockClient.asCurrentUser.indices.get.mockImplementationOnce(() => getIndexResponse);
     mockClient.asCurrentUser.indices.stats.mockImplementationOnce(() => indexStats);
@@ -71,13 +71,10 @@ describe('fetchIndicesStats lib function', () => {
     ).resolves.toEqual(fetchIndicesStatsResponse);
   });
 
-  it('should return count : null, health: unknown for closed index ', async () => {
+
+  it('should return count : null, health: unknown for deleted or closed index ', async () => {
     mockClient.asCurrentUser.indices.exists.mockImplementationOnce(() => true);
-    mockClient.asCurrentUser.indices.get.mockImplementationOnce(() =>
-      Object.assign(getIndexResponse, {
-        'test-index-name-2': { settings: { index: { verified_before_close: 'true' } } },
-      })
-    );
+    mockClient.asCurrentUser.indices.get.mockImplementationOnce(() => getIndexResponse);
     mockClient.asCurrentUser.indices.stats.mockImplementationOnce(() => indexStats);
 
     await expect(
@@ -91,26 +88,6 @@ describe('fetchIndicesStats lib function', () => {
         count: null,
         health: 'unknown',
         name: 'test-index-name-2',
-      },
-    ]);
-  });
-
-  it('should return count : null, health: unknown for deleted index ', async () => {
-    mockClient.asCurrentUser.indices.exists.mockImplementationOnce(() => true);
-    mockClient.asCurrentUser.indices.get.mockImplementationOnce(() => getIndexResponse);
-    mockClient.asCurrentUser.indices.stats.mockImplementationOnce(() => indexStats);
-
-    await expect(
-      fetchIndicesStats(mockClient as unknown as IScopedClusterClient, [
-        ...indices,
-        'test-index-name-3',
-      ])
-    ).resolves.toEqual([
-      ...fetchIndicesStatsResponse,
-      {
-        count: null,
-        health: 'unknown',
-        name: 'test-index-name-3',
       },
     ]);
   });
