@@ -46,9 +46,7 @@ describe('format_column', () => {
     const result = await fn(datatable, { columnId: 'test', format: 'number' });
     expect(result.columns[0].meta.params).toEqual({
       id: 'number',
-      params: {
-        pattern: '0,0.00',
-      },
+      params: { formatOverride: true, pattern: '0,0.00' },
     });
   });
 
@@ -57,9 +55,7 @@ describe('format_column', () => {
     const result = await fn(datatable, { columnId: 'test', format: 'number', decimals: 5 });
     expect(result.columns[0].meta.params).toEqual({
       id: 'number',
-      params: {
-        pattern: '0,0.00000',
-      },
+      params: { formatOverride: true, pattern: '0,0.00000' },
     });
   });
 
@@ -76,9 +72,7 @@ describe('format_column', () => {
       params: {
         suffixString: 'ABC',
         id: 'number',
-        params: {
-          pattern: '0,0.00000',
-        },
+        params: { formatOverride: true, pattern: '0,0.00000' },
       },
     });
   });
@@ -88,9 +82,7 @@ describe('format_column', () => {
     const result = await fn(datatable, { columnId: 'test', format: 'number', decimals: 0 });
     expect(result.columns[0].meta.params).toEqual({
       id: 'number',
-      params: {
-        pattern: '0,0',
-      },
+      params: { formatOverride: true, pattern: '0,0' },
     });
   });
 
@@ -229,9 +221,8 @@ describe('format_column', () => {
         params: {
           wrapperParam: 123,
           id: 'number',
-          params: {
-            pattern: '0,0.00000',
-          },
+          params: { formatOverride: true, pattern: '0,0.00000' },
+          formatOverride: true,
           pattern: '0,0.00000',
         },
       });
@@ -256,9 +247,8 @@ describe('format_column', () => {
           paramsPerField: [
             {
               id: 'number',
-              params: {
-                pattern: '0,0.00000',
-              },
+              params: { formatOverride: true, pattern: '0,0.00000' },
+              formatOverride: true,
               pattern: '0,0.00000',
             },
           ],

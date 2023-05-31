@@ -255,14 +255,14 @@ export function getReferenceLinesFormattersMap(
     if (isReferenceLine(layer)) {
       for (const { valueMeta, forAccessor } of layer.decorations) {
         if (valueMeta?.params?.params?.formatOverride) {
-          formattersMap[forAccessor] = formatFactory(valueMeta.params.params);
+          formattersMap[forAccessor] = formatFactory(valueMeta.params);
         }
       }
     } else {
       for (const { forAccessor } of layer.decorations || []) {
         const columnFormat = layer.table.columns.find(({ id }) => id === forAccessor)?.meta.params;
         if (columnFormat?.params?.formatOverride) {
-          formattersMap[forAccessor] = formatFactory(columnFormat.params);
+          formattersMap[forAccessor] = formatFactory(columnFormat);
         }
       }
     }
