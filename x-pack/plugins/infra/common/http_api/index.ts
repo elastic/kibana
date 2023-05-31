@@ -9,7 +9,6 @@ export * from './log_analysis';
 export * from './metadata_api';
 export * from './metrics_explorer';
 export * from './metrics_api';
-export * from './log_alerts';
 export * from './snapshot_api';
 export * from './host_details';
 export * from './infra';
@@ -19,6 +18,7 @@ export * from './infra';
  */
 export * from './latest';
 export * as inventoryViewsV1 from './inventory_views/v1';
+export * as logAlertsV1 from './log_alerts/v1';
 export * as logEntriesV1 from './log_entries/v1';
 export * as logViewsV1 from './log_views/v1';
 export * as metricsExplorerViewsV1 from './metrics_explorer_views/v1';

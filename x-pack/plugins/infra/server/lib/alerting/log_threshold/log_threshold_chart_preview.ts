@@ -18,7 +18,7 @@ import {
   GetLogAlertsChartPreviewDataAlertParamsSubset,
   Point,
   Series,
-} from '../../../../common/http_api/log_alerts';
+} from '../../../../common/http_api';
 import { ResolvedLogView } from '../../../../common/log_views';
 import { decodeOrThrow } from '../../../../common/runtime_types';
 import type { InfraPluginRequestHandlerContext } from '../../../types';
