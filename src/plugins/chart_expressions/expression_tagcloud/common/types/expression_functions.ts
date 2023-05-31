@@ -46,44 +46,6 @@ export interface TagcloudRendererConfig {
   syncColors: boolean;
 }
 
-/*
-
-interface VisCommonParams {
-  addTooltip: boolean;
-  legendDisplay: LegendDisplay;
-  legendPosition: Position;
-  truncateLegend: boolean;
-  maxLegendLines: number;
-  legendSize?: LegendSize;
-  ariaLabel?: string;
-}
-
-export interface PieVisConfig extends VisCommonConfig {
-  partitionByColumn?: boolean;
-  isDonut: boolean;
-  emptySizeRatio?: EmptySizeRatios;
-  respectSourceOrder?: boolean;
-  startFromSecondLargestSlice?: boolean;
-  distinctColors?: boolean;
-  nestedLegend: boolean;
-}
-
-export interface PartitionChartProps {
-  visData: Datatable;
-  visType: ChartTypes;
-  visConfig: PartitionVisParams;
-  syncColors: boolean;
-  canNavigateToLens?: boolean;
-  overrides?: AllowedPartitionOverrides & AllowedSettingsOverrides;
-}
-
-export type PieVisExpressionFunctionDefinition = ExpressionFunctionDefinition<
-  typeof PIE_VIS_EXPRESSION_NAME,
-  Datatable,
-  PieVisConfig,
-  ExpressionValueRender<PartitionChartProps>
->;*/
-
 export type ExpressionTagcloudFunctionDefinition = ExpressionFunctionDefinition<
   typeof EXPRESSION_NAME,
   Datatable,
