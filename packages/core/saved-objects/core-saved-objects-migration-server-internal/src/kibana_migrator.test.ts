@@ -243,9 +243,9 @@ describe('KibanaMigrator', () => {
       const migrator = new KibanaMigrator(options);
       migrator.prepareMigrations();
       await expect(migrator.runMigrations()).rejects.toMatchInlineSnapshot(`
-              [Error: Unable to complete saved object migrations for the [.my-index] index. Error: Reindex failed with the following error:
-              {"_tag":"Some","value":{"type":"elasticsearch_exception","reason":"task failed with an error"}}]
-            `);
+        [Error: Unable to complete saved object migrations for the [.my-index] index. Error: Reindex failed with the following error:
+        {"_tag":"Some","value":{"type":"elasticsearch_exception","reason":"task failed with an error"}}]
+      `);
       expect(loggingSystemMock.collect(options.logger).error[0][0]).toMatchInlineSnapshot(`
         [Error: Reindex failed with the following error:
         {"_tag":"Some","value":{"type":"elasticsearch_exception","reason":"task failed with an error"}}]
@@ -533,6 +533,7 @@ const mockOptions = () => {
       algorithm: 'v2',
       batchSize: 20,
       maxBatchSizeBytes: ByteSizeValue.parse('20mb'),
+      maxReadBatchSizeBytes: new ByteSizeValue(536870888),
       pollInterval: 20000,
       scrollDuration: '10m',
       skip: false,
