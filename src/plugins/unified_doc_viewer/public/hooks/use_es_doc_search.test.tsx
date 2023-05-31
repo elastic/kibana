@@ -274,9 +274,6 @@ describe('Test of <Doc /> helper / hook', () => {
       await hook.waitForNextUpdate();
     });
 
-    expect(hook.result.current.slice(0, 2)).toEqual([
-      ElasticRequestState.Found,
-      record,
-    ]);
+    expect(hook.result.current.slice(0, 2)).toEqual([ElasticRequestState.Found, record]);
   });
 });
