@@ -14,7 +14,7 @@ import {
   EuiText,
   EuiPopoverTitle,
   useEuiTheme,
-  EuiToolTip,
+  EuiIconTip,
 } from '@elastic/eui';
 import { ToolbarButton } from '@kbn/kibana-react-plugin/public';
 import { IconChartBarReferenceLine, IconChartBarAnnotations } from '@kbn/chart-icons';
@@ -96,20 +96,13 @@ function AnnotationsLayerHeader({
       }
       indicator={
         hasUnsavedChanges && (
-          <EuiToolTip
+          <EuiIconTip
             content={i18n.translate('xpack.lens.xyChart.unsavedChanges', {
               defaultMessage: 'Unsaved changes',
             })}
-          >
-            <div
-              css={css`
-                background-color: ${euiThemeVars.euiColorSuccess};
-                border-radius: 100%;
-                width: ${euiThemeVars.euiSizeS};
-                height: ${euiThemeVars.euiSizeS};
-              `}
-            />
-          </EuiToolTip>
+            type="dot"
+            color={euiThemeVars.euiColorSuccess}
+          />
         )
       }
     />

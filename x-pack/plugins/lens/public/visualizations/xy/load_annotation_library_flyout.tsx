@@ -9,6 +9,8 @@ import React from 'react';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiFlyoutFooter } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
+import { euiThemeVars } from '@kbn/ui-theme';
+import { css } from '@emotion/react';
 import { FlyoutContainer } from '../../shared_components/flyout_container';
 import type { ExtraAppendLayerArg } from './visualization';
 
@@ -65,18 +67,24 @@ export function LoadAnnotationLibraryFlyout({
         return true;
       }}
     >
-      <EventAnnotationGroupSavedObjectFinder
-        onChoose={({ id }) => {
-          loadAnnotationGroup(id).then((loadedGroup) => {
-            addLayer({ ...loadedGroup, annotationGroupId: id });
+      <div
+        css={css`
+          padding: ${euiThemeVars.euiSize};
+        `}
+      >
+        <EventAnnotationGroupSavedObjectFinder
+          onChoose={({ id }) => {
+            loadAnnotationGroup(id).then((loadedGroup) => {
+              addLayer({ ...loadedGroup, annotationGroupId: id });
+              setLoadLibraryFlyoutVisible(false);
+            });
+          }}
+          onCreateNew={() => {
+            addLayer();
             setLoadLibraryFlyoutVisible(false);
-          });
-        }}
-        onCreateNew={() => {
-          addLayer();
-          setLoadLibraryFlyoutVisible(false);
-        }}
-      />
+          }}
+        />
+      </div>
     </FlyoutContainer>
   );
 }

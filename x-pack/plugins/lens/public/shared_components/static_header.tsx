@@ -43,7 +43,6 @@ export const StaticHeader = ({
         {indicator && (
           <div
             css={css`
-              margin-left: 3px;
               padding-bottom: 3px;
             `}
           >
