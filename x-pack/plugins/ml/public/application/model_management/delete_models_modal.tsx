@@ -81,6 +81,10 @@ export const DeleteModelsModal: FC<DeleteModelsModalProps> = ({ models, onClose 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [modelIds, trainedModelsApiService, deletePipelines, forceDelete]);
 
+  const pipelinesCount = modelsWithPipelines.reduce((acc, curr) => {
+    return acc + Object.keys(curr.pipelines).length;
+  }, 0);
+
   return canDeleteModel ? (
     <EuiModal
       onClose={onClose.bind(null, false)}
@@ -123,15 +127,12 @@ export const DeleteModelsModal: FC<DeleteModelsModalProps> = ({ models, onClose 
                   <FormattedMessage
                     id="xpack.ml.trainedModels.modelsList.deleteModal.approvePipelinesDeletionLabel"
                     defaultMessage="Delete {pipelinesCount, plural, one {pipeline} other {pipelines}}?"
-                    values={{
-                      pipelinesCount: modelsWithPipelines.reduce((acc, curr) => {
-                        return acc + Object.keys(curr.pipelines).length;
-                      }, 0),
-                    }}
+                    values={{ pipelinesCount }}
                   />
                 }
                 checked={deletePipelines}
                 onChange={setDeletePipelines.bind(null, (prev) => !prev)}
+                data-test-subj="mlModelsDeleteModalDeletePipelinesCheckbox"
               />
             </div>
             <ul>
@@ -141,6 +142,14 @@ export const DeleteModelsModal: FC<DeleteModelsModalProps> = ({ models, onClose 
                 ));
               })}
             </ul>
+
+            <p>
+              <FormattedMessage
+                id="xpack.ml.trainedModels.modelsList.deleteModal.warningMessage"
+                defaultMessage="Deleting the trained model and its associated {pipelinesCount, plural, one {pipeline} other {pipelines}} will result in the permanent removal of these resources. Any process configured to send data to the {pipelinesCount, plural, one {pipeline} other {pipelines}} will no longer be able to do so once you delete the {pipelinesCount, plural, one {pipeline} other {pipelines}}."
+                values={{ pipelinesCount }}
+              />
+            </p>
           </EuiCallOut>
 
           <EuiSpacer size="m" />
@@ -155,6 +164,7 @@ export const DeleteModelsModal: FC<DeleteModelsModalProps> = ({ models, onClose 
             }
             checked={forceDelete}
             onChange={setForceDelete.bind(null, (prev) => !prev)}
+            data-test-subj="mlModelsDeleteModalForceDeleteCheckbox"
           />
         </EuiModalBody>
       ) : null}
