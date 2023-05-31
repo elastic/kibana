@@ -17,7 +17,6 @@ import type { Logger } from '@kbn/logging';
 import type { DocLinksServiceStart } from '@kbn/core-doc-links-server';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import {
-  MAIN_SAVED_OBJECT_INDEX,
   type SavedObjectUnsanitizedDoc,
   type SavedObjectsRawDoc,
   type ISavedObjectTypeRegistry,
@@ -190,7 +189,7 @@ export class KibanaMigrator implements IKibanaMigrator {
     // compare indexTypesMap with the one present (or not) in the .kibana index meta
     // and check if some SO types have been moved to different indices
     const indicesWithMovingTypes = await getIndicesInvolvedInRelocation({
-      mainIndex: MAIN_SAVED_OBJECT_INDEX,
+      mainIndex: this.kibanaIndex,
       client: this.client,
       indexTypesMap,
       logger: this.log,
