@@ -13,6 +13,7 @@ import {
 } from '@tanstack/react-query';
 import type { Rule } from '@kbn/triggers-actions-ui-plugin/public';
 import { useKibana } from '../../utils/kibana_react';
+import { sloKeys } from './query-key-factory';
 
 type SloId = string;
 
@@ -47,7 +48,7 @@ export function useFetchRulesForSlo({ sloIds }: Params): UseFetchRulesForSloResp
 
   const { isInitialLoading, isLoading, isError, isSuccess, isRefetching, data, refetch } = useQuery(
     {
-      queryKey: ['fetchRulesForSlo', sloIds],
+      queryKey: sloKeys.rule(sloIds),
       queryFn: async () => {
         try {
           const body = JSON.stringify({
