@@ -188,10 +188,15 @@ export class PdfExportType implements ExportType {
    * @param JobParamsPDFV2
    * @returns jobParams
    */
-  public createJob(jobParams: JobParamsPDFV2) {
-    return {
-      ...jobParams,
-      forceNow: new Date().toISOString(),
+  public createJob({ locatorParams, ...jobParams }: JobParamsPDFV2) {
+    return async function () {
+      return {
+        ...jobParams,
+        locatorParams,
+        isDeprecated: false,
+        browserTimezone: jobParams.browserTimezone,
+        forceNow: new Date().toISOString(),
+      };
     };
   }
 
@@ -201,7 +206,6 @@ export class PdfExportType implements ExportType {
    * @param payload
    * @param cancellationToken
    * @param stream
-   * Is of type RunTaskFn
    */
   async runTask(
     jobId: string,
@@ -228,7 +232,6 @@ export class PdfExportType implements ExportType {
         }),
         mergeMap(({ logo, headers }) => {
           const { browserTimezone, layout, title, locatorParams } = payload;
-
           const screenshotFn: GetScreenshotsFn = () =>
             this.getScreenshots({
               format: 'pdf',

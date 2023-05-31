@@ -9,6 +9,7 @@ import moment from 'moment';
 import Boom from '@hapi/boom';
 import { i18n } from '@kbn/i18n';
 import type { KibanaRequest, KibanaResponseFactory, Logger } from '@kbn/core/server';
+import { JobParamsPDFV2 } from '../../../common/types';
 import type { ReportingCore } from '../..';
 import { API_BASE_URL } from '../../../common/constants';
 import { checkParamsVersion, cryptoFactory } from '../../lib';
@@ -53,28 +54,28 @@ export class RequestHandler {
       throw new Error(`Export type ${exportTypeId} does not exist in the registry!`);
     }
 
-    const [createJob, store] = await Promise.all([
-      exportType.createJob(jobParams, context, this.req),
-      reporting.getStore(),
-    ]);
+    const [store] = await Promise.all([reporting.getStore()]);
 
-    if (!createJob) {
+    if (!exportType.createJob) {
       throw new Error(`Export type ${exportTypeId} is not an async job type!`);
     }
 
     // 1. ensure the incoming params have a version field (should be set by the UI)
     jobParams.version = checkParamsVersion(jobParams, logger);
-
     // 2. encrypt request headers for the running report job to authenticate itself with Kibana
     // 3. call the export type's createJobFn to create the job payload
     const [headers, job] = await Promise.all([
       this.encryptHeaders(),
-      exportType.createJob(jobParams, context, this.req),
+      exportType.createJob(jobParams as JobParamsPDFV2, context, this.req),
     ]);
 
     const payload = {
       ...job,
       headers,
+      objectType: jobParams.objectType,
+      title: 'Reporting: execute job',
+      browserTimezone: jobParams.browserTimezone,
+      version: jobParams.version,
       spaceId: reporting.getSpaceId(request, logger),
     };
 
@@ -88,7 +89,7 @@ export class RequestHandler {
           // telemetry fields
           objectType: jobParams.objectType,
           layout: jobParams.layout?.id,
-          isDeprecated: job.isDeprecated,
+          isDeprecated: job.isDeprecated ? job.isDeprecated : false,
         },
       })
     );
