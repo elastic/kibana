@@ -216,30 +216,12 @@ export function registerSetupRoute({
           });
         }
 
-        const statusResponse = await clientWithDefaultAuth.profilingStatus();
-        body.resource_management.enabled = statusResponse.resource_management.enabled;
-        body.resources.created = statusResponse.resources.created;
-
-        if (!body.resources.created) {
-          return response.ok({
-            body: {
-              has_data: false,
-              has_setup: false,
-            },
-          });
-        }
-
-        const executeFunctions = [
-          installLatestApmPackage,
-          updateApmPolicy,
-          createCollectorPackagePolicy,
-          createSymbolizerPackagePolicy,
-          setSecurityRole,
-          setMaximumBuckets,
-        ];
-        await Promise.all(executeFunctions.map(async (fn) => await fn(setupOptions)));
-
         const verifyFunctions = [
+          async () => {
+            const statusResponse = await clientWithDefaultAuth.profilingStatus();
+            body.resource_management.enabled = statusResponse.resource_management.enabled;
+            body.resources.created = statusResponse.resources.created;
+          },
           async () => {
             body.packages.installed = await isApmPackageInstalled(setupOptions);
           },
@@ -258,6 +240,16 @@ export function registerSetupRoute({
         if (everySetupResourceResponse(body)) {
           return response.ok();
         }
+
+        const executeFunctions = [
+          installLatestApmPackage,
+          updateApmPolicy,
+          createCollectorPackagePolicy,
+          createSymbolizerPackagePolicy,
+          setSecurityRole,
+          setMaximumBuckets,
+        ];
+        await Promise.all(executeFunctions.map(async (fn) => await fn(setupOptions)));
 
         return response.custom({
           statusCode: 500,
