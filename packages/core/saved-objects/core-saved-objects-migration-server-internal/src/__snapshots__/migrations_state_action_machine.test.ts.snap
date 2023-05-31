@@ -166,7 +166,9 @@ Object {
                   "message": "Log from LEGACY_REINDEX control state",
                 },
               ],
+              "maxBatchSize": 1000,
               "maxBatchSizeBytes": 100000000,
+              "maxReadBatchSizeBytes": 536870888,
               "migrationDocLinks": Object {
                 "clusterShardLimitExceeded": "https://www.elastic.co/guide/en/kibana/test-branch/resolve-migrations-failures.html#cluster-shard-limit-exceeded",
                 "repeatedTimeoutRequests": "https://www.elastic.co/guide/en/kibana/test-branch/resolve-migrations-failures.html#_repeated_time_out_requests_that_eventually_fail",
@@ -209,12 +211,11 @@ Object {
               "tempIndexMappings": Object {
                 "dynamic": false,
                 "properties": Object {
-                  "migrationVersion": Object {
-                    "dynamic": "true",
-                    "type": "object",
-                  },
                   "type": Object {
                     "type": "keyword",
+                  },
+                  "typeMigrationVersion": Object {
+                    "type": "version",
                   },
                 },
               },
@@ -393,7 +394,9 @@ Object {
                   "message": "Log from LEGACY_DELETE control state",
                 },
               ],
+              "maxBatchSize": 1000,
               "maxBatchSizeBytes": 100000000,
+              "maxReadBatchSizeBytes": 536870888,
               "migrationDocLinks": Object {
                 "clusterShardLimitExceeded": "https://www.elastic.co/guide/en/kibana/test-branch/resolve-migrations-failures.html#cluster-shard-limit-exceeded",
                 "repeatedTimeoutRequests": "https://www.elastic.co/guide/en/kibana/test-branch/resolve-migrations-failures.html#_repeated_time_out_requests_that_eventually_fail",
@@ -436,12 +439,11 @@ Object {
               "tempIndexMappings": Object {
                 "dynamic": false,
                 "properties": Object {
-                  "migrationVersion": Object {
-                    "dynamic": "true",
-                    "type": "object",
-                  },
                   "type": Object {
                     "type": "keyword",
+                  },
+                  "typeMigrationVersion": Object {
+                    "type": "version",
                   },
                 },
               },
@@ -624,7 +626,9 @@ Object {
                   "message": "Log from LEGACY_DELETE control state",
                 },
               ],
+              "maxBatchSize": 1000,
               "maxBatchSizeBytes": 100000000,
+              "maxReadBatchSizeBytes": 536870888,
               "migrationDocLinks": Object {
                 "clusterShardLimitExceeded": "https://www.elastic.co/guide/en/kibana/test-branch/resolve-migrations-failures.html#cluster-shard-limit-exceeded",
                 "repeatedTimeoutRequests": "https://www.elastic.co/guide/en/kibana/test-branch/resolve-migrations-failures.html#_repeated_time_out_requests_that_eventually_fail",
@@ -667,12 +671,11 @@ Object {
               "tempIndexMappings": Object {
                 "dynamic": false,
                 "properties": Object {
-                  "migrationVersion": Object {
-                    "dynamic": "true",
-                    "type": "object",
-                  },
                   "type": Object {
                     "type": "keyword",
+                  },
+                  "typeMigrationVersion": Object {
+                    "type": "version",
                   },
                 },
               },
@@ -859,7 +862,9 @@ Object {
                   "message": "Log from DONE control state",
                 },
               ],
+              "maxBatchSize": 1000,
               "maxBatchSizeBytes": 100000000,
+              "maxReadBatchSizeBytes": 536870888,
               "migrationDocLinks": Object {
                 "clusterShardLimitExceeded": "https://www.elastic.co/guide/en/kibana/test-branch/resolve-migrations-failures.html#cluster-shard-limit-exceeded",
                 "repeatedTimeoutRequests": "https://www.elastic.co/guide/en/kibana/test-branch/resolve-migrations-failures.html#_repeated_time_out_requests_that_eventually_fail",
@@ -902,12 +907,11 @@ Object {
               "tempIndexMappings": Object {
                 "dynamic": false,
                 "properties": Object {
-                  "migrationVersion": Object {
-                    "dynamic": "true",
-                    "type": "object",
-                  },
                   "type": Object {
                     "type": "keyword",
+                  },
+                  "typeMigrationVersion": Object {
+                    "type": "version",
                   },
                 },
               },
@@ -1114,7 +1118,9 @@ Object {
                   "message": "Log from LEGACY_DELETE control state",
                 },
               ],
+              "maxBatchSize": 1000,
               "maxBatchSizeBytes": 100000000,
+              "maxReadBatchSizeBytes": 536870888,
               "migrationDocLinks": Object {
                 "clusterShardLimitExceeded": "https://www.elastic.co/guide/en/kibana/test-branch/resolve-migrations-failures.html#cluster-shard-limit-exceeded",
                 "repeatedTimeoutRequests": "https://www.elastic.co/guide/en/kibana/test-branch/resolve-migrations-failures.html#_repeated_time_out_requests_that_eventually_fail",
@@ -1162,12 +1168,11 @@ Object {
               "tempIndexMappings": Object {
                 "dynamic": false,
                 "properties": Object {
-                  "migrationVersion": Object {
-                    "dynamic": "true",
-                    "type": "object",
-                  },
                   "type": Object {
                     "type": "keyword",
+                  },
+                  "typeMigrationVersion": Object {
+                    "type": "version",
                   },
                 },
               },
@@ -1352,7 +1357,9 @@ Object {
                   "message": "Log from FATAL control state",
                 },
               ],
+              "maxBatchSize": 1000,
               "maxBatchSizeBytes": 100000000,
+              "maxReadBatchSizeBytes": 536870888,
               "migrationDocLinks": Object {
                 "clusterShardLimitExceeded": "https://www.elastic.co/guide/en/kibana/test-branch/resolve-migrations-failures.html#cluster-shard-limit-exceeded",
                 "repeatedTimeoutRequests": "https://www.elastic.co/guide/en/kibana/test-branch/resolve-migrations-failures.html#_repeated_time_out_requests_that_eventually_fail",
@@ -1400,12 +1407,11 @@ Object {
               "tempIndexMappings": Object {
                 "dynamic": false,
                 "properties": Object {
-                  "migrationVersion": Object {
-                    "dynamic": "true",
-                    "type": "object",
-                  },
                   "type": Object {
                     "type": "keyword",
+                  },
+                  "typeMigrationVersion": Object {
+                    "type": "version",
                   },
                 },
               },

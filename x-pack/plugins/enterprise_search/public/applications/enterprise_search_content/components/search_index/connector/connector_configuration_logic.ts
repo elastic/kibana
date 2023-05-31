@@ -351,7 +351,7 @@ export const ConnectorConfigurationLogic = kea<
             type,
             ui_restrictions,
             validations: validations ?? [],
-            value: ensureCorrectTyping(type, value),
+            value: display ? ensureCorrectTyping(type, value) : value, // only check type if field had a specified eui element
           },
         }),
         setLocalConfigState: (_, { configState }) => configState,

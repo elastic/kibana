@@ -22,7 +22,7 @@ import {
   ThreatIntelligencePluginStartDeps,
 } from './types';
 import { SecuritySolutionContext } from './containers/security_solution_context';
-import { EnterpriseGuard } from './containers/enterprise_guard/enterprise_guard';
+import { EnterpriseGuard } from './containers/enterprise_guard';
 
 interface AppProps {
   securitySolutionContext: SecuritySolutionPluginContext;

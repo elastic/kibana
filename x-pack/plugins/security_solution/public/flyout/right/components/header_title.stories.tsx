@@ -20,7 +20,9 @@ export default {
 };
 
 const KibanaReactContext = createKibanaReactContext({
-  uiSettings: mockUiSettingsService(),
+  settings: {
+    client: mockUiSettingsService(),
+  },
 } as unknown as CoreStart);
 
 export const IsAlert: Story<void> = () => {
@@ -83,11 +85,9 @@ export const NoTimestamp: Story<void> = () => {
   } as unknown as RightPanelContext;
 
   return (
-    <KibanaReactContext.Provider>
-      <RightPanelContext.Provider value={contextValue}>
-        <HeaderTitle />
-      </RightPanelContext.Provider>
-    </KibanaReactContext.Provider>
+    <RightPanelContext.Provider value={contextValue}>
+      <HeaderTitle />
+    </RightPanelContext.Provider>
   );
 };
 

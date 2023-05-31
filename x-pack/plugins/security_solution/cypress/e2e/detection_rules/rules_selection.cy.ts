@@ -51,10 +51,8 @@ describe.skip('Rules selection', () => {
       cy.get(SELECTED_RULES_NUMBER_LABEL).should('contain.text', availablePrebuiltRulesCount);
     });
 
-    const bulkSelectButton = cy.get(SELECT_ALL_RULES_BTN);
-
     // Un-select all rules via the Bulk Selection button from the Utility bar
-    bulkSelectButton.click();
+    cy.get(SELECT_ALL_RULES_BTN).click();
 
     // Current selection should be 0 rules
     cy.get(SELECTED_RULES_NUMBER_LABEL).should('contain.text', '0');

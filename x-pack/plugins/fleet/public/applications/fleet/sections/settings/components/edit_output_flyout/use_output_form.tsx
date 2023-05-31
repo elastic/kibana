@@ -78,37 +78,45 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
 
   // preconfigured output do not allow edition
   const isPreconfigured = output?.is_preconfigured ?? false;
+  const allowEdit = output?.allow_edit ?? [];
+
+  function isDisabled(field: keyof Output) {
+    if (!isPreconfigured) {
+      return false;
+    }
+    return !allowEdit.includes(field);
+  }
 
   // Define inputs
   // Shared inputs
-  const nameInput = useInput(output?.name ?? '', validateName, isPreconfigured);
-  const typeInput = useInput(output?.type ?? 'elasticsearch', undefined, isPreconfigured);
+  const nameInput = useInput(output?.name ?? '', validateName, isDisabled('name'));
+  const typeInput = useInput(output?.type ?? 'elasticsearch', undefined, isDisabled('type'));
   const additionalYamlConfigInput = useInput(
     output?.config_yaml ?? '',
     validateYamlConfig,
-    isPreconfigured
+    isDisabled('config_yaml')
   );
 
   const defaultOutputInput = useSwitchInput(
     output?.is_default ?? false,
-    isPreconfigured || output?.is_default
+    isDisabled('is_default') || output?.is_default
   );
   const defaultMonitoringOutputInput = useSwitchInput(
     output?.is_default_monitoring ?? false,
-    isPreconfigured || output?.is_default_monitoring
+    isDisabled('is_default_monitoring') || output?.is_default_monitoring
   );
 
   // ES inputs
   const caTrustedFingerprintInput = useInput(
     output?.ca_trusted_fingerprint ?? '',
     validateCATrustedFingerPrint,
-    isPreconfigured
+    isDisabled('ca_trusted_fingerprint')
   );
   const elasticsearchUrlInput = useComboInput(
     'esHostsComboxBox',
     output?.hosts ?? [],
     validateESHosts,
-    isPreconfigured
+    isDisabled('hosts')
   );
   /*
   Shipper feature flag - currently depends on the content of the yaml
@@ -166,28 +174,28 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
   const queueFlushTimeout = useNumberInput(output?.shipper?.queue_flush_timeout || undefined);
   const maxBatchBytes = useNumberInput(output?.shipper?.max_batch_bytes || undefined);
 
+  const isSSLEditable = isDisabled('ssl');
   // Logstash inputs
   const logstashHostsInput = useComboInput(
     'logstashHostsComboxBox',
     output?.hosts ?? [],
     validateLogstashHosts,
-    isPreconfigured
+    isDisabled('hosts')
   );
   const sslCertificateAuthoritiesInput = useComboInput(
     'sslCertificateAuthoritiesComboxBox',
     output?.ssl?.certificate_authorities ?? [],
     undefined,
-    isPreconfigured
+    isSSLEditable
   );
   const sslCertificateInput = useInput(
     output?.ssl?.certificate ?? '',
     validateSSLCertificate,
-    isPreconfigured
+    isSSLEditable
   );
+  const sslKeyInput = useInput(output?.ssl?.key ?? '', validateSSLKey, isSSLEditable);
 
-  const proxyIdInput = useInput(output?.proxy_id ?? '', () => undefined, isPreconfigured);
-
-  const sslKeyInput = useInput(output?.ssl?.key ?? '', validateSSLKey, isPreconfigured);
+  const proxyIdInput = useInput(output?.proxy_id ?? '', () => undefined, isDisabled('proxy_id'));
 
   const isLogstash = typeInput.value === 'logstash';
 
@@ -402,9 +410,6 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
     hasEncryptedSavedObjectConfigured,
     isShipperEnabled: !isShipperDisabled,
     isDisabled:
-      isLoading ||
-      isPreconfigured ||
-      (output && !hasChanged) ||
-      (isLogstash && !hasEncryptedSavedObjectConfigured),
+      isLoading || (output && !hasChanged) || (isLogstash && !hasEncryptedSavedObjectConfigured),
   };
 }

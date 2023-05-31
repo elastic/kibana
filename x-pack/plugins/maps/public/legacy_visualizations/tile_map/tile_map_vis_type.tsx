@@ -50,4 +50,5 @@ export const tileMapVisType = {
   },
   toExpressionAst,
   requiresSearch: true,
+  disableCreate: true,
 } as VisTypeDefinition<TileMapVisParams>;

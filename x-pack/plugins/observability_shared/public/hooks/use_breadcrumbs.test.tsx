@@ -18,6 +18,7 @@ const kibanaServices = {
   application: { getUrlForApp: () => {}, navigateToApp: () => {} },
   chrome: { setBreadcrumbs, docTitle: { change: setTitle } },
   uiSettings: { get: () => true },
+  settings: { client: { get: () => true } },
 } as unknown as Partial<CoreStart>;
 const KibanaContext = createKibanaReactContext(kibanaServices);
 
