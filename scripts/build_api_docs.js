@@ -7,4 +7,4 @@
  */
 
 require('../src/setup_node_env');
-require('@kbn/docs-utils').runBuildApiDocsCli();
+require('@kbn/docs-utils').linkDocumentation();

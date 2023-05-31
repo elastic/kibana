@@ -30,9 +30,14 @@ import { writeDeprecationDueByTeam } from './mdx/write_deprecations_due_by_team'
 import { trimDeletedDocsFromNav } from './trim_deleted_docs_from_nav';
 import { getAllDocFileIds } from './mdx/get_all_doc_file_ids';
 import { getPathsByPackage } from './get_paths_by_package';
+import { docLinker } from './linker';
 
 function isStringArray(arr: unknown | string[]): arr is string[] {
   return Array.isArray(arr) && arr.every((p) => typeof p === 'string');
+}
+
+export function linkDocumentation() {
+  run(() => docLinker({ sourceDir: './x-pack/plugins' }));
 }
 
 export function runBuildApiDocsCli() {
