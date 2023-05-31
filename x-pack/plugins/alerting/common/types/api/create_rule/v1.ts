@@ -6,42 +6,19 @@
  */
 
 import { TypeOf, schema } from '@kbn/config-schema';
-import {
-  validateDurationV1,
-  validateHoursV1,
-  validateTimezoneV1,
-  validateNotifyWhenTypeV1,
-  ruleV1,
-} from '..';
+import { ruleV1 } from '..';
 
-export type RulesClientCreateData = TypeOf<typeof rulesClientCreateDataSchema>;
-export type RulesClientCreateOptions = TypeOf<typeof rulesClientCreateOptionsSchema>;
+import { RuleNotifyWhen } from '../rule/v1';
+import { validateNotifyWhenType } from '../validation/validate_notify_when/v1';
+import { validateDuration } from '../validation/validate_duration/v1';
+import { validateHours } from '../validation/validate_hours/v1';
+import { validateTimezone } from '../validation/validate_timezone/v1';
 
-export type CreateRuleActionData = TypeOf<typeof actionSchema>;
-export type CreateRuleActionFrequencyData = TypeOf<typeof actionFrequencySchema>;
+export type CreateRuleAction = TypeOf<typeof actionSchema>;
+export type CreateRuleActionFrequency = TypeOf<typeof actionFrequencySchema>;
 
-export type CreateRuleActionRequestBody = Omit<
-  CreateRuleActionData,
-  'frequency' | 'alertsFilter'
-> & {
-  frequency: Omit<CreateRuleActionFrequencyData, 'notifyWhen'> & {
-    notify_when: CreateRuleActionFrequencyData['notifyWhen'];
-  };
-  alerts_filter: CreateRuleActionData['alertsFilter'];
-};
-
-export interface CreateRuleRequestParams {
-  id?: string;
-}
-
-export type CreateRuleRequestBody = Omit<
-  RulesClientCreateData,
-  'alertTypeId' | 'notifyWhen' | 'actions'
-> & {
-  rule_type_id: RulesClientCreateData['alertTypeId'];
-  notify_when: RulesClientCreateData['notifyWhen'];
-  actions: CreateRuleActionRequestBody[];
-};
+export type CreateRuleRequestParams = TypeOf<typeof createParamsSchema>;
+export type CreateRuleRequestBody = TypeOf<typeof createBodySchema>;
 
 export interface CreateRuleResponse {
   body: ruleV1.RuleResponse;
@@ -49,17 +26,17 @@ export interface CreateRuleResponse {
 
 const notifyWhenSchema = schema.oneOf(
   [
-    schema.literal(ruleV1.RuleNotifyWhen.CHANGE),
-    schema.literal(ruleV1.RuleNotifyWhen.ACTIVE),
-    schema.literal(ruleV1.RuleNotifyWhen.THROTTLE),
+    schema.literal(RuleNotifyWhen.CHANGE),
+    schema.literal(RuleNotifyWhen.ACTIVE),
+    schema.literal(RuleNotifyWhen.THROTTLE),
   ],
-  { validate: validateNotifyWhenTypeV1.validateNotifyWhenType }
+  { validate: validateNotifyWhenType }
 );
 
 const actionFrequencySchema = schema.object({
   summary: schema.boolean(),
-  notifyWhen: notifyWhenSchema,
-  throttle: schema.nullable(schema.string({ validate: validateDurationV1.validateDuration })),
+  notify_when: notifyWhenSchema,
+  throttle: schema.nullable(schema.string({ validate: validateDuration })),
 });
 
 const actionSchema = schema.object({
@@ -68,7 +45,7 @@ const actionSchema = schema.object({
   params: schema.recordOf(schema.string(), schema.any(), { defaultValue: {} }),
   frequency: schema.maybe(actionFrequencySchema),
   uuid: schema.maybe(schema.string()),
-  alertsFilter: schema.maybe(
+  alerts_filter: schema.maybe(
     schema.object({
       query: schema.maybe(
         schema.object({
@@ -98,36 +75,34 @@ const actionSchema = schema.object({
           ),
           hours: schema.object({
             start: schema.string({
-              validate: validateHoursV1.validateHours,
+              validate: validateHours,
             }),
             end: schema.string({
-              validate: validateHoursV1.validateHours,
+              validate: validateHours,
             }),
           }),
-          timezone: schema.string({ validate: validateTimezoneV1.validateTimezone }),
+          timezone: schema.string({ validate: validateTimezone }),
         })
       ),
     })
   ),
 });
 
-export const rulesClientCreateDataSchema = schema.object({
+export const createBodySchema = schema.object({
   name: schema.string(),
-  alertTypeId: schema.string(),
+  rule_type_id: schema.string(),
   enabled: schema.boolean({ defaultValue: true }),
   consumer: schema.string(),
   tags: schema.arrayOf(schema.string(), { defaultValue: [] }),
-  throttle: schema.maybe(
-    schema.nullable(schema.string({ validate: validateDurationV1.validateDuration }))
-  ),
+  throttle: schema.maybe(schema.nullable(schema.string({ validate: validateDuration }))),
   params: schema.recordOf(schema.string(), schema.any(), { defaultValue: {} }),
   schedule: schema.object({
-    interval: schema.string({ validate: validateDurationV1.validateDuration }),
+    interval: schema.string({ validate: validateDuration }),
   }),
   actions: schema.arrayOf(actionSchema, { defaultValue: [] }),
-  notifyWhen: schema.maybe(schema.nullable(notifyWhenSchema)),
+  notify_when: schema.maybe(schema.nullable(notifyWhenSchema)),
 });
 
-export const rulesClientCreateOptionsSchema = schema.object({
+export const createParamsSchema = schema.object({
   id: schema.maybe(schema.string()),
 });

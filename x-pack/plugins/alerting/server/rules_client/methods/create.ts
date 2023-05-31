@@ -9,7 +9,7 @@ import Boom from '@hapi/boom';
 import { SavedObject, SavedObjectsUtils } from '@kbn/core/server';
 import { withSpan } from '@kbn/apm-utils';
 import { parseDuration } from '../../../common/parse_duration';
-import { RawRule, RuleTypeParams } from '../../types';
+import { RawRule } from '../../types';
 import { WriteOperations, AlertingAuthorizationEntity } from '../../authorization';
 import { validateRuleTypeParams, getRuleNotifyWhenType, getDefaultMonitoring } from '../../lib';
 import { getRuleExecutionStatusPending } from '../../lib/rule_execution_status';
@@ -24,34 +24,37 @@ import {
 import { generateAPIKeyName, apiKeyAsAlertAttributes } from '../common';
 import { ruleAuditEvent, RuleAuditAction } from '../common/audit_events';
 import { RulesClientContext } from '../types';
-import {
-  Rule,
-  SanitizedRule,
-  RulesClientCreateData,
-  RulesClientCreateOptions,
-  rulesClientCreateDataSchema,
-  rulesClientCreateOptionsSchema,
-} from '../../../common/types/api';
+import { Rule, RuleParams, SanitizedRule, NormalizedAction } from '../../../common/types/api';
 import { RuleAttributes } from '../../common/types';
 
+export interface CreateRuleData {
+  name: Rule['name'];
+  alertTypeId: Rule['alertTypeId'];
+  enabled: Rule['enabled'];
+  consumer: Rule['consumer'];
+  tags: Rule['tags'];
+  throttle?: Rule['throttle'];
+  params: RuleParams;
+  schedule: Rule['schedule'];
+  actions: NormalizedAction[];
+  notifyWhen: Rule['notifyWhen'];
+}
+
+export interface CreateRuleOptions {
+  id?: string;
+}
+
 export interface CreateParams {
-  data: RulesClientCreateData;
-  options?: RulesClientCreateOptions;
+  data: CreateRuleData;
+  options?: CreateRuleOptions;
   allowMissingConnectorSecrets?: boolean;
 }
 
-export async function create<Params extends RuleTypeParams = never>(
+export async function create<Params extends RuleParams = never>(
   context: RulesClientContext,
   createParams: CreateParams
 ): Promise<SanitizedRule<Params>> {
   const { data: initialData, options, allowMissingConnectorSecrets } = createParams;
-
-  try {
-    rulesClientCreateDataSchema.validate(initialData);
-    rulesClientCreateOptionsSchema.validate(options);
-  } catch (e) {
-    throw Boom.badRequest(`Failed to validate input schema - ${e.message}`);
-  }
 
   const data = { ...initialData, actions: addGeneratedActionValues(initialData.actions) };
 

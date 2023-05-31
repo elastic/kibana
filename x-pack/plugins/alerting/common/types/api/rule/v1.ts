@@ -73,6 +73,8 @@ export type Action = TypeOf<typeof actionSchema>;
 
 export type ActionFrequency = TypeOf<typeof actionFrequencySchema>;
 
+export type NormalizedAction = Omit<Action, 'actionTypeId'>;
+
 // Sanitized types for HTTP response
 export type SanitizedRule<Params extends RuleParams = never> = Omit<
   Rule<Params>,
