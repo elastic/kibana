@@ -228,7 +228,7 @@ export const createBulkIndexOperationTuple = (
       index: {
         _id: doc._id,
         ...(typeIndexMap[doc._source.type] && {
-          _index: typeIndexMap[doc._source.type] + '_alias',
+          _index: typeIndexMap[doc._source.type],
         }),
         // use optimistic concurrency control to ensure that outdated
         // documents are only overwritten once with the latest version
