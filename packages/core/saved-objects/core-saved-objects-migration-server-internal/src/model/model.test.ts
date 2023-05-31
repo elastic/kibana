@@ -332,6 +332,21 @@ describe('migrations v2 model', () => {
             `"The .kibana alias is pointing to a newer version of Kibana: v7.12.0"`
           );
         });
+        test('INIT -> FATAL when later version alias exists', () => {
+          const res: ResponseType<'INIT'> = Either.right({
+            '.kibana_7.11.0_001': {
+              aliases: { '.kibana_7.12.0': {}, '.kibana': {} },
+              mappings: { properties: {}, _meta: { migrationMappingPropertyHashes: {} } },
+              settings: {},
+            },
+          });
+          const newState = model(initState, res) as FatalState;
+
+          expect(newState.controlState).toEqual('FATAL');
+          expect(newState.reason).toMatchInlineSnapshot(
+            `"The .kibana_7.12.0 alias refers to a newer version of Kibana: v7.12.0"`
+          );
+        });
         test('INIT -> FATAL when .kibana points to multiple indices', () => {
           const res: ResponseType<'INIT'> = Either.right({
             '.kibana_7.12.0_001': {
@@ -367,13 +382,13 @@ describe('migrations v2 model', () => {
             '.kibana_7.invalid.0_001': {
               aliases: {
                 '.kibana': {},
-                '.kibana_7.12.0': {},
+                '.kibana_7.11.0': {},
               },
               mappings: mappingsWithUnknownType,
               settings: {},
             },
-            '.kibana_7.11.0_001': {
-              aliases: { '.kibana_7.11.0': {} },
+            '.kibana_7.10.0_001': {
+              aliases: { '.kibana_7.10.0': {} },
               mappings: { properties: {}, _meta: { migrationMappingPropertyHashes: {} } },
               settings: {},
             },
@@ -573,13 +588,13 @@ describe('migrations v2 model', () => {
             '.kibana_7.invalid.0_001': {
               aliases: {
                 '.kibana': {},
-                '.kibana_7.12.0': {},
+                '.kibana_7.11.0': {},
               },
               mappings: mappingsWithUnknownType,
               settings: {},
             },
-            '.kibana_7.11.0_001': {
-              aliases: { '.kibana_7.11.0': {} },
+            '.kibana_7.10.0_001': {
+              aliases: { '.kibana_7.10.0': {} },
               mappings: { properties: {}, _meta: { migrationMappingPropertyHashes: {} } },
               settings: {},
             },
@@ -590,8 +605,8 @@ describe('migrations v2 model', () => {
           expect(newState.sourceIndex.value).toBe('.kibana_7.invalid.0_001');
           expect(newState.aliases).toEqual({
             '.kibana': '.kibana_7.invalid.0_001',
-            '.kibana_7.11.0': '.kibana_7.11.0_001',
-            '.kibana_7.12.0': '.kibana_7.invalid.0_001',
+            '.kibana_7.10.0': '.kibana_7.10.0_001',
+            '.kibana_7.11.0': '.kibana_7.invalid.0_001',
           });
         });
 
