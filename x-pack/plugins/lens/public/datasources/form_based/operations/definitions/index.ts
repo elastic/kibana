@@ -52,7 +52,6 @@ import {
   timeRangeOperation,
   nowOperation,
   intervalOperation,
-  constantsOperation,
 } from './formula';
 import { staticValueOperation } from './static_value';
 import { lastValueOperation } from './last_value';
@@ -118,7 +117,6 @@ export type {
   TimeRangeIndexPatternColumn,
   NowIndexPatternColumn,
   IntervalIndexPatternColumn,
-  ConstantIndexPatternColumn,
 } from './formula';
 export type { StaticValueIndexPatternColumn } from './static_value';
 
@@ -156,7 +154,6 @@ const internalOperationDefinitions = [
   timeRangeOperation,
   nowOperation,
   intervalOperation,
-  constantsOperation,
 ];
 
 export { termsOperation } from './terms';

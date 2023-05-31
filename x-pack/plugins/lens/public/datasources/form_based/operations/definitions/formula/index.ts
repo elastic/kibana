@@ -16,12 +16,6 @@ export { mathOperation } from './math';
 export type {
   TimeRangeIndexPatternColumn,
   NowIndexPatternColumn,
-  ConstantIndexPatternColumn,
   IntervalIndexPatternColumn,
 } from './context_variables';
-export {
-  timeRangeOperation,
-  nowOperation,
-  constantsOperation,
-  intervalOperation,
-} from './context_variables';
+export { timeRangeOperation, nowOperation, intervalOperation } from './context_variables';
