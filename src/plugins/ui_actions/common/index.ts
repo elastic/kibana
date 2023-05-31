@@ -13,5 +13,5 @@ export {
   VISUALIZE_FIELD_TRIGGER,
   visualizeGeoFieldTrigger,
   VISUALIZE_GEO_FIELD_TRIGGER,
-  type Trigger,
 } from './triggers';
+export type { Trigger } from './triggers';
