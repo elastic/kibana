@@ -172,7 +172,6 @@ export const getSecurityAppFeaturesConfig = (
         },
       },
     },
-<<<<<<< HEAD
 
     [AppFeatureSecurityKey.endpointResponseActions]: {
       subFeatures: [
@@ -199,7 +198,5 @@ export const getSecurityAppFeaturesConfig = (
         },
       ],
     },
-=======
->>>>>>> pablo/siem-explore-serverless-pli
   };
 };
