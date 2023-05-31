@@ -8,5 +8,5 @@
 export const SLO_BURN_RATE_RULE_ID = 'slo.rules.burnRate';
 export const INVALID_EQUATION_REGEX = /[^A-Z|+|\-|\s|\d+|\.|\(|\)|\/|\*|>|<|=|\?|\:|&|\!|\|]+/g;
 export const ALERT_STATUS_ALL = 'all';
-export const OBSERVABILITY_THRESHOLD_RULE_TYPE_ID = 'observability.threshold.rule';
 export const ALERTS_URL_STORAGE_KEY = '_a';
+export const OBSERVABILITY_THRESHOLD_RULE_TYPE_ID = 'observability.threshold.rule';
