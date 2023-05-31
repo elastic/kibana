@@ -38,7 +38,6 @@ import {
 } from './security_kibana_sub_features';
 import type { AppFeaturesSecurityConfig } from './types';
 import { AppFeatureSecurityKey } from '../../../common/types/app_features';
-import { ENTITY_ANALYTICS_CAPABILITY } from '../../../common/capabilities';
 
 // Same as the plugin id defined by Cloud Security Posture
 const CLOUD_POSTURE_APP_ID = 'csp';
@@ -177,12 +176,12 @@ export const getSecurityAppFeaturesConfig = (): AppFeaturesSecurityConfig => {
     [AppFeatureSecurityKey.advancedInsights]: {
       privileges: {
         all: {
-          ui: [ENTITY_ANALYTICS_CAPABILITY],
-          api: [`${APP_ID}-${ENTITY_ANALYTICS_CAPABILITY}`],
+          ui: ['entity-analytics'],
+          api: [`${APP_ID}-entity-analytics`],
         },
         read: {
-          ui: [ENTITY_ANALYTICS_CAPABILITY],
-          api: [`${APP_ID}-${ENTITY_ANALYTICS_CAPABILITY}`],
+          ui: ['entity-analytics'],
+          api: [`${APP_ID}-entity-analytics`],
         },
       },
     },
