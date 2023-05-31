@@ -39,7 +39,7 @@ export function hasKibanaPrivilege(
 export const calculateEndpointAuthz = (
   licenseService: LicenseService,
   fleetAuthz: FleetAuthz,
-  userRoles: MaybeImmutable<string[]>
+  userRoles: MaybeImmutable<string[]> = []
 ): EndpointAuthz => {
   const isPlatinumPlusLicense = licenseService.isPlatinumPlus();
   const isEnterpriseLicense = licenseService.isEnterprise();

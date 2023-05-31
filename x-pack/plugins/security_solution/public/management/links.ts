@@ -249,14 +249,14 @@ export const getManagementFilteredLinks = async (
     canReadEventFilters,
     canReadBlocklist,
     canReadPolicyManagement,
-  } = fleetAuthz
-    ? calculateEndpointAuthz(licenseService, fleetAuthz, currentUser.roles)
-    : getEndpointAuthzInitialState();
+  } =
+    fleetAuthz && currentUser
+      ? calculateEndpointAuthz(licenseService, fleetAuthz, currentUser.roles)
+      : getEndpointAuthzInitialState();
 
-  // show host isolation link only when user can write or when user can read and there is data, exclude link otherwise
   const showHostIsolationExceptions =
-    canWriteHostIsolationExceptions ||
-    (canReadHostIsolationExceptions &&
+    canWriteHostIsolationExceptions || // has read-write isolate host payment feature
+    (canReadHostIsolationExceptions && // no payment feature enables the link if there is data to allow user to unisolate hosts
       (await checkArtifactHasData(HostIsolationExceptionsApiClient.getInstance(core.http))));
 
   const linksToExclude: SecurityPageName[] = [];

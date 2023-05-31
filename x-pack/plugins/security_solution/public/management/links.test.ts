@@ -126,9 +126,12 @@ describe('links', () => {
   });
 
   describe('Host Isolation Exception', () => {
-    it('should NOT return HIE if `canReadHostIsolationExceptions` is false', async () => {
+    it('should NOT return HIE if the user has no read or write permission', async () => {
       (calculateEndpointAuthz as jest.Mock).mockReturnValue(
-        getEndpointAuthzInitialStateMock({ canReadHostIsolationExceptions: false })
+        getEndpointAuthzInitialStateMock({
+          canWriteHostIsolationExceptions: false,
+          canReadHostIsolationExceptions: false,
+        })
       );
 
       const filteredLinks = await getManagementFilteredLinks(
@@ -137,124 +140,74 @@ describe('links', () => {
       );
 
       expect(filteredLinks).toEqual(getLinksWithout(SecurityPageName.hostIsolationExceptions));
+      expect(fakeHttpServices.get).not.toHaveBeenCalled();
     });
 
-    it('should NOT return HIE if license is lower than Enterprise and NO HIE entries exist', async () => {
+    it('should NOT return HIE if user has read only permission (no license) and NO HIE entries exist', async () => {
       (calculateEndpointAuthz as jest.Mock).mockReturnValue(
-        getEndpointAuthzInitialStateMock({ canReadHostIsolationExceptions: false })
+        getEndpointAuthzInitialStateMock({
+          canWriteHostIsolationExceptions: false,
+          canReadHostIsolationExceptions: true,
+        })
       );
 
       fakeHttpServices.get.mockResolvedValue({ total: 0 });
-      licenseServiceMock.isPlatinumPlus.mockReturnValue(false);
-      ExperimentalFeaturesService.init({
-        experimentalFeatures: { ...allowedExperimentalValues, endpointRbacEnabled: true },
-      });
 
       const filteredLinks = await getManagementFilteredLinks(
         coreMockStarted,
-        getPlugins([], {
-          packagePrivileges: {
-            endpoint: {
-              actions: {
-                readHostIsolationExceptions: {
-                  executePackageAction: true,
-                },
-              },
-            },
-          },
-        })
+        getPlugins(['superuser'])
       );
 
+      expect(filteredLinks).toEqual(getLinksWithout(SecurityPageName.hostIsolationExceptions));
       expect(fakeHttpServices.get).toHaveBeenCalledWith('/api/exception_lists/items/_find', {
         query: expect.objectContaining({
           list_id: [ENDPOINT_ARTIFACT_LISTS.hostIsolationExceptions.id],
         }),
       });
-      expect(calculateEndpointAuthz as jest.Mock).toHaveBeenLastCalledWith(
-        expect.anything(),
-        expect.anything(),
-        expect.anything(),
-        expect.anything(),
-        false
-      );
-      expect(filteredLinks).toEqual(getLinksWithout(SecurityPageName.hostIsolationExceptions));
     });
 
-    it('should return HIE if license is lower than Enterprise, but HIE entries exist', async () => {
+    it('should return HIE if user has read only permission (no license) but HIE entries exist', async () => {
       (calculateEndpointAuthz as jest.Mock).mockReturnValue(
-        getEndpointAuthzInitialStateMock({ canReadHostIsolationExceptions: true })
+        getEndpointAuthzInitialStateMock({
+          canWriteHostIsolationExceptions: false,
+          canReadHostIsolationExceptions: true,
+        })
       );
 
       fakeHttpServices.get.mockResolvedValue({ total: 100 });
-      licenseServiceMock.isPlatinumPlus.mockReturnValue(false);
-      ExperimentalFeaturesService.init({
-        experimentalFeatures: { ...allowedExperimentalValues, endpointRbacEnabled: true },
-      });
 
       const filteredLinks = await getManagementFilteredLinks(
         coreMockStarted,
-        getPlugins([], {
-          packagePrivileges: {
-            endpoint: {
-              actions: {
-                readHostIsolationExceptions: {
-                  executePackageAction: true,
-                },
-              },
-            },
-          },
-        })
+        getPlugins(['superuser'])
       );
 
+      expect(filteredLinks).toEqual(links);
       expect(fakeHttpServices.get).toHaveBeenCalledWith('/api/exception_lists/items/_find', {
         query: expect.objectContaining({
           list_id: [ENDPOINT_ARTIFACT_LISTS.hostIsolationExceptions.id],
         }),
       });
-      expect(calculateEndpointAuthz as jest.Mock).toHaveBeenLastCalledWith(
-        expect.anything(),
-        expect.anything(),
-        expect.anything(),
-        expect.anything(),
-        true
+    });
+
+    it('should return HIE if user has write permission (licensed)', async () => {
+      (calculateEndpointAuthz as jest.Mock).mockReturnValue(
+        getEndpointAuthzInitialStateMock({ canWriteHostIsolationExceptions: true })
       );
-      expect(filteredLinks).toEqual(getLinksWithout());
-    });
-  });
 
-  // this can be removed after removing endpointRbacEnabled feature flag
-  describe('without endpointRbacEnabled', () => {
-    beforeAll(() => {
-      ExperimentalFeaturesService.init({
-        experimentalFeatures: { ...allowedExperimentalValues, endpointRbacEnabled: false },
-      });
-    });
+      fakeHttpServices.get.mockResolvedValue({ total: 100 });
 
-    it('shows Trusted Applications for non-superuser, too', async () => {
-      (calculateEndpointAuthz as jest.Mock).mockReturnValue(getEndpointAuthzInitialStateMock());
-
-      const filteredLinks = await getManagementFilteredLinks(coreMockStarted, getPlugins([]));
+      const filteredLinks = await getManagementFilteredLinks(
+        coreMockStarted,
+        getPlugins(['superuser'])
+      );
 
       expect(filteredLinks).toEqual(links);
+      expect(fakeHttpServices.get).not.toHaveBeenCalled();
     });
   });
 
   // this can be the default after removing endpointRbacEnabled feature flag
-  describe('with endpointRbacEnabled', () => {
-    beforeAll(() => {
-      ExperimentalFeaturesService.init({
-        experimentalFeatures: { ...allowedExperimentalValues, endpointRbacEnabled: true },
-      });
-    });
-
-    it('should return all links for user with all sub-feature privileges', async () => {
-      (calculateEndpointAuthz as jest.Mock).mockReturnValue(getEndpointAuthzInitialStateMock());
-
-      const filteredLinks = await getManagementFilteredLinks(coreMockStarted, getPlugins([]));
-
-      expect(filteredLinks).toEqual(links);
-    });
-
+  describe('endpointRbacEnabled links', () => {
     it('should hide Trusted Applications for user without privilege', async () => {
       (calculateEndpointAuthz as jest.Mock).mockReturnValue(
         getEndpointAuthzInitialStateMock({

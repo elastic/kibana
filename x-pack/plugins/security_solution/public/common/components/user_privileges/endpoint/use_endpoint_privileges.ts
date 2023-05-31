@@ -49,7 +49,7 @@ export const useEndpointPrivileges = (): Immutable<EndpointPrivileges> => {
 
     const privilegeList: EndpointPrivileges = Object.freeze({
       loading,
-      ...(!loading && fleetAuthz
+      ...(!loading && fleetAuthz && !isEmpty(user)
         ? calculateEndpointAuthz(licenseService, fleetAuthz, userRoles)
         : getEndpointAuthzInitialState()),
     });
