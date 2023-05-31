@@ -83,7 +83,7 @@ function createDefaultSetupResourceResponse(): SetupResourceResponse {
   };
 }
 
-function everySetupResourceResponse(response: SetupResourceResponse): boolean {
+function areResourcesSetup(response: SetupResourceResponse): boolean {
   return (
     response.resource_management.enabled &&
     response.resources.created &&
@@ -171,7 +171,7 @@ export function registerSetupRoute({
 
         return response.ok({
           body: {
-            has_setup: everySetupResourceResponse(body),
+            has_setup: areResourcesSetup(body),
             has_data: body.data.available,
           },
         });
@@ -241,7 +241,7 @@ export function registerSetupRoute({
         ];
         await Promise.all(verifyFunctions.map(async (fn) => await fn()));
 
-        if (everySetupResourceResponse(body)) {
+        if (areResourcesSetup(body)) {
           return response.ok();
         }
 
