@@ -46,6 +46,8 @@ test('convertSavedDashboardPanelToPanelState', () => {
       savedObjectId: 'savedObjectId',
     },
     type: 'search',
+    panelRefName: undefined,
+    version: '7.0.0',
   });
 });
 
