@@ -13,10 +13,8 @@ import * as useUiSettingHook from '@kbn/kibana-react-plugin/public/ui_settings/u
 import { CodeEditor, KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { buildDataTableRecord, EsHitRecord } from '@kbn/unified-discover';
-import { ElasticRequestState, JsonCodeEditorCommon, useEsDocSearch } from '../..';
+import { ElasticRequestState, JsonCodeEditorCommon } from '../..';
 import { DocViewerSource } from './source';
-
-const hooks = { useEsDocSearch };
 
 const mockDataView = {
   getComputedFields: () => [],
@@ -40,7 +38,6 @@ const services = {
 
 describe('Source Viewer component', () => {
   test('renders loading state', () => {
-    jest.spyOn(hooks, 'useEsDocSearch').mockImplementation(() => [0, null, () => {}]);
     const comp = mountWithIntl(
       <KibanaContextProvider services={services}>
         <DocViewerSource
@@ -59,7 +56,6 @@ describe('Source Viewer component', () => {
   });
 
   test('renders error state', () => {
-    jest.spyOn(hooks, 'useEsDocSearch').mockImplementation(() => [3, null, () => {}]);
     const comp = mountWithIntl(
       <KibanaContextProvider services={services}>
         <DocViewerSource
@@ -97,9 +93,6 @@ describe('Source Viewer component', () => {
         _underscore: 123,
       },
     });
-    jest
-      .spyOn(hooks, 'useEsDocSearch')
-      .mockImplementation(() => [2, mockHit as unknown as EsHitRecord, () => {}]);
     jest.spyOn(useUiSettingHook, 'useUiSetting').mockImplementation(() => {
       return false;
     });

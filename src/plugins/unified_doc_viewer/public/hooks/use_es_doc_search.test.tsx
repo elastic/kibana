@@ -12,7 +12,7 @@ import { Subject } from 'rxjs';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import React from 'react';
-import { DocProps, ElasticRequestState } from '../types';
+import { DocProps, ElasticRequestState } from '@kbn/unified-doc-viewer/src/types';
 
 const index = 'test-index';
 const mockSearchResult = new Subject();

@@ -32,7 +32,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { getFieldIconType } from '@kbn/unified-field-list-plugin/public';
 import { getIgnoredReason, isNestedFieldParent } from '@kbn/unified-doc-viewer/src';
-import { usePager, useUnifiedDocViewerServices } from '@kbn/unified-doc-viewer/src/hooks';
+import { usePager, useUnifiedDocViewerServices } from '@kbn/unified-doc-viewer/../../hooks';
 import { formatFieldValue, getShouldShowFieldHandler } from '@kbn/unified-discover';
 import { FieldName } from '../field_name';
 import { TableFieldValue } from './table_cell_value';

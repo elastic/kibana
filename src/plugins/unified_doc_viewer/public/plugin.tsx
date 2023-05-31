@@ -10,9 +10,9 @@ import React, { Suspense } from 'react';
 import { CoreSetup, Plugin } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { EuiSkeletonText } from '@elastic/eui';
-import { useUnifiedDocViewerServices } from '@kbn/unified-doc-viewer/src/hooks';
 import { DocViewsRegistry, setDocViewsRegistry } from './services';
 import { DeferredSpinner } from './components';
+import { useUnifiedDocViewerServices } from './hooks/use_doc_view_services';
 
 const DocViewerSource = React.lazy(() => import('./components/doc_viewer_source'));
 const DocViewerTable = React.lazy(() => import('./components/doc_viewer_table'));

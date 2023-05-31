@@ -6,6 +6,6 @@
  * Side Public License, v 1.
  */
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import type { UnifiedDocViewerServices } from '../types';
+import type { UnifiedDocViewerServices } from '@kbn/unified-doc-viewer/src/types';
 
 export const useUnifiedDocViewerServices = () => useKibana<UnifiedDocViewerServices>().services;

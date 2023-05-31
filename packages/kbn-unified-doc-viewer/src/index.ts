@@ -15,4 +15,3 @@ export {
 export { ElasticRequestState } from './types';
 export type { DocViewFilterFn, UnifiedDocViewerServices } from './types';
 export { IgnoredReason, getIgnoredReason, isNestedFieldParent } from './utils';
-export * from './hooks';
