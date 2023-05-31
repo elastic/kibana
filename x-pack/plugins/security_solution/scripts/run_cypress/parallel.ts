@@ -290,6 +290,7 @@ export const cli = () => {
 
             const options = {
               installDir: process.env.KIBANA_INSTALL_DIR,
+              ci: process.env.CI,
             };
 
             const shutdownEs = await pRetry(
@@ -308,9 +309,10 @@ export const cli = () => {
               procs,
               config,
               installDir: options?.installDir,
-              extraKbnOpts: options?.installDir
-                ? []
-                : ['--dev', '--no-dev-config', '--no-dev-credentials'],
+              extraKbnOpts:
+                options?.installDir || options?.ci
+                  ? []
+                  : ['--dev', '--no-dev-config', '--no-dev-credentials'],
               onEarlyExit,
             });
 
@@ -363,7 +365,7 @@ export const cli = () => {
           });
           return result;
         },
-        { concurrency: !isOpen ? 3 : 1 }
+        { concurrency: !isOpen ? 1 : 1 }
       ).then((results) => {
         renderSummaryTable(results as CypressCommandLine.CypressRunResult[]);
         const hasFailedTests = _.some(
