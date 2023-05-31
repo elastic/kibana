@@ -254,7 +254,7 @@ export class ActionExecutor {
 
         // add meta and user.name to event log when GenerativeAi Connector is executed
         if (result.status === 'ok' && actionTypeId === '.gen-ai') {
-          const data = result.data as unknown as { usage: {} };
+          const data = result.data as unknown as { meta: { usage: {} } };
           event.kibana = event.kibana || {};
           event.kibana = {
             ...event.kibana,
