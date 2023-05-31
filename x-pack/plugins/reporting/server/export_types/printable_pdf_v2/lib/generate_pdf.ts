@@ -14,7 +14,7 @@ import type { LocatorParams, PdfMetrics, UrlOrUrlLocatorTuple } from '../../../.
 import type { PdfScreenshotOptions } from '../../../types';
 import { getFullRedirectAppUrl } from '../../common/v2/get_full_redirect_app_url';
 import { getTracker } from '../../common/pdf_tracker';
-import type { TaskPayloadPDFV2 } from '../types';
+import type { TaskPayloadPDFV2 } from '..';
 
 interface PdfResult {
   buffer: Uint8Array | null;
@@ -22,7 +22,9 @@ interface PdfResult {
   warnings: string[];
 }
 
-type GetScreenshotsFn = (options: PdfScreenshotOptions) => Rx.Observable<PdfScreenshotResult>;
+export type GetScreenshotsFn = (
+  options: PdfScreenshotOptions
+) => Rx.Observable<PdfScreenshotResult>;
 
 export function generatePdfObservable(
   config: ReportingConfigType,

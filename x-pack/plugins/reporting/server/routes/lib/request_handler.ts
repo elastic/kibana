@@ -53,12 +53,8 @@ export class RequestHandler {
       throw new Error(`Export type ${exportTypeId} does not exist in the registry!`);
     }
 
-    if (!exportType.createJobFnFactory) {
-      throw new Error(`Export type ${exportTypeId} is not an async job type!`);
-    }
-
     const [createJob, store] = await Promise.all([
-      exportType.createJobFnFactory(reporting, logger.get(exportType.id)),
+      exportType.createJob(jobParams, context, this.req),
       reporting.getStore(),
     ]);
 
@@ -73,7 +69,7 @@ export class RequestHandler {
     // 3. call the export type's createJobFn to create the job payload
     const [headers, job] = await Promise.all([
       this.encryptHeaders(),
-      createJob(jobParams, context, this.req),
+      exportType.createJob(jobParams, context, this.req),
     ]);
 
     const payload = {

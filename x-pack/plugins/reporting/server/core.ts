@@ -46,7 +46,8 @@ import { filter, first, map, switchMap, take } from 'rxjs/operators';
 import type { ReportingSetup } from '.';
 import { REPORTING_REDIRECT_LOCATOR_STORE_KEY } from '../common/constants';
 import { createConfig, ReportingConfigType } from './config';
-import { checkLicense, getExportTypesRegistry } from './lib';
+import { PdfExportType } from './export_types/printable_pdf_v2';
+import { checkLicense, ExportTypesRegistry } from './lib';
 import { reportingEventLoggerFactory } from './lib/event_logger/logger';
 import type { IReport, ReportingStore } from './lib/store';
 import { ExecuteReportTask, MonitorReportsTask, ReportTaskParams } from './lib/tasks';
@@ -63,6 +64,8 @@ export interface ReportingInternalSetup {
   logger: Logger;
   status: StatusServiceSetup;
   docLinks: DocLinksServiceSetup;
+  pdfExport: PdfExportType;
+  exportTypesRegistry: ExportTypesRegistry;
 }
 
 export interface ReportingInternalStart {
@@ -102,7 +105,6 @@ export class ReportingCore {
   private readonly pluginSetup$ = new Rx.ReplaySubject<boolean>(); // observe async background setupDeps each are done
   private readonly pluginStart$ = new Rx.ReplaySubject<ReportingInternalStart>(); // observe async background startDeps
   private deprecatedAllowedRoles: string[] | false = false; // DEPRECATED. If `false`, the deprecated features have been disableed
-  private exportTypesRegistry = getExportTypesRegistry();
   private executeTask: ExecuteReportTask;
   private monitorTask: MonitorReportsTask;
   private config: ReportingConfigType;
@@ -305,7 +307,7 @@ export class ReportingCore {
   }
 
   public getExportTypesRegistry() {
-    return this.exportTypesRegistry;
+    return this.getPluginSetupDeps().exportTypesRegistry;
   }
 
   public async scheduleTask(report: ReportTaskParams) {
@@ -318,8 +320,7 @@ export class ReportingCore {
 
   public async getLicenseInfo() {
     const { license$ } = (await this.getPluginStartDeps()).licensing;
-    const registry = this.getExportTypesRegistry();
-
+    const registry = this.getPluginSetupDeps().exportTypesRegistry;
     return await Rx.firstValueFrom(
       license$.pipe(map((license) => checkLicense(registry, license)))
     );
