@@ -13,6 +13,7 @@ import {
 } from '@tanstack/react-query';
 import { GetSLOResponse, SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { useKibana } from '../../utils/kibana_react';
+import { sloKeys } from './query-key-factory';
 
 export interface UseFetchSloDetailsResponse {
   isInitialLoading: boolean;
@@ -39,7 +40,7 @@ export function useFetchSloDetails({
 
   const { isInitialLoading, isLoading, isError, isSuccess, isRefetching, data, refetch } = useQuery(
     {
-      queryKey: ['fetchSloDetails', sloId],
+      queryKey: sloKeys.detail(sloId),
       queryFn: async ({ signal }) => {
         try {
           const response = await http.get<GetSLOResponse>(`/api/observability/slos/${sloId}`, {
