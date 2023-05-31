@@ -675,8 +675,19 @@ export class CaseUserActionService {
       }
     );
 
-    result.total_artifacts.osQuery =
-      response.aggregations?.totalExternalReferenceAttachments.buckets.length ?? 0;
+    response.aggregations?.totalExternalReferenceAttachments.buckets.forEach(({ key, doc_count: docCount }) => {
+      if (key === '.osquery') {
+        result.total_artifacts.osQuery += docCount;
+      }
+
+      if (key === '.lens') {
+        result.total_artifacts.lens += docCount;
+      }
+
+      if (key === '.timeline') {
+        result.total_artifacts.timeline += docCount;
+      }
+    });
 
     return result;
   }
