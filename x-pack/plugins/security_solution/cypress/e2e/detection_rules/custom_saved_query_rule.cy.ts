@@ -49,10 +49,11 @@ const savedQueryFilterKey = 'testAgent.value';
 describe('Custom saved_query rules', () => {
   before(() => {
     cleanKibana();
-    login();
   });
+
   describe('Custom saved_query detection rule creation', () => {
     beforeEach(() => {
+      login();
       deleteAlertsAndRules();
       deleteSavedQueries();
     });
@@ -102,7 +103,7 @@ describe('Custom saved_query rules', () => {
       const FAILED_TO_LOAD_ERROR = 'Failed to load the saved query';
       beforeEach(() => {
         createRule(getSavedQueryRule({ saved_id: 'non-existent', query: undefined }));
-        cy.visit(SECURITY_DETECTIONS_RULES_URL);
+        visit(SECURITY_DETECTIONS_RULES_URL);
       });
       it('Shows error toast on details page when saved query can not be loaded', function () {
         goToRuleDetails();
@@ -122,7 +123,7 @@ describe('Custom saved_query rules', () => {
         createSavedQuery(savedQueryName, savedQueryQuery);
         createRule(getNewRule());
 
-        cy.visit(SECURITY_DETECTIONS_RULES_URL);
+        visit(SECURITY_DETECTIONS_RULES_URL);
 
         editFirstRule();
 
@@ -150,7 +151,7 @@ describe('Custom saved_query rules', () => {
           createRule(getSavedQueryRule({ saved_id: response.body.id, query: undefined }));
         });
 
-        cy.visit(SECURITY_DETECTIONS_RULES_URL);
+        visit(SECURITY_DETECTIONS_RULES_URL);
 
         editFirstRule();
 
@@ -176,7 +177,7 @@ describe('Custom saved_query rules', () => {
         const expectedCustomTestQuery = 'random test query';
         createRule(getSavedQueryRule({ saved_id: 'non-existent', query: undefined }));
 
-        cy.visit(SECURITY_DETECTIONS_RULES_URL);
+        visit(SECURITY_DETECTIONS_RULES_URL);
 
         editFirstRule();
 
@@ -199,7 +200,7 @@ describe('Custom saved_query rules', () => {
         createSavedQuery(savedQueryName, savedQueryQuery);
         createRule(getSavedQueryRule({ saved_id: 'non-existent', query: undefined }));
 
-        cy.visit(SECURITY_DETECTIONS_RULES_URL);
+        visit(SECURITY_DETECTIONS_RULES_URL);
 
         editFirstRule();
 
