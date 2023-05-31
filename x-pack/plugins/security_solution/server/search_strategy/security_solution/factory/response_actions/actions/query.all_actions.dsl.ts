@@ -12,16 +12,28 @@ import { OSQUERY_ACTIONS_INDEX } from '@kbn/osquery-plugin/common/constants';
 import type { ActionRequestOptions } from '../../../../../../common/search_strategy/security_solution/response_actions';
 import { ENDPOINT_ACTIONS_INDEX } from '../../../../../../common/endpoint/constants';
 
+const EndpointFieldsLimited = [
+  'EndpointActions.action_id',
+  'EndpointActions.input_type',
+  'EndpointActions.expiration',
+  'EndpointActions.data.command',
+];
+
 export const buildResponseActionsQuery = ({
   alertIds,
   sort,
+  canAccessEndpointActionsLogManagement,
 }: ActionRequestOptions): ISearchRequestParams => {
+  const fields = !canAccessEndpointActionsLogManagement
+    ? ['@timestamp', 'action_id', 'input_type', ...EndpointFieldsLimited]
+    : [{ field: '*' }, { field: 'EndpointActions.*', include_unmapped: true }];
+
   const dslQuery = {
     allow_no_indices: true,
     index: [ENDPOINT_ACTIONS_INDEX, OSQUERY_ACTIONS_INDEX],
     ignore_unavailable: true,
     body: {
-      fields: [{ field: '*' }, { field: 'EndpointActions.*', include_unmapped: true }],
+      fields,
       query: {
         bool: {
           minimum_should_match: 2,

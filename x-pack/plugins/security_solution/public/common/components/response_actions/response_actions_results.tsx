@@ -49,6 +49,7 @@ export const ResponseActionsResults = React.memo(
             return (
               <EndpointResponseActionResults
                 action={action}
+                ruleName={ruleName}
                 key={action.EndpointActions.action_id}
               />
             );

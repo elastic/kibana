@@ -21,6 +21,7 @@ export interface ActionRequestOptions extends RequestBasicOptions {
     order: SortOrder;
     field: string;
   };
+  canAccessEndpointActionsLogManagement: boolean;
 }
 
 export interface ActionRequestStrategyResponse extends IEsSearchResponse {

@@ -9,6 +9,7 @@ import React, { useMemo } from 'react';
 import styled from 'styled-components';
 import { EuiNotificationBadge, EuiSpacer } from '@elastic/eui';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
+import { useUserPrivileges } from '../user_privileges';
 import { ResponseActionsResults } from '../response_actions/response_actions_results';
 import { expandDottedObject } from '../../../../common/utils/expand_dotted';
 import { useGetAutomatedActionList } from '../../../management/hooks/response_actions/use_get_automated_action_list';
@@ -31,7 +32,9 @@ export const useResponseActionsView = ({
   rawEventData: RawEventData;
 }) => {
   const responseActionsEnabled = useIsExperimentalFeatureEnabled('endpointResponseActionsEnabled');
-
+  const {
+    endpointPrivileges: { canAccessEndpointActionsLogManagement },
+  } = useUserPrivileges();
   const expandedEventFieldsObject = rawEventData
     ? (expandDottedObject(rawEventData.fields) as ExpandedEventFieldsObject)
     : undefined;
@@ -46,7 +49,7 @@ export const useResponseActionsView = ({
     {
       alertIds: [alertId],
     },
-    { enabled: !shouldEarlyReturn }
+    { enabled: !shouldEarlyReturn, canAccessEndpointActionsLogManagement }
   );
 
   const ruleName = expandedEventFieldsObject?.kibana?.alert?.rule?.name;
