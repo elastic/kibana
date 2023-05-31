@@ -6,7 +6,6 @@
  */
 
 import expect from '@kbn/expect';
-import { Name } from '@elastic/elasticsearch/lib/api/types';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
@@ -15,7 +14,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const browser = getService('browser');
   const es = getService('es');
   const security = getService('security');
-  const retry = getService('retry');
 
   describe('Snapshot restore', function () {
     before(async () => {
