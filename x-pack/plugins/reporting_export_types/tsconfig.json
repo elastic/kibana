@@ -11,6 +11,9 @@
   "kbn_references": [
     "@kbn/core",
     "@kbn/reporting-plugin",
+    "@kbn/reporting-common",
+    "@kbn/screenshotting-plugin",
+    "@kbn/spaces-plugin",
   ],
   "exclude": ["target/**/*"]
 }
