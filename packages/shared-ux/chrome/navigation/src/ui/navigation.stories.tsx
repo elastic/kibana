@@ -24,11 +24,11 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { NavigationStorybookMock } from '../../../mocks';
-import mdx from '../../../README.mdx';
-import { NavigationProvider } from '../../services';
+import { NavigationStorybookMock } from '../../mocks';
+import mdx from '../../README.mdx';
+import { NavigationProvider } from '../services';
 import { DefaultNavigation } from './default_navigation';
-import type { ChromeNavigationViewModel, NavigationServices } from '../../../types';
+import type { ChromeNavigationViewModel, NavigationServices } from '../../types';
 import { Navigation } from './components';
 import { ProjectNavigationDefinition } from './types';
 import { getPresets } from './nav_tree_presets';

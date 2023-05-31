@@ -11,8 +11,8 @@ import { render } from '@testing-library/react';
 import { type Observable, of } from 'rxjs';
 import type { ChromeNavLink } from '@kbn/core-chrome-browser';
 
-import { getServicesMock } from '../../../mocks/src/jest';
-import { NavigationProvider } from '../../services';
+import { getServicesMock } from '../../mocks/src/jest';
+import { NavigationProvider } from '../services';
 import { DefaultNavigation } from './default_navigation';
 import type { ProjectNavigationTreeDefinition, RootNavigationItemDefinition } from './types';
 import {

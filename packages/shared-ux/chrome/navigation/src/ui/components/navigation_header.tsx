@@ -13,7 +13,7 @@ import { useNavigation as useServices } from '../../services';
 import { ElasticMark } from '../elastic_mark';
 import { getI18nStrings } from '../i18n_strings';
 
-import '../../header_logo.scss';
+import '../header_logo.scss';
 
 interface Props {
   homeHref: string;
