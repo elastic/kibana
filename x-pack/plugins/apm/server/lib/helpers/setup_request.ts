@@ -14,9 +14,6 @@ import {
   ApmIndicesConfig,
   getApmIndices,
 } from '../settings/apm_indices/get_apm_indices';
-import {
-  APMEventClient,
-} from './create_es_client/create_apm_event_client';
 import { APMEventClient } from './create_es_client/create_apm_event_client';
 import {
   APMInternalClient,

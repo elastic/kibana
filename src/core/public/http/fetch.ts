@@ -181,9 +181,15 @@ export class Fetch {
   }
 
   private shorthand(method: string): HttpHandler {
-    return (pathOrOptions: string | HttpFetchOptionsWithPath, options?: HttpFetchOptions) => {
-      const optionsWithPath = validateFetchArguments(pathOrOptions, options);
-      return this.fetch({ ...optionsWithPath, method });
+    return <T = unknown>(
+      pathOrOptions: string | HttpFetchOptionsWithPath,
+      options?: HttpFetchOptions
+    ) => {
+      const optionsWithPath: HttpFetchOptionsWithPath = validateFetchArguments(
+        pathOrOptions,
+        options
+      );
+      return this.fetch<HttpResponse<T>>({ ...optionsWithPath, method });
     };
   }
 }

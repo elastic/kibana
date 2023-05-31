@@ -24,7 +24,9 @@ import { CrawlEvent, readableCrawlerStatuses } from '../types';
 
 import { CustomFormattedTimestamp } from './custom_formatted_timestamp';
 
-const columns: Array<EuiTableFieldDataColumnType<CrawlEvent> | EuiTableComputedColumnType<CrawlEvent>> = [
+const columns: Array<
+  EuiTableFieldDataColumnType<CrawlEvent> | EuiTableComputedColumnType<CrawlEvent>
+> = [
   {
     field: 'id',
     name: i18n.translate(
