@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import classNames from 'classnames';
 import React, { useCallback, useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 
@@ -151,9 +150,7 @@ export function DashboardEmptyScreen() {
           actions={actions}
           titleSize="xs"
           color="transparent"
-          className={classNames('dshEmptyWidgetContainer', {
-            dshEmptyEditWidgetContainer: showEditPrompt,
-          })}
+          className="dshEmptyWidgetContainer"
         />
       </EuiPageTemplate>
     </div>
