@@ -698,6 +698,7 @@ test/plugin_functional/plugins/ui_settings_plugin @elastic/kibana-core
 packages/kbn-ui-shared-deps-npm @elastic/kibana-operations
 packages/kbn-ui-shared-deps-src @elastic/kibana-operations
 packages/kbn-ui-theme @elastic/kibana-operations
+examples/unified_field_list_examples @elastic/kibana-data-discovery
 src/plugins/unified_field_list @elastic/kibana-data-discovery
 src/plugins/unified_histogram @elastic/kibana-data-discovery
 src/plugins/unified_search @elastic/kibana-visualizations
@@ -1070,6 +1071,11 @@ x-pack/plugins/cloud_integrations/cloud_full_story/server/config.ts @elastic/kib
 /x-pack/plugins/security_solution/server/search_strategy/security_solution/factory/matrix_histogram @elastic/security-threat-hunting-explore
 /x-pack/plugins/security_solution/server/search_strategy/security_solution/factory/network @elastic/security-threat-hunting-explore
 /x-pack/plugins/security_solution/server/search_strategy/security_solution/factory/users @elastic/security-threat-hunting-explore
+
+## Explore owner connectors
+/x-pack/plugins/stack_connectors/public/connector_types/gen_ai @elastic/security-threat-hunting-explore
+/x-pack/plugins/stack_connectors/server/connector_types/gen_ai @elastic/security-threat-hunting-explore
+/x-pack/plugins/stack_connectors/common/gen_ai @elastic/security-threat-hunting-explore
 
 ## Security Solution sub teams - Detection Rule Management
 /x-pack/plugins/security_solution/common/detection_engine/fleet_integrations @elastic/security-detection-rule-management

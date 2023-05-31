@@ -455,7 +455,8 @@ describe('parseIndexAliases', () => {
   });
 });
 
-describe('retries', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/156061
+describe.skip('retries', () => {
   let esContext = contextMock.create();
   // set up context APIs to return defaults indicating already created
   beforeEach(() => {

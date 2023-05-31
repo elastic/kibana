@@ -69,10 +69,6 @@ import { getDetails } from '../../tasks/rule_details';
 import { RULE_CREATION } from '../../urls/navigation';
 
 describe('Custom query rules', () => {
-  before(() => {
-    login();
-  });
-
   describe('Custom detection rules creation with data views', () => {
     const rule = getDataViewRule();
     const expectedUrls = rule.references?.join('');
@@ -83,14 +79,15 @@ describe('Custom query rules', () => {
     const expectedNumberOfRules = 1;
 
     beforeEach(() => {
-      /* We don't call cleanKibana method on the before hook, instead we call esArchiverReseKibana on the before each. This is because we 
+      /* We don't call cleanKibana method on the before hook, instead we call esArchiverReseKibana on the before each. This is because we
       are creating a data view we'll use after and cleanKibana does not delete all the data views created, esArchiverReseKibana does.
-      We don't use esArchiverReseKibana in all the tests because is a time-consuming method and we don't need to perform an exhaustive 
+      We don't use esArchiverReseKibana in all the tests because is a time-consuming method and we don't need to perform an exhaustive
       cleaning in all the other tests. */
       esArchiverResetKibana();
       if (rule.data_view_id != null) {
         postDataView(rule.data_view_id);
       }
+      login();
     });
 
     it('Creates and enables a new rule', function () {
@@ -150,11 +147,14 @@ describe('Custom query rules', () => {
         .should('match', /^[1-9].+$/);
       cy.get(ALERT_GRID_CELL).contains(rule.name);
     });
+
     it('Creates and edits a new rule with a data view', function () {
       visit(RULE_CREATION);
       fillDefineCustomRuleAndContinue(rule);
-      cy.get(RULE_NAME_INPUT).clear().type(rule.name);
-      cy.get(RULE_DESCRIPTION_INPUT).clear().type(rule.description);
+      cy.get(RULE_NAME_INPUT).clear();
+      cy.get(RULE_NAME_INPUT).type(rule.name);
+      cy.get(RULE_DESCRIPTION_INPUT).clear();
+      cy.get(RULE_DESCRIPTION_INPUT).type(rule.description);
 
       cy.get(ABOUT_CONTINUE_BTN).should('exist').click();
 
