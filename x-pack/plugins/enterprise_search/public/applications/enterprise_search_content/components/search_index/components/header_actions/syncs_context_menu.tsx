@@ -23,12 +23,15 @@ import {
 import { i18n } from '@kbn/i18n';
 
 import { Status } from '../../../../../../../common/types/api';
+import { KibanaLogic } from '../../../../../shared/kibana';
 import { CancelSyncsApiLogic } from '../../../../api/connector/cancel_syncs_api_logic';
 import { IngestionStatus } from '../../../../types';
 import { CancelSyncsLogic } from '../../connector/cancel_syncs_logic';
 import { IndexViewLogic } from '../../index_view_logic';
 
 export const SyncsContextMenu: React.FC = () => {
+  // TODO we cannot fully rely on feature flag. we need data from index to show or hide actions
+  const { productFeatures } = useValues(KibanaLogic);
   const { ingestionMethod, ingestionStatus, isCanceling, isSyncing, isWaitingForSync } =
     useValues(IndexViewLogic);
   const { cancelSyncs } = useActions(CancelSyncsLogic);
@@ -36,7 +39,6 @@ export const SyncsContextMenu: React.FC = () => {
   const { startSync } = useActions(IndexViewLogic);
 
   const [isPopoverOpen, setPopover] = useState(false);
-
   const togglePopover = () => setPopover(!isPopoverOpen);
   const closePopover = () => setPopover(false);
 
@@ -60,6 +62,9 @@ export const SyncsContextMenu: React.FC = () => {
   };
 
   const syncLoading = (isSyncing || isWaitingForSync) && ingestionStatus !== IngestionStatus.ERROR;
+  const shouldShowMoreSync =
+    !syncLoading &&
+    (productFeatures.hasDocumentLevelSecurityEnabled || productFeatures.hasIncrementalSyncEnabled);
   const panels: EuiContextMenuProps['panels'] = [
     {
       id: 0,
@@ -79,6 +84,9 @@ export const SyncsContextMenu: React.FC = () => {
                   startSync();
                 },
               },
+            ]),
+        ...(shouldShowMoreSync
+          ? [
               {
                 // @ts-ignore - data-* attributes are applied but doesn't exist on types
                 'data-telemetry-id': `entSearchContent-${ingestionMethod}-header-sync-moreSyncs`,
@@ -88,7 +96,8 @@ export const SyncsContextMenu: React.FC = () => {
                 }),
                 panel: 1,
               },
-            ]),
+            ]
+          : []),
         {
           // @ts-ignore - data-* attributes are applied but doesn't exist on types
           'data-telemetry-id': `entSearchContent-${ingestionMethod}-header-sync-cancelSync`,
@@ -129,35 +138,44 @@ export const SyncsContextMenu: React.FC = () => {
             startSync();
           },
         },
-        {
-          // @ts-ignore - data-* attributes are applied but doesn't exist on types
-          'data-telemetry-id':
-            'entSearchContent-${ingestionMethod}-header-sync-more-incrementalSync',
-          'data-test-subj': 'entSearchContent-${ingestionMethod}-header-sync-more-incrementalSync',
-          icon: 'play',
-          name: i18n.translate('xpack.enterpriseSearch.index.header.more.incrementalSync', {
-            defaultMessage: 'Incremental content',
-          }),
-          onClick: () => {
-            closePopover();
-            startSync(); // TODO DO NOT MERGE / REPLACE WITH PROPER SYNC
-          },
-        },
-        {
-          // @ts-ignore - data-* attributes are applied but doesn't exist on types
-          'data-telemetry-id':
-            'entSearchContent-${ingestionMethod}-header-sync-more-accessControlSync',
-          'data-test-subj':
-            'entSearchContent-${ingestionMethod}-header-sync-more-accessControlSync',
-          icon: 'play',
-          name: i18n.translate('xpack.enterpriseSearch.index.header.more.accessControlSync', {
-            defaultMessage: 'Access Control',
-          }),
-          onClick: () => {
-            closePopover();
-            startSync(); // TODO DO NOT MERGE / REPLACE WITH PROPER SYNC
-          },
-        },
+        ...(productFeatures.hasIncrementalSyncEnabled
+          ? [
+              {
+                // @ts-ignore - data-* attributes are applied but doesn't exist on types
+                'data-telemetry-id':
+                  'entSearchContent-${ingestionMethod}-header-sync-more-incrementalSync',
+                'data-test-subj':
+                  'entSearchContent-${ingestionMethod}-header-sync-more-incrementalSync',
+                icon: 'play',
+                name: i18n.translate('xpack.enterpriseSearch.index.header.more.incrementalSync', {
+                  defaultMessage: 'Incremental content',
+                }),
+                onClick: () => {
+                  closePopover();
+                  startSync(); // TODO DO NOT MERGE / REPLACE WITH PROPER SYNC
+                },
+              },
+            ]
+          : []),
+        ...(productFeatures.hasDocumentLevelSecurityEnabled
+          ? [
+              {
+                // @ts-ignore - data-* attributes are applied but doesn't exist on types
+                'data-telemetry-id':
+                  'entSearchContent-${ingestionMethod}-header-sync-more-accessControlSync',
+                'data-test-subj':
+                  'entSearchContent-${ingestionMethod}-header-sync-more-accessControlSync',
+                icon: 'play',
+                name: i18n.translate('xpack.enterpriseSearch.index.header.more.accessControlSync', {
+                  defaultMessage: 'Access Control',
+                }),
+                onClick: () => {
+                  closePopover();
+                  startSync(); // TODO DO NOT MERGE / REPLACE WITH PROPER SYNC
+                },
+              },
+            ]
+          : []),
         {
           // @ts-ignore - data-* attributes are applied but doesn't exist on types
           'data-telemetry-id': 'entSearchContent-${ingestionMethod}-header-sync-more-allSync',
