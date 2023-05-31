@@ -6,11 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Trigger } from '.';
-
-export const CATEGORIZE_FIELD_TRIGGER = 'CATEGORIZE_FIELD_TRIGGER';
-export const categorizeFieldTrigger: Trigger = {
-  id: CATEGORIZE_FIELD_TRIGGER,
-  title: 'Run pattern analysis',
-  description: 'Triggered when user wants to run pattern analysis on a field.',
-};
+export * from './trigger';
+export * from './categorize_field_trigger';
+export * from './visualize_field_trigger';
+export * from './visualize_geo_field_trigger';

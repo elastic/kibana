@@ -20,7 +20,7 @@ import {
   VISUALIZE_GEO_FIELD_TRIGGER,
   VisualizeFieldContext,
 } from '@kbn/ui-actions-plugin/public';
-import { TriggerContract } from '@kbn/ui-actions-plugin/public/triggers';
+import type { TriggerContract } from '@kbn/ui-actions-plugin/public/triggers';
 
 const ORIGINATING_APP = 'test';
 const mockExecuteAction = jest.fn();

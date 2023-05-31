@@ -6,8 +6,11 @@
  * Side Public License, v 1.
  */
 
-export * from './trigger_contract';
-export * from './trigger_internal';
-export * from './row_click_trigger';
-export * from './default_trigger';
-export * from '../../common/triggers';
+import { Trigger } from './trigger';
+
+export const CATEGORIZE_FIELD_TRIGGER = 'CATEGORIZE_FIELD_TRIGGER';
+export const categorizeFieldTrigger: Trigger = {
+  id: CATEGORIZE_FIELD_TRIGGER,
+  title: 'Run pattern analysis',
+  description: 'Triggered when user wants to run pattern analysis on a field.',
+};

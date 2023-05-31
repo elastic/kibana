@@ -6,11 +6,8 @@
  * Side Public License, v 1.
  */
 
-import {
-  type UiActionsStart,
-  CATEGORIZE_FIELD_TRIGGER,
-  CategorizeFieldContext,
-} from '@kbn/ui-actions-plugin/public';
+import type { UiActionsStart, CategorizeFieldContext } from '@kbn/ui-actions-plugin/public';
+import { CATEGORIZE_FIELD_TRIGGER } from '@kbn/ui-actions-plugin/common';
 import type { DataViewField, DataView } from '@kbn/data-views-plugin/public';
 
 async function getCompatibleActions(

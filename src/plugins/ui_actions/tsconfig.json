@@ -3,7 +3,7 @@
   "compilerOptions": {
     "outDir": "target/types",
   },
-  "include": ["public/**/*"],
+  "include": ["common/**/*", "public/**/*"],
   "kbn_references": [
     "@kbn/core",
     "@kbn/expressions-plugin",

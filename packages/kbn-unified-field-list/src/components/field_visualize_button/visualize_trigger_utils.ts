@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
+import { type UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import {
-  type UiActionsStart,
   VISUALIZE_FIELD_TRIGGER,
   VISUALIZE_GEO_FIELD_TRIGGER,
   visualizeFieldTrigger,
   visualizeGeoFieldTrigger,
-} from '@kbn/ui-actions-plugin/public';
+} from '@kbn/ui-actions-plugin/common';
 import type { AggregateQuery } from '@kbn/es-query';
 import type { DataViewField, DataView } from '@kbn/data-views-plugin/public';
 import { KBN_FIELD_TYPES } from '@kbn/data-plugin/common';

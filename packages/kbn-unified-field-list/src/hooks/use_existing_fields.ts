@@ -9,10 +9,10 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { htmlIdGenerator } from '@elastic/eui';
 import { BehaviorSubject } from 'rxjs';
-import { CoreStart } from '@kbn/core/public';
+import type { CoreStart } from '@kbn/core/public';
 import type { AggregateQuery, EsQueryConfig, Filter, Query } from '@kbn/es-query';
 import { type DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { type DataView, DataViewsContract, getEsQueryConfig } from '@kbn/data-plugin/common';
+import { type DataView, type DataViewsContract, getEsQueryConfig } from '@kbn/data-plugin/common';
 import { loadFieldExisting } from '../services/field_existing';
 import { ExistenceFetchStatus } from '../types';
 
