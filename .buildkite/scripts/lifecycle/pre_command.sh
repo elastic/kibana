@@ -16,11 +16,17 @@ echo '--- Install/build buildkite dependencies'
 # `rm -rf <ts-node node_modules dir>; npm install -g ts-node` will cause ts-node bin files to be messed up
 # but literally just calling `npm install -g ts-node` a second time fixes it
 # this is only on newer versions of npm
+echo "install ts-node #1"
 npm_install_global ts-node
+echo "installation is done, check the version #1"
 if ! ts-node --version; then
+  echo "install ts-node #2"
   npm_install_global ts-node
+  echo "installation is done, check the version #2"
   ts-node --version;
 fi
+
+echo "cd tp .buildkite"
 
 cd '.buildkite'
 retry 5 15 npm ci
