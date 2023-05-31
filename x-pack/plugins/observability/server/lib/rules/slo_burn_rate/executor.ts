@@ -98,8 +98,7 @@ async function evaluate(slo: SLO, summaryClient: DefaultSLIClient, params: BurnR
       longWindow: params.longWindow,
       burnRateThreshold: params.burnRateThreshold,
     };
-    const result = await evaluateWindow(slo, summaryClient, legacyWindowDef);
-    return result;
+    return evaluateWindow(slo, summaryClient, legacyWindowDef);
   }
 }
 
