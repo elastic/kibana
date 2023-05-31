@@ -7,10 +7,6 @@
 
 import styled from 'styled-components';
 
-export const WhitePageWrapperNoBorder = styled.div`
-  background-color: ${({ theme }) => theme.eui.euiColorEmptyShade};
-  flex: 1 1 auto;
-`;
 export const SectionWrapper = styled.div`
   box-sizing: content-box;
   margin: 0 auto;
