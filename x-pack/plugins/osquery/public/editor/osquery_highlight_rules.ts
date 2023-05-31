@@ -190,6 +190,7 @@ export const initializeOsqueryEditor = () => {
             column: (findOsqueryToken?.offset || 0) + 1,
           });
 
+          const value = model.getValue();
           const lineContent = model.getLineContent(position.lineNumber);
 
           const word = model.getWordUntilPosition(position);
@@ -205,7 +206,7 @@ export const initializeOsqueryEditor = () => {
             endColumn: word.endColumn,
           };
 
-          return getEditorAutoCompleteSuggestion(range, lineContent, isDot, osqueryTable?.word);
+          return getEditorAutoCompleteSuggestion(range, value, isDot, osqueryTable?.word);
         },
       });
     });
@@ -216,11 +217,11 @@ export const initializeOsqueryEditor = () => {
 
 export const getEditorAutoCompleteSuggestion = (
   range: Range,
-  lineContent: string,
+  value: string,
   isDot: boolean,
   name?: string
 ): monaco.languages.ProviderResult<monaco.languages.CompletionList> => {
-  const localKeywords = lineContent.split(/\s+/).map((kw) => ({
+  const localKeywords = value.split(/\s*[\s,]\s*/).map((kw) => ({
     label: kw,
     kind: monaco.languages.CompletionItemKind.Snippet,
     detail: 'Local',
