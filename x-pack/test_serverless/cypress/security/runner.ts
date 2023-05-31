@@ -1,0 +1,45 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { resolve } from 'path';
+import { withProcRunner } from '@kbn/dev-proc-runner';
+
+import { FtrProviderContext } from '@kbn/test';
+
+export type { FtrProviderContext } from '@kbn/test';
+
+export async function SecuritySolutionServerlessVisualTestRunner({ getService }: FtrProviderContext) {
+  const log = getService('log');
+
+  await withProcRunner(log, async (procs) => {
+    await procs.run('cypress', {
+      cmd: 'yarn',
+      args: ['cypress:open'],
+      cwd: resolve(__dirname),
+      env: {
+        ...process.env,
+      },
+      wait: true,
+    });
+  });
+}
+
+export async function SecuritySolutionServerlessHeadlessTestRunner({ getService }: FtrProviderContext) {
+  const log = getService('log');
+
+  await withProcRunner(log, async (procs) => {
+    await procs.run('cypress', {
+      cmd: 'yarn',
+      args: ['cypress:run'],
+      cwd: resolve(__dirname),
+      env: {
+        ...process.env,
+      },
+      wait: true,
+    });
+  });
+}

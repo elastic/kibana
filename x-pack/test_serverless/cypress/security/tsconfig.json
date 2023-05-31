@@ -1,0 +1,22 @@
+{
+  "extends": "../../../../tsconfig.base.json",
+  "include": [
+    "**/*"
+  ],
+  "exclude": [
+    "target/**/*"
+  ],
+  "compilerOptions": {
+    "outDir": "target/types",
+    "types": [
+      "cypress",
+      "cypress-file-upload",
+      "cypress-real-events",
+      "cypress-recurse",
+      "node",
+    ],
+  },
+  "kbn_references": [
+    "@kbn/cypress-config"
+  ]
+}
