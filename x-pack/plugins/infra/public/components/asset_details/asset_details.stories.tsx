@@ -6,23 +6,17 @@
  */
 
 import React from 'react';
-import { EuiButton, EuiCard } from '@elastic/eui';
-import { I18nProvider } from '@kbn/i18n-react';
+import { EuiButton } from '@elastic/eui';
 import type { Meta, Story } from '@storybook/react/types-6-0';
 import { i18n } from '@kbn/i18n';
-import { DecorateWithKibanaContext } from './asset_details.story_decorators';
 import { AssetDetails } from './asset_details';
 import { decorateWithGlobalStorybookThemeProviders } from '../../test_utils/use_global_storybook_theme';
 import { FlyoutTabIds, type AssetDetailsProps } from './types';
+import { DecorateWithKibanaContext } from './__stories__/decorator';
 
-export default {
-  title: 'infra/Asset Details View/Asset Details Embeddable',
-  decorators: [
-    (wrappedStory) => <EuiCard title="Asset Details">{wrappedStory()}</EuiCard>,
-    (wrappedStory) => <I18nProvider>{wrappedStory()}</I18nProvider>,
-    decorateWithGlobalStorybookThemeProviders,
-    DecorateWithKibanaContext,
-  ],
+const stories: Meta<AssetDetailsProps> = {
+  title: 'infra/Asset Details View',
+  decorators: [decorateWithGlobalStorybookThemeProviders, DecorateWithKibanaContext],
   component: AssetDetails,
   args: {
     node: {
@@ -40,6 +34,11 @@ export default {
       cpu: 0.3979674157303371,
       diskLatency: 0.15291777273162221,
       memoryTotal: 34359738368,
+    },
+    overrides: {
+      metadata: {
+        showActionsColumn: true,
+      },
     },
     nodeType: 'host',
     currentTimeRange: {
@@ -68,7 +67,7 @@ export default {
   } as AssetDetailsProps,
 } as Meta;
 
-const Template: Story<AssetDetailsProps> = (args) => {
+const PageTemplate: Story<AssetDetailsProps> = (args) => {
   return <AssetDetails {...args} />;
 };
 
@@ -90,60 +89,14 @@ const FlyoutTemplate: Story<AssetDetailsProps> = (args) => {
   );
 };
 
-export const DefaultAssetDetailsWithMetadataTabSelected = Template.bind({});
-DefaultAssetDetailsWithMetadataTabSelected.args = {
-  overrides: {
-    metadata: {
-      showActionsColumn: true,
-    },
-  },
-};
+export const Page = PageTemplate.bind({});
 
-export const AssetDetailsWithMetadataTabSelectedWithPersistedSearch = Template.bind({});
-AssetDetailsWithMetadataTabSelectedWithPersistedSearch.args = {
-  overrides: {
-    metadata: {
-      showActionsColumn: true,
-      query: 'ip',
-    },
-  },
-  activeTabId: 'metadata',
-  onTabsStateChange: () => {},
-};
-
-export const AssetDetailsWithMetadataWithoutActions = Template.bind({});
-AssetDetailsWithMetadataWithoutActions.args = {};
-
-export const AssetDetailsWithMetadataWithoutLinks = Template.bind({});
-AssetDetailsWithMetadataWithoutLinks.args = { links: [] };
-
-export const AssetDetailsAsFlyout = FlyoutTemplate.bind({});
-AssetDetailsAsFlyout.args = {
+export const Flyout = FlyoutTemplate.bind({});
+Flyout.args = {
   renderMode: {
     showInFlyout: true,
     closeFlyout: () => {},
   },
 };
 
-export const AssetDetailsWithProcessesTabSelected = Template.bind({});
-AssetDetailsWithProcessesTabSelected.args = {
-  activeTabId: 'processes',
-  currentTimeRange: {
-    interval: '1s',
-    from: 1683630468,
-    to: 1683630469,
-  },
-};
-
-export const AssetDetailsWithMetadataTabOnly = Template.bind({});
-AssetDetailsWithMetadataTabOnly.args = {
-  tabs: [
-    {
-      id: FlyoutTabIds.METADATA,
-      name: i18n.translate('xpack.infra.metrics.nodeDetails.tabs.metadata', {
-        defaultMessage: 'Metadata',
-      }),
-      'data-test-subj': 'hostsView-flyout-tabs-metadata',
-    },
-  ],
-};
+export default stories;
