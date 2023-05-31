@@ -22,6 +22,7 @@ export const DEFAULT_SETTINGS = Object.freeze({
   }),
   isHistoryEnabled: true,
   isKeyboardShortcutsEnabled: true,
+  isAccessibilityOverlayEnabled: true,
 });
 
 export interface DevToolsSettings {
@@ -38,6 +39,7 @@ export interface DevToolsSettings {
   tripleQuotes: boolean;
   isHistoryEnabled: boolean;
   isKeyboardShortcutsEnabled: boolean;
+  isAccessibilityOverlayEnabled: boolean;
 }
 
 enum SettingKeys {
@@ -49,6 +51,7 @@ enum SettingKeys {
   POLL_INTERVAL = 'poll_interval',
   IS_HISTORY_ENABLED = 'is_history_enabled',
   IS_KEYBOARD_SHORTCUTS_ENABLED = 'is_keyboard_shortcuts_enabled',
+  IS_ACCESSIBILITY_OVERLAY_ENABLED = 'is_accessibility_overlay_enabled',
 }
 
 export class Settings {
@@ -148,6 +151,13 @@ export class Settings {
     );
   }
 
+  getIsAccessibilityOverlayEnabled() {
+    return this.storage.get(
+      SettingKeys.IS_ACCESSIBILITY_OVERLAY_ENABLED,
+      DEFAULT_SETTINGS.isAccessibilityOverlayEnabled
+    );
+  }
+
   toJSON(): DevToolsSettings {
     return {
       autocomplete: this.getAutocomplete(),
@@ -158,6 +168,7 @@ export class Settings {
       pollInterval: this.getPollInterval(),
       isHistoryEnabled: Boolean(this.getIsHistoryEnabled()),
       isKeyboardShortcutsEnabled: Boolean(this.getIsKeyboardShortcutsDisabled()),
+      isAccessibilityOverlayEnabled: Boolean(this.getIsAccessibilityOverlayEnabled()),
     };
   }
 
