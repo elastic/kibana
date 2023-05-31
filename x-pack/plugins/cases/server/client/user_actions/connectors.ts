@@ -9,7 +9,7 @@ import { isEqual } from 'lodash';
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { ActionResult, ActionsClient } from '@kbn/actions-plugin/server';
-import type { SavedObject } from '@kbn/core-saved-objects-common';
+import type { SavedObject } from '@kbn/core-saved-objects-common/src/server_types';
 import type {
   GetCaseConnectorsResponse,
   CaseConnector,
