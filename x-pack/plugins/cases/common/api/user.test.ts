@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { set } from 'lodash';
 import { UserRt, UserWithProfileInfoRt, UsersRt, GetCaseUsersResponseRt } from './user';
 
 describe('User', () => {
@@ -58,6 +59,16 @@ describe('User', () => {
       expect(query).toStrictEqual({
         _tag: 'Right',
         right: defaultRequest,
+      });
+    });
+
+    it('does not returns an error if imageUrl is null', () => {
+      const reqWithNullImage = set(defaultRequest, 'avatar.imageUrl', null);
+      const query = UserWithProfileInfoRt.decode(reqWithNullImage);
+
+      expect(query).toStrictEqual({
+        _tag: 'Right',
+        right: reqWithNullImage,
       });
     });
 
