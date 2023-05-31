@@ -14,6 +14,7 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import type { Query } from '@kbn/data-plugin/common';
 import { merge } from 'lodash';
+import { cloneDeep } from 'lodash';
 import { SearchQueryLanguage } from '../../application/utils/search_utils';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import {
@@ -317,38 +318,23 @@ export const useFetchDataDriftResult = ({
             },
           };
         }
-        const query = searchQuery;
+        const query = cloneDeep(searchQuery);
         if (isPopulatedObject(query, ['match_all'])) {
           delete query.match_all;
         }
-        //
-        // const query =
-        //   (isPopulatedObject(searchQuery) &&
-        //     (searchQuery.match_all ||
-        //       (Array.isArray(searchQuery.bool.must) &&
-        //         searchQuery.bool.must.find((o: object) => isDefined(o.match_all))))) ? searchQuery
-        //   {};
-        // console.log(
-        //   `--@@searchQuery`,
-        //   searchQuery,
-        //
-        //   '\n--@@merged',
-        //   merge(query, { bool: { filter: [refRangeFilter] } })
-        // );
+        const refDataQuery = refRangeFilter
+          ? { query: merge({}, query, { bool: { filter: [refRangeFilter] } }) }
+          : { query };
 
         try {
           const baselineRequest = {
             index: referenceIndex,
             body: {
               size: 0,
-              // @Todo: merge with searchQuery
-              ...(refRangeFilter
-                ? { query: merge(query, { bool: { filter: [refRangeFilter] } }) }
-                : { query }),
               aggs: {} as Record<string, estypes.AggregationsAggregationContainer>,
+              ...refDataQuery,
             },
           };
-          console.log(`--@@baselineRequest`, baselineRequest);
 
           // for each field with type "numeric", add a percentiles agg to the request
           for (const { field, type } of fields) {
@@ -377,10 +363,8 @@ export const useFetchDataDriftResult = ({
             }
           }
 
-          console.log(`--@@baselineResponse`, baselineRequest);
           const baselineResponse = await dataSearch(baselineRequest, signal);
 
-          console.log(`--@@baselineResponse`, baselineResponse);
           if (!baselineResponse?.aggregations) {
             setResult({
               data: undefined,
@@ -405,15 +389,16 @@ export const useFetchDataDriftResult = ({
               },
             };
           }
+          const prodDataQuery = prodRangeFilter
+            ? { query: merge({}, query, { bool: { filter: [prodRangeFilter] } }) }
+            : { query };
 
           const driftedRequest = {
             index: productionIndex,
             body: {
               size: 0,
-              ...(prodRangeFilter
-                ? { query: merge(query, { bool: { filter: [prodRangeFilter] } }) }
-                : { query }),
               aggs: {} as Record<string, estypes.AggregationsAggregationContainer>,
+              ...prodDataQuery,
             },
           };
 
@@ -484,12 +469,8 @@ export const useFetchDataDriftResult = ({
             index: referenceIndex,
             body: {
               size: 0,
-              ...(refRangeFilter
-                ? { query: merge(query, { bool: { filter: [refRangeFilter] } }) }
-                : { query }),
-
-              // ...(refRangeFilter ? { query: { bool: { filter: [refRangeFilter] } } } : {}),
               aggs: {} as Record<string, estypes.AggregationsAggregationContainer>,
+              ...refDataQuery,
             },
           };
 
@@ -497,10 +478,8 @@ export const useFetchDataDriftResult = ({
             index: productionIndex,
             body: {
               size: 0,
-              ...(prodRangeFilter
-                ? { query: merge(query, { bool: { filter: [prodRangeFilter] } }) }
-                : { query }),
               aggs: {} as Record<string, estypes.AggregationsAggregationContainer>,
+              ...prodDataQuery,
             },
           };
 
@@ -554,9 +533,6 @@ export const useFetchDataDriftResult = ({
             dataSearch(productionHistogramRequest, signal),
             dataSearch(referenceHistogramRequest, signal),
           ]);
-          console.log(`--@@productionHistogramRequest`, productionHistogramRequest);
-
-          console.log(`--@@productionHistogramResponse`, productionHistogramResponse);
           if (!productionHistogramResponse.aggregations) {
             setResult({
               data: undefined,
@@ -565,12 +541,6 @@ export const useFetchDataDriftResult = ({
             });
             return;
           }
-
-          // const referenceHistogramResponse = await dataSearch(referenceHistogramRequest, signal);
-
-          console.log(`--@@referenceHistogramResponse`, referenceHistogramResponse);
-
-          console.log(`--@@referenceHistogramResponse`, referenceHistogramResponse);
 
           if (!referenceHistogramResponse.aggregations) {
             setResult({
@@ -614,7 +584,7 @@ export const useFetchDataDriftResult = ({
             status: FETCH_STATUS.SUCCESS,
           });
         } catch (e) {
-          console.log(`--@@e`, e);
+          console.error(`An error occurred while fetching data drift data:`, e);
           setResult({
             data: undefined,
             status: FETCH_STATUS.FAILURE,

@@ -23,6 +23,7 @@ import type { SignificantTerm } from '@kbn/ml-agg-utils';
 import { Filter, FilterStateStore, Query } from '@kbn/es-query';
 import { useUrlState, usePageUrlState } from '@kbn/ml-url-state';
 
+import { useSearch } from '../../hooks/use_search';
 import { DataDriftView } from './data_drift_view';
 import { useDataSource } from '../../hooks/use_data_source';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
@@ -58,6 +59,7 @@ export const DataDriftDetectionPage: FC = () => {
   const { data: dataService } = useAiopsAppContext();
   const { dataView, savedSearch } = useDataSource();
 
+  console.log(`--@@dataView`, dataView);
   const {
     currentSelectedSignificantTerm,
     currentSelectedGroup,
@@ -109,10 +111,15 @@ export const DataDriftDetectionPage: FC = () => {
     [selectedSavedSearch, aiopsListState, setAiopsListState]
   );
 
-  const { documentStats, timefilter, searchQueryLanguage, searchString, searchQuery } = useData(
-    { selectedDataView: dataView, selectedSavedSearch },
+  const { searchQueryLanguage, searchString, searchQuery } = useSearch(
+    { dataView, savedSearch },
+    aiopsListState
+  );
+
+  const { documentStats, timefilter } = useData(
+    dataView,
     'data_drift',
-    aiopsListState,
+    searchQuery,
     setGlobalState,
     undefined,
     undefined
