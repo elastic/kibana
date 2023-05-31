@@ -13,7 +13,7 @@ import { configArray, dataViewConfig } from '../../constants';
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
-  describe.only('main', () => {
+  describe('main', () => {
     configArray.forEach((config) => {
       describe(config.name, () => {
         it('can create an index_pattern with just a title', async () => {
