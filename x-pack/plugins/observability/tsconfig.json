@@ -73,7 +73,6 @@
     "@kbn/io-ts-utils",
     "@kbn/ml-anomaly-utils",
     "@kbn/observability-alert-details",
-    "@kbn/observability-plugin",
     "@kbn/ui-actions-plugin",
     "@kbn/field-types",
     "@kbn/safer-lodash-set"
