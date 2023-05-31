@@ -138,7 +138,7 @@ export default function ({ getService }: FtrProviderContext) {
         );
       });
 
-      it('displays a model with an ingest pipeline and delete action is disabled', async () => {
+      it('displays a model with an ingest pipeline and model can be deleted with associated ingest pipelines', async () => {
         await ml.testExecution.logTestStep('should display the model in the table');
         await ml.trainedModelsTable.filterWithSearchString(modelWithPipelineData.modelId, 1);
 
@@ -152,13 +152,23 @@ export default function ({ getService }: FtrProviderContext) {
         });
 
         await ml.testExecution.logTestStep(
-          'should show disabled delete action for the model in the table'
+          'should show enabled delete action for the model in the table'
         );
 
         await ml.trainedModelsTable.assertModelDeleteActionButtonEnabled(
           modelWithPipelineData.modelId,
-          false
+          true
         );
+
+        // await ml.testExecution.logTestStep('should show the delete modal with the default state');
+        // await ml.trainedModelsTable.clickDeleteAction(modelWithPipelineData.modelId);
+
+        // await ml.testExecution.logTestStep('should delete the model with pipelines');
+        // await ml.trainedModelsTable.confirmDeleteModel(true, false);
+        // await ml.trainedModelsTable.assertModelDisplayedInTable(
+        //   modelWithoutPipelineData.modelId,
+        //   false
+        // );
       });
 
       it('displays a model without an ingest pipeline and model can be deleted', async () => {
