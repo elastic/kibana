@@ -10,7 +10,6 @@
     "server/**/*",
   ],
   "kbn_references": [
-    "@kbn/unified-field-list-plugin",
     "@kbn/i18n",
     "@kbn/unified-search-plugin",
     "@kbn/utility-types",
@@ -24,7 +23,8 @@
     "@kbn/core-doc-links-browser",
     "@kbn/core",
     "@kbn/ui-theme",
-    "@kbn/coloring"
+    "@kbn/coloring",
+    "@kbn/unified-field-list"
   ],
   "exclude": [
     "target/**/*",
