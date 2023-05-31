@@ -24,7 +24,7 @@ describe('registerUpsellings', () => {
       registerSections,
     } as unknown as UpsellingService;
 
-    registerUpsellings(upselling, ['endpointEssentials', 'cloudEssentials']);
+    registerUpsellings(upselling, ['securityEssentials', 'securityComplete']);
 
     expect(registerPages).toHaveBeenCalledTimes(1);
     expect(registerPages).toHaveBeenCalledWith(
