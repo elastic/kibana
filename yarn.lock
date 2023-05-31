@@ -4579,6 +4579,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/ml-data-frame-analytics-utils@link:x-pack/packages/ml/data_frame_analytics_utils":
+  version "0.0.0"
+  uid ""
+
 "@kbn/ml-date-picker@link:x-pack/packages/ml/date_picker":
   version "0.0.0"
   uid ""
@@ -5528,6 +5532,10 @@
   uid ""
 
 "@kbn/ui-theme@link:packages/kbn-ui-theme":
+  version "0.0.0"
+  uid ""
+
+"@kbn/unified-field-list-examples-plugin@link:examples/unified_field_list_examples":
   version "0.0.0"
   uid ""
 
