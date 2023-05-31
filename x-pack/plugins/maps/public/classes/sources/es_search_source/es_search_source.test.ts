@@ -122,7 +122,7 @@ describe('ESSearchSource', () => {
         const tileUrl = await esSearchSource.getTileUrl(requestMeta, '1234', false, 5);
 
         const urlParts = tileUrl.split('?');
-        expect(urlParts[0]).toEqual('rootdir/api/maps/mvt/getTile/{z}/{x}/{y}.pbf');
+        expect(urlParts[0]).toEqual('rootdir/internal/maps/mvt/getTile/{z}/{x}/{y}.pbf');
 
         const params = new URLSearchParams(urlParts[1]);
         expect(Object.fromEntries(params)).toEqual({
@@ -174,29 +174,27 @@ describe('ESSearchSource', () => {
     });
   });
 
-  describe('getJoinsDisabledReason', () => {
+  describe('supportsJoins', () => {
     it('limit', () => {
       const esSearchSource = new ESSearchSource({
         ...mockDescriptor,
         scalingType: SCALING_TYPES.LIMIT,
       });
-      expect(esSearchSource.getJoinsDisabledReason()).toBe(null);
+      expect(esSearchSource.supportsJoins()).toBe(true);
     });
     it('blended layer', () => {
       const esSearchSource = new ESSearchSource({
         ...mockDescriptor,
         scalingType: SCALING_TYPES.CLUSTERS,
       });
-      expect(esSearchSource.getJoinsDisabledReason()).toBe(
-        'Joins are not supported when scaling by clusters'
-      );
+      expect(esSearchSource.supportsJoins()).toBe(false);
     });
     it('mvt', () => {
       const esSearchSource = new ESSearchSource({
         ...mockDescriptor,
         scalingType: SCALING_TYPES.MVT,
       });
-      expect(esSearchSource.getJoinsDisabledReason()).toBe(null);
+      expect(esSearchSource.supportsJoins()).toBe(true);
     });
   });
 });

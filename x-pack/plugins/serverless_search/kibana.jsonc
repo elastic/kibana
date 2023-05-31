@@ -14,8 +14,18 @@
     ],
     "requiredPlugins": [
       "serverless",
-      "enterpriseSearch",
-      "management"
+      "cloud",
+      "management",
+      "security",
+      "share",
+      "devTools",
+      "console",
+      "searchprofiler",
+      "grokdebugger",
+      "painlessLab",
+      "discover",
+      "dashboard",
+      "visualizations",
     ],
     "optionalPlugins": [],
     "requiredBundles": ["kibanaReact"]

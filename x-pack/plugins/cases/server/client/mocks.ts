@@ -16,10 +16,10 @@ import { makeLensEmbeddableFactory } from '@kbn/lens-plugin/server/embeddable/ma
 import { serializerMock } from '@kbn/core-saved-objects-base-server-mocks';
 
 import type { CasesFindRequest } from '../../common/api';
-import type { CasesClient } from '.';
+import type { CasesClient, CasesClientInternal } from '.';
 import type { AttachmentsSubClient } from './attachments/client';
 import type { CasesSubClient } from './cases/client';
-import type { ConfigureSubClient } from './configure/client';
+import type { ConfigureSubClient, InternalConfigureSubClient } from './configure/client';
 import type { CasesClientFactory } from './factory';
 import type { MetricsSubClient } from './metrics/client';
 import type { UserActionsSubClient } from './user_actions/client';
@@ -112,6 +112,16 @@ const createConfigureSubClientMock = (): ConfigureSubClientMock => {
   };
 };
 
+type InternalConfigureSubClientMock = jest.Mocked<InternalConfigureSubClient>;
+
+const createInternalConfigureSubClientMock = (): InternalConfigureSubClientMock => {
+  return {
+    getMappings: jest.fn(),
+    createMappings: jest.fn(),
+    updateMappings: jest.fn(),
+  };
+};
+
 export interface CasesClientMock extends CasesClient {
   cases: CasesSubClientMock;
   attachments: AttachmentsSubClientMock;
@@ -127,6 +137,16 @@ export const createCasesClientMock = (): CasesClientMock => {
     metrics: createMetricsSubClientMock(),
   };
   return client as unknown as CasesClientMock;
+};
+
+type CasesClientInternalMock = jest.Mocked<CasesClientInternal>;
+
+export const createCasesClientInternalMock = (): CasesClientInternalMock => {
+  const client: PublicContract<CasesClientInternal> = {
+    configuration: createInternalConfigureSubClientMock(),
+  };
+
+  return client as unknown as CasesClientInternalMock;
 };
 
 export type CasesClientFactoryMock = jest.Mocked<CasesClientFactory>;

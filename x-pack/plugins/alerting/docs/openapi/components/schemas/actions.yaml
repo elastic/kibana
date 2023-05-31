@@ -41,3 +41,7 @@ items:
       type: object
       description: The parameters for the action, which are sent to the connector. The `params` are handled as Mustache templates and passed a default set of context.
       additionalProperties: true
+    uuid:
+      type: string
+      description: A universally unique identifier (UUID) for the action.
+      example: 1c7a1280-f28c-4e06-96b2-e4e5f05d1d61

@@ -12,10 +12,9 @@ import { toMountPoint, useKibana } from '@kbn/kibana-react-plugin/public';
 import { i18n } from '@kbn/i18n';
 
 import { useDispatch } from 'react-redux';
-import { getGlobalParamAction } from '../../../state/global_params';
+import { getGlobalParamAction, deleteGlobalParams } from '../../../state/global_params';
 import { syncGlobalParamsAction } from '../../../state/settings';
 import { kibanaService } from '../../../../../utils/kibana_service';
-import { syntheticsParamType } from '../../../../../../common/types/saved_objects';
 import { NO_LABEL, YES_LABEL } from '../../monitors_page/management/monitor_list_table/labels';
 import { ListParamItem } from './params_list';
 
@@ -38,10 +37,7 @@ export const DeleteParam = ({
 
   const { status } = useFetcher(() => {
     if (isDeleting && savedObjects) {
-      return savedObjects.client.bulkDelete(
-        items.map(({ id }) => ({ type: syntheticsParamType, id })),
-        { force: true }
-      );
+      return deleteGlobalParams({ ids: items.map(({ id }) => id) });
     }
   }, [items, isDeleting]);
 

@@ -15,6 +15,7 @@ import { getFlattenedObject } from '@kbn/std';
 
 import { difference } from 'lodash';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
+import { INDEX_STATUS } from '@kbn/ml-data-frame-analytics-utils';
 
 import type { PreviewMappingsProperties } from '../../../common/api_schemas/transforms';
 import { isPostTransformsPreviewResponseSchema } from '../../../common/api_schemas/type_guards';
@@ -113,7 +114,6 @@ export const useTransformConfigData = (
       multiColumnSortFactory,
       getNestedOrEscapedVal,
       useDataGrid,
-      INDEX_STATUS,
     },
   } = useAppDependencies();
 

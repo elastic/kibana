@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { CreateSLOInput } from '@kbn/slo-schema';
+import { CreateSLOInput, MetricCustomIndicatorSchema } from '@kbn/slo-schema';
 import { FormState, UseFormGetFieldState, UseFormGetValues, UseFormWatch } from 'react-hook-form';
+import { isObject } from 'lodash';
 
 interface Props {
   getFieldState: UseFormGetFieldState<CreateSLOInput>;
@@ -19,6 +20,41 @@ export function useSectionFormValidation({ getFieldState, getValues, formState, 
   let isIndicatorSectionValid: boolean = false;
 
   switch (watch('indicator.type')) {
+    case 'sli.metric.custom':
+      const isGoodParamsValid = () => {
+        const data = getValues(
+          'indicator.params.good'
+        ) as MetricCustomIndicatorSchema['params']['good'];
+        const isEquationValid = !getFieldState('indicator.params.good.equation').invalid;
+        const areMetricsValid =
+          isObject(data) && (data.metrics ?? []).every((metric) => Boolean(metric.field));
+        return isEquationValid && areMetricsValid;
+      };
+
+      const isTotalParamsValid = () => {
+        const data = getValues(
+          'indicator.params.total'
+        ) as MetricCustomIndicatorSchema['params']['total'];
+        const isEquationValid = !getFieldState('indicator.params.total.equation').invalid;
+        const areMetricsValid =
+          isObject(data) && (data.metrics ?? []).every((metric) => Boolean(metric.field));
+        return isEquationValid && areMetricsValid;
+      };
+
+      isIndicatorSectionValid =
+        (
+          [
+            'indicator.params.index',
+            'indicator.params.filter',
+            'indicator.params.timestampField',
+          ] as const
+        ).every((field) => !getFieldState(field).invalid) &&
+        (['indicator.params.index', 'indicator.params.timestampField'] as const).every(
+          (field) => !!getValues(field)
+        ) &&
+        isGoodParamsValid() &&
+        isTotalParamsValid();
+      break;
     case 'sli.kql.custom':
       isIndicatorSectionValid =
         (
