@@ -6,7 +6,7 @@
  */
 
 import { ILicense } from '@kbn/licensing-plugin/server';
-import { ExportTypeDefinition } from '../types';
+import { ExportType } from '../export_types/common';
 import { ExportTypesRegistry } from './export_types_registry';
 
 export interface LicenseCheckResult {
@@ -25,7 +25,7 @@ const messages = {
   },
 };
 
-const makeManagementFeature = (exportTypes: ExportTypeDefinition[]) => {
+const makeManagementFeature = (exportTypes: ExportType[]) => {
   return {
     id: 'management',
     checkLicense: (license?: ILicense) => {
@@ -58,7 +58,7 @@ const makeManagementFeature = (exportTypes: ExportTypeDefinition[]) => {
   };
 };
 
-const makeExportTypeFeature = (exportType: ExportTypeDefinition) => {
+const makeExportTypeFeature = (exportType: ExportType) => {
   return {
     id: exportType.id,
     checkLicense: (license?: ILicense) => {
