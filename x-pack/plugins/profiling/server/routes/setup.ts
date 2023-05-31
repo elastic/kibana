@@ -131,10 +131,12 @@ export function registerSetupRoute({
         body.cloud.available = dependencies.setup.cloud.isCloudEnabled;
 
         if (!body.cloud.available) {
-          return response.ok({
+          const msg = `Elastic Cloud is required to set up Elasticsearch and Fleet for Universal Profiling`;
+          logger.error(msg);
+          return response.custom({
+            statusCode: 500,
             body: {
-              has_data: false,
-              has_setup: false,
+              message: msg,
             },
           });
         }
@@ -204,10 +206,12 @@ export function registerSetupRoute({
         body.cloud.available = dependencies.setup.cloud.isCloudEnabled;
 
         if (!body.cloud.available) {
-          return response.ok({
+          const msg = `Elastic Cloud is required to set up Elasticsearch and Fleet for Universal Profiling`;
+          logger.error(msg);
+          return response.custom({
+            statusCode: 500,
             body: {
-              has_data: false,
-              has_setup: false,
+              message: msg,
             },
           });
         }
