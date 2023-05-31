@@ -30,14 +30,14 @@ const AssetDetailsDecorator: DecoratorFn = (story) => {
     }
   }, [updateArgs, checked]);
 
-  const onChange = (e: EuiSwitchEvent) => {
+  const handleChange = (e: EuiSwitchEvent) => {
     setChecked(e.target.checked);
   };
 
   return (
     <EuiFlexGroup direction="column">
       <EuiFlexItem>
-        <EuiSwitch label="With Links" checked={checked} onChange={(e) => onChange(e)} />
+        <EuiSwitch label="With Links" checked={checked} onChange={handleChange} />
       </EuiFlexItem>
       <EuiFlexItem>{story()}</EuiFlexItem>
     </EuiFlexGroup>
