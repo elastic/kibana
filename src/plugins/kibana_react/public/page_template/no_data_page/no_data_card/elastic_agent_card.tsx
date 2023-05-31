@@ -10,7 +10,7 @@ import React, { FunctionComponent } from 'react';
 import { i18n } from '@kbn/i18n';
 import { CoreStart } from '@kbn/core/public';
 import { EuiButton, EuiCard, EuiTextColor, EuiScreenReaderOnly, EuiImage } from '@elastic/eui';
-import { useKibana } from '../../../context';
+import { useKibana } from '@kbn/react';
 import { NoDataPageActions, NO_DATA_RECOMMENDED } from '../no_data_page';
 import { RedirectAppLinks } from '../../../app_links';
 

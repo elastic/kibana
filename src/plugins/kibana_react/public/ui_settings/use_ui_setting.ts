@@ -8,7 +8,7 @@
 
 import { useCallback, useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
-import { useKibana } from '../context';
+import { useKibana } from '@kbn/react';
 
 /**
  * Returns the current UI-settings value.

@@ -14,7 +14,7 @@ import {
   RouteProps,
   useRouteMatch,
 } from 'react-router-dom';
-import { useKibana } from '../context';
+import { useKibana } from '@kbn/react';
 import { useExecutionContext } from '../use_execution_context';
 
 /**

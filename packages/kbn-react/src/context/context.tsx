@@ -7,7 +7,7 @@
  */
 
 import * as React from 'react';
-import { KibanaReactContext, KibanaReactContextValue, KibanaServices } from './types';
+import type { KibanaReactContext, KibanaReactContextValue, KibanaServices } from './types';
 import { createReactOverlays } from '../overlays';
 import { createNotifications } from '../notifications';
 

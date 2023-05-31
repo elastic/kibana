@@ -12,7 +12,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { CoreStart } from '@kbn/core/public';
 import { RedirectAppLinks } from '../../app_links';
-import { useKibana } from '../../context';
+import { useKibana } from '@kbn/react';
 import { useUiSetting$ } from '../../ui_settings';
 
 interface Props {

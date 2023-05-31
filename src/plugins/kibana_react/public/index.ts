@@ -23,19 +23,7 @@ export { UrlTemplateEditor } from './url_template_editor';
 export type { ExitFullScreenButtonProps } from './exit_full_screen_button';
 export { ExitFullScreenButton } from './exit_full_screen_button';
 
-export type { KibanaReactContext, KibanaReactContextValue, KibanaServices } from './context';
-export {
-  context,
-  createKibanaReactContext,
-  KibanaContextProvider,
-  useKibana,
-  withKibana,
-} from './context';
-
 export { overviewPageActions, OverviewPageFooter } from './overview_page';
-
-export type { KibanaReactOverlays } from './overlays';
-export { createReactOverlays } from './overlays';
 
 export {
   useUiSetting,
@@ -75,14 +63,8 @@ export {
 export type { Value } from './validated_range';
 export { ValidatedDualRange } from './validated_range';
 
-export type { ToastInput, KibanaReactNotifications } from './notifications';
-export { createNotifications } from './notifications';
-
 /** @deprecated use `Markdown` from `@kbn/shared-ux-markdown` */
 export { Markdown, MarkdownSimple } from './markdown';
-
-export { toMountPoint, MountPointPortal } from './util';
-export type { ToMountPointOptions } from './util';
 
 /** @deprecated Use `RedirectAppLinks` from `@kbn/shared-ux-link-redirect-app` */
 export { RedirectAppLinks } from './app_links';

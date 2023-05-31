@@ -7,9 +7,9 @@
  */
 
 import * as React from 'react';
+import { toMountPoint } from '../util';
 import { KibanaServices } from '../context/types';
 import { KibanaReactOverlays } from './types';
-import { toMountPoint } from '../util';
 
 export const createReactOverlays = (services: KibanaServices): KibanaReactOverlays => {
   const checkCoreService = () => {

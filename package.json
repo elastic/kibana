@@ -516,6 +516,7 @@
     "@kbn/presentation-util-plugin": "link:src/plugins/presentation_util",
     "@kbn/profiling-plugin": "link:x-pack/plugins/profiling",
     "@kbn/random-sampling": "link:x-pack/packages/kbn-random-sampling",
+    "@kbn/react": "link:packages/kbn-react",
     "@kbn/react-field": "link:packages/kbn-react-field",
     "@kbn/remote-clusters-plugin": "link:x-pack/plugins/remote_clusters",
     "@kbn/rendering-plugin": "link:test/plugin_functional/plugins/rendering_plugin",
