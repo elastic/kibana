@@ -102,6 +102,12 @@ export function ObservabilityAlertSearchBar({
     ]
   );
 
+  const onSearchBarParamsCleared = (params: { query?: string }) => {
+    if (params.query === '') {
+      onKueryChange(params.query);
+    }
+  };
+
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
       <EuiFlexItem>
@@ -112,6 +118,7 @@ export function ObservabilityAlertSearchBar({
           rangeTo={rangeTo}
           query={kuery}
           onQuerySubmit={onSearchBarParamsChange}
+          onQueryChange={onSearchBarParamsCleared}
         />
       </EuiFlexItem>
 
