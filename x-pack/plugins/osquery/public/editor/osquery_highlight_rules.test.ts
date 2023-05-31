@@ -25,10 +25,7 @@ describe('Osquery Editor', () => {
       'des',
     ];
 
-    // const suggestions = getEditorAutoCompleteSuggestion(defaultRange, value, false);
-
     expect(split).toEqual(result);
-    // expect(suggestions).toEqual([]);
   });
   test('should provide proper suggestions', () => {
     const value = 'Select description, user_account from services; /n Where des';
