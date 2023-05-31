@@ -217,9 +217,9 @@ export interface Connector {
   name: string;
   pipeline?: IngestPipelineParams | null;
   scheduling: {
-    access_control: SchedulingConfiguraton,
-    incremental: SchedulingConfiguraton,
-    full: SchedulingConfiguraton
+    access_control: SchedulingConfiguraton;
+    incremental: SchedulingConfiguraton;
+    full: SchedulingConfiguraton;
   };
   service_type: string | null;
   status: ConnectorStatus;
