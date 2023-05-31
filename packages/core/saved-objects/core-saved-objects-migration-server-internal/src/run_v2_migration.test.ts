@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import buffer from 'buffer';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import {
@@ -14,7 +15,7 @@ import {
 } from '@kbn/core-saved-objects-base-server-internal';
 import { ByteSizeValue } from '@kbn/config-schema';
 import { docLinksServiceMock } from '@kbn/core-doc-links-server-mocks';
-import { runV2Migration } from './run_v2_migration';
+import { runV2Migration, RunV2MigrationOpts } from './run_v2_migration';
 import { DocumentMigrator } from './document_migrator';
 import { ALLOWED_CONVERT_VERSION } from './kibana_migrator_constants';
 import { buildTypesMappings, createIndexMap } from './core';
@@ -229,7 +230,7 @@ describe('runV2Migration', () => {
   });
 });
 
-const mockOptions = (kibanaVersion = '8.2.3') => {
+const mockOptions = (kibanaVersion = '8.2.3'): RunV2MigrationOpts => {
   const mockedClient = elasticsearchClientMock.createElasticsearchClient();
   (mockedClient as any).child = jest.fn().mockImplementation(() => mockedClient);
 
@@ -248,12 +249,14 @@ const mockOptions = (kibanaVersion = '8.2.3') => {
       algorithm: 'v2' as const,
       batchSize: 20,
       maxBatchSizeBytes: ByteSizeValue.parse('20mb'),
+      maxReadBatchSizeBytes: new ByteSizeValue(buffer.constants.MAX_STRING_LENGTH),
       pollInterval: 20000,
       scrollDuration: '10m',
       skip: false,
       retryAttempts: 20,
       zdt: {
         metaPickupSyncDelaySec: 120,
+        runOnNonMigratorNodes: true,
       },
     },
     elasticsearchClient: mockedClient,

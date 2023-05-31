@@ -66,7 +66,7 @@ export const runV2Migration = async (options: RunV2MigrationOpts): Promise<Migra
   });
 
   options.logger.debug('Applying registered migrations for the following saved object types:');
-  Object.entries(options.documentMigrator.migrationVersion)
+  Object.entries(options.documentMigrator.getMigrationVersion())
     .sort(([t1, v1], [t2, v2]) => {
       return Semver.compare(v1, v2);
     })
@@ -133,7 +133,13 @@ export const runV2Migration = async (options: RunV2MigrationOpts): Promise<Migra
               migrateDoc: options.documentMigrator.migrateAndConvert,
               rawDocs,
             }),
-          migrationVersionPerType: options.documentMigrator.migrationVersion,
+          coreMigrationVersionPerType: options.documentMigrator.getMigrationVersion({
+            includeDeferred: false,
+            migrationType: 'core',
+          }),
+          migrationVersionPerType: options.documentMigrator.getMigrationVersion({
+            includeDeferred: false,
+          }),
           indexPrefix: indexName,
           migrationsConfig: options.migrationConfig,
           typeRegistry: options.typeRegistry,
