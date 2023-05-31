@@ -8,7 +8,6 @@
 import { elementsOverlap } from '../../../helpers/rules';
 import {
   TIMELINE_ROW_RENDERERS_DISABLE_ALL_BTN,
-  TIMELINE_ROW_RENDERERS_MODAL_CLOSE_BUTTON,
   TIMELINE_ROW_RENDERERS_MODAL_ITEMS_CHECKBOX,
   TIMELINE_ROW_RENDERERS_SEARCHBOX,
   TIMELINE_SHOW_ROW_RENDERERS_GEAR,
@@ -22,7 +21,7 @@ import {
   waitForPageToBeLoaded,
   waitForWelcomePanelToBeLoaded,
 } from '../../../tasks/common';
-import { esArchiverLoad, esArchiverUnload } from '../../../tasks/es_archiver';
+import { esArchiverLoad } from '../../../tasks/es_archiver';
 import { waitForAllHostsToBeLoaded } from '../../../tasks/hosts/all_hosts';
 
 import { login, visit } from '../../../tasks/login';
@@ -36,10 +35,11 @@ describe('Row renderers', () => {
     esArchiverLoad('auditbeat');
 
     cleanKibana();
-    login();
   });
+
   beforeEach(() => {
     deleteTimelines();
+    login();
     visit(HOSTS_URL, {
       onLoad: () => {
         waitForWelcomePanelToBeLoaded();
@@ -51,14 +51,6 @@ describe('Row renderers', () => {
     populateTimeline();
     cy.get(TIMELINE_SHOW_ROW_RENDERERS_GEAR).should('exist');
     cy.get(TIMELINE_SHOW_ROW_RENDERERS_GEAR).first().click({ force: true });
-  });
-
-  after(() => {
-    esArchiverUnload('auditbeat');
-  });
-
-  afterEach(() => {
-    cy.get(TIMELINE_ROW_RENDERERS_MODAL_CLOSE_BUTTON).click({ force: true });
   });
 
   it('Row renderers should be enabled by default', () => {
@@ -109,12 +101,9 @@ describe('Row renderers', () => {
     // In cases where the click handler is not present on the page just yet, this will cause the button to be clicked
     // multiple times until it sees that the click took effect. You could go through the whole list but I just check
     // for the first to be unchecked and then assume the click was successful
-    cy.root()
-      .pipe(($el) => {
-        $el.find(TIMELINE_ROW_RENDERERS_DISABLE_ALL_BTN).trigger('click');
-        return $el.find(TIMELINE_ROW_RENDERERS_MODAL_ITEMS_CHECKBOX).first();
-      })
-      .should('not.be.checked');
+    cy.get(TIMELINE_ROW_RENDERERS_DISABLE_ALL_BTN).click();
+
+    cy.get(TIMELINE_ROW_RENDERERS_MODAL_ITEMS_CHECKBOX).first().should('not.be.checked');
 
     cy.wait('@updateTimeline').its('response.statusCode').should('eq', 200);
   });
@@ -124,9 +113,7 @@ describe('Row renderers', () => {
     // A follw-up ticket to tackle this issue has been created.
     it.skip('Signature tooltips do not overlap', () => {
       // Hover the signature to show the tooltips
-      cy.get(TIMELINE_ROW_RENDERERS_SURICATA_SIGNATURE)
-        .parents('.euiPopover__anchor')
-        .trigger('mouseover');
+      cy.get(TIMELINE_ROW_RENDERERS_SURICATA_SIGNATURE).parents('.euiPopover__anchor').realHover();
 
       cy.get(TIMELINE_ROW_RENDERERS_SURICATA_LINK_TOOLTIP).then(($googleLinkTooltip) => {
         cy.get(TIMELINE_ROW_RENDERERS_SURICATA_SIGNATURE_TOOLTIP).then(($signatureTooltip) => {

@@ -67,6 +67,7 @@ export const KQL_INPUT = '[data-test-subj="queryInput"]';
 export const REFRESH_BUTTON = '[data-test-subj="querySubmitButton"]';
 
 export const LOADING_INDICATOR = '[data-test-subj="globalLoadingIndicator"]';
+export const LOADING_INDICATOR_HIDDEN = '[data-test-subj="globalLoadingIndicator-hidden"]';
 
 export const WELCOME_ICON = '[data-test-subj="kbnLoadingMessage"]';
 // opens the navigation panel for a given nested link
