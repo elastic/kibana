@@ -38,6 +38,9 @@ export const config: PluginConfigDescriptor = {
     developer: {
       maxAgentPoliciesWithInactivityTimeout: true,
     },
+    internal: {
+      fleetServerStandalone: true,
+    },
   },
   deprecations: ({ renameFromRoot, unused, unusedFromRoot }) => [
     // Unused settings before Fleet server exists
@@ -163,6 +166,9 @@ export const config: PluginConfigDescriptor = {
     internal: schema.maybe(
       schema.object({
         disableILMPolicies: schema.boolean({
+          defaultValue: false,
+        }),
+        fleetServerStandalone: schema.boolean({
           defaultValue: false,
         }),
       })

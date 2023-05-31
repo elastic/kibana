@@ -58,17 +58,17 @@ const ActiveStateSwitchComponent: React.FC<ActiveStateSwitchProps> = ({ item }) 
         queryClient.invalidateQueries([PACKS_ID]);
         setErrorToast();
         toasts.addSuccess(
-          response?.data?.attributes.enabled
+          response?.data?.enabled
             ? i18n.translate('xpack.osquery.pack.table.activatedSuccessToastMessageText', {
                 defaultMessage: 'Successfully activated "{packName}" pack',
                 values: {
-                  packName: response?.data?.attributes.name,
+                  packName: response?.data?.name,
                 },
               })
             : i18n.translate('xpack.osquery.pack.table.deactivatedSuccessToastMessageText', {
                 defaultMessage: 'Successfully deactivated "{packName}" pack',
                 values: {
-                  packName: response?.data?.attributes.name,
+                  packName: response?.data?.name,
                 },
               })
         );
@@ -77,7 +77,7 @@ const ActiveStateSwitchComponent: React.FC<ActiveStateSwitchProps> = ({ item }) 
   });
 
   const handleToggleActive = useCallback(() => {
-    mutateAsync({ id: item.id, enabled: !item.attributes.enabled });
+    mutateAsync({ id: item.saved_object_id, enabled: !item.enabled });
     hideConfirmationModal();
   }, [hideConfirmationModal, item, mutateAsync]);
 
@@ -93,7 +93,7 @@ const ActiveStateSwitchComponent: React.FC<ActiveStateSwitchProps> = ({ item }) 
     <>
       {isLoading && <StyledEuiLoadingSpinner />}
       <EuiSwitch
-        checked={!!item.attributes.enabled}
+        checked={!!item.enabled}
         disabled={!permissions.writePacks || isLoading}
         showLabel={false}
         label=""

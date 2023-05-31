@@ -10,9 +10,16 @@ import { useEffect, useMemo } from 'react';
 import { EuiDataGridColumn } from '@elastic/eui';
 
 import type { DataView } from '@kbn/data-views-plugin/public';
+import {
+  sortExplorationResultsFields,
+  ML__ID_COPY,
+  ML__INCREMENTAL_ID,
+  DEFAULT_RESULTS_FIELD,
+  FEATURE_INFLUENCE,
+  type DataFrameAnalyticsConfig,
+} from '@kbn/ml-data-frame-analytics-utils';
 
 import { DataLoader } from '../../../../../datavisualizer/index_based/data_loader';
-
 import {
   useColorRange,
   COLOR_RANGE,
@@ -28,14 +35,7 @@ import {
 import { SavedSearchQuery } from '../../../../../contexts/ml';
 import { getToastNotifications } from '../../../../../util/dependency_cache';
 
-import { getIndexData, getIndexFields, DataFrameAnalyticsConfig } from '../../../../common';
-import { FEATURE_INFLUENCE } from '../../../../common/constants';
-import { DEFAULT_RESULTS_FIELD } from '../../../../../../../common/constants/data_frame_analytics';
-import {
-  sortExplorationResultsFields,
-  ML__ID_COPY,
-  ML__INCREMENTAL_ID,
-} from '../../../../common/fields';
+import { getIndexData, getIndexFields } from '../../../../common';
 
 import { getFeatureCount, getOutlierScoreFieldName } from './common';
 import { useExplorationDataGrid } from '../exploration_results_table/use_exploration_data_grid';

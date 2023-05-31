@@ -7,7 +7,7 @@
 
 import * as rt from 'io-ts';
 
-export const ServiceNowSIRFieldsRT = rt.type({
+export const ServiceNowSIRFieldsRT = rt.strict({
   category: rt.union([rt.string, rt.null]),
   destIp: rt.union([rt.boolean, rt.null]),
   malwareHash: rt.union([rt.boolean, rt.null]),

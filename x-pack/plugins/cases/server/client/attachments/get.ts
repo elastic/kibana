@@ -5,11 +5,6 @@
  * 2.0.
  */
 
-import Boom from '@hapi/boom';
-import { pipe } from 'fp-ts/lib/pipeable';
-import { fold } from 'fp-ts/lib/Either';
-import { identity } from 'fp-ts/lib/function';
-
 import type { SavedObject } from '@kbn/core/server';
 
 import type { CasesClient } from '../client';
@@ -25,13 +20,13 @@ import type { FindCommentsArgs, GetAllAlertsAttachToCase, GetAllArgs, GetArgs } 
 
 import { CASE_COMMENT_SAVED_OBJECT, CASE_SAVED_OBJECT } from '../../../common/constants';
 import {
-  FindCommentsArgsRt,
+  FindCommentsQueryParamsRt,
   CommentType,
   CommentsRt,
   CommentRt,
   CommentsFindResponseRt,
-  excess,
-  throwErrors,
+  decodeWithExcessOrThrow,
+  AlertResponseRt,
 } from '../../../common/api';
 import {
   defaultSortField,
@@ -45,6 +40,7 @@ import { DEFAULT_PAGE, DEFAULT_PER_PAGE } from '../../routes/api';
 import { buildFilter, combineFilters } from '../utils';
 import { Operations } from '../../authorization';
 import { validateFindCommentsPagination } from './validators';
+import { decodeOrThrow } from '../../../common/api/runtime_types';
 
 const normalizeAlertResponse = (alerts: Array<SavedObject<AttributesTypeAlerts>>): AlertResponse =>
   alerts.reduce((acc: AlertResponse, alert) => {
@@ -100,7 +96,9 @@ export const getAllAlertsAttachToCase = async (
       }))
     );
 
-    return normalizeAlertResponse(alerts);
+    const res = normalizeAlertResponse(alerts);
+
+    return decodeOrThrow(AlertResponseRt)(res);
   } catch (error) {
     throw createCaseError({
       message: `Failed to get alerts attached to case id: ${caseId}: ${error}`,
@@ -114,7 +112,7 @@ export const getAllAlertsAttachToCase = async (
  * Retrieves the attachments for a case entity. This support pagination.
  */
 export async function find(
-  data: FindCommentsArgs,
+  { caseID, findQueryParams }: FindCommentsArgs,
   clientArgs: CasesClientArgs
 ): Promise<CommentsFindResponse> {
   const {
@@ -123,14 +121,11 @@ export async function find(
     authorization,
   } = clientArgs;
 
-  const { caseID, queryParams } = pipe(
-    excess(FindCommentsArgsRt).decode(data),
-    fold(throwErrors(Boom.badRequest), identity)
-  );
-
-  validateFindCommentsPagination(queryParams);
-
   try {
+    const queryParams = decodeWithExcessOrThrow(FindCommentsQueryParamsRt)(findQueryParams);
+
+    validateFindCommentsPagination(queryParams);
+
     const { filter: authorizationFilter, ensureSavedObjectsAreAuthorized } =
       await authorization.getAuthorizationFilter(Operations.findComments);
 
@@ -162,7 +157,9 @@ export async function find(
       }))
     );
 
-    return CommentsFindResponseRt.encode(transformComments(theComments));
+    const res = transformComments(theComments);
+
+    return decodeOrThrow(CommentsFindResponseRt)(res);
   } catch (error) {
     throw createCaseError({
       message: `Failed to find comments case id: ${caseID}: ${error}`,
@@ -195,7 +192,9 @@ export async function get(
       operation: Operations.getComment,
     });
 
-    return CommentRt.encode(flattenCommentSavedObject(comment));
+    const res = flattenCommentSavedObject(comment);
+
+    return decodeOrThrow(CommentRt)(res);
   } catch (error) {
     throw createCaseError({
       message: `Failed to get comment case id: ${caseID} attachment id: ${attachmentID}: ${error}`,
@@ -235,7 +234,9 @@ export async function getAll(
       comments.saved_objects.map((comment) => ({ id: comment.id, owner: comment.attributes.owner }))
     );
 
-    return CommentsRt.encode(flattenCommentSavedObjects(comments.saved_objects));
+    const res = flattenCommentSavedObjects(comments.saved_objects);
+
+    return decodeOrThrow(CommentsRt)(res);
   } catch (error) {
     throw createCaseError({
       message: `Failed to get all comments case id: ${caseID}: ${error}`,

@@ -414,7 +414,6 @@ export const pushedCase: CaseUI = {
 const basicAction = {
   createdAt: basicCreatedAt,
   createdBy: elasticUser,
-  caseId: basicCaseId,
   commentId: null,
   owner: SECURITY_SOLUTION_OWNER,
   payload: { title: 'a title' },
@@ -770,7 +769,16 @@ export const caseUserActionsWithRegisteredAttachmentsSnake: UserActions = [
     type: 'comment',
     action: 'create',
     id: 'create-comment-id',
-    payload: { comment: externalReferenceAttachmentSnake },
+    payload: {
+      comment: {
+        type: CommentType.externalReference,
+        externalReferenceId: 'my-id',
+        externalReferenceMetadata: { test_foo: 'foo' },
+        externalReferenceAttachmentTypeId: '.test',
+        externalReferenceStorage: { type: ExternalReferenceStorageType.elasticSearchDoc },
+        owner: SECURITY_SOLUTION_OWNER,
+      },
+    },
     version: 'WzQ3LDFc',
   },
   {
@@ -781,7 +789,14 @@ export const caseUserActionsWithRegisteredAttachmentsSnake: UserActions = [
     type: 'comment',
     action: 'create',
     id: 'create-comment-id',
-    payload: { comment: persistableStateAttachmentSnake },
+    payload: {
+      comment: {
+        type: CommentType.persistableState,
+        persistableStateAttachmentState: { test_foo: 'foo' },
+        persistableStateAttachmentTypeId: '.test',
+        owner: SECURITY_SOLUTION_OWNER,
+      },
+    },
     version: 'WzQ3LDFc',
   },
 ];
@@ -876,7 +891,16 @@ export const caseUserActionsWithRegisteredAttachments: UserActionUI[] = [
     type: 'comment',
     action: 'create',
     id: 'create-comment-id',
-    payload: { comment: externalReferenceAttachment },
+    payload: {
+      comment: {
+        type: CommentType.externalReference,
+        externalReferenceId: 'my-id',
+        externalReferenceMetadata: { test_foo: 'foo' },
+        externalReferenceAttachmentTypeId: '.test',
+        externalReferenceStorage: { type: ExternalReferenceStorageType.elasticSearchDoc },
+        owner: SECURITY_SOLUTION_OWNER,
+      },
+    },
     version: 'WzQ3LDFc',
   },
   {
@@ -887,7 +911,14 @@ export const caseUserActionsWithRegisteredAttachments: UserActionUI[] = [
     type: 'comment',
     action: 'create',
     id: 'create-comment-id',
-    payload: { comment: persistableStateAttachment },
+    payload: {
+      comment: {
+        type: CommentType.persistableState,
+        persistableStateAttachmentState: { test_foo: 'foo' },
+        persistableStateAttachmentTypeId: '.test',
+        owner: SECURITY_SOLUTION_OWNER,
+      },
+    },
     version: 'WzQ3LDFc',
   },
 ];

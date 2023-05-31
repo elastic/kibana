@@ -38,6 +38,7 @@ export default function connectorsTests({ loadTestFile, getService }: FtrProvide
     loadTestFile(require.resolve('./connector_types/xmatters'));
     loadTestFile(require.resolve('./connector_types/tines'));
     loadTestFile(require.resolve('./connector_types/torq'));
+    loadTestFile(require.resolve('./connector_types/gen_ai'));
     loadTestFile(require.resolve('./create'));
     loadTestFile(require.resolve('./delete'));
     loadTestFile(require.resolve('./execute'));

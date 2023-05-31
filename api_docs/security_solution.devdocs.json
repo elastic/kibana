@@ -101,7 +101,7 @@
             "label": "experimentalFeatures",
             "description": [],
             "signature": [
-              "{ readonly tGridEnabled: boolean; readonly tGridEventRenderedViewEnabled: boolean; readonly excludePoliciesInFilterEnabled: boolean; readonly kubernetesEnabled: boolean; readonly disableIsolationUIPendingStatuses: boolean; readonly pendingActionResponsesWithAck: boolean; readonly policyListEnabled: boolean; readonly policyResponseInFleetEnabled: boolean; readonly chartEmbeddablesEnabled: boolean; readonly donutChartEmbeddablesEnabled: boolean; readonly alertsPreviewChartEmbeddablesEnabled: boolean; readonly previewTelemetryUrlEnabled: boolean; readonly responseActionsConsoleEnabled: boolean; readonly insightsRelatedAlertsByProcessAncestry: boolean; readonly extendedRuleExecutionLoggingEnabled: boolean; readonly prebuiltRulesNewUpgradeAndInstallationWorkflowsEnabled: boolean; readonly socTrendsEnabled: boolean; readonly responseActionsEnabled: boolean; readonly endpointResponseActionsEnabled: boolean; readonly endpointRbacEnabled: boolean; readonly endpointRbacV1Enabled: boolean; readonly alertDetailsPageEnabled: boolean; readonly responseActionGetFileEnabled: boolean; readonly responseActionExecuteEnabled: boolean; readonly responseActionUploadEnabled: boolean; readonly alertsPageChartsEnabled: boolean; readonly alertTypeEnabled: boolean; readonly securityFlyoutEnabled: boolean; readonly riskyHostsEnabled: boolean; readonly riskyUsersEnabled: boolean; readonly alertsPageFiltersEnabled: boolean; readonly newUserDetailsFlyout: boolean; }"
+              "{ readonly tGridEnabled: boolean; readonly tGridEventRenderedViewEnabled: boolean; readonly excludePoliciesInFilterEnabled: boolean; readonly kubernetesEnabled: boolean; readonly disableIsolationUIPendingStatuses: boolean; readonly pendingActionResponsesWithAck: boolean; readonly policyListEnabled: boolean; readonly policyResponseInFleetEnabled: boolean; readonly chartEmbeddablesEnabled: boolean; readonly donutChartEmbeddablesEnabled: boolean; readonly alertsPreviewChartEmbeddablesEnabled: boolean; readonly previewTelemetryUrlEnabled: boolean; readonly responseActionsConsoleEnabled: boolean; readonly insightsRelatedAlertsByProcessAncestry: boolean; readonly extendedRuleExecutionLoggingEnabled: boolean; readonly prebuiltRulesNewUpgradeAndInstallationWorkflowsEnabled: boolean; readonly socTrendsEnabled: boolean; readonly responseActionsEnabled: boolean; readonly endpointResponseActionsEnabled: boolean; readonly endpointRbacEnabled: boolean; readonly endpointRbacV1Enabled: boolean; readonly alertDetailsPageEnabled: boolean; readonly responseActionGetFileEnabled: boolean; readonly responseActionExecuteEnabled: boolean; readonly responseActionUploadEnabled: boolean; readonly alertsPageChartsEnabled: boolean; readonly alertTypeEnabled: boolean; readonly securityFlyoutEnabled: boolean; readonly riskyHostsEnabled: boolean; readonly riskyUsersEnabled: boolean; readonly alertsPageFiltersEnabled: boolean; readonly newUserDetailsFlyout: boolean; readonly detectionsCoverageOverview: boolean; }"
             ],
             "path": "x-pack/plugins/security_solution/public/plugin.tsx",
             "deprecated": false,
@@ -1403,6 +1403,40 @@
               "description": [],
               "signature": [
                 "boolean"
+              ],
+              "path": "x-pack/plugins/security_solution/public/types.ts",
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            }
+          ],
+          "returnComment": []
+        },
+        {
+          "parentPluginId": "securitySolution",
+          "id": "def-public.PluginStart.setGetStartedPage",
+          "type": "Function",
+          "tags": [],
+          "label": "setGetStartedPage",
+          "description": [],
+          "signature": [
+            "(getStartedComponent: ",
+            "GetStartedComponent",
+            ") => void"
+          ],
+          "path": "x-pack/plugins/security_solution/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [
+            {
+              "parentPluginId": "securitySolution",
+              "id": "def-public.PluginStart.setGetStartedPage.$1",
+              "type": "Function",
+              "tags": [],
+              "label": "getStartedComponent",
+              "description": [],
+              "signature": [
+                "GetStartedComponent"
               ],
               "path": "x-pack/plugins/security_solution/public/types.ts",
               "deprecated": false,

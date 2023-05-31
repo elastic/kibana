@@ -17,6 +17,7 @@ export interface RangeSliderComponentState {
   field?: FieldSpec;
   min: string;
   max: string;
+  error?: string;
   isInvalid?: boolean;
 }
 
