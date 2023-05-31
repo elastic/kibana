@@ -207,6 +207,9 @@ export const cli = () => {
             const fleetServerPort: number = getFleetServerPort();
             const configFromTestFile = parseTestFileConfig(filePath);
 
+            // Port that newsfeed uses
+            process.env.TEST_KIBANA_PORT = `${kibanaPort}`;
+
             const config = await readConfigFile(
               log,
               EsVersion.getDefault(),
