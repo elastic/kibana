@@ -178,11 +178,11 @@ export const getSecurityAppFeaturesConfig = (): AppFeaturesSecurityConfig => {
       privileges: {
         all: {
           ui: [ENTITY_ANALYTICS_CAPABILITY],
-          api: [ENTITY_ANALYTICS_CAPABILITY],
+          api: [`${APP_ID}-${ENTITY_ANALYTICS_CAPABILITY}`],
         },
         read: {
           ui: [ENTITY_ANALYTICS_CAPABILITY],
-          api: [ENTITY_ANALYTICS_CAPABILITY],
+          api: [`${APP_ID}-${ENTITY_ANALYTICS_CAPABILITY}`],
         },
       },
     },

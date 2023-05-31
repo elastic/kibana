@@ -7,7 +7,7 @@
 
 import { transformError } from '@kbn/securitysolution-es-utils';
 
-import { RISK_SCORE_INDEX_STATUS_API_URL } from '../../../../common/constants';
+import { APP_ID, RISK_SCORE_INDEX_STATUS_API_URL } from '../../../../common/constants';
 import type { SecuritySolutionPluginRouter } from '../../../types';
 import { buildRouteValidation } from '../../../utils/build_validation/route_validation';
 import { buildSiemResponse } from '../../detection_engine/routes/utils';
@@ -21,7 +21,7 @@ export const getRiskScoreIndexStatusRoute = (router: SecuritySolutionPluginRoute
         query: buildRouteValidation(indexStatusSchema),
       },
       options: {
-        tags: ['access:securitySolution', 'access:entity-analytics'],
+        tags: ['access:securitySolution', `access:${APP_ID}-entity-analytics`],
       },
     },
     async (context, request, response) => {
