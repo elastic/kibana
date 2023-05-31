@@ -157,6 +157,5 @@
     "@kbn/ecs",
     "@kbn/url-state",
     "@kbn/field-formats-plugin",
-    "@kbn/dev-proc-runner"
   ]
 }
