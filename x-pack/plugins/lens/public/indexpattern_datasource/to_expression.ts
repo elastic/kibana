@@ -20,12 +20,14 @@ import {
   ExpressionAstExpressionBuilder,
   ExpressionAstFunction,
 } from '../../../../../src/plugins/expressions/public';
-import { IndexPatternColumn } from './indexpattern';
+import { GenericIndexPatternColumn } from './indexpattern';
 import { operationDefinitionMap } from './operations';
 import { IndexPattern, IndexPatternPrivateState, IndexPatternLayer } from './types';
-import { dateHistogramOperation } from './operations/definitions';
+import { DateHistogramIndexPatternColumn, RangeIndexPatternColumn } from './operations/definitions';
+import { FormattedIndexPatternColumn } from './operations/definitions/column_types';
+import { isColumnFormatted, isColumnOfType } from './operations/definitions/helpers';
 
-type OriginalColumn = { id: string } & IndexPatternColumn;
+type OriginalColumn = { id: string } & GenericIndexPatternColumn;
 
 function getExpressionForLayer(
   layer: IndexPatternLayer,
@@ -147,50 +149,29 @@ function getExpressionForLayer(
         },
       };
     }, {} as Record<string, OriginalColumn>);
-
-    type FormattedColumn = Required<
-      Extract<
-        IndexPatternColumn,
-        | {
-            params?: {
-              format: unknown;
-            };
-          }
-        // when formatters are nested there's a slightly different format
-        | {
-            params: {
-              format?: unknown;
-              parentFormat?: unknown;
-            };
-          }
-      >
-    >;
     const columnsWithFormatters = columnEntries.filter(
       ([, col]) =>
-        col.params &&
-        (('format' in col.params && col.params.format) ||
-          ('parentFormat' in col.params && col.params.parentFormat))
-    ) as Array<[string, FormattedColumn]>;
-    const formatterOverrides: ExpressionAstFunction[] = columnsWithFormatters.map(
-      ([id, col]: [string, FormattedColumn]) => {
-        // TODO: improve the type handling here
-        const parentFormat = 'parentFormat' in col.params ? col.params!.parentFormat! : undefined;
-        const format = (col as FormattedColumn).params!.format;
+        (isColumnOfType<RangeIndexPatternColumn>('range', col) && col.params?.parentFormat) ||
+        (isColumnFormatted(col) && col.params?.format)
+    ) as Array<[string, RangeIndexPatternColumn | FormattedIndexPatternColumn]>;
+    const formatterOverrides: ExpressionAstFunction[] = columnsWithFormatters.map(([id, col]) => {
+      // TODO: improve the type handling here
+      const parentFormat = 'parentFormat' in col.params! ? col.params!.parentFormat! : undefined;
+      const format = col.params!.format;
 
-        const base: ExpressionAstFunction = {
-          type: 'function',
-          function: 'lens_format_column',
-          arguments: {
-            format: format ? [format.id] : [''],
-            columnId: [id],
-            decimals: typeof format?.params?.decimals === 'number' ? [format.params.decimals] : [],
-            parentFormat: parentFormat ? [JSON.stringify(parentFormat)] : [],
-          },
-        };
+      const base: ExpressionAstFunction = {
+        type: 'function',
+        function: 'lens_format_column',
+        arguments: {
+          format: format ? [format.id] : [''],
+          columnId: [id],
+          decimals: typeof format?.params?.decimals === 'number' ? [format.params.decimals] : [],
+          parentFormat: parentFormat ? [JSON.stringify(parentFormat)] : [],
+        },
+      };
 
-        return base;
-      }
-    );
+      return base;
+    });
 
     const firstDateHistogramColumn = columnEntries.find(
       ([, col]) => col.operationType === 'date_histogram'
@@ -254,7 +235,9 @@ function getExpressionForLayer(
 
     const allDateHistogramFields = Object.values(columns)
       .map((column) =>
-        column.operationType === dateHistogramOperation.type ? column.sourceField : null
+        isColumnOfType<DateHistogramIndexPatternColumn>('date_histogram', column)
+          ? column.sourceField
+          : null
       )
       .filter((field): field is string => Boolean(field));
 
@@ -291,7 +274,7 @@ function getExpressionForLayer(
 }
 
 // Topologically sorts references so that we can execute them in sequence
-function sortedReferences(columns: Array<readonly [string, IndexPatternColumn]>) {
+function sortedReferences(columns: Array<readonly [string, GenericIndexPatternColumn]>) {
   const allNodes: Record<string, string[]> = {};
   columns.forEach(([id, col]) => {
     allNodes[id] = 'references' in col ? col.references : [];
