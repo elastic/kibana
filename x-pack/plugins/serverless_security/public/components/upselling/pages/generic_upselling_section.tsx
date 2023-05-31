@@ -11,9 +11,9 @@ import { SecurityProductLineIds } from '../../../../common/config';
 
 export const GenericUpsellingSection: React.FC<{ projectPLIs: SecurityProductLineIds }> =
   React.memo(({ projectPLIs }) => {
-    const upsellingPLI = projectPLIs.includes('cloudEssentials')
-      ? 'Cloud Complete'
-      : 'Endpoint Complete';
+    const upsellingPLI = projectPLIs.includes('securityComplete')
+      ? 'Security Complete'
+      : 'Security Essential';
 
     return (
       <EuiEmptyPrompt
