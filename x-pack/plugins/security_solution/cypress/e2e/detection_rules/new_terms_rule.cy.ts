@@ -62,8 +62,8 @@ import { RULE_CREATION } from '../../urls/navigation';
 describe('New Terms rules', () => {
   before(() => {
     cleanKibana();
-    login();
   });
+
   describe('Detection rules, New Terms', () => {
     const rule = getNewTermsRule();
     const expectedUrls = rule.references?.join('');

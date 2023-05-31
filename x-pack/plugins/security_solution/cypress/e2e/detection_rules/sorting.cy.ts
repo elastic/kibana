@@ -36,7 +36,6 @@ import { TABLE_FIRST_PAGE, TABLE_SECOND_PAGE } from '../../screens/table_paginat
 describe('Alerts detection rules', () => {
   before(() => {
     cleanKibana();
-    login();
     createRule(getNewRule({ rule_id: '1' }));
     createRule(getExistingRule({ rule_id: '2' }));
     createRule(getNewOverrideRule({ rule_id: '3' }));
