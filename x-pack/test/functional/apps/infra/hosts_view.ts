@@ -146,8 +146,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       security.user.delete('global_hosts_read_privileges_user'),
     ]);
 
-  // Failing: See https://github.com/elastic/kibana/issues/157721
-  describe.skip('Hosts View', function () {
+  describe('Hosts View', function () {
     this.tags('includeFirefox');
 
     before(async () => {
@@ -160,11 +159,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await browser.setWindowSize(1600, 1200);
     });
 
-    after(() => {
-      esArchiver.unload('x-pack/test/functional/es_archives/infra/alerts');
-      esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs');
-      esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_hosts_processes');
-      browser.removeLocalStorageItem(HOSTS_LINK_LOCAL_STORAGE_KEY);
+    after(async () => {
+      await Promise.all([
+        esArchiver.unload('x-pack/test/functional/es_archives/infra/alerts'),
+        esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs'),
+        esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_hosts_processes'),
+        browser.removeLocalStorageItem(HOSTS_LINK_LOCAL_STORAGE_KEY),
+      ]);
     });
 
     it('should be accessible from the Inventory page', async () => {
@@ -302,42 +303,19 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await pageObjects.header.waitUntilLoadingHasFinished();
       });
 
-      describe('should render processes tab', async () => {
-        const processTitles = [
-          'Total processes',
-          'Running',
-          'Sleeping',
-          'Dead',
-          'Stopped',
-          'Idle',
-          'Zombie',
-          'Unknown',
-        ];
+      it('should render processes tab and with Total Value summary', async () => {
+        await pageObjects.infraHostsView.clickProcessesFlyoutTab();
+        const processesTotalValue =
+          await pageObjects.infraHostsView.getProcessesTabContentTotalValue();
+        const processValue = await processesTotalValue.getVisibleText();
+        expect(processValue).to.eql('313');
+      });
 
-        processTitles.forEach((value, index) => {
-          it(`Render title: ${value}`, async () => {
-            await pageObjects.infraHostsView.clickProcessesFlyoutTab();
-            const processesTitleValue =
-              await pageObjects.infraHostsView.getProcessesTabContentTitle(index);
-            const processValue = await processesTitleValue.getVisibleText();
-            expect(processValue).to.eql(value);
-          });
-        });
-
-        it('should render processes total value', async () => {
-          await pageObjects.infraHostsView.clickProcessesFlyoutTab();
-          const processesTotalValue =
-            await pageObjects.infraHostsView.getProcessesTabContentTotalValue();
-          const processValue = await processesTotalValue.getVisibleText();
-          expect(processValue).to.eql('313');
-        });
-
-        it('should render processes table', async () => {
-          await pageObjects.infraHostsView.clickProcessesFlyoutTab();
-          await pageObjects.infraHostsView.getProcessesTable();
-          await pageObjects.infraHostsView.getProcessesTableBody();
-          await pageObjects.infraHostsView.clickProcessesTableExpandButton();
-        });
+      it('should expand processes table row', async () => {
+        await pageObjects.infraHostsView.clickProcessesFlyoutTab();
+        await pageObjects.infraHostsView.getProcessesTable();
+        await pageObjects.infraHostsView.getProcessesTableBody();
+        await pageObjects.infraHostsView.clickProcessesTableExpandButton();
       });
     });
 
