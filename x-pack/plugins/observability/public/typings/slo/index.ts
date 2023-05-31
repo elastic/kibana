@@ -14,12 +14,22 @@ interface Duration {
   unit: DurationUnit;
 }
 
-interface BurnRateRuleParams extends RuleTypeParams {
-  sloId: string;
+interface WindowSchema {
+  id: string;
   burnRateThreshold: number;
   maxBurnRateThreshold: number;
   longWindow: Duration;
   shortWindow: Duration;
+  actionGroup: string;
+}
+
+interface BurnRateRuleParams extends RuleTypeParams {
+  sloId: string;
+  burnRateThreshold?: number;
+  maxBurnRateThreshold?: number;
+  longWindow?: Duration;
+  shortWindow?: Duration;
+  windows: WindowSchema[];
 }
 
 interface ChartData {
@@ -27,4 +37,4 @@ interface ChartData {
   value: number | undefined;
 }
 
-export type { BurnRateRuleParams, ChartData, Duration, DurationUnit };
+export type { BurnRateRuleParams, ChartData, Duration, DurationUnit, WindowSchema };
