@@ -77,46 +77,48 @@ export const TableRowDetails = ({
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiFlexGroup gutterSize="l" alignItems="center" responsive={false}>
-            <EuiFlexItem grow={false}>
-              {isTimeBased && (
-                /* eslint-disable-next-line @elastic/eui/href-or-on-click */
+        {!isPlainRecord && (
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup gutterSize="l" alignItems="center" responsive={false}>
+              <EuiFlexItem grow={false}>
+                {isTimeBased && (
+                  /* eslint-disable-next-line @elastic/eui/href-or-on-click */
+                  <EuiButtonEmpty
+                    size="s"
+                    iconSize="s"
+                    iconType="document"
+                    flush="left"
+                    data-test-subj="docTableRowAction"
+                    href={contextViewHref}
+                    onClick={onOpenContextView}
+                  >
+                    <FormattedMessage
+                      id="discover.docTable.tableRow.viewSurroundingDocumentsLinkText"
+                      defaultMessage="View surrounding documents"
+                    />
+                  </EuiButtonEmpty>
+                )}
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
                 <EuiButtonEmpty
                   size="s"
                   iconSize="s"
                   iconType="document"
                   flush="left"
                   data-test-subj="docTableRowAction"
-                  href={contextViewHref}
-                  onClick={onOpenContextView}
+                  href={singleDocHref}
+                  onClick={onOpenSingleDoc}
                 >
                   <FormattedMessage
-                    id="discover.docTable.tableRow.viewSurroundingDocumentsLinkText"
-                    defaultMessage="View surrounding documents"
+                    id="discover.docTable.tableRow.viewSingleDocumentLinkText"
+                    defaultMessage="View single document"
                   />
                 </EuiButtonEmpty>
-              )}
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
-              <EuiButtonEmpty
-                size="s"
-                iconSize="s"
-                iconType="document"
-                flush="left"
-                data-test-subj="docTableRowAction"
-                href={singleDocHref}
-                onClick={onOpenSingleDoc}
-              >
-                <FormattedMessage
-                  id="discover.docTable.tableRow.viewSingleDocumentLinkText"
-                  defaultMessage="View single document"
-                />
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
       <div data-test-subj="docViewer">{children}</div>
     </td>
