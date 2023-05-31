@@ -52,7 +52,7 @@ function getRetryOptions(esContext: EsContext, operation: string) {
     maxTimeout: MAX_RETRY_DELAY,
     retries: 4,
     factor: 2,
-    randomize: false,
+    randomize: true,
     onFailedAttempt: (err: FailedAttemptError) => {
       const message = `eventLog initialization operation failed and will be retried: ${operation}; ${err.retriesLeft} more times; error: ${err.message}`;
       logger.warn(message);

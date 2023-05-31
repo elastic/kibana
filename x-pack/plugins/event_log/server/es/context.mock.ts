@@ -25,7 +25,7 @@ const createContextMock = () => {
     waitTillReady: jest.fn(async () => true),
     esAdapter: clusterClientAdapterMock.create(),
     initialized: true,
-    retryDelay: MOCK_RETRY_DELAY,
+    retryDelay: MOCK_RETRY_DELAY - 1,
   };
   return mock;
 };
