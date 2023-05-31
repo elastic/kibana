@@ -1035,6 +1035,7 @@ x-pack/plugins/cloud_integrations/cloud_full_story/server/config.ts @elastic/kib
 /x-pack/plugins/security_solution/common/search_strategy/security_solution/network @elastic/security-threat-hunting-explore
 /x-pack/plugins/security_solution/common/search_strategy/security_solution/user @elastic/security-threat-hunting-explore
 
+/x-pack/plugins/security_solution/cypress/e2e/explore @elastic/security-threat-hunting-explore
 /x-pack/plugins/security_solution/cypress/e2e/cases @elastic/security-threat-hunting-explore
 /x-pack/plugins/security_solution/cypress/e2e/dashboards @elastic/security-threat-hunting-explore
 /x-pack/plugins/security_solution/cypress/e2e/filters @elastic/security-threat-hunting-explore
