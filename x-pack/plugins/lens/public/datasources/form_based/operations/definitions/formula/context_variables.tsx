@@ -8,13 +8,45 @@
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import { calcAutoIntervalNear, UI_SETTINGS } from '@kbn/data-plugin/common';
-import type { DateHistogramIndexPatternColumn, FormBasedLayer } from '../../../../..';
+import { partition } from 'lodash';
+import type {
+  DateHistogramIndexPatternColumn,
+  FormBasedLayer,
+  GenericIndexPatternColumn,
+} from '../../../../..';
 import type { DateRange } from '../../../../../../common/types';
 import type { GenericOperationDefinition, OperationDefinition } from '..';
 import type { ReferenceBasedIndexPatternColumn } from '../column_types';
 import { IndexPattern } from '../../../../../types';
-import { getColumnOrder } from '../../helpers/layer_helpers';
-import { isColumnOfType } from '../helpers';
+
+// copied over from layer_helpers
+// TODO: split layer_helpers util into pure/non-pure functions to avoid issues with tests
+export function getColumnOrder(layer: FormBasedLayer): string[] {
+  const entries = Object.entries(layer.columns);
+  entries.sort(([idA], [idB]) => {
+    const indexA = layer.columnOrder.indexOf(idA);
+    const indexB = layer.columnOrder.indexOf(idB);
+    if (indexA > -1 && indexB > -1) {
+      return indexA - indexB;
+    } else if (indexA > -1) {
+      return -1;
+    } else {
+      return 1;
+    }
+  });
+
+  const [aggregations, metrics] = partition(entries, ([, col]) => col.isBucketed);
+
+  return aggregations.map(([id]) => id).concat(metrics.map(([id]) => id));
+}
+
+// Copied over from helpers
+export function isColumnOfType<C extends GenericIndexPatternColumn>(
+  type: C['operationType'],
+  column: GenericIndexPatternColumn
+): column is C {
+  return column.operationType === type;
+}
 
 export interface ContextValues {
   dateRange?: DateRange;
