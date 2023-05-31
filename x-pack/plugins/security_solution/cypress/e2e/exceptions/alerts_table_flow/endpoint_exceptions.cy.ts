@@ -43,18 +43,17 @@ import {
 
 describe('Endpoint Exceptions workflows from Alert', () => {
   const expectedNumberOfAlerts = 1;
-  before(() => {
+  beforeEach(() => {
     esArchiverResetKibana();
     esArchiverLoad('endpoint');
     login();
     createRule(getEndpointRule());
-  });
-  beforeEach(() => {
     visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
     goToRuleDetails();
     waitForTheRuleToBeExecuted();
     waitForAlertsToPopulate();
   });
+
   after(() => {
     esArchiverUnload('endpoint');
     esArchiverUnload('endpoint_2');

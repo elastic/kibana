@@ -11,7 +11,7 @@ import {
 } from '../../../tasks/es_archiver';
 import { getNewRule } from '../../../objects/rule';
 import { login, visitWithoutDateRange } from '../../../tasks/login';
-import { createRule, deleteCustomRule } from '../../../tasks/api_calls/rules';
+import { createRule } from '../../../tasks/api_calls/rules';
 import {
   addExceptionFlyoutItemName,
   editException,
@@ -57,10 +57,6 @@ describe('Add, edit and delete exception', () => {
   });
   after(() => {
     esArchiverUnload('exceptions');
-  });
-
-  afterEach(() => {
-    deleteCustomRule();
   });
 
   const exceptionName = 'My item name';

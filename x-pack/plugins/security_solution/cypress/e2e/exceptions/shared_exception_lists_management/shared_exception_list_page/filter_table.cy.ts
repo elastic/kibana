@@ -36,7 +36,7 @@ const getExceptionList2 = () => ({
   list_id: 'exception_list_2',
 });
 describe('Filter Lists', () => {
-  before(() => {
+  beforeEach(() => {
     esArchiverResetKibana();
     login();
 
@@ -59,9 +59,6 @@ describe('Filter Lists', () => {
     createExceptionList(getExceptionList1(), getExceptionList1().list_id).as(
       'exceptionListResponse'
     );
-  });
-
-  beforeEach(() => {
     login();
     visitWithoutDateRange(EXCEPTIONS_URL);
   });

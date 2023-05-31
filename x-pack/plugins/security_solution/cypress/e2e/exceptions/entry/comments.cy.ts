@@ -24,7 +24,6 @@ import {
   goToExceptionsTab,
   openEditException,
   openExceptionFlyoutFromEmptyViewerPrompt,
-  removeException,
 } from '../../../tasks/rule_details';
 import {
   addExceptionComment,
@@ -59,7 +58,7 @@ interface ResponseType {
 }
 describe('Add, copy comments in different exceptions type and validate sharing them between users', () => {
   describe('Rule exceptions', () => {
-    before(() => {
+    beforeEach(() => {
       esArchiverResetKibana();
       esArchiverLoad('exceptions');
       login();
@@ -98,8 +97,6 @@ describe('Add, copy comments in different exceptions type and validate sharing t
           ],
         });
       });
-    });
-    beforeEach(() => {
       visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
       goToRuleDetails();
       goToExceptionsTab();
@@ -164,7 +161,7 @@ describe('Add, copy comments in different exceptions type and validate sharing t
   });
 
   describe('Endpoint exceptions', () => {
-    before(() => {
+    beforeEach(() => {
       esArchiverResetKibana();
       esArchiverLoad('auditbeat');
       login();
@@ -185,9 +182,6 @@ describe('Add, copy comments in different exceptions type and validate sharing t
           rule_id: '2',
         });
       });
-    });
-
-    beforeEach(() => {
       visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
       goToRuleDetails();
       goToEndpointExceptionsTab();
@@ -253,7 +247,6 @@ describe('Add, copy comments in different exceptions type and validate sharing t
       cy.get(EXCEPTION_ITEM_COMMENTS_CONTAINER_TEXT)
         .eq(1)
         .should('have.text', 'User 2 comment @ using unicode');
-      removeException();
     });
   });
 });

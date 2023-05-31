@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { EXCEPTION_ITEM_ACTIONS_BUTTON, REMOVE_EXCEPTION_BTN } from '../../../screens/rule_details';
 import { getNewRule } from '../../../objects/rule';
 
 import { createRule } from '../../../tasks/api_calls/rules';
@@ -15,7 +14,6 @@ import { login, visitWithoutDateRange } from '../../../tasks/login';
 import {
   openExceptionFlyoutFromEmptyViewerPrompt,
   goToExceptionsTab,
-  removeException,
 } from '../../../tasks/rule_details';
 import {
   addExceptionFlyoutItemName,
@@ -35,7 +33,7 @@ describe(
   'Add multiple conditions and validate the generated exceptions',
   { testIsolation: false },
   () => {
-    before(() => {
+    beforeEach(() => {
       esArchiverResetKibana();
       login();
       // At least create Rule with exceptions_list to be able to view created exceptions
@@ -77,7 +75,6 @@ describe(
         'have.text',
         ' agent.nameIS fooAND @timestampIS 123'
       );
-      removeException();
     });
 
     it('Use multipe OR conditions and validate it generates multiple exceptions', () => {
@@ -98,12 +95,6 @@ describe(
 
       // validate the details of the first exception
       cy.get(EXCEPTION_CARD_ITEM_NAME).eq(0).should('have.text', exceptionName);
-
-      cy.get(EXCEPTION_ITEM_ACTIONS_BUTTON).eq(1).click();
-      cy.get(REMOVE_EXCEPTION_BTN).click();
-
-      cy.get(EXCEPTION_ITEM_ACTIONS_BUTTON).eq(0).click();
-      cy.get(REMOVE_EXCEPTION_BTN).click();
     });
   }
 );

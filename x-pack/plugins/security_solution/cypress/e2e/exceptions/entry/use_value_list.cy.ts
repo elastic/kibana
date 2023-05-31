@@ -55,7 +55,6 @@ describe('Use Value list in exception entry', () => {
     cleanKibana();
     login();
     esArchiverLoad('exceptions');
-    // deleteAlertsAndRules();
     createRule({
       ...getNewRule(),
       query: 'user.name:*',
