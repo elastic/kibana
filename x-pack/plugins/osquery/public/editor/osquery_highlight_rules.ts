@@ -133,12 +133,10 @@ const theme = {
 
 export const initializeOsqueryEditor = () => {
   let disposable: IDisposable | null = null;
-  // or make sure that it exists by other ways
   if (monaco) {
     disposable = monaco.languages.onLanguage('sql', () => {
       monaco.languages.setMonarchTokensProvider('sql', {
         ignoreCase: true,
-        // defaultToken: 'identifier',
         osqueryTableNames,
         builtinFunctions,
         keywords,
@@ -179,7 +177,8 @@ export const initializeOsqueryEditor = () => {
       monaco?.languages.registerCompletionItemProvider('sql', {
         triggerCharacters: ['.'],
         provideCompletionItems: (model: monaco.editor.ITextModel, position: monaco.Position) => {
-          const tokens = monaco.editor.tokenize(model.getValue(), 'sql'); // ВЕСЬ текст редактора
+          const value = model.getValue();
+          const tokens = monaco.editor.tokenize(value, 'sql');
           const findOsqueryToken = findLast(
             tokens[position.lineNumber - 1],
             (token) => token.type === 'osquery.sql'
@@ -190,7 +189,6 @@ export const initializeOsqueryEditor = () => {
             column: (findOsqueryToken?.offset || 0) + 1,
           });
 
-          const value = model.getValue();
           const lineContent = model.getLineContent(position.lineNumber);
 
           const word = model.getWordUntilPosition(position);
@@ -215,13 +213,16 @@ export const initializeOsqueryEditor = () => {
   }
 };
 
+const regex = /\s*[\s,]\s*/;
 export const getEditorAutoCompleteSuggestion = (
   range: Range,
   value: string,
   isDot: boolean,
   name?: string
 ): monaco.languages.ProviderResult<monaco.languages.CompletionList> => {
-  const localKeywords = value.split(/\s*[\s,]\s*/).map((kw) => ({
+  // we do not want to suggest the last word (currently being typed)
+  const localValue = value.split(regex).slice(0, -1);
+  const localKeywords = localValue.map((kw) => ({
     label: kw,
     kind: monaco.languages.CompletionItemKind.Snippet,
     detail: 'Local',
