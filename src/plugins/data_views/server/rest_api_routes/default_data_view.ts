@@ -69,6 +69,11 @@ const manageDefaultIndexPatternRoutesFactory =
         version: INITIAL_REST_VERSION,
         validate: {
           request: {},
+          response: {
+            200: {
+              body: schema.object({ [`${serviceKey}_id`]: schema.string() }),
+            },
+          },
         },
       },
       handleErrors(async (ctx, req, res) => {
@@ -110,6 +115,11 @@ const manageDefaultIndexPatternRoutesFactory =
               ),
               force: schema.boolean({ defaultValue: false }),
             }),
+          },
+          response: {
+            200: {
+              body: schema.object({ acknowledged: schema.boolean() }),
+            },
           },
         },
       },

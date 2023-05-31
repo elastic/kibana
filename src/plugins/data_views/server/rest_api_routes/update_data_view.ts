@@ -9,6 +9,7 @@
 import { schema } from '@kbn/config-schema';
 import { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { IRouter, StartServicesAccessor } from '@kbn/core/server';
+import { DataViewSpecRestResponse } from '../../common/types';
 import { DataViewsService, DataView } from '../../common/data_views';
 import { DataViewSpec } from '../../common/types';
 import { handleErrors } from './util/handle_errors';
@@ -17,6 +18,7 @@ import {
   runtimeFieldSchema,
   serializedFieldFormatSchema,
 } from '../../common/schemas';
+import { dataViewSpecSchema } from './shared_schema';
 import type { DataViewsServerPluginStartDependencies, DataViewsServerPluginStart } from '../types';
 import {
   SPECIFIC_DATA_VIEW_PATH,
@@ -172,6 +174,11 @@ const updateDataViewRouteFactory =
               [serviceKey]: indexPatternUpdateSchema,
             }),
           },
+          response: {
+            200: {
+              body: dataViewSpecSchema,
+            },
+          },
         },
       },
       router.handleLegacyErrors(
@@ -204,13 +211,15 @@ const updateDataViewRouteFactory =
             counterName: `${req.route.method} ${path}`,
           });
 
+          const body: Record<string, DataViewSpecRestResponse> = {
+            [serviceKey]: dataView.toSpec(),
+          };
+
           return res.ok({
             headers: {
               'content-type': 'application/json',
             },
-            body: {
-              [serviceKey]: dataView.toSpec(),
-            },
+            body,
           });
         })
       )

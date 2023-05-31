@@ -11,6 +11,8 @@ import { schema } from '@kbn/config-schema';
 import { IRouter, StartServicesAccessor } from '@kbn/core/server';
 import { DataViewsService } from '../../common';
 import { handleErrors } from './util/handle_errors';
+import { dataViewSpecSchema } from './shared_schema';
+import { DataViewSpecRestResponse } from '../../common/types';
 import type { DataViewsServerPluginStartDependencies, DataViewsServerPluginStart } from '../types';
 import {
   SPECIFIC_DATA_VIEW_PATH,
@@ -62,6 +64,13 @@ const getDataViewRouteFactory =
               { unknowns: 'allow' }
             ),
           },
+          response: {
+            200: {
+              body: schema.object({
+                [serviceKey]: dataViewSpecSchema,
+              }),
+            },
+          },
         },
       },
       router.handleLegacyErrors(
@@ -84,13 +93,18 @@ const getDataViewRouteFactory =
             id,
           });
 
+          const responseBody: Record<string, DataViewSpecRestResponse> = {
+            [serviceKey]: {
+              ...dataView.toSpec(),
+              namespaces: dataView.namespaces,
+            },
+          };
+
           return res.ok({
             headers: {
               'content-type': 'application/json',
             },
-            body: {
-              [serviceKey]: dataView.toSpec(),
-            },
+            body: responseBody,
           });
         })
       )

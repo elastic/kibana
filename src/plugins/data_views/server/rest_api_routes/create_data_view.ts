@@ -9,14 +9,10 @@
 import { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { schema } from '@kbn/config-schema';
 import { IRouter, StartServicesAccessor } from '@kbn/core/server';
-import { DataViewSpec } from '../../common/types';
+import { DataViewSpec, DataViewSpecRestResponse } from '../../common/types';
 import { DataViewsService } from '../../common/data_views';
 import { handleErrors } from './util/handle_errors';
-import {
-  fieldSpecSchema,
-  runtimeFieldSchema,
-  serializedFieldFormatSchema,
-} from '../../common/schemas';
+import { dataViewSpecSchema } from './shared_schema';
 import type { DataViewsServerPluginStartDependencies, DataViewsServerPluginStart } from '../types';
 import {
   DATA_VIEW_PATH,
@@ -46,37 +42,6 @@ export const createDataView = async ({
   usageCollection?.incrementCounter({ counterName });
   return dataViewsService.createAndSave(spec, override, !refreshFields);
 };
-
-const dataViewSpecSchema = schema.object({
-  title: schema.string(),
-  version: schema.maybe(schema.string()),
-  id: schema.maybe(schema.string()),
-  type: schema.maybe(schema.string()),
-  timeFieldName: schema.maybe(schema.string()),
-  sourceFilters: schema.maybe(
-    schema.arrayOf(
-      schema.object({
-        value: schema.string(),
-      })
-    )
-  ),
-  fields: schema.maybe(schema.recordOf(schema.string(), fieldSpecSchema)),
-  typeMeta: schema.maybe(schema.object({}, { unknowns: 'allow' })),
-  fieldFormats: schema.maybe(schema.recordOf(schema.string(), serializedFieldFormatSchema)),
-  fieldAttrs: schema.maybe(
-    schema.recordOf(
-      schema.string(),
-      schema.object({
-        customLabel: schema.maybe(schema.string()),
-        count: schema.maybe(schema.number()),
-      })
-    )
-  ),
-  allowNoIndex: schema.maybe(schema.boolean()),
-  runtimeFieldMap: schema.maybe(schema.recordOf(schema.string(), runtimeFieldSchema)),
-  name: schema.maybe(schema.string()),
-  namespaces: schema.maybe(schema.arrayOf(schema.string())),
-});
 
 const registerCreateDataViewRouteFactory =
   (path: string, serviceKey: string) =>
@@ -135,16 +100,18 @@ const registerCreateDataViewRouteFactory =
             counterName: `${req.route.method} ${path}`,
           });
 
+          const responseBody: Record<string, DataViewSpecRestResponse> = {
+            [serviceKey]: {
+              ...dataView.toSpec(),
+              namespaces: dataView.namespaces,
+            },
+          };
+
           return res.ok({
             headers: {
               'content-type': 'application/json',
             },
-            body: {
-              [serviceKey]: {
-                ...dataView.toSpec(),
-                namespaces: dataView.namespaces,
-              },
-            },
+            body: responseBody,
           });
         })
       )

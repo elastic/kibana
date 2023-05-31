@@ -7,11 +7,13 @@
  */
 
 import { UsageCounter } from '@kbn/usage-collection-plugin/server';
+import { schema } from '@kbn/config-schema';
 import { IRouter, StartServicesAccessor } from '@kbn/core/server';
 import { DataViewsService } from '../../common';
 import { handleErrors } from './util/handle_errors';
 import type { DataViewsServerPluginStartDependencies, DataViewsServerPluginStart } from '../types';
 import { SERVICE_KEY, SERVICE_PATH, INITIAL_REST_VERSION } from '../constants';
+import { DataViewListItemRestResponse } from '../../common/types';
 
 interface GetDataViewsArgs {
   dataViewsService: DataViewsService;
@@ -28,6 +30,17 @@ export const getDataViews = async ({
   return dataViewsService.getIdsWithTitle();
 };
 
+const dataViewListSchema = schema.arrayOf(
+  schema.object({
+    id: schema.string(),
+    namespaces: schema.maybe(schema.arrayOf(schema.string())),
+    title: schema.string(),
+    type: schema.maybe(schema.string()),
+    typeMeta: schema.maybe(schema.object({}, { unknowns: 'allow' })),
+    name: schema.maybe(schema.string()),
+  })
+);
+
 const getDataViewsRouteFactory =
   (path: string, serviceKey: string) =>
   (
@@ -41,7 +54,7 @@ const getDataViewsRouteFactory =
     router.versioned.get({ path, access: 'public' }).addVersion(
       {
         version: INITIAL_REST_VERSION,
-        validate: { request: {} },
+        validate: { request: {}, response: { 200: { body: dataViewListSchema } } },
       },
       router.handleLegacyErrors(
         handleErrors(async (ctx, req, res) => {
@@ -61,13 +74,15 @@ const getDataViewsRouteFactory =
             counterName: `${req.route.method} ${path}`,
           });
 
+          const body: Record<string, DataViewListItemRestResponse[]> = {
+            [serviceKey]: dataViews,
+          };
+
           return res.ok({
             headers: {
               'content-type': 'application/json',
             },
-            body: {
-              [serviceKey]: dataViews,
-            },
+            body,
           });
         })
       )

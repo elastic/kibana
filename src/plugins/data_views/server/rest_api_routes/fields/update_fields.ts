@@ -13,6 +13,8 @@ import { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
 import { DataViewsService } from '../../../common';
 import { handleErrors } from '../util/handle_errors';
 import { serializedFieldFormatSchema } from '../../../common/schemas';
+import { dataViewSpecSchema } from '../shared_schema';
+import { DataViewSpecRestResponse } from '../../../common/types';
 import type {
   DataViewsServerPluginStartDependencies,
   DataViewsServerPluginStart,
@@ -133,6 +135,13 @@ const updateFieldsActionRouteFactory = (path: string, serviceKey: string) => {
               ),
             }),
           },
+          response: {
+            200: {
+              body: schema.object({
+                [serviceKey]: dataViewSpecSchema,
+              }),
+            },
+          },
         },
       },
       router.handleLegacyErrors(
@@ -157,13 +166,15 @@ const updateFieldsActionRouteFactory = (path: string, serviceKey: string) => {
             counterName: `${req.route.method} ${path}`,
           });
 
+          const body: Record<string, DataViewSpecRestResponse> = {
+            [serviceKey]: dataView.toSpec(),
+          };
+
           return res.ok({
             headers: {
               'content-type': 'application/json',
             },
-            body: {
-              [serviceKey]: dataView.toSpec(),
-            },
+            body,
           });
         })
       )

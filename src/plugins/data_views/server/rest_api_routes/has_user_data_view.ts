@@ -8,6 +8,7 @@
 
 import { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { IRouter, StartServicesAccessor } from '@kbn/core/server';
+import { schema } from '@kbn/config-schema';
 import { DataViewsService } from '../../common';
 import { handleErrors } from './util/handle_errors';
 import type { DataViewsServerPluginStartDependencies, DataViewsServerPluginStart } from '../types';
@@ -41,7 +42,16 @@ const hasUserDataViewRouteFactory =
     router.versioned.get({ path, access: 'internal' }).addVersion(
       {
         version: '1',
-        validate: { request: {} },
+        validate: {
+          request: {},
+          response: {
+            200: {
+              body: schema.object({
+                result: schema.boolean(),
+              }),
+            },
+          },
+        },
       },
       router.handleLegacyErrors(
         handleErrors(async (ctx, req, res) => {
@@ -62,10 +72,10 @@ const hasUserDataViewRouteFactory =
             counterName: `${req.route.method} ${path}`,
           });
 
+          const body: { result: boolean } = { result };
+
           return res.ok({
-            body: {
-              result,
-            },
+            body,
           });
         })
       )
