@@ -208,6 +208,7 @@ function DiscoverDocumentsComponent({
             isLoading={isDataLoading}
             searchDescription={savedSearch.description}
             sharedItemTitle={savedSearch.title}
+            isPlainRecord={isPlainRecord}
             onAddColumn={onAddColumn}
             onFilter={onAddFilter as DocViewFilterFn}
             onMoveColumn={onMoveColumn}

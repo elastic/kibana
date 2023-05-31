@@ -23,6 +23,7 @@ interface TableRowDetailsProps {
   dataView: DataView;
   filters?: Filter[];
   savedSearchId?: string;
+  isPlainRecord?: boolean;
 }
 
 export const TableRowDetails = ({
@@ -35,6 +36,7 @@ export const TableRowDetails = ({
   columns,
   filters,
   savedSearchId,
+  isPlainRecord,
 }: TableRowDetailsProps) => {
   const { singleDocHref, contextViewHref, onOpenSingleDoc, onOpenContextView } = useNavigationProps(
     {
@@ -58,10 +60,18 @@ export const TableRowDetails = ({
             <EuiFlexItem grow={false}>
               <EuiTitle size="xxs" data-test-subj="docTableRowDetailsTitle">
                 <h4>
-                  <FormattedMessage
-                    id="discover.docTable.tableRow.detailHeading"
-                    defaultMessage="Expanded document"
-                  />
+                  {isPlainRecord && (
+                    <FormattedMessage
+                      id="discover.grid.tableRow.textBasedDetailHeading"
+                      defaultMessage="Expanded row"
+                    />
+                  )}
+                  {!isPlainRecord && (
+                    <FormattedMessage
+                      id="discover.docTable.tableRow.detailHeading"
+                      defaultMessage="Expanded document"
+                    />
+                  )}
                 </h4>
               </EuiTitle>
             </EuiFlexItem>
