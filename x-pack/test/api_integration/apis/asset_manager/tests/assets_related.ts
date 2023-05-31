@@ -243,6 +243,27 @@ export default function ({ getService }: FtrProviderContext) {
             '[request query]: Failed to validate: \n  in /0/from: "now_1p" does not match expected type Date\n  in /0/from: "now_1p" does not match expected type datemath\n  in /1/to: "now_1p" does not match expected type Date\n  in /1/to: "now_1p" does not match expected type datemath'
           );
         });
+
+        it('should reject requests where time range is moving backwards in time', async () => {
+          const now = new Date();
+          const isoNow = now.toISOString();
+          const oneHourAgo = new Date(now.getTime() - 1000 * 60 * 60 * 1).toISOString();
+
+          const getResponse = await supertest
+            .get(RELATED_ASSETS_ENDPOINT)
+            .query({
+              ...relatedAssetBaseQuery,
+              relation: 'descendants',
+              from: isoNow,
+              to: oneHourAgo,
+              maxDistance: 1,
+              ean: 'non-existing-ean',
+            })
+            .expect(400);
+          expect(getResponse.body.message).to.equal(
+            `Time range cannot move backwards in time. "to" (${oneHourAgo}) is before "from" (${isoNow}).`
+          );
+        });
       });
 
       describe('no asset.type filters', () => {

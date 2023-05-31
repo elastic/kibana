@@ -23,7 +23,7 @@ import { getAllRelatedAssets } from '../lib/get_all_related_assets';
 import { SetupRouteOptions } from './types';
 import { getEsClientFromContext } from './utils';
 import { AssetNotFoundError } from '../lib/errors';
-import { toArray } from '../lib/utils';
+import { isValidRange, toArray } from '../lib/utils';
 
 const sizeRT = rt.union([inRangeFromStringRt(1, 100), createLiteralValueFromUndefinedRT(10)]);
 const assetDateRT = rt.union([dateRt, datemathStringRt]);
@@ -117,6 +117,12 @@ export function assetsRoutes<T extends RequestHandlerContext>({ router }: SetupR
 
       const type = toArray<AssetType>(req.query.type);
 
+      if (to && !isValidRange(from, to)) {
+        return res.badRequest({
+          body: `Time range cannot move backwards in time. "to" (${to}) is before "from" (${from}).`,
+        });
+      }
+
       try {
         return res.ok({
           body: {
@@ -153,13 +159,13 @@ export function assetsRoutes<T extends RequestHandlerContext>({ router }: SetupR
       const { aFrom, aTo, bFrom, bTo } = req.query;
       const type = toArray<AssetType>(req.query.type);
 
-      if (new Date(aFrom) > new Date(aTo)) {
+      if (!isValidRange(aFrom, aTo)) {
         return res.badRequest({
           body: `Time range cannot move backwards in time. "aTo" (${aTo}) is before "aFrom" (${aFrom}).`,
         });
       }
 
-      if (new Date(bFrom) > new Date(bTo)) {
+      if (!isValidRange(bFrom, bTo)) {
         return res.badRequest({
           body: `Time range cannot move backwards in time. "bTo" (${bTo}) is before "bFrom" (${bFrom}).`,
         });
