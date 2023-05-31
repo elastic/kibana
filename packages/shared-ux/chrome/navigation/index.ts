@@ -8,7 +8,7 @@
 
 export { NavigationKibanaProvider, NavigationProvider } from './src/services';
 
-export { DefaultNavigation, Navigation } from './src/ui';
+export { DefaultNavigation, Navigation, getPresets } from './src/ui';
 
 export type {
   NavigationTreeDefinition,

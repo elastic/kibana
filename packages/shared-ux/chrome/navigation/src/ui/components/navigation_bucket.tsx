@@ -8,16 +8,11 @@
 
 import React, { FC, useCallback } from 'react';
 
-import { analytics, devtools, ml, management } from '../nav_tree_presets';
+import { getPresets } from '../nav_tree_presets';
 import { Navigation } from './navigation';
 import type { NavigationGroupPreset, NodeDefinition } from '../types';
 
-const navTreePresets: { [preset in NavigationGroupPreset]: NodeDefinition } = {
-  analytics,
-  ml,
-  devtools,
-  management,
-};
+const navTreePresets = getPresets('all');
 
 export interface Props {
   preset?: NavigationGroupPreset;

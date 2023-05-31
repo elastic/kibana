@@ -13,11 +13,6 @@ import { devtools, type ID as DevtoolsID } from './devtools';
 import { management, type ID as ManagementID } from './management';
 import { ml, type ID as MlID } from './ml';
 
-export { analytics } from './analytics';
-export { devtools } from './devtools';
-export { ml } from './ml';
-export { management } from './management';
-
 export type NodeDefinitionWithChildren<ID extends string = string> = NodeDefinition<ID> & {
   children: Required<NodeDefinition<ID>>['children'];
 };
