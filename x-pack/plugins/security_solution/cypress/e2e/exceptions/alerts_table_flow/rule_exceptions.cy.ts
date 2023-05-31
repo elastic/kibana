@@ -25,7 +25,11 @@ import {
   validateExceptionItemFirstAffectedRuleNameInRulePage,
   validateExceptionItemAffectsTheCorrectRulesInRulePage,
 } from '../../../tasks/exceptions';
-import { esArchiverLoad, esArchiverUnload } from '../../../tasks/es_archiver';
+import {
+  esArchiverLoad,
+  esArchiverResetKibana,
+  esArchiverUnload,
+} from '../../../tasks/es_archiver';
 import { login, visitWithoutDateRange } from '../../../tasks/login';
 import {
   goToAlertsTab,
@@ -35,7 +39,7 @@ import {
 } from '../../../tasks/rule_details';
 
 import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../../urls/navigation';
-import { postDataView, deleteAlertsAndRules, cleanKibana } from '../../../tasks/common';
+import { postDataView, deleteAlertsAndRules } from '../../../tasks/common';
 import { NO_EXCEPTIONS_EXIST_PROMPT } from '../../../screens/exceptions';
 import { waitForAlertsToPopulate } from '../../../tasks/create_new_rule';
 
@@ -44,7 +48,8 @@ describe('Rule Exceptions workflows from Alert', () => {
   const ITEM_NAME = 'Sample Exception List Item';
   const newRule = getNewRule();
   before(() => {
-    cleanKibana();
+    // Need to delete all exceptions list
+    esArchiverResetKibana();
     esArchiverLoad('exceptions');
     login();
     postDataView('exceptions-*');

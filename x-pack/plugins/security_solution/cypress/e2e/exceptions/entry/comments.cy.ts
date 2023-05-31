@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { ExceptionListTypeEnum, NamespaceType } from '@kbn/securitysolution-io-ts-list-types';
 import { getException, getExceptionList } from '../../../objects/exception';
 import { getNewRule } from '../../../objects/rule';
 
@@ -48,6 +49,14 @@ import {
 } from '../../../tasks/api_calls/exceptions';
 import { ROLES } from '../../../../common/test';
 
+interface ResponseType {
+  body: {
+    id: string;
+    list_id: string;
+    type: ExceptionListTypeEnum;
+    namespace_type: NamespaceType;
+  };
+}
 describe('Add, copy comments in different exceptions type and validate sharing them between users', () => {
   describe('Rule exceptions', () => {
     before(() => {
@@ -131,7 +140,7 @@ describe('Add, copy comments in different exceptions type and validate sharing t
 
       // User 2
       // Login with different users to validate accessing comments of different users
-      login(ROLES.detections_admin);
+      login(ROLES.soc_manager);
 
       // Navigate to Rule page
       visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
@@ -167,10 +176,10 @@ describe('Add, copy comments in different exceptions type and validate sharing t
           index: ['auditbeat*'],
           exceptions_list: [
             {
-              id: response.body.id,
-              list_id: response.body.list_id,
-              type: response.body.type,
-              namespace_type: response.body.namespace_type,
+              id: (response as ResponseType).body.id,
+              list_id: (response as ResponseType).body.list_id,
+              type: (response as ResponseType).body.type,
+              namespace_type: (response as ResponseType).body.namespace_type,
             },
           ],
           rule_id: '2',
@@ -223,7 +232,7 @@ describe('Add, copy comments in different exceptions type and validate sharing t
 
       // User 2
       // Login with different users to validate accessing comments of different users
-      login(ROLES.detections_admin);
+      login(ROLES.soc_manager);
 
       // Navigate to Rule page
       visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);

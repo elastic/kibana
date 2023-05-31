@@ -42,8 +42,9 @@ const getExceptionList2 = () => ({
 });
 
 describe('Duplicate List', () => {
-  before(() => {
+  beforeEach(() => {
     esArchiverResetKibana();
+    login();
 
     createRule(getNewRule({ name: 'Another rule' }));
 
@@ -67,11 +68,6 @@ describe('Duplicate List', () => {
     createExceptionList(getExceptionList1(), getExceptionList1().list_id).as(
       'exceptionListResponse'
     );
-  });
-  beforeEach(() => {
-    esArchiverResetKibana();
-    login();
-
     // Create exception list associated with a rule
     createExceptionList(getExceptionList2(), getExceptionList2().list_id);
 
@@ -111,7 +107,6 @@ describe('Duplicate List', () => {
       ],
       expire_time: futureDate,
     });
-
     visitWithoutDateRange(EXCEPTIONS_URL);
     waitForExceptionsTableToBeLoaded();
   });

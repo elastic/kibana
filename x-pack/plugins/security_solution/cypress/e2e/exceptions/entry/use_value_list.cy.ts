@@ -18,7 +18,7 @@ import {
 } from '../../../tasks/rule_details';
 import { VALUE_LISTS_TABLE, VALUE_LISTS_ROW } from '../../../screens/lists';
 import { getNewRule } from '../../../objects/rule';
-import { deleteAlertsAndRules } from '../../../tasks/common';
+import { cleanKibana } from '../../../tasks/common';
 import { login, visitWithoutDateRange } from '../../../tasks/login';
 import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../../urls/navigation';
 import {
@@ -30,6 +30,7 @@ import {
   uploadValueList,
   openValueListsModal,
   deleteValueListsFile,
+  closeValueListsModal,
 } from '../../../tasks/lists';
 import { createRule } from '../../../tasks/api_calls/rules';
 import { esArchiverLoad, esArchiverUnload } from '../../../tasks/es_archiver';
@@ -51,9 +52,10 @@ const goToRulesAndOpenValueListModal = () => {
 
 describe('Use Value list in exception entry', () => {
   before(() => {
+    cleanKibana();
     login();
     esArchiverLoad('exceptions');
-    deleteAlertsAndRules();
+    // deleteAlertsAndRules();
     createRule({
       ...getNewRule(),
       query: 'user.name:*',
@@ -89,6 +91,7 @@ describe('Use Value list in exception entry', () => {
         expect($row.text()).to.contain(listName);
         expect($row.text()).to.contain('Keywords');
       });
+    closeValueListsModal();
     goToRuleDetails();
     goToExceptionsTab();
 

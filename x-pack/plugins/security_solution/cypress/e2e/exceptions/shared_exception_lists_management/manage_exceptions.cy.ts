@@ -46,11 +46,12 @@ describe('Add, edit and delete exception', () => {
   before(() => {
     esArchiverResetKibana();
     esArchiverLoad('exceptions');
-    login();
+
     createRule(getNewRule());
   });
 
   beforeEach(() => {
+    login();
     visitWithoutDateRange(EXCEPTIONS_URL);
     waitForExceptionsTableToBeLoaded();
   });

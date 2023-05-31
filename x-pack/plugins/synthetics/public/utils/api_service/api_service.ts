@@ -115,8 +115,9 @@ class ApiService {
     return response;
   }
 
-  public async delete<T>(apiUrl: string) {
-    const response = await this._http!.delete<T>(apiUrl);
+  public async delete<T>(apiUrl: string, params?: HttpFetchQuery) {
+    const response = await this._http!.delete<T>({ path: apiUrl, query: params });
+
     if (response instanceof Error) {
       throw response;
     }

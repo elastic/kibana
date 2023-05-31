@@ -97,17 +97,16 @@ describe.skip('Exceptions flyout', { testIsolation: false }, () => {
         })
       )
     );
+    login();
+    visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
   });
 
   beforeEach(() => {
+    login();
     visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
     goToRuleDetails();
     cy.get(RULE_STATUS).should('have.text', '—');
     goToExceptionsTab();
-  });
-
-  afterEach(() => {
-    closeExceptionBuilderFlyout();
   });
 
   after(() => {
@@ -247,7 +246,8 @@ describe.skip('Exceptions flyout', { testIsolation: false }, () => {
     addExceptionEntryFieldValueOfItemX('name{enter}', 1, 3);
     // This button will now read `Add non-nested button`
     cy.get(ADD_NESTED_BTN).scrollIntoView();
-    cy.get(ADD_NESTED_BTN).focus().click();
+    cy.get(ADD_NESTED_BTN).focus();
+    cy.get(ADD_NESTED_BTN).click();
     addExceptionEntryFieldValueOfItemX('@timestamp', 1, 4);
 
     // should have only deleted `user.id`

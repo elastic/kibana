@@ -5,20 +5,19 @@
  * 2.0.
  */
 
-import { TOASTER, TOASTER_BODY } from '../../../../screens/alerts_detection_rules';
 import {
   IMPORT_SHARED_EXCEPTION_LISTS_CLOSE_BTN,
   EXCEPTIONS_TABLE_SHOWING_LISTS,
-  IMPORT_SHARED_EXCEPTION_LISTS_OVERWRITE_EXISTING_CHECKBOX,
-  IMPORT_SHARED_EXCEPTION_LISTS_CONFIRM_BTN,
-  IMPORT_SHARED_EXCEPTION_LISTS_OVERWRITE_CREATE_NEW_CHECKBOX,
 } from '../../../../screens/exceptions';
-import { closeErrorToast } from '../../../../tasks/alerts_detection_rules';
 import {
   waitForExceptionsTableToBeLoaded,
   importExceptionLists,
+  importExceptionListWithSelectingOverwriteExistingOption,
+  importExceptionListWithSelectingCreateNewOption,
+  validateImportExceptionListWentSuccessfully,
+  validateImportExceptionListFailedBecauseExistingListFound,
 } from '../../../../tasks/exceptions_table';
-import { visitWithoutDateRange } from '../../../../tasks/login';
+import { login, visitWithoutDateRange } from '../../../../tasks/login';
 import { EXCEPTIONS_URL } from '../../../../urls/navigation';
 import { esArchiverResetKibana } from '../../../../tasks/es_archiver';
 
@@ -28,17 +27,16 @@ describe('Import Lists', () => {
     esArchiverResetKibana();
   });
   beforeEach(() => {
+    login();
     visitWithoutDateRange(EXCEPTIONS_URL);
     waitForExceptionsTableToBeLoaded();
+    cy.intercept(/(\/api\/exception_lists\/_import)/).as('import');
   });
   it('Should import exception list successfully if the list does not exist', () => {
-    cy.intercept(/(\/api\/exception_lists\/_import)/).as('import');
     importExceptionLists(LIST_TO_IMPORT_FILENAME);
 
-    cy.wait('@import').then(({ response }) => {
-      cy.wrap(response?.statusCode).should('eql', 200);
-      cy.get(TOASTER).should('have.text', `Exception list imported`);
-    });
+    validateImportExceptionListWentSuccessfully();
+
     cy.get(IMPORT_SHARED_EXCEPTION_LISTS_CLOSE_BTN).click();
 
     // Validate table items count
@@ -46,77 +44,41 @@ describe('Import Lists', () => {
   });
 
   it('Should not import exception list if it exists', () => {
-    cy.intercept(/(\/api\/exception_lists\/_import)/).as('import');
     importExceptionLists(LIST_TO_IMPORT_FILENAME);
 
-    cy.wait('@import').then(({ response }) => {
-      cy.wrap(response?.statusCode).should('eql', 200);
-      cy.get(TOASTER).should('have.text', 'There was an error uploading the exception list.');
-      cy.get(TOASTER_BODY).should('contain', 'Found that list_id');
-    });
+    validateImportExceptionListFailedBecauseExistingListFound();
+
     // Validate table items count
     cy.contains(EXCEPTIONS_TABLE_SHOWING_LISTS, '1');
   });
 
   it('Should import exception list if it exists but the user selected overwrite checkbox', () => {
-    cy.intercept(/(\/api\/exception_lists\/_import)/).as('import');
     importExceptionLists(LIST_TO_IMPORT_FILENAME);
 
-    cy.wait('@import').then(({ response }) => {
-      cy.wrap(response?.statusCode).should('eql', 200);
-      cy.get(TOASTER).should('have.text', 'There was an error uploading the exception list.');
-      cy.get(TOASTER_BODY).should('contain', 'Found that list_id');
-    });
+    validateImportExceptionListFailedBecauseExistingListFound();
+
     // Validate table items count
     cy.contains(EXCEPTIONS_TABLE_SHOWING_LISTS, '1');
 
-    // { force: true }: The EuiCheckbox component's label covers the checkbox
-    cy.get(IMPORT_SHARED_EXCEPTION_LISTS_OVERWRITE_EXISTING_CHECKBOX).check({ force: true });
+    importExceptionListWithSelectingOverwriteExistingOption();
 
-    // Close the Error toast to be able to import again
-    closeErrorToast();
-
-    cy.intercept(/(\/api\/exception_lists\/_import)/).as('import');
-
-    // Import after selecting overwrite option
-    cy.get(IMPORT_SHARED_EXCEPTION_LISTS_CONFIRM_BTN).click();
-
-    cy.wait('@import').then(({ response }) => {
-      cy.wrap(response?.statusCode).should('eql', 200);
-      cy.get(TOASTER).should('have.text', `Exception list imported`);
-    });
+    validateImportExceptionListWentSuccessfully();
 
     // Validate table items count
     cy.contains(EXCEPTIONS_TABLE_SHOWING_LISTS, '1');
   });
 
   it('Should import exception list if it exists but the user selected create new checkbox', () => {
-    cy.intercept(/(\/api\/exception_lists\/_import)/).as('import');
     importExceptionLists(LIST_TO_IMPORT_FILENAME);
 
-    cy.wait('@import').then(({ response }) => {
-      cy.wrap(response?.statusCode).should('eql', 200);
-      cy.get(TOASTER).should('have.text', 'There was an error uploading the exception list.');
-      cy.get(TOASTER_BODY).should('contain', 'Found that list_id');
-    });
+    validateImportExceptionListFailedBecauseExistingListFound();
+
     // Validate table items count
     cy.contains(EXCEPTIONS_TABLE_SHOWING_LISTS, '1');
 
-    // { force: true }: The EuiCheckbox component's label covers the checkbox
-    cy.get(IMPORT_SHARED_EXCEPTION_LISTS_OVERWRITE_CREATE_NEW_CHECKBOX).check({ force: true });
+    importExceptionListWithSelectingCreateNewOption();
 
-    // Close the Error toast to be able to import again
-    closeErrorToast();
-
-    cy.intercept(/(\/api\/exception_lists\/_import)/).as('import');
-
-    // Import after selecting overwrite option
-    cy.get(IMPORT_SHARED_EXCEPTION_LISTS_CONFIRM_BTN).click();
-
-    cy.wait('@import').then(({ response }) => {
-      cy.wrap(response?.statusCode).should('eql', 200);
-      cy.get(TOASTER).should('have.text', `Exception list imported`);
-    });
+    validateImportExceptionListWentSuccessfully();
     // Validate table items count
     cy.contains(EXCEPTIONS_TABLE_SHOWING_LISTS, '2');
   });

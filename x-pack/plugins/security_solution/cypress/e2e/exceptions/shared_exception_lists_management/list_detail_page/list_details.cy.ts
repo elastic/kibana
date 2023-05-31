@@ -11,13 +11,13 @@ import { getNewRule } from '../../../../objects/rule';
 
 import { login, visitWithoutDateRange } from '../../../../tasks/login';
 import { createRule } from '../../../../tasks/api_calls/rules';
-import { exceptionsListDetailsUrl, EXCEPTIONS_URL } from '../../../../urls/navigation';
+import { EXCEPTIONS_URL, exceptionsListDetailsUrl } from '../../../../urls/navigation';
 import {
   createSharedExceptionList,
   editExceptionLisDetails,
-  waitForExceptionsTableToBeLoaded,
   linkSharedListToRulesFromListDetails,
   validateSharedListLinkedRules,
+  waitForExceptionListDetailToBeLoaded,
 } from '../../../../tasks/exceptions_table';
 import { createExceptionList } from '../../../../tasks/api_calls/exceptions';
 import {
@@ -65,13 +65,13 @@ describe('Exception list detail page', () => {
   });
 
   beforeEach(() => {
+    login();
     visitWithoutDateRange(EXCEPTIONS_URL);
-    waitForExceptionsTableToBeLoaded();
   });
 
   it('Should edit list details', () => {
     visitWithoutDateRange(exceptionsListDetailsUrl(getExceptionList1().list_id));
-
+    waitForExceptionListDetailToBeLoaded();
     // Check list details are loaded
     cy.get(EXCEPTIONS_LIST_MANAGEMENT_NAME).should('have.text', LIST_NAME);
     cy.get(EXCEPTIONS_LIST_MANAGEMENT_DESCRIPTION).should('have.text', LIST_DESCRIPTION);

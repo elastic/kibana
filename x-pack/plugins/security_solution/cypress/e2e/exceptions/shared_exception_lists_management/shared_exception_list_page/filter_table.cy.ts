@@ -62,6 +62,7 @@ describe('Filter Lists', () => {
   });
 
   beforeEach(() => {
+    login();
     visitWithoutDateRange(EXCEPTIONS_URL);
   });
 

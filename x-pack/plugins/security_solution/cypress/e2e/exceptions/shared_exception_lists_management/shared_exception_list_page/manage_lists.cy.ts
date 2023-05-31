@@ -8,7 +8,7 @@ import { getExceptionList, expectedExportedExceptionList } from '../../../../obj
 import { getNewRule } from '../../../../objects/rule';
 
 import { createRule } from '../../../../tasks/api_calls/rules';
-import { visitWithoutDateRange, waitForPageWithoutDateRange } from '../../../../tasks/login';
+import { login, visitWithoutDateRange, waitForPageWithoutDateRange } from '../../../../tasks/login';
 
 import { EXCEPTIONS_URL } from '../../../../urls/navigation';
 import {
@@ -74,6 +74,7 @@ describe('Manage lists from "Shared Exception Lists" page', () => {
     });
 
     beforeEach(() => {
+      login();
       visitWithoutDateRange(EXCEPTIONS_URL);
       waitForExceptionsTableToBeLoaded();
     });

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { INPUT_FILE } from '../screens/alerts_detection_rules';
+import { INPUT_FILE, TOASTER, TOASTER_BODY } from '../screens/alerts_detection_rules';
 import {
   EXCEPTIONS_TABLE,
   EXCEPTIONS_TABLE_SEARCH,
@@ -41,7 +41,10 @@ import {
   EXCEPTION_LIST_DETAIL_LINKED_TO_RULES_HEADER_MENU,
   EXCEPTION_LIST_DETAIL_LINKED_TO_RULES_HEADER_MENU_ITEM,
   MANAGE_EXCEPTION_CREATE_BUTTON_EXCEPTION,
+  IMPORT_SHARED_EXCEPTION_LISTS_OVERWRITE_CREATE_NEW_CHECKBOX,
+  IMPORT_SHARED_EXCEPTION_LISTS_OVERWRITE_EXISTING_CHECKBOX,
 } from '../screens/exceptions';
+import { closeErrorToast } from './alerts_detection_rules';
 import { assertExceptionItemsExists } from './exceptions';
 
 export const clearSearchSelection = () => {
@@ -55,7 +58,9 @@ export const expandExceptionActions = () => {
 export const importExceptionLists = (listsFile: string) => {
   cy.get(IMPORT_SHARED_EXCEPTION_LISTS_BTN).click();
   cy.get(INPUT_FILE).should('exist');
-  cy.get(INPUT_FILE).trigger('click').selectFile(listsFile).trigger('change');
+  cy.get(INPUT_FILE).trigger('click');
+  cy.get(INPUT_FILE).selectFile(listsFile);
+  cy.get(INPUT_FILE).trigger('change');
   cy.get(IMPORT_SHARED_EXCEPTION_LISTS_CONFIRM_BTN).click();
 };
 
@@ -107,7 +112,8 @@ export const searchForExceptionList = (searchText: string) => {
   if (Cypress.browser.name === 'firefox') {
     cy.get(EXCEPTIONS_TABLE_SEARCH).type(`${searchText}{enter}`, { force: true });
   } else {
-    cy.get(EXCEPTIONS_TABLE_SEARCH).type(searchText, { force: true }).trigger('search');
+    cy.get(EXCEPTIONS_TABLE_SEARCH).type(searchText, { force: true });
+    cy.get(EXCEPTIONS_TABLE_SEARCH).trigger('search');
   }
 };
 
@@ -187,16 +193,16 @@ export const editExceptionLisDetails = ({
     cy.get(EXCEPTIONS_LIST_MANAGEMENT_NAME).should('have.text', name.original);
     cy.get(EXCEPTIONS_LIST_MANAGEMENT_EDIT_MODAL_NAME_INPUT)
       .should('have.value', name.original)
-      .clear({ force: true })
-      .type(`${name.updated}`);
+      .clear({ force: true });
+    cy.get(EXCEPTIONS_LIST_MANAGEMENT_EDIT_MODAL_NAME_INPUT).type(`${name.updated}`);
     cy.get(EXCEPTIONS_LIST_MANAGEMENT_EDIT_MODAL_NAME_INPUT).should('have.value', name.updated);
   }
 
   if (description != null) {
     cy.get(EXCEPTIONS_LIST_MANAGEMENT_EDIT_MODAL_DESCRIPTION_INPUT)
       .should('have.value', description.original)
-      .clear({ force: true })
-      .should('not.have.value');
+      .clear({ force: true });
+    cy.get(EXCEPTIONS_LIST_MANAGEMENT_EDIT_MODAL_DESCRIPTION_INPUT).should('not.have.value');
     if (description.updated != null) {
       cy.get(EXCEPTIONS_LIST_MANAGEMENT_EDIT_MODAL_DESCRIPTION_INPUT).type(
         `${description.updated}`
@@ -239,4 +245,38 @@ export const addExceptionListFromSharedExceptionListHeaderMenu = () => {
   cy.get(MANAGE_EXCEPTION_CREATE_BUTTON_MENU).click();
   // Click on "Create exception item"
   cy.get(MANAGE_EXCEPTION_CREATE_BUTTON_EXCEPTION).click();
+};
+
+export const importExceptionListWithSelectingOverwriteExistingOption = () => {
+  // { force: true }: The EuiCheckbox component's label covers the checkbox
+  cy.get(IMPORT_SHARED_EXCEPTION_LISTS_OVERWRITE_EXISTING_CHECKBOX).check({ force: true });
+  // Close the Error toast to be able to import again
+  closeErrorToast();
+
+  // Import after selecting overwrite option
+  cy.get(IMPORT_SHARED_EXCEPTION_LISTS_CONFIRM_BTN).click();
+};
+
+export const importExceptionListWithSelectingCreateNewOption = () => {
+  // { force: true }: The EuiCheckbox component's label covers the checkbox
+  cy.get(IMPORT_SHARED_EXCEPTION_LISTS_OVERWRITE_CREATE_NEW_CHECKBOX).check({ force: true });
+  // Close the Error toast to be able to import again
+  closeErrorToast();
+
+  // Import after selecting overwrite option
+  cy.get(IMPORT_SHARED_EXCEPTION_LISTS_CONFIRM_BTN).click();
+};
+
+export const validateImportExceptionListWentSuccessfully = () => {
+  cy.wait('@import').then(({ response }) => {
+    cy.wrap(response?.statusCode).should('eql', 200);
+    cy.get(TOASTER).should('have.text', `Exception list imported`);
+  });
+};
+export const validateImportExceptionListFailedBecauseExistingListFound = () => {
+  cy.wait('@import').then(({ response }) => {
+    cy.wrap(response?.statusCode).should('eql', 200);
+    cy.get(TOASTER).should('have.text', 'There was an error uploading the exception list.');
+    cy.get(TOASTER_BODY).should('contain', 'Found that list_id');
+  });
 };

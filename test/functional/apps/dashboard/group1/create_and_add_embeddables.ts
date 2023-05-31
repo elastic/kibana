@@ -9,7 +9,6 @@
 import expect from '@kbn/expect';
 
 import { VisualizeConstants } from '@kbn/visualizations-plugin/common/constants';
-import { VISUALIZE_ENABLE_LABS_SETTING } from '@kbn/visualizations-plugin/common/constants';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
@@ -18,9 +17,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
   const kibanaServer = getService('kibanaServer');
   const dashboardAddPanel = getService('dashboardAddPanel');
-  const testSubjects = getService('testSubjects');
-  const dashboardVisualizations = getService('dashboardVisualizations');
-  const dashboardExpect = getService('dashboardExpect');
 
   describe('create and add embeddables', () => {
     before(async () => {
@@ -130,96 +126,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       after(async () => {
         await PageObjects.header.clickDashboard();
-      });
-    });
-
-    describe('visualize:enableLabs advanced setting', () => {
-      const LAB_VIS_NAME = 'Rendering Test: input control';
-
-      let experimentalTypes: string[] = [];
-
-      before(async () => {
-        // get the data-test-subj values for all experimental visualizations for later tests
-        await PageObjects.visualize.gotoVisualizationLandingPage();
-        await PageObjects.visualize.clickNewVisualization();
-        const experimentalTypeWrappers = await PageObjects.visualize.getExperimentalTypeLinks();
-        experimentalTypes = await Promise.all(
-          experimentalTypeWrappers.map((element) => element.getAttribute('data-test-subj'))
-        );
-      });
-
-      it('should display lab visualizations in add panel', async () => {
-        await PageObjects.common.navigateToApp('dashboard');
-        await PageObjects.dashboard.clickNewDashboard();
-        const exists = await dashboardAddPanel.panelAddLinkExists(LAB_VIS_NAME);
-        await dashboardAddPanel.closeAddPanel();
-        expect(exists).to.be(true);
-      });
-
-      it('should display lab visualizations in editor menu', async () => {
-        await dashboardAddPanel.clickEditorMenuButton();
-        for (const dataTestSubj of experimentalTypes) {
-          await testSubjects.existOrFail(dataTestSubj);
-        }
-      });
-
-      describe('is false', () => {
-        before(async () => {
-          await PageObjects.header.clickStackManagement();
-          await PageObjects.settings.clickKibanaSettings();
-          await PageObjects.settings.toggleAdvancedSettingCheckbox(VISUALIZE_ENABLE_LABS_SETTING);
-        });
-
-        it('should not display lab visualizations in add panel', async () => {
-          await PageObjects.common.navigateToApp('dashboard');
-          await PageObjects.dashboard.clickNewDashboard();
-
-          const exists = await dashboardAddPanel.panelAddLinkExists(LAB_VIS_NAME);
-          await dashboardAddPanel.closeAddPanel();
-          expect(exists).to.be(false);
-        });
-
-        it('should not display lab visualizations in editor menu', async () => {
-          await dashboardAddPanel.clickEditorMenuButton();
-          for (const dataTestSubj of experimentalTypes) {
-            expect(await testSubjects.exists(dataTestSubj)).to.be(false);
-          }
-        });
-
-        after(async () => {
-          await PageObjects.header.clickStackManagement();
-          await PageObjects.settings.clickKibanaSettings();
-          await PageObjects.settings.clearAdvancedSettings(VISUALIZE_ENABLE_LABS_SETTING);
-          await PageObjects.header.clickDashboard();
-        });
-      });
-
-      describe('adds metric and markdown by value to a new dashboard', () => {
-        before(async () => {
-          await PageObjects.common.navigateToApp('dashboard');
-          await PageObjects.dashboard.preserveCrossAppState();
-          await PageObjects.dashboard.clickNewDashboard();
-        });
-
-        it('adding a metric visualization', async function () {
-          const originalPanelCount = await PageObjects.dashboard.getPanelCount();
-          expect(originalPanelCount).to.eql(0);
-          await dashboardVisualizations.createAndEmbedMetric('Embedding Vis Test');
-          await dashboardExpect.metricValuesExist(['0']);
-          const panelCount = await PageObjects.dashboard.getPanelCount();
-          expect(panelCount).to.eql(1);
-        });
-        it('adding a markdown', async function () {
-          const originalPanelCount = await PageObjects.dashboard.getPanelCount();
-          expect(originalPanelCount).to.eql(1);
-          await dashboardVisualizations.createAndEmbedMarkdown({
-            name: 'Embedding Markdown Test',
-            markdown: 'Nice to meet you, markdown is my name',
-          });
-          await dashboardExpect.markdownWithValuesExists(['Nice to meet you, markdown is my name']);
-          const panelCount = await PageObjects.dashboard.getPanelCount();
-          expect(panelCount).to.eql(2);
-        });
       });
     });
   });
