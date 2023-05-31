@@ -58,8 +58,6 @@ export { ConnectorTypeId as WebhookConnectorTypeId } from './webhook';
 export type { ActionParamsType as WebhookActionParams } from './webhook';
 export { ConnectorTypeId as XmattersConnectorTypeId } from './xmatters';
 export type { ActionParamsType as XmattersActionParams } from './xmatters';
-export { ConnectorTypeId as D3SecurityConnectorTypeId } from './d3security';
-export type { ActionParamsType as D3SecurityActionParams } from './d3security';
 
 export type {
   OpsgenieActionConfig,
@@ -99,9 +97,9 @@ export function registerConnectorTypes({
   actions.registerType(getResilientConnectorType());
   actions.registerType(getTeamsConnectorType());
   actions.registerType(getTorqConnectorType());
-  actions.registerType(getD3SecurityConnectorType());
 
   actions.registerSubActionConnectorType(getOpsgenieConnectorType());
   actions.registerSubActionConnectorType(getTinesConnectorType());
   actions.registerSubActionConnectorType(getGenerativeAiConnectorType());
+  actions.registerSubActionConnectorType(getD3SecurityConnectorType());
 }

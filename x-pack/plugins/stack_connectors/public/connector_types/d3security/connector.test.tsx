@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
-import D3SecurityConnectorFields from './d3security_connectors';
+import D3SecurityConnectorFields from './connector';
 import { ConnectorFormTestProvider } from '../lib/test_utils';
 import { act, render, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';

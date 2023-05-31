@@ -7,15 +7,17 @@
 
 import { lazy } from 'react';
 import { i18n } from '@kbn/i18n';
-import {
-  ActionTypeModel as ConnectorTypeModel,
-  GenericValidationResult,
-} from '@kbn/triggers-actions-ui-plugin/public/types';
-import { D3ActionParams, D3Config, D3Secrets } from '../types';
-
-export function getConnectorType(): ConnectorTypeModel<D3Config, D3Secrets, D3ActionParams> {
+import { GenericValidationResult } from '@kbn/triggers-actions-ui-plugin/public/types';
+import { SUB_ACTION } from '../../../common/gen_ai/constants';
+import { D3SecurityActionParams, D3SecurityConnector } from './types';
+import { D3_SECURITY_CONNECTOR_ID } from '../../../common/d3security/constants';
+interface ValidationErrors {
+  subAction: string[];
+  body: string[];
+}
+export function getConnectorType(): D3SecurityConnector {
   return {
-    id: '.d3security',
+    id: D3_SECURITY_CONNECTOR_ID,
     iconClass: lazy(() => import('./logo')),
     selectMessage: i18n.translate('xpack.stackConnectors.components.d3security.selectMessageText', {
       defaultMessage: 'Create event or trigger playbook workflow actions in D3 SOAR.',
@@ -27,22 +29,27 @@ export function getConnectorType(): ConnectorTypeModel<D3Config, D3Secrets, D3Ac
       }
     ),
     validateParams: async (
-      actionParams: D3ActionParams
-    ): Promise<GenericValidationResult<D3ActionParams>> => {
-      const translations = await import('./translations');
-      const errors = {
-        body: new Array<string>(),
-        severity: new Array<string>(),
-        eventType: new Array<string>(),
+      actionParams: D3SecurityActionParams
+    ): Promise<GenericValidationResult<ValidationErrors>> => {
+      const errors: ValidationErrors = {
+        body: [],
+        subAction: [],
       };
-      const validationResult = { errors };
-      validationResult.errors = errors;
-      if (!actionParams.body?.length) {
+      const { subAction, subActionParams } = actionParams;
+      const translations = await import('./translations');
+
+      if (!subActionParams.body?.length) {
         errors.body.push(translations.BODY_REQUIRED);
       }
-      return validationResult;
+      // The internal "subAction" param should always be valid, ensure it is only if "subActionParams" are valid
+      if (!subAction) {
+        errors.subAction.push(translations.ACTION_REQUIRED);
+      } else if (subAction !== SUB_ACTION.RUN && subAction !== SUB_ACTION.TEST) {
+        errors.subAction.push(translations.INVALID_ACTION);
+      }
+      return { errors };
     },
-    actionConnectorFields: lazy(() => import('./d3security_connectors')),
-    actionParamsFields: lazy(() => import('./d3security_params')),
+    actionConnectorFields: lazy(() => import('./connector')),
+    actionParamsFields: lazy(() => import('./params')),
   };
 }

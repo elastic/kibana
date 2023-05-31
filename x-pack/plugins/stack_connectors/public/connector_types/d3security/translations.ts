@@ -25,3 +25,17 @@ export const BODY_REQUIRED = i18n.translate(
     defaultMessage: 'Body is required.',
   }
 );
+
+export const ACTION_REQUIRED = i18n.translate(
+  'xpack.stackConnectors.components.d3security.requiredActionText',
+  {
+    defaultMessage: 'Action is required.',
+  }
+);
+
+export const INVALID_ACTION = i18n.translate(
+  'xpack.stackConnectors.components.d3security.invalidActionText',
+  {
+    defaultMessage: 'Invalid action name.',
+  }
+);

@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
-import D3ParamsFields from './d3security_params';
+import D3ParamsFields from './params';
 import { MockCodeEditor } from '@kbn/triggers-actions-ui-plugin/public/application/code_editor.mock';
 
 const kibanaReactPath = '../../../../../../src/plugins/kibana_react/public';

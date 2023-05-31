@@ -5,22 +5,42 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public';
+import { ActionConnectorMode, ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public';
 import { JsonEditorWithMessageVariables } from '@kbn/triggers-actions-ui-plugin/public';
 import { EuiFormRow } from '@elastic/eui';
 import { EuiFieldText } from '@elastic/eui';
-import { D3ActionParams } from '../types';
+import { D3SecurityRunActionParams } from '../../../common/d3security/types';
+import { SUB_ACTION } from '../../../common/d3security/constants';
+import { D3SecurityActionParams } from './types';
 
-const D3ParamsFields: React.FunctionComponent<ActionParamsProps<D3ActionParams>> = ({
+const D3ParamsFields: React.FunctionComponent<ActionParamsProps<D3SecurityActionParams>> = ({
   actionParams,
   editAction,
   index,
   messageVariables,
+  executionMode,
   errors,
 }) => {
-  const { body, severity, eventType } = actionParams;
+  const { subAction, subActionParams } = actionParams;
+  const { body, severity, eventType } = subActionParams ?? {};
+
+  const isTest = useMemo(() => executionMode === ActionConnectorMode.Test, [executionMode]);
+
+  useEffect(() => {
+    if (!subAction) {
+      editAction('subAction', isTest ? SUB_ACTION.TEST : SUB_ACTION.RUN, index);
+    }
+  }, [editAction, index, isTest, subAction]);
+
+  const editSubActionParams = useCallback(
+    (params: D3SecurityRunActionParams) => {
+      editAction('subActionParams', { ...subActionParams, ...params }, index);
+    },
+    [editAction, index, subActionParams]
+  );
+
   return (
     <>
       <EuiFormRow
@@ -35,7 +55,9 @@ const D3ParamsFields: React.FunctionComponent<ActionParamsProps<D3ActionParams>>
           data-test-subj="eventTypeInput"
           name="eventType"
           value={eventType}
-          onChange={(e) => editAction('eventType', e.target.value, index)}
+          onChange={(e) => {
+            editSubActionParams({ eventType: e.target.value });
+          }}
           isInvalid={false}
           fullWidth={true}
         />
@@ -52,7 +74,9 @@ const D3ParamsFields: React.FunctionComponent<ActionParamsProps<D3ActionParams>>
           data-test-subj="severityInput"
           name="severity"
           value={severity}
-          onChange={(e) => editAction('severity', e.target.value, index)}
+          onChange={(e) => {
+            editSubActionParams({ severity: e.target.value });
+          }}
           isInvalid={false}
           fullWidth={true}
         />
@@ -73,11 +97,11 @@ const D3ParamsFields: React.FunctionComponent<ActionParamsProps<D3ActionParams>>
         )}
         errors={errors.body as string[]}
         onDocumentsChange={(json: string) => {
-          editAction('body', json, index);
+          editSubActionParams({ body: json });
         }}
         onBlur={() => {
           if (!body) {
-            editAction('body', '', index);
+            editSubActionParams({ body: '' });
           }
         }}
       />
