@@ -417,6 +417,8 @@ export interface RegistryVarsEntry {
   };
 }
 export interface InstallSavedObject {
+  type?: string;
+  id?: string;
   attributes?: Installation;
 }
 
@@ -484,6 +486,8 @@ export interface Installation {
     data_stream: string;
     features: Partial<Record<ExperimentalIndexingFeature, boolean>>;
   }>;
+  internal?: boolean;
+  removable?: boolean;
 }
 export interface PackageUsageStats {
   agent_policy_count: number;
