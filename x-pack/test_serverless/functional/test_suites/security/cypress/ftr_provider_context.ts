@@ -7,8 +7,8 @@
 
 import { GenericFtrProviderContext, GenericFtrService } from '@kbn/test';
 
-import { services as xpackFunctionalServices } from '../../../test/functional/services';
-import { services as svlSharedServices } from '../../shared/services';
+import { services as xpackFunctionalServices } from '../../../../../test/functional/services';
+import { services as svlSharedServices } from '../../../../shared/services';
 
 export const services = {
   ...xpackFunctionalServices,

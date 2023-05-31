@@ -12,7 +12,9 @@ import { FtrProviderContext } from './ftr_provider_context';
 
 export type { FtrProviderContext } from './ftr_provider_context';
 
-export async function SecuritySolutionServerlessVisualTestRunner({ getService }: FtrProviderContext) {
+export async function SecuritySolutionServerlessVisualTestRunner({
+  getService,
+}: FtrProviderContext) {
   const log = getService('log');
 
   await withProcRunner(log, async (procs) => {
@@ -28,7 +30,9 @@ export async function SecuritySolutionServerlessVisualTestRunner({ getService }:
   });
 }
 
-export async function SecuritySolutionServerlessHeadlessTestRunner({ getService }: FtrProviderContext) {
+export async function SecuritySolutionServerlessHeadlessTestRunner({
+  getService,
+}: FtrProviderContext) {
   const log = getService('log');
 
   await withProcRunner(log, async (procs) => {

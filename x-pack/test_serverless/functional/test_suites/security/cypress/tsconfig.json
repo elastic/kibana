@@ -1,5 +1,5 @@
 {
-  "extends": "../../tsconfig.json",
+  "extends": "../../../../../../tsconfig.base.json",
   "include": [
     "**/*"
   ],
@@ -17,6 +17,10 @@
     ],
   },
   "kbn_references": [
-    "@kbn/cypress-config"
+    "@kbn/cypress-config",
+    {
+      "path": "../tsconfig.json",
+      "force": true
+    },
   ]
 }
