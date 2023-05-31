@@ -10,11 +10,13 @@ import Fs from 'fs';
 import Fsp from 'fs/promises';
 import Path from 'path';
 
+import apm from 'elastic-apm-node';
+import { Project } from 'ts-morph';
+
 import { run } from '@kbn/dev-cli-runner';
 import { createFlagError } from '@kbn/dev-cli-errors';
 import { CiStatsReporter } from '@kbn/ci-stats-reporter';
 import { REPO_ROOT } from '@kbn/repo-info';
-import { Project } from 'ts-morph';
 import { initApm } from '@kbn/apm-config-loader';
 
 import { writePluginDocs } from './mdx/write_plugin_mdx_docs';
@@ -37,7 +39,7 @@ function isStringArray(arr: unknown | string[]): arr is string[] {
 }
 
 const rootDir = Path.join(__dirname, '../../..');
-const apm = initApm(process.argv, rootDir, false, 'build_api_docs_cli');
+initApm(process.argv, rootDir, false, 'build_api_docs_cli');
 
 async function endTransactionWithFailure(transaction: any) {
   transaction?.setOutcome('failure');

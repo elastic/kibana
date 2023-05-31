@@ -35,5 +35,5 @@ export const initApm = (
     return payload;
   });
 
-  return apm.start(apmConfig);
+  apm.start(apmConfig);
 };
