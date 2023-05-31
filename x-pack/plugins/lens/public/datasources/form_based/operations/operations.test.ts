@@ -464,11 +464,6 @@ describe('getOperationTypesForField', () => {
                 "type": "managedReference",
                 "usedInMath": true,
               },
-              Object {
-                "operationType": "constant",
-                "type": "managedReference",
-                "usedInMath": true,
-              },
             ],
           },
           Object {
