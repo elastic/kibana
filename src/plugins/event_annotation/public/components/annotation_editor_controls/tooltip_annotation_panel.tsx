@@ -98,7 +98,7 @@ export function TooltipSection({
       onClick={() => {
         handleInputChange([...localValues, { id: generateId(), value: undefined, isNew: true }]);
       }}
-      label={i18n.translate('xpack.lens.xyChart.annotation.tooltip.addField', {
+      label={i18n.translate('eventAnnotation.xyChart.annotation.tooltip.addField', {
         defaultMessage: 'Add field',
       })}
       isDisabled={localValues.length > MAX_TOOLTIP_FIELDS_SIZE}
@@ -115,7 +115,7 @@ export function TooltipSection({
             className="lnsConfigPanelAnnotations__noFieldsPrompt"
           >
             <EuiText color="subdued" size="s" textAlign="center">
-              {i18n.translate('xpack.lens.xyChart.annotation.tooltip.noFields', {
+              {i18n.translate('eventAnnotation.xyChart.annotation.tooltip.noFields', {
                 defaultMessage: 'None selected',
               })}
             </EuiText>
@@ -170,7 +170,7 @@ export function TooltipSection({
                 handleInputChange(arrayRef.filter((_, i) => i !== index));
               }}
               removeTitle={i18n.translate(
-                'xpack.lens.xyChart.annotation.tooltip.deleteButtonLabel',
+                'eventAnnotation.xyChart.annotation.tooltip.deleteButtonLabel',
                 {
                   defaultMessage: 'Delete',
                 }

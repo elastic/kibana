@@ -36,7 +36,7 @@ export const ConfigPanelManualAnnotation = ({
           <ConfigPanelRangeDatePicker
             dataTestSubj="lns-xyAnnotation-fromTime"
             calendarClassName={calendarClassName}
-            prependLabel={i18n.translate('xpack.lens.xyChart.annotationDate.from', {
+            prependLabel={i18n.translate('eventAnnotation.xyChart.annotationDate.from', {
               defaultMessage: 'From',
             })}
             value={moment(annotation?.key.timestamp)}
@@ -63,14 +63,14 @@ export const ConfigPanelManualAnnotation = ({
                 }
               }
             }}
-            label={i18n.translate('xpack.lens.xyChart.annotationDate', {
+            label={i18n.translate('eventAnnotation.xyChart.annotationDate', {
               defaultMessage: 'Annotation date',
             })}
           />
           <ConfigPanelRangeDatePicker
             dataTestSubj="lns-xyAnnotation-toTime"
             calendarClassName={calendarClassName}
-            prependLabel={i18n.translate('xpack.lens.xyChart.annotationDate.to', {
+            prependLabel={i18n.translate('eventAnnotation.xyChart.annotationDate.to', {
               defaultMessage: 'To',
             })}
             value={moment(annotation?.key.endTimestamp)}
@@ -103,7 +103,7 @@ export const ConfigPanelManualAnnotation = ({
         <ConfigPanelRangeDatePicker
           dataTestSubj="lns-xyAnnotation-time"
           calendarClassName={calendarClassName}
-          label={i18n.translate('xpack.lens.xyChart.annotationDate', {
+          label={i18n.translate('eventAnnotation.xyChart.annotationDate', {
             defaultMessage: 'Annotation date',
           })}
           value={moment(annotation?.key.timestamp)}

@@ -23,12 +23,15 @@ export const defaultAnnotationColor = euiLightVars.euiColorAccent;
 // Do not compute it live as dependencies will add tens of Kbs to the plugin
 export const defaultAnnotationRangeColor = `#F04E981A`; // defaultAnnotationColor with opacity 0.1
 
-export const defaultAnnotationLabel = i18n.translate('xpack.lens.xyChart.defaultAnnotationLabel', {
-  defaultMessage: 'Event',
-});
+export const defaultAnnotationLabel = i18n.translate(
+  'eventAnnotation.xyChart.defaultAnnotationLabel',
+  {
+    defaultMessage: 'Event',
+  }
+);
 
 export const defaultRangeAnnotationLabel = i18n.translate(
-  'xpack.lens.xyChart.defaultRangeAnnotationLabel',
+  'eventAnnotation.xyChart.defaultRangeAnnotationLabel',
   {
     defaultMessage: 'Event range',
   }
