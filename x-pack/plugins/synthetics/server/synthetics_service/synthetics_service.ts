@@ -611,7 +611,7 @@ export class SyntheticsService {
             paramsBySpace[namespace] = Object.create(null);
           }
           paramsBySpace[namespace][param.attributes.key] = hideParams
-            ? '*******'
+            ? '"*******"'
             : param.attributes.value;
         });
       });
