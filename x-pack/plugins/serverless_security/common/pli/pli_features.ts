@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AppFeatureKey, AppFeatureKeys } from '@kbn/security-solution-plugin/common';
+import type { AppFeatureKeys } from '@kbn/security-solution-plugin/common';
 import { SecurityProductLineId } from '../config';
 import { PLI_APP_FEATURES } from './pli_config';
 
@@ -16,10 +16,8 @@ export const getProductAppFeatures = (productLineIds: SecurityProductLineId[]): 
   productLineIds.reduce<AppFeatureKeys>((appFeatures, productLineId) => {
     const productAppFeatures = PLI_APP_FEATURES[productLineId];
 
-    Object.entries(productAppFeatures).forEach(([featureName, enabled]) => {
-      if (enabled) {
-        appFeatures[featureName as AppFeatureKey] = true;
-      }
+    productAppFeatures.forEach((featureName) => {
+      appFeatures[featureName] = true;
     });
 
     return appFeatures;
