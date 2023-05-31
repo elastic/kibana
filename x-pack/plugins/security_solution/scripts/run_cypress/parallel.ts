@@ -365,7 +365,7 @@ export const cli = () => {
           });
           return result;
         },
-        { concurrency: !isOpen ? 1 : 1 }
+        { concurrency: !isOpen ? 3 : 1 }
       ).then((results) => {
         renderSummaryTable(results as CypressCommandLine.CypressRunResult[]);
         const hasFailedTests = _.some(
