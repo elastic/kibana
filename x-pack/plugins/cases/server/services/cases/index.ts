@@ -53,6 +53,7 @@ import {
   CaseTransformedAttributesRt,
   CasePersistedStatus,
   getPartialCaseTransformedAttributesRt,
+  OwnerRt,
 } from '../../common/types/case';
 import type {
   GetCaseIdsByAlertIdArgs,
@@ -136,7 +137,15 @@ export class CasesService {
         aggs: this.buildCaseIdsAggs(MAX_DOCS_PER_PAGE),
         filter: combinedFilter,
       });
-      return response;
+
+      const owners: Array<SavedObjectsFindResult<{ owner: string }>> = [];
+      for (const so of response.saved_objects) {
+        const validatedAttributes = decodeOrThrow(OwnerRt)(so.attributes);
+
+        owners.push(Object.assign(so, { attributes: validatedAttributes }));
+      }
+
+      return Object.assign(response, { saved_objects: owners });
     } catch (error) {
       this.log.error(`Error on GET all cases for alert id ${alertId}: ${error}`);
       throw error;
@@ -201,7 +210,7 @@ export class CasesService {
     [status in CaseStatuses]: number;
   }> {
     const cases = await this.unsecuredSavedObjectsClient.find<
-      CasePersistedAttributes,
+      unknown,
       {
         statuses: {
           buckets: Array<{
@@ -461,7 +470,7 @@ export class CasesService {
       this.log.debug(`Attempting to GET all reporters`);
 
       const results = await this.unsecuredSavedObjectsClient.find<
-        CasePersistedAttributes,
+        unknown,
         {
           reporters: {
             buckets: Array<{
@@ -523,7 +532,7 @@ export class CasesService {
       this.log.debug(`Attempting to GET all cases`);
 
       const results = await this.unsecuredSavedObjectsClient.find<
-        CasePersistedAttributes,
+        unknown,
         { tags: { buckets: Array<{ key: string }> } }
       >({
         type: CASE_SAVED_OBJECT,

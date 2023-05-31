@@ -1,0 +1,70 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`UserActionsService: Finder Decoding: find strips out excess attributes 1`] = `
+Object {
+  "page": 1,
+  "per_page": 1,
+  "saved_objects": Array [
+    Object {
+      "attributes": Object {
+        "action": "create",
+        "comment_id": null,
+        "created_at": "abc",
+        "created_by": Object {
+          "email": "a",
+          "full_name": "abc",
+          "username": "b",
+        },
+        "owner": "securitySolution",
+        "payload": Object {
+          "title": "a new title",
+        },
+        "type": "title",
+      },
+      "id": "100",
+      "references": Array [
+        Object {
+          "id": "1",
+          "name": "associated-cases",
+          "type": "cases",
+        },
+      ],
+      "score": 0,
+      "type": "cases-user-actions",
+    },
+  ],
+  "total": 1,
+}
+`;
+
+exports[`UserActionsService: Finder Decoding: findStatusChanges strips out excess attributes 1`] = `
+Array [
+  Object {
+    "attributes": Object {
+      "action": "create",
+      "comment_id": null,
+      "created_at": "abc",
+      "created_by": Object {
+        "email": "a",
+        "full_name": "abc",
+        "username": "b",
+      },
+      "owner": "securitySolution",
+      "payload": Object {
+        "title": "a new title",
+      },
+      "type": "title",
+    },
+    "id": "100",
+    "references": Array [
+      Object {
+        "id": "1",
+        "name": "associated-cases",
+        "type": "cases",
+      },
+    ],
+    "score": 0,
+    "type": "cases-user-actions",
+  },
+]
+`;

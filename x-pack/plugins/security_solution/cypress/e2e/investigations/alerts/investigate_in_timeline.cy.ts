@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { closeTimeline } from '../../../tasks/timeline';
 import { getNewRule } from '../../../objects/rule';
 import { PROVIDER_BADGE, QUERY_TAB_BUTTON, TIMELINE_TITLE } from '../../../screens/timeline';
 import { FILTER_BADGE } from '../../../screens/alerts';
@@ -27,18 +26,17 @@ import {
 } from '../../../screens/alerts_details';
 import { verifyInsightCount } from '../../../tasks/alerts_details';
 
-describe('Investigate in timeline', { testIsolation: false }, () => {
+describe('Investigate in timeline', () => {
   before(() => {
     cleanKibana();
-    login();
     createRule(getNewRule());
-    visit(ALERTS_URL);
-    waitForAlertsToPopulate();
   });
 
   describe('From alerts table', () => {
-    after(() => {
-      closeTimeline();
+    beforeEach(() => {
+      login();
+      visit(ALERTS_URL);
+      waitForAlertsToPopulate();
     });
 
     it('should open new timeline from alerts table', () => {
@@ -47,19 +45,17 @@ describe('Investigate in timeline', { testIsolation: false }, () => {
         .first()
         .invoke('text')
         .then((eventId) => {
-          investigateFirstAlertInTimeline();
           cy.get(PROVIDER_BADGE).filter(':visible').should('have.text', eventId);
         });
     });
   });
 
   describe('From alerts details flyout', () => {
-    before(() => {
+    beforeEach(() => {
+      login();
+      visit(ALERTS_URL);
+      waitForAlertsToPopulate();
       expandFirstAlert();
-    });
-
-    afterEach(() => {
-      closeTimeline();
     });
 
     it('should open a new timeline from a prevalence field', () => {
@@ -68,12 +64,11 @@ describe('Investigate in timeline', { testIsolation: false }, () => {
 
       // Click on the last button that lets us investigate in timeline.
       // We expect this to be the `process.args` row.
-      const investigateButton = cy
-        .get(ALERT_FLYOUT)
+      cy.get(ALERT_FLYOUT)
         .find(SUMMARY_VIEW_INVESTIGATE_IN_TIMELINE_BUTTON)
-        .last();
-      investigateButton.should('have.text', alertCount);
-      investigateButton.click();
+        .last()
+        .should('have.text', alertCount)
+        .click();
 
       // Make sure a new timeline is created and opened
       cy.get(TIMELINE_TITLE).should('have.text', 'Untitled timeline');

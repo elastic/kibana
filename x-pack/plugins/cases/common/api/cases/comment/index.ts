@@ -304,13 +304,6 @@ export const FindCommentsQueryParamsRt = rt.exact(
   })
 );
 
-export const FindCommentsArgsRt = rt.intersection([
-  rt.strict({
-    caseID: rt.string,
-  }),
-  rt.strict({ queryParams: rt.union([FindCommentsQueryParamsRt, rt.undefined]) }),
-]);
-
 export const BulkCreateCommentRequestRt = rt.array(CommentRequestRt);
 
 export const BulkGetAttachmentsRequestRt = rt.strict({
