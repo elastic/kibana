@@ -296,6 +296,7 @@ export const ControlEditor = ({
                 description={ControlGroupStrings.manageControl.controlTypeSettings.getFormGroupDescription(
                   factory.getDisplayName()
                 )}
+                data-test-subj="control-editor-custom-settings"
               >
                 <CustomSettings
                   onChange={(settings) => setCustomSettings(settings)}

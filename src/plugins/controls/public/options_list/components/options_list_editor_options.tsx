@@ -146,7 +146,10 @@ export const OptionsListEditorOptions = ({
       ) : (
         allowExpensiveQueries &&
         fieldType !== 'ip' && (
-          <EuiFormRow label={OptionsListStrings.editor.getSearchOptionsTitle()}>
+          <EuiFormRow
+            label={OptionsListStrings.editor.getSearchOptionsTitle()}
+            data-test-subj="optionsListControl__searchOptionsSetting"
+          >
             <EuiRadioGroup
               options={searchOptions}
               idSelected={state.searchTechnique ?? 'prefix'}
