@@ -9,7 +9,7 @@ import { Action } from '@elastic/eui/src/components/basic_table/action_types';
 import { i18n } from '@kbn/i18n';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { EuiToolTip } from '@elastic/eui';
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useEffect, useState } from 'react';
 import {
   BUILT_IN_MODEL_TAG,
   DEPLOYMENT_STATE,
@@ -51,8 +51,11 @@ export function useModelActions({
       overlays,
       theme,
       docLinks,
+      mlServices: { mlApiServices },
     },
   } = useMlKibana();
+
+  const [canManageIngestPipelines, setCanManageIngestPipelines] = useState(false);
 
   const startModelDeploymentDocUrl = docLinks.links.ml.startTrainedModelsDeployment;
 
@@ -68,7 +71,22 @@ export function useModelActions({
   const canTestTrainedModels = capabilities.ml.canTestTrainedModels as boolean;
   const canDeleteTrainedModels = capabilities.ml.canDeleteTrainedModels as boolean;
 
-  const canManageIngestPipelines = capabilities.management.ingest.ingest_pipelines;
+  useEffect(() => {
+    let isMounted = true;
+    mlApiServices
+      .hasPrivileges({
+        cluster: ['manage_ingest_pipelines'],
+      })
+      .then((result) => {
+        const canManagePipelines = result.cluster.manage_ingest_pipelines;
+        if (isMounted) {
+          setCanManageIngestPipelines(canManagePipelines);
+        }
+      });
+    return () => {
+      isMounted = false;
+    };
+  }, [mlApiServices]);
 
   const getUserConfirmation = useMemo(
     () => getUserConfirmationProvider(overlays, theme),
@@ -434,7 +452,6 @@ export function useModelActions({
           !item.putModelConfig &&
           (Object.keys(item.pipelines ?? {}).length === 0 || canManageIngestPipelines),
         enabled: (item) => {
-          // ATM undefined means pipelines fetch failed server-side.
           return item.state !== MODEL_STATE.STARTED;
         },
       },
