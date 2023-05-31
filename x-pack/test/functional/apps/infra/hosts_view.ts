@@ -146,7 +146,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       security.user.delete('global_hosts_read_privileges_user'),
     ]);
 
-  describe('Hosts View', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/157721
+  describe.skip('Hosts View', function () {
     this.tags('includeFirefox');
 
     before(async () => {
