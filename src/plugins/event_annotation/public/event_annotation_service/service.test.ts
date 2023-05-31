@@ -618,6 +618,7 @@ describe('Event Annotation Service', () => {
         {
           title: 'newTitle',
           description: '',
+          tags: [],
           annotations: [],
           dataViewSpec: null,
           ignoreGlobalFilters: false,
@@ -634,72 +635,4 @@ describe('Event Annotation Service', () => {
       );
     });
   });
-  // describe.skip('updateAnnotations', () => {
-  //   const upsert = [
-  //     {
-  //       id: 'annotation2',
-  //       label: 'Query based event',
-  //       icon: 'triangle',
-  //       color: 'red',
-  //       type: 'query',
-  //       timeField: 'timestamp',
-  //       key: {
-  //         type: 'point_in_time',
-  //       },
-  //       lineStyle: 'dashed',
-  //       lineWidth: 3,
-  //       filter: { type: 'kibana_query', query: '', language: 'kuery' },
-  //     },
-  //     {
-  //       id: 'annotation4',
-  //       label: 'Query based event',
-  //       type: 'query',
-  //       timeField: 'timestamp',
-  //       key: {
-  //         type: 'point_in_time',
-  //       },
-  //       filter: { type: 'kibana_query', query: '', language: 'kuery' },
-  //     },
-  //   ] as EventAnnotationConfig[];
-  //   it('updates annotations - deletes annotations', async () => {
-  //     await eventAnnotationService.updateAnnotations('multiAnnotations', {
-  //       delete: ['annotation1', 'annotation2'],
-  //     });
-  //     expect(core.savedObjects.client.bulkDelete).toHaveBeenCalledWith([
-  //       { id: 'annotation1', type: 'event-annotation' },
-  //       { id: 'annotation2', type: 'event-annotation' },
-  //     ]);
-  //   });
-  //   it('updates annotations - inserts new annotations', async () => {
-  //     await eventAnnotationService.updateAnnotations('multiAnnotations', { upsert });
-  //     expect(core.savedObjects.client.bulkCreate).toHaveBeenCalledWith([
-  //       {
-  //         id: 'annotation2',
-  //         type: 'event-annotation',
-  //         attributes: upsert[0],
-  //         overwrite: true,
-  //         references: [
-  //           {
-  //             id: 'multiAnnotations',
-  //             name: 'event-annotation-group-ref-annotation2',
-  //             type: 'event-annotation-group',
-  //           },
-  //         ],
-  //       },
-  //       {
-  //         id: 'annotation4',
-  //         type: 'event-annotation',
-  //         attributes: upsert[1],
-  //         overwrite: true,
-  //         references: [
-  //           {
-  //             id: 'multiAnnotations',
-  //             name: 'event-annotation-group-ref-annotation4',
-  //             type: 'event-annotation-group',
-  //           },
-  //         ],
-  //       },
-  //     ]);
-  //   });
-  // });
 });

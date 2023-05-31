@@ -94,7 +94,6 @@ export class EventAnnotationPlugin
           },
         };
 
-        // TODO wire parent props
         return getTableList(props, services);
       },
     });

@@ -174,7 +174,7 @@ export function getEventAnnotationService(
     );
 
     return {
-      attributes: { title, description, ignoreGlobalFilters, annotations, dataViewSpec },
+      attributes: { title, description, ignoreGlobalFilters, annotations, dataViewSpec, tags },
       references,
     };
   };
