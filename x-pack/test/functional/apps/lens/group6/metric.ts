@@ -133,8 +133,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         {
           title: '97.220.3.248',
           subtitle: 'Average of bytes',
-          extraText: 'Average of bytes 19.76k',
-          value: '19.76k',
+          extraText: 'Average of bytes 19,755',
+          value: '19,755',
           color: 'rgba(245, 247, 250, 1)',
           showingTrendline: false,
           showingBar: false,
@@ -142,8 +142,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         {
           title: '169.228.188.120',
           subtitle: 'Average of bytes',
-          extraText: 'Average of bytes 18.99k',
-          value: '18.99k',
+          extraText: 'Average of bytes 18,994',
+          value: '18,994',
           color: 'rgba(245, 247, 250, 1)',
           showingTrendline: false,
           showingBar: false,
@@ -151,8 +151,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         {
           title: '78.83.247.30',
           subtitle: 'Average of bytes',
-          extraText: 'Average of bytes 17.25k',
-          value: '17.25k',
+          extraText: 'Average of bytes 17,246',
+          value: '17,246',
           color: 'rgba(245, 247, 250, 1)',
           showingTrendline: false,
           showingBar: false,
@@ -160,8 +160,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         {
           title: '226.82.228.233',
           subtitle: 'Average of bytes',
-          extraText: 'Average of bytes 15.69k',
-          value: '15.69k',
+          extraText: 'Average of bytes 15,687',
+          value: '15,687',
           color: 'rgba(245, 247, 250, 1)',
           showingTrendline: false,
           showingBar: false,
@@ -169,8 +169,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         {
           title: '93.28.27.24',
           subtitle: 'Average of bytes',
-          extraText: 'Average of bytes 15.61k',
-          value: '15.61k',
+          extraText: 'Average of bytes 15,614.333',
+          value: '15,614.333',
           color: 'rgba(245, 247, 250, 1)',
           showingTrendline: false,
           showingBar: false,
@@ -178,8 +178,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         {
           title: 'Other',
           subtitle: 'Average of bytes',
-          extraText: 'Average of bytes 5.72k',
-          value: '5.72k',
+          extraText: 'Average of bytes 5,722.775',
+          value: '5,722.775',
           color: 'rgba(245, 247, 250, 1)',
           showingTrendline: false,
           showingBar: false,
@@ -345,7 +345,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.lens.waitForVisualization('mtrVis');
     });
 
-    it('does not carry custom formatting when transitioning from other visualization', async () => {
+    it('does carry custom formatting when transitioning from other visualization', async () => {
       await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickVisType('lens');
       await PageObjects.lens.goToTimeRange();
@@ -364,10 +364,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.lens.switchToVisualization('lnsMetric', 'Metric');
       await PageObjects.lens.waitForVisualization('mtrVis');
       const [{ value }] = await PageObjects.lens.getMetricVisualizationData();
-      expect(value).not.contain('blah');
+      expect(value).contain('blah');
       // Extract the numeric decimals from the value without any compact suffix like k or m
       const decimals = (value?.split(`.`)[1] || '').match(/(\d)+/)?.[1];
-      expect(decimals).not.have.length(3);
+      expect(decimals).have.length(3);
     });
   });
 }

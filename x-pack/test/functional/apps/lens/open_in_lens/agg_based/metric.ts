@@ -48,7 +48,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           title: 'Count',
           subtitle: undefined,
           extraText: '',
-          value: '14.01k',
+          value: '14,005',
           color: 'rgba(245, 247, 250, 1)',
           showingBar: false,
           showingTrendline: false,
