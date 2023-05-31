@@ -19,7 +19,14 @@ export const getHttp = (params: Parameters): HttpStart => {
         return '';
       },
     },
-
+    get: (async (path: string) => {
+      switch (path) {
+        case '/internal/osquery/privileges_check':
+          return Promise.resolve(true);
+        default:
+          return Promise.resolve({});
+      }
+    }) as HttpHandler,
     fetch: (async (path: string) => {
       switch (path) {
         case '/api/metrics/process_list':
@@ -32,7 +39,7 @@ export const getHttp = (params: Parameters): HttpStart => {
           return Promise.resolve({});
       }
     }) as HttpHandler,
-  } as unknown as HttpStart;
+  };
 
-  return http;
+  return http as unknown as HttpStart;
 };

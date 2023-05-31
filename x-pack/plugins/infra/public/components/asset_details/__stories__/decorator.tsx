@@ -17,13 +17,15 @@ import type { DecoratorFn } from '@storybook/react';
 import { useParameter } from '@storybook/addons';
 import { DeepPartial } from 'utility-types';
 import { LocatorPublic } from '@kbn/share-plugin/public';
+import { getLazyOsqueryAction } from '@kbn/osquery-plugin/public/shared_components';
+import { useGlobalStorybookTheme } from '../../../test_utils/use_global_storybook_theme';
 import type { PluginKibanaContextValue } from '../../../hooks/use_kibana';
 import { SourceProvider } from '../../../containers/metrics_source';
 import { getHttp } from './context/http';
 import { ProcessesHttpMocks } from './context/fixtures/processes';
 import { MetadataResponseMocks } from './context/fixtures/metadata';
 
-export const DecorateWithKibanaContext: DecoratorFn = (story) => {
+export const DecorateWithKibanaContext: DecoratorFn = (story, context) => {
   const initialProcesses = useParameter<{ mock: ProcessesHttpMocks | MetadataResponseMocks }>(
     'apiResponse',
     {
@@ -31,6 +33,7 @@ export const DecorateWithKibanaContext: DecoratorFn = (story) => {
     }
   )!;
 
+  const { theme$ } = useGlobalStorybookTheme(context);
   const mockServices: DeepPartial<KibanaReactContextValue<PluginKibanaContextValue>['services']> = {
     application: {
       currentAppId$: of('infra'),
@@ -38,6 +41,13 @@ export const DecorateWithKibanaContext: DecoratorFn = (story) => {
         action(`Navigate to: ${url}`);
       },
       getUrlForApp: (url: string) => url,
+      capabilities: {
+        osquery: {
+          runSavedQueries: true,
+          readSavedQueries: true,
+          writeLiveQueries: true,
+        },
+      },
     },
     data: {
       query: {
@@ -55,6 +65,7 @@ export const DecorateWithKibanaContext: DecoratorFn = (story) => {
         },
       },
     },
+
     http: getHttp(initialProcesses),
     share: {
       url: {
@@ -73,11 +84,24 @@ export const DecorateWithKibanaContext: DecoratorFn = (story) => {
     },
   };
 
+  const osquery = {
+    OsqueryAction: getLazyOsqueryAction({
+      application: mockServices.application,
+      theme: {
+        theme$,
+      },
+    } as any),
+  };
+
   return (
     <I18nProvider>
-      <KibanaContextProvider services={mockServices}>
+      <KibanaContextProvider services={{ ...mockServices, osquery }}>
         <SourceProvider sourceId="default">{story()}</SourceProvider>
       </KibanaContextProvider>
     </I18nProvider>
   );
 };
+
+// elasticsearch: {
+//   indices: [{ names: ['metricbeat-*'], privileges: ['read', 'view_index_metadata'] }],
+// },

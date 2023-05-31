@@ -7,8 +7,10 @@
 
 import React from 'react';
 import { useTabSwitcherContext } from '../hooks/use_tab_switcher';
+import { Anomalies } from '../tabs/anomalies/anomalies';
 import { Metadata } from '../tabs/metadata/metadata';
 import { Processes } from '../tabs/processes/processes';
+import { OSQuery } from '../tabs/osquery/osquery';
 import { FlyoutTabIds, type TabState, type AssetDetailsProps } from '../types';
 
 type Props = Pick<
@@ -36,7 +38,7 @@ export const TabContent = ({
       <TabPanel activeWhen={FlyoutTabIds.METADATA}>
         <Metadata
           currentTimeRange={currentTimeRange}
-          node={node}
+          nodeName={node.name}
           nodeType={nodeType}
           showActionsColumn={overrides?.metadata?.showActionsColumn}
           search={overrides?.metadata?.query}
@@ -45,12 +47,18 @@ export const TabContent = ({
       </TabPanel>
       <TabPanel activeWhen={FlyoutTabIds.PROCESSES}>
         <Processes
-          node={node}
+          nodeName={node.name}
           nodeType={nodeType}
           currentTime={currentTimeRange.to}
           searchFilter={overrides?.processes?.query}
           onSearchFilterChange={(query) => onChange({ processes: { query } })}
         />
+      </TabPanel>
+      <TabPanel activeWhen={FlyoutTabIds.ANOMALIES}>
+        <Anomalies nodeName={node.name} onClose={overrides?.anomalies?.onClose} />
+      </TabPanel>
+      <TabPanel activeWhen={FlyoutTabIds.OSQUERY}>
+        <OSQuery nodeName={node.name} nodeType={nodeType} currentTimeRange={currentTimeRange} />
       </TabPanel>
     </>
   );

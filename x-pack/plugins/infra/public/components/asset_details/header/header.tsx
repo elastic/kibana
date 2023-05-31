@@ -18,12 +18,11 @@ import {
   useEuiMinBreakpoint,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { EuiShowFor } from '@elastic/eui';
-import type { AssetDetailsProps } from '../types';
+import type { AssetDetailsProps, TabIds } from '../types';
 import { LinkToApmServices } from '../links/link_to_apm_services';
 import { LinkToUptime } from '../links/link_to_uptime';
 import { useTabSwitcherContext } from '../hooks/use_tab_switcher';
-import type { TabIds } from '../types';
+
 type Props = Pick<
   AssetDetailsProps,
   'node' | 'nodeType' | 'links' | 'tabs' | 'onTabsStateChange'
@@ -59,36 +58,37 @@ export const Header = ({ nodeType, node, tabs, links, compact, onTabsStateChange
     uptime: <LinkToUptime nodeType={nodeType} node={node} />,
   };
 
-  const headerLinks = links?.map((link, index) => (
-    <EuiFlexItem key={index} grow={false}>
-      {linkComponent[link]}
-    </EuiFlexItem>
-  ));
-
   return (
     <>
-      <EuiFlexGroup gutterSize="m" justifyContent="spaceBetween">
-        {!compact && (
-          <EuiShowFor sizes={['l', 'xl']}>
-            <EuiFlexItem grow={1} />
-          </EuiShowFor>
-        )}
+      <EuiFlexGroup
+        gutterSize="m"
+        justifyContent="spaceBetween"
+        direction={compact ? 'row' : 'columnReverse'}
+      >
         <EuiFlexItem
           grow
           css={css`
+            overflow: hidden;
+            & h4 {
+              text-overflow: ellipsis;
+              overflow: hidden;
+              white-space: nowrap;
+              width: calc(100%);
+            }
+            align-items: center;
             ${useEuiMaxBreakpoint('l')} {
               align-items: flex-start;
             }
           `}
         >
-          <EuiTitle size={compact ? 'xs' : 'l'}>
-            <h1>{node.name}</h1>
+          <EuiTitle size={compact ? 'xs' : 'm'}>
+            {compact ? <h4>{node.name}</h4> : <h1>{node.name}</h1>}
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem
           grow={compact ? 0 : 1}
           css={css`
-            align-items: flex-start;
+            align-items: ${compact ? 'flex-start' : 'initial'};
             ${useEuiMinBreakpoint('m')} {
               align-items: flex-end;
             }
@@ -103,7 +103,11 @@ export const Header = ({ nodeType, node, tabs, links, compact, onTabsStateChange
               margin-right: ${compact ? euiTheme.size.l : 0};
             `}
           >
-            {headerLinks}
+            {links?.map((link, index) => (
+              <EuiFlexItem key={index} grow={false}>
+                {linkComponent[link]}
+              </EuiFlexItem>
+            ))}
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>

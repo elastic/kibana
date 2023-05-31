@@ -26,6 +26,8 @@ export type HostNodeRow = HostMetadata &
 export enum FlyoutTabIds {
   METADATA = 'metadata',
   PROCESSES = 'processes',
+  ANOMALIES = 'anomalies',
+  OSQUERY = 'osquery',
 }
 
 export type TabIds = `${FlyoutTabIds}`;
@@ -37,6 +39,9 @@ export interface TabState {
   };
   processes?: {
     query?: string;
+  };
+  anomalies?: {
+    onClose?: () => void;
   };
 }
 

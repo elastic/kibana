@@ -13,14 +13,44 @@ import { useArgs } from '@storybook/addons';
 import { DecoratorFn } from '@storybook/react';
 import { AssetDetails } from './asset_details';
 import { decorateWithGlobalStorybookThemeProviders } from '../../test_utils/use_global_storybook_theme';
-import { FlyoutTabIds, type AssetDetailsProps } from './types';
+import { FlyoutTabIds, Tab, type AssetDetailsProps } from './types';
 import { DecorateWithKibanaContext } from './__stories__/decorator';
 
 const links: AssetDetailsProps['links'] = ['apmServices', 'uptime'];
+const tabs: Tab[] = [
+  {
+    id: FlyoutTabIds.METADATA,
+    name: i18n.translate('xpack.infra.metrics.nodeDetails.tabs.metadata', {
+      defaultMessage: 'Metadata',
+    }),
+    'data-test-subj': 'hostsView-flyout-tabs-metadata',
+  },
+  {
+    id: FlyoutTabIds.PROCESSES,
+    name: i18n.translate('xpack.infra.metrics.nodeDetails.tabs.processes', {
+      defaultMessage: 'Processes',
+    }),
+    'data-test-subj': 'hostsView-flyout-tabs-processes',
+  },
+  {
+    id: FlyoutTabIds.ANOMALIES,
+    name: i18n.translate('xpack.infra.nodeDetails.tabs.osquery', {
+      defaultMessage: 'Anomalies',
+    }),
+    'data-test-subj': 'hostsView-flyout-tabs-anomalies',
+  },
+  {
+    id: FlyoutTabIds.OSQUERY,
+    name: i18n.translate('xpack.infra.nodeDetails.tabs.osquery', {
+      defaultMessage: 'Osquery',
+    }),
+    'data-test-subj': 'hostsView-flyout-tabs-osquery',
+  },
+];
 
 const AssetDetailsDecorator: DecoratorFn = (story) => {
   const [_, updateArgs] = useArgs();
-  const [checked, setChecked] = React.useState(true);
+  const [checked, setChecked] = useState(true);
 
   useEffect(() => {
     if (checked) {
@@ -81,23 +111,7 @@ const stories: Meta<AssetDetailsProps> = {
       to: 1683630469,
     },
     activeTabId: 'metadata',
-    tabs: [
-      {
-        id: FlyoutTabIds.METADATA,
-        name: i18n.translate('xpack.infra.metrics.nodeDetails.tabs.metadata', {
-          defaultMessage: 'Metadata',
-        }),
-        'data-test-subj': 'hostsView-flyout-tabs-metadata',
-      },
-      {
-        id: FlyoutTabIds.PROCESSES,
-        name: i18n.translate('xpack.infra.metrics.nodeDetails.tabs.processes', {
-          defaultMessage: 'Processes',
-        }),
-        'data-test-subj': 'hostsView-flyout-tabs-processes',
-      },
-    ],
-
+    tabs,
     links,
   },
 };
