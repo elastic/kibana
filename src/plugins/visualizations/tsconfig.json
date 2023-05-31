@@ -57,7 +57,8 @@
     "@kbn/core-saved-objects-api-server",
     "@kbn/object-versioning",
     "@kbn/core-saved-objects-server",
-    "@kbn/core-saved-objects-utils-server"
+    "@kbn/core-saved-objects-utils-server",
+    "@kbn/react"
   ],
   "exclude": [
     "target/**/*",

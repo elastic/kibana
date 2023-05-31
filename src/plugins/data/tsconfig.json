@@ -49,6 +49,7 @@
     "@kbn/core-application-browser",
     "@kbn/core-saved-objects-server",
     "@kbn/core-saved-objects-utils-server",
+    "@kbn/react",
   ],
   "exclude": [
     "target/**/*",

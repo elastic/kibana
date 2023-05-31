@@ -27,6 +27,7 @@
     "@kbn/monaco",
     "@kbn/es-ui-shared-plugin",
     "@kbn/utility-types",
+    "@kbn/react",
   ],
   "exclude": [
     "target/**/*",

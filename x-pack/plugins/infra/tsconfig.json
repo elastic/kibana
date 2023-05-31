@@ -64,6 +64,7 @@
     "@kbn/observability-shared-plugin",
     "@kbn/ui-theme",
     "@kbn/ml-anomaly-utils",
+    "@kbn/react",
   ],
   "exclude": ["target/**/*"]
 }

@@ -29,6 +29,7 @@
     "@kbn/config-schema",
     "@kbn/storybook",
     "@kbn/ui-actions-plugin",
+    "@kbn/react",
   ],
   "exclude": [
     "target/**/*",

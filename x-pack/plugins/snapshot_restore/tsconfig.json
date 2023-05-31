@@ -32,6 +32,7 @@
     "@kbn/shared-ux-router",
     "@kbn/core-ui-settings-browser",
     "@kbn/core-http-router-server-mocks",
+    "@kbn/react",
   ],
   "exclude": [
     "target/**/*",

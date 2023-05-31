@@ -17,7 +17,6 @@
     "@kbn/data-views-plugin",
     "@kbn/expressions-plugin",
     "@kbn/kibana-utils-plugin",
-    "@kbn/kibana-react-plugin",
     "@kbn/vis-default-editor-plugin",
     "@kbn/field-formats-plugin",
     "@kbn/usage-collection-plugin",
@@ -26,6 +25,7 @@
     "@kbn/i18n-react",
     "@kbn/ui-theme",
     "@kbn/config-schema",
+    "@kbn/react",
   ],
   "exclude": [
     "target/**/*",

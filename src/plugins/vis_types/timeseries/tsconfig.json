@@ -45,6 +45,7 @@
     "@kbn/home-plugin",
     "@kbn/std",
     "@kbn/tinymath",
+    "@kbn/react",
   ],
   "exclude": [
     "target/**/*",

@@ -16,7 +16,6 @@
   ],
   "kbn_references": [
     "@kbn/core",
-    "@kbn/kibana-react-plugin",
     "@kbn/navigation-plugin",
     "@kbn/screenshot-mode-plugin",
     "@kbn/developer-examples-plugin",
@@ -25,5 +24,6 @@
     "@kbn/i18n-react",
     "@kbn/utility-types",
     "@kbn/shared-ux-router",
+    "@kbn/react",
   ]
 }

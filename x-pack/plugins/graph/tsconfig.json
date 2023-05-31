@@ -21,7 +21,6 @@
     "@kbn/saved-objects-plugin",
     "@kbn/home-plugin",
     "@kbn/kibana-utils-plugin",
-    "@kbn/kibana-react-plugin",
     "@kbn/spaces-plugin",
     "@kbn/unified-search-plugin",
     "@kbn/i18n",
@@ -41,6 +40,7 @@
     "@kbn/saved-objects-management-plugin",
     "@kbn/saved-objects-finder-plugin",
     "@kbn/core-saved-objects-server",
+    "@kbn/react",
   ],
   "exclude": [
     "target/**/*",

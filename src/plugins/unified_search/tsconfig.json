@@ -40,7 +40,8 @@
     "@kbn/saved-objects-management-plugin",
     "@kbn/text-based-languages",
     "@kbn/text-based-editor",
-    "@kbn/core-doc-links-browser"
+    "@kbn/core-doc-links-browser",
+    "@kbn/react"
   ],
   "exclude": [
     "target/**/*",

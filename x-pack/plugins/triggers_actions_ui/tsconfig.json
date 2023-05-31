@@ -52,6 +52,7 @@
     "@kbn/ecs",
     "@kbn/alerts-as-data-utils",
     "@kbn/core-ui-settings-common",
+    "@kbn/react",
   ],
   "exclude": ["target/**/*"]
 }

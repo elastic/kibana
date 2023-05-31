@@ -25,5 +25,6 @@
     "@kbn/kibana-react-plugin",
     "@kbn/core-chrome-browser",
     "@kbn/i18n-react",
+    "@kbn/react",
   ]
 }

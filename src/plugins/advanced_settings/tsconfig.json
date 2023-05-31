@@ -28,6 +28,7 @@
     "@kbn/core-notifications-browser",
     "@kbn/core-theme-browser",
     "@kbn/core-ui-settings-common",
+    "@kbn/react",
   ],
   "exclude": [
     "target/**/*",

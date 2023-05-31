@@ -12,9 +12,9 @@
   ],
   "kbn_references": [
     "@kbn/core",
-    "@kbn/kibana-react-plugin",
     "@kbn/security-solution-plugin",
     "@kbn/i18n",
     "@kbn/i18n-react",
+    "@kbn/react",
   ]
 }

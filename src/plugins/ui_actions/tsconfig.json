@@ -8,12 +8,12 @@
     "@kbn/core",
     "@kbn/expressions-plugin",
     "@kbn/kibana-utils-plugin",
-    "@kbn/kibana-react-plugin",
     "@kbn/data-views-plugin",
     "@kbn/utility-types",
     "@kbn/i18n",
     "@kbn/es-query",
     "@kbn/ui-actions-browser",
+    "@kbn/react",
   ],
   "exclude": [
     "target/**/*",

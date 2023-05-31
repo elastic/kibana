@@ -33,6 +33,7 @@
     "@kbn/saved-objects-management-plugin",
     "@kbn/saved-objects-tagging-oss-plugin",
     "@kbn/saved-objects-finder-plugin",
+    "@kbn/react",
   ],
   "exclude": [
     "target/**/*",

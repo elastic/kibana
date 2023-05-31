@@ -16,11 +16,11 @@
     "@kbn/management-plugin",
     "@kbn/features-plugin",
     // required bundles
-    "@kbn/kibana-react-plugin",
     "@kbn/i18n",
     "@kbn/i18n-react",
     "@kbn/config-schema",
     "@kbn/core-plugins-server",
+    "@kbn/react",
   ],
   "exclude": [
     "target/**/*",

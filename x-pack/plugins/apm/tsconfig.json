@@ -91,6 +91,7 @@
     "@kbn/dashboard-plugin",
     "@kbn/controls-plugin",
     "@kbn/core-http-server",
+    "@kbn/react",
   ],
   "exclude": [
     "target/**/*",

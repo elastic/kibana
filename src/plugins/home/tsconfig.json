@@ -30,6 +30,7 @@
     "@kbn/ebt-tools",
     "@kbn/core-analytics-server",
     "@kbn/storybook",
+    "@kbn/react",
   ],
   "exclude": [
     "target/**/*",

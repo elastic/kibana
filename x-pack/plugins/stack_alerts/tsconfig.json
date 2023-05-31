@@ -42,6 +42,7 @@
     "@kbn/logging-mocks",
     "@kbn/share-plugin",
     "@kbn/discover-plugin",
+    "@kbn/react",
   ],
   "exclude": [
     "target/**/*",
