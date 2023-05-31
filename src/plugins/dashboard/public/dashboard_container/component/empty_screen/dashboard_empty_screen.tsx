@@ -6,21 +6,19 @@
  * Side Public License, v 1.
  */
 
+import classNames from 'classnames';
 import React, { useCallback, useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 
 import {
-  EuiIcon,
   EuiText,
   EuiImage,
   EuiButton,
-  EuiSpacer,
   EuiFlexItem,
   EuiFlexGroup,
   EuiButtonEmpty,
   EuiPageTemplate,
 } from '@elastic/eui';
-import { euiThemeVars } from '@kbn/ui-theme';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 
@@ -76,91 +74,88 @@ export function DashboardEmptyScreen() {
     `/plugins/dashboard/assets/${isDarkTheme ? 'dashboards_dark' : 'dashboards_light'}.svg`
   );
 
-  if (showWriteControls && isEditMode) {
+  // If the user ends up in edit mode without write privileges, we shouldn't show the edit prompt.
+  const showEditPrompt = showWriteControls && isEditMode;
+
+  const emptyPromptTestSubject = (() => {
+    if (showEditPrompt) return 'emptyDashboardWidget';
+    return showWriteControls ? 'dashboardEmptyReadWrite' : 'dashboardEmptyReadOnly';
+  })();
+
+  const title = (() => {
+    const titleString = showEditPrompt
+      ? emptyScreenStrings.getEditModeTitle()
+      : showWriteControls
+      ? emptyScreenStrings.getViewModeWithPermissionsTitle()
+      : emptyScreenStrings.getViewModeWithoutPermissionsTitle();
+    return <h2>{titleString}</h2>;
+  })();
+
+  const body = (() => {
+    const bodyString = showEditPrompt
+      ? emptyScreenStrings.getEditModeSubtitle()
+      : showWriteControls
+      ? emptyScreenStrings.getViewModeWithPermissionsSubtitle()
+      : emptyScreenStrings.getViewModeWithoutPermissionsSubtitle();
     return (
-      <EuiPageTemplate
-        data-test-subj="emptyDashboardWidget"
-        style={{ backgroundColor: 'inherit' }}
-        grow={false}
-      >
-        <EuiPageTemplate.EmptyPrompt
-          color="transparent"
-          titleSize="xs"
-          hasBorder={true}
-          className="dshEditEmptyWidgetContainer"
-          style={{ padding: euiThemeVars.euiSizeXL }}
-          icon={<EuiImage size="fullWidth" src={imageUrl} alt="" />}
-          title={<h2>{emptyScreenStrings.getEditModeTitle()}</h2>}
-          body={
-            <EuiText size="s" color="subdued">
-              <span>{emptyScreenStrings.getEditModeSubtitle()}</span>
-            </EuiText>
-          }
-          actions={
-            <EuiFlexGroup justifyContent="center" gutterSize="s" alignItems="center">
-              <EuiFlexItem grow={false}>
-                <EuiButton iconType="lensApp" onClick={() => goToLens()}>
-                  {emptyScreenStrings.getCreateVisualizationButtonTitle()}
-                </EuiButton>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiText size="s" color="subdued">
-                  <span>{emptyScreenStrings.orText()}</span>
-                </EuiText>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty
-                  flush="left"
-                  iconType="folderOpen"
-                  onClick={() => dashboardContainer.addFromLibrary()}
-                >
-                  {emptyScreenStrings.getAddFromLibraryButtonTitle()}
-                </EuiButtonEmpty>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          }
-        />
-      </EuiPageTemplate>
+      <EuiText size="s" color="subdued">
+        <span>{bodyString}</span>
+      </EuiText>
     );
-  }
+  })();
+
+  const actions = (() => {
+    if (showEditPrompt) {
+      return (
+        <EuiFlexGroup justifyContent="center" gutterSize="l" alignItems="center">
+          <EuiFlexItem grow={false}>
+            <EuiButton iconType="lensApp" onClick={() => goToLens()}>
+              {emptyScreenStrings.getCreateVisualizationButtonTitle()}
+            </EuiButton>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              flush="left"
+              iconType="folderOpen"
+              onClick={() => dashboardContainer.addFromLibrary()}
+            >
+              {emptyScreenStrings.getAddFromLibraryButtonTitle()}
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      );
+    }
+    if (showWriteControls) {
+      return (
+        <EuiButton
+          iconType="pencil"
+          onClick={() => dashboardContainer.dispatch.setViewMode(ViewMode.EDIT)}
+        >
+          {emptyScreenStrings.getEditLinkTitle()}
+        </EuiButton>
+      );
+    }
+  })();
 
   return (
-    <EuiPageTemplate
-      data-test-subj={showWriteControls ? 'dashboardEmptyReadWrite' : 'dashboardEmptyReadOnly'}
-      style={{ backgroundColor: 'inherit' }}
-      grow={false}
-    >
-      <EuiPageTemplate.EmptyPrompt style={{ padding: euiThemeVars.euiSizeXXL }}>
-        <EuiIcon color="subdued" size="xl" type="visAreaStacked" />
-        <EuiSpacer size="m" />
-        <EuiText color="default" size="m">
-          <p style={{ fontWeight: 'bold' }}>
-            {showWriteControls
-              ? emptyScreenStrings.getViewModeWithPermissionsTitle()
-              : emptyScreenStrings.getViewModeWithoutPermissionsTitle()}
-          </p>
-        </EuiText>
-        <EuiSpacer size="s" />
-        <EuiText size="m" color="subdued">
-          <p>
-            {showWriteControls
-              ? emptyScreenStrings.getViewModeWithPermissionsSubtitle()
-              : emptyScreenStrings.getViewModeWithoutPermissionsSubtitle()}
-          </p>
-        </EuiText>
-        {showWriteControls && (
-          <>
-            <EuiSpacer size="m" />
-            <EuiButton
-              fill
-              iconType="pencil"
-              onClick={() => dashboardContainer.dispatch.setViewMode(ViewMode.EDIT)}
-            >
-              {emptyScreenStrings.getEditLinkTitle()}
-            </EuiButton>
-          </>
-        )}
-      </EuiPageTemplate.EmptyPrompt>
-    </EuiPageTemplate>
+    <div className="dshEmptyPromptParent">
+      <EuiPageTemplate
+        grow={false}
+        data-test-subj={emptyPromptTestSubject}
+        className="dshEmptyPromptPageTemplate"
+      >
+        <EuiPageTemplate.EmptyPrompt
+          icon={<EuiImage size="fullWidth" src={imageUrl} alt="" />}
+          title={title}
+          body={body}
+          actions={actions}
+          titleSize="xs"
+          color="transparent"
+          className={classNames('dshEmptyWidgetContainer', {
+            dshEmptyEditWidgetContainer: showEditPrompt,
+          })}
+        />
+      </EuiPageTemplate>
+    </div>
   );
 }

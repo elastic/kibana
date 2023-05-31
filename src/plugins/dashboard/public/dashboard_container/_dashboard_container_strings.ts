@@ -25,10 +25,6 @@ export const emptyScreenStrings = {
     i18n.translate('dashboard.emptyScreen.addFromLibrary', {
       defaultMessage: 'Add from library',
     }),
-  orText: () =>
-    i18n.translate('dashboard.emptyWidget.orText', {
-      defaultMessage: 'or',
-    }),
   getCreateVisualizationButtonTitle: () =>
     i18n.translate('dashboard.emptyScreen.createVisualization', {
       defaultMessage: 'Create visualization',

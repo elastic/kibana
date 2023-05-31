@@ -74,6 +74,7 @@ export const DashboardViewportComponent = () => {
           ref={controlsRoot}
         />
       ) : null}
+      {panelCount === 0 && <DashboardEmptyScreen />}
       <div
         ref={resizeRef}
         className={classes}
@@ -82,11 +83,6 @@ export const DashboardViewportComponent = () => {
         data-description={description}
         data-shared-items-count={panelCount}
       >
-        {panelCount === 0 && (
-          <>
-            <DashboardEmptyScreen />
-          </>
-        )}
         <DashboardGrid viewportWidth={viewportWidth} />
       </div>
     </div>
