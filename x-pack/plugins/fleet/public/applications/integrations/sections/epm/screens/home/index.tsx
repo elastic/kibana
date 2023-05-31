@@ -101,8 +101,8 @@ export const mapToCard = ({
       : item.uiExternalLink || getAbsolutePath(item.uiInternalPath);
   } else {
     let urlVersion = item.version;
-    if (item?.attributes?.version) {
-      urlVersion = item.attributes.version || item.version;
+    if ('savedObject' in item && item?.savedObject?.attributes?.version) {
+      urlVersion = item.savedObject.attributes.version || item.version;
       isUnverified = isPackageUnverified(item, packageVerificationKeyId);
       isUpdateAvailable = isPackageUpdatable(item);
 
@@ -151,7 +151,10 @@ export const EPMHomePage: React.FC = () => {
 
   const unverifiedPackageCount = installedPackages.filter(
     (pkg) =>
-      pkg?.attributes?.verification_status && pkg.attributes.verification_status === 'unverified'
+      'savedObject' in pkg &&
+      pkg?.savedObject?.attributes &&
+      pkg.savedObject.attributes.verification_status &&
+      pkg.savedObject.attributes.verification_status === 'unverified'
   ).length;
 
   const upgradeablePackageCount = installedPackages.filter(isPackageUpdatable).length;

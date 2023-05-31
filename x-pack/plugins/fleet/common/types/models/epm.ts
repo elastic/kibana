@@ -416,6 +416,9 @@ export interface RegistryVarsEntry {
     };
   };
 }
+export interface InstallSavedObject {
+  attributes?: Installation;
+}
 
 // some properties are optional in Registry responses but required in EPM
 // internal until we need them
@@ -426,9 +429,7 @@ export interface EpmPackageAdditions {
   notice?: string;
   licensePath?: string;
   keepPoliciesUpToDate?: boolean;
-  savedObject?: {
-    attributes?: InstallAttributes;
-  };
+  savedObject?: InstallSavedObject;
 }
 
 type Merge<FirstType, SecondType> = Omit<FirstType, Extract<keyof FirstType, keyof SecondType>> &
@@ -439,7 +440,7 @@ export type PackageList = PackageListItem[];
 export type PackageListItem = Installable<RegistrySearchResult> & {
   id: string;
   integration?: string;
-  attributes?: InstallAttributes;
+  savedObject?: InstallSavedObject;
 };
 export type PackagesGroupedByStatus = Record<ValueOf<InstallationStatus>, PackageList>;
 export type PackageInfo =
@@ -484,8 +485,6 @@ export interface Installation {
     features: Partial<Record<ExperimentalIndexingFeature, boolean>>;
   }>;
 }
-export type InstallAttributes = Installation;
-
 export interface PackageUsageStats {
   agent_policy_count: number;
 }

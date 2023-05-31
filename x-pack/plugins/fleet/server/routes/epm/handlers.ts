@@ -294,6 +294,7 @@ export const getInfoHandler: FleetRequestHandler<
       ignoreUnverified,
       prerelease,
     });
+    console.log(res);
     const body: GetInfoResponse = {
       item: res,
     };

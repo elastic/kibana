@@ -170,7 +170,10 @@ export const InstalledPackages: React.FC<{
   const updatablePackages = useMemo(
     () =>
       installedPackages.filter(
-        (item) => item?.attributes?.version && semverLt(item.attributes.version, item.version)
+        (item) =>
+          'savedObject' in item &&
+          item?.savedObject?.attributes?.version &&
+          semverLt(item.savedObject.attributes.version, item.version)
       ),
     [installedPackages]
   );

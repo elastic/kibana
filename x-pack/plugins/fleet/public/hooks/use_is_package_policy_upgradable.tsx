@@ -30,11 +30,14 @@ export const useIsPackagePolicyUpgradable = () => {
       }
       const { name, version } = pkgPolicy.package;
       const installedPackage = allInstalledPackages.find(
-        (installedPkg) => installedPkg?.attributes?.name && installedPkg.attributes.name === name
+        (installedPkg) =>
+          'savedObject' in installedPkg &&
+          installedPkg?.savedObject?.attributes?.name &&
+          installedPkg.savedObject.attributes.name === name
       );
       if (
-        installedPackage?.attributes?.version &&
-        semverLt(version, installedPackage.attributes.version)
+        installedPackage?.savedObject?.attributes?.version &&
+        semverLt(version, installedPackage.savedObject.attributes.version)
       ) {
         return true;
       }
