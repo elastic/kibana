@@ -43,7 +43,7 @@ export interface UseFetchRulesForSloResponse {
   ) => Promise<QueryObserverResult<Record<string, Array<Rule<SloRule>>> | undefined, unknown>>;
 }
 
-export function useFetchRulesForSlo({ sloIds }: Params): UseFetchRulesForSloResponse {
+export function useFetchRulesForSlo({ sloIds = [] }: Params): UseFetchRulesForSloResponse {
   const { http } = useKibana().services;
 
   const { isInitialLoading, isLoading, isError, isSuccess, isRefetching, data, refetch } = useQuery(
