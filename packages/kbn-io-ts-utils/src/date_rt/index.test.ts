@@ -10,15 +10,15 @@ import { dateRt } from '.';
 import { isRight } from 'fp-ts/lib/Either';
 
 describe('dateRt', () => {
-  it('passes if it is a valide date/time', () => {
+  it('passes if it is a valid date/time', () => {
     expect(isRight(dateRt.decode('2019-08-20T11:18:31.407Z'))).toBe(true);
   });
 
-  it('passes if it is a valide date', () => {
+  it('passes if it is a valid date', () => {
     expect(isRight(dateRt.decode('2019-08-20'))).toBe(true);
   });
 
-  it('fails if it is an invalide date/time', () => {
+  it('fails if it is an invalid date/time', () => {
     expect(isRight(dateRt.decode('2019-02-30T11:18:31.407Z'))).toBe(false);
   });
 });

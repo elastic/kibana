@@ -11,23 +11,22 @@ import { i18n } from '@kbn/i18n';
 
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { extractErrorMessage } from '@kbn/ml-error-utils';
+import {
+  isClassificationAnalysis,
+  isRegressionAnalysis,
+  type DataFrameAnalyticsConfig,
+  type DataFrameTaskStateType,
+  type TotalFeatureImportance,
+} from '@kbn/ml-data-frame-analytics-utils';
 
 import { getDataViewIdFromName } from '../../util/index_utils';
 import { ml } from '../../services/ml_api_service';
 import { newJobCapsServiceAnalytics } from '../../services/new_job_capabilities/new_job_capabilities_service_analytics';
 import { useMlContext } from '../../contexts/ml';
 
-import { DataFrameAnalyticsConfig } from '.';
-
 import { isGetDataFrameAnalyticsStatsResponseOk } from '../pages/analytics_management/services/analytics_service/get_analytics';
-import { DataFrameTaskStateType } from '../pages/analytics_management/components/analytics_list/common';
 import { useTrainedModelsApiService } from '../../services/ml_api_service/trained_models';
-import { TotalFeatureImportance } from '../../../../common/types/feature_importance';
 import { getToastNotificationService } from '../../services/toast_notification_service';
-import {
-  isClassificationAnalysis,
-  isRegressionAnalysis,
-} from '../../../../common/util/analytics_utils';
 import { getDestinationIndex } from './get_destination_index';
 
 export const useResultsViewConfig = (jobId: string) => {

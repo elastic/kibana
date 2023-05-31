@@ -16,12 +16,10 @@ import {
 } from '@elastic/eui';
 
 import type { TimeRange as TimeRangeMs } from '@kbn/ml-date-picker';
+import { FeatureImportanceBaseline, INDEX_STATUS } from '@kbn/ml-data-frame-analytics-utils';
+
 import { Dictionary } from '../../../../common/types/common';
 import { ChartData } from '../../../../common/types/field_histograms';
-
-import { INDEX_STATUS } from '../../data_frame_analytics/common/analytics';
-
-import { FeatureImportanceBaseline } from '../../../../common/types/feature_importance';
 
 export type ColumnId = string;
 export type DataGridItem = Record<string, any>;

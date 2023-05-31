@@ -223,7 +223,10 @@ describe('Response actions history page', () => {
       }, []);
 
       expect(selectedFilterOptions.length).toEqual(2);
-      expect(selectedFilterOptions).toEqual(['release', 'processes']);
+      expect(selectedFilterOptions).toEqual([
+        'release. Checked option. To uncheck this option, press Enter.',
+        'processes. Checked option. To uncheck this option, press Enter.',
+      ]);
       expect(history.location.search).toEqual('?commands=release,processes');
     });
 
@@ -263,10 +266,10 @@ describe('Response actions history page', () => {
 
       expect(selectedFilterOptions.length).toEqual(4);
       expect(selectedFilterOptions).toEqual([
-        'Host-name-0',
-        'Host-name-1',
-        'Host-name-3',
-        'Host-name-5',
+        'Host-name-0. Checked option. To uncheck this option, press Enter.',
+        'Host-name-1. Checked option. To uncheck this option, press Enter.',
+        'Host-name-3. Checked option. To uncheck this option, press Enter.',
+        'Host-name-5. Checked option. To uncheck this option, press Enter.',
       ]);
       expect(history.location.search).toEqual('?hosts=agent-id-1,agent-id-2,agent-id-4,agent-id-5');
     });
@@ -290,7 +293,10 @@ describe('Response actions history page', () => {
       }, []);
 
       expect(selectedFilterOptions.length).toEqual(2);
-      expect(selectedFilterOptions).toEqual(['Failed', 'Pending']);
+      expect(selectedFilterOptions).toEqual([
+        'Failed. Checked option.',
+        'Pending. Checked option.',
+      ]);
       expect(history.location.search).toEqual('?statuses=pending,failed');
     });
 
