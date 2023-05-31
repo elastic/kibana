@@ -81,7 +81,7 @@ describe('ValidateBurnRateRule', () => {
     expect(
       validateBurnRateRule(
         createTestParams({
-          longWindow: { value: 72, unit: 'h' },
+          longWindow: { value: 73, unit: 'h' },
         })
       ).errors.windows[0].longWindow.length
     ).toBe(1);

@@ -44,7 +44,7 @@ export function validateBurnRateRule(
   if (windows) {
     windows.forEach(({ burnRateThreshold, longWindow, maxBurnRateThreshold }) => {
       const result = { longWindow: new Array<string>(), burnRateThreshold: new Array<string>() };
-      if (burnRateThreshold === undefined) {
+      if (burnRateThreshold === undefined || maxBurnRateThreshold === undefined) {
         result.burnRateThreshold.push(BURN_RATE_THRESHOLD_REQUIRED);
       } else if (sloId && (burnRateThreshold < 1 || burnRateThreshold > maxBurnRateThreshold)) {
         result.burnRateThreshold.push(getInvalidThresholdValueError(maxBurnRateThreshold));
