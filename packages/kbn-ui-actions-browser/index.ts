@@ -17,4 +17,5 @@ export {
   rowClickTrigger,
   CATEGORIZE_FIELD_TRIGGER,
   categorizeFieldTrigger,
+  defaultTrigger,
 } from './src/triggers';
