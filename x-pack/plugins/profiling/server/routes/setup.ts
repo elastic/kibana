@@ -8,7 +8,11 @@
 import { RouteRegisterParameters } from '.';
 import { getClient } from './compat';
 import { installLatestApmPackage, isApmPackageInstalled } from '../lib/setup/apm_package';
-import { setMaximumBuckets, validateMaximumBuckets } from '../lib/setup/cluster_settings';
+import {
+  enableResourceManagement,
+  setMaximumBuckets,
+  validateMaximumBuckets,
+} from '../lib/setup/cluster_settings';
 import {
   createCollectorPackagePolicy,
   createSymbolizerPackagePolicy,
@@ -246,6 +250,7 @@ export function registerSetupRoute({
           updateApmPolicy,
           createCollectorPackagePolicy,
           createSymbolizerPackagePolicy,
+          enableResourceManagement,
           setSecurityRole,
           setMaximumBuckets,
         ];
