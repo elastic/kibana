@@ -22,6 +22,7 @@ import type { OperationMetadata, Visualization } from '../..';
 import type { TagcloudState } from './types';
 import { suggestions } from './suggestions';
 import { TagcloudToolbar } from './tagcloud_toolbar';
+import { TagsDimensionEditor } from './tags_dimension_editor';
 
 const TAG_GROUP_ID = 'tags';
 const METRIC_GROUP_ID = 'metric';
@@ -169,10 +170,14 @@ export const getTagcloudVisualization = ({
             maxFontSize: state.maxFontSize,
             minFontSize: state.minFontSize,
             palette: buildExpression([
-              buildExpressionFunction<ExpressionFunctionTheme>('theme', {
-                variable: 'palette',
-                default: [paletteService.get('positive').toExpression()],
-              })
+              state.palette
+                ? buildExpressionFunction<ExpressionFunctionTheme>('theme', {
+                    variable: 'palette',
+                    default: [paletteService.get(state.palette.name).toExpression(state.palette.params)],
+                  })
+                : buildExpressionFunction<SystemPaletteExpressionFunctionDefinition>('system_palette', {
+                    name: 'default',
+                  })
             ]).toAst(),
             showLabel: state.showLabel,
           }
@@ -233,7 +238,20 @@ export const getTagcloudVisualization = ({
   },
 
   renderDimensionEditor(domElement, props) {
-    return null;
+    if (props.groupId === TAG_GROUP_ID) {
+      render(
+        <KibanaThemeProvider theme$={theme.theme$}>
+          <I18nProvider>
+            <TagsDimensionEditor
+              paletteService={paletteService}
+              state={props.state}
+              setState={props.setState}
+            />
+          </I18nProvider>
+        </KibanaThemeProvider>,
+        domElement
+      );
+    }
   },
 
   renderToolbar(domElement, props) {

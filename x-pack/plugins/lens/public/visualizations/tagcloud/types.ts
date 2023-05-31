@@ -6,6 +6,7 @@
  */
 
 import { Datatable } from '@kbn/expressions-plugin/common';
+import type { PaletteOutput } from '@kbn/coloring';
 
 export interface TagcloudState {
   layerId: string;
@@ -14,6 +15,7 @@ export interface TagcloudState {
   maxFontSize: number;
   minFontSize: number;
   showLabel: boolean;
+  palette?: PaletteOutput;
 }
 
 export interface TagcloudConfig extends TagcloudState {
