@@ -425,16 +425,8 @@ export function getFormBasedDatasource({
       return fields;
     },
 
-    toExpression: (state, layerId, indexPatterns, dateRange, searchSessionId, visPreferences) =>
-      toExpression(
-        state,
-        layerId,
-        indexPatterns,
-        uiSettings,
-        dateRange,
-        searchSessionId,
-        visPreferences
-      ),
+    toExpression: (state, layerId, indexPatterns, dateRange, searchSessionId) =>
+      toExpression(state, layerId, indexPatterns, uiSettings, dateRange, searchSessionId),
 
     renderLayerSettings(domElement, props) {
       render(

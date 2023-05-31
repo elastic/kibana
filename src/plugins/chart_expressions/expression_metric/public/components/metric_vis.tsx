@@ -32,7 +32,6 @@ import type {
 import { CustomPaletteState } from '@kbn/charts-plugin/public';
 import {
   FieldFormatConvertFunction,
-  FORMATS_UI_SETTINGS,
   SerializedFieldFormat,
 } from '@kbn/field-formats-plugin/common';
 import { CUSTOM_PALETTE } from '@kbn/coloring';
@@ -47,26 +46,6 @@ import { getPaletteService, getThemeService, getFormatService } from '../service
 import { getDataBoundsForPalette } from '../utils';
 
 export const defaultColor = euiThemeVars.euiColorLightestShade;
-
-export const COMPACT_CUSTOM_PATTERNS_LOOKUP = {
-  number: {
-    uiSettingsKey: FORMATS_UI_SETTINGS.FORMAT_NUMBER_DEFAULT_PATTERN,
-    patternFn: () => '0,0.[00]a',
-    overrideCheck: true,
-  },
-  currency: {
-    uiSettingsKey: FORMATS_UI_SETTINGS.FORMAT_CURRENCY_DEFAULT_PATTERN,
-    patternFn: (prevPattern: string) =>
-      /a/.test(prevPattern) ? prevPattern : `${prevPattern}a`.replace(/(\))?a$/, 'a$1'), // add the "a" first to have always a match
-    overrideCheck: false,
-  },
-  percent: {
-    uiSettingsKey: FORMATS_UI_SETTINGS.FORMAT_PERCENT_DEFAULT_PATTERN,
-    patternFn: () => `0,0.[000]a%`,
-    overrideCheck: true,
-  },
-  // bytes does not require a special compact format
-} as const;
 
 function enhanceFieldFormat(serializedFieldFormat: SerializedFieldFormat | undefined) {
   const formatId = serializedFieldFormat?.id || 'number';

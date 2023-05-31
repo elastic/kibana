@@ -7,21 +7,14 @@
 import { Ast, fromExpression } from '@kbn/interpreter';
 import type { DateRange } from '../../../common/types';
 import { DatasourceStates } from '../../state_management';
-import {
-  Visualization,
-  DatasourceMap,
-  DatasourceLayers,
-  IndexPatternMap,
-  VisualizationDataPreferences,
-} from '../../types';
+import type { Visualization, DatasourceMap, DatasourceLayers, IndexPatternMap } from '../../types';
 
 export function getDatasourceExpressionsByLayers(
   datasourceMap: DatasourceMap,
   datasourceStates: DatasourceStates,
   indexPatterns: IndexPatternMap,
   dateRange: DateRange,
-  searchSessionId?: string,
-  visualizationPreferences?: VisualizationDataPreferences
+  searchSessionId?: string
 ): null | Record<string, Ast> {
   const datasourceExpressions: Array<[string, Ast | string]> = [];
 
@@ -39,8 +32,7 @@ export function getDatasourceExpressionsByLayers(
         layerId,
         indexPatterns,
         dateRange,
-        searchSessionId,
-        visualizationPreferences
+        searchSessionId
       );
       if (result) {
         datasourceExpressions.push([layerId, result]);
@@ -88,15 +80,12 @@ export function buildExpression({
     return null;
   }
 
-  const sourcePreferences = visualization.getSourcePreferences?.(visualizationState);
-
   const datasourceExpressionsByLayers = getDatasourceExpressionsByLayers(
     datasourceMap,
     datasourceStates,
     indexPatterns,
     dateRange,
-    searchSessionId,
-    sourcePreferences
+    searchSessionId
   );
 
   const visualizationExpression = visualization.toExpression(

@@ -9,13 +9,8 @@ import { Ast } from '@kbn/interpreter';
 import { textBasedQueryStateToExpressionAst } from '@kbn/data-plugin/common';
 import type { OriginalColumn } from '../../../common/types';
 import { TextBasedPrivateState, TextBasedLayer, IndexPatternRef } from './types';
-import type { VisualizationDataPreferences } from '../../types';
 
-function getExpressionForLayer(
-  layer: TextBasedLayer,
-  refs: IndexPatternRef[],
-  visualizationPreferences?: VisualizationDataPreferences
-): Ast | null {
+function getExpressionForLayer(layer: TextBasedLayer, refs: IndexPatternRef[]): Ast | null {
   if (!layer.columns || layer.columns?.length === 0) {
     return null;
   }
@@ -56,17 +51,9 @@ function getExpressionForLayer(
   return textBasedQueryToAst;
 }
 
-export function toExpression(
-  state: TextBasedPrivateState,
-  layerId: string,
-  visualizationPreferences?: VisualizationDataPreferences
-) {
+export function toExpression(state: TextBasedPrivateState, layerId: string) {
   if (state.layers[layerId]) {
-    return getExpressionForLayer(
-      state.layers[layerId],
-      state.indexPatternRefs,
-      visualizationPreferences
-    );
+    return getExpressionForLayer(state.layers[layerId], state.indexPatternRefs);
   }
 
   return null;

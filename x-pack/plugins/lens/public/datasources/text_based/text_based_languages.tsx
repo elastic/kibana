@@ -331,8 +331,8 @@ export function getTextBasedDatasource({
       };
     },
 
-    toExpression: (state, layerId, indexPatterns, dateRange, searchSessionId, visPreferences) => {
-      return toExpression(state, layerId, visPreferences);
+    toExpression: (state, layerId, indexPatterns, dateRange, searchSessionId) => {
+      return toExpression(state, layerId);
     },
     getSelectedFields(state) {
       const fields: string[] = [];

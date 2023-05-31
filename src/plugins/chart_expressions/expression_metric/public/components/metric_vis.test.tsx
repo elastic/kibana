@@ -9,7 +9,7 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 import { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common';
-import { COMPACT_CUSTOM_PATTERNS_LOOKUP, MetricVis, MetricVisComponentProps } from './metric_vis';
+import { MetricVis, MetricVisComponentProps } from './metric_vis';
 import {
   LayoutDirection,
   Metric,
@@ -29,7 +29,7 @@ import { euiThemeVars } from '@kbn/ui-theme';
 import { DEFAULT_TRENDLINE_NAME } from '../../common/constants';
 import faker from 'faker';
 
-const mockDeserialize = jest.fn(({ id }: { id: string }) => {
+const mockDeserialize = jest.fn(({ id }: { id: string } = { id: 'fallback' }) => {
   const convertFn = (v: unknown) => `${id}-${v}`;
   return { getConverterFor: () => convertFn };
 });
@@ -1383,34 +1383,6 @@ describe('MetricVisComponent', function () {
     );
 
     it.each`
-      id            | compactPattern
-      ${'number'}   | ${COMPACT_CUSTOM_PATTERNS_LOOKUP.number.patternFn()}
-      ${'currency'} | ${COMPACT_CUSTOM_PATTERNS_LOOKUP.currency.patternFn(CURRENCY_DEFAULT_FORMAT)}
-      ${'percent'}  | ${COMPACT_CUSTOM_PATTERNS_LOOKUP.percent.patternFn()}
-    `(
-      'applies the metric compact format "$compactPattern" if no custom params are passed over',
-      ({ id, compactPattern }) => {
-        getFormattedMetrics(394.2393, 983123.984, { id });
-        expect(mockDeserialize).toHaveBeenCalledTimes(2);
-        expect(mockDeserialize).toHaveBeenCalledWith({ id, params: { pattern: compactPattern } });
-      }
-    );
-
-    it.each`
-      id            | compactPattern
-      ${'number'}   | ${COMPACT_CUSTOM_PATTERNS_LOOKUP.number.patternFn()}
-      ${'currency'} | ${COMPACT_CUSTOM_PATTERNS_LOOKUP.currency.patternFn(CURRENCY_DEFAULT_FORMAT)}
-      ${'percent'}  | ${COMPACT_CUSTOM_PATTERNS_LOOKUP.percent.patternFn()}
-    `(
-      'applies the metric compact format "$compactPattern" if has the override flag enabled',
-      ({ id, compactPattern }) => {
-        getFormattedMetrics(394.2393, 983123.984, { id, params: { formatOverride: true } });
-        expect(mockDeserialize).toHaveBeenCalledTimes(2);
-        expect(mockDeserialize).toHaveBeenCalledWith({ id, params: { pattern: compactPattern } });
-      }
-    );
-
-    it.each`
       id
       ${'number'}
       ${'percent'}
@@ -1477,18 +1449,6 @@ describe('MetricVisComponent', function () {
       expect(mockDeserialize).toHaveBeenCalledWith(legacyBitFormat);
     });
 
-    it('should handle abs pattern for currency when passed', () => {
-      mockFormatSettingLookup.mockReturnValueOnce('(€0.0,[00])');
-      getFormattedMetrics(394.2393, 983123.984, {
-        id: 'currency',
-      });
-      expect(mockDeserialize).toHaveBeenCalledTimes(2);
-      expect(mockDeserialize).toHaveBeenCalledWith({
-        id: 'currency',
-        params: { pattern: '(€0.0,[00]a)' },
-      });
-    });
-
     it('calls the formatter only once when no secondary value is passed', () => {
       getFormattedMetrics(394.2393, undefined, { id: 'number' });
       expect(mockDeserialize).toHaveBeenCalledTimes(1);
@@ -1497,12 +1457,9 @@ describe('MetricVisComponent', function () {
     it('still call the numeric formatter when no format is passed', () => {
       const { primary, secondary } = getFormattedMetrics(394.2393, 983123.984, undefined);
       expect(mockDeserialize).toHaveBeenCalledTimes(2);
-      expect(mockDeserialize).toHaveBeenCalledWith({
-        id: 'number',
-        params: { pattern: COMPACT_CUSTOM_PATTERNS_LOOKUP.number.patternFn() },
-      });
-      expect(primary).toBe('number-394.2393');
-      expect(secondary).toBe('number-983123.984');
+      expect(mockDeserialize).toHaveBeenCalledWith(undefined);
+      expect(primary).toBe('fallback-394.2393');
+      expect(secondary).toBe('fallback-983123.984');
     });
   });
 
