@@ -28,7 +28,6 @@ export const CorrelationsDetails: React.FC = () => {
 
   const scopeId = 'flyout'; // TODO: update to use context
 
-  // TODO: move this to a separate hook
   const [{ pageName }] = useRouteSpy();
   const sourcererScope =
     pageName === SecurityPageName.detections
@@ -57,8 +56,6 @@ export const CorrelationsDetails: React.FC = () => {
     scopeId,
   });
 
-  // TODO: handle errors
-
   const topLevelLoading = isEventDataLoading || isCorrelationsLoading;
 
   if (topLevelLoading) {
@@ -69,6 +66,11 @@ export const CorrelationsDetails: React.FC = () => {
         </EuiFlexItem>
       </EuiFlexGroup>
     );
+  }
+
+  if (correlationsError) {
+    // TODO: handle errors
+    return null;
   }
 
   return (

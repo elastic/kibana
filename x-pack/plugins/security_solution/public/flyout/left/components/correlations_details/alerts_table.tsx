@@ -8,6 +8,9 @@
 import React, { type FC, useMemo, useCallback } from 'react';
 import { type Criteria, EuiBasicTable, formatDate } from '@elastic/eui';
 
+import { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
+import { isRight } from 'fp-ts/lib/Either';
+import { SeverityBadge } from '../../../../detections/components/rules/severity_badge';
 import { usePaginatedAlerts } from './use_paginated_alerts';
 
 export const TIMESTAMP_DATE_FORMAT = 'MMM D, YYYY @ HH:mm:ss.SSS';
@@ -17,7 +20,7 @@ export const columns = [
     field: '@timestamp',
     name: 'Timestamp',
     truncateText: true,
-    dataType: 'date',
+    dataType: 'date' as const,
     render: (value: string) => formatDate(value, TIMESTAMP_DATE_FORMAT),
   },
   {
@@ -34,6 +37,14 @@ export const columns = [
     field: 'kibana.alert.severity',
     name: 'Severity',
     truncateText: true,
+    render: (value: string) => {
+      const decodedSeverity = Severity.decode(value);
+      if (isRight(decodedSeverity)) {
+        return <SeverityBadge value={decodedSeverity.right} />;
+      }
+
+      return value;
+    },
   },
 ];
 
@@ -75,9 +86,8 @@ export const AlertsTable: FC<AlertsTableProps> = ({ alertIds }) => {
   }
 
   return (
-    <EuiBasicTable
+    <EuiBasicTable<Record<string, unknown>>
       loading={loading}
-      tableCaption="Demo for EuiBasicTable with sorting"
       items={mappedData}
       columns={columns}
       pagination={paginationConfig}
