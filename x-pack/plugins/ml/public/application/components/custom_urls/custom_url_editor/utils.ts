@@ -17,11 +17,12 @@ import { isFilterPinned, Filter } from '@kbn/es-query';
 import { DataViewListItem } from '@kbn/data-views-plugin/common';
 import { TimeRange as EsQueryTimeRange } from '@kbn/es-query';
 import type { MlKibanaUrlConfig, MlUrlConfig } from '@kbn/ml-anomaly-utils';
-import { DEFAULT_RESULTS_FIELD } from '../../../../../common/constants/data_frame_analytics';
 import {
   isDataFrameAnalyticsConfigs,
   type DataFrameAnalyticsConfig,
-} from '../../../../../common/types/data_frame_analytics';
+  DEFAULT_RESULTS_FIELD,
+} from '@kbn/ml-data-frame-analytics-utils';
+
 import { categoryFieldTypes } from '../../../../../common/util/fields_utils';
 import { TIME_RANGE_TYPE, URL_TYPE } from './constants';
 
@@ -389,7 +390,7 @@ function buildAppStateQueryParam(queryFieldNames: string[]) {
 // may contain dollar delimited partition / influencer entity tokens and
 // drilldown time range settings.
 async function getAnomalyDetectionJobTestUrl(job: Job, customUrl: MlUrlConfig): Promise<string> {
-  const interval = parseInterval(job.analysis_config.bucket_span);
+  const interval = parseInterval(job.analysis_config.bucket_span!);
   const bucketSpanSecs = interval !== null ? interval.asSeconds() : 0;
 
   // By default, return configured url_value. Look to substitute any dollar-delimited
@@ -462,6 +463,7 @@ async function getAnomalyDetectionJobTestUrl(job: Job, customUrl: MlUrlConfig): 
       undefined,
       jobConfig,
       datafeedConfig
+      // @ts-expect-error TODO: fix after elasticsearch-js bump
     )) as unknown as estypes.MlPreviewDatafeedResponse<Record<string, unknown>>['data'];
 
     const docTimeFieldName = job.data_description.time_field;

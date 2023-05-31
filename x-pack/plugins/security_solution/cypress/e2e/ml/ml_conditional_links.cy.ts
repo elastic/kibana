@@ -26,7 +26,7 @@ import {
 } from '../../urls/ml_conditional_links';
 
 describe('ml conditional links', () => {
-  before(() => {
+  beforeEach(() => {
     login();
   });
 
