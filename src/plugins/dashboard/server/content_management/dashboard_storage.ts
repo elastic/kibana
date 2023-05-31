@@ -37,6 +37,18 @@ export class DashboardStorage extends SOContentStorage<DashboardCrudTypes> {
       cmServicesDefinition,
       searchArgsToSOFindOptions,
       enableMSearch: true,
+      allowedSavedObjectAttributes: [
+        'kibanaSavedObjectMeta',
+        'controlGroupInput',
+        'refreshInterval',
+        'description',
+        'timeRestore',
+        'optionsJSON',
+        'panelsJSON',
+        'timeFrom',
+        'timeTo',
+        'title',
+      ],
     });
   }
 }

@@ -355,12 +355,12 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
     this.stopSyncingWithUnifiedSearch?.();
 
     const {
-      dashboardSavedObject: { loadDashboardStateFromSavedObject },
+      dashboardContentManagement: { loadDashboardState },
     } = pluginServices.getServices();
     if (newCreationOptions) {
       this.creationOptions = { ...this.creationOptions, ...newCreationOptions };
     }
-    const loadDashboardReturn = await loadDashboardStateFromSavedObject({ id: newSavedObjectId });
+    const loadDashboardReturn = await loadDashboardState({ id: newSavedObjectId });
 
     const dashboardContainerReady$ = new Subject<DashboardContainer>();
     const untilDashboardReady = () =>

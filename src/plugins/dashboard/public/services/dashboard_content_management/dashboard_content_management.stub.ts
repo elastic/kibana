@@ -6,10 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { LoadDashboardReturn } from './types';
+import { PluginServiceFactory } from '@kbn/presentation-util-plugin/public';
+
+import { DashboardContentManagementService, LoadDashboardReturn } from './types';
 import { DashboardAttributes } from '../../../common/content_management';
 import { SearchDashboardsResponse } from './lib/find_dashboards';
-import { DashboardContentManagementServiceFactory } from './dashboard_content_management_service';
+
+export type DashboardContentManagementServiceFactory =
+  PluginServiceFactory<DashboardContentManagementService>;
 
 export const dashboardContentManagementServiceFactory: DashboardContentManagementServiceFactory =
   () => {

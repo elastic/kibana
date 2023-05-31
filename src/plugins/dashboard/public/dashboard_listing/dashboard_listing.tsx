@@ -134,6 +134,7 @@ export const DashboardListing = ({
       } = {}
     ) => {
       const searchStartTime = window.performance.now();
+
       return findDashboards
         .search({
           search: searchTerm,

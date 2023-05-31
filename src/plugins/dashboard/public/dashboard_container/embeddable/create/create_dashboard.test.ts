@@ -52,7 +52,7 @@ test('throws error when provided validation function returns invalid', async () 
 });
 
 test('pulls state from dashboard saved object when given a saved object id', async () => {
-  pluginServices.getServices().dashboardSavedObject.loadDashboardStateFromSavedObject = jest
+  pluginServices.getServices().dashboardContentManagement.loadDashboardState = jest
     .fn()
     .mockResolvedValue({
       dashboardInput: {
@@ -62,13 +62,13 @@ test('pulls state from dashboard saved object when given a saved object id', asy
     });
   const dashboard = await createDashboard({}, 0, 'wow-such-id');
   expect(
-    pluginServices.getServices().dashboardSavedObject.loadDashboardStateFromSavedObject
+    pluginServices.getServices().dashboardContentManagement.loadDashboardState
   ).toHaveBeenCalledWith({ id: 'wow-such-id' });
   expect(dashboard.getState().explicitInput.description).toBe(`wow would you look at that? Wow.`);
 });
 
 test('pulls state from session storage which overrides state from saved object', async () => {
-  pluginServices.getServices().dashboardSavedObject.loadDashboardStateFromSavedObject = jest
+  pluginServices.getServices().dashboardContentManagement.loadDashboardState = jest
     .fn()
     .mockResolvedValue({
       dashboardInput: {
@@ -86,7 +86,7 @@ test('pulls state from session storage which overrides state from saved object',
 });
 
 test('pulls state from creation options initial input which overrides all other state sources', async () => {
-  pluginServices.getServices().dashboardSavedObject.loadDashboardStateFromSavedObject = jest
+  pluginServices.getServices().dashboardContentManagement.loadDashboardState = jest
     .fn()
     .mockResolvedValue({
       dashboardInput: {

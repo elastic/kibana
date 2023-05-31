@@ -18,12 +18,12 @@ import {
 import { DashboardAttributesAndReferences, ParsedDashboardAttributesWithType } from '../../types';
 import { DashboardAttributes, SavedDashboardPanel } from '../../content_management';
 
-interface InjectExtractDeps {
+export interface InjectExtractDeps {
   embeddablePersistableStateService: EmbeddablePersistableStateService;
 }
 
 const isPre730Panel = (panel: Record<string, string>): boolean => {
-  return 'version' in panel ? semverGt('7.3.0', panel.version) : true;
+  return 'version' in panel && panel.version ? semverGt('7.3.0', panel.version) : true;
 };
 
 function parseDashboardAttributesWithType(
@@ -82,7 +82,7 @@ export function extractReferences(
 
   const panels = parsedAttributes.panels;
 
-  if ((panels as unknown as Array<Record<string, string>>).some(isPre730Panel)) {
+  if ((Object.values(panels) as unknown as Array<Record<string, string>>).some(isPre730Panel)) {
     return pre730ExtractReferences({ attributes, references });
   }
 

@@ -8,8 +8,7 @@
 
 import type { SavedObjectReference } from '@kbn/core/public';
 import type { Serializable } from '@kbn/utility-types';
-
-import { GridData } from '..';
+import { GridData } from '../content_management';
 
 interface SavedObjectAttributes {
   kibanaSavedObjectMeta: {
