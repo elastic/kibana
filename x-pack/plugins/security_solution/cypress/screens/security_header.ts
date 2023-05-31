@@ -69,7 +69,7 @@ export const REFRESH_BUTTON = '[data-test-subj="querySubmitButton"]';
 export const LOADING_INDICATOR = '[data-test-subj="globalLoadingIndicator"]';
 export const LOADING_INDICATOR_HIDDEN = '[data-test-subj="globalLoadingIndicator-hidden"]';
 
-export const WELCOME_ICON = '[data-test-subj="kbnLoadingMessage"]';
+export const KIBANA_LOADING_ICON = '[data-test-subj="kbnLoadingMessage"]';
 // opens the navigation panel for a given nested link
 export const openNavigationPanelFor = (page: string) => {
   let panel;
