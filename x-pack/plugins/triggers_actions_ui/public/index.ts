@@ -75,12 +75,9 @@ export { getCategory } from './application/sections/field_browser/helpers';
 export type { ConfigFieldSchema, SecretsFieldSchema } from './application/components';
 
 export {
-  ButtonGroupField,
-  HiddenField,
   JsonEditorWithMessageVariables,
   JsonFieldWrapper,
   MustacheTextFieldWrapper,
-  PasswordField,
   SimpleConnectorForm,
   TextAreaWithMessageVariables,
   TextFieldWithMessageVariables,

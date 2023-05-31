@@ -109,7 +109,7 @@ export interface ApmPluginStartDeps {
   fieldFormats?: FieldFormatsStart;
   security?: SecurityPluginStart;
   spaces?: SpacesPluginStart;
-  infra?: InfraClientStartExports;
+  infra: InfraClientStartExports;
   dataViews: DataViewsPublicPluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
   storage: IStorageWrapper;
@@ -213,6 +213,11 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
                         );
                       }
                     },
+                  },
+                  {
+                    label: apmStorageExplorerTitle,
+                    app: 'apm',
+                    path: '/storage-explorer',
                   },
                 ],
               },

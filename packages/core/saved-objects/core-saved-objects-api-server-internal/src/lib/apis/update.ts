@@ -47,6 +47,7 @@ export const performUpdate = async <T>(
     common: commonHelper,
     encryption: encryptionHelper,
     preflight: preflightHelper,
+    migration: migrationHelper,
   } = helpers;
   const { securityExtension } = extensions;
 
@@ -108,7 +109,7 @@ export const performUpdate = async <T>(
       savedObjectNamespaces = preflightResult!.savedObjectNamespaces;
     }
 
-    const migrated = migrator.migrateDocument({
+    const migrated = migrationHelper.migrateInputDocument({
       id,
       type,
       ...(savedObjectNamespace && { namespace: savedObjectNamespace }),
