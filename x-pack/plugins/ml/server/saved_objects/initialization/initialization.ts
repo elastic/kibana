@@ -106,10 +106,22 @@ export function jobSavedObjectsInitializationFactory(
     //   index: '.ml-config',
     // });
     // return body.count > 0;
+    let adJobsCount = 0;
+    let dfaJobsCount = 0;
 
-    const adJobs = await client.asInternalUser.ml.getJobs();
-    const dfaJobs = await client.asInternalUser.ml.getDataFrameAnalytics();
-    return adJobs.count > 0 || dfaJobs.count > 0;
+    try {
+      const adJobs = await client.asInternalUser.ml.getJobs();
+      adJobsCount = adJobs.count;
+    } catch (error) {
+      // ignore errors as anomaly detection may not be enabled
+    }
+    try {
+      const dfaJobs = await client.asInternalUser.ml.getDataFrameAnalytics();
+      dfaJobsCount = dfaJobs.count;
+    } catch (error) {
+      // ignore errors as data frame analytics may not be enabled
+    }
+    return adJobsCount > 0 || dfaJobsCount > 0;
   }
 
   return { initializeJobs };
