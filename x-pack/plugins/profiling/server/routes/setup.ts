@@ -81,6 +81,8 @@ function createDefaultSetupResourceResponse(): SetupResourceResponse {
 
 function everySetupResourceResponse(response: SetupResourceResponse): boolean {
   return (
+    response.resource_management.enabled &&
+    response.resources.created &&
     response.packages.installed &&
     response.permissions.configured &&
     response.policies.installed &&
@@ -105,6 +107,10 @@ export function registerSetupRoute({
       try {
         const esClient = await getClient(context);
         const core = await context.core;
+        const client = createProfilingEsClient({
+          esClient,
+          request,
+        });
         const clientWithDefaultAuth = createProfilingEsClient({
           esClient,
           request,
@@ -133,27 +139,15 @@ export function registerSetupRoute({
           });
         }
 
-        const statusResponse = await clientWithDefaultAuth.profilingStatus();
-        body.resource_management.enabled = statusResponse.resource_management.enabled;
-        body.resources.created = statusResponse.resources.created;
-
-        if (!body.resources.created) {
-          return response.ok({
-            body: {
-              has_data: false,
-              has_setup: false,
-            },
-          });
-        }
-
-        body.data.available = await hasProfilingData({
-          client: createProfilingEsClient({
-            esClient,
-            request,
-          }),
-        });
-
         const verifyFunctions = [
+          async () => {
+            const statusResponse = await clientWithDefaultAuth.profilingStatus();
+            body.resource_management.enabled = statusResponse.resource_management.enabled;
+            body.resources.created = statusResponse.resources.created;
+          },
+          async () => {
+            body.data.available = await hasProfilingData({ client });
+          },
           async () => {
             body.packages.installed = await isApmPackageInstalled(setupOptions);
           },
