@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import buffer from 'buffer';
 import { ByteSizeValue } from '@kbn/config-schema';
 import { docLinksServiceMock } from '@kbn/core-doc-links-server-mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
@@ -72,6 +73,7 @@ describe('runResilientMigrator', () => {
       targetMappings: options.targetMappings,
       preMigrationScript: options.preMigrationScript,
       migrationVersionPerType: options.migrationVersionPerType,
+      coreMigrationVersionPerType: options.coreMigrationVersionPerType,
       indexPrefix: options.indexPrefix,
       migrationsConfig: options.migrationsConfig,
       typeRegistry: options.typeRegistry,
@@ -132,11 +134,13 @@ const mockOptions = (): RunResilientMigratorParams => {
     transformRawDocs: jest.fn(),
     preMigrationScript: "ctx._id = ctx._source.type + ':' + ctx._id",
     migrationVersionPerType: { my_dashboard: '7.10.1', my_viz: '8.0.0' },
+    coreMigrationVersionPerType: {},
     indexPrefix: '.my_index',
     migrationsConfig: {
       algorithm: 'v2' as const,
       batchSize: 20,
       maxBatchSizeBytes: ByteSizeValue.parse('20mb'),
+      maxReadBatchSizeBytes: new ByteSizeValue(buffer.constants.MAX_STRING_LENGTH),
       pollInterval: 20000,
       scrollDuration: '10m',
       skip: false,
