@@ -181,6 +181,11 @@ export const initializeDashboard = async ({
     filterManager.setAppFilters(cloneDeep(filters ?? []));
     queryString.setQuery(query ?? queryString.getDefaultQuery());
 
+    const { stop: stopSyncingQueryServiceStateWithUrl } = syncGlobalQueryStateWithUrl(
+      queryService,
+      kbnUrlStateStorage
+    );
+
     /**
      * If a global time range is not set explicitly and the time range was saved with the dashboard, apply
      * time range and refresh interval to the query service. Otherwise, set the current dashboard time range
@@ -190,11 +195,6 @@ export const initializeDashboard = async ({
       if (timeRange) timefilterService.setTime(timeRange);
       if (refreshInterval) timefilterService.setRefreshInterval(refreshInterval);
     }
-
-    const { stop: stopSyncingQueryServiceStateWithUrl } = syncGlobalQueryStateWithUrl(
-      queryService,
-      kbnUrlStateStorage
-    );
 
     if (!timeRestore) {
       initialInput.timeRange = timefilterService.getTime();
