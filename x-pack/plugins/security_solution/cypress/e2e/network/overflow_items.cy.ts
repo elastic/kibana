@@ -27,10 +27,10 @@ describe('Overflow items', () => {
   context('Network stats and tables', () => {
     before(() => {
       esArchiverLoad('network');
-      login();
     });
 
     beforeEach(() => {
+      login();
       visit(NETWORK_URL);
       cy.get(DESTINATION_DOMAIN).should('not.exist');
       cy.get(FILTER_IN).should('not.exist');

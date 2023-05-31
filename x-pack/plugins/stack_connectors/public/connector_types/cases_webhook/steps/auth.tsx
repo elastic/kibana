@@ -21,9 +21,8 @@ import {
   useFormContext,
   useFormData,
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import { Field, TextField } from '@kbn/es-ui-shared-plugin/static/forms/components';
+import { Field, TextField, PasswordField } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
-import { PasswordField } from '@kbn/triggers-actions-ui-plugin/public';
 import * as i18n from '../translations';
 const { emptyField } = fieldValidators;
 
@@ -85,11 +84,20 @@ export const AuthStep: FunctionComponent<Props> = ({ display, readOnly }) => {
             />
           </EuiFlexItem>
           <EuiFlexItem>
-            <PasswordField
+            <UseField
               path="secrets.password"
-              label={i18n.PASSWORD}
-              readOnly={readOnly}
-              data-test-subj="webhookPasswordInput"
+              config={{
+                label: i18n.PASSWORD,
+                validations: [
+                  {
+                    validator: emptyField(i18n.PASSWORD_REQUIRED),
+                  },
+                ],
+              }}
+              component={PasswordField}
+              componentProps={{
+                euiFieldProps: { readOnly, 'data-test-subj': 'webhookPasswordInput' },
+              }}
             />
           </EuiFlexItem>
         </EuiFlexGroup>
