@@ -21,6 +21,7 @@ import {
   MEDIUM_PRIORITY_ACTION,
   SLO_BURN_RATE_RULE_ID,
 } from '../../../../common/constants';
+
 import { getRuleExecutor } from './executor';
 import { sloRuleFieldMap } from './field_map';
 

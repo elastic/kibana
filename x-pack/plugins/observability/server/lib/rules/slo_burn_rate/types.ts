@@ -15,10 +15,6 @@ import {
   HIGH_PRIORITY_ACTION,
   MEDIUM_PRIORITY_ACTION,
   LOW_PRIORITY_ACTION,
-  ALERT_ACTION_ID,
-  HIGH_PRIORITY_ACTION_ID,
-  MEDIUM_PRIORITY_ACTION_ID,
-  LOW_PRIORITY_ACTION_ID,
 } from '../../../../common/constants';
 
 export enum AlertStates {
@@ -32,11 +28,7 @@ export interface WindowSchema {
   maxBurnRateThreshold: number;
   longWindow: { value: number; unit: string };
   shortWindow: { value: number; unit: string };
-  actionGroup:
-    | typeof ALERT_ACTION_ID
-    | typeof HIGH_PRIORITY_ACTION_ID
-    | typeof MEDIUM_PRIORITY_ACTION_ID
-    | typeof LOW_PRIORITY_ACTION_ID;
+  actionGroup: string;
 }
 
 export type BurnRateRuleParams = {
