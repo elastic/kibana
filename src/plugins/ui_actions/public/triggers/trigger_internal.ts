@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Trigger } from './trigger';
+import { Trigger } from '../../common/triggers/trigger';
 import { TriggerContract } from './trigger_contract';
 import { UiActionsService } from '../service';
 

@@ -8,7 +8,7 @@
 
 import { TriggerRegistry, ActionRegistry, TriggerToActionsRegistry } from '../types';
 import { ActionInternal, Action, ActionDefinition } from '../actions';
-import { Trigger } from '../triggers/trigger';
+import { Trigger } from '../../common/triggers/trigger';
 import { TriggerInternal } from '../triggers/trigger_internal';
 import { TriggerContract } from '../triggers/trigger_contract';
 import { UiActionsExecutionService } from './ui_actions_execution_service';
