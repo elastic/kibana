@@ -17,11 +17,11 @@ import { getKibanaMigratorTestKit, startElasticsearch } from '../kibana_migrator
 import { delay, createType, parseLogFile } from '../test_utils';
 import { getBaseMigratorParams } from '../fixtures/zdt_base.fixtures';
 
-const logFilePath = Path.join(__dirname, 'v2_with_mv_stack_version_bump.test.log');
+const logFilePath = Path.join(__dirname, 'v2_with_mv_same_stack_version.test.log');
 
-const NB_DOCS_PER_TYPE = 100;
+const NB_DOCS_PER_TYPE = 25;
 
-describe('V2 algorithm - using model versions - stack version bump scenario', () => {
+describe('V2 algorithm - using model versions - upgrade without stack version increase', () => {
   let esServer: TestElasticsearchUtils['es'];
 
   beforeAll(async () => {
@@ -33,59 +33,6 @@ describe('V2 algorithm - using model versions - stack version bump scenario', ()
     await esServer?.stop();
     await delay(10);
   });
-
-  const getTestSwitchType = ({ beforeUpgrade }: { beforeUpgrade: boolean }) => {
-    const type = createType({
-      name: 'test_switch',
-      namespaceType: 'single',
-      migrations: {
-        '8.7.0': (doc) => {
-          return doc;
-        },
-      },
-      modelVersions: {},
-      mappings: {
-        properties: {
-          field1: { type: 'text' },
-          field2: { type: 'text' },
-        },
-      },
-    });
-
-    if (!beforeUpgrade) {
-      Object.assign<typeof type, Partial<typeof type>>(type, {
-        switchToModelVersionAt: '8.8.0',
-        modelVersions: {
-          1: {
-            changes: [
-              {
-                type: 'mappings_addition',
-                addedMappings: {
-                  field3: { type: 'text' },
-                },
-              },
-              {
-                type: 'data_backfill',
-                transform: (document) => {
-                  document.attributes.field3 = 'test_switch-backfilled';
-                  return { document };
-                },
-              },
-            ],
-          },
-        },
-        mappings: {
-          ...type.mappings,
-          properties: {
-            ...type.mappings.properties,
-            field3: { type: 'text' },
-          },
-        },
-      });
-    }
-
-    return type;
-  };
 
   const getTestModelVersionType = ({ beforeUpgrade }: { beforeUpgrade: boolean }) => {
     const type = createType({
@@ -147,23 +94,9 @@ describe('V2 algorithm - using model versions - stack version bump scenario', ()
         migrationAlgorithm: 'v2',
         kibanaVersion: '8.8.0',
       }),
-      types: [
-        getTestSwitchType({ beforeUpgrade: true }),
-        getTestModelVersionType({ beforeUpgrade: true }),
-      ],
+      types: [getTestModelVersionType({ beforeUpgrade: true })],
     });
     await runMigrations();
-
-    const switchObjs = range(NB_DOCS_PER_TYPE).map<SavedObjectsBulkCreateObject>((number) => ({
-      id: `switch-${String(number).padStart(3, '0')}`,
-      type: 'test_switch',
-      attributes: {
-        field1: `f1-${number}`,
-        field2: `f2-${number}`,
-      },
-    }));
-
-    await savedObjectsRepository.bulkCreate(switchObjs);
 
     const mvObjs = range(NB_DOCS_PER_TYPE).map<SavedObjectsBulkCreateObject>((number) => ({
       id: `mv-${String(number).padStart(3, '0')}`,
@@ -180,13 +113,12 @@ describe('V2 algorithm - using model versions - stack version bump scenario', ()
   it('migrates the documents', async () => {
     await createBaseline();
 
-    const switchType = getTestSwitchType({ beforeUpgrade: false });
     const modelVersionType = getTestModelVersionType({ beforeUpgrade: false });
 
     const { runMigrations, client, savedObjectsRepository } = await getKibanaMigratorTestKit({
-      ...getBaseMigratorParams({ migrationAlgorithm: 'v2' }),
+      ...getBaseMigratorParams({ migrationAlgorithm: 'v2', kibanaVersion: '8.8.0' }),
       logFilePath,
-      types: [switchType, modelVersionType],
+      types: [modelVersionType],
     });
     await runMigrations();
 
@@ -199,49 +131,23 @@ describe('V2 algorithm - using model versions - stack version bump scenario', ()
 
     expect(mappings.properties).toEqual(
       expect.objectContaining({
-        test_switch: switchType.mappings,
         test_mv: modelVersionType.mappings,
       })
     );
 
     expect(mappingMeta).toEqual({
       indexTypesMap: {
-        '.kibana': ['test_mv', 'test_switch'],
+        '.kibana': ['test_mv'],
       },
       migrationMappingPropertyHashes: expect.any(Object),
     });
 
-    const { saved_objects: testSwitchDocs } = await savedObjectsRepository.find({
-      type: 'test_switch',
-      perPage: 1000,
-    });
     const { saved_objects: testMvDocs } = await savedObjectsRepository.find({
       type: 'test_mv',
       perPage: 1000,
     });
 
-    expect(testSwitchDocs).toHaveLength(NB_DOCS_PER_TYPE);
     expect(testMvDocs).toHaveLength(NB_DOCS_PER_TYPE);
-
-    const testSwitchDocsData = sortBy(testSwitchDocs, 'id').map((object) => ({
-      id: object.id,
-      type: object.type,
-      attributes: object.attributes,
-      version: object.typeMigrationVersion,
-    }));
-
-    expect(testSwitchDocsData).toEqual(
-      range(NB_DOCS_PER_TYPE).map((number) => ({
-        id: `switch-${String(number).padStart(3, '0')}`,
-        type: 'test_switch',
-        attributes: {
-          field1: `f1-${number}`,
-          field2: `f2-${number}`,
-          field3: 'test_switch-backfilled',
-        },
-        version: modelVersionToVirtualVersion(1),
-      }))
-    );
 
     const testMvData = sortBy(testMvDocs, 'id').map((object) => ({
       id: object.id,
@@ -267,7 +173,7 @@ describe('V2 algorithm - using model versions - stack version bump scenario', ()
     expect(records).toContainLogEntries(
       [
         'INIT -> WAIT_FOR_YELLOW_SOURCE',
-        'CLEANUP_UNKNOWN_AND_EXCLUDED_WAIT_FOR_TASK -> PREPARE_COMPATIBLE_MIGRATION',
+        'CHECK_TARGET_MAPPINGS -> UPDATE_TARGET_MAPPINGS_PROPERTIES',
         'Migration completed',
       ],
       {
