@@ -14,7 +14,7 @@ export default defineCypressConfig({
   pageLoadTimeout: 150000,
   numTestsKeptInMemory: 0,
   retries: {
-    runMode: 2,
+    runMode: 1,
   },
   screenshotsFolder: '../../../target/kibana-security-solution/cypress/screenshots',
   trashAssetsBeforeRuns: false,
@@ -24,5 +24,7 @@ export default defineCypressConfig({
   viewportWidth: 1680,
   e2e: {
     baseUrl: 'http://localhost:5601',
+    experimentalMemoryManagement: true,
+    specPattern: './cypress/e2e/**/*.cy.ts',
   },
 });

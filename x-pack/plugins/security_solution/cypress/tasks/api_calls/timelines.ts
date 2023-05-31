@@ -5,10 +5,12 @@
  * 2.0.
  */
 
+import type { TimelineResponse } from '../../../common/types/timeline';
 import type { CompleteTimeline } from '../../objects/timeline';
+import { rootRequest } from '../common';
 
 export const createTimeline = (timeline: CompleteTimeline) =>
-  cy.request({
+  rootRequest<TimelineResponse>({
     method: 'POST',
     url: 'api/timeline',
     body: {
@@ -55,7 +57,7 @@ export const createTimeline = (timeline: CompleteTimeline) =>
   });
 
 export const createTimelineTemplate = (timeline: CompleteTimeline) =>
-  cy.request({
+  rootRequest<TimelineResponse>({
     method: 'POST',
     url: 'api/timeline',
     body: {
@@ -101,7 +103,7 @@ export const createTimelineTemplate = (timeline: CompleteTimeline) =>
   });
 
 export const loadPrepackagedTimelineTemplates = () =>
-  cy.request({
+  rootRequest({
     method: 'POST',
     url: 'api/timeline/_prepackaged',
     headers: { 'kbn-xsrf': 'cypress-creds' },
@@ -118,7 +120,7 @@ export const favoriteTimeline = ({
   templateTimelineId?: string;
   templateTimelineVersion?: number;
 }) =>
-  cy.request({
+  rootRequest({
     method: 'PATCH',
     url: 'api/timeline/_favorite',
     body: {

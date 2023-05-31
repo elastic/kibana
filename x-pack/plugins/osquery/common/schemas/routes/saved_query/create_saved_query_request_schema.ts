@@ -19,7 +19,6 @@ import {
   removedOrUndefined,
   ecsMappingOrUndefined,
 } from '@kbn/osquery-io-ts-types';
-import type { RequiredKeepUndefined } from '../../../types';
 
 export const createSavedQueryRequestSchema = t.type({
   id,
@@ -36,9 +35,8 @@ export const createSavedQueryRequestSchema = t.type({
 export type CreateSavedQueryRequestSchema = t.OutputOf<typeof createSavedQueryRequestSchema>;
 
 // This type is used after a decode since some things are defaults after a decode.
-export type CreateSavedQueryRequestSchemaDecoded = Omit<
-  RequiredKeepUndefined<t.TypeOf<typeof createSavedQueryRequestSchema>>,
-  'description'
+export type CreateSavedQueryRequestSchemaDecoded = t.TypeOf<
+  typeof createSavedQueryRequestSchema
 > & {
   description: Description;
 };
