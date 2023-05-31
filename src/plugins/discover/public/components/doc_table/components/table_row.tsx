@@ -13,7 +13,7 @@ import { Filter } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { formatFieldValue } from '@kbn/unified-discover';
 import type { DataTableRecord, EsHitRecord } from '@kbn/unified-discover';
-import type { DocViewFilterFn, DocViewRenderProps } from '@kbn/unified-doc-viewer/public/types';
+import type { DocViewFilterFn, DocViewRenderProps } from '@kbn/unified-doc-viewer/src/types';
 import { TableCell } from './table_row/table_cell';
 import { formatRow, formatTopLevelObject } from '../utils/row_formatter';
 import { TableRowDetails } from './table_row_details';

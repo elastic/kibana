@@ -9,7 +9,7 @@
 import React from 'react';
 import { EuiBasicTableColumn, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { FieldRecordLegacy } from '@kbn/unified-doc-viewer/public/types';
+import type { FieldRecordLegacy } from '@kbn/unified-doc-viewer/src/types';
 // TODO: Does this belong here?
 import { TableFieldValue } from '../doc_viewer_table/table_cell_value';
 import { FieldName } from '../field_name';

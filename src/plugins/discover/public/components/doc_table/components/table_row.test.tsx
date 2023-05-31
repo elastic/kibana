@@ -82,6 +82,7 @@ describe('Doc table row component', () => {
     useNewFieldsApi: true,
     filterManager: mockFilterManager,
     addBasePath: (path: string) => path,
+    DocViewer: () => <span>mocked_doc_viewer</span>,
   } as unknown as TableRowProps;
 
   beforeEach(() => {

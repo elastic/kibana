@@ -7,7 +7,7 @@
  */
 
 import React, { useEffect, useRef } from 'react';
-import type { DocViewRenderFn, DocViewRenderProps } from '@kbn/unified-doc-viewer/public/types';
+import type { DocViewRenderFn, DocViewRenderProps } from '@kbn/unified-doc-viewer/src/types';
 
 interface Props {
   render: DocViewRenderFn;

@@ -29,7 +29,7 @@ import type { Filter } from '@kbn/es-query';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { getShouldShowFieldHandler } from '@kbn/unified-discover';
-import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/public/types';
+import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/src/types';
 import { useRowHeightsOptions } from '../../hooks/use_row_heights_options';
 import { ValueToStringConverter } from '../../types';
 import { convertValueToString } from '../../utils/convert_value_to_string';

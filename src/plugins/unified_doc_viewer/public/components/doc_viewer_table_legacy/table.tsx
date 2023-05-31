@@ -13,9 +13,9 @@ import { DataView } from '@kbn/data-views-plugin/common';
 import { getFieldIconType } from '@kbn/unified-field-list-plugin/public';
 import { getShouldShowFieldHandler } from '@kbn/unified-discover';
 import { formatFieldValue, DataTableRecord } from '@kbn/unified-discover';
-import { getIgnoredReason, isNestedFieldParent } from '@kbn/unified-doc-viewer/public';
-import type { DocViewFilterFn, FieldRecordLegacy } from '@kbn/unified-doc-viewer/public/types';
-import { useUnifiedDocViewerServices } from '@kbn/unified-doc-viewer/public/hooks';
+import { getIgnoredReason, isNestedFieldParent } from '@kbn/unified-doc-viewer/src';
+import type { DocViewFilterFn, FieldRecordLegacy } from '@kbn/unified-doc-viewer/src/types';
+import { useUnifiedDocViewerServices } from '@kbn/unified-doc-viewer/src/hooks';
 import { ACTIONS_COLUMN, MAIN_COLUMNS } from './table_columns';
 
 export interface DocViewRenderProps {

@@ -7,7 +7,6 @@
  */
 
 import { renderHook, act } from '@testing-library/react-hooks';
-import { buildDataTableRecord } from '@kbn/unified-discover';
 import { buildSearchBody, useEsDocSearch } from './use_es_doc_search';
 import { Subject } from 'rxjs';
 import { DataView } from '@kbn/data-views-plugin/public';
@@ -277,7 +276,7 @@ describe('Test of <Doc /> helper / hook', () => {
 
     expect(hook.result.current.slice(0, 2)).toEqual([
       ElasticRequestState.Found,
-      buildDataTableRecord(record),
+      record,
     ]);
   });
 });

@@ -2,6 +2,7 @@
 
 exports[`returns the \`JsonCodeEditor\` component 1`] = `
 <JsonCodeEditorCommon
+  CodeEditor={[Function]}
   hideCopyButton={true}
   jsonValue="{
   \\"_index\\": \\"test\\",

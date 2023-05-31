@@ -22,7 +22,7 @@ exports[`returns the \`JsonCodeEditorCommon\` component 1`] = `
     </div>
   </EuiFlexItem>
   <EuiFlexItem>
-    <Component
+    <CodeEditor
       aria-label="Read only JSON view of an elasticsearch document"
       editorDidMount={[Function]}
       height={300}

@@ -12,7 +12,7 @@ import { DocViewer } from './doc_viewer';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { buildDataTableRecord } from '@kbn/unified-discover';
 import { DocViewsRegistry, getDocViewsRegistry, setDocViewsRegistry } from '../../services';
-import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/public/types';
+import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/src/types';
 
 beforeEach(() => {
   setDocViewsRegistry(new DocViewsRegistry());

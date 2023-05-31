@@ -11,7 +11,7 @@ import React, { Fragment, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiTextColor, EuiToolTip } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { IgnoredReason } from '@kbn/unified-doc-viewer/public';
+import { IgnoredReason } from '@kbn/unified-doc-viewer/src';
 // TODO: Does this belong in legacy or here?
 import { DocViewTableRowBtnCollapse } from '../doc_viewer_table_legacy/table_row_btn_collapse';
 import { FieldRecord } from './table';
