@@ -15,7 +15,9 @@ import type {
   AnyAction,
   Reducer,
 } from 'redux';
-import { applyMiddleware, compose, createStore as createReduxStore } from 'redux';
+import { applyMiddleware, createStore as createReduxStore } from 'redux';
+import { composeWithDevTools } from 'redux-devtools-extension/developmentOnly';
+import type { EnhancerOptions } from 'redux-devtools-extension';
 
 import { createEpicMiddleware } from 'redux-observable';
 import type { Observable } from 'rxjs';
@@ -35,7 +37,8 @@ import {
 } from '../../../common/constants';
 import { telemetryMiddleware } from '../lib/telemetry';
 import { appSelectors } from './app';
-import { timelineSelectors } from '../../timelines/store/timeline';
+import { timelineSelectors, timelineActions } from '../../timelines/store/timeline';
+import type { TimelineModel } from '../../timelines/store/timeline/model';
 import { inputsSelectors } from './inputs';
 import type { SubPluginsInitReducer } from './reducer';
 import { createInitialState, createReducer } from './reducer';
@@ -44,18 +47,13 @@ import type { AppAction } from './actions';
 import type { Immutable } from '../../../common/endpoint/types';
 import type { State } from './types';
 import type { TimelineEpicDependencies, TimelineState } from '../../timelines/store/timeline/types';
-import type { KibanaDataView, SourcererModel } from './sourcerer/model';
+import type { KibanaDataView, SourcererModel, SourcererDataView } from './sourcerer/model';
 import { initDataView } from './sourcerer/model';
 import type { AppObservableLibs, StartedSubPlugins, StartPlugins } from '../../types';
 import type { ExperimentalFeatures } from '../../../common/experimental_features';
 import { createSourcererDataView } from '../containers/sourcerer/create_sourcerer_data_view';
+import { sourcererActions } from './sourcerer';
 
-type ComposeType = typeof compose;
-declare global {
-  interface Window {
-    __REDUX_DEVTOOLS_EXTENSION_COMPOSE__: ComposeType;
-  }
-}
 let store: Store<State, Action> | null = null;
 
 export const createStoreFactory = async (
@@ -166,6 +164,90 @@ export const createStoreFactory = async (
   ]);
 };
 
+const timelineActionsWithNonserializablePayloads = [
+  timelineActions.updateTimeline.type,
+  timelineActions.addTimeline.type,
+  timelineActions.updateAutoSaveMsg.type,
+  timelineActions.initializeTimelineSettings.type,
+];
+
+const actionSanitizer = (action: AnyAction) => {
+  if (action.type === sourcererActions.setDataView.type) {
+    return {
+      ...action,
+      payload: {
+        ...action.payload,
+        dataView: 'dataView',
+        browserFields: 'browserFields',
+        indexFields: 'indexFields',
+        fields: 'fields',
+      },
+    };
+  } else if (timelineActionsWithNonserializablePayloads.includes(action.type)) {
+    const { type, payload } = action;
+    if (type === timelineActions.addTimeline.type || type === timelineActions.updateTimeline.type) {
+      return {
+        ...action,
+        payload: {
+          ...payload,
+          timeline: sanitizeTimelineModel(payload.timeline),
+        },
+      };
+    } else if (type === timelineActions.updateAutoSaveMsg.type) {
+      return {
+        ...action,
+        payload: {
+          ...payload,
+          newTimelineModel: sanitizeTimelineModel(payload.newTimelineModel),
+        },
+      };
+    } else if (type === timelineActions.initializeTimelineSettings.type) {
+      return {
+        ...action,
+        payload: {
+          ...payload,
+          timeline: sanitizeTimelineModel(payload.timeline),
+        },
+      };
+    }
+  }
+  return action;
+};
+
+const sanitizeDataView = (dataView: SourcererDataView) => {
+  return {
+    ...dataView,
+    browserFields: 'browserFields',
+    indexFields: 'indexFields',
+    fields: 'fields',
+    dataView: 'dataView',
+  };
+};
+
+const sanitizeTimelineModel = (timeline: TimelineModel) => {
+  return {
+    ...timeline,
+    filterManager: 'filterManager',
+    footerText: 'footerText',
+    loadingText: 'loadingText',
+  };
+};
+
+const stateSanitizer = (state: State) => {
+  if (state.sourcerer) {
+    return {
+      ...state,
+      sourcerer: {
+        ...state.sourcerer,
+        defaultDataView: sanitizeDataView(state.sourcerer.defaultDataView),
+        kibanaDataViews: state.sourcerer.kibanaDataViews.map(sanitizeDataView),
+      },
+    };
+  } else {
+    return state;
+  }
+};
+
 /**
  * Factory for Security App's redux store.
  */
@@ -176,7 +258,13 @@ export const createStore = (
   storage: Storage,
   additionalMiddleware?: Array<Middleware<{}, State, Dispatch<AppAction | Immutable<AppAction>>>>
 ): Store<State, Action> => {
-  const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
+  const enhancerOptions: EnhancerOptions = {
+    name: 'Kibana Security Solution',
+    actionSanitizer: actionSanitizer as EnhancerOptions['actionSanitizer'],
+    stateSanitizer: stateSanitizer as EnhancerOptions['stateSanitizer'],
+  };
+
+  const composeEnhancers = composeWithDevTools(enhancerOptions);
 
   const middlewareDependencies: TimelineEpicDependencies<State> = {
     kibana$: kibana,
@@ -194,12 +282,16 @@ export const createStore = (
     }
   );
 
+  const middlewareEnhancer = applyMiddleware(
+    epicMiddleware,
+    telemetryMiddleware,
+    ...(additionalMiddleware ?? [])
+  );
+
   store = createReduxStore(
     createReducer(pluginsReducer),
     state as PreloadedState<State>,
-    composeEnhancers(
-      applyMiddleware(epicMiddleware, telemetryMiddleware, ...(additionalMiddleware ?? []))
-    )
+    composeEnhancers(middlewareEnhancer)
   );
 
   epicMiddleware.run(createRootEpic<CombinedState<State>>());
