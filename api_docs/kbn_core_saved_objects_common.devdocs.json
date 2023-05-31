@@ -1274,38 +1274,6 @@
             "path": "x-pack/plugins/canvas/public/components/home/hooks/use_upload_workpad.ts"
           },
           {
-            "plugin": "osquery",
-            "path": "x-pack/plugins/osquery/public/packs/types.ts"
-          },
-          {
-            "plugin": "osquery",
-            "path": "x-pack/plugins/osquery/public/packs/types.ts"
-          },
-          {
-            "plugin": "osquery",
-            "path": "x-pack/plugins/osquery/public/routes/saved_queries/list/index.tsx"
-          },
-          {
-            "plugin": "osquery",
-            "path": "x-pack/plugins/osquery/public/routes/saved_queries/list/index.tsx"
-          },
-          {
-            "plugin": "osquery",
-            "path": "x-pack/plugins/osquery/public/assets/use_assets_status.ts"
-          },
-          {
-            "plugin": "osquery",
-            "path": "x-pack/plugins/osquery/public/assets/use_assets_status.ts"
-          },
-          {
-            "plugin": "osquery",
-            "path": "x-pack/plugins/osquery/public/assets/use_assets_status.ts"
-          },
-          {
-            "plugin": "osquery",
-            "path": "x-pack/plugins/osquery/public/assets/use_assets_status.ts"
-          },
-          {
             "plugin": "savedObjects",
             "path": "src/plugins/saved_objects/public/saved_object/helpers/find_object_by_title.test.ts"
           },
