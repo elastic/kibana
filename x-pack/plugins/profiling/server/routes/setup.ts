@@ -251,12 +251,7 @@ export function registerSetupRoute({
         ];
         await Promise.all(executeFunctions.map(async (fn) => await fn(setupOptions)));
 
-        return response.custom({
-          statusCode: 500,
-          body: {
-            message: `Failed to complete all steps`,
-          },
-        });
+        return response.accepted();
       } catch (error) {
         return handleRouteHandlerError({ error, logger, response });
       }
