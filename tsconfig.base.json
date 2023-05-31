@@ -916,6 +916,8 @@
       "@kbn/ml-agg-utils/*": ["x-pack/packages/ml/agg_utils/*"],
       "@kbn/ml-anomaly-utils": ["x-pack/packages/ml/anomaly_utils"],
       "@kbn/ml-anomaly-utils/*": ["x-pack/packages/ml/anomaly_utils/*"],
+      "@kbn/ml-data-frame-analytics-utils": ["x-pack/packages/ml/data_frame_analytics_utils"],
+      "@kbn/ml-data-frame-analytics-utils/*": ["x-pack/packages/ml/data_frame_analytics_utils/*"],
       "@kbn/ml-date-picker": ["x-pack/packages/ml/date_picker"],
       "@kbn/ml-date-picker/*": ["x-pack/packages/ml/date_picker/*"],
       "@kbn/ml-error-utils": ["x-pack/packages/ml/error_utils"],

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-export const FEATURE_IMPORTANCE = 'feature_importance';
-export const FEATURE_INFLUENCE = 'feature_influence';
-export const TOP_CLASSES = 'top_classes';
-export const OUTLIER_SCORE = 'outlier_score';
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: '../../../..',
+  roots: ['<rootDir>/x-pack/packages/ml/data_frame_analytics_utils'],
+};
