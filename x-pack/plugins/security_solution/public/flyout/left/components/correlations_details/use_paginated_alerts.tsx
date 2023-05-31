@@ -6,15 +6,14 @@
  */
 
 import { useMemo } from 'react';
-import { useFetchAlerts } from './use_fetch_alerts';
+import { useFetchAlerts } from '../../../shared/hooks/use_fetch_alerts';
 import { usePagination, useSorting } from './use_pagination_and_sorting';
 
 export const usePaginatedAlerts = (alertIds: string[]) => {
   const { setPagination, pagination, pageSizeOptions } = usePagination();
   const { sorting, sortConfig, setSorting } = useSorting();
 
-  // TODO: handle errors returned from this hook
-  const { data, totalItemCount, loading } = useFetchAlerts({
+  const { data, totalItemCount, loading, error } = useFetchAlerts({
     alertIds,
     from: pagination.pageIndex * pagination.pageSize,
     size: pagination.pageSize,
@@ -36,5 +35,6 @@ export const usePaginatedAlerts = (alertIds: string[]) => {
     loading,
     data,
     sorting,
+    error,
   };
 };

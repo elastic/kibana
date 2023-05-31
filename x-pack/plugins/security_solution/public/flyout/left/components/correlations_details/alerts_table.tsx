@@ -42,7 +42,7 @@ export interface AlertsTableProps {
 }
 
 export const AlertsTable: FC<AlertsTableProps> = ({ alertIds }) => {
-  const { setPagination, setSorting, data, loading, paginationConfig, sorting } =
+  const { setPagination, setSorting, data, loading, paginationConfig, sorting, error } =
     usePaginatedAlerts(alertIds);
 
   const onTableChange = useCallback(
@@ -69,6 +69,10 @@ export const AlertsTable: FC<AlertsTableProps> = ({ alertIds }) => {
         }, {} as Record<string, unknown>)
       );
   }, [data]);
+
+  if (error) {
+    return <div>{'handle errors'}</div>;
+  }
 
   return (
     <EuiBasicTable

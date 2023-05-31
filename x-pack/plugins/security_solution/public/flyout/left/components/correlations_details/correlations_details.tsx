@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiSpacer, formatDate } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiSpacer } from '@elastic/eui';
 import { useTimelineEventsDetails } from '../../../../timelines/containers/details';
 import { useSourcererDataView } from '../../../../common/containers/sourcerer';
 
