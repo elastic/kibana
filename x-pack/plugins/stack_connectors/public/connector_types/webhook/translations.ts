@@ -104,3 +104,10 @@ export const BODY_REQUIRED = i18n.translate(
     defaultMessage: 'Body is required.',
   }
 );
+
+export const PASSWORD_REQUIRED = i18n.translate(
+  'xpack.stackConnectors.components.webhook.error.requiredWebhookPasswordText',
+  {
+    defaultMessage: 'Password is required.',
+  }
+);
