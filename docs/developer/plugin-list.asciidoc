@@ -332,10 +332,6 @@ In general this plugin provides:
 |Registers commercially licensed generic actions like per panel time range and contains some code that supports drilldown work.
 
 
-|{kib-repo}blob/{branch}/src/plugins/unified_field_list/README.md[unifiedFieldList]
-|This Kibana plugin contains components and services for field list UI (as in fields sidebar on Discover and Lens pages).
-
-
 |{kib-repo}blob/{branch}/src/plugins/unified_histogram/README.md[unifiedHistogram]
 |Unified Histogram is a UX Building Block including a layout with a resizable histogram and a main display.
 It manages its own state and data fetching, and can easily be dropped into pages with minimal setup.

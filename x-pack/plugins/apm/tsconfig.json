@@ -62,7 +62,6 @@
     "@kbn/shared-ux-page-kibana-template",
     "@kbn/es-ui-shared-plugin",
     "@kbn/es-types",
-    "@kbn/unified-field-list-plugin",
     "@kbn/analytics",
     "@kbn/rison",
     "@kbn/config-schema",
@@ -91,6 +90,7 @@
     "@kbn/dashboard-plugin",
     "@kbn/controls-plugin",
     "@kbn/core-http-server",
+    "@kbn/unified-field-list",
   ],
   "exclude": [
     "target/**/*",
