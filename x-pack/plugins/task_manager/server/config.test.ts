@@ -21,7 +21,6 @@ describe('config validation', () => {
           "warn_threshold": 5000,
         },
         "max_attempts": 3,
-        "max_poll_inactivity_cycles": 10,
         "max_workers": 10,
         "monitored_aggregated_stats_refresh_rate": 60000,
         "monitored_stats_health_verbose_log": Object {
@@ -41,6 +40,7 @@ describe('config validation', () => {
         "poll_interval": 3000,
         "request_capacity": 1000,
         "unsafe": Object {
+          "authenticate_background_task_utilization": true,
           "exclude_task_types": Array [],
         },
         "version_conflict_threshold": 80,
@@ -73,7 +73,6 @@ describe('config validation', () => {
           "warn_threshold": 5000,
         },
         "max_attempts": 3,
-        "max_poll_inactivity_cycles": 10,
         "max_workers": 10,
         "monitored_aggregated_stats_refresh_rate": 60000,
         "monitored_stats_health_verbose_log": Object {
@@ -93,6 +92,7 @@ describe('config validation', () => {
         "poll_interval": 3000,
         "request_capacity": 1000,
         "unsafe": Object {
+          "authenticate_background_task_utilization": true,
           "exclude_task_types": Array [],
         },
         "version_conflict_threshold": 80,
@@ -123,7 +123,6 @@ describe('config validation', () => {
           "warn_threshold": 5000,
         },
         "max_attempts": 3,
-        "max_poll_inactivity_cycles": 10,
         "max_workers": 10,
         "monitored_aggregated_stats_refresh_rate": 60000,
         "monitored_stats_health_verbose_log": Object {
@@ -148,6 +147,7 @@ describe('config validation', () => {
         "poll_interval": 3000,
         "request_capacity": 1000,
         "unsafe": Object {
+          "authenticate_background_task_utilization": true,
           "exclude_task_types": Array [],
         },
         "version_conflict_threshold": 80,

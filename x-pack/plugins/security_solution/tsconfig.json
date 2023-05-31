@@ -156,6 +156,7 @@
     "@kbn/core-lifecycle-browser",
     "@kbn/ecs",
     "@kbn/url-state",
-    "@kbn/ml-anomaly-utils"
+    "@kbn/ml-anomaly-utils",
+    "@kbn/dev-proc-runner"
   ]
 }

@@ -59,7 +59,6 @@ import type { Overview } from './overview';
 import type { Rules } from './rules';
 import type { Timelines } from './timelines';
 import type { Management } from './management';
-import type { LandingPages } from './landing_pages';
 import type { CloudSecurityPosture } from './cloud_security_posture';
 import type { CloudDefend } from './cloud_defend';
 import type { ThreatIntelligence } from './threat_intelligence';
@@ -133,6 +132,7 @@ export type StartServices = CoreStart &
     };
     savedObjectsManagement: SavedObjectsManagementPluginStart;
     isSidebarEnabled$: BehaviorSubject<boolean>;
+    getStartedComponent: GetStartedComponent | undefined;
     telemetry: TelemetryClientStart;
   };
 
@@ -140,9 +140,15 @@ export interface PluginSetup {
   resolver: () => Promise<ResolverPluginSetup>;
 }
 
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
+export type GetStartedComponentProps = {};
+
+export type GetStartedComponent = (props?: GetStartedComponentProps) => JSX.Element;
+
 export interface PluginStart {
-  navLinks$: Observable<NavigationLink[]>;
+  getNavLinks$: () => Observable<NavigationLink[]>;
   setIsSidebarEnabled: (isSidebarEnabled: boolean) => void;
+  setGetStartedPage: (getStartedComponent: GetStartedComponent) => void;
 }
 
 export interface AppObservableLibs {
@@ -161,7 +167,6 @@ export interface SubPlugins {
   exceptions: Exceptions;
   explore: Explore;
   kubernetes: Kubernetes;
-  landingPages: LandingPages;
   management: Management;
   overview: Overview;
   rules: Rules;
@@ -179,7 +184,6 @@ export interface StartedSubPlugins {
   exceptions: ReturnType<Exceptions['start']>;
   explore: ReturnType<Explore['start']>;
   kubernetes: ReturnType<Kubernetes['start']>;
-  landingPages: ReturnType<LandingPages['start']>;
   management: ReturnType<Management['start']>;
   overview: ReturnType<Overview['start']>;
   rules: ReturnType<Rules['start']>;

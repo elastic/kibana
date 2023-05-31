@@ -12,7 +12,11 @@ import { IRouter, StartServicesAccessor } from '@kbn/core/server';
 import { DataViewSpec } from '../../common/types';
 import { DataViewsService } from '../../common/data_views';
 import { handleErrors } from './util/handle_errors';
-import { fieldSpecSchema, runtimeFieldSchema, serializedFieldFormatSchema } from './util/schemas';
+import {
+  fieldSpecSchema,
+  runtimeFieldSchema,
+  serializedFieldFormatSchema,
+} from '../../common/schemas';
 import type { DataViewsServerPluginStartDependencies, DataViewsServerPluginStart } from '../types';
 import {
   DATA_VIEW_PATH,
@@ -70,6 +74,7 @@ const dataViewSpecSchema = schema.object({
   allowNoIndex: schema.maybe(schema.boolean()),
   runtimeFieldMap: schema.maybe(schema.recordOf(schema.string(), runtimeFieldSchema)),
   name: schema.maybe(schema.string()),
+  namespaces: schema.maybe(schema.arrayOf(schema.string())),
 });
 
 const registerCreateDataViewRouteFactory =
@@ -124,7 +129,10 @@ const registerCreateDataViewRouteFactory =
               'content-type': 'application/json',
             },
             body: {
-              [serviceKey]: dataView.toSpec(),
+              [serviceKey]: {
+                ...dataView.toSpec(),
+                namespaces: dataView.namespaces,
+              },
             },
           });
         })

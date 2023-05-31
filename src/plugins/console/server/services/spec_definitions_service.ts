@@ -128,17 +128,15 @@ export class SpecDefinitionsService {
       if (overrideFile) {
         merge(loadedSpec, JSON.parse(readFileSync(overrideFile, 'utf8')));
       }
-      const spec: Record<string, EndpointDescription> = {};
       Object.entries(loadedSpec).forEach(([key, value]) => {
         if (acc[key]) {
           // add time to remove key collision
-          spec[`${key}${Date.now()}`] = value;
+          acc[`${key}${Date.now()}`] = value;
         } else {
-          spec[key] = value;
+          acc[key] = value;
         }
       });
-
-      return { ...acc, ...spec };
+      return acc;
     }, {} as Record<string, EndpointDescription>);
   }
 

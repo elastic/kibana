@@ -18,7 +18,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const monacoEditor = getService('monacoEditor');
   const security = getService('security');
-  const PageObjects = getPageObjects(['common', 'discover', 'header', 'timePicker']);
+  const PageObjects = getPageObjects([
+    'common',
+    'discover',
+    'header',
+    'timePicker',
+    'unifiedFieldList',
+  ]);
 
   const defaultSettings = {
     defaultIndex: 'logstash-*',
@@ -39,7 +45,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('test', () => {
       it('should render sql view correctly', async function () {
-        await PageObjects.discover.waitUntilSidebarHasLoaded();
+        await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
 
         expect(await testSubjects.exists('showQueryBarMenu')).to.be(true);
         expect(await testSubjects.exists('superDatePickerToggleQuickMenuButton')).to.be(true);
@@ -57,10 +63,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await testSubjects.exists('discoverFieldListPanelEdit-@message')).to.be(true);
 
         await PageObjects.discover.selectTextBaseLang('SQL');
-        await PageObjects.discover.waitUntilSidebarHasLoaded();
+        await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
 
         expect(await testSubjects.exists('fieldListFiltersFieldSearch')).to.be(true);
-        expect(await testSubjects.exists('unifiedTextLangEditor')).to.be(true);
+        expect(await testSubjects.exists('TextBasedLangEditor')).to.be(true);
         expect(await testSubjects.exists('superDatePickerToggleQuickMenuButton')).to.be(true);
 
         expect(await testSubjects.exists('showQueryBarMenu')).to.be(false);
@@ -70,7 +76,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await testSubjects.exists('unifiedHistogramChart')).to.be(false);
         expect(await testSubjects.exists('unifiedHistogramQueryHits')).to.be(true);
         expect(await testSubjects.exists('discoverAlertsButton')).to.be(false);
-        expect(await testSubjects.exists('shareTopNavButton')).to.be(false);
+        expect(await testSubjects.exists('shareTopNavButton')).to.be(true);
         expect(await testSubjects.exists('docTableExpandToggleColumn')).to.be(false);
         expect(await testSubjects.exists('dataGridColumnSortingButton')).to.be(false);
         expect(await testSubjects.exists('fieldListFiltersFieldTypeFilterToggle')).to.be(true);

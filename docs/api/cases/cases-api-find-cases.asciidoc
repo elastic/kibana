@@ -43,9 +43,6 @@ identifiers can be found by using the
 (Optional, string) The default operator to use for the `simple_query_string`.
 Defaults to `OR`.
 
-`fields`::
-(Optional, array of strings) The fields in the entity to return in the response.
-
 `from`::
 (Optional, string) Returns only cases that were created after a specific date. The date must be specified as a <<kuery-query,KQL>> data range or date match expression.  preview:[]
 

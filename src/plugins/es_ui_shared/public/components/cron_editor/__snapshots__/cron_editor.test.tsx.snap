@@ -69,7 +69,7 @@ Array [
             </option>
           </select>
           <div
-            class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+            class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right euiFormControlLayoutIcons--absolute"
           >
             <span
               class="euiFormControlLayoutCustomIcon"
@@ -249,7 +249,7 @@ Array [
                 </option>
               </select>
               <div
-                class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+                class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right euiFormControlLayoutIcons--absolute"
               >
                 <span
                   class="euiFormControlLayoutCustomIcon"
@@ -585,7 +585,7 @@ Array [
                 </option>
               </select>
               <div
-                class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+                class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right euiFormControlLayoutIcons--absolute"
               >
                 <span
                   class="euiFormControlLayoutCustomIcon"
@@ -675,7 +675,7 @@ Array [
             </option>
           </select>
           <div
-            class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+            class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right euiFormControlLayoutIcons--absolute"
           >
             <span
               class="euiFormControlLayoutCustomIcon"
@@ -1029,7 +1029,7 @@ Array [
             </option>
           </select>
           <div
-            class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+            class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right euiFormControlLayoutIcons--absolute"
           >
             <span
               class="euiFormControlLayoutCustomIcon"
@@ -1116,7 +1116,7 @@ exports[`CronEditor is rendered with a MINUTE frequency 1`] = `
           </option>
         </select>
         <div
-          class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+          class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right euiFormControlLayoutIcons--absolute"
         >
           <span
             class="euiFormControlLayoutCustomIcon"
@@ -1203,7 +1203,7 @@ Array [
             </option>
           </select>
           <div
-            class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+            class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right euiFormControlLayoutIcons--absolute"
           >
             <span
               class="euiFormControlLayoutCustomIcon"
@@ -1412,7 +1412,7 @@ Array [
             </option>
           </select>
           <div
-            class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+            class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right euiFormControlLayoutIcons--absolute"
           >
             <span
               class="euiFormControlLayoutCustomIcon"
@@ -1592,7 +1592,7 @@ Array [
                 </option>
               </select>
               <div
-                class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+                class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right euiFormControlLayoutIcons--absolute"
               >
                 <span
                   class="euiFormControlLayoutCustomIcon"
@@ -1928,7 +1928,7 @@ Array [
                 </option>
               </select>
               <div
-                class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+                class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right euiFormControlLayoutIcons--absolute"
               >
                 <span
                   class="euiFormControlLayoutCustomIcon"
@@ -2018,7 +2018,7 @@ Array [
             </option>
           </select>
           <div
-            class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+            class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right euiFormControlLayoutIcons--absolute"
           >
             <span
               class="euiFormControlLayoutCustomIcon"
@@ -2107,7 +2107,7 @@ Array [
             </option>
           </select>
           <div
-            class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+            class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right euiFormControlLayoutIcons--absolute"
           >
             <span
               class="euiFormControlLayoutCustomIcon"
@@ -2287,7 +2287,7 @@ Array [
                 </option>
               </select>
               <div
-                class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+                class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right euiFormControlLayoutIcons--absolute"
               >
                 <span
                   class="euiFormControlLayoutCustomIcon"
@@ -2623,7 +2623,7 @@ Array [
                 </option>
               </select>
               <div
-                class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+                class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right euiFormControlLayoutIcons--absolute"
               >
                 <span
                   class="euiFormControlLayoutCustomIcon"
@@ -2713,7 +2713,7 @@ Array [
             </option>
           </select>
           <div
-            class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+            class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right euiFormControlLayoutIcons--absolute"
           >
             <span
               class="euiFormControlLayoutCustomIcon"
@@ -2827,7 +2827,7 @@ Array [
             </option>
           </select>
           <div
-            class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+            class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right euiFormControlLayoutIcons--absolute"
           >
             <span
               class="euiFormControlLayoutCustomIcon"
@@ -3036,7 +3036,7 @@ Array [
             </option>
           </select>
           <div
-            class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+            class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right euiFormControlLayoutIcons--absolute"
           >
             <span
               class="euiFormControlLayoutCustomIcon"
@@ -3216,7 +3216,7 @@ Array [
                 </option>
               </select>
               <div
-                class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+                class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right euiFormControlLayoutIcons--absolute"
               >
                 <span
                   class="euiFormControlLayoutCustomIcon"
@@ -3552,7 +3552,7 @@ Array [
                 </option>
               </select>
               <div
-                class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+                class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right euiFormControlLayoutIcons--absolute"
               >
                 <span
                   class="euiFormControlLayoutCustomIcon"

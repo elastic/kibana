@@ -5,10 +5,19 @@
  * 2.0.
  */
 
-import type { SavedObject } from '@kbn/core/server';
+import type {
+  SavedObject,
+  SavedObjectsBulkResponse,
+  SavedObjectsFindResponse,
+} from '@kbn/core/server';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { FILE_SO_TYPE } from '@kbn/files-plugin/common';
-import type { AttachmentPersistedAttributes } from '../../../common/types/attachments';
+import type {
+  AttachmentPersistedAttributes,
+  AttachmentTransformedAttributes,
+  AttachmentSavedObjectTransformed,
+} from '../../../common/types/attachments';
+import { AttachmentTransformedAttributesRt } from '../../../common/types/attachments';
 import {
   CASE_COMMENT_SAVED_OBJECT,
   CASE_SAVED_OBJECT,
@@ -16,12 +25,8 @@ import {
   MAX_DOCS_PER_PAGE,
 } from '../../../../common/constants';
 import { buildFilter, combineFilters } from '../../../client/utils';
-import type {
-  AttachmentTotals,
-  AttributesTypeAlerts,
-  CommentAttributes as AttachmentAttributes,
-} from '../../../../common/api';
-import { CommentType } from '../../../../common/api';
+import type { AttachmentTotals, AttributesTypeAlerts } from '../../../../common/api';
+import { CommentType, decodeOrThrow, AttributesTypeAlertsRt } from '../../../../common/api';
 import type {
   AlertIdsAggsResult,
   BulkOptionalAttributes,
@@ -36,13 +41,14 @@ import {
 import { partitionByCaseAssociation } from '../../../common/partitioning';
 import type { AttachmentSavedObject } from '../../../common/types';
 import { getCaseReferenceId } from '../../../common/references';
+import { isSOError } from '../../../common/utils';
 
 export class AttachmentGetter {
   constructor(private readonly context: ServiceContext) {}
 
   public async bulkGet(
     attachmentIds: string[]
-  ): Promise<BulkOptionalAttributes<AttachmentAttributes>> {
+  ): Promise<BulkOptionalAttributes<AttachmentTransformedAttributes>> {
     try {
       this.context.log.debug(
         `Attempting to retrieve attachments with ids: ${attachmentIds.join()}`
@@ -53,20 +59,42 @@ export class AttachmentGetter {
           attachmentIds.map((id) => ({ id, type: CASE_COMMENT_SAVED_OBJECT }))
         );
 
-      return {
-        saved_objects: response.saved_objects.map((so) =>
-          injectAttachmentAttributesAndHandleErrors(
-            so,
-            this.context.persistableStateAttachmentTypeRegistry
-          )
-        ),
-      };
+      return this.transformAndDecodeBulkGetResponse(response);
     } catch (error) {
       this.context.log.error(
         `Error retrieving attachments with ids ${attachmentIds.join()}: ${error}`
       );
       throw error;
     }
+  }
+
+  private transformAndDecodeBulkGetResponse(
+    response: SavedObjectsBulkResponse<AttachmentPersistedAttributes>
+  ): BulkOptionalAttributes<AttachmentTransformedAttributes> {
+    const validatedAttachments: AttachmentSavedObjectTransformed[] = [];
+
+    for (const so of response.saved_objects) {
+      if (isSOError(so)) {
+        // Forcing the type here even though it is an error. The caller is responsible for
+        // determining what to do with the errors
+        // TODO: we should fix the return type of this bulkGet so that it can return errors
+        validatedAttachments.push(so as AttachmentSavedObjectTransformed);
+      } else {
+        const transformedAttachment = injectAttachmentAttributesAndHandleErrors(
+          so,
+          this.context.persistableStateAttachmentTypeRegistry
+        );
+        const validatedAttributes = decodeOrThrow(AttachmentTransformedAttributesRt)(
+          transformedAttachment.attributes
+        );
+
+        validatedAttachments.push(
+          Object.assign(transformedAttachment, { attributes: validatedAttributes })
+        );
+      }
+    }
+
+    return Object.assign(response, { saved_objects: validatedAttachments });
   }
 
   public async getAttachmentIdsForCases({ caseIds }: { caseIds: string[] }) {
@@ -138,11 +166,7 @@ export class AttachmentGetter {
 
       let result: Array<SavedObject<AttributesTypeAlerts>> = [];
       for await (const userActionSavedObject of finder.find()) {
-        result = result.concat(
-          // We need a cast here because to limited attachment type conflicts with the expected result even though they
-          // should be the same
-          userActionSavedObject.saved_objects as unknown as Array<SavedObject<AttributesTypeAlerts>>
-        );
+        result = result.concat(AttachmentGetter.decodeAlerts(userActionSavedObject));
       }
 
       return result;
@@ -150,6 +174,16 @@ export class AttachmentGetter {
       this.context.log.error(`Error on GET all alerts for case id ${caseId}: ${error}`);
       throw error;
     }
+  }
+
+  private static decodeAlerts(
+    response: SavedObjectsFindResponse<AttachmentPersistedAttributes>
+  ): Array<SavedObject<AttributesTypeAlerts>> {
+    return response.saved_objects.map((so) => {
+      const validatedAttributes = decodeOrThrow(AttributesTypeAlertsRt)(so.attributes);
+
+      return Object.assign(so, { attributes: validatedAttributes });
+    });
   }
 
   /**
@@ -190,9 +224,7 @@ export class AttachmentGetter {
     }
   }
 
-  public async get({
-    attachmentId,
-  }: GetAttachmentArgs): Promise<SavedObject<AttachmentAttributes>> {
+  public async get({ attachmentId }: GetAttachmentArgs): Promise<AttachmentSavedObjectTransformed> {
     try {
       this.context.log.debug(`Attempting to GET attachment ${attachmentId}`);
       const res = await this.context.unsecuredSavedObjectsClient.get<AttachmentPersistedAttributes>(
@@ -200,10 +232,16 @@ export class AttachmentGetter {
         attachmentId
       );
 
-      return injectAttachmentSOAttributesFromRefs(
+      const transformedAttachment = injectAttachmentSOAttributesFromRefs(
         res,
         this.context.persistableStateAttachmentTypeRegistry
       );
+
+      const validatedAttributes = decodeOrThrow(AttachmentTransformedAttributesRt)(
+        transformedAttachment.attributes
+      );
+
+      return Object.assign(transformedAttachment, { attributes: validatedAttributes });
     } catch (error) {
       this.context.log.error(`Error on GET attachment ${attachmentId}: ${error}`);
       throw error;
@@ -302,7 +340,7 @@ export class AttachmentGetter {
   }: {
     caseId: string;
     fileIds: string[];
-  }): Promise<Array<SavedObject<AttachmentAttributes>>> {
+  }): Promise<AttachmentSavedObjectTransformed[]> {
     try {
       this.context.log.debug('Attempting to find file attachments');
 
@@ -331,19 +369,10 @@ export class AttachmentGetter {
           }
         );
 
-      const foundAttachments: Array<SavedObject<AttachmentAttributes>> = [];
+      const foundAttachments: AttachmentSavedObjectTransformed[] = [];
 
       for await (const attachmentSavedObjects of finder.find()) {
-        foundAttachments.push(
-          ...attachmentSavedObjects.saved_objects.map((attachment) => {
-            const modifiedAttachment = injectAttachmentSOAttributesFromRefs(
-              attachment,
-              this.context.persistableStateAttachmentTypeRegistry
-            );
-
-            return modifiedAttachment;
-          })
-        );
+        foundAttachments.push(...this.transformAndDecodeFileAttachments(attachmentSavedObjects));
       }
 
       const [validFileAttachments, invalidFileAttachments] = partitionByCaseAssociation(
@@ -358,6 +387,23 @@ export class AttachmentGetter {
       this.context.log.error(`Error retrieving file attachments file ids: ${fileIds}: ${error}`);
       throw error;
     }
+  }
+
+  private transformAndDecodeFileAttachments(
+    response: SavedObjectsFindResponse<AttachmentPersistedAttributes>
+  ): AttachmentSavedObjectTransformed[] {
+    return response.saved_objects.map((so) => {
+      const transformedFileAttachment = injectAttachmentSOAttributesFromRefs(
+        so,
+        this.context.persistableStateAttachmentTypeRegistry
+      );
+
+      const validatedAttributes = decodeOrThrow(AttachmentTransformedAttributesRt)(
+        transformedFileAttachment.attributes
+      );
+
+      return Object.assign(transformedFileAttachment, { attributes: validatedAttributes });
+    });
   }
 
   private logInvalidFileAssociations(

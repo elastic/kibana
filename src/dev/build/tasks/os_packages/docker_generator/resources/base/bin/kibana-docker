@@ -87,7 +87,6 @@ kibana_vars=(
     i18n.locale
     interactiveSetup.enabled
     interactiveSetup.connectionCheck.interval
-    interpreter.enableInVisualize
     kibana.autocompleteTerminateAfter
     kibana.autocompleteTimeout
     kibana.index
@@ -162,6 +161,7 @@ kibana_vars=(
     server.requestId.allowFromAnyIp
     server.requestId.ipAllowlist
     server.rewriteBasePath
+    server.restrictInternalApis
     server.securityResponseHeaders.disableEmbedding
     server.securityResponseHeaders.permissionsPolicy
     server.securityResponseHeaders.referrerPolicy
@@ -400,7 +400,6 @@ kibana_vars=(
     xpack.securitySolution.prebuiltRulesPackageVersion
     xpack.spaces.maxSpaces
     xpack.task_manager.max_attempts
-    xpack.task_manager.max_poll_inactivity_cycles
     xpack.task_manager.max_workers
     xpack.task_manager.monitored_aggregated_stats_refresh_rate
     xpack.task_manager.monitored_stats_required_freshness

@@ -6,6 +6,7 @@
  */
 
 import sinon from 'sinon';
+import { Client } from '@elastic/elasticsearch';
 import { elasticsearchServiceMock, savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
 import { SavedObjectsErrorHelpers, Logger } from '@kbn/core/server';
 import { ADJUST_THROUGHPUT_INTERVAL } from '../lib/create_managed_configuration';
@@ -43,7 +44,6 @@ describe('managed configuration', () => {
       max_attempts: 9,
       poll_interval: 3000,
       version_conflict_threshold: 80,
-      max_poll_inactivity_cycles: 10,
       monitored_aggregated_stats_refresh_rate: 60000,
       monitored_stats_health_verbose_log: {
         enabled: false,
@@ -66,6 +66,7 @@ describe('managed configuration', () => {
       },
       unsafe: {
         exclude_task_types: [],
+        authenticate_background_task_utilization: true,
       },
       event_loop_delay: {
         monitor: true,
@@ -87,6 +88,9 @@ describe('managed configuration', () => {
 
     const coreStart = coreMock.createStart();
     coreStart.elasticsearch = esStart;
+    esStart.client.asInternalUser.child.mockReturnValue(
+      esStart.client.asInternalUser as unknown as Client
+    );
     coreStart.savedObjects.createInternalRepository.mockReturnValue(savedObjectsClient);
     taskManagerStart = await taskManager.start(coreStart);
 
@@ -146,7 +150,8 @@ describe('managed configuration', () => {
   });
 
   test('should lower max workers when Elasticsearch returns "cannot execute [inline] scripts" error', async () => {
-    esStart.client.asInternalUser.search.mockImplementationOnce(async () => {
+    const childEsClient = esStart.client.asInternalUser.child({}) as jest.Mocked<Client>;
+    childEsClient.search.mockImplementationOnce(async () => {
       throw inlineScriptError;
     });
 
@@ -165,7 +170,8 @@ describe('managed configuration', () => {
   });
 
   test('should increase poll interval when Elasticsearch returns "cannot execute [inline] scripts" error', async () => {
-    esStart.client.asInternalUser.search.mockImplementationOnce(async () => {
+    const childEsClient = esStart.client.asInternalUser.child({}) as jest.Mocked<Client>;
+    childEsClient.search.mockImplementationOnce(async () => {
       throw inlineScriptError;
     });
 

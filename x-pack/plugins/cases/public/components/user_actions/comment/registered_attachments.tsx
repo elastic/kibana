@@ -24,7 +24,7 @@ import type {
 import { AttachmentActionType } from '../../../client/attachment_framework/types';
 import { UserActionTimestamp } from '../timestamp';
 import type { AttachmentTypeRegistry } from '../../../../common/registry';
-import type { CommentResponse } from '../../../../common/api';
+import type { Comment } from '../../../../common/api';
 import type { UserActionBuilder, UserActionBuilderArgs } from '../types';
 import type { SnakeToCamelCase } from '../../../../common/types';
 import {
@@ -50,26 +50,30 @@ type BuilderArgs<C, R> = Pick<
 /**
  * Provides a render function for attachment type
  */
-const getAttachmentRenderer = memoize(() => {
-  let AttachmentElement: React.ReactElement;
+const getAttachmentRenderer = (cachingKey: string) =>
+  memoize(
+    () => {
+      let AttachmentElement: React.ReactElement;
 
-  const renderCallback = (attachmentViewObject: AttachmentViewObject, props: object) => {
-    if (!attachmentViewObject.children) return;
+      const renderCallback = (attachmentViewObject: AttachmentViewObject, props: object) => {
+        if (!attachmentViewObject.children) return;
 
-    if (!AttachmentElement) {
-      AttachmentElement = React.createElement(attachmentViewObject.children, props);
-    } else {
-      AttachmentElement = React.cloneElement(AttachmentElement, props);
-    }
+        if (!AttachmentElement) {
+          AttachmentElement = React.createElement(attachmentViewObject.children, props);
+        } else {
+          AttachmentElement = React.cloneElement(AttachmentElement, props);
+        }
 
-    return <Suspense fallback={<EuiLoadingSpinner />}>{AttachmentElement}</Suspense>;
-  };
+        return <Suspense fallback={<EuiLoadingSpinner />}>{AttachmentElement}</Suspense>;
+      };
 
-  return renderCallback;
-});
+      return renderCallback;
+    },
+    () => cachingKey
+  );
 
 export const createRegisteredAttachmentUserActionBuilder = <
-  C extends CommentResponse,
+  C extends Comment,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   R extends AttachmentTypeRegistry<AttachmentType<any>>
 >({
@@ -120,7 +124,7 @@ export const createRegisteredAttachmentUserActionBuilder = <
 
     const attachmentViewObject = attachmentType.getAttachmentViewObject(props);
 
-    const renderer = getAttachmentRenderer();
+    const renderer = getAttachmentRenderer(userAction.id)();
     const actions = attachmentViewObject.getActions?.(props) ?? [];
     const [primaryActions, nonPrimaryActions] = partition(actions, 'isPrimary');
     const visiblePrimaryActions = primaryActions.slice(0, 2);

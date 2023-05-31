@@ -12,7 +12,7 @@ import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 import type { IRouter } from '@kbn/core/server';
 import { packSavedObjectType } from '../../../common/types';
 import { PLUGIN_ID } from '../../../common';
-import type { PackSavedObjectAttributes } from '../../common/types';
+import type { PackSavedObject } from '../../common/types';
 
 export const findPackRoute = (router: IRouter) => {
   router.get(
@@ -35,7 +35,7 @@ export const findPackRoute = (router: IRouter) => {
       const coreContext = await context.core;
       const savedObjectsClient = coreContext.savedObjects.client;
 
-      const soClientResponse = await savedObjectsClient.find<PackSavedObjectAttributes>({
+      const soClientResponse = await savedObjectsClient.find<PackSavedObject>({
         type: packSavedObjectType,
         page: request.query.page ?? 1,
         perPage: request.query.pageSize ?? 20,
@@ -50,7 +50,8 @@ export const findPackRoute = (router: IRouter) => {
         );
 
         return {
-          ...pack,
+          ...pack.attributes,
+          saved_object_id: pack.id,
           policy_ids: policyIds,
         };
       });

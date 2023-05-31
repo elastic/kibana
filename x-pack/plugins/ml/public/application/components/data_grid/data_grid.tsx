@@ -30,10 +30,17 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { CoreSetup } from '@kbn/core/public';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
+import {
+  type DataFrameAnalysisConfigType,
+  type FeatureImportanceBaseline,
+  type FeatureImportance,
+  type TopClasses,
+  ANALYSIS_CONFIG_TYPE,
+  DEFAULT_RESULTS_FIELD,
+  INDEX_STATUS,
+} from '@kbn/ml-data-frame-analytics-utils';
 
 import { DEFAULT_SAMPLER_SHARD_SIZE } from '../../../../common/constants/field_histograms';
-
-import { ANALYSIS_CONFIG_TYPE, INDEX_STATUS } from '../../data_frame_analytics/common';
 
 import {
   euiDataGridStyle,
@@ -43,13 +50,6 @@ import {
 } from './common';
 import { UseIndexDataReturnType } from './types';
 import { DecisionPathPopover } from '../../data_frame_analytics/pages/analytics_exploration/components/feature_importance/decision_path_popover';
-import {
-  FeatureImportanceBaseline,
-  FeatureImportance,
-  TopClasses,
-} from '../../../../common/types/feature_importance';
-import { DEFAULT_RESULTS_FIELD } from '../../../../common/constants/data_frame_analytics';
-import { DataFrameAnalysisConfigType } from '../../../../common/types/data_frame_analytics';
 
 // TODO Fix row hovering + bar highlighting
 // import { hoveredRow$ } from './column_chart';
@@ -346,74 +346,76 @@ export const DataGrid: FC<Props> = memo(
             <EuiSpacer size="m" />
           </div>
         )}
-        <EuiMutationObserver
-          observerOptions={{ subtree: true, attributes: true, childList: true }}
-          onMutation={onMutation}
-        >
-          {(mutationRef) => (
-            <div css={cssOverride} ref={mutationRef}>
-              <EuiDataGrid
-                aria-label={isWithHeader(props) ? props.title : ''}
-                columns={columnsWithCharts.map((c) => {
-                  c.initialWidth = 165;
-                  return c;
-                })}
-                columnVisibility={{ visibleColumns, setVisibleColumns }}
-                trailingControlColumns={trailingControlColumns}
-                gridStyle={euiDataGridStyle}
-                rowCount={rowCount}
-                renderCellValue={renderCellValue}
-                renderCellPopover={renderCellPopover}
-                sorting={{ columns: sortingColumns, onSort }}
-                toolbarVisibility={{
-                  ...euiDataGridToolbarSettings,
-                  ...(chartsButtonVisible
-                    ? {
-                        additionalControls: (
-                          <EuiToolTip
-                            content={i18n.translate(
-                              'xpack.ml.dataGrid.histogramButtonToolTipContent',
-                              {
-                                defaultMessage:
-                                  'Queries run to fetch histogram chart data will use a sample size per shard of {samplerShardSize} documents.',
-                                values: {
-                                  samplerShardSize: DEFAULT_SAMPLER_SHARD_SIZE,
-                                },
-                              }
-                            )}
-                          >
-                            <EuiButtonEmpty
-                              aria-pressed={chartsVisible === true}
-                              className={`euiDataGrid__controlBtn${
-                                chartsVisible === true ? ' euiDataGrid__controlBtn--active' : ''
-                              }`}
-                              data-test-subj={`${dataTestSubj}HistogramButton`}
-                              size="xs"
-                              iconType="visBarVertical"
-                              color="text"
-                              onClick={toggleChartVisibility}
-                              disabled={chartsVisible === undefined}
+        {rowCount > 0 && (
+          <EuiMutationObserver
+            observerOptions={{ subtree: true, attributes: true, childList: true }}
+            onMutation={onMutation}
+          >
+            {(mutationRef) => (
+              <div css={cssOverride} ref={mutationRef}>
+                <EuiDataGrid
+                  aria-label={isWithHeader(props) ? props.title : ''}
+                  columns={columnsWithCharts.map((c) => {
+                    c.initialWidth = 165;
+                    return c;
+                  })}
+                  columnVisibility={{ visibleColumns, setVisibleColumns }}
+                  trailingControlColumns={trailingControlColumns}
+                  gridStyle={euiDataGridStyle}
+                  rowCount={rowCount}
+                  renderCellValue={renderCellValue}
+                  renderCellPopover={renderCellPopover}
+                  sorting={{ columns: sortingColumns, onSort }}
+                  toolbarVisibility={{
+                    ...euiDataGridToolbarSettings,
+                    ...(chartsButtonVisible
+                      ? {
+                          additionalControls: (
+                            <EuiToolTip
+                              content={i18n.translate(
+                                'xpack.ml.dataGrid.histogramButtonToolTipContent',
+                                {
+                                  defaultMessage:
+                                    'Queries run to fetch histogram chart data will use a sample size per shard of {samplerShardSize} documents.',
+                                  values: {
+                                    samplerShardSize: DEFAULT_SAMPLER_SHARD_SIZE,
+                                  },
+                                }
+                              )}
                             >
-                              <FormattedMessage
-                                id="xpack.ml.dataGrid.histogramButtonText"
-                                defaultMessage="Histogram charts"
-                              />
-                            </EuiButtonEmpty>
-                          </EuiToolTip>
-                        ),
-                      }
-                    : {}),
-                }}
-                pagination={{
-                  ...pagination,
-                  pageSizeOptions: [5, 10, 25],
-                  onChangeItemsPerPage,
-                  onChangePage,
-                }}
-              />
-            </div>
-          )}
-        </EuiMutationObserver>
+                              <EuiButtonEmpty
+                                aria-pressed={chartsVisible === true}
+                                className={`euiDataGrid__controlBtn${
+                                  chartsVisible === true ? ' euiDataGrid__controlBtn--active' : ''
+                                }`}
+                                data-test-subj={`${dataTestSubj}HistogramButton`}
+                                size="xs"
+                                iconType="visBarVertical"
+                                color="text"
+                                onClick={toggleChartVisibility}
+                                disabled={chartsVisible === undefined}
+                              >
+                                <FormattedMessage
+                                  id="xpack.ml.dataGrid.histogramButtonText"
+                                  defaultMessage="Histogram charts"
+                                />
+                              </EuiButtonEmpty>
+                            </EuiToolTip>
+                          ),
+                        }
+                      : {}),
+                  }}
+                  pagination={{
+                    ...pagination,
+                    pageSizeOptions: [5, 10, 25],
+                    onChangeItemsPerPage,
+                    onChangePage,
+                  }}
+                />
+              </div>
+            )}
+          </EuiMutationObserver>
+        )}
       </div>
     );
   },

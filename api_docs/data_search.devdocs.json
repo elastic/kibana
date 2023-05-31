@@ -3207,9 +3207,9 @@
                 "label": "options",
                 "description": [],
                 "signature": [
-                  "{ page?: number | undefined; filter?: any; aggs?: Record<string, ",
+                  "{ search?: string | undefined; page?: number | undefined; filter?: any; aggs?: Record<string, ",
                   "AggregationsAggregationContainer",
-                  "> | undefined; search?: string | undefined; namespaces?: string[] | undefined; fields?: string[] | undefined; sortField?: string | undefined; preference?: string | undefined; pit?: ",
+                  "> | undefined; namespaces?: string[] | undefined; fields?: string[] | undefined; sortField?: string | undefined; preference?: string | undefined; pit?: ",
                   {
                     "pluginId": "@kbn/core-saved-objects-api-server",
                     "scope": "common",
@@ -26133,7 +26133,7 @@
             "label": "aggregate",
             "description": [],
             "signature": [
-              "\"min\" | \"max\" | \"sum\" | \"concat\" | \"average\""
+              "\"concat\" | \"min\" | \"max\" | \"sum\" | \"average\""
             ],
             "path": "src/plugins/data/common/search/aggs/metrics/top_hit.ts",
             "deprecated": false,

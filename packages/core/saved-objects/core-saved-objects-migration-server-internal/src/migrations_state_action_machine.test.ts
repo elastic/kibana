@@ -44,18 +44,21 @@ describe('migrationsStateActionMachine', () => {
       '.kibana_cases': ['typeD', 'typeE'],
     },
     targetMappings: { properties: {} },
+    coreMigrationVersionPerType: {},
     migrationVersionPerType: {},
     indexPrefix: '.my-so-index',
     migrationsConfig: {
       algorithm: 'v2',
       batchSize: 1000,
       maxBatchSizeBytes: new ByteSizeValue(1e8),
+      maxReadBatchSizeBytes: new ByteSizeValue(536870888),
       pollInterval: 0,
       scrollDuration: '0s',
       skip: false,
       retryAttempts: 5,
       zdt: {
         metaPickupSyncDelaySec: 120,
+        runOnNonMigratorNodes: false,
       },
     },
     typeRegistry,
@@ -98,7 +101,8 @@ describe('migrationsStateActionMachine', () => {
       abort,
     });
     const logs = loggingSystemMock.collect(mockLogger);
-    const doneLog = logs.info.splice(8, 1)[0][0];
+    // the 'done' log is the 5th entry in the list
+    const doneLog = logs.info.splice(4, 1)[0][0];
     expect(doneLog).toMatch(/\[.my-so-index\] Migration completed after \d+ms/);
     expect(logs).toMatchSnapshot();
   });

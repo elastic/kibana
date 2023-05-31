@@ -15,6 +15,7 @@ import {
   SavedObjectTypeRegistry,
 } from '@kbn/core-saved-objects-base-server-internal';
 import { KibanaMigrator } from './kibana_migrator';
+import { DocumentMigrator } from './document_migrator';
 import { ByteSizeValue } from '@kbn/config-schema';
 import { docLinksServiceMock } from '@kbn/core-doc-links-server-mocks';
 import { lastValueFrom } from 'rxjs';
@@ -119,30 +120,19 @@ describe('KibanaMigrator', () => {
       );
     });
 
+    // TODO check if it applies
     it('calls documentMigrator.migrate', () => {
       const options = mockOptions();
       const kibanaMigrator = new KibanaMigrator(options);
-      const mockDocumentMigrator = { migrate: jest.fn() };
-      // @ts-expect-error `documentMigrator` is readonly.
-      kibanaMigrator.documentMigrator = mockDocumentMigrator;
+      jest.spyOn(DocumentMigrator.prototype, 'migrate').mockImplementation((doc) => doc);
       const doc = {} as any;
 
       expect(() => kibanaMigrator.migrateDocument(doc)).not.toThrowError();
-      expect(mockDocumentMigrator.migrate).toBeCalledTimes(1);
+      expect(DocumentMigrator.prototype.migrate).toBeCalledTimes(1);
     });
   });
 
   describe('runMigrations', () => {
-    // TODO move to document_migrator.test.ts
-    // it('throws if prepareMigrations is not called first', async () => {
-    //   const options = mockOptions();
-    //   const migrator = new KibanaMigrator(options);
-
-    //   await expect(migrator.runMigrations()).rejects.toThrowError(
-    //     'Migrations are not ready. Make sure prepareMigrations is called first.'
-    //   );
-    // });
-
     it("calls runV2Migration with the right params when the migration algorithm is 'v2'", async () => {
       const options = mockOptions();
       const migrator = new KibanaMigrator(options);
@@ -319,15 +309,18 @@ const mockOptions = (algorithm: 'v2' | 'zdt' = 'v2') => {
       algorithm,
       batchSize: 20,
       maxBatchSizeBytes: ByteSizeValue.parse('20mb'),
+      maxReadBatchSizeBytes: new ByteSizeValue(536870888),
       pollInterval: 20000,
       scrollDuration: '10m',
       skip: false,
       retryAttempts: 20,
       zdt: {
         metaPickupSyncDelaySec: 120,
+        runOnNonMigratorNodes: false,
       },
     },
     client: mockedClient,
     docLinks: docLinksServiceMock.createSetupContract(),
+    nodeRoles: { backgroundTasks: true, ui: true, migrator: true },
   };
 };

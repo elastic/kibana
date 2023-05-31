@@ -5,38 +5,6 @@
     "functions": [
       {
         "parentPluginId": "visualizationUiComponents",
-        "id": "def-public.chroma",
-        "type": "Function",
-        "tags": [],
-        "label": "chroma",
-        "description": [
-          "\nChroma.js is a tiny library for all kinds of color conversions and color scales."
-        ],
-        "signature": [
-          "ChromaStatic"
-        ],
-        "path": "node_modules/@types/chroma-js/index.d.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "visualizationUiComponents",
-        "id": "def-public.chroma",
-        "type": "Function",
-        "tags": [],
-        "label": "chroma",
-        "description": [],
-        "signature": [
-          "ChromaStatic"
-        ],
-        "path": "node_modules/@types/chroma-js/index.d.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "visualizationUiComponents",
         "id": "def-public.ColorPicker",
         "type": "Function",
         "tags": [],

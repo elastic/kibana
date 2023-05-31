@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { createEsParams, useEsSearch } from '@kbn/observability-plugin/public';
+import { createEsParams, useEsSearch } from '@kbn/observability-shared-plugin/public';
 import { SYNTHETICS_INDEX_PATTERN } from '../../../../../../common/constants';
 import { MarkerItems } from './waterfall/context/waterfall_context';
 

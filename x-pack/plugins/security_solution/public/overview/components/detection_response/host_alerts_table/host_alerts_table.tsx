@@ -38,6 +38,7 @@ import {
   SecurityCellActions,
   SecurityCellActionsTrigger,
 } from '../../../../common/components/cell_actions';
+import { useGlobalFilterQuery } from '../../../../common/hooks/use_global_filter_query';
 
 interface HostAlertsTableProps {
   signalIndexName: string | null;
@@ -51,6 +52,7 @@ const DETECTION_RESPONSE_HOST_SEVERITY_QUERY_ID = 'vulnerableHostsBySeverityQuer
 
 export const HostAlertsTable = React.memo(({ signalIndexName }: HostAlertsTableProps) => {
   const openAlertsPageWithFilters = useNavigateToAlertsPageWithFilters();
+  const { filterQuery } = useGlobalFilterQuery();
 
   const openHostInAlerts = useCallback(
     ({ hostName, severity }: { hostName: string; severity?: string }) =>
@@ -81,6 +83,7 @@ export const HostAlertsTable = React.memo(({ signalIndexName }: HostAlertsTableP
     skip: !toggleStatus,
     queryId: DETECTION_RESPONSE_HOST_SEVERITY_QUERY_ID,
     signalIndexName,
+    filterQuery,
   });
 
   const columns = useMemo(() => getTableColumns(openHostInAlerts), [openHostInAlerts]);

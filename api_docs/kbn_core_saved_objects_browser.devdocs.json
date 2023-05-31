@@ -82,14 +82,6 @@
             "path": "src/plugins/dashboard/public/dashboard_actions/clone_panel_action.tsx"
           },
           {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/public/app_plugin/types.ts"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/public/app_plugin/types.ts"
-          },
-          {
             "plugin": "exploratoryView",
             "path": "x-pack/plugins/exploratory_view/public/application/types.ts"
           },

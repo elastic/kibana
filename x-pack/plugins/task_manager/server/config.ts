@@ -10,7 +10,6 @@ import { schema, TypeOf } from '@kbn/config-schema';
 export const MAX_WORKERS_LIMIT = 100;
 export const DEFAULT_MAX_WORKERS = 10;
 export const DEFAULT_POLL_INTERVAL = 3000;
-export const DEFAULT_MAX_POLL_INACTIVITY_CYCLES = 10;
 export const DEFAULT_VERSION_CONFLICT_THRESHOLD = 80;
 export const DEFAULT_MAX_EPHEMERAL_REQUEST_CAPACITY = MAX_WORKERS_LIMIT;
 
@@ -63,11 +62,6 @@ export const configSchema = schema.object(
     poll_interval: schema.number({
       defaultValue: DEFAULT_POLL_INTERVAL,
       min: 100,
-    }),
-    /* How many poll interval cycles can work take before it's timed out. */
-    max_poll_inactivity_cycles: schema.number({
-      defaultValue: DEFAULT_MAX_POLL_INACTIVITY_CYCLES,
-      min: 1,
     }),
     /* How many requests can Task Manager buffer before it rejects new requests. */
     request_capacity: schema.number({
@@ -141,6 +135,7 @@ export const configSchema = schema.object(
     /* These are not designed to be used by most users. Please use caution when changing these */
     unsafe: schema.object({
       exclude_task_types: schema.arrayOf(schema.string(), { defaultValue: [] }),
+      authenticate_background_task_utilization: schema.boolean({ defaultValue: true }),
     }),
   },
   {

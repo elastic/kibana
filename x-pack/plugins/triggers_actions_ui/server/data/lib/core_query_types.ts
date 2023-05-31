@@ -22,11 +22,11 @@ export const CoreQueryParamsSchemaProperties = {
   // field in index used for date/time
   timeField: schema.string({ minLength: 1 }),
   // aggregation type
-  aggType: schema.string({ validate: validateAggType }),
+  aggType: schema.string({ validate: validateAggType, defaultValue: 'count' }),
   // aggregation field
   aggField: schema.maybe(schema.string({ minLength: 1 })),
   // how to group
-  groupBy: schema.string({ validate: validateGroupBy }),
+  groupBy: schema.string({ validate: validateGroupBy, defaultValue: 'all' }),
   // field to group on (for groupBy: top)
   termField: schema.maybe(schema.string({ minLength: 1 })),
   // filter field

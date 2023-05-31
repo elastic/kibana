@@ -45,6 +45,7 @@ DescriptionListStyled.displayName = 'DescriptionListStyled';
 export interface ModalInspectProps {
   closeModal: () => void;
   getInspectQuery: GetInspectQuery;
+  title: string;
 }
 
 interface Request {
@@ -91,7 +92,7 @@ const stringify = (object: Request | Response): string => {
   }
 };
 
-const ModalInspectQueryComponent = ({ closeModal, getInspectQuery }: ModalInspectProps) => {
+const ModalInspectQueryComponent = ({ closeModal, getInspectQuery, title }: ModalInspectProps) => {
   const { request, response } = getInspectQuery();
   // using index 0 as there will be only one request and response for now
   const parsedRequest: Request = parse(request[0]);
@@ -200,7 +201,9 @@ const ModalInspectQueryComponent = ({ closeModal, getInspectQuery }: ModalInspec
   return (
     <MyEuiModal onClose={closeModal} data-test-subj="modal-inspect-euiModal">
       <EuiModalHeader>
-        <EuiModalHeaderTitle>{i18n.INSPECT}</EuiModalHeaderTitle>
+        <EuiModalHeaderTitle>
+          {i18n.INSPECT} {title}
+        </EuiModalHeaderTitle>
       </EuiModalHeader>
 
       <EuiModalBody>

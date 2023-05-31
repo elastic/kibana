@@ -78,6 +78,7 @@ export const PreconfiguredOutputsSchema = schema.arrayOf(
     id: schema.string(),
     config: schema.maybe(schema.object({}, { unknowns: 'allow' })),
     config_yaml: schema.never(),
+    allow_edit: schema.maybe(schema.arrayOf(schema.string())),
   }),
   {
     defaultValue: [],

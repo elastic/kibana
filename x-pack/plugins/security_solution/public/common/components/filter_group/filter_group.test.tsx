@@ -95,7 +95,11 @@ const getStoreWithCustomState = (newState: typeof state = state) => {
   return createStore(newState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
 };
 
-const TestComponent: FC<ComponentProps<typeof TestProviders>> = (props) => (
+const TestComponent: FC<
+  ComponentProps<typeof TestProviders> & {
+    filterGroupProps?: Partial<ComponentProps<typeof FilterGroup>>;
+  }
+> = (props) => (
   <TestProviders store={getStoreWithCustomState()} {...props}>
     <FilterGroup
       initialControls={DEFAULT_DETECTION_PAGE_FILTERS}
@@ -103,6 +107,7 @@ const TestComponent: FC<ComponentProps<typeof TestProviders>> = (props) => (
       chainingSystem="HIERARCHICAL"
       onFilterChange={onFilterChangeMock}
       onInit={onInitMock}
+      {...props.filterGroupProps}
     />
   </TestProviders>
 );
@@ -520,6 +525,36 @@ describe(' Filter Group Component ', () => {
       fireEvent.mouseOver(screen.getByTestId(TEST_IDS.SAVE_CONTROL));
       await waitFor(() => {
         expect(screen.queryByTestId(TEST_IDS.SAVE_CHANGE_POPOVER)).toBeVisible();
+      });
+    });
+    it('should update controlGroup with new filters and queries when valid query is supplied', async () => {
+      const validQuery = { query: { language: 'kuery', query: '' } };
+      // pass an invalid query
+      render(<TestComponent filterGroupProps={validQuery} />);
+
+      await waitFor(() => {
+        expect(controlGroupMock.updateInput).toHaveBeenNthCalledWith(
+          1,
+          expect.objectContaining({
+            filters: undefined,
+            query: validQuery.query,
+          })
+        );
+      });
+    });
+
+    it('should not update controlGroup with new filters and queries when invalid query is supplied', async () => {
+      const invalidQuery = { query: { language: 'kuery', query: '\\' } };
+      // pass an invalid query
+      render(<TestComponent filterGroupProps={invalidQuery} />);
+
+      await waitFor(() => {
+        expect(controlGroupMock.updateInput).toHaveBeenCalledWith(
+          expect.objectContaining({
+            filters: [],
+            query: undefined,
+          })
+        );
       });
     });
   });

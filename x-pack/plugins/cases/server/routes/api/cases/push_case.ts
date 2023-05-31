@@ -5,12 +5,7 @@
  * 2.0.
  */
 
-import Boom from '@hapi/boom';
-import { pipe } from 'fp-ts/lib/pipeable';
-import { fold } from 'fp-ts/lib/Either';
-import { identity } from 'fp-ts/lib/function';
-
-import { throwErrors, CasePushRequestParamsRt } from '../../../../common/api';
+import { decodeWithExcessOrThrow, CasePushRequestParamsRt } from '../../../../common/api';
 import { CASE_PUSH_URL } from '../../../../common/constants';
 import type { CaseRoute } from '../types';
 import { createCaseError } from '../../../common/error';
@@ -24,10 +19,7 @@ export const pushCaseRoute: CaseRoute = createCasesRoute({
       const caseContext = await context.cases;
       const casesClient = await caseContext.getCasesClient();
 
-      const params = pipe(
-        CasePushRequestParamsRt.decode(request.params),
-        fold(throwErrors(Boom.badRequest), identity)
-      );
+      const params = decodeWithExcessOrThrow(CasePushRequestParamsRt)(request.params);
 
       return response.ok({
         body: await casesClient.cases.push({

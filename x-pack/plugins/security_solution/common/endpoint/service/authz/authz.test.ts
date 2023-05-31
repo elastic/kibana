@@ -11,7 +11,7 @@ import { createFleetAuthzMock } from '@kbn/fleet-plugin/common/mocks';
 import { createLicenseServiceMock } from '../../../license/mocks';
 import type { EndpointAuthzKeyList } from '../../types/authz';
 import {
-  commandToRBACMap,
+  RESPONSE_CONSOLE_ACTION_COMMANDS_TO_RBAC_FEATURE_CONTROL,
   CONSOLE_RESPONSE_ACTION_COMMANDS,
   type ResponseConsoleRbacControls,
 } from '../response_actions/constants';
@@ -129,7 +129,7 @@ describe('Endpoint Authz service', () => {
       const responseConsolePrivileges = CONSOLE_RESPONSE_ACTION_COMMANDS.slice().reduce<
         ResponseConsoleRbacControls[]
       >((acc, e) => {
-        const item = commandToRBACMap[e];
+        const item = RESPONSE_CONSOLE_ACTION_COMMANDS_TO_RBAC_FEATURE_CONTROL[e];
         if (!acc.includes(item)) {
           acc.push(item);
         }
@@ -207,6 +207,49 @@ describe('Endpoint Authz service', () => {
         const authz = calculateEndpointAuthz(licenseService, fleetAuthz, userRoles, true);
         expect(authz[auth]).toBe(false);
       });
+
+      it.each<[EndpointAuthzKeyList[number], string[]]>([
+        ['canWriteEndpointList', ['writeEndpointList']],
+        ['canReadEndpointList', ['writeEndpointList', 'readEndpointList']],
+        ['canWritePolicyManagement', ['writePolicyManagement']],
+        ['canReadPolicyManagement', ['writePolicyManagement', 'readPolicyManagement']],
+        ['canWriteActionsLogManagement', ['writeActionsLogManagement']],
+        ['canReadActionsLogManagement', ['writeActionsLogManagement', 'readActionsLogManagement']],
+        [
+          'canAccessEndpointActionsLogManagement',
+          ['writeActionsLogManagement', 'readActionsLogManagement'],
+        ],
+        ['canIsolateHost', ['writeHostIsolation']],
+        ['canUnIsolateHost', ['writeHostIsolation']],
+        ['canKillProcess', ['writeProcessOperations']],
+        ['canSuspendProcess', ['writeProcessOperations']],
+        ['canGetRunningProcesses', ['writeProcessOperations']],
+        ['canWriteExecuteOperations', ['writeExecuteOperations']],
+        ['canWriteFileOperations', ['writeFileOperations']],
+        ['canWriteTrustedApplications', ['writeTrustedApplications']],
+        ['canReadTrustedApplications', ['writeTrustedApplications', 'readTrustedApplications']],
+        ['canWriteHostIsolationExceptions', ['writeHostIsolationExceptions']],
+        [
+          'canReadHostIsolationExceptions',
+          ['writeHostIsolationExceptions', 'readHostIsolationExceptions'],
+        ],
+        ['canWriteBlocklist', ['writeBlocklist']],
+        ['canReadBlocklist', ['writeBlocklist', 'readBlocklist']],
+        ['canWriteEventFilters', ['writeEventFilters']],
+        ['canReadEventFilters', ['writeEventFilters', 'readEventFilters']],
+        // all dependent privileges are false and so it should be false
+        ['canAccessResponseConsole', responseConsolePrivileges],
+      ])(
+        '%s should be false if `packagePrivilege.%s` is `false` and user roles is undefined',
+        (auth, privileges) => {
+          // read permission checks for write || read so we need to set both to false
+          privileges.forEach((privilege) => {
+            fleetAuthz.packagePrivileges!.endpoint.actions[privilege].executePackageAction = false;
+          });
+          const authz = calculateEndpointAuthz(licenseService, fleetAuthz, undefined, true);
+          expect(authz[auth]).toBe(false);
+        }
+      );
 
       it.each(responseConsolePrivileges)(
         'canAccessResponseConsole should be true if %s for CONSOLE privileges is true',

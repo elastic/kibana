@@ -12,6 +12,7 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
+import type { NodeRoles } from '@kbn/core-node-server';
 import type { Logger } from '@kbn/logging';
 import type { DocLinksServiceStart } from '@kbn/core-doc-links-server';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
@@ -25,6 +26,7 @@ import {
   type SavedObjectsTypeMappingDefinitions,
   type SavedObjectsMigrationConfigType,
   type IKibanaMigrator,
+  type MigrateDocumentOptions,
   type KibanaMigratorStatus,
   type MigrationResult,
   type IndexTypesMap,
@@ -45,6 +47,7 @@ export interface KibanaMigratorOptions {
   logger: Logger;
   docLinks: DocLinksServiceStart;
   waitForMigrationCompletion: boolean;
+  nodeRoles: NodeRoles;
 }
 
 /**
@@ -67,6 +70,7 @@ export class KibanaMigrator implements IKibanaMigrator {
   private readonly soMigrationsConfig: SavedObjectsMigrationConfigType;
   private readonly docLinks: DocLinksServiceStart;
   private readonly waitForMigrationCompletion: boolean;
+  private readonly nodeRoles: NodeRoles;
   public readonly kibanaVersion: string;
 
   /**
@@ -82,6 +86,7 @@ export class KibanaMigrator implements IKibanaMigrator {
     logger,
     docLinks,
     waitForMigrationCompletion,
+    nodeRoles,
   }: KibanaMigratorOptions) {
     this.client = client;
     this.kibanaIndex = kibanaIndex;
@@ -99,6 +104,7 @@ export class KibanaMigrator implements IKibanaMigrator {
       log: this.log,
     });
     this.waitForMigrationCompletion = waitForMigrationCompletion;
+    this.nodeRoles = nodeRoles;
     // Building the active mappings (and associated md5sums) is an expensive
     // operation so we cache the result
     this.activeMappings = buildActiveMappings(this.mappingProperties);
@@ -145,6 +151,7 @@ export class KibanaMigrator implements IKibanaMigrator {
         docLinks: this.docLinks,
         serializer: this.serializer,
         elasticsearchClient: this.client,
+        nodeRoles: this.nodeRoles,
       });
     } else {
       return runV2Migration({
@@ -168,7 +175,10 @@ export class KibanaMigrator implements IKibanaMigrator {
     return this.activeMappings;
   }
 
-  public migrateDocument(doc: SavedObjectUnsanitizedDoc): SavedObjectUnsanitizedDoc {
-    return this.documentMigrator.migrate(doc);
+  public migrateDocument(
+    doc: SavedObjectUnsanitizedDoc,
+    { allowDowngrade = false }: MigrateDocumentOptions = {}
+  ): SavedObjectUnsanitizedDoc {
+    return this.documentMigrator.migrate(doc, { allowDowngrade });
   }
 }

@@ -280,7 +280,8 @@ export abstract class InferenceBase<TInferResponse> {
       const inferenceConfig = getInferenceConfig();
 
       const resp = (await this.trainedModelsApi.inferTrainedModel(
-        this.deploymentId ?? this.model.model_id,
+        this.model.model_id,
+        this.deploymentId,
         {
           docs: this.getInferDocs(),
           ...(inferenceConfig ? { inference_config: inferenceConfig } : {}),
@@ -334,7 +335,7 @@ export abstract class InferenceBase<TInferResponse> {
   }
 
   private getDefaultInferenceConfig(): estypes.MlInferenceConfigUpdateContainer[keyof estypes.MlInferenceConfigUpdateContainer] {
-    return this.model.inference_config[
+    return this.model.inference_config![
       this.inferenceType as keyof estypes.MlInferenceConfigUpdateContainer
     ];
   }

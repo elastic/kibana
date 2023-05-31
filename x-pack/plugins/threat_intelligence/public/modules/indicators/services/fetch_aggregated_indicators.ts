@@ -5,12 +5,15 @@
  * 2.0.
  */
 
+import { EuiComboBoxOptionOption } from '@elastic/eui';
 import { TimeRangeBounds } from '@kbn/data-plugin/common';
 import type { ISearchStart, QueryStart } from '@kbn/data-plugin/public';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
+import moment from 'moment';
 import { BARCHART_AGGREGATION_NAME, FactoryQueryType } from '../../../../common/constants';
 import { RawIndicatorFieldId } from '../../../../common/types/indicator';
+import { dateFormatter } from '../../../utils/dates';
 import { search } from '../../../utils/search';
 import { getIndicatorQueryParams } from '../utils/get_indicator_query_params';
 
@@ -49,22 +52,33 @@ export interface FetchAggregatedIndicatorsParams {
   filters: Filter[];
   filterQuery: Query;
   timeRange: TimeRange;
-  field: string;
+  field: EuiComboBoxOptionOption<string>;
 }
 
 /**
  * Converts data received from an Elastic search with date_histogram aggregation enabled to something usable in the "@elastic/chart" BarChart component
  * @param aggregations An array of {@link Aggregation} objects to process
+ * @param userTimeZone User's timezone as a string
+ * @param userFormat User's time format as a string
+ * @param field Field Eui combobox options
  * @returns An array of  {@link ChartSeries} directly usable in a BarChart component
  */
-export const convertAggregationToChartSeries = (aggregations: Aggregation[]): ChartSeries[] =>
+export const convertAggregationToChartSeries = (
+  aggregations: Aggregation[],
+  userTimeZone: string,
+  userFormat: string,
+  field: EuiComboBoxOptionOption<string>
+): ChartSeries[] =>
   aggregations.reduce(
     (accumulated: ChartSeries[], current: Aggregation) =>
       accumulated.concat(
         current.events.buckets.map((val: AggregationValue) => ({
           x: val.key_as_string,
           y: val.doc_count,
-          g: current.key,
+          g:
+            field.value === 'date'
+              ? dateFormatter(moment(current.key), userTimeZone, userFormat)
+              : current.key,
         }))
       ),
     []
@@ -75,10 +89,14 @@ export const createFetchAggregatedIndicators =
     inspectorAdapter,
     searchService,
     queryService,
+    userTimeZone,
+    userFormat,
   }: {
     inspectorAdapter: RequestAdapter;
     searchService: ISearchStart;
     queryService: QueryStart;
+    userTimeZone: string;
+    userFormat: string;
   }) =>
   async (
     { selectedPatterns, timeRange, field, filterQuery, filters }: FetchAggregatedIndicatorsParams,
@@ -93,7 +111,7 @@ export const createFetchAggregatedIndicators =
     const sharedParams = getIndicatorQueryParams({ timeRange, filters, filterQuery });
 
     const searchRequestBody = {
-      fields: [TIMESTAMP_FIELD, field],
+      fields: [TIMESTAMP_FIELD, field.label],
       size: 0,
       ...sharedParams,
     };
@@ -115,14 +133,19 @@ export const createFetchAggregatedIndicators =
           from: dateFrom,
           to: dateTo,
         },
-        field,
+        field: field.label,
       },
       { signal, inspectorAdapter, requestName: 'Indicators barchart' }
     );
 
     const aggregations: Aggregation[] = aggregation?.buckets;
 
-    const chartSeries: ChartSeries[] = convertAggregationToChartSeries(aggregations);
+    const chartSeries: ChartSeries[] = convertAggregationToChartSeries(
+      aggregations,
+      userTimeZone,
+      userFormat,
+      field
+    );
 
     return chartSeries;
   };

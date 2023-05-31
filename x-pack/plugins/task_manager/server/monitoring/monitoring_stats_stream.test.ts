@@ -22,7 +22,6 @@ describe('createMonitoringStatsStream', () => {
     poll_interval: 6000000,
     version_conflict_threshold: 80,
     monitored_stats_required_freshness: 6000000,
-    max_poll_inactivity_cycles: 10,
     request_capacity: 1000,
     monitored_aggregated_stats_refresh_rate: 5000,
     monitored_stats_health_verbose_log: {
@@ -44,6 +43,7 @@ describe('createMonitoringStatsStream', () => {
     },
     unsafe: {
       exclude_task_types: [],
+      authenticate_background_task_utilization: true,
     },
     event_loop_delay: {
       monitor: true,
@@ -77,7 +77,6 @@ describe('createMonitoringStatsStream', () => {
                 value: {
                   max_workers: 10,
                   poll_interval: 6000000,
-                  max_poll_inactivity_cycles: 10,
                   request_capacity: 1000,
                   monitored_aggregated_stats_refresh_rate: 5000,
                   monitored_stats_running_average_window: 50,
@@ -111,7 +110,6 @@ describe('createMonitoringStatsStream', () => {
                 value: {
                   max_workers: 10,
                   poll_interval: 6000000,
-                  max_poll_inactivity_cycles: 10,
                   request_capacity: 1000,
                   monitored_aggregated_stats_refresh_rate: 5000,
                   monitored_stats_running_average_window: 50,
@@ -145,7 +143,6 @@ describe('createMonitoringStatsStream', () => {
                 value: {
                   max_workers: 10,
                   poll_interval: 6000000,
-                  max_poll_inactivity_cycles: 10,
                   request_capacity: 1000,
                   monitored_aggregated_stats_refresh_rate: 5000,
                   monitored_stats_running_average_window: 50,

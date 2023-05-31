@@ -171,7 +171,7 @@ export const getSyntheticsEnablement = async ({ server }: { server: UptimeServer
 
   const { canEnable, canManageApiKeys } = hasPrivileges;
 
-  if (!config.service?.manifestUrl) {
+  if (!config.service?.manifestUrl && !config.service?.devUrl) {
     return {
       canEnable: true,
       canManageApiKeys,

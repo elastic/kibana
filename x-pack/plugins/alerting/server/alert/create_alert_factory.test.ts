@@ -329,6 +329,7 @@ describe('createAlertFactory()', () => {
     expect(result).toEqual({
       meta: {
         flappingHistory: [],
+        maintenanceWindowIds: [],
         uuid: expect.any(String),
       },
       state: {},

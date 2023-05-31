@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiButton, EuiSpacer, EuiCallOut, EuiSkeletonText } from '@elastic/eui';
+import { EuiButton, EuiSpacer, EuiCallOut, EuiSkeletonText, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
@@ -91,15 +91,12 @@ export const CloudFormationInstructions: React.FunctionComponent<Props> = ({
         }
       )}
     >
-      <EuiSpacer size="m" />
-      <EuiCallOut
-        title={i18n.translate('xpack.fleet.agentEnrollment.cloudFormation.callout', {
-          defaultMessage:
-            'Sign in to your AWS cloud provider account, and switch to the region that you want to scan, then click Launch CloudFormation.',
-        })}
-        color="warning"
-        iconType="warning"
-      />
+      <EuiText>
+        <FormattedMessage
+          id="xpack.fleet.agentEnrollment.cloudFormation.instructions"
+          defaultMessage="Sign in to your AWS cloud provider account, and switch to the region that you want to scan, then click Launch CloudFormation."
+        />
+      </EuiText>
       <EuiSpacer size="m" />
       <EuiButton
         color="primary"

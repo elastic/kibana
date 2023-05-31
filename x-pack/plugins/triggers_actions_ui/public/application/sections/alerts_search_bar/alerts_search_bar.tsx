@@ -17,6 +17,7 @@ import { TriggersAndActionsUiServices } from '../../..';
 // TODO Share buildEsQuery to be used between AlertsSearchBar and AlertsStateTable component https://github.com/elastic/kibana/issues/144615
 export function AlertsSearchBar({
   appName,
+  disableQueryLanguageSwitcher = false,
   featureIds,
   query,
   filters,
@@ -70,6 +71,7 @@ export function AlertsSearchBar({
   return (
     <SearchBar
       appName={appName}
+      disableQueryLanguageSwitcher={disableQueryLanguageSwitcher}
       indexPatterns={loading || error ? NO_INDEX_PATTERNS : [dataView!]}
       placeholder={placeholder}
       query={{ query: query ?? '', language: queryLanguage }}
@@ -82,6 +84,8 @@ export function AlertsSearchBar({
       onFiltersUpdated={onFiltersUpdated}
       onRefresh={onRefresh}
       showDatePicker={showDatePicker}
+      showQueryInput={true}
+      showSaveQuery={true}
       showSubmitButton={showSubmitButton}
       submitOnBlur={submitOnBlur}
       onQueryChange={onSearchQueryChange}

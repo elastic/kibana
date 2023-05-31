@@ -15,18 +15,9 @@ export function InfraSavedViewsProvider({ getService }: FtrProviderContext) {
   const browser = getService('browser');
 
   return {
-    getSavedViewsButton() {
-      return testSubjects.find('savedViews-openPopover');
-    },
-
     clickSavedViewsButton() {
       return testSubjects.click('savedViews-openPopover');
     },
-
-    getSavedViewsPopover() {
-      return testSubjects.find('savedViews-popover');
-    },
-
     pressEsc() {
       return browser.pressKeys([Key.ESCAPE]);
     },
@@ -36,46 +27,21 @@ export function InfraSavedViewsProvider({ getService }: FtrProviderContext) {
       return this.pressEsc();
     },
 
-    getLoadViewButton() {
-      return testSubjects.find('savedViews-loadView');
-    },
-
-    getManageViewsButton() {
-      return testSubjects.find('savedViews-manageViews');
-    },
-
     clickManageViewsButton() {
       return testSubjects.click('savedViews-manageViews');
     },
 
-    getManageViewsFlyout() {
-      return testSubjects.find('loadViewsFlyout');
-    },
-
     async getManageViewsEntries() {
-      await this.clickSavedViewsButton();
       await this.clickManageViewsButton();
       return testSubjects.findAll('infraRenderNameButton');
-    },
-
-    getUpdateViewButton() {
-      return testSubjects.find('savedViews-updateView');
     },
 
     clickUpdateViewButton() {
       return testSubjects.click('savedViews-updateView');
     },
 
-    getSaveNewViewButton() {
-      return testSubjects.find('savedViews-saveNewView');
-    },
-
     clickSaveNewViewButton() {
       return testSubjects.click('savedViews-saveNewView');
-    },
-
-    getCreateSavedViewModal() {
-      return testSubjects.find('savedViews-upsertModal');
     },
 
     async createNewSavedView(name: string) {
@@ -85,13 +51,11 @@ export function InfraSavedViewsProvider({ getService }: FtrProviderContext) {
     },
 
     async createView(name: string) {
-      await this.clickSavedViewsButton();
       await this.clickSaveNewViewButton();
       await this.createNewSavedView(name);
     },
 
     async updateView(name: string) {
-      await this.clickSavedViewsButton();
       await this.clickUpdateViewButton();
       await this.createNewSavedView(name);
     },
@@ -101,15 +65,6 @@ export function InfraSavedViewsProvider({ getService }: FtrProviderContext) {
         const subject = await testSubjects.find('savedViews-openPopover');
         expect(await subject.getVisibleText()).to.be(name);
       });
-    },
-
-    async ensureViewIsLoadable(name: string) {
-      const subject = await testSubjects.find('savedViews-loadList');
-      await subject.findByCssSelector(`li[title="${name}"]`);
-    },
-
-    closeSavedViewsLoadModal() {
-      return testSubjects.click('cancelSavedViewModal');
     },
   };
 }

@@ -22,3 +22,10 @@ export interface ApmDataSource<
   rollupInterval: RollupInterval;
   documentType: TDocumentType;
 }
+
+export type ApmDataSourceWithSummary<
+  T extends AnyApmDocumentType = AnyApmDocumentType
+> = ApmDataSource<T> & {
+  hasDurationSummaryField: boolean;
+  hasDocs: boolean;
+};

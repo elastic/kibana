@@ -8,7 +8,7 @@
 import React, { useMemo } from 'react';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import type { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
-import { EuiBasicTable, EuiLoadingContent, EuiSpacer } from '@elastic/eui';
+import { EuiBasicTable, EuiSkeletonText, EuiSpacer } from '@elastic/eui';
 
 import { PreferenceFormattedDate } from '../../formatted_date';
 import { SeverityBadge } from '../../../../detections/components/rules/severity_badge';
@@ -57,7 +57,7 @@ export const SimpleAlertTable = React.memo<{ alertIds: string[] }>(({ alertIds }
   }, [data]);
 
   if (loading) {
-    return <EuiLoadingContent lines={2} />;
+    return <EuiSkeletonText lines={2} />;
   } else if (error) {
     return <>{SIMPLE_ALERT_TABLE_ERROR}</>;
   } else if (mappedData) {

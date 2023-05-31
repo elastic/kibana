@@ -31,6 +31,7 @@ export function SavedSearchEmbeddableComponent({
   return (
     <DiscoverGridEmbeddableMemoized
       {...(searchProps as DiscoverGridEmbeddableProps)}
+      showFullScreenButton={false}
       className="dscDiscoverGrid"
     />
   );

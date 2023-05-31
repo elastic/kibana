@@ -98,6 +98,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     'infraHostsView',
     'security',
     'settings',
+    'header',
   ]);
 
   // Helpers
@@ -105,7 +106,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     kibanaServer.uiSettings.update({ [enableInfrastructureHostsView]: value });
 
   const loginWithReadOnlyUser = async () => {
-    const roleCreation = security.role.create('global_hosts_read_privileges_role', {
+    const roleCreation = await security.role.create('global_hosts_read_privileges_role', {
       elasticsearch: {
         indices: [{ names: ['metricbeat-*'], privileges: ['read', 'view_index_metadata'] }],
       },
@@ -126,10 +127,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       full_name: 'test user',
     });
 
-    const logout = pageObjects.security.forceLogout();
+    await Promise.all([roleCreation, userCreation]);
 
-    await Promise.all([roleCreation, userCreation, logout]);
-
+    await pageObjects.security.forceLogout();
     await pageObjects.security.login(
       'global_hosts_read_privileges_user',
       'global_hosts_read_privileges_user-password',
@@ -146,9 +146,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       security.user.delete('global_hosts_read_privileges_user'),
     ]);
 
-  const enableHostView = () => pageObjects.infraHostsView.clickEnableHostViewButton();
-
-  // Tests
   describe('Hosts View', function () {
     this.tags('includeFirefox');
 
@@ -171,6 +168,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     it('should be accessible from the Inventory page', async () => {
       await pageObjects.common.navigateToApp('infraOps');
+
       await pageObjects.infraHome.clickDismissKubernetesTourButton();
       await pageObjects.infraHostsView.clickTryHostViewBadge();
 
@@ -180,62 +178,87 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     describe('#Landing page', () => {
-      beforeEach(() => {
-        setHostViewEnabled(false);
+      beforeEach(async () => {
+        await setHostViewEnabled(false);
       });
 
-      it('as a user with read permission, should show hosts landing page with callout when the hosts view is disabled', async () => {
-        await loginWithReadOnlyUser();
-        await pageObjects.common.navigateToApp(HOSTS_VIEW_PATH);
-
-        const landingPageDisabled = await pageObjects.infraHostsView.getHostsLandingPageDisabled();
-        const learnMoreDocsUrl = await pageObjects.infraHostsView.getHostsLandingPageDocsLink();
-        const parsedUrl = new URL(learnMoreDocsUrl);
-
-        expect(parsedUrl.host).to.be('www.elastic.co');
-        expect(parsedUrl.pathname).to.be('/guide/en/kibana/current/kibana-privileges.html');
-        expect(landingPageDisabled).to.contain(
-          'Your user role doesn’t have sufficient privileges to enable this feature'
-        );
-
-        await logoutAndDeleteReadOnlyUser();
+      afterEach(async () => {
+        await setHostViewEnabled(true);
       });
 
-      it('as an admin, should see an enable button when the hosts view is disabled', async () => {
-        await pageObjects.common.navigateToApp(HOSTS_VIEW_PATH);
+      describe('User with read permission', () => {
+        beforeEach(async () => {
+          await loginWithReadOnlyUser();
+        });
 
-        const landingPageEnableButton =
-          await pageObjects.infraHostsView.getHostsLandingPageEnableButton();
-        const landingPageEnableButtonText = await landingPageEnableButton.getVisibleText();
-        expect(landingPageEnableButtonText).to.eql('Enable hosts view');
+        afterEach(async () => {
+          await logoutAndDeleteReadOnlyUser();
+        });
+
+        it('Should show hosts landing page with callout when the hosts view is disabled', async () => {
+          await pageObjects.common.navigateToApp(HOSTS_VIEW_PATH);
+          await pageObjects.header.waitUntilLoadingHasFinished();
+
+          const landingPageDisabled =
+            await pageObjects.infraHostsView.getHostsLandingPageDisabled();
+          const learnMoreDocsUrl = await pageObjects.infraHostsView.getHostsLandingPageDocsLink();
+          const parsedUrl = new URL(learnMoreDocsUrl);
+
+          expect(parsedUrl.host).to.be('www.elastic.co');
+          expect(parsedUrl.pathname).to.be('/guide/en/kibana/current/kibana-privileges.html');
+          expect(landingPageDisabled).to.contain(
+            'Your user role doesn’t have sufficient privileges to enable this feature'
+          );
+        });
       });
 
-      it('as an admin, should be able to enable the hosts view feature', async () => {
-        await pageObjects.common.navigateToApp(HOSTS_VIEW_PATH);
-        await enableHostView();
+      describe('Admin user', () => {
+        it('as an admin, should see an enable button when the hosts view is disabled', async () => {
+          await pageObjects.common.navigateToApp(HOSTS_VIEW_PATH);
+          await pageObjects.header.waitUntilLoadingHasFinished();
 
-        const titleElement = await find.byCssSelector('h1');
-        const title = await titleElement.getVisibleText();
+          const landingPageEnableButton =
+            await pageObjects.infraHostsView.getHostsLandingPageEnableButton();
+          const landingPageEnableButtonText = await landingPageEnableButton.getVisibleText();
+          expect(landingPageEnableButtonText).to.eql('Enable hosts view');
+        });
 
-        expect(title).to.contain('Hosts');
+        it('as an admin, should be able to enable the hosts view feature', async () => {
+          await pageObjects.common.navigateToApp(HOSTS_VIEW_PATH);
+          await pageObjects.header.waitUntilLoadingHasFinished();
+          await pageObjects.infraHostsView.clickEnableHostViewButton();
+
+          const titleElement = await find.byCssSelector('h1');
+          const title = await titleElement.getVisibleText();
+
+          expect(title).to.contain('Hosts');
+        });
       });
     });
 
     describe('#Single host Flyout', () => {
       before(async () => {
-        await setHostViewEnabled(true);
         await loginWithReadOnlyUser();
         await pageObjects.common.navigateToApp(HOSTS_VIEW_PATH);
+        await pageObjects.header.waitUntilLoadingHasFinished();
         await pageObjects.timePicker.setAbsoluteRange(
           START_HOST_PROCESSES_DATE.format(timepickerFormat),
           END_HOST_PROCESSES_DATE.format(timepickerFormat)
         );
-        await pageObjects.infraHostsView.clickTableOpenFlyoutButton();
       });
 
       after(async () => {
-        await pageObjects.infraHostsView.clickCloseFlyoutButton();
         await logoutAndDeleteReadOnlyUser();
+      });
+
+      beforeEach(async () => {
+        await pageObjects.infraHostsView.clickTableOpenFlyoutButton();
+      });
+
+      afterEach(async () => {
+        await retry.try(async () => {
+          await pageObjects.infraHostsView.clickCloseFlyoutButton();
+        });
       });
 
       it('should render metadata tab, add and remove filter', async () => {
@@ -243,7 +266,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         expect(metadataTab).to.contain('Metadata');
 
         await pageObjects.infraHostsView.clickAddMetadataFilter();
-        await pageObjects.infraHome.waitForLoading();
+        await pageObjects.header.waitUntilLoadingHasFinished();
 
         // Add Filter
         const addedFilter = await pageObjects.infraHostsView.getAppliedFilter();
@@ -253,29 +276,29 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         // Remove filter
         await pageObjects.infraHostsView.clickRemoveMetadataFilter();
-        await pageObjects.infraHome.waitForLoading();
+        await pageObjects.header.waitUntilLoadingHasFinished();
         const removeFilterShouldNotExist = await pageObjects.infraHostsView.getRemoveFilterExist();
         expect(removeFilterShouldNotExist).to.be(false);
       });
 
       it('should navigate to Uptime after click', async () => {
         await pageObjects.infraHostsView.clickFlyoutUptimeLink();
-        await pageObjects.infraHome.waitForLoading();
+        await pageObjects.header.waitUntilLoadingHasFinished();
         const url = await browser.getCurrentUrl();
         expect(url).to.contain(
           'app/uptime/?search=host.name%3A%20%22Jennys-MBP.fritz.box%22%20OR%20host.ip%3A%20%22192.168.1.79%22'
         );
         await browser.goBack();
-        await pageObjects.infraHome.waitForLoading();
+        await pageObjects.header.waitUntilLoadingHasFinished();
       });
 
       it('should navigate to APM services after click', async () => {
         await pageObjects.infraHostsView.clickFlyoutApmServicesLink();
-        await pageObjects.infraHome.waitForLoading();
+        await pageObjects.header.waitUntilLoadingHasFinished();
         const url = await browser.getCurrentUrl();
         expect(url).to.contain('app/apm/services?kuery=host.hostname%3A%22Jennys-MBP.fritz.box%22');
         await browser.goBack();
-        await pageObjects.infraHome.waitForLoading();
+        await pageObjects.header.waitUntilLoadingHasFinished();
       });
 
       describe('should render processes tab', async () => {
@@ -319,9 +342,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     describe('#Page Content', () => {
       before(async () => {
-        await setHostViewEnabled(true);
         await loginWithReadOnlyUser();
         await pageObjects.common.navigateToApp(HOSTS_VIEW_PATH);
+        await pageObjects.header.waitUntilLoadingHasFinished();
         await pageObjects.timePicker.setAbsoluteRange(
           START_DATE.format(timepickerFormat),
           END_DATE.format(timepickerFormat)
@@ -364,6 +387,16 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         });
       });
 
+      it('should render "N/A" when processes summary is not available in flyout', async () => {
+        await pageObjects.infraHostsView.clickTableOpenFlyoutButton();
+        await pageObjects.infraHostsView.clickProcessesFlyoutTab();
+        const processesTotalValue =
+          await pageObjects.infraHostsView.getProcessesTabContentTotalValue();
+        const processValue = await processesTotalValue.getVisibleText();
+        expect(processValue).to.eql('N/A');
+        await pageObjects.infraHostsView.clickCloseFlyoutButton();
+      });
+
       describe('KPI tiles', () => {
         it('should render 5 metrics trend tiles', async () => {
           const hosts = await pageObjects.infraHostsView.getAllKPITiles();
@@ -371,7 +404,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         });
 
         [
-          { metric: 'hosts', value: '6' },
+          { metric: 'hostsCount', value: '6' },
           { metric: 'cpu', value: '0.8%' },
           { metric: 'memory', value: '16.81%' },
           { metric: 'tx', value: 'N/A' },
@@ -392,6 +425,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           await pageObjects.infraHostsView.visitMetricsTab();
         });
 
+        after(async () => {
+          await browser.scrollTop();
+        });
+
         it('should load 8 lens metric charts', async () => {
           const metricCharts = await pageObjects.infraHostsView.getAllMetricsCharts();
           expect(metricCharts.length).to.equal(8);
@@ -408,6 +445,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           await pageObjects.infraHostsView.visitLogsTab();
         });
 
+        after(async () => {
+          await browser.scrollTop();
+        });
+
         it('should load the Logs tab section when clicking on it', async () => {
           await testSubjects.existOrFail('hostsView-logs');
         });
@@ -422,6 +463,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         before(async () => {
           await browser.scrollTop();
           await pageObjects.infraHostsView.visitAlertTab();
+        });
+
+        after(async () => {
+          await browser.scrollTop();
         });
 
         it('should correctly load the Alerts tab section when clicking on it', async () => {
@@ -492,6 +537,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         });
 
         after(async () => {
+          await browser.scrollTop();
           await pageObjects.infraHostsView.submitQuery('');
         });
 
@@ -510,7 +556,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         it('should update the KPIs content on a search submit', async () => {
           await Promise.all(
             [
-              { metric: 'hosts', value: '3' },
+              { metric: 'hostsCount', value: '3' },
               { metric: 'cpu', value: '0.8%' },
               { metric: 'memory', value: '16.25%' },
               { metric: 'tx', value: 'N/A' },
@@ -544,6 +590,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             expect(cells.length).to.be(ALL_ALERTS * COLUMNS);
           });
         });
+
+        it('should show an error message when an invalid KQL is submitted', async () => {
+          await pageObjects.infraHostsView.submitQuery('cloud.provider="gcp" A');
+          await testSubjects.existOrFail('hostsViewErrorCallout');
+        });
       });
 
       describe('Pagination and Sorting', () => {
@@ -551,8 +602,14 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           await browser.scrollTop();
         });
 
+        after(async () => {
+          await browser.scrollTop();
+        });
+
         beforeEach(async () => {
-          await pageObjects.infraHostsView.changePageSize(5);
+          await retry.try(async () => {
+            await pageObjects.infraHostsView.changePageSize(5);
+          });
         });
 
         it('should show 5 rows on the first page', async () => {

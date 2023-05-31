@@ -32,7 +32,7 @@ export const MonitorCompleteCount = (props: MonitorCompleteCountProps) => {
 
   return (
     <ExploratoryViewEmbeddable
-      id="monitorCompleteCount"
+      id="monitorSuccessfulCount"
       align="left"
       reportType={ReportTypes.SINGLE_METRIC}
       attributes={[
@@ -43,14 +43,17 @@ export const MonitorCompleteCount = (props: MonitorCompleteCountProps) => {
             'observer.geo.name': [selectedLocation.label],
           },
           dataType: 'synthetics',
-          selectedMetricField: 'monitor_complete',
-          name: COMPLETE_LABEL,
+          selectedMetricField: 'monitor_successful',
+          name: SUCCESSFUL_LABEL,
         },
       ]}
     />
   );
 };
 
-export const COMPLETE_LABEL = i18n.translate('xpack.synthetics.monitorDetails.summary.complete', {
-  defaultMessage: 'Complete',
-});
+export const SUCCESSFUL_LABEL = i18n.translate(
+  'xpack.synthetics.monitorDetails.summary.successful',
+  {
+    defaultMessage: 'Successful',
+  }
+);

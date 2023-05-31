@@ -13,13 +13,13 @@ import { formatKibanaNamespace } from '@kbn/synthetics-plugin/common/formatters'
 import { API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import { DEFAULT_FIELDS } from '@kbn/synthetics-plugin/common/constants/monitor_defaults';
 import { ALL_SPACES_ID } from '@kbn/security-plugin/common/constants';
-import { syntheticsMonitorType } from '@kbn/synthetics-plugin/server/legacy_uptime/lib/saved_objects/synthetics_monitor';
 import { format as formatUrl } from 'url';
 
 import supertest from 'supertest';
 import { serviceApiKeyPrivileges } from '@kbn/synthetics-plugin/server/synthetics_service/get_api_key';
+import { syntheticsMonitorType } from '@kbn/synthetics-plugin/common/types/saved_objects';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { getFixtureJson } from '../uptime/rest/helper/get_fixture_json';
+import { getFixtureJson } from './helper/get_fixture_json';
 
 export default function ({ getService }: FtrProviderContext) {
   describe('AddNewMonitors', function () {
@@ -180,7 +180,7 @@ export default function ({ getService }: FtrProviderContext) {
         .expect(200);
 
       const response = await supertestAPI
-        .get(`${API_URLS.SYNTHETICS_MONITORS}/${apiResponse.body.id}`)
+        .get(API_URLS.GET_SYNTHETICS_MONITOR.replace('{monitorId}', apiResponse.body.id))
         .set('kbn-xsrf', 'true')
         .expect(200);
 
@@ -272,7 +272,7 @@ export default function ({ getService }: FtrProviderContext) {
             .send(httpMonitorJson);
 
           expect(apiResponse.status).eql(403);
-          expect(apiResponse.body.message).eql('Unable to create synthetics-monitor');
+          expect(apiResponse.body.message).eql('Forbidden');
         });
     });
 

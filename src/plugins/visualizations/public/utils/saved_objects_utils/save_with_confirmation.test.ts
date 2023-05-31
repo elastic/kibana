@@ -6,50 +6,94 @@
  * Side Public License, v 1.
  */
 
-import type {
-  SavedObjectAttributes,
-  SavedObjectsCreateOptions,
-  OverlayStart,
-} from '@kbn/core/public';
-import type { SavedObjectsClientContract } from '@kbn/core/public';
+import type { SavedObjectsCreateOptions, OverlayStart } from '@kbn/core/public';
 import { saveWithConfirmation } from './save_with_confirmation';
 import { VisSavedObject } from '../../types';
 import * as deps from './confirm_modal_promise';
 import { OVERWRITE_REJECTED } from './constants';
+import { VisualizationSavedObjectAttributes } from '../../../common';
+
+const mockFindContent = jest.fn(() => ({
+  pagination: { total: 0 },
+  hits: [],
+}));
+const mockGetContent = jest.fn(() => ({
+  item: {
+    id: 'test',
+    references: [
+      {
+        id: 'test',
+        type: 'index-pattern',
+      },
+    ],
+    attributes: {
+      visState: JSON.stringify({ type: 'area' }),
+      kibanaSavedObjectMeta: {
+        searchSourceJSON: '{filter: []}',
+      },
+    },
+    _version: '1',
+  },
+  meta: {
+    outcome: 'exact',
+    alias_target_id: null,
+  },
+}));
+const mockCreateContent = jest.fn(async (input: any) => ({
+  item: {
+    id: 'test',
+  },
+}));
+
+const mockUpdateContent = jest.fn(() => ({
+  item: {
+    id: 'test',
+  },
+}));
+
+jest.mock('../../services', () => ({
+  getContentManagement: jest.fn(() => ({
+    client: {
+      create: mockCreateContent,
+      update: mockUpdateContent,
+      get: mockGetContent,
+      search: mockFindContent,
+    },
+  })),
+}));
 
 describe('saveWithConfirmation', () => {
-  const savedObjectsClient: SavedObjectsClientContract = {} as SavedObjectsClientContract;
   const overlays: OverlayStart = {} as OverlayStart;
-  const source: SavedObjectAttributes = {} as SavedObjectAttributes;
+  const source: VisualizationSavedObjectAttributes = {} as VisualizationSavedObjectAttributes;
   const options: SavedObjectsCreateOptions = {} as SavedObjectsCreateOptions;
   const savedObject = {
-    getEsType: () => 'test type',
+    getEsType: () => 'visualization',
     title: 'test title',
     displayName: 'test display name',
   } as VisSavedObject;
 
   beforeEach(() => {
-    savedObjectsClient.create = jest.fn();
+    mockCreateContent.mockClear();
     jest.spyOn(deps, 'confirmModalPromise').mockReturnValue(Promise.resolve({} as any));
   });
 
   test('should call create of savedObjectsClient', async () => {
-    await saveWithConfirmation(source, savedObject, options, { savedObjectsClient, overlays });
-    expect(savedObjectsClient.create).toHaveBeenCalledWith(
-      savedObject.getEsType(),
-      source,
-      options
-    );
+    await saveWithConfirmation(source, savedObject, options, { overlays });
+    expect(mockCreateContent).toHaveBeenCalledWith({
+      contentTypeId: savedObject.getEsType(),
+      data: source,
+      options,
+    });
   });
 
   test('should call confirmModalPromise when such record exists', async () => {
-    savedObjectsClient.create = jest
-      .fn()
-      .mockImplementation((type, src, opt) =>
-        opt && opt.overwrite ? Promise.resolve({} as any) : Promise.reject({ res: { status: 409 } })
-      );
+    mockCreateContent.mockImplementation((input) =>
+      input?.options?.overwrite
+        ? Promise.resolve({} as any)
+        : Promise.reject({ res: { status: 409 } })
+    );
 
-    await saveWithConfirmation(source, savedObject, options, { savedObjectsClient, overlays });
+    await saveWithConfirmation(source, savedObject, options, { overlays });
     expect(deps.confirmModalPromise).toHaveBeenCalledWith(
       expect.any(String),
       expect.any(String),
@@ -59,27 +103,30 @@ describe('saveWithConfirmation', () => {
   });
 
   test('should call create of savedObjectsClient when overwriting confirmed', async () => {
-    savedObjectsClient.create = jest
-      .fn()
-      .mockImplementation((type, src, opt) =>
-        opt && opt.overwrite ? Promise.resolve({} as any) : Promise.reject({ res: { status: 409 } })
-      );
+    mockCreateContent.mockImplementation((input) =>
+      input?.options?.overwrite
+        ? Promise.resolve({} as any)
+        : Promise.reject({ res: { status: 409 } })
+    );
 
-    await saveWithConfirmation(source, savedObject, options, { savedObjectsClient, overlays });
-    expect(savedObjectsClient.create).toHaveBeenLastCalledWith(savedObject.getEsType(), source, {
-      overwrite: true,
-      ...options,
+    await saveWithConfirmation(source, savedObject, options, { overlays });
+    expect(mockCreateContent).toHaveBeenLastCalledWith({
+      contentTypeId: savedObject.getEsType(),
+      data: source,
+      options: {
+        overwrite: true,
+        ...options,
+      },
     });
   });
 
   test('should reject when overwriting denied', async () => {
-    savedObjectsClient.create = jest.fn().mockReturnValue(Promise.reject({ res: { status: 409 } }));
+    mockCreateContent.mockReturnValue(Promise.reject({ res: { status: 409 } }));
     jest.spyOn(deps, 'confirmModalPromise').mockReturnValue(Promise.reject());
 
     expect.assertions(1);
     await expect(
       saveWithConfirmation(source, savedObject, options, {
-        savedObjectsClient,
         overlays,
       })
     ).rejects.toThrow(OVERWRITE_REJECTED);

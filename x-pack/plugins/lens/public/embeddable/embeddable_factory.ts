@@ -140,6 +140,7 @@ export class EmbeddableFactory implements EmbeddableFactoryDefinition {
           capabilities: {
             canSaveDashboards: Boolean(capabilities.dashboard?.showWriteControls),
             canSaveVisualizations: Boolean(capabilities.visualize.save),
+            canOpenVisualizations: Boolean(capabilities.visualize.show),
             navLinks: capabilities.navLinks,
             discover: capabilities.discover,
           },

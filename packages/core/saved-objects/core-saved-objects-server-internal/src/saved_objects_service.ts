@@ -58,6 +58,7 @@ import { registerRoutes } from './routes';
 import { calculateStatus$ } from './status';
 import { registerCoreObjectTypes } from './object_types';
 import { getSavedObjectsDeprecationsProvider } from './deprecations';
+import { applyTypeDefaults } from './apply_type_defaults';
 
 /**
  * @internal
@@ -195,7 +196,7 @@ export class SavedObjectsService
         if (this.started) {
           throw new Error('cannot call `registerType` after service startup.');
         }
-        this.typeRegistry.registerType(type);
+        this.typeRegistry.registerType(applyTypeDefaults(type));
       },
       getTypeRegistry: () => this.typeRegistry,
       getDefaultIndex: () => MAIN_SAVED_OBJECT_INDEX,
@@ -222,7 +223,8 @@ export class SavedObjectsService
       this.config.migration,
       elasticsearch.client.asInternalUser,
       docLinks,
-      waitForMigrationCompletion
+      waitForMigrationCompletion,
+      node
     );
 
     this.migrator$.next(migrator);
@@ -366,7 +368,8 @@ export class SavedObjectsService
     soMigrationsConfig: SavedObjectsMigrationConfigType,
     client: ElasticsearchClient,
     docLinks: DocLinksServiceStart,
-    waitForMigrationCompletion: boolean
+    waitForMigrationCompletion: boolean,
+    nodeInfo: NodeInfo
   ): IKibanaMigrator {
     return new KibanaMigrator({
       typeRegistry: this.typeRegistry,
@@ -378,6 +381,7 @@ export class SavedObjectsService
       client,
       docLinks,
       waitForMigrationCompletion,
+      nodeRoles: nodeInfo.roles,
     });
   }
 
