@@ -26,7 +26,7 @@ const TabContentWrapper = styled.div`
   position: relative;
 `;
 
-export const useOsqueryTab = ({
+export const useOsqueryTab = <T extends object = JSX.Element>({
   rawEventData,
   ecsData,
   isNewFlyout,
@@ -34,7 +34,7 @@ export const useOsqueryTab = ({
   rawEventData?: SearchHit | undefined;
   ecsData?: Ecs | null;
   isNewFlyout: boolean;
-}) => {
+}): T | undefined => {
   const {
     services: { osquery },
   } = useKibana();
@@ -101,7 +101,7 @@ export const useOsqueryTab = ({
         </EuiNotificationBadge>
       ),
       content,
-    };
+    } as T;
   }
-  return content;
+  return content as T;
 };

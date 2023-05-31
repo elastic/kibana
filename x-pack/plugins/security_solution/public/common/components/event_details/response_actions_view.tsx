@@ -27,7 +27,7 @@ const TabContentWrapper = styled.div`
   position: relative;
 `;
 
-export const useResponseActionsView = ({
+export const useResponseActionsView = <T extends object = JSX.Element>({
   rawEventData,
   ecsData,
   isNewFlyout,
@@ -35,7 +35,7 @@ export const useResponseActionsView = ({
   ecsData?: Ecs | null;
   rawEventData: SearchHit | undefined;
   isNewFlyout?: boolean;
-}) => {
+}): T | undefined => {
   const responseActionsEnabled = useIsExperimentalFeatureEnabled('endpointResponseActionsEnabled');
 
   const expandedEventFieldsObject = rawEventData
@@ -90,7 +90,7 @@ export const useResponseActionsView = ({
         </EuiNotificationBadge>
       ),
       content,
-    };
+    } as T;
   }
-  return content;
+  return content as T;
 };
