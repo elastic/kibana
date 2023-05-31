@@ -233,20 +233,18 @@ function addSeverityAndEventTypeInBody(
   } catch {
     logger.debug(`Warning on d3 action: Invalid JSON input`);
   }
-  const resultObj = JSON.parse('{}');
-  resultObj.hits = {
-    // empty
-  };
-  resultObj.hits.hits = {
-    // empty
-  };
-  resultObj.hits.hits._source = {
-    // empty
-  };
-  resultObj.hits.hits._source.rawData = bodyObj;
-  resultObj.hits.hits._source['event.type'] = eventType;
-  resultObj.hits.hits._source['kibana.alert.severity'] = severity;
-  return JSON.stringify(resultObj);
+
+  return JSON.stringify({
+    hits: {
+      hits: {
+        '_source': {
+          'rawData': bodyObj,
+          'event.type': eventType,
+          'kibana.alert.severity': severity
+        }
+      }
+    }
+  })
 }
 // Action Executor Result w/ internationalisation
 function successResult(actionId: string, data: unknown): ConnectorTypeExecutorResult<unknown> {
