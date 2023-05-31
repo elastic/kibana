@@ -11,7 +11,10 @@ import {
   GLOBAL_SEARCH_BAR_FILTER_ITEM,
   GLOBAL_SEARCH_BAR_PINNED_FILTER,
 } from '../../../screens/search_bar';
-import { DISCOVER_WITH_FILTER_URL, DISCOVER_WITH_PINNED_FILTER_URL } from '../../../urls/navigation';
+import {
+  DISCOVER_WITH_FILTER_URL,
+  DISCOVER_WITH_PINNED_FILTER_URL,
+} from '../../../urls/navigation';
 import {
   navigateFromKibanaCollapsibleTo,
   openKibanaNavigation,

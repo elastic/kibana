@@ -75,7 +75,7 @@ const uploadPipeline = (pipelineContent: string | object) => {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/security_solution.yml'));
       pipeline.push(
         getPipeline('.buildkite/pipelines/pull_request/security_solution_investigations.yml'),
-        getPipeline('.buildkite/pipelines/pull_request/security_solution_explore.yml'),
+        getPipeline('.buildkite/pipelines/pull_request/security_solution_explore.yml')
       );
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/defend_workflows.yml'));
     }

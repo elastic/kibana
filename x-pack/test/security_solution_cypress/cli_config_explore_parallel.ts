@@ -20,4 +20,3 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       SecuritySolutionConfigurableCypressTestRunner(context),
   };
 }
-
