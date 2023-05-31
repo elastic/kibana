@@ -27,6 +27,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     'share',
     'spaceSelector',
     'header',
+    'unifiedFieldList',
   ]);
   const testSubjects = getService('testSubjects');
   const appsMenu = getService('appsMenu');
@@ -234,8 +235,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await PageObjects.common.waitForTopNavToBeVisible();
         await PageObjects.discover.selectIndexPattern('logstash-*');
         await setDiscoverTimeRange();
-        await PageObjects.discover.clickFieldListItem('bytes');
-        await PageObjects.discover.expectMissingFieldListItemVisualize('bytes');
+        await PageObjects.unifiedFieldList.clickFieldListItem('bytes');
+        await PageObjects.unifiedFieldList.expectMissingFieldListItemVisualize('bytes');
       });
 
       it(`Permalinks doesn't show create short-url button`, async () => {
@@ -326,8 +327,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await PageObjects.common.navigateToApp('discover');
         await PageObjects.common.waitForTopNavToBeVisible();
         await setDiscoverTimeRange();
-        await PageObjects.discover.clickFieldListItem('bytes');
-        await PageObjects.discover.expectMissingFieldListItemVisualize('bytes');
+        await PageObjects.unifiedFieldList.clickFieldListItem('bytes');
+        await PageObjects.unifiedFieldList.expectMissingFieldListItemVisualize('bytes');
       });
 
       it('Permalinks shows create short-url button', async () => {
@@ -404,8 +405,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await PageObjects.common.navigateToApp('discover');
         await PageObjects.common.waitForTopNavToBeVisible();
         await setDiscoverTimeRange();
-        await PageObjects.discover.clickFieldListItem('bytes');
-        await PageObjects.discover.expectFieldListItemVisualize('bytes');
+        await PageObjects.unifiedFieldList.clickFieldListItem('bytes');
+        await PageObjects.unifiedFieldList.expectFieldListItemVisualize('bytes');
       });
     });
 
