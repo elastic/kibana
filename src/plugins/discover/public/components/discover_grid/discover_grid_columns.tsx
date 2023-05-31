@@ -78,7 +78,7 @@ function buildEuiGridColumn({
   dataView: DataView;
   defaultColumns: boolean;
   isSortEnabled: boolean;
-  isPlainRecord: boolean;
+  isPlainRecord?: boolean;
   toastNotifications: ToastsStart;
   hasEditDataViewPermission: () => boolean;
   valueToStringConverter: ValueToStringConverter;
@@ -192,7 +192,7 @@ export function getEuiGridColumns({
   showTimeCol: boolean;
   defaultColumns: boolean;
   isSortEnabled: boolean;
-  isPlainRecord: boolean;
+  isPlainRecord?: boolean;
   services: {
     uiSettings: IUiSettingsClient;
     toastNotifications: ToastsStart;
