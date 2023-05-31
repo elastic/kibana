@@ -93,7 +93,7 @@ describe('Saved Objects type validator', () => {
   describe('schema selection', () => {
     beforeEach(() => {
       validationMap = {
-        '2.0.0': createStubSpec(),
+        '2.0.0': createStubSpec(), // version keys have to be valid kibana versions. These are not
         '2.7.0': createStubSpec(),
         '3.0.0': createStubSpec(),
         '3.5.0': createStubSpec(),

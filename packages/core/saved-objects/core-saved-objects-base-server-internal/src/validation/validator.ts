@@ -50,7 +50,7 @@ export class SavedObjectsTypeValidator {
       version ??
       document.typeMigrationVersion ??
       document.migrationVersion?.[document.type] ??
-      this.defaultVersion;
+      this.defaultVersion; 
     const schemaVersion = previousVersionWithSchema(this.orderedVersions, docVersion);
     if (!schemaVersion || !this.validationMap[schemaVersion]) {
       return;
