@@ -3923,6 +3923,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/data-common@link:packages/kbn-data-common":
+  version "0.0.0"
+  uid ""
+
 "@kbn/data-plugin@link:src/plugins/data":
   version "0.0.0"
   uid ""
@@ -4772,6 +4776,10 @@
   uid ""
 
 "@kbn/react-field@link:packages/kbn-react-field":
+  version "0.0.0"
+  uid ""
+
+"@kbn/react-public@link:packages/kbn-react-public":
   version "0.0.0"
   uid ""
 

@@ -6,7 +6,7 @@
  */
 import React from 'react';
 import { render } from '@testing-library/react';
-import '@kbn/kibana-react-plugin/public/code_editor/code_editor.test.helpers';
+import '@kbn/react-public/code_editor/code_editor.test.helpers';
 import { TestProvider } from '../../test/test_provider';
 import {
   getCloudDefendNewPolicyMock,

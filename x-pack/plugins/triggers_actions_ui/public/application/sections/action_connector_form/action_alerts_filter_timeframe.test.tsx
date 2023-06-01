@@ -12,7 +12,7 @@ import { ActionAlertsFilterTimeframe } from './action_alerts_filter_timeframe';
 import { AlertsFilterTimeframe } from '@kbn/alerting-plugin/common';
 import { Moment } from 'moment';
 
-jest.mock('@kbn/kibana-react-plugin/public/ui_settings/use_ui_setting', () => ({
+jest.mock('@kbn/react-public/ui_settings/use_ui_setting', () => ({
   useUiSetting: jest.fn().mockImplementation((_, defaultValue) => defaultValue),
 }));
 

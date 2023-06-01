@@ -14,7 +14,7 @@ import {
 } from './create_maintenance_windows_form';
 import { useUiSetting } from '@kbn/kibana-react-plugin/public';
 
-jest.mock('@kbn/kibana-react-plugin/public/ui_settings/use_ui_setting', () => ({
+jest.mock('@kbn/react-public/ui_settings/use_ui_setting', () => ({
   useUiSetting: jest.fn(),
 }));
 
