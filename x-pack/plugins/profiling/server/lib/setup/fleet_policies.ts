@@ -9,6 +9,7 @@ import { merge } from 'lodash';
 import { ElasticsearchClient } from '@kbn/core/server';
 import { getApmPolicy } from './get_apm_policy';
 import { ProfilingSetupOptions } from './types';
+import { SetupState } from '../../../common/setup';
 
 async function createIngestAPIKey(esClient: ElasticsearchClient) {
   const apiKeyResponse = await esClient.security.createApiKey({
@@ -41,9 +42,13 @@ async function createIngestAPIKey(esClient: ElasticsearchClient) {
 export async function validateApmPolicy({
   soClient,
   packagePolicyClient,
-}: ProfilingSetupOptions): Promise<boolean> {
+}: ProfilingSetupOptions): Promise<Partial<SetupState>> {
   const apmPolicy = await getApmPolicy({ packagePolicyClient, soClient });
-  return !!(apmPolicy && apmPolicy?.inputs[0].config?.['apm-server'].value?.profiling);
+  return {
+    apm_policy: {
+      installed: !!(apmPolicy && apmPolicy?.inputs[0].config?.['apm-server'].value?.profiling),
+    },
+  };
 }
 
 export async function updateApmPolicy({
@@ -106,9 +111,13 @@ const SYMBOLIZER_PACKAGE_POLICY_NAME = 'elastic-universal-profiling-symbolizer';
 export async function validateCollectorPackagePolicy({
   soClient,
   packagePolicyClient,
-}: ProfilingSetupOptions): Promise<boolean> {
+}: ProfilingSetupOptions): Promise<Partial<SetupState>> {
   const packagePolicies = await packagePolicyClient.list(soClient, {});
-  return packagePolicies.items.some((pkg) => pkg.name === COLLECTOR_PACKAGE_POLICY_NAME);
+  return {
+    collector_policy: {
+      installed: packagePolicies.items.some((pkg) => pkg.name === COLLECTOR_PACKAGE_POLICY_NAME),
+    },
+  };
 }
 
 export async function createCollectorPackagePolicy({
@@ -144,9 +153,13 @@ export async function createCollectorPackagePolicy({
 export async function validateSymbolizerPackagePolicy({
   soClient,
   packagePolicyClient,
-}: ProfilingSetupOptions): Promise<boolean> {
+}: ProfilingSetupOptions): Promise<Partial<SetupState>> {
   const packagePolicies = await packagePolicyClient.list(soClient, {});
-  return packagePolicies.items.some((pkg) => pkg.name === SYMBOLIZER_PACKAGE_POLICY_NAME);
+  return {
+    symbolizer_policy: {
+      installed: packagePolicies.items.some((pkg) => pkg.name === SYMBOLIZER_PACKAGE_POLICY_NAME),
+    },
+  };
 }
 
 export async function createSymbolizerPackagePolicy({

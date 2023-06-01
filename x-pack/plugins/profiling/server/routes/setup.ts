@@ -12,6 +12,7 @@ import {
   enableResourceManagement,
   setMaximumBuckets,
   validateMaximumBuckets,
+  validateResourceManagement,
 } from '../lib/setup/cluster_settings';
 import {
   createCollectorPackagePolicy,
@@ -26,7 +27,11 @@ import { hasProfilingData } from '../lib/setup/has_profiling_data';
 import { setSecurityRole, validateSecurityRole } from '../lib/setup/security_role';
 import { handleRouteHandlerError } from '../utils/handle_route_error_handler';
 import { getRoutePaths } from '../../common';
-import { areResourcesSetup, createDefaultSetupState } from '../../common/setup';
+import {
+  areResourcesSetup,
+  createDefaultSetupState,
+  mergePartialSetupStates,
+} from '../../common/setup';
 
 export function registerSetupRoute({
   router,
@@ -45,10 +50,6 @@ export function registerSetupRoute({
       try {
         const esClient = await getClient(context);
         const core = await context.core;
-        const client = createProfilingEsClient({
-          esClient,
-          request,
-        });
         const clientWithDefaultAuth = createProfilingEsClient({
           esClient,
           request,
@@ -80,41 +81,24 @@ export function registerSetupRoute({
         }
 
         const verifyFunctions = [
-          async () => {
-            const statusResponse = await clientWithDefaultAuth.profilingStatus();
-            state.resource_management.enabled = statusResponse.resource_management.enabled;
-            state.resources.created = statusResponse.resources.created;
-          },
-          async () => {
-            state.data.available = await hasProfilingData({ client });
-          },
-          async () => {
-            state.packages.installed = await isApmPackageInstalled(setupOptions);
-          },
-          async () => {
-            state.policies.apm.installed = await validateApmPolicy(setupOptions);
-          },
-          async () => {
-            state.policies.collector.installed = await validateCollectorPackagePolicy(setupOptions);
-          },
-          async () => {
-            state.policies.symbolizer.installed = await validateSymbolizerPackagePolicy(
-              setupOptions
-            );
-          },
-          async () => {
-            state.settings.configured = await validateMaximumBuckets(setupOptions);
-          },
-          async () => {
-            state.permissions.configured = await validateSecurityRole(setupOptions);
-          },
+          hasProfilingData,
+          isApmPackageInstalled,
+          validateApmPolicy,
+          validateCollectorPackagePolicy,
+          validateMaximumBuckets,
+          validateResourceManagement,
+          validateSecurityRole,
+          validateSymbolizerPackagePolicy,
         ];
-        await Promise.all(verifyFunctions.map(async (fn) => await fn()));
+        const partialStates = await Promise.all(
+          verifyFunctions.map(async (fn) => await fn(setupOptions))
+        );
+        const mergedState = mergePartialSetupStates(state, partialStates);
 
         return response.ok({
           body: {
-            has_setup: areResourcesSetup(state),
-            has_data: state.data.available,
+            has_setup: areResourcesSetup(mergedState),
+            has_data: mergedState.data.available,
           },
         });
       } catch (error) {
@@ -163,35 +147,20 @@ export function registerSetupRoute({
         }
 
         const verifyFunctions = [
-          async () => {
-            const statusResponse = await clientWithDefaultAuth.profilingStatus();
-            state.resource_management.enabled = statusResponse.resource_management.enabled;
-            state.resources.created = statusResponse.resources.created;
-          },
-          async () => {
-            state.packages.installed = await isApmPackageInstalled(setupOptions);
-          },
-          async () => {
-            state.policies.apm.installed = await validateApmPolicy(setupOptions);
-          },
-          async () => {
-            state.policies.collector.installed = await validateCollectorPackagePolicy(setupOptions);
-          },
-          async () => {
-            state.policies.symbolizer.installed = await validateSymbolizerPackagePolicy(
-              setupOptions
-            );
-          },
-          async () => {
-            state.settings.configured = await validateMaximumBuckets(setupOptions);
-          },
-          async () => {
-            state.permissions.configured = await validateSecurityRole(setupOptions);
-          },
+          isApmPackageInstalled,
+          validateApmPolicy,
+          validateCollectorPackagePolicy,
+          validateMaximumBuckets,
+          validateResourceManagement,
+          validateSecurityRole,
+          validateSymbolizerPackagePolicy,
         ];
-        await Promise.all(verifyFunctions.map(async (fn) => await fn()));
+        const partialStates = await Promise.all(
+          verifyFunctions.map(async (fn) => await fn(setupOptions))
+        );
+        const mergedState = mergePartialSetupStates(state, partialStates);
 
-        if (areResourcesSetup(state)) {
+        if (areResourcesSetup(mergedState)) {
           return response.ok();
         }
 

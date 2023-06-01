@@ -11,13 +11,20 @@ import {
   pkgToPkgKey,
 } from '@kbn/fleet-plugin/server/services/epm/registry';
 import { ProfilingSetupOptions } from './types';
+import { SetupState } from '../../../common/setup';
 
-export async function isApmPackageInstalled({ soClient }: ProfilingSetupOptions): Promise<boolean> {
+export async function isApmPackageInstalled({
+  soClient,
+}: ProfilingSetupOptions): Promise<Partial<SetupState>> {
   const installation = await getInstallation({
     pkgName: 'apm',
     savedObjectsClient: soClient,
   });
-  return !!installation;
+  return {
+    packages: {
+      installed: !!installation,
+    },
+  };
 }
 
 export async function installLatestApmPackage({

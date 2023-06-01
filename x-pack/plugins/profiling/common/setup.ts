@@ -19,16 +19,14 @@ export interface SetupState {
   permissions: {
     configured: boolean;
   };
-  policies: {
-    apm: {
-      installed: boolean;
-    };
-    collector: {
-      installed: boolean;
-    };
-    symbolizer: {
-      installed: boolean;
-    };
+  apm_policy: {
+    installed: boolean;
+  };
+  collector_policy: {
+    installed: boolean;
+  };
+  symbolizer_policy: {
+    installed: boolean;
   };
   resource_management: {
     enabled: boolean;
@@ -56,16 +54,14 @@ export function createDefaultSetupState(): SetupState {
     permissions: {
       configured: false,
     },
-    policies: {
-      apm: {
-        installed: false,
-      },
-      collector: {
-        installed: false,
-      },
-      symbolizer: {
-        installed: false,
-      },
+    apm_policy: {
+      installed: false,
+    },
+    collector_policy: {
+      installed: false,
+    },
+    symbolizer_policy: {
+      installed: false,
     },
     resource_management: {
       enabled: false,
@@ -85,9 +81,18 @@ export function areResourcesSetup(state: SetupState): boolean {
     state.resources.created &&
     state.packages.installed &&
     state.permissions.configured &&
-    state.policies.apm.installed &&
-    state.policies.collector.installed &&
-    state.policies.symbolizer.installed &&
+    state.apm_policy.installed &&
+    state.collector_policy.installed &&
+    state.symbolizer_policy.installed &&
     state.settings.configured
   );
+}
+
+export function mergePartialSetupStates(
+  base: SetupState,
+  partials: Array<Partial<SetupState>>
+): SetupState {
+  return partials.reduce((previous: SetupState, current: Partial<SetupState>): SetupState => {
+    return { ...previous, ...current };
+  }, base);
 }

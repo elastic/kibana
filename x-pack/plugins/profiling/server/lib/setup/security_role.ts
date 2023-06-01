@@ -6,13 +6,20 @@
  */
 
 import { ProfilingSetupOptions } from './types';
+import { SetupState } from '../../../common/setup';
 
 const PROFILING_READER_ROLE_NAME = 'profiling-reader';
 
-export async function validateSecurityRole({ client }: ProfilingSetupOptions): Promise<boolean> {
+export async function validateSecurityRole({
+  client,
+}: ProfilingSetupOptions): Promise<Partial<SetupState>> {
   const esClient = client.getEsClient();
   const roles = await esClient.security.getRole();
-  return PROFILING_READER_ROLE_NAME in roles;
+  return {
+    settings: {
+      configured: PROFILING_READER_ROLE_NAME in roles,
+    },
+  };
 }
 
 export async function setSecurityRole({ client }: ProfilingSetupOptions) {
