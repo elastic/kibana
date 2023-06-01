@@ -6,11 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { KibanaThemeProvider as ThemeProvider } from '@kbn/react-kibana-context';
-
-export type { KibanaThemeProviderProps } from '@kbn/react-kibana-context';
-
-/**
- * @deprecated use `KibanaThemeProvider` from `@kbn/react-kibana-context
- */
-export const KibanaThemeProvider = ThemeProvider;
+export {
+  /**
+   * @deprecated use `KibanaThemeProvider` from `@kbn/react-kibana-context
+   */
+  KibanaThemeProvider,
+  type KibanaThemeProviderProps,
+} from '@kbn/react-kibana-context';

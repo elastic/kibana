@@ -6,5 +6,8 @@
  * Side Public License, v 1.
  */
 
-export { KibanaContextProvider, withKibanaContextProvider } from './kibana_provider';
-export type { KibanaContextProviderProps } from './kibana_provider';
+export {
+  KibanaContextProvider,
+  withKibanaContextProvider,
+  type KibanaContextProviderProps,
+} from './kibana_provider';

@@ -6,20 +6,15 @@
  * Side Public License, v 1.
  */
 
-import {
-  KibanaThemeProvider as ThemeProvider,
-  wrapWithTheme as withTheme,
+export {
+  /**
+   * @deprecated use `KibanaThemeProvider` from `@kbn/react-kibana-context
+   */
+  KibanaThemeProvider,
+  /**
+   * @deprecated use `wrapWithTheme` from `@kbn/react-kibana-context
+   */
+  wrapWithTheme,
+  type KibanaThemeProviderProps,
 } from '@kbn/react-kibana-context';
-
-export type { KibanaThemeProviderProps } from '@kbn/react-kibana-context';
 export type { UseEuiTheme as EuiTheme } from '@elastic/eui';
-
-/**
- * @deprecated use `KibanaThemeProvider` from `@kbn/react-kibana-context
- */
-export const KibanaThemeProvider = ThemeProvider;
-
-/**
- * @deprecated use `wrapWithTheme` from `@kbn/react-kibana-context
- */
-export const wrapWithTheme = withTheme;

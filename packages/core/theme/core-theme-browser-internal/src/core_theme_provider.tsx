@@ -13,5 +13,5 @@ import { KibanaThemeProvider } from '@kbn/react-kibana-context';
  * @internal Only meant to be used within core for internal usages of EUI/React
  * @deprecated use `KibanaThemeProvider` from `@kbn/react-kibana-context
  */
-export const CoreThemeProvider = KibanaThemeProvider;
+export const CoreThemeProvider = KibanaThemeProvider.bind(undefined);
 CoreThemeProvider.displayName = 'CoreThemeProvider';

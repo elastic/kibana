@@ -6,10 +6,11 @@
  * Side Public License, v 1.
  */
 
-export { KibanaThemeProvider, wrapWithTheme } from './theme';
-export type { KibanaThemeProviderProps } from './theme';
-
-export { KibanaContextProvider, withKibanaContextProvider } from './provider';
-export type { KibanaContextProviderProps } from './provider';
+export { KibanaThemeProvider, wrapWithTheme, type KibanaThemeProviderProps } from './theme';
+export {
+  KibanaContextProvider,
+  withKibanaContextProvider,
+  type KibanaContextProviderProps,
+} from './provider';
 
 export { composeProviders } from './utils';
