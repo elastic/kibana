@@ -6,6 +6,7 @@
  */
 import Semver from 'semver';
 import Boom from '@hapi/boom';
+import { TypeOf, schema } from '@kbn/config-schema';
 import { SavedObject, SavedObjectsUtils } from '@kbn/core/server';
 import { withSpan } from '@kbn/apm-utils';
 import { parseDuration } from '../../../common/parse_duration';
@@ -25,21 +26,48 @@ import {
 import { generateAPIKeyName, apiKeyAsAlertAttributes } from '../common';
 import { ruleAuditEvent, RuleAuditAction } from '../common/audit_events';
 import { RulesClientContext } from '../types';
-import { Rule, RuleParams, SanitizedRule, NormalizedAction } from '../../../common/types/api';
+import {
+  Rule,
+  RuleParams,
+  SanitizedRule,
+  notifyWhenSchema,
+  actionAlertsFilterSchema,
+  validateDuration,
+} from '../../../common/types/api';
 import { RuleAttributes } from '../../common/types';
 
-export interface CreateRuleData {
-  name: Rule['name'];
-  alertTypeId: Rule['alertTypeId'];
-  enabled: Rule['enabled'];
-  consumer: Rule['consumer'];
-  tags: Rule['tags'];
-  throttle?: Rule['throttle'];
-  params: RuleParams;
-  schedule: Rule['schedule'];
-  actions: NormalizedAction[];
-  notifyWhen: Rule['notifyWhen'];
-}
+const createRuleDataSchema = schema.object({
+  name: schema.string(),
+  alertTypeId: schema.string(),
+  enabled: schema.boolean({ defaultValue: true }),
+  consumer: schema.string(),
+  tags: schema.arrayOf(schema.string(), { defaultValue: [] }),
+  throttle: schema.maybe(schema.nullable(schema.string({ validate: validateDuration }))),
+  params: schema.recordOf(schema.string(), schema.any(), { defaultValue: {} }),
+  schedule: schema.object({
+    interval: schema.string({ validate: validateDuration }),
+  }),
+  actions: schema.arrayOf(
+    schema.object({
+      group: schema.string(),
+      id: schema.string(),
+      params: schema.recordOf(schema.string(), schema.any(), { defaultValue: {} }),
+      frequency: schema.maybe(
+        schema.object({
+          summary: schema.boolean(),
+          notifyWhen: notifyWhenSchema,
+          throttle: schema.nullable(schema.string({ validate: validateDuration })),
+        })
+      ),
+      uuid: schema.maybe(schema.string()),
+      alertsFilter: schema.maybe(actionAlertsFilterSchema),
+    }),
+    { defaultValue: [] }
+  ),
+  notifyWhen: schema.maybe(schema.nullable(notifyWhenSchema)),
+});
+
+export type CreateRuleData = TypeOf<typeof createRuleDataSchema>;
 
 export interface CreateRuleOptions {
   id?: string;
@@ -60,6 +88,12 @@ export async function create<Params extends RuleParams = never>(
   const data = { ...initialData, actions: addGeneratedActionValues(initialData.actions) };
 
   const id = options?.id || SavedObjectsUtils.generateId();
+
+  try {
+    createRuleDataSchema.validate(data);
+  } catch (error) {
+    throw Boom.badRequest(`Error validating create data - ${error.message}`);
+  }
 
   try {
     await withSpan({ name: 'authorization.ensureAuthorized', type: 'rules' }, () =>

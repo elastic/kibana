@@ -64,8 +64,8 @@ export const createRuleRoute = ({ router, licenseState, usageCounter }: RouteOpt
       router.handleLegacyErrors(
         verifyAccessAndContext(licenseState, async function (context, req, res) {
           const rulesClient = (await context.alerting).getRulesClient();
-          const rule = req.body as createRuleV1.CreateRuleRequestBody;
-          const params = req.params as createRuleV1.CreateRuleRequestParams;
+          const createRuleData: createRuleV1.CreateRuleRequestBody = req.body;
+          const params: createRuleV1.CreateRuleRequestParams = req.params;
 
           countUsageOfPredefinedIds({
             predefinedId: params?.id,
@@ -76,7 +76,7 @@ export const createRuleRoute = ({ router, licenseState, usageCounter }: RouteOpt
           try {
             const createdRule: ruleV1.SanitizedRule<ruleV1.RuleParams> =
               await rulesClient.create<ruleV1.RuleParams>({
-                data: rewriteBodyReq(rule),
+                data: rewriteBodyReq(createRuleData),
                 options: { id: params?.id },
               });
 

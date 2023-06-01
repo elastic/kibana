@@ -24,7 +24,7 @@ export interface CreateRuleResponse<Params extends ruleV1.RuleParams = never> {
   body: ruleV1.RuleResponse<Params>;
 }
 
-const notifyWhenSchema = schema.oneOf(
+export const notifyWhenSchema = schema.oneOf(
   [
     schema.literal(RuleNotifyWhen.CHANGE),
     schema.literal(RuleNotifyWhen.ACTIVE),
@@ -33,59 +33,59 @@ const notifyWhenSchema = schema.oneOf(
   { validate: validateNotifyWhenType }
 );
 
-const actionFrequencySchema = schema.object({
+export const actionFrequencySchema = schema.object({
   summary: schema.boolean(),
   notify_when: notifyWhenSchema,
   throttle: schema.nullable(schema.string({ validate: validateDuration })),
 });
 
-const actionSchema = schema.object({
+export const actionAlertsFilterSchema = schema.object({
+  query: schema.maybe(
+    schema.object({
+      kql: schema.string(),
+      filters: schema.arrayOf(
+        schema.object({
+          query: schema.maybe(schema.recordOf(schema.string(), schema.any())),
+          meta: schema.recordOf(schema.string(), schema.any()),
+          state$: schema.maybe(schema.object({ store: schema.string() })),
+        })
+      ),
+      dsl: schema.maybe(schema.string()),
+    })
+  ),
+  timeframe: schema.maybe(
+    schema.object({
+      days: schema.arrayOf(
+        schema.oneOf([
+          schema.literal(1),
+          schema.literal(2),
+          schema.literal(3),
+          schema.literal(4),
+          schema.literal(5),
+          schema.literal(6),
+          schema.literal(7),
+        ])
+      ),
+      hours: schema.object({
+        start: schema.string({
+          validate: validateHours,
+        }),
+        end: schema.string({
+          validate: validateHours,
+        }),
+      }),
+      timezone: schema.string({ validate: validateTimezone }),
+    })
+  ),
+});
+
+export const actionSchema = schema.object({
   group: schema.string(),
   id: schema.string(),
   params: schema.recordOf(schema.string(), schema.any(), { defaultValue: {} }),
   frequency: schema.maybe(actionFrequencySchema),
   uuid: schema.maybe(schema.string()),
-  alerts_filter: schema.maybe(
-    schema.object({
-      query: schema.maybe(
-        schema.object({
-          kql: schema.string(),
-          filters: schema.arrayOf(
-            schema.object({
-              query: schema.maybe(schema.recordOf(schema.string(), schema.any())),
-              meta: schema.recordOf(schema.string(), schema.any()),
-              state$: schema.maybe(schema.object({ store: schema.string() })),
-            })
-          ),
-          dsl: schema.maybe(schema.string()),
-        })
-      ),
-      timeframe: schema.maybe(
-        schema.object({
-          days: schema.arrayOf(
-            schema.oneOf([
-              schema.literal(1),
-              schema.literal(2),
-              schema.literal(3),
-              schema.literal(4),
-              schema.literal(5),
-              schema.literal(6),
-              schema.literal(7),
-            ])
-          ),
-          hours: schema.object({
-            start: schema.string({
-              validate: validateHours,
-            }),
-            end: schema.string({
-              validate: validateHours,
-            }),
-          }),
-          timezone: schema.string({ validate: validateTimezone }),
-        })
-      ),
-    })
-  ),
+  alerts_filter: schema.maybe(actionAlertsFilterSchema),
 });
 
 export const createBodySchema = schema.object({
