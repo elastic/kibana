@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { merge, omit } from 'lodash';
+import { merge } from 'lodash';
 import { ElasticsearchClient } from '@kbn/core/server';
 import { getApmPolicy } from './get_apm_policy';
 import { ProfilingSetupOptions } from './types';
@@ -82,16 +82,21 @@ export async function updateApmPolicy({
     },
   };
 
-  const modifiedPolicyInputs = apmPolicy.inputs.map((input) => {
+  const {
+    id,
+    revision,
+    updated_at: updateAt,
+    updated_by: updateBy,
+    ...apmPolicyModified
+  } = apmPolicy;
+
+  apmPolicyModified.inputs = apmPolicy.inputs.map((input) => {
     return input.type === 'apm'
       ? merge({}, input, { config: { 'apm-server': { value: profilingApmConfig } } })
       : input;
   });
 
-  await packagePolicyClient.update(soClient, esClient, apmPolicy.id, {
-    ...omit(apmPolicy, 'id', 'revision', 'updated_at', 'updated_by'),
-    inputs: modifiedPolicyInputs,
-  });
+  await packagePolicyClient.update(soClient, esClient, id, apmPolicyModified);
 }
 
 const CLOUD_AGENT_POLICY_ID = 'policy-elastic-agent-on-cloud';
