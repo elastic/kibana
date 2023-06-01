@@ -27,22 +27,22 @@ export const devtools: NodeDefinitionWithChildren<ID> = {
         {
           id: 'console',
           title: 'Console',
-          href: '/app/dev_tools#/console',
+          link: 'dev_tools:console',
         },
         {
           id: 'search_profiler',
           title: 'Search profiler',
-          href: '/app/dev_tools#/searchprofiler',
+          link: 'dev_tools:searchprofiler',
         },
         {
           id: 'grok_debugger',
           title: 'Grok debugger',
-          href: '/app/dev_tools#/grokdebugger',
+          link: 'dev_tools:grokdebugger',
         },
         {
           id: 'painless_lab',
           title: 'Painless lab',
-          href: '/app/dev_tools#/painless_lab',
+          link: 'dev_tools:painless_lab',
         },
       ],
     },
