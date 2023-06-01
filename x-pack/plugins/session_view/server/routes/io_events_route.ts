@@ -5,7 +5,8 @@
  * 2.0.
  */
 import { schema } from '@kbn/config-schema';
-import { IRouter } from '@kbn/core/server';
+import { transformError } from '@kbn/securitysolution-es-utils';
+import { IRouter, Logger } from '@kbn/core/server';
 import { EVENT_ACTION, TIMESTAMP } from '@kbn/rule-data-utils';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { Aggregate } from '../../common/types/aggregate';
@@ -17,9 +18,10 @@ import {
   TIMESTAMP_PROPERTY,
   PROCESS_ENTITY_ID_PROPERTY,
   PROCESS_EVENTS_PER_PAGE,
+  IO_EVENT_FIELDS,
 } from '../../common/constants';
 
-export const registerIOEventsRoute = (router: IRouter) => {
+export const registerIOEventsRoute = (router: IRouter, logger: Logger) => {
   router.get(
     {
       path: IO_EVENTS_ROUTE,
@@ -29,7 +31,7 @@ export const registerIOEventsRoute = (router: IRouter) => {
           sessionEntityId: schema.string(),
           sessionStartTime: schema.string(),
           cursor: schema.maybe(schema.string()),
-          pageSize: schema.maybe(schema.number()),
+          pageSize: schema.maybe(schema.number({ min: 1, max: IO_EVENTS_PER_PAGE })), // currently only set in FTR tests to test pagination
         }),
       },
     },
@@ -66,6 +68,7 @@ export const registerIOEventsRoute = (router: IRouter) => {
             size: Math.min(pageSize, IO_EVENTS_PER_PAGE),
             sort: [{ [TIMESTAMP]: 'asc' }],
             search_after: cursor ? [cursor] : undefined,
+            fields: IO_EVENT_FIELDS,
           },
         });
 
@@ -75,12 +78,18 @@ export const registerIOEventsRoute = (router: IRouter) => {
 
         return response.ok({ body: { total, events } });
       } catch (err) {
+        const error = transformError(err);
+        logger.error(`Failed to fetch io events: ${err}`);
+
         // unauthorized
         if (err?.meta?.statusCode === 403) {
           return response.ok({ body: { total: 0, events: [] } });
         }
 
-        return response.badRequest(err.message);
+        return response.customError({
+          body: { message: error.message },
+          statusCode: error.statusCode,
+        });
       }
     }
   );

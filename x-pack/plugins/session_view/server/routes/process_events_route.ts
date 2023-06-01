@@ -5,9 +5,10 @@
  * 2.0.
  */
 import { schema } from '@kbn/config-schema';
+import { transformError } from '@kbn/securitysolution-es-utils';
 import _ from 'lodash';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { IRouter } from '@kbn/core/server';
+import { IRouter, Logger } from '@kbn/core/server';
 import type {
   AlertsClient,
   RuleRegistryPluginStartContract,
@@ -19,6 +20,7 @@ import {
   PROCESS_EVENTS_PER_PAGE,
   ENTRY_SESSION_ENTITY_ID_PROPERTY,
   TIMESTAMP_PROPERTY,
+  PROCESS_EVENT_FIELDS,
 } from '../../common/constants';
 import { ProcessEvent } from '../../common/types/process_tree';
 import { searchAlerts } from './alerts_route';
@@ -26,6 +28,7 @@ import { searchProcessWithIOEvents } from './io_events_route';
 
 export const registerProcessEventsRoute = (
   router: IRouter,
+  logger: Logger,
   ruleRegistry: RuleRegistryPluginStartContract
 ) => {
   router.get(
@@ -38,7 +41,7 @@ export const registerProcessEventsRoute = (
           sessionStartTime: schema.string(),
           cursor: schema.maybe(schema.string()),
           forward: schema.maybe(schema.boolean()),
-          pageSize: schema.maybe(schema.number()),
+          pageSize: schema.maybe(schema.number({ min: 1, max: PROCESS_EVENTS_PER_PAGE })), // currently only set in FTR tests to test pagination
         }),
       },
     },
@@ -61,12 +64,18 @@ export const registerProcessEventsRoute = (
 
         return response.ok({ body });
       } catch (err) {
+        const error = transformError(err);
+        logger.error(`Failed to fetch process events: ${err}`);
+
         // unauthorized
-        if (err.meta.statusCode === 403) {
+        if (err?.meta?.statusCode === 403) {
           return response.ok({ body: { total: 0, events: [] } });
         }
 
-        return response.badRequest(err.message);
+        return response.customError({
+          body: { message: error.message },
+          statusCode: error.statusCode,
+        });
       }
     }
   );
@@ -114,6 +123,7 @@ export const fetchEventsAndScopedAlerts = async (
       size: Math.min(pageSize, PROCESS_EVENTS_PER_PAGE),
       sort: [{ '@timestamp': forward ? 'asc' : 'desc' }],
       search_after: cursorMillis ? [cursorMillis] : undefined,
+      fields: PROCESS_EVENT_FIELDS,
     },
   });
 

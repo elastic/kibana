@@ -5,7 +5,8 @@
  * 2.0.
  */
 import { schema } from '@kbn/config-schema';
-import { IRouter } from '@kbn/core/server';
+import { IRouter, Logger } from '@kbn/core/server';
+import { transformError } from '@kbn/securitysolution-es-utils';
 import type {
   AlertsClient,
   RuleRegistryPluginStartContract,
@@ -19,6 +20,7 @@ import { expandDottedObject } from '../../common/utils/expand_dotted_object';
 
 export const registerAlertStatusRoute = (
   router: IRouter,
+  logger: Logger,
   ruleRegistry: RuleRegistryPluginStartContract
 ) => {
   router.get(
@@ -33,9 +35,19 @@ export const registerAlertStatusRoute = (
     async (_context, request, response) => {
       const client = await ruleRegistry.getRacClientWithRequest(request);
       const { alertUuid } = request.query;
-      const body = await searchAlertByUuid(client, alertUuid);
+      try {
+        const body = await searchAlertByUuid(client, alertUuid);
 
-      return response.ok({ body });
+        return response.ok({ body });
+      } catch (err) {
+        const error = transformError(err);
+        logger.error(`Failed to fetch alert status: ${err}`);
+
+        return response.customError({
+          body: { message: error.message },
+          statusCode: error.statusCode,
+        });
+      }
     }
   );
 };

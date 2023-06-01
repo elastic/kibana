@@ -3,7 +3,8 @@
  * 2.0.
  */
 import { schema } from '@kbn/config-schema';
-import { IRouter } from '@kbn/core/server';
+import { transformError } from '@kbn/securitysolution-es-utils';
+import { IRouter, Logger } from '@kbn/core/server';
 import { EVENT_ACTION } from '@kbn/rule-data-utils';
 import {
   GET_TOTAL_IO_BYTES_ROUTE,
@@ -12,7 +13,7 @@ import {
   TIMESTAMP_PROPERTY,
 } from '../../common/constants';
 
-export const registerGetTotalIOBytesRoute = (router: IRouter) => {
+export const registerGetTotalIOBytesRoute = (router: IRouter, logger: Logger) => {
   router.get(
     {
       path: GET_TOTAL_IO_BYTES_ROUTE,
@@ -63,12 +64,18 @@ export const registerGetTotalIOBytesRoute = (router: IRouter) => {
 
         return response.ok({ body: { total: agg?.value || 0 } });
       } catch (err) {
+        const error = transformError(err);
+        logger.error(`Failed to fetch total io bytes: ${err}`);
+
         // unauthorized
         if (err?.meta?.statusCode === 403) {
           return response.ok({ body: { total: 0 } });
         }
 
-        return response.badRequest(err.message);
+        return response.customError({
+          body: { message: error.message },
+          statusCode: error.statusCode,
+        });
       }
     }
   );

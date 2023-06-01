@@ -5,7 +5,8 @@
  * 2.0.
  */
 import { schema } from '@kbn/config-schema';
-import { IRouter } from '@kbn/core/server';
+import { transformError } from '@kbn/securitysolution-es-utils';
+import { IRouter, Logger } from '@kbn/core/server';
 import type {
   AlertsClient,
   RuleRegistryPluginStartContract,
@@ -17,12 +18,14 @@ import {
   ALERT_UUID_PROPERTY,
   ALERT_ORIGINAL_TIME_PROPERTY,
   PREVIEW_ALERTS_INDEX,
+  ALERT_FIELDS,
 } from '../../common/constants';
 
 import { expandDottedObject } from '../../common/utils/expand_dotted_object';
 
 export const registerAlertsRoute = (
   router: IRouter,
+  logger: Logger,
   ruleRegistry: RuleRegistryPluginStartContract
 ) => {
   router.get(
@@ -53,7 +56,13 @@ export const registerAlertsRoute = (
 
         return response.ok({ body });
       } catch (err) {
-        return response.badRequest(err.message);
+        const error = transformError(err);
+        logger.error(`Failed to fetch alerts: ${err}`);
+
+        return response.customError({
+          body: { message: error.message },
+          statusCode: error.statusCode,
+        });
       }
     }
   );
@@ -101,12 +110,14 @@ export const searchAlerts = async (
       index: indices.join(','),
       sort: [{ '@timestamp': 'asc' }],
       search_after: cursor ? [cursor] : undefined,
+      fields: ALERT_FIELDS,
     });
 
     // if an alert is being investigated, fetch it on it's own, as it's not guaranteed to come back in the above request.
     // we only need to do this for the first page of alerts.
     if (!cursor && investigatedAlertId) {
       const investigatedAlertSearch = await client.find({
+        fields: ALERT_FIELDS,
         query: {
           match: {
             [ALERT_UUID_PROPERTY]: investigatedAlertId,

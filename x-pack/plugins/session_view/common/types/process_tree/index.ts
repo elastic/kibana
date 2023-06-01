@@ -96,7 +96,6 @@ export interface IOFields {
 export interface ProcessFields {
   entity_id?: string;
   args?: string[];
-  args_count?: number;
   command_line?: string;
   executable?: string;
   name?: string;
@@ -107,10 +106,6 @@ export interface ProcessFields {
   end?: string;
   user?: User;
   group?: Group;
-  real_user?: User;
-  real_group?: Group;
-  saved_user?: User;
-  saved_group?: Group;
   supplemental_groups?: Group[];
   exit_code?: number;
   entry_meta?: EntryMeta;
@@ -273,6 +268,8 @@ export interface ProcessEventOrchestrator {
     parent?: {
       type?: string;
     };
+    labels?: string[];
+    annotations?: string[];
   };
   namespace?: string;
   cluster?: {
