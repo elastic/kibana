@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { FC, useState, useEffect, useCallback, useRef } from 'react';
+import React, { FC, useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import type { SavedSearch } from '@kbn/discover-plugin/public';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import { i18n } from '@kbn/i18n';
@@ -22,6 +22,7 @@ import { buildEmptyFilter, Filter } from '@kbn/es-query';
 
 import { usePageUrlState } from '@kbn/ml-url-state';
 import { useData } from '../../hooks/use_data';
+import { useSearch } from '../../hooks/use_search';
 import { useCategorizeRequest } from './use_categorize_request';
 import type { EventRate, Category, SparkLinesPerCategory } from './use_categorize_request';
 import { CategoryTable } from './category_table';
@@ -60,12 +61,15 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
     uiSettings,
   } = useAiopsAppContext();
   const { euiTheme } = useEuiTheme();
+  const { filters, query } = useMemo(() => getState(), [getState]);
 
   const mounted = useRef(false);
   const { runCategorizeRequest, cancelRequest, randomSampler } = useCategorizeRequest();
-  const [aiopsListState, setAiopsListState] = usePageUrlState<AiOpsPageUrlState>(
+  const [aiopsListState] = usePageUrlState<AiOpsPageUrlState>(
     'AIOPS_INDEX_VIEWER',
-    getDefaultAiOpsListState()
+    getDefaultAiOpsListState({
+      searchQuery: createMergedEsQuery(query, filters, dataView, uiSettings),
+    })
   );
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
   const [selectedSavedSearch /* , setSelectedSavedSearch*/] = useState(savedSearch);
@@ -88,36 +92,21 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
     [cancelRequest, mounted]
   );
 
-  const {
-    documentStats,
-    timefilter,
-    earliest,
-    latest,
-    searchQueryLanguage,
-    searchString,
-    searchQuery,
-    intervalMs,
-    forceRefresh,
-  } = useData(
-    { selectedDataView: dataView, selectedSavedSearch },
-    'log_categorization',
+  const { searchQueryLanguage, searchString, searchQuery } = useSearch(
+    { dataView, savedSearch: selectedSavedSearch },
     aiopsListState,
-    undefined,
-    undefined,
-    undefined,
-    BAR_TARGET,
     true
   );
 
-  useEffect(() => {
-    const { filters, query } = getState();
-
-    setAiopsListState({
-      ...aiopsListState,
-      searchQuery: createMergedEsQuery(query, filters, dataView, uiSettings),
-    });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  const { documentStats, timefilter, earliest, latest, intervalMs, forceRefresh } = useData(
+    dataView,
+    'log_categorization',
+    searchQuery,
+    undefined,
+    undefined,
+    undefined,
+    BAR_TARGET
+  );
 
   const loadCategories = useCallback(async () => {
     const { title: index, timeFieldName: timeField } = dataView;

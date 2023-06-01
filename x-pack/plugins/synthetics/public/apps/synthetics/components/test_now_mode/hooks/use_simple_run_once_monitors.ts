@@ -6,7 +6,7 @@
  */
 
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { createEsParams, useEsSearch } from '@kbn/observability-plugin/public';
+import { createEsParams, useEsSearch } from '@kbn/observability-shared-plugin/public';
 import { SUMMARY_FILTER } from '../../../../../../common/constants/client_defaults';
 import { Ping } from '../../../../../../common/runtime_types';
 import { SYNTHETICS_INDEX_PATTERN } from '../../../../../../common/constants';

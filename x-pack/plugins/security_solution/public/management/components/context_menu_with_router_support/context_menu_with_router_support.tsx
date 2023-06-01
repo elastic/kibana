@@ -8,7 +8,7 @@
 import type { CSSProperties, HTMLAttributes } from 'react';
 import React, { memo, useCallback, useMemo, useState } from 'react';
 import type { CommonProps, EuiContextMenuPanelProps, EuiPopoverProps } from '@elastic/eui';
-import { EuiContextMenuPanel, EuiPopover, EuiPopoverTitle, EuiLoadingContent } from '@elastic/eui';
+import { EuiContextMenuPanel, EuiPopover, EuiPopoverTitle, EuiSkeletonText } from '@elastic/eui';
 import { v4 as uuidv4 } from 'uuid';
 import type { ContextMenuItemNavByRouterProps } from './context_menu_item_nav_by_router';
 import { ContextMenuItemNavByRouter } from './context_menu_item_nav_by_router';
@@ -76,7 +76,7 @@ export const ContextMenuWithRouterSupport = memo<ContextMenuWithRouterSupportPro
       return items.map((itemProps, index) => {
         if (loading) {
           return (
-            <EuiLoadingContent
+            <EuiSkeletonText
               lines={1}
               key={uuidv4()}
               data-test-subj={itemProps['data-test-subj'] ?? getTestId(`item-loading-${index}`)}

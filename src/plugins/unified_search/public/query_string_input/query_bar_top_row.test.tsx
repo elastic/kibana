@@ -115,6 +115,7 @@ describe('QueryBarTopRowTopRow', () => {
   const TIMEPICKER_SELECTOR = 'Memo(EuiSuperDatePicker)';
   const REFRESH_BUTTON_SELECTOR = 'EuiSuperUpdateButton';
   const TIMEPICKER_DURATION = '[data-shared-timefilter-duration]';
+  const TEXT_BASED_EDITOR = '[data-test-subj="unifiedTextLangEditor"]';
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -293,7 +294,7 @@ describe('QueryBarTopRowTopRow', () => {
   });
 
   it('Should NOT render query input bar if on text based languages mode', () => {
-    const component = shallow(
+    const component = mount(
       wrapQueryBarTopRowInContext({
         query: sqlQuery,
         isDirty: false,
@@ -307,6 +308,8 @@ describe('QueryBarTopRowTopRow', () => {
     );
 
     expect(component.find(QUERY_INPUT_SELECTOR).length).toBe(0);
+    expect(component.find(TEXT_BASED_EDITOR).length).toBe(1);
+    expect(component.find(TEXT_BASED_EDITOR).prop('detectTimestamp')).toBe(true);
   });
 });
 

@@ -57,6 +57,7 @@ describe('Exception list management page', () => {
   });
 
   beforeEach(() => {
+    login();
     visitWithoutDateRange(exceptionsListDetailsUrl(getExceptionList1().list_id));
     waitForExceptionListDetailToBeLoaded();
   });

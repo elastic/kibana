@@ -177,7 +177,8 @@
           "minItems": 1,
           "items": {
             "type": "string",
-            "pattern": "^(?:\\/[^\\/\\*]+)+(?:\\/\\*|\\/\\*\\*)?$"
+            "pattern": "^(?:\\/[^\\/\\*]+)*(?:\\/\\*|\\/\\*\\*)?$",
+            "minLength": 1
           }
         },
         "ignoreVolumeMounts": {
@@ -319,7 +320,8 @@
           "minItems": 1,
           "items": {
             "type": "string",
-            "pattern": "^(?:\\/[^\\/\\*]+)+(?:\\/\\*|\\/\\*\\*)?$"
+            "pattern": "^(?:\\/[^\\/\\*]+)*(?:\\/\\*|\\/\\*\\*)?$",
+            "minLength": 1
           }
         },
         "processName": {

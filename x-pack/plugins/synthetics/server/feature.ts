@@ -6,13 +6,12 @@
  */
 
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
-import { syntheticsParamType } from '../common/types/saved_objects';
+import { syntheticsMonitorType, syntheticsParamType } from '../common/types/saved_objects';
 import { SYNTHETICS_RULE_TYPES } from '../common/constants/synthetics_alerts';
 import { privateLocationsSavedObjectName } from '../common/saved_objects/private_locations';
 import { PLUGIN } from '../common/constants/plugin';
 import { UPTIME_RULE_TYPES } from '../common/constants/uptime_alerts';
 import { umDynamicSettings } from './legacy_uptime/lib/saved_objects/uptime_settings';
-import { syntheticsMonitorType } from './legacy_uptime/lib/saved_objects/synthetics_monitor';
 import { syntheticsApiKeyObjectType } from './legacy_uptime/lib/saved_objects/service_api_key';
 
 export const uptimeFeature = {

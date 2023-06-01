@@ -91,5 +91,7 @@
     "@kbn/utility-types",
     "@kbn/ml-error-utils",
     "@kbn/ml-anomaly-utils",
+    "@kbn/ml-data-frame-analytics-utils",
+    "@kbn/ml-kibana-theme",
   ],
 }

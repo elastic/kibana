@@ -191,6 +191,7 @@ export interface Connector {
   index_name: string;
   is_native: boolean;
   language: string | null;
+  last_access_control_sync_status: SyncStatus | null;
   last_seen: string | null;
   last_sync_error: string | null;
   last_sync_scheduled_at: string | null;

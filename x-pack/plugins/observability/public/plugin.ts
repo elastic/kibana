@@ -53,12 +53,11 @@ import { RulesLocatorDefinition } from './locators/rules';
 import { RuleDetailsLocatorDefinition } from './locators/rule_details';
 import { SloDetailsLocatorDefinition } from './locators/slo_details';
 import { observabilityAppId, observabilityFeatureId, casesPath } from '../common';
-import { registerDataHandler } from './data_handler';
+import { registerDataHandler } from './context/has_data_context/data_handler';
 import {
   createObservabilityRuleTypeRegistry,
   ObservabilityRuleTypeRegistry,
 } from './rules/create_observability_rule_type_registry';
-import { createCallObservabilityApi } from './services/call_observability_api';
 import { createUseRulesLink } from './hooks/create_use_rules_link';
 import { registerObservabilityRuleTypes } from './rules/register_observability_rule_types';
 
@@ -186,8 +185,6 @@ export class Plugin
     const euiIconType = 'logoObservability';
     const config = this.initContext.config.get();
     const kibanaVersion = this.initContext.env.packageInfo.version;
-
-    createCallObservabilityApi(coreSetup.http);
 
     this.observabilityRuleTypeRegistry = createObservabilityRuleTypeRegistry(
       pluginsSetup.triggersActionsUi.ruleTypeRegistry
