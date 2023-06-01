@@ -8,9 +8,10 @@
 import { isEmpty, isEqual, keyBy, pick } from 'lodash/fp';
 import memoizeOne from 'memoize-one';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import type { BrowserField, BrowserFields, IndexField } from '@kbn/timelines-plugin/common';
-import type { DataView, FieldSpec } from '@kbn/data-views-plugin/common';
-import { getCategory } from '@kbn/triggers-actions-ui-plugin/public';
+import type { DataViewBase } from '@kbn/es-query';
+import type { BrowserField, BrowserFields } from '@kbn/timelines-plugin/common';
+import type { DataViewFieldMap, FieldSpec } from '@kbn/data-views-plugin/common';
+import type { DataViewSpec } from '@kbn/data-views-plugin/public';
 
 import { useKibana } from '../../lib/kibana';
 import * as i18n from './translations';
@@ -42,12 +43,12 @@ export const getAllFieldsByName = (
 export const getIndexFields = memoizeOne(
   (
     title: string,
-    fields: FieldSpec[],
+    fields: DataViewFieldMap,
     _includeUnmapped: boolean = false
   ): { fields: FieldSpec[]; title: string } =>
-    fields && fields.length > 0
+    fields && Object.keys(fields).length > 0
       ? {
-          fields: fields.map((field) =>
+          fields: Object.keys(fields).map((fieldName) =>
             pick(
               [
                 'name',
@@ -58,7 +59,7 @@ export const getIndexFields = memoizeOne(
                 'subType',
                 'conflictDescriptions',
               ],
-              field
+              fields[fieldName]
             )
           ),
           title,
@@ -68,35 +69,6 @@ export const getIndexFields = memoizeOne(
     newArgs[0] === lastArgs[0] &&
     newArgs[1].length === lastArgs[1].length &&
     newArgs[2] === lastArgs[2]
-);
-
-/**
- * HOT Code path where the fields can be 16087 in length or larger. This is
- * VERY mutatious on purpose to improve the performance of the transform.
- */
-export const getBrowserFields = memoizeOne(
-  (_title: string, fields: IndexField[]): BrowserFields => {
-    // Adds two dangerous casts to allow for mutations within this function
-    type DangerCastForMutation = Record<string, {}>;
-    type DangerCastForBrowserFieldsMutation = Record<
-      string,
-      Omit<BrowserField, 'fields'> & { fields: Record<string, BrowserField> }
-    >;
-
-    // We mutate this instead of using lodash/set to keep this as fast as possible
-    return fields.reduce<DangerCastForBrowserFieldsMutation>((accumulator, field) => {
-      const category = getCategory(field.name);
-      if (accumulator[category] == null) {
-        (accumulator as DangerCastForMutation)[category] = {};
-      }
-      if (accumulator[category].fields == null) {
-        accumulator[category].fields = {};
-      }
-      accumulator[category].fields[field.name] = field as unknown as BrowserField;
-      return accumulator;
-    }, {});
-  },
-  (newArgs, lastArgs) => newArgs[0] === lastArgs[0] && newArgs[1].length === lastArgs[1].length
 );
 
 const DEFAULT_BROWSER_FIELDS = {};
@@ -112,11 +84,8 @@ interface FetchIndexReturn {
   browserFields: BrowserFields;
   indexes: string[];
   indexExists: boolean;
-  /**
-   * @deprecated use `dataView` property
-   */
-  indexPatterns: { title: string; fields: FieldSpec[] };
-  dataView: DataView | undefined;
+  indexPatterns: DataViewBase;
+  dataView: DataViewSpec | undefined;
 }
 
 /**
@@ -153,17 +122,21 @@ export const useFetchIndex = (
         try {
           setState({ ...state, loading: true });
           abortCtrl.current = new AbortController();
-          let dv: DataView;
+          let dv: DataViewSpec;
           if (!isIndexNameArray) {
-            dv = await data.dataViews.get(dataViewIdOrIndexNames);
+            const fulldv = await data.dataViews.get(dataViewIdOrIndexNames);
+            dv = fulldv.toSpec();
             previousIndexesNameOrId.current = dv?.id;
           } else {
-            dv = await data.dataViews.create({ title: iNames.join(','), allowNoIndex: true });
-            previousIndexesNameOrId.current = dv.getIndexPattern().split(',');
+            const fulldv = await data.dataViews.create({
+              title: iNames.join(','),
+              allowNoIndex: true,
+            });
+            dv = fulldv.toSpec();
+            previousIndexesNameOrId.current = dv?.title?.split(',');
           }
 
-          const fields = dv.fields.map((field) => field.toSpec());
-          if (includeUnmapped) {
+          if (includeUnmapped && dv.fields != null) {
             try {
               const fieldNameConflictDescriptionsMap =
                 await data.dataViews.getFieldsForIndexPattern(dv, {
@@ -171,23 +144,17 @@ export const useFetchIndex = (
                   includeUnmapped: true,
                 });
               fieldNameConflictDescriptionsMap.forEach((field) => {
-                dv.fields.update({ ...field });
+                if (dv?.fields?.[field.name] != null) {
+                  dv.fields[field.name] = { ...field };
+                }
               });
-              // dv.fields.replaceAll([
-              //   ...fields.map((field) => ({
-              //     ...field,
-              //     ...(fieldNameConflictDescriptionsMap[field.name] != null
-              //       ? { conflictDescriptions: fieldNameConflictDescriptionsMap[field.name] }
-              //       : {}),
-              //   })),
-              // ]);
             } catch (error) {
               addWarning(error, { title: i18n.FETCH_FIELDS_WITH_UNMAPPED_DATA_ERROR });
             }
           }
           const { browserFields } = getDataViewStateFromIndexFields(
             iNames,
-            fields,
+            dv.fields,
             includeUnmapped
           );
 
@@ -195,9 +162,12 @@ export const useFetchIndex = (
             loading: false,
             dataView: dv,
             browserFields,
-            indexes: dv.getIndexPattern().split(','),
-            indexExists: dv.getIndexPattern().split(',').length > 0,
-            indexPatterns: getIndexFields(dv.getIndexPattern(), fields, includeUnmapped),
+            indexes: dv?.title != null ? dv.title.split(',') : [],
+            indexExists: dv?.title != null && dv?.title?.split(',').length > 0,
+            indexPatterns:
+              dv.title != null && dv.fields != null
+                ? getIndexFields(dv?.title, dv?.fields, includeUnmapped)
+                : { title: '', fields: [] },
           });
         } catch (exc) {
           setState({

@@ -136,19 +136,22 @@ const ConfigurationPopover: React.FC<ConfigurationPopOverProps> = ({
         panelPaddingSize="none"
         closePopover={setCloseConfiguration}
         button={
-          <EuiButtonEmpty
-            color="primary"
-            iconType="arrowDown"
-            iconSide="right"
-            onClick={setCloseConfiguration}
-          >
-            {i18n.translate(
-              'xpack.enterpriseSearch.content.engine.searchPreview.configuration.buttonTitle',
-              {
-                defaultMessage: 'Configuration',
-              }
-            )}
-          </EuiButtonEmpty>
+          <EuiFlexGroup alignItems="center" gutterSize="xs">
+            {hasSchemaConflicts && <EuiIcon type="alert" color="danger" />}
+            <EuiButtonEmpty
+              color="primary"
+              iconType="arrowDown"
+              iconSide="right"
+              onClick={setCloseConfiguration}
+            >
+              {i18n.translate(
+                'xpack.enterpriseSearch.content.engine.searchPreview.configuration.buttonTitle',
+                {
+                  defaultMessage: 'Configuration',
+                }
+              )}
+            </EuiButtonEmpty>
+          </EuiFlexGroup>
         }
       >
         <EuiContextMenuPanel style={{ width: 300 }}>

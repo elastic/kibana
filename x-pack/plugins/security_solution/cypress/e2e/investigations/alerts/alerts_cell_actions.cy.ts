@@ -8,7 +8,6 @@
 import { getNewRule } from '../../../objects/rule';
 import { CELL_COPY_BUTTON, FILTER_BADGE, SHOW_TOP_N_HEADER } from '../../../screens/alerts';
 import {
-  ALERT_TABLE_ACTIONS_HEADER,
   ALERT_TABLE_FILE_NAME_HEADER,
   ALERT_TABLE_FILE_NAME_VALUES,
   ALERT_TABLE_SEVERITY_HEADER,
@@ -23,35 +22,32 @@ import {
   showTopNAlertProperty,
   clickExpandActions,
   filterOutAlertProperty,
-  closeTopNAlertProperty,
 } from '../../../tasks/alerts';
 import { createRule } from '../../../tasks/api_calls/rules';
 import { cleanKibana } from '../../../tasks/common';
 import { waitForAlertsToPopulate } from '../../../tasks/create_new_rule';
 import { login, visit } from '../../../tasks/login';
 import {
-  clearKqlQueryBar,
   fillAddFilterForm,
   fillKqlQueryBar,
   openAddFilterPopover,
   removeKqlFilter,
 } from '../../../tasks/search_bar';
-import { closeTimeline, openActiveTimeline, removeDataProvider } from '../../../tasks/timeline';
+import { openActiveTimeline } from '../../../tasks/timeline';
 
 import { ALERTS_URL } from '../../../urls/navigation';
-describe('Alerts cell actions', { testIsolation: false }, () => {
+
+describe('Alerts cell actions', () => {
   before(() => {
     cleanKibana();
-    login();
     createRule(getNewRule());
-    visit(ALERTS_URL);
-    waitForAlertsToPopulate();
   });
 
   describe('Filter', () => {
-    afterEach(() => {
-      clearKqlQueryBar();
-      scrollAlertTableColumnIntoView(ALERT_TABLE_ACTIONS_HEADER);
+    beforeEach(() => {
+      login();
+      visit(ALERTS_URL);
+      waitForAlertsToPopulate();
     });
 
     it('should filter for a non-empty property', () => {
@@ -104,10 +100,10 @@ describe('Alerts cell actions', { testIsolation: false }, () => {
   });
 
   describe('Add to timeline', () => {
-    afterEach(() => {
-      removeDataProvider();
-      closeTimeline();
-      scrollAlertTableColumnIntoView(ALERT_TABLE_ACTIONS_HEADER);
+    beforeEach(() => {
+      login();
+      visit(ALERTS_URL);
+      waitForAlertsToPopulate();
     });
 
     it('should add a non-empty property to default timeline', () => {
@@ -137,9 +133,10 @@ describe('Alerts cell actions', { testIsolation: false }, () => {
   });
 
   describe('Show Top N', () => {
-    afterEach(() => {
-      closeTopNAlertProperty();
-      scrollAlertTableColumnIntoView(ALERT_TABLE_ACTIONS_HEADER);
+    beforeEach(() => {
+      login();
+      visit(ALERTS_URL);
+      waitForAlertsToPopulate();
     });
 
     it('should show top for a property', () => {
@@ -155,8 +152,10 @@ describe('Alerts cell actions', { testIsolation: false }, () => {
   });
 
   describe('Copy to clipboard', () => {
-    afterEach(() => {
-      scrollAlertTableColumnIntoView(ALERT_TABLE_ACTIONS_HEADER);
+    beforeEach(() => {
+      login();
+      visit(ALERTS_URL);
+      waitForAlertsToPopulate();
     });
 
     it('should copy to clipboard', () => {

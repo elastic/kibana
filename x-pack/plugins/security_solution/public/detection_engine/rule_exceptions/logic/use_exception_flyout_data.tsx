@@ -72,7 +72,7 @@ export const useFetchIndexPatterns = (rules: Rule[] | null): ReturnUseFetchExcep
     isLoading: isIndexPatternLoading || mlJobLoading,
     indexPatterns: {
       ...dataView,
-      fields: dataView != null ? Object.values(dataView.fields.toSpec()) : [],
+      fields: dataView != null && dataView.fields != null ? Object.values(dataView.fields) : [],
     } as Omit<DataView, 'fields'> & { fields: FieldSpec[] },
   };
 };
