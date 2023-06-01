@@ -7,6 +7,8 @@
 
 import type { ReducerAction } from 'react';
 
+import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
+
 import type { UseFetchStreamParamsDefault } from './use_fetch_stream';
 
 type GeneratorError = string | null;
@@ -56,7 +58,7 @@ export async function* fetchStream<I extends UseFetchStreamParamsDefault, BasePa
         // This refers to the format of the request body,
         // not the response, which will be a uint8array Buffer.
         'Content-Type': 'application/json',
-        'Elastic-Api-Version': apiVersion,
+        [ELASTIC_HTTP_VERSION_HEADER]: apiVersion,
         'kbn-xsrf': 'stream',
       },
       ...(Object.keys(body).length > 0 ? { body: JSON.stringify(body) } : {}),

@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
@@ -21,7 +22,7 @@ export default ({ getService }: FtrProviderContext) => {
           const resp = await supertest
             .post(`/internal/aiops/explain_log_rate_spikes`)
             .set('kbn-xsrf', 'kibana')
-            .set('Elastic-Api-Version', '1')
+            .set(ELASTIC_HTTP_VERSION_HEADER, '1')
             .send({
               ...testData.requestBody,
               index: 'does_not_exist',
