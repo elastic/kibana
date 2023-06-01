@@ -108,12 +108,10 @@ export function DiscoverMainRoute(props: Props) {
       }
 
       const checkDataDuration = window.performance.now() - checkDataStartTime;
-      if (services.analytics) {
-        reportPerformanceMetricEvent(services.analytics, {
-          eventName: 'discoverCheckData',
-          duration: checkDataDuration,
-        });
-      }
+      reportPerformanceMetricEvent(services.analytics, {
+        eventName: 'discoverCheckData',
+        duration: checkDataDuration,
+      });
 
       if (!defaultDataView) {
         setShowNoDataPage(true);
@@ -162,12 +160,10 @@ export function DiscoverMainRoute(props: Props) {
 
         setLoading(false);
         const loadSavedSearchDuration = window.performance.now() - loadSavedSearchStartTime;
-        if (services.analytics) {
-          reportPerformanceMetricEvent(services.analytics, {
-            eventName: 'discoverLoadSavedSearch',
-            duration: loadSavedSearchDuration,
-          });
-        }
+        reportPerformanceMetricEvent(services.analytics, {
+          eventName: 'discoverLoadSavedSearch',
+          duration: loadSavedSearchDuration,
+        });
       } catch (e) {
         if (e instanceof SavedObjectNotFound) {
           redirectWhenMissing({
