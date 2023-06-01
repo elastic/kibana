@@ -26,7 +26,6 @@ describe('engines field_capabilities', () => {
     updated_at_millis: 2202018295,
   };
 
-
   beforeEach(() => {
     jest.clearAllMocks();
   });
