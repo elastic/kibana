@@ -26,6 +26,7 @@ import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import type { LayerAction } from '../../../../types';
 import { LOCAL_STORAGE_LENS_KEY } from '../../../../settings_storage';
 import type { LayerType } from '../../../../../common/types';
+import { LAST_ACTION_ORDER } from './order_bounds';
 
 interface RemoveLayerAction {
   execute: () => void;
@@ -196,7 +197,6 @@ export const getRemoveLayerAction = (props: RemoveLayerAction): LayerAction => {
   );
 
   return {
-    id: 'removeLayerAction',
     execute: async () => {
       const storage = new Storage(localStorage);
       const lensLocalStorage = storage.get(LOCAL_STORAGE_LENS_KEY) ?? {};
@@ -224,6 +224,7 @@ export const getRemoveLayerAction = (props: RemoveLayerAction): LayerAction => {
           ),
           {
             'data-test-subj': 'lnsLayerRemoveModal',
+            maxWidth: 600,
           }
         );
         await modal.onClose;
@@ -236,5 +237,6 @@ export const getRemoveLayerAction = (props: RemoveLayerAction): LayerAction => {
     icon: props.isOnlyLayer ? 'eraser' : 'trash',
     color: 'danger',
     'data-test-subj': `lnsLayerRemove--${props.layerIndex}`,
+    order: LAST_ACTION_ORDER,
   };
 };
