@@ -31,7 +31,7 @@ properties:
     description: The parameters for the rule.
     additionalProperties: true
     oneOf:
-      - "#/components/schemas/params_property_apm_anomaly"
+      - $ref: "#/components/schemas/params_property_apm_anomaly"
   rule_type_id:
     type: string
     description: >
