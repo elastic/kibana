@@ -44,18 +44,16 @@ export enum RuleExecutionStatusWarningReason {
   MAX_ALERTS = 'maxAlerts',
 }
 
-export const fieldsToExcludeFromPublicApi: Array<keyof SanitizedRule> = [
-  'monitoring',
-  'mapped_params',
-  'snoozeSchedule',
-  'activeSnoozes',
-];
-
 export type RuleParams = TypeOf<typeof ruleParamsSchema>;
 
 export type Rule<Params extends RuleParams = never> = Omit<TypeOf<typeof ruleSchema>, 'params'> & {
   params: Params;
 };
+
+export type PublicRule<Params extends RuleParams = never> = Omit<
+  Rule<Params>,
+  'monitoring' | 'mapped_params' | 'snoozeSchedule' | 'activeSnoozes'
+>;
 
 export type RRule = TypeOf<typeof rRuleSchema>;
 
@@ -88,12 +86,14 @@ export type SanitizedAction = Omit<Action, 'alertsFilter'> & {
 };
 
 interface SanitizedAlertsFilter {
-  query: Omit<AlertsFilter['query'], 'dsl'>;
-  timeframe: AlertsFilter['timeframe'];
+  query?: Omit<AlertsFilter['query'], 'dsl'>;
+  timeframe?: AlertsFilter['timeframe'];
 }
 
-export type RuleResponse = Omit<
-  Rule,
+// Rule response of all rule endpoints, this type is sanitized and the
+// keys are converted to snake case
+export type RuleResponse<Params extends RuleParams = never> = Omit<
+  SanitizedRule<Params>,
   | 'actions'
   | 'alertTypeId'
   | 'scheduledTaskId'
@@ -111,35 +111,43 @@ export type RuleResponse = Omit<
   | 'nextRun'
   | 'executionStatus'
 > & {
-  rule_type_id: Rule['alertTypeId'];
-  scheduled_task_id: Rule['scheduledTaskId'];
-  snooze_schedule: Rule['snoozeSchedule'];
-  created_by: Rule['createdBy'];
-  updated_by: Rule['updatedBy'];
-  created_at: Rule['createdAt'];
-  updated_at: Rule['updatedBy'];
-  api_key_owner: Rule['apiKeyOwner'];
-  notify_when: Rule['notifyWhen'];
-  mute_all: Rule['muteAll'];
-  muted_alert_ids: Rule['mutedInstanceIds'];
+  rule_type_id: SanitizedRule['alertTypeId'];
+  scheduled_task_id: SanitizedRule['scheduledTaskId'];
+  snooze_schedule: SanitizedRule['snoozeSchedule'];
+  created_by: SanitizedRule['createdBy'];
+  updated_by: SanitizedRule['updatedBy'];
+  created_at: SanitizedRule['createdAt'];
+  updated_at: SanitizedRule['updatedBy'];
+  api_key_owner: SanitizedRule['apiKeyOwner'];
+  notify_when: SanitizedRule['notifyWhen'];
+  mute_all: SanitizedRule['muteAll'];
+  muted_alert_ids: SanitizedRule['mutedInstanceIds'];
   execution_status: Omit<RuleExecutionStatus, 'lastExecutionDate' | 'lastDuration'> & {
     last_execution_date: RuleExecutionStatus['lastExecutionDate'];
     last_duration: RuleExecutionStatus['lastDuration'];
   };
   actions: ActionResponse[];
-  last_run: Omit<RuleLastRun, 'alertsCount' | 'outcomeMsg' | 'outcomeOrder'> & {
+  last_run?: Omit<RuleLastRun, 'alertsCount' | 'outcomeMsg' | 'outcomeOrder'> & {
     alerts_count: RuleLastRun['alertsCount'];
     outcome_msg: RuleLastRun['outcomeMsg'];
     outcome_order: RuleLastRun['outcomeOrder'];
   };
-  next_run: Rule['nextRun'];
-  api_key_created_by_user: Rule['apiKeyCreatedByUser'];
+  next_run?: SanitizedRule['nextRun'];
+  api_key_created_by_user?: SanitizedRule['apiKeyCreatedByUser'];
 };
 
-export type ActionResponse = Omit<Action, 'alertsFilter' | 'frequency' | 'actionTypeId'> & {
-  alerts_filter: SanitizedAction['alertsFilter'];
+export type PublicRuleResponse = Omit<
+  RuleResponse,
+  'monitoring' | 'mapped_params' | 'snooze_schedule' | 'active_snoozes'
+>;
+
+export type ActionResponse = Omit<
+  SanitizedAction,
+  'alertsFilter' | 'frequency' | 'actionTypeId'
+> & {
+  alerts_filter?: SanitizedAction['alertsFilter'];
   connector_type_id: SanitizedAction['actionTypeId'];
-  frequency: Omit<ActionFrequency['notifyWhen'], 'notifyWhen'> & {
+  frequency?: Omit<ActionFrequency, 'notifyWhen'> & {
     notify_when: ActionFrequency['notifyWhen'];
   };
 };

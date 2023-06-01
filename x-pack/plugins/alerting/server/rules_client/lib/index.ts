@@ -21,3 +21,4 @@ export { addGeneratedActionValues } from './add_generated_action_values';
 export { incrementRevision } from './increment_revision';
 export { transformRuleToEs } from './transform_rule_to_es';
 export { transformEsToRule } from './transform_es_to_rule';
+export { transformRuleToPublicRule } from './transform_rule_to_public_rule';

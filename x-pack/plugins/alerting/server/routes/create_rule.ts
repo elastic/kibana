@@ -79,9 +79,12 @@ export const createRuleRoute = ({ router, licenseState, usageCounter }: RouteOpt
                 data: rewriteBodyReq(rule),
                 options: { id: params?.id },
               });
-            return res.ok({
-              body: rewriteRule(createdRule),
-            });
+
+            const response: createRuleV1.CreateRuleResponse<ruleV1.RuleParams> = {
+              body: rewriteRule<ruleV1.RuleParams>(createdRule),
+            };
+
+            return res.ok(response);
           } catch (e) {
             if (e instanceof RuleTypeDisabledError) {
               return e.sendResponse(res);

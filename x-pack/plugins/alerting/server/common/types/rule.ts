@@ -17,7 +17,7 @@ export enum RuleNotifyWhen {
   THROTTLE = 'onThrottleInterval',
 }
 
-interface IntervaleScheduleAttributes {
+interface IntervaleScheduleAttributes extends SavedObjectAttributes {
   interval: string;
 }
 

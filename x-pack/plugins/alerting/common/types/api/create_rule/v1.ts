@@ -20,8 +20,8 @@ export type CreateRuleActionFrequency = TypeOf<typeof actionFrequencySchema>;
 export type CreateRuleRequestParams = TypeOf<typeof createParamsSchema>;
 export type CreateRuleRequestBody = TypeOf<typeof createBodySchema>;
 
-export interface CreateRuleResponse {
-  body: ruleV1.RuleResponse;
+export interface CreateRuleResponse<Params extends ruleV1.RuleParams = never> {
+  body: ruleV1.RuleResponse<Params>;
 }
 
 const notifyWhenSchema = schema.oneOf(

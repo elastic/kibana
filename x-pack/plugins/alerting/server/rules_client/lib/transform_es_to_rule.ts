@@ -9,13 +9,7 @@ import { Logger } from '@kbn/core/server';
 import { SavedObjectReference } from '@kbn/core/server';
 import { getRuleSnoozeEndTime } from '../../lib';
 import { RawRule, PartialRule } from '../../types';
-import {
-  Rule,
-  Monitoring,
-  RuleExecutionStatusValues,
-  RuleParams,
-  fieldsToExcludeFromPublicApi,
-} from '../../../common/types/api';
+import { Rule, Monitoring, RuleExecutionStatusValues, RuleParams } from '../../../common/types/api';
 import { RuleAttributes } from '../../common/types';
 import { UntypedNormalizedRuleType } from '../../rule_type_registry';
 import { injectReferencesIntoActions, injectReferencesIntoParams } from '../common';
@@ -33,10 +27,8 @@ const INITIAL_LAST_RUN_METRICS = {
 const transformEsExecutionStatus = (
   logger: Logger,
   ruleId: string,
-  esRuleExecutionStatus?: RuleAttributes['executionStatus']
-): Rule['executionStatus'] | undefined => {
-  if (!esRuleExecutionStatus) return undefined;
-
+  esRuleExecutionStatus: RuleAttributes['executionStatus']
+): Rule['executionStatus'] => {
   const {
     lastExecutionDate,
     lastDuration,
@@ -126,31 +118,14 @@ interface TransformEsToRuleParams {
 export const transformEsToRule = <Params extends RuleParams = never>(
   esRule: RuleAttributes,
   transformParams: TransformEsToRuleParams
-) => {
-  const {
-    createdAt,
-    updatedAt,
-    meta,
-    notifyWhen,
-    legacyId,
-    scheduledTaskId,
-    params,
-    executionStatus,
-    monitoring,
-    nextRun,
-    schedule,
-    actions,
-    snoozeSchedule,
-    lastRun,
-    ...partialEsRule
-  } = esRule;
+): Rule<Params> => {
+  const { scheduledTaskId, executionStatus, monitoring, snoozeSchedule, lastRun } = esRule;
 
   const {
     id,
     logger,
     ruleType,
     references,
-    excludeFromPublicApi = false,
     includeSnoozeData = false,
     omitGeneratedValues = true,
   } = transformParams;
@@ -163,39 +138,61 @@ export const transformEsToRule = <Params extends RuleParams = never>(
       ...(s.rRule.until ? { until: new Date(s.rRule.until).toISOString() } : {}),
     },
   }));
-  const includeSnoozeSchedule =
-    snoozeSchedule !== undefined && !isEmpty(snoozeSchedule) && !excludeFromPublicApi;
+  const includeSnoozeSchedule = snoozeSchedule !== undefined && !isEmpty(snoozeSchedule);
   const isSnoozedUntil = includeSnoozeSchedule
     ? getRuleSnoozeEndTime({
-        muteAll: partialEsRule.muteAll ?? false,
+        muteAll: esRule.muteAll ?? false,
         snoozeSchedule,
       })?.toISOString()
     : null;
-  const includeMonitoring = monitoring && !excludeFromPublicApi;
+
+  let actions = esRule.actions
+    ? injectReferencesIntoActions(id, esRule.actions as RawRule['actions'], references || [])
+    : [];
+
+  if (omitGeneratedValues) {
+    actions = actions.map((ruleAction) => omit(ruleAction, 'alertsFilter.query.dsl'));
+  }
+
+  const params = injectReferencesIntoParams<Params, RuleParams>(
+    id,
+    ruleType,
+    esRule.params,
+    references || []
+  );
+
+  const activeSnoozes = getActiveScheduledSnoozes({
+    snoozeSchedule,
+    muteAll: esRule.muteAll ?? false,
+  })?.map((s) => s.id);
+
   const rule = {
     id,
-    notifyWhen,
-    ...omit(partialEsRule, excludeFromPublicApi ? [...fieldsToExcludeFromPublicApi] : ''),
-    schedule,
-    actions: (actions
-      ? injectReferencesIntoActions(id, actions as RawRule['actions'], references || [])
-      : []) as Rule['actions'],
-    params: injectReferencesIntoParams(id, ruleType, params, references || []) as Params,
-    ...(excludeFromPublicApi ? {} : { snoozeSchedule: snoozeScheduleDates ?? [] }),
-    ...(includeSnoozeData && !excludeFromPublicApi
-      ? {
-          activeSnoozes: getActiveScheduledSnoozes({
-            snoozeSchedule,
-            muteAll: partialEsRule.muteAll ?? false,
-          })?.map((s) => s.id),
-          isSnoozedUntil,
-        }
-      : {}),
+    enabled: esRule.enabled,
+    name: esRule.name,
+    tags: esRule.tags,
+    alertTypeId: esRule.alertTypeId,
+    consumer: esRule.consumer,
+    schedule: esRule.schedule,
+    actions: actions as Rule['actions'],
+    params,
+    mapped_params: esRule.mapped_params,
     ...(scheduledTaskId ? { scheduledTaskId } : {}),
-    ...(executionStatus
-      ? { executionStatus: transformEsExecutionStatus(logger, id, executionStatus) }
-      : {}),
-    ...(includeMonitoring ? { monitoring: transformEsMonitoring(logger, id, monitoring) } : {}),
+    createdBy: esRule.createdBy,
+    updatedBy: esRule.updatedBy,
+    createdAt: esRule.createdAt,
+    updatedAt: esRule.updatedAt,
+    apiKey: esRule.apiKey,
+    apiKeyOwner: esRule.apiKeyOwner,
+    apiKeyCreatedByUser: esRule.apiKeyCreatedByUser,
+    throttle: esRule.throttle,
+    muteAll: esRule.muteAll,
+    notifyWhen: esRule.notifyWhen,
+    mutedInstanceIds: esRule.mutedInstanceIds,
+    executionStatus: transformEsExecutionStatus(logger, id, executionStatus),
+    ...(monitoring ? { monitoring: transformEsMonitoring(logger, id, monitoring) } : {}),
+    snoozeSchedule: snoozeScheduleDates ?? [],
+    ...(includeSnoozeData ? { activeSnoozes, isSnoozedUntil } : {}),
     ...(lastRun
       ? {
           lastRun: {
@@ -206,22 +203,26 @@ export const transformEsToRule = <Params extends RuleParams = never>(
           },
         }
       : {}),
+    nextRun: esRule.nextRun,
+    revision: esRule.revision,
+    running: esRule.running,
   };
 
-  if (omitGeneratedValues) {
-    if (rule.actions) {
-      rule.actions = rule.actions.map((ruleAction) => omit(ruleAction, 'alertsFilter.query.dsl'));
+  // Bad casts, but will fix once we fix all rule types
+  const viewInAppRelativeUrl =
+    ruleType.getViewInAppRelativeUrl &&
+    ruleType.getViewInAppRelativeUrl({ rule: rule as unknown as PartialRule<Params> });
+  if (viewInAppRelativeUrl) {
+    (rule as unknown as PartialRule<Params>).viewInAppRelativeUrl = viewInAppRelativeUrl;
+  }
+
+  // Remove all undefined keys to clean up the object
+  type RuleKeys = keyof Omit<Rule, 'viewInAppRelativeUrl'>;
+  for (const key in rule) {
+    if (rule[key as RuleKeys] === undefined) {
+      delete rule[key as RuleKeys];
     }
   }
 
-  if (!excludeFromPublicApi) {
-    const viewInAppRelativeUrl =
-      ruleType.getViewInAppRelativeUrl &&
-      ruleType.getViewInAppRelativeUrl({ rule: rule as PartialRule<Params> });
-    if (viewInAppRelativeUrl) {
-      (rule as PartialRule<Params>).viewInAppRelativeUrl = viewInAppRelativeUrl;
-    }
-  }
-
-  return rule as Rule<Params>;
+  return rule;
 };

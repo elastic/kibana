@@ -20,6 +20,7 @@ import {
   addGeneratedActionValues,
   transformRuleToEs,
   transformEsToRule,
+  transformRuleToPublicRule,
 } from '../lib';
 import { generateAPIKeyName, apiKeyAsAlertAttributes } from '../common';
 import { ruleAuditEvent, RuleAuditAction } from '../common/audit_events';
@@ -190,9 +191,9 @@ export async function create<Params extends RuleParams = never>(
       logger: context.logger,
       ruleType: context.ruleTypeRegistry.get(createdRuleSavedObject.attributes.alertTypeId),
       references,
-      excludeFromPublicApi: true,
     }
   );
 
-  return rule as SanitizedRule<Params>;
+  // Convert rule to public rule (Remove certain properties)
+  return transformRuleToPublicRule<Params>(rule);
 }
