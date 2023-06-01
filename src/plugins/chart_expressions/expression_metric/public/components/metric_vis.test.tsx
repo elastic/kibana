@@ -29,7 +29,7 @@ import { euiThemeVars } from '@kbn/ui-theme';
 import { DEFAULT_TRENDLINE_NAME } from '../../common/constants';
 import faker from 'faker';
 
-const mockDeserialize = jest.fn(({ id }: { id: string } = { id: 'fallback' }) => {
+const mockDeserialize = jest.fn(({ id }: { id: string }) => {
   const convertFn = (v: unknown) => `${id}-${v}`;
   return { getConverterFor: () => convertFn };
 });
@@ -1457,9 +1457,9 @@ describe('MetricVisComponent', function () {
     it('still call the numeric formatter when no format is passed', () => {
       const { primary, secondary } = getFormattedMetrics(394.2393, 983123.984, undefined);
       expect(mockDeserialize).toHaveBeenCalledTimes(2);
-      expect(mockDeserialize).toHaveBeenCalledWith(undefined);
-      expect(primary).toBe('fallback-394.2393');
-      expect(secondary).toBe('fallback-983123.984');
+      expect(mockDeserialize).toHaveBeenCalledWith({ id: 'number' });
+      expect(primary).toBe('number-394.2393');
+      expect(secondary).toBe('number-983123.984');
     });
   });
 
