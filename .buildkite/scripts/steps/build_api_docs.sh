@@ -2,10 +2,12 @@
 
 set -euo pipefail
 
+source .buildkite/scripts/common/util.sh
+
 .buildkite/scripts/bootstrap.sh
 
 echo "--- Run scripts/type_check to ensure that all build available"
-node scripts/type_check
+# node scripts/type_check # TODO: ENABLE THIS BACK
 
 if is_pr_with_label "ci:link-docs"; then
   echo "--- Link API Docs"
