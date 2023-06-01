@@ -62,8 +62,8 @@ describe('User', () => {
       });
     });
 
-    it('does not returns an error if imageUrl is null', () => {
-      const reqWithNullImage = set(defaultRequest, 'avatar.imageUrl', null);
+    it.each(['initials', 'color', 'imageUrl'])('does not returns an error if %s is null', (key) => {
+      const reqWithNullImage = set(defaultRequest, `avatar.${key}`, null);
       const query = UserWithProfileInfoRt.decode(reqWithNullImage);
 
       expect(query).toStrictEqual({
