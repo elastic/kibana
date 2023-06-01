@@ -67,8 +67,10 @@ export const cli = () => {
         spec ? (spec.includes(',') ? spec.split(',') : [spec]) : cypressConfigFile?.e2e?.specPattern
       );
 
-      if (!files.length) {
-        throw new Error('No files found');
+      if (!files || !files.length) {
+        throw new Error(
+          'No files found. Make sure you are passing the correct spec list to run and if you see this in CI make sure the number of parallel jobs is not greater than the number of specs.'
+        );
       }
 
       const esPorts: number[] = [9200, 9220];
