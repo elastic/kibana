@@ -4,10 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import moment from 'moment';
-import { schema } from '@kbn/config-schema';
-import { ALERT_REASON, ALERT_UUID } from '@kbn/rule-data-utils';
 import { ActionGroupIdsOf } from '@kbn/alerting-plugin/common';
+import { schema } from '@kbn/config-schema';
+import { getAlertUrl } from '@kbn/infra-plugin/server/lib/alerting/common/utils';
+import { ALERT_REASON, ALERT_UUID } from '@kbn/rule-data-utils';
+import { asyncForEach } from '@kbn/std';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { formatFilterString } from './status_check';
 import { UptimeAlertTypeFactory } from './types';
@@ -15,7 +18,6 @@ import {
   updateState,
   generateAlertMessage,
   setRecoveredAlertsContext,
-  getAlertDetailsUrl,
   UptimeRuleTypeAlertDefinition,
 } from './common';
 import { CLIENT_ALERT_TYPES, TLS } from '../../../../common/constants/uptime_alerts';
@@ -128,9 +130,7 @@ export const tlsAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (
     context: [
       ...tlsTranslations.actionVariables,
       ...commonStateTranslations,
-      ...(plugins.observability.getAlertDetailsConfig()?.uptime.enabled
-        ? [ACTION_VARIABLES[ALERT_DETAILS_URL]]
-        : []),
+      ACTION_VARIABLES[ALERT_DETAILS_URL],
     ],
     state: [...tlsTranslations.actionVariables, ...commonStateTranslations],
   },
@@ -142,6 +142,7 @@ export const tlsAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (
     services: {
       alertFactory,
       alertWithLifecycle,
+      getAlertStartedDate,
       getAlertUuid,
       savedObjectsClient,
       scopedClusterClient,
@@ -149,7 +150,7 @@ export const tlsAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (
     spaceId,
     state,
   }) {
-    const { basePath } = _server;
+    const { alertsLocator, basePath } = _server;
     const dynamicSettings = await savedObjectsAdapter.getUptimeDynamicSettings(savedObjectsClient);
 
     const uptimeEsClient = new UptimeEsClient(
@@ -187,7 +188,7 @@ export const tlsAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (
     const foundCerts = total > 0;
 
     if (foundCerts) {
-      certs.forEach((cert) => {
+      await asyncForEach(certs, async (cert) => {
         const absoluteExpirationThreshold = moment().add(certExpirationThreshold, 'd').valueOf();
         const absoluteAgeThreshold = moment().subtract(certAgeThreshold, 'd').valueOf();
         const summary = getCertSummary(cert, absoluteExpirationThreshold, absoluteAgeThreshold);
@@ -196,11 +197,12 @@ export const tlsAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (
           return;
         }
 
-        const id = `${cert.common_name}-${cert.issuer?.replace(/\s/g, '_')}-${cert.sha256}`;
-        const alertUuid = getAlertUuid(id);
+        const alertId = `${cert.common_name}-${cert.issuer?.replace(/\s/g, '_')}-${cert.sha256}`;
+        const alertUuid = getAlertUuid(alertId);
+        const indexedStartedAt = getAlertStartedDate(alertId) ?? startedAt.toISOString();
 
         const alertInstance = alertWithLifecycle({
-          id,
+          id: alertId,
           fields: {
             'tls.server.x509.subject.common_name': cert.common_name,
             'tls.server.x509.issuer.common_name': cert.issuer,
@@ -218,13 +220,26 @@ export const tlsAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (
         });
 
         alertInstance.scheduleActions(TLS.id, {
-          alertDetailsUrl: getAlertDetailsUrl(basePath, spaceId, alertUuid),
+          [ALERT_DETAILS_URL]: await getAlertUrl(
+            alertUuid,
+            spaceId,
+            indexedStartedAt,
+            alertsLocator,
+            basePath.publicBaseUrl
+          ),
           ...summary,
         });
       });
     }
 
-    setRecoveredAlertsContext({ alertFactory, basePath, getAlertUuid, spaceId });
+    await setRecoveredAlertsContext({
+      alertFactory,
+      getAlertStartedDate,
+      alertsLocator,
+      basePath,
+      getAlertUuid,
+      spaceId,
+    });
 
     return { state: updateState(state, foundCerts) };
   },

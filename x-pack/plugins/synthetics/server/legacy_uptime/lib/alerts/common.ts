@@ -7,6 +7,9 @@
 
 import { isRight } from 'fp-ts/lib/Either';
 import Mustache from 'mustache';
+import { getAlertUrl } from '@kbn/infra-plugin/server/lib/alerting/common/utils';
+import { AlertsLocatorParams } from '@kbn/observability-plugin/common';
+import { LocatorPublic } from '@kbn/share-plugin/common';
 import { legacyExperimentalFieldMap } from '@kbn/alerts-as-data-utils';
 import { IBasePath } from '@kbn/core/server';
 import { type IRuleTypeAlerts, RuleExecutorServices } from '@kbn/alerting-plugin/server';
@@ -80,29 +83,40 @@ export const getAlertDetailsUrl = (
   alertUuid: string | null
 ) => addSpaceIdToPath(basePath.publicBaseUrl, spaceId, `/app/observability/alerts/${alertUuid}`);
 
-export const setRecoveredAlertsContext = ({
+export const setRecoveredAlertsContext = async ({
   alertFactory,
+  getAlertStartedDate,
+  alertsLocator,
   basePath,
   getAlertUuid,
   spaceId,
 }: {
   alertFactory: RuleExecutorServices['alertFactory'];
+  getAlertStartedDate: (alertInstanceId: string) => string | null;
+  alertsLocator?: LocatorPublic<AlertsLocatorParams>;
   basePath?: IBasePath;
   getAlertUuid?: (alertId: string) => string | null;
   spaceId?: string;
 }) => {
   const { getRecoveredAlerts } = alertFactory.done();
-  for (const alert of getRecoveredAlerts()) {
+
+  for await (const alert of getRecoveredAlerts()) {
     const recoveredAlertId = alert.getId();
     const alertUuid = getAlertUuid?.(recoveredAlertId) || undefined;
+    const indexedStartedAt = getAlertStartedDate(recoveredAlertId) ?? startedAt.toISOString();
 
     const state = alert.getState();
+    const alertUrl = await getAlertUrl(
+      alertUuid,
+      spaceId,
+      indexedStartedAt,
+      alertsLocator,
+      basePath.publicBaseUrl
+    );
 
     alert.setContext({
       ...state,
-      ...(basePath && spaceId && alertUuid
-        ? { [ALERT_DETAILS_URL]: getAlertDetailsUrl(basePath, spaceId, alertUuid) }
-        : {}),
+      [ALERT_DETAILS_URL]: alertUrl,
     });
   }
 };
