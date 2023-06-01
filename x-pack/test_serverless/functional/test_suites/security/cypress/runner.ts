@@ -8,9 +8,9 @@
 import { resolve } from 'path';
 import { withProcRunner } from '@kbn/dev-proc-runner';
 
-import { FtrProviderContext } from './ftr_provider_context';
+import { FtrProviderContext } from '../../../ftr_provider_context';
 
-export type { FtrProviderContext } from './ftr_provider_context';
+export type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export async function SecuritySolutionServerlessVisualTestRunner({
   getService,

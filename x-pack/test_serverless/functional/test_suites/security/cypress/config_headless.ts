@@ -10,7 +10,7 @@ import { FtrConfigProviderContext } from '@kbn/test';
 import { SecuritySolutionServerlessHeadlessTestRunner } from './runner';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
-  const svlSecConfig = await readConfigFile(require.resolve('./config.ts'));
+  const svlSecConfig = await readConfigFile(require.resolve('./security_config.base.ts'));
 
   return {
     ...svlSecConfig.getAll(),
