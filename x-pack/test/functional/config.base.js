@@ -178,6 +178,9 @@ export default async function ({ readConfigFile }) {
       triggersActions: {
         pathname: '/app/management/insightsAndAlerting/triggersActions',
       },
+      maintenanceWindows: {
+        pathname: '/app/management/insightsAndAlerting/maintenanceWindows',
+      },
     },
 
     // choose where screenshots should be saved
@@ -633,6 +636,45 @@ export default async function ({ readConfigFile }) {
             },
           ],
           elasticsearch: {
+            indices: [
+              {
+                names: ['*'],
+                privileges: ['all'],
+              },
+            ],
+          },
+        },
+
+        slo_all: {
+          kibana: [
+            {
+              feature: {
+                slo: ['all'],
+              },
+              spaces: ['*'],
+            },
+          ],
+          elasticsearch: {
+            cluster: ['all'],
+            indices: [
+              {
+                names: ['*'],
+                privileges: ['all'],
+              },
+            ],
+          },
+        },
+        slo_read_only: {
+          kibana: [
+            {
+              feature: {
+                slo: ['read'],
+              },
+              spaces: ['*'],
+            },
+          ],
+          elasticsearch: {
+            cluster: ['all'],
             indices: [
               {
                 names: ['*'],

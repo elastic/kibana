@@ -40,6 +40,7 @@ describe('config validation', () => {
         "poll_interval": 3000,
         "request_capacity": 1000,
         "unsafe": Object {
+          "authenticate_background_task_utilization": true,
           "exclude_task_types": Array [],
         },
         "version_conflict_threshold": 80,
@@ -91,6 +92,7 @@ describe('config validation', () => {
         "poll_interval": 3000,
         "request_capacity": 1000,
         "unsafe": Object {
+          "authenticate_background_task_utilization": true,
           "exclude_task_types": Array [],
         },
         "version_conflict_threshold": 80,
@@ -145,6 +147,7 @@ describe('config validation', () => {
         "poll_interval": 3000,
         "request_capacity": 1000,
         "unsafe": Object {
+          "authenticate_background_task_utilization": true,
           "exclude_task_types": Array [],
         },
         "version_conflict_threshold": 80,

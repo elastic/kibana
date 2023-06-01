@@ -17,7 +17,7 @@ import {
   RedirectAppLinks,
 } from '@kbn/kibana-react-plugin/public';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
-import { InspectorContextProvider } from '@kbn/observability-plugin/public';
+import { InspectorContextProvider } from '@kbn/observability-shared-plugin/public';
 import { ClientPluginsSetup, ClientPluginsStart } from '../../plugin';
 import { UMUpdateBadge } from '../lib/lib';
 import {

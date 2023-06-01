@@ -9,21 +9,22 @@ import expect from '@kbn/expect';
 import { ConfigKey, ProjectMonitorsRequest } from '@kbn/synthetics-plugin/common/runtime_types';
 import { API_URLS, SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import { formatKibanaNamespace } from '@kbn/synthetics-plugin/common/formatters';
-import { syntheticsMonitorType } from '@kbn/synthetics-plugin/server/legacy_uptime/lib/saved_objects/synthetics_monitor';
 import { REQUEST_TOO_LARGE } from '@kbn/synthetics-plugin/server/routes/monitor_cruds/add_monitor_project';
 import { PackagePolicy } from '@kbn/fleet-plugin/common';
 import {
   PROFILE_VALUES_ENUM,
   PROFILES_MAP,
 } from '@kbn/synthetics-plugin/common/constants/monitor_defaults';
+import { syntheticsMonitorType } from '@kbn/synthetics-plugin/common/types/saved_objects';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { getFixtureJson } from '../uptime/rest/helper/get_fixture_json';
+import { getFixtureJson } from './helper/get_fixture_json';
 import { PrivateLocationTestService } from './services/private_location_test_service';
 import { comparePolicies } from './sample_data/test_policy';
 import {
   getTestProjectSyntheticsPolicy,
   getTestProjectSyntheticsPolicyLightweight,
 } from './sample_data/test_project_monitor_policy';
+import { SyntheticsMonitorTestService } from './services/synthetics_monitor_test_service';
 
 export default function ({ getService }: FtrProviderContext) {
   describe('AddProjectMonitors', function () {
@@ -33,6 +34,8 @@ export default function ({ getService }: FtrProviderContext) {
     const supertestWithoutAuth = getService('supertestWithoutAuth');
     const security = getService('security');
     const kibanaServer = getService('kibanaServer');
+    const monitorTestService = new SyntheticsMonitorTestService(getService);
+    const testPrivateLocations = new PrivateLocationTestService(getService);
 
     let projectMonitors: ProjectMonitorsRequest;
     let httpProjectMonitors: ProjectMonitorsRequest;
@@ -40,7 +43,6 @@ export default function ({ getService }: FtrProviderContext) {
     let icmpProjectMonitors: ProjectMonitorsRequest;
 
     let testPolicyId = '';
-    const testPrivateLocations = new PrivateLocationTestService(getService);
 
     const setUniqueIds = (request: ProjectMonitorsRequest) => {
       return {
@@ -78,12 +80,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     before(async () => {
       await supertest.put(API_URLS.SYNTHETICS_ENABLEMENT).set('kbn-xsrf', 'true').expect(200);
-      await supertest.post('/api/fleet/setup').set('kbn-xsrf', 'true').send().expect(200);
-      await supertest
-        .post('/api/fleet/epm/packages/synthetics/0.12.0')
-        .set('kbn-xsrf', 'true')
-        .send({ force: true })
-        .expect(200);
+      await testPrivateLocations.installSyntheticsPackage();
 
       const testPolicyName = 'Fleet test server policy' + Date.now();
       const apiResponse = await testPrivateLocations.addFleetPolicy(testPolicyName);
@@ -154,10 +151,9 @@ export default function ({ getService }: FtrProviderContext) {
             .set('kbn-xsrf', 'true')
             .expect(200);
 
-          const decryptedCreatedMonitor = await supertest
-            .get(`${API_URLS.SYNTHETICS_MONITORS}/${createdMonitorsResponse.body.monitors[0].id}`)
-            .set('kbn-xsrf', 'true')
-            .expect(200);
+          const decryptedCreatedMonitor = await monitorTestService.getMonitor(
+            createdMonitorsResponse.body.monitors[0].id
+          );
 
           expect(decryptedCreatedMonitor.body.attributes).to.eql({
             __ui: {
@@ -261,10 +257,9 @@ export default function ({ getService }: FtrProviderContext) {
             .set('kbn-xsrf', 'true')
             .expect(200);
 
-          const decryptedCreatedMonitor = await supertest
-            .get(`${API_URLS.SYNTHETICS_MONITORS}/${createdMonitorsResponse.body.monitors[0].id}`)
-            .set('kbn-xsrf', 'true')
-            .expect(200);
+          const decryptedCreatedMonitor = await monitorTestService.getMonitor(
+            createdMonitorsResponse.body.monitors[0].id
+          );
 
           expect(decryptedCreatedMonitor.body.attributes.throttling).to.eql({
             value: null,
@@ -319,10 +314,9 @@ export default function ({ getService }: FtrProviderContext) {
             .set('kbn-xsrf', 'true')
             .expect(200);
 
-          const decryptedCreatedMonitor = await supertest
-            .get(`${API_URLS.SYNTHETICS_MONITORS}/${createdMonitorsResponse.body.monitors[0].id}`)
-            .set('kbn-xsrf', 'true')
-            .expect(200);
+          const decryptedCreatedMonitor = await monitorTestService.getMonitor(
+            createdMonitorsResponse.body.monitors[0].id
+          );
 
           expect(decryptedCreatedMonitor.body.attributes).to.eql({
             __ui: {
@@ -450,10 +444,9 @@ export default function ({ getService }: FtrProviderContext) {
             .set('kbn-xsrf', 'true')
             .expect(200);
 
-          const decryptedCreatedMonitor = await supertest
-            .get(`${API_URLS.SYNTHETICS_MONITORS}/${createdMonitorsResponse.body.monitors[0].id}`)
-            .set('kbn-xsrf', 'true')
-            .expect(200);
+          const decryptedCreatedMonitor = await monitorTestService.getMonitor(
+            createdMonitorsResponse.body.monitors[0].id
+          );
 
           expect(decryptedCreatedMonitor.body.attributes).to.eql({
             __ui: {
@@ -560,10 +553,9 @@ export default function ({ getService }: FtrProviderContext) {
             .set('kbn-xsrf', 'true')
             .expect(200);
 
-          const decryptedCreatedMonitor = await supertest
-            .get(`${API_URLS.SYNTHETICS_MONITORS}/${createdMonitorsResponse.body.monitors[0].id}`)
-            .set('kbn-xsrf', 'true')
-            .expect(200);
+          const decryptedCreatedMonitor = await monitorTestService.getMonitor(
+            createdMonitorsResponse.body.monitors[0].id
+          );
 
           expect(decryptedCreatedMonitor.body.attributes).to.eql({
             config_id: decryptedCreatedMonitor.body.id,
@@ -1056,10 +1048,11 @@ export default function ({ getService }: FtrProviderContext) {
           .set('kbn-xsrf', 'true')
           .expect(200);
 
-        const decryptedCreatedMonitor = await supertest
-          .get(`/s/${SPACE_ID}${API_URLS.SYNTHETICS_MONITORS}/${getResponse.body.monitors[0].id}`)
-          .set('kbn-xsrf', 'true')
-          .expect(200);
+        const decryptedCreatedMonitor = await monitorTestService.getMonitor(
+          getResponse.body.monitors[0].id,
+          true,
+          SPACE_ID
+        );
         const { monitors } = getResponse.body;
         expect(monitors.length).eql(1);
         expect(decryptedCreatedMonitor.body.attributes[ConfigKey.SOURCE_PROJECT_CONTENT]).eql(
@@ -1093,10 +1086,11 @@ export default function ({ getService }: FtrProviderContext) {
         const { monitors: monitorsUpdated } = getResponseUpdated.body;
         expect(monitorsUpdated.length).eql(1);
 
-        const decryptedUpdatedMonitor = await supertest
-          .get(`/s/${SPACE_ID}${API_URLS.SYNTHETICS_MONITORS}/${monitorsUpdated[0].id}`)
-          .set('kbn-xsrf', 'true')
-          .expect(200);
+        const decryptedUpdatedMonitor = await monitorTestService.getMonitor(
+          monitorsUpdated[0].id,
+          true,
+          SPACE_ID
+        );
         expect(decryptedUpdatedMonitor.body.attributes[ConfigKey.SOURCE_PROJECT_CONTENT]).eql(
           updatedSource
         );
@@ -1209,10 +1203,7 @@ export default function ({ getService }: FtrProviderContext) {
         });
 
         // ensure that monitor can still be decrypted
-        await supertest
-          .get(API_URLS.SYNTHETICS_MONITORS + '/' + monitors[0]?.id)
-          .set('kbn-xsrf', 'true')
-          .expect(200);
+        await monitorTestService.getMonitor(monitors[0]?.id);
       } finally {
         await Promise.all([
           projectMonitors.monitors.map((monitor) => {
@@ -1446,6 +1437,7 @@ export default function ({ getService }: FtrProviderContext) {
             id,
             configId,
             projectId: project,
+            locationId: testPolicyId,
             locationName: 'Test private location 0',
           })
         );
@@ -1514,6 +1506,7 @@ export default function ({ getService }: FtrProviderContext) {
             configId,
             projectId: project,
             locationName: 'Test private location 0',
+            locationId: testPolicyId,
           })
         );
       } finally {
@@ -1636,6 +1629,7 @@ export default function ({ getService }: FtrProviderContext) {
             id,
             configId,
             projectId: project,
+            locationId: testPolicyId,
             locationName: 'Test private location 0',
           })
         );
@@ -1717,6 +1711,7 @@ export default function ({ getService }: FtrProviderContext) {
             id,
             configId,
             projectId: project,
+            locationId: testPolicyId,
             locationName: 'Test private location 0',
           })
         );
@@ -1754,6 +1749,7 @@ export default function ({ getService }: FtrProviderContext) {
             id: id2,
             configId: configId2,
             projectId: project,
+            locationId: testPolicyId,
             locationName: 'Test private location 0',
           })
         );

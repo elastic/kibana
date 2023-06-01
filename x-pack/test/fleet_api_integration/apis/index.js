@@ -17,20 +17,8 @@ export default function ({ loadTestFile, getService }) {
     // Fleet setup
     loadTestFile(require.resolve('./fleet_setup')); // ~ 6s
 
-    // Enrollment API keys
-    loadTestFile(require.resolve('./enrollment_api_keys/crud'));
+    loadTestFile(require.resolve('./policy_secrets')); // ~40s
 
-    // Package policies
-    loadTestFile(require.resolve('./policy_secrets'));
-    loadTestFile(require.resolve('./package_policy/create'));
-    loadTestFile(require.resolve('./package_policy/update'));
-    loadTestFile(require.resolve('./package_policy/get'));
-    loadTestFile(require.resolve('./package_policy/delete'));
-    loadTestFile(require.resolve('./package_policy/upgrade'));
-    loadTestFile(require.resolve('./package_policy/input_package_create_upgrade'));
-
-    // Agent policies
-    loadTestFile(require.resolve('./agent_policy'));
     loadTestFile(require.resolve('./enrollment_api_keys/crud')); // ~ 20s
 
     // Data Streams
