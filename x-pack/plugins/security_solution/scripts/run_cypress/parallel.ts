@@ -58,7 +58,7 @@ const retrieveIntegrations = (
 
   const integrationsPathsForChunk: string[] = [];
 
-  for (let i = chunkIndex; i < integrationsPaths.length; i+=chunksTotal) {
+  for (let i = chunkIndex; i < integrationsPaths.length; i += chunksTotal) {
     integrationsPathsForChunk.push(integrationsPaths[i]);
   }
 
