@@ -311,13 +311,19 @@ export function TrainedModelsTableProvider(
 
     public async setDeletePipelinesCheckbox() {
       await this.assertDeletePipelinesCheckboxSelected(false);
-      await testSubjects.click('mlModelsDeleteModalDeletePipelinesCheckbox');
+
+      const checkboxLabel = await find.byCssSelector(`label[for="delete-model-pipelines"]`);
+      await checkboxLabel.click();
+
       await this.assertDeletePipelinesCheckboxSelected(true);
     }
 
     public async setForceDeleteCheckbox() {
       await this.assertForceModelDeleteCheckboxSelected(false);
-      await testSubjects.click('mlModelsDeleteModalForceDeleteCheckbox');
+
+      const checkboxLabel = await find.byCssSelector(`label[for="force-delete"]`);
+      await checkboxLabel.click();
+
       await this.assertForceModelDeleteCheckboxSelected(true);
     }
 

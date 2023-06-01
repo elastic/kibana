@@ -160,15 +160,15 @@ export default function ({ getService }: FtrProviderContext) {
           true
         );
 
-        // await ml.testExecution.logTestStep('should show the delete modal with the default state');
-        // await ml.trainedModelsTable.clickDeleteAction(modelWithPipelineData.modelId);
+        await ml.testExecution.logTestStep('should show the delete modal');
+        await ml.trainedModelsTable.clickDeleteAction(modelWithPipelineData.modelId);
 
-        // await ml.testExecution.logTestStep('should delete the model with pipelines');
-        // await ml.trainedModelsTable.confirmDeleteModel(true, false);
-        // await ml.trainedModelsTable.assertModelDisplayedInTable(
-        //   modelWithoutPipelineData.modelId,
-        //   false
-        // );
+        await ml.testExecution.logTestStep('should delete the model with pipelines');
+        await ml.trainedModelsTable.confirmDeleteModel(true, false);
+        await ml.trainedModelsTable.assertModelDisplayedInTable(
+          modelWithPipelineData.modelId,
+          false
+        );
       });
 
       it('displays a model without an ingest pipeline and model can be deleted', async () => {
