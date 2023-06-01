@@ -116,6 +116,7 @@ export function DiagnosticsIndices() {
         <h3>Indices with problems</h3>
       </EuiTitle>
       <EuiBasicTable
+        data-test-subj="indicedWithProblems"
         items={invalidIndices}
         rowHeader="index"
         columns={columns}
@@ -126,7 +127,12 @@ export function DiagnosticsIndices() {
       <EuiTitle size="s">
         <h3>Indices without problems</h3>
       </EuiTitle>
-      <EuiBasicTable items={validIndices} rowHeader="index" columns={columns} />
+      <EuiBasicTable
+        data-test-subj="indicedWithoutProblems"
+        items={validIndices}
+        rowHeader="index"
+        columns={columns}
+      />
     </>
   );
 }

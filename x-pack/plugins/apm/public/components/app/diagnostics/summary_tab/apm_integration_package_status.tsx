@@ -38,7 +38,10 @@ export function ApmIntegrationPackageStatus() {
         </EuiFlexGroup>
       </EuiFlexItem>
 
-      <EuiFlexItem grow={10}>
+      <EuiFlexItem
+        grow={10}
+        data-test-subj="apmDiagnosticsSummaryApmIntegration"
+      >
         {isLoading
           ? '...'
           : isInstalled
