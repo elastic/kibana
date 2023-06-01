@@ -10,7 +10,7 @@ import { useTabSwitcherContext } from '../hooks/use_tab_switcher';
 import { Anomalies } from '../tabs/anomalies/anomalies';
 import { Metadata } from '../tabs/metadata/metadata';
 import { Processes } from '../tabs/processes/processes';
-import { OSQuery } from '../tabs/osquery/osquery';
+import { Osquery } from '../tabs/osquery/osquery';
 import { FlyoutTabIds, type TabState, type AssetDetailsProps } from '../types';
 
 type Props = Pick<
@@ -18,7 +18,7 @@ type Props = Pick<
   'currentTimeRange' | 'node' | 'nodeType' | 'overrides' | 'onTabsStateChange'
 >;
 
-export const TabContent = ({
+export const Content = ({
   overrides,
   currentTimeRange,
   node,
@@ -58,7 +58,7 @@ export const TabContent = ({
         <Anomalies nodeName={node.name} onClose={overrides?.anomalies?.onClose} />
       </TabPanel>
       <TabPanel activeWhen={FlyoutTabIds.OSQUERY}>
-        <OSQuery nodeName={node.name} nodeType={nodeType} currentTimeRange={currentTimeRange} />
+        <Osquery nodeName={node.name} nodeType={nodeType} currentTimeRange={currentTimeRange} />
       </TabPanel>
     </>
   );

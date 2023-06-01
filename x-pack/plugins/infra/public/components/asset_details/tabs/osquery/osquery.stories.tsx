@@ -8,14 +8,14 @@
 import React from 'react';
 import type { Meta, Story } from '@storybook/react/types-6-0';
 
-import { OSQuery, type OSQueryProps } from './osquery';
+import { Osquery, type OsqueryProps } from './osquery';
 import { decorateWithGlobalStorybookThemeProviders } from '../../../../test_utils/use_global_storybook_theme';
 import { DecorateWithKibanaContext } from '../../__stories__/decorator';
 
-const stories: Meta<OSQueryProps> = {
-  title: 'infra/Asset Details View/Components/OsQuery',
+const stories: Meta<OsqueryProps> = {
+  title: 'infra/Asset Details View/Components/Osquery',
   decorators: [decorateWithGlobalStorybookThemeProviders, DecorateWithKibanaContext],
-  component: OSQuery,
+  component: Osquery,
   args: {
     currentTimeRange: {
       from: 1679316685686,
@@ -27,8 +27,8 @@ const stories: Meta<OSQueryProps> = {
   },
 };
 
-const Template: Story<OSQueryProps> = (args) => {
-  return <OSQuery {...args} />;
+const Template: Story<OsqueryProps> = (args) => {
+  return <Osquery {...args} />;
 };
 
 export const Default = Template.bind({});

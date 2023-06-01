@@ -14,13 +14,13 @@ import { findInventoryModel } from '../../../../../common/inventory_models';
 import { InventoryItemType } from '../../../../../common/inventory_models/types';
 import { useMetadata } from '../../hooks/use_metadata';
 
-export interface OSQueryProps {
+export interface OsqueryProps {
   nodeName: string;
   nodeType: InventoryItemType;
   currentTimeRange: MetricsTimeInput;
 }
 
-export const OSQuery = ({ nodeName, nodeType, currentTimeRange }: OSQueryProps) => {
+export const Osquery = ({ nodeName, nodeType, currentTimeRange }: OsqueryProps) => {
   const inventoryModel = findInventoryModel(nodeType);
   const { sourceId } = useSourceContext();
   const { loading, metadata } = useMetadata(
@@ -33,7 +33,7 @@ export const OSQuery = ({ nodeName, nodeType, currentTimeRange }: OSQueryProps) 
   const {
     services: { osquery },
   } = useKibanaContextForPlugin();
-  // @ts-expect-error
+
   const OsqueryAction = osquery?.OsqueryAction;
 
   // avoids component rerender when resizing the popover
@@ -43,7 +43,7 @@ export const OSQuery = ({ nodeName, nodeType, currentTimeRange }: OSQueryProps) 
       return <EuiSkeletonText lines={10} />;
     }
 
-    return <OsqueryAction agentId={metadata?.info?.agent?.id} hideAgentsField />;
+    return <OsqueryAction agentId={metadata?.info?.agent?.id} hideAgentsField formType="simple" />;
   }, [OsqueryAction, loading, metadata]);
 
   return content;

@@ -9,7 +9,7 @@ import React from 'react';
 import { EuiFlyout, EuiFlyoutHeader, EuiFlyoutBody } from '@elastic/eui';
 import type { AssetDetailsProps, RenderMode } from './types';
 import type { InventoryItemType } from '../../../common/inventory_models/types';
-import { TabContent } from './tab_content/tab_content';
+import { Content } from './content/content';
 import { Header } from './header/header';
 import { TabSwitcherProvider } from './hooks/use_tab_switcher';
 
@@ -65,7 +65,7 @@ export const AssetDetails = ({
           />
         }
         body={
-          <TabContent
+          <Content
             node={node}
             nodeType={nodeType}
             currentTimeRange={currentTimeRange}

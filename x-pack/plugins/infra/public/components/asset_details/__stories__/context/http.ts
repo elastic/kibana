@@ -9,7 +9,11 @@ import { HttpStart, HttpHandler } from '@kbn/core/public';
 import { Parameters } from '@storybook/react';
 import { INFA_ML_GET_METRICS_HOSTS_ANOMALIES_PATH } from '../../../../../common/http_api/infra_ml';
 import { metadataHttpResponse, type MetadataResponseMocks } from './fixtures/metadata';
-import { processesHttpResponse, type ProcessesHttpMocks } from './fixtures/processes';
+import {
+  processesHttpResponse,
+  processesChartHttpResponse,
+  type ProcessesHttpMocks,
+} from './fixtures/processes';
 import { anomaliesHttpResponse, type AnomaliesHttpMocks } from './fixtures/anomalies';
 
 export const getHttp = (params: Parameters): HttpStart => {
@@ -22,15 +26,19 @@ export const getHttp = (params: Parameters): HttpStart => {
     get: (async (path: string) => {
       switch (path) {
         case '/internal/osquery/privileges_check':
+          // grants permission to view the osquery content
           return Promise.resolve(true);
-        default:
+        default: {
           return Promise.resolve({});
+        }
       }
     }) as HttpHandler,
     fetch: (async (path: string) => {
       switch (path) {
         case '/api/metrics/process_list':
           return processesHttpResponse[params.mock as ProcessesHttpMocks]();
+        case '/api/metrics/process_list/chart':
+          return processesChartHttpResponse.default();
         case '/api/infra/metadata':
           return metadataHttpResponse[params.mock as MetadataResponseMocks]();
         case INFA_ML_GET_METRICS_HOSTS_ANOMALIES_PATH:

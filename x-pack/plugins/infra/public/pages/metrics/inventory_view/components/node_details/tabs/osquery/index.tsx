@@ -32,7 +32,7 @@ const TabComponent = (props: TabProps) => {
   const {
     services: { osquery },
   } = useKibanaContextForPlugin();
-  // @ts-expect-error
+
   const OsqueryAction = osquery?.OsqueryAction;
 
   // avoids component rerender when resizing the popover
@@ -48,7 +48,7 @@ const TabComponent = (props: TabProps) => {
 
     return (
       <TabContent>
-        <OsqueryAction agentId={metadata?.info?.agent?.id} hideAgentsField />
+        <OsqueryAction agentId={metadata?.info?.agent?.id} hideAgentsField formType="simple" />
       </TabContent>
     );
   }, [OsqueryAction, loading, metadata]);
