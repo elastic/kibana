@@ -6,10 +6,10 @@
  */
 
 import type {
-  TimelineSavedObjectRuntimeResponseType,
+  TimelineSavedToReturnObjectRuntimeType,
   TimelineTypeLiteral,
 } from '../../../../common/types/timeline/api';
-import { SavedObjectTimelineType, TimelineStatus } from '../../../../common/types/timeline';
+import { TimelineType, TimelineStatus } from '../../../../common/types/timeline/api';
 import type { FrameworkRequest } from '../../framework';
 import { getTimelineOrNull, getTimelineTemplateOrNull } from '../saved_object/timelines';
 
@@ -26,11 +26,11 @@ export class TimelineObject {
   public readonly version: string | number | null;
   private frameworkRequest: FrameworkRequest;
 
-  public data: TimelineSavedObjectRuntimeResponseType | null;
+  public data: TimelineSavedToReturnObjectRuntimeType | null;
 
   constructor({
     id = null,
-    type = SavedObjectTimelineType.default,
+    type = TimelineType.default,
     version = null,
     frameworkRequest,
   }: TimelineObjectProps) {
@@ -45,7 +45,7 @@ export class TimelineObject {
   public async getTimeline() {
     this.data =
       this.id != null
-        ? this.type === SavedObjectTimelineType.template
+        ? this.type === TimelineType.template
           ? await getTimelineTemplateOrNull(this.frameworkRequest, this.id)
           : await getTimelineOrNull(this.frameworkRequest, this.id)
         : null;
@@ -73,7 +73,7 @@ export class TimelineObject {
   }
 
   public get isUpdatableViaImport() {
-    return this.type === SavedObjectTimelineType.template && this.isExists;
+    return this.type === TimelineType.template && this.isExists;
   }
 
   public get getVersion() {

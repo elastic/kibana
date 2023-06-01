@@ -10,7 +10,7 @@ import React, { useCallback, useState } from 'react';
 import styled from 'styled-components';
 import { useParams } from 'react-router-dom';
 
-import { TimelineId, SavedObjectTimelineType } from '../../../common/types/timeline';
+import { TimelineId, TimelineType } from '../../../common/types/timeline/api';
 import { HeaderPage } from '../../common/components/header_page';
 import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
 import { useKibana } from '../../common/lib/kibana';
@@ -58,7 +58,7 @@ export const TimelinesPageComponent: React.FC = () => {
                       {i18n.ALL_TIMELINES_IMPORT_TIMELINE_TITLE}
                     </EuiButton>
                   </EuiFlexItem>
-                  {tabName === SavedObjectTimelineType.default ? (
+                  {tabName === TimelineType.default ? (
                     <EuiFlexItem>
                       <NewTimeline
                         timelineId={TimelineId.active}

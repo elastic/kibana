@@ -11,7 +11,7 @@ import { waitFor } from '@testing-library/react';
 import { renderHook, act } from '@testing-library/react-hooks';
 import { mount, shallow } from 'enzyme';
 
-import { SavedObjectTimelineType } from '../../../../../common/types/timeline';
+import { TimelineType } from '../../../../../common/types/timeline/api';
 import { TestProviders } from '../../../../common/mock';
 import { useCreateTimelineButton } from './use_create_timeline';
 import { InputsModelId } from '../../../../common/store/inputs/constants';
@@ -28,7 +28,7 @@ jest.mock('react-redux', () => {
 
 describe('useCreateTimelineButton', () => {
   const mockId = 'mockId';
-  const timelineType = SavedObjectTimelineType.default;
+  const timelineType = TimelineType.default;
   const wrapperContainer: React.FC<{ children?: React.ReactNode }> = ({ children }) => (
     <TestProviders>{children}</TestProviders>
   );

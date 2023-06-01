@@ -13,7 +13,7 @@ import {
   createMockConfig,
 } from '../../../../detection_engine/routes/__mocks__';
 import { TIMELINE_EXPORT_URL } from '../../../../../../common/constants';
-import { TimelineStatus, SavedObjectTimelineType } from '../../../../../../common/types/timeline';
+import { TimelineStatus, TimelineType } from '../../../../../../common/types/timeline/api';
 import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
 
 import {
@@ -417,7 +417,7 @@ describe('import timelines', () => {
         [
           {
             ...mockGetTimelineValue,
-            timelineType: SavedObjectTimelineType.template,
+            timelineType: TimelineType.template,
           },
         ],
       ]);

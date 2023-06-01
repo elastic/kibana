@@ -7,8 +7,8 @@
 
 import path, { join, resolve } from 'path';
 import * as rt from 'io-ts';
-import type { TimelineSavedObjectRuntimeResponseType } from '../../../../common/types/timeline/api';
-import { TimelineSavedToReturnObjectRuntimeType } from '../../../../common/types/timeline/api';
+import type { TimelineSavedToReturnObjectRuntimeType } from '../../../../common/types/timeline/api';
+import { TimelineSavedToReturnObjectRuntime } from '../../../../common/types/timeline/api';
 
 import type { ImportTimelinesSchema } from '../schemas/timelines/import_timelines_schema';
 import { ImportTimelinesSchemaRt } from '../schemas/timelines/import_timelines_schema';
@@ -23,14 +23,14 @@ import { loadData, getReadables } from './common';
 export const checkTimelineStatusRt = rt.type({
   timelinesToInstall: rt.array(unionWithNullType(ImportTimelinesSchemaRt)),
   timelinesToUpdate: rt.array(unionWithNullType(ImportTimelinesSchemaRt)),
-  prepackagedTimelines: rt.array(unionWithNullType(TimelineSavedToReturnObjectRuntimeType)),
+  prepackagedTimelines: rt.array(unionWithNullType(TimelineSavedToReturnObjectRuntime)),
 });
 
 export type CheckTimelineStatusRt = rt.TypeOf<typeof checkTimelineStatusRt>;
 
 export const getTimelinesToUpdate = (
   timelinesFromFileSystem: ImportTimelinesSchema[],
-  installedTimelines: TimelineSavedObjectRuntimeResponseType[]
+  installedTimelines: TimelineSavedToReturnObjectRuntimeType[]
 ): ImportTimelinesSchema[] => {
   return timelinesFromFileSystem.filter((timeline) =>
     installedTimelines.some((installedTimeline) => {
@@ -45,7 +45,7 @@ export const getTimelinesToUpdate = (
 
 export const getTimelinesToInstall = (
   timelinesFromFileSystem: ImportTimelinesSchema[],
-  installedTimelines: TimelineSavedObjectRuntimeResponseType[]
+  installedTimelines: TimelineSavedToReturnObjectRuntimeType[]
 ): ImportTimelinesSchema[] => {
   return timelinesFromFileSystem.filter(
     (timeline) =>
@@ -63,7 +63,7 @@ export const checkTimelinesStatus = async (
   let readStream;
   let timeline: {
     totalCount: number;
-    timeline: TimelineSavedObjectRuntimeResponseType[];
+    timeline: TimelineSavedToReturnObjectRuntimeType[];
   };
   const dir = resolve(
     join(

@@ -10,7 +10,7 @@ import { mountWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
 import { ThemeProvider } from 'styled-components';
 
-import { SavedObjectTimelineType } from '../../../../../common/types/timeline';
+import { TimelineType } from '../../../../../common/types/timeline/api';
 
 import { SearchRow } from '.';
 
@@ -32,7 +32,7 @@ describe('SearchRow', () => {
           onQueryChange={jest.fn()}
           onToggleOnlyFavorites={jest.fn()}
           query=""
-          timelineType={SavedObjectTimelineType.default}
+          timelineType={TimelineType.default}
         />
       </ThemeProvider>
     );
@@ -52,7 +52,7 @@ describe('SearchRow', () => {
             onQueryChange={jest.fn()}
             onToggleOnlyFavorites={jest.fn()}
             query=""
-            timelineType={SavedObjectTimelineType.default}
+            timelineType={TimelineType.default}
           />
         </ThemeProvider>
       );
@@ -72,7 +72,7 @@ describe('SearchRow', () => {
             onQueryChange={jest.fn()}
             onToggleOnlyFavorites={onToggleOnlyFavorites}
             query=""
-            timelineType={SavedObjectTimelineType.default}
+            timelineType={TimelineType.default}
           />
         </ThemeProvider>
       );
@@ -90,7 +90,7 @@ describe('SearchRow', () => {
             onQueryChange={jest.fn()}
             onToggleOnlyFavorites={jest.fn()}
             query=""
-            timelineType={SavedObjectTimelineType.default}
+            timelineType={TimelineType.default}
           />
         </ThemeProvider>
       );
@@ -111,7 +111,7 @@ describe('SearchRow', () => {
             onQueryChange={jest.fn()}
             onToggleOnlyFavorites={jest.fn()}
             query=""
-            timelineType={SavedObjectTimelineType.default}
+            timelineType={TimelineType.default}
           />
         </ThemeProvider>
       );
@@ -136,7 +136,7 @@ describe('SearchRow', () => {
             onQueryChange={onQueryChange}
             onToggleOnlyFavorites={jest.fn()}
             query=""
-            timelineType={SavedObjectTimelineType.default}
+            timelineType={TimelineType.default}
           />
         </ThemeProvider>
       );

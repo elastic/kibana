@@ -22,7 +22,7 @@ import type {
   OpenTimelineResult,
 } from '../../../timelines/components/open_timeline/types';
 import { WithHoverActions } from '../../../common/components/with_hover_actions';
-import { SavedObjectTimelineType } from '../../../../common/types/timeline';
+import { TimelineType } from '../../../../common/types/timeline/api';
 
 import { RecentTimelineCounts } from './counts';
 import * as i18n from './translations';
@@ -74,14 +74,14 @@ const RecentTimelinesItem = React.memo<RecentTimelinesItemProps>(
             <EuiFlexItem grow={false}>
               <EuiToolTip
                 content={
-                  timeline.timelineType === SavedObjectTimelineType.default
+                  timeline.timelineType === TimelineType.default
                     ? i18n.OPEN_AS_DUPLICATE
                     : i18n.OPEN_AS_DUPLICATE_TEMPLATE
                 }
               >
                 <EuiButtonIcon
                   aria-label={
-                    timeline.timelineType === SavedObjectTimelineType.default
+                    timeline.timelineType === TimelineType.default
                       ? i18n.OPEN_AS_DUPLICATE
                       : i18n.OPEN_AS_DUPLICATE_TEMPLATE
                   }

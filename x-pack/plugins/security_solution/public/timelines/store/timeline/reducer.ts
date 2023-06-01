@@ -102,7 +102,7 @@ import {
 
 import type { TimelineState } from './types';
 import { EMPTY_TIMELINE_BY_ID } from './types';
-import { SavedObjectTimelineType } from '../../../../common/types/timeline';
+import { TimelineType } from '../../../../common/types/timeline/api';
 
 export const initialTimelineState: TimelineState = {
   timelineById: EMPTY_TIMELINE_BY_ID,
@@ -125,20 +125,17 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
       timelineById: state.timelineById,
     }),
   }))
-  .case(
-    createTimeline,
-    (state, { id, timelineType = SavedObjectTimelineType.default, ...timelineProps }) => {
-      return {
-        ...state,
-        timelineById: addNewTimeline({
-          id,
-          timelineById: state.timelineById,
-          timelineType,
-          ...timelineProps,
-        }),
-      };
-    }
-  )
+  .case(createTimeline, (state, { id, timelineType = TimelineType.default, ...timelineProps }) => {
+    return {
+      ...state,
+      timelineById: addNewTimeline({
+        id,
+        timelineById: state.timelineById,
+        timelineType,
+        ...timelineProps,
+      }),
+    };
+  })
   .case(addNote, (state, { id, noteId }) => ({
     ...state,
     timelineById: addTimelineNote({ id, noteId, timelineById: state.timelineById }),

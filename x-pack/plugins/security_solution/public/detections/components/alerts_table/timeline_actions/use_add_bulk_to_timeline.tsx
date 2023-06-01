@@ -25,7 +25,8 @@ import { dispatchUpdateTimeline } from '../../../../timelines/components/open_ti
 import { timelineActions } from '../../../../timelines/store/timeline';
 import { useCreateTimeline } from '../../../../timelines/components/timeline/properties/use_create_timeline';
 import { INVESTIGATE_BULK_IN_TIMELINE } from '../translations';
-import { TimelineId, SavedObjectTimelineType } from '../../../../../common/types/timeline';
+import { TimelineId } from '../../../../../common/types/timeline';
+import { TimelineType } from '../../../../../common/types/timeline/api';
 import { sendBulkEventsToTimelineAction } from '../actions';
 import type { CreateTimelineProps } from '../types';
 import type { SourcererScopeName } from '../../../../common/store/sourcerer/model';
@@ -133,7 +134,7 @@ export const useAddBulkToTimelineAction = ({
 
   const clearActiveTimeline = useCreateTimeline({
     timelineId: TimelineId.active,
-    timelineType: SavedObjectTimelineType.default,
+    timelineType: TimelineType.default,
   });
 
   const updateTimelineIsLoading = useCallback(

@@ -7,7 +7,7 @@
 
 import * as api from './api';
 import { KibanaServices } from '../../common/lib/kibana';
-import { SavedObjectTimelineType, TimelineStatus } from '../../../common/types/timeline';
+import { TimelineType, TimelineStatus } from '../../../common/types/timeline/api';
 import { TIMELINE_DRAFT_URL, TIMELINE_URL } from '../../../common/constants';
 import type { ImportDataProps } from '../../detection_engine/rule_management/logic/types';
 
@@ -67,7 +67,7 @@ const timelineData = {
     filterQuery: null,
   },
   title: '',
-  timelineType: SavedObjectTimelineType.default,
+  timelineType: TimelineType.default,
   templateTimelineVersion: null,
   templateTimelineId: null,
   dateRange: {
@@ -381,7 +381,7 @@ describe('exportSelectedTimeline', () => {
 });
 
 describe('getDraftTimeline', () => {
-  const timelineType = { timelineType: SavedObjectTimelineType.default };
+  const timelineType = { timelineType: TimelineType.default };
   const getMock = jest.fn();
 
   beforeAll(() => {
@@ -418,7 +418,7 @@ describe('cleanDraftTimeline', () => {
   });
 
   test('should pass correct args to KibanaServices - timeline', () => {
-    const args = { timelineType: SavedObjectTimelineType.default };
+    const args = { timelineType: TimelineType.default };
 
     api.cleanDraftTimeline(args);
 
@@ -429,7 +429,7 @@ describe('cleanDraftTimeline', () => {
 
   test('should pass correct args to KibanaServices - timeline template', () => {
     const args = {
-      timelineType: SavedObjectTimelineType.template,
+      timelineType: TimelineType.template,
       templateTimelineId: 'test-123',
       templateTimelineVersion: 1,
     };

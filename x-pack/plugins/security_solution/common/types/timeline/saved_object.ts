@@ -162,8 +162,6 @@ const SavedSortRuntimeType = runtimeTypes.union([
   SavedSortObject,
 ]);
 
-type Sort = runtimeTypes.TypeOf<typeof SavedSortRuntimeType>;
-
 /*
  *  Timeline Statuses
  */

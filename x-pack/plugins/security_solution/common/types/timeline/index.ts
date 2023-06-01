@@ -64,15 +64,6 @@ export enum RowRendererId {
 
 export const RowRendererIdRuntimeType = stringEnum(RowRendererId, 'RowRendererId');
 
-/*
- *  Saved Object Timeline Types
- */
-
-export enum SavedObjectTimelineType { // this is the one that is used EVERYWHERE, we should not use the SO type
-  default = 'default',
-  template = 'template',
-}
-
 // ++++++++ TIMELINE TYPES THAT ARE NEITHER IN THE API, NOR IN THE SAVED OBJECT +++++++++
 
 /**

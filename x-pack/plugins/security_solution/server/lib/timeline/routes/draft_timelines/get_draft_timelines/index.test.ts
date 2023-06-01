@@ -6,7 +6,7 @@
  */
 
 import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
-import { SavedObjectTimelineType } from '../../../../../../common/types/timeline';
+import { TimelineType } from '../../../../../../common/types/timeline/api';
 
 import {
   serverMock,
@@ -82,7 +82,7 @@ describe('get draft timelines', () => {
         mockGetDraftTimeline.mockResolvedValue({
           timeline: [],
         });
-        const req = getDraftTimelinesRequest(SavedObjectTimelineType.default);
+        const req = getDraftTimelinesRequest(TimelineType.default);
         const response = await server.inject(req, requestContextMock.convertContext(context));
         expect(mockPersistTimeline).toHaveBeenCalled();
         expect(mockPersistTimeline.mock.calls[0][3]).toEqual({
@@ -106,7 +106,7 @@ describe('get draft timelines', () => {
         });
 
         const response = await server.inject(
-          getDraftTimelinesRequest(SavedObjectTimelineType.default),
+          getDraftTimelinesRequest(TimelineType.default),
           requestContextMock.convertContext(context)
         );
         expect(mockPersistTimeline).not.toHaveBeenCalled();

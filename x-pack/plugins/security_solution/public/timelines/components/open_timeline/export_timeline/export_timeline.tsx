@@ -9,7 +9,7 @@ import React, { useCallback, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 
 import * as i18n from '../translations';
-import { SavedObjectTimelineType } from '../../../../../common/types/timeline';
+import { TimelineType } from '../../../../../common/types/timeline/api';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { exportSelectedTimeline } from '../../../containers/api';
 import { downloadBlob } from '../../../../common/utils/download_blob';
@@ -19,7 +19,7 @@ const ExportTimeline: React.FC<{
   isEnableDownloader: boolean;
   onComplete?: () => void;
 }> = ({ onComplete, isEnableDownloader, exportedIds }) => {
-  const { tabName: timelineType } = useParams<{ tabName: SavedObjectTimelineType }>();
+  const { tabName: timelineType } = useParams<{ tabName: TimelineType }>();
   const { addSuccess } = useAppToasts();
 
   const onExportSuccess = useCallback(
@@ -30,7 +30,7 @@ const ExportTimeline: React.FC<{
 
       addSuccess({
         title:
-          timelineType === SavedObjectTimelineType.template
+          timelineType === TimelineType.template
             ? i18n.SUCCESSFULLY_EXPORTED_TIMELINE_TEMPLATES(exportCount)
             : i18n.SUCCESSFULLY_EXPORTED_TIMELINES(exportCount),
         'data-test-subj': 'addObjectToContainerSuccess',

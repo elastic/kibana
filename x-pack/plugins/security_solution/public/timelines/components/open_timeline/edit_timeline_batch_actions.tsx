@@ -9,7 +9,7 @@ import type { EuiBasicTable } from '@elastic/eui';
 import { EuiContextMenuPanel, EuiContextMenuItem } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 
-import { SavedObjectTimelineType } from '../../../../common/types/timeline';
+import { TimelineType } from '../../../../common/types/timeline/api';
 
 import * as i18n from './translations';
 import type { DeleteTimelines, OpenTimelineResult } from './types';
@@ -28,12 +28,12 @@ export const useEditTimelineBatchActions = ({
   deleteTimelines,
   selectedItems,
   tableRef,
-  timelineType = SavedObjectTimelineType.default,
+  timelineType = TimelineType.default,
 }: {
   deleteTimelines?: DeleteTimelines;
   selectedItems?: OpenTimelineResult[];
   tableRef: React.MutableRefObject<EuiBasicTable<OpenTimelineResult> | undefined>;
-  timelineType: SavedObjectTimelineType | null;
+  timelineType: TimelineType | null;
 }) => {
   const {
     enableExportTimelineDownloader,
@@ -108,7 +108,7 @@ export const useEditTimelineBatchActions = ({
             onComplete={onCompleteBatchActions.bind(null, closePopover)}
             title={
               selectedItems?.length !== 1
-                ? timelineType === SavedObjectTimelineType.template
+                ? timelineType === TimelineType.template
                   ? i18n.SELECTED_TEMPLATES(selectedItems?.length ?? 0)
                   : i18n.SELECTED_TIMELINES(selectedItems?.length ?? 0)
                 : selectedItems[0]?.title ?? ''

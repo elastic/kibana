@@ -26,7 +26,8 @@ import {
   ADDED_TO_TIMELINE_TEMPLATE_MESSAGE,
 } from '../../hooks/translations';
 import { displaySuccessToast, useStateToaster } from '../toasters';
-import { TimelineId, SavedObjectTimelineType } from '../../../../common/types/timeline';
+import { TimelineId } from '../../../../common/types/timeline';
+import { TimelineType } from '../../../../common/types/timeline/api';
 import {
   addProviderToTimeline,
   fieldWasDroppedOnTimelineColumns,
@@ -117,7 +118,7 @@ export const DragDropContextWrapperComponent: React.FC<Props> = ({ browserFields
   const onAddedToTimeline = useCallback(
     (fieldOrValue: string) => {
       const message =
-        timelineType === SavedObjectTimelineType.template
+        timelineType === TimelineType.template
           ? ADDED_TO_TIMELINE_TEMPLATE_MESSAGE(fieldOrValue)
           : ADDED_TO_TIMELINE_MESSAGE(fieldOrValue);
       displaySuccessToast(message, dispatchToaster);

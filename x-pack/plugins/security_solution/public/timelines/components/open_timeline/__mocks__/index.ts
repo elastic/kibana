@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { TimelineStatus, SavedObjectTimelineType } from '../../../../../common/types/timeline';
+import { TimelineStatus, TimelineType } from '../../../../../common/types/timeline/api';
 
 export const mockTimeline = {
   data: {
@@ -146,7 +146,7 @@ export const mockTimeline = {
       pinnedEventsSaveObject: [],
       status: TimelineStatus.active,
       title: 'my timeline',
-      timelineType: SavedObjectTimelineType.default,
+      timelineType: TimelineType.default,
       templateTimelineId: null,
       templateTimelineVersion: null,
       savedQueryId: null,

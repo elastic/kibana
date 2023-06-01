@@ -7,7 +7,8 @@
 
 import React from 'react';
 
-import { TimelineId, SavedObjectTimelineType } from '../../../../../common/types/timeline';
+import { TimelineId } from '../../../../../common/types/timeline';
+import { TimelineType } from '../../../../../common/types/timeline/api';
 
 import { useCreateTimelineButton } from './use_create_timeline';
 
@@ -26,7 +27,7 @@ export const NewTemplateTimelineComponent: React.FC<OwnProps> = ({
 }) => {
   const { getButton } = useCreateTimelineButton({
     timelineId,
-    timelineType: SavedObjectTimelineType.template,
+    timelineType: TimelineType.template,
     closeGearMenu,
   });
 

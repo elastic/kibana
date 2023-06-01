@@ -16,11 +16,8 @@ import { timelineSelectors } from '../../../store/timeline';
 import { setInsertTimeline, showTimeline } from '../../../store/timeline/actions';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { useGetUserCasesPermissions, useKibana } from '../../../../common/lib/kibana';
-import {
-  TimelineStatus,
-  TimelineId,
-  SavedObjectTimelineType,
-} from '../../../../../common/types/timeline';
+import { TimelineId } from '../../../../../common/types/timeline';
+import { TimelineStatus, TimelineType } from '../../../../../common/types/timeline/api';
 import { getCreateCaseUrl, getCaseDetailsUrl } from '../../../../common/components/link_to';
 import { SecurityPageName } from '../../../../app/types';
 import { timelineDefaults } from '../../../store/timeline/defaults';
@@ -128,10 +125,7 @@ const AddToCaseButtonComponent: React.FC<Props> = ({ timelineId }) => {
         iconType="arrowDown"
         iconSide="right"
         onClick={handleButtonClick}
-        disabled={
-          timelineStatus === TimelineStatus.draft ||
-          timelineType !== SavedObjectTimelineType.default
-        }
+        disabled={timelineStatus === TimelineStatus.draft || timelineType !== TimelineType.default}
       >
         {i18n.ATTACH_TO_CASE}
       </EuiButton>

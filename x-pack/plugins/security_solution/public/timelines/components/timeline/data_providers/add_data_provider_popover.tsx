@@ -21,7 +21,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { useDispatch } from 'react-redux';
 
 import type { BrowserFields } from '../../../../common/containers/source';
-import { SavedObjectTimelineType } from '../../../../../common/types/timeline';
+import { TimelineType } from '../../../../../common/types/timeline/api';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { StatefulEditDataProvider } from '../../edit_data_provider';
 import { addContentToTimeline, getDisplayValue } from './helpers';
@@ -102,9 +102,9 @@ const AddDataProviderPopoverComponent: React.FC<AddDataProviderPopoverProps> = (
             icon: <EuiIcon type="plusInCircle" size="m" />,
             panel: 1,
           },
-          timelineType === SavedObjectTimelineType.template
+          timelineType === TimelineType.template
             ? {
-                disabled: timelineType !== SavedObjectTimelineType.template,
+                disabled: timelineType !== TimelineType.template,
                 name: ADD_TEMPLATE_FIELD_LABEL,
                 icon: <EuiIcon type="visText" size="m" />,
                 panel: 2,
@@ -153,7 +153,7 @@ const AddDataProviderPopoverComponent: React.FC<AddDataProviderPopoverProps> = (
   );
 
   const button = useMemo(() => {
-    if (timelineType === SavedObjectTimelineType.template) {
+    if (timelineType === TimelineType.template) {
       return (
         <EuiButton
           size="s"
@@ -181,7 +181,7 @@ const AddDataProviderPopoverComponent: React.FC<AddDataProviderPopoverProps> = (
   }, [togglePopoverState, timelineType]);
 
   const content = useMemo(() => {
-    if (timelineType === SavedObjectTimelineType.template) {
+    if (timelineType === TimelineType.template) {
       return <EuiContextMenu initialPanelId={0} panels={panels} />;
     }
 

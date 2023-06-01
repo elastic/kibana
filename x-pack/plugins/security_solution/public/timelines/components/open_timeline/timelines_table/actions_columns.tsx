@@ -16,7 +16,7 @@ import type {
   TimelineActionsOverflowColumns,
 } from '../types';
 import * as i18n from '../translations';
-import { TimelineStatus, SavedObjectTimelineType } from '../../../../../common/types/timeline';
+import { TimelineStatus, TimelineType } from '../../../../../common/types/timeline/api';
 /**
  * Returns the action columns (e.g. delete, open duplicate timeline)
  */
@@ -45,7 +45,7 @@ export const getActionsColumns = ({
     onClick: ({ savedObjectId }: OpenTimelineResult) => {
       onOpenTimeline({
         duplicate: true,
-        timelineType: SavedObjectTimelineType.default,
+        timelineType: TimelineType.default,
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         timelineId: savedObjectId!,
       });
@@ -55,8 +55,7 @@ export const getActionsColumns = ({
     description: i18n.CREATE_TIMELINE_FROM_TEMPLATE,
     'data-test-subj': 'create-from-template',
     available: (item: OpenTimelineResult) =>
-      item.timelineType === SavedObjectTimelineType.template &&
-      actionTimelineToShow.includes('createFrom'),
+      item.timelineType === TimelineType.template && actionTimelineToShow.includes('createFrom'),
   };
 
   const createTemplateFromTimeline = {
@@ -65,7 +64,7 @@ export const getActionsColumns = ({
     onClick: ({ savedObjectId }: OpenTimelineResult) => {
       onOpenTimeline({
         duplicate: true,
-        timelineType: SavedObjectTimelineType.template,
+        timelineType: TimelineType.template,
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         timelineId: savedObjectId!,
       });
@@ -75,8 +74,7 @@ export const getActionsColumns = ({
     description: i18n.CREATE_TEMPLATE_FROM_TIMELINE,
     'data-test-subj': 'create-template-from-timeline',
     available: (item: OpenTimelineResult) =>
-      item.timelineType !== SavedObjectTimelineType.template &&
-      actionTimelineToShow.includes('createFrom'),
+      item.timelineType !== TimelineType.template && actionTimelineToShow.includes('createFrom'),
   };
 
   const openAsDuplicateColumn = {
@@ -93,8 +91,7 @@ export const getActionsColumns = ({
     description: i18n.OPEN_AS_DUPLICATE,
     'data-test-subj': 'open-duplicate',
     available: (item: OpenTimelineResult) =>
-      item.timelineType !== SavedObjectTimelineType.template &&
-      actionTimelineToShow.includes('duplicate'),
+      item.timelineType !== TimelineType.template && actionTimelineToShow.includes('duplicate'),
   };
 
   const openAsDuplicateTemplateColumn = {
@@ -111,8 +108,7 @@ export const getActionsColumns = ({
     description: i18n.OPEN_AS_DUPLICATE_TEMPLATE,
     'data-test-subj': 'open-duplicate-template',
     available: (item: OpenTimelineResult) =>
-      item.timelineType === SavedObjectTimelineType.template &&
-      actionTimelineToShow.includes('duplicate'),
+      item.timelineType === TimelineType.template && actionTimelineToShow.includes('duplicate'),
   };
 
   const exportTimelineAction = {

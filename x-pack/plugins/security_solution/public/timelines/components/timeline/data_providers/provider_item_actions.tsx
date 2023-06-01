@@ -11,7 +11,7 @@ import type { FunctionComponent } from 'react';
 import React from 'react';
 import styled from 'styled-components';
 
-import { SavedObjectTimelineType } from '../../../../../common/types/timeline';
+import { TimelineType } from '../../../../../common/types/timeline/api';
 import type { PrimitiveOrArrayOfPrimitives } from '../../../../common/lib/kuery';
 import type { BrowserFields } from '../../../../common/containers/source';
 
@@ -45,7 +45,7 @@ interface OwnProps {
   operator: QueryOperator;
   providerId: string;
   timelineId?: string;
-  timelineType?: SavedObjectTimelineType;
+  timelineType?: TimelineType;
   toggleEnabledProvider: () => void;
   toggleExcludedProvider: () => void;
   toggleTypeProvider: () => void;
@@ -77,7 +77,7 @@ interface GetProviderActionsProps {
   operator: QueryOperator;
   providerId: string;
   timelineId?: string;
-  timelineType?: SavedObjectTimelineType;
+  timelineType?: TimelineType;
   toggleEnabled: () => void;
   toggleExcluded: () => void;
   toggleType: () => void;
@@ -136,7 +136,7 @@ export const getProviderActions = ({
         name: i18n.FILTER_FOR_FIELD_PRESENT,
         onClick: onFilterForFieldPresent,
       },
-      timelineType === SavedObjectTimelineType.template
+      timelineType === TimelineType.template
         ? {
             className: CONVERT_TO_FIELD_CLASS_NAME,
             disabled: isLoading || operator === IS_ONE_OF_OPERATOR,

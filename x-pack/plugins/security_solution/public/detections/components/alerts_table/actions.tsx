@@ -42,11 +42,8 @@ import {
   ALERT_RULE_INDICES,
 } from '../../../../common/field_maps/field_names';
 import type { TimelineResult } from '../../../../common/types/timeline/api';
-import {
-  TimelineId,
-  TimelineStatus,
-  SavedObjectTimelineType,
-} from '../../../../common/types/timeline';
+import { TimelineId } from '../../../../common/types/timeline';
+import { TimelineStatus, TimelineType } from '../../../../common/types/timeline/api';
 import { updateAlertStatus } from '../../containers/detection_engine/alerts/api';
 import type {
   SendAlertToTimelineActionProps,
@@ -991,7 +988,7 @@ export const sendAlertToTimelineAction = async ({
         const { timeline, notes } = formatTimelineResultToModel(
           timelineTemplate,
           true,
-          timelineTemplate.timelineType ?? SavedObjectTimelineType.default
+          timelineTemplate.timelineType ?? TimelineType.default
         );
         const query = replaceTemplateFieldFromQuery(
           timeline.kqlQuery?.filterQuery?.kuery?.expression ?? '',
@@ -1050,7 +1047,7 @@ export const sendAlertToTimelineAction = async ({
             timeline: {
               ...timeline,
               title: '',
-              timelineType: SavedObjectTimelineType.default,
+              timelineType: TimelineType.default,
               templateTimelineId: null,
               status: TimelineStatus.draft,
               dataProviders,

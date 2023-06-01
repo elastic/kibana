@@ -32,12 +32,8 @@ import {
   VIEW_SELECTION,
 } from '../../../common/constants';
 import { networkModel } from '../../explore/network/store';
-import {
-  SavedObjectTimelineType,
-  TimelineStatus,
-  TimelineTabs,
-  TimelineId,
-} from '../../../common/types/timeline';
+import { TimelineTabs, TimelineId } from '../../../common/types/timeline';
+import { TimelineType, TimelineStatus } from '../../../common/types/timeline/api';
 import { mockManagementState } from '../../management/store/reducer';
 import type { ManagementState } from '../../management/types';
 import { initialSourcererState, SourcererScopeName } from '../store/sourcerer/model';
@@ -347,7 +343,7 @@ export const mockGlobalState: State = {
         kqlQuery: { filterQuery: null },
         loadingEventIds: [],
         title: '',
-        timelineType: SavedObjectTimelineType.default,
+        timelineType: TimelineType.default,
         templateTimelineId: null,
         templateTimelineVersion: null,
         noteIds: [],

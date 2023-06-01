@@ -26,12 +26,8 @@ import { FormattedRelative } from '@kbn/i18n-react';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import { InputsModelId } from '../../../../common/store/inputs/constants';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
-import {
-  TimelineStatus,
-  TimelineTabs,
-  SavedObjectTimelineType,
-  TimelineId,
-} from '../../../../../common/types/timeline';
+import { TimelineTabs, TimelineId } from '../../../../../common/types/timeline';
+import { TimelineStatus, TimelineType } from '../../../../../common/types/timeline/api';
 import type { State } from '../../../../common/store';
 import { timelineActions, timelineSelectors } from '../../../store/timeline';
 import { timelineDefaults } from '../../../store/timeline/defaults';
@@ -264,7 +260,7 @@ const TimelineNameComponent: React.FC<FlyoutHeaderProps> = ({ timelineId }) => {
   );
   const placeholder = useMemo(
     () =>
-      timelineType === SavedObjectTimelineType.template
+      timelineType === TimelineType.template
         ? commonI18n.UNTITLED_TEMPLATE
         : commonI18n.UNTITLED_TIMELINE,
     [timelineType]

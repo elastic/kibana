@@ -17,7 +17,8 @@ import {
   getDataProviderAnd,
 } from '../../../../common/components/event_details/table/use_action_cell_data_provider';
 import type { DataProvider, QueryOperator } from '../../../../../common/types/timeline';
-import { TimelineId, SavedObjectTimelineType } from '../../../../../common/types/timeline';
+import { TimelineId } from '../../../../../common/types/timeline';
+import { TimelineType } from '../../../../../common/types/timeline/api';
 import { useCreateTimeline } from '../../../../timelines/components/timeline/properties/use_create_timeline';
 import { updateProviders } from '../../../../timelines/store/timeline/actions';
 import { sourcererSelectors } from '../../../../common/store';
@@ -42,7 +43,7 @@ export const useNavigateToTimeline = () => {
 
   const clearTimeline = useCreateTimeline({
     timelineId: TimelineId.active,
-    timelineType: SavedObjectTimelineType.default,
+    timelineType: TimelineType.default,
   });
 
   const navigateToTimeline = useCallback(

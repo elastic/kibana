@@ -14,7 +14,7 @@ import { useHistory, useParams } from 'react-router-dom';
 import '../../../common/mock/match_media';
 import '../../../common/mock/formatted_relative';
 import { SecurityPageName } from '../../../app/types';
-import { SavedObjectTimelineType } from '../../../../common/types/timeline';
+import { TimelineType } from '../../../../common/types/timeline/api';
 
 import { TestProviders, mockOpenTimelineQueryResults } from '../../../common/mock';
 
@@ -101,7 +101,7 @@ describe('StatefulOpenTimeline', () => {
 
   beforeEach(() => {
     (useParams as jest.Mock).mockReturnValue({
-      tabName: SavedObjectTimelineType.default,
+      tabName: TimelineType.default,
       pageName: SecurityPageName.timelines,
     });
     useUserPrivilegesMock.mockReturnValue({
@@ -166,12 +166,12 @@ describe('StatefulOpenTimeline', () => {
         }
       );
 
-      expect(result.current.timelineType).toBe(SavedObjectTimelineType.default);
+      expect(result.current.timelineType).toBe(TimelineType.default);
     });
 
     test("should land on correct timelines' tab with url timelines/template", () => {
       (useParams as jest.Mock).mockReturnValue({
-        tabName: SavedObjectTimelineType.template,
+        tabName: TimelineType.template,
         pageName: SecurityPageName.timelines,
       });
 
@@ -182,12 +182,12 @@ describe('StatefulOpenTimeline', () => {
         }
       );
 
-      expect(result.current.timelineType).toBe(SavedObjectTimelineType.template);
+      expect(result.current.timelineType).toBe(TimelineType.template);
     });
 
     test("should land on correct templates' tab after switching tab", async () => {
       (useParams as jest.Mock).mockReturnValue({
-        tabName: SavedObjectTimelineType.template,
+        tabName: TimelineType.template,
         pageName: SecurityPageName.timelines,
       });
 
@@ -203,9 +203,7 @@ describe('StatefulOpenTimeline', () => {
       );
       await waitFor(() => {
         wrapper
-          .find(
-            `[data-test-subj="timeline-${TimelineTabsStyle.tab}-${SavedObjectTimelineType.template}"]`
-          )
+          .find(`[data-test-subj="timeline-${TimelineTabsStyle.tab}-${TimelineType.template}"]`)
           .first()
           .simulate('click');
 
@@ -226,7 +224,7 @@ describe('StatefulOpenTimeline', () => {
         }
       );
 
-      expect(result.current.timelineType).toBe(SavedObjectTimelineType.default);
+      expect(result.current.timelineType).toBe(TimelineType.default);
     });
 
     test('should not change url after switching filter', async () => {
@@ -248,7 +246,7 @@ describe('StatefulOpenTimeline', () => {
       await waitFor(() => {
         wrapper
           .find(
-            `[data-test-subj="open-timeline-modal-body-${TimelineTabsStyle.filter}-${SavedObjectTimelineType.template}"]`
+            `[data-test-subj="open-timeline-modal-body-${TimelineTabsStyle.filter}-${TimelineType.template}"]`
           )
           .first()
           .simulate('click');
@@ -577,7 +575,7 @@ describe('StatefulOpenTimeline', () => {
       expect(
         wrapper
           .find(
-            `[data-test-subj="open-timeline-modal-body-${TimelineTabsStyle.filter}-${SavedObjectTimelineType.default}"]`
+            `[data-test-subj="open-timeline-modal-body-${TimelineTabsStyle.filter}-${TimelineType.default}"]`
           )
           .exists()
       ).toEqual(true);

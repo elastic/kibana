@@ -8,7 +8,7 @@
 import { EuiIcon, EuiLink, EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo } from 'react';
-import { SavedObjectTimelineType } from '../../../../common/types';
+import { TimelineType } from '../../../../common/types/timeline/api';
 import { Blockquote } from './helpers';
 import * as i18n from './translations';
 
@@ -21,7 +21,7 @@ export const CurrentPatternsMessage = ({
   activePatterns: string[];
   deadPatterns: string[];
   selectedPatterns: string[];
-  timelineType: SavedObjectTimelineType;
+  timelineType: TimelineType;
 }) => {
   const tooltip = useMemo(
     () =>
@@ -41,7 +41,7 @@ export const CurrentPatternsMessage = ({
     [activePatterns, deadPatterns.length, selectedPatterns, timelineType]
   );
 
-  if (timelineType === SavedObjectTimelineType.template) {
+  if (timelineType === TimelineType.template) {
     return (
       <FormattedMessage
         data-test-subj="sourcerer-current-patterns-message"
@@ -75,13 +75,13 @@ export const NoMatchDataMessage = ({
 }: {
   activePatterns: string[];
   selectedPatterns: string[];
-  timelineType: SavedObjectTimelineType;
+  timelineType: TimelineType;
 }) => {
   const aliases = useMemo(
     () => selectedPatterns.filter((p) => !activePatterns.includes(p)).join(', '),
     [activePatterns, selectedPatterns]
   );
-  if (timelineType === SavedObjectTimelineType.template) {
+  if (timelineType === TimelineType.template) {
     return (
       <FormattedMessage
         id="xpack.securitySolution.indexPatterns.timelineTemplate.noMatchData"
@@ -108,7 +108,7 @@ export const BadCurrentPatternsMessage = ({
   timelineType,
   selectedPatterns,
 }: {
-  timelineType: SavedObjectTimelineType;
+  timelineType: TimelineType;
   selectedPatterns: string[];
 }) => {
   const callout = useMemo(
@@ -116,7 +116,7 @@ export const BadCurrentPatternsMessage = ({
     [selectedPatterns]
   );
 
-  if (timelineType === SavedObjectTimelineType.template) {
+  if (timelineType === TimelineType.template) {
     return (
       <FormattedMessage
         id="xpack.securitySolution.indexPatterns.timelineTemplate.currentPatternsBad"
@@ -143,9 +143,9 @@ export const DeprecatedMessage = ({
   timelineType,
 }: {
   onReset: () => void;
-  timelineType: SavedObjectTimelineType;
+  timelineType: TimelineType;
 }) => {
-  if (timelineType === SavedObjectTimelineType.template) {
+  if (timelineType === TimelineType.template) {
     return (
       <FormattedMessage
         data-test-subj="sourcerer-deprecated-message"
@@ -173,10 +173,10 @@ export const MissingPatternsMessage = ({
   onReset,
   timelineType,
 }: {
-  timelineType: SavedObjectTimelineType;
+  timelineType: TimelineType;
   onReset: () => void;
 }) => {
-  if (timelineType === SavedObjectTimelineType.template) {
+  if (timelineType === TimelineType.template) {
     return (
       <FormattedMessage
         data-test-subj="sourcerer-missing-patterns-message"

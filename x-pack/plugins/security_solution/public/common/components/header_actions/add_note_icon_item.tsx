@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { NotesButton } from '../../../timelines/components/timeline/properties/helpers';
-import { SavedObjectTimelineType } from '../../../../common/types';
+import { TimelineType } from '../../../../common/types/timeline/api';
 import { useUserPrivileges } from '../user_privileges';
 import * as i18n from './translations';
 import { ActionIconItem } from './action_icon_item';
@@ -15,7 +15,7 @@ import { ActionIconItem } from './action_icon_item';
 interface AddEventNoteActionProps {
   ariaLabel?: string;
   showNotes: boolean;
-  timelineType: SavedObjectTimelineType;
+  timelineType: TimelineType;
   toggleShowNotes: () => void;
 }
 
@@ -37,9 +37,7 @@ const AddEventNoteActionComponent: React.FC<AddEventNoteActionProps> = ({
         timelineType={timelineType}
         toggleShowNotes={toggleShowNotes}
         toolTip={
-          timelineType === SavedObjectTimelineType.template
-            ? i18n.NOTES_DISABLE_TOOLTIP
-            : i18n.NOTES_TOOLTIP
+          timelineType === TimelineType.template ? i18n.NOTES_DISABLE_TOOLTIP : i18n.NOTES_TOOLTIP
         }
       />
     </ActionIconItem>

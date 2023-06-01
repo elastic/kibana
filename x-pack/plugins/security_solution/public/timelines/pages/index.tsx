@@ -9,7 +9,7 @@ import React from 'react';
 import { Switch, Redirect } from 'react-router-dom';
 import { Route } from '@kbn/shared-ux-router';
 
-import { SavedObjectTimelineType } from '../../../common/types/timeline';
+import { TimelineType } from '../../../common/types/timeline/api';
 
 import { TimelinesPage } from './timelines_page';
 
@@ -17,8 +17,8 @@ import { appendSearch } from '../../common/components/link_to/helpers';
 
 import { TIMELINES_PATH } from '../../../common/constants';
 
-const timelinesPagePath = `${TIMELINES_PATH}/:tabName(${SavedObjectTimelineType.default}|${SavedObjectTimelineType.template})`;
-const timelinesDefaultPath = `${TIMELINES_PATH}/${SavedObjectTimelineType.default}`;
+const timelinesPagePath = `${TIMELINES_PATH}/:tabName(${TimelineType.default}|${TimelineType.template})`;
+const timelinesDefaultPath = `${TIMELINES_PATH}/${TimelineType.default}`;
 
 export const Timelines = React.memo(() => (
   <Switch>

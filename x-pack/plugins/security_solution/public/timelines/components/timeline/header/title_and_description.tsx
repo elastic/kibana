@@ -22,11 +22,8 @@ import { useDispatch } from 'react-redux';
 import usePrevious from 'react-use/lib/usePrevious';
 
 import { getUseField, Field, Form, useForm } from '../../../../shared_imports';
-import {
-  TimelineId,
-  TimelineStatus,
-  SavedObjectTimelineType,
-} from '../../../../../common/types/timeline';
+import { TimelineId } from '../../../../../common/types/timeline';
+import { TimelineStatus, TimelineType } from '../../../../../common/types/timeline/api';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { timelineActions, timelineSelectors } from '../../../store/timeline';
 import { NOTES_PANEL_WIDTH } from '../properties/notes_size';
@@ -68,7 +65,7 @@ export const TimelineTitleAndDescription = React.memo<TimelineTitleAndDescriptio
     const dispatch = useDispatch();
     const handleCreateNewTimeline = useCreateTimeline({
       timelineId: TimelineId.active,
-      timelineType: SavedObjectTimelineType.default,
+      timelineType: TimelineType.default,
     });
 
     const handleSubmit = useCallback(
@@ -120,7 +117,7 @@ export const TimelineTitleAndDescription = React.memo<TimelineTitleAndDescriptio
 
     const closeModalText = useMemo(() => {
       if (status === TimelineStatus.draft && showWarning) {
-        return timelineType === SavedObjectTimelineType.template
+        return timelineType === TimelineType.template
           ? i18n.DISCARD_TIMELINE_TEMPLATE
           : i18n.DISCARD_TIMELINE;
       }
@@ -130,10 +127,10 @@ export const TimelineTitleAndDescription = React.memo<TimelineTitleAndDescriptio
     const modalHeader = useMemo(
       () =>
         status === TimelineStatus.draft
-          ? timelineType === SavedObjectTimelineType.template
+          ? timelineType === TimelineType.template
             ? i18n.SAVE_TIMELINE_TEMPLATE
             : i18n.SAVE_TIMELINE
-          : timelineType === SavedObjectTimelineType.template
+          : timelineType === TimelineType.template
           ? i18n.NAME_TIMELINE_TEMPLATE
           : i18n.NAME_TIMELINE,
       [status, timelineType]
@@ -142,7 +139,7 @@ export const TimelineTitleAndDescription = React.memo<TimelineTitleAndDescriptio
     const saveButtonTitle = useMemo(
       () =>
         status === TimelineStatus.draft && showWarning
-          ? timelineType === SavedObjectTimelineType.template
+          ? timelineType === TimelineType.template
             ? i18n.SAVE_TIMELINE_TEMPLATE
             : i18n.SAVE_TIMELINE
           : i18n.SAVE,
@@ -164,7 +161,7 @@ export const TimelineTitleAndDescription = React.memo<TimelineTitleAndDescriptio
         disabled: isSaving,
         spellCheck: true,
         placeholder:
-          timelineType === SavedObjectTimelineType.template
+          timelineType === TimelineType.template
             ? commonI18n.UNTITLED_TEMPLATE
             : commonI18n.UNTITLED_TIMELINE,
       }),

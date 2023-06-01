@@ -13,7 +13,7 @@ import {
   stringifyEvent,
 } from './helpers';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
-import { SavedObjectTimelineType } from '../../../../../common/types/timeline';
+import { TimelineType } from '../../../../../common/types/timeline/api';
 
 describe('helpers', () => {
   describe('stringifyEvent', () => {
@@ -200,7 +200,7 @@ describe('helpers', () => {
           isAlert: false,
           isPinned: true,
           eventHasNotes: true,
-          timelineType: SavedObjectTimelineType.default,
+          timelineType: TimelineType.default,
         })
       ).toEqual('This event cannot be unpinned because it has notes');
     });
@@ -211,7 +211,7 @@ describe('helpers', () => {
           isAlert: true,
           isPinned: true,
           eventHasNotes: true,
-          timelineType: SavedObjectTimelineType.default,
+          timelineType: TimelineType.default,
         })
       ).toEqual('This alert cannot be unpinned because it has notes');
     });
@@ -222,7 +222,7 @@ describe('helpers', () => {
           isAlert: false,
           isPinned: true,
           eventHasNotes: false,
-          timelineType: SavedObjectTimelineType.default,
+          timelineType: TimelineType.default,
         })
       ).toEqual('Unpin event');
     });
@@ -233,7 +233,7 @@ describe('helpers', () => {
           isAlert: true,
           isPinned: true,
           eventHasNotes: false,
-          timelineType: SavedObjectTimelineType.default,
+          timelineType: TimelineType.default,
         })
       ).toEqual('Unpin alert');
     });
@@ -244,7 +244,7 @@ describe('helpers', () => {
           isAlert: false,
           isPinned: false,
           eventHasNotes: true,
-          timelineType: SavedObjectTimelineType.default,
+          timelineType: TimelineType.default,
         })
       ).toEqual('Pin event');
     });
@@ -255,7 +255,7 @@ describe('helpers', () => {
           isAlert: true,
           isPinned: false,
           eventHasNotes: true,
-          timelineType: SavedObjectTimelineType.default,
+          timelineType: TimelineType.default,
         })
       ).toEqual('Pin alert');
     });
@@ -266,7 +266,7 @@ describe('helpers', () => {
           isAlert: false,
           isPinned: false,
           eventHasNotes: false,
-          timelineType: SavedObjectTimelineType.default,
+          timelineType: TimelineType.default,
         })
       ).toEqual('Pin event');
     });
@@ -277,7 +277,7 @@ describe('helpers', () => {
           isAlert: true,
           isPinned: false,
           eventHasNotes: false,
-          timelineType: SavedObjectTimelineType.default,
+          timelineType: TimelineType.default,
         })
       ).toEqual('Pin alert');
     });
@@ -288,7 +288,7 @@ describe('helpers', () => {
           isAlert: false,
           isPinned: false,
           eventHasNotes: false,
-          timelineType: SavedObjectTimelineType.template,
+          timelineType: TimelineType.template,
         })
       ).toEqual('This event may not be pinned while editing a template timeline');
     });
@@ -299,7 +299,7 @@ describe('helpers', () => {
           isAlert: true,
           isPinned: false,
           eventHasNotes: false,
-          timelineType: SavedObjectTimelineType.template,
+          timelineType: TimelineType.template,
         })
       ).toEqual('This alert may not be pinned while editing a template timeline');
     });

@@ -46,7 +46,7 @@ import type {
   TimelineResult,
 } from '../../../../common/types/timeline/api';
 import type { ColumnHeaderOptions } from '../../../../common/types/timeline';
-import { TimelineStatus, SavedObjectTimelineType } from '../../../../common/types/timeline';
+import { TimelineStatus, TimelineType } from '../../../../common/types/timeline/api';
 import type { inputsModel } from '../../../common/store/inputs';
 import { addError } from '../../../common/store/app/actions';
 
@@ -278,8 +278,7 @@ export const createTimelineEpic =
                           savedObjectId: response.timeline.savedObjectId,
                           version: response.timeline.version,
                           status: response.timeline.status ?? TimelineStatus.active,
-                          timelineType:
-                            response.timeline.timelineType ?? SavedObjectTimelineType.default,
+                          timelineType: response.timeline.timelineType ?? TimelineType.default,
                           templateTimelineId: response.timeline.templateTimelineId ?? null,
                           templateTimelineVersion:
                             response.timeline.templateTimelineVersion ?? null,
@@ -340,7 +339,7 @@ const timelineInput: TimelineInput = {
   kqlQuery: null,
   indexNames: null,
   title: null,
-  timelineType: SavedObjectTimelineType.default,
+  timelineType: TimelineType.default,
   templateTimelineVersion: null,
   templateTimelineId: null,
   dateRange: null,
