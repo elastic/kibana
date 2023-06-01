@@ -47,6 +47,11 @@ export const registerDeleteScriptedFieldRoute = (
               { unknowns: 'allow' }
             ),
           },
+          response: {
+            200: {
+              body: schema.never(),
+            },
+          },
         },
       },
       router.handleLegacyErrors(

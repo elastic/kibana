@@ -18,7 +18,7 @@ const dataViewsRuntimeResponseSchema = schema.object({
   fields: schema.arrayOf(serializedFieldFormatSchema),
 });
 
-const indexPatternsRuntimeResponseSchema = schema.object({
+export const indexPatternsRuntimeResponseSchema = schema.object({
   [SERVICE_KEY_LEGACY]: dataViewSpecSchema,
   field: serializedFieldFormatSchema,
 });

@@ -15,6 +15,7 @@ import type {
   DataViewsServerPluginStartDependencies,
 } from '../../types';
 import { INITIAL_REST_VERSION } from '../../constants';
+import { serializedFieldFormatSchema } from '../../../common/schemas';
 
 export const registerGetScriptedFieldRoute = (
   router: IRouter,
@@ -44,6 +45,13 @@ export const registerGetScriptedFieldRoute = (
               { unknowns: 'allow' }
             ),
           },
+          response: {
+            200: {
+              body: schema.object({
+                field: serializedFieldFormatSchema,
+              }),
+            },
+          },
         },
       },
       router.handleLegacyErrors(
@@ -71,13 +79,16 @@ export const registerGetScriptedFieldRoute = (
             throw new Error('Only scripted fields can be retrieved.');
           }
 
+          // todo set type
+          const body = {
+            field: field.toSpec(),
+          };
+
           return res.ok({
             headers: {
               'content-type': 'application/json',
             },
-            body: JSON.stringify({
-              field: field.toSpec(),
-            }),
+            body,
           });
         })
       )

@@ -15,6 +15,10 @@ import type {
   DataViewsServerPluginStartDependencies,
 } from '../../types';
 import { INITIAL_REST_VERSION } from '../../constants';
+import {
+  indexPatternsRuntimeResponseSchema,
+  type IndexPatternsRuntimeResponseType,
+} from '../runtime_fields/shared';
 
 export const registerCreateScriptedFieldRoute = (
   router: IRouter,
@@ -42,6 +46,11 @@ export const registerCreateScriptedFieldRoute = (
             body: schema.object({
               field: fieldSpecSchema,
             }),
+          },
+          response: {
+            200: {
+              body: indexPatternsRuntimeResponseSchema,
+            },
           },
         },
       },
@@ -80,14 +89,16 @@ export const registerCreateScriptedFieldRoute = (
           const fieldObject = indexPattern.fields.getByName(field.name);
           if (!fieldObject) throw new Error(`Could not create a field [name = ${field.name}].`);
 
+          const body: IndexPatternsRuntimeResponseType = {
+            field: fieldObject.toSpec(),
+            index_pattern: indexPattern.toSpec(),
+          };
+
           return res.ok({
             headers: {
               'content-type': 'application/json',
             },
-            body: JSON.stringify({
-              field: fieldObject.toSpec(),
-              index_pattern: indexPattern.toSpec(),
-            }),
+            body,
           });
         })
       )
