@@ -10,6 +10,12 @@ import Url from 'url';
 
 import * as yaml from 'js-yaml';
 
+import {
+  LOADING_INDICATOR,
+  LOADING_INDICATOR_HIDDEN,
+} from '@kbn/security-solution-plugin/cypress/screens/security_header';
+import { encode } from '@kbn/rison';
+import { NEW_FEATURES_TOUR_STORAGE_KEYS } from '@kbn/security-solution-plugin/common/constants';
 import type { ROLES } from './privileges';
 
 const LOGIN_API_ENDPOINT = '/internal/security/login';
@@ -350,4 +356,55 @@ export const waitForPageWithoutDateRange = (url: string, role?: ROLES) => {
 
 export const logout = () => {
   cy.visit(LOGOUT_URL);
+};
+
+export const visit = (url: string, options: Partial<Cypress.VisitOptions> = {}, role?: ROLES) => {
+  const timerangeConfig = {
+    from: 1547914976217,
+    fromStr: '2019-01-19T16:22:56.217Z',
+    kind: 'relative',
+    to: 1579537385745,
+    toStr: 'now',
+  };
+
+  const timerange = encode({
+    global: {
+      linkTo: ['timeline'],
+      timerange: timerangeConfig,
+    },
+    timeline: {
+      linkTo: ['global'],
+      timerange: timerangeConfig,
+    },
+  });
+
+  cy.visit(role ? getUrlWithRoute(role, url) : url, {
+    ...options,
+    qs: {
+      ...options.qs,
+      timerange,
+    },
+    onBeforeLoad: (win) => {
+      options.onBeforeLoad?.(win);
+
+      disableNewFeaturesTours(win);
+    },
+  });
+  waitForPageToBeLoaded();
+};
+
+const disableNewFeaturesTours = (window: Window) => {
+  const tourStorageKeys = Object.values(NEW_FEATURES_TOUR_STORAGE_KEYS);
+  const tourConfig = {
+    isTourActive: false,
+  };
+
+  tourStorageKeys.forEach((key) => {
+    window.localStorage.setItem(key, JSON.stringify(tourConfig));
+  });
+};
+
+export const waitForPageToBeLoaded = () => {
+  cy.get(LOADING_INDICATOR_HIDDEN).should('exist');
+  cy.get(LOADING_INDICATOR).should('not.exist');
 };

@@ -23,17 +23,18 @@ import {
 } from '../tasks/common';
 import { TIMELINE_DRAGGABLE_ITEM } from '../screens/timeline';
 import { esArchiverLoad, esArchiverUnload } from '../tasks/es_archiver';
-import { login } from '../tasks/login';
-import { selectRange } from '../tasks/select_range';
+import { login, visit } from '../tasks/login';
 
 const THREAT_INTELLIGENCE = '/app/security/threat_intelligence/indicators';
 
-describe('Timeline', { testIsolation: false }, () => {
+describe('Timeline', () => {
   before(() => {
     esArchiverLoad('threat_intelligence/indicators_data');
+  });
+
+  beforeEach(() => {
     login();
-    cy.visit(THREAT_INTELLIGENCE);
-    selectRange();
+    visit(THREAT_INTELLIGENCE);
   });
 
   after(() => {

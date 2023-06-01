@@ -27,19 +27,21 @@ import {
 } from '../tasks/query_bar';
 import { INDICATOR_TYPE_CELL } from '../screens/indicators';
 import { KQL_FILTER } from '../screens/query_bar';
-import { selectRange } from '../tasks/select_range';
-import { login } from '../tasks/login';
+import { login, visit } from '../tasks/login';
 import { esArchiverLoad, esArchiverUnload } from '../tasks/es_archiver';
 
 const THREAT_INTELLIGENCE = '/app/security/threat_intelligence/indicators';
 
-describe('Indicators query bar interaction', { testIsolation: false }, () => {
+describe('Indicators query bar interaction', () => {
   before(() => {
     esArchiverLoad('threat_intelligence/indicators_data');
-    login();
-    cy.visit(THREAT_INTELLIGENCE);
-    selectRange();
   });
+
+  beforeEach(() => {
+    login();
+    visit(THREAT_INTELLIGENCE);
+  });
+
   after(() => {
     esArchiverUnload('threat_intelligence/indicators_data');
   });

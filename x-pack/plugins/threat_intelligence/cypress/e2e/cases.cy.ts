@@ -30,18 +30,20 @@ import {
   INDICATORS_TABLE_ADD_TO_EXISTING_CASE_BUTTON_ICON,
   INDICATORS_TABLE_ADD_TO_NEW_CASE_BUTTON_ICON,
 } from '../screens/cases';
-import { login } from '../tasks/login';
+import { login, visit } from '../tasks/login';
 import { esArchiverLoad, esArchiverUnload } from '../tasks/es_archiver';
 import { selectRange } from '../tasks/select_range';
 
 const THREAT_INTELLIGENCE = '/app/security/threat_intelligence/indicators';
 
-describe('Cases with invalid indicators', { testIsolation: false }, () => {
+describe('Cases with invalid indicators', () => {
   before(() => {
     esArchiverLoad('threat_intelligence/invalid_indicators_data');
+  });
+
+  beforeEach(() => {
     login();
-    cy.visit(THREAT_INTELLIGENCE);
-    selectRange();
+    visit(THREAT_INTELLIGENCE);
   });
 
   after(() => {
@@ -66,12 +68,14 @@ describe('Cases with invalid indicators', { testIsolation: false }, () => {
   });
 });
 
-describe('Cases interactions', { testIsolation: false }, () => {
+describe('Cases interactions', () => {
   before(() => {
     esArchiverLoad('threat_intelligence/indicators_data');
+  });
+
+  beforeEach(() => {
     login();
-    cy.visit(THREAT_INTELLIGENCE);
-    selectRange();
+    visit(THREAT_INTELLIGENCE);
   });
 
   after(() => {

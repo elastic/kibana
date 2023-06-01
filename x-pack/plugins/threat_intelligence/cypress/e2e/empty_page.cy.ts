@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { login } from '../tasks/login';
+import { login, visit } from '../tasks/login';
 import {
   EMPTY_PAGE_BODY,
   EMPTY_PAGE_DOCS_LINK,
@@ -14,10 +14,10 @@ import {
 
 const THREAT_INTEL_PATH = '/app/security/threat_intelligence/';
 
-describe('Empty Page', { testIsolation: false }, () => {
-  before(() => {
+describe('Empty Page', () => {
+  beforeEach(() => {
     login();
-    cy.visit(THREAT_INTEL_PATH);
+    visit(THREAT_INTEL_PATH);
   });
 
   it('should render the empty page with link to docs and integrations', () => {

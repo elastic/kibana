@@ -41,9 +41,8 @@ import {
   TIME_RANGE_PICKER,
   REFRESH_BUTTON,
 } from '../screens/indicators';
-import { login } from '../tasks/login';
+import { login, visit, waitForPageToBeLoaded } from '../tasks/login';
 import { esArchiverLoad, esArchiverUnload } from '../tasks/es_archiver';
-import { selectRange } from '../tasks/select_range';
 import {
   closeFlyout,
   navigateToFlyoutJsonTab,
@@ -58,15 +57,14 @@ const URL_WITH_CONTRADICTORY_FILTERS =
   '/app/security/threat_intelligence/indicators?indicators=(filterQuery:(language:kuery,query:%27%27),filters:!((%27$state%27:(store:appState),meta:(alias:!n,disabled:!f,index:%27%27,key:threat.indicator.type,negate:!f,params:(query:file),type:phrase),query:(match_phrase:(threat.indicator.type:file))),(%27$state%27:(store:appState),meta:(alias:!n,disabled:!f,index:%27%27,key:threat.indicator.type,negate:!f,params:(query:url),type:phrase),query:(match_phrase:(threat.indicator.type:url)))),timeRange:(from:now/d,to:now/d))';
 
 describe('Invalid Indicators', () => {
-  before(() => {
-    login();
-  });
-
   describe('verify the grid loads even with missing fields', () => {
     before(() => {
       esArchiverLoad('threat_intelligence/invalid_indicators_data');
-      cy.visit(THREAT_INTELLIGENCE);
-      selectRange();
+    });
+
+    beforeEach(() => {
+      login();
+      visit(THREAT_INTELLIGENCE);
     });
 
     after(() => {
@@ -116,8 +114,11 @@ describe('Invalid Indicators', () => {
   describe('verify the grid loads even with missing mappings and missing fields', () => {
     before(() => {
       esArchiverLoad('threat_intelligence/missing_mappings_indicators_data');
-      cy.visit(THREAT_INTELLIGENCE);
-      selectRange();
+    });
+
+    beforeEach(() => {
+      login();
+      visit(THREAT_INTELLIGENCE);
     });
 
     after(() => {
@@ -140,7 +141,6 @@ describe('Invalid Indicators', () => {
 describe('Indicators', () => {
   before(() => {
     esArchiverLoad('threat_intelligence/indicators_data');
-    login();
   });
 
   after(() => {
@@ -148,6 +148,11 @@ describe('Indicators', () => {
   });
 
   describe('Indicators page loading', () => {
+    beforeEach(() => {
+      login();
+      visit(THREAT_INTELLIGENCE);
+    });
+
     it('verify the fleet plugin integrations endpoint exists', () => {
       cy.request({
         method: 'GET',
@@ -156,10 +161,10 @@ describe('Indicators', () => {
     });
   });
 
-  describe('Indicators page basics', { testIsolation: false }, () => {
-    before(() => {
-      cy.visit(THREAT_INTELLIGENCE);
-      selectRange();
+  describe('Indicators page basics', () => {
+    beforeEach(() => {
+      login();
+      visit(THREAT_INTELLIGENCE);
     });
 
     it('should render the basic page elements', () => {
@@ -208,10 +213,10 @@ describe('Indicators', () => {
     });
   });
 
-  describe('Indicator page search', { testIsolation: false }, () => {
-    before(() => {
-      cy.visit(THREAT_INTELLIGENCE);
-      selectRange();
+  describe('Indicator page search', () => {
+    beforeEach(() => {
+      login();
+      visit(THREAT_INTELLIGENCE);
     });
 
     it('should narrow the results to url indicators when respective KQL search is executed', () => {
@@ -251,19 +256,19 @@ describe('Indicators', () => {
 
       cy.wait('@search');
     });
+  });
 
-    describe('No items match search criteria', () => {
-      before(() => {
-        // Contradictory filter set
-        cy.visit(URL_WITH_CONTRADICTORY_FILTERS);
-        selectRange();
-      });
+  describe('No items match search criteria', () => {
+    beforeEach(() => {
+      login();
+      cy.visit(URL_WITH_CONTRADICTORY_FILTERS);
+      waitForPageToBeLoaded();
+    });
 
-      it('should not display the table when contradictory filters are set', () => {
-        cy.get(FLYOUT_TABLE).should('not.exist');
+    it('should not display the table when contradictory filters are set', () => {
+      cy.get(FLYOUT_TABLE).should('not.exist');
 
-        cy.get(EMPTY_STATE).should('exist').and('contain.text', 'No results');
-      });
+      cy.get(EMPTY_STATE).should('exist').and('contain.text', 'No results');
     });
 
     it('should have the default selected field, then update when user selects', () => {
@@ -279,14 +284,15 @@ describe('Indicators', () => {
   });
 
   describe('Field browser', () => {
-    before(() => {
-      cy.visit(THREAT_INTELLIGENCE);
-      selectRange();
+    beforeEach(() => {
+      login();
+      visit(THREAT_INTELLIGENCE);
     });
-
     describe('when field browser is triggered', () => {
       it('should render proper modal window', () => {
-        cy.get(FIELD_BROWSER).last().click({ force: true });
+        cy.get('[data-test-subj="tiIndicatorsTable"]').within(() => {
+          cy.get(FIELD_BROWSER).last().click();
+        });
 
         cy.get(FIELD_BROWSER_MODAL).should('be.visible');
       });
@@ -294,32 +300,28 @@ describe('Indicators', () => {
   });
 
   describe('Request inspector', () => {
-    before(() => {
-      cy.visit(THREAT_INTELLIGENCE);
-      selectRange();
+    beforeEach(() => {
+      login();
+      visit(THREAT_INTELLIGENCE);
     });
 
-    describe('when inspector button is clicked', () => {
-      it('should render the inspector flyout', () => {
-        cy.get(INSPECTOR_BUTTON).last().click({ force: true });
+    it('when inspector button is clicked it should render the inspector flyout', () => {
+      cy.get(INSPECTOR_BUTTON).last().click();
 
-        cy.get(INSPECTOR_PANEL).contains('Indicators search requests');
-      });
+      cy.get(INSPECTOR_PANEL).contains('Indicators search requests');
     });
   });
 
   describe('Add integrations', () => {
-    before(() => {
-      cy.visit(THREAT_INTELLIGENCE);
-      selectRange();
+    beforeEach(() => {
+      login();
+      visit(THREAT_INTELLIGENCE);
     });
 
-    describe('when the global header add integrations button is clicked', () => {
-      it('should navigate to the Integrations page with Threat Intelligence category selected', () => {
-        cy.get(ADD_INTEGRATIONS_BUTTON).click();
+    it('when the global header add integrations button is clicked it should navigate to the Integrations page with Threat Intelligence category selected', () => {
+      cy.get(ADD_INTEGRATIONS_BUTTON).click();
 
-        cy.url().should('include', 'threat_intel');
-      });
+      cy.url().should('include', 'threat_intel');
     });
   });
 });

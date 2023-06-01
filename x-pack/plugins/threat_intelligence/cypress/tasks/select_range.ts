@@ -10,9 +10,7 @@ import { EMPTY_STATE, TIME_RANGE_PICKER } from '../screens/indicators';
 export const selectRange = () => {
   cy.get(EMPTY_STATE);
 
-  cy.get(TIME_RANGE_PICKER).first().click({ force: true });
+  cy.get(TIME_RANGE_PICKER).first().click();
   cy.get('[aria-label="Time unit"]').select('y');
-  cy.get('[data-test-subj="superDatePickerQuickMenu"] .euiQuickSelect__applyButton').click({
-    force: true,
-  });
+  cy.get('[data-test-subj="superDatePickerQuickMenu"] .euiQuickSelect__applyButton').click();
 };
