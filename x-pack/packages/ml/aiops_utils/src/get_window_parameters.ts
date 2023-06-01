@@ -7,11 +7,31 @@
 
 /**
  * Time range definition for baseline and deviation to be used by spike log analysis.
+ *
+ * @export
+ * @interface WindowParameters
+ * @typedef {WindowParameters}
  */
 export interface WindowParameters {
+  /**
+   * Baseline minimum value
+   * @type {number}
+   */
   baselineMin: number;
+  /**
+   * Baseline maximum value
+   * @type {number}
+   */
   baselineMax: number;
+  /**
+   * Deviation minimum value
+   * @type {number}
+   */
   deviationMin: number;
+  /**
+   * Deviation maximum value
+   * @type {number}
+   */
   deviationMax: number;
 }
 
