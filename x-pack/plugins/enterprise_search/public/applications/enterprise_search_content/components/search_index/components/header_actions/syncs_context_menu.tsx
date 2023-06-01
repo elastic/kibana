@@ -30,10 +30,16 @@ import { CancelSyncsLogic } from '../../connector/cancel_syncs_logic';
 import { IndexViewLogic } from '../../index_view_logic';
 
 export const SyncsContextMenu: React.FC = () => {
-  // TODO we cannot fully rely on feature flag. we need data from index to show or hide actions
   const { productFeatures } = useValues(KibanaLogic);
-  const { ingestionMethod, ingestionStatus, isCanceling, isSyncing, isWaitingForSync } =
-    useValues(IndexViewLogic);
+  const {
+    hasDocumentLevelSecurityFeature,
+    hasIncrementalSyncFeature,
+    ingestionMethod,
+    ingestionStatus,
+    isCanceling,
+    isSyncing,
+    isWaitingForSync,
+  } = useValues(IndexViewLogic);
   const { cancelSyncs } = useActions(CancelSyncsLogic);
   const { status } = useValues(CancelSyncsApiLogic);
   const { startSync } = useActions(IndexViewLogic);
@@ -62,9 +68,15 @@ export const SyncsContextMenu: React.FC = () => {
   };
 
   const syncLoading = (isSyncing || isWaitingForSync) && ingestionStatus !== IngestionStatus.ERROR;
+
+  const shouldShowDocumentLevelSecurity =
+    productFeatures.hasDocumentLevelSecurityEnabled && hasDocumentLevelSecurityFeature;
+  const shouldShowIncrementalSync =
+    productFeatures.hasIncrementalSyncEnabled && hasIncrementalSyncFeature;
+
   const shouldShowMoreSync =
-    !syncLoading &&
-    (productFeatures.hasDocumentLevelSecurityEnabled || productFeatures.hasIncrementalSyncEnabled);
+    !syncLoading && (shouldShowDocumentLevelSecurity || shouldShowIncrementalSync);
+
   const panels: EuiContextMenuProps['panels'] = [
     {
       id: 0,
@@ -138,7 +150,7 @@ export const SyncsContextMenu: React.FC = () => {
             startSync();
           },
         },
-        ...(productFeatures.hasIncrementalSyncEnabled
+        ...(shouldShowIncrementalSync
           ? [
               {
                 // @ts-ignore - data-* attributes are applied but doesn't exist on types
@@ -157,7 +169,7 @@ export const SyncsContextMenu: React.FC = () => {
               },
             ]
           : []),
-        ...(productFeatures.hasDocumentLevelSecurityEnabled
+        ...(shouldShowDocumentLevelSecurity
           ? [
               {
                 // @ts-ignore - data-* attributes are applied but doesn't exist on types

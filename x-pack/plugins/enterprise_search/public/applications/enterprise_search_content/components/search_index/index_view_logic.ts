@@ -69,7 +69,9 @@ export interface IndexViewValues {
   fetchIndexApiStatus: Status;
   hasAdvancedFilteringFeature: boolean;
   hasBasicFilteringFeature: boolean;
+  hasDocumentLevelSecurityFeature: boolean;
   hasFilteringFeature: boolean;
+  hasIncrementalSyncFeature: boolean;
   htmlExtraction: boolean | undefined;
   index: ElasticsearchViewIndex | undefined;
   indexData: typeof CachedFetchIndexApiLogic.values.indexData;
@@ -212,9 +214,18 @@ export const IndexViewLogic = kea<MakeLogicType<IndexViewValues, IndexViewAction
             connector.features[FeatureName.FILTERING_RULES]
           : false,
     ],
+    hasDocumentLevelSecurityFeature: [
+      () => [selectors.connector],
+      (connector?: Connector) =>
+        connector?.features?.[FeatureName.DOCUMENT_LEVEL_SECURITY] || false,
+    ],
     hasFilteringFeature: [
       () => [selectors.hasAdvancedFilteringFeature, selectors.hasBasicFilteringFeature],
       (advancedFeature: boolean, basicFeature: boolean) => advancedFeature || basicFeature,
+    ],
+    hasIncrementalSyncFeature: [
+      () => [selectors.connector],
+      (connector?: Connector) => connector?.features?.[FeatureName.INCREMENTAL_SYNC] || false,
     ],
     htmlExtraction: [
       () => [selectors.connector],

@@ -163,12 +163,16 @@ export enum TriggerMethod {
 export enum FeatureName {
   FILTERING_ADVANCED_CONFIG = 'filtering_advanced_config',
   FILTERING_RULES = 'filtering_rules',
+  DOCUMENT_LEVEL_SECURITY = 'document_level_security',
+  INCREMENTAL_SYNC = 'incremental_sync',
   SYNC_RULES = 'sync_rules',
 }
 
 export type ConnectorFeatures = Partial<{
+  [FeatureName.DOCUMENT_LEVEL_SECURITY]: boolean;
   [FeatureName.FILTERING_ADVANCED_CONFIG]: boolean;
   [FeatureName.FILTERING_RULES]: boolean;
+  [FeatureName.INCREMENTAL_SYNC]: boolean;
   [FeatureName.SYNC_RULES]: {
     advanced?: {
       enabled: boolean;
