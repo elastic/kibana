@@ -62,7 +62,8 @@
     "@kbn/core-ui-settings-browser-mocks",
     "@kbn/core-ui-settings-browser",
     "@kbn/ml-error-utils",
-    "@kbn/ml-data-frame-analytics-utils"
+    "@kbn/ml-data-frame-analytics-utils",
+    "@kbn/data-common"
   ],
   "exclude": [
     "target/**/*",

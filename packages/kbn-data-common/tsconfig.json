@@ -10,10 +10,25 @@
   },
   "include": [
     "**/*.ts",
-      "**/*.tsx",
+    "**/*.tsx",
   ],
   "exclude": [
     "target/**/*"
   ],
-  "kbn_references": []
+  "kbn_references": [
+    "@kbn/data-views-plugin",
+    "@kbn/expressions-plugin",
+    "@kbn/field-formats-plugin",
+    "@kbn/core",
+    "@kbn/es-query",
+    "@kbn/expect",
+    "@kbn/field-types",
+    "@kbn/kibana-utils-plugin",
+    "@kbn/datemath",
+    "@kbn/i18n",
+    "@kbn/utility-types",
+    "@kbn/inspector-plugin",
+    "@kbn/utility-types-jest",
+    "@kbn/safer-lodash-set",
+  ]
 }

@@ -13,7 +13,7 @@
     "@kbn/core",
     "@kbn/maps-plugin",
     "@kbn/developer-examples-plugin",
-    "@kbn/data-plugin",
+    "@kbn/data-common",
   ],
   "exclude": [
     "target/**/*",

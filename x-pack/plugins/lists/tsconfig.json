@@ -22,7 +22,6 @@
     "@kbn/securitysolution-list-api",
     "@kbn/kibana-react-plugin",
     "@kbn/i18n",
-    "@kbn/data-plugin",
     "@kbn/securitysolution-list-utils",
     "@kbn/securitysolution-utils",
     "@kbn/es-query",
@@ -39,6 +38,7 @@
     "@kbn/utility-types",
     "@kbn/core-elasticsearch-client-server-mocks",
     "@kbn/core-saved-objects-server",
+    "@kbn/data-common",
   ],
   "exclude": [
     "target/**/*",

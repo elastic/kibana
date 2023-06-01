@@ -80,6 +80,7 @@
     "@kbn/observability-shared-plugin",
     "@kbn/ml-error-utils",
     "@kbn/ml-anomaly-utils",
+    "@kbn/data-common",
   ],
   "exclude": [
     "target/**/*",

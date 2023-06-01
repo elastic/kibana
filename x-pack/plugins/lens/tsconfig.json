@@ -77,6 +77,7 @@
     "@kbn/core-lifecycle-browser",
     "@kbn/core-notifications-browser-mocks",
     "@kbn/core-saved-objects-utils-server",
+    "@kbn/data-common",
   ],
   "exclude": [
     "target/**/*",

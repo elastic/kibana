@@ -26,6 +26,7 @@
     "@kbn/i18n-react",
     "@kbn/ui-theme",
     "@kbn/config-schema",
+    "@kbn/data-common",
   ],
   "exclude": [
     "target/**/*",

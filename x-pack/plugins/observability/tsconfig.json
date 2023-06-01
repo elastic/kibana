@@ -69,7 +69,8 @@
     "@kbn/core-elasticsearch-server",
     "@kbn/observability-shared-plugin",
     "@kbn/exploratory-view-plugin",
-    "@kbn/rison"
+    "@kbn/rison",
+    "@kbn/data-common"
   ],
   "exclude": ["target/**/*"]
 }

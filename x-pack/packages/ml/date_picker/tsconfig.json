@@ -27,5 +27,6 @@
     "@kbn/ml-is-populated-object",
     "@kbn/kibana-react-plugin",
     "@kbn/ml-query-utils",
+    "@kbn/data-common",
   ]
 }

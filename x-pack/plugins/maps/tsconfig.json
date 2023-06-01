@@ -71,6 +71,7 @@
     "@kbn/core-saved-objects-server",
     "@kbn/maps-vector-tile-utils",
     "@kbn/core-http-common",
+    "@kbn/data-common",
   ],
   "exclude": [
     "target/**/*",

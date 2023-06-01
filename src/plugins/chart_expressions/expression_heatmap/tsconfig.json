@@ -27,6 +27,7 @@
     "@kbn/kibana-react-plugin",
     "@kbn/analytics",
     "@kbn/chart-expressions-common",
+    "@kbn/data-common",
   ],
   "exclude": [
     "target/**/*",

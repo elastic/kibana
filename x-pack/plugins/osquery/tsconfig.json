@@ -72,6 +72,7 @@
     "@kbn/securitysolution-ecs",
     "@kbn/licensing-plugin",
     "@kbn/core-lifecycle-browser",
-    "@kbn/core-saved-objects-server"
+    "@kbn/core-saved-objects-server",
+    "@kbn/data-common"
   ]
 }
