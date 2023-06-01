@@ -249,7 +249,7 @@ export class ExecuteReportTask implements ReportingTask {
 
     const payload = {
       forceNow: new Date().toISOString(),
-      locatorParams: url,
+      locatorParams: [url],
       layout: task.meta.layout,
       ...task.payload,
     } as unknown as TaskPayloadPDFV2;

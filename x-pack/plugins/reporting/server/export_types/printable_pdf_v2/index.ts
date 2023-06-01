@@ -40,7 +40,7 @@ import {
   REPORTING_TRANSACTION_TYPE,
   PDF_JOB_TYPE_V2,
 } from '../../../common/constants';
-import { JobParamsPDFV2, UrlOrUrlLocatorTuple } from '../../../common/types';
+import { JobParamsPDFV2 } from '../../../common/types';
 import { TaskPayloadPDFV2 } from '../../../common/types/export_types/printable_pdf_v2';
 import { ReportingConfigType } from '../../config';
 import { ReportingServerInfo } from '../../core';
@@ -174,16 +174,16 @@ export class PdfExportType implements ExportType {
   }
 
   public getScreenshots(options: PdfScreenshotOptions): Rx.Observable<PdfScreenshotResult> {
-    return Rx.defer(() =>
-      this.startDeps.screenshotting.getScreenshots({
+    return Rx.defer(() => {
+      return this.startDeps.screenshotting.getScreenshots({
         ...options,
         urls: options.urls.map((url) =>
           typeof url === 'string'
             ? url
             : [url[0], { [REPORTING_REDIRECT_LOCATOR_STORE_KEY]: url[1] }]
         ),
-      } as PdfScreenshotOptions)
-    );
+      } as PdfScreenshotOptions);
+    });
   }
 
   /**
@@ -238,7 +238,8 @@ export class PdfExportType implements ExportType {
             payload.forceNow
           ),
           locator,
-        ]) as UrlOrUrlWithContext[];
+        ]) as unknown as UrlOrUrlWithContext[];
+
         const screenshotFn: GetScreenshotsFn = () =>
           this.getScreenshots({
             format: 'pdf',
