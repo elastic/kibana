@@ -14,7 +14,6 @@ import {
   InstallPrebuiltRulesAndTimelinesResponse,
   PREBUILT_RULES_URL,
 } from '../../../../../../common/detection_engine/prebuilt_rules';
-import { importTimelineResultSchema } from '../../../../../../common/types/timeline';
 import type {
   SecuritySolutionApiRequestHandlerContext,
   SecuritySolutionPluginRouter,
