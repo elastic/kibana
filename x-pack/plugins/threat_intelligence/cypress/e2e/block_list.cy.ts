@@ -34,16 +34,13 @@ const BLOCK_LIST_NEW_NAME = 'new blocklist entry';
 const BLOCK_LIST_NEW_DESCRIPTION = 'the best description';
 
 describe('Block list with invalid indicators', () => {
-  before(() => {
-    esArchiverLoad('threat_intelligence/invalid_indicators_data');
-  });
-
   beforeEach(() => {
+    esArchiverLoad('threat_intelligence/invalid_indicators_data');
     login();
     visit(THREAT_INTELLIGENCE);
   });
 
-  after(() => {
+  afterEach(() => {
     esArchiverUnload('threat_intelligence/invalid_indicators_data');
   });
 
@@ -60,16 +57,13 @@ describe('Block list with invalid indicators', () => {
 });
 
 describe('Block list interactions', () => {
-  before(() => {
-    esArchiverLoad('threat_intelligence/indicators_data');
-  });
-
   beforeEach(() => {
+    esArchiverLoad('threat_intelligence/indicators_data');
     login();
     visit(THREAT_INTELLIGENCE);
   });
 
-  after(() => {
+  afterEach(() => {
     esArchiverUnload('threat_intelligence/indicators_data');
   });
 
