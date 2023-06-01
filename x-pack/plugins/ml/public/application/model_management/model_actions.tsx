@@ -19,13 +19,15 @@ import {
   ELASTIC_MODEL_TAG,
   MODEL_STATE,
 } from '@kbn/ml-trained-models-utils/src/constants/trained_models';
+import {
+  getAnalysisType,
+  type DataFrameAnalysisConfigType,
+} from '@kbn/ml-data-frame-analytics-utils';
 import { useTrainedModelsApiService } from '../services/ml_api_service/trained_models';
 import { getUserConfirmationProvider } from './force_stop_dialog';
 import { useToastNotificationService } from '../services/toast_notification_service';
 import { getUserInputModelDeploymentParamsProvider } from './deployment_setup';
 import { useMlKibana, useMlLocator, useNavigateToPath } from '../contexts/kibana';
-import { getAnalysisType } from '../../../common/util/analytics_utils';
-import { DataFrameAnalysisConfigType } from '../../../common/types/data_frame_analytics';
 import { ML_PAGES } from '../../../common/constants/locator';
 import { isTestable } from './test_models';
 import { ModelItem } from './models_list';
