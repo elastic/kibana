@@ -11,7 +11,7 @@ import { waitForChrome } from '../utils';
 
 export const journey = new Journey({
   // FAILING: https://github.com/elastic/kibana/issues/130287
-  skipped: true,
+  // skipped: true,
   kbnArchives: ['test/functional/fixtures/kbn_archiver/many_fields_data_view'],
   esArchives: ['test/functional/fixtures/es_archiver/many_fields'],
 })
