@@ -24,6 +24,7 @@ import {
   SavedObjectTypeRegistry,
   type IKibanaMigrator,
   type MigrationResult,
+  type IndexTypesMap,
 } from '@kbn/core-saved-objects-base-server-internal';
 import { SavedObjectsRepository } from '@kbn/core-saved-objects-api-server-internal';
 import {
@@ -70,6 +71,7 @@ export interface KibanaMigratorTestKitParams {
   kibanaBranch?: string;
   settings?: Record<string, any>;
   types?: Array<SavedObjectsType<any>>;
+  defaultIndexTypesMap?: IndexTypesMap;
   logFilePath?: string;
 }
 
@@ -123,6 +125,7 @@ export const getEsClient = async ({
 export const getKibanaMigratorTestKit = async ({
   settings = {},
   kibanaIndex = defaultKibanaIndex,
+  defaultIndexTypesMap = {}, // do NOT assume any types are stored in any index by default
   kibanaVersion = currentVersion,
   kibanaBranch = currentBranch,
   types = [],
@@ -145,15 +148,16 @@ export const getKibanaMigratorTestKit = async ({
   // types must be registered before instantiating the migrator
   registerTypes(typeRegistry, types);
 
-  const migrator = await getMigrator(
+  const migrator = await getMigrator({
     configService,
     client,
     typeRegistry,
     loggerFactory,
     kibanaIndex,
+    defaultIndexTypesMap,
     kibanaVersion,
-    kibanaBranch
-  );
+    kibanaBranch,
+  });
 
   const runMigrations = async () => {
     if (hasRun) {
@@ -254,15 +258,26 @@ const getElasticsearchClient = async (
   });
 };
 
-const getMigrator = async (
-  configService: ConfigService,
-  client: ElasticsearchClient,
-  typeRegistry: ISavedObjectTypeRegistry,
-  loggerFactory: LoggerFactory,
-  kibanaIndex: string,
-  kibanaVersion: string,
-  kibanaBranch: string
-) => {
+interface GetMigratorParams {
+  configService: ConfigService;
+  client: ElasticsearchClient;
+  kibanaIndex: string;
+  typeRegistry: ISavedObjectTypeRegistry;
+  defaultIndexTypesMap: IndexTypesMap;
+  loggerFactory: LoggerFactory;
+  kibanaVersion: string;
+  kibanaBranch: string;
+}
+const getMigrator = async ({
+  configService,
+  client,
+  kibanaIndex,
+  typeRegistry,
+  defaultIndexTypesMap,
+  loggerFactory,
+  kibanaVersion,
+  kibanaBranch,
+}: GetMigratorParams) => {
   const savedObjectsConf = await firstValueFrom(
     configService.atPath<SavedObjectsConfigType>('savedObjects')
   );
@@ -278,8 +293,9 @@ const getMigrator = async (
 
   return new KibanaMigrator({
     client,
-    typeRegistry,
     kibanaIndex,
+    typeRegistry,
+    defaultIndexTypesMap,
     soMigrationsConfig: soConfig.migration,
     kibanaVersion,
     logger: loggerFactory.get('savedobjects-service'),
