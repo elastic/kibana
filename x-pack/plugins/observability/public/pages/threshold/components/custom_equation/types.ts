@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { AggregationType, IErrorObject } from '@kbn/triggers-actions-ui-plugin/public';
-import { MetricExpressionCustomMetric } from '../../../../../common/alerting/metrics';
+import { MetricExpressionCustomMetric } from '../../../../../common/threshold_rule/types';
 import { MetricExpression } from '../../types';
 
 export type CustomMetrics = MetricExpression['customMetrics'];
