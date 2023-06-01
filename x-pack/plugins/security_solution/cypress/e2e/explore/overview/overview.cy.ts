@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { HOST_STATS, NETWORK_STATS, OVERVIEW_EMPTY_PAGE } from '../../screens/overview';
+import { HOST_STATS, NETWORK_STATS, OVERVIEW_EMPTY_PAGE } from '../../../screens/overview';
 
-import { expandHostStats, expandNetworkStats } from '../../tasks/overview';
-import { login, visit } from '../../tasks/login';
+import { expandHostStats, expandNetworkStats } from '../../../tasks/overview';
+import { login, visit } from '../../../tasks/login';
 
-import { OVERVIEW_URL } from '../../urls/navigation';
+import { OVERVIEW_URL } from '../../../urls/navigation';
 
-import { cleanKibana } from '../../tasks/common';
-import { createTimeline, favoriteTimeline } from '../../tasks/api_calls/timelines';
-import { getTimeline } from '../../objects/timeline';
-import { esArchiverLoad, esArchiverUnload } from '../../tasks/es_archiver';
+import { cleanKibana } from '../../../tasks/common';
+import { createTimeline, favoriteTimeline } from '../../../tasks/api_calls/timelines';
+import { getTimeline } from '../../../objects/timeline';
+import { esArchiverLoad, esArchiverUnload } from '../../../tasks/es_archiver';
 
 describe('Overview Page', () => {
   before(() => {

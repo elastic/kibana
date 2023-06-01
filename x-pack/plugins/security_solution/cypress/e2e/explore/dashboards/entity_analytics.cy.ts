@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { login, visit } from '../../tasks/login';
+import { login, visit } from '../../../tasks/login';
 
-import { ALERTS_URL, ENTITY_ANALYTICS_URL } from '../../urls/navigation';
+import { ALERTS_URL, ENTITY_ANALYTICS_URL } from '../../../urls/navigation';
 
-import { esArchiverLoad, esArchiverUnload } from '../../tasks/es_archiver';
-import { cleanKibana, deleteAlertsAndRules } from '../../tasks/common';
+import { esArchiverLoad, esArchiverUnload } from '../../../tasks/es_archiver';
+import { cleanKibana, deleteAlertsAndRules } from '../../../tasks/common';
 import {
   ANOMALIES_TABLE,
   ANOMALIES_TABLE_ROWS,
@@ -32,16 +32,16 @@ import {
   ANOMALIES_TABLE_ENABLE_JOB_BUTTON,
   ANOMALIES_TABLE_ENABLE_JOB_LOADER,
   ANOMALIES_TABLE_COUNT_COLUMN,
-} from '../../screens/entity_analytics';
-import { openRiskTableFilterAndSelectTheLowOption, removeLowFilter } from '../../tasks/host_risk';
-import { createRule } from '../../tasks/api_calls/rules';
-import { waitForAlertsToPopulate } from '../../tasks/create_new_rule';
-import { getNewRule } from '../../objects/rule';
-import { clickOnFirstHostsAlerts, clickOnFirstUsersAlerts } from '../../tasks/risk_scores';
-import { OPTION_LIST_LABELS, OPTION_LIST_VALUES } from '../../screens/common/filter_group';
-import { setRowsPerPageTo } from '../../tasks/table_pagination';
-import { clearSearchBar, kqlSearch } from '../../tasks/security_header';
-import { setEndDate, setEndDateNow, updateDates } from '../../tasks/date_picker';
+} from '../../../screens/entity_analytics';
+import { openRiskTableFilterAndSelectTheLowOption, removeLowFilter } from '../../../tasks/host_risk';
+import { createRule } from '../../../tasks/api_calls/rules';
+import { waitForAlertsToPopulate } from '../../../tasks/create_new_rule';
+import { getNewRule } from '../../../objects/rule';
+import { clickOnFirstHostsAlerts, clickOnFirstUsersAlerts } from '../../../tasks/risk_scores';
+import { OPTION_LIST_LABELS, OPTION_LIST_VALUES } from '../../../screens/common/filter_group';
+import { setRowsPerPageTo } from '../../../tasks/table_pagination';
+import { clearSearchBar, kqlSearch } from '../../../tasks/security_header';
+import { setEndDate, setEndDateNow, updateDates } from '../../../tasks/date_picker';
 
 const TEST_USER_ALERTS = 2;
 const TEST_USER_NAME = 'test';

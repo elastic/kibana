@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { TestCase } from '../../objects/case';
-import { getCase1 } from '../../objects/case';
+import type { TestCase } from '../../../objects/case';
+import { getCase1 } from '../../../objects/case';
 
 import {
   ALL_CASES_CLOSED_CASES_STATS,
@@ -20,7 +20,7 @@ import {
   ALL_CASES_SERVICE_NOW_INCIDENT,
   ALL_CASES_TAGS,
   ALL_CASES_TAGS_COUNT,
-} from '../../screens/all_cases';
+} from '../../../screens/all_cases';
 import {
   CASE_DETAILS_DESCRIPTION,
   CASE_DETAILS_PAGE_TITLE,
@@ -33,25 +33,25 @@ import {
   EXPECTED_METRICS,
   CASES_METRIC,
   UNEXPECTED_METRICS,
-} from '../../screens/case_details';
-import { TIMELINE_DESCRIPTION, TIMELINE_QUERY, TIMELINE_TITLE } from '../../screens/timeline';
+} from '../../../screens/case_details';
+import { TIMELINE_DESCRIPTION, TIMELINE_QUERY, TIMELINE_TITLE } from '../../../screens/timeline';
 
-import { OVERVIEW_CASE_DESCRIPTION, OVERVIEW_CASE_NAME } from '../../screens/overview';
+import { OVERVIEW_CASE_DESCRIPTION, OVERVIEW_CASE_NAME } from '../../../screens/overview';
 
-import { goToCaseDetails, goToCreateNewCase } from '../../tasks/all_cases';
-import { createTimeline } from '../../tasks/api_calls/timelines';
-import { openCaseTimeline } from '../../tasks/case_details';
-import { cleanKibana } from '../../tasks/common';
+import { goToCaseDetails, goToCreateNewCase } from '../../../tasks/all_cases';
+import { createTimeline } from '../../../tasks/api_calls/timelines';
+import { openCaseTimeline } from '../../../tasks/case_details';
+import { cleanKibana } from '../../../tasks/common';
 import {
   attachTimeline,
   backToCases,
   createCase,
   fillCasesMandatoryfields,
   filterStatusOpen,
-} from '../../tasks/create_new_case';
-import { loginWithUser, visit, visitWithoutDateRange } from '../../tasks/login';
+} from '../../../tasks/create_new_case';
+import { loginWithUser, visit, visitWithoutDateRange } from '../../../tasks/login';
 
-import { CASES_URL, OVERVIEW_URL } from '../../urls/navigation';
+import { CASES_URL, OVERVIEW_URL } from '../../../urls/navigation';
 
 describe('Cases', () => {
   before(() => {

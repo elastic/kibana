@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import { HEADER_SUBTITLE, ALL_USERS_TABLE } from '../../screens/users/all_users';
-import { ANOMALIES_TAB, ANOMALIES_TAB_CONTENT } from '../../screens/users/user_anomalies';
+import { HEADER_SUBTITLE, ALL_USERS_TABLE } from '../../../screens/users/all_users';
+import { ANOMALIES_TAB, ANOMALIES_TAB_CONTENT } from '../../../screens/users/user_anomalies';
 import {
   AUTHENTICATIONS_TAB,
   AUTHENTICATIONS_TABLE,
-} from '../../screens/users/user_authentications';
-import { EVENTS_TAB, EVENTS_TAB_CONTENT } from '../../screens/users/user_events';
-import { RISK_SCORE_TAB, RISK_SCORE_TAB_CONTENT } from '../../screens/users/user_risk_score';
-import { cleanKibana } from '../../tasks/common';
-import { esArchiverLoad, esArchiverUnload } from '../../tasks/es_archiver';
+} from '../../../screens/users/user_authentications';
+import { EVENTS_TAB, EVENTS_TAB_CONTENT } from '../../../screens/users/user_events';
+import { RISK_SCORE_TAB, RISK_SCORE_TAB_CONTENT } from '../../../screens/users/user_risk_score';
+import { cleanKibana } from '../../../tasks/common';
+import { esArchiverLoad, esArchiverUnload } from '../../../tasks/es_archiver';
 
-import { login, visit, visitUserDetailsPage } from '../../tasks/login';
+import { login, visit, visitUserDetailsPage } from '../../../tasks/login';
 
-import { USERS_URL } from '../../urls/navigation';
+import { USERS_URL } from '../../../urls/navigation';
 
 describe('Users stats and tables', () => {
   before(() => {

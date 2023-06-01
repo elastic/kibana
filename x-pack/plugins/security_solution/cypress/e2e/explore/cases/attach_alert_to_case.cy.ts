@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { getNewRule } from '../../objects/rule';
-import { ROLES } from '../../../common/test';
+import { getNewRule } from '../../../objects/rule';
+import { ROLES } from '../../../../common/test';
 
-import { expandFirstAlertActions } from '../../tasks/alerts';
-import { createRule } from '../../tasks/api_calls/rules';
-import { cleanKibana } from '../../tasks/common';
-import { waitForAlertsToPopulate } from '../../tasks/create_new_rule';
-import { login, visit, waitForPageWithoutDateRange } from '../../tasks/login';
+import { expandFirstAlertActions } from '../../../tasks/alerts';
+import { createRule } from '../../../tasks/api_calls/rules';
+import { cleanKibana } from '../../../tasks/common';
+import { waitForAlertsToPopulate } from '../../../tasks/create_new_rule';
+import { login, visit, waitForPageWithoutDateRange } from '../../../tasks/login';
 
-import { ALERTS_URL } from '../../urls/navigation';
-import { ATTACH_ALERT_TO_CASE_BUTTON, ATTACH_TO_NEW_CASE_BUTTON } from '../../screens/alerts';
-import { LOADING_INDICATOR } from '../../screens/security_header';
+import { ALERTS_URL } from '../../../urls/navigation';
+import { ATTACH_ALERT_TO_CASE_BUTTON, ATTACH_TO_NEW_CASE_BUTTON } from '../../../screens/alerts';
+import { LOADING_INDICATOR } from '../../../screens/security_header';
 
 const loadDetectionsPage = (role: ROLES) => {
   login(role);

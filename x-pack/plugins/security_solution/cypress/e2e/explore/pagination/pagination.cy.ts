@@ -8,18 +8,18 @@
 import {
   PROCESS_NAME_FIELD,
   UNCOMMON_PROCESSES_TABLE,
-} from '../../screens/hosts/uncommon_processes';
-import { TABLE_FIRST_PAGE, TABLE_SECOND_PAGE } from '../../screens/table_pagination';
-import { esArchiverLoad, esArchiverUnload } from '../../tasks/es_archiver';
-import { waitsForEventsToBeLoaded } from '../../tasks/hosts/events';
-import { openEvents, openUncommonProcesses } from '../../tasks/hosts/main';
-import { waitForUncommonProcessesToBeLoaded } from '../../tasks/hosts/uncommon_processes';
-import { login, visit } from '../../tasks/login';
-import { refreshPage } from '../../tasks/security_header';
-import { HOSTS_URL, USERS_URL, HOSTS_PAGE_TAB_URLS } from '../../urls/navigation';
-import { ALL_HOSTS_TABLE } from '../../screens/hosts/all_hosts';
-import { ALL_USERS_TABLE } from '../../screens/users/all_users';
-import { goToTablePage, sortFirstTableColumn } from '../../tasks/table_pagination';
+} from '../../../screens/hosts/uncommon_processes';
+import { TABLE_FIRST_PAGE, TABLE_SECOND_PAGE } from '../../../screens/table_pagination';
+import { esArchiverLoad, esArchiverUnload } from '../../../tasks/es_archiver';
+import { waitsForEventsToBeLoaded } from '../../../tasks/hosts/events';
+import { openEvents, openUncommonProcesses } from '../../../tasks/hosts/main';
+import { waitForUncommonProcessesToBeLoaded } from '../../../tasks/hosts/uncommon_processes';
+import { login, visit } from '../../../tasks/login';
+import { refreshPage } from '../../../tasks/security_header';
+import { HOSTS_URL, USERS_URL, HOSTS_PAGE_TAB_URLS } from '../../../urls/navigation';
+import { ALL_HOSTS_TABLE } from '../../../screens/hosts/all_hosts';
+import { ALL_USERS_TABLE } from '../../../screens/users/all_users';
+import { goToTablePage, sortFirstTableColumn } from '../../../tasks/table_pagination';
 
 describe('Pagination', () => {
   describe('Host uncommon processes table)', () => {

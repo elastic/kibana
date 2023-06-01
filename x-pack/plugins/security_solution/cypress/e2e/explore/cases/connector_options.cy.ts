@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { login, visitWithoutDateRange } from '../../tasks/login';
+import { login, visitWithoutDateRange } from '../../../tasks/login';
 import {
   getCase1,
   getConnectorIds,
@@ -15,18 +15,18 @@ import {
   getJiraConnectorOptions,
   getServiceNowConnectorOptions,
   getCaseResponse,
-} from '../../objects/case';
+} from '../../../objects/case';
 import {
   createCase,
   fillCasesMandatoryfields,
   fillIbmResilientConnectorOptions,
   fillJiraConnectorOptions,
   fillServiceNowConnectorOptions,
-} from '../../tasks/create_new_case';
-import { goToCreateNewCase } from '../../tasks/all_cases';
-import { CASES_URL } from '../../urls/navigation';
-import { CONNECTOR_CARD_DETAILS, CONNECTOR_TITLE } from '../../screens/case_details';
-import { cleanKibana } from '../../tasks/common';
+} from '../../../tasks/create_new_case';
+import { goToCreateNewCase } from '../../../tasks/all_cases';
+import { CASES_URL } from '../../../urls/navigation';
+import { CONNECTOR_CARD_DETAILS, CONNECTOR_TITLE } from '../../../screens/case_details';
+import { cleanKibana } from '../../../tasks/common';
 
 describe('Cases connector incident fields', () => {
   before(() => {

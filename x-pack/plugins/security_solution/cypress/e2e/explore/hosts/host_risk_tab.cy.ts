@@ -5,22 +5,22 @@
  * 2.0.
  */
 
-import { cleanKibana } from '../../tasks/common';
-import { esArchiverLoad, esArchiverUnload } from '../../tasks/es_archiver';
+import { cleanKibana } from '../../../tasks/common';
+import { esArchiverLoad, esArchiverUnload } from '../../../tasks/es_archiver';
 import {
   navigateToHostRiskDetailTab,
   openRiskTableFilterAndSelectTheCriticalOption,
   removeCriticalFilter,
   selectFiveItemsPerPageOption,
-} from '../../tasks/host_risk';
+} from '../../../tasks/host_risk';
 import {
   HOST_BY_RISK_TABLE_CELL,
   HOST_BY_RISK_TABLE_HOSTNAME_CELL,
   HOST_BY_RISK_TABLE_NEXT_PAGE_BUTTON,
-} from '../../screens/hosts/host_risk';
-import { login, visit } from '../../tasks/login';
-import { HOSTS_URL } from '../../urls/navigation';
-import { clearSearchBar, kqlSearch } from '../../tasks/security_header';
+} from '../../../screens/hosts/host_risk';
+import { login, visit } from '../../../tasks/login';
+import { HOSTS_URL } from '../../../urls/navigation';
+import { clearSearchBar, kqlSearch } from '../../../tasks/security_header';
 
 describe('risk tab', () => {
   before(() => {

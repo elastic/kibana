@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { login, visitTimeline } from '../../tasks/login';
+import { login, visitTimeline } from '../../../tasks/login';
 import {
   attachTimelineToNewCase,
   attachTimelineToExistingCase,
   addNewCase,
   selectCase,
-} from '../../tasks/timeline';
-import { DESCRIPTION_INPUT, ADD_COMMENT_INPUT } from '../../screens/create_new_case';
-import { getCase1 } from '../../objects/case';
-import { getTimeline } from '../../objects/timeline';
-import { createTimeline } from '../../tasks/api_calls/timelines';
-import { cleanKibana, deleteTimelines } from '../../tasks/common';
-import { createCase } from '../../tasks/api_calls/cases';
+} from '../../../tasks/timeline';
+import { DESCRIPTION_INPUT, ADD_COMMENT_INPUT } from '../../../screens/create_new_case';
+import { getCase1 } from '../../../objects/case';
+import { getTimeline } from '../../../objects/timeline';
+import { createTimeline } from '../../../tasks/api_calls/timelines';
+import { cleanKibana, deleteTimelines } from '../../../tasks/common';
+import { createCase } from '../../../tasks/api_calls/cases';
 
 describe('attach timeline to case', () => {
   context('without cases created', () => {

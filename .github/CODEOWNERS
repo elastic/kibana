@@ -1036,15 +1036,6 @@ x-pack/plugins/cloud_integrations/cloud_full_story/server/config.ts @elastic/kib
 /x-pack/plugins/security_solution/common/search_strategy/security_solution/user @elastic/security-threat-hunting-explore
 
 /x-pack/plugins/security_solution/cypress/e2e/explore @elastic/security-threat-hunting-explore
-/x-pack/plugins/security_solution/cypress/e2e/cases @elastic/security-threat-hunting-explore
-/x-pack/plugins/security_solution/cypress/e2e/dashboards @elastic/security-threat-hunting-explore
-/x-pack/plugins/security_solution/cypress/e2e/filters @elastic/security-threat-hunting-explore
-/x-pack/plugins/security_solution/cypress/e2e/host_details @elastic/security-threat-hunting-explore
-/x-pack/plugins/security_solution/cypress/e2e/hosts @elastic/security-threat-hunting-explore
-/x-pack/plugins/security_solution/cypress/e2e/network @elastic/security-threat-hunting-explore
-/x-pack/plugins/security_solution/cypress/e2e/overview @elastic/security-threat-hunting-explore
-/x-pack/plugins/security_solution/cypress/e2e/pagination @elastic/security-threat-hunting-explore
-/x-pack/plugins/security_solution/cypress/e2e/users @elastic/security-threat-hunting-explore
 /x-pack/plugins/security_solution/cypress/screens/hosts @elastic/security-threat-hunting-explore
 /x-pack/plugins/security_solution/cypress/screens/network @elastic/security-threat-hunting-explore
 /x-pack/plugins/security_solution/cypress/tasks/hosts @elastic/security-threat-hunting-explore
@@ -1219,7 +1210,6 @@ x-pack/test/threat_intelligence_cypress @elastic/protections-experience
 
 # Security Solution onboarding tour
 /x-pack/plugins/security_solution/public/common/components/guided_onboarding @elastic/security-threat-hunting-explore
-/x-pack/plugins/security_solution/cypress/e2e/guided_onboarding @elastic/security-threat-hunting-explore
 
 # Kibana design
 # scss overrides should be below this line for specificity

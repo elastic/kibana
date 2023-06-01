@@ -10,11 +10,11 @@ import {
   OVERVIEW_CTI_LINKS,
   OVERVIEW_CTI_LINKS_ERROR_INNER_PANEL,
   OVERVIEW_CTI_TOTAL_EVENT_COUNT,
-} from '../../screens/overview';
+} from '../../../screens/overview';
 
-import { login, visit } from '../../tasks/login';
-import { OVERVIEW_URL } from '../../urls/navigation';
-import { esArchiverLoad, esArchiverUnload } from '../../tasks/es_archiver';
+import { login, visit } from '../../../tasks/login';
+import { OVERVIEW_URL } from '../../../urls/navigation';
+import { esArchiverLoad, esArchiverUnload } from '../../../tasks/es_archiver';
 
 describe('CTI Link Panel', () => {
   beforeEach(() => {

@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { login, visit } from '../../tasks/login';
+import { login, visit } from '../../../tasks/login';
 
-import { HOSTS_URL } from '../../urls/navigation';
-import { cleanKibana } from '../../tasks/common';
-import { esArchiverLoad, esArchiverUnload } from '../../tasks/es_archiver';
-import { TABLE_CELL } from '../../screens/alerts_details';
-import { kqlSearch } from '../../tasks/security_header';
+import { HOSTS_URL } from '../../../urls/navigation';
+import { cleanKibana } from '../../../tasks/common';
+import { esArchiverLoad, esArchiverUnload } from '../../../tasks/es_archiver';
+import { TABLE_CELL } from '../../../screens/alerts_details';
+import { kqlSearch } from '../../../tasks/security_header';
 
 describe('All hosts table', () => {
   before(() => {

@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { login, visitHostDetailsPage } from '../../tasks/login';
+import { login, visitHostDetailsPage } from '../../../tasks/login';
 
-import { cleanKibana } from '../../tasks/common';
-import { esArchiverLoad, esArchiverUnload } from '../../tasks/es_archiver';
-import { TABLE_CELL, TABLE_ROWS } from '../../screens/alerts_details';
+import { cleanKibana } from '../../../tasks/common';
+import { esArchiverLoad, esArchiverUnload } from '../../../tasks/es_archiver';
+import { TABLE_CELL, TABLE_ROWS } from '../../../screens/alerts_details';
 
 describe('risk tab', () => {
   before(() => {

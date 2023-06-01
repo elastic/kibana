@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import { getServiceNowConnector, getServiceNowITSMHealthResponse } from '../../objects/case';
+import { getServiceNowConnector, getServiceNowITSMHealthResponse } from '../../../objects/case';
 
-import { SERVICE_NOW_MAPPING } from '../../screens/configure_cases';
+import { SERVICE_NOW_MAPPING } from '../../../screens/configure_cases';
 
-import { goToEditExternalConnection } from '../../tasks/all_cases';
-import { cleanKibana, deleteCases, deleteConnectors } from '../../tasks/common';
+import { goToEditExternalConnection } from '../../../tasks/all_cases';
+import { cleanKibana, deleteCases, deleteConnectors } from '../../../tasks/common';
 import {
   addServiceNowConnector,
   openAddNewConnectorOption,
   verifyNewConnectorSelected,
-} from '../../tasks/configure_cases';
-import { login, visitWithoutDateRange } from '../../tasks/login';
+} from '../../../tasks/configure_cases';
+import { login, visitWithoutDateRange } from '../../../tasks/login';
 
-import { CASES_URL } from '../../urls/navigation';
+import { CASES_URL } from '../../../urls/navigation';
 
 describe('Cases connectors', () => {
   const configureResult = {

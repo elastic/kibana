@@ -4,12 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { TOP_N_CONTAINER } from '../../screens/network/flows';
-import { GLOBAL_SEARCH_BAR_FILTER_ITEM } from '../../screens/search_bar';
-import { DATA_PROVIDERS } from '../../screens/timeline';
+import { TOP_N_CONTAINER } from '../../../screens/network/flows';
+import { GLOBAL_SEARCH_BAR_FILTER_ITEM } from '../../../screens/search_bar';
+import { DATA_PROVIDERS } from '../../../screens/timeline';
 
-import { login, visit } from '../../tasks/login';
-import { NETWORK_URL } from '../../urls/navigation';
+import { login, visit } from '../../../tasks/login';
+import { NETWORK_URL } from '../../../urls/navigation';
 import {
   clickOnAddToTimeline,
   clickOnCopyValue,
@@ -18,9 +18,9 @@ import {
   clickOnShowTopN,
   mouseoverOnToOverflowItem,
   openHoverActions,
-} from '../../tasks/network/flows';
-import { openTimelineUsingToggle } from '../../tasks/security_main';
-import { esArchiverLoad, esArchiverUnload } from '../../tasks/es_archiver';
+} from '../../../tasks/network/flows';
+import { openTimelineUsingToggle } from '../../../tasks/security_main';
+import { esArchiverLoad, esArchiverUnload } from '../../../tasks/es_archiver';
 
 const testDomain = 'myTest';
 

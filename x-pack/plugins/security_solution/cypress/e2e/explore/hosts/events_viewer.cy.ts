@@ -9,32 +9,32 @@ import {
   FIELDS_BROWSER_CHECKBOX,
   FIELDS_BROWSER_SELECTED_CATEGORIES_BADGES,
   FIELDS_BROWSER_VIEW_BUTTON,
-} from '../../screens/fields_browser';
+} from '../../../../screens/fields_browser';
 import {
   HOST_GEO_CITY_NAME_HEADER,
   HOST_GEO_COUNTRY_NAME_HEADER,
   SERVER_SIDE_EVENT_COUNT,
-} from '../../screens/hosts/events';
+} from '../../../screens/hosts/events';
 
 import {
   activateViewAll,
   activateViewSelected,
   closeFieldsBrowser,
   filterFieldsBrowser,
-} from '../../tasks/fields_browser';
-import { login, visit } from '../../tasks/login';
-import { openEvents } from '../../tasks/hosts/main';
+} from '../../../tasks/fields_browser';
+import { login, visit } from '../../../tasks/login';
+import { openEvents } from '../../../tasks/hosts/main';
 import {
   addsHostGeoCityNameToHeader,
   addsHostGeoCountryNameToHeader,
   openEventsViewerFieldsBrowser,
   waitsForEventsToBeLoaded,
-} from '../../tasks/hosts/events';
-import { kqlSearch } from '../../tasks/security_header';
+} from '../../../tasks/hosts/events';
+import { kqlSearch } from '../../../tasks/security_header';
 
-import { HOSTS_URL } from '../../urls/navigation';
-import { resetFields } from '../../tasks/timeline';
-import { esArchiverLoad, esArchiverUnload } from '../../tasks/es_archiver';
+import { HOSTS_URL } from '../../../urls/navigation';
+import { resetFields } from '../../../tasks/timeline';
+import { esArchiverLoad, esArchiverUnload } from '../../../tasks/es_archiver';
 
 const defaultHeadersInDefaultEcsCategory = [
   { id: '@timestamp' },

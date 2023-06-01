@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import type { TestCaseWithoutTimeline } from '../../objects/case';
-import { ALL_CASES_CREATE_NEW_CASE_BTN, ALL_CASES_NAME } from '../../screens/all_cases';
+import type { TestCaseWithoutTimeline } from '../../../objects/case';
+import { ALL_CASES_CREATE_NEW_CASE_BTN, ALL_CASES_NAME } from '../../../screens/all_cases';
 
-import { goToCreateNewCase } from '../../tasks/all_cases';
-import { cleanKibana, deleteCases } from '../../tasks/common';
+import { goToCreateNewCase } from '../../../tasks/all_cases';
+import { cleanKibana, deleteCases } from '../../../tasks/common';
 
 import {
   backToCases,
   createCase,
   fillCasesMandatoryfields,
   filterStatusOpen,
-} from '../../tasks/create_new_case';
-import { login, loginWithUser, visitWithUser } from '../../tasks/login';
+} from '../../../tasks/create_new_case';
+import { login, loginWithUser, visitWithUser } from '../../../tasks/login';
 import {
   createUsersAndRoles,
   deleteUsersAndRoles,
@@ -29,9 +29,9 @@ import {
   secAllCasesNoDeleteUser,
   secAllCasesOnlyReadDeleteUser,
   secAllCasesOnlyReadDelete,
-} from '../../tasks/privileges';
+} from '../../../tasks/privileges';
 
-import { CASES_URL } from '../../urls/navigation';
+import { CASES_URL } from '../../../urls/navigation';
 const usersToCreate = [
   secAllUser,
   secReadCasesAllUser,

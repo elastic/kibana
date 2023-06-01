@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getNewRule } from '../../objects/rule';
+import { getNewRule } from '../../../objects/rule';
 import {
   RISK_SCORE_INSTALLATION_SUCCESS_TOAST,
   UPGRADE_HOST_RISK_SCORE_BUTTON,
@@ -13,25 +13,25 @@ import {
   UPGRADE_CANCELLATION_BUTTON,
   UPGRADE_CONFIRMATION_MODAL,
   RISK_SCORE_DASHBOARDS_INSTALLATION_SUCCESS_TOAST,
-} from '../../screens/entity_analytics';
-import { deleteRiskScore, installLegacyRiskScoreModule } from '../../tasks/api_calls/risk_scores';
-import { findSavedObjects } from '../../tasks/api_calls/risk_scores/saved_objects';
-import { createRule } from '../../tasks/api_calls/rules';
-import { cleanKibana } from '../../tasks/common';
-import { login, visit } from '../../tasks/login';
+} from '../../../screens/entity_analytics';
+import { deleteRiskScore, installLegacyRiskScoreModule } from '../../../tasks/api_calls/risk_scores';
+import { findSavedObjects } from '../../../tasks/api_calls/risk_scores/saved_objects';
+import { createRule } from '../../../tasks/api_calls/rules';
+import { cleanKibana } from '../../../tasks/common';
+import { login, visit } from '../../../tasks/login';
 import {
   clickUpgradeRiskScore,
   clickUpgradeRiskScoreConfirmed,
   interceptUpgradeRiskScoreModule,
   waitForUpgradeRiskScoreModule,
-} from '../../tasks/risk_scores';
-import { RiskScoreEntity } from '../../tasks/risk_scores/common';
+} from '../../../tasks/risk_scores';
+import { RiskScoreEntity } from '../../../tasks/risk_scores/common';
 import {
   getRiskScoreLatestTransformId,
   getRiskScorePivotTransformId,
   getTransformState,
-} from '../../tasks/risk_scores/transforms';
-import { ENTITY_ANALYTICS_URL } from '../../urls/navigation';
+} from '../../../tasks/risk_scores/transforms';
+import { ENTITY_ANALYTICS_URL } from '../../../urls/navigation';
 
 const spaceId = 'default';
 
