@@ -46,7 +46,7 @@ export async function registerRoutes(fleetAuthzRouter: FleetAuthzRouter, config:
   registerDownloadSourcesRoutes(fleetAuthzRouter);
   registerHealthCheckRoutes(fleetAuthzRouter);
   registerMessageSigningServiceRoutes(fleetAuthzRouter);
-  registerUninstallTokenRoutes(fleetAuthzRouter);
+  registerUninstallTokenRoutes(fleetAuthzRouter, config);
 
   // Conditional config routes
   if (config.agents.enabled) {

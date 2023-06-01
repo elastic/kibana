@@ -9,6 +9,9 @@ import type { TypeOf } from '@kbn/config-schema';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import { httpServerMock, coreMock } from '@kbn/core/server/mocks';
 
+import type { RouterMock } from '@kbn/core-http-router-server-mocks';
+import { mockRouter } from '@kbn/core-http-router-server-mocks';
+
 import type { FleetRequestHandlerContext } from '../..';
 import type { PolicyUninstallTokenMap } from '../../../common/types/models/uninstall_token';
 
@@ -16,6 +19,8 @@ import type { MockedFleetAppContext } from '../../mocks';
 import { createAppContextStartContractMock, xpackMocks } from '../../mocks';
 import { appContextService } from '../../services';
 import type { GetUninstallTokensRequestSchema } from '../../types/rest_spec/uninstall_token';
+
+import { registerRoutes } from '.';
 
 import { getUninstallTokensHandler } from './handlers';
 
@@ -37,14 +42,7 @@ describe('getUninstallTokensHandler', () => {
     response = httpServerMock.createResponseFactory();
     request = httpServerMock.createKibanaRequest();
 
-    const contractMock = createAppContextStartContractMock();
-    appContextStartContractMock = {
-      ...contractMock,
-      experimentalFeatures: {
-        ...contractMock.experimentalFeatures,
-        agentTamperProtectionEnabled: true,
-      },
-    };
+    appContextStartContractMock = createAppContextStartContractMock();
 
     appContextService.start(appContextStartContractMock);
     getAllTokensMock = appContextService.getUninstallTokenService()?.getAllTokens as jest.Mock;
@@ -97,21 +95,28 @@ describe('getUninstallTokensHandler', () => {
     });
   });
 
-  it('should return 404 if Agent Tamper Protection feature flag is disabled', async () => {
-    appContextService.stop();
-    appContextService.start({
-      ...appContextStartContractMock,
-      experimentalFeatures: {
-        ...appContextStartContractMock.experimentalFeatures,
-        agentTamperProtectionEnabled: false,
-      },
+  describe('Agent Tamper Protection feature flag', () => {
+    let config: { enableExperimental: string[] };
+    let router: RouterMock;
+
+    beforeEach(() => {
+      router = mockRouter.create();
     });
 
-    await getUninstallTokensHandler(context, request, response);
+    it('should register handler if feature flag is enabled', () => {
+      config = { enableExperimental: ['agentTamperProtectionEnabled'] };
 
-    expect(response.customError).toHaveBeenCalledWith({
-      statusCode: 404,
-      body: { message: 'Not Found' },
+      registerRoutes(router, config);
+
+      expect(router.get).toHaveBeenCalledWith(expect.any(Object), getUninstallTokensHandler);
+    });
+
+    it('should NOT register handler if feature flag is disabled', async () => {
+      config = { enableExperimental: [] };
+
+      registerRoutes(router, config);
+
+      expect(router.get).not.toHaveBeenCalled();
     });
   });
 });
