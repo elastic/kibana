@@ -10,12 +10,7 @@ import { EuiButtonEmpty, EuiBadge, EuiText } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import type { usePerformUpgradeSpecificRules } from '../../../../rule_management/logic/prebuilt_rules/use_perform_rule_upgrade';
 import type { RuleUpgradeInfoForReview } from '../../../../../../common/detection_engine/prebuilt_rules/api/review_rule_upgrade/response_schema';
-import {
-  DEFAULT_RELATIVE_DATE_THRESHOLD,
-  SHOW_RELATED_INTEGRATIONS_SETTING,
-} from '../../../../../../common/constants';
-import { getEmptyTagValue } from '../../../../../common/components/empty_value';
-import { FormattedRelativePreferenceDate } from '../../../../../common/components/formatted_date';
+import { SHOW_RELATED_INTEGRATIONS_SETTING } from '../../../../../../common/constants';
 import { PopoverItems } from '../../../../../common/components/popover_items';
 import { useUiSetting$ } from '../../../../../common/lib/kibana';
 import { IntegrationsPopover } from '../../../../../detections/components/rules/related_integrations/integrations_popover';
@@ -121,13 +116,14 @@ export const useUpgradePrebuiltRulesTableColumns = ({
 
   const upgradeRowRule = useMemo(
     () => async (value: RuleUpgradeInfoForReview['rule_id'], item: RuleUpgradeInfoForReview) => {
-      await upgradeSpecificRules([
+      const payload = [
         {
           rule_id: value,
           version: item.diff.fields.version?.target_version ?? item.rule.version,
-          revision: item.rule.version,
+          revision: item.revision,
         },
-      ]);
+      ];
+      await upgradeSpecificRules(payload);
     },
     [upgradeSpecificRules]
   );
@@ -156,25 +152,6 @@ export const useUpgradePrebuiltRulesTableColumns = ({
         sortable: true,
         truncateText: true,
         width: '12%',
-      },
-      {
-        field: 'rule.updated_at',
-        name: i18n.COLUMN_LAST_UPDATE,
-        render: (value: Rule['updated_at']) => {
-          return value == null ? (
-            getEmptyTagValue()
-          ) : (
-            <FormattedRelativePreferenceDate
-              tooltipFieldName={i18n.COLUMN_LAST_UPDATE}
-              relativeThresholdInHrs={DEFAULT_RELATIVE_DATE_THRESHOLD}
-              value={value}
-              tooltipAnchorClassName="eui-textTruncate"
-            />
-          );
-        },
-        sortable: true,
-        width: '18%',
-        truncateText: true,
       },
       ...(hasCRUDPermissions ? [createUpgradelButtonColumn(upgradeRowRule)] : []),
     ],

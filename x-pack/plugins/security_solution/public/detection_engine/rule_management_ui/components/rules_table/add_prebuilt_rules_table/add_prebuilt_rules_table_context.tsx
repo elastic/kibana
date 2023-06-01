@@ -147,6 +147,7 @@ export const AddPrebuiltRulesTableContextProvider = ({
   const rulesColumns = useAddPrebuiltRulesTableColumns({
     installSpecificRules,
     hasCRUDPermissions: hasPermissions,
+    isRuleInstalling: isInstallSpecificRulesLoading || isInstallAllRulesLoading,
   });
 
   const actions = useMemo(

@@ -9,12 +9,7 @@ import type { EuiBasicTableColumn, EuiTableActionsColumnType } from '@elastic/eu
 import { EuiButtonEmpty, EuiBadge, EuiText } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import type { usePerformInstallSpecificRules } from '../../../../rule_management/logic/prebuilt_rules/use_perform_rule_install';
-import {
-  DEFAULT_RELATIVE_DATE_THRESHOLD,
-  SHOW_RELATED_INTEGRATIONS_SETTING,
-} from '../../../../../../common/constants';
-import { getEmptyTagValue } from '../../../../../common/components/empty_value';
-import { FormattedRelativePreferenceDate } from '../../../../../common/components/formatted_date';
+import { SHOW_RELATED_INTEGRATIONS_SETTING } from '../../../../../../common/constants';
 import { PopoverItems } from '../../../../../common/components/popover_items';
 import { useUiSetting$ } from '../../../../../common/lib/kibana';
 import { IntegrationsPopover } from '../../../../../detections/components/rules/related_integrations/integrations_popover';
@@ -30,6 +25,7 @@ export type TableColumn =
 interface ColumnsProps {
   installSpecificRules: ReturnType<typeof usePerformInstallSpecificRules>['mutateAsync'];
   hasCRUDPermissions: boolean;
+  isRuleInstalling: boolean;
 }
 
 const useRuleNameColumn = (): TableColumn => {
@@ -99,7 +95,10 @@ type InstallRowRule = (
   item: RuleInstallationInfoForReview
 ) => void;
 
-const createInstallButtonColumn = (installRowRule: InstallRowRule): TableColumn => ({
+const createInstallButtonColumn = (
+  installRowRule: InstallRowRule,
+  isRuleInstalling: boolean
+): TableColumn => ({
   field: 'rule_id',
   name: '',
   render: (
@@ -107,7 +106,11 @@ const createInstallButtonColumn = (installRowRule: InstallRowRule): TableColumn 
     item: RuleInstallationInfoForReview
   ) => {
     return (
-      <EuiButtonEmpty size="s" onClick={() => installRowRule(value, item)}>
+      <EuiButtonEmpty
+        size="s"
+        disabled={isRuleInstalling}
+        onClick={() => installRowRule(value, item)}
+      >
         {i18n.INSTALL_RULE_BUTTON}
       </EuiButtonEmpty>
     );
@@ -118,6 +121,7 @@ const createInstallButtonColumn = (installRowRule: InstallRowRule): TableColumn 
 export const useAddPrebuiltRulesTableColumns = ({
   installSpecificRules,
   hasCRUDPermissions,
+  isRuleInstalling,
 }: ColumnsProps): TableColumn[] => {
   const ruleNameColumn = useRuleNameColumn();
   const [showRelatedIntegrations] = useUiSetting$<boolean>(SHOW_RELATED_INTEGRATIONS_SETTING);
@@ -163,27 +167,8 @@ export const useAddPrebuiltRulesTableColumns = ({
         truncateText: true,
         width: '12%',
       },
-      {
-        field: 'updated_at',
-        name: i18n.COLUMN_LAST_UPDATE,
-        render: (value: Rule['updated_at']) => {
-          return value == null ? (
-            getEmptyTagValue()
-          ) : (
-            <FormattedRelativePreferenceDate
-              tooltipFieldName={i18n.COLUMN_LAST_UPDATE}
-              relativeThresholdInHrs={DEFAULT_RELATIVE_DATE_THRESHOLD}
-              value={value}
-              tooltipAnchorClassName="eui-textTruncate"
-            />
-          );
-        },
-        sortable: true,
-        width: '18%',
-        truncateText: true,
-      },
-      ...(hasCRUDPermissions ? [createInstallButtonColumn(installRowRule)] : []),
+      ...(hasCRUDPermissions ? [createInstallButtonColumn(installRowRule, isRuleInstalling)] : []),
     ],
-    [hasCRUDPermissions, installRowRule, ruleNameColumn, showRelatedIntegrations]
+    [hasCRUDPermissions, installRowRule, isRuleInstalling, ruleNameColumn, showRelatedIntegrations]
   );
 };

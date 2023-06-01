@@ -27,7 +27,7 @@ import { RULES_TABLE_INITIAL_PAGE_SIZE, RULES_TABLE_PAGE_SIZE_OPTIONS } from '..
 import { hasUserCRUDPermission } from '../../../../../common/utils/privileges';
 import type { TableColumn } from './use_upgrade_prebuilt_rules_table_columns';
 import { useUpgradePrebuiltRulesTableColumns } from './use_upgrade_prebuilt_rules_table_columns';
-import { UpgradePrebuiltRulesTableButton } from './upgrade_prebuilts_rules_table_buttons';
+import { UpgradePrebuiltRulesTableButtons } from './upgrade_prebuilts_rules_table_buttons';
 
 export interface UpgradePrebuiltRulesTableState {
   /**
@@ -168,7 +168,7 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
         incremental: true,
         isClearable: true,
       },
-      toolsRight: [<UpgradePrebuiltRulesTableButton />],
+      toolsRight: [<UpgradePrebuiltRulesTableButtons />],
       filters: [
         {
           type: 'field_value_selection',
