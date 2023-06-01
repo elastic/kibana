@@ -233,7 +233,7 @@ export const RowRendererIdRuntimeType = stringEnum(RowRendererId, 'RowRendererId
  * Timeline template type
  */
 
-enum TemplateTimelineType {
+export enum TemplateTimelineType {
   elastic = 'elastic',
   custom = 'custom',
 }
