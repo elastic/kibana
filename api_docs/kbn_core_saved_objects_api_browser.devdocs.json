@@ -1059,6 +1059,14 @@
             "path": "src/plugins/dashboard/public/plugin.tsx"
           },
           {
+            "plugin": "eventAnnotation",
+            "path": "src/plugins/event_annotation/public/event_annotation_service/service.tsx"
+          },
+          {
+            "plugin": "eventAnnotation",
+            "path": "src/plugins/event_annotation/public/event_annotation_service/service.tsx"
+          },
+          {
             "plugin": "lens",
             "path": "x-pack/plugins/lens/public/datasources/form_based/dimension_panel/reference_editor.tsx"
           },
@@ -1263,6 +1271,18 @@
                 "path": "src/plugins/dashboard/public/dashboard_actions/clone_panel_action.tsx"
               },
               {
+                "plugin": "eventAnnotation",
+                "path": "src/plugins/event_annotation/public/event_annotation_service/service.tsx"
+              },
+              {
+                "plugin": "eventAnnotation",
+                "path": "src/plugins/event_annotation/public/event_annotation_service/service.test.ts"
+              },
+              {
+                "plugin": "eventAnnotation",
+                "path": "src/plugins/event_annotation/public/event_annotation_service/service.test.ts"
+              },
+              {
                 "plugin": "savedObjects",
                 "path": "src/plugins/saved_objects/public/saved_object/saved_object.test.ts"
               },
@@ -1464,6 +1484,10 @@
               {
                 "plugin": "home",
                 "path": "src/plugins/home/public/application/components/home_app.js"
+              },
+              {
+                "plugin": "eventAnnotation",
+                "path": "src/plugins/event_annotation/public/event_annotation_service/service.test.ts"
               },
               {
                 "plugin": "@kbn/core-saved-objects-browser-internal",
@@ -1848,6 +1872,10 @@
                 "path": "src/plugins/dashboard/public/dashboard_actions/clone_panel_action.tsx"
               },
               {
+                "plugin": "eventAnnotation",
+                "path": "src/plugins/event_annotation/public/event_annotation_service/service.tsx"
+              },
+              {
                 "plugin": "ml",
                 "path": "x-pack/plugins/ml/public/application/util/index_utils.ts"
               },
@@ -1858,10 +1886,6 @@
               {
                 "plugin": "ml",
                 "path": "x-pack/plugins/ml/public/application/services/dashboard_service.ts"
-              },
-              {
-                "plugin": "cloudSecurityPosture",
-                "path": "x-pack/plugins/cloud_security_posture/public/pages/rules/use_csp_rules.ts"
               },
               {
                 "plugin": "dashboardEnhanced",
@@ -1980,6 +2004,10 @@
                 "path": "src/plugins/dashboard/public/dashboard_actions/clone_panel_action.tsx"
               },
               {
+                "plugin": "eventAnnotation",
+                "path": "src/plugins/event_annotation/public/event_annotation_service/service.tsx"
+              },
+              {
                 "plugin": "ml",
                 "path": "x-pack/plugins/ml/public/application/util/index_utils.ts"
               },
@@ -1992,16 +2020,16 @@
                 "path": "x-pack/plugins/ml/public/application/jobs/new_job/job_from_lens/route_resolver.ts"
               },
               {
-                "plugin": "cloudSecurityPosture",
-                "path": "x-pack/plugins/cloud_security_posture/public/pages/rules/use_csp_rules.ts"
-              },
-              {
                 "plugin": "dashboardEnhanced",
                 "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/components/collect_config_container.tsx"
               },
               {
                 "plugin": "monitoring",
                 "path": "x-pack/plugins/monitoring/public/application/pages/elasticsearch/ingest_pipeline_modal.tsx"
+              },
+              {
+                "plugin": "eventAnnotation",
+                "path": "src/plugins/event_annotation/public/event_annotation_service/service.test.ts"
               },
               {
                 "plugin": "savedObjects",
@@ -2505,6 +2533,14 @@
               {
                 "plugin": "savedSearch",
                 "path": "src/plugins/saved_search/public/services/saved_searches/save_saved_searches.ts"
+              },
+              {
+                "plugin": "eventAnnotation",
+                "path": "src/plugins/event_annotation/public/event_annotation_service/service.tsx"
+              },
+              {
+                "plugin": "eventAnnotation",
+                "path": "src/plugins/event_annotation/public/event_annotation_service/service.test.ts"
               },
               {
                 "plugin": "savedObjects",
@@ -3396,18 +3432,6 @@
             "path": "x-pack/plugins/fleet/public/applications/integrations/sections/epm/screens/detail/assets/types.ts"
           },
           {
-            "plugin": "cloudSecurityPosture",
-            "path": "x-pack/plugins/cloud_security_posture/public/pages/rules/use_csp_rules.ts"
-          },
-          {
-            "plugin": "cloudSecurityPosture",
-            "path": "x-pack/plugins/cloud_security_posture/public/pages/rules/use_csp_rules.ts"
-          },
-          {
-            "plugin": "cloudSecurityPosture",
-            "path": "x-pack/plugins/cloud_security_posture/public/pages/rules/use_csp_rules.ts"
-          },
-          {
             "plugin": "dashboardEnhanced",
             "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/components/collect_config_container.tsx"
           },
@@ -3454,6 +3478,14 @@
           {
             "plugin": "securitySolution",
             "path": "x-pack/plugins/security_solution/public/common/hooks/types.ts"
+          },
+          {
+            "plugin": "eventAnnotation",
+            "path": "src/plugins/event_annotation/public/event_annotation_service/service.test.ts"
+          },
+          {
+            "plugin": "eventAnnotation",
+            "path": "src/plugins/event_annotation/public/event_annotation_service/service.test.ts"
           },
           {
             "plugin": "savedObjects",
@@ -4056,14 +4088,6 @@
           {
             "plugin": "@kbn/core",
             "path": "src/core/public/index.ts"
-          },
-          {
-            "plugin": "cloudSecurityPosture",
-            "path": "x-pack/plugins/cloud_security_posture/public/pages/rules/use_csp_rules.ts"
-          },
-          {
-            "plugin": "cloudSecurityPosture",
-            "path": "x-pack/plugins/cloud_security_posture/public/pages/rules/use_csp_rules.ts"
           }
         ],
         "initialIsOpen": false

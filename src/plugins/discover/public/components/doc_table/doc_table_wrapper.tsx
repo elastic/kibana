@@ -62,6 +62,11 @@ export interface DocTableProps {
    */
   filters?: Filter[];
   /**
+   * Flag which identifies if Discover operates
+   * in text based mode (ESQL)
+   */
+  isPlainRecord?: boolean;
+  /**
    * Saved search id
    */
   savedSearchId?: string;
@@ -114,6 +119,7 @@ export const DocTableWrapper = forwardRef(
       render,
       columns,
       filters,
+      isPlainRecord,
       savedSearchId,
       rows,
       dataView,
@@ -187,6 +193,8 @@ export const DocTableWrapper = forwardRef(
             onAddColumn={onAddColumn}
             onRemoveColumn={onRemoveColumn}
             DocViewer={DocViewer}
+            isPlainRecord={isPlainRecord}
+            rows={rows}
           />
         ));
       },
@@ -201,6 +209,8 @@ export const DocTableWrapper = forwardRef(
         onAddColumn,
         onRemoveColumn,
         DocViewer,
+        isPlainRecord,
+        rows,
       ]
     );
 

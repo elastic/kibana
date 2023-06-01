@@ -9,11 +9,13 @@ import { mount } from 'enzyme';
 import React from 'react';
 import { navTabsHostDetails } from '../../../../explore/hosts/pages/details/nav_tabs';
 import { HostsTableType } from '../../../../explore/hosts/store/model';
-import type { RouteSpyState } from '../../../utils/route/types';
-import { TabNavigationComponent } from '.';
+import { TabNavigationComponent } from './tab_navigation';
 import type { TabNavigationProps } from './types';
-import { SecurityPageName } from '../../../../app/types';
 
+const mockUseRouteSpy = jest.fn();
+jest.mock('../../../utils/route/use_route_spy', () => ({
+  useRouteSpy: () => mockUseRouteSpy(),
+}));
 jest.mock('../../link_to');
 jest.mock('../../../lib/kibana/kibana_react', () => {
   const originalModule = jest.requireActual('../../../lib/kibana/kibana_react');
@@ -50,38 +52,31 @@ const hostName = 'siem-window';
 describe('Table Navigation', () => {
   const mockHasMlUserPermissions = true;
   const mockRiskyHostEnabled = true;
+  mockUseRouteSpy.mockReturnValue([{ tabName: HostsTableType.authentications }]);
 
-  const mockProps: TabNavigationProps & RouteSpyState = {
-    pageName: SecurityPageName.hosts,
-    pathName: '/hosts',
-    detailName: hostName,
-    search: '',
-    tabName: HostsTableType.authentications,
+  const mockProps: TabNavigationProps = {
     navTabs: navTabsHostDetails({
       hostName,
       hasMlUserPermissions: mockHasMlUserPermissions,
       isRiskyHostsEnabled: mockRiskyHostEnabled,
     }),
   };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   test('it mounts with correct tab highlighted', () => {
     const wrapper = mount(<TabNavigationComponent {...mockProps} />);
-    const tableNavigationTab = wrapper.find(
+    const authNavigationTab = wrapper.find(
       `EuiTab[data-test-subj="navigation-${HostsTableType.authentications}"]`
     );
-
-    expect(tableNavigationTab.prop('isSelected')).toBeTruthy();
-  });
-  test('it changes active tab when nav changes by props', () => {
-    const wrapper = mount(<TabNavigationComponent {...mockProps} />);
-    const tableNavigationTab = () =>
+    expect(authNavigationTab.prop('isSelected')).toBeTruthy();
+    const eventsNavigationTab = () =>
       wrapper.find(`[data-test-subj="navigation-${HostsTableType.events}"]`).first();
-    expect(tableNavigationTab().prop('isSelected')).toBeFalsy();
-    wrapper.setProps({
-      tabName: HostsTableType.events,
-    });
-    wrapper.update();
-    expect(tableNavigationTab().prop('isSelected')).toBeTruthy();
+    expect(eventsNavigationTab().prop('isSelected')).toBeFalsy();
   });
+
   test('it carries the url state in the link', () => {
     const wrapper = mount(<TabNavigationComponent {...mockProps} />);
 
