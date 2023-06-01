@@ -412,21 +412,21 @@ export const createMetricThresholdExecutor = ({
 
 export const FIRED_ACTIONS = {
   id: 'metrics.threshold.fired',
-  name: i18n.translate('xpack.infra.metrics.alerting.threshold.fired', {
+  name: i18n.translate('xpack.observability.threshold.rule.alerting.threshold.fired', {
     defaultMessage: 'Alert',
   }),
 };
 
 export const WARNING_ACTIONS = {
   id: 'metrics.threshold.warning',
-  name: i18n.translate('xpack.infra.metrics.alerting.threshold.warning', {
+  name: i18n.translate('xpack.observability.threshold.rule.alerting.threshold.warning', {
     defaultMessage: 'Warning',
   }),
 };
 
 export const NO_DATA_ACTIONS = {
   id: 'metrics.threshold.nodata',
-  name: i18n.translate('xpack.infra.metrics.alerting.threshold.nodata', {
+  name: i18n.translate('xpack.observability.threshold.rule.alerting.threshold.nodata', {
     defaultMessage: 'No Data',
   }),
 };
@@ -470,7 +470,7 @@ const formatAlertResult = <AlertResult>(
   const { metric, currentValue, threshold, comparator, warningThreshold, warningComparator } =
     alertResult;
   const noDataValue = i18n.translate(
-    'xpack.infra.metrics.alerting.threshold.noDataFormattedValue',
+    'xpack.observability.threshold.rule.alerting.threshold.noDataFormattedValue',
     { defaultMessage: '[NO DATA]' }
   );
   const thresholdToFormat = useWarningThreshold ? warningThreshold! : threshold;

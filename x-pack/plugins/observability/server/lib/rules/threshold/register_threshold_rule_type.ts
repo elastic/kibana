@@ -124,7 +124,7 @@ export function thresholdRuleType(
   });
 
   const groupActionVariableDescription = i18n.translate(
-    'xpack.infra.metrics.alerting.groupActionVariableDescription',
+    'xpack.observability.threshold.rule.alerting.groupActionVariableDescription',
     {
       defaultMessage:
         'Name of the group(s) reporting data. For accessing each group key, use context.groupByKeys.',

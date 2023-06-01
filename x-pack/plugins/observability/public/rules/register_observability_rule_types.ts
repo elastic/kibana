@@ -55,7 +55,7 @@ export const registerObservabilityRuleTypes = (
   });
   observabilityRuleTypeRegistry.register({
     id: OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
-    description: i18n.translate('xpack.infra.metrics.alertFlyout.alertDescription', {
+    description: i18n.translate('xpack.observability.threshold.rule.alertFlyout.alertDescription', {
       defaultMessage: '[NEW OBSERVABILITY] - Alert when threshold breached.',
     }),
     iconClass: 'bell',
@@ -65,7 +65,7 @@ export const registerObservabilityRuleTypes = (
     ruleParamsExpression: lazy(() => import('../pages/threshold/components/expression')),
     validate: validateMetricThreshold,
     defaultActionMessage: i18n.translate(
-      'xpack.infra.metrics.alerting.threshold.defaultActionMessage',
+      'xpack.observability.threshold.rule.alerting.threshold.defaultActionMessage',
       {
         defaultMessage: `\\{\\{alertName\\}\\} - \\{\\{context.group\\}\\} is in a state of \\{\\{context.alertState\\}\\}
   

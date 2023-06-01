@@ -9,9 +9,12 @@ import { i18n } from '@kbn/i18n';
 import { createFormatter } from './formatters';
 
 export const metricValueFormatter = (value: number | null, metric: string = '') => {
-  const noDataValue = i18n.translate('xpack.infra.metrics.alerting.noDataFormattedValue', {
-    defaultMessage: '[NO DATA]',
-  });
+  const noDataValue = i18n.translate(
+    'xpack.observability.threshold.rule.alerting.noDataFormattedValue',
+    {
+      defaultMessage: '[NO DATA]',
+    }
+  );
 
   const formatter = metric.endsWith('.pct')
     ? createFormatter('percent')
