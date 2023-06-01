@@ -205,9 +205,10 @@ export const durationAnomalyAlertFactory: UptimeAlertTypeFactory<ActionGroupIds>
 
     await setRecoveredAlertsContext({
       alertFactory,
-      getAlertStartedDate,
       alertsLocator,
       basePath,
+      defaultStartedAt: startedAt.toISOString(),
+      getAlertStartedDate,
       getAlertUuid,
       spaceId,
     });

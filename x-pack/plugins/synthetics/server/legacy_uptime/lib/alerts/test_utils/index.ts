@@ -9,6 +9,8 @@ import { IBasePath, Logger } from '@kbn/core/server';
 import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import { ruleRegistryMocks } from '@kbn/rule-registry-plugin/server/mocks';
 import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
+import type { AlertsLocatorParams } from '@kbn/observability-plugin/common';
+import { LocatorPublic } from '@kbn/share-plugin/common';
 import { UMServerLibs } from '../../lib';
 import { UptimeCorePluginsSetup, UptimeServerSetup } from '../../adapters';
 import type { UptimeRouter } from '../../../../types';
@@ -33,9 +35,15 @@ export const bootstrapDependencies = (
     publicBaseUrl: 'http://localhost:5601/hfe',
     serverBasePath: '/hfe',
   } as IBasePath;
+
+  const alertsLocator = {
+    getLocation: jest.fn().mockImplementation(() => ({
+      path: 'mockedAlertsLocator > getLocation',
+    })),
+  } as any as LocatorPublic<AlertsLocatorParams>;
   // these server/libs parameters don't have any functionality, which is fine
   // because we aren't testing them here
-  const server = { router, config: {}, basePath } as UptimeServerSetup;
+  const server = { router, config: {}, basePath, alertsLocator } as UptimeServerSetup;
   const plugins: UptimeCorePluginsSetup = customPlugins as any;
   const libs: UMServerLibs = { requests: {} } as UMServerLibs;
   libs.requests = { ...libs.requests, ...customRequests };

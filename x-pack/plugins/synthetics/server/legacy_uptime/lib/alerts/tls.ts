@@ -235,9 +235,10 @@ export const tlsAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (
 
     await setRecoveredAlertsContext({
       alertFactory,
-      getAlertStartedDate,
       alertsLocator,
       basePath,
+      defaultStartedAt: startedAt.toISOString(),
+      getAlertStartedDate,
       getAlertUuid,
       spaceId,
     });

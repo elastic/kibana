@@ -33,6 +33,7 @@ import { CloudSetup } from '@kbn/cloud-plugin/server';
 import { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { FleetStartContract } from '@kbn/fleet-plugin/server';
 import { BfetchServerSetup } from '@kbn/bfetch-plugin/server';
+import { SharePluginSetup } from '@kbn/share-plugin/server';
 import { UptimeEsClient } from '../../lib';
 import type { TelemetryEventsSender } from '../../telemetry/sender';
 import type { UptimeRouter } from '../../../../types';

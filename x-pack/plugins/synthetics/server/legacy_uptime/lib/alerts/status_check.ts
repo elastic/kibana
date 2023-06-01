@@ -457,9 +457,10 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (
 
       await setRecoveredAlertsContext({
         alertFactory,
-        getAlertStartedDate,
         alertsLocator,
         basePath,
+        defaultStartedAt: startedAt.toISOString(),
+        getAlertStartedDate,
         getAlertUuid,
         spaceId,
       });
@@ -550,9 +551,10 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (
 
     await setRecoveredAlertsContext({
       alertFactory,
-      getAlertStartedDate,
       alertsLocator,
       basePath,
+      defaultStartedAt: startedAt.toISOString(),
+      getAlertStartedDate,
       getAlertUuid,
       spaceId,
     });

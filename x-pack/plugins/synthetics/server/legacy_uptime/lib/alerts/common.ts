@@ -85,25 +85,27 @@ export const getAlertDetailsUrl = (
 
 export const setRecoveredAlertsContext = async ({
   alertFactory,
-  getAlertStartedDate,
-  alertsLocator,
   basePath,
-  getAlertUuid,
+  defaultStartedAt,
+  getAlertStartedDate,
   spaceId,
+  alertsLocator,
+  getAlertUuid,
 }: {
   alertFactory: RuleExecutorServices['alertFactory'];
+  defaultStartedAt: string;
   getAlertStartedDate: (alertInstanceId: string) => string | null;
-  alertsLocator?: LocatorPublic<AlertsLocatorParams>;
   basePath: IBasePath;
+  spaceId: string;
+  alertsLocator?: LocatorPublic<AlertsLocatorParams>;
   getAlertUuid?: (alertId: string) => string | null;
-  spaceId?: string;
 }) => {
   const { getRecoveredAlerts } = alertFactory.done();
 
   for await (const alert of getRecoveredAlerts()) {
     const recoveredAlertId = alert.getId();
     const alertUuid = getAlertUuid?.(recoveredAlertId) || null;
-    const indexedStartedAt = getAlertStartedDate(recoveredAlertId);
+    const indexedStartedAt = getAlertStartedDate(recoveredAlertId) ?? defaultStartedAt;
 
     const state = alert.getState();
     const alertUrl = await getAlertUrl(
