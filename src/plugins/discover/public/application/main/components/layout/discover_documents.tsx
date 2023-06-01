@@ -208,6 +208,7 @@ function DiscoverDocumentsComponent({
             isLoading={isDataLoading}
             searchDescription={savedSearch.description}
             sharedItemTitle={savedSearch.title}
+            isPlainRecord={isPlainRecord}
             onAddColumn={onAddColumn}
             onFilter={onAddFilter as DocViewFilterFn}
             onMoveColumn={onMoveColumn}
@@ -238,7 +239,7 @@ function DiscoverDocumentsComponent({
               sampleSize={sampleSize}
               searchDescription={savedSearch.description}
               searchTitle={savedSearch.title}
-              setExpandedDoc={!isPlainRecord ? setExpandedDoc : undefined}
+              setExpandedDoc={setExpandedDoc}
               showTimeCol={showTimeCol}
               settings={grid}
               onAddColumn={onAddColumn}
@@ -252,6 +253,7 @@ function DiscoverDocumentsComponent({
               onUpdateRowHeight={onUpdateRowHeight}
               isSortEnabled={!isPlainRecord}
               isPlainRecord={isPlainRecord}
+              query={query}
               rowsPerPageState={rowsPerPage}
               onUpdateRowsPerPage={onUpdateRowsPerPage}
               onFieldEdited={onFieldEdited}

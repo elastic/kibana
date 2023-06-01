@@ -5,42 +5,31 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { EuiButtonEmpty, EuiToolTip } from '@elastic/eui';
 
-const BUTTON_LABEL = i18n.translate('xpack.maps.layerPanel.joinEditor.addJoinButton.label', {
-  defaultMessage: 'Add join',
-});
-
 export interface Props {
-  addJoin: () => void;
-  isLayerSourceMvt: boolean;
-  numJoins: number;
+  disabledReason: string;
+  isDisabled: boolean;
+  label: string;
+  onClick: () => void;
 }
 
-export function AddJoinButton({ addJoin, isLayerSourceMvt, numJoins }: Props) {
-  const isDisabled = isLayerSourceMvt && numJoins >= 1;
+export function AddJoinButton(props: Props) {
   const button = (
     <EuiButtonEmpty
-      onClick={addJoin}
+      onClick={props.onClick}
       size="xs"
       iconType="plusInCircleFilled"
-      aria-label={BUTTON_LABEL}
-      isDisabled={isDisabled}
+      aria-label={props.label}
+      isDisabled={props.isDisabled}
     >
-      {BUTTON_LABEL}
+      {props.label}
     </EuiButtonEmpty>
   );
 
-  return isDisabled ? (
-    <EuiToolTip
-      content={i18n.translate('xpack.maps.layerPanel.joinEditor.addJoinButton.mvtSingleJoinMsg', {
-        defaultMessage: `Vector tiles support one term join. To add multiple joins, select 'Limit results' in 'Scaling'.`,
-      })}
-    >
-      {button}
-    </EuiToolTip>
+  return props.isDisabled ? (
+    <EuiToolTip content={props.disabledReason}>{button}</EuiToolTip>
   ) : (
     button
   );

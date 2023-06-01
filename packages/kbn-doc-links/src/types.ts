@@ -393,6 +393,7 @@ export interface DocLinks {
     indexAction: string;
     esQuery: string;
     indexThreshold: string;
+    maintenanceWindows: string;
     pagerDutyAction: string;
     preconfiguredConnectors: string;
     preconfiguredAlertHistoryConnector: string;

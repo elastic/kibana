@@ -6,9 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { Subscription } from 'rxjs';
 import { BehaviorSubject, Subject } from 'rxjs';
-import { combineLatestWith } from 'rxjs/operators';
 import type * as H from 'history';
 import type {
   AppMountParameters,
@@ -29,22 +27,16 @@ import type {
   SubPlugins,
   StartedSubPlugins,
   StartPluginsDependencies,
+  GetStartedComponent,
 } from './types';
 import { initTelemetry, TelemetryService } from './common/lib/telemetry';
 import { KibanaServices } from './common/lib/kibana/services';
 import { SOLUTION_NAME } from './common/translations';
 
-import {
-  APP_ID,
-  APP_UI_ID,
-  APP_PATH,
-  APP_ICON_SOLUTION,
-  ENABLE_GROUPED_NAVIGATION,
-} from '../common/constants';
+import { APP_ID, APP_UI_ID, APP_PATH, APP_ICON_SOLUTION } from '../common/constants';
 
-import { getDeepLinks, registerDeepLinksUpdater } from './app/deep_links';
-import type { LinksPermissions } from './common/links';
-import { updateAppLinks } from './common/links';
+import { updateAppLinks, type LinksPermissions } from './common/links';
+import { registerDeepLinksUpdater } from './common/links/deep_links';
 import { navLinks$ } from './common/links/nav_links';
 import { licenseService } from './common/hooks/use_license';
 import type { SecuritySolutionUiConfigType } from './common/types';
@@ -88,6 +80,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
   readonly experimentalFeatures: ExperimentalFeatures;
   private isSidebarEnabled$: BehaviorSubject<boolean>;
+  private getStartedComponent?: GetStartedComponent;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.config = this.initializerContext.config.get<SecuritySolutionUiConfigType>();
@@ -171,6 +164,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         },
         savedObjectsManagement: startPluginsDeps.savedObjectsManagement,
         isSidebarEnabled$: this.isSidebarEnabled$,
+        getStartedComponent: this.getStartedComponent,
         telemetry: this.telemetry.start(),
       };
       return services;
@@ -313,6 +307,9 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       getNavLinks$: () => navLinks$,
       setIsSidebarEnabled: (isSidebarEnabled: boolean) =>
         this.isSidebarEnabled$.next(isSidebarEnabled),
+      setGetStartedPage: (getStartedComponent: GetStartedComponent) => {
+        this.getStartedComponent = getStartedComponent;
+      },
     };
   }
 
@@ -412,7 +409,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         overview: new subPluginClasses.Overview(),
         timelines: new subPluginClasses.Timelines(),
         management: new subPluginClasses.Management(),
-        landingPages: new subPluginClasses.LandingPages(),
         cloudDefend: new subPluginClasses.CloudDefend(),
         cloudSecurityPosture: new subPluginClasses.CloudSecurityPosture(),
         threatIntelligence: new subPluginClasses.ThreatIntelligence(),
@@ -439,7 +435,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       exceptions: subPlugins.exceptions.start(storage),
       explore: subPlugins.explore.start(storage),
       kubernetes: subPlugins.kubernetes.start(),
-      landingPages: subPlugins.landingPages.start(),
       management: subPlugins.management.start(core, plugins),
       overview: subPlugins.overview.start(),
       rules: subPlugins.rules.start(storage),
@@ -489,12 +484,11 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
    */
   async registerAppLinks(core: CoreStart, plugins: StartPlugins) {
     const { links, getFilteredLinks } = await this.lazyApplicationLinks();
-
     const { license$ } = plugins.licensing;
-    const newNavEnabled$ = core.uiSettings.get$<boolean>(ENABLE_GROUPED_NAVIGATION, true);
 
-    let appLinksSubscription: Subscription | null = null;
-    license$.pipe(combineLatestWith(newNavEnabled$)).subscribe(async ([license, newNavEnabled]) => {
+    registerDeepLinksUpdater(this.appUpdater$);
+
+    license$.subscribe(async (license) => {
       const linksPermissions: LinksPermissions = {
         experimentalFeatures: this.experimentalFeatures,
         capabilities: core.application.capabilities,
@@ -502,25 +496,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
       if (license.type !== undefined) {
         linksPermissions.license = license;
-      }
-
-      if (appLinksSubscription) {
-        appLinksSubscription.unsubscribe();
-        appLinksSubscription = null;
-      }
-
-      if (newNavEnabled) {
-        appLinksSubscription = registerDeepLinksUpdater(this.appUpdater$);
-      } else {
-        // old nav links update
-        this.appUpdater$.next(() => ({
-          navLinkStatus: AppNavLinkStatus.hidden,
-          deepLinks: getDeepLinks(
-            this.experimentalFeatures,
-            license.type,
-            core.application.capabilities
-          ),
-        }));
       }
 
       // set initial links to not block rendering
