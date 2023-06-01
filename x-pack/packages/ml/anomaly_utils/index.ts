@@ -12,6 +12,7 @@ export { ML_SEVERITY_COLORS } from './severity_colors';
 export {
   mlJobAggregations,
   mlJobAggregationsWithoutEsEquivalent,
+  type SparseDataAggregation,
   ES_AGGREGATION,
   ML_JOB_AGGREGATION,
   SPARSE_DATA_AGGREGATIONS,
@@ -50,7 +51,11 @@ export {
   type MlUrlConfig,
 } from './custom_urls';
 
-export { formatHumanReadableDateTimeSeconds, timeFormatter } from './date_utils';
+export {
+  formatHumanReadableDateTime,
+  formatHumanReadableDateTimeSeconds,
+  timeFormatter,
+} from './date_utils';
 
 export {
   ML_DETECTOR_RULE_ACTION,
@@ -81,9 +86,12 @@ export {
 
 export {
   mlCategory,
+  type AggFieldNamePair,
   type AggFieldPair,
+  type AggId,
   type Aggregation,
   type Field,
+  type FieldId,
   type NewJobCaps,
   type NewJobCapsResponse,
   type RollupFields,

@@ -13,8 +13,9 @@ import { render, screen, waitFor } from '@testing-library/react';
 import { renderHook } from '@testing-library/react-hooks';
 
 import { CoreSetup } from '@kbn/core/public';
+import { DataGrid, type UseIndexDataReturnType } from '@kbn/ml-data-grid';
 
-import { getMlSharedImports, UseIndexDataReturnType } from '../../shared_imports';
+import { getMlSharedImports } from '../../shared_imports';
 
 import { SimpleQuery } from '../common';
 
@@ -25,7 +26,6 @@ jest.mock('../../shared_imports');
 jest.mock('../app_dependencies');
 jest.mock('./use_api');
 
-import { useAppDependencies } from '../__mocks__/app_dependencies';
 import { MlSharedContext } from '../__mocks__/shared_context';
 import type { RuntimeField } from '@kbn/data-views-plugin/common';
 
@@ -89,9 +89,6 @@ describe('Transform: <DataGrid /> with useIndexData()', () => {
     const mlSharedImports = await getMlSharedImports();
 
     const Wrapper = () => {
-      const {
-        ml: { DataGrid },
-      } = useAppDependencies();
       const props = {
         ...useIndexData(dataView, { match_all: {} }, runtimeMappings),
         copyToClipboard: 'the-copy-to-clipboard-code',
@@ -132,9 +129,6 @@ describe('Transform: <DataGrid /> with useIndexData()', () => {
     const mlSharedImports = await getMlSharedImports();
 
     const Wrapper = () => {
-      const {
-        ml: { DataGrid },
-      } = useAppDependencies();
       const props = {
         ...useIndexData(dataView, { match_all: {} }, runtimeMappings),
         copyToClipboard: 'the-copy-to-clipboard-code',
