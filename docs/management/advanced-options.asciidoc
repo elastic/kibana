@@ -578,7 +578,7 @@ The URL of a custom PNG image that appears on {kib} browser tabs.
 
 [float]
 [[kibana-usage-collection-settings]]
-==== Usage Collection
+==== Usage collection
 
 [[provide-usage-data]]`telemetry:enabled`::
 Enabling data usage collection (also known as Telemetry) allows us to learn
