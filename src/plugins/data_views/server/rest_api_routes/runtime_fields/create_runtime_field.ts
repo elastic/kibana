@@ -26,6 +26,8 @@ import {
   INITIAL_REST_VERSION,
 } from '../../constants';
 import { responseFormatter } from './response_formatter';
+import { runtimeResponseSchema } from './shared';
+import type { RuntimeResponseType } from './shared';
 
 interface CreateRuntimeFieldArgs {
   dataViewsService: DataViewsService;
@@ -93,6 +95,11 @@ const runtimeCreateFieldRouteFactory =
               runtimeField: runtimeFieldSchema,
             }),
           },
+          response: {
+            200: {
+              body: runtimeResponseSchema,
+            },
+          },
         },
       },
       handleErrors(async (ctx, req, res) => {
@@ -117,7 +124,13 @@ const runtimeCreateFieldRouteFactory =
           runtimeField: runtimeField as RuntimeField,
         });
 
-        return res.ok(responseFormatter({ serviceKey, dataView, fields }));
+        const response: RuntimeResponseType = responseFormatter({
+          serviceKey,
+          dataView,
+          fields,
+        });
+
+        return res.ok(response);
       })
     );
   };
