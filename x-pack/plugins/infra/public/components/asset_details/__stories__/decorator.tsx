@@ -18,13 +18,19 @@ import { useParameter } from '@storybook/addons';
 import type { DeepPartial } from 'utility-types';
 import type { LocatorPublic } from '@kbn/share-plugin/public';
 import { getLazyOsqueryAction } from '@kbn/osquery-plugin/public/shared_components';
-import { ApplicationStart } from '@kbn/core/public';
+import type { ApplicationStart } from '@kbn/core/public';
+import type { IKibanaSearchRequest, ISearchOptions } from '@kbn/data-plugin/public';
 import { useGlobalStorybookTheme } from '../../../test_utils/use_global_storybook_theme';
 import type { PluginKibanaContextValue } from '../../../hooks/use_kibana';
 import { SourceProvider } from '../../../containers/metrics_source';
 import { getHttp } from './context/http';
+import { getLogEntries } from './context/fixtures/log_entries';
 
-const getSettings = (key: string): any => ({ [key]: false });
+const settings: Record<string, any> = {
+  'dateFormat:scaled': [['', 'HH:mm:ss.SSS']],
+};
+const getSettings = (key: string): any => settings[key];
+
 const getApplication = (): DeepPartial<ApplicationStart> => ({
   currentAppId$: of('infra'),
   navigateToUrl: async (url: string) => {
@@ -49,11 +55,28 @@ export const DecorateWithKibanaContext: DecoratorFn = (story, context) => {
   const mockServices: DeepPartial<KibanaReactContextValue<PluginKibanaContextValue>['services']> = {
     application: getApplication(),
     data: {
+      search: {
+        search: (request: IKibanaSearchRequest, options?: ISearchOptions) => {
+          return getLogEntries(request, options) as any;
+        },
+      },
       query: {
         filterManager: {
           addFilters: () => {},
           removeFilter: () => {},
         },
+      },
+    },
+    locators: {
+      nodeLogsLocator: {
+        getRedirectUrl: () => {
+          return '';
+        },
+      },
+    },
+    uiActions: {
+      getTriggerCompatibleActions: () => {
+        return Promise.resolve([]);
       },
     },
     settings: {
@@ -65,7 +88,7 @@ export const DecorateWithKibanaContext: DecoratorFn = (story, context) => {
     notifications: {
       toasts: {
         add: (params) => {
-          action('toast add')(params);
+          action('notifications.toats.add')(params);
           return { id: 'id' };
         },
       },
@@ -85,11 +108,7 @@ export const DecorateWithKibanaContext: DecoratorFn = (story, context) => {
           get: (_id: string) =>
             ({
               navigate: async (params: any) => {
-                return Promise.resolve(
-                  action(
-                    'https://kibana:8080/base-path/app/uptime/?search=host.name: "host1" OR host.ip: "192.168.0.1" OR monitor.ip: "192.168.0.1"'
-                  )(params)
-                );
+                return Promise.resolve();
               },
             } as unknown as LocatorPublic<any>),
         },

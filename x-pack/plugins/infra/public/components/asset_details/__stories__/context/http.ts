@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { HttpStart, HttpHandler } from '@kbn/core/public';
+import { HttpStart, HttpHandler, HttpFetchOptions } from '@kbn/core/public';
 import { Parameters } from '@storybook/react';
 import { INFA_ML_GET_METRICS_HOSTS_ANOMALIES_PATH } from '../../../../../common/http_api/infra_ml';
 import { metadataHttpResponse, type MetadataResponseMocks } from './fixtures/metadata';
@@ -15,6 +15,7 @@ import {
   type ProcessesHttpMocks,
 } from './fixtures/processes';
 import { anomaliesHttpResponse, type AnomaliesHttpMocks } from './fixtures/anomalies';
+import { snapshotAPItHttpResponse, type SnapshotAPIHttpMocks } from './fixtures/snapshot_api';
 
 export const getHttp = (params: Parameters): HttpStart => {
   const http = {
@@ -23,6 +24,16 @@ export const getHttp = (params: Parameters): HttpStart => {
         return '';
       },
     },
+    post: (async (path: string) => {
+      switch (path) {
+        case '/internal/osquery/privileges_check':
+          // grants permission to view the osquery content
+          return Promise.resolve(true);
+        default: {
+          return Promise.resolve({});
+        }
+      }
+    }) as HttpHandler,
     get: (async (path: string) => {
       switch (path) {
         case '/internal/osquery/privileges_check':
@@ -33,14 +44,16 @@ export const getHttp = (params: Parameters): HttpStart => {
         }
       }
     }) as HttpHandler,
-    fetch: (async (path: string) => {
+    fetch: (async (path: string, options: HttpFetchOptions) => {
       switch (path) {
+        case '/api/infra/metadata':
+          return metadataHttpResponse[params.mock as MetadataResponseMocks]();
         case '/api/metrics/process_list':
           return processesHttpResponse[params.mock as ProcessesHttpMocks]();
         case '/api/metrics/process_list/chart':
           return processesChartHttpResponse.default();
-        case '/api/infra/metadata':
-          return metadataHttpResponse[params.mock as MetadataResponseMocks]();
+        case '/api/metrics/snapshot':
+          return snapshotAPItHttpResponse[params.mock as SnapshotAPIHttpMocks]();
         case INFA_ML_GET_METRICS_HOSTS_ANOMALIES_PATH:
           return anomaliesHttpResponse[params.mock as AnomaliesHttpMocks]();
         default:

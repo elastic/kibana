@@ -6,7 +6,7 @@
  */
 
 import { InventoryItemType } from '../../../common/inventory_models/types';
-import { InfraAssetMetricType } from '../../../common/http_api';
+import { InfraAssetMetricType, SnapshotCustomMetricInput } from '../../../common/http_api';
 
 export type CloudProvider = 'gcp' | 'aws' | 'azure' | 'unknownProvider';
 type HostMetrics = Record<InfraAssetMetricType, number | null>;
@@ -24,10 +24,12 @@ export type HostNodeRow = HostMetadata &
   };
 
 export enum FlyoutTabIds {
+  METRICS = 'metrics',
   METADATA = 'metadata',
   PROCESSES = 'processes',
   ANOMALIES = 'anomalies',
   OSQUERY = 'osquery',
+  LOGS = 'logs',
 }
 
 export type TabIds = `${FlyoutTabIds}`;
@@ -42,6 +44,11 @@ export interface TabState {
   };
   anomalies?: {
     onClose?: () => void;
+  };
+  metrics?: {
+    accountId?: string;
+    region?: string;
+    customMetrics?: SnapshotCustomMetricInput[];
   };
 }
 

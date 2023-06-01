@@ -19,6 +19,20 @@ import { DecorateWithKibanaContext } from './__stories__/decorator';
 const links: AssetDetailsProps['links'] = ['apmServices', 'uptime'];
 const tabs: Tab[] = [
   {
+    id: FlyoutTabIds.METRICS,
+    name: i18n.translate('xpack.infra.nodeDetails.tabs.metrics', {
+      defaultMessage: 'Metrics',
+    }),
+    'data-test-subj': 'hostsView-flyout-tabs-metrics',
+  },
+  {
+    id: FlyoutTabIds.LOGS,
+    name: i18n.translate('xpack.infra.nodeDetails.tabs.logs', {
+      defaultMessage: 'Logs',
+    }),
+    'data-test-subj': 'hostsView-flyout-tabs-logs',
+  },
+  {
     id: FlyoutTabIds.METADATA,
     name: i18n.translate('xpack.infra.metrics.nodeDetails.tabs.metadata', {
       defaultMessage: 'Metadata',
@@ -34,7 +48,7 @@ const tabs: Tab[] = [
   },
   {
     id: FlyoutTabIds.ANOMALIES,
-    name: i18n.translate('xpack.infra.nodeDetails.tabs.osquery', {
+    name: i18n.translate('xpack.infra.nodeDetails.tabs.anomalies', {
       defaultMessage: 'Anomalies',
     }),
     'data-test-subj': 'hostsView-flyout-tabs-anomalies',
@@ -107,10 +121,9 @@ const stories: Meta<AssetDetailsProps> = {
     nodeType: 'host',
     currentTimeRange: {
       interval: '1s',
-      from: 1683630468,
-      to: 1683630469,
+      from: 168363046800,
+      to: 168363046900,
     },
-    activeTabId: 'metadata',
     tabs,
     links,
   },

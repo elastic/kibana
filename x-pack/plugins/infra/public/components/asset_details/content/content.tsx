@@ -12,6 +12,8 @@ import { Metadata } from '../tabs/metadata/metadata';
 import { Processes } from '../tabs/processes/processes';
 import { Osquery } from '../tabs/osquery/osquery';
 import { FlyoutTabIds, type TabState, type AssetDetailsProps } from '../types';
+import { Logs } from '../tabs/logs/logs';
+import { Metrics } from '../tabs/metrics/metrics';
 
 type Props = Pick<
   AssetDetailsProps,
@@ -35,6 +37,12 @@ export const Content = ({
 
   return (
     <>
+      <TabPanel activeWhen={FlyoutTabIds.ANOMALIES}>
+        <Anomalies nodeName={node.name} onClose={overrides?.anomalies?.onClose} />
+      </TabPanel>
+      <TabPanel activeWhen={FlyoutTabIds.LOGS}>
+        <Logs nodeName={node.name} nodeType={nodeType} currentTime={currentTimeRange.to} />
+      </TabPanel>
       <TabPanel activeWhen={FlyoutTabIds.METADATA}>
         <Metadata
           currentTimeRange={currentTimeRange}
@@ -45,6 +53,19 @@ export const Content = ({
           onSearchChange={(query) => onChange({ metadata: { query } })}
         />
       </TabPanel>
+      <TabPanel activeWhen={FlyoutTabIds.METRICS}>
+        <Metrics
+          currentTime={currentTimeRange.to}
+          accountId={overrides?.metrics?.accountId}
+          customMetrics={overrides?.metrics?.customMetrics}
+          region={overrides?.metrics?.region}
+          nodeName={node.name}
+          nodeType={nodeType}
+        />
+      </TabPanel>
+      <TabPanel activeWhen={FlyoutTabIds.OSQUERY}>
+        <Osquery nodeName={node.name} nodeType={nodeType} currentTimeRange={currentTimeRange} />
+      </TabPanel>
       <TabPanel activeWhen={FlyoutTabIds.PROCESSES}>
         <Processes
           nodeName={node.name}
@@ -53,12 +74,6 @@ export const Content = ({
           searchFilter={overrides?.processes?.query}
           onSearchFilterChange={(query) => onChange({ processes: { query } })}
         />
-      </TabPanel>
-      <TabPanel activeWhen={FlyoutTabIds.ANOMALIES}>
-        <Anomalies nodeName={node.name} onClose={overrides?.anomalies?.onClose} />
-      </TabPanel>
-      <TabPanel activeWhen={FlyoutTabIds.OSQUERY}>
-        <Osquery nodeName={node.name} nodeType={nodeType} currentTimeRange={currentTimeRange} />
       </TabPanel>
     </>
   );
