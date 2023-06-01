@@ -7,4 +7,5 @@
  */
 
 export * from './use_es_doc_search';
+export * from './use_doc_view_services';
 export * from './use_pager';

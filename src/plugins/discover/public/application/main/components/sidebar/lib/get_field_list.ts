@@ -10,7 +10,7 @@ import { difference } from 'lodash';
 import { type DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { fieldWildcardFilter } from '@kbn/kibana-utils-plugin/public';
-import { isNestedFieldParent } from '@kbn/unified-doc-viewer-plugin/public';
+import { isNestedFieldParent } from '@kbn/unified-doc-viewer';
 
 export function getDataViewFieldList(
   dataView: DataView | undefined | null,

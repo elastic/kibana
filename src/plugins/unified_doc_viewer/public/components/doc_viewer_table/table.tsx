@@ -7,7 +7,6 @@
  */
 
 import './table.scss';
-import type { DocViewRenderProps, FieldRecordLegacy } from '@kbn/unified-doc-viewer/src/types';
 import { debounce } from 'lodash';
 import React, { useCallback, useMemo, useState } from 'react';
 import {
@@ -31,12 +30,17 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { getFieldIconType } from '@kbn/unified-field-list-plugin/public';
-import { getIgnoredReason, isNestedFieldParent } from '@kbn/unified-doc-viewer/src';
-import { usePager, useUnifiedDocViewerServices } from '@kbn/unified-doc-viewer/../../hooks';
+import { getIgnoredReason, isNestedFieldParent } from '@kbn/unified-doc-viewer';
 import { formatFieldValue, getShouldShowFieldHandler } from '@kbn/unified-discover';
+import type {
+  DocViewRenderProps,
+  FieldRecordLegacy,
+} from 'packages/kbn-unified-doc-viewer/src/types';
 import { FieldName } from '../field_name';
 import { TableFieldValue } from './table_cell_value';
 import { TableActions } from './table_cell_actions';
+import { usePager } from '../../hooks';
+import { useUnifiedDocViewerServices } from '../../hooks/use_doc_view_services';
 
 export interface FieldRecord {
   action: Omit<FieldRecordLegacy['action'], 'isActive'>;

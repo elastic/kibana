@@ -10,7 +10,7 @@ import { UnifiedDocViewerPlugin } from './plugin';
 
 export { DocViewer, DocViewerSource, DocViewerTable, DocViewerTableLegacy } from './components';
 
-export { useEsDocSearch, usePager, isNestedFieldParent } from '@kbn/unified-doc-viewer';
+export { usePager, useUnifiedDocViewerServices, useEsDocSearch } from './hooks';
 
 export function plugin() {
   return new UnifiedDocViewerPlugin();
