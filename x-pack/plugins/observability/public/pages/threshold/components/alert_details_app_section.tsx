@@ -30,12 +30,13 @@ import { useKibana } from '../../../utils/kibana_react';
 import { metricValueFormatter } from '../../../../common/threshold_rule/metric_value_formatter';
 import { AlertSummaryField, TopAlert } from '../../..';
 import { generateUniqueKey } from '../lib/generate_unique_key';
-import { MetricThresholdRuleTypeParams } from '..';
+
 import { ExpressionChart } from './expression_chart';
 import { TIME_LABELS } from './criterion_preview_chart/criterion_preview_chart';
 import { Threshold } from './threshold';
 import { MetricsExplorerChartType } from '../hooks/use_metrics_explorer_options';
 import { useSourceContext, withSourceProvider } from '../helpers/source';
+import { MetricThresholdRuleTypeParams } from '../types';
 
 // TODO Use a generic props for app sections https://github.com/elastic/kibana/issues/152690
 export type MetricThresholdRule = Rule<

@@ -15,13 +15,12 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { PrefilledInventoryAlertFlyout } from '../../inventory/components/alert_flyout';
-import { PrefilledThresholdAlertFlyout } from '../../metric_threshold/components/alert_flyout';
-import { InfraClientStartDeps } from '../../../types';
+import { InfraClientStartDeps } from '../types';
+import { PrefilledThresholdAlertFlyout } from './alert_flyout';
 
 type VisibleFlyoutType = 'inventory' | 'threshold' | null;
 
-export const MetricsAlertDropdown = () => {
+export function MetricsAlertDropdown() {
   const [popoverOpen, setPopoverOpen] = useState(false);
   const [visibleFlyoutType, setVisibleFlyoutType] = useState<VisibleFlyoutType>(null);
   const uiCapabilities = useKibana().services.application?.capabilities;
@@ -45,13 +44,13 @@ export const MetricsAlertDropdown = () => {
   const infrastructureAlertsPanel = useMemo(
     () => ({
       id: 1,
-      title: i18n.translate('xpack.infra.alerting.infrastructureDropdownTitle', {
+      title: i18n.translate('xpack.observability.threshold.rule.infrastructureDropdownTitle', {
         defaultMessage: 'Infrastructure rules',
       }),
       items: [
         {
           'data-test-subj': 'inventory-alerts-create-rule',
-          name: i18n.translate('xpack.infra.alerting.createInventoryRuleButton', {
+          name: i18n.translate('xpack.observability.threshold.rule.createInventoryRuleButton', {
             defaultMessage: 'Create inventory rule',
           }),
           onClick: () => {
@@ -67,13 +66,13 @@ export const MetricsAlertDropdown = () => {
   const metricsAlertsPanel = useMemo(
     () => ({
       id: 2,
-      title: i18n.translate('xpack.infra.alerting.metricsDropdownTitle', {
+      title: i18n.translate('xpack.observability.threshold.rule.metricsDropdownTitle', {
         defaultMessage: 'Metrics rules',
       }),
       items: [
         {
           'data-test-subj': 'metrics-threshold-alerts-create-rule',
-          name: i18n.translate('xpack.infra.alerting.createThresholdRuleButton', {
+          name: i18n.translate('xpack.observability.threshold.rule.createThresholdRuleButton', {
             defaultMessage: 'Create threshold rule',
           }),
           onClick: () => {
@@ -90,7 +89,7 @@ export const MetricsAlertDropdown = () => {
 
   const manageAlertsMenuItem = useMemo(
     () => ({
-      name: i18n.translate('xpack.infra.alerting.manageRules', {
+      name: i18n.translate('xpack.observability.threshold.rule.manageRules', {
         defaultMessage: 'Manage rules',
       }),
       icon: 'tableOfContents',
@@ -105,14 +104,17 @@ export const MetricsAlertDropdown = () => {
         ? [
             {
               'data-test-subj': 'inventory-alerts-menu-option',
-              name: i18n.translate('xpack.infra.alerting.infrastructureDropdownMenu', {
-                defaultMessage: 'Infrastructure',
-              }),
+              name: i18n.translate(
+                'xpack.observability.threshold.rule.infrastructureDropdownMenu',
+                {
+                  defaultMessage: 'Infrastructure',
+                }
+              ),
               panel: 1,
             },
             {
               'data-test-subj': 'metrics-threshold-alerts-menu-option',
-              name: i18n.translate('xpack.infra.alerting.metricsDropdownMenu', {
+              name: i18n.translate('xpack.observability.threshold.rule.metricsDropdownMenu', {
                 defaultMessage: 'Metrics',
               }),
               panel: 2,
@@ -128,7 +130,7 @@ export const MetricsAlertDropdown = () => {
       [
         {
           id: 0,
-          title: i18n.translate('xpack.infra.alerting.alertDropdownTitle', {
+          title: i18n.translate('xpack.observability.threshold.rule.alertDropdownTitle', {
             defaultMessage: 'Alerts and rules',
           }),
           items: firstPanelMenuItems,
@@ -151,7 +153,7 @@ export const MetricsAlertDropdown = () => {
             data-test-subj="infrastructure-alerts-and-rules"
           >
             <FormattedMessage
-              id="xpack.infra.alerting.alertsButton"
+              id="xpack.observability.threshold.rule.alertsButton"
               defaultMessage="Alerts and rules"
             />
           </EuiHeaderLink>
@@ -164,20 +166,18 @@ export const MetricsAlertDropdown = () => {
       <AlertFlyout visibleFlyoutType={visibleFlyoutType} onClose={closeFlyout} />
     </>
   );
-};
+}
 
 interface AlertFlyoutProps {
   visibleFlyoutType: VisibleFlyoutType;
   onClose(): void;
 }
 
-const AlertFlyout = ({ visibleFlyoutType, onClose }: AlertFlyoutProps) => {
+function AlertFlyout({ visibleFlyoutType, onClose }: AlertFlyoutProps) {
   switch (visibleFlyoutType) {
-    case 'inventory':
-      return <PrefilledInventoryAlertFlyout onClose={onClose} />;
     case 'threshold':
       return <PrefilledThresholdAlertFlyout onClose={onClose} />;
     default:
       return null;
   }
-};
+}

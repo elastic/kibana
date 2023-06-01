@@ -16,7 +16,10 @@ import { LensPublicStart } from '@kbn/lens-plugin/public';
 import { ObservabilitySharedPluginStart } from '@kbn/observability-shared-plugin/public';
 import { SharePluginStart } from '@kbn/share-plugin/public';
 import { SpacesPluginStart } from '@kbn/spaces-plugin/public';
-import { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
+import {
+  RuleTypeParams,
+  TriggersAndActionsUIPublicPluginStart,
+} from '@kbn/triggers-actions-ui-plugin/public';
 import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
@@ -169,11 +172,6 @@ export interface InventoryMetricConditions {
   warningComparator?: Comparator;
 }
 
-// export interface InventoryMetricThresholdParams {
-//   criteria: InventoryMetricConditions[];
-//   filterQuery?: string;
-//   filterQueryText?: string;
-//   nodeType: InventoryItemType;
-//   sourceId?: string;
-//   alertOnNoData?: boolean;
-// }
+export interface MetricThresholdRuleTypeParams extends RuleTypeParams {
+  criteria: MetricExpressionParams[];
+}
