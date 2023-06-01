@@ -7,7 +7,10 @@
  */
 
 import type { LocatorDefinition } from '@kbn/share-plugin/public';
-import { DiscoverSingleDocLocatorParams, DocHistoryLocationState } from './types';
+import {
+  DiscoverSingleDocLocatorParams,
+  DocHistoryLocationState,
+} from '@kbn/unified-discover/src/doc/types';
 
 export const DISCOVER_SINGLE_DOC_LOCATOR = 'DISCOVER_SINGLE_DOC_LOCATOR';
 

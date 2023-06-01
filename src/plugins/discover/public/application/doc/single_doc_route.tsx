@@ -10,15 +10,14 @@ import { useLocation, useParams } from 'react-router-dom';
 import { EuiEmptyPrompt } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
+import { DocHistoryLocationState } from '@kbn/unified-discover/src/doc/types';
 import { i18n } from '@kbn/i18n';
-import { DocHistoryLocationState } from '@kbn/unified-discover/src/doc/locator';
 import { LoadingIndicator } from '../../components/common/loading_indicator';
 import { Doc } from './components/doc';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { getScopedHistory } from '../../kibana_services';
 import { DiscoverError } from '../../components/common/error_alert';
 import { useDataView } from '../../hooks/use_data_view';
-
 export interface DocUrlParams {
   dataViewId: string;
   index: string;

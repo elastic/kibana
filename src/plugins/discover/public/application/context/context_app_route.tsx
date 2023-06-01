@@ -10,7 +10,7 @@ import { useParams } from 'react-router-dom';
 import { EuiEmptyPrompt } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { ScopedHistory } from '@kbn/core/public';
-import type { ContextHistoryLocationState } from '@kbn/unified-discover/src/context/locator';
+import type { ContextHistoryLocationState } from '@kbn/unified-discover/src/context/types';
 import { ContextApp } from './context_app';
 import { LoadingIndicator } from '../../components/common/loading_indicator';
 import { getScopedHistory } from '../../kibana_services';

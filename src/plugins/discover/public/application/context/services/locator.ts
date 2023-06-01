@@ -14,7 +14,8 @@ import {
   ContextHistoryLocationState,
   DiscoverContextAppLocatorDependencies,
   DiscoverContextAppLocatorParams,
-} from './types';
+} from '@kbn/unified-discover/src/context/types';
+
 export const DISCOVER_CONTEXT_APP_LOCATOR = 'DISCOVER_CONTEXT_APP_LOCATOR';
 
 export class DiscoverContextAppLocatorDefinition

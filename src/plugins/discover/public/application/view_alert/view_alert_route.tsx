@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
+import type { DiscoverAppLocatorParams } from '@kbn/unified-discover/src/main/types';
 import { useEffect, useMemo } from 'react';
 import { useHistory, useLocation, useParams } from 'react-router-dom';
-import { DiscoverAppLocatorParams } from '@kbn/unified-discover/src/locator';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { displayPossibleDocsDiffInfoAlert } from '../main/hooks/use_alert_results_toast';
 import { getAlertUtils, QueryParams } from './view_alert_utils';

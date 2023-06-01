@@ -33,5 +33,7 @@ export {
   ENABLE_SQL,
 } from '@kbn/unified-discover';
 
-export { DISCOVER_APP_LOCATOR, DiscoverAppLocatorDefinition } from '@kbn/unified-discover';
-export type { DiscoverAppLocator, DiscoverAppLocatorParams } from '@kbn/unified-discover';
+export type {
+  DiscoverAppLocator,
+  DiscoverAppLocatorParams,
+} from '@kbn/unified-discover/src/main/types';

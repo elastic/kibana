@@ -9,10 +9,9 @@
 import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/server';
 import type { PluginSetup as DataPluginSetup } from '@kbn/data-plugin/server';
 import type { HomeServerPluginSetup } from '@kbn/home-plugin/server';
-import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/common';
 import type { SharePluginSetup } from '@kbn/share-plugin/server';
-import { DiscoverAppLocatorDefinition } from '@kbn/unified-discover/src/locator';
 import type { DiscoverServerPluginStart, DiscoverServerPluginStartDeps } from '.';
+import { DiscoverAppLocatorDefinitionCommon } from '../common/locator';
 import { capabilitiesProvider } from './capabilities_provider';
 import { initializeLocatorServices } from './locator';
 import { registerSampleData } from './sample_data';
@@ -37,9 +36,7 @@ export class DiscoverServerPlugin
     }
 
     if (plugins.share) {
-      plugins.share.url.locators.create(
-        new DiscoverAppLocatorDefinition({ useHash: false, setStateToKbnUrl })
-      );
+      plugins.share.url.locators.create(new DiscoverAppLocatorDefinitionCommon({ useHash: false }));
     }
 
     return {};

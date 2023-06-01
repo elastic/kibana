@@ -39,9 +39,9 @@ import type { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-manag
 import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
-import type { DiscoverAppLocator } from './locator';
-import type { DiscoverContextAppLocator } from './context/locator';
-import type { DiscoverSingleDocLocator } from './doc/locator';
+import { DiscoverAppLocator } from './main/types';
+import {DiscoverContextAppLocator} from "@kbn/unified-discover/src/context/types";
+import {DiscoverSingleDocLocator} from "@kbn/unified-discover/src/doc/types";
 
 export interface EsHitRecord extends Omit<estypes.SearchHit, '_source'> {
   _source?: Record<string, unknown>;

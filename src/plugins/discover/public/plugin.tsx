@@ -37,16 +37,11 @@ import { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-
 import type { SavedObjectTaggingOssPluginStart } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import type { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
-import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
-import {
-  DiscoverContextAppLocator,
-  DiscoverContextAppLocatorDefinition,
-} from '@kbn/unified-discover/src/context/locator';
-import {
-  DiscoverSingleDocLocator,
-  DiscoverSingleDocLocatorDefinition,
-} from '@kbn/unified-discover/src/doc/locator';
+import type { DiscoverContextAppLocator } from '@kbn/unified-discover/src/context/types';
+import { DiscoverSingleDocLocator } from '@kbn/unified-discover/src/doc/types';
+import { DiscoverAppLocator } from '@kbn/lens-plugin/public/trigger_actions/open_in_discover_helpers';
+import { DiscoverAppLocatorDefinitionPublic } from './locator';
 import { PLUGIN_ID } from '../common';
 import {
   setHeaderActionMenuMounter,
@@ -62,7 +57,8 @@ import { ViewSavedSearchAction } from './embeddable/view_saved_search_action';
 import { injectTruncateStyles } from './utils/truncate_styles';
 import { TRUNCATE_MAX_HEIGHT } from '../common';
 import { initializeKbnUrlTracking } from './utils/initialize_kbn_url_tracking';
-import { DiscoverAppLocator, DiscoverAppLocatorDefinition } from '../common';
+import { DiscoverContextAppLocatorDefinition } from './application/context/services/locator';
+import { DiscoverSingleDocLocatorDefinition } from './application/doc/locator';
 
 /**
  * @public
@@ -196,7 +192,7 @@ export class DiscoverPlugin
     if (plugins.share) {
       const useHash = core.uiSettings.get('state:storeInSessionStorage');
       this.locator = plugins.share.url.locators.create(
-        new DiscoverAppLocatorDefinition({ useHash, setStateToKbnUrl })
+        new DiscoverAppLocatorDefinitionPublic({ useHash })
       );
 
       this.contextLocator = plugins.share.url.locators.create(

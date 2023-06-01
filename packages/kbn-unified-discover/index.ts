@@ -21,5 +21,4 @@ export type {
   HistoryLocationState,
 } from './src/types';
 
-export * from './src/locator';
 export * from './src/constants';

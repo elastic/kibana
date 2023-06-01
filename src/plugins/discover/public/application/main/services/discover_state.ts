@@ -13,6 +13,7 @@ import {
   StateContainer,
   withNotifyOnErrors,
 } from '@kbn/kibana-utils-plugin/public';
+import { DiscoverAppLocatorParams } from '@kbn/unified-discover/src/main/types';
 import {
   type DataPublicPluginStart,
   noSearchSessionStorageCapabilityMessage,
@@ -35,7 +36,6 @@ import { addLog } from '../../../utils/add_log';
 import { getUrlTracker } from '../../../kibana_services';
 import { DiscoverDataStateContainer, getDataStateContainer } from './discover_data_state_container';
 import { DiscoverSearchSessionManager } from './discover_search_session';
-import { DISCOVER_APP_LOCATOR, DiscoverAppLocatorParams } from '../../../../common';
 import {
   DiscoverAppState,
   DiscoverAppStateContainer,
@@ -52,6 +52,7 @@ import {
   DiscoverSavedSearchContainer,
 } from './discover_saved_search_container';
 import { updateFiltersReferences } from '../utils/update_filter_references';
+import { DISCOVER_APP_LOCATOR } from '../../../../common/locator';
 interface DiscoverStateContainerParams {
   /**
    * Browser history

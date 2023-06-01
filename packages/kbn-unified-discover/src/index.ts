@@ -11,6 +11,5 @@ export { formatFieldValue } from './utils/format_value';
 export * from './utils/get_doc_id';
 export * from './utils/get_should_show_field_handler';
 export * from './types';
-export * from './locator';
 export * from './constants';
 export { buildDataTableRecord, buildDataTableRecordList } from './utils/build_data_record';

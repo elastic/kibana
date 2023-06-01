@@ -9,15 +9,16 @@
 import type { Filter, Query, AggregateQuery } from '@kbn/es-query';
 import type { GlobalQueryStateFromUrl } from '@kbn/data-plugin/public';
 import type { LocatorDefinition } from '@kbn/share-plugin/public';
-import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/common';
-import {
+import type { SetStateToKbnUrlHashOptions } from '@kbn/kibana-utils-plugin/common/state_management/set_state_to_kbn_url';
+import type {
   DiscoverAppLocatorDependencies,
   DiscoverAppLocatorParams,
   MainHistoryLocationState,
-} from './main/types';
+} from '@kbn/unified-discover/src/main/types';
+import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/common';
 export const DISCOVER_APP_LOCATOR = 'DISCOVER_APP_LOCATOR';
 
-export class DiscoverAppLocatorDefinition implements LocatorDefinition<DiscoverAppLocatorParams> {
+export class DiscoverAppLocatorDefinitionCommon implements LocatorDefinition<DiscoverAppLocatorParams> {
   public readonly id = DISCOVER_APP_LOCATOR;
 
   constructor(protected readonly deps: DiscoverAppLocatorDependencies) {}
@@ -80,8 +81,8 @@ export class DiscoverAppLocatorDefinition implements LocatorDefinition<DiscoverA
     if (isAlertResults) state.isAlertResults = isAlertResults;
 
     let path = `#/${savedSearchPath}`;
-    path = setStateToKbnUrl<GlobalQueryStateFromUrl>('_g', queryState, { useHash }, path);
-    path = setStateToKbnUrl('_a', appState, { useHash }, path);
+    path = this.setStateToKbnUrl<GlobalQueryStateFromUrl>('_g', queryState, { useHash }, path);
+    path = this.setStateToKbnUrl('_a', appState, { useHash }, path);
 
     if (searchSessionId) {
       path = `${path}&searchSessionId=${searchSessionId}`;
@@ -92,5 +93,13 @@ export class DiscoverAppLocatorDefinition implements LocatorDefinition<DiscoverA
       path,
       state,
     };
+  };
+  public setStateToKbnUrl = <State>(
+    key: string,
+    state: State,
+    hashOptions: SetStateToKbnUrlHashOptions,
+    rawUrl: string
+  ): string => {
+    return setStateToKbnUrl<State>(key, state, hashOptions, rawUrl);
   };
 }
