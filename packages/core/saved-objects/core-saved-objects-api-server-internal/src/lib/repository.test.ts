@@ -853,9 +853,7 @@ describe('SavedObjectsRepository', () => {
         await bulkCreateError(obj3, true, expectedErrorResult);
       });
 
-      it.skip(`returns errors for any bulk objects with invalid schemas`, async () => {
-        // todo: fix me
-        // change to validate caused this not to throw when it should
+      it(`returns errors for any bulk objects with invalid schemas`, async () => {
         const response = getMockBulkCreateResponse([obj3]);
         client.bulk.mockResponseOnce(response);
 
@@ -3038,8 +3036,7 @@ describe('SavedObjectsRepository', () => {
         expect(client.create).not.toHaveBeenCalled();
       });
 
-      it.skip(`throws when schema validation fails`, async () => {
-        // todo: fix
+      it(`throws when schema validation fails`, async () => {
         await expect(
           repository.create('dashboard', { title: 123 })
         ).rejects.toThrowErrorMatchingInlineSnapshot(
