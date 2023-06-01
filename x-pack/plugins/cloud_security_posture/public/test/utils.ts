@@ -15,3 +15,19 @@ export const expectIdsInDoc = ({ be = [], notToBe = [] }: { be: string[]; notToB
     expect(screen.queryByTestId(testId)).not.toBeInTheDocument();
   });
 };
+
+export const expectSingleIdInDoc = <TTestID>({
+  testIds,
+  singleIdInDoc,
+}: {
+  testIds: TTestID[];
+  singleIdInDoc: TTestID;
+}) => {
+  const testIdsNotInDoc = testIds.filter((testId) => testId !== singleIdInDoc);
+
+  expect(screen.getByTestId(singleIdInDoc)).toBeInTheDocument();
+
+  testIdsNotInDoc.forEach((testId) => {
+    expect(screen.queryByTestId(testId)).not.toBeInTheDocument();
+  });
+};
