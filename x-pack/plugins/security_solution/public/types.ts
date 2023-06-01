@@ -10,6 +10,7 @@ import type { BehaviorSubject, Observable } from 'rxjs';
 import type { AppLeaveHandler, CoreStart } from '@kbn/core/public';
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { FieldFormatsStartCommon } from '@kbn/field-formats-plugin/common';
 import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import type { NewsfeedPublicPluginStart } from '@kbn/newsfeed-plugin/public';
@@ -108,6 +109,7 @@ export interface StartPlugins {
   threatIntelligence: ThreatIntelligencePluginStart;
   cloudExperiments?: CloudExperimentsPluginStart;
   dataViews: DataViewsServicePublic;
+  fieldFormats: FieldFormatsStartCommon;
 }
 
 export interface StartPluginsDependencies extends StartPlugins {

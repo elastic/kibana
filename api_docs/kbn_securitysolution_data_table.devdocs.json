@@ -238,15 +238,15 @@
         "signature": [
           "(headers: ",
           "ColumnHeaderOptions",
-          "[], browserFields: Readonly<Record<string, Partial<",
+          "[], browserFields: ",
           {
             "pluginId": "timelines",
             "scope": "common",
             "docId": "kibTimelinesPluginApi",
-            "section": "def-common.BrowserField",
-            "text": "BrowserField"
+            "section": "def-common.BrowserFields",
+            "text": "BrowserFields"
           },
-          ">>>, isEventRenderedView?: boolean | undefined) => ",
+          ", isEventRenderedView?: boolean | undefined) => ",
           "ColumnHeaderOptions",
           "[]"
         ],
@@ -278,15 +278,13 @@
             "label": "browserFields",
             "description": [],
             "signature": [
-              "Readonly<Record<string, Partial<",
               {
                 "pluginId": "timelines",
                 "scope": "common",
                 "docId": "kibTimelinesPluginApi",
-                "section": "def-common.BrowserField",
-                "text": "BrowserField"
-              },
-              ">>>"
+                "section": "def-common.BrowserFields",
+                "text": "BrowserFields"
+              }
             ],
             "path": "x-pack/packages/security-solution/data_table/components/data_table/column_headers/helpers.tsx",
             "deprecated": false,
