@@ -16,10 +16,16 @@ import {
   EuiIcon,
   EuiProgress,
   EuiPanel,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiButton,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { apmServiceInventoryOptimizedSorting } from '@kbn/observability-plugin/common';
+import moment from 'moment';
+import { isEmpty } from 'lodash';
+import { downloadJson } from '../../../../utils/download_json';
 import { AgentName } from '../../../../../typings/es_schemas/ui/fields/agent';
 import { EnvironmentBadge } from '../../../shared/environment_badge';
 import { asPercent } from '../../../../../common/utils/formatters';
@@ -218,7 +224,7 @@ export function ServicesTable() {
             {i18n.translate(
               'xpack.apm.storageExplorer.table.samplingColumnName',
               {
-                defaultMessage: 'Sample rate',
+                defaultMessage: 'Sampling rate',
               }
             )}{' '}
             <EuiIcon
@@ -282,6 +288,44 @@ export function ServicesTable() {
       style={{ position: 'relative' }}
     >
       {loading && <EuiProgress size="xs" color="accent" position="absolute" />}
+      <EuiFlexGroup justifyContent="flexEnd">
+        <EuiFlexItem grow={false}>
+          <EuiButton
+            data-test-subj="StorageExplorerDownloadReportButton"
+            iconType="download"
+            isDisabled={isEmpty(serviceStatisticsItems)}
+            onClick={() =>
+              downloadJson({
+                fileName: `storage-explorefpr-${moment(Date.now()).format(
+                  'YYYYMMDDHHmmss'
+                )}.json`,
+                data: {
+                  filters: {
+                    rangeFrom,
+                    rangeTo,
+                    environment,
+                    kuery,
+                    indexLifecyclePhase,
+                  },
+                  services: serviceStatisticsItems.map((item) => ({
+                    ...item,
+                    sampling: asPercent(item?.sampling, 1),
+                    size: item?.size
+                      ? asDynamicBytes(item?.size)
+                      : NOT_AVAILABLE_LABEL,
+                  })),
+                },
+              })
+            }
+            fill
+          >
+            {i18n.translate('xpack.apm.storageExplorer.downloadReport', {
+              defaultMessage: 'Download report',
+            })}
+          </EuiButton>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+
       <EuiInMemoryTable
         tableCaption={i18n.translate(
           'xpack.apm.storageExplorer.table.caption',

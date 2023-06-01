@@ -72,14 +72,12 @@ class OptionsListService implements ControlsOptionsListService {
     async (request: OptionsListRequest, abortSignal: AbortSignal) => {
       const index = request.dataView.title;
       const requestBody = this.getRequestBody(request);
-      return await this.http.fetch<OptionsListResponse>(
-        `/api/kibana/controls/optionsList/${index}`,
-        {
-          body: JSON.stringify(requestBody),
-          signal: abortSignal,
-          method: 'POST',
-        }
-      );
+      return await this.http.fetch<OptionsListResponse>(`/internal/controls/optionsList/${index}`, {
+        version: '1',
+        body: JSON.stringify(requestBody),
+        signal: abortSignal,
+        method: 'POST',
+      });
     },
     this.optionsListCacheResolver
   );
@@ -104,7 +102,9 @@ class OptionsListService implements ControlsOptionsListService {
   private cachedAllowExpensiveQueries = memoize(async () => {
     const { allowExpensiveQueries } = await this.http.get<{
       allowExpensiveQueries: boolean;
-    }>('/api/kibana/controls/optionsList/getExpensiveQueriesSetting');
+    }>('/internal/controls/optionsList/getExpensiveQueriesSetting', {
+      version: '1',
+    });
     return allowExpensiveQueries;
   });
 
