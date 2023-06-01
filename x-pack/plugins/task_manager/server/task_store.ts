@@ -565,7 +565,7 @@ function migrateTaskState(
 
   let migratedState = state;
   for (let i = currentVersion || 1; i <= lastestStateSchema.version; i++) {
-    if (!taskTypeDef.stateSchemaByVersion || taskTypeDef.stateSchemaByVersion[i]) {
+    if (!taskTypeDef.stateSchemaByVersion || taskTypeDef.stateSchemaByVersion[`${i}`]) {
       throw new Error(`[migrateStateSchema] state schema missing for version: ${i}`);
     }
     migratedState = taskTypeDef.stateSchemaByVersion[i].up(migratedState);
