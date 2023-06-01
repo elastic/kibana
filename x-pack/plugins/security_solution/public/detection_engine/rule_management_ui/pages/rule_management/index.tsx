@@ -43,6 +43,7 @@ import * as i18n from '../../../../detections/pages/detection_engine/rules/trans
 import { useInvalidateFetchRuleManagementFiltersQuery } from '../../../rule_management/api/hooks/use_fetch_rule_management_filters_query';
 
 import { MaintenanceWindowCallout } from '../../components/maintenance_window_callout/maintenance_window_callout';
+import { RulesPageTourComponent } from '../../components/rules_table/alternative_tour/tour';
 
 const RulesPageComponent: React.FC = () => {
   const [isImportModalVisible, showImportModal, hideImportModal] = useBoolState();
@@ -144,15 +145,17 @@ const RulesPageComponent: React.FC = () => {
                 </EuiButton>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <SecuritySolutionLinkButton
-                  data-test-subj="create-new-rule"
-                  fill
-                  iconType="plusInCircle"
-                  isDisabled={!hasUserCRUDPermission(canUserCRUD) || loading}
-                  deepLinkId={SecurityPageName.rulesCreate}
-                >
-                  {i18n.ADD_NEW_RULE}
-                </SecuritySolutionLinkButton>
+                <RulesPageTourComponent>
+                  <SecuritySolutionLinkButton
+                    data-test-subj="create-new-rule"
+                    fill
+                    iconType="plusInCircle"
+                    isDisabled={!hasUserCRUDPermission(canUserCRUD) || loading}
+                    deepLinkId={SecurityPageName.rulesCreate}
+                  >
+                    {i18n.ADD_NEW_RULE}
+                  </SecuritySolutionLinkButton>
+                </RulesPageTourComponent>
               </EuiFlexItem>
             </EuiFlexGroup>
           </HeaderPage>
