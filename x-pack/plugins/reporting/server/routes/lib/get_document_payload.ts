@@ -33,7 +33,7 @@ type TaskRunResult = Required<ReportApiJSON>['output'];
 
 const DEFAULT_TITLE = 'report';
 
-const getTitle = (exportType: ExportType, title?: string): string =>
+export const getTitle = (exportType: ExportType, title?: string): string =>
   `${title || DEFAULT_TITLE}.${exportType.jobContentExtension}`;
 
 const getReportingHeaders = (output: TaskRunResult, exportType: ExportType) => {

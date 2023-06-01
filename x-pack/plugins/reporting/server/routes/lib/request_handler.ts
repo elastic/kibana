@@ -72,8 +72,8 @@ export class RequestHandler {
     const payload = {
       ...job,
       headers,
+      title: jobParams.title,
       objectType: jobParams.objectType,
-      title: 'Reporting: execute job',
       browserTimezone: jobParams.browserTimezone,
       version: jobParams.version,
       spaceId: reporting.getSpaceId(request, logger),
