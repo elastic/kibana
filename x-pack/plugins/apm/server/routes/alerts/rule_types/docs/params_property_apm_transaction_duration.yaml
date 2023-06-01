@@ -35,8 +35,15 @@ params_property_apm_transaction_duration:
       description: The latency threshold value
     groupBy:
       type: array
+      default: ["service.name", "service.environment", "transaction.type"]
+      uniqueItems: true
       items:
         type: string
+        enum:
+          - "service.name"
+          - "service.environment"
+          - "transaction.type"
+          - "transaction.name"
     aggregationType:
       type: string
       enum:

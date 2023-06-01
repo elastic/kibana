@@ -29,7 +29,14 @@ params_property_apm_error_count:
       description: The error count threshold value
     groupBy:
       type: array
+      default: ["service.name", "service.environment"]
+      uniqueItems: true
       items:
         type: string
+        enum:
+          - "service.name"
+          - "service.environment"
+          - "transaction.name"
+          - "error.grouping_key"
     errorGroupingKey:
       type: string

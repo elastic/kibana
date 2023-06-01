@@ -35,5 +35,12 @@ params_property_apm_transaction_error_rate:
       description: The error rate threshold value
     groupBy:
       type: array
+      default: ["service.name", "service.environment", "transaction.type"]
+      uniqueItems: true
       items:
         type: string
+        enum:
+          - "service.name"
+          - "service.environment"
+          - "transaction.type"
+          - "transaction.name"
