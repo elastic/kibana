@@ -94,7 +94,8 @@ export class ValidationHelper {
     }
     const validator = this.getTypeValidator(type);
     try {
-      validator.validate(doc, this.kibanaVersion);
+      validator.validate(doc);
+      // validator.validate(doc, this.kibanaVersion);
     } catch (error) {
       throw SavedObjectsErrorHelpers.createBadRequestError(error.message);
     }
