@@ -30,7 +30,8 @@ export const RULE_UPDATES_LINK = i18n.translate(
   }
 );
 
-export const UPDATE_RULES_CALLOUT_TITLE = (
+type OnClick = () => void;
+export const UPDATE_RULES_CALLOUT_TITLE = (onClick: OnClick) => (
   <FormattedMessage
     id="xpack.securitySolution.detectionEngine.rules.updatePrebuiltRulesCalloutTitle"
     defaultMessage="Updates available for installed rules. Review and update in&nbsp;{link}."
@@ -40,6 +41,7 @@ export const UPDATE_RULES_CALLOUT_TITLE = (
           className={css`
             font-weight: 400;
           `}
+          onClick={onClick}
         >
           {RULE_UPDATES_LINK}
         </EuiLink>

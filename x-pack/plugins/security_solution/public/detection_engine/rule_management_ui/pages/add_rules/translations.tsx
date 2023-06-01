@@ -13,4 +13,3 @@ export const PAGE_TITLE = i18n.translate(
     defaultMessage: 'Add Elastic Rules',
   }
 );
-

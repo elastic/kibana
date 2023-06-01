@@ -11,7 +11,10 @@ import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiToolTip } from
 import { APP_UI_ID } from '../../../../../common/constants';
 import { SecurityPageName } from '../../../../app/types';
 import { ImportDataModal } from '../../../../common/components/import_data_modal';
-import { SecuritySolutionLinkButton } from '../../../../common/components/links';
+import {
+  SecuritySolutionLinkButton,
+  useGetSecuritySolutionLinkProps,
+} from '../../../../common/components/links';
 import { getDetectionEngineUrl } from '../../../../common/components/link_to/redirect_to_detection_engine';
 import { SecuritySolutionPageWrapper } from '../../../../common/components/page_wrapper';
 import { useBoolState } from '../../../../common/hooks/use_bool_state';
@@ -47,6 +50,7 @@ import {
   UPDATE_RULES_CALLOUT_TITLE,
 } from '../../components/mini_callout/translations';
 import { useInvalidateFetchPrebuiltRulesStatusQueryNew } from '../../../rule_management/api/hooks/prebuilt_rules/use_fetch_prebuilt_rules_status_query_new';
+import { AllRulesTabs } from '../../components/rules_table/rules_table_toolbar';
 
 const RulesPageComponent: React.FC = () => {
   const [isImportModalVisible, showImportModal, hideImportModal] = useBoolState();
@@ -90,6 +94,19 @@ const RulesPageComponent: React.FC = () => {
     needsConfiguration: needsListsConfiguration,
   } = useListsConfig();
   const loading = userInfoLoading || listsConfigLoading;
+
+  const getSecuritySolutionLinkProps = useGetSecuritySolutionLinkProps();
+  const { href } = getSecuritySolutionLinkProps({
+    deepLinkId: SecurityPageName.rules,
+    path: AllRulesTabs.updates,
+  });
+  const {
+    application: { navigateToUrl },
+  } = useKibana().services;
+
+  const updateCallOutOnClick = useCallback(() => {
+    navigateToUrl(href);
+  }, [navigateToUrl, href]);
 
   if (
     redirectToDetections(
@@ -179,7 +196,7 @@ const RulesPageComponent: React.FC = () => {
             <MiniCallout
               iconType={'iInCircle'}
               data-test-subj="prebuilt-rules-update-callout"
-              title={UPDATE_RULES_CALLOUT_TITLE}
+              title={UPDATE_RULES_CALLOUT_TITLE(updateCallOutOnClick)}
             />
           )}
 
