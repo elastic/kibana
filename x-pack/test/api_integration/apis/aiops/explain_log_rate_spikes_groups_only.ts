@@ -96,6 +96,7 @@ export default ({ getService }: FtrProviderContext) => {
           const resp = await supertest
             .post(`/internal/aiops/explain_log_rate_spikes`)
             .set('kbn-xsrf', 'kibana')
+            .set('Elastic-Api-Version', '1')
             .send(body)
             .expect(200);
 
@@ -158,6 +159,7 @@ export default ({ getService }: FtrProviderContext) => {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
+              'Elastic-Api-Version': '1',
               'kbn-xsrf': 'stream',
             },
             body: JSON.stringify(body),
