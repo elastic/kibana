@@ -6,16 +6,17 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import {
+  getAnalysisType,
+  type DataFrameAnalysisConfigType,
+  DATA_FRAME_TASK_STATE,
+} from '@kbn/ml-data-frame-analytics-utils';
 import { ml } from '../../../../../services/ml_api_service';
 import {
   GetDataFrameAnalyticsStatsResponseError,
   GetDataFrameAnalyticsStatsResponseOk,
 } from '../../../../../services/ml_api_service/data_frame_analytics';
-import {
-  getAnalysisType,
-  REFRESH_ANALYTICS_LIST_STATE,
-  refreshAnalyticsList$,
-} from '../../../../common';
+import { REFRESH_ANALYTICS_LIST_STATE, refreshAnalyticsList$ } from '../../../../common';
 
 import {
   DATA_FRAME_MODE,
@@ -26,8 +27,6 @@ import {
   isDataFrameAnalyticsStopped,
 } from '../../components/analytics_list/common';
 import { AnalyticStatsBarStats } from '../../../../../components/stats_bar';
-import { DataFrameAnalysisConfigType } from '../../../../../../../common/types/data_frame_analytics';
-import { DATA_FRAME_TASK_STATE } from '../../../../../../../common/constants/data_frame_analytics';
 
 export const isGetDataFrameAnalyticsStatsResponseOk = (
   arg: any

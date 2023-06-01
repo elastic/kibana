@@ -7,7 +7,7 @@
 
 import React, { FC, useCallback, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
-import { EuiFormRow } from '@elastic/eui';
+import { EuiFormRow, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { SavedObjectSaveModalTagSelectorComponentProps } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import { TagsCapabilities } from '../../../common';
@@ -29,6 +29,7 @@ export const getConnectedSavedObjectModalTagSelectorComponent = ({
   return ({
     initialSelection,
     onTagsSelected: notifySelectionChange,
+    markOptional,
     ...rest
   }: SavedObjectSaveModalTagSelectorComponentProps) => {
     const tags = useObservable(cache.getState$(), cache.getState());
@@ -50,6 +51,16 @@ export const getConnectedSavedObjectModalTagSelectorComponent = ({
             id="xpack.savedObjectsTagging.uiApi.saveModal.label"
             defaultMessage="Tags"
           />
+        }
+        labelAppend={
+          markOptional && (
+            <EuiText color="subdued" size="xs">
+              <FormattedMessage
+                id="xpack.savedObjectsTagging.uiApi.saveModal.optional"
+                defaultMessage="Optional"
+              />
+            </EuiText>
+          )
         }
       >
         <TagSelector

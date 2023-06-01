@@ -10,12 +10,14 @@ import { EuiEmptyPrompt } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { useUrlState } from '@kbn/ml-url-state';
+import {
+  ANALYSIS_CONFIG_TYPE,
+  type DataFrameAnalysisConfigType,
+} from '@kbn/ml-data-frame-analytics-utils';
 import { OutlierExploration } from './components/outlier_exploration';
 import { RegressionExploration } from './components/regression_exploration';
 import { ClassificationExploration } from './components/classification_exploration';
 
-import { ANALYSIS_CONFIG_TYPE } from '../../../../../common/constants/data_frame_analytics';
-import { DataFrameAnalysisConfigType } from '../../../../../common/types/data_frame_analytics';
 import { HelpMenu } from '../../../components/help_menu';
 import { useMlKibana, useMlApiContext } from '../../../contexts/kibana';
 import { MlPageHeader } from '../../../components/page_header';

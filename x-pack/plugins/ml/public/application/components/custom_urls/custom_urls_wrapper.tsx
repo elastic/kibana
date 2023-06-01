@@ -7,9 +7,9 @@
 
 import React, { FC } from 'react';
 import type { MlUrlConfig } from '@kbn/ml-anomaly-utils';
+import type { DataFrameAnalyticsConfig } from '@kbn/ml-data-frame-analytics-utils';
 import { useMlKibana } from '../../contexts/kibana';
 import { Job } from '../../../../common/types/anomaly_detection_jobs';
-import { type DataFrameAnalyticsConfig } from '../../../../common/types/data_frame_analytics';
 import { CustomUrls } from './custom_urls';
 
 export interface CustomUrlsWrapperProps {
