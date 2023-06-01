@@ -15,7 +15,7 @@ import {
 } from './use_metrics_explorer_options';
 
 let PREFILL: Record<string, any> = {};
-jest.mock('../../../../alerting/use_alert_prefill', () => ({
+jest.mock('../helpers/use_alert_prefill', () => ({
   useAlertPrefillContext: () => ({
     metricThresholdPrefill: {
       setPrefillOptions(opts: Record<string, any>) {
@@ -25,7 +25,7 @@ jest.mock('../../../../alerting/use_alert_prefill', () => ({
   }),
 }));
 
-jest.mock('../../../../hooks/use_kibana_timefilter_time', () => ({
+jest.mock('./use_kibana_timefilter_time', () => ({
   useKibanaTimefilterTime: (defaults: { from: string; to: string }) => [() => defaults],
   useSyncKibanaTimeFilterTime: () => [() => {}],
 }));

@@ -34,7 +34,7 @@ jest.mock('./expression_chart', () => ({
   ExpressionChart: jest.fn(() => <div data-test-subj="ExpressionChart" />),
 }));
 
-jest.mock('../../../hooks/use_kibana', () => ({
+jest.mock('../../../utils/kibana_react', () => ({
   useKibanaContextForPlugin: () => ({
     services: {
       ...mockCoreMock.createStart(),
@@ -43,7 +43,7 @@ jest.mock('../../../hooks/use_kibana', () => ({
   }),
 }));
 
-jest.mock('../../../containers/metrics_source/source', () => ({
+jest.mock('../helpers/source', () => ({
   withSourceProvider: () => jest.fn,
   useSourceContext: () => ({
     source: { id: 'default' },

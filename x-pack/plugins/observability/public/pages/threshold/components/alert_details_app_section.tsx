@@ -29,8 +29,6 @@ import {
 import { useKibana } from '../../../utils/kibana_react';
 import { metricValueFormatter } from '../../../../common/threshold_rule/metric_value_formatter';
 import { AlertSummaryField, TopAlert } from '../../..';
-
-// import { useSourceContext, withSourceProvider } from '../../../containers/metrics_source';
 import { generateUniqueKey } from '../lib/generate_unique_key';
 import { MetricThresholdRuleTypeParams } from '..';
 import { ExpressionChart } from './expression_chart';

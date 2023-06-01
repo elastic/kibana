@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Aggregators, Comparator } from '../../../../common/alerting/metrics';
+import { Aggregators, Comparator } from '../../../../common/threshold_rule/types';
 import { MetricExpression } from '../types';
 import { generateUniqueKey } from './generate_unique_key';
 

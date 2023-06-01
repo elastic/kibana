@@ -13,19 +13,19 @@ import { renderHook } from '@testing-library/react-hooks';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 
 import {
-  options,
-  source,
-  derivedIndexPattern,
-  timestamps,
-  resp,
-  createSeries,
-} from '../../../../utils/fixtures/metrics_explorer';
-import {
   MetricsExplorerOptions,
   MetricsExplorerTimestampsRT,
 } from './use_metrics_explorer_options';
 import { DataViewBase } from '@kbn/es-query';
-import { MetricsSourceConfigurationProperties } from '../../../../../common/metrics_sources';
+import { MetricsSourceConfigurationProperties } from '../../../../common/threshold_rule/types';
+import {
+  createSeries,
+  derivedIndexPattern,
+  options,
+  resp,
+  source,
+  timestamps,
+} from '../../../utils/metrics_explorer';
 
 const mockedFetch = jest.fn();
 
@@ -76,7 +76,7 @@ const renderUseMetricsExplorerDataHook = () => {
   );
 };
 
-jest.mock('../../../../utils/kuery', () => {
+jest.mock('../helpers/kuery', () => {
   return {
     convertKueryToElasticSearchQuery: (query: string) => query,
   };

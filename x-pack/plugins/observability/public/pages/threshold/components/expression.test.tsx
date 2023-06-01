@@ -10,12 +10,13 @@ import React from 'react';
 import { act } from 'react-dom/test-utils';
 // We are using this inside a `jest.mock` call. Jest requires dynamic dependencies to be prefixed with `mock`
 import { coreMock as mockCoreMock } from '@kbn/core/public/mocks';
-import { Comparator } from '../../../../common/alerting/metrics';
-import { MetricsExplorerMetric } from '../../../../common/http_api/metrics_explorer';
+
 import { Expressions } from './expression';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
+import { MetricsExplorerMetric } from '../../../../common/threshold_rule/metrics_explorer';
+import { Comparator } from '../../../../common/threshold_rule/types';
 
-jest.mock('../../../containers/metrics_source/source', () => ({
+jest.mock('../helpers/source', () => ({
   withSourceProvider: () => jest.fn,
   useSourceContext: () => ({
     source: { id: 'default' },
@@ -23,8 +24,8 @@ jest.mock('../../../containers/metrics_source/source', () => ({
   }),
 }));
 
-jest.mock('../../../hooks/use_kibana', () => ({
-  useKibanaContextForPlugin: () => ({
+jest.mock('../../../utils/kibana_react', () => ({
+  useKibana: () => ({
     services: mockCoreMock.createStart(),
   }),
 }));
