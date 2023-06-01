@@ -4,13 +4,20 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiAccordion, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiPanel, EuiText } from '@elastic/eui';
+import {
+  EuiAccordion,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiPanel,
+  EuiText,
+  useEuiTheme,
+} from '@elastic/eui';
 import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { Observable } from 'rxjs';
-import { useTheme } from '@kbn/observability-shared-plugin/public';
 import { OpenAIPromptId, PromptParamsOf } from '../../../common/openai';
 import { CoPilotService, PromptObservableState } from '../../hooks/use_co_pilot';
 
@@ -50,7 +57,7 @@ export function CoPilotPrompt<TPromptId extends OpenAIPromptId>({
 }: Props<TPromptId>) {
   const [hasOpened, setHasOpened] = useState(false);
 
-  const theme = useTheme();
+  const theme = useEuiTheme();
 
   const conversation$ = useMemo(() => {
     return hasOpened
@@ -67,7 +74,7 @@ export function CoPilotPrompt<TPromptId extends OpenAIPromptId>({
   const cursor = isLoading ? <span className={cursorCss} /> : <></>;
 
   const chat = (
-    <p style={{ whiteSpace: 'pre-wrap', paddingTop: theme.eui.euiSizeM, lineHeight: 1.5 }}>
+    <p style={{ whiteSpace: 'pre-wrap', paddingTop: theme.euiTheme.size.m, lineHeight: 1.5 }}>
       {content}
       {cursor}
     </p>
