@@ -6,25 +6,10 @@
  * Side Public License, v 1.
  */
 
-import type { SerializableRecord } from '@kbn/utility-types';
-import type { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/public';
-import type { DataViewSpec } from '@kbn/data-views-plugin/public';
+import type { LocatorDefinition } from '@kbn/share-plugin/public';
+import { DiscoverSingleDocLocatorParams, DocHistoryLocationState } from './types';
 
 export const DISCOVER_SINGLE_DOC_LOCATOR = 'DISCOVER_SINGLE_DOC_LOCATOR';
-
-export interface DiscoverSingleDocLocatorParams extends SerializableRecord {
-  index: string | DataViewSpec; // spec in case of adhoc data view
-  rowId: string;
-  rowIndex: string;
-  referrer: string; // discover main view url
-}
-
-export type DiscoverSingleDocLocator = LocatorPublic<DiscoverSingleDocLocatorParams>;
-
-export interface DocHistoryLocationState {
-  referrer: string;
-  dataViewSpec?: DataViewSpec;
-}
 
 export class DiscoverSingleDocLocatorDefinition
   implements LocatorDefinition<DiscoverSingleDocLocatorParams>

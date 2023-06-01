@@ -6,32 +6,16 @@
  * Side Public License, v 1.
  */
 
-import type { SerializableRecord } from '@kbn/utility-types';
 import type { Filter } from '@kbn/es-query';
 import type { GlobalQueryStateFromUrl } from '@kbn/data-plugin/public';
-import type { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/public';
+import type { LocatorDefinition } from '@kbn/share-plugin/public';
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
-import type { DataViewSpec } from '@kbn/data-views-plugin/public';
+import {
+  ContextHistoryLocationState,
+  DiscoverContextAppLocatorDependencies,
+  DiscoverContextAppLocatorParams,
+} from './types';
 export const DISCOVER_CONTEXT_APP_LOCATOR = 'DISCOVER_CONTEXT_APP_LOCATOR';
-
-export interface DiscoverContextAppLocatorParams extends SerializableRecord {
-  index: string | DataViewSpec; // spec in case of adhoc data view
-  rowId: string;
-  columns?: string[];
-  filters?: Filter[];
-  referrer: string; // discover main view url
-}
-
-export type DiscoverContextAppLocator = LocatorPublic<DiscoverContextAppLocatorParams>;
-
-export interface DiscoverContextAppLocatorDependencies {
-  useHash: boolean;
-}
-
-export interface ContextHistoryLocationState {
-  referrer: string;
-  dataViewSpec?: DataViewSpec;
-}
 
 export class DiscoverContextAppLocatorDefinition
   implements LocatorDefinition<DiscoverContextAppLocatorParams>
