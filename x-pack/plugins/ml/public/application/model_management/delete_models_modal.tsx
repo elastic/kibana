@@ -85,6 +85,8 @@ export const DeleteModelsModal: FC<DeleteModelsModalProps> = ({ models, onClose 
     return acc + Object.keys(curr.pipelines).length;
   }, 0);
 
+  const isDeleteButtonDisabled = pipelinesCount > 0 && !forceDelete && !deletePipelines;
+
   return canDeleteModel ? (
     <EuiModal
       onClose={onClose.bind(null, false)}
@@ -182,6 +184,7 @@ export const DeleteModelsModal: FC<DeleteModelsModalProps> = ({ models, onClose 
           fill
           color="danger"
           data-test-subj="mlModelsDeleteModalConfirmButton"
+          disabled={isDeleteButtonDisabled}
         >
           <FormattedMessage
             id="xpack.ml.trainedModels.modelsList.deleteModal.deleteButtonLabel"
