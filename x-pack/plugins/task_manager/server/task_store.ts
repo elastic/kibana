@@ -510,17 +510,26 @@ export class TaskStore {
     const taskTypeDef = this.definitions.get(task.taskType);
     const lastestStateSchema = taskTypeDef.getLatestStateSchema();
 
+    if (mode === 'read') {
+      return {
+        ...task,
+        state: this.validateState
+          ? getValidatedStateSchema(
+              migrateTaskState(task.state, task.stateVersion, taskTypeDef, lastestStateSchema),
+              task.taskType,
+              lastestStateSchema,
+              'ignore'
+            )
+          : task.state,
+      };
+    }
+
     return {
       ...task,
       state: this.validateState
-        ? getValidatedStateSchema(
-            task.state,
-            task.taskType,
-            lastestStateSchema,
-            mode === 'read' ? 'ignore' : 'forbid'
-          )
+        ? getValidatedStateSchema(task.state, task.taskType, lastestStateSchema, 'forbid')
         : task.state,
-      stateVersion: mode === 'write' ? lastestStateSchema?.version : task.stateVersion,
+      stateVersion: lastestStateSchema?.version,
     };
   }
 }
@@ -542,6 +551,27 @@ export function correctVersionConflictsForContinuation(
 ): number {
   // @ts-expect-error estypes.ReindexResponse['updated'] and estypes.ReindexResponse['version_conflicts'] can be undefined
   return maxDocs && versionConflicts + updated > maxDocs ? maxDocs - updated : versionConflicts;
+}
+
+function migrateTaskState(
+  state: ConcreteTaskInstance['state'],
+  currentVersion: number | undefined,
+  taskTypeDef: TaskDefinition,
+  lastestStateSchema: ReturnType<TaskDefinition['getLatestStateSchema']>
+) {
+  if (!lastestStateSchema || (currentVersion && currentVersion >= lastestStateSchema.version)) {
+    return state;
+  }
+
+  let migratedState = state;
+  for (let i = currentVersion || 1; i <= lastestStateSchema.version; i++) {
+    if (!taskTypeDef.stateSchemaByVersion || taskTypeDef.stateSchemaByVersion[i]) {
+      throw new Error(`[migrateStateSchema] state schema missing for version: ${i}`);
+    }
+    migratedState = taskTypeDef.stateSchemaByVersion[i].up(migratedState);
+  }
+
+  return migratedState;
 }
 
 function getValidatedStateSchema(
