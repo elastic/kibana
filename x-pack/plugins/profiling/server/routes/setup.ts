@@ -24,75 +24,7 @@ import { hasProfilingData } from '../lib/setup/has_profiling_data';
 import { setSecurityRole, validateSecurityRole } from '../lib/setup/security_role';
 import { handleRouteHandlerError } from '../utils/handle_route_error_handler';
 import { getRoutePaths } from '../../common';
-
-export interface SetupResourceResponse {
-  cloud: {
-    available: boolean;
-    required: boolean;
-  };
-  data: {
-    available: boolean;
-  };
-  packages: {
-    installed: boolean;
-  };
-  permissions: {
-    configured: boolean;
-  };
-  policies: {
-    installed: boolean;
-  };
-  resource_management: {
-    enabled: boolean;
-  };
-  resources: {
-    created: boolean;
-  };
-  settings: {
-    configured: boolean;
-  };
-}
-
-function createDefaultSetupResourceResponse(): SetupResourceResponse {
-  return {
-    cloud: {
-      available: false,
-      required: true,
-    },
-    data: {
-      available: false,
-    },
-    packages: {
-      installed: false,
-    },
-    permissions: {
-      configured: false,
-    },
-    policies: {
-      installed: false,
-    },
-    resource_management: {
-      enabled: false,
-    },
-    resources: {
-      created: false,
-    },
-    settings: {
-      configured: false,
-    },
-  };
-}
-
-function areResourcesSetup(response: SetupResourceResponse): boolean {
-  return (
-    response.resource_management.enabled &&
-    response.resources.created &&
-    response.packages.installed &&
-    response.permissions.configured &&
-    response.policies.installed &&
-    response.settings.configured
-  );
-}
+import { areResourcesSetup, createDefaultSetupState } from '../../common/setup';
 
 export function registerSetupRoute({
   router,
@@ -131,10 +63,10 @@ export function registerSetupRoute({
 
         logger.info('Checking if Elasticsearch and Fleet are setup for Universal Profiling');
 
-        const body = createDefaultSetupResourceResponse();
-        body.cloud.available = dependencies.setup.cloud.isCloudEnabled;
+        const state = createDefaultSetupState();
+        state.cloud.available = dependencies.setup.cloud.isCloudEnabled;
 
-        if (!body.cloud.available) {
+        if (!state.cloud.available) {
           const msg = `Elastic Cloud is required to set up Elasticsearch and Fleet for Universal Profiling`;
           logger.error(msg);
           return response.custom({
@@ -148,31 +80,31 @@ export function registerSetupRoute({
         const verifyFunctions = [
           async () => {
             const statusResponse = await clientWithDefaultAuth.profilingStatus();
-            body.resource_management.enabled = statusResponse.resource_management.enabled;
-            body.resources.created = statusResponse.resources.created;
+            state.resource_management.enabled = statusResponse.resource_management.enabled;
+            state.resources.created = statusResponse.resources.created;
           },
           async () => {
-            body.data.available = await hasProfilingData({ client });
+            state.data.available = await hasProfilingData({ client });
           },
           async () => {
-            body.packages.installed = await isApmPackageInstalled(setupOptions);
+            state.packages.installed = await isApmPackageInstalled(setupOptions);
           },
           async () => {
-            body.policies.installed = await validateApmPolicy(setupOptions);
+            state.policies.installed = await validateApmPolicy(setupOptions);
           },
           async () => {
-            body.settings.configured = await validateMaximumBuckets(setupOptions);
+            state.settings.configured = await validateMaximumBuckets(setupOptions);
           },
           async () => {
-            body.permissions.configured = await validateSecurityRole(setupOptions);
+            state.permissions.configured = await validateSecurityRole(setupOptions);
           },
         ];
         await Promise.all(verifyFunctions.map(async (fn) => await fn()));
 
         return response.ok({
           body: {
-            has_setup: areResourcesSetup(body),
-            has_data: body.data.available,
+            has_setup: areResourcesSetup(state),
+            has_data: state.data.available,
           },
         });
       } catch (error) {
@@ -206,10 +138,10 @@ export function registerSetupRoute({
 
         logger.info('Setting up Elasticsearch and Fleet for Universal Profiling');
 
-        const body = createDefaultSetupResourceResponse();
-        body.cloud.available = dependencies.setup.cloud.isCloudEnabled;
+        const state = createDefaultSetupState();
+        state.cloud.available = dependencies.setup.cloud.isCloudEnabled;
 
-        if (!body.cloud.available) {
+        if (!state.cloud.available) {
           const msg = `Elastic Cloud is required to set up Elasticsearch and Fleet for Universal Profiling`;
           logger.error(msg);
           return response.custom({
@@ -223,25 +155,25 @@ export function registerSetupRoute({
         const verifyFunctions = [
           async () => {
             const statusResponse = await clientWithDefaultAuth.profilingStatus();
-            body.resource_management.enabled = statusResponse.resource_management.enabled;
-            body.resources.created = statusResponse.resources.created;
+            state.resource_management.enabled = statusResponse.resource_management.enabled;
+            state.resources.created = statusResponse.resources.created;
           },
           async () => {
-            body.packages.installed = await isApmPackageInstalled(setupOptions);
+            state.packages.installed = await isApmPackageInstalled(setupOptions);
           },
           async () => {
-            body.policies.installed = await validateApmPolicy(setupOptions);
+            state.policies.installed = await validateApmPolicy(setupOptions);
           },
           async () => {
-            body.settings.configured = await validateMaximumBuckets(setupOptions);
+            state.settings.configured = await validateMaximumBuckets(setupOptions);
           },
           async () => {
-            body.permissions.configured = await validateSecurityRole(setupOptions);
+            state.permissions.configured = await validateSecurityRole(setupOptions);
           },
         ];
         await Promise.all(verifyFunctions.map(async (fn) => await fn()));
 
-        if (areResourcesSetup(body)) {
+        if (areResourcesSetup(state)) {
           return response.ok();
         }
 
