@@ -100,8 +100,10 @@ export const initGetLogEntryAnomaliesRoute = ({ framework }: InfraBackendLibs) =
 };
 
 const getSortAndPagination = (
-  sort: Partial<GetLogEntryAnomaliesRequestPayload['data']['sort']> = {},
-  pagination: Partial<GetLogEntryAnomaliesRequestPayload['data']['pagination']> = {}
+  sort: Partial<logAnalysisResultsV1.GetLogEntryAnomaliesRequestPayload['data']['sort']> = {},
+  pagination: Partial<
+    logAnalysisResultsV1.GetLogEntryAnomaliesRequestPayload['data']['pagination']
+  > = {}
 ): {
   sort: AnomaliesSort;
   pagination: Pagination;
