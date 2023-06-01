@@ -4,10 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { Color } from '../../../../../common/threshold_rule/color_palette';
+import { Comparator } from '../../../../../common/threshold_rule/types';
 import { shallow } from 'enzyme';
 import React from 'react';
-import { Comparator } from '../../../../common/alerting/metrics';
-import { Color } from '../../../../common/color_palette';
+
 import { ThresholdAnnotations } from './threshold_annotations';
 
 jest.mock('@elastic/charts', () => {

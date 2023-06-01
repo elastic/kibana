@@ -8,13 +8,14 @@
 import { Meta, Story } from '@storybook/react/types-6-0';
 import React, { useCallback, useEffect, useState } from 'react';
 import { IErrorObject } from '@kbn/triggers-actions-ui-plugin/public';
-import { TimeUnitChar } from '../../../../../common';
+import { decorateWithGlobalStorybookThemeProviders } from '../../../../test_utils/use_global_storybook_theme';
 import {
   Aggregators,
   Comparator,
   MetricExpressionParams,
-} from '../../../../../common/alerting/metrics';
-import { decorateWithGlobalStorybookThemeProviders } from '../../../../test_utils/use_global_storybook_theme';
+} from '../../../../../common/threshold_rule/types';
+import { TimeUnitChar } from '../../../../../common';
+
 import { CustomEquationEditor, CustomEquationEditorProps } from './custom_equation_editor';
 import { aggregationType } from '../expression_row';
 import { MetricExpression } from '../../types';

@@ -35,7 +35,7 @@ jest.mock('./expression_chart', () => ({
 }));
 
 jest.mock('../../../utils/kibana_react', () => ({
-  useKibanaContextForPlugin: () => ({
+  useKibana: () => ({
     services: {
       ...mockCoreMock.createStart(),
       charts: mockedChartStartContract,
