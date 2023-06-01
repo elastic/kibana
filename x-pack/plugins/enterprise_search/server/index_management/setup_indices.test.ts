@@ -165,8 +165,24 @@ describe('Setup Indices', () => {
       },
       scheduling: {
         properties: {
-          enabled: { type: 'boolean' },
-          interval: { type: 'text' },
+          access_control: {
+            properties: {
+              enabled: { type: 'boolean' },
+              interval: { type: 'text' },
+            },
+          },
+          incremental: {
+            properties: {
+              enabled: { type: 'boolean' },
+              interval: { type: 'text' },
+            },
+          },
+          full: {
+            properties: {
+              enabled: { type: 'boolean' },
+              interval: { type: 'text' },
+            },
+          },
         },
       },
       service_type: { type: 'keyword' },
