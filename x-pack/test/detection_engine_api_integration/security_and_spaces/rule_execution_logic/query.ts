@@ -1014,7 +1014,7 @@ export default ({ getService }: FtrProviderContext) => {
             alert_suppression: {
               group_by: ['host.name'],
               duration: {
-                value: 2,
+                value: 3,
                 unit: 'h',
               },
             },
@@ -1032,7 +1032,6 @@ export default ({ getService }: FtrProviderContext) => {
             es,
             previewId,
             sort: [ALERT_ORIGINAL_TIME],
-            size: 1,
           });
           expect(previewAlerts.length).to.eql(1);
           expect(previewAlerts[0]._source).to.eql({
