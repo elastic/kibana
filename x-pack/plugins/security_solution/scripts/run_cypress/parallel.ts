@@ -54,10 +54,8 @@ const retrieveIntegrations = (
 
   const retval: string[] = [];
 
-  for (let i = 0; i < integrationsPaths.length; i++) {
-    if (i%chunksTotal === chunkIndex) {
-      retval.push(integrationsPaths[i]);
-    }
+  for (let i = chunkIndex; i < integrationsPaths.length; i+=chunksTotal) {
+    retval.push(integrationsPaths[i]);
   }
 
   return retval;
