@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { useEffect, useRef, useState } from 'react';
-import { debounce } from 'lodash';
+import React, { useEffect, useState } from 'react';
+import useDebounce from 'react-use/lib/useDebounce';
 import { EuiDualRange } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -22,20 +22,19 @@ export function FontSizeInput(props: Props) {
     props.maxFontSize,
   ]);
 
-  // Storing propagateOnChange in ref
-  // so there is one instance per component
-  // instead of one instance per execution cycle.
-  const propagateOnChangeRef = useRef({
-    onChange: debounce((minFontSize: number, maxFontSize: number) => {
-      props.onChange(minFontSize, maxFontSize);
-    }, 150),
-  });
+  const [, cancel] = useDebounce(
+    () => {
+      props.onChange(fontSize[0], fontSize[1]);
+    },
+    150,
+    [fontSize]
+  );
 
   useEffect(() => {
     return () => {
-      propagateOnChangeRef.current.onChange.cancel();
+      cancel();
     };
-  }, []);
+  }, [cancel]);
 
   return (
     <EuiDualRange
@@ -46,7 +45,6 @@ export function FontSizeInput(props: Props) {
       value={fontSize}
       onChange={(value) => {
         setFontSize(value as [number, number]);
-        propagateOnChangeRef.current.onChange(value[0] as number, value[1] as number);
       }}
       aria-label={i18n.translate('xpack.lens.label.tagcloud.fontSizeLabel', {
         defaultMessage: 'Font size',
