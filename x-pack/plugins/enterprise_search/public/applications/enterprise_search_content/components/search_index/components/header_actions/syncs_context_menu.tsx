@@ -42,7 +42,7 @@ export const SyncsContextMenu: React.FC = () => {
   } = useValues(IndexViewLogic);
   const { cancelSyncs } = useActions(CancelSyncsLogic);
   const { status } = useValues(CancelSyncsApiLogic);
-  const { startSync } = useActions(IndexViewLogic);
+  const { startSync, startIncrementalSync, startAccessControlSync } = useActions(IndexViewLogic);
 
   const [isPopoverOpen, setPopover] = useState(false);
   const togglePopover = () => setPopover(!isPopoverOpen);
@@ -164,7 +164,7 @@ export const SyncsContextMenu: React.FC = () => {
                 }),
                 onClick: () => {
                   closePopover();
-                  startSync(); // TODO DO NOT MERGE / REPLACE WITH PROPER SYNC
+                  startIncrementalSync();
                 },
               },
             ]
@@ -183,7 +183,7 @@ export const SyncsContextMenu: React.FC = () => {
                 }),
                 onClick: () => {
                   closePopover();
-                  startSync(); // TODO DO NOT MERGE / REPLACE WITH PROPER SYNC
+                  startAccessControlSync();
                 },
               },
             ]
@@ -198,7 +198,7 @@ export const SyncsContextMenu: React.FC = () => {
           }),
           onClick: () => {
             closePopover();
-            startSync(); // TODO DO NOT MERGE / REPLACE WITH PROPER SYNC
+            startSync(); // TODO CHECK IF THIS IS EXPECTED?
           },
         },
       ],
