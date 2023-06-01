@@ -16,6 +16,7 @@ import {
 } from '@kbn/shared-ux-page-analytics-no-data';
 import { getSavedSearchFullPathUrl } from '@kbn/saved-search-plugin/public';
 import useObservable from 'react-use/lib/useObservable';
+import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import { useUrl } from './hooks/use_url';
 import { useSingleton } from './hooks/use_singleton';
 import { MainHistoryLocationState } from '../../../common/locator';
@@ -86,6 +87,7 @@ export function DiscoverMainRoute(props: Props) {
 
   const checkData = useCallback(async () => {
     try {
+      const checkDataStartTime = window.performance.now();
       const hasUserDataViewValue = await data.dataViews.hasData
         .hasUserDataView()
         .catch(() => false);
@@ -105,6 +107,14 @@ export function DiscoverMainRoute(props: Props) {
         //
       }
 
+      const checkDataDuration = window.performance.now() - checkDataStartTime;
+      if (services.analytics) {
+        reportPerformanceMetricEvent(services.analytics, {
+          eventName: 'discoverCheckData',
+          duration: checkDataDuration,
+        });
+      }
+
       if (!defaultDataView) {
         setShowNoDataPage(true);
         return false;
@@ -114,10 +124,11 @@ export function DiscoverMainRoute(props: Props) {
       setError(e);
       return false;
     }
-  }, [data.dataViews, isDev]);
+  }, [data.dataViews, isDev, services.analytics]);
 
   const loadSavedSearch = useCallback(
     async (nextDataView?: DataView) => {
+      const loadSavedSearchStartTime = window.performance.now();
       setLoading(true);
       if (!nextDataView && !(await checkData())) {
         setLoading(false);
@@ -150,6 +161,13 @@ export function DiscoverMainRoute(props: Props) {
         );
 
         setLoading(false);
+        const loadSavedSearchDuration = window.performance.now() - loadSavedSearchStartTime;
+        if (services.analytics) {
+          reportPerformanceMetricEvent(services.analytics, {
+            eventName: 'discoverLoadSavedSearch',
+            duration: loadSavedSearchDuration,
+          });
+        }
       } catch (e) {
         if (e instanceof SavedObjectNotFound) {
           redirectWhenMissing({
@@ -176,10 +194,12 @@ export function DiscoverMainRoute(props: Props) {
     },
     [
       checkData,
-      stateContainer,
+      stateContainer.actions,
+      stateContainer.appState,
       savedSearchId,
       historyLocationState?.dataViewSpec,
       chrome,
+      services.analytics,
       history,
       core.application.navigateToApp,
       core.theme,
@@ -190,12 +210,16 @@ export function DiscoverMainRoute(props: Props) {
 
   const onDataViewCreated = useCallback(
     async (nextDataView: unknown) => {
+      const dataViewCreatedStartTime = window.performance.now();
       if (nextDataView) {
         setLoading(true);
         setShowNoDataPage(false);
         setError(undefined);
         await loadSavedSearch(nextDataView as DataView);
       }
+      const dataViewCreatedEndTime = window.performance.now();
+      const dataViewCreatedDuration = dataViewCreatedEndTime - dataViewCreatedStartTime;
+      window.console.log(`dataViewCreatedDuration=${dataViewCreatedDuration}`);
     },
     [loadSavedSearch]
   );
