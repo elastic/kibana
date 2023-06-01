@@ -253,16 +253,20 @@ export class ActionExecutor {
 
         event.event = event.event || {};
 
-        // add meta to event log when GenerativeAi Connector is executed
+        // add event.kibana.action.execution.gen_ai to event log when GenerativeAi Connector is executed
         if (result.status === 'ok' && actionTypeId === '.gen-ai') {
           const data = result.data as unknown as { usage: {} };
           event.kibana = event.kibana || {};
+          event.kibana.action = event.kibana.action || {};
           event.kibana = {
             ...event.kibana,
             action: {
               ...event.kibana.action,
-              meta: {
-                usage: data.usage,
+              execution: {
+                ...event.kibana.action.execution,
+                gen_ai: {
+                  usage: data.usage,
+                },
               },
             },
           };

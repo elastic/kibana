@@ -207,15 +207,17 @@ export const EventSchema = schema.maybe(
               schema.object({
                 source: ecsString(),
                 uuid: ecsString(),
-              })
-            ),
-            meta: schema.maybe(
-              schema.object({
-                usage: schema.object({
-                  prompt_tokens: ecsNumber(),
-                  completion_tokens: ecsNumber(),
-                  total_tokens: ecsNumber(),
-                }),
+                gen_ai: schema.maybe(
+                  schema.object({
+                    usage: schema.maybe(
+                      schema.object({
+                        prompt_tokens: ecsStringOrNumber(),
+                        completion_tokens: ecsStringOrNumber(),
+                        total_tokens: ecsStringOrNumber(),
+                      })
+                    ),
+                  })
+                ),
               })
             ),
           })

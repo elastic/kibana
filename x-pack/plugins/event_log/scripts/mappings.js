@@ -246,20 +246,20 @@ exports.EcsCustomPropertyMappings = {
                 ignore_above: 1024,
                 type: 'keyword',
               },
-            },
-          },
-          meta: {
-            properties: {
-              usage: {
+              gen_ai: {
                 properties: {
-                  prompt_tokens: {
-                    type: 'long',
-                  },
-                  completion_tokens: {
-                    type: 'long',
-                  },
-                  total_tokens: {
-                    type: 'long',
+                  usage: {
+                    properties: {
+                      prompt_tokens: {
+                        type: 'long',
+                      },
+                      completion_tokens: {
+                        type: 'long',
+                      },
+                      total_tokens: {
+                        type: 'long',
+                      },
+                    },
                   },
                 },
               },

@@ -1355,12 +1355,12 @@ test('writes usage data to event log for gen ai events', async () => {
       action: {
         execution: {
           uuid: '2',
+          gen_ai: {
+            usage: mockGenAi.usage,
+          },
         },
         name: 'action-1',
         id: '1',
-        meta: {
-          usage: mockGenAi.usage,
-        },
       },
       alert: {
         rule: {
