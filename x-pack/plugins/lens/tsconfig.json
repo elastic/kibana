@@ -73,6 +73,10 @@
     "@kbn/core-saved-objects-api-server",
     "@kbn/object-versioning",
     "@kbn/config-schema",
+    "@kbn/core-mount-utils-browser",
+    "@kbn/core-notifications-browser",
+    "@kbn/core-lifecycle-browser",
+    "@kbn/core-notifications-browser-mocks",
     "@kbn/core-saved-objects-utils-server",
   ],
   "exclude": [

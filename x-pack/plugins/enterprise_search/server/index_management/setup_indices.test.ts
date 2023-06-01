@@ -48,6 +48,25 @@ describe('Setup Indices', () => {
         properties: {
           filtering_advanced_config: { type: 'boolean' },
           filtering_rules: { type: 'boolean' },
+          incremental_sync: {
+            properties: {
+              enabled: { type: 'boolean' },
+            },
+          },
+          sync_rules: {
+            properties: {
+              basic: {
+                properties: {
+                  enabled: { type: 'boolean' },
+                },
+              },
+              advanced: {
+                properties: {
+                  enabled: { type: 'boolean' },
+                },
+              },
+            },
+          },
         },
       },
       filtering: {
@@ -126,6 +145,7 @@ describe('Setup Indices', () => {
       index_name: { type: 'keyword' },
       is_native: { type: 'boolean' },
       language: { type: 'keyword' },
+      last_access_control_sync_status: { type: 'keyword' },
       last_deleted_document_count: { type: 'long' },
       last_incremental_sync_scheduled_at: { type: 'date' },
       last_indexed_document_count: { type: 'long' },
@@ -145,8 +165,24 @@ describe('Setup Indices', () => {
       },
       scheduling: {
         properties: {
-          enabled: { type: 'boolean' },
-          interval: { type: 'text' },
+          access_control: {
+            properties: {
+              enabled: { type: 'boolean' },
+              interval: { type: 'text' },
+            },
+          },
+          incremental: {
+            properties: {
+              enabled: { type: 'boolean' },
+              interval: { type: 'text' },
+            },
+          },
+          full: {
+            properties: {
+              enabled: { type: 'boolean' },
+              interval: { type: 'text' },
+            },
+          },
         },
       },
       service_type: { type: 'keyword' },

@@ -33,7 +33,10 @@ import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public'
 import type { UrlForwardingSetup } from '@kbn/url-forwarding-plugin/public';
 import type { GlobalSearchPluginSetup } from '@kbn/global-search-plugin/public';
 import type { ChartsPluginSetup, ChartsPluginStart } from '@kbn/charts-plugin/public';
-import type { EventAnnotationPluginSetup } from '@kbn/event-annotation-plugin/public';
+import type {
+  EventAnnotationPluginStart,
+  EventAnnotationServiceType,
+} from '@kbn/event-annotation-plugin/public';
 import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
 import { EmbeddableStateTransfer } from '@kbn/embeddable-plugin/public';
 import type { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
@@ -132,7 +135,6 @@ export interface LensPluginSetupDependencies {
   embeddable?: EmbeddableSetup;
   visualizations: VisualizationsSetup;
   charts: ChartsPluginSetup;
-  eventAnnotation: EventAnnotationPluginSetup;
   globalSearch?: GlobalSearchPluginSetup;
   usageCollection?: UsageCollectionSetup;
   uiActionsEnhanced: AdvancedUiActionsSetup;
@@ -152,7 +154,7 @@ export interface LensPluginStartDependencies {
   visualizations: VisualizationsStart;
   embeddable: EmbeddableStart;
   charts: ChartsPluginStart;
-  eventAnnotation: EventAnnotationPluginSetup;
+  eventAnnotation: EventAnnotationPluginStart;
   savedObjectsTagging?: SavedObjectTaggingPluginStart;
   presentationUtil: PresentationUtilPluginStart;
   dataViewFieldEditor: IndexPatternFieldEditorStart;
@@ -162,6 +164,7 @@ export interface LensPluginStartDependencies {
   usageCollection?: UsageCollectionStart;
   docLinks: DocLinksStart;
   share?: SharePluginStart;
+  eventAnnotationService: EventAnnotationServiceType;
   contentManagement: ContentManagementPublicStart;
 }
 
@@ -285,7 +288,6 @@ export class LensPlugin {
       embeddable,
       visualizations,
       charts,
-      eventAnnotation,
       globalSearch,
       usageCollection,
       uiActionsEnhanced,
@@ -295,7 +297,7 @@ export class LensPlugin {
   ) {
     const startServices = createStartServicesGetter(core.getStartServices);
 
-    const getStartServices = async (): Promise<LensEmbeddableStartServices> => {
+    const getStartServicesForEmbeddable = async (): Promise<LensEmbeddableStartServices> => {
       const { getLensAttributeService, setUsageCollectionStart, initMemoizedErrorNotification } =
         await import('./async_services');
       const { core: coreStart, plugins } = startServices();
@@ -306,11 +308,11 @@ export class LensPlugin {
         charts,
         expressions,
         fieldFormats,
-        plugins.fieldFormats.deserialize,
-        eventAnnotation
+        plugins.fieldFormats.deserialize
       );
       const visualizationMap = await this.editorFrameService!.loadVisualizations();
       const datasourceMap = await this.editorFrameService!.loadDatasources();
+      const eventAnnotationService = await plugins.eventAnnotation.getService();
 
       if (plugins.usageCollection) {
         setUsageCollectionStart(plugins.usageCollection);
@@ -332,6 +334,7 @@ export class LensPlugin {
             storage: new Storage(localStorage),
             uiSettings: core.uiSettings,
             timefilter: plugins.data.query.timefilter.timefilter,
+            eventAnnotationService,
           }),
         injectFilterReferences: data.query.filterManager.inject.bind(data.query.filterManager),
         visualizationMap,
@@ -347,7 +350,10 @@ export class LensPlugin {
     };
 
     if (embeddable) {
-      embeddable.registerEmbeddableFactory('lens', new EmbeddableFactory(getStartServices));
+      embeddable.registerEmbeddableFactory(
+        'lens',
+        new EmbeddableFactory(getStartServicesForEmbeddable)
+      );
     }
 
     if (share) {
@@ -409,8 +415,7 @@ export class LensPlugin {
           charts,
           expressions,
           fieldFormats,
-          deps.fieldFormats.deserialize,
-          eventAnnotation
+          deps.fieldFormats.deserialize
         );
 
         const {
@@ -460,8 +465,7 @@ export class LensPlugin {
         charts,
         expressions,
         fieldFormats,
-        plugins.fieldFormats.deserialize,
-        eventAnnotation
+        plugins.fieldFormats.deserialize
       );
     };
 
@@ -486,8 +490,7 @@ export class LensPlugin {
     charts: ChartsPluginSetup,
     expressions: ExpressionsServiceSetup,
     fieldFormats: FieldFormatsSetup,
-    formatFactory: FormatFactory,
-    eventAnnotation: EventAnnotationPluginSetup
+    formatFactory: FormatFactory
   ) {
     const {
       DatatableVisualization,
@@ -527,7 +530,6 @@ export class LensPlugin {
       charts,
       editorFrame: editorFrameSetupInterface,
       formatFactory,
-      eventAnnotation,
     };
     this.FormBasedDatasource.setup(core, dependencies);
     this.TextBasedDatasource.setup(core, dependencies);
