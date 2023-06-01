@@ -11,12 +11,8 @@ import { createRule, snoozeRule as snoozeRuleViaAPI } from '../../tasks/api_call
 import { cleanKibana, deleteAlertsAndRules, deleteConnectors } from '../../tasks/common';
 import { login, visitWithoutDateRange } from '../../tasks/login';
 import { getNewRule } from '../../objects/rule';
-import {
-  internalAlertingSnoozeRule,
-  ruleDetailsUrl,
-  ruleEditUrl,
-  SECURITY_DETECTIONS_RULES_URL,
-} from '../../urls/navigation';
+import { ruleDetailsUrl, ruleEditUrl, SECURITY_DETECTIONS_RULES_URL } from '../../urls/navigation';
+import { internalAlertingSnoozeRule } from '../../urls/routes';
 import { RULES_MANAGEMENT_TABLE, RULE_NAME } from '../../screens/alerts_detection_rules';
 import {
   expectRuleSnoozed,
