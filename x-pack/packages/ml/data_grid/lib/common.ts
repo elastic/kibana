@@ -40,9 +40,22 @@ import { extractErrorMessage } from '@kbn/ml-error-utils';
 
 import type { DataGridItem, IndexPagination, RenderCellValue } from './types';
 
+/**
+ * The initial maximum number of columns for the data grid.
+ * @type {10}
+ */
 export const INIT_MAX_COLUMNS = 10;
+
+/**
+ * The default threshold value for the number of rows at which the column chart visibility is set to true.
+ * @type {10000}
+ */
 export const COLUMN_CHART_DEFAULT_VISIBILITY_ROWS_THRESHOLD = 10000;
 
+/**
+ * Style configuration for the EuiDataGrid component.
+ * @type {EuiDataGridStyle}
+ */
 export const euiDataGridStyle: EuiDataGridStyle = {
   border: 'all',
   fontSize: 's',
@@ -52,6 +65,10 @@ export const euiDataGridStyle: EuiDataGridStyle = {
   header: 'shade',
 };
 
+/**
+ * Configuration settings for the EuiDataGrid toolbar.
+ * @type {{ showColumnSelector: boolean; showDisplaySelector: boolean; showSortSelector: boolean; showFullScreenSelector: boolean; }}
+ */
 export const euiDataGridToolbarSettings = {
   showColumnSelector: true,
   showDisplaySelector: false,
@@ -59,10 +76,15 @@ export const euiDataGridToolbarSettings = {
   showFullScreenSelector: false,
 };
 
-export const getFieldsFromKibanaIndexPattern = (indexPattern: DataView): string[] => {
-  const allFields = indexPattern.fields.map((f) => f.name);
-  const indexPatternFields: string[] = allFields.filter((f) => {
-    if (indexPattern.metaFields.includes(f)) {
+/**
+ * Retrieves fields from a Kibana data view.
+ * @param {DataView} dataView - The Kibana data view.
+ * @returns {string[]} - The array of field names from the data view.
+ */
+export const getFieldsFromKibanaIndexPattern = (dataView: DataView): string[] => {
+  const allFields = dataView.fields.map((f) => f.name);
+  const dataViewFields: string[] = allFields.filter((f) => {
+    if (dataView.metaFields.includes(f)) {
       return false;
     }
 
@@ -75,28 +97,28 @@ export const getFieldsFromKibanaIndexPattern = (indexPattern: DataView): string[
     return true;
   });
 
-  return indexPatternFields;
+  return dataViewFields;
 };
 
 /**
- * Return a map of runtime_mappings for each of the index pattern field provided
+ * Return a map of runtime_mappings for each of the data view field provided
  * to provide in ES search queries
- * @param indexPattern
- * @param RuntimeMappings
+ * @param {DataView | undefined} dataView - The Kibana data view.
+ * @param runtimeMappings - Optional runtime mappings.
  */
 export function getCombinedRuntimeMappings(
-  indexPattern: DataView | undefined,
+  dataView: DataView | undefined,
   runtimeMappings?: RuntimeMappings
 ): RuntimeMappings | undefined {
   let combinedRuntimeMappings = {};
 
   // Add runtime field mappings defined by index pattern
-  if (indexPattern) {
-    const computedFields = indexPattern?.getComputedFields();
+  if (dataView) {
+    const computedFields = dataView?.getComputedFields();
     if (computedFields?.runtimeFields !== undefined) {
-      const indexPatternRuntimeMappings = computedFields.runtimeFields;
-      if (isRuntimeMappings(indexPatternRuntimeMappings)) {
-        combinedRuntimeMappings = { ...combinedRuntimeMappings, ...indexPatternRuntimeMappings };
+      const dataViewRuntimeMappings = computedFields.runtimeFields;
+      if (isRuntimeMappings(dataViewRuntimeMappings)) {
+        combinedRuntimeMappings = { ...combinedRuntimeMappings, ...dataViewRuntimeMappings };
       }
     }
   }
@@ -116,6 +138,12 @@ export interface FieldTypes {
   [key: string]: ES_FIELD_TYPES;
 }
 
+/**
+ * Creates an array of objects representing the data grid schemas for each field.
+ * @param {FieldTypes} fieldTypes - The field types object.
+ * @param {string} resultsField - The results field.
+ * @returns {Array<{ id: string, schema: string | undefined, isSortable: boolean }>} - The array of data grid schemas.
+ */
 export const getDataGridSchemasFromFieldTypes = (fieldTypes: FieldTypes, resultsField: string) => {
   return Object.keys(fieldTypes).map((field) => {
     // Built-in values are ['boolean', 'currency', 'datetime', 'numeric', 'json']
@@ -167,6 +195,11 @@ export const getDataGridSchemasFromFieldTypes = (fieldTypes: FieldTypes, results
 
 export const NON_AGGREGATABLE = 'non-aggregatable';
 
+/**
+ * Creates a data grid schema from an ES field type.
+ * @param {ES_FIELD_TYPES | undefined | estypes.MappingRuntimeField['type'] | 'number'} fieldType - The ES field type.
+ * @returns {string | undefined} - The data grid schema corresponding to the field type.
+ */
 export const getDataGridSchemaFromESFieldType = (
   fieldType: ES_FIELD_TYPES | undefined | estypes.MappingRuntimeField['type'] | 'number'
 ): string | undefined => {
@@ -207,6 +240,11 @@ export const getDataGridSchemaFromESFieldType = (
   return schema;
 };
 
+/**
+ * Retrieves the data grid schema from the Kibana field type.
+ * @param {(DataViewField | undefined)} field - The Kibana field object.
+ * @returns {(string | undefined)} - The data grid schema corresponding to the field type.
+ */
 export const getDataGridSchemaFromKibanaFieldType = (
   field: DataViewField | undefined
 ): string | undefined => {
@@ -259,6 +297,7 @@ const getClassName = (className: string, isClassTypeBoolean: boolean) => {
  *
  * @param row - EUI data grid data row
  * @param mlResultsField - Data frame analytics results field
+ * @param isClassTypeBoolean - Flag if the class type is boolean
  * @returns nested object structure of feature importance values
  */
 export const getFeatureImportance = (
@@ -306,8 +345,18 @@ export const getTopClasses = (row: Record<string, any>, mlResultsField: string):
   return topClasses.map((tc) => getProcessedFields(tc)) as TopClasses;
 };
 
+/**
+ * Custom hook for rendering cell values in the data grid.
+ *
+ * @param {(DataView | undefined)} dataView - The data view.
+ * @param {IndexPagination} pagination - The pagination settings.
+ * @param {DataGridItem[]} tableItems - The table items.
+ * @param {?string} [resultsField] - The results field.
+ * @param {Function} cellPropsCallback - The callback function for setting cell properties.
+ * @returns {RenderCellValue} - The render cell value function.
+ */
 export const useRenderCellValue = (
-  indexPattern: DataView | undefined,
+  dataView: DataView | undefined,
   pagination: IndexPagination,
   tableItems: DataGridItem[],
   resultsField?: string,
@@ -336,14 +385,14 @@ export const useRenderCellValue = (
         return null;
       }
 
-      if (indexPattern === undefined) {
+      if (dataView === undefined) {
         return null;
       }
 
       let format: FieldFormat | undefined;
 
-      if (indexPattern !== undefined) {
-        format = getFieldFormatFromIndexPattern(indexPattern, columnId, '');
+      if (dataView !== undefined) {
+        format = getFieldFormatFromIndexPattern(dataView, columnId, '');
       }
 
       function getCellValue(cId: string) {
@@ -393,7 +442,7 @@ export const useRenderCellValue = (
         return cellValue;
       }
 
-      const field = indexPattern.fields.getByName(columnId);
+      const field = dataView.fields.getByName(columnId);
       if (field?.type === KBN_FIELD_TYPES.DATE) {
         return formatHumanReadableDateTimeSeconds(moment(cellValue).unix() * 1000);
       }
@@ -405,11 +454,16 @@ export const useRenderCellValue = (
       return cellValue;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [indexPattern?.fields, pagination.pageIndex, pagination.pageSize, tableItems]);
+  }, [dataView?.fields, pagination.pageIndex, pagination.pageSize, tableItems]);
   return renderCellValue;
 };
 
-// Value can be nested or the fieldName itself might contain other special characters like `.`
+/**
+ * Value can be nested or the fieldName itself might contain other special characters like `.`
+ * @param {*} obj - The object to get the nested property from.
+ * @param {string} sortId - The sort id attribute.
+ * @returns {*}
+ */
 export const getNestedOrEscapedVal = (obj: any, sortId: string) =>
   getNestedProperty(obj, sortId, null) ?? obj[sortId];
 
@@ -467,6 +521,12 @@ export const multiColumnSortFactory = (sortingColumns: MultiColumnSorter[]) => {
   return sortFn;
 };
 
+/**
+ * Displays an error toast message for the data grid column chart.
+ *
+ * @param {*} e - The error object or message.
+ * @param {CoreSetup['notifications']['toasts']} toastNotifications - The toast notifications service.
+ */
 export const showDataGridColumnChartErrorMessageToast = (
   e: any,
   toastNotifications: CoreSetup['notifications']['toasts']
@@ -481,9 +541,15 @@ export const showDataGridColumnChartErrorMessageToast = (
   );
 };
 
-// helper function to transform { [key]: [val] } => { [key]: val }
-// for when `fields` is used in es.search since response is always an array of values
-// since response always returns an array of values for each field
+/**
+ * Helper function to transform { [key]: [val] } => { [key]: val }
+ * for when `fields` is used in es.search since response is always an array of values
+ * since response always returns an array of values for each field
+ *
+ * @param {object} originalObj - The original object to get the processed fields from.
+ * @param {?(key: string) => boolean} [omitBy] - Optional callback.
+ * @returns {boolean) => { [key: string]: any; }}
+ */
 export const getProcessedFields = (originalObj: object, omitBy?: (key: string) => boolean) => {
   const obj: { [key: string]: any } = { ...originalObj };
   for (const key of Object.keys(obj)) {

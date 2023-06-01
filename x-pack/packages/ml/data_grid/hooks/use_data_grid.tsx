@@ -32,6 +32,15 @@ const rowCountDefault: RowCountInfo = {
   rowCountRelation: undefined,
 };
 
+/**
+ * Custom hook to manage DataGrid state.
+ *
+ * @param {EuiDataGridColumn[]} columns - EUI column spec
+ * @param {number} [defaultPageSize=5] - Default page size
+ * @param {number} [defaultVisibleColumnsCount=INIT_MAX_COLUMNS] - Default count of visible columns
+ * @param {?(id: string) => boolean} [defaultVisibleColumnsFilter] - Optional external columns filter
+ * @returns {UseDataGridReturnType}
+ */
 export const useDataGrid = (
   columns: EuiDataGridColumn[],
   defaultPageSize = 5,

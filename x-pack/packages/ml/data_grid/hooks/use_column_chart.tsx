@@ -61,6 +61,12 @@ export const getXScaleType = (kbnFieldType: KBN_FIELD_TYPES | undefined): XScale
   }
 };
 
+/**
+ * Gets the Kibana field type from a EUI data grid column schema.
+ *
+ * @param {EuiDataGridColumn['schema']} schema - EUI data grid column schema.
+ * @returns {(KBN_FIELD_TYPES | undefined)}
+ */
 export const getFieldType = (schema: EuiDataGridColumn['schema']): KBN_FIELD_TYPES | undefined => {
   if (schema === NON_AGGREGATABLE) {
     return undefined;
@@ -152,6 +158,14 @@ interface ColumnChart {
   xScaleType: XScaleType;
 }
 
+/**
+ * Custom hook to manage state of a DataGrid column chart.
+ *
+ * @param {ChartData} chartData - The original chart data to be transformed into the ColumnChart's format.
+ * @param {EuiDataGridColumn} columnType - EUI column type.
+ * @param {?number} [maxChartColumns] - Maximum number of chart columns.
+ * @returns {ColumnChart}
+ */
 export const useColumnChart = (
   chartData: ChartData,
   columnType: EuiDataGridColumn,
