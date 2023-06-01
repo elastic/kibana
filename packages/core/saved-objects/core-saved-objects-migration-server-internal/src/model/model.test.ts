@@ -10,7 +10,10 @@ import { chain } from 'lodash';
 import * as Either from 'fp-ts/lib/Either';
 import * as Option from 'fp-ts/lib/Option';
 import type { SavedObjectsRawDoc } from '@kbn/core-saved-objects-server';
-import type { IndexMapping } from '@kbn/core-saved-objects-base-server-internal';
+import {
+  DEFAULT_INDEX_TYPES_MAP,
+  type IndexMapping,
+} from '@kbn/core-saved-objects-base-server-internal';
 import type {
   BaseState,
   CalculateExcludeFiltersState,
@@ -60,7 +63,6 @@ import type { ResponseType } from '../next';
 import { createInitialProgress } from './progress';
 import { model } from './model';
 import type { BulkIndexOperationTuple, BulkOperation } from './create_batches';
-import { DEFAULT_INDEX_TYPES_MAP } from '../kibana_migrator_constants';
 
 describe('migrations v2 model', () => {
   const indexMapping: IndexMapping = {
