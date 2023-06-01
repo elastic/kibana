@@ -53,7 +53,6 @@ export function modelsProvider(client: IScopedClusterClient) {
 
     /**
      * Deletes associated pipelines of the requested model
-     * TODO
      * @param modelIds
      */
     async deleteModelPipelines(modelIds: string[]) {

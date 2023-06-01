@@ -186,7 +186,7 @@ export default function ({ getService }: FtrProviderContext) {
         await ml.trainedModelsTable.clickDeleteAction(modelWithPipelineData.modelId);
 
         await ml.testExecution.logTestStep('should delete the model with pipelines');
-        await ml.trainedModelsTable.confirmDeleteModel(true, false);
+        await ml.trainedModelsTable.confirmDeleteModel(true);
         await ml.trainedModelsTable.assertModelDisplayedInTable(
           modelWithPipelineData.modelId,
           false

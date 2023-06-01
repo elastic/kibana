@@ -18,7 +18,6 @@ import {
   EuiModalFooter,
   EuiModalHeader,
   EuiModalHeaderTitle,
-  EuiSpacer,
 } from '@elastic/eui';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { type WithRequired } from '../../../common/types/common';
@@ -38,7 +37,6 @@ export const DeleteModelsModal: FC<DeleteModelsModalProps> = ({ models, onClose 
 
   const [canDeleteModel, setCanDeleteModel] = useState(false);
   const [deletePipelines, setDeletePipelines] = useState<boolean>(false);
-  const [forceDelete, setForceDelete] = useState<boolean>(false);
 
   const modelIds = models.map((m) => m.model_id);
 
@@ -46,13 +44,17 @@ export const DeleteModelsModal: FC<DeleteModelsModalProps> = ({ models, onClose 
     WithRequired<ModelItem, 'pipelines'>
   >;
 
+  const pipelinesCount = modelsWithPipelines.reduce((acc, curr) => {
+    return acc + Object.keys(curr.pipelines).length;
+  }, 0);
+
   const deleteModels = useCallback(async () => {
     try {
       await Promise.all(
         modelIds.map((modelId) =>
           trainedModelsApiService.deleteTrainedModel(modelId, {
             with_pipelines: deletePipelines,
-            force: forceDelete,
+            force: pipelinesCount > 0,
           })
         )
       );
@@ -79,13 +81,7 @@ export const DeleteModelsModal: FC<DeleteModelsModalProps> = ({ models, onClose 
     }
     onClose(true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [modelIds, trainedModelsApiService, deletePipelines, forceDelete]);
-
-  const pipelinesCount = modelsWithPipelines.reduce((acc, curr) => {
-    return acc + Object.keys(curr.pipelines).length;
-  }, 0);
-
-  const isDeleteButtonDisabled = pipelinesCount > 0 && !forceDelete && !deletePipelines;
+  }, [modelIds, trainedModelsApiService, deletePipelines, pipelinesCount]);
 
   return canDeleteModel ? (
     <EuiModal
@@ -123,6 +119,13 @@ export const DeleteModelsModal: FC<DeleteModelsModalProps> = ({ models, onClose 
             iconType="warning"
           >
             <div>
+              <p>
+                <FormattedMessage
+                  id="xpack.ml.trainedModels.modelsList.deleteModal.warningMessage"
+                  defaultMessage="Deleting the trained model and its associated {pipelinesCount, plural, one {pipeline} other {pipelines}} will result in the permanent removal of these resources. Any process configured to send data to the {pipelinesCount, plural, one {pipeline} other {pipelines}} will no longer be able to do so once you delete the {pipelinesCount, plural, one {pipeline} other {pipelines}}."
+                  values={{ pipelinesCount }}
+                />
+              </p>
               <EuiCheckbox
                 id={'delete-model-pipelines'}
                 label={
@@ -144,30 +147,7 @@ export const DeleteModelsModal: FC<DeleteModelsModalProps> = ({ models, onClose 
                 ));
               })}
             </ul>
-
-            <p>
-              <FormattedMessage
-                id="xpack.ml.trainedModels.modelsList.deleteModal.warningMessage"
-                defaultMessage="Deleting the trained model and its associated {pipelinesCount, plural, one {pipeline} other {pipelines}} will result in the permanent removal of these resources. Any process configured to send data to the {pipelinesCount, plural, one {pipeline} other {pipelines}} will no longer be able to do so once you delete the {pipelinesCount, plural, one {pipeline} other {pipelines}}."
-                values={{ pipelinesCount }}
-              />
-            </p>
           </EuiCallOut>
-
-          <EuiSpacer size="m" />
-
-          <EuiCheckbox
-            id={'force-delete'}
-            label={
-              <FormattedMessage
-                id="xpack.ml.trainedModels.modelsList.deleteModal.forceDeleteLabel"
-                defaultMessage="Force delete?"
-              />
-            }
-            checked={forceDelete}
-            onChange={setForceDelete.bind(null, (prev) => !prev)}
-            data-test-subj="mlModelsDeleteModalForceDeleteCheckbox"
-          />
         </EuiModalBody>
       ) : null}
 
@@ -184,7 +164,6 @@ export const DeleteModelsModal: FC<DeleteModelsModalProps> = ({ models, onClose 
           fill
           color="danger"
           data-test-subj="mlModelsDeleteModalConfirmButton"
-          disabled={isDeleteButtonDisabled}
         >
           <FormattedMessage
             id="xpack.ml.trainedModels.modelsList.deleteModal.deleteButtonLabel"

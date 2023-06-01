@@ -298,17 +298,6 @@ export function TrainedModelsTableProvider(
       );
     }
 
-    public async assertForceModelDeleteCheckboxSelected(expectedValue: boolean) {
-      const actualCheckState = await this.getCheckBoxState(
-        'mlModelsDeleteModalForceDeleteCheckbox'
-      );
-
-      expect(actualCheckState).to.eql(
-        expectedValue,
-        `Force model delete checkbox should be ${expectedValue} (got ${actualCheckState})`
-      );
-    }
-
     public async setDeletePipelinesCheckbox() {
       await this.assertDeletePipelinesCheckboxSelected(false);
 
@@ -318,24 +307,12 @@ export function TrainedModelsTableProvider(
       await this.assertDeletePipelinesCheckboxSelected(true);
     }
 
-    public async setForceDeleteCheckbox() {
-      await this.assertForceModelDeleteCheckboxSelected(false);
-
-      const checkboxLabel = await find.byCssSelector(`label[for="force-delete"]`);
-      await checkboxLabel.click();
-
-      await this.assertForceModelDeleteCheckboxSelected(true);
-    }
-
-    public async confirmDeleteModel(withPipelines: boolean = false, force: boolean = false) {
+    public async confirmDeleteModel(withPipelines: boolean = false) {
       await retry.tryForTime(30 * 1000, async () => {
         await this.assertDeleteModalExists();
 
         if (withPipelines) {
           await this.setDeletePipelinesCheckbox();
-        }
-        if (force) {
-          await this.setForceDeleteCheckbox();
         }
 
         await testSubjects.click('mlModelsDeleteModalConfirmButton');
