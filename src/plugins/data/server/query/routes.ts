@@ -25,6 +25,11 @@ const SAVED_QUERY_ATTRS_CONFIG = schema.object({
   timefilter: schema.maybe(schema.any()),
 });
 
+const responseCreateSchema = schema.object({
+  id: schema.string(),
+  attributes: SAVED_QUERY_ATTRS_CONFIG,
+});
+
 export function registerSavedQueryRoutes({ http }: CoreSetup): void {
   const router = http.createRouter<SavedQueryRouteHandlerContext>();
 
@@ -34,6 +39,11 @@ export function registerSavedQueryRoutes({ http }: CoreSetup): void {
       validate: {
         request: {
           body: SAVED_QUERY_ATTRS_CONFIG,
+        },
+        response: {
+          200: {
+            body: responseCreateSchema,
+          },
         },
       },
     },
