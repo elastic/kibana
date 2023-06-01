@@ -34,10 +34,14 @@ export const OptInMessage: React.FC<OptInMessageProps> = ({
           This allows us to learn what our users are most interested in, so we can improve our products and services.
           Refer to our {privacyStatementLink}."
         values={{
-          optInStatus: telemetryService.isOptedIn ? (
-            <FormattedMessage id="telemetry.enabledStatus" defaultMessage="enabled" />
-          ) : (
-            <FormattedMessage id="telemetry.disabledStatus" defaultMessage="disabled" />
+          optInStatus: (
+            <em>
+              {telemetryService.isOptedIn ? (
+                <FormattedMessage id="telemetry.enabledStatus" defaultMessage="enabled" />
+              ) : (
+                <FormattedMessage id="telemetry.disabledStatus" defaultMessage="disabled" />
+              )}
+            </em>
           ),
           privacyStatementLink: (
             /* eslint-disable-next-line @elastic/eui/href-or-on-click */
