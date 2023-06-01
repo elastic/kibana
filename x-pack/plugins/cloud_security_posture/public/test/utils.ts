@@ -7,27 +7,19 @@
 
 import { Matcher, screen } from '@testing-library/react';
 
-export const expectIdsInDoc = ({ be = [], notToBe = [] }: { be: string[]; notToBe?: string[] }) => {
+export const expectIdsInDoc = ({
+  be = [],
+  notToBe = [],
+}: {
+  be: Matcher[];
+  notToBe?: Matcher[];
+}) => {
+  const filteredNotToBe = notToBe.filter((testId) => !be.includes(testId));
+
   be.forEach((testId) => {
     expect(screen.getByTestId(testId)).toBeInTheDocument();
   });
-  notToBe.forEach((testId) => {
-    expect(screen.queryByTestId(testId)).not.toBeInTheDocument();
-  });
-};
-
-export const expectSingleIdInDoc = ({
-  testIds,
-  singleIdInDoc,
-}: {
-  testIds: Matcher[];
-  singleIdInDoc: Matcher;
-}) => {
-  const testIdsNotInDoc = testIds.filter((testId) => testId !== singleIdInDoc);
-
-  expect(screen.getByTestId(singleIdInDoc)).toBeInTheDocument();
-
-  testIdsNotInDoc.forEach((testId) => {
+  filteredNotToBe.forEach((testId) => {
     expect(screen.queryByTestId(testId)).not.toBeInTheDocument();
   });
 };
