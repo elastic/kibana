@@ -8,11 +8,7 @@
 import React from 'react';
 import { takeUntil, distinctUntilChanged, skip } from 'rxjs/operators';
 import { from } from 'rxjs';
-import {
-  toMountPoint,
-  wrapWithTheme,
-  KibanaContextProvider,
-} from '@kbn/react-public';
+import { toMountPoint, wrapWithTheme, KibanaContextProvider } from '@kbn/react-public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { CoreStart } from '@kbn/core/public';

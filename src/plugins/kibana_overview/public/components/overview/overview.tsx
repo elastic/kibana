@@ -19,11 +19,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { CoreStart } from '@kbn/core/public';
-import {
-  useKibana,
-  overviewPageActions,
-  OverviewPageFooter,
-} from '@kbn/react-public';
+import { useKibana, overviewPageActions, OverviewPageFooter } from '@kbn/react-public';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { KibanaSolutionAvatar } from '@kbn/shared-ux-avatar-solution';
 import {

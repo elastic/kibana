@@ -13,12 +13,7 @@ export type {
 } from '@kbn/data-plugin/public';
 export type { DataView, DataViewField, DataViewSpec } from '@kbn/data-views-plugin/public';
 
-export {
-  createKibanaReactContext,
-  toMountPoint,
-  CodeEditor,
-  useKibana,
-} from '@kbn/react-public';
+export { createKibanaReactContext, toMountPoint, CodeEditor, useKibana } from '@kbn/react-public';
 
 export type {
   FormSchema,

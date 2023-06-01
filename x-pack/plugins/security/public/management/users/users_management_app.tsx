@@ -16,8 +16,8 @@ import type { Observable } from 'rxjs';
 import type { CoreStart, CoreTheme, StartServicesAccessor } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { I18nProvider } from '@kbn/i18n-react';
-import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/react-public';
 import type { RegisterManagementAppArgs } from '@kbn/management-plugin/public';
+import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/react-public';
 import { Route } from '@kbn/shared-ux-router';
 
 import type { AuthenticationServiceSetup } from '../../authentication';

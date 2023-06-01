@@ -5,12 +5,7 @@
  * 2.0.
  */
 
-import {
-  KibanaContextProvider,
-  useKibana,
-  useUiSetting,
-  useUiSetting$,
-} from '@kbn/react-public';
+import { KibanaContextProvider, useKibana, useUiSetting, useUiSetting$ } from '@kbn/react-public';
 import type { StartServices } from '../../../types';
 
 const useTypedKibana = () => useKibana<StartServices>();

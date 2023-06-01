@@ -10,11 +10,7 @@ import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { ScopedHistory, CoreStart, CoreTheme } from '@kbn/core/public';
 import { Observable } from 'rxjs';
-import {
-  KibanaContextProvider,
-  KibanaThemeProvider,
-  RedirectAppLinks,
-} from '@kbn/react-public';
+import { KibanaContextProvider, KibanaThemeProvider, RedirectAppLinks } from '@kbn/react-public';
 
 import { SampleDataTabKibanaProvider } from '@kbn/home-sample-data-tab';
 

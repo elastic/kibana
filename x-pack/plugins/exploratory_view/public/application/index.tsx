@@ -13,11 +13,7 @@ import { i18n } from '@kbn/i18n';
 import { Route } from '@kbn/shared-ux-router';
 import { AppMountParameters, APP_WRAPPER_CLASS, CoreStart } from '@kbn/core/public';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
-import {
-  KibanaContextProvider,
-  KibanaThemeProvider,
-  RedirectAppLinks,
-} from '@kbn/react-public';
+import { KibanaContextProvider, KibanaThemeProvider, RedirectAppLinks } from '@kbn/react-public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { PluginContext } from '../context/plugin_context';

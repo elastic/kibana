@@ -10,11 +10,7 @@ import { EuiFlyoutBody, EuiFlyoutHeader, EuiSpacer, EuiText, EuiTitle } from '@e
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { Fragment } from 'react';
 import { CoreStart } from '@kbn/core/public';
-import {
-  CodeEditor,
-  createKibanaReactContext,
-  toMountPoint,
-} from '@kbn/react-public';
+import { CodeEditor, createKibanaReactContext, toMountPoint } from '@kbn/react-public';
 import { UISession } from '../../types';
 import { IClickActionDescriptor } from '..';
 import './inspect_button.scss';

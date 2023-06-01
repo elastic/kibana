@@ -8,11 +8,7 @@
 import type { PropsOf } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import { CoreStart } from '@kbn/core/public';
-import {
-  createKibanaReactContext,
-  KibanaReactContextValue,
-  useKibana,
-} from '@kbn/react-public';
+import { createKibanaReactContext, KibanaReactContextValue, useKibana } from '@kbn/react-public';
 import { InfraClientCoreSetup, InfraClientStartDeps, InfraClientStartExports } from '../types';
 
 export type PluginKibanaContextValue = CoreStart & InfraClientStartDeps & InfraClientStartExports;

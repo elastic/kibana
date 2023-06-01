@@ -23,11 +23,7 @@ import {
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
-import {
-  KibanaContextProvider,
-  KibanaThemeProvider,
-  RedirectAppLinks,
-} from '@kbn/react-public';
+import { KibanaContextProvider, KibanaThemeProvider, RedirectAppLinks } from '@kbn/react-public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { SpacesPluginStart, SpacesContextProps } from '@kbn/spaces-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';

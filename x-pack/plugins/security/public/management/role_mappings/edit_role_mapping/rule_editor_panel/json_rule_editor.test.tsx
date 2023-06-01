@@ -15,8 +15,8 @@ import '@kbn/web-worker-stub';
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 
-import { CodeEditorField } from '@kbn/react-public';
 import type { monaco } from '@kbn/monaco';
+import { CodeEditorField } from '@kbn/react-public';
 import { shallowWithIntl } from '@kbn/test-jest-helpers';
 
 import { AllRule, AnyRule, ExceptAllRule, ExceptAnyRule, FieldRule } from '../../model';

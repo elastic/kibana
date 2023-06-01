@@ -7,10 +7,7 @@
 
 import { CoreStart } from '@kbn/core/public';
 import React from 'react';
-import {
-  KibanaContextProvider,
-  useKibana as useKibanaReact,
-} from '@kbn/react-public';
+import { KibanaContextProvider, useKibana as useKibanaReact } from '@kbn/react-public';
 import type { ServerlessSecurityPluginStartDependencies } from './types';
 
 export type Services = CoreStart & ServerlessSecurityPluginStartDependencies;

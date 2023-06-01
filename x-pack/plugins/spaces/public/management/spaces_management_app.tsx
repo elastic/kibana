@@ -12,12 +12,8 @@ import { Router, Switch, useParams } from 'react-router-dom';
 import type { StartServicesAccessor } from '@kbn/core/public';
 import { APP_WRAPPER_CLASS } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import {
-  KibanaContextProvider,
-  KibanaThemeProvider,
-  RedirectAppLinks,
-} from '@kbn/react-public';
 import type { RegisterManagementAppArgs } from '@kbn/management-plugin/public';
+import { KibanaContextProvider, KibanaThemeProvider, RedirectAppLinks } from '@kbn/react-public';
 import { Route } from '@kbn/shared-ux-router';
 
 import type { Space } from '../../common';

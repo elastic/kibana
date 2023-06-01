@@ -12,11 +12,7 @@ import { pick } from 'lodash';
 import type { CoreStart } from '@kbn/core/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 
-import {
-  toMountPoint,
-  wrapWithTheme,
-  KibanaContextProvider,
-} from '@kbn/react-public';
+import { toMountPoint, wrapWithTheme, KibanaContextProvider } from '@kbn/react-public';
 import type { DataViewField, DataView } from '@kbn/data-views-plugin/common';
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import { DatePickerContextProvider } from '@kbn/ml-date-picker';

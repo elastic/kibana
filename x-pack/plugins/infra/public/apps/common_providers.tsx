@@ -8,11 +8,7 @@
 import { AppMountParameters, CoreStart } from '@kbn/core/public';
 import React from 'react';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
-import {
-  KibanaContextProvider,
-  KibanaThemeProvider,
-  useUiSetting$,
-} from '@kbn/react-public';
+import { KibanaContextProvider, KibanaThemeProvider, useUiSetting$ } from '@kbn/react-public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { NavigationWarningPromptProvider } from '@kbn/observability-shared-plugin/public';
 import { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';

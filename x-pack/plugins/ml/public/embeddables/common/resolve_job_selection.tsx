@@ -9,11 +9,7 @@ import moment from 'moment';
 import { takeUntil, distinctUntilChanged, skip } from 'rxjs/operators';
 import { from } from 'rxjs';
 import React from 'react';
-import {
-  KibanaContextProvider,
-  toMountPoint,
-  wrapWithTheme,
-} from '@kbn/react-public';
+import { KibanaContextProvider, toMountPoint, wrapWithTheme } from '@kbn/react-public';
 import { getInitialGroupsMap } from '../../application/components/job_selector/job_selector';
 import { getMlGlobalServices } from '../../application/app';
 import { JobId } from '../../../common/types/anomaly_detection_jobs';

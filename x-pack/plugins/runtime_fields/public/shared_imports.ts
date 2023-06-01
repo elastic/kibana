@@ -22,8 +22,4 @@ export { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
 
 export { TextField } from '@kbn/es-ui-shared-plugin/static/forms/components';
 
-export {
-  CodeEditor,
-  toMountPoint,
-  createKibanaReactContext,
-} from '@kbn/react-public';
+export { CodeEditor, toMountPoint, createKibanaReactContext } from '@kbn/react-public';

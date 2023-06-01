@@ -7,11 +7,7 @@
 
 import React from 'react';
 import { DataViewBase } from '@kbn/es-query';
-import {
-  withKibana,
-  KibanaReactContextValue,
-  KibanaServices,
-} from '@kbn/react-public';
+import { withKibana, KibanaReactContextValue, KibanaServices } from '@kbn/react-public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { QuerySuggestion } from '@kbn/unified-search-plugin/public';
 import { RendererFunction } from '../utils/typed_react';

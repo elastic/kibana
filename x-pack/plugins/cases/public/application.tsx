@@ -12,11 +12,7 @@ import { Router } from 'react-router-dom';
 import { EuiErrorBoundary } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 import { EuiThemeProvider as StyledComponentsThemeProvider } from '@kbn/kibana-react-plugin/common';
-import {
-  KibanaContextProvider,
-  KibanaThemeProvider,
-  useUiSetting$,
-} from '@kbn/react-public';
+import { KibanaContextProvider, KibanaThemeProvider, useUiSetting$ } from '@kbn/react-public';
 
 import type { ScopedFilesClient } from '@kbn/files-plugin/public';
 import type { ExternalReferenceAttachmentTypeRegistry } from './client/attachment_framework/external_reference_registry';

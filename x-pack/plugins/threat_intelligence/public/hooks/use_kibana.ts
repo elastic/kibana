@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import {
-  context as KibanaContext,
-  KibanaContextProvider,
-  useKibana,
-} from '@kbn/react-public';
+import { context as KibanaContext, KibanaContextProvider, useKibana } from '@kbn/react-public';
 import { Services } from '../types';
 
 const useTypedKibana = () => useKibana<Services>();

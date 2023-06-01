@@ -11,11 +11,7 @@ import ReactDOM from 'react-dom';
 import { Router } from 'react-router-dom';
 
 import { AppMountParameters } from '@kbn/core/public';
-import {
-  KibanaContextProvider,
-  KibanaThemeProvider,
-  toMountPoint,
-} from '@kbn/react-public';
+import { KibanaContextProvider, KibanaThemeProvider, toMountPoint } from '@kbn/react-public';
 import { FormattedRelative } from '@kbn/i18n-react';
 import { TableListViewKibanaProvider } from '@kbn/content-management-table-list';
 import { VisualizeApp } from './app';
