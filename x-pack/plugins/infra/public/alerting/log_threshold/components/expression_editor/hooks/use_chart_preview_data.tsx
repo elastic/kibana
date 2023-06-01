@@ -147,6 +147,7 @@ export const callGetChartPreviewDataAPI = async (
         },
       })
     ),
+    version: '1',
   });
 
   return decodeOrThrow(getLogAlertsChartPreviewDataSuccessResponsePayloadRT)(response);

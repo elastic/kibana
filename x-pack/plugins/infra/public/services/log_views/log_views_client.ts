@@ -45,9 +45,11 @@ export class LogViewsClient implements ILogViewsClient {
     }
 
     const { logViewId } = logViewReference;
-    const response = await this.http.get(getLogViewUrl(logViewId)).catch((error) => {
-      throw new FetchLogViewError(`Failed to fetch log view "${logViewId}": ${error}`);
-    });
+    const response = await this.http
+      .get(getLogViewUrl(logViewId), { version: '1' })
+      .catch((error) => {
+        throw new FetchLogViewError(`Failed to fetch log view "${logViewId}": ${error}`);
+      });
 
     const { data } = decodeOrThrow(
       getLogViewResponsePayloadRT,
@@ -130,6 +132,7 @@ export class LogViewsClient implements ILogViewsClient {
           body: JSON.stringify(
             putLogViewRequestPayloadRT.encode({ attributes: logViewAttributes })
           ),
+          version: '1',
         })
         .catch((error) => {
           throw new PutLogViewError(`Failed to write log view "${logViewId}": ${error}`);

@@ -40,6 +40,7 @@ export const callGetLogEntryCategoryDatasetsAPI = async (
         },
       })
     ),
+    version: '1',
   });
 
   return decodeOrThrow(getLogEntryCategoryDatasetsSuccessReponsePayloadRT)(response);

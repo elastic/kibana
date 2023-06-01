@@ -42,6 +42,7 @@ export const callGetLogEntryExamplesAPI = async (requestArgs: RequestArgs, fetch
         },
       })
     ),
+    version: '1',
   });
 
   return decodeOrThrow(getLogEntryExamplesSuccessResponsePayloadRT)(response);

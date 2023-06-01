@@ -23,6 +23,7 @@ export const fetchLogEntriesHighlights = async (
   const response = await fetch(LOG_ENTRIES_HIGHLIGHTS_PATH, {
     method: 'POST',
     body: JSON.stringify(logEntriesHighlightsRequestRT.encode(requestArgs)),
+    version: '1',
   });
 
   return decodeOrThrow(logEntriesHighlightsResponseRT)(response);

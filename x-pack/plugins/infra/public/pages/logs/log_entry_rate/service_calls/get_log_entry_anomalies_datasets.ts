@@ -38,6 +38,7 @@ export const callGetLogEntryAnomaliesDatasetsAPI = async (
         },
       })
     ),
+    version: '1',
   });
 
   return decodeOrThrow(getLogEntryAnomaliesDatasetsSuccessReponsePayloadRT)(response);

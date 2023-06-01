@@ -42,6 +42,7 @@ export const callGetLogEntryAnomaliesAPI = async (requestArgs: RequestArgs, fetc
         },
       })
     ),
+    version: '1',
   });
 
   return decodeOrThrow(getLogEntryAnomaliesSuccessReponsePayloadRT)(response);

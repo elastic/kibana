@@ -66,6 +66,7 @@ export const callGetTopLogEntryCategoriesAPI = async (
         },
       })
     ),
+    version: '1',
   });
 
   return decodeOrThrow(getLogEntryCategoriesSuccessReponsePayloadRT)(response);

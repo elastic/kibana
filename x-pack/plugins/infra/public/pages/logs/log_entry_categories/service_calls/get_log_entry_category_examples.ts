@@ -44,6 +44,7 @@ export const callGetLogEntryCategoryExamplesAPI = async (
         },
       })
     ),
+    version: '1',
   });
 
   return decodeOrThrow(getLogEntryCategoryExamplesSuccessReponsePayloadRT)(response);
