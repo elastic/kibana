@@ -121,7 +121,6 @@ export function TimeComparison() {
   const { isSmall } = useBreakpoints();
   const {
     query: { rangeFrom, rangeTo },
-    // @ts-expect-error Type instantiation is excessively deep and possibly infinite.
   } = useApmParams('/services', '/backends/*', '/services/{serviceName}');
 
   const { exactStart, exactEnd } = useTimeRange({

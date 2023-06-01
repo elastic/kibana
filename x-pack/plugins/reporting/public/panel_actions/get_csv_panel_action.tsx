@@ -145,7 +145,9 @@ export class ReportingCsvPanelAction implements ActionDefinition<ActionContext> 
         });
 
         // Hack for IE11 Support
+        // @ts-expect-error
         if (window.navigator.msSaveOrOpenBlob) {
+          // @ts-expect-error
           return window.navigator.msSaveOrOpenBlob(blob, download);
         }
 

@@ -117,10 +117,10 @@ export async function deleteEmptyFolders(
 
   // Delete empty is used to gather all the empty folders and
   // then we use del to actually delete them
-  const emptyFoldersList = await deleteEmpty(rootFolderPath, {
+  const emptyFoldersList = (await deleteEmpty(rootFolderPath, {
     // @ts-expect-error DT package has incorrect types https://github.com/jonschlinkert/delete-empty/blob/6ae34547663e6845c3c98b184c606fa90ef79c0a/index.js#L160
     dryRun: true,
-  });
+  })) as unknown as string[]; // DT package has incorrect types
 
   const foldersToDelete = emptyFoldersList.filter((folderToDelete) => {
     return !foldersToKeep.some((folderToKeep) => folderToDelete.includes(folderToKeep));

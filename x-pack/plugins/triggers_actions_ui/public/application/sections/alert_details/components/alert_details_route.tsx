@@ -138,7 +138,7 @@ export async function getRuleData(
     const loadedRule: ResolvedRule = await resolveRule(ruleId);
     setAlert(loadedRule);
 
-    const [loadedAlertType, loadedActionTypes] = await Promise.all<AlertType, ActionType[]>([
+    const [loadedAlertType, loadedActionTypes] = await Promise.all([
       loadAlertTypes()
         .then((types) => types.find((type) => type.id === loadedRule.alertTypeId))
         .then(throwIfAbsent(`Invalid Rule Type: ${loadedRule.alertTypeId}`)),

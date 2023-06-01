@@ -23,7 +23,9 @@ export const AutoDownload: React.FC<AutoDownloadProps> = ({ blob, name, onDownlo
 
   useEffect(() => {
     if (blob && anchorRef?.current) {
+      // @ts-expect-error
       if (typeof window.navigator.msSaveOrOpenBlob === 'function') {
+        // @ts-expect-error
         window.navigator.msSaveBlob(blob);
       } else {
         const objectURL = window.URL.createObjectURL(blob);
