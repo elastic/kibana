@@ -40,7 +40,7 @@ import {
   REPORTING_TRANSACTION_TYPE,
   PDF_JOB_TYPE_V2,
 } from '../../../common/constants';
-import { JobParamsPDFV2, UrlOrUrlLocatorTuple } from '../../../common/types';
+import { JobParamsPDFV2 } from '../../../common/types';
 import { TaskPayloadPDFV2 } from '../../../common/types/export_types/printable_pdf_v2';
 import { ReportingConfigType } from '../../config';
 import { ReportingServerInfo } from '../../core';
