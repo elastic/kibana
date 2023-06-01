@@ -116,11 +116,9 @@ export class APMEventClient {
     return callAsyncWithDebug({
       cb: () => {
         const searchPromise = withApmSpan(operationName, () => {
-          const controller = new AbortController();
           return cancelEsRequestOnAbort(
-            this.esClient.search(searchParams, { signal: controller.signal }),
+            this.esClient.search(searchParams),
             this.request,
-            controller
           );
         });
 
@@ -154,17 +152,14 @@ export class APMEventClient {
       cb: () => {
         const { apm, ...rest } = params;
         const termsEnumPromise = withApmSpan(operationName, () => {
-          const controller = new AbortController();
           return cancelEsRequestOnAbort(
             this.esClient.termsEnum(
               {
                 index: Array.isArray(index) ? index.join(',') : index,
                 ...rest,
-              },
-              { signal: controller.signal }
+              }
             ),
             this.request,
-            controller
           );
         });
 
