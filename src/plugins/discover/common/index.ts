@@ -37,3 +37,5 @@ export type {
   DiscoverAppLocator,
   DiscoverAppLocatorParams,
 } from '@kbn/unified-discover/src/main/types';
+
+export { DISCOVER_APP_LOCATOR } from './locator';

@@ -317,7 +317,7 @@ describe('Discover grid columns', function () {
             >
               <React.Fragment>
                 timestamp
-
+                 
                 <EuiIcon
                   type="clock"
                 />
