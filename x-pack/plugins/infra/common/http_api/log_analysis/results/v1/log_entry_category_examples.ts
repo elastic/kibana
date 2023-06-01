@@ -7,14 +7,14 @@
 
 import * as rt from 'io-ts';
 
-import { persistedLogViewReferenceRT } from '../../../log_views';
+import { persistedLogViewReferenceRT } from '../../../../log_views';
 import {
   badRequestErrorRT,
   forbiddenErrorRT,
   timeRangeRT,
   routeTimingMetadataRT,
-} from '../../shared';
-import { logEntryContextRT } from '../../../log_entry';
+} from '../../../shared';
+import { logEntryContextRT } from '../../../../log_entry';
 
 export const LOG_ANALYSIS_GET_LOG_ENTRY_CATEGORY_EXAMPLES_PATH =
   '/api/infra/log_analysis/results/log_entry_category_examples';

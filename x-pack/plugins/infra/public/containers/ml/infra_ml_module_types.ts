@@ -9,7 +9,7 @@ import { HttpHandler } from '@kbn/core/public';
 import {
   ValidateLogEntryDatasetsResponsePayload,
   ValidationIndicesResponsePayload,
-} from '../../../common/http_api/log_analysis';
+} from '../../../common/http_api';
 import { DeleteJobsResponsePayload } from './api/ml_cleanup';
 import { FetchJobStatusResponsePayload } from './api/ml_get_jobs_summary_api';
 import { GetMlModuleResponsePayload } from './api/ml_get_module';

@@ -6,11 +6,8 @@
  */
 
 import Boom from '@hapi/boom';
-import {
-  getLogEntryCategoriesRequestPayloadRT,
-  getLogEntryCategoriesSuccessReponsePayloadRT,
-  LOG_ANALYSIS_GET_LOG_ENTRY_CATEGORIES_PATH,
-} from '../../../../common/http_api/log_analysis';
+
+import { logAnalysisResultsV1 } from '../../../../common/http_api';
 import { createValidationFunction } from '../../../../common/runtime_types';
 import type { InfraBackendLibs } from '../../../lib/infra_types';
 import { getTopLogEntryCategories } from '../../../lib/log_analysis';
@@ -18,74 +15,83 @@ import { assertHasInfraMlPlugins } from '../../../utils/request_context';
 import { isMlPrivilegesError } from '../../../lib/log_analysis/errors';
 
 export const initGetLogEntryCategoriesRoute = ({ framework }: InfraBackendLibs) => {
-  framework.registerRoute(
-    {
+  framework
+    .registerVersionedRoute({
+      access: 'internal',
       method: 'post',
-      path: LOG_ANALYSIS_GET_LOG_ENTRY_CATEGORIES_PATH,
-      validate: {
-        body: createValidationFunction(getLogEntryCategoriesRequestPayloadRT),
-      },
-    },
-    framework.router.handleLegacyErrors(async (requestContext, request, response) => {
-      const {
-        data: {
-          categoryCount,
-          histograms,
-          logView,
-          timeRange: { startTime, endTime },
-          datasets,
-          sort,
+      path: logAnalysisResultsV1.LOG_ANALYSIS_GET_LOG_ENTRY_CATEGORIES_PATH,
+    })
+    .addVersion(
+      {
+        version: '1',
+        validate: {
+          request: {
+            body: createValidationFunction(
+              logAnalysisResultsV1.getLogEntryCategoriesRequestPayloadRT
+            ),
+          },
         },
-      } = request.body;
+      },
+      framework.router.handleLegacyErrors(async (requestContext, request, response) => {
+        const {
+          data: {
+            categoryCount,
+            histograms,
+            logView,
+            timeRange: { startTime, endTime },
+            datasets,
+            sort,
+          },
+        } = request.body;
 
-      try {
-        const infraMlContext = await assertHasInfraMlPlugins(requestContext);
+        try {
+          const infraMlContext = await assertHasInfraMlPlugins(requestContext);
 
-        const { data: topLogEntryCategories, timing } = await getTopLogEntryCategories(
-          { infra: await infraMlContext.infra },
-          logView,
-          startTime,
-          endTime,
-          categoryCount,
-          datasets ?? [],
-          histograms.map((histogram) => ({
-            bucketCount: histogram.bucketCount,
-            endTime: histogram.timeRange.endTime,
-            id: histogram.id,
-            startTime: histogram.timeRange.startTime,
-          })),
-          sort
-        );
+          const { data: topLogEntryCategories, timing } = await getTopLogEntryCategories(
+            { infra: await infraMlContext.infra },
+            logView,
+            startTime,
+            endTime,
+            categoryCount,
+            datasets ?? [],
+            histograms.map((histogram) => ({
+              bucketCount: histogram.bucketCount,
+              endTime: histogram.timeRange.endTime,
+              id: histogram.id,
+              startTime: histogram.timeRange.startTime,
+            })),
+            sort
+          );
 
-        return response.ok({
-          body: getLogEntryCategoriesSuccessReponsePayloadRT.encode({
-            data: {
-              categories: topLogEntryCategories,
-            },
-            timing,
-          }),
-        });
-      } catch (error) {
-        if (Boom.isBoom(error)) {
-          throw error;
-        }
+          return response.ok({
+            body: logAnalysisResultsV1.getLogEntryCategoriesSuccessReponsePayloadRT.encode({
+              data: {
+                categories: topLogEntryCategories,
+              },
+              timing,
+            }),
+          });
+        } catch (error) {
+          if (Boom.isBoom(error)) {
+            throw error;
+          }
 
-        if (isMlPrivilegesError(error)) {
+          if (isMlPrivilegesError(error)) {
+            return response.customError({
+              statusCode: 403,
+              body: {
+                message: error.message,
+              },
+            });
+          }
+
           return response.customError({
-            statusCode: 403,
+            statusCode: error.statusCode ?? 500,
             body: {
-              message: error.message,
+              message: error.message ?? 'An unexpected error occurred',
             },
           });
         }
-
-        return response.customError({
-          statusCode: error.statusCode ?? 500,
-          body: {
-            message: error.message ?? 'An unexpected error occurred',
-          },
-        });
-      }
-    })
-  );
+      })
+    );
 };

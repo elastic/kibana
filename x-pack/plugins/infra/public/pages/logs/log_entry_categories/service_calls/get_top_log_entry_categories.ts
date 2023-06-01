@@ -12,7 +12,7 @@ import {
   getLogEntryCategoriesRequestPayloadRT,
   getLogEntryCategoriesSuccessReponsePayloadRT,
   LOG_ANALYSIS_GET_LOG_ENTRY_CATEGORIES_PATH,
-} from '../../../../../common/http_api/log_analysis';
+} from '../../../../../common/http_api';
 import { CategoriesSort } from '../../../../../common/log_analysis';
 import { decodeOrThrow } from '../../../../../common/runtime_types';
 

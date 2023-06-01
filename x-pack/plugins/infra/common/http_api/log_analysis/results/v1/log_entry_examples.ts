@@ -6,14 +6,14 @@
  */
 
 import * as rt from 'io-ts';
-import { persistedLogViewReferenceRT } from '../../../log_views';
-import { logEntryExampleRT } from '../../../log_analysis';
+import { persistedLogViewReferenceRT } from '../../../../log_views';
+import { logEntryExampleRT } from '../../../../log_analysis';
 import {
   badRequestErrorRT,
   forbiddenErrorRT,
   timeRangeRT,
   routeTimingMetadataRT,
-} from '../../shared';
+} from '../../../shared';
 
 export const LOG_ANALYSIS_GET_LOG_ENTRY_RATE_EXAMPLES_PATH =
   '/api/infra/log_analysis/results/log_entry_examples';
@@ -48,7 +48,7 @@ export type GetLogEntryExamplesRequestPayload = rt.TypeOf<
  * response
  */
 
-export const getLogEntryExamplesSuccessReponsePayloadRT = rt.intersection([
+export const getLogEntryExamplesSuccessResponsePayloadRT = rt.intersection([
   rt.type({
     data: rt.type({
       examples: rt.array(logEntryExampleRT),
@@ -60,11 +60,11 @@ export const getLogEntryExamplesSuccessReponsePayloadRT = rt.intersection([
 ]);
 
 export type GetLogEntryExamplesSuccessReponsePayload = rt.TypeOf<
-  typeof getLogEntryExamplesSuccessReponsePayloadRT
+  typeof getLogEntryExamplesSuccessResponsePayloadRT
 >;
 
 export const getLogEntryExamplesResponsePayloadRT = rt.union([
-  getLogEntryExamplesSuccessReponsePayloadRT,
+  getLogEntryExamplesSuccessResponsePayloadRT,
   badRequestErrorRT,
   forbiddenErrorRT,
 ]);

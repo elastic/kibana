@@ -11,7 +11,7 @@ import { PersistedLogViewReference } from '../../../../common/log_views';
 import { useTrackedPromise, CanceledPromiseError } from '../../../utils/use_tracked_promise';
 import { callGetLogEntryAnomaliesAPI } from './service_calls/get_log_entry_anomalies';
 import { callGetLogEntryAnomaliesDatasetsAPI } from './service_calls/get_log_entry_anomalies_datasets';
-import { GetLogEntryAnomaliesDatasetsSuccessResponsePayload } from '../../../../common/http_api/log_analysis';
+import { GetLogEntryAnomaliesDatasetsSuccessResponsePayload } from '../../../../common/http_api';
 import {
   AnomaliesSort,
   Pagination,
