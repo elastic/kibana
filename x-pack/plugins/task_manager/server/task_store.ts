@@ -153,7 +153,7 @@ export class TaskStore {
 
     let savedObject;
     try {
-      const validatedTaskInstance = this.getValidatedTaskInstance(taskInstance, 'forbid');
+      const validatedTaskInstance = this.getValidatedTaskInstance(taskInstance, 'write');
       savedObject = await this.savedObjectsRepository.create<SerializedConcreteTaskInstance>(
         'task',
         taskInstanceToAttributes(validatedTaskInstance),
@@ -168,7 +168,7 @@ export class TaskStore {
     }
 
     const result = savedObjectToConcreteTaskInstance(savedObject);
-    return this.getValidatedTaskInstance(result, 'ignore');
+    return this.getValidatedTaskInstance(result, 'read');
   }
 
   /**
@@ -179,7 +179,7 @@ export class TaskStore {
   public async bulkSchedule(taskInstances: TaskInstance[]): Promise<ConcreteTaskInstance[]> {
     const objects = taskInstances.map((taskInstance) => {
       this.definitions.ensureHas(taskInstance.taskType);
-      const validatedTaskInstance = this.getValidatedTaskInstance(taskInstance, 'forbid');
+      const validatedTaskInstance = this.getValidatedTaskInstance(taskInstance, 'write');
       return {
         type: 'task',
         attributes: taskInstanceToAttributes(validatedTaskInstance),
@@ -205,7 +205,7 @@ export class TaskStore {
 
     return savedObjects.saved_objects.map((so) => {
       const taskInstance = savedObjectToConcreteTaskInstance(so);
-      return this.getValidatedTaskInstance(taskInstance, 'ignore');
+      return this.getValidatedTaskInstance(taskInstance, 'read');
     });
   }
 
@@ -232,7 +232,7 @@ export class TaskStore {
    * @returns {Promise<TaskDoc>}
    */
   public async update(doc: ConcreteTaskInstance): Promise<ConcreteTaskInstance> {
-    const validatedTaskInstance = this.getValidatedTaskInstance(doc, 'forbid');
+    const validatedTaskInstance = this.getValidatedTaskInstance(doc, 'write');
     const attributes = taskInstanceToAttributes(validatedTaskInstance);
 
     let updatedSavedObject;
@@ -258,7 +258,7 @@ export class TaskStore {
       // This is far from ideal, but unless we change the SavedObjectsClient this is the best we can do
       { ...updatedSavedObject, attributes: defaults(updatedSavedObject.attributes, attributes) }
     );
-    return this.getValidatedTaskInstance(taskInstance, 'ignore');
+    return this.getValidatedTaskInstance(taskInstance, 'read');
   }
 
   /**
@@ -270,7 +270,7 @@ export class TaskStore {
    */
   public async bulkUpdate(docs: ConcreteTaskInstance[]): Promise<BulkUpdateResult[]> {
     const attributesByDocId = docs.reduce((attrsById, doc) => {
-      const validatedTaskInstance = this.getValidatedTaskInstance(doc, 'forbid');
+      const validatedTaskInstance = this.getValidatedTaskInstance(doc, 'write');
       attrsById.set(doc.id, taskInstanceToAttributes(validatedTaskInstance));
       return attrsById;
     }, new Map());
@@ -310,7 +310,7 @@ export class TaskStore {
           attributesByDocId.get(updatedSavedObject.id)!
         ),
       });
-      return asOk(this.getValidatedTaskInstance(taskInstance, 'ignore'));
+      return asOk(this.getValidatedTaskInstance(taskInstance, 'read'));
     });
   }
 
@@ -360,7 +360,7 @@ export class TaskStore {
       throw e;
     }
     const taskInstance = savedObjectToConcreteTaskInstance(result);
-    return this.getValidatedTaskInstance(taskInstance, 'ignore');
+    return this.getValidatedTaskInstance(taskInstance, 'read');
   }
 
   /**
@@ -384,7 +384,7 @@ export class TaskStore {
         return asErr({ id: task.id, type: task.type, error: task.error });
       }
       const taskInstance = savedObjectToConcreteTaskInstance(task);
-      const validatedTaskInstance = this.getValidatedTaskInstance(taskInstance, 'ignore');
+      const validatedTaskInstance = this.getValidatedTaskInstance(taskInstance, 'read');
       return asOk(validatedTaskInstance);
     });
   }
@@ -430,7 +430,7 @@ export class TaskStore {
           .map((doc) => this.serializer.rawToSavedObject(doc))
           .map((doc) => omit(doc, 'namespace') as SavedObject<SerializedConcreteTaskInstance>)
           .map((doc) => savedObjectToConcreteTaskInstance(doc))
-          .map((doc) => this.getValidatedTaskInstance(doc, 'ignore')),
+          .map((doc) => this.getValidatedTaskInstance(doc, 'read')),
       };
     } catch (e) {
       this.errors$.next(e);
@@ -499,14 +499,16 @@ export class TaskStore {
     }
   }
 
-  private getValidatedTaskInstance<T extends TaskInstance>(
-    task: T,
-    unknowns: 'forbid' | 'ignore'
-  ): T {
+  private getValidatedTaskInstance<T extends TaskInstance>(task: T, mode: 'read' | 'write'): T {
     return {
       ...task,
       state: this.validateState
-        ? getValidateStateSchema(task.state, task.taskType, this.definitions, unknowns)
+        ? getValidatedStateSchema(
+            task.state,
+            task.taskType,
+            this.definitions,
+            mode === 'read' ? 'ignore' : 'forbid'
+          )
         : task.state,
     };
   }
@@ -531,7 +533,7 @@ export function correctVersionConflictsForContinuation(
   return maxDocs && versionConflicts + updated > maxDocs ? maxDocs - updated : versionConflicts;
 }
 
-function getValidateStateSchema(
+function getValidatedStateSchema(
   state: ConcreteTaskInstance['state'],
   taskType: ConcreteTaskInstance['taskType'],
   definitions: TaskTypeDictionary,
@@ -542,11 +544,11 @@ function getValidateStateSchema(
   }
 
   const hasTypeDef = definitions.has(taskType);
-  const taskTypeDef = hasTypeDef ? definitions.get(taskType) : null;
-
   if (!hasTypeDef) {
     return state;
   }
+
+  const taskTypeDef = definitions.get(taskType);
 
   if (!taskTypeDef?.stateSchemaByVersion) {
     throw new Error(

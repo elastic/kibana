@@ -250,6 +250,7 @@ export interface TaskInstance {
   // this can be fixed by supporting generics in the future
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   state: Record<string, any>;
+  stateVersion?: number;
 
   /**
    * The serialized traceparent string of the current APM transaction or span.
