@@ -374,7 +374,7 @@ export function ErrorSampleDetails({
               coPilot={coPilot}
               title={i18n.translate(
                 'xpack.apm.errorGroupDetails.explainErrorTitle',
-                { defaultMessage: 'Explain error' }
+                { defaultMessage: "What's this error?" }
               )}
               promptId={OpenAIPromptId.ApmExplainError}
               params={promptParams}

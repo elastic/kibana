@@ -9,8 +9,11 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
+  EuiLoadingSpinner,
   EuiPanel,
+  EuiSpacer,
   EuiText,
+  EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/css';
@@ -69,42 +72,61 @@ export function CoPilotPrompt<TPromptId extends OpenAIPromptId>({
 
   const content = conversation?.message ?? '';
 
-  const isLoading = hasOpened && conversation?.loading !== false;
+  const isLoading = !!conversation?.loading;
+
+  const isStreaming = isLoading && !!content;
 
   const cursor = isLoading ? <span className={cursorCss} /> : <></>;
 
-  const chat = (
-    <p style={{ whiteSpace: 'pre-wrap', paddingTop: theme.euiTheme.size.m, lineHeight: 1.5 }}>
-      {content}
-      {cursor}
-    </p>
-  );
+  const inner =
+    isLoading && !isStreaming ? (
+      <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
+        <EuiFlexItem grow={false}>
+          <EuiLoadingSpinner size="s" />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiText size="s">
+            {i18n.translate('xpack.observability.coPilotPrompt.chatLoading', {
+              defaultMessage: 'Waiting for a response...',
+            })}
+          </EuiText>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    ) : (
+      <p style={{ whiteSpace: 'pre-wrap', lineHeight: 1.5 }}>
+        {content}
+        {cursor}
+      </p>
+    );
+
+  const tooltipContent = i18n.translate('xpack.observability.coPilotPrompt.askCoPilot', {
+    defaultMessage: 'Ask Observability Co-Pilot for assistence',
+  });
 
   return (
     <EuiPanel color="primary">
       <EuiAccordion
         id={title}
-        isLoading={isLoading}
+        css={css`
+          .euiButtonIcon {
+            color: ${theme.euiTheme.colors.primaryText};
+          }
+        `}
+        buttonClassName={css`
+          display: block;
+          width: 100%;
+        `}
         buttonContent={
-          <EuiFlexGroup direction="column" gutterSize="s">
-            <EuiFlexItem grow={false}>
-              <EuiFlexGroup direction="row" gutterSize="m" alignItems="center">
-                <EuiFlexItem grow={false}>
-                  <EuiIcon type="help" size="m" />
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiText size="m">
-                    <strong>{title}</strong>
-                  </EuiText>
-                </EuiFlexItem>
-              </EuiFlexGroup>
+          <EuiFlexGroup direction="row" alignItems="center">
+            <EuiFlexItem grow>
+              <EuiText size="m" color={theme.euiTheme.colors.primaryText}>
+                <strong>{title}</strong>
+              </EuiText>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiText size="xs" color="subdued">
-                {i18n.translate('xpack.observability.coPilotPrompt.askCoPilot', {
-                  defaultMessage: 'Ask Observability Co-Pilot for assistence',
-                })}
-              </EuiText>
+              <EuiToolTip content={tooltipContent}>
+                <EuiIcon color={theme.euiTheme.colors.primaryText} type="questionInCircle" />
+              </EuiToolTip>
             </EuiFlexItem>
           </EuiFlexGroup>
         }
@@ -113,7 +135,8 @@ export function CoPilotPrompt<TPromptId extends OpenAIPromptId>({
           setHasOpened(true);
         }}
       >
-        {chat}
+        <EuiSpacer size="s" />
+        {inner}
       </EuiAccordion>
     </EuiPanel>
   );
