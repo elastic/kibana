@@ -203,12 +203,11 @@
 {
   "attributes": {
     "description": "",
-    "hits": 0,
     "kibanaSavedObjectMeta": {
       "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"lucene\"},\"filter\":[]}"
     },
-    "optionsJSON": "{\"darkTheme\":false,\"useMargins\":true,\"hidePanelTitles\":false}",
-    "panelsJSON": "[{\"version\":\"7.0.0-alpha1\",\"gridData\":{\"x\":0,\"y\":0,\"w\":24,\"h\":20,\"i\":\"1\"},\"panelIndex\":\"1\",\"embeddableConfig\":{\"enhancements\":{}},\"panelRefName\":\"panel_0\"},{\"version\":\"7.0.0-alpha1\",\"gridData\":{\"x\":24,\"y\":0,\"w\":24,\"h\":20,\"i\":\"2\"},\"panelIndex\":\"2\",\"embeddableConfig\":{\"enhancements\":{}},\"panelRefName\":\"panel_1\"}]",
+    "optionsJSON": "{\"useMargins\":true,\"syncColors\":false,\"syncCursor\":true,\"syncTooltips\":false,\"hidePanelTitles\":false}",
+    "panelsJSON": "[{\"version\":\"8.9.0\",\"type\":\"map\",\"gridData\":{\"x\":0,\"y\":0,\"w\":24,\"h\":20,\"i\":\"1\"},\"panelIndex\":\"1\",\"embeddableConfig\":{\"enhancements\":{},\"mapCenter\":{\"lat\":-6.37321,\"lon\":80.23759,\"zoom\":2.39},\"mapBuffer\":{\"minLon\":0,\"minLat\":-40.9799,\"maxLon\":135,\"maxLat\":40.9799},\"isLayerTOCOpen\":false,\"openTOCDetails\":[\"n1t6f\"],\"hiddenLayers\":[],\"isMovementSynchronized\":false},\"panelRefName\":\"panel_1\"},{\"version\":\"8.9.0\",\"type\":\"map\",\"gridData\":{\"x\":24,\"y\":0,\"w\":24,\"h\":20,\"i\":\"2\"},\"panelIndex\":\"2\",\"embeddableConfig\":{\"enhancements\":{},\"mapCenter\":{\"lat\":0,\"lon\":88.26299,\"zoom\":0.04},\"mapBuffer\":{\"minLon\":-360,\"minLat\":-89.78601,\"maxLon\":360,\"maxLat\":89.78601},\"isLayerTOCOpen\":false,\"openTOCDetails\":[],\"hiddenLayers\":[],\"isMovementSynchronized\":false},\"panelRefName\":\"panel_2\"}]",
     "refreshInterval": {
       "pause": true,
       "value": 1000
@@ -219,26 +218,29 @@
     "title": "map embeddable example",
     "version": 1
   },
-  "coreMigrationVersion": "8.0.0",
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2023-06-01T22:36:46.490Z",
   "id": "19906970-2e40-11e9-85cb-6965aae20f13",
-  "migrationVersion": {
-    "dashboard": "7.14.0"
-  },
+  "managed": false,
+  "namespaces": [
+    "default"
+  ],
   "references": [
     {
       "id": "1649cc70-f736-11e8-8ce0-9723965e01e3",
-      "name": "panel_0",
+      "name": "1:panel_1",
       "type": "map"
     },
     {
       "id": "88845ec0-03ae-11e9-83d4-5b39b6575325",
-      "name": "panel_1",
+      "name": "2:panel_2",
       "type": "map"
     }
   ],
   "type": "dashboard",
-  "updated_at": "2018-04-11T21:57:52.253Z",
-  "version": "WzY1LDJd"
+  "typeMigrationVersion": "8.7.0",
+  "updated_at": "2023-06-01T22:36:46.490Z",
+  "version": "WzcwLDFd"
 }
 
 {
