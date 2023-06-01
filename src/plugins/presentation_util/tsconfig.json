@@ -29,6 +29,7 @@
     "@kbn/config-schema",
     "@kbn/storybook",
     "@kbn/ui-actions-plugin",
+    "@kbn/core-lifecycle-browser",
   ],
   "exclude": [
     "target/**/*",
