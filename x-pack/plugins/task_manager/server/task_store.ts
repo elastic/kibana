@@ -9,9 +9,8 @@
  * This module contains helpers for managing the task manager storage layer.
  */
 import { Subject } from 'rxjs';
-import { omit, defaults, get, isEmpty } from 'lodash';
+import { omit, defaults, get } from 'lodash';
 import { SavedObjectError } from '@kbn/core-saved-objects-common';
-
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { SavedObjectsBulkDeleteResponse } from '@kbn/core/server';
 
@@ -32,11 +31,11 @@ import {
   TaskLifecycle,
   TaskLifecycleResult,
   SerializedConcreteTaskInstance,
-  TaskDefinition,
 } from './task';
 
 import { TaskTypeDictionary } from './task_type_dictionary';
 import { AdHocTaskCounter } from './lib/adhoc_task_counter';
+import { TaskValidator } from './task_validator';
 
 export interface StoreOpts {
   esClient: ElasticsearchClient;
@@ -106,7 +105,7 @@ export class TaskStore {
   private savedObjectsRepository: ISavedObjectsRepository;
   private serializer: ISavedObjectsSerializer;
   private adHocTaskCounter: AdHocTaskCounter;
-  private readonly validateState: boolean;
+  private readonly taskValidator: TaskValidator;
 
   /**
    * Constructs a new TaskStore.
@@ -125,7 +124,10 @@ export class TaskStore {
     this.serializer = opts.serializer;
     this.savedObjectsRepository = opts.savedObjectsRepository;
     this.adHocTaskCounter = opts.adHocTaskCounter;
-    this.validateState = opts.validateState;
+    this.taskValidator = new TaskValidator({
+      definitions: opts.definitions,
+      validateState: opts.validateState,
+    });
     this.esClientWithoutRetries = opts.esClient.child({
       // Timeouts are retried and make requests timeout after (requestTimeout * (1 + maxRetries))
       // The poller doesn't need retry logic because it will try again at the next polling cycle
@@ -154,7 +156,10 @@ export class TaskStore {
 
     let savedObject;
     try {
-      const validatedTaskInstance = this.getValidatedTaskInstance(taskInstance, 'write');
+      const validatedTaskInstance = this.taskValidator.getValidatedTaskInstance(
+        taskInstance,
+        'write'
+      );
       savedObject = await this.savedObjectsRepository.create<SerializedConcreteTaskInstance>(
         'task',
         taskInstanceToAttributes(validatedTaskInstance),
@@ -169,7 +174,7 @@ export class TaskStore {
     }
 
     const result = savedObjectToConcreteTaskInstance(savedObject);
-    return this.getValidatedTaskInstance(result, 'read');
+    return this.taskValidator.getValidatedTaskInstance(result, 'read');
   }
 
   /**
@@ -180,7 +185,10 @@ export class TaskStore {
   public async bulkSchedule(taskInstances: TaskInstance[]): Promise<ConcreteTaskInstance[]> {
     const objects = taskInstances.map((taskInstance) => {
       this.definitions.ensureHas(taskInstance.taskType);
-      const validatedTaskInstance = this.getValidatedTaskInstance(taskInstance, 'write');
+      const validatedTaskInstance = this.taskValidator.getValidatedTaskInstance(
+        taskInstance,
+        'write'
+      );
       return {
         type: 'task',
         attributes: taskInstanceToAttributes(validatedTaskInstance),
@@ -206,7 +214,7 @@ export class TaskStore {
 
     return savedObjects.saved_objects.map((so) => {
       const taskInstance = savedObjectToConcreteTaskInstance(so);
-      return this.getValidatedTaskInstance(taskInstance, 'read');
+      return this.taskValidator.getValidatedTaskInstance(taskInstance, 'read');
     });
   }
 
@@ -233,7 +241,7 @@ export class TaskStore {
    * @returns {Promise<TaskDoc>}
    */
   public async update(doc: ConcreteTaskInstance): Promise<ConcreteTaskInstance> {
-    const validatedTaskInstance = this.getValidatedTaskInstance(doc, 'write');
+    const validatedTaskInstance = this.taskValidator.getValidatedTaskInstance(doc, 'write');
     const attributes = taskInstanceToAttributes(validatedTaskInstance);
 
     let updatedSavedObject;
@@ -259,7 +267,7 @@ export class TaskStore {
       // This is far from ideal, but unless we change the SavedObjectsClient this is the best we can do
       { ...updatedSavedObject, attributes: defaults(updatedSavedObject.attributes, attributes) }
     );
-    return this.getValidatedTaskInstance(taskInstance, 'read');
+    return this.taskValidator.getValidatedTaskInstance(taskInstance, 'read');
   }
 
   /**
@@ -271,7 +279,7 @@ export class TaskStore {
    */
   public async bulkUpdate(docs: ConcreteTaskInstance[]): Promise<BulkUpdateResult[]> {
     const attributesByDocId = docs.reduce((attrsById, doc) => {
-      const validatedTaskInstance = this.getValidatedTaskInstance(doc, 'write');
+      const validatedTaskInstance = this.taskValidator.getValidatedTaskInstance(doc, 'write');
       attrsById.set(doc.id, taskInstanceToAttributes(validatedTaskInstance));
       return attrsById;
     }, new Map());
@@ -311,7 +319,7 @@ export class TaskStore {
           attributesByDocId.get(updatedSavedObject.id)!
         ),
       });
-      return asOk(this.getValidatedTaskInstance(taskInstance, 'read'));
+      return asOk(this.taskValidator.getValidatedTaskInstance(taskInstance, 'read'));
     });
   }
 
@@ -361,7 +369,7 @@ export class TaskStore {
       throw e;
     }
     const taskInstance = savedObjectToConcreteTaskInstance(result);
-    return this.getValidatedTaskInstance(taskInstance, 'read');
+    return this.taskValidator.getValidatedTaskInstance(taskInstance, 'read');
   }
 
   /**
@@ -385,7 +393,10 @@ export class TaskStore {
         return asErr({ id: task.id, type: task.type, error: task.error });
       }
       const taskInstance = savedObjectToConcreteTaskInstance(task);
-      const validatedTaskInstance = this.getValidatedTaskInstance(taskInstance, 'read');
+      const validatedTaskInstance = this.taskValidator.getValidatedTaskInstance(
+        taskInstance,
+        'read'
+      );
       return asOk(validatedTaskInstance);
     });
   }
@@ -431,7 +442,7 @@ export class TaskStore {
           .map((doc) => this.serializer.rawToSavedObject(doc))
           .map((doc) => omit(doc, 'namespace') as SavedObject<SerializedConcreteTaskInstance>)
           .map((doc) => savedObjectToConcreteTaskInstance(doc))
-          .map((doc) => this.getValidatedTaskInstance(doc, 'read')),
+          .map((doc) => this.taskValidator.getValidatedTaskInstance(doc, 'read')),
       };
     } catch (e) {
       this.errors$.next(e);
@@ -499,39 +510,6 @@ export class TaskStore {
       throw e;
     }
   }
-
-  private getValidatedTaskInstance<T extends TaskInstance>(task: T, mode: 'read' | 'write'): T {
-    // In the scenario the task is unused / deprecated and Kibana needs to manipulate the task
-    // we'll do a pass-through for those
-    if (!this.definitions.has(task.taskType)) {
-      return task;
-    }
-
-    const taskTypeDef = this.definitions.get(task.taskType);
-    const lastestStateSchema = taskTypeDef.getLatestStateSchema();
-
-    if (mode === 'read') {
-      return {
-        ...task,
-        state: this.validateState
-          ? getValidatedStateSchema(
-              migrateTaskState(task.state, task.stateVersion, taskTypeDef, lastestStateSchema),
-              task.taskType,
-              lastestStateSchema,
-              'ignore'
-            )
-          : task.state,
-      };
-    }
-
-    return {
-      ...task,
-      state: this.validateState
-        ? getValidatedStateSchema(task.state, task.taskType, lastestStateSchema, 'forbid')
-        : task.state,
-      stateVersion: lastestStateSchema?.version,
-    };
-  }
 }
 
 /**
@@ -551,53 +529,6 @@ export function correctVersionConflictsForContinuation(
 ): number {
   // @ts-expect-error estypes.ReindexResponse['updated'] and estypes.ReindexResponse['version_conflicts'] can be undefined
   return maxDocs && versionConflicts + updated > maxDocs ? maxDocs - updated : versionConflicts;
-}
-
-function migrateTaskState(
-  state: ConcreteTaskInstance['state'],
-  currentVersion: number | undefined,
-  taskTypeDef: TaskDefinition,
-  lastestStateSchema: ReturnType<TaskDefinition['getLatestStateSchema']>
-) {
-  if (!lastestStateSchema || (currentVersion && currentVersion >= lastestStateSchema.version)) {
-    return state;
-  }
-
-  let migratedState = state;
-  for (let i = currentVersion || 1; i <= lastestStateSchema.version; i++) {
-    if (!taskTypeDef.stateSchemaByVersion || taskTypeDef.stateSchemaByVersion[`${i}`]) {
-      throw new Error(`[migrateStateSchema] state schema missing for version: ${i}`);
-    }
-    migratedState = taskTypeDef.stateSchemaByVersion[i].up(migratedState);
-    try {
-      taskTypeDef.stateSchemaByVersion[i].schema.validate(migratedState);
-    } catch (e) {
-      throw new Error(
-        `[migrateStateSchema] failed to migrate to version ${i} because the data returned from the up migration doesn't match the schema: ${e.message}`
-      );
-    }
-  }
-
-  return migratedState;
-}
-
-function getValidatedStateSchema(
-  state: ConcreteTaskInstance['state'],
-  taskType: string,
-  latestStateSchema: ReturnType<TaskDefinition['getLatestStateSchema']>,
-  unknowns: 'forbid' | 'ignore'
-): ConcreteTaskInstance['state'] {
-  if (isEmpty(state)) {
-    return {};
-  }
-
-  if (!latestStateSchema) {
-    throw new Error(
-      `[validateStateSchema] stateSchemaByVersion not defined for task type: ${taskType}`
-    );
-  }
-
-  return latestStateSchema.schema.extendsDeep({ unknowns }).validate(state);
 }
 
 function taskInstanceToAttributes(doc: TaskInstance): SerializedConcreteTaskInstance {
