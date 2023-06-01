@@ -11,8 +11,9 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { EuiDataGridColumn } from '@elastic/eui';
 
 import { buildBaseFilterCriteria } from '@kbn/ml-query-utils';
-
 import type { TimeRange as TimeRangeMs } from '@kbn/ml-date-picker';
+import { INDEX_STATUS } from '@kbn/ml-data-frame-analytics-utils';
+
 import {
   isEsSearchResponse,
   isFieldHistogramsResponseSchema,
@@ -56,7 +57,6 @@ export const useIndexData = (
       useDataGrid,
       useRenderCellValue,
       getProcessedFields,
-      INDEX_STATUS,
     },
   } = useAppDependencies();
 
