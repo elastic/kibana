@@ -160,6 +160,17 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'telemetry.sendUsageTo (any)',
         'usageCollection.uiCounters.debug (boolean)',
         'usageCollection.uiCounters.enabled (boolean)',
+        // readOnly is boolean flag
+        'vis_type_gauge.readOnly (any)',
+        'vis_type_heatmap.readOnly (any)',
+        'vis_type_metric.readOnly (any)',
+        'vis_type_pie.readOnly (any)',
+        'vis_type_table.readOnly (any)',
+        'vis_type_tagcloud.readOnly (any)',
+        'vis_type_timelion.readOnly (any)',
+        'vis_type_timeseries.readOnly (any)',
+        'vis_type_vislib.readOnly (any)',
+        'vis_type_xy.readOnly (any)',
         'vis_type_vega.enableExternalUrls (boolean)',
         'xpack.actions.email.domain_allowlist (array)',
         'xpack.apm.serviceMapEnabled (boolean)',
@@ -195,14 +206,19 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.discoverEnhanced.actions.exploreDataInContextMenu.enabled (boolean)',
         'xpack.fleet.agents.enabled (boolean)',
         'xpack.fleet.enableExperimental (array)',
+        'xpack.fleet.internal.fleetServerStandalone (boolean)',
         'xpack.fleet.developer.maxAgentPoliciesWithInactivityTimeout (number)',
         'xpack.global_search.search_timeout (duration)',
         'xpack.graph.canEditDrillDownUrls (boolean)',
         'xpack.graph.savePolicy (alternatives)',
         'xpack.ilm.ui.enabled (boolean)',
         'xpack.index_management.ui.enabled (boolean)',
-        'xpack.infra.logs.app_target (alternatives)',
         'xpack.infra.sources.default.fields.message (array)',
+        /**
+         * xpack.infra.logs is conditional and will resolve to an object of properties
+         * - xpack.infra.logs.app_target (string)
+         */
+        'xpack.infra.logs (any)',
         'xpack.license_management.ui.enabled (boolean)',
         'xpack.maps.preserveDrawingBuffer (boolean)',
         'xpack.maps.showMapsInspectorAdapter (boolean)',

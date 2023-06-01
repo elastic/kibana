@@ -249,7 +249,7 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
             })
           );
       } catch (e) {
-        this.onFatalError(e);
+        this.dispatch.setErrorMessage(e.message);
       }
 
       this.dispatch.setDataViewId(this.dataView?.id);
@@ -269,7 +269,7 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
 
         this.field = originalField.toSpec();
       } catch (e) {
-        this.onFatalError(e);
+        this.dispatch.setErrorMessage(e.message);
       }
       this.dispatch.setField(this.field);
     }
@@ -334,7 +334,7 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
           // from prematurely setting loading to `false` and updating the suggestions to show "No results"
           return;
         }
-        this.onFatalError(response.error);
+        this.dispatch.setErrorMessage(response.error.message);
         return;
       }
 
@@ -368,11 +368,13 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
       // publish filter
       const newFilters = await this.buildFilter();
       batch(() => {
+        this.dispatch.setErrorMessage(undefined);
         this.dispatch.setLoading(false);
         this.dispatch.publishFilters(newFilters);
       });
     } else {
       batch(() => {
+        this.dispatch.setErrorMessage(undefined);
         this.dispatch.updateQueryResults({
           availableOptions: [],
         });
@@ -415,14 +417,6 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
     this.runOptionsListQuery();
   };
 
-  public onFatalError = (e: Error) => {
-    batch(() => {
-      this.dispatch.setLoading(false);
-      this.dispatch.setPopoverOpen(false);
-    });
-    super.onFatalError(e);
-  };
-
   public destroy = () => {
     super.destroy();
     this.cleanupStateTools();
@@ -436,6 +430,7 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
       ReactDOM.unmountComponentAtNode(this.node);
     }
     this.node = node;
+
     ReactDOM.render(
       <KibanaThemeProvider theme$={pluginServices.getServices().theme.theme$}>
         <OptionsListEmbeddableContext.Provider value={this}>

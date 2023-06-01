@@ -201,6 +201,7 @@ export class ToolsControl extends Component<Props, State> {
     return (
       <EuiPanel paddingSize="none" className="mapToolbarOverlay__button">
         <EuiButtonIcon
+          className="mapToolbarOverlay__buttonIcon-empty"
           size="s"
           color="text"
           iconType="wrench"

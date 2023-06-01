@@ -14,7 +14,7 @@ import {
 } from '../../screens/entity_analytics';
 import {
   deleteRiskScore,
-  intercepInstallRiskScoreModule,
+  interceptInstallRiskScoreModule,
   waitForInstallRiskScoreModule,
 } from '../../tasks/api_calls/risk_scores';
 import { findSavedObjects } from '../../tasks/api_calls/risk_scores/saved_objects';
@@ -40,6 +40,7 @@ describe('Enable risk scores', () => {
   });
 
   beforeEach(() => {
+    login();
     deleteRiskScore({ riskScoreEntity: RiskScoreEntity.host, spaceId });
     deleteRiskScore({ riskScoreEntity: RiskScoreEntity.user, spaceId });
     visit(ENTITY_ANALYTICS_URL);
@@ -55,7 +56,7 @@ describe('Enable risk scores', () => {
   });
 
   it('should install host risk score successfully', () => {
-    intercepInstallRiskScoreModule();
+    interceptInstallRiskScoreModule();
     clickEnableRiskScore(RiskScoreEntity.host);
     waitForInstallRiskScoreModule();
 
@@ -89,7 +90,7 @@ describe('Enable risk scores', () => {
   });
 
   it('should install user risk score successfully', () => {
-    intercepInstallRiskScoreModule();
+    interceptInstallRiskScoreModule();
     clickEnableRiskScore(RiskScoreEntity.user);
     waitForInstallRiskScoreModule();
 
