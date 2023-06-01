@@ -258,7 +258,7 @@ export function registerTransactionDurationRuleType({
             [TRANSACTION_NAME]: ruleParams.transactionName,
             [PROCESSOR_EVENT]: ProcessorEvent.transaction,
             [ALERT_EVALUATION_VALUE]: transactionDuration,
-            [ALERT_EVALUATION_THRESHOLD]: ruleParams.threshold,
+            [ALERT_EVALUATION_THRESHOLD]: thresholdMicroseconds,
             [ALERT_REASON]: reason,
             ...sourceFields,
             ...groupByFields,

@@ -44,6 +44,8 @@ import {
   buildRemoveAliasActions,
   MigrationType,
   increaseBatchSize,
+  hasLaterVersionAlias,
+  aliasVersion,
 } from './helpers';
 import { buildTempIndexMap, createBatches } from './create_batches';
 import type { MigrationLog } from '../types';
@@ -116,6 +118,22 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
             stateP.currentAlias
           } alias is pointing to a newer version of Kibana: v${indexVersion(
             aliases[stateP.currentAlias]
+          )}`,
+        };
+      }
+
+      const laterVersionAlias = hasLaterVersionAlias(stateP.kibanaVersion, aliases);
+      if (
+        // a `.kibana_<version>` alias exist, which refers to a later version of Kibana
+        // e.g. `.kibana_8.7.0` exists, and current stack version is 8.6.1
+        // see https://github.com/elastic/kibana/issues/155136
+        laterVersionAlias
+      ) {
+        return {
+          ...stateP,
+          controlState: 'FATAL',
+          reason: `The ${laterVersionAlias} alias refers to a newer version of Kibana: v${aliasVersion(
+            laterVersionAlias
           )}`,
         };
       }

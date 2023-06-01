@@ -19,6 +19,7 @@ export class DashboardVisualizationsService extends FtrService {
   private readonly header = this.ctx.getPageObject('header');
   private readonly discover = this.ctx.getPageObject('discover');
   private readonly timePicker = this.ctx.getPageObject('timePicker');
+  private readonly unifiedFieldList = this.ctx.getPageObject('unifiedFieldList');
 
   async createAndAddTSVBVisualization(name: string) {
     this.log.debug(`createAndAddTSVBVisualization(${name})`);
@@ -54,7 +55,7 @@ export class DashboardVisualizationsService extends FtrService {
 
     if (fields) {
       for (let i = 0; i < fields.length; i++) {
-        await this.discover.clickFieldListItemAdd(fields[i]);
+        await this.unifiedFieldList.clickFieldListItemAdd(fields[i]);
       }
     }
 

@@ -8,7 +8,7 @@
 import React, { FC, useState } from 'react';
 import { Direction, EuiBadge, EuiBasicTableColumn, EuiInMemoryTable } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { getAnalysisType } from '../../../data_frame_analytics/common/analytics';
+import { getAnalysisType } from '@kbn/ml-data-frame-analytics-utils';
 import {
   DataFrameAnalyticsListColumn,
   DataFrameAnalyticsListRow,

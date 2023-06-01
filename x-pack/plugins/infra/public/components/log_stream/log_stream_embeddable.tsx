@@ -30,6 +30,7 @@ export class LogStreamEmbeddable extends Embeddable<LogStreamEmbeddableInput> {
   public readonly type = LOG_STREAM_EMBEDDABLE;
   private node?: HTMLElement;
   private subscription: Subscription;
+  private isDarkMode = false;
 
   constructor(
     private core: CoreStart,
@@ -40,7 +41,13 @@ export class LogStreamEmbeddable extends Embeddable<LogStreamEmbeddableInput> {
   ) {
     super(initialInput, {}, parent);
 
-    this.subscription = this.getInput$().subscribe(() => this.renderComponent());
+    this.subscription = new Subscription();
+
+    this.subscription.add(
+      core.theme?.theme$.subscribe((theme) => (this.isDarkMode = theme.darkMode))
+    );
+
+    this.subscription.add(this.getInput$().subscribe(() => this.renderComponent()));
   }
 
   public render(node: HTMLElement) {
@@ -81,7 +88,7 @@ export class LogStreamEmbeddable extends Embeddable<LogStreamEmbeddableInput> {
         pluginStart={this.pluginStart}
         theme$={this.core.theme.theme$}
       >
-        <EuiThemeProvider>
+        <EuiThemeProvider darkMode={this.isDarkMode}>
           <div style={{ width: '100%' }}>
             <LazyLogStreamWrapper
               logView={{ type: 'log-view-reference', logViewId: 'default' }}
