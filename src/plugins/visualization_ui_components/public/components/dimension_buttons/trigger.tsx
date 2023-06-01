@@ -15,11 +15,11 @@ import { euiThemeVars } from '@kbn/ui-theme';
 
 export const defaultDimensionTriggerTooltip = (
   <p>
-    {i18n.translate('xpack.lens.configure.invalidConfigTooltip', {
+    {i18n.translate('visualizationUiComponents.configure.invalidConfigTooltip', {
       defaultMessage: 'Invalid configuration.',
     })}
     <br />
-    {i18n.translate('xpack.lens.configure.invalidConfigTooltipClick', {
+    {i18n.translate('visualizationUiComponents.configure.invalidConfigTooltipClick', {
       defaultMessage: 'Click for more details.',
     })}
   </p>

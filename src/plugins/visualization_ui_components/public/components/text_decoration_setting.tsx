@@ -50,14 +50,14 @@ export function TextDecorationSetting({
   const options = [
     {
       id: `${idPrefix}none`,
-      label: i18n.translate('xpack.lens.xyChart.lineMarker.textVisibility.none', {
+      label: i18n.translate('visualizationUiComponents.xyChart.lineMarker.textVisibility.none', {
         defaultMessage: 'None',
       }),
       'data-test-subj': 'lnsXY_textVisibility_none',
     },
     {
       id: `${idPrefix}name`,
-      label: i18n.translate('xpack.lens.xyChart.lineMarker.textVisibility.name', {
+      label: i18n.translate('visualizationUiComponents.xyChart.lineMarker.textVisibility.name', {
         defaultMessage: 'Name',
       }),
       'data-test-subj': 'lnsXY_textVisibility_name',
@@ -66,7 +66,7 @@ export function TextDecorationSetting({
   if (isQueryBased) {
     options.push({
       id: `${idPrefix}field`,
-      label: i18n.translate('xpack.lens.xyChart.lineMarker.textVisibility.field', {
+      label: i18n.translate('visualizationUiComponents.xyChart.lineMarker.textVisibility.field', {
         defaultMessage: 'Field',
       }),
       'data-test-subj': 'lnsXY_textVisibility_field',
@@ -75,7 +75,7 @@ export function TextDecorationSetting({
 
   return (
     <EuiFormRow
-      label={i18n.translate('xpack.lens.lineMarker.textVisibility', {
+      label={i18n.translate('visualizationUiComponents.lineMarker.textVisibility', {
         defaultMessage: 'Text decoration',
       })}
       display="columnCompressed"
@@ -83,7 +83,7 @@ export function TextDecorationSetting({
     >
       <div>
         <EuiButtonGroup
-          legend={i18n.translate('xpack.lens.lineMarker.textVisibility', {
+          legend={i18n.translate('visualizationUiComponents.lineMarker.textVisibility', {
             defaultMessage: 'Text decoration',
           })}
           data-test-subj="lns-lineMarker-text-visibility"

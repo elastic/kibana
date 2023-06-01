@@ -36,7 +36,7 @@ export const LineStyleSettings = ({
       <EuiFormRow
         display="columnCompressed"
         fullWidth
-        label={i18n.translate('xpack.lens.xyChart.lineStyle.label', {
+        label={i18n.translate('visualizationUiComponents.xyChart.lineStyle.label', {
           defaultMessage: 'Line',
         })}
       >
@@ -51,7 +51,7 @@ export const LineStyleSettings = ({
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButtonGroup
-              legend={i18n.translate('xpack.lens.xyChart.lineStyle.label', {
+              legend={i18n.translate('visualizationUiComponents.xyChart.lineStyle.label', {
                 defaultMessage: 'Line',
               })}
               data-test-subj="lnsXY_line_style"
@@ -60,7 +60,7 @@ export const LineStyleSettings = ({
               options={[
                 {
                   id: `${idPrefix}solid`,
-                  label: i18n.translate('xpack.lens.xyChart.lineStyle.solid', {
+                  label: i18n.translate('visualizationUiComponents.xyChart.lineStyle.solid', {
                     defaultMessage: 'Solid',
                   }),
                   'data-test-subj': 'lnsXY_line_style_solid',
@@ -68,7 +68,7 @@ export const LineStyleSettings = ({
                 },
                 {
                   id: `${idPrefix}dashed`,
-                  label: i18n.translate('xpack.lens.xyChart.lineStyle.dashed', {
+                  label: i18n.translate('visualizationUiComponents.xyChart.lineStyle.dashed', {
                     defaultMessage: 'Dashed',
                   }),
                   'data-test-subj': 'lnsXY_line_style_dashed',
@@ -76,7 +76,7 @@ export const LineStyleSettings = ({
                 },
                 {
                   id: `${idPrefix}dotted`,
-                  label: i18n.translate('xpack.lens.xyChart.lineStyle.dotted', {
+                  label: i18n.translate('visualizationUiComponents.xyChart.lineStyle.dotted', {
                     defaultMessage: 'Dotted',
                   }),
                   'data-test-subj': 'lnsXY_line_style_dotted',
