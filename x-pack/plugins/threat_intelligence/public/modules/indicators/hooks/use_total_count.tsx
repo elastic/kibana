@@ -6,11 +6,7 @@
  */
 
 import { useEffect, useState } from 'react';
-import {
-  IEsSearchRequest,
-  IKibanaSearchResponse,
-  isCompleteResponse,
-} from '@kbn/data-common';
+import { IEsSearchRequest, IKibanaSearchResponse, isCompleteResponse } from '@kbn/data-common';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useSourcererDataView } from './use_sourcerer_data_view';
 import type { RawIndicatorsResponse } from '../services/fetch_indicators';

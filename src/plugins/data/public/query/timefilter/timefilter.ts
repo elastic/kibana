@@ -12,9 +12,6 @@ import moment from 'moment';
 import { PublicMethodsOf } from '@kbn/utility-types';
 import { TimeRange } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import { areRefreshIntervalsDifferent, areTimeRangesDifferent } from './lib/diff_time_picker_vals';
-import type { TimefilterConfig, InputTimeRange, TimeRangeBounds } from './types';
-import { NowProviderInternalContract } from '../../now_provider';
 import {
   calculateBounds,
   getAbsoluteTimeRange,
@@ -22,6 +19,9 @@ import {
   getRelativeTime,
   RefreshInterval,
 } from '@kbn/data-common';
+import { areRefreshIntervalsDifferent, areTimeRangesDifferent } from './lib/diff_time_picker_vals';
+import type { TimefilterConfig, InputTimeRange, TimeRangeBounds } from './types';
+import { NowProviderInternalContract } from '../../now_provider';
 import { TimeHistoryContract } from './time_history';
 import { createAutoRefreshLoop, AutoRefreshDoneFn } from './lib/auto_refresh_loop';
 

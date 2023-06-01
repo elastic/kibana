@@ -11,13 +11,13 @@ import type { IScopedClusterClient, Logger } from '@kbn/core/server';
 import { catchError, tap } from 'rxjs/operators';
 import { SqlQueryResponse } from '@elastic/elasticsearch/lib/api/types';
 import { getKbnServerError } from '@kbn/kibana-utils-plugin/server';
-import type { ISearchStrategy, SearchStrategyDependencies } from '../../types';
 import type {
   IAsyncSearchOptions,
   SqlSearchStrategyRequest,
   SqlSearchStrategyResponse,
 } from '@kbn/data-common';
 import { pollSearch } from '@kbn/data-common';
+import type { ISearchStrategy, SearchStrategyDependencies } from '../../types';
 import { getDefaultAsyncGetParams, getDefaultAsyncSubmitParams } from './request_utils';
 import { toAsyncKibanaSearchResponse } from './response_utils';
 import { SearchConfigSchema } from '../../../../config';

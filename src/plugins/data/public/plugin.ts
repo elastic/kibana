@@ -14,6 +14,7 @@ import {
   IStorageWrapper,
   createStartServicesGetter,
 } from '@kbn/kibana-utils-plugin/public';
+import { getAggsFormats, DatatableUtilitiesService } from '@kbn/data-common/common';
 import { ConfigSchema } from '../config';
 import type {
   DataPublicPluginSetup,
@@ -41,7 +42,6 @@ import {
 import { applyFilterTrigger } from './triggers';
 import { getTableViewDescription } from './utils/table_inspector_view';
 import { NowProvider, NowProviderInternalContract } from './now_provider';
-import { getAggsFormats, DatatableUtilitiesService } from '@kbn/data-common/common';
 
 export class DataPublicPlugin
   implements

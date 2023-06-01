@@ -13,6 +13,7 @@ import { from, race, timer } from 'rxjs';
 import { mapTo, tap } from 'rxjs/operators';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import { SerializableRecord } from '@kbn/utility-types';
+import { SearchSessionsFindResponse, SearchSessionStatus } from '@kbn/data-common';
 import { ACTION } from '../components/actions';
 import {
   PersistedSearchSessionSavedObjectAttributes,
@@ -21,7 +22,6 @@ import {
 } from '../types';
 import { ISessionsClient } from '../../sessions_client';
 import { SearchUsageCollector } from '../../../collectors';
-import { SearchSessionsFindResponse, SearchSessionStatus } from '@kbn/data-common';
 import { SearchSessionsConfigSchema } from '../../../../../config';
 
 type LocatorsStart = SharePluginStart['url']['locators'];

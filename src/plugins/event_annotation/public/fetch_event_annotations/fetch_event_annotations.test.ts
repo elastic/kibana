@@ -8,11 +8,7 @@
 
 import { CoreStart, IUiSettingsClient } from '@kbn/core/public';
 
-import {
-  AggsStart,
-  DataViewsContract,
-  ExpressionValueSearchContext,
-} from '@kbn/data-common';
+import { AggsStart, DataViewsContract, ExpressionValueSearchContext } from '@kbn/data-common';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { EventAnnotationService } from '..';
 import { getFetchEventAnnotations } from '.';

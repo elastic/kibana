@@ -45,14 +45,6 @@ import {
   getFieldSubtypeMulti,
 } from '@kbn/data-common';
 
-import {
-  ILLEGAL_CHARACTERS_KEY,
-  CONTAINS_SPACES_KEY,
-  ILLEGAL_CHARACTERS_VISIBLE,
-  ILLEGAL_CHARACTERS,
-  validateDataView,
-} from './data_views';
-
 // Index patterns namespace:
 export const indexPatterns = {
   ILLEGAL_CHARACTERS_KEY,
@@ -116,6 +108,13 @@ import {
   tabifyAggResponse,
   tabifyGetColumns,
 } from '@kbn/data-common';
+import {
+  ILLEGAL_CHARACTERS_KEY,
+  CONTAINS_SPACES_KEY,
+  ILLEGAL_CHARACTERS_VISIBLE,
+  ILLEGAL_CHARACTERS,
+  validateDataView,
+} from './data_views';
 
 export { AggGroupLabels, AggGroupNames, METRIC_TYPES, BUCKET_TYPES } from '@kbn/data-common';
 
@@ -281,7 +280,13 @@ export { getTime } from '@kbn/data-common';
 
 export type { SavedObject } from '@kbn/data-common';
 
-export { isTimeRange, isQuery, flattenHit, calculateBounds, tabifyAggResponse } from '@kbn/data-common';
+export {
+  isTimeRange,
+  isQuery,
+  flattenHit,
+  calculateBounds,
+  tabifyAggResponse,
+} from '@kbn/data-common';
 
 export { APPLY_FILTER_TRIGGER } from './triggers';
 

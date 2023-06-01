@@ -6,12 +6,7 @@
  * Side Public License, v 1.
  */
 
-import {
-  BUCKET_TYPES,
-  IAggConfig,
-  METRIC_TYPES,
-  SHARD_DELAY_AGG_NAME,
-} from '@kbn/data-common';
+import { BUCKET_TYPES, IAggConfig, METRIC_TYPES, SHARD_DELAY_AGG_NAME } from '@kbn/data-common';
 import { search } from '@kbn/data-plugin/public';
 import { Vis, VisToExpressionAstParams } from './types';
 import { SchemaConfig } from '../common/types';

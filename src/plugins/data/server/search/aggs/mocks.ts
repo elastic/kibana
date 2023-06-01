@@ -14,9 +14,8 @@ import {
   getCalculateAutoTimeExpression,
 } from '@kbn/data-common';
 
-import { AggsSetup, AggsStart } from './types';
-
 import { mockAggTypesRegistry } from '@kbn/data-common/search/aggs/test_helpers';
+import { AggsSetup, AggsStart } from './types';
 
 const getConfig = jest.fn();
 

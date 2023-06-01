@@ -12,6 +12,14 @@ import { PersistableStateService, VersionedState } from '@kbn/kibana-utils-plugi
 import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { buildEsQuery, TimeRange } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/common';
+import { getEsQueryConfig } from '@kbn/data-common';
+import {
+  extract,
+  getAllMigrations,
+  inject,
+  migrateToLatest,
+  telemetry,
+} from '@kbn/data-common/query/persistable_state';
 import { FilterManager } from './filter_manager';
 import { createAddToQueryLog } from './lib';
 import type { TimefilterSetup } from './timefilter';
@@ -24,16 +32,8 @@ import {
 import { getQueryState, QueryState } from './query_state';
 import type { QueryStringContract } from './query_string';
 import { QueryStringManager } from './query_string';
-import { getEsQueryConfig } from '@kbn/data-common';
 import { getUiSettings } from '../services';
 import { NowProviderInternalContract } from '../now_provider';
-import {
-  extract,
-  getAllMigrations,
-  inject,
-  migrateToLatest,
-  telemetry,
-} from '@kbn/data-common/query/persistable_state';
 
 interface QueryServiceSetupDependencies {
   storage: IStorageWrapper;

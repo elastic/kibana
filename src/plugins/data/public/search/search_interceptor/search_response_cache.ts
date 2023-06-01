@@ -7,8 +7,8 @@
  */
 
 import { Observable, Subscription } from 'rxjs';
-import { SearchAbortController } from './search_abort_controller';
 import { IKibanaSearchResponse, isErrorResponse } from '@kbn/data-common';
+import { SearchAbortController } from './search_abort_controller';
 
 interface ResponseCacheItem {
   response$: Observable<IKibanaSearchResponse>;

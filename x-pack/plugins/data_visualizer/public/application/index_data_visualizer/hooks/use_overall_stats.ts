@@ -11,11 +11,7 @@ import { mergeMap, last, map, toArray } from 'rxjs/operators';
 import { i18n } from '@kbn/i18n';
 import type { ToastsStart } from '@kbn/core/public';
 import { chunk } from 'lodash';
-import type {
-  IKibanaSearchRequest,
-  IKibanaSearchResponse,
-  ISearchOptions,
-} from '@kbn/data-common';
+import type { IKibanaSearchRequest, IKibanaSearchResponse, ISearchOptions } from '@kbn/data-common';
 import { extractErrorProperties } from '@kbn/ml-error-utils';
 import { useDataVisualizerKibana } from '../../kibana_context';
 import {

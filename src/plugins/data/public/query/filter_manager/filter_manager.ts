@@ -21,9 +21,6 @@ import {
   COMPARE_ALL_OPTIONS,
 } from '@kbn/es-query';
 import { PersistableStateService } from '@kbn/kibana-utils-plugin/common/persistable_state';
-import { sortFilters } from './lib/sort_filters';
-import { mapAndFlattenFilters } from './lib/map_and_flatten_filters';
-
 import { UI_SETTINGS } from '@kbn/data-common';
 import {
   getAllMigrations,
@@ -31,6 +28,8 @@ import {
   extract,
   telemetry,
 } from '@kbn/data-common/query/filters/persistable_state';
+import { sortFilters } from './lib/sort_filters';
+import { mapAndFlattenFilters } from './lib/map_and_flatten_filters';
 
 interface PartitionedFilters {
   globalFilters: Filter[];

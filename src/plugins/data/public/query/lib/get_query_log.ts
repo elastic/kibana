@@ -8,8 +8,8 @@
 
 import { IUiSettingsClient } from '@kbn/core/public';
 import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
-import { PersistedLog } from '../persisted_log';
 import { UI_SETTINGS } from '@kbn/data-common';
+import { PersistedLog } from '../persisted_log';
 
 /** @internal */
 export function getQueryLog(

@@ -31,24 +31,6 @@ import type {
 } from '@kbn/task-manager-plugin/server';
 import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
 import type { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
-import type {
-  DataRequestHandlerContext,
-  IScopedSearchClient,
-  ISearchSetup,
-  ISearchStart,
-  ISearchStrategy,
-  SearchStrategyDependencies,
-} from './types';
-
-import { AggsService } from './aggs';
-
-import { registerSearchRoute, registerSessionRoutes } from './routes';
-import { ES_SEARCH_STRATEGY, esSearchStrategyProvider } from './strategies/es_search';
-import { DataPluginStart, DataPluginStartDependencies } from '../plugin';
-import { usageProvider } from './collectors/search/usage';
-import { registerUsageCollector as registerSearchUsageCollector } from './collectors/search/register';
-import { registerUsageCollector as registerSearchSessionUsageCollector } from './collectors/search_session/register';
-import { searchTelemetry } from '../saved_objects';
 import {
   cidrFunction,
   dateRangeFunction,
@@ -85,12 +67,30 @@ import {
   eqlRawResponse,
   SQL_SEARCH_STRATEGY,
 } from '@kbn/data-common/search';
-import { getEsaggs, getEsdsl, getEssql, getEql } from './expressions';
 import {
   getShardDelayBucketAgg,
   SHARD_DELAY_AGG_NAME,
 } from '@kbn/data-common/search/aggs/buckets/shard_delay';
 import { aggShardDelay } from '@kbn/data-common/search/aggs/buckets/shard_delay_fn';
+import type {
+  DataRequestHandlerContext,
+  IScopedSearchClient,
+  ISearchSetup,
+  ISearchStart,
+  ISearchStrategy,
+  SearchStrategyDependencies,
+} from './types';
+
+import { AggsService } from './aggs';
+
+import { registerSearchRoute, registerSessionRoutes } from './routes';
+import { ES_SEARCH_STRATEGY, esSearchStrategyProvider } from './strategies/es_search';
+import { DataPluginStart, DataPluginStartDependencies } from '../plugin';
+import { usageProvider } from './collectors/search/usage';
+import { registerUsageCollector as registerSearchUsageCollector } from './collectors/search/register';
+import { registerUsageCollector as registerSearchSessionUsageCollector } from './collectors/search_session/register';
+import { searchTelemetry } from '../saved_objects';
+import { getEsaggs, getEsdsl, getEssql, getEql } from './expressions';
 import { ConfigSchema } from '../../config';
 import { SearchSessionService } from './session';
 import { registerBsearchRoute } from './routes/bsearch';

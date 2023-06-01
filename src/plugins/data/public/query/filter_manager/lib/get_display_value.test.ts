@@ -7,12 +7,7 @@
  */
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { FilterStateStore, PhraseFilter } from '@kbn/es-query';
-import {
-  stubIndexPattern,
-  phraseFilter,
-  phrasesFilter,
-  rangeFilter,
-} from '@kbn/data-common/stubs';
+import { stubIndexPattern, phraseFilter, phrasesFilter, rangeFilter } from '@kbn/data-common/stubs';
 import { getDisplayValueFromFilter, getFieldDisplayValueFromFilter } from './get_display_value';
 import { FieldFormat } from '@kbn/field-formats-plugin/common';
 

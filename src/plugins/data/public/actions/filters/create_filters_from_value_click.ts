@@ -9,8 +9,8 @@
 import _ from 'lodash';
 import { Datatable } from '@kbn/expressions-plugin/public';
 import { compareFilters, COMPARE_ALL_OPTIONS, Filter, toggleFilterNegated } from '@kbn/es-query';
-import { getIndexPatterns, getSearchService } from '../../services';
 import { AggConfigSerialized } from '@kbn/data-common/search/aggs';
+import { getIndexPatterns, getSearchService } from '../../services';
 import { mapAndFlattenFilters } from '../../query';
 
 interface ValueClickDataContext {

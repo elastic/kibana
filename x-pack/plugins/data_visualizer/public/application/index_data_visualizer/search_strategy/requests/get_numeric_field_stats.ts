@@ -10,11 +10,7 @@ import { find, get } from 'lodash';
 import { catchError, map } from 'rxjs/operators';
 import { Observable, of } from 'rxjs';
 import { AggregationsTermsAggregation } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type {
-  IKibanaSearchRequest,
-  IKibanaSearchResponse,
-  ISearchOptions,
-} from '@kbn/data-common';
+import type { IKibanaSearchRequest, IKibanaSearchResponse, ISearchOptions } from '@kbn/data-common';
 import type { ISearchStart } from '@kbn/data-plugin/public';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { isDefined } from '@kbn/ml-is-defined';

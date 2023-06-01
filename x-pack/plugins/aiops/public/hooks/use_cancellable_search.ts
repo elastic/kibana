@@ -6,11 +6,7 @@
  */
 
 import { useCallback, useRef, useState } from 'react';
-import {
-  type IKibanaSearchResponse,
-  isCompleteResponse,
-  isErrorResponse,
-} from '@kbn/data-common';
+import { type IKibanaSearchResponse, isCompleteResponse, isErrorResponse } from '@kbn/data-common';
 import { tap } from 'rxjs/operators';
 import { useAiopsAppContext } from './use_aiops_app_context';
 

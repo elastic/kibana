@@ -7,8 +7,8 @@
  */
 
 import { HttpStart } from '@kbn/core/public';
-import { SavedQuery } from './types';
 import type { SavedQueryAttributes } from '@kbn/data-common';
+import { SavedQuery } from './types';
 
 export const createSavedQueryService = (http: HttpStart) => {
   const createQuery = async (attributes: SavedQueryAttributes, { overwrite = false } = {}) => {

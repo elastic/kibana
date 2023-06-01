@@ -9,8 +9,8 @@
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { Logger } from '@kbn/core/server';
 import { CollectorFetchContext } from '@kbn/usage-collection-plugin/server';
-import { ReportedUsage } from './register';
 import { SEARCH_SESSION_TYPE } from '@kbn/data-common';
+import { ReportedUsage } from './register';
 
 interface SessionPersistedTermsBucket {
   key_as_string: 'false' | 'true';

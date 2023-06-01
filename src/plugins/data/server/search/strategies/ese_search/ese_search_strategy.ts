@@ -12,7 +12,6 @@ import { catchError, tap } from 'rxjs/operators';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { firstValueFrom, from } from 'rxjs';
 import { getKbnServerError, KbnServerError } from '@kbn/kibana-utils-plugin/server';
-import type { ISearchStrategy, SearchStrategyDependencies } from '../../types';
 import type {
   IAsyncSearchOptions,
   IEsSearchRequest,
@@ -20,6 +19,7 @@ import type {
   ISearchOptions,
 } from '@kbn/data-common';
 import { pollSearch } from '@kbn/data-common';
+import type { ISearchStrategy, SearchStrategyDependencies } from '../../types';
 import {
   getDefaultAsyncGetParams,
   getDefaultAsyncSubmitParams,

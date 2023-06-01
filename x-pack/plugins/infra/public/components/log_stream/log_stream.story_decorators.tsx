@@ -9,11 +9,7 @@ import type { StoryContext } from '@storybook/react';
 import React from 'react';
 import { defer, of, Subject } from 'rxjs';
 import { delay } from 'rxjs/operators';
-import {
-  ENHANCED_ES_SEARCH_STRATEGY,
-  ES_SEARCH_STRATEGY,
-  FieldSpec,
-} from '@kbn/data-common';
+import { ENHANCED_ES_SEARCH_STRATEGY, ES_SEARCH_STRATEGY, FieldSpec } from '@kbn/data-common';
 import {
   IEsSearchResponse,
   IKibanaSearchRequest,

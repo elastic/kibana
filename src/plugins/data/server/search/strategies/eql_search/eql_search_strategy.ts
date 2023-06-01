@@ -9,13 +9,13 @@
 import type { TransportResult } from '@elastic/elasticsearch';
 import { tap } from 'rxjs/operators';
 import type { IScopedClusterClient, Logger } from '@kbn/core/server';
-import { SearchConfigSchema } from '../../../../config';
 import {
   EqlSearchStrategyRequest,
   EqlSearchStrategyResponse,
   IAsyncSearchOptions,
   pollSearch,
 } from '@kbn/data-common';
+import { SearchConfigSchema } from '../../../../config';
 import { toEqlKibanaSearchResponse } from './response_utils';
 import { EqlSearchResponse } from './types';
 import { ISearchStrategy } from '../../types';
