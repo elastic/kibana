@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { FC, useMemo } from 'react';
+import React, { FC } from 'react';
 import type { I18nStart } from '@kbn/core-i18n-browser';
 import { composeProviders, KibanaThemeProvider } from '@kbn/react-kibana-context';
 import { ThemeServiceStart } from '@kbn/core-theme-browser/src/types';
@@ -26,7 +26,7 @@ export const CoreContextProvider: FC<CoreContextProviderProps> = ({
   theme,
   globalStyles = false,
 }) => {
-  const Provider = useMemo(() => composeProviders([i18n.Context, KibanaThemeProvider]), [i18n]);
+  const Provider = composeProviders([i18n.Context, KibanaThemeProvider]);
 
   return (
     <Provider theme$={theme.theme$} {...{ globalStyles }}>

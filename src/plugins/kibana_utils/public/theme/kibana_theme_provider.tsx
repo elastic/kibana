@@ -5,8 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { KibanaThemeProvider as _KibanaThemeProvider } from '@kbn/react-kibana-context';
-
-/** @deprecated use `KibanaThemeProvider` from `@kbn/react-kibana-context */
-export const KibanaThemeProvider = _KibanaThemeProvider;
+export {
+  /** @deprecated use `KibanaThemeProvider` from `@kbn/react-kibana-context */
+  KibanaThemeProvider,
+} from '@kbn/react-kibana-context';
