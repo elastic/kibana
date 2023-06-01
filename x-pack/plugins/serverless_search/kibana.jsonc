@@ -7,11 +7,7 @@
     "id": "serverlessSearch",
     "server": true,
     "browser": true,
-    "configPath": [
-      "xpack",
-      "serverless",
-      "search"
-    ],
+    "configPath": ["xpack", "serverless", "search"],
     "requiredPlugins": [
       "serverless",
       "cloud",
@@ -25,7 +21,7 @@
       "painlessLab",
       "discover",
       "dashboard",
-      "visualizations",
+      "visualizations"
     ],
     "optionalPlugins": [],
     "requiredBundles": ["kibanaReact"]

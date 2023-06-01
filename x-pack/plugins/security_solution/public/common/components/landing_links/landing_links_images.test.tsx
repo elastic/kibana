@@ -8,21 +8,20 @@
 import { render } from '@testing-library/react';
 import React from 'react';
 import { SecurityPageName } from '../../../app/types';
-import type { NavLinkItem } from '../navigation/types';
+import type { NavigationLink } from '../../links/types';
 import { TestProviders } from '../../mock';
 import { LandingLinksImages, LandingImageCards } from './landing_links_images';
 import * as telemetry from '../../lib/telemetry';
 
 const BETA = 'Beta';
-
-const DEFAULT_NAV_ITEM: NavLinkItem = {
+const DEFAULT_NAV_ITEM: NavigationLink = {
   id: SecurityPageName.overview,
   title: 'TEST LABEL',
   description: 'TEST DESCRIPTION',
   image: 'TEST_IMAGE.png',
 };
 
-const BETA_NAV_ITEM: NavLinkItem = {
+const BETA_NAV_ITEM: NavigationLink = {
   id: SecurityPageName.kubernetes,
   title: 'TEST LABEL',
   description: 'TEST DESCRIPTION',
