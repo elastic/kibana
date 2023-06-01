@@ -25,13 +25,7 @@ import {
   FormBasedDimensionEditorProps,
 } from './dimension_panel';
 import { mountWithIntl as mount } from '@kbn/test-jest-helpers';
-import {
-  IUiSettingsClient,
-  SavedObjectsClientContract,
-  HttpSetup,
-  CoreStart,
-  NotificationsStart,
-} from '@kbn/core/public';
+import { IUiSettingsClient, HttpSetup, CoreStart, NotificationsStart } from '@kbn/core/public';
 import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { useExistingFieldsReader } from '@kbn/unified-field-list-plugin/public/hooks/use_existing_fields';
 import { generateId } from '../../../id_generator';
@@ -243,7 +237,6 @@ describe('FormBasedDimensionEditor', () => {
       filterOperations: () => true,
       storage: {} as IStorageWrapper,
       uiSettings: {} as IUiSettingsClient,
-      savedObjectsClient: {} as SavedObjectsClientContract,
       http: {} as HttpSetup,
       fieldFormats: fieldFormatsServiceMock.createStartContract(),
       unifiedSearch: unifiedSearchPluginMock.createStartContract(),
