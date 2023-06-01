@@ -94,27 +94,25 @@ export class ValidationHelper {
     }
     const validator = this.getTypeValidator(type);
     try {
-      // validator.validate(doc);
-      // this change caused the repo test for create to not throw.
       validator.validate(doc, this.kibanaVersion);
     } catch (error) {
       throw SavedObjectsErrorHelpers.createBadRequestError(error.message);
     }
   }
-  // @TINA TODO: https://github.com/elastic/kibana/pull/158527/files#r1210089911
+
   private getTypeValidator(type: string): SavedObjectsTypeValidator {
     if (!this.typeValidatorMap[type]) {
       const savedObjectType = this.registry.getType(type);
 
       const stackVersionSchemas =
-        typeof savedObjectType!.schemas === 'function'
-          ? savedObjectType!.schemas()
-          : savedObjectType!.schemas ?? {};
+        typeof savedObjectType?.schemas === 'function'
+          ? savedObjectType.schemas()
+          : savedObjectType?.schemas ?? {};
 
       const modelVersionCreateSchemas =
-        typeof savedObjectType!.modelVersions === 'function'
-          ? savedObjectType!.modelVersions()
-          : savedObjectType!.modelVersions ?? {};
+        typeof savedObjectType?.modelVersions === 'function'
+          ? savedObjectType.modelVersions()
+          : savedObjectType?.modelVersions ?? {};
 
       const combinedSchemas = { ...stackVersionSchemas };
       Object.entries(modelVersionCreateSchemas).reduce((map, [key, modelVersion]) => {
