@@ -11,7 +11,7 @@ import { Chance } from 'chance';
 import { waitFor } from '@testing-library/react';
 import { casesPluginMock } from '@kbn/cases-plugin/public/mocks';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import * as useUiSettingHook from '@kbn/kibana-react-plugin/public/ui_settings/use_ui_setting';
+import * as useUiSettingHook from '@kbn/react-public/ui_settings/use_ui_setting';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 
 import { Subset } from '../../typings';

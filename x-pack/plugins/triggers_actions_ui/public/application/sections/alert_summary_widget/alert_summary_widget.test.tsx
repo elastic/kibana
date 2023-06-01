@@ -17,7 +17,7 @@ import {
   TOTAL_ALERT_COUNT_DATA_TEST_SUBJ,
 } from './components/constants';
 
-jest.mock('@kbn/kibana-react-plugin/public/ui_settings/use_ui_setting', () => ({
+jest.mock('@kbn/react-public/ui_settings/use_ui_setting', () => ({
   useUiSetting: jest.fn().mockImplementation(() => true),
 }));
 

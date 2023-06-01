@@ -18,7 +18,7 @@ import { getConnectorType as getSlackConnectorType } from './slack';
 import { getSlackApiConnectorType } from '../slack_api';
 
 jest.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana');
-jest.mock('@kbn/kibana-react-plugin/public/ui_settings/use_ui_setting', () => ({
+jest.mock('@kbn/react-public/ui_settings/use_ui_setting', () => ({
   useUiSetting: jest.fn(() => false),
   useUiSetting$: jest.fn((value: string) => ['0,0']),
 }));

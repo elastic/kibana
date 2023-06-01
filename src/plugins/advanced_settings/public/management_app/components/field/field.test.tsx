@@ -17,7 +17,7 @@ import { notificationServiceMock, docLinksServiceMock } from '@kbn/core/public/m
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { Field, getEditableValue } from './field';
 
-jest.mock('@kbn/kibana-react-plugin/public/ui_settings/use_ui_setting', () => ({
+jest.mock('@kbn/react-public/ui_settings/use_ui_setting', () => ({
   useUiSetting: jest.fn(),
 }));
 

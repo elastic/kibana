@@ -9,7 +9,7 @@
 import React from 'react';
 import { EuiDelayRender, EuiErrorBoundary, EuiSkeletonText } from '@elastic/eui';
 
-import { useUiSetting } from '../ui_settings';
+import { useUiSetting } from '@kbn/react-public';
 import type { Props } from './code_editor';
 
 export * from './languages/constants';
