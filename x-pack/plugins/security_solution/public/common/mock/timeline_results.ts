@@ -9,7 +9,7 @@ import { FilterStateStore } from '@kbn/es-query';
 
 import type { DataTableModel } from '@kbn/securitysolution-data-table';
 import { VIEW_SELECTION } from '../../../common/constants';
-import type { TimelineResult } from '../../../common/types/timeline';
+import type { TimelineResult } from '../../../common/types/timeline/api';
 import {
   TimelineId,
   TimelineType,

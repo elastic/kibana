@@ -637,3 +637,12 @@ export interface ExportTimelineNotFoundError {
   statusCode: number;
   message: string;
 }
+
+export interface GetAllTimelineVariables {
+  pageInfo: PageInfoTimeline;
+  search?: Maybe<string>;
+  sort?: Maybe<SortTimeline>;
+  onlyUserFavorite?: Maybe<boolean>;
+  timelineType?: Maybe<TimelineType>;
+  status?: Maybe<TimelineStatus>;
+}

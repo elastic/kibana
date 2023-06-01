@@ -13,14 +13,14 @@ import type { Dispatch } from 'redux';
 import deepMerge from 'deepmerge';
 
 import { InputsModelId } from '../../../common/store/inputs/constants';
+import type { ColumnHeaderOptions } from '../../../../common/types/timeline';
 import type {
-  ColumnHeaderOptions,
   TimelineResult,
   SingleTimelineResolveResponse,
   ColumnHeaderResult,
   FilterTimelineResult,
   DataProviderResult,
-} from '../../../../common/types/timeline';
+} from '../../../../common/types/timeline/api';
 import {
   DataProviderType,
   TimelineId,

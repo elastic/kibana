@@ -17,7 +17,7 @@ import type {
   RowRendererId,
   TimelineStatusLiteralWithNull,
   SingleTimelineResolveResponse,
-} from '../../../../common/types/timeline';
+} from '../../../../common/types/timeline/api';
 
 /** The users who added a timeline to favorites */
 export interface FavoriteTimelineResult {

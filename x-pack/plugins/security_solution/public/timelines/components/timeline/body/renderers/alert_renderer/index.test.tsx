@@ -27,7 +27,7 @@ import {
   WITH_FIELD_NAMES,
 } from './helpers';
 import { alertRenderer } from '.';
-import { TimelineId } from '../../../../../../../common/types';
+import { TimelineId } from '../../../../../../../common/types/timeline';
 
 const dataWithAllFields: Ecs = {
   _id: 'abcd',

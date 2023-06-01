@@ -12,7 +12,7 @@ import { useDispatch } from 'react-redux';
 import { getPageRowIndex } from '@kbn/securitysolution-data-table';
 import type { TimelineNonEcsData } from '../../../../common/search_strategy';
 import type { DataProvider } from '../../../../common/types';
-import { TimelineId } from '../../../../common/types';
+import { TimelineId } from '../../../../common/types/timeline';
 import { useGetMappedNonEcsValue } from '../../../timelines/components/timeline/body/data_driven_columns';
 import {
   EXISTS_OPERATOR,

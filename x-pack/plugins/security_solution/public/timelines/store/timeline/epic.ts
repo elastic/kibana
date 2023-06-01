@@ -44,8 +44,8 @@ import type {
   TimelineErrorResponse,
   ResponseTimeline,
   TimelineResult,
-  ColumnHeaderOptions,
-} from '../../../../common/types/timeline';
+} from '../../../../common/types/timeline/api';
+import type { ColumnHeaderOptions } from '../../../../common/types/timeline';
 import { TimelineStatus, TimelineType } from '../../../../common/types/timeline';
 import type { inputsModel } from '../../../common/store/inputs';
 import { addError } from '../../../common/store/app/actions';

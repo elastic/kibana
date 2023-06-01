@@ -9,7 +9,8 @@ import { EuiHorizontalRule, EuiText } from '@elastic/eui';
 import React, { useCallback, useMemo, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 
-import { SortFieldTimeline, TimelineType } from '../../../../common/types/timeline';
+import { TimelineType } from '../../../../common/types/timeline';
+import { SortFieldTimeline } from '../../../../common/types/timeline/api';
 import { useGetAllTimeline } from '../../../timelines/containers/all';
 import {
   queryTimelineById,

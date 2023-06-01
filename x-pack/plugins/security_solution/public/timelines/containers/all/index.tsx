@@ -24,7 +24,7 @@ import type {
   TimelineResult,
   SortTimeline,
   GetAllTimelineVariables,
-} from '../../../../common/types/timeline';
+} from '../../../../common/types/timeline/api';
 import { TimelineType } from '../../../../common/types/timeline';
 import { getAllTimelines } from '../api';
 

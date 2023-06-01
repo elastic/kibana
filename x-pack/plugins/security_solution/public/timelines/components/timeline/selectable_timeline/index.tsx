@@ -24,7 +24,7 @@ import type {
   TimelineTypeLiteralWithNull,
   TimelineTypeLiteral,
 } from '../../../../../common/types/timeline';
-import { SortFieldTimeline } from '../../../../../common/types/timeline';
+import { SortFieldTimeline } from '../../../../../common/types/timeline/api';
 
 import { useGetAllTimeline } from '../../../containers/all';
 import { isUntitled } from '../../open_timeline/helpers';

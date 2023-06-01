@@ -9,7 +9,7 @@ import { isEmpty } from 'lodash/fp';
 import type {
   TimelineTypeLiteral,
   TimelineSavedObjectRuntimeResponseType,
-} from '../../../../common/types/timeline';
+} from '../../../../common/types/timeline/api';
 import { TimelineStatus } from '../../../../common/types/timeline';
 
 export const UPDATE_TIMELINE_ERROR_MESSAGE =

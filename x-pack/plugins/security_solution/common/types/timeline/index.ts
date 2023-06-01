@@ -15,6 +15,8 @@ export * from './data_provider';
 export * from './rows';
 export * from './store';
 
+import type { ExpandedDetailType } from '../detail_panel';
+
 /*
  *  ColumnHeader Types
  */
@@ -298,3 +300,43 @@ export type SavedTimelineWithSavedObjectId = SavedTimeline & { savedObjectId?: s
  * other saved objects.
  */
 export type TimelineWithoutExternalRefs = Omit<SavedTimeline, 'dataViewId' | 'savedQueryId'>;
+
+// ++++++++ TIMELINE TYPES THAT ARE NEITHER IN THE API, NOR IN THE SAVED OBJECT +++++++++
+
+/**
+ * Used for scrolling top inside a tab. Especially when swiching tabs.
+ */
+export interface ScrollToTopEvent {
+  /**
+   * Timestamp of the moment when the event happened.
+   * The timestamp might be necessary for the scenario where the event could happen multiple times.
+   */
+  timestamp: number;
+}
+
+export type ToggleDetailPanel = ExpandedDetailType & {
+  tabType?: TimelineTabs;
+  id: string;
+};
+
+export enum TimelineTabs {
+  query = 'query',
+  graph = 'graph',
+  notes = 'notes',
+  pinned = 'pinned',
+  eql = 'eql',
+  session = 'session',
+}
+
+/*
+ *  Timeline IDs
+ */
+
+export enum TimelineId {
+  active = 'timeline-1',
+  casePage = 'timeline-case',
+  test = 'timeline-test', // Reserved for testing purposes
+  detectionsAlertDetailsPage = 'detections-alert-details-page',
+}
+
+export type TimelineEventsType = 'all' | 'raw' | 'alert' | 'signal' | 'custom' | 'eql';
