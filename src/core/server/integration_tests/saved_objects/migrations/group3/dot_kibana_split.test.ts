@@ -203,6 +203,7 @@ describe('split .kibana index into multiple system indices', () => {
             "enterprise_search_telemetry",
             "epm-packages",
             "epm-packages-assets",
+            "event-annotation-group",
             "event_loop_delays_daily",
             "exception-list",
             "exception-list-agnostic",
