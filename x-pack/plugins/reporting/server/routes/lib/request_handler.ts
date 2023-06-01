@@ -46,7 +46,7 @@ export class RequestHandler {
   }
 
   public async enqueueJob(exportTypeId: string, jobParams: BaseParams) {
-    const { reporting, logger, context, req: request, user } = this;
+    const { reporting, logger, context, user } = this;
 
     const exportType = reporting.getExportTypesRegistry().getById(exportTypeId);
 
@@ -64,9 +64,10 @@ export class RequestHandler {
     jobParams.version = checkParamsVersion(jobParams, logger);
     // 2. encrypt request headers for the running report job to authenticate itself with Kibana
     // 3. call the export type's createJobFn to create the job payload
-    const [headers, job] = await Promise.all([
+    const [headers, job, spaceId] = await Promise.all([
       this.encryptHeaders(),
       exportType.createJob(jobParams as JobParamsPDFV2, context, this.req),
+      exportType.getSpaceId(this.req, logger),
     ]);
 
     const payload = {
@@ -76,7 +77,7 @@ export class RequestHandler {
       objectType: jobParams.objectType,
       browserTimezone: jobParams.browserTimezone,
       version: jobParams.version,
-      // spaceId: reporting.getSpaceId(request, logger),
+      spaceId,
     };
 
     // 4. Add the report to ReportingStore to show as pending
@@ -136,7 +137,6 @@ export class RequestHandler {
     let report: Report | undefined;
     try {
       report = await this.enqueueJob(exportTypeId, jobParams);
-
       // return task manager's task information and the download URL
       const downloadBaseUrl = getDownloadBaseUrl(this.reporting);
 

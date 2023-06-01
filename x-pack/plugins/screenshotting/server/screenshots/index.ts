@@ -8,7 +8,6 @@
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { HttpServiceSetup, KibanaRequest, Logger, PackageInfo } from '@kbn/core/server';
 import type { ExpressionAstExpression } from '@kbn/expressions-plugin/common';
-import type { Optional } from '@kbn/utility-types';
 import { Semaphore } from '@kbn/std';
 import ipaddr from 'ipaddr.js';
 import { defaultsDeep, sum } from 'lodash';
@@ -50,7 +49,7 @@ import { ScreenshotObservableHandler, UrlOrUrlWithContext } from './observable';
 
 export type { ScreenshotObservableResult, UrlOrUrlWithContext } from './observable';
 
-export interface CaptureOptions extends Optional<ScreenshotObservableOptions, 'urls'> {
+export interface CaptureOptions extends ScreenshotObservableOptions {
   /**
    * Expression to render. Mutually exclusive with `urls`.
    */

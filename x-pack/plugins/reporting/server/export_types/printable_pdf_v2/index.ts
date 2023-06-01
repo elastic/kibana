@@ -16,7 +16,6 @@ import {
   SavedObjectsClientContract,
   SavedObjectsServiceStart,
   UiSettingsServiceStart,
-  CoreStart,
   PluginInitializerContext,
 } from '@kbn/core/server';
 import { CancellationToken, TaskRunResult } from '@kbn/reporting-common';
@@ -30,6 +29,7 @@ import * as Rx from 'rxjs';
 import { catchError, map, mergeMap, takeUntil, tap } from 'rxjs';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
+import { UrlOrUrlWithContext } from '@kbn/screenshotting-plugin/server/screenshots';
 import {
   LICENSE_TYPE_CLOUD_STANDARD,
   LICENSE_TYPE_ENTERPRISE,
@@ -40,21 +40,24 @@ import {
   REPORTING_TRANSACTION_TYPE,
   PDF_JOB_TYPE_V2,
 } from '../../../common/constants';
-import { JobParamsPDFV2 } from '../../../common/types';
+import { JobParamsPDFV2, UrlOrUrlLocatorTuple } from '../../../common/types';
 import { TaskPayloadPDFV2 } from '../../../common/types/export_types/printable_pdf_v2';
 import { ReportingConfigType } from '../../config';
 import { ReportingServerInfo } from '../../core';
 import { decryptJobHeaders, ExportType, getCustomLogo } from '../common';
 import { generatePdfObservable, GetScreenshotsFn } from './lib/generate_pdf';
+import { getFullRedirectAppUrl } from '../common/v2/get_full_redirect_app_url';
 export type {
   JobParamsPDFV2,
   TaskPayloadPDFV2,
 } from '../../../common/types/export_types/printable_pdf_v2';
 
-/** @TODO move to be within @kbn-reporting-export-types */
+/**
+ * @TODO move to be within @kbn-reporting-export-types
+ */
 export interface PdfExportTypeSetupDeps {
   basePath: Pick<IBasePath, 'set'>;
-  spaces: SpacesPluginSetup;
+  spaces?: SpacesPluginSetup;
   logger: Logger;
 }
 
@@ -90,19 +93,18 @@ export class PdfExportType implements ExportType {
     this.logger = logger.get('pdf-export');
   }
 
-  public setup(core: CoreSetup, setupDeps: PdfExportTypeSetupDeps) {
+  setup(core: CoreSetup, setupDeps: PdfExportTypeSetupDeps) {
     this.setupDeps = setupDeps;
   }
-  public start(core: CoreStart, startDeps: PdfExportTypeStartupDeps) {
+
+  start({}, startDeps: PdfExportTypeStartupDeps) {
     this.startDeps = startDeps;
   }
 
-  public getSpaceId(request: KibanaRequest, logger = this.logger): string | undefined {
-    const spacesService = this.setupDeps.spaces.spacesService;
-    console.log(this.setupDeps.spaces);
+  public async getSpaceId(request: KibanaRequest, logger = this.logger) {
+    const spacesService = await this.setupDeps!.spaces?.spacesService;
     if (spacesService) {
       const spaceId = spacesService.getSpaceId(request);
-
       if (spaceId !== DEFAULT_SPACE_ID) {
         logger.info(`Request uses Space ID: ${spaceId}`);
         return spaceId;
@@ -119,13 +121,13 @@ export class PdfExportType implements ExportType {
 
   public async getUiSettingsServiceFactory(savedObjectsClient: SavedObjectsClientContract) {
     const { uiSettings: uiSettingsService } = await this.startDeps;
-    const scopedUiSettingsService = uiSettingsService.asScopedToClient(savedObjectsClient);
+    const scopedUiSettingsService = await uiSettingsService.asScopedToClient(savedObjectsClient);
     return scopedUiSettingsService;
   }
 
   public async getUiSettingsClient(request: KibanaRequest, logger = this.logger) {
-    const spacesService = this.setupDeps.spaces.spacesService;
-    const spaceId = this.getSpaceId(request, logger);
+    const spacesService = await this.setupDeps.spaces?.spacesService;
+    const spaceId = await this.getSpaceId(request, logger);
     if (spacesService && spaceId) {
       logger.info(`Creating UI Settings Client for space: ${spaceId}`);
     }
@@ -144,11 +146,11 @@ export class PdfExportType implements ExportType {
     };
     const fakeRequest = CoreKibanaRequest.from(rawRequest);
 
-    const spacesService = this.setupDeps.spaces.spacesService;
+    const spacesService = this.setupDeps?.spaces?.spacesService;
     if (spacesService) {
       if (spaceId && spaceId !== DEFAULT_SPACE_ID) {
         logger.info(`Generating request for space: ${spaceId}`);
-        this.setupDeps.basePath.set(fakeRequest, `/s/${spaceId}`);
+        this.setupDeps?.basePath.set(fakeRequest, `/s/${spaceId}`);
       }
     }
 
@@ -171,18 +173,17 @@ export class PdfExportType implements ExportType {
     };
   }
 
-  public getScreenshots(options: PdfScreenshotOptions): Rx.Observable<PdfScreenshotResult>;
   public getScreenshots(options: PdfScreenshotOptions): Rx.Observable<PdfScreenshotResult> {
-    return this.startDeps.screenshotting.getScreenshots({
-      ...options,
-      urls: options.urls
-        ? options.urls.map((url) =>
-            typeof url === 'string'
-              ? url
-              : [url[0], { [REPORTING_REDIRECT_LOCATOR_STORE_KEY]: url[1] }]
-          )
-        : null,
-    } as PdfScreenshotOptions);
+    return Rx.defer(() =>
+      this.startDeps.screenshotting.getScreenshots({
+        ...options,
+        urls: options.urls.map((url) =>
+          typeof url === 'string'
+            ? url
+            : [url[0], { [REPORTING_REDIRECT_LOCATOR_STORE_KEY]: url[1] }]
+        ),
+      } as PdfScreenshotOptions)
+    );
   }
 
   /**
@@ -212,78 +213,82 @@ export class PdfExportType implements ExportType {
     cancellationToken: CancellationToken,
     stream: Writable
   ) {
-    // use the dependencies to execute the job and return the content through the stream
+    const jobLogger = this.logger.get(`execute-job:${jobId}`);
+    const apmTrans = apm.startTransaction('execute-job-pdf-v2', REPORTING_TRANSACTION_TYPE);
+    const apmGetAssets = apmTrans?.startSpan('get-assets', 'setup');
     const { encryptionKey } = this.config;
-    const pdfPerformJob = async () => {
-      const jobLogger = this.logger.get(`execute-job:${jobId}`);
-      const apmTrans = apm.startTransaction('execute-job-pdf-v2', REPORTING_TRANSACTION_TYPE);
-      const apmGetAssets = apmTrans?.startSpan('get-assets', 'setup');
 
-      let apmGeneratePdf: { end: () => void } | null | undefined;
+    let apmGeneratePdf: { end: () => void } | null | undefined;
 
-      const process$: Rx.Observable<TaskRunResult> = Rx.of(1).pipe(
-        mergeMap(() => decryptJobHeaders(encryptionKey, payload.headers, jobLogger)),
-        mergeMap(async (headers) => {
-          const fakeRequest = this.getFakeRequest(headers, payload.spaceId, jobLogger);
-          const uiSettingsClient = await this.getUiSettingsClient(fakeRequest);
-          const result = getCustomLogo(uiSettingsClient, headers);
-          return result;
-        }),
-        mergeMap(({ logo, headers }) => {
-          const { browserTimezone, layout, title, locatorParams } = payload;
-          const screenshotFn: GetScreenshotsFn = () =>
-            this.getScreenshots({
-              format: 'pdf',
-              title,
-              logo,
-              browserTimezone,
-              headers,
-              layout,
-            });
-          apmGetAssets?.end();
-
-          apmGeneratePdf = apmTrans?.startSpan('generate-pdf-pipeline', 'execute');
-          return generatePdfObservable(
+    const process$: Rx.Observable<TaskRunResult> = Rx.of(1).pipe(
+      mergeMap(() => decryptJobHeaders(encryptionKey, payload.headers, jobLogger)),
+      mergeMap(async (headers) => {
+        const fakeRequest = await this.getFakeRequest(headers, payload.spaceId, jobLogger);
+        const uiSettingsClient = await this.getUiSettingsClient(fakeRequest);
+        const result = await getCustomLogo(uiSettingsClient, headers);
+        return result;
+      }),
+      mergeMap(({ logo, headers }) => {
+        const { browserTimezone, layout, title, locatorParams } = payload;
+        const urls = locatorParams.map((locator) => [
+          getFullRedirectAppUrl(
             this.config,
             this.getServerInfo(),
-            screenshotFn,
-            payload,
-            locatorParams,
-            {
-              format: 'pdf',
-              title,
-              logo,
-              browserTimezone,
-              headers,
-              layout,
-            }
-          );
-        }),
-        tap(({ buffer }) => {
-          apmGeneratePdf?.end();
+            payload.spaceId,
+            payload.forceNow
+          ),
+          locator,
+        ]) as UrlOrUrlWithContext[];
+        const screenshotFn: GetScreenshotsFn = () =>
+          this.getScreenshots({
+            format: 'pdf',
+            title,
+            logo,
+            browserTimezone,
+            headers,
+            layout,
+            urls,
+          });
+        apmGetAssets?.end();
 
-          if (buffer) {
-            stream.write(buffer);
+        apmGeneratePdf = apmTrans?.startSpan('generate-pdf-pipeline', 'execute');
+        return generatePdfObservable(
+          this.config,
+          this.getServerInfo(),
+          screenshotFn,
+          payload,
+          locatorParams,
+          {
+            format: 'pdf',
+            title,
+            logo,
+            browserTimezone,
+            headers,
+            layout,
           }
-        }),
-        map(({ metrics, warnings }) => ({
-          content_type: 'application/pdf',
-          metrics: { pdf: metrics },
-          warnings,
-        })),
-        catchError((err) => {
-          jobLogger.error(err);
-          return Rx.throwError(err);
-        })
-      );
+        );
+      }),
+      tap(({ buffer }) => {
+        apmGeneratePdf?.end();
 
-      const stop$ = Rx.fromEventPattern(cancellationToken.on);
+        if (buffer) {
+          stream.write(buffer);
+        }
+      }),
+      map(({ metrics, warnings }) => ({
+        content_type: 'application/pdf',
+        metrics: { pdf: metrics },
+        warnings,
+      })),
+      catchError((err) => {
+        jobLogger.error(err);
+        return Rx.throwError(err);
+      })
+    );
 
-      apmTrans?.end();
-      const rsu = process$.pipe(takeUntil(stop$));
-      const result = Rx.firstValueFrom(rsu);
-      return await result;
-    };
-    return pdfPerformJob();
+    const stop$ = Rx.fromEventPattern(cancellationToken.on);
+
+    apmTrans?.end();
+    return Rx.firstValueFrom(process$.pipe(takeUntil(stop$)));
   }
 }

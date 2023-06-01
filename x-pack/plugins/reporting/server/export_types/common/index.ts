@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CoreSetup, CoreStart } from '@kbn/core/server';
+import { CoreSetup, CoreStart, KibanaRequest, Logger } from '@kbn/core/server';
 import { CreateJobFn, RunTaskFn } from '../../types';
 
 export { decryptJobHeaders } from './decrypt_job_headers';
@@ -30,4 +30,8 @@ export interface ExportType {
   createJob: CreateJobFn;
   runTask: RunTaskFn;
   jobContentEncoding: string;
+  getSpaceId(
+    req: KibanaRequest<unknown, unknown, unknown, any>,
+    logger: Logger
+  ): Promise<string | undefined>;
 }

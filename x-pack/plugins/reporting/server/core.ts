@@ -46,6 +46,7 @@ import { filter, first, map, switchMap, take } from 'rxjs/operators';
 import type { ReportingSetup } from '.';
 import { REPORTING_REDIRECT_LOCATOR_STORE_KEY } from '../common/constants';
 import { createConfig, ReportingConfigType } from './config';
+import { ExportType } from './export_types/common';
 import { PdfExportType } from './export_types/printable_pdf_v2';
 import { checkLicense, ExportTypesRegistry } from './lib';
 import { reportingEventLoggerFactory } from './lib/event_logger/logger';
@@ -64,8 +65,6 @@ export interface ReportingInternalSetup {
   logger: Logger;
   status: StatusServiceSetup;
   docLinks: DocLinksServiceSetup;
-  pdfExport: PdfExportType;
-  exportTypesRegistry: ExportTypesRegistry;
 }
 
 export interface ReportingInternalStart {
@@ -109,6 +108,8 @@ export class ReportingCore {
   private monitorTask: MonitorReportsTask;
   private config: ReportingConfigType;
   private executing: Set<string>;
+  private pdfExport: PdfExportType;
+  private exportTypesRegistry: ExportTypesRegistry = new ExportTypesRegistry();
 
   public getContract: () => ReportingSetup;
 
@@ -122,6 +123,9 @@ export class ReportingCore {
     this.packageInfo = context.env.packageInfo;
     const config = createConfig(core, context.config.get<ReportingConfigType>(), logger);
     this.config = config;
+
+    this.pdfExport = new PdfExportType(this.core, this.config, this.logger, this.context);
+    this.exportTypesRegistry.register(this.pdfExport as unknown as ExportType);
 
     this.deprecatedAllowedRoles = config.roles.enabled ? config.roles.allow : false;
     this.executeTask = new ExecuteReportTask(this, config, this.logger);
@@ -146,6 +150,8 @@ export class ReportingCore {
     this.pluginSetup$.next(true); // trigger the observer
     this.pluginSetupDeps = setupDeps; // cache
 
+    this.pdfExport.setup(this.core, setupDeps);
+
     const { executeTask, monitorTask } = this;
     setupDeps.taskManager.registerTaskDefinitions({
       [executeTask.TYPE]: executeTask.getTaskDefinition(),
@@ -159,6 +165,7 @@ export class ReportingCore {
   public async pluginStart(startDeps: ReportingInternalStart) {
     this.pluginStart$.next(startDeps); // trigger the observer
     this.pluginStartDeps = startDeps; // cache
+    this.pdfExport.start({}, startDeps);
 
     await this.assertKibanaIsAvailable();
 
@@ -307,7 +314,7 @@ export class ReportingCore {
   }
 
   public getExportTypesRegistry() {
-    return this.getPluginSetupDeps().exportTypesRegistry;
+    return this.exportTypesRegistry;
   }
 
   public async scheduleTask(report: ReportTaskParams) {

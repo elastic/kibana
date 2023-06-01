@@ -250,7 +250,7 @@ export class ExecuteReportTask implements ReportingTask {
     const payload = {
       forceNow: new Date().toISOString(),
       locatorParams: url,
-      layout: task.meta,
+      layout: task.meta.layout,
       ...task.payload,
     } as unknown as TaskPayloadPDFV2;
 
@@ -365,14 +365,12 @@ export class ExecuteReportTask implements ReportingTask {
                 encoding: jobContentEncoding === 'base64' ? 'base64' : 'raw',
               }
             );
-
             eventLog.logExecutionStart();
 
             const output = await Promise.race<TaskRunResult>([
               this._performJob(task, cancellationToken, stream),
               this.throwIfKibanaShutsDown(),
             ]);
-            // output.metrics is undefined with PDF
             stream.end();
 
             await finishedWithNoPendingCallbacks(stream);
