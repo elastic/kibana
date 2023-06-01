@@ -118,7 +118,7 @@ export class APMEventClient {
         const searchPromise = withApmSpan(operationName, () => {
           return cancelEsRequestOnAbort(
             this.esClient.search(searchParams),
-            this.request,
+            this.request
           );
         });
 
@@ -153,13 +153,11 @@ export class APMEventClient {
         const { apm, ...rest } = params;
         const termsEnumPromise = withApmSpan(operationName, () => {
           return cancelEsRequestOnAbort(
-            this.esClient.termsEnum(
-              {
-                index: Array.isArray(index) ? index.join(',') : index,
-                ...rest,
-              }
-            ),
-            this.request,
+            this.esClient.termsEnum({
+              index: Array.isArray(index) ? index.join(',') : index,
+              ...rest,
+            }),
+            this.request
           );
         });
 
