@@ -92,7 +92,7 @@ steps:
         IMAGE_TAG: "git-$GIT_ABBREV_COMMIT"
         SERVICE: kibana-controller
         NAMESPACE: kibana-ci
-        IMAGE_NAME: kibana
+        IMAGE_NAME: kibana-serverless
         COMMIT_MESSAGE: "gitops: update kibana tag to elastic/kibana@$GIT_ABBREV_COMMIT"
 EOF
 
