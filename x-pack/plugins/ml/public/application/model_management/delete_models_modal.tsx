@@ -131,7 +131,7 @@ export const DeleteModelsModal: FC<DeleteModelsModalProps> = ({ models, onClose 
                 label={
                   <FormattedMessage
                     id="xpack.ml.trainedModels.modelsList.deleteModal.approvePipelinesDeletionLabel"
-                    defaultMessage="Delete {pipelinesCount, plural, one {pipeline} other {pipelines}}?"
+                    defaultMessage="Delete {pipelinesCount, plural, one {pipeline} other {pipelines}}"
                     values={{ pipelinesCount }}
                   />
                 }
