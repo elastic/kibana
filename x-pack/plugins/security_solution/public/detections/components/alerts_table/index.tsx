@@ -37,7 +37,6 @@ import { inputsSelectors } from '../../../common/store';
 import { combineQueries } from '../../../common/lib/kuery';
 import { useInvalidFilterQuery } from '../../../common/hooks/use_invalid_filter_query';
 import { StatefulEventContext } from '../../../common/components/events_viewer/stateful_event_context';
-import { getDataTablesInStorageByIds } from '../../../timelines/containers/local_storage';
 import { useSourcererDataView } from '../../../common/containers/sourcerer';
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
 import { useKibana } from '../../../common/lib/kibana';
@@ -139,9 +138,10 @@ export const AlertsTableComponent: FC<DetectionEngineAlertTableProps> = ({
 
   const getTable = useMemo(() => dataTableSelectors.getTableByIdSelector(), []);
 
-  const isDataTableInitialized = useShallowEqualSelector(
-    (state) => (getTable(state, tableId) ?? tableDefaults).initialized
+  const dataTableFromStore = useShallowEqualSelector(
+    (state) => getTable(state, tableId) ?? tableDefaults
   );
+  const isDataTableInitialized = dataTableFromStore.initialized;
 
   const timeRangeFilter = useMemo(() => buildTimeRangeFilter(from, to), [from, to]);
 
@@ -210,9 +210,10 @@ export const AlertsTableComponent: FC<DetectionEngineAlertTableProps> = ({
     return undefined;
   }, [isEventRenderedView]);
 
-  const dataTableStorage = getDataTablesInStorageByIds(storage, [TableId.alertsOnAlertsPage]);
-  const columnsFormStorage = dataTableStorage?.[TableId.alertsOnAlertsPage]?.columns ?? [];
-  const alertColumns = columnsFormStorage.length ? columnsFormStorage : getColumns(license);
+  const alertColumns = useMemo(
+    () => dataTableFromStore.columns ?? getColumns(license),
+    [dataTableFromStore.columns, license]
+  );
 
   const finalBrowserFields = useMemo(
     () => (isEventRenderedView ? {} : browserFields),

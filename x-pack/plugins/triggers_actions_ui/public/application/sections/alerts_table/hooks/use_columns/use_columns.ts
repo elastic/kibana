@@ -10,7 +10,7 @@ import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { BrowserField, BrowserFields } from '@kbn/rule-registry-plugin/common';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { AlertConsumers } from '@kbn/rule-data-utils';
-import { isEmpty, isEqual } from 'lodash';
+import _, { isEmpty, isEqual, difference } from 'lodash';
 import { AlertsTableStorage } from '../../alerts_table_state';
 import { toggleColumn } from './toggle_column';
 import { useFetchBrowserFieldCapabilities } from '../use_fetch_browser_fields_capabilities';
@@ -164,22 +164,6 @@ export const useColumns = ({
 
   const defaultColumnsRef = useRef<typeof defaultColumns>(defaultColumns);
 
-  const didDefaultColumnChange = useMemo(
-    () => !isEqual(defaultColumns, defaultColumnsRef.current),
-    [defaultColumns]
-  );
-
-  useEffect(() => {
-    // if defaultColumns have changed,
-    // get the latest columns provided by client and
-    if (didDefaultColumnChange) {
-      defaultColumnsRef.current = defaultColumns;
-      setColumnsPopulated(false);
-      setColumns(storageAlertsTable.current.columns);
-      return;
-    }
-  }, [didDefaultColumnChange, storageAlertsTable, defaultColumns]);
-
   useEffect(() => {
     if (isEmpty(browserFields) || isColumnsPopulated) return;
 
@@ -224,6 +208,28 @@ export const useColumns = ({
     },
     [browserFields, columns, defaultColumns, setColumnsAndSave]
   );
+
+  const changedColumns = useMemo(() => {
+    const newColumnIds = defaultColumns.map((column) => column.id);
+    const oldColumnIds = defaultColumnsRef.current.map((column) => column.id);
+    const addedColumnIds = difference(newColumnIds, oldColumnIds);
+    const removedColumnIds = difference(oldColumnIds, newColumnIds);
+    return addedColumnIds.concat(removedColumnIds);
+  }, [defaultColumns]);
+
+  useEffect(() => {
+    if (defaultColumnsRef.current !== defaultColumns) {
+      defaultColumnsRef.current = defaultColumns;
+      // If a column was toggled in a consuming component, manually toggle here
+      if (changedColumns.length === 1) {
+        onToggleColumn(changedColumns[0]);
+      } else if (changedColumns.length > 1) {
+        // If multiple columns were changed, wholesale replace the columns
+        setColumnsPopulated(false);
+        setColumns(storageAlertsTable.current.columns);
+      }
+    }
+  }, [changedColumns, defaultColumns, onToggleColumn, storageAlertsTable]);
 
   const onResetColumns = useCallback(() => {
     const populatedDefaultColumns = populateColumns(defaultColumns, browserFields, defaultColumns);
