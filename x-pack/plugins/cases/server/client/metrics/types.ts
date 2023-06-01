@@ -37,3 +37,8 @@ export interface AllCasesBaseHandlerCommonOptions extends BaseHandlerCommonOptio
   to?: string;
   owner?: string | string[];
 }
+
+export interface GetCaseMetricsParams {
+  caseId: string;
+  features: string[];
+}
