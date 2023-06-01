@@ -34,8 +34,8 @@ import type {
   SortColumnTimeline,
 } from '../../../../common/types/timeline';
 import type { TimelineTypeLiteral } from '../../../../common/types/timeline/api';
-import { TimelineStatus, TimelineId } from '../../../../common/types/timeline';
-import { TimelineType } from '../../../../common/types/timeline/api';
+import { TimelineId } from '../../../../common/types/timeline';
+import { TimelineStatus, TimelineType } from '../../../../common/types/timeline/api';
 import { normalizeTimeRange } from '../../../common/utils/normalize_time_range';
 import { getTimelineManageDefaults, timelineDefaults } from './defaults';
 import type { KqlMode, TimelineModel } from './model';

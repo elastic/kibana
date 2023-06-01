@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import * as runtimeTypes from 'io-ts';
-
-import { stringEnum, unionWithNullType } from '../../utility_types';
+import { stringEnum } from '../../utility_types';
 
 export * from './cells';
 export * from './columns';
@@ -16,28 +14,6 @@ export * from './rows';
 export * from './store';
 
 import type { ExpandedDetailType } from '../detail_panel';
-
-/*
- *  Timeline Statuses
- */
-
-export enum TimelineStatus {
-  active = 'active',
-  draft = 'draft',
-  immutable = 'immutable',
-}
-
-export const TimelineStatusLiteralRt = runtimeTypes.union([
-  runtimeTypes.literal(TimelineStatus.active),
-  runtimeTypes.literal(TimelineStatus.draft),
-  runtimeTypes.literal(TimelineStatus.immutable),
-]);
-
-const TimelineStatusLiteralWithNullRt = unionWithNullType(TimelineStatusLiteralRt);
-
-export type TimelineStatusLiteralWithNull = runtimeTypes.TypeOf<
-  typeof TimelineStatusLiteralWithNullRt
->;
 
 export enum RowRendererId {
   /** event.kind: signal */
@@ -63,8 +39,6 @@ export enum RowRendererId {
 }
 
 export const RowRendererIdRuntimeType = stringEnum(RowRendererId, 'RowRendererId');
-
-// ++++++++ TIMELINE TYPES THAT ARE NEITHER IN THE API, NOR IN THE SAVED OBJECT +++++++++
 
 /**
  * Used for scrolling top inside a tab. Especially when swiching tabs.

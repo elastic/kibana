@@ -10,7 +10,7 @@ import type {
   TimelineTypeLiteral,
   TimelineSavedToReturnObjectRuntimeType,
 } from '../../../../common/types/timeline/api';
-import { TimelineStatus } from '../../../../common/types/timeline';
+import { TimelineStatus } from '../../../../common/types/timeline/api';
 
 export const UPDATE_TIMELINE_ERROR_MESSAGE =
   'You cannot create new timelines with PATCH. Use POST instead.';

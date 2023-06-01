@@ -33,9 +33,8 @@ import type {
   TimelineSOServerRepresentationType,
   TimelineSOServerRepresentationWithoutExternalRefs,
 } from '../../../../../common/types/timeline/api';
-import { TimelineType } from '../../../../../common/types/timeline/api';
+import { TimelineStatus, TimelineType } from '../../../../../common/types/timeline/api';
 import type { SavedObjectTimeline } from '../../../../../common/types/timeline/saved_object';
-import { TimelineStatus } from '../../../../../common/types/timeline';
 import type { FrameworkRequest } from '../../../framework';
 import * as note from '../notes/saved_object';
 import * as pinnedEvent from '../pinned_events';
