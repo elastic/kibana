@@ -9,14 +9,14 @@ import { isEmpty } from 'lodash/fp';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common/model';
 import { getUserDisplayName } from '@kbn/user-profile-components';
 import { UNAUTHENTICATED_USER } from '../../../../../common/constants';
-import type { SavedTimelineWithSavedObjectId } from '../../../../../common/types/timeline';
-import { TimelineType, TimelineStatus } from '../../../../../common/types/timeline';
+import type { SavedObjectTimelineWithSavedObjectId } from '../../../../../common/types/timeline';
+import { SavedObjectTimelineType, TimelineStatus } from '../../../../../common/types/timeline';
 
 export const pickSavedTimeline = (
   timelineId: string | null,
-  savedTimeline: SavedTimelineWithSavedObjectId,
+  savedTimeline: SavedObjectTimelineWithSavedObjectId,
   userInfo: AuthenticatedUser | null
-): SavedTimelineWithSavedObjectId => {
+): SavedObjectTimelineWithSavedObjectId => {
   const dateNow = new Date().valueOf();
 
   if (timelineId == null) {
@@ -35,8 +35,8 @@ export const pickSavedTimeline = (
       : TimelineStatus.draft;
   }
 
-  if (savedTimeline.timelineType === TimelineType.default) {
-    savedTimeline.timelineType = savedTimeline.timelineType ?? TimelineType.default;
+  if (savedTimeline.timelineType === SavedObjectTimelineType.default) {
+    savedTimeline.timelineType = savedTimeline.timelineType ?? SavedObjectTimelineType.default;
     savedTimeline.status = savedTimeline.status ?? TimelineStatus.active;
     savedTimeline.templateTimelineId = null;
     savedTimeline.templateTimelineVersion = null;

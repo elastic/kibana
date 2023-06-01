@@ -19,8 +19,8 @@ import {
 import { convertSavedObjectToSavedTimeline } from './convert_saved_object_to_savedtimeline';
 import { getNotesByTimelineId } from '../notes/saved_object';
 import { getAllPinnedEventsByTimelineId } from '../pinned_events';
-import type { SavedTimeline } from '../../../../../common/types/timeline';
-import { TimelineType } from '../../../../../common/types/timeline';
+import type { SavedObjectTimeline } from '../../../../../common/types/timeline';
+import { SavedObjectTimelineType } from '../../../../../common/types/timeline';
 import type {
   AllTimelinesResponse,
   ResolvedTimelineWithOutcomeSavedObjectResponse,
@@ -371,7 +371,7 @@ describe('saved_object', () => {
     let mockSOClientUpdate: jest.Mock;
     let mockRequest: FrameworkRequest;
 
-    const patchTimelineRequest: SavedTimeline = {
+    const patchTimelineRequest: SavedObjectTimeline = {
       savedQueryId: null,
     };
 
@@ -416,7 +416,7 @@ describe('saved_object', () => {
         mockRequest,
         '760d3d20-2142-11ec-a46f-051cb8e3154c',
         patchTimelineRequest
-      )) as SavedObjectsUpdateResponse<SavedTimeline>;
+      )) as SavedObjectsUpdateResponse<SavedObjectTimeline>;
 
       expect(resp.attributes.savedQueryId).toBeNull();
     });
@@ -451,7 +451,7 @@ describe('saved_object', () => {
     });
 
     test('should get draft filtered by current user', async () => {
-      await getDraftTimeline(mockRequest, TimelineType.default);
+      await getDraftTimeline(mockRequest, SavedObjectTimelineType.default);
       expect(mockFindSavedObject).toBeCalledWith({
         filter:
           'not siem-ui-timeline.attributes.timelineType: template and siem-ui-timeline.attributes.status: draft and not siem-ui-timeline.attributes.status: immutable and siem-ui-timeline.attributes.updatedBy: username and siem-ui-timeline.attributes.createdBy: username',

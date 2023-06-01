@@ -10,13 +10,13 @@ import { failure } from 'io-ts/lib/PathReporter';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { map, fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
+import type { SavedObjectTimeline } from '../../../../../common/types/timeline';
 import {
-  SavedTimelineRuntimeType,
-  TimelineTypeLiteralWithNullRt,
-  TimelineType,
+  SavedObjectTimelineRuntimeType,
+  SavedObjectTimelineTypeLiteralWithNullRt,
+  SavedObjectTimelineType,
   TimelineStatus,
 } from '../../../../../common/types/timeline';
-import type { TimelineSavedObjectRuntimeResponseType } from '../../../../../common/types/timeline/api';
 
 // TODO: Added to support legacy TimelineType.draft, can be removed in 7.10
 const TimelineSavedObjectWithDraftRuntime = intersection([
@@ -24,8 +24,8 @@ const TimelineSavedObjectWithDraftRuntime = intersection([
     id: string,
     version: string,
     attributes: partial({
-      ...SavedTimelineRuntimeType.props,
-      timelineType: union([TimelineTypeLiteralWithNullRt, literal('draft')]),
+      ...SavedObjectTimelineRuntimeType.props,
+      timelineType: union([SavedObjectTimelineTypeLiteralWithNullRt, literal('draft')]),
     }),
   }),
   partial({
@@ -34,13 +34,13 @@ const TimelineSavedObjectWithDraftRuntime = intersection([
 ]);
 
 const getTimelineTypeAndStatus = (
-  timelineType: TimelineType | 'draft' | null = TimelineType.default,
+  timelineType: SavedObjectTimelineType | 'draft' | null = SavedObjectTimelineType.default,
   status: TimelineStatus | null = TimelineStatus.active
 ) => {
   // TODO: Added to support legacy TimelineType.draft, can be removed in 7.10
   if (timelineType === 'draft') {
     return {
-      timelineType: TimelineType.default,
+      timelineType: SavedObjectTimelineType.default,
       status: TimelineStatus.draft,
     };
   }
@@ -51,9 +51,7 @@ const getTimelineTypeAndStatus = (
   };
 };
 
-export const convertSavedObjectToSavedTimeline = (
-  savedObject: unknown
-): TimelineSavedObjectRuntimeResponseType =>
+export const convertSavedObjectToSavedTimeline = (savedObject: unknown): SavedObjectTimeline =>
   pipe(
     TimelineSavedObjectWithDraftRuntime.decode(savedObject),
     map((savedTimeline) => {

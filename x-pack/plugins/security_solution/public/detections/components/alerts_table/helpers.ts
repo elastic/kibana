@@ -11,7 +11,7 @@ import type { Filter, KueryNode } from '@kbn/es-query';
 import { FilterStateStore, fromKueryExpression } from '@kbn/es-query';
 
 import type { TimelineEventsDetailsItem } from '../../../../common/search_strategy';
-import { TimelineType } from '../../../../common/types/timeline';
+import { SavedObjectTimelineType } from '../../../../common/types/timeline';
 import type {
   DataProvider,
   DataProvidersAnd,
@@ -114,9 +114,9 @@ export const findValueToChangeInQuery = (
 export const replaceTemplateFieldFromQuery = (
   query: string,
   eventData: TimelineEventsDetailsItem[],
-  timelineType: TimelineType = TimelineType.default
+  timelineType: SavedObjectTimelineType = SavedObjectTimelineType.default
 ): string => {
-  if (timelineType === TimelineType.default) {
+  if (timelineType === SavedObjectTimelineType.default) {
     if (query.trim() !== '') {
       const valueToChange = findValueToChangeInQuery(fromKueryExpression(query));
       return valueToChange.reduce((newQuery, vtc) => {
@@ -157,10 +157,10 @@ export const replaceTemplateFieldFromMatchFilters = (
 export const reformatDataProviderWithNewValue = <T extends DataProvider | DataProvidersAnd>(
   dataProvider: T,
   eventData: TimelineEventsDetailsItem[],
-  timelineType: TimelineType = TimelineType.default
+  timelineType: SavedObjectTimelineType = SavedObjectTimelineType.default
 ): T => {
   // Support for legacy "template-like" timeline behavior that is using hardcoded list of templateFields
-  if (timelineType !== TimelineType.template) {
+  if (timelineType !== SavedObjectTimelineType.template) {
     if (templateFields.includes(dataProvider.queryMatch.field)) {
       const newValue = getStringArray(dataProvider.queryMatch.field, eventData);
       if (newValue.length) {
@@ -175,7 +175,7 @@ export const reformatDataProviderWithNewValue = <T extends DataProvider | DataPr
     return dataProvider;
   }
 
-  if (timelineType === TimelineType.template) {
+  if (timelineType === SavedObjectTimelineType.template) {
     if (
       dataProvider.type === DataProviderType.template &&
       dataProvider.queryMatch.operator === ':'
@@ -207,7 +207,7 @@ export const reformatDataProviderWithNewValue = <T extends DataProvider | DataPr
 export const replaceTemplateFieldFromDataProviders = (
   dataProviders: DataProvider[],
   eventData: TimelineEventsDetailsItem[],
-  timelineType: TimelineType = TimelineType.default
+  timelineType: SavedObjectTimelineType = SavedObjectTimelineType.default
 ): DataProvider[] =>
   dataProviders.map((dataProvider) => {
     const newDataProvider = reformatDataProviderWithNewValue(dataProvider, eventData, timelineType);

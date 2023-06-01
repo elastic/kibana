@@ -9,7 +9,7 @@ import * as module from './helpers';
 import { savePinnedEvents } from '../../../saved_object/pinned_events';
 import { getNote } from '../../../saved_object/notes';
 import type { FrameworkRequest } from '../../../../framework';
-import type { SavedTimeline } from '../../../../../../common/types';
+import type { SavedObjectTimeline } from '../../../../../../common/types';
 import { mockTemplate, mockTimeline } from '../../../__mocks__/create_timelines';
 import { buildFrameworkRequest } from '../../../utils/common';
 import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
@@ -21,8 +21,8 @@ import {
 import { persistTimeline } from '../../../saved_object/timelines';
 import { persistNotes } from '../../../saved_object/notes/persist_notes';
 
-const template = { ...mockTemplate } as SavedTimeline;
-const timeline = { ...mockTimeline } as SavedTimeline;
+const template = { ...mockTemplate } as SavedObjectTimeline;
+const timeline = { ...mockTimeline } as SavedObjectTimeline;
 const timelineSavedObjectId = null;
 const timelineVersion = null;
 const pinnedEventIds = ['123'];

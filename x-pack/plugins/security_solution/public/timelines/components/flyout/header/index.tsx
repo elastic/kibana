@@ -29,7 +29,7 @@ import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import {
   TimelineStatus,
   TimelineTabs,
-  TimelineType,
+  SavedObjectTimelineType,
   TimelineId,
 } from '../../../../../common/types/timeline';
 import type { State } from '../../../../common/store';
@@ -264,7 +264,7 @@ const TimelineNameComponent: React.FC<FlyoutHeaderProps> = ({ timelineId }) => {
   );
   const placeholder = useMemo(
     () =>
-      timelineType === TimelineType.template
+      timelineType === SavedObjectTimelineType.template
         ? commonI18n.UNTITLED_TEMPLATE
         : commonI18n.UNTITLED_TIMELINE,
     [timelineType]

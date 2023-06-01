@@ -10,7 +10,7 @@ import React, { useCallback, useMemo, useRef } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import styled from 'styled-components';
-import { TimelineType, TimelineStatus } from '../../../../common/types/timeline';
+import { SavedObjectTimelineType, TimelineStatus } from '../../../../common/types/timeline';
 import { ImportDataModal } from '../../../common/components/import_data_modal';
 import {
   UtilityBarGroup,
@@ -63,7 +63,7 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
     sortDirection,
     setImportDataModalToggle,
     sortField,
-    timelineType = TimelineType.default,
+    timelineType = SavedObjectTimelineType.default,
     timelineStatus,
     timelineFilter,
     templateTimelineFilter,
@@ -238,7 +238,7 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
                 <UtilityBarText data-test-subj="query-message">
                   <>
                     {i18n.SHOWING}{' '}
-                    {timelineType === TimelineType.template ? nTemplates : nTimelines}
+                    {timelineType === SavedObjectTimelineType.template ? nTemplates : nTimelines}
                   </>
                 </UtilityBarText>
               </UtilityBarGroup>
@@ -246,7 +246,7 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
                 {timelineStatus !== TimelineStatus.immutable && (
                   <>
                     <UtilityBarText data-test-subj="selected-count">
-                      {timelineType === TimelineType.template
+                      {timelineType === SavedObjectTimelineType.template
                         ? i18n.SELECTED_TEMPLATES(selectedItems.length)
                         : i18n.SELECTED_TIMELINES(selectedItems.length)}
                     </UtilityBarText>

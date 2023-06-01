@@ -25,7 +25,7 @@ import { myEpicTimelineId } from './my_epic_timeline_id';
 import type { ActionTimeline, TimelineById } from './types';
 import type { inputsModel } from '../../../common/store/inputs';
 import type { ResponseFavoriteTimeline } from '../../../../common/types/timeline/api';
-import { TimelineType } from '../../../../common/types/timeline';
+import { SavedObjectTimelineType } from '../../../../common/types/timeline';
 import { persistFavorite } from '../../containers/api';
 
 export const timelineFavoriteActionsType = [updateIsFavorite.type];
@@ -43,7 +43,7 @@ export const epicPersistTimelineFavorite = (
       timelineId: myEpicTimelineId.getTimelineId(),
       templateTimelineId: timeline[action.payload.id].templateTimelineId,
       templateTimelineVersion: timeline[action.payload.id].templateTimelineVersion,
-      timelineType: timeline[action.payload.id].timelineType ?? TimelineType.default,
+      timelineType: timeline[action.payload.id].timelineType ?? SavedObjectTimelineType.default,
     })
   ).pipe(
     withLatestFrom(timeline$, allTimelineQuery$),

@@ -18,7 +18,7 @@ import type { Filter } from '@kbn/es-query';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { timelineDefaults } from '../../../../timelines/store/timeline/defaults';
 import { useKibana } from '../../../../common/lib/kibana';
-import { TimelineId, TimelineType } from '../../../../../common/types/timeline';
+import { TimelineId, SavedObjectTimelineType } from '../../../../../common/types/timeline';
 import { timelineActions, timelineSelectors } from '../../../../timelines/store/timeline';
 import { sendAlertToTimelineAction } from '../actions';
 import { dispatchUpdateTimeline } from '../../../../timelines/components/open_timeline/helpers';
@@ -127,7 +127,7 @@ export const useInvestigateInTimeline = ({
 
   const clearActiveTimeline = useCreateTimeline({
     timelineId: TimelineId.active,
-    timelineType: TimelineType.default,
+    timelineType: SavedObjectTimelineType.default,
   });
 
   const createTimeline = useCallback(

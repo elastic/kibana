@@ -10,7 +10,7 @@ import { mount } from 'enzyme';
 
 import { TestProviders } from '../../../../common/mock';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
-import { TimelineStatus, TimelineType } from '../../../../../common/types/timeline';
+import { TimelineStatus, SavedObjectTimelineType } from '../../../../../common/types/timeline';
 import { TimelineTitleAndDescription } from './title_and_description';
 import * as i18n from './translations';
 
@@ -49,7 +49,7 @@ describe('TimelineTitleAndDescription', () => {
         isSaving: true,
         status: TimelineStatus.draft,
         title: 'my timeline',
-        timelineType: TimelineType.default,
+        timelineType: SavedObjectTimelineType.default,
       });
     });
 
@@ -80,7 +80,7 @@ describe('TimelineTitleAndDescription', () => {
         isSaving: true,
         status: TimelineStatus.draft,
         title: 'my timeline',
-        timelineType: TimelineType.template,
+        timelineType: SavedObjectTimelineType.template,
       });
       const component = mount(<TimelineTitleAndDescription {...props} />, {
         wrappingComponent: TestProviders,
@@ -139,7 +139,7 @@ describe('TimelineTitleAndDescription', () => {
         isSaving: true,
         status: TimelineStatus.active,
         title: 'my timeline',
-        timelineType: TimelineType.default,
+        timelineType: SavedObjectTimelineType.default,
       });
     });
 
@@ -170,7 +170,7 @@ describe('TimelineTitleAndDescription', () => {
         isSaving: true,
         status: TimelineStatus.active,
         title: 'my timeline',
-        timelineType: TimelineType.template,
+        timelineType: SavedObjectTimelineType.template,
       });
       const component = mount(<TimelineTitleAndDescription {...props} />, {
         wrappingComponent: TestProviders,
@@ -223,7 +223,7 @@ describe('TimelineTitleAndDescription', () => {
         isSaving: true,
         status: TimelineStatus.draft,
         title: 'my timeline',
-        timelineType: TimelineType.default,
+        timelineType: SavedObjectTimelineType.default,
         showWarnging: true,
       });
     });
@@ -255,7 +255,7 @@ describe('TimelineTitleAndDescription', () => {
         isSaving: true,
         status: TimelineStatus.draft,
         title: 'my timeline',
-        timelineType: TimelineType.template,
+        timelineType: SavedObjectTimelineType.template,
       });
       const component = mount(<TimelineTitleAndDescription {...props} />, {
         wrappingComponent: TestProviders,

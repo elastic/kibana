@@ -18,7 +18,7 @@ import { buildSiemResponse } from '../../../../detection_engine/routes/utils';
 
 import { buildFrameworkRequest } from '../../../utils/common';
 import { persistFavorite } from '../../../saved_object/timelines';
-import { TimelineType } from '../../../../../../common/types/timeline';
+import { SavedObjectTimelineType } from '../../../../../../common/types/timeline';
 import { persistFavoriteSchema } from '../../../schemas/timelines/persist_favorite_schema';
 
 export const persistFavoriteRoute = (
@@ -49,7 +49,7 @@ export const persistFavoriteRoute = (
           timelineId || null,
           templateTimelineId || null,
           templateTimelineVersion || null,
-          timelineType || TimelineType.default
+          timelineType || SavedObjectTimelineType.default
         );
 
         return response.ok({

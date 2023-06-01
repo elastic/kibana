@@ -25,7 +25,7 @@ import type { EuiSuperSelectOption } from '@elastic/eui/src/components/form/supe
 import { waitFor } from '@testing-library/dom';
 import { useSourcererDataView } from '../../containers/sourcerer';
 import { useSignalHelpers } from '../../containers/sourcerer/use_signal_helpers';
-import { TimelineId, TimelineType } from '../../../../common/types';
+import { TimelineId, SavedObjectTimelineType } from '../../../../common/types';
 import { DEFAULT_INDEX_PATTERN } from '../../../../common/constants';
 import { sortWithExcludesAtEnd } from '../../../../common/utils/sourcerer';
 
@@ -1100,7 +1100,7 @@ describe('Update available for timeline template', () => {
         ...mockGlobalState.timeline.timelineById,
         [TimelineId.active]: {
           ...mockGlobalState.timeline.timelineById.test,
-          timelineType: TimelineType.template,
+          timelineType: SavedObjectTimelineType.template,
         },
       },
     },
@@ -1179,7 +1179,7 @@ describe('Missing index patterns', () => {
         ...mockGlobalState.timeline.timelineById,
         [TimelineId.active]: {
           ...mockGlobalState.timeline.timelineById.test,
-          timelineType: TimelineType.template,
+          timelineType: SavedObjectTimelineType.template,
         },
       },
     },
@@ -1226,7 +1226,7 @@ describe('Missing index patterns', () => {
       activePatterns: ['myFakebeat-*'],
     });
     const state3 = cloneDeep(state2);
-    state3.timeline.timelineById[TimelineId.active].timelineType = TimelineType.default;
+    state3.timeline.timelineById[TimelineId.active].timelineType = SavedObjectTimelineType.default;
     store = createStore(state3, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
 
     wrapper = mount(

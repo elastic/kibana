@@ -10,8 +10,8 @@ import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 import { useDispatch } from 'react-redux';
 
-import type { TimelineTypeLiteral } from '../../../../../common/types/timeline';
-import { TimelineType, TimelineStatus } from '../../../../../common/types/timeline';
+import type { SavedObjectTimelineTypeLiteral } from '../../../../../common/types/timeline';
+import { SavedObjectTimelineType, TimelineStatus } from '../../../../../common/types/timeline';
 import { timelineActions, timelineSelectors } from '../../../store/timeline';
 import { useShallowEqualSelector } from '../../../../common/hooks/use_selector';
 
@@ -76,7 +76,7 @@ export const NewTimeline = React.memo<NewTimelineProps>(
   ({ closeGearMenu, outline = false, timelineId, title = i18n.NEW_TIMELINE }) => {
     const { getButton } = useCreateTimelineButton({
       timelineId,
-      timelineType: TimelineType.default,
+      timelineType: SavedObjectTimelineType.default,
       closeGearMenu,
     });
     const button = getButton({ outline, title });
@@ -92,21 +92,21 @@ interface NotesButtonProps {
   showNotes: boolean;
   toggleShowNotes: () => void;
   toolTip?: string;
-  timelineType: TimelineTypeLiteral;
+  timelineType: SavedObjectTimelineTypeLiteral;
 }
 
 interface SmallNotesButtonProps {
   ariaLabel?: string;
   isDisabled?: boolean;
   toggleShowNotes: () => void;
-  timelineType: TimelineTypeLiteral;
+  timelineType: SavedObjectTimelineTypeLiteral;
 }
 
 export const NOTES_BUTTON_CLASS_NAME = 'notes-button';
 
 const SmallNotesButton = React.memo<SmallNotesButtonProps>(
   ({ ariaLabel = i18n.NOTES, isDisabled, toggleShowNotes, timelineType }) => {
-    const isTemplate = timelineType === TimelineType.template;
+    const isTemplate = timelineType === SavedObjectTimelineType.template;
 
     return (
       <EuiButtonIcon

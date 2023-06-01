@@ -8,7 +8,7 @@
 import type { SortField, Maybe } from '../common';
 import type {
   DataProviderType,
-  TimelineType,
+  SavedObjectTimelineType,
   TimelineStatus,
   RowRendererId,
 } from '../../types/timeline';
@@ -128,7 +128,7 @@ export interface TimelineInput {
   title?: Maybe<string>;
   templateTimelineId?: Maybe<string>;
   templateTimelineVersion?: Maybe<number>;
-  timelineType?: Maybe<TimelineType>;
+  timelineType?: Maybe<SavedObjectTimelineType>;
   dateRange?: Maybe<DateRangePickerInput>;
   savedQueryId?: Maybe<string>;
   sort?: Maybe<SortTimelineInput[]>;

@@ -26,7 +26,7 @@ import {
   TEMPLATE_TIMELINE_VERSION_CONFLICT_MESSAGE,
 } from './failure_cases';
 import type { TimelineSavedObjectRuntimeResponseType } from '../../../../common/types/timeline/api';
-import { TimelineStatus, TimelineType } from '../../../../common/types/timeline';
+import { TimelineStatus, SavedObjectTimelineType } from '../../../../common/types/timeline';
 import { mockGetTimelineValue, mockGetTemplateTimelineValue } from '../__mocks__/import_timelines';
 
 describe('failure cases', () => {
@@ -73,7 +73,7 @@ describe('failure cases', () => {
       const result = checkIsCreateFailureCases(
         isHandlingTemplateTimeline,
         TimelineStatus.active,
-        TimelineType.default,
+        SavedObjectTimelineType.default,
         version,
         templateTimelineVersion,
         templateTimelineId,
@@ -98,7 +98,7 @@ describe('failure cases', () => {
       const result = checkIsCreateFailureCases(
         isHandlingTemplateTimeline,
         TimelineStatus.active,
-        TimelineType.template,
+        SavedObjectTimelineType.template,
         version,
         templateTimelineVersion,
         templateTimelineId,
@@ -122,7 +122,7 @@ describe('failure cases', () => {
       const result = checkIsCreateFailureCases(
         isHandlingTemplateTimeline,
         TimelineStatus.active,
-        TimelineType.template,
+        SavedObjectTimelineType.template,
         version,
         templateTimelineVersion,
         templateTimelineId,
@@ -151,7 +151,7 @@ describe('failure cases', () => {
       const result = checkIsUpdateFailureCases(
         isHandlingTemplateTimeline,
         TimelineStatus.active,
-        TimelineType.default,
+        SavedObjectTimelineType.default,
         version,
         templateTimelineVersion,
         templateTimelineId,
@@ -178,7 +178,7 @@ describe('failure cases', () => {
       const result = checkIsUpdateFailureCases(
         isHandlingTemplateTimeline,
         TimelineStatus.active,
-        TimelineType.template,
+        SavedObjectTimelineType.template,
         version,
         templateTimelineVersion,
         templateTimelineId,
@@ -203,7 +203,7 @@ describe('failure cases', () => {
       const result = checkIsUpdateFailureCases(
         isHandlingTemplateTimeline,
         TimelineStatus.active,
-        TimelineType.default,
+        SavedObjectTimelineType.default,
         version,
         templateTimelineVersion,
         templateTimelineId,
@@ -227,7 +227,7 @@ describe('failure cases', () => {
       const result = checkIsUpdateFailureCases(
         isHandlingTemplateTimeline,
         TimelineStatus.active,
-        TimelineType.default,
+        SavedObjectTimelineType.default,
         version,
         templateTimelineVersion,
         templateTimelineId,
@@ -255,7 +255,7 @@ describe('failure cases', () => {
       const result = checkIsUpdateFailureCases(
         isHandlingTemplateTimeline,
         TimelineStatus.active,
-        TimelineType.template,
+        SavedObjectTimelineType.template,
         version,
         templateTimelineVersion,
         templateTimelineId,
@@ -280,7 +280,7 @@ describe('failure cases', () => {
       const result = checkIsUpdateFailureCases(
         isHandlingTemplateTimeline,
         TimelineStatus.active,
-        TimelineType.template,
+        SavedObjectTimelineType.template,
         version,
         templateTimelineVersion,
         templateTimelineId,
@@ -307,7 +307,7 @@ describe('failure cases', () => {
       const result = checkIsCreateViaImportFailureCases(
         isHandlingTemplateTimeline,
         TimelineStatus.draft,
-        TimelineType.template,
+        SavedObjectTimelineType.template,
         version,
         templateTimelineVersion,
         templateTimelineId,
@@ -332,7 +332,7 @@ describe('failure cases', () => {
       const result = checkIsCreateViaImportFailureCases(
         isHandlingTemplateTimeline,
         TimelineStatus.active,
-        TimelineType.template,
+        SavedObjectTimelineType.template,
         version,
         templateTimelineVersion,
         templateTimelineId,
@@ -356,7 +356,7 @@ describe('failure cases', () => {
       const result = checkIsCreateViaImportFailureCases(
         isHandlingTemplateTimeline,
         TimelineStatus.active,
-        TimelineType.default,
+        SavedObjectTimelineType.default,
         version,
         templateTimelineVersion,
         templateTimelineId,
@@ -382,7 +382,7 @@ describe('failure cases', () => {
       const result = checkIsUpdateViaImportFailureCases(
         isHandlingTemplateTimeline,
         TimelineStatus.active,
-        TimelineType.default,
+        SavedObjectTimelineType.default,
         version,
         templateTimelineVersion,
         templateTimelineId,
@@ -407,7 +407,7 @@ describe('failure cases', () => {
       const result = checkIsUpdateViaImportFailureCases(
         isHandlingTemplateTimeline,
         TimelineStatus.active,
-        TimelineType.default,
+        SavedObjectTimelineType.default,
         version,
         templateTimelineVersion,
         templateTimelineId,
@@ -432,7 +432,7 @@ describe('failure cases', () => {
       const result = checkIsUpdateViaImportFailureCases(
         isHandlingTemplateTimeline,
         TimelineStatus.immutable,
-        TimelineType.template,
+        SavedObjectTimelineType.template,
         version,
         templateTimelineVersion,
         templateTimelineId,
@@ -456,7 +456,7 @@ describe('failure cases', () => {
       const result = checkIsUpdateViaImportFailureCases(
         isHandlingTemplateTimeline,
         TimelineStatus.active,
-        TimelineType.default,
+        SavedObjectTimelineType.default,
         version,
         templateTimelineVersion,
         templateTimelineId,
@@ -484,7 +484,7 @@ describe('failure cases', () => {
       const result = checkIsUpdateViaImportFailureCases(
         isHandlingTemplateTimeline,
         TimelineStatus.active,
-        TimelineType.template,
+        SavedObjectTimelineType.template,
         version,
         templateTimelineVersion,
         templateTimelineId,
@@ -509,7 +509,7 @@ describe('failure cases', () => {
       const result = checkIsUpdateViaImportFailureCases(
         isHandlingTemplateTimeline,
         TimelineStatus.active,
-        TimelineType.template,
+        SavedObjectTimelineType.template,
         version,
         templateTimelineVersion,
         templateTimelineId,
@@ -534,7 +534,7 @@ describe('failure cases', () => {
       const result = checkIsUpdateViaImportFailureCases(
         isHandlingTemplateTimeline,
         TimelineStatus.active,
-        TimelineType.template,
+        SavedObjectTimelineType.template,
         version,
         templateTimelineVersion,
         templateTimelineId,

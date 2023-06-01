@@ -13,8 +13,8 @@ import { InputsModelId } from '../../../../common/store/inputs/constants';
 import { defaultHeaders } from '../body/column_headers/default_headers';
 import { timelineActions } from '../../../store/timeline';
 import { useTimelineFullScreen } from '../../../../common/containers/use_full_screen';
-import type { TimelineTypeLiteral } from '../../../../../common/types/timeline';
-import { TimelineId, TimelineType } from '../../../../../common/types/timeline';
+import type { SavedObjectTimelineTypeLiteral } from '../../../../../common/types/timeline';
+import { TimelineId, SavedObjectTimelineType } from '../../../../../common/types/timeline';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { inputsActions, inputsSelectors } from '../../../../common/store/inputs';
 import { sourcererActions, sourcererSelectors } from '../../../../common/store/sourcerer';
@@ -24,7 +24,7 @@ import type { TimeRange } from '../../../../common/store/inputs/model';
 
 interface Props {
   timelineId?: string;
-  timelineType: TimelineTypeLiteral;
+  timelineType: SavedObjectTimelineTypeLiteral;
   closeGearMenu?: () => void;
   timeRange?: TimeRange;
 }
@@ -147,7 +147,9 @@ export const useCreateTimelineButton = ({ timelineId, timelineType, closeGearMen
         fill,
       };
       const dataTestSubjPrefix =
-        timelineType === TimelineType.template ? `template-timeline-new` : `timeline-new`;
+        timelineType === SavedObjectTimelineType.template
+          ? `template-timeline-new`
+          : `timeline-new`;
       const { fill: noThanks, ...propsWithoutFill } = buttonProps;
       return outline ? (
         <EuiButton data-test-subj={`${dataTestSubjPrefix}-with-border`} {...buttonProps}>

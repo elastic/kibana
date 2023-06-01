@@ -9,7 +9,7 @@ import { noop } from 'lodash/fp';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
 
-import { TimelineType } from '../../../../../common/types/timeline';
+import { SavedObjectTimelineType } from '../../../../../common/types/timeline';
 import type { BrowserFields } from '../../../../common/containers/source';
 import {
   useDeepEqualSelector,
@@ -77,10 +77,10 @@ export const ProviderItemBadge = React.memo<ProviderItemBadgeProps>(
     const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
     const timelineType = useShallowEqualSelector((state) => {
       if (!timelineId) {
-        return TimelineType.default;
+        return SavedObjectTimelineType.default;
       }
 
-      return getTimeline(state, timelineId)?.timelineType ?? TimelineType.default;
+      return getTimeline(state, timelineId)?.timelineType ?? SavedObjectTimelineType.default;
     });
 
     const { isLoading } = useDeepEqualSelector(

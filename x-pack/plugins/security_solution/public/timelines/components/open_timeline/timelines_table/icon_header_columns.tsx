@@ -12,8 +12,8 @@ import { ACTION_COLUMN_WIDTH } from './common_styles';
 import { getNotesCount, getPinnedEventCount } from '../helpers';
 import * as i18n from '../translations';
 import type { FavoriteTimelineResult, OpenTimelineResult } from '../types';
-import type { TimelineTypeLiteralWithNull } from '../../../../../common/types/timeline';
-import { TimelineType } from '../../../../../common/types/timeline';
+import type { SavedObjectTimelineTypeLiteralWithNull } from '../../../../../common/types/timeline';
+import { SavedObjectTimelineType } from '../../../../../common/types/timeline';
 
 /**
  * Returns the columns that have icon headers
@@ -21,7 +21,7 @@ import { TimelineType } from '../../../../../common/types/timeline';
 export const getIconHeaderColumns = ({
   timelineType,
 }: {
-  timelineType: TimelineTypeLiteralWithNull;
+  timelineType: SavedObjectTimelineTypeLiteralWithNull;
 }) => {
   const columns = {
     note: {
@@ -76,5 +76,5 @@ export const getIconHeaderColumns = ({
   };
   const templateColumns = [columns.note, columns.favorite];
   const defaultColumns = [columns.pinnedEvent, columns.note, columns.favorite];
-  return timelineType === TimelineType.template ? templateColumns : defaultColumns;
+  return timelineType === SavedObjectTimelineType.template ? templateColumns : defaultColumns;
 };

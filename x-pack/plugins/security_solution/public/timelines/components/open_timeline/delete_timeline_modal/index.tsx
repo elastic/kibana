@@ -12,7 +12,7 @@ import { createGlobalStyle } from 'styled-components';
 import { useParams } from 'react-router-dom';
 import { DeleteTimelineModal, DELETE_TIMELINE_MODAL_WIDTH } from './delete_timeline_modal';
 import type { DeleteTimelines } from '../types';
-import { TimelineType } from '../../../../../common/types/timeline';
+import { SavedObjectTimelineType } from '../../../../../common/types/timeline';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import * as i18n from '../translations';
 
@@ -35,7 +35,7 @@ interface Props {
 export const DeleteTimelineModalOverlay = React.memo<Props>(
   ({ deleteTimelines, isModalOpen, savedObjectIds, title, onComplete }) => {
     const { addSuccess } = useAppToasts();
-    const { tabName: timelineType } = useParams<{ tabName: TimelineType }>();
+    const { tabName: timelineType } = useParams<{ tabName: SavedObjectTimelineType }>();
 
     const internalCloseModal = useCallback(() => {
       if (onComplete != null) {
@@ -48,7 +48,7 @@ export const DeleteTimelineModalOverlay = React.memo<Props>(
 
         addSuccess({
           title:
-            timelineType === TimelineType.template
+            timelineType === SavedObjectTimelineType.template
               ? i18n.SUCCESSFULLY_DELETED_TIMELINE_TEMPLATES(savedObjectIds.length)
               : i18n.SUCCESSFULLY_DELETED_TIMELINES(savedObjectIds.length),
         });

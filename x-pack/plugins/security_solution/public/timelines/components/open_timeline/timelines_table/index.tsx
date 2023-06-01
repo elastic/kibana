@@ -26,8 +26,8 @@ import { getActionsColumns } from './actions_columns';
 import { getCommonColumns } from './common_columns';
 import { getExtendedColumns } from './extended_columns';
 import { getIconHeaderColumns } from './icon_header_columns';
-import type { TimelineTypeLiteralWithNull } from '../../../../../common/types/timeline';
-import { TimelineStatus, TimelineType } from '../../../../../common/types/timeline';
+import type { SavedObjectTimelineTypeLiteralWithNull } from '../../../../../common/types/timeline';
+import { TimelineStatus, SavedObjectTimelineType } from '../../../../../common/types/timeline';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 // there are a number of type mismatches across this file
 const EuiBasicTable: any = _EuiBasicTable; // eslint-disable-line @typescript-eslint/no-explicit-any
@@ -75,7 +75,7 @@ export const getTimelinesTableColumns = ({
   onSelectionChange: OnSelectionChange;
   onToggleShowNotes: OnToggleShowNotes;
   showExtendedColumns: boolean;
-  timelineType: TimelineTypeLiteralWithNull;
+  timelineType: SavedObjectTimelineTypeLiteralWithNull;
   hasCrudAccess: boolean;
 }) => {
   return [
@@ -122,7 +122,7 @@ export interface TimelinesTableProps {
   showExtendedColumns: boolean;
   sortDirection: 'asc' | 'desc';
   sortField: string;
-  timelineType: TimelineTypeLiteralWithNull;
+  timelineType: SavedObjectTimelineTypeLiteralWithNull;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   tableRef?: React.MutableRefObject<_EuiBasicTable<any> | undefined>;
   totalSearchResultsCount: number;
@@ -222,7 +222,7 @@ export const TimelinesTable = React.memo<TimelinesTableProps>(
     const noItemsMessage =
       isLoading || searchResults == null
         ? i18n.LOADING
-        : timelineType === TimelineType.template
+        : timelineType === SavedObjectTimelineType.template
         ? i18n.ZERO_TIMELINE_TEMPLATES_MATCH
         : i18n.ZERO_TIMELINES_MATCH;
 

@@ -10,7 +10,7 @@ import { useDispatch } from 'react-redux';
 import { timelineDefaults } from '../timelines/store/timeline/defaults';
 import { APP_UI_ID } from '../../common/constants';
 import type { DataProvider } from '../../common/types';
-import { TimelineId, TimelineType } from '../../common/types';
+import { TimelineId, SavedObjectTimelineType } from '../../common/types';
 import { useDeepEqualSelector } from '../common/hooks/use_selector';
 import { useKibana } from '../common/lib/kibana';
 import { useStartTransaction } from '../common/lib/apm/use_start_transaction';
@@ -70,7 +70,7 @@ export const useInvestigateInTimeline = ({
 
   const clearActiveTimeline = useCreateTimeline({
     timelineId: TimelineId.active,
-    timelineType: TimelineType.default,
+    timelineType: SavedObjectTimelineType.default,
   });
 
   const createTimeline = useCallback(

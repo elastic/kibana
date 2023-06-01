@@ -33,7 +33,7 @@ import {
 } from '../../../common/constants';
 import { networkModel } from '../../explore/network/store';
 import {
-  TimelineType,
+  SavedObjectTimelineType,
   TimelineStatus,
   TimelineTabs,
   TimelineId,
@@ -347,7 +347,7 @@ export const mockGlobalState: State = {
         kqlQuery: { filterQuery: null },
         loadingEventIds: [],
         title: '',
-        timelineType: TimelineType.default,
+        timelineType: SavedObjectTimelineType.default,
         templateTimelineId: null,
         templateTimelineVersion: null,
         noteIds: [],

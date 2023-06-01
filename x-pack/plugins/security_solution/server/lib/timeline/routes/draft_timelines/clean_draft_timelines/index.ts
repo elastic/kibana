@@ -23,7 +23,7 @@ import {
 } from '../../../saved_object/timelines';
 import { draftTimelineDefaults } from '../../../utils/default_timeline';
 import { cleanDraftTimelineSchema } from '../../../schemas/draft_timelines';
-import { TimelineType } from '../../../../../../common/types/timeline';
+import { SavedObjectTimelineType } from '../../../../../../common/types/timeline';
 
 export const cleanDraftTimelinesRoute = (
   router: SecuritySolutionPluginRouter,
@@ -71,7 +71,7 @@ export const cleanDraftTimelinesRoute = (
           });
         }
         const templateTimelineData =
-          request.body.timelineType === TimelineType.template
+          request.body.timelineType === SavedObjectTimelineType.template
             ? {
                 timelineType: request.body.timelineType,
                 templateTimelineId: uuidv4(),

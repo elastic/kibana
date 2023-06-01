@@ -13,8 +13,8 @@ import styled from 'styled-components';
 import type { OpenTimelineResult } from '../../open_timeline/types';
 import { SelectableTimeline } from '../selectable_timeline';
 import * as i18n from '../translations';
-import type { TimelineTypeLiteral } from '../../../../../common/types/timeline';
-import { TimelineType } from '../../../../../common/types/timeline';
+import type { SavedObjectTimelineTypeLiteral } from '../../../../../common/types/timeline';
+import { SavedObjectTimelineType } from '../../../../../common/types/timeline';
 
 const StyledEuiFieldText = styled(EuiFieldText)`
   padding-left: 12px;
@@ -50,7 +50,7 @@ interface SearchTimelineSuperSelectProps {
   hideUntitled?: boolean;
   timelineId: string | null;
   timelineTitle: string | null;
-  timelineType?: TimelineTypeLiteral;
+  timelineType?: SavedObjectTimelineTypeLiteral;
   placeholder?: string;
   onTimelineChange: (timelineTitle: string, timelineId: string | null) => void;
 }
@@ -71,7 +71,7 @@ const SearchTimelineSuperSelectComponent: React.FC<SearchTimelineSuperSelectProp
   hideUntitled = false,
   timelineId,
   timelineTitle,
-  timelineType = TimelineType.template,
+  timelineType = SavedObjectTimelineType.template,
   onTimelineChange,
   placeholder,
 }) => {
@@ -112,7 +112,10 @@ const SearchTimelineSuperSelectComponent: React.FC<SearchTimelineSuperSelectProp
               description: t.description,
               favorite: t.favorite,
               label: t.title,
-              id: timelineType === TimelineType.template ? t.templateTimelineId : t.savedObjectId,
+              id:
+                timelineType === SavedObjectTimelineType.template
+                  ? t.templateTimelineId
+                  : t.savedObjectId,
               key: `${t.title}-${index}`,
               title: t.title,
               checked: [t.savedObjectId, t.templateTimelineId].includes(timelineId)

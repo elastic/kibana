@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { TimelineType } from '../../../../common/types';
+import { SavedObjectTimelineType } from '../../../../common/types';
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 import { TestProviders } from '../../mock';
@@ -33,7 +33,7 @@ describe('AddEventNoteAction', () => {
         <TestProviders>
           <AddEventNoteAction
             showNotes={false}
-            timelineType={TimelineType.default}
+            timelineType={SavedObjectTimelineType.default}
             toggleShowNotes={jest.fn}
           />
         </TestProviders>
@@ -52,7 +52,7 @@ describe('AddEventNoteAction', () => {
         <TestProviders>
           <AddEventNoteAction
             showNotes={false}
-            timelineType={TimelineType.default}
+            timelineType={SavedObjectTimelineType.default}
             toggleShowNotes={jest.fn}
           />
         </TestProviders>

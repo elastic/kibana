@@ -7,7 +7,7 @@
 
 import { defaultHeaders } from './default_timeline_headers';
 import type { TimelineSOServerRepresentationType } from '../../../../common/types/timeline/api';
-import { TimelineType, TimelineStatus } from '../../../../common/types/timeline';
+import { SavedObjectTimelineType, TimelineStatus } from '../../../../common/types/timeline';
 import { Direction } from '../../../../common/search_strategy';
 
 export const draftTimelineDefaults: TimelineSOServerRepresentationType = {
@@ -17,7 +17,7 @@ export const draftTimelineDefaults: TimelineSOServerRepresentationType = {
   eventType: 'all',
   filters: [],
   kqlMode: 'filter',
-  timelineType: TimelineType.default,
+  timelineType: SavedObjectTimelineType.default,
   kqlQuery: {
     filterQuery: null,
   },

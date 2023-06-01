@@ -7,7 +7,7 @@
 
 import * as rt from 'io-ts';
 
-import { TimelineTypeLiteralRt } from '../../../../../common/types/timeline';
+import { TimelineTypeLiteralRt } from '../../../../../common/types/timeline/api';
 import { unionWithNullType } from '../../../../../common/utility_types';
 
 export const persistFavoriteSchema = rt.type({

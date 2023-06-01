@@ -6,8 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { TimelineTypeLiteral } from '../../../../common/types/timeline';
-import { TimelineType } from '../../../../common/types/timeline';
+import type { SavedObjectTimelineTypeLiteral } from '../../../../common/types/timeline';
+import { SavedObjectTimelineType } from '../../../../common/types/timeline';
 
 export const DEFAULT_TIMELINE_TITLE = i18n.translate(
   'xpack.securitySolution.timeline.defaultTimelineTitle',
@@ -35,9 +35,12 @@ export const EVENTS_TABLE_ARIA_LABEL = ({
     defaultMessage: 'events; Page {activePage} of {totalPages}',
   });
 
-export const SEARCH_BOX_TIMELINE_PLACEHOLDER = (timelineType: TimelineTypeLiteral) =>
+export const SEARCH_BOX_TIMELINE_PLACEHOLDER = (timelineType: SavedObjectTimelineTypeLiteral) =>
   i18n.translate('xpack.securitySolution.timeline.searchBoxPlaceholder', {
-    values: { timeline: timelineType === TimelineType.template ? 'Timeline template' : 'Timeline' },
+    values: {
+      timeline:
+        timelineType === SavedObjectTimelineType.template ? 'Timeline template' : 'Timeline',
+    },
     defaultMessage: 'e.g. {timeline} name or description',
   });
 

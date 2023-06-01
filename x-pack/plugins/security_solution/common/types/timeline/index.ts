@@ -223,22 +223,28 @@ export const RowRendererIdRuntimeType = stringEnum(RowRendererId, 'RowRendererId
  *  Timeline Types
  */
 
-export enum TimelineType {
+export enum SavedObjectTimelineType {
   default = 'default',
   template = 'template',
 }
 
-export const TimelineTypeLiteralRt = runtimeTypes.union([
-  runtimeTypes.literal(TimelineType.template),
-  runtimeTypes.literal(TimelineType.default),
+const SavedObjectTimelineTypeLiteralRt = runtimeTypes.union([
+  runtimeTypes.literal(SavedObjectTimelineType.template),
+  runtimeTypes.literal(SavedObjectTimelineType.default),
 ]);
 
-export const TimelineTypeLiteralWithNullRt = unionWithNullType(TimelineTypeLiteralRt);
+export const SavedObjectTimelineTypeLiteralWithNullRt = unionWithNullType(
+  SavedObjectTimelineTypeLiteralRt
+);
 
-export type TimelineTypeLiteral = runtimeTypes.TypeOf<typeof TimelineTypeLiteralRt>;
-export type TimelineTypeLiteralWithNull = runtimeTypes.TypeOf<typeof TimelineTypeLiteralWithNullRt>;
+export type SavedObjectTimelineTypeLiteral = runtimeTypes.TypeOf<
+  typeof SavedObjectTimelineTypeLiteralRt
+>;
+export type SavedObjectTimelineTypeLiteralWithNull = runtimeTypes.TypeOf<
+  typeof SavedObjectTimelineTypeLiteralWithNullRt
+>;
 
-export const SavedTimelineRuntimeType = runtimeTypes.partial({
+export const SavedObjectTimelineRuntimeType = runtimeTypes.partial({
   columns: unionWithNullType(runtimeTypes.array(SavedColumnHeaderRuntimeType)),
   dataProviders: unionWithNullType(runtimeTypes.array(SavedDataProviderRuntimeType)),
   dataViewId: unionWithNullType(runtimeTypes.string),
@@ -254,7 +260,7 @@ export const SavedTimelineRuntimeType = runtimeTypes.partial({
   title: unionWithNullType(runtimeTypes.string),
   templateTimelineId: unionWithNullType(runtimeTypes.string),
   templateTimelineVersion: unionWithNullType(runtimeTypes.number),
-  timelineType: unionWithNullType(TimelineTypeLiteralRt),
+  timelineType: unionWithNullType(SavedObjectTimelineTypeLiteralRt),
   dateRange: unionWithNullType(SavedDateRangePickerRuntimeType),
   savedQueryId: unionWithNullType(runtimeTypes.string),
   sort: unionWithNullType(SavedSortRuntimeType),
@@ -268,15 +274,20 @@ export const SavedTimelineRuntimeType = runtimeTypes.partial({
 /**
  * This is the actual type that is used for the saved object
  */
-export type SavedTimeline = runtimeTypes.TypeOf<typeof SavedTimelineRuntimeType>;
+export type SavedObjectTimeline = runtimeTypes.TypeOf<typeof SavedObjectTimelineRuntimeType>;
 
-export type SavedTimelineWithSavedObjectId = SavedTimeline & { savedObjectId?: string | null };
+export type SavedObjectTimelineWithSavedObjectId = SavedObjectTimeline & {
+  savedObjectId?: string | null;
+};
 
 /**
  * This type represents a timeline type stored in a saved object that does not include any fields that reference
  * other saved objects.
  */
-export type TimelineWithoutExternalRefs = Omit<SavedTimeline, 'dataViewId' | 'savedQueryId'>;
+export type SavedObjectTimelineWithoutExternalRefs = Omit<
+  SavedObjectTimeline,
+  'dataViewId' | 'savedQueryId'
+>;
 
 // ++++++++ TIMELINE TYPES THAT ARE NEITHER IN THE API, NOR IN THE SAVED OBJECT +++++++++
 

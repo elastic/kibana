@@ -9,7 +9,7 @@ import { EuiHorizontalRule, EuiText } from '@elastic/eui';
 import React, { useCallback, useMemo, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 
-import { TimelineType } from '../../../../common/types/timeline';
+import { SavedObjectTimelineType } from '../../../../common/types/timeline';
 import { SortFieldTimeline } from '../../../../common/types/timeline/api';
 import { useGetAllTimeline } from '../../../timelines/containers/all';
 import {
@@ -86,7 +86,7 @@ const StatefulRecentTimelinesComponent: React.FC<Props> = ({ filterBy }) => {
   );
 
   const { fetchAllTimeline, timelines, loading } = useGetAllTimeline();
-  const timelineType = TimelineType.default;
+  const timelineType = SavedObjectTimelineType.default;
   const { timelineStatus } = useTimelineStatus({ timelineType });
 
   useEffect(() => {

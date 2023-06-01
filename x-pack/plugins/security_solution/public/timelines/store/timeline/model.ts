@@ -14,7 +14,7 @@ import type {
 } from '../../../../common/search_strategy/timeline';
 import type {
   TimelineEventsType,
-  TimelineType,
+  SavedObjectTimelineType,
   TimelineStatus,
   TimelineTabs,
   ScrollToTopEvent,
@@ -58,7 +58,7 @@ export interface TimelineModel {
   /** Title */
   title: string;
   /** timelineType: default | template */
-  timelineType: TimelineType;
+  timelineType: SavedObjectTimelineType;
   /** an unique id for timeline template */
   templateTimelineId: string | null;
   /** null for default timeline, number for timeline template */

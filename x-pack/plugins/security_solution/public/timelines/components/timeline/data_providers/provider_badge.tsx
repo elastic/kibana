@@ -12,7 +12,7 @@ import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 
 import type { PrimitiveOrArrayOfPrimitives } from '../../../../common/lib/kuery';
-import { TimelineType } from '../../../../../common/types/timeline';
+import { SavedObjectTimelineType } from '../../../../../common/types/timeline';
 import { getEmptyString } from '../../../../common/components/empty_value';
 import { ProviderContainer } from '../../../../common/components/drag_and_drop/provider_container';
 
@@ -23,7 +23,7 @@ import * as i18n from './translations';
 
 type ProviderBadgeStyledType = typeof EuiBadge & {
   // https://styled-components.com/docs/api#transient-props
-  $timelineType: TimelineType;
+  $timelineType: SavedObjectTimelineType;
 };
 
 const ProviderBadgeStyled = styled(EuiBadge)<ProviderBadgeStyledType>`
@@ -38,7 +38,7 @@ const ProviderBadgeStyled = styled(EuiBadge)<ProviderBadgeStyledType>`
   &.globalFilterItem {
     white-space: nowrap;
     min-width: ${({ $timelineType }) =>
-      $timelineType === TimelineType.template ? '140px' : 'none'};
+      $timelineType === SavedObjectTimelineType.template ? '140px' : 'none'};
     display: flex;
 
     &.globalFilterItem-isDisabled {
@@ -107,7 +107,7 @@ interface ProviderBadgeProps {
   val: PrimitiveOrArrayOfPrimitives;
   operator: QueryOperator;
   type: DataProviderType;
-  timelineType: TimelineType;
+  timelineType: SavedObjectTimelineType;
 }
 
 const closeButtonProps = {
@@ -204,7 +204,7 @@ export const ProviderBadge = React.memo<ProviderBadgeProps>(
           {/* Add a UI feature to let users know the is one of operator doesnt work with timeline templates: 
           https://github.com/elastic/kibana/issues/142437 */}
 
-          {timelineType === TimelineType.template && operator !== IS_ONE_OF_OPERATOR && (
+          {timelineType === SavedObjectTimelineType.template && operator !== IS_ONE_OF_OPERATOR && (
             <TemplateFieldBadge toggleType={toggleType} type={type} />
           )}
         </>

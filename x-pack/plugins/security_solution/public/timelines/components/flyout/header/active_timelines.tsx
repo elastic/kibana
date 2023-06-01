@@ -12,7 +12,7 @@ import { isEmpty } from 'lodash/fp';
 import styled from 'styled-components';
 import { FormattedRelative } from '@kbn/i18n-react';
 
-import { TimelineStatus, TimelineType } from '../../../../../common/types/timeline';
+import { TimelineStatus, SavedObjectTimelineType } from '../../../../../common/types/timeline';
 import { TimelineEventsCountBadge } from '../../../../common/hooks/use_timeline_events_count';
 import {
   ACTIVE_TIMELINE_BUTTON_CLASS_NAME,
@@ -30,7 +30,7 @@ interface ActiveTimelinesProps {
   timelineId: string;
   timelineStatus: TimelineStatus;
   timelineTitle: string;
-  timelineType: TimelineType;
+  timelineType: SavedObjectTimelineType;
   isOpen: boolean;
   updated?: number;
 }
@@ -63,7 +63,7 @@ const ActiveTimelinesComponent: React.FC<ActiveTimelinesProps> = ({
 
   const title = !isEmpty(timelineTitle)
     ? timelineTitle
-    : timelineType === TimelineType.template
+    : timelineType === SavedObjectTimelineType.template
     ? UNTITLED_TEMPLATE
     : UNTITLED_TIMELINE;
 
