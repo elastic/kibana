@@ -1,0 +1,5 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/react-public",
+  "owner": "@elastic/appex-sharedux"
+}
