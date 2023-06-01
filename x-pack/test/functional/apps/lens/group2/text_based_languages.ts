@@ -130,12 +130,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.lens.removeDimension('lnsMetric_breakdownByDimensionPanel');
       await PageObjects.lens.waitForVisualization('mtrVis');
       const metricData = await PageObjects.lens.getMetricVisualizationData();
-      expect(metricData[0].value).to.eql('5.7k');
+      expect(metricData[0].value).to.eql('5,699.406');
       expect(metricData[0].title).to.eql('average');
       await PageObjects.lens.save('New text based languages viz', false, false, false, 'new');
 
       await PageObjects.dashboard.waitForRenderComplete();
-      expect(metricData[0].value).to.eql('5.7k');
+      expect(metricData[0].value).to.eql('5,699.406');
 
       const panelCount = await PageObjects.dashboard.getPanelCount();
       expect(panelCount).to.eql(1);
