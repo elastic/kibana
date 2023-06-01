@@ -19,8 +19,6 @@ import {
 import {
   EuiButton,
   Comparators,
-  EuiTableSortingType,
-  Criteria,
   EuiButtonIcon,
   EuiBasicTable,
   EuiBasicTableColumn,
@@ -32,10 +30,11 @@ import { WindowParameters } from '@kbn/aiops-utils';
 import { SeriesColorAccessor } from '@elastic/charts/dist/chart_types/xy_chart/utils/specs';
 import { i18n } from '@kbn/i18n';
 import { Query } from '@kbn/es-query';
+import { UseTableState, useTableState } from '../log_categorization/category_table/use_table_state';
 import { SearchQueryLanguage } from '../../application/utils/search_utils';
 import { useEuiTheme } from '../../hooks/use_eui_theme';
 import { getDataDriftType, useFetchDataDriftResult } from './use_data_drift_result';
-import { DATA_DRIFT_TYPE, NUMERIC_TYPE_LABEL } from './constants';
+import { DATA_DRIFT_TYPE, DATA_DRIFT_TYPE_LABEL, PRODUCTION_LABEL } from './constants';
 import { Histogram, ComparisionHistogram, Feature, DataDriftField, TimeRange } from './types';
 import { DataDriftChartTooltipBody } from './data_drift_chart_tooltip_body';
 
@@ -54,11 +53,11 @@ const formatSignificanceLevel = (significanceLevel: number) => {
 export const ReferenceDistribution = ({
   data,
   color,
-  featureType,
+  fieldType,
 }: {
   data: Histogram[];
   color?: SeriesColorAccessor;
-  featureType?: DataDriftField['type'];
+  fieldType?: DataDriftField['type'];
 }) => {
   return (
     <Chart>
@@ -66,7 +65,7 @@ export const ReferenceDistribution = ({
       <BarSeries
         id="reference-distr-viz"
         name="Reference distribution"
-        xScaleType={featureType === DATA_DRIFT_TYPE.NUMERIC ? ScaleType.Linear : ScaleType.Ordinal}
+        xScaleType={fieldType === DATA_DRIFT_TYPE.NUMERIC ? ScaleType.Linear : ScaleType.Ordinal}
         yScaleType={ScaleType.Linear}
         xAccessor="key"
         yAccessors={['percentage']}
@@ -81,11 +80,11 @@ export const ReferenceDistribution = ({
 export const ProductionDistribution = ({
   data,
   color,
-  featureType,
+  fieldType,
 }: {
   data: Histogram[];
   color?: SeriesColorAccessor;
-  featureType?: DataDriftField['type'];
+  fieldType?: DataDriftField['type'];
 }) => {
   return (
     <Chart>
@@ -93,7 +92,7 @@ export const ProductionDistribution = ({
       <BarSeries
         id="production-distr-viz"
         name="Production distribution"
-        xScaleType={featureType === DATA_DRIFT_TYPE.NUMERIC ? ScaleType.Linear : ScaleType.Ordinal}
+        xScaleType={fieldType === DATA_DRIFT_TYPE.NUMERIC ? ScaleType.Linear : ScaleType.Ordinal}
         yScaleType={ScaleType.Linear}
         xAccessor="key"
         yAccessors={['percentage']}
@@ -107,11 +106,13 @@ export const ProductionDistribution = ({
 const OverlapDistributionComparison = ({
   data,
   colors,
-  featureType,
+  fieldType,
+  fieldName,
 }: {
   data: ComparisionHistogram[];
   colors: { referenceColor: string; productionColor: string };
-  featureType?: DataDriftField['type'];
+  fieldType?: DataDriftField['type'];
+  fieldName?: DataDriftField['field'];
 }) => {
   return (
     <Chart>
@@ -121,9 +122,11 @@ const OverlapDistributionComparison = ({
       <AreaSeries
         id="aiops.overlapDistributionComparisonChart"
         name={i18n.translate('xpack.aiops.dataDrift.distributionComparisonChartName', {
-          defaultMessage: 'Distribution comparison of reference and production data',
+          defaultMessage:
+            'Distribution comparison of reference and production data for {fieldName}',
+          values: { fieldName },
         })}
-        xScaleType={featureType === DATA_DRIFT_TYPE.NUMERIC ? ScaleType.Linear : ScaleType.Ordinal}
+        xScaleType={fieldType === DATA_DRIFT_TYPE.NUMERIC ? ScaleType.Linear : ScaleType.Ordinal}
         yScaleType={ScaleType.Linear}
         xAccessor="key"
         yAccessors={['percentage']}
@@ -132,7 +135,7 @@ const OverlapDistributionComparison = ({
         curve={CurveType.CURVE_STEP_AFTER}
         color={(identifier) => {
           const key = identifier.seriesKeys[0];
-          return key === 'Production' ? colors.productionColor : colors.referenceColor;
+          return key === PRODUCTION_LABEL ? colors.productionColor : colors.referenceColor;
         }}
       />
     </Chart>
@@ -141,15 +144,14 @@ const OverlapDistributionComparison = ({
 
 const DataDriftChart = ({
   featureName,
-  featureType,
+  fieldType,
   data,
   colors,
 }: {
   featureName: string;
-  featureType: string;
+  fieldType: string;
   data: ComparisionHistogram[];
   colors: { referenceColor: string; productionColor: string };
-  compact: boolean;
 }) => {
   return (
     <Chart>
@@ -165,7 +167,7 @@ const DataDriftChart = ({
       <BarSeries
         id="data-drift-viz"
         name={featureName}
-        xScaleType={featureType === NUMERIC_TYPE_LABEL ? ScaleType.Linear : ScaleType.Ordinal}
+        xScaleType={fieldType === DATA_DRIFT_TYPE.NUMERIC ? ScaleType.Linear : ScaleType.Ordinal}
         yScaleType={ScaleType.Linear}
         xAccessor="key"
         yAccessors={['percentage']}
@@ -248,8 +250,10 @@ export const DataDriftView = ({
     searchQueryLanguage,
     searchQuery,
   });
-
-  const dataFromResult = result.data;
+  const { onTableChange, pagination, sorting, setPageIndex } = useTableState<Feature>(
+    result.data ?? [],
+    'driftDetected'
+  );
 
   return (
     <div>
@@ -257,12 +261,27 @@ export const DataDriftView = ({
         Analyze
       </EuiButton>
 
-      {dataFromResult ? <DataDriftOverviewTable data={dataFromResult} /> : null}
+      {result.data ? (
+        <DataDriftOverviewTable
+          data={result.data}
+          onTableChange={onTableChange}
+          pagination={pagination}
+          sorting={sorting}
+          setPageIndex={setPageIndex}
+        />
+      ) : null}
     </div>
   );
 };
 
-export const DataDriftOverviewTable = ({ data }: { data: Feature[] }) => {
+export const DataDriftOverviewTable = ({
+  data,
+  onTableChange,
+  pagination,
+  sorting,
+}: {
+  data: Feature[];
+} & UseTableState) => {
   const euiTheme = useEuiTheme();
   const colors = {
     referenceColor: euiTheme.euiColorVis2,
@@ -271,37 +290,14 @@ export const DataDriftOverviewTable = ({ data }: { data: Feature[] }) => {
   const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<Record<string, ReactNode>>(
     {}
   );
-  const [pageIndex, setPageIndex] = useState(0);
-  const [pageSize, setPageSize] = useState(5);
-  const [sortField, setSortField] = useState<keyof Feature>('driftDetected');
-  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
 
-  const onTableChange = ({ page, sort }: Criteria<Feature>) => {
-    if (page) {
-      setPageIndex(page.index);
-      setPageSize(page.size);
-    }
-    if (sort) {
-      setSortField(sort.field);
-      setSortDirection(sort.direction);
-    }
-  };
-
-  const sorting: EuiTableSortingType<Feature> = {
-    sort: {
-      field: sortField,
-      direction: sortDirection,
-    },
-  };
-  const pagination = {
-    pageIndex,
-    pageSize,
-    totalItemCount: data.length,
-    pageSizeOptions: [5, 10, 20, 50],
-  };
-  // const features = data;
   const features = useMemo(() => {
+    const { pageIndex, pageSize } = pagination;
+    const {
+      sort: { field: sortField, direction: sortDirection },
+    } = sorting;
     if (data.length === 0) return [];
+
     const items = sortField
       ? [...data].sort(Comparators.property(sortField, Comparators.default(sortDirection)))
       : data;
@@ -314,7 +310,8 @@ export const DataDriftOverviewTable = ({ data }: { data: Feature[] }) => {
       pageOfItems = items.slice(startIndex, Math.min(startIndex + pageSize, data.length));
     }
     return pageOfItems;
-  }, [data, sortField, sortDirection, pageIndex, pageSize]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [data, pagination.pageIndex, pagination.pageSize, sorting.sort.direction, sorting.sort.field]);
 
   // if data is an empty array return
   if (features.length === 0) {
@@ -354,18 +351,21 @@ export const DataDriftOverviewTable = ({ data }: { data: Feature[] }) => {
       textOnly: true,
     },
     {
-      field: 'featureType',
+      field: 'fieldType',
       name: i18n.translate('xpack.aiops.dataDrift.fieldTypeLabel', {
         defaultMessage: 'Field type',
       }),
       'data-test-subj': 'mlDataDriftOverviewTableFeatureType',
       sortable: true,
       textOnly: true,
+      render: (fieldType: DataDriftField['type']) => {
+        return <span>{DATA_DRIFT_TYPE_LABEL[fieldType]}</span>;
+      },
     },
     {
       field: 'driftDetected',
       name: i18n.translate('xpack.aiops.dataDrift.driftDetectedLabel', {
-        defaultMessage: 'Field type',
+        defaultMessage: 'Drift detected',
       }),
       'data-test-subj': 'mlDataDriftOverviewTableDriftDetected',
       sortable: true,
@@ -403,7 +403,7 @@ export const DataDriftOverviewTable = ({ data }: { data: Feature[] }) => {
         return (
           <div css={{ width: 100, height: 40 }}>
             <ReferenceDistribution
-              featureType={item.featureType}
+              fieldType={item.fieldType}
               data={referenceHistogram}
               color={colors.referenceColor}
             />
@@ -420,7 +420,7 @@ export const DataDriftOverviewTable = ({ data }: { data: Feature[] }) => {
         return (
           <div css={{ width: 100, height: 40 }}>
             <ProductionDistribution
-              featureType={item.featureType}
+              fieldType={item.fieldType}
               data={productionDistribution}
               color={colors.productionColor}
             />
@@ -437,18 +437,11 @@ export const DataDriftOverviewTable = ({ data }: { data: Feature[] }) => {
         return (
           <div css={{ width: 100, height: 40 }}>
             <OverlapDistributionComparison
-              featureName={item.featureName}
-              featureType={item.featureType}
+              fieldName={item.featureName}
+              fieldType={item.fieldType}
               data={comparisonDistribution}
               colors={colors}
             />
-            {/* <DataDriftChart*/}
-            {/*  featureName={item.featureName}*/}
-            {/*  featureType={item.featureType}*/}
-            {/*  data={comparisonDistribution}*/}
-            {/*  colors={colors}*/}
-            {/*  compact={true}*/}
-            {/* />*/}
           </div>
         );
       },
@@ -485,7 +478,7 @@ export const DataDriftOverviewTable = ({ data }: { data: Feature[] }) => {
         <div css={{ width: '100%', height: 200 }}>
           <DataDriftChart
             featureName={featureName}
-            featureType={item.featureType}
+            fieldType={item.fieldType}
             data={comparisonDistribution}
             colors={colors}
           />

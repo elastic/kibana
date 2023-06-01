@@ -20,8 +20,8 @@ export const CATEGORICAL_TYPE_LABEL = i18n.translate('xpack.aiops.driftData.cate
   defaultMessage: 'Categorical',
 });
 
-export const UNKNOWN_PVALUE_LABEL = i18n.translate('xpack.aiops.driftData.unknownPValueLabel', {
-  defaultMessage: 'Unknown',
+export const UNSUPPORTED_LABEL = i18n.translate('xpack.aiops.driftData.UnsupportedLabel', {
+  defaultMessage: 'Unsupported',
 });
 
 export const REFERENCE_LABEL = i18n.translate('xpack.aiops.driftData.referenceLabel', {
@@ -31,6 +31,12 @@ export const REFERENCE_LABEL = i18n.translate('xpack.aiops.driftData.referenceLa
 export const PRODUCTION_LABEL = i18n.translate('xpack.aiops.driftData.productionLabel', {
   defaultMessage: 'Production',
 });
+
+export const DATA_DRIFT_TYPE_LABEL = {
+  [DATA_DRIFT_TYPE.NUMERIC]: NUMERIC_TYPE_LABEL,
+  [DATA_DRIFT_TYPE.CATEGORICAL]: CATEGORICAL_TYPE_LABEL,
+  [DATA_DRIFT_TYPE.UNSUPPORTED]: UNSUPPORTED_LABEL,
+} as const;
 
 export const DRIFT_P_VALUE_THRESHOLD = 0.05;
 

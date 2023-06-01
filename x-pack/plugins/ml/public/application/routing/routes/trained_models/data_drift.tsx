@@ -45,7 +45,6 @@ const PageWrapper: FC<PageProps> = ({ location, deps }) => {
     checkBasicLicense,
     cacheDataViewsContract: () => cacheDataViewsContract(deps.dataViewsContract),
   });
-  console.log(`--@@context`, context);
 
   return (
     <PageLoader context={context}>

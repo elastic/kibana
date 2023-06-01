@@ -18,8 +18,6 @@ import { cloneDeep } from 'lodash';
 import { SearchQueryLanguage } from '../../application/utils/search_utils';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import {
-  NUMERIC_TYPE_LABEL,
-  CATEGORICAL_TYPE_LABEL,
   REFERENCE_LABEL,
   PRODUCTION_LABEL,
   DRIFT_P_VALUE_THRESHOLD,
@@ -53,7 +51,11 @@ export const getDataDriftType = (kibanaType: string): DataDriftField['type'] => 
   }
 };
 
+// @TODO Write tests
 const criticalTableLookup = (chi2Statistic: number, df: number) => {
+  if (df < 1) return 1;
+  if (!Number.isInteger(df)) throw Error('Degrees of freedom must be a valid integer');
+
   // Get the row index
   const rowIndex: number = df - 1;
 
@@ -72,6 +74,7 @@ const criticalTableLookup = (chi2Statistic: number, df: number) => {
   return significanceLevel;
 };
 
+// @TODO Write tests
 export const computeChi2PValue = (
   normalizedBaselineTerms: Histogram[],
   normalizedDriftedTerms: Histogram[]
@@ -136,7 +139,10 @@ const normalizeHistogram = (histogram: Histogram[]): Histogram[] => {
   // Compute a total doc_count for all terms
   const totalDocCount: number = histogram.reduce((acc, term) => acc + term.doc_count, 0);
   // Iterate over the original array and update the doc_count of each term in the new array
-  return histogram.map((term) => ({ ...term, percentage: term.doc_count / totalDocCount }));
+  return histogram.map((term) => ({
+    ...term,
+    percentage: totalDocCount > 0 ? term.doc_count / totalDocCount : 0,
+  }));
 };
 
 const normalizeTerms = (
@@ -169,7 +175,7 @@ const normalizeTerms = (
 const processDataDriftResult = (
   result: Record<string, NumericDriftData | CategoricalDriftData>
 ): Feature[] => {
-  const d = Object.entries(result).map(([featureName, data], idx) => {
+  return Object.entries(result).map(([featureName, data]) => {
     if (isNumericDriftData(data)) {
       // normalize data.referenceHistogram and data.productionHistogram to use frequencies instead of counts
       const referenceHistogram: Histogram[] = normalizeHistogram(data.referenceHistogram);
@@ -177,7 +183,7 @@ const processDataDriftResult = (
 
       return {
         featureName,
-        featureType: NUMERIC_TYPE_LABEL,
+        fieldType: DATA_DRIFT_TYPE.NUMERIC,
         driftDetected: data.pValue < DRIFT_P_VALUE_THRESHOLD,
         similarityTestPValue: data.pValue,
         referenceHistogram: referenceHistogram ?? [],
@@ -245,7 +251,7 @@ const processDataDriftResult = (
     const pValue: number = computeChi2PValue(normalizedBaselineTerms, normalizedDriftedTerms);
     return {
       featureName,
-      featureType: CATEGORICAL_TYPE_LABEL,
+      fieldType: DATA_DRIFT_TYPE.CATEGORICAL,
       driftDetected: pValue < DRIFT_P_VALUE_THRESHOLD,
       similarityTestPValue: pValue,
       referenceHistogram: normalizedBaselineTerms ?? [],
@@ -256,7 +262,6 @@ const processDataDriftResult = (
       ],
     };
   });
-  return d;
 };
 export const useFetchDataDriftResult = ({
   fields,
@@ -412,7 +417,6 @@ export const useFetchDataDriftResult = ({
               const percentiles = Object.values<number>(
                 baselineResponse.aggregations[`${field}_percentiles`].values
               );
-              // Result is
               const ranges: Array<{ from?: number; to?: number }> = [];
               percentiles.forEach((val: number, idx) => {
                 if (idx === 0) {

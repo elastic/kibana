@@ -46,8 +46,6 @@ export function dataDriftRoutes({ router, routeGuard }: RouteInitialization) {
             },
             { maxRetries: 0 }
           );
-
-          console.log(`--@@ranges`, ranges);
         };
 
         const result = getRangesAndKsTest([{ field: 'numeric_unchangeable', type: 'numeric' }]);

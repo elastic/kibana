@@ -11,6 +11,9 @@ import {
   type RandomSamplerProbability,
 } from '../components/log_categorization/sampling_menu/random_sampler';
 
+export const AIOPS_DATA_DRIFT_TABLE_PAGINATION = 'aiops.dataDriftTablePagination';
+export const AIOPS_DATA_DRIFT_TABLE_SORTING = 'aiops.dataDriftTableSorting';
+
 export const AIOPS_FROZEN_TIER_PREFERENCE = 'aiops.frozenDataTierPreference';
 export const AIOPS_RANDOM_SAMPLING_MODE_PREFERENCE = 'aiops.randomSamplingModePreference';
 export const AIOPS_RANDOM_SAMPLING_PROBABILITY_PREFERENCE =
@@ -20,6 +23,8 @@ export type AiOps = Partial<{
   [AIOPS_FROZEN_TIER_PREFERENCE]: FrozenTierPreference;
   [AIOPS_RANDOM_SAMPLING_MODE_PREFERENCE]: RandomSamplerOption;
   [AIOPS_RANDOM_SAMPLING_PROBABILITY_PREFERENCE]: number;
+  [AIOPS_DATA_DRIFT_TABLE_PAGINATION]: unknown;
+  [AIOPS_DATA_DRIFT_TABLE_SORTING]: unknown;
 }> | null;
 
 export type AiOpsKey = keyof Exclude<AiOps, null>;

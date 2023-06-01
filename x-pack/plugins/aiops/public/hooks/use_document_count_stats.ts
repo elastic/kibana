@@ -114,13 +114,6 @@ export function useDocumentCountStats<TParams extends DocumentStatsSearchStrateg
         seed: RANDOM_SAMPLER_SEED,
       });
 
-      console.log(
-        `--@@getDocumentCountStatsRequest`,
-        getDocumentCountStatsRequest(
-          { ...searchParams, trackTotalHits: false },
-          randomSamplerWrapper
-        )
-      );
       const resp = await lastValueFrom(
         data.search.search(
           {
