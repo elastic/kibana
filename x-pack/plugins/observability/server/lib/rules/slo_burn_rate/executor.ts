@@ -16,7 +16,7 @@ import { LifecycleRuleExecutor } from '@kbn/rule-registry-plugin/server';
 import { ExecutorType } from '@kbn/alerting-plugin/server';
 import { IBasePath } from '@kbn/core/server';
 
-import { sortBy, memoize, last } from 'lodash';
+import { memoize, last } from 'lodash';
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/server';
 import { SLO_ID_FIELD, SLO_REVISION_FIELD } from '../../../../common/field_names/infra_metrics';
 import { Duration, SLO, toDurationUnit } from '../../../domain/models';
@@ -73,8 +73,7 @@ async function evaluate(slo: SLO, summaryClient: DefaultSLIClient, params: BurnR
     const evalWindow = memoize(async (windowDef: WindowSchema) =>
       evaluateWindow(slo, summaryClient, windowDef)
     );
-    const sortedWindows = sortBy(params.windows, (windowDef) => windowDef.longWindow.value);
-    for (const windowDef of sortedWindows) {
+    for (const windowDef of params.windows) {
       const result = await evalWindow(windowDef);
       if (result.shouldAlert) {
         return result;
