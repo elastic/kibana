@@ -601,11 +601,7 @@ export const DiscoverGrid = ({
           data-title={searchTitle}
           data-description={searchDescription}
           data-document-number={displayedRows.length}
-          className={classnames(
-            className,
-            'dscDiscoverGrid__table',
-            'dscDiscoverGrid__documentsMode'
-          )}
+          className={classnames(className, 'dscDiscoverGrid__table')}
         >
           <EuiDataGridMemoized
             aria-describedby={randomId}
