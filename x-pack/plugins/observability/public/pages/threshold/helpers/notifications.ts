@@ -14,9 +14,12 @@ export const useSourceNotifier = () => {
   const updateFailure = (message?: string) => {
     notifications.toasts.danger({
       toastLifeTimeMs: 3000,
-      title: i18n.translate('xpack.observability.threshold.rule.sourceConfiguration.updateFailureTitle', {
-        defaultMessage: 'Configuration update failed',
-      }),
+      title: i18n.translate(
+        'xpack.observability.threshold.rule.sourceConfiguration.updateFailureTitle',
+        {
+          defaultMessage: 'Configuration update failed',
+        }
+      ),
       body: [
         i18n.translate('xpack.observability.threshold.rule.sourceConfiguration.updateFailureBody', {
           defaultMessage:
@@ -32,9 +35,12 @@ export const useSourceNotifier = () => {
   const updateSuccess = () => {
     notifications.toasts.success({
       toastLifeTimeMs: 3000,
-      title: i18n.translate('xpack.observability.threshold.rule.sourceConfiguration.updateSuccessTitle', {
-        defaultMessage: 'Metrics settings successfully updated',
-      }),
+      title: i18n.translate(
+        'xpack.observability.threshold.rule.sourceConfiguration.updateSuccessTitle',
+        {
+          defaultMessage: 'Metrics settings successfully updated',
+        }
+      ),
     });
   };
 
