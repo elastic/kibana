@@ -257,9 +257,9 @@ List of proxies to access {fleet-server} that are configured when the {fleet} ap
   `certificate_authorities`::: 
     Certificate authority (CA) used to issue the certificate.
   `certificate`::: 
-    The name of the certificate to use to validate the proxy.
+    The name of the certificate used to authenticate the proxy.
   `certificate_key`::: 
-    Hash pin used for certificate verification. The pin is a base64-encoded string of the SHA-256 fingerprint.
+    The certificate key used to authenticate the proxy.
 =====
 
 `xpack.fleet.enableExperimental`::
