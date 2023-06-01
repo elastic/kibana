@@ -26,10 +26,18 @@ export const tooltipProps = {
 export const NUM_BUCKETS = 20;
 
 export const TIME_LABELS = {
-  s: i18n.translate('xpack.infra.alerts.timeLabels.seconds', { defaultMessage: 'seconds' }),
-  m: i18n.translate('xpack.infra.alerts.timeLabels.minutes', { defaultMessage: 'minutes' }),
-  h: i18n.translate('xpack.infra.alerts.timeLabels.hours', { defaultMessage: 'hours' }),
-  d: i18n.translate('xpack.infra.alerts.timeLabels.days', { defaultMessage: 'days' }),
+  s: i18n.translate('xpack.observability.threshold.rule..timeLabels.seconds', {
+    defaultMessage: 'seconds',
+  }),
+  m: i18n.translate('xpack.observability.threshold.rule..timeLabels.minutes', {
+    defaultMessage: 'minutes',
+  }),
+  h: i18n.translate('xpack.observability.threshold.rule..timeLabels.hours', {
+    defaultMessage: 'hours',
+  }),
+  d: i18n.translate('xpack.observability.threshold.rule..timeLabels.days', {
+    defaultMessage: 'days',
+  }),
 };
 
 export const useDateFormatter = (xMin?: number, xMax?: number) => {
@@ -107,7 +115,7 @@ export function NoDataState() {
     <EmptyContainer>
       <EuiText color="subdued" data-test-subj="noChartData">
         <FormattedMessage
-          id="xpack.infra.alerts.charts.noDataMessage"
+          id="xpack.observability.threshold.rule..charts.noDataMessage"
           defaultMessage="No chart data available"
         />
       </EuiText>
@@ -130,7 +138,7 @@ export function ErrorState() {
     <EmptyContainer>
       <EuiText color="subdued" data-test-subj="chartErrorState">
         <FormattedMessage
-          id="xpack.infra.alerts.charts.errorMessage"
+          id="xpack.observability.threshold.rule..charts.errorMessage"
           defaultMessage="Uh oh, something went wrong"
         />
       </EuiText>

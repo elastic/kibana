@@ -8,33 +8,39 @@
 import { i18n } from '@kbn/i18n';
 
 export const EQUATION_HELP_MESSAGE = i18n.translate(
-  'xpack.infra.metrics.alertFlyout.customEquationEditor.equationHelpMessage',
+  'xpack.observability.threshold.rule.alertFlyout.customEquationEditor.equationHelpMessage',
   { defaultMessage: 'Supports basic math expressions' }
 );
 
 export const LABEL_LABEL = i18n.translate(
-  'xpack.infra.metrics.alertFlyout.customEquationEditor.labelLabel',
+  'xpack.observability.threshold.rule.alertFlyout.customEquationEditor.labelLabel',
   { defaultMessage: 'Label (optional)' }
 );
 
 export const LABEL_HELP_MESSAGE = i18n.translate(
-  'xpack.infra.metrics.alertFlyout.customEquationEditor.labelHelpMessage',
+  'xpack.observability.threshold.rule.alertFlyout.customEquationEditor.labelHelpMessage',
   {
     defaultMessage: 'Custom label will show on the alert chart and in reason/alert title',
   }
 );
 
-export const CUSTOM_EQUATION = i18n.translate('xpack.infra.metrics.alertFlyout.customEquation', {
-  defaultMessage: 'Custom equation',
-});
+export const CUSTOM_EQUATION = i18n.translate(
+  'xpack.observability.threshold.rule.alertFlyout.customEquation',
+  {
+    defaultMessage: 'Custom equation',
+  }
+);
 
 export const DELETE_LABEL = i18n.translate(
-  'xpack.infra.metrics.alertFlyout.customEquationEditor.deleteRowButton',
+  'xpack.observability.threshold.rule.alertFlyout.customEquationEditor.deleteRowButton',
   { defaultMessage: 'Delete' }
 );
 
 export const AGGREGATION_LABEL = (name: string) =>
-  i18n.translate('xpack.infra.metrics.alertFlyout.customEquationEditor.aggregationLabel', {
-    defaultMessage: 'Aggregation {name}',
-    values: { name },
-  });
+  i18n.translate(
+    'xpack.observability.threshold.rule.alertFlyout.customEquationEditor.aggregationLabel',
+    {
+      defaultMessage: 'Aggregation {name}',
+      values: { name },
+    }
+  );
