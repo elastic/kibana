@@ -1032,8 +1032,9 @@ export default ({ getService }: FtrProviderContext) => {
             es,
             previewId,
             sort: [ALERT_ORIGINAL_TIME],
+            size: 1,
           });
-          expect(previewAlerts.length).to.not.eql(0);
+          expect(previewAlerts.length).to.eql(1);
           expect(previewAlerts[0]._source).to.eql({
             ...previewAlerts[0]._source,
             [ALERT_SUPPRESSION_TERMS]: [
