@@ -100,7 +100,7 @@ export const AssetsPage = ({ packageInfo }: AssetsPanelProps) => {
           return;
         }
         try {
-          const objects: AssetSOObject[] = [
+          const assetIds: AssetSOObject[] = [
             ...authorizedTransforms,
             ...(packageAttributes?.installed_kibana || []),
           ].map(({ id, type }) => ({
@@ -108,7 +108,7 @@ export const AssetsPage = ({ packageInfo }: AssetsPanelProps) => {
             type,
           }));
 
-          const response = await sendGetBulkAssets({ objects });
+          const response = await sendGetBulkAssets({ assetIds });
           setAssetsSavedObjects(response.data?.items);
         } catch (e) {
           setFetchError(e);

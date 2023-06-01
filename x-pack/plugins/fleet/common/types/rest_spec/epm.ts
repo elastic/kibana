@@ -202,8 +202,7 @@ export interface GetVerificationKeyIdResponse {
 
 export interface GetBulkAssetsRequest {
   body: {
-    objects: AssetSOObject[];
-    options?: { spaceId?: string };
+    assetIds: AssetSOObject[];
   };
 }
 

@@ -48,7 +48,7 @@ export default function (providerContext: FtrProviderContext) {
           .post(`/api/fleet/epm/bulk_assets`)
           .set('kbn-xsrf', 'xxxx')
           .send({
-            objects: [
+            assetIds: [
               {
                 type: 'dashboard',
                 id: 'sample_dashboard',
