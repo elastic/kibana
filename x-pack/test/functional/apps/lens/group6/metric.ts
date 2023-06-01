@@ -365,8 +365,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.lens.waitForVisualization('mtrVis');
       const [{ value }] = await PageObjects.lens.getMetricVisualizationData();
       expect(value).contain('blah');
+
       // Extract the numeric decimals from the value without any compact suffix like k or m
-      const decimals = (value?.split(`.`)[1] || '').match(/(\d)+/)?.[1];
+      const decimals = (value?.split(`.`)[1] || '').match(/(\d)+/)?.[0];
       expect(decimals).have.length(3);
     });
   });

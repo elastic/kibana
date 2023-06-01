@@ -62,7 +62,7 @@ function enhanceFieldFormat(serializedFieldFormat: SerializedFieldFormat | undef
       },
     };
   }
-  return serializedFieldFormat;
+  return serializedFieldFormat ?? { id: formatId };
 }
 
 const getMetricFormatter = (
