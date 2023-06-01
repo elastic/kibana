@@ -6,6 +6,7 @@
   "include": [
     "public/**/*",
     "server/**/*",
+    "*.ts",
   ],
   "kbn_references": [
     "@kbn/kibana-react-plugin",
