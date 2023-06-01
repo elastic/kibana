@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import {
-  IUiSettingsClient,
-  HttpSetup,
-  CoreStart,
-} from '@kbn/core/public';
+import { IUiSettingsClient, HttpSetup, CoreStart } from '@kbn/core/public';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import type {
   ExpressionAstExpressionBuilder,
