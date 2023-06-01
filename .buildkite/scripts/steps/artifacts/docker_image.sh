@@ -13,7 +13,7 @@ echo "--- Verify manifest does not already exist"
 echo "$KIBANA_DOCKER_PASSWORD" | docker login -u "$KIBANA_DOCKER_USERNAME" --password-stdin docker.elastic.co
 trap 'docker logout docker.elastic.co' EXIT
 
-if docker manifest inspect $KIBANA_IMAGE_OUTPUT &> /dev/null; then
+if docker manifest inspect $KIBANA_IMAGE &> /dev/null; then
   echo "Manifest already exists, exiting"
   exit 1
 fi
