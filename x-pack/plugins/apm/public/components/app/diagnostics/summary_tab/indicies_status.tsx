@@ -7,15 +7,16 @@
 
 import React from 'react';
 import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
+import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { useApmRouter } from '../../../../hooks/use_apm_router';
 import { useDiagnosticsContext } from '../context/use_diagnostics';
-import { getIndicesItems } from '../indices_tab';
+
+type DiagnosticsBundle = APIReturnType<'GET /internal/apm/diagnostics'>;
 
 export function FieldMappingStatus() {
   const router = useApmRouter();
-  const { diagnosticsBundle, status } = useDiagnosticsContext();
-
-  const isOk = getIndicesItems(diagnosticsBundle).invalidItems.length === 0;
+  const { diagnosticsBundle } = useDiagnosticsContext();
+  const isOk = getIndicesTabStatus(diagnosticsBundle);
 
   return (
     <EuiFlexGroup>
@@ -41,4 +42,8 @@ export function FieldMappingStatus() {
       </EuiFlexItem>
     </EuiFlexGroup>
   );
+}
+
+export function getIndicesTabStatus(diagnosticsBundle?: DiagnosticsBundle) {
+  return diagnosticsBundle?.invalidIndices.length === 0;
 }

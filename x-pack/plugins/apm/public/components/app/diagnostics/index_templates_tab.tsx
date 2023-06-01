@@ -17,8 +17,6 @@ import React from 'react';
 import { APIReturnType } from '../../../services/rest/create_call_apm_api';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { useDiagnosticsContext } from './context/use_diagnostics';
-import { getApmIndexTemplatePrefixes } from './helpers';
-import { getIsNonStandardIndexTemplate } from './index_pattern_settings_tab';
 
 type DiagnosticsBundle = APIReturnType<'GET /internal/apm/diagnostics'>;
 
@@ -29,25 +27,36 @@ export function DiagnosticsIndexTemplates() {
     return <EuiLoadingElastic size="m" />;
   }
 
-  const items = getIndexTemplateItems(diagnosticsBundle);
-
+  const items = diagnosticsBundle?.apmIndexTemplates ?? [];
   const columns: Array<EuiBasicTableColumn<typeof items[0]>> = [
     {
       name: 'Index template name',
       field: 'name',
       render: (_, item) => {
-        return item.matchingIndexTemplate?.name || item.prefix;
+        return item.name || item.prefix;
       },
       truncateText: true,
     },
     {
       name: 'Exists',
       field: 'exists',
-      render: (_, { matchingIndexTemplate }) => {
-        return matchingIndexTemplate ? (
+      render: (_, { exists }) => {
+        return exists ? (
           <EuiBadge color="green">OK</EuiBadge>
         ) : (
           <EuiBadge color="danger">Not found</EuiBadge>
+        );
+      },
+      truncateText: true,
+    },
+    {
+      name: 'Standard',
+      field: 'isNonStandard',
+      render: (_, { isNonStandard }) => {
+        return isNonStandard ? (
+          <EuiBadge color="warning">Non standard</EuiBadge>
+        ) : (
+          <EuiBadge color="green">OK</EuiBadge>
         );
       },
       truncateText: true,
@@ -74,40 +83,15 @@ export function DiagnosticsIndexTemplates() {
   );
 }
 
-export function getIndexTemplateItems(diagnosticsBundle?: DiagnosticsBundle) {
-  const apmIndexTemplatePrefix = getApmIndexTemplatePrefixes();
-  return apmIndexTemplatePrefix.map((indexTemplatePrefix) => {
-    const matchingIndexTemplate =
-      diagnosticsBundle?.existingIndexTemplates.index_templates.find(
-        ({ name }) => name.startsWith(indexTemplatePrefix)
-      );
-
-    return {
-      prefix: indexTemplatePrefix,
-      matchingIndexTemplate,
-    };
-  });
-}
-
-function getNonStandardIndexTemplates(diagnosticsBundle?: DiagnosticsBundle) {
-  return diagnosticsBundle?.indexTemplatesByIndexPattern?.flatMap(
-    ({ indexTemplates }) => {
-      return indexTemplates
-        ?.filter(({ templateName }) =>
-          getIsNonStandardIndexTemplate(templateName)
-        )
-        .map(({ templateName }) => templateName);
-    }
-  );
-}
-
 function NonStandardIndexTemplateCalout({
   diagnosticsBundle,
 }: {
   diagnosticsBundle?: DiagnosticsBundle;
 }) {
   const nonStandardIndexTemplates =
-    getNonStandardIndexTemplates(diagnosticsBundle);
+    diagnosticsBundle?.apmIndexTemplates?.filter(
+      ({ isNonStandard }) => isNonStandard
+    );
 
   if (!nonStandardIndexTemplates?.length) {
     return null;
@@ -122,7 +106,7 @@ function NonStandardIndexTemplateCalout({
       >
         The following index templates do not follow the recommended naming
         scheme:{' '}
-        {nonStandardIndexTemplates.map((name) => (
+        {nonStandardIndexTemplates.map(({ name }) => (
           <EuiBadge>{name}</EuiBadge>
         ))}
       </EuiCallOut>

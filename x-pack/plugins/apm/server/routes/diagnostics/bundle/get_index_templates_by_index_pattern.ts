@@ -9,8 +9,9 @@ import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { IndicesSimulateTemplateResponse } from '@elastic/elasticsearch/lib/api/types';
 import { orderBy } from 'lodash';
 import { ApmIndicesConfig } from '../../settings/apm_indices/get_apm_indices';
-import { getApmIndexPatterns } from '../indices/get_indices';
-import { getIndexTemplate } from '../index_templates/get_index_template';
+import { getApmIndexPatterns } from './get_indices';
+import { getIndexTemplate } from './get_index_template';
+import { getApmIndexTemplatePrefixes } from '../get_apm_index_template_prefixes';
 
 export async function getIndexTemplatesByIndexPattern({
   esClient,
@@ -51,7 +52,9 @@ async function getSimulatedIndexTemplateForIndexPattern({
     (simulatedIndexTemplate.overlapping ?? []).map(
       async ({ index_patterns: templateIndexPatterns, name: templateName }) => {
         const priority = await getTemplatePriority(esClient, templateName);
+        const isNonStandard = getIsNonStandardIndexTemplate(templateName);
         return {
+          isNonStandard,
           priority,
           templateIndexPatterns,
           templateName,
@@ -72,4 +75,18 @@ async function getTemplatePriority(
 ) {
   const res = await getIndexTemplate(esClient, { name });
   return res.index_templates[0]?.index_template?.priority;
+}
+
+function getIsNonStandardIndexTemplate(templateName: string) {
+  const apmIndexTemplatePrefixes = getApmIndexTemplatePrefixes();
+  const stackIndexTemplatePrefixes = ['logs', 'metrics'];
+  const isNonStandard = [
+    ...apmIndexTemplatePrefixes,
+    ...stackIndexTemplatePrefixes,
+  ].every((prefix) => {
+    const notMatch = !templateName.startsWith(prefix);
+    return notMatch;
+  });
+
+  return isNonStandard;
 }

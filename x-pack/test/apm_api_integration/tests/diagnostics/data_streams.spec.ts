@@ -26,16 +26,17 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         await es.indices.deleteDataStream({ name: '*apm*' });
       });
 
-      it('returns data streams`', async () => {
-        const { status, body } = await apmApiClient.readUser({
-          endpoint: 'GET /internal/apm/diagnostics/data_streams',
+      it('returns zero data streams`', async () => {
+        const { status, body } = await apmApiClient.adminUser({
+          endpoint: 'GET /internal/apm/diagnostics',
         });
         expect(status).to.be(200);
         expect(body.dataStreams).to.eql(undefined);
       });
-      it('returns non-data stream indices`', async () => {
-        const { status, body } = await apmApiClient.readUser({
-          endpoint: 'GET /internal/apm/diagnostics/data_streams',
+
+      it('returns zero non-data stream indices`', async () => {
+        const { status, body } = await apmApiClient.adminUser({
+          endpoint: 'GET /internal/apm/diagnostics',
         });
         expect(status).to.be(200);
         expect(body.nonDataStreamIndices).to.eql([]);
@@ -67,9 +68,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       after(() => synthtraceEsClient.clean());
 
-      it('returns data streams', async () => {
-        const { status, body } = await apmApiClient.readUser({
-          endpoint: 'GET /internal/apm/diagnostics/data_streams',
+      it('returns 5 data streams', async () => {
+        const { status, body } = await apmApiClient.adminUser({
+          endpoint: 'GET /internal/apm/diagnostics',
         });
         expect(status).to.be(200);
         expect(body.dataStreams).to.eql([
@@ -87,9 +88,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         ]);
       });
 
-      it('returns non data stream indices', async () => {
-        const { status, body } = await apmApiClient.readUser({
-          endpoint: 'GET /internal/apm/diagnostics/data_streams',
+      it('returns zero non-data stream indices', async () => {
+        const { status, body } = await apmApiClient.adminUser({
+          endpoint: 'GET /internal/apm/diagnostics',
         });
         expect(status).to.be(200);
         expect(body.nonDataStreamIndices).to.eql([]);

@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { apm, timerange } from '@kbn/apm-synthtrace-client';
-import { getApmIndexTemplatePrefixes } from '@kbn/apm-plugin/common/diagnostics/get_default_index_template_names';
+import { getApmIndexTemplatePrefixes } from '@kbn/apm-plugin/server/routes/diagnostics/get_apm_index_template_prefixes';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
@@ -29,10 +29,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       it('verifies that none of the default APM index templates exists`', async () => {
         const { status, body } = await apmApiClient.adminUser({
-          endpoint: 'GET /internal/apm/diagnostics/index_templates',
+          endpoint: 'GET /internal/apm/diagnostics',
         });
         expect(status).to.be(200);
-        const noApmIndexTemplateExists = Object.values(body.defaultApmIndexTemplateStates).every(
+        const noApmIndexTemplateExists = body.apmIndexTemplates.every(
           ({ exists }) => exists === false
         );
         expect(noApmIndexTemplateExists).to.eql(true);
@@ -65,11 +65,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       it('verifies that all the default APM index templates exist', async () => {
         const { status, body } = await apmApiClient.adminUser({
-          endpoint: 'GET /internal/apm/diagnostics/index_templates',
+          endpoint: 'GET /internal/apm/diagnostics',
         });
         expect(status).to.be(200);
 
-        const everyApmIndexTemplateExists = Object.values(body.defaultApmIndexTemplateStates).every(
+        const everyApmIndexTemplateExists = body.apmIndexTemplates.every(
           ({ exists }) => exists === true
         );
 

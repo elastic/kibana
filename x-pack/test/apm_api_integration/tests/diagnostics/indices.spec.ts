@@ -24,12 +24,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     describe('When there is no data', () => {
       it('returns empty response`', async () => {
         const { status, body } = await apmApiClient.adminUser({
-          endpoint: 'GET /internal/apm/diagnostics/indices',
+          endpoint: 'GET /internal/apm/diagnostics',
         });
 
         expect(status).to.be(200);
-        expect(body.validItems).to.eql([]);
-        expect(body.invalidItems).to.eql([]);
+        expect(body.validIndices).to.eql([]);
+        expect(body.invalidIndices).to.eql([]);
       });
     });
 
@@ -57,12 +57,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       it('returns empty response', async () => {
         const { status, body } = await apmApiClient.adminUser({
-          endpoint: 'GET /internal/apm/diagnostics/indices',
+          endpoint: 'GET /internal/apm/diagnostics',
         });
 
         expect(status).to.be(200);
-        expect(body.validItems.length).to.be.greaterThan(0);
-        expect(body.invalidItems).to.eql([]);
+        expect(body.validIndices.length).to.be.greaterThan(0);
+        expect(body.invalidIndices).to.eql([]);
       });
     });
 
@@ -98,12 +98,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       it('returns a list of items with mapping issues', async () => {
         const { status, body } = await apmApiClient.adminUser({
-          endpoint: 'GET /internal/apm/diagnostics/indices',
+          endpoint: 'GET /internal/apm/diagnostics',
         });
 
         expect(status).to.be(200);
-        expect(body.validItems.length).to.be.greaterThan(0);
-        expect(body.invalidItems).to.eql([
+        expect(body.validIndices.length).to.be.greaterThan(0);
+        expect(body.invalidIndices).to.eql([
           {
             isValid: false,
             fieldMappings: { isValid: false, invalidType: 'text' },
@@ -154,14 +154,14 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         it('returns the item without an ingest pipeline', async () => {
           const { status, body } = await apmApiClient.adminUser({
-            endpoint: 'GET /internal/apm/diagnostics/indices',
+            endpoint: 'GET /internal/apm/diagnostics',
           });
 
           expect(status).to.be(200);
-          expect(body.validItems.length).to.be.greaterThan(0);
-          expect(body.invalidItems.length).to.be(1);
+          expect(body.validIndices.length).to.be.greaterThan(0);
+          expect(body.invalidIndices.length).to.be(1);
 
-          expect(omit(body.invalidItems[0], 'index')).to.eql({
+          expect(omit(body.invalidIndices[0], 'index')).to.eql({
             isValid: false,
             fieldMappings: { isValid: true },
             ingestPipeline: { isValid: false },
@@ -183,13 +183,13 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         it('returns the item without an ingest pipeline', async () => {
           const { status, body } = await apmApiClient.adminUser({
-            endpoint: 'GET /internal/apm/diagnostics/indices',
+            endpoint: 'GET /internal/apm/diagnostics',
           });
 
           expect(status).to.be(200);
-          expect(body.validItems.length).to.be.greaterThan(0);
-          expect(body.invalidItems.length).to.be(1);
-          expect(omit(body.invalidItems[0], 'index')).to.eql({
+          expect(body.validIndices.length).to.be.greaterThan(0);
+          expect(body.invalidIndices.length).to.be(1);
+          expect(omit(body.invalidIndices[0], 'index')).to.eql({
             isValid: false,
             fieldMappings: { isValid: true },
             ingestPipeline: { isValid: false, id: 'logs-default-pipeline' },

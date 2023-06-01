@@ -14,7 +14,7 @@ export type ApmIndexTemplateStates = Record<
 >;
 
 // Check whether the default APM index templates exist
-export async function getApmIndexTemplates({
+export async function getExistingApmIndexTemplates({
   esClient,
 }: {
   esClient: ElasticsearchClient;

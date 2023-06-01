@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { apm, timerange } from '@kbn/apm-synthtrace-client';
-import { getApmIndexTemplatePrefixes } from '@kbn/apm-plugin/common/diagnostics/get_default_index_template_names';
+import { getApmIndexTemplatePrefixes } from '@kbn/apm-plugin/server/routes/diagnostics/get_apm_index_template_prefixes';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
@@ -29,7 +29,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       it('returns the built-in (non-APM) index templates`', async () => {
         const { status, body } = await apmApiClient.adminUser({
-          endpoint: 'GET /internal/apm/diagnostics/index_pattern_settings',
+          endpoint: 'GET /internal/apm/diagnostics',
         });
         expect(status).to.be(200);
 
@@ -67,7 +67,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       it('returns APM index templates', async () => {
         const { status, body } = await apmApiClient.adminUser({
-          endpoint: 'GET /internal/apm/diagnostics/index_pattern_settings',
+          endpoint: 'GET /internal/apm/diagnostics',
         });
         expect(status).to.be(200);
 

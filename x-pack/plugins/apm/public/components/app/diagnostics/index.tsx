@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { Outlet } from '@kbn/typed-react-router-config';
 import React from 'react';
-import { EuiButton, EuiCallOut } from '@elastic/eui';
+import { EuiButton, EuiCallOut, EuiIcon } from '@elastic/eui';
 import { useApmRouter } from '../../../hooks/use_apm_router';
 import { useApmRoutePath } from '../../../hooks/use_apm_route_path';
 import { DiagnosticsSummary } from './summary_tab';
@@ -16,10 +16,16 @@ import { ApmMainTemplate } from '../../routing/templates/apm_main_template';
 import { DiagnosticsIndexTemplates } from './index_templates_tab';
 import { DiagnosticsIndices } from './indices_tab';
 import { DiagnosticsDataStreams } from './data_stream_tab';
-import { DiagnosticsIndexPatternSettings } from './index_pattern_settings_tab';
+import {
+  DiagnosticsIndexPatternSettings,
+  getIndexPatternTabStatus,
+} from './index_pattern_settings_tab';
 import { DiagnosticsImportExport } from './import_export_tab';
 import { DiagnosticsContextProvider } from './context/diagnostics_context';
 import { useDiagnosticsContext } from './context/use_diagnostics';
+import { getIndexTemplateStatus } from './summary_tab/index_templates_status';
+import { getDataStreamTabStatus } from './summary_tab/data_streams_status';
+import { getIndicesTabStatus } from './summary_tab/indicies_status';
 
 export const diagnosticsRoute = {
   '/diagnostics': {
@@ -56,6 +62,7 @@ export const diagnosticsRoute = {
 function DiagnosticsTemplate({ children }: { children: React.ReactChild }) {
   const routePath = useApmRoutePath();
   const router = useApmRouter();
+  const { diagnosticsBundle } = useDiagnosticsContext();
 
   return (
     <ApmMainTemplate
@@ -76,6 +83,9 @@ function DiagnosticsTemplate({ children }: { children: React.ReactChild }) {
             isSelected: routePath === '/diagnostics',
           },
           {
+            prepend: !getIndexPatternTabStatus(diagnosticsBundle) && (
+              <EuiIcon type="warning" color="red" />
+            ),
             href: router.link('/diagnostics/index-pattern-settings'),
             label: i18n.translate(
               'xpack.apm.diagnostics.tab.index_pattern_settings',
@@ -86,6 +96,9 @@ function DiagnosticsTemplate({ children }: { children: React.ReactChild }) {
             isSelected: routePath === '/diagnostics/index-pattern-settings',
           },
           {
+            prepend: !getIndexTemplateStatus(diagnosticsBundle) && (
+              <EuiIcon type="warning" color="red" />
+            ),
             href: router.link('/diagnostics/index-templates'),
             label: i18n.translate('xpack.apm.diagnostics.tab.index_templates', {
               defaultMessage: 'Index templates',
@@ -93,6 +106,9 @@ function DiagnosticsTemplate({ children }: { children: React.ReactChild }) {
             isSelected: routePath === '/diagnostics/index-templates',
           },
           {
+            prepend: !getDataStreamTabStatus(diagnosticsBundle) && (
+              <EuiIcon type="warning" color="red" />
+            ),
             href: router.link('/diagnostics/data-streams'),
             label: i18n.translate('xpack.apm.diagnostics.tab.datastreams', {
               defaultMessage: 'Data streams',
@@ -100,6 +116,9 @@ function DiagnosticsTemplate({ children }: { children: React.ReactChild }) {
             isSelected: routePath === '/diagnostics/data-streams',
           },
           {
+            prepend: !getIndicesTabStatus(diagnosticsBundle) && (
+              <EuiIcon type="warning" color="red" />
+            ),
             href: router.link('/diagnostics/indices'),
             label: i18n.translate('xpack.apm.diagnostics.tab.indices', {
               defaultMessage: 'Indices',
@@ -122,8 +141,8 @@ function DiagnosticsTemplate({ children }: { children: React.ReactChild }) {
 }
 
 function TemplateDescription() {
-  const { isUploaded } = useDiagnosticsContext();
-  if (isUploaded) {
+  const { isImported } = useDiagnosticsContext();
+  if (isImported) {
     return (
       <EuiCallOut
         title="Displaying results from the uploaded diagnostics report"
@@ -136,10 +155,10 @@ function TemplateDescription() {
 }
 
 function RefreshButton() {
-  const { isUploaded, refetch } = useDiagnosticsContext();
+  const { isImported, refetch } = useDiagnosticsContext();
   return (
     <EuiButton
-      isDisabled={isUploaded}
+      isDisabled={isImported}
       data-test-subj="apmDiagnosticsTemplateAddSomethingButton"
       fill
       onClick={refetch}

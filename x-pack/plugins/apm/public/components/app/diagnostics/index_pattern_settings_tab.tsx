@@ -14,10 +14,12 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import React from 'react';
+import { APIReturnType } from '../../../services/rest/create_call_apm_api';
 import { useApmRouter } from '../../../hooks/use_apm_router';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { useDiagnosticsContext } from './context/use_diagnostics';
-import { getApmIndexTemplatePrefixes } from './helpers';
+
+type DiagnosticsBundle = APIReturnType<'GET /internal/apm/diagnostics'>;
 
 export function DiagnosticsIndexPatternSettings() {
   const router = useApmRouter();
@@ -48,15 +50,21 @@ export function DiagnosticsIndexPatternSettings() {
           {!indexTemplates?.length && <em>No matching index templates</em>}
 
           {indexTemplates?.map(
-            ({ templateName, templateIndexPatterns, priority }) => {
-              const isNonStandard = getIsNonStandardIndexTemplate(templateName);
-
+            ({
+              templateName,
+              templateIndexPatterns,
+              priority,
+              isNonStandard,
+            }) => {
+              const text = priority
+                ? `(Priority: ${priority})`
+                : isNonStandard
+                ? `(legacy template)`
+                : '';
               return (
                 <EuiToolTip
                   key={templateName}
-                  content={`${templateIndexPatterns.join(
-                    ', '
-                  )} (Priority: ${priority})`}
+                  content={`${templateIndexPatterns.join(', ')} ${text}`}
                 >
                   <EuiBadge
                     color={isNonStandard ? 'warning' : 'hollow'}
@@ -94,16 +102,17 @@ export function DiagnosticsIndexPatternSettings() {
   );
 }
 
-export function getIsNonStandardIndexTemplate(templateName: string) {
-  const apmIndexTemplatePrefixes = getApmIndexTemplatePrefixes();
-  const stackIndexTemplatePrefixes = ['logs', 'metrics'];
-  const isNonStandard = [
-    ...apmIndexTemplatePrefixes,
-    ...stackIndexTemplatePrefixes,
-  ].every((prefix) => {
-    const notMatch = !templateName.startsWith(prefix);
-    return notMatch;
-  });
+export function getIndexPatternTabStatus(
+  diagnosticsBundle?: DiagnosticsBundle
+) {
+  if (!diagnosticsBundle) {
+    return true;
+  }
 
-  return isNonStandard;
+  const hasError = diagnosticsBundle.indexTemplatesByIndexPattern.some(
+    ({ indexTemplates }) =>
+      indexTemplates.some(({ isNonStandard }) => isNonStandard)
+  );
+
+  return !hasError;
 }

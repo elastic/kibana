@@ -14,13 +14,13 @@ import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { useDiagnosticsContext } from '../context/use_diagnostics';
 
 export function ApmIntegrationPackageStatus() {
-  const { diagnosticsBundle, status, isUploaded } = useDiagnosticsContext();
+  const { diagnosticsBundle, status, isImported } = useDiagnosticsContext();
   const { core } = useApmPluginContext();
   const { basePath } = core.http;
 
   const isLoading = status === FETCH_STATUS.LOADING;
-  const isInstalled = diagnosticsBundle?.packageInfo.isInstalled;
-  const packageVersion = diagnosticsBundle?.packageInfo.version;
+  const isInstalled = diagnosticsBundle?.fleetPackageInfo.isInstalled;
+  const packageVersion = diagnosticsBundle?.fleetPackageInfo.version;
 
   return (
     <EuiFlexGroup>
@@ -45,7 +45,7 @@ export function ApmIntegrationPackageStatus() {
           ? `APM integration (${packageVersion})`
           : 'APM integration: not installed'}
 
-        {!isUploaded ? (
+        {!isImported ? (
           <EuiLink
             data-test-subj="apmDiagnosticsSummaryFasLink"
             href={basePath.prepend('/app/integrations/detail/apm/overview')}

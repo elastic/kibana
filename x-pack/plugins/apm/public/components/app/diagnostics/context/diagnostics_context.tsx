@@ -13,13 +13,13 @@ type DiagnosticsBundle = APIReturnType<'GET /internal/apm/diagnostics'>;
 
 export const DiagnosticsContext = React.createContext<{
   diagnosticsBundle?: DiagnosticsBundle;
-  setUploadedDiagnosticsBundle: (bundle: DiagnosticsBundle | undefined) => void;
+  setImportedDiagnosticsBundle: (bundle: DiagnosticsBundle | undefined) => void;
   status: FETCH_STATUS;
-  isUploaded?: boolean;
+  isImported?: boolean;
   refetch: () => void;
 }>({
   diagnosticsBundle: undefined,
-  setUploadedDiagnosticsBundle: () => undefined,
+  setImportedDiagnosticsBundle: () => undefined,
   status: FETCH_STATUS.NOT_INITIATED,
   refetch: () => undefined,
 });
@@ -33,31 +33,31 @@ export function DiagnosticsContextProvider({
     return callApmApi(`GET /internal/apm/diagnostics`);
   }, []);
 
-  const [uploadedDiagnosticsBundle, setUploadedDiagnosticsBundle] = useState<
+  const [importedDiagnosticsBundle, setImportedDiagnosticsBundle] = useState<
     DiagnosticsBundle | undefined
   >(undefined);
 
   const value = useMemo(() => {
-    if (uploadedDiagnosticsBundle) {
+    if (importedDiagnosticsBundle) {
       return {
         refetch,
-        diagnosticsBundle: uploadedDiagnosticsBundle,
-        setUploadedDiagnosticsBundle,
+        diagnosticsBundle: importedDiagnosticsBundle,
+        setImportedDiagnosticsBundle,
         status: FETCH_STATUS.SUCCESS,
-        isUploaded: true,
+        isImported: true,
       };
     }
 
     return {
       refetch,
       diagnosticsBundle: data,
-      setUploadedDiagnosticsBundle,
+      setImportedDiagnosticsBundle,
       status,
-      isUploaded: false,
+      isImported: false,
     };
   }, [
-    uploadedDiagnosticsBundle,
-    setUploadedDiagnosticsBundle,
+    importedDiagnosticsBundle,
+    setImportedDiagnosticsBundle,
     status,
     data,
     refetch,

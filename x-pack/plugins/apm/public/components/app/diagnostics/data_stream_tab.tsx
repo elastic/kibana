@@ -10,49 +10,26 @@ import {
   EuiBadge,
   EuiBasicTable,
   EuiBasicTableColumn,
-  EuiCallOut,
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
 import React from 'react';
 import { APIReturnType } from '../../../services/rest/create_call_apm_api';
 import { useDiagnosticsContext } from './context/use_diagnostics';
-import { getIsValidIndexTemplateName } from './helpers';
 
 type DiagnosticsBundle = APIReturnType<'GET /internal/apm/diagnostics'>;
 
 export function DiagnosticsDataStreams() {
-  const { diagnosticsBundle, status } = useDiagnosticsContext();
+  const { diagnosticsBundle } = useDiagnosticsContext();
 
   return (
     <>
-      <NonDataStreamIndicesCallout data={diagnosticsBundle} />
-
       <EuiText>
         This section shows the APM data streams and their underlying index
         template.
       </EuiText>
       <EuiSpacer />
       <DataStreamsTable data={diagnosticsBundle} />
-    </>
-  );
-}
-
-function NonDataStreamIndicesCallout({ data }: { data?: DiagnosticsBundle }) {
-  if (!data?.nonDataStreamIndices.length) {
-    return null;
-  }
-
-  return (
-    <>
-      <EuiCallOut title="Legacy indices" color="warning" iconType="warning">
-        The following indices are not backed by a data stream. Please consider
-        deleting them to resolve any potential issues
-        {data?.nonDataStreamIndices.map((name) => (
-          <EuiBadge>{name}</EuiBadge>
-        ))}
-      </EuiCallOut>
-      <EuiSpacer />
     </>
   );
 }
@@ -67,8 +44,9 @@ function DataStreamsTable({ data }: { data?: DiagnosticsBundle }) {
       field: 'template',
       name: 'Index template name',
       render: (templateName: string) => {
-        const isValid = getIsValidIndexTemplateName(templateName);
-        return isValid ? (
+        const isStandard =
+          data && getIsStandardIndexTemplateName(data, templateName);
+        return isStandard ? (
           <>
             {templateName}&nbsp;<EuiBadge color="green">OK</EuiBadge>
           </>
@@ -89,5 +67,14 @@ function DataStreamsTable({ data }: { data?: DiagnosticsBundle }) {
       rowHeader="firstName"
       columns={columns}
     />
+  );
+}
+
+export function getIsStandardIndexTemplateName(
+  diagnosticsBundle: DiagnosticsBundle,
+  templateName: string
+) {
+  return diagnosticsBundle.apmIndexTemplates.some(
+    ({ name, isNonStandard }) => templateName === name && !isNonStandard
   );
 }

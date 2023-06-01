@@ -7,7 +7,7 @@
 
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { ApmIndicesConfig } from '@kbn/observability-plugin/common/typings';
-import { getApmIndexPatterns } from '../indices/get_indices';
+import { getApmIndexPatterns } from './get_indices';
 
 export async function getNonDataStreamIndices({
   esClient,

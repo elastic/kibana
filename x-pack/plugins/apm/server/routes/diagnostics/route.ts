@@ -13,13 +13,8 @@ import {
   IngestGetPipelineResponse,
 } from '@elastic/elasticsearch/lib/api/types';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
-import { getApmIndexTemplates } from './index_templates/get_existing_index_templates';
-import { getIndicesAndIngestPipelines } from './indices/get_indices';
 import { getApmIndices } from '../settings/apm_indices/get_apm_indices';
-import { getIndexTemplatesByIndexPattern } from './index_pattern_settings/get_index_templates_by_index_pattern';
-import { getDataStreams } from './data_streams/get_data_streams';
-import { getNonDataStreamIndices } from './data_streams/get_non_data_stream_indices';
-import { getFieldCaps } from './indices/get_field_caps';
+import { getDiagnosticsBundle } from './get_diagnostics_bundle';
 import { getFleetPackageInfo } from './get_fleet_package_info';
 
 export interface IndiciesItem {
@@ -43,24 +38,37 @@ const getDiagnosticsRoute = createApmServerRoute({
   handler: async (
     resources
   ): Promise<{
-    packageInfo: {
+    esResponses: {
+      existingIndexTemplates: IndicesGetIndexTemplateResponse;
+      fieldCaps: FieldCapsResponse;
+      indices: IndicesGetResponse;
+      ingestPipelines: IngestGetPipelineResponse;
+    };
+    apmIndexTemplates: Array<{
+      prefix?: string;
+      name?: string;
+      isNonStandard: boolean;
+      exists: boolean;
+    }>;
+    fleetPackageInfo: {
       isInstalled: boolean;
       version?: string;
     };
+    kibanaVersion: string;
+    elasticsearchVersion: string;
+    invalidIndices: IndiciesItem[];
+    validIndices: IndiciesItem[];
     dataStreams: IndicesDataStream[];
     nonDataStreamIndices: string[];
     indexTemplatesByIndexPattern: Array<{
       indexPattern: string;
       indexTemplates: Array<{
         priority: number | undefined;
+        isNonStandard: boolean;
         templateIndexPatterns: string[];
         templateName: string;
       }>;
     }>;
-    existingIndexTemplates: IndicesGetIndexTemplateResponse;
-    fieldCaps: FieldCapsResponse;
-    indices: IndicesGetResponse;
-    ingestPipelines: IngestGetPipelineResponse;
   }> => {
     const coreContext = await resources.context.core;
     const { asCurrentUser: esClient } = coreContext.elasticsearch.client;
@@ -69,40 +77,11 @@ const getDiagnosticsRoute = createApmServerRoute({
       config: resources.config,
     });
 
-    const packageInfo = await getFleetPackageInfo(resources);
+    const bundle = await getDiagnosticsBundle(esClient, apmIndices);
+    const fleetPackageInfo = await getFleetPackageInfo(resources);
+    const kibanaVersion = resources.kibanaVersion;
 
-    const { indices, ingestPipelines } = await getIndicesAndIngestPipelines({
-      esClient,
-      apmIndices,
-    });
-
-    const indexTemplatesByIndexPattern = await getIndexTemplatesByIndexPattern({
-      esClient,
-      apmIndices,
-    });
-
-    const existingIndexTemplates = await getApmIndexTemplates({
-      esClient,
-    });
-
-    const fieldCaps = await getFieldCaps({ esClient, apmIndices });
-
-    const dataStreams = await getDataStreams({ esClient, apmIndices });
-    const nonDataStreamIndices = await getNonDataStreamIndices({
-      esClient,
-      apmIndices,
-    });
-
-    return {
-      packageInfo,
-      fieldCaps,
-      indices,
-      ingestPipelines,
-      indexTemplatesByIndexPattern,
-      existingIndexTemplates,
-      dataStreams,
-      nonDataStreamIndices,
-    };
+    return { ...bundle, fleetPackageInfo, kibanaVersion };
   },
 });
 

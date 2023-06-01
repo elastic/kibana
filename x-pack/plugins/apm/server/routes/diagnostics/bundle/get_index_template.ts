@@ -17,10 +17,12 @@ export async function getIndexTemplate(
   params: IndicesGetIndexTemplateRequest
 ): Promise<IndicesGetIndexTemplateResponse> {
   try {
-    return await esClient.indices.getIndexTemplate(params);
+    return await esClient.indices.getIndexTemplate(params, {
+      signal: new AbortController().signal,
+    });
   } catch (e) {
     if (e instanceof errors.ResponseError && e.statusCode === 404) {
-      return e.body as { index_templates: [] };
+      return { index_templates: [] };
     }
 
     throw e;

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import {
   EuiButton,
   EuiCard,
@@ -13,9 +13,14 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFilePicker,
+  EuiCallOut,
+  EuiSpacer,
 } from '@elastic/eui';
 import { APIReturnType } from '../../../services/rest/create_call_apm_api';
 import { useDiagnosticsContext } from './context/use_diagnostics';
+import { getIndexTemplateStatus } from './summary_tab/index_templates_status';
+import { getIndicesTabStatus } from './summary_tab/indicies_status';
+import { getDataStreamTabStatus } from './summary_tab/data_streams_status';
 
 type DiagnosticsBundle = APIReturnType<'GET /internal/apm/diagnostics'>;
 
@@ -23,30 +28,30 @@ export function DiagnosticsImportExport() {
   return (
     <EuiFlexGroup gutterSize="l">
       <EuiFlexItem>
-        <DownloadCard />
+        <ExportCard />
       </EuiFlexItem>
       <EuiFlexItem>
-        <UploadCard />
+        <ImportCard />
       </EuiFlexItem>
     </EuiFlexGroup>
   );
 }
 
-function DownloadCard() {
-  const { diagnosticsBundle, isUploaded } = useDiagnosticsContext();
+function ExportCard() {
+  const { diagnosticsBundle, isImported } = useDiagnosticsContext();
 
   return (
     <EuiCard
-      isDisabled={isUploaded}
+      isDisabled={isImported}
       icon={<EuiIcon size="xxl" type="importAction" />}
-      title="Download"
-      description="Download the diagnostics report in order to provide it to Elastic Support"
+      title="Export"
+      description="Export the diagnostics report in order to provide it to Elastic Support"
       footer={
         <div>
           <EuiButton
-            isDisabled={isUploaded}
+            isDisabled={isImported}
             data-test-subj="apmDiagnosticsImportExportGoForItButton"
-            aria-label="Download diagnostics report"
+            aria-label="Export diagnostics report"
             onClick={() => {
               const blob = new Blob(
                 [JSON.stringify(diagnosticsBundle, null, 2)],
@@ -62,7 +67,7 @@ function DownloadCard() {
               link.click();
             }}
           >
-            Download
+            Export
           </EuiButton>
         </div>
       }
@@ -70,56 +75,82 @@ function DownloadCard() {
   );
 }
 
-function UploadCard() {
-  const { setUploadedDiagnosticsBundle, isUploaded: isUploaded } =
-    useDiagnosticsContext();
+function ImportCard() {
+  const { setImportedDiagnosticsBundle, isImported } = useDiagnosticsContext();
+  const [importError, setImportError] = useState(false);
   return (
     <EuiCard
       icon={<EuiIcon size="xxl" type="exportAction" />}
-      title="Upload diagnostics report"
-      description="Upload a diagnostics report in order to view the results in the UI"
+      title="Import diagnostics report"
+      description="Import a diagnostics report in order to view the results in the UI"
       footer={
         <div>
-          {isUploaded ? (
+          {isImported ? (
             <EuiButton
-              onClick={() => {
-                setUploadedDiagnosticsBundle(undefined);
-              }}
-              data-test-subj="apmUploadCardRemoveReportButton"
+              data-test-subj="apmImportCardRemoveReportButton"
+              onClick={() => setImportedDiagnosticsBundle(undefined)}
               color="danger"
             >
               Remove report
             </EuiButton>
           ) : (
-            <EuiFilePicker
-              fullWidth
-              id="file-picker"
-              multiple
-              onChange={(_files) => {
-                if (_files && _files.length > 0) {
-                  const file = Array.from(_files)[0];
-                  const reader = new FileReader();
-                  reader.onload = (evt: ProgressEvent<FileReader>) => {
-                    try {
-                      const content = JSON.parse(
-                        // @ts-ignore
-                        evt?.target?.result
-                      ) as DiagnosticsBundle;
-                      setUploadedDiagnosticsBundle(content);
-                    } catch (e) {
-                      console.error(
-                        `Could not parse file ${file.name}. ${e.message}`
-                      );
-                    }
-                  };
+            <>
+              {importError && (
+                <>
+                  <EuiCallOut color="danger" iconType="warning">
+                    The uploaded file could not be parsed
+                  </EuiCallOut>
+                  <EuiSpacer />
+                </>
+              )}
+              <EuiFilePicker
+                fullWidth
+                id="file-picker"
+                multiple
+                onChange={(_files) => {
+                  setImportError(false);
 
-                  reader.readAsText(file);
-                }
-              }}
-            />
+                  if (_files && _files.length > 0) {
+                    const file = Array.from(_files)[0];
+                    const reader = new FileReader();
+                    reader.onload = (evt: ProgressEvent<FileReader>) => {
+                      try {
+                        const diagnosticsBundle = JSON.parse(
+                          // @ts-expect-error
+                          evt?.target?.result
+                        ) as DiagnosticsBundle;
+
+                        if (isBundleValid(diagnosticsBundle)) {
+                          setImportedDiagnosticsBundle(diagnosticsBundle);
+                        } else {
+                          setImportError(true);
+                        }
+                      } catch (e) {
+                        console.error(
+                          `Could not parse file ${file.name}. ${e.message}`
+                        );
+                      }
+                    };
+
+                    reader.readAsText(file);
+                  }
+                }}
+              />
+            </>
           )}
         </div>
       }
     />
   );
+}
+
+function isBundleValid(diagnosticsBundle: DiagnosticsBundle) {
+  try {
+    getIndexTemplateStatus(diagnosticsBundle);
+    getIndicesTabStatus(diagnosticsBundle);
+    getDataStreamTabStatus(diagnosticsBundle);
+    return true;
+  } catch (e) {
+    return false;
+  }
 }
