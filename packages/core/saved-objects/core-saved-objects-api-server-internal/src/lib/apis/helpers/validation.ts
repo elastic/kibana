@@ -94,13 +94,14 @@ export class ValidationHelper {
     }
     const validator = this.getTypeValidator(type);
     try {
-      validator.validate(doc);
-      // validator.validate(doc, this.kibanaVersion);
+      // validator.validate(doc);
+      // this change caused the repo test for create to not throw.
+      validator.validate(doc, this.kibanaVersion);
     } catch (error) {
       throw SavedObjectsErrorHelpers.createBadRequestError(error.message);
     }
   }
-
+  // @TINA TODO: https://github.com/elastic/kibana/pull/158527/files#r1210089911
   private getTypeValidator(type: string): SavedObjectsTypeValidator {
     if (!this.typeValidatorMap[type]) {
       const savedObjectType = this.registry.getType(type);

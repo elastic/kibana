@@ -45,40 +45,17 @@ export class SavedObjectsTypeValidator {
     this.validationMap = typeof validationMap === 'function' ? validationMap() : validationMap;
     this.orderedVersions = Object.keys(this.validationMap).sort(Semver.compare);
   }
-  // uses index meta's mappingVersions & docVersions -> virtualVersion to allow keeping track of mixed stack and model versions per type.
-  /**
-   * want to use the model virtual version if and only if the document has a switchToModelVersion
-   * check if the type has a switchToModelVersionsAt and if that is equal to the version or the default.
-   * if version is a valid model virtual versionvalid semver and if switchToModelVersionsAt === version, it is, then the docVersion can be a model version IF the docVersion is a valid modelVersion
-   * @param document
-   * @param version
-   * @returns
-   */
+
   public validate(document: SavedObjectSanitizedDoc, version?: string): void {
-    // if a version is specified, use that
     let usedVersion = version;
-    if (!usedVersion) {
-      const docVersion =
-        document.typeMigrationVersion ?? document.migrationVersion?.[document.type];
-      if (docVersion) {
-        // retain virtualModelVersion if one was set, otherwise if the latest migration wasn't a model migration, then the most recent migration the doc went through is older that the default and we use the default version.
-        // only allow validation against versions > default if the version is a valid virtual model version.
-        usedVersion =
-          (Semver.gt(docVersion, this.defaultVersion) && isVirtualModelVersion(docVersion)) ||
-          Semver.lt(docVersion, this.defaultVersion)
-            ? docVersion
-            : this.defaultVersion;
-      } else {
-        usedVersion = this.defaultVersion;
-      }
+    const docVersion = document.typeMigrationVersion ?? document.migrationVersion?.[document.type];
+    if (docVersion) {
+      usedVersion = isVirtualModelVersion(docVersion) ? docVersion : this.defaultVersion;
+    } else {
+      usedVersion = this.defaultVersion;
     }
     const schemaVersion = previousVersionWithSchema(this.orderedVersions, usedVersion);
-    // const docVersion =
-    //   version ??
-    //   document.typeMigrationVersion ??
-    //   document.migrationVersion?.[document.type] ??
-    //   this.defaultVersion;
-    // const schemaVersion = previousVersionWithSchema(this.orderedVersions, docVersion);
+
     if (!schemaVersion || !this.validationMap[schemaVersion]) {
       return;
     }
