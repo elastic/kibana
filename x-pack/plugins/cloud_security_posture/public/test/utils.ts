@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { screen } from '@testing-library/react';
+import { Matcher, screen } from '@testing-library/react';
 
 export const expectIdsInDoc = ({ be = [], notToBe = [] }: { be: string[]; notToBe?: string[] }) => {
   be.forEach((testId) => {
@@ -16,12 +16,12 @@ export const expectIdsInDoc = ({ be = [], notToBe = [] }: { be: string[]; notToB
   });
 };
 
-export const expectSingleIdInDoc = <TTestID>({
+export const expectSingleIdInDoc = ({
   testIds,
   singleIdInDoc,
 }: {
-  testIds: TTestID[];
-  singleIdInDoc: TTestID;
+  testIds: Matcher[];
+  singleIdInDoc: Matcher;
 }) => {
   const testIdsNotInDoc = testIds.filter((testId) => testId !== singleIdInDoc);
 
