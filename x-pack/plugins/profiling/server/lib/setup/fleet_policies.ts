@@ -100,6 +100,16 @@ export async function updateApmPolicy({
 }
 
 const CLOUD_AGENT_POLICY_ID = 'policy-elastic-agent-on-cloud';
+const COLLECTOR_PACKAGE_POLICY_NAME = 'elastic-universal-profiling-collector';
+const SYMBOLIZER_PACKAGE_POLICY_NAME = 'elastic-universal-profiling-symbolizer';
+
+export async function validateCollectorPackagePolicy({
+  soClient,
+  packagePolicyClient,
+}: ProfilingSetupOptions): Promise<boolean> {
+  const packagePolicies = await packagePolicyClient.list(soClient, {});
+  return packagePolicies.items.some((pkg) => pkg.name === COLLECTOR_PACKAGE_POLICY_NAME);
+}
 
 export async function createCollectorPackagePolicy({
   client,
@@ -114,7 +124,7 @@ export async function createCollectorPackagePolicy({
       title: 'Universal Profiling Collector',
       version: '8.9.0-preview',
     },
-    name: 'elastic-universal-profiling-collector',
+    name: COLLECTOR_PACKAGE_POLICY_NAME,
     namespace: 'default',
     inputs: [
       {
@@ -131,6 +141,14 @@ export async function createCollectorPackagePolicy({
   });
 }
 
+export async function validateSymbolizerPackagePolicy({
+  soClient,
+  packagePolicyClient,
+}: ProfilingSetupOptions): Promise<boolean> {
+  const packagePolicies = await packagePolicyClient.list(soClient, {});
+  return packagePolicies.items.some((pkg) => pkg.name === SYMBOLIZER_PACKAGE_POLICY_NAME);
+}
+
 export async function createSymbolizerPackagePolicy({
   client,
   soClient,
@@ -144,7 +162,7 @@ export async function createSymbolizerPackagePolicy({
       title: 'Universal Profiling Symbolizer',
       version: '8.8.0-preview',
     },
-    name: 'elastic-universal-profiling-symbolizer',
+    name: SYMBOLIZER_PACKAGE_POLICY_NAME,
     namespace: 'default',
     inputs: [
       {

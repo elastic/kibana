@@ -20,7 +20,15 @@ export interface SetupState {
     configured: boolean;
   };
   policies: {
-    installed: boolean;
+    apm: {
+      installed: boolean;
+    };
+    collector: {
+      installed: boolean;
+    };
+    symbolizer: {
+      installed: boolean;
+    };
   };
   resource_management: {
     enabled: boolean;
@@ -49,7 +57,15 @@ export function createDefaultSetupState(): SetupState {
       configured: false,
     },
     policies: {
-      installed: false,
+      apm: {
+        installed: false,
+      },
+      collector: {
+        installed: false,
+      },
+      symbolizer: {
+        installed: false,
+      },
     },
     resource_management: {
       enabled: false,
@@ -69,7 +85,9 @@ export function areResourcesSetup(state: SetupState): boolean {
     state.resources.created &&
     state.packages.installed &&
     state.permissions.configured &&
-    state.policies.installed &&
+    state.policies.apm.installed &&
+    state.policies.collector.installed &&
+    state.policies.symbolizer.installed &&
     state.settings.configured
   );
 }

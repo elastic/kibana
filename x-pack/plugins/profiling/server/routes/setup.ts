@@ -18,6 +18,8 @@ import {
   createSymbolizerPackagePolicy,
   updateApmPolicy,
   validateApmPolicy,
+  validateCollectorPackagePolicy,
+  validateSymbolizerPackagePolicy,
 } from '../lib/setup/fleet_policies';
 import { getSetupInstructions } from '../lib/setup/get_setup_instructions';
 import { hasProfilingData } from '../lib/setup/has_profiling_data';
@@ -90,7 +92,15 @@ export function registerSetupRoute({
             state.packages.installed = await isApmPackageInstalled(setupOptions);
           },
           async () => {
-            state.policies.installed = await validateApmPolicy(setupOptions);
+            state.policies.apm.installed = await validateApmPolicy(setupOptions);
+          },
+          async () => {
+            state.policies.collector.installed = await validateCollectorPackagePolicy(setupOptions);
+          },
+          async () => {
+            state.policies.symbolizer.installed = await validateSymbolizerPackagePolicy(
+              setupOptions
+            );
           },
           async () => {
             state.settings.configured = await validateMaximumBuckets(setupOptions);
@@ -162,7 +172,15 @@ export function registerSetupRoute({
             state.packages.installed = await isApmPackageInstalled(setupOptions);
           },
           async () => {
-            state.policies.installed = await validateApmPolicy(setupOptions);
+            state.policies.apm.installed = await validateApmPolicy(setupOptions);
+          },
+          async () => {
+            state.policies.collector.installed = await validateCollectorPackagePolicy(setupOptions);
+          },
+          async () => {
+            state.policies.symbolizer.installed = await validateSymbolizerPackagePolicy(
+              setupOptions
+            );
           },
           async () => {
             state.settings.configured = await validateMaximumBuckets(setupOptions);
