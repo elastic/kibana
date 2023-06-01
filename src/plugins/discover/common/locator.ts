@@ -18,7 +18,9 @@ import type {
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/common';
 export const DISCOVER_APP_LOCATOR = 'DISCOVER_APP_LOCATOR';
 
-export class DiscoverAppLocatorDefinitionCommon implements LocatorDefinition<DiscoverAppLocatorParams> {
+export class DiscoverAppLocatorDefinitionCommon
+  implements LocatorDefinition<DiscoverAppLocatorParams>
+{
   public readonly id = DISCOVER_APP_LOCATOR;
 
   constructor(protected readonly deps: DiscoverAppLocatorDependencies) {}
