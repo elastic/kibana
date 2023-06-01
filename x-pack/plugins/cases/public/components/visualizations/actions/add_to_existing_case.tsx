@@ -75,20 +75,25 @@ export const createAddToExistingCaseLensAction = ({
     currentAppId = appId;
   });
 
-  const owner = getCaseOwnerByAppId(currentAppId);
-  const casePermissions = canUseCases(applicationService.capabilities)(owner ? [owner] : undefined);
-
   return createAction<ActionContext>({
     id: ACTION_ID,
     type: 'actionButton',
     getIconType: () => 'casesApp',
     getDisplayName: () => ADD_TO_EXISTING_CASE_DISPLAYNAME,
-    isCompatible: async ({ embeddable }) =>
-      !isErrorEmbeddable(embeddable) &&
-      isLensEmbeddable(embeddable) &&
-      casePermissions.update &&
-      casePermissions.create &&
-      hasInput(embeddable),
+    isCompatible: async ({ embeddable }) => {
+      const owner = getCaseOwnerByAppId(currentAppId);
+      const casePermissions = canUseCases(applicationService.capabilities)(
+        owner ? [owner] : undefined
+      );
+
+      return (
+        !isErrorEmbeddable(embeddable) &&
+        isLensEmbeddable(embeddable) &&
+        casePermissions.update &&
+        casePermissions.create &&
+        hasInput(embeddable)
+      );
+    },
     execute: async ({ embeddable }) => {
       const targetDomElement = document.createElement('div');
 

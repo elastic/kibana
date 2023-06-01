@@ -11,6 +11,7 @@ import { createAction } from '@kbn/ui-actions-plugin/public';
 import { isErrorEmbeddable } from '@kbn/embeddable-plugin/public';
 
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { getCaseOwnerByAppId } from '../../../../common/utils/owner';
 import { CommentType } from '../../../../common';
 import { hasInput, isLensEmbeddable } from './utils';
 
@@ -74,18 +75,25 @@ export const createAddToNewCaseLensAction = ({
     currentAppId = appId;
   });
 
-  const casePermissions = canUseCases(applicationService.capabilities)([]);
-
   return createAction<ActionContext>({
     id: ACTION_ID,
     type: 'actionButton',
     getIconType: () => 'casesApp',
     getDisplayName: () => ADD_TO_NEW_CASE_DISPLAYNAME,
-    isCompatible: async ({ embeddable }) =>
-      !isErrorEmbeddable(embeddable) &&
-      isLensEmbeddable(embeddable) &&
-      casePermissions.create &&
-      hasInput(embeddable),
+    isCompatible: async ({ embeddable }) => {
+      const owner = getCaseOwnerByAppId(currentAppId);
+      const casePermissions = canUseCases(applicationService.capabilities)(
+        owner ? [owner] : undefined
+      );
+
+      return (
+        !isErrorEmbeddable(embeddable) &&
+        isLensEmbeddable(embeddable) &&
+        casePermissions.update &&
+        casePermissions.create &&
+        hasInput(embeddable)
+      );
+    },
     execute: async ({ embeddable }) => {
       const targetDomElement = document.createElement('div');
 
