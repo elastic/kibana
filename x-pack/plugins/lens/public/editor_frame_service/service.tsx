@@ -24,6 +24,7 @@ import {
   DataViewsPublicPluginSetup,
   DataViewsPublicPluginStart,
 } from '@kbn/data-views-plugin/public';
+import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
 import { Document } from '../persistence/saved_object_store';
 import {
   Datasource,
@@ -50,6 +51,7 @@ export interface EditorFrameStartPlugins {
   expressions: ExpressionsStart;
   charts: ChartsPluginSetup;
   dataViews: DataViewsPublicPluginStart;
+  eventAnnotationService: EventAnnotationServiceType;
 }
 
 export interface EditorFramePlugins {
@@ -58,6 +60,7 @@ export interface EditorFramePlugins {
   storage: IStorageWrapper;
   timefilter: TimefilterContract;
   nowProvider: DataPublicPluginStart['nowProvider'];
+  eventAnnotationService: EventAnnotationServiceType;
 }
 
 async function collectAsyncDefinitions<T extends { id: string }>(

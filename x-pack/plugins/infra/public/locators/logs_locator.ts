@@ -11,7 +11,7 @@ import type { LogViewReference } from '../../common/log_views';
 import type { TimeRange } from '../../common/time';
 import type { InfraClientCoreSetup } from '../types';
 
-const LOGS_LOCATOR_ID = 'LOGS_LOCATOR';
+export const LOGS_LOCATOR_ID = 'LOGS_LOCATOR';
 
 export interface LogsLocatorParams extends SerializableRecord {
   /** Defines log position */
