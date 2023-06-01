@@ -73,6 +73,7 @@ import { SecurityCellActionsTrigger } from '../../../../actions/constants';
 import { StatefulRowRenderer } from '../body/events/stateful_row_renderer';
 import { plainRowRenderer } from '../body/renderers/plain_row_renderer';
 import { timelineBodySelector } from '../body/selectors';
+import { TgridTdCell } from '../body/data_driven_columns';
 
 /** This offset begins at two, because the header row counts as "row 1", and aria-rowindex starts at "1" */
 const ARIA_ROW_INDEX_OFFSET = 2;
@@ -473,8 +474,9 @@ export const QueryTabContentComponent: React.FC<Props> = ({
             <div role="row" css={styles.row} key={rowIndex}>
               <div css={styles.rowCellsWrapper}>
                 {visibleColumns.map((column, colIndex) => {
+                  console.log('Stuff!!:', column, row);
                   // Skip the row details cell - we'll render it manually outside of the flex wrapper
-                  if (column.id !== 'row-details') {
+                  if (column.id.includes('timeline')) {
                     return (
                       <Cell
                         colIndex={colIndex}
@@ -482,6 +484,48 @@ export const QueryTabContentComponent: React.FC<Props> = ({
                         key={`${rowIndex},${colIndex}`}
                       />
                     );
+                  }
+                  if (column.id !== 'row-details') {
+                    return (
+                      <TgridTdCell
+                        _id={discoverGridRows[rowIndex]._id}
+                        ariaRowindex={rowIndex}
+                        index={rowIndex}
+                        header={defaultHeaders.find(({ id }) => column.id === id)}
+                        data={discoverGridRows[rowIndex].data}
+                        ecsData={discoverGridRows[rowIndex].ecs}
+                        hasRowRenderers={true}
+                        notesCount={0}
+                        renderCellValue={renderCellValue}
+                        tabType={TimelineTabs.query}
+                        timelineId={timelineId}
+                      />
+                    );
+
+                    // return renderCellValue({
+                    //   columnId: column.id,
+                    //   eventId: discoverGridRows[rowIndex]._id,
+                    //   data: discoverGridRows[rowIndex].data,
+                    //   header: defaultHeaders.find(({ id }) => column.id === id),
+                    //   isDraggable: true,
+                    //   isExpandable: true,
+                    //   isExpanded: false,
+                    //   isDetails: false,
+                    //   isTimeline: true,
+                    //   linkValues: undefined,
+                    //   rowIndex,
+                    //   colIndex,
+                    //   setCellProps: () => {},
+                    //   scopeId: timelineId,
+                    //   key: `${timelineId}-query`,
+                    // });
+                    // return (
+                    //   <Cell
+                    //     colIndex={colIndex}
+                    //     visibleRowIndex={rowIndex}
+                    //     key={`${rowIndex},${colIndex}`}
+                    //   />
+                    // );
                   }
                 })}
               </div>
