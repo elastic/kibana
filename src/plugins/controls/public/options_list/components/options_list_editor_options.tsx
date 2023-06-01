@@ -7,7 +7,7 @@
  */
 
 import useAsync from 'react-use/lib/useAsync';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import {
   EuiFlexGroup,
