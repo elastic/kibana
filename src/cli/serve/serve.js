@@ -21,6 +21,8 @@ import { readKeystore } from '../keystore/read_keystore';
 /** @type {ServerlessProjectMode[]} */
 const VALID_SERVERLESS_PROJECT_MODE = ['es', 'oblt', 'security'];
 
+const isNotEmpty = _.negate(_.isEmpty);
+
 /**
  * @param {Record<string, unknown>} opts
  * @returns {ServerlessProjectMode | null}
@@ -295,7 +297,12 @@ export default function (program) {
   }
 
   command.action(async function (opts) {
-    let configs = [getConfigPath(), ...getEnvConfigs(), ...(opts.config || [])];
+    const cliConfigs = opts.config || [];
+    const envConfigs = getEnvConfigs();
+    const defaultConfig = getConfigPath();
+
+    let configs = [cliConfigs, envConfigs, [defaultConfig]].find(isNotEmpty);
+
     const unknownOptions = this.getUnknownOptions();
 
     // .dev. configs are "pushed" so that they override all other config files
