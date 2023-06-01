@@ -569,6 +569,13 @@ function migrateTaskState(
       throw new Error(`[migrateStateSchema] state schema missing for version: ${i}`);
     }
     migratedState = taskTypeDef.stateSchemaByVersion[i].up(migratedState);
+    try {
+      taskTypeDef.stateSchemaByVersion[i].schema.validate(migratedState);
+    } catch (e) {
+      throw new Error(
+        `[migrateStateSchema] failed to migrate to version ${i} because the data returned from the up migration doesn't match the schema: ${e.message}`
+      );
+    }
   }
 
   return migratedState;

@@ -52,7 +52,10 @@ const invalidateAPIKeys = async (
 
 const stateSchemaByVersion = {
   1: {
-    up: (state: Record<string, unknown>) => ({ runs: state.runs || 0, total_invalidated: 0 }),
+    up: (state: Record<string, unknown>) => ({
+      runs: state.runs || 0,
+      total_invalidated: state.total_invalidated || 0,
+    }),
     schema: schema.object({
       runs: schema.number(),
       total_invalidated: schema.number(),
