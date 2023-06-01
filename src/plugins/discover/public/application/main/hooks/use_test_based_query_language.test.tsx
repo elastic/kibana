@@ -193,7 +193,7 @@ describe('useTextBasedQueryLanguage', () => {
       query: { sql: 'SELECT field1 from the-data-view-title WHERE field1=1' },
     });
 
-    await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(0));
+    await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(1));
   });
   test('if its not a text based query coming along, it should be ignored', async () => {
     const { replaceUrlState, stateContainer } = renderHookWithContext(false);
@@ -270,7 +270,7 @@ describe('useTextBasedQueryLanguage', () => {
     });
     await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(2));
     expect(replaceUrlState).toHaveBeenCalledWith({
-      columns: ['field1'],
+      columns: ['field1', 'field2'],
     });
   });
 
@@ -286,7 +286,7 @@ describe('useTextBasedQueryLanguage', () => {
       fetchStatus: FetchStatus.LOADING,
       query: { sql: 'SELECT * from the-data-view-title WHERE field1=2' },
     });
-    await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(1));
+    await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(0));
     documents$.next({
       recordRawType: RecordRawType.PLAIN,
       fetchStatus: FetchStatus.COMPLETE,
@@ -299,7 +299,7 @@ describe('useTextBasedQueryLanguage', () => {
       ],
       query: { sql: 'SELECT * from the-data-view-title WHERE field1=2' },
     });
-    await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(2));
+    await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(1));
     stateContainer.appState.getState = jest.fn(() => {
       return { columns: ['field1', 'field2'], index: 'the-data-view-id' };
     });
