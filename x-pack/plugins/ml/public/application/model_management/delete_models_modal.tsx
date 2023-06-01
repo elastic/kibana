@@ -122,7 +122,7 @@ export const DeleteModelsModal: FC<DeleteModelsModalProps> = ({ models, onClose 
               <p>
                 <FormattedMessage
                   id="xpack.ml.trainedModels.modelsList.deleteModal.warningMessage"
-                  defaultMessage="Deleting the trained model and its associated {pipelinesCount, plural, one {pipeline} other {pipelines}} will result in the permanent removal of these resources. Any process configured to send data to the {pipelinesCount, plural, one {pipeline} other {pipelines}} will no longer be able to do so once you delete the {pipelinesCount, plural, one {pipeline} other {pipelines}}."
+                  defaultMessage="Deleting the trained model and its associated {pipelinesCount, plural, one {pipeline} other {pipelines}} will permanently remove these resources. Any process configured to send data to the {pipelinesCount, plural, one {pipeline} other {pipelines}} will no longer be able to do so once you delete the {pipelinesCount, plural, one {pipeline} other {pipelines}}. Deleting only the trained model will cause failures in the {pipelinesCount, plural, one {pipeline} other {pipelines}} that {pipelinesCount, plural, one {depends} other {depend}} on the model."
                   values={{ pipelinesCount }}
                 />
               </p>
