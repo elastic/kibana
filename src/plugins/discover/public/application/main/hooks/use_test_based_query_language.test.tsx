@@ -270,7 +270,7 @@ describe('useTextBasedQueryLanguage', () => {
     });
     await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(2));
     expect(replaceUrlState).toHaveBeenCalledWith({
-      index: 'the-data-view-id',
+      columns: ['field1', 'field2'],
     });
   });
 
@@ -286,7 +286,7 @@ describe('useTextBasedQueryLanguage', () => {
       fetchStatus: FetchStatus.LOADING,
       query: { sql: 'SELECT * from the-data-view-title WHERE field1=2' },
     });
-    await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(2));
+    await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(0));
     documents$.next({
       recordRawType: RecordRawType.PLAIN,
       fetchStatus: FetchStatus.COMPLETE,
@@ -299,7 +299,7 @@ describe('useTextBasedQueryLanguage', () => {
       ],
       query: { sql: 'SELECT * from the-data-view-title WHERE field1=2' },
     });
-    await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(3));
+    await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(1));
     stateContainer.appState.getState = jest.fn(() => {
       return { columns: ['field1', 'field2'], index: 'the-data-view-id' };
     });
@@ -335,7 +335,7 @@ describe('useTextBasedQueryLanguage', () => {
       query: { sql: 'SELECT field1 from the-data-view-title' },
     });
 
-    await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(3));
+    await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(1));
     expect(replaceUrlState).toHaveBeenCalledWith({
       columns: ['field1'],
     });
