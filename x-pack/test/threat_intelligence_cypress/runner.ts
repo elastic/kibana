@@ -21,7 +21,6 @@ import { tiAbusechUrl } from './pipelines/ti_abusech_url';
 
 export async function ThreatIntelligenceConfigurableCypressTestRunner(
   { getService }: FtrProviderContext,
-  // command: string,
   envVars?: Record<string, string>
 ) {
   const log = getService('log');
