@@ -8,12 +8,22 @@
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 
+/**
+ * Type guard to validate multi bucket aggregate format.
+ *
+ * @template TBucket
+ * @param {unknown} arg - The item to be checked.
+ * @returns {arg is estypes.AggregationsMultiBucketAggregateBase<TBucket>}
+ */
 export const isMultiBucketAggregate = <TBucket = unknown>(
   arg: unknown
 ): arg is estypes.AggregationsMultiBucketAggregateBase<TBucket> => {
   return isPopulatedObject(arg, ['buckets']);
 };
 
+/**
+ * Custom enum for total hits relation values
+ */
 export const ES_CLIENT_TOTAL_HITS_RELATION: Record<
   Uppercase<estypes.SearchTotalHitsRelation>,
   estypes.SearchTotalHitsRelation
@@ -22,4 +32,7 @@ export const ES_CLIENT_TOTAL_HITS_RELATION: Record<
   GTE: 'gte',
 } as const;
 
+/**
+ * Alias for QueryDslQueryContainer
+ */
 export type InfluencersFilterQuery = estypes.QueryDslQueryContainer;

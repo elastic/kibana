@@ -5,5 +5,10 @@
  * 2.0.
  */
 
-// Default sampler shard size used for field histograms
+/**
+ * Default sampler shard size used for field histograms
+ * @date 01/06/2023 - 14:46:21
+ *
+ * @type {5000}
+ */
 export const DEFAULT_SAMPLER_SHARD_SIZE = 5000;

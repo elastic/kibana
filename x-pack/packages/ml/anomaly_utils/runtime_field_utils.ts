@@ -10,6 +10,13 @@ import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 
 type RuntimeType = typeof RUNTIME_FIELD_TYPES[number];
 
+/**
+ * Type guard for a runtime field
+ *
+ * @export
+ * @param {unknown} arg - The item to be checked
+ * @returns {arg is estypes.MappingRuntimeField}
+ */
 export function isRuntimeField(arg: unknown): arg is estypes.MappingRuntimeField {
   return (
     ((isPopulatedObject(arg, ['type']) && Object.keys(arg).length === 1) ||
@@ -24,6 +31,13 @@ export function isRuntimeField(arg: unknown): arg is estypes.MappingRuntimeField
   );
 }
 
+/**
+ * Type guard for runtime mappings
+ *
+ * @export
+ * @param {unknown} arg - The item to be checked
+ * @returns {arg is estypes.MappingRuntimeFields}
+ */
 export function isRuntimeMappings(arg: unknown): arg is estypes.MappingRuntimeFields {
   return isPopulatedObject(arg) && Object.values(arg).every((d) => isRuntimeField(d));
 }
