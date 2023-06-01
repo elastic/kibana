@@ -127,5 +127,5 @@ function snoozeRuleInOpenPopover(duration: SnoozeDuration): void {
 function expectedSnoozeBadgeText(duration: SnoozeDuration): string {
   return moment()
     .add(...duration.split(' '))
-    .format('MMMM DD');
+    .format('MMM D');
 }
