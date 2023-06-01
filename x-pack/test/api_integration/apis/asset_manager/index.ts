@@ -11,5 +11,7 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./tests/basics'));
     loadTestFile(require.resolve('./tests/sample_assets'));
     loadTestFile(require.resolve('./tests/assets'));
+    loadTestFile(require.resolve('./tests/assets_diff'));
+    loadTestFile(require.resolve('./tests/assets_related'));
   });
 }

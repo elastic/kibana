@@ -154,7 +154,7 @@ const getBaseSubFeatures = (_experimentalFeatures: ExperimentalFeatures): SubFea
  * Privileges can be added in different ways:
  * - `privileges`: the privileges that will be added directly into the main Security feature.
  * - `subFeatures`: the entire sub-feature configs that will be added into the Security subFeatures entry.
- * - `subFeaturesPrivileges`: the privileges that will be added into the Security subFeature with the `id` specified.
+ * - `subFeaturesPrivileges`: the privileges that will be added into the existing Security subFeature with the `id` specified.
  */
 export const getSecurityAppFeaturesConfig = (
   experimentalFeatures: ExperimentalFeatures
