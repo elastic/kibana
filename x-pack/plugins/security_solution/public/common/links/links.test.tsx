@@ -18,9 +18,11 @@ import {
   needsUrlState,
   updateAppLinks,
   useLinkExists,
-  hasCapabilities,
 } from './links';
 import { createCapabilities } from './test_utils';
+import { hasCapabilities } from '../lib/capabilities';
+import { UpsellingService } from '../lib/upsellings';
+import React from 'react';
 
 const defaultAppLinks: AppLinkItems = [
   {
@@ -42,6 +44,8 @@ const defaultAppLinks: AppLinkItems = [
     ],
   },
 ];
+
+const mockUpselling = new UpsellingService();
 
 const mockExperimentalDefaults = mockGlobalState.app.enableExperimental;
 
@@ -90,6 +94,7 @@ describe('Security links', () => {
       capabilities: mockCapabilities,
       experimentalFeatures: mockExperimentalDefaults,
       license: mockLicense,
+      upselling: mockUpselling,
     });
   });
 
@@ -168,12 +173,81 @@ describe('Security links', () => {
               flagDisabled: false,
             } as unknown as typeof mockExperimentalDefaults,
             license: { hasAtLeast: licenseBasicMock } as unknown as ILicense,
+            upselling: mockUpselling,
           }
         );
         await waitForNextUpdate();
       });
 
       expect(result.current).toStrictEqual([networkLinkItem]);
+    });
+
+    it('should return unauthorized page when page has upselling', async () => {
+      const upselling = new UpsellingService();
+      upselling.registerPages({ [SecurityPageName.network]: () => <span /> });
+
+      const { result, waitForNextUpdate } = renderUseAppLinks();
+      const networkLinkItem = {
+        id: SecurityPageName.network,
+        title: 'Network',
+        path: '/network',
+        capabilities: [`${CASES_FEATURE_ID}.read_cases`, `${CASES_FEATURE_ID}.write_cases`],
+        experimentalKey: 'flagEnabled' as unknown as keyof typeof mockExperimentalDefaults,
+        hideWhenExperimentalKey: 'flagDisabled' as unknown as keyof typeof mockExperimentalDefaults,
+        licenseType: 'basic' as const,
+      };
+
+      await act(async () => {
+        updateAppLinks(
+          [
+            {
+              ...networkLinkItem,
+              // The following links should be filtered out because network link is unauthorized
+              links: [
+                {
+                  id: SecurityPageName.networkDns,
+                  title: 'dns',
+                  path: '/dns',
+                },
+                {
+                  id: SecurityPageName.networkHttp,
+                  title: 'Http',
+                  path: '/http',
+                },
+              ],
+            },
+            {
+              // should be excluded by license with all its links
+              id: SecurityPageName.hosts,
+              title: 'Hosts',
+              path: '/hosts',
+              licenseType: 'platinum',
+              links: [
+                {
+                  id: SecurityPageName.hostsEvents,
+                  title: 'Events',
+                  path: '/events',
+                },
+              ],
+            },
+          ],
+          {
+            capabilities: {
+              ...mockCapabilities,
+              [CASES_FEATURE_ID]: { read_cases: false, crud_cases: false },
+            },
+            experimentalFeatures: {
+              flagEnabled: true,
+              flagDisabled: false,
+            } as unknown as typeof mockExperimentalDefaults,
+            license: { hasAtLeast: licenseBasicMock } as unknown as ILicense,
+            upselling,
+          }
+        );
+        await waitForNextUpdate();
+      });
+
+      expect(result.current).toStrictEqual([{ ...networkLinkItem, unauthorized: true }]);
     });
   });
 
@@ -204,6 +278,7 @@ describe('Security links', () => {
             capabilities: mockCapabilities,
             experimentalFeatures: mockExperimentalDefaults,
             license: mockLicense,
+            upselling: new UpsellingService(),
           }
         );
         await waitForNextUpdate();
@@ -234,6 +309,7 @@ describe('Security links', () => {
             capabilities: mockCapabilities,
             experimentalFeatures: mockExperimentalDefaults,
             license: mockLicense,
+            upselling: mockUpselling,
           }
         );
         await waitForNextUpdate();
@@ -291,33 +367,33 @@ describe('Security links', () => {
     const pushCases = 'securitySolutionCases.push_cases';
 
     it('returns false when capabilities is an empty array', () => {
-      expect(hasCapabilities([], createCapabilities())).toBeFalsy();
+      expect(hasCapabilities(createCapabilities(), [])).toBeFalsy();
     });
 
     it('returns true when the capability requested is specified as a single value', () => {
-      expect(hasCapabilities(siemShow, createCapabilities({ siem: { show: true } }))).toBeTruthy();
+      expect(hasCapabilities(createCapabilities({ siem: { show: true } }), siemShow)).toBeTruthy();
     });
 
     it('returns true when the capability requested is a single entry in an array', () => {
       expect(
-        hasCapabilities([siemShow], createCapabilities({ siem: { show: true } }))
+        hasCapabilities(createCapabilities({ siem: { show: true } }), [siemShow])
       ).toBeTruthy();
     });
 
     it("returns true when the capability requested is a single entry in an AND'd array format", () => {
       expect(
-        hasCapabilities([[siemShow]], createCapabilities({ siem: { show: true } }))
+        hasCapabilities(createCapabilities({ siem: { show: true } }), [[siemShow]])
       ).toBeTruthy();
     });
 
     it('returns true when only one requested capability is found in an OR situation', () => {
       expect(
         hasCapabilities(
-          [siemShow, createCases],
           createCapabilities({
             siem: { show: true },
             securitySolutionCases: { create_cases: false },
-          })
+          }),
+          [siemShow, createCases]
         )
       ).toBeTruthy();
     });
@@ -325,11 +401,11 @@ describe('Security links', () => {
     it('returns true when only the create_cases requested capability is found in an OR situation', () => {
       expect(
         hasCapabilities(
-          [siemShow, createCases],
           createCapabilities({
             siem: { show: false },
             securitySolutionCases: { create_cases: true },
-          })
+          }),
+          [siemShow, createCases]
         )
       ).toBeTruthy();
     });
@@ -337,11 +413,11 @@ describe('Security links', () => {
     it('returns false when none of the requested capabilities are found in an OR situation', () => {
       expect(
         hasCapabilities(
-          [readCases, createCases],
           createCapabilities({
             siem: { show: true },
             securitySolutionCases: { create_cases: false },
-          })
+          }),
+          [readCases, createCases]
         )
       ).toBeFalsy();
     });
@@ -349,11 +425,11 @@ describe('Security links', () => {
     it('returns true when all of the requested capabilities are found in an AND situation', () => {
       expect(
         hasCapabilities(
-          [[readCases, createCases]],
           createCapabilities({
             siem: { show: true },
             securitySolutionCases: { read_cases: true, create_cases: true },
-          })
+          }),
+          [[readCases, createCases]]
         )
       ).toBeTruthy();
     });
@@ -361,11 +437,11 @@ describe('Security links', () => {
     it('returns false when neither the single OR capability is found nor all of the AND capabilities', () => {
       expect(
         hasCapabilities(
-          [siemShow, [readCases, createCases]],
           createCapabilities({
             siem: { show: false },
             securitySolutionCases: { read_cases: false, create_cases: true },
-          })
+          }),
+          [siemShow, [readCases, createCases]]
         )
       ).toBeFalsy();
     });
@@ -373,11 +449,11 @@ describe('Security links', () => {
     it('returns true when the single OR capability is found when using an OR with an AND format', () => {
       expect(
         hasCapabilities(
-          [siemShow, [readCases, createCases]],
           createCapabilities({
             siem: { show: true },
             securitySolutionCases: { read_cases: false, create_cases: true },
-          })
+          }),
+          [siemShow, [readCases, createCases]]
         )
       ).toBeTruthy();
     });
@@ -385,14 +461,14 @@ describe('Security links', () => {
     it("returns false when the AND'd expressions are not satisfied", () => {
       expect(
         hasCapabilities(
-          [
-            [siemShow, pushCases],
-            [readCases, createCases],
-          ],
           createCapabilities({
             siem: { show: true },
             securitySolutionCases: { read_cases: false, create_cases: true, push_cases: false },
-          })
+          }),
+          [
+            [siemShow, pushCases],
+            [readCases, createCases],
+          ]
         )
       ).toBeFalsy();
     });

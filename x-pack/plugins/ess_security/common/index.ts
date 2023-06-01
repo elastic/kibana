@@ -4,11 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { i18n } from '@kbn/i18n';
 
-export const RESPONSE_ACTION_BUTTON = i18n.translate(
-  'xpack.kubernetesSecurity.breadcrumb.responseActionButton',
-  {
-    defaultMessage: 'Respond',
-  }
-);
+export const PLUGIN_ID = 'essSecurity';
+export const PLUGIN_NAME = 'essSecurity';
