@@ -137,6 +137,7 @@ export const configSchema = schema.object(
       exclude_task_types: schema.arrayOf(schema.string(), { defaultValue: [] }),
       authenticate_background_task_utilization: schema.boolean({ defaultValue: true }),
     }),
+    validate_state: schema.boolean({ defaultValue: false }),
   },
   {
     validate: (config) => {

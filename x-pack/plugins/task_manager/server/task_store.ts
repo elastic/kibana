@@ -45,6 +45,7 @@ export interface StoreOpts {
   savedObjectsRepository: ISavedObjectsRepository;
   serializer: ISavedObjectsSerializer;
   adHocTaskCounter: AdHocTaskCounter;
+  validateState: boolean;
 }
 
 export interface SearchOpts {
@@ -104,6 +105,7 @@ export class TaskStore {
   private savedObjectsRepository: ISavedObjectsRepository;
   private serializer: ISavedObjectsSerializer;
   private adHocTaskCounter: AdHocTaskCounter;
+  private readonly validateState: boolean;
 
   /**
    * Constructs a new TaskStore.
@@ -122,6 +124,7 @@ export class TaskStore {
     this.serializer = opts.serializer;
     this.savedObjectsRepository = opts.savedObjectsRepository;
     this.adHocTaskCounter = opts.adHocTaskCounter;
+    this.validateState = opts.validateState;
     this.esClientWithoutRetries = opts.esClient.child({
       // Timeouts are retried and make requests timeout after (requestTimeout * (1 + maxRetries))
       // The poller doesn't need retry logic because it will try again at the next polling cycle
@@ -502,7 +505,9 @@ export class TaskStore {
   ): T {
     return {
       ...task,
-      state: getValidateStateSchema(task.state, task.taskType, this.definitions, unknowns),
+      state: this.validateState
+        ? getValidateStateSchema(task.state, task.taskType, this.definitions, unknowns)
+        : task.state,
     };
   }
 }
