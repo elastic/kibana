@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { PluginInitializerContext, Plugin, CoreSetup } from '@kbn/core/server';
+import type { PluginInitializerContext, Plugin, CoreSetup, CoreStart } from '@kbn/core/server';
 import type { ServerlessSecurityConfig } from './config';
 import { getProductAppFeatures } from '../common/pli/pli_features';
 
@@ -15,6 +15,7 @@ import type {
   SecuritySolutionServerlessPluginSetupDeps,
   SecuritySolutionServerlessPluginStartDeps,
 } from './types';
+import { EndpointUsageReportingTask } from './endpoint/tasks/usage_reporting_task';
 
 export class SecuritySolutionServerlessPlugin
   implements
@@ -26,6 +27,7 @@ export class SecuritySolutionServerlessPlugin
     >
 {
   private config: ServerlessSecurityConfig;
+  private endpointUsageReportingTask: EndpointUsageReportingTask | undefined;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.config = this.initializerContext.config.get<ServerlessSecurityConfig>();
@@ -43,10 +45,16 @@ export class SecuritySolutionServerlessPlugin
 
     pluginsSetup.ml.setFeaturesEnabled({ ad: true, dfa: true, nlp: false });
 
+    this.endpointUsageReportingTask = new EndpointUsageReportingTask({
+      logFactory: this.initializerContext.logger,
+      core: _coreSetup,
+      taskManager: pluginsSetup.taskManager,
+    });
     return {};
   }
 
-  public start() {
+  public start(_coreStart: CoreStart, pluginsSetup: SecuritySolutionServerlessPluginStartDeps) {
+    this.endpointUsageReportingTask?.start({ taskManager: pluginsSetup.taskManager });
     return {};
   }
 
