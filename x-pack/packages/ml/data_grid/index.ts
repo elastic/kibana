@@ -19,6 +19,8 @@ export {
   showDataGridColumnChartErrorMessageToast,
   useRenderCellValue,
   INIT_MAX_COLUMNS,
+  type FieldTypes,
+  type MultiColumnSorter,
 } from './lib/common';
 
 export { DataGrid } from './components/data_grid';
@@ -44,6 +46,7 @@ export type {
   RowCountRelation,
   UseDataGridReturnType,
   UseIndexDataReturnType,
+  RowCountInfo,
 } from './lib/types';
 
 export { getFieldType } from './hooks/use_column_chart';

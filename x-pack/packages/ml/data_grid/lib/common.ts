@@ -134,6 +134,12 @@ export function getCombinedRuntimeMappings(
   }
 }
 
+/**
+ * Record of ES field types.
+ * @export
+ * @interface FieldTypes
+ * @typedef {FieldTypes}
+ */
 export interface FieldTypes {
   [key: string]: ES_FIELD_TYPES;
 }
@@ -467,9 +473,27 @@ export const useRenderCellValue = (
 export const getNestedOrEscapedVal = (obj: any, sortId: string) =>
   getNestedProperty(obj, sortId, null) ?? obj[sortId];
 
+/**
+ * Interface definition for multi column sorter
+ * @export
+ * @interface MultiColumnSorter
+ * @typedef {MultiColumnSorter}
+ */
 export interface MultiColumnSorter {
+  /**
+   * The id.
+   * @type {string}
+   */
   id: string;
+  /**
+   * The direction.
+   * @type {('asc' | 'desc')}
+   */
   direction: 'asc' | 'desc';
+  /**
+   * The type of the sorter.
+   * @type {string}
+   */
   type: string;
 }
 
