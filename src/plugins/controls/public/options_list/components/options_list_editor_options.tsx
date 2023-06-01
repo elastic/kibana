@@ -90,6 +90,7 @@ export const OptionsListEditorOptions = ({
     }
   }, [fieldType, onChange, state.sortBy]);
 
+  /** TODO: clean this up - and fix optionsListSetAdditionalSettings */
   const selectionOptions = useMemo(() => {
     return Object.keys(OptionsListStrings.editor.selectionTypes).map((type: string) => {
       return {
@@ -112,6 +113,7 @@ export const OptionsListEditorOptions = ({
             tooltip={OptionsListStrings.editor.searchTypes.prefix.getTooltip()}
           />
         ),
+        'data-test-subj': 'optionsListControl__prefixSearchOptionAdditionalSetting',
       },
       {
         id: 'wildcard',
@@ -121,6 +123,7 @@ export const OptionsListEditorOptions = ({
             tooltip={OptionsListStrings.editor.searchTypes.wildcard.getTooltip()}
           />
         ),
+        'data-test-subj': 'optionsListControl__wildcardSearchOptionAdditionalSetting',
       },
     ],
     []
@@ -148,7 +151,7 @@ export const OptionsListEditorOptions = ({
         fieldType !== 'ip' && (
           <EuiFormRow
             label={OptionsListStrings.editor.getSearchOptionsTitle()}
-            data-test-subj="optionsListControl__searchOptionsSetting"
+            data-test-subj="optionsListControl__searchOptionsRadioGroup"
           >
             <EuiRadioGroup
               options={searchOptions}

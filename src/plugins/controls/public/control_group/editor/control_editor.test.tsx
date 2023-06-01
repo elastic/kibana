@@ -106,7 +106,7 @@ describe('Data control editor', () => {
     test('has custom search options', async () => {
       const searchOptions = findTestSubject(
         controlEditor,
-        'optionsListControl__searchOptionsSetting'
+        'optionsListControl__searchOptionsRadioGroup'
       );
       expect(searchOptions.exists()).toBe(true);
     });
@@ -125,7 +125,7 @@ describe('Data control editor', () => {
     test('does not have custom search options', async () => {
       const searchOptions = findTestSubject(
         controlEditor,
-        'optionsListControl__searchOptionsSetting'
+        'optionsListControl__searchOptionsRadioGroup'
       );
       expect(searchOptions.exists()).toBe(false);
     });

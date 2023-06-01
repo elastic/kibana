@@ -12,6 +12,7 @@ import {
   RANGE_SLIDER_CONTROL,
   ControlWidth,
 } from '@kbn/controls-plugin/common';
+import { OptionsListSearchTechnique } from '@kbn/controls-plugin/common/options_list/types';
 import { ControlGroupChainingSystem } from '@kbn/controls-plugin/common/control_group/types';
 import { OptionsListSortingType } from '@kbn/controls-plugin/common/options_list/suggestions_sorting';
 
@@ -25,6 +26,7 @@ const CONTROL_DISPLAY_NAMES: { [key: string]: string } = {
 };
 
 interface OptionsListAdditionalSettings {
+  searchTechnique?: OptionsListSearchTechnique;
   defaultSortType?: OptionsListSortingType;
   ignoreTimeout?: boolean;
   allowMultiple?: boolean;
@@ -345,12 +347,28 @@ export class DashboardPageControls extends FtrService {
   public async optionsListSetAdditionalSettings({
     ignoreTimeout,
     allowMultiple,
+    searchTechnique,
   }: OptionsListAdditionalSettings) {
     const getSettingTestSubject = (setting: string) =>
       `optionsListControl__${setting}AdditionalSetting`;
 
     if (allowMultiple) await this.testSubjects.click(getSettingTestSubject('allowMultiple'));
     if (ignoreTimeout) await this.testSubjects.click(getSettingTestSubject('runPastTimeout'));
+    if (searchTechnique) {
+      this.log.debug(`clicking search technique: ${searchTechnique}`);
+      await this.find.clickByCssSelector(
+        `[data-test-subj=${getSettingTestSubject(
+          `${searchTechnique}SearchOption`
+        )}] label[for="${searchTechnique}"]`
+      );
+    }
+  }
+
+  public async optionsListGetCurrentSearchTechnique() {
+    this.log.debug('getting current search technique');
+    const radioGroup = await this.testSubjects.find('optionsListControl__searchOptionsRadioGroup');
+    const checkedOption = await radioGroup.findByCssSelector('input[checked]');
+    return await checkedOption.getAttribute('id');
   }
 
   public async optionsListGetSelectionsString(controlId: string) {
