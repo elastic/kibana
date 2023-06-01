@@ -51,9 +51,18 @@ const retrieveIntegrations = (
     : 0
 ) => {
   const integrationsPaths = globby.sync(specPattern);
-  const chunkSize = Math.ceil(integrationsPaths.length / chunksTotal);
 
-  return _.chunk(integrationsPaths, chunkSize)[chunkIndex];
+  const chunks: string[][] = [];
+
+  for (let i = 0; i < chunksTotal; i++) {
+    chunks.push([]);
+  }
+
+  for (let i = 0; i < integrationsPaths.length; i++) {
+    chunks[i%chunksTotal].push(integrationsPaths[i])
+  }
+
+  return chunks[chunkIndex];
 };
 
 export const cli = () => {
