@@ -82,7 +82,7 @@ async function evaluate(slo: SLO, summaryClient: DefaultSLIClient, params: BurnR
     // If none of the previous windows match, we need to return the last window
     // for the recovery context. Since evalWindow is memoized, it shouldn't make
     // and additional call to evaulateWindow.
-    return await evalWindow(last(sortedWindows) as WindowSchema);
+    return await evalWindow(last(params.windows) as WindowSchema);
   } else if (
     params.shortWindow &&
     params.longWindow &&
