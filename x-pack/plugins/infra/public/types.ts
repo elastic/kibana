@@ -38,7 +38,6 @@ import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import { CasesUiStart } from '@kbn/cases-plugin/public';
 import { DiscoverStart } from '@kbn/discover-plugin/public';
 import { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import type { OsqueryPluginStart } from '@kbn/osquery-plugin/public';
 import type { UnwrapPromise } from '../common/utility_types';
 import type {
   SourceProviderProps,
@@ -96,7 +95,7 @@ export interface InfraClientStartDeps {
   ml: MlPluginStart;
   observability: ObservabilityPublicStart;
   observabilityShared: ObservabilitySharedPluginStart;
-  osquery?: OsqueryPluginStart;
+  osquery?: unknown; // OsqueryPluginStart - can't be imported due to cyclick dependency;
   share: SharePluginStart;
   spaces: SpacesPluginStart;
   storage: IStorageWrapper;

@@ -14,7 +14,6 @@ import {
   EuiTabs,
   EuiTab,
   useEuiTheme,
-  useEuiMaxBreakpoint,
   useEuiMinBreakpoint,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -60,13 +59,9 @@ export const Header = ({ nodeType, node, tabs, links, compact, onTabsStateChange
 
   return (
     <>
-      <EuiFlexGroup
-        gutterSize="m"
-        justifyContent="spaceBetween"
-        direction={compact ? 'row' : 'columnReverse'}
-      >
+      <EuiFlexGroup gutterSize="m" justifyContent="spaceBetween" direction="row">
         <EuiFlexItem
-          grow
+          grow={false}
           css={css`
             overflow: hidden;
             & h4 {
@@ -75,10 +70,6 @@ export const Header = ({ nodeType, node, tabs, links, compact, onTabsStateChange
               white-space: nowrap;
               width: calc(100%);
             }
-            align-items: center;
-            ${useEuiMaxBreakpoint('l')} {
-              align-items: flex-start;
-            }
           `}
         >
           <EuiTitle size={compact ? 'xs' : 'm'}>
@@ -86,9 +77,9 @@ export const Header = ({ nodeType, node, tabs, links, compact, onTabsStateChange
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem
-          grow={compact ? 0 : 1}
+          grow={false}
           css={css`
-            align-items: ${compact ? 'flex-start' : 'initial'};
+            align-items: flex-start;
             ${useEuiMinBreakpoint('m')} {
               align-items: flex-end;
             }

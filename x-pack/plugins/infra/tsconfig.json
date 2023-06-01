@@ -63,8 +63,7 @@
     "@kbn/observability-alert-details",
     "@kbn/observability-shared-plugin",
     "@kbn/ui-theme",
-    "@kbn/ml-anomaly-utils",
-    "@kbn/osquery-plugin"
+    "@kbn/ml-anomaly-utils"
   ],
   "exclude": ["target/**/*"]
 }

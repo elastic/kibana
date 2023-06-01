@@ -53,13 +53,6 @@ const tabs: Tab[] = [
     }),
     'data-test-subj': 'hostsView-flyout-tabs-anomalies',
   },
-  {
-    id: FlyoutTabIds.OSQUERY,
-    name: i18n.translate('xpack.infra.nodeDetails.tabs.osquery', {
-      defaultMessage: 'Osquery',
-    }),
-    'data-test-subj': 'hostsView-flyout-tabs-osquery',
-  },
 ];
 
 const AssetDetailsDecorator: DecoratorFn = (story) => {
@@ -67,14 +60,11 @@ const AssetDetailsDecorator: DecoratorFn = (story) => {
   const [checked, setChecked] = useState(true);
 
   useEffect(() => {
-    if (checked) {
-      updateArgs({ links });
-    } else {
-      updateArgs({ links: [] });
-    }
-  }, [updateArgs, checked]);
+    updateArgs({ links });
+  }, [updateArgs]);
 
   const handleChange = (e: EuiSwitchEvent) => {
+    updateArgs({ links: e.target.checked ? links : [] });
     setChecked(e.target.checked);
   };
 

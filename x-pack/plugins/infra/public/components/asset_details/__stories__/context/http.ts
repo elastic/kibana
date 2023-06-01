@@ -5,17 +5,20 @@
  * 2.0.
  */
 
-import { HttpStart, HttpHandler, HttpFetchOptions } from '@kbn/core/public';
-import { Parameters } from '@storybook/react';
+import type { HttpStart, HttpHandler } from '@kbn/core/public';
+import type { Parameters } from '@storybook/react';
 import { INFA_ML_GET_METRICS_HOSTS_ANOMALIES_PATH } from '../../../../../common/http_api/infra_ml';
-import { metadataHttpResponse, type MetadataResponseMocks } from './fixtures/metadata';
 import {
-  processesHttpResponse,
+  anomaliesHttpResponse,
+  metadataHttpResponse,
   processesChartHttpResponse,
+  processesHttpResponse,
+  snapshotAPItHttpResponse,
+  type AnomaliesHttpMocks,
+  type MetadataResponseMocks,
   type ProcessesHttpMocks,
-} from './fixtures/processes';
-import { anomaliesHttpResponse, type AnomaliesHttpMocks } from './fixtures/anomalies';
-import { snapshotAPItHttpResponse, type SnapshotAPIHttpMocks } from './fixtures/snapshot_api';
+  type SnapshotAPIHttpMocks,
+} from './fixtures';
 
 export const getHttp = (params: Parameters): HttpStart => {
   const http = {
@@ -24,27 +27,7 @@ export const getHttp = (params: Parameters): HttpStart => {
         return '';
       },
     },
-    post: (async (path: string) => {
-      switch (path) {
-        case '/internal/osquery/privileges_check':
-          // grants permission to view the osquery content
-          return Promise.resolve(true);
-        default: {
-          return Promise.resolve({});
-        }
-      }
-    }) as HttpHandler,
-    get: (async (path: string) => {
-      switch (path) {
-        case '/internal/osquery/privileges_check':
-          // grants permission to view the osquery content
-          return Promise.resolve(true);
-        default: {
-          return Promise.resolve({});
-        }
-      }
-    }) as HttpHandler,
-    fetch: (async (path: string, options: HttpFetchOptions) => {
+    fetch: (async (path: string) => {
       switch (path) {
         case '/api/infra/metadata':
           return metadataHttpResponse[params.mock as MetadataResponseMocks]();

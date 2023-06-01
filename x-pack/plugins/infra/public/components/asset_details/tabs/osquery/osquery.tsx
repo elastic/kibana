@@ -7,11 +7,11 @@
 
 import { EuiSkeletonText } from '@elastic/eui';
 import React, { useMemo } from 'react';
-import { MetricsTimeInput } from '../../../../pages/metrics/metric_detail/hooks/use_metrics_time';
+import type { MetricsTimeInput } from '../../../../pages/metrics/metric_detail/hooks/use_metrics_time';
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import { useSourceContext } from '../../../../containers/metrics_source';
 import { findInventoryModel } from '../../../../../common/inventory_models';
-import { InventoryItemType } from '../../../../../common/inventory_models/types';
+import type { InventoryItemType } from '../../../../../common/inventory_models/types';
 import { useMetadata } from '../../hooks/use_metadata';
 
 export interface OsqueryProps {
@@ -34,6 +34,7 @@ export const Osquery = ({ nodeName, nodeType, currentTimeRange }: OsqueryProps) 
     services: { osquery },
   } = useKibanaContextForPlugin();
 
+  // @ts-expect-error
   const OsqueryAction = osquery?.OsqueryAction;
 
   // avoids component rerender when resizing the popover

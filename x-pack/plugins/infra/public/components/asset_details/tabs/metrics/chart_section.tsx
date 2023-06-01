@@ -19,11 +19,11 @@ import moment from 'moment';
 import React from 'react';
 import {
   MetricsExplorerChartType,
-  MetricsExplorerOptionsMetric,
+  type MetricsExplorerOptionsMetric,
 } from '../../../../pages/metrics/metrics_explorer/hooks/use_metrics_explorer_options';
 import { useIsDarkMode } from '../../../../hooks/use_is_dark_mode';
 import { MetricExplorerSeriesChart } from '../../../../pages/metrics/metrics_explorer/components/series_chart';
-import { MetricsExplorerSeries } from '../../../../../common/http_api';
+import type { MetricsExplorerSeries } from '../../../../../common/http_api';
 import { getTimelineChartTheme } from '../../../../utils/get_chart_theme';
 
 import { ChartHeader } from './chart_header';

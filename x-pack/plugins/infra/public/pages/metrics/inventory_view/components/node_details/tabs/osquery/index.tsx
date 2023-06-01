@@ -33,6 +33,7 @@ const TabComponent = (props: TabProps) => {
     services: { osquery },
   } = useKibanaContextForPlugin();
 
+  // @ts-expect-error
   const OsqueryAction = osquery?.OsqueryAction;
 
   // avoids component rerender when resizing the popover

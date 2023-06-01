@@ -55,7 +55,7 @@ export interface MetricsProps {
   accountId?: string;
   currentTime: number;
   customMetrics?: SnapshotCustomMetricInput[];
-  nodeName: string;
+  nodeId: string;
   nodeType: InventoryItemType;
   region?: string;
 }
@@ -65,7 +65,7 @@ export const Metrics = ({
   currentTime,
   customMetrics = [],
   nodeType,
-  nodeName,
+  nodeId,
   region,
 }: MetricsProps) => {
   const cpuChartRef = useRef<Chart>(null);
@@ -91,7 +91,7 @@ export const Metrics = ({
     () => createDerivedIndexPattern(),
     [createDerivedIndexPattern]
   );
-  let filter = `${findInventoryFields(nodeType).id}: "${nodeName}"`;
+  let filter = `${findInventoryFields(nodeType).id}: "${nodeId}"`;
 
   if (filter) {
     filter = convertKueryToElasticSearchQuery(filter, derivedIndexPattern);

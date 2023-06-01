@@ -21,13 +21,13 @@ import { findInventoryFields } from '../../../../../common/inventory_models';
 
 export interface LogsProps {
   currentTime: number;
-  nodeName: string;
+  nodeId: string;
   nodeType: InventoryItemType;
 }
 
 const textQueryThrottleIntervalMs = 1000;
 
-export const Logs = ({ nodeName, nodeType, currentTime }: LogsProps) => {
+export const Logs = ({ nodeId, nodeType, currentTime }: LogsProps) => {
   const { services } = useKibanaContextForPlugin();
   const { locators } = services;
   const [textQuery, setTextQuery] = useState('');
@@ -38,7 +38,7 @@ export const Logs = ({ nodeName, nodeType, currentTime }: LogsProps) => {
 
   const filter = useMemo(() => {
     const query = [
-      `${findInventoryFields(nodeType).id}: "${nodeName}"`,
+      `${findInventoryFields(nodeType).id}: "${nodeId}"`,
       ...(textQueryDebounced !== '' ? [textQueryDebounced] : []),
     ].join(' and ');
 
@@ -46,7 +46,7 @@ export const Logs = ({ nodeName, nodeType, currentTime }: LogsProps) => {
       language: 'kuery',
       query,
     };
-  }, [nodeType, nodeName, textQueryDebounced]);
+  }, [nodeType, nodeId, textQueryDebounced]);
 
   const onQueryChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     setTextQuery(e.target.value);
@@ -55,11 +55,11 @@ export const Logs = ({ nodeName, nodeType, currentTime }: LogsProps) => {
   const logsUrl = useMemo(() => {
     return locators.nodeLogsLocator.getRedirectUrl({
       nodeType,
-      nodeId: nodeName,
+      nodeId,
       time: startTimestamp,
       filter: textQueryDebounced,
     });
-  }, [locators.nodeLogsLocator, nodeName, nodeType, startTimestamp, textQueryDebounced]);
+  }, [locators.nodeLogsLocator, nodeId, nodeType, startTimestamp, textQueryDebounced]);
 
   return (
     <>

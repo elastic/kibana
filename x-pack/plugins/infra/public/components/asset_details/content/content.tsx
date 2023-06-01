@@ -7,13 +7,8 @@
 
 import React from 'react';
 import { useTabSwitcherContext } from '../hooks/use_tab_switcher';
-import { Anomalies } from '../tabs/anomalies/anomalies';
-import { Metadata } from '../tabs/metadata/metadata';
-import { Processes } from '../tabs/processes/processes';
-import { Osquery } from '../tabs/osquery/osquery';
+import { Anomalies, Metadata, Processes, Osquery, Metrics, Logs } from '../tabs';
 import { FlyoutTabIds, type TabState, type AssetDetailsProps } from '../types';
-import { Logs } from '../tabs/logs/logs';
-import { Metrics } from '../tabs/metrics/metrics';
 
 type Props = Pick<
   AssetDetailsProps,
@@ -41,7 +36,7 @@ export const Content = ({
         <Anomalies nodeName={node.name} onClose={overrides?.anomalies?.onClose} />
       </TabPanel>
       <TabPanel activeWhen={FlyoutTabIds.LOGS}>
-        <Logs nodeName={node.name} nodeType={nodeType} currentTime={currentTimeRange.to} />
+        <Logs nodeId={node.id} nodeType={nodeType} currentTime={currentTimeRange.to} />
       </TabPanel>
       <TabPanel activeWhen={FlyoutTabIds.METADATA}>
         <Metadata
@@ -59,7 +54,7 @@ export const Content = ({
           accountId={overrides?.metrics?.accountId}
           customMetrics={overrides?.metrics?.customMetrics}
           region={overrides?.metrics?.region}
-          nodeName={node.name}
+          nodeId={node.id}
           nodeType={nodeType}
         />
       </TabPanel>

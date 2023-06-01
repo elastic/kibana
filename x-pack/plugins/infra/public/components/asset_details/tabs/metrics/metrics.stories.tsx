@@ -7,7 +7,6 @@
 
 import React from 'react';
 import type { Meta, Story } from '@storybook/react/types-6-0';
-
 import { Metrics, type MetricsProps } from './metrics';
 import { decorateWithGlobalStorybookThemeProviders } from '../../../../test_utils/use_global_storybook_theme';
 import { DecorateWithKibanaContext } from '../../__stories__/decorator';
@@ -17,7 +16,7 @@ const stories: Meta<MetricsProps> = {
   decorators: [decorateWithGlobalStorybookThemeProviders, DecorateWithKibanaContext],
   component: Metrics,
   args: {
-    nodeName: 'host-1',
+    nodeId: 'host-1',
     currentTime: 1683630468,
     nodeType: 'host',
   },
