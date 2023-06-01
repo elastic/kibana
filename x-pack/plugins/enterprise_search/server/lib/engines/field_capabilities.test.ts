@@ -15,21 +15,18 @@ import { fetchEngineFieldCapabilities, parseFieldsCapabilities } from './field_c
 describe('engines field_capabilities', () => {
   const mockClient = {
     asCurrentUser: {
-      cat: { indices: jest.fn() },
       fieldCaps: jest.fn(),
-      indices: { exists: jest.fn(), get: jest.fn() },
+      indices: { get: jest.fn() },
     },
     asInternalUser: {},
   };
   const mockEngine: EnterpriseSearchEngine = {
     indices: ['index-001'],
-    name: 'unit-test-engine',
+    name: 'unit_test_engine',
     updated_at_millis: 2202018295,
   };
 
-  const getIndexResponse = {
-    'test-index-name-1': { settings: { index: { verified_before_close: 'true' } } },
-  };
+
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -50,11 +47,14 @@ describe('engines field_capabilities', () => {
         indices: ['index-001'],
       };
 
-      mockClient.asCurrentUser.indices.exists.mockResolvedValueOnce(true);
-      mockClient.asCurrentUser.indices.get.mockImplementation(() => {
-        return getIndexResponse;
-      });
+      const getAllAvailableIndexResponse = {
+        'index-001': { aliases: { unit_test_engine: {} } },
+      };
+
+      mockClient.asCurrentUser.indices.get.mockResolvedValueOnce(() => {});
+      mockClient.asCurrentUser.indices.get.mockResolvedValueOnce(getAllAvailableIndexResponse);
       mockClient.asCurrentUser.fieldCaps.mockResolvedValueOnce(fieldCapsResponse);
+
       await expect(
         fetchEngineFieldCapabilities(mockClient as unknown as IScopedClusterClient, mockEngine)
       ).resolves.toEqual({
