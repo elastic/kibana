@@ -16,7 +16,7 @@ import type { PublicLicenseJSON } from '@kbn/licensing-plugin/public';
 import type { SecurityGetUserPrivilegesResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { useKibana } from '../../utils/kibana_react';
 import { convertErrorForUseInToast } from './helpers/convert_error_for_use_in_toast';
-import { sloKeys } from './query-key-factory';
+import { sloKeys } from './query_key_factory';
 
 interface SloGlobalDiagnosisResponse {
   licenseAndFeatures: PublicLicenseJSON;

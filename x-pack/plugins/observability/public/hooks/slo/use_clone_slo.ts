@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import type { CreateSLOInput, CreateSLOResponse, FindSLOResponse } from '@kbn/slo-schema';
 
 import { useKibana } from '../../utils/kibana_react';
-import { sloKeys } from './query-key-factory';
+import { sloKeys } from './query_key_factory';
 
 export function useCloneSlo() {
   const {

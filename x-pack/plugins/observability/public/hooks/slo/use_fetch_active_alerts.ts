@@ -9,7 +9,7 @@ import { useQuery } from '@tanstack/react-query';
 import { BASE_RAC_ALERTS_API_PATH } from '@kbn/rule-registry-plugin/common';
 
 import { useKibana } from '../../utils/kibana_react';
-import { sloKeys } from './query-key-factory';
+import { sloKeys } from './query_key_factory';
 
 type SloId = string;
 

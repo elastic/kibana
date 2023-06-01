@@ -13,7 +13,7 @@ import {
 } from '@tanstack/react-query';
 import { GetSLOResponse, SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { useKibana } from '../../utils/kibana_react';
-import { sloKeys } from './query-key-factory';
+import { sloKeys } from './query_key_factory';
 
 export interface UseFetchSloDetailsResponse {
   isInitialLoading: boolean;

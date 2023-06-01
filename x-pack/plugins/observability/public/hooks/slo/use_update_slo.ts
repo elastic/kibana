@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import type { UpdateSLOInput, UpdateSLOResponse } from '@kbn/slo-schema';
 
 import { useKibana } from '../../utils/kibana_react';
-import { sloKeys } from './query-key-factory';
+import { sloKeys } from './query_key_factory';
 
 export function useUpdateSlo() {
   const {
