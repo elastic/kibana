@@ -53,47 +53,48 @@ const NON_EXPIRED_EXCEPTION_ITEM_NAME = 'Sample exception item with future expir
 describe('Detection rules, bulk duplicate', () => {
   before(() => {
     cleanKibana();
-    login();
   });
+
   beforeEach(() => {
+    login();
     // Make sure persisted rules table state is cleared
     resetRulesTableState();
     deleteAlertsAndRules();
     esArchiverResetKibana();
-    createRule(getNewRule({ name: RULE_NAME, ...defaultRuleData, rule_id: '1' })).then(
-      (response) => {
-        createRuleExceptionItem(response.body.id, [
-          {
-            description: 'Exception item for rule default exception list',
-            entries: [
-              {
-                field: 'user.name',
-                operator: 'included',
-                type: 'match',
-                value: 'some value',
-              },
-            ],
-            name: EXPIRED_EXCEPTION_ITEM_NAME,
-            type: 'simple',
-            expire_time: expiredDate,
-          },
-          {
-            description: 'Exception item for rule default exception list',
-            entries: [
-              {
-                field: 'user.name',
-                operator: 'included',
-                type: 'match',
-                value: 'some value',
-              },
-            ],
-            name: NON_EXPIRED_EXCEPTION_ITEM_NAME,
-            type: 'simple',
-            expire_time: futureDate,
-          },
-        ]);
-      }
-    );
+    createRule<{ id: string }>(
+      getNewRule({ name: RULE_NAME, ...defaultRuleData, rule_id: '1' })
+    ).then((response) => {
+      createRuleExceptionItem(response.body.id, [
+        {
+          description: 'Exception item for rule default exception list',
+          entries: [
+            {
+              field: 'user.name',
+              operator: 'included',
+              type: 'match',
+              value: 'some value',
+            },
+          ],
+          name: EXPIRED_EXCEPTION_ITEM_NAME,
+          type: 'simple',
+          expire_time: expiredDate,
+        },
+        {
+          description: 'Exception item for rule default exception list',
+          entries: [
+            {
+              field: 'user.name',
+              operator: 'included',
+              type: 'match',
+              value: 'some value',
+            },
+          ],
+          name: NON_EXPIRED_EXCEPTION_ITEM_NAME,
+          type: 'simple',
+          expire_time: futureDate,
+        },
+      ]);
+    });
 
     visitWithoutDateRange(SECURITY_DETECTIONS_RULES_URL);
 
