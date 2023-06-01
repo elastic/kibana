@@ -33,7 +33,7 @@ export async function bootstrap(runOptions: RunOptions) {
     version,
   });
 
-  // await kibanaClient.installApmPackage(latestPackageVersion);
+  await kibanaClient.installApmPackage(latestPackageVersion);
 
   if (runOptions.clean) {
     await apmEsClient.clean();
