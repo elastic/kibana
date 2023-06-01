@@ -39,7 +39,7 @@ import {
 } from '../../../tasks/rule_details';
 
 import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../../urls/navigation';
-import { postDataView } from '../../../tasks/common';
+import { postDataView, deleteAlertsAndRules } from '../../../tasks/common';
 import { NO_EXCEPTIONS_EXIST_PROMPT } from '../../../screens/exceptions';
 import { waitForAlertsToPopulate } from '../../../tasks/create_new_rule';
 
@@ -47,11 +47,19 @@ describe('Rule Exceptions workflows from Alert', () => {
   const NUMBER_OF_AUDITBEAT_EXCEPTIONS_ALERTS = '1 alert';
   const ITEM_NAME = 'Sample Exception List Item';
   const newRule = getNewRule();
-  beforeEach(() => {
+  before(() => {
     esArchiverResetKibana();
     esArchiverLoad('exceptions');
     login();
     postDataView('exceptions-*');
+  });
+
+  after(() => {
+    esArchiverUnload('exceptions');
+  });
+
+  beforeEach(() => {
+    deleteAlertsAndRules();
     createRule({
       ...newRule,
       query: 'agent.name:*',
@@ -62,10 +70,6 @@ describe('Rule Exceptions workflows from Alert', () => {
     visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
     goToRuleDetails();
     waitForAlertsToPopulate();
-  });
-
-  after(() => {
-    esArchiverUnload('exceptions');
   });
 
   afterEach(() => {
