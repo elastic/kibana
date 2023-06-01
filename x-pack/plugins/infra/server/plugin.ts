@@ -68,14 +68,21 @@ import { UsageCollector } from './usage/usage_collector';
 
 export const config: PluginConfigDescriptor<InfraConfig> = {
   schema: schema.object({
-    logs: schema.object({
-      app_target: schema.oneOf(
-        [schema.literal(LOGS_APP_TARGET), schema.literal(DISCOVER_APP_TARGET)],
-        {
-          defaultValue: LOGS_APP_TARGET,
-        }
-      ),
-    }),
+    // Setting variants only allowed in the Serverless offering, otherwise always default `logs-ui` value
+    logs: schema.conditional(
+      schema.contextRef('serverless'),
+      true,
+      schema.object({
+        app_target: schema.oneOf(
+          [schema.literal(LOGS_APP_TARGET), schema.literal(DISCOVER_APP_TARGET)],
+          { defaultValue: LOGS_APP_TARGET }
+        ),
+      }),
+      schema.never(),
+      {
+        defaultValue: { app_target: LOGS_APP_TARGET },
+      }
+    ),
     alerting: schema.object({
       inventory_threshold: schema.object({
         group_by_page_size: schema.number({ defaultValue: 5_000 }),
