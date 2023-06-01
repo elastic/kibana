@@ -41,7 +41,6 @@ const mockActions = {
   analyticsEventsExist: jest.fn(),
   fetchAnalyticsCollection: jest.fn(),
   fetchAnalyticsCollectionDataViewId: jest.fn(),
-  analyticsEventsExist: jest.fn(),
   setTimeRange: jest.fn(),
 };
 

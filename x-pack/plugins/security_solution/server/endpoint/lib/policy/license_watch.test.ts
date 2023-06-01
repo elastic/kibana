@@ -16,7 +16,6 @@ import { createPackagePolicyServiceMock } from '@kbn/fleet-plugin/server/mocks';
 import { PolicyWatcher } from './license_watch';
 import type { ILicense } from '@kbn/licensing-plugin/common/types';
 import { licenseMock } from '@kbn/licensing-plugin/common/licensing.mock';
-import { cloudMock } from '@kbn/cloud-plugin/server/mocks';
 import type { PackagePolicyClient } from '@kbn/fleet-plugin/server';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common';
 import { createPackagePolicyMock } from '@kbn/fleet-plugin/common/mocks';
@@ -36,7 +35,6 @@ const MockPPWithEndpointPolicy = (cb?: (p: PolicyConfig) => PolicyConfig): Packa
 
 describe('Policy-Changing license watcher', () => {
   const logger = loggingSystemMock.create().get('license_watch.test');
-  const cloudServiceMock = cloudMock.createSetup();
   const soStartMock = savedObjectsServiceMock.createStartContract();
   const esStartMock = elasticsearchServiceMock.createStart();
   let packagePolicySvcMock: jest.Mocked<PackagePolicyClient>;
@@ -53,13 +51,7 @@ describe('Policy-Changing license watcher', () => {
     // mock a license-changing service to test reactivity
     const licenseEmitter: Subject<ILicense> = new Subject();
     const licenseService = new LicenseService();
-    const pw = new PolicyWatcher(
-      packagePolicySvcMock,
-      soStartMock,
-      esStartMock,
-      cloudServiceMock,
-      logger
-    );
+    const pw = new PolicyWatcher(packagePolicySvcMock, soStartMock, esStartMock, logger);
 
     // swap out watch function, just to ensure it gets called when a license change happens
     const mockWatch = jest.fn();
@@ -104,13 +96,7 @@ describe('Policy-Changing license watcher', () => {
         perPage: 100,
       });
 
-    const pw = new PolicyWatcher(
-      packagePolicySvcMock,
-      soStartMock,
-      esStartMock,
-      cloudServiceMock,
-      logger
-    );
+    const pw = new PolicyWatcher(packagePolicySvcMock, soStartMock, esStartMock, logger);
     await pw.watch(Gold); // just manually trigger with a given license
 
     expect(packagePolicySvcMock.list.mock.calls.length).toBe(3); // should have asked for 3 pages of resuts
@@ -137,13 +123,7 @@ describe('Policy-Changing license watcher', () => {
       perPage: 100,
     });
 
-    const pw = new PolicyWatcher(
-      packagePolicySvcMock,
-      soStartMock,
-      esStartMock,
-      cloudServiceMock,
-      logger
-    );
+    const pw = new PolicyWatcher(packagePolicySvcMock, soStartMock, esStartMock, logger);
 
     // emulate a license change below paid tier
     await pw.watch(Basic);
