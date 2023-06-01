@@ -27,6 +27,21 @@ export type SavedObjectsModelChange =
 /**
  * A {@link SavedObjectsModelChange | model change} adding new mappings.
  *
+ * @example
+ * ```ts
+ * let change: SavedObjectsModelMappingsAdditionChange = {
+ *   type: 'mappings_addition',
+ *   addedMappings: {
+ *     newField: { type: 'text' },
+ *     existingNestedField: {
+ *       properties: {
+ *         newNestedProp: { type: 'keyword' },
+ *       },
+ *     },
+ *   },
+ * };
+ * ```
+ *
  * @remark when adding mappings, {@link SavedObjectsType.mappings | the type mappings} must also be updated accordingly.
  *         Overall, the type's mapping represents the latest version of the mappings, where the model changes
  *         represent the changes of mappings between two versions.
@@ -42,8 +57,17 @@ export interface SavedObjectsModelMappingsAdditionChange {
 }
 
 /**
- * A {@link SavedObjectsModelChange | model change} flagging mappings as being deprecated.
- * Deprecated mappings should no longer be used and will eventually be deleted later.
+ * A {@link SavedObjectsModelChange | model change} flagging mappings as being no longer used.
+ *
+ * @example
+ * ```ts
+ * let change: SavedObjectsModelMappingsDeprecationChange = {
+ *   type: 'mappings_deprecation',
+ *   deprecatedMappings: ['someDeprecatedField', 'someNested.deprecatedField'],
+ * };
+ * ```
+ *
+ * @remark Deprecated mappings will eventually be deleted later.
  */
 export interface SavedObjectsModelMappingsDeprecationChange {
   type: 'mappings_deprecation';
@@ -55,6 +79,17 @@ export interface SavedObjectsModelMappingsDeprecationChange {
 
 /**
  * A {@link SavedObjectsModelChange | model change} used to backfill fields introduced in the same model version.
+ *
+ * @example
+ * ```
+ * let change: SavedObjectsModelDataBackfillChange = {
+ *   type: 'data_backfill',
+ *   transform: (document) => {
+ *     document.attributes.someAddedField = 'defaultValue';
+ *     return { document };
+ *   },
+ * };
+ * ```
  *
  * @remark This type of model change should only be used to backfill newly introduced fields.
  *         Even if no check is performed to ensure that, using such transformations to mutate
