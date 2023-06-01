@@ -57,7 +57,7 @@ export function validateMetricThreshold({
 
   if (filterQuery === QUERY_INVALID) {
     errors.filterQuery = [
-      i18n.translate('xpack.infra.metrics.alertFlyout.error.invalidFilterQuery', {
+      i18n.translate('xpack.observability.threshold.rule.alertFlyout.error.invalidFilterQuery', {
         defaultMessage: 'Filter query is invalid.',
       }),
     ];
@@ -89,7 +89,7 @@ export function validateMetricThreshold({
     };
     if (!c.aggType) {
       errors[id].aggField.push(
-        i18n.translate('xpack.infra.metrics.alertFlyout.error.aggregationRequired', {
+        i18n.translate('xpack.observability.threshold.rule.alertFlyout.error.aggregationRequired', {
           defaultMessage: 'Aggregation is required.',
         })
       );
@@ -97,7 +97,7 @@ export function validateMetricThreshold({
 
     if (!c.threshold || !c.threshold.length) {
       errors[id].critical.threshold0.push(
-        i18n.translate('xpack.infra.metrics.alertFlyout.error.thresholdRequired', {
+        i18n.translate('xpack.observability.threshold.rule.alertFlyout.error.thresholdRequired', {
           defaultMessage: 'Threshold is required.',
         })
       );
@@ -105,7 +105,7 @@ export function validateMetricThreshold({
 
     if (c.warningThreshold && !c.warningThreshold.length) {
       errors[id].warning.threshold0.push(
-        i18n.translate('xpack.infra.metrics.alertFlyout.error.thresholdRequired', {
+        i18n.translate('xpack.observability.threshold.rule.alertFlyout.error.thresholdRequired', {
           defaultMessage: 'Threshold is required.',
         })
       );
@@ -127,9 +127,12 @@ export function validateMetricThreshold({
           if (!isNumber(v)) {
             const key = i === 0 ? 'threshold0' : 'threshold1';
             errors[id][type][key].push(
-              i18n.translate('xpack.infra.metrics.alertFlyout.error.thresholdTypeRequired', {
-                defaultMessage: 'Thresholds must contain a valid number.',
-              })
+              i18n.translate(
+                'xpack.observability.threshold.rule.alertFlyout.error.thresholdTypeRequired',
+                {
+                  defaultMessage: 'Thresholds must contain a valid number.',
+                }
+              )
             );
           }
         });
@@ -137,7 +140,7 @@ export function validateMetricThreshold({
 
       if (comparator === Comparator.BETWEEN && (!threshold || threshold.length < 2)) {
         errors[id][type].threshold1.push(
-          i18n.translate('xpack.infra.metrics.alertFlyout.error.thresholdRequired', {
+          i18n.translate('xpack.observability.threshold.rule.alertFlyout.error.thresholdRequired', {
             defaultMessage: 'Threshold is required.',
           })
         );
@@ -146,7 +149,7 @@ export function validateMetricThreshold({
 
     if (!c.timeSize) {
       errors[id].timeWindowSize.push(
-        i18n.translate('xpack.infra.metrics.alertFlyout.error.timeRequred', {
+        i18n.translate('xpack.observability.threshold.rule.alertFlyout.error.timeRequred', {
           defaultMessage: 'Time size is Required.',
         })
       );
@@ -154,7 +157,7 @@ export function validateMetricThreshold({
 
     if (c.aggType !== 'count' && c.aggType !== 'custom' && !c.metric) {
       errors[id].metric.push(
-        i18n.translate('xpack.infra.metrics.alertFlyout.error.metricRequired', {
+        i18n.translate('xpack.observability.threshold.rule.alertFlyout.error.metricRequired', {
           defaultMessage: 'Metric is required.',
         })
       );
@@ -163,7 +166,7 @@ export function validateMetricThreshold({
     if (isCustomMetricExpressionParams(c)) {
       if (!c.customMetrics || (c.customMetrics && c.customMetrics.length < 1)) {
         errors[id].customMetricsError = i18n.translate(
-          'xpack.infra.metrics.alertFlyout.error.customMetricsError',
+          'xpack.observability.threshold.rule.alertFlyout.error.customMetricsError',
           {
             defaultMessage: 'You must define at least 1 custom metric',
           }
@@ -173,7 +176,7 @@ export function validateMetricThreshold({
           const customMetricErrors: { aggType?: string; field?: string; filter?: string } = {};
           if (!metric.aggType) {
             customMetricErrors.aggType = i18n.translate(
-              'xpack.infra.metrics.alertFlyout.error.customMetrics.aggTypeRequired',
+              'xpack.observability.threshold.rule.alertFlyout.error.customMetrics.aggTypeRequired',
               {
                 defaultMessage: 'Aggregation is required',
               }
@@ -181,7 +184,7 @@ export function validateMetricThreshold({
           }
           if (metric.aggType !== 'count' && !metric.field) {
             customMetricErrors.field = i18n.translate(
-              'xpack.infra.metrics.alertFlyout.error.customMetrics.fieldRequired',
+              'xpack.observability.threshold.rule.alertFlyout.error.customMetrics.fieldRequired',
               {
                 defaultMessage: 'Field is required',
               }
@@ -202,7 +205,7 @@ export function validateMetricThreshold({
 
       if (c.equation && c.equation.match(EQUATION_REGEX)) {
         errors[id].equation = i18n.translate(
-          'xpack.infra.metrics.alertFlyout.error.equation.invalidCharacters',
+          'xpack.observability.threshold.rule.alertFlyout.error.equation.invalidCharacters',
           {
             defaultMessage:
               'The equation field only supports the following characters: A-Z, +, -, /, *, (, ), ?, !, &, :, |, >, <, =',

@@ -98,9 +98,12 @@ export function AlertDetailsAppSection({
   useEffect(() => {
     setAlertSummaryFields([
       {
-        label: i18n.translate('xpack.infra.metrics.alertDetailsAppSection.summaryField.rule', {
-          defaultMessage: 'Rule',
-        }),
+        label: i18n.translate(
+          'xpack.observability.threshold.rule.alertDetailsAppSection.summaryField.rule',
+          {
+            defaultMessage: 'Rule',
+          }
+        ),
         value: (
           <EuiLink data-test-subj="alertDetailsAppSectionRuleLink" href={ruleLink}>
             {rule.name}
@@ -123,7 +126,7 @@ export function AlertDetailsAppSection({
             </EuiTitle>
             <EuiText size="s" color="subdued">
               <FormattedMessage
-                id="xpack.infra.metrics.alertDetailsAppSection.criterion.subtitle"
+                id="xpack.observability.threshold.rule.alertDetailsAppSection.criterion.subtitle"
                 defaultMessage="Last {lookback} {timeLabel}"
                 values={{
                   lookback: criterion.timeSize,
@@ -143,7 +146,7 @@ export function AlertDetailsAppSection({
                     metricValueFormatter(d, 'metric' in criterion ? criterion.metric : undefined)
                   }
                   title={i18n.translate(
-                    'xpack.infra.metrics.alertDetailsAppSection.thresholdTitle',
+                    'xpack.observability.threshold.rule.alertDetailsAppSection.thresholdTitle',
                     {
                       defaultMessage: 'Threshold breached',
                     }

@@ -288,7 +288,7 @@ export function Expressions(props: Props) {
       <EuiText size="xs">
         <h4>
           <FormattedMessage
-            id="xpack.infra.metrics.alertFlyout.conditions"
+            id="xpack.observability.threshold.rule.alertFlyout.conditions"
             defaultMessage="Conditions"
           />
         </h4>
@@ -341,7 +341,7 @@ export function Expressions(props: Props) {
           onClick={addExpression}
         >
           <FormattedMessage
-            id="xpack.infra.metrics.alertFlyout.addCondition"
+            id="xpack.observability.threshold.rule.alertFlyout.addCondition"
             defaultMessage="Add condition"
           />
         </EuiButtonEmpty>
@@ -350,9 +350,12 @@ export function Expressions(props: Props) {
       <EuiSpacer size={'m'} />
       <EuiAccordion
         id="advanced-options-accordion"
-        buttonContent={i18n.translate('xpack.infra.metrics.alertFlyout.advancedOptions', {
-          defaultMessage: 'Advanced options',
-        })}
+        buttonContent={i18n.translate(
+          'xpack.observability.threshold.rule.alertFlyout.advancedOptions',
+          {
+            defaultMessage: 'Advanced options',
+          }
+        )}
       >
         <EuiPanel color="subdued">
           <EuiCheckbox
@@ -360,16 +363,19 @@ export function Expressions(props: Props) {
             id="metrics-alert-no-data-toggle"
             label={
               <>
-                {i18n.translate('xpack.infra.metrics.alertFlyout.alertOnNoData', {
+                {i18n.translate('xpack.observability.threshold.rule.alertFlyout.alertOnNoData', {
                   defaultMessage: "Alert me if there's no data",
                 })}{' '}
                 <EuiToolTip
                   content={
                     (disableNoData ? `${docCountNoDataDisabledHelpText} ` : '') +
-                    i18n.translate('xpack.infra.metrics.alertFlyout.noDataHelpText', {
-                      defaultMessage:
-                        'Enable this to trigger the action if the metric(s) do not report any data over the expected time period, or if the alert fails to query Elasticsearch',
-                    })
+                    i18n.translate(
+                      'xpack.observability.threshold.rule.alertFlyout.noDataHelpText',
+                      {
+                        defaultMessage:
+                          'Enable this to trigger the action if the metric(s) do not report any data over the expected time period, or if the alert fails to query Elasticsearch',
+                      }
+                    )
                   }
                 >
                   <EuiIcon type="questionInCircle" color="subdued" />
@@ -384,10 +390,10 @@ export function Expressions(props: Props) {
       <EuiSpacer size={'m'} />
 
       <EuiFormRow
-        label={i18n.translate('xpack.infra.metrics.alertFlyout.filterLabel', {
+        label={i18n.translate('xpack.observability.threshold.rule.alertFlyout.filterLabel', {
           defaultMessage: 'Filter (optional)',
         })}
-        helpText={i18n.translate('xpack.infra.metrics.alertFlyout.filterHelpText', {
+        helpText={i18n.translate('xpack.observability.threshold.rule.alertFlyout.filterHelpText', {
           defaultMessage: 'Use a KQL expression to limit the scope of your alert trigger.',
         })}
         fullWidth
@@ -412,13 +418,16 @@ export function Expressions(props: Props) {
 
       <EuiSpacer size={'m'} />
       <EuiFormRow
-        label={i18n.translate('xpack.infra.metrics.alertFlyout.createAlertPerText', {
+        label={i18n.translate('xpack.observability.threshold.rule.alertFlyout.createAlertPerText', {
           defaultMessage: 'Group alerts by (optional)',
         })}
-        helpText={i18n.translate('xpack.infra.metrics.alertFlyout.createAlertPerHelpText', {
-          defaultMessage:
-            'Create an alert for every unique value. For example: "host.id" or "cloud.region".',
-        })}
+        helpText={i18n.translate(
+          'xpack.observability.threshold.rule.alertFlyout.createAlertPerHelpText',
+          {
+            defaultMessage:
+              'Create an alert for every unique value. For example: "host.id" or "cloud.region".',
+          }
+        )}
         fullWidth
         display="rowCompressed"
       >
@@ -437,7 +446,7 @@ export function Expressions(props: Props) {
           <EuiSpacer size="s" />
           <EuiText size="xs" color="danger">
             <FormattedMessage
-              id="xpack.infra.metrics.alertFlyout.alertPerRedundantFilterError"
+              id="xpack.observability.threshold.rule.alertFlyout.alertPerRedundantFilterError"
               defaultMessage="This rule may alert on {matchedGroups} less than expected, because the filter query contains a match for {groupCount, plural, one {this field} other {these fields}}. For more information, refer to {filteringAndGroupingLink}."
               values={{
                 matchedGroups: <strong>{redundantFilterGroupBy.join(', ')}</strong>,
@@ -448,7 +457,7 @@ export function Expressions(props: Props) {
                     href={`${docLinks.links.observability.metricsThreshold}#filtering-and-grouping`}
                   >
                     {i18n.translate(
-                      'xpack.infra.metrics.alertFlyout.alertPerRedundantFilterError.docsLink',
+                      'xpack.observability.threshold.rule.alertFlyout.alertPerRedundantFilterError.docsLink',
                       { defaultMessage: 'the docs' }
                     )}
                   </EuiLink>
@@ -463,16 +472,22 @@ export function Expressions(props: Props) {
         id="metrics-alert-group-disappear-toggle"
         label={
           <>
-            {i18n.translate('xpack.infra.metrics.alertFlyout.alertOnGroupDisappear', {
-              defaultMessage: 'Alert me if a group stops reporting data',
-            })}{' '}
+            {i18n.translate(
+              'xpack.observability.threshold.rule.alertFlyout.alertOnGroupDisappear',
+              {
+                defaultMessage: 'Alert me if a group stops reporting data',
+              }
+            )}{' '}
             <EuiToolTip
               content={
                 (disableNoData ? `${docCountNoDataDisabledHelpText} ` : '') +
-                i18n.translate('xpack.infra.metrics.alertFlyout.groupDisappearHelpText', {
-                  defaultMessage:
-                    'Enable this to trigger the action if a previously detected group begins to report no results. This is not recommended for dynamically scaling infrastructures that may rapidly start and stop nodes automatically.',
-                })
+                i18n.translate(
+                  'xpack.observability.threshold.rule.alertFlyout.groupDisappearHelpText',
+                  {
+                    defaultMessage:
+                      'Enable this to trigger the action if a previously detected group begins to report no results. This is not recommended for dynamically scaling infrastructures that may rapidly start and stop nodes automatically.',
+                  }
+                )
               }
             >
               <EuiIcon type="questionInCircle" color="subdued" />
@@ -489,7 +504,7 @@ export function Expressions(props: Props) {
 }
 
 const docCountNoDataDisabledHelpText = i18n.translate(
-  'xpack.infra.metrics.alertFlyout.docCountNoDataDisabledHelpText',
+  'xpack.observability.threshold.rule.alertFlyout.docCountNoDataDisabledHelpText',
   {
     defaultMessage: '[This setting is not applicable to the Document Count aggregator.]',
   }

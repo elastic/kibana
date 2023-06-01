@@ -38,7 +38,7 @@ import { decimalToPct, pctToDecimal } from '../helpers/corrected_percent_convert
 const customComparators = {
   ...builtInComparators,
   [Comparator.OUTSIDE_RANGE]: {
-    text: i18n.translate('xpack.infra.metrics.alertFlyout.outsideRangeLabel', {
+    text: i18n.translate('xpack.observability.threshold.rule.alertFlyout.outsideRangeLabel', {
       defaultMessage: 'Is not between',
     }),
     value: Comparator.OUTSIDE_RANGE,
@@ -227,9 +227,12 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
             iconType={isExpanded ? 'arrowDown' : 'arrowRight'}
             onClick={toggle}
             data-test-subj="expandRow"
-            aria-label={i18n.translate('xpack.infra.metrics.alertFlyout.expandRowLabel', {
-              defaultMessage: 'Expand row.',
-            })}
+            aria-label={i18n.translate(
+              'xpack.observability.threshold.rule.alertFlyout.expandRowLabel',
+              {
+                defaultMessage: 'Expand row.',
+              }
+            )}
           />
         </EuiFlexItem>
         <EuiFlexItem grow>
@@ -252,7 +255,7 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
                   onChangeSelectedAggField={updateMetric}
                   helpText={
                     <FormattedMessage
-                      id="xpack.infra.metrics.alertFlyout.ofExpression.helpTextDetail"
+                      id="xpack.observability.threshold.rule.alertFlyout.ofExpression.helpTextDetail"
                       defaultMessage="Can't find a metric? {documentationLink}."
                       values={{
                         documentationLink: (
@@ -262,7 +265,7 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
                             target="BLANK"
                           >
                             <FormattedMessage
-                              id="xpack.infra.metrics.alertFlyout.ofExpression.popoverLinkLabel"
+                              id="xpack.observability.threshold.rule.alertFlyout.ofExpression.popoverLinkLabel"
                               defaultMessage="Learn how to add more data"
                             />
                           </EuiLink>
@@ -288,7 +291,7 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
                     onClick={toggleWarningThreshold}
                   >
                     <FormattedMessage
-                      id="xpack.infra.metrics.alertFlyout.addWarningThreshold"
+                      id="xpack.observability.threshold.rule.alertFlyout.addWarningThreshold"
                       defaultMessage="Add warning threshold"
                     />
                   </EuiButtonEmpty>
@@ -302,7 +305,7 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
                 {criticalThresholdExpression}
                 <StyledHealth color="danger">
                   <FormattedMessage
-                    id="xpack.infra.metrics.alertFlyout.criticalThreshold"
+                    id="xpack.observability.threshold.rule.alertFlyout.criticalThreshold"
                     defaultMessage="Alert"
                   />
                 </StyledHealth>
@@ -311,13 +314,13 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
                 {warningThresholdExpression}
                 <StyledHealth color="warning">
                   <FormattedMessage
-                    id="xpack.infra.metrics.alertFlyout.warningThreshold"
+                    id="xpack.observability.threshold.rule.alertFlyout.warningThreshold"
                     defaultMessage="Warning"
                   />
                 </StyledHealth>
                 <EuiButtonIcon
                   aria-label={i18n.translate(
-                    'xpack.infra.metrics.alertFlyout.removeWarningThreshold',
+                    'xpack.observability.threshold.rule.alertFlyout.removeWarningThreshold',
                     {
                       defaultMessage: 'Remove warningThreshold',
                     }
@@ -350,9 +353,12 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
         {canDelete && (
           <EuiFlexItem grow={false}>
             <EuiButtonIcon
-              aria-label={i18n.translate('xpack.infra.metrics.alertFlyout.removeCondition', {
-                defaultMessage: 'Remove condition',
-              })}
+              aria-label={i18n.translate(
+                'xpack.observability.threshold.rule.alertFlyout.removeCondition',
+                {
+                  defaultMessage: 'Remove condition',
+                }
+              )}
               color={'danger'}
               iconType={'trash'}
               onClick={() => remove(expressionId)}
@@ -407,7 +413,7 @@ const ThresholdElement: React.FC<{
 
 export const aggregationType: { [key: string]: AggregationType } = {
   avg: {
-    text: i18n.translate('xpack.infra.metrics.alertFlyout.aggregationText.avg', {
+    text: i18n.translate('xpack.observability.threshold.rule.alertFlyout.aggregationText.avg', {
       defaultMessage: 'Average',
     }),
     fieldRequired: true,
@@ -415,7 +421,7 @@ export const aggregationType: { [key: string]: AggregationType } = {
     value: AGGREGATION_TYPES.AVERAGE,
   },
   max: {
-    text: i18n.translate('xpack.infra.metrics.alertFlyout.aggregationText.max', {
+    text: i18n.translate('xpack.observability.threshold.rule.alertFlyout.aggregationText.max', {
       defaultMessage: 'Max',
     }),
     fieldRequired: true,
@@ -423,7 +429,7 @@ export const aggregationType: { [key: string]: AggregationType } = {
     value: AGGREGATION_TYPES.MAX,
   },
   min: {
-    text: i18n.translate('xpack.infra.metrics.alertFlyout.aggregationText.min', {
+    text: i18n.translate('xpack.observability.threshold.rule.alertFlyout.aggregationText.min', {
       defaultMessage: 'Min',
     }),
     fieldRequired: true,
@@ -431,15 +437,18 @@ export const aggregationType: { [key: string]: AggregationType } = {
     value: AGGREGATION_TYPES.MIN,
   },
   cardinality: {
-    text: i18n.translate('xpack.infra.metrics.alertFlyout.aggregationText.cardinality', {
-      defaultMessage: 'Cardinality',
-    }),
+    text: i18n.translate(
+      'xpack.observability.threshold.rule.alertFlyout.aggregationText.cardinality',
+      {
+        defaultMessage: 'Cardinality',
+      }
+    ),
     fieldRequired: false,
     value: AGGREGATION_TYPES.CARDINALITY,
     validNormalizedTypes: ['number', 'string', 'ip', 'date'],
   },
   rate: {
-    text: i18n.translate('xpack.infra.metrics.alertFlyout.aggregationText.rate', {
+    text: i18n.translate('xpack.observability.threshold.rule.alertFlyout.aggregationText.rate', {
       defaultMessage: 'Rate',
     }),
     fieldRequired: false,
@@ -447,7 +456,7 @@ export const aggregationType: { [key: string]: AggregationType } = {
     validNormalizedTypes: ['number'],
   },
   count: {
-    text: i18n.translate('xpack.infra.metrics.alertFlyout.aggregationText.count', {
+    text: i18n.translate('xpack.observability.threshold.rule.alertFlyout.aggregationText.count', {
       defaultMessage: 'Document count',
     }),
     fieldRequired: false,
@@ -455,7 +464,7 @@ export const aggregationType: { [key: string]: AggregationType } = {
     validNormalizedTypes: ['number'],
   },
   sum: {
-    text: i18n.translate('xpack.infra.metrics.alertFlyout.aggregationText.sum', {
+    text: i18n.translate('xpack.observability.threshold.rule.alertFlyout.aggregationText.sum', {
       defaultMessage: 'Sum',
     }),
     fieldRequired: false,
@@ -463,7 +472,7 @@ export const aggregationType: { [key: string]: AggregationType } = {
     validNormalizedTypes: ['number', 'histogram'],
   },
   p95: {
-    text: i18n.translate('xpack.infra.metrics.alertFlyout.aggregationText.p95', {
+    text: i18n.translate('xpack.observability.threshold.rule.alertFlyout.aggregationText.p95', {
       defaultMessage: '95th Percentile',
     }),
     fieldRequired: false,
@@ -471,7 +480,7 @@ export const aggregationType: { [key: string]: AggregationType } = {
     validNormalizedTypes: ['number', 'histogram'],
   },
   p99: {
-    text: i18n.translate('xpack.infra.metrics.alertFlyout.aggregationText.p99', {
+    text: i18n.translate('xpack.observability.threshold.rule.alertFlyout.aggregationText.p99', {
       defaultMessage: '99th Percentile',
     }),
     fieldRequired: false,

@@ -209,7 +209,7 @@ export function ExpressionChart({
           {series.id !== 'ALL' ? (
             <EuiText size="xs" color="subdued">
               <FormattedMessage
-                id="xpack.infra.metrics.alerts.dataTimeRangeLabelWithGrouping"
+                id="xpack.observability.threshold.rule.alerts.dataTimeRangeLabelWithGrouping"
                 defaultMessage="Last {lookback} {timeLabel} of data for {id}"
                 values={{ id: series.id, timeLabel, lookback: timeSize! * 20 }}
               />
@@ -217,7 +217,7 @@ export function ExpressionChart({
           ) : (
             <EuiText size="xs" color="subdued">
               <FormattedMessage
-                id="xpack.infra.metrics.alerts.dataTimeRangeLabel"
+                id="xpack.observability.threshold.rule.alerts.dataTimeRangeLabel"
                 defaultMessage="Last {lookback} {timeLabel}"
                 values={{ timeLabel, lookback: timeSize! * 20 }}
               />

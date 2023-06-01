@@ -45,10 +45,10 @@ export function MetricsExplorerGroupBy({ options, onChange, fields, errorOptions
   return (
     <EuiComboBox
       data-test-subj="metricsExplorer-groupBy"
-      placeholder={i18n.translate('xpack.infra.metricsExplorer.groupByLabel', {
+      placeholder={i18n.translate('xpack.observability.threshold.ruleExplorer.groupByLabel', {
         defaultMessage: 'Everything',
       })}
-      aria-label={i18n.translate('xpack.infra.metricsExplorer.groupByAriaLabel', {
+      aria-label={i18n.translate('xpack.observability.threshold.ruleExplorer.groupByAriaLabel', {
         defaultMessage: 'Graph per',
       })}
       fullWidth

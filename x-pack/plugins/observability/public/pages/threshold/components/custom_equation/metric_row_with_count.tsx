@@ -72,7 +72,7 @@ export function MetricRowWithCount({
         <EuiFlexItem style={{ maxWidth: 145 }}>
           <EuiFormRow
             label={i18n.translate(
-              'xpack.infra.metrics.alertFlyout.customEquationEditor.aggregationLabel',
+              'xpack.observability.threshold.rule.alertFlyout.customEquationEditor.aggregationLabel',
               { defaultMessage: 'Aggregation {name}', values: { name } }
             )}
           >
@@ -88,7 +88,7 @@ export function MetricRowWithCount({
         <EuiFlexItem>
           <EuiFormRow
             label={i18n.translate(
-              'xpack.infra.metrics.alertFlyout.customEquationEditor.filterLabel',
+              'xpack.observability.threshold.rule.alertFlyout.customEquationEditor.filterLabel',
               { defaultMessage: 'KQL Filter {name}', values: { name } }
             )}
           >

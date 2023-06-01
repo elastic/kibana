@@ -99,7 +99,7 @@ export function MetricRowWithAgg({
         <EuiFlexItem style={{ maxWidth: 145 }}>
           <EuiFormRow
             label={i18n.translate(
-              'xpack.infra.metrics.alertFlyout.customEquationEditor.aggregationLabel',
+              'xpack.observability.threshold.rule.alertFlyout.customEquationEditor.aggregationLabel',
               { defaultMessage: 'Aggregation {name}', values: { name } }
             )}
             isInvalid={isAggInvalid}
@@ -117,7 +117,7 @@ export function MetricRowWithAgg({
         <EuiFlexItem>
           <EuiFormRow
             label={i18n.translate(
-              'xpack.infra.metrics.alertFlyout.customEquationEditor.fieldLabel',
+              'xpack.observability.threshold.rule.alertFlyout.customEquationEditor.fieldLabel',
               { defaultMessage: 'Field {name}', values: { name } }
             )}
             isInvalid={isFieldInvalid}

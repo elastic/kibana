@@ -175,7 +175,7 @@ export function CustomEquationEditor({
           isDisabled={disableAdd}
         >
           <FormattedMessage
-            id="xpack.infra.metrics.alertFlyout.customEquationEditor.addCustomRow"
+            id="xpack.observability.threshold.rule.alertFlyout.customEquationEditor.addCustomRow"
             defaultMessage="Add aggregation/field"
           />
         </EuiButtonEmpty>
