@@ -41,6 +41,10 @@ import pRetry from 'p-retry';
 import { renderSummaryTable } from './print_run';
 import { getLocalhostRealIp } from '../endpoint/common/localhost_services';
 
+/**
+ * Iterate over the matching test files, but only take ones that are assigned to this parallel job
+ * There are `n` parallel jobs, so only process every nth file.
+ **/
 const retrieveIntegrations = (
   specPattern: string[],
   chunksTotal: number = process.env.BUILDKITE_PARALLEL_JOB_COUNT
@@ -52,13 +56,13 @@ const retrieveIntegrations = (
 ) => {
   const integrationsPaths = globby.sync(specPattern);
 
-  const retval: string[] = [];
+  const integrationsPathsForChunk: string[] = [];
 
-  for (let i = chunkIndex; i < integrationsPaths.length; i += chunksTotal) {
-    retval.push(integrationsPaths[i]);
+  for (let i = chunkIndex; i < integrationsPaths.length; i+=chunksTotal) {
+    integrationsPathsForChunk.push(integrationsPaths[i]);
   }
 
-  return retval;
+  return integrationsPathsForChunk;
 };
 
 export const cli = () => {
