@@ -33,7 +33,10 @@ import {
   ANOMALIES_TABLE_ENABLE_JOB_LOADER,
   ANOMALIES_TABLE_COUNT_COLUMN,
 } from '../../../screens/entity_analytics';
-import { openRiskTableFilterAndSelectTheLowOption, removeLowFilter } from '../../../tasks/host_risk';
+import {
+  openRiskTableFilterAndSelectTheLowOption,
+  removeLowFilter,
+} from '../../../tasks/host_risk';
 import { createRule } from '../../../tasks/api_calls/rules';
 import { waitForAlertsToPopulate } from '../../../tasks/create_new_rule';
 import { getNewRule } from '../../../objects/rule';

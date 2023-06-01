@@ -14,7 +14,10 @@ import {
   UPGRADE_CONFIRMATION_MODAL,
   RISK_SCORE_DASHBOARDS_INSTALLATION_SUCCESS_TOAST,
 } from '../../../screens/entity_analytics';
-import { deleteRiskScore, installLegacyRiskScoreModule } from '../../../tasks/api_calls/risk_scores';
+import {
+  deleteRiskScore,
+  installLegacyRiskScoreModule,
+} from '../../../tasks/api_calls/risk_scores';
 import { findSavedObjects } from '../../../tasks/api_calls/risk_scores/saved_objects';
 import { createRule } from '../../../tasks/api_calls/rules';
 import { cleanKibana } from '../../../tasks/common';
