@@ -29,6 +29,7 @@ export type OnSourceChangeArgs = {
 
 export type SourceEditorArgs = {
   currentLayerType: string;
+  hasSpatialJoins: boolean;
   numberOfJoins: number;
   onChange: (...args: OnSourceChangeArgs[]) => Promise<void>;
   onStyleDescriptorChange: (styleDescriptor: StyleDescriptor) => void;

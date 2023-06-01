@@ -10,3 +10,8 @@
  * The major version that is used to represent model versions.
  */
 export const modelVersionVirtualMajor = 10;
+
+/**
+ * The stack version where all types will be forced to switch to using the model version system.
+ */
+export const globalSwitchToModelVersionAt = '8.10.0';

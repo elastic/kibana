@@ -19,13 +19,15 @@ import {
   ELASTIC_MODEL_TAG,
   MODEL_STATE,
 } from '@kbn/ml-trained-models-utils/src/constants/trained_models';
+import {
+  getAnalysisType,
+  type DataFrameAnalysisConfigType,
+} from '@kbn/ml-data-frame-analytics-utils';
 import { useTrainedModelsApiService } from '../services/ml_api_service/trained_models';
 import { getUserConfirmationProvider } from './force_stop_dialog';
 import { useToastNotificationService } from '../services/toast_notification_service';
 import { getUserInputModelDeploymentParamsProvider } from './deployment_setup';
 import { useMlKibana, useMlLocator, useNavigateToPath } from '../contexts/kibana';
-import { getAnalysisType } from '../../../common/util/analytics_utils';
-import { DataFrameAnalysisConfigType } from '../../../common/types/data_frame_analytics';
 import { ML_PAGES } from '../../../common/constants/locator';
 import { isTestable } from './test_models';
 import { ModelItem } from './models_list';
@@ -392,16 +394,24 @@ export function useModelActions({
       },
       {
         name: (model) => {
-          const enabled = !isPopulatedObject(model.pipelines);
+          const hasPipelines = isPopulatedObject(model.pipelines);
+          const hasDeployments = model.state === MODEL_STATE.STARTED;
           return (
             <EuiToolTip
               position="left"
               content={
-                enabled
-                  ? null
-                  : i18n.translate('xpack.ml.trainedModels.modelsList.deleteDisabledTooltip', {
+                hasPipelines
+                  ? i18n.translate('xpack.ml.trainedModels.modelsList.deleteDisabledTooltip', {
                       defaultMessage: 'Model has associated pipelines',
                     })
+                  : hasDeployments
+                  ? i18n.translate(
+                      'xpack.ml.trainedModels.modelsList.deleteDisabledWithDeploymentsTooltip',
+                      {
+                        defaultMessage: 'Model has started deployments',
+                      }
+                    )
+                  : null
               }
             >
               <>
@@ -428,7 +438,7 @@ export function useModelActions({
         enabled: (item) => {
           // TODO check for permissions to delete ingest pipelines.
           // ATM undefined means pipelines fetch failed server-side.
-          return !isPopulatedObject(item.pipelines);
+          return item.state !== MODEL_STATE.STARTED && !isPopulatedObject(item.pipelines);
         },
       },
       {

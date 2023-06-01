@@ -4,13 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { ActionGroupIdsOf } from '@kbn/alerting-plugin/common';
 import { isEmpty } from 'lodash';
+import { ActionGroupIdsOf } from '@kbn/alerting-plugin/common';
 import { createLifecycleRuleTypeFactory, IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import { DOWN_LABEL, getMonitorAlertDocument, getMonitorSummary } from './message_utils';
-import { getSyntheticsMonitorRouteFromMonitorId } from '../../../common/utils/get_synthetics_monitor_url';
-import { SyntheticsCommonState } from '../../../common/runtime_types/alert_rules/common';
+import {
+  SyntheticsCommonState,
+  SyntheticsMonitorStatusAlertState,
+} from '../../../common/runtime_types/alert_rules/common';
 import { UptimeCorePluginsSetup, UptimeServerSetup } from '../../legacy_uptime/lib/adapters';
 import { OverviewStatus } from '../../../common/runtime_types';
 import { StatusRuleExecutor } from './status_rule_executor';
@@ -24,6 +25,8 @@ import {
   updateState,
   getAlertDetailsUrl,
   getViewInAppUrl,
+  getRelativeViewInAppUrl,
+  getFullViewInAppMessage,
 } from '../common';
 import { getActionVariables } from '../action_variables';
 import { STATUS_RULE_NAME } from '../translations';
@@ -62,18 +65,22 @@ export const registerSyntheticsStatusCheckRule = (
     isExportable: true,
     minimumLicenseRequired: 'basic',
     doesSetRecoveryContext: true,
-    async executor({ state, params, services, startedAt, spaceId, previousStartedAt }) {
+    async executor({ state, params, services, spaceId, previousStartedAt }) {
       const ruleState = state as SyntheticsCommonState;
 
       const { basePath } = server;
       const {
         alertFactory,
         getAlertUuid,
-        getAlertStartedDate,
         savedObjectsClient,
         scopedClusterClient,
         alertWithLifecycle,
+        uiSettingsClient,
       } = services;
+
+      const dateFormat = await uiSettingsClient.get('dateFormat');
+      const timezone = await uiSettingsClient.get('dateFormat:tz');
+      const tz = timezone === 'Browser' ? 'UTC' : timezone;
 
       const statusRule = new StatusRuleExecutor(
         previousStartedAt,
@@ -90,17 +97,40 @@ export const registerSyntheticsStatusCheckRule = (
 
       Object.entries(downConfigs).forEach(([idWithLocation, { ping, configId }]) => {
         const locationId = statusRule.getLocationId(ping.observer?.geo?.name!) ?? '';
-        const monitorSummary = getMonitorSummary(ping, DOWN_LABEL, locationId, configId);
         const alertId = idWithLocation;
+        const monitorSummary = getMonitorSummary(
+          ping,
+          DOWN_LABEL,
+          locationId,
+          configId,
+          dateFormat,
+          tz
+        );
+
         const alert = alertWithLifecycle({
           id: alertId,
           fields: getMonitorAlertDocument(monitorSummary),
         });
         const alertUuid = getAlertUuid(alertId);
-        const indexedStartedAt = getAlertStartedDate(alertId) ?? startedAt.toISOString();
+        const alertState = alert.getState() as SyntheticsMonitorStatusAlertState;
+        const errorStartedAt: string = alertState.errorStartedAt || ping['@timestamp'];
+
+        let relativeViewInAppUrl = '';
+        if (monitorSummary.stateId) {
+          relativeViewInAppUrl = getRelativeViewInAppUrl({
+            configId,
+            stateId: monitorSummary.stateId,
+            locationId,
+          });
+        }
 
         const context = {
           ...monitorSummary,
+          errorStartedAt,
+          linkMessage: monitorSummary.stateId
+            ? getFullViewInAppMessage(basePath, spaceId, relativeViewInAppUrl)
+            : '',
+          [VIEW_IN_APP_URL]: getViewInAppUrl(basePath, spaceId, relativeViewInAppUrl),
         };
 
         alert.replaceState({
@@ -109,17 +139,9 @@ export const registerSyntheticsStatusCheckRule = (
           idWithLocation,
         });
 
-        const relativeViewInAppUrl = getSyntheticsMonitorRouteFromMonitorId({
-          configId,
-          dateRangeEnd: 'now',
-          dateRangeStart: indexedStartedAt,
-          locationId,
-        });
-
         alert.scheduleActions(MONITOR_STATUS.id, {
-          [ALERT_DETAILS_URL]: getAlertDetailsUrl(basePath, spaceId, alertUuid),
-          [VIEW_IN_APP_URL]: getViewInAppUrl(basePath, spaceId, relativeViewInAppUrl),
           ...context,
+          [ALERT_DETAILS_URL]: getAlertDetailsUrl(basePath, spaceId, alertUuid),
         });
       });
 
@@ -130,6 +152,8 @@ export const registerSyntheticsStatusCheckRule = (
         spaceId,
         staleDownConfigs,
         upConfigs,
+        dateFormat,
+        tz,
       });
 
       return {

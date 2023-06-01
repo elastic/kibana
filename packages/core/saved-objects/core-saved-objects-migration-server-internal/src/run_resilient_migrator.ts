@@ -40,6 +40,26 @@ import type { State } from './state';
  */
 export const MIGRATION_CLIENT_OPTIONS = { maxRetries: 0, requestTimeout: 120_000 };
 
+export interface RunResilientMigratorParams {
+  client: ElasticsearchClient;
+  kibanaVersion: string;
+  waitForMigrationCompletion: boolean;
+  mustRelocateDocuments: boolean;
+  indexTypesMap: IndexTypesMap;
+  targetMappings: IndexMapping;
+  preMigrationScript?: string;
+  readyToReindex: Defer<any>;
+  doneReindexing: Defer<any>;
+  logger: Logger;
+  transformRawDocs: TransformRawDocs;
+  coreMigrationVersionPerType: SavedObjectsMigrationVersion;
+  migrationVersionPerType: SavedObjectsMigrationVersion;
+  indexPrefix: string;
+  migrationsConfig: SavedObjectsMigrationConfigType;
+  typeRegistry: ISavedObjectTypeRegistry;
+  docLinks: DocLinksServiceStart;
+}
+
 /**
  * Migrates the provided indexPrefix index using a resilient algorithm that is
  * completely lock-free so that any failure can always be retried by
@@ -57,29 +77,13 @@ export async function runResilientMigrator({
   readyToReindex,
   doneReindexing,
   transformRawDocs,
+  coreMigrationVersionPerType,
   migrationVersionPerType,
   indexPrefix,
   migrationsConfig,
   typeRegistry,
   docLinks,
-}: {
-  client: ElasticsearchClient;
-  kibanaVersion: string;
-  waitForMigrationCompletion: boolean;
-  mustRelocateDocuments: boolean;
-  indexTypesMap: IndexTypesMap;
-  targetMappings: IndexMapping;
-  preMigrationScript?: string;
-  readyToReindex: Defer<any>;
-  doneReindexing: Defer<any>;
-  logger: Logger;
-  transformRawDocs: TransformRawDocs;
-  migrationVersionPerType: SavedObjectsMigrationVersion;
-  indexPrefix: string;
-  migrationsConfig: SavedObjectsMigrationConfigType;
-  typeRegistry: ISavedObjectTypeRegistry;
-  docLinks: DocLinksServiceStart;
-}): Promise<MigrationResult> {
+}: RunResilientMigratorParams): Promise<MigrationResult> {
   const initialState = createInitialState({
     kibanaVersion,
     waitForMigrationCompletion,
@@ -87,6 +91,7 @@ export async function runResilientMigrator({
     indexTypesMap,
     targetMappings,
     preMigrationScript,
+    coreMigrationVersionPerType,
     migrationVersionPerType,
     indexPrefix,
     migrationsConfig,

@@ -22,6 +22,11 @@ interface LinkToPageProps {
 
 const ITEM_TYPES = inventoryModels.map((m) => m.id).join('|');
 
+/**
+ * @deprecated Link-to routes shouldn't be used anymore
+ * Instead please use locators registered for the infra plugin
+ * LogsLocator & NodeLogsLocator
+ */
 export const LinkToLogsPage: React.FC<LinkToPageProps> = (props) => {
   return (
     <Switch>

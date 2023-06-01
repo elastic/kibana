@@ -5,8 +5,10 @@
  * 2.0.
  */
 
+import { rootRequest } from '../common';
+
 export const deleteIndex = (index: string) => {
-  cy.request({
+  rootRequest({
     method: 'DELETE',
     url: `${Cypress.env('ELASTICSEARCH_URL')}/${index}`,
     headers: { 'kbn-xsrf': 'cypress-creds' },
@@ -16,22 +18,19 @@ export const deleteIndex = (index: string) => {
 
 export const waitForNewDocumentToBeIndexed = (index: string, initialNumberOfDocuments: number) => {
   cy.waitUntil(
-    () => {
-      return cy
-        .request({
-          method: 'GET',
-          url: `${Cypress.env('ELASTICSEARCH_URL')}/${index}/_search`,
-          headers: { 'kbn-xsrf': 'cypress-creds' },
-          failOnStatusCode: false,
-        })
-        .then((response) => {
-          if (response.status !== 200) {
-            return false;
-          } else {
-            return response.body.hits.hits.length > initialNumberOfDocuments;
-          }
-        });
-    },
+    () =>
+      rootRequest<{ hits: { hits: unknown[] } }>({
+        method: 'GET',
+        url: `${Cypress.env('ELASTICSEARCH_URL')}/${index}/_search`,
+        headers: { 'kbn-xsrf': 'cypress-creds' },
+        failOnStatusCode: false,
+      }).then((response) => {
+        if (response.status !== 200) {
+          return false;
+        } else {
+          return response.body.hits.hits.length > initialNumberOfDocuments;
+        }
+      }),
     { interval: 500, timeout: 12000 }
   );
 };

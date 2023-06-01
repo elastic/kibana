@@ -208,14 +208,11 @@ export const getAggregationsBuckets = ({
 }: {
   keys: string[];
   aggs?: Record<string, unknown>;
-}): Record<string, Buckets['buckets']> =>
-  keys.reduce(
-    (acc, key) => ({
-      ...acc,
-      [key]: getBucketFromAggregation({ aggs, key }),
-    }),
-    {}
-  );
+}) =>
+  keys.reduce<Record<string, Buckets['buckets']>>((acc, key) => {
+    acc[key] = getBucketFromAggregation({ aggs, key });
+    return acc;
+  }, {});
 
 export const getAttachmentsFrameworkStats = ({
   attachmentAggregations,

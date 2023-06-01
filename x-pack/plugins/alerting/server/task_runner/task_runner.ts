@@ -49,6 +49,8 @@ import {
   RawAlertInstance,
   RuleLastRunOutcomeOrderMap,
   MaintenanceWindow,
+  RuleAlertData,
+  SanitizedRule,
 } from '../../common';
 import { NormalizedRuleType, UntypedNormalizedRuleType } from '../rule_type_registry';
 import { getEsErrorMessage } from '../lib/errors';
@@ -70,7 +72,7 @@ import { RuleMonitoringService } from '../monitoring/rule_monitoring_service';
 import { ILastRun, lastRunFromState, lastRunToRaw } from '../lib/last_run_status';
 import { RunningHandler } from './running_handler';
 import { RuleResultService } from '../monitoring/rule_result_service';
-import { LegacyAlertsClient } from '../alerts_client/legacy_alerts_client';
+import { LegacyAlertsClient } from '../alerts_client';
 
 const FALLBACK_RETRY_INTERVAL = '5m';
 const CONNECTIVITY_RETRY_INTERVAL = '5m';
@@ -87,7 +89,8 @@ export class TaskRunner<
   State extends AlertInstanceState,
   Context extends AlertInstanceContext,
   ActionGroupIds extends string,
-  RecoveryActionGroupId extends string
+  RecoveryActionGroupId extends string,
+  AlertData extends RuleAlertData
 > {
   private context: TaskRunnerContext;
   private logger: Logger;
@@ -100,7 +103,8 @@ export class TaskRunner<
     State,
     Context,
     ActionGroupIds,
-    RecoveryActionGroupId
+    RecoveryActionGroupId,
+    AlertData
   >;
   private readonly executionId: string;
   private readonly ruleTypeRegistry: RuleTypeRegistry;
@@ -115,12 +119,6 @@ export class TaskRunner<
   private ruleMonitoring: RuleMonitoringService;
   private ruleRunning: RunningHandler;
   private ruleResult: RuleResultService;
-  private legacyAlertsClient: LegacyAlertsClient<
-    State,
-    Context,
-    ActionGroupIds,
-    RecoveryActionGroupId
-  >;
 
   constructor(
     ruleType: NormalizedRuleType<
@@ -130,7 +128,8 @@ export class TaskRunner<
       State,
       Context,
       ActionGroupIds,
-      RecoveryActionGroupId
+      RecoveryActionGroupId,
+      AlertData
     >,
     taskInstance: ConcreteTaskInstance,
     context: TaskRunnerContext,
@@ -159,11 +158,6 @@ export class TaskRunner<
       loggerId
     );
     this.ruleResult = new RuleResultService();
-    this.legacyAlertsClient = new LegacyAlertsClient({
-      logger: this.logger,
-      maxAlerts: context.maxAlerts,
-      ruleType: this.ruleType as UntypedNormalizedRuleType,
-    });
   }
 
   private async updateRuleSavedObjectPostRun(
@@ -210,6 +204,19 @@ export class TaskRunner<
 
     // if execution has been cancelled, return true if EITHER alerting config or rule type indicate to proceed with scheduling actions
     return !this.context.cancelAlertsOnRuleTimeout || !this.ruleType.cancelAlertsOnRuleTimeout;
+  }
+
+  private getAADRuleData(rule: SanitizedRule<Params>, spaceId: string) {
+    return {
+      consumer: rule.consumer,
+      executionId: this.executionId,
+      id: rule.id,
+      name: rule.name,
+      parameters: rule.params,
+      revision: rule.revision,
+      spaceId,
+      tags: rule.tags,
+    };
   }
 
   // Usage counter for telemetry
@@ -282,18 +289,42 @@ export class TaskRunner<
 
     const ruleLabel = `${this.ruleType.id}:${ruleId}: '${name}'`;
 
-    if (this.context.alertsService && ruleType.alerts) {
-      // Wait for alerts-as-data resources to be installed
-      // Since this occurs at the beginning of rule execution, we can be
-      // assured that all resources will be ready for reading/writing when
-      // the rule type executors are called
+    const rulesSettingsClient = this.context.getRulesSettingsClientWithRequest(fakeRequest);
+    const flappingSettings = await rulesSettingsClient.flapping().get();
 
-      // TODO - add retry if any initialization steps have failed
-      await this.context.alertsService.getContextInitializationPromise(
-        ruleType.alerts.context,
-        namespace ?? DEFAULT_NAMESPACE_STRING
+    const alertsClientParams = {
+      logger: this.logger,
+      ruleType: this.ruleType as UntypedNormalizedRuleType,
+    };
+
+    // Create AlertsClient if rule type has registered an alerts context
+    // with the framework. The AlertsClient will handle reading and
+    // writing from alerts-as-data indices and eventually
+    // we will want to migrate all the processing of alerts out
+    // of the LegacyAlertsClient and into the AlertsClient.
+    const alertsClient =
+      (await this.context.alertsService?.createAlertsClient<
+        AlertData,
+        State,
+        Context,
+        ActionGroupIds,
+        RecoveryActionGroupId
+      >({
+        ...alertsClientParams,
+        namespace: namespace ?? DEFAULT_NAMESPACE_STRING,
+        rule: this.getAADRuleData(rule, spaceId),
+      })) ??
+      new LegacyAlertsClient<State, Context, ActionGroupIds, RecoveryActionGroupId>(
+        alertsClientParams
       );
-    }
+
+    await alertsClient.initializeExecution({
+      maxAlerts: this.maxAlerts,
+      ruleLabel,
+      flappingSettings,
+      activeAlertsFromState: alertRawInstances,
+      recoveredAlertsFromState: alertRecoveredRawInstances,
+    });
 
     const wrappedClientOptions = {
       rule: {
@@ -315,8 +346,6 @@ export class TaskRunner<
       ...wrappedClientOptions,
       searchSourceClient,
     });
-    const rulesSettingsClient = this.context.getRulesSettingsClientWithRequest(fakeRequest);
-    const flappingSettings = await rulesSettingsClient.flapping().get();
     const maintenanceWindowClient = this.context.getMaintenanceWindowClientWithRequest(fakeRequest);
 
     let activeMaintenanceWindows: MaintenanceWindow[] = [];
@@ -338,14 +367,8 @@ export class TaskRunner<
     const { updatedRuleTypeState } = await this.timer.runWithTimer(
       TaskRunnerTimerSpan.RuleTypeRun,
       async () => {
-        this.legacyAlertsClient.initialize(
-          alertRawInstances,
-          alertRecoveredRawInstances,
-          maintenanceWindowIds
-        );
-
         const checkHasReachedAlertLimit = () => {
-          const reachedLimit = this.legacyAlertsClient.hasReachedAlertLimit();
+          const reachedLimit = alertsClient.hasReachedAlertLimit() || false;
           if (reachedLimit) {
             this.logger.warn(
               `rule execution generated greater than ${this.maxAlerts} alerts: ${ruleLabel}`
@@ -383,7 +406,7 @@ export class TaskRunner<
                 searchSourceClient: wrappedSearchSourceClient.searchSourceClient,
                 uiSettingsClient: this.context.uiSettings.asScopedToClient(savedObjectsClient),
                 scopedClusterClient: wrappedScopedClusterClient.client(),
-                alertFactory: this.legacyAlertsClient.getExecutorServices(),
+                alertFactory: alertsClient.getExecutorServices(),
                 shouldWriteAlerts: () => this.shouldLogAndScheduleActionsForAlerts(),
                 shouldStopExecution: () => this.cancelled,
                 ruleMonitoringService: this.ruleMonitoring.getLastRunMetricsSetters(),
@@ -429,7 +452,7 @@ export class TaskRunner<
           // or requested it and then reported back whether it exceeded the limit
           // If neither of these apply, this check will throw an error
           // These errors should show up during rule type development
-          this.legacyAlertsClient.checkLimitUsage();
+          alertsClient.checkLimitUsage();
         } catch (err) {
           // Check if this error is due to reaching the alert limit
           if (!checkHasReachedAlertLimit()) {
@@ -461,11 +484,10 @@ export class TaskRunner<
     );
 
     await this.timer.runWithTimer(TaskRunnerTimerSpan.ProcessAlerts, async () => {
-      this.legacyAlertsClient.processAndLogAlerts({
+      alertsClient.processAndLogAlerts({
         eventLogger: this.alertingEventLogger,
-        ruleLabel,
         ruleRunMetricsStore,
-        shouldLogAndScheduleActionsForAlerts: this.shouldLogAndScheduleActionsForAlerts(),
+        shouldLogAlerts: this.shouldLogAndScheduleActionsForAlerts(),
         flappingSettings,
         notifyWhen,
         maintenanceWindowIds,
@@ -503,21 +525,20 @@ export class TaskRunner<
         this.countUsageOfActionExecutionAfterRuleCancellation();
       } else {
         executionHandlerRunResult = await executionHandler.run({
-          ...this.legacyAlertsClient.getProcessedAlerts('activeCurrent'),
-          ...this.legacyAlertsClient.getProcessedAlerts('recoveredCurrent'),
+          ...alertsClient.getProcessedAlerts('activeCurrent'),
+          ...alertsClient.getProcessedAlerts('recoveredCurrent'),
         });
       }
     });
 
-    this.legacyAlertsClient.setFlapping(flappingSettings);
-
     let alertsToReturn: Record<string, RawAlertInstance> = {};
     let recoveredAlertsToReturn: Record<string, RawAlertInstance> = {};
+    const { alertsToReturn: alerts, recoveredAlertsToReturn: recovered } =
+      await alertsClient.getAlertsToSerialize();
+
     // Only serialize alerts into task state if we're auto-recovering, otherwise
     // we don't need to keep this information around.
     if (this.ruleType.autoRecoverAlerts) {
-      const { alertsToReturn: alerts, recoveredAlertsToReturn: recovered } =
-        this.legacyAlertsClient.getAlertsToSerialize();
       alertsToReturn = alerts;
       recoveredAlertsToReturn = recovered;
     }

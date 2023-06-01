@@ -22,6 +22,8 @@ export const configSchema = schema.object({
   enabled: schema.boolean({ defaultValue: true }),
   hasConnectors: schema.boolean({ defaultValue: true }),
   hasDefaultIngestPipeline: schema.boolean({ defaultValue: true }),
+  hasDocumentLevelSecurityEnabled: schema.boolean({ defaultValue: true }),
+  hasIncrementalSyncEnabled: schema.boolean({ defaultValue: true }),
   hasNativeConnectors: schema.boolean({ defaultValue: true }),
   hasWebCrawler: schema.boolean({ defaultValue: true }),
   host: schema.maybe(schema.string()),

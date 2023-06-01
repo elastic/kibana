@@ -53,7 +53,6 @@ export default function updateFlappingSettingsTest({ getService }: FtrProviderCo
               expect(response.body.enabled).to.eql(false);
               expect(response.body.look_back_window).to.eql(20);
               expect(response.body.status_change_threshold).to.eql(20);
-              expect(response.body.created_by).to.eql(user.username);
               expect(response.body.updated_by).to.eql(user.username);
               expect(Date.parse(response.body.created_at)).to.be.greaterThan(0);
               expect(Date.parse(response.body.updated_at)).to.be.greaterThan(0);

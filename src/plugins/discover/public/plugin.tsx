@@ -26,7 +26,7 @@ import { SharePluginStart, SharePluginSetup } from '@kbn/share-plugin/public';
 import { UrlForwardingSetup, UrlForwardingStart } from '@kbn/url-forwarding-plugin/public';
 import { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import { Start as InspectorPublicPluginStart } from '@kbn/inspector-plugin/public';
-import { EuiLoadingContent } from '@elastic/eui';
+import { EuiSkeletonText } from '@elastic/eui';
 import { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { SavedObjectsStart } from '@kbn/saved-objects-plugin/public';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
@@ -248,7 +248,7 @@ export class DiscoverPlugin
           <React.Suspense
             fallback={
               <DeferredSpinner>
-                <EuiLoadingContent />
+                <EuiSkeletonText />
               </DeferredSpinner>
             }
           >
@@ -262,22 +262,25 @@ export class DiscoverPlugin
         defaultMessage: 'JSON',
       }),
       order: 20,
-      component: ({ hit, dataView }) => (
-        <React.Suspense
-          fallback={
-            <DeferredSpinner>
-              <EuiLoadingContent />
-            </DeferredSpinner>
-          }
-        >
-          <SourceViewer
-            index={hit.raw._index}
-            id={hit.raw._id}
-            dataView={dataView}
-            hasLineNumbers
-          />
-        </React.Suspense>
-      ),
+      component: ({ hit, dataView, query, textBasedHits }) => {
+        return (
+          <React.Suspense
+            fallback={
+              <DeferredSpinner>
+                <EuiSkeletonText />
+              </DeferredSpinner>
+            }
+          >
+            <SourceViewer
+              index={hit.raw._index}
+              id={hit.raw._id ?? hit.id}
+              dataView={dataView}
+              textBasedHits={textBasedHits}
+              hasLineNumbers
+            />
+          </React.Suspense>
+        );
+      },
     });
 
     const {
