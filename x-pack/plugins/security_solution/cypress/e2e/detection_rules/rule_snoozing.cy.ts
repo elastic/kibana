@@ -46,14 +46,14 @@ const RULES_TO_IMPORT_FILENAME = 'cypress/fixtures/7_16_rules.ndjson';
 describe('rule snoozing', () => {
   before(() => {
     cleanKibana();
-    login();
   });
 
   beforeEach(() => {
+    login();
     deleteAlertsAndRules();
   });
 
-  it('ensures the rule is snoozed on the rules management page , rule details page and rule editing page', () => {
+  it('ensures the rule is snoozed on the rules management page, rule details page and rule editing page', () => {
     createRule(getNewRule({ name: 'Test on all pages' }));
 
     visitWithoutDateRange(SECURITY_DETECTIONS_RULES_URL);
