@@ -7,7 +7,7 @@
  */
 
 import { stubLogstashDataView } from '@kbn/data-views-plugin/common/data_view.stub';
-import { DataViewField, IAggConfig, METRIC_TYPES } from '@kbn/data-plugin/common';
+import { DataViewField, IAggConfig, METRIC_TYPES } from '@kbn/data-common';
 import { SchemaConfig } from '../../..';
 import { getFormulaForPipelineAgg, getFormulaForAgg } from './formula';
 

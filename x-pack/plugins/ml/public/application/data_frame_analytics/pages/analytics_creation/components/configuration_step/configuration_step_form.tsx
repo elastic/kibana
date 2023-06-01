@@ -18,7 +18,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { debounce, cloneDeep } from 'lodash';
 
-import { Query } from '@kbn/data-plugin/common/query';
+import { Query } from '@kbn/data-common/query';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { FieldStatsServices } from '@kbn/unified-field-list-plugin/public';
 import {

@@ -9,7 +9,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { AggFunctionsMapping, UI_SETTINGS } from '@kbn/data-plugin/public';
-import { extendedBoundsToAst, numericalRangeToAst } from '@kbn/data-plugin/common';
+import { extendedBoundsToAst, numericalRangeToAst } from '@kbn/data-common';
 import { buildExpressionFunction, Range } from '@kbn/expressions-plugin/public';
 import { RangeEditor } from './range_editor';
 import { OperationDefinition } from '..';

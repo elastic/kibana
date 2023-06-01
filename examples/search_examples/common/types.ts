@@ -11,7 +11,7 @@ import {
   IEsSearchResponse,
   IKibanaSearchRequest,
   IKibanaSearchResponse,
-} from '@kbn/data-plugin/common';
+} from '@kbn/data-common';
 
 export interface IMyStrategyRequest extends IEsSearchRequest {
   get_cool: boolean;

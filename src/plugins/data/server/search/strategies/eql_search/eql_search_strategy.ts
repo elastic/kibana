@@ -15,7 +15,7 @@ import {
   EqlSearchStrategyResponse,
   IAsyncSearchOptions,
   pollSearch,
-} from '../../../../common';
+} from '@kbn/data-common';
 import { toEqlKibanaSearchResponse } from './response_utils';
 import { EqlSearchResponse } from './types';
 import { ISearchStrategy } from '../../types';

@@ -7,7 +7,7 @@
  */
 
 import { stubLogstashDataView } from '@kbn/data-views-plugin/common/data_view.stub';
-import { AggParamsRange, AggParamsHistogram } from '@kbn/data-plugin/common';
+import { AggParamsRange, AggParamsHistogram } from '@kbn/data-common';
 import { convertToRangeColumn } from './range';
 import { RangeColumn } from './types';
 import { DataType } from '../../types';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { IEsSearchResponse } from '@kbn/data-plugin/common';
+import type { IEsSearchResponse } from '@kbn/data-common';
 
 import type { NetworkTlsRequestOptions } from '../../../../../../../common/search_strategy';
 import {

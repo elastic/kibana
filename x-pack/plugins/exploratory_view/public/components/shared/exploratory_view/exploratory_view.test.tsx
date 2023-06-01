@@ -11,7 +11,7 @@ import { render, mockAppDataView } from './rtl_helpers';
 import { ExploratoryView } from './exploratory_view';
 import * as obsvDataViews from '../../../utils/observability_data_views/observability_data_views';
 import * as pluginHook from '../../../hooks/use_plugin_context';
-import { createStubIndexPattern } from '@kbn/data-plugin/common/stubs';
+import { createStubIndexPattern } from '@kbn/data-common/stubs';
 import { noCasesPermissions as mockUseGetCasesPermissions } from '@kbn/observability-shared-plugin/public/utils/cases_permissions';
 import * as obsHooks from '@kbn/observability-shared-plugin/public/hooks/use_get_user_cases_permissions';
 

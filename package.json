@@ -342,6 +342,7 @@
     "@kbn/custom-integrations-plugin": "link:src/plugins/custom_integrations",
     "@kbn/dashboard-enhanced-plugin": "link:x-pack/plugins/dashboard_enhanced",
     "@kbn/dashboard-plugin": "link:src/plugins/dashboard",
+    "@kbn/data-common": "link:packages/kbn-data-common",
     "@kbn/data-plugin": "link:src/plugins/data",
     "@kbn/data-search-plugin": "link:test/plugin_functional/plugins/data_search",
     "@kbn/data-view-editor-plugin": "link:src/plugins/data_view_editor",

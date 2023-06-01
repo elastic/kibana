@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
-import { getEsQueryConfig } from '@kbn/data-plugin/common';
+import { getEsQueryConfig } from '@kbn/data-common';
 import type { ResponseActionButtonProps } from '@kbn/kubernetes-security-plugin/public/types';
 import { TableId } from '@kbn/securitysolution-data-table';
 import { InputsModelId } from '../../common/store/inputs/constants';

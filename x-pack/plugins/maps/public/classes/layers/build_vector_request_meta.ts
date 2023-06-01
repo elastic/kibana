@@ -6,7 +6,7 @@
  */
 
 import _ from 'lodash';
-import type { Query } from '@kbn/data-plugin/common';
+import type { Query } from '@kbn/data-common';
 import { DataFilters, VectorSourceRequestMeta } from '../../../common/descriptor_types';
 import { IVectorSource } from '../sources/vector_source';
 import { IJoinSource } from '../sources/join_sources';

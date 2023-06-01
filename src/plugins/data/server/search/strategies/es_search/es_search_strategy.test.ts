@@ -12,7 +12,7 @@ import { pluginInitializerContextConfigMock } from '@kbn/core/server/mocks';
 import { esSearchStrategyProvider } from './es_search_strategy';
 import { SearchStrategyDependencies } from '../../types';
 
-import * as indexNotFoundException from '../../../../common/search/test_data/index_not_found_exception.json';
+import * as indexNotFoundException from '@kbn/data-common/search/test_data/index_not_found_exception.json';
 import { errors } from '@elastic/elasticsearch';
 import { KbnServerError } from '@kbn/kibana-utils-plugin/server';
 import { firstValueFrom } from 'rxjs';

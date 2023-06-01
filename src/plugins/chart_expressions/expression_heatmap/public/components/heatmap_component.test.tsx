@@ -16,7 +16,7 @@ import {
 } from '@elastic/charts';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { EmptyPlaceholder } from '@kbn/charts-plugin/public';
-import { createDatatableUtilitiesMock } from '@kbn/data-plugin/common/mocks';
+import { createDatatableUtilitiesMock } from '@kbn/data-common/mocks';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
 import type { Datatable } from '@kbn/expressions-plugin/public';
 import { mountWithIntl, shallowWithIntl } from '@kbn/test-jest-helpers';

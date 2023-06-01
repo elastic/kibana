@@ -9,7 +9,7 @@
 import React from 'react';
 import FilterContent from './filter_content';
 import { render } from '@testing-library/react';
-import { phraseFilter } from '@kbn/data-plugin/common/stubs';
+import { phraseFilter } from '@kbn/data-common/stubs';
 
 test('alias', () => {
   const filter = {

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { AggParamsRange, AggParamsHistogram } from '@kbn/data-plugin/common';
+import { AggParamsRange, AggParamsHistogram } from '@kbn/data-common';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { v4 as uuidv4 } from 'uuid';
 import { RANGE_MODES } from '../../constants';

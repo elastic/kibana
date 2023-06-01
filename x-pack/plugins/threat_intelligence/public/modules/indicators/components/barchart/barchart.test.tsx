@@ -8,7 +8,7 @@
 import moment from 'moment-timezone';
 import React from 'react';
 import { render } from '@testing-library/react';
-import { TimeRangeBounds } from '@kbn/data-plugin/common';
+import { TimeRangeBounds } from '@kbn/data-common';
 import { TestProvidersComponent } from '../../../../mocks/test_providers';
 import { IndicatorsBarChart } from './barchart';
 import { ChartSeries } from '../../services/fetch_aggregated_indicators';

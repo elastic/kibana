@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Query } from '@kbn/data-plugin/common';
+import type { Query } from '@kbn/data-common';
 import { SOURCE_BOUNDS_DATA_REQUEST_ID } from '../../../../common/constants';
 import { MapExtent } from '../../../../common/descriptor_types';
 import { DataRequestContext } from '../../../actions';

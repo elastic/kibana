@@ -28,7 +28,7 @@ import type {
 import { NoSearchIdInSessionError } from '.';
 import { expressionsPluginMock } from '@kbn/expressions-plugin/public/mocks';
 import { createSearchSessionsClientMock } from './mocks';
-import { ENHANCED_ES_SEARCH_STRATEGY } from '../../common';
+import { ENHANCED_ES_SEARCH_STRATEGY } from '@kbn/data-common';
 
 let mockSessionClient: jest.Mocked<IScopedSearchSessionsClient>;
 jest.mock('./session', () => {

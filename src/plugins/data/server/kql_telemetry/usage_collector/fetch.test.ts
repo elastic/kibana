@@ -11,7 +11,7 @@ import { ElasticsearchClient } from '@kbn/core/server';
 import { CollectorFetchContext } from '@kbn/usage-collection-plugin/server';
 import { createCollectorFetchContextMock } from '@kbn/usage-collection-plugin/server/mocks';
 
-jest.mock('../../../common', () => ({
+jest.mock(@kbn/data-common', () => ({
   DEFAULT_QUERY_LANGUAGE: 'lucene',
   UI_SETTINGS: {
     SEARCH_QUERY_LANGUAGE: 'search:queryLanguage',

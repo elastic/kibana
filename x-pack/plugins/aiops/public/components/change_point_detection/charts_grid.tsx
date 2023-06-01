@@ -22,7 +22,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useTimefilter } from '@kbn/ml-date-picker';
-import { type RefreshInterval } from '@kbn/data-plugin/common';
+import { type RefreshInterval } from '@kbn/data-common';
 import { type SelectedChangePoint } from './change_point_detection_context';
 import { ChartComponent } from './chart_component';
 

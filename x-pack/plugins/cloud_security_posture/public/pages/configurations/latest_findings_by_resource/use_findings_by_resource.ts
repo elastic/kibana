@@ -6,7 +6,7 @@
  */
 import { useQuery } from '@tanstack/react-query';
 import { lastValueFrom } from 'rxjs';
-import { IKibanaSearchRequest, IKibanaSearchResponse } from '@kbn/data-plugin/common';
+import { IKibanaSearchRequest, IKibanaSearchResponse } from '@kbn/data-common';
 import type { Pagination } from '@elastic/eui';
 import {
   AggregationsCardinalityAggregate,

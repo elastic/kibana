@@ -13,7 +13,7 @@ import moment from 'moment';
 import { TimeRange } from '@kbn/es-query';
 import { AutoRefreshDoneFn, Timefilter } from './timefilter';
 import { Subscription } from 'rxjs';
-import { RefreshInterval } from '../../../common';
+import { RefreshInterval } from '@kbn/data-common';
 import { createNowProviderMock } from '../../now_provider/mocks';
 
 import { timefilterServiceMock } from './timefilter_service.mock';

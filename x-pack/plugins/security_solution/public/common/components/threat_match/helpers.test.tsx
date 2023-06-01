@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { fields, getField } from '@kbn/data-plugin/common/mocks';
+import { fields, getField } from '@kbn/data-common/mocks';
 import type { Entry, EmptyEntry, ThreatMapEntries, FormattedEntry } from './types';
-import type { FieldSpec } from '@kbn/data-plugin/common';
+import type { FieldSpec } from '@kbn/data-common';
 import type { DataViewBase } from '@kbn/es-query';
 import moment from 'moment-timezone';
 

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { TimeRange } from '@kbn/data-plugin/common';
+import type { TimeRange } from '@kbn/data-common';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import type { DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
 import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';

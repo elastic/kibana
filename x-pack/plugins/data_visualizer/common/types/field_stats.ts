@@ -7,7 +7,7 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { Query } from '@kbn/es-query';
-import type { IKibanaSearchResponse } from '@kbn/data-plugin/common';
+import type { IKibanaSearchResponse } from '@kbn/data-common';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 import type { TimeBucketsInterval } from '../services/time_buckets';

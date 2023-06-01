@@ -8,8 +8,8 @@
 
 import { errors as esErrors, estypes } from '@elastic/elasticsearch';
 import type { IScopedClusterClient, IUiSettingsClient, Logger } from '@kbn/core/server';
-import type { ISearchSource, ISearchStartSearchSource } from '@kbn/data-plugin/common';
-import { cellHasFormulas, ES_SEARCH_STRATEGY, tabifyDocs } from '@kbn/data-plugin/common';
+import type { ISearchSource, ISearchStartSearchSource } from '@kbn/data-common';
+import { cellHasFormulas, ES_SEARCH_STRATEGY, tabifyDocs } from '@kbn/data-common';
 import type { IScopedSearchClient } from '@kbn/data-plugin/server';
 import type { Datatable } from '@kbn/expressions-plugin/server';
 import type {

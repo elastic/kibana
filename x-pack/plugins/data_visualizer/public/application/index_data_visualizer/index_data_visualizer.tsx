@@ -23,7 +23,7 @@ import { StorageContextProvider } from '@kbn/ml-local-storage';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { getNestedProperty } from '@kbn/ml-nested-property';
 import { DatePickerContextProvider } from '@kbn/ml-date-picker';
-import { UI_SETTINGS } from '@kbn/data-plugin/common';
+import { UI_SETTINGS } from '@kbn/data-common';
 import {
   Provider as UrlStateContextProvider,
   parseUrlState,

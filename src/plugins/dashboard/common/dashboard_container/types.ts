@@ -13,7 +13,7 @@ import {
   SavedObjectEmbeddableInput,
 } from '@kbn/embeddable-plugin/common';
 import { Filter, Query, TimeRange } from '@kbn/es-query';
-import { RefreshInterval } from '@kbn/data-plugin/common';
+import { RefreshInterval } from '@kbn/data-common';
 import { PersistableControlGroupInput } from '@kbn/controls-plugin/common';
 import { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 

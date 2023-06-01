@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { UI_SETTINGS } from '@kbn/data-plugin/common';
+import { UI_SETTINGS } from '@kbn/data-common';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {

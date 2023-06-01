@@ -17,7 +17,7 @@ import {
   SqlSearchStrategyRequest,
   SqlSearchStrategyResponse,
   SQL_SEARCH_STRATEGY,
-} from '@kbn/data-plugin/common';
+} from '@kbn/data-common';
 
 import { searchService } from '../../../public/services';
 import { getFunctionHelp } from '../../../i18n';

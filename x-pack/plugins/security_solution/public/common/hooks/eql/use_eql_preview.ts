@@ -11,13 +11,13 @@ import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 
 import { parseScheduleDates } from '@kbn/securitysolution-io-ts-utils';
-import type { EqlSearchStrategyRequest, EqlSearchStrategyResponse } from '@kbn/data-plugin/common';
+import type { EqlSearchStrategyRequest, EqlSearchStrategyResponse } from '@kbn/data-common';
 import {
   isCompleteResponse,
   isErrorResponse,
   isPartialResponse,
   EQL_SEARCH_STRATEGY,
-} from '@kbn/data-plugin/common';
+} from '@kbn/data-common';
 import { AbortError } from '@kbn/kibana-utils-plugin/common';
 import * as i18n from '../translations';
 import { useKibana } from '../../lib/kibana';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { EqlSearchStrategyResponse } from '@kbn/data-plugin/common';
+import type { EqlSearchStrategyResponse } from '@kbn/data-common';
 import type { Source } from './types';
 import type { EqlSearchResponse } from '../../../../common/detection_engine/types';
 import type { Connection } from '@elastic/elasticsearch';

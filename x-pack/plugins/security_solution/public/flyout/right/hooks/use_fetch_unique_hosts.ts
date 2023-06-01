@@ -6,7 +6,7 @@
  */
 
 import { useQuery } from '@tanstack/react-query';
-import type { IEsSearchRequest } from '@kbn/data-plugin/common';
+import type { IEsSearchRequest } from '@kbn/data-common';
 import { createFetchAggregatedData } from '../utils/fetch_aggregated_data';
 import { useKibana } from '../../../common/lib/kibana';
 

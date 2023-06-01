@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { TimeBuckets, TimeRange, UI_SETTINGS } from '@kbn/data-plugin/common';
+import { TimeBuckets, TimeRange, UI_SETTINGS } from '@kbn/data-common';
 import { Datatable, DatatableColumn, DatatableRow } from '@kbn/expressions-plugin/common';
 import { omit, pick } from 'lodash';
 import dateMath from '@kbn/datemath';

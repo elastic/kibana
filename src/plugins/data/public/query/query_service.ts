@@ -24,7 +24,7 @@ import {
 import { getQueryState, QueryState } from './query_state';
 import type { QueryStringContract } from './query_string';
 import { QueryStringManager } from './query_string';
-import { getEsQueryConfig } from '../../common';
+import { getEsQueryConfig } from '@kbn/data-common';
 import { getUiSettings } from '../services';
 import { NowProviderInternalContract } from '../now_provider';
 import {
@@ -33,7 +33,7 @@ import {
   inject,
   migrateToLatest,
   telemetry,
-} from '../../common/query/persistable_state';
+} from '@kbn/data-common/query/persistable_state';
 
 interface QueryServiceSetupDependencies {
   storage: IStorageWrapper;

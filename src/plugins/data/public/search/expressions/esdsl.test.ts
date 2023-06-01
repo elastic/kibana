@@ -8,7 +8,7 @@
 
 import { getEsdsl } from './esdsl';
 import type { MockedKeys } from '@kbn/utility-types-jest';
-import { EsdslExpressionFunctionDefinition } from '../../../common/search/expressions';
+import { EsdslExpressionFunctionDefinition } from '@kbn/data-common/search/expressions';
 import { StartServicesAccessor } from '@kbn/core/public';
 import { DataPublicPluginStart, DataStartDependencies } from '../../types';
 import { of } from 'rxjs';

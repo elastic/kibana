@@ -15,7 +15,7 @@ import type {
   DurationRange,
   OnRefreshChangeProps,
 } from '@elastic/eui/src/components/date_picker/types';
-import { UI_SETTINGS } from '@kbn/data-plugin/common';
+import { UI_SETTINGS } from '@kbn/data-common';
 import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
 
 export interface DateRangePickerValues {

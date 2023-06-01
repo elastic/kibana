@@ -16,7 +16,7 @@ import { Setup as InspectorSetup } from '@kbn/inspector-plugin/public';
 import { ScreenshotModePluginStart } from '@kbn/screenshot-mode-plugin/public';
 import { SharePluginStart } from '@kbn/share-plugin/public';
 import { ManagementSetup } from '@kbn/management-plugin/public';
-import { DatatableUtilitiesService } from '../common';
+import { DatatableUtilitiesService } from '@kbn/data-common';
 import { createFiltersFromRangeSelectAction, createFiltersFromValueClickAction } from './actions';
 import type { ISearchSetup, ISearchStart } from './search';
 import { QuerySetup, QueryStart } from './query';

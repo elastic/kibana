@@ -8,7 +8,7 @@
 
 import { StartServicesAccessor } from '@kbn/core/public';
 import { SavedObjectsClientCommon } from '@kbn/data-views-plugin/public';
-import { getKibanaContextFn } from '../../../common/search/expressions';
+import { getKibanaContextFn } from '@kbn/data-common/search/expressions';
 import { DataPublicPluginStart, DataStartDependencies } from '../../types';
 
 /**

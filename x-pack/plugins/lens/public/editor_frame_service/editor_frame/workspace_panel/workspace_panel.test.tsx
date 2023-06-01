@@ -29,7 +29,7 @@ import { DragDrop, ChildDragDropProvider } from '@kbn/dom-drag-drop';
 import { buildExistsFilter } from '@kbn/es-query';
 import { coreMock } from '@kbn/core/public/mocks';
 import { DataView } from '@kbn/data-views-plugin/public';
-import type { FieldSpec } from '@kbn/data-plugin/common';
+import type { FieldSpec } from '@kbn/data-common';
 import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import { TriggerContract } from '@kbn/ui-actions-plugin/public/triggers';

@@ -25,7 +25,7 @@ import {
   DataDocuments$,
   RecordRawType,
 } from '../../services/discover_data_state_container';
-import { stubLogstashDataView } from '@kbn/data-plugin/common/stubs';
+import { stubLogstashDataView } from '@kbn/data-common/stubs';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
 import { DiscoverAppStateProvider } from '../../services/discover_app_state_container';

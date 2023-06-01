@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { IEsSearchResponse } from '@kbn/data-plugin/common';
+import type { IEsSearchResponse } from '@kbn/data-common';
 
 import type { Inspect, Maybe, TimerangeInput } from '../../../common';
 import type { UserItem } from '../common';

@@ -9,7 +9,7 @@ import React from 'react';
 import { render } from '@testing-library/react';
 
 import type { DataViewBase } from '@kbn/es-query';
-import { fields } from '@kbn/data-plugin/common/mocks';
+import { fields } from '@kbn/data-common/mocks';
 
 import { TestProviders } from '../../../../common/mock';
 import type { RulePreviewProps } from '.';

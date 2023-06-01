@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { IEsSearchResponse } from '@kbn/data-plugin/common';
+import type { IEsSearchResponse } from '@kbn/data-common';
 
 import type { Inspect, Maybe, PageInfoPaginated } from '../../../common';
 import type { RequestOptionsPaginated } from '../..';

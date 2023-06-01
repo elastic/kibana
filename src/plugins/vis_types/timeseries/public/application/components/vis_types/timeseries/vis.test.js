@@ -13,7 +13,7 @@ import TimeseriesVisualization from './vis';
 import { setFieldFormats, setCharts, setUISettings } from '../../../../services';
 import { createFieldFormatter } from '../../lib/create_field_formatter';
 import { FORMATS_UI_SETTINGS } from '@kbn/field-formats-plugin/common';
-import { METRIC_TYPES } from '@kbn/data-plugin/common';
+import { METRIC_TYPES } from '@kbn/data-common';
 import { getFieldFormatsRegistry } from '@kbn/data-plugin/public/test_utils';
 import { MULTILAYER_TIME_AXIS_STYLE } from '@kbn/charts-plugin/public';
 

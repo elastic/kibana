@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { IEsSearchResponse } from '@kbn/data-plugin/common';
+import type { IEsSearchResponse } from '@kbn/data-common';
 
 import type { HostItem, HostsFields } from '../common';
 import type { CursorType, Direction, Inspect, Maybe, PageInfoPaginated } from '../../../common';

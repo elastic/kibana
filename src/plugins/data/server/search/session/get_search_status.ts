@@ -9,7 +9,7 @@
 import { i18n } from '@kbn/i18n';
 import type { TransportResult } from '@elastic/elasticsearch';
 import { ElasticsearchClient } from '@kbn/core/server';
-import { SearchSessionRequestStatus } from '../../../common';
+import { SearchSessionRequestStatus } from '@kbn/data-common';
 import { SearchStatus } from './types';
 import { AsyncSearchStatusResponse } from '../..';
 

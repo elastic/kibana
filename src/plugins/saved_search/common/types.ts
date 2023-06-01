@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { ISearchSource, RefreshInterval, TimeRange } from '@kbn/data-plugin/common';
+import type { ISearchSource, RefreshInterval, TimeRange } from '@kbn/data-common';
 import { VIEW_MODE } from '.';
 
 export interface DiscoverGridSettings {

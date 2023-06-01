@@ -7,7 +7,7 @@
 import React from 'react';
 import { CoreStart } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import type { FieldSpec } from '@kbn/data-plugin/common';
+import type { FieldSpec } from '@kbn/data-common';
 import type { TimelinesUIStart } from '@kbn/timelines-plugin/public';
 import type { SessionViewStart } from '@kbn/session-view-plugin/public';
 import { EuiIconProps } from '@elastic/eui';

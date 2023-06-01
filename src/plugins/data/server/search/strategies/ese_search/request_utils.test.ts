@@ -12,7 +12,7 @@ import {
   getIgnoreThrottled,
 } from './request_utils';
 import { IUiSettingsClient } from '@kbn/core/server';
-import { UI_SETTINGS } from '../../../../common';
+import { UI_SETTINGS } from '@kbn/data-common';
 import moment from 'moment';
 import { getMockSearchConfig } from '../../../../config.mock';
 

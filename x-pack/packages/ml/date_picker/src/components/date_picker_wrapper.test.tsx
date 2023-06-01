@@ -11,7 +11,7 @@ import React from 'react';
 
 import { EuiSuperDatePicker } from '@elastic/eui';
 
-import type { UI_SETTINGS } from '@kbn/data-plugin/common';
+import type { UI_SETTINGS } from '@kbn/data-common';
 
 import { useDatePickerContext } from '../hooks/use_date_picker_context';
 import { mlTimefilterRefresh$ } from '../services/timefilter_refresh_service';

@@ -17,7 +17,7 @@ import type {
 import { mergeSavedObjectMigrationMaps } from '@kbn/core/server';
 import { DEFAULT_QUERY_LANGUAGE } from '@kbn/data-plugin/server';
 import { MigrateFunctionsObject, MigrateFunction } from '@kbn/kibana-utils-plugin/common';
-import { isSerializedSearchSource, SerializedSearchSourceFields } from '@kbn/data-plugin/common';
+import { isSerializedSearchSource, SerializedSearchSourceFields } from '@kbn/data-common';
 
 export interface SavedSearchMigrationAttributes extends SavedObjectAttributes {
   kibanaSavedObjectMeta: {

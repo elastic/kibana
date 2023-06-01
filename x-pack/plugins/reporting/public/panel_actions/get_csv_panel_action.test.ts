@@ -8,7 +8,7 @@
 import * as Rx from 'rxjs';
 import { first } from 'rxjs/operators';
 import { CoreStart } from '@kbn/core/public';
-import type { SearchSource } from '@kbn/data-plugin/common';
+import type { SearchSource } from '@kbn/data-common';
 import type { SavedSearch } from '@kbn/discover-plugin/public';
 import { LicenseCheckState } from '@kbn/licensing-plugin/public';
 import { coreMock } from '@kbn/core/public/mocks';

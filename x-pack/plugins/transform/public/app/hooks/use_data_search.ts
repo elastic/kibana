@@ -8,7 +8,7 @@
 import { useCallback } from 'react';
 import { lastValueFrom } from 'rxjs';
 
-import type { IKibanaSearchRequest } from '@kbn/data-plugin/common';
+import type { IKibanaSearchRequest } from '@kbn/data-common';
 
 import { useAppDependencies } from '../app_dependencies';
 

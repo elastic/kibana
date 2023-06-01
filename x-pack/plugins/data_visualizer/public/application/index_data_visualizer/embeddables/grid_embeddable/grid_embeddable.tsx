@@ -21,7 +21,7 @@ import {
   EmbeddableOutput,
   IContainer,
 } from '@kbn/embeddable-plugin/public';
-import { UI_SETTINGS } from '@kbn/data-plugin/common';
+import { UI_SETTINGS } from '@kbn/data-common';
 import { toMountPoint, wrapWithTheme } from '@kbn/kibana-react-plugin/public';
 import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import type { Query } from '@kbn/es-query';

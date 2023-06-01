@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { IEsSearchRequest, IEsSearchResponse } from '@kbn/data-plugin/common';
+import type { IEsSearchRequest, IEsSearchResponse } from '@kbn/data-common';
 import type { ActionResponsesRequestStrategyParseResponse } from './response_actions/response';
 import type { ESQuery } from '../../typed_json';
 import type {

@@ -7,7 +7,7 @@
  */
 
 import { SqlQueryResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { SqlSearchStrategyResponse } from '../../../../common';
+import { SqlSearchStrategyResponse } from '@kbn/data-common';
 
 /**
  * Get the Kibana representation of an async search response

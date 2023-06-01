@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { createDatatableUtilitiesMock } from '@kbn/data-plugin/common/mocks';
+import { createDatatableUtilitiesMock } from '@kbn/data-common/mocks';
 import { DataLayerConfig, XYChartProps } from '../../common';
 import { sampleArgs } from '../../common/__mocks__';
 import { calculateMinInterval } from './interval';

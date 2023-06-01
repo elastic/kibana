@@ -12,7 +12,7 @@ import { CoreStart, ToastsStart } from '@kbn/core/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { Rule } from '@kbn/alerting-plugin/common';
 import type { RuleTypeParams } from '@kbn/alerting-plugin/common';
-import { ISearchSource, SerializedSearchSourceFields, getTime } from '@kbn/data-plugin/common';
+import { ISearchSource, SerializedSearchSourceFields, getTime } from '@kbn/data-common';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { MarkdownSimple, toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { Filter } from '@kbn/es-query';

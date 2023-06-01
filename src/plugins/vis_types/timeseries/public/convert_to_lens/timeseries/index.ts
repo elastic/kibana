@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { parseTimeShift } from '@kbn/data-plugin/common';
+import { parseTimeShift } from '@kbn/data-common';
 import {
   getIndexPatternIds,
   isAnnotationsLayer,

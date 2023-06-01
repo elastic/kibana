@@ -9,7 +9,7 @@ import _ from 'lodash';
 import React, { Component } from 'react';
 import { EuiFlexItem, EuiFlexGroup, EuiButtonIcon, EuiText, EuiTextColor } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { DataViewField, DataView, Query } from '@kbn/data-plugin/common';
+import type { DataViewField, DataView, Query } from '@kbn/data-common';
 import { indexPatterns } from '@kbn/data-plugin/public';
 import { SpatialJoinExpression } from './spatial_join_expression';
 import { TermJoinExpression } from './term_join_expression';

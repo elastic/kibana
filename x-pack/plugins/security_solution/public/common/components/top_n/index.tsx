@@ -10,7 +10,7 @@ import type { ConnectedProps } from 'react-redux';
 import { connect } from 'react-redux';
 
 import type { DataViewBase, Filter, Query } from '@kbn/es-query';
-import { getEsQueryConfig } from '@kbn/data-plugin/common';
+import { getEsQueryConfig } from '@kbn/data-common';
 import { isActiveTimeline } from '../../../helpers';
 import { InputsModelId } from '../../store/inputs/constants';
 import { useGlobalTime } from '../../containers/use_global_time';

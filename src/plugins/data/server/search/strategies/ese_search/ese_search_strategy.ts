@@ -18,8 +18,8 @@ import type {
   IEsSearchRequest,
   IEsSearchResponse,
   ISearchOptions,
-} from '../../../../common';
-import { pollSearch } from '../../../../common';
+} from '@kbn/data-common';
+import { pollSearch } from '@kbn/data-common';
 import {
   getDefaultAsyncGetParams,
   getDefaultAsyncSubmitParams,

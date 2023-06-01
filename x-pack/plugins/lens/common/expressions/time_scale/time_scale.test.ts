@@ -9,7 +9,7 @@ import moment from 'moment';
 import type { Datatable, ExecutionContext } from '@kbn/expressions-plugin/common';
 
 import type { TimeRange } from '@kbn/es-query';
-import { createDatatableUtilitiesMock } from '@kbn/data-plugin/common/mocks';
+import { createDatatableUtilitiesMock } from '@kbn/data-common/mocks';
 import { functionWrapper } from '@kbn/expressions-plugin/common/expression_functions/specs/tests/utils';
 
 import { getTimeScale } from './time_scale';

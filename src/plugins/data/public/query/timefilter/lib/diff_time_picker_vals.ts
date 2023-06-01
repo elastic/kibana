@@ -8,7 +8,7 @@
 
 import _ from 'lodash';
 
-import { RefreshInterval } from '../../../../common';
+import { RefreshInterval } from '@kbn/data-common';
 import type { InputTimeRange } from '../types';
 
 const valueOf = function (o: any) {

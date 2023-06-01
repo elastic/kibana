@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import type { DataView } from '@kbn/data-plugin/common';
+import type { DataView } from '@kbn/data-common';
 import { extractOrGenerateDatasourceInfo } from './datasource_info';
 
 const dataViewsMap: Record<string, DataView> = {

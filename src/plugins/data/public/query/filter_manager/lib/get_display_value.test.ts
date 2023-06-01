@@ -12,7 +12,7 @@ import {
   phraseFilter,
   phrasesFilter,
   rangeFilter,
-} from '../../../../common/stubs';
+} from '@kbn/data-common/stubs';
 import { getDisplayValueFromFilter, getFieldDisplayValueFromFilter } from './get_display_value';
 import { FieldFormat } from '@kbn/field-formats-plugin/common';
 

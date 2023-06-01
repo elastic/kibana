@@ -14,7 +14,7 @@ import { Subscription } from 'rxjs';
 import { FilterManager } from './filter_manager';
 import { getFilter } from './test_helpers/get_stub_filter';
 import { getFiltersArray } from './test_helpers/get_filters_array';
-import { UI_SETTINGS } from '../../../common';
+import { UI_SETTINGS } from '@kbn/data-common';
 
 import { coreMock } from '@kbn/core/public/mocks';
 const setupMock = coreMock.createSetup();

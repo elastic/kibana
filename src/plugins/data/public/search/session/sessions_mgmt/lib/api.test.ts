@@ -12,7 +12,7 @@ import moment from 'moment';
 import { coreMock } from '@kbn/core/public/mocks';
 import type { SavedObjectsFindResponse } from '@kbn/core/server';
 import { SessionsClient } from '../../..';
-import { SearchSessionStatus } from '../../../../../common';
+import { SearchSessionStatus } from '@kbn/data-common';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 import { SharePluginStart } from '@kbn/share-plugin/public';
 import { SearchSessionsMgmtAPI } from './api';

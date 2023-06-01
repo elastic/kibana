@@ -6,5 +6,5 @@
  * Side Public License, v 1.
  */
 
-export * from '../common/stubs';
+export * from '@kbn/data-common/stubs';
 export { createStubDataView } from '@kbn/data-views-plugin/public/data_views/data_view.stub';

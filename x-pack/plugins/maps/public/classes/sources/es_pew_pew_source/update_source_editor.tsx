@@ -6,7 +6,7 @@
  */
 
 import React, { Component, Fragment } from 'react';
-import type { DataViewField } from '@kbn/data-plugin/common';
+import type { DataViewField } from '@kbn/data-common';
 import { EuiPanel, EuiTitle, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { indexPatterns } from '@kbn/data-plugin/public';

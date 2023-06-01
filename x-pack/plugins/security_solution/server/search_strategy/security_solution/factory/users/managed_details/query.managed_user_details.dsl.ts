@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ISearchRequestParams } from '@kbn/data-plugin/common';
+import type { ISearchRequestParams } from '@kbn/data-common';
 import { EVENT_KIND_ASSET_FILTER } from '../../../../../../common/search_strategy';
 import type { ManagedUserDetailsRequestOptions } from '../../../../../../common/search_strategy/security_solution/users/managed_details';
 

@@ -13,7 +13,7 @@ import {
   SerializedSearchSourceFields,
   METRIC_TYPES,
   BUCKET_TYPES,
-} from '@kbn/data-plugin/common';
+} from '@kbn/data-common';
 import type { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
 
 export interface VisParams {

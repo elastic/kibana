@@ -21,7 +21,7 @@ import {
   getTime,
   getRelativeTime,
   RefreshInterval,
-} from '../../../common';
+} from '@kbn/data-common';
 import { TimeHistoryContract } from './time_history';
 import { createAutoRefreshLoop, AutoRefreshDoneFn } from './lib/auto_refresh_loop';
 

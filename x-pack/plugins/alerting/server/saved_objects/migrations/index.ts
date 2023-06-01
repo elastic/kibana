@@ -15,7 +15,7 @@ import {
 import { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
 import { MigrateFunctionsObject, MigrateFunction } from '@kbn/kibana-utils-plugin/common';
 import { mergeSavedObjectMigrationMaps } from '@kbn/core/server';
-import { isSerializedSearchSource, SerializedSearchSourceFields } from '@kbn/data-plugin/common';
+import { isSerializedSearchSource, SerializedSearchSourceFields } from '@kbn/data-common';
 import { RawRule } from '../../types';
 import { getMigrations7100 } from './7.10';
 import { getMigrations7110, getMigrations7112 } from './7.11';

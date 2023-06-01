@@ -15,7 +15,7 @@ import type {
   IKibanaSearchRequest,
   IKibanaSearchResponse,
   ISearchOptions,
-} from '@kbn/data-plugin/common';
+} from '@kbn/data-common';
 import { extractErrorProperties } from '@kbn/ml-error-utils';
 import { useDataVisualizerKibana } from '../../kibana_context';
 import {

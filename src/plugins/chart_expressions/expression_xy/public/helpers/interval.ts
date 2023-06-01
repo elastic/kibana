@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { DatatableUtilitiesService } from '@kbn/data-plugin/common';
+import type { DatatableUtilitiesService } from '@kbn/data-common';
 import { search } from '@kbn/data-plugin/public';
 import { getColumnByAccessor } from '@kbn/visualizations-plugin/common/utils';
 import { XYChartProps } from '../../common';

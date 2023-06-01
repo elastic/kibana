@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { DataViewSpec, KibanaQueryOutput } from '@kbn/data-plugin/common';
+import { DataViewSpec, KibanaQueryOutput } from '@kbn/data-common';
 import { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { $Values } from '@kbn/utility-types';
 import { AvailableAnnotationIcons } from './constants';

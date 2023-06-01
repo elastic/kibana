@@ -19,7 +19,7 @@ import moment from 'moment';
 import { coreMock } from '@kbn/core/server/mocks';
 import { ConfigSchema } from '../../../config';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common/model';
-import { SEARCH_SESSION_TYPE, SearchSessionStatus } from '../../../common';
+import { SEARCH_SESSION_TYPE, SearchSessionStatus } from '@kbn/data-common';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 
 const MAX_UPDATE_RETRIES = 3;

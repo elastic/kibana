@@ -19,7 +19,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { type DataView } from '@kbn/data-plugin/common';
+import { type DataView } from '@kbn/data-common';
 import type { FieldStatsProps, FieldStatsServices } from '@kbn/unified-field-list-plugin/public';
 import type { TimeRange as TimeRangeMs } from '@kbn/ml-date-picker';
 import { useFieldStatsFlyoutContext } from './use_field_stats_flytout_context';

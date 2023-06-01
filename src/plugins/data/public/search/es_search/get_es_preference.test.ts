@@ -10,7 +10,7 @@ import type { MockedKeys } from '@kbn/utility-types-jest';
 import { getEsPreference } from './get_es_preference';
 import { CoreStart } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';
-import { UI_SETTINGS } from '../../../common';
+import { UI_SETTINGS } from '@kbn/data-common';
 
 describe('Get ES preference', () => {
   let mockCoreStart: MockedKeys<CoreStart>;

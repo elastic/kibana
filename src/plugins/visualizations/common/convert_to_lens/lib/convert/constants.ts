@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { METRIC_TYPES } from '@kbn/data-plugin/common';
+import { METRIC_TYPES } from '@kbn/data-common';
 
 export const PARENT_PIPELINE_AGGS: string[] = [
   METRIC_TYPES.CUMULATIVE_SUM,

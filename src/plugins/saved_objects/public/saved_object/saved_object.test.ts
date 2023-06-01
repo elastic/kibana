@@ -17,9 +17,9 @@ import { SavedObjectDecorator } from './decorators';
 
 import { coreMock } from '@kbn/core/public/mocks';
 import { dataPluginMock, createSearchSourceMock } from '@kbn/data-plugin/public/mocks';
-import { createStubIndexPattern } from '@kbn/data-plugin/common/stubs';
+import { createStubIndexPattern } from '@kbn/data-common/stubs';
 import { SavedObjectAttributes, SimpleSavedObject } from '@kbn/core/public';
-import { DataView } from '@kbn/data-plugin/common';
+import { DataView } from '@kbn/data-common';
 import { savedObjectsDecoratorRegistryMock } from './decorators/registry.mock';
 
 describe('Saved Object', () => {

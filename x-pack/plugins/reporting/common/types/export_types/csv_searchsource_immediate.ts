@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
+import type { SerializedSearchSourceFields } from '@kbn/data-common';
 
 export interface FakeRequest {
   headers: Record<string, string>;

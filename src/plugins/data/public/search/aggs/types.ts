@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { AggsCommonSetup } from '../../../common';
+import { AggsCommonSetup } from '@kbn/data-common';
 
 export type AggsSetup = AggsCommonSetup;
-export type { AggsStart } from '../../../common';
+export type { AggsStart } from '@kbn/data-common';

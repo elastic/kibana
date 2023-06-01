@@ -10,7 +10,7 @@ import React, { useCallback, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFormRow, EuiSwitch, EuiSwitchEvent, EuiButtonGroup, EuiSpacer } from '@elastic/eui';
 import type { PaletteRegistry } from '@kbn/coloring';
-import type { DatatableUtilitiesService } from '@kbn/data-plugin/common';
+import type { DatatableUtilitiesService } from '@kbn/data-common';
 import {
   defaultAnnotationColor,
   defaultAnnotationRangeColor,

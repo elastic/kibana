@@ -6,7 +6,7 @@
  */
 
 import { EuiFormRow } from '@elastic/eui';
-import type { Query } from '@kbn/data-plugin/common';
+import type { Query } from '@kbn/data-common';
 import type { QueryPointEventAnnotationConfig } from '@kbn/event-annotation-plugin/common';
 import { i18n } from '@kbn/i18n';
 import React from 'react';

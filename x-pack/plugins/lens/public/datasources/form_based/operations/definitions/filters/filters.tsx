@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiFormRow, EuiLink, htmlIdGenerator } from '@elastic/eui';
 import type { Query } from '@kbn/es-query';
 import type { AggFunctionsMapping } from '@kbn/data-plugin/public';
-import { queryFilterToAst } from '@kbn/data-plugin/common';
+import { queryFilterToAst } from '@kbn/data-common';
 import { buildExpressionFunction } from '@kbn/expressions-plugin/public';
 import {
   NewBucketButton,

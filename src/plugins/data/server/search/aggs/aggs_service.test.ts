@@ -10,7 +10,7 @@ import { KibanaRequest, ElasticsearchClient } from '@kbn/core/server';
 
 import { coreMock } from '@kbn/core/server/mocks';
 import { expressionsPluginMock } from '@kbn/expressions-plugin/server/mocks';
-import { BucketAggType, getAggTypes, MetricAggType } from '../../../common';
+import { BucketAggType, getAggTypes, MetricAggType } from '@kbn/data-common';
 import { createFieldFormatsStartMock } from '@kbn/field-formats-plugin/server/mocks';
 import { createIndexPatternsStartMock } from '../../data_views/mocks';
 

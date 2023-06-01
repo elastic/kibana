@@ -6,7 +6,7 @@
  */
 
 import moment from 'moment-timezone';
-import { TimeRangeBounds } from '@kbn/data-plugin/common';
+import { TimeRangeBounds } from '@kbn/data-common';
 import { dateFormatter, getDateDifferenceInDays, barChartTimeAxisLabelFormatter } from './dates';
 import { EMPTY_VALUE } from '../constants/common';
 

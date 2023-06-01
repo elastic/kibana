@@ -9,7 +9,7 @@
 import semverGte from 'semver/functions/gte';
 import { makeVisualizeEmbeddableFactory } from './make_visualize_embeddable_factory';
 import { getAllMigrations } from '../migrations/visualization_saved_object_migrations';
-import type { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
+import type { SerializedSearchSourceFields } from '@kbn/data-common';
 import type { GetMigrationFunctionObjectFn } from '@kbn/kibana-utils-plugin/common';
 
 describe('embeddable migrations', () => {

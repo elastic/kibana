@@ -6,7 +6,7 @@
  */
 
 import { ReactNode } from 'react';
-import { DataView } from '@kbn/data-plugin/common';
+import { DataView } from '@kbn/data-common';
 import { ESTooltipProperty } from './es_tooltip_property';
 import { AGG_TYPE } from '../../../common/constants';
 import { ITooltipProperty } from './tooltip_property';

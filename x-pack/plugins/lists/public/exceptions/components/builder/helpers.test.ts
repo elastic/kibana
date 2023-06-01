@@ -53,8 +53,8 @@ import {
   isOperator,
 } from '@kbn/securitysolution-list-utils';
 import { DataViewBase, DataViewFieldBase } from '@kbn/es-query';
-import { fields, getField } from '@kbn/data-plugin/common/mocks';
-import type { FieldSpec } from '@kbn/data-plugin/common';
+import { fields, getField } from '@kbn/data-common/mocks';
+import type { FieldSpec } from '@kbn/data-common';
 
 import { ENTRIES_WITH_IDS } from '../../../../common/constants.mock';
 import { getEntryExistsMock } from '../../../../common/schemas/types/entry_exists.mock';

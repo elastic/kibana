@@ -10,7 +10,7 @@ import { useDispatch } from 'react-redux';
 import { useParams } from 'react-router-dom';
 
 import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
-import { getEsQueryConfig } from '@kbn/data-plugin/common';
+import { getEsQueryConfig } from '@kbn/data-common';
 
 import { buildEsQuery } from '@kbn/es-query';
 import { AlertsByStatus } from '../../../../overview/components/detection_response/alerts_by_status';

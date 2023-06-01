@@ -7,7 +7,7 @@
  */
 import type { SortOrder } from '@kbn/saved-search-plugin/public';
 import { getSortForSearchSource } from './get_sort_for_search_source';
-import { stubDataView, stubDataViewWithoutTimeField } from '@kbn/data-plugin/common/stubs';
+import { stubDataView, stubDataViewWithoutTimeField } from '@kbn/data-common/stubs';
 
 describe('getSortForSearchSource function', function () {
   test('should be a function', function () {

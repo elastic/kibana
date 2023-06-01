@@ -6,7 +6,7 @@
  */
 
 import rison from '@kbn/rison';
-import type { RefreshInterval, TimeRange } from '@kbn/data-plugin/common/query';
+import type { RefreshInterval, TimeRange } from '@kbn/data-common/query';
 import type { Filter } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 

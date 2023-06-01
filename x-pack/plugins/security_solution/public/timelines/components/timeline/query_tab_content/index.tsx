@@ -23,7 +23,7 @@ import deepEqual from 'fast-deep-equal';
 import { InPortal } from 'react-reverse-portal';
 
 import { FilterManager } from '@kbn/data-plugin/public';
-import { getEsQueryConfig } from '@kbn/data-plugin/common';
+import { getEsQueryConfig } from '@kbn/data-common';
 import type { ControlColumnProps } from '../../../../../common/types';
 import { InputsModelId } from '../../../../common/store/inputs/constants';
 import { useInvalidFilterQuery } from '../../../../common/hooks/use_invalid_filter_query';

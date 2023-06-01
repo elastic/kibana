@@ -10,7 +10,7 @@ import {
   SavedObjectReference,
   SavedObjectUnsanitizedDoc,
 } from '@kbn/core/server';
-import { Query } from '@kbn/data-plugin/common/query';
+import { Query } from '@kbn/data-common/query';
 import { RuleTypeParams } from '../..';
 import { RawRule } from '../../types';
 

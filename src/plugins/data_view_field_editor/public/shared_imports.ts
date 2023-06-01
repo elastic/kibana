@@ -25,7 +25,7 @@ export type {
   RuntimeFieldSubFields,
   RuntimePrimitiveTypes,
 } from '@kbn/data-views-plugin/common';
-export { KBN_FIELD_TYPES, ES_FIELD_TYPES } from '@kbn/data-plugin/common';
+export { KBN_FIELD_TYPES, ES_FIELD_TYPES } from '@kbn/data-common';
 
 export {
   createKibanaReactContext,

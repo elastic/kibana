@@ -8,7 +8,7 @@
 
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { getSessionStatus } from './get_session_status';
-import { SearchSessionSavedObjectAttributes, SearchSessionStatus } from '../../../common';
+import { SearchSessionSavedObjectAttributes, SearchSessionStatus } from '@kbn/data-common';
 import moment from 'moment';
 import { SearchSessionsConfigSchema } from '../../../config';
 

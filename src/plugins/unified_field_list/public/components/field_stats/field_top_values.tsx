@@ -8,7 +8,7 @@
 
 import React, { Fragment } from 'react';
 import { euiPaletteColorBlind, EuiSpacer } from '@elastic/eui';
-import { DataView, DataViewField } from '@kbn/data-plugin/common';
+import { DataView, DataViewField } from '@kbn/data-common';
 import type { BucketedAggregation } from '../../../common/types';
 import type { AddFieldFilterHandler } from '../../types';
 import FieldTopValuesBucket from './field_top_values_bucket';

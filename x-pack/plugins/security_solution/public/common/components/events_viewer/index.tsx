@@ -25,7 +25,7 @@ import { ThemeContext } from 'styled-components';
 import type { Filter } from '@kbn/es-query';
 import type { Direction, EntityType, RowRenderer } from '@kbn/timelines-plugin/common';
 import { isEmpty } from 'lodash';
-import { getEsQueryConfig } from '@kbn/data-plugin/common';
+import { getEsQueryConfig } from '@kbn/data-common';
 import type { EuiTheme } from '@kbn/kibana-react-plugin/common';
 import type { EuiDataGridRowHeightsOptions } from '@elastic/eui';
 import { ALERTS_TABLE_VIEW_SELECTION_KEY } from '../../../../common/constants';

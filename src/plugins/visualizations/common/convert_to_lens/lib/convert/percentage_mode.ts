@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { METRIC_TYPES } from '@kbn/data-plugin/common';
+import { METRIC_TYPES } from '@kbn/data-common';
 import { MinMax } from '../../types';
 import { getFormulaForAgg } from '../metrics/formula';
 import { createFormulaColumn } from './formula';

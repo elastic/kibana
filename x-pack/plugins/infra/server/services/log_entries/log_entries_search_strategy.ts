@@ -13,7 +13,7 @@ import type {
   IEsSearchRequest,
   IKibanaSearchRequest,
   IKibanaSearchResponse,
-} from '@kbn/data-plugin/common';
+} from '@kbn/data-common';
 import type { ISearchStrategy, PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
 import {
   getLogEntryCursorFromHit,

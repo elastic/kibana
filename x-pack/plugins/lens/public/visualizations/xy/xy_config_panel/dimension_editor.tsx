@@ -9,7 +9,7 @@ import React, { useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonGroup, EuiFormRow, htmlIdGenerator } from '@elastic/eui';
 import type { PaletteRegistry } from '@kbn/coloring';
-import type { DatatableUtilitiesService } from '@kbn/data-plugin/common';
+import type { DatatableUtilitiesService } from '@kbn/data-common';
 import { useDebouncedValue } from '@kbn/visualization-ui-components/public';
 import { ColorPicker } from '@kbn/visualization-ui-components/public';
 import type { VisualizationDimensionEditorProps } from '../../../types';

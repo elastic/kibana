@@ -7,7 +7,7 @@
  */
 
 import { DataView } from '@kbn/data-views-plugin/public';
-import { cellHasFormulas, createEscapeValue } from '@kbn/data-plugin/common';
+import { cellHasFormulas, createEscapeValue } from '@kbn/data-common';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { formatFieldValue } from './format_value';
 import { DataTableRecord } from '../types';

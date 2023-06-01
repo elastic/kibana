@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { AggParamsTopHit, METRIC_TYPES } from '@kbn/data-plugin/common';
+import { AggParamsTopHit, METRIC_TYPES } from '@kbn/data-common';
 import { stubLogstashDataView } from '@kbn/data-views-plugin/common/data_view.stub';
 import { SchemaConfig } from '../../..';
 import { convertToLastValueColumn } from './last_value';

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { METRIC_TYPES, BUCKET_TYPES } from '@kbn/data-plugin/common';
+import { METRIC_TYPES, BUCKET_TYPES } from '@kbn/data-common';
 
 export const SAVED_OBJECTS_LIMIT_SETTING = 'savedObjects:listingLimit';
 export const SAVED_OBJECTS_PER_PAGE_SETTING = 'savedObjects:perPage';

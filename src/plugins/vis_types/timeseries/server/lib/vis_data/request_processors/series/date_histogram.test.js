@@ -9,7 +9,7 @@
 import { DefaultSearchCapabilities } from '../../../search_strategies/capabilities/default_search_capabilities';
 import { dateHistogram } from './date_histogram';
 import { getInterval } from '../../get_interval';
-import { UI_SETTINGS } from '@kbn/data-plugin/common';
+import { UI_SETTINGS } from '@kbn/data-common';
 
 describe('dateHistogram(req, panel, series)', () => {
   let panel;

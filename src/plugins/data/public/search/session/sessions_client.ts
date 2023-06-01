@@ -17,7 +17,7 @@ import type {
 import type {
   SearchSessionSavedObjectAttributes,
   SearchSessionsFindResponse,
-} from '../../../common';
+} from '@kbn/data-common';
 export type SearchSessionSavedObject = SavedObject<SearchSessionSavedObjectAttributes>;
 export type ISessionsClient = PublicContract<SessionsClient>;
 export interface SessionsClientDeps {

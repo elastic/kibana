@@ -12,7 +12,7 @@ import type {
   IUiSettingsClient,
 } from '@kbn/core/server';
 import { DataViewsContract } from '@kbn/data-views-plugin/common';
-import { ISearchStartSearchSource } from '@kbn/data-plugin/common';
+import { ISearchStartSearchSource } from '@kbn/data-common';
 import { LicenseType } from '@kbn/licensing-plugin/server';
 import {
   IScopedClusterClient,

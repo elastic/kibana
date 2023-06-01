@@ -6,7 +6,7 @@
  */
 
 import * as rt from 'io-ts';
-import { ES_SEARCH_STRATEGY, IKibanaSearchResponse } from '@kbn/data-plugin/common';
+import { ES_SEARCH_STRATEGY, IKibanaSearchResponse } from '@kbn/data-common';
 import { useCallback, useEffect } from 'react';
 import { catchError, map, Observable, of, startWith } from 'rxjs';
 import createContainer from 'constate';

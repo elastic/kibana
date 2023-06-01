@@ -13,7 +13,7 @@ import moment from 'moment';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
 import { TableText } from '..';
-import { SEARCH_SESSIONS_TABLE_ID } from '../../../../../../common';
+import { SEARCH_SESSIONS_TABLE_ID } from '@kbn/data-common';
 import { SearchSessionsMgmtAPI } from '../../lib/api';
 import { getColumns } from '../../lib/get_columns';
 import { UISession } from '../../types';

@@ -14,7 +14,7 @@ import { TablesAdapter } from '@kbn/expressions-plugin/common';
 jest.mock('@kbn/share-plugin/public', () => ({
   downloadMultipleAs: jest.fn(),
 }));
-jest.mock('../../../../common', () => ({
+jest.mock(@kbn/data-common', () => ({
   datatableToCSV: jest.fn().mockReturnValue('csv'),
   tableHasFormulas: jest.fn().mockReturnValue(false),
 }));

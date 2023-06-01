@@ -8,7 +8,7 @@
 import { map, mergeMap } from 'rxjs/operators';
 import type { ISearchStrategy, PluginStart } from '@kbn/data-plugin/server';
 import { shimHitsTotal } from '@kbn/data-plugin/server';
-import { ENHANCED_ES_SEARCH_STRATEGY } from '@kbn/data-plugin/common';
+import { ENHANCED_ES_SEARCH_STRATEGY } from '@kbn/data-common';
 import type { KibanaRequest } from '@kbn/core/server';
 import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import type {

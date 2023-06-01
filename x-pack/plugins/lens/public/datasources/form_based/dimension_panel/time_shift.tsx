@@ -9,7 +9,7 @@ import { EuiFormRow, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 import { EuiComboBox } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useState } from 'react';
-import { type DatatableUtilitiesService, parseTimeShift } from '@kbn/data-plugin/common';
+import { type DatatableUtilitiesService, parseTimeShift } from '@kbn/data-common';
 import {
   adjustTimeScaleLabelSuffix,
   GenericIndexPatternColumn,

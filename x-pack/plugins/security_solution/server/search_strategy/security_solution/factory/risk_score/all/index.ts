@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { IEsSearchResponse, SearchRequest, TimeRange } from '@kbn/data-plugin/common';
+import type { IEsSearchResponse, SearchRequest, TimeRange } from '@kbn/data-common';
 import { get, getOr } from 'lodash/fp';
 import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import type { AggregationsMinAggregate } from '@elastic/elasticsearch/lib/api/types';

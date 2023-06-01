@@ -10,7 +10,7 @@ import type { SerializableRecord } from '@kbn/utility-types';
 import type { GlobalQueryStateFromUrl } from '@kbn/data-plugin/public';
 import type { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/common';
 import type { Filter, Query } from '@kbn/es-query';
-import type { DataViewSpec, SavedQuery } from '@kbn/data-plugin/common';
+import type { DataViewSpec, SavedQuery } from '@kbn/data-common';
 import { SavedObjectReference } from '@kbn/core-saved-objects-common';
 import type { DateRange } from '../types';
 

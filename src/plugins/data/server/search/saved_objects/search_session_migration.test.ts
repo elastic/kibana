@@ -14,7 +14,7 @@ import {
   SearchSessionSavedObjectAttributesPre$8$6$0,
 } from './search_session_migration';
 import { SavedObject } from '@kbn/core/types';
-import { SEARCH_SESSION_TYPE, SearchSessionStatus, SearchStatus } from '../../../common';
+import { SEARCH_SESSION_TYPE, SearchSessionStatus, SearchStatus } from '@kbn/data-common';
 import { SavedObjectMigrationContext } from '@kbn/core/server';
 import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
 

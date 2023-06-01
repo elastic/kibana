@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ISearchRequestParams } from '@kbn/data-plugin/common';
+import type { ISearchRequestParams } from '@kbn/data-common';
 import type { ActionResponsesRequestOptions } from '../../../../../../common/search_strategy/security_solution/response_actions';
 import { ENDPOINT_ACTION_RESPONSES_INDEX } from '../../../../../../common/endpoint/constants';
 

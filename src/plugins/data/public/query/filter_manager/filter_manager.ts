@@ -24,13 +24,13 @@ import { PersistableStateService } from '@kbn/kibana-utils-plugin/common/persist
 import { sortFilters } from './lib/sort_filters';
 import { mapAndFlattenFilters } from './lib/map_and_flatten_filters';
 
-import { UI_SETTINGS } from '../../../common';
+import { UI_SETTINGS } from '@kbn/data-common';
 import {
   getAllMigrations,
   inject,
   extract,
   telemetry,
-} from '../../../common/query/filters/persistable_state';
+} from '@kbn/data-common/query/filters/persistable_state';
 
 interface PartitionedFilters {
   globalFilters: Filter[];

@@ -9,7 +9,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import styled from 'styled-components';
 import { fromKueryExpression } from '@kbn/es-query';
 
-import type { FieldSpec } from '@kbn/data-plugin/common';
+import type { FieldSpec } from '@kbn/data-common';
 import { QueryStringInput } from '@kbn/unified-search-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 

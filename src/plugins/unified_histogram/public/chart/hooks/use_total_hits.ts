@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { textBasedQueryStateToAstWithValidation } from '@kbn/data-plugin/common';
+import { textBasedQueryStateToAstWithValidation } from '@kbn/data-common';
 import { isCompleteResponse } from '@kbn/data-plugin/public';
 import { DataView, DataViewType } from '@kbn/data-views-plugin/public';
 import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';

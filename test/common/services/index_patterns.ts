@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { DataViewSpec } from '@kbn/data-plugin/common';
+import { DataViewSpec } from '@kbn/data-common';
 import { FtrService } from '../ftr_provider_context';
 
 export class IndexPatternsService extends FtrService {

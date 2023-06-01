@@ -15,7 +15,7 @@ import {
   ExpressionValueSearchContext,
   parseEsInterval,
   AggConfigs,
-} from '@kbn/data-plugin/common';
+} from '@kbn/data-common';
 
 import { ExecutionContext } from '@kbn/expressions-plugin/common';
 import moment from 'moment';

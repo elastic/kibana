@@ -8,7 +8,7 @@
 
 import { StartServicesAccessor } from '@kbn/core/server';
 import { DataPluginStart, DataPluginStartDependencies } from '../../plugin';
-import { getEqlFn } from '../../../common/search/expressions/eql';
+import { getEqlFn } from '@kbn/data-common/search/expressions/eql';
 
 /**
  * This is some glue code that takes in `core.getStartServices`, extracts the dependencies

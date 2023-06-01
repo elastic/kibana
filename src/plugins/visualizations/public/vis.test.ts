@@ -24,9 +24,9 @@ jest.mock('./services', () => {
   // eslint-disable-next-line @typescript-eslint/no-var-requires
   const { BaseVisType } = require('./vis_types/base_vis_type');
   // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const { SearchSource } = require('@kbn/data-plugin/common/search/search_source');
+  const { SearchSource } = require('@kbn/data-common/search/search_source');
   // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const stubIndexPattern = require('@kbn/data-plugin/common/stubs');
+  const stubIndexPattern = require('@kbn/data-common/stubs');
   const visType = new BaseVisType({
     name: 'pie',
     title: 'pie',

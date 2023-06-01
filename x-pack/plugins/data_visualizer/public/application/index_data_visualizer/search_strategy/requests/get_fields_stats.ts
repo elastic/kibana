@@ -6,7 +6,7 @@
  */
 
 import type { Observable } from 'rxjs';
-import type { ISearchOptions } from '@kbn/data-plugin/common';
+import type { ISearchOptions } from '@kbn/data-common';
 import type { ISearchStart } from '@kbn/data-plugin/public';
 import type {
   FieldStatsCommonRequestParams,

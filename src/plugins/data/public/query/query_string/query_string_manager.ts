@@ -13,7 +13,7 @@ import { CoreStart } from '@kbn/core/public';
 import type { Query, AggregateQuery } from '@kbn/es-query';
 import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { isEqual } from 'lodash';
-import { KIBANA_USER_QUERY_LANGUAGE_KEY, UI_SETTINGS } from '../../../common';
+import { KIBANA_USER_QUERY_LANGUAGE_KEY, UI_SETTINGS } from '@kbn/data-common';
 
 export class QueryStringManager {
   private query$: BehaviorSubject<Query | AggregateQuery>;

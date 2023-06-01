@@ -7,7 +7,7 @@
 
 import { FeatureCollection, GeoJsonProperties } from 'geojson';
 import type { KibanaExecutionContext } from '@kbn/core/public';
-import { Query } from '@kbn/data-plugin/common/query';
+import { Query } from '@kbn/data-common/query';
 import { Adapters } from '@kbn/inspector-plugin/common/adapters';
 import { IField } from '../../fields/field';
 import { VectorSourceRequestMeta } from '../../../../common/descriptor_types';

@@ -11,7 +11,7 @@ import type { PackageInfo } from '@kbn/core/server';
 import { DataViewsContract } from '@kbn/data-views-plugin/common';
 import { RequestAdapter } from '@kbn/inspector-plugin/public';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
-import { ISearchGeneric, ISearchStartSearchSource, SearchRequest } from '../../common/search';
+import { ISearchGeneric, ISearchStartSearchSource, SearchRequest } from '@kbn/data-common/search';
 import { AggsSetup, AggsSetupDependencies, AggsStart, AggsStartDependencies } from './aggs';
 import { SearchUsageCollector } from './collectors';
 import { ISessionsClient, ISessionService } from './session';

@@ -7,7 +7,7 @@
  */
 
 import { DataView } from '@kbn/data-views-plugin/common';
-import { SearchSource } from '@kbn/data-plugin/common';
+import { SearchSource } from '@kbn/data-common';
 import { BehaviorSubject, Observable, Subject } from 'rxjs';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { action } from '@storybook/addon-actions';

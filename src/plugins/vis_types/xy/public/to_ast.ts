@@ -18,7 +18,7 @@ import {
 } from '@kbn/visualizations-plugin/public';
 import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/public';
 import { BUCKET_TYPES } from '@kbn/data-plugin/public';
-import type { TimeRangeBounds } from '@kbn/data-plugin/common';
+import type { TimeRangeBounds } from '@kbn/data-common';
 import type { PaletteOutput } from '@kbn/charts-plugin/common/expressions/palette/types';
 import {
   Dimensions,

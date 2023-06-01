@@ -12,7 +12,7 @@ import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useMemo } from 'react';
 import dateMath from '@kbn/datemath';
-import type { TimeRange } from '@kbn/data-plugin/common';
+import type { TimeRange } from '@kbn/data-common';
 import type { UnifiedHistogramBucketInterval } from '../../types';
 
 export const useTimeRange = ({

@@ -8,8 +8,8 @@
 
 import { IUiSettingsClient, SavedObject, SavedObjectsClientContract } from '@kbn/core/server';
 import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
-import { ISearchStartSearchSource, SearchSource } from '@kbn/data-plugin/common';
-import { createSearchSourceMock } from '@kbn/data-plugin/common/search/search_source/mocks';
+import { ISearchStartSearchSource, SearchSource } from '@kbn/data-common';
+import { createSearchSourceMock } from '@kbn/data-common/search/search_source/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { createStubDataView } from '@kbn/data-views-plugin/common/stubs';

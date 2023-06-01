@@ -9,7 +9,7 @@ import { createSelector } from 'reselect';
 import { FeatureCollection } from 'geojson';
 import _ from 'lodash';
 import type { KibanaExecutionContext } from '@kbn/core/public';
-import type { Query } from '@kbn/data-plugin/common';
+import type { Query } from '@kbn/data-common';
 import { Filter } from '@kbn/es-query';
 import type { TimeRange } from '@kbn/es-query';
 import { RasterTileLayer } from '../classes/layers/raster_tile_layer/raster_tile_layer';

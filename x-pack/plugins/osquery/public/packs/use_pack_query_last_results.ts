@@ -8,7 +8,7 @@
 import { useQuery } from '@tanstack/react-query';
 import moment from 'moment-timezone';
 import { lastValueFrom } from 'rxjs';
-import { SortDirection } from '@kbn/data-plugin/common';
+import { SortDirection } from '@kbn/data-common';
 import { useKibana } from '../common/lib/kibana';
 import { useLogsDataView } from '../common/hooks/use_logs_data_view';
 

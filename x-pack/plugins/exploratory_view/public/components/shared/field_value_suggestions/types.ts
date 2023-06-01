@@ -8,7 +8,7 @@
 import { PopoverAnchorPosition } from '@elastic/eui';
 import { Dispatch, SetStateAction } from 'react';
 import type { ESFilter } from '@kbn/es-types';
-import { IInspectorInfo } from '@kbn/data-plugin/common';
+import { IInspectorInfo } from '@kbn/data-common';
 
 interface CommonProps {
   selectedValue?: string[];

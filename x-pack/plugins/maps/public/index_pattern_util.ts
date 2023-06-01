@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { DataViewField, DataView } from '@kbn/data-plugin/common';
+import type { DataViewField, DataView } from '@kbn/data-common';
 import { i18n } from '@kbn/i18n';
 import { asyncMap } from '@kbn/std';
 import { indexPatterns } from '@kbn/data-plugin/public';

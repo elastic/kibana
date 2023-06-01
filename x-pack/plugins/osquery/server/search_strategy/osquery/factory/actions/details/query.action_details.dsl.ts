@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ISearchRequestParams } from '@kbn/data-plugin/common';
+import type { ISearchRequestParams } from '@kbn/data-common';
 import { AGENT_ACTIONS_INDEX } from '@kbn/fleet-plugin/common';
 import { ACTIONS_INDEX } from '../../../../../../common/constants';
 import type { ActionDetailsRequestOptions } from '../../../../../../common/search_strategy';

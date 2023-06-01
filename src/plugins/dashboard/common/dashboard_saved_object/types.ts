@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { RefreshInterval } from '@kbn/data-plugin/common';
+import { RefreshInterval } from '@kbn/data-common';
 import { RawControlGroupAttributes } from '@kbn/controls-plugin/common';
 
 import { Serializable } from '@kbn/utility-types';

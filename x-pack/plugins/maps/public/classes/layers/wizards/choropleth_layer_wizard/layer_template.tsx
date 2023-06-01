@@ -18,7 +18,7 @@ import {
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
-import { DataViewField, DataView } from '@kbn/data-plugin/common';
+import { DataViewField, DataView } from '@kbn/data-common';
 import { getDataViewLabel, getDataViewSelectPlaceholder } from '../../../../../common/i18n_getters';
 import { RenderWizardArguments } from '../layer_wizard_registry';
 import { EMSFileSelect } from '../../../../components/ems_file_select';

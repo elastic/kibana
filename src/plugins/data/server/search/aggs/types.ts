@@ -7,7 +7,7 @@
  */
 
 import type { SavedObjectsClientContract, ElasticsearchClient } from '@kbn/core/server';
-import type { AggsCommonSetup, AggsStart as Start } from '../../../common';
+import type { AggsCommonSetup, AggsStart as Start } from '@kbn/data-common';
 
 export type AggsSetup = AggsCommonSetup;
 

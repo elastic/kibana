@@ -10,7 +10,7 @@ import { Logger } from '@kbn/core/server';
 import { from, of } from 'rxjs';
 import { isEmpty } from 'lodash';
 import { isValidFeatureId, AlertConsumers } from '@kbn/rule-data-utils';
-import { ENHANCED_ES_SEARCH_STRATEGY } from '@kbn/data-plugin/common';
+import { ENHANCED_ES_SEARCH_STRATEGY } from '@kbn/data-common';
 import { ISearchStrategy, PluginStart } from '@kbn/data-plugin/server';
 import { ReadOperations, PluginStartContract as AlertingStart } from '@kbn/alerting-plugin/server';
 import { SecurityPluginSetup } from '@kbn/security-plugin/server';

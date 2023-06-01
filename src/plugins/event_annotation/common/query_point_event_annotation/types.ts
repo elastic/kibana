@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { KibanaQueryOutput } from '@kbn/data-plugin/common';
+import { KibanaQueryOutput } from '@kbn/data-common';
 import { PointStyleProps } from '../types';
 
 export type QueryPointEventAnnotationArgs = {

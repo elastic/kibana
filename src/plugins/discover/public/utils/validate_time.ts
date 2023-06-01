@@ -7,7 +7,7 @@
  */
 
 import dateMath from '@kbn/datemath';
-import type { RefreshInterval } from '@kbn/data-plugin/common';
+import type { RefreshInterval } from '@kbn/data-common';
 
 export function isTimeRangeValid(timeRange?: { from: string; to: string }): boolean {
   if (!timeRange?.from || !timeRange?.to) {

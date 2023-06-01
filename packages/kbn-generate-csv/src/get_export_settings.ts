@@ -8,7 +8,7 @@
 
 import { ByteSizeValue } from '@kbn/config-schema';
 import type { IUiSettingsClient, Logger } from '@kbn/core/server';
-import { createEscapeValue } from '@kbn/data-plugin/common';
+import { createEscapeValue } from '@kbn/data-common';
 import { CsvConfig } from '@kbn/generate-csv-types';
 import {
   UI_SETTINGS_DATEFORMAT_TZ,

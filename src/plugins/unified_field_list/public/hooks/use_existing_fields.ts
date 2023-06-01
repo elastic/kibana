@@ -16,7 +16,7 @@ import {
   DataViewsContract,
   getEsQueryConfig,
 } from '@kbn/data-plugin/public';
-import { type DataView } from '@kbn/data-plugin/common';
+import { type DataView } from '@kbn/data-common';
 import { loadFieldExisting } from '../services/field_existing';
 import { ExistenceFetchStatus } from '../types';
 

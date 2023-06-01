@@ -16,16 +16,16 @@ import type {
   KibanaContext,
   EsaggsStartDependencies,
   EsaggsExpressionFunctionDefinition,
-} from '../../../common/search';
+} from '@kbn/data-common/search';
 import type { AggsStart } from '../aggs/types';
 import { getFunctionDefinition } from './esaggs';
 
-jest.mock('../../../common/search/expressions', () => ({
+jest.mock(@kbn/data-common/search/expressions', () => ({
   getEsaggsMeta: jest.fn().mockReturnValue({ name: 'esaggs' }),
   handleEsaggsRequest: jest.fn(() => mockOf({})),
 }));
 
-import { getEsaggsMeta, handleEsaggsRequest } from '../../../common/search/expressions';
+import { getEsaggsMeta, handleEsaggsRequest } from '@kbn/data-common/search/expressions';
 
 describe('esaggs expression function - public', () => {
   let getStartDependencies: () => Promise<MockedKeys<EsaggsStartDependencies>>;

@@ -15,8 +15,8 @@ import {
   savedObjectsClientMock,
   uiSettingsServiceMock,
 } from '@kbn/core/server/mocks';
-import { ISearchStartSearchSource } from '@kbn/data-plugin/common';
-import { searchSourceInstanceMock } from '@kbn/data-plugin/common/search/search_source/mocks';
+import { ISearchStartSearchSource } from '@kbn/data-common';
+import { searchSourceInstanceMock } from '@kbn/data-common/search/search_source/mocks';
 import { IScopedSearchClient } from '@kbn/data-plugin/server';
 import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
 import { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';

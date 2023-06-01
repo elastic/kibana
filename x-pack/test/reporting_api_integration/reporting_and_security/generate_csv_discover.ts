@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
+import { SerializedSearchSourceFields } from '@kbn/data-common';
 import { ReportApiJSON } from '@kbn/reporting-plugin/common/types';
 import { FtrProviderContext } from '../ftr_provider_context';
 

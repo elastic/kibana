@@ -9,7 +9,7 @@
 import type { MockedKeys } from '@kbn/utility-types-jest';
 import { CoreSetup, CoreStart } from '@kbn/core/public';
 import { coreMock, themeServiceMock } from '@kbn/core/public/mocks';
-import { IEsSearchRequest } from '../../../common/search';
+import { IEsSearchRequest } from '@kbn/data-common/search';
 import { SearchInterceptor } from './search_interceptor';
 import { AbortError } from '@kbn/kibana-utils-plugin/public';
 import { SearchTimeoutError, PainlessError, TimeoutErrorMode, EsError } from '../errors';
@@ -17,11 +17,11 @@ import { ISessionService, SearchSessionState } from '..';
 import { bfetchPluginMock } from '@kbn/bfetch-plugin/public/mocks';
 import { BfetchPublicSetup } from '@kbn/bfetch-plugin/public';
 
-import * as searchPhaseException from '../../../common/search/test_data/search_phase_execution_exception.json';
-import * as resourceNotFoundException from '../../../common/search/test_data/resource_not_found_exception.json';
+import * as searchPhaseException from '@kbn/data-common/search/test_data/search_phase_execution_exception.json';
+import * as resourceNotFoundException from '@kbn/data-common/search/test_data/resource_not_found_exception.json';
 import { BehaviorSubject } from 'rxjs';
 import { dataPluginMock } from '../../mocks';
-import { UI_SETTINGS } from '../../../common';
+import { UI_SETTINGS } from '@kbn/data-common';
 
 jest.mock('./utils', () => {
   const originalModule = jest.requireActual('./utils');

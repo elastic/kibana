@@ -53,12 +53,12 @@ import {
   SearchSourceDependencies,
   SearchSourceService,
   selectFilterFunction,
-} from '../../common/search';
+} from '@kbn/data-common/search';
 import {
   getShardDelayBucketAgg,
   SHARD_DELAY_AGG_NAME,
-} from '../../common/search/aggs/buckets/shard_delay';
-import { aggShardDelay } from '../../common/search/aggs/buckets/shard_delay_fn';
+} from '@kbn/data-common/search/aggs/buckets/shard_delay';
+import { aggShardDelay } from '@kbn/data-common/search/aggs/buckets/shard_delay_fn';
 import { ConfigSchema } from '../../config';
 import { NowProviderInternalContract } from '../now_provider';
 import { DataPublicPluginStart, DataStartDependencies } from '../types';

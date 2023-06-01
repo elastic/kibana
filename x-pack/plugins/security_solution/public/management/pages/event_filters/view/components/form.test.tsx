@@ -6,7 +6,7 @@
  */
 import React from 'react';
 import { act, cleanup, fireEvent } from '@testing-library/react';
-import { stubIndexPattern } from '@kbn/data-plugin/common/stubs';
+import { stubIndexPattern } from '@kbn/data-common/stubs';
 import { useFetchIndex } from '../../../../../common/containers/source';
 import { NAME_ERROR } from '../event_filters_list';
 import { useCurrentUser, useKibana } from '../../../../../common/lib/kibana';

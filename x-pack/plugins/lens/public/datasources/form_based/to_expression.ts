@@ -13,7 +13,7 @@ import type {
   EsaggsExpressionFunctionDefinition,
   IndexPatternLoadExpressionFunctionDefinition,
 } from '@kbn/data-plugin/public';
-import { queryToAst } from '@kbn/data-plugin/common';
+import { queryToAst } from '@kbn/data-common';
 import {
   buildExpression,
   buildExpressionFunction,

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { METRIC_TYPES } from '@kbn/data-plugin/common';
+import { METRIC_TYPES } from '@kbn/data-common';
 import { getAggValue } from './get_agg_value';
 import type { Metric } from '../../../../common/types';
 import type { PanelDataArray } from '../../../../common/types/vis_data';

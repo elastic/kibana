@@ -9,7 +9,7 @@
 import { Moment } from 'moment';
 
 import { TimeRange } from '@kbn/es-query';
-import { RefreshInterval } from '../../../common';
+import { RefreshInterval } from '@kbn/data-common';
 
 export interface TimefilterConfig {
   timeDefaults: TimeRange;
@@ -24,4 +24,4 @@ export type InputTimeRange =
       to: Moment;
     };
 
-export type { TimeRangeBounds } from '../../../common';
+export type { TimeRangeBounds } from '@kbn/data-common';

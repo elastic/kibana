@@ -8,7 +8,7 @@
 
 import type { SerializableRecord } from '@kbn/utility-types';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
-import type { RefreshInterval } from '@kbn/data-plugin/common';
+import type { RefreshInterval } from '@kbn/data-common';
 import type { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/common';
 import type { SavedVisState } from './types';
 

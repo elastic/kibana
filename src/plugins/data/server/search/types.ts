@@ -24,7 +24,7 @@ import {
   IEsSearchResponse,
   IEsSearchRequest,
   SearchSourceService,
-} from '../../common/search';
+} from '@kbn/data-common/search';
 import { AggsSetup, AggsStart } from './aggs';
 import { SearchUsage } from './collectors/search';
 import type { IScopedSearchSessionsClient } from './session';

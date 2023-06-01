@@ -10,7 +10,7 @@ import { ThemeProvider } from 'styled-components';
 import { mount } from 'enzyme';
 import { waitFor } from '@testing-library/react';
 
-import { fields } from '@kbn/data-plugin/common/mocks';
+import { fields } from '@kbn/data-common/mocks';
 
 import { useKibana } from '../../lib/kibana';
 

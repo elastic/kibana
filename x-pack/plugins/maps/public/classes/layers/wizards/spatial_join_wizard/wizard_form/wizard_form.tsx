@@ -7,7 +7,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { EuiSpacer } from '@elastic/eui';
-import type { DataViewField, DataView } from '@kbn/data-plugin/common';
+import type { DataViewField, DataView } from '@kbn/data-common';
 import { getGeoFields, getGeoPointFields } from '../../../../../index_pattern_util';
 import { RenderWizardArguments } from '../../layer_wizard_registry';
 import { LeftSourcePanel } from './left_source_panel';

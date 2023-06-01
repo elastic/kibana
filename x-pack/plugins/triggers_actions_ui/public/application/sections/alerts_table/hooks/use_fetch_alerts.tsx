@@ -12,7 +12,7 @@ import { noop } from 'lodash';
 import { useCallback, useEffect, useReducer, useRef, useMemo } from 'react';
 import { Subscription } from 'rxjs';
 
-import { isCompleteResponse, isErrorResponse } from '@kbn/data-plugin/common';
+import { isCompleteResponse, isErrorResponse } from '@kbn/data-common';
 import type {
   RuleRegistrySearchRequest,
   RuleRegistrySearchRequestPagination,

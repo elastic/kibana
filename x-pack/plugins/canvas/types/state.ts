@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { KibanaContext } from '@kbn/data-plugin/common';
+import { KibanaContext } from '@kbn/data-common';
 import {
   AnyExpressionFunctionDefinition,
   Datatable,

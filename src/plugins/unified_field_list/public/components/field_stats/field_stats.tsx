@@ -13,7 +13,7 @@ import {
   ES_FIELD_TYPES,
   getEsQueryConfig,
   KBN_FIELD_TYPES,
-} from '@kbn/data-plugin/common';
+} from '@kbn/data-common';
 import type { IUiSettingsClient } from '@kbn/core/public';
 import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';

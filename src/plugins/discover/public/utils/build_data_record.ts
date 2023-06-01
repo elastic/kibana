@@ -7,7 +7,7 @@
  */
 
 import { DataView } from '@kbn/data-views-plugin/common';
-import { flattenHit } from '@kbn/data-plugin/common';
+import { flattenHit } from '@kbn/data-common';
 import { getDocId } from './get_doc_id';
 import type { DataTableRecord, EsHitRecord } from '../types';
 

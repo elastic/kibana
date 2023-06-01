@@ -15,7 +15,7 @@ import {
 } from '@kbn/embeddable-plugin/public/lib/test_samples/embeddables';
 import { CoreStart } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';
-import { LINE_FEED_CHARACTER } from '@kbn/data-plugin/common/exports/export_csv';
+import { LINE_FEED_CHARACTER } from '@kbn/data-common/exports/export_csv';
 import { isErrorEmbeddable, IContainer, ErrorEmbeddable } from '@kbn/embeddable-plugin/public';
 
 import { ExportCSVAction } from './export_csv_action';

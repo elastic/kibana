@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { GeoJsonProperties } from 'geojson';
-import { DataView } from '@kbn/data-plugin/common';
+import { DataView } from '@kbn/data-common';
 import type { IESAggSource } from './types';
 import { AbstractESSource } from '../es_source';
 import { esAggFieldsFactory, IESAggField } from '../../fields/agg';

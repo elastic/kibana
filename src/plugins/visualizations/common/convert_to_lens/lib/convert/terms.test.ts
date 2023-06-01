@@ -7,7 +7,7 @@
  */
 
 import { stubLogstashDataView } from '@kbn/data-views-plugin/common/data_view.stub';
-import { AggParamsTerms, IAggConfig, METRIC_TYPES, BUCKET_TYPES } from '@kbn/data-plugin/common';
+import { AggParamsTerms, IAggConfig, METRIC_TYPES, BUCKET_TYPES } from '@kbn/data-common';
 import { convertToTermsColumn } from './terms';
 import { AggBasedColumn, TermsColumn } from './types';
 import { SchemaConfig } from '../../..';

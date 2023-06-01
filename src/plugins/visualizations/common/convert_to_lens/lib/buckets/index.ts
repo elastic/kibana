@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { BUCKET_TYPES, IAggConfig, METRIC_TYPES } from '@kbn/data-plugin/common';
+import { BUCKET_TYPES, IAggConfig, METRIC_TYPES } from '@kbn/data-common';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { convertToSchemaConfig } from '../../../vis_schemas';
 import { AggBasedColumn, SchemaConfig } from '../../..';

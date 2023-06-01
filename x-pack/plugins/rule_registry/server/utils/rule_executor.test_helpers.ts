@@ -17,7 +17,7 @@ import {
   RuleTypeState,
 } from '@kbn/alerting-plugin/server';
 import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
-import { searchSourceCommonMock } from '@kbn/data-plugin/common/search/search_source/mocks';
+import { searchSourceCommonMock } from '@kbn/data-common/search/search_source/mocks';
 import { Logger } from '@kbn/logging';
 import { SharePluginStart } from '@kbn/share-plugin/server';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';

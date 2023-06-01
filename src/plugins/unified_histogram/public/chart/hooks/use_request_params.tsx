@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { getAbsoluteTimeRange } from '@kbn/data-plugin/common';
+import { getAbsoluteTimeRange } from '@kbn/data-common';
 import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import { useCallback, useMemo, useRef } from 'react';
 import type { UnifiedHistogramServices } from '../../types';

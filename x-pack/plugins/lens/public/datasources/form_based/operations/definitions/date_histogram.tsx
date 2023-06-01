@@ -27,7 +27,7 @@ import {
   search,
   UI_SETTINGS,
 } from '@kbn/data-plugin/public';
-import { extendedBoundsToAst, intervalOptions } from '@kbn/data-plugin/common';
+import { extendedBoundsToAst, intervalOptions } from '@kbn/data-common';
 import { buildExpressionFunction } from '@kbn/expressions-plugin/public';
 import { TooltipWrapper } from '@kbn/visualization-ui-components/public';
 import { updateColumnParam } from '../layer_helpers';

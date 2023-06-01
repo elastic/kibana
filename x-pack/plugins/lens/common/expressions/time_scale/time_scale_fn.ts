@@ -14,7 +14,7 @@ import {
   parseInterval,
   TimeRangeBounds,
   TimeRange,
-} from '@kbn/data-plugin/common';
+} from '@kbn/data-common';
 import type { TimeScaleExpressionFunction, TimeScaleUnit, TimeScaleArgs } from './types';
 
 const unitInMs: Record<TimeScaleUnit, number> = {

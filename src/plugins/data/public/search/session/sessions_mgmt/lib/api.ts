@@ -21,7 +21,7 @@ import {
 } from '../types';
 import { ISessionsClient } from '../../sessions_client';
 import { SearchUsageCollector } from '../../../collectors';
-import { SearchSessionsFindResponse, SearchSessionStatus } from '../../../../../common';
+import { SearchSessionsFindResponse, SearchSessionStatus } from '@kbn/data-common';
 import { SearchSessionsConfigSchema } from '../../../../../config';
 
 type LocatorsStart = SharePluginStart['url']['locators'];

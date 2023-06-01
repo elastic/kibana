@@ -7,7 +7,7 @@
  */
 
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
-import { createDatatableUtilitiesMock } from '../common/mocks';
+import { createDatatableUtilitiesMock } from '@kbn/data-common/mocks';
 import { DataPlugin } from '.';
 import { searchServiceMock } from './search/mocks';
 import { queryServiceMock } from './query/mocks';
@@ -47,8 +47,8 @@ const createStartContract = (): Start => {
   };
 };
 
-export { createSearchSourceMock } from '../common/search/search_source/mocks';
-export { getCalculateAutoTimeExpression } from '../common/search/aggs';
+export { createSearchSourceMock } from '@kbn/data-common/search/search_source/mocks';
+export { getCalculateAutoTimeExpression } from '@kbn/data-common/search/aggs';
 
 export const dataPluginMock = {
   createSetupContract,

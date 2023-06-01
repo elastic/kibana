@@ -16,7 +16,7 @@ import { DatePickerContextProvider } from '@kbn/ml-date-picker';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { StorageContextProvider } from '@kbn/ml-local-storage';
 import { UrlStateProvider } from '@kbn/ml-url-state';
-import { UI_SETTINGS } from '@kbn/data-plugin/common';
+import { UI_SETTINGS } from '@kbn/data-common';
 import { toMountPoint, wrapWithTheme } from '@kbn/kibana-react-plugin/public';
 
 import { FieldStatsServices } from '@kbn/unified-field-list-plugin/public';

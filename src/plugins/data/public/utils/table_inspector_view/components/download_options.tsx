@@ -23,7 +23,7 @@ import { Datatable } from '@kbn/expressions-plugin/common';
 import { downloadMultipleAs } from '@kbn/share-plugin/public';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { IUiSettingsClient } from '@kbn/core/public';
-import { CSV_MIME_TYPE, datatableToCSV, tableHasFormulas } from '../../../../common';
+import { CSV_MIME_TYPE, datatableToCSV, tableHasFormulas } from '@kbn/data-common';
 
 interface DataDownloadOptionsState {
   isPopoverOpen: boolean;

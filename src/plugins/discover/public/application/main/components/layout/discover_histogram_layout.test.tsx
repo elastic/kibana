@@ -28,7 +28,7 @@ import { SavedSearch, VIEW_MODE } from '@kbn/saved-search-plugin/public';
 import { CoreTheme } from '@kbn/core/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { createSearchSessionMock } from '../../../../__mocks__/search_session';
-import { searchSourceInstanceMock } from '@kbn/data-plugin/common/search/search_source/mocks';
+import { searchSourceInstanceMock } from '@kbn/data-common/search/search_source/mocks';
 import { getSessionServiceMock } from '@kbn/data-plugin/public/search/session/mocks';
 import { ResetSearchButton } from './reset_search_button';
 import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';

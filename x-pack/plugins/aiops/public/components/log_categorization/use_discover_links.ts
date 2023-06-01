@@ -8,7 +8,7 @@
 import rison from '@kbn/rison';
 import moment from 'moment';
 
-import type { TimeRangeBounds } from '@kbn/data-plugin/common';
+import type { TimeRangeBounds } from '@kbn/data-common';
 import { i18n } from '@kbn/i18n';
 import type { Filter } from '@kbn/es-query';
 import type { AiOpsIndexBasedAppState } from '../../application/utils/url_state';

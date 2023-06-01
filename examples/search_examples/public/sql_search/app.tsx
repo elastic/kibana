@@ -36,7 +36,7 @@ import {
   SQL_SEARCH_STRATEGY,
   SqlSearchStrategyRequest,
   SqlSearchStrategyResponse,
-} from '@kbn/data-plugin/common';
+} from '@kbn/data-common';
 
 interface SearchExamplesAppDeps {
   notifications: CoreStart['notifications'];

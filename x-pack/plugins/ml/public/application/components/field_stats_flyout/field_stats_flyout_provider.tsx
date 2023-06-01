@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useState, type FC } from 'react';
-import type { DataView } from '@kbn/data-plugin/common';
+import type { DataView } from '@kbn/data-common';
 import type { FieldStatsServices } from '@kbn/unified-field-list-plugin/public';
 import type { TimeRange as TimeRangeMs } from '@kbn/ml-date-picker';
 import type { FieldStatsProps } from '@kbn/unified-field-list-plugin/public';

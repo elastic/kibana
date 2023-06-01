@@ -10,7 +10,7 @@ import { BehaviorSubject, Subscription } from 'rxjs';
 
 import { coreMock } from '@kbn/core/public/mocks';
 import { expressionsPluginMock } from '@kbn/expressions-plugin/public/mocks';
-import { BucketAggType, getAggTypes, MetricAggType } from '../../../common';
+import { BucketAggType, getAggTypes, MetricAggType } from '@kbn/data-common';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
 import { dataPluginMock } from '../../mocks';
 

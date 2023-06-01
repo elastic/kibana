@@ -9,7 +9,7 @@
 import { Observable } from 'rxjs';
 import { IEsSearchRequest } from '@kbn/data-plugin/server';
 import { schema } from '@kbn/config-schema';
-import { IEsSearchResponse } from '@kbn/data-plugin/common';
+import { IEsSearchResponse } from '@kbn/data-common';
 import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
 import type { IRouter } from '@kbn/core/server';
 import { SERVER_SEARCH_ROUTE_PATH } from '../../common';

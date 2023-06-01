@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { BUCKET_TYPES } from '@kbn/data-plugin/common';
+import { BUCKET_TYPES } from '@kbn/data-common';
 import { v4 as uuidv4 } from 'uuid';
 import { DataType, TermsParams } from '../../types';
 import { getFieldNameFromField, isColumnWithMeta } from '../utils';

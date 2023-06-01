@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { RefreshInterval, TimeRange } from '@kbn/data-plugin/common';
+import type { RefreshInterval, TimeRange } from '@kbn/data-common';
 import { isTimeRangeValid, isRefreshIntervalValid } from './validate_time';
 
 describe('discover validate time', () => {

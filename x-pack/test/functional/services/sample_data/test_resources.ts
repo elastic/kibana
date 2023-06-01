@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { UI_SETTINGS } from '@kbn/data-plugin/common';
+import { UI_SETTINGS } from '@kbn/data-common';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export function SampleDataTestResourcesServiceProvider({ getService }: FtrProviderContext) {

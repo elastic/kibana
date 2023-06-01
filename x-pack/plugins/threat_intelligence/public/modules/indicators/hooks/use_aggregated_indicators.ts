@@ -8,7 +8,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { Filter, Query, TimeRange } from '@kbn/es-query';
 import { useMemo, useState } from 'react';
-import { TimeRangeBounds } from '@kbn/data-plugin/common';
+import { TimeRangeBounds } from '@kbn/data-common';
 import { EuiComboBoxOptionOption } from '@elastic/eui';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useInspector } from '../../../hooks/use_inspector';

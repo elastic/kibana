@@ -29,7 +29,7 @@ export type {
   SearchSourceDependencies,
   SearchSourceFields,
   SerializedSearchSourceFields,
-} from '../../common/search';
+} from '@kbn/data-common/search';
 export {
   ES_SEARCH_STRATEGY,
   extractReferences as extractSearchSourceReferences,
@@ -38,7 +38,7 @@ export {
   parseSearchSourceJSON,
   SearchSource,
   SortDirection,
-} from '../../common/search';
+} from '@kbn/data-common/search';
 export type {
   ISessionService,
   SearchSessionInfoProvider,

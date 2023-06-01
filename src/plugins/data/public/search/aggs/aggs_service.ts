@@ -16,8 +16,8 @@ import {
   aggsRequiredUiSettings,
   AggsCommonStartDependencies,
   AggsCommonService,
-} from '../../../common/search/aggs';
-import { calculateBounds, TimeRange } from '../../../common';
+} from '@kbn/data-common/search/aggs';
+import { calculateBounds, TimeRange } from '@kbn/data-common';
 import type { AggsSetup, AggsStart } from './types';
 import type { NowProviderInternalContract } from '../../now_provider';
 

@@ -15,7 +15,7 @@ import {
   FieldTopValuesBucket,
 } from '@kbn/unified-field-list-plugin/public';
 import { isDefined } from '@kbn/ml-is-defined';
-import type { DataView, DataViewField } from '@kbn/data-plugin/common';
+import type { DataView, DataViewField } from '@kbn/data-common';
 import type { TimeRange as TimeRangeMs } from '@kbn/ml-date-picker';
 import moment from 'moment';
 import { FormattedMessage } from '@kbn/i18n-react';

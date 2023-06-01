@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { DatatableUtilitiesService } from '@kbn/data-plugin/common';
+import type { DatatableUtilitiesService } from '@kbn/data-common';
 import type {
   PointInTimeEventAnnotationConfig,
   RangeEventAnnotationConfig,

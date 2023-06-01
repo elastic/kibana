@@ -18,7 +18,7 @@ import {
 } from 'rxjs/operators';
 import { isEqual, sortBy, uniq } from 'lodash';
 import type { TimefilterContract } from '@kbn/data-plugin/public';
-import type { TimeRangeBounds } from '@kbn/data-plugin/common';
+import type { TimeRangeBounds } from '@kbn/data-common';
 // FIXME get rid of the static import
 import { mlTimefilterRefresh$ } from '@kbn/ml-date-picker';
 import { AnomalyTimelineService } from '../services/anomaly_timeline_service';

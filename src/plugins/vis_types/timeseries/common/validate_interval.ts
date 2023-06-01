@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { parseInterval, TimeRangeBounds } from '@kbn/data-plugin/common';
+import { parseInterval, TimeRangeBounds } from '@kbn/data-common';
 import { GTE_INTERVAL_RE } from './interval_regexp';
 import { ValidateIntervalError } from './errors';
 

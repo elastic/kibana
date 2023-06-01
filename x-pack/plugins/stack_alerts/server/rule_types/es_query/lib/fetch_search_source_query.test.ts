@@ -6,7 +6,7 @@
  */
 
 import { OnlySearchSourceRuleParams } from '../types';
-import { createSearchSourceMock } from '@kbn/data-plugin/common/search/search_source/mocks';
+import { createSearchSourceMock } from '@kbn/data-common/search/search_source/mocks';
 import { updateSearchSource, getSmallerDataViewSpec } from './fetch_search_source_query';
 import {
   createStubDataView,

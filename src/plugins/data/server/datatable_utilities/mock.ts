@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { createDatatableUtilitiesMock as createDatatableUtilitiesCommonMock } from '../../common/mocks';
+import { createDatatableUtilitiesMock as createDatatableUtilitiesCommonMock } from '@kbn/data-common/mocks';
 import type { DatatableUtilitiesService } from './datatable_utilities_service';
 
 export function createDatatableUtilitiesMock(): jest.Mocked<DatatableUtilitiesService> {

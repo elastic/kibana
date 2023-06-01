@@ -7,7 +7,7 @@
 
 import { kea, MakeLogicType } from 'kea';
 
-import { RefreshInterval } from '@kbn/data-plugin/common';
+import { RefreshInterval } from '@kbn/data-common';
 
 import { TimeRange } from '@kbn/es-query';
 

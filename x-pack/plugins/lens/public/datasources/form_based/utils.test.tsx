@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { shallow } from 'enzyme';
-import { createDatatableUtilitiesMock } from '@kbn/data-plugin/common/mocks';
+import { createDatatableUtilitiesMock } from '@kbn/data-common/mocks';
 import { getPrecisionErrorWarningMessages, cloneLayer } from './utils';
 import type { FormBasedPrivateState, GenericIndexPatternColumn } from './types';
 import type { FramePublicAPI } from '../../types';

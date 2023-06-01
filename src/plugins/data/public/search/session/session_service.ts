@@ -50,7 +50,7 @@ import {
   TrackedSearchState,
 } from './search_session_state';
 import { ISessionsClient } from './sessions_client';
-import { ISearchOptions } from '../../../common';
+import { ISearchOptions } from '@kbn/data-common';
 import { NowProviderInternalContract } from '../../now_provider';
 import { SEARCH_SESSIONS_MANAGEMENT_ID } from './constants';
 import { formatSessionName } from './lib/session_name_formatter';

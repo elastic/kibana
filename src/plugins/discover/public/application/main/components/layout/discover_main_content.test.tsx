@@ -26,7 +26,7 @@ import { DiscoverMainContent, DiscoverMainContentProps } from './discover_main_c
 import { SavedSearch, VIEW_MODE } from '@kbn/saved-search-plugin/public';
 import { CoreTheme } from '@kbn/core/public';
 import { DocumentViewModeToggle } from '../../../../components/view_mode_toggle';
-import { searchSourceInstanceMock } from '@kbn/data-plugin/common/search/search_source/mocks';
+import { searchSourceInstanceMock } from '@kbn/data-common/search/search_source/mocks';
 import { DiscoverDocuments } from './discover_documents';
 import { FieldStatisticsTab } from '../field_stats_table';
 import { DiscoverMainProvider } from '../../services/discover_state_provider';

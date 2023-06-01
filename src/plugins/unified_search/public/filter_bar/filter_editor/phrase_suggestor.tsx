@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { withKibana, KibanaReactContextValue } from '@kbn/kibana-react-plugin/public';
-import { UI_SETTINGS } from '@kbn/data-plugin/common';
+import { UI_SETTINGS } from '@kbn/data-common';
 import { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { debounce } from 'lodash';
 

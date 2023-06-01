@@ -29,7 +29,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { CoreStart } from '@kbn/core/public';
-import { IInspectorInfo } from '@kbn/data-plugin/common';
+import { IInspectorInfo } from '@kbn/data-common';
 import {
   DataPublicPluginStart,
   IKibanaSearchResponse,

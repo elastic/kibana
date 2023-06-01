@@ -6,7 +6,7 @@
  */
 
 import { Observable } from 'rxjs';
-import type { DataView } from '@kbn/data-plugin/common';
+import type { DataView } from '@kbn/data-common';
 import {
   Embeddable,
   EmbeddableInput,

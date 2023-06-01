@@ -8,8 +8,8 @@
 
 import { CustomRequestHandlerContext, RequestHandlerContext, SavedObject } from '@kbn/core/server';
 import { isFilters, isOfQueryType } from '@kbn/es-query';
-import { isQuery, SavedQueryAttributes } from '../../common';
-import { extract, inject } from '../../common/query/filters/persistable_state';
+import { isQuery, SavedQueryAttributes } from '@kbn/data-common';
+import { extract, inject } from '@kbn/data-common/query/filters/persistable_state';
 
 function injectReferences({
   id,

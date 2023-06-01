@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { METRIC_TYPES } from '@kbn/data-plugin/common';
+import { METRIC_TYPES } from '@kbn/data-common';
 import { Column, ColumnWithMeta, SchemaConfig } from '@kbn/visualizations-plugin/common';
 import {
   convertToLensModule,

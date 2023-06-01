@@ -6,7 +6,7 @@
  */
 
 import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
-import { UI_SETTINGS } from '@kbn/data-plugin/common';
+import { UI_SETTINGS } from '@kbn/data-common';
 import { ary, assign, isPlainObject, isString, sortBy } from 'lodash';
 import moment from 'moment';
 import dateMath from '@kbn/datemath';

@@ -34,7 +34,7 @@ import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 import { LocalStorageMock } from './local_storage_mock';
 import { createDiscoverDataViewsMock } from './data_views';
-import { SearchSourceDependencies } from '@kbn/data-plugin/common';
+import { SearchSourceDependencies } from '@kbn/data-common';
 import { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 
 export function createDiscoverServicesMock(): DiscoverServices {

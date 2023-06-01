@@ -6,7 +6,7 @@
  */
 import { useCallback, useMemo, useState } from 'react';
 import createContainer from 'constate';
-import { getTime } from '@kbn/data-plugin/common';
+import { getTime } from '@kbn/data-common';
 import { ALERT_TIME_RANGE } from '@kbn/rule-data-utils';
 import { BoolQuery, buildEsQuery, Filter } from '@kbn/es-query';
 import { InfraAssetMetricsItem } from '../../../../../common/http_api';

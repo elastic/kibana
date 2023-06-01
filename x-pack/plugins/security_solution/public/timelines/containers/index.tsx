@@ -11,8 +11,8 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { Subscription } from 'rxjs';
 
-import type { DataView } from '@kbn/data-plugin/common';
-import { isCompleteResponse, isErrorResponse } from '@kbn/data-plugin/common';
+import type { DataView } from '@kbn/data-common';
+import { isCompleteResponse, isErrorResponse } from '@kbn/data-common';
 import type { ESQuery } from '../../../common/typed_json';
 
 import type { inputsModel } from '../../common/store';

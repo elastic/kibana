@@ -14,7 +14,7 @@ import {
   EsaggsExpressionFunctionDefinition,
   EsaggsStartDependencies,
   getEsaggsMeta,
-} from '../../../common/search/expressions';
+} from '@kbn/data-common/search/expressions';
 import { DataPublicPluginStart, DataStartDependencies } from '../../types';
 
 /**
@@ -56,7 +56,7 @@ export function getFunctionDefinition({
           }
         );
 
-        const { handleEsaggsRequest } = await import('../../../common/search/expressions');
+        const { handleEsaggsRequest } = await import(@kbn/data-common/search/expressions');
 
         return { aggConfigs, indexPattern, searchSource, getNow, handleEsaggsRequest };
       }).pipe(

@@ -12,7 +12,7 @@ import { omit } from 'lodash';
 
 import { i18n } from '@kbn/i18n';
 import { EuiCheckboxGroup } from '@elastic/eui';
-import { QueryState } from '@kbn/data-plugin/common';
+import { QueryState } from '@kbn/data-common';
 import type { Capabilities } from '@kbn/core/public';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { getStateFromKbnUrl } from '@kbn/kibana-utils-plugin/public';

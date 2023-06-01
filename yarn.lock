@@ -3923,6 +3923,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/data-common@link:packages/kbn-data-common":
+  version "0.0.0"
+  uid ""
+
 "@kbn/data-plugin@link:src/plugins/data":
   version "0.0.0"
   uid ""

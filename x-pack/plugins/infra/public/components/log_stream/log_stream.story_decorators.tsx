@@ -13,7 +13,7 @@ import {
   ENHANCED_ES_SEARCH_STRATEGY,
   ES_SEARCH_STRATEGY,
   FieldSpec,
-} from '@kbn/data-plugin/common';
+} from '@kbn/data-common';
 import {
   IEsSearchResponse,
   IKibanaSearchRequest,

@@ -7,7 +7,7 @@
  */
 import { lastValueFrom } from 'rxjs';
 import { ISearchSource, EsQuerySortValue, SortDirection } from '@kbn/data-plugin/public';
-import { EsQuerySearchAfter } from '@kbn/data-plugin/common';
+import { EsQuerySearchAfter } from '@kbn/data-common';
 import { buildDataTableRecord } from '../../../utils/build_data_record';
 import { convertTimeValueToIso } from './date_conversion';
 import { IntervalValue } from './generate_intervals';

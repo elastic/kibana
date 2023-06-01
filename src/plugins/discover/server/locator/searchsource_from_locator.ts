@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { SearchSource, TimeRange } from '@kbn/data-plugin/common';
+import { SearchSource, TimeRange } from '@kbn/data-common';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { AggregateQuery, Filter, Query } from '@kbn/es-query';
 import { SavedSearch } from '@kbn/saved-search-plugin/common';

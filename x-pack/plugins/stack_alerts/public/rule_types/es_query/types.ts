@@ -6,7 +6,7 @@
  */
 
 import { RuleTypeParams } from '@kbn/alerting-plugin/common';
-import { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
+import { SerializedSearchSourceFields } from '@kbn/data-common';
 import { EuiComboBoxOptionOption } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/public';
 

@@ -9,7 +9,7 @@ import {
   IKibanaSearchResponse,
   isCompleteResponse,
   isErrorResponse,
-} from '@kbn/data-plugin/common';
+} from '@kbn/data-common';
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ESSearchResponse } from '@kbn/es-types';
 import { FETCH_STATUS } from '@kbn/observability-shared-plugin/public';

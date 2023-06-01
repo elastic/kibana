@@ -13,7 +13,7 @@ import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 
 import { isTab } from '@kbn/timelines-plugin/public';
-import { getEsQueryConfig } from '@kbn/data-plugin/common';
+import { getEsQueryConfig } from '@kbn/data-common';
 import { dataTableSelectors, tableDefaults, TableId } from '@kbn/securitysolution-data-table';
 import { InputsModelId } from '../../../common/store/inputs/constants';
 import { SecurityPageName } from '../../../app/types';

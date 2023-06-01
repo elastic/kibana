@@ -11,10 +11,10 @@ import {
   AggTypesRegistrySetup,
   AggTypesRegistryStart,
   getCalculateAutoTimeExpression,
-} from '../../../common';
+} from '@kbn/data-common';
 import { AggsSetup, AggsStart } from './types';
 
-import { mockAggTypesRegistry } from '../../../common/search/aggs/test_helpers';
+import { mockAggTypesRegistry } from '@kbn/data-common/search/aggs/test_helpers';
 
 const getConfig = jest.fn();
 

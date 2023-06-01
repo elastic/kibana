@@ -6,7 +6,7 @@
  */
 
 import { EuiComboBoxOptionOption } from '@elastic/eui';
-import { TimeRangeBounds } from '@kbn/data-plugin/common';
+import { TimeRangeBounds } from '@kbn/data-common';
 import type { ISearchStart, QueryStart } from '@kbn/data-plugin/public';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';

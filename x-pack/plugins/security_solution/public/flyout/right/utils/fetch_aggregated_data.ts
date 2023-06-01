@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { IEsSearchRequest, IKibanaSearchResponse } from '@kbn/data-plugin/common';
+import type { IEsSearchRequest, IKibanaSearchResponse } from '@kbn/data-common';
 import type { ISearchStart } from '@kbn/data-plugin/public';
 
 /**

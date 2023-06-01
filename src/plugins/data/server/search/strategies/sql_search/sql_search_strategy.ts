@@ -16,8 +16,8 @@ import type {
   IAsyncSearchOptions,
   SqlSearchStrategyRequest,
   SqlSearchStrategyResponse,
-} from '../../../../common';
-import { pollSearch } from '../../../../common';
+} from '@kbn/data-common';
+import { pollSearch } from '@kbn/data-common';
 import { getDefaultAsyncGetParams, getDefaultAsyncSubmitParams } from './request_utils';
 import { toAsyncKibanaSearchResponse } from './response_utils';
 import { SearchConfigSchema } from '../../../../config';

@@ -13,7 +13,7 @@ import React, { useEffect, useMemo, useCallback } from 'react';
 import type { DataViewBase, Filter, Query } from '@kbn/es-query';
 import styled from 'styled-components';
 import { EuiButton } from '@elastic/eui';
-import { getEsQueryConfig } from '@kbn/data-plugin/common';
+import { getEsQueryConfig } from '@kbn/data-common';
 import { DEFAULT_NUMBER_FORMAT, APP_UI_ID } from '../../../../common/constants';
 import { SHOWING, UNIT } from '../../../common/components/events_viewer/translations';
 import { getTabsOnHostsUrl } from '../../../common/components/link_to/redirect_to_hosts';

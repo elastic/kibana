@@ -13,7 +13,7 @@ import { setNotifications } from '../../services';
 import { SearchResponseWarning } from '../types';
 import { filterWarnings, handleWarnings } from './handle_warnings';
 import * as extract from './extract_warnings';
-import { SearchRequest } from '../../../common';
+import { SearchRequest } from '@kbn/data-common';
 
 jest.mock('@kbn/i18n', () => {
   return {

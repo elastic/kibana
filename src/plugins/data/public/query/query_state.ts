@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { QueryState } from '../../common';
+import type { QueryState } from '@kbn/data-common';
 import type { TimefilterSetup } from './timefilter';
 import type { FilterManager } from './filter_manager';
 import type { QueryStringContract } from './query_string';

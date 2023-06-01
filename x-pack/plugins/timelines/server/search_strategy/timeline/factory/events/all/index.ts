@@ -6,7 +6,7 @@
  */
 
 import { cloneDeep, getOr } from 'lodash/fp';
-import type { IEsSearchResponse } from '@kbn/data-plugin/common';
+import type { IEsSearchResponse } from '@kbn/data-common';
 import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../../../../common/constants';
 import {
   EventHit,

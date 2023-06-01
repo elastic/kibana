@@ -7,7 +7,7 @@
  */
 
 import { $Values } from '@kbn/utility-types';
-import { AggConfigs } from '@kbn/data-plugin/common';
+import { AggConfigs } from '@kbn/data-common';
 import { NEW_GAUGE_CHARTS_LIBRARY } from '../constants';
 
 export const CHARTS_WITHOUT_SMALL_MULTIPLES = {

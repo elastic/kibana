@@ -13,7 +13,7 @@ import { ConfigSchema } from '../config';
  * Filters:
  */
 
-export { getEsQueryConfig } from '../common';
+export { getEsQueryConfig } from '@kbn/data-common';
 export {
   getDisplayValueFromFilter,
   getFieldDisplayValueFromFilter,
@@ -25,7 +25,7 @@ export {
  * Exporters (CSV)
  */
 
-import { datatableToCSV, CSV_MIME_TYPE, cellHasFormulas, tableHasFormulas } from '../common';
+import { datatableToCSV, CSV_MIME_TYPE, cellHasFormulas, tableHasFormulas } from '@kbn/data-common';
 export const exporters = {
   datatableToCSV,
   CSV_MIME_TYPE,
@@ -43,7 +43,7 @@ import {
   isMultiField,
   getFieldSubtypeNested,
   getFieldSubtypeMulti,
-} from '../common';
+} from '@kbn/data-common';
 
 import {
   ILLEGAL_CHARACTERS_KEY,
@@ -75,14 +75,14 @@ export type {
   GetFieldsOptions,
   AggregationRestrictions,
   DataViewListItem,
-} from '../common';
+} from '@kbn/data-common';
 export {
   ES_FIELD_TYPES,
   KBN_FIELD_TYPES,
   UI_SETTINGS,
   fieldList,
   DuplicateDataViewError,
-} from '../common';
+} from '@kbn/data-common';
 
 /*
  * Search:
@@ -115,9 +115,9 @@ import {
   // tabify
   tabifyAggResponse,
   tabifyGetColumns,
-} from '../common';
+} from '@kbn/data-common';
 
-export { AggGroupLabels, AggGroupNames, METRIC_TYPES, BUCKET_TYPES } from '../common';
+export { AggGroupLabels, AggGroupNames, METRIC_TYPES, BUCKET_TYPES } from '@kbn/data-common';
 
 export type {
   // aggs
@@ -145,9 +145,9 @@ export type {
   ExpressionFunctionKibanaContext,
   ExpressionValueSearchContext,
   KibanaContext,
-} from '../common';
+} from '@kbn/data-common';
 
-export type { AggConfigs, AggConfig } from '../common';
+export type { AggConfigs, AggConfig } from '@kbn/data-common';
 
 export type {
   // search
@@ -195,8 +195,8 @@ export type {
   SearchUsageCollector,
 } from './search';
 
-export type { ISearchOptions } from '../common';
-export { isErrorResponse, isCompleteResponse, isPartialResponse } from '../common';
+export type { ISearchOptions } from '@kbn/data-common';
+export { isErrorResponse, isCompleteResponse, isPartialResponse } from '@kbn/data-common';
 
 // Search namespace
 export const search = {
@@ -236,7 +236,7 @@ export const search = {
  * Types to be shared externally
  * @public
  */
-export type { RefreshInterval } from '../common';
+export type { RefreshInterval } from '@kbn/data-common';
 
 export {
   createSavedQueryService,
@@ -277,11 +277,11 @@ export { ShardFailureOpenModalButton } from './shard_failure_modal';
 
 export type { AggsStart } from './search/aggs';
 
-export { getTime } from '../common';
+export { getTime } from '@kbn/data-common';
 
-export type { SavedObject } from '../common';
+export type { SavedObject } from '@kbn/data-common';
 
-export { isTimeRange, isQuery, flattenHit, calculateBounds, tabifyAggResponse } from '../common';
+export { isTimeRange, isQuery, flattenHit, calculateBounds, tabifyAggResponse } from '@kbn/data-common';
 
 export { APPLY_FILTER_TRIGGER } from './triggers';
 

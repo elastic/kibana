@@ -7,7 +7,7 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import { parseTimeShift } from '@kbn/data-plugin/common';
+import { parseTimeShift } from '@kbn/data-common';
 import {
   FormulaColumn,
   getIndexPatternIds,

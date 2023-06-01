@@ -11,7 +11,7 @@
 import expect from '@kbn/expect';
 import request from 'superagent';
 import type SuperTest from 'supertest';
-import { IEsSearchResponse } from '@kbn/data-plugin/common';
+import { IEsSearchResponse } from '@kbn/data-common';
 import { FtrService } from '../ftr_provider_context';
 
 const parseBfetchResponse = (resp: request.Response): Array<Record<string, any>> => {

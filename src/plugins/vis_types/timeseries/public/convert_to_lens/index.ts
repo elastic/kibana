@@ -7,7 +7,7 @@
  */
 
 import { Vis } from '@kbn/visualizations-plugin/public';
-import { TimeRange } from '@kbn/data-plugin/common';
+import { TimeRange } from '@kbn/data-common';
 import type { Panel } from '../../common/types';
 import { PANEL_TYPES } from '../../common/enums';
 import { ConvertTsvbToLensVisualization } from './types';

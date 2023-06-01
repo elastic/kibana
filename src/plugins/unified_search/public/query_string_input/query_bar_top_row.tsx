@@ -34,7 +34,7 @@ import { TimeHistoryContract, getQueryLog } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { PersistedLog } from '@kbn/data-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { UI_SETTINGS } from '@kbn/data-plugin/common';
+import { UI_SETTINGS } from '@kbn/data-common';
 import type { IUnifiedSearchPluginServices } from '../types';
 import QueryStringInputUI from './query_string_input';
 import { NoDataPopover } from './no_data_popover';

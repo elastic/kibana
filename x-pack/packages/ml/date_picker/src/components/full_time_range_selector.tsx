@@ -22,7 +22,7 @@ import {
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-import type { DataView } from '@kbn/data-plugin/common';
+import type { DataView } from '@kbn/data-common';
 import type { TimefilterContract } from '@kbn/data-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useDatePickerContext } from '../hooks/use_date_picker_context';

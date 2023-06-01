@@ -10,7 +10,7 @@ import { ThemeProvider } from 'styled-components';
 import { mount } from 'enzyme';
 
 import { useKibana } from '../../lib/kibana';
-import { fields } from '@kbn/data-plugin/common/mocks';
+import { fields } from '@kbn/data-common/mocks';
 
 import { ListItemComponent } from './list_item';
 import type { ThreatMapEntries } from './types';

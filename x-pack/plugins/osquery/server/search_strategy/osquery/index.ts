@@ -8,7 +8,7 @@
 import { from, map, mergeMap } from 'rxjs';
 import type { ISearchStrategy, PluginStart } from '@kbn/data-plugin/server';
 import { shimHitsTotal } from '@kbn/data-plugin/server';
-import { ENHANCED_ES_SEARCH_STRATEGY } from '@kbn/data-plugin/common';
+import { ENHANCED_ES_SEARCH_STRATEGY } from '@kbn/data-common';
 import type { CoreStart } from '@kbn/core/server';
 import { ACTIONS_INDEX } from '../../../common/constants';
 import type {

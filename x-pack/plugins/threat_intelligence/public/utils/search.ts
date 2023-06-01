@@ -10,7 +10,7 @@ import {
   IKibanaSearchResponse,
   isCompleteResponse,
   isErrorResponse,
-} from '@kbn/data-plugin/common';
+} from '@kbn/data-common';
 import { ISearchStart } from '@kbn/data-plugin/public';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { THREAT_INTELLIGENCE_SEARCH_STRATEGY_NAME } from '../../common/constants';

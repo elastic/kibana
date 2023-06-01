@@ -9,8 +9,8 @@
 import { BehaviorSubject, firstValueFrom } from 'rxjs';
 import { KbnServerError } from '@kbn/kibana-utils-plugin/server';
 import { errors } from '@elastic/elasticsearch';
-import * as indexNotFoundException from '../../../../common/search/test_data/index_not_found_exception.json';
-import * as xContentParseException from '../../../../common/search/test_data/x_content_parse_exception.json';
+import * as indexNotFoundException from '@kbn/data-common/search/test_data/index_not_found_exception.json';
+import * as xContentParseException from '@kbn/data-common/search/test_data/x_content_parse_exception.json';
 import { SearchStrategyDependencies } from '../../types';
 import { enhancedEsSearchStrategyProvider } from './ese_search_strategy';
 import { createSearchSessionsClientMock } from '../../mocks';

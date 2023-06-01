@@ -8,7 +8,7 @@
 import type { Logger } from '@kbn/logging';
 import { compact, keyBy } from 'lodash';
 import { rangeQuery } from '@kbn/observability-plugin/server';
-import { parseInterval } from '@kbn/data-plugin/common';
+import { parseInterval } from '@kbn/data-common';
 import { Environment } from '../../../common/environment_rt';
 import { apmMlAnomalyQuery } from './apm_ml_anomaly_query';
 import {

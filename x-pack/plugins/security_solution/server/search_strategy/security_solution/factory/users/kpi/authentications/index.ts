@@ -7,7 +7,7 @@
 
 import { getOr } from 'lodash/fp';
 
-import type { IEsSearchResponse } from '@kbn/data-plugin/common';
+import type { IEsSearchResponse } from '@kbn/data-common';
 import { inspectStringifyObject } from '../../../../../../utils/build_query';
 import type { SecuritySolutionFactory } from '../../../types';
 import { buildUsersKpiAuthenticationsQuery } from './query.users_kpi_authentications.dsl';

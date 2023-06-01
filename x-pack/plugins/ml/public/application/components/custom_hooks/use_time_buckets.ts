@@ -6,7 +6,7 @@
  */
 
 import { useMemo } from 'react';
-import { UI_SETTINGS } from '@kbn/data-plugin/common';
+import { UI_SETTINGS } from '@kbn/data-common';
 import { useUiSettings } from '../../contexts/kibana';
 import { TimeBuckets } from '../../util/time_buckets';
 

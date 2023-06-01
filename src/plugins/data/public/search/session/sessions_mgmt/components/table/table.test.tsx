@@ -14,7 +14,7 @@ import moment from 'moment';
 import React from 'react';
 import { coreMock } from '@kbn/core/public/mocks';
 import { SearchUsageCollector, SessionsClient } from '../../../..';
-import { SearchSessionStatus } from '../../../../../../common';
+import { SearchSessionStatus } from '@kbn/data-common';
 import { SearchSessionsMgmtAPI } from '../../lib/api';
 import { LocaleWrapper } from '../../__mocks__';
 import { SearchSessionsMgmtTable } from './table';

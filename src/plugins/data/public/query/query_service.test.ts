@@ -10,7 +10,7 @@ import { FilterStateStore } from '@kbn/es-query';
 import { FilterManager } from './filter_manager';
 import { QueryStringContract } from './query_string';
 import { getFilter } from './filter_manager/test_helpers/get_stub_filter';
-import { UI_SETTINGS } from '../../common';
+import { UI_SETTINGS } from '@kbn/data-common';
 import { coreMock } from '@kbn/core/public/mocks';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { QueryService, QueryStart } from './query_service';

@@ -23,7 +23,7 @@ import {
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import type { DataView, Query } from '@kbn/data-plugin/common';
+import type { DataView, Query } from '@kbn/data-common';
 import { APP_ID } from '../../../../common/constants';
 import { getIndexPatternService, getData, getSearchBar } from '../../../kibana_services';
 import { GlobalFilterCheckbox } from '../../../components/global_filter_checkbox';

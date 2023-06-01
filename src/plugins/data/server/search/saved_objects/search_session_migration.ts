@@ -10,7 +10,7 @@ import { SavedObjectMigrationMap, SavedObjectUnsanitizedDoc } from '@kbn/core/se
 import {
   SearchSessionSavedObjectAttributes as SearchSessionSavedObjectAttributesLatest,
   SearchSessionStatus,
-} from '../../../common';
+} from '@kbn/data-common';
 
 /**
  * Search sessions were released in 7.12.0

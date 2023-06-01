@@ -13,7 +13,7 @@ import {
   IKibanaSearchResponse,
   isCompleteResponse,
   TimeRange,
-} from '@kbn/data-plugin/common';
+} from '@kbn/data-common';
 
 import { KibanaLogic } from '../../../shared/kibana/kibana_logic';
 

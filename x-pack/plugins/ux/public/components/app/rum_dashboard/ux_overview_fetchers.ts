@@ -10,7 +10,7 @@ import {
   DataPublicPluginStart,
   isCompleteResponse,
 } from '@kbn/data-plugin/public';
-import { IKibanaSearchRequest } from '@kbn/data-plugin/common';
+import { IKibanaSearchRequest } from '@kbn/data-common';
 import {
   FetchDataParams,
   HasDataParams,

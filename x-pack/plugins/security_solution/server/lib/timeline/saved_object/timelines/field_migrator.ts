@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-plugin/common';
+import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-common';
 import { DATA_VIEW_ID_REF_NAME, SAVED_QUERY_ID_REF_NAME, SAVED_QUERY_TYPE } from '../../constants';
 import { FieldMigrator } from '../../utils/migrator';
 /**

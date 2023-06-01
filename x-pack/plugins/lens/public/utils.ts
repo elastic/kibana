@@ -13,7 +13,7 @@ import type { Serializable } from '@kbn/utility-types';
 import type { TimefilterContract } from '@kbn/data-plugin/public';
 import type { IUiSettingsClient, SavedObjectReference } from '@kbn/core/public';
 import type { DataView, DataViewsContract } from '@kbn/data-views-plugin/public';
-import type { DatatableUtilitiesService } from '@kbn/data-plugin/common';
+import type { DatatableUtilitiesService } from '@kbn/data-common';
 import {
   BrushTriggerEvent,
   ClickTriggerEvent,

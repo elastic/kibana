@@ -8,7 +8,7 @@
 
 import { i18n } from '@kbn/i18n';
 import type { KibanaExecutionContext } from '@kbn/core/public';
-import { DataView } from '@kbn/data-plugin/common';
+import { DataView } from '@kbn/data-common';
 import { Filter, buildEsQuery, TimeRange, Query } from '@kbn/es-query';
 import { KibanaContext, getEsQueryConfig } from '@kbn/data-plugin/public';
 import { TimelionVisDependencies } from '../plugin';

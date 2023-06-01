@@ -7,7 +7,7 @@
 
 import { buildEsQuery as kbnBuildEsQuery, TimeRange, Query } from '@kbn/es-query';
 import { ALERT_TIME_RANGE } from '@kbn/rule-data-utils';
-import { getTime } from '@kbn/data-plugin/common';
+import { getTime } from '@kbn/data-common';
 
 export function buildEsQuery(timeRange: TimeRange, kuery?: string, queries: Query[] = []) {
   const timeFilter =

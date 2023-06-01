@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { IEsSearchRequest } from '@kbn/data-plugin/common';
+import type { IEsSearchRequest } from '@kbn/data-common';
 import { ESQuery } from '../../typed_json';
 import {
   TimelineEventsQueries,

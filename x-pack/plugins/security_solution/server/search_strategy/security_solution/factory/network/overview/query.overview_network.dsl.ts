@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ISearchRequestParams } from '@kbn/data-plugin/common';
+import type { ISearchRequestParams } from '@kbn/data-common';
 import { createQueryFilterClauses } from '../../../../../utils/build_query';
 import type { NetworkOverviewRequestOptions } from '../../../../../../common/search_strategy/security_solution/network';
 

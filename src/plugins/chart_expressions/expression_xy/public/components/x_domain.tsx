@@ -11,7 +11,7 @@ import React from 'react';
 import moment from 'moment';
 import dateMath, { Unit } from '@kbn/datemath';
 import { Endzones, getAdjustedInterval } from '@kbn/charts-plugin/public';
-import type { DatatableUtilitiesService } from '@kbn/data-plugin/common';
+import type { DatatableUtilitiesService } from '@kbn/data-common';
 import {
   getAccessorByDimension,
   getColumnByAccessor,

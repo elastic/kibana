@@ -19,10 +19,10 @@ import {
   SearchSessionsFindResponse,
   SearchSessionSavedObjectAttributes,
   SearchSessionStatusResponse,
-} from '../../../common/search';
+} from '@kbn/data-common/search';
 import { SearchSessionsConfigSchema } from '../../../config';
 
-export { SearchStatus } from '../../../common/search';
+export { SearchStatus } from '@kbn/data-common/search';
 
 export interface IScopedSearchSessionsClient {
   getId: (request: IKibanaSearchRequest, options: ISearchOptions) => Promise<string>;

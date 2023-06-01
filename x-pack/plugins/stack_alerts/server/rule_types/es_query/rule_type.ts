@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { CoreSetup } from '@kbn/core/server';
-import { extractReferences, injectReferences } from '@kbn/data-plugin/common';
+import { extractReferences, injectReferences } from '@kbn/data-common';
 import { RuleType } from '../../types';
 import { ActionContext } from './action_context';
 import {

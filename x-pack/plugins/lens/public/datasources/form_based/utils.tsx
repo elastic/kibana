@@ -9,14 +9,14 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { DocLinksStart, ThemeServiceStart } from '@kbn/core/public';
-import type { DatatableUtilitiesService } from '@kbn/data-plugin/common';
+import type { DatatableUtilitiesService } from '@kbn/data-common';
 import { TimeRange } from '@kbn/es-query';
 import { EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
 
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { groupBy, escape, uniq } from 'lodash';
-import type { Query } from '@kbn/data-plugin/common';
-import { SearchRequest } from '@kbn/data-plugin/common';
+import type { Query } from '@kbn/data-common';
+import { SearchRequest } from '@kbn/data-common';
 
 import {
   SearchResponseWarning,

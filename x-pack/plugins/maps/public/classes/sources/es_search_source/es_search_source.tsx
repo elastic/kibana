@@ -11,10 +11,10 @@ import { i18n } from '@kbn/i18n';
 import { GeoJsonProperties, Geometry, Position } from 'geojson';
 import type { KibanaExecutionContext } from '@kbn/core/public';
 import { type Filter, buildPhraseFilter, type TimeRange } from '@kbn/es-query';
-import type { DataViewField, DataView } from '@kbn/data-plugin/common';
+import type { DataViewField, DataView } from '@kbn/data-common';
 import { lastValueFrom } from 'rxjs';
 import { Adapters } from '@kbn/inspector-plugin/common/adapters';
-import { SortDirection, SortDirectionNumeric } from '@kbn/data-plugin/common';
+import { SortDirection, SortDirectionNumeric } from '@kbn/data-common';
 import { getTileUrlParams } from '@kbn/maps-vector-tile-utils';
 import { AbstractESSource } from '../es_source';
 import {

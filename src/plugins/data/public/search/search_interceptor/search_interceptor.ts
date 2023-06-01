@@ -56,7 +56,7 @@ import {
   ISearchOptionsSerializable,
   pollSearch,
   UI_SETTINGS,
-} from '../../../common';
+} from '@kbn/data-common';
 import { SearchUsageCollector } from '../collectors';
 import {
   EsError,

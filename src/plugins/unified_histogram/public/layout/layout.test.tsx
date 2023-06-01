@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { searchSourceInstanceMock } from '@kbn/data-plugin/common/search/search_source/mocks';
+import { searchSourceInstanceMock } from '@kbn/data-common/search/search_source/mocks';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import type { ReactWrapper } from 'enzyme';
 import React from 'react';

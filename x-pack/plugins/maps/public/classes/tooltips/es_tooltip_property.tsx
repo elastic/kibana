@@ -8,7 +8,7 @@
 import React, { ReactNode } from 'react';
 import _ from 'lodash';
 import { type Filter, buildExistsFilter, buildPhraseFilter } from '@kbn/es-query';
-import { DataView, DataViewField } from '@kbn/data-plugin/common';
+import { DataView, DataViewField } from '@kbn/data-common';
 import { ITooltipProperty } from './tooltip_property';
 import { IField } from '../fields/field';
 

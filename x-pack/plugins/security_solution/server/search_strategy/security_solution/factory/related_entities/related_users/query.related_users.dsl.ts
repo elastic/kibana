@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ISearchRequestParams } from '@kbn/data-plugin/common';
+import type { ISearchRequestParams } from '@kbn/data-common';
 import type { HostsRelatedUsersRequestOptions } from '../../../../../../common/search_strategy/security_solution/related_entities/related_users';
 
 export const buildRelatedUsersQuery = ({

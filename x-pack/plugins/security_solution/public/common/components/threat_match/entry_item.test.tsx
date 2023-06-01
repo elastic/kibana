@@ -11,7 +11,7 @@ import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiComboBox } from '@elastic/eui';
 
 import { EntryItem } from './entry_item';
-import { fields, getField } from '@kbn/data-plugin/common/mocks';
+import { fields, getField } from '@kbn/data-common/mocks';
 import type { DataViewBase } from '@kbn/es-query';
 
 jest.mock('../../lib/kibana');

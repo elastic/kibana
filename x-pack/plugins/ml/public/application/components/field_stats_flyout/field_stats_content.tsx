@@ -12,7 +12,7 @@ import {
   FieldStatsServices,
 } from '@kbn/unified-field-list-plugin/public';
 import { isDefined } from '@kbn/ml-is-defined';
-import type { DataView } from '@kbn/data-plugin/common';
+import type { DataView } from '@kbn/data-common';
 import type { TimeRange as TimeRangeMs } from '@kbn/ml-date-picker';
 import moment from 'moment';
 import { euiPaletteColorBlind } from '@elastic/eui';

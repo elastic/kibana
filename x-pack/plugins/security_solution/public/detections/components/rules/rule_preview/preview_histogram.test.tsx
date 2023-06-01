@@ -9,7 +9,7 @@ import React from 'react';
 import moment from 'moment';
 
 import type { DataViewBase } from '@kbn/es-query';
-import { fields } from '@kbn/data-plugin/common/mocks';
+import { fields } from '@kbn/data-common/mocks';
 
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import {

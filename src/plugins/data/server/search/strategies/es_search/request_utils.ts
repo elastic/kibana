@@ -8,7 +8,7 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 import type { IUiSettingsClient, SharedGlobalConfig } from '@kbn/core/server';
-import { UI_SETTINGS } from '../../../../common';
+import { UI_SETTINGS } from '@kbn/data-common';
 
 export function getShardTimeout(
   config: SharedGlobalConfig

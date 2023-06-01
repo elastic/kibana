@@ -16,7 +16,7 @@ import {
   EsaggsStartDependencies,
   getEsaggsMeta,
   handleEsaggsRequest,
-} from '../../../common/search/expressions';
+} from '@kbn/data-common/search/expressions';
 import { DataPluginStartDependencies, DataPluginStart } from '../../plugin';
 
 /**

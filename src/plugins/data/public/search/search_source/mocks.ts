@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { searchSourceCommonMock } from '../../../common/search/search_source/mocks';
+import { searchSourceCommonMock } from '@kbn/data-common/search/search_source/mocks';
 import type { ISearchStart } from '../types';
 
 function createStartContract(): jest.Mocked<ISearchStart['searchSource']> {

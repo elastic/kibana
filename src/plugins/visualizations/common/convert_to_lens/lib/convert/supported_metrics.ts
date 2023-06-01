@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { BUCKET_TYPES, METRIC_TYPES } from '@kbn/data-plugin/common';
+import { BUCKET_TYPES, METRIC_TYPES } from '@kbn/data-common';
 import { Operation } from '../../types';
 import { Operations } from '../../constants';
 

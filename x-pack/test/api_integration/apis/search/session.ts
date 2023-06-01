@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { SearchSessionStatus } from '@kbn/data-plugin/common';
+import { SearchSessionStatus } from '@kbn/data-common';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {

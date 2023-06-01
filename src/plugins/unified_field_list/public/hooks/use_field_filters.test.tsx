@@ -9,7 +9,7 @@
 import { renderHook } from '@testing-library/react-hooks';
 import { act } from 'react-test-renderer';
 import { stubLogstashDataView as dataView } from '@kbn/data-views-plugin/common/data_view.stub';
-import { type DataViewField } from '@kbn/data-plugin/common';
+import { type DataViewField } from '@kbn/data-common';
 import { coreMock } from '@kbn/core/public/mocks';
 import { useFieldFilters, type FieldFiltersParams } from './use_field_filters';
 

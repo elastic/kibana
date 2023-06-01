@@ -15,7 +15,7 @@ import { getExceptionBuilderComponentLazy } from '@kbn/lists-plugin/public';
 import type { EntriesArray } from '@kbn/securitysolution-io-ts-list-types';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import { getExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_item_schema.mock';
-import { createStubIndexPattern, stubIndexPattern } from '@kbn/data-plugin/common/stubs';
+import { createStubIndexPattern, stubIndexPattern } from '@kbn/data-common/stubs';
 
 import { AddExceptionFlyout } from '.';
 import { useFetchIndex } from '../../../../common/containers/source';

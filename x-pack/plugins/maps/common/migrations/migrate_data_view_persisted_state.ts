@@ -6,7 +6,7 @@
  */
 
 import type { Serializable } from '@kbn/utility-types';
-import type { DataViewSpec } from '@kbn/data-plugin/common';
+import type { DataViewSpec } from '@kbn/data-common';
 import { MigrateFunction } from '@kbn/kibana-utils-plugin/common';
 import type { MapAttributes } from '../content_management';
 

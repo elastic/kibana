@@ -7,7 +7,7 @@
 
 import { search } from '@kbn/data-plugin/public';
 import { transparentize } from '@elastic/eui';
-import type { DatatableUtilitiesService } from '@kbn/data-plugin/common';
+import type { DatatableUtilitiesService } from '@kbn/data-common';
 import type {
   EventAnnotationConfig,
   RangeEventAnnotationConfig,

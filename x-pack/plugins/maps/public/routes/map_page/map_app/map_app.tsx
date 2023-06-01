@@ -19,7 +19,7 @@ import { Adapters } from '@kbn/embeddable-plugin/public';
 import { Subscription } from 'rxjs';
 import { type Filter, FilterStateStore, type Query, type TimeRange } from '@kbn/es-query';
 import type { DataViewSpec } from '@kbn/data-views-plugin/public';
-import type { DataView } from '@kbn/data-plugin/common';
+import type { DataView } from '@kbn/data-common';
 import {
   GlobalQueryStateFromUrl,
   QueryState,

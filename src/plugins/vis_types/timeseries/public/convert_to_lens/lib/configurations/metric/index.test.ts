@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { METRIC_TYPES } from '@kbn/data-plugin/common';
+import { METRIC_TYPES } from '@kbn/data-common';
 import { TSVB_METRIC_TYPES } from '../../../../../common/enums';
 import { Column, FormulaColumn, Layer } from '../../convert';
 import { createPanel, createSeries } from '../../__mocks__';

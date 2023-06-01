@@ -7,7 +7,7 @@
  */
 
 import { IUiSettingsClient } from '@kbn/core/public';
-import { UI_SETTINGS } from '../../../common';
+import { UI_SETTINGS } from '@kbn/data-common';
 
 const defaultSessionId = `${Date.now()}`;
 

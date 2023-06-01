@@ -6,7 +6,7 @@
  */
 
 import { estypes } from '@elastic/elasticsearch';
-import { ISearchClient } from '@kbn/data-plugin/common';
+import { ISearchClient } from '@kbn/data-common';
 import { ESSearchRequest } from '@kbn/es-types';
 import { catchError, map, Observable } from 'rxjs';
 import { findInventoryModel } from '../../../../../common/inventory_models';

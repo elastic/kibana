@@ -11,7 +11,7 @@ import { waitFor } from '@testing-library/react';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 import { coreMock } from '@kbn/core/public/mocks';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
-import { fields, getField } from '@kbn/data-plugin/common/mocks';
+import { fields, getField } from '@kbn/data-common/mocks';
 
 import { getExceptionListItemSchemaMock } from '../../../../common/schemas/response/exception_list_item_schema.mock';
 import { getEntryMatchAnyMock } from '../../../../common/schemas/types/entry_match_any.mock';

@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { EsQuerySearchAfter } from '@kbn/data-plugin/common';
+import type { EsQuerySearchAfter } from '@kbn/data-common';
 import { SurrDocType } from '../services/context';
 import type { DataTableRecord } from '../../../types';
 

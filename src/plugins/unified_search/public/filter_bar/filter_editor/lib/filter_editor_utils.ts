@@ -10,7 +10,7 @@ import dateMath from '@kbn/datemath';
 import { Filter } from '@kbn/es-query';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import isSemverValid from 'semver/functions/valid';
-import { isFilterable, IpAddress } from '@kbn/data-plugin/common';
+import { isFilterable, IpAddress } from '@kbn/data-common';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { FILTER_OPERATORS, Operator } from './filter_operators';
 

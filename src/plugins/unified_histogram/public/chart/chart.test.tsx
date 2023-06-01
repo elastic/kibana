@@ -15,7 +15,7 @@ import type { UnifiedHistogramFetchStatus } from '../types';
 import { Chart } from './chart';
 import type { ReactWrapper } from 'enzyme';
 import { unifiedHistogramServicesMock } from '../__mocks__/services';
-import { searchSourceInstanceMock } from '@kbn/data-plugin/common/search/search_source/mocks';
+import { searchSourceInstanceMock } from '@kbn/data-common/search/search_source/mocks';
 import { of } from 'rxjs';
 import { HitsCounter } from '../hits_counter';
 import { dataViewWithTimefieldMock } from '../__mocks__/data_view_with_timefield';

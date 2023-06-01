@@ -22,8 +22,8 @@ import {
 } from '@kbn/securitysolution-list-utils';
 import { validateFilePathInput } from '@kbn/securitysolution-utils';
 import { useFindListsBySize } from '@kbn/securitysolution-list-hooks';
-import type { FieldSpec } from '@kbn/data-plugin/common';
-import { fields, getField } from '@kbn/data-plugin/common/mocks';
+import type { FieldSpec } from '@kbn/data-common';
+import { fields, getField } from '@kbn/data-common/mocks';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 import { waitFor } from '@testing-library/dom';
 import { ReactWrapper, mount } from 'enzyme';

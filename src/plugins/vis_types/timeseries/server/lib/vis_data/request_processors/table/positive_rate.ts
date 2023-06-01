@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { UI_SETTINGS } from '@kbn/data-plugin/common';
+import { UI_SETTINGS } from '@kbn/data-common';
 import { getBucketSize } from '../../helpers/get_bucket_size';
 import { calculateAggRoot } from './calculate_agg_root';
 

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ValueSuggestionsMethod } from '@kbn/data-plugin/common';
+import { ValueSuggestionsMethod } from '@kbn/data-common';
 // for replace IIndexPattern => DataView need to fix the issue https://github.com/elastic/kibana/issues/131292
 import type { DataViewField, DataView } from '@kbn/data-views-plugin/common';
 

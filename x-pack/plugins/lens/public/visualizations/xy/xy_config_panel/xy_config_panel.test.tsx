@@ -8,7 +8,7 @@
 import React from 'react';
 import { mountWithIntl as mount, shallowWithIntl as shallow } from '@kbn/test-jest-helpers';
 import { EuiButtonGroupProps, EuiButtonGroup } from '@elastic/eui';
-import { createDatatableUtilitiesMock } from '@kbn/data-plugin/common/mocks';
+import { createDatatableUtilitiesMock } from '@kbn/data-common/mocks';
 import { XyToolbar } from '.';
 import { DimensionEditor } from './dimension_editor';
 import { AxisSettingsPopover } from './axis_settings_popover';

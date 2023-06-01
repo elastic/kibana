@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DataView } from '@kbn/data-plugin/common';
+import { DataView } from '@kbn/data-common';
 import type {
   AggregationsExtendedStatsAggregation,
   AggregationsPercentilesAggregation,

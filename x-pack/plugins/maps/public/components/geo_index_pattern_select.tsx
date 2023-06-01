@@ -11,7 +11,7 @@ import { EuiCallOut, EuiFormRow, EuiLink, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { indexPatterns } from '@kbn/data-plugin/public';
-import { DataView } from '@kbn/data-plugin/common';
+import { DataView } from '@kbn/data-common';
 import {
   getIndexPatternSelectComponent,
   getIndexPatternService,

@@ -21,7 +21,7 @@ import type {
   QuerySuggestion,
 } from '@kbn/unified-search-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import { parseTimeShift } from '@kbn/data-plugin/common';
+import { parseTimeShift } from '@kbn/data-common';
 import moment from 'moment';
 import { nonNullable } from '../../../../../../utils';
 import { DateRange } from '../../../../../../../common/types';

@@ -8,7 +8,7 @@
 import React, { Fragment, Component } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
-import type { DataViewField, DataView } from '@kbn/data-plugin/common';
+import type { DataViewField, DataView } from '@kbn/data-common';
 import { indexPatterns } from '@kbn/data-plugin/public';
 import { MetricsEditor } from '../../../components/metrics_editor';
 import { getIndexPatternService } from '../../../kibana_services';

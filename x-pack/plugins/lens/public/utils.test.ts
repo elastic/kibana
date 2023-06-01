@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { createDatatableUtilitiesMock } from '@kbn/data-plugin/common/mocks';
+import { createDatatableUtilitiesMock } from '@kbn/data-common/mocks';
 import { Datatable } from '@kbn/expressions-plugin/public';
 import { inferTimeField, renewIDs } from './utils';
 

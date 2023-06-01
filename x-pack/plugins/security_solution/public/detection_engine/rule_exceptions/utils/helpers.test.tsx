@@ -37,7 +37,7 @@ import type { DataViewBase } from '@kbn/es-query';
 import { getExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_item_schema.mock';
 import { getEntryMatchMock } from '@kbn/lists-plugin/common/schemas/types/entry_match.mock';
 import { getCommentsArrayMock } from '@kbn/lists-plugin/common/schemas/types/comment.mock';
-import { fields } from '@kbn/data-plugin/common/mocks';
+import { fields } from '@kbn/data-common/mocks';
 import { ENTRIES, OLD_DATE_RELATIVE_TO_DATE_NOW } from '@kbn/lists-plugin/common/constants.mock';
 import type { CodeSignature } from '@kbn/securitysolution-ecs';
 import {

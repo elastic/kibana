@@ -14,7 +14,7 @@ import {
   ListOperatorTypeEnum as OperatorTypeEnum,
 } from '@kbn/securitysolution-io-ts-list-types';
 import type { AutocompleteStart } from '@kbn/unified-search-plugin/public';
-import { fields } from '@kbn/data-plugin/common/mocks';
+import { fields } from '@kbn/data-common/mocks';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 
 import { BuilderEntryItem, EntryItemProps } from './entry_renderer';

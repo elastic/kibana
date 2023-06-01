@@ -13,7 +13,7 @@ import {
   TimefilterContract,
   AggConfigSerialized,
 } from '@kbn/data-plugin/public';
-import type { ISearchSource } from '@kbn/data-plugin/common';
+import type { ISearchSource } from '@kbn/data-common';
 import { ExpressionAstExpression } from '@kbn/expressions-plugin/public';
 
 import type { Vis } from './vis';

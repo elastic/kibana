@@ -13,7 +13,7 @@
 
 import { getOr } from 'lodash/fp';
 
-import type { IEsSearchResponse } from '@kbn/data-plugin/common';
+import type { IEsSearchResponse } from '@kbn/data-common';
 import type { UsersQueries } from '../../../../../../../common/search_strategy/security_solution/users';
 import type {
   TotalUsersKpiRequestOptions,

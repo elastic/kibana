@@ -10,7 +10,7 @@ import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 
 import type { TimeRange as TimeRangeMs } from '@kbn/ml-date-picker';
 import { TIME_SERIES_METRIC_TYPES } from '@kbn/ml-agg-utils';
-import { RUNTIME_FIELD_TYPES } from '@kbn/data-plugin/common';
+import { RUNTIME_FIELD_TYPES } from '@kbn/data-common';
 
 import { EsFieldName } from '../../../../../../../common/types/fields';
 

@@ -6,7 +6,7 @@
  */
 
 import { useMemo } from 'react';
-import { getEsQueryConfig } from '@kbn/data-plugin/common';
+import { getEsQueryConfig } from '@kbn/data-common';
 import type { DataViewBase, EsQueryConfig, Filter, Query } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
 import { useGlobalTime } from '../containers/use_global_time';

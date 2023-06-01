@@ -22,7 +22,7 @@ import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-m
 import { coreMock } from '@kbn/core/server/mocks';
 import { ActionGroupId, ConditionMetAlertInstanceId } from './constants';
 import { OnlyEsQueryRuleParams, OnlySearchSourceRuleParams } from './types';
-import { searchSourceInstanceMock } from '@kbn/data-plugin/common/search/search_source/mocks';
+import { searchSourceInstanceMock } from '@kbn/data-common/search/search_source/mocks';
 import { Comparator } from '../../../common/comparator_types';
 import { DEFAULT_FLAPPING_SETTINGS } from '@kbn/alerting-plugin/common/rules_settings';
 

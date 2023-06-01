@@ -8,7 +8,7 @@
 
 import { IUiSettingsClient } from '@kbn/core/public';
 import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
-import { Query } from '../../../common';
+import { Query } from '@kbn/data-common';
 import { getQueryLog } from './get_query_log';
 
 interface AddToQueryLogDependencies {

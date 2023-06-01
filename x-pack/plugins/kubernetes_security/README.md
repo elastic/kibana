@@ -26,7 +26,7 @@ Parameters
 `indexPattern`
 | Property  | Description                         | Type                                         |
 | --------- | ----------------------------------- | -------------------------------------------- |
-| fields    | A list of `FieldSpec`               | `FieldSpec[]` from `@kbn/data-plugin/common` |
+| fields    | A list of `FieldSpec`               | `FieldSpec[]` from `@kbn/data-common` |
 | title     | Index pattern string representation | string                                       |
 
 `globalFilter`

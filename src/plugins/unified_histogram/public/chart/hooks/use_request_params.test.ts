@@ -10,9 +10,9 @@ import { renderHook } from '@testing-library/react-hooks';
 import { unifiedHistogramServicesMock } from '../../__mocks__/services';
 
 const getUseRequestParams = async () => {
-  jest.doMock('@kbn/data-plugin/common', () => {
+  jest.doMock('@kbn/data-common', () => {
     return {
-      ...jest.requireActual('@kbn/data-plugin/common'),
+      ...jest.requireActual('@kbn/data-common'),
       getAbsoluteTimeRange: jest.fn((range) => range),
     };
   });

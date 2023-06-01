@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { partition } from 'lodash';
-import { queryToAst } from '@kbn/data-plugin/common';
+import { queryToAst } from '@kbn/data-common';
 import { ExpressionAstExpression } from '@kbn/expressions-plugin/common';
 import { CoreStart, SavedObjectReference, SavedObjectsClientContract } from '@kbn/core/public';
 import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { DataViewSpec, Query } from '@kbn/data-plugin/common';
+import type { DataViewSpec, Query } from '@kbn/data-common';
 import { Filter } from '@kbn/es-query';
 import type { TimeRange } from '@kbn/es-query';
 import { MapCenter, MapSettings } from '../../../../common/descriptor_types';

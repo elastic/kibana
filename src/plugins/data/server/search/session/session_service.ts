@@ -30,7 +30,7 @@ import {
   SearchSessionSavedObjectAttributes,
   SearchSessionsFindResponse,
   SearchSessionStatusResponse,
-} from '../../../common';
+} from '@kbn/data-common';
 import { ISearchSessionService, NoSearchIdInSessionError } from '../..';
 import { createRequestHash } from './utils';
 import { ConfigSchema, SearchSessionsConfigSchema } from '../../../config';

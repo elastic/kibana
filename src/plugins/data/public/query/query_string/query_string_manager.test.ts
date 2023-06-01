@@ -10,7 +10,7 @@ import { QueryStringManager } from './query_string_manager';
 import { Storage } from '@kbn/kibana-utils-plugin/public/storage';
 import { StubBrowserStorage } from '@kbn/test-jest-helpers';
 import { coreMock } from '@kbn/core/public/mocks';
-import { Query, AggregateQuery } from '../../../common/query';
+import { Query, AggregateQuery } from '@kbn/data-common/query';
 
 describe('QueryStringManager', () => {
   let service: QueryStringManager;

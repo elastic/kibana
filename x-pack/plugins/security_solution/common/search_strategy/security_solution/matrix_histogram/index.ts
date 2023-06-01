@@ -6,7 +6,7 @@
  */
 
 import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { IEsSearchResponse } from '@kbn/data-plugin/common';
+import type { IEsSearchResponse } from '@kbn/data-common';
 import type { Inspect, Maybe, TimerangeInput } from '../../common';
 import type { RequestBasicOptions } from '..';
 import type { AlertsGroupData } from './alerts';

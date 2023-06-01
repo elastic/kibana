@@ -9,7 +9,7 @@
 import { IUiSettingsClient, CoreSetup } from '@kbn/core/public';
 import { stubIndexPattern, stubFields } from '@kbn/data-plugin/public/stubs';
 import type { TimefilterSetup } from '@kbn/data-plugin/public';
-import { UI_SETTINGS } from '@kbn/data-plugin/common';
+import { UI_SETTINGS } from '@kbn/data-common';
 import { setupValueSuggestionProvider } from './value_suggestion_provider';
 import type { ValueSuggestionsGetFn } from './value_suggestion_provider';
 import type { DataView } from '@kbn/data-views-plugin/public';

@@ -22,7 +22,7 @@ import {
   AggsCommonService,
   aggsRequiredUiSettings,
   TimeRange,
-} from '../../../common';
+} from '@kbn/data-common';
 import { AggsSetup, AggsStart } from './types';
 
 /** @internal */

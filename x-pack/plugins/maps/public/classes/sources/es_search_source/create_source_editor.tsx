@@ -7,7 +7,7 @@
 
 import React, { Component } from 'react';
 import { EuiFormRow, EuiPanel } from '@elastic/eui';
-import { DataView } from '@kbn/data-plugin/common';
+import { DataView } from '@kbn/data-common';
 import { DataViewField } from '@kbn/data-views-plugin/public';
 
 import { i18n } from '@kbn/i18n';

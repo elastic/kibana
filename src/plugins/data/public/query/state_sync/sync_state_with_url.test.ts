@@ -11,7 +11,7 @@ import { createBrowserHistory, History } from 'history';
 import { Filter, FilterStateStore } from '@kbn/es-query';
 import { FilterManager } from '../filter_manager';
 import { getFilter } from '../filter_manager/test_helpers/get_stub_filter';
-import { UI_SETTINGS } from '../../../common';
+import { UI_SETTINGS } from '@kbn/data-common';
 import { coreMock } from '@kbn/core/public/mocks';
 import {
   createKbnUrlStateStorage,

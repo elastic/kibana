@@ -9,7 +9,7 @@ import React from 'react';
 import { mount, shallow } from 'enzyme';
 import { act } from '@testing-library/react';
 
-import { stubIndexPattern } from '@kbn/data-plugin/common/stubs';
+import { stubIndexPattern } from '@kbn/data-common/stubs';
 import { StepAboutRule } from '.';
 import { useFetchIndex } from '../../../../common/containers/source';
 import { useGetInstalledJob } from '../../../../common/components/ml/hooks/use_get_jobs';

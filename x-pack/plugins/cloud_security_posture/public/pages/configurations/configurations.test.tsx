@@ -16,7 +16,7 @@ import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks
 import { createStubDataView } from '@kbn/data-views-plugin/public/data_views/data_view.stub';
 import { CSP_LATEST_FINDINGS_DATA_VIEW } from '../../../common/constants';
 import * as TEST_SUBJECTS from './test_subjects';
-import type { DataView } from '@kbn/data-plugin/common';
+import type { DataView } from '@kbn/data-common';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { discoverPluginMock } from '@kbn/discover-plugin/public/mocks';
 import { useCspSetupStatusApi } from '../../common/api/use_setup_status_api';

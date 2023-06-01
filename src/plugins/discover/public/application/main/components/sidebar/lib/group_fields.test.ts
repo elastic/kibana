@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { type DataViewField } from '@kbn/data-plugin/common';
+import { type DataViewField } from '@kbn/data-common';
 import { stubLogstashDataView as dataView } from '@kbn/data-views-plugin/common/data_view.stub';
 import { getSelectedFields, shouldShowField, INITIAL_SELECTED_FIELDS_RESULT } from './group_fields';
 

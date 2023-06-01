@@ -8,8 +8,8 @@
 
 import { coreMock } from '@kbn/core/server/mocks';
 import { FilterStateStore, Query } from '@kbn/es-query';
-import { DATA_VIEW_SAVED_OBJECT_TYPE } from '../../common';
-import type { SavedObject, SavedQueryAttributes } from '../../common';
+import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-common';
+import type { SavedObject, SavedQueryAttributes } from '@kbn/data-common';
 import { registerSavedQueryRouteHandlerContext } from './route_handler_context';
 import { SavedObjectsFindResponse, SavedObjectsUpdateResponse } from '@kbn/core/server';
 

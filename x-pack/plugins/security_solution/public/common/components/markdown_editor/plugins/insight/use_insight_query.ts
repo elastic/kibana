@@ -7,7 +7,7 @@
 
 import { useMemo, useState } from 'react';
 import type { Filter } from '@kbn/es-query';
-import { getEsQueryConfig } from '@kbn/data-plugin/common';
+import { getEsQueryConfig } from '@kbn/data-common';
 import type { DataProvider } from '@kbn/timelines-plugin/common';
 import { TimelineId } from '../../../../../../common/types/timeline';
 import { useKibana } from '../../../../lib/kibana';

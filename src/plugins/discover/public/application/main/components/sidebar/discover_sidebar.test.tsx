@@ -18,7 +18,7 @@ import {
 } from './discover_sidebar';
 import type { AggregateQuery, Query } from '@kbn/es-query';
 import { createDiscoverServicesMock } from '../../../../__mocks__/services';
-import { stubLogstashDataView } from '@kbn/data-plugin/common/stubs';
+import { stubLogstashDataView } from '@kbn/data-common/stubs';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { BehaviorSubject } from 'rxjs';
 import { FetchStatus } from '../../../types';

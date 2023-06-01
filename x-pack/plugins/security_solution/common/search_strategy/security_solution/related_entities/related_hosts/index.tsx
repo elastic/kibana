@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { IEsSearchResponse } from '@kbn/data-plugin/common';
+import type { IEsSearchResponse } from '@kbn/data-common';
 import type { RiskSeverity, Inspect, Maybe } from '../../..';
 import type { RequestBasicOptions } from '../..';
 import type { BucketItem } from '../../cti';

@@ -12,7 +12,7 @@ import {
   DataViewsContract,
   ExpressionValueSearchContext,
   ISearchStartSearchSource,
-} from '@kbn/data-plugin/common';
+} from '@kbn/data-common';
 import { ExpressionFunctionDefinition, Datatable } from '@kbn/expressions-plugin/common';
 import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import { EventAnnotationGroupOutput } from '../event_annotation_group';

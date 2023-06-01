@@ -17,7 +17,7 @@ import { RequestAdapter } from '@kbn/inspector-plugin/public';
 import { managementPluginMock } from '@kbn/management-plugin/public/mocks';
 import { screenshotModePluginMock } from '@kbn/screenshot-mode-plugin/public/mocks';
 import type { MockedKeys } from '@kbn/utility-types-jest';
-import { IInspectorInfo } from '../../common/search/search_source';
+import { IInspectorInfo } from '@kbn/data-common/search/search_source';
 import { setNotifications } from '../services';
 import { SearchService, SearchServiceSetupDependencies } from './search_service';
 import { ISearchStart, WarningHandlerCallback } from './types';

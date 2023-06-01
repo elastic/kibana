@@ -9,11 +9,11 @@
 import { merge } from 'lodash';
 import { KbnServerError } from '@kbn/kibana-utils-plugin/server';
 import { errors } from '@elastic/elasticsearch';
-import * as indexNotFoundException from '../../../../common/search/test_data/index_not_found_exception.json';
+import * as indexNotFoundException from '@kbn/data-common/search/test_data/index_not_found_exception.json';
 import { SearchStrategyDependencies } from '../../types';
 import { sqlSearchStrategyProvider } from './sql_search_strategy';
 import { createSearchSessionsClientMock } from '../../mocks';
-import { SqlSearchStrategyRequest } from '../../../../common';
+import { SqlSearchStrategyRequest } from '@kbn/data-common';
 import { getMockSearchConfig } from '../../../../config.mock';
 
 const mockSqlResponse = {

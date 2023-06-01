@@ -11,7 +11,7 @@ import type { Filter, Query } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
 import type { GroupingAggregation } from '@kbn/securitysolution-grouping';
 import { isNoneGroup } from '@kbn/securitysolution-grouping';
-import { getEsQueryConfig } from '@kbn/data-plugin/common';
+import { getEsQueryConfig } from '@kbn/data-common';
 import type { DynamicGroupingProps } from '@kbn/securitysolution-grouping/src';
 import type { TableIdLiteral } from '@kbn/securitysolution-data-table';
 import { parseGroupingQuery } from '@kbn/securitysolution-grouping/src';

@@ -7,7 +7,7 @@
  */
 
 import { CoreStart, IUiSettingsClient, SavedObjectsClientContract } from '@kbn/core/server';
-import { ISearchStartSearchSource } from '@kbn/data-plugin/common';
+import { ISearchStartSearchSource } from '@kbn/data-common';
 import { DiscoverServerPluginLocatorService, DiscoverServerPluginStartDeps } from '..';
 import { getScopedClient } from './service';
 

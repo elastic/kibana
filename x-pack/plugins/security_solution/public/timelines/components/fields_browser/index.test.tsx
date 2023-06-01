@@ -14,7 +14,7 @@ import { indexPatternFieldEditorPluginMock } from '@kbn/data-view-field-editor-p
 
 import { TestProviders } from '../../../common/mock';
 import { useKibana } from '../../../common/lib/kibana';
-import type { DataView, DataViewField } from '@kbn/data-plugin/common';
+import type { DataView, DataViewField } from '@kbn/data-common';
 import type { RenderHookResult } from '@testing-library/react-hooks';
 import { renderHook } from '@testing-library/react-hooks';
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';

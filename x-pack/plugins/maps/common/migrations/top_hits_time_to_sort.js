@@ -7,7 +7,7 @@
 
 import _ from 'lodash';
 import { SOURCE_TYPES } from '../constants';
-import { SortDirection } from '@kbn/data-plugin/common/search';
+import { SortDirection } from '@kbn/data-common/search';
 
 function isEsDocumentSource(layerDescriptor) {
   const sourceType = _.get(layerDescriptor, 'sourceDescriptor.type');

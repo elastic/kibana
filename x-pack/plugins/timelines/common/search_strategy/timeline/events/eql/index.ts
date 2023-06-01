@@ -10,7 +10,7 @@ import type {
   EqlSearchStrategyRequest,
   EqlSearchStrategyResponse,
   EqlRequestParams,
-} from '@kbn/data-plugin/common';
+} from '@kbn/data-common';
 import type { RuntimeFieldSpec, RuntimePrimitiveTypes } from '@kbn/data-views-plugin/common';
 import { EqlSearchResponse, Inspect, Maybe, PaginationInputPaginated } from '../../..';
 import { TimelineEdges, TimelineEventsAllRequestOptions } from '../..';

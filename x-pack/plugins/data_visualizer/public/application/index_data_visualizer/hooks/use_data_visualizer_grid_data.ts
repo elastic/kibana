@@ -10,7 +10,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { merge } from 'rxjs';
 import type { EuiTableActionsColumnType } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { type DataViewField, UI_SETTINGS } from '@kbn/data-plugin/common';
+import { type DataViewField, UI_SETTINGS } from '@kbn/data-common';
 import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
 import seedrandom from 'seedrandom';
 import type { SamplingOption } from '@kbn/discover-plugin/public/application/main/components/field_stats_table/field_stats_table';

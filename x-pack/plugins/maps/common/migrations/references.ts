@@ -7,7 +7,7 @@
 
 // Can not use public Layer classes to extract references since this logic must run in both client and server.
 
-import type { DataViewSpec } from '@kbn/data-plugin/common';
+import type { DataViewSpec } from '@kbn/data-common';
 import { SavedObjectReference } from '@kbn/core/types';
 import type { MapAttributes } from '../content_management';
 import { LayerDescriptor, VectorLayerDescriptor } from '../descriptor_types';

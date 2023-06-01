@@ -17,7 +17,7 @@ import {
   REASON_IDS,
   REASON_ID_TYPES,
   validateAbsoluteTimeShift,
-} from '@kbn/data-plugin/common';
+} from '@kbn/data-common';
 import { nonNullable } from '../../../../../utils';
 import { DateRange } from '../../../../../../common/types';
 import {

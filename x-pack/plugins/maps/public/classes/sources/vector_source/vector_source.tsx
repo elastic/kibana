@@ -16,7 +16,7 @@ import {
 } from 'geojson';
 import type { KibanaExecutionContext } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import type { Query } from '@kbn/data-plugin/common';
+import type { Query } from '@kbn/data-common';
 import type { MapGeoJSONFeature } from '@kbn/mapbox-gl';
 import { Filter } from '@kbn/es-query';
 import type { TimeRange } from '@kbn/es-query';

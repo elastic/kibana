@@ -14,7 +14,7 @@ import moment from 'moment';
 import { ReactElement } from 'react';
 import { coreMock } from '@kbn/core/public/mocks';
 import { SearchUsageCollector, SessionsClient } from '../../..';
-import { SearchSessionStatus } from '../../../../../common';
+import { SearchSessionStatus } from '@kbn/data-common';
 import { OnActionComplete } from '../components';
 import { UISession } from '../types';
 import { SearchSessionsMgmtAPI } from './api';

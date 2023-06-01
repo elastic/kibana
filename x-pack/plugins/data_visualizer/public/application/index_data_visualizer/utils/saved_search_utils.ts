@@ -21,7 +21,7 @@ import {
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { DataView } from '@kbn/data-views-plugin/public';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
-import { getEsQueryConfig, isQuery, SearchSource } from '@kbn/data-plugin/common';
+import { getEsQueryConfig, isQuery, SearchSource } from '@kbn/data-common';
 import { FilterManager, mapAndFlattenFilters } from '@kbn/data-plugin/public';
 import { SEARCH_QUERY_LANGUAGE, SearchQueryLanguage } from '../types/combined_query';
 import { isSavedSearchSavedObject, SavedSearchSavedObject } from '../../../../common/types';

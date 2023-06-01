@@ -8,7 +8,7 @@
 
 import { getEql } from './eql';
 import type { MockedKeys } from '@kbn/utility-types-jest';
-import { EqlExpressionFunctionDefinition } from '../../../common/search/expressions';
+import { EqlExpressionFunctionDefinition } from '@kbn/data-common/search/expressions';
 import { StartServicesAccessor } from '@kbn/core/public';
 import { DataPublicPluginStart, DataStartDependencies } from '../../types';
 import { of } from 'rxjs';

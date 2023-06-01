@@ -13,7 +13,7 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { Datatable } from '@kbn/expressions-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import { textBasedQueryStateToAstWithValidation } from '@kbn/data-plugin/common';
+import { textBasedQueryStateToAstWithValidation } from '@kbn/data-common';
 import type { RecordsFetchResponse, DataTableRecord } from '../../../types';
 
 interface SQLErrorResponse {

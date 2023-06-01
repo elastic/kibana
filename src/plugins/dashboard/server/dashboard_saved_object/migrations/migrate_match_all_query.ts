@@ -7,7 +7,7 @@
  */
 
 import { get } from 'lodash';
-import { DEFAULT_QUERY_LANGUAGE } from '@kbn/data-plugin/common';
+import { DEFAULT_QUERY_LANGUAGE } from '@kbn/data-common';
 import { SavedObjectMigrationFn } from '@kbn/core/server';
 
 /**

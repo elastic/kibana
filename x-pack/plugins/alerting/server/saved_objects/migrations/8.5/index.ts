@@ -10,7 +10,7 @@ import {
   SavedObjectUnsanitizedDoc,
 } from '@kbn/core-saved-objects-server';
 import { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
-import { isSerializedSearchSource } from '@kbn/data-plugin/common';
+import { isSerializedSearchSource } from '@kbn/data-common';
 import { pick } from 'lodash';
 import { RawRule } from '../../../types';
 import { createEsoMigration, isEsQueryRuleType, pipeMigrations } from '../utils';

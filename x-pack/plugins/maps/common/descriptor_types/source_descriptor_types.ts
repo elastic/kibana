@@ -9,7 +9,7 @@
 
 import { FeatureCollection } from 'geojson';
 import type { Query } from '@kbn/es-query';
-import { SortDirection } from '@kbn/data-plugin/common/search';
+import { SortDirection } from '@kbn/data-common/search';
 import {
   AGG_TYPE,
   GRID_RESOLUTION,

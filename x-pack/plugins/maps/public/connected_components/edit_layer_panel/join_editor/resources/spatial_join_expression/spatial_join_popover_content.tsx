@@ -8,7 +8,7 @@
 import React, { useEffect, useState } from 'react';
 import { EuiCallOut, EuiFormRow, EuiPopoverTitle, EuiSkeletonText, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { DataView, DataViewField } from '@kbn/data-plugin/common';
+import type { DataView, DataViewField } from '@kbn/data-common';
 import type {
   ESDistanceSourceDescriptor,
   JoinSourceDescriptor,

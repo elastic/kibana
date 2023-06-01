@@ -17,7 +17,7 @@ import {
   isAbsoluteTimeShift,
   parseAbsoluteTimeShift,
   parseTimeShift,
-} from '@kbn/data-plugin/common';
+} from '@kbn/data-common';
 import type { DateRange } from '../../../common/types';
 import type { FormBasedLayer, FormBasedPrivateState } from './types';
 import type { FramePublicAPI, IndexPattern } from '../../types';

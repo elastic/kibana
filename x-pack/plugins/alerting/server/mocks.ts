@@ -11,7 +11,7 @@ import {
   uiSettingsServiceMock,
 } from '@kbn/core/server/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
-import { searchSourceCommonMock } from '@kbn/data-plugin/common/search/search_source/mocks';
+import { searchSourceCommonMock } from '@kbn/data-common/search/search_source/mocks';
 import { SharePluginStart } from '@kbn/share-plugin/server';
 import { rulesClientMock } from './rules_client.mock';
 import { PluginSetupContract, PluginStartContract } from './plugin';

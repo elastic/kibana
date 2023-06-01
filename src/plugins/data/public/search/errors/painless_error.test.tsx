@@ -12,7 +12,7 @@ const startMock = coreMock.createStart();
 import { mount } from 'enzyme';
 import { PainlessError } from './painless_error';
 import { findTestSubject } from '@elastic/eui/lib/test';
-import * as searchPhaseException from '../../../common/search/test_data/search_phase_execution_exception.json';
+import * as searchPhaseException from '@kbn/data-common/search/test_data/search_phase_execution_exception.json';
 
 describe('PainlessError', () => {
   beforeEach(() => {

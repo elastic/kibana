@@ -10,7 +10,7 @@ import { EuiCallOut, EuiLoadingChart, EuiResizeObserver, EuiText } from '@elasti
 import { Observable } from 'rxjs';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { throttle } from 'lodash';
-import { UI_SETTINGS } from '@kbn/data-plugin/common';
+import { UI_SETTINGS } from '@kbn/data-common';
 import useObservable from 'react-use/lib/useObservable';
 import {
   type MlEntityField,

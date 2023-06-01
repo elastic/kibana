@@ -9,7 +9,7 @@ import type { Observable } from 'rxjs';
 import { filter } from 'rxjs/operators';
 
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { isErrorResponse, isCompleteResponse } from '@kbn/data-plugin/common';
+import { isErrorResponse, isCompleteResponse } from '@kbn/data-common';
 import type {
   CtiEventEnrichmentRequestOptions,
   CtiEventEnrichmentStrategyResponse,

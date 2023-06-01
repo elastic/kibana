@@ -9,7 +9,7 @@
 import { get, map } from 'lodash';
 import { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { getFieldSubtypeNested } from '@kbn/data-plugin/common';
+import { getFieldSubtypeNested } from '@kbn/data-common';
 import type { FieldSpec } from '@kbn/data-views-plugin/common';
 import { ConfigSchema } from '../../config';
 import { findIndexPatternById, getFieldByName } from '../data_views';

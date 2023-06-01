@@ -11,7 +11,7 @@ import {
   injectReferences,
   ISearchStartSearchSource,
   parseSearchSourceJSON,
-} from '@kbn/data-plugin/common';
+} from '@kbn/data-common';
 import { fromSavedSearchAttributes, SavedSearchAttributes } from '../../../common';
 
 interface GetSavedSearchDependencies {

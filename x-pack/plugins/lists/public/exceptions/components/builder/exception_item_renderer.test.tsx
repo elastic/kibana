@@ -8,7 +8,7 @@
 import React from 'react';
 import { mount } from 'enzyme';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
-import { fields } from '@kbn/data-plugin/common/mocks';
+import { fields } from '@kbn/data-common/mocks';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { coreMock } from '@kbn/core/public/mocks';
 

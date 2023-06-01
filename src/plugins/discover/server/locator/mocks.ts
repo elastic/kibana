@@ -7,8 +7,8 @@
  */
 
 import { KibanaRequest } from '@kbn/core/server';
-import { SearchSource } from '@kbn/data-plugin/common';
-import { createSearchSourceMock } from '@kbn/data-plugin/common/search/search_source/mocks';
+import { SearchSource } from '@kbn/data-common';
+import { createSearchSourceMock } from '@kbn/data-common/search/search_source/mocks';
 import { DiscoverServerPluginLocatorService, LocatorServiceScopedClient } from '..';
 import { DiscoverAppLocatorParams } from '../../common';
 

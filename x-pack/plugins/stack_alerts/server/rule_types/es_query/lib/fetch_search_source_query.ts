@@ -14,7 +14,7 @@ import {
   ISearchSource,
   ISearchStartSearchSource,
   SortDirection,
-} from '@kbn/data-plugin/common';
+} from '@kbn/data-common';
 import {
   BUCKET_SELECTOR_FIELD,
   buildAggregation,

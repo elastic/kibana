@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { UI_SETTINGS } from '@kbn/data-plugin/common';
+import { UI_SETTINGS } from '@kbn/data-common';
 import { APMRouteHandlerResources } from '../../routes/typings';
 import { getApmIndices } from '../../routes/settings/apm_indices/get_apm_indices';
 import { APMEventClient } from './create_es_client/create_apm_event_client';

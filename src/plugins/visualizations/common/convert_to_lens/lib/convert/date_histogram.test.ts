@@ -7,7 +7,7 @@
  */
 
 import { stubLogstashDataView } from '@kbn/data-views-plugin/common/data_view.stub';
-import { AggParamsDateHistogram } from '@kbn/data-plugin/common';
+import { AggParamsDateHistogram } from '@kbn/data-common';
 import { convertToDateHistogramColumn } from './date_histogram';
 import { DateHistogramColumn } from './types';
 import { DataType } from '../../types';

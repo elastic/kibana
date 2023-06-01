@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { DataViewsContract } from '@kbn/data-plugin/public';
 import { HttpSetup } from '@kbn/core/public';
-import { DataView } from '@kbn/data-plugin/common';
+import { DataView } from '@kbn/data-common';
 
 interface Props {
   onChange: (indexPattern: DataView) => void;

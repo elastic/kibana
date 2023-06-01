@@ -18,7 +18,7 @@ import { savedSearchMock } from '../../../../__mocks__/saved_search';
 import {
   createSearchSourceMock,
   searchSourceInstanceMock,
-} from '@kbn/data-plugin/common/search/search_source/mocks';
+} from '@kbn/data-common/search/search_source/mocks';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { dataViewWithTimefieldMock } from '../../../../__mocks__/data_view_with_timefield';
 import {

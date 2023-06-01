@@ -10,7 +10,7 @@
 
 import { cloneDeep } from 'lodash';
 import { IUiSettingsClient } from '@kbn/core/public';
-import { getEsQueryConfig, SearchSource } from '@kbn/data-plugin/common';
+import { getEsQueryConfig, SearchSource } from '@kbn/data-common';
 import type { SavedSearch } from '@kbn/discover-plugin/public';
 import { FilterManager, isQuery, mapAndFlattenFilters } from '@kbn/data-plugin/public';
 import {

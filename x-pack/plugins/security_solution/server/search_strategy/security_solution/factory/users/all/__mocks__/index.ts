@@ -6,7 +6,7 @@
  */
 
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { IEsSearchResponse } from '@kbn/data-plugin/common';
+import type { IEsSearchResponse } from '@kbn/data-common';
 import { Direction } from '../../../../../../../common/search_strategy';
 import { UsersQueries } from '../../../../../../../common/search_strategy/security_solution/users';
 import type { UsersRequestOptions } from '../../../../../../../common/search_strategy/security_solution/users/all';

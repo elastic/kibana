@@ -7,7 +7,7 @@
 
 import React, { createContext, useContext, type FC } from 'react';
 
-import type { UI_SETTINGS } from '@kbn/data-plugin/common';
+import type { UI_SETTINGS } from '@kbn/data-common';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { CoreSetup, IUiSettingsClient, ThemeServiceStart } from '@kbn/core/public';
 import type { HttpStart } from '@kbn/core/public';

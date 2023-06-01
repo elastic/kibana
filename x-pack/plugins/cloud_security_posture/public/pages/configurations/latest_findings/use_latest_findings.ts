@@ -7,7 +7,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { number } from 'io-ts';
 import { lastValueFrom } from 'rxjs';
-import type { IKibanaSearchRequest, IKibanaSearchResponse } from '@kbn/data-plugin/common';
+import type { IKibanaSearchRequest, IKibanaSearchResponse } from '@kbn/data-common';
 import type { Pagination } from '@elastic/eui';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { CspFinding } from '../../../../common/schemas/csp_finding';

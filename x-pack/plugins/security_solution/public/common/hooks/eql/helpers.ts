@@ -7,7 +7,7 @@
 
 import moment from 'moment';
 import type { Unit } from '@kbn/datemath';
-import type { EqlSearchStrategyResponse } from '@kbn/data-plugin/common';
+import type { EqlSearchStrategyResponse } from '@kbn/data-common';
 import type { inputsModel } from '../../store';
 
 import type { InspectResponse } from '../../../types';

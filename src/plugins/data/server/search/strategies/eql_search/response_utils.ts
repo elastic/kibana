@@ -8,7 +8,7 @@
 
 import type { TransportResult } from '@elastic/elasticsearch';
 import { EqlSearchResponse } from './types';
-import { EqlSearchStrategyResponse } from '../../../../common';
+import { EqlSearchStrategyResponse } from '@kbn/data-common';
 
 /**
  * Get the Kibana representation of an EQL search response (see `IKibanaSearchResponse`).

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Query } from '@kbn/data-plugin/common/query';
+import { Query } from '@kbn/data-common/query';
 import {
   RuleType,
   RuleTypeState,

@@ -9,7 +9,7 @@
 import type { MockedKeys } from '@kbn/utility-types-jest';
 import { KibanaRequest } from '@kbn/core/server';
 
-import { searchSourceCommonMock } from '../../../common/search/search_source/mocks';
+import { searchSourceCommonMock } from '@kbn/data-common/search/search_source/mocks';
 import type { ISearchStart, ISearchSetup } from '../types';
 
 function createSetupContract(): MockedKeys<ISearchSetup['searchSource']> {

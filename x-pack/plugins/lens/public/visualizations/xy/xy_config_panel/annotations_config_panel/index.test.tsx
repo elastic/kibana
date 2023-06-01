@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { mountWithIntl as mount } from '@kbn/test-jest-helpers';
-import { createDatatableUtilitiesMock } from '@kbn/data-plugin/common/mocks';
+import { createDatatableUtilitiesMock } from '@kbn/data-common/mocks';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { AnnotationsPanel } from '.';
 import { FramePublicAPI } from '../../../../types';

@@ -11,7 +11,7 @@ import { Observable } from 'rxjs';
 import { PluginSetup as UnifiedSearchPluginSetup } from '@kbn/unified-search-plugin/server';
 import { getKbnServerError, reportServerError } from '@kbn/kibana-utils-plugin/server';
 import { CoreSetup, ElasticsearchClient } from '@kbn/core/server';
-import { SearchRequest } from '@kbn/data-plugin/common';
+import { SearchRequest } from '@kbn/data-common';
 import { schema } from '@kbn/config-schema';
 
 import { OptionsListRequestBody, OptionsListResponse } from '../../common/options_list/types';

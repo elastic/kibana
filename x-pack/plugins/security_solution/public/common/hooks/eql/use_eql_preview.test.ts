@@ -11,7 +11,7 @@ import { of, throwError } from 'rxjs';
 import { delay } from 'rxjs/operators';
 
 import * as i18n from '../translations';
-import type { EqlSearchStrategyResponse } from '@kbn/data-plugin/common';
+import type { EqlSearchStrategyResponse } from '@kbn/data-common';
 import type { Source } from './types';
 import type { EqlSearchResponse } from '../../../../common/detection_engine/types';
 import { useKibana } from '../../lib/kibana';

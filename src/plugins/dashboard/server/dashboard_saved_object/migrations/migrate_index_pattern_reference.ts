@@ -7,7 +7,7 @@
  */
 
 import type { SavedObjectMigrationFn } from '@kbn/core/server';
-import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-plugin/common';
+import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-common';
 
 export const replaceIndexPatternReference: SavedObjectMigrationFn<any, any> = (doc) => ({
   ...doc,

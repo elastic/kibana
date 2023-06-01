@@ -12,7 +12,7 @@ import type { Observable } from 'rxjs';
 import type { CoreTheme, I18nStart } from '@kbn/core/public';
 import { EuiWrappingPopover, EuiContextMenu } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { DataView } from '@kbn/data-plugin/common';
+import type { DataView } from '@kbn/data-common';
 import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { DiscoverStateContainer } from '../../services/discover_state';
 import { DiscoverServices } from '../../../../build_services';

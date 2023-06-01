@@ -17,7 +17,7 @@ import {
   IErrorObject,
   RuleTypeParamsExpressionProps,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import { DataViewField, DataView } from '@kbn/data-plugin/common';
+import { DataViewField, DataView } from '@kbn/data-common';
 import { ES_GEO_FIELD_TYPES } from '../../types';
 import { GeoIndexPatternSelect } from '../util_components/geo_index_pattern_select';
 import { SingleFieldSelect } from '../util_components/single_field_select';

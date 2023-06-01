@@ -37,7 +37,7 @@ import { VisDataContext } from '../contexts/vis_data_context';
 import { PanelModelContext } from '../contexts/panel_model_context';
 import { FormValidationContext } from '../contexts/form_validation_context';
 import { getUISettings, getDataViewsStart } from '../../services';
-import { UI_SETTINGS } from '@kbn/data-plugin/common';
+import { UI_SETTINGS } from '@kbn/data-common';
 import {
   fetchIndexPattern,
   isDataViewTypeIndexPattern,

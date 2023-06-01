@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { render } from 'enzyme';
-import { stubLogstashDataView as dataView } from '@kbn/data-plugin/common/stubs';
+import { stubLogstashDataView as dataView } from '@kbn/data-common/stubs';
 import { FieldName } from './field_name';
 
 describe('FieldName', function () {

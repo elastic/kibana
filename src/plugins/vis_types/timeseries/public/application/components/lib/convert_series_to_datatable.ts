@@ -8,7 +8,7 @@
 import { DataView } from '@kbn/data-views-plugin/public';
 import { DatatableRow, DatatableColumn, DatatableColumnType } from '@kbn/expressions-plugin/public';
 import type { Query } from '@kbn/es-query';
-import { BUCKET_TYPES as DATA_PLUGIN_BUCKET_TYPES, MultiFieldKey } from '@kbn/data-plugin/common';
+import { BUCKET_TYPES as DATA_PLUGIN_BUCKET_TYPES, MultiFieldKey } from '@kbn/data-common';
 import { TimeseriesVisParams } from '../../../types';
 import type { PanelData, Metric } from '../../../../common/types';
 import { getMultiFieldLabel, getFieldsForTerms } from '../../../../common/fields_utils';

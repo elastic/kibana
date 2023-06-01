@@ -8,7 +8,7 @@
 
 import { IUiSettingsClient, SavedObject, SavedObjectsClientContract } from '@kbn/core/server';
 import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
-import { ISearchStartSearchSource } from '@kbn/data-plugin/common';
+import { ISearchStartSearchSource } from '@kbn/data-common';
 import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
 import { SavedSearchAttributes } from '@kbn/saved-search-plugin/common';
 import { LocatorServicesDeps as Services } from '.';

@@ -12,7 +12,7 @@ import {
   AggConfigs,
   AggConfigsOptions,
   GetConfigFn,
-} from '@kbn/data-plugin/common';
+} from '@kbn/data-common';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { stubLogstashDataView } from '@kbn/data-views-plugin/common/data_view.stub';
 import type { Vis } from '../vis';

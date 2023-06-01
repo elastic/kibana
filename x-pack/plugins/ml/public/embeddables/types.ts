@@ -7,7 +7,7 @@
 
 import type { CoreStart } from '@kbn/core/public';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
-import type { RefreshInterval } from '@kbn/data-plugin/common';
+import type { RefreshInterval } from '@kbn/data-common';
 import type { EmbeddableInput, EmbeddableOutput, IEmbeddable } from '@kbn/embeddable-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';

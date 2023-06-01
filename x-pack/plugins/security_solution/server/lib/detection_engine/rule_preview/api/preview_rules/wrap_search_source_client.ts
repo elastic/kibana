@@ -11,7 +11,7 @@ import type {
   ISearchStartSearchSource,
   SearchSource,
   SerializedSearchSourceFields,
-} from '@kbn/data-plugin/common';
+} from '@kbn/data-common';
 import { catchError, throwError } from 'rxjs';
 
 interface Props {

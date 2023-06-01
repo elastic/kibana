@@ -9,7 +9,7 @@
 import { HorizontalAlignment, LayoutDirection, Position, VerticalAlignment } from '@elastic/charts';
 import { $Values } from '@kbn/utility-types';
 import type { CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
-import { KibanaQueryOutput } from '@kbn/data-plugin/common';
+import { KibanaQueryOutput } from '@kbn/data-common';
 import { LegendSize } from '../../constants';
 import {
   CategoryDisplayTypes,

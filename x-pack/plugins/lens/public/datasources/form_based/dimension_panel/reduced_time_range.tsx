@@ -10,7 +10,7 @@ import { EuiComboBox } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useState } from 'react';
 
-import { parseTimeShift } from '@kbn/data-plugin/common';
+import { parseTimeShift } from '@kbn/data-common';
 import { Duration } from 'moment';
 import {
   adjustTimeScaleLabelSuffix,

@@ -10,14 +10,14 @@ import { CoreSetup, Plugin } from '@kbn/core/server';
 import type { Filter } from '@kbn/es-query';
 import { PersistableStateService } from '@kbn/kibana-utils-plugin/common';
 import { querySavedObjectType } from '../saved_objects';
-import * as queryPersistableState from '../../common/query/persistable_state';
-import * as filtersPersistableState from '../../common/query/filters/persistable_state';
+import * as queryPersistableState from '@kbn/data-common/query/persistable_state';
+import * as filtersPersistableState from '@kbn/data-common/query/filters/persistable_state';
 import { registerSavedQueryRoutes } from './routes';
 import {
   registerSavedQueryRouteHandlerContext,
   SavedQueryRouteHandlerContext,
 } from './route_handler_context';
-import { QueryState } from '../../common';
+import { QueryState } from '@kbn/data-common';
 
 export interface QuerySetup extends PersistableStateService<QueryState> {
   filterManager: PersistableStateService<Filter[]>;

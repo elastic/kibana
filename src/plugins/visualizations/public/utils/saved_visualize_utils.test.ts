@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { ISearchSource } from '@kbn/data-plugin/common';
+import type { ISearchSource } from '@kbn/data-common';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import { coreMock } from '@kbn/core/public/mocks';

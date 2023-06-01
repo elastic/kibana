@@ -6,7 +6,7 @@
  */
 
 import { estypes } from '@elastic/elasticsearch';
-import { ISearchClient } from '@kbn/data-plugin/common';
+import { ISearchClient } from '@kbn/data-common';
 import * as rt from 'io-ts';
 import { InfraStaticSourceConfiguration } from '../../../../common/source_configuration/source_configuration';
 

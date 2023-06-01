@@ -22,7 +22,7 @@ import { CoreStart } from '@kbn/core/public';
 import { capitalize } from 'lodash';
 import React from 'react';
 import { RedirectAppLinks } from '@kbn/kibana-react-plugin/public';
-import { SearchSessionStatus } from '../../../../../common';
+import { SearchSessionStatus } from '@kbn/data-common';
 import { OnActionComplete, PopoverActionsMenu, TableText } from '../components';
 import { StatusIndicator } from '../components/status';
 import { dateString } from './date_string';

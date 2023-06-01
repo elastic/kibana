@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { AggParamsFilters } from '@kbn/data-plugin/common';
+import { AggParamsFilters } from '@kbn/data-common';
 import { v4 as uuidv4 } from 'uuid';
 import { FiltersColumn } from './types';
 

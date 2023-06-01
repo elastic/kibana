@@ -10,7 +10,7 @@ import { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/serv
 import { ConfigSchema, configSchema } from '../config';
 import { DataServerPlugin, DataPluginSetup, DataPluginStart } from './plugin';
 
-export { getEsQueryConfig, DEFAULT_QUERY_LANGUAGE } from '../common';
+export { getEsQueryConfig, DEFAULT_QUERY_LANGUAGE } from '@kbn/data-common';
 
 export { getRequestAbortedSignal } from './lib';
 
@@ -18,7 +18,7 @@ export { getRequestAbortedSignal } from './lib';
  * Exporters (CSV)
  */
 
-import { datatableToCSV, CSV_MIME_TYPE } from '../common';
+import { datatableToCSV, CSV_MIME_TYPE } from '@kbn/data-common';
 export const exporters = {
   datatableToCSV,
   CSV_MIME_TYPE,
@@ -37,7 +37,7 @@ export {
   UI_SETTINGS,
   DataViewsService as DataViewsCommonService,
   DataView,
-} from '../common';
+} from '@kbn/data-common';
 
 /**
  * Search
@@ -51,7 +51,7 @@ import {
   parseInterval,
   // tabify
   calcAutoIntervalLessThan,
-} from '../common';
+} from '@kbn/data-common';
 import { configDeprecationProvider } from './config_deprecations';
 
 export type {
@@ -59,8 +59,8 @@ export type {
   ISearchOptions,
   IEsSearchRequest,
   IEsSearchResponse,
-} from '../common';
-export { METRIC_TYPES, ES_SEARCH_STRATEGY } from '../common';
+} from '@kbn/data-common';
+export { METRIC_TYPES, ES_SEARCH_STRATEGY } from '@kbn/data-common';
 
 export type {
   IScopedSearchClient,
@@ -89,7 +89,7 @@ export const search = {
  * @public
  */
 
-export { getTime, parseInterval } from '../common';
+export { getTime, parseInterval } from '@kbn/data-common';
 
 /**
  * Static code to be shared externally

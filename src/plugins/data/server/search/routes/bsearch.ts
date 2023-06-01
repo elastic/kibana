@@ -15,7 +15,7 @@ import {
   IKibanaSearchRequest,
   IKibanaSearchResponse,
   ISearchOptionsSerializable,
-} from '../../../common/search';
+} from '@kbn/data-common/search';
 import type { ISearchStart } from '../types';
 
 export function registerBsearchRoute(

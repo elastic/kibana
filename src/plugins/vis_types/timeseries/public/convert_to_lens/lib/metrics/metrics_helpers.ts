@@ -9,7 +9,7 @@
 import { utc } from 'moment';
 import { search } from '@kbn/data-plugin/public';
 import dateMath from '@kbn/datemath';
-import { TimeRange, UI_SETTINGS } from '@kbn/data-plugin/common';
+import { TimeRange, UI_SETTINGS } from '@kbn/data-common';
 import { TimeScaleUnit } from '@kbn/visualizations-plugin/common/convert_to_lens';
 import { getUISettings } from '../../../services';
 import type { Metric, Panel, Series } from '../../../../common/types';

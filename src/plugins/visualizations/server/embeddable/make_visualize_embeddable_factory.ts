@@ -9,7 +9,7 @@
 import { flow, mapValues } from 'lodash';
 import type { EmbeddableRegistryDefinition } from '@kbn/embeddable-plugin/server';
 import type { SerializableRecord } from '@kbn/utility-types';
-import type { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
+import type { SerializedSearchSourceFields } from '@kbn/data-common';
 import {
   mergeMigrationFunctionMaps,
   MigrateFunctionsObject,

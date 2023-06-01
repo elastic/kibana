@@ -7,7 +7,7 @@
  */
 
 import { Filter } from '@kbn/es-query';
-import { KBN_FIELD_TYPES, Query } from '@kbn/data-plugin/common';
+import { KBN_FIELD_TYPES, Query } from '@kbn/data-common';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { Panel } from './panel_model';
 

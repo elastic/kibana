@@ -7,7 +7,7 @@
  */
 
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
-import { TimeRange } from '@kbn/data-plugin/common';
+import { TimeRange } from '@kbn/data-common';
 import { renderHook } from '@testing-library/react-hooks';
 import { UnifiedHistogramBucketInterval } from '../../types';
 import { useTimeRange } from './use_time_range';
@@ -263,7 +263,7 @@ describe('useTimeRange', () => {
         size="xs"
         textAlign="center"
       >
-        2022-11-17T00:00:00.000Z - 2022-11-17T12:00:00.000Z 
+        2022-11-17T00:00:00.000Z - 2022-11-17T12:00:00.000Z
       </EuiText>
     `);
   });

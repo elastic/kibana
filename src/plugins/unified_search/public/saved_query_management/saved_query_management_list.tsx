@@ -28,7 +28,7 @@ import { css } from '@emotion/react';
 import { sortBy } from 'lodash';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { SavedQuery, SavedQueryService } from '@kbn/data-plugin/public';
-import type { SavedQueryAttributes } from '@kbn/data-plugin/common';
+import type { SavedQueryAttributes } from '@kbn/data-common';
 import './saved_query_management_list.scss';
 import type { IUnifiedSearchPluginServices } from '../types';
 

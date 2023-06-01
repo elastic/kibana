@@ -8,7 +8,7 @@
 
 import moment from 'moment';
 import { ElasticsearchClient } from '@kbn/core/server';
-import { SearchSessionSavedObjectAttributes, SearchSessionStatus } from '../../../common';
+import { SearchSessionSavedObjectAttributes, SearchSessionStatus } from '@kbn/data-common';
 import { SearchStatus } from './types';
 import { SearchSessionsConfigSchema } from '../../../config';
 import { getSearchStatus } from './get_search_status';

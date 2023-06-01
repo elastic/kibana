@@ -6,7 +6,7 @@
  */
 
 import { Ast } from '@kbn/interpreter';
-import { textBasedQueryStateToExpressionAst } from '@kbn/data-plugin/common';
+import { textBasedQueryStateToExpressionAst } from '@kbn/data-common';
 import type { OriginalColumn } from '../../../common/types';
 import { TextBasedPrivateState, TextBasedLayer, IndexPatternRef } from './types';
 

@@ -13,7 +13,7 @@ import {
   XYConfiguration,
   TableVisConfiguration,
 } from '@kbn/visualizations-plugin/common';
-import { TimeRange } from '@kbn/data-plugin/common';
+import { TimeRange } from '@kbn/data-common';
 import type { Panel } from '../../common/types';
 
 export type ConvertTsvbToLensVisualization = (

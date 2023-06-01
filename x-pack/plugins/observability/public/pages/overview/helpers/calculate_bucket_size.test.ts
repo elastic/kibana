@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { TimeBuckets } from '@kbn/data-plugin/common';
+import { TimeBuckets } from '@kbn/data-common';
 import { calculateTimeRangeBucketSize } from './calculate_bucket_size';
 
 describe('calculateTimeRangeBucketSize', () => {

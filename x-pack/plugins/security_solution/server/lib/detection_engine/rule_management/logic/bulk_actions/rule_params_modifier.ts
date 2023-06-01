@@ -6,7 +6,7 @@
  */
 
 import moment from 'moment';
-import { parseInterval } from '@kbn/data-plugin/common/search/aggs/utils/date_interval_utils';
+import { parseInterval } from '@kbn/data-common/search/aggs/utils/date_interval_utils';
 import type { RuleParamsModifierResult } from '@kbn/alerting-plugin/server/rules_client/methods/bulk_edit';
 import type { RuleAlertType } from '../../../rule_schema';
 import type {

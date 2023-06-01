@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { IEsSearchRequest, IEsSearchResponse } from '@kbn/data-plugin/common';
+import type { IEsSearchRequest, IEsSearchResponse } from '@kbn/data-common';
 import type { EcsBase, EcsEvent, EcsHost, EcsUser, EcsAgent } from '@kbn/ecs';
 import type { Inspect, Maybe } from '../../../common';
 import type { RequestBasicOptions } from '../..';

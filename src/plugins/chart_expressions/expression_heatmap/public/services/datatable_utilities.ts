@@ -7,7 +7,7 @@
  */
 
 import { createGetterSetter } from '@kbn/kibana-utils-plugin/public';
-import type { DatatableUtilitiesService } from '@kbn/data-plugin/common';
+import type { DatatableUtilitiesService } from '@kbn/data-common';
 
 export const [getDatatableUtilities, setDatatableUtilities] =
   createGetterSetter<DatatableUtilitiesService>('data.datatableUtilities');

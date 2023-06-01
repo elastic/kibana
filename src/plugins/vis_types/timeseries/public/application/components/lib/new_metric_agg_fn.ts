@@ -7,7 +7,7 @@
  */
 
 import { v1 as uuidv1 } from 'uuid';
-import { METRIC_TYPES } from '@kbn/data-plugin/common';
+import { METRIC_TYPES } from '@kbn/data-common';
 import type { Metric } from '../../../../common/types';
 
 export const newMetricAggFn = (): Metric => {

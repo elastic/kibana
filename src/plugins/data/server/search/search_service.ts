@@ -84,13 +84,13 @@ import {
   SearchSourceService,
   eqlRawResponse,
   SQL_SEARCH_STRATEGY,
-} from '../../common/search';
+} from '@kbn/data-common/search';
 import { getEsaggs, getEsdsl, getEssql, getEql } from './expressions';
 import {
   getShardDelayBucketAgg,
   SHARD_DELAY_AGG_NAME,
-} from '../../common/search/aggs/buckets/shard_delay';
-import { aggShardDelay } from '../../common/search/aggs/buckets/shard_delay_fn';
+} from '@kbn/data-common/search/aggs/buckets/shard_delay';
+import { aggShardDelay } from '@kbn/data-common/search/aggs/buckets/shard_delay_fn';
 import { ConfigSchema } from '../../config';
 import { SearchSessionService } from './session';
 import { registerBsearchRoute } from './routes/bsearch';

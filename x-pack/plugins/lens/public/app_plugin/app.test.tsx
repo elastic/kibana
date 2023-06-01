@@ -28,7 +28,7 @@ import type { Query } from '@kbn/es-query';
 import { FilterManager } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { buildExistsFilter, FilterStateStore } from '@kbn/es-query';
-import type { FieldSpec } from '@kbn/data-plugin/common';
+import type { FieldSpec } from '@kbn/data-common';
 import { TopNavMenuData } from '@kbn/navigation-plugin/public';
 import { LensByValueInput } from '../embeddable/embeddable';
 import { SavedObjectReference } from '@kbn/core/types';

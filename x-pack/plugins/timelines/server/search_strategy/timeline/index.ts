@@ -19,7 +19,7 @@ import {
   SearchStrategyDependencies,
   shimHitsTotal,
 } from '@kbn/data-plugin/server';
-import { ENHANCED_ES_SEARCH_STRATEGY, ISearchOptions } from '@kbn/data-plugin/common';
+import { ENHANCED_ES_SEARCH_STRATEGY, ISearchOptions } from '@kbn/data-common';
 import { AuditLogger, SecurityPluginSetup } from '@kbn/security-plugin/server';
 import { AlertAuditAction, alertAuditEvent } from '@kbn/rule-registry-plugin/server';
 import { Logger } from '@kbn/logging';

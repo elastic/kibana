@@ -14,7 +14,7 @@ import type {
   IKibanaSearchRequest,
   IKibanaSearchResponse,
   ISearchOptions,
-} from '@kbn/data-plugin/common';
+} from '@kbn/data-common';
 import type { ISearchStart } from '@kbn/data-plugin/public';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { isDefined } from '@kbn/ml-is-defined';

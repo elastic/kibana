@@ -15,7 +15,7 @@ import {
   DEFAULT_QUERY_LANGUAGE,
   isSerializedSearchSource,
   SerializedSearchSourceFields,
-} from '@kbn/data-plugin/common';
+} from '@kbn/data-common';
 import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/common';
 import {
   commonAddSupportOfDualIndexSelectionModeInTSVB,

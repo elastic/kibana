@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DataView, IKibanaSearchRequest, TimeRange } from '@kbn/data-plugin/common';
+import { DataView, IKibanaSearchRequest, TimeRange } from '@kbn/data-common';
 
 const getSearchQueryRequestParams = (field: string, search: string): { regexp: {} } => {
   const createRegexQuery = (queryString: string) => {

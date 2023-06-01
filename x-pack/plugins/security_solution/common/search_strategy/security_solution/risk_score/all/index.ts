@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { IEsSearchRequest, IEsSearchResponse } from '@kbn/data-plugin/common';
+import type { IEsSearchRequest, IEsSearchResponse } from '@kbn/data-common';
 import type { ESQuery } from '../../../../typed_json';
 
 import type { Inspect, Maybe, SortField, TimerangeInput } from '../../../common';

@@ -10,8 +10,8 @@
 
 import { map, sortBy, defaults, isObject, pick } from 'lodash';
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { DataView, DataViewField } from '@kbn/data-plugin/common';
-import { flattenHit } from '@kbn/data-plugin/common';
+import type { DataView, DataViewField } from '@kbn/data-common';
+import { flattenHit } from '@kbn/data-common';
 import { FieldFormat } from '@kbn/field-formats-plugin/common';
 
 type FieldHitValue = any;

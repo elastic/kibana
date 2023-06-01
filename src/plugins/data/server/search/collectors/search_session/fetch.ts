@@ -10,7 +10,7 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { Logger } from '@kbn/core/server';
 import { CollectorFetchContext } from '@kbn/usage-collection-plugin/server';
 import { ReportedUsage } from './register';
-import { SEARCH_SESSION_TYPE } from '../../../../common';
+import { SEARCH_SESSION_TYPE } from '@kbn/data-common';
 
 interface SessionPersistedTermsBucket {
   key_as_string: 'false' | 'true';

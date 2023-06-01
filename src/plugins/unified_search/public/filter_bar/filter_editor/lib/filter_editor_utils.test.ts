@@ -13,7 +13,7 @@ import {
   rangeFilter,
   stubIndexPattern,
   stubFields,
-} from '@kbn/data-plugin/common/stubs';
+} from '@kbn/data-common/stubs';
 import { toggleFilterNegated } from '@kbn/es-query';
 import {
   getFieldFromFilter,

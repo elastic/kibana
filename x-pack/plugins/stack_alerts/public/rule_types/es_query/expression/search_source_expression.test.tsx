@@ -15,7 +15,7 @@ import { SearchSourceExpression } from './search_source_expression';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { act } from 'react-dom/test-utils';
 import { Subject } from 'rxjs';
-import { ISearchSource } from '@kbn/data-plugin/common';
+import { ISearchSource } from '@kbn/data-common';
 import { IUiSettingsClient } from '@kbn/core/public';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { copyToClipboard, EuiLoadingSpinner } from '@elastic/eui';

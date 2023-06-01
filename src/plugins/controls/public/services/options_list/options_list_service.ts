@@ -10,7 +10,7 @@ import { memoize } from 'lodash';
 
 import dateMath from '@kbn/datemath';
 import { CoreStart } from '@kbn/core/public';
-import { getEsQueryConfig } from '@kbn/data-plugin/common';
+import { getEsQueryConfig } from '@kbn/data-common';
 import { buildEsQuery, type TimeRange } from '@kbn/es-query';
 import { KibanaPluginServiceFactory } from '@kbn/presentation-util-plugin/public';
 

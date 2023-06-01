@@ -12,7 +12,7 @@ import {
   AggsStart,
   DataViewsContract,
   ExpressionValueSearchContext,
-} from '@kbn/data-plugin/common';
+} from '@kbn/data-common';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { EventAnnotationService } from '..';
 import { getFetchEventAnnotations } from '.';
