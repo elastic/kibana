@@ -5,7 +5,7 @@
  * 2.0.
  */
 import expect from '@kbn/expect';
-import type { BenchmarkResponse } from '@kbn/cloud-security-posture-plugin/common/types';
+import type { GetBenchmarkResponse } from '@kbn/cloud-security-posture-plugin/common/types';
 import type { SuperTest, Test } from 'supertest';
 import { FtrProviderContext } from '../../ftr_provider_context';
 // import { createPackagePolicy } from './status';
@@ -91,7 +91,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it(`Should return non-empty array filled with Rules if user has CSP integrations`, async () => {
-      const { body: res }: { body: BenchmarkResponse } = await supertest
+      const { body: res }: { body: GetBenchmarkResponse } = await supertest
         .get(`/internal/cloud_security_posture/benchmarks`)
         .set('kbn-xsrf', 'xxxx')
         .expect(200);
@@ -101,7 +101,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it(`Should return array size 2 when we set per page to be only 2 (total element is still 3)`, async () => {
-      const { body: res }: { body: BenchmarkResponse } = await supertest
+      const { body: res }: { body: GetBenchmarkResponse } = await supertest
         .get(`/internal/cloud_security_posture/benchmarks?per_page=2`)
         .set('kbn-xsrf', 'xxxx')
         .expect(200);
@@ -111,7 +111,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it(`Should return array size 2 when we set per page to be only 2 (total element is still 3)`, async () => {
-      const { body: res }: { body: BenchmarkResponse } = await supertest
+      const { body: res }: { body: GetBenchmarkResponse } = await supertest
         .get(`/internal/cloud_security_posture/benchmarks?per_page=2&page=2`)
         .set('kbn-xsrf', 'xxxx')
         .expect(200);
@@ -121,7 +121,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it(`Should return empty array when we set page to be above the last page number`, async () => {
-      const { body: res }: { body: BenchmarkResponse } = await supertest
+      const { body: res }: { body: GetBenchmarkResponse } = await supertest
         .get(`/internal/cloud_security_posture/benchmarks?per_page=2&page=3`)
         .set('kbn-xsrf', 'xxxx')
         .expect(200);

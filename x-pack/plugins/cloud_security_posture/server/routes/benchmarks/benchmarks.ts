@@ -14,11 +14,8 @@ import {
   CLOUD_SECURITY_POSTURE_PACKAGE_NAME,
   POSTURE_TYPE_ALL,
 } from '../../../common/constants';
-import {
-  GetBenchmarkResponse,
-  benchmarksQueryParamsSchema,
-} from '../../../common/schemas/benchmark';
-import type { Benchmark } from '../../../common/types';
+import { benchmarksQueryParamsSchema } from '../../../common/schemas/benchmark';
+import type { Benchmark, GetBenchmarkResponse } from '../../../common/types';
 import {
   getBenchmarkFromPackagePolicy,
   getBenchmarkTypeFilter,
