@@ -76,7 +76,7 @@ export const GroupEditorFlyout = ({
         <EuiTitle>
           <h2 id={flyoutHeadingId}>
             <FormattedMessage
-              id="eventAnnotation.groupEditor.title"
+              id="eventAnnotation.groupEditorFlyout.title"
               defaultMessage="Edit annotation group"
             />
           </h2>
