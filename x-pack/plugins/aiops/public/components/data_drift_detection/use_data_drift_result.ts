@@ -15,7 +15,7 @@ import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import type { Query } from '@kbn/data-plugin/common';
 import { merge } from 'lodash';
 import { cloneDeep } from 'lodash';
-import { SearchQueryLanguage } from '../../application/utils/search_utils';
+import { getDefaultQuery, SearchQueryLanguage } from '../../application/utils/search_utils';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import {
   REFERENCE_LABEL,
@@ -263,6 +263,34 @@ const processDataDriftResult = (
     };
   });
 };
+
+const getDataDriftQuery = (
+  type: 'reference' | 'production',
+  searchQuery?: Query['query'],
+  datetimeField?: string,
+  timeRange?: TimeRange
+) => {
+  let rangeFilter;
+  if (timeRange && datetimeField !== undefined && isPopulatedObject(timeRange, ['start', 'end'])) {
+    rangeFilter = {
+      range: {
+        [datetimeField]: {
+          gte: timeRange.start,
+          lte: timeRange.end,
+        },
+      },
+    };
+  }
+  const query = cloneDeep(searchQuery);
+  if (isPopulatedObject(query, ['match_all'])) {
+    delete query.match_all;
+  }
+  const refDataQuery = rangeFilter
+    ? { query: merge({}, query, { bool: { filter: [rangeFilter] } }) }
+    : { query };
+  return refDataQuery;
+};
+
 export const useFetchDataDriftResult = ({
   fields,
   currentDataView,
@@ -305,31 +333,12 @@ export const useFetchDataDriftResult = ({
         const referenceIndex = currentDataView?.getIndexPattern();
         const productionIndex = referenceIndex;
 
-        const referenceDatetimeField = currentDataView?.timeFieldName;
-        const productionDatetimeField = referenceDatetimeField;
-
-        let refRangeFilter;
-        if (
-          referenceDatetimeField !== undefined &&
-          timeRanges?.reference &&
-          isPopulatedObject(timeRanges?.reference, ['start', 'end'])
-        ) {
-          refRangeFilter = {
-            range: {
-              [referenceDatetimeField]: {
-                gte: timeRanges.reference.start,
-                lte: timeRanges.reference.end,
-              },
-            },
-          };
-        }
-        const query = cloneDeep(searchQuery);
-        if (isPopulatedObject(query, ['match_all'])) {
-          delete query.match_all;
-        }
-        const refDataQuery = refRangeFilter
-          ? { query: merge({}, query, { bool: { filter: [refRangeFilter] } }) }
-          : { query };
+        const refDataQuery = getDataDriftQuery(
+          'reference',
+          searchQuery ?? getDefaultQuery(),
+          currentDataView?.timeFieldName,
+          timeRanges?.reference
+        );
 
         try {
           const baselineRequest = {
@@ -379,24 +388,12 @@ export const useFetchDataDriftResult = ({
             return;
           }
 
-          let prodRangeFilter;
-          if (
-            productionDatetimeField !== undefined &&
-            timeRanges?.production &&
-            isPopulatedObject(timeRanges?.production, ['start', 'end'])
-          ) {
-            prodRangeFilter = {
-              range: {
-                [productionDatetimeField]: {
-                  gte: timeRanges?.production.start,
-                  lte: timeRanges.production.end,
-                },
-              },
-            };
-          }
-          const prodDataQuery = prodRangeFilter
-            ? { query: merge({}, query, { bool: { filter: [prodRangeFilter] } }) }
-            : { query };
+          const prodDataQuery = getDataDriftQuery(
+            'production',
+            searchQuery ?? getDefaultQuery(),
+            currentDataView?.timeFieldName,
+            timeRanges?.production
+          );
 
           const driftedRequest = {
             index: productionIndex,
@@ -588,6 +585,7 @@ export const useFetchDataDriftResult = ({
             status: FETCH_STATUS.SUCCESS,
           });
         } catch (e) {
+          // eslint-disable-next-line no-console
           console.error(`An error occurred while fetching data drift data:`, e);
           setResult({
             data: undefined,

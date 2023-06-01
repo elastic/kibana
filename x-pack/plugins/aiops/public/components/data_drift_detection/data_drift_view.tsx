@@ -252,7 +252,8 @@ export const DataDriftView = ({
   });
   const { onTableChange, pagination, sorting, setPageIndex } = useTableState<Feature>(
     result.data ?? [],
-    'driftDetected'
+    'driftDetected',
+    'desc'
   );
 
   return (
