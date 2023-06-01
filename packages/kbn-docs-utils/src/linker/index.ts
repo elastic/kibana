@@ -73,7 +73,29 @@ export const docLinker = async ({ sourceDir = './openapi' }: { sourceDir: string
 
     bundle({
       ref,
-      config: new Config({}),
+      config: new Config(
+        new Config({
+          resolve: {
+            http: {
+              headers: [],
+              customFetch() {},
+            },
+          },
+          apis: {
+            api1: {
+              root: 'root_path',
+              styleguide: {
+                extendPaths: [],
+                pluginPaths: [],
+              },
+            },
+          },
+          styleguide: {
+            extendPaths: [],
+            pluginPaths: [],
+          },
+        })
+      ),
       dereference: false,
     })
       .then((result) => {
