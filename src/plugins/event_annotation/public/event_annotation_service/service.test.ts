@@ -618,11 +618,10 @@ describe('Event Annotation Service', () => {
         {
           title: 'newTitle',
           description: '',
-          tags: [],
           annotations: [],
           dataViewSpec: null,
           ignoreGlobalFilters: false,
-        },
+        } as EventAnnotationGroupAttributes,
         {
           references: [
             {

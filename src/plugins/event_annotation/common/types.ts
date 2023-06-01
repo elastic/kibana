@@ -86,7 +86,6 @@ export type EventAnnotationConfig =
 export interface EventAnnotationGroupAttributes {
   title: string;
   description: string;
-  tags: string[];
   ignoreGlobalFilters: boolean;
   annotations: EventAnnotationConfig[];
   dataViewSpec?: DataViewSpec | null;
