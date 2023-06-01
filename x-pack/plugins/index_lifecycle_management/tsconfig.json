@@ -24,7 +24,6 @@
     "@kbn/index-management-plugin",
     "@kbn/home-plugin",
     // required bundles
-    "@kbn/kibana-react-plugin",
     "@kbn/test-jest-helpers",
     "@kbn/core-http-browser-mocks",
     "@kbn/i18n",
@@ -35,6 +34,7 @@
     "@kbn/core-http-browser",
     "@kbn/config-schema",
     "@kbn/shared-ux-router",
+    "@kbn/react-public",
   ],
   "exclude": [
     "target/**/*",

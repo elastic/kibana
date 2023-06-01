@@ -12,7 +12,6 @@
     "@kbn/core",
     "@kbn/data-plugin",
     "@kbn/home-plugin",
-    "@kbn/kibana-react-plugin",
     "@kbn/management-plugin",
     "@kbn/saved-objects-tagging-oss-plugin",
     "@kbn/spaces-plugin",
@@ -28,6 +27,7 @@
     "@kbn/shared-ux-router",
     "@kbn/core-ui-settings-browser-mocks",
     "@kbn/core-ui-settings-browser",
+    "@kbn/react-public",
   ],
   "exclude": [
     "target/**/*",

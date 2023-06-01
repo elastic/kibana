@@ -17,9 +17,9 @@
     "@kbn/monaco",
     "@kbn/es-query",
     "@kbn/core",
-    "@kbn/kibana-react-plugin",
     "@kbn/language-documentation-popover",
-    "@kbn/test-jest-helpers"
+    "@kbn/test-jest-helpers",
+    "@kbn/react-public"
   ],
   "exclude": [
     "target/**/*",

@@ -30,7 +30,6 @@
     "@kbn/spaces-plugin",
     "@kbn/triggers-actions-ui-plugin",
     "@kbn/i18n-react",
-    "@kbn/kibana-react-plugin",
     "@kbn/ace",
     "@kbn/es-ui-shared-plugin",
     "@kbn/discover-plugin",
@@ -62,6 +61,7 @@
     "@kbn/core-ui-settings-browser-mocks",
     "@kbn/core-ui-settings-browser",
     "@kbn/ml-error-utils",
+    "@kbn/react-public",
   ],
   "exclude": [
     "target/**/*",

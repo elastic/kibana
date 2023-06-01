@@ -13,7 +13,6 @@
     "@kbn/core",
     "@kbn/data-plugin",
     "@kbn/embeddable-plugin",
-    "@kbn/kibana-react-plugin",
     "@kbn/kibana-utils-plugin",
     "@kbn/ui-actions-plugin",
     "@kbn/licensing-plugin",
@@ -24,6 +23,7 @@
     "@kbn/rison",
     "@kbn/datemath",
     "@kbn/monaco",
+    "@kbn/react-public",
   ],
   "exclude": [
     "target/**/*",

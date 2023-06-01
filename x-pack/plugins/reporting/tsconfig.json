@@ -9,7 +9,6 @@
     "@kbn/data-plugin",
     "@kbn/discover-plugin",
     "@kbn/embeddable-plugin",
-    "@kbn/kibana-react-plugin",
     "@kbn/kibana-utils-plugin",
     "@kbn/management-plugin",
     "@kbn/screenshot-mode-plugin",
@@ -38,6 +37,7 @@
     "@kbn/safer-lodash-set",
     "@kbn/generate-csv",
     "@kbn/reporting-common",
+    "@kbn/react-public",
   ],
   "exclude": [
     "target/**/*",

@@ -13,7 +13,6 @@
     "@kbn/data-views-plugin",
     "@kbn/es-ui-shared-plugin",
     "@kbn/home-plugin",
-    "@kbn/kibana-react-plugin",
     "@kbn/management-plugin",
     "@kbn/share-plugin",
     "@kbn/usage-collection-plugin",
@@ -61,6 +60,7 @@
     "@kbn/core-http-server",
     "@kbn/core-http-server-mocks",
     "@kbn/core-user-settings-server",
+    "@kbn/react-public",
   ],
   "exclude": [
     "target/**/*",

@@ -11,9 +11,9 @@
     "@kbn/security-plugin",
     "@kbn/i18n",
     "@kbn/i18n-react",
-    "@kbn/kibana-react-plugin",
     "@kbn/ml-is-populated-object",
     "@kbn/config-schema",
+    "@kbn/react-public",
   ],
   "exclude": [
     "target/**/*",

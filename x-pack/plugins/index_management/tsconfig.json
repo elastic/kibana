@@ -16,7 +16,6 @@
     "@kbn/management-plugin",
     "@kbn/share-plugin",
     "@kbn/usage-collection-plugin",
-    "@kbn/kibana-react-plugin",
     "@kbn/es-ui-shared-plugin",
     "@kbn/features-plugin",
     "@kbn/licensing-plugin",
@@ -34,6 +33,7 @@
     "@kbn/core-http-router-server-mocks",
     "@kbn/core-ui-settings-browser-mocks",
     "@kbn/core-ui-settings-browser",
+    "@kbn/react-public",
   ],
   "exclude": [
     "target/**/*",

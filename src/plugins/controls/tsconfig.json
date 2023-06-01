@@ -15,7 +15,6 @@
   ],
   "kbn_references": [
     "@kbn/core",
-    "@kbn/kibana-react-plugin",
     "@kbn/embeddable-plugin",
     "@kbn/presentation-util-plugin",
     "@kbn/kibana-react-plugin",
@@ -36,6 +35,7 @@
     "@kbn/safer-lodash-set",
     "@kbn/ui-actions-plugin",
     "@kbn/core-mount-utils-browser",
+    "@kbn/react-public",
   ],
   "exclude": [
     "target/**/*",

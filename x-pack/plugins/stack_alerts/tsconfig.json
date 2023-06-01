@@ -14,7 +14,6 @@
     "@kbn/alerting-plugin",
     "@kbn/features-plugin",
     "@kbn/triggers-actions-ui-plugin",
-    "@kbn/kibana-react-plugin",
     "@kbn/data-plugin",
     "@kbn/transform-plugin",
     "@kbn/unified-search-plugin",
@@ -42,6 +41,7 @@
     "@kbn/logging-mocks",
     "@kbn/share-plugin",
     "@kbn/discover-plugin",
+    "@kbn/react-public",
   ],
   "exclude": [
     "target/**/*",

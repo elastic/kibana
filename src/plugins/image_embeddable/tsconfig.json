@@ -8,7 +8,6 @@
     "@kbn/core",
     "@kbn/embeddable-plugin",
     "@kbn/kibana-utils-plugin",
-    "@kbn/kibana-react-plugin",
     "@kbn/files-plugin",
     "@kbn/security-plugin",
     "@kbn/shared-ux-file-context",
@@ -21,7 +20,8 @@
     "@kbn/core-http-browser",
     "@kbn/shared-ux-file-image",
     "@kbn/ui-actions-plugin",
-    "@kbn/screenshot-mode-plugin"
+    "@kbn/screenshot-mode-plugin",
+    "@kbn/react-public"
   ],
   "exclude": [
     "target/**/*",

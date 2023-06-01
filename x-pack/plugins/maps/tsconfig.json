@@ -28,7 +28,6 @@
     "@kbn/home-plugin",
     "@kbn/charts-plugin",
     "@kbn/usage-collection-plugin",
-    "@kbn/kibana-react-plugin",
     "@kbn/kibana-utils-plugin",
     "@kbn/screenshot-mode-plugin",
     "@kbn/cloud-plugin",
@@ -70,6 +69,7 @@
     "@kbn/content-management-utils",
     "@kbn/core-saved-objects-server",
     "@kbn/maps-vector-tile-utils",
+    "@kbn/react-public",
   ],
   "exclude": [
     "target/**/*",

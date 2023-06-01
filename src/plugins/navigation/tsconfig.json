@@ -6,11 +6,11 @@
   "include": ["public/**/*"],
   "kbn_references": [
     "@kbn/core",
-    "@kbn/kibana-react-plugin",
     "@kbn/unified-search-plugin",
     "@kbn/es-query",
     "@kbn/i18n-react",
     "@kbn/test-jest-helpers",
+    "@kbn/react-public",
   ],
   "exclude": [
     "target/**/*",

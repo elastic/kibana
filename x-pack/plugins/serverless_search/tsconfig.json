@@ -21,10 +21,10 @@
     "@kbn/shared-ux-chrome-navigation",
     "@kbn/doc-links",
     "@kbn/i18n",
-    "@kbn/kibana-react-plugin",
     "@kbn/i18n-react",
     "@kbn/serverless",
     "@kbn/security-plugin",
     "@kbn/cloud-plugin",
+    "@kbn/react-public",
   ]
 }

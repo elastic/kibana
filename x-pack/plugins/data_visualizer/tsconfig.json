@@ -34,7 +34,6 @@
     "@kbn/home-plugin",
     "@kbn/i18n-react",
     "@kbn/i18n",
-    "@kbn/kibana-react-plugin",
     "@kbn/kibana-utils-plugin",
     "@kbn/lens-plugin",
     "@kbn/maps-plugin",
@@ -60,6 +59,7 @@
     "@kbn/utility-types",
     "@kbn/ml-error-utils",
     "@kbn/ml-kibana-theme",
+    "@kbn/react-public",
   ],
   "exclude": [
     "target/**/*",

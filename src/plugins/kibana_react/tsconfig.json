@@ -7,11 +7,6 @@
   "kbn_references": [
     "@kbn/storybook",
     "@kbn/ui-theme",
-    "@kbn/core",
-    "@kbn/monaco",
-    "@kbn/test-jest-helpers",
-    "@kbn/i18n",
-    "@kbn/i18n-react",
   ],
   "exclude": [
     "target/**/*",

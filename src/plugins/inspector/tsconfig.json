@@ -6,7 +6,6 @@
   "include": ["common/**/*", "public/**/*", "index.ts"],
   "kbn_references": [
     "@kbn/core",
-    "@kbn/kibana-react-plugin",
     "@kbn/share-plugin",
     "@kbn/i18n",
     "@kbn/test-jest-helpers",
@@ -14,6 +13,7 @@
     "@kbn/monaco",
     "@kbn/core-ui-settings-browser-mocks",
     "@kbn/core-ui-settings-browser",
+    "@kbn/react-public",
   ],
   "exclude": [
     "target/**/*",

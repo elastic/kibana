@@ -12,7 +12,6 @@
     "@kbn/visualizations-plugin",
     "@kbn/discover-plugin",
     "@kbn/kibana-utils-plugin",
-    "@kbn/kibana-react-plugin",
     "@kbn/field-formats-plugin",
     "@kbn/unified-search-plugin",
     "@kbn/data-views-plugin",
@@ -27,6 +26,7 @@
     "@kbn/monaco",
     "@kbn/es-ui-shared-plugin",
     "@kbn/utility-types",
+    "@kbn/react-public",
   ],
   "exclude": [
     "target/**/*",

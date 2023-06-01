@@ -10,7 +10,6 @@
     "@kbn/es-ui-shared-plugin",
     "@kbn/advanced-settings-plugin",
     "@kbn/home-plugin",
-    "@kbn/kibana-react-plugin",
     "@kbn/management-plugin",
     "@kbn/usage-collection-plugin",
     "@kbn/i18n",
@@ -31,6 +30,7 @@
     "@kbn/shared-ux-router",
     "@kbn/core-custom-branding-browser-mocks",
     "@kbn/core-custom-branding-common",
+    "@kbn/react-public",
   ],
   "exclude": [
     "target/**/*",

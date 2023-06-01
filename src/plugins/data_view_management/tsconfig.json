@@ -12,7 +12,6 @@
     "@kbn/data-plugin",
     "@kbn/management-plugin",
     "@kbn/url-forwarding-plugin",
-    "@kbn/kibana-react-plugin",
     "@kbn/kibana-utils-plugin",
     "@kbn/data-view-field-editor-plugin",
     "@kbn/data-view-editor-plugin",
@@ -34,6 +33,7 @@
     "@kbn/config-schema",
     "@kbn/shared-ux-router",
     "@kbn/core-ui-settings-browser",
+    "@kbn/react-public",
   ],
   "exclude": [
     "target/**/*",

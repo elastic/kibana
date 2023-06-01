@@ -25,7 +25,6 @@
     "@kbn/usage-collection-plugin",
     "@kbn/saved-objects-plugin",
     "@kbn/kibana-utils-plugin",
-    "@kbn/kibana-react-plugin",
     "@kbn/embeddable-plugin",
     "@kbn/presentation-util-plugin",
     "@kbn/field-formats-plugin",
@@ -73,6 +72,7 @@
     "@kbn/object-versioning",
     "@kbn/config-schema",
     "@kbn/core-saved-objects-utils-server",
+    "@kbn/react-public",
   ],
   "exclude": [
     "target/**/*",

@@ -23,10 +23,10 @@
     "@kbn/alerting-plugin",
     "@kbn/i18n-react",
     "@kbn/es-ui-shared-plugin",
-    "@kbn/kibana-react-plugin",
     "@kbn/test-jest-helpers",
     "@kbn/securitysolution-io-ts-utils",
     "@kbn/safer-lodash-set",
+    "@kbn/react-public",
   ],
   "exclude": [
     "target/**/*",

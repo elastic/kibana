@@ -21,7 +21,6 @@
     "@kbn/usage-collection-plugin",
     "@kbn/cloud-plugin",
     // required bundles
-    "@kbn/kibana-react-plugin",
     "@kbn/es-ui-shared-plugin",
     "@kbn/test-jest-helpers",
     "@kbn/core-execution-context-browser-mocks",
@@ -33,6 +32,7 @@
     "@kbn/i18n-react",
     "@kbn/config-schema",
     "@kbn/expect",
+    "@kbn/react-public",
   ],
   "exclude": [
     "target/**/*",

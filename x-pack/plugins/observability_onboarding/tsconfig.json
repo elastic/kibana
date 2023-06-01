@@ -14,7 +14,6 @@
   "kbn_references": [
     "@kbn/core",
     "@kbn/data-plugin",
-    "@kbn/kibana-react-plugin",
     "@kbn/observability-plugin",
     "@kbn/i18n",
     "@kbn/core-http-browser",
@@ -29,6 +28,7 @@
     "@kbn/observability-shared-plugin",
     "@kbn/core-http-server",
     "@kbn/security-plugin",
+    "@kbn/react-public",
   ],
   "exclude": [
     "target/**/*",

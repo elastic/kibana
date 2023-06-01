@@ -22,7 +22,6 @@
     "@kbn/vis-type-timeseries-plugin",
     // required bundles
     "@kbn/kibana-utils-plugin",
-    "@kbn/kibana-react-plugin",
     "@kbn/es-ui-shared-plugin",
     "@kbn/data-plugin",
     "@kbn/test-jest-helpers",
@@ -31,6 +30,7 @@
     "@kbn/core-http-browser",
     "@kbn/i18n-react",
     "@kbn/config-schema",
+    "@kbn/react-public",
 
   ],
   "exclude": [

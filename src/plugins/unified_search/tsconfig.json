@@ -18,7 +18,6 @@
     "@kbn/embeddable-plugin",
     "@kbn/usage-collection-plugin",
     "@kbn/kibana-utils-plugin",
-    "@kbn/kibana-react-plugin",
     "@kbn/field-formats-plugin",
     "@kbn/es-query",
     "@kbn/i18n-react",
@@ -40,7 +39,8 @@
     "@kbn/saved-objects-management-plugin",
     "@kbn/text-based-languages",
     "@kbn/text-based-editor",
-    "@kbn/core-doc-links-browser"
+    "@kbn/core-doc-links-browser",
+    "@kbn/react-public"
   ],
   "exclude": [
     "target/**/*",

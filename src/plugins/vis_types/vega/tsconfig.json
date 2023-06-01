@@ -23,7 +23,6 @@
     "@kbn/inspector-plugin",
     "@kbn/home-plugin",
     "@kbn/kibana-utils-plugin",
-    "@kbn/kibana-react-plugin",
     "@kbn/vis-default-editor-plugin",
     "@kbn/usage-collection-plugin",
     "@kbn/es-query",
@@ -38,6 +37,7 @@
     "@kbn/datemath",
     "@kbn/mapbox-gl",
     "@kbn/config-schema",
+    "@kbn/react-public",
   ],
   "exclude": [
     "target/**/*",

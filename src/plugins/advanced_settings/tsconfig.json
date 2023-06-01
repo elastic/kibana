@@ -12,7 +12,6 @@
     "@kbn/management-plugin",
     "@kbn/home-plugin",
     "@kbn/usage-collection-plugin",
-    "@kbn/kibana-react-plugin",
     "@kbn/i18n",
     "@kbn/test-jest-helpers",
     "@kbn/analytics",
@@ -28,6 +27,7 @@
     "@kbn/core-notifications-browser",
     "@kbn/core-theme-browser",
     "@kbn/core-ui-settings-common",
+    "@kbn/react-public",
   ],
   "exclude": [
     "target/**/*",

@@ -20,7 +20,6 @@
     "@kbn/config-schema",
     "@kbn/licensing-plugin",
     "@kbn/data-plugin",
-    "@kbn/kibana-react-plugin",
     "@kbn/monaco",
     "@kbn/i18n",
     "@kbn/usage-collection-plugin",
@@ -33,7 +32,8 @@
     "@kbn/data-views-plugin",
     "@kbn/utility-types",
     "@kbn/utility-types-jest",
-    "@kbn/kubernetes-security-plugin"
+    "@kbn/kubernetes-security-plugin",
+    "@kbn/react-public"
   ],
   "exclude": ["target/**/*"]
 }

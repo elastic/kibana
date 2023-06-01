@@ -9,6 +9,6 @@
   ],
   "kbn_references": [
     "@kbn/core",
-    "@kbn/kibana-react-plugin"
+    "@kbn/react-public"
   ]
 }

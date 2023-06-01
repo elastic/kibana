@@ -6,7 +6,6 @@
   "include": ["common/**/*", "public/**/*", "server/**/*"],
   "kbn_references": [
     "@kbn/core",
-    "@kbn/kibana-react-plugin",
     "@kbn/kibana-utils-plugin",
     "@kbn/utility-types",
     "@kbn/i18n",
@@ -14,6 +13,7 @@
     "@kbn/config-schema",
     "@kbn/core-custom-branding-browser",
     "@kbn/core-saved-objects-utils-server",
+    "@kbn/react-public",
   ],
   "exclude": [
     "target/**/*",

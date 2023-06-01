@@ -13,7 +13,6 @@
     "@kbn/home-plugin",
     "@kbn/newsfeed-plugin",
     "@kbn/usage-collection-plugin",
-    "@kbn/kibana-react-plugin",
     "@kbn/data-view-editor-plugin",
     "@kbn/i18n",
     "@kbn/i18n-react",
@@ -26,6 +25,7 @@
     "@kbn/shared-ux-avatar-solution",
     "@kbn/shared-ux-link-redirect-app",
     "@kbn/shared-ux-router",
+    "@kbn/react-public",
   ],
   "exclude": [
     "target/**/*",

@@ -34,7 +34,6 @@
 
     // requiredBundles from ./kibana.json
     "@kbn/es-ui-shared-plugin",
-    "@kbn/kibana-react-plugin",
     "@kbn/kibana-utils-plugin",
 
     // packages
@@ -72,6 +71,7 @@
     "@kbn/securitysolution-ecs",
     "@kbn/licensing-plugin",
     "@kbn/core-lifecycle-browser",
-    "@kbn/core-saved-objects-server"
+    "@kbn/core-saved-objects-server",
+    "@kbn/react-public"
   ]
 }

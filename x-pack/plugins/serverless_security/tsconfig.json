@@ -22,8 +22,8 @@
     "@kbn/serverless",
     "@kbn/shared-ux-page-solution-nav",
     "@kbn/security-solution-side-nav",
-    "@kbn/kibana-react-plugin",
     "@kbn/core-chrome-browser",
     "@kbn/i18n-react",
+    "@kbn/react-public",
   ]
 }

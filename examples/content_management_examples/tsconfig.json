@@ -21,9 +21,9 @@
     "@kbn/core-application-browser",
     "@kbn/shared-ux-link-redirect-app",
     "@kbn/content-management-table-list",
-    "@kbn/kibana-react-plugin",
     "@kbn/i18n-react",
     "@kbn/saved-objects-tagging-oss-plugin",
     "@kbn/core-saved-objects-api-browser",
+    "@kbn/react-public",
   ]
 }

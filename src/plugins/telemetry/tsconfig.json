@@ -15,7 +15,6 @@
   "kbn_references": [
     "@kbn/core",
     "@kbn/home-plugin",
-    "@kbn/kibana-react-plugin",
     "@kbn/kibana-utils-plugin",
     "@kbn/screenshot-mode-plugin",
     "@kbn/telemetry-collection-manager-plugin",
@@ -32,6 +31,7 @@
     "@kbn/core-saved-objects-server",
     "@kbn/core-saved-objects-api-server",
     "@kbn/std",
+    "@kbn/react-public",
   ],
   "exclude": [
     "target/**/*",

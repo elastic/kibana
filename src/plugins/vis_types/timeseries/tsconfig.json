@@ -19,7 +19,6 @@
     "@kbn/expressions-plugin",
     "@kbn/visualizations-plugin",
     "@kbn/kibana-utils-plugin",
-    "@kbn/kibana-react-plugin",
     "@kbn/unified-search-plugin",
     "@kbn/i18n",
     "@kbn/field-formats-plugin",
@@ -45,6 +44,7 @@
     "@kbn/home-plugin",
     "@kbn/std",
     "@kbn/tinymath",
+    "@kbn/react-public",
   ],
   "exclude": [
     "target/**/*",

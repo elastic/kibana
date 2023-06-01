@@ -16,7 +16,6 @@
     "@kbn/core",
     "@kbn/saved-objects-plugin",
     "@kbn/embeddable-plugin",
-    "@kbn/kibana-react-plugin",
     "@kbn/i18n",
     "@kbn/expressions-plugin",
     "@kbn/data-views-plugin",
@@ -29,6 +28,7 @@
     "@kbn/config-schema",
     "@kbn/storybook",
     "@kbn/ui-actions-plugin",
+    "@kbn/react-public",
   ],
   "exclude": [
     "target/**/*",

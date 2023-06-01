@@ -24,7 +24,6 @@
     "@kbn/vis-default-editor-plugin",
     "@kbn/field-formats-plugin",
     "@kbn/usage-collection-plugin",
-    "@kbn/kibana-react-plugin",
     "@kbn/utility-types",
     "@kbn/i18n",
     "@kbn/core-execution-context-common",
@@ -36,6 +35,7 @@
     "@kbn/std",
     "@kbn/ui-theme",
     "@kbn/config-schema",
+    "@kbn/react-public",
   ],
   "exclude": [
     "target/**/*",

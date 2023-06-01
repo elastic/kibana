@@ -10,10 +10,10 @@
     "@kbn/management-plugin",
     "@kbn/i18n",
     "@kbn/content-management-table-list",
-    "@kbn/kibana-react-plugin",
     "@kbn/i18n-react",
     "@kbn/shared-ux-file-image",
     "@kbn/shared-ux-router",
+    "@kbn/react-public",
   ],
   "exclude": [
     "target/**/*",

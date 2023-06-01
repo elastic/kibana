@@ -27,7 +27,6 @@
     "@kbn/data-plugin",
     "@kbn/i18n",
     "@kbn/kibana-utils-plugin",
-    "@kbn/kibana-react-plugin",
     "@kbn/i18n-react",
     "@kbn/analytics",
     "@kbn/rison",
@@ -37,6 +36,7 @@
     "@kbn/core-elasticsearch-client-server-mocks",
     "@kbn/utility-types",
     "@kbn/shared-ux-router",
+    "@kbn/react-public",
   ],
   "exclude": [
     "target/**/*",

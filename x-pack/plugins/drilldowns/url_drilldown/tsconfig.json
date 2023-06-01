@@ -9,7 +9,6 @@
     "@kbn/ui-actions-enhanced-plugin",
     "@kbn/embeddable-plugin",
     "@kbn/expressions-plugin",
-    "@kbn/kibana-react-plugin",
     "@kbn/kibana-utils-plugin",
     "@kbn/ui-actions-plugin",
     "@kbn/i18n",
@@ -18,7 +17,8 @@
     "@kbn/std",
     "@kbn/image-embeddable-plugin",
     "@kbn/core-ui-settings-browser-mocks",
-    "@kbn/core-ui-settings-browser"
+    "@kbn/core-ui-settings-browser",
+    "@kbn/react-public"
   ],
   "exclude": [
     "target/**/*",

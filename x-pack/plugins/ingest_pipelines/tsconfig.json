@@ -17,7 +17,6 @@
     "@kbn/security-plugin",
     "@kbn/file-upload-plugin",
     "@kbn/es-ui-shared-plugin",
-    "@kbn/kibana-react-plugin",
     "@kbn/management-plugin",
     "@kbn/share-plugin",
     "@kbn/usage-collection-plugin",
@@ -30,6 +29,7 @@
     "@kbn/config-schema",
     "@kbn/shared-ux-router",
     "@kbn/core-ui-settings-browser",
+    "@kbn/react-public",
   ],
   "exclude": [
     "target/**/*",

@@ -21,7 +21,6 @@
     "@kbn/share-plugin",
     "@kbn/usage-collection-plugin",
     "@kbn/kibana-utils-plugin",
-    "@kbn/kibana-react-plugin",
     "@kbn/data-view-field-editor-plugin",
     "@kbn/field-formats-plugin",
     "@kbn/data-views-plugin",
@@ -52,6 +51,7 @@
     "@kbn/storybook",
     "@kbn/shared-ux-router",
     "@kbn/dom-drag-drop",
+    "@kbn/react-public",
   ],
   "exclude": [
     "target/**/*",

@@ -22,7 +22,6 @@
     "@kbn/security-plugin",
     "@kbn/config-schema",
     "@kbn/licensing-plugin",
-    "@kbn/kibana-react-plugin",
     "@kbn/shared-ux-link-redirect-app",
     "@kbn/usage-collection-plugin",
     "@kbn/cloud-plugin",
@@ -48,6 +47,7 @@
     "@kbn/shared-ux-router",
     "@kbn/core-saved-objects-server",
     "@kbn/share-plugin",
+    "@kbn/react-public",
   ],
   "exclude": [
     "target/**/*",

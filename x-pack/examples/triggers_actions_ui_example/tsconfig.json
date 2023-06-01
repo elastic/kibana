@@ -15,7 +15,6 @@
   ],
   "kbn_references": [
     "@kbn/core",
-    "@kbn/kibana-react-plugin",
     "@kbn/alerting-plugin",
     "@kbn/triggers-actions-ui-plugin",
     "@kbn/developer-examples-plugin",
@@ -23,5 +22,6 @@
     "@kbn/data-plugin",
     "@kbn/i18n-react",
     "@kbn/shared-ux-router",
+    "@kbn/react-public",
   ]
 }

@@ -157,5 +157,6 @@
     "@kbn/ecs",
     "@kbn/url-state",
     "@kbn/ml-anomaly-utils",
+    "@kbn/react-public",
   ]
 }

@@ -42,7 +42,6 @@
     "@kbn/expression-shape-plugin",
     "@kbn/home-plugin",
     "@kbn/inspector-plugin",
-    "@kbn/kibana-react-plugin",
     "@kbn/kibana-utils-plugin",
     "@kbn/presentation-util-plugin",
     "@kbn/ui-actions-plugin",
@@ -81,6 +80,7 @@
     "@kbn/saved-objects-finder-plugin",
     "@kbn/saved-objects-management-plugin",
     "@kbn/core-saved-objects-server",
+    "@kbn/react-public",
   ],
   "exclude": [
     "target/**/*",

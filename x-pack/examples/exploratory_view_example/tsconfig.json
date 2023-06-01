@@ -19,7 +19,7 @@
     "@kbn/observability-plugin",
     "@kbn/developer-examples-plugin",
     "@kbn/data-views-plugin",
-    "@kbn/kibana-react-plugin",
     "@kbn/exploratory-view-plugin",
+    "@kbn/react-public",
   ]
 }

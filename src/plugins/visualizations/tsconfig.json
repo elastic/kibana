@@ -21,7 +21,6 @@
     "@kbn/saved-objects-plugin",
     "@kbn/saved-objects-tagging-oss-plugin",
     "@kbn/kibana-utils-plugin",
-    "@kbn/kibana-react-plugin",
     "@kbn/saved-search-plugin",
     "@kbn/url-forwarding-plugin",
     "@kbn/navigation-plugin",
@@ -57,7 +56,8 @@
     "@kbn/core-saved-objects-api-server",
     "@kbn/object-versioning",
     "@kbn/core-saved-objects-server",
-    "@kbn/core-saved-objects-utils-server"
+    "@kbn/core-saved-objects-utils-server",
+    "@kbn/react-public"
   ],
   "exclude": [
     "target/**/*",

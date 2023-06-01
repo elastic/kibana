@@ -18,7 +18,6 @@
     "@kbn/data-views-plugin",
     "@kbn/expressions-plugin",
     "@kbn/kibana-utils-plugin",
-    "@kbn/kibana-react-plugin",
     "@kbn/vis-default-editor-plugin",
     "@kbn/charts-plugin",
     "@kbn/usage-collection-plugin",
@@ -31,6 +30,7 @@
     "@kbn/expect",
     "@kbn/std",
     "@kbn/timelion-grammar",
+    "@kbn/react-public",
   ],
   "exclude": [
     "target/**/*",
