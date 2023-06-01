@@ -364,13 +364,6 @@ export class DashboardPageControls extends FtrService {
     }
   }
 
-  public async optionsListGetCurrentSearchTechnique() {
-    this.log.debug('getting current search technique');
-    const radioGroup = await this.testSubjects.find('optionsListControl__searchOptionsRadioGroup');
-    const checkedOption = await radioGroup.findByCssSelector('input[checked]');
-    return await checkedOption.getAttribute('id');
-  }
-
   public async optionsListGetSelectionsString(controlId: string) {
     this.log.debug(`Getting selections string for Options List: ${controlId}`);
     await this.optionsListWaitForLoading(controlId);

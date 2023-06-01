@@ -59,7 +59,7 @@ import { pluginServices } from '../../services';
 import { getDataControlFieldRegistry } from './data_control_editor_tools';
 import { useControlGroupContainer } from '../embeddable/control_group_container';
 
-interface EditControlProps {
+export interface EditControlProps {
   embeddable?: ControlEmbeddable<DataControlInput>;
   isCreate: boolean;
   title?: string;

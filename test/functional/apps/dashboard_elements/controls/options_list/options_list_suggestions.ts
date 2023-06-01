@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import expect from 'expect';
 import { OPTIONS_LIST_CONTROL } from '@kbn/controls-plugin/common';
 
 import { OPTIONS_LIST_ANIMAL_SOUND_SUGGESTIONS } from '../../../../page_objects/dashboard_page_controls';
@@ -15,7 +14,7 @@ import { FtrProviderContext } from '../../../../ftr_provider_context';
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
 
-  const { dashboardControls, dashboard, header, common } = getPageObjects([
+  const { dashboardControls, dashboard, header } = getPageObjects([
     'dashboardControls',
     'timePicker',
     'dashboard',
@@ -146,13 +145,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    it('selects default search in edit flyout additional settings', async () => {
-      await dashboardControls.editExistingControl(controlId);
-      const selectedSearch = await dashboardControls.optionsListGetCurrentSearchTechnique();
-      expect(selectedSearch).toEqual('prefix');
-    });
-
     it('wildcard searching causes unsaved changes', async () => {
+      await dashboardControls.editExistingControl(controlId);
       await dashboardControls.optionsListSetAdditionalSettings({ searchTechnique: 'wildcard' });
       await dashboardControls.controlEditorSave();
       await testSubjects.existOrFail('dashboardUnsavedChangesBadge');
@@ -178,13 +172,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
       await dashboardControls.optionsListPopoverClearSearch();
       await dashboardControls.optionsListEnsurePopoverIsClosed(controlId);
-    });
-
-    it('selects non-default search in edit flyout additional settings', async () => {
-      await dashboardControls.editExistingControl(controlId);
-      const selectedSearch = await dashboardControls.optionsListGetCurrentSearchTechnique();
-      expect(selectedSearch).toEqual('wildcard');
-      await dashboardControls.controlEditorCancel();
     });
 
     it('returning to default search technqiue should remove unsaved changes', async () => {

@@ -90,18 +90,21 @@ export const OptionsListEditorOptions = ({
     }
   }, [fieldType, onChange, state.sortBy]);
 
-  /** TODO: clean this up - and fix optionsListSetAdditionalSettings */
-  const selectionOptions = useMemo(() => {
-    return Object.keys(OptionsListStrings.editor.selectionTypes).map((type: string) => {
-      return {
-        id: type,
-        label:
-          OptionsListStrings.editor.selectionTypes[
-            type as keyof typeof OptionsListStrings.editor.selectionTypes
-          ].getLabel(),
-      };
-    });
-  }, []);
+  const selectionOptions = useMemo(
+    () => [
+      {
+        id: 'multi',
+        label: OptionsListStrings.editor.selectionTypes.multi.getLabel(),
+        'data-test-subj': 'optionsListControl__multiSearchOptionAdditionalSetting',
+      },
+      {
+        id: 'single',
+        label: OptionsListStrings.editor.selectionTypes.single.getLabel(),
+        'data-test-subj': 'optionsListControl__singleSearchOptionAdditionalSetting',
+      },
+    ],
+    []
+  );
 
   const searchOptions = useMemo(
     () => [
@@ -131,7 +134,10 @@ export const OptionsListEditorOptions = ({
 
   return (
     <>
-      <EuiFormRow label={OptionsListStrings.editor.getSelectionOptionsTitle()}>
+      <EuiFormRow
+        label={OptionsListStrings.editor.getSelectionOptionsTitle()}
+        data-test-subj="optionsListControl__selectionOptionsRadioGroup"
+      >
         <EuiRadioGroup
           options={selectionOptions}
           idSelected={state.singleSelect ? 'single' : 'multi'}
