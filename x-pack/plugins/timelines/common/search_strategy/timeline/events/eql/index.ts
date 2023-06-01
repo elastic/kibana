@@ -6,10 +6,20 @@
  */
 
 import { EuiComboBoxOptionOption } from '@elastic/eui';
-import type { EqlSearchStrategyRequest, EqlSearchStrategyResponse } from '@kbn/data-plugin/common';
+import type {
+  EqlSearchStrategyRequest,
+  EqlSearchStrategyResponse,
+  EqlRequestParams,
+} from '@kbn/data-plugin/common';
+import type { RuntimeFieldSpec, RuntimePrimitiveTypes } from '@kbn/data-views-plugin/common';
 import { EqlSearchResponse, Inspect, Maybe, PaginationInputPaginated } from '../../..';
 import { TimelineEdges, TimelineEventsAllRequestOptions } from '../..';
 
+type EqlBody = Pick<EqlRequestParams, 'body'>;
+
+export type RunTimeMappings =
+  | Record<string, Omit<RuntimeFieldSpec, 'type'> & { type: RuntimePrimitiveTypes }>
+  | undefined;
 export interface TimelineEqlRequestOptions
   extends EqlSearchStrategyRequest,
     Omit<TimelineEventsAllRequestOptions, 'params'> {
@@ -17,6 +27,8 @@ export interface TimelineEqlRequestOptions
   tiebreakerField?: string;
   timestampField?: string;
   size?: number;
+  runtime_mappings?: RunTimeMappings;
+  body?: Omit<EqlRequestParams, 'body'> & EqlBody & { runtime_mappings?: RunTimeMappings };
 }
 
 export interface TimelineEqlResponse extends EqlSearchStrategyResponse<EqlSearchResponse<unknown>> {

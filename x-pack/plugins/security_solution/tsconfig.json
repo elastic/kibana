@@ -156,5 +156,6 @@
     "@kbn/core-lifecycle-browser",
     "@kbn/ecs",
     "@kbn/url-state",
+    "@kbn/field-formats-plugin",
   ]
 }
