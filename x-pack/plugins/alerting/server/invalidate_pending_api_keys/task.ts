@@ -79,17 +79,18 @@ export async function scheduleApiKeyInvalidatorTask(
 ) {
   const interval = config.invalidateApiKeysTask.interval;
   try {
+    const state: LatestTaskStateSchema = { runs: 0, total_invalidated: 0 };
     await taskManager.ensureScheduled({
       id: TASK_ID,
       taskType: TASK_TYPE,
       schedule: {
         interval,
       },
-      state: {},
+      state,
       params: {},
     });
   } catch (e) {
-    logger.debug(`Error scheduling task, received ${e.message}`);
+    logger.error(`Error scheduling task ${TASK_ID}, received ${e.message}`);
   }
 }
 
