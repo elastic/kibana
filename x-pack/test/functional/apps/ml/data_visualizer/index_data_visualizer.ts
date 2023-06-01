@@ -34,6 +34,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await ml.jobSourceSelection.selectSourceForIndexBasedDataVisualizer(
         testData.sourceIndexOrSavedSearch
       );
+      await headerPage.waitUntilLoadingHasFinished();
     });
 
     it(`${testData.suiteTitle} displays index details`, async () => {
