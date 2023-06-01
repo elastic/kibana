@@ -50,7 +50,7 @@ describe('shouldShowOptedInNoticeBanner', () => {
     const telemetryNotifications = mockTelemetryNotifications({ telemetryService });
     telemetryNotifications['optInStatusNoticeBannerId'] = 'bruce-banner';
 
-    it('should return false when `telemetryService.getUserShouldSeeOptInNotice returns true', () => {
+    it('should return false when `telemetryService.getUserShouldSeeOptInNotice` returns true', () => {
       getUserShouldSeeOptInNotice.mockReturnValue(true);
       expect(telemetryNotifications.shouldShowOptInStatusNoticeBanner()).toBe(false);
     });
