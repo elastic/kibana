@@ -33,6 +33,7 @@ export async function deleteCases(ids: string[], clientArgs: CasesClientArgs): P
     authorization,
     fileService,
   } = clientArgs;
+
   try {
     const cases = await caseService.getCases({ caseIds: ids });
     const entities = new Map<string, OwnerEntity>();

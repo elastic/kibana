@@ -17,7 +17,7 @@ import {
   AnnotationDomainType,
 } from '@elastic/charts';
 import React, { ReactElement, useEffect, useMemo } from 'react';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useIsDarkMode } from '../../../../../hooks/use_is_dark_mode';
 import { ExecutionTimeRange } from '../../../../../types';
 import { decodeOrThrow } from '../../../../../../common/runtime_types';
 import {
@@ -108,8 +108,7 @@ const LogsRatioChart: React.FC<ChartProps> = ({
     getChartPreviewData();
   }, [getChartPreviewData]);
 
-  const { uiSettings } = useKibana().services;
-  const isDarkMode = uiSettings?.get('theme:darkMode') || false;
+  const isDarkMode = useIsDarkMode();
   const timezone = useKibanaTimeZoneSetting();
   const { yMin, yMax, xMin, xMax } = getDomain(series, false);
   const dateFormatter = useDateFormatter(xMin, xMax);

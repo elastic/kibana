@@ -37,7 +37,6 @@ import {
   ES_GEO_FIELD_TYPE,
   FIELD_ORIGIN,
   GEO_JSON_TYPE,
-  GIS_API_PATH,
   MVT_GETTILE_API_PATH,
   SCALING_TYPES,
   SOURCE_TYPES,
@@ -491,7 +490,7 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
     return !!(scalingType === SCALING_TYPES.TOP_HITS && topHitsSplitField);
   }
 
-  async getSourceIndexList(): Promise<string[]> {
+  async _getSourceIndexList(): Promise<string[]> {
     const dataView = await this.getIndexPattern();
     try {
       const { success, matchingIndexes } = await getMatchingIndexes(dataView.getIndexPattern());
@@ -503,12 +502,12 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
   }
 
   async supportsFeatureEditing(): Promise<boolean> {
-    const matchingIndexes = await this.getSourceIndexList();
+    const matchingIndexes = await this._getSourceIndexList();
     // For now we only support 1:1 index-pattern:index matches
     return matchingIndexes.length === 1;
   }
 
-  async getDefaultFields(): Promise<Record<string, Record<string, string>>> {
+  async _getNewFeatureFields(): Promise<Record<string, Record<string, string>>> {
     if (!(await this._isDrawingIndex())) {
       return {};
     }
@@ -820,7 +819,7 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
   }
 
   async _getEditableIndex(): Promise<string> {
-    const indexList = await this.getSourceIndexList();
+    const indexList = await this._getSourceIndexList();
     if (indexList.length === 0) {
       throw new Error(
         i18n.translate('xpack.maps.source.esSearch.indexZeroLengthEditError', {
@@ -838,12 +837,14 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
     return indexList[0];
   }
 
-  async addFeature(
-    geometry: Geometry | Position[],
-    defaultFields: Record<string, Record<string, string>>
-  ) {
+  async addFeature(geometry: Geometry | Position[]) {
     const index = await this._getEditableIndex();
-    await addFeatureToIndex(index, geometry, this.getGeoFieldName(), defaultFields);
+    await addFeatureToIndex(
+      index,
+      geometry,
+      this.getGeoFieldName(),
+      await this._getNewFeatureFields()
+    );
   }
 
   async deleteFeature(featureId: string) {
@@ -894,9 +895,7 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
         })
     );
 
-    const mvtUrlServicePath = getHttp().basePath.prepend(
-      `/${GIS_API_PATH}/${MVT_GETTILE_API_PATH}/{z}/{x}/{y}.pbf`
-    );
+    const mvtUrlServicePath = getHttp().basePath.prepend(`${MVT_GETTILE_API_PATH}/{z}/{x}/{y}.pbf`);
 
     const tileUrlParams = getTileUrlParams({
       geometryFieldName: this._descriptor.geoField,
