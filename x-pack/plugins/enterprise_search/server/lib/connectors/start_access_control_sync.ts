@@ -8,7 +8,6 @@
 import { IScopedClusterClient } from '@kbn/core/server';
 
 import { CONNECTORS_INDEX, CONNECTORS_JOBS_INDEX } from '../..';
-import { ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE } from '../../../common/constants';
 
 import {
   ConnectorSyncConfiguration,
@@ -20,7 +19,7 @@ import {
 } from '../../../common/types/connectors';
 import { ErrorCode } from '../../../common/types/error_codes';
 
-export const startConnectorSync = async (
+export const startAccessControlConnectorSync = async (
   client: IScopedClusterClient,
   connectorId: string,
   nextSyncConfig?: string
@@ -41,19 +40,6 @@ export const startConnectorSync = async (
 
     const now = new Date().toISOString();
 
-    if (connector.service_type === ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE) {
-      return await client.asCurrentUser.update({
-        doc: {
-          configuration,
-          sync_now: true,
-        },
-        id: connectorId,
-        if_primary_term: connectorResult._primary_term,
-        if_seq_no: connectorResult._seq_no,
-        index: CONNECTORS_INDEX,
-      });
-    }
-
     return await client.asCurrentUser.index<ConnectorSyncJobDocument>({
       document: {
         cancelation_requested_at: null,
@@ -73,7 +59,7 @@ export const startConnectorSync = async (
         error: null,
         indexed_document_count: 0,
         indexed_document_volume: 0,
-        job_type: SyncJobType.FULL,
+        job_type: SyncJobType.ACCESS_CONTROL,
         last_seen: null,
         metadata: {},
         started_at: null,

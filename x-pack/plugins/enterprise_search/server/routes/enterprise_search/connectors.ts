@@ -23,6 +23,8 @@ import { cancelSyncs } from '../../lib/connectors/post_cancel_syncs';
 import { updateFiltering } from '../../lib/connectors/put_update_filtering';
 import { updateFilteringDraft } from '../../lib/connectors/put_update_filtering_draft';
 import { putUpdateNative } from '../../lib/connectors/put_update_native';
+import { startAccessControlConnectorSync } from '../../lib/connectors/start_access_control_sync';
+import { startIncrementalConnectorSync } from '../../lib/connectors/start_incremental_sync';
 import { startConnectorSync } from '../../lib/connectors/start_sync';
 import { updateConnectorConfiguration } from '../../lib/connectors/update_connector_configuration';
 import { updateConnectorNameAndDescription } from '../../lib/connectors/update_connector_name_and_description';
@@ -152,6 +154,53 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
     elasticsearchErrorHandler(log, async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
       await startConnectorSync(client, request.params.connectorId, request.body.nextSyncConfig);
+      return response.ok();
+    })
+  );
+
+  router.post(
+    {
+      path: '/internal/enterprise_search/connectors/{connectorId}/start_incremental_sync',
+      validate: {
+        body: schema.object({
+          nextSyncConfig: schema.maybe(schema.string()),
+        }),
+        params: schema.object({
+          connectorId: schema.string(),
+        }),
+      },
+    },
+    elasticsearchErrorHandler(log, async (context, request, response) => {
+      const { client } = (await context.core).elasticsearch;
+      await startIncrementalConnectorSync(
+        client,
+        request.params.connectorId,
+        request.body.nextSyncConfig
+      );
+      return response.ok();
+    })
+  );
+
+  router.post(
+    {
+      path: '/internal/enterprise_search/connectors/{connectorId}/start_access_control_sync',
+      validate: {
+        body: schema.object({
+          nextSyncConfig: schema.maybe(schema.string()),
+        }),
+        params: schema.object({
+          connectorId: schema.string(),
+        }),
+      },
+    },
+    elasticsearchErrorHandler(log, async (context, request, response) => {
+      const { client } = (await context.core).elasticsearch;
+      // TODO DO NOT MERGE - Change this
+      await startAccessControlConnectorSync(
+        client,
+        request.params.connectorId,
+        request.body.nextSyncConfig
+      );
       return response.ok();
     })
   );

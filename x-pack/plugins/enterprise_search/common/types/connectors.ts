@@ -160,6 +160,12 @@ export enum TriggerMethod {
   SCHEDULED = 'scheduled',
 }
 
+export enum SyncJobType {
+  FULL = 'full',
+  INCREMENTAL = 'incremental',
+  ACCESS_CONTROL = 'access',
+}
+
 export enum FeatureName {
   FILTERING_ADVANCED_CONFIG = 'filtering_advanced_config',
   FILTERING_RULES = 'filtering_rules',
@@ -196,6 +202,7 @@ export interface Connector {
   is_native: boolean;
   language: string | null;
   last_access_control_sync_status: SyncStatus | null;
+  last_incremental_sync_scheduled_at: string | null;
   last_seen: string | null;
   last_sync_error: string | null;
   last_sync_scheduled_at: string | null;
@@ -233,6 +240,7 @@ export interface ConnectorSyncJob {
   id: string;
   indexed_document_count: number;
   indexed_document_volume: number;
+  job_type: SyncJobType;
   last_seen: string | null;
   metadata: Record<string, unknown>;
   started_at: string | null;
