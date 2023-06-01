@@ -31,6 +31,6 @@ export const plugin = (initializerContext: PluginInitializerContext) => ({
 
     return {};
   },
-  
+
   start() {},
 });

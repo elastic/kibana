@@ -15,7 +15,7 @@ import { InputControlVisParams } from './types';
 
 export function createInputControlVisTypeDefinition(
   deps: InputControlVisDependencies,
-  readOnly: boolean,
+  readOnly: boolean
 ): VisTypeDefinition<InputControlVisParams> {
   const ControlsTab = getControlsTab(deps);
 
