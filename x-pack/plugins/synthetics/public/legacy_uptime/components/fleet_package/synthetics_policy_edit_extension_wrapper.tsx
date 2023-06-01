@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import type { FleetStartServices } from '@kbn/fleet-plugin/public';
 import { EuiButton, EuiCallOut } from '@elastic/eui';
 import type { PackagePolicyEditExtensionComponentProps } from '@kbn/fleet-plugin/public';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '@kbn/react-public';
 import { ConfigKey, DataStream } from '../../../../common/runtime_types';
 import { DeprecateNoticeModal } from './deprecate_notice_modal';
 import { useEditMonitorLocator } from '../../../apps/synthetics/hooks';

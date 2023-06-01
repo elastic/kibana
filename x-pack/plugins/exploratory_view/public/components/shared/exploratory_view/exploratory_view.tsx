@@ -16,7 +16,7 @@ import {
   EuiFlexItem,
 } from '@elastic/eui';
 import { PanelDirection } from '@elastic/eui/src/components/resizable_container/types';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '@kbn/react-public';
 import { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import { ExploratoryViewPublicPluginsStart } from '../../../plugin';
 import { useSeriesStorage } from './hooks/use_series_storage';

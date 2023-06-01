@@ -10,7 +10,7 @@ import { isEqual } from 'lodash';
 import React, { useEffect, useRef } from 'react';
 import type { CoreStart } from '@kbn/core/public';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider } from '@kbn/react-public';
 import type { QueryStart, SavedQuery, DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { Query, AggregateQuery } from '@kbn/es-query';
 import type { Filter, TimeRange } from '@kbn/es-query';

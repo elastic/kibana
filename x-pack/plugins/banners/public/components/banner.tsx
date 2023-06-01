@@ -6,7 +6,7 @@
  */
 
 import React, { FC } from 'react';
-import { Markdown } from '@kbn/kibana-react-plugin/public';
+import { Markdown } from '@kbn/react-public';
 import { BannerConfiguration } from '../../common';
 
 import './banner.scss';

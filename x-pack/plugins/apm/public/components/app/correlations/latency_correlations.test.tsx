@@ -17,7 +17,7 @@ import { merge } from 'lodash';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import type { IKibanaSearchResponse } from '@kbn/data-plugin/public';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
-import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
+import { createKibanaReactContext } from '@kbn/react-public';
 import type { LatencyCorrelationsResponse } from '../../../../common/correlations/latency_correlations/types';
 import { MockUrlParamsContextProvider } from '../../../context/url_params_context/mock_url_params_context_provider';
 import { ApmPluginContextValue } from '../../../context/apm_plugin/apm_plugin_context';

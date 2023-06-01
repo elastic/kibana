@@ -6,7 +6,7 @@
  */
 import React from 'react';
 import { EuiSuperSelect } from '@elastic/eui';
-import { useUiSetting } from '@kbn/kibana-react-plugin/public';
+import { useUiSetting } from '@kbn/react-public';
 import { syntheticsThrottlingEnabled } from '@kbn/observability-plugin/public';
 import { useConnectionProfiles } from './use_connection_profiles';
 import { ThrottlingDisabledCallout } from './throttling_disabled_callout';

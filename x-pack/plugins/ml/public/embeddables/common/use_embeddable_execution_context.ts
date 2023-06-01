@@ -9,7 +9,7 @@ import useObservable from 'react-use/lib/useObservable';
 import { map } from 'rxjs/operators';
 import { KibanaExecutionContext } from '@kbn/core/types';
 import { useMemo } from 'react';
-import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
+import { useExecutionContext } from '@kbn/react-public';
 import type { Observable } from 'rxjs';
 import type { EmbeddableInput } from '@kbn/embeddable-plugin/common';
 import { ExecutionContextStart } from '@kbn/core/public';

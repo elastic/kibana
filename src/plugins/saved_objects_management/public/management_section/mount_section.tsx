@@ -14,7 +14,7 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { CoreSetup } from '@kbn/core/public';
-import { wrapWithTheme } from '@kbn/kibana-react-plugin/public';
+import { wrapWithTheme } from '@kbn/react-public';
 import { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import type { SavedObjectManagementTypeInfo } from '../../common/types';
 import { StartDependencies, SavedObjectsManagementPluginStart } from '../plugin';

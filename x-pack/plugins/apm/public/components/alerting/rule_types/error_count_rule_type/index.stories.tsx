@@ -8,7 +8,7 @@
 import { Meta, Story } from '@storybook/react';
 import React, { useState } from 'react';
 import { CoreStart } from '@kbn/core/public';
-import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
+import { createKibanaReactContext } from '@kbn/react-public';
 import { TIME_UNITS } from '@kbn/triggers-actions-ui-plugin/public';
 import { RuleParams, ErrorCountRuleType } from '.';
 import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';

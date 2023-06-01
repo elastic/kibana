@@ -18,7 +18,7 @@ import {
 import classNames from 'classnames';
 
 import { MountPoint } from '@kbn/core/public';
-import { MountPointPortal } from '@kbn/kibana-react-plugin/public';
+import { MountPointPortal } from '@kbn/react-public';
 import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { StatefulSearchBarProps, SearchBarProps } from '@kbn/unified-search-plugin/public';
 import { AggregateQuery, Query } from '@kbn/es-query';

@@ -22,7 +22,7 @@ import { ModelSnapshotTable } from '../../../../components/model_snapshots';
 import { ForecastsTable } from './forecasts_table';
 import { JobDetailsPane } from './job_details_pane';
 import { JobMessagesPane } from './job_messages_pane';
-import { withKibana } from '@kbn/kibana-react-plugin/public';
+import { withKibana } from '@kbn/react-public';
 
 export class JobDetailsUI extends Component {
   constructor(props) {

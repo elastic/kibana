@@ -10,7 +10,7 @@ import {
   KibanaContextProvider,
   RedirectAppLinks,
   useUiSetting$,
-} from '@kbn/kibana-react-plugin/public';
+} from '@kbn/react-public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { InspectorContextProvider } from '@kbn/observability-shared-plugin/public';
 import { HeaderMenuPortal } from '@kbn/observability-shared-plugin/public';

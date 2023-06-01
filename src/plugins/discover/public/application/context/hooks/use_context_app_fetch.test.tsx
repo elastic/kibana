@@ -22,7 +22,7 @@ import { dataViewWithTimefieldMock } from '../../../__mocks__/data_view_with_tim
 import { createContextSearchSourceStub } from '../services/_stubs';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { themeServiceMock } from '@kbn/core/public/mocks';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider } from '@kbn/react-public';
 
 const mockFilterManager = createFilterManagerMock();
 

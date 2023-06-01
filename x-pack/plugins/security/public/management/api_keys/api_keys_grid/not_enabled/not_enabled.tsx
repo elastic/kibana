@@ -9,7 +9,7 @@ import { EuiLink } from '@elastic/eui';
 import React from 'react';
 
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '@kbn/react-public';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 
 export const NotEnabled: React.FunctionComponent = () => {

@@ -8,7 +8,7 @@
 import type React from 'react';
 import { useHistory } from 'react-router-dom';
 import { FieldIcon } from '@kbn/react-field';
-import type { KibanaReactContextValue } from '@kbn/kibana-react-plugin/public';
+import type { KibanaReactContextValue } from '@kbn/react-public';
 import {
   KibanaContextProvider,
   useKibana,
@@ -16,7 +16,7 @@ import {
   useUiSetting$,
   withKibana,
   reactRouterNavigate,
-} from '@kbn/kibana-react-plugin/public';
+} from '@kbn/react-public';
 import type { StartServices } from '../../../types';
 
 export type KibanaContext = KibanaReactContextValue<StartServices>;

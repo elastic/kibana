@@ -12,7 +12,7 @@ import { Router, Redirect } from 'react-router-dom';
 import { Route } from '@kbn/shared-ux-router';
 import { I18nProvider } from '@kbn/i18n-react';
 import { AppMountParameters, CoreStart } from '@kbn/core/public';
-import { RedirectAppLinks } from '@kbn/kibana-react-plugin/public';
+import { RedirectAppLinks } from '@kbn/react-public';
 import { AppPluginStartDependencies } from './types';
 import { SearchExamplePage, ExampleLink } from './common/example_page';
 import { SearchExamplesApp } from './search/app';

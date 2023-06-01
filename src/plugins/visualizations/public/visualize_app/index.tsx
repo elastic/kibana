@@ -15,7 +15,7 @@ import {
   KibanaContextProvider,
   KibanaThemeProvider,
   toMountPoint,
-} from '@kbn/kibana-react-plugin/public';
+} from '@kbn/react-public';
 import { FormattedRelative } from '@kbn/i18n-react';
 import { TableListViewKibanaProvider } from '@kbn/content-management-table-list';
 import { VisualizeApp } from './app';

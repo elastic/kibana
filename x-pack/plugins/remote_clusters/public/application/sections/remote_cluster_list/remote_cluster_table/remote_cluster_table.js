@@ -21,7 +21,7 @@ import {
   EuiToolTip,
   EuiText,
 } from '@elastic/eui';
-import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
+import { reactRouterNavigate } from '@kbn/react-public';
 import { UIM_SHOW_DETAILS_CLICK } from '../../../constants';
 import { PROXY_MODE } from '../../../../../common/constants';
 import { trackUiMetric, METRIC_TYPE, getRouter } from '../../../services';

@@ -16,7 +16,7 @@ import {
 } from '@elastic/charts';
 import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiToolTip } from '@elastic/eui';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
-import { useKibana, useUiSetting } from '@kbn/kibana-react-plugin/public';
+import { useKibana, useUiSetting } from '@kbn/react-public';
 import { first, last } from 'lodash';
 import moment from 'moment';
 import React, { useCallback, useMemo } from 'react';

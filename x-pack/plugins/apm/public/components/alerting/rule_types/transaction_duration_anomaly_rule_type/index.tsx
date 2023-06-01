@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { defaults, omit } from 'lodash';
 import React, { useEffect } from 'react';
 import { CoreStart } from '@kbn/core/public';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '@kbn/react-public';
 import { TIME_UNITS } from '@kbn/triggers-actions-ui-plugin/public';
 import { ML_ANOMALY_SEVERITY } from '@kbn/ml-anomaly-utils/anomaly_severity';
 import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';

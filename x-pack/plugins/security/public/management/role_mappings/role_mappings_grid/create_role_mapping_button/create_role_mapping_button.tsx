@@ -10,7 +10,7 @@ import React from 'react';
 
 import type { ScopedHistory } from '@kbn/core/public';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
+import { reactRouterNavigate } from '@kbn/react-public';
 
 import { EDIT_ROLE_MAPPING_PATH } from '../../../management_urls';
 

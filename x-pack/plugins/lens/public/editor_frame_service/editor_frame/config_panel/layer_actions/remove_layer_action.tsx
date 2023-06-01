@@ -20,7 +20,7 @@ import {
   EuiModalHeaderTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint } from '@kbn/react-public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import type { LayerAction } from '../../../../types';

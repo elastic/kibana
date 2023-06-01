@@ -11,7 +11,7 @@ import React, { Fragment } from 'react';
 import { EuiCode, EuiFieldText, EuiFormRow, EuiIcon, EuiLink } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
-import { context as contextType } from '@kbn/kibana-react-plugin/public';
+import { context as contextType } from '@kbn/react-public';
 import { DefaultFormatEditor, defaultState } from '../default/default';
 
 import { FormatEditorSamples } from '../../samples';

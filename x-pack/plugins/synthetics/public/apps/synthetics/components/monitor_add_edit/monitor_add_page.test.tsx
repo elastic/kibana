@@ -12,8 +12,8 @@ import { MonitorAddPage } from './monitor_add_page';
 
 mockGlobals();
 
-jest.mock('@kbn/kibana-react-plugin/public', () => {
-  const original = jest.requireActual('@kbn/kibana-react-plugin/public');
+jest.mock('@kbn/react-public', () => {
+  const original = jest.requireActual('@kbn/react-public');
   return {
     ...original,
     // Mocking CodeEditor, which uses React Monaco under the hood

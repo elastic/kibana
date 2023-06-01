@@ -7,7 +7,7 @@
 import React, { ReactNode } from 'react';
 import { renderHook } from '@testing-library/react-hooks';
 import { useTabs } from './use_tabs';
-import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
+import { createKibanaReactContext } from '@kbn/react-public';
 import { CoreStart } from '@kbn/core/public';
 import { shallow } from 'enzyme';
 

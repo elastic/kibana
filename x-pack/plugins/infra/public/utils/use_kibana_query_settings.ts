@@ -9,7 +9,7 @@ import type { EsQueryConfig } from '@kbn/es-query';
 import { SerializableRecord } from '@kbn/utility-types';
 import { useMemo } from 'react';
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
-import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
+import { useUiSetting$ } from '@kbn/react-public';
 
 export const useKibanaQuerySettings = (): EsQueryConfig => {
   const [allowLeadingWildcards] = useUiSetting$<boolean>(UI_SETTINGS.QUERY_ALLOW_LEADING_WILDCARDS);

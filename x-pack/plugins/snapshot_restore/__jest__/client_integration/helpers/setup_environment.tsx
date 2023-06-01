@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { merge } from 'lodash';
 import { LocationDescriptorObject } from 'history';
 
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider } from '@kbn/react-public';
 import { HttpSetup } from '@kbn/core/public';
 import { coreMock, scopedHistoryMock } from '@kbn/core/public/mocks';
 import { setUiMetricService, httpService } from '../../../public/application/services/http';

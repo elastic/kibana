@@ -13,7 +13,7 @@ import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiText, EuiLink, EuiIcon } from 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ScopedHistory } from '@kbn/core/public';
 
-import { reactRouterNavigate, useKibana } from '@kbn/kibana-react-plugin/public';
+import { reactRouterNavigate, useKibana } from '@kbn/react-public';
 import { IndexPatternManagmentContext } from '../../../../../types';
 
 interface HeaderProps extends RouteComponentProps {

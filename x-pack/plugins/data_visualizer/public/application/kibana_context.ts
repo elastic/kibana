@@ -6,7 +6,7 @@
  */
 
 import { CoreStart } from '@kbn/core/public';
-import { KibanaReactContextValue, useKibana } from '@kbn/kibana-react-plugin/public';
+import { KibanaReactContextValue, useKibana } from '@kbn/react-public';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import type { DataVisualizerStartDependencies } from '../plugin';
 

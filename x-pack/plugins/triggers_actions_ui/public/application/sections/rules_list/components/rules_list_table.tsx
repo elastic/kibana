@@ -9,7 +9,7 @@ import moment from 'moment';
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
 import { AlertConsumers } from '@kbn/rule-data-utils';
-import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
+import { useUiSetting$ } from '@kbn/react-public';
 import {
   EuiBasicTable,
   EuiFlexGroup,

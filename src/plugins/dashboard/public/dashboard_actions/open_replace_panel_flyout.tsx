@@ -14,7 +14,7 @@ import type {
   EmbeddableInput,
   EmbeddableOutput,
 } from '@kbn/embeddable-plugin/public';
-import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint } from '@kbn/react-public';
 
 import { ReplacePanelFlyout } from './replace_panel_flyout';
 import { pluginServices } from '../services/plugin_services';

@@ -48,8 +48,8 @@ jest.mock('@elastic/eui', () => {
   };
 });
 
-jest.mock('@kbn/kibana-react-plugin/public', () => {
-  const original = jest.requireActual('@kbn/kibana-react-plugin/public');
+jest.mock('@kbn/react-public', () => {
+  const original = jest.requireActual('@kbn/react-public');
 
   const CodeEditorMock = (props: any) => (
     <input

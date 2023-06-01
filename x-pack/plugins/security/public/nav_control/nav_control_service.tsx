@@ -15,7 +15,7 @@ import { map, takeUntil } from 'rxjs/operators';
 
 import type { CoreStart, CoreTheme } from '@kbn/core/public';
 import { I18nProvider } from '@kbn/i18n-react';
-import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/react-public';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 
 import type { SecurityLicense } from '../../common/licensing';

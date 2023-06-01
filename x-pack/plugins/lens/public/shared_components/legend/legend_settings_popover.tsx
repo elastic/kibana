@@ -15,7 +15,7 @@ import {
   EuiFieldNumber,
 } from '@elastic/eui';
 import { Position, VerticalAlignment, HorizontalAlignment } from '@elastic/charts';
-import { ToolbarButtonProps } from '@kbn/kibana-react-plugin/public';
+import { ToolbarButtonProps } from '@kbn/react-public';
 import { LegendSize } from '@kbn/visualizations-plugin/public';
 import { useDebouncedValue } from '@kbn/visualization-ui-components/public';
 import { ToolbarPopover } from '../toolbar_popover';

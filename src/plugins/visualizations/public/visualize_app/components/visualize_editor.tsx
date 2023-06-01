@@ -11,7 +11,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { EventEmitter } from 'events';
 
-import { useExecutionContext, useKibana } from '@kbn/kibana-react-plugin/public';
+import { useExecutionContext, useKibana } from '@kbn/react-public';
 import {
   useChromeVisibility,
   useSavedVisInstance,

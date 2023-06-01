@@ -17,7 +17,7 @@ import {
   FieldOptionValue,
   FieldPicker,
 } from '@kbn/visualization-ui-components/public';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '@kbn/react-public';
 import { LENS_APP_NAME } from '../../../../../common/constants';
 import type { FramePublicAPI } from '../../../../types';
 import type { XYState, XYAnnotationLayerConfig } from '../../types';

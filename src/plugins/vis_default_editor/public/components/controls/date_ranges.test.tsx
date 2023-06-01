@@ -9,7 +9,7 @@
 import React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { DateRangesParamEditor } from './date_ranges';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider } from '@kbn/react-public';
 import { docLinksServiceMock } from '@kbn/core/public/mocks';
 
 describe('DateRangesParamEditor component', () => {

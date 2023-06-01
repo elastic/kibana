@@ -8,7 +8,7 @@
 
 import React from 'react';
 import type { OverlayStart } from '@kbn/core/public';
-import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint } from '@kbn/react-public';
 import { withSuspense } from '@kbn/shared-ux-utility';
 import type { TelemetryConstants } from '../..';
 

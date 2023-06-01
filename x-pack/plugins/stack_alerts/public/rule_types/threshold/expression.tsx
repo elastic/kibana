@@ -18,7 +18,7 @@ import {
   EuiFormRow,
 } from '@elastic/eui';
 import { HttpSetup } from '@kbn/core/public';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '@kbn/react-public';
 import {
   getFields,
   COMPARATORS,

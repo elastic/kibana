@@ -31,7 +31,7 @@ import {
   EuiTextColor,
   EuiTitle,
 } from '@elastic/eui';
-import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
+import { reactRouterNavigate } from '@kbn/react-public';
 import { PROXY_MODE } from '../../../../../common/constants';
 import { ConfiguredByNodeWarning } from '../../components';
 import { ConnectionStatus, RemoveClusterButtonProvider } from '../components';

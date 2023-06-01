@@ -15,7 +15,7 @@ import {
   ISearchStart,
 } from '@kbn/data-plugin/public';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
-import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
+import { createKibanaReactContext } from '@kbn/react-public';
 import { PluginKibanaContextValue } from '../../hooks/use_kibana';
 import { normalizeDataSearchResponses } from './normalize_data_search_responses';
 import { useDataSearch } from './use_data_search_request';

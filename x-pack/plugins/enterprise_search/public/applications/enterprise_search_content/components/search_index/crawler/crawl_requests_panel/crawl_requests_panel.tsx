@@ -11,7 +11,7 @@ import { useValues } from 'kea';
 
 import { EuiButton, EuiCode, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '@kbn/react-public';
 
 import { KibanaDeps } from '../../../../../../../common/types';
 import { DataPanel } from '../../../../../shared/data_panel/data_panel';

@@ -7,7 +7,7 @@
 import React, { useCallback } from 'react';
 
 import { useParams, useRouteMatch } from 'react-router-dom';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '@kbn/react-public';
 import { useGetUrlParams } from '../../hooks';
 import { MONITOR_ERRORS_ROUTE, MONITOR_HISTORY_ROUTE } from '../../../../../common/constants';
 import { ClientPluginsStart } from '../../../../plugin';

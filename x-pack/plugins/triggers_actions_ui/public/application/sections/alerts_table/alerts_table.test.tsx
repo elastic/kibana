@@ -40,12 +40,12 @@ import { act } from 'react-dom/test-utils';
 const mockCaseService = createCasesServiceMock();
 
 jest.mock('@kbn/data-plugin/public');
-jest.mock('@kbn/kibana-react-plugin/public/ui_settings/use_ui_setting', () => ({
+jest.mock('@kbn/react-public/ui_settings/use_ui_setting', () => ({
   useUiSetting$: jest.fn((value: string) => ['0,0']),
 }));
 
-jest.mock('@kbn/kibana-react-plugin/public', () => {
-  const original = jest.requireActual('@kbn/kibana-react-plugin/public');
+jest.mock('@kbn/react-public', () => {
+  const original = jest.requireActual('@kbn/react-public');
 
   return {
     ...original,

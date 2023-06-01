@@ -21,7 +21,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { ValidatedDualRange } from '@kbn/kibana-react-plugin/public';
+import { ValidatedDualRange } from '@kbn/react-public';
 import { Attribution } from '../../../../common/descriptor_types';
 import { AUTOSELECT_EMS_LOCALE, NO_EMS_LOCALE, MAX_ZOOM } from '../../../../common/constants';
 import { AlphaSlider } from '../../../components/alpha_slider';

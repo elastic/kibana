@@ -12,7 +12,7 @@ import type { UseSubActionParams } from '@kbn/triggers-actions-ui-plugin/public/
 import TinesParamsFields from './tines_params';
 import { ActionConnectorMode } from '@kbn/triggers-actions-ui-plugin/public/types';
 
-const kibanaReactPath = '@kbn/kibana-react-plugin/public';
+const kibanaReactPath = '@kbn/react-public';
 const triggersActionsPath = '@kbn/triggers-actions-ui-plugin/public';
 interface Result {
   isLoading: boolean;

@@ -18,7 +18,7 @@ import {
   BrushEndListener,
 } from '@elastic/charts';
 import { EuiPageContentBody_Deprecated as EuiPageContentBody } from '@elastic/eui';
-import { useUiSetting } from '@kbn/kibana-react-plugin/public';
+import { useUiSetting } from '@kbn/react-public';
 import { SeriesChart } from './series_chart';
 import {
   getFormatter,

@@ -16,7 +16,7 @@ import { EuiErrorBoundary } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/react-public';
 
 import { addInternalBasePath } from '../../common/constants';
 

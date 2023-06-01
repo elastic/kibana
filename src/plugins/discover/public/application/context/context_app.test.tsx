@@ -20,7 +20,7 @@ import { act } from 'react-dom/test-utils';
 import { uiSettingsMock } from '../../__mocks__/ui_settings';
 import { themeServiceMock } from '@kbn/core/public/mocks';
 import { LocalStorageMock } from '../../__mocks__/local_storage_mock';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider } from '@kbn/react-public';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import type { HistoryLocationState } from '../../build_services';
 

@@ -6,7 +6,7 @@
  */
 
 import type { CoreStart } from '@kbn/core/public';
-import { useKibana as useKibanaBase } from '@kbn/kibana-react-plugin/public';
+import { useKibana as useKibanaBase } from '@kbn/react-public';
 import type { CspClientPluginStartDeps } from '../../types';
 
 type CspKibanaContext = CoreStart & CspClientPluginStartDeps;

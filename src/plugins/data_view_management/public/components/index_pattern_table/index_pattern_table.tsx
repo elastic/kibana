@@ -22,7 +22,7 @@ import { RouteComponentProps, withRouter, useLocation } from 'react-router-dom';
 import useObservable from 'react-use/lib/useObservable';
 import React, { useState, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { reactRouterNavigate, useKibana } from '@kbn/kibana-react-plugin/public';
+import { reactRouterNavigate, useKibana } from '@kbn/react-public';
 import type { SpacesContextProps } from '@kbn/spaces-plugin/public';
 import { NoDataViewsPromptComponent } from '@kbn/shared-ux-prompt-no-data-views';
 import { EmptyIndexListPrompt } from '../empty_index_list_prompt';

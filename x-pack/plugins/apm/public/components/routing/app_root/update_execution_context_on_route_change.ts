@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
+import { useExecutionContext } from '@kbn/react-public';
 import { useMatchRoutes } from '@kbn/typed-react-router-config';
 import { last } from 'lodash';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';

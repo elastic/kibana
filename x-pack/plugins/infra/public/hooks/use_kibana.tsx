@@ -12,7 +12,7 @@ import {
   createKibanaReactContext,
   KibanaReactContextValue,
   useKibana,
-} from '@kbn/kibana-react-plugin/public';
+} from '@kbn/react-public';
 import { InfraClientCoreSetup, InfraClientStartDeps, InfraClientStartExports } from '../types';
 
 export type PluginKibanaContextValue = CoreStart & InfraClientStartDeps & InfraClientStartExports;

@@ -10,7 +10,7 @@ import type {
   EndpointOf,
   ReturnOf,
 } from '@kbn/server-route-repository';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '@kbn/react-public';
 import {
   apmProgressiveLoading,
   getProbabilityFromProgressiveLoadingQuality,

@@ -19,7 +19,7 @@ import {
 } from '@elastic/eui';
 
 import { setBreadcrumbs, listBreadcrumb, editBreadcrumb } from '../../services/breadcrumbs';
-import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
+import { reactRouterNavigate } from '@kbn/react-public';
 import {
   FollowerIndexForm,
   FollowerIndexPageTitle,

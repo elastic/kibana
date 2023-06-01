@@ -17,7 +17,7 @@ import {
   IInterpreterRenderHandlers,
 } from '@kbn/expressions-plugin/common';
 import { CoreSetup } from '@kbn/core/public';
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaThemeProvider } from '@kbn/react-public';
 import { withSuspense } from '@kbn/presentation-util-plugin/public';
 import { defaultTheme$ } from '@kbn/presentation-util-plugin/common';
 import { ErrorRendererConfig } from '../../common/types';

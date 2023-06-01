@@ -18,7 +18,7 @@ import {
   VisualizeEmbeddableContract,
   EditorRenderProps,
 } from '@kbn/visualizations-plugin/public';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider } from '@kbn/react-public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 
 import { DefaultEditorSideBar } from './components/sidebar';

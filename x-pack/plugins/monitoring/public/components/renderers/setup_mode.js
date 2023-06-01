@@ -15,7 +15,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { Fragment } from 'react';
-import { withKibana } from '@kbn/kibana-react-plugin/public';
+import { withKibana } from '@kbn/react-public';
 import { GlobalStateContext } from '../../application/contexts/global_state_context';
 import { useRequestErrorHandler } from '../../application/hooks/use_request_error_handler';
 import {

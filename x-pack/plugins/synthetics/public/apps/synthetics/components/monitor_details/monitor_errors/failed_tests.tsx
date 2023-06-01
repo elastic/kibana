@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '@kbn/react-public';
 import { useParams } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';

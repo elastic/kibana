@@ -28,7 +28,7 @@ import semverGte from 'semver/functions/gte';
 import semverCoerce from 'semver/functions/coerce';
 
 import { createStateContainerReactHelpers } from '@kbn/kibana-utils-plugin/public';
-import { RedirectAppLinks } from '@kbn/kibana-react-plugin/public';
+import { RedirectAppLinks } from '@kbn/react-public';
 import type { TimeRange } from '@kbn/es-query';
 import { LogStream, type LogStreamProps } from '@kbn/infra-plugin/public';
 

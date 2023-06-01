@@ -11,7 +11,7 @@ import { HttpSetup } from '@kbn/core/public';
 
 import { ApplicationStart } from '@kbn/core/public';
 import { MockUrlService } from '@kbn/share-plugin/common/mocks';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider } from '@kbn/react-public';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 import {
   notificationServiceMock,

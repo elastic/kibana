@@ -6,7 +6,7 @@
  */
 import type { ComponentType } from 'react';
 import React, { memo } from 'react';
-import { Route } from '@kbn/kibana-react-plugin/public';
+import { Route } from '@kbn/react-public';
 import type { DocLinks } from '@kbn/doc-links';
 import { NoPrivilegesPage } from '../../../common/components/no_privileges';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';

@@ -9,7 +9,7 @@ import React from 'react';
 import { MLIntegrationComponent } from './ml_integeration';
 import { renderWithRouter, shallowWithRouter } from '../../../lib';
 import * as redux from 'react-redux';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider } from '@kbn/react-public';
 import { coreMock } from '@kbn/core/public/mocks';
 
 const core = coreMock.createStart();

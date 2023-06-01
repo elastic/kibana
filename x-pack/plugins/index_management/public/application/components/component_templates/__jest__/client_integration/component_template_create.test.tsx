@@ -14,8 +14,8 @@ import { setupEnvironment } from './helpers';
 import { API_BASE_PATH } from './helpers/constants';
 import { setup, ComponentTemplateCreateTestBed } from './helpers/component_template_create.helpers';
 
-jest.mock('@kbn/kibana-react-plugin/public', () => {
-  const original = jest.requireActual('@kbn/kibana-react-plugin/public');
+jest.mock('@kbn/react-public', () => {
+  const original = jest.requireActual('@kbn/react-public');
   return {
     ...original,
     // Mocking CodeEditor, which uses React Monaco under the hood

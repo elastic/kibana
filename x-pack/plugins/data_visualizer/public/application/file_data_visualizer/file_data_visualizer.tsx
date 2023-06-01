@@ -6,7 +6,7 @@
  */
 import '../_index.scss';
 import React, { FC } from 'react';
-import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/react-public';
 import { getCoreStart, getPluginsStart } from '../../kibana_services';
 
 // @ts-ignore

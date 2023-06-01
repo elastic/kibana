@@ -25,8 +25,8 @@ jest.mock('../components/app/rum_dashboard/rum_home', () => ({
   RumHome: () => <p>Home Mock</p>,
 }));
 
-jest.mock('@kbn/kibana-react-plugin/public', () => {
-  const actual = jest.requireActual('@kbn/kibana-react-plugin/public');
+jest.mock('@kbn/react-public', () => {
+  const actual = jest.requireActual('@kbn/react-public');
   return {
     ...actual,
     useUiSetting: () => ({

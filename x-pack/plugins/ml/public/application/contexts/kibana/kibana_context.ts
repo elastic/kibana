@@ -9,7 +9,7 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
-import { useKibana, KibanaReactContextValue } from '@kbn/kibana-react-plugin/public';
+import { useKibana, KibanaReactContextValue } from '@kbn/react-public';
 import type { SecurityPluginSetup } from '@kbn/security-plugin/public';
 import type { LicenseManagementUIPluginSetup } from '@kbn/license-management-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';

@@ -11,7 +11,7 @@ import type { UI_SETTINGS } from '@kbn/data-plugin/common';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { CoreSetup, IUiSettingsClient, ThemeServiceStart } from '@kbn/core/public';
 import type { HttpStart } from '@kbn/core/public';
-import type { toMountPoint, wrapWithTheme } from '@kbn/kibana-react-plugin/public';
+import type { toMountPoint, wrapWithTheme } from '@kbn/react-public';
 
 /**
  * Date Picker Dependencies to be passed on via `DatePickerContextProvider`.

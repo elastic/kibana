@@ -11,7 +11,7 @@ import { useActions, useValues } from 'kea';
 
 import { EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { CodeEditor } from '@kbn/kibana-react-plugin/public';
+import { CodeEditor } from '@kbn/react-public';
 
 import { ConnectorFilteringLogic } from './connector_filtering_logic';
 

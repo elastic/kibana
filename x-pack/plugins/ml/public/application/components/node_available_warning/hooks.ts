@@ -6,7 +6,7 @@
  */
 
 import { useEffect, useMemo, useState, useCallback } from 'react';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '@kbn/react-public';
 import { HttpService } from '../../services/http_service';
 import { mlApiServicesProvider } from '../../services/ml_api_service';
 import { type CloudInfo, extractDeploymentId } from '../../services/ml_server_info';

@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import useAsync from 'react-use/lib/useAsync';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider } from '@kbn/react-public';
 import { TextBasedLanguagesEditorProps } from '@kbn/text-based-editor';
 import { untilPluginStartServicesReady } from './kibana_services';
 

@@ -15,7 +15,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { CodeEditorField } from '@kbn/kibana-react-plugin/public';
+import { CodeEditorField } from '@kbn/react-public';
 import React from 'react';
 import { docLinks } from '../../../../common/doc_links';
 import { OPTIONAL_LABEL } from '../../../../common/i18n_string';

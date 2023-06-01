@@ -6,7 +6,7 @@
  */
 import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider } from '@kbn/react-public';
 import { coreMock } from '@kbn/core/public/mocks';
 import { serverlessMock } from '@kbn/serverless/public/mocks';
 import { securityMock } from '@kbn/security-plugin/public/mocks';

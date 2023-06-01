@@ -7,7 +7,7 @@
 
 import moment, { Moment } from 'moment';
 import React, { useState, useCallback, useMemo, useEffect } from 'react';
-import { useUiSetting } from '@kbn/kibana-react-plugin/public';
+import { useUiSetting } from '@kbn/react-public';
 import { i18n } from '@kbn/i18n';
 import {
   EuiFlexGroup,

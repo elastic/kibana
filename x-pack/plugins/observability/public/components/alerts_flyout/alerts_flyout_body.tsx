@@ -28,7 +28,7 @@ import {
 } from '@kbn/rule-data-utils';
 import { AlertLifecycleStatusBadge } from '@kbn/alerts-ui-shared';
 import moment from 'moment-timezone';
-import { useUiSetting } from '@kbn/kibana-react-plugin/public';
+import { useUiSetting } from '@kbn/react-public';
 import { useKibana } from '../../utils/kibana_react';
 import { asDuration, toMicroseconds } from '../../../common/utils/formatters';
 import { paths } from '../../config/paths';

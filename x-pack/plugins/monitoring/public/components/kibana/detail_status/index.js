@@ -7,7 +7,7 @@
 
 import { EuiBadge, EuiStat, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useUiSetting } from '@kbn/kibana-react-plugin/public';
+import { useUiSetting } from '@kbn/react-public';
 import { capitalize } from 'lodash';
 import React from 'react';
 import { ExternalConfigContext } from '../../../application/contexts/external_config_context';

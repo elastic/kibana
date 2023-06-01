@@ -26,7 +26,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { isEmpty } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { UiCounterMetricType } from '@kbn/analytics';
-import { KibanaThemeProvider, toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { KibanaThemeProvider, toMountPoint } from '@kbn/react-public';
 import { DocLinksStart, ThemeServiceStart, ToastsStart } from '@kbn/core/public';
 
 import { getCategoryName } from '../../lib';

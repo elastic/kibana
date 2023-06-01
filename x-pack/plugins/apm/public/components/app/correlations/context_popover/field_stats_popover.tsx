@@ -16,7 +16,7 @@ import {
   FieldStatsProps,
   FieldStatsState,
 } from '@kbn/unified-field-list-plugin/public';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '@kbn/react-public';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { FieldTopValuesBucket } from '@kbn/unified-field-list-plugin/public';
 

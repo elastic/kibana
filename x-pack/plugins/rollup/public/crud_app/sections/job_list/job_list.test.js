@@ -10,7 +10,7 @@ import { registerTestBed } from '@kbn/test-jest-helpers';
 import { rollupJobsStore } from '../../store';
 import { JobList } from './job_list';
 
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider } from '@kbn/react-public';
 import { coreMock } from '@kbn/core/public/mocks';
 const startMock = coreMock.createStart();
 

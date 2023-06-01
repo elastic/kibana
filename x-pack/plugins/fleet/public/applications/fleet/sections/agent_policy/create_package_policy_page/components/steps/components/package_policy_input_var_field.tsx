@@ -21,7 +21,7 @@ import {
 } from '@elastic/eui';
 import styled from 'styled-components';
 
-import { CodeEditor } from '@kbn/kibana-react-plugin/public';
+import { CodeEditor } from '@kbn/react-public';
 
 import { DATASET_VAR_NAME } from '../../../../../../../../../common/constants';
 

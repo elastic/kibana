@@ -8,7 +8,7 @@ import React, { useContext, useState, useCallback, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useParams } from 'react-router-dom';
 import { find } from 'lodash';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '@kbn/react-public';
 import { GlobalStateContext } from '../../contexts/global_state_context';
 // @ts-ignore
 import { Index } from '../../../components/elasticsearch/index/index.js';

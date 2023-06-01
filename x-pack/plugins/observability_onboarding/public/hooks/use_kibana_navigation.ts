@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '@kbn/react-public';
 import type { ApplicationStart, HttpStart } from '@kbn/core/public';
 
 interface ObservabilityOnboardingAppServices {

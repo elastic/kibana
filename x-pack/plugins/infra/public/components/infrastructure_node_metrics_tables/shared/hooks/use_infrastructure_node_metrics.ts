@@ -7,7 +7,7 @@
 
 import { parse } from '@kbn/datemath';
 import { useEffect, useMemo, useState } from 'react';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '@kbn/react-public';
 import type {
   MetricsExplorerRequestBody,
   MetricsExplorerResponse,

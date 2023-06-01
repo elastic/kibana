@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { NotificationsStart, OverlayRef, OverlayStart, ThemeServiceStart } from '@kbn/core/public';
-import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint } from '@kbn/react-public';
 import { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import { EmbeddableStart } from '../../../../../plugin';
 import { IContainer } from '../../../../containers';

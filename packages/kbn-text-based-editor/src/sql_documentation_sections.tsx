@@ -7,7 +7,7 @@
  */
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { Markdown } from '@kbn/kibana-react-plugin/public';
+import { Markdown } from '@kbn/react-public';
 
 export const initialSection = (
   <Markdown
@@ -17,18 +17,18 @@ export const initialSection = (
         defaultMessage: `## About Elasticsearch SQL
 
 Use Elasticsearch SQL to search and aggregate data inside Elasticsearch. This query language provides full text search with a familiar syntax. Here is an example query:
-                    
+
 \`\`\`
-SELECT * FROM library 
+SELECT * FROM library
 ORDER BY page_count DESC LIMIT 5
 \`\`\`
-                    
+
 Elasticsearch SQL:
 
 - Provides a comprehensive set of built-in operators and functions.
 - Follows SQL terminology and conventions.
 - Accepts one command per line. A command is a sequence of tokens terminated by the end of input stream
-                    
+
                                       `,
       }
     )}
@@ -60,7 +60,7 @@ export const comparisonOperators = {
             {
               defaultMessage: `### Equality (=)
 \`\`\`
-SELECT last_name l FROM "test_emp" 
+SELECT last_name l FROM "test_emp"
 WHERE emp_no = 10000 LIMIT 5
 \`\`\`
             `,
@@ -120,7 +120,7 @@ true
             {
               defaultMessage: `### Inequality (<> or !=)
 \`\`\`
-SELECT last_name l FROM "test_emp" 
+SELECT last_name l FROM "test_emp"
 WHERE emp_no <> 10000 ORDER BY emp_no LIMIT 5
 \`\`\`
             `,
@@ -145,7 +145,7 @@ WHERE emp_no <> 10000 ORDER BY emp_no LIMIT 5
             {
               defaultMessage: `### Comparison (<, <=, >, >=)
 \`\`\`
-SELECT last_name l FROM "test_emp" 
+SELECT last_name l FROM "test_emp"
 WHERE emp_no < 10003 ORDER BY emp_no LIMIT 5
 \`\`\`
             `,
@@ -170,7 +170,7 @@ WHERE emp_no < 10003 ORDER BY emp_no LIMIT 5
             {
               defaultMessage: `### Between
 \`\`\`
-SELECT last_name l FROM "test_emp" 
+SELECT last_name l FROM "test_emp"
 WHERE emp_no BETWEEN 9990 AND 10003 ORDER BY emp_no
 \`\`\`
             `,
@@ -195,7 +195,7 @@ WHERE emp_no BETWEEN 9990 AND 10003 ORDER BY emp_no
             {
               defaultMessage: `### IS NULL/IS NOT NULL
 \`\`\`
-SELECT last_name l FROM "test_emp" 
+SELECT last_name l FROM "test_emp"
 WHERE emp_no IS NOT NULL AND gender IS NULL
 \`\`\`
             `,
@@ -220,7 +220,7 @@ WHERE emp_no IS NOT NULL AND gender IS NULL
             {
               defaultMessage: `### IN (<value1>, <value2>, ...)
 \`\`\`
-SELECT last_name l FROM "test_emp" 
+SELECT last_name l FROM "test_emp"
 WHERE emp_no IN (10000, 10001, 10002, 999) ORDER BY emp_no LIMIT 5
 \`\`\`
             `,
@@ -259,7 +259,7 @@ export const logicalOperators = {
             {
               defaultMessage: `### AND
 \`\`\`
-SELECT last_name l FROM "test_emp" 
+SELECT last_name l FROM "test_emp"
 WHERE emp_no > 10000 AND emp_no < 10005 ORDER BY emp_no LIMIT 5
 \`\`\`
               `,
@@ -284,7 +284,7 @@ WHERE emp_no > 10000 AND emp_no < 10005 ORDER BY emp_no LIMIT 5
             {
               defaultMessage: `### OR
 \`\`\`
-SELECT last_name l FROM "test_emp" 
+SELECT last_name l FROM "test_emp"
 WHERE emp_no < 10003 OR emp_no = 10005 ORDER BY emp_no LIMIT 5
 \`\`\`
               `,
@@ -309,7 +309,7 @@ WHERE emp_no < 10003 OR emp_no = 10005 ORDER BY emp_no LIMIT 5
             {
               defaultMessage: `### NOT
 \`\`\`
-SELECT last_name l FROM "test_emp" 
+SELECT last_name l FROM "test_emp"
 WHERE NOT emp_no = 10000 LIMIT 5
 \`\`\`
               `,
@@ -568,7 +568,7 @@ SELECT COUNT(*) AS count FROM emp
 Returns the total number (count) of all non-null input values. COUNT(<field_name>) and COUNT(ALL <field_name>) are equivalent.
 
 \`\`\`
-COUNT(ALL field_name) 
+COUNT(ALL field_name)
 \`\`\`
 - a field name. If this field contains only null values, the function returns null. Otherwise, the function ignores null values in this field.
 \`\`\`
@@ -627,11 +627,11 @@ SELECT COUNT(DISTINCT hire_date) unique_hires, COUNT(hire_date) AS hires FROM em
             'textBasedEditor.query.textBasedLanguagesEditor.documentation.firstFunction.markdown',
             {
               defaultMessage: `### FIRST / FIRST_VALUE
-Returns the first non-null value (if such exists) of the field_name input column sorted by the ordering_field_name column. If ordering_field_name is not provided, only the field_name column is used for the sorting. 
+Returns the first non-null value (if such exists) of the field_name input column sorted by the ordering_field_name column. If ordering_field_name is not provided, only the field_name column is used for the sorting.
 
 \`\`\`
 FIRST(
-  field_name               
+  field_name
   [, ordering_field_name])
 \`\`\`
 - field name: target field for the aggregation
@@ -664,11 +664,11 @@ SELECT gender, FIRST(first_name, birth_date) FROM emp GROUP BY gender ORDER BY g
             'textBasedEditor.query.textBasedLanguagesEditor.documentation.lastFunction.markdown',
             {
               defaultMessage: `### LAST / LAST_VALUE
-It is the inverse of FIRST/FIRST_VALUE. Returns the last non-null value (if such exists) of the field_name input column sorted descending by the ordering_field_name column. If ordering_field_name is not provided, only the field_name column is used for the sorting.  
+It is the inverse of FIRST/FIRST_VALUE. Returns the last non-null value (if such exists) of the field_name input column sorted descending by the ordering_field_name column. If ordering_field_name is not provided, only the field_name column is used for the sorting.
 
 \`\`\`
 LAST(
-  field_name               
+  field_name
   [, ordering_field_name])
 \`\`\`
 - field name: target field for the aggregation
@@ -702,7 +702,7 @@ SELECT gender, LAST(first_name) FROM emp GROUP BY gender ORDER BY gender
 Returns the maximum value across input values in the field field_name.
 
 \`\`\`
-MAX(field_name) 
+MAX(field_name)
 \`\`\`
 - a numeric field. If this field contains only null values, the function returns null. Otherwise, the function ignores null values in this field.
 
@@ -736,7 +736,7 @@ SELECT MAX(salary) AS max FROM emp
 Returns the minimum value across input values in the field field_name.
 
 \`\`\`
-MIN(field_name) 
+MIN(field_name)
 \`\`\`
 - a numeric field. If this field contains only null values, the function returns null. Otherwise, the function ignores null values in this field.
 
@@ -769,7 +769,7 @@ SELECT MIN(salary) AS min FROM emp
 Returns the sum of input values in the field field_name.
 
 \`\`\`
-SUM(field_name) 
+SUM(field_name)
 \`\`\`
 - a numeric field. If this field contains only null values, the function returns null. Otherwise, the function ignores null values in this field.
 
@@ -800,7 +800,7 @@ SELECT SUM(salary) AS sum FROM emp
 Quantify the shape of the distribution of input values in the field field_name.
 
 \`\`\`
-KURTOSIS(field_name) 
+KURTOSIS(field_name)
 \`\`\`
 - a numeric field. If this field contains only null values, the function returns null. Otherwise, the function ignores null values in this field.
 
@@ -808,7 +808,7 @@ KURTOSIS(field_name)
 SELECT MIN(salary) AS min, MAX(salary) AS max, KURTOSIS(salary) AS k FROM emp
 \`\`\`
 
-- KURTOSIS cannot be used on top of scalar functions or operators but only directly on a field. 
+- KURTOSIS cannot be used on top of scalar functions or operators but only directly on a field.
               `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
@@ -833,7 +833,7 @@ SELECT MIN(salary) AS min, MAX(salary) AS max, KURTOSIS(salary) AS k FROM emp
 Measure the variability of the input values in the field field_name.
 
 \`\`\`
-MAD(field_name) 
+MAD(field_name)
 \`\`\`
 - a numeric field. If this field contains only null values, the function returns null. Otherwise, the function ignores null values in this field.
 
@@ -865,9 +865,9 @@ Returns the nth percentile (represented by numeric_exp parameter) of input value
 
 \`\`\`
 PERCENTILE(
-  field_name,         
-  percentile[,        
-  method[,            
+  field_name,
+  percentile[,
+  method[,
   method_parameter]])
 \`\`\`
 - field_name : a numeric field. If this field contains only null values, the function returns null. Otherwise, the function ignores null values in this field.
@@ -908,10 +908,10 @@ Returns the nth percentile rank (represented by numeric_exp parameter) of input 
 
 \`\`\`
 PERCENTILE_RANK(
-  field_name,         
-  value[,             
-  method[,            
-  method_parameter]]) 
+  field_name,
+  value[,
+  method[,
+  method_parameter]])
 \`\`\`
 - field_name : a numeric field. If this field contains only null values, the function returns null. Otherwise, the function ignores null values in this field.
 - percentile : a numeric expression (must be a constant and not based on a field). If null, the function returns null.
@@ -950,7 +950,7 @@ GROUP BY languages
 Quantify the asymmetric distribution of input values in the field field_name.
 
 \`\`\`
-SKEWNESS(field_name) 
+SKEWNESS(field_name)
 \`\`\`
 - field_name : a numeric field. If this field contains only null values, the function returns null. Otherwise, the function ignores null values in this field.
 
@@ -981,7 +981,7 @@ SELECT MIN(salary) AS min, MAX(salary) AS max, SKEWNESS(salary) AS s FROM emp
 Returns the population standard deviation of input values in the field field_name.
 
 \`\`\`
-STDDEV_POP(field_name) 
+STDDEV_POP(field_name)
 \`\`\`
 - field_name : a numeric field. If this field contains only null values, the function returns null. Otherwise, the function ignores null values in this field.
 
@@ -1012,7 +1012,7 @@ SELECT MIN(salary) AS min, MAX(salary) AS max, STDDEV_POP(salary) AS stddev FROM
 Returns the sample standard deviation of input values in the field field_name.
 
 \`\`\`
-STDDEV_SAMP(field_name) 
+STDDEV_SAMP(field_name)
 \`\`\`
 - field_name : a numeric field. If this field contains only null values, the function returns null. Otherwise, the function ignores null values in this field.
 
@@ -1043,7 +1043,7 @@ SELECT MIN(salary) AS min, MAX(salary) AS max, STDDEV_SAMP(salary) AS stddev FRO
 Returns the sum of squares of input values in the field field_name.
 
 \`\`\`
-SUM_OF_SQUARES(field_name) 
+SUM_OF_SQUARES(field_name)
 \`\`\`
 - field_name : a numeric field. If this field contains only null values, the function returns null. Otherwise, the function ignores null values in this field.
 
@@ -1075,7 +1075,7 @@ SELECT MIN(salary) AS min, MAX(salary) AS max, SUM_OF_SQUARES(salary) AS sumsq
 Returns the population variance of input values in the field field_name.
 
 \`\`\`
-VAR_POP(field_name) 
+VAR_POP(field_name)
 \`\`\`
 - field_name : a numeric field. If this field contains only null values, the function returns null. Otherwise, the function ignores null values in this field.
 
@@ -1106,7 +1106,7 @@ SELECT MIN(salary) AS min, MAX(salary) AS max, VAR_POP(salary) AS varpop FROM em
 Returns the sample variance of input values in the field field_name.
 
 \`\`\`
-VAR_SAMP(field_name) 
+VAR_SAMP(field_name)
 \`\`\`
 - field_name : a numeric field. If this field contains only null values, the function returns null. Otherwise, the function ignores null values in this field.
 

@@ -12,7 +12,7 @@ import {
   withKibana,
   KibanaReactContextValue,
   KibanaServices,
-} from '@kbn/kibana-react-plugin/public';
+} from '@kbn/react-public';
 import { RendererFunction } from '../../lib/typed_react';
 
 interface WithKueryAutocompletionLifecycleProps {

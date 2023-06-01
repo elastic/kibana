@@ -8,7 +8,7 @@
 
 import _ from 'lodash';
 import React, { PureComponent } from 'react';
-import { ValidatedDualRange } from '@kbn/kibana-react-plugin/public';
+import { ValidatedDualRange } from '@kbn/react-public';
 import { FormRow } from './form_row';
 import { RangeControl as RangeControlClass } from '../../control/range_control_factory';
 

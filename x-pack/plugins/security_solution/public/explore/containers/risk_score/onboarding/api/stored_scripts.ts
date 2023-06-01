@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint } from '@kbn/react-public';
 import {
   RISK_SCORE_CREATE_STORED_SCRIPT,
   RISK_SCORE_DELETE_STORED_SCRIPT,

@@ -16,7 +16,7 @@ import {
   toMountPoint,
   wrapWithTheme,
   KibanaContextProvider,
-} from '@kbn/kibana-react-plugin/public';
+} from '@kbn/react-public';
 import type { DataViewField, DataView } from '@kbn/data-views-plugin/common';
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import { DatePickerContextProvider } from '@kbn/ml-date-picker';

@@ -16,8 +16,8 @@ import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { DatePickerContextProvider } from '@kbn/ml-date-picker';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
-import { toMountPoint, wrapWithTheme } from '@kbn/kibana-react-plugin/public';
-import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint, wrapWithTheme } from '@kbn/react-public';
+import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/react-public';
 import { StorageContextProvider } from '@kbn/ml-local-storage';
 
 import { firstValueFrom } from 'rxjs';

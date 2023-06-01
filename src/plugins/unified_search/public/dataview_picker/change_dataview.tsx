@@ -25,7 +25,7 @@ import {
   EuiButtonEmpty,
   EuiToolTip,
 } from '@elastic/eui';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '@kbn/react-public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { IUnifiedSearchPluginServices } from '../types';
 import type { DataViewPickerPropsExtended } from './data_view_picker';

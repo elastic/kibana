@@ -16,7 +16,7 @@ import {
   KibanaContextProvider,
   KibanaThemeProvider,
   useUiSetting$,
-} from '@kbn/kibana-react-plugin/public';
+} from '@kbn/react-public';
 
 import type { ScopedFilesClient } from '@kbn/files-plugin/public';
 import type { ExternalReferenceAttachmentTypeRegistry } from './client/attachment_framework/external_reference_registry';

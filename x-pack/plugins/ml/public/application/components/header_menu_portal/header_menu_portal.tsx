@@ -7,7 +7,7 @@
 
 import React, { FC, ReactNode, useContext, useEffect, useMemo } from 'react';
 import { createHtmlPortalNode, InPortal, OutPortal } from 'react-reverse-portal';
-import { KibanaContextProvider, toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider, toMountPoint } from '@kbn/react-public';
 import { useMlKibana } from '../../contexts/kibana';
 import { MlPageControlsContext } from '../ml_page';
 

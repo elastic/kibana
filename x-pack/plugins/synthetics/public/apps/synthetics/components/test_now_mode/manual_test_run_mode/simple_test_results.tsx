@@ -6,7 +6,7 @@
  */
 import React, { useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint } from '@kbn/react-public';
 import { FAILED_TO_SCHEDULE } from './browser_test_results';
 import { kibanaService } from '../../../../../utils/kibana_service';
 import { useSimpleRunOnceMonitors } from '../hooks/use_simple_run_once_monitors';

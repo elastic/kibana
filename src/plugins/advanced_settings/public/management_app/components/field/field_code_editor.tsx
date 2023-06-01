@@ -8,7 +8,7 @@
 
 import React, { useCallback } from 'react';
 import { monaco, XJsonLang } from '@kbn/monaco';
-import { CodeEditor, MarkdownLang } from '@kbn/kibana-react-plugin/public';
+import { CodeEditor, MarkdownLang } from '@kbn/react-public';
 
 interface FieldCodeEditorProps {
   value: string;

@@ -13,7 +13,7 @@ import { InjectedIntl, injectI18n } from '@kbn/i18n-react';
 import type { Filter } from '@kbn/es-query';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { DataView } from '@kbn/data-views-plugin/public';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '@kbn/react-public';
 import { FilterItem, FilterItemProps } from './filter_item';
 import type { IUnifiedSearchPluginServices } from '../../types';
 

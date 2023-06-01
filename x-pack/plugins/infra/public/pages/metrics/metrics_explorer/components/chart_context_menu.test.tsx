@@ -15,7 +15,7 @@ import {
   chartOptions,
 } from '../../../../utils/fixtures/metrics_explorer';
 import { Capabilities } from '@kbn/core/public';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider } from '@kbn/react-public';
 import { coreMock } from '@kbn/core/public/mocks';
 
 const coreStartMock = coreMock.createStart();

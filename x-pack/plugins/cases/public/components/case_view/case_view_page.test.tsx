@@ -423,7 +423,7 @@ describe('CaseViewPage', () => {
   // FLAKY: https://github.com/elastic/kibana/issues/153335
   // FLAKY: https://github.com/elastic/kibana/issues/153336
   describe.skip('Tabs', () => {
-    jest.mock('@kbn/kibana-react-plugin/public', () => ({
+    jest.mock('@kbn/react-public', () => ({
       useKibana: () => ({
         services: {
           application: {

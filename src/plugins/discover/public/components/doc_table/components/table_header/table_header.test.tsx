@@ -12,7 +12,7 @@ import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import type { SortOrder } from '@kbn/saved-search-plugin/public';
 import { TableHeader } from './table_header';
 import { findTestSubject } from '@elastic/eui/lib/test';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider } from '@kbn/react-public';
 import { DOC_HIDE_TIME_COLUMN_SETTING } from '../../../../../common';
 import { FORMATS_UI_SETTINGS } from '@kbn/field-formats-plugin/common';
 

@@ -31,7 +31,7 @@ export {
   createKibanaReactContext,
   toMountPoint,
   CodeEditor,
-} from '@kbn/kibana-react-plugin/public';
+} from '@kbn/react-public';
 
 export type { FieldFormat, SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
 

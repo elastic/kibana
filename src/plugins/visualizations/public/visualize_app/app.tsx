@@ -14,7 +14,7 @@ import { EuiLoadingSpinner } from '@elastic/eui';
 import { AppMountParameters, CoreStart } from '@kbn/core/public';
 import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import { syncGlobalQueryStateWithUrl } from '@kbn/data-plugin/public';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '@kbn/react-public';
 import {
   AnalyticsNoDataPageKibanaProvider,
   AnalyticsNoDataPage,

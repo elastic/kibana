@@ -10,7 +10,7 @@ import ReactDOM from 'react-dom';
 import { Router, Switch } from 'react-router-dom';
 import { Route } from '@kbn/shared-ux-router';
 import { AppMountParameters, CoreStart } from '@kbn/core/public';
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaThemeProvider } from '@kbn/react-public';
 import { CaptureTest } from './containers/capture_test';
 import { Main } from './containers/main';
 import { ApplicationContextProvider } from './application_context';

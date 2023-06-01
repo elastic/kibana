@@ -9,7 +9,7 @@
 import * as React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { CoreSetup, CoreStart, AppMountParameters } from '@kbn/core/public';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider } from '@kbn/react-public';
 import { ResponseStreamStartPlugins } from './plugin';
 import { App } from './containers/app';
 

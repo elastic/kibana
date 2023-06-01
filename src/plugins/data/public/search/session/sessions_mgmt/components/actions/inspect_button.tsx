@@ -14,7 +14,7 @@ import {
   CodeEditor,
   createKibanaReactContext,
   toMountPoint,
-} from '@kbn/kibana-react-plugin/public';
+} from '@kbn/react-public';
 import { UISession } from '../../types';
 import { IClickActionDescriptor } from '..';
 import './inspect_button.scss';

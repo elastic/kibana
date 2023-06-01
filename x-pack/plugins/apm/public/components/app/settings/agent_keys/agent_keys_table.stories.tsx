@@ -7,7 +7,7 @@
 import { Meta, Story } from '@storybook/react';
 import React, { ComponentProps } from 'react';
 import { CoreStart } from '@kbn/core/public';
-import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
+import { createKibanaReactContext } from '@kbn/react-public';
 import { ApiKey } from '@kbn/security-plugin/common/model';
 import type { ApmPluginContextValue } from '../../../../context/apm_plugin/apm_plugin_context';
 import { MockApmPluginContextWrapper } from '../../../../context/apm_plugin/mock_apm_plugin_context';

@@ -9,7 +9,7 @@ import { renderHook } from '@testing-library/react-hooks';
 import React from 'react';
 
 import { coreMock } from '@kbn/core/public/mocks';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider } from '@kbn/react-public';
 
 import type { ChromeBadge } from './use_badge';
 import { useBadge } from './use_badge';

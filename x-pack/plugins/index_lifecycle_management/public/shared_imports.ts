@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useKibana as _useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana as _useKibana } from '@kbn/react-public';
 import { AppServicesContext } from './types';
 
 export type {
@@ -49,7 +49,7 @@ export {
   KibanaThemeProvider,
   RedirectAppLinks,
   useExecutionContext,
-} from '@kbn/kibana-react-plugin/public';
+} from '@kbn/react-public';
 
 export { APP_WRAPPER_CLASS } from '@kbn/core/public';
 

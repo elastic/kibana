@@ -13,8 +13,8 @@ import { coreMock } from '@kbn/core/public/mocks';
 import type { FilterEditorProps } from '.';
 import { FilterEditor } from '.';
 
-jest.mock('@kbn/kibana-react-plugin/public', () => {
-  const original = jest.requireActual('@kbn/kibana-react-plugin/public');
+jest.mock('@kbn/react-public', () => {
+  const original = jest.requireActual('@kbn/react-public');
 
   return {
     ...original,

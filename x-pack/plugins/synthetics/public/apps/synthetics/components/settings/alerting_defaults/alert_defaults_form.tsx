@@ -17,7 +17,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { useDispatch, useSelector } from 'react-redux';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '@kbn/react-public';
 import { i18n } from '@kbn/i18n';
 import { isEmpty, isEqual } from 'lodash';
 import { hasInvalidEmail } from './validation';

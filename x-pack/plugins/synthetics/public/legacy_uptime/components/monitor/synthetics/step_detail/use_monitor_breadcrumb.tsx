@@ -7,7 +7,7 @@
 
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '@kbn/react-public';
 import { useBreadcrumbs } from '../../../../hooks/use_breadcrumbs';
 import { JourneyState } from '../../../../state/reducers/journey';
 import { PLUGIN } from '../../../../../../common/constants/plugin';

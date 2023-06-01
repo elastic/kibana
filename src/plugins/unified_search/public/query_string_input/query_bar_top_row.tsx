@@ -32,7 +32,7 @@ import { i18n } from '@kbn/i18n';
 import { TimeHistoryContract, getQueryLog } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { PersistedLog } from '@kbn/data-plugin/public';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '@kbn/react-public';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import type { IUnifiedSearchPluginServices } from '../types';
 import QueryStringInputUI from './query_string_input';

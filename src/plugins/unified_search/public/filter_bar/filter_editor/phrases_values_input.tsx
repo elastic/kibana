@@ -9,7 +9,7 @@
 import { InjectedIntl, injectI18n } from '@kbn/i18n-react';
 import { uniq } from 'lodash';
 import React from 'react';
-import { withKibana } from '@kbn/kibana-react-plugin/public';
+import { withKibana } from '@kbn/react-public';
 import { EuiFlexGroup, EuiFlexItem, withEuiTheme, WithEuiThemeProps } from '@elastic/eui';
 import { GenericComboBox, GenericComboBoxProps } from './generic_combo_box';
 import { PhraseSuggestorUI, PhraseSuggestorProps } from './phrase_suggestor';

@@ -16,7 +16,7 @@ import {
   EuiIconTip,
 } from '@elastic/eui';
 
-import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
+import { reactRouterNavigate } from '@kbn/react-public';
 import { REPOSITORY_TYPES } from '../../../../../../common';
 import { Repository, RepositoryType } from '../../../../../../common/types';
 import { UseRequestResponse } from '../../../../../shared_imports';

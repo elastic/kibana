@@ -8,8 +8,8 @@
 import React from 'react';
 import { registerTestBed } from '@kbn/test-jest-helpers';
 
-jest.mock('@kbn/kibana-react-plugin/public', () => {
-  const original = jest.requireActual('@kbn/kibana-react-plugin/public');
+jest.mock('@kbn/react-public', () => {
+  const original = jest.requireActual('@kbn/react-public');
 
   return {
     ...original,

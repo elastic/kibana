@@ -18,7 +18,7 @@ import {
   KibanaThemeProvider,
   toMountPoint,
   wrapWithTheme,
-} from '@kbn/kibana-react-plugin/public';
+} from '@kbn/react-public';
 import { StorageContextProvider } from '@kbn/ml-local-storage';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { getNestedProperty } from '@kbn/ml-nested-property';

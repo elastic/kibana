@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider } from '@kbn/react-public';
 import { renderHook } from '@testing-library/react-hooks';
 import { useDataView } from './use_data_view';
 

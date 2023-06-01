@@ -24,7 +24,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { i18n } from '@kbn/i18n';
-import { withKibana } from '@kbn/kibana-react-plugin/public';
+import { withKibana } from '@kbn/react-public';
 import { DataViewListItem } from '@kbn/data-views-plugin/common';
 import type { MlUrlConfig } from '@kbn/ml-anomaly-utils';
 import { MlKibanaReactContextValue } from '../../contexts/kibana';

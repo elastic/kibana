@@ -8,7 +8,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiForm, EuiFormRow, EuiSwitch, EuiSwitchEvent, EuiToolTip } from '@elastic/eui';
-import { ValidatedDualRange } from '@kbn/kibana-react-plugin/public';
+import { ValidatedDualRange } from '@kbn/react-public';
 import { LabelZoomRangeStylePropertyDescriptor } from '../../../../../../common/descriptor_types';
 import { VECTOR_STYLES } from '../../../../../../common/constants';
 import { getVectorStyleLabel, getDisabledByMessage } from '../get_vector_style_label';

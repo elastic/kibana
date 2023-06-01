@@ -11,10 +11,10 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { DocViewerSource } from './source';
 import * as hooks from '../../../../hooks/use_es_doc_search';
-import * as useUiSettingHook from '@kbn/kibana-react-plugin/public/ui_settings/use_ui_setting';
+import * as useUiSettingHook from '@kbn/react-public/ui_settings/use_ui_setting';
 import { EuiButton, EuiEmptyPrompt, EuiLoadingSpinner } from '@elastic/eui';
 import { JsonCodeEditorCommon } from '../../../../components/json_code_editor/json_code_editor_common';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider } from '@kbn/react-public';
 import { buildDataTableRecord } from '../../../../utils/build_data_record';
 
 const mockDataView = {

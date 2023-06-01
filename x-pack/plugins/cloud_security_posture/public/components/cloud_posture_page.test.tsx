@@ -22,7 +22,7 @@ import { render, screen } from '@testing-library/react';
 import React, { ComponentProps } from 'react';
 import { UseQueryResult } from '@tanstack/react-query';
 import { CloudPosturePage } from './cloud_posture_page';
-import { NoDataPage } from '@kbn/kibana-react-plugin/public';
+import { NoDataPage } from '@kbn/react-public';
 import { useLicenseManagementLocatorApi } from '../common/api/use_license_management_locator_api';
 
 const chance = new Chance();

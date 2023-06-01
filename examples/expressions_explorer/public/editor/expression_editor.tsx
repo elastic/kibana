@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { CodeEditor } from '@kbn/kibana-react-plugin/public';
+import { CodeEditor } from '@kbn/react-public';
 
 interface Props {
   value: string;

@@ -7,7 +7,7 @@
 
 import React, { useState, useMemo } from 'react';
 import numeral from '@elastic/numeral';
-import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
+import { useUiSetting$ } from '@kbn/react-public';
 import { EuiButtonEmpty, EuiPopover } from '@elastic/eui';
 import { SELECT_SHOW_BULK_ACTIONS_ARIA_LABEL, SELECTED_RULES } from '../../rules_list/translations';
 import { DEFAULT_NUMBER_FORMAT } from '../../../constants';

@@ -16,7 +16,7 @@ import {
   KibanaContextProvider,
   KibanaThemeProvider,
   RedirectAppLinks,
-} from '@kbn/kibana-react-plugin/public';
+} from '@kbn/react-public';
 import type { RegisterManagementAppArgs } from '@kbn/management-plugin/public';
 import { Route } from '@kbn/shared-ux-router';
 

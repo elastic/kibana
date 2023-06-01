@@ -22,7 +22,7 @@ import {
   AlertAnnotation,
 } from '@kbn/observability-alert-details';
 import { useEuiTheme } from '@elastic/eui';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '@kbn/react-public';
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import { filterNil } from '../../../shared/charts/latency_chart';
 import { TimeseriesChart } from '../../../shared/charts/timeseries_chart';

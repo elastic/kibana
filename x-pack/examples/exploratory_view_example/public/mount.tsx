@@ -8,7 +8,7 @@
 import * as React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { CoreSetup, AppMountParameters, APP_WRAPPER_CLASS } from '@kbn/core/public';
-import { KibanaContextProvider, RedirectAppLinks } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider, RedirectAppLinks } from '@kbn/react-public';
 import { StartDependencies } from './plugin';
 export const mount =
   (coreSetup: CoreSetup<StartDependencies>) =>

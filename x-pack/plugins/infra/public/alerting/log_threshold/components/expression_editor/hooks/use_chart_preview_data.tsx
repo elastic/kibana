@@ -7,7 +7,7 @@
 
 import { useState, useMemo } from 'react';
 import { HttpHandler } from '@kbn/core/public';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '@kbn/react-public';
 import { isRatioRule } from '../../../../../../common/alerting/logs/log_threshold';
 import { PersistedLogViewReference } from '../../../../../../common/log_views';
 import { ExecutionTimeRange } from '../../../../../types';

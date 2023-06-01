@@ -11,7 +11,7 @@ import { css } from '@emotion/react';
 import { useEuiBackgroundColor } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useTrackPageview } from '@kbn/observability-shared-plugin/public';
-import { useUiSetting } from '@kbn/kibana-react-plugin/public';
+import { useUiSetting } from '@kbn/react-public';
 import { MetricsPageTemplate } from '../../../page_template';
 import hostsLandingBetaLight from './hosts_landing_beta_light.svg';
 import hostsLandingBetaDark from './hosts_landing_beta_dark.svg';

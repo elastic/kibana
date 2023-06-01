@@ -8,7 +8,7 @@
 import React from 'react';
 import { withSuspense } from '@kbn/shared-ux-utility';
 import { TextBasedLanguagesEditorProps } from '@kbn/text-based-editor';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider } from '@kbn/react-public';
 
 const TextBasedLanguagesEditorLazy = React.lazy(() => import('@kbn/text-based-editor'));
 const TextBasedLanguagesEditor = withSuspense(TextBasedLanguagesEditorLazy);

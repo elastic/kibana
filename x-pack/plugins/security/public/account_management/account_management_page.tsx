@@ -11,7 +11,7 @@ import React from 'react';
 
 import type { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '@kbn/react-public';
 
 import type { UserProfileData } from '../../common';
 import { canUserHaveProfile } from '../../common/model';

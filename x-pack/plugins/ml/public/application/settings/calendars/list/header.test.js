@@ -10,7 +10,7 @@ import React from 'react';
 
 import { CalendarsListHeader } from './header';
 
-jest.mock('@kbn/kibana-react-plugin/public', () => ({
+jest.mock('@kbn/react-public', () => ({
   withKibana: (comp) => {
     return comp;
   },

@@ -7,7 +7,7 @@
 import { EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '@kbn/react-public';
 import { getAgentAuthorizationSettings } from './settings_definition/agent_authorization_settings';
 import { getApmSettings } from './settings_definition/apm_settings';
 import { getDebugSettings } from './settings_definition/debug_settings';

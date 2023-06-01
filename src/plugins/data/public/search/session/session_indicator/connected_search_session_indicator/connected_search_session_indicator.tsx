@@ -11,7 +11,7 @@ import { debounce } from 'rxjs/operators';
 import { timer } from 'rxjs';
 import useObservable from 'react-use/lib/useObservable';
 import { i18n } from '@kbn/i18n';
-import { RedirectAppLinks } from '@kbn/kibana-react-plugin/public';
+import { RedirectAppLinks } from '@kbn/react-public';
 import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { ApplicationStart, IBasePath } from '@kbn/core/public';
 import { SearchSessionIndicator, SearchSessionIndicatorRef } from '../search_session_indicator';

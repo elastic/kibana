@@ -7,13 +7,13 @@
 
 import { useDataView } from './use_data_view';
 import { renderHook } from '@testing-library/react-hooks';
-import { type KibanaReactContextValue, useKibana } from '@kbn/kibana-react-plugin/public';
+import { type KibanaReactContextValue, useKibana } from '@kbn/react-public';
 import { coreMock } from '@kbn/core/public/mocks';
 import type { DataView, DataViewsServicePublic } from '@kbn/data-views-plugin/public';
 import type { InfraClientStartDeps } from '../../../../types';
 import { CoreStart } from '@kbn/core/public';
 
-jest.mock('@kbn/kibana-react-plugin/public');
+jest.mock('@kbn/react-public');
 
 let dataViewMock: jest.Mocked<DataViewsServicePublic>;
 const useKibanaMock = useKibana as jest.MockedFunction<typeof useKibana>;

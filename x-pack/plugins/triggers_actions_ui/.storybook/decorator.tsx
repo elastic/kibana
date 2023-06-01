@@ -11,7 +11,7 @@ import { action } from '@storybook/addon-actions';
 import { DecoratorFn } from '@storybook/react';
 import { EMPTY, of } from 'rxjs';
 import { I18nProvider } from '@kbn/i18n-react';
-import { KibanaThemeProvider, KibanaServices } from '@kbn/kibana-react-plugin/public';
+import { KibanaThemeProvider, KibanaServices } from '@kbn/react-public';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import type { NotificationsStart, ApplicationStart } from '@kbn/core/public';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';

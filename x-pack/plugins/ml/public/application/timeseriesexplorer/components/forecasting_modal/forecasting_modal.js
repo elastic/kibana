@@ -18,7 +18,7 @@ import { EuiButton, EuiToolTip } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { withKibana } from '@kbn/kibana-react-plugin/public';
+import { withKibana } from '@kbn/react-public';
 import { extractErrorMessage } from '@kbn/ml-error-utils';
 
 import { FORECAST_REQUEST_STATE, JOB_STATE } from '../../../../../common/constants/states';

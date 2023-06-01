@@ -11,7 +11,7 @@ import { EventEmitter } from 'events';
 import { AppMountParameters, OverlayRef } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '@kbn/react-public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type {
   VisualizeServices,

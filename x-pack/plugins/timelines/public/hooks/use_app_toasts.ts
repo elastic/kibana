@@ -10,7 +10,7 @@ import { isString } from 'lodash/fp';
 import { isAppError, isKibanaError, isSecurityAppError } from '@kbn/securitysolution-t-grid';
 import type { AppError } from '@kbn/securitysolution-t-grid';
 
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '@kbn/react-public';
 import type { ErrorToastOptions, ToastsStart, Toast, NotificationsStart } from '@kbn/core/public';
 import { IEsError, isEsError } from '@kbn/data-plugin/public';
 

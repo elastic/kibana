@@ -12,7 +12,7 @@ import React from 'react';
 import type { KibanaFeatureConfig } from '@kbn/features-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '@kbn/react-public';
 
 import type { Space } from '../../../../common';
 import { SectionPanel } from '../section_panel';

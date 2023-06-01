@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { Markdown } from '@kbn/kibana-react-plugin/public';
+import { Markdown } from '@kbn/react-public';
 import { groupBy } from 'lodash';
 import type { IndexPattern } from '../../../../../../types';
 import { tinymathFunctions } from '../util';

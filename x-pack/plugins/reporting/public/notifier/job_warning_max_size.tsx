@@ -8,7 +8,7 @@
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 import { ThemeServiceStart, ToastInput } from '@kbn/core/public';
-import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint } from '@kbn/react-public';
 import { JobId, JobSummary } from '../../common/types';
 import { DownloadButton } from './job_download_button';
 import { ReportLink } from './report_link';

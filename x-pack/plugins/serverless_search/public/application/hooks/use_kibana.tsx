@@ -7,7 +7,7 @@
 
 import { CloudStart } from '@kbn/cloud-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
-import { useKibana as useKibanaBase } from '@kbn/kibana-react-plugin/public';
+import { useKibana as useKibanaBase } from '@kbn/react-public';
 import { GetUserProfileResponse, UserProfileData } from '@kbn/security-plugin/common';
 
 export interface ServerlessSearchContext {

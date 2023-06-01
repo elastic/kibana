@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider } from '@kbn/react-public';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import React, { lazy, Suspense } from 'react';
 import type { CloudDefendRouterProps } from './application/router';

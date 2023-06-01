@@ -28,7 +28,7 @@ import { isEqual, omit } from 'lodash';
 import useMount from 'react-use/lib/useMount';
 import { DocLinksStart } from '@kbn/core/public';
 
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '@kbn/react-public';
 import { AggParamEditorProps } from '../agg_param_props';
 
 const FROM_PLACEHOLDER = '\u2212\u221E';

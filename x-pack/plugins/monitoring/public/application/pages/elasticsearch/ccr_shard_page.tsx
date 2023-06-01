@@ -9,7 +9,7 @@ import { useParams } from 'react-router-dom';
 import { find } from 'lodash';
 import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '@kbn/react-public';
 import { PageTemplate } from '../page_template';
 import { GlobalStateContext } from '../../contexts/global_state_context';
 import { CcrShard } from '../../../components/elasticsearch/ccr_shard';

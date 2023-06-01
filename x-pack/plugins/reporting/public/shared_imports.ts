@@ -12,9 +12,9 @@ export { AppNavLinkStatus } from '@kbn/core/public';
 export type { UseRequestResponse } from '@kbn/es-ui-shared-plugin/public';
 export { useRequest } from '@kbn/es-ui-shared-plugin/public';
 
-export { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+export { KibanaContextProvider } from '@kbn/react-public';
 
-import { useKibana as _useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana as _useKibana } from '@kbn/react-public';
 import type { KibanaContext } from './types';
 export const useKibana = () => _useKibana<KibanaContext>();
 

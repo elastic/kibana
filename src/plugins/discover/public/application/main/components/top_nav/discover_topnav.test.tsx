@@ -19,8 +19,8 @@ import { DiscoverMainProvider } from '../../services/discover_state_provider';
 
 setHeaderActionMenuMounter(jest.fn());
 
-jest.mock('@kbn/kibana-react-plugin/public', () => ({
-  ...jest.requireActual('@kbn/kibana-react-plugin/public'),
+jest.mock('@kbn/react-public', () => ({
+  ...jest.requireActual('@kbn/react-public'),
   useKibana: () => ({
     services: jest.requireActual('../../../../__mocks__/services').discoverServiceMock,
   }),

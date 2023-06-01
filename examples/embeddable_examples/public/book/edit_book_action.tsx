@@ -9,7 +9,7 @@
 import React from 'react';
 import { OverlayStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint } from '@kbn/react-public';
 import {
   ViewMode,
   SavedObjectEmbeddableInput,

@@ -25,7 +25,7 @@ import {
 } from '@elastic/eui';
 import type { UrlService } from '@kbn/share-plugin/common/url_service';
 import { ApplicationStart, APP_WRAPPER_CLASS } from '@kbn/core/public';
-import { RedirectAppLinks } from '@kbn/kibana-react-plugin/public';
+import { RedirectAppLinks } from '@kbn/react-public';
 
 type FlyoutProps = Omit<EuiFlyoutProps, 'onClose'>;
 interface ViewApiRequestFlyoutProps {

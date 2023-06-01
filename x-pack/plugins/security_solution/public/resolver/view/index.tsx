@@ -9,7 +9,7 @@
 
 import React, { useMemo, useState, useEffect } from 'react';
 import { Provider } from 'react-redux';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '@kbn/react-public';
 import { resolverStoreFactory } from '../store';
 import type { StartServices } from '../../types';
 import type { DataAccessLayer, ResolverProps } from '../types';

@@ -20,7 +20,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useUiSetting } from '@kbn/kibana-react-plugin/public';
+import { useUiSetting } from '@kbn/react-public';
 import { capitalize, get } from 'lodash';
 import React, { Fragment } from 'react';
 import type { TableChange, Sorting, Pagination } from '../../../application/hooks/use_table';

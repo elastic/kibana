@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { find } from 'lodash';
 import moment from 'moment';
 import { useRouteMatch } from 'react-router-dom';
-import { useKibana, useUiSetting } from '@kbn/kibana-react-plugin/public';
+import { useKibana, useUiSetting } from '@kbn/react-public';
 import { EuiSpacer } from '@elastic/eui';
 import { GlobalStateContext } from '../../contexts/global_state_context';
 import { ComponentProps } from '../../route_init';

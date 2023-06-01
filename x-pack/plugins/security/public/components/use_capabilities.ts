@@ -7,7 +7,7 @@
 
 import type { Capabilities } from '@kbn/core-capabilities-common';
 import type { CoreStart } from '@kbn/core/public';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '@kbn/react-public';
 
 type FeatureCapabilities = Capabilities[string];
 

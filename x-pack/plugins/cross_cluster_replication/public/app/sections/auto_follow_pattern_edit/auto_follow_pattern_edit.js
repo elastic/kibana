@@ -18,7 +18,7 @@ import {
 } from '@elastic/eui';
 
 import { listBreadcrumb, editBreadcrumb, setBreadcrumbs } from '../../services/breadcrumbs';
-import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
+import { reactRouterNavigate } from '@kbn/react-public';
 import {
   AutoFollowPatternForm,
   AutoFollowPatternPageTitle,

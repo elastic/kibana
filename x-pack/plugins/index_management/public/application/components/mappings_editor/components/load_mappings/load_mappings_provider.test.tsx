@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider } from '@kbn/react-public';
 import { uiSettingsServiceMock } from '@kbn/core/public/mocks';
 import '@kbn/es-ui-shared-plugin/public/components/code_editor/jest_mock';
 
@@ -20,8 +20,8 @@ jest.mock('lodash', () => {
   };
 });
 
-jest.mock('@kbn/kibana-react-plugin/public', () => {
-  const original = jest.requireActual('@kbn/kibana-react-plugin/public');
+jest.mock('@kbn/react-public', () => {
+  const original = jest.requireActual('@kbn/react-public');
 
   const CodeEditorMock = (props: any) => (
     <input

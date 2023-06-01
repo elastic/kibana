@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { HttpSetup } from '@kbn/core/public';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '@kbn/react-public';
 import { IErrorObject } from '@kbn/triggers-actions-ui-plugin/public';
 import { DataViewField, DataView } from '@kbn/data-plugin/common';
 import { ES_GEO_SHAPE_TYPES, GeoContainmentAlertParams } from '../../types';

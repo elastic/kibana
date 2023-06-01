@@ -8,7 +8,7 @@
 import React from 'react';
 import { Provider as ReduxProvider } from 'react-redux';
 import { CoreStart } from '@kbn/core/public';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider } from '@kbn/react-public';
 import type { RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
 import type { TLSParams } from '../../../../../common/runtime_types/alerts/tls';
 import { store } from '../../../state';

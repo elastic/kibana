@@ -23,7 +23,7 @@ import {
   EuiButtonEmpty,
 } from '@elastic/eui';
 
-import { withKibana } from '@kbn/kibana-react-plugin/public';
+import { withKibana } from '@kbn/react-public';
 import { MlPageHeader } from '../../../components/page_header';
 
 function CalendarsListHeaderUI({ totalCount, refreshCalendars, kibana }) {

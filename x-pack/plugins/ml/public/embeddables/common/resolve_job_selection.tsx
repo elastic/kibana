@@ -13,7 +13,7 @@ import {
   KibanaContextProvider,
   toMountPoint,
   wrapWithTheme,
-} from '@kbn/kibana-react-plugin/public';
+} from '@kbn/react-public';
 import { getInitialGroupsMap } from '../../application/components/job_selector/job_selector';
 import { getMlGlobalServices } from '../../application/app';
 import { JobId } from '../../../common/types/anomaly_detection_jobs';

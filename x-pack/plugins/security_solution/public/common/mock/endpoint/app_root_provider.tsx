@@ -14,7 +14,7 @@ import type { History } from 'history';
 import useObservable from 'react-use/lib/useObservable';
 import type { Store } from 'redux';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider } from '@kbn/react-public';
 import type { CoreStart } from '@kbn/core/public';
 import { RouteCapture } from '../../components/endpoint/route_capture';
 import type { StartPlugins } from '../../../types';

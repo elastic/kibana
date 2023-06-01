@@ -10,7 +10,7 @@ import './visualize_editor.scss';
 import React, { useEffect, useState } from 'react';
 import { EventEmitter } from 'events';
 
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '@kbn/react-public';
 import { VisualizeInput } from '../..';
 import {
   useChromeVisibility,

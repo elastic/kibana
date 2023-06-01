@@ -13,6 +13,6 @@ export {
   PageLoading,
 } from '@kbn/es-ui-shared-plugin/public';
 
-export { KibanaThemeProvider, useExecutionContext } from '@kbn/kibana-react-plugin/public';
+export { KibanaThemeProvider, useExecutionContext } from '@kbn/react-public';
 
 export { APP_WRAPPER_CLASS } from '@kbn/core/public';

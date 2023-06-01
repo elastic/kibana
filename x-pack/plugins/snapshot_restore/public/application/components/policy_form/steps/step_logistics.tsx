@@ -24,7 +24,7 @@ import {
   EuiCode,
 } from '@elastic/eui';
 
-import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
+import { reactRouterNavigate } from '@kbn/react-public';
 import { Repository } from '../../../../../common/types';
 import { Frequency, CronEditor, SectionError } from '../../../../shared_imports';
 import { useCore, useServices } from '../../../app_context';

@@ -12,7 +12,7 @@ import { Router } from 'react-router-dom';
 import { encode } from '@kbn/rison';
 import { coreMock } from '@kbn/core/public/mocks';
 import { CoreScopedHistory } from '@kbn/core/public';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider } from '@kbn/react-public';
 import { LinkDescriptor, useLinkProps } from './use_link_props';
 
 const PREFIX = '/test-basepath/s/test-space/app/';

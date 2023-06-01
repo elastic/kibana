@@ -17,8 +17,8 @@ import { REPOSITORY_EDIT, REPOSITORY_NAME } from './helpers/constant';
 const { setup } = pageHelpers.repositoryEdit;
 const { setup: setupRepositoryAdd } = pageHelpers.repositoryAdd;
 
-jest.mock('@kbn/kibana-react-plugin/public', () => {
-  const original = jest.requireActual('@kbn/kibana-react-plugin/public');
+jest.mock('@kbn/react-public', () => {
+  const original = jest.requireActual('@kbn/react-public');
   return {
     ...original,
     // Mocking CodeEditor, which uses React Monaco under the hood

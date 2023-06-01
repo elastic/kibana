@@ -15,7 +15,7 @@ const renderUseHostIpToNameHook = () =>
 
 const mockedFetch = jest.fn();
 
-jest.mock('@kbn/kibana-react-plugin/public', () => {
+jest.mock('@kbn/react-public', () => {
   return {
     useKibana: () => {
       return {

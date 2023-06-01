@@ -15,7 +15,7 @@ import { VizChartWarning } from './viz_chart_warning';
 
 const mockGetLegacyUrlConflict = jest.fn();
 const mockRedirectLegacyUrl = jest.fn(() => Promise.resolve());
-jest.mock('@kbn/kibana-react-plugin/public', () => ({
+jest.mock('@kbn/react-public', () => ({
   useKibana: jest.fn(() => ({
     services: {
       spaces: {

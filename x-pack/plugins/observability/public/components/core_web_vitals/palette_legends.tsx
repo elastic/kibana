@@ -17,7 +17,7 @@ import {
 import styled from 'styled-components';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { euiLightVars, euiDarkVars } from '@kbn/ui-theme';
-import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
+import { useUiSetting$ } from '@kbn/react-public';
 import { getCoreVitalTooltipMessage, Thresholds } from './core_vital_item';
 import {
   LEGEND_NEEDS_IMPROVEMENT_LABEL,

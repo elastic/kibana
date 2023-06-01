@@ -15,7 +15,7 @@ import { FilesProgress, BytesProgress, TranslogProgress } from './progress';
 import { parseProps } from './parse_props';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '@kbn/react-public';
 
 const columns = [
   {

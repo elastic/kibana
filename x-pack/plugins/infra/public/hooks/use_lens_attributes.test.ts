@@ -10,13 +10,13 @@ import { renderHook } from '@testing-library/react-hooks';
 import { useLensAttributes } from './use_lens_attributes';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { coreMock } from '@kbn/core/public/mocks';
-import { type KibanaReactContextValue, useKibana } from '@kbn/kibana-react-plugin/public';
+import { type KibanaReactContextValue, useKibana } from '@kbn/react-public';
 import { CoreStart } from '@kbn/core/public';
 import type { InfraClientStartDeps } from '../types';
 import { lensPluginMock } from '@kbn/lens-plugin/public/mocks';
 import { FilterStateStore } from '@kbn/es-query';
 
-jest.mock('@kbn/kibana-react-plugin/public');
+jest.mock('@kbn/react-public');
 const useKibanaMock = useKibana as jest.MockedFunction<typeof useKibana>;
 
 const mockDataView = {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { i18n } from '@kbn/i18n';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '@kbn/react-public';
 import { useSelectedLocation } from '../../monitor_details/hooks/use_selected_location';
 import { useSelectedMonitor } from '../../monitor_details/hooks/use_selected_monitor';
 import { useBreadcrumbs } from '../../../hooks/use_breadcrumbs';

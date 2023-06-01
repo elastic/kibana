@@ -15,7 +15,7 @@ import {
   TickFormatter,
   TooltipValue,
 } from '@elastic/charts';
-import { useUiSetting } from '@kbn/kibana-react-plugin/public';
+import { useUiSetting } from '@kbn/react-public';
 import moment from 'moment';
 import React from 'react';
 import { MetricsExplorerSeries } from '../../../../../../../../common/http_api';

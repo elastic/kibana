@@ -11,7 +11,7 @@ import React, { useState } from 'react';
 import { EuiPopover, EuiPopoverTitle, EuiSelectable, EuiSelectableProps } from '@elastic/eui';
 import { DataViewListItem } from '@kbn/data-views-plugin/common';
 
-import { ToolbarButton, ToolbarButtonProps } from '@kbn/kibana-react-plugin/public';
+import { ToolbarButton, ToolbarButtonProps } from '@kbn/react-public';
 
 import './data_view_picker.scss';
 

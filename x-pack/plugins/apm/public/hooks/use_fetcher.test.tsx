@@ -8,7 +8,7 @@
 import { renderHook, RenderHookResult } from '@testing-library/react-hooks';
 import React, { ReactNode } from 'react';
 import { CoreStart } from '@kbn/core/public';
-import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
+import { createKibanaReactContext } from '@kbn/react-public';
 import { delay } from '../utils/test_helpers';
 import {
   FetcherResult,

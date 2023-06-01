@@ -21,7 +21,7 @@ import {
 } from '../../services/discover_data_state_container';
 import { discoverServiceMock } from '../../../../__mocks__/services';
 import { FetchStatus } from '../../../types';
-import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/react-public';
 import { buildDataTableRecord } from '../../../../utils/build_data_record';
 import { DiscoverHistogramLayout, DiscoverHistogramLayoutProps } from './discover_histogram_layout';
 import { SavedSearch, VIEW_MODE } from '@kbn/saved-search-plugin/public';

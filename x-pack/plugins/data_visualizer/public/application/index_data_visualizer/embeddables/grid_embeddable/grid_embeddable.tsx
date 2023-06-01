@@ -22,8 +22,8 @@ import {
   IContainer,
 } from '@kbn/embeddable-plugin/public';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
-import { toMountPoint, wrapWithTheme } from '@kbn/kibana-react-plugin/public';
-import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint, wrapWithTheme } from '@kbn/react-public';
+import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/react-public';
 import type { Query } from '@kbn/es-query';
 import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import { DatePickerContextProvider } from '@kbn/ml-date-picker';

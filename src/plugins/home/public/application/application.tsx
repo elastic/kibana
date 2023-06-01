@@ -14,7 +14,7 @@ import {
   KibanaContextProvider,
   KibanaThemeProvider,
   RedirectAppLinks,
-} from '@kbn/kibana-react-plugin/public';
+} from '@kbn/react-public';
 
 import { SampleDataTabKibanaProvider } from '@kbn/home-sample-data-tab';
 

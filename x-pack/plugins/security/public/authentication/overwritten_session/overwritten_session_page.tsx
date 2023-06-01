@@ -11,7 +11,7 @@ import ReactDOM from 'react-dom';
 
 import type { AppMountParameters, CoreStart, IBasePath } from '@kbn/core/public';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaThemeProvider } from '@kbn/react-public';
 
 import { parseNext } from '../../../common/parse_next';
 import type { AuthenticationServiceSetup } from '../authentication_service';

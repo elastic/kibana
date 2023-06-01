@@ -10,7 +10,7 @@ import { estypes } from '@elastic/elasticsearch';
 import { debounce } from 'lodash';
 import { EuiSpacer, EuiTextAlign } from '@elastic/eui';
 import { ThemeServiceStart } from '@kbn/core/public';
-import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint } from '@kbn/react-public';
 import React from 'react';
 import type { MountPoint } from '@kbn/core/public';
 import { SearchRequest } from '..';

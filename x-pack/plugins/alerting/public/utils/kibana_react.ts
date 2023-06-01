@@ -6,7 +6,7 @@
  */
 
 import { CoreStart } from '@kbn/core/public';
-import { useKibana, useUiSetting } from '@kbn/kibana-react-plugin/public';
+import { useKibana, useUiSetting } from '@kbn/react-public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { AlertingPluginStart } from '../plugin';
 

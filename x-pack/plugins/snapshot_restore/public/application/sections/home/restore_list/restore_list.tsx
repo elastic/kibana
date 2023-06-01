@@ -20,7 +20,7 @@ import {
   EuiLoadingSpinner,
   EuiLink,
 } from '@elastic/eui';
-import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
+import { reactRouterNavigate } from '@kbn/react-public';
 import { APP_RESTORE_INDEX_PRIVILEGES } from '../../../../../common';
 import {
   WithPrivileges,

@@ -26,4 +26,4 @@ export {
   CodeEditor,
   toMountPoint,
   createKibanaReactContext,
-} from '@kbn/kibana-react-plugin/public';
+} from '@kbn/react-public';

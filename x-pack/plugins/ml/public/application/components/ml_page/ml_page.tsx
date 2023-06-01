@@ -98,7 +98,7 @@ export const MlPage: FC<{ pageDeps: PageDependencies }> = React.memo(({ pageDeps
 
   useDocTitle(activeRoute);
 
-  // The deprecated `KibanaPageTemplate` from`'@kbn/kibana-react-plugin/public'`
+  // The deprecated `KibanaPageTemplate` from`'@kbn/react-public'`
   // had a `pageBodyProps` prop where we could pass in the `data-test-subj` for
   // the `main` element. This is no longer available in the update template
   // imported from `'@kbn/shared-ux-page-kibana-template'`. The following is a

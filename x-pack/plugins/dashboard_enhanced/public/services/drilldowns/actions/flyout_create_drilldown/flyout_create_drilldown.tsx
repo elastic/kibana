@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { distinctUntilChanged, filter, map, skip, take, takeUntil } from 'rxjs/operators';
 import { Subject } from 'rxjs';
 import { Action } from '@kbn/ui-actions-plugin/public';
-import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint } from '@kbn/react-public';
 import { CONTEXT_MENU_TRIGGER, EmbeddableContext, ViewMode } from '@kbn/embeddable-plugin/public';
 import {
   isEnhancedEmbeddable,

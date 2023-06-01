@@ -8,7 +8,7 @@
 import React, { useContext, useState, useCallback, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment-timezone';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '@kbn/react-public';
 import { PageTemplate } from './page_template';
 import { License } from '../../components';
 import { GlobalStateContext } from '../contexts/global_state_context';

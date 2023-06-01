@@ -19,7 +19,7 @@ import { ISearchSource } from '@kbn/data-plugin/common';
 import { IUiSettingsClient } from '@kbn/core/public';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { copyToClipboard, EuiLoadingSpinner } from '@elastic/eui';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider } from '@kbn/react-public';
 import { indexPatternEditorPluginMock as dataViewEditorPluginMock } from '@kbn/data-view-editor-plugin/public/mocks';
 import { ReactWrapper } from 'enzyme';
 import { DataPlugin } from '@kbn/data-plugin/public';

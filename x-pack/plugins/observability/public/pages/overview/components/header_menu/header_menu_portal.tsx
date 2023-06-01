@@ -7,7 +7,7 @@
 
 import React, { ReactNode, useEffect, useMemo } from 'react';
 import { createHtmlPortalNode, InPortal, OutPortal } from 'react-reverse-portal';
-import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint } from '@kbn/react-public';
 import { AppMountParameters } from '@kbn/core/public';
 
 export interface HeaderMenuPortalProps {

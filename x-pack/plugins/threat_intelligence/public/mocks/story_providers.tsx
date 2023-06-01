@@ -6,7 +6,7 @@
  */
 
 import React, { FC, ReactNode, VFC } from 'react';
-import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
+import { createKibanaReactContext } from '@kbn/react-public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { CoreStart, IUiSettingsClient } from '@kbn/core/public';
 import { TimelinesUIStart } from '@kbn/timelines-plugin/public';

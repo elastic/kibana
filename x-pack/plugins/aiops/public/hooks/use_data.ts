@@ -8,7 +8,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { merge } from 'rxjs';
 
-import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
+import { useExecutionContext } from '@kbn/react-public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { SignificantTerm } from '@kbn/ml-agg-utils';
 import type { SavedSearch } from '@kbn/discover-plugin/public';

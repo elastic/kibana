@@ -17,7 +17,7 @@ import {
   EuiLoadingSpinner,
 } from '@elastic/eui';
 
-import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
+import { reactRouterNavigate } from '@kbn/react-public';
 import { SnapshotDetails } from '../../../../../../../common/types';
 import { SNAPSHOT_STATE } from '../../../../../constants';
 import {

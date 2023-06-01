@@ -11,7 +11,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiLink, EuiButton, EuiButtonProps } from '@elastic/eui';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { ThemeServiceStart } from '@kbn/core/public';
-import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint } from '@kbn/react-public';
 import { getOverlays } from '../services';
 import { ShardFailureModal } from './shard_failure_modal';
 import type { ShardFailureRequest } from './shard_failure_types';

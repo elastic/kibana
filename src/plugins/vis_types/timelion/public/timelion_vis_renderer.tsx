@@ -11,7 +11,7 @@ import { render, unmountComponentAtNode } from 'react-dom';
 
 import { ExpressionRenderDefinition } from '@kbn/expressions-plugin/common';
 import { RangeFilterParams } from '@kbn/es-query';
-import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/react-public';
 import { VisualizationContainer } from '@kbn/visualizations-plugin/public';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { KibanaExecutionContext } from '@kbn/core/public';

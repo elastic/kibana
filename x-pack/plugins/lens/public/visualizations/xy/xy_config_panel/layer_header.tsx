@@ -15,7 +15,7 @@ import {
   EuiPopoverTitle,
   useEuiTheme,
 } from '@elastic/eui';
-import { ToolbarButton } from '@kbn/kibana-react-plugin/public';
+import { ToolbarButton } from '@kbn/react-public';
 import { IconChartBarReferenceLine, IconChartBarAnnotations } from '@kbn/chart-icons';
 import { css } from '@emotion/react';
 import type {

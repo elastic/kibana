@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiIcon, EuiSuperSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '@kbn/react-public';
 import { SeriesType } from '@kbn/lens-plugin/public';
 import { useFetcher } from '@kbn/observability-shared-plugin/public';
 import { ExploratoryViewPublicPluginsStart } from '../../../../../plugin';

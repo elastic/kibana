@@ -24,7 +24,7 @@ import { TelemetryOptIn } from '../../components/telemetry_opt_in';
 import { shouldShowTelemetryOptIn } from '../../lib/telemetry';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
+import { reactRouterNavigate } from '@kbn/react-public';
 
 export class UploadLicense extends React.PureComponent {
   state = {

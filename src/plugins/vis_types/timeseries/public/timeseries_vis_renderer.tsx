@@ -16,7 +16,7 @@ import { IUiSettingsClient, KibanaExecutionContext, ThemeServiceStart } from '@k
 import { VisualizationContainer, PersistedState } from '@kbn/visualizations-plugin/public';
 
 import type { ExpressionRenderDefinition } from '@kbn/expressions-plugin/common';
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaThemeProvider } from '@kbn/react-public';
 import { getUsageCollectionStart } from './services';
 import { TIME_RANGE_DATA_MODES } from '../common/enums';
 import type { TimeseriesVisData } from '../common/types';

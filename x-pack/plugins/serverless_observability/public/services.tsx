@@ -7,7 +7,7 @@
 
 import { CoreStart } from '@kbn/core/public';
 import React from 'react';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider } from '@kbn/react-public';
 import type { ServerlessObservabilityPluginStartDependencies } from './types';
 
 type Services = CoreStart & ServerlessObservabilityPluginStartDependencies;

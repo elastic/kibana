@@ -20,7 +20,7 @@ import {
   IKibanaSearchResponse,
   ISearchOptions,
 } from '@kbn/data-plugin/public';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider } from '@kbn/react-public';
 import { getLogViewResponsePayloadRT } from '../../../common/http_api/log_views';
 import { defaultLogViewAttributes } from '../../../common/log_views';
 import {

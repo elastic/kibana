@@ -14,7 +14,7 @@ import { EuiErrorBoundary } from '@elastic/eui';
 import React from 'react';
 
 import { coreMock } from '@kbn/core/public/mocks';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider } from '@kbn/react-public';
 import { findTestSubject, mountWithIntl } from '@kbn/test-jest-helpers';
 
 import { AllRule, FieldRule } from '../../model';

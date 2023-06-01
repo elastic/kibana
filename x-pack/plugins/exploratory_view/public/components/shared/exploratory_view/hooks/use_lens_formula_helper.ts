@@ -6,7 +6,7 @@
  */
 
 import { useMemo } from 'react';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '@kbn/react-public';
 import { useFetcher } from '@kbn/observability-shared-plugin/public';
 import { ExploratoryViewPublicPluginsStart } from '../../../..';
 

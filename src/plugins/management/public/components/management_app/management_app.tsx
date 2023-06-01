@@ -14,7 +14,7 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { AppMountParameters, ChromeBreadcrumb, ScopedHistory } from '@kbn/core/public';
 
-import { reactRouterNavigate, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { reactRouterNavigate, KibanaThemeProvider } from '@kbn/react-public';
 import { KibanaPageTemplate, KibanaPageTemplateProps } from '@kbn/shared-ux-page-kibana-template';
 import useObservable from 'react-use/lib/useObservable';
 import {

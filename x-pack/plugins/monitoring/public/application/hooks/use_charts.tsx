@@ -7,7 +7,7 @@
 import moment from 'moment';
 import { useState, useEffect, useRef } from 'react';
 import { useHistory } from 'react-router-dom';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '@kbn/react-public';
 import { useMonitoringTimeContainerContext } from './use_monitoring_time';
 
 export function useCharts() {

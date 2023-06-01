@@ -18,7 +18,7 @@ import {
   KibanaThemeProvider,
   RedirectAppLinks,
   useUiSetting$,
-} from '@kbn/kibana-react-plugin/public';
+} from '@kbn/react-public';
 import { Route } from '@kbn/shared-ux-router';
 import { euiDarkVars, euiLightVars } from '@kbn/ui-theme';
 import React from 'react';

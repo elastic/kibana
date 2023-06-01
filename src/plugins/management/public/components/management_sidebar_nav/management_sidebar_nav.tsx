@@ -11,7 +11,7 @@ import { sortBy } from 'lodash';
 
 import { EuiIcon, EuiSideNavItemType, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { AppMountParameters } from '@kbn/core/public';
-import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
+import { reactRouterNavigate } from '@kbn/react-public';
 import { ManagementApp, ManagementSection } from '../../utils';
 
 import { ManagementItem } from '../../utils/management_item';

@@ -13,7 +13,7 @@ import { matchPath, useLocation } from 'react-router-dom';
 import useObservable from 'react-use/lib/useObservable';
 import type { BehaviorSubject, Observable } from 'rxjs';
 import type { ApplicationStart } from '@kbn/core/public';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '@kbn/react-public';
 import {
   KibanaPageTemplate,
   KibanaPageTemplateKibanaProvider,

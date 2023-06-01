@@ -9,7 +9,7 @@
 import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiTextColor } from '@elastic/eui';
 import type { Toast } from '@kbn/core/public';
-import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint } from '@kbn/react-public';
 import { euiThemeVars } from '@kbn/ui-theme';
 import React, { useCallback } from 'react';
 import { DuplicateOptions } from '../../../../../../common/detection_engine/rule_management/constants';

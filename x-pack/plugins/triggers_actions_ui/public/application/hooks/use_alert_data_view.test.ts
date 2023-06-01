@@ -15,7 +15,7 @@ import { useAlertDataView } from './use_alert_data_view';
 
 const mockUseKibanaReturnValue = createStartServicesMock();
 
-jest.mock('@kbn/kibana-react-plugin/public', () => ({
+jest.mock('@kbn/react-public', () => ({
   __esModule: true,
   useKibana: jest.fn(() => ({
     services: mockUseKibanaReturnValue,

@@ -10,7 +10,7 @@ import React, { FC } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { EuiCallOut, EuiLink } from '@elastic/eui';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '@kbn/react-public';
 import { VisualizeServices } from '../types';
 import {
   CHARTS_WITHOUT_SMALL_MULTIPLES,

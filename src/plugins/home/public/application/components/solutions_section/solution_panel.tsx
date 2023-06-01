@@ -10,7 +10,7 @@ import { snakeCase } from 'lodash';
 import React, { FC, MouseEvent } from 'react';
 import { EuiCard, EuiFlexItem } from '@elastic/eui';
 import { METRIC_TYPE } from '@kbn/analytics';
-import { KibanaPageTemplateSolutionNavAvatar } from '@kbn/kibana-react-plugin/public';
+import { KibanaPageTemplateSolutionNavAvatar } from '@kbn/react-public';
 import { FeatureCatalogueSolution } from '../../..';
 import { createAppNavigationHandler } from '../app_navigation_handler';
 import { getServices } from '../../kibana_services';

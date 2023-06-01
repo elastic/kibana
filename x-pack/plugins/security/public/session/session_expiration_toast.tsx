@@ -15,7 +15,7 @@ import type { Observable } from 'rxjs';
 import type { ToastInput } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
-import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint } from '@kbn/react-public';
 
 import { SESSION_GRACE_PERIOD_MS } from '../../common/constants';
 import type { SessionState } from './session_timeout';

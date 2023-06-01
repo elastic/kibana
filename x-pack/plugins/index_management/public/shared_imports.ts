@@ -62,4 +62,4 @@ export {
   useKibana,
   KibanaThemeProvider,
   useExecutionContext,
-} from '@kbn/kibana-react-plugin/public';
+} from '@kbn/react-public';

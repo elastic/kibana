@@ -13,7 +13,7 @@ import { indexPatternEditorPluginMock } from '@kbn/data-view-editor-plugin/publi
 export const hasUserDataView = jest.fn();
 export const hasESData = jest.fn();
 
-jest.doMock('@kbn/kibana-react-plugin/public', () => ({
+jest.doMock('@kbn/react-public', () => ({
   useKibana: jest.fn().mockReturnValue({
     services: {
       application: {

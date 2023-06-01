@@ -10,7 +10,7 @@ import { EuiDatePicker, EuiDatePickerRange } from '@elastic/eui';
 import { Moment } from 'moment';
 import DateMath from '@kbn/datemath';
 import { i18n } from '@kbn/i18n';
-import { useUiSetting } from '@kbn/kibana-react-plugin/public';
+import { useUiSetting } from '@kbn/react-public';
 import { useSeriesStorage } from '../hooks/use_series_storage';
 import { SeriesUrl } from '../types';
 import { ReportTypes } from '../configurations/constants';

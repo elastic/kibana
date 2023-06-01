@@ -11,7 +11,7 @@ import {
   useUiSetting,
   useUiSetting$,
   withKibana,
-} from '@kbn/kibana-react-plugin/public';
+} from '@kbn/react-public';
 import type { ApmBase } from '@elastic/apm-rum';
 import type { StartServices } from '../../../types';
 

@@ -6,7 +6,7 @@
  */
 
 import { CoreStart } from '@kbn/core/public';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '@kbn/react-public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { ObservabilityPublicPluginsStart } from '../plugin';
 

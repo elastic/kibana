@@ -8,7 +8,7 @@
 import React, { useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiDescribedFormGroup } from '@elastic/eui';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '@kbn/react-public';
 import { UptimePluginServices } from '../../../../../plugin';
 import { DefaultEmail as DefaultEmailType } from '../../../../../../common/runtime_types';
 import { hasInvalidEmail } from './validation';

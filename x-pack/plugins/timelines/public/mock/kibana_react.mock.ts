@@ -9,7 +9,7 @@ import React from 'react';
 
 import { RecursivePartial } from '@elastic/eui/src/components/common';
 import { coreMock } from '@kbn/core/public/mocks';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider } from '@kbn/react-public';
 import { EuiTheme } from '@kbn/kibana-react-plugin/common';
 import { CoreStart } from '@kbn/core/public';
 

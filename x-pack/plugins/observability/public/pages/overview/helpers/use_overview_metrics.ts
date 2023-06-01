@@ -6,7 +6,7 @@
  */
 
 import { useEffect } from 'react';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '@kbn/react-public';
 import { useUiTracker, useTrackPageview } from '@kbn/observability-shared-plugin/public';
 
 import { ObservabilityAppServices } from '../../../application/types';

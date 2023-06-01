@@ -17,7 +17,7 @@ import { CalendarForm } from './calendar_form';
 import { NewEventModal } from './new_event_modal';
 import { ImportModal } from './import_modal';
 import { ml } from '../../../services/ml_api_service';
-import { withKibana } from '@kbn/kibana-react-plugin/public';
+import { withKibana } from '@kbn/react-public';
 import { GLOBAL_CALENDAR } from '../../../../../common/constants/calendars';
 import { ML_PAGES } from '../../../../../common/constants/locator';
 import { getDocLinks } from '../../../util/dependency_cache';

@@ -19,11 +19,11 @@ import {
   IKibanaSearchResponse,
   ISearchStart,
 } from '@kbn/data-plugin/public';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '@kbn/react-public';
 import { EsQueryRuleParams, SearchType } from '../types';
 import { EsQueryExpression } from './es_query_expression';
 
-jest.mock('@kbn/kibana-react-plugin/public', () => ({
+jest.mock('@kbn/react-public', () => ({
   useKibana: jest.fn(),
   // Mocking CodeEditor
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

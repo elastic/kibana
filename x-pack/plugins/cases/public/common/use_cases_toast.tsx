@@ -9,7 +9,7 @@ import type { ErrorToastOptions } from '@kbn/core/public';
 import { EuiButtonEmpty, EuiText } from '@elastic/eui';
 import React from 'react';
 import styled from 'styled-components';
-import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint } from '@kbn/react-public';
 import { isValidOwner } from '../../common/utils/owner';
 import type { CaseUI } from '../../common';
 import { CommentType } from '../../common';

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '@kbn/react-public';
 import { BfetchDeps } from '../mount';
 
 export const useDeps = () => useKibana().services as BfetchDeps;

@@ -40,7 +40,7 @@ jest.mock('@kbn/kibana-utils-plugin/public');
 const mockCurrentAppId$ = new BehaviorSubject<string>('testAppId');
 const mockCaseService = createCasesServiceMock();
 
-jest.mock('@kbn/kibana-react-plugin/public', () => ({
+jest.mock('@kbn/react-public', () => ({
   useKibana: () => ({
     services: {
       application: {

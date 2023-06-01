@@ -22,7 +22,7 @@ import { coreMock } from '@kbn/core/public/mocks';
 import { render, screen } from '@testing-library/react';
 import React, { ComponentProps } from 'react';
 import { UseQueryResult } from '@tanstack/react-query';
-import { NoDataPage } from '@kbn/kibana-react-plugin/public';
+import { NoDataPage } from '@kbn/react-public';
 import { useCloudDefendSetupStatusApi } from '../../common/api/use_setup_status_api';
 import { useCloudDefendIntegrationLinks } from '../../common/navigation/use_cloud_defend_integration_links';
 

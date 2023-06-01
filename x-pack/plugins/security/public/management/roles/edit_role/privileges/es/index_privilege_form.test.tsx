@@ -9,7 +9,7 @@ import { EuiButtonIcon, EuiComboBox, EuiTextArea } from '@elastic/eui';
 import React from 'react';
 
 import { coreMock } from '@kbn/core/public/mocks';
-import { CodeEditorField, KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { CodeEditorField, KibanaContextProvider } from '@kbn/react-public';
 import { findTestSubject, mountWithIntl, nextTick, shallowWithIntl } from '@kbn/test-jest-helpers';
 
 import { indicesAPIClientMock } from '../../../index.mock';

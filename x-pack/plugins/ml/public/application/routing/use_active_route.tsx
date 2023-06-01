@@ -8,7 +8,7 @@
 import { useLocation, useRouteMatch } from 'react-router-dom';
 import { keyBy } from 'lodash';
 import React, { useEffect, useMemo, useRef } from 'react';
-import { toMountPoint, useExecutionContext } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint, useExecutionContext } from '@kbn/react-public';
 import { EuiCallOut } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { PLUGIN_ID } from '../../../common/constants/app';

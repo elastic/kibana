@@ -9,7 +9,7 @@ import { renderHook } from '@testing-library/react-hooks';
 import { ALERT_STATUS, ValidFeatureId } from '@kbn/rule-data-utils';
 
 import { useAlertsCount } from './use_alerts_count';
-import { KibanaReactContextValue, useKibana } from '@kbn/kibana-react-plugin/public';
+import { KibanaReactContextValue, useKibana } from '@kbn/react-public';
 import { InfraClientStartDeps } from '../types';
 import { coreMock } from '@kbn/core/public/mocks';
 import { CoreStart } from '@kbn/core/public';
@@ -38,7 +38,7 @@ const expectedResult = {
   recoveredAlertCount: 20,
 };
 
-jest.mock('@kbn/kibana-react-plugin/public');
+jest.mock('@kbn/react-public');
 const useKibanaMock = useKibana as jest.MockedFunction<typeof useKibana>;
 
 const mockedPostAPI = jest.fn();

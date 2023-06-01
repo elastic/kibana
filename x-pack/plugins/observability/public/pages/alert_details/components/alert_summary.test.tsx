@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import * as useUiSettingHook from '@kbn/kibana-react-plugin/public/ui_settings/use_ui_setting';
+import * as useUiSettingHook from '@kbn/react-public/ui_settings/use_ui_setting';
 import { render } from '../../../utils/test_helper';
 import { AlertSummary } from './alert_summary';
 import { alertWithTags } from '../mock/alert';

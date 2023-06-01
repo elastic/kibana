@@ -32,7 +32,7 @@ import useUpdateEffect from 'react-use/lib/useUpdateEffect';
 import type { CoreStart, IUiSettingsClient, ToastInput, ToastOptions } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { toMountPoint, useKibana } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint, useKibana } from '@kbn/react-public';
 import { UserAvatar } from '@kbn/user-profile-components';
 
 import type { AuthenticatedUser, UserProfileAvatarData } from '../../../common';

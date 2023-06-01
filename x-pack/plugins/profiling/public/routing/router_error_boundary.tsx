@@ -6,7 +6,7 @@
  */
 import { NotFoundRouteException } from '@kbn/typed-react-router-config';
 import { EuiErrorBoundary } from '@elastic/eui';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '@kbn/react-public';
 import React from 'react';
 import { NotFoundPrompt } from '@kbn/shared-ux-prompt-not-found';
 import { useLocation } from 'react-router-dom';

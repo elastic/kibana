@@ -7,7 +7,7 @@
 
 import React, { useEffect, useMemo } from 'react';
 import { createHtmlPortalNode, InPortal, OutPortal } from 'react-reverse-portal';
-import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint } from '@kbn/react-public';
 import type { HeaderMenuPortalProps } from '../../types';
 
 // eslint-disable-next-line import/no-default-export

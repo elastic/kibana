@@ -7,7 +7,7 @@
 
 import { useEffect, useState } from 'react';
 import { CasesPermissions } from '@kbn/cases-plugin/common';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '@kbn/react-public';
 import { casesFeatureId } from '../../common';
 import { ObservabilitySharedStart } from '../plugin';
 

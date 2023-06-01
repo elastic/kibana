@@ -9,7 +9,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { EuiComboBox, EuiComboBoxOptionOption, EuiFormRow, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '@kbn/react-public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useGetUrlParams, useUrlParams } from '../../../hooks';
 import { useAlertingDefaults } from './hooks/use_alerting_defaults';

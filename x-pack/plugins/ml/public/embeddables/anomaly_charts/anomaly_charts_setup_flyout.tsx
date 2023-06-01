@@ -7,7 +7,7 @@
 
 import React from 'react';
 import type { CoreStart } from '@kbn/core/public';
-import { toMountPoint, wrapWithTheme } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint, wrapWithTheme } from '@kbn/react-public';
 import { extractInfluencers } from '../../../common/util/job_utils';
 import { VIEW_BY_JOB_LABEL } from '../../application/explorer/explorer_constants';
 import { getDefaultExplorerChartsPanelTitle } from './anomaly_charts_embeddable';

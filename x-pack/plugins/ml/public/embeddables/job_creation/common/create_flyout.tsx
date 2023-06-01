@@ -12,7 +12,7 @@ import {
   toMountPoint,
   wrapWithTheme,
   KibanaContextProvider,
-} from '@kbn/kibana-react-plugin/public';
+} from '@kbn/react-public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { CoreStart } from '@kbn/core/public';

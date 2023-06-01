@@ -33,7 +33,7 @@ import { SEARCH_QUERY_LANGUAGE } from '../../../../common/constants/search';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { MlTooltipComponent } from '../../components/chart_tooltip';
-import { withKibana } from '@kbn/kibana-react-plugin/public';
+import { withKibana } from '@kbn/react-public';
 import { useMlKibana } from '../../contexts/kibana';
 import { ML_JOB_AGGREGATION } from '../../../../common/constants/aggregation_types';
 import { getInitialAnomaliesLayers } from '../../../maps/util';

@@ -12,7 +12,7 @@ import type { EuiButtonEmptyProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ViewApiRequestFlyout } from '@kbn/es-ui-shared-plugin/public';
-import { KibanaContextProvider, toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider, toMountPoint } from '@kbn/react-public';
 
 import { useStartServices } from '../../hooks';
 

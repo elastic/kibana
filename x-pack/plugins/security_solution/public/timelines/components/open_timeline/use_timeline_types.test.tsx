@@ -28,8 +28,8 @@ jest.mock('../../../common/components/link_to', () => {
   };
 });
 
-jest.mock('@kbn/kibana-react-plugin/public', () => {
-  const originalModule = jest.requireActual('@kbn/kibana-react-plugin/public');
+jest.mock('@kbn/react-public', () => {
+  const originalModule = jest.requireActual('@kbn/react-public');
   const useKibana = jest.fn().mockImplementation(() => ({
     services: {
       application: {

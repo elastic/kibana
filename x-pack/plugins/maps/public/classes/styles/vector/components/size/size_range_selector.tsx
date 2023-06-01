@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { ValidatedDualRange } from '@kbn/kibana-react-plugin/public';
+import { ValidatedDualRange } from '@kbn/react-public';
 import { EuiDualRangeProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { MIN_SIZE, MAX_SIZE } from '../../vector_style_defaults';

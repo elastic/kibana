@@ -16,7 +16,7 @@ import {
   EuiPageContent_Deprecated as EuiPageContent,
 } from '@elastic/eui';
 import { useHistory } from 'react-router-dom';
-import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
+import { reactRouterNavigate } from '@kbn/react-public';
 import { PolicyFromES } from '../../../../common/types';
 import { PolicyTable } from './components/policy_table';
 import { getPolicyCreatePath } from '../../services/navigation';

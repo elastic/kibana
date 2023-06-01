@@ -14,7 +14,7 @@ import { first } from 'rxjs/operators';
 
 import { CoreStart } from '@kbn/core/public';
 import { ManagementAppMountParams } from '@kbn/management-plugin/public';
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaThemeProvider } from '@kbn/react-public';
 import {
   ClusterService,
   MonitoringService,

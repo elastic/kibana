@@ -20,7 +20,7 @@ import {
 } from '@elastic/charts';
 import { EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '@kbn/react-public';
 import { PersistedLogViewReference } from '../../../../../common/log_views';
 import { ExecutionTimeRange } from '../../../../types';
 import {

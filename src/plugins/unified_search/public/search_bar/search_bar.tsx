@@ -16,7 +16,7 @@ import memoizeOne from 'memoize-one';
 
 import { METRIC_TYPE } from '@kbn/analytics';
 import { Query, Filter, TimeRange, AggregateQuery, isOfQueryType } from '@kbn/es-query';
-import { withKibana, KibanaReactContextValue } from '@kbn/kibana-react-plugin/public';
+import { withKibana, KibanaReactContextValue } from '@kbn/react-public';
 import type { TimeHistoryContract, SavedQuery } from '@kbn/data-plugin/public';
 import type { SavedQueryAttributes } from '@kbn/data-plugin/common';
 import { DataView } from '@kbn/data-views-plugin/public';

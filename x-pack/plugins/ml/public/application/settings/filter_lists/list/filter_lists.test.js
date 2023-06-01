@@ -26,7 +26,7 @@ jest.mock('../../../capabilities/check_capabilities', () => ({
   checkPermission: () => true,
 }));
 
-jest.mock('@kbn/kibana-react-plugin/public', () => ({
+jest.mock('@kbn/react-public', () => ({
   withKibana: (node) => {
     return node;
   },

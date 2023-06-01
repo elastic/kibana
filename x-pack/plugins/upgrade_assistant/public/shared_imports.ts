@@ -32,7 +32,7 @@ export {
   reactRouterNavigate,
   RedirectAppLinks,
   KibanaThemeProvider,
-} from '@kbn/kibana-react-plugin/public';
+} from '@kbn/react-public';
 
 export type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 

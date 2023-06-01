@@ -23,7 +23,7 @@ import {
   useKibana,
   overviewPageActions,
   OverviewPageFooter,
-} from '@kbn/kibana-react-plugin/public';
+} from '@kbn/react-public';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { KibanaSolutionAvatar } from '@kbn/shared-ux-avatar-solution';
 import {

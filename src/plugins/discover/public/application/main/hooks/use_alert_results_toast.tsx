@@ -8,7 +8,7 @@
 
 import { ToastsStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import { MarkdownSimple, toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { MarkdownSimple, toMountPoint } from '@kbn/react-public';
 import React, { useEffect } from 'react';
 
 export const displayPossibleDocsDiffInfoAlert = (toastNotifications: ToastsStart) => {

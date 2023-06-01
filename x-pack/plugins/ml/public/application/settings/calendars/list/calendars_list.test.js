@@ -50,7 +50,7 @@ jest.mock('react', () => {
   return { ...r, memo: (x) => x };
 });
 
-jest.mock('@kbn/kibana-react-plugin/public', () => ({
+jest.mock('@kbn/react-public', () => ({
   withKibana: (node) => {
     return node;
   },

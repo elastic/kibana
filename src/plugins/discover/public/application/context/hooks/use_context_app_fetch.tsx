@@ -7,7 +7,7 @@
  */
 import React, { useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { MarkdownSimple, toMountPoint, wrapWithTheme } from '@kbn/kibana-react-plugin/public';
+import { MarkdownSimple, toMountPoint, wrapWithTheme } from '@kbn/react-public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { SortDirection } from '@kbn/data-plugin/public';
 import { CONTEXT_TIE_BREAKER_FIELDS_SETTING } from '../../../../common';

@@ -10,7 +10,7 @@ import type { FunctionComponent } from 'react';
 import React, { useCallback } from 'react';
 
 import type { DocLinksStart } from '@kbn/core/public';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '@kbn/react-public';
 
 export type DocLinks = DocLinksStart['links'];
 export type GetDocLinkFunction = (app: string, doc: string) => string;

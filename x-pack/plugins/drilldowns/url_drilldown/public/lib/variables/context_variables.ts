@@ -10,7 +10,7 @@ import { monaco } from '@kbn/monaco';
 import { getFlattenedObject } from '@kbn/std';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import { EmbeddableInput, EmbeddableOutput } from '@kbn/embeddable-plugin/public';
-import type { UrlTemplateEditorVariable } from '@kbn/kibana-react-plugin/public';
+import type { UrlTemplateEditorVariable } from '@kbn/react-public';
 import { txtValue } from './i18n';
 import type { EmbeddableWithQueryInput } from '../url_drilldown';
 import { deleteUndefinedKeys } from './util';

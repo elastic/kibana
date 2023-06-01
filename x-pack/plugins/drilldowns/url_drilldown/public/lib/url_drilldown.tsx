@@ -19,7 +19,7 @@ import { IMAGE_CLICK_TRIGGER } from '@kbn/image-embeddable-plugin/public';
 import { ActionExecutionContext, ROW_CLICK_TRIGGER } from '@kbn/ui-actions-plugin/public';
 import type { Query, Filter, TimeRange } from '@kbn/es-query';
 import type { CollectConfigProps as CollectConfigPropsBase } from '@kbn/kibana-utils-plugin/public';
-import { UrlTemplateEditorVariable, KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { UrlTemplateEditorVariable, KibanaContextProvider } from '@kbn/react-public';
 import {
   UiActionsEnhancedDrilldownDefinition as Drilldown,
   UrlDrilldownGlobalScope,

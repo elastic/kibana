@@ -10,7 +10,7 @@ import { render, waitFor } from '@testing-library/react';
 
 import { I18nProvider } from '@kbn/i18n-react';
 import { DatePickerContextProvider, type DatePickerDependencies } from '@kbn/ml-date-picker';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider } from '@kbn/react-public';
 import { coreMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { timefilterServiceMock } from '@kbn/data-plugin/public/query/timefilter/timefilter_service.mock';

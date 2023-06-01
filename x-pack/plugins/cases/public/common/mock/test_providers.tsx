@@ -22,7 +22,7 @@ import { createMockFilesClient } from '@kbn/shared-ux-file-mocks';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 import { render as reactRender } from '@testing-library/react';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider } from '@kbn/react-public';
 import { FilesContext } from '@kbn/shared-ux-file-context';
 
 import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';

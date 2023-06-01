@@ -18,7 +18,7 @@ import useMount from 'react-use/lib/useMount';
 import { useLocation } from 'react-router-dom';
 
 import type { SavedObjectReference } from '@kbn/core/public';
-import { useKibana, useExecutionContext } from '@kbn/kibana-react-plugin/public';
+import { useKibana, useExecutionContext } from '@kbn/react-public';
 import { TableListView } from '@kbn/content-management-table-list';
 import type { OpenContentEditorParams } from '@kbn/content-management-content-editor';
 import type { UserContentCommonSchema } from '@kbn/content-management-table-list';

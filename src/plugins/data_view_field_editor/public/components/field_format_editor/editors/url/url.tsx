@@ -16,7 +16,7 @@ import {
 } from '@elastic/eui';
 import { UrlFormat } from '@kbn/field-formats-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { context as contextType } from '@kbn/kibana-react-plugin/public';
+import { context as contextType } from '@kbn/react-public';
 import React, { Fragment } from 'react';
 import { FormatEditorSamples } from '../../samples';
 import { DefaultFormatEditor } from '../default/default';

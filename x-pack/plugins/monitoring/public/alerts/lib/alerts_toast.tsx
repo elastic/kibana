@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiSpacer, EuiLink } from '@elastic/eui';
 import type { Observable } from 'rxjs';
 import type { CoreTheme } from '@kbn/core/public';
-import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint } from '@kbn/react-public';
 import { Legacy } from '../../legacy_shims';
 
 export interface EnableAlertResponse {

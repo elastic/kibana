@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '@kbn/react-public';
 import React from 'react';
 import { useSelectedLocation } from '../hooks/use_selected_location';
 import { FAILED_TESTS_LABEL } from './failed_tests';

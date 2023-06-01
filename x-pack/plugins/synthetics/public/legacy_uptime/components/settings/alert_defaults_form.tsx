@@ -18,7 +18,7 @@ import {
 } from '@elastic/eui';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '@kbn/react-public';
 import { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
 import { useFetcher } from '@kbn/observability-shared-plugin/public';
 import { SettingsFormProps } from '../../pages/settings';

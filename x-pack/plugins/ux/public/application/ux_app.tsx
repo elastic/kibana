@@ -25,7 +25,7 @@ import {
   KibanaThemeProvider,
   RedirectAppLinks,
   useUiSetting$,
-} from '@kbn/kibana-react-plugin/public';
+} from '@kbn/react-public';
 
 import { DatePickerContextProvider } from '@kbn/observability-plugin/public';
 import {

@@ -6,7 +6,7 @@
  */
 
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '@kbn/react-public';
 
 export { UI_SETTINGS };
 

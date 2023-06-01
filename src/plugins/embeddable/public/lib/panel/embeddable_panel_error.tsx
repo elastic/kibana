@@ -9,7 +9,7 @@
 import React, { ReactNode, useEffect, useMemo, useState } from 'react';
 import { EuiButtonEmpty, EuiEmptyPrompt, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { Markdown } from '@kbn/kibana-react-plugin/public';
+import { Markdown } from '@kbn/react-public';
 import type { MaybePromise } from '@kbn/utility-types';
 import { ErrorLike } from '@kbn/expressions-plugin/common';
 import { distinctUntilChanged, merge, of, switchMap } from 'rxjs';

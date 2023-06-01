@@ -18,7 +18,7 @@ export {
   toMountPoint,
   CodeEditor,
   useKibana,
-} from '@kbn/kibana-react-plugin/public';
+} from '@kbn/react-public';
 
 export type {
   FormSchema,

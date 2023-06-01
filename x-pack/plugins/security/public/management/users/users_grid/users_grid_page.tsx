@@ -23,7 +23,7 @@ import React, { Component } from 'react';
 import type { ApplicationStart, NotificationsStart, ScopedHistory } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
+import { reactRouterNavigate } from '@kbn/react-public';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
 import type { Role, User } from '../../../../common/model';

@@ -13,7 +13,7 @@ import {
   CoreStart,
   APP_WRAPPER_CLASS,
 } from '@kbn/core/public';
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaThemeProvider } from '@kbn/react-public';
 import { ConfigSchema } from '..';
 import { ApmPluginSetupDeps, ApmPluginStartDeps } from '../plugin';
 import { createCallApmApi } from '../services/rest/create_call_apm_api';

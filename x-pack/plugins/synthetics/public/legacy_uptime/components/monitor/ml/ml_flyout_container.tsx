@@ -9,7 +9,7 @@ import React, { useContext, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import type { Observable } from 'rxjs';
 import type { CoreTheme } from '@kbn/core/public';
-import { toMountPoint, useKibana } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint, useKibana } from '@kbn/react-public';
 import {
   canCreateMLJobSelector,
   hasMLJobSelector,

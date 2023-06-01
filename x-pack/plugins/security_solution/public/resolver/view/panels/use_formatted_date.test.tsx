@@ -10,7 +10,7 @@ import { render, screen } from '@testing-library/react';
 import React from 'react';
 import { useFormattedDate } from './use_formatted_date';
 import { coreMock } from '@kbn/core/public/mocks';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider } from '@kbn/react-public';
 import { uiSetting } from '../../mocks/ui_setting';
 
 describe(`useFormattedDate, when the "dateFormat" UI setting is "${uiSetting(

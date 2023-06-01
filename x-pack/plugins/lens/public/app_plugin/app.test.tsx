@@ -32,7 +32,7 @@ import type { FieldSpec } from '@kbn/data-plugin/common';
 import { TopNavMenuData } from '@kbn/navigation-plugin/public';
 import { LensByValueInput } from '../embeddable/embeddable';
 import { SavedObjectReference } from '@kbn/core/types';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider } from '@kbn/react-public';
 import moment from 'moment';
 
 import { setState, LensAppState } from '../state_management';

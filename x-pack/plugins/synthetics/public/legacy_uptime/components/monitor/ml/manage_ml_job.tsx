@@ -9,7 +9,7 @@ import React, { useCallback, useContext, useState } from 'react';
 
 import { EuiButton, EuiContextMenu, EuiIcon, EuiPopover } from '@elastic/eui';
 import { useSelector, useDispatch } from 'react-redux';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '@kbn/react-public';
 import { CLIENT_ALERT_TYPES } from '../../../../../common/constants/uptime_alerts';
 import {
   canDeleteMLJobSelector,

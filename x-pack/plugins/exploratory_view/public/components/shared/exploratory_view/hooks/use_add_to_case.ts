@@ -12,7 +12,7 @@ import { CaseUI } from '@kbn/cases-plugin/common';
 import { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import { CasesDeepLinkId, DRAFT_COMMENT_STORAGE_ID } from '@kbn/cases-plugin/public';
 import { observabilityFeatureId } from '@kbn/observability-shared-plugin/public';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '@kbn/react-public';
 import { ObservabilityAppServices } from '../../../../application/types';
 import { AddToCaseProps } from '../header/add_to_case_action';
 

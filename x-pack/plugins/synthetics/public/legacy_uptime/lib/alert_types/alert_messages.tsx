@@ -11,7 +11,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 import type { CoreTheme } from '@kbn/core/public';
 import { EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
-import { RedirectAppLinks, toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { RedirectAppLinks, toMountPoint } from '@kbn/react-public';
 import type { Rule } from '@kbn/triggers-actions-ui-plugin/public';
 import { ActionConnector } from '../../../../common/rules/types';
 import { kibanaService } from '../../state/kibana_service';

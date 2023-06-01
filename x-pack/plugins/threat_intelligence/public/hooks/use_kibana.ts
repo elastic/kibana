@@ -9,7 +9,7 @@ import {
   context as KibanaContext,
   KibanaContextProvider,
   useKibana,
-} from '@kbn/kibana-react-plugin/public';
+} from '@kbn/react-public';
 import { Services } from '../types';
 
 const useTypedKibana = () => useKibana<Services>();

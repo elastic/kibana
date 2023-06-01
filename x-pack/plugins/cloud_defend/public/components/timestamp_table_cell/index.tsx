@@ -8,7 +8,7 @@
 import React from 'react';
 import moment, { type MomentInput } from 'moment';
 import { EuiToolTip, formatDate } from '@elastic/eui';
-import { useUiSetting } from '@kbn/kibana-react-plugin/public';
+import { useUiSetting } from '@kbn/react-public';
 
 const DEFAULT_DATE_FORMAT = 'dateFormat';
 

@@ -13,7 +13,7 @@ import { useStore } from 'react-redux';
 import { TopNavMenuData } from '@kbn/navigation-plugin/public';
 import { getEsQueryConfig } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '@kbn/react-public';
 import { DataViewPickerProps } from '@kbn/unified-search-plugin/public';
 import moment from 'moment';
 import { LENS_APP_LOCATOR } from '../../common/locator/locator';

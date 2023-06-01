@@ -18,7 +18,7 @@ import {
 } from '@kbn/rule-data-utils';
 import moment from 'moment';
 import React, { useEffect, useMemo } from 'react';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '@kbn/react-public';
 import { getPaddedAlertTimeRange } from '@kbn/observability-alert-details';
 import { EuiCallOut } from '@elastic/eui';
 import { toMicroseconds as toMicrosecondsUtil } from '../../../../../common/utils/formatters';

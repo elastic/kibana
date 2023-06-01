@@ -26,7 +26,7 @@ import { coreMock } from '@kbn/core/public/mocks';
 import { configure } from '@testing-library/dom';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
-import { KibanaContextProvider, KibanaServices } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider, KibanaServices } from '@kbn/react-public';
 import { triggersActionsUiMock } from '@kbn/triggers-actions-ui-plugin/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';

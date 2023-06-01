@@ -14,7 +14,7 @@ import React, { Fragment, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { CodeEditorField, useKibana } from '@kbn/kibana-react-plugin/public';
+import { CodeEditorField, useKibana } from '@kbn/react-public';
 import { XJsonLang } from '@kbn/monaco';
 
 import type { Rule } from '../../model';

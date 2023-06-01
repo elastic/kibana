@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
+import { createKibanaReactContext } from '@kbn/react-public';
 import { CoreStart } from '@kbn/core/public';
 import { mockUiSettingsService } from '../mocks/mock_kibana_ui_settings_service';
 import { DateFormatter } from './date_formatter';

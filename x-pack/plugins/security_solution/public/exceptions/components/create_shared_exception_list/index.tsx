@@ -26,7 +26,7 @@ import type { HttpSetup } from '@kbn/core-http-browser';
 import type { ErrorToastOptions, Toast, ToastInput } from '@kbn/core-notifications-browser';
 import { i18n as translate } from '@kbn/i18n';
 import type { ListDetails } from '@kbn/securitysolution-exception-list-components';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '@kbn/react-public';
 import type { CoreStart } from '@kbn/core/public';
 
 import { APP_UI_ID, SecurityPageName } from '../../../../common/constants';

@@ -7,7 +7,7 @@
 
 import React, { FC } from 'react';
 import { EuiLink } from '@elastic/eui';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '@kbn/react-public';
 import { ReactRouterEuiLink } from './react_router_helpers';
 
 interface DetailPageLinkProps {

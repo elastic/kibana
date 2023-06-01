@@ -9,7 +9,7 @@
 import React, { Fragment, useEffect, useRef, useState } from 'react';
 import type { EuiSelectableProps } from '@elastic/eui';
 import type { DataViewListItem } from '@kbn/data-views-plugin/public';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '@kbn/react-public';
 import { DataViewsList } from './dataview_list';
 import { IUnifiedSearchPluginServices } from '../types';
 import { ExploreMatchingButton } from './explore_matching_button';

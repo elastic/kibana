@@ -249,7 +249,7 @@ const RESTRICTED_IMPORTS = [
     message: 'Please use @kbn/shared-ux-router instead',
   },
   {
-    name: '@kbn/kibana-react-plugin/public',
+    name: '@kbn/react-public',
     importNames: ['Route'],
     message: 'Please use @kbn/shared-ux-router instead',
   },
@@ -1050,7 +1050,7 @@ module.exports = {
               {
                 name: 'react-router-dom',
                 importNames: ['Route'],
-                message: "import { Route } from '@kbn/kibana-react-plugin/public'",
+                message: "import { Route } from '@kbn/react-public'",
               },
             ],
           },

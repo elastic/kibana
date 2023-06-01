@@ -57,6 +57,6 @@ export type {
 } from '@kbn/runtime-fields-plugin/public';
 export { RuntimeFieldEditorFlyoutContent } from '@kbn/runtime-fields-plugin/public';
 
-export { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
+export { createKibanaReactContext } from '@kbn/react-public';
 
 export type { DocLinksStart } from '@kbn/core/public';

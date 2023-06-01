@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '@kbn/react-public';
 import { useRequestErrorHandler } from './use_request_error_handler';
 import { EnableAlertResponse, showAlertsToast } from '../../alerts/lib/alerts_toast';
 

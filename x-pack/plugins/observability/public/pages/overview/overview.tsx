@@ -9,7 +9,7 @@ import React, { useEffect, useMemo, useCallback, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
 import { BoolQuery } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '@kbn/react-public';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import { useBreadcrumbs, useFetcher } from '@kbn/observability-shared-plugin/public';
 

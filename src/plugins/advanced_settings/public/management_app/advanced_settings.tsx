@@ -12,7 +12,7 @@ import { UiCounterMetricType } from '@kbn/analytics';
 
 import { DocLinksStart, ToastsStart, ThemeServiceStart } from '@kbn/core/public';
 
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider } from '@kbn/react-public';
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { IUiSettingsClient, SettingsStart } from '@kbn/core-ui-settings-browser';
 import { AdvancedSettingsVoiceAnnouncement } from './components/advanced_settings_voice_announcement';

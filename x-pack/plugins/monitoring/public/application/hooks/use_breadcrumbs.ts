@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import createContainer from 'constate';
 import { History } from 'history';
 import { Observable } from 'rxjs';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '@kbn/react-public';
 
 interface Crumb {
   url?: string | null;

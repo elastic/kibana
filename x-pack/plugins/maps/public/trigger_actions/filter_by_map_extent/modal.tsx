@@ -14,7 +14,7 @@ import {
   EuiSwitch,
   EuiSwitchEvent,
 } from '@elastic/eui';
-import { createReactOverlays } from '@kbn/kibana-react-plugin/public';
+import { createReactOverlays } from '@kbn/react-public';
 import { mapEmbeddablesSingleton } from '../../embeddable/map_embeddables_singleton';
 import { getCore } from '../../kibana_services';
 

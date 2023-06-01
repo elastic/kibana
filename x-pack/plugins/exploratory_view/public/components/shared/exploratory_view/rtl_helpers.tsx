@@ -20,7 +20,7 @@ import { createMemoryHistory, History } from 'history';
 import { CoreStart } from '@kbn/core/public';
 import { I18nProvider } from '@kbn/i18n-react';
 import { coreMock, themeServiceMock } from '@kbn/core/public/mocks';
-import { KibanaContextProvider, KibanaServices } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider, KibanaServices } from '@kbn/react-public';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { lensPluginMock } from '@kbn/lens-plugin/public/mocks';
 import { setIndexPatterns } from '@kbn/unified-search-plugin/public/services';

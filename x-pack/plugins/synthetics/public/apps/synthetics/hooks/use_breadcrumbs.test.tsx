@@ -10,7 +10,7 @@ import { render } from '../utils/testing';
 import React from 'react';
 import { Route } from 'react-router-dom';
 import { OVERVIEW_ROUTE } from '../../../../common/constants';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider } from '@kbn/react-public';
 import {
   SyntheticsUrlParams,
   getSupportedUrlParams,

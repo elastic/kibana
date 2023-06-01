@@ -27,7 +27,7 @@ import {
   KibanaContextProvider,
   KibanaThemeProvider,
   RedirectAppLinks,
-} from '@kbn/kibana-react-plugin/public';
+} from '@kbn/react-public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { SpacesPluginStart, SpacesContextProps } from '@kbn/spaces-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';

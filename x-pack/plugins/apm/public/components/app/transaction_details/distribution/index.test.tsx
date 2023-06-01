@@ -13,7 +13,7 @@ import React, { ReactNode } from 'react';
 import { CoreStart } from '@kbn/core/public';
 import { merge } from 'lodash';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
-import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
+import { createKibanaReactContext } from '@kbn/react-public';
 import { MockUrlParamsContextProvider } from '../../../../context/url_params_context/mock_url_params_context_provider';
 import { ApmPluginContextValue } from '../../../../context/apm_plugin/apm_plugin_context';
 import {

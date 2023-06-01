@@ -22,7 +22,7 @@ import {
   EuiCodeBlock,
 } from '@elastic/eui';
 
-import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
+import { reactRouterNavigate } from '@kbn/react-public';
 import { SlmPolicy } from '../../../../../../../common/types';
 import { FormattedDateTime } from '../../../../../components';
 import { linkToSnapshot } from '../../../../../services/navigation';

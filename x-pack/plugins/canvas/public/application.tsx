@@ -17,7 +17,7 @@ import { includes, remove } from 'lodash';
 
 import { AppMountParameters, CoreStart, CoreSetup, AppUpdater } from '@kbn/core/public';
 
-import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/react-public';
 import { PluginServices } from '@kbn/presentation-util-plugin/public';
 
 import { CanvasStartDeps, CanvasSetupDeps } from './plugin';

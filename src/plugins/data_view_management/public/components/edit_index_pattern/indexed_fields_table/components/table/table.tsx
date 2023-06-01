@@ -28,7 +28,7 @@ import {
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint } from '@kbn/react-public';
 
 import { DataView } from '@kbn/data-views-plugin/public';
 import { IndexedFieldItem } from '../../types';

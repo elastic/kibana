@@ -6,7 +6,7 @@
  */
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { CoreStart } from '@kbn/core/public';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '@kbn/react-public';
 import { QueryDslQueryContainerBool } from '../../../types';
 import {
   QUERY_KEY_PROCESS_EVENTS,

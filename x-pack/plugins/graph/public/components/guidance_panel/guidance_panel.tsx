@@ -20,7 +20,7 @@ import { i18n } from '@kbn/i18n';
 import classNames from 'classnames';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { connect } from 'react-redux';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '@kbn/react-public';
 import { IUnifiedSearchPluginServices } from '@kbn/unified-search-plugin/public/types';
 import {
   GraphState,

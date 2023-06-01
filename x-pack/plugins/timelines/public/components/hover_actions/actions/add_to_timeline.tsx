@@ -11,7 +11,7 @@ import { DraggableId } from 'react-beautiful-dnd';
 import { isEmpty } from 'lodash';
 
 import { useDispatch } from 'react-redux';
-import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint } from '@kbn/react-public';
 import { TimelineId } from '../../../store/timeline';
 import { addProviderToTimeline } from '../../../store/timeline/actions';
 import { stopPropagationAndPreventDefault } from '../../../../common/utils/accessibility';

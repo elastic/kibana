@@ -7,7 +7,7 @@
 
 import React, { FC } from 'react';
 import { monaco, XJsonLang } from '@kbn/monaco';
-import { CodeEditor } from '@kbn/kibana-react-plugin/public';
+import { CodeEditor } from '@kbn/react-public';
 import { type EuiCodeEditorProps, XJson } from '@kbn/es-ui-shared-plugin/public';
 
 const { expandLiteralStrings } = XJson;

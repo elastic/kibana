@@ -8,7 +8,7 @@
 import React from 'react';
 
 import { coreMock } from '@kbn/core/public/mocks';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider } from '@kbn/react-public';
 import { mountWithIntl, shallowWithIntl } from '@kbn/test-jest-helpers';
 
 import { licenseMock } from '../../../../../../common/licensing/index.mock';

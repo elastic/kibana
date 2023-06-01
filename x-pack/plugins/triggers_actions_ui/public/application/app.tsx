@@ -14,7 +14,7 @@ import { I18nProvider } from '@kbn/i18n-react';
 import useObservable from 'react-use/lib/useObservable';
 import { Observable } from 'rxjs';
 import { KibanaFeature } from '@kbn/features-plugin/common';
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaThemeProvider } from '@kbn/react-public';
 import { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';

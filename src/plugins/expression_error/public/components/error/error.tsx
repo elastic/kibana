@@ -9,7 +9,7 @@
 import React, { FC } from 'react';
 import { EuiButtonIcon, EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { Markdown } from '@kbn/kibana-react-plugin/public';
+import { Markdown } from '@kbn/react-public';
 import { ShowDebugging } from './show_debugging';
 
 export interface Props {

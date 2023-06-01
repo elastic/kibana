@@ -10,7 +10,7 @@ import React from 'react';
 import { ContentClientProvider, type ContentClient } from '@kbn/content-management-plugin/public';
 import { TableListViewKibanaProvider } from '@kbn/content-management-table-list';
 import type { CoreStart } from '@kbn/core/public';
-import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint } from '@kbn/react-public';
 import { FormattedRelative, I18nProvider } from '@kbn/i18n-react';
 import { SavedObjectTaggingOssPluginStart } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import { MSearchTable } from './msearch_table';

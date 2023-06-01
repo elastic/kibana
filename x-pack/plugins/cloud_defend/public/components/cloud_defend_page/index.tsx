@@ -16,7 +16,7 @@ import {
   EuiLink,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { NoDataPage, NoDataPageProps } from '@kbn/kibana-react-plugin/public';
+import { NoDataPage, NoDataPageProps } from '@kbn/react-public';
 import { css } from '@emotion/react';
 import { SubscriptionNotAllowed } from '../subscription_not_allowed';
 import { useSubscriptionStatus } from '../../common/hooks/use_subscription_status';

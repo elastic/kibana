@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
+import { useUiSetting$ } from '@kbn/react-public';
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
 
 export function useKibanaTimeZoneSetting() {

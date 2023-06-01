@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { monaco } from '@kbn/monaco';
 import { UrlDrilldownGlobalScope } from '@kbn/ui-actions-enhanced-plugin/public';
-import type { UrlTemplateEditorVariable } from '@kbn/kibana-react-plugin/public';
+import type { UrlTemplateEditorVariable } from '@kbn/react-public';
 import { txtValue } from './i18n';
 
 const kind = monaco.languages.CompletionItemKind.Constant;

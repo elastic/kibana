@@ -14,7 +14,7 @@ import { Position } from '@elastic/charts';
 import { IconChartHeatmap } from '@kbn/chart-icons';
 import { CUSTOM_PALETTE, PaletteRegistry, CustomPaletteParams } from '@kbn/coloring';
 import { ThemeServiceStart } from '@kbn/core/public';
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaThemeProvider } from '@kbn/react-public';
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { HeatmapConfiguration } from '@kbn/visualizations-plugin/common';

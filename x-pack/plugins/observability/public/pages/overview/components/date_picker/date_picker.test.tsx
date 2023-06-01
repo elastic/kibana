@@ -13,7 +13,7 @@ import React from 'react';
 import { Router, useLocation } from 'react-router-dom';
 import qs from 'query-string';
 import { DatePicker } from './date_picker';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider } from '@kbn/react-public';
 import { of } from 'rxjs';
 import { DatePickerContextProvider } from '../../../../context/date_picker_context/date_picker_context';
 

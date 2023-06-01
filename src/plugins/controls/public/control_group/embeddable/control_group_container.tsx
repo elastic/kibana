@@ -14,7 +14,7 @@ import { skip, debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { compareFilters, COMPARE_ALL_OPTIONS, Filter, uniqFilters } from '@kbn/es-query';
 
 import { OverlayRef } from '@kbn/core/public';
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaThemeProvider } from '@kbn/react-public';
 import { Container, EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { ReduxToolsPackage, ReduxEmbeddableTools } from '@kbn/presentation-util-plugin/public';
 

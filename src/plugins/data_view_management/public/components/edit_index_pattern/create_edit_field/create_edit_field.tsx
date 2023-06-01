@@ -12,7 +12,7 @@ import { RouteComponentProps, withRouter } from 'react-router-dom';
 import { EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '@kbn/react-public';
 import { IndexPatternManagmentContext } from '../../../types';
 import { IndexHeader } from '../index_header';
 import { TAB_INDEXED_FIELDS, TAB_SCRIPTED_FIELDS } from '../constants';

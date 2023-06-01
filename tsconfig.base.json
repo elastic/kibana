@@ -1012,6 +1012,8 @@
       "@kbn/random-sampling/*": ["x-pack/packages/kbn-random-sampling/*"],
       "@kbn/react-field": ["packages/kbn-react-field"],
       "@kbn/react-field/*": ["packages/kbn-react-field/*"],
+      "@kbn/react-public": ["packages/kbn-react-public"],
+      "@kbn/react-public/*": ["packages/kbn-react-public/*"],
       "@kbn/remote-clusters-plugin": ["x-pack/plugins/remote_clusters"],
       "@kbn/remote-clusters-plugin/*": ["x-pack/plugins/remote_clusters/*"],
       "@kbn/rendering-plugin": ["test/plugin_functional/plugins/rendering_plugin"],

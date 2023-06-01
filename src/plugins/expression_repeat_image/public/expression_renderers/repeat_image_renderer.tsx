@@ -16,7 +16,7 @@ import {
 } from '@kbn/expressions-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { I18nProvider } from '@kbn/i18n-react';
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaThemeProvider } from '@kbn/react-public';
 import { CoreSetup } from '@kbn/core/public';
 import { defaultTheme$, getElasticOutline, isValidUrl } from '@kbn/presentation-util-plugin/common';
 import { RepeatImageRendererConfig } from '../../common/types';

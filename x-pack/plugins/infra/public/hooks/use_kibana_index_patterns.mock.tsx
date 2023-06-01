@@ -12,7 +12,7 @@ import { CoreStart } from '@kbn/core/public';
 import { FieldSpec } from '@kbn/data-plugin/common';
 import { DataView, DataViewsContract } from '@kbn/data-views-plugin/public';
 import { DataViewField } from '@kbn/data-views-plugin/common';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider } from '@kbn/react-public';
 import { Pick2 } from '../../common/utility_types';
 
 type MockIndexPattern = Pick<

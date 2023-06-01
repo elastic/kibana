@@ -19,7 +19,7 @@ import {
   EuiHorizontalRule,
 } from '@elastic/eui';
 
-import { RedirectAppLinks } from '@kbn/kibana-react-plugin/public';
+import { RedirectAppLinks } from '@kbn/react-public';
 
 import { AssetTitleMap } from '../applications/integrations/sections/epm/constants';
 import { useStartServices } from '../hooks';

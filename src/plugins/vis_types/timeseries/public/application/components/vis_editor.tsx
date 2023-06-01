@@ -15,7 +15,7 @@ import { css } from '@emotion/react';
 import type { IUiSettingsClient } from '@kbn/core/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { Vis, VisualizeEmbeddableContract } from '@kbn/visualizations-plugin/public';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider } from '@kbn/react-public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 
 import type { TimeRange } from '@kbn/es-query';

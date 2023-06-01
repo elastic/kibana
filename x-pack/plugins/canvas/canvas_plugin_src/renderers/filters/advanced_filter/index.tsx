@@ -7,7 +7,7 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaThemeProvider } from '@kbn/react-public';
 import { StartInitializer } from '../../../plugin';
 import { RendererFactory } from '../../../../types';
 import { AdvancedFilter } from './component';

@@ -7,7 +7,7 @@
  */
 
 import { EuiButton, EuiCallOut, EuiEmptyPrompt, EuiLink, EuiModal } from '@elastic/eui';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider } from '@kbn/react-public';
 import { findTestSubject } from '@kbn/test-jest-helpers';
 import { mount } from 'enzyme';
 import React, { ReactNode } from 'react';

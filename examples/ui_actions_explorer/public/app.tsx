@@ -21,7 +21,7 @@ import { EuiFieldText } from '@elastic/eui';
 import { EuiCallOut } from '@elastic/eui';
 import { EuiPageHeader } from '@elastic/eui';
 import { EuiModalBody } from '@elastic/eui';
-import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint } from '@kbn/react-public';
 import { UiActionsStart, createAction } from '@kbn/ui-actions-plugin/public';
 import { AppMountParameters, OverlayStart } from '@kbn/core/public';
 import { HELLO_WORLD_TRIGGER_ID, ACTION_HELLO_WORLD } from '@kbn/ui-actions-examples-plugin/public';

@@ -9,7 +9,7 @@
 import React from 'react';
 import { EuiText, EuiModalBody, EuiButton } from '@elastic/eui';
 import { OverlayStart } from '@kbn/core/public';
-import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint } from '@kbn/react-public';
 
 export const ACTION_HELLO_WORLD = 'ACTION_HELLO_WORLD';
 

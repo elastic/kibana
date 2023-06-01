@@ -6,7 +6,7 @@
  */
 
 import { useQuery } from '@tanstack/react-query';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '@kbn/react-public';
 import type { DataView } from '@kbn/data-plugin/common';
 import { CspClientPluginStartDeps } from '../../types';
 

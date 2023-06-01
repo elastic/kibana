@@ -27,7 +27,7 @@ import { getCasesMockMap } from '../cases/index.mock';
 import { createCasesServiceMock } from '../index.mock';
 
 jest.mock('@kbn/data-plugin/public');
-jest.mock('@kbn/kibana-react-plugin/public/ui_settings/use_ui_setting', () => ({
+jest.mock('@kbn/react-public/ui_settings/use_ui_setting', () => ({
   useUiSetting$: jest.fn((value: string) => ['0,0']),
 }));
 
@@ -52,8 +52,8 @@ const mockKibana = jest.fn().mockReturnValue({
   },
 });
 
-jest.mock('@kbn/kibana-react-plugin/public', () => {
-  const original = jest.requireActual('@kbn/kibana-react-plugin/public');
+jest.mock('@kbn/react-public', () => {
+  const original = jest.requireActual('@kbn/react-public');
 
   return {
     ...original,

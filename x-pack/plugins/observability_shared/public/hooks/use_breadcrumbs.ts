@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { ApplicationStart, ChromeBreadcrumb, ChromeStart } from '@kbn/core/public';
 import { MouseEvent, useEffect } from 'react';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '@kbn/react-public';
 import { useQueryParams } from './use_query_params';
 
 function addClickHandlers(

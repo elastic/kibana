@@ -9,7 +9,7 @@ import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useSelector } from 'react-redux';
 import { EuiDescribedFormGroup } from '@elastic/eui';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '@kbn/react-public';
 import { OnFieldChangeType } from './certificate_form';
 import { connectorsSelector } from '../../state/alerts/alerts';
 import { DefaultEmail as DefaultEmailType } from '../../../../common/runtime_types';
