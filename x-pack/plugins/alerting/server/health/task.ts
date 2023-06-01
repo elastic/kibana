@@ -60,7 +60,7 @@ function registerAlertingHealthCheckTask(
       title: 'Alerting framework health check task',
       stateSchemaByVersion: {
         1: {
-          up: (task) => task,
+          up: (state) => state,
           schema: schema.object({
             runs: schema.number(),
             health_status: schema.string(),

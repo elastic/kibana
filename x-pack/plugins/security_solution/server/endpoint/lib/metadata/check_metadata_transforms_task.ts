@@ -57,7 +57,7 @@ export class CheckMetadataTransformsTask {
         timeout: TIMEOUT,
         stateSchemaByVersion: {
           1: {
-            up: (task) => task,
+            up: (state) => state,
             schema: schema.object({
               restartAttempts: schema.maybe(schema.recordOf(schema.string(), schema.number())),
               reinstallAttempts: schema.maybe(schema.number()),

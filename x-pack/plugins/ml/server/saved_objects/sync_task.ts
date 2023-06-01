@@ -44,7 +44,7 @@ export class SavedObjectsSyncService {
         maxAttempts: 3,
         stateSchemaByVersion: {
           1: {
-            up: (task) => task,
+            up: (state) => state,
             schema: schema.object({
               runs: schema.number(),
               totalSavedObjectsSynced: schema.number(),

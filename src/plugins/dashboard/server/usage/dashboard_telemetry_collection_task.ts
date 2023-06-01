@@ -64,7 +64,7 @@ function registerDashboardTelemetryTask(
       timeout: '2m',
       stateSchemaByVersion: {
         1: {
-          up: (task) => task,
+          up: (state) => state,
           schema: schema.object({
             runs: schema.maybe(schema.number()),
             telemetry: schema.maybe(

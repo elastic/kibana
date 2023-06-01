@@ -52,7 +52,7 @@ const invalidateAPIKeys = async (
 
 const stateSchemaByVersion = {
   1: {
-    up: <T>(task: T) => task,
+    up: (state: Record<string, unknown>) => ({ runs: state.runs || 0, total_invalidated: 0 }),
     schema: schema.object({
       runs: schema.number(),
       total_invalidated: schema.number(),
@@ -132,7 +132,7 @@ function taskRunner(
   config: AlertingConfig
 ) {
   return ({ taskInstance }: RunContext) => {
-    const { state } = taskInstance;
+    const state = taskInstance.state as LatestTaskStateSchema;
     return {
       async run() {
         let totalInvalidated = 0;
@@ -175,7 +175,7 @@ function taskRunner(
           } while (hasApiKeysPendingInvalidation);
 
           const updatedState: LatestTaskStateSchema = {
-            runs: (state.runs || 0) + 1,
+            runs: state.runs + 1,
             total_invalidated: totalInvalidated,
           };
           return {
@@ -187,7 +187,7 @@ function taskRunner(
         } catch (e) {
           logger.warn(`Error executing alerting apiKey invalidation task: ${e.message}`);
           const updatedState: LatestTaskStateSchema = {
-            runs: (state.runs || 0) + 1,
+            runs: state.runs + 1,
             total_invalidated: totalInvalidated,
           };
           return {

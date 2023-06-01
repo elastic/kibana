@@ -53,7 +53,7 @@ function registerAlertingTelemetryTask(
       timeout: '5m',
       stateSchemaByVersion: {
         1: {
-          up: (task) => task,
+          up: (state) => state,
           schema: schema.object({
             has_errors: schema.boolean(),
             error_messages: schema.maybe(schema.arrayOf(schema.any())),

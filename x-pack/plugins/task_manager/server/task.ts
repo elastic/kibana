@@ -171,12 +171,16 @@ export type TaskDefinition = TypeOf<typeof taskDefinitionSchema> & {
     number,
     {
       schema: ObjectType;
-      up: <T>(task: T) => T;
+      up: (state: Record<string, unknown>) => Record<string, unknown>;
     }
   >;
   getLatestStateSchema: () =>
     | undefined
-    | { schema: ObjectType; version: number; up: <T>(task: T) => T };
+    | {
+        schema: ObjectType;
+        version: number;
+        up: (state: Record<string, unknown>) => Record<string, unknown>;
+      };
 };
 
 export enum TaskStatus {

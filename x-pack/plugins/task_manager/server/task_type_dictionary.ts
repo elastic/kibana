@@ -71,7 +71,7 @@ export interface TaskRegisterDefinition {
     number,
     {
       schema: ObjectType;
-      up: <T>(task: T) => T;
+      up: (state: Record<string, unknown>) => Record<string, unknown>;
     }
   >;
 }

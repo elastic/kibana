@@ -86,7 +86,7 @@ export class SecurityTelemetryTask {
         timeout: this.config.timeout,
         stateSchemaByVersion: {
           1: {
-            up: (task) => task,
+            up: (state) => state,
             schema: schema.object({
               lastExecutionTimestamp: schema.maybe(schema.string()),
               runs: schema.number(),

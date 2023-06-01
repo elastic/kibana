@@ -66,7 +66,7 @@ export function setupFindingsStatsTask(
         title: 'Aggregate latest findings index for score calculation',
         stateSchemaByVersion: {
           1: {
-            up: (task) => task,
+            up: (state) => state,
             schema: schema.object({
               runs: schema.number(),
               health_status: schema.string(),

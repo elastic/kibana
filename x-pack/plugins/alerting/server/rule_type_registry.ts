@@ -353,7 +353,7 @@ export class RuleTypeRegistry {
         timeout: ruleType.ruleTaskTimeout,
         stateSchemaByVersion: {
           1: {
-            up: (task) => task,
+            up: (state) => state,
             schema: schema.object({
               // Places using rule state:
               // x-pack/examples/alerting_example/server/alert_types/always_firing.ts
