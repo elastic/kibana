@@ -25,7 +25,7 @@ import {
   EuiFlexItem,
 } from '@elastic/eui';
 import moment from 'moment';
-import { TIME_FORMAT } from '../../../../../../common/constants/time_format';
+import { TIME_FORMAT } from '@kbn/ml-anomaly-utils';
 import { generateTempId } from '../utils';
 
 import { i18n } from '@kbn/i18n';

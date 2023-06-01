@@ -18,8 +18,11 @@ import {
 import type { TimeRange as TimeRangeMs } from '@kbn/ml-date-picker';
 import { FeatureImportanceBaseline, INDEX_STATUS } from '@kbn/ml-data-frame-analytics-utils';
 
-import { Dictionary } from '../../../../common/types/common';
-import { ChartData } from '../../../../common/types/field_histograms';
+import { ChartData } from './field_histograms';
+
+interface Dictionary<TValue> {
+  [id: string]: TValue;
+}
 
 export type ColumnId = string;
 export type DataGridItem = Record<string, any>;

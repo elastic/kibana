@@ -25,9 +25,9 @@ import {
   ChartDataItem,
   NumericDataItem,
   OrdinalDataItem,
-} from './field_histograms';
+} from '../lib/field_histograms';
 
-import { NON_AGGREGATABLE } from './common';
+import { NON_AGGREGATABLE } from '../lib/common';
 
 const cssHistogramLegendBoolean = css({
   width: '100%',

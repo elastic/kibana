@@ -66,9 +66,18 @@ export {
   ES_CLIENT_TOTAL_HITS_RELATION,
 } from './es_client';
 
+export { getFieldFormatFromIndexPattern } from './field_format_utils';
+
 export { DEFAULT_SAMPLER_SHARD_SIZE } from './field_histograms';
 
-export { type MlJobFieldType, DOC_COUNT, MLCATEGORY, OMIT_FIELDS, _DOC_COUNT } from './field_types';
+export {
+  type MlJobFieldType,
+  DOC_COUNT,
+  MLCATEGORY,
+  ML_JOB_FIELD_TYPES,
+  OMIT_FIELDS,
+  _DOC_COUNT,
+} from './field_types';
 
 export {
   mlCategory,
@@ -90,6 +99,8 @@ export { getSeverityColor } from './get_severity_color';
 export { getSeverityType } from './get_severity_type';
 
 export { isRuntimeField, isRuntimeMappings } from './runtime_field_utils';
+
+export { TIME_FORMAT } from './time_format';
 
 export type {
   MlEntityFieldType,
