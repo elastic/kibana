@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { StrictMode } from 'react';
 import ReactDOM from 'react-dom';
 import { pairwise, startWith } from 'rxjs/operators';
 
@@ -36,6 +36,10 @@ export interface StartDeps {
  * @internal
  */
 export class RenderingService {
+  private readonly isDev: boolean;
+  constructor(isDev: boolean) {
+    this.isDev = isDev;
+  }
   start({ application, chrome, overlays, theme, i18n, targetDomElement }: StartDeps) {
     const chromeHeader = chrome.getHeaderComponent();
     const appComponent = application.getComponent();
@@ -50,26 +54,54 @@ export class RenderingService {
         body.classList.add(...newClasses);
       });
 
-    ReactDOM.render(
-      <CoreContextProvider i18n={i18n} theme={theme} globalStyles={true}>
-        <>
-          {/* Fixed headers */}
-          {chromeHeader}
+    const Root = () => {
+      if (this.isDev) {
+        return (
+          <StrictMode>
+            <CoreContextProvider i18n={i18n} theme={theme} globalStyles={true}>
+              <>
+                {/* Fixed headers */}
+                {chromeHeader}
 
-          {/* banners$.subscribe() for things like the No data banner */}
-          <div id="globalBannerList">{bannerComponent}</div>
+                {/* banners$.subscribe() for things like the No data banner */}
+                <div id="globalBannerList">{bannerComponent}</div>
 
-          {/* The App Wrapper outside of the fixed headers that accepts custom class names from apps */}
-          <AppWrapper chromeVisible$={chrome.getIsVisible$()}>
-            {/* Affixes a div to restrict the position of charts tooltip to the visible viewport minus the header */}
-            <div id="app-fixed-viewport" />
+                {/* The App Wrapper outside of the fixed headers that accepts custom class names from apps */}
+                <AppWrapper chromeVisible$={chrome.getIsVisible$()}>
+                  {/* Affixes a div to restrict the position of charts tooltip to the visible viewport minus the header */}
+                  <div id="app-fixed-viewport" />
 
-            {/* The actual plugin/app */}
-            {appComponent}
-          </AppWrapper>
-        </>
-      </CoreContextProvider>,
-      targetDomElement
-    );
+                  {/* The actual plugin/app */}
+                  {appComponent}
+                </AppWrapper>
+              </>
+            </CoreContextProvider>
+          </StrictMode>
+        );
+      } else {
+        return (
+          <CoreContextProvider i18n={i18n} theme={theme} globalStyles={true}>
+            <>
+              {/* Fixed headers */}
+              {chromeHeader}
+
+              {/* banners$.subscribe() for things like the No data banner */}
+              <div id="globalBannerList">{bannerComponent}</div>
+
+              {/* The App Wrapper outside of the fixed headers that accepts custom class names from apps */}
+              <AppWrapper chromeVisible$={chrome.getIsVisible$()}>
+                {/* Affixes a div to restrict the position of charts tooltip to the visible viewport minus the header */}
+                <div id="app-fixed-viewport" />
+
+                {/* The actual plugin/app */}
+                {appComponent}
+              </AppWrapper>
+            </>
+          </CoreContextProvider>
+        );
+      }
+    };
+
+    ReactDOM.render(Root(), targetDomElement);
   }
 }

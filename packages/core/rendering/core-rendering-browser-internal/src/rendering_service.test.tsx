@@ -42,7 +42,7 @@ describe('RenderingService#start', () => {
 
     targetDomElement = document.createElement('div');
 
-    rendering = new RenderingService();
+    rendering = new RenderingService(false);
   });
 
   const startService = () => {

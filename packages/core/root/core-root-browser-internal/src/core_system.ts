@@ -142,7 +142,7 @@ export class CoreSystem {
       kibanaVersion: injectedMetadata.version,
     });
     this.docLinks = new DocLinksService();
-    this.rendering = new RenderingService();
+    this.rendering = new RenderingService(injectedMetadata.env.mode.dev);
     this.application = new ApplicationService();
     this.integrations = new IntegrationsService();
     this.deprecations = new DeprecationsService();
