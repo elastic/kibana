@@ -111,7 +111,7 @@ export function ListingRoute({
         entityNamePlural={i18n.translate('xpack.graph.listing.table.entityNamePlural', {
           defaultMessage: 'graphs',
         })}
-        tableListTitle={i18n.translate('xpack.graph.listing.graphsTitle', {
+        title={i18n.translate('xpack.graph.listing.graphsTitle', {
           defaultMessage: 'Graphs',
         })}
         getDetailViewLink={({ id }) => getEditUrl(addBasePath, { id })}

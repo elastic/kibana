@@ -42,8 +42,8 @@ export const App: FunctionComponent = () => {
   return (
     <div data-test-subj="filesManagementApp">
       <TableListView<FilesUserContentSchema>
-        tableListTitle={i18nTexts.tableListTitle}
-        tableListDescription={i18nTexts.tableListDescription}
+        title={i18nTexts.tableListTitle}
+        description={i18nTexts.tableListDescription}
         titleColumnName={i18nTexts.titleColumnName}
         emptyPrompt={<EmptyPrompt />}
         entityName={i18nTexts.entityName}

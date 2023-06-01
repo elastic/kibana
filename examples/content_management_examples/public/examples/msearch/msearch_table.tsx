@@ -51,7 +51,7 @@ export const MSearchTable = () => {
       initialPageSize={50}
       entityName={`ContentItem`}
       entityNamePlural={`ContentItems`}
-      tableListTitle={`MSearch Demo`}
+      title={`MSearch Demo`}
       urlStateEnabled={false}
       emptyPrompt={<>No data found. Try to install some sample data first.</>}
       onClickTitle={(item) => {

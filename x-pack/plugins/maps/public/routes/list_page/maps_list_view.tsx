@@ -133,7 +133,7 @@ function MapsListViewComp({ history }: Props) {
       entityNamePlural={i18n.translate('xpack.maps.mapListing.entityNamePlural', {
         defaultMessage: 'maps',
       })}
-      tableListTitle={APP_NAME}
+      title={APP_NAME}
       onClickTitle={({ id }) => history.push(getEditPath(id))}
     />
   );
