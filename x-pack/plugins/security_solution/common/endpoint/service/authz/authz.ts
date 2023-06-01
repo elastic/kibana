@@ -100,6 +100,7 @@ export const calculateEndpointAuthz = (
     canAccessResponseConsole:
       isEnterpriseLicense &&
       (canIsolateHost ||
+        canUnIsolateHost ||
         canWriteProcessOperations ||
         canWriteFileOperations ||
         canWriteExecuteOperations),

@@ -86,7 +86,7 @@ describe('Endpoint Authz service', () => {
       it(`should allow Host Isolation Exception read/delete when license is not Platinum+, but entries exist`, () => {
         licenseService.isPlatinumPlus.mockReturnValue(false);
 
-        expect(calculateEndpointAuthz(licenseService, fleetAuthz, userRoles, false, true)).toEqual(
+        expect(calculateEndpointAuthz(licenseService, fleetAuthz, userRoles)).toEqual(
           expect.objectContaining({
             canWriteHostIsolationExceptions: false,
             canReadHostIsolationExceptions: true,
@@ -112,14 +112,6 @@ describe('Endpoint Authz service', () => {
         ['canGetRunningProcesses'],
       ])('should set `%s` to `false`', (authProperty) => {
         expect(calculateEndpointAuthz(licenseService, fleetAuthz, userRoles)[authProperty]).toBe(
-          false
-        );
-      });
-
-      it('should set `canUnIsolateHost` to false when policy is also not platinum', () => {
-        licenseService.isPlatinumPlus.mockReturnValue(false);
-
-        expect(calculateEndpointAuthz(licenseService, fleetAuthz, userRoles).canUnIsolateHost).toBe(
           false
         );
       });
@@ -159,94 +151,82 @@ describe('Endpoint Authz service', () => {
         ['canReadTrustedApplications', 'readTrustedApplications'],
         ['canWriteHostIsolationExceptions', 'writeHostIsolationExceptions'],
         ['canReadHostIsolationExceptions', 'readHostIsolationExceptions'],
+        ['canDeleteHostIsolationExceptions', 'deleteHostIsolationExceptions'],
         ['canWriteBlocklist', 'writeBlocklist'],
         ['canReadBlocklist', 'readBlocklist'],
         ['canWriteEventFilters', 'writeEventFilters'],
         ['canReadEventFilters', 'readEventFilters'],
       ])('%s should be true if `packagePrivilege.%s` is `true`', (auth) => {
-        const authz = calculateEndpointAuthz(licenseService, fleetAuthz, userRoles, true);
+        const authz = calculateEndpointAuthz(licenseService, fleetAuthz, userRoles);
         expect(authz[auth]).toBe(true);
       });
 
       it.each<[EndpointAuthzKeyList[number], string[]]>([
         ['canWriteEndpointList', ['writeEndpointList']],
-        ['canReadEndpointList', ['writeEndpointList', 'readEndpointList']],
+        ['canReadEndpointList', ['readEndpointList']],
         ['canWritePolicyManagement', ['writePolicyManagement']],
-        ['canReadPolicyManagement', ['writePolicyManagement', 'readPolicyManagement']],
+        ['canReadPolicyManagement', ['readPolicyManagement']],
         ['canWriteActionsLogManagement', ['writeActionsLogManagement']],
-        ['canReadActionsLogManagement', ['writeActionsLogManagement', 'readActionsLogManagement']],
-        [
-          'canAccessEndpointActionsLogManagement',
-          ['writeActionsLogManagement', 'readActionsLogManagement'],
-        ],
+        ['canReadActionsLogManagement', ['readActionsLogManagement']],
+        ['canAccessEndpointActionsLogManagement', ['readActionsLogManagement']],
         ['canIsolateHost', ['writeHostIsolation']],
-        ['canUnIsolateHost', ['writeHostIsolation']],
+        ['canUnIsolateHost', ['writeHostIsolationRelease']],
         ['canKillProcess', ['writeProcessOperations']],
         ['canSuspendProcess', ['writeProcessOperations']],
         ['canGetRunningProcesses', ['writeProcessOperations']],
         ['canWriteExecuteOperations', ['writeExecuteOperations']],
         ['canWriteFileOperations', ['writeFileOperations']],
         ['canWriteTrustedApplications', ['writeTrustedApplications']],
-        ['canReadTrustedApplications', ['writeTrustedApplications', 'readTrustedApplications']],
+        ['canReadTrustedApplications', ['readTrustedApplications']],
         ['canWriteHostIsolationExceptions', ['writeHostIsolationExceptions']],
-        [
-          'canReadHostIsolationExceptions',
-          ['writeHostIsolationExceptions', 'readHostIsolationExceptions'],
-        ],
+        ['canReadHostIsolationExceptions', ['readHostIsolationExceptions']],
+        ['canDeleteHostIsolationExceptions', ['deleteHostIsolationExceptions']],
         ['canWriteBlocklist', ['writeBlocklist']],
-        ['canReadBlocklist', ['writeBlocklist', 'readBlocklist']],
+        ['canReadBlocklist', ['readBlocklist']],
         ['canWriteEventFilters', ['writeEventFilters']],
-        ['canReadEventFilters', ['writeEventFilters', 'readEventFilters']],
+        ['canReadEventFilters', ['readEventFilters']],
         // all dependent privileges are false and so it should be false
         ['canAccessResponseConsole', responseConsolePrivileges],
       ])('%s should be false if `packagePrivilege.%s` is `false`', (auth, privileges) => {
-        // read permission checks for write || read so we need to set both to false
         privileges.forEach((privilege) => {
           fleetAuthz.packagePrivileges!.endpoint.actions[privilege].executePackageAction = false;
         });
-        const authz = calculateEndpointAuthz(licenseService, fleetAuthz, userRoles, true);
+        const authz = calculateEndpointAuthz(licenseService, fleetAuthz, userRoles);
         expect(authz[auth]).toBe(false);
       });
 
       it.each<[EndpointAuthzKeyList[number], string[]]>([
         ['canWriteEndpointList', ['writeEndpointList']],
-        ['canReadEndpointList', ['writeEndpointList', 'readEndpointList']],
+        ['canReadEndpointList', ['readEndpointList']],
         ['canWritePolicyManagement', ['writePolicyManagement']],
-        ['canReadPolicyManagement', ['writePolicyManagement', 'readPolicyManagement']],
+        ['canReadPolicyManagement', ['readPolicyManagement']],
         ['canWriteActionsLogManagement', ['writeActionsLogManagement']],
-        ['canReadActionsLogManagement', ['writeActionsLogManagement', 'readActionsLogManagement']],
-        [
-          'canAccessEndpointActionsLogManagement',
-          ['writeActionsLogManagement', 'readActionsLogManagement'],
-        ],
+        ['canReadActionsLogManagement', ['readActionsLogManagement']],
+        ['canAccessEndpointActionsLogManagement', ['readActionsLogManagement']],
         ['canIsolateHost', ['writeHostIsolation']],
-        ['canUnIsolateHost', ['writeHostIsolation']],
+        ['canUnIsolateHost', ['writeHostIsolationRelease']],
         ['canKillProcess', ['writeProcessOperations']],
         ['canSuspendProcess', ['writeProcessOperations']],
         ['canGetRunningProcesses', ['writeProcessOperations']],
         ['canWriteExecuteOperations', ['writeExecuteOperations']],
         ['canWriteFileOperations', ['writeFileOperations']],
         ['canWriteTrustedApplications', ['writeTrustedApplications']],
-        ['canReadTrustedApplications', ['writeTrustedApplications', 'readTrustedApplications']],
+        ['canReadTrustedApplications', ['readTrustedApplications']],
         ['canWriteHostIsolationExceptions', ['writeHostIsolationExceptions']],
-        [
-          'canReadHostIsolationExceptions',
-          ['writeHostIsolationExceptions', 'readHostIsolationExceptions'],
-        ],
+        ['canReadHostIsolationExceptions', ['readHostIsolationExceptions']],
         ['canWriteBlocklist', ['writeBlocklist']],
-        ['canReadBlocklist', ['writeBlocklist', 'readBlocklist']],
+        ['canReadBlocklist', ['readBlocklist']],
         ['canWriteEventFilters', ['writeEventFilters']],
-        ['canReadEventFilters', ['writeEventFilters', 'readEventFilters']],
+        ['canReadEventFilters', ['readEventFilters']],
         // all dependent privileges are false and so it should be false
         ['canAccessResponseConsole', responseConsolePrivileges],
       ])(
         '%s should be false if `packagePrivilege.%s` is `false` and user roles is undefined',
         (auth, privileges) => {
-          // read permission checks for write || read so we need to set both to false
           privileges.forEach((privilege) => {
             fleetAuthz.packagePrivileges!.endpoint.actions[privilege].executePackageAction = false;
           });
-          const authz = calculateEndpointAuthz(licenseService, fleetAuthz, undefined, true);
+          const authz = calculateEndpointAuthz(licenseService, fleetAuthz, undefined);
           expect(authz[auth]).toBe(false);
         }
       );
@@ -263,7 +243,7 @@ describe('Endpoint Authz service', () => {
             responseConsolePrivilege
           ].executePackageAction = true;
 
-          const authz = calculateEndpointAuthz(licenseService, fleetAuthz, userRoles, true);
+          const authz = calculateEndpointAuthz(licenseService, fleetAuthz, userRoles);
           expect(authz.canAccessResponseConsole).toBe(true);
         }
       );
@@ -287,7 +267,7 @@ describe('Endpoint Authz service', () => {
         canWriteActionsLogManagement: false,
         canReadActionsLogManagement: false,
         canIsolateHost: false,
-        canUnIsolateHost: true,
+        canUnIsolateHost: false,
         canKillProcess: false,
         canSuspendProcess: false,
         canGetRunningProcesses: false,
