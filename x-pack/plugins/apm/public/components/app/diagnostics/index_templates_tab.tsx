@@ -38,26 +38,18 @@ export function DiagnosticsIndexTemplates() {
       truncateText: true,
     },
     {
-      name: 'Exists',
-      field: 'exists',
-      render: (_, { exists }) => {
-        return exists ? (
-          <EuiBadge color="green">OK</EuiBadge>
-        ) : (
-          <EuiBadge color="danger">Not found</EuiBadge>
-        );
-      },
-      truncateText: true,
-    },
-    {
-      name: 'Standard',
-      field: 'isNonStandard',
-      render: (_, { isNonStandard }) => {
-        return isNonStandard ? (
-          <EuiBadge color="warning">Non standard</EuiBadge>
-        ) : (
-          <EuiBadge color="green">OK</EuiBadge>
-        );
+      name: 'Status',
+      field: 'status',
+      render: (_, { exists, isNonStandard }) => {
+        if (isNonStandard) {
+          return <EuiBadge color="warning">Non standard</EuiBadge>;
+        }
+
+        if (!exists) {
+          return <EuiBadge color="danger">Not found</EuiBadge>;
+        }
+
+        return <EuiBadge color="green">OK</EuiBadge>;
       },
       truncateText: true,
     },

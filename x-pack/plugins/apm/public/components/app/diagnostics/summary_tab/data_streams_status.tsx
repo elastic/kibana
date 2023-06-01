@@ -11,7 +11,7 @@ import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { useApmRouter } from '../../../../hooks/use_apm_router';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { useDiagnosticsContext } from '../context/use_diagnostics';
-import { getIsStandardIndexTemplateName } from '../data_stream_tab';
+import { getIndexTemplateState } from '../data_stream_tab';
 
 type DiagnosticsBundle = APIReturnType<'GET /internal/apm/diagnostics'>;
 
@@ -51,13 +51,12 @@ export function DataStreamsStatus() {
 }
 
 export function getDataStreamTabStatus(diagnosticsBundle?: DiagnosticsBundle) {
-  const isEveryTemplateNameValid = (diagnosticsBundle?.dataStreams ?? []).every(
-    (ds) =>
-      diagnosticsBundle &&
-      getIsStandardIndexTemplateName(diagnosticsBundle, ds.template)
-  );
+  if (!diagnosticsBundle) {
+    return false;
+  }
 
-  const hasNonDataStreamIndices =
-    diagnosticsBundle?.nonDataStreamIndices.length;
-  return !hasNonDataStreamIndices && isEveryTemplateNameValid;
+  return diagnosticsBundle.dataStreams.every((ds) => {
+    const match = getIndexTemplateState(diagnosticsBundle, ds.template);
+    return match?.exists && !match.isNonStandard;
+  });
 }

@@ -11,7 +11,7 @@ import {
   IngestGetPipelineResponse,
 } from '@elastic/elasticsearch/lib/api/types';
 import { SERVICE_NAME } from '../../../../common/es_fields/apm';
-import { getApmIndexTemplatePrefixes } from '../get_apm_index_template_prefixes';
+import { getApmIndexTemplateNames } from '../get_apm_index_template_prefixes';
 
 export function getIndicesStates({
   indices,
@@ -83,9 +83,10 @@ export function validateIngestPipelineName(
     return false;
   }
 
-  const indexTemplatePrefixes = getApmIndexTemplatePrefixes();
-  return indexTemplatePrefixes.some(
-    (prefix) =>
-      dataStream.startsWith(prefix) && ingestPipelineId.startsWith(prefix)
+  const indexTemplateNames = getApmIndexTemplateNames();
+  return indexTemplateNames.some(
+    (indexTemplateName) =>
+      dataStream.startsWith(indexTemplateName) &&
+      ingestPipelineId.startsWith(indexTemplateName)
   );
 }

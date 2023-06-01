@@ -11,7 +11,7 @@ export async function getFleetPackageInfo(resources: APMRouteHandlerResources) {
   const fleetPluginStart = await resources.plugins.fleet?.start();
   const packageInfo = await fleetPluginStart?.packageService
     .asScoped(resources.request)
-    .ensureInstalledPackage({ pkgName: 'apm' });
+    .getInstallation('apm');
 
   return {
     isInstalled: packageInfo?.install_status === 'installed',

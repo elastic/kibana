@@ -29,5 +29,5 @@ export async function getDataStreams({
     filter_path: ['data_streams.name', 'data_streams.template'],
   });
 
-  return dataStreams;
+  return dataStreams ?? [];
 }

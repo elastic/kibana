@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-export function getApmIndexTemplatePrefixes() {
-  const indexTemplatePrefixes = [
+export function getApmIndexTemplateNames() {
+  const indexTemplateNames = [
     'logs-apm.app',
     'logs-apm.error',
     'metrics-apm.app',
@@ -15,16 +15,14 @@ export function getApmIndexTemplatePrefixes() {
     'traces-apm',
   ];
 
-  const rollupIndexTemplatePrefixes = ['1m', '10m', '60m'].flatMap(
-    (interval) => {
-      return [
-        'metrics-apm.service_destination',
-        'metrics-apm.service_summary',
-        'metrics-apm.service_transaction',
-        'metrics-apm.transaction',
-      ].map((ds) => `${ds}.${interval}`);
-    }
-  );
+  const rollupIndexTemplateNames = ['1m', '10m', '60m'].flatMap((interval) => {
+    return [
+      'metrics-apm.service_destination',
+      'metrics-apm.service_summary',
+      'metrics-apm.service_transaction',
+      'metrics-apm.transaction',
+    ].map((ds) => `${ds}.${interval}`);
+  });
 
-  return [...indexTemplatePrefixes, ...rollupIndexTemplatePrefixes];
+  return [...indexTemplateNames, ...rollupIndexTemplateNames];
 }

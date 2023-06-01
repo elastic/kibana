@@ -8,7 +8,7 @@
 import {
   FieldCapsResponse,
   IndicesDataStream,
-  IndicesGetIndexTemplateResponse,
+  IndicesGetIndexTemplateIndexTemplateItem,
   IndicesGetResponse,
   IngestGetPipelineResponse,
 } from '@elastic/elasticsearch/lib/api/types';
@@ -39,7 +39,7 @@ const getDiagnosticsRoute = createApmServerRoute({
     resources
   ): Promise<{
     esResponses: {
-      existingIndexTemplates: IndicesGetIndexTemplateResponse;
+      existingIndexTemplates: IndicesGetIndexTemplateIndexTemplateItem[];
       fieldCaps: FieldCapsResponse;
       indices: IndicesGetResponse;
       ingestPipelines: IngestGetPipelineResponse;

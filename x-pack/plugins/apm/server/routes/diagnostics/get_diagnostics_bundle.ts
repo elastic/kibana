@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { IndicesGetIndexTemplateResponse } from '@elastic/elasticsearch/lib/api/types';
+import { IndicesGetIndexTemplateIndexTemplateItem } from '@elastic/elasticsearch/lib/api/types';
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { ApmIndicesConfig } from '../settings/apm_indices/get_apm_indices';
 import { getDataStreams } from './bundle/get_data_streams';
 import { getNonDataStreamIndices } from './bundle/get_non_data_stream_indices';
-import { getApmIndexTemplatePrefixes } from './get_apm_index_template_prefixes';
+import { getApmIndexTemplateNames } from './get_apm_index_template_prefixes';
 import { getElasticsearchVersion } from './get_elasticsearch_version';
 import { getIndexTemplatesByIndexPattern } from './bundle/get_index_templates_by_index_pattern';
 import { getExistingApmIndexTemplates } from './bundle/get_existing_index_templates';
@@ -22,7 +22,7 @@ export async function getDiagnosticsBundle(
   esClient: ElasticsearchClient,
   apmIndices: ApmIndicesConfig
 ) {
-  const apmIndexTemplatePrefixes = getApmIndexTemplatePrefixes();
+  const apmIndexTemplateNames = getApmIndexTemplateNames();
 
   const { indices, ingestPipelines } = await getIndicesAndIngestPipelines({
     esClient,
@@ -36,6 +36,7 @@ export async function getDiagnosticsBundle(
 
   const existingIndexTemplates = await getExistingApmIndexTemplates({
     esClient,
+    apmIndexTemplateNames,
   });
 
   const fieldCaps = await getFieldCaps({ esClient, apmIndices });
@@ -61,7 +62,7 @@ export async function getDiagnosticsBundle(
       existingIndexTemplates,
     },
     apmIndexTemplates: getApmIndexTemplates(
-      apmIndexTemplatePrefixes,
+      apmIndexTemplateNames,
       existingIndexTemplates
     ),
     invalidIndices,
@@ -73,13 +74,13 @@ export async function getDiagnosticsBundle(
 }
 
 function getApmIndexTemplates(
-  apmIndexTemplatePrefixes: string[],
-  existingIndexTemplates: IndicesGetIndexTemplateResponse
+  apmIndexTemplateNames: string[],
+  existingIndexTemplates: IndicesGetIndexTemplateIndexTemplateItem[]
 ) {
-  const standardIndexTemplates = apmIndexTemplatePrefixes.map(
+  const standardIndexTemplates = apmIndexTemplateNames.map(
     (indexTemplatePrefix) => {
-      const matchingTemplate = existingIndexTemplates.index_templates.find(
-        ({ name }) => name.startsWith(indexTemplatePrefix)
+      const matchingTemplate = existingIndexTemplates.find(
+        ({ name }) => name === indexTemplatePrefix
       );
 
       return {
@@ -91,7 +92,7 @@ function getApmIndexTemplates(
     }
   );
 
-  const nonStandardIndexTemplates = existingIndexTemplates.index_templates
+  const nonStandardIndexTemplates = existingIndexTemplates
     .filter(
       (indexTemplate) =>
         standardIndexTemplates.some(

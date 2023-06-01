@@ -44,16 +44,17 @@ function DataStreamsTable({ data }: { data?: DiagnosticsBundle }) {
       field: 'template',
       name: 'Index template name',
       render: (templateName: string) => {
-        const isStandard =
-          data && getIsStandardIndexTemplateName(data, templateName);
-        return isStandard ? (
+        const indexTemplate = data && getIndexTemplateState(data, templateName);
+
+        return indexTemplate?.exists && !indexTemplate?.isNonStandard ? (
           <>
-            {templateName}&nbsp;<EuiBadge color="green">OK</EuiBadge>
+            {templateName}&nbsp;
+            <EuiBadge color="green">OK</EuiBadge>
           </>
         ) : (
           <>
             {templateName}&nbsp;
-            <EuiBadge color="warning">Non-standard template</EuiBadge>
+            <EuiBadge color="warning">Non-standard</EuiBadge>
           </>
         );
       },
@@ -70,11 +71,11 @@ function DataStreamsTable({ data }: { data?: DiagnosticsBundle }) {
   );
 }
 
-export function getIsStandardIndexTemplateName(
+export function getIndexTemplateState(
   diagnosticsBundle: DiagnosticsBundle,
   templateName: string
 ) {
-  return diagnosticsBundle.apmIndexTemplates.some(
-    ({ name, isNonStandard }) => templateName === name && !isNonStandard
+  return diagnosticsBundle.apmIndexTemplates.find(
+    ({ prefix }) => templateName === prefix
   );
 }

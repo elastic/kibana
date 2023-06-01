@@ -16,8 +16,17 @@ export type ApmIndexTemplateStates = Record<
 // Check whether the default APM index templates exist
 export async function getExistingApmIndexTemplates({
   esClient,
+  apmIndexTemplateNames,
 }: {
   esClient: ElasticsearchClient;
+  apmIndexTemplateNames: string[];
 }) {
-  return getIndexTemplate(esClient, { name: '*-apm.*' });
+  const values = await Promise.all(
+    apmIndexTemplateNames.map(async (indexTemplateName) => {
+      const res = await getIndexTemplate(esClient, { name: indexTemplateName });
+      return res.index_templates[0];
+    })
+  );
+
+  return values.filter((v) => v !== undefined);
 }
