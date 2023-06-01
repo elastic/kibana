@@ -12,13 +12,13 @@ import {
   FILTER_IN,
   FILTER_OUT,
   SHOW_TOP_FIELD,
-} from '../../screens/network/flows';
-import { esArchiverLoad, esArchiverUnload } from '../../tasks/es_archiver';
+} from '../../../screens/network/flows';
+import { esArchiverLoad, esArchiverUnload } from '../../../tasks/es_archiver';
 
-import { login, visit } from '../../tasks/login';
-import { mouseoverOnToOverflowItem, openHoverActions } from '../../tasks/network/flows';
+import { login, visit } from '../../../tasks/login';
+import { mouseoverOnToOverflowItem, openHoverActions } from '../../../tasks/network/flows';
 
-import { NETWORK_URL } from '../../urls/navigation';
+import { NETWORK_URL } from '../../../urls/navigation';
 
 const testDomainOne = 'myTest';
 const testDomainTwo = 'myTest2';

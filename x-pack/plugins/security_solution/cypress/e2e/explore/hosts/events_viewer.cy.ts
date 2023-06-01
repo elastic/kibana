@@ -9,7 +9,7 @@ import {
   FIELDS_BROWSER_CHECKBOX,
   FIELDS_BROWSER_SELECTED_CATEGORIES_BADGES,
   FIELDS_BROWSER_VIEW_BUTTON,
-} from '../../../../screens/fields_browser';
+} from '../../../screens/fields_browser';
 import {
   HOST_GEO_CITY_NAME_HEADER,
   HOST_GEO_COUNTRY_NAME_HEADER,
