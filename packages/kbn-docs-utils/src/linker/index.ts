@@ -17,6 +17,28 @@ export interface OpenAPISpec {
   [key: string]: any;
 }
 
+const BASIC_CONFIG = {
+  resolve: {
+    http: {
+      headers: [],
+      customFetch() {},
+    },
+  },
+  apis: {
+    api1: {
+      root: '',
+      styleguide: {
+        extendPaths: [],
+        pluginPaths: [],
+      },
+    },
+  },
+  styleguide: {
+    extendPaths: [],
+    pluginPaths: [],
+  },
+};
+
 export function loadYamlFile(filePath: string): OpenAPISpec {
   const fileContent = fs.readFileSync(filePath, 'utf8');
   return yaml.safeLoad(fileContent) as OpenAPISpec;
@@ -73,29 +95,7 @@ export const docLinker = async ({ sourceDir = './openapi' }: { sourceDir: string
 
     bundle({
       ref,
-      config: new Config(
-        new Config({
-          resolve: {
-            http: {
-              headers: [],
-              customFetch() {},
-            },
-          },
-          apis: {
-            api1: {
-              root: 'root_path',
-              styleguide: {
-                extendPaths: [],
-                pluginPaths: [],
-              },
-            },
-          },
-          styleguide: {
-            extendPaths: [],
-            pluginPaths: [],
-          },
-        })
-      ),
+      config: new Config(BASIC_CONFIG),
       dereference: false,
     })
       .then((result) => {
@@ -118,6 +118,9 @@ export const docLinker = async ({ sourceDir = './openapi' }: { sourceDir: string
               const spec = loadYamlFile(location.source.absoluteRef);
               const definition = getValueFromPath(spec, location.pointer);
               if (definition && definition.$ref) {
+                console.log(
+                  `Replacing ${definition.$ref} to ${relativePath} in ${location.source.absoluteRef}`
+                );
                 replaceRef(spec, definition.$ref, relativePath);
 
                 const yamlContent = yaml.safeDump(spec);
