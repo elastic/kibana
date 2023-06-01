@@ -184,15 +184,15 @@ export interface SchedulingConfiguraton {
   access_control: {
     enabled: boolean;
     interval: string;
-  },
+  };
   incremental: {
     enabled: boolean;
     interval: string;
-  },
+  };
   full: {
     enabled: boolean;
     interval: string;
-  }
+  };
 }
 
 export interface Connector {
@@ -216,7 +216,7 @@ export interface Connector {
   last_synced: string | null;
   name: string;
   pipeline?: IngestPipelineParams | null;
-  scheduling: SchedulingConfiguraton
+  scheduling: SchedulingConfiguraton;
   service_type: string | null;
   status: ConnectorStatus;
   sync_now: boolean;
