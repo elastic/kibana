@@ -12,6 +12,9 @@ import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { AggregateQuery, Query } from '@kbn/es-query';
 import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
+import { DataView } from '@kbn/data-views-plugin/common';
+import { getDataViewByTextBasedQueryLang } from '../utils/get_data_view_by_text_based_query_lang';
+import { isTextBasedQuery } from '../utils/is_text_based_query';
 import { getRawRecordType } from '../utils/get_raw_record_type';
 import { DiscoverAppState } from './discover_app_state_container';
 import { DiscoverServices } from '../../../build_services';
@@ -129,11 +132,13 @@ export function getDataStateContainer({
   searchSessionManager,
   getAppState,
   getSavedSearch,
+  setDataView,
 }: {
   services: DiscoverServices;
   searchSessionManager: DiscoverSearchSessionManager;
   getAppState: () => DiscoverAppState;
   getSavedSearch: () => SavedSearch;
+  setDataView: (dataView: DataView) => void;
 }): DiscoverDataStateContainer {
   const { data, uiSettings, toastNotifications } = services;
   const { timefilter } = data.query.timefilter;
@@ -226,7 +231,17 @@ export function getDataStateContainer({
     };
   }
 
-  const fetchQuery = (resetQuery?: boolean) => {
+  const fetchQuery = async (resetQuery?: boolean) => {
+    const query = getAppState().query;
+    const currentDataView = getSavedSearch().searchSource.getField('index');
+
+    if (isTextBasedQuery(query)) {
+      const nextDataView = await getDataViewByTextBasedQueryLang(query, currentDataView, services);
+      if (nextDataView !== currentDataView) {
+        setDataView(nextDataView);
+      }
+    }
+
     if (resetQuery) {
       refetch$.next('reset');
     } else {

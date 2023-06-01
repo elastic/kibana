@@ -1471,18 +1471,6 @@
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/common/containers/source/index.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/common/containers/source/index.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/common/containers/source/index.tsx"
-          },
-          {
-            "plugin": "securitySolution",
             "path": "x-pack/plugins/security_solution/public/common/components/event_details/types.ts"
           },
           {
@@ -1633,7 +1621,7 @@
             "label": "fields",
             "description": [],
             "signature": [
-              "{ readonly [x: string]: Partial<",
+              "{ [x: string]: Partial<",
               {
                 "pluginId": "timelines",
                 "scope": "common",
@@ -3029,6 +3017,54 @@
             "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/eql/index.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "timelines",
+            "id": "def-common.TimelineEqlRequestOptions.runtime_mappings",
+            "type": "Object",
+            "tags": [],
+            "label": "runtime_mappings",
+            "description": [],
+            "signature": [
+              "Record<string, Omit<",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.RuntimeFieldSpec",
+                "text": "RuntimeFieldSpec"
+              },
+              ", \"type\"> & { type: ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.RuntimePrimitiveTypes",
+                "text": "RuntimePrimitiveTypes"
+              },
+              "; }> | undefined"
+            ],
+            "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/eql/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "timelines",
+            "id": "def-common.TimelineEqlRequestOptions.body",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "body",
+            "description": [],
+            "signature": [
+              "(Omit<",
+              "EqlSearchRequest",
+              ", \"body\"> & EqlBody & { runtime_mappings?: ",
+              "RunTimeMappings",
+              "; }) | undefined"
+            ],
+            "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/eql/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -3242,9 +3278,23 @@
             "label": "runtimeMappings",
             "description": [],
             "signature": [
-              "{ [x: string]: ",
-              "MappingRuntimeField",
-              "; }"
+              "Record<string, Omit<",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.RuntimeFieldSpec",
+                "text": "RuntimeFieldSpec"
+              },
+              ", \"type\"> & { type: ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.RuntimePrimitiveTypes",
+                "text": "RuntimePrimitiveTypes"
+              },
+              "; }> | undefined"
             ],
             "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/all/index.ts",
             "deprecated": false,
@@ -4221,7 +4271,7 @@
         "label": "BrowserFields",
         "description": [],
         "signature": [
-          "{ readonly [x: string]: Partial<",
+          "{ [x: string]: Partial<",
           {
             "pluginId": "timelines",
             "scope": "common",
@@ -4425,7 +4475,11 @@
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/common/containers/source/index.tsx"
+            "path": "x-pack/plugins/security_solution/public/common/containers/source/use_data_view.tsx"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/public/common/containers/source/use_data_view.tsx"
           },
           {
             "plugin": "securitySolution",
@@ -4721,15 +4775,15 @@
         ],
         "signature": [
           "EuiDataGridCellValueElementProps",
-          " & { asPlainText?: boolean | undefined; browserFields?: Readonly<Record<string, Partial<",
+          " & { asPlainText?: boolean | undefined; browserFields?: ",
           {
             "pluginId": "timelines",
             "scope": "common",
             "docId": "kibTimelinesPluginApi",
-            "section": "def-common.BrowserField",
-            "text": "BrowserField"
+            "section": "def-common.BrowserFields",
+            "text": "BrowserFields"
           },
-          ">>> | undefined; data: ",
+          " | undefined; data: ",
           {
             "pluginId": "timelines",
             "scope": "common",

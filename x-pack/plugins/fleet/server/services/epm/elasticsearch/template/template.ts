@@ -605,6 +605,7 @@ const getDataStreams = async (
 
   const body = await esClient.indices.getDataStream({
     name: indexTemplate.index_patterns.join(','),
+    expand_wildcards: ['open', 'hidden'],
   });
 
   const dataStreams = body.data_streams;

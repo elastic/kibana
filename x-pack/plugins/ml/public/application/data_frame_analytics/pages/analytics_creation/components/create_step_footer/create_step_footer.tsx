@@ -10,16 +10,16 @@ import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import {
-  getDataFrameAnalyticsProgressPhase,
+  type DataFrameAnalysisConfigType,
   DATA_FRAME_TASK_STATE,
-} from '../../../analytics_management/components/analytics_list/common';
+} from '@kbn/ml-data-frame-analytics-utils';
+import { getDataFrameAnalyticsProgressPhase } from '../../../analytics_management/components/analytics_list/common';
 import { isGetDataFrameAnalyticsStatsResponseOk } from '../../../analytics_management/services/analytics_service/get_analytics';
 import { useMlKibana } from '../../../../../contexts/kibana';
 import { ml } from '../../../../../services/ml_api_service';
 import { BackToListPanel } from '../back_to_list_panel';
 import { ViewResultsPanel } from '../view_results_panel';
 import { ProgressStats } from './progress_stats';
-import { DataFrameAnalysisConfigType } from '../../../../../../../common/types/data_frame_analytics';
 import { NewJobAwaitingNodeWarning } from '../../../../../components/jobs_awaiting_node_warning';
 
 export const PROGRESS_REFRESH_INTERVAL_MS = 1000;
