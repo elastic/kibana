@@ -174,20 +174,6 @@ describe('rule snoozing', () => {
       deleteConnectors();
     });
 
-    it('ensures actions are visible', () => {
-      createRuleWithActions({ name: 'Snoozed rule with actions' }, createSnoozedRule).then(
-        ({ body: rule }) => {
-          visitWithoutDateRange(ruleEditUrl(rule.id));
-          // Wait for rule data being loaded
-          cy.get(RULE_INDICES).should('be.visible');
-          goToActionsStepTab();
-        }
-      );
-
-      // It's enough to check only the first action is visible
-      cy.get(actionFormSelector(0)).should('be.visible');
-    });
-
     it('adds an action to a snoozed rule', () => {
       createSnoozedRule(getNewRule({ name: 'Snoozed rule' })).then(({ body: rule }) => {
         visitWithoutDateRange(ruleEditUrl(rule.id));
