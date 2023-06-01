@@ -190,8 +190,7 @@ export function DiscoverMainRoute(props: Props) {
     },
     [
       checkData,
-      stateContainer.actions,
-      stateContainer.appState,
+      stateContainer,
       savedSearchId,
       historyLocationState?.dataViewSpec,
       chrome,
@@ -206,16 +205,12 @@ export function DiscoverMainRoute(props: Props) {
 
   const onDataViewCreated = useCallback(
     async (nextDataView: unknown) => {
-      const dataViewCreatedStartTime = window.performance.now();
       if (nextDataView) {
         setLoading(true);
         setShowNoDataPage(false);
         setError(undefined);
         await loadSavedSearch(nextDataView as DataView);
       }
-      const dataViewCreatedEndTime = window.performance.now();
-      const dataViewCreatedDuration = dataViewCreatedEndTime - dataViewCreatedStartTime;
-      window.console.log(`dataViewCreatedDuration=${dataViewCreatedDuration}`);
     },
     [loadSavedSearch]
   );
