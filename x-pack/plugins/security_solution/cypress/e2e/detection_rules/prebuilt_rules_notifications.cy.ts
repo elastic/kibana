@@ -17,7 +17,12 @@ import {
   createNewRuleAsset,
   preventPrebuiltRulesPackageInstallation,
 } from '../../tasks/api_calls/prebuilt_rules';
-import { cleanKibana, resetRulesTableState, deleteAlertsAndRules } from '../../tasks/common';
+import {
+  cleanKibana,
+  resetRulesTableState,
+  deleteAlertsAndRules,
+  reload,
+} from '../../tasks/common';
 import { esArchiverResetKibana } from '../../tasks/es_archiver';
 import { login, visitWithoutDateRange } from '../../tasks/login';
 import { SECURITY_DETECTIONS_RULES_URL } from '../../urls/navigation';
@@ -25,14 +30,13 @@ import { SECURITY_DETECTIONS_RULES_URL } from '../../urls/navigation';
 describe('Detection rules, Prebuilt Rules Installation and Update workflow', () => {
   before(() => {
     cleanKibana();
-    login();
   });
   beforeEach(() => {
+    login();
     /* Make sure persisted rules table state is cleared */
     resetRulesTableState();
     deleteAlertsAndRules();
     esArchiverResetKibana();
-
     preventPrebuiltRulesPackageInstallation();
     createNewRuleAsset({
       rule: createRuleAssetSavedObject({
@@ -86,6 +90,7 @@ describe('Detection rules, Prebuilt Rules Installation and Update workflow', () 
         }),
       });
       visitWithoutDateRange(SECURITY_DETECTIONS_RULES_URL);
+      reload();
       waitForRulesTableToBeLoaded();
     });
 
@@ -118,6 +123,7 @@ describe('Detection rules, Prebuilt Rules Installation and Update workflow', () 
       });
       visitWithoutDateRange(SECURITY_DETECTIONS_RULES_URL);
       waitForRulesTableToBeLoaded();
+      reload();
     });
 
     it('should notify user about prebuilt rules package available for update', () => {
