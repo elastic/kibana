@@ -42,7 +42,7 @@ export const useLensProps = ({
     };
   }, [attributesContext, getTimeRange, onLoad, request?.searchSessionId]);
 
-  const [lensPropsContext, setLensPropsContext] = useState(buildLensProps());
+  const [, setLensPropsContext] = useState(buildLensProps());
   const updateLensPropsContext = useStableCallback(() => setLensPropsContext(buildLensProps()));
 
   useEffect(() => {
@@ -50,7 +50,7 @@ export const useLensProps = ({
     return () => subscription.unsubscribe();
   }, [refetch$, updateLensPropsContext]);
 
-  return lensPropsContext;
+  return buildLensProps();
 };
 
 export const getLensProps = ({
