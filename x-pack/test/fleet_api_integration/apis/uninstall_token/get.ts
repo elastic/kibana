@@ -43,7 +43,7 @@ export default function (providerContext: FtrProviderContext) {
         await cleanSavedObjects();
       });
 
-      it('should return tokens for all policies if number is below default perPage', async () => {
+      it('should return tokens for all policies if number of policies is below default perPage', async () => {
         const response = await supertest.get(UNINSTALL_TOKEN_ROUTES.LIST_PATTERN).expect(200);
 
         const body: GetUninstallTokensResponse = response.body;
