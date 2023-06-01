@@ -58,7 +58,7 @@ export const EmptyDimensionButton = ({
         onClick();
       }}
     >
-      <DimensionTrigger label={label} />
+      <DimensionTrigger label={label} dataTestSubj="emptyDimensionTrigger" />
     </EuiButtonEmpty>
   );
 };
