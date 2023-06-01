@@ -53,10 +53,6 @@ import {
 import { TOASTER } from '../../../screens/alerts_detection_rules';
 import { setEndDate, setStartDate } from '../../../tasks/date_picker';
 import { fillAddFilterForm, openAddFilterPopover } from '../../../tasks/search_bar';
-import {
-  GLOBAL_SEARCH_BAR_FILTER_ITEM,
-  GLOBAL_SEARCH_BAR_FILTER_ITEM_DELETE,
-} from '../../../screens/search_bar';
 
 const customFilters = [
   {
@@ -346,10 +342,6 @@ describe('Detections : Page Filters', () => {
       cy.get(OPTION_SELECTABLE(0, 'open')).should('be.visible');
       cy.get(OPTION_SELECTABLE(0, 'open')).should('contain.text', 'open');
       cy.get(OPTION_SELECTABLE(0, 'open')).get(OPTION_SELECTABLE_COUNT).should('have.text', 2);
-      // // cleanup
-      // togglePageFilterPopover(0);
-      // clearSearchBar();
-      // cy.get(ALERTS_REFRESH_BTN).trigger('click');
     });
 
     it('should take kqlQuery into account', () => {
@@ -359,10 +351,6 @@ describe('Detections : Page Filters', () => {
       togglePageFilterPopover(0);
       cy.get(CONTROL_POPOVER(0)).should('contain.text', 'No options found');
       cy.get(OPTION_IGNORED(0, 'open')).should('be.visible');
-      // // cleanup
-      // togglePageFilterPopover(0);
-      // clearSearchBar();
-      // cy.get(ALERTS_REFRESH_BTN).trigger('click');
     });
 
     it('should take filters into account', () => {
@@ -375,9 +363,6 @@ describe('Detections : Page Filters', () => {
       togglePageFilterPopover(0);
       cy.get(CONTROL_POPOVER(0)).should('contain.text', 'No options found');
       cy.get(OPTION_IGNORED(0, 'open')).should('be.visible');
-      // cleanup
-      cy.get(GLOBAL_SEARCH_BAR_FILTER_ITEM_DELETE).trigger('click');
-      cy.get(GLOBAL_SEARCH_BAR_FILTER_ITEM).should('not.exist');
     });
     it('should take timeRange into account', () => {
       const startDateWithZeroAlerts = 'Jan 1, 2002 @ 00:00:00.000';
@@ -391,10 +376,6 @@ describe('Detections : Page Filters', () => {
       togglePageFilterPopover(0);
       cy.get(CONTROL_POPOVER(0)).should('contain.text', 'No options found');
       cy.get(OPTION_IGNORED(0, 'open')).should('be.visible');
-      // // cleanup
-      // togglePageFilterPopover(0);
-      // clearSearchBar();
-      // cy.get(ALERTS_REFRESH_BTN).trigger('click');
     });
   });
   it('Number fields are not visible in field edit panel', () => {
