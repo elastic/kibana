@@ -5,6 +5,71 @@
  * 2.0.
  */
 
+import type {
+  createAction,
+  bulkCreateActions,
+  getActionsByIds,
+  getActionResultsWithKuery,
+  getActionResultsByIds,
+  getActionsWithKuery,
+} from './actions';
+
+export interface FleetActionsClientInterface {
+  /**
+   *
+   * @param action
+   * @returns {id: string; created_at: string}
+   * @throws {FleetActionsError}
+   * creates a new action document
+   */
+  createAction(action: FleetAction): Promise<ReturnType<typeof createAction>>;
+
+  /**
+   *
+   * @param actions
+   * @returns {id: string; created_at: string}[]
+   * @throws {FleetActionsError}
+   * creates multiple action documents
+   * return successfully created actions
+   * logs failed actions documents
+   */
+  bulkCreateActions(actions: FleetAction[]): Promise<ReturnType<typeof bulkCreateActions>>;
+
+  /**
+   *
+   * @param actionIds
+   * @returns {FleetAction[]}
+   * @throws {FleetActionsError}
+   * returns actions by action ids
+   */
+  getActionsByIds(actionIds: string[]): Promise<ReturnType<typeof getActionsByIds>>;
+
+  /**
+   *
+   * @param kuery
+   * @returns {FleetAction[]}
+   * @throws {FleetActionsError}
+   * returns actions by kuery
+   */
+  getActionsWithKuery(kuery: string): Promise<ReturnType<typeof getActionsWithKuery>>;
+
+  /**
+   *
+   * @param actionIds
+   * @returns {FleetActionResponse[]}
+   * @throws {FleetActionsError}
+   * returns action results by action ids
+   */
+  getActionResultsByIds(actionIds: string[]): Promise<ReturnType<typeof getActionResultsByIds>>;
+
+  /**
+   *
+   * @param kuery
+   * @returns {FleetActionResponse[]}
+   */
+  getActionResultsWithKuery(kuery: string): Promise<ReturnType<typeof getActionResultsWithKuery>>;
+}
+
 interface CommonFleetActionResponseDocFields {
   '@timestamp': string;
   action_id: string;

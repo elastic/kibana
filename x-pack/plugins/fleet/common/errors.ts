@@ -21,3 +21,4 @@ export class PackagePolicyValidationError extends FleetError {}
 export class MessageSigningError extends FleetError {}
 
 export class FleetActionsError extends FleetError {}
+export class FleetActionsClientError extends FleetError {}
