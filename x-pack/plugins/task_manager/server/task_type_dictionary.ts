@@ -67,7 +67,13 @@ export interface TaskRegisterDefinition {
    * The default value, if not given, is 0.
    */
   maxConcurrency?: number;
-  stateSchemaByVersion?: Record<number, ObjectType>;
+  stateSchemaByVersion?: Record<
+    number,
+    {
+      schema: ObjectType;
+      up: <T>(task: T) => T;
+    }
+  >;
 }
 
 /**
@@ -167,6 +173,7 @@ export function sanitizeAndAugmentTaskDefinitions(
     return {
       ...validatedDefinition,
       createTaskRunner: rawDefinition.createTaskRunner,
+      stateSchemaByVersion: rawDefinition.stateSchemaByVersion,
       getLatestStateSchema: createGetLatestSchemaFn(rawDefinition.stateSchemaByVersion),
     };
   });
@@ -188,7 +195,8 @@ function createGetLatestSchemaFn(
 
     return {
       version: latest,
-      schema: stateSchemaByVersion[latest],
+      schema: stateSchemaByVersion[latest].schema,
+      up: stateSchemaByVersion[latest].up,
     };
   };
 }

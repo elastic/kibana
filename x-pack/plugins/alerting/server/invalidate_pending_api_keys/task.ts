@@ -90,10 +90,13 @@ function registerApiKeyInvalidatorTaskDefinition(
     [TASK_TYPE]: {
       title: 'Invalidate alert API Keys',
       stateSchemaByVersion: {
-        1: schema.object({
-          runs: schema.number(),
-          total_invalidated: schema.number(),
-        }),
+        1: {
+          up: (task) => task,
+          schema: schema.object({
+            runs: schema.number(),
+            total_invalidated: schema.number(),
+          }),
+        },
       },
       createTaskRunner: taskRunner(logger, coreStartServices, config),
     },

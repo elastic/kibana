@@ -352,30 +352,33 @@ export class RuleTypeRegistry {
         title: ruleType.name,
         timeout: ruleType.ruleTaskTimeout,
         stateSchemaByVersion: {
-          1: schema.object({
-            // Places using rule state:
-            // x-pack/examples/alerting_example/server/alert_types/always_firing.ts
-            // x-pack/examples/alerting_example/server/alert_types/astros.ts
-            // x-pack/plugins/infra/server/lib/alerting/metric_threshold/metric_threshold_executor.ts
-            // x-pack/plugins/rule_registry/server/utils/create_lifecycle_executor.ts
-            // x-pack/plugins/stack_alerts/server/rule_types/es_query/executor.ts
-            // x-pack/plugins/stack_alerts/server/rule_types/geo_containment/geo_containment.ts
-            // x-pack/plugins/synthetics/server/alert_rules/status_rule/monitor_status_rule.ts
-            // x-pack/plugins/synthetics/server/legacy_uptime/lib/alerts/duration_anomaly.ts
-            // x-pack/plugins/synthetics/server/legacy_uptime/lib/alerts/status_check.ts
-            // x-pack/plugins/synthetics/server/legacy_uptime/lib/alerts/tls.ts
-            // x-pack/plugins/synthetics/server/legacy_uptime/lib/alerts/tls_legacy.ts
-            // x-pack/test/alerting_api_integration/common/fixtures/plugins/alerts/server/alert_types.ts
-            // x-pack/test/rule_registry/spaces_only/tests/trial/get_summarized_alerts.ts
-            // x-pack/test/rule_registry/spaces_only/tests/trial/lifecycle_executor.ts
-            alertTypeState: ruleStateSchema,
-            alertInstances: rawAlertInstanceSchema,
-            alertRecoveredInstances: rawAlertInstanceSchema,
-            previousStartedAt: schema.maybe(schema.nullable(schema.string())),
-            summaryActions: schema.maybe(
-              schema.recordOf(schema.string(), schema.object({ date: schema.string() }))
-            ),
-          }),
+          1: {
+            up: (task) => task,
+            schema: schema.object({
+              // Places using rule state:
+              // x-pack/examples/alerting_example/server/alert_types/always_firing.ts
+              // x-pack/examples/alerting_example/server/alert_types/astros.ts
+              // x-pack/plugins/infra/server/lib/alerting/metric_threshold/metric_threshold_executor.ts
+              // x-pack/plugins/rule_registry/server/utils/create_lifecycle_executor.ts
+              // x-pack/plugins/stack_alerts/server/rule_types/es_query/executor.ts
+              // x-pack/plugins/stack_alerts/server/rule_types/geo_containment/geo_containment.ts
+              // x-pack/plugins/synthetics/server/alert_rules/status_rule/monitor_status_rule.ts
+              // x-pack/plugins/synthetics/server/legacy_uptime/lib/alerts/duration_anomaly.ts
+              // x-pack/plugins/synthetics/server/legacy_uptime/lib/alerts/status_check.ts
+              // x-pack/plugins/synthetics/server/legacy_uptime/lib/alerts/tls.ts
+              // x-pack/plugins/synthetics/server/legacy_uptime/lib/alerts/tls_legacy.ts
+              // x-pack/test/alerting_api_integration/common/fixtures/plugins/alerts/server/alert_types.ts
+              // x-pack/test/rule_registry/spaces_only/tests/trial/get_summarized_alerts.ts
+              // x-pack/test/rule_registry/spaces_only/tests/trial/lifecycle_executor.ts
+              alertTypeState: ruleStateSchema,
+              alertInstances: rawAlertInstanceSchema,
+              alertRecoveredInstances: rawAlertInstanceSchema,
+              previousStartedAt: schema.maybe(schema.nullable(schema.string())),
+              summaryActions: schema.maybe(
+                schema.recordOf(schema.string(), schema.object({ date: schema.string() }))
+              ),
+            }),
+          },
         },
         createTaskRunner: (context: RunContext) =>
           this.taskRunnerFactory.create<

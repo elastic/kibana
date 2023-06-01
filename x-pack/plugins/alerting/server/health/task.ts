@@ -59,10 +59,13 @@ function registerAlertingHealthCheckTask(
     [HEALTH_TASK_TYPE]: {
       title: 'Alerting framework health check task',
       stateSchemaByVersion: {
-        1: schema.object({
-          runs: schema.number(),
-          health_status: schema.string(),
-        }),
+        1: {
+          up: (task) => task,
+          schema: schema.object({
+            runs: schema.number(),
+            health_status: schema.string(),
+          }),
+        },
       },
       createTaskRunner: healthCheckTaskRunner(logger, coreStartServices),
     },

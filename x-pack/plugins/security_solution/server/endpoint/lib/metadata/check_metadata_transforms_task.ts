@@ -56,10 +56,13 @@ export class CheckMetadataTransformsTask {
         title: 'Security Solution Endpoint Metadata Periodic Tasks',
         timeout: TIMEOUT,
         stateSchemaByVersion: {
-          1: schema.object({
-            restartAttempts: schema.maybe(schema.recordOf(schema.string(), schema.number())),
-            reinstallAttempts: schema.maybe(schema.number()),
-          }),
+          1: {
+            up: (task) => task,
+            schema: schema.object({
+              restartAttempts: schema.maybe(schema.recordOf(schema.string(), schema.number())),
+              reinstallAttempts: schema.maybe(schema.number()),
+            }),
+          },
         },
         createTaskRunner: ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => {
           return {

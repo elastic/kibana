@@ -138,7 +138,15 @@ export const taskDefinitionSchema = schema.object(
         min: 0,
       })
     ),
-    stateSchemaByVersion: schema.maybe(schema.recordOf(schema.string(), schema.any())),
+    stateSchemaByVersion: schema.maybe(
+      schema.recordOf(
+        schema.string(),
+        schema.object({
+          schema: schema.any(),
+          up: schema.any(),
+        })
+      )
+    ),
   },
   {
     validate({ timeout }) {
@@ -159,8 +167,16 @@ export type TaskDefinition = TypeOf<typeof taskDefinitionSchema> & {
    * and an optional cancel function which cancels the task.
    */
   createTaskRunner: TaskRunCreatorFunction;
-  stateSchemaByVersion?: Record<number, ObjectType>;
-  getLatestStateSchema: () => undefined | { schema: ObjectType; version: number };
+  stateSchemaByVersion?: Record<
+    number,
+    {
+      schema: ObjectType;
+      up: <T>(task: T) => T;
+    }
+  >;
+  getLatestStateSchema: () =>
+    | undefined
+    | { schema: ObjectType; version: number; up: <T>(task: T) => T };
 };
 
 export enum TaskStatus {

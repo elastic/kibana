@@ -52,111 +52,120 @@ function registerAlertingTelemetryTask(
       title: 'Alerting usage fetch task',
       timeout: '5m',
       stateSchemaByVersion: {
-        1: schema.object({
-          has_errors: schema.boolean(),
-          error_messages: schema.maybe(schema.arrayOf(schema.any())),
-          runs: schema.number(),
-          count_total: schema.number(),
-          count_by_type: schema.recordOf(schema.string(), schema.number()),
-          throttle_time: schema.object({
-            min: schema.string(),
-            avg: schema.string(),
-            max: schema.string(),
+        1: {
+          up: (task) => task,
+          schema: schema.object({
+            has_errors: schema.boolean(),
+            error_messages: schema.maybe(schema.arrayOf(schema.any())),
+            runs: schema.number(),
+            count_total: schema.number(),
+            count_by_type: schema.recordOf(schema.string(), schema.number()),
+            throttle_time: schema.object({
+              min: schema.string(),
+              avg: schema.string(),
+              max: schema.string(),
+            }),
+            schedule_time: schema.object({
+              min: schema.string(),
+              avg: schema.string(),
+              max: schema.string(),
+            }),
+            throttle_time_number_s: schema.object({
+              min: schema.number(),
+              avg: schema.number(),
+              max: schema.number(),
+            }),
+            schedule_time_number_s: schema.object({
+              min: schema.number(),
+              avg: schema.number(),
+              max: schema.number(),
+            }),
+            connectors_per_alert: schema.object({
+              min: schema.number(),
+              avg: schema.number(),
+              max: schema.number(),
+            }),
+            count_active_by_type: schema.recordOf(schema.string(), schema.number()),
+            count_active_total: schema.number(),
+            count_disabled_total: schema.number(),
+            count_rules_by_execution_status: schema.object({
+              success: schema.number(),
+              error: schema.number(),
+              warning: schema.number(),
+            }),
+            count_rules_with_tags: schema.number(),
+            count_rules_by_notify_when: schema.object({
+              on_action_group_change: schema.number(),
+              on_active_alert: schema.number(),
+              on_throttle_interval: schema.number(),
+            }),
+            count_rules_snoozed: schema.number(),
+            count_rules_muted: schema.number(),
+            count_rules_with_muted_alerts: schema.number(),
+            count_connector_types_by_consumers: schema.recordOf(
+              schema.string(),
+              schema.recordOf(schema.string(), schema.number())
+            ),
+            count_rules_namespaces: schema.number(),
+            count_rules_executions_per_day: schema.number(),
+            count_rules_executions_by_type_per_day: schema.recordOf(
+              schema.string(),
+              schema.number()
+            ),
+            count_rules_executions_failured_per_day: schema.number(),
+            count_rules_executions_failured_by_reason_per_day: schema.recordOf(
+              schema.string(),
+              schema.number()
+            ),
+            count_rules_executions_failured_by_reason_by_type_per_day: schema.recordOf(
+              schema.string(),
+              schema.recordOf(schema.string(), schema.number())
+            ),
+            count_rules_by_execution_status_per_day: schema.recordOf(
+              schema.string(),
+              schema.number()
+            ),
+            count_rules_executions_timeouts_per_day: schema.number(),
+            count_rules_executions_timeouts_by_type_per_day: schema.recordOf(
+              schema.string(),
+              schema.number()
+            ),
+            count_failed_and_unrecognized_rule_tasks_per_day: schema.number(),
+            count_failed_and_unrecognized_rule_tasks_by_status_per_day: schema.recordOf(
+              schema.string(),
+              schema.number()
+            ),
+            count_failed_and_unrecognized_rule_tasks_by_status_by_type_per_day: schema.recordOf(
+              schema.string(),
+              schema.recordOf(schema.string(), schema.number())
+            ),
+            avg_execution_time_per_day: schema.number(),
+            avg_execution_time_by_type_per_day: schema.recordOf(schema.string(), schema.number()),
+            avg_es_search_duration_per_day: schema.number(),
+            avg_es_search_duration_by_type_per_day: schema.recordOf(
+              schema.string(),
+              schema.number()
+            ),
+            avg_total_search_duration_per_day: schema.number(),
+            avg_total_search_duration_by_type_per_day: schema.recordOf(
+              schema.string(),
+              schema.number()
+            ),
+            percentile_num_generated_actions_per_day: schema.recordOf(
+              schema.string(),
+              schema.number()
+            ),
+            percentile_num_generated_actions_by_type_per_day: schema.recordOf(
+              schema.string(),
+              schema.recordOf(schema.string(), schema.number())
+            ),
+            percentile_num_alerts_per_day: schema.recordOf(schema.string(), schema.number()),
+            percentile_num_alerts_by_type_per_day: schema.recordOf(
+              schema.string(),
+              schema.recordOf(schema.string(), schema.number())
+            ),
           }),
-          schedule_time: schema.object({
-            min: schema.string(),
-            avg: schema.string(),
-            max: schema.string(),
-          }),
-          throttle_time_number_s: schema.object({
-            min: schema.number(),
-            avg: schema.number(),
-            max: schema.number(),
-          }),
-          schedule_time_number_s: schema.object({
-            min: schema.number(),
-            avg: schema.number(),
-            max: schema.number(),
-          }),
-          connectors_per_alert: schema.object({
-            min: schema.number(),
-            avg: schema.number(),
-            max: schema.number(),
-          }),
-          count_active_by_type: schema.recordOf(schema.string(), schema.number()),
-          count_active_total: schema.number(),
-          count_disabled_total: schema.number(),
-          count_rules_by_execution_status: schema.object({
-            success: schema.number(),
-            error: schema.number(),
-            warning: schema.number(),
-          }),
-          count_rules_with_tags: schema.number(),
-          count_rules_by_notify_when: schema.object({
-            on_action_group_change: schema.number(),
-            on_active_alert: schema.number(),
-            on_throttle_interval: schema.number(),
-          }),
-          count_rules_snoozed: schema.number(),
-          count_rules_muted: schema.number(),
-          count_rules_with_muted_alerts: schema.number(),
-          count_connector_types_by_consumers: schema.recordOf(
-            schema.string(),
-            schema.recordOf(schema.string(), schema.number())
-          ),
-          count_rules_namespaces: schema.number(),
-          count_rules_executions_per_day: schema.number(),
-          count_rules_executions_by_type_per_day: schema.recordOf(schema.string(), schema.number()),
-          count_rules_executions_failured_per_day: schema.number(),
-          count_rules_executions_failured_by_reason_per_day: schema.recordOf(
-            schema.string(),
-            schema.number()
-          ),
-          count_rules_executions_failured_by_reason_by_type_per_day: schema.recordOf(
-            schema.string(),
-            schema.recordOf(schema.string(), schema.number())
-          ),
-          count_rules_by_execution_status_per_day: schema.recordOf(
-            schema.string(),
-            schema.number()
-          ),
-          count_rules_executions_timeouts_per_day: schema.number(),
-          count_rules_executions_timeouts_by_type_per_day: schema.recordOf(
-            schema.string(),
-            schema.number()
-          ),
-          count_failed_and_unrecognized_rule_tasks_per_day: schema.number(),
-          count_failed_and_unrecognized_rule_tasks_by_status_per_day: schema.recordOf(
-            schema.string(),
-            schema.number()
-          ),
-          count_failed_and_unrecognized_rule_tasks_by_status_by_type_per_day: schema.recordOf(
-            schema.string(),
-            schema.recordOf(schema.string(), schema.number())
-          ),
-          avg_execution_time_per_day: schema.number(),
-          avg_execution_time_by_type_per_day: schema.recordOf(schema.string(), schema.number()),
-          avg_es_search_duration_per_day: schema.number(),
-          avg_es_search_duration_by_type_per_day: schema.recordOf(schema.string(), schema.number()),
-          avg_total_search_duration_per_day: schema.number(),
-          avg_total_search_duration_by_type_per_day: schema.recordOf(
-            schema.string(),
-            schema.number()
-          ),
-          percentile_num_generated_actions_per_day: schema.recordOf(
-            schema.string(),
-            schema.number()
-          ),
-          percentile_num_generated_actions_by_type_per_day: schema.recordOf(
-            schema.string(),
-            schema.recordOf(schema.string(), schema.number())
-          ),
-          percentile_num_alerts_per_day: schema.recordOf(schema.string(), schema.number()),
-          percentile_num_alerts_by_type_per_day: schema.recordOf(
-            schema.string(),
-            schema.recordOf(schema.string(), schema.number())
-          ),
-        }),
+        },
       },
       createTaskRunner: telemetryTaskRunner(logger, core, eventLogIndex, taskManager.index),
     },

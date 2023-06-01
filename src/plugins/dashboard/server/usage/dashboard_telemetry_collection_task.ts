@@ -63,40 +63,43 @@ function registerDashboardTelemetryTask(
       title: 'Dashboard telemetry collection task',
       timeout: '2m',
       stateSchemaByVersion: {
-        1: schema.object({
-          runs: schema.maybe(schema.number()),
-          telemetry: schema.maybe(
-            schema.object({
-              panels: schema.object({
-                total: schema.number(),
-                by_reference: schema.number(),
-                by_value: schema.number(),
-                by_type: schema.recordOf(
-                  schema.string(),
-                  schema.object({
-                    total: schema.number(),
-                    by_reference: schema.number(),
-                    by_value: schema.number(),
-                    details: schema.recordOf(schema.string(), schema.number()),
-                  })
-                ),
-              }),
-              controls: schema.object({
-                total: schema.number(),
-                chaining_system: schema.recordOf(schema.string(), schema.number()),
-                label_position: schema.recordOf(schema.string(), schema.number()),
-                ignore_settings: schema.recordOf(schema.string(), schema.number()),
-                by_type: schema.recordOf(
-                  schema.string(),
-                  schema.object({
-                    total: schema.number(),
-                    details: schema.recordOf(schema.string(), schema.number()),
-                  })
-                ),
-              }),
-            })
-          ),
-        }),
+        1: {
+          up: (task) => task,
+          schema: schema.object({
+            runs: schema.maybe(schema.number()),
+            telemetry: schema.maybe(
+              schema.object({
+                panels: schema.object({
+                  total: schema.number(),
+                  by_reference: schema.number(),
+                  by_value: schema.number(),
+                  by_type: schema.recordOf(
+                    schema.string(),
+                    schema.object({
+                      total: schema.number(),
+                      by_reference: schema.number(),
+                      by_value: schema.number(),
+                      details: schema.recordOf(schema.string(), schema.number()),
+                    })
+                  ),
+                }),
+                controls: schema.object({
+                  total: schema.number(),
+                  chaining_system: schema.recordOf(schema.string(), schema.number()),
+                  label_position: schema.recordOf(schema.string(), schema.number()),
+                  ignore_settings: schema.recordOf(schema.string(), schema.number()),
+                  by_type: schema.recordOf(
+                    schema.string(),
+                    schema.object({
+                      total: schema.number(),
+                      details: schema.recordOf(schema.string(), schema.number()),
+                    })
+                  ),
+                }),
+              })
+            ),
+          }),
+        },
       },
       createTaskRunner: dashboardTaskRunner(logger, core, embeddable),
     },

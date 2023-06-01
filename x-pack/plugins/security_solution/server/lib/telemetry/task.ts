@@ -85,11 +85,14 @@ export class SecurityTelemetryTask {
         title: this.config.title,
         timeout: this.config.timeout,
         stateSchemaByVersion: {
-          1: schema.object({
-            lastExecutionTimestamp: schema.maybe(schema.string()),
-            runs: schema.number(),
-            hits: schema.maybe(schema.number()),
-          }),
+          1: {
+            up: (task) => task,
+            schema: schema.object({
+              lastExecutionTimestamp: schema.maybe(schema.string()),
+              runs: schema.number(),
+              hits: schema.maybe(schema.number()),
+            }),
+          },
         },
         createTaskRunner: ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => {
           const { state } = taskInstance;

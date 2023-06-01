@@ -101,9 +101,12 @@ export class SampleTaskManagerFixturePlugin
         title: 'Sample Task',
         description: 'A sample task for testing the task_manager.',
         stateSchemaByVersion: {
-          1: schema.object({
-            count: schema.maybe(schema.number()),
-          }),
+          1: {
+            up: (task) => task,
+            schema: schema.object({
+              count: schema.maybe(schema.number()),
+            }),
+          },
         },
       },
       singleAttemptSampleTask: {

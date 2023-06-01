@@ -51,9 +51,12 @@ taskDefinitions.registerTaskDefinitions({
   report: {
     title: 'report',
     stateSchemaByVersion: {
-      1: schema.object({
-        foo: schema.string(),
-      }),
+      1: {
+        schema: schema.object({
+          foo: schema.string(),
+        }),
+        up: (doc) => doc,
+      },
     },
     createTaskRunner: jest.fn(),
   },

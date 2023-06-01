@@ -43,10 +43,13 @@ export class SavedObjectsSyncService {
         timeout: '1m',
         maxAttempts: 3,
         stateSchemaByVersion: {
-          1: schema.object({
-            runs: schema.number(),
-            totalSavedObjectsSynced: schema.number(),
-          }),
+          1: {
+            up: (task) => task,
+            schema: schema.object({
+              runs: schema.number(),
+              totalSavedObjectsSynced: schema.number(),
+            }),
+          },
         },
 
         createTaskRunner: ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => {

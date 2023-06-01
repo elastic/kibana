@@ -65,10 +65,13 @@ export function setupFindingsStatsTask(
       [CSPM_FINDINGS_STATS_TASK_TYPE]: {
         title: 'Aggregate latest findings index for score calculation',
         stateSchemaByVersion: {
-          1: schema.object({
-            runs: schema.number(),
-            health_status: schema.string(),
-          }),
+          1: {
+            up: (task) => task,
+            schema: schema.object({
+              runs: schema.number(),
+              health_status: schema.string(),
+            }),
+          },
         },
         createTaskRunner: taskRunner(coreStartServices, logger),
       },

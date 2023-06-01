@@ -47,37 +47,40 @@ function registerActionsTelemetryTask(
       title: 'Actions usage fetch task',
       timeout: '5m',
       stateSchemaByVersion: {
-        1: schema.object({
-          has_errors: schema.boolean(),
-          error_messages: schema.maybe(schema.recordOf(schema.string(), schema.any())),
-          runs: schema.number(),
-          count_total: schema.number(),
-          count_by_type: schema.recordOf(schema.string(), schema.number()),
-          count_active_total: schema.number(),
-          count_active_by_type: schema.recordOf(schema.string(), schema.number()),
-          count_active_alert_history_connectors: schema.number(),
-          count_active_email_connectors_by_service_type: schema.recordOf(
-            schema.string(),
-            schema.number()
-          ),
-          count_actions_namespaces: schema.number(),
-          count_actions_executions_per_day: schema.number(),
-          count_actions_executions_by_type_per_day: schema.recordOf(
-            schema.string(),
-            schema.number()
-          ),
-          count_actions_executions_failed_per_day: schema.number(),
-          count_actions_executions_failed_by_type_per_day: schema.recordOf(
-            schema.string(),
-            schema.number()
-          ),
-          avg_execution_time_per_day: schema.number(),
-          avg_execution_time_by_type_per_day: schema.recordOf(schema.string(), schema.number()),
-          count_connector_types_by_action_run_outcome_per_day: schema.recordOf(
-            schema.string(),
-            schema.number()
-          ),
-        }),
+        1: {
+          up: (task) => task,
+          schema: schema.object({
+            has_errors: schema.boolean(),
+            error_messages: schema.maybe(schema.recordOf(schema.string(), schema.any())),
+            runs: schema.number(),
+            count_total: schema.number(),
+            count_by_type: schema.recordOf(schema.string(), schema.number()),
+            count_active_total: schema.number(),
+            count_active_by_type: schema.recordOf(schema.string(), schema.number()),
+            count_active_alert_history_connectors: schema.number(),
+            count_active_email_connectors_by_service_type: schema.recordOf(
+              schema.string(),
+              schema.number()
+            ),
+            count_actions_namespaces: schema.number(),
+            count_actions_executions_per_day: schema.number(),
+            count_actions_executions_by_type_per_day: schema.recordOf(
+              schema.string(),
+              schema.number()
+            ),
+            count_actions_executions_failed_per_day: schema.number(),
+            count_actions_executions_failed_by_type_per_day: schema.recordOf(
+              schema.string(),
+              schema.number()
+            ),
+            avg_execution_time_per_day: schema.number(),
+            avg_execution_time_by_type_per_day: schema.recordOf(schema.string(), schema.number()),
+            count_connector_types_by_action_run_outcome_per_day: schema.recordOf(
+              schema.string(),
+              schema.number()
+            ),
+          }),
+        },
       },
       createTaskRunner: telemetryTaskRunner(logger, core, preconfiguredActions, eventLogIndex),
     },
