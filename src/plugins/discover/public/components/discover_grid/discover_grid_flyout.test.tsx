@@ -9,6 +9,7 @@
 import React from 'react';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
+import type { Query, AggregateQuery } from '@kbn/es-query';
 import { DiscoverGridFlyout, DiscoverGridFlyoutProps } from './discover_grid_flyout';
 import { esHits } from '../../__mocks__/es_hits';
 import { createFilterManagerMock } from '@kbn/data-plugin/public/query/filter_manager/filter_manager.mock';
@@ -40,10 +41,12 @@ describe('Discover flyout', function () {
     dataView,
     hits,
     hitIndex,
+    query,
   }: {
     dataView?: DataView;
     hits?: DataTableRecord[];
     hitIndex?: number;
+    query?: Query | AggregateQuery;
   }) => {
     const onClose = jest.fn();
     const services = {
@@ -71,6 +74,7 @@ describe('Discover flyout', function () {
       hits:
         hits ||
         esHits.map((entry: EsHitRecord) => buildDataTableRecord(entry, dataView || dataViewMock)),
+      query,
       onAddColumn: jest.fn(),
       onClose,
       onFilter: jest.fn(),
@@ -191,5 +195,15 @@ describe('Discover flyout', function () {
     component.setProps({ ...props, hit: props.hits[props.hits.length - 1] });
     findTestSubject(component, 'docTableDetailsFlyout').simulate('keydown', { key: 'ArrowRight' });
     expect(props.setExpandedDoc).not.toHaveBeenCalled();
+  });
+
+  it('should not render single/surrounding views for text based', async () => {
+    const { component } = await mountComponent({
+      query: { sql: 'Select * from indexpattern' },
+    });
+    const singleDocumentView = findTestSubject(component, 'docTableRowAction');
+    expect(singleDocumentView.length).toBeFalsy();
+    const flyoutTitle = findTestSubject(component, 'docTableRowDetailsTitle');
+    expect(flyoutTitle.text()).toBe('Expanded row');
   });
 });
