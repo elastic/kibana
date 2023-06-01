@@ -51,6 +51,7 @@
     "@kbn/usage-collection-plugin",
     "@kbn/unified-doc-viewer",
     "@kbn/unified-discover",
+    "@kbn/utility-types",
   ],
   "exclude": [
     "target/**/*",
