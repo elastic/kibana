@@ -7,6 +7,12 @@ set -euo pipefail
 echo "--- Run scripts/type_check to ensure that all build available"
 node scripts/type_check
 
+if is_pr_with_label "ci:link-docs"; then
+  echo "--- Link API Docs"
+  node --max-old-space-size=12000 node scripts/link_api_docs
+  git status
+fi
+
 echo "--- Build API Docs"
 node --max-old-space-size=12000 scripts/build_api_docs
 echo "**** Running my cmd"

@@ -9,7 +9,7 @@
 import globby from 'globby';
 import * as fs from 'fs';
 import yaml from 'js-yaml';
-import { Config, bundle } from '@redocly/openapi-core';
+import { Config, bundle, LocationObject } from '@redocly/openapi-core';
 import path from 'path';
 
 export interface OpenAPISpec {
@@ -41,7 +41,7 @@ function getValueFromPath(obj: OpenAPISpec, _path: string) {
   return current;
 }
 
-const getDefinition = (location: redocly.LocationObject) => {
+const getDefinition = (location: LocationObject) => {
   if (!location.pointer) return undefined;
   const spec = loadYamlFile(location.source.absoluteRef);
   return getValueFromPath(spec, location.pointer);
