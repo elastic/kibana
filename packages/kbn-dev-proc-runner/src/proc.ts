@@ -109,7 +109,9 @@ export function startProc(name: string, options: ProcOptions, log: ToolingLog) {
     // observe first error event
     Rx.fromEvent(childProcess, 'error').pipe(
       take(1),
-      mergeMap((err) => Rx.throwError(err))
+      mergeMap((err: any) => {
+        throw new Error(err);
+      })
     )
   ).pipe(share());
 
