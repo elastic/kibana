@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { SavedObjectTimeline } from '../../../../common/types/timeline';
+import type { TimelineSOServerRepresentationType } from '../../../../common/types/timeline/api';
 
 export const defaultColumnHeaderType = 'not-filtered';
 
-export const defaultHeaders: SavedObjectTimeline['columns'] = [
+export const defaultHeaders: TimelineSOServerRepresentationType['columns'] = [
   {
     columnHeaderType: defaultColumnHeaderType,
     id: '@timestamp',

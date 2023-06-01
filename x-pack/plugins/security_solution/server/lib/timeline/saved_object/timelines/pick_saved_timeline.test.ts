@@ -7,15 +7,15 @@
 
 import type { AuthenticatedUser } from '@kbn/security-plugin/common/model';
 
-import type { SavedObjectTimeline } from '../../../../../common/types/timeline';
-import { TimelineStatus, SavedObjectTimelineType } from '../../../../../common/types/timeline';
+import type { TimelineSOServerRepresentationTypeWithSavedObjectId } from '../../../../../common/types/timeline/api';
+import { TimelineStatus, TimelineType } from '../../../../../common/types/timeline/api';
 import type { NoteSavedObject } from '../../../../../common/types/timeline/note';
 
 import { pickSavedTimeline } from './pick_saved_timeline';
 
 describe('pickSavedTimeline', () => {
   const mockDateNow = new Date('2020-04-03T23:00:00.000Z').valueOf();
-  const getMockSavedTimeline = (): SavedObjectTimeline & {
+  const getMockSavedTimeline = (): TimelineSOServerRepresentationTypeWithSavedObjectId & {
     savedObjectId?: string | null;
     version?: string;
     eventNotes?: NoteSavedObject[];
@@ -56,7 +56,7 @@ describe('pickSavedTimeline', () => {
     sort: { sortDirection: 'desc', columnType: 'number', columnId: '@timestamp' },
     title: 'title',
     kqlMode: 'filter',
-    timelineType: SavedObjectTimelineType.default,
+    timelineType: TimelineType.default,
     savedQueryId: null,
     kqlQuery: { filterQuery: null },
     dataProviders: [],
@@ -281,7 +281,7 @@ describe('pickSavedTimeline', () => {
     const userInfo = { username: 'elastic' } as AuthenticatedUser;
     const result = pickSavedTimeline(timelineId, savedTimeline, userInfo);
 
-    expect(result.timelineType).toEqual(SavedObjectTimelineType.default);
+    expect(result.timelineType).toEqual(TimelineType.default);
     expect(result.status).toEqual(TimelineStatus.active);
     expect(result.templateTimelineId).toBeNull();
     expect(result.templateTimelineVersion).toBeNull();

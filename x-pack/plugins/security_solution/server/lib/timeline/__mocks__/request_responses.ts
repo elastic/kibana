@@ -15,8 +15,8 @@ import {
   TIMELINE_URL,
   TIMELINE_PREPACKAGED_URL,
 } from '../../../../common/constants';
-import type { SavedObjectTimeline } from '../../../../common/types/timeline';
-import { SavedObjectTimelineType, TimelineStatus } from '../../../../common/types/timeline';
+import type { TimelineSOServerRepresentationType } from '../../../../common/types/timeline/api';
+import { TimelineType, TimelineStatus } from '../../../../common/types/timeline/api';
 
 import { requestMock } from '../../detection_engine/routes/__mocks__';
 
@@ -57,7 +57,7 @@ export const getImportTimelinesRequest = async (fileName?: string) => {
   });
 };
 
-export const inputTimeline: SavedObjectTimeline = {
+export const inputTimeline: TimelineSOServerRepresentationType = {
   columns: [
     { columnHeaderType: 'not-filtered', id: '@timestamp' },
     { columnHeaderType: 'not-filtered', id: 'message' },
@@ -75,7 +75,7 @@ export const inputTimeline: SavedObjectTimeline = {
   kqlMode: 'filter',
   kqlQuery: { filterQuery: null },
   title: 't',
-  timelineType: SavedObjectTimelineType.default,
+  timelineType: TimelineType.default,
   templateTimelineId: null,
   templateTimelineVersion: 1,
   dateRange: { start: '2020-03-26T12:50:05.527Z', end: '2020-03-27T12:50:05.527Z' },
@@ -85,7 +85,7 @@ export const inputTimeline: SavedObjectTimeline = {
 
 export const inputTemplateTimeline = {
   ...inputTimeline,
-  timelineType: SavedObjectTimelineType.template,
+  timelineType: TimelineType.template,
   templateTimelineId: '79deb4c0-6bc1-11ea-inpt-templatea189',
   templateTimelineVersion: null,
 };
@@ -95,14 +95,14 @@ export const createTimelineWithoutTimelineId = {
   timeline: inputTimeline,
   timelineId: null,
   version: null,
-  timelineType: SavedObjectTimelineType.default,
+  timelineType: TimelineType.default,
 };
 
 export const createTemplateTimelineWithoutTimelineId = {
   timeline: inputTemplateTimeline,
   timelineId: null,
   version: null,
-  timelineType: SavedObjectTimelineType.template,
+  timelineType: TimelineType.template,
   status: TimelineStatus.active,
 };
 
@@ -146,7 +146,7 @@ export const getUpdateTimelinesRequest = (mockBody: rt.TypeOf<typeof patchTimeli
     body: mockBody,
   });
 
-export const getDraftTimelinesRequest = (timelineType: SavedObjectTimelineType) =>
+export const getDraftTimelinesRequest = (timelineType: TimelineType) =>
   requestMock.create({
     method: 'get',
     path: TIMELINE_DRAFT_URL,
@@ -155,7 +155,7 @@ export const getDraftTimelinesRequest = (timelineType: SavedObjectTimelineType) 
     },
   });
 
-export const cleanDraftTimelinesRequest = (timelineType: SavedObjectTimelineType) =>
+export const cleanDraftTimelinesRequest = (timelineType: TimelineType) =>
   requestMock.create({
     method: 'post',
     path: TIMELINE_DRAFT_URL,

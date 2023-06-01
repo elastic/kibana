@@ -14,7 +14,6 @@ import type {
 } from '../../../../common/search_strategy/timeline';
 import type {
   TimelineEventsType,
-  SavedObjectTimelineType,
   TimelineStatus,
   TimelineTabs,
   ScrollToTopEvent,
@@ -24,6 +23,7 @@ import type {
   RowRendererId,
   SerializedFilterQuery,
 } from '../../../../common/types/timeline';
+import type { TimelineType } from '../../../../common/types/timeline/api';
 import type { PinnedEvent } from '../../../../common/types/timeline/pinned_event';
 import type { ResolveTimelineConfig } from '../../components/open_timeline/types';
 
@@ -58,7 +58,7 @@ export interface TimelineModel {
   /** Title */
   title: string;
   /** timelineType: default | template */
-  timelineType: SavedObjectTimelineType;
+  timelineType: TimelineType;
   /** an unique id for timeline template */
   templateTimelineId: string | null;
   /** null for default timeline, number for timeline template */

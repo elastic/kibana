@@ -7,10 +7,10 @@
 
 import { isEmpty, isInteger } from 'lodash/fp';
 import type {
-  SavedObjectTimelineTypeLiteralWithNull,
-  SavedObjectTimelineTypeLiteral,
-} from '../../../../common/types/timeline';
-import { SavedObjectTimelineType, TimelineStatus } from '../../../../common/types/timeline';
+  TimelineTypeLiteralWithNull,
+  TimelineTypeLiteral,
+} from '../../../../common/types/timeline/api';
+import { TimelineType, TimelineStatus } from '../../../../common/types/timeline/api';
 import type { FrameworkRequest } from '../../framework';
 
 import type { TimelineStatusAction } from './common';
@@ -26,14 +26,14 @@ import {
 
 interface GivenTimelineInput {
   id: string | null | undefined;
-  type?: SavedObjectTimelineTypeLiteralWithNull;
+  type?: TimelineTypeLiteralWithNull;
   version: string | number | null | undefined;
 }
 
 interface TimelinesStatusProps {
   status: TimelineStatus | null | undefined;
   title: string | null | undefined;
-  timelineType: SavedObjectTimelineTypeLiteralWithNull | undefined;
+  timelineType: TimelineTypeLiteralWithNull | undefined;
   timelineInput: GivenTimelineInput;
   templateTimelineInput: GivenTimelineInput;
   frameworkRequest: FrameworkRequest;
@@ -42,31 +42,31 @@ interface TimelinesStatusProps {
 export class CompareTimelinesStatus {
   public readonly timelineObject: TimelineObject;
   public readonly templateTimelineObject: TimelineObject;
-  private readonly timelineType: SavedObjectTimelineTypeLiteral;
+  private readonly timelineType: TimelineTypeLiteral;
   private readonly title: string | null;
   private readonly status: TimelineStatus;
   constructor({
     status = TimelineStatus.active,
     title,
-    timelineType = SavedObjectTimelineType.default,
+    timelineType = TimelineType.default,
     timelineInput,
     templateTimelineInput,
     frameworkRequest,
   }: TimelinesStatusProps) {
     this.timelineObject = new TimelineObject({
       id: timelineInput.id,
-      type: timelineInput.type ?? SavedObjectTimelineType.default,
+      type: timelineInput.type ?? TimelineType.default,
       version: timelineInput.version,
       frameworkRequest,
     });
 
     this.templateTimelineObject = new TimelineObject({
       id: templateTimelineInput.id,
-      type: templateTimelineInput.type ?? SavedObjectTimelineType.template,
+      type: templateTimelineInput.type ?? TimelineType.template,
       version: templateTimelineInput.version,
       frameworkRequest,
     });
-    this.timelineType = timelineType ?? SavedObjectTimelineType.default;
+    this.timelineType = timelineType ?? TimelineType.default;
     this.title = title ?? null;
     this.status = status ?? TimelineStatus.active;
   }
@@ -124,7 +124,7 @@ export class CompareTimelinesStatus {
 
   private get isTimelineTypeValid() {
     const obj = this.isHandlingTemplateTimeline ? this.templateTimelineObject : this.timelineObject;
-    const existintTimelineType = obj.getData?.timelineType ?? SavedObjectTimelineType.default;
+    const existintTimelineType = obj.getData?.timelineType ?? TimelineType.default;
     return obj.isExists ? this.timelineType === existintTimelineType : true;
   }
 
@@ -196,7 +196,7 @@ export class CompareTimelinesStatus {
   }
 
   public get isHandlingTemplateTimeline() {
-    return this.timelineType === SavedObjectTimelineType.template;
+    return this.timelineType === TimelineType.template;
   }
 
   private get isSavedObjectVersionConflict() {

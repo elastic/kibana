@@ -6,10 +6,10 @@
  */
 
 import { isEmpty } from 'lodash/fp';
-import type { SavedObjectTimelineTypeLiteral } from '../../../../common/types/timeline';
+import type { TimelineTypeLiteral } from '../../../../common/types/timeline/api';
 import { appendSearch } from './helpers';
 
-export const getTimelineTabsUrl = (tabName: SavedObjectTimelineTypeLiteral, search?: string) =>
+export const getTimelineTabsUrl = (tabName: TimelineTypeLiteral, search?: string) =>
   `/${tabName}${appendSearch(search)}`;
 
 export const getTimelineUrl = (id: string, graphEventId?: string) =>

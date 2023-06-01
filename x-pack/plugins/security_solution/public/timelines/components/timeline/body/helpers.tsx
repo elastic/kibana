@@ -11,9 +11,9 @@ import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import type { TimelineItem, TimelineNonEcsData } from '../../../../../common/search_strategy';
 import type {
   TimelineEventsType,
-  SavedObjectTimelineTypeLiteral,
-} from '../../../../../common/types/timeline';
-import { SavedObjectTimelineType } from '../../../../../common/types/timeline';
+  TimelineTypeLiteral,
+} from '../../../../../common/types/timeline/api';
+import { TimelineType } from '../../../../../common/types/timeline/api';
 import type { OnPinEvent, OnUnPinEvent } from '../events';
 import * as i18n from './translations';
 
@@ -37,9 +37,9 @@ export const getPinTooltip = ({
   isAlert: boolean;
   isPinned: boolean;
   eventHasNotes: boolean;
-  timelineType: SavedObjectTimelineTypeLiteral;
+  timelineType: TimelineTypeLiteral;
 }) => {
-  if (timelineType === SavedObjectTimelineType.template) {
+  if (timelineType === TimelineType.template) {
     return i18n.DISABLE_PIN(isAlert);
   } else if (isPinned && eventHasNotes) {
     return i18n.PINNED_WITH_NOTES(isAlert);

@@ -9,8 +9,8 @@ import { EuiButtonIcon } from '@elastic/eui';
 import { noop } from 'lodash/fp';
 import React from 'react';
 
-import type { SavedObjectTimelineTypeLiteral } from '../../../../../common/types/timeline';
-import { SavedObjectTimelineType } from '../../../../../common/types/timeline';
+import type { TimelineTypeLiteral } from '../../../../../common/types/timeline/api';
+import { TimelineType } from '../../../../../common/types/timeline/api';
 
 import * as i18n from '../body/translations';
 
@@ -23,7 +23,7 @@ interface Props {
   allowUnpinning: boolean;
   isAlert: boolean;
   isDisabled?: boolean;
-  timelineType?: SavedObjectTimelineTypeLiteral;
+  timelineType?: TimelineTypeLiteral;
   onClick?: () => void;
   pinned: boolean;
 }
@@ -48,7 +48,7 @@ export const getDefaultAriaLabel = ({
 
 export const Pin = React.memo<Props>(
   ({ ariaLabel, allowUnpinning, isAlert, isDisabled, onClick = noop, pinned, timelineType }) => {
-    const isTemplate = timelineType === SavedObjectTimelineType.template;
+    const isTemplate = timelineType === TimelineType.template;
     const defaultAriaLabel = getDefaultAriaLabel({
       isAlert,
       isTemplate,

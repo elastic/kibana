@@ -21,9 +21,9 @@ import React, { memo, useCallback, useMemo, useState, useEffect, useRef } from '
 import styled from 'styled-components';
 
 import type {
-  SavedObjectTimelineTypeLiteralWithNull,
-  SavedObjectTimelineTypeLiteral,
-} from '../../../../../common/types/timeline';
+  TimelineTypeLiteralWithNull,
+  TimelineTypeLiteral,
+} from '../../../../../common/types/timeline/api';
 import { SortFieldTimeline } from '../../../../../common/types/timeline/api';
 
 import { useGetAllTimeline } from '../../../containers/all';
@@ -60,7 +60,7 @@ const replaceTitleInOptions = (options: EuiSelectableOption[]): EuiSelectableOpt
 export interface GetSelectableOptions {
   timelines: OpenTimelineResult[];
   onlyFavorites: boolean;
-  timelineType?: SavedObjectTimelineTypeLiteralWithNull;
+  timelineType?: TimelineTypeLiteralWithNull;
   searchTimelineValue: string;
 }
 
@@ -78,7 +78,7 @@ export interface SelectableTimelineProps {
     timelineId: string | null,
     graphEventId?: string
   ) => void;
-  timelineType: SavedObjectTimelineTypeLiteral;
+  timelineType: TimelineTypeLiteral;
   placeholder?: string;
 }
 

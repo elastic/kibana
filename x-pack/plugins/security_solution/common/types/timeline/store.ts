@@ -6,7 +6,8 @@
  */
 
 import type { Filter } from '@kbn/es-query';
-import type { RowRendererId, SavedObjectTimelineTypeLiteral } from '.';
+import type { RowRendererId } from '.';
+import type { TimelineTypeLiteral } from './api';
 
 import type { Direction } from '../../search_strategy';
 import type { ExpandedDetailTimeline } from '../detail_panel';
@@ -54,7 +55,7 @@ export interface TimelinePersistInput {
   show?: boolean;
   sort?: SortColumnTimeline[];
   showCheckboxes?: boolean;
-  timelineType?: SavedObjectTimelineTypeLiteral;
+  timelineType?: TimelineTypeLiteral;
   templateTimelineId?: string | null;
   templateTimelineVersion?: number | null;
   title?: string;

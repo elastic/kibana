@@ -21,13 +21,12 @@ import type {
   FilterTimelineResult,
   DataProviderResult,
 } from '../../../../common/types/timeline/api';
+import { TimelineId, TimelineTabs } from '../../../../common/types/timeline';
 import {
   DataProviderType,
-  TimelineId,
   TimelineStatus,
-  SavedObjectTimelineType,
-  TimelineTabs,
-} from '../../../../common/types/timeline';
+  TimelineType,
+} from '../../../../common/types/timeline/api';
 
 import {
   addNotes as dispatchAddNotes,
@@ -190,16 +189,16 @@ const setPinnedEventIds = (duplicate: boolean, pinnedEventIds: string[] | null |
 const getTemplateTimelineId = (
   timeline: TimelineResult,
   duplicate: boolean,
-  targetTimelineType?: SavedObjectTimelineType
+  targetTimelineType?: TimelineType
 ) => {
   if (
-    targetTimelineType === SavedObjectTimelineType.default &&
-    timeline.timelineType === SavedObjectTimelineType.template
+    targetTimelineType === TimelineType.default &&
+    timeline.timelineType === TimelineType.template
   ) {
     return timeline.templateTimelineId;
   }
 
-  return duplicate && timeline.timelineType === SavedObjectTimelineType.template
+  return duplicate && timeline.timelineType === TimelineType.template
     ? // TODO: MOVE TO THE BACKEND
       uuidv4()
     : timeline.templateTimelineId;
@@ -225,9 +224,9 @@ const convertToDefaultField = ({ and, ...dataProvider }: DataProviderResult) => 
 const getDataProviders = (
   duplicate: boolean,
   dataProviders: TimelineResult['dataProviders'],
-  timelineType?: SavedObjectTimelineType
+  timelineType?: TimelineType
 ) => {
-  if (duplicate && dataProviders && timelineType === SavedObjectTimelineType.default) {
+  if (duplicate && dataProviders && timelineType === TimelineType.default) {
     return dataProviders.map((dataProvider) => ({
       ...convertToDefaultField(dataProvider),
       and: dataProvider.and?.map(convertToDefaultField) ?? [],
@@ -240,7 +239,7 @@ const getDataProviders = (
 export const getTimelineTitle = (
   timeline: TimelineResult,
   duplicate: boolean,
-  timelineType?: SavedObjectTimelineType
+  timelineType?: TimelineType
 ) => {
   const isCreateTimelineFromAction = timelineType && timeline.timelineType !== timelineType;
   if (isCreateTimelineFromAction) return '';
@@ -251,7 +250,7 @@ export const getTimelineTitle = (
 export const getTimelineStatus = (
   timeline: TimelineResult,
   duplicate: boolean,
-  timelineType?: SavedObjectTimelineType
+  timelineType?: TimelineType
 ) => {
   const isCreateTimelineFromAction = timelineType && timeline.timelineType !== timelineType;
   if (isCreateTimelineFromAction) return TimelineStatus.draft;
@@ -262,16 +261,16 @@ export const getTimelineStatus = (
 export const defaultTimelineToTimelineModel = (
   timeline: TimelineResult,
   duplicate: boolean,
-  timelineType?: SavedObjectTimelineType
+  timelineType?: TimelineType
 ): TimelineModel => {
-  const isTemplate = timeline.timelineType === SavedObjectTimelineType.template;
+  const isTemplate = timeline.timelineType === TimelineType.template;
   const timelineEntries = {
     ...timeline,
     columns: timeline.columns != null ? timeline.columns.map(setTimelineColumn) : defaultHeaders,
     defaultColumns: defaultHeaders,
     dateRange:
       timeline.status === TimelineStatus.immutable &&
-      timeline.timelineType === SavedObjectTimelineType.template
+      timeline.timelineType === TimelineType.template
         ? {
             start: DEFAULT_FROM_MOMENT.toISOString(),
             end: DEFAULT_TO_MOMENT.toISOString(),
@@ -309,7 +308,7 @@ export const defaultTimelineToTimelineModel = (
 export const formatTimelineResultToModel = (
   timelineToOpen: TimelineResult,
   duplicate: boolean = false,
-  timelineType?: SavedObjectTimelineType
+  timelineType?: TimelineType
 ): { notes: NoteResult[] | null | undefined; timeline: TimelineModel } => {
   const { notes, ...timelineModel } = timelineToOpen;
   return {
@@ -323,7 +322,7 @@ export interface QueryTimelineById<TCache> {
   duplicate?: boolean;
   graphEventId?: string;
   timelineId: string;
-  timelineType?: SavedObjectTimelineType;
+  timelineType?: TimelineType;
   onError?: TimelineErrorCallback;
   onOpenTimeline?: (timeline: TimelineModel) => void;
   openTimeline?: boolean;
@@ -427,7 +426,7 @@ export const dispatchUpdateTimeline =
     }
     if (
       timeline.status === TimelineStatus.immutable &&
-      timeline.timelineType === SavedObjectTimelineType.template
+      timeline.timelineType === TimelineType.template
     ) {
       dispatch(
         dispatchSetRelativeRangeDatePicker({

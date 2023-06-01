@@ -27,18 +27,15 @@ import {
 import type {
   ColumnHeaderOptions,
   TimelineEventsType,
-  SavedObjectTimelineTypeLiteral,
   RowRendererId,
   SerializedFilterQuery,
   TimelinePersistInput,
   ToggleDetailPanel,
   SortColumnTimeline,
 } from '../../../../common/types/timeline';
-import {
-  SavedObjectTimelineType,
-  TimelineStatus,
-  TimelineId,
-} from '../../../../common/types/timeline';
+import type { TimelineTypeLiteral } from '../../../../common/types/timeline/api';
+import { TimelineStatus, TimelineId } from '../../../../common/types/timeline';
+import { TimelineType } from '../../../../common/types/timeline/api';
 import { normalizeTimeRange } from '../../../common/utils/normalize_time_range';
 import { getTimelineManageDefaults, timelineDefaults } from './defaults';
 import type { KqlMode, TimelineModel } from './model';
@@ -148,7 +145,7 @@ export const addTimelineToStore = ({
       resolveTimelineConfig,
       dateRange:
         timeline.status === TimelineStatus.immutable &&
-        timeline.timelineType === SavedObjectTimelineType.template
+        timeline.timelineType === TimelineType.template
           ? {
               start: DEFAULT_FROM_MOMENT.toISOString(),
               end: DEFAULT_TO_MOMENT.toISOString(),
@@ -160,7 +157,7 @@ export const addTimelineToStore = ({
 
 interface AddNewTimelineParams extends TimelinePersistInput {
   timelineById: TimelineById;
-  timelineType: SavedObjectTimelineTypeLiteral;
+  timelineType: TimelineTypeLiteral;
 }
 
 /** Adds a new `Timeline` to the provided collection of `TimelineById` */
@@ -175,7 +172,7 @@ export const addNewTimeline = ({
   const { from: startDateRange, to: endDateRange } = normalizeTimeRange({ from: '', to: '' });
   const dateRange = maybeDateRange ?? { start: startDateRange, end: endDateRange };
   const templateTimelineInfo =
-    timelineType === SavedObjectTimelineType.template
+    timelineType === TimelineType.template
       ? {
           templateTimelineId: uuidv4(),
           templateTimelineVersion: 1,
@@ -1032,10 +1029,7 @@ export const updateTimelineProviderType = ({
 }: UpdateTimelineProviderTypeParams): TimelineById => {
   const timeline = timelineById[id];
 
-  if (
-    timeline.timelineType !== SavedObjectTimelineType.template &&
-    type === DataProviderType.template
-  ) {
+  if (timeline.timelineType !== TimelineType.template && type === DataProviderType.template) {
     // Not supported, timeline template cannot have template type providers
     return timelineById;
   }

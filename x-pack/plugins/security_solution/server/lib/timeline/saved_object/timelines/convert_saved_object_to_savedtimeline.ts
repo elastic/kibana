@@ -14,8 +14,8 @@ import {
   SavedObjectTimelineRuntimeType,
   SavedObjectTimelineTypeLiteralWithNullRt,
   SavedObjectTimelineType,
-  TimelineStatus as SavedObjectTimelineStatus,
-} from '../../../../../common/types/timeline';
+  SavedObjectTimelineStatus,
+} from '../../../../../common/types/timeline/saved_object';
 import type { TimelineSavedToReturnObjectRuntimeType } from '../../../../../common/types/timeline/api';
 import { TimelineType, TimelineStatus } from '../../../../../common/types/timeline/api';
 
