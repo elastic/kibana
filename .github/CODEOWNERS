@@ -297,6 +297,7 @@ src/plugins/custom_integrations @elastic/fleet
 packages/kbn-cypress-config @elastic/kibana-operations
 x-pack/plugins/dashboard_enhanced @elastic/kibana-presentation
 src/plugins/dashboard @elastic/kibana-presentation
+packages/kbn-data-common @elastic/kibana-data-discovery
 src/plugins/data @elastic/kibana-visualizations @elastic/kibana-data-discovery
 test/plugin_functional/plugins/data_search @elastic/kibana-app-services
 src/plugins/data_view_editor @elastic/kibana-data-discovery
