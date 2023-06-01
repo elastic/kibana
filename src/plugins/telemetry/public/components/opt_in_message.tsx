@@ -31,7 +31,7 @@ export const OptInMessage: React.FC<OptInMessageProps> = ({
       <FormattedMessage
         id="telemetry.dataManagementDisclaimerPrivacy"
         defaultMessage="Usage collection (also known as Telemetry) is {optInStatus}.
-          This allows us to learn what our users are most interested in so we can improve our products and services.
+          This allows us to learn what our users are most interested in, so we can improve our products and services.
           Refer to our {privacyStatementLink}."
         values={{
           optInStatus: telemetryService.isOptedIn ? (
@@ -73,12 +73,12 @@ function renderTelemetryEnabledOrDisabledText(
   const actionMessage = isOptedIn ? (
     <FormattedMessage
       id="telemetry.dataManagementDisableCollectionLink"
-      defaultMessage="Disable it here."
+      defaultMessage="Disable usage collection."
     />
   ) : (
     <FormattedMessage
       id="telemetry.dataManagementEnableCollectionLink"
-      defaultMessage="Enable it here."
+      defaultMessage="Enable usage collection."
     />
   );
 

@@ -34,11 +34,8 @@ const SEARCH_TERMS: string[] = [
   i18n.translate('telemetry.telemetryConstant', {
     defaultMessage: 'telemetry',
   }),
-  i18n.translate('telemetry.usageDataConstant', {
-    defaultMessage: 'Usage data',
-  }),
   i18n.translate('telemetry.usageCollectionConstant', {
-    defaultMessage: 'Usage collection',
+    defaultMessage: 'usage collection',
   }),
 ].flatMap((term) => {
   // Automatically lower-case and split by space the terms from above
@@ -132,7 +129,7 @@ export class TelemetryManagementSection extends Component<Props, State> {
                 <h2>
                   <FormattedMessage
                     id="telemetry.usageDataTitle"
-                    defaultMessage="Usage Collection"
+                    defaultMessage="Usage collection"
                   />
                 </h2>
               </EuiTitle>
@@ -226,7 +223,7 @@ export class TelemetryManagementSection extends Component<Props, State> {
             id="telemetry.telemetryConfigAndLinkDescription"
             defaultMessage="Enabling usage collection (also known as Telemetry) allows us to learn
             what our users are most interested in, so we can improve our products and services.
-            Refer to our {privacyStatementLink} for more details."
+            Refer to our {privacyStatementLink}."
             values={{
               privacyStatementLink: (
                 <EuiLink href={docLinks.legal.privacyStatement} target="_blank">
@@ -270,7 +267,7 @@ export class TelemetryManagementSection extends Component<Props, State> {
             toasts.addSuccess(
               newOptInValue
                 ? i18n.translate('telemetry.optInSuccessOn', {
-                    defaultMessage: 'Sharing Usage with Elastic turned on. Thank you!',
+                    defaultMessage: 'Sharing usage with Elastic is enabled.',
                   })
                 : i18n.translate('telemetry.optInSuccessOff', {
                     defaultMessage: 'No longer sharing usage with Elastic.',

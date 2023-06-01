@@ -41,7 +41,7 @@ describe('OptInMessage', () => {
     });
 
     it('offers the link to disable it', () => {
-      expect(dom.text()).toContain('Disable it here.');
+      expect(dom.text()).toContain('Disable usage collection.');
     });
   });
 
@@ -69,7 +69,7 @@ describe('OptInMessage', () => {
     });
 
     it('offers the link to enable it', () => {
-      expect(dom.text()).toContain('Enable it here.');
+      expect(dom.text()).toContain('Enable usage collection.');
     });
   });
 
@@ -97,7 +97,7 @@ describe('OptInMessage', () => {
     });
 
     it('offers the link to enable it', () => {
-      expect(dom.text()).toContain('Enable it here.');
+      expect(dom.text()).toContain('Enable usage collection.');
     });
   });
 });
