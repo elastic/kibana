@@ -14,9 +14,9 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { CspRuleTemplate } from '../../../common/schemas';
 import type { RulesState } from './rules_container';
 import * as TEST_SUBJECTS from './test_subjects';
-import type { RuleSavedObject } from './use_csp_rules';
 
 type RulesTableProps = Pick<
   RulesState,
@@ -41,26 +41,28 @@ export const RulesTable = ({
   const { euiTheme } = useEuiTheme();
   const columns = useMemo(() => getColumns({ setSelectedRuleId }), [setSelectedRuleId]);
 
-  const euiPagination: EuiBasicTableProps<RuleSavedObject>['pagination'] = {
+  const euiPagination: EuiBasicTableProps<CspRuleTemplate>['pagination'] = {
     pageIndex: page,
     pageSize,
     totalItemCount: total,
     pageSizeOptions: [10, 25, 100],
   };
 
-  const onTableChange = ({ page: pagination }: Criteria<RuleSavedObject>) => {
+  const onTableChange = ({ page: pagination }: Criteria<CspRuleTemplate>) => {
     if (!pagination) return;
     setPagination({ page: pagination.index, perPage: pagination.size });
   };
 
-  const rowProps = (row: RuleSavedObject) => ({
-    ['data-test-subj']: TEST_SUBJECTS.getCspRuleTemplatesTableRowItemTestId(row.id),
-    style: { background: row.id === selectedRuleId ? euiTheme.colors.highlight : undefined },
+  const rowProps = (row: CspRuleTemplate) => ({
+    ['data-test-subj']: TEST_SUBJECTS.getCspRuleTemplatesTableRowItemTestId(row.metadata.id),
+    style: {
+      background: row.metadata.id === selectedRuleId ? euiTheme.colors.highlight : undefined,
+    },
     onClick: (e: MouseEvent) => {
       const tag = (e.target as HTMLDivElement).tagName;
       // Ignore checkbox and switch toggle columns
       if (tag === 'BUTTON' || tag === 'INPUT') return;
-      setSelectedRuleId(row.id);
+      setSelectedRuleId(row.metadata.id);
     },
   });
 
@@ -73,7 +75,7 @@ export const RulesTable = ({
       columns={columns}
       pagination={euiPagination}
       onChange={onTableChange}
-      itemId={(v) => v.id}
+      itemId={(v) => v.metadata.id}
       rowProps={rowProps}
     />
   );
@@ -83,9 +85,9 @@ type GetColumnProps = Pick<RulesTableProps, 'setSelectedRuleId'>;
 
 const getColumns = ({
   setSelectedRuleId,
-}: GetColumnProps): Array<EuiTableFieldDataColumnType<RuleSavedObject>> => [
+}: GetColumnProps): Array<EuiTableFieldDataColumnType<CspRuleTemplate>> => [
   {
-    field: 'attributes.metadata.name',
+    field: 'metadata.name',
     name: i18n.translate('xpack.csp.rules.rulesTable.nameColumnLabel', {
       defaultMessage: 'Name',
     }),
@@ -97,7 +99,7 @@ const getColumns = ({
         title={name}
         onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
           e.stopPropagation();
-          setSelectedRuleId(rule.id);
+          setSelectedRuleId(rule.metadata.id);
         }}
         data-test-subj={TEST_SUBJECTS.CSP_RULES_TABLE_ROW_ITEM_NAME}
       >
@@ -106,7 +108,7 @@ const getColumns = ({
     ),
   },
   {
-    field: 'attributes.metadata.section',
+    field: 'metadata.section',
     name: i18n.translate('xpack.csp.rules.rulesTable.cisSectionColumnLabel', {
       defaultMessage: 'CIS Section',
     }),
