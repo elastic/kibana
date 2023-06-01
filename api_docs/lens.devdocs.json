@@ -2976,7 +2976,7 @@
                 "section": "def-public.Visualization",
                 "text": "Visualization"
               },
-              "<T, T> | (() => Promise<",
+              "<T, T, unknown> | (() => Promise<",
               {
                 "pluginId": "lens",
                 "scope": "public",
@@ -2984,7 +2984,7 @@
                 "section": "def-public.Visualization",
                 "text": "Visualization"
               },
-              "<T, T>>)) => void"
+              "<T, T, unknown>>)) => void"
             ],
             "path": "x-pack/plugins/lens/public/plugin.ts",
             "deprecated": false,
@@ -3005,7 +3005,7 @@
                     "section": "def-public.Visualization",
                     "text": "Visualization"
                   },
-                  "<T, T> | (() => Promise<",
+                  "<T, T, unknown> | (() => Promise<",
                   {
                     "pluginId": "lens",
                     "scope": "public",
@@ -3013,7 +3013,7 @@
                     "section": "def-public.Visualization",
                     "text": "Visualization"
                   },
-                  "<T, T>>)"
+                  "<T, T, unknown>>)"
                 ],
                 "path": "x-pack/plugins/lens/public/plugin.ts",
                 "deprecated": false,
@@ -4981,7 +4981,7 @@
             "section": "def-public.Visualization",
             "text": "Visualization"
           },
-          "<T, P>"
+          "<T, P, ExtraAppendLayerArg>"
         ],
         "path": "x-pack/plugins/lens/public/types.ts",
         "deprecated": false,
@@ -5010,7 +5010,7 @@
               "\nInitialize is allowed to modify the state stored in memory. The initialize function\nis called with a previous state in two cases:\n- Loading from a saved visualization\n- When using suggestions, the suggested state is passed in"
             ],
             "signature": [
-              "(addNewLayer: () => string, state?: T | P | undefined, mainPalette?: ",
+              "{ (addNewLayer: () => string, nonPersistedState?: T | undefined, mainPalette?: ",
               {
                 "pluginId": "@kbn/coloring",
                 "scope": "common",
@@ -5018,7 +5018,17 @@
                 "section": "def-common.PaletteOutput",
                 "text": "PaletteOutput"
               },
-              "<{ [key: string]: unknown; }> | undefined, references?: ",
+              "<{ [key: string]: unknown; }> | undefined): T; (addNewLayer: () => string, persistedState: P, mainPalette?: ",
+              {
+                "pluginId": "@kbn/coloring",
+                "scope": "common",
+                "docId": "kibKbnColoringPluginApi",
+                "section": "def-common.PaletteOutput",
+                "text": "PaletteOutput"
+              },
+              "<{ [key: string]: unknown; }> | undefined, annotationGroups?: ",
+              "AnnotationGroups",
+              " | undefined, references?: ",
               {
                 "pluginId": "@kbn/core-saved-objects-common",
                 "scope": "common",
@@ -5026,138 +5036,11 @@
                 "section": "def-common.SavedObjectReference",
                 "text": "SavedObjectReference"
               },
-              "[] | undefined, initialContext?: ",
-              {
-                "pluginId": "uiActions",
-                "scope": "public",
-                "docId": "kibUiActionsPluginApi",
-                "section": "def-public.VisualizeFieldContext",
-                "text": "VisualizeFieldContext"
-              },
-              " | ",
-              "VisualizeEditorContext",
-              "<",
-              {
-                "pluginId": "visualizations",
-                "scope": "common",
-                "docId": "kibVisualizationsPluginApi",
-                "section": "def-common.Configuration",
-                "text": "Configuration"
-              },
-              "> | undefined) => T"
+              "[] | undefined): T; }"
             ],
             "path": "x-pack/plugins/lens/public/types.ts",
             "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "lens",
-                "id": "def-public.Visualization.initialize.$1",
-                "type": "Function",
-                "tags": [],
-                "label": "addNewLayer",
-                "description": [],
-                "signature": [
-                  "() => string"
-                ],
-                "path": "x-pack/plugins/lens/public/types.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "lens",
-                "id": "def-public.Visualization.initialize.$2",
-                "type": "CompoundType",
-                "tags": [],
-                "label": "state",
-                "description": [],
-                "signature": [
-                  "T | P | undefined"
-                ],
-                "path": "x-pack/plugins/lens/public/types.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": false
-              },
-              {
-                "parentPluginId": "lens",
-                "id": "def-public.Visualization.initialize.$3",
-                "type": "Object",
-                "tags": [],
-                "label": "mainPalette",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "@kbn/coloring",
-                    "scope": "common",
-                    "docId": "kibKbnColoringPluginApi",
-                    "section": "def-common.PaletteOutput",
-                    "text": "PaletteOutput"
-                  },
-                  "<{ [key: string]: unknown; }> | undefined"
-                ],
-                "path": "x-pack/plugins/lens/public/types.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": false
-              },
-              {
-                "parentPluginId": "lens",
-                "id": "def-public.Visualization.initialize.$4",
-                "type": "Array",
-                "tags": [],
-                "label": "references",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "@kbn/core-saved-objects-common",
-                    "scope": "common",
-                    "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
-                    "section": "def-common.SavedObjectReference",
-                    "text": "SavedObjectReference"
-                  },
-                  "[] | undefined"
-                ],
-                "path": "x-pack/plugins/lens/public/types.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": false
-              },
-              {
-                "parentPluginId": "lens",
-                "id": "def-public.Visualization.initialize.$5",
-                "type": "CompoundType",
-                "tags": [],
-                "label": "initialContext",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "uiActions",
-                    "scope": "public",
-                    "docId": "kibUiActionsPluginApi",
-                    "section": "def-public.VisualizeFieldContext",
-                    "text": "VisualizeFieldContext"
-                  },
-                  " | ",
-                  "VisualizeEditorContext",
-                  "<",
-                  {
-                    "pluginId": "visualizations",
-                    "scope": "common",
-                    "docId": "kibVisualizationsPluginApi",
-                    "section": "def-common.Configuration",
-                    "text": "Configuration"
-                  },
-                  "> | undefined"
-                ],
-                "path": "x-pack/plugins/lens/public/types.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": false
-              }
-            ],
-            "returnComment": []
+            "trackAdoption": false
           },
           {
             "parentPluginId": "lens",
@@ -5712,7 +5595,7 @@
             "signature": [
               "((state: T, layerId: string, type: ",
               "LayerType",
-              ", indexPatternId: string) => T) | undefined"
+              ", indexPatternId: string, extraArg?: ExtraAppendLayerArg | undefined) => T) | undefined"
             ],
             "path": "x-pack/plugins/lens/public/types.ts",
             "deprecated": false,
@@ -5777,6 +5660,21 @@
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
+              },
+              {
+                "parentPluginId": "lens",
+                "id": "def-public.Visualization.appendLayer.$5",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "extraArg",
+                "description": [],
+                "signature": [
+                  "ExtraAppendLayerArg | undefined"
+                ],
+                "path": "x-pack/plugins/lens/public/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
               }
             ],
             "returnComment": []
@@ -5793,11 +5691,9 @@
             "signature": [
               "(state?: T | undefined, frame?: Pick<",
               "FramePublicAPI",
-              ", \"activeData\" | \"datasourceLayers\"> | undefined) => { type: ",
-              "LayerType",
-              "; label: string; icon?: ",
-              "IconType",
-              " | undefined; noDatasource?: boolean | undefined; disabled?: boolean | undefined; toolTipContent?: string | undefined; initialDimensions?: { columnId: string; groupId: string; staticValue?: unknown; autoTimeField?: boolean | undefined; }[] | undefined; canAddViaMenu?: boolean | undefined; }[]"
+              ", \"activeData\" | \"datasourceLayers\"> | undefined) => ",
+              "VisualizationLayerDescription",
+              "[]"
             ],
             "path": "x-pack/plugins/lens/public/types.ts",
             "deprecated": false,
@@ -5848,8 +5744,10 @@
               "\nreturns a list of custom actions supported by the visualization layer.\nDefault actions like delete/clear are not included in this list and are managed by the editor frame"
             ],
             "signature": [
-              "((layerId: string, state: T) => ",
-              "LayerActionFromVisualization",
+              "((layerId: string, state: T, setState: ",
+              "StateSetter",
+              "<T, unknown>, isSaveable?: boolean | undefined) => ",
+              "LayerAction",
               "[]) | undefined"
             ],
             "path": "x-pack/plugins/lens/public/types.ts",
@@ -5885,35 +5783,17 @@
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "lens",
-            "id": "def-public.Visualization.onLayerAction",
-            "type": "Function",
-            "tags": [],
-            "label": "onLayerAction",
-            "description": [
-              "\nPerform state mutations in response to a layer action"
-            ],
-            "signature": [
-              "((layerId: string, actionId: string, state: T) => T) | undefined"
-            ],
-            "path": "x-pack/plugins/lens/public/types.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
+              },
               {
                 "parentPluginId": "lens",
-                "id": "def-public.Visualization.onLayerAction.$1",
-                "type": "string",
+                "id": "def-public.Visualization.getSupportedActionsForLayer.$3",
+                "type": "Function",
                 "tags": [],
-                "label": "layerId",
+                "label": "setState",
                 "description": [],
                 "signature": [
-                  "string"
+                  "StateSetter",
+                  "<T, unknown>"
                 ],
                 "path": "x-pack/plugins/lens/public/types.ts",
                 "deprecated": false,
@@ -5922,33 +5802,18 @@
               },
               {
                 "parentPluginId": "lens",
-                "id": "def-public.Visualization.onLayerAction.$2",
-                "type": "string",
+                "id": "def-public.Visualization.getSupportedActionsForLayer.$4",
+                "type": "CompoundType",
                 "tags": [],
-                "label": "actionId",
+                "label": "isSaveable",
                 "description": [],
                 "signature": [
-                  "string"
+                  "boolean | undefined"
                 ],
                 "path": "x-pack/plugins/lens/public/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "lens",
-                "id": "def-public.Visualization.onLayerAction.$3",
-                "type": "Uncategorized",
-                "tags": [],
-                "label": "state",
-                "description": [],
-                "signature": [
-                  "T"
-                ],
-                "path": "x-pack/plugins/lens/public/types.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
+                "isRequired": false
               }
             ],
             "returnComment": []
@@ -6900,6 +6765,248 @@
           },
           {
             "parentPluginId": "lens",
+            "id": "def-public.Visualization.getAddLayerButtonComponent",
+            "type": "Function",
+            "tags": [],
+            "label": "getAddLayerButtonComponent",
+            "description": [],
+            "signature": [
+              "((props: { supportedLayers: ",
+              "VisualizationLayerDescription",
+              "[]; addLayer: ",
+              "AddLayerFunction",
+              "<unknown>; ensureIndexPattern: (specOrId: string | ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewSpec",
+                "text": "DataViewSpec"
+              },
+              ") => Promise<void>; registerLibraryAnnotationGroup: (groupInfo: { id: string; group: ",
+              {
+                "pluginId": "eventAnnotation",
+                "scope": "common",
+                "docId": "kibEventAnnotationPluginApi",
+                "section": "def-common.EventAnnotationGroupConfig",
+                "text": "EventAnnotationGroupConfig"
+              },
+              "; }) => void; }) => JSX.Element | null) | undefined"
+            ],
+            "path": "x-pack/plugins/lens/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "lens",
+                "id": "def-public.Visualization.getAddLayerButtonComponent.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "props",
+                "description": [],
+                "path": "x-pack/plugins/lens/public/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "lens",
+                    "id": "def-public.Visualization.getAddLayerButtonComponent.$1.supportedLayers",
+                    "type": "Array",
+                    "tags": [],
+                    "label": "supportedLayers",
+                    "description": [],
+                    "signature": [
+                      "VisualizationLayerDescription",
+                      "[]"
+                    ],
+                    "path": "x-pack/plugins/lens/public/types.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "lens",
+                    "id": "def-public.Visualization.getAddLayerButtonComponent.$1.addLayer",
+                    "type": "Function",
+                    "tags": [],
+                    "label": "addLayer",
+                    "description": [],
+                    "signature": [
+                      "(layerType: ",
+                      "LayerType",
+                      ", extraArg?: unknown, ignoreInitialValues?: boolean | undefined) => void"
+                    ],
+                    "path": "x-pack/plugins/lens/public/types.ts",
+                    "deprecated": false,
+                    "trackAdoption": false,
+                    "returnComment": [],
+                    "children": [
+                      {
+                        "parentPluginId": "lens",
+                        "id": "def-public.Visualization.getAddLayerButtonComponent.$1.addLayer.$1",
+                        "type": "CompoundType",
+                        "tags": [],
+                        "label": "layerType",
+                        "description": [],
+                        "signature": [
+                          "\"data\" | \"annotations\" | \"metricTrendline\" | \"referenceLine\""
+                        ],
+                        "path": "x-pack/plugins/lens/public/types.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "lens",
+                        "id": "def-public.Visualization.getAddLayerButtonComponent.$1.addLayer.$2",
+                        "type": "Uncategorized",
+                        "tags": [],
+                        "label": "extraArg",
+                        "description": [],
+                        "signature": [
+                          "T | undefined"
+                        ],
+                        "path": "x-pack/plugins/lens/public/types.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "lens",
+                        "id": "def-public.Visualization.getAddLayerButtonComponent.$1.addLayer.$3",
+                        "type": "CompoundType",
+                        "tags": [],
+                        "label": "ignoreInitialValues",
+                        "description": [],
+                        "signature": [
+                          "boolean | undefined"
+                        ],
+                        "path": "x-pack/plugins/lens/public/types.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      }
+                    ]
+                  },
+                  {
+                    "parentPluginId": "lens",
+                    "id": "def-public.Visualization.getAddLayerButtonComponent.$1.ensureIndexPattern",
+                    "type": "Function",
+                    "tags": [],
+                    "label": "ensureIndexPattern",
+                    "description": [],
+                    "signature": [
+                      "(specOrId: string | ",
+                      {
+                        "pluginId": "dataViews",
+                        "scope": "common",
+                        "docId": "kibDataViewsPluginApi",
+                        "section": "def-common.DataViewSpec",
+                        "text": "DataViewSpec"
+                      },
+                      ") => Promise<void>"
+                    ],
+                    "path": "x-pack/plugins/lens/public/types.ts",
+                    "deprecated": false,
+                    "trackAdoption": false,
+                    "children": [
+                      {
+                        "parentPluginId": "lens",
+                        "id": "def-public.Visualization.getAddLayerButtonComponent.$1.ensureIndexPattern.$1",
+                        "type": "CompoundType",
+                        "tags": [],
+                        "label": "specOrId",
+                        "description": [],
+                        "signature": [
+                          "string | ",
+                          {
+                            "pluginId": "dataViews",
+                            "scope": "common",
+                            "docId": "kibDataViewsPluginApi",
+                            "section": "def-common.DataViewSpec",
+                            "text": "DataViewSpec"
+                          }
+                        ],
+                        "path": "x-pack/plugins/lens/public/types.ts",
+                        "deprecated": false,
+                        "trackAdoption": false,
+                        "isRequired": true
+                      }
+                    ],
+                    "returnComment": []
+                  },
+                  {
+                    "parentPluginId": "lens",
+                    "id": "def-public.Visualization.getAddLayerButtonComponent.$1.registerLibraryAnnotationGroup",
+                    "type": "Function",
+                    "tags": [],
+                    "label": "registerLibraryAnnotationGroup",
+                    "description": [],
+                    "signature": [
+                      "(groupInfo: { id: string; group: ",
+                      {
+                        "pluginId": "eventAnnotation",
+                        "scope": "common",
+                        "docId": "kibEventAnnotationPluginApi",
+                        "section": "def-common.EventAnnotationGroupConfig",
+                        "text": "EventAnnotationGroupConfig"
+                      },
+                      "; }) => void"
+                    ],
+                    "path": "x-pack/plugins/lens/public/types.ts",
+                    "deprecated": false,
+                    "trackAdoption": false,
+                    "children": [
+                      {
+                        "parentPluginId": "lens",
+                        "id": "def-public.Visualization.getAddLayerButtonComponent.$1.registerLibraryAnnotationGroup.$1",
+                        "type": "Object",
+                        "tags": [],
+                        "label": "groupInfo",
+                        "description": [],
+                        "path": "x-pack/plugins/lens/public/types.ts",
+                        "deprecated": false,
+                        "trackAdoption": false,
+                        "children": [
+                          {
+                            "parentPluginId": "lens",
+                            "id": "def-public.Visualization.getAddLayerButtonComponent.$1.registerLibraryAnnotationGroup.$1.id",
+                            "type": "string",
+                            "tags": [],
+                            "label": "id",
+                            "description": [],
+                            "path": "x-pack/plugins/lens/public/types.ts",
+                            "deprecated": false,
+                            "trackAdoption": false
+                          },
+                          {
+                            "parentPluginId": "lens",
+                            "id": "def-public.Visualization.getAddLayerButtonComponent.$1.registerLibraryAnnotationGroup.$1.group",
+                            "type": "Object",
+                            "tags": [],
+                            "label": "group",
+                            "description": [],
+                            "signature": [
+                              {
+                                "pluginId": "eventAnnotation",
+                                "scope": "common",
+                                "docId": "kibEventAnnotationPluginApi",
+                                "section": "def-common.EventAnnotationGroupConfig",
+                                "text": "EventAnnotationGroupConfig"
+                              }
+                            ],
+                            "path": "x-pack/plugins/lens/public/types.ts",
+                            "deprecated": false,
+                            "trackAdoption": false
+                          }
+                        ]
+                      }
+                    ],
+                    "returnComment": []
+                  }
+                ]
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "lens",
             "id": "def-public.Visualization.getUniqueLabels",
             "type": "Function",
             "tags": [],
@@ -7585,6 +7692,130 @@
           },
           {
             "parentPluginId": "lens",
+            "id": "def-public.Visualization.isEqual",
+            "type": "Function",
+            "tags": [],
+            "label": "isEqual",
+            "description": [],
+            "signature": [
+              "((state1: P, references1: ",
+              {
+                "pluginId": "@kbn/core-saved-objects-common",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                "section": "def-common.SavedObjectReference",
+                "text": "SavedObjectReference"
+              },
+              "[], state2: P, references2: ",
+              {
+                "pluginId": "@kbn/core-saved-objects-common",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                "section": "def-common.SavedObjectReference",
+                "text": "SavedObjectReference"
+              },
+              "[], annotationGroups: ",
+              "AnnotationGroups",
+              ") => boolean) | undefined"
+            ],
+            "path": "x-pack/plugins/lens/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "lens",
+                "id": "def-public.Visualization.isEqual.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "state1",
+                "description": [],
+                "signature": [
+                  "P"
+                ],
+                "path": "x-pack/plugins/lens/public/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "lens",
+                "id": "def-public.Visualization.isEqual.$2",
+                "type": "Array",
+                "tags": [],
+                "label": "references1",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/core-saved-objects-common",
+                    "scope": "common",
+                    "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                    "section": "def-common.SavedObjectReference",
+                    "text": "SavedObjectReference"
+                  },
+                  "[]"
+                ],
+                "path": "x-pack/plugins/lens/public/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "lens",
+                "id": "def-public.Visualization.isEqual.$3",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "state2",
+                "description": [],
+                "signature": [
+                  "P"
+                ],
+                "path": "x-pack/plugins/lens/public/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "lens",
+                "id": "def-public.Visualization.isEqual.$4",
+                "type": "Array",
+                "tags": [],
+                "label": "references2",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/core-saved-objects-common",
+                    "scope": "common",
+                    "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                    "section": "def-common.SavedObjectReference",
+                    "text": "SavedObjectReference"
+                  },
+                  "[]"
+                ],
+                "path": "x-pack/plugins/lens/public/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "lens",
+                "id": "def-public.Visualization.isEqual.$5",
+                "type": "Object",
+                "tags": [],
+                "label": "annotationGroups",
+                "description": [],
+                "signature": [
+                  "AnnotationGroups"
+                ],
+                "path": "x-pack/plugins/lens/public/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "lens",
             "id": "def-public.Visualization.getVisualizationInfo",
             "type": "Function",
             "tags": [],
@@ -7782,116 +8013,6 @@
               "string | React.ComponentType<{}>"
             ],
             "path": "x-pack/plugins/lens/public/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "lens",
-        "id": "def-public.XYAnnotationLayerConfig",
-        "type": "Interface",
-        "tags": [],
-        "label": "XYAnnotationLayerConfig",
-        "description": [],
-        "path": "x-pack/plugins/lens/public/visualizations/xy/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "lens",
-            "id": "def-public.XYAnnotationLayerConfig.layerId",
-            "type": "string",
-            "tags": [],
-            "label": "layerId",
-            "description": [],
-            "path": "x-pack/plugins/lens/public/visualizations/xy/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "lens",
-            "id": "def-public.XYAnnotationLayerConfig.layerType",
-            "type": "string",
-            "tags": [],
-            "label": "layerType",
-            "description": [],
-            "signature": [
-              "\"annotations\""
-            ],
-            "path": "x-pack/plugins/lens/public/visualizations/xy/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "lens",
-            "id": "def-public.XYAnnotationLayerConfig.annotations",
-            "type": "Array",
-            "tags": [],
-            "label": "annotations",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "eventAnnotation",
-                "scope": "common",
-                "docId": "kibEventAnnotationPluginApi",
-                "section": "def-common.EventAnnotationConfig",
-                "text": "EventAnnotationConfig"
-              },
-              "[]"
-            ],
-            "path": "x-pack/plugins/lens/public/visualizations/xy/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "lens",
-            "id": "def-public.XYAnnotationLayerConfig.hide",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "hide",
-            "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "x-pack/plugins/lens/public/visualizations/xy/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "lens",
-            "id": "def-public.XYAnnotationLayerConfig.indexPatternId",
-            "type": "string",
-            "tags": [],
-            "label": "indexPatternId",
-            "description": [],
-            "path": "x-pack/plugins/lens/public/visualizations/xy/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "lens",
-            "id": "def-public.XYAnnotationLayerConfig.simpleView",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "simpleView",
-            "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "x-pack/plugins/lens/public/visualizations/xy/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "lens",
-            "id": "def-public.XYAnnotationLayerConfig.ignoreGlobalFilters",
-            "type": "boolean",
-            "tags": [],
-            "label": "ignoreGlobalFilters",
-            "description": [],
-            "path": "x-pack/plugins/lens/public/visualizations/xy/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -10504,6 +10625,23 @@
           "\"time\" | \"linear\" | \"ordinal\""
         ],
         "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "lens",
+        "id": "def-public.XYAnnotationLayerConfig",
+        "type": "Type",
+        "tags": [],
+        "label": "XYAnnotationLayerConfig",
+        "description": [],
+        "signature": [
+          "XYByValueAnnotationLayerConfig",
+          " | ",
+          "XYByReferenceAnnotationLayerConfig"
+        ],
+        "path": "x-pack/plugins/lens/public/visualizations/xy/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

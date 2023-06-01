@@ -32,6 +32,7 @@ export const formatColumnFn: FormatColumnExpressionFunction['fn'] = (
         if (!parentFormat) {
           if (supportedFormats[format]) {
             const serializedFormat: SerializedFieldFormat = {
+              // Lens custom formatter is still a number format, different from the Kibana custom one
               id:
                 supportedFormats[format].formatId !== 'custom'
                   ? supportedFormats[format].formatId
@@ -135,6 +136,7 @@ export const formatColumnFn: FormatColumnExpressionFunction['fn'] = (
             params: {
               ...col.meta.params,
               suffixString: suffix,
+              formatOverride: true,
             },
           },
         },

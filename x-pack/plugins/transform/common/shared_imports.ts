@@ -5,12 +5,10 @@
  * 2.0.
  */
 
-export type { ChartData } from '@kbn/ml-plugin/common';
 export {
   composeValidators,
   isRuntimeMappings,
   patternValidator,
   isRuntimeField,
+  type ChartData,
 } from '@kbn/ml-plugin/common';
-
-export { RUNTIME_FIELD_TYPES } from '@kbn/data-plugin/common';
