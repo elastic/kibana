@@ -23,6 +23,7 @@ type GeneratorError = string | null;
  * ```
  *
  * @param endpoint     — The API endpoint including the Kibana basepath.
+ * @param apiVersion   - The API version to be used.
  * @param abortCtrl    — Abort controller for cancelling the request.
  * @param body         — The request body. For now all requests are POST.
  * @param ndjson       — Boolean flag to receive the stream as a raw string or NDJSON.
@@ -37,6 +38,7 @@ type GeneratorError = string | null;
  */
 export async function* fetchStream<I extends UseFetchStreamParamsDefault, BasePath extends string>(
   endpoint: `${BasePath}${I['endpoint']}`,
+  apiVersion: string,
   abortCtrl: React.MutableRefObject<AbortController>,
   body: I['body'],
   ndjson = true,
@@ -54,6 +56,7 @@ export async function* fetchStream<I extends UseFetchStreamParamsDefault, BasePa
         // This refers to the format of the request body,
         // not the response, which will be a uint8array Buffer.
         'Content-Type': 'application/json',
+        'Elastic-Api-Version': apiVersion,
         'kbn-xsrf': 'stream',
       },
       ...(Object.keys(body).length > 0 ? { body: JSON.stringify(body) } : {}),

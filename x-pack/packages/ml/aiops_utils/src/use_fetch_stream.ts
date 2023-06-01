@@ -24,6 +24,7 @@ import { stringReducer, StringReducer } from './string_reducer';
  */
 export interface UseFetchStreamCustomReducerParams {
   endpoint: string;
+  apiVersion: string;
   body: object;
   reducer: Reducer<any, any>;
 }
@@ -33,6 +34,7 @@ export interface UseFetchStreamCustomReducerParams {
  */
 export interface UseFetchStreamParamsDefault {
   endpoint: string;
+  apiVersion: string;
   body: object;
   reducer: StringReducer;
 }
@@ -51,6 +53,7 @@ interface UseFetchStreamReturnType<Data, Action> {
 // if no options are supplied. Passing in options will use a custom reducer with appropriate type support.
 export function useFetchStream<I extends UseFetchStreamParamsDefault, BasePath extends string>(
   endpoint: `${BasePath}${I['endpoint']}`,
+  apiVersion: I['apiVersion'],
   body: I['body']
 ): UseFetchStreamReturnType<string, ReducerAction<I['reducer']>>;
 
@@ -59,6 +62,7 @@ export function useFetchStream<
   BasePath extends string
 >(
   endpoint: `${BasePath}${I['endpoint']}`,
+  apiVersion: I['apiVersion'],
   body: I['body'],
   options: { reducer: I['reducer']; initialState: ReducerState<I['reducer']> }
 ): UseFetchStreamReturnType<ReducerState<I['reducer']>, ReducerAction<I['reducer']>>;
@@ -73,6 +77,7 @@ export function useFetchStream<
  */
 export function useFetchStream<I extends UseFetchStreamParamsDefault, BasePath extends string>(
   endpoint: `${BasePath}${I['endpoint']}`,
+  apiVersion: string,
   body: I['body'],
   options?: { reducer: I['reducer']; initialState: ReducerState<I['reducer']> }
 ): UseFetchStreamReturnType<ReducerState<I['reducer']>, ReducerAction<I['reducer']>> {
@@ -106,7 +111,7 @@ export function useFetchStream<I extends UseFetchStreamParamsDefault, BasePath e
     for await (const [fetchStreamError, actions] of fetchStream<
       UseFetchStreamCustomReducerParams,
       BasePath
-    >(endpoint, abortCtrl, body, options !== undefined)) {
+    >(endpoint, apiVersion, abortCtrl, body, options !== undefined)) {
       if (fetchStreamError !== null) {
         addError(fetchStreamError);
       } else if (actions.length > 0) {
