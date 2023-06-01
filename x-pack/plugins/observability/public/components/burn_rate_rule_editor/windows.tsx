@@ -153,16 +153,17 @@ function Window({
         </EuiFlexItem>
         <EuiFlexItem grow={0}>
           <EuiButtonIcon
+            data-test-subj="sloBurnRateRuleDeleteWindowButton"
             iconType="trash"
             color="danger"
             style={{ marginBottom: '-1em' }}
             onClick={() => onDelete(id)}
             disabled={disableDelete}
             title={i18n.translate('xpack.observability.slo.rules.deleteWindowLabel', {
-              defaultMessage: 'Delete metric',
+              defaultMessage: 'Delete window',
             })}
             aria-label={i18n.translate('xpack.observability.slo.rules.deleteWindowLabel', {
-              defaultMessage: 'Delete metric',
+              defaultMessage: 'Delete window',
             })}
           />
         </EuiFlexItem>
@@ -248,7 +249,7 @@ export function Windows({ slo, windows, errors, onChange, totalNumberOfWindows }
         );
       })}
       <EuiButtonEmpty
-        data-test-subj="customMetricIndicatorAddMetricButton"
+        data-test-subj="sloBurnRateRuleAddWindowButton"
         color={'primary'}
         size="xs"
         iconType={'plusInCircleFilled'}
