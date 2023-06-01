@@ -37,6 +37,13 @@ export class TelemetryService {
             type: 'keyword',
             _meta: { description: 'The version of prebuilt rules', optional: true },
           },
+          enabledFeatures: {
+            type: 'array',
+            items: {
+              type: 'keyword',
+              _meta: { description: 'Allowed Experimental Values', optional: true },
+            },
+          },
         },
       });
     }
