@@ -144,6 +144,11 @@ export class Settings {
     return true;
   }
 
+  setIsAccessibilityOverlayEnabled(isEnabled: boolean) {
+    this.storage.set(SettingKeys.IS_ACCESSIBILITY_OVERLAY_ENABLED, isEnabled);
+    return true;
+  }
+
   getIsKeyboardShortcutsDisabled() {
     return this.storage.get(
       SettingKeys.IS_KEYBOARD_SHORTCUTS_ENABLED,
@@ -181,6 +186,7 @@ export class Settings {
     pollInterval,
     isHistoryEnabled,
     isKeyboardShortcutsEnabled,
+    isAccessibilityOverlayEnabled,
   }: DevToolsSettings) {
     this.setFontSize(fontSize);
     this.setWrapMode(wrapMode);
@@ -190,6 +196,7 @@ export class Settings {
     this.setPollInterval(pollInterval);
     this.setIsHistoryEnabled(isHistoryEnabled);
     this.setIsKeyboardShortcutsEnabled(isKeyboardShortcutsEnabled);
+    this.setIsAccessibilityOverlayEnabled(isAccessibilityOverlayEnabled);
   }
 }
 
