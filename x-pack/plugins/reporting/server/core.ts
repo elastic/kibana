@@ -320,7 +320,7 @@ export class ReportingCore {
 
   public async getLicenseInfo() {
     const { license$ } = (await this.getPluginStartDeps()).licensing;
-    const registry = this.getPluginSetupDeps().exportTypesRegistry;
+    const registry = this.getExportTypesRegistry();
     return await Rx.firstValueFrom(
       license$.pipe(map((license) => checkLicense(registry, license)))
     );

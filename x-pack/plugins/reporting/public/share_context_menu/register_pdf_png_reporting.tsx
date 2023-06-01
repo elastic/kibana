@@ -18,7 +18,7 @@ const getJobParams =
   (
     apiClient: ReportingAPIClient,
     opts: JobParamsProviderOptions,
-    type: 'png' | 'pngV2' | 'printablePdf' | 'printablePdfV2'
+    type: 'png' | 'pngV2' | 'printablePdf' | 'printable_pdf_v2'
   ) =>
   () => {
     const {
@@ -32,7 +32,7 @@ const getJobParams =
       title,
     };
 
-    if (type === 'printablePdfV2') {
+    if (type === 'printable_pdf_v2') {
       // multi locator for PDF V2
       return { ...baseParams, locatorParams: [locatorParams] };
     } else if (type === 'pngV2') {
@@ -161,7 +161,7 @@ export const reportingScreenshotShareProvider = ({
       defaultMessage: 'PDF Reports',
     });
 
-    const pdfReportType = isV2Job ? 'printablePdfV2' : 'printablePdf';
+    const pdfReportType = isV2Job ? 'printable_pdf_v2' : 'printablePdf';
 
     const panelPdf = {
       shareMenuItem: {

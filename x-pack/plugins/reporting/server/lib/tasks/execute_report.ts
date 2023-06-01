@@ -245,13 +245,12 @@ export class ExecuteReportTask implements ReportingTask {
     cancellationToken: CancellationToken,
     stream: Writable
   ): Promise<TaskRunResult> {
-    // @TODO hardcoding for now because pdf is all that will work
-    const exportType = this.reporting.getExportTypesRegistry().getById('printablePdfV2');
+    const exportType = this.reporting.getExportTypesRegistry().getById(task.jobtype);
 
     const payload = {
       forceNow: new Date().toISOString(),
       locatorParams: url,
-      layout: {},
+      layout: task.meta,
       ...task.payload,
     } as unknown as TaskPayloadPDFV2;
 
@@ -373,7 +372,7 @@ export class ExecuteReportTask implements ReportingTask {
               this._performJob(task, cancellationToken, stream),
               this.throwIfKibanaShutsDown(),
             ]);
-
+            // output.metrics is undefined with PDF
             stream.end();
 
             await finishedWithNoPendingCallbacks(stream);

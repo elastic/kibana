@@ -76,7 +76,7 @@ export class RequestHandler {
       objectType: jobParams.objectType,
       browserTimezone: jobParams.browserTimezone,
       version: jobParams.version,
-      spaceId: reporting.getSpaceId(request, logger),
+      // spaceId: reporting.getSpaceId(request, logger),
     };
 
     // 4. Add the report to ReportingStore to show as pending
@@ -89,7 +89,7 @@ export class RequestHandler {
           // telemetry fields
           objectType: jobParams.objectType,
           layout: jobParams.layout?.id,
-          isDeprecated: job.isDeprecated ? job.isDeprecated : false,
+          isDeprecated: job.isDeprecated,
         },
       })
     );
@@ -103,7 +103,6 @@ export class RequestHandler {
 
     // 6. Log the action with event log
     reporting.getEventLogger(report, task).logScheduleTask();
-
     return report;
   }
 

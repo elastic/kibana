@@ -54,7 +54,7 @@ export type {
 /** @TODO move to be within @kbn-reporting-export-types */
 export interface PdfExportTypeSetupDeps {
   basePath: Pick<IBasePath, 'set'>;
-  spaces?: SpacesPluginSetup;
+  spaces: SpacesPluginSetup;
   logger: Logger;
 }
 
@@ -66,7 +66,7 @@ export interface PdfExportTypeStartupDeps {
 }
 
 export class PdfExportType implements ExportType {
-  id = 'printablePdfV2';
+  id = 'printable_pdf_v2';
   name = 'PDF';
   validLicenses = [
     LICENSE_TYPE_TRIAL,
@@ -98,9 +98,10 @@ export class PdfExportType implements ExportType {
   }
 
   public getSpaceId(request: KibanaRequest, logger = this.logger): string | undefined {
-    const spacesService = this.setupDeps.spaces?.spacesService;
+    const spacesService = this.setupDeps.spaces.spacesService;
+    console.log(this.setupDeps.spaces);
     if (spacesService) {
-      const spaceId = spacesService?.getSpaceId(request);
+      const spaceId = spacesService.getSpaceId(request);
 
       if (spaceId !== DEFAULT_SPACE_ID) {
         logger.info(`Request uses Space ID: ${spaceId}`);
@@ -123,7 +124,7 @@ export class PdfExportType implements ExportType {
   }
 
   public async getUiSettingsClient(request: KibanaRequest, logger = this.logger) {
-    const spacesService = this.setupDeps.spaces?.spacesService;
+    const spacesService = this.setupDeps.spaces.spacesService;
     const spaceId = this.getSpaceId(request, logger);
     if (spacesService && spaceId) {
       logger.info(`Creating UI Settings Client for space: ${spaceId}`);
@@ -143,7 +144,7 @@ export class PdfExportType implements ExportType {
     };
     const fakeRequest = CoreKibanaRequest.from(rawRequest);
 
-    const spacesService = this.setupDeps.spaces?.spacesService;
+    const spacesService = this.setupDeps.spaces.spacesService;
     if (spacesService) {
       if (spaceId && spaceId !== DEFAULT_SPACE_ID) {
         logger.info(`Generating request for space: ${spaceId}`);
@@ -189,14 +190,12 @@ export class PdfExportType implements ExportType {
    * @returns jobParams
    */
   public createJob({ locatorParams, ...jobParams }: JobParamsPDFV2) {
-    return async function () {
-      return {
-        ...jobParams,
-        locatorParams,
-        isDeprecated: false,
-        browserTimezone: jobParams.browserTimezone,
-        forceNow: new Date().toISOString(),
-      };
+    return {
+      ...jobParams,
+      locatorParams,
+      isDeprecated: false,
+      browserTimezone: jobParams.browserTimezone,
+      forceNow: new Date().toISOString(),
     };
   }
 
@@ -215,7 +214,7 @@ export class PdfExportType implements ExportType {
   ) {
     // use the dependencies to execute the job and return the content through the stream
     const { encryptionKey } = this.config;
-    return async () => {
+    const pdfPerformJob = async () => {
       const jobLogger = this.logger.get(`execute-job:${jobId}`);
       const apmTrans = apm.startTransaction('execute-job-pdf-v2', REPORTING_TRANSACTION_TYPE);
       const apmGetAssets = apmTrans?.startSpan('get-assets', 'setup');
@@ -281,7 +280,10 @@ export class PdfExportType implements ExportType {
       const stop$ = Rx.fromEventPattern(cancellationToken.on);
 
       apmTrans?.end();
-      return Rx.lastValueFrom(process$.pipe(takeUntil(stop$)));
+      const rsu = process$.pipe(takeUntil(stop$));
+      const result = Rx.firstValueFrom(rsu);
+      return await result;
     };
+    return pdfPerformJob();
   }
 }
