@@ -21,6 +21,25 @@ function withParams(col: DatatableColumn, params: Record<string, unknown>) {
   return { ...col, meta: { ...col.meta, params } };
 }
 
+function getSafeFormatId(format: string) {
+  return supportedFormats[format].formatId !== 'custom'
+    ? supportedFormats[format].formatId
+    : 'number';
+}
+
+function getPatternFromFormat(
+  format: string,
+  decimals: number | undefined,
+  compact: boolean | undefined,
+  pattern: string | undefined
+) {
+  const basePattern = supportedFormats[format].decimalsToPattern(decimals, compact);
+  if (supportedFormats[format].formatId === 'custom') {
+    return pattern ?? basePattern;
+  }
+  return basePattern;
+}
+
 export const formatColumnFn: FormatColumnExpressionFunction['fn'] = (
   input,
   { format, columnId, decimals, compact, suffix, pattern, parentFormat }: FormatColumnArgs
@@ -33,12 +52,9 @@ export const formatColumnFn: FormatColumnExpressionFunction['fn'] = (
           if (supportedFormats[format]) {
             const serializedFormat: SerializedFieldFormat = {
               // Lens custom formatter is still a number format, different from the Kibana custom one
-              id:
-                supportedFormats[format].formatId !== 'custom'
-                  ? supportedFormats[format].formatId
-                  : 'number',
+              id: getSafeFormatId(format),
               params: {
-                pattern: pattern ?? supportedFormats[format].decimalsToPattern(decimals, compact),
+                pattern: getPatternFromFormat(format, decimals, compact, pattern),
                 formatOverride: true,
               },
             };
@@ -62,7 +78,7 @@ export const formatColumnFn: FormatColumnExpressionFunction['fn'] = (
 
         if (format && supportedFormats[format]) {
           const customParams = {
-            pattern: pattern ?? supportedFormats[format].decimalsToPattern(decimals, compact),
+            pattern: getPatternFromFormat(format, decimals, compact, pattern),
             formatOverride: true,
           };
           // Some parent formatters are multi-fields and wrap the custom format into a "paramsPerField"
@@ -72,7 +88,7 @@ export const formatColumnFn: FormatColumnExpressionFunction['fn'] = (
               id: parentFormatId,
               params: {
                 ...col.meta.params?.params,
-                id: supportedFormats[format].formatId,
+                id: getSafeFormatId(format),
                 ...parentFormatParams,
                 // some wrapper formatters require params to be flatten out (i.e. terms) while others
                 // require them to be in the params property (i.e. ranges)
@@ -91,7 +107,7 @@ export const formatColumnFn: FormatColumnExpressionFunction['fn'] = (
             id: parentFormatId,
             params: {
               ...col.meta.params?.params,
-              id: supportedFormats[format].formatId,
+              id: getSafeFormatId(format),
               // some wrapper formatters require params to be flatten out (i.e. terms) while others
               // require them to be in the params property (i.e. ranges)
               // so for now duplicate

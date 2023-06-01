@@ -265,4 +265,65 @@ describe('format_column', () => {
     const result = await fn(datatable, { columnId: 'test', format: 'number' });
     expect(result.columns[1]).toEqual(extraColumn);
   });
+
+  it('does support compact format', async () => {
+    const result = await fn(datatable, {
+      columnId: 'test',
+      format: 'number',
+      compact: true,
+    });
+    expect(result.columns[0].meta).toEqual({
+      type: 'number',
+      params: {
+        id: 'number',
+        params: { pattern: '0,0.00a', formatOverride: true },
+      },
+    });
+  });
+
+  it('does support a Lens custom format', async () => {
+    const result = await fn(datatable, {
+      columnId: 'test',
+      format: 'custom',
+      pattern: '00:00',
+    });
+    expect(result.columns[0].meta).toEqual({
+      type: 'number',
+      params: {
+        id: 'number',
+        params: { pattern: '00:00', formatOverride: true },
+      },
+    });
+  });
+
+  it('does support both decimals and compact format', async () => {
+    const result = await fn(datatable, {
+      columnId: 'test',
+      format: 'number',
+      decimals: 5,
+      compact: true,
+    });
+    expect(result.columns[0].meta).toEqual({
+      type: 'number',
+      params: {
+        id: 'number',
+        params: { pattern: '0,0.00000a', formatOverride: true },
+      },
+    });
+  });
+
+  it("does not apply the custom pattern unless it's a custom format", async () => {
+    const result = await fn(datatable, {
+      columnId: 'test',
+      format: 'number',
+      pattern: '00:00',
+    });
+    expect(result.columns[0].meta).toEqual({
+      type: 'number',
+      params: {
+        id: 'number',
+        params: { pattern: '0,0.00', formatOverride: true },
+      },
+    });
+  });
 });
