@@ -11,7 +11,7 @@ properties:
           id:
             type: string
           type:
-            $ref: ./SO_type.yaml
+            $ref: ./so_type.yaml
           updatedAt:
             type: string
           attributes:
