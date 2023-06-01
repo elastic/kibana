@@ -17,20 +17,13 @@ import {
   createNewRuleAsset,
   preventPrebuiltRulesPackageInstallation,
 } from '../../tasks/api_calls/prebuilt_rules';
-import {
-  cleanKibana,
-  resetRulesTableState,
-  deleteAlertsAndRules,
-  reload,
-} from '../../tasks/common';
+import { resetRulesTableState, deleteAlertsAndRules, reload } from '../../tasks/common';
 import { esArchiverResetKibana } from '../../tasks/es_archiver';
 import { login, visitWithoutDateRange } from '../../tasks/login';
+import { installPrebuiltRulesButtonClick } from '../../tasks/prebuilt_rules';
 import { SECURITY_DETECTIONS_RULES_URL } from '../../urls/navigation';
 
 describe('Detection rules, Prebuilt Rules Installation and Update workflow', () => {
-  before(() => {
-    cleanKibana();
-  });
   beforeEach(() => {
     login();
     /* Make sure persisted rules table state is cleared */
@@ -49,7 +42,6 @@ describe('Detection rules, Prebuilt Rules Installation and Update workflow', () 
   describe('Rules installation notification when no rules have been installed', () => {
     beforeEach(() => {
       visitWithoutDateRange(SECURITY_DETECTIONS_RULES_URL);
-      waitForRulesTableToBeLoaded();
     });
 
     it('should notify user about prebuilt rules available for installation', () => {
@@ -96,14 +88,16 @@ describe('Detection rules, Prebuilt Rules Installation and Update workflow', () 
 
     it('should notify user about prebuilt rules package available for installation', () => {
       cy.get(LOAD_PREBUILT_RULES_ON_PAGE_HEADER_BTN).should('be.visible');
-      cy.get(LOAD_PREBUILT_RULES_ON_PAGE_HEADER_BTN).contains('2 Elastic prebuilt rules');
+      cy.get(LOAD_PREBUILT_RULES_ON_PAGE_HEADER_BTN).should(
+        'have.text',
+        'Install 2 Elastic prebuilt rules '
+      );
     });
 
     it('should notify user a rule is again available for installation if it is deleted', () => {
       /* Install available rules, assert that the notification is gone */
       /* then delete one rule and assert that the notification is back */
-      cy.get(LOAD_PREBUILT_RULES_ON_PAGE_HEADER_BTN).click();
-      cy.get(LOAD_PREBUILT_RULES_ON_PAGE_HEADER_BTN).should('not.exist');
+      installPrebuiltRulesButtonClick(LOAD_PREBUILT_RULES_ON_PAGE_HEADER_BTN);
       deleteFirstRule();
       cy.get(LOAD_PREBUILT_RULES_ON_PAGE_HEADER_BTN).should('be.visible');
     });

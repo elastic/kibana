@@ -24,12 +24,7 @@ import {
   installAvailableRules,
   preventPrebuiltRulesPackageInstallation,
 } from '../../tasks/api_calls/prebuilt_rules';
-import {
-  cleanKibana,
-  resetRulesTableState,
-  deleteAlertsAndRules,
-  reload,
-} from '../../tasks/common';
+import { resetRulesTableState, deleteAlertsAndRules, reload } from '../../tasks/common';
 import { esArchiverResetKibana } from '../../tasks/es_archiver';
 import { login, visitWithoutDateRange } from '../../tasks/login';
 import { SECURITY_DETECTIONS_RULES_URL } from '../../urls/navigation';
@@ -41,10 +36,6 @@ import {
 } from '../../tasks/prebuilt_rules';
 
 describe('Detection rules, Prebuilt Rules Installation and Update workflow', () => {
-  before(() => {
-    cleanKibana();
-  });
-
   beforeEach(() => {
     login();
     resetRulesTableState();
