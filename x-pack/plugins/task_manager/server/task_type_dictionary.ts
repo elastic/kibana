@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { max } from 'lodash';
 import { ObjectType } from '@kbn/config-schema';
 import { Logger } from '@kbn/core/server';
 import { TaskDefinition, taskDefinitionSchema, TaskRunCreatorFunction } from './task';
@@ -140,7 +141,7 @@ export class TaskTypeDictionary {
     }
 
     try {
-      for (const definition of sanitizeTaskDefinitions(taskDefinitions)) {
+      for (const definition of sanitizeAndAugmentTaskDefinitions(taskDefinitions)) {
         this.definitions.set(definition.type, definition);
       }
     } catch (e) {
@@ -155,8 +156,39 @@ export class TaskTypeDictionary {
  *
  * @param taskDefinitions - The Kibana task definitions dictionary
  */
-export function sanitizeTaskDefinitions(taskDefinitions: TaskDefinitionRegistry): TaskDefinition[] {
-  return Object.entries(taskDefinitions).map(([type, rawDefinition]) => {
-    return taskDefinitionSchema.validate({ type, ...rawDefinition }) as TaskDefinition;
+export function sanitizeAndAugmentTaskDefinitions(
+  taskDefinitions: TaskDefinitionRegistry
+): TaskDefinition[] {
+  return Object.entries(taskDefinitions).map(([type, rawDefinition]): TaskDefinition => {
+    const validatedDefinition = taskDefinitionSchema.validate({
+      type,
+      ...rawDefinition,
+    });
+    return {
+      ...validatedDefinition,
+      createTaskRunner: rawDefinition.createTaskRunner,
+      getLatestStateSchema: createGetLatestSchemaFn(rawDefinition.stateSchemaByVersion),
+    };
   });
+}
+
+function createGetLatestSchemaFn(
+  stateSchemaByVersion: TaskRegisterDefinition['stateSchemaByVersion']
+) {
+  return () => {
+    if (!stateSchemaByVersion) {
+      return;
+    }
+    const versions = Object.keys(stateSchemaByVersion).map((v) => parseInt(v, 10));
+    const latest = max(versions);
+
+    if (latest === undefined) {
+      return;
+    }
+
+    return {
+      version: latest,
+      schema: stateSchemaByVersion[latest],
+    };
+  };
 }

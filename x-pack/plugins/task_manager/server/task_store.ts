@@ -9,7 +9,7 @@
  * This module contains helpers for managing the task manager storage layer.
  */
 import { Subject } from 'rxjs';
-import { omit, defaults, get, max, isEmpty } from 'lodash';
+import { omit, defaults, get, isEmpty } from 'lodash';
 import { SavedObjectError } from '@kbn/core-saved-objects-common';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
@@ -32,6 +32,7 @@ import {
   TaskLifecycle,
   TaskLifecycleResult,
   SerializedConcreteTaskInstance,
+  TaskDefinition,
 } from './task';
 
 import { TaskTypeDictionary } from './task_type_dictionary';
@@ -500,16 +501,26 @@ export class TaskStore {
   }
 
   private getValidatedTaskInstance<T extends TaskInstance>(task: T, mode: 'read' | 'write'): T {
+    // In the scenario the task is unused / deprecated and Kibana needs to manipulate the task
+    // we'll do a pass-through for those
+    if (!this.definitions.has(task.taskType)) {
+      return task;
+    }
+
+    const taskTypeDef = this.definitions.get(task.taskType);
+    const lastestStateSchema = taskTypeDef.getLatestStateSchema();
+
     return {
       ...task,
       state: this.validateState
         ? getValidatedStateSchema(
             task.state,
             task.taskType,
-            this.definitions,
+            lastestStateSchema,
             mode === 'read' ? 'ignore' : 'forbid'
           )
         : task.state,
+      stateVersion: mode === 'write' ? lastestStateSchema?.version : task.stateVersion,
     };
   }
 }
@@ -535,35 +546,21 @@ export function correctVersionConflictsForContinuation(
 
 function getValidatedStateSchema(
   state: ConcreteTaskInstance['state'],
-  taskType: ConcreteTaskInstance['taskType'],
-  definitions: TaskTypeDictionary,
+  taskType: string,
+  latestStateSchema: ReturnType<TaskDefinition['getLatestStateSchema']>,
   unknowns: 'forbid' | 'ignore'
 ): ConcreteTaskInstance['state'] {
   if (isEmpty(state)) {
     return {};
   }
 
-  const hasTypeDef = definitions.has(taskType);
-  if (!hasTypeDef) {
-    return state;
-  }
-
-  const taskTypeDef = definitions.get(taskType);
-
-  if (!taskTypeDef?.stateSchemaByVersion) {
+  if (!latestStateSchema) {
     throw new Error(
       `[validateStateSchema] stateSchemaByVersion not defined for task type: ${taskType}`
     );
   }
 
-  const versions = Array.from(taskTypeDef.stateSchemaByVersion.keys());
-  const latest = max(versions);
-  if (latest !== undefined) {
-    // TODO: Don't extendsDeep all the time
-    return taskTypeDef.stateSchemaByVersion.get(latest).extendsDeep({ unknowns }).validate(state);
-  }
-
-  return state;
+  return latestStateSchema.schema.extendsDeep({ unknowns }).validate(state);
 }
 
 function taskInstanceToAttributes(doc: TaskInstance): SerializedConcreteTaskInstance {
