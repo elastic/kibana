@@ -190,8 +190,19 @@ export type ConnectorFeatures = Partial<{
 }> | null;
 
 export interface SchedulingConfiguraton {
-  enabled: boolean;
-  interval: string; // crontab syntax
+  // interval has crontab syntax
+  access_control: {
+    enabled: boolean;
+    interval: string;
+  },
+  incremental: {
+    enabled: boolean;
+    interval: string;
+  },
+  full: {
+    enabled: boolean;
+    interval: string;
+  }
 }
 
 export interface Connector {
@@ -216,11 +227,7 @@ export interface Connector {
   last_synced: string | null;
   name: string;
   pipeline?: IngestPipelineParams | null;
-  scheduling: {
-    access_control: SchedulingConfiguraton;
-    incremental: SchedulingConfiguraton;
-    full: SchedulingConfiguraton;
-  };
+  scheduling: SchedulingConfiguraton
   service_type: string | null;
   status: ConnectorStatus;
   sync_now: boolean;
