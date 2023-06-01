@@ -52,9 +52,11 @@ export {
 } from './custom_urls';
 
 export {
+  formatHumanReadableDate,
   formatHumanReadableDateTime,
   formatHumanReadableDateTimeSeconds,
   timeFormatter,
+  validateTimeRange,
 } from './date_utils';
 
 export {
