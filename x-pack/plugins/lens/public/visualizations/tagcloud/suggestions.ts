@@ -40,7 +40,8 @@ export function suggestions({
       return {
         previewIcon: 'visTagCloud',
         title: TAGCLOUD_LABEL,
-        score: 0.1, // lowest since tagcloud is in tech preview
+        hide: true, // hide suggestions while in tech preview
+        score: 0.1,
         state: {
           layerId: table.layerId,
           tagAccessor: bucket.columnId,
