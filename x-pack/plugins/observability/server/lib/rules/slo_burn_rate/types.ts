@@ -33,11 +33,7 @@ export interface WindowSchema {
 
 export type BurnRateRuleParams = {
   sloId: string;
-  burnRateThreshold?: number;
-  maxBurnRateThreshold?: number;
-  longWindow?: { value: number; unit: string };
-  shortWindow?: { value: number; unit: string };
-  windows?: WindowSchema[];
+  windows: WindowSchema[];
 } & Record<string, any>;
 export type BurnRateRuleTypeState = RuleTypeState; // no specific rule state
 export type BurnRateAlertState = AlertState; // no specific alert state

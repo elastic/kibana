@@ -53,11 +53,7 @@ export function sloBurnRateRuleType(
     validate: {
       params: schema.object({
         sloId: schema.string(),
-        burnRateThreshold: schema.maybe(schema.number()), // Depricated in favor of using `windows`
-        maxBurnRateThreshold: schema.maybe(schema.number()), // Depricated in favor of using `windows`
-        longWindow: schema.maybe(durationSchema), // Depricated in favor of using `windows`
-        shortWindow: schema.maybe(durationSchema), // Depricated in favor of using `windows`
-        windows: schema.maybe(schema.arrayOf(windowSchema)),
+        windows: schema.arrayOf(windowSchema),
       }),
     },
     defaultActionGroupId: ALERT_ACTION.id,

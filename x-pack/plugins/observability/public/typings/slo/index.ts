@@ -25,11 +25,7 @@ interface WindowSchema {
 
 interface BurnRateRuleParams extends RuleTypeParams {
   sloId: string;
-  burnRateThreshold?: number;
-  maxBurnRateThreshold?: number;
-  longWindow?: Duration;
-  shortWindow?: Duration;
-  windows?: WindowSchema[];
+  windows: WindowSchema[];
 }
 
 interface ChartData {

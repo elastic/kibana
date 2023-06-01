@@ -31,7 +31,6 @@ import {
   BurnRateRuleTypeState,
   WindowSchema,
 } from './types';
-import { ALERT_ACTION_ID } from '../../../../common/constants';
 
 const SHORT_WINDOW = 'SHORT_WINDOW';
 const LONG_WINDOW = 'LONG_WINDOW';
@@ -69,36 +68,19 @@ async function evaluateWindow(slo: SLO, summaryClient: DefaultSLIClient, windowD
 }
 
 async function evaluate(slo: SLO, summaryClient: DefaultSLIClient, params: BurnRateRuleParams) {
-  if (params.windows && params.windows.length > 0) {
-    const evalWindow = memoize(async (windowDef: WindowSchema) =>
-      evaluateWindow(slo, summaryClient, windowDef)
-    );
-    for (const windowDef of params.windows) {
-      const result = await evalWindow(windowDef);
-      if (result.shouldAlert) {
-        return result;
-      }
+  const evalWindow = memoize(async (windowDef: WindowSchema) =>
+    evaluateWindow(slo, summaryClient, windowDef)
+  );
+  for (const windowDef of params.windows) {
+    const result = await evalWindow(windowDef);
+    if (result.shouldAlert) {
+      return result;
     }
-    // If none of the previous windows match, we need to return the last window
-    // for the recovery context. Since evalWindow is memoized, it shouldn't make
-    // and additional call to evaulateWindow.
-    return await evalWindow(last(params.windows) as WindowSchema);
-  } else if (
-    params.shortWindow &&
-    params.longWindow &&
-    params.burnRateThreshold != null &&
-    params.maxBurnRateThreshold != null
-  ) {
-    const legacyWindowDef: WindowSchema = {
-      id: 'legacy',
-      maxBurnRateThreshold: params.maxBurnRateThreshold,
-      actionGroup: ALERT_ACTION_ID,
-      shortWindow: params.shortWindow,
-      longWindow: params.longWindow,
-      burnRateThreshold: params.burnRateThreshold,
-    };
-    return evaluateWindow(slo, summaryClient, legacyWindowDef);
   }
+  // If none of the previous windows match, we need to return the last window
+  // for the recovery context. Since evalWindow is memoized, it shouldn't make
+  // and additional call to evaulateWindow.
+  return await evalWindow(last(params.windows) as WindowSchema);
 }
 
 export const getRuleExecutor = ({

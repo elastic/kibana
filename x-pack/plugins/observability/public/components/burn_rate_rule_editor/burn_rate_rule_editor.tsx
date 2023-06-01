@@ -46,26 +46,8 @@ export function BurnRateRuleEditor(props: Props) {
     setRuleParams('sloId', slo?.id);
   };
 
-  const isLegacyRule =
-    ruleParams?.windows == null &&
-    ruleParams?.longWindow &&
-    ruleParams?.shortWindow &&
-    ruleParams?.burnRateThreshold;
-
-  const initialWindows = isLegacyRule
-    ? [
-        createNewWindow(selectedSlo, {
-          longWindow: ruleParams?.longWindow,
-          shortWindow: ruleParams?.shortWindow,
-          burnRateThreshold: ruleParams?.burnRateThreshold,
-          maxBurnRateThreshold: ruleParams?.maxBurnRateThreshold,
-          actionGroup: ALERT_ACTION.id,
-        }),
-      ]
-    : ruleParams.windows;
-
   const [windowDefs, setWindowDefs] = useState<WindowSchema[]>(
-    initialWindows || [
+    ruleParams?.windows || [
       createNewWindow(selectedSlo, {
         burnRateThreshold: 14.4,
         longWindow: { value: 1, unit: 'h' },
