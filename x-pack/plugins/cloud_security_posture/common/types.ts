@@ -4,11 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { type TypeOf } from '@kbn/config-schema';
 import type { PackagePolicy, AgentPolicy } from '@kbn/fleet-plugin/common';
 import { CspFinding } from './schemas/csp_finding';
 import { SUPPORTED_CLOUDBEAT_INPUTS, SUPPORTED_POLICY_TEMPLATES } from './constants';
 import { CspRuleTemplateMetadata } from './schemas/csp_rule_template_metadata';
+import { CspRuleTemplate } from './schemas';
+import { findCspRuleTemplateRequest } from './schemas/csp_rule_template_api/get_csp_rule_template';
 
 export type Evaluation = 'passed' | 'failed' | 'NA';
 
@@ -110,6 +112,15 @@ export type PosturePolicyTemplate = Extract<CloudSecurityPolicyTemplate, 'kspm' 
 
 export interface GetBenchmarkResponse {
   items: Benchmark[];
+  total: number;
+  page: number;
+  perPage: number;
+}
+
+export type GetCspRuleTemplateRequest = TypeOf<typeof findCspRuleTemplateRequest>;
+
+export interface GetCspRuleTemplateResponse {
+  items: CspRuleTemplate[];
   total: number;
   page: number;
   perPage: number;
