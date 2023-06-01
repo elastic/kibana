@@ -9,9 +9,9 @@ import { isEmpty, isEqual, keyBy, pick } from 'lodash/fp';
 import memoizeOne from 'memoize-one';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { DataViewBase } from '@kbn/es-query';
-import type { BrowserField, BrowserFields, IndexField } from '@kbn/timelines-plugin/common';
-import type { DataView, IIndexPatternFieldList } from '@kbn/data-views-plugin/common';
-import { getCategory } from '@kbn/triggers-actions-ui-plugin/public';
+import type { BrowserField, BrowserFields } from '@kbn/timelines-plugin/common';
+import type { IIndexPatternFieldList } from '@kbn/data-views-plugin/common';
+import type { DataViewSpec } from '@kbn/data-views-plugin/public';
 
 import { useKibana } from '../../lib/kibana';
 import * as i18n from './translations';
@@ -72,35 +72,6 @@ export const getIndexFields = memoizeOne(
     newArgs[2] === lastArgs[2]
 );
 
-/**
- * HOT Code path where the fields can be 16087 in length or larger. This is
- * VERY mutatious on purpose to improve the performance of the transform.
- */
-export const getBrowserFields = memoizeOne(
-  (_title: string, fields: IndexField[]): BrowserFields => {
-    // Adds two dangerous casts to allow for mutations within this function
-    type DangerCastForMutation = Record<string, {}>;
-    type DangerCastForBrowserFieldsMutation = Record<
-      string,
-      Omit<BrowserField, 'fields'> & { fields: Record<string, BrowserField> }
-    >;
-
-    // We mutate this instead of using lodash/set to keep this as fast as possible
-    return fields.reduce<DangerCastForBrowserFieldsMutation>((accumulator, field) => {
-      const category = getCategory(field.name);
-      if (accumulator[category] == null) {
-        (accumulator as DangerCastForMutation)[category] = {};
-      }
-      if (accumulator[category].fields == null) {
-        accumulator[category].fields = {};
-      }
-      accumulator[category].fields[field.name] = field as unknown as BrowserField;
-      return accumulator;
-    }, {});
-  },
-  (newArgs, lastArgs) => newArgs[0] === lastArgs[0] && newArgs[1].length === lastArgs[1].length
-);
-
 const DEFAULT_BROWSER_FIELDS = {};
 const DEFAULT_INDEX_PATTERNS = { fields: [], title: '' };
 interface FetchIndexReturn {
@@ -115,7 +86,7 @@ interface FetchIndexReturn {
   indexes: string[];
   indexExists: boolean;
   indexPatterns: DataViewBase;
-  dataView: DataView | undefined;
+  dataView: DataViewSpec | undefined;
 }
 
 /**
@@ -149,9 +120,10 @@ export const useFetchIndex = (
           setState({ ...state, loading: true });
           abortCtrl.current = new AbortController();
           const dv = await data.dataViews.create({ title: iNames.join(','), allowNoIndex: true });
+          const dataView = dv.toSpec();
           const { browserFields } = getDataViewStateFromIndexFields(
             iNames,
-            dv.fields,
+            dataView.fields,
             includeUnmapped
           );
 
@@ -159,7 +131,7 @@ export const useFetchIndex = (
 
           setState({
             loading: false,
-            dataView: dv,
+            dataView,
             browserFields,
             indexes: dv.getIndexPattern().split(','),
             indexExists: dv.getIndexPattern().split(',').length > 0,
