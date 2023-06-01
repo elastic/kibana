@@ -1411,6 +1411,40 @@
             }
           ],
           "returnComment": []
+        },
+        {
+          "parentPluginId": "securitySolution",
+          "id": "def-public.PluginStart.setGetStartedPage",
+          "type": "Function",
+          "tags": [],
+          "label": "setGetStartedPage",
+          "description": [],
+          "signature": [
+            "(getStartedComponent: ",
+            "GetStartedComponent",
+            ") => void"
+          ],
+          "path": "x-pack/plugins/security_solution/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [
+            {
+              "parentPluginId": "securitySolution",
+              "id": "def-public.PluginStart.setGetStartedPage.$1",
+              "type": "Function",
+              "tags": [],
+              "label": "getStartedComponent",
+              "description": [],
+              "signature": [
+                "GetStartedComponent"
+              ],
+              "path": "x-pack/plugins/security_solution/public/types.ts",
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            }
+          ],
+          "returnComment": []
         }
       ],
       "lifecycle": "start",
