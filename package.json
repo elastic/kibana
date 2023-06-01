@@ -83,9 +83,9 @@
     "**/react-syntax-highlighter": "^15.3.1",
     "**/recursive-readdir/minimatch": "^3.1.2",
     "**/remark-parse/trim": "1.0.1",
-    "**/typescript": "4.1.3",
+    "**/typescript": "4.3.5",
     "**/underscore": "^1.13.1",
-    "globby/fast-glob": "3.2.5"
+    "globby/fast-glob": "3.2.7"
   },
   "dependencies": {
     "@babel/runtime": "^7.16.3",
@@ -536,7 +536,7 @@
     "@types/hapi__inert": "^5.2.3",
     "@types/has-ansi": "^3.0.0",
     "@types/he": "^1.1.1",
-    "@types/history": "^4.7.3",
+    "@types/history": "^4.7.9",
     "@types/hjson": "^2.4.2",
     "@types/http-proxy": "^1.17.4",
     "@types/inquirer": "^7.3.1",
@@ -809,9 +809,9 @@
     "terser-webpack-plugin": "^4.2.3",
     "tough-cookie": "^4.1.2",
     "ts-loader": "^7.0.5",
-    "ts-morph": "^9.1.0",
+    "ts-morph": "^11.0.0",
     "tsd": "^0.13.1",
-    "typescript": "4.1.3",
+    "typescript": "4.3.5",
     "unlazy-loader": "^0.1.3",
     "url-loader": "^2.2.0",
     "val-loader": "^1.1.1",

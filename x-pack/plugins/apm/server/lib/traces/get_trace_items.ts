@@ -71,10 +71,8 @@ export async function getTraceItems(
     },
   });
 
-  const [errorResponse, traceResponse] = await Promise.all([
-    errorResponsePromise,
-    traceResponsePromise,
-  ]);
+  const errorResponse = await errorResponsePromise;
+  const traceResponse = await traceResponsePromise;
 
   const exceedsMax = traceResponse.hits.total.value > maxTraceItems;
   const traceDocs = traceResponse.hits.hits.map((hit) => hit._source);
