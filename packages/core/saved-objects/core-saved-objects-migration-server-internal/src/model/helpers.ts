@@ -93,6 +93,22 @@ export function indexBelongsToLaterVersion(kibanaVersion: string, indexName?: st
   return version != null ? gt(version, kibanaVersion) : false;
 }
 
+export function hasLaterVersionAlias(
+  kibanaVersion: string,
+  aliases?: Partial<Record<string, string>>
+): string | undefined {
+  const mostRecentAlias = Object.keys(aliases ?? {})
+    .filter(aliasVersion)
+    .sort()
+    .pop();
+
+  const mostRecentAliasVersion = valid(aliasVersion(mostRecentAlias));
+
+  return mostRecentAliasVersion != null && gt(mostRecentAliasVersion, kibanaVersion)
+    ? mostRecentAlias
+    : undefined;
+}
+
 /**
  * Add new must_not clauses to the given query
  * in order to filter out the specified types
@@ -168,6 +184,14 @@ export function addMustNotClausesToBoolQuery(
  */
 export function indexVersion(indexName?: string): string | undefined {
   return (indexName?.match(/.+_(\d+\.\d+\.\d+)_\d+/) || [])[1];
+}
+
+/**
+ * Extracts the version number from a >= 7.11 index alias
+ * @param indexName A >= v7.11 index alias
+ */
+export function aliasVersion(alias?: string): string | undefined {
+  return (alias?.match(/.+_(\d+\.\d+\.\d+)/) || [])[1];
 }
 
 /** @internal */
