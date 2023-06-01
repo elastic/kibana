@@ -417,9 +417,9 @@ export interface RegistryVarsEntry {
   };
 }
 
-// Saved object type - this should be removed
-// TODO: add Ticket number
-
+/**
+ * @deprecated
+ */
 export interface InstallSavedObject {
   type?: string;
   id?: string;
@@ -447,7 +447,6 @@ export interface EpmPackageAdditions {
   notice?: string;
   licensePath?: string;
   keepPoliciesUpToDate?: boolean;
-  savedObject?: InstallSavedObject;
 }
 
 type Merge<FirstType, SecondType> = Omit<FirstType, Extract<keyof FirstType, keyof SecondType>> &
