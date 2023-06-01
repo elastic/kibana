@@ -46,7 +46,7 @@ import { useColorRange, ColorRangeLegend } from '../../../../../components/color
 import { SavedSearchQuery } from '../../../../../contexts/ml';
 import { useMlKibana } from '../../../../../contexts/kibana';
 
-import { defaultSearchQuery, SEARCH_SIZE } from '../../../../common';
+import { defaultSearchQuery, renderCellPopoverFactory, SEARCH_SIZE } from '../../../../common';
 
 import {
   replaceTokensInDFAUrlValue,
@@ -318,6 +318,26 @@ export const ExpandableSectionResults: FC<ExpandableSectionResultsProps> = ({
     },
   ];
 
+  const renderCellPopover = useMemo(
+    () =>
+      renderCellPopoverFactory({
+        analysisType,
+        baseline: indexData.baseline,
+        data: indexData.tableItems,
+        pagination: indexData.pagination,
+        predictionFieldName: indexData.predictionFieldName,
+        resultsField: indexData.resultsField,
+      }),
+    [
+      analysisType,
+      indexData.baseline,
+      indexData.tableItems,
+      indexData.pagination,
+      indexData.predictionFieldName,
+      indexData.resultsField,
+    ]
+  );
+
   const resultsSectionContent = (
     <>
       {jobConfig !== undefined && needsDestIndexPattern && (
@@ -342,8 +362,8 @@ export const ExpandableSectionResults: FC<ExpandableSectionResultsProps> = ({
                   trailingControlColumns={
                     indexData.visibleColumns.length ? trailingControlColumns : undefined
                   }
-                  analysisType={analysisType}
                   dataTestSubj="mlExplorationDataGrid"
+                  renderCellPopover={renderCellPopover}
                   toastNotifications={getToastNotifications()}
                 />
               )}

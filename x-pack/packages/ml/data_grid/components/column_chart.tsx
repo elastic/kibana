@@ -13,9 +13,9 @@ import { euiTextTruncate, type EuiDataGridColumn } from '@elastic/eui';
 
 import { euiThemeVars } from '@kbn/ui-theme';
 
-import { isUnsupportedChartData, ChartData } from './field_histograms';
+import { isUnsupportedChartData, ChartData } from '../lib/field_histograms';
 
-import { useColumnChart } from './use_column_chart';
+import { useColumnChart } from '../hooks/use_column_chart';
 
 const cssHistogram = css({
   width: '100%',

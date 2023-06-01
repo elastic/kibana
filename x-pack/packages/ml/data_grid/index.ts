@@ -9,13 +9,15 @@ export {
   getDataGridSchemasFromFieldTypes,
   getDataGridSchemaFromESFieldType,
   getDataGridSchemaFromKibanaFieldType,
+  getFeatureImportance,
   getFieldsFromKibanaIndexPattern,
   getCombinedRuntimeMappings,
-  multiColumnSortFactory,
   getNestedOrEscapedVal,
+  getProcessedFields,
+  getTopClasses,
+  multiColumnSortFactory,
   showDataGridColumnChartErrorMessageToast,
   useRenderCellValue,
-  getProcessedFields,
   INIT_MAX_COLUMNS,
 } from './lib/common';
 
@@ -36,6 +38,7 @@ export {
 
 export type {
   DataGridItem,
+  IndexPagination,
   EsSorting,
   RenderCellValue,
   RowCountRelation,
