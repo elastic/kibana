@@ -5,38 +5,35 @@
  * 2.0.
  */
 
+/* eslint-disable no-console */
+
 import yargs from 'yargs';
 import { initDiagnosticsBundle } from './diagnostics_bundle';
 
 const { argv } = yargs(process.argv.slice(2))
   .option('esHost', {
+    demandOption: true,
     type: 'string',
     description: 'Elasticsearch host name',
   })
   .option('kbHost', {
+    demandOption: true,
     type: 'string',
     description: 'Kibana host name',
   })
   .option('username', {
+    demandOption: true,
     type: 'string',
     description: 'Kibana host name',
   })
   .option('password', {
+    demandOption: true,
     type: 'string',
     description: 'Kibana host name',
   })
   .help();
 
 const { esHost, kbHost, password, username } = argv;
-
-Object.entries({ esHost, kbHost, password, username }).forEach(
-  ([key, value]) => {
-    if (!value) {
-      console.log(`Missing required argument: ${key}`);
-      process.exit(1);
-    }
-  }
-);
 
 initDiagnosticsBundle({ esHost, kbHost, password, username })
   .then((res) => {

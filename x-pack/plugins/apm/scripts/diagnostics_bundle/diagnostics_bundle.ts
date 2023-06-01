@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+/* eslint-disable no-console */
+
 import { Client } from '@elastic/elasticsearch';
 import fs from 'fs/promises';
 import axios, { AxiosInstance } from 'axios';

@@ -5,6 +5,5 @@
  * 2.0.
  */
 
-// compile typescript on the fly
 require('@kbn/babel-register').install();
-require('./diagnostics_bundle');
+require('./diagnostics_bundle/main');
