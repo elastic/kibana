@@ -40,7 +40,7 @@ export type CodeEditorProps = Props;
  * @see CodeEditorField to render a code editor in the same style as other EUI form fields.
  */
 export const CodeEditor: React.FunctionComponent<Props> = (props) => {
-  const darkMode = useUiSetting<boolean>('theme:darkMode');
+  const darkMode = useUiSetting<boolean>('theme:codeEditors');
   return (
     <EuiErrorBoundary>
       <React.Suspense fallback={<Fallback height={props.height} />}>
@@ -54,7 +54,7 @@ export const CodeEditor: React.FunctionComponent<Props> = (props) => {
  * Renders a Monaco code editor in the same style as other EUI form fields.
  */
 export const CodeEditorField: React.FunctionComponent<Props> = (props) => {
-  const darkMode = useUiSetting<boolean>('theme:darkMode');
+  const darkMode = useUiSetting<boolean>('theme:codeEditors');
   return (
     <EuiErrorBoundary>
       <React.Suspense fallback={<Fallback height={props.height} />}>

@@ -175,6 +175,10 @@ export class RenderingService {
       darkMode = getSettingValue('theme:darkMode', settings, Boolean);
     }
 
+    settings.user['theme:codeEditors'] = {
+      userValue: darkMode,
+    };
+
     const themeVersion: ThemeVersion = 'v8';
 
     const stylesheetPaths = getStylesheetPaths({
