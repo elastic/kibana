@@ -39,7 +39,7 @@ import { getCommentsArrayMock } from '@kbn/lists-plugin/common/schemas/types/com
 import { fields } from '@kbn/data-plugin/common/mocks';
 import { ENTRIES, OLD_DATE_RELATIVE_TO_DATE_NOW } from '@kbn/lists-plugin/common/constants.mock';
 import type { CodeSignature } from '@kbn/securitysolution-ecs';
-import type { DataView } from '@kbn/data-views-plugin/common';
+import type { DataView, FieldSpec } from '@kbn/data-views-plugin/common';
 import { createStubDataView } from '@kbn/data-views-plugin/common/data_view.stub';
 
 import {
@@ -51,13 +51,13 @@ jest.mock('uuid', () => ({
   v4: jest.fn().mockReturnValue('123'),
 }));
 
-const getMockIndexPattern = (): DataView => ({
-  ...createStubDataView({
-    spec: { id: '1234', title: 'logstash-*' },
-  }),
-  // @ts-expect-error fields does not contain toSpec, it's okay
-  fields,
-});
+const getMockIndexPattern = (): Omit<DataView, 'fields'> & { fields: FieldSpec[] } =>
+  ({
+    ...createStubDataView({
+      spec: { id: '1234', title: 'logstash-*' },
+    }),
+    fields,
+  } as Omit<DataView, 'fields'> & { fields: FieldSpec[] });
 
 const mockEndpointFields = [
   {
@@ -114,22 +114,20 @@ describe('Exception helpers', () => {
     });
 
     test('it returns filtered index patterns if list type is "endpoint"', () => {
-      const mockIndexPatterns: DataView = {
+      const mockIndexPatterns: Omit<DataView, 'fields'> & { fields: FieldSpec[] } = {
         ...getMockIndexPattern(),
-        // @ts-expect-error mocked fields missing toSpec but it's okay
         fields: [...fields, ...mockEndpointFields],
-      };
+      } as Omit<DataView, 'fields'> & { fields: FieldSpec[] };
       const output = filterIndexPatterns(mockIndexPatterns, 'endpoint', ['windows']);
 
       expect(output?.fields).toEqual([...mockEndpointFields]);
     });
 
     test('it returns filtered index patterns if list type is "endpoint" and os contains "linux"', () => {
-      const mockIndexPatterns: DataView = {
+      const mockIndexPatterns: Omit<DataView, 'fields'> & { fields: FieldSpec[] } = {
         ...getMockIndexPattern(),
-        // @ts-expect-error mocked fields missing toSpec but it's okay
         fields: [...fields, ...mockLinuxEndpointFields],
-      };
+      } as Omit<DataView, 'fields'> & { fields: FieldSpec[] };
       const output = filterIndexPatterns(mockIndexPatterns, 'endpoint', ['linux']);
 
       expect(output?.fields).toEqual([...mockLinuxEndpointFields]);

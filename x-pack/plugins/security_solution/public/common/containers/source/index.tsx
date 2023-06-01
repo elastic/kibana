@@ -165,26 +165,22 @@ export const useFetchIndex = (
           const fields = dv.fields.map((field) => field.toSpec());
           if (includeUnmapped) {
             try {
-              const fieldNameConflictDescriptionsMap = (await data.dataViews
-                .getFieldsForIndexPattern(dv, {
+              const fieldNameConflictDescriptionsMap =
+                await data.dataViews.getFieldsForIndexPattern(dv, {
                   pattern: '',
                   includeUnmapped: true,
-                })
-                .then((fieldsToReduce) =>
-                  fieldsToReduce.reduce(
-                    (acc, f) => ({ ...acc, [f.name]: f.conflictDescriptions }),
-                    {} as { [x: string]: Record<string, string[]> | undefined }
-                  )
-                )) as { [x: string]: Record<string, string[]> | undefined };
-
-              dv.fields.replaceAll([
-                ...fields.map((field) => ({
-                  ...field,
-                  ...(fieldNameConflictDescriptionsMap[field.name] != null
-                    ? { conflictDescriptions: fieldNameConflictDescriptionsMap[field.name] }
-                    : {}),
-                })),
-              ]);
+                });
+              fieldNameConflictDescriptionsMap.forEach((field) => {
+                dv.fields.update({ ...field });
+              });
+              // dv.fields.replaceAll([
+              //   ...fields.map((field) => ({
+              //     ...field,
+              //     ...(fieldNameConflictDescriptionsMap[field.name] != null
+              //       ? { conflictDescriptions: fieldNameConflictDescriptionsMap[field.name] }
+              //       : {}),
+              //   })),
+              // ]);
             } catch (error) {
               addWarning(error, { title: i18n.FETCH_FIELDS_WITH_UNMAPPED_DATA_ERROR });
             }

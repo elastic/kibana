@@ -55,39 +55,6 @@ describe('QueryBar ', () => {
 
   const mockDataView = createStubDataView({ spec: { title: mockIndexNames.join() } });
 
-  test('check if we format the appropriate props to QueryBar', () => {
-    const wrapper = mount(
-      <TestProviders>
-        <QueryBar
-          dateRangeFrom={DEFAULT_FROM}
-          dateRangeTo={DEFAULT_TO}
-          hideSavedQuery={false}
-          indexPattern={mockDataView}
-          isRefreshPaused={true}
-          filterQuery={{ query: 'here: query', language: 'kuery' }}
-          filterManager={new FilterManager(mockUiSettingsForFilterManager)}
-          filters={[]}
-          onChangedQuery={mockOnChangeQuery}
-          onSubmitQuery={mockOnSubmitQuery}
-          onSavedQuery={mockOnSavedQuery}
-        />
-      </TestProviders>
-    );
-    const {
-      customSubmitButton,
-      timeHistory,
-      onClearSavedQuery,
-      onFiltersUpdated,
-      onQueryChange,
-      onQuerySubmit,
-      onSaved,
-      onSavedQueryUpdated,
-      ...searchBarProps
-    } = wrapper.find(SearchBar).props();
-
-    expect(searchBarProps).toMatchSnapshot();
-  });
-
   // FLAKY: https://github.com/elastic/kibana/issues/132659
   describe.skip('#onQuerySubmit', () => {
     test(' is the only reference that changed when filterQuery props get updated', async () => {

@@ -38,13 +38,13 @@ import * as i18n from './translations';
 jest.mock('@kbn/securitysolution-list-hooks');
 jest.mock('@kbn/securitysolution-utils');
 
-const getMockIndexPattern = (title?: string): DataView => ({
-  ...createStubDataView({
-    spec: { id: '1234', title: title ?? 'logstash-*' },
-  }),
-  // @ts-expect-error fields does not contain toSpec, it's okay
-  fields,
-});
+const getMockIndexPattern = (title?: string): Omit<DataView, 'fields'> & { fields: FieldSpec[] } =>
+  ({
+    ...createStubDataView({
+      spec: { id: '1234', title: title ?? 'logstash-*' },
+    }),
+    fields,
+  } as Omit<DataView, 'fields'> & { fields: FieldSpec[] });
 
 const mockKibanaHttpService = coreMock.createStart().http;
 const { autocomplete: autocompleteStartMock } = unifiedSearchPluginMock.createStartContract();

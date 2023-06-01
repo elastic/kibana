@@ -11,7 +11,7 @@ import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks
 import { fields } from '@kbn/data-plugin/common/mocks';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { coreMock } from '@kbn/core/public/mocks';
-import type { DataView } from '@kbn/data-views-plugin/common';
+import type { DataView, FieldSpec } from '@kbn/data-views-plugin/common';
 import { createStubDataView } from '@kbn/data-views-plugin/common/data_view.stub';
 
 import { getExceptionListItemSchemaMock } from '../../../../common/schemas/response/exception_list_item_schema.mock';
@@ -20,13 +20,13 @@ import { getEntryMatchAnyMock } from '../../../../common/schemas/types/entry_mat
 
 import { BuilderExceptionListItemComponent } from './exception_item_renderer';
 
-const getMockIndexPattern = (): DataView => ({
-  ...createStubDataView({
-    spec: { id: '1234', title: 'logstash-*' },
-  }),
-  // @ts-expect-error fields does not contain toSpec, it's okay
-  fields,
-});
+const getMockIndexPattern = (): Omit<DataView, 'fields'> & { fields: FieldSpec[] } =>
+  ({
+    ...createStubDataView({
+      spec: { id: '1234', title: 'logstash-*' },
+    }),
+    fields,
+  } as Omit<DataView, 'fields'> & { fields: FieldSpec[] });
 
 const mockKibanaHttpService = coreMock.createStart().http;
 const { autocomplete: autocompleteStartMock } = unifiedSearchPluginMock.createStartContract();

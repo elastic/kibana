@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
-import type { DataView } from '@kbn/data-views-plugin/common';
+import type { DataView, FieldSpec } from '@kbn/data-views-plugin/common';
 import { createStubDataView } from '@kbn/data-views-plugin/common/data_view.stub';
 
 import { ExceptionsConditions } from '.';
@@ -20,13 +20,13 @@ import * as i18n from './translations';
 
 jest.mock('@kbn/lists-plugin/public');
 
-const getMockIndexPattern = (): DataView => ({
-  ...createStubDataView({
-    spec: { id: '1234', title: mockIndexPattern.title },
-  }),
-  // @ts-expect-error fields does not contain toSpec, it's okay
-  fields: mockIndexPattern.fields,
-});
+const getMockIndexPattern = (): Omit<DataView, 'fields'> & { fields: FieldSpec[] } =>
+  ({
+    ...createStubDataView({
+      spec: { id: '1234', title: mockIndexPattern.title },
+    }),
+    fields: mockIndexPattern.fields,
+  } as Omit<DataView, 'fields'> & { fields: FieldSpec[] });
 
 describe('ExceptionsConditions', () => {
   describe('EQL rule type', () => {
