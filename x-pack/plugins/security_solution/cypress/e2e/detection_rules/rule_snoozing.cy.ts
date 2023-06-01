@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { INTERNAL_ALERTING_API_FIND_RULES_PATH, Rule } from '@kbn/alerting-plugin/common';
+import { INTERNAL_ALERTING_API_FIND_RULES_PATH } from '@kbn/alerting-plugin/common';
+import type { RuleResponse } from '../../../common/detection_engine/rule_schema';
 import { createRule, snoozeRule as snoozeRuleViaAPI } from '../../tasks/api_calls/rules';
 import { cleanKibana, deleteAlertsAndRules, deleteConnectors } from '../../tasks/common';
 import { login, visitWithoutDateRange } from '../../tasks/login';
@@ -260,8 +261,8 @@ function createRuleWithActions(
   ruleParams: Parameters<typeof getNewRule>[0],
   ruleCreator: (
     ruleParams: Parameters<typeof createRule>[0]
-  ) => Cypress.Chainable<Cypress.Response<Rule<never>>>
-): Cypress.Chainable<Cypress.Response<Rule<never>>> {
+  ) => Cypress.Chainable<Cypress.Response<RuleResponse>>
+): Cypress.Chainable<Cypress.Response<RuleResponse>> {
   return createSlackConnector().then(({ body }) =>
     ruleCreator(
       getNewRule({
@@ -283,7 +284,7 @@ function createRuleWithActions(
 
 function createSnoozedRule(
   ruleParams: Parameters<typeof createRule>[0]
-): Cypress.Chainable<Cypress.Response<Rule<never>>> {
+): Cypress.Chainable<Cypress.Response<RuleResponse>> {
   return createRule(ruleParams).then((response) => {
     const createdRule = response.body;
     const oneDayInMs = 24 * 60 * 60 * 1000;

@@ -5,17 +5,16 @@
  * 2.0.
  */
 
-import { rootRequest } from '../common';
 import moment from 'moment';
-import { Rule } from '@kbn/alerting-plugin/common';
+import { rootRequest } from '../common';
 import { DETECTION_ENGINE_RULES_URL } from '../../../common/constants';
-import type { RuleCreateProps } from '../../../common/detection_engine/rule_schema';
+import type { RuleCreateProps, RuleResponse } from '../../../common/detection_engine/rule_schema';
 import { internalAlertingSnoozeRule } from '../../urls/navigation';
 
-export const createRule = <T = unknown>(
+export const createRule = (
   rule: RuleCreateProps
-): Cypress.Chainable<Cypress.Response<T>> => {
-  return rootRequest<T>({
+): Cypress.Chainable<Cypress.Response<RuleResponse>> => {
+  return rootRequest<RuleResponse>({
     method: 'POST',
     url: DETECTION_ENGINE_RULES_URL,
     body: rule,
