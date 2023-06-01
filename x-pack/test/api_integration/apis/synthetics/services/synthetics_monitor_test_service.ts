@@ -52,6 +52,9 @@ export class SyntheticsMonitorTestService {
     delete res.body.result?.publicConfigs?.[0].monitors[0].streams[0].id;
     delete res.body.result?.publicConfigs?.[0].monitors[0].streams[0].config_id;
     delete res.body.result?.publicConfigs?.[0].monitors[0].streams[0].fields.config_id;
+    delete res.body.result?.publicConfigs?.[0].output.api_key;
+    delete res.body.result?.publicConfigs?.[0].license_issued_to;
+    delete res.body.result?.publicConfigs?.[0].stack_version;
 
     return res.body as { result: MonitorInspectResponse; decodedCode: string };
   }
