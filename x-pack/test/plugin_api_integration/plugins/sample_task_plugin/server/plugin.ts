@@ -116,6 +116,14 @@ export class SampleTaskManagerFixturePlugin
           'A sample task for testing the task_manager that fails on the first attempt to run.',
         // fail after the first failed run
         maxAttempts: 1,
+        stateSchemaByVersion: {
+          1: {
+            up: (state) => state,
+            schema: schema.object({
+              count: schema.maybe(schema.number()),
+            }),
+          },
+        },
       },
       sampleTaskWithSingleConcurrency: {
         ...defaultSampleTaskConfig,
@@ -123,6 +131,14 @@ export class SampleTaskManagerFixturePlugin
         maxConcurrency: 1,
         timeout: '60s',
         description: 'A sample task that can only have one concurrent instance.',
+        stateSchemaByVersion: {
+          1: {
+            up: (state) => state,
+            schema: schema.object({
+              count: schema.maybe(schema.number()),
+            }),
+          },
+        },
       },
       sampleTaskWithLimitedConcurrency: {
         ...defaultSampleTaskConfig,
@@ -130,6 +146,14 @@ export class SampleTaskManagerFixturePlugin
         maxConcurrency: 2,
         timeout: '60s',
         description: 'A sample task that can only have two concurrent instance.',
+        stateSchemaByVersion: {
+          1: {
+            up: (state) => state,
+            schema: schema.object({
+              count: schema.maybe(schema.number()),
+            }),
+          },
+        },
       },
       sampleRecurringTaskTimingOut: {
         title: 'Sample Recurring Task that Times Out',
