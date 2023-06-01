@@ -69,7 +69,7 @@ export const OptionsListStrings = {
         getTooltip: () =>
           i18n.translate('controls.optionsList.editor.wildcardSearchTooltip', {
             defaultMessage:
-              'Matches values that contain the given search string. Results may take longer to populate.',
+              'Matches values that contain the given search string. Results might take longer to populate.',
           }),
       },
     },

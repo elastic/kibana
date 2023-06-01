@@ -42,6 +42,7 @@ export default function ({ loadTestFile, getService, getPageObjects }: FtrProvid
     loadTestFile(require.resolve('./options_list_dashboard_interaction'));
     loadTestFile(require.resolve('./options_list_suggestions'));
     loadTestFile(require.resolve('./options_list_validation'));
+
     loadTestFile(require.resolve('./options_list_allow_expensive_queries_off.ts'));
   });
 }

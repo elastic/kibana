@@ -47,8 +47,8 @@ export function openAddDataControlFlyout(
     theme: { theme$ },
   } = pluginServices.getServices();
 
-  const onCancel = (changes: DataControlEditorChanges) => {
-    if (Object.keys(changes.input).length === 0) {
+  const onCancel = (changes?: DataControlEditorChanges) => {
+    if (!changes || Object.keys(changes.input).length === 0) {
       this.closeAllFlyouts();
       return;
     }
@@ -131,7 +131,7 @@ export function openAddDataControlFlyout(
       'aria-label': ControlGroupStrings.manageControl.getFlyoutCreateTitle(),
       outsideClickCloses: false,
       onClose: () => {
-        onCancel({ input: {} });
+        onCancel();
       },
     }
   );

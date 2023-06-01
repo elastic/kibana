@@ -7,7 +7,7 @@
  */
 
 import useAsync from 'react-use/lib/useAsync';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 import {
   EuiFlexGroup,
@@ -44,6 +44,42 @@ const TooltipText = ({ label, tooltip }: { label: string; tooltip: string }) => 
     </EuiFlexItem>
   </EuiFlexGroup>
 );
+
+const selectionOptions = [
+  {
+    id: 'multi',
+    label: OptionsListStrings.editor.selectionTypes.multi.getLabel(),
+    'data-test-subj': 'optionsListControl__multiSearchOptionAdditionalSetting',
+  },
+  {
+    id: 'single',
+    label: OptionsListStrings.editor.selectionTypes.single.getLabel(),
+    'data-test-subj': 'optionsListControl__singleSearchOptionAdditionalSetting',
+  },
+];
+
+const searchOptions = [
+  {
+    id: 'prefix',
+    label: (
+      <TooltipText
+        label={OptionsListStrings.editor.searchTypes.prefix.getLabel()}
+        tooltip={OptionsListStrings.editor.searchTypes.prefix.getTooltip()}
+      />
+    ),
+    'data-test-subj': 'optionsListControl__prefixSearchOptionAdditionalSetting',
+  },
+  {
+    id: 'wildcard',
+    label: (
+      <TooltipText
+        label={OptionsListStrings.editor.searchTypes.wildcard.getLabel()}
+        tooltip={OptionsListStrings.editor.searchTypes.wildcard.getTooltip()}
+      />
+    ),
+    'data-test-subj': 'optionsListControl__wildcardSearchOptionAdditionalSetting',
+  },
+];
 
 interface OptionsListEditorState {
   sortDirection: Direction;
@@ -89,48 +125,6 @@ export const OptionsListEditorOptions = ({
       }));
     }
   }, [fieldType, onChange, state.sortBy]);
-
-  const selectionOptions = useMemo(
-    () => [
-      {
-        id: 'multi',
-        label: OptionsListStrings.editor.selectionTypes.multi.getLabel(),
-        'data-test-subj': 'optionsListControl__multiSearchOptionAdditionalSetting',
-      },
-      {
-        id: 'single',
-        label: OptionsListStrings.editor.selectionTypes.single.getLabel(),
-        'data-test-subj': 'optionsListControl__singleSearchOptionAdditionalSetting',
-      },
-    ],
-    []
-  );
-
-  const searchOptions = useMemo(
-    () => [
-      {
-        id: 'prefix',
-        label: (
-          <TooltipText
-            label={OptionsListStrings.editor.searchTypes.prefix.getLabel()}
-            tooltip={OptionsListStrings.editor.searchTypes.prefix.getTooltip()}
-          />
-        ),
-        'data-test-subj': 'optionsListControl__prefixSearchOptionAdditionalSetting',
-      },
-      {
-        id: 'wildcard',
-        label: (
-          <TooltipText
-            label={OptionsListStrings.editor.searchTypes.wildcard.getLabel()}
-            tooltip={OptionsListStrings.editor.searchTypes.wildcard.getTooltip()}
-          />
-        ),
-        'data-test-subj': 'optionsListControl__wildcardSearchOptionAdditionalSetting',
-      },
-    ],
-    []
-  );
 
   return (
     <>
