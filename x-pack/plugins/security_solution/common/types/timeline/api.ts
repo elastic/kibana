@@ -305,6 +305,20 @@ export type TimelineSOServerRepresentationType = runtimeTypes.TypeOf<
   typeof TimelineSOServerRepresentation
 >;
 
+export type TimelineSOServerRepresentationTypeWithSavedObjectId =
+  TimelineSOServerRepresentationType & {
+    savedObjectId?: string | null;
+  };
+
+/**
+ * This type represents a timeline type stored in a saved object that does not include any fields that reference
+ * other saved objects.
+ */
+export type TimelineSOServerRepresentationWithoutExternalRefs = Omit<
+  TimelineSOServerRepresentationType,
+  'dataViewId' | 'savedQueryId'
+>;
+
 export const TimelineSavedToReturnObjectRuntimeType = runtimeTypes.intersection([
   TimelineSOServerRepresentation,
   runtimeTypes.type({
@@ -320,7 +334,7 @@ export const TimelineSavedToReturnObjectRuntimeType = runtimeTypes.intersection(
   }),
 ]);
 
-export type TimelineSavedObjectRuntimeResponseType = runtimeTypes.TypeOf<
+export type TimelineSavedToReturnObjectRuntimeType = runtimeTypes.TypeOf<
   typeof TimelineSavedToReturnObjectRuntimeType
 >;
 

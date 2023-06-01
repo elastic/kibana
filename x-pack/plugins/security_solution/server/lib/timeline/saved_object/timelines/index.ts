@@ -26,16 +26,16 @@ import type {
   ResponseTimeline,
   SortTimeline,
   TimelineResult,
-  TimelineSavedObjectRuntimeResponseType,
   TimelineTypeLiteralWithNull,
   TimelineStatusLiteralWithNull,
   ResolvedTimelineWithOutcomeSavedObjectResponse,
+  TimelineSavedToReturnObjectRuntimeType,
+  TimelineSOServerRepresentationType,
+  TimelineSOServerRepresentationWithoutExternalRefs,
 } from '../../../../../common/types/timeline/api';
-import type {
-  SavedObjectTimeline,
-  SavedObjectTimelineWithoutExternalRefs,
-} from '../../../../../common/types/timeline';
-import { SavedObjectTimelineType, TimelineStatus } from '../../../../../common/types/timeline';
+import { TimelineType } from '../../../../../common/types/timeline/api';
+import type { SavedObjectTimeline } from '../../../../../common/types/timeline';
+import { TimelineStatus } from '../../../../../common/types/timeline';
 import type { FrameworkRequest } from '../../../framework';
 import * as note from '../notes/saved_object';
 import * as pinnedEvent from '../pinned_events';
@@ -51,11 +51,11 @@ export { convertSavedObjectToSavedTimeline } from './convert_saved_object_to_sav
 export const getTimeline = async (
   request: FrameworkRequest,
   timelineId: string,
-  timelineType: TimelineTypeLiteralWithNull = SavedObjectTimelineType.default
-): Promise<TimelineSavedObjectRuntimeResponseType> => {
+  timelineType: TimelineTypeLiteralWithNull = TimelineType.default
+): Promise<TimelineSavedToReturnObjectRuntimeType> => {
   let timelineIdToUse = timelineId;
   try {
-    if (timelineType === SavedObjectTimelineType.template) {
+    if (timelineType === TimelineType.template) {
       const options = {
         type: timelineSavedObjectType,
         perPage: 1,
@@ -76,7 +76,7 @@ export const getTimeline = async (
 export const getTimelineOrNull = async (
   frameworkRequest: FrameworkRequest,
   savedObjectId: string
-): Promise<TimelineSavedObjectRuntimeResponseType | null> => {
+): Promise<TimelineSavedToReturnObjectRuntimeType | null> => {
   let timeline = null;
   try {
     timeline = await getTimeline(frameworkRequest, savedObjectId);
@@ -142,7 +142,7 @@ export const getTimelineByTemplateTimelineId = async (
   templateTimelineId: string
 ): Promise<{
   totalCount: number;
-  timeline: TimelineSavedObjectRuntimeResponseType[];
+  timeline: TimelineSavedToReturnObjectRuntimeType[];
 }> => {
   const options: SavedObjectsFindOptions = {
     type: timelineSavedObjectType,
@@ -155,7 +155,7 @@ export const getTimelineByTemplateTimelineId = async (
 export const getTimelineTemplateOrNull = async (
   frameworkRequest: FrameworkRequest,
   templateTimelineId: string
-): Promise<TimelineSavedObjectRuntimeResponseType | null> => {
+): Promise<TimelineSavedToReturnObjectRuntimeType | null> => {
   try {
     const templateTimelineResponse = await getTimelineByTemplateTimelineId(
       frameworkRequest,
@@ -168,7 +168,7 @@ export const getTimelineTemplateOrNull = async (
       return null;
     }
 
-    const response: TimelineSavedObjectRuntimeResponseType = {
+    const response: TimelineSavedToReturnObjectRuntimeType = {
       columns: timeline.columns,
       dataProviders: timeline.dataProviders,
       dataViewId: timeline.dataViewId,
@@ -216,12 +216,12 @@ const getTimelineTypeFilter = (
   const typeFilter =
     timelineType == null
       ? null
-      : timelineType === SavedObjectTimelineType.template
-      ? `siem-ui-timeline.attributes.timelineType: ${SavedObjectTimelineType.template}` /** Show only whose timelineType exists and equals to "template" */
+      : timelineType === TimelineType.template
+      ? `siem-ui-timeline.attributes.timelineType: ${TimelineType.template}` /** Show only whose timelineType exists and equals to "template" */
       : /** Show me every timeline whose timelineType is not "template".
          * which includes timelineType === 'default' and
          * those timelineType doesn't exists */
-        `not siem-ui-timeline.attributes.timelineType: ${SavedObjectTimelineType.template}`;
+        `not siem-ui-timeline.attributes.timelineType: ${TimelineType.template}`;
 
   /** Show me every timeline whose status is not "draft".
    * which includes status === 'active' and
@@ -272,7 +272,7 @@ export const getExistingPrepackagedTimelines = async (
   pageInfo?: PageInfoTimeline
 ): Promise<{
   totalCount: number;
-  timeline: TimelineSavedObjectRuntimeResponseType[];
+  timeline: TimelineSavedToReturnObjectRuntimeType[];
 }> => {
   const queryPageInfo =
     countsOnly && pageInfo == null
@@ -284,7 +284,7 @@ export const getExistingPrepackagedTimelines = async (
   const elasticTemplateTimelineOptions = {
     type: timelineSavedObjectType,
     ...queryPageInfo,
-    filter: getTimelineTypeFilter(SavedObjectTimelineType.template, TimelineStatus.immutable),
+    filter: getTimelineTypeFilter(TimelineType.template, TimelineStatus.immutable),
   };
 
   return getAllSavedTimeline(request, elasticTemplateTimelineOptions);
@@ -320,21 +320,18 @@ export const getAllTimeline = async (
     type: timelineSavedObjectType,
     perPage: 1,
     page: 1,
-    filter: getTimelineTypeFilter(SavedObjectTimelineType.default, TimelineStatus.active),
   };
 
   const templateTimelineOptions = {
     type: timelineSavedObjectType,
     perPage: 1,
     page: 1,
-    filter: getTimelineTypeFilter(SavedObjectTimelineType.template, null),
   };
 
   const customTemplateTimelineOptions = {
     type: timelineSavedObjectType,
     perPage: 1,
     page: 1,
-    filter: getTimelineTypeFilter(SavedObjectTimelineType.template, TimelineStatus.active),
   };
 
   const favoriteTimelineOptions = {
@@ -391,12 +388,12 @@ export const persistFavorite = async (
   timelineId: string | null,
   templateTimelineId: string | null,
   templateTimelineVersion: number | null,
-  timelineType: SavedObjectTimelineType
+  timelineType: TimelineType
 ): Promise<ResponseFavoriteTimeline> => {
   const userName = request.user?.username ?? UNAUTHENTICATED_USER;
   const fullName = request.user?.full_name ?? '';
   try {
-    let timeline: SavedObjectTimeline = {};
+    let timeline: TimelineSOServerRepresentationType = {};
     if (timelineId != null) {
       const {
         eventIdToNoteIds,
@@ -409,7 +406,7 @@ export const persistFavorite = async (
         ...savedTimeline
       } = await getBasicSavedTimeline(request, timelineId);
       timelineId = savedObjectId; // eslint-disable-line no-param-reassign
-      timeline = savedTimeline as Partial<TimelineSavedObjectRuntimeResponseType>;
+      timeline = savedTimeline as Partial<TimelineSOServerRepresentationType>;
     }
 
     const userFavoriteTimeline = {
@@ -469,7 +466,7 @@ export const persistTimeline = async (
   request: FrameworkRequest,
   timelineId: string | null,
   version: string | null,
-  timeline: SavedObjectTimeline,
+  timeline: TimelineSOServerRepresentationType,
   isImmutable?: boolean
 ): Promise<ResponseTimeline> => {
   const savedObjectsClient = (await request.context.core).savedObjects.client;
@@ -516,22 +513,25 @@ export const createTimeline = async ({
   userInfo,
 }: {
   timelineId: string | null;
-  timeline: SavedObjectTimeline;
+  timeline: TimelineSOServerRepresentationType;
   savedObjectsClient: SavedObjectsClientContract;
   userInfo: AuthenticatedUser | null;
 }) => {
   const { transformedFields: migratedAttributes, references } =
-    timelineFieldsMigrator.extractFieldsToReferences<SavedObjectTimelineWithoutExternalRefs>({
-      data: pickSavedTimeline(timelineId, timeline, userInfo),
-    });
+    timelineFieldsMigrator.extractFieldsToReferences<TimelineSOServerRepresentationWithoutExternalRefs>(
+      {
+        data: pickSavedTimeline(timelineId, timeline, userInfo),
+      }
+    );
 
-  const createdTimeline = await savedObjectsClient.create<SavedObjectTimelineWithoutExternalRefs>(
-    timelineSavedObjectType,
-    migratedAttributes,
-    {
-      references,
-    }
-  );
+  const createdTimeline =
+    await savedObjectsClient.create<TimelineSOServerRepresentationWithoutExternalRefs>(
+      timelineSavedObjectType,
+      migratedAttributes,
+      {
+        references,
+      }
+    );
 
   const repopulatedSavedObject =
     timelineFieldsMigrator.populateFieldsFromReferences(createdTimeline);
@@ -555,22 +555,24 @@ const updateTimeline = async ({
 }: {
   request: FrameworkRequest;
   timelineId: string;
-  timeline: SavedObjectTimeline;
+  timeline: TimelineSOServerRepresentationType;
   savedObjectsClient: SavedObjectsClientContract;
   userInfo: AuthenticatedUser | null;
   version: string | null;
 }) => {
   const rawTimelineSavedObject =
-    await savedObjectsClient.get<SavedObjectTimelineWithoutExternalRefs>(
+    await savedObjectsClient.get<TimelineSOServerRepresentationWithoutExternalRefs>(
       timelineSavedObjectType,
       timelineId
     );
 
   const { transformedFields: migratedPatchAttributes, references } =
-    timelineFieldsMigrator.extractFieldsToReferences<SavedObjectTimelineWithoutExternalRefs>({
-      data: pickSavedTimeline(timelineId, timeline, userInfo),
-      existingReferences: rawTimelineSavedObject.references,
-    });
+    timelineFieldsMigrator.extractFieldsToReferences<TimelineSOServerRepresentationWithoutExternalRefs>(
+      {
+        data: pickSavedTimeline(timelineId, timeline, userInfo),
+        existingReferences: rawTimelineSavedObject.references,
+      }
+    );
 
   // Update Timeline
   await savedObjectsClient.update(timelineSavedObjectType, timelineId, migratedPatchAttributes, {
@@ -588,7 +590,7 @@ const updateTimeline = async ({
 export const updatePartialSavedTimeline = async (
   request: FrameworkRequest,
   timelineId: string,
-  timeline: SavedObjectTimeline
+  timeline: TimelineSOServerRepresentationType
 ) => {
   const savedObjectsClient = (await request.context.core).savedObjects.client;
   const currentSavedTimeline = await savedObjectsClient.get<SavedObjectTimeline>(
@@ -597,10 +599,12 @@ export const updatePartialSavedTimeline = async (
   );
 
   const { transformedFields, references } =
-    timelineFieldsMigrator.extractFieldsToReferences<SavedObjectTimelineWithoutExternalRefs>({
-      data: timeline,
-      existingReferences: currentSavedTimeline.references,
-    });
+    timelineFieldsMigrator.extractFieldsToReferences<TimelineSOServerRepresentationWithoutExternalRefs>(
+      {
+        data: timeline,
+        existingReferences: currentSavedTimeline.references,
+      }
+    );
 
   const timelineUpdateAttributes = pickSavedTimeline(
     null,
@@ -611,15 +615,16 @@ export const updatePartialSavedTimeline = async (
     request.user
   );
 
-  const updatedTimeline = await savedObjectsClient.update<SavedObjectTimelineWithoutExternalRefs>(
-    timelineSavedObjectType,
-    timelineId,
-    timelineUpdateAttributes,
-    { references }
-  );
+  const updatedTimeline =
+    await savedObjectsClient.update<TimelineSOServerRepresentationWithoutExternalRefs>(
+      timelineSavedObjectType,
+      timelineId,
+      timelineUpdateAttributes,
+      { references }
+    );
 
   const populatedTimeline =
-    timelineFieldsMigrator.populateFieldsFromReferencesForPatch<SavedObjectTimelineWithoutExternalRefs>(
+    timelineFieldsMigrator.populateFieldsFromReferencesForPatch<TimelineSOServerRepresentationWithoutExternalRefs>(
       {
         dataBeforeRequest: timeline,
         dataReturnedFromRequest: updatedTimeline,
@@ -632,7 +637,7 @@ export const updatePartialSavedTimeline = async (
 export const resetTimeline = async (
   request: FrameworkRequest,
   timelineIds: string[],
-  timelineType: SavedObjectTimelineType
+  timelineType: TimelineType
 ) => {
   if (!timelineIds.length) {
     return Promise.reject(new Error('timelineIds is empty'));
@@ -673,7 +678,7 @@ export const deleteTimeline = async (request: FrameworkRequest, timelineIds: str
 const resolveBasicSavedTimeline = async (request: FrameworkRequest, timelineId: string) => {
   const savedObjectsClient = (await request.context.core).savedObjects.client;
   const { saved_object: savedObject, ...resolveAttributes } =
-    await savedObjectsClient.resolve<SavedObjectTimelineWithoutExternalRefs>(
+    await savedObjectsClient.resolve<TimelineSOServerRepresentationWithoutExternalRefs>(
       timelineSavedObjectType,
       timelineId
     );
@@ -710,10 +715,11 @@ const resolveSavedTimeline = async (request: FrameworkRequest, timelineId: strin
 
 const getBasicSavedTimeline = async (request: FrameworkRequest, timelineId: string) => {
   const savedObjectsClient = (await request.context.core).savedObjects.client;
-  const savedObject = await savedObjectsClient.get<SavedObjectTimelineWithoutExternalRefs>(
-    timelineSavedObjectType,
-    timelineId
-  );
+  const savedObject =
+    await savedObjectsClient.get<TimelineSOServerRepresentationWithoutExternalRefs>(
+      timelineSavedObjectType,
+      timelineId
+    );
 
   const populatedTimeline = timelineFieldsMigrator.populateFieldsFromReferences(savedObject);
 
@@ -740,9 +746,8 @@ const getAllSavedTimeline = async (request: FrameworkRequest, options: SavedObje
   const userName = request.user?.username ?? UNAUTHENTICATED_USER;
   const savedObjectsClient = (await request.context.core).savedObjects.client;
 
-  const savedObjects = await savedObjectsClient.find<SavedObjectTimelineWithoutExternalRefs>(
-    options
-  );
+  const savedObjects =
+    await savedObjectsClient.find<TimelineSOServerRepresentationWithoutExternalRefs>(options);
 
   const timelinesWithNotesAndPinnedEvents = await Promise.all(
     savedObjects.saved_objects.map(async (savedObject) => {
@@ -770,9 +775,9 @@ export const convertStringToBase64 = (text: string): string => Buffer.from(text)
 export const timelineWithReduxProperties = (
   notes: NoteSavedObject[],
   pinnedEvents: PinnedEventSavedObject[],
-  timeline: TimelineSavedObjectRuntimeResponseType,
+  timeline: TimelineSavedToReturnObjectRuntimeType,
   userName: string
-): TimelineSavedObjectRuntimeResponseType => ({
+): TimelineSavedToReturnObjectRuntimeType => ({
   ...timeline,
   favorite:
     timeline.favorite != null && userName != null
@@ -808,7 +813,7 @@ export const getSelectedTimelines = async (
   }
 
   const savedObjects = await Promise.resolve(
-    savedObjectsClient.bulkGet<SavedObjectTimelineWithoutExternalRefs>(
+    savedObjectsClient.bulkGet<TimelineSOServerRepresentationWithoutExternalRefs>(
       (exportedIds ?? []).reduce(
         (acc, timelineId) => [...acc, { id: timelineId, type: timelineSavedObjectType }],
         [] as Array<{ id: string; type: string }>
@@ -817,7 +822,7 @@ export const getSelectedTimelines = async (
   );
 
   const timelineObjects: {
-    timelines: TimelineSavedObjectRuntimeResponseType[];
+    timelines: TimelineSOServerRepresentationType[];
     errors: ExportTimelineNotFoundError[];
   } = savedObjects.saved_objects.reduce(
     (acc, savedObject) => {
@@ -833,7 +838,7 @@ export const getSelectedTimelines = async (
       return { errors: [...acc.errors, savedObject.error], timelines: acc.timelines };
     },
     {
-      timelines: [] as TimelineSavedObjectRuntimeResponseType[],
+      timelines: [] as TimelineSOServerRepresentationType[],
       errors: [] as ExportTimelineNotFoundError[],
     }
   );

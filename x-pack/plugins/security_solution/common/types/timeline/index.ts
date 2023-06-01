@@ -276,19 +276,6 @@ export const SavedObjectTimelineRuntimeType = runtimeTypes.partial({
  */
 export type SavedObjectTimeline = runtimeTypes.TypeOf<typeof SavedObjectTimelineRuntimeType>;
 
-export type SavedObjectTimelineWithSavedObjectId = SavedObjectTimeline & {
-  savedObjectId?: string | null;
-};
-
-/**
- * This type represents a timeline type stored in a saved object that does not include any fields that reference
- * other saved objects.
- */
-export type SavedObjectTimelineWithoutExternalRefs = Omit<
-  SavedObjectTimeline,
-  'dataViewId' | 'savedQueryId'
->;
-
 // ++++++++ TIMELINE TYPES THAT ARE NEITHER IN THE API, NOR IN THE SAVED OBJECT +++++++++
 
 /**
