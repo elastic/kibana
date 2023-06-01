@@ -12,7 +12,7 @@ import {
   KibanaRequest,
   SavedObjectsClientContract,
 } from '@kbn/core/server';
-import { schema } from '@kbn/config-schema';
+import { schema, TypeOf } from '@kbn/config-schema';
 import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 import { InvalidateAPIKeysParams, SecurityPluginStart } from '@kbn/security-plugin/server';
 import {
@@ -49,6 +49,19 @@ const invalidateAPIKeys = async (
     result: invalidateAPIKeyResult,
   };
 };
+
+const stateSchemaByVersion = {
+  1: {
+    up: <T>(task: T) => task,
+    schema: schema.object({
+      runs: schema.number(),
+      total_invalidated: schema.number(),
+    }),
+  },
+};
+
+const latestSchema = stateSchemaByVersion[1].schema;
+type LatestTaskStateSchema = TypeOf<typeof latestSchema>;
 
 export function initializeApiKeyInvalidator(
   logger: Logger,
@@ -89,15 +102,7 @@ function registerApiKeyInvalidatorTaskDefinition(
   taskManager.registerTaskDefinitions({
     [TASK_TYPE]: {
       title: 'Invalidate alert API Keys',
-      stateSchemaByVersion: {
-        1: {
-          up: (task) => task,
-          schema: schema.object({
-            runs: schema.number(),
-            total_invalidated: schema.number(),
-          }),
-        },
-      },
+      stateSchemaByVersion,
       createTaskRunner: taskRunner(logger, coreStartServices, config),
     },
   });
@@ -169,22 +174,24 @@ function taskRunner(
             hasApiKeysPendingInvalidation = apiKeysToInvalidate.total > PAGE_SIZE;
           } while (hasApiKeysPendingInvalidation);
 
+          const updatedState: LatestTaskStateSchema = {
+            runs: (state.runs || 0) + 1,
+            total_invalidated: totalInvalidated,
+          };
           return {
-            state: {
-              runs: (state.runs || 0) + 1,
-              total_invalidated: totalInvalidated,
-            },
+            state: updatedState,
             schedule: {
               interval: config.invalidateApiKeysTask.interval,
             },
           };
         } catch (e) {
           logger.warn(`Error executing alerting apiKey invalidation task: ${e.message}`);
+          const updatedState: LatestTaskStateSchema = {
+            runs: (state.runs || 0) + 1,
+            total_invalidated: totalInvalidated,
+          };
           return {
-            state: {
-              runs: (state.runs || 0) + 1,
-              total_invalidated: totalInvalidated,
-            },
+            state: updatedState,
             schedule: {
               interval: config.invalidateApiKeysTask.interval,
             },
