@@ -19,7 +19,7 @@ import treeKill from 'tree-kill';
 import { ToolingLog } from '@kbn/tooling-log';
 import { observeLines } from '@kbn/stdio-dev-helpers';
 import { createFailError } from '@kbn/dev-cli-errors';
-
+import type { ChildProcess } from 'child_process';
 const treeKillAsync = promisify((...args: [number, string, any]) => treeKill(...args));
 
 const SECOND = 1000;
@@ -85,11 +85,13 @@ export function startProc(name: string, options: ProcOptions, log: ToolingLog) {
 
   let stopCalled = false;
 
+  type ChildProcessOnOff = Omit<ChildProcess, 'addListener' | 'removeListener'>;
+
   const outcome$: Rx.Observable<number | null> = Rx.race(
     // observe first exit event
-    Rx.fromEvent<[number]>(childProcess, 'exit').pipe(
+    Rx.fromEvent(childProcess as ChildProcessOnOff, 'exit').pipe(
       take(1),
-      map(([code]) => {
+      map(([code]: readonly number[]) => {
         if (stopCalled) {
           return null;
         }
