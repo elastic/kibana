@@ -11,7 +11,7 @@ properties:
           id:
             type: string
           type:
-            $ref: ./so_type.yaml
+            $ref: ./saved_object_type.yaml
           updatedAt:
             type: string
           attributes:

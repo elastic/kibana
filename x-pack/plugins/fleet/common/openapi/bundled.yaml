@@ -3507,7 +3507,7 @@ components:
           $ref: '#/components/schemas/settings'
       required:
         - item
-    so_type:
+    saved_object_type:
       title: Saved Object type
       oneOf:
         - type: string
@@ -3548,7 +3548,7 @@ components:
                 id:
                   type: string
                 type:
-                  $ref: '#/components/schemas/SO_type'
+                  $ref: '#/components/schemas/saved_object_type'
                 updatedAt:
                   type: string
                 attributes:

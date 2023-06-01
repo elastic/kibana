@@ -5606,7 +5606,7 @@
           "item"
         ]
       },
-      "so_type": {
+      "saved_object_type": {
         "title": "Saved Object type",
         "oneOf": [
           {
@@ -5656,7 +5656,7 @@
                     "type": "string"
                   },
                   "type": {
-                    "$ref": "#/components/schemas/so_type"
+                    "$ref": "#/components/schemas/saved_object_type"
                   },
                   "updatedAt": {
                     "type": "string"
