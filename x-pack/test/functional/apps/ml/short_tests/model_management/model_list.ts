@@ -52,6 +52,28 @@ export default function ({ getService }: FtrProviderContext) {
       modelTypes: ['regression', 'tree_ensemble'],
     };
 
+    describe('for ML user with read-only access', () => {
+      before(async () => {
+        await ml.securityUI.loginAsMlViewer();
+        await ml.navigation.navigateToTrainedModels();
+        await ml.commonUI.waitForRefreshButtonEnabled();
+      });
+
+      after(async () => {
+        await ml.securityUI.logout();
+      });
+
+      it('renders expanded row content correctly for model with pipelines', async () => {
+        await ml.trainedModelsTable.ensureRowIsExpanded(modelWithPipelineData.modelId);
+        await ml.trainedModelsTable.assertDetailsTabContent();
+        await ml.trainedModelsTable.assertInferenceConfigTabContent();
+        await ml.trainedModelsTable.assertStatsTabContent();
+        await ml.trainedModelsTable.assertPipelinesTabContent(true, [
+          { pipelineName: `pipeline_${modelWithPipelineData.modelId}`, expectDefinition: false },
+        ]);
+      });
+    });
+
     describe('for ML power user', () => {
       before(async () => {
         await ml.securityUI.loginAsMlPowerUser();
@@ -232,28 +254,6 @@ export default function ({ getService }: FtrProviderContext) {
             await ml.trainedModelsTable.deleteModel(model.id);
           });
         }
-      });
-    });
-
-    describe('for ML user with read-only access', () => {
-      before(async () => {
-        await ml.securityUI.loginAsMlViewer();
-        await ml.navigation.navigateToTrainedModels();
-        await ml.commonUI.waitForRefreshButtonEnabled();
-      });
-
-      after(async () => {
-        await ml.securityUI.logout();
-      });
-
-      it('renders expanded row content correctly for model with pipelines', async () => {
-        await ml.trainedModelsTable.ensureRowIsExpanded(modelWithPipelineData.modelId);
-        await ml.trainedModelsTable.assertDetailsTabContent();
-        await ml.trainedModelsTable.assertInferenceConfigTabContent();
-        await ml.trainedModelsTable.assertStatsTabContent();
-        await ml.trainedModelsTable.assertPipelinesTabContent(true, [
-          { pipelineName: `pipeline_${modelWithPipelineData.modelId}`, expectDefinition: false },
-        ]);
       });
     });
   });
