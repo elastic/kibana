@@ -16,7 +16,6 @@ import supertest from 'supertest';
 import { format, UrlObject } from 'url';
 import { MachineLearningAPIProvider } from '../../functional/services/ml/api';
 import { APMFtrConfigName } from '../configs';
-import { createApmApiClient } from './apm_api_supertest';
 import { bootstrapApmSynthtrace } from './bootstrap_apm_synthtrace';
 import {
   FtrProviderContext,
@@ -29,21 +28,6 @@ export interface ApmFtrConfig {
   name: APMFtrConfigName;
   license: 'basic' | 'trial';
   kibanaConfig?: Record<string, any>;
-}
-
-async function getApmApiClient({
-  kibanaServer,
-  username,
-}: {
-  kibanaServer: UrlObject;
-  username: ApmUsername;
-}) {
-  const url = format({
-    ...kibanaServer,
-    auth: `${username}:${APM_TEST_PASSWORD}`,
-  });
-
-  return createApmApiClient(supertest(url));
 }
 
 export type CreateTestConfig = ReturnType<typeof createTestConfig>;
