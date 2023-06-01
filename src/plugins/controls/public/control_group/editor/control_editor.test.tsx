@@ -184,7 +184,7 @@ describe('Data control editor', () => {
         },
       });
       await mountComponent({
-        componentOptions: { isCreate: false, embeddable: control, title: control.getTitle() },
+        componentOptions: { isCreate: false, embeddable: control },
       });
     };
 

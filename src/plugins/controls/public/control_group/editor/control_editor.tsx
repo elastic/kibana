@@ -62,7 +62,6 @@ import { useControlGroupContainer } from '../embeddable/control_group_container'
 export interface EditControlProps {
   embeddable?: ControlEmbeddable<DataControlInput>;
   isCreate: boolean;
-  title?: string;
   width: ControlWidth;
   onSave: (changes: DataControlEditorChanges, type?: string) => void;
   grow: boolean;
@@ -78,7 +77,6 @@ const DataViewPicker = withSuspense(LazyDataViewPicker, null);
 export const ControlEditor = ({
   embeddable,
   isCreate,
-  title,
   width,
   grow,
   onSave,
@@ -98,7 +96,7 @@ export const ControlEditor = ({
   const [currentGrow, setCurrentGrow] = useState(grow);
   const [currentWidth, setCurrentWidth] = useState(width);
   const [defaultTitle, setDefaultTitle] = useState<string>();
-  const [currentTitle, setCurrentTitle] = useState(title ?? '');
+  const [currentTitle, setCurrentTitle] = useState(embeddable?.getTitle() ?? '');
   const [controlEditorValid, setControlEditorValid] = useState(false);
   const [selectedDataViewId, setSelectedDataViewId] = useState<string>();
   const [selectedField, setSelectedField] = useState<string | undefined>(
@@ -309,7 +307,7 @@ export const ControlEditor = ({
             <>
               <EuiSpacer size="l" />
               <EuiButtonEmpty
-                aria-label={`delete-${title}`}
+                aria-label={`delete-${currentInput.title}`}
                 iconType="trash"
                 flush="left"
                 color="danger"
@@ -328,7 +326,7 @@ export const ControlEditor = ({
         <EuiFlexGroup responsive={false} justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
-              aria-label={`cancel-${title}`}
+              aria-label={`cancel-${currentInput.title}`}
               data-test-subj="control-editor-cancel"
               iconType="cross"
               onClick={() => {
@@ -346,7 +344,7 @@ export const ControlEditor = ({
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButton
-              aria-label={`save-${title}`}
+              aria-label={`save-${currentInput.title}`}
               data-test-subj="control-editor-save"
               iconType="check"
               color="primary"

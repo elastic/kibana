@@ -100,7 +100,6 @@ export const EditControlFlyout = ({
       width={panel.width}
       grow={panel.grow}
       embeddable={embeddable}
-      title={embeddable.getTitle()}
       onCancel={onCancel}
       setLastUsedDataViewId={(lastUsed) => controlGroup.setLastUsedDataViewId(lastUsed)}
       onSave={onSave}
