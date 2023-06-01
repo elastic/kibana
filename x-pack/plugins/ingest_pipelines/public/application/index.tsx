@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { HttpSetup } from '@kbn/core/public';
+import { CoreTheme, HttpSetup } from '@kbn/core/public';
 import React, { ReactNode } from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { Observable } from 'rxjs';
 
 import { ApplicationStart } from '@kbn/core/public';
-import { NotificationsSetup, IUiSettingsClient, CoreTheme } from '@kbn/core/public';
+import { NotificationsSetup, IUiSettingsClient } from '@kbn/core/public';
 import { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { FileUploadPluginStart } from '@kbn/file-upload-plugin/public';
 import type { SettingsStart } from '@kbn/core-ui-settings-browser';
 
+import { Observable } from 'rxjs';
 import { KibanaContextProvider, KibanaThemeProvider } from '../shared_imports';
 import { ILicense } from '../types';
 
@@ -67,7 +67,7 @@ export const renderApp = (
     >
       <I18nContext>
         <KibanaThemeProvider theme$={theme$}>
-          <KibanaContextProvider services={services}>
+          <KibanaContextProvider services={{ ...services, theme: { theme$ } }}>
             <App />
           </KibanaContextProvider>
         </KibanaThemeProvider>

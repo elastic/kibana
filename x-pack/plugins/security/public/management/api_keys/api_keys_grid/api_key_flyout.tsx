@@ -26,6 +26,8 @@ import moment from 'moment-timezone';
 import type { FunctionComponent } from 'react';
 import React, { useEffect } from 'react';
 import useAsyncFn from 'react-use/lib/useAsyncFn';
+import useObservable from 'react-use/lib/useObservable';
+import { of } from 'rxjs';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -112,6 +114,8 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
   }
 
   const { services } = useKibana();
+  const defaultTheme = { darkMode: false };
+  const darkMode = useObservable(services.theme?.theme$ ?? of(defaultTheme), defaultTheme).darkMode;
 
   const [{ value: roles, loading: isLoadingRoles }, getRoles] = useAsyncFn(
     () => new RolesAPIClient(services.http!).getRoles(),
@@ -310,6 +314,7 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
                 >
                   <CodeEditorField
                     value={form.values.role_descriptors!}
+                    useDarkTheme={darkMode}
                     onChange={(value) => form.setValue('role_descriptors', value)}
                     languageId="xjson"
                     height={200}
@@ -408,6 +413,7 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
                 >
                   <CodeEditorField
                     value={form.values.metadata!}
+                    useDarkTheme={darkMode}
                     onChange={(value) => form.setValue('metadata', value)}
                     languageId="xjson"
                     height={200}

@@ -20,8 +20,10 @@ import {
 } from '@elastic/eui';
 import { XJsonLang } from '@kbn/monaco';
 import { i18n } from '@kbn/i18n';
-
 import { CodeEditorField } from '@kbn/kibana-react-plugin/public';
+import { of } from 'rxjs';
+import useObservable from 'react-use/lib/useObservable';
+import { useKibana } from '../../../shared_imports';
 
 interface Props {
   processors: object[];
@@ -38,6 +40,10 @@ export const PipelinesPreview: FC<Props> = ({
   onUpdateProcessors,
   hasError,
 }) => {
+  const { services } = useKibana();
+  const defaultTheme = { darkMode: false };
+  const darkMode = useObservable(services.theme?.theme$ ?? of(defaultTheme), defaultTheme).darkMode;
+
   const [isValidJson, setIsValidJson] = useState<boolean>(true);
   const [processorsJson, setProcessorsJson] = useState<string>('');
 
@@ -96,6 +102,7 @@ export const PipelinesPreview: FC<Props> = ({
               onChange={onUpdate}
               fullWidth={true}
               height="400px"
+              useDarkTheme={darkMode}
               options={{
                 accessibilitySupport: 'off',
                 lineNumbers: 'on',

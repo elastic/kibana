@@ -592,6 +592,12 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
         defaultMessage="Script is required"
       />
     );
+    const { theme } = this.context.services;
+
+    let darkModeTheme = { darkMode: false };
+    theme.theme$.subscribe((nextTheme) => {
+      darkModeTheme = nextTheme;
+    });
 
     return spec.scripted ? (
       <Fragment>
@@ -602,6 +608,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
           error={isInvalid ? errorMsg : null}
         >
           <CodeEditor
+            useDarkTheme={darkModeTheme.darkMode}
             languageId={PainlessLang.ID}
             width="100%"
             height="300px"

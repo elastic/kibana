@@ -223,6 +223,7 @@ export class VisEditor extends Component<TimeseriesEditorProps, TimeseriesEditor
               onChange={this.handleChange}
               getConfig={this.getConfig}
               defaultIndexPattern={this.props.defaultIndexPattern}
+              theme={getCoreStart().theme}
             />
           </div>
         </div>

@@ -8,18 +8,18 @@
 
 import React, { Component } from 'react';
 import {
-  htmlIdGenerator,
   EuiComboBox,
-  EuiTabs,
-  EuiTab,
-  EuiPanel,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFormRow,
   EuiFormLabel,
-  EuiSpacer,
-  EuiTitle,
+  EuiFormRow,
   EuiHorizontalRule,
+  EuiPanel,
+  EuiSpacer,
+  EuiTab,
+  EuiTabs,
+  EuiTitle,
+  htmlIdGenerator,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -34,7 +34,7 @@ import { MarkdownEditor } from '../markdown_editor';
 import { QueryBarWrapper } from '../query_bar_wrapper';
 import { getDefaultQueryLanguage } from '../lib/get_default_query_language';
 import { VisDataContext } from '../../contexts/vis_data_context';
-import { PanelConfigProps, PANEL_CONFIG_TABS } from './types';
+import { PANEL_CONFIG_TABS, PanelConfigProps } from './types';
 
 export class MarkdownPanelConfig extends Component<
   PanelConfigProps,
@@ -60,6 +60,11 @@ export class MarkdownPanelConfig extends Component<
     const { selectedTab } = this.state;
     const handleSelectChange = createSelectHandler(this.props.onChange);
     const htmlId = htmlIdGenerator();
+
+    let darkModeTheme = { darkMode: false };
+    this.props.theme.theme$.subscribe((theme) => {
+      darkModeTheme = theme;
+    });
 
     const alignOptions = [
       {
@@ -258,6 +263,7 @@ export class MarkdownPanelConfig extends Component<
             </EuiTitle>
             <EuiSpacer size="s" />
             <CodeEditor
+              useDarkTheme={darkModeTheme.darkMode}
               height="500px"
               languageId={CssLang}
               options={{ fontSize: 14 }}

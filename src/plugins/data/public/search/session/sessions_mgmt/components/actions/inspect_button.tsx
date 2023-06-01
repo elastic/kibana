@@ -15,6 +15,8 @@ import {
   createKibanaReactContext,
   toMountPoint,
 } from '@kbn/kibana-react-plugin/public';
+import { of } from 'rxjs';
+import useObservable from 'react-use/lib/useObservable';
 import { UISession } from '../../types';
 import { IClickActionDescriptor } from '..';
 import './inspect_button.scss';
@@ -23,17 +25,22 @@ import { SearchSessionsMgmtAPI } from '../../lib/api';
 interface InspectFlyoutProps {
   searchSession: UISession;
   uiSettings: CoreStart['uiSettings'];
+  theme?: CoreStart['theme'];
 }
 
-const InspectFlyout = ({ uiSettings, searchSession }: InspectFlyoutProps) => {
+const InspectFlyout = ({ uiSettings, searchSession, theme }: InspectFlyoutProps) => {
   const { Provider: KibanaReactContextProvider } = createKibanaReactContext({
     uiSettings,
   });
+
+  const defaultTheme = { darkMode: false };
+  const darkMode = useObservable(theme?.theme$ ?? of(defaultTheme), defaultTheme).darkMode;
 
   const renderInfo = () => {
     return (
       <Fragment>
         <CodeEditor
+          useDarkTheme={darkMode}
           languageId="json"
           value={JSON.stringify(searchSession, null, 2)}
           options={{
@@ -97,7 +104,9 @@ export const createInspectActionDescriptor = (
     />
   ),
   onClick: async () => {
-    const flyout = <InspectFlyout uiSettings={core.uiSettings} searchSession={uiSession} />;
+    const flyout = (
+      <InspectFlyout theme={core.theme} uiSettings={core.uiSettings} searchSession={uiSession} />
+    );
     const overlay = core.overlays.openFlyout(toMountPoint(flyout, { theme$: core.theme.theme$ }));
     await overlay.onClose;
   },

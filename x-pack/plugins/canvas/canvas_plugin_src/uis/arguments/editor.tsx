@@ -8,8 +8,10 @@
 import React, { useState, useEffect, useCallback, FC } from 'react';
 import { EuiFormRow } from '@elastic/eui';
 import { LangModuleType } from '@kbn/monaco';
-import { CodeEditorField } from '@kbn/kibana-react-plugin/public';
+import { CodeEditorField, useKibana } from '@kbn/kibana-react-plugin/public';
 import usePrevious from 'react-use/lib/usePrevious';
+import useObservable from 'react-use/lib/useObservable';
+import { of } from 'rxjs';
 import { templateFromReactComponent } from '../../../public/lib/template_from_react_component';
 import { ArgumentStrings } from '../../../i18n';
 import { withDebounceArg } from '../../../public/components/with_debounce_arg';
@@ -28,6 +30,10 @@ interface EditorArgProps {
 }
 
 const EditorArg: FC<EditorArgProps> = ({ argValue, typeInstance, onValueChange, renderError }) => {
+  const { services } = useKibana();
+  const defaultTheme = { darkMode: false };
+  const darkMode = useObservable(services.theme?.theme$ ?? of(defaultTheme), defaultTheme).darkMode;
+
   const [value, setValue] = useState(argValue);
   const prevValue = usePrevious(value);
 
@@ -57,6 +63,7 @@ const EditorArg: FC<EditorArgProps> = ({ argValue, typeInstance, onValueChange, 
         languageId={language ?? ''}
         value={value}
         onChange={onChange}
+        useDarkTheme={darkMode}
         options={{
           fontSize: 14,
           scrollBeyondLastLine: false,

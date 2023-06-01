@@ -8,7 +8,9 @@
 
 import React, { useCallback } from 'react';
 import { monaco, XJsonLang } from '@kbn/monaco';
-import { CodeEditor, MarkdownLang } from '@kbn/kibana-react-plugin/public';
+import { CodeEditor, MarkdownLang, useKibana } from '@kbn/kibana-react-plugin/public';
+import useObservable from 'react-use/lib/useObservable';
+import { of } from 'rxjs';
 
 interface FieldCodeEditorProps {
   value: string;
@@ -80,8 +82,13 @@ export const FieldCodeEditor = ({
     [setEditorCalculatedHeight, trimEditorBlankLines]
   );
 
+  const { services } = useKibana();
+  const defaultTheme = { darkMode: false };
+  const darkMode = useObservable(services.theme?.theme$ ?? of(defaultTheme), defaultTheme).darkMode;
+
   return (
     <CodeEditor
+      useDarkTheme={darkMode}
       {...a11yProps}
       languageId={type === 'json' ? XJsonLang.ID : MarkdownLang}
       value={value}

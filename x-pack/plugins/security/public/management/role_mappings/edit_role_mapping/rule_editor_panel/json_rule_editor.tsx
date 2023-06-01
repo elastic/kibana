@@ -11,6 +11,8 @@ import 'brace/theme/github';
 
 import { EuiButton, EuiFormRow, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
 import React, { Fragment, useState } from 'react';
+import useObservable from 'react-use/lib/useObservable';
+import { of } from 'rxjs';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -28,7 +30,12 @@ interface Props {
 }
 
 export const JSONRuleEditor = (props: Props) => {
-  const docLinks = useKibana().services.docLinks!;
+  const { services } = useKibana();
+  const defaultTheme = { darkMode: false };
+  const darkMode = useObservable(services.theme?.theme$ ?? of(defaultTheme), defaultTheme).darkMode;
+
+  const docLinks = services.docLinks!;
+
   const [rawRules, setRawRules] = useState(
     JSON.stringify(props.rules ? props.rules.toRaw() : {}, null, 2)
   );
@@ -104,6 +111,7 @@ export const JSONRuleEditor = (props: Props) => {
           onChange={onRulesChange}
           fullWidth={true}
           height="300px"
+          useDarkTheme={darkMode}
           options={{
             accessibilitySupport: 'off',
             lineNumbers: 'on',

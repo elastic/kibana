@@ -17,6 +17,8 @@ import { XJsonLang } from '@kbn/monaco';
 import { compressToEncodedURIComponent } from 'lz-string';
 import React, { useCallback } from 'react';
 import { CodeEditor, useKibana } from '@kbn/kibana-react-plugin/public';
+import useObservable from 'react-use/lib/useObservable';
+import { of } from 'rxjs';
 import { InspectorPluginStartDeps } from '../../../../plugin';
 
 interface RequestCodeViewerProps {
@@ -41,6 +43,8 @@ const openInSearchProfilerLabel = i18n.translate('inspector.requests.openInSearc
  */
 export const RequestCodeViewer = ({ indexPattern, json }: RequestCodeViewerProps) => {
   const { services } = useKibana<InspectorPluginStartDeps>();
+  const defaultTheme = { darkMode: false };
+  const darkMode = useObservable(services.theme?.theme$ ?? of(defaultTheme), defaultTheme).darkMode;
 
   const navigateToUrl = services.application?.navigateToUrl;
 
@@ -134,6 +138,7 @@ export const RequestCodeViewer = ({ indexPattern, json }: RequestCodeViewerProps
       </EuiFlexItem>
       <EuiFlexItem grow={true} data-test-subj="inspectorRequestCodeViewerContainer">
         <CodeEditor
+          useDarkTheme={darkMode}
           languageId={XJsonLang.ID}
           value={json}
           options={{

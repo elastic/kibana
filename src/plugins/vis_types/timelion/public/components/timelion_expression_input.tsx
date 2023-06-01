@@ -12,6 +12,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { monaco } from '@kbn/monaco';
 
 import { CodeEditor, useKibana } from '@kbn/kibana-react-plugin/public';
+import useObservable from 'react-use/lib/useObservable';
+import { of } from 'rxjs';
 import { suggest, getSuggestion } from './timelion_expression_input_helpers';
 import { getArgValueSuggestions } from '../helpers/arg_value_suggestions';
 import { ITimelionFunction, TimelionFunctionArgs } from '../../common/types';
@@ -28,6 +30,12 @@ function TimelionExpressionInput({ value, setValue }: TimelionExpressionInputPro
   const functionList = useRef<ITimelionFunction[]>([]);
   const kibana = useKibana();
   const argValueSuggestions = useMemo(getArgValueSuggestions, []);
+
+  const defaultTheme = { darkMode: false };
+  const darkMode = useObservable(
+    kibana.services.theme?.theme$ ?? of(defaultTheme),
+    defaultTheme
+  ).darkMode;
 
   const provideCompletionItems = useCallback(
     async (model: monaco.editor.ITextModel, position: monaco.Position) => {
@@ -104,6 +112,7 @@ function TimelionExpressionInput({ value, setValue }: TimelionExpressionInputPro
       <div className="timExpressionInput__editor">
         <div className="timExpressionInput__absolute" data-test-subj="timelionCodeEditor">
           <CodeEditor
+            useDarkTheme={darkMode}
             languageId={LANGUAGE_ID}
             value={value}
             onChange={setValue}

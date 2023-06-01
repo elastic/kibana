@@ -14,6 +14,9 @@ import { XJsonLang } from '@kbn/monaco';
 import { CodeEditor } from '@kbn/kibana-react-plugin/public';
 import { XJson } from '@kbn/es-ui-shared-plugin/public';
 
+import useObservable from 'react-use/lib/useObservable';
+import { of } from 'rxjs';
+import { getTheme } from '../../services';
 import { AggParamEditorProps } from '../agg_param_props';
 
 function RawJsonParamEditor({
@@ -24,6 +27,10 @@ function RawJsonParamEditor({
   setTouched,
 }: AggParamEditorProps<string>) {
   const [isFieldValid, setFieldValidity] = useState(true);
+
+  const theme = getTheme();
+  const defaultTheme = { darkMode: false };
+  const darkMode = useObservable(theme?.theme$ ?? of(defaultTheme), defaultTheme).darkMode;
 
   const editorTooltipText = useMemo(
     () =>
@@ -80,6 +87,7 @@ function RawJsonParamEditor({
     >
       <>
         <CodeEditor
+          useDarkTheme={darkMode}
           aria-label={jsonEditorLabelText}
           aria-describedby="jsonEditorDescription"
           languageId={XJsonLang.ID}

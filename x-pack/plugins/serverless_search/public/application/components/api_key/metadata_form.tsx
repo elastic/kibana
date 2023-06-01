@@ -15,8 +15,10 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { CodeEditorField } from '@kbn/kibana-react-plugin/public';
+import { CodeEditorField, useKibana } from '@kbn/kibana-react-plugin/public';
 import React from 'react';
+import useObservable from 'react-use/lib/useObservable';
+import { of } from 'rxjs';
 import { docLinks } from '../../../../common/doc_links';
 import { OPTIONAL_LABEL } from '../../../../common/i18n_string';
 
@@ -31,6 +33,10 @@ export const MetadataForm: React.FC<MetadataFormProps> = ({
   onChangeMetadata,
   error,
 }) => {
+  const { services } = useKibana();
+  const defaultTheme = { darkMode: false };
+  const darkMode = useObservable(services.theme?.theme$ ?? of(defaultTheme), defaultTheme).darkMode;
+
   return (
     <>
       <EuiFlexGroup alignItems="center">
@@ -74,6 +80,7 @@ export const MetadataForm: React.FC<MetadataFormProps> = ({
         isCopyable
         onChange={(e) => onChangeMetadata(e)}
         value={metadata}
+        useDarkTheme={darkMode}
       />
     </>
   );

@@ -18,10 +18,12 @@ import {
 } from '@elastic/eui';
 import _ from 'lodash';
 import React, { Component, Fragment } from 'react';
+import useObservable from 'react-use/lib/useObservable';
+import { of } from 'rxjs';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { CodeEditorField } from '@kbn/kibana-react-plugin/public';
+import { CodeEditorField, useKibana } from '@kbn/kibana-react-plugin/public';
 import type { monaco } from '@kbn/monaco';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
@@ -366,6 +368,13 @@ export class IndexPrivilegeForm extends Component<Props, State> {
       return null;
     }
 
+    const { services } = useKibana();
+    const defaultTheme = { darkMode: false };
+    const darkMode = useObservable(
+      services.theme?.theme$ ?? of(defaultTheme),
+      defaultTheme
+    ).darkMode;
+
     return (
       <>
         <EuiSpacer />
@@ -403,6 +412,7 @@ export class IndexPrivilegeForm extends Component<Props, State> {
                   languageId="xjson"
                   width="100%"
                   fullWidth
+                  useDarkTheme={darkMode}
                   height={this.state.documentQueryEditorHeight}
                   aria-label={i18n.translate(
                     'xpack.security.management.editRole.indexPrivilegeForm.grantedDocumentsQueryEditorAriaLabel',

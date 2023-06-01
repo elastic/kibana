@@ -7,7 +7,7 @@
  */
 
 import { Observable } from 'rxjs';
-import { IUiSettingsClient } from '@kbn/core/public';
+import { CoreStart, IUiSettingsClient } from '@kbn/core/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { TimeseriesVisData } from '../../../../common/types';
 import { TimeseriesVisParams } from '../../../types';
@@ -20,6 +20,7 @@ export interface PanelConfigProps {
   getConfig: IUiSettingsClient['get'];
   onChange: (partialModel: Partial<TimeseriesVisParams>) => void;
   defaultIndexPattern?: DataView;
+  theme: CoreStart['theme'];
 }
 
 export enum PANEL_CONFIG_TABS {

@@ -10,7 +10,9 @@ import { i18n } from '@kbn/i18n';
 import { XJsonLang } from '@kbn/monaco';
 import { omit } from 'lodash';
 import { EuiButtonEmpty, EuiCopy, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import { CodeEditor } from '@kbn/kibana-react-plugin/public';
+import { CodeEditor, useKibana } from '@kbn/kibana-react-plugin/public';
+import useObservable from 'react-use/lib/useObservable';
+import { of } from 'rxjs';
 import { SavedObjectWithMetadata } from '../../../../common';
 
 export interface InspectProps {
@@ -28,6 +30,10 @@ const copyToClipboardLabel = i18n.translate('savedObjectsManagement.view.copyToC
 });
 
 export const Inspect: FC<InspectProps> = ({ object }) => {
+  const { services } = useKibana();
+  const defaultTheme = { darkMode: false };
+  const darkMode = useObservable(services.theme?.theme$ ?? of(defaultTheme), defaultTheme).darkMode;
+
   const title = object.meta.title || 'saved object';
 
   const objectAsJsonString = useMemo(() => JSON.stringify(omit(object, 'meta'), null, 2), [object]);
@@ -52,6 +58,7 @@ export const Inspect: FC<InspectProps> = ({ object }) => {
           <EuiSpacer size="s" />
         </div>
         <CodeEditor
+          useDarkTheme={darkMode}
           languageId={XJsonLang.ID}
           value={objectAsJsonString}
           aria-label={codeEditorAriaLabel(title)}

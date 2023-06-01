@@ -7,7 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { CoreSetup, Plugin } from '@kbn/core/public';
+import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import { ComponentRegistry } from './component_registry';
 import { AdvancedSettingsSetup, AdvancedSettingsStart, AdvancedSettingsPluginSetup } from './types';
 
@@ -63,7 +63,7 @@ export class AdvancedSettingsPlugin
     };
   }
 
-  public start() {
+  public start(core: CoreStart) {
     return {
       component: component.start,
     };

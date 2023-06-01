@@ -13,6 +13,9 @@ import { i18n } from '@kbn/i18n';
 import { monaco, XJsonLang } from '@kbn/monaco';
 import { EuiButtonEmpty, EuiCopy, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { CodeEditor } from '@kbn/kibana-react-plugin/public';
+import useObservable from 'react-use/lib/useObservable';
+import { of } from 'rxjs';
+import { useDiscoverServices } from '../../hooks/use_discover_services';
 
 const codeEditorAriaLabel = i18n.translate('discover.json.codeEditorAriaLabel', {
   defaultMessage: 'Read only JSON view of an elasticsearch document',
@@ -38,11 +41,17 @@ export const JsonCodeEditorCommon = ({
   onEditorDidMount,
   hideCopyButton,
 }: JsonCodeEditorCommonProps) => {
+  const { theme } = useDiscoverServices();
+  const defaultTheme = { darkMode: false };
+  const darkMode = useObservable(theme.theme$ ?? of(defaultTheme), defaultTheme).darkMode;
+
   if (jsonValue === '') {
     return null;
   }
+
   const codeEditor = (
     <CodeEditor
+      useDarkTheme={darkMode}
       languageId={XJsonLang.ID}
       width={width}
       height={height}
