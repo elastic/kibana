@@ -148,6 +148,7 @@ export const tlsAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (
       scopedClusterClient,
     },
     spaceId,
+    startedAt,
     state,
   }) {
     const { alertsLocator, basePath } = _server;

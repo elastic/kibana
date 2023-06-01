@@ -164,7 +164,7 @@ export const durationAnomalyAlertFactory: UptimeAlertTypeFactory<ActionGroupIds>
 
         const alertId = DURATION_ANOMALY.id + index;
         const indexedStartedAt = getAlertStartedDate(alertId) ?? startedAt.toISOString();
-        const alertUuid = getAlertUuid(group);
+        const alertUuid = getAlertUuid(alertId);
         const relativeViewInAppUrl = getMonitorRouteFromMonitorId({
           monitorId: alertId,
           dateRangeEnd: 'now',

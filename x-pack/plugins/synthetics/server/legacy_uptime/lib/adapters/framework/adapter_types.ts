@@ -84,6 +84,7 @@ export interface UptimeCorePluginsSetup {
   taskManager: TaskManagerSetupContract;
   telemetry: TelemetryPluginSetup;
   bfetch: BfetchServerSetup;
+  share: SharePluginSetup;
 }
 
 export interface UptimeCorePluginsStart {
