@@ -154,6 +154,12 @@ const connectorMappingsProperties: Record<string, MappingProperty> = {
   },
   scheduling: {
     properties: {
+      access_control: {
+        properties: {
+          enabled: { type: 'boolean' },
+          interval: { type: 'text' },
+        },
+      },
       incremental: {
         properties: {
           enabled: { type: 'boolean' },
@@ -161,12 +167,6 @@ const connectorMappingsProperties: Record<string, MappingProperty> = {
         },
       },
       full: {
-        properties: {
-          enabled: { type: 'boolean' },
-          interval: { type: 'text' },
-        },
-      },
-      permissions: {
         properties: {
           enabled: { type: 'boolean' },
           interval: { type: 'text' },
