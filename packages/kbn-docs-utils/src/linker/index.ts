@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+/* eslint-disable no-console */
 import globby from 'globby';
 import * as fs from 'fs';
 import yaml from 'js-yaml';
