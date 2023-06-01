@@ -37,7 +37,7 @@ describe('ALL - Add Integration', () => {
 
   before(() => {
     loadSavedQuery().then((data) => {
-      savedQueryId = data.id;
+      savedQueryId = data.saved_object_id;
     });
   });
 

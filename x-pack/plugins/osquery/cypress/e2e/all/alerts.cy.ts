@@ -64,8 +64,8 @@ describe('Alert Event Details', () => {
 
     before(() => {
       loadPack(packData).then((data) => {
-        packId = data.id;
-        packName = data.attributes.name;
+        packId = data.saved_object_id;
+        packName = data.name;
       });
       loadRule().then((data) => {
         ruleId = data.id;
@@ -107,12 +107,12 @@ describe('Alert Event Details', () => {
 
     before(() => {
       loadPack(packData).then((data) => {
-        packId = data.id;
-        packName = data.attributes.name;
+        packId = data.saved_object_id;
+        packName = data.name;
       });
       loadPack(multiQueryPackData).then((data) => {
-        multiQueryPackId = data.id;
-        multiQueryPackName = data.attributes.name;
+        multiQueryPackId = data.saved_object_id;
+        multiQueryPackName = data.name;
       });
       loadRule().then((data) => {
         ruleId = data.id;
@@ -382,8 +382,8 @@ describe('Alert Event Details', () => {
 
     before(() => {
       loadPack(packData).then((data) => {
-        packId = data.id;
-        packName = data.attributes.name;
+        packId = data.saved_object_id;
+        packName = data.name;
       });
       loadRule(true).then((data) => {
         ruleId = data.id;

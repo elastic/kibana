@@ -18,7 +18,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const monacoEditor = getService('monacoEditor');
   const security = getService('security');
-  const PageObjects = getPageObjects(['common', 'discover', 'header', 'timePicker']);
+  const PageObjects = getPageObjects([
+    'common',
+    'discover',
+    'header',
+    'timePicker',
+    'unifiedFieldList',
+  ]);
 
   const defaultSettings = {
     defaultIndex: 'logstash-*',
@@ -39,7 +45,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('test', () => {
       it('should render sql view correctly', async function () {
-        await PageObjects.discover.waitUntilSidebarHasLoaded();
+        await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
 
         expect(await testSubjects.exists('showQueryBarMenu')).to.be(true);
         expect(await testSubjects.exists('superDatePickerToggleQuickMenuButton')).to.be(true);
@@ -57,7 +63,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await testSubjects.exists('discoverFieldListPanelEdit-@message')).to.be(true);
 
         await PageObjects.discover.selectTextBaseLang('SQL');
-        await PageObjects.discover.waitUntilSidebarHasLoaded();
+        await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
 
         expect(await testSubjects.exists('fieldListFiltersFieldSearch')).to.be(true);
         expect(await testSubjects.exists('TextBasedLangEditor')).to.be(true);
