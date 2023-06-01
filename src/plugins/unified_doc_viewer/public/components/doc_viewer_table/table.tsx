@@ -32,10 +32,7 @@ import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { getFieldIconType } from '@kbn/unified-field-list-plugin/public';
 import { getIgnoredReason, isNestedFieldParent } from '@kbn/unified-doc-viewer';
 import { formatFieldValue, getShouldShowFieldHandler } from '@kbn/unified-discover';
-import type {
-  DocViewRenderProps,
-  FieldRecordLegacy,
-} from 'packages/kbn-unified-doc-viewer/src/types';
+import type { DocViewRenderProps, FieldRecordLegacy } from '@kbn/unified-doc-viewer/src/types';
 import { FieldName } from '../field_name';
 import { TableFieldValue } from './table_cell_value';
 import { TableActions } from './table_cell_actions';
