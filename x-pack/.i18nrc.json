@@ -48,6 +48,7 @@
     "xpack.maps": ["plugins/maps"],
     "xpack.ml": [
       "packages/ml/anomaly_utils",
+      "packages/ml/data_grid",
       "packages/ml/date_picker",
       "packages/ml/trained_models_utils",
       "plugins/ml"
