@@ -24,7 +24,7 @@ export const curlDefinition: LanguageDefinition = {
   configureClient: ({ apiKey, url }) => `export ES_URL="${url}"
 export API_KEY="${apiKey}"`,
   docLink: docLinks.apiIntro,
-  iconType: 'cURL.svg',
+  iconType: 'curl.svg',
   id: Languages.CURL,
   ingestData: `curl -X POST "\$\{ES_URL\}/_bulk?pretty" \\
   -H "Authorization: ApiKey "\$\{API_KEY\}"" \\
