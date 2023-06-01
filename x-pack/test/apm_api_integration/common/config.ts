@@ -5,14 +5,11 @@
  * 2.0.
  */
 
-import {
-  ApmUsername,
-  APM_TEST_PASSWORD,
-} from '@kbn/apm-plugin/server/test_helpers/create_apm_users/authentication';
+import { ApmUsername } from '@kbn/apm-plugin/server/test_helpers/create_apm_users/authentication';
+import { getApmApiClient } from '@kbn/apm-plugin/server/test_helpers/apm_api_client/get_apm_api_client';
 import { createApmUsers } from '@kbn/apm-plugin/server/test_helpers/create_apm_users/create_apm_users';
 import { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
 import { FtrConfigProviderContext } from '@kbn/test';
-import supertest from 'supertest';
 import { format, UrlObject } from 'url';
 import { MachineLearningAPIProvider } from '../../functional/services/ml/api';
 import { APMFtrConfigName } from '../configs';
