@@ -53,7 +53,6 @@ import { ReducedTimeRange } from './reduced_time_range';
 import { DimensionEditor } from './dimension_editor';
 import { AdvancedOptions } from './advanced_options';
 import { coreMock } from '@kbn/core/public/mocks';
-import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { LensAppServices } from '../../../app_plugin/types';
 
@@ -167,16 +166,13 @@ const bytesColumn: GenericIndexPatternColumn = {
 const services = coreMock.createStart() as unknown as LensAppServices;
 
 function mountWithServices(component: React.ReactElement) {
-  const WrappingComponent: React.FC<{
-    children: React.ReactNode;
-  }> = ({ children }) => {
-    return (
-      <I18nProvider>
-        <KibanaContextProvider services={services}>{children}</KibanaContextProvider>
-      </I18nProvider>
-    );
-  };
-  return mount(<WrappingComponent>{component}</WrappingComponent>);
+  return mount(component, {
+    // This is an elegant way to wrap a component in Enzyme
+    // preserving the root at the component level rather than
+    // at the wrapper one
+    wrappingComponent: KibanaContextProvider,
+    wrappingComponentProps: { services },
+  });
 }
 
 /**
@@ -230,10 +226,7 @@ describe('FormBasedDimensionEditor', () => {
     setState = jest.fn().mockImplementation((newState) => {
       if (wrapper instanceof ReactWrapper) {
         wrapper.setProps({
-          state:
-            typeof newState === 'function'
-              ? newState(wrapper.find(FormBasedDimensionEditorComponent).prop('state'))
-              : newState,
+          state: typeof newState === 'function' ? newState(wrapper.prop('state')) : newState,
         });
       }
     });
@@ -930,7 +923,11 @@ describe('FormBasedDimensionEditor', () => {
           .simulate('click');
       });
 
-      wrapper.find('button[data-test-subj="lns-indexPatternDimension-filters"]').simulate('click');
+      act(() => {
+        wrapper
+          .find('button[data-test-subj="lns-indexPatternDimension-filters"]')
+          .simulate('click');
+      });
 
       expect(wrapper.find('[data-test-subj="indexPattern-invalid-operation"]')).toHaveLength(0);
     });
@@ -1302,7 +1299,9 @@ describe('FormBasedDimensionEditor', () => {
     it('should allow to change time scaling', () => {
       const props = getProps({ timeScale: 's', label: 'Count of records per second' });
       wrapper = mountWithServices(<FormBasedDimensionEditorComponent {...props} />);
-      findTestSubject(wrapper, 'indexPattern-advanced-accordion').simulate('click');
+      act(() => {
+        findTestSubject(wrapper, 'indexPattern-advanced-accordion').simulate('click');
+      });
 
       act(() => {
         wrapper
@@ -1403,7 +1402,9 @@ describe('FormBasedDimensionEditor', () => {
         columnId: 'col2',
       };
       wrapper = mountWithServices(<FormBasedDimensionEditorComponent {...props} />);
-      findTestSubject(wrapper, 'indexPattern-advanced-accordion').simulate('click');
+      act(() => {
+        findTestSubject(wrapper, 'indexPattern-advanced-accordion').simulate('click');
+      });
       expect(
         wrapper.find('[data-test-subj="indexPattern-dimension-reducedTimeRange-row"]')
       ).toHaveLength(0);
@@ -1421,10 +1422,14 @@ describe('FormBasedDimensionEditor', () => {
     it('should allow to set reduced time range initially', () => {
       const props = getProps({});
       wrapper = mountWithServices(<FormBasedDimensionEditorComponent {...props} />);
-      findTestSubject(wrapper, 'indexPattern-advanced-accordion').simulate('click');
-      wrapper.find(ReducedTimeRange).find(EuiComboBox).prop('onChange')!([
-        { value: '1h', label: '' },
-      ]);
+      act(() => {
+        findTestSubject(wrapper, 'indexPattern-advanced-accordion').simulate('click');
+      });
+      act(() => {
+        wrapper.find(ReducedTimeRange).find(EuiComboBox).prop('onChange')!([
+          { value: '1h', label: '' },
+        ]);
+      });
       expect((props.setState as jest.Mock).mock.calls[0][0](props.state)).toEqual({
         ...props.state,
         layers: {
@@ -1449,7 +1454,9 @@ describe('FormBasedDimensionEditor', () => {
         label: 'Sum of bytes per hour',
       });
       wrapper = mountWithServices(<FormBasedDimensionEditorComponent {...props} />);
-      wrapper.find('button[data-test-subj="lns-indexPatternDimension-count"]').simulate('click');
+      act(() => {
+        wrapper.find('button[data-test-subj="lns-indexPatternDimension-count"]').simulate('click');
+      });
       expect((props.setState as jest.Mock).mock.calls[0][0](props.state)).toEqual({
         ...props.state,
         layers: {
@@ -1560,7 +1567,9 @@ describe('FormBasedDimensionEditor', () => {
           }}
         />
       );
-      findTestSubject(wrapper, 'indexPattern-advanced-accordion').simulate('click');
+      act(() => {
+        findTestSubject(wrapper, 'indexPattern-advanced-accordion').simulate('click');
+      });
       expect(wrapper.find('[data-test-subj="indexPattern-time-shift-enable"]')).toHaveLength(1);
       expect(wrapper.find(TimeShift)).toHaveLength(0);
     });
@@ -1587,8 +1596,12 @@ describe('FormBasedDimensionEditor', () => {
     it('should allow to set time shift initially', () => {
       const props = getProps({});
       wrapper = mountWithServices(<FormBasedDimensionEditorComponent {...props} />);
-      findTestSubject(wrapper, 'indexPattern-advanced-accordion').simulate('click');
-      wrapper.find(TimeShift).find(EuiComboBox).prop('onChange')!([{ value: '1h', label: '' }]);
+      act(() => {
+        findTestSubject(wrapper, 'indexPattern-advanced-accordion').simulate('click');
+      });
+      act(() => {
+        wrapper.find(TimeShift).find(EuiComboBox).prop('onChange')!([{ value: '1h', label: '' }]);
+      });
       expect((props.setState as jest.Mock).mock.calls[0][0](props.state)).toEqual({
         ...props.state,
         layers: {
@@ -1613,7 +1626,9 @@ describe('FormBasedDimensionEditor', () => {
         label: 'Sum of bytes per hour',
       });
       wrapper = mountWithServices(<FormBasedDimensionEditorComponent {...props} />);
-      wrapper.find('button[data-test-subj="lns-indexPatternDimension-count"]').simulate('click');
+      act(() => {
+        wrapper.find('button[data-test-subj="lns-indexPatternDimension-count"]').simulate('click');
+      });
       expect((props.setState as jest.Mock).mock.calls[0][0](props.state)).toEqual({
         ...props.state,
         layers: {
@@ -1737,7 +1752,9 @@ describe('FormBasedDimensionEditor', () => {
 
     it('should show custom options if filtering is available', () => {
       wrapper = mountWithServices(<FormBasedDimensionEditorComponent {...getProps({})} />);
-      findTestSubject(wrapper, 'indexPattern-advanced-accordion').simulate('click');
+      act(() => {
+        findTestSubject(wrapper, 'indexPattern-advanced-accordion').simulate('click');
+      });
       expect(
         wrapper.find('[data-test-subj="indexPattern-filter-by-enable"]').hostNodes()
       ).toHaveLength(1);
@@ -1766,7 +1783,9 @@ describe('FormBasedDimensionEditor', () => {
         label: 'Sum of bytes per hour',
       });
       wrapper = mountWithServices(<FormBasedDimensionEditorComponent {...props} />);
-      wrapper.find('button[data-test-subj="lns-indexPatternDimension-count"]').simulate('click');
+      act(() => {
+        wrapper.find('button[data-test-subj="lns-indexPatternDimension-count"]').simulate('click');
+      });
       expect(setState.mock.calls[0]).toEqual([expect.any(Function), { isDimensionComplete: true }]);
       expect(setState.mock.calls[0][0](props.state)).toEqual({
         ...props.state,
@@ -1848,9 +1867,9 @@ describe('FormBasedDimensionEditor', () => {
     wrapper = mountWithServices(
       <FormBasedDimensionEditorComponent {...defaultProps} columnId={'col2'} />
     );
-
-    wrapper.find('button[data-test-subj="lns-indexPatternDimension-average"]').simulate('click');
-
+    act(() => {
+      wrapper.find('button[data-test-subj="lns-indexPatternDimension-average"]').simulate('click');
+    });
     expect(setState.mock.calls[0]).toEqual([expect.any(Function), { isDimensionComplete: false }]);
     expect(setState.mock.calls[0][0](defaultProps.state)).toEqual({
       ...state,
@@ -1909,9 +1928,9 @@ describe('FormBasedDimensionEditor', () => {
         }}
       />
     );
-
-    wrapper.find('button[data-test-subj="lns-indexPatternDimension-average"]').simulate('click');
-
+    act(() => {
+      wrapper.find('button[data-test-subj="lns-indexPatternDimension-average"]').simulate('click');
+    });
     expect(setState.mock.calls[0]).toEqual([expect.any(Function), { isDimensionComplete: true }]);
     expect(setState.mock.calls[0][0](state)).toEqual({
       ...state,
@@ -1936,9 +1955,9 @@ describe('FormBasedDimensionEditor', () => {
     wrapper = mountWithServices(
       <FormBasedDimensionEditorComponent {...defaultProps} columnId={'col2'} />
     );
-
-    wrapper.find('button[data-test-subj="lns-indexPatternDimension-count"]').simulate('click');
-
+    act(() => {
+      wrapper.find('button[data-test-subj="lns-indexPatternDimension-count"]').simulate('click');
+    });
     expect(setState.mock.calls[0]).toEqual([expect.any(Function), { isDimensionComplete: true }]);
     expect(setState.mock.calls[0][0](state)).toEqual({
       ...state,
