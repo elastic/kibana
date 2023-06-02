@@ -67,11 +67,6 @@ export const allowedExperimentalValues = Object.freeze({
   endpointResponseActionsEnabled: false,
 
   /**
-   * Enables endpoint package level rbac for response actions only.
-   * if endpointRbacEnabled is enabled, it will take precedence.
-   */
-  endpointRbacV1Enabled: true,
-  /**
    * Enables the alert details page currently only accessible via the alert details flyout and alert table context menu
    */
   alertDetailsPageEnabled: false,
