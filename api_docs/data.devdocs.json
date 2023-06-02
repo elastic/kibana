@@ -13490,7 +13490,7 @@
               },
               {
                 "plugin": "unifiedFieldList",
-                "path": "src/plugins/unified_field_list/common/utils/field_existing_utils.ts"
+                "path": "src/plugins/unified_field_list/public/services/field_existing/field_existing_utils.ts"
               },
               {
                 "plugin": "unifiedFieldList",
@@ -13933,14 +13933,6 @@
                 "path": "src/plugins/input_control_vis/public/control/range_control_factory.ts"
               },
               {
-                "plugin": "unifiedFieldList",
-                "path": "src/plugins/unified_field_list/server/routes/field_stats.ts"
-              },
-              {
-                "plugin": "unifiedFieldList",
-                "path": "src/plugins/unified_field_list/server/routes/field_stats.ts"
-              },
-              {
                 "plugin": "visDefaultEditor",
                 "path": "src/plugins/vis_default_editor/public/components/controls/field.tsx"
               },
@@ -14011,10 +14003,6 @@
               {
                 "plugin": "dataViews",
                 "path": "src/plugins/data_views/common/data_views/data_views.ts"
-              },
-              {
-                "plugin": "discover",
-                "path": "src/plugins/discover/public/application/main/hooks/use_text_based_query_language.ts"
               },
               {
                 "plugin": "infra",
@@ -21128,7 +21116,7 @@
               },
               {
                 "plugin": "unifiedFieldList",
-                "path": "src/plugins/unified_field_list/common/utils/field_existing_utils.ts"
+                "path": "src/plugins/unified_field_list/public/services/field_existing/field_existing_utils.ts"
               },
               {
                 "plugin": "unifiedFieldList",
@@ -21571,14 +21559,6 @@
                 "path": "src/plugins/input_control_vis/public/control/range_control_factory.ts"
               },
               {
-                "plugin": "unifiedFieldList",
-                "path": "src/plugins/unified_field_list/server/routes/field_stats.ts"
-              },
-              {
-                "plugin": "unifiedFieldList",
-                "path": "src/plugins/unified_field_list/server/routes/field_stats.ts"
-              },
-              {
                 "plugin": "visDefaultEditor",
                 "path": "src/plugins/vis_default_editor/public/components/controls/field.tsx"
               },
@@ -21649,10 +21629,6 @@
               {
                 "plugin": "dataViews",
                 "path": "src/plugins/data_views/common/data_views/data_views.ts"
-              },
-              {
-                "plugin": "discover",
-                "path": "src/plugins/discover/public/application/main/hooks/use_text_based_query_language.ts"
               },
               {
                 "plugin": "infra",

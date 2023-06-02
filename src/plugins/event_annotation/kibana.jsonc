@@ -9,7 +9,12 @@
     "browser": true,
     "requiredPlugins": [
       "expressions",
-      "data"
+      "savedObjectsManagement",
+      "data",
+    ],
+    "requiredBundles": [
+      "savedObjectsFinder",
+      "dataViews"
     ],
     "extraPublicDirs": [
       "common"

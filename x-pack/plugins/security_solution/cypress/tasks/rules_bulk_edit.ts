@@ -244,14 +244,15 @@ export const selectTimelineTemplate = (timelineTitle: string) => {
 /**
  * check if rule tags filter populated with a list of tags
  * @param tags
+ * @param srOnlyText SR-only text appended by EUI
  */
-export const checkTagsInTagsFilter = (tags: string[]) => {
+export const checkTagsInTagsFilter = (tags: string[], srOnlyText: string = '') => {
   cy.get(RULES_TAGS_FILTER_BTN).contains(`Tags${tags.length}`).click();
 
   cy.get(EUI_SELECTABLE_LIST_ITEM)
     .should('have.length', tags.length)
     .each(($el, index) => {
-      cy.wrap($el).should('have.text', tags[index]);
+      cy.wrap($el).should('have.text', `${tags[index]}${srOnlyText}`);
     });
 };
 

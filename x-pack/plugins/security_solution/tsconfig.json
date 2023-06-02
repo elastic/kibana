@@ -91,6 +91,7 @@
     "@kbn/ui-theme",
     "@kbn/securitysolution-list-api",
     "@kbn/core-http-browser",
+    "@kbn/core-http-browser-mocks",
     "@kbn/securitysolution-list-hooks",
     "@kbn/securitysolution-exception-list-components",
     "@kbn/rison",
@@ -158,7 +159,7 @@
     "@kbn/ecs",
     "@kbn/url-state",
     "@kbn/ml-anomaly-utils",
-    "@kbn/dev-proc-runner",
-    "@kbn/core-http-browser-mocks"
+    "@kbn/field-formats-plugin",
+    "@kbn/dev-proc-runner"
   ]
 }
