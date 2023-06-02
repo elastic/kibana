@@ -8,7 +8,7 @@
 import React, { ChangeEvent } from 'react';
 import { act } from 'react-dom/test-utils';
 import { EuiRange } from '@elastic/eui';
-import { IUiSettingsClient, SavedObjectsClientContract, HttpSetup } from '@kbn/core/public';
+import { IUiSettingsClient, HttpSetup } from '@kbn/core/public';
 import { EuiFormRow } from '@elastic/eui';
 import { shallow, mount } from 'enzyme';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
@@ -45,7 +45,6 @@ const uiSettingsMock = {} as IUiSettingsClient;
 const defaultProps = {
   storage: {} as IStorageWrapper,
   uiSettings: uiSettingsMock,
-  savedObjectsClient: {} as SavedObjectsClientContract,
   dateRange: { fromDate: 'now-1d', toDate: 'now' },
   data: dataPluginMock.createStartContract(),
   fieldFormats: fieldFormatsServiceMock.createStartContract(),
@@ -220,19 +219,19 @@ describe('percentile', () => {
         ],
         // filtered
         [
-          `aggFilteredMetric id="2" enabled=true schema="metric" 
+          `aggFilteredMetric id="2" enabled=true schema="metric"
             customBucket={aggFilter id="2-filter" enabled=true schema="bucket" filter={kql q="geo.dest: \\"GA\\" "}}
             customMetric={aggSinglePercentile id="2" enabled=true schema="metric" field="foo" percentile=10}`,
-          `aggFilteredMetric id="3" enabled=true schema="metric" 
+          `aggFilteredMetric id="3" enabled=true schema="metric"
             customBucket={aggFilter id="2-filter" enabled=true schema="bucket" filter={kql q="geo.dest: \\"GA\\" "}}
             customMetric={aggSinglePercentile id="2" enabled=true schema="metric" field="foo" percentile=10}`,
         ],
         // different filter
         [
-          `aggFilteredMetric id="4" enabled=true schema="metric" 
+          `aggFilteredMetric id="4" enabled=true schema="metric"
             customBucket={aggFilter id="2-filter" enabled=true schema="bucket" filter={kql q="geo.dest: \\"AL\\" "}}
             customMetric={aggSinglePercentile id="2" enabled=true schema="metric" field="foo" percentile=10}`,
-          `aggFilteredMetric id="5" enabled=true schema="metric" 
+          `aggFilteredMetric id="5" enabled=true schema="metric"
             customBucket={aggFilter id="2-filter" enabled=true schema="bucket" filter={kql q="geo.dest: \\"AL\\" "}}
             customMetric={aggSinglePercentile id="2" enabled=true schema="metric" field="foo" percentile=10}`,
         ],

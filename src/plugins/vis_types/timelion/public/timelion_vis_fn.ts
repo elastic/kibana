@@ -12,7 +12,7 @@ import { Filter, Query, TimeRange } from '@kbn/es-query';
 import { ExpressionFunctionDefinition, Render } from '@kbn/expressions-plugin/public';
 import { KibanaContext } from '@kbn/data-plugin/public';
 import { TimelionSuccessResponse } from './helpers/timelion_request_handler';
-import { TIMELION_VIS_NAME } from './timelion_vis_type';
+import { TIMELION_VIS_NAME } from '../common/constants';
 import { TimelionVisDependencies } from './plugin';
 
 type Input = KibanaContext | null;

@@ -26,7 +26,6 @@ export interface ChromeProjectNavigationNode {
   id?: string;
   link?: ChromeProjectNavigationLink;
   children?: ChromeProjectNavigationNode[];
-
   title?: string;
   icon?: string;
 }

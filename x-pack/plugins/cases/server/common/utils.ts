@@ -144,7 +144,8 @@ export const flattenCommentSavedObjects = (
   savedObjects: Array<SavedObject<CommentAttributes>>
 ): Comment[] =>
   savedObjects.reduce((acc: Comment[], savedObject: SavedObject<CommentAttributes>) => {
-    return [...acc, flattenCommentSavedObject(savedObject)];
+    acc.push(flattenCommentSavedObject(savedObject));
+    return acc;
   }, []);
 
 export const flattenCommentSavedObject = (

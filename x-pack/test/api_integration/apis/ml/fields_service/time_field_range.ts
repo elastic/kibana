@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { USER } from '../../../../functional/services/ml/security_common';
-import { COMMON_REQUEST_HEADERS } from '../../../../functional/services/ml/common_api';
+import { getCommonRequestHeader } from '../../../../functional/services/ml/common_api';
 
 export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
@@ -85,9 +85,9 @@ export default ({ getService }: FtrProviderContext) => {
     for (const testData of testDataList) {
       it(`${testData.testTitle}`, async () => {
         const { body, status } = await supertest
-          .post('/api/ml/fields_service/time_field_range')
+          .post('/internal/ml/fields_service/time_field_range')
           .auth(testData.user, ml.securityCommon.getPasswordForUser(testData.user))
-          .set(COMMON_REQUEST_HEADERS)
+          .set(getCommonRequestHeader('1'))
           .send(testData.requestBody);
         ml.api.assertResponseStatusCode(testData.expected.responseCode, status, body);
 

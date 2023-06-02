@@ -8,6 +8,7 @@
 import type { ManagementSetup, ManagementStart } from '@kbn/management-plugin/public';
 import type {
   SideNavComponent,
+  ChromeProjectNavigation,
   ChromeProjectBreadcrumb,
   ChromeSetProjectBreadcrumbsParams,
 } from '@kbn/core-chrome-browser';
@@ -17,6 +18,7 @@ export interface ServerlessPluginSetup {}
 
 export interface ServerlessPluginStart {
   setSideNavComponent: (navigation: SideNavComponent) => void;
+  setNavigation(projectNavigation: ChromeProjectNavigation): void;
   setBreadcrumbs: (
     breadcrumbs: ChromeProjectBreadcrumb | ChromeProjectBreadcrumb[],
     params?: Partial<ChromeSetProjectBreadcrumbsParams>

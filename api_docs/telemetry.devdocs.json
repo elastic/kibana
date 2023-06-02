@@ -713,7 +713,7 @@
             "section": "def-server.DataTelemetryPayload",
             "text": "DataTelemetryPayload"
           },
-          " | undefined; kibana: { count: number; indices: number; os: {}; versions: { version: string; count: number; }[]; plugins: { [plugin: string]: Record<string, unknown>; }; } | undefined; }; }"
+          " | undefined; kibana: { count: number; indices: number; os: Record<string, unknown[]>; versions: { version: string; count: number; }[]; plugins: { [plugin: string]: Record<string, unknown>; }; } | undefined; }; }"
         ],
         "path": "src/plugins/telemetry/server/telemetry_collection/get_local_stats.ts",
         "deprecated": false,
@@ -781,7 +781,7 @@
           ],
           "label": "getIsOptedIn",
           "description": [
-            "\nResolves `true` if the user has opted into send Elastic usage data.\nResolves `false` if the user explicitly opted out of sending usage data to Elastic\nor did not choose to opt-in or out -yet- after a minor or major upgrade (only when previously opted-out).\n"
+            "\nResolves `true` if sending usage to Elastic is enabled.\nResolves `false` if the user explicitly opted out of sending usage data to Elastic\nor did not choose to opt-in or out -yet- after a minor or major upgrade (only when previously opted-out).\n"
           ],
           "signature": [
             "() => Promise<boolean>"
