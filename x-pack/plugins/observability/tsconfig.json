@@ -76,6 +76,7 @@
     "@kbn/ui-actions-plugin",
     "@kbn/field-types",
     "@kbn/safer-lodash-set"
+    "@kbn/core-http-server"
   ],
   "exclude": ["target/**/*"]
 }
