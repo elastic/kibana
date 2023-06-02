@@ -5,18 +5,16 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
-import { EuiButton, EuiFlexGroup, EuiSwitch, type EuiSwitchEvent, EuiFlexItem } from '@elastic/eui';
+import React, { useState } from 'react';
+import { EuiButton } from '@elastic/eui';
 import type { Meta, Story } from '@storybook/react/types-6-0';
 import { i18n } from '@kbn/i18n';
-import { useArgs } from '@storybook/addons';
-import { DecoratorFn } from '@storybook/react';
 import { AssetDetails } from './asset_details';
 import { decorateWithGlobalStorybookThemeProviders } from '../../test_utils/use_global_storybook_theme';
 import { FlyoutTabIds, Tab, type AssetDetailsProps } from './types';
 import { DecorateWithKibanaContext } from './__stories__/decorator';
 
-const links: AssetDetailsProps['links'] = ['linkToAlertRule', 'linkToNodeDetails'];
+const links: AssetDetailsProps['links'] = ['alertRule', 'nodeDetails', 'apmServices', 'uptime'];
 const tabs: Tab[] = [
   {
     id: FlyoutTabIds.METRICS,
@@ -69,37 +67,19 @@ const tabs: Tab[] = [
   },
 ];
 
-const AssetDetailsDecorator: DecoratorFn = (story) => {
-  const [_, updateArgs] = useArgs();
-  const [checked, setChecked] = useState(true);
-
-  useEffect(() => {
-    updateArgs({ links });
-  }, [updateArgs]);
-
-  const handleChange = (e: EuiSwitchEvent) => {
-    updateArgs({ links: e.target.checked ? links : [] });
-    setChecked(e.target.checked);
-  };
-
-  return (
-    <EuiFlexGroup direction="column">
-      <EuiFlexItem>
-        <EuiSwitch label="With Links" checked={checked} onChange={handleChange} />
-      </EuiFlexItem>
-      <EuiFlexItem>{story()}</EuiFlexItem>
-    </EuiFlexGroup>
-  );
-};
-
 const stories: Meta<AssetDetailsProps> = {
   title: 'infra/Asset Details View',
-  decorators: [
-    decorateWithGlobalStorybookThemeProviders,
-    DecorateWithKibanaContext,
-    AssetDetailsDecorator,
-  ],
+  decorators: [decorateWithGlobalStorybookThemeProviders, DecorateWithKibanaContext],
   component: AssetDetails,
+  argTypes: {
+    links: {
+      options: links,
+      control: {
+        // Type 'select' is automatically inferred when 'options' is defined
+        type: 'inline-check',
+      },
+    },
+  },
   args: {
     node: {
       name: 'host1',

@@ -5,45 +5,47 @@
  * 2.0.
  */
 import React from 'react';
-import { css } from '@emotion/react';
-import { EuiIcon, useEuiTheme, EuiTab } from '@elastic/eui';
-import { useLinkProps } from '@kbn/observability-shared-plugin/public';
-import type { Tab } from '../types';
+import { stringify } from 'querystring';
+import { encode } from '@kbn/rison';
+import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiButtonEmpty } from '@elastic/eui';
+import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 
-export interface LinkToApmServicesProps extends Tab {
+export interface LinkToApmServicesProps {
   nodeName: string;
   apmField: string;
 }
 
-export const LinkToApmServices = ({
-  nodeName,
-  apmField,
-  name,
-  ...props
-}: LinkToApmServicesProps) => {
-  const { euiTheme } = useEuiTheme();
+export const LinkToApmServices = ({ nodeName, apmField }: LinkToApmServicesProps) => {
+  const { services } = useKibanaContextForPlugin();
+  const { http } = services;
 
-  const apmTracesMenuItemLinkProps = useLinkProps({
-    app: 'apm',
-    hash: 'services',
-    search: {
-      kuery: `${apmField}:"${nodeName}"`,
-    },
-  });
+  const queryString = new URLSearchParams(
+    encode(
+      stringify({
+        kuery: `${apmField}:"${nodeName}"`,
+      })
+    )
+  );
+
+  const linkToApmServices = http.basePath.prepend(`/app/apm/services?${queryString}`);
 
   return (
-    <EuiTab
-      {...props}
-      {...apmTracesMenuItemLinkProps}
-      data-test-subj="hostsView-flyout-apm-services-link"
-    >
-      <EuiIcon
-        type="popout"
-        css={css`
-          margin-right: ${euiTheme.size.xs};
-        `}
-      />
-      {name}
-    </EuiTab>
+    <RedirectAppLinks coreStart={services}>
+      <EuiButtonEmpty
+        data-test-subj="hostsView-flyout-apm-services-link"
+        size="xs"
+        iconSide="left"
+        iconType="popout"
+        flush="both"
+        href={linkToApmServices}
+      >
+        <FormattedMessage
+          id="xpack.infra.hostsViewPage.flyout.apmServicesLinkLabel"
+          defaultMessage="APM Services"
+        />
+      </EuiButtonEmpty>
+    </RedirectAppLinks>
   );
 };

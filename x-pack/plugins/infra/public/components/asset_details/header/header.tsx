@@ -18,7 +18,14 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { AssetDetailsProps, FlyoutTabIds, LinkOptions, Tab, TabIds } from '../types';
-import { LinkToApmServices, LinkToUptime, LinkToAlertsRule, LinkToNodeDetails } from '../links';
+import {
+  LinkToApmServices,
+  LinkToUptime,
+  LinkToAlertsRule,
+  LinkToNodeDetails,
+  TabToApmTraces,
+  TabToUptime,
+} from '../links';
 import { useTabSwitcherContext } from '../hooks/use_tab_switcher';
 
 type Props = Pick<
@@ -31,8 +38,8 @@ type Props = Pick<
 export const Header = ({
   nodeType,
   node,
-  tabs,
-  links,
+  tabs = [],
+  links = [],
   compact,
   currentTimeRange,
   overrides,
@@ -51,18 +58,20 @@ export const Header = ({
 
   const tabLinkComponents = {
     [FlyoutTabIds.LINK_TO_APM]: (tab: Tab) => (
-      <LinkToApmServices nodeName={node.name} apmField={'host.hostname'} {...tab} />
+      <TabToApmTraces nodeName={node.name} apmField={'host.hostname'} {...tab} />
     ),
     [FlyoutTabIds.LINK_TO_UPTIME]: (tab: Tab) => (
-      <LinkToUptime nodeName={node.name} nodeType={nodeType} nodeIp={node.ip} {...tab} />
+      <TabToUptime nodeName={node.name} nodeType={nodeType} nodeIp={node.ip} {...tab} />
     ),
   };
 
   const topCornerLinkComponents: Record<LinkOptions, JSX.Element> = {
-    linkToNodeDetails: (
+    nodeDetails: (
       <LinkToNodeDetails nodeId={node.id} nodeType={nodeType} currentTime={currentTimeRange.to} />
     ),
-    linkToAlertRule: <LinkToAlertsRule onClick={overrides?.linkToApm?.onCreateRuleClick} />,
+    alertRule: <LinkToAlertsRule onClick={overrides?.alertRule?.onCreateRuleClick} />,
+    apmServices: <LinkToApmServices nodeName={node.name} apmField={'host.hostname'} />,
+    uptime: <LinkToUptime nodeName={node.name} nodeType={nodeType} nodeIp={node.ip} />,
   };
 
   const tabEntries = tabs.map(({ name, ...tab }) => {

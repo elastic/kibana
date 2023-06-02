@@ -52,7 +52,7 @@ export interface TabState {
     region?: string;
     customMetrics?: SnapshotCustomMetricInput[];
   };
-  linkToApm?: {
+  alertRule?: {
     onCreateRuleClick?: () => void;
   };
 }
@@ -74,7 +74,7 @@ export interface Tab {
   'data-test-subj': string;
 }
 
-export type LinkOptions = 'linkToAlertRule' | 'linkToNodeDetails';
+export type LinkOptions = 'alertRule' | 'nodeDetails' | 'apmServices' | 'uptime';
 
 export interface AssetDetailsProps {
   node: HostNodeRow;
@@ -89,7 +89,6 @@ export interface AssetDetailsProps {
   overrides?: TabState;
   renderMode?: RenderMode;
   onTabsStateChange?: TabsStateChangeFn;
-  openAlertFlyout(): void;
   links?: LinkOptions[];
 }
 

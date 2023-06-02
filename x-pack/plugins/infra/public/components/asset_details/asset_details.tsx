@@ -42,7 +42,7 @@ export const AssetDetails = ({
   activeTabId,
   overrides,
   onTabsStateChange,
-  tabs,
+  tabs = [],
   links,
   nodeType = NODE_TYPE,
   renderMode = {

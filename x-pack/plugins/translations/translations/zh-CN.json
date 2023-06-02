@@ -18499,6 +18499,8 @@
     "xpack.infra.hostsPage.tellUsWhatYouThinkLink": "告诉我们您的看法！",
     "xpack.infra.hostsViewPage.experimentalBadgeDescription": "此功能处于技术预览状态，在未来版本中可能会更改或完全移除。Elastic 将尽最大努力来修复任何问题，但处于技术预览状态的功能不受正式 GA 功能支持 SLA 的约束。",
     "xpack.infra.hostsViewPage.experimentalBadgeLabel": "技术预览",
+    "xpack.infra.hostsViewPage.flyout.apmServicesLinkLabel": "APM 服务",
+    "xpack.infra.hostsViewPage.flyout.uptimeLinkLabel": "运行时间",
     "xpack.infra.hostsViewPage.hostLimit": "主机限制",
     "xpack.infra.hostsViewPage.hostLimit.tooltip": "为确保更快的查询性能，对返回的主机数量实施了限制",
     "xpack.infra.hostsViewPage.landing.calloutReachOutToYourKibanaAdministrator": "您的用户角色权限不足，无法启用此功能 - 请 \n                联系您的 Kibana 管理员，要求他们访问此页面以启用该功能。",
