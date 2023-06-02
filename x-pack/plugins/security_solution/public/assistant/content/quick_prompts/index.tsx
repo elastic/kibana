@@ -47,9 +47,15 @@ export const BASE_SECURITY_QUICK_PROMPTS: QuickPrompt[] = [
     isDefault: true,
   },
   {
-    title: i18n.OMNI_QUERY_5000_TITLE,
-    prompt: i18n.OMNI_QUERY_5000_PROMPT,
+    title: i18n.SPL_QUERY_CONVERSION_TITLE,
+    prompt: i18n.SPL_QUERY_CONVERSION_PROMPT,
     color: '#BADA55',
+    isDefault: true,
+  },
+  {
+    title: i18n.AUTOMATION_TITLE,
+    prompt: i18n.AUTOMATION_PROMPT,
+    color: '#FFA500',
     isDefault: true,
   },
 ];

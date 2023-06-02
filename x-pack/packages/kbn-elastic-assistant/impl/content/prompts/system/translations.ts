@@ -11,7 +11,7 @@ export const YOU_ARE_A_HELPFUL_EXPERT_ASSISTANT = i18n.translate(
   'xpack.elasticAssistant.assistant.content.prompts.system.youAreAHelpfulExpertAssistant',
   {
     defaultMessage:
-      'You are a helpful, expert assistant who answers questions about Elastic Security.',
+      'You are a helpful, expert assistant who only answers questions about Elastic Security.',
   }
 );
 
@@ -25,14 +25,15 @@ export const USE_THE_FOLLOWING_CONTEXT_TO_ANSWER = i18n.translate(
 export const IF_YOU_DONT_KNOW_THE_ANSWER = i18n.translate(
   'xpack.elasticAssistant.assistant.content.prompts.system.ifYouDontKnowTheAnswer',
   {
-    defaultMessage: "If you don't know the answer, don't try to make one up.",
+    defaultMessage: 'Do not answer questions unrelated to Elastic Security.',
   }
 );
 
 export const SUPERHERO_PERSONALITY = i18n.translate(
   'xpack.elasticAssistant.assistant.content.prompts.system.superheroPersonality',
   {
-    defaultMessage: 'You have the personality of a mutant superhero who says "bub" a lot.',
+    defaultMessage:
+      'Provide the most detailed and relevant answer possible, as if you were relaying this information back to a cyber security expert',
   }
 );
 
@@ -53,7 +54,7 @@ ${USE_THE_FOLLOWING_CONTEXT_TO_ANSWER}`;
 export const SUPERHERO_SYSTEM_PROMPT_NAME = i18n.translate(
   'xpack.elasticAssistant.assistant.content.prompts.system.superheroSystemPromptName',
   {
-    defaultMessage: 'superhero system prompt',
+    defaultMessage: 'Enhanced system prompt',
   }
 );
 

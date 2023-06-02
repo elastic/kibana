@@ -1152,7 +1152,8 @@ export const RULE_MANAGEMENT_CONTEXT_DESCRIPTION = i18n.translate(
 export const EXPLAIN_THEN_SUMMARIZE_RULE_DETAILS = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleManagement.explainThenSummarizeRuleDetails',
   {
-    defaultMessage: 'This is the prompt around the stuff',
+    defaultMessage:
+      "Please explain the selected rules above. For each rule, highlight why they are relevant, the query as published on Elastic's detection rules repository and an in-depth explanation of it, and what they typically mean for an organization if detected.",
   }
 );
 
