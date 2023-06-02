@@ -7,7 +7,7 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { i18n } from '@kbn/i18n';
-import { AlertsLocatorParams } from '@kbn/observability-plugin/common';
+import { getAlertUrl, AlertsLocatorParams } from '@kbn/observability-plugin/common';
 import {
   ALERT_CONTEXT,
   ALERT_EVALUATION_THRESHOLD,
@@ -60,7 +60,6 @@ import { InfraBackendLibs } from '../../infra_types';
 import {
   AdditionalContext,
   flattenAdditionalContext,
-  getAlertUrl,
   getContextForRecoveredAlerts,
   getGroupByObject,
   unflattenObject,
