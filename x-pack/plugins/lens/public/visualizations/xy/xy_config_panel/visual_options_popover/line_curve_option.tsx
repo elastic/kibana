@@ -31,10 +31,9 @@ export const LineCurveOption: React.FC<LineCurveOptionProps> = ({
       })}
     >
       <EuiSuperSelect
-        data-test-subj="lnsMissingValuesSelect"
+        data-test-subj="lnsCurveStyleSelect"
         compressed
-        options={lineCurveDefinitions.map(({ type, title, description }) => {
-          return {
+        options={lineCurveDefinitions.map(({ type, title, description }) => ({
             value: type,
             dropdownDisplay: (
               <>
@@ -45,8 +44,7 @@ export const LineCurveOption: React.FC<LineCurveOptionProps> = ({
               </>
             ),
             inputDisplay: title,
-          };
-        })}
+        }))}
         valueOfSelected={value}
         onChange={onChange}
         itemLayoutAlign="top"

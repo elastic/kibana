@@ -161,7 +161,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.lens.editDimensionColor('#ff0000');
       await PageObjects.lens.openVisualOptions();
 
-      await PageObjects.lens.useCurvedLines();
+      await PageObjects.lens.setCurvedLines('CURVE_MONOTONE_X');
       await PageObjects.lens.editMissingValues('Linear');
 
       await PageObjects.lens.assertMissingValues('Linear');

@@ -10,7 +10,7 @@ import { XYCurveTypes } from '@kbn/expression-xy-plugin/public';
 import { i18n } from '@kbn/i18n';
 
 export interface lineCurveDefinitions {
-  type: XYCurveType;
+  type: Extract<XYCurveType, 'LINEAR' | 'CURVE_MONOTONE_X' | 'CURVE_STEP_AFTER'>;
   title: string;
   description?: string;
 }

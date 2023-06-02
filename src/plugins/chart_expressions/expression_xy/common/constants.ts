@@ -6,9 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { CurveType } from '@elastic/charts';
-import { $Keys } from 'utility-types';
-
 export const XY_VIS = 'xyVis';
 export const LAYERED_XY_VIS = 'layeredXyVis';
 export const DATA_DECORATION_CONFIG = 'dataDecorationConfig';
@@ -101,7 +98,7 @@ export const XScaleTypes = {
   ORDINAL: 'ordinal',
 } as const;
 
-export const XYCurveTypes: Record<string, $Keys<typeof CurveType>> = {
+export const XYCurveTypes = {
   LINEAR: 'LINEAR',
   CURVE_MONOTONE_X: 'CURVE_MONOTONE_X',
   CURVE_STEP_AFTER: 'CURVE_STEP_AFTER',
