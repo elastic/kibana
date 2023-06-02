@@ -40,6 +40,8 @@ describe('startSync lib function', () => {
           error: null,
           index_name: 'index_name',
           language: null,
+          last_access_control_sync_scheduled_at: null,
+          last_access_control_sync_status: null,
           last_seen: null,
           last_sync_error: null,
           last_sync_scheduled_at: null,
