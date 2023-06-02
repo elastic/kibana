@@ -28,21 +28,22 @@ import { RawRule, RulesClientApi, CombinedSummarizedAlerts } from '../types';
 import { RuleRunMetrics, RuleRunMetricsStore } from '../lib/rule_run_metrics_store';
 import { AlertingEventLogger } from '../lib/alerting_event_logger/alerting_event_logger';
 
-export interface RuleTaskRunResult {
+export interface RuleTaskRunSuccessResult {
   state: RuleTaskState;
-  monitoring?: RuleMonitoring | undefined;
-  schedule?: IntervalSchedule | undefined;
-  runAt?: Date;
+  monitoring: RuleMonitoring | undefined;
+  schedule: IntervalSchedule | undefined;
 }
+
+export interface RuleTaskRunSkipResult {
+  state: RuleTaskState;
+  runAt: Date;
+}
+
+export type RuleTaskRunResult = RuleTaskRunSuccessResult | RuleTaskRunSkipResult;
 
 // This is the state of the alerting task after rule execution, which includes run metrics plus the task state
 export type RuleTaskStateAndMetrics = RuleTaskState & {
   metrics: RuleRunMetrics;
-};
-
-export type RuleRunResult = Pick<RuleTaskRunResult, 'monitoring' | 'schedule'> & {
-  rulesClient: RulesClientApi;
-  stateWithMetrics: RuleTaskStateAndMetrics;
 };
 
 export interface RunRuleParams<Params extends RuleTypeParams> {
