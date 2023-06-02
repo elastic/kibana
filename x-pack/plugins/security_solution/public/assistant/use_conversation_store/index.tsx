@@ -6,10 +6,10 @@
  */
 
 import type { Conversation } from '@kbn/elastic-assistant';
-import { BASE_CONVERSATIONS } from '@kbn/elastic-assistant';
 
 import { useLocalStorage } from '../../common/components/local_storage';
 import { LOCAL_STORAGE_KEY } from '../helpers';
+import { BASE_SECURITY_CONVERSATIONS } from '../content/conversations';
 
 export interface UseConversationStore {
   conversations: Record<string, Conversation>;
@@ -18,7 +18,7 @@ export interface UseConversationStore {
 
 export const useConversationStore = (): UseConversationStore => {
   const [conversations, setConversations] = useLocalStorage<Record<string, Conversation>>({
-    defaultValue: BASE_CONVERSATIONS,
+    defaultValue: BASE_SECURITY_CONVERSATIONS,
     key: LOCAL_STORAGE_KEY,
     isInvalidDefault: (valueFromStorage) => {
       return !valueFromStorage;

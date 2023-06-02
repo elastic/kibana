@@ -41,7 +41,7 @@ export const CONNECTOR_SELECTOR_TITLE = i18n.translate(
 export const ADD_NEW_CONNECTOR = i18n.translate(
   'xpack.elasticAssistant.assistant.connectors.connectorSelector.newConnectorOptions',
   {
-    defaultMessage: 'Add New Connector...',
+    defaultMessage: 'Add new Connector...',
   }
 );
 

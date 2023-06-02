@@ -36,7 +36,7 @@ export const ADD_TO_CASE_EXISTING_CASE = i18n.translate(
 );
 
 export const ELASTIC_SECURITY_ASSISTANT = i18n.translate(
-  'xpack.securitySolution.assistant.commentActions.elasticSecurityAssistantOwner',
+  'xpack.securitySolution.assistant.commentActions.elasticSecurityAssistantTitle',
   {
     defaultMessage: 'Elastic Security Assistant',
   }

@@ -11,6 +11,8 @@ import useEvent from 'react-use/lib/useEvent';
 import { css } from '@emotion/react';
 
 import { useAssistantContext } from '../../assistant_context';
+import * as i18n from './translations';
+import { DEFAULT_CONVERSATION_TITLE } from '../use_conversation/translations';
 
 const isMac = navigator.platform.toLowerCase().indexOf('mac') >= 0;
 
@@ -35,7 +37,7 @@ function getNextConversationId(conversationIds: string[], selectedConversationId
 
 export const ConversationSelector: React.FC<Props> = React.memo(
   ({
-    conversationId = 'default',
+    conversationId = DEFAULT_CONVERSATION_TITLE,
     onSelectionChange,
     shouldDisableKeyboardShortcut = () => false,
     isDisabled = false,
@@ -47,7 +49,7 @@ export const ConversationSelector: React.FC<Props> = React.memo(
     const conversationOptions = conversationIds.map((id) => ({ value: id, inputDisplay: id }));
 
     const onChange = useCallback((value: string) => {
-      setSelectedConversationId(value ?? 'default');
+      setSelectedConversationId(value ?? DEFAULT_CONVERSATION_TITLE);
     }, []);
     const onLeftArrowClick = useCallback(() => {
       const prevId = getPreviousConversationId(conversationIds, selectedConversationId);
@@ -98,11 +100,10 @@ export const ConversationSelector: React.FC<Props> = React.memo(
 
     return (
       <EuiFormRow
-        label="Selected Conversation"
+        label={i18n.SELECTED_CONVERSATION_LABEL}
         display="rowCompressed"
         css={css`
           min-width: 300px;
-          margin-top: -6px;
         `}
       >
         <EuiSuperSelect
@@ -111,22 +112,22 @@ export const ConversationSelector: React.FC<Props> = React.memo(
           onChange={onChange}
           compressed={true}
           disabled={isDisabled}
-          aria-label="Conversation Selector"
+          aria-label={i18n.CONVERSATION_SELECTOR_ARIA_LABEL}
           prepend={
-            <EuiToolTip content="Previous Conversation (⌘ + ←)" display="block">
+            <EuiToolTip content={`${i18n.PREVIOUS_CONVERSATION_TITLE} (⌘ + ←)`} display="block">
               <EuiButtonIcon
                 iconType="arrowLeft"
-                aria-label="Previous Conversation"
+                aria-label={i18n.PREVIOUS_CONVERSATION_TITLE}
                 onClick={onLeftArrowClick}
                 disabled={isDisabled || conversationIds.length <= 1}
               />
             </EuiToolTip>
           }
           append={
-            <EuiToolTip content="Next Conversation (⌘ + →)" display="block">
+            <EuiToolTip content={`${i18n.NEXT_CONVERSATION_TITLE} (⌘ + →)`} display="block">
               <EuiButtonIcon
                 iconType="arrowRight"
-                aria-label="Next Conversation"
+                aria-label={i18n.NEXT_CONVERSATION_TITLE}
                 onClick={onRightArrowClick}
                 disabled={isDisabled || conversationIds.length <= 1}
               />

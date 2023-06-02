@@ -33,7 +33,7 @@ export const SUPERHERO_PERSONALITY = i18n.translate(
   'xpack.elasticAssistant.assistant.content.prompts.system.superheroPersonality',
   {
     defaultMessage:
-      'Provide the most detailed and relevant answer possible, as if you were relaying this information back to a cyber security expert',
+      'Provide the most detailed and relevant answer possible, as if you were relaying this information back to a cyber security expert.',
   }
 );
 

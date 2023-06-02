@@ -13,7 +13,7 @@ import useEvent from 'react-use/lib/useEvent';
 import styled from 'styled-components';
 import { ShowAssistantOverlayProps, useAssistantContext } from '../../assistant_context';
 import { Assistant } from '..';
-import { WELCOME_CONVERSATION_ID } from '../use_conversation/sample_conversations';
+import { WELCOME_CONVERSATION_TITLE } from '../use_conversation/translations';
 
 const isMac = navigator.platform.toLowerCase().indexOf('mac') >= 0;
 
@@ -29,7 +29,9 @@ const StyledEuiModal = styled(EuiModal)`
  */
 export const AssistantOverlay: React.FC = React.memo(() => {
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const [conversationId, setConversationId] = useState<string | undefined>(WELCOME_CONVERSATION_ID);
+  const [conversationId, setConversationId] = useState<string | undefined>(
+    WELCOME_CONVERSATION_TITLE
+  );
   const [promptContextId, setPromptContextId] = useState<string | undefined>();
   const { setShowAssistantOverlay } = useAssistantContext();
 

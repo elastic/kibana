@@ -15,16 +15,28 @@ import * as i18n from './translations';
 export interface Props extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
   handlePromptChange?: (value: string) => void;
   isDisabled?: boolean;
+  isSendingDisabled?: boolean;
   onPromptSubmit: (value: string) => void;
   value: string;
 }
 
 const StyledTextArea = styled(EuiTextArea)`
   min-height: 125px;
+  padding-right: 42px;
 `;
 
 export const PromptTextArea = forwardRef<HTMLTextAreaElement, Props>(
-  ({ isDisabled = false, value, onPromptSubmit, handlePromptChange, ...props }, ref) => {
+  (
+    {
+      isDisabled = false,
+      isSendingDisabled = false,
+      value,
+      onPromptSubmit,
+      handlePromptChange,
+      ...props
+    },
+    ref
+  ) => {
     const [currentValue, setCurrentValue] = React.useState(value);
 
     const onChangeCallback = useCallback(
@@ -39,13 +51,26 @@ export const PromptTextArea = forwardRef<HTMLTextAreaElement, Props>(
 
     const onKeyDown = useCallback(
       (event) => {
-        if (event.key === 'Enter' && !event.shiftKey) {
+        if (
+          event.key === 'Enter' &&
+          !event.shiftKey &&
+          currentValue.trim().length > 0 &&
+          !isSendingDisabled
+        ) {
           event.preventDefault();
           onPromptSubmit(event.target.value?.trim());
           setCurrentValue('');
+        } else if (
+          event.key === 'Enter' &&
+          !event.shiftKey &&
+          currentValue.trim().length === 0 &&
+          isSendingDisabled
+        ) {
+          event.preventDefault();
+          event.stopPropagation();
         }
       },
-      [onPromptSubmit]
+      [currentValue, isSendingDisabled, onPromptSubmit]
     );
 
     useEffect(() => {

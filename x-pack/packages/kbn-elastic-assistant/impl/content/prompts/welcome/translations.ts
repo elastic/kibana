@@ -11,7 +11,7 @@ export const WELCOME_GENERAL = i18n.translate(
   'xpack.elasticAssistant.securityAssistant.content.prompts.welcome.welcomeGeneralPrompt',
   {
     defaultMessage:
-      'Welcome to your Elastic Assistant! I am your [100% open-code](https://github.com/elastic/kibana/pull/156933) portal into your Elastic Life. In time, I will be able to answer questions and provide assistance over all your information in Elastic, and oh-so much more. Till then, I hope this early preview will open your minds to the possibilities of what we can create when we work together, in the open. Cheers!&nbsp;![elasticheart](https://github.com/elastic/kibana/assets/2946766/ce3effae-1f01-4300-80f6-d66ff2c27c53)',
+      'Welcome to your Elastic Assistant! I am your [100% open-code](https://github.com/elastic/kibana/pull/156933) portal into your Elastic Life. In time, I will be able to answer questions and provide assistance over all your information in Elastic, and oh-so much more. Till then, I hope this early preview will open your minds to the possibilities of what we can create when we work together, in the open. Cheers!',
   }
 );
 

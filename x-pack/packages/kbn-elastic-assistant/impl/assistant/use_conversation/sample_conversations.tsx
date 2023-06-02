@@ -7,12 +7,16 @@
 
 import { Conversation } from '../../assistant_context/types';
 import * as i18n from '../../content/prompts/welcome/translations';
-
-export const WELCOME_CONVERSATION_ID = 'welcome';
+import {
+  DEFAULT_CONVERSATION_TITLE,
+  ELASTIC_SECURITY_ASSISTANT,
+  ELASTIC_SECURITY_ASSISTANT_TITLE,
+  WELCOME_CONVERSATION_TITLE,
+} from './translations';
 
 export const BASE_CONVERSATIONS: Record<string, Conversation> = {
-  default: {
-    id: 'default',
+  [DEFAULT_CONVERSATION_TITLE]: {
+    id: DEFAULT_CONVERSATION_TITLE,
     messages: [
       {
         role: 'user',
@@ -80,21 +84,19 @@ export const BASE_CONVERSATIONS: Record<string, Conversation> = {
     messages: [],
     apiConfig: {},
   },
-  [WELCOME_CONVERSATION_ID]: {
-    id: 'welcome',
+  [WELCOME_CONVERSATION_TITLE]: {
+    id: WELCOME_CONVERSATION_TITLE,
     theme: {
-      title: 'Elastic Assistant',
-      titleIcon: 'logoElastic',
+      title: ELASTIC_SECURITY_ASSISTANT_TITLE,
+      titleIcon: 'logoSecurity',
       assistant: {
-        name: 'Elastic Assistant',
-        icon: 'logoElastic',
+        name: ELASTIC_SECURITY_ASSISTANT,
+        icon: 'logoSecurity',
       },
       system: {
         icon: 'logoElastic',
       },
-      user: {
-        icon: 'logoElastic',
-      },
+      user: {},
     },
     messages: [
       {

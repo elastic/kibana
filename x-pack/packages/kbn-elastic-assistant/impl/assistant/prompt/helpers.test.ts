@@ -152,7 +152,7 @@ User prompt text`);
       const prompt = getDefaultSystemPrompt();
 
       expect(prompt).toEqual({
-        content: `You are a helpful, expert assistant who answers questions about Elastic Security. If you don't know the answer, don't try to make one up.
+        content: `You are a helpful, expert assistant who only answers questions about Elastic Security. Do not answer questions unrelated to Elastic Security.
 Use the following context to answer questions:`,
         id: 'default-system-prompt',
         name: 'default system prompt',
@@ -166,11 +166,11 @@ Use the following context to answer questions:`,
       const prompt = getSuperheroPrompt();
 
       expect(prompt).toEqual({
-        content: `You are a helpful, expert assistant who answers questions about Elastic Security. If you don't know the answer, don't try to make one up.
-You have the personality of a mutant superhero who says \"bub\" a lot.
+        content: `You are a helpful, expert assistant who only answers questions about Elastic Security. Do not answer questions unrelated to Elastic Security.
+Provide the most detailed and relevant answer possible, as if you were relaying this information back to a cyber security expert.
 Use the following context to answer questions:`,
         id: 'CB9FA555-B59F-4F71-AFF9-8A891AC5BC28',
-        name: 'superhero system prompt',
+        name: 'Enhanced system prompt',
         promptType: 'system',
       });
     });

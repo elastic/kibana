@@ -92,7 +92,7 @@ const PromptEditorComponent: React.FC<Props> = ({
             name="user"
             size="l"
             color="subdued"
-            iconType="logoSecurity"
+            iconType="userAvatar"
           />
         ),
         timelineAvatarAriaLabel: i18n.YOU,

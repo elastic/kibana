@@ -37,7 +37,7 @@ export const QUICK_PROMPT_PROMPT = i18n.translate(
 export const QUICK_PROMPT_BADGE_COLOR = i18n.translate(
   'xpack.elasticAssistant.assistant.quickPrompts.addQuickPromptModal.badgeColorLabel',
   {
-    defaultMessage: 'Badge Color',
+    defaultMessage: 'Badge color',
   }
 );
 

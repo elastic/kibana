@@ -88,9 +88,6 @@ export type {
   QueryType,
 } from './impl/assistant/use_conversation/helpers';
 
-/** provides configuration to the assistant */
-export type { AssistantUiSettings } from './impl/assistant/helpers';
-
 /** serialized conversations */
 export type { Conversation, Message } from './impl/assistant_context/types';
 

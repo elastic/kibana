@@ -7,18 +7,11 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const EXPLAIN_THE_MEANING_FROM_CONTEXT_ABOVE = i18n.translate(
-  'xpack.elasticAssistant.assistant.content.prompts.user.explainTheMeaningFromContextAbove',
-  {
-    defaultMessage: 'You are an expert cyber security analyst using Elastic Security.',
-  }
-);
-
 export const THEN_SUMMARIZE_SUGGESTED_KQL_AND_EQL_QUERIES = i18n.translate(
   'xpack.elasticAssistant.assistant.content.prompts.user.thenSummarizeSuggestedKqlAndEqlQueries',
   {
     defaultMessage:
-      'I would like you to evaluate the event from the context above with and format your output neatly in markdown syntax for my Elastic Security case.',
+      'Evaluate the event from the context above and format your output neatly in markdown syntax for my Elastic Security case.',
   }
 );
 
@@ -29,5 +22,5 @@ export const FINALLY_SUGGEST_INVESTIGATION_GUIDE_AND_FORMAT_AS_MARKDOWN = i18n.t
   }
 );
 
-export const EXPLAIN_THEN_SUMMARIZE_SUGGEST_INVESTIGATION_GUIDE_NON_I18N = `${EXPLAIN_THE_MEANING_FROM_CONTEXT_ABOVE} ${THEN_SUMMARIZE_SUGGESTED_KQL_AND_EQL_QUERIES}
+export const EXPLAIN_THEN_SUMMARIZE_SUGGEST_INVESTIGATION_GUIDE_NON_I18N = `${THEN_SUMMARIZE_SUGGESTED_KQL_AND_EQL_QUERIES}
 ${FINALLY_SUGGEST_INVESTIGATION_GUIDE_AND_FORMAT_AS_MARKDOWN}`;

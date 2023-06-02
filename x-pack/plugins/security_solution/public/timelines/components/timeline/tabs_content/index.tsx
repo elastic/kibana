@@ -37,6 +37,7 @@ import {
 import * as i18n from './translations';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useLicense } from '../../../../common/hooks/use_license';
+import { TIMELINE_CONVERSATION_TITLE } from '../../../../assistant/content/conversations/translations';
 
 const HideShowContainer = styled.div.attrs<{ $isVisible: boolean; isOverflowYScroll: boolean }>(
   ({ $isVisible = false, isOverflowYScroll = false }) => ({
@@ -146,7 +147,10 @@ const AssistantTab: React.FC<{
 }> = memo(({ renderCellValue, rowRenderers, timelineId, shouldRefocusPrompt }) => (
   <Suspense fallback={<EuiSkeletonText lines={10} />}>
     <AssistantTabContainer>
-      <Assistant conversationId={'timeline'} shouldRefocusPrompt={shouldRefocusPrompt} />
+      <Assistant
+        conversationId={TIMELINE_CONVERSATION_TITLE}
+        shouldRefocusPrompt={shouldRefocusPrompt}
+      />
     </AssistantTabContainer>
   </Suspense>
 ));

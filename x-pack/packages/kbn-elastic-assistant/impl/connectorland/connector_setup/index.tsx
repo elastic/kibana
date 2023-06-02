@@ -26,9 +26,9 @@ import {
   GEN_AI_CONNECTOR_ID,
   OpenAiProviderType,
 } from '@kbn/stack-connectors-plugin/public/common';
-import { BASE_CONVERSATIONS, Conversation, Message } from '@kbn/elastic-assistant';
 import useEvent from 'react-use/lib/useEvent';
 import { ActionConnectorProps } from '@kbn/triggers-actions-ui-plugin/public/types';
+import { BASE_CONVERSATIONS, Conversation, Message } from '../../..';
 import { useLoadActionTypes } from '../use_load_action_types';
 import { StreamingText } from '../../assistant/streaming_text';
 import { ConnectorButton } from '../connector_button';
@@ -36,6 +36,7 @@ import { useConversation } from '../../assistant/use_conversation';
 import { clearPresentationData, conversationHasNoPresentationData } from './helpers';
 import * as i18n from '../translations';
 import { useAssistantContext } from '../../assistant_context';
+import { WELCOME_CONVERSATION_TITLE } from '../../assistant/use_conversation/translations';
 
 const MESSAGE_INDEX_BEFORE_CONNECTOR = 2;
 
@@ -72,7 +73,7 @@ export interface ConnectorSetupProps {
 export const ConnectorSetup: React.FC<ConnectorSetupProps> = React.memo<ConnectorSetupProps>(
   ({
     actionTypeRegistry,
-    conversation = BASE_CONVERSATIONS.welcome,
+    conversation = BASE_CONVERSATIONS[WELCOME_CONVERSATION_TITLE],
     http,
     isConnectorConfigured = false,
     onSetupComplete,

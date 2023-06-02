@@ -7,9 +7,9 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const DATA_QUALITY_DASHBOARD_CONVERSATION_ID = i18n.translate(
-  'securitySolutionPackages.ecsDataQualityDashboard.incompatibleTab.dataQualityDashboardConversationId',
+export const TIMELINE_CONVERSATION_TITLE = i18n.translate(
+  'xpack.securitySolution.assistant.conversations.timelineConversationTitle',
   {
-    defaultMessage: 'Data Quality dashboard',
+    defaultMessage: 'Timeline',
   }
 );

@@ -9,11 +9,25 @@ import { useCallback } from 'react';
 
 import { useAssistantContext } from '../../assistant_context';
 import { Conversation, Message } from '../../assistant_context/types';
+import * as i18n from './translations';
+import { ELASTIC_SECURITY_ASSISTANT, ELASTIC_SECURITY_ASSISTANT_TITLE } from './translations';
 
 export const DEFAULT_CONVERSATION_STATE: Conversation = {
-  id: 'default',
+  id: i18n.DEFAULT_CONVERSATION_TITLE,
   messages: [],
   apiConfig: {},
+  theme: {
+    title: ELASTIC_SECURITY_ASSISTANT_TITLE,
+    titleIcon: 'logoSecurity',
+    assistant: {
+      name: ELASTIC_SECURITY_ASSISTANT,
+      icon: 'logoSecurity',
+    },
+    system: {
+      icon: 'logoElastic',
+    },
+    user: {},
+  },
 };
 
 interface AppendMessageProps {

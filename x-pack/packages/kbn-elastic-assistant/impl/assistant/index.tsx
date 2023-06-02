@@ -13,9 +13,11 @@ import {
   EuiButtonIcon,
   EuiHorizontalRule,
   EuiCommentList,
-  EuiPageHeader,
   EuiToolTip,
   EuiSplitPanel,
+  EuiCallOut,
+  EuiIcon,
+  EuiTitle,
 } from '@elastic/eui';
 
 // eslint-disable-next-line @kbn/eslint/module_migration
@@ -43,7 +45,8 @@ import { getPromptById } from './prompt_editor/helpers';
 import { QuickPrompts } from './quick_prompts/quick_prompts';
 import { useLoadConnectors } from '../connectorland/use_load_connectors';
 import { ConnectorSetup } from '../connectorland/connector_setup';
-import { WELCOME_CONVERSATION_ID } from './use_conversation/sample_conversations';
+import { WELCOME_CONVERSATION_TITLE } from './use_conversation/translations';
+import { BASE_CONVERSATIONS } from './use_conversation/sample_conversations';
 
 const CommentsContainer = styled.div`
   max-height: 600px;
@@ -52,13 +55,9 @@ const CommentsContainer = styled.div`
 `;
 
 const ChatOptionsFlexItem = styled(EuiFlexItem)`
-  left: -44px;
+  left: -34px;
   position: relative;
   top: 11px;
-`;
-
-const ChatContainerFlexGroup = styled(EuiFlexGroup)`
-  width: 102%;
 `;
 
 const StyledCommentList = styled(EuiCommentList)`
@@ -79,7 +78,7 @@ export interface Props {
 const AssistantComponent: React.FC<Props> = ({
   promptContextId = '',
   showTitle = true,
-  conversationId = WELCOME_CONVERSATION_ID,
+  conversationId = WELCOME_CONVERSATION_TITLE,
   shouldRefocusPrompt = false,
 }) => {
   const {
@@ -105,7 +104,7 @@ const AssistantComponent: React.FC<Props> = ({
   // Welcome conversation is a special 'setup' case when no connector exists, mostly extracted to `ConnectorSetup` component,
   // but currently a bit of state is littered throughout the assistant component. TODO: clean up/isolate this state
   const welcomeConversation = useMemo(
-    () => conversations[selectedConversationId] ?? conversations.welcome,
+    () => conversations[selectedConversationId] ?? BASE_CONVERSATIONS[WELCOME_CONVERSATION_TITLE],
     [conversations, selectedConversationId]
   );
 
@@ -127,6 +126,8 @@ const AssistantComponent: React.FC<Props> = ({
   const [autoPopulatedOnce, setAutoPopulatedOnce] = useState<boolean>(false);
   const [suggestedUserPrompt, setSuggestedUserPrompt] = useState<string | null>(null);
 
+  const [showMissingConnectorCallout, setShowMissingConnectorCallout] = useState<boolean>(false);
+
   const [messageCodeBlocks, setMessageCodeBlocks] = useState<CodeBlockDetails[][]>(
     augmentMessageCodeBlocks(currentConversation)
   );
@@ -134,6 +135,10 @@ const AssistantComponent: React.FC<Props> = ({
   useLayoutEffect(() => {
     setMessageCodeBlocks(augmentMessageCodeBlocks(currentConversation));
   }, [augmentMessageCodeBlocks, currentConversation]);
+
+  const isSendingDisabled = useMemo(() => {
+    return isWelcomeSetup || promptTextPreview.trim().length === 0 || showMissingConnectorCallout;
+  }, [showMissingConnectorCallout, isWelcomeSetup, promptTextPreview]);
 
   // Fixes initial render not showing buttons as code block controls are added to the DOM really late
   useEffect(() => {
@@ -166,8 +171,10 @@ const AssistantComponent: React.FC<Props> = ({
     bottomRef.current?.scrollIntoView({ behavior: 'auto' });
   }, []);
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: 'auto' });
-    promptTextAreaRef?.current?.focus();
+    setTimeout(() => {
+      bottomRef.current?.scrollIntoView({ behavior: 'auto' });
+      promptTextAreaRef?.current?.focus();
+    }, 0);
   }, [currentConversation.messages.length, selectedPromptContextIds.length]);
   ////
 
@@ -267,11 +274,14 @@ const AssistantComponent: React.FC<Props> = ({
     autoPopulatedOnce,
   ]);
 
-  // TODO: Fix timeline suspense code over in x-pack/plugins/security_solution/public/timelines/components/timeline/tabs_content/index.tsx
-  // TODO: So there aren't two assistants at the same time
-  if (conversationId !== WELCOME_CONVERSATION_ID && connectors?.length === 0) {
-    return <></>;
-  }
+  // Show missing connector callout if no connectors are configured
+  useEffect(() => {
+    const connectorExists =
+      connectors?.some(
+        (connector) => connector.id === currentConversation.apiConfig?.connectorId
+      ) ?? false;
+    setShowMissingConnectorCallout(!connectorExists);
+  }, [connectors, currentConversation]);
 
   return (
     <EuiSplitPanel.Outer
@@ -283,19 +293,42 @@ const AssistantComponent: React.FC<Props> = ({
       <EuiSplitPanel.Inner grow={false}>
         {showTitle && (
           <>
-            <EuiPageHeader
-              pageTitle={currentTitle.title}
-              rightSideItems={[
+            <EuiFlexGroup alignItems={'center'} justifyContent={'spaceBetween'}>
+              <EuiFlexItem grow={false}>
+                <EuiFlexGroup alignItems={'center'}>
+                  <EuiFlexItem grow={false}>
+                    <EuiIcon type={currentTitle.titleIcon} size="xl" />
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiTitle>
+                      <span>{currentTitle.title}</span>
+                    </EuiTitle>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
                 <ConversationSelector
                   conversationId={selectedConversationId}
                   onSelectionChange={(id) => setSelectedConversationId(id)}
                   shouldDisableKeyboardShortcut={shouldDisableConversationSelectorHotkeys}
                   isDisabled={isWelcomeSetup}
-                />,
-              ]}
-              iconType={currentTitle.titleIcon}
-            />
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
             <EuiHorizontalRule margin={'m'} />
+            {!isWelcomeSetup && showMissingConnectorCallout && (
+              <>
+                <EuiCallOut
+                  color="danger"
+                  iconType="controlsVertical"
+                  size="m"
+                  title={i18n.MISSING_CONNECTOR_CALLOUT_TITLE}
+                >
+                  <p>{i18n.MISSING_CONNECTOR_CALLOUT_DESCRIPTION}</p>
+                </EuiCallOut>
+                <EuiSpacer size={'s'} />
+              </>
+            )}
           </>
         )}
 
@@ -319,14 +352,13 @@ const AssistantComponent: React.FC<Props> = ({
               selectedPromptContextIds={selectedPromptContextIds}
               setSelectedPromptContextIds={setSelectedPromptContextIds}
             />
-            {Object.keys(promptContexts).length > 0 && <EuiSpacer />}
+            {Object.keys(promptContexts).length > 0 && <EuiSpacer size={'s'} />}
           </>
         )}
 
         {isWelcomeSetup && (
           <ConnectorSetup
             actionTypeRegistry={actionTypeRegistry}
-            conversation={welcomeConversation}
             http={http}
             refetchConnectors={refetchConnectors}
             isConnectorConfigured={!!connectors?.length}
@@ -339,7 +371,7 @@ const AssistantComponent: React.FC<Props> = ({
               <StyledCommentList comments={comments} />
               <div ref={bottomRef} />
 
-              <EuiSpacer />
+              <EuiSpacer size={'m'} />
 
               {(currentConversation.messages.length === 0 ||
                 selectedPromptContextIds.length > 0) && (
@@ -360,17 +392,26 @@ const AssistantComponent: React.FC<Props> = ({
 
         <EuiSpacer />
 
-        <ChatContainerFlexGroup gutterSize="s">
-          <PromptTextArea
-            onPromptSubmit={handleSendMessage}
-            ref={promptTextAreaRef}
-            handlePromptChange={setPromptTextPreview}
-            value={suggestedUserPrompt ?? ''}
-            isDisabled={isWelcomeSetup}
-          />
+        <EuiFlexGroup gutterSize="none">
+          <EuiFlexItem>
+            <PromptTextArea
+              onPromptSubmit={handleSendMessage}
+              ref={promptTextAreaRef}
+              handlePromptChange={setPromptTextPreview}
+              value={isWelcomeSetup ? '' : suggestedUserPrompt ?? ''}
+              isDisabled={isWelcomeSetup}
+              isSendingDisabled={isSendingDisabled}
+            />
+          </EuiFlexItem>
 
           <ChatOptionsFlexItem grow={false}>
-            <EuiFlexGroup direction="column" gutterSize="xs">
+            <EuiFlexGroup
+              direction="column"
+              gutterSize="xs"
+              css={css`
+                position: absolute;
+              `}
+            >
               <EuiFlexItem grow={false}>
                 <EuiToolTip position="right" content={i18n.CLEAR_CHAT}>
                   <EuiButtonIcon
@@ -394,7 +435,7 @@ const AssistantComponent: React.FC<Props> = ({
                   <EuiButtonIcon
                     display="base"
                     iconType="returnKey"
-                    isDisabled={isWelcomeSetup}
+                    isDisabled={isSendingDisabled}
                     aria-label={i18n.SUBMIT_MESSAGE}
                     color="primary"
                     onClick={handleButtonSendMessage}
@@ -412,7 +453,7 @@ const AssistantComponent: React.FC<Props> = ({
               </EuiFlexItem>
             </EuiFlexGroup>
           </ChatOptionsFlexItem>
-        </ChatContainerFlexGroup>
+        </EuiFlexGroup>
       </EuiSplitPanel.Inner>
       {!isWelcomeSetup && (
         <EuiSplitPanel.Inner

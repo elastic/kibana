@@ -37,9 +37,9 @@ export const getComments = ({
           </EuiText>
         ),
       timelineAvatar: isUser ? (
-        <EuiAvatar name="user" size="l" color="subdued" iconType="logoSecurity" />
+        <EuiAvatar name="user" size="l" color="subdued" iconType="userAvatar" />
       ) : (
-        <EuiAvatar name="machine" size="l" color="subdued" iconType="machineLearningApp" />
+        <EuiAvatar name="machine" size="l" color="subdued" iconType="logoSecurity" />
       ),
       timestamp: i18n.AT(message.timestamp),
       username: isUser ? i18n.YOU : i18n.ASSISTANT,
