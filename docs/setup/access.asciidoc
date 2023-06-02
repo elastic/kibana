@@ -41,24 +41,25 @@ For JSON-formatted server status details, use the `localhost:5601/api/status` AP
 [[not-ready]]
 === Troubleshoot {kib} UI error
 
-Troubleshoot the `{kib} Server is not Ready yet` error.
+Troubleshoot the `Kibana Server is not Ready yet` error.
 
 . From within a {kib} node, confirm the connection to {es}:
 +
 [source,sh]
 ----
-`curl -XGET elasticsearch_ip_or_hostname:9200/`
+curl -XGET elasticsearch_ip_or_hostname:9200/
 ----
 . Guarantee the health of the three {kib}-backing indices.  All indices must appear and display `status:green` and `status:open`:
 +
 [source,sh]
 ----
-`curl -XGET elasticsearch_ip_or_hostname:9200/_cat/indices/.kibana,.kibana_task_manager,.kibana_security_session?v=true`
+curl -XGET elasticsearch_ip_or_hostname:9200/_cat/indices/.kibana,.kibana_task_manager,.kibana_security_session?v=true
 ----
 . <<start-stop,Shut down all {kib} nodes>>. 
 . Choose any {kib} node, then update the config to set the <<change-overall-log-level,debug logging>>.
 . <<start-stop,Start the node>>, then check the start-up debug logs for `ERROR` messages or other start-up issues. 
 +
 For example:
+
 * When {kib} is unable to connect to a healthy {es} cluster, the `master_not_discovered_exception` or `Unable to revive connection` errors appear.
 * When one or more {kib}-backing indices are unhealthy, the `index_not_green_timeout` error appears.
