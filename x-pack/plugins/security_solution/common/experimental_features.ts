@@ -32,11 +32,6 @@ export const allowedExperimentalValues = Object.freeze({
   previewTelemetryUrlEnabled: false,
 
   /**
-   * Enables the Endpoint response actions console in various areas of the app
-   */
-  responseActionsConsoleEnabled: true,
-
-  /**
    * Enables the insights module for related alerts by process ancestry
    */
   insightsRelatedAlertsByProcessAncestry: true,
