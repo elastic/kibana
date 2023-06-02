@@ -26,6 +26,7 @@ import { renderParameterTemplates } from './render';
 
 export const getConnectorType = (): SubActionConnectorType<GenAiConfig, GenAiSecrets> => ({
   id: GEN_AI_CONNECTOR_ID,
+  isExperimental: true,
   name: GEN_AI_TITLE,
   Service: GenAiConnector,
   schema: {
