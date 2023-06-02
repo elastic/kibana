@@ -1005,7 +1005,7 @@ export const LensTopNavMenu = ({
     onAddField: addField,
     onDataViewCreated: createNewDataView,
     onCreateDefaultAdHocDataView,
-    adHocDataViews: isOnTextBasedMode ? [] : adHocDataViews,
+    adHocDataViews,
     onChangeDataView: async (newIndexPatternId: string) => {
       const currentDataView = await data.dataViews.get(newIndexPatternId);
       setCurrentIndexPattern(currentDataView);

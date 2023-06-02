@@ -102,11 +102,9 @@ export const loadSavedSearch = async (
 function updateBySavedSearch(savedSearch: SavedSearch, deps: LoadSavedSearchDeps) {
   const { dataStateContainer, internalStateContainer, services, setDataView } = deps;
   const savedSearchDataView = savedSearch.searchSource.getField('index')!;
-  const savedSearchQuery = savedSearch.searchSource.getField('query');
-  const isPlainRecord = isTextBasedQuery(savedSearchQuery);
 
   setDataView(savedSearchDataView);
-  if (!savedSearchDataView.isPersisted() && !isPlainRecord) {
+  if (!savedSearchDataView.isPersisted()) {
     internalStateContainer.transitions.appendAdHocDataViews(savedSearchDataView);
   }
 
