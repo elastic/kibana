@@ -6,13 +6,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import {
-  SubActionConnectorType,
-  ValidatorType,
-} from '@kbn/actions-plugin/server/sub_action_framework/types';
+import type { SubActionConnectorType } from '@kbn/actions-plugin/server/sub_action_framework/types';
+import { ValidatorType } from '@kbn/actions-plugin/server/sub_action_framework/types';
 import { GeneralConnectorFeatureId } from '@kbn/actions-plugin/common';
 import { urlAllowListValidator } from '@kbn/actions-plugin/server';
-import { ValidatorServices } from '@kbn/actions-plugin/server/types';
+import type { ValidatorServices } from '@kbn/actions-plugin/server/types';
 import { assertURL } from '@kbn/actions-plugin/server/sub_action_framework/helpers/validators';
 import {
   GEN_AI_CONNECTOR_ID,
@@ -20,7 +18,7 @@ import {
   OpenAiProviderType,
 } from '../../../common/gen_ai/constants';
 import { GenAiConfigSchema, GenAiSecretsSchema } from '../../../common/gen_ai/schema';
-import { GenAiConfig, GenAiSecrets } from '../../../common/gen_ai/types';
+import type { GenAiConfig, GenAiSecrets } from '../../../common/gen_ai/types';
 import { GenAiConnector } from './gen_ai';
 import { renderParameterTemplates } from './render';
 

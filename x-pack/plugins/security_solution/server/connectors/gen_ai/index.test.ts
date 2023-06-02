@@ -6,11 +6,11 @@
  */
 
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
-import { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
+import type { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
 import axios from 'axios';
 import { configValidator, getConnectorType } from '.';
-import { GenAiConfig, GenAiSecrets } from '../../../common/gen_ai/types';
-import { SubActionConnectorType } from '@kbn/actions-plugin/server/sub_action_framework/types';
+import type { GenAiConfig, GenAiSecrets } from '../../../common/gen_ai/types';
+import type { SubActionConnectorType } from '@kbn/actions-plugin/server/sub_action_framework/types';
 import { OpenAiProviderType } from '../../../common/gen_ai/constants';
 
 jest.mock('axios');

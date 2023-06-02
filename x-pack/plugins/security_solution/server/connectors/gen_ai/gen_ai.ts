@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { ServiceParams, SubActionConnector } from '@kbn/actions-plugin/server';
+import type { ServiceParams } from '@kbn/actions-plugin/server';
+import { SubActionConnector } from '@kbn/actions-plugin/server';
 import type { AxiosError } from 'axios';
 import {
   GenAiRunActionParamsSchema,
@@ -67,8 +68,8 @@ export class GenAiConnector extends SubActionConnector<GenAiConfig, GenAiSecrets
       headers: {
         ...(this.provider === OpenAiProviderType.OpenAi
           ? { Authorization: `Bearer ${this.key}` }
-          : { ['api-key']: this.key }),
-        ['content-type']: 'application/json',
+          : { 'api-key': this.key }),
+        'content-type': 'application/json',
       },
     });
     return response.data;

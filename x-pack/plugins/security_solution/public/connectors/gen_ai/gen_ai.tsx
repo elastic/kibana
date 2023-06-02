@@ -8,9 +8,8 @@
 import { lazy } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { GenericValidationResult } from '@kbn/triggers-actions-ui-plugin/public/types';
-import { SUB_ACTION } from '../../../common/gen_ai/constants';
-import { GEN_AI_CONNECTOR_ID, GEN_AI_TITLE } from '../../../common/gen_ai/constants';
-import { GenerativeAiActionParams, GenerativeAiConnector } from './types';
+import { GEN_AI_CONNECTOR_ID, GEN_AI_TITLE, SUB_ACTION } from '../../../common/gen_ai/constants';
+import type { GenerativeAiActionParams, GenerativeAiConnector } from './types';
 
 interface ValidationErrors {
   subAction: string[];

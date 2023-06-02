@@ -6,9 +6,9 @@
  */
 
 import { TypeRegistry } from '@kbn/triggers-actions-ui-plugin/public/application/type_registry';
-import { registerConnectorTypes } from '..';
+import { registerConnectorTypes } from '@kbn/stack-connectors-plugin/public/connector_types';
 import type { ActionTypeModel } from '@kbn/triggers-actions-ui-plugin/public/types';
-import { registrationServicesMock } from '../../mocks';
+import { registrationServicesMock } from '@kbn/stack-connectors-plugin/public/mocks';
 import { SUB_ACTION } from '../../../common/gen_ai/constants';
 
 const ACTION_TYPE_ID = '.gen-ai';

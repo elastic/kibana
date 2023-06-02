@@ -91,6 +91,7 @@ import { artifactService } from './lib/telemetry/artifact';
 import { endpointFieldsProvider } from './search_strategy/endpoint_fields';
 import { ENDPOINT_FIELDS_SEARCH_STRATEGY } from '../common/endpoint/constants';
 import { AppFeatures } from './lib/app_features';
+import { getConnectorType as getGenAiConnectorType } from './connectors/gen_ai';
 
 export type { SetupPlugins, StartPlugins, PluginSetup, PluginStart } from './plugin_contract';
 
@@ -273,6 +274,7 @@ export class Plugin implements ISecuritySolutionPlugin {
     );
     plugins.alerting.registerType(securityRuleTypeWrapper(createThresholdAlertType(ruleOptions)));
     plugins.alerting.registerType(securityRuleTypeWrapper(createNewTermsAlertType(ruleOptions)));
+    plugins.actions.registerSubActionConnectorType(getGenAiConnectorType());
 
     // TODO We need to get the endpoint routes inside of initRoutes
     initRoutes(

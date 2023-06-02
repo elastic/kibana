@@ -54,6 +54,7 @@ import { UpsellingService } from './common/lib/upsellings';
 import { LazyEndpointCustomAssetsExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_custom_assets_extension';
 
 import type { SecurityAppStore } from './common/store/types';
+import { getGenerativeAiConnectorType } from './connectors/gen_ai';
 
 export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
   /**
@@ -232,6 +233,8 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         return () => true;
       },
     });
+
+    plugins.triggersActionsUi.actionTypeRegistry.register(getGenerativeAiConnectorType());
 
     return {
       resolver: async () => {

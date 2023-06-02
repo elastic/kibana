@@ -7,7 +7,7 @@
 
 import React from 'react';
 import GenerativeAiConnectorFields from './connector';
-import { ConnectorFormTestProvider } from '../lib/test_utils';
+import { ConnectorFormTestProvider } from '@kbn/stack-connectors-plugin/public/connector_types/lib/test_utils';
 import { act, render, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { OpenAiProviderType } from '../../../common/gen_ai/constants';

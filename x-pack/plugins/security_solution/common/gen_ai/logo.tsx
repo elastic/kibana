@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { LogoProps } from '../types';
+import type { LogoProps } from '@kbn/stack-connectors-plugin/public/connector_types/types';
 
 const Logo = (props: LogoProps) => (
   <svg

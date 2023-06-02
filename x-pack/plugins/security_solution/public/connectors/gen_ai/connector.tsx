@@ -6,12 +6,12 @@
  */
 
 import React, { useMemo } from 'react';
-import {
+import type {
   ActionConnectorFieldsProps,
   ConfigFieldSchema,
   SecretsFieldSchema,
-  SimpleConnectorForm,
 } from '@kbn/triggers-actions-ui-plugin/public';
+import { SimpleConnectorForm } from '@kbn/triggers-actions-ui-plugin/public';
 import { SelectField } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import { EuiLink, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
