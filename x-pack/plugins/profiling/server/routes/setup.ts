@@ -25,6 +25,7 @@ import {
 import { getSetupInstructions } from '../lib/setup/get_setup_instructions';
 import { hasProfilingData } from '../lib/setup/has_profiling_data';
 import { setSecurityRole, validateSecurityRole } from '../lib/setup/security_role';
+import { ProfilingSetupOptions } from '../lib/setup/types';
 import { handleRouteHandlerError } from '../utils/handle_route_error_handler';
 import { getRoutePaths } from '../../common';
 import {
@@ -55,7 +56,7 @@ export function registerSetupRoute({
           request,
           useDefaultAuth: true,
         });
-        const setupOptions = {
+        const setupOptions: ProfilingSetupOptions = {
           client: clientWithDefaultAuth,
           logger,
           packagePolicyClient: dependencies.start.fleet.packagePolicyService,
@@ -119,7 +120,7 @@ export function registerSetupRoute({
           request,
           useDefaultAuth: true,
         });
-        const setupOptions = {
+        const setupOptions: ProfilingSetupOptions = {
           client: clientWithDefaultAuth,
           logger,
           packagePolicyClient: dependencies.start.fleet.packagePolicyService,
