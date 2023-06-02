@@ -10,7 +10,7 @@ import React, { Component } from 'react';
 import { sortBy } from 'lodash';
 import moment from 'moment';
 
-import { TIME_FORMAT } from '@kbn/ml-anomaly-utils';
+import { TIME_FORMAT } from '@kbn/ml-date-utils';
 
 import { toLocaleString } from '../../../../util/string_utils';
 import { JobIcon } from '../../../../components/job_message_icon';

@@ -14,7 +14,7 @@ import { EuiDatePicker, EuiFieldText, EuiSpacer, EuiFlexGroup, EuiFlexItem } fro
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { TIME_FORMAT } from '@kbn/ml-anomaly-utils';
+import { TIME_FORMAT } from '@kbn/ml-date-utils';
 import { ManagedJobsWarningCallout } from '../../confirm_modals/managed_jobs_warning_callout';
 
 export class TimeRangeSelector extends Component {
