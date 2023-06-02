@@ -47,3 +47,8 @@ export const SETTINGS_CONNECTOR_TITLE = i18n.translate(
 export const SUBMIT_MESSAGE = i18n.translate('xpack.elasticAssistant.assistant.submitMessage', {
   defaultMessage: 'Submit message',
 });
+
+export const API_ERROR = i18n.translate('xpack.elasticAssistant.assistant.apiErrorTitle', {
+  defaultMessage:
+    'An error occurred sending your message. If the problem persists, please test the connector configuration.',
+});

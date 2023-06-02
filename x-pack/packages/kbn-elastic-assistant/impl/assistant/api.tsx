@@ -11,6 +11,7 @@ import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/public/common';
 import { HttpSetup } from '@kbn/core-http-browser';
 import type { Message } from '../assistant_context/types';
 import { Conversation } from '../assistant_context/types';
+import { API_ERROR } from './translations';
 
 export const fetchOpenAlerts = async () => []; // TODO: fetch alerts via alerts API
 
@@ -118,16 +119,16 @@ export const fetchConnectorExecuteAction = async ({
 
     const data = response.data;
     if (response.status !== 'ok') {
-      return 'An error occurred while processing your request.';
+      return API_ERROR;
     }
 
     if (data.choices && data.choices.length > 0 && data.choices[0].message.content) {
       const result = data.choices[0].message.content.trim();
       return result;
     } else {
-      return 'An error occurred while processing your request.';
+      return API_ERROR;
     }
   } catch (error) {
-    return 'An error occurred while processing your request.';
+    return API_ERROR;
   }
 };
