@@ -14,13 +14,13 @@ export interface TopNavDefaultMenuItem {
 }
 
 export interface TopNavDefaultMenu {
-  options?: TopNavDefaultMenuItem;
-  new?: TopNavDefaultMenuItem;
-  open?: TopNavDefaultMenuItem;
-  share?: TopNavDefaultMenuItem;
-  alerts?: TopNavDefaultMenuItem;
-  inspect?: TopNavDefaultMenuItem;
-  save?: TopNavDefaultMenuItem;
+  optionsItem?: TopNavDefaultMenuItem;
+  newItem?: TopNavDefaultMenuItem;
+  openItem?: TopNavDefaultMenuItem;
+  shareItem?: TopNavDefaultMenuItem;
+  alertsItem?: TopNavDefaultMenuItem;
+  inspectItem?: TopNavDefaultMenuItem;
+  saveItem?: TopNavDefaultMenuItem;
 }
 
 export interface TopNavMenuItem {

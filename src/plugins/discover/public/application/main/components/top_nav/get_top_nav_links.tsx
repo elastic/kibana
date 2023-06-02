@@ -221,33 +221,33 @@ export const getTopNavLinks = ({
   const defaultMenu = topNavCustomization?.defaultMenu;
   const entries = [...(topNavCustomization?.getMenuItems?.() ?? [])];
 
-  if (!defaultMenu?.new?.disabled) {
-    entries.push({ data: newSearch, order: defaultMenu?.new?.order ?? 200 });
+  if (!defaultMenu?.newItem?.disabled) {
+    entries.push({ data: newSearch, order: defaultMenu?.newItem?.order ?? 200 });
   }
 
-  if (!defaultMenu?.open?.disabled) {
-    entries.push({ data: openSearch, order: defaultMenu?.open?.order ?? 300 });
+  if (!defaultMenu?.openItem?.disabled) {
+    entries.push({ data: openSearch, order: defaultMenu?.openItem?.order ?? 300 });
   }
 
-  if (!defaultMenu?.share?.disabled) {
-    entries.push({ data: shareSearch, order: defaultMenu?.share?.order ?? 400 });
+  if (!defaultMenu?.shareItem?.disabled) {
+    entries.push({ data: shareSearch, order: defaultMenu?.shareItem?.order ?? 400 });
   }
 
   if (
     services.triggersActionsUi &&
     services.capabilities.management?.insightsAndAlerting?.triggersActions &&
     !isPlainRecord &&
-    !defaultMenu?.alerts?.disabled
+    !defaultMenu?.alertsItem?.disabled
   ) {
-    entries.push({ data: alerts, order: defaultMenu?.alerts?.order ?? 500 });
+    entries.push({ data: alerts, order: defaultMenu?.alertsItem?.order ?? 500 });
   }
 
-  if (!defaultMenu?.inspect?.disabled) {
-    entries.push({ data: inspectSearch, order: defaultMenu?.inspect?.order ?? 600 });
+  if (!defaultMenu?.inspectItem?.disabled) {
+    entries.push({ data: inspectSearch, order: defaultMenu?.inspectItem?.order ?? 600 });
   }
 
-  if (services.capabilities.discover.save && !defaultMenu?.save?.disabled) {
-    entries.push({ data: saveSearch, order: defaultMenu?.save?.order ?? 700 });
+  if (services.capabilities.discover.save && !defaultMenu?.saveItem?.disabled) {
+    entries.push({ data: saveSearch, order: defaultMenu?.saveItem?.order ?? 700 });
   }
 
   return entries.sort((a, b) => a.order - b.order).map((entry) => entry.data);

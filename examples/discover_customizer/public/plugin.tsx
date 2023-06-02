@@ -69,13 +69,13 @@ export class DiscoverCustomizerPlugin implements Plugin {
       customizations.set({
         id: 'top_nav',
         defaultMenu: {
-          options: { disabled: true },
-          new: { disabled: true },
-          open: { disabled: true },
-          share: { order: 200 },
-          alerts: { disabled: true },
-          inspect: { disabled: true },
-          save: { order: 400 },
+          optionsItem: { disabled: true },
+          newItem: { disabled: true },
+          openItem: { disabled: true },
+          shareItem: { order: 200 },
+          alertsItem: { disabled: true },
+          inspectItem: { disabled: true },
+          saveItem: { order: 400 },
         },
         getMenuItems: () => [
           {

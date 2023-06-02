@@ -31,7 +31,7 @@ describe('createCustomizatonService', () => {
       const service = createCustomizationService();
       const customization: DiscoverCustomization = {
         id: 'top_nav',
-        defaultMenu: { new: { disabled: true } },
+        defaultMenu: { newItem: { disabled: true } },
       };
       service.set(customization);
       let current: DiscoverCustomization | undefined;
@@ -41,7 +41,7 @@ describe('createCustomizatonService', () => {
       expect(current).toBe(customization);
       const updatedCustomization: DiscoverCustomization = {
         ...customization,
-        defaultMenu: { new: { disabled: false } },
+        defaultMenu: { newItem: { disabled: false } },
       };
       service.set(updatedCustomization);
       expect(current).toBe(updatedCustomization);
@@ -51,7 +51,7 @@ describe('createCustomizatonService', () => {
       const service = createCustomizationService();
       const customization: DiscoverCustomization = {
         id: 'top_nav',
-        defaultMenu: { new: { disabled: true } },
+        defaultMenu: { newItem: { disabled: true } },
       };
       service.set(customization);
       let current: DiscoverCustomization | undefined;
@@ -63,7 +63,7 @@ describe('createCustomizatonService', () => {
       expect(current).toBeUndefined();
       const updatedCustomization: DiscoverCustomization = {
         ...customization,
-        defaultMenu: { new: { disabled: false } },
+        defaultMenu: { newItem: { disabled: false } },
       };
       service.set(updatedCustomization);
       expect(current).toBeUndefined();
