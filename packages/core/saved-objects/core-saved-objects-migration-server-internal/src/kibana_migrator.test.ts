@@ -15,7 +15,6 @@ import {
   SavedObjectTypeRegistry,
 } from '@kbn/core-saved-objects-base-server-internal';
 import { KibanaMigrator } from './kibana_migrator';
-import { DocumentMigrator } from './document_migrator';
 import { ByteSizeValue } from '@kbn/config-schema';
 import { docLinksServiceMock } from '@kbn/core-doc-links-server-mocks';
 import { lastValueFrom } from 'rxjs';
