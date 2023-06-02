@@ -41,7 +41,7 @@ export const ExplainLogRateSpikes: FC<AlertDetailsExplainLogRateSpikesSectionPro
   alert,
 }) => {
   const { services } = useKibanaContextForPlugin();
-  const { dataViews: dataViewsService, http, data } = services;
+  const { dataViews: dataViewsService, http, data, logViews, fieldFormats } = services;
   const [dataView, setDataView] = useState<DataView | undefined>();
   const [esSearchQuery, setEsSearchQuery] = useState<QueryDslQueryContainer | undefined>();
 
