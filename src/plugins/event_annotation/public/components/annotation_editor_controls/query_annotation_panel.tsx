@@ -72,9 +72,9 @@ export const ConfigPanelQueryAnnotation = ({
         label={i18n.translate('eventAnnotation.xyChart.annotation.queryInput', {
           defaultMessage: 'Annotation query',
         })}
-        data-test-subj="annotation-query-based-query-input"
       >
         <FilterQueryInput
+          data-test-subj="annotation-query-based-query-input"
           initiallyOpen={queryInputShouldOpen}
           label=""
           inputFilter={annotation?.filter ?? defaultQuery}

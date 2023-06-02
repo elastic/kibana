@@ -127,7 +127,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       extraFields?: string[];
     }) {
       // type * in the query editor
-      const queryInput = await testSubjects.find('lnsXY-annotation-query-based-query-input');
+      const queryInput = await testSubjects.find('annotation-query-based-query-input');
       await queryInput.type(opts.queryString);
       await testSubjects.click('indexPattern-filters-existingFilterTrigger');
       await this.selectOptionFromComboBox(
