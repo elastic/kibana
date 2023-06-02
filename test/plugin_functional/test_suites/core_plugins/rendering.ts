@@ -161,6 +161,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'usageCollection.uiCounters.debug (boolean)',
         'usageCollection.uiCounters.enabled (boolean)',
         // readOnly is boolean flag
+        'input_control_vis.readOnly (any)',
         'vis_type_gauge.readOnly (any)',
         'vis_type_heatmap.readOnly (any)',
         'vis_type_metric.readOnly (any)',
@@ -214,8 +215,12 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.graph.savePolicy (alternatives)',
         'xpack.ilm.ui.enabled (boolean)',
         'xpack.index_management.ui.enabled (boolean)',
-        'xpack.infra.logs.app_target (alternatives)',
         'xpack.infra.sources.default.fields.message (array)',
+        /**
+         * xpack.infra.logs is conditional and will resolve to an object of properties
+         * - xpack.infra.logs.app_target (string)
+         */
+        'xpack.infra.logs (any)',
         'xpack.license_management.ui.enabled (boolean)',
         'xpack.maps.preserveDrawingBuffer (boolean)',
         'xpack.maps.showMapsInspectorAdapter (boolean)',

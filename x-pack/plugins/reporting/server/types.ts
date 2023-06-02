@@ -34,6 +34,7 @@ import type { BaseParams, BasePayload, UrlOrUrlLocatorTuple } from '../common/ty
 import type { ReportingConfigType } from './config';
 import type { ReportingCore } from './core';
 import type { ReportTaskParams } from './lib/tasks';
+import { ExportTypesRegistry } from './lib';
 
 /**
  * Plugin Setup Contract
@@ -43,6 +44,7 @@ export interface ReportingSetup {
    * Used to inform plugins if Reporting config is compatible with UI Capabilities / Application Sub-Feature Controls
    */
   usesUiCapabilities: () => boolean;
+  registerExportTypes: ExportTypesRegistry['register'];
 }
 
 /**

@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { useTabSwitcherContext } from '../hooks/use_tab_switcher';
-import Metadata from '../tabs/metadata/metadata';
+import { Metadata } from '../tabs/metadata/metadata';
 import { Processes } from '../tabs/processes/processes';
 import { FlyoutTabIds, type TabState, type AssetDetailsProps } from '../types';
 

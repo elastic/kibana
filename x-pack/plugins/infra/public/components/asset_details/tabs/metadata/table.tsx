@@ -202,7 +202,7 @@ const ExpandableContent = (props: ExpandableContentProps) => {
           </>
         )}
       </div>
-      {isExpanded && others.map((item) => <EuiFlexItem key={item}>{item}</EuiFlexItem>)}
+      {isExpanded && others.map((item, index) => <EuiFlexItem key={index}>{item}</EuiFlexItem>)}
       {hasOthers && isExpanded && (
         <EuiFlexItem>
           <EuiLink data-test-subj="infraExpandableContentShowLessLink" onClick={toggle}>
