@@ -25,7 +25,7 @@ import {
   NOT_ALLOW_UPDATE_STATUS_ERROR_MESSAGE,
   TEMPLATE_TIMELINE_VERSION_CONFLICT_MESSAGE,
 } from './failure_cases';
-import type { TimelineSavedToReturnObjectRuntimeType } from '../../../../common/types/timeline/api';
+import type { TimelineSavedObject } from '../../../../common/types/timeline/api';
 import { TimelineStatus, TimelineType } from '../../../../common/types/timeline/api';
 import { mockGetTimelineValue, mockGetTemplateTimelineValue } from '../__mocks__/import_timelines';
 
@@ -68,7 +68,7 @@ describe('failure cases', () => {
       const version = null;
       const templateTimelineVersion = null;
       const templateTimelineId = null;
-      const existTimeline = mockGetTimelineValue as TimelineSavedToReturnObjectRuntimeType;
+      const existTimeline = mockGetTimelineValue as TimelineSavedObject;
       const existTemplateTimeline = null;
       const result = checkIsCreateFailureCases(
         isHandlingTemplateTimeline,
@@ -93,8 +93,7 @@ describe('failure cases', () => {
       const templateTimelineVersion = 1;
       const templateTimelineId = 'template-timeline-id-one';
       const existTimeline = null;
-      const existTemplateTimeline =
-        mockGetTemplateTimelineValue as TimelineSavedToReturnObjectRuntimeType;
+      const existTemplateTimeline = mockGetTemplateTimelineValue as TimelineSavedObject;
       const result = checkIsCreateFailureCases(
         isHandlingTemplateTimeline,
         TimelineStatus.active,
@@ -144,7 +143,7 @@ describe('failure cases', () => {
       const templateTimelineVersion = null;
       const templateTimelineId = null;
       const existTimeline = {
-        ...(mockGetTimelineValue as TimelineSavedToReturnObjectRuntimeType),
+        ...(mockGetTimelineValue as TimelineSavedObject),
         status: TimelineStatus.immutable,
       };
       const existTemplateTimeline = null;
@@ -172,7 +171,7 @@ describe('failure cases', () => {
       const templateTimelineId = mockGetTemplateTimelineValue.templateTimelineId;
       const existTimeline = null;
       const existTemplateTimeline = {
-        ...(mockGetTemplateTimelineValue as TimelineSavedToReturnObjectRuntimeType),
+        ...(mockGetTemplateTimelineValue as TimelineSavedObject),
         status: TimelineStatus.immutable,
       };
       const result = checkIsUpdateFailureCases(
@@ -198,8 +197,7 @@ describe('failure cases', () => {
       const templateTimelineVersion = mockGetTemplateTimelineValue.templateTimelineVersion;
       const templateTimelineId = mockGetTemplateTimelineValue.templateTimelineId;
       const existTimeline = null;
-      const existTemplateTimeline =
-        mockGetTemplateTimelineValue as TimelineSavedToReturnObjectRuntimeType;
+      const existTemplateTimeline = mockGetTemplateTimelineValue as TimelineSavedObject;
       const result = checkIsUpdateFailureCases(
         isHandlingTemplateTimeline,
         TimelineStatus.active,
@@ -247,11 +245,10 @@ describe('failure cases', () => {
       const templateTimelineVersion = mockGetTemplateTimelineValue.templateTimelineVersion;
       const templateTimelineId = mockGetTemplateTimelineValue.templateTimelineId;
       const existTimeline = {
-        ...(mockGetTemplateTimelineValue as TimelineSavedToReturnObjectRuntimeType),
+        ...(mockGetTemplateTimelineValue as TimelineSavedObject),
         savedObjectId: 'someOtherId',
       };
-      const existTemplateTimeline =
-        mockGetTemplateTimelineValue as TimelineSavedToReturnObjectRuntimeType;
+      const existTemplateTimeline = mockGetTemplateTimelineValue as TimelineSavedObject;
       const result = checkIsUpdateFailureCases(
         isHandlingTemplateTimeline,
         TimelineStatus.active,
@@ -275,8 +272,7 @@ describe('failure cases', () => {
       const templateTimelineVersion = mockGetTemplateTimelineValue.templateTimelineVersion;
       const templateTimelineId = mockGetTemplateTimelineValue.templateTimelineId;
       const existTimeline = null;
-      const existTemplateTimeline =
-        mockGetTemplateTimelineValue as TimelineSavedToReturnObjectRuntimeType;
+      const existTemplateTimeline = mockGetTemplateTimelineValue as TimelineSavedObject;
       const result = checkIsUpdateFailureCases(
         isHandlingTemplateTimeline,
         TimelineStatus.active,
@@ -302,8 +298,7 @@ describe('failure cases', () => {
       const templateTimelineVersion = mockGetTemplateTimelineValue.templateTimelineVersion;
       const templateTimelineId = mockGetTemplateTimelineValue.templateTimelineId;
       const existTimeline = null;
-      const existTemplateTimeline =
-        mockGetTemplateTimelineValue as TimelineSavedToReturnObjectRuntimeType;
+      const existTemplateTimeline = mockGetTemplateTimelineValue as TimelineSavedObject;
       const result = checkIsCreateViaImportFailureCases(
         isHandlingTemplateTimeline,
         TimelineStatus.draft,
@@ -327,8 +322,7 @@ describe('failure cases', () => {
       const templateTimelineVersion = mockGetTemplateTimelineValue.templateTimelineVersion;
       const templateTimelineId = mockGetTemplateTimelineValue.templateTimelineId;
       const existTimeline = null;
-      const existTemplateTimeline =
-        mockGetTemplateTimelineValue as TimelineSavedToReturnObjectRuntimeType;
+      const existTemplateTimeline = mockGetTemplateTimelineValue as TimelineSavedObject;
       const result = checkIsCreateViaImportFailureCases(
         isHandlingTemplateTimeline,
         TimelineStatus.active,
@@ -351,7 +345,7 @@ describe('failure cases', () => {
       const version = mockGetTimelineValue.version;
       const templateTimelineVersion = null;
       const templateTimelineId = null;
-      const existTimeline = mockGetTimelineValue as TimelineSavedToReturnObjectRuntimeType;
+      const existTimeline = mockGetTimelineValue as TimelineSavedObject;
       const existTemplateTimeline = null;
       const result = checkIsCreateViaImportFailureCases(
         isHandlingTemplateTimeline,
@@ -377,7 +371,7 @@ describe('failure cases', () => {
       const version = mockGetTimelineValue.version;
       const templateTimelineVersion = null;
       const templateTimelineId = null;
-      const existTimeline = mockGetTimelineValue as TimelineSavedToReturnObjectRuntimeType;
+      const existTimeline = mockGetTimelineValue as TimelineSavedObject;
       const existTemplateTimeline = null;
       const result = checkIsUpdateViaImportFailureCases(
         isHandlingTemplateTimeline,
@@ -402,8 +396,7 @@ describe('failure cases', () => {
       const templateTimelineVersion = mockGetTemplateTimelineValue.templateTimelineVersion;
       const templateTimelineId = mockGetTemplateTimelineValue.templateTimelineId;
       const existTimeline = null;
-      const existTemplateTimeline =
-        mockGetTemplateTimelineValue as TimelineSavedToReturnObjectRuntimeType;
+      const existTemplateTimeline = mockGetTemplateTimelineValue as TimelineSavedObject;
       const result = checkIsUpdateViaImportFailureCases(
         isHandlingTemplateTimeline,
         TimelineStatus.active,
@@ -427,8 +420,7 @@ describe('failure cases', () => {
       const templateTimelineVersion = mockGetTemplateTimelineValue.templateTimelineVersion;
       const templateTimelineId = mockGetTemplateTimelineValue.templateTimelineId;
       const existTimeline = null;
-      const existTemplateTimeline =
-        mockGetTemplateTimelineValue as TimelineSavedToReturnObjectRuntimeType;
+      const existTemplateTimeline = mockGetTemplateTimelineValue as TimelineSavedObject;
       const result = checkIsUpdateViaImportFailureCases(
         isHandlingTemplateTimeline,
         TimelineStatus.immutable,
@@ -476,11 +468,10 @@ describe('failure cases', () => {
       const templateTimelineVersion = mockGetTemplateTimelineValue.templateTimelineVersion;
       const templateTimelineId = mockGetTemplateTimelineValue.templateTimelineId;
       const existTimeline = {
-        ...(mockGetTemplateTimelineValue as TimelineSavedToReturnObjectRuntimeType),
+        ...(mockGetTemplateTimelineValue as TimelineSavedObject),
         savedObjectId: 'someOtherId',
       };
-      const existTemplateTimeline =
-        mockGetTemplateTimelineValue as TimelineSavedToReturnObjectRuntimeType;
+      const existTemplateTimeline = mockGetTemplateTimelineValue as TimelineSavedObject;
       const result = checkIsUpdateViaImportFailureCases(
         isHandlingTemplateTimeline,
         TimelineStatus.active,
@@ -504,8 +495,7 @@ describe('failure cases', () => {
       const templateTimelineVersion = mockGetTemplateTimelineValue.templateTimelineVersion;
       const templateTimelineId = mockGetTemplateTimelineValue.templateTimelineId;
       const existTimeline = null;
-      const existTemplateTimeline =
-        mockGetTemplateTimelineValue as TimelineSavedToReturnObjectRuntimeType;
+      const existTemplateTimeline = mockGetTemplateTimelineValue as TimelineSavedObject;
       const result = checkIsUpdateViaImportFailureCases(
         isHandlingTemplateTimeline,
         TimelineStatus.active,
@@ -529,8 +519,7 @@ describe('failure cases', () => {
       const templateTimelineVersion = mockGetTemplateTimelineValue.templateTimelineVersion;
       const templateTimelineId = mockGetTemplateTimelineValue.templateTimelineId;
       const existTimeline = null;
-      const existTemplateTimeline =
-        mockGetTemplateTimelineValue as TimelineSavedToReturnObjectRuntimeType;
+      const existTemplateTimeline = mockGetTemplateTimelineValue as TimelineSavedObject;
       const result = checkIsUpdateViaImportFailureCases(
         isHandlingTemplateTimeline,
         TimelineStatus.active,

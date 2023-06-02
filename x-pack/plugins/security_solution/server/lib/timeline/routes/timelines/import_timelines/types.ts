@@ -6,11 +6,11 @@
  */
 import type { BulkError } from '../../../../detection_engine/routes/utils';
 
-import type { TimelineSOServerRepresentationType } from '../../../../../../common/types/timeline/api';
+import type { SavedTimeline } from '../../../../../../common/types/timeline/api';
 import type { TimelineStatusActions } from '../../../utils/common';
 import type { NoteResult } from '../../../../../../common/types/timeline/note';
 
-export type ImportedTimeline = TimelineSOServerRepresentationType & {
+export type ImportedTimeline = SavedTimeline & {
   savedObjectId: string | null;
   version: string | null;
   pinnedEventIds: string[];

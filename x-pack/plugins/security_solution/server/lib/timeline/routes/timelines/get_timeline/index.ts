@@ -20,7 +20,7 @@ import { buildFrameworkRequest } from '../../../utils/common';
 import { getTimelineQuerySchema } from '../../../schemas/timelines';
 import { getTimelineTemplateOrNull, getTimelineOrNull } from '../../../saved_object/timelines';
 import type {
-  TimelineSavedToReturnObjectRuntimeType,
+  TimelineSavedObject,
   ResolvedTimelineWithOutcomeSavedObjectResponse,
 } from '../../../../../../common/types/timeline/api';
 
@@ -45,10 +45,7 @@ export const getTimelineRoute = (
         const query = request.query ?? {};
         const { template_timeline_id: templateTimelineId, id } = query;
 
-        let res:
-          | TimelineSavedToReturnObjectRuntimeType
-          | ResolvedTimelineWithOutcomeSavedObjectResponse
-          | null = null;
+        let res: TimelineSavedObject | ResolvedTimelineWithOutcomeSavedObjectResponse | null = null;
 
         if (templateTimelineId != null && id == null) {
           res = await getTimelineTemplateOrNull(frameworkRequest, templateTimelineId);

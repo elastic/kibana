@@ -15,7 +15,7 @@ import {
   TIMELINE_URL,
   TIMELINE_PREPACKAGED_URL,
 } from '../../../../common/constants';
-import type { TimelineSOServerRepresentationType } from '../../../../common/types/timeline/api';
+import type { SavedTimeline } from '../../../../common/types/timeline/api';
 import { TimelineType, TimelineStatus } from '../../../../common/types/timeline/api';
 
 import { requestMock } from '../../detection_engine/routes/__mocks__';
@@ -57,7 +57,7 @@ export const getImportTimelinesRequest = async (fileName?: string) => {
   });
 };
 
-export const inputTimeline: TimelineSOServerRepresentationType = {
+export const inputTimeline: SavedTimeline = {
   columns: [
     { columnHeaderType: 'not-filtered', id: '@timestamp' },
     { columnHeaderType: 'not-filtered', id: 'message' },

@@ -16,7 +16,7 @@ import {
   SavedObjectTimelineType,
   SavedObjectTimelineStatus,
 } from '../../../../../common/types/timeline/saved_object';
-import type { TimelineSavedToReturnObjectRuntimeType } from '../../../../../common/types/timeline/api';
+import type { TimelineSavedObject } from '../../../../../common/types/timeline/api';
 import { TimelineType, TimelineStatus } from '../../../../../common/types/timeline/api';
 
 // TODO: Added to support legacy TimelineType.draft, can be removed in 7.10
@@ -44,9 +44,7 @@ const getTimelineTypeAndStatus = (
   };
 };
 
-export const convertSavedObjectToSavedTimeline = (
-  savedObject: unknown
-): TimelineSavedToReturnObjectRuntimeType =>
+export const convertSavedObjectToSavedTimeline = (savedObject: unknown): TimelineSavedObject =>
   pipe(
     TimelineSavedObjectWithDraftRuntime.decode(savedObject),
     map((savedTimeline) => {

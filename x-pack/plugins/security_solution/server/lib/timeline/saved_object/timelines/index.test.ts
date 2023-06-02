@@ -23,7 +23,7 @@ import { TimelineType } from '../../../../../common/types/timeline/api';
 import type {
   AllTimelinesResponse,
   ResolvedTimelineWithOutcomeSavedObjectResponse,
-  TimelineSOServerRepresentationType,
+  SavedTimeline,
 } from '../../../../../common/types/timeline/api';
 import {
   mockResolvedSavedObject,
@@ -371,7 +371,7 @@ describe('saved_object', () => {
     let mockSOClientUpdate: jest.Mock;
     let mockRequest: FrameworkRequest;
 
-    const patchTimelineRequest: TimelineSOServerRepresentationType = {
+    const patchTimelineRequest: SavedTimeline = {
       savedQueryId: null,
     };
 
@@ -416,7 +416,7 @@ describe('saved_object', () => {
         mockRequest,
         '760d3d20-2142-11ec-a46f-051cb8e3154c',
         patchTimelineRequest
-      )) as SavedObjectsUpdateResponse<TimelineSOServerRepresentationType>;
+      )) as SavedObjectsUpdateResponse<SavedTimeline>;
 
       expect(resp.attributes.savedQueryId).toBeNull();
     });

@@ -274,7 +274,7 @@ export type TimelineTypeLiteralWithNull = runtimeTypes.TypeOf<typeof TimelineTyp
 /**
  * This is the response type
  */
-export const TimelineSOServerRepresentation = runtimeTypes.partial({
+export const SavedTimelineRuntimeType = runtimeTypes.partial({
   columns: unionWithNullType(runtimeTypes.array(SavedColumnHeaderRuntimeType)),
   dataProviders: unionWithNullType(runtimeTypes.array(SavedDataProviderRuntimeType)),
   dataViewId: unionWithNullType(runtimeTypes.string),
@@ -301,26 +301,20 @@ export const TimelineSOServerRepresentation = runtimeTypes.partial({
   updatedBy: unionWithNullType(runtimeTypes.string),
 });
 
-export type TimelineSOServerRepresentationType = runtimeTypes.TypeOf<
-  typeof TimelineSOServerRepresentation
->;
+export type SavedTimeline = runtimeTypes.TypeOf<typeof SavedTimelineRuntimeType>;
 
-export type TimelineSOServerRepresentationTypeWithSavedObjectId =
-  TimelineSOServerRepresentationType & {
-    savedObjectId?: string | null;
-  };
+export type SavedTimelineWithSavedObjectId = SavedTimeline & {
+  savedObjectId?: string | null;
+};
 
 /**
  * This type represents a timeline type stored in a saved object that does not include any fields that reference
  * other saved objects.
  */
-export type TimelineSOServerRepresentationWithoutExternalRefs = Omit<
-  TimelineSOServerRepresentationType,
-  'dataViewId' | 'savedQueryId'
->;
+export type TimelineWithoutExternalRefs = Omit<SavedTimeline, 'dataViewId' | 'savedQueryId'>;
 
-export const TimelineSavedToReturnObjectRuntime = runtimeTypes.intersection([
-  TimelineSOServerRepresentation,
+export const TimelineSavedToReturnObjectRuntimeType = runtimeTypes.intersection([
+  SavedTimelineRuntimeType,
   runtimeTypes.type({
     savedObjectId: runtimeTypes.string,
     version: runtimeTypes.string,
@@ -334,13 +328,13 @@ export const TimelineSavedToReturnObjectRuntime = runtimeTypes.intersection([
   }),
 ]);
 
-export type TimelineSavedToReturnObjectRuntimeType = runtimeTypes.TypeOf<
-  typeof TimelineSavedToReturnObjectRuntime
+export type TimelineSavedObject = runtimeTypes.TypeOf<
+  typeof TimelineSavedToReturnObjectRuntimeType
 >;
 
 export const SingleTimelineResponseType = runtimeTypes.type({
   data: runtimeTypes.type({
-    getOneTimeline: TimelineSavedToReturnObjectRuntime,
+    getOneTimeline: TimelineSavedToReturnObjectRuntimeType,
   }),
 });
 
@@ -349,7 +343,7 @@ export type SingleTimelineResponse = runtimeTypes.TypeOf<typeof SingleTimelineRe
 /** Resolved Timeline Response */
 export const ResolvedTimelineSavedObjectToReturnObjectRuntimeType = runtimeTypes.intersection([
   runtimeTypes.type({
-    timeline: TimelineSavedToReturnObjectRuntime,
+    timeline: TimelineSavedToReturnObjectRuntimeType,
     outcome: SavedObjectResolveOutcome,
   }),
   runtimeTypes.partial({
@@ -371,7 +365,7 @@ export type SingleTimelineResolveResponse = runtimeTypes.TypeOf<
 >;
 
 const responseTimelines = runtimeTypes.type({
-  timeline: runtimeTypes.array(TimelineSavedToReturnObjectRuntime),
+  timeline: runtimeTypes.array(TimelineSavedToReturnObjectRuntimeType),
   totalCount: runtimeTypes.number,
 });
 
@@ -401,7 +395,7 @@ export const TimelineResponseType = runtimeTypes.type({
         message: unionWithNullType(runtimeTypes.string),
       }),
       runtimeTypes.type({
-        timeline: TimelineSavedToReturnObjectRuntime,
+        timeline: TimelineSavedToReturnObjectRuntimeType,
       }),
     ]),
   }),
@@ -451,7 +445,7 @@ export interface ExportedNotes {
   globalNotes: ExportedGlobalNotes;
 }
 
-export type ExportedTimelines = TimelineSOServerRepresentationType &
+export type ExportedTimelines = SavedTimeline &
   ExportedNotes & {
     pinnedEventIds: string[];
   };

@@ -9,14 +9,14 @@ import { isEmpty } from 'lodash/fp';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common/model';
 import { getUserDisplayName } from '@kbn/user-profile-components';
 import { UNAUTHENTICATED_USER } from '../../../../../common/constants';
-import type { TimelineSOServerRepresentationTypeWithSavedObjectId } from '../../../../../common/types/timeline/api';
+import type { SavedTimelineWithSavedObjectId } from '../../../../../common/types/timeline/api';
 import { TimelineType, TimelineStatus } from '../../../../../common/types/timeline/api';
 
 export const pickSavedTimeline = (
   timelineId: string | null,
-  savedTimeline: TimelineSOServerRepresentationTypeWithSavedObjectId,
+  savedTimeline: SavedTimelineWithSavedObjectId,
   userInfo: AuthenticatedUser | null
-): TimelineSOServerRepresentationTypeWithSavedObjectId => {
+): SavedTimelineWithSavedObjectId => {
   const dateNow = new Date().valueOf();
 
   if (timelineId == null) {

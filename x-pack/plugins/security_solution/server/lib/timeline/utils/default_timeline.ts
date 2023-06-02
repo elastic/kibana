@@ -6,11 +6,11 @@
  */
 
 import { defaultHeaders } from './default_timeline_headers';
-import type { TimelineSOServerRepresentationType } from '../../../../common/types/timeline/api';
+import type { SavedTimeline } from '../../../../common/types/timeline/api';
 import { TimelineType, TimelineStatus } from '../../../../common/types/timeline/api';
 import { Direction } from '../../../../common/search_strategy';
 
-export const draftTimelineDefaults: TimelineSOServerRepresentationType = {
+export const draftTimelineDefaults: SavedTimeline = {
   columns: defaultHeaders,
   dataProviders: [],
   description: '',

@@ -10,16 +10,13 @@ import { isEmpty } from 'lodash/fp';
 import moment from 'moment';
 import { timeline as timelineLib, pinnedEvent as pinnedEventLib } from '../../../saved_object';
 import type { FrameworkRequest } from '../../../../framework';
-import type {
-  ResponseTimeline,
-  TimelineSOServerRepresentationType,
-} from '../../../../../../common/types/timeline/api';
+import type { ResponseTimeline, SavedTimeline } from '../../../../../../common/types/timeline/api';
 import { persistNotes } from '../../../saved_object/notes/persist_notes';
 import type { NoteResult } from '../../../../../../common/types/timeline/note';
 
 interface CreateTimelineProps {
   frameworkRequest: FrameworkRequest;
-  timeline: TimelineSOServerRepresentationType;
+  timeline: SavedTimeline;
   timelineSavedObjectId?: string | null;
   timelineVersion?: string | null;
   overrideNotesOwner?: boolean;

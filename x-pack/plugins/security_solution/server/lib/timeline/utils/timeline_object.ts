@@ -6,7 +6,7 @@
  */
 
 import type {
-  TimelineSavedToReturnObjectRuntimeType,
+  TimelineSavedObject,
   TimelineTypeLiteral,
 } from '../../../../common/types/timeline/api';
 import { TimelineType, TimelineStatus } from '../../../../common/types/timeline/api';
@@ -26,7 +26,7 @@ export class TimelineObject {
   public readonly version: string | number | null;
   private frameworkRequest: FrameworkRequest;
 
-  public data: TimelineSavedToReturnObjectRuntimeType | null;
+  public data: TimelineSavedObject | null;
 
   constructor({
     id = null,

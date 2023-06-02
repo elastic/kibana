@@ -7,7 +7,7 @@
 
 import type { AuthenticatedUser } from '@kbn/security-plugin/common/model';
 
-import type { TimelineSOServerRepresentationTypeWithSavedObjectId } from '../../../../../common/types/timeline/api';
+import type { SavedTimelineWithSavedObjectId } from '../../../../../common/types/timeline/api';
 import { TimelineStatus, TimelineType } from '../../../../../common/types/timeline/api';
 import type { NoteSavedObject } from '../../../../../common/types/timeline/note';
 
@@ -15,7 +15,7 @@ import { pickSavedTimeline } from './pick_saved_timeline';
 
 describe('pickSavedTimeline', () => {
   const mockDateNow = new Date('2020-04-03T23:00:00.000Z').valueOf();
-  const getMockSavedTimeline = (): TimelineSOServerRepresentationTypeWithSavedObjectId & {
+  const getMockSavedTimeline = (): SavedTimelineWithSavedObjectId & {
     savedObjectId?: string | null;
     version?: string;
     eventNotes?: NoteSavedObject[];

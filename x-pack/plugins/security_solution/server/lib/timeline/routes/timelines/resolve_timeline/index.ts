@@ -20,7 +20,7 @@ import { buildFrameworkRequest } from '../../../utils/common';
 import { getTimelineQuerySchema } from '../../../schemas/timelines';
 import { getTimelineTemplateOrNull, resolveTimelineOrNull } from '../../../saved_object/timelines';
 import type {
-  TimelineSOServerRepresentationType,
+  SavedTimeline,
   ResolvedTimelineWithOutcomeSavedObjectResponse,
 } from '../../../../../../common/types/timeline/api';
 
@@ -45,10 +45,7 @@ export const resolveTimelineRoute = (
         const query = request.query ?? {};
         const { template_timeline_id: templateTimelineId, id } = query;
 
-        let res:
-          | TimelineSOServerRepresentationType
-          | ResolvedTimelineWithOutcomeSavedObjectResponse
-          | null = null;
+        let res: SavedTimeline | ResolvedTimelineWithOutcomeSavedObjectResponse | null = null;
 
         if (templateTimelineId != null && id == null) {
           // Template timelineId is not a SO id, so it does not need to be updated to use resolve
