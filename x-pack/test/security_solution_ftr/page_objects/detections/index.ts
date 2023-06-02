@@ -206,7 +206,7 @@ export class DetectionsPageObject extends FtrService {
    */
   async clickRefresh(): Promise<void> {
     await this.ensureOnAlertsPage();
-    this.testSubjects.click('querySubmitButton');
+    await this.testSubjects.click('querySubmitButton');
 
     // wait for refresh to complete
     await this.retry.waitFor(

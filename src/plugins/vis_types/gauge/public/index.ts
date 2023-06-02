@@ -6,10 +6,12 @@
  * Side Public License, v 1.
  */
 
+import { PluginInitializerContext } from '@kbn/core/public';
+import { GaugePublicConfig } from '../config';
 import { VisTypeGaugePlugin } from './plugin';
 
-export function plugin() {
-  return new VisTypeGaugePlugin();
+export function plugin(initializerContext: PluginInitializerContext<GaugePublicConfig>) {
+  return new VisTypeGaugePlugin(initializerContext);
 }
 
 export type { VisTypeGaugePluginSetup, VisTypeGaugePluginStart } from './types';
