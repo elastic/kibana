@@ -21,6 +21,7 @@ const createPackageInfo = (parts: Partial<PackageInfo> = {}): PackageInfo => ({
   dist: true,
   branch: 'master',
   version: '8.0.0',
+  buildDate: new Date('2023-05-15T23:12:09.000Z'),
 });
 
 const createUiPlugins = (...ids: string[]): UiPlugins => ({

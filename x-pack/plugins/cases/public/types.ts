@@ -24,6 +24,8 @@ import type { ApmBase } from '@elastic/apm-rum';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { FilesSetup, FilesStart } from '@kbn/files-plugin/public';
 import type { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
+import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+
 import type {
   CasesBulkGetRequest,
   CasesBulkGetResponse,
@@ -62,18 +64,19 @@ export interface CasesPluginSetup {
 }
 
 export interface CasesPluginStart {
+  apm?: ApmBase;
   data: DataPublicPluginStart;
   embeddable: EmbeddableStart;
-  files: FilesStart;
-  licensing?: LicensingPluginStart;
-  lens: LensPublicStart;
-  storage: Storage;
-  triggersActionsUi: TriggersActionsStart;
   features: FeaturesPluginStart;
+  files: FilesStart;
+  lens: LensPublicStart;
+  licensing?: LicensingPluginStart;
+  savedObjectsManagement: SavedObjectsManagementPluginStart;
   security: SecurityPluginStart;
   spaces?: SpacesPluginStart;
-  apm?: ApmBase;
-  savedObjectsManagement: SavedObjectsManagementPluginStart;
+  storage: Storage;
+  triggersActionsUi: TriggersActionsStart;
+  uiActions: UiActionsStart;
 }
 
 /**

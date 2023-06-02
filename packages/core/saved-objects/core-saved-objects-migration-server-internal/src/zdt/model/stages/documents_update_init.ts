@@ -27,6 +27,34 @@ export const documentsUpdateInit: ModelStage<
 
   const types = context.types.map((type) => context.typeRegistry.getType(type)!);
   const logs: MigrationLog[] = [...state.logs];
+  const excludeFilterHooks = Object.fromEntries(
+    context.types
+      .map((name) => context.typeRegistry.getType(name)!)
+      .filter((type) => !!type.excludeOnUpgrade)
+      .map((type) => [type.name, type.excludeOnUpgrade!])
+  );
+  const outdatedDocumentsQuery = getOutdatedDocumentsQuery({ types });
+  const transformRawDocs = createDocumentTransformFn({
+    serializer: context.serializer,
+    documentMigrator: context.documentMigrator,
+  });
+  const commonState = {
+    logs,
+    excludeOnUpgradeQuery: excludeUnusedTypesQuery,
+    excludeFromUpgradeFilterHooks: excludeFilterHooks,
+    outdatedDocumentsQuery,
+    transformRawDocs,
+  };
+
+  // index was previously using the v2 algo, we skip compat check and jump to next stage
+  if (state.previousAlgorithm === 'v2') {
+    return {
+      ...state,
+      ...commonState,
+      controlState: 'SET_DOC_MIGRATION_STARTED',
+    };
+  }
+
   const versionCheck = checkVersionCompatibility({
     mappings: state.previousMappings,
     types,
@@ -43,24 +71,9 @@ export const documentsUpdateInit: ModelStage<
     // app version is greater than the index mapping version.
     // scenario of an upgrade: we need to run the document migration.
     case 'greater':
-      const excludeFilterHooks = Object.fromEntries(
-        context.types
-          .map((name) => context.typeRegistry.getType(name)!)
-          .filter((type) => !!type.excludeOnUpgrade)
-          .map((type) => [type.name, type.excludeOnUpgrade!])
-      );
-      const outdatedDocumentsQuery = getOutdatedDocumentsQuery({ types });
-      const transformRawDocs = createDocumentTransformFn({
-        serializer: context.serializer,
-        documentMigrator: context.documentMigrator,
-      });
       return {
         ...state,
-        logs,
-        excludeOnUpgradeQuery: excludeUnusedTypesQuery,
-        excludeFromUpgradeFilterHooks: excludeFilterHooks,
-        outdatedDocumentsQuery,
-        transformRawDocs,
+        ...commonState,
         controlState: 'SET_DOC_MIGRATION_STARTED',
       };
     // app version and index mapping version are the same.

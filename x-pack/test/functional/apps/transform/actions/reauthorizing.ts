@@ -14,7 +14,7 @@ import type { SecurityCreateApiKeyResponse } from '@elastic/elasticsearch/lib/ap
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 import { getLatestTransformConfig, getPivotTransformConfig } from '../helpers';
 import { USER } from '../../../services/transform/security_common';
-import { COMMON_REQUEST_HEADERS } from '../../../services/ml/common_api';
+import { getCommonRequestHeader } from '../../../services/ml/common_api';
 
 interface TestDataPivot {
   suiteTitle: string;
@@ -46,9 +46,9 @@ interface TestDataLatest {
 
 type TestData = TestDataPivot | TestDataLatest;
 
-function generateHeaders(apiKey: SecurityCreateApiKeyResponse) {
+function generateHeaders(apiKey: SecurityCreateApiKeyResponse, version?: string) {
   return {
-    ...COMMON_REQUEST_HEADERS,
+    ...getCommonRequestHeader(version),
     'es-secondary-authorization': `ApiKey ${apiKey.encoded}`,
   };
 }
@@ -144,7 +144,7 @@ export default function ({ getService }: FtrProviderContext) {
         await transform.api.createTransform(testData.originalConfig.id, testData.originalConfig, {
           deferValidation: true,
           // Create transforms with secondary authorization headers
-          headers: generateHeaders(apiKeysForTransformUsers.get(testData.created_by_user)!),
+          headers: generateHeaders(apiKeysForTransformUsers.get(testData.created_by_user)!, '1'),
         });
         // For transforms created with insufficient permissions, they can be created but not started
         // so we should not assert that the api call is successful here
