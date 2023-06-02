@@ -22,9 +22,11 @@ import {
 } from './rules_table_defaults';
 import { RuleSource } from './rules_table_saved_state';
 import { useRulesTableSavedState } from './use_rules_table_saved_state';
+import { usePrebuiltRulesInstallReview } from '../../../../rule_management/logic/prebuilt_rules/use_prebuilt_rules_install_review';
 
 jest.mock('../../../../../common/lib/kibana');
 jest.mock('../../../../rule_management/logic/use_find_rules');
+jest.mock('../../../../rule_management/logic/prebuilt_rules/use_prebuilt_rules_install_review');
 jest.mock('../../../../rule_management/api/hooks/use_fetch_rules_snooze_settings');
 jest.mock('./use_rules_table_saved_state');
 
@@ -46,6 +48,9 @@ function renderUseRulesTableContext({
     isLoading: !rules,
     isRefetching: false,
     isError: rules instanceof Error,
+  });
+  (usePrebuiltRulesInstallReview as jest.Mock).mockReturnValue({
+    data: [],
   });
   (useFetchRulesSnoozeSettings as jest.Mock).mockReturnValue({
     data: rulesSnoozeSettings instanceof Error ? undefined : rulesSnoozeSettings,
