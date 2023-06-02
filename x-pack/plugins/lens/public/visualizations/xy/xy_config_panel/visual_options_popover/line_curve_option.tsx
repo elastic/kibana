@@ -34,16 +34,16 @@ export const LineCurveOption: React.FC<LineCurveOptionProps> = ({
         data-test-subj="lnsCurveStyleSelect"
         compressed
         options={lineCurveDefinitions.map(({ type, title, description }) => ({
-            value: type,
-            dropdownDisplay: (
-              <>
-                <strong>{title}</strong>
-                <EuiText size="xs" color="subdued">
-                  <p>{description}</p>
-                </EuiText>
-              </>
-            ),
-            inputDisplay: title,
+          value: type,
+          dropdownDisplay: (
+            <>
+              <strong>{title}</strong>
+              <EuiText size="xs" color="subdued">
+                <p>{description}</p>
+              </EuiText>
+            </>
+          ),
+          inputDisplay: title,
         }))}
         valueOfSelected={value}
         onChange={onChange}

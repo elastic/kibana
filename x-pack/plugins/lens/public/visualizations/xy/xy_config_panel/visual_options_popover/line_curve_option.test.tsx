@@ -12,11 +12,14 @@ import { LineCurveOption } from './line_curve_option';
 import { lineCurveDefinitions } from './line_curve_definitions';
 
 describe('Line curve option', () => {
-  it.each(lineCurveDefinitions.map((v) => v.type))('should show currently line curve option - %s', (type) => {
-    const component = shallow(<LineCurveOption onChange={jest.fn()} value={type} />);
+  it.each(lineCurveDefinitions.map((v) => v.type))(
+    'should show currently line curve option - %s',
+    (type) => {
+      const component = shallow(<LineCurveOption onChange={jest.fn()} value={type} />);
 
-    expect(component.find(EuiSuperSelect).first().prop('valueOfSelected')).toEqual(type);
-  })
+      expect(component.find(EuiSuperSelect).first().prop('valueOfSelected')).toEqual(type);
+    }
+  );
 
   it('should show line curve option when enabled', () => {
     const component = mount(

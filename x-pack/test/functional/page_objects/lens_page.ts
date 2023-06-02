@@ -7,8 +7,8 @@
 
 import expect from '@kbn/expect';
 import { setTimeout as setTimeoutAsync } from 'timers/promises';
+import type { FittingFunction, XYCurveType } from '@kbn/lens-plugin/public';
 import { WebElementWrapper } from '../../../../test/functional/services/lib/web_element_wrapper';
-import type { FittingFunction, XYCurveType } from '../../../plugins/lens/public';
 import { FtrProviderContext } from '../ftr_provider_context';
 import { logWrapper } from './log_wrapper';
 
