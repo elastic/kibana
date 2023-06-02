@@ -33,7 +33,7 @@ describe('UserActionUsername ', () => {
 
   test('it shows the fullname when hovering the username', () => {
     // Use fake timers so we don't have to wait for the EuiToolTip timeout
-    jest.useFakeTimers('legacy');
+    jest.useFakeTimers({ legacyFakeTimers: true });
 
     wrapper.find('[data-test-subj="user-action-username-tooltip"]').first().simulate('mouseOver');
 
@@ -49,7 +49,7 @@ describe('UserActionUsername ', () => {
 
   test('it shows the username when hovering the username and the fullname is missing', () => {
     // Use fake timers so we don't have to wait for the EuiToolTip timeout
-    jest.useFakeTimers('legacy');
+    jest.useFakeTimers({ legacyFakeTimers: true });
 
     const newWrapper = mount(<UserActionUsername username="elastic" />);
     newWrapper

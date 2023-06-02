@@ -33,7 +33,7 @@ describe('DraggableWrapper', () => {
   const mount = useMountAppended();
 
   beforeEach(() => {
-    jest.useFakeTimers('legacy');
+    jest.useFakeTimers({ legacyFakeTimers: true });
   });
 
   describe('rendering', () => {
@@ -101,7 +101,7 @@ describe('DraggableWrapper', () => {
       await waitFor(() => {
         wrapper.find('[data-test-subj="withHoverActionsButton"]').simulate('mouseenter');
         wrapper.update();
-        jest.runAllTimers();
+        jest.advanceTimersByTime(500);
         wrapper.update();
         expect(wrapper.find('[data-test-subj="hover-actions-copy-button"]').exists()).toBe(true);
       });

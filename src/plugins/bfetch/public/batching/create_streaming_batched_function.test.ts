@@ -51,7 +51,7 @@ const setup = () => {
 
 describe('createStreamingBatchedFunction()', () => {
   beforeAll(() => {
-    jest.useFakeTimers('legacy');
+    jest.useFakeTimers({ legacyFakeTimers: true });
   });
 
   afterAll(() => {

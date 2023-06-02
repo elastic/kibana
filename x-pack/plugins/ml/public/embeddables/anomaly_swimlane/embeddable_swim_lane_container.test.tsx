@@ -109,6 +109,7 @@ describe('ExplorerSwimlaneContainer', () => {
         onRenderComplete={onRenderComplete}
         onError={onError}
       />,
+      // @ts-expect-error upgrade to jest 28
       defaultOptions
     );
 
@@ -151,6 +152,7 @@ describe('ExplorerSwimlaneContainer', () => {
         onRenderComplete={onRenderComplete}
         onError={onError}
       />,
+      // @ts-expect-error upgrade to jest 28
       defaultOptions
     );
     const errorMessage = await findByText('Something went wrong');

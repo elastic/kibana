@@ -194,7 +194,7 @@ test('should be disabled in case not enough permissions', async () => {
 
 describe('Completed inactivity', () => {
   beforeEach(() => {
-    jest.useFakeTimers('legacy');
+    jest.useFakeTimers({ legacyFakeTimers: true });
   });
   afterEach(() => {
     jest.useRealTimers();
@@ -255,7 +255,7 @@ describe('Completed inactivity', () => {
 describe('tour steps', () => {
   describe('loading state', () => {
     beforeAll(() => {
-      jest.useFakeTimers('legacy');
+      jest.useFakeTimers({ legacyFakeTimers: true });
     });
 
     afterAll(() => {

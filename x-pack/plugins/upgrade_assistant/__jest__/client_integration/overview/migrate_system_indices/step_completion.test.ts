@@ -55,7 +55,7 @@ describe('Overview - Migrate system indices - Step completion', () => {
 
   describe('Poll for new status', () => {
     beforeEach(async () => {
-      jest.useFakeTimers('legacy');
+      jest.useFakeTimers({ legacyFakeTimers: true });
 
       // First request should make the step be incomplete
       httpRequestsMockHelpers.setLoadSystemIndicesMigrationStatus({

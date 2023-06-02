@@ -31,6 +31,7 @@ describe('AnomalyChartsInitializer', () => {
         onCreate={(params) => onCreate(params)}
         onCancel={onCancel}
       />,
+      // @ts-expect-error upgrade to jest 28
       defaultOptions
     );
     const confirmButton = screen.getByText(/Confirm/i).closest('button');
