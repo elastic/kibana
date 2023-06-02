@@ -5,12 +5,13 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-/* eslint-disable no-console */
+
 import globby from 'globby';
 import * as fs from 'fs';
 import yaml from 'js-yaml';
 import { Config, bundle, LocationObject } from '@redocly/openapi-core';
 import path from 'path';
+import { ToolingLog } from '@kbn/tooling-log';
 
 export interface OpenAPISpec {
   $ref?: string;
@@ -79,7 +80,10 @@ function replaceRef(obj: OpenAPISpec, oldRef: string, newRef: string): void {
   }
 }
 
-export const docLinker = async ({ sourceDir = './openapi' }: { sourceDir: string }) => {
+export const docLinker = async (
+  { sourceDir = './openapi' }: { sourceDir: string },
+  { log, flags }: { log: ToolingLog }
+) => {
   const entryPointFiles = await globby([`${sourceDir}/**/entrypoint.yaml`]);
   const yamlFiles = await globby([
     `${sourceDir}/**/*.yaml`,
@@ -87,11 +91,13 @@ export const docLinker = async ({ sourceDir = './openapi' }: { sourceDir: string
     '!**/bundle.yaml',
   ]);
 
+  log.info(JSON.stringify(flags, null, 2));
+
   entryPointFiles.forEach((entryPointFile: string) => {
     if (!entryPointFile.endsWith('entrypoint.yaml')) return;
 
     const ref = path.join(process.cwd(), entryPointFile);
-    console.log(`Linking ${ref}`);
+    log.info(`Linking ${ref}`);
 
     bundle({
       ref,
@@ -118,7 +124,7 @@ export const docLinker = async ({ sourceDir = './openapi' }: { sourceDir: string
               const spec = loadYamlFile(location.source.absoluteRef);
               const definition = getValueFromPath(spec, location.pointer);
               if (definition && definition.$ref) {
-                console.log(
+                log.info(
                   `Replacing ${definition.$ref} to ${relativePath} in ${location.source.absoluteRef}`
                 );
                 replaceRef(spec, definition.$ref, relativePath);
@@ -131,14 +137,14 @@ export const docLinker = async ({ sourceDir = './openapi' }: { sourceDir: string
             });
 
             if (!found) {
-              console.error('Unknown error, run @readcly/cli for details');
+              log.error('Unknown error, run @readcly/cli for details');
               process.exit(1);
             }
           });
         });
       })
       .catch((error) => {
-        console.log('catched it', error);
+        log.info('catched it', error);
       });
   });
 };
