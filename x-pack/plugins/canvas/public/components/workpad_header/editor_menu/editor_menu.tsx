@@ -13,6 +13,7 @@ import {
   EmbeddableFactoryDefinition,
   EmbeddableInput,
 } from '@kbn/embeddable-plugin/public';
+import useObservable from 'react-use/lib/useObservable';
 import { trackCanvasUiMetric, METRIC_TYPE } from '../../../lib/ui_metric';
 import {
   useEmbeddablesService,
@@ -39,10 +40,8 @@ interface UnwrappedEmbeddableFactory {
 export const EditorMenu: FC<Props> = ({ addElement }) => {
   const embeddablesService = useEmbeddablesService();
   const { pathname, search, hash } = useLocation();
-  const platformService = usePlatformService();
   const stateTransferService = embeddablesService.getStateTransfer();
   const visualizationsService = useVisualizationsService();
-  const IS_DARK_THEME = platformService.getUISetting('theme:darkMode');
 
   const embeddableFactories = useMemo(
     () => (embeddablesService ? Array.from(embeddablesService.getEmbeddableFactories()) : []),
@@ -161,7 +160,6 @@ export const EditorMenu: FC<Props> = ({ addElement }) => {
       createNewVisType={createNewVisType}
       createNewEmbeddable={createNewEmbeddable}
       promotedVisTypes={promotedVisTypes}
-      isDarkThemeEnabled={IS_DARK_THEME}
       factories={factories}
       visTypeAliases={visTypeAliases}
     />
