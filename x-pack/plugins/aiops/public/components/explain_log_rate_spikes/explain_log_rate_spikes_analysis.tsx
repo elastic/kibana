@@ -139,6 +139,7 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
     errors: streamErrors,
   } = useFetchStream<ApiExplainLogRateSpikes, typeof basePath>(
     `${basePath}/internal/aiops/explain_log_rate_spikes`,
+    '1',
     {
       start: earliest,
       end: latest,

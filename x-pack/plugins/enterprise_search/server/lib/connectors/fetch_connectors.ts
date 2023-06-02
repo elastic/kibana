@@ -49,11 +49,10 @@ export const fetchConnectorByIndexName = async (
       index: CONNECTORS_INDEX,
       query: { term: { index_name: indexName } },
     });
+    // Because we cannot guarantee that the index has been refreshed and is giving us the most recent source
+    // we need to fetch the source with a direct get from the index, which will always be up to date
     const result = connectorResult.hits.hits[0]?._source
-      ? {
-          ...connectorResult.hits.hits[0]._source,
-          id: connectorResult.hits.hits[0]._id,
-        }
+      ? (await fetchConnectorById(client, connectorResult.hits.hits[0]._id))?.value
       : undefined;
     return result;
   } catch (error) {

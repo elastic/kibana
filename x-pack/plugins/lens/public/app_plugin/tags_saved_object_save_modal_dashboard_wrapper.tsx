@@ -43,6 +43,7 @@ export const TagEnhancedSavedObjectSaveModalDashboard: FC<
         <savedObjectsTagging.ui.components.SavedObjectSaveModalTagSelector
           initialSelection={initialTags}
           onTagsSelected={setSelectedTags}
+          markOptional
         />
       ) : undefined,
     [savedObjectsTagging, initialTags]

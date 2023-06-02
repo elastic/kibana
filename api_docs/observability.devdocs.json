@@ -969,61 +969,20 @@
           },
           {
             "parentPluginId": "observability",
-            "id": "def-public.BurnRateRuleParams.burnRateThreshold",
-            "type": "number",
+            "id": "def-public.BurnRateRuleParams.windows",
+            "type": "Array",
             "tags": [],
-            "label": "burnRateThreshold",
-            "description": [],
-            "path": "x-pack/plugins/observability/public/typings/slo/index.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "observability",
-            "id": "def-public.BurnRateRuleParams.maxBurnRateThreshold",
-            "type": "number",
-            "tags": [],
-            "label": "maxBurnRateThreshold",
-            "description": [],
-            "path": "x-pack/plugins/observability/public/typings/slo/index.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "observability",
-            "id": "def-public.BurnRateRuleParams.longWindow",
-            "type": "Object",
-            "tags": [],
-            "label": "longWindow",
+            "label": "windows",
             "description": [],
             "signature": [
               {
                 "pluginId": "observability",
                 "scope": "public",
                 "docId": "kibObservabilityPluginApi",
-                "section": "def-public.Duration",
-                "text": "Duration"
-              }
-            ],
-            "path": "x-pack/plugins/observability/public/typings/slo/index.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "observability",
-            "id": "def-public.BurnRateRuleParams.shortWindow",
-            "type": "Object",
-            "tags": [],
-            "label": "shortWindow",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "observability",
-                "scope": "public",
-                "docId": "kibObservabilityPluginApi",
-                "section": "def-public.Duration",
-                "text": "Duration"
-              }
+                "section": "def-public.WindowSchema",
+                "text": "WindowSchema"
+              },
+              "[]"
             ],
             "path": "x-pack/plugins/observability/public/typings/slo/index.ts",
             "deprecated": false,
@@ -3459,6 +3418,104 @@
               "number[]"
             ],
             "path": "x-pack/plugins/observability/public/components/core_web_vitals/core_vitals.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
+        "id": "def-public.WindowSchema",
+        "type": "Interface",
+        "tags": [],
+        "label": "WindowSchema",
+        "description": [],
+        "path": "x-pack/plugins/observability/public/typings/slo/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "observability",
+            "id": "def-public.WindowSchema.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "x-pack/plugins/observability/public/typings/slo/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-public.WindowSchema.burnRateThreshold",
+            "type": "number",
+            "tags": [],
+            "label": "burnRateThreshold",
+            "description": [],
+            "path": "x-pack/plugins/observability/public/typings/slo/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-public.WindowSchema.maxBurnRateThreshold",
+            "type": "number",
+            "tags": [],
+            "label": "maxBurnRateThreshold",
+            "description": [],
+            "path": "x-pack/plugins/observability/public/typings/slo/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-public.WindowSchema.longWindow",
+            "type": "Object",
+            "tags": [],
+            "label": "longWindow",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "observability",
+                "scope": "public",
+                "docId": "kibObservabilityPluginApi",
+                "section": "def-public.Duration",
+                "text": "Duration"
+              }
+            ],
+            "path": "x-pack/plugins/observability/public/typings/slo/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-public.WindowSchema.shortWindow",
+            "type": "Object",
+            "tags": [],
+            "label": "shortWindow",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "observability",
+                "scope": "public",
+                "docId": "kibObservabilityPluginApi",
+                "section": "def-public.Duration",
+                "text": "Duration"
+              }
+            ],
+            "path": "x-pack/plugins/observability/public/typings/slo/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-public.WindowSchema.actionGroup",
+            "type": "string",
+            "tags": [],
+            "label": "actionGroup",
+            "description": [],
+            "path": "x-pack/plugins/observability/public/typings/slo/index.ts",
             "deprecated": false,
             "trackAdoption": false
           }
