@@ -20,6 +20,7 @@ import { SLO_DESTINATION_INDEX_NAME } from '../../assets/constants';
 import { CompositeSLO, CompositeSLOId, DateRange, Summary } from '../../domain/models';
 import { computeSLI, computeSummaryStatus, toErrorBudget } from '../../domain/services';
 import { toDateRange } from '../../domain/services/date_range';
+import { toHighPrecision } from '../../utils/number';
 
 export interface SummaryClient {
   fetchSummary(compositeSloList: CompositeSLO[]): Promise<Record<CompositeSLOId, Summary>>;
@@ -91,7 +92,7 @@ export class DefaultSummaryClient implements SummaryClient {
 
         const errorBudget = toErrorBudget(initialErrorBudget, errorBudgetConsumed);
         summaryByCompositeSlo[compositeSlo.id] = {
-          sliValue,
+          sliValue: toHighPrecision(sliValue),
           errorBudget,
           status: computeSummaryStatus(compositeSlo, sliValue, errorBudget),
         };
@@ -120,7 +121,7 @@ export class DefaultSummaryClient implements SummaryClient {
           calendarAlignedTimeWindowSchema.is(compositeSlo.timeWindow)
         );
         summaryByCompositeSlo[compositeSlo.id] = {
-          sliValue,
+          sliValue: toHighPrecision(sliValue),
           errorBudget,
           status: computeSummaryStatus(compositeSlo, sliValue, errorBudget),
         };
