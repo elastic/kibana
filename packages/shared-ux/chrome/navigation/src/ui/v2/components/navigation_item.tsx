@@ -6,65 +6,55 @@
  * Side Public License, v 1.
  */
 
-import { EuiButton } from '@elastic/eui';
-import React, { useCallback } from 'react';
+import React, { Fragment, ReactElement, ReactNode, useEffect } from 'react';
 
-import { NodeProps } from '../types';
-import { useInitNavnode } from '../use_init_navnode';
+import type { ChromeProjectNavigationNodeEnhanced, NodeProps } from '../types';
+import { useInitNavNode } from '../hooks';
+import { useNavigation } from './navigation';
 
-function NavigationItemComp(node: NodeProps) {
-  const { children, onRemove } = node;
-  const { navNode } = useInitNavnode(node);
-  const { title, deepLink } = navNode ?? {};
+export interface Props extends NodeProps {
+  element?: string;
+  unstyled?: boolean;
+}
 
-  // Note: temporary UI. In future PR we'll have an EUI component here
-  const wrapTextWithLink = useCallback(
-    (text?: string) =>
-      deepLink ? (
-        <a href={deepLink.href} target="_blank">
-          {text}
-        </a>
-      ) : (
-        text
-      ),
-    [deepLink]
-  );
+function isReactElement(element: ReactNode): element is ReactElement {
+  return React.isValidElement(element);
+}
 
-  const renderContent = useCallback(() => {
-    if (!children) {
-      return wrapTextWithLink(title);
-    }
+function NavigationItemComp(props: Props) {
+  const navigationContext = useNavigation();
+  const navNodeRef = React.useRef<ChromeProjectNavigationNodeEnhanced | null>(null);
 
-    if (typeof children === 'string') {
-      return wrapTextWithLink(children);
-    } else if (typeof children === 'function') {
-      return children(deepLink);
-    }
+  const { element, children, ...node } = props;
+  const unstyled = props.unstyled ?? navigationContext.unstyled;
 
-    return children;
-  }, [children, deepLink, title, wrapTextWithLink]);
+  let renderItem: (() => ReactElement) | undefined;
 
-  const renderTempUIToTestRemoveBehavior = () =>
-    onRemove ? (
-      <>
-        {' '}
-        <EuiButton size="s" onClick={() => onRemove()}>
-          Remove
-        </EuiButton>
-      </>
-    ) : null;
+  if (!unstyled && children && (typeof children === 'function' || isReactElement(children))) {
+    renderItem =
+      typeof children === 'function' ? () => children(navNodeRef.current) : () => children;
+  }
 
-  if (!navNode) {
+  const { navNode } = useInitNavNode({ ...node, children, renderItem });
+
+  useEffect(() => {
+    navNodeRef.current = navNode;
+  }, [navNode]);
+
+  if (!navNode || !unstyled) {
     return null;
   }
 
-  return (
-    // Note: temporary UI. In future PR we'll have an EUI component here
-    <li style={{ paddingLeft: '20px', marginBottom: '5px' }}>
-      {renderContent()}
-      {renderTempUIToTestRemoveBehavior()}
-    </li>
-  );
+  if (children) {
+    if (typeof children === 'function') {
+      return children(navNode);
+    }
+    return <>{children}</>;
+  }
+
+  const Element = element || Fragment;
+
+  return <Element>{navNode.title}</Element>;
 }
 
 export const NavigationItem = React.memo(NavigationItemComp);
