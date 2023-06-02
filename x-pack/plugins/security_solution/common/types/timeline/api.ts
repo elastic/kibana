@@ -227,7 +227,7 @@ export enum RowRendererId {
   zeek = 'zeek',
 }
 
-export const RowRendererIdRuntimeType = stringEnum(RowRendererId, 'RowRendererId');
+const RowRendererIdRuntimeType = stringEnum(RowRendererId, 'RowRendererId');
 
 /**
  * Timeline template type

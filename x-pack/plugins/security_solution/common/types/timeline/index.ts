@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { stringEnum } from '../../utility_types';
-
 export * from './cells';
 export * from './columns';
 export * from './data_provider';
@@ -14,31 +12,6 @@ export * from './rows';
 export * from './store';
 
 import type { ExpandedDetailType } from '../detail_panel';
-
-export enum RowRendererId {
-  /** event.kind: signal */
-  alert = 'alert',
-  /** endpoint alerts (created on the endpoint) */
-  alerts = 'alerts',
-  auditd = 'auditd',
-  auditd_file = 'auditd_file',
-  library = 'library',
-  netflow = 'netflow',
-  plain = 'plain',
-  registry = 'registry',
-  suricata = 'suricata',
-  system = 'system',
-  system_dns = 'system_dns',
-  system_endgame_process = 'system_endgame_process',
-  system_file = 'system_file',
-  system_fim = 'system_fim',
-  system_security_event = 'system_security_event',
-  system_socket = 'system_socket',
-  threat_match = 'threat_match',
-  zeek = 'zeek',
-}
-
-export const RowRendererIdRuntimeType = stringEnum(RowRendererId, 'RowRendererId');
 
 /**
  * Used for scrolling top inside a tab. Especially when swiching tabs.

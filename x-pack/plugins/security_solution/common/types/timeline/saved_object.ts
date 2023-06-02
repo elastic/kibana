@@ -201,7 +201,7 @@ enum RowRendererId {
   zeek = 'zeek',
 }
 
-export const RowRendererIdRuntimeType = stringEnum(RowRendererId, 'RowRendererId');
+const RowRendererIdRuntimeType = stringEnum(RowRendererId, 'RowRendererId');
 
 /*
  *  Saved Object Timeline Types
