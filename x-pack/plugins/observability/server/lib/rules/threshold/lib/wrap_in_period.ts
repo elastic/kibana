@@ -6,8 +6,8 @@
  */
 
 import moment from 'moment';
+import { MetricExpressionParams } from '../../../../../common/threshold_rule/types';
 import { TIMESTAMP_FIELD } from '../../../../../common/threshold_rule/constants';
-import { MetricExpressionParams } from '../types';
 
 export const createLastPeriod = (
   lastPeriodEnd: number,

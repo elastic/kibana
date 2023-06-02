@@ -5,9 +5,12 @@
  * 2.0.
  */
 
-import { Comparator, Aggregators } from '../../../../../common/threshold_rule/types';
+import {
+  Comparator,
+  Aggregators,
+  MetricExpressionParams,
+} from '../../../../../common/threshold_rule/types';
 import moment from 'moment';
-import { MetricExpressionParams } from '../types';
 import { getElasticsearchMetricQuery } from './metric_query';
 
 describe("The Metric Threshold Alert's getElasticsearchMetricQuery", () => {

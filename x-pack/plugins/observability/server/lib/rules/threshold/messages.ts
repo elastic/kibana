@@ -6,8 +6,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { Comparator } from '../../../../common/threshold_rule/types';
 import { formatDurationFromTimeUnitChar, TimeUnitChar } from '../../../../common';
-import { AlertStates, Comparator } from './types';
+import { AlertStates } from './types';
 import { UNGROUPED_FACTORY_KEY } from './utils';
 
 export const DOCUMENT_COUNT_I18N = i18n.translate(

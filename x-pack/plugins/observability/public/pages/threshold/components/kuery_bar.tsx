@@ -74,7 +74,7 @@ export function MetricsExplorerKueryBar({
   };
 
   const defaultPlaceholder = i18n.translate(
-    'xpack.infra.homePage.toolbar.kqlSearchFieldPlaceholder',
+    'xpack.observability.threshold.rule.homePage.toolbar.kqlSearchFieldPlaceholder',
     {
       defaultMessage: 'Search for infrastructure data… (e.g. host.name:host-1)',
     }

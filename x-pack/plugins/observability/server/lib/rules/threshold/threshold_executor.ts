@@ -120,8 +120,8 @@ export const createMetricThresholdExecutor = ({
       executionId,
     });
 
-    const { alertWithLifecycle, savedObjectsClient, getAlertUuid, getAlertByAlertUuid, dataViews } =
-      services;
+    // TODO: check if we need to use "savedObjectsClient"
+    const { alertWithLifecycle, getAlertUuid, getAlertByAlertUuid, dataViews } = services;
 
     const alertFactory: MetricThresholdAlertFactory = (
       id,
@@ -139,12 +139,8 @@ export const createMetricThresholdExecutor = ({
           ...flattenAdditionalContext(additionalContext),
         },
       });
-
-    const {
-      sourceId,
-      alertOnNoData,
-      alertOnGroupDisappear: _alertOnGroupDisappear,
-    } = params as {
+    // TODO: check if we need to use "sourceId"
+    const { alertOnNoData, alertOnGroupDisappear: _alertOnGroupDisappear } = params as {
       sourceId?: string;
       alertOnNoData: boolean;
       alertOnGroupDisappear: boolean | undefined;
