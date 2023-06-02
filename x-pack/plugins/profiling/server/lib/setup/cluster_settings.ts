@@ -6,13 +6,13 @@
  */
 
 import { ProfilingSetupOptions } from './types';
-import { SetupState } from '../../../common/setup';
+import { PartialSetupState } from '../../../common/setup';
 
 const MAX_BUCKETS = 150000;
 
 export async function validateMaximumBuckets({
   client,
-}: ProfilingSetupOptions): Promise<Partial<SetupState>> {
+}: ProfilingSetupOptions): Promise<PartialSetupState> {
   const settings = await client.getEsClient().cluster.getSettings({});
   const maxBuckets = settings.persistent.search?.max_buckets;
   return {
@@ -34,7 +34,7 @@ export async function setMaximumBuckets({ client }: ProfilingSetupOptions) {
 
 export async function validateResourceManagement({
   client,
-}: ProfilingSetupOptions): Promise<Partial<SetupState>> {
+}: ProfilingSetupOptions): Promise<PartialSetupState> {
   const statusResponse = await client.profilingStatus();
   return {
     resource_management: {

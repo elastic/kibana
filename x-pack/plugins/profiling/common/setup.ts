@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { RecursivePartial } from '@kbn/apm-plugin/typings/common';
+
 export interface SetupState {
   cloud: {
     available: boolean;
@@ -19,14 +21,16 @@ export interface SetupState {
   permissions: {
     configured: boolean;
   };
-  apm_policy: {
-    installed: boolean;
-  };
-  collector_policy: {
-    installed: boolean;
-  };
-  symbolizer_policy: {
-    installed: boolean;
+  policies: {
+    apm: {
+      installed: boolean;
+    };
+    collector: {
+      installed: boolean;
+    };
+    symbolizer: {
+      installed: boolean;
+    };
   };
   resource_management: {
     enabled: boolean;
@@ -38,6 +42,8 @@ export interface SetupState {
     configured: boolean;
   };
 }
+
+export type PartialSetupState = RecursivePartial<SetupState>;
 
 export function createDefaultSetupState(): SetupState {
   return {
@@ -54,14 +60,16 @@ export function createDefaultSetupState(): SetupState {
     permissions: {
       configured: false,
     },
-    apm_policy: {
-      installed: false,
-    },
-    collector_policy: {
-      installed: false,
-    },
-    symbolizer_policy: {
-      installed: false,
+    policies: {
+      apm: {
+        installed: false,
+      },
+      collector: {
+        installed: false,
+      },
+      symbolizer: {
+        installed: false,
+      },
     },
     resource_management: {
       enabled: false,
@@ -81,18 +89,20 @@ export function areResourcesSetup(state: SetupState): boolean {
     state.resources.created &&
     state.packages.installed &&
     state.permissions.configured &&
-    state.apm_policy.installed &&
-    state.collector_policy.installed &&
-    state.symbolizer_policy.installed &&
+    state.policies.apm.installed &&
+    state.policies.collector.installed &&
+    state.policies.symbolizer.installed &&
     state.settings.configured
   );
 }
 
+function mergeRecursivePartial<T>(base: T, partial: RecursivePartial<T>): T {
+  return { ...base, ...partial };
+}
+
 export function mergePartialSetupStates(
   base: SetupState,
-  partials: Array<Partial<SetupState>>
+  partials: PartialSetupState[]
 ): SetupState {
-  return partials.reduce<SetupState>((previous, current) => {
-    return { ...previous, ...current };
-  }, base);
+  return partials.reduce<SetupState>(mergeRecursivePartial, base);
 }

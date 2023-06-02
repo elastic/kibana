@@ -6,11 +6,11 @@
  */
 
 import { ProfilingSetupOptions } from './types';
-import { SetupState } from '../../../common/setup';
+import { PartialSetupState } from '../../../common/setup';
 
 export async function hasProfilingData({
   client,
-}: ProfilingSetupOptions): Promise<Partial<SetupState>> {
+}: ProfilingSetupOptions): Promise<PartialSetupState> {
   const hasProfilingDataResponse = await client.search('has_any_profiling_data', {
     index: 'profiling*',
     size: 0,

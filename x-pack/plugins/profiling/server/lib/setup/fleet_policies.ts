@@ -10,7 +10,7 @@ import { ElasticsearchClient } from '@kbn/core/server';
 import { fetchFindLatestPackageOrThrow } from '@kbn/fleet-plugin/server/services/epm/registry';
 import { getApmPolicy } from './get_apm_policy';
 import { ProfilingSetupOptions } from './types';
-import { SetupState } from '../../../common/setup';
+import { PartialSetupState } from '../../../common/setup';
 
 async function createIngestAPIKey(esClient: ElasticsearchClient) {
   const apiKeyResponse = await esClient.security.createApiKey({
@@ -43,11 +43,13 @@ async function createIngestAPIKey(esClient: ElasticsearchClient) {
 export async function validateApmPolicy({
   soClient,
   packagePolicyClient,
-}: ProfilingSetupOptions): Promise<Partial<SetupState>> {
+}: ProfilingSetupOptions): Promise<PartialSetupState> {
   const apmPolicy = await getApmPolicy({ packagePolicyClient, soClient });
   return {
-    apm_policy: {
-      installed: !!(apmPolicy && apmPolicy?.inputs[0].config?.['apm-server'].value?.profiling),
+    policies: {
+      apm: {
+        installed: !!(apmPolicy && apmPolicy?.inputs[0].config?.['apm-server'].value?.profiling),
+      },
     },
   };
 }
@@ -112,11 +114,13 @@ const SYMBOLIZER_PACKAGE_POLICY_NAME = 'elastic-universal-profiling-symbolizer';
 export async function validateCollectorPackagePolicy({
   soClient,
   packagePolicyClient,
-}: ProfilingSetupOptions): Promise<Partial<SetupState>> {
+}: ProfilingSetupOptions): Promise<PartialSetupState> {
   const packagePolicies = await packagePolicyClient.list(soClient, {});
   return {
-    collector_policy: {
-      installed: packagePolicies.items.some((pkg) => pkg.name === COLLECTOR_PACKAGE_POLICY_NAME),
+    policies: {
+      collector: {
+        installed: packagePolicies.items.some((pkg) => pkg.name === COLLECTOR_PACKAGE_POLICY_NAME),
+      },
     },
   };
 }
@@ -156,11 +160,13 @@ export async function createCollectorPackagePolicy({
 export async function validateSymbolizerPackagePolicy({
   soClient,
   packagePolicyClient,
-}: ProfilingSetupOptions): Promise<Partial<SetupState>> {
+}: ProfilingSetupOptions): Promise<PartialSetupState> {
   const packagePolicies = await packagePolicyClient.list(soClient, {});
   return {
-    symbolizer_policy: {
-      installed: packagePolicies.items.some((pkg) => pkg.name === SYMBOLIZER_PACKAGE_POLICY_NAME),
+    policies: {
+      symbolizer: {
+        installed: packagePolicies.items.some((pkg) => pkg.name === SYMBOLIZER_PACKAGE_POLICY_NAME),
+      },
     },
   };
 }
