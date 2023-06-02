@@ -219,7 +219,7 @@ export const getTopNavLinks = ({
   };
 
   const defaultMenu = topNavCustomization?.defaultMenu;
-  const entries = topNavCustomization?.getMenuItems?.() ?? [];
+  const entries = [...(topNavCustomization?.getMenuItems?.() ?? [])];
 
   if (!defaultMenu?.new?.disabled) {
     entries.push({ data: newSearch, order: defaultMenu?.new?.order ?? 200 });
