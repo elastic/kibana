@@ -5,15 +5,23 @@
  * 2.0.
  */
 
-import { tcpFormatters as baicTCPFormatters } from '../../../common/formatters/tcp/formatters';
+import { ConfigKey, TCPFields } from '../../../../common/runtime_types';
 import { Formatter, commonFormatters } from './common';
 import { tlsFormatters } from './tls';
-import { ConfigKey, TCPFields } from '../../../common/runtime_types/monitor_management';
 
 export type TCPFormatMap = Record<keyof TCPFields, Formatter>;
 export const tcpFormatters: TCPFormatMap = {
   ...tlsFormatters,
   ...commonFormatters,
-  ...baicTCPFormatters,
+  [ConfigKey.HOSTS]: null,
+  [ConfigKey.PROXY_USE_LOCAL_RESOLVER]: null,
+  [ConfigKey.RESPONSE_RECEIVE_CHECK]: null,
+  [ConfigKey.REQUEST_SEND_CHECK]: null,
+  [ConfigKey.PROXY_URL]: null,
+  [ConfigKey.PORT]: null,
+  [ConfigKey.URLS]: null,
+  [ConfigKey.MODE]: null,
+  [ConfigKey.IPV4]: null,
+  [ConfigKey.IPV6]: null,
   [ConfigKey.METADATA]: null,
 };

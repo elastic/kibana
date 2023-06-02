@@ -5,4 +5,5 @@
  * 2.0.
  */
 
-export { formatKibanaNamespace } from './format_space_name';
+export * from './formatters';
+export { formatKibanaNamespace } from '../../../../common/formatters/format_space_name';

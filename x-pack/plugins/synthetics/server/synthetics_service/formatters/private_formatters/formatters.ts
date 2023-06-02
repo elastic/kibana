@@ -4,16 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { httpFormatters, HTTPFormatMap } from './http';
-import { tcpFormatters, TCPFormatMap } from './tcp';
-import { icmpFormatters, ICMPFormatMap } from './icmp';
-import { browserFormatters, BrowserFormatMap } from './browser';
-import { commonFormatters, CommonFormatMap } from './common';
+import { HTTPFormatMap, httpFormatters } from './http_formatters';
+import { TCPFormatMap, tcpFormatters } from './tcp_formatters';
+import { ICMPFormatMap, icmpFormatters } from './icmp_formatters';
+import { BrowserFormatMap, browserFormatters } from './browser_formatters';
+import { CommonFormatMap, commonFormatters } from './common_formatters';
 
 type Formatters = HTTPFormatMap & TCPFormatMap & ICMPFormatMap & BrowserFormatMap & CommonFormatMap;
 
-export const formatters: Formatters = {
+export const syntheticsPolicyFormatters: Formatters = {
   ...httpFormatters,
   ...icmpFormatters,
   ...tcpFormatters,

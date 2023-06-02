@@ -11,6 +11,8 @@ import {
   formatHeartbeatRequest,
   mixParamsWithGlobalParams,
 } from './format_configs';
+
+import { loggerMock } from '@kbn/logging-mocks';
 import {
   ConfigKey,
   DataStream,
@@ -20,8 +22,7 @@ import {
   ScheduleUnit,
   SyntheticsMonitor,
   VerificationMode,
-} from '../../../common/runtime_types';
-import { loggerMock } from '@kbn/logging-mocks';
+} from '../../../../common/runtime_types';
 
 const testHTTPConfig: Partial<MonitorFields> = {
   type: 'http' as DataStream,
@@ -35,6 +36,7 @@ const testHTTPConfig: Partial<MonitorFields> = {
   __ui: { is_tls_enabled: false },
   urls: 'https://www.google.com',
   max_redirects: '0',
+  'url.port': 900,
   password: '3z9SBOQWW5F0UrdqLVFqlF6z',
   proxy_url: '${proxyUrl}',
   'check.response.body.negative': [],
@@ -55,7 +57,7 @@ const testHTTPConfig: Partial<MonitorFields> = {
   'check.request.headers': {},
   'check.request.method': 'GET',
   'ssl.verification_mode': VerificationMode.NONE,
-  username: '',
+  username: 'test-username',
   params: '{"proxyUrl":"https://www.google.com"}',
 };
 
@@ -63,7 +65,7 @@ const testBrowserConfig: Partial<MonitorFields> = {
   type: DataStream.BROWSER,
   enabled: true,
   schedule: { number: '3', unit: ScheduleUnit.MINUTES },
-  'service.name': '',
+  'service.name': 'APM Service',
   tags: [],
   timeout: '16',
   name: 'Test',
@@ -128,6 +130,8 @@ describe('formatMonitorConfig', () => {
         type: 'http',
         urls: 'https://www.google.com',
         proxy_url: 'https://www.google.com',
+        username: 'test-username',
+        'url.port': 900,
       });
     });
 
@@ -159,6 +163,7 @@ describe('formatMonitorConfig', () => {
           locations: [],
           max_redirects: '0',
           name: 'Test',
+          username: 'test-username',
           password: '3z9SBOQWW5F0UrdqLVFqlF6z',
           proxy_url: 'https://www.google.com',
           'response.include_body': 'on_error',
@@ -166,6 +171,7 @@ describe('formatMonitorConfig', () => {
           schedule: '@every 3m',
           timeout: '16s',
           type: 'http',
+          'url.port': 900,
           urls: 'https://www.google.com',
           ...(isTLSEnabled ? { 'ssl.verification_mode': 'none' } : {}),
         });
@@ -187,6 +193,7 @@ describe('browser fields', () => {
       locations: [],
       schedule: '@every 3m',
       screenshots: 'on',
+      'service.name': 'APM Service',
       'source.inline.script':
         "step('Go to https://www.google.com/', async () => {\n  await page.goto('https://www.google.com/');\n});",
       throttling: {

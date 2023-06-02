@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { ConfigKey } from '../../../common/runtime_types';
 import { stringToObjectFormatter } from './formatting_utils';
+import { ConfigKey } from '../../../../common/runtime_types';
+import { secondsToCronFormatter } from '../formatting_utils';
 
 describe('common formatters', () => {
   it.each([
@@ -16,5 +17,13 @@ describe('common formatters', () => {
     ['{"some": "json"}', { some: 'json' }],
   ])('formats strings to objects correctly, avoiding errors', (input, expected) => {
     expect(stringToObjectFormatter({ name: input }, ConfigKey.NAME)).toEqual(expected);
+  });
+});
+
+describe('formatters', () => {
+  describe('cronToSecondsNormalizer', () => {
+    it('takes a number of seconds and converts it to cron format', () => {
+      expect(secondsToCronFormatter({ [ConfigKey.WAIT]: '3' }, ConfigKey.WAIT)).toEqual('3s');
+    });
   });
 });

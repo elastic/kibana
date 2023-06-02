@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import { Logger } from '@kbn/logging';
-import { replaceVarsWithParams, ParsedVars } from './lightweight_param_formatter';
-import variableParser from './variable_parser';
-import { ConfigKey, MonitorFields } from '../runtime_types';
+import { ConfigKey, MonitorFields } from '../../../../common/runtime_types';
 
 export type FormatterFn = (fields: Partial<MonitorFields>, key: ConfigKey) => string | null;
 
@@ -61,32 +58,13 @@ export const stringToJsonFormatter: FormatterFn = (fields, key) => {
   return value ? JSON.stringify(value) : null;
 };
 
-export const replaceStringWithParams = (
-  value: string | boolean | {} | [],
-  params: Record<string, string>,
-  logger?: Logger
-) => {
-  if (!value || typeof value === 'boolean') {
-    return value as string | null;
-  }
-
+export const stringifyString = (value?: string) => {
+  if (!value) return value;
   try {
-    if (typeof value !== 'string') {
-      const strValue = JSON.stringify(value);
-      const parsedVars: ParsedVars = variableParser.parse(strValue);
-
-      const parseValue = replaceVarsWithParams(parsedVars, params);
-      return JSON.parse(parseValue);
-    }
-
-    const parsedVars: ParsedVars = variableParser.parse(value);
-
-    return replaceVarsWithParams(parsedVars, params);
+    return JSON.stringify(value);
   } catch (e) {
-    logger?.error(`error parsing vars for value ${JSON.stringify(value)}, ${e}`);
+    return value;
   }
-
-  return value as string | null;
 };
 
 export const secondsToCronFormatter: FormatterFn = (fields, key) => {
