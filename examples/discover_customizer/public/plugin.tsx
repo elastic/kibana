@@ -7,14 +7,23 @@
  */
 
 import { EuiButton, EuiContextMenu, EuiPopover, EuiWrappingPopover } from '@elastic/eui';
-import type { CoreSetup, CoreStart, Plugin, SimpleSavedObject } from '@kbn/core/public';
+import {
+  AppNavLinkStatus,
+  CoreSetup,
+  CoreStart,
+  Plugin,
+  SimpleSavedObject,
+} from '@kbn/core/public';
+import type { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
 import type { DiscoverSetup, DiscoverStart } from '@kbn/discover-plugin/public';
 import { noop } from 'lodash';
 import React, { useEffect, useState } from 'react';
 import ReactDOM from 'react-dom';
 import useObservable from 'react-use/lib/useObservable';
+import image from './discover_customizer.png';
 
 export interface DiscoverCustomizerSetupPlugins {
+  developerExamples: DeveloperExamplesSetup;
   discover: DiscoverSetup;
 }
 
@@ -22,15 +31,26 @@ export interface DiscoverCustomizerStartPlugins {
   discover: DiscoverStart;
 }
 
+const PLUGIN_ID = 'discoverCustomizer';
+const PLUGIN_NAME = 'Discover Customizer';
+
 export class DiscoverCustomizerPlugin implements Plugin {
   setup(core: CoreSetup, plugins: DiscoverCustomizerSetupPlugins) {
     core.application.register({
-      id: 'discoverCustomizer',
-      title: 'Discover Customizer',
+      id: PLUGIN_ID,
+      title: PLUGIN_NAME,
+      navLinkStatus: AppNavLinkStatus.hidden,
       mount() {
-        plugins.discover?.locator?.navigate({ profile: 'customizer' });
+        plugins.discover?.locator?.navigate({ profile: 'customizer' }, { replace: true });
         return noop;
       },
+    });
+
+    plugins.developerExamples.register({
+      appId: PLUGIN_ID,
+      title: PLUGIN_NAME,
+      description: 'Example plugin that uses the Discover customization framework.',
+      image,
     });
   }
 

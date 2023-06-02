@@ -6,6 +6,6 @@
     "id": "discoverCustomizer",
     "server": false,
     "browser": true,
-    "requiredPlugins": ["discover"]
+    "requiredPlugins": ["developerExamples", "discover"]
   }
 }
