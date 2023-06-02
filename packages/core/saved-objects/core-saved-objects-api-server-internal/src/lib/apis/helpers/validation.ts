@@ -94,7 +94,7 @@ export class ValidationHelper {
     }
     const validator = this.getTypeValidator(type);
     try {
-      validator.validate(doc, this.kibanaVersion);
+      validator.validate(doc);
     } catch (error) {
       throw SavedObjectsErrorHelpers.createBadRequestError(error.message);
     }
@@ -116,8 +116,8 @@ export class ValidationHelper {
 
       const combinedSchemas = { ...stackVersionSchemas };
       Object.entries(modelVersionCreateSchemas).reduce((map, [key, modelVersion]) => {
-        const virtualVersion = modelVersionToVirtualVersion(key);
         if (modelVersion.schemas?.create) {
+          const virtualVersion = modelVersionToVirtualVersion(key);
           combinedSchemas[virtualVersion] = modelVersion.schemas!.create!;
         }
         return map;

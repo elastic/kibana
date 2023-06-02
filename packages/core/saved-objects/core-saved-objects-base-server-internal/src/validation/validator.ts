@@ -46,14 +46,17 @@ export class SavedObjectsTypeValidator {
     this.orderedVersions = Object.keys(this.validationMap).sort(Semver.compare);
   }
 
-  public validate(document: SavedObjectSanitizedDoc, version?: string): void {
-    let usedVersion = version;
+  public validate(document: SavedObjectSanitizedDoc): void {
+    let usedVersion: string;
     const docVersion = document.typeMigrationVersion ?? document.migrationVersion?.[document.type];
     if (docVersion) {
+      console.log('docVersion', docVersion);
+      console.log('defaultVersion', this.defaultVersion);
       usedVersion = isVirtualModelVersion(docVersion) ? docVersion : this.defaultVersion;
     } else {
       usedVersion = this.defaultVersion;
     }
+    console.log('usedVersion', usedVersion);
     const schemaVersion = previousVersionWithSchema(this.orderedVersions, usedVersion);
 
     if (!schemaVersion || !this.validationMap[schemaVersion]) {
@@ -77,6 +80,8 @@ const previousVersionWithSchema = (
   orderedVersions: string[],
   targetVersion: string
 ): string | undefined => {
+  console.log('orderedVersions', orderedVersions);
+  console.log('targetVersion', targetVersion);
   for (let i = orderedVersions.length - 1; i >= 0; i--) {
     const currentVersion = orderedVersions[i];
     if (Semver.lte(currentVersion, targetVersion)) {

@@ -7,7 +7,7 @@
  */
 
 import type { ObjectType } from '@kbn/config-schema';
-import { SavedObjectsValidationSpec } from '../validation';
+import type { SavedObjectsValidationSpec } from '../validation';
 
 /**
  * The schemas associated with this model version.

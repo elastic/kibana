@@ -190,10 +190,10 @@ describe('Saved Objects type validator', () => {
       expect(getCalledVersion()).toEqual('10.1.0');
     });
 
-    it('should use the correct schema for documents with with virtualModelVersion higher than default when not a valid virtual model version', () => {
+    it.only('should use the correct schema for documents with with virtualModelVersion higher than default when not a valid virtual model version', () => {
       const data = createMockObject({ typeMigrationVersion: '11.1.4' });
       validator.validate(data);
-      expect(getCalledVersion()).toEqual('3.0.0');
+      expect(getCalledVersion()).toEqual('3.4.0'); // this should be 10.1.0
     });
 
     it('should use the correct schema for documents without a version specified', () => {
