@@ -297,6 +297,18 @@ export const ConfigSchema = schema.object({
     ),
   }),
   enabled: schema.boolean({ defaultValue: true }),
+
+  // Setting only allowed in the Serverless offering
+  ui: schema.conditional(
+    schema.contextRef('serverless'),
+    true,
+    schema.object({
+      userManagementEnabled: schema.boolean({ defaultValue: false }),
+      roleManagementEnabled: schema.boolean({ defaultValue: false }),
+      roleMappingManagementEnabled: schema.boolean({ defaultValue: false }),
+    }),
+    schema.never()
+  ),
 });
 
 export function createConfig(

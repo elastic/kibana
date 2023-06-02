@@ -12,7 +12,7 @@ import { getUrlPrefix } from '../../../../common/lib/space_test_utils';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
-export default function listAlertTypes({ getService }: FtrProviderContext) {
+export default function listRuleTypes({ getService }: FtrProviderContext) {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
 
   const expectedNoOpType = {

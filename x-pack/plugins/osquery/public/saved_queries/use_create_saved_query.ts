@@ -55,7 +55,7 @@ export const useCreateSavedQuery = ({ withRedirect }: UseCreateSavedQueryProps) 
           i18n.translate('xpack.osquery.newSavedQuery.successToastMessageText', {
             defaultMessage: 'Successfully saved "{savedQueryId}" query',
             values: {
-              savedQueryId: response.data.attributes?.id ?? '',
+              savedQueryId: response.data?.id ?? '',
             },
           })
         );

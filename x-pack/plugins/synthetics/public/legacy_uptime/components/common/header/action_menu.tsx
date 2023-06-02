@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { HeaderMenuPortal } from '@kbn/observability-plugin/public';
+import { HeaderMenuPortal } from '@kbn/observability-shared-plugin/public';
 import { AppMountParameters } from '@kbn/core/public';
 import { ActionMenuContent } from './action_menu_content';
 

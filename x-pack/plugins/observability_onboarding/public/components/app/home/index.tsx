@@ -17,7 +17,7 @@ import {
   EuiBadge,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useBreadcrumbs } from '@kbn/observability-plugin/public';
+import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 import React from 'react';
 import { useKibanaNavigation } from '../../../hooks/use_kibana_navigation';
 import { breadcrumbsApp } from '../../../application/app';

@@ -158,6 +158,8 @@
     "@kbn/url-state",
     "@kbn/ml-anomaly-utils",
     "@kbn/discover-plugin",
-    "@kbn/shared-ux-file-types"
+    "@kbn/shared-ux-file-types",
+    "@kbn/field-formats-plugin",
+    "@kbn/dev-proc-runner"
   ]
 }

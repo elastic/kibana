@@ -545,19 +545,6 @@ The maximum number of buckets a datasource can return. High numbers can have a n
 [[visualization-visualize-heatmapChartslibrary]]`visualization:visualize:legacyHeatmapChartsLibrary`::
 Disable this option if you prefer to use the new heatmap charts with improved performance, legend settings, and more..
 
-[[visualize-enablelabs]]`visualize:enableLabs`::
-Enables users to create, view, and edit experimental visualizations. When disabled,
-only production-ready visualizations are available to users.
-
-[float]
-[[kibana-telemetry-settings]]
-==== Usage Data
-
-[horizontal]
-[[telemetry-enabled-advanced-setting]]`telemetry:enabled`::
-When enabled, helps improve the Elastic Stack by providing usage statistics for
-basic features.
-
 [float]
 [[kibana-global-settings-reference]]
 === Change the global settings
@@ -590,8 +577,10 @@ The URL of a custom SVG image that appears on {kib} browser tabs. Images must be
 The URL of a custom PNG image that appears on {kib} browser tabs.
 
 [float]
-[[kibana-usage-data-settings]]
-==== Usage Data
+[[kibana-usage-collection-settings]]
+==== Usage collection
 
 [[provide-usage-data]]`telemetry:enabled`::
-When enabled, helps manage and improve Elastic products and services by providing usage statistics.
+Enabling data usage collection (also known as Telemetry) allows us to learn
+what our users are most interested in, so we can improve our products and services.
+Refer to our https://www.elastic.co/legal/product-privacy-statement[Privacy Statement] for more details.

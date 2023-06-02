@@ -70,15 +70,41 @@ describe('validateTypeMigrations', () => {
       );
     });
 
-    it('validates the migration function', () => {
+    it('throws on the invalid migration type', () => {
       const type = createType({
         name: 'foo',
-        convertToMultiNamespaceTypeVersion: '3.1.1',
-        namespaceType: 'multiple',
         migrations: { '1.2.3': 23 as any },
       });
 
-      expect(() => validate({ type })).toThrow(/expected a function, but got 23/i);
+      expect(() => validate({ type })).toThrow(/expected a function or an object/i);
+    });
+
+    it('throws on the invalid migration object', () => {
+      const type = createType({
+        name: 'foo',
+        migrations: {
+          '1.2.3': {
+            deferred: false,
+            transform: 23 as any,
+          },
+        },
+      });
+
+      expect(() => validate({ type })).toThrow(/expected a function or an object/i);
+    });
+
+    it('validates the migration object', () => {
+      const type = createType({
+        name: 'foo',
+        migrations: {
+          '1.2.3': {
+            deferred: false,
+            transform: jest.fn(),
+          },
+        },
+      });
+
+      expect(() => validate({ type })).not.toThrow();
     });
 
     describe('when switchToModelVersionAt is specified', () => {
@@ -206,6 +232,103 @@ describe('validateTypeMigrations', () => {
 
       expect(() => validate({ type, kibanaVersion: '3.2.3' })).toThrowErrorMatchingInlineSnapshot(
         `"Type foo: gaps between model versions aren't allowed (missing versions: 2,4,5)"`
+      );
+    });
+  });
+
+  describe('modelVersions mapping additions', () => {
+    it('throws when registering mapping additions not present in the global mappings', () => {
+      const type = createType({
+        name: 'foo',
+        switchToModelVersionAt: '8.8.0',
+        modelVersions: {
+          '1': {
+            changes: [
+              {
+                type: 'mappings_addition',
+                addedMappings: {
+                  field2: { type: 'text' },
+                },
+              },
+            ],
+          },
+        },
+        mappings: {
+          properties: {
+            field1: { type: 'text' },
+          },
+        },
+      });
+
+      expect(() => validate({ type, kibanaVersion: '3.2.3' })).toThrowErrorMatchingInlineSnapshot(
+        `"Type foo: mappings added on model versions not present on the global mappings definition: field2.type"`
+      );
+    });
+
+    it('does not throw when registering mapping additions are present in the global mappings', () => {
+      const type = createType({
+        name: 'foo',
+        switchToModelVersionAt: '8.8.0',
+        modelVersions: {
+          '1': {
+            changes: [
+              {
+                type: 'mappings_addition',
+                addedMappings: {
+                  field2: { type: 'text' },
+                },
+              },
+            ],
+          },
+          '2': {
+            changes: [
+              {
+                type: 'mappings_addition',
+                addedMappings: {
+                  field3: { type: 'text' },
+                },
+              },
+            ],
+          },
+        },
+        mappings: {
+          properties: {
+            field1: { type: 'text' },
+            field2: { type: 'text' },
+            field3: { type: 'text' },
+          },
+        },
+      });
+
+      expect(() => validate({ type, kibanaVersion: '3.2.3' })).not.toThrow();
+    });
+
+    it('throws when registering mapping additions different than the global mappings', () => {
+      const type = createType({
+        name: 'foo',
+        switchToModelVersionAt: '8.8.0',
+        modelVersions: {
+          '1': {
+            changes: [
+              {
+                type: 'mappings_addition',
+                addedMappings: {
+                  field2: { type: 'boolean' },
+                },
+              },
+            ],
+          },
+        },
+        mappings: {
+          properties: {
+            field1: { type: 'text' },
+            field2: { type: 'text' },
+          },
+        },
+      });
+
+      expect(() => validate({ type, kibanaVersion: '3.2.3' })).toThrowErrorMatchingInlineSnapshot(
+        `"Type foo: mappings added on model versions differs from the global mappings definition: field2.type"`
       );
     });
   });

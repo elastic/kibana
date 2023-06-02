@@ -27,8 +27,10 @@ export const getOutdatedDocumentsQuery = ({
         const virtualVersion = virtualVersions[type.name];
         return {
           bool: {
-            must: [{ term: { type: type.name } }],
-            must_not: [{ term: { typeMigrationVersion: virtualVersion } }],
+            must: [
+              { term: { type: type.name } },
+              { range: { typeMigrationVersion: { lt: virtualVersion } } },
+            ],
           },
         };
       }),

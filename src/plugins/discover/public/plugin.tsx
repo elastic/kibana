@@ -263,22 +263,25 @@ export class DiscoverPlugin
         defaultMessage: 'JSON',
       }),
       order: 20,
-      component: ({ hit, dataView }) => (
-        <React.Suspense
-          fallback={
-            <DeferredSpinner>
-              <EuiSkeletonText />
-            </DeferredSpinner>
-          }
-        >
-          <SourceViewer
-            index={hit.raw._index}
-            id={hit.raw._id}
-            dataView={dataView}
-            hasLineNumbers
-          />
-        </React.Suspense>
-      ),
+      component: ({ hit, dataView, query, textBasedHits }) => {
+        return (
+          <React.Suspense
+            fallback={
+              <DeferredSpinner>
+                <EuiSkeletonText />
+              </DeferredSpinner>
+            }
+          >
+            <SourceViewer
+              index={hit.raw._index}
+              id={hit.raw._id ?? hit.id}
+              dataView={dataView}
+              textBasedHits={textBasedHits}
+              hasLineNumbers
+            />
+          </React.Suspense>
+        );
+      },
     });
 
     const {

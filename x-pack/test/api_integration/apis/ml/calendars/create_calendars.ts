@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { USER } from '../../../../functional/services/ml/security_common';
-import { COMMON_REQUEST_HEADERS } from '../../../../functional/services/ml/common_api';
+import { getCommonRequestHeader } from '../../../../functional/services/ml/common_api';
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertestWithoutAuth');
@@ -39,9 +39,9 @@ export default ({ getService }: FtrProviderContext) => {
 
     it('should successfully create calendar by id', async () => {
       const { body, status } = await supertest
-        .put(`/api/ml/calendars`)
+        .put(`/internal/ml/calendars`)
         .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
-        .set(COMMON_REQUEST_HEADERS)
+        .set(getCommonRequestHeader('1'))
         .send(requestBody);
       ml.api.assertResponseStatusCode(200, status, body);
 
@@ -57,9 +57,9 @@ export default ({ getService }: FtrProviderContext) => {
 
     it('should not create new calendar for user without required permission', async () => {
       const { body, status } = await supertest
-        .put(`/api/ml/calendars`)
+        .put(`/internal/ml/calendars`)
         .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
-        .set(COMMON_REQUEST_HEADERS)
+        .set(getCommonRequestHeader('1'))
         .send(requestBody);
       ml.api.assertResponseStatusCode(403, status, body);
 
@@ -70,9 +70,9 @@ export default ({ getService }: FtrProviderContext) => {
 
     it('should not create new calendar for unauthorized user', async () => {
       const { body, status } = await supertest
-        .put(`/api/ml/calendars`)
+        .put(`/internal/ml/calendars`)
         .auth(USER.ML_UNAUTHORIZED, ml.securityCommon.getPasswordForUser(USER.ML_UNAUTHORIZED))
-        .set(COMMON_REQUEST_HEADERS)
+        .set(getCommonRequestHeader('1'))
         .send(requestBody);
       ml.api.assertResponseStatusCode(403, status, body);
 

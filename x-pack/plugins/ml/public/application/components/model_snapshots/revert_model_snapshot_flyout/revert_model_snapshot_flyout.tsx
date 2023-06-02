@@ -102,7 +102,7 @@ export const RevertModelSnapshotFlyout: FC<Props> = ({
   }, [calendarEvents]);
 
   const createChartData = useCallback(async () => {
-    const bucketSpanMs = parseInterval(job.analysis_config.bucket_span)!.asMilliseconds();
+    const bucketSpanMs = parseInterval(job.analysis_config.bucket_span!)!.asMilliseconds();
     const eventRate = await loadEventRateForJob(job, bucketSpanMs, 100);
     const anomalyData = await loadAnomalyDataForJob(job, bucketSpanMs, 100);
     setEventRateData(eventRate);
