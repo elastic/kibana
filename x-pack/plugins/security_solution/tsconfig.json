@@ -158,6 +158,9 @@
     "@kbn/url-state",
     "@kbn/ml-anomaly-utils",
     "@kbn/field-formats-plugin",
-    "@kbn/dev-proc-runner"
+    "@kbn/dev-proc-runner",
+    "@kbn/stack-connectors-plugin",
+    "@kbn/security-solution-plugin",
+    "@kbn/core-logging-server-mocks"
   ]
 }
