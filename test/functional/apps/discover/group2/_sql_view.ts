@@ -77,8 +77,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await testSubjects.exists('unifiedHistogramQueryHits')).to.be(true);
         expect(await testSubjects.exists('discoverAlertsButton')).to.be(false);
         expect(await testSubjects.exists('shareTopNavButton')).to.be(true);
-        expect(await testSubjects.exists('docTableExpandToggleColumn')).to.be(false);
         expect(await testSubjects.exists('dataGridColumnSortingButton')).to.be(true);
+        expect(await testSubjects.exists('docTableExpandToggleColumn')).to.be(true);
         expect(await testSubjects.exists('fieldListFiltersFieldTypeFilterToggle')).to.be(true);
         await testSubjects.click('field-@message-showDetails');
         expect(await testSubjects.exists('discoverFieldListPanelEditItem')).to.be(false);
@@ -97,7 +97,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         // here Lens suggests a heatmap so it is rendered
         expect(await testSubjects.exists('unifiedHistogramChart')).to.be(true);
         expect(await testSubjects.exists('heatmapChart')).to.be(true);
-        const cell = await dataGrid.getCellElement(0, 3);
+        const cell = await dataGrid.getCellElement(0, 4);
         expect(await cell.getVisibleText()).to.be('2269');
       });
 
@@ -110,7 +110,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await monacoEditor.setCodeEditorValue(testQuery);
         await testSubjects.click('querySubmitButton');
         await PageObjects.header.waitUntilLoadingHasFinished();
-        let cell = await dataGrid.getCellElement(0, 3);
+        let cell = await dataGrid.getCellElement(0, 4);
         expect(await cell.getVisibleText()).to.be('2269');
         await PageObjects.timePicker.setAbsoluteRange(
           'Sep 19, 2015 @ 06:31:44.000',
@@ -120,7 +120,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await testSubjects.exists('discoverNoResults')).to.be(true);
         await PageObjects.timePicker.setDefaultAbsoluteRange();
         await PageObjects.header.waitUntilLoadingHasFinished();
-        cell = await dataGrid.getCellElement(0, 3);
+        cell = await dataGrid.getCellElement(0, 4);
         expect(await cell.getVisibleText()).to.be('2269');
       });
 
@@ -135,7 +135,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await testSubjects.click('querySubmitButton');
         await PageObjects.header.waitUntilLoadingHasFinished();
 
-        const cell = await dataGrid.getCellElement(0, 3);
+        const cell = await dataGrid.getCellElement(0, 4);
         expect(await cell.getVisibleText()).to.be('2269');
       });
     });

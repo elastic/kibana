@@ -25,7 +25,7 @@ import {
 } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { SortOrder } from '@kbn/saved-search-plugin/public';
-import { Filter } from '@kbn/es-query';
+import type { AggregateQuery, Filter, Query } from '@kbn/es-query';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { ToastsStart, IUiSettingsClient, HttpStart, CoreStart } from '@kbn/core/public';
 import { DataViewFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
@@ -192,6 +192,10 @@ export interface DiscoverGridProps {
    */
   filters?: Filter[];
   /**
+   * Query applied by KQL bar or text based editor
+   */
+  query?: Query | AggregateQuery;
+  /**
    * Saved search id used for links to single doc and surrounding docs in the flyout
    */
   savedSearchId?: string;
@@ -224,6 +228,7 @@ export const DiscoverGrid = ({
   expandedDoc,
   onAddColumn,
   filters,
+  query,
   savedSearchId,
   onFilter,
   onRemoveColumn,
@@ -606,11 +611,7 @@ export const DiscoverGrid = ({
           data-title={searchTitle}
           data-description={searchDescription}
           data-document-number={displayedRows.length}
-          className={classnames(
-            className,
-            'dscDiscoverGrid__table',
-            isPlainRecord ? 'dscDiscoverGrid__textLanguageMode' : 'dscDiscoverGrid__documentsMode'
-          )}
+          className={classnames(className, 'dscDiscoverGrid__table')}
         >
           <EuiDataGridMemoized
             aria-describedby={randomId}
@@ -676,6 +677,7 @@ export const DiscoverGrid = ({
             onAddColumn={onAddColumn}
             onClose={() => setExpandedDoc(undefined)}
             setExpandedDoc={setExpandedDoc}
+            query={query}
           />
         )}
       </span>
