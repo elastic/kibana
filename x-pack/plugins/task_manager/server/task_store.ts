@@ -448,6 +448,7 @@ export class TaskStore {
               return this.taskValidator.getValidatedTaskInstance(doc, 'read');
             } catch (e) {
               if (opts.drop_invalid_tasks) {
+                // TODO: Log error
                 return null;
               }
               throw e;
