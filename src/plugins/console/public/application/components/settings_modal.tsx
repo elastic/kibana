@@ -338,6 +338,7 @@ export const DevToolsSettingsModal = (props: DevToolsSettingsModalProps) => {
           }
         >
           <EuiSwitch
+            data-test-subj="enableA11yOverlay"
             checked={isAccessibilityOverlayEnabled}
             label={
               <FormattedMessage

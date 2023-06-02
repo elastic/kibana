@@ -17,14 +17,16 @@ const OverlayText = () => (
   // in this case
   //
   <>
-    <EuiText size="s">Press Enter to start editing.</EuiText>
+    <EuiText size="s" data-test-subj="a11y-overlay">
+      Press Enter to start editing.
+    </EuiText>
     <EuiText size="s">When you&rsquo;re done, press Escape to stop editing.</EuiText>
   </>
 );
 
 export function useUIAceKeyboardMode(
   aceTextAreaElement: HTMLTextAreaElement | null,
-  isAccessibilityOverlayEnabled: boolean
+  isAccessibilityOverlayEnabled: boolean = true
 ) {
   const overlayMountNode = useRef<HTMLDivElement | null>(null);
   const autoCompleteVisibleRef = useRef<boolean>(false);
