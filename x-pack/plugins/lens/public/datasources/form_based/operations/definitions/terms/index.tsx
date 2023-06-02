@@ -61,9 +61,7 @@ export function supportsRarityRanking(field?: IndexPatternField) {
   );
 }
 export function supportsSignificantRanking(field?: IndexPatternField) {
-  return field?.esTypes?.some((esType) =>
-    esType === 'keyword'
-  );
+  return field?.esTypes?.some((esType) => esType === 'keyword');
 }
 export type { TermsIndexPatternColumn } from './types';
 
@@ -163,7 +161,10 @@ export const termsOperation: OperationDefinition<
     return ret;
   },
   canAddNewField: ({ targetColumn, sourceColumn, field, indexPattern }) => {
-    if (targetColumn.params.orderBy.type === 'rare' || targetColumn.params.orderBy.type === 'significant') {
+    if (
+      targetColumn.params.orderBy.type === 'rare' ||
+      targetColumn.params.orderBy.type === 'significant'
+    ) {
       return false;
     }
     // collect the fields from the targetColumn
@@ -281,16 +282,19 @@ export const termsOperation: OperationDefinition<
       : undefined;
 
     if (column.params?.orderBy.type === 'significant') {
-      return buildExpressionFunction<AggFunctionsMapping['aggSignificantTerms']>('aggSignificantTerms', {
-        id: columnId,
-        enabled: true,
-        schema: 'segment',
-        field: column.sourceField,
-        size: column.params.size,
-        shardSize,
-        ...(column.params.include?.length && { include: column.params.include }),
-        ...(column.params.exclude?.length && { exclude: column.params.exclude }),
-      }).toAst();
+      return buildExpressionFunction<AggFunctionsMapping['aggSignificantTerms']>(
+        'aggSignificantTerms',
+        {
+          id: columnId,
+          enabled: true,
+          schema: 'segment',
+          field: column.sourceField,
+          size: column.params.size,
+          shardSize,
+          ...(column.params.include?.length && { include: column.params.include }),
+          ...(column.params.exclude?.length && { exclude: column.params.exclude }),
+        }
+      ).toAst();
     }
 
     let orderBy = '_key';
@@ -387,7 +391,10 @@ export const termsOperation: OperationDefinition<
       delete newParams.format;
     }
     newParams.parentFormat = getParentFormatter(newParams);
-    if (!supportsRarityRanking(field) && newParams.orderBy.type === 'rare' || !supportsSignificantRanking(field) && newParams.orderBy.type === 'significant') {
+    if (
+      (!supportsRarityRanking(field) && newParams.orderBy.type === 'rare') ||
+      (!supportsSignificantRanking(field) && newParams.orderBy.type === 'significant')
+    ) {
       newParams.orderBy = { type: 'alphabetical' };
     }
 
@@ -468,7 +475,10 @@ export const termsOperation: OperationDefinition<
           delete newParams.format;
         }
         const mainField = indexPattern.getFieldByName(sourcefield);
-        if (!supportsRarityRanking(mainField) && newParams.orderBy.type === 'rare' || !supportsSignificantRanking(field) && newParams.orderBy.type === 'significant') {
+        if (
+          (!supportsRarityRanking(mainField) && newParams.orderBy.type === 'rare') ||
+          (!supportsSignificantRanking(field) && newParams.orderBy.type === 'significant')
+        ) {
           newParams.orderBy = { type: 'alphabetical' };
         }
         // in single field mode, allow the automatic switch of the function to
@@ -935,7 +945,10 @@ The top values of a specified field ranked by the chosen metric.
             aria-label={i18n.translate('xpack.lens.indexPattern.terms.orderDirection', {
               defaultMessage: 'Rank direction',
             })}
-            isDisabled={currentColumn.params.orderBy.type === 'rare' || currentColumn.params.orderBy.type === 'significant'}
+            isDisabled={
+              currentColumn.params.orderBy.type === 'rare' ||
+              currentColumn.params.orderBy.type === 'significant'
+            }
             options={[
               {
                 id: `${idPrefix}asc`,
@@ -1038,7 +1051,10 @@ The top values of a specified field ranked by the chosen metric.
                 compressed
                 data-test-subj="indexPattern-terms-other-bucket"
                 checked={Boolean(currentColumn.params.otherBucket)}
-                disabled={currentColumn.params.orderBy.type === 'rare' || currentColumn.params.orderBy.type === 'significant'}
+                disabled={
+                  currentColumn.params.orderBy.type === 'rare' ||
+                  currentColumn.params.orderBy.type === 'significant'
+                }
                 onChange={(e: EuiSwitchEvent) =>
                   paramEditorUpdater(
                     updateColumnParam({
@@ -1072,10 +1088,15 @@ The top values of a specified field ranked by the chosen metric.
                   </EuiText>
                 }
                 compressed
-                disabled={currentColumn.params.orderBy.type === 'rare' || currentColumn.params.orderBy.type === 'significant'}
+                disabled={
+                  currentColumn.params.orderBy.type === 'rare' ||
+                  currentColumn.params.orderBy.type === 'significant'
+                }
                 data-test-subj="indexPattern-accuracy-mode"
                 checked={Boolean(
-                  currentColumn.params.accuracyMode && (currentColumn.params.orderBy.type !== 'rare' || currentColumn.params.orderBy.type === 'significant')
+                  currentColumn.params.accuracyMode &&
+                    (currentColumn.params.orderBy.type !== 'rare' ||
+                      currentColumn.params.orderBy.type === 'significant')
                 )}
                 onChange={(e: EuiSwitchEvent) =>
                   paramEditorUpdater(
