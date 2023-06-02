@@ -18,10 +18,13 @@ export const journey = new Journey({
   .step('Go to Discover Page', async ({ page, kbnUrl }) => {
     await page.goto(kbnUrl.get(`/app/discover`));
     await waitForChrome(page);
-    await page.waitForSelector(subj('discoverDocTable'));
+    await page.waitForSelector('[data-test-subj="discoverDocTable"][data-render-complete="true"]');
+    await page.waitForSelector(subj('globalLoadingIndicator-hidden'));
   })
   .step('Expand the first document', async ({ page }) => {
     const expandButtons = page.locator(subj('docTableExpandToggleColumn'));
     await expandButtons.first().click();
-    await page.locator('text="Expanded document"');
+    await page.waitForSelector(subj('docTableRowAction'));
+    await page.click(subj('docTableRowAction'));
+    await page.waitForSelector(subj('globalLoadingIndicator-hidden'));
   });
