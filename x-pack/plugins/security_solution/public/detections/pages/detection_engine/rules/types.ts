@@ -71,24 +71,6 @@ export type RuleStepsOrder = [
   RuleStep.ruleActions
 ];
 
-export interface RuleStepsData {
-  [RuleStep.defineRule]: DefineStepRule;
-  [RuleStep.aboutRule]: AboutStepRule;
-  [RuleStep.scheduleRule]: ScheduleStepRule;
-  [RuleStep.ruleActions]: ActionsStepRule;
-}
-
-export type RuleStepsFormData = {
-  [K in keyof RuleStepsData]: {
-    data: RuleStepsData[K] | undefined;
-    isValid: boolean;
-  };
-};
-
-export type RuleStepsFormHooks = {
-  [K in keyof RuleStepsData]: () => Promise<RuleStepsFormData[K] | undefined>;
-};
-
 export interface RuleStepProps {
   isUpdateView?: boolean;
   isLoading: boolean;
