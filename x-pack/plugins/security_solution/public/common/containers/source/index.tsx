@@ -85,7 +85,7 @@ interface FetchIndexReturn {
   indexes: string[];
   indexExists: boolean;
   indexPatterns: DataViewBase;
-  dataView: DataViewSpec | undefined;
+  dataView: DataViewSpec;
 }
 
 /**
@@ -111,7 +111,7 @@ export const useFetchIndex = (
     indexes: defaultIndexesArray,
     indexExists: true,
     indexPatterns: DEFAULT_INDEX_PATTERNS,
-    dataView: undefined,
+    dataView: {},
     loading: false,
   });
   const { addError, addWarning } = useAppToasts();

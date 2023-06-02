@@ -15,6 +15,8 @@ import { EuiLoadingSpinner } from '@elastic/eui';
 import type { Filter, Query } from '@kbn/es-query';
 import { FilterStateStore } from '@kbn/es-query';
 import type { FilterManager, SavedQuery, SavedQueryTimeFilter } from '@kbn/data-plugin/public';
+import { DataView } from '@kbn/data-views-plugin/common';
+
 import { InputsModelId } from '../../../../common/store/inputs/constants';
 import { useSourcererDataView } from '../../../../common/containers/sourcerer';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
@@ -28,6 +30,7 @@ import type { DataProvider } from '../data_providers/data_provider';
 import { buildGlobalQuery } from '../helpers';
 import { timelineActions } from '../../../store/timeline';
 import type { KueryFilterQuery, KueryFilterQueryKind } from '../../../../../common/types/timeline';
+import { useKibana } from '../../../../common/lib/kibana';
 
 export interface QueryBarTimelineComponentProps {
   dataProviders: DataProvider[];
@@ -73,6 +76,7 @@ export const QueryBarTimeline = memo<QueryBarTimelineComponentProps>(
     updateReduxTime,
   }) => {
     const dispatch = useDispatch();
+    const { fieldFormats } = useKibana().services;
     const [dateRangeFrom, setDateRangeFrom] = useState<string>(
       fromStr != null ? fromStr : new Date(from).toISOString()
     );
@@ -270,7 +274,7 @@ export const QueryBarTimeline = memo<QueryBarTimelineComponentProps>(
         dateRangeFrom={dateRangeFrom}
         dateRangeTo={dateRangeTo}
         hideSavedQuery={kqlMode === 'search'}
-        indexPattern={sourcererDataView}
+        indexPattern={new DataView({ spec: sourcererDataView, fieldFormats })}
         isRefreshPaused={isRefreshPaused}
         filterQuery={filterQueryConverted}
         filterManager={filterManager}

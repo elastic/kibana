@@ -7,7 +7,9 @@
 
 import React, { useCallback, useEffect, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiFormRow } from '@elastic/eui';
-import type { DataViewBase } from '@kbn/es-query';
+import type { DataViewSpec } from '@kbn/data-views-plugin/common';
+import { DataView } from '@kbn/data-views-plugin/common';
+
 import type { ThreatMapEntries } from '../../../../common/components/threat_match/types';
 import { ThreatMatchComponent } from '../../../../common/components/threat_match';
 import type { BrowserField } from '../../../../common/containers/source';
@@ -23,14 +25,15 @@ import { schema } from '../step_define_rule/schema';
 import { QueryBarDefineRule } from '../query_bar';
 import * as i18n from '../step_define_rule/translations';
 import { MyLabelButton } from '../step_define_rule';
+import { useKibana } from '../../../../common/lib/kibana';
 
 const CommonUseField = getUseField({ component: Field });
 
 interface ThreatMatchInputProps {
   threatMapping: FieldHook;
   threatBrowserFields: Readonly<Record<string, Partial<BrowserField>>>;
-  threatIndexPatterns: DataViewBase;
-  indexPatterns: DataViewBase;
+  threatIndexPatterns: DataViewSpec;
+  indexPatterns: DataViewSpec;
   threatIndexPatternsLoading: boolean;
   threatIndexModified: boolean;
   handleResetThreatIndices: () => void;
@@ -48,6 +51,7 @@ const ThreatMatchInputComponent: React.FC<ThreatMatchInputProps> = ({
   onValidityChange,
 }: ThreatMatchInputProps) => {
   const { setValue, value: threatItems } = threatMapping;
+  const { fieldFormats } = useKibana().services;
 
   const { isInvalid: isThreatMappingInvalid, errorMessage } =
     getFieldValidityAndErrorMessage(threatMapping);
@@ -124,8 +128,8 @@ const ThreatMatchInputComponent: React.FC<ThreatMatchInputProps> = ({
       >
         <ThreatMatchComponent
           listItems={threatItems as ThreatMapEntries[]}
-          indexPatterns={indexPatterns}
-          threatIndexPatterns={threatIndexPatterns}
+          indexPatterns={new DataView({ spec: indexPatterns, fieldFormats })}
+          threatIndexPatterns={new DataView({ spec: threatIndexPatterns, fieldFormats })}
           data-test-subj="threatmatch-builder"
           id-aria="threatmatch-builder"
           onChange={handleBuilderOnChange}

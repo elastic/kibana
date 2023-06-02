@@ -59,6 +59,7 @@ import { useEditExceptionItems } from './use_edit_exception';
 
 import * as i18n from './translations';
 import { ExceptionsExpireTime } from '../flyout_components/expire_time';
+import { useKibana } from '../../../../common/lib/kibana';
 
 interface EditExceptionFlyoutProps {
   list: ExceptionListSchema;
@@ -108,8 +109,9 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
   const selectedOs = useMemo(() => itemToEdit.os_types, [itemToEdit]);
   const rules = useMemo(() => (rule != null ? [rule] : null), [rule]);
   const listType = useMemo((): ExceptionListTypeEnum => list.type as ExceptionListTypeEnum, [list]);
+  const { fieldFormats } = useKibana().services;
 
-  const { isLoading, indexPatterns } = useFetchIndexPatterns(rules);
+  const { isLoading, indexPatterns } = useFetchIndexPatterns(rules, fieldFormats);
   const [isSubmitting, submitEditExceptionItems] = useEditExceptionItems();
   const [isClosingAlerts, closeAlerts] = useCloseAlertsFromExceptions();
 

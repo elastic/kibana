@@ -14,6 +14,7 @@ import type { ThreatMapping, Threats, Type } from '@kbn/securitysolution-io-ts-a
 import type { DataViewBase, Filter } from '@kbn/es-query';
 import { FilterStateStore } from '@kbn/es-query';
 import { FilterManager } from '@kbn/data-plugin/public';
+
 import { buildRelatedIntegrationsDescription } from '../related_integrations/integrations_description';
 import type {
   RelatedIntegrationArray,

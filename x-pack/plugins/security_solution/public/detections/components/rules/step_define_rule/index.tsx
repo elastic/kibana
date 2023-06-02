@@ -23,6 +23,7 @@ import React, { memo, useCallback, useState, useEffect, useMemo } from 'react';
 import styled from 'styled-components';
 import { i18n as i18nCore } from '@kbn/i18n';
 import { isEqual, isEmpty, omit } from 'lodash';
+import { DataView } from '@kbn/data-views-plugin/common';
 import type { FieldSpec } from '@kbn/data-views-plugin/common';
 import usePrevious from 'react-use/lib/usePrevious';
 
@@ -91,6 +92,7 @@ import {
   AlertSuppressionMissingFieldsStrategy,
 } from '../../../../../common/detection_engine/rule_schema';
 import { DurationInput } from '../duration_input';
+import { useKibana } from '../../../../common/lib/kibana';
 
 const CommonUseField = getUseField({ component: Field });
 
@@ -151,6 +153,8 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   const [indexModified, setIndexModified] = useState(false);
   const [threatIndexModified, setThreatIndexModified] = useState(false);
   const license = useLicense();
+
+  const { fieldFormats } = useKibana().services;
 
   const { form } = useForm<DefineStepRule>({
     defaultValue: initialState,
@@ -291,10 +295,9 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   // if 'index' is selected, use these browser fields
   // otherwise use the dataview browserfields
   const previousRuleType = usePrevious(ruleType);
-  const [isIndexPatternLoading, { browserFields, indexPatterns: indexPattern, dataView }] =
+  const [isIndexPatternLoading, { browserFields, dataView }] =
     // dataViewId is not empty, therefore not undefined
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    useFetchIndex(!isEmpty(dataViewId) ? dataViewId! : index);
+    useFetchIndex(dataViewId != null && !isEmpty(dataViewId) ? dataViewId : index);
 
   // Callback for when user toggles between Data Views and Index Patterns
   const onChangeDataSource = useCallback(
@@ -313,7 +316,6 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   const [aggFields, setAggregatableFields] = useState<FieldSpec[]>([]);
 
   useEffect(() => {
-    const { fields } = indexPattern;
     /**
      * Typecasting to BrowserField because fields is
      * typed as DataViewFieldBase[] which does not have
@@ -323,8 +325,10 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
      * We will need to determine where these types are defined and
      * figure out where the discrepency is.
      */
-    setAggregatableFields(aggregatableFields(fields));
-  }, [indexPattern]);
+    setAggregatableFields(
+      aggregatableFields(dataView?.fields != null ? Object.values(dataView.fields) : [])
+    );
+  }, [dataView]);
 
   const termsAggregationFields: FieldSpec[] = useMemo(
     () => getTermsAggregationFields(aggFields),
@@ -333,7 +337,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
 
   const [
     threatIndexPatternsLoading,
-    { browserFields: threatBrowserFields, indexPatterns: threatIndexPatterns },
+    { browserFields: threatBrowserFields, dataView: threatIndexPatterns },
   ] = useFetchIndex(!isEmpty(threatIndex) ? threatIndex : []);
 
   // reset form when rule type changes
@@ -478,7 +482,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     ({ threatMapping }) => (
       <ThreatMatchInput
         handleResetThreatIndices={handleResetThreatIndices}
-        indexPatterns={dataView ?? indexPattern}
+        indexPatterns={dataView}
         threatBrowserFields={threatBrowserFields}
         threatIndexModified={threatIndexModified}
         threatIndexPatterns={threatIndexPatterns}
@@ -490,7 +494,6 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     [
       handleResetThreatIndices,
       dataView,
-      indexPattern,
       threatBrowserFields,
       threatIndexModified,
       threatIndexPatterns,
@@ -713,7 +716,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
           {
             browserFields,
             idAria: 'detectionEngineStepDefineRuleQueryBar',
-            indexPattern: dataView,
+            indexPattern: new DataView({ spec: dataView, fieldFormats }),
             isDisabled: isLoading || formShouldLoadQueryDynamically || timelineQueryLoading,
             resetToSavedQuery: formShouldLoadQueryDynamically,
             isLoading: isIndexPatternLoading || timelineQueryLoading,
@@ -733,6 +736,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
       formShouldLoadQueryDynamically,
       browserFields,
       dataView,
+      fieldFormats,
       isLoading,
       timelineQueryLoading,
       isIndexPatternLoading,
@@ -752,20 +756,20 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
 
   const optionsData = useMemo(
     () =>
-      isEmpty(dataView?.fields)
+      dataView == null || dataView?.fields == null || isEmpty(dataView?.fields)
         ? {
             keywordFields: [],
             dateFields: [],
             nonDateFields: [],
           }
         : {
-            keywordFields: (dataView?.fields as FieldSpec[])
+            keywordFields: Object.values(dataView.fields)
               .filter((f) => f.esTypes?.includes('keyword'))
               .map((f) => ({ label: f.name })),
-            dateFields: dataView?.fields
+            dateFields: Object.values(dataView.fields)
               .filter((f) => f.type === 'date')
               .map((f) => ({ label: f.name })),
-            nonDateFields: dataView?.fields
+            nonDateFields: Object.values(dataView.fields)
               .filter((f) => f.type !== 'date')
               .map((f) => ({ label: f.name })),
           },
@@ -775,14 +779,14 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   const dataForDescription: Partial<DefineStepRule> = getStepDataDataSource(initialState);
 
   if (dataSourceType === DataSourceType.DataView) {
-    dataForDescription.dataViewTitle = dataView?.getIndexPattern();
+    dataForDescription.dataViewTitle = dataView.title;
   }
 
   return isReadOnlyView ? (
     <StepContentWrapper data-test-subj="definitionRule" addPadding={addPadding}>
       <StepRuleDescription
         columns={descriptionColumns}
-        indexPatterns={dataView}
+        indexPatterns={new DataView({ spec: dataView, fieldFormats })}
         schema={filterRuleFieldsForType(schema, ruleType)}
         data={filterRuleFieldsForType(dataForDescription, ruleType)}
       />

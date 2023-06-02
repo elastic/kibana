@@ -28,6 +28,8 @@ import { OperatingSystem } from '@kbn/securitysolution-utils';
 import { getExceptionBuilderComponentLazy } from '@kbn/lists-plugin/public';
 import type { OnChangeProps } from '@kbn/lists-plugin/public';
 import type { ValueSuggestionsGetFn } from '@kbn/unified-search-plugin/public/autocomplete/providers/value_suggestion_provider';
+import { DataView } from '@kbn/data-views-plugin/common';
+
 import { eventsIndexPattern } from '../../../../../../common/endpoint/constants';
 import { useSuggestions } from '../../../../hooks/use_suggestions';
 import { useTestIdGenerator } from '../../../../hooks/use_test_id_generator';
@@ -117,7 +119,7 @@ type EventFilterItemEntries = Array<{
 export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSelectOs?: boolean }> =
   memo(({ allowSelectOs = true, item: exception, policies, policiesIsLoading, onChange, mode }) => {
     const getTestId = useTestIdGenerator('eventFilters-form');
-    const { http } = useKibana().services;
+    const { http, fieldFormats } = useKibana().services;
 
     const getSuggestionsFn = useCallback<ValueSuggestionsGetFn>(
       ({ field, query }) => {
@@ -436,7 +438,7 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
           listId: ENDPOINT_EVENT_FILTERS_LIST_ID,
           listNamespaceType: 'agnostic',
           ruleName: RULE_NAME,
-          indexPatterns: dataView,
+          indexPatterns: new DataView({ spec: dataView, fieldFormats }),
           isOrDisabled: true,
           isOrHidden: true,
           isAndDisabled: false,
@@ -448,7 +450,15 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
           operatorsList: EVENT_FILTERS_OPERATORS,
           osTypes: exception.os_types,
         }),
-      [autocompleteSuggestions, handleOnBuilderChange, http, dataView, exception, eventFilterItem]
+      [
+        http,
+        autocompleteSuggestions,
+        eventFilterItem,
+        dataView,
+        fieldFormats,
+        handleOnBuilderChange,
+        exception.os_types,
+      ]
     );
 
     // conditions
