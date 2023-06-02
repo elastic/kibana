@@ -50,9 +50,17 @@ export class CoreAppsService {
   preboot(corePreboot: InternalCorePreboot, uiPlugins: UiPlugins) {
     this.logger.debug('Prebooting core app.');
 
+    this.logger.info(
+      `!!!!!!!!!!!!Will register preboot routes: ${uiPlugins.public.size > 0}!!!!!!!!!!!!!`
+    );
+
+    this.logger.info(
+      `!!!!!!!!!!Found ${Array.from(uiPlugins.public.keys()).join(', ')} uiPlugins!!!!!!!!!!`
+    );
+
     // We register app-serving routes only if there are `preboot` plugins that may need them.
     if (uiPlugins.public.size > 0) {
-      this.registerPrebootDefaultRoutes(corePreboot, uiPlugins);
+      // this.registerPrebootDefaultRoutes(corePreboot, uiPlugins);
       this.registerStaticDirs(corePreboot);
     }
   }
