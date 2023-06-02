@@ -821,7 +821,7 @@ export const getSelectedTimelines = async (
   );
 
   const timelineObjects: {
-    timelines: TimelineSOServerRepresentationType[];
+    timelines: TimelineSavedToReturnObjectRuntimeType[];
     errors: ExportTimelineNotFoundError[];
   } = savedObjects.saved_objects.reduce(
     (acc, savedObject) => {
@@ -837,7 +837,7 @@ export const getSelectedTimelines = async (
       return { errors: [...acc.errors, savedObject.error], timelines: acc.timelines };
     },
     {
-      timelines: [] as TimelineSOServerRepresentationType[],
+      timelines: [] as TimelineSavedToReturnObjectRuntimeType[],
       errors: [] as ExportTimelineNotFoundError[],
     }
   );
