@@ -52,19 +52,19 @@ export class AppFeaturesConfigMerger<T extends string = string> {
     });
 
     // generate sub features configs from enabled sub feature ids, preserving map order
-    const subFeatures: SubFeatureConfig[] = [];
+    const mergedKibanaSubFeatures: SubFeatureConfig[] = [];
     this.subFeaturesMap.forEach((subFeature, id) => {
       if (enabledSubFeaturesIndexed[id]) {
-        subFeatures.push(cloneDeep(subFeature));
+        mergedKibanaSubFeatures.push(cloneDeep(subFeature));
       }
     });
 
     // add extra privileges to subFeatures
     subFeaturesPrivilegesToMerge.forEach((subFeaturesPrivileges) => {
-      this.mergeSubFeaturesPrivileges(subFeatures, subFeaturesPrivileges);
+      this.mergeSubFeaturesPrivileges(mergedKibanaSubFeatures, subFeaturesPrivileges);
     });
 
-    mergedKibanaFeatureConfig.subFeatures = subFeatures;
+    mergedKibanaFeatureConfig.subFeatures = mergedKibanaSubFeatures;
 
     return mergedKibanaFeatureConfig;
   }

@@ -16,17 +16,11 @@ import { PLI_APP_FEATURES } from './pli_config';
 export const getProductAppFeatures = (productTypes: SecurityProductTypes): AppFeatureKeys => {
   const appFeatureKeys = productTypes.reduce<AppFeatureKeys>(
     (appFeatures, { product_line: line, product_tier: tier }) => {
-      // Add all the essentials features when the tier is complete
       if (tier === 'complete') {
-        PLI_APP_FEATURES[line].essentials.forEach((featureName) => {
-          appFeatures.push(featureName);
-        });
+        // Adding all "essentials" PLIs when tier is "complete"
+        appFeatures.push(...PLI_APP_FEATURES[line].essentials);
       }
-
-      PLI_APP_FEATURES[line][tier].forEach((featureName) => {
-        appFeatures.push(featureName);
-      });
-
+      appFeatures.push(...PLI_APP_FEATURES[line][tier]);
       return appFeatures;
     },
     []

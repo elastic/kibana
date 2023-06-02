@@ -70,12 +70,12 @@ export const getCasesBaseKibanaSubFeatureIds = (): CasesSubFeatureId[] => [
 
 /**
  * Maps the AppFeatures keys to Kibana privileges that will be merged
- * into the base privileges config for the Security app.
+ * into the base privileges config for the Security Cases app.
  *
  * Privileges can be added in different ways:
- * - `privileges`: the privileges that will be added directly into the main Security feature.
- * - `subFeatureIds`: the ids of the sub-features that will be added into the Security subFeatures entry.
- * - `subFeaturesPrivileges`: the privileges that will be added into the existing Security subFeature with the privilege `id` specified.
+ * - `privileges`: the privileges that will be added directly into the main Security Cases feature.
+ * - `subFeatureIds`: the ids of the sub-features that will be added into the Cases subFeatures entry.
+ * - `subFeaturesPrivileges`: the privileges that will be added into the existing Cases subFeature with the privilege `id` specified.
  */
 export const getCasesAppFeaturesConfig = (): AppFeaturesCasesConfig => ({
   [AppFeatureCasesKey.casesConnectors]: {
