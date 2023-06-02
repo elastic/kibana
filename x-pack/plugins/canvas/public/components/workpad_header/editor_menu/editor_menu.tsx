@@ -13,13 +13,8 @@ import {
   EmbeddableFactoryDefinition,
   EmbeddableInput,
 } from '@kbn/embeddable-plugin/public';
-import useObservable from 'react-use/lib/useObservable';
 import { trackCanvasUiMetric, METRIC_TYPE } from '../../../lib/ui_metric';
-import {
-  useEmbeddablesService,
-  usePlatformService,
-  useVisualizationsService,
-} from '../../../services';
+import { useEmbeddablesService, useVisualizationsService } from '../../../services';
 import { CANVAS_APP } from '../../../../common/lib';
 import { encode } from '../../../../common/lib/embeddable_dataurl';
 import { ElementSpec } from '../../../../types';
