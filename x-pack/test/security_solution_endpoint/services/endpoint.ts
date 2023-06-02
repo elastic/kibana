@@ -49,6 +49,29 @@ const CurrentKibanaVersionDocGenerator = class extends EndpointDocGenerator {
   }
 };
 
+// Document Generator that allows input of a custom hostname
+const CustomHostNameDocGenerator = class extends EndpointDocGenerator {
+  constructor(seedValue: string | seedrandom.prng) {
+    const MetadataGenerator = class extends EndpointMetadataGenerator {
+      protected randomVersion(): string {
+        return kibanaPackageJson.version;
+      }
+
+      generate(...args: DeepPartial<HostMetadataInterface>) {
+        const metadataInfo = super.generate(...args);
+        console.log('metadatainfo', metadataInfo);
+        // change host name
+        metadataInfo.host.name = 'custom 😄 name';
+        metadataInfo.host.hostname = 'custom 😄 name';
+        console.log('after metadatainfo', metadataInfo);
+        return metadataInfo;
+      }
+    };
+
+    super(seedValue, MetadataGenerator);
+  }
+};
+
 export class EndpointTestResources extends FtrService {
   private readonly esClient = this.ctx.getService('es');
   private readonly retry = this.ctx.getService('retry');
@@ -91,6 +114,7 @@ export class EndpointTestResources extends FtrService {
    * @param [options.generatorSeed='seed`] The seed to be used by the data generator. Important in order to ensure the same data is generated on very run.
    * @param [options.waitUntilTransformed=true] If set to `true`, the data loading process will wait until the endpoint hosts metadata is processed by the transform
    * @param [options.waitTimeout=60000] If waitUntilTransformed=true, number of ms to wait until timeout
+   * @param [options.namedHosts] If set to `true`, the indexHostsAndAlerts function will use the CustomHostNameDocGenerator to produce host with custom names
    * @param [options.customIndexFn] If provided, will use this function to generate and index data instead
    */
   async loadEndpointData(
@@ -102,6 +126,7 @@ export class EndpointTestResources extends FtrService {
       generatorSeed: string;
       waitUntilTransformed: boolean;
       waitTimeout: number;
+      namedHosts: boolean;
       customIndexFn: () => Promise<IndexedHostsAndAlertsResponse>;
     }> = {}
   ): Promise<IndexedHostsAndAlertsResponse> {
@@ -113,6 +138,7 @@ export class EndpointTestResources extends FtrService {
       generatorSeed = 'seed',
       waitUntilTransformed = true,
       waitTimeout = 60000,
+      namedHosts = false,
       customIndexFn,
     } = options;
 
@@ -139,7 +165,7 @@ export class EndpointTestResources extends FtrService {
           alertsPerHost,
           enableFleetIntegration,
           undefined,
-          CurrentKibanaVersionDocGenerator
+          namedHosts ? CustomHostNameDocGenerator : CurrentKibanaVersionDocGenerator
         );
 
     if (waitUntilTransformed && customIndexFn) {
