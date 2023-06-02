@@ -139,7 +139,7 @@ export function getFleetPolicyStep({
           package: {
             name: 'profiler_collector',
             title: 'Universal Profiling Collector',
-            version: '8.9.0-preview',
+            version: '8.9.1-preview',
           },
           name: 'elastic-universal-profiling-collector',
           namespace: 'default',
@@ -149,6 +149,35 @@ export function getFleetPolicyStep({
               enabled: true,
               streams: [],
               type: 'pf-elastic-collector',
+              vars: {
+                "host": {
+                  "value": ":8260",
+                  "type": "text"
+                },
+                "secret_token": {
+                  "value": "foo_bar",
+                  "type": "text"
+                },
+                "tls_enabled": {
+                  "value": true,
+                  "type": "bool"
+                },
+                "tls_supported_protocols": {
+                  "value": [
+                    "TLSv1.1",
+                    "TLSv1.2"
+                  ],
+                  "type": "text"
+                },
+                "tls_certificate_path": {
+                  "value": "/app/config/certs/node.crt",
+                  "type": "text"
+                },
+                "tls_key_path": {
+                  "value": "/app/config/certs/node.key",
+                  "type": "text"
+                }
+              }
             },
           ],
         },
