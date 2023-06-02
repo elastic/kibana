@@ -39,7 +39,7 @@ export const AddPrebuiltRulesTable = React.memo(() => {
       isRefetching,
       rulesColumns,
     },
-    actions: { reFetchRules, onTableChange },
+    actions: { onTableChange },
   } = addRulesTableContext;
 
   const isTableEmpty = rules.length === 0;

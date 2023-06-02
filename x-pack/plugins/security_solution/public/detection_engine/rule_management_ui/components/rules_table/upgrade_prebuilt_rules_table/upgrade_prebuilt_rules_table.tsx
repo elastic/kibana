@@ -39,7 +39,7 @@ export const UpgradePrebuiltRulesTable = React.memo(() => {
       isRefetching,
       rulesColumns,
     },
-    actions: { reFetchRules, onTableChange },
+    actions: { onTableChange },
   } = upgradeRulesTableContext;
 
   const isTableEmpty = rules.length === 0;

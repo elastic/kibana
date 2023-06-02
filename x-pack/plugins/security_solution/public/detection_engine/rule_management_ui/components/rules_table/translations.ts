@@ -23,28 +23,28 @@ export const ML_RULE_JOBS_WARNING_BUTTON_LABEL = i18n.translate(
 );
 
 export const INSTALLED_RULES_TAB = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.allRules.tabs.rules',
+  'xpack.securitySolution.detectionEngine.ruleManagementUi.rulesTable.allRules.tabs.rules',
   {
     defaultMessage: `Installed Rules`,
   }
 );
 
 export const RULE_MONITORING_TAB = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.allRules.tabs.monitoring',
+  'xpack.securitySolution.detectionEngine.ruleManagementUi.rulesTable.allRules.tabs.monitoring',
   {
     defaultMessage: 'Rule Monitoring',
   }
 );
 
 export const RULE_UPDATES_TAB = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.allRules.tabs.updates',
+  'xpack.securitySolution.detectionEngine.ruleManagementUi.rulesTable.allRules.tabs.updates',
   {
     defaultMessage: 'Rule Updates',
   }
 );
 
 export const ADD_RULES_TAB = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.allRules.tabs.addRules',
+  'xpack.securitySolution.detectionEngine.ruleManagementUi.rulesTable.allRules.tabs.addRules',
   {
     defaultMessage: 'Add Rules',
   }
