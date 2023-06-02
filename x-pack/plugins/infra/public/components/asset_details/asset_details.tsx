@@ -24,7 +24,7 @@ interface ContentTemplateProps {
 
 const ContentTemplate = ({ header, body, renderMode }: ContentTemplateProps) => {
   return renderMode.showInFlyout ? (
-    <EuiFlyout onClose={renderMode.closeFlyout} ownFocus={false} size="l">
+    <EuiFlyout onClose={renderMode.closeFlyout} ownFocus={false}>
       <EuiFlyoutHeader hasBorder>{header}</EuiFlyoutHeader>
       <EuiFlyoutBody>{body}</EuiFlyoutBody>
     </EuiFlyout>
