@@ -171,6 +171,9 @@ export function registerSetupRoute({
         ];
         await Promise.all(executeFunctions.map((fn) => fn(setupOptions)));
 
+        // We return a status code of 202 instead of 200 because enabling
+        // resource management in Elasticsearch is an asynchronous action
+        // and is not guaranteed to complete before Kibana sends a response.
         return response.accepted();
       } catch (error) {
         return handleRouteHandlerError({ error, logger, response });
