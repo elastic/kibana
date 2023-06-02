@@ -18,7 +18,6 @@ export const allowedExperimentalValues = Object.freeze({
   kubernetesEnabled: true,
   disableIsolationUIPendingStatuses: false,
   pendingActionResponsesWithAck: true,
-  policyListEnabled: true,
   policyResponseInFleetEnabled: true,
   chartEmbeddablesEnabled: true,
   donutChartEmbeddablesEnabled: false, // Depends on https://github.com/elastic/kibana/issues/136409 item 2 - 6
