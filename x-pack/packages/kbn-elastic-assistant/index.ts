@@ -106,3 +106,18 @@ export type { Conversation, Message } from './impl/assistant_context/types';
  * - anything else that the LLM can interpret
  */
 export type { PromptContext } from './impl/assistant/prompt_context/types';
+
+/**
+ * This interface is used to pass a default or base set of contexts to the Elastic Assistant when
+ * initializing it. This is used to provide 'category' options when users create Quick Prompts.
+ * Also, useful for collating all of a solutions' prompts in one place.
+ *
+ * e.g. see Security Solution's x-pack/plugins/security_solution/public/assistant/prompt_contexts/index.tsx
+ */
+export type { PromptContextTemplate } from './impl/assistant/prompt_context/types';
+
+/**
+ * This interface is used to pass a default or base set of Quick Prompts to the Elastic Assistant that
+ * can be displayed when corresponding PromptContext's are registered.
+ */
+export type { QuickPrompt } from './impl/assistant/quick_prompts/types';

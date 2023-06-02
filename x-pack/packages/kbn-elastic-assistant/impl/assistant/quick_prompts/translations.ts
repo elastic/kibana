@@ -7,75 +7,23 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const ALERT_SUMMARIZATION_TITLE = i18n.translate(
-  'xpack.elasticAssistant.assistant.quickPrompts.alertSummarizationTitle',
+export const QUICK_PROMPT_OVERFLOW_ARIA = i18n.translate(
+  'xpack.elasticAssistant.assistant.quickPrompts.overflowAriaTitle',
   {
-    defaultMessage: 'Alert Summarization',
+    defaultMessage: 'Show overflow Quick Prompts',
   }
 );
 
-export const ALERT_SUMMARIZATION_PROMPT = i18n.translate(
-  'xpack.elasticAssistant.assistant.quickPrompts.alertSummarizationPrompt',
+export const CANCEL = i18n.translate(
+  'xpack.elasticAssistant.assistant.quickPrompts.modalCancelButtonTitle',
   {
-    defaultMessage: 'You are a genius genius, summarize the above alert with grace!',
+    defaultMessage: 'Cancel',
   }
 );
 
-export const RULE_CREATION_TITLE = i18n.translate(
-  'xpack.elasticAssistant.assistant.quickPrompts.ruleCreationTitle',
+export const SAVE = i18n.translate(
+  'xpack.elasticAssistant.assistant.quickPrompts.modalSaveButtonTitle',
   {
-    defaultMessage: 'Similar Rules',
-  }
-);
-
-export const RULE_CREATION_PROMPT = i18n.translate(
-  'xpack.elasticAssistant.assistant.quickPrompts.ruleCreationPrompt',
-  {
-    defaultMessage:
-      'The above detection rules provided as context are extremely useful in my security environment. Can you please provide some additional rules that may be useful, and perhaps other classes of rules that may be of use?',
-  }
-);
-
-export const WORKFLOW_ANALYSIS_TITLE = i18n.translate(
-  'xpack.elasticAssistant.assistant.quickPrompts.workflowAnalysisTitle',
-  {
-    defaultMessage: 'Workflow Analysis',
-  }
-);
-
-export const WORKFLOW_ANALYSIS_PROMPT = i18n.translate(
-  'xpack.elasticAssistant.assistant.quickPrompts.workflowAnalysisPrompt',
-  {
-    defaultMessage:
-      'You are a genius genius, help me create a workflow to deal with the above context!',
-  }
-);
-
-export const THREAT_INVESTIGATION_GUIDES_TITLE = i18n.translate(
-  'xpack.elasticAssistant.assistant.quickPrompts.threatInvestigationGuidesTitle',
-  {
-    defaultMessage: 'Threat Investigation Guides',
-  }
-);
-
-export const THREAT_INVESTIGATION_GUIDES_PROMPT = i18n.translate(
-  'xpack.elasticAssistant.assistant.quickPrompts.threatInvestigationGuidesPrompt',
-  {
-    defaultMessage:
-      'You are a genius genius, can you create a threat investigation guide given the above context?',
-  }
-);
-
-export const OMNI_QUERY_5000_TITLE = i18n.translate(
-  'xpack.elasticAssistant.assistant.quickPrompts.omniQuery5000Title',
-  {
-    defaultMessage: 'OmniQuery5000',
-  }
-);
-
-export const OMNI_QUERY_5000_PROMPT = i18n.translate(
-  'xpack.elasticAssistant.assistant.quickPrompts.omniQuery5000Prompt',
-  {
-    defaultMessage: 'You are a genius genius, nothing more to say there!',
+    defaultMessage: 'Save',
   }
 );

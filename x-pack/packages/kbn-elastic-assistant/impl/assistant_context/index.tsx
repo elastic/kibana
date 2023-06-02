@@ -20,6 +20,8 @@ import type {
 import type { Conversation } from './types';
 import { DEFAULT_ASSISTANT_TITLE } from '../assistant/translations';
 import { CodeBlockDetails } from '../assistant/use_conversation/helpers';
+import { PromptContextTemplate } from '../assistant/prompt_context/types';
+import { QuickPrompt } from '../assistant/quick_prompts/types';
 
 export interface ShowAssistantOverlayProps {
   showOverlay: boolean;
@@ -35,6 +37,8 @@ type ShowAssistantOverlay = ({
 interface AssistantProviderProps {
   actionTypeRegistry: ActionTypeRegistryContract;
   augmentMessageCodeBlocks: (currentConversation: Conversation) => CodeBlockDetails[][];
+  basePromptContexts?: PromptContextTemplate[];
+  baseQuickPrompts?: QuickPrompt[];
   children: React.ReactNode;
   getComments: ({
     currentConversation,
@@ -45,6 +49,7 @@ interface AssistantProviderProps {
   }) => EuiCommentProps[];
   http: HttpSetup;
   getInitialConversations: () => Record<string, Conversation>;
+  nameSpace?: string;
   setConversations: React.Dispatch<React.SetStateAction<Record<string, Conversation>>>;
   title?: string;
 }
@@ -52,6 +57,8 @@ interface AssistantProviderProps {
 interface UseAssistantContext {
   actionTypeRegistry: ActionTypeRegistryContract;
   augmentMessageCodeBlocks: (currentConversation: Conversation) => CodeBlockDetails[][];
+  basePromptContexts: PromptContextTemplate[];
+  baseQuickPrompts: QuickPrompt[];
   conversationIds: string[];
   conversations: Record<string, Conversation>;
   getComments: ({
@@ -63,6 +70,7 @@ interface UseAssistantContext {
   }) => EuiCommentProps[];
   http: HttpSetup;
   promptContexts: Record<string, PromptContext>;
+  nameSpace: string;
   registerPromptContext: RegisterPromptContext;
   setConversations: React.Dispatch<React.SetStateAction<Record<string, Conversation>>>;
   setShowAssistantOverlay: (showAssistantOverlay: ShowAssistantOverlay) => void;
@@ -76,10 +84,13 @@ const AssistantContext = React.createContext<UseAssistantContext | undefined>(un
 export const AssistantProvider: React.FC<AssistantProviderProps> = ({
   actionTypeRegistry,
   augmentMessageCodeBlocks,
+  basePromptContexts = [],
+  baseQuickPrompts = [],
   children,
   getComments,
   http,
   getInitialConversations,
+  nameSpace = 'elasticAssistantDefault',
   setConversations,
   title = DEFAULT_ASSISTANT_TITLE,
 }) => {
@@ -158,11 +169,14 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
     () => ({
       actionTypeRegistry,
       augmentMessageCodeBlocks,
+      basePromptContexts,
+      baseQuickPrompts,
       conversationIds,
       conversations,
       getComments,
       http,
       promptContexts,
+      nameSpace,
       registerPromptContext,
       setConversations: onConversationsUpdated,
       setShowAssistantOverlay,
@@ -173,11 +187,14 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
     [
       actionTypeRegistry,
       augmentMessageCodeBlocks,
+      basePromptContexts,
+      baseQuickPrompts,
       conversationIds,
       conversations,
       getComments,
       http,
       promptContexts,
+      nameSpace,
       registerPromptContext,
       onConversationsUpdated,
       showAssistantOverlay,

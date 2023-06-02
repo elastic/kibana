@@ -257,7 +257,7 @@ export const ConnectorSetup: React.FC<ConnectorSetupProps> = React.memo<Connecto
                 message: {
                   role: 'assistant',
                   content: 'Connector setup complete!',
-                  timestamp: '',
+                  timestamp: new Date().toLocaleString(),
                 },
               });
             }}

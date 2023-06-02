@@ -5,57 +5,117 @@
  * 2.0.
  */
 
-import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiBadge } from '@elastic/eui';
+import React, { useCallback, useState } from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiBadge, EuiPopover } from '@elastic/eui';
 // eslint-disable-next-line @kbn/eslint/module_migration
 import styled from 'styled-components';
-import { css } from '@emotion/react';
 
+import { useLocalStorage } from 'react-use';
+import { QuickPrompt } from '../../..';
 import * as i18n from './translations';
+import { AddQuickPromptModal } from './add_quick_prompt_modal/add_quick_prompt_modal';
+import { useAssistantContext } from '../../assistant_context';
 
 const QuickPromptsFlexGroup = styled(EuiFlexGroup)`
   margin: 16px;
 `;
 
-interface QuickPrompt {
-  title: string;
-  prompt: string;
-  color: string;
-}
-const quickPrompts: QuickPrompt[] = [
-  {
-    title: i18n.ALERT_SUMMARIZATION_TITLE,
-    prompt: i18n.ALERT_SUMMARIZATION_PROMPT,
-    color: 'accent',
-  },
-  { title: i18n.RULE_CREATION_TITLE, prompt: i18n.RULE_CREATION_PROMPT, color: 'success' },
-  { title: i18n.WORKFLOW_ANALYSIS_TITLE, prompt: i18n.WORKFLOW_ANALYSIS_PROMPT, color: 'primary' },
-  {
-    title: i18n.THREAT_INVESTIGATION_GUIDES_TITLE,
-    prompt: i18n.THREAT_INVESTIGATION_GUIDES_PROMPT,
-    color: 'warning',
-  },
-  { title: i18n.OMNI_QUERY_5000_TITLE, prompt: i18n.OMNI_QUERY_5000_PROMPT, color: '#BADA55' },
-];
+export const QUICK_PROMPT_LOCAL_STORAGE_KEY = 'quickPrompts';
+
+const COUNT_BEFORE_OVERFLOW = 5;
 interface QuickPromptsProps {
   setInput: (input: string) => void;
 }
+
+/**
+ * Component displaying a horizontal list of quick prompts, with callback for retrieving the selected quick prompt
+ * text, and support for adding new quick prompts and editing existing. Also supports overflow of quick prompts,
+ * and localstorage for storing new and edited prompts.
+ */
 export const QuickPrompts: React.FC<QuickPromptsProps> = React.memo(({ setInput }) => {
+  const { basePromptContexts, baseQuickPrompts, nameSpace } = useAssistantContext();
+
+  // Local storage for all quick prompts, prefixed by assistant nameSpace
+  const [localStorageQuickPrompts, setLocalStorageQuickPrompts] = useLocalStorage(
+    `${nameSpace}.${QUICK_PROMPT_LOCAL_STORAGE_KEY}`,
+    baseQuickPrompts
+  );
+  const [quickPrompts, setQuickPrompts] = useState(localStorageQuickPrompts ?? []);
+
+  // Overflow state
+  const [isOverflowPopoverOpen, setIsOverflowPopoverOpen] = useState(false);
+  const toggleOverflowPopover = useCallback(
+    () => setIsOverflowPopoverOpen(!isOverflowPopoverOpen),
+    [isOverflowPopoverOpen]
+  );
+  const closeOverflowPopover = useCallback(() => setIsOverflowPopoverOpen(false), []);
+
+  const onClickOverflowQuickPrompt = useCallback(
+    (prompt: string) => {
+      setInput(prompt);
+      closeOverflowPopover();
+    },
+    [closeOverflowPopover, setInput]
+  );
+  // Callback for manage modal, saves to local storage on change
+  const onQuickPromptsChange = useCallback(
+    (newQuickPrompts: QuickPrompt[]) => {
+      setLocalStorageQuickPrompts(newQuickPrompts);
+      setQuickPrompts(newQuickPrompts);
+    },
+    [setLocalStorageQuickPrompts]
+  );
   return (
     <QuickPromptsFlexGroup gutterSize="s" alignItems="center">
-      {quickPrompts.map((badge, index) => (
+      {quickPrompts.slice(0, COUNT_BEFORE_OVERFLOW).map((badge, index) => (
         <EuiFlexItem key={index} grow={false}>
           <EuiBadge
             color={badge.color}
             onClick={() => setInput(badge.prompt)}
             onClickAriaLabel={badge.title}
-            css={css``}
           >
-            {/* <EuiText size="s">{badge.title}</EuiText>*/}
             {badge.title}
           </EuiBadge>
         </EuiFlexItem>
       ))}
+      {quickPrompts.length > COUNT_BEFORE_OVERFLOW && (
+        <EuiFlexItem grow={false}>
+          <EuiPopover
+            button={
+              <EuiBadge
+                color={'hollow'}
+                iconType={'boxesHorizontal'}
+                onClick={toggleOverflowPopover}
+                onClickAriaLabel={i18n.QUICK_PROMPT_OVERFLOW_ARIA}
+              />
+            }
+            isOpen={isOverflowPopoverOpen}
+            closePopover={closeOverflowPopover}
+            anchorPosition="rightUp"
+          >
+            <EuiFlexGroup direction="column" gutterSize="s">
+              {quickPrompts.slice(COUNT_BEFORE_OVERFLOW).map((badge, index) => (
+                <EuiFlexItem key={index} grow={false}>
+                  <EuiBadge
+                    color={badge.color}
+                    onClick={() => onClickOverflowQuickPrompt(badge.prompt)}
+                    onClickAriaLabel={badge.title}
+                  >
+                    {badge.title}
+                  </EuiBadge>
+                </EuiFlexItem>
+              ))}
+            </EuiFlexGroup>
+          </EuiPopover>
+        </EuiFlexItem>
+      )}
+      <EuiFlexItem grow={false}>
+        <AddQuickPromptModal
+          promptContexts={basePromptContexts}
+          quickPrompts={quickPrompts}
+          onQuickPromptsChange={onQuickPromptsChange}
+        />
+      </EuiFlexItem>
     </QuickPromptsFlexGroup>
   );
 });

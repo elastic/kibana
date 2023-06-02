@@ -64,6 +64,15 @@ export interface PromptContext {
   tooltip: ReactNode;
 }
 
+/**
+ * This interface is used to pass a default or base set of contexts to the Elastic Assistant when
+ * initializing it. This is used to provide 'category' options when users create Quick Prompts.
+ * Also, useful for collating all of a solutions' prompts in one place.
+ *
+ * e.g. see Security Solution's x-pack/plugins/security_solution/public/assistant/prompt_contexts/index.tsx
+ */
+export type PromptContextTemplate = Omit<PromptContext, 'id' | 'getPromptContext'>;
+
 export type UnRegisterPromptContext = (promptContextId: string) => void;
 
 export type RegisterPromptContext = (promptContext: PromptContext) => void;

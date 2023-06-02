@@ -58,6 +58,7 @@ export const PromptTextArea = forwardRef<HTMLTextAreaElement, Props>(
 
     return (
       <StyledTextArea
+        className="eui-scrollBar"
         inputRef={ref}
         id={'prompt-textarea'}
         data-test-subj={'prompt-textarea'}

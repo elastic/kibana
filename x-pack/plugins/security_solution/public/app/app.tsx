@@ -20,10 +20,10 @@ import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { CellActionsProvider } from '@kbn/cell-actions';
 
 import { getComments } from '../assistant/get_comments';
-import { augmentMessageCodeBlocks } from '../assistant/helpers';
+import { augmentMessageCodeBlocks, LOCAL_STORAGE_KEY } from '../assistant/helpers';
 import { useConversationStore } from '../assistant/use_conversation_store';
 import { ManageUserInfo } from '../detections/components/user_info';
-import { DEFAULT_DARK_MODE, APP_NAME } from '../../common/constants';
+import { DEFAULT_DARK_MODE, APP_NAME, APP_ID } from '../../common/constants';
 import { ErrorToastDispatcher } from '../common/components/error_toast_dispatcher';
 import { MlCapabilitiesProvider } from '../common/components/ml/permissions/ml_capabilities_provider';
 import { GlobalToaster, ManageGlobalToaster } from '../common/components/toasters';
@@ -34,6 +34,8 @@ import type { StartServices } from '../types';
 import { PageRouter } from './routes';
 import { UserPrivilegesProvider } from '../common/components/user_privileges/user_privileges_context';
 import { ReactQueryClientProvider } from '../common/containers/query_client/query_client_provider';
+import { PROMPT_CONTEXTS } from '../assistant/content/prompt_contexts';
+import { BASE_SECURITY_QUICK_PROMPTS } from '../assistant/content/quick_prompts';
 
 interface StartAppComponent {
   children: React.ReactNode;
@@ -65,6 +67,8 @@ const StartAppComponent: FC<StartAppComponent> = ({
     return conversations;
   }, [conversations]);
 
+  const nameSpace = `${APP_ID}.${LOCAL_STORAGE_KEY}`;
+
   const [darkMode] = useUiSetting$<boolean>(DEFAULT_DARK_MODE);
   return (
     <EuiErrorBoundary>
@@ -76,9 +80,12 @@ const StartAppComponent: FC<StartAppComponent> = ({
                 <AssistantProvider
                   actionTypeRegistry={actionTypeRegistry}
                   augmentMessageCodeBlocks={augmentMessageCodeBlocks}
+                  basePromptContexts={Object.values(PROMPT_CONTEXTS)}
+                  baseQuickPrompts={BASE_SECURITY_QUICK_PROMPTS}
                   getInitialConversations={getInitialConversation}
                   getComments={getComments}
                   http={http}
+                  nameSpace={nameSpace}
                   setConversations={setConversations}
                   title={ASSISTANT_TITLE}
                 >
