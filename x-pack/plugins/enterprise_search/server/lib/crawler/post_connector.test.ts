@@ -91,6 +91,7 @@ describe('recreateConnectorDocument lib function', () => {
         is_native: false,
         language: '',
         last_access_control_sync_status: null,
+        last_incremental_sync_scheduled_at: null,
         last_seen: null,
         last_sync_error: null,
         last_sync_scheduled_at: null,

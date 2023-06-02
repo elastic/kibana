@@ -101,7 +101,6 @@ export interface IndexViewValues {
   lastUpdated: string | null;
   localSyncNowValue: boolean; // holds local value after update so UI updates correctly
   pipelineData: IngestPipelineParams | undefined;
-  productFeatures: typeof KibanaLogic.values.productFeatures;
   recheckIndexLoading: boolean;
   resetFetchIndexLoading: boolean;
   syncStatus: SyncStatus | null;
@@ -149,8 +148,6 @@ export const IndexViewLogic = kea<MakeLogicType<IndexViewValues, IndexViewAction
       ['indexName'],
       CachedFetchIndexApiLogic,
       ['fetchIndexApiData', 'status as fetchIndexApiStatus', 'indexData', 'isInitialLoading'],
-      KibanaLogic,
-      ['productFeatures'],
     ],
   },
   events: ({ actions }) => ({
@@ -188,7 +185,7 @@ export const IndexViewLogic = kea<MakeLogicType<IndexViewValues, IndexViewAction
       if (
         isConnectorIndex(values.fetchIndexApiData) &&
         values.hasDocumentLevelSecurityFeature &&
-        values.productFeatures.hasDocumentLevelSecurityEnabled
+        KibanaLogic.values.productFeatures.hasDocumentLevelSecurityEnabled
       ) {
         actions.makeStartAccessControlSyncRequest({
           connectorId: values.fetchIndexApiData.connector.id,
@@ -199,7 +196,7 @@ export const IndexViewLogic = kea<MakeLogicType<IndexViewValues, IndexViewAction
       if (
         isConnectorIndex(values.fetchIndexApiData) &&
         values.hasIncrementalSyncFeature &&
-        values.productFeatures.hasIncrementalSyncEnabled
+        KibanaLogic.values.productFeatures.hasIncrementalSyncEnabled
       ) {
         actions.makeStartIncrementalSyncRequest({
           connectorId: values.fetchIndexApiData.connector.id,

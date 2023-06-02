@@ -23,6 +23,7 @@ import { ErrorCode } from '../../../common/types/error_codes';
 export const startConnectorSync = async (
   client: IScopedClusterClient,
   connectorId: string,
+  jobType: SyncJobType,
   nextSyncConfig?: string
 ) => {
   const connectorResult = await client.asCurrentUser.get<ConnectorDocument>({
@@ -73,7 +74,7 @@ export const startConnectorSync = async (
         error: null,
         indexed_document_count: 0,
         indexed_document_volume: 0,
-        job_type: SyncJobType.FULL,
+        job_type: jobType,
         last_seen: null,
         metadata: {},
         started_at: null,

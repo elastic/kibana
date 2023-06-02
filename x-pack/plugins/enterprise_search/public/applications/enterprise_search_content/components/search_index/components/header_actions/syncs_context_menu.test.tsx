@@ -30,11 +30,17 @@ describe('SyncsContextMenu', () => {
   const cancelSyncs = jest.fn();
 
   const mockValues = {
+    hasDocumentLevelSecurityFeature: false,
+    hasIncrementalSyncFeature: false,
     ingestionMethod: IngestionMethod.CONNECTOR,
     ingestionStatus: IngestionStatus.CONNECTED,
     isCanceling: false,
     isSyncing: false,
     isWaitingForSync: false,
+    productFeatures: {
+      hasDocumentLevelSecurityEnabled: true,
+      hasIncrementalSyncEnabled: true,
+    },
     status: Status.SUCCESS,
   };
 
@@ -55,6 +61,34 @@ describe('SyncsContextMenu', () => {
     expect(popover.props().isOpen).toEqual(false);
   });
 
+  it('renders more syncs menu', () => {
+    setMockValues({
+      ...mockValues,
+      hasDocumentLevelSecurityFeature: true,
+      hasIncrementalSyncFeature: true,
+      isWaitingForSync: false,
+    });
+    const wrapper = mountWithIntl(<SyncsContextMenu />);
+    const button = wrapper.find(
+      'button[data-telemetry-id="entSearchContent-connector-header-sync-openSyncMenu"]'
+    );
+    button.simulate('click');
+
+    const menuItems = wrapper
+      .find(EuiContextMenuPanel)
+      .find(EuiResizeObserver)
+      .find(EuiContextMenuItem);
+    expect(menuItems).toHaveLength(3);
+
+    const firstButton = menuItems.at(0);
+    const secondButton = menuItems.at(1);
+    const thirdButton = menuItems.at(2);
+
+    expect(firstButton.text()).toEqual('Sync');
+    expect(secondButton.text()).toEqual('More syncs');
+    expect(thirdButton.text()).toEqual('Cancel Syncs');
+  });
+
   it('Can cancel syncs', () => {
     setMockValues({ ...mockValues, isSyncing: true });
     const wrapper = mountWithIntl(<SyncsContextMenu />);
@@ -69,14 +103,11 @@ describe('SyncsContextMenu', () => {
       .find(EuiContextMenuItem);
     expect(menuItems).toHaveLength(1);
 
-    const firstButton = menuItems.get(0);
+    const firstButton = menuItems;
 
-    expect(firstButton.props).toEqual(
-      expect.objectContaining({
-        children: 'Cancel Syncs',
-        disabled: false,
-      })
-    );
+    expect(firstButton.prop('disabled')).toEqual(false);
+    expect(firstButton.text()).toEqual('Cancel Syncs');
+
     menuItems.first().simulate('click');
     expect(cancelSyncs).toHaveBeenCalled();
   });

@@ -163,7 +163,7 @@ export enum TriggerMethod {
 export enum SyncJobType {
   FULL = 'full',
   INCREMENTAL = 'incremental',
-  ACCESS_CONTROL = 'access',
+  ACCESS_CONTROL = 'access_control',
 }
 
 export enum FeatureName {
