@@ -28,6 +28,7 @@ import { Dataset } from '@kbn/rule-registry-plugin/server';
 import type { ListPluginSetup } from '@kbn/lists-plugin/server';
 import type { ILicense } from '@kbn/licensing-plugin/server';
 
+import { getConnectorType as getGenerativeAiConnectorType } from '@kbn/stack-connectors-plugin/server/connector_types/gen_ai';
 import { getScheduleNotificationResponseActionsService } from './lib/detection_engine/rule_response_actions/schedule_notification_response_actions';
 import { siemGuideId, siemGuideConfig } from '../common/guided_onboarding/siem_guide_config';
 import {
@@ -160,7 +161,10 @@ export class Plugin implements ISecuritySolutionPlugin {
 
     initSavedObjects(core.savedObjects);
     initUiSettings(core.uiSettings, experimentalFeatures);
-
+    if (experimentalFeatures.genAiEnabled ?? false) {
+      console.log('REGISTER THE SUBACTION CONNECTOR TYPE');
+      plugins.actions.registerSubActionConnectorType(getGenerativeAiConnectorType());
+    }
     const ruleExecutionLogService = createRuleExecutionLogService(config, logger, core, plugins);
     ruleExecutionLogService.registerEventLogProvider();
 
