@@ -437,9 +437,11 @@ export function runBuildApiDocsCli() {
         defaultLevel: 'info',
       },
       flags: {
-        string: ['plugin', 'stats'],
+        string: ['plugin', 'stats', 'link'],
         boolean: ['references'],
         help: `
+          --link             Optionally, search and replace for missing definition in yaml files that
+                             have '@kbn-doc-linker partial' as top comment.
           --plugin           Optionally, run for only a specific plugin
           --stats            Optionally print API stats. Must be one or more of: any, comments or exports.
                              In combination with a single plugin filter this option will skip writing any
