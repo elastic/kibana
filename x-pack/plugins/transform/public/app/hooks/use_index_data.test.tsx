@@ -14,6 +14,7 @@ import { renderHook } from '@testing-library/react-hooks';
 
 import { CoreSetup } from '@kbn/core/public';
 import { DataGrid, type UseIndexDataReturnType } from '@kbn/ml-data-grid';
+import type { RuntimeMappings } from '@kbn/ml-runtime-field-utils';
 
 import { getMlSharedImports } from '../../shared_imports';
 
@@ -27,7 +28,6 @@ jest.mock('../app_dependencies');
 jest.mock('./use_api');
 
 import { MlSharedContext } from '../__mocks__/shared_context';
-import type { RuntimeField } from '@kbn/data-views-plugin/common';
 
 const query: SimpleQuery = {
   query_string: {
@@ -36,13 +36,13 @@ const query: SimpleQuery = {
   },
 };
 
-const runtimeMappings = {
+const runtimeMappings: RuntimeMappings = {
   rt_bytes_bigger: {
     type: 'double',
     script: {
       source: "emit(doc['bytes'].value * 2.0)",
     },
-  } as RuntimeField,
+  },
 };
 
 describe('Transform: useIndexData()', () => {
