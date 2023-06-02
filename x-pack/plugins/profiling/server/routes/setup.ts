@@ -90,9 +90,7 @@ export function registerSetupRoute({
           validateSecurityRole,
           validateSymbolizerPackagePolicy,
         ];
-        const partialStates = await Promise.all(
-          verifyFunctions.map(async (fn) => await fn(setupOptions))
-        );
+        const partialStates = await Promise.all(verifyFunctions.map((fn) => fn(setupOptions)));
         const mergedState = mergePartialSetupStates(state, partialStates);
 
         return response.ok({
@@ -155,9 +153,7 @@ export function registerSetupRoute({
           validateSecurityRole,
           validateSymbolizerPackagePolicy,
         ];
-        const partialStates = await Promise.all(
-          verifyFunctions.map(async (fn) => await fn(setupOptions))
-        );
+        const partialStates = await Promise.all(verifyFunctions.map((fn) => fn(setupOptions)));
         const mergedState = mergePartialSetupStates(state, partialStates);
 
         if (areResourcesSetup(mergedState)) {
@@ -173,7 +169,7 @@ export function registerSetupRoute({
           setSecurityRole,
           setMaximumBuckets,
         ];
-        await Promise.all(executeFunctions.map(async (fn) => await fn(setupOptions)));
+        await Promise.all(executeFunctions.map((fn) => fn(setupOptions)));
 
         return response.accepted();
       } catch (error) {
