@@ -26,10 +26,10 @@ describe('risk tab', () => {
   before(() => {
     cleanKibana();
     esArchiverLoad('risk_hosts');
-    login();
   });
 
   beforeEach(() => {
+    login();
     visit(HOSTS_URL);
     navigateToHostRiskDetailTab();
   });

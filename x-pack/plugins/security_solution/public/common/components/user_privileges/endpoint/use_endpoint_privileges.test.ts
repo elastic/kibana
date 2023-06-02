@@ -95,6 +95,13 @@ describe('When using useEndpointPrivileges hook', () => {
     expect(result.current).toEqual(getEndpointPrivilegesInitialStateMock());
   });
 
+  it('should return initial state when no user authz', async () => {
+    (useCurrentUser as jest.Mock).mockReturnValue({});
+
+    render();
+    expect(result.current).toEqual({ ...getEndpointPrivilegesInitialState(), loading: false });
+  });
+
   it.each([
     ['HIE exist', true],
     ['No HIE exist', false],

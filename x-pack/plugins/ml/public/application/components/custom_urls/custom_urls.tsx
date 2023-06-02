@@ -27,6 +27,7 @@ import { i18n } from '@kbn/i18n';
 import { withKibana } from '@kbn/kibana-react-plugin/public';
 import { DataViewListItem } from '@kbn/data-views-plugin/common';
 import type { MlUrlConfig } from '@kbn/ml-anomaly-utils';
+import { isDataFrameAnalyticsConfigs } from '@kbn/ml-data-frame-analytics-utils';
 import { MlKibanaReactContextValue } from '../../contexts/kibana';
 import { CustomUrlEditor, CustomUrlList } from './custom_url_editor';
 import {
@@ -43,7 +44,6 @@ import {
 import { openCustomUrlWindow } from '../../util/custom_url_utils';
 import type { CustomUrlsWrapperProps } from './custom_urls_wrapper';
 import { isAnomalyDetectionJob } from '../../../../common/types/anomaly_detection_jobs';
-import { isDataFrameAnalyticsConfigs } from '../../../../common/types/data_frame_analytics';
 
 const MAX_NUMBER_DASHBOARDS = 1000;
 

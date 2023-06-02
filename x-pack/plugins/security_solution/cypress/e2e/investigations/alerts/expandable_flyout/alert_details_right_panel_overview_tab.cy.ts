@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+/* eslint-disable cypress/unsafe-to-chain-command */
+
 import {
   DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_MITRE_ATTACK_DETAILS,
   DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_MITRE_ATTACK_TITLE,
@@ -62,7 +64,7 @@ import { waitForAlertsToPopulate } from '../../../../tasks/create_new_rule';
 // To run the tests locally, add 'securityFlyoutEnabled' in the Cypress config.ts here https://github.com/elastic/kibana/blob/main/x-pack/test/security_solution_cypress/config.ts#L50
 describe.skip(
   'Alert details expandable flyout right panel overview tab',
-  { testIsolation: false },
+  { env: { ftrConfig: { enableExperimental: ['securityFlyoutEnabled'] } } },
   () => {
     const rule = getNewRule();
 
