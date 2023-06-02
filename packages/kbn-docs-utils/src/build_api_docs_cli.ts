@@ -437,8 +437,8 @@ export function runBuildApiDocsCli() {
         defaultLevel: 'info',
       },
       flags: {
-        string: ['plugin', 'stats', 'link'],
-        boolean: ['references'],
+        string: ['plugin', 'stats'],
+        boolean: ['references', 'link'],
         help: `
           --link             Optionally, search and replace for missing definition in yaml files that
                              have '@kbn-doc-linker partial' as top comment.
