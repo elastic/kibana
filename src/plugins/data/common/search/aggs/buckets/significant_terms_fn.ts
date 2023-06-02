@@ -75,12 +75,14 @@ export const aggSignificantTerms = (): FunctionDefinition => ({
       help: i18n.translate('data.search.aggs.buckets.significantTerms.exclude.help', {
         defaultMessage: 'Specific bucket values to exclude from results',
       }),
+      multi: true,
     },
     include: {
       types: ['string'],
       help: i18n.translate('data.search.aggs.buckets.significantTerms.include.help', {
         defaultMessage: 'Specific bucket values to include in results',
       }),
+      multi: true,
     },
     json: {
       types: ['string'],

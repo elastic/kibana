@@ -23,8 +23,8 @@ export interface AggParamsSignificantTerms extends BaseAggParams {
   field: string;
   size?: number;
   shardSize?: number;
-  exclude?: string;
-  include?: string;
+  exclude?: string | string[];
+  include?: string | string[];
 }
 
 export const getSignificantTermsBucketAgg = () =>

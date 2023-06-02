@@ -281,6 +281,8 @@ export const termsOperation: OperationDefinition<
       ? Math.max(1000, column.params.size * 1.5 + 10)
       : undefined;
 
+    console.log(column.params.include);
+
     if (column.params?.orderBy.type === 'significant') {
       return buildExpressionFunction<AggFunctionsMapping['aggSignificantTerms']>(
         'aggSignificantTerms',
@@ -291,8 +293,8 @@ export const termsOperation: OperationDefinition<
           field: column.sourceField,
           size: column.params.size,
           shardSize,
-          ...(column.params.include?.length && { include: column.params.include }),
-          ...(column.params.exclude?.length && { exclude: column.params.exclude }),
+          ...(column.params.include?.length && { include: column.params.include as string[] }),
+          ...(column.params.exclude?.length && { exclude: column.params.exclude as string[] }),
         }
       ).toAst();
     }
@@ -1092,8 +1094,7 @@ The top values of a specified field ranked by the chosen metric.
                 data-test-subj="indexPattern-accuracy-mode"
                 checked={Boolean(
                   currentColumn.params.accuracyMode &&
-                    (currentColumn.params.orderBy.type !== 'rare' ||
-                      currentColumn.params.orderBy.type === 'significant')
+                    currentColumn.params.orderBy.type !== 'rare'
                 )}
                 onChange={(e: EuiSwitchEvent) =>
                   paramEditorUpdater(
