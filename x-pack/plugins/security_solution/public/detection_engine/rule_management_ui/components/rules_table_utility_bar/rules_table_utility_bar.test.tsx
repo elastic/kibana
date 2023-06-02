@@ -7,7 +7,6 @@
 
 import React from 'react';
 import { mount } from 'enzyme';
-import { waitFor } from '@testing-library/react';
 
 import { getShowingRulesParams, RulesTableUtilityBar } from './rules_table_utility_bar';
 import { TestProviders } from '../../../../common/mock';
