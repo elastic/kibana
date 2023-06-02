@@ -22,7 +22,6 @@ interface BuildEqlSearchRequestParams {
   filters: RuleFilterArray | undefined;
   primaryTimestamp: TimestampOverride;
   secondaryTimestamp: TimestampOverride | undefined;
-  runtimeMappings: estypes.MappingRuntimeFields | undefined;
   exceptionFilter: Filter | undefined;
 }
 
@@ -30,21 +29,12 @@ export const buildEsqlSearchRequest = ({
   query,
   from,
   to,
-  size,
   filters,
   primaryTimestamp,
   secondaryTimestamp,
-  runtimeMappings,
   exceptionFilter,
+  size,
 }: BuildEqlSearchRequestParams) => {
-  const timestamps = secondaryTimestamp
-    ? [primaryTimestamp, secondaryTimestamp]
-    : [primaryTimestamp];
-  const docFields = timestamps.map((tstamp) => ({
-    field: tstamp,
-    format: 'strict_date_optional_time',
-  }));
-
   const esFilter = getQueryFilter({
     query: '',
     language: 'esql',
@@ -59,17 +49,11 @@ export const buildEsqlSearchRequest = ({
     primaryTimestamp,
     secondaryTimestamp,
   });
+
   const requestFilter: estypes.QueryDslQueryContainer[] = [rangeFilter, esFilter];
-  // const fields = [
-  //   {
-  //     field: '*',
-  //     include_unmapped: true,
-  //   },
-  //   ...docFields,
-  // ];
 
   return {
-    query,
+    query: `${query} | limit ${size + 1}`,
     filter: {
       bool: {
         filter: requestFilter,

@@ -87,6 +87,7 @@ import {
 import { Threshold } from './specific_attributes/threshold_attributes';
 import { HistoryWindowStart, NewTermsFields } from './specific_attributes/new_terms_attributes';
 import { AlertSuppression } from './specific_attributes/query_attributes';
+import { EsqlParams } from './specific_attributes/esql_attributes';
 
 import { buildRuleSchemas } from './build_rule_schemas';
 
@@ -269,6 +270,7 @@ const esqlSchema = buildRuleSchemas({
   },
   optional: {
     filters: RuleFilterArray,
+    esql_params: EsqlParams,
   },
   defaultable: {},
 });

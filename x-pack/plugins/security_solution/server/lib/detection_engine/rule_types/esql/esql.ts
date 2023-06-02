@@ -15,6 +15,9 @@ import type {
 import { buildEsqlSearchRequest } from './build_esql_search_request';
 import { performEsqlRequest } from './esql_request';
 import { wrapEsqlAlerts } from './wrap_esql_alerts';
+import { wrapGroupedEsqlAlerts } from './wrap_grouped_esql_alerts';
+import { bulkCreateWithSuppression } from '../query/alert_suppression/bulk_create_with_suppression';
+
 import { createEnrichEventsFunction } from '../utils/enrichments';
 import type { RunOpts } from '../types';
 
@@ -27,6 +30,8 @@ import {
 } from '../utils/utils';
 import type { EsqlRuleParams } from '../../rule_schema';
 import { withSecuritySpan } from '../../../../utils/with_security_span';
+
+import { computeIfGrouping } from './utils';
 
 export const esqlExecutor = async ({
   runOpts: {
@@ -42,6 +47,7 @@ export const esqlExecutor = async ({
     unprocessedExceptions,
     alertTimestampOverride,
     publicBaseUrl,
+    alertWithSuppression,
   },
   services,
   state,
@@ -66,7 +72,6 @@ export const esqlExecutor = async ({
       filters: ruleParams.filters,
       primaryTimestamp,
       secondaryTimestamp,
-      runtimeMappings,
       exceptionFilter,
     });
 
@@ -85,31 +90,59 @@ export const esqlExecutor = async ({
     const esqlSearchDuration = makeFloatString(performance.now() - esqlSignalSearchStart);
     result.searchAfterTimes = [esqlSearchDuration];
 
-    const wrappedAlerts = wrapEsqlAlerts({
-      results: response,
-      spaceId,
-      completeRule,
-      mergeStrategy,
-      alertTimestampOverride,
-      ruleExecutionLogger,
-      publicBaseUrl,
-      tuple,
-    });
+    const isGrouping = computeIfGrouping(completeRule.ruleParams.query);
+    const suppressionDuration = completeRule.ruleParams.esqlParams?.suppressionDuration;
 
-    if (wrappedAlerts?.length) {
-      const createResult = await bulkCreate(
-        wrappedAlerts,
-        undefined,
-        createEnrichEventsFunction({
-          services,
-          logger: ruleExecutionLogger,
-        })
-      );
+    if (isGrouping && suppressionDuration) {
+      const wrappedAlerts = wrapGroupedEsqlAlerts({
+        results: response,
+        spaceId,
+        completeRule,
+        mergeStrategy,
+        alertTimestampOverride,
+        ruleExecutionLogger,
+        publicBaseUrl,
+        tuple,
+      });
 
-      addToSearchAfterReturn({ current: result, next: createResult });
+      const suppressionWindow = `now-${suppressionDuration.value}${suppressionDuration.unit}`;
+      const bulkCreateResult = await bulkCreateWithSuppression({
+        alertWithSuppression,
+        ruleExecutionLogger,
+        wrappedDocs: wrappedAlerts,
+        services,
+        suppressionWindow,
+        alertTimestampOverride,
+      });
+      addToSearchAfterReturn({ current: result, next: bulkCreateResult });
+      ruleExecutionLogger.debug(`created ${bulkCreateResult.createdItemsCount} signals`);
+    } else {
+      const wrappedAlerts = wrapEsqlAlerts({
+        results: response,
+        spaceId,
+        completeRule,
+        mergeStrategy,
+        alertTimestampOverride,
+        ruleExecutionLogger,
+        publicBaseUrl,
+        tuple,
+      });
+
+      if (wrappedAlerts?.length) {
+        const createResult = await bulkCreate(
+          wrappedAlerts,
+          undefined,
+          createEnrichEventsFunction({
+            services,
+            logger: ruleExecutionLogger,
+          })
+        );
+
+        addToSearchAfterReturn({ current: result, next: createResult });
+      }
     }
 
-    if (response.values.length >= ruleParams.maxSignals) {
+    if (response.values.length > ruleParams.maxSignals) {
       result.warningMessages.push(getMaxSignalsWarning());
     }
     return { ...result, state };

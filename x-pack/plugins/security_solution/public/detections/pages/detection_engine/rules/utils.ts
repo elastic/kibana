@@ -156,6 +156,13 @@ export const stepDefineDefaultValue: DefineStepRule = {
     unit: 'm',
   },
   suppressionMissingFields: DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY,
+  esqlOptions: {
+    suppressionDuration: {
+      value: 5,
+      unit: 'm',
+    },
+    groupByFields: [],
+  },
 };
 
 export const stepAboutDefaultValue: AboutStepRule = {

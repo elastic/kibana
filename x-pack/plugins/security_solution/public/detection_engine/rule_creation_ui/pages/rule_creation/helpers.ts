@@ -103,6 +103,7 @@ export interface RuleFields {
   eqlOptions: unknown;
   newTermsFields?: unknown;
   historyWindowSize?: unknown;
+  esqlOptions?: unknown;
 }
 
 type QueryRuleFields<T> = Omit<
@@ -477,6 +478,12 @@ export const formatDefineStepData = (defineStepData: DefineStepRule): DefineStep
         filters: ruleFields.queryBar?.filters,
         language: ruleFields.queryBar?.query?.language,
         query: ruleFields.queryBar?.query?.query as string,
+        esql_params: ruleFields.esqlOptions
+          ? {
+              suppression_duration: ruleFields.esqlOptions?.suppressionDuration,
+              group_by_fields: ruleFields.esqlOptions?.groupByFields,
+            }
+          : undefined,
       }
     : isNewTermsFields(ruleFields)
     ? {

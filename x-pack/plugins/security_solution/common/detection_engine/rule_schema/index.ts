@@ -13,6 +13,7 @@ export * from './model/common_attributes/saved_objects';
 export * from './model/common_attributes/timeline_template';
 
 export * from './model/specific_attributes/eql_attributes';
+export * from './model/specific_attributes/esql_attributes';
 export * from './model/specific_attributes/new_terms_attributes';
 export * from './model/specific_attributes/query_attributes';
 export * from './model/specific_attributes/threshold_attributes';

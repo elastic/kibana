@@ -89,6 +89,7 @@ import { DocLink } from '../../../../common/components/links_to_docs/doc_link';
 import { defaultCustomQuery } from '../../../pages/detection_engine/rules/utils';
 import { getIsRulePreviewDisabled } from '../rule_preview/helpers';
 import { GroupByFields } from '../group_by_fields';
+import { EsqlFieldsSelect } from '../esql_fields_select/esql_fields_select';
 import { useLicense } from '../../../../common/hooks/use_license';
 import {
   minimumLicenseForSuppression,
@@ -189,6 +190,9 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
       'groupByDuration.value',
       'groupByDuration.unit',
       'suppressionMissingFields',
+      'esqlOptions.suppressionDuration.value',
+      'esqlOptions.suppressionDuration.unit',
+      'esqlOptions.groupByFields',
     ],
     onChange: (data: DefineStepRule) => {
       if (onRuleDataChange) {
@@ -577,6 +581,28 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     [license, groupByFields]
   );
 
+  const EsqlOptions = useCallback(
+    ({ esqlSuppressionDurationValue, esqlSuppressionDurationUnit, esqlGroupByFields }) => {
+      // if (queryBar.query.language !== 'esql' && typeof queryBar.query.query !== 'string') {
+      //   return null;
+      // }
+      return (
+        <>
+          <EsqlFieldsSelect field={esqlGroupByFields} query={queryBar.query.query as string} />
+          <DurationInput
+            data-test-subj="esqlSuppressionDurationSelect"
+            durationValueField={esqlSuppressionDurationValue}
+            durationUnitField={esqlSuppressionDurationUnit}
+            isDisabled={false}
+            minimumValue={1}
+            label={'Configure suppression window for grouping ESQL alerts'}
+          />
+        </>
+      );
+    },
+    [queryBar]
+  );
+
   const AlertsSuppressionMissingFields = useCallback(
     ({ suppressionMissingFields }) => (
       <EuiRadioGroup
@@ -913,6 +939,27 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
               </RuleTypeEuiFormRow>
             </>
           )}
+
+          <RuleTypeEuiFormRow
+            $isVisible={isEsqlRule(ruleType)}
+            data-test-subj="esqlSuppressionDuration"
+          >
+            <UseMultiFields
+              fields={{
+                esqlSuppressionDurationValue: {
+                  path: 'esqlOptions.suppressionDuration.value',
+                },
+                esqlSuppressionDurationUnit: {
+                  path: 'esqlOptions.suppressionDuration.unit',
+                },
+                esqlGroupByFields: {
+                  path: 'esqlOptions.groupByFields',
+                },
+              }}
+            >
+              {EsqlOptions}
+            </UseMultiFields>
+          </RuleTypeEuiFormRow>
 
           <RuleTypeEuiFormRow
             $isVisible={isQueryRule(ruleType)}

@@ -227,6 +227,20 @@ export const getDescriptionItem = (
   } else if (field === 'eqlOptions') {
     const eqlOptions: EqlOptionsSelected = get(field, data);
     return buildEqlOptionsDescription(eqlOptions);
+    // TODO: make code production ready
+  } else if (field === 'esqlOptions') {
+    const esqlSuppressionDuration = get('esqlOptions.suppressionDuration', data);
+    const esqlGroupByFields = get('esqlOptions.groupByFields', data);
+    return [
+      {
+        title: 'ESQL suppression window',
+        description: `${esqlSuppressionDuration?.value}${esqlSuppressionDuration?.unit}`,
+      },
+      {
+        title: 'ESQL group by fields',
+        description: esqlGroupByFields?.join(', '),
+      },
+    ];
   } else if (field === 'threat') {
     const threats: Threats = get(field, data);
     return buildThreatDescription({ label, threat: filterEmptyThreats(threats) });

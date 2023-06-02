@@ -632,6 +632,34 @@ export const schema: FormSchema<DefineStepRule> = {
       }
     ),
   },
+  esqlOptions: {
+    groupByFields: {
+      type: FIELD_TYPES.COMBO_BOX,
+      label: i18n.translate(
+        'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.esqlOptions.groupByFieldsLabel',
+        {
+          defaultMessage: 'Select fields to suppress duplicate alerts',
+        }
+      ),
+      helpText: i18n.translate(
+        'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.esqlOptions.fieldGroupByFieldHelpText',
+        {
+          defaultMessage: 'Select available field(s) to suppress ESQL alerts',
+        }
+      ),
+      validations: [],
+    },
+    suppressionDuration: {
+      label: i18n.translate(
+        'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.esqlSuppressionDurationLabel',
+        {
+          defaultMessage: 'Configure suppression window for grouping ESQL alerts',
+        }
+      ),
+      value: {},
+      unit: {},
+    },
+  },
   newTermsFields: {
     type: FIELD_TYPES.COMBO_BOX,
     label: i18n.translate(

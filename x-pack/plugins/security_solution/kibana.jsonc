@@ -43,6 +43,7 @@
       "controls",
       "dataViews",
       "savedObjectsManagement",
+      "expressions"
     ],
     "optionalPlugins": [
       "cloudExperiments",

@@ -44,6 +44,7 @@ import {
   AlertSuppressionCamel,
   BuildingBlockType,
   DataViewId,
+  EsqlParamsCamel,
   EventCategoryOverride,
   ExceptionListArray,
   HistoryWindowStart,
@@ -145,6 +146,7 @@ const esqlSpecificRuleParams = t.type({
   language: t.literal('esql'),
   query: RuleQuery,
   filters: t.union([RuleFilterArray, t.undefined]),
+  esqlParams: t.union([EsqlParamsCamel, t.undefined]),
 });
 export const esqlRuleParams = t.intersection([baseRuleParams, esqlSpecificRuleParams]);
 export type EsqlSpecificRuleParams = t.TypeOf<typeof esqlSpecificRuleParams>;

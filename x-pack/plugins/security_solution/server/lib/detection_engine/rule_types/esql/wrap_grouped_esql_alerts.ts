@@ -7,6 +7,7 @@
 
 import objectHash from 'object-hash';
 import type { Moment } from 'moment';
+import { ALERT_INSTANCE_ID } from '@kbn/rule-data-utils';
 import type {
   BaseFieldsLatest,
   WrappedFieldsLatest,
@@ -16,11 +17,16 @@ import type { CompleteRule, EsqlRuleParams } from '../../rule_schema';
 import { buildReasonMessageForNewTermsAlert } from '../utils/reason_formatters';
 import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
 import { buildBulkBody } from '../factories/utils/build_bulk_body';
-import type { EsqlTable } from './esql_request';
+import type { EsqlTable, EsqlResultRow, EsqlResultColumn } from './esql_request';
 
-import { rowToDocument } from './utils';
+import { rowToDocument, pickCells } from './utils';
 
-export const wrapEsqlAlerts = ({
+const retrieveGroupByFields = (esqlQuery: string, columns: EsqlResultColumn[]) => {
+  // fields after the last ...by, will be the ones piped
+  const lastBySection = esqlQuery.split('by').pop();
+};
+
+export const wrapGroupedEsqlAlerts = ({
   results,
   spaceId,
   completeRule,
@@ -44,9 +50,6 @@ export const wrapEsqlAlerts = ({
   };
   // TODO latest fields
 }): Array<WrappedFieldsLatest<any>> => {
-  // console.log('>>>>>>> results', JSON.stringify(results, null, 2));
-  // console.log('>>>>>>> columns', JSON.stringify(results.columns, null, 2));
-
   return results.values.slice(0, completeRule.ruleParams.maxSignals).map((row, i) => {
     const ruleRunId = tuple.from.toISOString() + tuple.to.toISOString();
     const id = objectHash([
@@ -54,6 +57,13 @@ export const wrapEsqlAlerts = ({
       completeRule.ruleParams.query,
       `${spaceId}:${completeRule.alertId}`,
       i,
+    ]);
+
+    const instanceId = objectHash([
+      completeRule.ruleParams.query,
+      `${spaceId}:${completeRule.alertId}`,
+      row.slice(1),
+      //   pickCells(results.columns, row, ['destination.domain']).join(),
     ]);
 
     const document = rowToDocument(results.columns, row);
@@ -78,6 +88,7 @@ export const wrapEsqlAlerts = ({
       _index: '',
       _source: {
         ...baseAlert,
+        [ALERT_INSTANCE_ID]: instanceId,
       },
     };
   });

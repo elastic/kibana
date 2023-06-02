@@ -142,6 +142,10 @@ export const getDefineStepsData = (rule: Rule): DefineStepRule => ({
   groupByDuration: rule.alert_suppression?.duration ?? { value: 5, unit: 'm' },
   suppressionMissingFields:
     rule.alert_suppression?.missing_fields_strategy ?? DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY,
+  esqlOptions: {
+    suppressionDuration: rule.esql_params?.suppression_duration,
+    groupByFields: rule.esql_params?.group_by_fields,
+  },
 });
 
 const convertHistoryStartToSize = (relativeTime: string) => {

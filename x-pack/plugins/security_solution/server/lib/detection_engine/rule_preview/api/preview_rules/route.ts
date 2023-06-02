@@ -62,7 +62,7 @@ import { assertUnreachable } from '../../../../../../common/utility_types';
 import { wrapScopedClusterClient } from './wrap_scoped_cluster_client';
 import { wrapSearchSourceClient } from './wrap_search_source_client';
 
-const PREVIEW_TIMEOUT_SECONDS = 60;
+const PREVIEW_TIMEOUT_SECONDS = 60 * 10;
 const MAX_ROUTE_CONCURRENCY = 10;
 
 export const previewRulesRoute = async (
@@ -84,6 +84,9 @@ export const previewRulesRoute = async (
       },
       options: {
         tags: ['access:securitySolution', routeLimitedConcurrencyTag(MAX_ROUTE_CONCURRENCY)],
+        timeout: {
+          idleSocket: 10 * 60 * 1000,
+        },
       },
     },
     async (context, request, response) => {

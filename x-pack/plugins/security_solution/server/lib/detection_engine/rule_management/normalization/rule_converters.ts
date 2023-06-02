@@ -77,7 +77,12 @@ import type {
   NewTermsSpecificRuleParams,
 } from '../../rule_schema';
 import { transformFromAlertThrottle, transformToActionFrequency } from './rule_actions';
-import { convertAlertSuppressionToCamel, convertAlertSuppressionToSnake } from '../utils/utils';
+import {
+  convertAlertSuppressionToCamel,
+  convertAlertSuppressionToSnake,
+  convertEsqlParamsToCamel,
+  convertEsqlParamsToSnake,
+} from '../utils/utils';
 import { createRuleExecutionSummary } from '../../rule_monitoring';
 
 // These functions provide conversions from the request API schema to the internal rule schema and from the internal rule schema
@@ -111,6 +116,7 @@ export const typeSpecificSnakeToCamel = (
         language: params.language,
         query: params.query,
         filters: params.filters,
+        esqlParams: convertEsqlParamsToCamel(params.esql_params),
       };
     }
     case 'threat_match': {
@@ -221,6 +227,7 @@ const patchEsqlParams = (
     language: params.language ?? existingRule.language,
     query: params.query ?? existingRule.query,
     filters: params.filters ?? existingRule.filters,
+    esqlParams: convertEsqlParamsToCamel(params.esql_params) ?? existingRule.esqlParams,
   };
 };
 
@@ -555,6 +562,7 @@ export const typeSpecificCamelToSnake = (params: TypeSpecificRuleParams): TypeSp
         language: params.language,
         query: params.query,
         filters: params.filters,
+        esql_params: convertEsqlParamsToSnake(params.esqlParams),
       };
     }
     case 'threat_match': {

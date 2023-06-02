@@ -34,6 +34,8 @@ import type {
   SetupGuide,
   TimestampOverride,
   AlertSuppressionMissingFields,
+  EsqlSuppressionDuration,
+  EsqlParams,
 } from '../../../../../common/detection_engine/rule_schema';
 import type { SortOrder } from '../../../../../common/detection_engine/schemas/common';
 import type { EqlOptionsSelected } from '../../../../../common/search_strategy';
@@ -178,6 +180,10 @@ export interface DefineStepRule {
   groupByRadioSelection: GroupByOptions;
   groupByDuration: Duration;
   suppressionMissingFields?: AlertSuppressionMissingFields;
+  esqlOptions: {
+    suppressionDuration?: EsqlSuppressionDuration;
+    groupByFields?: string[];
+  };
 }
 
 export interface Duration {
@@ -226,6 +232,7 @@ export interface DefineStepRuleJson {
   timestamp_field?: string;
   event_category_override?: string;
   tiebreaker_field?: string;
+  esql_params?: EsqlParams;
 }
 
 export interface AboutStepRuleJson {
