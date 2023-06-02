@@ -12,6 +12,7 @@ describe('config validation', () => {
     const config: Record<string, unknown> = {};
     expect(configSchema.validate(config)).toMatchInlineSnapshot(`
       Object {
+        "allow_reading_invalid_state": false,
         "ephemeral_tasks": Object {
           "enabled": false,
           "request_capacity": 10,
@@ -43,7 +44,6 @@ describe('config validation', () => {
           "authenticate_background_task_utilization": true,
           "exclude_task_types": Array [],
         },
-        "validate_state": true,
         "version_conflict_threshold": 80,
         "worker_utilization_running_average_window": 5,
       }
@@ -65,6 +65,7 @@ describe('config validation', () => {
     const config: Record<string, unknown> = {};
     expect(configSchema.validate(config)).toMatchInlineSnapshot(`
       Object {
+        "allow_reading_invalid_state": false,
         "ephemeral_tasks": Object {
           "enabled": false,
           "request_capacity": 10,
@@ -96,7 +97,6 @@ describe('config validation', () => {
           "authenticate_background_task_utilization": true,
           "exclude_task_types": Array [],
         },
-        "validate_state": true,
         "version_conflict_threshold": 80,
         "worker_utilization_running_average_window": 5,
       }
@@ -116,6 +116,7 @@ describe('config validation', () => {
     };
     expect(configSchema.validate(config)).toMatchInlineSnapshot(`
       Object {
+        "allow_reading_invalid_state": false,
         "ephemeral_tasks": Object {
           "enabled": false,
           "request_capacity": 10,
@@ -152,7 +153,6 @@ describe('config validation', () => {
           "authenticate_background_task_utilization": true,
           "exclude_task_types": Array [],
         },
-        "validate_state": true,
         "version_conflict_threshold": 80,
         "worker_utilization_running_average_window": 5,
       }

@@ -20,7 +20,7 @@ describe('createMonitoringStatsStream', () => {
     max_workers: 10,
     max_attempts: 9,
     poll_interval: 6000000,
-    validate_state: true,
+    allow_reading_invalid_state: false,
     version_conflict_threshold: 80,
     monitored_stats_required_freshness: 6000000,
     request_capacity: 1000,

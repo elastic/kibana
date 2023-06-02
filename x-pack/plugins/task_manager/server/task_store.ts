@@ -45,7 +45,7 @@ export interface StoreOpts {
   savedObjectsRepository: ISavedObjectsRepository;
   serializer: ISavedObjectsSerializer;
   adHocTaskCounter: AdHocTaskCounter;
-  validateState: boolean;
+  allowReadingInvalidState: boolean;
 }
 
 export interface SearchOpts {
@@ -127,7 +127,7 @@ export class TaskStore {
     this.adHocTaskCounter = opts.adHocTaskCounter;
     this.taskValidator = new TaskValidator({
       definitions: opts.definitions,
-      validateState: opts.validateState,
+      allowReadingInvalidState: opts.allowReadingInvalidState,
     });
     this.esClientWithoutRetries = opts.esClient.child({
       // Timeouts are retried and make requests timeout after (requestTimeout * (1 + maxRetries))

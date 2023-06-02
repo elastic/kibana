@@ -10,17 +10,17 @@ import { TaskTypeDictionary } from './task_type_dictionary';
 import type { TaskInstance, ConcreteTaskInstance, TaskDefinition } from './task';
 
 interface TaskValidatorOpts {
-  validateState: boolean;
+  allowReadingInvalidState: boolean;
   definitions: TaskTypeDictionary;
 }
 
 export class TaskValidator {
   private readonly definitions: TaskTypeDictionary;
-  private readonly validateState: boolean;
+  private readonly allowReadingInvalidState: boolean;
 
-  constructor({ definitions, validateState }: TaskValidatorOpts) {
+  constructor({ definitions, allowReadingInvalidState }: TaskValidatorOpts) {
     this.definitions = definitions;
-    this.validateState = validateState;
+    this.allowReadingInvalidState = allowReadingInvalidState;
   }
 
   public getValidatedTaskInstance<T extends TaskInstance>(task: T, mode: 'read' | 'write'): T {
@@ -36,72 +36,70 @@ export class TaskValidator {
     if (mode === 'read') {
       return {
         ...task,
-        state: this.validateState
-          ? getValidatedStateSchema(
-              migrateTaskState(task.state, task.stateVersion, taskTypeDef, lastestStateSchema),
+        state: this.allowReadingInvalidState
+          ? task.state
+          : this.getValidatedStateSchema(
+              this.migrateTaskState(task.state, task.stateVersion, taskTypeDef, lastestStateSchema),
               task.taskType,
               lastestStateSchema,
               'ignore'
-            )
-          : task.state,
+            ),
       };
     }
 
     return {
       ...task,
-      state: this.validateState
-        ? getValidatedStateSchema(task.state, task.taskType, lastestStateSchema, 'forbid')
-        : task.state,
+      state: this.getValidatedStateSchema(task.state, task.taskType, lastestStateSchema, 'forbid'),
       stateVersion: lastestStateSchema?.version,
     };
   }
-}
 
-export function migrateTaskState(
-  state: ConcreteTaskInstance['state'],
-  currentVersion: number | undefined,
-  taskTypeDef: TaskDefinition,
-  lastestStateSchema: ReturnType<TaskDefinition['getLatestStateSchema']>
-) {
-  if (!lastestStateSchema || (currentVersion && currentVersion >= lastestStateSchema.version)) {
-    return state;
+  private migrateTaskState(
+    state: ConcreteTaskInstance['state'],
+    currentVersion: number | undefined,
+    taskTypeDef: TaskDefinition,
+    lastestStateSchema: ReturnType<TaskDefinition['getLatestStateSchema']>
+  ) {
+    if (!lastestStateSchema || (currentVersion && currentVersion >= lastestStateSchema.version)) {
+      return state;
+    }
+
+    let migratedState = state;
+    for (let i = currentVersion || 1; i <= lastestStateSchema.version; i++) {
+      if (!taskTypeDef.stateSchemaByVersion || !taskTypeDef.stateSchemaByVersion[`${i}`]) {
+        throw new Error(
+          `[TaskValidator] state schema for ${taskTypeDef.type} missing version: ${i}`
+        );
+      }
+      migratedState = taskTypeDef.stateSchemaByVersion[i].up(migratedState);
+      try {
+        taskTypeDef.stateSchemaByVersion[i].schema.validate(migratedState);
+      } catch (e) {
+        throw new Error(
+          `[TaskValidator] failed to migrate to version ${i} because the data returned from the up migration doesn't match the schema: ${e.message}`
+        );
+      }
+    }
+
+    return migratedState;
   }
 
-  let migratedState = state;
-  for (let i = currentVersion || 1; i <= lastestStateSchema.version; i++) {
-    if (!taskTypeDef.stateSchemaByVersion || !taskTypeDef.stateSchemaByVersion[`${i}`]) {
+  private getValidatedStateSchema(
+    state: ConcreteTaskInstance['state'],
+    taskType: string,
+    latestStateSchema: ReturnType<TaskDefinition['getLatestStateSchema']>,
+    unknowns: 'forbid' | 'ignore'
+  ): ConcreteTaskInstance['state'] {
+    if (isEmpty(state)) {
+      return {};
+    }
+
+    if (!latestStateSchema) {
       throw new Error(
-        `[migrateStateSchema] state schema for ${taskTypeDef.type} missing version: ${i}`
+        `[TaskValidator] stateSchemaByVersion not defined for task type: ${taskType}`
       );
     }
-    migratedState = taskTypeDef.stateSchemaByVersion[i].up(migratedState);
-    try {
-      taskTypeDef.stateSchemaByVersion[i].schema.validate(migratedState);
-    } catch (e) {
-      throw new Error(
-        `[migrateStateSchema] failed to migrate to version ${i} because the data returned from the up migration doesn't match the schema: ${e.message}`
-      );
-    }
+
+    return latestStateSchema.schema.extendsDeep({ unknowns }).validate(state);
   }
-
-  return migratedState;
-}
-
-export function getValidatedStateSchema(
-  state: ConcreteTaskInstance['state'],
-  taskType: string,
-  latestStateSchema: ReturnType<TaskDefinition['getLatestStateSchema']>,
-  unknowns: 'forbid' | 'ignore'
-): ConcreteTaskInstance['state'] {
-  if (isEmpty(state)) {
-    return {};
-  }
-
-  if (!latestStateSchema) {
-    throw new Error(
-      `[validateStateSchema] stateSchemaByVersion not defined for task type: ${taskType}`
-    );
-  }
-
-  return latestStateSchema.schema.extendsDeep({ unknowns }).validate(state);
 }

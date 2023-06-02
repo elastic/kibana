@@ -212,7 +212,7 @@ export class TaskManagerPlugin
       definitions: this.definitions,
       taskManagerId: `kibana:${this.taskManagerId!}`,
       adHocTaskCounter: this.adHocTaskCounter,
-      validateState: this.config.validate_state,
+      allowReadingInvalidState: this.config.allow_reading_invalid_state,
     });
 
     const managedConfiguration = createManagedConfiguration({

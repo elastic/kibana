@@ -83,7 +83,7 @@ describe('TaskStore', () => {
         definitions: taskDefinitions,
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
-        validateState: true,
+        allowReadingInvalidState: false,
       });
     });
 
@@ -256,7 +256,7 @@ describe('TaskStore', () => {
         definitions: taskDefinitions,
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
-        validateState: true,
+        allowReadingInvalidState: false,
       });
     });
 
@@ -326,7 +326,7 @@ describe('TaskStore', () => {
         definitions: taskDefinitions,
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
-        validateState: true,
+        allowReadingInvalidState: false,
       });
     });
 
@@ -425,7 +425,7 @@ describe('TaskStore', () => {
         definitions: taskDefinitions,
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
-        validateState: true,
+        allowReadingInvalidState: false,
       });
     });
 
@@ -531,7 +531,7 @@ describe('TaskStore', () => {
         definitions: taskDefinitions,
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
-        validateState: true,
+        allowReadingInvalidState: false,
       });
     });
 
@@ -573,7 +573,7 @@ describe('TaskStore', () => {
         definitions: taskDefinitions,
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
-        validateState: true,
+        allowReadingInvalidState: false,
       });
     });
 
@@ -608,7 +608,7 @@ describe('TaskStore', () => {
         definitions: taskDefinitions,
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
-        validateState: true,
+        allowReadingInvalidState: false,
       });
     });
 
@@ -643,7 +643,7 @@ describe('TaskStore', () => {
         definitions: taskDefinitions,
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
-        validateState: true,
+        allowReadingInvalidState: false,
       });
     });
 
@@ -702,7 +702,7 @@ describe('TaskStore', () => {
         definitions: taskDefinitions,
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
-        validateState: true,
+        allowReadingInvalidState: false,
       });
     });
 
@@ -796,7 +796,7 @@ describe('TaskStore', () => {
             definitions: taskDefinitions,
             savedObjectsRepository: savedObjectsClient,
             adHocTaskCounter,
-            validateState: true,
+            allowReadingInvalidState: false,
           });
 
           expect(await store.getLifecycle(task.id)).toEqual(status);
@@ -817,7 +817,7 @@ describe('TaskStore', () => {
         definitions: taskDefinitions,
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
-        validateState: true,
+        allowReadingInvalidState: false,
       });
 
       expect(await store.getLifecycle(randomId())).toEqual(TaskLifecycleResult.NotFound);
@@ -836,7 +836,7 @@ describe('TaskStore', () => {
         definitions: taskDefinitions,
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
-        validateState: true,
+        allowReadingInvalidState: false,
       });
 
       return expect(store.getLifecycle(randomId())).rejects.toThrow('Bad Request');
@@ -855,7 +855,7 @@ describe('TaskStore', () => {
         definitions: taskDefinitions,
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
-        validateState: true,
+        allowReadingInvalidState: false,
       });
     });
 
