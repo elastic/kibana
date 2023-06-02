@@ -6,7 +6,7 @@
  */
 
 import { isEmpty } from 'lodash/fp';
-import React, { memo, useCallback, useState, useEffect } from 'react';
+import React, { memo, useCallback, useState, useEffect, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 import { Subscription } from 'rxjs';
 import deepEqual from 'fast-deep-equal';
@@ -98,6 +98,14 @@ export const QueryBarTimeline = memo<QueryBarTimelineComponentProps>(
       convertKueryToElasticSearchQuery(buildGlobalQuery(dataProviders, browserFields), indexPattern)
     );
     const savedQueryServices = useSavedQueryServices();
+
+    const sourcererDataViewMemo = useMemo(() => {
+      if (sourcererDataView != null) {
+        return new DataView({ spec: sourcererDataView, fieldFormats });
+      } else {
+        return null;
+      }
+    }, [sourcererDataView, fieldFormats]);
 
     const applyKqlFilterQuery = useCallback(
       (expression: string, kind) =>
@@ -269,12 +277,12 @@ export const QueryBarTimeline = memo<QueryBarTimelineComponentProps>(
       [dataProvidersDsl, savedQueryId, savedQueryServices]
     );
 
-    return sourcererDataView ? (
+    return sourcererDataViewMemo ? (
       <QueryBar
         dateRangeFrom={dateRangeFrom}
         dateRangeTo={dateRangeTo}
         hideSavedQuery={kqlMode === 'search'}
-        indexPattern={new DataView({ spec: sourcererDataView, fieldFormats })}
+        indexPattern={sourcererDataViewMemo}
         isRefreshPaused={isRefreshPaused}
         filterQuery={filterQueryConverted}
         filterManager={filterManager}

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiFormRow } from '@elastic/eui';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiFormRow, EuiLoadingSpinner } from '@elastic/eui';
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import { DataView } from '@kbn/data-views-plugin/common';
 
@@ -70,6 +70,22 @@ const ThreatMatchInputComponent: React.FC<ThreatMatchInputProps> = ({
     [setValue]
   );
 
+  const dataViewMemo = useMemo(() => {
+    if (indexPatterns != null) {
+      return new DataView({ spec: indexPatterns, fieldFormats });
+    } else {
+      return null;
+    }
+  }, [indexPatterns, fieldFormats]);
+
+  const threatDataViewMemo = useMemo(() => {
+    if (threatIndexPatterns != null && !threatIndexPatternsLoading) {
+      return new DataView({ spec: threatIndexPatterns, fieldFormats });
+    } else {
+      return null;
+    }
+  }, [threatIndexPatterns, threatIndexPatternsLoading, fieldFormats]);
+
   return (
     <>
       <EuiSpacer size="m" />
@@ -97,24 +113,28 @@ const ThreatMatchInputComponent: React.FC<ThreatMatchInputProps> = ({
           />
         </EuiFlexItem>
         <EuiFlexItem grow={true}>
-          <UseField
-            path="threatQueryBar"
-            config={{
-              ...schema.threatQueryBar,
-              labelAppend: null,
-            }}
-            component={QueryBarDefineRule}
-            componentProps={{
-              browserFields: threatBrowserFields,
-              idAria: 'detectionEngineStepDefineThreatRuleQueryBar',
-              indexPattern: threatIndexPatterns,
-              isDisabled: false,
-              isLoading: threatIndexPatternsLoading,
-              dataTestSubj: 'detectionEngineStepDefineThreatRuleQueryBar',
-              openTimelineSearch: false,
-              onValidityChange: setIsThreatIndexPatternValid,
-            }}
-          />
+          {threatDataViewMemo != null ? (
+            <UseField
+              path="threatQueryBar"
+              config={{
+                ...schema.threatQueryBar,
+                labelAppend: null,
+              }}
+              component={QueryBarDefineRule}
+              componentProps={{
+                browserFields: threatBrowserFields,
+                idAria: 'detectionEngineStepDefineThreatRuleQueryBar',
+                indexPattern: threatDataViewMemo,
+                isDisabled: false,
+                isLoading: threatIndexPatternsLoading,
+                dataTestSubj: 'detectionEngineStepDefineThreatRuleQueryBar',
+                openTimelineSearch: false,
+                onValidityChange: setIsThreatIndexPatternValid,
+              }}
+            />
+          ) : (
+            <EuiLoadingSpinner />
+          )}
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="m" />
@@ -126,14 +146,18 @@ const ThreatMatchInputComponent: React.FC<ThreatMatchInputProps> = ({
         isInvalid={isThreatMappingInvalid}
         fullWidth
       >
-        <ThreatMatchComponent
-          listItems={threatItems as ThreatMapEntries[]}
-          indexPatterns={new DataView({ spec: indexPatterns, fieldFormats })}
-          threatIndexPatterns={new DataView({ spec: threatIndexPatterns, fieldFormats })}
-          data-test-subj="threatmatch-builder"
-          id-aria="threatmatch-builder"
-          onChange={handleBuilderOnChange}
-        />
+        {dataViewMemo != null && threatDataViewMemo != null ? (
+          <ThreatMatchComponent
+            listItems={threatItems as ThreatMapEntries[]}
+            indexPatterns={dataViewMemo}
+            threatIndexPatterns={threatDataViewMemo}
+            data-test-subj="threatmatch-builder"
+            id-aria="threatmatch-builder"
+            onChange={handleBuilderOnChange}
+          />
+        ) : (
+          <EuiLoadingSpinner />
+        )}
       </EuiFormRow>
       <EuiSpacer size="m" />
     </>

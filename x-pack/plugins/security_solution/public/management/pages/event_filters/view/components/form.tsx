@@ -11,6 +11,7 @@ import { isEqual } from 'lodash';
 import type { EuiSuperSelectOption } from '@elastic/eui';
 import {
   EuiFieldText,
+  EuiLoadingSpinner,
   EuiSpacer,
   EuiForm,
   EuiFormRow,
@@ -208,6 +209,14 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
       const policiesData = policies.filter((policy) => policyIds.includes(policy.id));
       setSelectedPolicies(policiesData);
     }, [hasFormChanged, exception, policies]);
+
+    const dataViewMemo = useMemo(() => {
+      if (dataView != null) {
+        return new DataView({ spec: dataView, fieldFormats });
+      } else {
+        return null;
+      }
+    }, [dataView, fieldFormats]);
 
     const eventFilterItem = useMemo<ArtifactFormComponentProps['item']>(() => {
       const ef: ArtifactFormComponentProps['item'] = exception;
@@ -429,33 +438,36 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
     );
     const exceptionBuilderComponentMemo = useMemo(
       () =>
-        getExceptionBuilderComponentLazy({
-          allowLargeValueLists: false,
-          httpService: http,
-          autocompleteService: autocompleteSuggestions,
-          exceptionListItems: [eventFilterItem as ExceptionListItemSchema],
-          listType: EVENT_FILTER_LIST_TYPE,
-          listId: ENDPOINT_EVENT_FILTERS_LIST_ID,
-          listNamespaceType: 'agnostic',
-          ruleName: RULE_NAME,
-          indexPatterns: new DataView({ spec: dataView, fieldFormats }),
-          isOrDisabled: true,
-          isOrHidden: true,
-          isAndDisabled: false,
-          isNestedDisabled: false,
-          dataTestSubj: 'alert-exception-builder',
-          idAria: 'alert-exception-builder',
-          onChange: handleOnBuilderChange,
-          listTypeSpecificIndexPatternFilter: filterIndexPatterns,
-          operatorsList: EVENT_FILTERS_OPERATORS,
-          osTypes: exception.os_types,
-        }),
+        dataViewMemo != null ? (
+          getExceptionBuilderComponentLazy({
+            allowLargeValueLists: false,
+            httpService: http,
+            autocompleteService: autocompleteSuggestions,
+            exceptionListItems: [eventFilterItem as ExceptionListItemSchema],
+            listType: EVENT_FILTER_LIST_TYPE,
+            listId: ENDPOINT_EVENT_FILTERS_LIST_ID,
+            listNamespaceType: 'agnostic',
+            ruleName: RULE_NAME,
+            indexPatterns: dataViewMemo,
+            isOrDisabled: true,
+            isOrHidden: true,
+            isAndDisabled: false,
+            isNestedDisabled: false,
+            dataTestSubj: 'alert-exception-builder',
+            idAria: 'alert-exception-builder',
+            onChange: handleOnBuilderChange,
+            listTypeSpecificIndexPatternFilter: filterIndexPatterns,
+            operatorsList: EVENT_FILTERS_OPERATORS,
+            osTypes: exception.os_types,
+          })
+        ) : (
+          <EuiLoadingSpinner />
+        ),
       [
         http,
         autocompleteSuggestions,
         eventFilterItem,
-        dataView,
-        fieldFormats,
+        dataViewMemo,
         handleOnBuilderChange,
         exception.os_types,
       ]

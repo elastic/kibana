@@ -132,6 +132,7 @@ const IntendedRuleTypeEuiFormRow = styled(RuleTypeEuiFormRow)`
   ${({ theme }) => `padding-left: ${theme.eui.euiSizeXL};`}
 `;
 
+// eslint-disable-next-line complexity
 const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   addPadding = false,
   defaultValues: initialState,
@@ -693,6 +694,14 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     handleResetIndices,
   ]);
 
+  const dataViewMemo = useMemo(() => {
+    if (dataView != null) {
+      return new DataView({ spec: dataView, fieldFormats });
+    } else {
+      return null;
+    }
+  }, [dataView, fieldFormats]);
+
   const QueryBarMemo = useMemo(
     () => (
       <UseField
@@ -716,7 +725,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
           {
             browserFields,
             idAria: 'detectionEngineStepDefineRuleQueryBar',
-            indexPattern: new DataView({ spec: dataView, fieldFormats }),
+            indexPattern: dataViewMemo,
             isDisabled: isLoading || formShouldLoadQueryDynamically || timelineQueryLoading,
             resetToSavedQuery: formShouldLoadQueryDynamically,
             isLoading: isIndexPatternLoading || timelineQueryLoading,
@@ -735,8 +744,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
       handleOpenTimelineSearch,
       formShouldLoadQueryDynamically,
       browserFields,
-      dataView,
-      fieldFormats,
+      dataViewMemo,
       isLoading,
       timelineQueryLoading,
       isIndexPatternLoading,
@@ -784,12 +792,16 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
 
   return isReadOnlyView ? (
     <StepContentWrapper data-test-subj="definitionRule" addPadding={addPadding}>
-      <StepRuleDescription
-        columns={descriptionColumns}
-        indexPatterns={new DataView({ spec: dataView, fieldFormats })}
-        schema={filterRuleFieldsForType(schema, ruleType)}
-        data={filterRuleFieldsForType(dataForDescription, ruleType)}
-      />
+      {dataViewMemo != null ? (
+        <StepRuleDescription
+          columns={descriptionColumns}
+          indexPatterns={dataViewMemo}
+          schema={filterRuleFieldsForType(schema, ruleType)}
+          data={filterRuleFieldsForType(dataForDescription, ruleType)}
+        />
+      ) : (
+        <EuiLoadingSpinner />
+      )}
     </StepContentWrapper>
   ) : (
     <>
