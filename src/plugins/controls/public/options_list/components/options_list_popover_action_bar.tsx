@@ -40,6 +40,8 @@ export const OptionsListPopoverActionBar = ({
   const searchString = optionsList.select((state) => state.componentState.searchString);
   const invalidSelections = optionsList.select((state) => state.componentState.invalidSelections);
 
+  const searchTechnique = optionsList.select((state) => state.explicitInput.searchTechnique);
+
   const allowExpensiveQueries = optionsList.select(
     (state) => state.componentState.allowExpensiveQueries
   );
@@ -59,7 +61,9 @@ export const OptionsListPopoverActionBar = ({
               onChange={(event) => updateSearchString(event.target.value)}
               value={searchString.value}
               data-test-subj="optionsList-control-search-input"
-              placeholder={OptionsListStrings.popover.getSearchPlaceholder()}
+              placeholder={OptionsListStrings.popover.searchPlaceholder[
+                searchTechnique ?? 'prefix'
+              ].getPlaceholderText()}
             />
           </EuiFlexItem>
           {!hideSort && (

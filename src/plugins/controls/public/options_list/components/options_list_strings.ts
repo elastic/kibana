@@ -133,10 +133,20 @@ export const OptionsListStrings = {
       i18n.translate('controls.optionsList.popover.clearAllSelectionsTitle', {
         defaultMessage: 'Clear selections',
       }),
-    getSearchPlaceholder: () =>
-      i18n.translate('controls.optionsList.popover.searchPlaceholder', {
-        defaultMessage: 'Search',
-      }),
+    searchPlaceholder: {
+      prefix: {
+        getPlaceholderText: () =>
+          i18n.translate('controls.optionsList.popover.prefixSearchPlaceholder', {
+            defaultMessage: 'Starts with...',
+          }),
+      },
+      wildcard: {
+        getPlaceholderText: () =>
+          i18n.translate('controls.optionsList.popover.wildcardSearchPlaceholder', {
+            defaultMessage: 'Contains...',
+          }),
+      },
+    },
     getCardinalityLabel: (totalOptions: number) =>
       i18n.translate('controls.optionsList.popover.cardinalityLabel', {
         defaultMessage:
