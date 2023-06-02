@@ -388,7 +388,6 @@ export class SyntheticsMonitorClient {
     if (hideParams) {
       formattedConfig.params = hideParamsHelper(formattedConfig.params);
       config.monitor.params = hideParamsHelper(config.monitor.params);
-      console.log('config.params', config.monitor.params);
     }
 
     const { privateLocations, publicLocations } = this.parseLocations(formattedConfig);
