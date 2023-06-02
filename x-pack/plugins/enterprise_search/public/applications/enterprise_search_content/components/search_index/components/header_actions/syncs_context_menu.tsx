@@ -198,7 +198,8 @@ export const SyncsContextMenu: React.FC = () => {
           }),
           onClick: () => {
             closePopover();
-            startSync(); // TODO CHECK IF THIS IS EXPECTED?
+            startSync();
+            startAccessControlSync();
           },
         },
       ],

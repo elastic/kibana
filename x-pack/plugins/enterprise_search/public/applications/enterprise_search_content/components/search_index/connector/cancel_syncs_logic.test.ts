@@ -25,9 +25,9 @@ describe('CancelSyncsLogic', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    IndexViewLogicMount(undefined, { productFeatures: {} });
+    IndexViewLogicMount();
     FetchIndexApiLogicMount();
-    mount(undefined, { productFeatures: {} });
+    mount();
   });
   it('has expected default values', () => {
     expect(CancelSyncsLogic.values).toEqual(DEFAULT_VALUES);

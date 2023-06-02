@@ -16,7 +16,6 @@ export interface StartIncrementalSyncArgs {
   nextSyncConfig?: CrawlRequestOverrides;
 }
 
-// TODO Efe - scheduling check
 export const startIncrementalSync = async ({
   connectorId,
   nextSyncConfig,

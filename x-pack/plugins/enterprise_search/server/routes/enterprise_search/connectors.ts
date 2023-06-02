@@ -200,7 +200,6 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
     },
     elasticsearchErrorHandler(log, async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
-      // TODO DO NOT MERGE - Change this
       await startConnectorSync(
         client,
         request.params.connectorId,

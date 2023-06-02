@@ -16,7 +16,6 @@ export interface StartAccessControlSyncArgs {
   nextSyncConfig?: CrawlRequestOverrides;
 }
 
-// TODO Efe - scheduling check
 export const startAccessControlSync = async ({
   connectorId,
   nextSyncConfig,
