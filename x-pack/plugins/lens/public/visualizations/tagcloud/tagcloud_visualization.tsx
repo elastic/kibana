@@ -197,18 +197,30 @@ export const getTagcloudVisualization = ({
       type: 'expression',
       chain: [
         ...(datasourceExpression ? datasourceExpression.chain : []),
-        {
-          type: 'function',
-          function: 'tagcloud',
-          arguments: {
-            bucket: [state.tagAccessor],
-            metric: [state.valueAccessor],
-            maxFontSize: [18],
-            minFontSize: [4],
-            showLabel: [false],
-            isPreview: [true],
-          },
-        },
+        buildExpressionFunction<ExpressionTagcloudFunctionDefinition>('tagcloud', {
+          bucket: state.tagAccessor,
+          isPreview: true,
+          metric: state.valueAccessor,
+          maxFontSize: 18,
+          minFontSize: 4,
+          orientation: state.orientation,
+          palette: buildExpression([
+            state.palette
+              ? buildExpressionFunction<ExpressionFunctionTheme>('theme', {
+                  variable: 'palette',
+                  default: [
+                    paletteService.get(state.palette.name).toExpression(state.palette.params),
+                  ],
+                })
+              : buildExpressionFunction<SystemPaletteExpressionFunctionDefinition>(
+                  'system_palette',
+                  {
+                    name: 'default',
+                  }
+                ),
+          ]).toAst(),
+          showLabel: false,
+        }).toAst(),
       ],
     };
   },
