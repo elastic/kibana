@@ -88,12 +88,12 @@ export const VisualOptionsPopover: React.FC<VisualOptionsPopoverProps> = ({
         isDisabled={isDisabled}
       >
         <LineCurveOption
-          isCurveTypeEnabled={isCurveTypeEnabled}
+          enabled={isCurveTypeEnabled}
           value={state?.curveType}
-          onChange={(id) => {
+          onChange={(curveType) => {
             setState({
               ...state,
-              curveType: id,
+              curveType,
             });
           }}
         />

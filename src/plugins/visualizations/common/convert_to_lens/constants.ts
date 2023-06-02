@@ -6,6 +6,9 @@
  * Side Public License, v 1.
  */
 
+import { CurveType } from "@elastic/charts";
+import { $Keys } from "utility-types";
+
 export const OperationsWithSourceField = {
   FILTERS: 'filters',
   RANGE: 'range',
@@ -68,7 +71,7 @@ export const LayerTypes = {
   ANNOTATIONS: 'annotations',
 } as const;
 
-export const XYCurveTypes = {
+export const XYCurveTypes: Record<string, $Keys<typeof CurveType>> = {
   LINEAR: 'LINEAR',
   CURVE_MONOTONE_X: 'CURVE_MONOTONE_X',
   CURVE_STEP_AFTER: 'CURVE_STEP_AFTER',
