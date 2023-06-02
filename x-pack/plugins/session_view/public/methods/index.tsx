@@ -8,7 +8,6 @@
 import React, { lazy, Suspense } from 'react';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { CURRENT_API_VERSION } from '../constants';
 import { SessionViewDeps } from '../types';
 
 // Initializing react-query
@@ -17,15 +16,19 @@ const queryClient = new QueryClient();
 const SessionViewLazy = lazy(() => import('../components/session_view'));
 
 const SUPPORTED_PACKAGES = ['endpoint', 'cloud_defend'];
-const DEFAULT_INDEX = 'logs-*';
-const CLOUD_DEFEND_INDEX = 'logs-cloud_defend.*';
-const ENDPOINT_INDEX = 'logs-endpoint.events.process*';
-const INDEX_REGEX = new RegExp(`([a-z0-9_-]+:)?\(${SUPPORTED_PACKAGES.join('|')})`, 'i');
+const INDEX_REGEX = new RegExp(
+  `([a-z0-9_-]+\:)?[a-z0-9\-.]*(${SUPPORTED_PACKAGES.join('|')})`,
+  'i'
+);
+
+export const DEFAULT_INDEX = 'logs-*';
+export const CLOUD_DEFEND_INDEX = 'logs-cloud_defend.*';
+export const ENDPOINT_INDEX = 'logs-endpoint.events.process*';
 
 // Currently both logs-endpoint.events.process* and logs-cloud_defend.process* are valid sources for session data.
 // To avoid cross cluster searches, the original index of the event is used to infer the index to find data for the
 // rest of the session.
-const getSessionViewProcessIndex = (eventIndex?: string | null) => {
+export const getIndexPattern = (eventIndex?: string | null) => {
   if (!eventIndex) {
     return DEFAULT_INDEX;
   }
@@ -46,10 +49,12 @@ const getSessionViewProcessIndex = (eventIndex?: string | null) => {
 };
 
 export const getSessionViewLazy = (props: SessionViewDeps) => {
+  const index = getIndexPattern(props.index);
+
   return (
     <QueryClientProvider client={queryClient}>
       <Suspense fallback={<EuiLoadingSpinner />}>
-        <SessionViewLazy {...props} index={getSessionViewProcessIndex(props.index)} />
+        <SessionViewLazy {...props} index={index} />
       </Suspense>
     </QueryClientProvider>
   );
