@@ -28,7 +28,8 @@
       "ruleRegistry",
       "files",
       "savedObjectsFinder",
-      "savedObjectsManagement"
+      "savedObjectsManagement",
+      "uiActions",
     ],
     "optionalPlugins": [
       "home",
