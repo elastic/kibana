@@ -896,7 +896,7 @@ export function XYChart({
               tooltip: { visible: syncTooltips, placement: Placement.Right },
             }}
             legendColorPicker={uiState ? LegendColorPickerWrapper : undefined}
-            debugState={true}
+            debugState={window._echDebugStateFlag ?? false}
             showLegend={showLegend}
             legendPosition={legend?.isInside ? legendInsideParams : legend.position}
             legendSize={LegendSizeToPixels[legend.legendSize ?? DEFAULT_LEGEND_SIZE]}
