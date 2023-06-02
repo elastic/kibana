@@ -43,10 +43,10 @@ export const filterOutFromBarChartLegend = () => {
  * Filter in value by clicking on the menu item within an indicators table cell
  */
 export const filterInFromTableCell = () => {
+  cy.get(INDICATOR_TYPE_CELL).first().should('be.visible');
+  cy.get(INDICATOR_TYPE_CELL).first().trigger('mouseover');
   cy.get(INDICATOR_TYPE_CELL)
     .first()
-    .should('be.visible')
-    .trigger('mouseover')
     .within((_cell) => {
       cy.get(INDICATORS_TABLE_CELL_FILTER_IN_BUTTON).should('exist').click({
         force: true,
@@ -58,9 +58,9 @@ export const filterInFromTableCell = () => {
  * Filter out value by clicking on the menu item within an indicators table cell
  */
 export const filterOutFromTableCell = () => {
+  cy.get(INDICATOR_TYPE_CELL).first().trigger('mouseover');
   cy.get(INDICATOR_TYPE_CELL)
     .first()
-    .trigger('mouseover')
     .within((_cell) => {
       cy.get(INDICATORS_TABLE_CELL_FILTER_OUT_BUTTON).should('exist').click({ force: true });
     });

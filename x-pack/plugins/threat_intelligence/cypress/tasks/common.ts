@@ -26,7 +26,8 @@ import {
  * Navigate to Blocklist screen via the Security Solution navbar and Manage menu item
  */
 export const navigateToBlocklist = () => {
-  cy.get(SECURITY_SOLUTION_NAVBAR_MANAGE_ITEM).scrollIntoView().click();
+  cy.get(SECURITY_SOLUTION_NAVBAR_MANAGE_ITEM).scrollIntoView();
+  cy.get(SECURITY_SOLUTION_NAVBAR_MANAGE_ITEM).click();
   cy.get(MANAGE_NAVIGATION_ITEMS).contains('Blocklist').click();
 };
 
@@ -87,7 +88,8 @@ export const navigateToFlyoutJsonTab = () => {
 };
 
 export const waitForViewToBeUpdated = () => {
-  cy.get(UPDATE_STATUS).scrollIntoView().should('contain.text', 'Updated');
+  cy.get(UPDATE_STATUS).scrollIntoView();
+  cy.get(UPDATE_STATUS).should('contain.text', 'Updated');
 };
 
 /**

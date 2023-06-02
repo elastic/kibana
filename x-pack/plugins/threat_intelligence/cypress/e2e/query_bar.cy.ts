@@ -33,16 +33,13 @@ import { esArchiverLoad, esArchiverUnload } from '../tasks/es_archiver';
 const THREAT_INTELLIGENCE = '/app/security/threat_intelligence/indicators';
 
 describe('Indicators query bar interaction', () => {
-  before(() => {
-    esArchiverLoad('threat_intelligence/indicators_data');
-  });
-
   beforeEach(() => {
+    esArchiverLoad('threat_intelligence/indicators_data');
     login();
     visit(THREAT_INTELLIGENCE);
   });
 
-  after(() => {
+  afterEach(() => {
     esArchiverUnload('threat_intelligence/indicators_data');
   });
 

@@ -57,8 +57,10 @@ export const openAddToExistingCaseFromFlyout = () => {
  */
 export const createNewCaseFromCases = () => {
   cy.get(CREATE_CASE_BUTTON).click();
-  cy.get(NEW_CASE_NAME_INPUT).click().type('case');
-  cy.get(NEW_CASE_DESCRIPTION_INPUT).click().type('case description');
+  cy.get(NEW_CASE_NAME_INPUT).click();
+  cy.get(NEW_CASE_NAME_INPUT).type('case');
+  cy.get(NEW_CASE_DESCRIPTION_INPUT).click();
+  cy.get(NEW_CASE_DESCRIPTION_INPUT).type('case description');
   cy.get(NEW_CASE_CREATE_BUTTON).click();
 };
 

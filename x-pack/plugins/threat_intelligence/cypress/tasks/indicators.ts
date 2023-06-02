@@ -18,12 +18,14 @@ export const navigateToIndicatorsTablePage = (index: number) => {
  * Clears text in KQL bar
  */
 export const enterQuery = (text: string) => {
-  cy.get(QUERY_INPUT).should('exist').focus().type(text);
+  cy.get(QUERY_INPUT).should('exist').focus();
+  cy.get(QUERY_INPUT).should('exist').type(text);
 };
 
 /**
  * Clears text in KQL bar
  */
 export const clearQuery = () => {
-  cy.get(QUERY_INPUT).should('exist').focus().clear();
+  cy.get(QUERY_INPUT).should('exist').focus();
+  cy.get(QUERY_INPUT).should('exist').clear();
 };

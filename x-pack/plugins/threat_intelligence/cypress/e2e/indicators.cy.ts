@@ -240,7 +240,9 @@ describe('Indicators', () => {
     });
 
     it('should go to page 1 when search input is cleared', () => {
-      cy.get(QUERY_INPUT).should('exist').focus().clear().type('{enter}');
+      cy.get(QUERY_INPUT).should('exist').focus();
+      cy.get(QUERY_INPUT).clear();
+      cy.get(QUERY_INPUT).type('{enter}');
 
       cy.get(TABLE_CONTROLS).should('contain.text', 'Showing 1-25 of');
     });
