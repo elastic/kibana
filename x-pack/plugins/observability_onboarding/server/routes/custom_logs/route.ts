@@ -5,22 +5,42 @@
  * 2.0.
  */
 
-import * as t from 'io-ts';
-import Boom from '@hapi/boom';
 import type { Client } from '@elastic/elasticsearch';
-import { createObservabilityOnboardingServerRoute } from '../create_observability_onboarding_server_route';
-import { getESHosts } from './get_es_hosts';
-import { getKibanaUrl } from './get_kibana_url';
-import { createShipperApiKey } from './create_shipper_api_key';
-import { saveObservabilityOnboardingState } from './save_observability_onboarding_state';
+import Boom from '@hapi/boom';
+import * as t from 'io-ts';
+import { getAuthenticationAPIKey } from '../../lib/get_authentication_api_key';
 import {
   ObservabilityOnboardingState,
   OBSERVABILITY_ONBOARDING_STATE_SAVED_OBJECT_TYPE,
   SavedObservabilityOnboardingState,
 } from '../../saved_objects/observability_onboarding_status';
-import { getObservabilityOnboardingState } from './get_observability_onboarding_state';
+import { createObservabilityOnboardingServerRoute } from '../create_observability_onboarding_server_route';
+import { createShipperApiKey } from './create_shipper_api_key';
 import { findLatestObservabilityOnboardingState } from './find_latest_observability_onboarding_state';
-import { getAuthenticationAPIKey } from '../../lib/get_authentication_api_key';
+import { getESHosts } from './get_es_hosts';
+import { getKibanaUrl } from './get_kibana_url';
+import { getObservabilityOnboardingState } from './get_observability_onboarding_state';
+import { hasLogMonitoringPrivileges } from './has_log_monitoring_privileges';
+import { saveObservabilityOnboardingState } from './save_observability_onboarding_state';
+
+const logMonitoringPrivilegesRoute = createObservabilityOnboardingServerRoute({
+  endpoint: 'GET /internal/observability_onboarding/custom_logs/privileges',
+  options: { tags: [] },
+
+  handler: async (resources): Promise<{ hasPrivileges: boolean }> => {
+    const { context } = resources;
+
+    const {
+      elasticsearch: { client },
+    } = await context.core;
+
+    const hasPrivileges = await hasLogMonitoringPrivileges(
+      client.asCurrentUser
+    );
+
+    return { hasPrivileges };
+  },
+});
 
 const createApiKeyRoute = createObservabilityOnboardingServerRoute({
   endpoint:
@@ -249,6 +269,7 @@ const deleteStatesRoute = createObservabilityOnboardingServerRoute({
 });
 
 export const customLogsRouteRepository = {
+  ...logMonitoringPrivilegesRoute,
   ...createApiKeyRoute,
   ...stepProgressUpdateRoute,
   ...getStateRoute,
