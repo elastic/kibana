@@ -1,8 +1,11 @@
 newsfeed.enabled: false
 xpack.security.showNavLinks: false
 xpack.serverless.plugin.enabled: true
-xpack.fleet.enableExperimental: ['fleetServerStandalone']
+xpack.fleet.internal.fleetServerStandalone: true
 xpack.fleet.internal.disableILMPolicies: true
+
+# Ess plugins
+xpack.ess.security.enabled: false
 
 # Management team plugins
 xpack.upgrade_assistant.enabled: false

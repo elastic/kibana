@@ -8,13 +8,13 @@
 import { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
-  ClassificationFeatureImportanceBaseline,
-  FeatureImportance,
-  FeatureImportanceBaseline,
+  type ClassificationFeatureImportanceBaseline,
+  type FeatureImportance,
+  type FeatureImportanceBaseline,
+  type TopClasses,
   isClassificationFeatureImportanceBaseline,
   isRegressionFeatureImportanceBaseline,
-  TopClasses,
-} from '../../../../../../../common/types/feature_importance';
+} from '@kbn/ml-data-frame-analytics-utils';
 import type { ExtendedFeatureImportance } from './decision_path_popover';
 
 export type DecisionPathPlotData = Array<[string, number, number]>;

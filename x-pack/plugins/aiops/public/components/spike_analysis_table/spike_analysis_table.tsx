@@ -240,7 +240,11 @@ export const SpikeAnalysisTable: FC<SpikeAnalysisTableProps> = ({
       name: i18n.translate('xpack.aiops.spikeAnalysisTable.actionsColumnName', {
         defaultMessage: 'Actions',
       }),
-      actions: [viewInDiscoverAction, viewInLogPatternAnalysisAction, copyToClipBoardAction],
+      actions: [
+        ...(viewInDiscoverAction ? [viewInDiscoverAction] : []),
+        ...(viewInLogPatternAnalysisAction ? [viewInLogPatternAnalysisAction] : []),
+        copyToClipBoardAction,
+      ],
       width: ACTIONS_COLUMN_WIDTH,
       valign: 'middle',
     },
