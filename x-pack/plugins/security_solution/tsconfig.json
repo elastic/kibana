@@ -157,5 +157,6 @@
     "@kbn/ecs",
     "@kbn/url-state",
     "@kbn/field-formats-plugin",
+    "@kbn/stack-connectors-plugin",
   ]
 }
