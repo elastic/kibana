@@ -326,10 +326,3 @@ export const mlCategory: Field = {
  * @typedef {RollupFields}
  */
 export type RollupFields = Record<FieldId, [Record<'agg', ES_AGGREGATION>]>;
-
-/**
- * Alias for `estypes.MappingRuntimeFields`.
- * @export
- * @typedef {RuntimeMappings}
- */
-export type RuntimeMappings = estypes.MappingRuntimeFields;

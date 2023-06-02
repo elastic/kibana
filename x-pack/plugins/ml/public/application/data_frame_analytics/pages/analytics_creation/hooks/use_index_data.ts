@@ -12,16 +12,16 @@ import { EuiDataGridColumn } from '@elastic/eui';
 
 import { CoreSetup } from '@kbn/core/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
+import { DEFAULT_SAMPLER_SHARD_SIZE } from '@kbn/ml-anomaly-utils';
 import {
+  getCombinedRuntimeMappings,
   isRuntimeMappings,
   type RuntimeMappings,
-  DEFAULT_SAMPLER_SHARD_SIZE,
-} from '@kbn/ml-anomaly-utils';
+} from '@kbn/ml-runtime-field-utils';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import type { TimeRange as TimeRangeMs } from '@kbn/ml-date-picker';
 import { extractErrorMessage } from '@kbn/ml-error-utils';
 import { INDEX_STATUS } from '@kbn/ml-data-frame-analytics-utils';
-
 import {
   getFieldType,
   getDataGridSchemaFromKibanaFieldType,
@@ -33,7 +33,6 @@ import {
   EsSorting,
   UseIndexDataReturnType,
   getProcessedFields,
-  getCombinedRuntimeMappings,
 } from '@kbn/ml-data-grid';
 
 import { DataLoader } from '../../../../datavisualizer/index_based/data_loader';

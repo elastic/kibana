@@ -16,7 +16,6 @@ import {
   aggregationTypeTransform,
   getEntityFieldList,
   isMultiBucketAnomaly,
-  isRuntimeMappings,
   type InfluencersFilterQuery,
   type MlAnomalyRecordDoc,
   type MlEntityField,
@@ -26,6 +25,7 @@ import {
   ES_AGGREGATION,
   ML_JOB_AGGREGATION,
 } from '@kbn/ml-anomaly-utils';
+import { isRuntimeMappings } from '@kbn/ml-runtime-field-utils';
 import type { MlClient } from '../../lib/ml_client';
 import type {
   MetricData,

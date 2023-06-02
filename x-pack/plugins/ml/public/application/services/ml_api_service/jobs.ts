@@ -7,7 +7,8 @@
 
 import { Observable } from 'rxjs';
 import { useMemo } from 'react';
-import type { AggFieldNamePair, RuntimeMappings } from '@kbn/ml-anomaly-utils';
+import type { AggFieldNamePair } from '@kbn/ml-anomaly-utils';
+import type { RuntimeMappings } from '@kbn/ml-runtime-field-utils';
 import { HttpService } from '../http_service';
 import { useMlKibana } from '../../contexts/kibana';
 

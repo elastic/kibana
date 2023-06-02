@@ -15,11 +15,11 @@ import {
   type Aggregation,
   type Field,
   type MlUrlConfig,
-  type RuntimeMappings,
   ML_JOB_AGGREGATION,
   mlJobAggregations,
   mlJobAggregationsWithoutEsEquivalent,
 } from '@kbn/ml-anomaly-utils';
+import type { RuntimeMappings } from '@kbn/ml-runtime-field-utils';
 import { SavedSearchSavedObject } from '../../../../../../common/types/kibana';
 import { IndexPatternTitle } from '../../../../../../common/types/kibana';
 import { getQueryFromSavedSearchObject } from '../../../../util/index_utils';

@@ -11,7 +11,7 @@ import { IScopedClusterClient } from '@kbn/core/server';
 import { duration } from 'moment';
 import type { AggCardinality } from '@kbn/ml-agg-utils';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
-import type { RuntimeMappings } from '@kbn/ml-anomaly-utils';
+import type { RuntimeMappings } from '@kbn/ml-runtime-field-utils';
 import { parseInterval } from '../../../common/util/parse_interval';
 import { initCardinalityFieldsCache } from './fields_aggs_cache';
 import { isValidAggregationField } from '../../../common/util/validation_utils';

@@ -8,7 +8,7 @@
 import { DataView } from '@kbn/data-views-plugin/public';
 import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
 import { isCounterTimeSeriesMetric, TIME_SERIES_METRIC_TYPES } from '@kbn/ml-agg-utils';
-import { isRuntimeMappings } from '@kbn/ml-anomaly-utils';
+import { isRuntimeMappings } from '@kbn/ml-runtime-field-utils';
 import { getNestedProperty } from '@kbn/ml-nested-property';
 
 import { removeKeywordPostfix } from '../../../../../../../common/utils/field_utils';

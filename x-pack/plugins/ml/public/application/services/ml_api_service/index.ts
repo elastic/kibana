@@ -10,7 +10,7 @@ import { Observable } from 'rxjs';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import type { HttpStart } from '@kbn/core/public';
-import type { RuntimeMappings } from '@kbn/ml-anomaly-utils';
+import type { RuntimeMappings } from '@kbn/ml-runtime-field-utils';
 
 import { ML_INTERNAL_BASE_PATH } from '../../../../common/constants/app';
 import type {

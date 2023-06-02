@@ -28,8 +28,12 @@ import { Query } from '@kbn/data-plugin/common/query';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { stringHash } from '@kbn/ml-string-hash';
 import { extractErrorMessage } from '@kbn/ml-error-utils';
-import { isRuntimeMappings, type RuntimeMappings } from '@kbn/ml-anomaly-utils';
-import { getCombinedRuntimeMappings, getProcessedFields } from '@kbn/ml-data-grid';
+import {
+  getCombinedRuntimeMappings,
+  isRuntimeMappings,
+  type RuntimeMappings,
+} from '@kbn/ml-runtime-field-utils';
+import { getProcessedFields } from '@kbn/ml-data-grid';
 
 import { useCurrentThemeVars, useMlApiContext, useMlKibana } from '../../contexts/kibana';
 

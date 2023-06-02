@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isRuntimeMappings, type RuntimeMappings } from '@kbn/ml-anomaly-utils';
+import { isRuntimeMappings, type RuntimeMappings } from '@kbn/ml-runtime-field-utils';
 import {
   getAnalysisType,
   isClassificationAnalysis,

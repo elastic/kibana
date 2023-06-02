@@ -10,7 +10,7 @@ import { useEffect, useMemo, useState } from 'react';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { EuiDataGridColumn } from '@elastic/eui';
 
-import { isRuntimeMappings } from '@kbn/ml-anomaly-utils';
+import { isRuntimeMappings } from '@kbn/ml-runtime-field-utils';
 import { buildBaseFilterCriteria } from '@kbn/ml-query-utils';
 import {
   getFieldType,

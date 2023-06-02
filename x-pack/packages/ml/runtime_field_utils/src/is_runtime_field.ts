@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { RUNTIME_FIELD_TYPES } from '@kbn/data-plugin/common';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
@@ -29,15 +30,4 @@ export function isRuntimeField(arg: unknown): arg is estypes.MappingRuntimeField
           (isPopulatedObject(arg.script, ['id']) && typeof arg.script.id === 'string')))) &&
     RUNTIME_FIELD_TYPES.includes(arg.type as RuntimeType)
   );
-}
-
-/**
- * Type guard for runtime mappings
- *
- * @export
- * @param {unknown} arg - The item to be checked
- * @returns {arg is estypes.MappingRuntimeFields}
- */
-export function isRuntimeMappings(arg: unknown): arg is estypes.MappingRuntimeFields {
-  return isPopulatedObject(arg) && Object.values(arg).every((d) => isRuntimeField(d));
 }

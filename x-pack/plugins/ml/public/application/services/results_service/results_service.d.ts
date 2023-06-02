@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { InfluencersFilterQuery, EntityField, RuntimeMappings } from '@kbn/ml-anomaly-utils';
+import type { InfluencersFilterQuery, EntityField } from '@kbn/ml-anomaly-utils';
+import type { RuntimeMappings } from '@kbn/ml-runtime-field-utils';
 import { IndicesOptions } from '../../../../common/types/anomaly_detection_jobs';
 import { MlApiServices } from '../ml_api_service';
 

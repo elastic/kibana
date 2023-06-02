@@ -6,7 +6,7 @@
  */
 
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
-import type { RuntimeMappings } from '@kbn/ml-anomaly-utils';
+import type { RuntimeMappings } from '@kbn/ml-runtime-field-utils';
 import type { Datafeed, Job } from '../../../../../../../common/types/anomaly_detection_jobs';
 
 interface Response {

@@ -21,8 +21,6 @@ import { isCounterTimeSeriesMetric } from '@kbn/ml-agg-utils';
 import {
   formatHumanReadableDateTimeSeconds,
   getFieldFormatFromIndexPattern,
-  isRuntimeMappings,
-  type RuntimeMappings,
 } from '@kbn/ml-anomaly-utils';
 import {
   type FeatureImportance,
@@ -100,40 +98,6 @@ export const getFieldsFromKibanaIndexPattern = (dataView: DataView): string[] =>
 
   return dataViewFields;
 };
-
-/**
- * Return a map of runtime_mappings for each of the data view field provided
- * to provide in ES search queries
- * @param {DataView | undefined} dataView - The Kibana data view.
- * @param runtimeMappings - Optional runtime mappings.
- */
-export function getCombinedRuntimeMappings(
-  dataView: DataView | undefined,
-  runtimeMappings?: RuntimeMappings
-): RuntimeMappings | undefined {
-  let combinedRuntimeMappings = {};
-
-  // Add runtime field mappings defined by index pattern
-  if (dataView) {
-    const computedFields = dataView?.getComputedFields();
-    if (computedFields?.runtimeFields !== undefined) {
-      const dataViewRuntimeMappings = computedFields.runtimeFields;
-      if (isRuntimeMappings(dataViewRuntimeMappings)) {
-        combinedRuntimeMappings = { ...combinedRuntimeMappings, ...dataViewRuntimeMappings };
-      }
-    }
-  }
-
-  // Use runtime field mappings defined inline from API
-  // and override fields with same name from index pattern
-  if (isRuntimeMappings(runtimeMappings)) {
-    combinedRuntimeMappings = { ...combinedRuntimeMappings, ...runtimeMappings };
-  }
-
-  if (isRuntimeMappings(combinedRuntimeMappings)) {
-    return combinedRuntimeMappings;
-  }
-}
 
 /**
  * Record of ES field types.

@@ -11,7 +11,6 @@ export {
   getDataGridSchemaFromKibanaFieldType,
   getFeatureImportance,
   getFieldsFromKibanaIndexPattern,
-  getCombinedRuntimeMappings,
   getNestedOrEscapedVal,
   getProcessedFields,
   getTopClasses,

@@ -94,5 +94,6 @@
     "@kbn/ml-data-frame-analytics-utils",
     "@kbn/ml-data-grid",
     "@kbn/ml-kibana-theme",
+    "@kbn/ml-runtime-field-utils",
   ],
 }

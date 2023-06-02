@@ -19,12 +19,12 @@ import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import type { ErrorType } from '@kbn/ml-error-utils';
 import {
   aggregationTypeTransform,
-  isRuntimeMappings,
   type InfluencersFilterQuery,
   type MlEntityField,
   type MlRecordForInfluencer,
   ES_AGGREGATION,
 } from '@kbn/ml-anomaly-utils';
+import { isRuntimeMappings } from '@kbn/ml-runtime-field-utils';
 import { Dictionary } from '../../../../common/types/common';
 import { ML_MEDIAN_PERCENTS } from '../../../../common/util/job_utils';
 import { Datafeed, JobId } from '../../../../common/types/anomaly_detection_jobs';

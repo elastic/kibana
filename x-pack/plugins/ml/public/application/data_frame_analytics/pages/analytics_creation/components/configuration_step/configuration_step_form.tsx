@@ -22,17 +22,18 @@ import { Query } from '@kbn/data-plugin/common/query';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { FieldStatsServices } from '@kbn/unified-field-list-plugin/public';
 import {
+  getCombinedRuntimeMappings,
   isRuntimeMappings,
   isRuntimeField,
   type RuntimeMappings as RuntimeMappingsType,
-} from '@kbn/ml-anomaly-utils';
+} from '@kbn/ml-runtime-field-utils';
 import {
   type FieldSelectionItem,
   ANALYSIS_CONFIG_TYPE,
   TRAINING_PERCENT_MIN,
   TRAINING_PERCENT_MAX,
 } from '@kbn/ml-data-frame-analytics-utils';
-import { getCombinedRuntimeMappings, DataGrid } from '@kbn/ml-data-grid';
+import { DataGrid } from '@kbn/ml-data-grid';
 import { useMlKibana } from '../../../../../contexts/kibana';
 import {
   EuiComboBoxWithFieldStats,

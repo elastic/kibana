@@ -98,7 +98,6 @@ export {
   type NewJobCaps,
   type NewJobCapsResponse,
   type RollupFields,
-  type RuntimeMappings,
   type SplitField,
   EVENT_RATE_FIELD_ID,
   METRIC_AGG_TYPE,
@@ -108,8 +107,6 @@ export { getFormattedSeverityScore } from './get_formatted_severity_score';
 export { getSeverity } from './get_severity';
 export { getSeverityColor } from './get_severity_color';
 export { getSeverityType } from './get_severity_type';
-
-export { isRuntimeField, isRuntimeMappings } from './runtime_field_utils';
 
 export { TIME_FORMAT } from './time_format';
 
