@@ -113,6 +113,7 @@ export const getTagcloudVisualization = ({
           filterOperations: (op: OperationMetadata) => op.isBucketed && op.dataType === 'string',
           enableDimensionEditor: true,
           required: true,
+          requiredMinDimensionCount: 1,
           dataTestSubj: 'lnsTagcloud_tagDimensionPanel',
         },
         {
@@ -127,6 +128,7 @@ export const getTagcloudVisualization = ({
           filterOperations: (op: OperationMetadata) => !op.isBucketed && op.dataType === 'number',
           enableDimensionEditor: true,
           required: true,
+          requiredMinDimensionCount: 1,
           dataTestSubj: 'lnsTagcloud_valueDimensionPanel',
         },
       ],
