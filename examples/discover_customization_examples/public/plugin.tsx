@@ -20,28 +20,31 @@ import { noop } from 'lodash';
 import React, { useEffect, useState } from 'react';
 import ReactDOM from 'react-dom';
 import useObservable from 'react-use/lib/useObservable';
-import image from './discover_customizer.png';
+import image from './discover_customization_examples.png';
 
-export interface DiscoverCustomizerSetupPlugins {
+export interface DiscoverCustomizationExamplesSetupPlugins {
   developerExamples: DeveloperExamplesSetup;
   discover: DiscoverSetup;
 }
 
-export interface DiscoverCustomizerStartPlugins {
+export interface DiscoverCustomizationExamplesStartPlugins {
   discover: DiscoverStart;
 }
 
-const PLUGIN_ID = 'discoverCustomizer';
-const PLUGIN_NAME = 'Discover Customizer';
+const PLUGIN_ID = 'discoverCustomizationExamples';
+const PLUGIN_NAME = 'Discover Customizations';
 
-export class DiscoverCustomizerPlugin implements Plugin {
-  setup(core: CoreSetup, plugins: DiscoverCustomizerSetupPlugins) {
+export class DiscoverCustomizationExamplesPlugin implements Plugin {
+  setup(core: CoreSetup, plugins: DiscoverCustomizationExamplesSetupPlugins) {
     core.application.register({
       id: PLUGIN_ID,
       title: PLUGIN_NAME,
       navLinkStatus: AppNavLinkStatus.hidden,
       mount() {
-        plugins.discover?.locator?.navigate({ profile: 'customizer' }, { replace: true });
+        plugins.discover?.locator?.navigate(
+          { profile: 'customization-examples' },
+          { replace: true }
+        );
         return noop;
       },
     });
@@ -54,7 +57,7 @@ export class DiscoverCustomizerPlugin implements Plugin {
     });
   }
 
-  start(core: CoreStart, plugins: DiscoverCustomizerStartPlugins) {
+  start(core: CoreStart, plugins: DiscoverCustomizationExamplesStartPlugins) {
     const { discover } = plugins;
 
     let isOptionsOpen = false;
@@ -65,7 +68,7 @@ export class DiscoverCustomizerPlugin implements Plugin {
       isOptionsOpen = false;
     };
 
-    discover.customize('customizer', async ({ customizations, stateContainer }) => {
+    discover.customize('customization-examples', async ({ customizations, stateContainer }) => {
       customizations.set({
         id: 'top_nav',
         defaultMenu: {

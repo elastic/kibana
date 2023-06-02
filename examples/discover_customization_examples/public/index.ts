@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { DiscoverCustomizerPlugin } from './plugin';
+import { DiscoverCustomizationExamplesPlugin } from './plugin';
 
 export function plugin() {
-  return new DiscoverCustomizerPlugin();
+  return new DiscoverCustomizationExamplesPlugin();
 }

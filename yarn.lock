@@ -4132,7 +4132,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/discover-customizer-plugin@link:examples/discover_customizer":
+"@kbn/discover-customization-examples-plugin@link:examples/discover_customization_examples":
   version "0.0.0"
   uid ""
 

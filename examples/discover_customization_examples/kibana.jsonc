@@ -1,9 +1,9 @@
 {
   "type": "plugin",
-  "id": "@kbn/discover-customizer-plugin",
+  "id": "@kbn/discover-customization-examples-plugin",
   "owner": "@elastic/kibana-data-discovery",
   "plugin": {
-    "id": "discoverCustomizer",
+    "id": "discoverCustomizationExamples",
     "server": false,
     "browser": true,
     "requiredPlugins": ["developerExamples", "discover"]
