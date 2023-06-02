@@ -281,8 +281,6 @@ export const termsOperation: OperationDefinition<
       ? Math.max(1000, column.params.size * 1.5 + 10)
       : undefined;
 
-    console.log(column.params.include);
-
     if (column.params?.orderBy.type === 'significant') {
       return buildExpressionFunction<AggFunctionsMapping['aggSignificantTerms']>(
         'aggSignificantTerms',
