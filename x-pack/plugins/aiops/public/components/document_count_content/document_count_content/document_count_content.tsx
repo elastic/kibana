@@ -33,6 +33,7 @@ export interface DocumentCountContentProps {
   totalCount: number;
   sampleProbability: number;
   windowParameters?: WindowParameters;
+  incomingInitialAnalysisStart?: number;
 }
 
 export const DocumentCountContent: FC<DocumentCountContentProps> = ({
@@ -44,8 +45,12 @@ export const DocumentCountContent: FC<DocumentCountContentProps> = ({
   totalCount,
   sampleProbability,
   windowParameters,
+  incomingInitialAnalysisStart,
 }) => {
   const [isBrushCleared, setIsBrushCleared] = useState(true);
+  const [initialAnalysisStart, setInitialAnalysisStart] = useState<number | undefined>(
+    incomingInitialAnalysisStart
+  );
 
   useEffect(() => {
     setIsBrushCleared(windowParameters === undefined);
@@ -95,6 +100,7 @@ export const DocumentCountContent: FC<DocumentCountContentProps> = ({
 
   function clearSelection() {
     setIsBrushCleared(true);
+    setInitialAnalysisStart(undefined);
     clearSelectionHandler();
   }
 
@@ -126,6 +132,7 @@ export const DocumentCountContent: FC<DocumentCountContentProps> = ({
           interval={documentCountStats.interval}
           chartPointsSplitLabel={documentCountStatsSplitLabel}
           isBrushCleared={isBrushCleared}
+          autoAnalysisStart={initialAnalysisStart}
         />
       )}
     </>
