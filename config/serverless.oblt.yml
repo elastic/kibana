@@ -15,7 +15,7 @@ xpack.observability_onboarding.ui.enabled: true
 xpack.infra.logs.app_target: discover
 
 ## Set the home route
-uiSettings.overrides.defaultRoute: /app/observabilityOnboarding
+uiSettings.overrides.defaultRoute: /app/observability/landing
 
 ## Set the dev project switch current type
 xpack.serverless.plugin.developer.projectSwitcher.currentType: 'observability'
