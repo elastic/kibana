@@ -92,7 +92,7 @@ export function mergePartialSetupStates(
   base: SetupState,
   partials: Array<Partial<SetupState>>
 ): SetupState {
-  return partials.reduce((previous: SetupState, current: Partial<SetupState>): SetupState => {
+  return partials.reduce<SetupState>((previous, current) => {
     return { ...previous, ...current };
   }, base);
 }
