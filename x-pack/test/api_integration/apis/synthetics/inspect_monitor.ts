@@ -12,18 +12,25 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 import { getFixtureJson } from './helper/get_fixture_json';
 import { SyntheticsMonitorTestService } from './services/synthetics_monitor_test_service';
 import { PrivateLocationTestService } from './services/private_location_test_service';
+import {
+  syntheticsMonitorType,
+  syntheticsParamType,
+} from '@kbn/synthetics-plugin/common/types/saved_objects';
 
 export default function ({ getService }: FtrProviderContext) {
   describe('inspectSyntheticsMonitor', function () {
     this.tags('skipCloud');
 
     const supertest = getService('supertest');
+
     const monitorTestService = new SyntheticsMonitorTestService(getService);
     const testPrivateLocations = new PrivateLocationTestService(getService);
+    const kibanaServer = getService('kibanaServer');
 
     let _monitors: MonitorFields[];
 
     before(async () => {
+      await kibanaServer.savedObjects.clean({ types: [syntheticsParamType] });
       await supertest.put(API_URLS.SYNTHETICS_ENABLEMENT).set('kbn-xsrf', 'true').expect(200);
       _monitors = [getFixtureJson('http_monitor'), getFixtureJson('inspect_browser_monitor')];
     });
@@ -94,6 +101,10 @@ export default function ({ getService }: FtrProviderContext) {
     it('inspect project browser monitor', async () => {
       const apiResponse = await monitorTestService.inspectMonitor({
         ..._monitors[1],
+        params: JSON.stringify({
+          username: 'elastic',
+          password: 'changeme',
+        }),
         locations: [
           {
             id: 'localhost',
@@ -122,8 +133,8 @@ export default function ({ getService }: FtrProviderContext) {
                       namespace: 'default',
                       origin: 'project',
                       params: {
-                        testGlobalParam2: 'testGlobalParamValue2',
-                        testGlobalParam: 'testGlobalParamValue',
+                        username: '********',
+                        password: '********',
                       },
                       playwright_options: { headless: true, chromiumSandbox: false },
                       'source.project.content':
@@ -142,6 +153,7 @@ export default function ({ getService }: FtrProviderContext) {
                   ],
                 },
               ],
+              license_level: 'trial',
               output: { hosts: [] },
             },
           ],

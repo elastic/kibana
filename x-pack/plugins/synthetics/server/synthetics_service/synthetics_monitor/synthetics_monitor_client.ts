@@ -385,6 +385,12 @@ export class SyntheticsMonitorClient {
       paramsBySpace
     );
 
+    if (hideParams) {
+      formattedConfig.params = hideParamsHelper(formattedConfig.params);
+      config.monitor.params = hideParamsHelper(config.monitor.params);
+      console.log('config.params', config.monitor.params);
+    }
+
     const { privateLocations, publicLocations } = this.parseLocations(formattedConfig);
     if (privateLocations.length > 0) {
       privateConfigs.push({ config: formattedConfig, globalParams: params });
@@ -404,3 +410,16 @@ export class SyntheticsMonitorClient {
     return { publicConfigs, privateConfig };
   }
 }
+
+const hideParamsHelper = (params?: string) => {
+  if (!params) return params;
+
+  const parsedParams = JSON.parse(params);
+  // replace all values with '***'
+  const newParams = Object.create(null);
+  Object.keys(parsedParams).forEach((key) => {
+    newParams[key] = '********';
+  });
+
+  return JSON.stringify(newParams);
+};

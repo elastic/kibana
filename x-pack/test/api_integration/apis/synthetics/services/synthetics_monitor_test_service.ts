@@ -40,7 +40,7 @@ export class SyntheticsMonitorTestService {
     return res.body as SavedObject<MonitorFields>;
   }
 
-  async inspectMonitor(monitor: any) {
+  async inspectMonitor(monitor: any, hideParams: boolean = true) {
     const res = await this.supertest
       .post(API_URLS.SYNTHETICS_MONITOR_INSPECT)
       .set('kbn-xsrf', 'true')
