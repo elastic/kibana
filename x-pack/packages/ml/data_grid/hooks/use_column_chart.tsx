@@ -28,6 +28,7 @@ import {
 } from '../lib/field_histograms';
 
 import { NON_AGGREGATABLE } from '../lib/common';
+import { DataGridItem } from '../lib/types';
 
 const cssHistogramLegendBoolean = css({
   width: '100%',
@@ -41,7 +42,7 @@ const cssTextAlignCenter = css({
   textAlign: 'center',
 });
 
-export const hoveredRow$ = new BehaviorSubject<any | null>(null);
+export const hoveredRow$ = new BehaviorSubject<DataGridItem | null>(null);
 
 export const BAR_COLOR = euiPaletteColorBlind()[0];
 const BAR_COLOR_BLUR = euiPaletteColorBlind({ rotations: 2 })[10];

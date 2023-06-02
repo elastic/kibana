@@ -71,8 +71,8 @@ interface PropsWithHeader extends PropsWithoutHeader {
   title: string;
 }
 
-function isWithHeader(arg: any): arg is PropsWithHeader {
-  return typeof arg?.title === 'string' && arg?.title !== '';
+function isWithHeader(arg: unknown): arg is PropsWithHeader {
+  return isPopulatedObject(arg, ['title']) && typeof arg.title === 'string' && arg.title !== '';
 }
 
 type Props = PropsWithHeader | PropsWithoutHeader;
@@ -109,7 +109,7 @@ export const DataGrid: FC<Props> = memo(
       trailingControlColumns,
     } = props;
     // TODO Fix row hovering + bar highlighting
-    // const getRowProps = (item: any) => {
+    // const getRowProps = (item: DataGridItem) => {
     //   return {
     //     onMouseOver: () => hoveredRow$.next(item),
     //     onMouseLeave: () => hoveredRow$.next(null),

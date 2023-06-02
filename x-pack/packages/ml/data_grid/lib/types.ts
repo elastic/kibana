@@ -81,7 +81,7 @@ export type IndexPagination = Pick<EuiDataGridPaginationProps, 'pageIndex' | 'pa
  * @export
  * @typedef {OnChangeItemsPerPage}
  */
-export type OnChangeItemsPerPage = (pageSize: any) => void;
+export type OnChangeItemsPerPage = (pageSize: number) => void;
 
 /**
  * Type for callback function for changing the current page.
@@ -89,7 +89,7 @@ export type OnChangeItemsPerPage = (pageSize: any) => void;
  * @export
  * @typedef {OnChangePage}
  */
-export type OnChangePage = (pageIndex: any) => void;
+export type OnChangePage = (pageIndex: number) => void;
 
 /**
  * Array of sortings specs.

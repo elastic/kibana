@@ -36,7 +36,8 @@ import {
   OUTLIER_SCORE,
   TOP_CLASSES,
 } from '@kbn/ml-data-frame-analytics-utils';
-import { extractErrorMessage } from '@kbn/ml-error-utils';
+import { extractErrorMessage, type ErrorType } from '@kbn/ml-error-utils';
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 
 import type { DataGridItem, IndexPagination, RenderCellValue } from './types';
 
@@ -307,7 +308,7 @@ const getClassName = (className: string, isClassTypeBoolean: boolean) => {
  * @returns nested object structure of feature importance values
  */
 export const getFeatureImportance = (
-  row: Record<string, any>,
+  row: DataGridItem,
   mlResultsField: string,
   isClassTypeBoolean = false
 ): FeatureImportance[] => {
@@ -340,7 +341,7 @@ export const getFeatureImportance = (
  * @param mlResultsField - Data frame analytics results field
  * @returns nested object structure of feature importance values
  */
-export const getTopClasses = (row: Record<string, any>, mlResultsField: string): TopClasses => {
+export const getTopClasses = (row: DataGridItem, mlResultsField: string): TopClasses => {
   const topClasses: Array<{
     class_name: FeatureImportanceClassName[];
     class_probability: number[];
@@ -369,7 +370,7 @@ export const useRenderCellValue = (
   cellPropsCallback?: (
     columnId: string,
     cellValue: any,
-    fullItem: Record<string, any>,
+    fullItem: DataGridItem,
     setCellProps: EuiDataGridCellValueElementProps['setCellProps']
   ) => void
 ): RenderCellValue => {
@@ -466,12 +467,15 @@ export const useRenderCellValue = (
 
 /**
  * Value can be nested or the fieldName itself might contain other special characters like `.`
- * @param {*} obj - The object to get the nested property from.
+ * @param {unknown} obj - The object to get the nested property from.
  * @param {string} sortId - The sort id attribute.
  * @returns {*}
  */
-export const getNestedOrEscapedVal = (obj: any, sortId: string) =>
-  getNestedProperty(obj, sortId, null) ?? obj[sortId];
+export const getNestedOrEscapedVal = (obj: unknown, sortId: string) => {
+  if (isPopulatedObject(obj, [sortId])) {
+    return getNestedProperty(obj, sortId, null) ?? obj[sortId];
+  }
+};
 
 /**
  * Interface definition for multi column sorter
@@ -548,19 +552,17 @@ export const multiColumnSortFactory = (sortingColumns: MultiColumnSorter[]) => {
 /**
  * Displays an error toast message for the data grid column chart.
  *
- * @param {*} e - The error object or message.
+ * @param {unknown} e - The error object or message.
  * @param {CoreSetup['notifications']['toasts']} toastNotifications - The toast notifications service.
  */
 export const showDataGridColumnChartErrorMessageToast = (
-  e: any,
+  e: unknown,
   toastNotifications: CoreSetup['notifications']['toasts']
 ) => {
-  const error = extractErrorMessage(e);
-
   toastNotifications.addDanger(
     i18n.translate('xpack.ml.dataGrid.columnChart.ErrorMessageToast', {
       defaultMessage: 'An error occurred fetching the histogram charts data: {error}',
-      values: { error: error !== '' ? error : e },
+      values: { error: extractErrorMessage(e as ErrorType) },
     })
   );
 };
