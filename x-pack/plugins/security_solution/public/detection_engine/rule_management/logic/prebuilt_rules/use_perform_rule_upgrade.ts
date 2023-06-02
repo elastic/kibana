@@ -4,25 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { useIsMutating } from '@tanstack/react-query';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
-import {
-  PERFORM_ALL_RULES_UPGRADE_KEY,
-  usePerformAllRulesUpgradeMutation,
-} from '../../api/hooks/prebuilt_rules/use_perform_all_rules_upgrade_mutation';
-import {
-  PERFORM_SPECIFIC_RULES_UPGRADE_KEY,
-  usePerformSpecificRulesUpgradeMutation,
-} from '../../api/hooks/prebuilt_rules/use_perform_specific_rules_upgrade_mutation';
+import { usePerformAllRulesUpgradeMutation } from '../../api/hooks/prebuilt_rules/use_perform_all_rules_upgrade_mutation';
+import { usePerformSpecificRulesUpgradeMutation } from '../../api/hooks/prebuilt_rules/use_perform_specific_rules_upgrade_mutation';
 
-// import * as i18n from './translations';
+import * as i18n from './translations';
 
 export const usePerformUpgradeAllRules = () => {
   const { addError, addSuccess } = useAppToasts();
 
   return usePerformAllRulesUpgradeMutation({
     onError: (err) => {
-      addError(err, { title: 'Failed to upgrade rules' });
+      addError(err, { title: i18n.FAILED_ALL_RULES_UPGRADE });
     },
     onSuccess: (result) => {
       addSuccess(getSuccessToastMessage(result));
@@ -35,22 +28,12 @@ export const usePerformUpgradeSpecificRules = () => {
 
   return usePerformSpecificRulesUpgradeMutation({
     onError: (err) => {
-      addError(err, { title: 'Failed to upgrade selected rules' });
+      addError(err, { title: i18n.FAILED_SPECIFIC_RULES_UPGRADE });
     },
     onSuccess: (result) => {
       addSuccess(getSuccessToastMessage(result));
     },
   });
-};
-
-export const useIsPerformingAllRulesUpgrade = () => {
-  const mutationsCount = useIsMutating(PERFORM_ALL_RULES_UPGRADE_KEY);
-  return mutationsCount > 0;
-};
-
-export const useIsPerformingSpecificRulesUpgrade = () => {
-  const mutationsCount = useIsMutating(PERFORM_SPECIFIC_RULES_UPGRADE_KEY);
-  return mutationsCount > 0;
 };
 
 const getSuccessToastMessage = (result: {
@@ -66,13 +49,13 @@ const getSuccessToastMessage = (result: {
     summary: { succeeded, skipped, failed },
   } = result;
   if (succeeded > 0) {
-    toastMessage += `${succeeded} rules upgraded successfully.`;
+    toastMessage += i18n.UPGRADE_RULE_SUCCESS(succeeded);
   }
   if (skipped > 0) {
-    toastMessage += ` ${skipped} rules upgrade skipped.`;
+    toastMessage += i18n.UPGRADE_RULE_SKIPPED(skipped);
   }
   if (failed > 0) {
-    toastMessage += ` ${failed} rules upgrade failed.`;
+    toastMessage += i18n.UPGRADE_RULE_FAILED(failed);
   }
   return toastMessage;
 };
