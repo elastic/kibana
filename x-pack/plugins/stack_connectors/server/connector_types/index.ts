@@ -102,9 +102,8 @@ export function registerConnectorTypes({
 
   actions.registerSubActionConnectorType(getOpsgenieConnectorType());
   actions.registerSubActionConnectorType(getTinesConnectorType());
-  console.log('experimentalFeatures', experimentalFeatures);
+
   if (experimentalFeatures.genAiEnabled ?? false) {
-    console.log('GEN AI ENABLED DAWG');
     actions.registerSubActionConnectorType(getGenerativeAiConnectorType());
   }
 }

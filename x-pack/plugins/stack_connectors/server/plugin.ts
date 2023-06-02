@@ -22,9 +22,7 @@ export class StackConnectorsPlugin implements Plugin<void, void> {
   private config: ConfigType;
 
   constructor(context: PluginInitializerContext) {
-    // this.pluginContext = context;
     this.config = createConfig(context);
-    console.log('config!!!!!!!', this.config);
   }
 
   public setup(core: CoreSetup<ConnectorsPluginsStart>, plugins: ConnectorsPluginsSetup) {
