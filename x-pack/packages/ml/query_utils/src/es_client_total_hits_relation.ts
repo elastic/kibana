@@ -8,6 +8,12 @@
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 /**
- * Alias for QueryDslQueryContainer
+ * Custom enum for total hits relation values
  */
-export type InfluencersFilterQuery = estypes.QueryDslQueryContainer;
+export const ES_CLIENT_TOTAL_HITS_RELATION: Record<
+  Uppercase<estypes.SearchTotalHitsRelation>,
+  estypes.SearchTotalHitsRelation
+> = {
+  EQ: 'eq',
+  GTE: 'gte',
+} as const;

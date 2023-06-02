@@ -15,7 +15,7 @@ import { EuiComboBox, EuiComboBoxOptionOption, EuiFormRow } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { isMultiBucketAggregate } from '@kbn/ml-anomaly-utils';
+import { isMultiBucketAggregate } from '@kbn/ml-agg-utils';
 
 import { useDataSearch } from '../../../../../../../hooks/use_data_search';
 import { isEsSearchResponseWithAggregations } from '../../../../../../../../../common/api_schemas/type_guards';

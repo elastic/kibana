@@ -24,7 +24,8 @@ import {
 } from '@elastic/eui';
 
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { type MlKibanaUrlConfig, ES_CLIENT_TOTAL_HITS_RELATION } from '@kbn/ml-anomaly-utils';
+import { type MlKibanaUrlConfig } from '@kbn/ml-anomaly-utils';
+import { ES_CLIENT_TOTAL_HITS_RELATION } from '@kbn/ml-query-utils';
 import {
   type DataGridItem,
   DataGrid,

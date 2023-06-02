@@ -68,15 +68,9 @@ export {
   ML_DETECTOR_RULE_OPERATOR,
 } from './detector_rule';
 
-export {
-  isMultiBucketAggregate,
-  type InfluencersFilterQuery,
-  ES_CLIENT_TOTAL_HITS_RELATION,
-} from './es_client';
+export type { InfluencersFilterQuery } from './es_client';
 
 export { getFieldFormatFromIndexPattern } from './field_format_utils';
-
-export { DEFAULT_SAMPLER_SHARD_SIZE } from './field_histograms';
 
 export {
   type MlJobFieldType,

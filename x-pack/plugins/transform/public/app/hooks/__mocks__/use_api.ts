@@ -8,7 +8,7 @@
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
-import { DEFAULT_SAMPLER_SHARD_SIZE } from '@kbn/ml-anomaly-utils';
+import { DEFAULT_SAMPLER_SHARD_SIZE } from '@kbn/ml-agg-utils';
 
 import type { TransformId } from '../../../../common/types/transform';
 import type { FieldHistogramsResponseSchema } from '../../../../common/api_schemas/field_histograms';

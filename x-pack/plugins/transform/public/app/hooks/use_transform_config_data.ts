@@ -16,10 +16,8 @@ import { getFlattenedObject } from '@kbn/std';
 import { difference } from 'lodash';
 
 import { ES_FIELD_TYPES } from '@kbn/field-types';
-import {
-  formatHumanReadableDateTimeSeconds,
-  ES_CLIENT_TOTAL_HITS_RELATION,
-} from '@kbn/ml-anomaly-utils';
+import { formatHumanReadableDateTimeSeconds } from '@kbn/ml-anomaly-utils';
+import { ES_CLIENT_TOTAL_HITS_RELATION } from '@kbn/ml-query-utils';
 import { INDEX_STATUS } from '@kbn/ml-data-frame-analytics-utils';
 import {
   getDataGridSchemaFromESFieldType,

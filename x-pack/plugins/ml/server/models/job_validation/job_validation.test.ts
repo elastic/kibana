@@ -7,7 +7,7 @@
 
 import { IScopedClusterClient } from '@kbn/core/server';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
-import { ES_CLIENT_TOTAL_HITS_RELATION } from '@kbn/ml-anomaly-utils';
+import { ES_CLIENT_TOTAL_HITS_RELATION } from '@kbn/ml-query-utils';
 
 import type { MlClient } from '../../lib/ml_client';
 import type { AuthorizationHeader } from '../../lib/request_authorization';

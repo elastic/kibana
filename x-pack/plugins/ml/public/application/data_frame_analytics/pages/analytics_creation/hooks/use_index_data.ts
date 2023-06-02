@@ -12,7 +12,7 @@ import { EuiDataGridColumn } from '@elastic/eui';
 
 import { CoreSetup } from '@kbn/core/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { DEFAULT_SAMPLER_SHARD_SIZE } from '@kbn/ml-anomaly-utils';
+import { DEFAULT_SAMPLER_SHARD_SIZE } from '@kbn/ml-agg-utils';
 import {
   getCombinedRuntimeMappings,
   isRuntimeMappings,

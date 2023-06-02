@@ -29,7 +29,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { CoreSetup } from '@kbn/core/public';
-import { DEFAULT_SAMPLER_SHARD_SIZE } from '@kbn/ml-anomaly-utils';
+import { DEFAULT_SAMPLER_SHARD_SIZE } from '@kbn/ml-agg-utils';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { INDEX_STATUS } from '@kbn/ml-data-frame-analytics-utils';
 
