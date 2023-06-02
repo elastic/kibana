@@ -2164,6 +2164,10 @@
       }
     }
   },
+  "threshold-explorer-view": {
+    "dynamic": false,
+    "properties": {}
+  },
   "observability-onboarding-state": {
     "properties": {
       "state": {
