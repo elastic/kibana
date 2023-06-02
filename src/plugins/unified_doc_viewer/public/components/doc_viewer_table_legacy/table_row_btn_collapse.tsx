@@ -16,7 +16,7 @@ export interface Props {
 }
 
 export function DocViewTableRowBtnCollapse({ onClick, isCollapsed }: Props) {
-  const label = i18n.translate('unifiedDocViewer.table.toggleFieldDetails', {
+  const label = i18n.translate('unifiedDocViewerPlugin.table.toggleFieldDetails', {
     defaultMessage: 'Toggle field details',
   });
   return (

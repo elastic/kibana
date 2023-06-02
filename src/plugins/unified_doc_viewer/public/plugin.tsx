@@ -26,7 +26,7 @@ export class UnifiedDocViewerPlugin implements Plugin<{}, {}> {
     setDocViewsRegistry(this.docViewsRegistry);
 
     this.docViewsRegistry.addDocView({
-      title: i18n.translate('unifiedDocViewer.table.tableTitle', {
+      title: i18n.translate('unifiedDocViewerPlugin.table.tableTitle', {
         defaultMessage: 'Table',
       }),
       order: 10,
@@ -51,7 +51,7 @@ export class UnifiedDocViewerPlugin implements Plugin<{}, {}> {
     });
 
     this.docViewsRegistry.addDocView({
-      title: i18n.translate('unifiedDocViewer.json.jsonTitle', {
+      title: i18n.translate('unifiedDocViewerPlugin.json.jsonTitle', {
         defaultMessage: 'JSON',
       }),
       order: 20,

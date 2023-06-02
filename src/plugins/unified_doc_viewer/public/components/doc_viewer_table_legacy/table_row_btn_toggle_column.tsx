@@ -27,7 +27,7 @@ export function DocViewTableRowBtnToggleColumn({
   if (disabled) {
     return (
       <EuiButtonIcon
-        aria-label={i18n.translate('unifiedDocViewer.table.toggleColumnInTableButtonAriaLabel', {
+        aria-label={i18n.translate('unifiedDocViewerPlugin.table.toggleColumnInTableButtonAriaLabel', {
           defaultMessage: 'Toggle column in table',
         })}
         className="kbnDocViewer__actionButton"
@@ -42,13 +42,13 @@ export function DocViewTableRowBtnToggleColumn({
     <EuiToolTip
       content={
         <FormattedMessage
-          id="unifiedDocViewer.table.toggleColumnInTableButtonTooltip"
+          id="unifiedDocViewerPlugin.table.toggleColumnInTableButtonTooltip"
           defaultMessage="Toggle column in table"
         />
       }
     >
       <EuiButtonIcon
-        aria-label={i18n.translate('unifiedDocViewer.table.toggleColumnInTableButtonAriaLabel', {
+        aria-label={i18n.translate('unifiedDocViewerPlugin.table.toggleColumnInTableButtonAriaLabel', {
           defaultMessage: 'Toggle column in table',
         })}
         aria-pressed={active}

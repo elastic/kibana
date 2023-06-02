@@ -125,7 +125,7 @@ export const DocViewerTable = ({
     [flattened, dataView, showMultiFields]
   );
 
-  const searchPlaceholder = i18n.translate('unifiedDocViewer.table.searchPlaceHolder', {
+  const searchPlaceholder = i18n.translate('unifiedDocViewerPlugin.table.searchPlaceHolder', {
     defaultMessage: 'Search field names',
   });
 
@@ -279,7 +279,7 @@ export const DocViewerTable = ({
         <EuiText size="xs">
           <strong>
             <FormattedMessage
-              id="unifiedDocViewer.fieldChooser.discoverField.actions"
+              id="unifiedDocViewerPlugin.fieldChooser.discoverField.actions"
               defaultMessage="Actions"
             />
           </strong>
@@ -290,7 +290,7 @@ export const DocViewerTable = ({
       <EuiText size="xs">
         <strong>
           <FormattedMessage
-            id="unifiedDocViewer.fieldChooser.discoverField.name"
+            id="unifiedDocViewerPlugin.fieldChooser.discoverField.name"
             defaultMessage="Field"
           />
         </strong>
@@ -300,7 +300,7 @@ export const DocViewerTable = ({
       <EuiText size="xs">
         <strong>
           <FormattedMessage
-            id="unifiedDocViewer.fieldChooser.discoverField.value"
+            id="unifiedDocViewerPlugin.fieldChooser.discoverField.value"
             defaultMessage="Value"
           />
         </strong>
@@ -403,7 +403,7 @@ export const DocViewerTable = ({
       {rowElements.length === 0 ? (
         <EuiSelectableMessage style={{ minHeight: 300 }}>
           <p>
-            <EuiI18n token="unifiedDocViewer.table.noFieldFound" default="No fields found" />
+            <EuiI18n token="unifiedDocViewerPlugin.table.noFieldFound" default="No fields found" />
           </p>
         </EuiSelectableMessage>
       ) : (

@@ -25,18 +25,18 @@ export function DocViewTableRowBtnFilterExists({
   const tooltipContent = disabled ? (
     scripted ? (
       <FormattedMessage
-        id="unifiedDocViewer.table.unableToFilterForPresenceOfScriptedFieldsTooltip"
+        id="unifiedDocViewerPlugin.table.unableToFilterForPresenceOfScriptedFieldsTooltip"
         defaultMessage="Unable to filter for presence of scripted fields"
       />
     ) : (
       <FormattedMessage
-        id="unifiedDocViewer.table.unableToFilterForPresenceOfMetaFieldsTooltip"
+        id="unifiedDocViewerPlugin.table.unableToFilterForPresenceOfMetaFieldsTooltip"
         defaultMessage="Unable to filter for presence of meta fields"
       />
     )
   ) : (
     <FormattedMessage
-      id="unifiedDocViewer.table.filterForFieldPresentButtonTooltip"
+      id="unifiedDocViewerPlugin.table.filterForFieldPresentButtonTooltip"
       defaultMessage="Filter for field present"
     />
   );
@@ -44,7 +44,7 @@ export function DocViewTableRowBtnFilterExists({
   return (
     <EuiToolTip content={tooltipContent}>
       <EuiButtonIcon
-        aria-label={i18n.translate('unifiedDocViewer.table.filterForFieldPresentButtonAriaLabel', {
+        aria-label={i18n.translate('unifiedDocViewerPlugin.table.filterForFieldPresentButtonAriaLabel', {
           defaultMessage: 'Filter for field present',
         })}
         onClick={onClick}

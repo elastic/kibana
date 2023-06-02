@@ -115,9 +115,9 @@
     "unifiedSearch": "src/plugins/unified_search",
     "unifiedFieldList": "src/plugins/unified_field_list",
     "unifiedHistogram": "src/plugins/unified_histogram",
-    "unifiedDocViewer-plugin": "src/plugins/unified_doc_viewer",
-    "unifiedDocViewer-package": "packages/kbn-unified_doc_viewer",
-    "unifiedDiscover": "packages/kbn-unified_discover/src"
+    "unifiedDocViewerPlugin": "src/plugins/unified_doc_viewer",
+    "unifiedDocViewerPackage": "packages/kbn-unified-doc-viewer",
+    "unifiedDiscover": "packages/kbn-unified-discover"
   },
   "translations": []
 }
