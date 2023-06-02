@@ -7,7 +7,7 @@
 
 import React, { useMemo } from 'react';
 import { TabNavigation } from '../../../../common/components/navigation/tab_navigation';
-import * as i18n from '../../../../detections/pages/detection_engine/rules/translations';
+import * as i18n from './translations';
 import { useRulesTableContext } from './rules_table/rules_table_context';
 import { usePrebuiltRulesStatus } from '../../../rule_management/logic/prebuilt_rules/use_prebuilt_rules_status';
 

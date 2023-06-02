@@ -38,7 +38,8 @@ const useRuleNameColumn = (): TableColumn => {
       ),
       sortable: true,
       truncateText: true,
-      width: '40%',
+      width: '60%',
+      align: 'left',
     }),
     []
   );
