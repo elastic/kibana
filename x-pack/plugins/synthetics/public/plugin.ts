@@ -287,7 +287,7 @@ function registerUptimeRoutesWithNavigation(
               entries: [
                 {
                   label: i18n.translate('xpack.synthetics.overview.uptimeHeading', {
-                    defaultMessage: 'Monitors',
+                    defaultMessage: 'Uptime Monitors',
                   }),
                   app: 'uptime',
                   path: '/',
