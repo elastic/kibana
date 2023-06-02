@@ -20,7 +20,7 @@ import { WebElementWrapper } from '../services/lib/web_element_wrapper';
 import { FtrService } from '../ftr_provider_context';
 
 const CONTROL_DISPLAY_NAMES: { [key: string]: string } = {
-  default: 'Please select a field',
+  default: 'No field selected yet',
   [OPTIONS_LIST_CONTROL]: 'Options list',
   [RANGE_SLIDER_CONTROL]: 'Range slider',
 };
