@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { IKibanaSearchRequest } from '@kbn/data-plugin/common';
 import { lastValueFrom } from 'rxjs';
 import { extractErrorMessage } from '@kbn/ml-error-utils';
@@ -311,6 +311,7 @@ export const useFetchDataDriftResult = ({
     status: FETCH_STATUS.NOT_INITIATED,
     error: undefined,
   });
+  const [loaded, setLoaded] = useState<number>(0);
 
   useEffect(
     () => {
@@ -319,6 +320,7 @@ export const useFetchDataDriftResult = ({
       const doFetchEsRequest = async function () {
         controller.abort();
 
+        setLoaded(0);
         setResult({ data: undefined, status: FETCH_STATUS.NOT_INITIATED, error: undefined });
 
         controller = new AbortController();
@@ -378,6 +380,7 @@ export const useFetchDataDriftResult = ({
           }
 
           const baselineResponse = await dataSearch(baselineRequest, signal);
+          setLoaded(0.25);
 
           if (!baselineResponse?.aggregations) {
             setResult({
@@ -456,6 +459,7 @@ export const useFetchDataDriftResult = ({
           }
 
           const driftedResp = await dataSearch(driftedRequest, signal);
+          setLoaded(0.5);
 
           if (!driftedResp.aggregations) {
             setResult({
@@ -584,6 +588,7 @@ export const useFetchDataDriftResult = ({
             data: processDataDriftResult(data),
             status: FETCH_STATUS.SUCCESS,
           });
+          setLoaded(1);
         } catch (e) {
           // eslint-disable-next-line no-console
           console.error(`An error occurred while fetching data drift data:`, e);
@@ -604,5 +609,6 @@ export const useFetchDataDriftResult = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [dataSearch, JSON.stringify({ fields, timeRanges }), currentDataView?.id, searchString]
   );
-  return result;
+  const dataDriftResult = useMemo(() => ({ ...result, loaded }), [result, loaded]);
+  return dataDriftResult;
 };
