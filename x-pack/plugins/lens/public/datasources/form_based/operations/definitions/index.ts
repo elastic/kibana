@@ -5,12 +5,7 @@
  * 2.0.
  */
 
-import {
-  IUiSettingsClient,
-  SavedObjectsClientContract,
-  HttpSetup,
-  CoreStart,
-} from '@kbn/core/public';
+import { IUiSettingsClient, HttpSetup, CoreStart } from '@kbn/core/public';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import type {
   ExpressionAstExpressionBuilder,
@@ -189,7 +184,6 @@ export interface ParamEditorProps<
   indexPattern: IndexPattern;
   uiSettings: IUiSettingsClient;
   storage: IStorageWrapper;
-  savedObjectsClient: SavedObjectsClientContract;
   http: HttpSetup;
   dateRange: DateRange;
   data: DataPublicPluginStart;
