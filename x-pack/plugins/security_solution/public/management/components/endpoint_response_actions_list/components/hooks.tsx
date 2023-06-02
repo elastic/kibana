@@ -247,12 +247,6 @@ export const useActionsLogFilter = ({
       : RESPONSE_ACTION_API_COMMANDS_NAMES.filter((commandName) => {
           const featureFlags = ExperimentalFeaturesService.get();
 
-          // TODO: remove this when `execute` is no longer behind FF
-          // planned for 8.8
-          if (commandName === 'execute' && !featureFlags.responseActionExecuteEnabled) {
-            return false;
-          }
-
           // upload - v8.9
           if (commandName === 'upload' && !featureFlags.responseActionUploadEnabled) {
             return false;

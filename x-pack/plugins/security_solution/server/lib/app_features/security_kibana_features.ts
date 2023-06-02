@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-import type { KibanaFeatureConfig, SubFeatureConfig } from '@kbn/features-plugin/common';
+import type { KibanaFeatureConfig } from '@kbn/features-plugin/common';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/common';
 import { EXCEPTION_LIST_NAMESPACE_AGNOSTIC } from '@kbn/securitysolution-list-constants';
@@ -135,11 +135,7 @@ export const getSecurityBaseKibanaFeature = (
       ui: ['show'],
     },
   },
-  subFeatures: getSubFeatures(experimentalFeatures),
-});
-
-function getSubFeatures(experimentalFeatures: ExperimentalFeatures) {
-  const subFeatures: SubFeatureConfig[] = [
+  subFeatures: [
     endpointListSubFeature,
     trustedApplicationsSubFeature,
     hostIsolationExceptionsSubFeature,
@@ -150,15 +146,9 @@ function getSubFeatures(experimentalFeatures: ExperimentalFeatures) {
     hostIsolationSubFeature,
     processOperationsSubFeature,
     fileOperationsSubFeature,
-  ];
-
-  // planned for 8.8
-  if (experimentalFeatures.responseActionExecuteEnabled) {
-    subFeatures.push(executeActionSubFeature);
-  }
-
-  return subFeatures;
-}
+    executeActionSubFeature,
+  ],
+});
 
 // maps the AppFeatures keys to Kibana privileges
 export const getSecurityAppFeaturesConfig = (): AppFeaturesSecurityConfig => {

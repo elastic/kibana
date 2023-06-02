@@ -25,10 +25,6 @@ describe('When displaying Endpoint Response Actions', () => {
   beforeEach(() => {
     const testSetup = getConsoleTestSetup();
 
-    testSetup.setExperimentalFlag({
-      responseActionExecuteEnabled: true,
-    });
-
     const endpointMetadata = new EndpointMetadataGenerator().generate();
     const commands = getEndpointConsoleCommands({
       endpointAgentId: '123',

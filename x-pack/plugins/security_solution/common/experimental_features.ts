@@ -72,12 +72,7 @@ export const allowedExperimentalValues = Object.freeze({
   alertDetailsPageEnabled: false,
 
   /**
-   * Enables the `execute` endpoint response action
-   */
-  responseActionExecuteEnabled: true,
-
-  /**
-   * Enables the `upload` endpoint response action
+   * Enables the `upload` endpoint response action (v8.9)
    */
   responseActionUploadEnabled: false,
 
