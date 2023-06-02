@@ -49,7 +49,28 @@ export const convertSavedObjectToSavedTimeline = (savedObject: unknown): Timelin
     TimelineSavedObjectWithDraftRuntime.decode(savedObject),
     map((savedTimeline) => {
       const attributes = {
-        ...savedTimeline.attributes,
+        columns: savedTimeline.attributes.columns,
+        dataProviders: savedTimeline.attributes.dataProviders,
+        dataViewId: savedTimeline.attributes.dataViewId,
+        description: savedTimeline.attributes.description,
+        eqlOptions: savedTimeline.attributes.eqlOptions,
+        eventType: savedTimeline.attributes.eventType,
+        excludedRowRendererIds: savedTimeline.attributes.excludedRowRendererIds,
+        favorite: savedTimeline.attributes.favorite,
+        filters: savedTimeline.attributes.filters,
+        indexNames: savedTimeline.attributes.indexNames,
+        kqlMode: savedTimeline.attributes.kqlMode,
+        kqlQuery: savedTimeline.attributes.kqlQuery,
+        title: savedTimeline.attributes.title,
+        templateTimelineId: savedTimeline.attributes.templateTimelineId,
+        templateTimelineVersion: savedTimeline.attributes.templateTimelineVersion,
+        dateRange: savedTimeline.attributes.dateRange,
+        savedQueryId: savedTimeline.attributes.savedQueryId,
+        created: savedTimeline.attributes.created,
+        createdBy: savedTimeline.attributes.createdBy,
+        updated: savedTimeline.attributes.updated,
+        updatedBy: savedTimeline.attributes.updatedBy,
+
         ...getTimelineTypeAndStatus(
           savedTimeline.attributes.timelineType,
           savedTimeline.attributes.status

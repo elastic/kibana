@@ -247,8 +247,13 @@ export const SavedObjectTimelineRuntimeType = runtimeTypes.partial({
   updated: unionWithNullType(runtimeTypes.number),
   updatedBy: unionWithNullType(runtimeTypes.string),
 });
+type SavedObjectTimeline = runtimeTypes.TypeOf<typeof SavedObjectTimelineRuntimeType>;
 
 /**
- * This is the actual type that is used for the saved object
+ * This type represents a timeline type stored in a saved object that does not include any fields that reference
+ * other saved objects.
  */
-export type SavedObjectTimeline = runtimeTypes.TypeOf<typeof SavedObjectTimelineRuntimeType>;
+export type SavedObjectTimelineWithoutExternalRefs = Omit<
+  SavedObjectTimeline,
+  'dataViewId' | 'savedQueryId'
+>;
