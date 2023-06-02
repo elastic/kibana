@@ -28,6 +28,7 @@ export function useEsDocSearch({
   index,
   dataView,
   requestSource,
+  textBasedHits,
 }: DocProps): [ElasticRequestState, DataTableRecord | null, () => void] {
   const [status, setStatus] = useState(ElasticRequestState.Loading);
   const [hit, setHit] = useState<DataTableRecord | null>(null);
@@ -72,8 +73,16 @@ export function useEsDocSearch({
   }, [analytics, data.search, dataView, id, index, useNewFieldsApi, requestSource]);
 
   useEffect(() => {
-    requestData();
-  }, [requestData]);
+    if (textBasedHits) {
+      const selectedHit = textBasedHits?.find((r) => r.id === id);
+      if (selectedHit) {
+        setStatus(ElasticRequestState.Found);
+        setHit(selectedHit);
+      }
+    } else {
+      requestData();
+    }
+  }, [id, requestData, textBasedHits]);
 
   return [status, hit, requestData];
 }
