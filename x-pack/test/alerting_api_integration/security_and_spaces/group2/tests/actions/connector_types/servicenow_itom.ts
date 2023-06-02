@@ -408,13 +408,7 @@ export default function serviceNowITOMTest({ getService }: FtrProviderContext) {
               params: {},
             })
             .then((resp: any) => {
-              expect(Object.keys(resp.body)).to.eql([
-                'status',
-                'message',
-                'retry',
-                'reason',
-                'connector_id',
-              ]);
+              expect(Object.keys(resp.body)).to.eql(['status', 'message', 'retry', 'connector_id']);
               expect(resp.body.connector_id).to.eql(simulatedActionId);
               expect(resp.body.status).to.eql('error');
             });
@@ -431,8 +425,7 @@ export default function serviceNowITOMTest({ getService }: FtrProviderContext) {
               expect(resp.body).to.eql({
                 connector_id: simulatedActionId,
                 status: 'error',
-                retry: true,
-                reason: 'validation',
+                retry: false,
                 message:
                   'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [addEvent]\n- [1.subAction]: expected value to equal [getChoices]',
               });
@@ -450,8 +443,7 @@ export default function serviceNowITOMTest({ getService }: FtrProviderContext) {
               expect(resp.body).to.eql({
                 connector_id: simulatedActionId,
                 status: 'error',
-                retry: true,
-                reason: 'validation',
+                retry: false,
                 message:
                   'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [addEvent]\n- [1.subAction]: expected value to equal [getChoices]',
               });
@@ -473,8 +465,7 @@ export default function serviceNowITOMTest({ getService }: FtrProviderContext) {
                 expect(resp.body).to.eql({
                   connector_id: simulatedActionId,
                   status: 'error',
-                  retry: true,
-                  reason: 'validation',
+                  retry: false,
                   message:
                     'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [addEvent]\n- [1.subActionParams.fields]: expected value of type [array] but got [undefined]',
                 });

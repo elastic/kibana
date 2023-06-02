@@ -520,6 +520,50 @@ test('throws an error with suggested retry logic when return status is error', a
   }
 });
 
+test('returns the existing state and runAt to retry the task when return status is error', async () => {
+  const mockTaskInstance = { ...mockedTaskInstance, state: { foo: 'bar' } };
+
+  const taskRunner = taskRunnerFactory.create({
+    taskInstance: mockTaskInstance,
+  });
+
+  mockedEncryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
+    id: '3',
+    type: 'action_task_params',
+    attributes: {
+      actionId: '2',
+      params: { baz: true },
+      executionId: '123abc',
+      apiKey: Buffer.from('123:abc').toString('base64'),
+    },
+    references: [
+      {
+        id: '2',
+        name: 'actionRef',
+        type: 'action',
+      },
+    ],
+  });
+  mockedActionExecutor.execute.mockResolvedValueOnce({
+    status: 'error',
+    actionId: '2',
+    message: 'error validating action',
+    data: { foo: true },
+    retry: true,
+  });
+
+  const result = await taskRunner.run();
+
+  expect(result).toEqual({
+    runAt: mockTaskInstance.runAt,
+    state: mockTaskInstance.state,
+  });
+
+  expect(taskRunnerFactoryInitializerParams.logger.debug).toHaveBeenCalledWith(
+    'Task Runner has skipped executing the Action (2) as it has invalid params.'
+  );
+});
+
 test('uses API key when provided', async () => {
   const taskRunner = taskRunnerFactory.create({
     taskInstance: mockedTaskInstance,

@@ -592,16 +592,27 @@ export class TaskRunner<
       ...(namespace ? { namespace } : {}),
     });
 
+    let ruleData;
+
+    try {
+      ruleData = await loadRule<Params>({
+        paramValidator: this.ruleType.validate.params,
+        ruleId,
+        spaceId,
+        context: this.context,
+        ruleTypeRegistry: this.ruleTypeRegistry,
+        alertingEventLogger: this.alertingEventLogger,
+      });
+    } catch (err) {
+      if (!this.shouldSkipRun(err)) {
+        this.alertingEventLogger.start();
+      }
+      throw err;
+    }
+
     this.alertingEventLogger.start();
 
-    return await loadRule<Params>({
-      paramValidator: this.ruleType.validate.params,
-      ruleId,
-      spaceId,
-      context: this.context,
-      ruleTypeRegistry: this.ruleTypeRegistry,
-      alertingEventLogger: this.alertingEventLogger,
-    });
+    return ruleData;
   }
 
   private async processRunResults({
@@ -706,6 +717,10 @@ export class TaskRunner<
     return { executionStatus, executionMetrics };
   }
 
+  private shouldSkipRun(err: Error) {
+    return isValidationError(err);
+  }
+
   async run(): Promise<RuleTaskRunResult> {
     const {
       params: { alertId: ruleId, spaceId },
@@ -751,8 +766,10 @@ export class TaskRunner<
         ).rule.schedule
       );
     } catch (err) {
-      if (isValidationError(err)) {
-        this.logger.debug(`Task Runner has skipped executing ${ruleId} as it has invalid params.`);
+      if (this.shouldSkipRun(err)) {
+        this.logger.debug(
+          `Task Runner has skipped executing the Rule (${ruleId}) as it has invalid params.`
+        );
         return {
           state: originalState,
           runAt: originalRunAt,

@@ -740,13 +740,12 @@ describe('action executor', () => {
     expect(result).toEqual({
       actionId: '1',
       status: 'error',
-      retry: true,
+      retry: false,
       message: `error validating action type config: [param1]: expected value of type [string] but got [undefined]`,
-      reason: 'validation',
     });
   });
 
-  test('throws an error when connector is invalid', async () => {
+  test('returns an error when connector is invalid', async () => {
     const actionType: jest.Mocked<ActionType> = {
       id: 'test',
       name: 'Test',
@@ -780,9 +779,8 @@ describe('action executor', () => {
     expect(result).toEqual({
       actionId: '1',
       status: 'error',
-      retry: true,
+      retry: false,
       message: `error validating action type connector: config must be defined`,
-      reason: 'validation',
     });
   });
 
@@ -819,9 +817,8 @@ describe('action executor', () => {
     expect(result).toEqual({
       actionId: '1',
       status: 'error',
-      retry: true,
+      retry: false,
       message: `error validating action params: [param1]: expected value of type [string] but got [undefined]`,
-      reason: 'validation',
     });
   });
 
@@ -851,13 +848,18 @@ describe('action executor', () => {
     actionTypeRegistry.get.mockReturnValueOnce(actionType);
 
     const result = await actionExecutor.execute(executeParams);
+
     expect(result).toEqual({
       actionId: '1',
+      message:
+        'error validating action: [isMissingSecrets]: expected value of type [boolean] but got [undefined]',
+      retry: false,
       status: 'error',
-      retry: true,
-      message: '[isMissingSecrets]: expected value of type [boolean] but got [undefined]',
-      reason: 'validation',
     });
+    expect(actionType.executor).not.toHaveBeenCalled();
+    expect(eventLogger.startTiming).not.toHaveBeenCalled();
+    expect(eventLogger.stopTiming).not.toHaveBeenCalled();
+    expect(eventLogger.logEvent).not.toHaveBeenCalled();
   });
 
   test('throws an error when failing to load action through savedObjectsClient', async () => {

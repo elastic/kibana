@@ -12,12 +12,12 @@ import { withSpan } from '@kbn/apm-utils';
 import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 import { SpacesServiceStart } from '@kbn/spaces-plugin/server';
 import { IEventLogger, SAVED_OBJECT_REL_PRIMARY } from '@kbn/event-log-plugin/server';
-import { rawActionSchema, rawPreconfiguredActionSchema } from '../raw_action_schema';
 import {
   validateParams,
   validateConfig,
   validateSecrets,
   validateConnector,
+  validateRawAction,
 } from './validate_with_schema';
 import {
   ActionType,
@@ -480,19 +480,15 @@ function validateAction(
         secrets,
       });
     }
-    if (isPreconfigured) {
-      rawPreconfiguredActionSchema.validate(rawAction);
-    } else {
-      rawActionSchema.validate(rawAction);
-    }
+    validateRawAction({ isPreconfigured, rawAction });
+
     return { validatedParams, validatedConfig, validatedSecrets };
   } catch (err) {
     throw new ActionExecutionError(err.message, ActionExecutionErrorReason.Validation, {
       actionId,
       status: 'error',
       message: err.message,
-      retry: true,
-      reason: ActionExecutionErrorReason.Validation,
+      retry: false,
     });
   }
 }

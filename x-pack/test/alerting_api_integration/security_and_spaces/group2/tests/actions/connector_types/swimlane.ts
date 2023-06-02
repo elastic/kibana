@@ -321,13 +321,7 @@ export default function swimlaneTest({ getService }: FtrProviderContext) {
               params: {},
             })
             .then((resp: any) => {
-              expect(Object.keys(resp.body)).to.eql([
-                'status',
-                'message',
-                'retry',
-                'reason',
-                'connector_id',
-              ]);
+              expect(Object.keys(resp.body)).to.eql(['status', 'message', 'retry', 'connector_id']);
               expect(resp.body.connector_id).to.eql(simulatedActionId);
               expect(resp.body.status).to.eql('error');
             });
@@ -344,8 +338,7 @@ export default function swimlaneTest({ getService }: FtrProviderContext) {
               expect(resp.body).to.eql({
                 connector_id: simulatedActionId,
                 status: 'error',
-                retry: true,
-                reason: 'validation',
+                retry: false,
                 message:
                   'error validating action params: [subAction]: expected value to equal [pushToService]',
               });
@@ -370,8 +363,8 @@ export default function swimlaneTest({ getService }: FtrProviderContext) {
               expect(resp.body).to.eql({
                 connector_id: simulatedActionId,
                 status: 'error',
-                retry: true,
-                reason: 'validation',
+                retry: false,
+
                 message:
                   'error validating action params: [subActionParams]: expected a plain object value, but found [null] instead.',
               });
@@ -395,8 +388,7 @@ export default function swimlaneTest({ getService }: FtrProviderContext) {
               expect(resp.body).to.eql({
                 connector_id: simulatedActionId,
                 status: 'error',
-                retry: true,
-                reason: 'validation',
+                retry: false,
                 message:
                   'error validating action params: [subActionParams.comments]: types that failed validation:\n- [subActionParams.comments.0.0.commentId]: expected value of type [string] but got [undefined]\n- [subActionParams.comments.1]: expected value to equal [null]',
               });
@@ -420,8 +412,7 @@ export default function swimlaneTest({ getService }: FtrProviderContext) {
               expect(resp.body).to.eql({
                 connector_id: simulatedActionId,
                 status: 'error',
-                retry: true,
-                reason: 'validation',
+                retry: false,
                 message:
                   'error validating action params: [subActionParams.comments]: types that failed validation:\n- [subActionParams.comments.0.0.comment]: expected value of type [string] but got [undefined]\n- [subActionParams.comments.1]: expected value to equal [null]',
               });

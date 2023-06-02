@@ -174,6 +174,28 @@ describe('rule_loader', () => {
       }
       expect(outcome).toBe('failure');
     });
+
+    test('throws when rule data fail validation', async () => {
+      const { name, ...attributesWithoutName } = mockedRawRuleSO.attributes;
+
+      encryptedSavedObjects.getDecryptedAsInternalUser.mockImplementation(
+        mockGetDecrypted({
+          ...attributesWithoutName,
+          apiKey,
+          enabled,
+          consumer,
+        })
+      );
+      await expect(
+        loadRule({
+          ...DefaultLoadRuleParams,
+          context,
+          paramValidator: undefined,
+        })
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        '"[name]: expected value of type [string] but got [undefined]"'
+      );
+    });
   });
 
   describe('getDecryptedAttributes()', () => {

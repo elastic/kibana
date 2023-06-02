@@ -443,13 +443,7 @@ export default function serviceNowITSMTest({ getService }: FtrProviderContext) {
               params: {},
             })
             .then((resp: any) => {
-              expect(Object.keys(resp.body)).to.eql([
-                'status',
-                'message',
-                'retry',
-                'reason',
-                'connector_id',
-              ]);
+              expect(Object.keys(resp.body)).to.eql(['status', 'message', 'retry', 'connector_id']);
               expect(resp.body.connector_id).to.eql(simulatedActionId);
               expect(resp.body.status).to.eql('error');
             });
@@ -466,8 +460,7 @@ export default function serviceNowITSMTest({ getService }: FtrProviderContext) {
               expect(resp.body).to.eql({
                 connector_id: simulatedActionId,
                 status: 'error',
-                retry: true,
-                reason: 'validation',
+                retry: false,
                 message:
                   'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getFields]\n- [1.subAction]: expected value to equal [getIncident]\n- [2.subAction]: expected value to equal [handshake]\n- [3.subAction]: expected value to equal [pushToService]\n- [4.subAction]: expected value to equal [getChoices]',
               });
@@ -485,8 +478,7 @@ export default function serviceNowITSMTest({ getService }: FtrProviderContext) {
               expect(resp.body).to.eql({
                 connector_id: simulatedActionId,
                 status: 'error',
-                retry: true,
-                reason: 'validation',
+                retry: false,
                 message:
                   'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getFields]\n- [1.subAction]: expected value to equal [getIncident]\n- [2.subAction]: expected value to equal [handshake]\n- [3.subActionParams.incident.short_description]: expected value of type [string] but got [undefined]\n- [4.subAction]: expected value to equal [getChoices]',
               });
@@ -509,8 +501,7 @@ export default function serviceNowITSMTest({ getService }: FtrProviderContext) {
               expect(resp.body).to.eql({
                 connector_id: simulatedActionId,
                 status: 'error',
-                retry: true,
-                reason: 'validation',
+                retry: false,
                 message:
                   'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getFields]\n- [1.subAction]: expected value to equal [getIncident]\n- [2.subAction]: expected value to equal [handshake]\n- [3.subActionParams.incident.short_description]: expected value of type [string] but got [undefined]\n- [4.subAction]: expected value to equal [getChoices]',
               });
@@ -537,8 +528,7 @@ export default function serviceNowITSMTest({ getService }: FtrProviderContext) {
               expect(resp.body).to.eql({
                 connector_id: simulatedActionId,
                 status: 'error',
-                retry: true,
-                reason: 'validation',
+                retry: false,
                 message:
                   'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getFields]\n- [1.subAction]: expected value to equal [getIncident]\n- [2.subAction]: expected value to equal [handshake]\n- [3.subActionParams.comments]: types that failed validation:\n - [subActionParams.comments.0.0.commentId]: expected value of type [string] but got [undefined]\n - [subActionParams.comments.1]: expected value to equal [null]\n- [4.subAction]: expected value to equal [getChoices]',
               });
@@ -565,8 +555,7 @@ export default function serviceNowITSMTest({ getService }: FtrProviderContext) {
               expect(resp.body).to.eql({
                 connector_id: simulatedActionId,
                 status: 'error',
-                retry: true,
-                reason: 'validation',
+                retry: false,
                 message:
                   'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getFields]\n- [1.subAction]: expected value to equal [getIncident]\n- [2.subAction]: expected value to equal [handshake]\n- [3.subActionParams.comments]: types that failed validation:\n - [subActionParams.comments.0.0.comment]: expected value of type [string] but got [undefined]\n - [subActionParams.comments.1]: expected value to equal [null]\n- [4.subAction]: expected value to equal [getChoices]',
               });
@@ -588,8 +577,7 @@ export default function serviceNowITSMTest({ getService }: FtrProviderContext) {
                 expect(resp.body).to.eql({
                   connector_id: simulatedActionId,
                   status: 'error',
-                  retry: true,
-                  reason: 'validation',
+                  retry: false,
                   message:
                     'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getFields]\n- [1.subAction]: expected value to equal [getIncident]\n- [2.subAction]: expected value to equal [handshake]\n- [3.subAction]: expected value to equal [pushToService]\n- [4.subActionParams.fields]: expected value of type [array] but got [undefined]',
                 });

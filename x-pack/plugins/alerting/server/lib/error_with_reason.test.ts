@@ -5,12 +5,21 @@
  * 2.0.
  */
 
-import { ErrorWithReason, getReasonFromError, isErrorWithReason } from './error_with_reason';
+import {
+  ErrorWithReason,
+  getReasonFromError,
+  isErrorWithReason,
+  isValidationError,
+} from './error_with_reason';
 import { RuleExecutionStatusErrorReasons } from '../types';
 
 describe('ErrorWithReason', () => {
   const plainError = new Error('well, actually');
   const errorWithReason = new ErrorWithReason(RuleExecutionStatusErrorReasons.Decrypt, plainError);
+  const validtionErrorWithReason = new ErrorWithReason(
+    RuleExecutionStatusErrorReasons.Validate,
+    plainError
+  );
 
   test('ErrorWithReason class', () => {
     expect(errorWithReason.message).toBe(plainError.message);
@@ -26,5 +35,10 @@ describe('ErrorWithReason', () => {
   test('isErrorWithReason()', () => {
     expect(isErrorWithReason(plainError)).toBe(false);
     expect(isErrorWithReason(errorWithReason)).toBe(true);
+  });
+
+  test('isValidationError()', () => {
+    expect(isValidationError(plainError)).toBe(false);
+    expect(isValidationError(validtionErrorWithReason)).toBe(true);
   });
 });

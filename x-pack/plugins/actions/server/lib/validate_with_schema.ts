@@ -6,13 +6,17 @@
  */
 
 import Boom from '@hapi/boom';
+import { rawActionSchema, rawPreconfiguredActionSchema } from '../raw_action_schema';
 import {
   ActionType,
   ActionTypeConfig,
   ActionTypeSecrets,
   ActionTypeParams,
   ValidatorServices,
+  RawAction,
 } from '../types';
+
+export const validationErrorPrefix = 'error validating';
 
 export function validateParams<
   Config extends ActionTypeConfig = ActionTypeConfig,
@@ -147,9 +151,27 @@ function validateWithSchema<
       }
     } catch (err) {
       // we can't really i18n this yet, since the err.message isn't i18n'd itself
-      throw Boom.badRequest(`error validating ${name}: ${err.message}`);
+      throw Boom.badRequest(`${validationErrorPrefix} ${name}: ${err.message}`);
     }
   }
 
   return value as Record<string, unknown>;
+}
+
+export function validateRawAction({
+  isPreconfigured,
+  rawAction,
+}: {
+  isPreconfigured: boolean;
+  rawAction: RawAction;
+}) {
+  try {
+    if (isPreconfigured) {
+      rawPreconfiguredActionSchema.validate(rawAction);
+    } else {
+      rawActionSchema.validate(rawAction);
+    }
+  } catch (err) {
+    throw Boom.badRequest(`${validationErrorPrefix} action: ${err.message}`);
+  }
 }

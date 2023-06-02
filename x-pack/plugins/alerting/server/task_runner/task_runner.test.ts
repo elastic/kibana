@@ -3088,6 +3088,38 @@ describe('Task Runner', () => {
     expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
   });
 
+  test('skips executing the rule and returns the existing state and the runAt to retry when the rule has invalid data', async () => {
+    const mockTask = { ...mockedTaskInstance, state: { foo: 'bar' } };
+    const taskRunner = new TaskRunner(
+      ruleType,
+      mockTask,
+      taskRunnerFactoryInitializerParams,
+      inMemoryMetrics
+    );
+
+    rulesClient.getAlertFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
+
+    const mockRule = { ...mockedRawRuleSO };
+    // @ts-ignore
+    mockRule.attributes.name = undefined;
+
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockRule);
+
+    const result = await taskRunner.run();
+    expect(result).toEqual({ runAt: mockTask.runAt, state: mockTask.state });
+    expect(alertsService.createAlertsClient).not.toHaveBeenCalledWith({});
+    expect(ruleType.executor).not.toHaveBeenCalled();
+    expect(logger.debug).toHaveBeenCalledTimes(2);
+    expect(logger.debug).toHaveBeenLastCalledWith(
+      'Task Runner has skipped executing the Rule (1) as it has invalid params.'
+    );
+    expect(alertingEventLogger.start).not.toHaveBeenCalled();
+    expect(alertingEventLogger.logAlert).not.toHaveBeenCalled();
+    expect(alertingEventLogger.logAction).not.toHaveBeenCalled();
+    expect(alertingEventLogger.done).not.toHaveBeenCalled();
+  });
+  encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedRawRuleSO);
+
   function testAlertingEventLogCalls({
     ruleContext = alertingEventLoggerInitializer,
     activeAlerts = 0,

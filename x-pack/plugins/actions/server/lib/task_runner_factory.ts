@@ -24,7 +24,7 @@ import {
   throwRetryableError,
   throwUnrecoverableError,
 } from '@kbn/task-manager-plugin/server/task_running';
-import { ActionExecutionErrorReason } from './errors/action_execution_error';
+import { validationErrorPrefix } from './validate_with_schema';
 import { ActionExecutorContract } from './action_executor';
 import {
   ActionTaskParams,
@@ -144,7 +144,7 @@ export class TaskRunnerFactory {
 
         if (
           executorResult.status === 'error' &&
-          executorResult.reason === ActionExecutionErrorReason.Validation
+          executorResult.message?.includes(validationErrorPrefix)
         ) {
           logger.debug(
             `Task Runner has skipped executing the Action (${actionId}) as it has invalid params.`
