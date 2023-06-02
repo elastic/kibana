@@ -51,6 +51,7 @@ interface Props {
   formatNumber: (value: number | undefined) => string;
   ilmPhase: IlmPhase | undefined;
   indexName: string;
+  isAssistantEnabled: boolean;
   onAddToNewCase: (markdownComments: string[]) => void;
   partitionedFieldMetadata: PartitionedFieldMetadata;
   patternDocsCount: number;
@@ -65,6 +66,7 @@ const IncompatibleTabComponent: React.FC<Props> = ({
   formatNumber,
   ilmPhase,
   indexName,
+  isAssistantEnabled,
   onAddToNewCase,
   partitionedFieldMetadata,
   patternDocsCount,
@@ -139,16 +141,18 @@ const IncompatibleTabComponent: React.FC<Props> = ({
                 </CopyToClipboardButton>
               </EuiFlexItem>
 
-              <EuiFlexItem grow={false}>
-                <NewChat
-                  category="data-quality-dashboard"
-                  conversationId={DATA_QUALITY_DASHBOARD_CONVERSATION_ID}
-                  description={DATA_QUALITY_PROMPT_CONTEXT_PILL(indexName)}
-                  getPromptContext={getPromptContext}
-                  suggestedUserPrompt={DATA_QUALITY_SUGGESTED_USER_PROMPT}
-                  tooltip={DATA_QUALITY_PROMPT_CONTEXT_PILL_TOOLTIP}
-                />
-              </EuiFlexItem>
+              {isAssistantEnabled && (
+                <EuiFlexItem grow={false}>
+                  <NewChat
+                    category="data-quality-dashboard"
+                    conversationId={DATA_QUALITY_DASHBOARD_CONVERSATION_ID}
+                    description={DATA_QUALITY_PROMPT_CONTEXT_PILL(indexName)}
+                    getPromptContext={getPromptContext}
+                    suggestedUserPrompt={DATA_QUALITY_SUGGESTED_USER_PROMPT}
+                    tooltip={DATA_QUALITY_PROMPT_CONTEXT_PILL_TOOLTIP}
+                  />
+                </EuiFlexItem>
+              )}
             </EuiFlexGroup>
           </IncompatibleCallout>
 

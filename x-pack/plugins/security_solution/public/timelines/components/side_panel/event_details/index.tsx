@@ -21,6 +21,7 @@ import type { RunTimeMappings } from '../../../../common/store/sourcerer/model';
 import { useHostIsolationTools } from './use_host_isolation_tools';
 import { FlyoutBody, FlyoutHeader, FlyoutFooter } from './flyout';
 import { useBasicDataFromDetailsData, getAlertIndexAlias } from './helpers';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useSpaceId } from '../../../../common/hooks/use_space_id';
 import { EndpointIsolateSuccess } from '../../../../common/components/endpoint/host_isolation';
 import { HostIsolationPanel } from '../../../../detections/components/host_isolation';
@@ -52,6 +53,8 @@ interface EventDetailsPanelProps {
   isReadOnly?: boolean;
 }
 
+const useAssistantNoop = () => ({ promptContextId: undefined });
+
 const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
   browserFields,
   entityType = 'events', // Default to events so only alerts have to pass entityType in
@@ -64,6 +67,9 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
   scopeId,
   isReadOnly,
 }) => {
+  const isAssistantEnabled = useIsExperimentalFeatureEnabled('assistantEnabled');
+  // TODO: changing feature flags requires a hard refresh to take effect, but this temporary workaround technically violates the rules of hooks:
+  const useAssistant = isAssistantEnabled ? useAssistantOverlay : useAssistantNoop;
   const currentSpaceId = useSpaceId();
   const { indexName } = expandedEvent;
   const eventIndex = getAlertIndexAlias(indexName, currentSpaceId) ?? indexName;
@@ -96,7 +102,7 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
     [detailsData]
   );
 
-  const { promptContextId } = useAssistantOverlay(
+  const { promptContextId } = useAssistant(
     isAlert ? 'alert' : 'event',
     isAlert ? ALERT_SUMMARY_CONVERSATION_ID : EVENT_SUMMARY_CONVERSATION_ID,
     isAlert ? ALERT_SUMMARY_CONTEXT_DESCRIPTION(view) : EVENT_SUMMARY_CONTEXT_DESCRIPTION(view),

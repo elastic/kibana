@@ -6,11 +6,10 @@
  */
 
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
-// eslint-disable-next-line @kbn/eslint/module_migration
-import styled from 'styled-components';
-
 import { sortBy } from 'lodash/fp';
 import React, { useCallback, useMemo } from 'react';
+// eslint-disable-next-line @kbn/eslint/module_migration
+import styled from 'styled-components';
 
 import type { PromptContext } from '../prompt_context/types';
 

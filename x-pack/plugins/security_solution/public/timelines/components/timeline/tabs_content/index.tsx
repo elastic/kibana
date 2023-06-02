@@ -35,6 +35,7 @@ import {
   getEventIdToNoteIdsSelector,
 } from './selectors';
 import * as i18n from './translations';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useLicense } from '../../../../common/hooks/use_license';
 
 const HideShowContainer = styled.div.attrs<{ $isVisible: boolean; isOverflowYScroll: boolean }>(
@@ -288,6 +289,7 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
   sessionViewConfig,
   timelineDescription,
 }) => {
+  const isAssistantEnabled = useIsExperimentalFeatureEnabled('assistantEnabled');
   const dispatch = useDispatch();
   const getActiveTab = useMemo(() => getActiveTabSelector(), []);
   const getShowTimeline = useMemo(() => getShowTimelineSelector(), []);
@@ -442,15 +444,17 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
               </div>
             )}
           </StyledEuiTab>
-          <StyledEuiTab
-            data-test-subj={`timelineTabs-${TimelineTabs.securityAssistant}`}
-            onClick={setSecurityAssistantAsActiveTab}
-            disabled={timelineType === TimelineType.template}
-            isSelected={activeTab === TimelineTabs.securityAssistant}
-            key={TimelineTabs.securityAssistant}
-          >
-            <span>{i18n.SECURITY_ASSISTANT}</span>
-          </StyledEuiTab>
+          {isAssistantEnabled && (
+            <StyledEuiTab
+              data-test-subj={`timelineTabs-${TimelineTabs.securityAssistant}`}
+              onClick={setSecurityAssistantAsActiveTab}
+              disabled={timelineType === TimelineType.template}
+              isSelected={activeTab === TimelineTabs.securityAssistant}
+              key={TimelineTabs.securityAssistant}
+            >
+              <span>{i18n.SECURITY_ASSISTANT}</span>
+            </StyledEuiTab>
+          )}
         </EuiTabs>
       )}
 

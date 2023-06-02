@@ -56,6 +56,8 @@ const SelectedPromptContextsComponent: React.FC<Props> = ({
   );
 
   useEffect(() => {
+    const abortController = new AbortController();
+
     const fetchAccordionContent = async () => {
       const newAccordionContent = await Promise.all(
         selectedPromptContexts.map(async ({ getPromptContext, id }) => ({
@@ -63,10 +65,16 @@ const SelectedPromptContextsComponent: React.FC<Props> = ({
         }))
       );
 
-      setAccordionContent(newAccordionContent.reduce((acc, curr) => ({ ...acc, ...curr }), {}));
+      if (!abortController.signal.aborted) {
+        setAccordionContent(newAccordionContent.reduce((acc, curr) => ({ ...acc, ...curr }), {}));
+      }
     };
 
     fetchAccordionContent();
+
+    return () => {
+      abortController.abort();
+    };
   }, [selectedPromptContexts]);
 
   if (isEmpty(promptContexts)) {
