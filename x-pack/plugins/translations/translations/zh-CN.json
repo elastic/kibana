@@ -36995,7 +36995,6 @@
     "xpack.synthetics.overview.groupPopover.project.label": "项目",
     "xpack.synthetics.overview.groupPopover.tag.label": "标签",
     "xpack.synthetics.overview.heading": "监测",
-    "xpack.synthetics.overview.headingBetaSection": "Synthetics",
     "xpack.synthetics.overview.monitors.label": "监测",
     "xpack.synthetics.overview.noMonitorsFoundContent": "请尝试优化您的搜索。",
     "xpack.synthetics.overview.noMonitorsFoundHeading": "未找到任何监测",
