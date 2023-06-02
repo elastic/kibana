@@ -266,6 +266,12 @@ export class SavedObjectsService
         take(1)
       ).toPromise();
 
+      this.logger.info('!!!!!!!About to start migrations!!!!!!!');
+      // Pretend to be busy...
+      await new Promise((res) => {
+        setTimeout(res, 10_000);
+      });
+
       // Running migrations only if we got compatible nodes.
       // It may happen that the observable completes due to Kibana shutting down
       // and the promise above fulfils as undefined. We shouldn't trigger migrations at that point.
