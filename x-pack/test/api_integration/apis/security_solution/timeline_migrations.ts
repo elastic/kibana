@@ -11,7 +11,7 @@ import {
   pinnedEventSavedObjectType,
   timelineSavedObjectType,
 } from '@kbn/security-solution-plugin/server/lib/timeline/saved_object_mappings';
-import { TimelineWithoutExternalRefs } from '@kbn/security-solution-plugin/common/types/timeline';
+import { TimelineWithoutExternalRefs } from '@kbn/security-solution-plugin/common/types/timeline/api';
 import { NoteWithoutExternalRefs } from '@kbn/security-solution-plugin/common/types/timeline/note';
 
 import { PinnedEventWithoutExternalRefs } from '@kbn/security-solution-plugin/common/types/timeline/pinned_event';
