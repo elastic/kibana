@@ -29,8 +29,8 @@ import { RuleRunMetrics, RuleRunMetricsStore } from '../lib/rule_run_metrics_sto
 import { AlertingEventLogger } from '../lib/alerting_event_logger/alerting_event_logger';
 
 export type RuleTaskRunResult = {
-  state: Record<string, unknown>;
-  monitoring: RuleMonitoring | undefined;
+  state: RuleTaskState;
+  monitoring?: RuleMonitoring | undefined;
 } & (
   | {
       runAt?: Date;
