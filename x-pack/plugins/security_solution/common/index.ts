@@ -14,10 +14,7 @@ export { allowedExperimentalValues, type ExperimentalFeatures } from './experime
 export type { AppFeatureKeys } from './types/app_features';
 export { AppFeatureKey } from './types/app_features';
 
-import GenAiLogo from './gen_ai/logo';
-
 export { GEN_AI_CONNECTOR_ID, OpenAiProviderType } from './gen_ai/constants';
-export { GenAiLogo };
 
 // Careful of exporting anything from this file as any file(s) you export here will cause your page bundle size to increase.
 // If you're using functions/types/etc... internally it's best to import directly from their paths than expose the functions/types/etc... here.
