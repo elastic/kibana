@@ -14,7 +14,6 @@ type RuntimeType = typeof RUNTIME_FIELD_TYPES[number];
 /**
  * Type guard for a runtime field
  *
- * @export
  * @param {unknown} arg - The item to be checked
  * @returns {arg is estypes.MappingRuntimeField}
  */

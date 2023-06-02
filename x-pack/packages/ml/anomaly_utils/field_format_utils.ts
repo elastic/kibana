@@ -12,7 +12,6 @@ import type { FieldFormat } from '@kbn/field-formats-plugin/common';
  * Utility for returning the FieldFormat from a full populated Kibana index pattern object
  * containing the list of fields by name with their formats.
  *
- * @export
  * @param {DataView} fullDataView - The data view to get the field format from.
  * @param {string} fieldName - The field to get the format from.
  * @param {string} esAggName - The ES aggregation name.

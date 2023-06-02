@@ -12,7 +12,6 @@ import { isRuntimeField } from './is_runtime_field';
 /**
  * Type guard for runtime mappings
  *
- * @export
  * @param {unknown} arg - The item to be checked
  * @returns {arg is RuntimeMappings}
  */
@@ -22,7 +21,5 @@ export function isRuntimeMappings(arg: unknown): arg is RuntimeMappings {
 
 /**
  * Alias for `estypes.MappingRuntimeFields`.
- * @export
- * @typedef {RuntimeMappings}
  */
 export type RuntimeMappings = estypes.MappingRuntimeFields;

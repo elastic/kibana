@@ -15,7 +15,6 @@ import { TIME_FORMAT } from './time_format';
 /**
  * Format a timestamp as human readable date.
  *
- * @export
  * @param {number} ts - The timestamp to be formatted.
  * @returns {string}
  */
@@ -26,7 +25,6 @@ export function formatHumanReadableDate(ts: number): string {
 /**
  * Format a timestamp as human readable date including hours and minutes.
  *
- * @export
  * @param {number} ts - The timestamp to be formatted.
  * @returns {string}
  */
@@ -37,7 +35,6 @@ export function formatHumanReadableDateTime(ts: number): string {
 /**
  * Format a timestamp as human readable date including hours, minutes and seconds.
  *
- * @export
  * @param {number} ts - The timestamp to be formatted.
  * @returns {string}
  */
@@ -48,7 +45,6 @@ export function formatHumanReadableDateTimeSeconds(ts: number): string {
 /**
  * Validate a time range of two string based dates.
  *
- * @export
  * @param {?TimeRange} [time] - The time range to be validated.
  * @returns {boolean}
  */
@@ -62,7 +58,6 @@ export function validateTimeRange(time?: TimeRange): boolean {
 /**
  * Transform a string based time range into one based on timestamps.
  *
- * @export
  * @param {TimeRange} time - The time range to be transformed.
  * @returns {{ to: any; from: any; }}
  */

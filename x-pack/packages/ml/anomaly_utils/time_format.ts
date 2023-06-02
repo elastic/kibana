@@ -7,6 +7,5 @@
 
 /**
  * Time format spec for string parsing.
- * @type {"YYYY-MM-DD HH:mm:ss"}
  */
 export const TIME_FORMAT = 'YYYY-MM-DD HH:mm:ss';

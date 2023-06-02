@@ -41,19 +41,16 @@ import type { DataGridItem, IndexPagination, RenderCellValue } from './types';
 
 /**
  * The initial maximum number of columns for the data grid.
- * @type {10}
  */
 export const INIT_MAX_COLUMNS = 10;
 
 /**
  * The default threshold value for the number of rows at which the column chart visibility is set to true.
- * @type {10000}
  */
 export const COLUMN_CHART_DEFAULT_VISIBILITY_ROWS_THRESHOLD = 10000;
 
 /**
  * Style configuration for the EuiDataGrid component.
- * @type {EuiDataGridStyle}
  */
 export const euiDataGridStyle: EuiDataGridStyle = {
   border: 'all',
@@ -66,7 +63,6 @@ export const euiDataGridStyle: EuiDataGridStyle = {
 
 /**
  * Configuration settings for the EuiDataGrid toolbar.
- * @type {{ showColumnSelector: boolean; showDisplaySelector: boolean; showSortSelector: boolean; showFullScreenSelector: boolean; }}
  */
 export const euiDataGridToolbarSettings = {
   showColumnSelector: true,
@@ -101,9 +97,6 @@ export const getFieldsFromKibanaIndexPattern = (dataView: DataView): string[] =>
 
 /**
  * Record of ES field types.
- * @export
- * @interface FieldTypes
- * @typedef {FieldTypes}
  */
 export interface FieldTypes {
   [key: string]: ES_FIELD_TYPES;
@@ -443,24 +436,18 @@ export const getNestedOrEscapedVal = (obj: unknown, sortId: string) => {
 
 /**
  * Interface definition for multi column sorter
- * @export
- * @interface MultiColumnSorter
- * @typedef {MultiColumnSorter}
  */
 export interface MultiColumnSorter {
   /**
    * The id.
-   * @type {string}
    */
   id: string;
   /**
    * The direction.
-   * @type {('asc' | 'desc')}
    */
   direction: 'asc' | 'desc';
   /**
    * The type of the sorter.
-   * @type {string}
    */
   type: string;
 }

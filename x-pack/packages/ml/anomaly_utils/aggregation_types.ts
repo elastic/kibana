@@ -9,8 +9,6 @@ import { type Aggregation, METRIC_AGG_TYPE } from './fields';
 
 /**
  * Enum for ML job aggregations.
- * @export
- * @enum {number}
  */
 export enum ML_JOB_AGGREGATION {
   // count
@@ -65,7 +63,6 @@ export enum ML_JOB_AGGREGATION {
 
 /**
  * Custom enum for sparse data aggregations.
- * @type {readonly [ML_JOB_AGGREGATION.NON_ZERO_COUNT, ML_JOB_AGGREGATION.HIGH_NON_ZERO_COUNT, ML_JOB_AGGREGATION.LOW_NON_ZERO_COUNT, ML_JOB_AGGREGATION.NON_NULL_SUM, ML_JOB_AGGREGATION.HIGH_NON_NULL_SUM, ML_JOB_AGGREGATION.LOW_NON_NULL_SUM]}
  */
 export const SPARSE_DATA_AGGREGATIONS = [
   ML_JOB_AGGREGATION.NON_ZERO_COUNT,
@@ -78,15 +75,11 @@ export const SPARSE_DATA_AGGREGATIONS = [
 
 /**
  * Type definition of SPARSE_DATA_AGGREGATIONS values.
- * @export
- * @typedef {SparseDataAggregation}
  */
 export type SparseDataAggregation = typeof SPARSE_DATA_AGGREGATIONS[number];
 
 /**
  * Enum for Kibana aggregations.
- * @export
- * @enum {number}
  */
 export enum KIBANA_AGGREGATION {
   COUNT = 'count',
@@ -100,8 +93,6 @@ export enum KIBANA_AGGREGATION {
 
 /**
  * Enum for ES aggregatins.
- * @export
- * @enum {number}
  */
 export enum ES_AGGREGATION {
   COUNT = 'count',
@@ -133,7 +124,6 @@ function getBasicMlOnlyAggregation(): Omit<Aggregation, 'id' | 'title' | 'fields
 /**
  * List of aggregations only support by ML and which don't have an equivalent ES aggregation.
  * Note, not all aggs have a field list. Some aggs cannot be used with a field.
- * @type {Aggregation[]}
  */
 export const mlJobAggregationsWithoutEsEquivalent: Aggregation[] = [
   {
@@ -253,7 +243,6 @@ export const mlJobAggregationsWithoutEsEquivalent: Aggregation[] = [
 
 /**
  * ML job aggregation definitions.
- * @type {Aggregation[]}
  */
 export const mlJobAggregations: Aggregation[] = [
   {

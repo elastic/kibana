@@ -79,7 +79,6 @@ type Props = PropsWithHeader | PropsWithoutHeader;
 
 /**
  * Custom data grid component with support for mini histograms.
- * @type {FC<Props>}
  */
 export const DataGrid: FC<Props> = memo(
   (props) => {
