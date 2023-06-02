@@ -16,6 +16,7 @@ import { parsingPlugins, processingPlugins, platinumOnlyPluginTokens } from './p
 import { MarkdownLink } from './markdown_link';
 import { useKibana } from '../../lib/kibana';
 import { useLicense } from '../../hooks/use_license';
+import * as i18n from './translations';
 
 interface Props {
   children: string;
@@ -62,11 +63,7 @@ const MarkdownRendererComponent: React.FC<Props> = ({ children, disableLinks }) 
     <>
       {platinumPluginDetected && (
         <>
-          <EuiCallOut
-            title="The following markdown may make use of subscription features"
-            color="primary"
-            iconType="lock"
-          >
+          <EuiCallOut title={i18n.PLATINUM_WARNING} color="primary" iconType="lock">
             <FormattedMessage
               id="xpack.securitySolution.markdown.premiumPluginLinkPrefix"
               defaultMessage="To use these interactive markdown features, you must {link}."
@@ -91,7 +88,7 @@ const MarkdownRendererComponent: React.FC<Props> = ({ children, disableLinks }) 
       )}
       {markdownParseResult !== null && (
         <>
-          <EuiCallOut title="Invalid markdown detected" color="danger" iconType="error">
+          <EuiCallOut title={i18n.INVALID_MARKDOWN} color="danger" iconType="error">
             {markdownParseResult}
           </EuiCallOut>
           <EuiSpacer size="s" />
