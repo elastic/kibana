@@ -21,27 +21,27 @@ interface Props {
 
 export const ChartHeader = ({ title, metrics }: Props) => {
   return (
-    <EuiFlexGroup gutterSize={'s'} responsive={false}>
+    <EuiFlexGroup gutterSize="s" responsive={false}>
       <HeaderItem grow={1}>
-        <EuiText size={'s'}>
+        <EuiText size="s">
           <H4>{title}</H4>
         </EuiText>
       </HeaderItem>
       <EuiFlexItem grow={false}>
-        <EuiFlexGroup gutterSize={'s'} alignItems={'center'} responsive={false}>
+        <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
           {metrics.map((chartMetric) => (
             <EuiFlexItem key={chartMetric.label!}>
               <EuiFlexGroup
                 key={chartMetric.label!}
-                gutterSize={'xs'}
-                alignItems={'center'}
+                gutterSize="xs"
+                alignItems="center"
                 responsive={false}
               >
                 <EuiFlexItem grow={false}>
-                  <EuiIcon color={colorTransformer(chartMetric.color!)} type={'dot'} />
+                  <EuiIcon color={colorTransformer(chartMetric.color!)} type="dot" />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <EuiText size={'xs'}>{chartMetric.label}</EuiText>
+                  <EuiText size="xs">{chartMetric.label}</EuiText>
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiFlexItem>

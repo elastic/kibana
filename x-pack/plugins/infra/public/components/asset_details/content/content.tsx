@@ -19,7 +19,7 @@ export const Content = ({
   overrides,
   currentTimeRange,
   node,
-  nodeType,
+  nodeType = 'host',
   onTabsStateChange,
 }: Props) => {
   const onChange = (state: TabState) => {

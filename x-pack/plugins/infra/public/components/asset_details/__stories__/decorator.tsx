@@ -40,13 +40,6 @@ export const DecorateWithKibanaContext: DecoratorFn = (story) => {
         action(`Navigate to: ${url}`);
       },
       getUrlForApp: (url: string) => url,
-      capabilities: {
-        osquery: {
-          runSavedQueries: true,
-          readSavedQueries: true,
-          writeLiveQueries: true,
-        },
-      },
     },
     data: {
       search: {

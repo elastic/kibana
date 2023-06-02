@@ -80,9 +80,9 @@ export const Logs = ({ nodeId, nodeType, currentTime }: LogsProps) => {
           <RedirectAppLinks coreStart={services}>
             <EuiButtonEmpty
               data-test-subj="infraTabComponentOpenInLogsButton"
-              size={'xs'}
-              flush={'both'}
-              iconType={'popout'}
+              size="xs"
+              flush="both"
+              iconType="popout"
               href={logsUrl}
             >
               <FormattedMessage

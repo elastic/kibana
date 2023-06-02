@@ -43,7 +43,7 @@ export const getHttp = (params: Parameters): HttpStart => {
           return Promise.resolve({});
       }
     }) as HttpHandler,
-  };
+  } as unknown as HttpStart;
 
-  return http as unknown as HttpStart;
+  return http;
 };

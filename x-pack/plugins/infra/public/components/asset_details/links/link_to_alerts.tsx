@@ -18,7 +18,7 @@ export const LinkToAlertsRule = ({ onClick }: LinkToAlertsRule) => {
       data-test-subj="infraNodeContextPopoverCreateInventoryRuleButton"
       onClick={onClick}
       size="xs"
-      iconSide={'left'}
+      iconSide="left"
       flush="both"
       iconType="bell"
     >

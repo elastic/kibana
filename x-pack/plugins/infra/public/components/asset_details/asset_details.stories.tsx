@@ -75,7 +75,6 @@ const stories: Meta<AssetDetailsProps> = {
     links: {
       options: links,
       control: {
-        // Type 'select' is automatically inferred when 'options' is defined
         type: 'inline-check',
       },
     },

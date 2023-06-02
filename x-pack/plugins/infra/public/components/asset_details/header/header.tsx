@@ -35,8 +35,10 @@ type Props = Pick<
   compact: boolean;
 };
 
+const APM_FIELD = 'host.hostname';
+
 export const Header = ({
-  nodeType,
+  nodeType = 'host',
   node,
   tabs = [],
   links = [],
@@ -58,7 +60,7 @@ export const Header = ({
 
   const tabLinkComponents = {
     [FlyoutTabIds.LINK_TO_APM]: (tab: Tab) => (
-      <TabToApmTraces nodeName={node.name} apmField={'host.hostname'} {...tab} />
+      <TabToApmTraces nodeName={node.name} apmField={APM_FIELD} {...tab} />
     ),
     [FlyoutTabIds.LINK_TO_UPTIME]: (tab: Tab) => (
       <TabToUptime nodeName={node.name} nodeType={nodeType} nodeIp={node.ip} {...tab} />
@@ -70,7 +72,7 @@ export const Header = ({
       <LinkToNodeDetails nodeId={node.id} nodeType={nodeType} currentTime={currentTimeRange.to} />
     ),
     alertRule: <LinkToAlertsRule onClick={overrides?.alertRule?.onCreateRuleClick} />,
-    apmServices: <LinkToApmServices nodeName={node.name} apmField={'host.hostname'} />,
+    apmServices: <LinkToApmServices nodeName={node.name} apmField={APM_FIELD} />,
     uptime: <LinkToUptime nodeName={node.name} nodeType={nodeType} nodeIp={node.ip} />,
   };
 

@@ -80,13 +80,13 @@ export const ChartSection = ({
           />
         ))}
         <Axis
-          id={'timestamp'}
+          id="timestamp"
           position={Position.Bottom}
           showOverlappingTicks={true}
           tickFormat={tickFormatterForTime}
         />
         <Axis
-          id={'values'}
+          id="values"
           position={Position.Left}
           tickFormat={tickFormatter}
           domain={domain}
