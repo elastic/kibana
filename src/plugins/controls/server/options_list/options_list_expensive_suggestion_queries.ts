@@ -61,7 +61,7 @@ const expensiveSuggestionAggSubtypes: { [key: string]: OptionsListSuggestionAggr
           },
         },
       };
-      if (searchString) {
+      if (searchString && searchString.length > 0) {
         textOrKeywordQuery = {
           filteredSuggestions: {
             filter: {
@@ -154,7 +154,7 @@ const expensiveSuggestionAggSubtypes: { [key: string]: OptionsListSuggestionAggr
         ],
       };
 
-      if (searchString) {
+      if (searchString && searchString.length > 0) {
         ipRangeQuery = getIpRangeQuery(searchString);
         if (!ipRangeQuery.validSearch) {
           // ideally should be prevented on the client side but, if somehow an invalid search gets through to the server,
