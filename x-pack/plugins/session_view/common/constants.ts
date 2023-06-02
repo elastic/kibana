@@ -8,6 +8,7 @@
 export const SESSION_VIEW_APP_ID = 'sessionView';
 
 // routes
+export const CURRENT_API_VERSION = '1';
 export const PROCESS_EVENTS_ROUTE = '/internal/session_view/process_events';
 export const ALERTS_ROUTE = '/internal/session_view/alerts';
 export const ALERT_STATUS_ROUTE = '/internal/session_view/alert_status';

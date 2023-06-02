@@ -46,7 +46,7 @@ import { REFRESH_SESSION, TOGGLE_TTY_PLAYER, DETAIL_PANEL } from './translations
  * The main wrapper component for the session view.
  */
 export const SessionView = ({
-  processIndex,
+  index,
   sessionEntityId,
   sessionStartTime,
   height,
@@ -132,7 +132,7 @@ export const SessionView = ({
     hasPreviousPage,
     refetch,
   } = useFetchSessionViewProcessEvents(
-    processIndex,
+    index,
     sessionEntityId,
     sessionStartTime,
     currentJumpToCursor
@@ -148,7 +148,7 @@ export const SessionView = ({
   } = useFetchSessionViewAlerts(sessionEntityId, sessionStartTime, investigatedAlertId);
 
   const { data: totalTTYOutputBytes, refetch: refetchTotalTTYOutput } = useFetchGetTotalIOBytes(
-    processIndex,
+    index,
     sessionEntityId,
     sessionStartTime
   );
@@ -431,7 +431,7 @@ export const SessionView = ({
         }}
       </EuiResizableContainer>
       <TTYPlayer
-        index={processIndex}
+        index={index}
         show={showTTY}
         sessionEntityId={sessionEntityId}
         sessionStartTime={sessionStartTime}

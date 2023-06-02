@@ -22,77 +22,84 @@ import {
 } from '../../common/constants';
 
 export const registerIOEventsRoute = (router: IRouter, logger: Logger) => {
-  router.get(
-    {
+  router.versioned
+    .get({
+      access: 'internal',
       path: IO_EVENTS_ROUTE,
-      validate: {
-        query: schema.object({
-          index: schema.string(),
-          sessionEntityId: schema.string(),
-          sessionStartTime: schema.string(),
-          cursor: schema.maybe(schema.string()),
-          pageSize: schema.maybe(schema.number({ min: 1, max: IO_EVENTS_PER_PAGE })), // currently only set in FTR tests to test pagination
-        }),
+    })
+    .addVersion(
+      {
+        version: '1',
+        validate: {
+          request: {
+            query: schema.object({
+              index: schema.string(),
+              sessionEntityId: schema.string(),
+              sessionStartTime: schema.string(),
+              cursor: schema.maybe(schema.string()),
+              pageSize: schema.maybe(schema.number({ min: 1, max: IO_EVENTS_PER_PAGE })), // currently only set in FTR tests to test pagination
+            }),
+          },
+        },
       },
-    },
-    async (context, request, response) => {
-      const client = (await context.core).elasticsearch.client.asCurrentUser;
-      const {
-        index,
-        sessionEntityId,
-        sessionStartTime,
-        cursor,
-        pageSize = IO_EVENTS_PER_PAGE,
-      } = request.query;
+      async (context, request, response) => {
+        const client = (await context.core).elasticsearch.client.asCurrentUser;
+        const {
+          index,
+          sessionEntityId,
+          sessionStartTime,
+          cursor,
+          pageSize = IO_EVENTS_PER_PAGE,
+        } = request.query;
 
-      try {
-        const search = await client.search({
-          index: [index],
-          body: {
-            query: {
-              bool: {
-                must: [
-                  { term: { [ENTRY_SESSION_ENTITY_ID_PROPERTY]: sessionEntityId } },
-                  { term: { [EVENT_ACTION]: 'text_output' } },
-                  {
-                    range: {
-                      // optimization to prevent data before this session from being hit.
-                      [TIMESTAMP_PROPERTY]: {
-                        gte: sessionStartTime,
+        try {
+          const search = await client.search({
+            index: [index],
+            body: {
+              query: {
+                bool: {
+                  must: [
+                    { term: { [ENTRY_SESSION_ENTITY_ID_PROPERTY]: sessionEntityId } },
+                    { term: { [EVENT_ACTION]: 'text_output' } },
+                    {
+                      range: {
+                        // optimization to prevent data before this session from being hit.
+                        [TIMESTAMP_PROPERTY]: {
+                          gte: sessionStartTime,
+                        },
                       },
                     },
-                  },
-                ],
+                  ],
+                },
               },
+              size: Math.min(pageSize, IO_EVENTS_PER_PAGE),
+              sort: [{ [TIMESTAMP]: 'asc' }],
+              search_after: cursor ? [cursor] : undefined,
+              fields: IO_EVENT_FIELDS,
             },
-            size: Math.min(pageSize, IO_EVENTS_PER_PAGE),
-            sort: [{ [TIMESTAMP]: 'asc' }],
-            search_after: cursor ? [cursor] : undefined,
-            fields: IO_EVENT_FIELDS,
-          },
-        });
+          });
 
-        const events = search.hits.hits;
-        const total =
-          typeof search.hits.total === 'number' ? search.hits.total : search.hits.total?.value;
+          const events = search.hits.hits;
+          const total =
+            typeof search.hits.total === 'number' ? search.hits.total : search.hits.total?.value;
 
-        return response.ok({ body: { total, events } });
-      } catch (err) {
-        const error = transformError(err);
-        logger.error(`Failed to fetch io events: ${err}`);
+          return response.ok({ body: { total, events } });
+        } catch (err) {
+          const error = transformError(err);
+          logger.error(`Failed to fetch io events: ${err}`);
 
-        // unauthorized
-        if (err?.meta?.statusCode === 403) {
-          return response.ok({ body: { total: 0, events: [] } });
+          // unauthorized
+          if (err?.meta?.statusCode === 403) {
+            return response.ok({ body: { total: 0, events: [] } });
+          }
+
+          return response.customError({
+            body: { message: error.message },
+            statusCode: error.statusCode,
+          });
         }
-
-        return response.customError({
-          body: { message: error.message },
-          statusCode: error.statusCode,
-        });
       }
-    }
-  );
+    );
 };
 
 export const searchProcessWithIOEvents = async (

@@ -14,69 +14,76 @@ import {
 } from '../../common/constants';
 
 export const registerGetTotalIOBytesRoute = (router: IRouter, logger: Logger) => {
-  router.get(
-    {
+  router.versioned
+    .get({
+      access: 'internal',
       path: GET_TOTAL_IO_BYTES_ROUTE,
-      validate: {
-        query: schema.object({
-          index: schema.string(),
-          sessionEntityId: schema.string(),
-          sessionStartTime: schema.string(),
-        }),
+    })
+    .addVersion(
+      {
+        version: '1',
+        validate: {
+          request: {
+            query: schema.object({
+              index: schema.string(),
+              sessionEntityId: schema.string(),
+              sessionStartTime: schema.string(),
+            }),
+          },
+        },
       },
-    },
-    async (context, request, response) => {
-      const client = (await context.core).elasticsearch.client.asCurrentUser;
-      const { index, sessionEntityId, sessionStartTime } = request.query;
+      async (context, request, response) => {
+        const client = (await context.core).elasticsearch.client.asCurrentUser;
+        const { index, sessionEntityId, sessionStartTime } = request.query;
 
-      try {
-        const search = await client.search({
-          index: [index],
-          body: {
-            query: {
-              bool: {
-                must: [
-                  { term: { [ENTRY_SESSION_ENTITY_ID_PROPERTY]: sessionEntityId } },
-                  { term: { [EVENT_ACTION]: 'text_output' } },
-                  {
-                    range: {
-                      // optimization to prevent data before this session from being hit.
-                      [TIMESTAMP_PROPERTY]: {
-                        gte: sessionStartTime,
+        try {
+          const search = await client.search({
+            index: [index],
+            body: {
+              query: {
+                bool: {
+                  must: [
+                    { term: { [ENTRY_SESSION_ENTITY_ID_PROPERTY]: sessionEntityId } },
+                    { term: { [EVENT_ACTION]: 'text_output' } },
+                    {
+                      range: {
+                        // optimization to prevent data before this session from being hit.
+                        [TIMESTAMP_PROPERTY]: {
+                          gte: sessionStartTime,
+                        },
                       },
                     },
-                  },
-                ],
+                  ],
+                },
               },
-            },
-            size: 0,
-            aggs: {
-              total_bytes_captured: {
-                sum: {
-                  field: TOTAL_BYTES_CAPTURED_PROPERTY,
+              size: 0,
+              aggs: {
+                total_bytes_captured: {
+                  sum: {
+                    field: TOTAL_BYTES_CAPTURED_PROPERTY,
+                  },
                 },
               },
             },
-          },
-        });
+          });
 
-        const agg: any = search.aggregations?.total_bytes_captured;
+          const agg: any = search.aggregations?.total_bytes_captured;
 
-        return response.ok({ body: { total: agg?.value || 0 } });
-      } catch (err) {
-        const error = transformError(err);
-        logger.error(`Failed to fetch total io bytes: ${err}`);
+          return response.ok({ body: { total: agg?.value || 0 } });
+        } catch (err) {
+          const error = transformError(err);
+          logger.error(`Failed to fetch total io bytes: ${err}`);
 
-        // unauthorized
-        if (err?.meta?.statusCode === 403) {
-          return response.ok({ body: { total: 0 } });
+          // unauthorized
+          if (err?.meta?.statusCode === 403) {
+            return response.ok({ body: { total: 0 } });
+          }
+
+          return response.customError({
+            body: { message: error.message },
+            statusCode: error.statusCode,
+          });
         }
-
-        return response.customError({
-          body: { message: error.message },
-          statusCode: error.statusCode,
-        });
       }
-    }
-  );
+    );
 };

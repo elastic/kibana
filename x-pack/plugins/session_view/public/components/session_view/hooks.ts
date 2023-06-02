@@ -25,6 +25,7 @@ import {
   QUERY_KEY_PROCESS_EVENTS,
   QUERY_KEY_ALERTS,
   QUERY_KEY_GET_TOTAL_IO_BYTES,
+  CURRENT_API_VERSION,
 } from '../../../common/constants';
 
 export const useFetchSessionViewProcessEvents = (
@@ -51,6 +52,7 @@ export const useFetchSessionViewProcessEvents = (
       }
 
       const res = await http.get<ProcessEventResults>(PROCESS_EVENTS_ROUTE, {
+        version: CURRENT_API_VERSION,
         query: {
           index,
           sessionEntityId,
@@ -142,6 +144,7 @@ export const useFetchSessionViewAlerts = (
       const { cursor } = pageParam;
 
       const res = await http.get<ProcessEventResults>(ALERTS_ROUTE, {
+        version: CURRENT_API_VERSION,
         query: {
           sessionEntityId,
           sessionStartTime,
@@ -189,6 +192,7 @@ export const useFetchAlertStatus = (
       }
 
       const res = await http.get<ProcessEventResults>(ALERT_STATUS_ROUTE, {
+        version: CURRENT_API_VERSION,
         query: {
           alertUuid,
         },
@@ -227,6 +231,7 @@ export const useFetchGetTotalIOBytes = (
     cachingKeys,
     async () => {
       return http.get<{ total: number }>(GET_TOTAL_IO_BYTES_ROUTE, {
+        version: CURRENT_API_VERSION,
         query: {
           index,
           sessionEntityId,

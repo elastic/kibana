@@ -28,44 +28,51 @@ export const registerAlertsRoute = (
   logger: Logger,
   ruleRegistry: RuleRegistryPluginStartContract
 ) => {
-  router.get(
-    {
+  router.versioned
+    .get({
+      access: 'internal',
       path: ALERTS_ROUTE,
-      validate: {
-        query: schema.object({
-          sessionEntityId: schema.string(),
-          sessionStartTime: schema.string(),
-          investigatedAlertId: schema.maybe(schema.string()),
-          cursor: schema.maybe(schema.string()),
-        }),
+    })
+    .addVersion(
+      {
+        version: '1',
+        validate: {
+          request: {
+            query: schema.object({
+              sessionEntityId: schema.string(),
+              sessionStartTime: schema.string(),
+              investigatedAlertId: schema.maybe(schema.string()),
+              cursor: schema.maybe(schema.string()),
+            }),
+          },
+        },
       },
-    },
-    async (_context, request, response) => {
-      const client = await ruleRegistry.getRacClientWithRequest(request);
-      const { sessionEntityId, sessionStartTime, investigatedAlertId, cursor } = request.query;
+      async (_context, request, response) => {
+        const client = await ruleRegistry.getRacClientWithRequest(request);
+        const { sessionEntityId, sessionStartTime, investigatedAlertId, cursor } = request.query;
 
-      try {
-        const body = await searchAlerts(
-          client,
-          sessionEntityId,
-          ALERTS_PER_PAGE,
-          investigatedAlertId,
-          [sessionStartTime],
-          cursor
-        );
+        try {
+          const body = await searchAlerts(
+            client,
+            sessionEntityId,
+            ALERTS_PER_PAGE,
+            investigatedAlertId,
+            [sessionStartTime],
+            cursor
+          );
 
-        return response.ok({ body });
-      } catch (err) {
-        const error = transformError(err);
-        logger.error(`Failed to fetch alerts: ${err}`);
+          return response.ok({ body });
+        } catch (err) {
+          const error = transformError(err);
+          logger.error(`Failed to fetch alerts: ${err}`);
 
-        return response.customError({
-          body: { message: error.message },
-          statusCode: error.statusCode,
-        });
+          return response.customError({
+            body: { message: error.message },
+            statusCode: error.statusCode,
+          });
+        }
       }
-    }
-  );
+    );
 };
 
 export const searchAlerts = async (

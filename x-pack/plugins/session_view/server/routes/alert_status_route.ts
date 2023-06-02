@@ -23,33 +23,40 @@ export const registerAlertStatusRoute = (
   logger: Logger,
   ruleRegistry: RuleRegistryPluginStartContract
 ) => {
-  router.get(
-    {
+  router.versioned
+    .get({
+      access: 'internal',
       path: ALERT_STATUS_ROUTE,
-      validate: {
-        query: schema.object({
-          alertUuid: schema.string(),
-        }),
+    })
+    .addVersion(
+      {
+        version: '1',
+        validate: {
+          request: {
+            query: schema.object({
+              alertUuid: schema.string(),
+            }),
+          },
+        },
       },
-    },
-    async (_context, request, response) => {
-      const client = await ruleRegistry.getRacClientWithRequest(request);
-      const { alertUuid } = request.query;
-      try {
-        const body = await searchAlertByUuid(client, alertUuid);
+      async (_context, request, response) => {
+        const client = await ruleRegistry.getRacClientWithRequest(request);
+        const { alertUuid } = request.query;
+        try {
+          const body = await searchAlertByUuid(client, alertUuid);
 
-        return response.ok({ body });
-      } catch (err) {
-        const error = transformError(err);
-        logger.error(`Failed to fetch alert status: ${err}`);
+          return response.ok({ body });
+        } catch (err) {
+          const error = transformError(err);
+          logger.error(`Failed to fetch alert status: ${err}`);
 
-        return response.customError({
-          body: { message: error.message },
-          statusCode: error.statusCode,
-        });
+          return response.customError({
+            body: { message: error.message },
+            statusCode: error.statusCode,
+          });
+        }
       }
-    }
-  );
+    );
 };
 
 export const searchAlertByUuid = async (client: AlertsClient, alertUuid: string) => {
