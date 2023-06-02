@@ -37,10 +37,10 @@ import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../urls/navigation';
 describe('Prebuilt rules', () => {
   before(() => {
     cleanKibana();
-    login();
   });
 
   beforeEach(() => {
+    login();
     deleteAlertsAndRules();
     visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
     loadPrebuiltDetectionRules();

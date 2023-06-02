@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import { PluginInitializerContext, Plugin } from '@kbn/core/server';
+import { PluginInitializerContext, Plugin, CoreSetup } from '@kbn/core/server';
+import { ServerlessSecurityConfig } from './config';
+import { getProductAppFeatures } from '../common/pli/pli_features';
 
 import {
   ServerlessSecurityPluginSetup,
@@ -23,9 +25,24 @@ export class ServerlessSecurityPlugin
       ServerlessSecurityPluginStartDependencies
     >
 {
-  constructor(_initializerContext: PluginInitializerContext) {}
+  private config: ServerlessSecurityConfig;
 
-  public setup() {
+  constructor(private readonly initializerContext: PluginInitializerContext) {
+    this.config = this.initializerContext.config.get<ServerlessSecurityConfig>();
+  }
+
+  public setup(_coreSetup: CoreSetup, pluginsSetup: ServerlessSecurityPluginSetupDependencies) {
+    // essSecurity plugin should always be disabled when serverlessSecurity is enabled.
+    // This check is an additional layer of security to prevent double registrations when
+    // `plugins.forceEnableAllPlugins` flag is enabled).
+    const shouldRegister = pluginsSetup.essSecurity == null;
+
+    if (shouldRegister) {
+      pluginsSetup.securitySolution.setAppFeatures(
+        getProductAppFeatures(this.config.productLineIds)
+      );
+    }
+
     return {};
   }
 
