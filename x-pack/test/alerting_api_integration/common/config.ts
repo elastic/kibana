@@ -195,7 +195,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
           ...actionsProxyUrl,
           ...customHostSettings,
           ...emailSettings,
-          `--xpack.securitySolution.enableExperimental=${JSON.stringify(['genAiEnabled'])}`,
+          `--xpack.securitySolution.enableExperimental=${JSON.stringify(['assistantEnabled'])}`,
           '--xpack.eventLog.logEntries=true',
           '--xpack.task_manager.ephemeral_tasks.enabled=false',
           `--xpack.task_manager.unsafe.exclude_task_types=${JSON.stringify([

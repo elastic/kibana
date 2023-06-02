@@ -161,8 +161,7 @@ export class Plugin implements ISecuritySolutionPlugin {
 
     initSavedObjects(core.savedObjects);
     initUiSettings(core.uiSettings, experimentalFeatures);
-    if (experimentalFeatures.genAiEnabled ?? false) {
-      console.log('REGISTER THE SUBACTION CONNECTOR TYPE');
+    if (experimentalFeatures.assistantEnabled ?? false) {
       plugins.actions.registerSubActionConnectorType(getGenerativeAiConnectorType());
     }
     const ruleExecutionLogService = createRuleExecutionLogService(config, logger, core, plugins);
