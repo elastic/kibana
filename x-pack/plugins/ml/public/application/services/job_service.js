@@ -9,7 +9,7 @@ import { cloneDeep, each, find, get, isNumber } from 'lodash';
 import moment from 'moment';
 
 import { i18n } from '@kbn/i18n';
-import { validateTimeRange, TIME_FORMAT } from '@kbn/ml-anomaly-utils';
+import { validateTimeRange, TIME_FORMAT } from '@kbn/ml-date-utils';
 
 import { parseInterval } from '../../../common/util/parse_interval';
 

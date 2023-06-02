@@ -16,7 +16,7 @@ import {
   EuiBasicTableColumn,
 } from '@elastic/eui';
 
-import { timeFormatter } from '@kbn/ml-anomaly-utils';
+import { timeFormatter } from '@kbn/ml-date-utils';
 import { checkPermission } from '../../capabilities/check_capabilities';
 import { EditModelSnapshotFlyout } from './edit_model_snapshot_flyout';
 import { RevertModelSnapshotFlyout } from './revert_model_snapshot_flyout';

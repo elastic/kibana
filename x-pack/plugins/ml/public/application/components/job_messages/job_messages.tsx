@@ -18,7 +18,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { euiLightVars as theme } from '@kbn/ui-theme';
-import { timeFormatter } from '@kbn/ml-anomaly-utils';
+import { timeFormatter } from '@kbn/ml-date-utils';
 
 import { JobMessage } from '../../../../common/types/audit_message';
 

@@ -44,6 +44,8 @@ export function formatHumanReadableDateTimeSeconds(ts: number): string {
 
 /**
  * Validate a time range of two string based dates.
+ * Copy of `src/plugins/data/public/query/timefilter/lib/validate_timerange.ts`
+ * for the time being so it can be used in packages.
  *
  * @param {?TimeRange} [time] - The time range to be validated.
  * @returns {boolean}
