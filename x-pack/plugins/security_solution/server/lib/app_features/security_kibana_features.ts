@@ -149,11 +149,9 @@ function getSubFeatures(experimentalFeatures: ExperimentalFeatures) {
     responseActionsHistorySubFeature,
     hostIsolationSubFeature,
     processOperationsSubFeature,
+    fileOperationsSubFeature,
   ];
 
-  if (experimentalFeatures.responseActionGetFileEnabled) {
-    subFeatures.push(fileOperationsSubFeature);
-  }
   // planned for 8.8
   if (experimentalFeatures.responseActionExecuteEnabled) {
     subFeatures.push(executeActionSubFeature);

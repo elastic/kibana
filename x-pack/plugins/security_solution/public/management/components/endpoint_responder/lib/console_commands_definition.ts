@@ -143,7 +143,6 @@ export const getEndpointConsoleCommands = ({
 }): CommandDefinition[] => {
   const featureFlags = ExperimentalFeaturesService.get();
 
-  const isGetFileEnabled = featureFlags.responseActionGetFileEnabled;
   const isExecuteEnabled = featureFlags.responseActionExecuteEnabled;
   const isUploadEnabled = featureFlags.responseActionUploadEnabled;
 
@@ -379,11 +378,7 @@ export const getEndpointConsoleCommands = ({
       helpDisabled: doesEndpointSupportCommand('processes') === false,
       helpHidden: !getRbacControl({ commandName: 'processes', privileges: endpointPrivileges }),
     },
-  ];
-
-  // `get-file` is currently behind feature flag
-  if (isGetFileEnabled) {
-    consoleCommands.push({
+    {
       name: 'get-file',
       about: getCommandAboutInfo({
         aboutInfo: i18n.translate('xpack.securitySolution.endpointConsoleCommands.getFile.about', {
@@ -429,8 +424,8 @@ export const getEndpointConsoleCommands = ({
         commandName: 'get-file',
         privileges: endpointPrivileges,
       }),
-    });
-  }
+    },
+  ];
 
   // `execute` is currently behind feature flag
   // planned for 8.8

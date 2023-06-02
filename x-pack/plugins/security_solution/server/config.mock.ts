@@ -12,8 +12,6 @@ import type { ConfigType } from './config';
 
 export const createMockConfig = (): ConfigType => {
   const enableExperimental: Array<keyof ExperimentalFeatures> = [
-    // Remove property below once `get-file` FF is enabled or removed
-    'responseActionGetFileEnabled',
     // remove property below once `execute` FF is enabled or removed
     'responseActionExecuteEnabled',
     'responseActionUploadEnabled',

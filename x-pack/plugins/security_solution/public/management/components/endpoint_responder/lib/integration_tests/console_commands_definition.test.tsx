@@ -26,7 +26,6 @@ describe('When displaying Endpoint Response Actions', () => {
     const testSetup = getConsoleTestSetup();
 
     testSetup.setExperimentalFlag({
-      responseActionGetFileEnabled: true,
       responseActionExecuteEnabled: true,
     });
 
