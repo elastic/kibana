@@ -127,6 +127,7 @@ describe('Server configuration ordering', () => {
       'serverless.recent.yml',
       'kibana.dev.yml',
       'serverless.dev.yml',
+      'serverless.recent.dev.yml',
       // 'serverless.es.dev.yml', // Shouldn't this be loaded? It's mentioned in the README, but wasn't in the code
     ]);
   });
