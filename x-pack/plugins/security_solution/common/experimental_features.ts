@@ -148,7 +148,6 @@ export const allowedExperimentalValues = Object.freeze({
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;
 type Mutable<T> = { -readonly [P in keyof T]: T[P] };
 
-const SecuritySolutionInvalidExperimentalValue = class extends Error {};
 const allowedKeys = Object.keys(allowedExperimentalValues) as Readonly<ExperimentalConfigKeys>;
 
 /**
@@ -158,25 +157,27 @@ const allowedKeys = Object.keys(allowedExperimentalValues) as Readonly<Experimen
  * @param configValue
  * @throws SecuritySolutionInvalidExperimentalValue
  */
-export const parseExperimentalConfigValue = (configValue: string[]): ExperimentalFeatures => {
+export const parseExperimentalConfigValue = (
+  configValue: string[]
+): { features: ExperimentalFeatures; invalid: string[] } => {
   const enabledFeatures: Mutable<Partial<ExperimentalFeatures>> = {};
+  const invalidKeys: string[] = [];
 
   for (const value of configValue) {
-    if (!isValidExperimentalValue(value)) {
-      throw new SecuritySolutionInvalidExperimentalValue(`[${value}] is not valid.`);
+    if (!allowedKeys.includes(value as keyof ExperimentalFeatures)) {
+      invalidKeys.push(value);
+    } else {
+      enabledFeatures[value as keyof ExperimentalFeatures] = true;
     }
-
-    enabledFeatures[value as keyof ExperimentalFeatures] = true;
   }
 
   return {
-    ...allowedExperimentalValues,
-    ...enabledFeatures,
+    features: {
+      ...allowedExperimentalValues,
+      ...enabledFeatures,
+    },
+    invalid: invalidKeys,
   };
-};
-
-export const isValidExperimentalValue = (value: string): value is keyof ExperimentalFeatures => {
-  return allowedKeys.includes(value as keyof ExperimentalFeatures);
 };
 
 export const getExperimentalAllowedValues = (): string[] => [...allowedKeys];

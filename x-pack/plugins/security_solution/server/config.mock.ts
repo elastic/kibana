@@ -32,7 +32,7 @@ export const createMockConfig = (): ConfigType => {
     alertIgnoreFields: [],
     maxUploadResponseActionFileBytes: 26214400,
 
-    experimentalFeatures: parseExperimentalConfigValue(enableExperimental),
+    experimentalFeatures: parseExperimentalConfigValue(enableExperimental).features,
     enabled: true,
   };
 };
@@ -45,7 +45,7 @@ const withExperimentalFeature = (
   return {
     ...config,
     enableExperimental,
-    experimentalFeatures: parseExperimentalConfigValue(enableExperimental),
+    experimentalFeatures: parseExperimentalConfigValue(enableExperimental).features,
   };
 };
 
