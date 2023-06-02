@@ -16,6 +16,27 @@ properties:
     type: number
   perPage:
     type: number
+  statusSummary:
+    type: object
+    properties:
+        offline: 
+          type: number
+        error: 
+          type: number
+        online : 
+          type: number
+        inactive : 
+          type: number
+        enrolling: 
+          type: number
+        unenrolling: 
+          type: number
+        unenrolled : 
+          type: number
+        updating : 
+          type: number
+        degraded': 
+          type: number
 required:
   - items
   - total

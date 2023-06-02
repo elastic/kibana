@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { PolicyResponderScreen } from './policy_responder';
 import { ActionResponderScreen } from './actions_responder';
 import { SCREEN_ROW_MAX_WIDTH } from '../../common/screen/constants';
 import { ColumnLayoutFormatter } from '../../common/screen/column_layout_formatter';
@@ -18,6 +19,7 @@ import { RunServiceStatus } from './components/run_service_status_formatter';
 export class MainScreen extends ScreenBaseClass {
   private readonly loadEndpointsScreen: LoadEndpointsScreen;
   private readonly actionsResponderScreen: ActionResponderScreen;
+  private readonly policyResponseScreen: PolicyResponderScreen;
 
   private actionColumnWidthPrc = 30;
   private runningStateColumnWidthPrc = 70;
@@ -26,6 +28,7 @@ export class MainScreen extends ScreenBaseClass {
     super();
     this.loadEndpointsScreen = new LoadEndpointsScreen(this.emulatorContext);
     this.actionsResponderScreen = new ActionResponderScreen(this.emulatorContext);
+    this.policyResponseScreen = new PolicyResponderScreen(this.emulatorContext);
   }
 
   protected header(title: string = '', subTitle: string = ''): string | DataFormatter {
@@ -41,7 +44,7 @@ export class MainScreen extends ScreenBaseClass {
   }
 
   private getMenuOptions(): ChoiceMenuFormatter {
-    return new ChoiceMenuFormatter(['Load endpoints', 'Actions Responder']);
+    return new ChoiceMenuFormatter(['Load endpoints', 'Actions Responder', 'Policy Responder']);
   }
 
   private runStateView(): ColumnLayoutFormatter {
@@ -82,12 +85,22 @@ export class MainScreen extends ScreenBaseClass {
         });
         return;
 
+      // Action Responder
       case '2':
         this.pause();
         this.actionsResponderScreen.show({ resume: true }).then(() => {
           this.show({ resume: true });
         });
         return;
+
+      // Policy Responder
+      case '3':
+        this.pause();
+        this.policyResponseScreen.show({ resume: true }).then(() => {
+          this.show({ resume: true });
+        });
+        return;
+
       case 'E':
         this.hide();
         return;

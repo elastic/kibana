@@ -9,6 +9,9 @@
 import { Agent as HttpAgent, type AgentOptions } from 'http';
 import { Agent as HttpsAgent } from 'https';
 import type { ConnectionOptions, HttpAgentOptions } from '@elastic/elasticsearch';
+import type { Logger } from '@kbn/logging';
+import type { ElasticsearchClientsMetrics } from '@kbn/core-metrics-server';
+import { getAgentsSocketsStats } from './get_agents_sockets_stats';
 
 const HTTPS = 'https:';
 
@@ -19,8 +22,14 @@ export interface AgentFactoryProvider {
   getAgentFactory(agentOptions?: HttpAgentOptions): AgentFactory;
 }
 
-export interface AgentStore {
-  getAgents(): Set<NetworkAgent>;
+/**
+ * Exposes the APIs to fetch stats of the existing agents.
+ */
+export interface AgentStatsProvider {
+  /**
+   * Returns the {@link ElasticsearchClientsMetrics}, to understand the load on the Elasticsearch HTTP agents.
+   */
+  getAgentsStats(): ElasticsearchClientsMetrics;
 }
 
 /**
@@ -34,10 +43,10 @@ export interface AgentStore {
  * exposes methods that can modify the underlying pools, effectively impacting the connections of other Clients.
  * @internal
  **/
-export class AgentManager implements AgentFactoryProvider, AgentStore {
-  private agents: Set<HttpAgent>;
+export class AgentManager implements AgentFactoryProvider, AgentStatsProvider {
+  private readonly agents: Set<HttpAgent>;
 
-  constructor() {
+  constructor(private readonly logger: Logger) {
     this.agents = new Set();
   }
 
@@ -69,8 +78,16 @@ export class AgentManager implements AgentFactoryProvider, AgentStore {
     };
   }
 
-  public getAgents(): Set<NetworkAgent> {
-    return this.agents;
+  public getAgentsStats(): ElasticsearchClientsMetrics {
+    const stats = getAgentsSocketsStats(this.agents);
+
+    if (stats.totalQueuedRequests > 0) {
+      this.logger.warn(
+        `There are ${stats.totalQueuedRequests} queued requests. If this number is constantly high, consider scaling Kibana horizontally or increasing "elasticsearch.maxSockets" in the config.`
+      );
+    }
+
+    return stats;
   }
 }
 

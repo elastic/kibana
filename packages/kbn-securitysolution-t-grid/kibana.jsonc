@@ -1,7 +1,5 @@
 {
   "type": "shared-common",
   "id": "@kbn/securitysolution-t-grid",
-  "owner": "@elastic/security-solution-platform",
-  "runtimeDeps": [],
-  "typeDeps": []
+  "owner": "@elastic/security-solution-platform"
 }

@@ -20,11 +20,13 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { CodeEditor, KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { getDocLinks, getHttp, getUiSettings } from '../kibana_services';
+import { getDocLinks, getHttp, getUiSettings, getSettings } from '../kibana_services';
 import { ImportResults } from '../importer';
+import { getPartialImportMessage } from './utils';
 
 const services = {
   uiSettings: getUiSettings(),
+  settings: getSettings(),
 };
 
 interface Props {
@@ -104,7 +106,7 @@ export class ImportCompleteView extends Component<Props, {}> {
             defaultMessage: 'Unable to upload file',
           })}
           color="danger"
-          iconType="alert"
+          iconType="warning"
           data-test-subj={STATUS_CALLOUT_DATA_TEST_SUBJ}
         >
           <p>
@@ -133,7 +135,7 @@ export class ImportCompleteView extends Component<Props, {}> {
         // Display http request error message
         reason = this.props.importResults.error.body.message;
       } else if (this.props.importResults?.error?.error?.reason) {
-        // Display elasticxsearch request error message
+        // Display elasticsearch request error message
         reason = this.props.importResults.error.error.reason;
       }
       const errorMsg = reason
@@ -148,7 +150,7 @@ export class ImportCompleteView extends Component<Props, {}> {
             defaultMessage: 'Unable to upload file',
           })}
           color="danger"
-          iconType="alert"
+          iconType="warning"
           data-test-subj={STATUS_CALLOUT_DATA_TEST_SUBJ}
         >
           <p>{errorMsg}</p>
@@ -156,21 +158,25 @@ export class ImportCompleteView extends Component<Props, {}> {
       );
     }
 
-    const successMsg = i18n.translate('xpack.fileUpload.importComplete.uploadSuccessMsg', {
-      defaultMessage: 'Indexed {numFeatures} features.',
-      values: {
-        numFeatures: this.props.importResults.docCount,
-      },
-    });
-
-    const failedFeaturesMsg = this.props.importResults.failures?.length
-      ? i18n.translate('xpack.fileUpload.importComplete.failedFeaturesMsg', {
-          defaultMessage: 'Unable to index {numFailures} features.',
-          values: {
-            numFailures: this.props.importResults.failures.length,
-          },
-        })
-      : '';
+    if (this.props.importResults.failures?.length) {
+      return (
+        <EuiCallOut
+          title={i18n.translate('xpack.fileUpload.importComplete.uploadSuccessWithFailuresTitle', {
+            defaultMessage: 'File upload complete with failures',
+          })}
+          color="warning"
+          iconType="help"
+          data-test-subj={STATUS_CALLOUT_DATA_TEST_SUBJ}
+        >
+          <p>
+            {getPartialImportMessage(
+              this.props.importResults.failures!.length,
+              this.props.importResults.docCount
+            )}
+          </p>
+        </EuiCallOut>
+      );
+    }
 
     return (
       <EuiCallOut
@@ -179,7 +185,14 @@ export class ImportCompleteView extends Component<Props, {}> {
         })}
         data-test-subj={STATUS_CALLOUT_DATA_TEST_SUBJ}
       >
-        <p>{`${successMsg} ${failedFeaturesMsg}`}</p>
+        <p>
+          {i18n.translate('xpack.fileUpload.importComplete.uploadSuccessMsg', {
+            defaultMessage: 'Indexed {numFeatures} features.',
+            values: {
+              numFeatures: this.props.importResults.docCount,
+            },
+          })}
+        </p>
       </EuiCallOut>
     );
   }

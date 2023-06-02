@@ -7,11 +7,10 @@
 
 import path from 'path';
 import getPort from 'get-port';
-import fs from 'fs';
 import { CA_CERT_PATH } from '@kbn/dev-utils';
-import { FtrConfigProviderContext } from '@kbn/test';
+import { FtrConfigProviderContext, findTestPluginPaths } from '@kbn/test';
+import { getAllExternalServiceSimulatorPaths } from '@kbn/actions-simulators-plugin/server/plugin';
 import { services } from './services';
-import { getAllExternalServiceSimulatorPaths } from './fixtures/plugins/actions_simulators/server/plugin';
 import { getTlsWebhookServerUrls } from './lib/get_tls_webhook_servers';
 
 interface CreateTestConfigOptions {
@@ -26,7 +25,9 @@ interface CreateTestConfigOptions {
   rejectUnauthorized?: boolean; // legacy
   emailDomainsAllowed?: string[];
   testFiles?: string[];
+  reportName?: string;
   useDedicatedTaskRunner: boolean;
+  enableFooterInEmail?: boolean;
 }
 
 // test.not-enabled is specifically not enabled
@@ -43,10 +44,13 @@ const enabledActionTypes = [
   '.servicenow-itom',
   '.jira',
   '.resilient',
+  '.gen-ai',
   '.slack',
+  '.slack_api',
   '.tines',
   '.webhook',
   '.xmatters',
+  '.torq',
   'test.sub-action-connector',
   'test.sub-action-connector-without-sub-actions',
   'test.authorization',
@@ -72,7 +76,9 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
     rejectUnauthorized = true, // legacy
     emailDomainsAllowed = undefined,
     testFiles = undefined,
+    reportName = undefined,
     useDedicatedTaskRunner,
+    enableFooterInEmail = true,
   } = options;
 
   return async ({ readConfigFile }: FtrConfigProviderContext) => {
@@ -86,11 +92,6 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
         protocol: ssl ? 'https' : 'http',
       },
     };
-    // Find all folders in ./plugins since we treat all them as plugin folder
-    const allFiles = fs.readdirSync(path.resolve(__dirname, 'fixtures', 'plugins'));
-    const plugins = allFiles.filter((file) =>
-      fs.statSync(path.resolve(__dirname, 'fixtures', 'plugins', file)).isDirectory()
-    );
 
     const proxyPort =
       process.env.ALERTING_PROXY_PORT ?? (await getPort({ port: getPort.makeRange(6200, 6299) }));
@@ -152,7 +153,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
       servers,
       services,
       junit: {
-        reportName: 'X-Pack Alerting API Integration Tests',
+        reportName: reportName ? reportName : 'X-Pack Alerting API Integration Tests',
       },
       esTestCluster: {
         ...xPackApiIntegrationTestsConfig.get('esTestCluster'),
@@ -175,7 +176,9 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
             'localhost',
             'some.non.existent.com',
             'smtp.live.com',
+            'slack.com',
           ])}`,
+          `--xpack.actions.enableFooterInEmail=${enableFooterInEmail}`,
           '--xpack.encryptedSavedObjects.encryptionKey="wuGNaIhoMpk5sO4UBxgr3NyW1sFcLgIf"',
           '--xpack.alerting.invalidateApiKeysTask.interval="15s"',
           '--xpack.alerting.healthCheck.interval="1s"',
@@ -184,6 +187,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
           `--xpack.alerting.rules.run.actions.connectorTypeOverrides=${JSON.stringify([
             { id: 'test.capped', max: '1' },
           ])}`,
+          `--xpack.alerting.enableFrameworkAlerts=true`,
           `--xpack.actions.enabledActionTypes=${JSON.stringify(enabledActionTypes)}`,
           `--xpack.actions.rejectUnauthorized=${rejectUnauthorized}`,
           `--xpack.actions.microsoftGraphApiUrl=${servers.kibana.protocol}://${servers.kibana.hostname}:${servers.kibana.port}/api/_actions-FTS-external-service-simulators/exchange/users/test@/sendMail`,
@@ -304,10 +308,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
           ...disabledPlugins
             .filter((k) => k !== 'security')
             .map((key) => `--xpack.${key}.enabled=false`),
-          ...plugins.map(
-            (pluginDir) =>
-              `--plugin-path=${path.resolve(__dirname, 'fixtures', 'plugins', pluginDir)}`
-          ),
+          ...findTestPluginPaths(path.resolve(__dirname, 'plugins')),
           `--server.xsrf.allowlist=${JSON.stringify(getAllExternalServiceSimulatorPaths())}`,
           ...(ssl
             ? [

@@ -39,6 +39,7 @@ export const savedObjectsTaggingServiceFactory: SavedObjectsTaggingServiceFactor
 
   return {
     hasApi: true,
+    api: taggingApi,
     components,
     hasTagDecoration,
     parseSearchQuery,

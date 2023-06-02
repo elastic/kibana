@@ -11,9 +11,7 @@ import { BehaviorSubject } from 'rxjs';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { setHeaderActionMenuMounter } from '../../../../kibana_services';
 import { esHits } from '../../../../__mocks__/es_hits';
-import { savedSearchMock } from '../../../../__mocks__/saved_search';
-import { AppState, GetStateReturn } from '../../services/discover_state';
-import { DataDocuments$ } from '../../hooks/use_saved_search';
+import { DataDocuments$ } from '../../services/discover_data_state_container';
 import { discoverServiceMock } from '../../../../__mocks__/services';
 import { FetchStatus } from '../../../types';
 import { DiscoverDocuments, onResize } from './discover_documents';
@@ -21,6 +19,9 @@ import { dataViewMock } from '../../../../__mocks__/data_view';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { buildDataTableRecord } from '../../../../utils/build_data_record';
 import { EsHitRecord } from '../../../../types';
+import { DiscoverMainProvider } from '../../services/discover_state_provider';
+import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
+import { DiscoverAppState } from '../../services/discover_app_state_container';
 
 setHeaderActionMenuMounter(jest.fn());
 
@@ -34,24 +35,22 @@ function mountComponent(fetchStatus: FetchStatus, hits: EsHitRecord[]) {
     fetchStatus,
     result: hits.map((hit) => buildDataTableRecord(hit, dataViewMock)),
   }) as DataDocuments$;
+  const stateContainer = getDiscoverStateMock({});
+  stateContainer.appState.update({ index: dataViewMock.id });
+  stateContainer.dataState.data$.documents$ = documents$;
 
   const props = {
-    expandedDoc: undefined,
     dataView: dataViewMock,
     onAddFilter: jest.fn(),
-    savedSearch: savedSearchMock,
-    documents$,
-    searchSource: documents$,
-    setExpandedDoc: jest.fn(),
-    state: { columns: [] },
-    stateContainer: { setAppState: () => {} } as unknown as GetStateReturn,
-    navigateTo: jest.fn(),
+    stateContainer,
     onFieldEdited: jest.fn(),
   };
 
   return mountWithIntl(
     <KibanaContextProvider services={services}>
-      <DiscoverDocuments {...props} />
+      <DiscoverMainProvider value={stateContainer}>
+        <DiscoverDocuments {...props} />
+      </DiscoverMainProvider>
     </KibanaContextProvider>
   );
 }
@@ -76,24 +75,20 @@ describe('Discover documents layout', () => {
   });
 
   test('should set rounded width to state on resize column', () => {
-    let state = {
+    const state = {
       grid: { columns: { timestamp: { width: 173 }, someField: { width: 197 } } },
-    } as AppState;
-    const stateContainer = {
-      setAppState: (newState: Partial<AppState>) => {
-        state = { ...state, ...newState };
-      },
-    } as unknown as GetStateReturn;
+    } as DiscoverAppState;
+    const container = getDiscoverStateMock({});
+    container.appState.update(state);
 
     onResize(
       {
         columnId: 'someField',
         width: 205.5435345534,
       },
-      stateContainer,
-      state
+      container
     );
 
-    expect(state.grid?.columns?.someField.width).toEqual(206);
+    expect(container.appState.getState().grid?.columns?.someField.width).toEqual(206);
   });
 });

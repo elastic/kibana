@@ -1,6 +1,7 @@
 get:
-  summary: Package policies - List
-  tags: []
+  summary: List package policies
+  tags:
+    - Package policies
   responses:
     '200':
       description: OK
@@ -21,12 +22,16 @@ get:
                 type: number
             required:
               - items
+    '400':
+      $ref: ../components/responses/error.yaml
   operationId: get-package-policies
   security: []
   parameters: []
 parameters: []
 post:
-  summary: Package policy - Create
+  summary: Create package policy
+  tags:
+    - Package policies
   operationId: create-package-policy
   responses:
     '200':
@@ -40,24 +45,15 @@ post:
                 $ref: ../components/schemas/package_policy.yaml
             required:
               - item
+    '400':
+      $ref: ../components/responses/error.yaml
+    '409':
+      $ref: ../components/responses/error.yaml
   requestBody:
     description: You should use inputs as an object and not use the deprecated inputs array.
     content:
       application/json:
         schema:
-          oneOf:
-            - $ref: ../components/schemas/simplified_package_policy.yaml
-            # Using inputs as an array is deprecated
-            - deprecated: true
-              allOf:
-                - $ref: ../components/schemas/new_package_policy.yaml
-                - type: object
-                  properties:
-                    id:
-                      type: string
-                - type: object
-                  properties:
-                    force:
-                      type: boolean
+          $ref: ../components/schemas/package_policy_request.yaml
   parameters:
     - $ref: ../components/headers/kbn_xsrf.yaml

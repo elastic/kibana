@@ -10,11 +10,13 @@ import { PresentationLabsService } from './labs/types';
 import { PresentationDashboardsService } from './dashboards/types';
 import { PresentationCapabilitiesService } from './capabilities/types';
 import { PresentationDataViewsService } from './data_views/types';
+import { PresentationUiActionsService } from './ui_actions/types';
 
 export interface PresentationUtilServices {
+  capabilities: PresentationCapabilitiesService;
   dashboards: PresentationDashboardsService;
   dataViews: PresentationDataViewsService;
-  capabilities: PresentationCapabilitiesService;
+  uiActions: PresentationUiActionsService;
   labs: PresentationLabsService;
 }
 

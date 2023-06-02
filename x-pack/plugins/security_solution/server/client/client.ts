@@ -13,18 +13,24 @@ export class AppClient {
   private readonly spaceId: string;
   private readonly previewIndex: string;
   private readonly sourcererDataViewId: string;
+  private readonly kibanaVersion: string;
+  private readonly kibanaBranch: string;
 
-  constructor(_spaceId: string, private config: ConfigType) {
-    const configuredSignalsIndex = this.config.signalsIndex;
+  constructor(spaceId: string, config: ConfigType, kibanaVersion: string, kibanaBranch: string) {
+    const configuredSignalsIndex = config.signalsIndex;
 
-    this.signalsIndex = `${configuredSignalsIndex}-${_spaceId}`;
-    this.previewIndex = `${DEFAULT_PREVIEW_INDEX}-${_spaceId}`;
-    this.sourcererDataViewId = `${DEFAULT_DATA_VIEW_ID}-${_spaceId}`;
-    this.spaceId = _spaceId;
+    this.signalsIndex = `${configuredSignalsIndex}-${spaceId}`;
+    this.previewIndex = `${DEFAULT_PREVIEW_INDEX}-${spaceId}`;
+    this.sourcererDataViewId = `${DEFAULT_DATA_VIEW_ID}-${spaceId}`;
+    this.spaceId = spaceId;
+    this.kibanaVersion = kibanaVersion;
+    this.kibanaBranch = kibanaBranch;
   }
 
   public getSignalsIndex = (): string => this.signalsIndex;
   public getPreviewIndex = (): string => this.previewIndex;
   public getSourcererDataViewId = (): string => this.sourcererDataViewId;
   public getSpaceId = (): string => this.spaceId;
+  public getKibanaVersion = (): string => this.kibanaVersion;
+  public getKibanaBranch = (): string => this.kibanaBranch;
 }

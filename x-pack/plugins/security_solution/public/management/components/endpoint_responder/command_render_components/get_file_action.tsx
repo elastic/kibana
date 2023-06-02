@@ -7,6 +7,7 @@
 
 import React, { memo, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
+import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { useSendGetFileRequest } from '../../../hooks/response_actions/use_send_get_file_request';
 import type { ResponseActionGetFileRequestBody } from '../../../../../common/endpoint/schema/actions';
 import { useConsoleActionSubmitter } from '../hooks/use_console_action_submitter';
@@ -18,6 +19,7 @@ export const GetFileActionResult = memo<
     path: string[];
   }>
 >(({ command, setStore, store, status, setStatus, ResultComponent }) => {
+  const { canWriteFileOperations } = useUserPrivileges().endpointPrivileges;
   const actionCreator = useSendGetFileRequest();
 
   const actionRequestBody = useMemo<undefined | ResponseActionGetFileRequestBody>(() => {
@@ -59,7 +61,10 @@ export const GetFileActionResult = memo<
           { defaultMessage: 'File retrieved from the host.' }
         )}
       >
-        <ResponseActionFileDownloadLink action={actionDetails} />
+        <ResponseActionFileDownloadLink
+          action={actionDetails}
+          canAccessFileDownloadLink={canWriteFileOperations}
+        />
       </ResultComponent>
     );
   }

@@ -18,15 +18,15 @@ import { DetectionAlert } from '@kbn/security-solution-plugin/common/detection_e
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   createSignalsIndex,
-  deleteSignalsIndex,
+  deleteAllAlerts,
   setSignalStatus,
   getSignalStatusEmptyResponse,
   getQuerySignalIds,
-  deleteAllAlerts,
+  deleteAllRules,
   createRule,
   waitForSignalsToBePresent,
   getSignalsByIds,
-  waitForRuleSuccessOrStatus,
+  waitForRuleSuccess,
   getRuleForSignalTesting,
 } from '../../utils';
 import { createUserAndRole, deleteUserAndRole } from '../../../common/services/security_solution';
@@ -37,6 +37,7 @@ export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const log = getService('log');
+  const es = getService('es');
 
   describe('open_close_signals', () => {
     describe('validation checks', () => {
@@ -66,7 +67,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         expect(body).to.eql(getSignalStatusEmptyResponse());
 
-        await deleteSignalsIndex(supertest, log);
+        await deleteAllAlerts(supertest, log, es);
       });
 
       describe('tests with auditbeat data', () => {
@@ -79,28 +80,34 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         beforeEach(async () => {
-          await deleteAllAlerts(supertest, log);
+          await deleteAllRules(supertest, log);
           await createSignalsIndex(supertest, log);
         });
 
         afterEach(async () => {
-          await deleteSignalsIndex(supertest, log);
-          await deleteAllAlerts(supertest, log);
+          await deleteAllAlerts(supertest, log, es);
+          await deleteAllRules(supertest, log);
         });
 
         it('should be able to execute and get 10 signals', async () => {
-          const rule = getRuleForSignalTesting(['auditbeat-*']);
+          const rule = {
+            ...getRuleForSignalTesting(['auditbeat-*']),
+            query: 'process.executable: "/usr/bin/sudo"',
+          };
           const { id } = await createRule(supertest, log, rule);
-          await waitForRuleSuccessOrStatus(supertest, log, id);
+          await waitForRuleSuccess({ supertest, log, id });
           await waitForSignalsToBePresent(supertest, log, 10, [id]);
           const signalsOpen = await getSignalsByIds(supertest, log, [id]);
           expect(signalsOpen.hits.hits.length).equal(10);
         });
 
         it('should be have set the signals in an open state initially', async () => {
-          const rule = getRuleForSignalTesting(['auditbeat-*']);
+          const rule = {
+            ...getRuleForSignalTesting(['auditbeat-*']),
+            query: 'process.executable: "/usr/bin/sudo"',
+          };
           const { id } = await createRule(supertest, log, rule);
-          await waitForRuleSuccessOrStatus(supertest, log, id);
+          await waitForRuleSuccess({ supertest, log, id });
           await waitForSignalsToBePresent(supertest, log, 10, [id]);
           const signalsOpen = await getSignalsByIds(supertest, log, [id]);
           const everySignalOpen = signalsOpen.hits.hits.every(
@@ -110,9 +117,12 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         it('should be able to get a count of 10 closed signals when closing 10', async () => {
-          const rule = getRuleForSignalTesting(['auditbeat-*']);
+          const rule = {
+            ...getRuleForSignalTesting(['auditbeat-*']),
+            query: 'process.executable: "/usr/bin/sudo"',
+          };
           const { id } = await createRule(supertest, log, rule);
-          await waitForRuleSuccessOrStatus(supertest, log, id);
+          await waitForRuleSuccess({ supertest, log, id });
           await waitForSignalsToBePresent(supertest, log, 10, [id]);
           const signalsOpen = await getSignalsByIds(supertest, log, [id]);
           const signalIds = signalsOpen.hits.hits.map((signal) => signal._id);
@@ -136,9 +146,12 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         it('should be able close signals immediately and they all should be closed', async () => {
-          const rule = getRuleForSignalTesting(['auditbeat-*']);
+          const rule = {
+            ...getRuleForSignalTesting(['auditbeat-*']),
+            query: 'process.executable: "/usr/bin/sudo"',
+          };
           const { id } = await createRule(supertest, log, rule);
-          await waitForRuleSuccessOrStatus(supertest, log, id);
+          await waitForRuleSuccess({ supertest, log, id });
           await waitForSignalsToBePresent(supertest, log, 1, [id]);
           const signalsOpen = await getSignalsByIds(supertest, log, [id]);
           const signalIds = signalsOpen.hits.hits.map((signal) => signal._id);
@@ -169,7 +182,7 @@ export default ({ getService }: FtrProviderContext) => {
         it.skip('should be able to close signals with t1 analyst user', async () => {
           const rule = getRuleForSignalTesting(['auditbeat-*']);
           const { id } = await createRule(supertest, log, rule);
-          await waitForRuleSuccessOrStatus(supertest, log, id);
+          await waitForRuleSuccess({ supertest, log, id });
           await waitForSignalsToBePresent(supertest, log, 1, [id]);
           await createUserAndRole(getService, ROLES.t1_analyst);
           const signalsOpen = await getSignalsByIds(supertest, log, [id]);
@@ -205,7 +218,7 @@ export default ({ getService }: FtrProviderContext) => {
         it.skip('should be able to close signals with soc_manager user', async () => {
           const rule = getRuleForSignalTesting(['auditbeat-*']);
           const { id } = await createRule(supertest, log, rule);
-          await waitForRuleSuccessOrStatus(supertest, log, id);
+          await waitForRuleSuccess({ supertest, log, id });
           await waitForSignalsToBePresent(supertest, log, 1, [id]);
           const userAndRole = ROLES.soc_manager;
           await createUserAndRole(getService, userAndRole);

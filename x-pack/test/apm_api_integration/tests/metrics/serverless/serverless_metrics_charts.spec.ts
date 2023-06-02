@@ -9,6 +9,8 @@ import expect from '@kbn/expect';
 import { meanBy, sumBy } from 'lodash';
 import { Coordinate } from '@kbn/apm-plugin/typings/timeseries';
 import { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
+import { ApmDocumentType } from '@kbn/apm-plugin/common/document_type';
+import { RollupInterval } from '@kbn/apm-plugin/common/rollup';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 import { generateData, config } from './generate_data';
 
@@ -35,6 +37,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           kuery: '',
           start: new Date(start).toISOString(),
           end: new Date(end).toISOString(),
+          documentType: ApmDocumentType.TransactionMetric,
+          rollupInterval: RollupInterval.OneMinute,
+          bucketSizeInSeconds: 60,
           ...(serverlessId ? { serverlessId } : {}),
         },
       },

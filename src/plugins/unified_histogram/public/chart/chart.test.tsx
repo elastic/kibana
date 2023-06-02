@@ -10,6 +10,7 @@ import React, { ReactElement } from 'react';
 import { act } from 'react-dom/test-utils';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import type { DataView } from '@kbn/data-views-plugin/public';
+import type { Suggestion } from '@kbn/lens-plugin/public';
 import type { UnifiedHistogramFetchStatus } from '../types';
 import { Chart } from './chart';
 import type { ReactWrapper } from 'enzyme';
@@ -20,7 +21,15 @@ import { HitsCounter } from '../hits_counter';
 import { dataViewWithTimefieldMock } from '../__mocks__/data_view_with_timefield';
 import { dataViewMock } from '../__mocks__/data_view';
 import { BreakdownFieldSelector } from './breakdown_field_selector';
-import { Histogram } from './histogram';
+import { SuggestionSelector } from './suggestion_selector';
+
+import { currentSuggestionMock, allSuggestionsMock } from '../__mocks__/suggestions';
+
+let mockUseEditVisualization: jest.Mock | undefined = jest.fn();
+
+jest.mock('./hooks/use_edit_visualization', () => ({
+  useEditVisualization: () => mockUseEditVisualization,
+}));
 
 async function mountComponent({
   noChart,
@@ -28,8 +37,10 @@ async function mountComponent({
   noBreakdown,
   chartHidden = false,
   appendHistogram,
-  onEditVisualization = jest.fn(),
   dataView = dataViewWithTimefieldMock,
+  currentSuggestion,
+  allSuggestions,
+  isPlainRecord,
 }: {
   noChart?: boolean;
   noHits?: boolean;
@@ -37,22 +48,22 @@ async function mountComponent({
   chartHidden?: boolean;
   appendHistogram?: ReactElement;
   dataView?: DataView;
-  onEditVisualization?: null | (() => void);
+  currentSuggestion?: Suggestion;
+  allSuggestions?: Suggestion[];
+  isPlainRecord?: boolean;
 } = {}) {
-  const services = unifiedHistogramServicesMock;
-  services.data.query.timefilter.timefilter.getAbsoluteTime = () => {
-    return { from: '2020-05-14T11:05:13.590', to: '2020-05-14T11:20:13.590' };
-  };
-  (services.data.query.queryString.getDefaultQuery as jest.Mock).mockReturnValue({
-    language: 'kuery',
-    query: '',
-  });
   (searchSourceInstanceMock.fetch$ as jest.Mock).mockImplementation(
     jest.fn().mockReturnValue(of({ rawResponse: { hits: { total: noHits ? 0 : 2 } } }))
   );
 
   const props = {
     dataView,
+    query: {
+      language: 'kuery',
+      query: '',
+    },
+    filters: [],
+    timeRange: { from: '2020-05-14T11:05:13.590', to: '2020-05-14T11:20:13.590' },
     services: unifiedHistogramServicesMock,
     hits: noHits
       ? undefined
@@ -73,8 +84,10 @@ async function mountComponent({
           },
         },
     breakdown: noBreakdown ? undefined : { field: undefined },
+    currentSuggestion,
+    allSuggestions,
+    isPlainRecord,
     appendHistogram,
-    onEditVisualization: onEditVisualization || undefined,
     onResetChartHeight: jest.fn(),
     onChartHiddenChange: jest.fn(),
     onTimeIntervalChange: jest.fn(),
@@ -91,6 +104,10 @@ async function mountComponent({
 }
 
 describe('Chart', () => {
+  beforeEach(() => {
+    mockUseEditVisualization = jest.fn();
+  });
+
   test('render when chart is undefined', async () => {
     const component = await mountComponent({ noChart: true });
     expect(
@@ -99,7 +116,8 @@ describe('Chart', () => {
   });
 
   test('render when chart is defined and onEditVisualization is undefined', async () => {
-    const component = await mountComponent({ onEditVisualization: null });
+    mockUseEditVisualization = undefined;
+    const component = await mountComponent();
     expect(
       component.find('[data-test-subj="unifiedHistogramChartOptionsToggle"]').exists()
     ).toBeTruthy();
@@ -134,17 +152,24 @@ describe('Chart', () => {
     expect(component.find('[data-test-subj="unifiedHistogramChart"]').exists()).toBeTruthy();
   });
 
+  test('render when is text based and not timebased', async () => {
+    const component = await mountComponent({ isPlainRecord: true, dataView: dataViewMock });
+    expect(
+      component.find('[data-test-subj="unifiedHistogramChartOptionsToggle"]').exists()
+    ).toBeTruthy();
+    expect(component.find('[data-test-subj="unifiedHistogramChart"]').exists()).toBeTruthy();
+  });
+
   test('triggers onEditVisualization on click', async () => {
-    const fn = jest.fn();
-    const component = await mountComponent({ onEditVisualization: fn });
+    expect(mockUseEditVisualization).not.toHaveBeenCalled();
+    const component = await mountComponent();
     await act(async () => {
       component
         .find('[data-test-subj="unifiedHistogramEditVisualization"]')
         .first()
         .simulate('click');
     });
-    const lensAttributes = component.find(Histogram).prop('lensAttributes');
-    expect(fn).toHaveBeenCalledWith(lensAttributes);
+    expect(mockUseEditVisualization).toHaveBeenCalled();
   });
 
   it('should render HitsCounter when hits is defined', async () => {
@@ -186,5 +211,27 @@ describe('Chart', () => {
   it('should not render BreakdownFieldSelector when chart is visible and breakdown is undefined', async () => {
     const component = await mountComponent({ noBreakdown: true });
     expect(component.find(BreakdownFieldSelector).exists()).toBeFalsy();
+  });
+
+  it('should render the Lens SuggestionsSelector when chart is visible and suggestions exist', async () => {
+    const component = await mountComponent({
+      currentSuggestion: currentSuggestionMock,
+      allSuggestions: allSuggestionsMock,
+    });
+    expect(component.find(SuggestionSelector).exists()).toBeTruthy();
+  });
+
+  it('should not render the Lens SuggestionsSelector when chart is hidden', async () => {
+    const component = await mountComponent({
+      chartHidden: true,
+      currentSuggestion: currentSuggestionMock,
+      allSuggestions: allSuggestionsMock,
+    });
+    expect(component.find(SuggestionSelector).exists()).toBeFalsy();
+  });
+
+  it('should not render the Lens SuggestionsSelector when chart is visible and suggestions are undefined', async () => {
+    const component = await mountComponent({ currentSuggestion: currentSuggestionMock });
+    expect(component.find(SuggestionSelector).exists()).toBeFalsy();
   });
 });

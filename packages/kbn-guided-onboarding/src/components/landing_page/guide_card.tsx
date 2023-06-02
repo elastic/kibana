@@ -6,91 +6,127 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { useCallback, useState } from 'react';
+import { css } from '@emotion/react';
+
+import {
+  EuiCard,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiSpacer,
+  EuiTextColor,
+  useEuiTheme,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { GuideState } from '../../types';
-import { GuideCardFooter } from './guide_card_footer';
-import { UseCase, UseCaseCard } from './use_case_card';
+import { GuideCardConstants } from './guide_cards.constants';
+import { GuideCardsProps } from './guide_cards';
 
-type GuideCardConstants = {
-  [key in UseCase]: {
-    i18nTexts: {
-      title: string;
-      description: string;
-    };
-  };
-};
-const constants: GuideCardConstants = {
-  search: {
-    i18nTexts: {
-      title: i18n.translate('guidedOnboardingPackage.gettingStarted.guideCard.search.cardTitle', {
-        defaultMessage: 'Search my data',
-      }),
-      description: i18n.translate(
-        'guidedOnboardingPackage.gettingStarted.guideCard.search.cardDescription',
-        {
-          defaultMessage:
-            'Create a search experience for your websites, applications, workplace content, or anything in between.',
-        }
-      ),
+const cardCss = css`
+  position: relative;
+  min-height: 110px;
+  width: 380px;
+  .euiCard__content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+`;
+
+const getProgressLabel = (guideState: GuideState | undefined): string | undefined => {
+  if (!guideState) {
+    return undefined;
+  }
+  const { steps } = guideState;
+  const numberSteps = steps.length;
+  const numberCompleteSteps = steps.filter((step) => step.status === 'complete').length;
+  if (numberCompleteSteps < 1 || numberCompleteSteps === numberSteps) {
+    return undefined;
+  }
+  return i18n.translate('guidedOnboardingPackage.gettingStarted.cards.progressLabel', {
+    defaultMessage: '{numberCompleteSteps} of {numberSteps} steps complete',
+    values: {
+      numberCompleteSteps,
+      numberSteps,
     },
-  },
-  observability: {
-    i18nTexts: {
-      title: i18n.translate(
-        'guidedOnboardingPackage.gettingStarted.guideCard.observability.cardTitle',
-        {
-          defaultMessage: 'Observe my Kubernetes infrastructure',
-        }
-      ),
-      description: i18n.translate(
-        'guidedOnboardingPackage.gettingStarted.guideCard.observability.cardDescription',
-        {
-          defaultMessage:
-            'Monitor your Kubernetes infrastructure by consolidating your logs and metrics.',
-        }
-      ),
-    },
-  },
-  security: {
-    i18nTexts: {
-      title: i18n.translate('guidedOnboardingPackage.gettingStarted.guideCard.security.cardTitle', {
-        defaultMessage: 'Protect my environment',
-      }),
-      description: i18n.translate(
-        'guidedOnboardingPackage.gettingStarted.guideCard.security.cardDescription',
-        {
-          defaultMessage:
-            'Investigate threats and get your SIEM up and running by installing the Elastic Defend integration.',
-        }
-      ),
-    },
-  },
+  });
 };
 
-export interface GuideCardProps {
-  useCase: UseCase;
-  guides: GuideState[];
-  activateGuide: (useCase: UseCase, guide?: GuideState) => Promise<void>;
-  isDarkTheme: boolean;
-  addBasePath: (url: string) => string;
-}
 export const GuideCard = ({
-  useCase,
-  guides,
+  card,
+  guidesState,
   activateGuide,
-  isDarkTheme,
-  addBasePath,
-}: GuideCardProps) => {
+  navigateToApp,
+  activeFilter,
+}: GuideCardsProps & { card: GuideCardConstants }) => {
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const { euiTheme } = useEuiTheme();
+  let guideState: GuideState | undefined;
+  if (card.guideId) {
+    guideState = guidesState.find((state) => state.guideId === card.guideId);
+  }
+
+  const onClick = useCallback(async () => {
+    setIsLoading(true);
+    if (card.guideId) {
+      await activateGuide(card.guideId, guideState);
+    } else if (card.navigateTo) {
+      await navigateToApp(card.navigateTo?.appId, {
+        path: card.navigateTo.path,
+      });
+    }
+    setIsLoading(false);
+  }, [activateGuide, card.guideId, card.navigateTo, guideState, navigateToApp]);
+
+  const isHighlighted = activeFilter === 'all' || activeFilter === card.solution;
+  const isComplete = guideState && guideState.status === 'complete';
+  const progress = getProgressLabel(guideState);
   return (
-    <UseCaseCard
-      useCase={useCase}
-      title={constants[useCase].i18nTexts.title}
-      description={constants[useCase].i18nTexts.description}
-      footer={<GuideCardFooter guides={guides} activateGuide={activateGuide} useCase={useCase} />}
-      isDarkTheme={isDarkTheme}
-      addBasePath={addBasePath}
+    <EuiCard
+      // data-test-subj used for FS tracking
+      data-test-subj={card.telemetryId}
+      isDisabled={isLoading}
+      onClick={onClick}
+      css={cardCss}
+      display={isHighlighted ? undefined : 'transparent'}
+      hasBorder={!isHighlighted}
+      title={
+        <>
+          <EuiSpacer size="s" />
+          <h3 style={{ fontWeight: 600 }}>{card.title}</h3>
+        </>
+      }
+      titleSize="xs"
+      betaBadgeProps={{
+        label: card.solution,
+      }}
+      description={
+        <>
+          {progress && (
+            <EuiTextColor color="subdued">
+              <small>{progress}</small>
+            </EuiTextColor>
+          )}
+          {isComplete && (
+            <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <EuiIcon type="checkInCircleFilled" color={euiTheme.colors.success} />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <small>
+                  {i18n.translate('guidedOnboardingPackage.gettingStarted.cards.completeLabel', {
+                    defaultMessage: 'Guide complete',
+                  })}
+                </small>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          )}
+          {card.navigateTo && <EuiIcon type="document" />}
+        </>
+      }
     />
   );
 };

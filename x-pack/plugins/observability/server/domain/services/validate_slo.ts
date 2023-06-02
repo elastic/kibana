@@ -5,10 +5,15 @@
  * 2.0.
  */
 
+import {
+  timeslicesBudgetingMethodSchema,
+  Duration,
+  DurationUnit,
+  rollingTimeWindowSchema,
+  calendarAlignedTimeWindowSchema,
+} from '@kbn/slo-schema';
 import { IllegalArgumentError } from '../../errors';
 import { SLO } from '../models';
-import { Duration, DurationUnit } from '../models/duration';
-import { timeslicesBudgetingMethodSchema } from '../../types/schema';
 
 /**
  * Asserts the SLO is valid from a business invariants point of view.
@@ -18,25 +23,39 @@ import { timeslicesBudgetingMethodSchema } from '../../types/schema';
  * @param slo {SLO}
  */
 export function validateSLO(slo: SLO) {
+  if (!isValidId(slo.id)) {
+    throw new IllegalArgumentError('Invalid id');
+  }
+
   if (!isValidTargetNumber(slo.objective.target)) {
     throw new IllegalArgumentError('Invalid objective.target');
   }
 
-  if (!isValidTimeWindowDuration(slo.time_window.duration)) {
+  if (
+    rollingTimeWindowSchema.is(slo.timeWindow) &&
+    !isValidRollingTimeWindowDuration(slo.timeWindow.duration)
+  ) {
     throw new IllegalArgumentError('Invalid time_window.duration');
   }
 
-  if (timeslicesBudgetingMethodSchema.is(slo.budgeting_method)) {
+  if (
+    calendarAlignedTimeWindowSchema.is(slo.timeWindow) &&
+    !isValidCalendarAlignedTimeWindowDuration(slo.timeWindow.duration)
+  ) {
+    throw new IllegalArgumentError('Invalid time_window.duration');
+  }
+
+  if (timeslicesBudgetingMethodSchema.is(slo.budgetingMethod)) {
     if (
-      slo.objective.timeslice_target === undefined ||
-      !isValidTargetNumber(slo.objective.timeslice_target)
+      slo.objective.timesliceTarget === undefined ||
+      !isValidTargetNumber(slo.objective.timesliceTarget)
     ) {
       throw new IllegalArgumentError('Invalid objective.timeslice_target');
     }
 
     if (
-      slo.objective.timeslice_window === undefined ||
-      !isValidTimesliceWindowDuration(slo.objective.timeslice_window, slo.time_window.duration)
+      slo.objective.timesliceWindow === undefined ||
+      !isValidTimesliceWindowDuration(slo.objective.timesliceWindow, slo.timeWindow.duration)
     ) {
       throw new IllegalArgumentError('Invalid objective.timeslice_window');
     }
@@ -50,16 +69,22 @@ function validateSettings(slo: SLO) {
     throw new IllegalArgumentError('Invalid settings.frequency');
   }
 
-  if (!isValidSyncDelaySettings(slo.settings.sync_delay)) {
+  if (!isValidSyncDelaySettings(slo.settings.syncDelay)) {
     throw new IllegalArgumentError('Invalid settings.sync_delay');
   }
+}
+
+function isValidId(id: string): boolean {
+  const MIN_ID_LENGTH = 8;
+  const MAX_ID_LENGTH = 36;
+  return MIN_ID_LENGTH <= id.length && id.length <= MAX_ID_LENGTH;
 }
 
 function isValidTargetNumber(value: number): boolean {
   return value > 0 && value < 1;
 }
 
-function isValidTimeWindowDuration(duration: Duration): boolean {
+function isValidRollingTimeWindowDuration(duration: Duration): boolean {
   return [
     DurationUnit.Day,
     DurationUnit.Week,
@@ -67,6 +92,11 @@ function isValidTimeWindowDuration(duration: Duration): boolean {
     DurationUnit.Quarter,
     DurationUnit.Year,
   ].includes(duration.unit);
+}
+
+function isValidCalendarAlignedTimeWindowDuration(duration: Duration): boolean {
+  // 1 week or 1 month
+  return [DurationUnit.Week, DurationUnit.Month].includes(duration.unit) && duration.value === 1;
 }
 
 function isValidTimesliceWindowDuration(timesliceWindow: Duration, timeWindow: Duration): boolean {

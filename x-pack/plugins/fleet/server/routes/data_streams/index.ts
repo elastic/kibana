@@ -5,8 +5,9 @@
  * 2.0.
  */
 
+import type { FleetAuthzRouter } from '../../services/security';
+
 import { DATA_STREAM_API_ROUTES } from '../../constants';
-import type { FleetAuthzRouter } from '../security';
 
 import { getListHandler } from './handlers';
 

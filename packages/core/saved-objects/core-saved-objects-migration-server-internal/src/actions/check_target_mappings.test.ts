@@ -15,13 +15,13 @@ jest.mock('../core/build_active_mappings');
 
 const diffMappingsMock = diffMappings as jest.MockedFn<typeof diffMappings>;
 
-const sourceIndexMappings: IndexMapping = {
+const actualMappings: IndexMapping = {
   properties: {
     field: { type: 'integer' },
   },
 };
 
-const targetIndexMappings: IndexMapping = {
+const expectedMappings: IndexMapping = {
   properties: {
     field: { type: 'long' },
   },
@@ -34,7 +34,7 @@ describe('checkTargetMappings', () => {
 
   it('returns match=false if source mappings are not defined', async () => {
     const task = checkTargetMappings({
-      targetIndexMappings,
+      expectedMappings,
     });
 
     const result = await task();
@@ -44,21 +44,21 @@ describe('checkTargetMappings', () => {
 
   it('calls diffMappings() with the source and target mappings', async () => {
     const task = checkTargetMappings({
-      sourceIndexMappings,
-      targetIndexMappings,
+      actualMappings,
+      expectedMappings,
     });
 
     await task();
     expect(diffMappings).toHaveBeenCalledTimes(1);
-    expect(diffMappings).toHaveBeenCalledWith(sourceIndexMappings, targetIndexMappings);
+    expect(diffMappings).toHaveBeenCalledWith(actualMappings, expectedMappings);
   });
 
   it('returns match=true if diffMappings() match', async () => {
     diffMappingsMock.mockReturnValueOnce(undefined);
 
     const task = checkTargetMappings({
-      sourceIndexMappings,
-      targetIndexMappings,
+      actualMappings,
+      expectedMappings,
     });
 
     const result = await task();
@@ -69,8 +69,8 @@ describe('checkTargetMappings', () => {
     diffMappingsMock.mockReturnValueOnce({ changedProp: 'field' });
 
     const task = checkTargetMappings({
-      sourceIndexMappings,
-      targetIndexMappings,
+      actualMappings,
+      expectedMappings,
     });
 
     const result = await task();

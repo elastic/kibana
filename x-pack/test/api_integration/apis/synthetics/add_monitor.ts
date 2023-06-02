@@ -5,7 +5,7 @@
  * 2.0.
  */
 import expect from '@kbn/expect';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { omit } from 'lodash';
 import { secretKeys } from '@kbn/synthetics-plugin/common/constants/monitor_management';
 import { ConfigKey, DataStream, HTTPFields } from '@kbn/synthetics-plugin/common/runtime_types';
@@ -13,13 +13,13 @@ import { formatKibanaNamespace } from '@kbn/synthetics-plugin/common/formatters'
 import { API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import { DEFAULT_FIELDS } from '@kbn/synthetics-plugin/common/constants/monitor_defaults';
 import { ALL_SPACES_ID } from '@kbn/security-plugin/common/constants';
-import { syntheticsMonitorType } from '@kbn/synthetics-plugin/server/legacy_uptime/lib/saved_objects/synthetics_monitor';
 import { format as formatUrl } from 'url';
 
 import supertest from 'supertest';
 import { serviceApiKeyPrivileges } from '@kbn/synthetics-plugin/server/synthetics_service/get_api_key';
+import { syntheticsMonitorType } from '@kbn/synthetics-plugin/common/types/saved_objects';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { getFixtureJson } from '../uptime/rest/helper/get_fixture_json';
+import { getFixtureJson } from './helper/get_fixture_json';
 
 export default function ({ getService }: FtrProviderContext) {
   describe('AddNewMonitors', function () {
@@ -180,7 +180,7 @@ export default function ({ getService }: FtrProviderContext) {
         .expect(200);
 
       const response = await supertestAPI
-        .get(`${API_URLS.SYNTHETICS_MONITORS}/${apiResponse.body.id}`)
+        .get(API_URLS.GET_SYNTHETICS_MONITOR.replace('{monitorId}', apiResponse.body.id))
         .set('kbn-xsrf', 'true')
         .expect(200);
 
@@ -272,12 +272,12 @@ export default function ({ getService }: FtrProviderContext) {
             .send(httpMonitorJson);
 
           expect(apiResponse.status).eql(403);
-          expect(apiResponse.body.message).eql('Unable to create synthetics-monitor');
+          expect(apiResponse.body.message).eql('Forbidden');
         });
     });
 
     it('handles private location errors and immediately deletes monitor if integration policy is unable to be saved', async () => {
-      const name = `Monitor with private location ${uuid.v4()}`;
+      const name = `Monitor with private location ${uuidv4()}`;
       const newMonitor = {
         name,
         type: 'http',
@@ -294,8 +294,8 @@ export default function ({ getService }: FtrProviderContext) {
       const username = 'admin';
       const roleName = `synthetics_admin`;
       const password = `${username}-password`;
-      const SPACE_ID = `test-space-${uuid.v4()}`;
-      const SPACE_NAME = `test-space-name ${uuid.v4()}`;
+      const SPACE_ID = `test-space-${uuidv4()}`;
+      const SPACE_NAME = `test-space-name ${uuidv4()}`;
 
       try {
         await kibanaServer.spaces.create({ id: SPACE_ID, name: SPACE_NAME });
@@ -343,8 +343,8 @@ export default function ({ getService }: FtrProviderContext) {
       const username = 'admin';
       const password = `${username}-password`;
       const roleName = 'uptime-role';
-      const SPACE_ID = `test-space-${uuid.v4()}`;
-      const SPACE_NAME = `test-space-name ${uuid.v4()}`;
+      const SPACE_ID = `test-space-${uuidv4()}`;
+      const SPACE_NAME = `test-space-name ${uuidv4()}`;
       const EXPECTED_NAMESPACE = formatKibanaNamespace(SPACE_ID);
       const monitor = {
         ...httpMonitorJson,
@@ -391,8 +391,8 @@ export default function ({ getService }: FtrProviderContext) {
       const username = 'admin';
       const password = `${username}-password`;
       const roleName = 'uptime-role';
-      const SPACE_ID = `test-space-${uuid.v4()}`;
-      const SPACE_NAME = `test-space-name ${uuid.v4()}`;
+      const SPACE_ID = `test-space-${uuidv4()}`;
+      const SPACE_NAME = `test-space-name ${uuidv4()}`;
       const monitor = {
         ...httpMonitorJson,
         [ConfigKey.NAMESPACE]: 'default',
@@ -439,8 +439,8 @@ export default function ({ getService }: FtrProviderContext) {
       const username = 'admin';
       const password = `${username}-password`;
       const roleName = 'uptime-role';
-      const SPACE_ID = `test-space-${uuid.v4()}`;
-      const SPACE_NAME = `test-space-name ${uuid.v4()}`;
+      const SPACE_ID = `test-space-${uuidv4()}`;
+      const SPACE_NAME = `test-space-name ${uuidv4()}`;
       const monitor = httpMonitorJson;
       let monitorId = '';
 

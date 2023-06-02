@@ -4,8 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { FileJSON } from '@kbn/shared-ux-file-types';
 
-import type { ActionLicense, Cases, Case, CasesStatus, CaseUserActions, Comment } from './types';
+import type { ActionLicense, CaseUI, CasesStatus, UserActionUI, CommentUI } from './types';
 
 import type {
   ResolvedCase,
@@ -15,17 +16,22 @@ import type {
   CasesMetrics,
   ExternalReferenceComment,
   PersistableComment,
+  FindCaseUserActions,
+  CaseUsers,
+  CaseUserActionsStats,
+  CasesFindResponseUI,
+  CasesUI,
 } from '../../common/ui/types';
 import type {
   CaseConnector,
-  CaseResponse,
+  Case,
   CasesFindResponse,
-  CasesResponse,
+  Cases,
   CasesStatusResponse,
-  CaseUserActionResponse,
-  CaseUserActionsResponse,
-  CommentResponse,
   UserAction,
+  UserActions,
+  Comment,
+  ActionCategory,
   UserActionTypes,
   UserActionWithResponse,
   CommentUserAction,
@@ -52,12 +58,14 @@ export { connectorsMock } from '../common/mock/connectors';
 export const basicCaseId = 'basic-case-id';
 export const caseWithAlertsId = 'case-with-alerts-id';
 export const caseWithAlertsSyncOffId = 'case-with-alerts-syncoff-id';
+export const pushConnectorId = 'servicenow-1';
 
 const basicCommentId = 'basic-comment-id';
 const basicCreatedAt = '2020-02-19T23:06:33.798Z';
 const basicUpdatedAt = '2020-02-20T15:02:57.995Z';
 const basicClosedAt = '2020-02-21T15:02:57.995Z';
-const laterTime = '2020-02-28T15:02:57.995Z';
+const basicPushedAt = '2023-01-17T09:46:29.813Z';
+const laterTime = '2023-01-18T09:46:29.813Z';
 
 export const elasticUser = {
   fullName: 'Leslie Knope',
@@ -67,7 +75,7 @@ export const elasticUser = {
 
 export const tags: string[] = ['coke', 'pepsi'];
 
-export const basicComment: Comment = {
+export const basicComment: CommentUI = {
   comment: 'Solve this fast!',
   type: CommentType.user,
   id: basicCommentId,
@@ -119,7 +127,7 @@ export const alertCommentWithIndices: AlertComment = {
   version: 'WzQ3LDFc',
 };
 
-export const hostIsolationComment = (overrides?: Record<string, unknown>): Comment => {
+export const hostIsolationComment = (overrides?: Record<string, unknown>): CommentUI => {
   return {
     type: CommentType.actions,
     comment: 'I just isolated the host!',
@@ -145,7 +153,7 @@ export const hostIsolationComment = (overrides?: Record<string, unknown>): Comme
   };
 };
 
-export const hostReleaseComment: () => Comment = () => {
+export const hostReleaseComment: () => CommentUI = () => {
   return {
     type: CommentType.actions,
     comment: 'I just released the host!',
@@ -202,7 +210,7 @@ export const persistableStateAttachment: PersistableComment = {
   version: 'WzQ3LDFc',
 };
 
-export const basicCase: Case = {
+export const basicCase: CaseUI = {
   owner: SECURITY_SOLUTION_OWNER,
   closedAt: null,
   closedBy: null,
@@ -233,6 +241,20 @@ export const basicCase: Case = {
   },
   // damaged_raccoon uid
   assignees: [{ uid: 'u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0' }],
+};
+
+export const basicFileMock: FileJSON = {
+  id: '7d47d130-bcec-11ed-afa1-0242ac120002',
+  name: 'my-super-cool-screenshot',
+  mimeType: 'image/png',
+  created: basicCreatedAt,
+  updated: basicCreatedAt,
+  size: 999,
+  meta: '',
+  alt: '',
+  fileKind: '',
+  status: 'READY',
+  extension: 'png',
 };
 
 export const caseWithAlerts = {
@@ -305,7 +327,7 @@ export const basicCaseMetrics: SingleCaseMetrics = {
   },
 };
 
-export const mockCase: Case = {
+export const mockCase: CaseUI = {
   owner: SECURITY_SOLUTION_OWNER,
   closedAt: null,
   closedBy: null,
@@ -337,13 +359,13 @@ export const mockCase: Case = {
   assignees: [],
 };
 
-export const basicCasePost: Case = {
+export const basicCasePost: CaseUI = {
   ...basicCase,
   updatedAt: null,
   updatedBy: null,
 };
 
-export const basicCommentPatch: Comment = {
+export const basicCommentPatch: CommentUI = {
   ...basicComment,
   updatedAt: basicUpdatedAt,
   updatedBy: {
@@ -369,21 +391,21 @@ export const casesMetrics: CasesMetrics = {
 };
 
 export const basicPush = {
-  connectorId: '123',
-  connectorName: 'connector name',
+  connectorId: pushConnectorId,
+  connectorName: 'My SN connector',
   externalId: 'external_id',
   externalTitle: 'external title',
   externalUrl: 'basicPush.com',
-  pushedAt: basicUpdatedAt,
+  pushedAt: basicPushedAt,
   pushedBy: elasticUser,
 };
 
-export const pushedCase: Case = {
+export const pushedCase: CaseUI = {
   ...basicCase,
   connector: {
-    id: '123',
-    name: 'My Connector',
-    type: ConnectorTypes.jira,
+    id: pushConnectorId,
+    name: 'My SN connector',
+    type: ConnectorTypes.serviceNowITSM,
     fields: null,
   },
   externalService: basicPush,
@@ -392,14 +414,13 @@ export const pushedCase: Case = {
 const basicAction = {
   createdAt: basicCreatedAt,
   createdBy: elasticUser,
-  caseId: basicCaseId,
   commentId: null,
   owner: SECURITY_SOLUTION_OWNER,
   payload: { title: 'a title' },
   type: 'title',
 };
 
-export const cases: Case[] = [
+export const cases: CasesUI = [
   basicCase,
   {
     ...pushedCase,
@@ -417,7 +438,7 @@ export const cases: Case[] = [
   caseWithRegisteredAttachments,
 ];
 
-export const allCases: Cases = {
+export const allCases: CasesFindResponseUI = {
   cases,
   page: 1,
   perPage: 5,
@@ -449,7 +470,7 @@ export const elasticUserSnake = {
   email: 'leslie.knope@elastic.co',
 };
 
-export const basicCommentSnake: CommentResponse = {
+export const basicCommentSnake: Comment = {
   comment: 'Solve this fast!',
   type: CommentType.user,
   id: basicCommentId,
@@ -463,7 +484,7 @@ export const basicCommentSnake: CommentResponse = {
   version: 'WzQ3LDFc',
 };
 
-export const externalReferenceAttachmentSnake: CommentResponse = {
+export const externalReferenceAttachmentSnake: Comment = {
   type: CommentType.externalReference,
   id: 'external-reference-comment-id',
   externalReferenceId: 'my-id',
@@ -480,7 +501,7 @@ export const externalReferenceAttachmentSnake: CommentResponse = {
   version: 'WzQ3LDFc',
 };
 
-export const persistableStateAttachmentSnake: CommentResponse = {
+export const persistableStateAttachmentSnake: Comment = {
   type: CommentType.persistableState,
   id: 'persistable-state-comment-id',
   persistableStateAttachmentState: { test_foo: 'foo' },
@@ -495,7 +516,7 @@ export const persistableStateAttachmentSnake: CommentResponse = {
   version: 'WzQ3LDFc',
 };
 
-export const basicCaseSnake: CaseResponse = {
+export const basicCaseSnake: Case = {
   ...basicCase,
   status: CaseStatuses.open,
   closed_at: null,
@@ -509,7 +530,7 @@ export const basicCaseSnake: CaseResponse = {
   updated_at: basicUpdatedAt,
   updated_by: elasticUserSnake,
   owner: SECURITY_SOLUTION_OWNER,
-} as CaseResponse;
+} as Case;
 
 export const caseWithAlertsSnake = {
   ...basicCaseSnake,
@@ -538,10 +559,9 @@ export const casesStatusSnake: CasesStatusResponse = {
   count_open_cases: 20,
 };
 
-export const pushConnectorId = '123';
 export const pushSnake = {
   connector_id: pushConnectorId,
-  connector_name: 'connector name',
+  connector_name: 'My SN connector',
   external_id: 'external_id',
   external_title: 'external title',
   external_url: 'basicPush.com',
@@ -549,22 +569,22 @@ export const pushSnake = {
 
 export const basicPushSnake = {
   ...pushSnake,
-  pushed_at: basicUpdatedAt,
+  pushed_at: basicPushedAt,
   pushed_by: elasticUserSnake,
 };
 
 export const pushedCaseSnake = {
   ...basicCaseSnake,
   connector: {
-    id: '123',
-    name: 'My Connector',
-    type: ConnectorTypes.jira,
+    id: pushConnectorId,
+    name: 'My SN connector',
+    type: ConnectorTypes.serviceNowITSM,
     fields: null,
   },
   external_service: { ...basicPushSnake, connector_id: pushConnectorId },
 };
 
-export const casesSnake: CasesResponse = [
+export const casesSnake: Cases = [
   basicCaseSnake,
   {
     ...pushedCaseSnake,
@@ -592,22 +612,23 @@ export const allCasesSnake: CasesFindResponse = {
 
 export const getUserAction = (
   type: UserActionTypes,
-  action: UserAction,
+  action: ActionCategory,
   overrides?: Record<string, unknown>
-): CaseUserActions => {
+): UserActionUI => {
   const commonProperties = {
     ...basicAction,
-    actionId: `${type}-${action}`,
+    id: `${type}-${action}`,
+    version: 'WzQ3LDFc',
     action,
   };
 
   const externalService = {
     connectorId: pushConnectorId,
-    connectorName: 'connector name',
+    connectorName: 'My SN connector',
     externalId: 'external_id',
     externalTitle: 'external title',
     externalUrl: 'basicPush.com',
-    pushedAt: basicUpdatedAt,
+    pushedAt: basicPushedAt,
     pushedBy: elasticUser,
   };
 
@@ -665,6 +686,7 @@ export const getUserAction = (
     case ActionTypes.pushed:
       return {
         ...commonProperties,
+        createdAt: basicPushedAt,
         type: ActionTypes.pushed,
         payload: {
           externalService,
@@ -717,49 +739,65 @@ export const getUserAction = (
       return {
         ...commonProperties,
         ...overrides,
-      } as CaseUserActions;
+      } as UserActionUI;
   }
 };
 
 export const getUserActionSnake = (
   type: UserActionTypes,
-  action: UserAction,
+  action: ActionCategory,
   overrides?: Record<string, unknown>
-): CaseUserActionResponse => {
+): UserAction => {
   return {
     ...covertToSnakeCase(getUserAction(type, action, overrides)),
-  } as unknown as CaseUserActionResponse;
+  } as unknown as UserAction;
 };
 
-export const caseUserActionsSnake: CaseUserActionsResponse = [
+export const caseUserActionsSnake: UserActions = [
   getUserActionSnake('description', Actions.create),
   getUserActionSnake('comment', Actions.create),
   getUserActionSnake('description', Actions.update),
 ];
 
-export const caseUserActionsWithRegisteredAttachmentsSnake: CaseUserActionsResponse = [
+export const caseUserActionsWithRegisteredAttachmentsSnake: UserActions = [
   getUserActionSnake('description', Actions.create),
   {
     created_at: basicCreatedAt,
     created_by: elasticUserSnake,
-    case_id: 'case-with-registered-attachment',
     comment_id: null,
     owner: SECURITY_SOLUTION_OWNER,
     type: 'comment',
     action: 'create',
-    action_id: 'create-comment-id',
-    payload: { comment: externalReferenceAttachmentSnake },
+    id: 'create-comment-id',
+    payload: {
+      comment: {
+        type: CommentType.externalReference,
+        externalReferenceId: 'my-id',
+        externalReferenceMetadata: { test_foo: 'foo' },
+        externalReferenceAttachmentTypeId: '.test',
+        externalReferenceStorage: { type: ExternalReferenceStorageType.elasticSearchDoc },
+        owner: SECURITY_SOLUTION_OWNER,
+      },
+    },
+    version: 'WzQ3LDFc',
   },
   {
     created_at: basicCreatedAt,
     created_by: elasticUserSnake,
-    case_id: 'case-with-registered-attachment',
     comment_id: null,
     owner: SECURITY_SOLUTION_OWNER,
     type: 'comment',
     action: 'create',
-    action_id: 'create-comment-id',
-    payload: { comment: persistableStateAttachmentSnake },
+    id: 'create-comment-id',
+    payload: {
+      comment: {
+        type: CommentType.persistableState,
+        persistableStateAttachmentState: { test_foo: 'foo' },
+        persistableStateAttachmentTypeId: '.test',
+        owner: SECURITY_SOLUTION_OWNER,
+      },
+    },
+    version: 'WzQ3LDFc',
   },
 ];
 
@@ -779,7 +817,7 @@ export const getAlertUserAction = (
   overrides?: Record<string, unknown>
 ): SnakeToCamelCase<UserActionWithResponse<CommentUserAction>> => ({
   ...getUserAction(ActionTypes.comment, Actions.create),
-  actionId: 'alert-action-id',
+  id: 'alert-action-id',
   commentId: 'alert-comment-id',
   type: ActionTypes.comment,
   payload: {
@@ -801,7 +839,7 @@ export const getMultipleAlertsUserAction = (
   overrides?: Record<string, unknown>
 ): SnakeToCamelCase<UserActionWithResponse<CommentUserAction>> => ({
   ...getUserAction(ActionTypes.comment, Actions.create),
-  actionId: 'alert-action-id',
+  id: 'alert-action-id',
   commentId: 'alert-comment-id',
   type: ActionTypes.comment,
   payload: {
@@ -823,7 +861,7 @@ export const getHostIsolationUserAction = (
   overrides?: Record<string, unknown>
 ): SnakeToCamelCase<UserActionWithResponse<CommentUserAction>> => ({
   ...getUserAction(ActionTypes.comment, Actions.create),
-  actionId: 'isolate-action-id',
+  id: 'isolate-action-id',
   type: ActionTypes.comment,
   commentId: 'isolate-comment-id',
   payload: {
@@ -837,37 +875,66 @@ export const getHostIsolationUserAction = (
   ...overrides,
 });
 
-export const caseUserActions: CaseUserActions[] = [
+export const caseUserActions: UserActionUI[] = [
   getUserAction('description', Actions.create),
   getUserAction('comment', Actions.create),
   getUserAction('description', Actions.update),
 ];
 
-export const caseUserActionsWithRegisteredAttachments: CaseUserActions[] = [
+export const caseUserActionsWithRegisteredAttachments: UserActionUI[] = [
   getUserAction('description', Actions.create),
   {
     createdAt: basicCreatedAt,
     createdBy: elasticUser,
-    caseId: 'case-with-registered-attachment',
     commentId: null,
     owner: SECURITY_SOLUTION_OWNER,
     type: 'comment',
     action: 'create',
-    actionId: 'create-comment-id',
-    payload: { comment: externalReferenceAttachment },
+    id: 'create-comment-id',
+    payload: {
+      comment: {
+        type: CommentType.externalReference,
+        externalReferenceId: 'my-id',
+        externalReferenceMetadata: { test_foo: 'foo' },
+        externalReferenceAttachmentTypeId: '.test',
+        externalReferenceStorage: { type: ExternalReferenceStorageType.elasticSearchDoc },
+        owner: SECURITY_SOLUTION_OWNER,
+      },
+    },
+    version: 'WzQ3LDFc',
   },
   {
     createdAt: basicCreatedAt,
     createdBy: elasticUser,
-    caseId: 'case-with-registered-attachment',
     commentId: null,
     owner: SECURITY_SOLUTION_OWNER,
     type: 'comment',
     action: 'create',
-    actionId: 'create-comment-id',
-    payload: { comment: persistableStateAttachment },
+    id: 'create-comment-id',
+    payload: {
+      comment: {
+        type: CommentType.persistableState,
+        persistableStateAttachmentState: { test_foo: 'foo' },
+        persistableStateAttachmentTypeId: '.test',
+        owner: SECURITY_SOLUTION_OWNER,
+      },
+    },
+    version: 'WzQ3LDFc',
   },
 ];
+
+export const findCaseUserActionsResponse: FindCaseUserActions = {
+  page: 1,
+  perPage: 10,
+  total: 30,
+  userActions: [...caseUserActionsWithRegisteredAttachments],
+};
+
+export const getCaseUserActionsStatsResponse: CaseUserActionsStats = {
+  total: 20,
+  totalComments: 10,
+  totalOtherActions: 10,
+};
 
 // components tests
 export const useGetCasesMockState = {
@@ -876,7 +943,7 @@ export const useGetCasesMockState = {
   isError: false,
 };
 
-export const basicCaseClosed: Case = {
+export const basicCaseClosed: CaseUI = {
   ...basicCase,
   closedAt: '2020-02-25T23:06:33.798Z',
   closedBy: elasticUser,
@@ -887,7 +954,7 @@ export const getExternalReferenceUserAction = (
   overrides?: Record<string, unknown>
 ): SnakeToCamelCase<UserActionWithResponse<CommentUserAction>> => ({
   ...getUserAction(ActionTypes.comment, Actions.create),
-  actionId: 'external-reference-action-id',
+  id: 'external-reference-action-id',
   type: ActionTypes.comment,
   commentId: 'external-reference-comment-id',
   payload: {
@@ -920,7 +987,7 @@ export const getPersistableStateUserAction = (
   overrides?: Record<string, unknown>
 ): SnakeToCamelCase<UserActionWithResponse<CommentUserAction>> => ({
   ...getUserAction(ActionTypes.comment, Actions.create),
-  actionId: 'persistable-state-action-id',
+  id: 'persistable-state-action-id',
   type: ActionTypes.comment,
   commentId: 'persistable-state-comment-id',
   payload: {
@@ -946,3 +1013,110 @@ export const getPersistableStateAttachment = (
     ...viewObject,
   }),
 });
+
+export const getCaseUsersMockResponse = (): CaseUsers => {
+  return {
+    participants: [
+      {
+        user: {
+          email: 'participant_1@elastic.co',
+          full_name: 'Participant 1',
+          username: 'participant_1',
+        },
+      },
+      {
+        user: {
+          email: 'participant_2@elastic.co',
+          full_name: null,
+          username: 'participant_2',
+        },
+      },
+      {
+        user: {
+          email: null,
+          full_name: null,
+          username: 'participant_3',
+        },
+      },
+      {
+        user: {
+          email: null,
+          full_name: null,
+          username: 'participant_4',
+        },
+        uid: 'participant_4_uid',
+        avatar: { initials: 'P4' },
+      },
+      {
+        user: {
+          email: 'participant_5@elastic.co',
+          full_name: 'Participant 5',
+          username: 'participant_5',
+        },
+        uid: 'participant_5_uid',
+      },
+    ],
+    reporter: {
+      user: {
+        email: 'reporter_1@elastic.co',
+        full_name: 'Reporter 1',
+        username: 'reporter_1',
+      },
+      uid: 'reporter_1_uid',
+      avatar: { initials: 'R1' },
+    },
+
+    assignees: [
+      {
+        user: {
+          email: null,
+          full_name: null,
+          username: null,
+        },
+        uid: 'u_62h24XVQzG4-MuH1-DqPmookrJY23aRa9h4fyULR6I8_0',
+      },
+      {
+        user: {
+          email: null,
+          full_name: null,
+          username: 'elastic',
+        },
+        uid: 'u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0',
+      },
+      {
+        user: {
+          email: 'fuzzy_marten@profiles.elastic.co',
+          full_name: 'Fuzzy Marten',
+          username: 'fuzzy_marten',
+        },
+        uid: 'u_3OgKOf-ogtr8kJ5B0fnRcqzXs2aQQkZLtzKEEFnKaYg_0',
+      },
+      {
+        user: {
+          email: 'misty_mackerel@profiles.elastic.co',
+          full_name: 'Misty Mackerel',
+          username: 'misty_mackerel',
+        },
+        uid: 'u_BXf_iGxcnicv4l-3-ER7I-XPpfanAFAap7uls86xV7A_0',
+      },
+    ],
+    unassignedUsers: [
+      {
+        user: {
+          email: '',
+          full_name: '',
+          username: 'cases_no_connectors',
+        },
+        uid: 'u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0',
+      },
+      {
+        user: {
+          email: 'valid_chimpanzee@profiles.elastic.co',
+          full_name: 'Valid Chimpanzee',
+          username: 'valid_chimpanzee',
+        },
+        uid: 'u_A_tM4n0wPkdiQ9smmd8o0Hr_h61XQfu8aRPh9GMoRoc_0',
+      },
+    ],
+  };
+};

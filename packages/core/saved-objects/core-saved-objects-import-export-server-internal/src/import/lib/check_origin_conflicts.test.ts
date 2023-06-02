@@ -9,13 +9,15 @@
 import { mockCreateOriginQuery } from './check_reference_origins.test.mock';
 
 import type {
-  SavedObjectReference,
-  SavedObject,
   SavedObjectsImportFailure,
   SavedObjectsImportRetry,
 } from '@kbn/core-saved-objects-common';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
-import type { ISavedObjectTypeRegistry } from '@kbn/core-saved-objects-server';
+import type {
+  ISavedObjectTypeRegistry,
+  SavedObject,
+  SavedObjectReference,
+} from '@kbn/core-saved-objects-server';
 import { typeRegistryMock } from '@kbn/core-saved-objects-base-server-mocks';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { checkOriginConflicts } from './check_origin_conflicts';

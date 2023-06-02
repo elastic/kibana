@@ -1,9 +1,7 @@
 {
-  "extends": "../../tsconfig.bazel.json",
+  "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "declaration": true,
-    "emitDeclarationOnly": true,
-    "outDir": "target_types",
+    "outDir": "target/types",
     "types": [
       "node",
     ]
@@ -14,5 +12,20 @@
   ],
   "exclude": [
     "**/*.config.js",
+    "target/**/*",
+  ],
+  "kbn_references": [
+    "@kbn/ui-theme",
+    "@kbn/i18n",
+    "@kbn/i18n-react",
+    "@kbn/monaco",
+    "@kbn/datemath",
+    "@kbn/flot-charts",
+    "@kbn/analytics",
+    "@kbn/es-query",
+    "@kbn/rison",
+    "@kbn/std",
+    "@kbn/safer-lodash-set",
+    "@kbn/repo-info"
   ]
 }

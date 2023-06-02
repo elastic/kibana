@@ -5,20 +5,17 @@
  * 2.0.
  */
 
-import { formatMitreAttackDescription } from '../../helpers/rules';
-import type { Mitre, OverrideRule } from '../../objects/rule';
+import { formatMitreAttackDescription, getHumanizedDuration } from '../../helpers/rules';
 import { getIndexPatterns, getNewOverrideRule, getSeveritiesOverride } from '../../objects/rule';
-import type { CompleteTimeline } from '../../objects/timeline';
 
-import { NUMBER_OF_ALERTS, ALERT_GRID_CELL } from '../../screens/alerts';
+import { ALERT_GRID_CELL, ALERTS_COUNT } from '../../screens/alerts';
 
 import {
   CUSTOM_RULES_BTN,
   RISK_SCORE,
+  RULES_MANAGEMENT_TABLE,
   RULE_NAME,
   RULE_SWITCH,
-  RULES_ROW,
-  RULES_TABLE,
   SEVERITY,
 } from '../../screens/alerts_detection_rules';
 import {
@@ -50,8 +47,7 @@ import {
   TIMESTAMP_OVERRIDE_DETAILS,
 } from '../../screens/rule_details';
 
-import { goToRuleDetails } from '../../tasks/alerts_detection_rules';
-import { createTimeline } from '../../tasks/api_calls/timelines';
+import { expectNumberOfRules, goToRuleDetails } from '../../tasks/alerts_detection_rules';
 import { cleanKibana } from '../../tasks/common';
 import {
   createAndEnableRule,
@@ -67,60 +63,49 @@ import { getDetails } from '../../tasks/rule_details';
 import { RULE_CREATION } from '../../urls/navigation';
 
 describe('Detection rules, override', () => {
-  const expectedUrls = getNewOverrideRule().referenceUrls?.join('');
-  const expectedFalsePositives = getNewOverrideRule().falsePositivesExamples?.join('');
-  const expectedTags = getNewOverrideRule().tags?.join('');
-  const mitreAttack = getNewOverrideRule().mitre as Mitre[];
-  const expectedMitre = formatMitreAttackDescription(mitreAttack);
+  const rule = getNewOverrideRule();
+  const expectedUrls = rule.references?.join('');
+  const expectedFalsePositives = rule.false_positives?.join('');
+  const expectedTags = rule.tags?.join('');
+  const mitreAttack = rule.threat;
+  const expectedMitre = formatMitreAttackDescription(mitreAttack ?? []);
 
   before(() => {
     cleanKibana();
-    login();
   });
+
   beforeEach(() => {
-    const timeline = getNewOverrideRule().timeline as CompleteTimeline;
-    createTimeline(timeline).then((response) => {
-      cy.wrap({
-        ...getNewOverrideRule(),
-        timeline: {
-          ...timeline,
-          id: response.body.data.persistTimeline.timeline.savedObjectId,
-        },
-      }).as('rule');
-    });
+    login();
   });
 
   it('Creates and enables a new custom rule with override option', function () {
     visitWithoutDateRange(RULE_CREATION);
-    fillDefineCustomRuleAndContinue(this.rule);
-    fillAboutRuleWithOverrideAndContinue(this.rule);
-    fillScheduleRuleAndContinue(this.rule);
+    fillDefineCustomRuleAndContinue(rule);
+    fillAboutRuleWithOverrideAndContinue(rule);
+    fillScheduleRuleAndContinue(rule);
     createAndEnableRule();
 
     cy.get(CUSTOM_RULES_BTN).should('have.text', 'Custom rules (1)');
 
-    const expectedNumberOfRules = 1;
-    cy.get(RULES_TABLE).then(($table) => {
-      cy.wrap($table.find(RULES_ROW).length).should('eql', expectedNumberOfRules);
-    });
+    expectNumberOfRules(RULES_MANAGEMENT_TABLE, 1);
 
-    cy.get(RULE_NAME).should('have.text', this.rule.name);
-    cy.get(RISK_SCORE).should('have.text', this.rule.riskScore);
-    cy.get(SEVERITY).should('have.text', this.rule.severity);
+    cy.get(RULE_NAME).should('have.text', rule.name);
+    cy.get(RISK_SCORE).should('have.text', rule.risk_score);
+    cy.get(SEVERITY).should('have.text', 'High');
     cy.get(RULE_SWITCH).should('have.attr', 'aria-checked', 'true');
 
     goToRuleDetails();
 
-    cy.get(RULE_NAME_HEADER).should('contain', `${this.rule.name}`);
-    cy.get(ABOUT_RULE_DESCRIPTION).should('have.text', this.rule.description);
+    cy.get(RULE_NAME_HEADER).should('contain', `${rule.name}`);
+    cy.get(ABOUT_RULE_DESCRIPTION).should('have.text', rule.description);
     cy.get(ABOUT_DETAILS).within(() => {
-      getDetails(SEVERITY_DETAILS).should('have.text', this.rule.severity);
-      getDetails(RISK_SCORE_DETAILS).should('have.text', this.rule.riskScore);
+      getDetails(SEVERITY_DETAILS).should('have.text', 'High');
+      getDetails(RISK_SCORE_DETAILS).should('have.text', rule.risk_score);
       getDetails(RISK_SCORE_OVERRIDE_DETAILS).should(
         'have.text',
-        `${this.rule.riskOverride}kibana.alert.risk_score`
+        `${rule.risk_score_mapping?.[0].field}kibana.alert.risk_score`
       );
-      getDetails(RULE_NAME_OVERRIDE_DETAILS).should('have.text', this.rule.nameOverride);
+      getDetails(RULE_NAME_OVERRIDE_DETAILS).should('have.text', rule.rule_name_override);
       getDetails(REFERENCE_URLS_DETAILS).should((details) => {
         expect(removeExternalLinkText(details.text())).equal(expectedUrls);
       });
@@ -129,43 +114,38 @@ describe('Detection rules, override', () => {
         expect(removeExternalLinkText(mitre.text())).equal(expectedMitre);
       });
       getDetails(TAGS_DETAILS).should('have.text', expectedTags);
-      getDetails(TIMESTAMP_OVERRIDE_DETAILS).should('have.text', this.rule.timestampOverride);
+      getDetails(TIMESTAMP_OVERRIDE_DETAILS).should('have.text', rule.timestamp_override);
       cy.contains(DETAILS_TITLE, 'Severity override')
         .invoke('index', DETAILS_TITLE) // get index relative to other titles, not all siblings
         .then((severityOverrideIndex) => {
-          (this.rule as OverrideRule).severityOverride.forEach((severity, i) => {
+          rule.severity_mapping?.forEach((severity, i) => {
             cy.get(DETAILS_DESCRIPTION)
               .eq(severityOverrideIndex + i)
               .should(
                 'have.text',
-                `${severity.sourceField}:${severity.sourceValue}${getSeveritiesOverride()[i]}`
+                `${severity.field}:${severity.value}${getSeveritiesOverride()[i]}`
               );
           });
         });
     });
-    cy.get(INVESTIGATION_NOTES_TOGGLE).click({ force: true });
+    cy.get(INVESTIGATION_NOTES_TOGGLE).click();
     cy.get(ABOUT_INVESTIGATION_NOTES).should('have.text', INVESTIGATION_NOTES_MARKDOWN);
     cy.get(DEFINITION_DETAILS).within(() => {
       getDetails(INDEX_PATTERNS_DETAILS).should('have.text', getIndexPatterns().join(''));
-      getDetails(CUSTOM_QUERY_DETAILS).should('have.text', this.rule.customQuery);
+      getDetails(CUSTOM_QUERY_DETAILS).should('have.text', rule.query);
       getDetails(RULE_TYPE_DETAILS).should('have.text', 'Query');
       getDetails(TIMELINE_TEMPLATE_DETAILS).should('have.text', 'None');
     });
     cy.get(SCHEDULE_DETAILS).within(() => {
-      getDetails(RUNS_EVERY_DETAILS).should(
-        'have.text',
-        `${this.rule.runsEvery.interval}${this.rule.runsEvery.type}`
-      );
-      getDetails(ADDITIONAL_LOOK_BACK_DETAILS).should(
-        'have.text',
-        `${this.rule.lookBack.interval}${this.rule.lookBack.type}`
-      );
+      getDetails(RUNS_EVERY_DETAILS).should('have.text', `${rule.interval}`);
+      const humanizedDuration = getHumanizedDuration(rule.from ?? 'now-6m', rule.interval ?? '5m');
+      getDetails(ADDITIONAL_LOOK_BACK_DETAILS).should('have.text', `${humanizedDuration}`);
     });
 
     waitForTheRuleToBeExecuted();
     waitForAlertsToPopulate();
 
-    cy.get(NUMBER_OF_ALERTS)
+    cy.get(ALERTS_COUNT)
       .invoke('text')
       .should('match', /^[1-9].+$/); // Any number of alerts
     cy.get(ALERT_GRID_CELL).contains('auditbeat');

@@ -98,7 +98,6 @@ export function SearchBarComponent(props: SearchBarStateProps & SearchBarProps) 
   const kibana = useKibana<IUnifiedSearchPluginServices>();
   const { services, overlays } = kibana;
   const {
-    savedObjects,
     uiSettings,
     appName,
     unifiedSearch,
@@ -108,9 +107,9 @@ export function SearchBarComponent(props: SearchBarStateProps & SearchBarProps) 
     notifications,
     http,
     docLinks,
+    savedObjectsManagement,
   } = services;
   if (!overlays) return null;
-
   return (
     <form
       onSubmit={(e) => {
@@ -133,7 +132,10 @@ export function SearchBarComponent(props: SearchBarStateProps & SearchBarProps) 
               onClick={() => {
                 confirmWipeWorkspace(
                   () =>
-                    openSourceModal({ overlays, savedObjects, uiSettings }, onIndexPatternSelected),
+                    openSourceModal(
+                      { overlays, http, uiSettings, savedObjectsManagement },
+                      onIndexPatternSelected
+                    ),
                   i18n.translate('xpack.graph.clearWorkspace.confirmText', {
                     defaultMessage:
                       'If you change data sources, your current fields and vertices will be reset.',

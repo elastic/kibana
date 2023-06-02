@@ -35,7 +35,7 @@ export const SearchIndexOverview: React.FC = () => {
       {isConnectorIndex(indexData) && error && (
         <>
           <EuiCallOut
-            iconType="alert"
+            iconType="warning"
             color="danger"
             title={i18n.translate(
               'xpack.enterpriseSearch.content.searchIndex.connectorErrorCallOut.title',

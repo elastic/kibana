@@ -6,22 +6,14 @@
  */
 
 import React from 'react';
-
-import { EuiCodeEditor } from '../../../../../shared_imports';
+import { EuiCodeBlock } from '@elastic/eui';
 
 export const TabJson = ({ json }) => {
   const jsonString = JSON.stringify(json, null, 2);
 
   return (
-    <EuiCodeEditor
-      mode="json"
-      theme="textmate"
-      isReadOnly
-      setOptions={{ maxLines: Infinity, useWorker: false }}
-      value={jsonString}
-      editorProps={{
-        $blockScrolling: Infinity,
-      }}
-    />
+    <EuiCodeBlock data-test-subj="jsonCodeBlock" paddingSize="m" language="json" isCopyable>
+      {jsonString}
+    </EuiCodeBlock>
   );
 };

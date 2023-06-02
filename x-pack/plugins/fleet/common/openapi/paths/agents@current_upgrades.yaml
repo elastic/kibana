@@ -1,6 +1,7 @@
 get:
-  summary: Agents - Current Bulk Upgrades
-  tags: []
+  summary: List current bulk upgrade operations
+  tags:
+    - Agents
   responses:
     '200':
       description: OK
@@ -35,4 +36,6 @@ get:
                     - startTime
             required:
               - items
+    '400':
+      $ref: ../components/responses/error.yaml
   operationId: agents-current-upgrades

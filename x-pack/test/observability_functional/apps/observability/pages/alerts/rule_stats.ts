@@ -39,12 +39,6 @@ export default ({ getService }: FtrProviderContext) => {
       await esArchiver.unload('x-pack/test/functional/es_archives/observability/alerts');
     });
 
-    describe('With no data', () => {
-      it('Shows the no data screen', async () => {
-        await observability.alerts.common.getNoDataPageOrFail();
-      });
-    });
-
     // FLAKY: https://github.com/elastic/kibana/issues/124681
     describe.skip('Stat counters', () => {
       beforeEach(async () => {

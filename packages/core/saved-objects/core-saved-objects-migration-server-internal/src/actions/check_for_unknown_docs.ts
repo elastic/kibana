@@ -116,7 +116,7 @@ export const checkForUnknownDocs =
     RetryableEsClientError,
     UnknownDocsFound | {}
   > =>
-  async () => {
+  () => {
     const excludeQuery = addExcludedTypesToBoolQuery(knownTypes, excludeOnUpgradeQuery.bool);
     return getAggregatedTypesDocuments(client, indexName, excludeQuery)
       .then((unknownDocs) => {

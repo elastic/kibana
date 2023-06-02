@@ -1,5 +1,81 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`shareContextMenuExtensions should render a custom panel title when provided 1`] = `
+<I18nProvider>
+  <EuiContextMenu
+    data-test-subj="shareContextMenu"
+    initialPanelId={5}
+    panels={
+      Array [
+        Object {
+          "content": <UrlPanelContent
+            allowShortUrl={false}
+            objectType="dashboard"
+            urlService={Object {}}
+          />,
+          "id": 1,
+          "title": "Get link",
+        },
+        Object {
+          "content": <UrlPanelContent
+            allowShortUrl={false}
+            isEmbedded={true}
+            objectType="dashboard"
+            urlService={Object {}}
+          />,
+          "id": 2,
+          "title": "Embed Code",
+        },
+        Object {
+          "content": <div>
+            panel content
+          </div>,
+          "id": 3,
+          "title": "AAA panel",
+        },
+        Object {
+          "content": <div>
+            panel content
+          </div>,
+          "id": 4,
+          "title": "ZZZ panel",
+        },
+        Object {
+          "id": 5,
+          "items": Array [
+            Object {
+              "data-test-subj": "sharePanel-Embedcode",
+              "icon": "console",
+              "name": "Embed code",
+              "panel": 2,
+            },
+            Object {
+              "data-test-subj": "sharePanel-Permalinks",
+              "disabled": false,
+              "icon": "link",
+              "name": "Get links",
+              "panel": 1,
+            },
+            Object {
+              "data-test-subj": "sharePanel-ZZZpanel",
+              "name": "ZZZ panel",
+              "panel": 4,
+            },
+            Object {
+              "data-test-subj": "sharePanel-AAApanel",
+              "name": "AAA panel",
+              "panel": 3,
+            },
+          ],
+          "title": "Share this Custom object",
+        },
+      ]
+    }
+    size="m"
+  />
+</I18nProvider>
+`;
+
 exports[`shareContextMenuExtensions should sort ascending on sort order first and then ascending on name 1`] = `
 <I18nProvider>
   <EuiContextMenu
@@ -14,7 +90,7 @@ exports[`shareContextMenuExtensions should sort ascending on sort order first an
             urlService={Object {}}
           />,
           "id": 1,
-          "title": "Permalink",
+          "title": "Get link",
         },
         Object {
           "content": <div>
@@ -35,8 +111,9 @@ exports[`shareContextMenuExtensions should sort ascending on sort order first an
           "items": Array [
             Object {
               "data-test-subj": "sharePanel-Permalinks",
+              "disabled": false,
               "icon": "link",
-              "name": "Permalinks",
+              "name": "Get links",
               "panel": 1,
             },
             Object {
@@ -48,6 +125,58 @@ exports[`shareContextMenuExtensions should sort ascending on sort order first an
               "data-test-subj": "sharePanel-AAApanel",
               "name": "AAA panel",
               "panel": 2,
+            },
+          ],
+          "title": "Share this dashboard",
+        },
+      ]
+    }
+    size="m"
+  />
+</I18nProvider>
+`;
+
+exports[`should disable the share URL when set 1`] = `
+<I18nProvider>
+  <EuiContextMenu
+    data-test-subj="shareContextMenu"
+    initialPanelId={3}
+    panels={
+      Array [
+        Object {
+          "content": <UrlPanelContent
+            allowShortUrl={false}
+            objectType="dashboard"
+            urlService={Object {}}
+          />,
+          "id": 1,
+          "title": "Get link",
+        },
+        Object {
+          "content": <UrlPanelContent
+            allowShortUrl={false}
+            isEmbedded={true}
+            objectType="dashboard"
+            urlService={Object {}}
+          />,
+          "id": 2,
+          "title": "Embed Code",
+        },
+        Object {
+          "id": 3,
+          "items": Array [
+            Object {
+              "data-test-subj": "sharePanel-Embedcode",
+              "icon": "console",
+              "name": "Embed code",
+              "panel": 2,
+            },
+            Object {
+              "data-test-subj": "sharePanel-Permalinks",
+              "disabled": true,
+              "icon": "link",
+              "name": "Get links",
+              "panel": 1,
             },
           ],
           "title": "Share this dashboard",
@@ -73,7 +202,7 @@ exports[`should only render permalink panel when there are no other panels 1`] =
             urlService={Object {}}
           />,
           "id": 1,
-          "title": "Permalink",
+          "title": "Get link",
         },
       ]
     }
@@ -96,7 +225,7 @@ exports[`should render context menu panel when there are more than one panel 1`]
             urlService={Object {}}
           />,
           "id": 1,
-          "title": "Permalink",
+          "title": "Get link",
         },
         Object {
           "content": <UrlPanelContent
@@ -119,8 +248,9 @@ exports[`should render context menu panel when there are more than one panel 1`]
             },
             Object {
               "data-test-subj": "sharePanel-Permalinks",
+              "disabled": false,
               "icon": "link",
-              "name": "Permalinks",
+              "name": "Get links",
               "panel": 1,
             },
           ],

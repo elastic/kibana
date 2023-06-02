@@ -8,8 +8,13 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
 
+import { FormattedMessage } from '@kbn/i18n-react';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import styled from 'styled-components';
+import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import type { RangeFilterParams } from '@kbn/es-query';
+import type { ClickTriggerEvent, MultiClickTriggerEvent } from '@kbn/charts-plugin/public';
+import type { XYState } from '@kbn/lens-plugin/public';
 import { setAbsoluteRangeDatePicker } from '../../store/inputs/actions';
 import { useKibana } from '../../lib/kibana';
 import { useLensAttributes } from './use_lens_attributes';
@@ -20,14 +25,31 @@ import { useDeepEqualSelector } from '../../hooks/use_selector';
 import { ModalInspectQuery } from '../inspect/modal';
 import { InputsModelId } from '../../store/inputs/constants';
 import { getRequestsAndResponses } from './utils';
+import { SourcererScopeName } from '../../store/sourcerer/model';
+import { VisualizationActions } from './actions';
 
-const LensComponentWrapper = styled.div<{ height?: string }>`
-  height: ${({ height }) => height ?? 'auto'};
+const HOVER_ACTIONS_PADDING = 24;
+
+const LensComponentWrapper = styled.div<{
+  $height?: number;
+  width?: string | number;
+  $addHoverActionsPadding?: boolean;
+}>`
+  height: ${({ $height }) => ($height ? `${$height}px` : 'auto')};
+  width: ${({ width }) => width ?? 'auto'};
   > div {
     background-color: transparent;
+    ${({ $addHoverActionsPadding }) =>
+      $addHoverActionsPadding ? `padding: ${HOVER_ACTIONS_PADDING}px 0 0 0;` : ``}
+  }
+  .lnsExpressionRenderer .echLegend {
+    ${({ $height, $addHoverActionsPadding }) =>
+      $height && $height > HOVER_ACTIONS_PADDING && $addHoverActionsPadding
+        ? `height: ${$height - HOVER_ACTIONS_PADDING * 1.5}px;`
+        : ''}
   }
   .expExpressionRenderer__expression {
-    padding: 0 !important;
+    padding: 2px 0 0 0 !important;
   }
   .legacyMtrVis__container {
     padding: 0;
@@ -44,31 +66,56 @@ const initVisualizationData: {
   isLoading: true,
 };
 
-const style = { height: '100%', minWidth: '100px' };
-
 const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
+  applyGlobalQueriesAndFilters = true,
+  extraActions,
+  extraOptions,
   getLensAttributes,
   height: wrapperHeight,
   id,
   inputsModelId = InputsModelId.global,
+  inspectTitle,
   lensAttributes,
+  onLoad,
+  scopeId = SourcererScopeName.default,
   stackByField,
   timerange,
-  inspectTitle,
+  width: wrapperWidth,
+  withActions = true,
 }) => {
-  const { lens } = useKibana().services;
+  const style = useMemo(
+    () => ({
+      height: wrapperHeight ?? '100%',
+      minWidth: '100px',
+      width: wrapperWidth ?? '100%',
+    }),
+    [wrapperHeight, wrapperWidth]
+  );
+  const {
+    lens,
+    data: {
+      actions: { createFiltersFromValueClickAction },
+    },
+  } = useKibana().services;
   const dispatch = useDispatch();
   const [isShowingModal, setIsShowingModal] = useState(false);
   const [visualizationData, setVisualizationData] = useState(initVisualizationData);
   const getGlobalQuery = inputsSelectors.globalQueryByIdSelector();
   const { searchSessionId } = useDeepEqualSelector((state) => getGlobalQuery(state, id));
   const attributes = useLensAttributes({
-    lensAttributes,
+    applyGlobalQueriesAndFilters,
+    extraOptions,
     getLensAttributes,
+    lensAttributes,
+    scopeId,
     stackByField,
     title: '',
   });
-
+  const preferredSeriesType = (attributes?.state?.visualization as XYState)?.preferredSeriesType;
+  // Avoid hover actions button overlaps with its chart
+  const addHoverActionsPadding =
+    attributes?.visualizationType !== 'lnsLegacyMetric' &&
+    attributes?.visualizationType !== 'lnsPie';
   const LensComponent = lens.EmbeddableComponent;
   const inspectActionProps = useMemo(
     () => ({
@@ -81,10 +128,11 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
   );
 
   const actions = useActions({
-    withActions: true,
     attributes,
-    timeRange: timerange,
+    extraActions,
     inspectActionProps,
+    timeRange: timerange,
+    withActions,
   });
 
   const handleCloseModal = useCallback(() => {
@@ -115,39 +163,131 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
     return { response, additionalResponses };
   }, [visualizationData.responses]);
 
-  const onLoad = useCallback((isLoading, adapters) => {
-    if (!adapters) {
-      return;
-    }
-    const data = getRequestsAndResponses(adapters?.requests?.getRequests());
-    setVisualizationData({
-      requests: data.requests,
-      responses: data.responses,
-      isLoading,
-    });
-  }, []);
+  const onLoadCallback = useCallback(
+    (isLoading, adapters) => {
+      if (!adapters) {
+        return;
+      }
+      const data = getRequestsAndResponses(adapters?.requests?.getRequests());
+      setVisualizationData({
+        requests: data.requests,
+        responses: data.responses,
+        isLoading,
+      });
+
+      if (onLoad != null) {
+        onLoad({
+          requests: data.requests,
+          responses: data.responses,
+          isLoading,
+        });
+      }
+    },
+    [onLoad]
+  );
+
+  const onFilterCallback = useCallback(
+    async (e: ClickTriggerEvent['data'] | MultiClickTriggerEvent['data']) => {
+      if (!Array.isArray(e.data) || preferredSeriesType !== 'area') {
+        return;
+      }
+      // Update timerange when clicking on a dot in an area chart
+      const [{ query }] = await createFiltersFromValueClickAction({
+        data: e.data,
+        negate: e.negate,
+      });
+      const rangeFilter: RangeFilterParams = query?.range['@timestamp'];
+      if (rangeFilter?.gte && rangeFilter?.lt) {
+        updateDateRange({
+          range: [rangeFilter.gte, rangeFilter.lt],
+        });
+      }
+    },
+    [createFiltersFromValueClickAction, updateDateRange, preferredSeriesType]
+  );
+
+  const adHocDataViews = useMemo(
+    () =>
+      attributes?.state?.adHocDataViews != null
+        ? Object.values(attributes?.state?.adHocDataViews).reduce((acc, adHocDataView) => {
+            if (adHocDataView?.name != null) {
+              acc.push(adHocDataView?.name);
+            }
+            return acc;
+          }, [] as string[])
+        : null,
+    [attributes?.state?.adHocDataViews]
+  );
+
+  if (!searchSessionId) {
+    return null;
+  }
+
+  if (
+    !attributes ||
+    (visualizationData?.responses != null && visualizationData?.responses?.length === 0)
+  ) {
+    return (
+      <EuiFlexGroup>
+        <EuiFlexItem grow={1}>
+          <EuiEmptyPrompt
+            body={
+              <EuiText size="xs">
+                <FormattedMessage
+                  id="xpack.securitySolution.lensEmbeddable.NoDataToDisplay.title"
+                  defaultMessage="No data to display"
+                />
+              </EuiText>
+            }
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <VisualizationActions
+            extraActions={extraActions}
+            getLensAttributes={getLensAttributes}
+            inputId={inputsModelId}
+            isInspectButtonDisabled={true}
+            lensAttributes={attributes}
+            queryId={id}
+            stackByField={stackByField}
+            timerange={timerange}
+            title={inspectTitle}
+            withDefaultActions={false}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  }
 
   return (
     <>
-      {attributes && searchSessionId ? (
-        <LensComponentWrapper height={wrapperHeight}>
+      {attributes && searchSessionId && (
+        <LensComponentWrapper
+          $height={wrapperHeight}
+          width={wrapperWidth}
+          $addHoverActionsPadding={addHoverActionsPadding}
+        >
           <LensComponent
             id={id}
             style={style}
             timeRange={timerange}
             attributes={attributes}
-            onLoad={onLoad}
+            onLoad={onLoadCallback}
             onBrushEnd={updateDateRange}
+            onFilter={onFilterCallback}
             viewMode={ViewMode.VIEW}
             withDefaultActions={false}
             extraActions={actions}
             searchSessionId={searchSessionId}
             showInspector={false}
+            syncTooltips={false}
+            syncCursor={false}
           />
         </LensComponentWrapper>
-      ) : null}
-      {isShowingModal && requests.request !== null && responses.response !== null && (
+      )}
+      {isShowingModal && requests.request != null && responses.response != null && (
         <ModalInspectQuery
+          adHocDataViews={adHocDataViews}
           additionalRequests={requests.additionalRequests}
           additionalResponses={responses.additionalResponses}
           closeModal={handleCloseModal}

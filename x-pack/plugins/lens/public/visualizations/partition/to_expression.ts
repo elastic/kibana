@@ -26,15 +26,13 @@ import type { CollapseExpressionFunction } from '../../../common/expressions';
 import type { Operation, DatasourcePublicAPI, DatasourceLayers } from '../../types';
 import { DEFAULT_PERCENT_DECIMALS } from './constants';
 import { shouldShowValuesInLegend } from './render_helpers';
+import { PieLayerState, PieVisualizationState, EmptySizeRatios } from '../../../common/types';
 import {
   CategoryDisplay,
+  LegendDisplay,
   NumberDisplay,
   PieChartTypes,
-  PieLayerState,
-  PieVisualizationState,
-  EmptySizeRatios,
-  LegendDisplay,
-} from '../../../common';
+} from '../../../common/constants';
 import { getDefaultVisualValuesForLayer } from '../../shared_components/datasource_default_values';
 import { isCollapsed } from './visualization';
 
@@ -79,10 +77,10 @@ export const getColumnToLabelMap = (
   return columnToLabel;
 };
 
-export const getSortedGroups = (
+export const getSortedAccessorsForGroup = (
   datasource: DatasourcePublicAPI | undefined,
   layer: PieLayerState,
-  accessor: 'primaryGroups' | 'secondaryGroups' = 'primaryGroups'
+  accessor: 'primaryGroups' | 'secondaryGroups' | 'metrics'
 ) => {
   const originalOrder = datasource
     ?.getTableSpec()
@@ -174,7 +172,9 @@ const generateCommonArguments = (
   datasourceLayers: DatasourceLayers,
   paletteService: PaletteRegistry
 ) => {
-  const columnToLabelMap = getColumnToLabelMap(layer.metrics, datasourceLayers[layer.layerId]);
+  const datasource = datasourceLayers[layer.layerId];
+  const columnToLabelMap = getColumnToLabelMap(layer.metrics, datasource);
+  const sortedMetricAccessors = getSortedAccessorsForGroup(datasource, layer, 'metrics');
 
   return {
     labels: generateCommonLabelsAstArgs(state, attributes, layer, columnToLabelMap),
@@ -182,7 +182,7 @@ const generateCommonArguments = (
       .filter(({ columnId }) => !isCollapsed(columnId, layer))
       .map(({ columnId }) => columnId)
       .map(prepareDimension),
-    metrics: (layer.allowMultipleMetrics ? layer.metrics : [layer.metrics[0]]).map(
+    metrics: (layer.allowMultipleMetrics ? sortedMetricAccessors : [sortedMetricAccessors[0]]).map(
       prepareDimension
     ),
     metricsToLabels: JSON.stringify(columnToLabelMap),
@@ -192,7 +192,10 @@ const generateCommonArguments = (
     legendPosition: layer.legendPosition || Position.Right,
     maxLegendLines: layer.legendMaxLines ?? 1,
     legendSize: layer.legendSize,
-    nestedLegend: !!layer.nestedLegend,
+    nestedLegend:
+      layer.primaryGroups.length + (layer.secondaryGroups?.length ?? 0) > 1
+        ? Boolean(layer.nestedLegend)
+        : false,
     truncateLegend:
       layer.truncateLegend ?? getDefaultVisualValuesForLayer(state, datasourceLayers).truncateText,
     palette: generatePaletteAstArguments(paletteService, state.palette),
@@ -290,16 +293,18 @@ function expressionHelper(
   const layer = state.layers[0];
   const datasource = datasourceLayers[layer.layerId];
 
-  const groups = Array.from(
+  const accessors = Array.from(
     new Set(
       [
-        getSortedGroups(datasource, layer, 'primaryGroups'),
-        layer.secondaryGroups ? getSortedGroups(datasource, layer, 'secondaryGroups') : [],
+        getSortedAccessorsForGroup(datasource, layer, 'primaryGroups'),
+        layer.secondaryGroups
+          ? getSortedAccessorsForGroup(datasource, layer, 'secondaryGroups')
+          : [],
       ].flat()
     )
   );
 
-  const operations = groups
+  const operations = accessors
     .map((columnId) => ({
       columnId,
       operation: datasource?.getOperationForColumnId(columnId) as Operation | null,
@@ -323,11 +328,11 @@ function expressionHelper(
     type: 'expression',
     chain: [
       ...(datasourceAst ? datasourceAst.chain : []),
-      ...groups
+      ...accessors
         .filter((columnId) => layer.collapseFns?.[columnId])
         .map((columnId) => {
           return buildExpressionFunction<CollapseExpressionFunction>('lens_collapse', {
-            by: groups.filter((chk) => chk !== columnId),
+            by: accessors.filter((chk) => chk !== columnId),
             metric: layer.metrics,
             fn: [layer.collapseFns![columnId]!],
           }).toAst();

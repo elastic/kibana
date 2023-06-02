@@ -5,17 +5,74 @@
  * 2.0.
  */
 
-export interface KeyValuePair {
+export interface SelectOption {
   label: string;
-  value: string | null;
+  value: string;
 }
 
-export type ConnectorConfiguration = Record<string, KeyValuePair | null>;
+export interface Dependency {
+  field: string;
+  value: string | number | boolean | null;
+}
+
+export type DependencyLookup = Record<string, string | number | boolean | null>;
+
+export enum DisplayType {
+  TEXTBOX = 'textbox',
+  TEXTAREA = 'textarea',
+  NUMERIC = 'numeric',
+  TOGGLE = 'toggle',
+  DROPDOWN = 'dropdown',
+}
+
+export enum FieldType {
+  STRING = 'str',
+  INTEGER = 'int',
+  LIST = 'list',
+  BOOLEAN = 'bool',
+}
+
+export interface ConnectorConfigProperties {
+  default_value: string | number | boolean | null;
+  depends_on: Dependency[];
+  display: DisplayType;
+  label: string;
+  options: SelectOption[];
+  order?: number | null;
+  required: boolean;
+  sensitive: boolean;
+  tooltip: string;
+  type: FieldType;
+  ui_restrictions: string[];
+  validations: string[];
+  value: string | number | boolean | null;
+}
+
+export type ConnectorConfiguration = Record<string, ConnectorConfigProperties | null> & {
+  extract_full_html?: { label: string; value: boolean };
+};
+
+export interface ConnectorSyncConfigProperties {
+  label: string;
+  value: string | number | boolean | null;
+}
+
+export type ConnectorSyncConfiguration = Record<string, ConnectorSyncConfigProperties | null>;
 
 export interface ConnectorScheduling {
   enabled: boolean;
   interval: string;
 }
+
+export interface CustomScheduling {
+  configuration_overrides: Record<string, unknown>;
+  enabled: boolean;
+  interval: string;
+  last_synced: string | null;
+  name: string;
+}
+
+export type ConnectorCustomScheduling = Record<string, CustomScheduling | null>;
 
 export enum ConnectorStatus {
   CREATED = 'created',
@@ -106,21 +163,39 @@ export enum TriggerMethod {
 export enum FeatureName {
   FILTERING_ADVANCED_CONFIG = 'filtering_advanced_config',
   FILTERING_RULES = 'filtering_rules',
+  SYNC_RULES = 'sync_rules',
 }
+
+export type ConnectorFeatures = Partial<{
+  [FeatureName.FILTERING_ADVANCED_CONFIG]: boolean;
+  [FeatureName.FILTERING_RULES]: boolean;
+  [FeatureName.SYNC_RULES]: {
+    advanced?: {
+      enabled: boolean;
+    };
+    basic?: {
+      enabled: boolean;
+    };
+  };
+}> | null;
 
 export interface Connector {
   api_key_id: string | null;
   configuration: ConnectorConfiguration;
+  custom_scheduling: ConnectorCustomScheduling;
   description: string | null;
   error: string | null;
-  features: Partial<Record<FeatureName, boolean>> | null;
+  features: ConnectorFeatures;
   filtering: FilteringConfig[];
   id: string;
   index_name: string;
   is_native: boolean;
   language: string | null;
+  last_access_control_sync_scheduled_at: string | null;
+  last_access_control_sync_status: SyncStatus | null;
   last_seen: string | null;
   last_sync_error: string | null;
+  last_sync_scheduled_at: string | null;
   last_sync_status: SyncStatus | null;
   last_synced: string | null;
   name: string;
@@ -141,13 +216,13 @@ export interface ConnectorSyncJob {
   canceled_at: string | null;
   completed_at: string | null;
   connector: {
-    configuration: ConnectorConfiguration;
-    filtering: FilteringRules[] | null;
+    configuration: ConnectorSyncConfiguration;
+    filtering: FilteringRules | FilteringRules[] | null;
     id: string;
     index_name: string;
-    language: string;
+    language: string | null;
     pipeline: IngestPipelineParams | null;
-    service_type: string;
+    service_type: string | null;
   };
   created_at: string;
   deleted_document_count: number;
@@ -155,12 +230,13 @@ export interface ConnectorSyncJob {
   id: string;
   indexed_document_count: number;
   indexed_document_volume: number;
-  last_seen: string;
+  last_seen: string | null;
   metadata: Record<string, unknown>;
-  started_at: string;
+  started_at: string | null;
   status: SyncStatus;
+  total_document_count: number | null;
   trigger_method: TriggerMethod;
-  worker_hostname: string;
+  worker_hostname: string | null;
 }
 
 export type ConnectorSyncJobDocument = Omit<ConnectorSyncJob, 'id'>;

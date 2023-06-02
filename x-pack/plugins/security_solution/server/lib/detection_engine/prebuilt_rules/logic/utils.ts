@@ -5,17 +5,7 @@
  * 2.0.
  */
 
-import type { PrebuiltRuleToInstall } from '../../../../../common/detection_engine/prebuilt_rules';
 import type { RuleAlertType } from '../../rule_schema';
-
-/**
- * Converts an array of prebuilt rules to a Map with rule IDs as keys
- *
- * @param rules Array of prebuilt rules
- * @returns Map
- */
-export const prebuiltRulesToMap = (rules: PrebuiltRuleToInstall[]) =>
-  new Map(rules.map((rule) => [rule.rule_id, rule]));
 
 /**
  * Converts an array of rules to a Map with rule IDs as keys

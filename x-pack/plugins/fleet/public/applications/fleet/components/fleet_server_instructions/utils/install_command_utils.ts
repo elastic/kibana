@@ -96,6 +96,8 @@ export function getInstallCommandForPlatform(
     commandArguments.push(['fleet-server-cert-key', '<PATH_TO_FLEET_SERVER_CERT_KEY>']);
   }
 
+  commandArguments.push(['fleet-server-port', '8220']);
+
   const commandArgumentsStr = commandArguments
     .reduce((acc, [key, val]) => {
       if (acc === '' && key === 'url') {
@@ -113,6 +115,7 @@ export function getInstallCommandForPlatform(
     deb: `${artifact.downloadCommand}\nsudo elastic-agent enroll ${commandArgumentsStr}\nsudo systemctl enable elastic-agent\nsudo systemctl start elastic-agent`,
     rpm: `${artifact.downloadCommand}\nsudo elastic-agent enroll ${commandArgumentsStr}\nsudo systemctl enable elastic-agent\nsudo systemctl start elastic-agent`,
     kubernetes: '',
+    cloudFormation: '',
   };
 
   return commands[platform];

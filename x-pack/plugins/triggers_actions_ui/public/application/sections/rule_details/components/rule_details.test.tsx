@@ -6,7 +6,7 @@
  */
 
 import * as React from 'react';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { shallow } from 'enzyme';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { act } from '@testing-library/react';
@@ -21,8 +21,6 @@ import {
 } from '@kbn/alerting-plugin/common';
 import { useKibana } from '../../../../common/lib/kibana';
 import { ruleTypeRegistryMock } from '../../../rule_type_registry.mock';
-
-export const DATE_9999 = '9999-12-31T12:34:56.789Z';
 
 jest.mock('../../../../common/lib/kibana');
 
@@ -44,11 +42,11 @@ jest.mock('../../../lib/action_connector_api', () => ({
   loadAllActions: jest.fn().mockResolvedValue([]),
 }));
 
-jest.mock('../../../lib/rule_api', () => ({
+jest.mock('../../../lib/rule_api/update_api_key', () => ({
   bulkUpdateAPIKey: jest.fn(),
-  deleteRules: jest.fn(),
 }));
-const { bulkUpdateAPIKey, deleteRules } = jest.requireMock('../../../lib/rule_api');
+
+const { bulkUpdateAPIKey } = jest.requireMock('../../../lib/rule_api/update_api_key');
 
 jest.mock('../../../lib/capabilities', () => ({
   hasAllPrivilege: jest.fn(() => true),
@@ -62,12 +60,13 @@ const ruleTypeRegistry = ruleTypeRegistryMock.create();
 const mockRuleApis = {
   muteRule: jest.fn(),
   unmuteRule: jest.fn(),
-  enableRule: jest.fn(),
-  disableRule: jest.fn(),
   requestRefresh: jest.fn(),
-  refreshToken: Date.now(),
+  refreshToken: { resolve: jest.fn(), reject: jest.fn() },
   snoozeRule: jest.fn(),
   unsnoozeRule: jest.fn(),
+  bulkEnableRules: jest.fn(),
+  bulkDisableRules: jest.fn(),
+  bulkDeleteRules: jest.fn(),
 };
 
 const authorizedConsumers = {
@@ -109,12 +108,21 @@ describe('rule_details', () => {
     });
 
     it('renders the API key owner badge when user can manage API keys', () => {
-      const rule = mockRule();
-      expect(
-        shallow(
-          <RuleDetails rule={rule} ruleType={ruleType} actionTypes={[]} {...mockRuleApis} />
-        ).find(<EuiBadge>{rule.apiKeyOwner}</EuiBadge>)
-      ).toBeTruthy();
+      const rule = mockRule({ apiKeyOwner: 'elastic' });
+      const wrapper = mountWithIntl(
+        <RuleDetails rule={rule} ruleType={ruleType} actionTypes={[]} {...mockRuleApis} />
+      );
+      expect(wrapper.find('[data-test-subj="apiKeyOwnerLabel"]').first().text()).toBe('elastic');
+    });
+
+    it('renders the user-managed icon when apiKeyCreatedByUser is true', async () => {
+      const rule = mockRule({ apiKeyOwner: 'elastic', apiKeyCreatedByUser: true });
+      const wrapper = mountWithIntl(
+        <RuleDetails rule={rule} ruleType={ruleType} actionTypes={[]} {...mockRuleApis} />
+      );
+      expect(wrapper.find('[data-test-subj="apiKeyOwnerLabel"]').first().text()).toBe(
+        'elastic Info'
+      );
     });
 
     it(`doesn't render the API key owner badge when user can't manage API keys`, () => {
@@ -192,7 +200,7 @@ describe('rule_details', () => {
           actions: [
             {
               group: 'default',
-              id: uuid.v4(),
+              id: uuidv4(),
               params: {},
               actionTypeId: '.server-log',
             },
@@ -230,13 +238,13 @@ describe('rule_details', () => {
           actions: [
             {
               group: 'default',
-              id: uuid.v4(),
+              id: uuidv4(),
               params: {},
               actionTypeId: '.server-log',
             },
             {
               group: 'default',
-              id: uuid.v4(),
+              id: uuidv4(),
               params: {},
               actionTypeId: '.email',
             },
@@ -354,7 +362,7 @@ describe('rule_details', () => {
         actions: [
           {
             group: 'default',
-            id: uuid.v4(),
+            id: uuidv4(),
             params: {},
             actionTypeId: '.server-log',
           },
@@ -394,7 +402,7 @@ describe('rule_details', () => {
         actions: [
           {
             group: 'default',
-            id: uuid.v4(),
+            id: uuidv4(),
             params: {},
             actionTypeId: '.server-log',
           },
@@ -691,7 +699,11 @@ describe('rule_details', () => {
 
   describe('delete rule button', () => {
     it('should delete the rule when clicked', async () => {
-      deleteRules.mockResolvedValueOnce({ successes: ['1'], errors: [] });
+      mockRuleApis.bulkDeleteRules.mockResolvedValueOnce({
+        rules: [{ id: 1 }],
+        errors: [],
+        total: 1,
+      });
       const rule = mockRule();
       const requestRefresh = jest.fn();
       const wrapper = mountWithIntl(
@@ -716,7 +728,7 @@ describe('rule_details', () => {
 
       updateButton.simulate('click');
 
-      const confirm = wrapper.find('[data-test-subj="deleteIdsConfirmation"]').first();
+      const confirm = wrapper.find('[data-test-subj="rulesDeleteConfirmation"]').first();
       expect(confirm.exists()).toBeTruthy();
 
       const confirmButton = wrapper.find('[data-test-subj="confirmModalConfirmButton"]').last();
@@ -724,8 +736,8 @@ describe('rule_details', () => {
 
       confirmButton.simulate('click');
 
-      expect(deleteRules).toHaveBeenCalledTimes(1);
-      expect(deleteRules).toHaveBeenCalledWith(expect.objectContaining({ ids: [rule.id] }));
+      expect(mockRuleApis.bulkDeleteRules).toHaveBeenCalledTimes(1);
+      expect(mockRuleApis.bulkDeleteRules).toHaveBeenCalledWith({ ids: [rule.id] });
     });
   });
 
@@ -755,8 +767,8 @@ describe('rule_details', () => {
 
       disableButton.simulate('click');
 
-      expect(mockRuleApis.disableRule).toHaveBeenCalledTimes(1);
-      expect(mockRuleApis.disableRule).toHaveBeenCalledWith(rule);
+      expect(mockRuleApis.bulkDisableRules).toHaveBeenCalledTimes(1);
+      expect(mockRuleApis.bulkDisableRules).toHaveBeenCalledWith({ ids: [rule.id] });
     });
 
     it('should enable the rule when clicked', async () => {
@@ -784,16 +796,16 @@ describe('rule_details', () => {
 
       enableButton.simulate('click');
 
-      expect(mockRuleApis.enableRule).toHaveBeenCalledTimes(1);
-      expect(mockRuleApis.enableRule).toHaveBeenCalledWith(rule);
+      expect(mockRuleApis.bulkEnableRules).toHaveBeenCalledTimes(1);
+      expect(mockRuleApis.bulkEnableRules).toHaveBeenCalledWith({ ids: [rule.id] });
     });
   });
 
   function mockRule(overloads: Partial<Rule> = {}): Rule {
     return {
-      id: uuid.v4(),
+      id: uuidv4(),
       enabled: true,
-      name: `rule-${uuid.v4()}`,
+      name: `rule-${uuidv4()}`,
       tags: [],
       ruleTypeId: '.noop',
       consumer: ALERTS_FEATURE_ID,
@@ -813,6 +825,8 @@ describe('rule_details', () => {
         status: 'unknown',
         lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
       },
+      revision: 0,
+      apiKeyCreatedByUser: false,
       ...overloads,
     };
   }

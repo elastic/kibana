@@ -6,12 +6,13 @@
  */
 
 import { SavedObject } from '@kbn/core/types';
+import moment from 'moment';
 import { apiService } from '../../../../utils/api_service';
 import {
+  EncryptedSyntheticsMonitor,
   EncryptedSyntheticsSavedMonitor,
   PingsResponse,
   PingsResponseType,
-  SyntheticsMonitor,
 } from '../../../../../common/runtime_types';
 import { API_URLS, SYNTHETICS_API_URLS } from '../../../../../common/constants';
 
@@ -47,7 +48,7 @@ export const fetchMonitorRecentPings = async ({
     SYNTHETICS_API_URLS.PINGS,
     {
       monitorId,
-      from: from ?? new Date(0).toISOString(),
+      from: from ?? moment().subtract(30, 'days').toISOString(),
       to: to ?? new Date().toISOString(),
       locations,
       sort,
@@ -64,8 +65,8 @@ export const fetchSyntheticsMonitor = async ({
   monitorId: string;
 }): Promise<EncryptedSyntheticsSavedMonitor> => {
   const savedObject = (await apiService.get(
-    `${API_URLS.SYNTHETICS_MONITORS}/${monitorId}`
-  )) as SavedObject<SyntheticsMonitor>;
+    API_URLS.GET_SYNTHETICS_MONITOR.replace('{monitorId}', monitorId)
+  )) as SavedObject<EncryptedSyntheticsMonitor>;
 
   return {
     ...savedObject.attributes,

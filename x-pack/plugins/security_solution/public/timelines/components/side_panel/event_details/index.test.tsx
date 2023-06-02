@@ -10,7 +10,7 @@ import { EventDetailsPanel } from '.';
 import '../../../../common/mock/match_media';
 import { TestProviders } from '../../../../common/mock';
 import { TimelineId, TimelineTabs } from '../../../../../common/types/timeline';
-import type { Ecs } from '../../../../../common/ecs';
+import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import {
   KibanaServices,
   useKibana,
@@ -36,6 +36,15 @@ const ecsData: Ecs = {
     },
   },
 };
+
+const mockUseLocation = jest.fn().mockReturnValue({ pathname: '/test', search: '?' });
+jest.mock('react-router-dom', () => {
+  const original = jest.requireActual('react-router-dom');
+  return {
+    ...original,
+    useLocation: () => mockUseLocation(),
+  };
+});
 
 jest.mock('../../../../../common/endpoint/service/host_isolation/utils', () => {
   return {
@@ -94,7 +103,7 @@ jest.mock(
   }
 );
 jest.mock('../../../../detections/components/alerts_table/actions');
-jest.mock('../../../../risk_score/containers', () => {
+jest.mock('../../../../explore/containers/risk_score', () => {
   return {
     useRiskScore: jest.fn().mockReturnValue({
       loading: true,
@@ -143,7 +152,8 @@ describe('event details panel component', () => {
           }),
         },
         osquery: {
-          OsqueryResults: jest.fn().mockReturnValue(null),
+          OsqueryResult: jest.fn().mockReturnValue(null),
+          fetchAllLiveQueries: jest.fn().mockReturnValue({ data: { data: { items: [] } } }),
         },
       },
     });

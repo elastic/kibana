@@ -13,7 +13,7 @@ import React, { useCallback, useMemo } from 'react';
 import { encode } from '@kbn/rison';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { MLJobsAwaitingNodeWarning } from '@kbn/ml-plugin/public';
-import { useTrackPageview } from '@kbn/observability-plugin/public';
+import { useTrackPageview } from '@kbn/observability-shared-plugin/public';
 import { isJobStatusWithResults } from '../../../../common/log_analysis';
 import { TimeKey } from '../../../../common/time';
 import {
@@ -29,7 +29,7 @@ import { useLogEntryCategoriesModuleContext } from '../../../containers/logs/log
 import { useLogEntryRateModuleContext } from '../../../containers/logs/log_analysis/modules/log_entry_rate';
 import { useLogEntryFlyoutContext } from '../../../containers/logs/log_flyout';
 import { useLogViewContext } from '../../../hooks/use_log_view';
-import { LogsPageTemplate } from '../page_template';
+import { LogsPageTemplate } from '../shared/page_template';
 import { AnomaliesResults } from './sections/anomalies';
 import { useDatasetFiltering } from './use_dataset_filtering';
 import { useLogEntryAnomaliesResults } from './use_log_entry_anomalies_results';
@@ -52,7 +52,11 @@ export const LogEntryRateResultsContent: React.FunctionComponent<{
 
   const navigateToApp = useKibana().services.application?.navigateToApp;
 
-  const { logViewId, logViewStatus } = useLogViewContext();
+  const { logViewReference, logViewStatus } = useLogViewContext();
+
+  if (logViewReference.type === 'log-view-inline') {
+    throw new Error('Logs ML features only support persisted Log Views');
+  }
 
   const { hasLogAnalysisSetupCapabilities } = useLogAnalysisCapabilitiesContext();
 
@@ -142,7 +146,7 @@ export const LogEntryRateResultsContent: React.FunctionComponent<{
     datasets,
     isLoadingDatasets,
   } = useLogEntryAnomaliesResults({
-    sourceId: logViewId,
+    logViewReference,
     startTime: timeRange.value.startTime,
     endTime: timeRange.value.endTime,
     defaultSortOptions: SORT_DEFAULTS,
@@ -272,7 +276,7 @@ export const LogEntryRateResultsContent: React.FunctionComponent<{
           logEntryId={flyoutLogEntryId}
           onCloseFlyout={closeLogEntryFlyout}
           onSetFieldFilter={linkToLogStream}
-          sourceId={logViewId}
+          logViewReference={logViewReference}
         />
       ) : null}
     </LogsPageTemplate>

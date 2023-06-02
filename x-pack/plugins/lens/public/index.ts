@@ -30,6 +30,7 @@ export type {
   TableSuggestion,
   Visualization,
   VisualizationSuggestion,
+  Suggestion,
 } from './types';
 export type {
   LegacyMetricState as MetricState,
@@ -43,6 +44,7 @@ export type {
 export type { DatatableVisualizationState } from './visualizations/datatable/visualization';
 export type { HeatmapVisualizationState } from './visualizations/heatmap/types';
 export type { GaugeVisualizationState } from './visualizations/gauge/constants';
+export type { MetricVisualizationState } from './visualizations/metric/types';
 export type {
   FormBasedPersistedState,
   PersistedIndexPatternLayer,
@@ -107,7 +109,8 @@ export type { LensEmbeddableInput, LensSavedObjectAttributes, Embeddable } from 
 export type { ChartInfo } from './chart_info_api';
 
 export { layerTypes } from '../common/layer_types';
+export { LENS_EMBEDDABLE_TYPE } from '../common/constants';
 
-export type { LensPublicStart, LensPublicSetup } from './plugin';
+export type { LensPublicStart, LensPublicSetup, LensSuggestionsApi } from './plugin';
 
 export const plugin = () => new LensPlugin();

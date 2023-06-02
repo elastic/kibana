@@ -8,22 +8,28 @@
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButton, EuiToolTip } from '@elastic/eui';
+import styled from 'styled-components';
 
-import { useGetPackageInfoByKey, useKibanaLink } from '../../../../hooks';
+import { useGetPackageInfoByKeyQuery, useLink, useDashboardLocator } from '../../../../hooks';
 import type { Agent, AgentPolicy } from '../../../../types';
 import {
   FLEET_ELASTIC_AGENT_PACKAGE,
-  FLEET_ELASTIC_AGENT_DETAILS_DASHBOARD_ID,
+  DASHBOARD_LOCATORS_IDS,
 } from '../../../../../../../common/constants';
 
 function useAgentDashboardLink(agent: Agent) {
-  const { isLoading, data } = useGetPackageInfoByKey(FLEET_ELASTIC_AGENT_PACKAGE);
+  const { isLoading, data } = useGetPackageInfoByKeyQuery(FLEET_ELASTIC_AGENT_PACKAGE);
 
   const isInstalled = data?.item.status === 'installed';
+  const dashboardLocator = useDashboardLocator();
 
-  const dashboardLink = useKibanaLink(`/dashboard/${FLEET_ELASTIC_AGENT_DETAILS_DASHBOARD_ID}`);
-  const query = `_a=(query:(language:kuery,query:'elastic_agent.id:${agent.id}'))`;
-  const link = `${dashboardLink}?${query}`;
+  const link = dashboardLocator?.getRedirectUrl({
+    dashboardId: DASHBOARD_LOCATORS_IDS.ELASTIC_AGENT_AGENT_METRICS,
+    query: {
+      language: 'kuery',
+      query: `elastic_agent.id:${agent.id}`,
+    },
+  });
 
   return {
     isLoading,
@@ -32,11 +38,16 @@ function useAgentDashboardLink(agent: Agent) {
   };
 }
 
+const EuiButtonCompressed = styled(EuiButton)`
+  height: 32px;
+`;
+
 export const AgentDashboardLink: React.FunctionComponent<{
   agent: Agent;
   agentPolicy?: AgentPolicy;
 }> = ({ agent, agentPolicy }) => {
   const { isInstalled, link, isLoading } = useAgentDashboardLink(agent);
+  const { getHref } = useLink();
 
   const isLogAndMetricsEnabled = agentPolicy?.monitoring_enabled?.length ?? 0 > 0;
 
@@ -44,15 +55,21 @@ export const AgentDashboardLink: React.FunctionComponent<{
     !isInstalled || isLoading || !isLogAndMetricsEnabled ? { disabled: true } : { href: link };
 
   const button = (
-    <EuiButton fill {...buttonArgs} isLoading={isLoading}>
+    <EuiButtonCompressed
+      {...buttonArgs}
+      isLoading={isLoading}
+      color="primary"
+      iconType="dashboardApp"
+    >
       <FormattedMessage
+        data-test-subj="agentDetails.viewMoreMetricsButton"
         id="xpack.fleet.agentDetails.viewDashboardButtonLabel"
-        defaultMessage="View agent dashboard"
+        defaultMessage="View more agent metrics"
       />
-    </EuiButton>
+    </EuiButtonCompressed>
   );
 
-  if (!isLogAndMetricsEnabled) {
+  if (!isLoading && !isLogAndMetricsEnabled && agentPolicy) {
     return (
       <EuiToolTip
         content={
@@ -62,7 +79,18 @@ export const AgentDashboardLink: React.FunctionComponent<{
           />
         }
       >
-        {button}
+        <EuiButtonCompressed
+          data-test-subj="agentDetails.enableLogsAndMetricsButton"
+          isLoading={isLoading}
+          color="primary"
+          href={getHref('policy_details', { policyId: agentPolicy.id, tabId: 'settings' })}
+          disabled={agentPolicy?.is_managed}
+        >
+          <FormattedMessage
+            id="xpack.fleet.agentDetails.enableLogsAndMetricsLabel"
+            defaultMessage="Enable logs and metrics"
+          />
+        </EuiButtonCompressed>
       </EuiToolTip>
     );
   }

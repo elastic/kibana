@@ -1,0 +1,14 @@
+{
+  "type": "plugin",
+  "id": "@kbn/application-usage-test-plugin",
+  "owner": "@elastic/kibana-core",
+  "plugin": {
+    "id": "applicationUsageTest",
+    "server": false,
+    "browser": true,
+    "configPath": [
+      "xpack",
+      "applicationUsageTest"
+    ]
+  }
+}

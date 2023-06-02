@@ -19,6 +19,8 @@ import {
   Observable,
   lastValueFrom,
 } from 'rxjs';
+import { isFileHashTransform } from '../file_client/stream_transforms/file_hash_transform/file_hash_transform';
+import { UploadOptions } from '../blob_storage_service';
 import type { FileShareJSON, FileShareJSONWithToken } from '../../common/types';
 import type { File as IFile, UpdatableFileMetadata, FileJSON } from '../../common';
 import { fileAttributesReducer, Action } from './file_attributes_reducer';
@@ -70,13 +72,17 @@ export class File<M = unknown> implements IFile {
     return this;
   }
 
-  private upload(content: Readable): Observable<{ size: number }> {
-    return defer(() => this.fileClient.upload(this.id, content));
+  private upload(
+    content: Readable,
+    options?: Partial<Pick<UploadOptions, 'transforms'>>
+  ): Observable<{ size: number }> {
+    return defer(() => this.fileClient.upload(this.metadata, content, options));
   }
 
   public async uploadContent(
     content: Readable,
-    abort$: Observable<unknown> = NEVER
+    abort$: Observable<unknown> = NEVER,
+    options?: Partial<Pick<UploadOptions, 'transforms'>>
   ): Promise<IFile<M>> {
     if (this.uploadInProgress()) {
       throw new UploadInProgressError('Upload already in progress.');
@@ -90,7 +96,7 @@ export class File<M = unknown> implements IFile {
       from(this.updateFileState({ action: 'uploading' })).pipe(
         mergeMap(() =>
           race(
-            this.upload(content),
+            this.upload(content, options),
             abort$.pipe(
               map(() => {
                 throw new AbortedUploadError(`Aborted upload of ${this.id}!`);
@@ -99,7 +105,28 @@ export class File<M = unknown> implements IFile {
           )
         ),
         mergeMap(({ size }) => {
-          return this.updateFileState({ action: 'uploaded', payload: { size } });
+          const updatedStateAction: Action & { action: 'uploaded' } = {
+            action: 'uploaded',
+            payload: { size },
+          };
+
+          if (options && options.transforms) {
+            options.transforms.some((transform) => {
+              if (isFileHashTransform(transform)) {
+                const fileHash = transform.getFileHash();
+
+                updatedStateAction.payload.hash = {
+                  [fileHash.algorithm]: fileHash.value,
+                };
+
+                return true;
+              }
+
+              return false;
+            });
+          }
+
+          return this.updateFileState(updatedStateAction);
         }),
         catchError(async (e) => {
           try {

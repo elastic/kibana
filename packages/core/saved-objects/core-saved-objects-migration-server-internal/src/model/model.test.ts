@@ -6,53 +6,79 @@
  * Side Public License, v 1.
  */
 
+import { chain } from 'lodash';
 import * as Either from 'fp-ts/lib/Either';
 import * as Option from 'fp-ts/lib/Option';
 import type { SavedObjectsRawDoc } from '@kbn/core-saved-objects-server';
+import {
+  DEFAULT_INDEX_TYPES_MAP,
+  type IndexMapping,
+} from '@kbn/core-saved-objects-base-server-internal';
 import type {
+  BaseState,
+  CalculateExcludeFiltersState,
+  UpdateSourceMappingsPropertiesState,
+  CheckTargetMappingsState,
+  CheckUnknownDocumentsState,
+  CheckVersionIndexReadyActions,
+  CleanupUnknownAndExcluded,
+  CleanupUnknownAndExcludedWaitForTaskState,
+  CloneTempToTarget,
+  CreateNewTargetState,
+  CreateReindexTempState,
   FatalState,
-  State,
-  LegacySetWriteBlockState,
-  SetSourceWriteBlockState,
   LegacyCreateReindexTargetState,
+  LegacyDeleteState,
   LegacyReindexState,
   LegacyReindexWaitForTaskState,
-  LegacyDeleteState,
-  ReindexSourceToTempOpenPit,
-  ReindexSourceToTempRead,
-  ReindexSourceToTempClosePit,
-  ReindexSourceToTempTransform,
-  RefreshTarget,
-  UpdateTargetMappingsState,
-  UpdateTargetMappingsWaitForTaskState,
+  LegacySetWriteBlockState,
+  MarkVersionIndexReady,
+  MarkVersionIndexReadyConflict,
+  OutdatedDocumentsSearchClosePit,
   OutdatedDocumentsSearchOpenPit,
   OutdatedDocumentsSearchRead,
-  OutdatedDocumentsSearchClosePit,
   OutdatedDocumentsTransform,
-  MarkVersionIndexReady,
-  BaseState,
-  CreateReindexTempState,
-  MarkVersionIndexReadyConflict,
-  CreateNewTargetState,
-  CloneTempToSource,
-  SetTempWriteBlock,
-  WaitForYellowSourceState,
-  TransformedDocumentsBulkIndex,
-  ReindexSourceToTempIndexBulk,
-  CheckUnknownDocumentsState,
-  CalculateExcludeFiltersState,
   PostInitState,
-  CheckVersionIndexReadyActions,
+  PrepareCompatibleMigration,
+  RefreshTarget,
+  ReindexSourceToTempClosePit,
+  ReindexSourceToTempIndexBulk,
+  ReindexSourceToTempOpenPit,
+  ReindexSourceToTempRead,
+  ReindexSourceToTempTransform,
+  SetSourceWriteBlockState,
+  SetTempWriteBlock,
+  State,
+  TransformedDocumentsBulkIndex,
   UpdateTargetMappingsMeta,
-  CheckTargetMappingsState,
+  UpdateTargetMappingsPropertiesState,
+  UpdateTargetMappingsPropertiesWaitForTaskState,
+  WaitForYellowSourceState,
+  ReadyToReindexSyncState,
+  DoneReindexingSyncState,
 } from '../state';
 import { type TransformErrorObjects, TransformSavedObjectDocumentError } from '../core';
 import type { AliasAction, RetryableEsClientError } from '../actions';
 import type { ResponseType } from '../next';
 import { createInitialProgress } from './progress';
 import { model } from './model';
+import type { BulkIndexOperationTuple, BulkOperation } from './create_batches';
 
 describe('migrations v2 model', () => {
+  const indexMapping: IndexMapping = {
+    properties: {
+      new_saved_object_type: {
+        properties: {
+          value: { type: 'text' },
+        },
+      },
+    },
+    _meta: {
+      migrationMappingPropertyHashes: {
+        new_saved_object_type: '4a11183eee21e6fbad864f7a30b39ad0',
+      },
+    },
+  };
   const baseState: BaseState = {
     controlState: '',
     legacyIndex: '.kibana',
@@ -62,25 +88,14 @@ describe('migrations v2 model', () => {
     retryDelay: 0,
     retryAttempts: 15,
     batchSize: 1000,
+    maxBatchSize: 1000,
     maxBatchSizeBytes: 1e8,
+    maxReadBatchSizeBytes: 1234,
     discardUnknownObjects: false,
     discardCorruptObjects: false,
     indexPrefix: '.kibana',
     outdatedDocumentsQuery: {},
-    targetIndexMappings: {
-      properties: {
-        new_saved_object_type: {
-          properties: {
-            value: { type: 'text' },
-          },
-        },
-      },
-      _meta: {
-        migrationMappingPropertyHashes: {
-          new_saved_object_type: '4a11183eee21e6fbad864f7a30b39ad0',
-        },
-      },
-    },
+    targetIndexMappings: indexMapping,
     tempIndexMappings: { properties: {} },
     preMigrationScript: Option.none,
     currentAlias: '.kibana',
@@ -107,7 +122,37 @@ describe('migrations v2 model', () => {
       clusterShardLimitExceeded: 'clusterShardLimitExceeded',
     },
     waitForMigrationCompletion: false,
+    mustRelocateDocuments: false,
+    indexTypesMap: DEFAULT_INDEX_TYPES_MAP,
   };
+  const postInitState = {
+    ...baseState,
+    aliases: {},
+    sourceIndex: Option.none,
+    sourceIndexMappings: Option.none,
+    versionIndexReadyActions: Option.none,
+    targetIndex: '.kibana_7.11.0_001',
+  };
+
+  const aProcessedDoc = {
+    _id: 'a:b',
+    _source: { type: 'a', a: { name: 'HOI!' }, migrationVersion: {}, references: [] },
+  };
+
+  const processedDocs: SavedObjectsRawDoc[] = [aProcessedDoc];
+
+  const bulkOperationBatches: BulkOperation[][] = [
+    [
+      [
+        {
+          index: {
+            _id: aProcessedDoc._id,
+          },
+        },
+        aProcessedDoc._source,
+      ],
+    ],
+  ];
 
   describe('exponential retry delays for retryable_es_client_error', () => {
     let state: State = {
@@ -205,9 +250,6 @@ describe('migrations v2 model', () => {
       const initState: State = {
         ...baseState,
         controlState: 'INIT',
-        currentAlias: '.kibana',
-        versionAlias: '.kibana_7.11.0',
-        versionIndex: '.kibana_7.11.0_001',
       };
 
       const res: ResponseType<'INIT'> = Either.right({
@@ -230,9 +272,6 @@ describe('migrations v2 model', () => {
       const initBaseState: State = {
         ...baseState,
         controlState: 'INIT',
-        currentAlias: '.kibana',
-        versionAlias: '.kibana_7.11.0',
-        versionIndex: '.kibana_7.11.0_001',
       };
 
       const mappingsWithUnknownType = {
@@ -253,47 +292,6 @@ describe('migrations v2 model', () => {
       describe('if waitForMigrationCompletion=true', () => {
         const initState = Object.assign({}, initBaseState, {
           waitForMigrationCompletion: true,
-        });
-        test('INIT -> OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT if .kibana is already pointing to the target index', () => {
-          const res: ResponseType<'INIT'> = Either.right({
-            '.kibana_7.11.0_001': {
-              aliases: {
-                '.kibana': {},
-                '.kibana_7.11.0': {},
-              },
-              mappings: mappingsWithUnknownType,
-              settings: {},
-            },
-          });
-          const newState = model(initState, res);
-
-          expect(newState.controlState).toEqual('OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT');
-          // This snapshot asserts that we merge the
-          // migrationMappingPropertyHashes of the existing index, but we leave
-          // the mappings for the disabled_saved_object_type untouched. There
-          // might be another Kibana instance that knows about this type and
-          // needs these mappings in place.
-          expect(newState.targetIndexMappings).toMatchInlineSnapshot(`
-            Object {
-              "_meta": Object {
-                "migrationMappingPropertyHashes": Object {
-                  "disabled_saved_object_type": "7997cf5a56cc02bdc9c93361bde732b0",
-                  "new_saved_object_type": "4a11183eee21e6fbad864f7a30b39ad0",
-                },
-              },
-              "properties": Object {
-                "new_saved_object_type": Object {
-                  "properties": Object {
-                    "value": Object {
-                      "type": "text",
-                    },
-                  },
-                },
-              },
-            }
-          `);
-          expect(newState.retryCount).toEqual(0);
-          expect(newState.retryDelay).toEqual(0);
         });
         test('INIT -> INIT when cluster routing allocation is incompatible', () => {
           const res: ResponseType<'INIT'> = Either.left({
@@ -334,6 +332,21 @@ describe('migrations v2 model', () => {
             `"The .kibana alias is pointing to a newer version of Kibana: v7.12.0"`
           );
         });
+        test('INIT -> FATAL when later version alias exists', () => {
+          const res: ResponseType<'INIT'> = Either.right({
+            '.kibana_7.11.0_001': {
+              aliases: { '.kibana_7.12.0': {}, '.kibana': {} },
+              mappings: { properties: {}, _meta: { migrationMappingPropertyHashes: {} } },
+              settings: {},
+            },
+          });
+          const newState = model(initState, res) as FatalState;
+
+          expect(newState.controlState).toEqual('FATAL');
+          expect(newState.reason).toMatchInlineSnapshot(
+            `"The .kibana_7.12.0 alias refers to a newer version of Kibana: v7.12.0"`
+          );
+        });
         test('INIT -> FATAL when .kibana points to multiple indices', () => {
           const res: ResponseType<'INIT'> = Either.right({
             '.kibana_7.12.0_001': {
@@ -369,13 +382,13 @@ describe('migrations v2 model', () => {
             '.kibana_7.invalid.0_001': {
               aliases: {
                 '.kibana': {},
-                '.kibana_7.12.0': {},
+                '.kibana_7.11.0': {},
               },
               mappings: mappingsWithUnknownType,
               settings: {},
             },
-            '.kibana_7.11.0_001': {
-              aliases: { '.kibana_7.11.0': {} },
+            '.kibana_7.10.0_001': {
+              aliases: { '.kibana_7.10.0': {} },
               mappings: { properties: {}, _meta: { migrationMappingPropertyHashes: {} } },
               settings: {},
             },
@@ -401,11 +414,9 @@ describe('migrations v2 model', () => {
           const newState = model(
             {
               ...initState,
-              ...{
-                kibanaVersion: '7.12.0',
-                versionAlias: '.kibana_7.12.0',
-                versionIndex: '.kibana_7.12.0_001',
-              },
+              kibanaVersion: '7.12.0',
+              versionAlias: '.kibana_7.12.0',
+              versionIndex: '.kibana_7.12.0_001',
             },
             res
           ) as WaitForYellowSourceState;
@@ -498,50 +509,10 @@ describe('migrations v2 model', () => {
           expect(newState.retryDelay).toEqual(2000);
         });
       });
+
       describe('if waitForMigrationCompletion=false', () => {
         const initState = Object.assign({}, initBaseState, {
           waitForMigrationCompletion: false,
-        });
-        test('INIT -> OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT if .kibana is already pointing to the target index', () => {
-          const res: ResponseType<'INIT'> = Either.right({
-            '.kibana_7.11.0_001': {
-              aliases: {
-                '.kibana': {},
-                '.kibana_7.11.0': {},
-              },
-              mappings: mappingsWithUnknownType,
-              settings: {},
-            },
-          });
-          const newState = model(initState, res);
-
-          expect(newState.controlState).toEqual('OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT');
-          // This snapshot asserts that we merge the
-          // migrationMappingPropertyHashes of the existing index, but we leave
-          // the mappings for the disabled_saved_object_type untouched. There
-          // might be another Kibana instance that knows about this type and
-          // needs these mappings in place.
-          expect(newState.targetIndexMappings).toMatchInlineSnapshot(`
-            Object {
-              "_meta": Object {
-                "migrationMappingPropertyHashes": Object {
-                  "disabled_saved_object_type": "7997cf5a56cc02bdc9c93361bde732b0",
-                  "new_saved_object_type": "4a11183eee21e6fbad864f7a30b39ad0",
-                },
-              },
-              "properties": Object {
-                "new_saved_object_type": Object {
-                  "properties": Object {
-                    "value": Object {
-                      "type": "text",
-                    },
-                  },
-                },
-              },
-            }
-          `);
-          expect(newState.retryCount).toEqual(0);
-          expect(newState.retryDelay).toEqual(0);
         });
         test('INIT -> INIT when cluster routing allocation is incompatible', () => {
           const res: ResponseType<'INIT'> = Either.left({
@@ -617,13 +588,13 @@ describe('migrations v2 model', () => {
             '.kibana_7.invalid.0_001': {
               aliases: {
                 '.kibana': {},
-                '.kibana_7.12.0': {},
+                '.kibana_7.11.0': {},
               },
               mappings: mappingsWithUnknownType,
               settings: {},
             },
-            '.kibana_7.11.0_001': {
-              aliases: { '.kibana_7.11.0': {} },
+            '.kibana_7.10.0_001': {
+              aliases: { '.kibana_7.10.0': {} },
               mappings: { properties: {}, _meta: { migrationMappingPropertyHashes: {} } },
               settings: {},
             },
@@ -632,6 +603,11 @@ describe('migrations v2 model', () => {
 
           expect(newState.controlState).toBe('WAIT_FOR_YELLOW_SOURCE');
           expect(newState.sourceIndex.value).toBe('.kibana_7.invalid.0_001');
+          expect(newState.aliases).toEqual({
+            '.kibana': '.kibana_7.invalid.0_001',
+            '.kibana_7.10.0': '.kibana_7.10.0_001',
+            '.kibana_7.11.0': '.kibana_7.invalid.0_001',
+          });
         });
 
         test('INIT -> WAIT_FOR_YELLOW_SOURCE when migrating from a v2 migrations index (>= 7.11.0)', () => {
@@ -650,11 +626,9 @@ describe('migrations v2 model', () => {
           const newState = model(
             {
               ...initState,
-              ...{
-                kibanaVersion: '7.12.0',
-                versionAlias: '.kibana_7.12.0',
-                versionIndex: '.kibana_7.12.0_001',
-              },
+              kibanaVersion: '7.12.0',
+              versionAlias: '.kibana_7.12.0',
+              versionIndex: '.kibana_7.12.0_001',
             },
             res
           ) as WaitForYellowSourceState;
@@ -663,6 +637,10 @@ describe('migrations v2 model', () => {
           expect(newState.sourceIndex.value).toBe('.kibana_7.11.0_001');
           expect(newState.retryCount).toEqual(0);
           expect(newState.retryDelay).toEqual(0);
+          expect(newState.aliases).toEqual({
+            '.kibana': '.kibana_7.11.0_001',
+            '.kibana_7.11.0': '.kibana_7.11.0_001',
+          });
         });
 
         test('INIT -> WAIT_FOR_YELLOW_SOURCE when migrating from a v1 migrations index (>= 6.5 < 7.11.0)', () => {
@@ -681,6 +659,9 @@ describe('migrations v2 model', () => {
           expect(newState.sourceIndex.value).toBe('.kibana_3');
           expect(newState.retryCount).toEqual(0);
           expect(newState.retryDelay).toEqual(0);
+          expect(newState.aliases).toEqual({
+            '.kibana': '.kibana_3',
+          });
         });
         test('INIT -> LEGACY_SET_WRITE_BLOCK when migrating from a legacy index (>= 6.0.0 < 6.5)', () => {
           const res: ResponseType<'INIT'> = Either.right({
@@ -708,10 +689,6 @@ describe('migrations v2 model', () => {
                 },
               },
               "properties": Object {
-                "disabled_saved_object_type": Object {
-                  "dynamic": false,
-                  "properties": Object {},
-                },
                 "new_saved_object_type": Object {
                   "properties": Object {
                     "value": Object {
@@ -779,7 +756,7 @@ describe('migrations v2 model', () => {
           expect(newState.retryCount).toEqual(0);
           expect(newState.retryDelay).toEqual(0);
         });
-        test('INIT -> CREATE_NEW_TARGET when no indices/aliases exist', () => {
+        test('INIT -> CREATE_NEW_TARGET when the index does not exist and the migrator is NOT involved in a relocation', () => {
           const res: ResponseType<'INIT'> = Either.right({});
           const newState = model(initState, res);
 
@@ -791,16 +768,38 @@ describe('migrations v2 model', () => {
           expect(newState.retryCount).toEqual(0);
           expect(newState.retryDelay).toEqual(0);
         });
+        test('INIT -> CREATE_REINDEX_TEMP when the index does not exist and the migrator is involved in a relocation', () => {
+          const res: ResponseType<'INIT'> = Either.right({});
+          const newState = model(
+            {
+              ...initState,
+              mustRelocateDocuments: true,
+            },
+            res
+          );
+
+          expect(newState).toMatchObject({
+            controlState: 'CREATE_REINDEX_TEMP',
+            sourceIndex: Option.none,
+            targetIndex: '.kibana_7.11.0_001',
+            versionIndexReadyActions: Option.some([
+              { add: { index: '.kibana_7.11.0_001', alias: '.kibana' } },
+              { add: { index: '.kibana_7.11.0_001', alias: '.kibana_7.11.0' } },
+              { remove_index: { index: '.kibana_7.11.0_reindex_temp' } },
+            ]),
+          });
+          expect(newState.retryCount).toEqual(0);
+          expect(newState.retryDelay).toEqual(0);
+        });
       });
     });
 
     describe('WAIT_FOR_MIGRATION_COMPLETION', () => {
       const waitForMState: State = {
-        ...baseState,
+        ...postInitState,
         controlState: 'WAIT_FOR_MIGRATION_COMPLETION',
-        currentAlias: '.kibana',
-        versionAlias: '.kibana_7.11.0',
-        versionIndex: '.kibana_7.11.0_001',
+        sourceIndex: Option.some('.kibana_7.11.0_001'),
+        sourceIndexMappings: Option.none,
       };
 
       test('WAIT_FOR_MIGRATION_COMPLETION -> WAIT_FOR_MIGRATION_COMPLETION when .kibana points to an index with an invalid version', () => {
@@ -961,12 +960,10 @@ describe('migrations v2 model', () => {
 
     describe('LEGACY_SET_WRITE_BLOCK', () => {
       const legacySetWriteBlockState: LegacySetWriteBlockState = {
-        ...baseState,
+        ...postInitState,
         controlState: 'LEGACY_SET_WRITE_BLOCK',
-        versionIndexReadyActions: Option.none,
         sourceIndex: Option.some('.kibana') as Option.Some<string>,
-        targetIndex: '.kibana_7.11.0_001',
-        legacyReindexTargetMappings: { properties: {} },
+        sourceIndexMappings: Option.some({ properties: {} }) as Option.Some<IndexMapping>,
         legacyPreMigrationDoneActions: [],
         legacyIndex: '',
       };
@@ -1003,12 +1000,10 @@ describe('migrations v2 model', () => {
 
     describe('LEGACY_CREATE_REINDEX_TARGET', () => {
       const legacyCreateReindexTargetState: LegacyCreateReindexTargetState = {
-        ...baseState,
+        ...postInitState,
         controlState: 'LEGACY_CREATE_REINDEX_TARGET',
-        versionIndexReadyActions: Option.none,
         sourceIndex: Option.some('.kibana') as Option.Some<string>,
-        targetIndex: '.kibana_7.11.0_001',
-        legacyReindexTargetMappings: { properties: {} },
+        sourceIndexMappings: Option.some({ properties: {} }) as Option.Some<IndexMapping>,
         legacyPreMigrationDoneActions: [],
         legacyIndex: '',
       };
@@ -1063,12 +1058,10 @@ describe('migrations v2 model', () => {
 
     describe('LEGACY_REINDEX', () => {
       const legacyReindexState: LegacyReindexState = {
-        ...baseState,
+        ...postInitState,
         controlState: 'LEGACY_REINDEX',
-        versionIndexReadyActions: Option.none,
         sourceIndex: Option.some('.kibana') as Option.Some<string>,
-        targetIndex: '.kibana_7.11.0_001',
-        legacyReindexTargetMappings: { properties: {} },
+        sourceIndexMappings: Option.some({ properties: {} }) as Option.Some<IndexMapping>,
         legacyPreMigrationDoneActions: [],
         legacyIndex: '',
       };
@@ -1083,12 +1076,10 @@ describe('migrations v2 model', () => {
 
     describe('LEGACY_REINDEX_WAIT_FOR_TASK', () => {
       const legacyReindexWaitForTaskState: LegacyReindexWaitForTaskState = {
-        ...baseState,
+        ...postInitState,
         controlState: 'LEGACY_REINDEX_WAIT_FOR_TASK',
-        versionIndexReadyActions: Option.none,
         sourceIndex: Option.some('source_index_name') as Option.Some<string>,
-        targetIndex: '.kibana_7.11.0_001',
-        legacyReindexTargetMappings: { properties: {} },
+        sourceIndexMappings: Option.some({ properties: {} }) as Option.Some<IndexMapping>,
         legacyPreMigrationDoneActions: [],
         legacyIndex: 'legacy_index_name',
         legacyReindexTaskId: 'test_task_id',
@@ -1144,12 +1135,10 @@ describe('migrations v2 model', () => {
 
     describe('LEGACY_DELETE', () => {
       const legacyDeleteState: LegacyDeleteState = {
-        ...baseState,
+        ...postInitState,
         controlState: 'LEGACY_DELETE',
-        versionIndexReadyActions: Option.none,
         sourceIndex: Option.some('source_index_name') as Option.Some<string>,
-        targetIndex: '.kibana_7.11.0_001',
-        legacyReindexTargetMappings: { properties: {} },
+        sourceIndexMappings: Option.some({ properties: {} }) as Option.Some<IndexMapping>,
         legacyPreMigrationDoneActions: [],
         legacyIndex: 'legacy_index_name',
       };
@@ -1182,25 +1171,52 @@ describe('migrations v2 model', () => {
     });
 
     describe('WAIT_FOR_YELLOW_SOURCE', () => {
-      const someMappings = {
-        properties: {},
-      } as const;
-
       const waitForYellowSourceState: WaitForYellowSourceState = {
-        ...baseState,
+        ...postInitState,
         controlState: 'WAIT_FOR_YELLOW_SOURCE',
-        sourceIndex: Option.some('.kibana_3') as Option.Some<string>,
-        sourceIndexMappings: someMappings,
+        sourceIndex: Option.some('.kibana_7.11.0_001') as Option.Some<string>,
+        sourceIndexMappings: Option.some(
+          baseState.targetIndexMappings
+        ) as Option.Some<IndexMapping>,
       };
 
-      test('WAIT_FOR_YELLOW_SOURCE -> CHECK_UNKNOWN_DOCUMENTS if action succeeds', () => {
-        const res: ResponseType<'WAIT_FOR_YELLOW_SOURCE'> = Either.right({});
-        const newState = model(waitForYellowSourceState, res);
-        expect(newState.controlState).toEqual('CHECK_UNKNOWN_DOCUMENTS');
+      describe('if action succeeds', () => {
+        test('it resets retry count and delay', () => {
+          const res: ResponseType<'WAIT_FOR_YELLOW_SOURCE'> = Either.right({});
+          const testState = {
+            ...waitForYellowSourceState,
+            retryCount: 1,
+            retryDelay: 2000,
+          };
+          const newState = model(testState, res);
+          expect(newState.retryCount).toEqual(0);
+          expect(newState.retryDelay).toEqual(0);
+        });
 
-        expect(newState).toMatchObject({
-          controlState: 'CHECK_UNKNOWN_DOCUMENTS',
-          sourceIndex: Option.some('.kibana_3'),
+        describe('if the migrator is NOT involved in a relocation', () => {
+          test('WAIT_FOR_YELLOW_SOURCE -> UPDATE_SOURCE_MAPPINGS_PROPERTIES', () => {
+            const res: ResponseType<'WAIT_FOR_YELLOW_SOURCE'> = Either.right({});
+            const newState = model(waitForYellowSourceState, res);
+
+            expect(newState).toMatchObject({
+              controlState: 'UPDATE_SOURCE_MAPPINGS_PROPERTIES',
+            });
+          });
+        });
+
+        describe('if the migrator is involved in a relocation', () => {
+          // no need to attempt to update the mappings, we are going to reindex
+          test('WAIT_FOR_YELLOW_SOURCE -> CHECK_UNKNOWN_DOCUMENTS', () => {
+            const res: ResponseType<'WAIT_FOR_YELLOW_SOURCE'> = Either.right({});
+            const newState = model(
+              { ...waitForYellowSourceState, mustRelocateDocuments: true },
+              res
+            );
+
+            expect(newState).toMatchObject({
+              controlState: 'CHECK_UNKNOWN_DOCUMENTS',
+            });
+          });
         });
       });
 
@@ -1220,20 +1236,239 @@ describe('migrations v2 model', () => {
           }
         `);
       });
+    });
 
-      test('WAIT_FOR_YELLOW_SOURCE -> CHECK_UNKNOWN_DOCUMENTS resets retry count and delay if action succeeds', () => {
-        const res: ResponseType<'WAIT_FOR_YELLOW_SOURCE'> = Either.right({});
-        const testState = {
-          ...waitForYellowSourceState,
-          retryCount: 1,
-          retryDelay: 2000,
-        };
-        const newState = model(testState, res);
-        expect(newState.controlState).toEqual('CHECK_UNKNOWN_DOCUMENTS');
+    describe('UPDATE_SOURCE_MAPPINGS_PROPERTIES', () => {
+      const updateSourceMappingsPropertiesState: UpdateSourceMappingsPropertiesState = {
+        ...postInitState,
+        aliases: {
+          '.kibana_7.11.0': '.kibana_7.11.0_001',
+        },
+        controlState: 'UPDATE_SOURCE_MAPPINGS_PROPERTIES',
+        sourceIndex: Option.some('.kibana_7.11.0_001') as Option.Some<string>,
+        sourceIndexMappings: Option.some(
+          chain(baseState.targetIndexMappings)
+            .cloneDeep()
+            .set('_meta.migrationMappingPropertyHashes.something', 'some-hash')
+            .value()
+        ) as Option.Some<IndexMapping>,
+      };
+
+      describe('if action succeeds', () => {
+        test('UPDATE_SOURCE_MAPPINGS_PROPERTIES -> CLEANUP_UNKNOWN_AND_EXCLUDED if mappings changes are compatible and index is not migrated yet', () => {
+          const res: ResponseType<'UPDATE_SOURCE_MAPPINGS_PROPERTIES'> = Either.right(
+            'update_mappings_succeeded'
+          );
+          const newState = model(updateSourceMappingsPropertiesState, res);
+
+          expect(newState).toMatchObject({
+            controlState: 'CLEANUP_UNKNOWN_AND_EXCLUDED',
+          });
+        });
+
+        test('UPDATE_SOURCE_MAPPINGS_PROPERTIES -> OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT if mappings changes are compatible and index is already migrated', () => {
+          const res: ResponseType<'UPDATE_SOURCE_MAPPINGS_PROPERTIES'> = Either.right(
+            'update_mappings_succeeded'
+          );
+          const newState = model(
+            chain(updateSourceMappingsPropertiesState)
+              .cloneDeep()
+              .set(['aliases', '.kibana'], '.kibana_7.11.0_001')
+              .value(),
+            res
+          );
+
+          expect(newState).toEqual(
+            expect.objectContaining({
+              controlState: 'OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT',
+              sourceIndex: Option.none,
+              targetIndex: '.kibana_7.11.0_001',
+              targetIndexMappings: chain(indexMapping)
+                .cloneDeep()
+                .set('_meta.migrationMappingPropertyHashes.something', 'some-hash')
+                .value(),
+            })
+          );
+        });
+      });
+
+      describe('if action fails', () => {
+        test('UPDATE_SOURCE_MAPPINGS_PROPERTIES -> CHECK_UNKNOWN_DOCUMENTS if mappings changes are incompatible', () => {
+          const res: ResponseType<'UPDATE_SOURCE_MAPPINGS_PROPERTIES'> = Either.left({
+            type: 'incompatible_mapping_exception',
+          });
+          const newState = model(updateSourceMappingsPropertiesState, res);
+
+          expect(newState).toMatchObject({
+            controlState: 'CHECK_UNKNOWN_DOCUMENTS',
+          });
+        });
+
+        test('UPDATE_SOURCE_MAPPINGS_PROPERTIES -> FATAL', () => {
+          const res: ResponseType<'UPDATE_SOURCE_MAPPINGS_PROPERTIES'> = Either.left({
+            type: 'incompatible_mapping_exception',
+          });
+          const newState = model(
+            chain(updateSourceMappingsPropertiesState)
+              .cloneDeep()
+              .set(['aliases', '.kibana'], '.kibana_7.11.0_001')
+              .value(),
+            res
+          );
+
+          expect(newState).toMatchObject({
+            controlState: 'FATAL',
+          });
+        });
+      });
+    });
+
+    describe('CLEANUP_UNKNOWN_AND_EXCLUDED', () => {
+      const cleanupUnknownAndExcluded: CleanupUnknownAndExcluded = {
+        ...postInitState,
+        controlState: 'CLEANUP_UNKNOWN_AND_EXCLUDED',
+        sourceIndex: Option.some('.kibana_7.11.0_001') as Option.Some<string>,
+        sourceIndexMappings: Option.some(
+          baseState.targetIndexMappings
+        ) as Option.Some<IndexMapping>,
+        targetIndex: baseState.versionIndex,
+        kibanaVersion: '7.12.0', // new version!
+        currentAlias: '.kibana',
+        versionAlias: '.kibana_7.12.0',
+      };
+
+      describe('if action succeeds', () => {
+        test('CLEANUP_UNKNOWN_AND_EXCLUDED -> CLEANUP_UNKNOWN_AND_EXCLUDED_WAIT_FOR_TASK', () => {
+          const res: ResponseType<'CLEANUP_UNKNOWN_AND_EXCLUDED'> = Either.right({
+            type: 'cleanup_started' as const,
+            taskId: '1234',
+            unknownDocs: [],
+            errorsByType: {},
+          });
+          const newState = model(cleanupUnknownAndExcluded, res) as PrepareCompatibleMigration;
+
+          expect(newState.controlState).toEqual('CLEANUP_UNKNOWN_AND_EXCLUDED_WAIT_FOR_TASK');
+        });
+      });
+
+      test('CLEANUP_UNKNOWN_AND_EXCLUDED -> FATAL if discardUnknownObjects=false', () => {
+        const res: ResponseType<'CLEANUP_UNKNOWN_AND_EXCLUDED'> = Either.left({
+          type: 'unknown_docs_found' as const,
+          unknownDocs: [
+            { id: 'dashboard:12', type: 'dashboard' },
+            { id: 'foo:17', type: 'foo' },
+          ],
+        });
+
+        const newState = model(cleanupUnknownAndExcluded, res);
 
         expect(newState).toMatchObject({
-          controlState: 'CHECK_UNKNOWN_DOCUMENTS',
-          sourceIndex: Option.some('.kibana_3'),
+          controlState: 'FATAL',
+          reason: expect.stringContaining(
+            'Migration failed because some documents were found which use unknown saved object types'
+          ),
+        });
+      });
+    });
+
+    describe('CLEANUP_UNKNOWN_AND_EXCLUDED_WAIT_FOR_TASK', () => {
+      const cleanupUnknownAndExcludedWaitForTask: CleanupUnknownAndExcludedWaitForTaskState = {
+        ...postInitState,
+        controlState: 'CLEANUP_UNKNOWN_AND_EXCLUDED_WAIT_FOR_TASK',
+        deleteByQueryTaskId: '1234',
+        sourceIndex: Option.some('.kibana_7.11.0_001') as Option.Some<string>,
+        sourceIndexMappings: Option.some(
+          baseState.targetIndexMappings
+        ) as Option.Some<IndexMapping>,
+        targetIndex: baseState.versionIndex,
+        kibanaVersion: '7.12.0', // new version!
+        currentAlias: '.kibana',
+        versionAlias: '.kibana_7.12.0',
+        aliases: {
+          '.kibana': '.kibana_7.11.0_001',
+          '.kibana_7.11.0': '.kibana_7.11.0_001',
+        },
+      };
+
+      test('CLEANUP_UNKNOWN_AND_EXCLUDED_WAIT_FOR_TASK -> CLEANUP_UNKNOWN_AND_EXCLUDED_WAIT_FOR_TASK when response is left wait_for_task_completion_timeout', () => {
+        const res: ResponseType<'UPDATE_TARGET_MAPPINGS_PROPERTIES_WAIT_FOR_TASK'> = Either.left({
+          message: '[timeout_exception] Timeout waiting for ...',
+          type: 'wait_for_task_completion_timeout',
+        });
+        const newState = model(cleanupUnknownAndExcludedWaitForTask, res);
+        expect(newState.controlState).toEqual('CLEANUP_UNKNOWN_AND_EXCLUDED_WAIT_FOR_TASK');
+        expect(newState.retryCount).toEqual(1);
+        expect(newState.retryDelay).toEqual(2000);
+      });
+
+      test('CLEANUP_UNKNOWN_AND_EXCLUDED_WAIT_FOR_TASK -> PREPARE_COMPATIBLE_MIGRATION if action succeeds', () => {
+        const res: ResponseType<'CLEANUP_UNKNOWN_AND_EXCLUDED_WAIT_FOR_TASK'> = Either.right({
+          type: 'cleanup_successful' as const,
+        });
+        const newState = model(
+          cleanupUnknownAndExcludedWaitForTask,
+          res
+        ) as PrepareCompatibleMigration;
+
+        expect(newState.controlState).toEqual('PREPARE_COMPATIBLE_MIGRATION');
+        expect(newState.targetIndexMappings).toEqual(indexMapping);
+        expect(newState.preTransformDocsActions).toEqual([
+          {
+            add: {
+              alias: '.kibana_7.12.0',
+              index: '.kibana_7.11.0_001',
+            },
+          },
+          {
+            remove: {
+              alias: '.kibana_7.11.0',
+              index: '.kibana_7.11.0_001',
+              must_exist: true,
+            },
+          },
+        ]);
+      });
+
+      test('CLEANUP_UNKNOWN_AND_EXCLUDED_WAIT_FOR_TASK -> CLEANUP_UNKNOWN_AND_EXCLUDED if the deleteQuery fails and we have some attempts left', () => {
+        const res: ResponseType<'CLEANUP_UNKNOWN_AND_EXCLUDED_WAIT_FOR_TASK'> = Either.left({
+          type: 'cleanup_failed' as const,
+          failures: ['Failed to delete dashboard:12345', 'Failed to delete dashboard:67890'],
+          versionConflicts: 12,
+        });
+
+        const newState = model(cleanupUnknownAndExcludedWaitForTask, res);
+
+        expect(newState).toMatchObject({
+          controlState: 'CLEANUP_UNKNOWN_AND_EXCLUDED',
+          logs: [
+            {
+              level: 'warning',
+              message:
+                'Errors occurred whilst deleting unwanted documents. Another instance is probably updating or deleting documents in the same index. Retrying attempt 1.',
+            },
+          ],
+        });
+      });
+
+      test('CLEANUP_UNKNOWN_AND_EXCLUDED_WAIT_FOR_TASK -> FAIL if the deleteQuery fails after N retries', () => {
+        const res: ResponseType<'CLEANUP_UNKNOWN_AND_EXCLUDED_WAIT_FOR_TASK'> = Either.left({
+          type: 'cleanup_failed' as const,
+          failures: ['Failed to delete dashboard:12345', 'Failed to delete dashboard:67890'],
+        });
+
+        const newState = model(
+          {
+            ...cleanupUnknownAndExcludedWaitForTask,
+            retryCount: cleanupUnknownAndExcludedWaitForTask.retryAttempts,
+          },
+          res
+        );
+
+        expect(newState).toMatchObject({
+          controlState: 'FATAL',
+          reason: expect.stringContaining(
+            'Migration failed because it was unable to delete unwanted documents from the .kibana_7.11.0_001 system index'
+          ),
         });
       });
     });
@@ -1256,10 +1491,10 @@ describe('migrations v2 model', () => {
 
       test('CHECK_UNKNOWN_DOCUMENTS -> SET_SOURCE_WRITE_BLOCK if action succeeds and no unknown docs are found', () => {
         const checkUnknownDocumentsSourceState: CheckUnknownDocumentsState = {
-          ...baseState,
+          ...postInitState,
           controlState: 'CHECK_UNKNOWN_DOCUMENTS',
           sourceIndex: Option.some('.kibana_3') as Option.Some<string>,
-          sourceIndexMappings: mappingsWithUnknownType,
+          sourceIndexMappings: Option.some(mappingsWithUnknownType) as Option.Some<IndexMapping>,
         };
 
         const res: ResponseType<'CHECK_UNKNOWN_DOCUMENTS'> = Either.right({});
@@ -1283,10 +1518,6 @@ describe('migrations v2 model', () => {
               },
             },
             "properties": Object {
-              "disabled_saved_object_type": Object {
-                "dynamic": false,
-                "properties": Object {},
-              },
               "new_saved_object_type": Object {
                 "properties": Object {
                   "value": Object {
@@ -1305,11 +1536,11 @@ describe('migrations v2 model', () => {
       describe('when unknown docs are found', () => {
         test('CHECK_UNKNOWN_DOCUMENTS -> SET_SOURCE_WRITE_BLOCK if discardUnknownObjects=true', () => {
           const checkUnknownDocumentsSourceState: CheckUnknownDocumentsState = {
-            ...baseState,
+            ...postInitState,
             discardUnknownObjects: true,
             controlState: 'CHECK_UNKNOWN_DOCUMENTS',
             sourceIndex: Option.some('.kibana_3') as Option.Some<string>,
-            sourceIndexMappings: mappingsWithUnknownType,
+            sourceIndexMappings: Option.some(mappingsWithUnknownType) as Option.Some<IndexMapping>,
           };
 
           const res: ResponseType<'CHECK_UNKNOWN_DOCUMENTS'> = Either.right({
@@ -1350,10 +1581,10 @@ describe('migrations v2 model', () => {
 
         test('CHECK_UNKNOWN_DOCUMENTS -> FATAL if discardUnknownObjects=false', () => {
           const checkUnknownDocumentsSourceState: CheckUnknownDocumentsState = {
-            ...baseState,
+            ...postInitState,
             controlState: 'CHECK_UNKNOWN_DOCUMENTS',
             sourceIndex: Option.some('.kibana_3') as Option.Some<string>,
-            sourceIndexMappings: mappingsWithUnknownType,
+            sourceIndexMappings: Option.some(mappingsWithUnknownType) as Option.Some<IndexMapping>,
           };
 
           const res: ResponseType<'CHECK_UNKNOWN_DOCUMENTS'> = Either.right({
@@ -1378,11 +1609,10 @@ describe('migrations v2 model', () => {
 
     describe('SET_SOURCE_WRITE_BLOCK', () => {
       const setWriteBlockState: SetSourceWriteBlockState = {
-        ...baseState,
+        ...postInitState,
         controlState: 'SET_SOURCE_WRITE_BLOCK',
-        versionIndexReadyActions: Option.none,
         sourceIndex: Option.some('.kibana') as Option.Some<string>,
-        targetIndex: '.kibana_7.11.0_001',
+        sourceIndexMappings: Option.some({}) as Option.Some<IndexMapping>,
       };
       test('SET_SOURCE_WRITE_BLOCK -> SET_SOURCE_WRITE_BLOCK if action fails with set_write_block_failed', () => {
         const res: ResponseType<'SET_SOURCE_WRITE_BLOCK'> = Either.left({
@@ -1407,11 +1637,10 @@ describe('migrations v2 model', () => {
 
     describe('CALCULATE_EXCLUDE_FILTERS', () => {
       const state: CalculateExcludeFiltersState = {
-        ...baseState,
+        ...postInitState,
         controlState: 'CALCULATE_EXCLUDE_FILTERS',
-        versionIndexReadyActions: Option.none,
         sourceIndex: Option.some('.kibana') as Option.Some<string>,
-        targetIndex: '.kibana_7.11.0_001',
+        sourceIndexMappings: Option.some({}) as Option.Some<IndexMapping>,
         tempIndexMappings: { properties: {} },
       };
       test('CALCULATE_EXCLUDE_FILTERS -> CALCULATE_EXCLUDE_FILTERS if action fails with retryable error', () => {
@@ -1424,7 +1653,7 @@ describe('migrations v2 model', () => {
       });
       it('CALCULATE_EXCLUDE_FILTERS -> CREATE_REINDEX_TEMP if action succeeds with filters', () => {
         const res: ResponseType<'CALCULATE_EXCLUDE_FILTERS'> = Either.right({
-          mustNotClauses: [{ term: { fieldA: 'abc' } }],
+          filterClauses: [{ term: { fieldA: 'abc' } }],
           errorsByType: { type1: new Error('an error!') },
         });
         const newState = model(state, res);
@@ -1459,20 +1688,33 @@ describe('migrations v2 model', () => {
 
     describe('CREATE_REINDEX_TEMP', () => {
       const state: CreateReindexTempState = {
-        ...baseState,
+        ...postInitState,
         controlState: 'CREATE_REINDEX_TEMP',
-        versionIndexReadyActions: Option.none,
         sourceIndex: Option.some('.kibana') as Option.Some<string>,
-        targetIndex: '.kibana_7.11.0_001',
+        sourceIndexMappings: Option.some({}) as Option.Some<IndexMapping>,
         tempIndexMappings: { properties: {} },
       };
-      it('CREATE_REINDEX_TEMP -> REINDEX_SOURCE_TO_TEMP_OPEN_PIT if action succeeds', () => {
-        const res: ResponseType<'CREATE_REINDEX_TEMP'> = Either.right('create_index_succeeded');
-        const newState = model(state, res);
-        expect(newState.controlState).toEqual('REINDEX_SOURCE_TO_TEMP_OPEN_PIT');
-        expect(newState.retryCount).toEqual(0);
-        expect(newState.retryDelay).toEqual(0);
+
+      describe('if the migrator is NOT involved in a relocation', () => {
+        it('CREATE_REINDEX_TEMP -> REINDEX_SOURCE_TO_TEMP_OPEN_PIT if action succeeds', () => {
+          const res: ResponseType<'CREATE_REINDEX_TEMP'> = Either.right('create_index_succeeded');
+          const newState = model(state, res);
+          expect(newState.controlState).toEqual('REINDEX_SOURCE_TO_TEMP_OPEN_PIT');
+          expect(newState.retryCount).toEqual(0);
+          expect(newState.retryDelay).toEqual(0);
+        });
       });
+
+      describe('if the migrator is involved in a relocation', () => {
+        it('CREATE_REINDEX_TEMP -> READY_TO_REINDEX_SYNC if action succeeds', () => {
+          const res: ResponseType<'CREATE_REINDEX_TEMP'> = Either.right('create_index_succeeded');
+          const newState = model({ ...state, mustRelocateDocuments: true }, res);
+          expect(newState.controlState).toEqual('READY_TO_REINDEX_SYNC');
+          expect(newState.retryCount).toEqual(0);
+          expect(newState.retryDelay).toEqual(0);
+        });
+      });
+
       it('CREATE_REINDEX_TEMP -> CREATE_REINDEX_TEMP if action fails with index_not_green_timeout', () => {
         const res: ResponseType<'CREATE_REINDEX_TEMP'> = Either.left({
           message: '[index_not_green_timeout] Timeout waiting for ...',
@@ -1513,13 +1755,58 @@ describe('migrations v2 model', () => {
       });
     });
 
+    describe('READY_TO_REINDEX_SYNC', () => {
+      const state: ReadyToReindexSyncState = {
+        ...postInitState,
+        controlState: 'READY_TO_REINDEX_SYNC',
+      };
+
+      describe('if the migrator source index did NOT exist', () => {
+        test('READY_TO_REINDEX_SYNC -> DONE_REINDEXING_SYNC', () => {
+          const res: ResponseType<'READY_TO_REINDEX_SYNC'> = Either.right(
+            'synchronized_successfully' as const
+          );
+          const newState = model(state, res);
+          expect(newState.controlState).toEqual('DONE_REINDEXING_SYNC');
+        });
+      });
+
+      describe('if the migrator source index did exist', () => {
+        test('READY_TO_REINDEX_SYNC -> REINDEX_SOURCE_TO_TEMP_OPEN_PIT', () => {
+          const res: ResponseType<'READY_TO_REINDEX_SYNC'> = Either.right(
+            'synchronized_successfully' as const
+          );
+          const newState = model(
+            {
+              ...state,
+              sourceIndex: Option.fromNullable('.kibana'),
+              sourceIndexMappings: Option.fromNullable({} as IndexMapping),
+            },
+            res
+          );
+          expect(newState.controlState).toEqual('REINDEX_SOURCE_TO_TEMP_OPEN_PIT');
+        });
+      });
+
+      test('READY_TO_REINDEX_SYNC -> FATAL if the synchronization between migrators fails', () => {
+        const res: ResponseType<'READY_TO_REINDEX_SYNC'> = Either.left({
+          type: 'sync_failed',
+          error: new Error('Other migrators failed to reach the synchronization point'),
+        });
+        const newState = model(state, res);
+        expect(newState.controlState).toEqual('FATAL');
+        expect((newState as FatalState).reason).toMatchInlineSnapshot(
+          `"An error occurred whilst waiting for other migrators to get to this step."`
+        );
+      });
+    });
+
     describe('REINDEX_SOURCE_TO_TEMP_OPEN_PIT', () => {
       const state: ReindexSourceToTempOpenPit = {
-        ...baseState,
+        ...postInitState,
         controlState: 'REINDEX_SOURCE_TO_TEMP_OPEN_PIT',
-        versionIndexReadyActions: Option.none,
         sourceIndex: Option.some('.kibana') as Option.Some<string>,
-        targetIndex: '.kibana_7.11.0_001',
+        sourceIndexMappings: Option.some({}) as Option.Some<IndexMapping>,
         tempIndexMappings: { properties: {} },
       };
       it('REINDEX_SOURCE_TO_TEMP_OPEN_PIT -> REINDEX_SOURCE_TO_TEMP_READ if action succeeds', () => {
@@ -1537,10 +1824,10 @@ describe('migrations v2 model', () => {
 
     describe('REINDEX_SOURCE_TO_TEMP_READ', () => {
       const state: ReindexSourceToTempRead = {
-        ...baseState,
+        ...postInitState,
         controlState: 'REINDEX_SOURCE_TO_TEMP_READ',
-        versionIndexReadyActions: Option.none,
         sourceIndex: Option.some('.kibana') as Option.Some<string>,
+        sourceIndexMappings: Option.some({}) as Option.Some<IndexMapping>,
         sourceIndexPitId: 'pit_id',
         targetIndex: '.kibana_7.11.0_001',
         tempIndexMappings: { properties: {} },
@@ -1564,6 +1851,8 @@ describe('migrations v2 model', () => {
         expect(newState.lastHitSortValue).toBe(lastHitSortValue);
         expect(newState.progress.processed).toBe(undefined);
         expect(newState.progress.total).toBe(1);
+        expect(newState.maxBatchSize).toBe(1000);
+        expect(newState.batchSize).toBe(1000); // don't increase batchsize above default
         expect(newState.logs).toMatchInlineSnapshot(`
           Array [
             Object {
@@ -1572,6 +1861,83 @@ describe('migrations v2 model', () => {
             },
           ]
         `);
+      });
+
+      it('REINDEX_SOURCE_TO_TEMP_READ -> REINDEX_SOURCE_TO_TEMP_TRANSFORM increases batchSize if < maxBatchSize', () => {
+        const outdatedDocuments = [{ _id: '1', _source: { type: 'vis' } }];
+        const lastHitSortValue = [123456];
+        const res: ResponseType<'REINDEX_SOURCE_TO_TEMP_READ'> = Either.right({
+          outdatedDocuments,
+          lastHitSortValue,
+          totalHits: 1,
+          processedDocs: 1,
+        });
+        let newState = model({ ...state, batchSize: 500 }, res) as ReindexSourceToTempTransform;
+        expect(newState.batchSize).toBe(600);
+        newState = model({ ...state, batchSize: 600 }, res) as ReindexSourceToTempTransform;
+        expect(newState.batchSize).toBe(720);
+        newState = model({ ...state, batchSize: 720 }, res) as ReindexSourceToTempTransform;
+        expect(newState.batchSize).toBe(864);
+        newState = model({ ...state, batchSize: 864 }, res) as ReindexSourceToTempTransform;
+        expect(newState.batchSize).toBe(1000); // + 20% would have been 1036
+        expect(newState.controlState).toBe('REINDEX_SOURCE_TO_TEMP_TRANSFORM');
+        expect(newState.maxBatchSize).toBe(1000);
+      });
+
+      it('REINDEX_SOURCE_TO_TEMP_READ -> REINDEX_SOURCE_TO_TEMP_READ if left es_response_too_large', () => {
+        const res: ResponseType<'REINDEX_SOURCE_TO_TEMP_READ'> = Either.left({
+          type: 'es_response_too_large',
+          contentLength: 4567,
+        });
+        const newState = model(state, res) as ReindexSourceToTempRead;
+        expect(newState.controlState).toBe('REINDEX_SOURCE_TO_TEMP_READ');
+        expect(newState.lastHitSortValue).toBe(undefined); // lastHitSortValue should not be set
+        expect(newState.progress.processed).toBe(undefined); // don't increment progress
+        expect(newState.batchSize).toBe(500); // halves the batch size
+        expect(newState.maxBatchSize).toBe(1000); // leaves maxBatchSize unchanged
+        expect(newState.logs).toMatchInlineSnapshot(`
+          Array [
+            Object {
+              "level": "warning",
+              "message": "Read a batch with a response content length of 4567 bytes which exceeds migrations.maxReadBatchSizeBytes, retrying by reducing the batch size in half to 500.",
+            },
+          ]
+        `);
+      });
+
+      it('REINDEX_SOURCE_TO_TEMP_READ -> REINDEX_SOURCE_TO_TEMP_READ if left es_response_too_large will not reduce batch size below 1', () => {
+        const res: ResponseType<'REINDEX_SOURCE_TO_TEMP_READ'> = Either.left({
+          type: 'es_response_too_large',
+          contentLength: 2345,
+        });
+        const newState = model({ ...state, batchSize: 1.5 }, res) as ReindexSourceToTempRead;
+        expect(newState.controlState).toBe('REINDEX_SOURCE_TO_TEMP_READ');
+        expect(newState.lastHitSortValue).toBe(undefined); // lastHitSortValue should not be set
+        expect(newState.progress.processed).toBe(undefined); // don't increment progress
+        expect(newState.batchSize).toBe(1); // don't halve the batch size or go below 1
+        expect(newState.maxBatchSize).toBe(1000); // leaves maxBatchSize unchanged
+        expect(newState.logs).toMatchInlineSnapshot(`
+          Array [
+            Object {
+              "level": "warning",
+              "message": "Read a batch with a response content length of 2345 bytes which exceeds migrations.maxReadBatchSizeBytes, retrying by reducing the batch size in half to 1.",
+            },
+          ]
+        `);
+      });
+
+      it('REINDEX_SOURCE_TO_TEMP_READ -> FATAL if left es_response_too_large and batchSize already 1', () => {
+        const res: ResponseType<'REINDEX_SOURCE_TO_TEMP_READ'> = Either.left({
+          type: 'es_response_too_large',
+          contentLength: 2345,
+        });
+        const newState = model({ ...state, batchSize: 1 }, res) as FatalState;
+        expect(newState.controlState).toBe('FATAL');
+        expect(newState.batchSize).toBe(1); // don't halve the batch size or go below 1
+        expect(newState.maxBatchSize).toBe(1000); // leaves maxBatchSize unchanged
+        expect(newState.reason).toMatchInlineSnapshot(
+          `"After reducing the read batch size to a single document, the Elasticsearch response content length was 2345bytes which still exceeded migrations.maxReadBatchSizeBytes. Increase migrations.maxReadBatchSizeBytes and try again."`
+        );
       });
 
       it('REINDEX_SOURCE_TO_TEMP_READ -> REINDEX_SOURCE_TO_TEMP_CLOSE_PIT if no outdated documents to reindex', () => {
@@ -1641,30 +2007,68 @@ describe('migrations v2 model', () => {
 
     describe('REINDEX_SOURCE_TO_TEMP_CLOSE_PIT', () => {
       const state: ReindexSourceToTempClosePit = {
-        ...baseState,
+        ...postInitState,
         controlState: 'REINDEX_SOURCE_TO_TEMP_CLOSE_PIT',
-        versionIndexReadyActions: Option.none,
         sourceIndex: Option.some('.kibana') as Option.Some<string>,
+        sourceIndexMappings: Option.some({}) as Option.Some<IndexMapping>,
         sourceIndexPitId: 'pit_id',
-        targetIndex: '.kibana_7.11.0_001',
         tempIndexMappings: { properties: {} },
       };
 
-      it('REINDEX_SOURCE_TO_TEMP_CLOSE_PIT -> SET_TEMP_WRITE_BLOCK if action succeeded', () => {
-        const res: ResponseType<'REINDEX_SOURCE_TO_TEMP_CLOSE_PIT'> = Either.right({});
-        const newState = model(state, res) as ReindexSourceToTempTransform;
-        expect(newState.controlState).toBe('SET_TEMP_WRITE_BLOCK');
-        expect(newState.sourceIndex).toEqual(state.sourceIndex);
+      describe('if the migrator is NOT involved in a relocation', () => {
+        it('REINDEX_SOURCE_TO_TEMP_CLOSE_PIT -> SET_TEMP_WRITE_BLOCK if action succeeded', () => {
+          const res: ResponseType<'REINDEX_SOURCE_TO_TEMP_CLOSE_PIT'> = Either.right({});
+          const newState = model(state, res) as ReindexSourceToTempTransform;
+          expect(newState.controlState).toBe('SET_TEMP_WRITE_BLOCK');
+          expect(newState.sourceIndex).toEqual(state.sourceIndex);
+        });
+      });
+
+      describe('if the migrator is involved in a relocation', () => {
+        it('REINDEX_SOURCE_TO_TEMP_CLOSE_PIT -> DONE_REINDEXING_SYNC if action succeeded', () => {
+          const res: ResponseType<'REINDEX_SOURCE_TO_TEMP_CLOSE_PIT'> = Either.right({});
+          const newState = model(
+            { ...state, mustRelocateDocuments: true },
+            res
+          ) as ReindexSourceToTempTransform;
+          expect(newState.controlState).toBe('DONE_REINDEXING_SYNC');
+        });
+      });
+    });
+
+    describe('DONE_REINDEXING_SYNC', () => {
+      const state: DoneReindexingSyncState = {
+        ...postInitState,
+        controlState: 'DONE_REINDEXING_SYNC',
+      };
+
+      test('DONE_REINDEXING_SYNC -> SET_TEMP_WRITE_BLOCK if synchronization succeeds', () => {
+        const res: ResponseType<'DONE_REINDEXING_SYNC'> = Either.right(
+          'synchronized_successfully' as const
+        );
+        const newState = model(state, res);
+        expect(newState.controlState).toEqual('SET_TEMP_WRITE_BLOCK');
+      });
+      test('DONE_REINDEXING_SYNC -> FATAL if the synchronization between migrators fails', () => {
+        const res: ResponseType<'DONE_REINDEXING_SYNC'> = Either.left({
+          type: 'sync_failed',
+          error: new Error('Other migrators failed to reach the synchronization point'),
+        });
+        const newState = model(state, res);
+        expect(newState.controlState).toEqual('FATAL');
+        expect((newState as FatalState).reason).toMatchInlineSnapshot(
+          `"An error occurred whilst waiting for other migrators to get to this step."`
+        );
       });
     });
 
     describe('REINDEX_SOURCE_TO_TEMP_TRANSFORM', () => {
       const state: ReindexSourceToTempTransform = {
-        ...baseState,
+        ...postInitState,
         controlState: 'REINDEX_SOURCE_TO_TEMP_TRANSFORM',
         outdatedDocuments: [],
-        versionIndexReadyActions: Option.none,
         sourceIndex: Option.some('.kibana') as Option.Some<string>,
+        sourceIndexMappings: Option.some({}) as Option.Some<IndexMapping>,
         sourceIndexPitId: 'pit_id',
         targetIndex: '.kibana_7.11.0_001',
         lastHitSortValue: undefined,
@@ -1672,12 +2076,6 @@ describe('migrations v2 model', () => {
         transformErrors: [],
         progress: { processed: undefined, total: 1 },
       };
-      const processedDocs = [
-        {
-          _id: 'a:b',
-          _source: { type: 'a', a: { name: 'HOI!' }, migrationVersion: {}, references: [] },
-        },
-      ] as SavedObjectsRawDoc[];
 
       it('REINDEX_SOURCE_TO_TEMP_TRANSFORM -> REINDEX_SOURCE_TO_TEMP_INDEX_BULK if action succeeded', () => {
         const res: ResponseType<'REINDEX_SOURCE_TO_TEMP_TRANSFORM'> = Either.right({
@@ -1686,7 +2084,7 @@ describe('migrations v2 model', () => {
         const newState = model(state, res) as ReindexSourceToTempIndexBulk;
         expect(newState.controlState).toEqual('REINDEX_SOURCE_TO_TEMP_INDEX_BULK');
         expect(newState.currentBatch).toEqual(0);
-        expect(newState.transformedDocBatches).toEqual([processedDocs]);
+        expect(newState.bulkOperationBatches).toEqual(bulkOperationBatches);
         expect(newState.progress.processed).toBe(0); // Result of `(undefined ?? 0) + corruptDocumentsId.length`
       });
 
@@ -1742,23 +2140,14 @@ describe('migrations v2 model', () => {
     });
 
     describe('REINDEX_SOURCE_TO_TEMP_INDEX_BULK', () => {
-      const transformedDocBatches = [
-        [
-          {
-            _id: 'a:b',
-            _source: { type: 'a', a: { name: 'HOI!' }, migrationVersion: {}, references: [] },
-          },
-        ],
-      ] as [SavedObjectsRawDoc[]];
       const reindexSourceToTempIndexBulkState: ReindexSourceToTempIndexBulk = {
-        ...baseState,
+        ...postInitState,
         controlState: 'REINDEX_SOURCE_TO_TEMP_INDEX_BULK',
-        transformedDocBatches,
+        bulkOperationBatches,
         currentBatch: 0,
-        versionIndexReadyActions: Option.none,
         sourceIndex: Option.some('.kibana') as Option.Some<string>,
+        sourceIndexMappings: Option.some({}) as Option.Some<IndexMapping>,
         sourceIndexPitId: 'pit_id',
-        targetIndex: '.kibana_7.11.0_001',
         lastHitSortValue: undefined,
         transformErrors: [],
         corruptDocumentIds: [],
@@ -1815,11 +2204,10 @@ describe('migrations v2 model', () => {
 
     describe('SET_TEMP_WRITE_BLOCK', () => {
       const state: SetTempWriteBlock = {
-        ...baseState,
+        ...postInitState,
         controlState: 'SET_TEMP_WRITE_BLOCK',
-        versionIndexReadyActions: Option.none,
         sourceIndex: Option.some('.kibana') as Option.Some<string>,
-        targetIndex: '.kibana_7.11.0_001',
+        sourceIndexMappings: Option.some({}) as Option.Some<IndexMapping>,
       };
       test('SET_TEMP_WRITE_BLOCK -> CLONE_TEMP_TO_TARGET when response is right', () => {
         const res: ResponseType<'SET_TEMP_WRITE_BLOCK'> = Either.right('set_write_block_succeeded');
@@ -1831,12 +2219,10 @@ describe('migrations v2 model', () => {
     });
 
     describe('CLONE_TEMP_TO_TARGET', () => {
-      const state: CloneTempToSource = {
-        ...baseState,
+      const state: CloneTempToTarget = {
+        ...postInitState,
         controlState: 'CLONE_TEMP_TO_TARGET',
-        versionIndexReadyActions: Option.none,
         sourceIndex: Option.some('.kibana') as Option.Some<string>,
-        targetIndex: '.kibana_7.11.0_001',
       };
       it('CLONE_TEMP_TO_TARGET -> REFRESH_TARGET if response is right', () => {
         const res: ResponseType<'CLONE_TEMP_TO_TARGET'> = Either.right({
@@ -1901,9 +2287,74 @@ describe('migrations v2 model', () => {
       });
     });
 
+    describe('PREPARE_COMPATIBLE_MIGRATIONS', () => {
+      const someAliasAction: AliasAction = { add: { index: '.kibana', alias: '.kibana_8.7.0' } };
+      const state: PrepareCompatibleMigration = {
+        ...postInitState,
+        controlState: 'PREPARE_COMPATIBLE_MIGRATION',
+        sourceIndex: Option.some('.kibana') as Option.Some<string>,
+        sourceIndexMappings: Option.some({}) as Option.Some<IndexMapping>,
+        preTransformDocsActions: [someAliasAction],
+      };
+
+      it('PREPARE_COMPATIBLE_MIGRATIONS -> REFRESH_SOURCE if action succeeds  and we must refresh the index', () => {
+        const res: ResponseType<'PREPARE_COMPATIBLE_MIGRATION'> = Either.right(
+          'update_aliases_succeeded'
+        );
+        const newState = model(
+          { ...state, mustRefresh: true },
+          res
+        ) as OutdatedDocumentsSearchOpenPit;
+        expect(newState.controlState).toEqual('REFRESH_SOURCE');
+        expect(newState.versionIndexReadyActions).toEqual(Option.none);
+      });
+
+      it('PREPARE_COMPATIBLE_MIGRATIONS -> OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT if action succeeds', () => {
+        const res: ResponseType<'PREPARE_COMPATIBLE_MIGRATION'> = Either.right(
+          'update_aliases_succeeded'
+        );
+        const newState = model(state, res) as OutdatedDocumentsSearchOpenPit;
+        expect(newState.controlState).toEqual('OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT');
+        expect(newState.versionIndexReadyActions).toEqual(Option.none);
+      });
+
+      it('PREPARE_COMPATIBLE_MIGRATIONS -> REFRESH_SOURCE if action fails because the alias is not found', () => {
+        const res: ResponseType<'PREPARE_COMPATIBLE_MIGRATION'> = Either.left({
+          type: 'alias_not_found_exception',
+        });
+
+        const newState = model(
+          { ...state, mustRefresh: true },
+          res
+        ) as OutdatedDocumentsSearchOpenPit;
+        expect(newState.controlState).toEqual('REFRESH_SOURCE');
+        expect(newState.versionIndexReadyActions).toEqual(Option.none);
+      });
+
+      it('PREPARE_COMPATIBLE_MIGRATIONS -> OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT if action fails because the alias is not found', () => {
+        const res: ResponseType<'PREPARE_COMPATIBLE_MIGRATION'> = Either.left({
+          type: 'alias_not_found_exception',
+        });
+
+        const newState = model(state, res) as OutdatedDocumentsSearchOpenPit;
+        expect(newState.controlState).toEqual('OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT');
+        expect(newState.versionIndexReadyActions).toEqual(Option.none);
+      });
+
+      it('throws an exception if action fails with an error other than a missing alias', () => {
+        const res: ResponseType<'PREPARE_COMPATIBLE_MIGRATION'> = Either.left({
+          type: 'remove_index_not_a_concrete_index',
+        });
+
+        expect(() => model(state, res)).toThrowErrorMatchingInlineSnapshot(
+          `"PREPARE_COMPATIBLE_MIGRATION received unexpected action response: {\\"type\\":\\"remove_index_not_a_concrete_index\\"}"`
+        );
+      });
+    });
+
     describe('OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT', () => {
       const state: OutdatedDocumentsSearchOpenPit = {
-        ...baseState,
+        ...postInitState,
         controlState: 'OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT',
         versionIndexReadyActions: Option.none,
         sourceIndex: Option.some('.kibana') as Option.Some<string>,
@@ -1924,7 +2375,7 @@ describe('migrations v2 model', () => {
 
     describe('OUTDATED_DOCUMENTS_SEARCH_READ', () => {
       const state: OutdatedDocumentsSearchRead = {
-        ...baseState,
+        ...postInitState,
         controlState: 'OUTDATED_DOCUMENTS_SEARCH_READ',
         versionIndexReadyActions: Option.none,
         sourceIndex: Option.some('.kibana') as Option.Some<string>,
@@ -1951,6 +2402,8 @@ describe('migrations v2 model', () => {
         expect(newState.lastHitSortValue).toBe(lastHitSortValue);
         expect(newState.progress.processed).toBe(undefined);
         expect(newState.progress.total).toBe(10);
+        expect(newState.maxBatchSize).toBe(1000);
+        expect(newState.batchSize).toBe(1000); // don't increase batchsize above default
         expect(newState.logs).toMatchInlineSnapshot(`
           Array [
             Object {
@@ -1990,6 +2443,83 @@ describe('migrations v2 model', () => {
             },
           ]
         `);
+      });
+
+      it('OUTDATED_DOCUMENTS_SEARCH_READ -> OUTDATED_DOCUMENTS_TRANSFORM increases batchSize up to maxBatchSize', () => {
+        const outdatedDocuments = [{ _id: '1', _source: { type: 'vis' } }];
+        const lastHitSortValue = [123456];
+        const res: ResponseType<'OUTDATED_DOCUMENTS_SEARCH_READ'> = Either.right({
+          outdatedDocuments,
+          lastHitSortValue,
+          totalHits: 1,
+          processedDocs: [],
+        });
+        let newState = model({ ...state, batchSize: 500 }, res) as ReindexSourceToTempTransform;
+        expect(newState.batchSize).toBe(600);
+        newState = model({ ...state, batchSize: 600 }, res) as ReindexSourceToTempTransform;
+        expect(newState.batchSize).toBe(720);
+        newState = model({ ...state, batchSize: 720 }, res) as ReindexSourceToTempTransform;
+        expect(newState.batchSize).toBe(864);
+        newState = model({ ...state, batchSize: 864 }, res) as ReindexSourceToTempTransform;
+        expect(newState.batchSize).toBe(1000); // + 20% would have been 1036
+        expect(newState.controlState).toBe('OUTDATED_DOCUMENTS_TRANSFORM');
+        expect(newState.maxBatchSize).toBe(1000);
+      });
+
+      it('OUTDATED_DOCUMENTS_SEARCH_READ -> OUTDATED_DOCUMENTS_SEARCH_READ if left es_response_too_large', () => {
+        const res: ResponseType<'OUTDATED_DOCUMENTS_SEARCH_READ'> = Either.left({
+          type: 'es_response_too_large',
+          contentLength: 3456,
+        });
+        const newState = model(state, res) as ReindexSourceToTempRead;
+        expect(newState.controlState).toBe('OUTDATED_DOCUMENTS_SEARCH_READ');
+        expect(newState.lastHitSortValue).toBe(undefined); // lastHitSortValue should not be set
+        expect(newState.progress.processed).toBe(undefined); // don't increment progress
+        expect(newState.batchSize).toBe(500); // halves the batch size
+        expect(newState.maxBatchSize).toBe(1000); // leaves maxBatchSize unchanged
+        expect(newState.logs).toMatchInlineSnapshot(`
+          Array [
+            Object {
+              "level": "warning",
+              "message": "Read a batch with a response content length of 3456 bytes which exceeds migrations.maxReadBatchSizeBytes, retrying by reducing the batch size in half to 500.",
+            },
+          ]
+        `);
+      });
+
+      it('OUTDATED_DOCUMENTS_SEARCH_READ -> OUTDATED_DOCUMENTS_SEARCH_READ if left es_response_too_large will not reduce batch size below 1', () => {
+        const res: ResponseType<'OUTDATED_DOCUMENTS_SEARCH_READ'> = Either.left({
+          type: 'es_response_too_large',
+          contentLength: 2345,
+        });
+        const newState = model({ ...state, batchSize: 1.5 }, res) as ReindexSourceToTempRead;
+        expect(newState.controlState).toBe('OUTDATED_DOCUMENTS_SEARCH_READ');
+        expect(newState.lastHitSortValue).toBe(undefined); // lastHitSortValue should not be set
+        expect(newState.progress.processed).toBe(undefined); // don't increment progress
+        expect(newState.batchSize).toBe(1); // don't halve the batch size or go below 1
+        expect(newState.maxBatchSize).toBe(1000); // leaves maxBatchSize unchanged
+        expect(newState.logs).toMatchInlineSnapshot(`
+          Array [
+            Object {
+              "level": "warning",
+              "message": "Read a batch with a response content length of 2345 bytes which exceeds migrations.maxReadBatchSizeBytes, retrying by reducing the batch size in half to 1.",
+            },
+          ]
+        `);
+      });
+
+      it('OUTDATED_DOCUMENTS_SEARCH_READ -> FATAL if left es_response_too_large and batchSize already 1', () => {
+        const res: ResponseType<'OUTDATED_DOCUMENTS_SEARCH_READ'> = Either.left({
+          type: 'es_response_too_large',
+          contentLength: 2345,
+        });
+        const newState = model({ ...state, batchSize: 1 }, res) as FatalState;
+        expect(newState.controlState).toBe('FATAL');
+        expect(newState.batchSize).toBe(1); // don't halve the batch size or go below 1
+        expect(newState.maxBatchSize).toBe(1000); // leaves maxBatchSize unchanged
+        expect(newState.reason).toMatchInlineSnapshot(
+          `"After reducing the read batch size to a single document, the response content length was 2345 bytes which still exceeded migrations.maxReadBatchSizeBytes. Increase migrations.maxReadBatchSizeBytes and try again."`
+        );
       });
 
       it('OUTDATED_DOCUMENTS_SEARCH_READ -> OUTDATED_DOCUMENTS_SEARCH_CLOSE_PIT if no outdated documents to transform', () => {
@@ -2036,7 +2566,7 @@ describe('migrations v2 model', () => {
 
     describe('OUTDATED_DOCUMENTS_SEARCH_CLOSE_PIT', () => {
       const state: OutdatedDocumentsSearchClosePit = {
-        ...baseState,
+        ...postInitState,
         controlState: 'OUTDATED_DOCUMENTS_SEARCH_CLOSE_PIT',
         versionIndexReadyActions: Option.none,
         sourceIndex: Option.some('.kibana') as Option.Some<string>,
@@ -2056,17 +2586,20 @@ describe('migrations v2 model', () => {
 
     describe('CHECK_TARGET_MAPPINGS', () => {
       const checkTargetMappingsState: CheckTargetMappingsState = {
-        ...baseState,
+        ...postInitState,
         controlState: 'CHECK_TARGET_MAPPINGS',
         versionIndexReadyActions: Option.none,
         sourceIndex: Option.some('.kibana') as Option.Some<string>,
         targetIndex: '.kibana_7.11.0_001',
       };
 
-      it('CHECK_TARGET_MAPPINGS -> UPDATE_TARGET_MAPPINGS if mappings do not match', () => {
+      it('CHECK_TARGET_MAPPINGS -> UPDATE_TARGET_MAPPINGS_PROPERTIES if mappings do not match', () => {
         const res: ResponseType<'CHECK_TARGET_MAPPINGS'> = Either.right({ match: false });
-        const newState = model(checkTargetMappingsState, res) as UpdateTargetMappingsState;
-        expect(newState.controlState).toBe('UPDATE_TARGET_MAPPINGS');
+        const newState = model(
+          checkTargetMappingsState,
+          res
+        ) as UpdateTargetMappingsPropertiesState;
+        expect(newState.controlState).toBe('UPDATE_TARGET_MAPPINGS_PROPERTIES');
       });
 
       it('CHECK_TARGET_MAPPINGS -> CHECK_VERSION_INDEX_READY_ACTIONS if mappings match', () => {
@@ -2078,7 +2611,7 @@ describe('migrations v2 model', () => {
 
     describe('REFRESH_TARGET', () => {
       const state: RefreshTarget = {
-        ...baseState,
+        ...postInitState,
         controlState: 'REFRESH_TARGET',
         versionIndexReadyActions: Option.none,
         sourceIndex: Option.some('.kibana') as Option.Some<string>,
@@ -2087,7 +2620,7 @@ describe('migrations v2 model', () => {
 
       it('REFRESH_TARGET -> OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT if action succeeded', () => {
         const res: ResponseType<'REFRESH_TARGET'> = Either.right({ refreshed: true });
-        const newState = model(state, res) as UpdateTargetMappingsState;
+        const newState = model(state, res) as UpdateTargetMappingsPropertiesState;
         expect(newState.controlState).toBe('OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT');
       });
     });
@@ -2102,6 +2635,8 @@ describe('migrations v2 model', () => {
       ] as TransformErrorObjects[];
       const outdatedDocumentsTransformState: OutdatedDocumentsTransform = {
         ...baseState,
+        aliases: {},
+        sourceIndexMappings: Option.none,
         controlState: 'OUTDATED_DOCUMENTS_TRANSFORM',
         versionIndexReadyActions: Option.none,
         sourceIndex: Option.some('.kibana') as Option.Some<string>,
@@ -2115,12 +2650,6 @@ describe('migrations v2 model', () => {
         progress: createInitialProgress(),
       };
       describe('OUTDATED_DOCUMENTS_TRANSFORM if action succeeds', () => {
-        const processedDocs = [
-          {
-            _id: 'a:b',
-            _source: { type: 'a', a: { name: 'HOI!' }, migrationVersion: {}, references: [] },
-          },
-        ] as SavedObjectsRawDoc[];
         test('OUTDATED_DOCUMENTS_TRANSFORM -> TRANSFORMED_DOCUMENTS_BULK_INDEX if action succeeds', () => {
           const res: ResponseType<'OUTDATED_DOCUMENTS_TRANSFORM'> = Either.right({ processedDocs });
           const newState = model(
@@ -2128,7 +2657,7 @@ describe('migrations v2 model', () => {
             res
           ) as TransformedDocumentsBulkIndex;
           expect(newState.controlState).toEqual('TRANSFORMED_DOCUMENTS_BULK_INDEX');
-          expect(newState.transformedDocBatches).toEqual([processedDocs]);
+          expect(newState.bulkOperationBatches).toEqual(bulkOperationBatches);
           expect(newState.currentBatch).toEqual(0);
           expect(newState.retryCount).toEqual(0);
           expect(newState.retryDelay).toEqual(0);
@@ -2214,30 +2743,28 @@ describe('migrations v2 model', () => {
     });
 
     describe('TRANSFORMED_DOCUMENTS_BULK_INDEX', () => {
-      const transformedDocBatches = [
-        [
-          // batch 0
-          {
-            _id: 'a:b',
-            _source: { type: 'a', a: { name: 'HOI!' }, migrationVersion: {}, references: [] },
+      const idToIndexOperation = (_id: string): BulkIndexOperationTuple => [
+        // "index" operations have a first part with the operation and the SO id
+        {
+          index: {
+            _id,
           },
-          {
-            _id: 'a:c',
-            _source: { type: 'a', a: { name: 'HOI!' }, migrationVersion: {}, references: [] },
-          },
-        ],
-        [
-          // batch 1
-          {
-            _id: 'a:d',
-            _source: { type: 'a', a: { name: 'HOI!' }, migrationVersion: {}, references: [] },
-          },
-        ],
-      ] as SavedObjectsRawDoc[][];
+        },
+        // and a second part with the object _source
+        { type: 'a', a: { name: `HOI ${_id}!` }, migrationVersion: {}, references: [] },
+        // these two parts are then serialized to NDJSON by esClient and sent over with POST _bulk
+      ];
+
+      const customBulkOperationBatches: BulkOperation[][] = [
+        // batch 0
+        ['a:b', 'a:c'].map(idToIndexOperation),
+        // batch 1
+        ['a:d'].map(idToIndexOperation),
+      ];
       const transformedDocumentsBulkIndexState: TransformedDocumentsBulkIndex = {
-        ...baseState,
+        ...postInitState,
         controlState: 'TRANSFORMED_DOCUMENTS_BULK_INDEX',
-        transformedDocBatches,
+        bulkOperationBatches: customBulkOperationBatches,
         currentBatch: 0,
         versionIndexReadyActions: Option.none,
         sourceIndex: Option.some('.kibana') as Option.Some<string>,
@@ -2304,41 +2831,41 @@ describe('migrations v2 model', () => {
       });
     });
 
-    describe('UPDATE_TARGET_MAPPINGS', () => {
-      const updateTargetMappingsState: UpdateTargetMappingsState = {
-        ...baseState,
-        controlState: 'UPDATE_TARGET_MAPPINGS',
+    describe('UPDATE_TARGET_MAPPINGS_PROPERTIES', () => {
+      const updateTargetMappingsState: UpdateTargetMappingsPropertiesState = {
+        ...postInitState,
+        controlState: 'UPDATE_TARGET_MAPPINGS_PROPERTIES',
         versionIndexReadyActions: Option.none,
         sourceIndex: Option.some('.kibana') as Option.Some<string>,
         targetIndex: '.kibana_7.11.0_001',
       };
-      test('UPDATE_TARGET_MAPPINGS -> UPDATE_TARGET_MAPPINGS_WAIT_FOR_TASK', () => {
-        const res: ResponseType<'UPDATE_TARGET_MAPPINGS'> = Either.right({
+      test('UPDATE_TARGET_MAPPINGS_PROPERTIES -> UPDATE_TARGET_MAPPINGS_PROPERTIES_WAIT_FOR_TASK', () => {
+        const res: ResponseType<'UPDATE_TARGET_MAPPINGS_PROPERTIES'> = Either.right({
           taskId: 'update target mappings task',
         });
         const newState = model(
           updateTargetMappingsState,
           res
-        ) as UpdateTargetMappingsWaitForTaskState;
-        expect(newState.controlState).toEqual('UPDATE_TARGET_MAPPINGS_WAIT_FOR_TASK');
+        ) as UpdateTargetMappingsPropertiesWaitForTaskState;
+        expect(newState.controlState).toEqual('UPDATE_TARGET_MAPPINGS_PROPERTIES_WAIT_FOR_TASK');
         expect(newState.updateTargetMappingsTaskId).toEqual('update target mappings task');
         expect(newState.retryCount).toEqual(0);
         expect(newState.retryDelay).toEqual(0);
       });
     });
 
-    describe('UPDATE_TARGET_MAPPINGS_WAIT_FOR_TASK', () => {
-      const updateTargetMappingsWaitForTaskState: UpdateTargetMappingsWaitForTaskState = {
-        ...baseState,
-        controlState: 'UPDATE_TARGET_MAPPINGS_WAIT_FOR_TASK',
+    describe('UPDATE_TARGET_MAPPINGS_PROPERTIES_WAIT_FOR_TASK', () => {
+      const updateTargetMappingsWaitForTaskState: UpdateTargetMappingsPropertiesWaitForTaskState = {
+        ...postInitState,
+        controlState: 'UPDATE_TARGET_MAPPINGS_PROPERTIES_WAIT_FOR_TASK',
         versionIndexReadyActions: Option.none,
         sourceIndex: Option.some('.kibana') as Option.Some<string>,
         targetIndex: '.kibana_7.11.0_001',
         updateTargetMappingsTaskId: 'update target mappings task',
       };
 
-      test('UPDATE_TARGET_MAPPINGS_WAIT_FOR_TASK -> UPDATE_TARGET_MAPPINGS_META if response is right', () => {
-        const res: ResponseType<'UPDATE_TARGET_MAPPINGS_WAIT_FOR_TASK'> = Either.right(
+      test('UPDATE_TARGET_MAPPINGS_PROPERTIES_WAIT_FOR_TASK -> UPDATE_TARGET_MAPPINGS_META if response is right', () => {
+        const res: ResponseType<'UPDATE_TARGET_MAPPINGS_PROPERTIES_WAIT_FOR_TASK'> = Either.right(
           'pickup_updated_mappings_succeeded'
         );
 
@@ -2351,28 +2878,28 @@ describe('migrations v2 model', () => {
         expect(newState.retryDelay).toEqual(0);
       });
 
-      test('UPDATE_TARGET_MAPPINGS_WAIT_FOR_TASK -> UPDATE_TARGET_MAPPINGS_WAIT_FOR_TASK when response is left wait_for_task_completion_timeout', () => {
-        const res: ResponseType<'UPDATE_TARGET_MAPPINGS_WAIT_FOR_TASK'> = Either.left({
+      test('UPDATE_TARGET_MAPPINGS_PROPERTIES_WAIT_FOR_TASK -> UPDATE_TARGET_MAPPINGS_PROPERTIES_WAIT_FOR_TASK when response is left wait_for_task_completion_timeout', () => {
+        const res: ResponseType<'UPDATE_TARGET_MAPPINGS_PROPERTIES_WAIT_FOR_TASK'> = Either.left({
           message: '[timeout_exception] Timeout waiting for ...',
           type: 'wait_for_task_completion_timeout',
         });
         const newState = model(
           updateTargetMappingsWaitForTaskState,
           res
-        ) as UpdateTargetMappingsWaitForTaskState;
-        expect(newState.controlState).toEqual('UPDATE_TARGET_MAPPINGS_WAIT_FOR_TASK');
+        ) as UpdateTargetMappingsPropertiesWaitForTaskState;
+        expect(newState.controlState).toEqual('UPDATE_TARGET_MAPPINGS_PROPERTIES_WAIT_FOR_TASK');
         expect(newState.retryCount).toEqual(1);
         expect(newState.retryDelay).toEqual(2000);
       });
 
-      test('UPDATE_TARGET_MAPPINGS_WAIT_FOR_TASK -> UPDATE_TARGET_MAPPINGS_WAIT_FOR_TASK with incremented retry count when response is left wait_for_task_completion_timeout a second time', () => {
+      test('UPDATE_TARGET_MAPPINGS_PROPERTIES_WAIT_FOR_TASK -> UPDATE_TARGET_MAPPINGS_PROPERTIES_WAIT_FOR_TASK with incremented retry count when response is left wait_for_task_completion_timeout a second time', () => {
         const state = Object.assign({}, updateTargetMappingsWaitForTaskState, { retryCount: 1 });
-        const res: ResponseType<'UPDATE_TARGET_MAPPINGS_WAIT_FOR_TASK'> = Either.left({
+        const res: ResponseType<'UPDATE_TARGET_MAPPINGS_PROPERTIES_WAIT_FOR_TASK'> = Either.left({
           message: '[timeout_exception] Timeout waiting for ...',
           type: 'wait_for_task_completion_timeout',
         });
-        const newState = model(state, res) as UpdateTargetMappingsWaitForTaskState;
-        expect(newState.controlState).toEqual('UPDATE_TARGET_MAPPINGS_WAIT_FOR_TASK');
+        const newState = model(state, res) as UpdateTargetMappingsPropertiesWaitForTaskState;
+        expect(newState.controlState).toEqual('UPDATE_TARGET_MAPPINGS_PROPERTIES_WAIT_FOR_TASK');
         expect(newState.retryCount).toEqual(2);
         expect(newState.retryDelay).toEqual(4000);
       });
@@ -2380,7 +2907,7 @@ describe('migrations v2 model', () => {
 
     describe('UPDATE_TARGET_MAPPINGS_META', () => {
       const updateTargetMappingsMetaState: UpdateTargetMappingsMeta = {
-        ...baseState,
+        ...postInitState,
         controlState: 'UPDATE_TARGET_MAPPINGS_META',
         versionIndexReadyActions: Option.none,
         sourceIndex: Option.some('.kibana') as Option.Some<string>,
@@ -2389,7 +2916,7 @@ describe('migrations v2 model', () => {
 
       test('UPDATE_TARGET_MAPPINGS_META -> CHECK_VERSION_INDEX_READY_ACTIONS if the mapping _meta information is successfully updated', () => {
         const res: ResponseType<'UPDATE_TARGET_MAPPINGS_META'> = Either.right(
-          'update_mappings_meta_succeeded'
+          'update_mappings_succeeded'
         );
         const newState = model(updateTargetMappingsMetaState, res) as CheckVersionIndexReadyActions;
         expect(newState.controlState).toBe('CHECK_VERSION_INDEX_READY_ACTIONS');
@@ -2399,8 +2926,8 @@ describe('migrations v2 model', () => {
     describe('CHECK_VERSION_INDEX_READY_ACTIONS', () => {
       const res: ResponseType<'CHECK_VERSION_INDEX_READY_ACTIONS'> = Either.right('noop');
 
-      const postInitState: CheckVersionIndexReadyActions = {
-        ...baseState,
+      const сheckVersionIndexReadyActionsState: CheckVersionIndexReadyActions = {
+        ...postInitState,
         controlState: 'CHECK_VERSION_INDEX_READY_ACTIONS',
         versionIndexReadyActions: Option.none,
         sourceIndex: Option.some('.kibana') as Option.Some<string>,
@@ -2414,7 +2941,7 @@ describe('migrations v2 model', () => {
 
         const newState = model(
           {
-            ...postInitState,
+            ...сheckVersionIndexReadyActionsState,
             versionIndexReadyActions,
           },
           res
@@ -2425,7 +2952,7 @@ describe('migrations v2 model', () => {
       });
 
       test('CHECK_VERSION_INDEX_READY_ACTIONS -> DONE if none versionIndexReadyActions', () => {
-        const newState = model(postInitState, res) as PostInitState;
+        const newState = model(сheckVersionIndexReadyActionsState, res) as PostInitState;
         expect(newState.controlState).toEqual('DONE');
         expect(newState.retryCount).toEqual(0);
         expect(newState.retryDelay).toEqual(0);
@@ -2437,7 +2964,7 @@ describe('migrations v2 model', () => {
         AliasAction[]
       >;
       const createNewTargetState: CreateNewTargetState = {
-        ...baseState,
+        ...postInitState,
         controlState: 'CREATE_NEW_TARGET',
         versionIndexReadyActions: aliasActions,
         sourceIndex: Option.none as Option.None,
@@ -2490,10 +3017,9 @@ describe('migrations v2 model', () => {
         AliasAction[]
       >;
       const markVersionIndexReadyState: MarkVersionIndexReady = {
-        ...baseState,
+        ...postInitState,
         controlState: 'MARK_VERSION_INDEX_READY',
         versionIndexReadyActions: aliasActions,
-        sourceIndex: Option.none as Option.None,
         targetIndex: '.kibana_7.11.0_001',
       };
       test('MARK_VERSION_INDEX_READY -> DONE if the action succeeded', () => {
@@ -2531,10 +3057,9 @@ describe('migrations v2 model', () => {
         AliasAction[]
       >;
       const markVersionIndexConflictState: MarkVersionIndexReadyConflict = {
-        ...baseState,
+        ...postInitState,
         controlState: 'MARK_VERSION_INDEX_READY_CONFLICT',
         versionIndexReadyActions: aliasActions,
-        sourceIndex: Option.none as Option.None,
         targetIndex: '.kibana_7.11.0_001',
       };
       test('MARK_VERSION_INDEX_CONFLICT -> DONE if the current alias is pointing to the version alias', () => {

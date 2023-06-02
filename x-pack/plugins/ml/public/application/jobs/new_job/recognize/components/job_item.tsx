@@ -18,11 +18,11 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { extractErrorMessage } from '@kbn/ml-error-utils';
 import { ModuleJobUI } from '../page';
 import { SETUP_RESULTS_WIDTH } from './module_jobs';
 import { tabColor } from '../../../../../../common/util/group_color_utils';
 import { JobOverride, DatafeedResponse } from '../../../../../../common/types/modules';
-import { extractErrorMessage } from '../../../../../../common/util/errors';
 
 interface JobItemProps {
   job: ModuleJobUI;
@@ -178,7 +178,7 @@ function getDatafeedStartedIcon({ awaitingMlNodeAllocation, success }: DatafeedR
   color: string;
 } {
   if (awaitingMlNodeAllocation === true) {
-    return { type: 'alert', color: 'warning' };
+    return { type: 'warning', color: 'warning' };
   }
 
   return success ? { type: 'check', color: 'success' } : { type: 'cross', color: 'danger' };

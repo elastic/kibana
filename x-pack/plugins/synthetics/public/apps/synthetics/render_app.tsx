@@ -78,6 +78,7 @@ export function renderApp(
   ReactDOM.render(<SyntheticsApp {...props} />, appMountParameters.element);
 
   return () => {
+    startPlugins.data.search.session.clear();
     ReactDOM.unmountComponentAtNode(appMountParameters.element);
   };
 }

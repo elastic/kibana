@@ -20,11 +20,11 @@ export const Description: FC = memo(({ children }) => {
       description={
         <FormattedMessage
           id="xpack.ml.newJob.wizard.jobDetailsStep.jobDescription.description"
-          defaultMessage="Optional descriptive text"
+          defaultMessage="Optional descriptive text."
         />
       }
     >
-      <EuiFormRow label={title}>
+      <EuiFormRow>
         <>{children}</>
       </EuiFormRow>
     </EuiDescribedFormGroup>

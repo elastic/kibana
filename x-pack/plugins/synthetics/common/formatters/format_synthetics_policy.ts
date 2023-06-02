@@ -6,8 +6,21 @@
  */
 
 import { NewPackagePolicy } from '@kbn/fleet-plugin/common';
-import { formatters } from './formatters';
+import { cloneDeep } from 'lodash';
+import { throttlingFormatter } from './browser/formatters';
+import { LegacyConfigKey } from '../constants/monitor_management';
+import { replaceStringWithParams } from './formatting_utils';
+import { syntheticsPolicyFormatters } from './formatters';
 import { ConfigKey, DataStream, MonitorFields } from '../runtime_types';
+
+export const PARAMS_KEYS_TO_SKIP = [
+  'secrets',
+  'fields',
+  ConfigKey.LOCATIONS,
+  ConfigKey.TLS_VERSION,
+  ConfigKey.SOURCE_PROJECT_CONTENT,
+  ConfigKey.SOURCE_INLINE,
+];
 
 export const formatSyntheticsPolicy = (
   newPolicy: NewPackagePolicy,
@@ -15,15 +28,17 @@ export const formatSyntheticsPolicy = (
   config: Partial<
     MonitorFields & {
       location_name: string;
+      location_id: string;
       'monitor.project.name': string;
       'monitor.project.id': string;
     }
   >,
+  params: Record<string, string>,
   isLegacy?: boolean
 ) => {
   const configKeys = Object.keys(config) as ConfigKey[];
 
-  const formattedPolicy = { ...newPolicy };
+  const formattedPolicy = cloneDeep(newPolicy);
 
   const currentInput = formattedPolicy.inputs.find(
     (input) => input.type === `synthetics/${monitorType}`
@@ -44,15 +59,24 @@ export const formatSyntheticsPolicy = (
   configKeys.forEach((key) => {
     const configItem = dataStream?.vars?.[key];
     if (configItem) {
-      if (formatters[key]) {
-        configItem.value = formatters[key]?.(config);
+      if (syntheticsPolicyFormatters[key]) {
+        configItem.value = syntheticsPolicyFormatters[key]?.(config, key);
       } else if (key === ConfigKey.MONITOR_SOURCE_TYPE && isLegacy) {
         configItem.value = undefined;
       } else {
         configItem.value = config[key] === undefined || config[key] === null ? null : config[key];
       }
+      if (!PARAMS_KEYS_TO_SKIP.includes(key)) {
+        configItem.value = replaceStringWithParams(configItem.value, params);
+      }
     }
   });
 
-  return { formattedPolicy, dataStream, currentInput };
+  // TODO: remove this once we remove legacy support
+  const throttling = dataStream?.vars?.[LegacyConfigKey.THROTTLING_CONFIG];
+  if (throttling) {
+    throttling.value = throttlingFormatter?.(config, ConfigKey.THROTTLING_CONFIG);
+  }
+
+  return { formattedPolicy, hasDataStream: Boolean(dataStream), hasInput: Boolean(currentInput) };
 };

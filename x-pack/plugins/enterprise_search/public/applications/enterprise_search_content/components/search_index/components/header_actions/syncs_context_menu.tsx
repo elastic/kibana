@@ -75,7 +75,9 @@ export const SyncsContextMenu: React.FC = () => {
                 <EuiLoadingSpinner size="m" />
               </EuiFlexItem>
             )}
-            <EuiFlexItem>{getSyncButtonText()}</EuiFlexItem>
+            <EuiFlexItem data-test-subj={`entSearchContent-${ingestionMethod}-header-sync-menu`}>
+              {getSyncButtonText()}
+            </EuiFlexItem>
           </EuiFlexGroup>
         </EuiButton>
       }
@@ -90,6 +92,7 @@ export const SyncsContextMenu: React.FC = () => {
             ? []
             : [
                 <EuiContextMenuItem
+                  data-test-subj={`entSearchContent-${ingestionMethod}-header-sync-startSync`}
                   data-telemetry-id={`entSearchContent-${ingestionMethod}-header-sync-startSync`}
                   disabled={ingestionStatus === IngestionStatus.INCOMPLETE}
                   key="Sync"

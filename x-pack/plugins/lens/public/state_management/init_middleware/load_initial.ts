@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { cloneDeep } from 'lodash';
 import { MiddlewareAPI } from '@reduxjs/toolkit';
 import { i18n } from '@kbn/i18n';
 import { History } from 'history';
@@ -102,6 +103,7 @@ export function loadInitial(
     datasourceMap,
     embeddableEditorIncomingState,
     initialContext,
+    initialStateFromLocator,
     visualizationMap,
   } = storeDeps;
   const { resolvedDateRange, searchSessionId, isLinkedToOriginatingApp, ...emptyState } =
@@ -112,6 +114,7 @@ export function loadInitial(
   const loaderSharedArgs = {
     dataViews: lensServices.dataViews,
     storage: lensServices.storage,
+    eventAnnotationService: lensServices.eventAnnotationService,
     defaultIndexPatternId: lensServices.uiSettings.get('defaultIndex'),
   };
 
@@ -119,12 +122,108 @@ export function loadInitial(
   if (initialContext && 'query' in initialContext) {
     activeDatasourceId = 'textBased';
   }
+  if (initialStateFromLocator) {
+    const newFilters = initialStateFromLocator.filters
+      ? cloneDeep(initialStateFromLocator.filters)
+      : undefined;
+
+    if (newFilters) {
+      data.query.filterManager.setAppFilters(newFilters);
+    }
+
+    if (initialStateFromLocator.resolvedDateRange) {
+      const newTimeRange = {
+        from: initialStateFromLocator.resolvedDateRange.fromDate,
+        to: initialStateFromLocator.resolvedDateRange.toDate,
+      };
+      data.query.timefilter.timefilter.setTime(newTimeRange);
+    }
+    // URL Reporting is using the locator params but also passing the savedObjectId
+    // so be sure to not go here as there's no full snapshot URL
+    if (!initialInput) {
+      const locatorReferences =
+        'references' in initialStateFromLocator ? initialStateFromLocator.references : undefined;
+
+      return initializeSources(
+        {
+          datasourceMap,
+          visualizationMap,
+          visualizationState: emptyState.visualization,
+          datasourceStates: emptyState.datasourceStates,
+          initialContext,
+          adHocDataViews:
+            lens.persistedDoc?.state.adHocDataViews || initialStateFromLocator.dataViewSpecs,
+          references: locatorReferences,
+          ...loaderSharedArgs,
+        },
+        {
+          isFullEditor: true,
+        }
+      )
+        .then(
+          ({
+            datasourceStates,
+            visualizationState,
+            indexPatterns,
+            indexPatternRefs,
+            annotationGroups,
+          }) => {
+            const currentSessionId =
+              initialStateFromLocator?.searchSessionId || data.search.session.getSessionId();
+            store.dispatch(
+              setState({
+                isSaveable: true,
+                filters: initialStateFromLocator.filters || data.query.filterManager.getFilters(),
+                query: initialStateFromLocator.query || emptyState.query,
+                searchSessionId: currentSessionId,
+                activeDatasourceId: emptyState.activeDatasourceId,
+                visualization: {
+                  activeId: emptyState.visualization.activeId,
+                  state: visualizationState,
+                },
+                dataViews: getInitialDataViewsObject(indexPatterns, indexPatternRefs),
+                datasourceStates: Object.entries(datasourceStates).reduce(
+                  (state, [datasourceId, datasourceState]) => ({
+                    ...state,
+                    [datasourceId]: {
+                      ...datasourceState,
+                      isLoading: false,
+                    },
+                  }),
+                  {}
+                ),
+                isLoading: false,
+                annotationGroups,
+              })
+            );
+
+            if (autoApplyDisabled) {
+              store.dispatch(disableAutoApply());
+            }
+          }
+        )
+        .catch((e: { message: string }) => {
+          notifications.toasts.addDanger({
+            title: e.message,
+          });
+        });
+    }
+  }
 
   if (
     !initialInput ||
     (attributeService.inputIsRefType(initialInput) &&
       initialInput.savedObjectId === lens.persistedDoc?.savedObjectId)
   ) {
+    const newFilters =
+      initialContext && 'searchFilters' in initialContext && initialContext.searchFilters
+        ? cloneDeep(initialContext.searchFilters)
+        : undefined;
+
+    if (newFilters) {
+      data.query.filterManager.setAppFilters(newFilters);
+    }
+
     return initializeSources(
       {
         datasourceMap,
@@ -215,52 +314,62 @@ export function loadInitial(
               references: [...doc.references, ...(doc.state.internalReferences || [])],
               initialContext,
               dataViews: lensServices.dataViews,
+              eventAnnotationService: lensServices.eventAnnotationService,
               storage: lensServices.storage,
               adHocDataViews: doc.state.adHocDataViews,
               defaultIndexPatternId: lensServices.uiSettings.get('defaultIndex'),
             },
             { isFullEditor: true }
           )
-            .then(({ datasourceStates, visualizationState, indexPatterns, indexPatternRefs }) => {
-              const currentSessionId = data.search.session.getSessionId();
-              store.dispatch(
-                setState({
-                  isSaveable: true,
-                  sharingSavedObjectProps,
-                  filters: data.query.filterManager.getFilters(),
-                  query: doc.state.query,
-                  searchSessionId:
-                    dashboardFeatureFlag.allowByValueEmbeddables &&
-                    Boolean(embeddableEditorIncomingState?.originatingApp) &&
-                    !(initialInput as LensByReferenceInput)?.savedObjectId &&
-                    currentSessionId
-                      ? currentSessionId
-                      : data.search.session.start(),
-                  persistedDoc: doc,
-                  activeDatasourceId: getInitialDatasourceId(datasourceMap, doc),
-                  visualization: {
-                    activeId: doc.visualizationType,
-                    state: visualizationState,
-                  },
-                  dataViews: getInitialDataViewsObject(indexPatterns, indexPatternRefs),
-                  datasourceStates: Object.entries(datasourceStates).reduce(
-                    (state, [datasourceId, datasourceState]) => ({
-                      ...state,
-                      [datasourceId]: {
-                        ...datasourceState,
-                        isLoading: false,
-                      },
-                    }),
-                    {}
-                  ),
-                  isLoading: false,
-                })
-              );
+            .then(
+              ({
+                datasourceStates,
+                visualizationState,
+                indexPatterns,
+                indexPatternRefs,
+                annotationGroups,
+              }) => {
+                const currentSessionId = data.search.session.getSessionId();
+                store.dispatch(
+                  setState({
+                    isSaveable: true,
+                    sharingSavedObjectProps,
+                    filters: data.query.filterManager.getFilters(),
+                    query: doc.state.query,
+                    searchSessionId:
+                      dashboardFeatureFlag.allowByValueEmbeddables &&
+                      Boolean(embeddableEditorIncomingState?.originatingApp) &&
+                      !(initialInput as LensByReferenceInput)?.savedObjectId &&
+                      currentSessionId
+                        ? currentSessionId
+                        : data.search.session.start(),
+                    persistedDoc: doc,
+                    activeDatasourceId: getInitialDatasourceId(datasourceMap, doc),
+                    visualization: {
+                      activeId: doc.visualizationType,
+                      state: visualizationState,
+                    },
+                    dataViews: getInitialDataViewsObject(indexPatterns, indexPatternRefs),
+                    datasourceStates: Object.entries(datasourceStates).reduce(
+                      (state, [datasourceId, datasourceState]) => ({
+                        ...state,
+                        [datasourceId]: {
+                          ...datasourceState,
+                          isLoading: false,
+                        },
+                      }),
+                      {}
+                    ),
+                    isLoading: false,
+                    annotationGroups,
+                  })
+                );
 
-              if (autoApplyDisabled) {
-                store.dispatch(disableAutoApply());
+                if (autoApplyDisabled) {
+                  store.dispatch(disableAutoApply());
+                }
               }
-            })
+            )
             .catch((e: { message: string }) =>
               notifications.toasts.addDanger({
                 title: e.message,

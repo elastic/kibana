@@ -7,11 +7,10 @@
 
 import { KibanaRequest } from '@kbn/core/server';
 import { Writable } from 'stream';
-import { CancellationToken } from '../../../common/cancellation_token';
-import { TaskRunResult } from '../../lib/tasks';
+import { CancellationToken, TaskRunResult } from '@kbn/reporting-common';
+import { CsvGenerator } from '@kbn/generate-csv';
 import { getFieldFormats } from '../../services';
 import { ReportingRequestHandlerContext, RunTaskFnFactory } from '../../types';
-import { CsvGenerator } from '../csv_searchsource/generate_csv/generate_csv';
 import { JobParamsDownloadCSV } from './types';
 
 /*
@@ -30,7 +29,7 @@ export const runTaskFnFactory: RunTaskFnFactory<ImmediateExecuteFn> = function e
   reporting,
   parentLogger
 ) {
-  const config = reporting.getConfig().get('csv');
+  const { csv: csvConfig } = reporting.getConfig();
   const logger = parentLogger.get('execute-job');
 
   return async function runTask(_jobId, immediateJobParams, context, stream, req) {
@@ -61,7 +60,7 @@ export const runTaskFnFactory: RunTaskFnFactory<ImmediateExecuteFn> = function e
 
     const csv = new CsvGenerator(
       job,
-      config,
+      csvConfig,
       clients,
       dependencies,
       cancellationToken,

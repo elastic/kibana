@@ -8,6 +8,7 @@
 import {
   LogicMounter,
   mockFlashMessageHelpers,
+  mockFlashMessagesActions,
   mockHttpValues,
   mockKibanaValues,
 } from '../../../__mocks__/kea_logic';
@@ -22,6 +23,7 @@ import { AddAnalyticsCollectionLogic } from './add_analytics_collection_logic';
 describe('addAnalyticsCollectionLogic', () => {
   const { mount } = new LogicMounter(AddAnalyticsCollectionLogic);
   const { flashSuccessToast, flashAPIErrors } = mockFlashMessageHelpers;
+  const { setFlashMessages } = mockFlashMessagesActions;
   const { http } = mockHttpValues;
 
   beforeEach(() => {
@@ -32,7 +34,11 @@ describe('addAnalyticsCollectionLogic', () => {
   it('has expected default values', () => {
     expect(AddAnalyticsCollectionLogic.values).toEqual({
       canSubmit: false,
+      error: undefined,
+      inputError: null,
       isLoading: false,
+      isSuccess: false,
+      isSystemError: false,
       name: '',
       status: Status.IDLE,
     });
@@ -42,12 +48,14 @@ describe('addAnalyticsCollectionLogic', () => {
     describe('setNameValue', () => {
       it('should set name', () => {
         AddAnalyticsCollectionLogic.actions.setNameValue('valid');
-        expect(AddAnalyticsCollectionLogic.values).toEqual({
-          canSubmit: true,
-          isLoading: false,
-          name: 'valid',
-          status: Status.IDLE,
-        });
+        expect(AddAnalyticsCollectionLogic.values.name).toEqual('valid');
+      });
+    });
+
+    describe('setInputError', () => {
+      it('should set error', () => {
+        AddAnalyticsCollectionLogic.actions.setInputError('invalid name');
+        expect(AddAnalyticsCollectionLogic.values.inputError).toEqual('invalid name');
       });
     });
   });
@@ -69,17 +77,39 @@ describe('addAnalyticsCollectionLogic', () => {
         expect(flashSuccessToast).toHaveBeenCalled();
         jest.advanceTimersByTime(1000);
         await nextTick();
-        expect(navigateToUrl).toHaveBeenCalledWith('/collections/test/events');
+        expect(navigateToUrl).toHaveBeenCalledWith('/collections/test/overview');
         jest.useRealTimers();
       });
     });
 
     describe('onApiError', () => {
-      it('should flash an error toast', () => {
+      it('should call setFlashMessages with an error when system error with message', () => {
         const httpError: HttpError = {
           body: {
-            error: 'Bad Request',
-            statusCode: 400,
+            error: 'Bad Gateway',
+            message: 'Something went wrong',
+            statusCode: 502,
+          },
+          fetchOptions: {},
+          request: {},
+        } as HttpError;
+        AddAnalyticsCollectionLogic.actions.apiError(httpError);
+
+        expect(flashAPIErrors).not.toHaveBeenCalled();
+        expect(setFlashMessages).toHaveBeenCalledWith([
+          {
+            description: 'Something went wrong',
+            message: 'Sorry, there was an error creating your collection.',
+            type: 'error',
+          },
+        ]);
+      });
+
+      it('should flash a default error toast when system error without message', () => {
+        const httpError: HttpError = {
+          body: {
+            error: 'Bad Gateway',
+            statusCode: 502,
           },
           fetchOptions: {},
           request: {},
@@ -87,6 +117,25 @@ describe('addAnalyticsCollectionLogic', () => {
         AddAnalyticsCollectionLogic.actions.apiError(httpError);
 
         expect(flashAPIErrors).toHaveBeenCalledWith(httpError);
+      });
+
+      it('should set input error when is client error', () => {
+        const errorMessage = 'Collection already exists';
+        const httpError: HttpError = {
+          body: {
+            error: 'Conflict',
+            message: errorMessage,
+            statusCode: 409,
+          },
+          fetchOptions: {},
+          request: {},
+        } as HttpError;
+        AddAnalyticsCollectionLogic.actions.setInputError = jest.fn();
+        AddAnalyticsCollectionLogic.actions.apiError(httpError);
+
+        expect(AddAnalyticsCollectionLogic.actions.setInputError).toHaveBeenCalledWith(
+          errorMessage
+        );
       });
     });
 
@@ -102,10 +151,24 @@ describe('addAnalyticsCollectionLogic', () => {
         });
       });
     });
+
+    describe('setNameValue', () => {
+      it('should call an error if name is not valid', () => {
+        AddAnalyticsCollectionLogic.actions.setNameValue('Invalid');
+        expect(AddAnalyticsCollectionLogic.values.inputError).toBeTruthy();
+      });
+
+      it('should remove error if name become valid', () => {
+        AddAnalyticsCollectionLogic.actions.setNameValue('Invalid');
+        expect(AddAnalyticsCollectionLogic.values.inputError).toBeTruthy();
+        AddAnalyticsCollectionLogic.actions.setNameValue('valid');
+        expect(AddAnalyticsCollectionLogic.values.inputError).toBeFalsy();
+      });
+    });
   });
 
   describe('selectors', () => {
-    describe('loading & status', () => {
+    describe('status', () => {
       it('updates when makeRequest triggered', () => {
         const promise = Promise.resolve({ name: 'result' });
         http.post.mockReturnValue(promise);
@@ -117,14 +180,41 @@ describe('addAnalyticsCollectionLogic', () => {
 
       it('updates when apiSuccess listener triggered', () => {
         AddAnalyticsCollectionLogic.actions.apiSuccess({
-          event_retention_day_length: 180,
           events_datastream: 'logs-elastic_analytics.events-test',
-          id: 'bla',
           name: 'test',
         });
 
-        expect(AddAnalyticsCollectionLogic.values.isLoading).toBe(true);
+        expect(AddAnalyticsCollectionLogic.values.isSuccess).toBe(true);
         expect(AddAnalyticsCollectionLogic.values.status).toBe(Status.SUCCESS);
+      });
+    });
+
+    describe('isSystemError', () => {
+      it('set true when error is 50x', () => {
+        expect(AddAnalyticsCollectionLogic.values.isSystemError).toBe(false);
+        AddAnalyticsCollectionLogic.actions.apiError({
+          body: {
+            error: 'Bad Gateway',
+            message: 'Something went wrong',
+            statusCode: 502,
+          },
+        } as HttpError);
+
+        expect(AddAnalyticsCollectionLogic.values.isSystemError).toBe(true);
+        expect(AddAnalyticsCollectionLogic.values.status).toBe(Status.ERROR);
+      });
+
+      it('keep false if error code is 40x', () => {
+        AddAnalyticsCollectionLogic.actions.apiError({
+          body: {
+            error: 'Conflict',
+            message: 'Something went wrong',
+            statusCode: 409,
+          },
+        } as HttpError);
+
+        expect(AddAnalyticsCollectionLogic.values.isSystemError).toBe(false);
+        expect(AddAnalyticsCollectionLogic.values.status).toBe(Status.ERROR);
       });
     });
   });

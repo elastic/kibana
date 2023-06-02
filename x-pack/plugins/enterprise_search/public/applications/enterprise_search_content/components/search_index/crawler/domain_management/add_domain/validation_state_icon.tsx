@@ -18,7 +18,7 @@ export const ValidationStateIcon: React.FC<{ state: CrawlerDomainValidationStepS
     case 'valid':
       return <EuiIcon color="success" type="check" />;
     case 'warning':
-      return <EuiIcon color="warning" type="alert" />;
+      return <EuiIcon color="warning" type="warning" />;
     case 'invalid':
       return <EuiIcon color="danger" type="cross" />;
     default:

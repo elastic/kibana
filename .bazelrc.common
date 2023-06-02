@@ -49,12 +49,11 @@ query --incompatible_no_implicit_file_export
 # Log configs
 ## different from default
 common --color=yes
-common --show_progress
+common --noshow_progress
 common --show_task_finish
 common --show_progress_rate_limit=10
 build --progress_report_interval=10
-build --show_loading_progress
-build --show_result=1
+build --noshow_loading_progress
 
 # Specifies desired output mode for running tests.
 # Valid values are

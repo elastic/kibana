@@ -29,10 +29,6 @@ jest.mock('react-router-dom', () => {
 });
 
 const defaultProps = {
-  allCasesNavigation: {
-    href: 'all-cases-href',
-    onClick: () => {},
-  },
   caseData: basicCase,
   currentExternalIncident: null,
 };
@@ -50,9 +46,41 @@ describe('CaseView actions', () => {
     );
 
     expect(wrapper.find('[data-test-subj="confirm-delete-case-modal"]').exists()).toBeFalsy();
-    wrapper.find('button[data-test-subj="property-actions-ellipses"]').first().simulate('click');
-    wrapper.find('button[data-test-subj="property-actions-trash"]').simulate('click');
+    wrapper
+      .find('button[data-test-subj="property-actions-case-ellipses"]')
+      .first()
+      .simulate('click');
+    wrapper.find('button[data-test-subj="property-actions-case-trash"]').simulate('click');
     expect(wrapper.find('[data-test-subj="confirm-delete-case-modal"]').exists()).toBeTruthy();
+  });
+
+  it('clicking copyClipboard icon copies case id', () => {
+    const originalClipboard = global.window.navigator.clipboard;
+
+    Object.defineProperty(navigator, 'clipboard', {
+      value: {
+        writeText: jest.fn().mockImplementation(() => Promise.resolve()),
+      },
+      writable: true,
+    });
+
+    const wrapper = mount(
+      <TestProviders>
+        <Actions {...defaultProps} />
+      </TestProviders>
+    );
+
+    wrapper
+      .find('button[data-test-subj="property-actions-case-ellipses"]')
+      .first()
+      .simulate('click');
+    wrapper.find('button[data-test-subj="property-actions-case-copyClipboard"]').simulate('click');
+
+    expect(navigator.clipboard.writeText).toHaveBeenCalledWith(basicCase.id);
+
+    Object.defineProperty(navigator, 'clipboard', {
+      value: originalClipboard,
+    });
   });
 
   it('does not show trash icon when user does not have deletion privileges', () => {
@@ -63,7 +91,14 @@ describe('CaseView actions', () => {
     );
 
     expect(wrapper.find('[data-test-subj="confirm-delete-case-modal"]').exists()).toBeFalsy();
-    expect(wrapper.find('button[data-test-subj="property-actions-ellipses"]').exists()).toBeFalsy();
+    wrapper
+      .find('button[data-test-subj="property-actions-case-ellipses"]')
+      .first()
+      .simulate('click');
+    expect(wrapper.find('[data-test-subj="property-actions-case-trash"]').exists()).toBeFalsy();
+    expect(
+      wrapper.find('[data-test-subj="property-actions-case-copyClipboard"]').exists()
+    ).toBeTruthy();
   });
 
   it('toggle delete modal and confirm', async () => {
@@ -77,8 +112,11 @@ describe('CaseView actions', () => {
       </TestProviders>
     );
 
-    wrapper.find('button[data-test-subj="property-actions-ellipses"]').first().simulate('click');
-    wrapper.find('button[data-test-subj="property-actions-trash"]').simulate('click');
+    wrapper
+      .find('button[data-test-subj="property-actions-case-ellipses"]')
+      .first()
+      .simulate('click');
+    wrapper.find('button[data-test-subj="property-actions-case-trash"]').simulate('click');
 
     expect(wrapper.find('[data-test-subj="confirm-delete-case-modal"]').exists()).toBeTruthy();
     wrapper.find('button[data-test-subj="confirmModalConfirmButton"]').simulate('click');
@@ -95,10 +133,6 @@ describe('CaseView actions', () => {
           {...defaultProps}
           currentExternalIncident={{
             ...basicPush,
-            firstPushIndex: 5,
-            lastPushIndex: 5,
-            commentsToUpdate: [],
-            hasDataToPush: false,
           }}
         />
       </TestProviders>
@@ -106,9 +140,12 @@ describe('CaseView actions', () => {
 
     expect(wrapper.find('[data-test-subj="confirm-delete-case-modal"]').exists()).toBeFalsy();
 
-    wrapper.find('button[data-test-subj="property-actions-ellipses"]').first().simulate('click');
+    wrapper
+      .find('button[data-test-subj="property-actions-case-ellipses"]')
+      .first()
+      .simulate('click');
     expect(
-      wrapper.find('[data-test-subj="property-actions-popout"]').first().prop('aria-label')
+      wrapper.find('[data-test-subj="property-actions-case-popout"]').first().prop('aria-label')
     ).toEqual(i18n.VIEW_INCIDENT(basicPush.externalTitle));
   });
 });

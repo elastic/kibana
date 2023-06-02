@@ -6,7 +6,9 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { IScopedClusterClient } from '@kbn/core/server';
+import type { IScopedClusterClient } from '@kbn/core/server';
+import type { DataFrameAnalyticsConfig } from '@kbn/ml-data-frame-analytics-utils';
+
 import { MLSavedObjectService } from '../../saved_objects';
 import { getJobDetailsFromTrainedModel } from '../../saved_objects/util';
 import { JobType } from '../../../common/types/saved_objects';
@@ -14,7 +16,6 @@ import { JobType } from '../../../common/types/saved_objects';
 import { Job, Datafeed } from '../../../common/types/anomaly_detection_jobs';
 import { searchProvider } from './search';
 
-import { DataFrameAnalyticsConfig } from '../../../common/types/data_frame_analytics';
 import { MLJobNotFound, MLModelNotFound } from './errors';
 import {
   MlClient,
@@ -130,6 +131,17 @@ export function getMlClient(
     if (modelIds.length) {
       await checkModelIds(modelIds, allowWildcards);
     }
+  }
+
+  function switchDeploymentId(
+    p: Parameters<MlClient['stopTrainedModelDeployment']>
+  ): Parameters<MlClient['stopTrainedModelDeployment']> {
+    const [params] = p;
+    if (params.deployment_id !== undefined) {
+      params.model_id = params.deployment_id;
+      delete params.deployment_id;
+    }
+    return p;
   }
 
   async function checkModelIds(modelIds: string[], allowWildcards: boolean = false) {
@@ -286,7 +298,7 @@ export function getMlClient(
         if (error.statusCode === 404) {
           throw new MLJobNotFound(error.body.error.reason);
         }
-        throw error.body ?? error;
+        throw error;
       }
     },
     async getDataFrameAnalyticsStats(...p: Parameters<MlClient['getDataFrameAnalyticsStats']>) {
@@ -317,7 +329,7 @@ export function getMlClient(
         if (error.statusCode === 404) {
           throw new MLJobNotFound(error.body.error.reason);
         }
-        throw error.body ?? error;
+        throw error;
       }
     },
     async getDatafeedStats(...p: Parameters<MlClient['getDatafeedStats']>) {
@@ -342,7 +354,7 @@ export function getMlClient(
         if (error.statusCode === 404) {
           throw new MLJobNotFound(error.body.error.reason);
         }
-        throw error.body ?? error;
+        throw error;
       }
     },
     async getDatafeeds(...p: Parameters<MlClient['getDatafeeds']>) {
@@ -367,7 +379,7 @@ export function getMlClient(
         if (error.statusCode === 404) {
           throw new MLJobNotFound(error.body.error.reason);
         }
-        throw error.body ?? error;
+        throw error;
       }
     },
     async getFilters(...p: Parameters<MlClient['getFilters']>) {
@@ -405,7 +417,7 @@ export function getMlClient(
         if (error.statusCode === 404) {
           throw new MLJobNotFound(error.body.error.reason);
         }
-        throw error.body ?? error;
+        throw error;
       }
     },
     async getJobs(...p: Parameters<MlClient['getJobs']>) {
@@ -437,7 +449,7 @@ export function getMlClient(
         if (error.statusCode === 404) {
           throw new MLJobNotFound(error.body.error.reason);
         }
-        throw error.body ?? error;
+        throw error;
       }
     },
     async getModelSnapshots(...p: Parameters<MlClient['getModelSnapshots']>) {
@@ -466,7 +478,7 @@ export function getMlClient(
         if (error.statusCode === 404) {
           throw new MLModelNotFound(error.body.error.reason);
         }
-        throw error.body ?? error;
+        throw error;
       }
     },
     async getTrainedModelsStats(...p: Parameters<MlClient['getTrainedModelsStats']>) {
@@ -483,7 +495,7 @@ export function getMlClient(
         if (error.statusCode === 404) {
           throw new MLModelNotFound(error.body.error.reason);
         }
-        throw error.body ?? error;
+        throw error;
       }
     },
     async startTrainedModelDeployment(...p: Parameters<MlClient['startTrainedModelDeployment']>) {
@@ -492,19 +504,23 @@ export function getMlClient(
     },
     async updateTrainedModelDeployment(...p: Parameters<MlClient['updateTrainedModelDeployment']>) {
       await modelIdsCheck(p);
-      const { model_id: modelId, number_of_allocations: numberOfAllocations } = p[0];
+
+      const { deployment_id: deploymentId, number_of_allocations: numberOfAllocations } = p[0];
       return client.asInternalUser.transport.request({
         method: 'POST',
-        path: `/_ml/trained_models/${modelId}/deployment/_update`,
+        path: `/_ml/trained_models/${deploymentId}/deployment/_update`,
         body: { number_of_allocations: numberOfAllocations },
       });
     },
     async stopTrainedModelDeployment(...p: Parameters<MlClient['stopTrainedModelDeployment']>) {
       await modelIdsCheck(p);
+      switchDeploymentId(p);
+
       return mlClient.stopTrainedModelDeployment(...p);
     },
     async inferTrainedModel(...p: Parameters<MlClient['inferTrainedModel']>) {
       await modelIdsCheck(p);
+      switchDeploymentId(p);
       // Temporary workaround for the incorrect inferTrainedModelDeployment function in the esclient
       if (
         // @ts-expect-error TS complains it's always false

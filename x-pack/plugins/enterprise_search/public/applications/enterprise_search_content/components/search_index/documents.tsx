@@ -79,7 +79,7 @@ export const SearchIndexDocuments: React.FC = () => {
         <EuiFlexItem>
           {!simplifiedMapping &&
             i18n.translate('xpack.enterpriseSearch.content.searchIndex.documents.noMappings', {
-              defaultMessage: 'No mappings found for index',
+              defaultMessage: 'No documents found for index',
             })}
           {simplifiedMapping && <DocumentList />}
         </EuiFlexItem>

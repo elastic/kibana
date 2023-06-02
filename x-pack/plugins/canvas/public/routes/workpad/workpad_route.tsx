@@ -6,7 +6,8 @@
  */
 
 import React, { FC, useEffect, useCallback } from 'react';
-import { Route, Switch, Redirect, useParams } from 'react-router-dom';
+import { Switch, Redirect, useParams } from 'react-router-dom';
+import { Route } from '@kbn/shared-ux-router';
 import { useDispatch } from 'react-redux';
 import { WorkpadApp } from '../../components/workpad_app';
 import { ExportApp } from '../../components/export_app';

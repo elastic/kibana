@@ -23,9 +23,10 @@ describe('attach timeline to case', () => {
   context('without cases created', () => {
     before(() => {
       cleanKibana();
-      login();
     });
+
     beforeEach(() => {
+      login();
       deleteTimelines();
       createTimeline(getTimeline()).then((response) => {
         cy.wrap(response.body.data.persistTimeline.timeline).as('myTimeline');
@@ -60,11 +61,16 @@ describe('attach timeline to case', () => {
 
   context('with cases created', () => {
     before(() => {
+      login();
       deleteTimelines();
       createTimeline(getTimeline()).then((response) =>
         cy.wrap(response.body.data.persistTimeline.timeline.savedObjectId).as('timelineId')
       );
       createCase(getCase1()).then((response) => cy.wrap(response.body.id).as('caseId'));
+    });
+
+    beforeEach(() => {
+      login();
     });
 
     it('attach timeline to an existing case', function () {
@@ -85,9 +91,7 @@ describe('attach timeline to case', () => {
     it('modal can be re-opened once closed', function () {
       visitTimeline(this.timelineId);
       attachTimelineToExistingCase();
-      cy.get('[data-test-subj="all-cases-modal"] .euiButton')
-        .contains('Cancel')
-        .click({ force: true });
+      cy.get('[data-test-subj="all-cases-modal-cancel-button"]').click({ force: true });
 
       cy.get('[data-test-subj="all-cases-modal"]').should('not.exist');
       attachTimelineToExistingCase();

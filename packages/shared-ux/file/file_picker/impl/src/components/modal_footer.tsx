@@ -26,7 +26,7 @@ interface Props {
 }
 
 export const ModalFooter: FunctionComponent<Props> = ({ kind, onDone, onUpload, multiple }) => {
-  const { state } = useFilePickerContext();
+  const { state, uploadMeta } = useFilePickerContext();
   const onUploadStart = useCallback(() => state.setIsUploading(true), [state]);
   const onUploadEnd = useCallback(() => state.setIsUploading(false), [state]);
   return (
@@ -50,6 +50,7 @@ export const ModalFooter: FunctionComponent<Props> = ({ kind, onDone, onUpload, 
               state.resetFilters();
               onUpload?.(n);
             }}
+            meta={uploadMeta as Record<string, unknown>}
             onUploadStart={onUploadStart}
             onUploadEnd={onUploadEnd}
             kind={kind}

@@ -8,10 +8,8 @@
 import { i18n } from '@kbn/i18n';
 import { handleActions, Action } from 'redux-actions';
 import { call, put, select, takeLatest } from 'redux-saga/effects';
-import type {
-  ActionConnector as RawActionConnector,
-  Rule,
-} from '@kbn/triggers-actions-ui-plugin/public';
+import type { Rule } from '@kbn/triggers-actions-ui-plugin/public';
+import { ActionConnector } from '../../../../common/rules/types';
 import { createAsyncAction } from '../actions/utils';
 import { asyncInitState, handleAsyncAction } from '../reducers/utils';
 import type { AppState } from '..';
@@ -29,8 +27,6 @@ import { kibanaService } from '../kibana_service';
 import { monitorIdSelector } from '../selectors';
 import { AlertsResult, MonitorIdParam } from '../actions/types';
 import { simpleAlertEnabled } from '../../lib/alert_types/alert_messages';
-
-export type ActionConnector = Omit<RawActionConnector, 'secrets'>;
 
 /**
  * TODO: Use actual AlertType Params type that's specific to Uptime instead of `any`

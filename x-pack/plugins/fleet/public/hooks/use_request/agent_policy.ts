@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { useQuery } from '@tanstack/react-query';
 
 import { agentPolicyRouteService } from '../../services';
 
@@ -22,8 +23,8 @@ import type {
   DeleteAgentPolicyResponse,
 } from '../../types';
 
-import { useRequest, sendRequest, useConditionalRequest } from './use_request';
-import type { SendConditionalRequestConfig } from './use_request';
+import { useRequest, sendRequest, useConditionalRequest, sendRequestForRq } from './use_request';
+import type { SendConditionalRequestConfig, RequestError } from './use_request';
 
 export const useGetAgentPolicies = (query?: GetAgentPoliciesRequest['query']) => {
   return useRequest<GetAgentPoliciesResponse>({
@@ -31,6 +32,16 @@ export const useGetAgentPolicies = (query?: GetAgentPoliciesRequest['query']) =>
     method: 'get',
     query,
   });
+};
+
+export const useGetAgentPoliciesQuery = (query?: GetAgentPoliciesRequest['query']) => {
+  return useQuery<GetAgentPoliciesResponse, RequestError>(['agentPolicies', query], () =>
+    sendRequestForRq<GetAgentPoliciesResponse>({
+      path: agentPolicyRouteService.getListPath(),
+      method: 'get',
+      query,
+    })
+  );
 };
 
 export const sendGetAgentPolicies = (query?: GetAgentPoliciesRequest['query']) => {

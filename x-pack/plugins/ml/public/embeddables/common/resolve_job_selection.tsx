@@ -92,7 +92,7 @@ export async function resolveJobSelection(
         {
           'data-test-subj': 'mlFlyoutJobSelector',
           ownFocus: true,
-          closeButtonAriaLabel: 'jobSelectorFlyout',
+          closeButtonProps: { 'aria-label': 'jobSelectorFlyout' },
         }
       );
 

@@ -8,29 +8,46 @@
 import { DatatableRow } from '@kbn/expressions-plugin/public';
 import { BucketColumns } from '../../common/types';
 
+/**
+ * All the available categories of a datatable.
+ */
 export interface DistinctSeries {
-  allSeries: string[];
-  parentSeries: string[];
+  /**
+   * An array of unique category/bucket available on all the categorical/bucket columns.
+   * It could be `string` or `RangeKey` but is typed as unknown for now due to the loose nature of the DatatableRow type
+   */
+  allSeries: unknown[];
+  /**
+   * An array of unique category/bucket available on the first column of a datatable.
+   * It could be `string` or `RangeKey` but is typed as unknown for now due to the loose nature of the DatatableRow type
+   */
+  parentSeries: unknown[];
 }
 
+/**
+ * This method returns all the categories available in a datatable.
+ * Here, categorical values are described as `bucket`, following the Elasticsearch bucket aggregation naming.
+ * It describes as `parentSeries` all the categories available on the `first` available column.
+ * It describes as `allSeries` each unique category/bucket available on all the categorical/bucket columns.
+ * The output order depends on the original datatable configuration.
+ */
 export const getDistinctSeries = (
   rows: DatatableRow[],
-  buckets: Array<Partial<BucketColumns>>
+  bucketColumns: Array<Partial<BucketColumns>>
 ): DistinctSeries => {
-  const parentBucketId = buckets[0].id;
-  const parentSeries: string[] = [];
-  const allSeries: string[] = [];
-  buckets.forEach(({ id }) => {
+  const parentBucketId = bucketColumns[0].id;
+  // using unknown here because there the DatatableRow is just a plain Record<string, any>
+  // At least we can prevent some issues, see https://github.com/elastic/kibana/issues/153437
+  const parentSeries: Set<unknown> = new Set();
+  const allSeries: Set<unknown> = new Set();
+  bucketColumns.forEach(({ id }) => {
     if (!id) return;
     rows.forEach((row) => {
-      const name = row[id];
-      if (!allSeries.includes(name)) {
-        allSeries.push(name);
-      }
-      if (id === parentBucketId && !parentSeries.includes(row[parentBucketId])) {
-        parentSeries.push(row[parentBucketId]);
+      allSeries.add(row[id]);
+      if (id === parentBucketId) {
+        parentSeries.add(row[parentBucketId]);
       }
     });
   });
-  return { allSeries, parentSeries };
+  return { allSeries: [...allSeries], parentSeries: [...parentSeries] };
 };

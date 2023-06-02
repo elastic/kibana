@@ -1,0 +1,34 @@
+{
+  "type": "plugin",
+  "id": "@kbn/monitoring-plugin",
+  "owner": "@elastic/infra-monitoring-ui",
+  "plugin": {
+    "id": "monitoring",
+    "server": true,
+    "browser": true,
+    "configPath": ["monitoring"],
+    "requiredPlugins": [
+      "licensing",
+      "features",
+      "data",
+      "navigation",
+      "observability",
+      "observabilityShared",
+      "dataViews",
+      "unifiedSearch"
+    ],
+    "optionalPlugins": [
+      "infra",
+      "usageCollection",
+      "home",
+      "cloud",
+      "triggersActionsUi",
+      "alerting",
+      "actions",
+      "encryptedSavedObjects",
+      "dashboard",
+      "fleet"
+    ],
+    "requiredBundles": ["kibanaUtils", "alerting", "kibanaReact"]
+  }
+}

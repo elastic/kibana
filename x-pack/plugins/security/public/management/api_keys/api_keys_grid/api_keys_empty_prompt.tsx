@@ -31,7 +31,7 @@ export const ApiKeysEmptyPrompt: FunctionComponent<ApiKeysEmptyPromptProps> = ({
     if (doesErrorIndicateAPIKeysAreDisabled(error)) {
       return (
         <KibanaPageTemplate.EmptyPrompt
-          iconType="alert"
+          iconType="warning"
           body={
             <>
               <p>
@@ -76,7 +76,7 @@ export const ApiKeysEmptyPrompt: FunctionComponent<ApiKeysEmptyPromptProps> = ({
 
     return (
       <KibanaPageTemplate.EmptyPrompt
-        iconType="alert"
+        iconType="warning"
         body={
           <p>
             <FormattedMessage
@@ -120,7 +120,7 @@ export const ApiKeysEmptyPrompt: FunctionComponent<ApiKeysEmptyPromptProps> = ({
   if (readOnly) {
     return (
       <KibanaPageTemplate.EmptyPrompt
-        iconType="crossInACircleFilled"
+        iconType="error"
         title={
           <h1>
             <FormattedMessage

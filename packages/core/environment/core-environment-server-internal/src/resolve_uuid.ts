@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { join } from 'path';
 import { PathConfigType } from '@kbn/utils';
 import type { Logger } from '@kbn/logging';
@@ -52,7 +52,7 @@ export async function resolveInstanceUuid({
     }
   }
   if (uuidFromFile === undefined) {
-    const newUuid = uuid.v4();
+    const newUuid = uuidv4();
     // no uuid either in config or file, we need to generate and write it.
     logger.debug(`Setting new Kibana instance UUID: ${newUuid}`);
     await writeUuidToFile(uuidFilePath, newUuid);

@@ -11,6 +11,7 @@ import { getNonHeapMemoryChart } from './non_heap_memory';
 import { getThreadCountChart } from './thread_count';
 import { getCPUChartData } from '../shared/cpu';
 import { getMemoryChartData } from '../shared/memory';
+import { getOTelSystemCPUChartDataForJava } from './otel_cpu';
 import { getGcRateChart } from './gc/get_gc_rate_chart';
 import { getGcTimeChart } from './gc/get_gc_time_chart';
 import { APMConfig } from '../../../..';
@@ -25,6 +26,7 @@ export function getJavaMetricsCharts({
   serviceNodeName,
   start,
   end,
+  isOpenTelemetry,
 }: {
   environment: string;
   kuery: string;
@@ -34,6 +36,7 @@ export function getJavaMetricsCharts({
   serviceNodeName?: string;
   start: number;
   end: number;
+  isOpenTelemetry: boolean;
 }) {
   return withApmSpan('get_java_system_metric_charts', () => {
     const options = {
@@ -45,10 +48,13 @@ export function getJavaMetricsCharts({
       serviceNodeName,
       start,
       end,
+      isOpenTelemetry,
     };
 
     return Promise.all([
-      getCPUChartData(options),
+      isOpenTelemetry
+        ? getOTelSystemCPUChartDataForJava(options)
+        : getCPUChartData(options),
       getMemoryChartData(options),
       getHeapMemoryChart(options),
       getNonHeapMemoryChart(options),

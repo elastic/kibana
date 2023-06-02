@@ -20,7 +20,8 @@ import { cleanKibana } from '../../tasks/common';
 import { login, visitWithoutDateRange } from '../../tasks/login';
 import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../urls/navigation';
 
-describe('Rules selection', () => {
+// TODO: See https://github.com/elastic/kibana/issues/154694
+describe.skip('Rules selection', () => {
   beforeEach(() => {
     cleanKibana();
     login();
@@ -50,10 +51,8 @@ describe('Rules selection', () => {
       cy.get(SELECTED_RULES_NUMBER_LABEL).should('contain.text', availablePrebuiltRulesCount);
     });
 
-    const bulkSelectButton = cy.get(SELECT_ALL_RULES_BTN);
-
     // Un-select all rules via the Bulk Selection button from the Utility bar
-    bulkSelectButton.click();
+    cy.get(SELECT_ALL_RULES_BTN).click();
 
     // Current selection should be 0 rules
     cy.get(SELECTED_RULES_NUMBER_LABEL).should('contain.text', '0');

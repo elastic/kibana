@@ -6,17 +6,28 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { CspBenchmarksPage, CspPage, CspPageNavigationItem } from './types';
+import { CSPM_POLICY_TEMPLATE, KSPM_POLICY_TEMPLATE } from '../../../common/constants';
+import { PosturePolicyTemplate } from '../../../common/types';
+import type {
+  CspBenchmarksPage,
+  CspIntegrationDocNavigationItem,
+  CspPage,
+  CspPageNavigationItem,
+} from './types';
 
 const NAV_ITEMS_NAMES = {
   DASHBOARD: i18n.translate('xpack.csp.navigation.dashboardNavItemLabel', {
-    defaultMessage: 'Cloud Posture',
+    defaultMessage: 'Cloud Security Posture',
   }),
+  VULNERABILITY_DASHBOARD: i18n.translate(
+    'xpack.csp.navigation.vulnerabilityDashboardNavItemLabel',
+    { defaultMessage: 'Cloud Native Vulnerability Management' }
+  ),
   FINDINGS: i18n.translate('xpack.csp.navigation.findingsNavItemLabel', {
     defaultMessage: 'Findings',
   }),
   BENCHMARKS: i18n.translate('xpack.csp.navigation.myBenchmarksNavItemLabel', {
-    defaultMessage: 'CSP Benchmarks',
+    defaultMessage: 'Cloud Posture Benchmarks',
   }),
   RULES: i18n.translate('xpack.csp.navigation.rulesNavItemLabel', {
     defaultMessage: 'Rules',
@@ -31,6 +42,11 @@ export const cloudPosturePages: Record<CspPage, CspPageNavigationItem> = {
     name: NAV_ITEMS_NAMES.DASHBOARD,
     path: `${CLOUD_SECURITY_POSTURE_BASE_PATH}/dashboard`,
     id: 'cloud_security_posture-dashboard',
+  },
+  vulnerability_dashboard: {
+    name: NAV_ITEMS_NAMES.VULNERABILITY_DASHBOARD,
+    path: `${CLOUD_SECURITY_POSTURE_BASE_PATH}/vulnerability_dashboard`,
+    id: 'cloud_security_posture-vulnerability_dashboard',
   },
   findings: {
     name: NAV_ITEMS_NAMES.FINDINGS,
@@ -55,7 +71,7 @@ export const benchmarksNavigation: Record<CspBenchmarksPage, CspPageNavigationIt
 export const findingsNavigation = {
   findings_default: {
     name: NAV_ITEMS_NAMES.FINDINGS,
-    path: `${CLOUD_SECURITY_POSTURE_BASE_PATH}/findings/default`,
+    path: `${CLOUD_SECURITY_POSTURE_BASE_PATH}/findings/configurations`,
     id: 'cloud_security_posture-findings-default',
   },
   findings_by_resource: {
@@ -67,5 +83,26 @@ export const findingsNavigation = {
     name: NAV_ITEMS_NAMES.FINDINGS,
     path: `${CLOUD_SECURITY_POSTURE_BASE_PATH}/findings/resource/:resourceId`,
     id: 'cloud_security_posture-findings-resourceId',
+  },
+  vulnerabilities: {
+    name: NAV_ITEMS_NAMES.FINDINGS,
+    path: `${CLOUD_SECURITY_POSTURE_BASE_PATH}/findings/vulnerabilities`,
+    id: 'cloud_security_posture-findings-vulnerabilities',
+  },
+};
+
+const ELASTIC_BASE_SHORT_URL = 'https://ela.st';
+
+export const cspIntegrationDocsNavigation: Record<
+  PosturePolicyTemplate,
+  CspIntegrationDocNavigationItem
+> = {
+  kspm: {
+    overviewPath: `${ELASTIC_BASE_SHORT_URL}/${KSPM_POLICY_TEMPLATE}`,
+    getStartedPath: `${ELASTIC_BASE_SHORT_URL}/${KSPM_POLICY_TEMPLATE}-get-started`,
+  },
+  cspm: {
+    overviewPath: `${ELASTIC_BASE_SHORT_URL}/${CSPM_POLICY_TEMPLATE}`,
+    getStartedPath: `${ELASTIC_BASE_SHORT_URL}/${CSPM_POLICY_TEMPLATE}-get-started`,
   },
 };

@@ -68,7 +68,7 @@ const UpgradeStep = () => {
             defaultMessage: 'An error occurred while retrieving the upgrade status',
           })}
           color="danger"
-          iconType="alert"
+          iconType="warning"
           data-test-subj="upgradeStatusErrorCallout"
         >
           <p>

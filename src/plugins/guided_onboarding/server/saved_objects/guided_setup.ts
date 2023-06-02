@@ -12,7 +12,8 @@ export const guideStateSavedObjectsType = 'guided-onboarding-guide-state';
 
 export const guideStateSavedObjects: SavedObjectsType = {
   name: guideStateSavedObjectsType,
-  hidden: false,
+  // hidden SO can't be changed by the SO client except when explicitly declared
+  hidden: true,
   // make it available in all spaces for now https://github.com/elastic/kibana/issues/144227
   namespaceType: 'agnostic',
   mappings: {
@@ -33,7 +34,8 @@ export const pluginStateSavedObjectsId = 'guided-onboarding-plugin-state-id';
 
 export const pluginStateSavedObjects: SavedObjectsType = {
   name: pluginStateSavedObjectsType,
-  hidden: false,
+  // hidden SO can't be changed by the SO client except when explicitly declared
+  hidden: true,
   // make it available in all spaces for now https://github.com/elastic/kibana/issues/144227
   namespaceType: 'agnostic',
   mappings: {

@@ -7,7 +7,7 @@
 
 import { getNewRule } from '../../../objects/rule';
 
-import { createCustomRule } from '../../../tasks/api_calls/rules';
+import { createRule } from '../../../tasks/api_calls/rules';
 import { goToRuleDetails } from '../../../tasks/alerts_detection_rules';
 import {
   esArchiverLoad,
@@ -43,9 +43,9 @@ import {
   CLOSE_SINGLE_ALERT_CHECKBOX,
   EXCEPTION_ITEM_CONTAINER,
   VALUES_INPUT,
-  FIELD_INPUT,
   EXCEPTION_CARD_ITEM_NAME,
   EXCEPTION_CARD_ITEM_CONDITIONS,
+  FIELD_INPUT_PARENT,
 } from '../../../screens/exceptions';
 import { createEndpointExceptionList } from '../../../tasks/api_calls/exceptions';
 
@@ -56,18 +56,26 @@ describe('Add endpoint exception from rule details', () => {
     esArchiverResetKibana();
     esArchiverLoad('auditbeat');
     login();
-  });
-
-  before(() => {
     deleteAlertsAndRules();
     // create rule with exception
-    createEndpointExceptionList().then((response) => {
-      createCustomRule(
-        {
-          ...getNewRule(),
-          customQuery: 'event.code:*',
-          dataSource: { index: ['auditbeat*'], type: 'indexPatterns' },
-          exceptionLists: [
+    createEndpointExceptionList<{
+      id: string;
+      list_id: string;
+      type:
+        | 'detection'
+        | 'rule_default'
+        | 'endpoint'
+        | 'endpoint_trusted_apps'
+        | 'endpoint_events'
+        | 'endpoint_host_isolation_exceptions'
+        | 'endpoint_blocklists';
+      namespace_type: 'agnostic' | 'single';
+    }>().then((response) => {
+      createRule(
+        getNewRule({
+          query: 'event.code:*',
+          index: ['auditbeat*'],
+          exceptions_list: [
             {
               id: response.body.id,
               list_id: response.body.list_id,
@@ -75,11 +83,14 @@ describe('Add endpoint exception from rule details', () => {
               namespace_type: response.body.namespace_type,
             },
           ],
-        },
-        '2'
+          rule_id: '2',
+        })
       );
     });
+  });
 
+  beforeEach(() => {
+    login();
     visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
     goToRuleDetails();
     goToEndpointExceptionsTab();
@@ -129,7 +140,7 @@ describe('Add endpoint exception from rule details', () => {
   it('edits an endpoint exception item', () => {
     const NEW_ITEM_NAME = 'Exception item-EDITED';
     const ITEM_FIELD = 'event.code';
-    const FIELD_DIFFERENT_FROM_EXISTING_ITEM_FIELD = 'agent.name';
+    const FIELD_DIFFERENT_FROM_EXISTING_ITEM_FIELD = 'agent.type';
 
     // displays existing exception items
     cy.get(EXCEPTION_ITEM_VIEWER_CONTAINER).should('have.length', 1);
@@ -144,7 +155,11 @@ describe('Add endpoint exception from rule details', () => {
     editExceptionFlyoutItemName(NEW_ITEM_NAME);
 
     // check that the existing item's field is being populated
-    cy.get(EXCEPTION_ITEM_CONTAINER).eq(0).find(FIELD_INPUT).eq(0).should('have.text', ITEM_FIELD);
+    cy.get(EXCEPTION_ITEM_CONTAINER)
+      .eq(0)
+      .find(FIELD_INPUT_PARENT)
+      .eq(0)
+      .should('have.text', ITEM_FIELD);
     cy.get(VALUES_INPUT).should('have.text', 'foo');
 
     // edit conditions
@@ -158,7 +173,7 @@ describe('Add endpoint exception from rule details', () => {
 
     // check that updates stuck
     cy.get(EXCEPTION_CARD_ITEM_NAME).should('have.text', NEW_ITEM_NAME);
-    cy.get(EXCEPTION_CARD_ITEM_CONDITIONS).should('have.text', ' agent.nameIS foo');
+    cy.get(EXCEPTION_CARD_ITEM_CONDITIONS).should('have.text', ' agent.typeIS foo');
   });
 
   it('allows user to search for items', () => {

@@ -38,7 +38,6 @@ export function WaterfallContainer({
   if (!waterfall) {
     return null;
   }
-
   const { legends, items } = waterfall;
 
   // Service colors are needed to color the dot in the error popover

@@ -12,6 +12,7 @@ import type { ArtifactListPageProps } from '../artifact_list_page';
 import type { AppContextTestRender } from '../../../../common/mock/endpoint';
 import type { getFormComponentMock } from '../mocks';
 import { getArtifactListPageRenderingSetup } from '../mocks';
+import { artifactListPageLabels } from '../translations';
 
 describe('When showing the Empty State in ArtifactListPage', () => {
   let render: (
@@ -60,51 +61,89 @@ describe('When showing the Empty State in ArtifactListPage', () => {
     expect(renderResult.queryByTestId('header-page-title')).toBe(null);
   });
 
-  it('should open create flyout when primary button is clicked', async () => {
-    render();
-    const addButton = await renderResult.findByTestId('testPage-emptyState-addButton');
+  describe('and user is allowed to Create entries', () => {
+    it('should show title, about info and add button', async () => {
+      const { getByTestId, queryByTestId } = render();
 
-    act(() => {
-      userEvent.click(addButton);
+      await waitFor(async () => {
+        expect(getByTestId('testPage-emptyState'));
+      });
+
+      expect(getByTestId('testPage-emptyState-title').textContent).toEqual(
+        artifactListPageLabels.emptyStateTitle
+      );
+      expect(getByTestId('testPage-emptyState-aboutInfo').textContent).toEqual(
+        artifactListPageLabels.emptyStateInfo
+      );
+      expect(getByTestId('testPage-emptyState-addButton').textContent).toEqual(
+        artifactListPageLabels.emptyStatePrimaryButtonLabel
+      );
+
+      expect(queryByTestId('testPage-emptyState-title-no-entries')).toBeNull();
     });
 
-    expect(renderResult.getByTestId('testPage-flyout')).toBeTruthy();
-    expect(history.location.search).toMatch(/show=create/);
-  });
-
-  describe('and the first item is created', () => {
-    it('should show the list after creating first item and remove empty state', async () => {
+    it('should open create flyout when primary button is clicked', async () => {
       render();
       const addButton = await renderResult.findByTestId('testPage-emptyState-addButton');
 
-      act(() => {
+      userEvent.click(addButton);
+
+      expect(renderResult.getByTestId('testPage-flyout')).toBeTruthy();
+      expect(history.location.search).toMatch(/show=create/);
+    });
+
+    describe('and the first item is created', () => {
+      it('should show the list after creating first item and remove empty state', async () => {
+        render();
+        const addButton = await renderResult.findByTestId('testPage-emptyState-addButton');
+
         userEvent.click(addButton);
-      });
 
-      await waitFor(async () => {
-        expect(renderResult.getByTestId('testPage-flyout'));
-      });
+        await waitFor(async () => {
+          expect(renderResult.getByTestId('testPage-flyout'));
+        });
 
-      // indicate form is valid
-      act(() => {
-        const lastProps = getLastFormComponentProps();
-        lastProps.onChange({ item: { ...lastProps.item, name: 'some name' }, isValid: true });
-      });
+        // indicate form is valid
+        act(() => {
+          const lastProps = getLastFormComponentProps();
+          lastProps.onChange({ item: { ...lastProps.item, name: 'some name' }, isValid: true });
+        });
 
-      mockedApi.responseProvider.trustedAppsList.mockImplementation(
-        originalListApiResponseProvider
-      );
+        mockedApi.responseProvider.trustedAppsList.mockImplementation(
+          originalListApiResponseProvider
+        );
 
-      // Submit form
-      act(() => {
+        // Submit form
         userEvent.click(renderResult.getByTestId('testPage-flyout-submitButton'));
-      });
 
-      // wait for the list to show up
-      await act(async () => {
+        // wait for the list to show up
         await waitFor(() => {
           expect(renderResult.getByTestId('testPage-list')).toBeTruthy();
         });
+      });
+    });
+  });
+
+  describe('and user is not allowed to Create entries', () => {
+    it('should hide title, about info and add button promoting entry creation', async () => {
+      render({ allowCardCreateAction: false });
+
+      await waitFor(async () => {
+        expect(renderResult.getByTestId('testPage-emptyState'));
+      });
+
+      expect(renderResult.queryByTestId('testPage-emptyState-title')).toBeNull();
+      expect(renderResult.queryByTestId('testPage-emptyState-aboutInfo')).toBeNull();
+      expect(renderResult.queryByTestId('testPage-emptyState-addButton')).toBeNull();
+    });
+
+    it('should show title indicating there are no entries', async () => {
+      render({ allowCardCreateAction: false });
+
+      await waitFor(async () => {
+        expect(
+          renderResult.getByTestId('testPage-emptyState-title-no-entries').textContent
+        ).toEqual(artifactListPageLabels.emptyStateTitleNoEntries);
       });
     });
   });

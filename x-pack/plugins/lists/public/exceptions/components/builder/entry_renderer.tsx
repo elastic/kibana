@@ -7,7 +7,16 @@
 
 import React, { useCallback, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiIconTip } from '@elastic/eui';
+import {
+  EuiAccordion,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormRow,
+  EuiIcon,
+  EuiIconTip,
+  EuiSpacer,
+  useEuiPaddingSize,
+} from '@elastic/eui';
 import styled from 'styled-components';
 import {
   ExceptionListType,
@@ -27,6 +36,7 @@ import {
   getEntryOnOperatorChange,
   getEntryOnWildcardChange,
   getFilteredIndexPatterns,
+  getMappingConflictsInfo,
   getOperatorOptions,
 } from '@kbn/securitysolution-list-utils';
 import {
@@ -50,6 +60,7 @@ import { HttpStart } from '@kbn/core/public';
 import { getEmptyValue } from '../../../common/empty_value';
 
 import * as i18n from './translations';
+import { EntryFieldError } from './reducer';
 
 const FieldFlexItem = styled(EuiFlexItem)`
   overflow: hidden;
@@ -71,7 +82,7 @@ export interface EntryItemProps {
   ) => DataViewBase;
   onChange: (arg: BuilderEntry, i: number) => void;
   onlyShowListOperators?: boolean;
-  setErrorsExist: (arg: boolean) => void;
+  setErrorsExist: (arg: EntryFieldError) => void;
   setWarningsExist: (arg: boolean) => void;
   isDisabled?: boolean;
   operatorsList?: OperatorOption[];
@@ -96,11 +107,13 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
   operatorsList,
   allowCustomOptions = false,
 }): JSX.Element => {
+  const sPaddingSize = useEuiPaddingSize('s');
+
   const handleError = useCallback(
     (err: boolean): void => {
-      setErrorsExist(err);
+      setErrorsExist({ [entry.id]: err });
     },
-    [setErrorsExist]
+    [setErrorsExist, entry.id]
   );
   const handleWarning = useCallback(
     (warn: boolean): void => {
@@ -192,51 +205,97 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
           isLoading={false}
           isDisabled={isDisabled || indexPattern == null}
           onChange={handleFieldChange}
-          acceptsCustomOptions={entry.nested == null}
+          acceptsCustomOptions={entry.nested == null && allowCustomOptions}
           data-test-subj="exceptionBuilderEntryField"
+          showMappingConflicts={true}
         />
       );
 
-      if (isFirst) {
+      const warningIconCss = { marginRight: `${sPaddingSize}` };
+      const getMappingConflictsWarning = (field: DataViewFieldBase): React.ReactNode | null => {
+        const conflictsInfo = getMappingConflictsInfo(field);
+        if (!conflictsInfo) {
+          return null;
+        }
         return (
-          <EuiFormRow
-            fullWidth
-            label={i18n.FIELD}
-            helpText={
-              entry.nested == null && allowCustomOptions
-                ? i18n.CUSTOM_COMBOBOX_OPTION_TEXT
-                : undefined
-            }
-            data-test-subj="exceptionBuilderEntryFieldFormRow"
-          >
-            {comboBox}
-          </EuiFormRow>
+          <>
+            <EuiSpacer size="s" />
+            <EuiAccordion
+              id={`${entry.id}`}
+              buttonContent={
+                <>
+                  <EuiIcon
+                    data-test-subj="mappingConflictsAccordionIcon"
+                    tabIndex={0}
+                    type="warning"
+                    size="s"
+                    css={warningIconCss}
+                  />
+                  {i18n.FIELD_CONFLICT_INDICES_WARNING_DESCRIPTION}
+                </>
+              }
+              arrowDisplay="none"
+              data-test-subj="mappingConflictsAccordion"
+            >
+              <div data-test-subj="mappingConflictsDescription">
+                {conflictsInfo.map((info) => {
+                  const groupDetails = info.groupedIndices.map(
+                    ({ name, count }) =>
+                      `${count > 1 ? i18n.CONFLICT_MULTIPLE_INDEX_DESCRIPTION(name, count) : name}`
+                  );
+                  return (
+                    <>
+                      <EuiSpacer size="s" />
+                      {`${
+                        info.totalIndexCount > 1
+                          ? i18n.CONFLICT_MULTIPLE_INDEX_DESCRIPTION(
+                              info.type,
+                              info.totalIndexCount
+                            )
+                          : info.type
+                      }: ${groupDetails.join(', ')}`}
+                    </>
+                  );
+                })}
+                <EuiSpacer size="s" />
+              </div>
+            </EuiAccordion>
+          </>
         );
-      } else {
-        return (
-          <EuiFormRow
-            fullWidth
-            label={''}
-            helpText={
-              entry.nested == null && allowCustomOptions
-                ? i18n.CUSTOM_COMBOBOX_OPTION_TEXT
-                : undefined
-            }
-            data-test-subj="exceptionBuilderEntryFieldFormRow"
-          >
-            {comboBox}
-          </EuiFormRow>
+      };
+
+      const customOptionText =
+        entry.nested == null && allowCustomOptions ? i18n.CUSTOM_COMBOBOX_OPTION_TEXT : undefined;
+
+      const helpText =
+        entry.field?.conflictDescriptions == null ? (
+          customOptionText
+        ) : (
+          <>
+            {customOptionText}
+            {getMappingConflictsWarning(entry.field)}
+          </>
         );
-      }
+      return (
+        <EuiFormRow
+          fullWidth
+          label={isFirst ? i18n.FIELD : ''}
+          helpText={helpText}
+          data-test-subj="exceptionBuilderEntryFieldFormRow"
+        >
+          {comboBox}
+        </EuiFormRow>
+      );
     },
     [
       indexPattern,
       entry,
       listType,
       listTypeSpecificIndexPatternFilter,
-      handleFieldChange,
       osTypes,
       isDisabled,
+      handleFieldChange,
+      sPaddingSize,
       allowCustomOptions,
     ]
   );
@@ -358,14 +417,16 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
       case OperatorTypeEnum.WILDCARD:
         const wildcardValue = typeof entry.value === 'string' ? entry.value : undefined;
         let actualWarning: React.ReactNode | string | undefined;
-        if (listType !== 'detection') {
+        if (listType !== 'detection' && listType !== 'rule_default') {
           let os: OperatingSystem = OperatingSystem.WINDOWS;
           if (osTypes) {
             [os] = osTypes as OperatingSystem[];
           }
           const warning = validateFilePathInput({ os, value: wildcardValue });
           actualWarning =
-            warning === FILENAME_WILDCARD_WARNING ? getWildcardWarning(warning) : warning;
+            warning === FILENAME_WILDCARD_WARNING
+              ? warning && getWildcardWarning(warning)
+              : warning;
         }
 
         return (

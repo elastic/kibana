@@ -6,7 +6,6 @@
  */
 
 import { combineReducers } from 'redux';
-import { agentPoliciesReducer, AgentPoliciesState } from '../private_locations';
 import { monitorReducer, MonitorState } from './monitor';
 import { uiReducer, UiState } from './ui';
 import { monitorStatusReducer, MonitorStatusState } from './monitor_status';
@@ -24,14 +23,11 @@ import { alertsReducer, AlertState } from '../alerts/alerts';
 import { JourneyKVP, journeyReducer } from './journey';
 import { networkEventsReducer, NetworkEventsState } from './network_events';
 import { syntheticsReducer, SyntheticsReducerState } from './synthetics';
-import { monitorManagementListReducer, MonitorManagementList } from './monitor_management';
-import { testNowRunsReducer, TestNowRunsState } from './test_now_runs';
 
 export interface RootState {
   monitor: MonitorState;
   ui: UiState;
   monitorList: MonitorList;
-  monitorManagementList: MonitorManagementList;
   monitorStatus: MonitorStatusState;
   dynamicSettings: DynamicSettingsState;
   ping: PingState;
@@ -45,15 +41,12 @@ export interface RootState {
   journeys: JourneyKVP;
   networkEvents: NetworkEventsState;
   synthetics: SyntheticsReducerState;
-  testNowRuns: TestNowRunsState;
-  agentPolicies: AgentPoliciesState;
 }
 
 export const rootReducer = combineReducers<RootState>({
   monitor: monitorReducer,
   ui: uiReducer,
   monitorList: monitorListReducer,
-  monitorManagementList: monitorManagementListReducer,
   monitorStatus: monitorStatusReducer,
   dynamicSettings: dynamicSettingsReducer,
   ping: pingReducer,
@@ -67,6 +60,4 @@ export const rootReducer = combineReducers<RootState>({
   journeys: journeyReducer,
   networkEvents: networkEventsReducer,
   synthetics: syntheticsReducer,
-  testNowRuns: testNowRunsReducer,
-  agentPolicies: agentPoliciesReducer,
 });

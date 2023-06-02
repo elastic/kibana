@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { SavedObject, SavedObjectsImportRetry } from '@kbn/core-saved-objects-common';
+import type { SavedObjectsImportRetry } from '@kbn/core-saved-objects-common';
+import type { SavedObject } from '@kbn/core-saved-objects-server';
 
 export function createObjectsFilter(retries: SavedObjectsImportRetry[]) {
   const retryKeys = new Set<string>(retries.map((retry) => `${retry.type}:${retry.id}`));

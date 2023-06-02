@@ -7,13 +7,15 @@
 
 import { i18n } from '@kbn/i18n';
 import { defaults, omit } from 'lodash';
-import React, { useEffect } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { CoreStart } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
   ForLastExpression,
   TIME_UNITS,
 } from '@kbn/triggers-actions-ui-plugin/public';
+import { EuiFormRow } from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
 import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
 import { asInteger } from '../../../../../common/utils/formatters';
 import { useFetcher } from '../../../../hooks/use_fetcher';
@@ -21,11 +23,19 @@ import { createCallApmApi } from '../../../../services/rest/create_call_apm_api'
 import { ChartPreview } from '../../ui_components/chart_preview';
 import {
   EnvironmentField,
+  ErrorGroupingKeyField,
   IsAboveField,
   ServiceField,
 } from '../../utils/fields';
 import { AlertMetadata, getIntervalAndTimeRange } from '../../utils/helper';
 import { ApmRuleParamsContainer } from '../../ui_components/apm_rule_params_container';
+import { APMRuleGroupBy } from '../../ui_components/apm_rule_group_by';
+import {
+  SERVICE_ENVIRONMENT,
+  SERVICE_NAME,
+  TRANSACTION_NAME,
+  ERROR_GROUP_ID,
+} from '../../../../../common/es_fields/apm';
 
 export interface RuleParams {
   windowSize?: number;
@@ -33,6 +43,8 @@ export interface RuleParams {
   threshold?: number;
   serviceName?: string;
   environment?: string;
+  groupBy?: string[] | undefined;
+  errorGroupingKey?: string;
 }
 
 interface Props {
@@ -74,6 +86,7 @@ export function ErrorCountRuleType(props: Props) {
               query: {
                 environment: params.environment,
                 serviceName: params.serviceName,
+                errorGroupingKey: params.errorGroupingKey,
                 interval,
                 start,
                 end,
@@ -88,18 +101,44 @@ export function ErrorCountRuleType(props: Props) {
       params.windowUnit,
       params.environment,
       params.serviceName,
+      params.errorGroupingKey,
     ]
+  );
+
+  const onGroupByChange = useCallback(
+    (group: string[] | null) => {
+      setRuleParams('groupBy', group ?? []);
+    },
+    [setRuleParams]
   );
 
   const fields = [
     <ServiceField
       currentValue={params.serviceName}
-      onChange={(value) => setRuleParams('serviceName', value)}
+      onChange={(value) => {
+        if (value !== params.serviceName) {
+          setRuleParams('serviceName', value);
+          setRuleParams('environment', ENVIRONMENT_ALL.value);
+          setRuleParams('errorGroupingKey', undefined);
+        }
+      }}
     />,
     <EnvironmentField
       currentValue={params.environment}
-      onChange={(value) => setRuleParams('environment', value)}
+      onChange={(value) =>
+        setRuleParams(
+          'environment',
+          value !== '' ? value : ENVIRONMENT_ALL.value
+        )
+      }
+      serviceName={params.serviceName}
     />,
+    <ErrorGroupingKeyField
+      currentValue={params.errorGroupingKey}
+      onChange={(value) => setRuleParams('errorGroupingKey', value)}
+      serviceName={params.serviceName}
+    />,
+
     <IsAboveField
       value={params.threshold}
       unit={i18n.translate('xpack.apm.errorCountRuleType.errors', {
@@ -123,13 +162,45 @@ export function ErrorCountRuleType(props: Props) {
     />,
   ];
 
-  const chartPreview = (
+  // hide preview chart until https://github.com/elastic/kibana/pull/156625 gets merged
+  const showChartPreview = false;
+  const chartPreview = showChartPreview ? (
     <ChartPreview
       series={[{ data: data?.errorCountChartPreview ?? [] }]}
       threshold={params.threshold}
       yTickFormat={asInteger}
       uiSettings={services.uiSettings}
     />
+  ) : null;
+
+  const groupAlertsBy = (
+    <>
+      <EuiFormRow
+        label={i18n.translate(
+          'xpack.apm.ruleFlyout.errorCount.createAlertPerText',
+          {
+            defaultMessage: 'Group alerts by',
+          }
+        )}
+        helpText={i18n.translate(
+          'xpack.apm.ruleFlyout.errorCount.createAlertPerHelpText',
+          {
+            defaultMessage:
+              'Create an alert for every unique value. For example: "transaction.name". By default, alert is created for every unique service.name and service.environment.',
+          }
+        )}
+        fullWidth
+        display="rowCompressed"
+      >
+        <APMRuleGroupBy
+          onChange={onGroupByChange}
+          options={{ groupBy: ruleParams.groupBy }}
+          fields={[TRANSACTION_NAME, ERROR_GROUP_ID]}
+          preSelectedOptions={[SERVICE_NAME, SERVICE_ENVIRONMENT]}
+        />
+      </EuiFormRow>
+      <EuiSpacer size="m" />
+    </>
   );
 
   return (
@@ -137,6 +208,7 @@ export function ErrorCountRuleType(props: Props) {
       minimumWindowSize={{ value: 5, unit: TIME_UNITS.MINUTE }}
       defaultParams={params}
       fields={fields}
+      groupAlertsBy={groupAlertsBy}
       setRuleParams={setRuleParams}
       setRuleProperty={setRuleProperty}
       chartPreview={chartPreview}

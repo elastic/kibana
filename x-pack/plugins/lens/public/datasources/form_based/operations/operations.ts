@@ -241,13 +241,16 @@ export function getAvailableOperationsByMetadata(
           );
         });
       } else if (operationDefinition.input === 'none') {
-        addToMap(
-          {
-            type: 'none',
-            operationType: operationDefinition.type,
-          },
-          operationDefinition.getPossibleOperation()
-        );
+        const validOperation = operationDefinition.getPossibleOperation(indexPattern);
+        if (validOperation) {
+          addToMap(
+            {
+              type: 'none',
+              operationType: operationDefinition.type,
+            },
+            validOperation
+          );
+        }
       } else if (operationDefinition.input === 'fullReference') {
         const validOperation = operationDefinition.getPossibleOperation(indexPattern);
         if (validOperation) {

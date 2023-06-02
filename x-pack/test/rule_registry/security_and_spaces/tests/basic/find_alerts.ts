@@ -6,7 +6,10 @@
  */
 import expect from '@kbn/expect';
 
-import { ALERT_WORKFLOW_STATUS } from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
+import {
+  ALERT_RULE_CONSUMER,
+  ALERT_WORKFLOW_STATUS,
+} from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
 import {
   superUser,
   globalRead,
@@ -263,6 +266,34 @@ export default ({ getService }: FtrProviderContext) => {
         });
       expect(found.statusCode).to.eql(200);
       expect(found.body.aggregations.nbr_consumer.value).to.be.equal(2);
+    });
+
+    it(`${superUser.username} should handle 'siem' featureIds`, async () => {
+      const found = await supertestWithoutAuth
+        .post(`${getSpaceUrlPrefix(SPACE1)}${TEST_URL}/find`)
+        .auth(superUser.username, superUser.password)
+        .set('kbn-xsrf', 'true')
+        .send({
+          feature_ids: ['siem'],
+        });
+
+      expect(found.body.hits.hits.every((hit: any) => hit[ALERT_RULE_CONSUMER] === 'siem')).equal(
+        true
+      );
+    });
+
+    it(`${superUser.username} should handle 'apm' featureIds`, async () => {
+      const found = await supertestWithoutAuth
+        .post(`${getSpaceUrlPrefix(SPACE1)}${TEST_URL}/find`)
+        .auth(superUser.username, superUser.password)
+        .set('kbn-xsrf', 'true')
+        .send({
+          feature_ids: ['apm'],
+        });
+
+      expect(found.body.hits.hits.every((hit: any) => hit[ALERT_RULE_CONSUMER] === 'apm')).equal(
+        true
+      );
     });
 
     function addTests({ space, authorizedUsers, unauthorizedUsers, alertId, index }: TestCase) {

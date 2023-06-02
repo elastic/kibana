@@ -6,8 +6,12 @@
  */
 
 import { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/types';
+import {
+  ALL_VALUE,
+  apmTransactionDurationIndicatorSchema,
+  timeslicesBudgetingMethodSchema,
+} from '@kbn/slo-schema';
 import { InvalidTransformError } from '../../../errors';
-import { ALL_VALUE, apmTransactionDurationIndicatorSchema } from '../../../types/schema';
 import {
   SLO_DESTINATION_INDEX_NAME,
   SLO_INGEST_PIPELINE_NAME,
@@ -15,9 +19,9 @@ import {
 } from '../../../assets/constants';
 import { getSLOTransformTemplate } from '../../../assets/transform_templates/slo_transform_template';
 import { SLO, APMTransactionDurationIndicator } from '../../../domain/models';
-import { TransformGenerator } from '.';
-
-const APM_SOURCE_INDEX = 'metrics-apm*';
+import { getElastichsearchQueryOrThrow, TransformGenerator } from '.';
+import { Query } from './types';
+import { parseIndex } from './common';
 
 export class ApmTransactionDurationTransformGenerator extends TransformGenerator {
   public getTransformParams(slo: SLO): TransformPutTransformRequest {
@@ -27,10 +31,11 @@ export class ApmTransactionDurationTransformGenerator extends TransformGenerator
 
     return getSLOTransformTemplate(
       this.buildTransformId(slo),
+      this.buildDescription(slo),
       this.buildSource(slo, slo.indicator),
       this.buildDestination(),
-      this.buildCommonGroupBy(slo),
-      this.buildAggregations(slo.indicator),
+      this.buildGroupBy(slo),
+      this.buildAggregations(slo, slo.indicator),
       this.buildSettings(slo)
     );
   }
@@ -40,7 +45,15 @@ export class ApmTransactionDurationTransformGenerator extends TransformGenerator
   }
 
   private buildSource(slo: SLO, indicator: APMTransactionDurationIndicator) {
-    const queryFilter = [];
+    const queryFilter: Query[] = [
+      {
+        range: {
+          '@timestamp': {
+            gte: `now-${slo.timeWindow.duration.format()}`,
+          },
+        },
+      },
+    ];
     if (indicator.params.service !== ALL_VALUE) {
       queryFilter.push({
         match: {
@@ -57,33 +70,35 @@ export class ApmTransactionDurationTransformGenerator extends TransformGenerator
       });
     }
 
-    if (indicator.params.transaction_name !== ALL_VALUE) {
+    if (indicator.params.transactionName !== ALL_VALUE) {
       queryFilter.push({
         match: {
-          'transaction.name': indicator.params.transaction_name,
+          'transaction.name': indicator.params.transactionName,
         },
       });
     }
 
-    if (indicator.params.transaction_type !== ALL_VALUE) {
+    if (indicator.params.transactionType !== ALL_VALUE) {
       queryFilter.push({
         match: {
-          'transaction.type': indicator.params.transaction_type,
+          'transaction.type': indicator.params.transactionType,
         },
       });
+    }
+
+    if (!!indicator.params.filter) {
+      queryFilter.push(getElastichsearchQueryOrThrow(indicator.params.filter));
     }
 
     return {
-      index: APM_SOURCE_INDEX,
+      index: parseIndex(indicator.params.index),
       runtime_mappings: this.buildCommonRuntimeMappings(slo),
       query: {
         bool: {
           filter: [
-            {
-              match: {
-                'transaction.root': true,
-              },
-            },
+            { terms: { 'processor.event': ['metric'] } },
+            { term: { 'metricset.name': 'transaction' } },
+            { exists: { field: 'transaction.duration.histogram' } },
             ...queryFilter,
           ],
         },
@@ -98,8 +113,9 @@ export class ApmTransactionDurationTransformGenerator extends TransformGenerator
     };
   }
 
-  private buildAggregations(indicator: APMTransactionDurationIndicator) {
-    const truncatedThreshold = Math.trunc(indicator.params['threshold.us']);
+  private buildAggregations(slo: SLO, indicator: APMTransactionDurationIndicator) {
+    // threshold is in ms (milliseconds), but apm data is stored in us (microseconds)
+    const truncatedThreshold = Math.trunc(indicator.params.threshold * 1000);
 
     return {
       _numerator: {
@@ -125,6 +141,17 @@ export class ApmTransactionDurationTransformGenerator extends TransformGenerator
           field: 'transaction.duration.histogram',
         },
       },
+      ...(timeslicesBudgetingMethodSchema.is(slo.budgetingMethod) && {
+        'slo.isGoodSlice': {
+          bucket_script: {
+            buckets_path: {
+              goodEvents: 'slo.numerator.value',
+              totalEvents: 'slo.denominator.value',
+            },
+            script: `params.goodEvents / params.totalEvents >= ${slo.objective.timesliceTarget} ? 1 : 0`,
+          },
+        },
+      }),
     };
   }
 }

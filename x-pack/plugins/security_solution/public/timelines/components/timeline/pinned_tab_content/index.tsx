@@ -14,8 +14,8 @@ import type { ConnectedProps } from 'react-redux';
 import { connect } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
 
+import type { ControlColumnProps } from '../../../../../common/types';
 import { timelineActions, timelineSelectors } from '../../../store/timeline';
-import { HeaderActions } from '../body/actions/header_actions';
 import type { CellValueElementProps } from '../cell_rendering';
 import type { Direction } from '../../../../../common/search_strategy';
 import { useTimelineEvents } from '../../../containers';
@@ -31,16 +31,13 @@ import { useTimelineFullScreen } from '../../../../common/containers/use_full_sc
 import type { TimelineModel } from '../../../store/timeline/model';
 import type { State } from '../../../../common/store';
 import { calculateTotalPages } from '../helpers';
-import type {
-  ControlColumnProps,
-  RowRenderer,
-  ToggleDetailPanel,
-} from '../../../../../common/types/timeline';
+import type { RowRenderer, ToggleDetailPanel } from '../../../../../common/types/timeline';
 import { TimelineTabs } from '../../../../../common/types/timeline';
 import { DetailsPanel } from '../../side_panel';
 import { ExitFullScreen } from '../../../../common/components/exit_full_screen';
 import { getDefaultControlColumn } from '../body/control_columns';
 import { useLicense } from '../../../../common/hooks/use_license';
+import { HeaderActions } from '../../../../common/components/header_actions/header_actions';
 
 const StyledEuiFlyoutBody = styled(EuiFlyoutBody)`
   overflow-y: hidden;

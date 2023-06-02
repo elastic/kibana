@@ -11,15 +11,23 @@ import { parse, TinymathLocation, TinymathVariable } from '@kbn/tinymath';
 import type { TinymathAST, TinymathFunction, TinymathNamedArgument } from '@kbn/tinymath';
 import { luceneStringToDsl, toElasticsearchQuery, fromKueryExpression } from '@kbn/es-query';
 import type { Query } from '@kbn/es-query';
-import { parseTimeShift } from '@kbn/data-plugin/common';
+import {
+  isAbsoluteTimeShift,
+  parseTimeShift,
+  REASON_IDS,
+  REASON_ID_TYPES,
+  validateAbsoluteTimeShift,
+} from '@kbn/data-plugin/common';
+import { nonNullable } from '../../../../../utils';
+import { DateRange } from '../../../../../../common/types';
 import {
   findMathNodes,
   findVariables,
   getOperationParams,
+  getTypeI18n,
   getValueOrName,
   groupArgsByType,
   isMathNode,
-  nonNullable,
   tinymathFunctions,
 } from './util';
 
@@ -109,10 +117,14 @@ type ErrorTypes = keyof ValidationErrors;
 type ErrorValues<K extends ErrorTypes> = ValidationErrors[K]['type'];
 
 export interface ErrorWrapper {
+  type?: ErrorTypes; // TODO - make this required?
   message: string;
   locations: TinymathLocation[];
   severity?: 'error' | 'warning';
+  extraInfo?: { missingFields: string[] };
 }
+
+const DEFAULT_RETURN_TYPE = getTypeI18n('number');
 
 function getNodeLocation(node: TinymathFunction): TinymathLocation[] {
   return [node.location].filter(nonNullable);
@@ -120,15 +132,15 @@ function getNodeLocation(node: TinymathFunction): TinymathLocation[] {
 
 function getArgumentType(arg: TinymathAST, operations: Record<string, GenericOperationDefinition>) {
   if (!isObject(arg)) {
-    return typeof arg;
+    return getTypeI18n(typeof arg);
   }
   if (arg.type === 'function') {
     if (tinymathFunctions[arg.name]) {
-      return tinymathFunctions[arg.name].outputType ?? 'number';
+      return tinymathFunctions[arg.name].outputType ?? DEFAULT_RETURN_TYPE;
     }
     // Assume it's a number for now
     if (operations[arg.name]) {
-      return 'number';
+      return DEFAULT_RETURN_TYPE;
     }
   }
   // leave for now other argument types
@@ -398,7 +410,7 @@ function getMessageFromId<K extends ErrorTypes>({
       break;
   }
 
-  return { message, locations };
+  return { type: messageId, message, locations };
 }
 
 export function tryToParse(
@@ -437,12 +449,13 @@ export function runASTValidation(
   layer: FormBasedLayer,
   indexPattern: IndexPattern,
   operations: Record<string, GenericOperationDefinition>,
-  currentColumn: GenericIndexPatternColumn
+  currentColumn: GenericIndexPatternColumn,
+  dateRange?: DateRange
 ) {
   return [
     ...checkMissingVariableOrFunctions(ast, layer, indexPattern, operations),
     ...checkTopNodeReturnType(ast),
-    ...runFullASTValidation(ast, layer, indexPattern, operations, currentColumn),
+    ...runFullASTValidation(ast, layer, indexPattern, operations, dateRange, currentColumn),
   ];
 }
 
@@ -490,16 +503,17 @@ function checkMissingVariableOrFunctions(
 
   // need to check the arguments here: check only strings for now
   if (missingVariables.length) {
-    missingErrors.push(
-      getMessageFromId({
+    missingErrors.push({
+      ...getMessageFromId({
         messageId: 'missingField',
         values: {
           variablesLength: missingVariables.length,
           variablesList: missingVariables.map(({ value }) => value).join(', '),
         },
         locations: missingVariables.map(({ location }) => location),
-      })
-    );
+      }),
+      extraInfo: { missingFields: [...new Set(missingVariables.map(({ value }) => value))] },
+    });
   }
   const invalidVariableErrors = checkVariableEdgeCases(
     ast,
@@ -508,9 +522,31 @@ function checkMissingVariableOrFunctions(
   return [...missingErrors, ...invalidVariableErrors];
 }
 
+function getAbsoluteTimeShiftErrorMessage(reason: REASON_ID_TYPES) {
+  switch (reason) {
+    case REASON_IDS.missingTimerange:
+      return i18n.translate('xpack.lens.indexPattern.absoluteMissingTimeRange', {
+        defaultMessage: 'Invalid time shift. No time range found as reference',
+      });
+    case REASON_IDS.invalidDate:
+      return i18n.translate('xpack.lens.indexPattern.absoluteInvalidDate', {
+        defaultMessage: 'Invalid time shift. The date is not of the correct format',
+      });
+    case REASON_IDS.shiftAfterTimeRange:
+      return i18n.translate('xpack.lens.indexPattern.absoluteAfterTimeRange', {
+        defaultMessage: 'Invalid time shift. The provided date is after the current time range',
+      });
+    case REASON_IDS.notAbsoluteTimeShift:
+      return i18n.translate('xpack.lens.indexPattern.notAbsoluteTimeShift', {
+        defaultMessage: 'Invalid time shift.',
+      });
+  }
+}
+
 function getQueryValidationErrors(
   namedArguments: TinymathNamedArgument[] | undefined,
-  indexPattern: IndexPattern
+  indexPattern: IndexPattern,
+  dateRange: DateRange | undefined
 ): ErrorWrapper[] {
   const errors: ErrorWrapper[] = [];
   (namedArguments ?? []).forEach((arg) => {
@@ -530,16 +566,34 @@ function getQueryValidationErrors(
     if (arg.name === 'shift') {
       const parsedShift = parseTimeShift(arg.value);
       if (parsedShift === 'invalid') {
-        errors.push({
-          message: i18n.translate('xpack.lens.indexPattern.invalidTimeShift', {
-            defaultMessage:
-              'Invalid time shift. Enter positive integer amount followed by one of the units s, m, h, d, w, M, y. For example 3h for 3 hours',
-          }),
-          locations: [arg.location],
-        });
+        if (isAbsoluteTimeShift(arg.value)) {
+          // try to parse as absolute time shift
+          const error = validateAbsoluteTimeShift(
+            arg.value,
+            dateRange
+              ? {
+                  from: dateRange.fromDate,
+                  to: dateRange.toDate,
+                }
+              : undefined
+          );
+          if (error) {
+            errors.push({
+              message: getAbsoluteTimeShiftErrorMessage(error),
+              locations: [arg.location],
+            });
+          }
+        } else {
+          errors.push({
+            message: i18n.translate('xpack.lens.indexPattern.invalidTimeShift', {
+              defaultMessage:
+                'Invalid time shift. Enter positive integer amount followed by one of the units s, m, h, d, w, M, y. For example 3h for 3 hours',
+            }),
+            locations: [arg.location],
+          });
+        }
       }
     }
-
     if (arg.name === 'reducedTimeRange') {
       const parsedReducedTimeRange = parseTimeShift(arg.value || '');
       if (parsedReducedTimeRange === 'invalid' || parsedReducedTimeRange === 'previous') {
@@ -600,7 +654,8 @@ function validateNameArguments(
     | OperationDefinition<GenericIndexPatternColumn, 'field'>
     | OperationDefinition<GenericIndexPatternColumn, 'fullReference'>,
   namedArguments: TinymathNamedArgument[] | undefined,
-  indexPattern: IndexPattern
+  indexPattern: IndexPattern,
+  dateRange: DateRange | undefined
 ) {
   const errors = [];
   const missingParams = getMissingParams(nodeOperation, namedArguments);
@@ -642,7 +697,7 @@ function validateNameArguments(
       })
     );
   }
-  const queryValidationErrors = getQueryValidationErrors(namedArguments, indexPattern);
+  const queryValidationErrors = getQueryValidationErrors(namedArguments, indexPattern, dateRange);
   if (queryValidationErrors.length) {
     errors.push(...queryValidationErrors);
   }
@@ -659,7 +714,6 @@ function validateNameArguments(
   return errors;
 }
 
-const DEFAULT_RETURN_TYPE = 'number';
 function checkTopNodeReturnType(ast: TinymathAST): ErrorWrapper[] {
   if (
     isObject(ast) &&
@@ -685,6 +739,7 @@ function runFullASTValidation(
   layer: FormBasedLayer,
   indexPattern: IndexPattern,
   operations: Record<string, GenericOperationDefinition>,
+  dateRange?: DateRange,
   currentColumn?: GenericIndexPatternColumn
 ): ErrorWrapper[] {
   const missingVariables = findVariables(ast).filter(
@@ -783,7 +838,8 @@ function runFullASTValidation(
             node,
             nodeOperation,
             namedArguments,
-            indexPattern
+            indexPattern,
+            dateRange
           );
 
           const filtersErrors = validateFiltersArguments(
@@ -860,7 +916,8 @@ function runFullASTValidation(
             node,
             nodeOperation,
             namedArguments,
-            indexPattern
+            indexPattern,
+            dateRange
           );
           const filtersErrors = validateFiltersArguments(
             node,
@@ -1123,7 +1180,7 @@ export function validateMathNodes(
           values: {
             operation: node.name,
             name: positionalArguments[wrongTypeArgumentIndex].name,
-            type: getArgumentType(arg, operations) || 'number',
+            type: getArgumentType(arg, operations) || DEFAULT_RETURN_TYPE,
             expectedType: positionalArguments[wrongTypeArgumentIndex].type || '',
           },
           locations: getNodeLocation(node),

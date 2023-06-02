@@ -38,7 +38,14 @@ export const TroubleshootPopover = () => {
 
   return (
     <EuiPopover
-      button={<EuiButtonEmpty onClick={onButtonClick}>{WHERE_ARE_MY_MONITORS}</EuiButtonEmpty>}
+      button={
+        <EuiButtonEmpty
+          data-test-subj="syntheticsTroubleshootPopoverButton"
+          onClick={onButtonClick}
+        >
+          {WHERE_ARE_MY_MONITORS}
+        </EuiButtonEmpty>
+      }
       isOpen={isPopoverOpen}
       closePopover={closePopover}
       anchorPosition="upCenter"
@@ -57,6 +64,7 @@ export const TroubleshootPopover = () => {
       </div>
       <EuiPopoverFooter>
         <EuiButton
+          data-test-subj="syntheticsTroubleshootPopoverButton"
           fullWidth
           iconType="calendar"
           size="s"

@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { ExpandWildcard } from '@elastic/elasticsearch/lib/api/types';
+import {
+  ExpandWildcard,
+  IndicesGetResponse,
+  IndicesIndexState,
+} from '@elastic/elasticsearch/lib/api/types';
 
 import { IScopedClusterClient } from '@kbn/core/server';
 
@@ -15,7 +19,7 @@ import { TotalIndexData } from '../fetch_indices';
 
 import { mapIndexStats } from './map_index_stats';
 
-export const getIndexData = async (
+export const getSearchIndexData = async (
   client: IScopedClusterClient,
   indexPattern: string,
   expandWildcards: ExpandWildcard[],
@@ -63,7 +67,7 @@ export const getIndexData = async (
     ? Object.keys(totalIndices)
     : Object.keys(totalIndices).filter(
         (indexName) =>
-          !(totalIndices[indexName]?.settings?.index?.hidden === 'true') ||
+          !isHidden(totalIndices[indexName]) ||
           (alwaysShowPattern?.index_pattern &&
             indexName.startsWith(alwaysShowPattern.index_pattern))
       );
@@ -83,4 +87,42 @@ export const getIndexDataMapper = (totalIndexData: TotalIndexData) => {
       totalIndexData.indicesStats[indexName],
       indexName
     );
+};
+
+function isHidden(index: IndicesIndexState): boolean {
+  return index.settings?.index?.hidden === true || index.settings?.index?.hidden === 'true';
+}
+
+export const getIndexData = async (
+  client: IScopedClusterClient,
+  onlyShowSearchOptimizedIndices: boolean,
+  returnHiddenIndices: boolean,
+  searchQuery?: string
+): Promise<{ indexData: IndicesGetResponse; indexNames: string[] }> => {
+  const expandWildcards: ExpandWildcard[] = returnHiddenIndices ? ['hidden', 'all'] : ['open'];
+  const indexPattern = searchQuery ? `*${searchQuery}*` : '*';
+  const allIndexMatches = await client.asCurrentUser.indices.get({
+    expand_wildcards: expandWildcards,
+    // for better performance only compute aliases and settings of indices but not mappings
+    features: ['aliases', 'settings'],
+    // only get specified index properties from ES to keep the response under 536MB
+    // node.js string length limit: https://github.com/nodejs/node/issues/33960
+    filter_path: ['*.aliases', '*.settings.index.hidden'],
+    index: onlyShowSearchOptimizedIndices ? 'search-*' : indexPattern,
+  });
+
+  const allIndexNames = returnHiddenIndices
+    ? Object.keys(allIndexMatches)
+    : Object.keys(allIndexMatches).filter(
+        (indexName) => allIndexMatches[indexName] && !isHidden(allIndexMatches[indexName])
+      );
+  const indexNames =
+    onlyShowSearchOptimizedIndices && searchQuery
+      ? allIndexNames.filter((indexName) => indexName.includes(searchQuery.toLowerCase()))
+      : allIndexNames;
+
+  return {
+    indexData: allIndexMatches,
+    indexNames,
+  };
 };

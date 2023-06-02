@@ -44,6 +44,12 @@ export const ExceptionItemCardMetaInfo = memo<ExceptionItemCardMetaInfoProps>(
         }),
       [dataTestSubj, rules, securityLinkAnchorComponent]
     );
+
+    const isExpired = useMemo(
+      () => (item.expire_time ? new Date(item.expire_time) <= new Date() : false),
+      [item]
+    );
+
     return (
       <EuiFlexGroup alignItems="center" responsive gutterSize="s" data-test-subj={dataTestSubj}>
         {FormattedDateComponent !== null && (
@@ -77,6 +83,27 @@ export const ExceptionItemCardMetaInfo = memo<ExceptionItemCardMetaInfoProps>(
                 dataTestSubj={`${dataTestSubj || ''}UpdatedBy`}
               />
             </EuiFlexItem>
+            {item.expire_time != null && (
+              <>
+                <EuiFlexItem css={itemCss} grow={false}>
+                  <MetaInfoDetails
+                    label={
+                      isExpired
+                        ? i18n.EXCEPTION_ITEM_CARD_EXPIRED_LABEL
+                        : i18n.EXCEPTION_ITEM_CARD_EXPIRES_LABEL
+                    }
+                    lastUpdate={
+                      <FormattedDateComponent
+                        data-test-subj={`{dataTestSubj||''}formattedDateComponentExpireTime`}
+                        fieldName="expire_time"
+                        value={item.expire_time}
+                      />
+                    }
+                    dataTestSubj={`${dataTestSubj || ''}ExpireTime`}
+                  />
+                </EuiFlexItem>
+              </>
+            )}
           </>
         )}
         <EuiFlexItem>

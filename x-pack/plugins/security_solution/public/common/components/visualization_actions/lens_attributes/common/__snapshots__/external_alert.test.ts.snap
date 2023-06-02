@@ -108,23 +108,6 @@ Object {
         "meta": Object {
           "alias": null,
           "disabled": false,
-          "key": "host.id",
-          "negate": false,
-          "params": Object {
-            "query": "123",
-          },
-          "type": "phrase",
-        },
-        "query": Object {
-          "match_phrase": Object {
-            "host.id": "123",
-          },
-        },
-      },
-      Object {
-        "meta": Object {
-          "alias": null,
-          "disabled": false,
           "key": "host.name",
           "negate": false,
           "params": Object {
@@ -184,12 +167,34 @@ Object {
           },
         },
       },
+      Object {
+        "meta": Object {
+          "alias": null,
+          "disabled": false,
+          "key": "host.id",
+          "negate": false,
+          "params": Object {
+            "query": "123",
+          },
+          "type": "phrase",
+        },
+        "query": Object {
+          "match_phrase": Object {
+            "host.id": "123",
+          },
+        },
+      },
     ],
     "query": Object {
       "language": "kql",
       "query": "host.name: *",
     },
     "visualization": Object {
+      "axisTitlesVisibilitySettings": Object {
+        "x": false,
+        "yLeft": false,
+        "yRight": true,
+      },
       "layers": Array [
         Object {
           "accessors": Array [
@@ -206,11 +211,13 @@ Object {
       ],
       "legend": Object {
         "isVisible": true,
+        "legendSize": "xlarge",
         "position": "right",
       },
       "preferredSeriesType": "bar_stacked",
       "title": "Empty XY chart",
       "valueLabels": "hide",
+      "valuesInLegend": true,
       "yLeftExtent": Object {
         "mode": "full",
       },

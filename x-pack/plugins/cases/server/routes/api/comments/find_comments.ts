@@ -6,20 +6,15 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import Boom from '@hapi/boom';
 
-import { pipe } from 'fp-ts/lib/pipeable';
-import { fold } from 'fp-ts/lib/Either';
-import { identity } from 'fp-ts/lib/function';
-
-import { FindQueryParamsRt, throwErrors, excess } from '../../../../common/api';
-import { CASE_COMMENTS_URL } from '../../../../common/constants';
+import { FindCommentsQueryParamsRt, decodeWithExcessOrThrow } from '../../../../common/api';
+import { CASE_FIND_ATTACHMENTS_URL } from '../../../../common/constants';
 import { createCasesRoute } from '../create_cases_route';
 import { createCaseError } from '../../../common/error';
 
 export const findCommentsRoute = createCasesRoute({
   method: 'get',
-  path: `${CASE_COMMENTS_URL}/_find`,
+  path: CASE_FIND_ATTACHMENTS_URL,
   params: {
     params: schema.object({
       case_id: schema.string(),
@@ -27,17 +22,14 @@ export const findCommentsRoute = createCasesRoute({
   },
   handler: async ({ context, request, response }) => {
     try {
-      const query = pipe(
-        excess(FindQueryParamsRt).decode(request.query),
-        fold(throwErrors(Boom.badRequest), identity)
-      );
+      const query = decodeWithExcessOrThrow(FindCommentsQueryParamsRt)(request.query);
 
       const caseContext = await context.cases;
       const client = await caseContext.getCasesClient();
       return response.ok({
         body: await client.attachments.find({
           caseID: request.params.case_id,
-          queryParams: query,
+          findQueryParams: query,
         }),
       });
     } catch (error) {

@@ -13,25 +13,17 @@ import { TestProviders } from '../../../../common/mock';
 import { parsedVulnerableHostsAlertsResult } from './mock_data';
 import type { UseHostAlertsItems } from './use_host_alerts_items';
 import { HostAlertsTable } from './host_alerts_table';
-import { openAlertsFilter } from '../utils';
 
-const mockGetAppUrl = jest.fn();
-jest.mock('../../../../common/lib/kibana/hooks', () => {
-  const original = jest.requireActual('../../../../common/lib/kibana/hooks');
+const mockNavigateToAlertsPageWithFilters = jest.fn();
+jest.mock('../../../../common/hooks/use_navigate_to_alerts_page_with_filters', () => {
   return {
-    ...original,
-    useNavigation: () => ({
-      getAppUrl: mockGetAppUrl,
-    }),
+    useNavigateToAlertsPageWithFilters: () => mockNavigateToAlertsPageWithFilters,
   };
 });
 
-const mockOpenTimelineWithFilters = jest.fn();
-jest.mock('../hooks/use_navigate_to_timeline', () => {
+jest.mock('../../../../common/hooks/use_global_filter_query', () => {
   return {
-    useNavigateToTimeline: () => ({
-      openTimelineWithFilters: mockOpenTimelineWithFilters,
-    }),
+    useGlobalFilterQuery: () => ({}),
   };
 });
 
@@ -141,14 +133,8 @@ describe('HostAlertsTable', () => {
 
     fireEvent.click(getByTestId('hostSeverityAlertsTable-totalAlertsLink'));
 
-    expect(mockOpenTimelineWithFilters).toHaveBeenCalledWith([
-      [
-        {
-          field: 'host.name',
-          value: 'Host-342m5gl1g2',
-        },
-        openAlertsFilter,
-      ],
+    expect(mockNavigateToAlertsPageWithFilters).toHaveBeenCalledWith([
+      { fieldName: 'host.name', selectedOptions: ['Host-342m5gl1g2'], title: 'Host name' },
     ]);
   });
 
@@ -158,18 +144,44 @@ describe('HostAlertsTable', () => {
 
     fireEvent.click(getByTestId('hostSeverityAlertsTable-criticalLink'));
 
-    expect(mockOpenTimelineWithFilters).toHaveBeenCalledWith([
-      [
+    expect(mockNavigateToAlertsPageWithFilters).toHaveBeenCalledWith([
+      {
+        fieldName: 'host.name',
+        selectedOptions: ['Host-342m5gl1g2'],
+        title: 'Host name',
+      },
+      {
+        fieldName: 'kibana.alert.severity',
+        selectedOptions: ['critical'],
+        title: 'Severity',
+      },
+    ]);
+  });
+
+  it('should render cellActions when count is bigger than zero', () => {
+    mockUseHostAlertsItemsReturn({
+      items: [parsedVulnerableHostsAlertsResult[0]],
+    });
+    const { getAllByTestId } = renderComponent();
+
+    expect(getAllByTestId('cellActions-renderContent-host.name').length).toBe(5);
+  });
+
+  it('should not render cellActions when count is zero', () => {
+    mockUseHostAlertsItemsReturn({
+      items: [
         {
-          field: 'host.name',
-          value: 'Host-342m5gl1g2',
-        },
-        openAlertsFilter,
-        {
-          field: 'kibana.alert.severity',
-          value: 'critical',
+          hostName: 'Host-342m5gl1g2',
+          totalAlerts: 100,
+          critical: 0,
+          high: 0,
+          low: 0,
+          medium: 0,
         },
       ],
-    ]);
+    });
+    const { getAllByTestId } = renderComponent();
+
+    expect(getAllByTestId('cellActions-renderContent-host.name').length).toBe(1);
   });
 });

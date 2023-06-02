@@ -6,10 +6,11 @@
  * Side Public License, v 1.
  */
 
-import type { SavedObject } from '@kbn/core-saved-objects-common';
+import type { SavedObject } from '..';
 import type {
   SavedObjectsBaseOptions,
   SavedObjectsFindOptions,
+  SavedObjectsGetOptions,
   SavedObjectsClosePointInTimeOptions,
   SavedObjectsOpenPointInTimeOptions,
   SavedObjectsCreatePointInTimeFinderOptions,
@@ -19,6 +20,7 @@ import type {
   SavedObjectsUpdateObjectsSpacesOptions,
   SavedObjectsCollectMultiNamespaceReferencesObject,
   SavedObjectsUpdateObjectsSpacesResponse,
+  SavedObjectsResolveOptions,
   SavedObjectsResolveResponse,
   ISavedObjectsPointInTimeFinder,
   SavedObjectsRemoveReferencesToOptions,
@@ -47,7 +49,7 @@ import type {
 } from './apis';
 
 /**
- * Saved Objects is Kibana's data persisentence mechanism allowing plugins to
+ * Saved Objects is Kibana's data persistence mechanism allowing plugins to
  * use Elasticsearch for storing plugin state.
  *
  * ## SavedObjectsClient errors
@@ -182,7 +184,7 @@ export interface SavedObjectsClientContract {
    * Returns an array of objects by id
    *
    * @param objects - array of objects to get (contains id, type, and optional fields)
-   * @param options {@link SavedObjectsBaseOptions} - options for the bulk get operation
+   * @param options {@link SavedObjectsGetOptions} - options for the bulk get operation
    * @returns the {@link SavedObjectsBulkResponse}
    * @example
    *
@@ -193,7 +195,7 @@ export interface SavedObjectsClientContract {
    */
   bulkGet<T = unknown>(
     objects: SavedObjectsBulkGetObject[],
-    options?: SavedObjectsBaseOptions
+    options?: SavedObjectsGetOptions
   ): Promise<SavedObjectsBulkResponse<T>>;
 
   /**
@@ -201,19 +203,21 @@ export interface SavedObjectsClientContract {
    *
    * @param type - The type of the object to retrieve
    * @param id - The ID of the object to retrieve
-   * @param options {@link SavedObjectsBaseOptions} - options for the get operation
+   * @param options {@link SavedObjectsGetOptions} - options for the get operation
    */
   get<T = unknown>(
     type: string,
     id: string,
-    options?: SavedObjectsBaseOptions
+    options?: SavedObjectsGetOptions
   ): Promise<SavedObject<T>>;
 
   /**
-   * Resolves an array of objects by id, using any legacy URL aliases if they exist
+   * Resolves an array of objects by id.
+   *
+   * See documentation for `.resolve`.
    *
    * @param objects - an array of objects to resolve (contains id and type)
-   * @param options {@link SavedObjectsBaseOptions} - options for the bulk resolve operation
+   * @param options {@link SavedObjectsResolveOptions} - options for the bulk resolve operation
    * @returns the {@link SavedObjectsBulkResolveResponse}
    * @example
    *
@@ -228,21 +232,29 @@ export interface SavedObjectsClientContract {
    */
   bulkResolve<T = unknown>(
     objects: SavedObjectsBulkResolveObject[],
-    options?: SavedObjectsBaseOptions
+    options?: SavedObjectsResolveOptions
   ): Promise<SavedObjectsBulkResolveResponse<T>>;
 
   /**
-   * Resolves a single object, using any legacy URL alias if it exists
+   * Resolves a single object.
+   *
+   * After 8.0.0, saved objects are provided a unique ID _across_ spaces.
+   * A subset of existing saved objects may have IDs regenerated while upgrading to 8+.
+   * `.resolve` provides a way for clients with legacy IDs to still retrieve the correct
+   * saved object.
+   *
+   * An example of a client with a "legacy ID" is a bookmarked dashboard in a
+   * non-default space.
    *
    * @param type - The type of SavedObject to retrieve
    * @param id - The ID of the SavedObject to retrieve
-   * @param options {@link SavedObjectsBaseOptions} - options for the resolve operation
+   * @param options {@link SavedObjectsResolveOptions} - options for the resolve operation
    * @returns the {@link SavedObjectsResolveResponse}
    */
   resolve<T = unknown>(
     type: string,
     id: string,
-    options?: SavedObjectsBaseOptions
+    options?: SavedObjectsResolveOptions
   ): Promise<SavedObjectsResolveResponse<T>>;
 
   /**
@@ -278,7 +290,7 @@ export interface SavedObjectsClientContract {
    *
    * @param type - the type of the object to remove references to
    * @param id - the ID of the object to remove references to
-   * @param options {@link SavedObjectsRemoveReferencesToOptions} - options for the remove references opertion
+   * @param options {@link SavedObjectsRemoveReferencesToOptions} - options for the remove references operation
    * @returns the {@link SavedObjectsRemoveReferencesToResponse}
    */
   removeReferencesTo(
@@ -367,7 +379,7 @@ export interface SavedObjectsClientContract {
    * ```
    *
    * @param findOptions {@link SavedObjectsCreatePointInTimeFinderOptions} - options for the create PIT finder operation
-   * @param dependencies {@link SavedObjectsCreatePointInTimeFinderDependencies} - dependencies for the create PIT fimder operation
+   * @param dependencies {@link SavedObjectsCreatePointInTimeFinderDependencies} - dependencies for the create PIT finder operation
    * @returns the created PIT finder
    */
   createPointInTimeFinder<T = unknown, A = unknown>(
@@ -402,4 +414,9 @@ export interface SavedObjectsClientContract {
     spacesToRemove: string[],
     options?: SavedObjectsUpdateObjectsSpacesOptions
   ): Promise<SavedObjectsUpdateObjectsSpacesResponse>;
+
+  /**
+   * Returns the namespace associated with the client. If the namespace is the default one, this method returns `undefined`.
+   */
+  getCurrentNamespace(): string | undefined;
 }

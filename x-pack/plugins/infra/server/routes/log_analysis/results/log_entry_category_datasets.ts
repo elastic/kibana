@@ -29,7 +29,7 @@ export const initGetLogEntryCategoryDatasetsRoute = ({ framework }: InfraBackend
     framework.router.handleLegacyErrors(async (requestContext, request, response) => {
       const {
         data: {
-          sourceId,
+          logView,
           timeRange: { startTime, endTime },
         },
       } = request.body;
@@ -39,7 +39,7 @@ export const initGetLogEntryCategoryDatasetsRoute = ({ framework }: InfraBackend
 
         const { data: logEntryCategoryDatasets, timing } = await getLogEntryCategoryDatasets(
           { infra: await infraMlContext.infra },
-          sourceId,
+          logView,
           startTime,
           endTime
         );

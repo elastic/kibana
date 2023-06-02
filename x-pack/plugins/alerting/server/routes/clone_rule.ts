@@ -13,6 +13,7 @@ import {
   RewriteResponseCase,
   handleDisabledApiKeysError,
   rewriteRuleLastRun,
+  rewriteActionsRes,
 } from './lib';
 import {
   RuleTypeParams,
@@ -35,6 +36,7 @@ const rewriteBodyRes: RewriteResponseCase<PartialRule<RuleTypeParams>> = ({
   createdAt,
   updatedAt,
   apiKeyOwner,
+  apiKeyCreatedByUser,
   notifyWhen,
   muteAll,
   mutedInstanceIds,
@@ -69,16 +71,12 @@ const rewriteBodyRes: RewriteResponseCase<PartialRule<RuleTypeParams>> = ({
     : {}),
   ...(actions
     ? {
-        actions: actions.map(({ group, id, actionTypeId, params }) => ({
-          group,
-          id,
-          params,
-          connector_type_id: actionTypeId,
-        })),
+        actions: rewriteActionsRes(actions),
       }
     : {}),
   ...(lastRun ? { last_run: rewriteRuleLastRun(lastRun) } : {}),
   ...(nextRun ? { next_run: nextRun } : {}),
+  ...(apiKeyCreatedByUser !== undefined ? { api_key_created_by_user: apiKeyCreatedByUser } : {}),
 });
 
 export const cloneRuleRoute = (

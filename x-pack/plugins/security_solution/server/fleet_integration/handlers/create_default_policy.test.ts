@@ -7,6 +7,7 @@
 import { Subject } from 'rxjs';
 import type { ILicense } from '@kbn/licensing-plugin/common/types';
 import { licenseMock } from '@kbn/licensing-plugin/common/licensing.mock';
+import { cloudMock } from '@kbn/cloud-plugin/server/mocks';
 import { LicenseService } from '../../../common/license';
 import { createDefaultPolicy } from './create_default_policy';
 import { ProtectionModes } from '../../../common/endpoint/types';
@@ -19,13 +20,14 @@ import type {
 } from '../types';
 
 describe('Create Default Policy tests ', () => {
+  const cloud = cloudMock.createSetup();
   const Platinum = licenseMock.createLicense({ license: { type: 'platinum', mode: 'platinum' } });
   const Gold = licenseMock.createLicense({ license: { type: 'gold', mode: 'gold' } });
   let licenseEmitter: Subject<ILicense>;
   let licenseService: LicenseService;
 
   const createDefaultPolicyCallback = (config: AnyPolicyCreateConfig | undefined): PolicyConfig => {
-    return createDefaultPolicy(licenseService, config);
+    return createDefaultPolicy(licenseService, config, cloud);
   };
 
   beforeEach(() => {
@@ -116,6 +118,28 @@ describe('Create Default Policy tests ', () => {
     });
     const OSTypes = ['linux', 'mac', 'windows'] as const;
 
+    it('Should return PolicyConfig for events only when preset is DataCollection', () => {
+      const defaultPolicy = policyFactory();
+      const config = createEndpointConfig({ preset: 'DataCollection' });
+      const policy = createDefaultPolicyCallback(config);
+
+      // events are the same
+      expect(policy.windows.events).toEqual(defaultPolicy.windows.events);
+      expect(policy.linux.events).toEqual(defaultPolicy.linux.events);
+      expect(policy.mac.events).toEqual(defaultPolicy.mac.events);
+
+      // check some of the protections to be disabled
+      const disabledButSupported = { mode: ProtectionModes.off, supported: true };
+      expect(policy.windows.behavior_protection).toEqual(disabledButSupported);
+      expect(policy.mac.memory_protection).toEqual(disabledButSupported);
+      expect(policy.linux.behavior_protection).toEqual(disabledButSupported);
+
+      // malware popups should be disabled
+      expect(policy.windows.popup.malware.enabled).toBeFalsy();
+      expect(policy.mac.popup.malware.enabled).toBeFalsy();
+      expect(policy.linux.popup.malware.enabled).toBeFalsy();
+    });
+
     it('Should return only process event enabled on policy when preset is NGAV', () => {
       const config = createEndpointConfig({ preset: 'NGAV' });
       const policy = createDefaultPolicyCallback(config);
@@ -147,6 +171,9 @@ describe('Create Default Policy tests ', () => {
       const config = createEndpointConfig({ preset: 'EDRComplete' });
       const policy = createDefaultPolicyCallback(config);
       const defaultPolicy = policyFactory();
+      // update defaultPolicy w/ platinum license & cloud info
+      defaultPolicy.meta.license = 'platinum';
+      defaultPolicy.meta.cloud = true;
       expect(policy).toMatchObject(defaultPolicy);
     });
   });

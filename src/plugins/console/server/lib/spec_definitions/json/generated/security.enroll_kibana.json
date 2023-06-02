@@ -6,6 +6,6 @@
     "patterns": [
       "_security/enroll/kibana"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/security-api-enroll-kibana.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/security-api-kibana-enrollment.html"
   }
 }

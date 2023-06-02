@@ -7,6 +7,7 @@
 
 import { produce } from 'immer';
 import type { SavedObjectsType } from '@kbn/core/server';
+import { SECURITY_SOLUTION_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import {
   savedQuerySavedObjectType,
   packSavedObjectType,
@@ -27,6 +28,7 @@ export const usageMetricSavedObjectMappings: SavedObjectsType['mappings'] = {
 
 export const usageMetricType: SavedObjectsType = {
   name: usageMetricSavedObjectType,
+  indexPattern: SECURITY_SOLUTION_SAVED_OBJECT_INDEX,
   hidden: false,
   namespaceType: 'agnostic',
   mappings: usageMetricSavedObjectMappings,
@@ -66,14 +68,15 @@ export const savedQuerySavedObjectMappings: SavedObjectsType['mappings'] = {
       type: 'keyword',
     },
     ecs_mapping: {
-      type: 'object',
-      enabled: false,
+      dynamic: false,
+      properties: {},
     },
   },
 };
 
 export const savedQueryType: SavedObjectsType = {
   name: savedQuerySavedObjectType,
+  indexPattern: SECURITY_SOLUTION_SAVED_OBJECT_INDEX,
   hidden: false,
   namespaceType: 'multiple-isolated',
   mappings: savedQuerySavedObjectMappings,
@@ -124,8 +127,8 @@ export const packSavedObjectMappings: SavedObjectsType['mappings'] = {
       type: 'boolean',
     },
     shards: {
-      type: 'object',
-      enabled: false,
+      dynamic: false,
+      properties: {},
     },
     version: {
       type: 'long',
@@ -149,8 +152,8 @@ export const packSavedObjectMappings: SavedObjectsType['mappings'] = {
           type: 'keyword',
         },
         ecs_mapping: {
-          type: 'object',
-          enabled: false,
+          dynamic: false,
+          properties: {},
         },
       },
     },
@@ -159,6 +162,7 @@ export const packSavedObjectMappings: SavedObjectsType['mappings'] = {
 
 export const packType: SavedObjectsType = {
   name: packSavedObjectType,
+  indexPattern: SECURITY_SOLUTION_SAVED_OBJECT_INDEX,
   hidden: false,
   namespaceType: 'multiple-isolated',
   mappings: packSavedObjectMappings,
@@ -200,8 +204,8 @@ export const packAssetSavedObjectMappings: SavedObjectsType['mappings'] = {
       type: 'long',
     },
     shards: {
-      type: 'object',
-      enabled: false,
+      dynamic: false,
+      properties: {},
     },
     queries: {
       dynamic: false,
@@ -222,8 +226,8 @@ export const packAssetSavedObjectMappings: SavedObjectsType['mappings'] = {
           type: 'keyword',
         },
         ecs_mapping: {
-          type: 'object',
-          enabled: false,
+          dynamic: false,
+          properties: {},
         },
       },
     },
@@ -232,6 +236,7 @@ export const packAssetSavedObjectMappings: SavedObjectsType['mappings'] = {
 
 export const packAssetType: SavedObjectsType = {
   name: packAssetSavedObjectType,
+  indexPattern: SECURITY_SOLUTION_SAVED_OBJECT_INDEX,
   hidden: false,
   management: {
     importableAndExportable: true,

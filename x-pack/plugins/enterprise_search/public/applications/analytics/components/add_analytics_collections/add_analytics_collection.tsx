@@ -5,28 +5,38 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
+
+import { EuiButton } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
-import { EnterpriseSearchAnalyticsPageTemplate } from '../layout/page_template';
+import { AddAnalyticsCollectionModal } from './add_analytics_collection_modal';
 
-import { AddAnalyticsCollectionForm } from './add_analytics_collection_form';
+interface AddAnalyticsCollectionProps {
+  disabled?: boolean;
+  render?: (onClick: () => void) => React.ReactNode;
+}
+export const AddAnalyticsCollection: React.FC<AddAnalyticsCollectionProps> = ({
+  render,
+  disabled,
+}) => {
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const closeModal = () => setIsModalVisible(false);
+  const showModal = () => setIsModalVisible(true);
 
-export const collectionsCreateBreadcrumbs = [
-  i18n.translate('xpack.enterpriseSearch.analytics.collectionsCreate.breadcrumb', {
-    defaultMessage: 'Create collection',
-  }),
-];
-
-export const AddAnalyticsCollection: React.FC = () => {
   return (
-    <EnterpriseSearchAnalyticsPageTemplate
-      pageChrome={[...collectionsCreateBreadcrumbs]}
-      restrictWidth
-      pageViewTelemetry="Add Analytics Collection"
-    >
-      <AddAnalyticsCollectionForm />
-    </EnterpriseSearchAnalyticsPageTemplate>
+    <>
+      {render ? (
+        render(showModal)
+      ) : (
+        <EuiButton fill iconType="plusInCircle" onClick={showModal} disabled={disabled}>
+          {i18n.translate('xpack.enterpriseSearch.analytics.collections.create.buttonTitle', {
+            defaultMessage: 'Create collection',
+          })}
+        </EuiButton>
+      )}
+      {isModalVisible && <AddAnalyticsCollectionModal onClose={closeModal} />}
+    </>
   );
 };

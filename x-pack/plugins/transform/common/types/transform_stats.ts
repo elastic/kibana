@@ -7,8 +7,16 @@
 
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 
-import { TransformState, TRANSFORM_STATE } from '../constants';
+import { type TransformHealth, type TransformState, TRANSFORM_STATE } from '../constants';
 import { TransformId } from './transform';
+
+export interface TransformHealthIssue {
+  type: string;
+  issue: string;
+  details?: string;
+  count: number;
+  first_occurrence?: number;
+}
 
 export interface TransformStats {
   id: TransformId;
@@ -25,7 +33,13 @@ export interface TransformStats {
         percent_complete: number;
       };
     };
-    operations_behind: number;
+    changes_last_detected_at: number;
+    last_search_time?: number;
+    operations_behind?: number;
+  };
+  health: {
+    status: TransformHealth;
+    issues?: TransformHealthIssue[];
   };
   node?: {
     id: string;

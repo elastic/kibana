@@ -40,7 +40,7 @@ import {
   RawValue,
   ZOOM_PRECISION,
 } from '../../../common/constants';
-import { getGlyphUrl } from '../../util';
+import { getCanAccessEmsFonts, getGlyphs, getKibanaFontsGlyphUrl } from './glyphs';
 import { syncLayerOrder } from './sort_layers';
 
 import { removeOrphanedSourcesAndLayers } from './utils';
@@ -51,6 +51,7 @@ import type { MapExtentState } from '../../reducers/map/types';
 import { CUSTOM_ICON_PIXEL_RATIO, createSdfIcon } from '../../classes/styles/vector/symbol_utils';
 import { MAKI_ICONS } from '../../classes/styles/vector/maki_icons';
 import { KeydownScrollZoom } from './keydown_scroll_zoom/keydown_scroll_zoom';
+import { transformRequest } from './transform_request';
 
 export interface Props {
   isMapReady: boolean;
@@ -156,11 +157,12 @@ export class MbMap extends Component<Props, State> {
   async _createMbMapInstance(initialView: MapCenterAndZoom | null): Promise<MapboxMap> {
     this._reportUsage();
     return new Promise((resolve) => {
+      const glyphs = getGlyphs();
       const mbStyle = {
         version: 8 as 8,
         sources: {},
         layers: [],
-        glyphs: getGlyphUrl(),
+        glyphs: glyphs.glyphUrlTemplate,
       };
 
       const options: MapOptions = {
@@ -170,6 +172,7 @@ export class MbMap extends Component<Props, State> {
         preserveDrawingBuffer: getPreserveDrawingBuffer(),
         maxZoom: this.props.settings.maxZoom,
         minZoom: this.props.settings.minZoom,
+        transformRequest,
       };
       if (initialView) {
         options.zoom = initialView.zoom;
@@ -199,6 +202,20 @@ export class MbMap extends Component<Props, State> {
         emptyImage.crossOrigin = 'anonymous';
         resolve(mbMap);
       });
+
+      if (glyphs.isEmsFont) {
+        getCanAccessEmsFonts().then((canAccessEmsFonts: boolean) => {
+          if (!this._isMounted || canAccessEmsFonts) {
+            return;
+          }
+
+          // fallback to kibana fonts when EMS fonts are not accessable to prevent layers from not displaying
+          mbMap.setStyle({
+            ...mbMap.getStyle(),
+            glyphs: getKibanaFontsGlyphUrl(),
+          });
+        });
+      }
     });
   }
 
@@ -268,11 +285,10 @@ export class MbMap extends Component<Props, State> {
   }
 
   _initResizerChecker() {
+    this.state.mbMap?.resize(); // ensure map is sized for container prior to monitoring
     this._checker = new ResizeChecker(this._containerRef!);
     this._checker.on('resize', () => {
-      if (this.state.mbMap) {
-        this.state.mbMap.resize();
-      }
+      this.state.mbMap?.resize();
     });
   }
 

@@ -14,16 +14,16 @@ import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
  */
 export function buildSamplerAggregation(
   aggs: any,
-  samplerShardSize: number
+  shardSize: number
 ): Record<string, estypes.AggregationsAggregationContainer> {
-  if (samplerShardSize < 1) {
+  if (shardSize <= 0) {
     return aggs;
   }
 
   return {
     sample: {
       sampler: {
-        shard_size: samplerShardSize,
+        shard_size: shardSize,
       },
       aggs,
     },

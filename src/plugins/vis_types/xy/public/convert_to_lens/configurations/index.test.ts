@@ -9,7 +9,7 @@
 import { Column } from '@kbn/visualizations-plugin/common/convert_to_lens';
 import { getConfiguration } from '.';
 import { Layer } from '..';
-import { ChartType } from '../..';
+import { ChartType } from '../../../common';
 import { sampleAreaVis } from '../../sample_vis.test.mocks';
 import { ChartMode, InterpolationMode } from '../../types';
 

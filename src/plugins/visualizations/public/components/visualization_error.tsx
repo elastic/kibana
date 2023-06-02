@@ -18,7 +18,7 @@ export class VisualizationError extends React.Component<VisualizationErrorProps>
   public render() {
     return (
       <EuiEmptyPrompt
-        iconType="alert"
+        iconType="warning"
         iconColor="danger"
         data-test-subj="visualization-error"
         body={

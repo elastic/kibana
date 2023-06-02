@@ -113,6 +113,7 @@ export function MachineLearningDataVisualizerTableProvider(
             fieldName,
             `dataVisualizerDetailsToggle-${fieldName}-arrowRight`
           );
+          await testSubjects.moveMouseTo(selector); // move mouse to selector before clicking to ensure a tooltip isn't blocking the button
           await testSubjects.click(selector);
           await testSubjects.existOrFail(
             this.rowSelector(fieldName, `dataVisualizerDetailsToggle-${fieldName}-arrowDown`),

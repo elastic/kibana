@@ -98,15 +98,9 @@ const fieldsConfig: FieldsConfig = {
     helpText: (
       <FormattedMessage
         id="xpack.ingestPipelines.pipelineEditor.dateForm.outputFormatHelpText"
-        defaultMessage="Format to use when writing the date to {targetField}. Accepts a Java time pattern or one of the following formats: {allowedFormats}. Defaults to {defaultFormat}."
+        defaultMessage="Format to use when writing the date to {targetField}. Must be a valid Java time pattern. Defaults to {defaultFormat}."
         values={{
           targetField: <EuiCode>{'target_field'}</EuiCode>,
-          allowedFormats: (
-            <>
-              <EuiCode>{'ISO8601'}</EuiCode>,<EuiCode>{'UNIX'}</EuiCode>,
-              <EuiCode>{'UNIX_MS'}</EuiCode>,<EuiCode>{'TAI64N'}</EuiCode>
-            </>
-          ),
           defaultFormat: <EuiCode>{`yyyy-MM-dd'T'HH:mm:ss.SSSXXX`}</EuiCode>,
         }}
       />

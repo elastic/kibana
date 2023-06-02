@@ -7,11 +7,31 @@
 
 /**
  * Time range definition for baseline and deviation to be used by spike log analysis.
+ *
+ * @export
+ * @interface WindowParameters
+ * @typedef {WindowParameters}
  */
 export interface WindowParameters {
+  /**
+   * Baseline minimum value
+   * @type {number}
+   */
   baselineMin: number;
+  /**
+   * Baseline maximum value
+   * @type {number}
+   */
   baselineMax: number;
+  /**
+   * Deviation minimum value
+   * @type {number}
+   */
   deviationMin: number;
+  /**
+   * Deviation maximum value
+   * @type {number}
+   */
   deviationMax: number;
 }
 
@@ -22,7 +42,7 @@ export interface WindowParameters {
  * 2. The historical time window prior to the click to use as a baseline.
  *
  * The philosophy here is that charts are displayed with different granularities according to their
- * overall time window. We select the change point and historical time windows inline with the
+ * overall time window. We select the log spike and historical time windows inline with the
  * overall time window.
  *
  * The algorithm for doing this is based on the typical granularities that exist in machine data.

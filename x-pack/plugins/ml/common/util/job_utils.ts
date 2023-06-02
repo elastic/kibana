@@ -16,6 +16,8 @@ import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import type { SerializableRecord } from '@kbn/utility-types';
 import { FilterStateStore } from '@kbn/es-query';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { isDefined } from '@kbn/ml-is-defined';
+import type { MlEntityField } from '@kbn/ml-anomaly-utils';
 import { ALLOWED_DATA_UNITS, JOB_ID_MAX_LENGTH } from '../constants/validation';
 import { parseInterval } from './parse_interval';
 import { maxLengthValidator } from './validators';
@@ -27,7 +29,6 @@ import type {
   Job,
   JobId,
 } from '../types/anomaly_detection_jobs';
-import type { EntityField } from './anomaly_utils';
 import type { MlServerLimits } from '../types/ml_server_info';
 import type { JobValidationMessage, JobValidationMessageId } from '../constants/messages';
 import { ES_AGGREGATION, ML_JOB_AGGREGATION } from '../constants/aggregation_types';
@@ -35,7 +36,6 @@ import { MLCATEGORY } from '../constants/field_types';
 import { getAggregations, getDatafeedAggregations } from './datafeed_utils';
 import { findAggField } from './validation_utils';
 import { getFirstKeyInObject } from './object_utils';
-import { isDefined } from '../types/guards';
 
 export interface ValidationResults {
   valid: boolean;
@@ -133,7 +133,7 @@ export function isSourceDataChartableForDetector(job: CombinedJob, detectorIndex
   const { detectors } = job.analysis_config;
   if (detectorIndex >= 0 && detectorIndex < detectors.length) {
     const dtr = detectors[detectorIndex];
-    const functionName = dtr.function;
+    const functionName = dtr.function as ML_JOB_AGGREGATION;
 
     // Check that the function maps to an ES aggregation,
     // and that the partitioning field isn't mlcategory
@@ -283,7 +283,7 @@ export function getPartitioningFieldNames(job: CombinedJob, detectorIndex: numbe
 export function isModelPlotEnabled(
   job: Job,
   detectorIndex: number,
-  entityFields?: EntityField[]
+  entityFields?: MlEntityField[]
 ): boolean {
   // Check if model_plot_config is enabled.
   let isEnabled = job.model_plot_config?.enabled ?? false;
@@ -334,7 +334,7 @@ export function isJobVersionGte(job: CombinedJob, version: string): boolean {
 // Note that the 'function' field in a record contains what the user entered e.g. 'high_count',
 // whereas the 'function_description' field holds an ML-built display hint for function e.g. 'count'.
 export function mlFunctionToESAggregation(
-  functionName: ML_JOB_AGGREGATION | string
+  functionName?: ML_JOB_AGGREGATION | string
 ): ES_AGGREGATION | null {
   if (
     functionName === ML_JOB_AGGREGATION.MEAN ||
@@ -422,14 +422,6 @@ export function prefixDatafeedId(datafeedId: string, prefix: string): string {
 
 export function createDatafeedId(jobId: string) {
   return `datafeed-${jobId}`;
-}
-
-// Returns a name which is safe to use in elasticsearch aggregations for the supplied
-// field name. Aggregation names must be alpha-numeric and can only contain '_' and '-' characters,
-// so if the supplied field names contains disallowed characters, the provided index
-// identifier is used to return a safe 'dummy' name in the format 'field_index' e.g. field_0, field_1
-export function getSafeAggregationName(fieldName: string, index: number): string {
-  return fieldName.match(/^[a-zA-Z0-9-_.]+$/) ? fieldName : `field_${index}`;
 }
 
 export function uniqWithIsEqual<T extends any[]>(arr: T): T {
@@ -923,4 +915,21 @@ export function isKnownEmptyQuery(query: QueryDslQueryContainer) {
   }
 
   return false;
+}
+
+/**
+ * Extract unique influencers from the job or collection of jobs
+ * @param jobs
+ */
+export function extractInfluencers(jobs: Job | Job[]): string[] {
+  if (!Array.isArray(jobs)) {
+    jobs = [jobs];
+  }
+  const influencers = new Set<string>();
+  for (const job of jobs) {
+    for (const influencer of job.analysis_config.influencers || []) {
+      influencers.add(influencer);
+    }
+  }
+  return Array.from(influencers);
 }

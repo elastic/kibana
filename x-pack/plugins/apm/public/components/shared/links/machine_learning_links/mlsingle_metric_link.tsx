@@ -31,6 +31,7 @@ export function MLSingleMetricLink({
 
   return (
     <EuiLink
+      data-test-subj="apmMLSingleMetricLinkLink"
       children={children}
       href={href}
       external={external}

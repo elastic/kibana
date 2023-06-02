@@ -9,7 +9,7 @@ import React from 'react';
 import type { EuiCommentProps } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
-import type { ConnectorUserAction, UserAction } from '../../../common/api';
+import type { ConnectorUserAction, ActionCategory } from '../../../common/api';
 import { Actions } from '../../../common/api';
 import { UserActionTimestamp } from './timestamp';
 import type { UserActionBuilder, UserActionBuilderArgs, UserActionResponse } from './types';
@@ -22,13 +22,15 @@ interface Props {
   handleOutlineComment: (id: string) => void;
 }
 
-const showMoveToReference = (action: UserAction, commentId: string | null): commentId is string =>
-  action === Actions.update && commentId != null;
+const showMoveToReference = (
+  action: ActionCategory,
+  commentId: string | null
+): commentId is string => action === Actions.update && commentId != null;
 
 const CommentListActions: React.FC<Props> = React.memo(({ userAction, handleOutlineComment }) => (
   <EuiFlexGroup responsive={false}>
     <EuiFlexItem grow={false}>
-      <UserActionCopyLink id={userAction.actionId} />
+      <UserActionCopyLink id={userAction.id} />
     </EuiFlexItem>
     {showMoveToReference(userAction.action, userAction.commentId) && (
       <EuiFlexItem grow={false}>
@@ -69,13 +71,13 @@ export const createCommonUpdateUserActionBuilder = ({
           />
         ),
         event: label,
-        'data-test-subj': `${userAction.type}-${userAction.action}-action-${userAction.actionId}`,
+        'data-test-subj': `${userAction.type}-${userAction.action}-action-${userAction.id}`,
         timestamp: <UserActionTimestamp createdAt={userAction.createdAt} />,
         timelineAvatar: icon,
         actions: (
           <EuiFlexGroup responsive={false}>
             <EuiFlexItem grow={false}>
-              <UserActionCopyLink id={userAction.actionId} />
+              <UserActionCopyLink id={userAction.id} />
             </EuiFlexItem>
             {showMoveToReference(userAction.action, userAction.commentId) && (
               <EuiFlexItem grow={false}>

@@ -32,7 +32,6 @@ import { useListsConfig } from '../../../../detections/containers/detection_engi
 import { redirectToDetections } from '../../../../detections/pages/detection_engine/rules/helpers';
 
 import { useInvalidateFindRulesQuery } from '../../../rule_management/api/hooks/use_find_rules_query';
-import { useInvalidateFetchPrebuiltRulesStatusQuery } from '../../../rule_management/api/hooks/use_fetch_prebuilt_rules_status_query';
 import { importRules } from '../../../rule_management/logic';
 import { usePrePackagedRulesInstallationStatus } from '../../../rule_management/logic/use_pre_packaged_rules_installation_status';
 import { usePrePackagedTimelinesInstallationStatus } from '../../../rule_management/logic/use_pre_packaged_timelines_installation_status';
@@ -41,18 +40,20 @@ import { AllRules } from '../../components/rules_table';
 import { RulesTableContextProvider } from '../../components/rules_table/rules_table/rules_table_context';
 
 import * as i18n from '../../../../detections/pages/detection_engine/rules/translations';
-import { RulesPageTourComponent } from '../../components/rules_table/alternative_tour/tour';
+import { useInvalidateFetchRuleManagementFiltersQuery } from '../../../rule_management/api/hooks/use_fetch_rule_management_filters_query';
+
+import { MaintenanceWindowCallout } from '../../components/maintenance_window_callout/maintenance_window_callout';
 
 const RulesPageComponent: React.FC = () => {
   const [isImportModalVisible, showImportModal, hideImportModal] = useBoolState();
   const [isValueListFlyoutVisible, showValueListFlyout, hideValueListFlyout] = useBoolState();
   const { navigateToApp } = useKibana().services.application;
   const invalidateFindRulesQuery = useInvalidateFindRulesQuery();
-  const invalidateFetchPrebuiltRulesStatusQuery = useInvalidateFetchPrebuiltRulesStatusQuery();
+  const invalidateFetchRuleManagementFilters = useInvalidateFetchRuleManagementFiltersQuery();
   const invalidateRules = useCallback(() => {
     invalidateFindRulesQuery();
-    invalidateFetchPrebuiltRulesStatusQuery();
-  }, [invalidateFindRulesQuery, invalidateFetchPrebuiltRulesStatusQuery]);
+    invalidateFetchRuleManagementFilters();
+  }, [invalidateFindRulesQuery, invalidateFetchRuleManagementFilters]);
 
   const [
     {
@@ -108,6 +109,7 @@ const RulesPageComponent: React.FC = () => {
         title={i18n.IMPORT_RULE}
         showExceptionsCheckBox
         showCheckBox
+        showActionConnectorsCheckBox
       />
 
       <RulesTableContextProvider>
@@ -141,25 +143,24 @@ const RulesPageComponent: React.FC = () => {
                   {i18n.IMPORT_RULE}
                 </EuiButton>
               </EuiFlexItem>
-              <RulesPageTourComponent>
-                <EuiFlexItem grow={false}>
-                  <SecuritySolutionLinkButton
-                    data-test-subj="create-new-rule"
-                    fill
-                    iconType="plusInCircle"
-                    isDisabled={!hasUserCRUDPermission(canUserCRUD) || loading}
-                    deepLinkId={SecurityPageName.rulesCreate}
-                  >
-                    {i18n.ADD_NEW_RULE}
-                  </SecuritySolutionLinkButton>
-                </EuiFlexItem>
-              </RulesPageTourComponent>
+              <EuiFlexItem grow={false}>
+                <SecuritySolutionLinkButton
+                  data-test-subj="create-new-rule"
+                  fill
+                  iconType="plusInCircle"
+                  isDisabled={!hasUserCRUDPermission(canUserCRUD) || loading}
+                  deepLinkId={SecurityPageName.rulesCreate}
+                >
+                  {i18n.ADD_NEW_RULE}
+                </SecuritySolutionLinkButton>
+              </EuiFlexItem>
             </EuiFlexGroup>
           </HeaderPage>
           {(prePackagedRuleStatus === 'ruleNeedUpdate' ||
             prePackagedTimelineStatus === 'timelineNeedUpdate') && (
             <UpdatePrePackagedRulesCallOut data-test-subj="update-callout-button" />
           )}
+          <MaintenanceWindowCallout />
           <AllRules data-test-subj="all-rules" />
         </SecuritySolutionPageWrapper>
       </RulesTableContextProvider>

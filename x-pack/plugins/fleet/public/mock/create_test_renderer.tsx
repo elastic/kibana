@@ -20,6 +20,8 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { ScopedHistory } from '@kbn/core/public';
 import { CoreScopedHistory } from '@kbn/core/public';
 
+import { allowedExperimentalValues } from '../../common/experimental_features';
+
 import { FleetAppContext } from '../applications/fleet/app';
 import { IntegrationsAppContext } from '../applications/integrations/app';
 import type { FleetConfigType } from '../plugin';
@@ -64,12 +66,7 @@ export const createFleetTestRendererMock = (): TestRenderer => {
   const history = createMemoryHistory({ initialEntries: [basePath] });
   const mountHistory = new CoreScopedHistory(history, basePath);
 
-  ExperimentalFeaturesService.init({
-    createPackagePolicyMultiPageLayout: true,
-    packageVerification: true,
-    showDevtoolsRequest: false,
-    diagnosticFileUploadEnabled: false,
-  });
+  ExperimentalFeaturesService.init(allowedExperimentalValues);
 
   const HookWrapper = memo(({ children }) => {
     return (
@@ -99,6 +96,11 @@ export const createFleetTestRendererMock = (): TestRenderer => {
           extensions={extensions}
           routerHistory={testRendererMocks.history}
           theme$={themeServiceMock.createTheme$()}
+          fleetStatus={{
+            enabled: true,
+            isLoading: false,
+            isReady: true,
+          }}
         >
           {children}
         </FleetAppContext>
@@ -159,6 +161,11 @@ export const createIntegrationsTestRendererMock = (): TestRenderer => {
           routerHistory={testRendererMocks.history}
           theme$={themeServiceMock.createTheme$()}
           setHeaderActionMenu={() => {}}
+          fleetStatus={{
+            enabled: true,
+            isLoading: false,
+            isReady: true,
+          }}
         >
           {children}
         </IntegrationsAppContext>

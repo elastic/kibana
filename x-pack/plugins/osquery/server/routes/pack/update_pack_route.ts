@@ -6,19 +6,8 @@
  */
 
 import moment from 'moment-timezone';
-import {
-  set,
-  unset,
-  has,
-  difference,
-  filter,
-  find,
-  map,
-  mapKeys,
-  uniq,
-  some,
-  isEmpty,
-} from 'lodash';
+import { set } from '@kbn/safer-lodash-set';
+import { unset, has, difference, filter, find, map, mapKeys, uniq, some, isEmpty } from 'lodash';
 import { schema } from '@kbn/config-schema';
 import { produce } from 'immer';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common';
@@ -41,7 +30,7 @@ import {
 } from './utils';
 
 import { convertShardsToArray, getInternalSavedObjectsClient } from '../utils';
-import type { PackSavedObjectAttributes } from '../../common/types';
+import type { PackSavedObject } from '../../common/types';
 
 export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
   router.put(
@@ -111,7 +100,7 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
       );
 
       if (name) {
-        const conflictingEntries = await savedObjectsClient.find<PackSavedObjectAttributes>({
+        const conflictingEntries = await savedObjectsClient.find<PackSavedObject>({
           type: packSavedObjectType,
           filter: `${packSavedObjectType}.attributes.name: "${name}"`,
         });
@@ -170,7 +159,7 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
 
       const references = getUpdatedReferences();
 
-      await savedObjectsClient.update<PackSavedObjectAttributes>(
+      await savedObjectsClient.update<PackSavedObject>(
         packSavedObjectType,
         request.params.id,
         {
@@ -201,7 +190,7 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
       updatedPackSO.attributes.queries = convertSOQueriesToPack(updatedPackSO.attributes.queries);
 
       if (enabled == null && !currentPackSO.attributes.enabled) {
-        return response.ok({ body: updatedPackSO });
+        return response.ok({ body: { data: updatedPackSO } });
       }
 
       if (enabled != null && enabled !== currentPackSO.attributes.enabled) {
@@ -360,7 +349,9 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
         );
       }
 
-      return response.ok({ body: { data: updatedPackSO } });
+      return response.ok({
+        body: { data: { ...updatedPackSO.attributes, saved_object_id: updatedPackSO.id } },
+      });
     }
   );
 };

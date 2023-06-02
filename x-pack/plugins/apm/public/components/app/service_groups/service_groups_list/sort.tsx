@@ -35,6 +35,7 @@ const options: Array<{
 export function Sort({ type, onChange }: Props) {
   return (
     <EuiSelect
+      data-test-subj="apmSortSelect"
       options={options}
       value={type}
       onChange={(e) => onChange(e.target.value as ServiceGroupsSortType)}

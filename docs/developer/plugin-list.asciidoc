@@ -6,7 +6,7 @@ NOTE:
 
     node scripts/build_plugin_list_docs
 
-  You can update the template within node_modules/@kbn/dev-utils/target_node/src/plugin_list/generate_plugin_list.js
+  You can update the template within packages/kbn-dev-utils/src/plugin_list/generate_plugin_list.ts
 
 ////
 
@@ -38,6 +38,10 @@ as uiSettings within the code.
 
 |{kib-repo}blob/{branch}/src/plugins/console/README.md[console]
 |Console provides the user with tools for storing and executing requests against Elasticsearch.
+
+
+|{kib-repo}blob/{branch}/src/plugins/content_management/README.md[contentManagement]
+|The content management plugin provides functionality to manage content in Kibana.
 
 
 |{kib-repo}blob/{branch}/src/plugins/controls/README.mdx[controls]
@@ -184,12 +188,21 @@ for use in their own application.
 |Minimal interface for admins to manage files in Kibana.
 
 
+|{kib-repo}blob/{branch}/src/plugins/ftr_apis/README.md[ftrApis]
+|This plugin exposes a set of APIs used internally during functional tests by the FTR.
+
+
 |{kib-repo}blob/{branch}/src/plugins/guided_onboarding/README.md[guidedOnboarding]
 |This plugin contains the code for the Guided Onboarding project. Guided onboarding consists of guides for Solutions (Enterprise Search, Observability, Security) that can be completed as a checklist of steps. The guides help users to ingest their data and to navigate to the correct Solutions pages.
 
 
 |{kib-repo}blob/{branch}/src/plugins/home/README.md[home]
 |Moves the legacy ui/registry/feature_catalogue module for registering "features" that should be shown in the home page's feature catalogue to a service within a "home" plugin. The feature catalogue refered to here should not be confused with the "feature" plugin for registering features used to derive UI capabilities for feature controls.
+
+
+|{kib-repo}blob/{branch}/src/plugins/image_embeddable/README.md[imageEmbeddable]
+|This plugin contains image embeddable. Image embeddable allows to embed images into the dashboard.
+Images can be added either by URL or by uploading the image file via file service.
 
 
 |{kib-repo}blob/{branch}/src/plugins/input_control_vis/README.md[inputControlVis]
@@ -287,6 +300,10 @@ generating deep links to other apps using locators, and creating short URLs.
 |This plugin adds the Advanced Settings section for the Usage and Security Data collection (aka Telemetry).
 
 
+|{kib-repo}blob/{branch}/src/plugins/text_based_languages/README.md[textBasedLanguages]
+|The editor accepts the following properties:
+
+
 |<<uiactions-plugin>>
 |UI Actions plugins provides API to manage *triggers* and *actions*.
 
@@ -320,7 +337,8 @@ In general this plugin provides:
 
 
 |{kib-repo}blob/{branch}/src/plugins/unified_histogram/README.md[unifiedHistogram]
-|The unifiedHistogram plugin provides UI components to create a layout including a resizable histogram and a main display.
+|Unified Histogram is a UX Building Block including a layout with a resizable histogram and a main display.
+It manages its own state and data fetching, and can easily be dropped into pages with minimal setup.
 
 
 |{kib-repo}blob/{branch}/src/plugins/unified_search/README.md[unifiedSearch]
@@ -393,6 +411,10 @@ The plugin exposes the static DefaultEditorController class to consume.
 |WARNING: Missing README.
 
 
+|{kib-repo}blob/{branch}/src/plugins/visualization_ui_components/README.md[visualizationUiComponents]
+|A series of UI components pulled out of Lens to make them available outside Lens.
+
+
 |===
 
 [discrete]
@@ -417,7 +439,12 @@ The plugin exposes the static DefaultEditorController class to consume.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/apm/readme.md[apm]
-|undefined
+|This plugin provides access to App Monitoring features provided by Elastic. It allows you to monitor your software services and applications in real-time; visualize detailed performance information on your services, identify and analyze errors, and monitor host-level and APM agent-specific metrics like JVM and Go runtime metrics.
+
+
+|{kib-repo}blob/{branch}/x-pack/plugins/asset_manager/README.md[assetManager]
+|This plugin provides access to the asset data stored in assets-* indices, primarily
+for inventory and topology purposes.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/banners/README.md[banners]
@@ -438,6 +465,14 @@ The plugin exposes the static DefaultEditorController class to consume.
 
 |{kib-repo}blob/{branch}/x-pack/plugins/cloud_integrations/cloud_chat/README.md[cloudChat]
 |Integrates with DriftChat in order to provide live support to our Elastic Cloud users. This plugin should only run on Elastic Cloud.
+
+
+|{kib-repo}blob/{branch}/x-pack/plugins/cloud_integrations/cloud_data_migration/README.md[cloudDataMigration]
+|Static migration page where self-managed users can see text/copy about migrating to Elastic Cloud
+
+
+|{kib-repo}blob/{branch}/x-pack/plugins/cloud_defend/README.md[cloudDefend]
+|This plugin currently only exists to provide custom fleet policy UX for a set of new BPF LSM features. The first feature being container "drift prevention".
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/cloud_integrations/cloud_experiments/README.mdx[cloudExperiments]
@@ -466,7 +501,7 @@ The plugin exposes the static DefaultEditorController class to consume.
 
 |{kib-repo}blob/{branch}/x-pack/plugins/custom_branding/README.md[customBranding]
 |This is a plugin to configure custom branding.
-This plugin is currently under active development; do not use.
+Plugin server-side only. Plugin has three main functions:
 
 
 |<<dashboard-enhanced-plugin>>
@@ -479,6 +514,10 @@ This plugin is currently under active development; do not use.
 
 |{kib-repo}blob/{branch}/x-pack/plugins/discover_enhanced/README.md[discoverEnhanced]
 |Contains the enhancements to the OSS discover app.
+
+
+|{kib-repo}blob/{branch}/x-pack/plugins/ecs_data_quality_dashboard/README.md[ecsDataQualityDashboard]
+|This plugin implements (server) APIs used to render the content of the Data Quality dashboard.
 
 
 |<<enhanced-embeddables-plugin>>
@@ -495,9 +534,17 @@ security and spaces filtering.
 |This plugin provides Kibana user interfaces for managing the Enterprise Search solution and its products, App Search and Workplace Search.
 
 
+|{kib-repo}blob/{branch}/x-pack/plugins/ess_security/README.md[essSecurity]
+|This plugin contains the ESS/on-prem deployments (non-serverless) customizations for Security Solution.
+
+
 |{kib-repo}blob/{branch}/x-pack/plugins/event_log/README.md[eventLog]
 |The event log plugin provides a persistent history of alerting and action
 activities.
+
+
+|{kib-repo}blob/{branch}/x-pack/plugins/exploratory_view/README.md[exploratoryView]
+|A shared component for visualizing observability data types via lens embeddable. For further details.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/features/README.md[features]
@@ -509,7 +556,7 @@ activities.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/fleet/README.md[fleet]
-|Fleet needs to have Elasticsearch API keys enabled, and also to have TLS enabled on kibana, (if you want to run Kibana without TLS you can provide the following config flag --xpack.fleet.agents.tlsCheckDisabled=false)
+|Fleet needs to have Elasticsearch API keys enabled.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/global_search/README.md[globalSearch]
@@ -606,6 +653,14 @@ Elastic.
 |This plugin provides shared components and services for use across observability solutions, as well as the observability landing page UI.
 
 
+|{kib-repo}blob/{branch}/x-pack/plugins/observability_onboarding/README.md[observabilityOnboarding]
+|This plugin provides an onboarding framework for observability solutions: Logs and APM.
+
+
+|{kib-repo}blob/{branch}/x-pack/plugins/observability_shared/README.md[observabilityShared]
+|A plugin that contains components and utilities shared by all Observability plugins.
+
+
 |{kib-repo}blob/{branch}/x-pack/plugins/osquery/README.md[osquery]
 |This plugin adds extended support to Security Solution Fleet Osquery integration
 
@@ -624,6 +679,10 @@ Elastic.
 
 |{kib-repo}blob/{branch}/x-pack/plugins/reporting/README.md[reporting]
 |An awesome Kibana reporting plugin
+
+
+|{kib-repo}blob/{branch}/x-pack/plugins/reporting_export_types/README.md[reportingExportTypes]
+|This plugin is intended to be a central point for the export types of reporting to convene before hitting the reporting plugin.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/rollup/README.md[rollup]
@@ -661,6 +720,22 @@ Kibana.
 
 |{kib-repo}blob/{branch}/x-pack/plugins/security_solution/README.md[securitySolution]
 |Welcome to the Kibana Security Solution plugin! This README will go over getting started with development and testing.
+
+
+|{kib-repo}blob/{branch}/x-pack/plugins/serverless/README.mdx[serverless]
+|
+
+
+|{kib-repo}blob/{branch}/x-pack/plugins/serverless_observability/README.mdx[serverlessObservability]
+|This plugin contains configuration and code used to create a Serverless Observability project.  It leverages universal configuration and other APIs in the serverless plugin to configure Kibana.
+
+
+|{kib-repo}blob/{branch}/x-pack/plugins/serverless_search/README.mdx[serverlessSearch]
+|This plugin contains configuration and code used to create a Serverless Search project.  It leverages universal configuration and other APIs in the serverless plugin to configure Kibana.
+
+
+|{kib-repo}blob/{branch}/x-pack/plugins/serverless_security/README.mdx[serverlessSecurity]
+|This plugin contains configuration and code used to create a Serverless Security project.  It leverages universal configuration and other APIs in the serverless plugin to configure Kibana.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/session_view/README.md[sessionView]

@@ -10,11 +10,11 @@ import { EuiSpacer } from '@elastic/eui';
 import { Axis, BarSeries, Chart, Settings, ScaleType } from '@elastic/charts';
 
 import { FormattedMessage } from '@kbn/i18n-react';
+import { roundToDecimalPlace } from '@kbn/ml-number-utils';
 import { TopValues } from '../../../top_values';
 import type { FieldDataRowProps } from '../../types/field_data_row';
 import { ExpandedRowFieldHeader } from '../expanded_row_field_header';
 import { getTFPercentage } from '../../utils';
-import { roundToDecimalPlace } from '../../../utils';
 import { useDataVizChartTheme } from '../../hooks';
 import { DocumentStatsTable } from './document_stats';
 import { ExpandedRowContent } from './expanded_row_content';

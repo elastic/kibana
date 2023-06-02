@@ -20,6 +20,7 @@ import {
 } from '@elastic/eui';
 
 import { ButtonContentIconSide } from '@elastic/eui/src/components/button/_button_content_deprecated';
+import { css } from '@emotion/react';
 
 export interface Action {
   key: string;
@@ -42,6 +43,12 @@ interface HeaderMenuComponentProps {
   panelPaddingSize?: PanelPaddingSize;
 }
 
+const popoverHeightStyle = css`
+  max-height: 300px;
+  height: 100%;
+  overflow-x: hidden;
+  overflow-y: auto;
+`;
 const HeaderMenuComponent: FC<HeaderMenuComponentProps> = ({
   text,
   dataTestSubj,
@@ -114,6 +121,8 @@ const HeaderMenuComponent: FC<HeaderMenuComponentProps> = ({
       >
         {!itemActions ? null : (
           <EuiContextMenuPanel
+            css={popoverHeightStyle}
+            className="eui-scrollBar"
             data-test-subj={`${dataTestSubj || ''}MenuPanel`}
             size="s"
             items={itemActions as ReactElement[]}

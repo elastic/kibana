@@ -12,7 +12,28 @@ import { PluginFunctionalProviderContext } from '../../plugin_functional/service
 // eslint-disable-next-line import/no-default-export
 export default function ({ getService }: PluginFunctionalProviderContext) {
   const testSubjects = getService('testSubjects');
+  const find = getService('find');
   const flyout = getService('flyout');
+
+  const toggleFilterPopover = async () => {
+    const filtersHolder = await find.byClassName('euiSearchBar__filtersHolder');
+    const filtersButton = await filtersHolder.findByCssSelector('button');
+    await filtersButton.click();
+  };
+
+  const clickFilter = async (type: string) => {
+    const list = await testSubjects.find('euiSelectableList');
+    const listItems = await list.findAllByCssSelector('li');
+    for (let i = 0; i < listItems.length; i++) {
+      const listItem = await listItems[i].findByClassName('euiSelectableListItem__text');
+      const text = await listItem.getVisibleText();
+      if (text.includes(type)) {
+        await listItem.click();
+        await toggleFilterPopover();
+        break;
+      }
+    }
+  };
 
   describe('adding children', () => {
     before(async () => {
@@ -23,8 +44,8 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
       await testSubjects.click('embeddablePanelToggleMenuIcon');
       await testSubjects.click('embeddablePanelAction-ACTION_ADD_PANEL');
       await testSubjects.waitForDeleted('savedObjectFinderLoadingIndicator');
-      await testSubjects.click('savedObjectFinderFilterButton');
-      await testSubjects.click('savedObjectFinderFilter-todo');
+      await toggleFilterPopover();
+      await clickFilter('Todo');
       await testSubjects.click('savedObjectTitleGarbage');
       await testSubjects.moveMouseTo('euiFlyoutCloseButton');
       await flyout.ensureClosed('dashboardAddPanel');

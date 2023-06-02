@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-// eslint-disable-next-line import/no-extraneous-dependencies
-import { defineConfig } from 'cypress';
+import { defineCypressConfig } from '@kbn/cypress-config';
 
 const CI = process.env.BUILDKITE === 'true';
 
@@ -25,8 +24,7 @@ const CI_CONFIG: Cypress.ConfigOptions<any> = {
   defaultCommandTimeout: sToMs(120),
 };
 
-// eslint-disable-next-line import/no-default-export
-export default defineConfig({
+export default defineCypressConfig({
   ...(CI ? CI_CONFIG : LOCAL_CONFIG),
   execTimeout: 120000,
   pageLoadTimeout: 120000,
@@ -46,9 +44,5 @@ export default defineConfig({
   },
   e2e: {
     baseUrl: 'http://localhost:5601',
-    setupNodeEvents(on, config) {
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
-      return require('./plugins')(on, config);
-    },
   },
 });

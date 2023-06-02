@@ -6,38 +6,24 @@
  */
 
 import React, { FC, useEffect } from 'react';
-import { EuiBetaBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { Route, Switch } from 'react-router-dom';
+import { Switch } from 'react-router-dom';
+import { Route } from '@kbn/shared-ux-router';
+
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { APP_WRAPPER_CLASS } from '@kbn/core/public';
-import { useInspectorContext } from '@kbn/observability-plugin/public';
-import type { LazyObservabilityPageTemplateProps } from '@kbn/observability-plugin/public';
-import { ManageLocations } from './pages/monitor_management/manage_locations';
+import { useInspectorContext } from '@kbn/observability-shared-plugin/public';
+import type { LazyObservabilityPageTemplateProps } from '@kbn/observability-shared-plugin/public';
 import {
   CERTIFICATES_ROUTE,
   MAPPING_ERROR_ROUTE,
   MONITOR_ROUTE,
-  MONITOR_ADD_ROUTE,
-  MONITOR_EDIT_ROUTE,
-  MONITOR_MANAGEMENT_ROUTE,
   OVERVIEW_ROUTE,
   SETTINGS_ROUTE,
   STEP_DETAIL_ROUTE,
   SYNTHETIC_CHECK_STEPS_ROUTE,
 } from '../../common/constants';
-import {
-  MappingErrorPage,
-  MonitorPage,
-  AddMonitorPage,
-  EditMonitorPage,
-  MonitorManagementPage,
-  StepDetailPage,
-  NotFoundPage,
-  SettingsPage,
-  MonitorManagementBottomBar,
-  APIKeysButton,
-} from './pages';
+import { MappingErrorPage, MonitorPage, StepDetailPage, NotFoundPage, SettingsPage } from './pages';
 import { CertificatesPage } from './pages/certificates';
 import { UptimePage, useUptimeTelemetry } from './hooks';
 import { OverviewPageComponent } from './pages/overview';
@@ -57,9 +43,7 @@ import {
 } from './pages/synthetics/step_detail_page';
 import { UptimePageTemplateComponent } from './app/uptime_page_template';
 import { apiService } from './state/api/utils';
-import { AddMonitorBtn } from './components/monitor_management/add_monitor_btn';
 import { SettingsBottomBar } from './components/settings/settings_bottom_bar';
-import { ServiceAllowedWrapper } from './pages/monitor_management/service_allowed_wrapper';
 
 type RouteProps = LazyObservabilityPageTemplateProps & {
   path: string;
@@ -183,95 +167,6 @@ const getRoutes = (): RouteProps[] => {
           </div>
         ),
         rightSideItems: [],
-      },
-    },
-    {
-      title: i18n.translate('xpack.synthetics.addMonitorRoute.title', {
-        defaultMessage: 'Add Monitor | {baseTitle}',
-        values: { baseTitle },
-      }),
-      path: MONITOR_ADD_ROUTE,
-      component: () => (
-        <ServiceAllowedWrapper>
-          <AddMonitorPage />
-        </ServiceAllowedWrapper>
-      ),
-      dataTestSubj: 'uptimeMonitorAddPage',
-      telemetryId: UptimePage.MonitorAdd,
-      pageHeader: {
-        pageTitle: (
-          <FormattedMessage
-            id="xpack.synthetics.addMonitor.pageHeader.title"
-            defaultMessage="Add Monitor"
-          />
-        ),
-        rightSideItems: [<APIKeysButton />, <ManageLocations />],
-      },
-      bottomBar: <MonitorManagementBottomBar />,
-      bottomBarProps: { paddingSize: 'm' as const },
-    },
-    {
-      title: i18n.translate('xpack.synthetics.editMonitorRoute.title', {
-        defaultMessage: 'Edit Monitor | {baseTitle}',
-        values: { baseTitle },
-      }),
-      path: MONITOR_EDIT_ROUTE,
-      component: () => (
-        <ServiceAllowedWrapper>
-          <EditMonitorPage />
-        </ServiceAllowedWrapper>
-      ),
-      dataTestSubj: 'uptimeMonitorEditPage',
-      telemetryId: UptimePage.MonitorEdit,
-      pageHeader: {
-        pageTitle: (
-          <FormattedMessage
-            id="xpack.synthetics.editMonitor.pageHeader.title"
-            defaultMessage="Edit Monitor"
-          />
-        ),
-        rightSideItems: [<APIKeysButton />, <ManageLocations />],
-      },
-      bottomBar: <MonitorManagementBottomBar />,
-      bottomBarProps: { paddingSize: 'm' as const },
-    },
-    {
-      title: i18n.translate('xpack.synthetics.monitorManagementRoute.title', {
-        defaultMessage: 'Monitor Management | {baseTitle}',
-        values: { baseTitle },
-      }),
-      path: MONITOR_MANAGEMENT_ROUTE + '/:type?',
-      component: () => (
-        <ServiceAllowedWrapper>
-          <MonitorManagementPage />
-        </ServiceAllowedWrapper>
-      ),
-      dataTestSubj: 'uptimeMonitorManagementListPage',
-      telemetryId: UptimePage.MonitorManagement,
-      pageHeader: {
-        pageTitle: (
-          <EuiFlexGroup alignItems="center" gutterSize="xs">
-            <EuiFlexItem grow={false}>
-              <FormattedMessage
-                id="xpack.synthetics.monitorManagement.pageHeader.title"
-                defaultMessage="Monitor Management"
-              />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiBetaBadge
-                label="Beta"
-                tooltipContent={i18n.translate(
-                  'xpack.synthetics.routes.monitorManagement.betaLabel',
-                  {
-                    defaultMessage:
-                      'This functionality is in beta and is subject to change. The design and code is less mature than official generally available features and is being provided as-is with no warranties. Beta features are not subject to the support service level agreement of official generally available features.',
-                  }
-                )}
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        ),
-        rightSideItems: [<AddMonitorBtn />, <APIKeysButton />, <ManageLocations />],
       },
     },
   ];

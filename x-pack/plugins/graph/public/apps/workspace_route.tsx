@@ -10,7 +10,6 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { Provider } from 'react-redux';
 import { useHistory } from 'react-router-dom';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { showSaveModal } from '@kbn/saved-objects-plugin/public';
 import { Workspace } from '../types';
 import { createGraphStore } from '../state_management';
 import { createWorkspace } from '../services/workspace/graph_client_workspace';
@@ -28,7 +27,7 @@ export const WorkspaceRoute = ({
   deps: {
     toastNotifications,
     coreStart,
-    savedObjectsClient,
+    contentClient,
     graphSavePolicy,
     chrome,
     canEditDrillDownUrls,
@@ -44,6 +43,7 @@ export const WorkspaceRoute = ({
     spaces,
     indexPatterns: getIndexPatternProvider,
     inspect,
+    savedObjectsManagement,
   },
 }: WorkspaceRouteProps) => {
   /**
@@ -71,9 +71,10 @@ export const WorkspaceRoute = ({
       storage,
       data,
       unifiedSearch,
+      savedObjectsManagement,
       ...coreStart,
     }),
-    [coreStart, data, storage, unifiedSearch]
+    [coreStart, data, storage, unifiedSearch, savedObjectsManagement]
   );
 
   const { loading, requestAdapter, callNodeProxy, callSearchNodeProxy, handleSearchQueryError } =
@@ -107,13 +108,11 @@ export const WorkspaceRoute = ({
       notifications: coreStart.notifications,
       http: coreStart.http,
       overlays: coreStart.overlays,
-      savedObjectsClient,
-      showSaveModal,
       savePolicy: graphSavePolicy,
+      contentClient,
       changeUrl: (newUrl) => history.push(newUrl),
       notifyReact: () => setRenderCounter((cur) => cur + 1),
       chrome,
-      I18nContext: coreStart.i18n.Context,
       handleSearchQueryError,
     })
   );
@@ -121,7 +120,7 @@ export const WorkspaceRoute = ({
   const loaded = useWorkspaceLoader({
     workspaceRef,
     store,
-    savedObjectsClient,
+    contentClient,
     spaces,
     coreStart,
     data,

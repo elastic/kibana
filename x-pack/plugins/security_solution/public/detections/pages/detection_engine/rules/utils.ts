@@ -18,12 +18,14 @@ import type { RouteSpyState } from '../../../../common/utils/route/types';
 import { SecurityPageName } from '../../../../app/types';
 import { DEFAULT_THREAT_MATCH_QUERY, RULES_PATH } from '../../../../../common/constants';
 import type { AboutStepRule, DefineStepRule, RuleStepsOrder, ScheduleStepRule } from './types';
-import { DataSourceType, RuleStep } from './types';
+import { DataSourceType, GroupByOptions, RuleStep } from './types';
 import type { GetSecuritySolutionUrl } from '../../../../common/components/link_to';
+import { DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY } from '../../../../../common/detection_engine/rule_schema';
 import {
   RuleDetailTabs,
   RULE_DETAILS_TAB_NAME,
 } from '../../../../detection_engine/rule_details_ui/pages/rule_details';
+import { DELETED_RULE } from '../../../../detection_engine/rule_details_ui/pages/rule_details/translations';
 import { fillEmptySeverityMappings } from './helpers';
 
 export const ruleStepsOrder: RuleStepsOrder = [
@@ -95,6 +97,10 @@ export const getTrailingBreadcrumbs = (
     ];
   }
 
+  if (!isRuleEditPage(params.pathName) && params.state && !params.state.isExistingRule) {
+    breadcrumb = [...breadcrumb, { text: DELETED_RULE, href: '' }];
+  }
+
   return breadcrumb;
 };
 
@@ -144,6 +150,12 @@ export const stepDefineDefaultValue: DefineStepRule = {
   historyWindowSize: '7d',
   shouldLoadQueryDynamically: false,
   groupByFields: [],
+  groupByRadioSelection: GroupByOptions.PerRuleExecution,
+  groupByDuration: {
+    value: 5,
+    unit: 'm',
+  },
+  suppressionMissingFields: DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY,
 };
 
 export const stepAboutDefaultValue: AboutStepRule = {

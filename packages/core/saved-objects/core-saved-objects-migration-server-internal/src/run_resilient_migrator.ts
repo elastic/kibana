@@ -15,12 +15,16 @@ import type {
   IndexMapping,
   SavedObjectsMigrationConfigType,
   MigrationResult,
+  IndexTypesMap,
 } from '@kbn/core-saved-objects-base-server-internal';
+import type { Defer } from './kibana_migrator_utils';
 import type { TransformRawDocs } from './types';
 import { next } from './next';
 import { model } from './model';
 import { createInitialState } from './initial_state';
 import { migrationStateActionMachine } from './migrations_state_action_machine';
+import { cleanup } from './migrations_state_machine_cleanup';
+import type { State } from './state';
 
 /**
  * To avoid the Elasticsearch-js client aborting our requests before we
@@ -36,6 +40,26 @@ import { migrationStateActionMachine } from './migrations_state_action_machine';
  */
 export const MIGRATION_CLIENT_OPTIONS = { maxRetries: 0, requestTimeout: 120_000 };
 
+export interface RunResilientMigratorParams {
+  client: ElasticsearchClient;
+  kibanaVersion: string;
+  waitForMigrationCompletion: boolean;
+  mustRelocateDocuments: boolean;
+  indexTypesMap: IndexTypesMap;
+  targetMappings: IndexMapping;
+  preMigrationScript?: string;
+  readyToReindex: Defer<any>;
+  doneReindexing: Defer<any>;
+  logger: Logger;
+  transformRawDocs: TransformRawDocs;
+  coreMigrationVersionPerType: SavedObjectsMigrationVersion;
+  migrationVersionPerType: SavedObjectsMigrationVersion;
+  indexPrefix: string;
+  migrationsConfig: SavedObjectsMigrationConfigType;
+  typeRegistry: ISavedObjectTypeRegistry;
+  docLinks: DocLinksServiceStart;
+}
+
 /**
  * Migrates the provided indexPrefix index using a resilient algorithm that is
  * completely lock-free so that any failure can always be retried by
@@ -45,34 +69,29 @@ export async function runResilientMigrator({
   client,
   kibanaVersion,
   waitForMigrationCompletion,
+  mustRelocateDocuments,
+  indexTypesMap,
   targetMappings,
   logger,
   preMigrationScript,
+  readyToReindex,
+  doneReindexing,
   transformRawDocs,
+  coreMigrationVersionPerType,
   migrationVersionPerType,
   indexPrefix,
   migrationsConfig,
   typeRegistry,
   docLinks,
-}: {
-  client: ElasticsearchClient;
-  kibanaVersion: string;
-  waitForMigrationCompletion: boolean;
-  targetMappings: IndexMapping;
-  preMigrationScript?: string;
-  logger: Logger;
-  transformRawDocs: TransformRawDocs;
-  migrationVersionPerType: SavedObjectsMigrationVersion;
-  indexPrefix: string;
-  migrationsConfig: SavedObjectsMigrationConfigType;
-  typeRegistry: ISavedObjectTypeRegistry;
-  docLinks: DocLinksServiceStart;
-}): Promise<MigrationResult> {
+}: RunResilientMigratorParams): Promise<MigrationResult> {
   const initialState = createInitialState({
     kibanaVersion,
     waitForMigrationCompletion,
+    mustRelocateDocuments,
+    indexTypesMap,
     targetMappings,
     preMigrationScript,
+    coreMigrationVersionPerType,
     migrationVersionPerType,
     indexPrefix,
     migrationsConfig,
@@ -84,8 +103,12 @@ export async function runResilientMigrator({
   return migrationStateActionMachine({
     initialState,
     logger,
-    next: next(migrationClient, transformRawDocs),
+    next: next(migrationClient, transformRawDocs, readyToReindex, doneReindexing),
     model,
-    client: migrationClient,
+    abort: async (state?: State) => {
+      // At this point, we could reject this migrator's defers and unblock other migrators
+      // but we are going to throw and shutdown Kibana anyway, so there's no real point in it
+      await cleanup(client, state);
+    },
   });
 }

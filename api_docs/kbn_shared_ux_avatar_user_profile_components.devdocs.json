@@ -193,7 +193,7 @@
           },
           " extends Omit<",
           "EuiAvatarProps",
-          ", \"name\" | \"type\" | \"color\" | \"iconColor\" | \"iconType\" | \"iconSize\" | \"initials\" | \"initialsLength\" | \"imageUrl\">"
+          ", \"type\" | \"name\" | \"color\" | \"iconType\" | \"iconColor\" | \"iconSize\" | \"initials\" | \"initialsLength\" | \"imageUrl\">"
         ],
         "path": "packages/shared-ux/avatar/user_profile/impl/user_avatar.tsx",
         "deprecated": false,
@@ -490,7 +490,7 @@
           },
           " extends Pick<",
           "EuiSelectableProps",
-          "<{}>, \"height\" | \"errorMessage\" | \"singleSelection\" | \"loadingMessage\" | \"noMatchesMessage\" | \"emptyMessage\">"
+          "<{}>, \"singleSelection\" | \"height\" | \"errorMessage\" | \"loadingMessage\" | \"noMatchesMessage\" | \"emptyMessage\">"
         ],
         "path": "packages/shared-ux/avatar/user_profile/impl/user_profiles_selectable.tsx",
         "deprecated": false,

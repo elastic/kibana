@@ -1,0 +1,121 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`UserActionAuditLogger logs add user action as event.type change 1`] = `
+Array [
+  Object {
+    "event": Object {
+      "action": "action",
+      "category": Array [
+        "database",
+      ],
+      "outcome": "success",
+      "type": Array [
+        "change",
+      ],
+    },
+    "kibana": Object {
+      "saved_object": Object {
+        "id": "123",
+        "type": "type",
+      },
+    },
+    "message": "id: idParam",
+  },
+]
+`;
+
+exports[`UserActionAuditLogger logs create user action as event.type creation 1`] = `
+Array [
+  Object {
+    "event": Object {
+      "action": "action",
+      "category": Array [
+        "database",
+      ],
+      "outcome": "success",
+      "type": Array [
+        "creation",
+      ],
+    },
+    "kibana": Object {
+      "saved_object": Object {
+        "id": "123",
+        "type": "type",
+      },
+    },
+    "message": "id: idParam",
+  },
+]
+`;
+
+exports[`UserActionAuditLogger logs delete user action as event.type deletion 1`] = `
+Array [
+  Object {
+    "event": Object {
+      "action": "action",
+      "category": Array [
+        "database",
+      ],
+      "outcome": "success",
+      "type": Array [
+        "deletion",
+      ],
+    },
+    "kibana": Object {
+      "saved_object": Object {
+        "id": "123",
+        "type": "type",
+      },
+    },
+    "message": "id: idParam",
+  },
+]
+`;
+
+exports[`UserActionAuditLogger logs push_to_service user action as event.type creation 1`] = `
+Array [
+  Object {
+    "event": Object {
+      "action": "action",
+      "category": Array [
+        "database",
+      ],
+      "outcome": "success",
+      "type": Array [
+        "change",
+      ],
+    },
+    "kibana": Object {
+      "saved_object": Object {
+        "id": "123",
+        "type": "type",
+      },
+    },
+    "message": "id: idParam",
+  },
+]
+`;
+
+exports[`UserActionAuditLogger logs update user action as event.type change 1`] = `
+Array [
+  Object {
+    "event": Object {
+      "action": "action",
+      "category": Array [
+        "database",
+      ],
+      "outcome": "success",
+      "type": Array [
+        "change",
+      ],
+    },
+    "kibana": Object {
+      "saved_object": Object {
+        "id": "123",
+        "type": "type",
+      },
+    },
+    "message": "id: idParam",
+  },
+]
+`;

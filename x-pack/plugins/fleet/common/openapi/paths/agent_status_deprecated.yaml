@@ -1,6 +1,7 @@
 get:
-  summary: Agents - Summary stats
-  tags: []
+  summary: Get agent status summary
+  tags:
+    - Agent status
   responses:
     '200':
       description: OK
@@ -34,6 +35,8 @@ get:
               - other
               - total
               - updating
+    '400':
+      $ref: ../components/responses/error.yaml
   operationId: get-agent-status-deprecated
   parameters:
     - schema:

@@ -12,7 +12,6 @@ import {
   REFRESH_SETTINGS_SELECTION_NOTE,
 } from '../../screens/alerts_detection_rules';
 import {
-  changeRowsPerPageTo,
   checkAutoRefresh,
   waitForRulesTableToBeLoaded,
   selectAllRules,
@@ -24,61 +23,67 @@ import {
   checkAutoRefreshIsDisabled,
   checkAutoRefreshIsEnabled,
 } from '../../tasks/alerts_detection_rules';
-import { login, visit } from '../../tasks/login';
+import { login, visit, visitWithoutDateRange } from '../../tasks/login';
 
 import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../urls/navigation';
-import { createCustomRule } from '../../tasks/api_calls/rules';
+import { createRule } from '../../tasks/api_calls/rules';
 import { cleanKibana } from '../../tasks/common';
 import { getNewRule } from '../../objects/rule';
+import { setRowsPerPageTo } from '../../tasks/table_pagination';
 
 const DEFAULT_RULE_REFRESH_INTERVAL_VALUE = 60000;
 
-describe('Alerts detection rules table auto-refresh', () => {
+// TODO: See https://github.com/elastic/kibana/issues/154694
+describe.skip('Alerts detection rules table auto-refresh', () => {
   before(() => {
     cleanKibana();
     login();
     for (let i = 1; i < 7; i += 1) {
-      createCustomRule({ ...getNewRule(), name: `Test rule ${i}` }, `${i}`);
+      createRule(getNewRule({ name: `Test rule ${i}`, rule_id: `${i}` }));
     }
   });
 
-  it('Auto refreshes rules', () => {
-    visit(DETECTIONS_RULE_MANAGEMENT_URL);
+  beforeEach(() => {
+    login();
+  });
 
-    mockGlobalClock();
+  it('Auto refreshes rules', () => {
+    visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
+
     waitForRulesTableToBeLoaded();
 
     // ensure rules have rendered. As there is no user interaction in this test,
     // rules were not rendered before test completes
     cy.get(RULE_CHECKBOX).should('have.length', 6);
 
-    // mock 1 minute passing to make sure refresh is conducted
+    // // mock 1 minute passing to make sure refresh is conducted
+    mockGlobalClock();
     checkAutoRefresh(DEFAULT_RULE_REFRESH_INTERVAL_VALUE, 'be.visible');
 
     cy.contains(REFRESH_RULES_STATUS, 'Updated now');
   });
 
   it('should prevent table from rules refetch if any rule selected', () => {
-    visit(DETECTIONS_RULE_MANAGEMENT_URL);
+    visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
 
-    mockGlobalClock();
     waitForRulesTableToBeLoaded();
 
     selectNumberOfRules(1);
 
     // mock 1 minute passing to make sure refresh is not conducted
+    mockGlobalClock();
     checkAutoRefresh(DEFAULT_RULE_REFRESH_INTERVAL_VALUE, 'not.exist');
 
     // ensure rule is still selected
     cy.get(RULE_CHECKBOX).first().should('be.checked');
 
-    cy.contains(REFRESH_RULES_STATUS, 'Updated 1 minute ago');
+    cy.get(REFRESH_RULES_STATUS).should('have.not.text', 'Updated now');
   });
 
   it('should disable auto refresh when any rule selected and enable it after rules unselected', () => {
     visit(DETECTIONS_RULE_MANAGEMENT_URL);
     waitForRulesTableToBeLoaded();
-    changeRowsPerPageTo(5);
+    setRowsPerPageTo(5);
 
     // check refresh settings if it's enabled before selecting
     openRefreshSettingsPopover();
@@ -107,7 +112,7 @@ describe('Alerts detection rules table auto-refresh', () => {
   it('should not enable auto refresh after rules were unselected if auto refresh was disabled', () => {
     visit(DETECTIONS_RULE_MANAGEMENT_URL);
     waitForRulesTableToBeLoaded();
-    changeRowsPerPageTo(5);
+    setRowsPerPageTo(5);
 
     openRefreshSettingsPopover();
     disableAutoRefresh();

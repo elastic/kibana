@@ -5,22 +5,32 @@
  * 2.0.
  */
 
-import { createContext, useContext } from 'react';
+import { createContext, type FC, useContext } from 'react';
 
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
-
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
-import type { CoreStart, CoreSetup, HttpStart, IUiSettingsClient } from '@kbn/core/public';
-import type { ThemeServiceStart } from '@kbn/core/public';
+import type {
+  CoreSetup,
+  CoreStart,
+  ExecutionContextStart,
+  HttpStart,
+  IUiSettingsClient,
+  ThemeServiceStart,
+} from '@kbn/core/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
+import { type EuiComboBoxProps } from '@elastic/eui/src/components/combo_box/combo_box';
+import { type DataView } from '@kbn/data-views-plugin/common';
+import type { FieldStatsProps, FieldStatsServices } from '@kbn/unified-field-list-plugin/public';
+import type { TimeRange as TimeRangeMs } from '@kbn/ml-date-picker';
 
 export interface AiopsAppDependencies {
   application: CoreStart['application'];
   data: DataPublicPluginStart;
+  executionContext: ExecutionContextStart;
   charts: ChartsPluginStart;
   fieldFormats: FieldFormatsStart;
   http: HttpStart;
@@ -31,6 +41,19 @@ export interface AiopsAppDependencies {
   unifiedSearch: UnifiedSearchPublicPluginStart;
   share: SharePluginStart;
   lens: LensPublicStart;
+  // deps for unified field stats
+  fieldStats?: {
+    useFieldStatsTrigger: () => {
+      renderOption: EuiComboBoxProps<string>['renderOption'];
+      closeFlyout: () => void;
+    };
+    FieldStatsFlyoutProvider: FC<{
+      dataView: DataView;
+      fieldStatsServices: FieldStatsServices;
+      timeRangeMs?: TimeRangeMs;
+      dslQuery?: FieldStatsProps['dslQuery'];
+    }>;
+  };
 }
 
 export const AiopsAppContext = createContext<AiopsAppDependencies | undefined>(undefined);

@@ -6,7 +6,7 @@ TIP: Traces link together related transactions to show an end-to-end performance
 and which services were part of it.
 In addition to the Traces overview, you can view your application traces in the <<spans,trace sample timeline waterfall>>.
 
-*Traces* displays your application's entry transactions.
+*Traces* displays your application's entry (root) transactions.
 Transactions with the same name are grouped together and only shown once in this table.
 If you're using <<distributed-tracing,distributed tracing>>,
 this view is key to finding the critical paths within your application.

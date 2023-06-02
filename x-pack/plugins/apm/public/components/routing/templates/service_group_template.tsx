@@ -9,7 +9,7 @@ import {
   EuiPageHeaderProps,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLoadingContent,
+  EuiSkeletonTitle,
   EuiIcon,
 } from '@elastic/eui';
 import React from 'react';
@@ -68,14 +68,16 @@ export function ServiceGroupTemplate({
       responsive={false}
     >
       <EuiFlexItem grow={false}>
-        {loadingServiceGroupName ? (
-          <EuiLoadingContent lines={2} style={{ width: 180, height: 40 }} />
-        ) : (
-          serviceGroupName ||
-          i18n.translate('xpack.apm.serviceGroup.allServices.title', {
-            defaultMessage: 'Services',
-          })
-        )}
+        <EuiSkeletonTitle
+          size="l"
+          style={{ width: 180 }}
+          isLoading={loadingServiceGroupName}
+        >
+          {serviceGroupName ||
+            i18n.translate('xpack.apm.serviceGroup.allServices.title', {
+              defaultMessage: 'Services',
+            })}
+        </EuiSkeletonTitle>
       </EuiFlexItem>
     </EuiFlexGroup>
   );
@@ -122,7 +124,7 @@ export function ServiceGroupTemplate({
                     <EuiIcon size="s" type="arrowLeft" />{' '}
                     {i18n.translate(
                       'xpack.apm.serviceGroups.breadcrumb.return',
-                      { defaultMessage: 'Return' }
+                      { defaultMessage: 'Return to service groups' }
                     )}
                   </>
                 ),

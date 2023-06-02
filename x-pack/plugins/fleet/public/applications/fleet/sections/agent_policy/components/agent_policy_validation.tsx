@@ -37,7 +37,16 @@ export const agentPolicyFormValidation = (
     errors.unenroll_timeout = [
       <FormattedMessage
         id="xpack.fleet.agentPolicyForm.unenrollTimeoutMinValueErrorMessage"
-        defaultMessage="Timeout must be greater than zero."
+        defaultMessage="Unenroll timeout must be greater than zero."
+      />,
+    ];
+  }
+
+  if (agentPolicy.inactivity_timeout && agentPolicy.inactivity_timeout < 0) {
+    errors.inactivity_timeout = [
+      <FormattedMessage
+        id="xpack.fleet.agentPolicyForm.inactivityTimeoutMinValueErrorMessage"
+        defaultMessage="Inactivity timeout must be greater than zero."
       />,
     ];
   }

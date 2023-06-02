@@ -7,7 +7,7 @@
 
 import React from 'react';
 import {
-  EuiLoadingContent,
+  EuiSkeletonText,
   EuiTitle,
   EuiFlexGroup,
   EuiFlexItem,
@@ -17,7 +17,7 @@ import {
   EuiFlexGrid,
   EuiSpacer,
 } from '@elastic/eui';
-import { useChartTheme } from '@kbn/observability-plugin/public';
+import { useChartTheme } from '@kbn/observability-shared-plugin/public';
 import {
   Chart,
   Partition,
@@ -134,7 +134,7 @@ export function StorageDetailsPerService({
   if (isPending(status)) {
     return (
       <div style={{ width: '50%' }}>
-        <EuiLoadingContent data-test-subj="loadingSpinner" />
+        <EuiSkeletonText data-test-subj="loadingSpinner" />
       </div>
     );
   }
@@ -169,7 +169,10 @@ export function StorageDetailsPerService({
               </EuiTitle>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiLink href={serviceOverviewLink}>
+              <EuiLink
+                data-test-subj="apmStorageDetailsPerServiceGoToServiceOverviewLink"
+                href={serviceOverviewLink}
+              >
                 {i18n.translate(
                   'xpack.apm.storageExplorer.serviceDetails.serviceOverviewLink',
                   {
@@ -216,7 +219,8 @@ export function StorageDetailsPerService({
                       {
                         groupByRollup: (d: Datum) => d.processorEventLabel,
                         shape: {
-                          fillColor: (d) => groupedPalette[d.sortIndex],
+                          fillColor: (dataName, sortIndex) =>
+                            groupedPalette[sortIndex],
                         },
                       },
                     ]}

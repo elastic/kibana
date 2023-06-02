@@ -6,28 +6,48 @@
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
-import { SavedObjectsClientContract, SavedObjectsFindResponse } from '@kbn/core/server';
-import { SyntheticsService } from '../synthetics_service/synthetics_service';
+import { SavedObjectsFindResponse } from '@kbn/core/server';
+import { MonitorSortFieldSchema } from '../../common/runtime_types/monitor_management/sort_field';
+import { getAllLocations } from '../synthetics_service/get_all_locations';
 import { EncryptedSyntheticsMonitor, ServiceLocations } from '../../common/runtime_types';
-import { monitorAttributes } from '../../common/types/saved_objects';
-import { syntheticsMonitorType } from '../legacy_uptime/lib/saved_objects/synthetics_monitor';
+import { monitorAttributes, syntheticsMonitorType } from '../../common/types/saved_objects';
+import { RouteContext } from '../legacy_uptime/routes';
+
+const StringOrArraySchema = schema.maybe(
+  schema.oneOf([schema.string(), schema.arrayOf(schema.string())])
+);
 
 export const QuerySchema = schema.object({
   page: schema.maybe(schema.number()),
   perPage: schema.maybe(schema.number()),
-  sortField: schema.maybe(schema.string()),
+  sortField: MonitorSortFieldSchema,
   sortOrder: schema.maybe(schema.oneOf([schema.literal('desc'), schema.literal('asc')])),
   query: schema.maybe(schema.string()),
   filter: schema.maybe(schema.string()),
-  tags: schema.maybe(schema.oneOf([schema.string(), schema.arrayOf(schema.string())])),
-  monitorType: schema.maybe(schema.oneOf([schema.string(), schema.arrayOf(schema.string())])),
-  locations: schema.maybe(schema.oneOf([schema.string(), schema.arrayOf(schema.string())])),
-  status: schema.maybe(schema.oneOf([schema.string(), schema.arrayOf(schema.string())])),
-  fields: schema.maybe(schema.arrayOf(schema.string())),
+  tags: StringOrArraySchema,
+  monitorTypes: StringOrArraySchema,
+  locations: StringOrArraySchema,
+  projects: StringOrArraySchema,
+  schedules: StringOrArraySchema,
+  status: StringOrArraySchema,
   searchAfter: schema.maybe(schema.arrayOf(schema.string())),
 });
 
 export type MonitorsQuery = TypeOf<typeof QuerySchema>;
+
+export const OverviewStatusSchema = schema.object({
+  query: schema.maybe(schema.string()),
+  filter: schema.maybe(schema.string()),
+  tags: StringOrArraySchema,
+  monitorTypes: StringOrArraySchema,
+  locations: StringOrArraySchema,
+  projects: StringOrArraySchema,
+  schedules: StringOrArraySchema,
+  status: StringOrArraySchema,
+  scopeStatusByLocation: schema.maybe(schema.boolean()),
+});
+
+export type OverviewStatusQuery = TypeOf<typeof OverviewStatusSchema>;
 
 export const SEARCH_FIELDS = [
   'name',
@@ -39,10 +59,9 @@ export const SEARCH_FIELDS = [
   'project_id.text',
 ];
 
-export const getMonitors = (
-  request: MonitorsQuery,
-  syntheticsService: SyntheticsService,
-  savedObjectsClient: SavedObjectsClientContract
+export const getMonitors = async (
+  context: RouteContext<MonitorsQuery>,
+  { fields }: { fields?: string[] } = {}
 ): Promise<SavedObjectsFindResponse<EncryptedSyntheticsMonitor>> => {
   const {
     perPage = 50,
@@ -51,36 +70,67 @@ export const getMonitors = (
     sortOrder,
     query,
     tags,
-    monitorType,
+    monitorTypes,
     locations,
     filter = '',
-    fields,
     searchAfter,
-  } = request as MonitorsQuery;
+    projects,
+    schedules,
+  } = context.request.query;
 
-  const locationFilter = parseLocationFilter(syntheticsService.locations, locations);
-
-  const filterStr = [
+  const filterStr = await getMonitorFilters({
     filter,
-    getKqlFilter({ field: 'tags', values: tags }),
-    getKqlFilter({ field: 'type', values: monitorType }),
-    getKqlFilter({ field: 'locations.id', values: locationFilter }),
-  ]
-    .filter((f) => !!f)
-    .join(' AND ');
+    monitorTypes,
+    tags,
+    locations,
+    projects,
+    schedules,
+    context,
+  });
 
-  return savedObjectsClient.find({
+  return context.savedObjectsClient.find({
     type: syntheticsMonitorType,
     perPage,
     page,
-    sortField: sortField === 'schedule.keyword' ? 'schedule.number' : sortField,
+    sortField: parseMappingKey(sortField),
     sortOrder,
     searchFields: SEARCH_FIELDS,
     search: query ? `${query}*` : undefined,
     filter: filterStr,
-    fields,
     searchAfter,
+    fields,
   });
+};
+
+export const getMonitorFilters = async ({
+  tags,
+  filter,
+  locations,
+  projects,
+  monitorTypes,
+  schedules,
+  context,
+}: {
+  filter?: string;
+  tags?: string | string[];
+  monitorTypes?: string | string[];
+  locations?: string | string[];
+  projects?: string | string[];
+  schedules?: string | string[];
+  context: RouteContext;
+}) => {
+  const locationFilter = await parseLocationFilter(context, locations);
+
+  return [
+    filter,
+    getKqlFilter({ field: 'tags', values: tags }),
+    getKqlFilter({ field: 'project_id', values: projects }),
+    getKqlFilter({ field: 'type', values: monitorTypes }),
+    getKqlFilter({ field: 'locations.id', values: locationFilter }),
+    getKqlFilter({ field: 'schedule.number', values: schedules }),
+  ]
+    .filter((f) => !!f)
+    .join(' AND ');
 };
 
 export const getKqlFilter = ({
@@ -105,24 +155,26 @@ export const getKqlFilter = ({
   }
 
   if (Array.isArray(values)) {
-    return `${fieldKey}:"${values.join(`" ${operator} ${fieldKey}:"`)}"`;
+    return ` (${fieldKey}:"${values.join(`" ${operator} ${fieldKey}:"`)}" )`;
   }
 
   return `${fieldKey}:"${values}"`;
 };
 
-const parseLocationFilter = (serviceLocations: ServiceLocations, locations?: string | string[]) => {
-  if (!locations) {
+const parseLocationFilter = async (context: RouteContext, locations?: string | string[]) => {
+  if (!locations || locations?.length === 0) {
     return '';
   }
 
+  const { allLocations } = await getAllLocations(context);
+
   if (Array.isArray(locations)) {
     return locations
-      .map((loc) => findLocationItem(loc, serviceLocations)?.id ?? '')
-      .filter((val) => !val);
+      .map((loc) => findLocationItem(loc, allLocations)?.id ?? '')
+      .filter((val) => !!val);
   }
 
-  return findLocationItem(locations, serviceLocations)?.id ?? '';
+  return findLocationItem(locations, allLocations)?.id ?? '';
 };
 
 export const findLocationItem = (query: string, locations: ServiceLocations) => {
@@ -135,14 +187,28 @@ export const findLocationItem = (query: string, locations: ServiceLocations) => 
  * @param monitorQuery { MonitorsQuery }
  */
 export const isMonitorsQueryFiltered = (monitorQuery: MonitorsQuery) => {
-  const { query, tags, monitorType, locations, status, filter } = monitorQuery;
+  const { query, tags, monitorTypes, locations, status, filter, projects, schedules } =
+    monitorQuery;
 
   return (
     !!query ||
     !!filter ||
     !!locations?.length ||
-    !!monitorType?.length ||
+    !!monitorTypes?.length ||
     !!tags?.length ||
-    !!status?.length
+    !!status?.length ||
+    !!projects?.length ||
+    !!schedules?.length
   );
 };
+
+function parseMappingKey(key: string | undefined) {
+  switch (key) {
+    case 'schedule.keyword':
+      return 'schedule.number';
+    case 'project_id.keyword':
+      return 'project_id';
+    default:
+      return key;
+  }
+}

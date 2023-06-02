@@ -24,7 +24,7 @@ import {
   createComment,
   removeServerGeneratedPropertiesFromCase,
   removeServerGeneratedPropertiesFromSavedObject,
-} from '../../../../common/lib/utils';
+} from '../../../../common/lib/api';
 import {
   secOnly,
   obsOnly,

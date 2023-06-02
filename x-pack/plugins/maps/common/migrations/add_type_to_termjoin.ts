@@ -5,18 +5,14 @@
  * 2.0.
  */
 
-import { MapSavedObjectAttributes } from '../map_saved_object_type';
+import type { MapAttributes } from '../content_management';
 import { JoinDescriptor, LayerDescriptor, VectorLayerDescriptor } from '../descriptor_types';
 import { SOURCE_TYPES } from '../constants';
 
 // enforce type property on joins. It's possible older saved-objects do not have this correctly filled in
 // e.g. sample-data was missing the right.type field.
 // This is just to be safe.
-export function addTypeToTermJoin({
-  attributes,
-}: {
-  attributes: MapSavedObjectAttributes;
-}): MapSavedObjectAttributes {
+export function addTypeToTermJoin({ attributes }: { attributes: MapAttributes }): MapAttributes {
   if (!attributes || !attributes.layerListJSON) {
     return attributes;
   }
@@ -37,7 +33,7 @@ export function addTypeToTermJoin({
     if (!vectorLayer.joins) {
       return;
     }
-    vectorLayer.joins.forEach((join: JoinDescriptor) => {
+    vectorLayer.joins.forEach((join: Partial<JoinDescriptor>) => {
       if (!join.right) {
         return;
       }

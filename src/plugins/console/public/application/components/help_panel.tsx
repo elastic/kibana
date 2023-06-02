@@ -17,7 +17,7 @@ import {
   EuiSpacer,
   EuiLink,
 } from '@elastic/eui';
-import { EditorExample } from './editor_example';
+import EditorExample from './editor_example';
 import { useServicesContext } from '../contexts';
 
 interface Props {

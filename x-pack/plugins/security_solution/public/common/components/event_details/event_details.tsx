@@ -9,7 +9,7 @@ import type { EuiTabbedContentTab } from '@elastic/eui';
 import {
   EuiFlexGroup,
   EuiHorizontalRule,
-  EuiLoadingContent,
+  EuiSkeletonText,
   EuiLoadingSpinner,
   EuiNotificationBadge,
   EuiSpacer,
@@ -20,6 +20,10 @@ import React, { useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import { isEmpty } from 'lodash';
 
+import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
+import { useResponseActionsView } from './response_actions_view';
+import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
+import type { RawEventData } from './types';
 import type { SearchHit } from '../../../../common/search_strategy';
 import { getMitreComponentParts } from '../../../detections/mitre/get_mitre_threat_component';
 import { GuidedOnboardingTourStep } from '../guided_onboarding_tour/tour_step';
@@ -29,15 +33,12 @@ import {
   getTourAnchor,
   SecurityStepId,
 } from '../guided_onboarding_tour/tour_config';
-import type { AlertRawEventData } from './osquery_tab';
-import { useOsqueryTab } from './osquery_tab';
 import { EventFieldsBrowser } from './event_fields_browser';
 import { JsonView } from './json_view';
 import { ThreatSummaryView } from './cti_details/threat_summary_view';
 import { ThreatDetailsView } from './cti_details/threat_details_view';
 import * as i18n from './translations';
 import { AlertSummaryView } from './alert_summary_view';
-import type { Ecs } from '../../../../common/ecs';
 import type { BrowserFields } from '../../containers/source';
 import { useInvestigationTimeEnrichment } from '../../containers/cti/event_enrichment';
 import type { TimelineEventsDetailsItem } from '../../../../common/search_strategy/timeline';
@@ -56,6 +57,7 @@ import { useRiskScoreData } from './use_risk_score_data';
 import { getRowRenderer } from '../../../timelines/components/timeline/body/renderers/get_row_renderer';
 import { DETAILS_CLASS_NAME } from '../../../timelines/components/timeline/body/renderers/helpers';
 import { defaultRowRenderers } from '../../../timelines/components/timeline/body/renderers';
+import { useOsqueryTab } from './osquery_tab';
 
 export const EVENT_DETAILS_CONTEXT_ID = 'event-details';
 
@@ -66,7 +68,9 @@ export type EventViewId =
   | EventsViewType.jsonView
   | EventsViewType.summaryView
   | EventsViewType.threatIntelView
-  | EventsViewType.osqueryView;
+  // Depending on endpointResponseActionsEnabled flag whether to render Osquery Tab or the commonTab (osquery + endpoint results)
+  | EventsViewType.osqueryView
+  | EventsViewType.responseActionsView;
 
 export enum EventsViewType {
   tableView = 'table-view',
@@ -74,6 +78,7 @@ export enum EventsViewType {
   summaryView = 'summary-view',
   threatIntelView = 'threat-intel-view',
   osqueryView = 'osquery-results-view',
+  responseActionsView = 'response-actions-results-view',
 }
 
 interface Props {
@@ -132,7 +137,9 @@ const RendererContainer = styled.div`
 `;
 
 const ThreatTacticContainer = styled(EuiFlexGroup)`
+  flex-grow: 0;
   flex-wrap: nowrap;
+
   & .euiFlexGroup {
     flex-wrap: nowrap;
   }
@@ -210,7 +217,9 @@ const EventDetailsComponent: React.FC<Props> = ({
     const hasRiskInfoWithLicense = isLicenseValid && (hostRisk || userRisk);
     return hasEnrichments || hasRiskInfoWithLicense;
   }, [enrichmentCount, hostRisk, isLicenseValid, userRisk]);
-
+  const endpointResponseActionsEnabled = useIsExperimentalFeatureEnabled(
+    'endpointResponseActionsEnabled'
+  );
   const summaryTab: EventViewTab | undefined = useMemo(
     () =>
       isAlert
@@ -232,8 +241,13 @@ const EventDetailsComponent: React.FC<Props> = ({
                   isReadOnly={isReadOnly}
                 />
                 <EuiSpacer size="l" />
-                <ThreatTacticContainer direction="column" wrap={false} gutterSize="none">
-                  {threatDetails && threatDetails[0] && (
+                {threatDetails && threatDetails[0] && (
+                  <ThreatTacticContainer
+                    alignItems="flexStart"
+                    direction="column"
+                    wrap={false}
+                    gutterSize="none"
+                  >
                     <>
                       <EuiTitle size="xxs">
                         <h5>{threatDetails[0].title}</h5>
@@ -242,8 +256,8 @@ const EventDetailsComponent: React.FC<Props> = ({
                         {threatDetails[0].description}
                       </ThreatTacticDescription>
                     </>
-                  )}
-                </ThreatTacticContainer>
+                  </ThreatTacticContainer>
+                )}
                 <EuiSpacer size="l" />
                 {renderer != null && detailsEcsData != null && (
                   <div>
@@ -299,7 +313,7 @@ const EventDetailsComponent: React.FC<Props> = ({
 
                 {isEnrichmentsLoading && (
                   <>
-                    <EuiLoadingContent lines={2} />
+                    <EuiSkeletonText lines={2} />
                   </>
                 )}
 
@@ -350,6 +364,7 @@ const EventDetailsComponent: React.FC<Props> = ({
             ),
             content: (
               <ThreatDetailsView
+                before={<EuiSpacer size="m" />}
                 loading={isEnrichmentsLoading}
                 enrichments={allEnrichments}
                 showInvestigationTimeEnrichments={!isEmpty(eventFields)}
@@ -417,17 +432,24 @@ const EventDetailsComponent: React.FC<Props> = ({
     }),
     [rawEventData]
   );
-
+  const responseActionsTab = useResponseActionsView({
+    rawEventData: rawEventData as RawEventData,
+    ...(detailsEcsData !== null ? { ecsData: detailsEcsData } : {}),
+  });
   const osqueryTab = useOsqueryTab({
-    rawEventData: rawEventData as AlertRawEventData,
+    rawEventData: rawEventData as RawEventData,
     ...(detailsEcsData !== null ? { ecsData: detailsEcsData } : {}),
   });
 
+  const responseActionsTabs = useMemo(() => {
+    return endpointResponseActionsEnabled ? [responseActionsTab] : [osqueryTab];
+  }, [endpointResponseActionsEnabled, osqueryTab, responseActionsTab]);
+
   const tabs = useMemo(() => {
-    return [summaryTab, threatIntelTab, tableTab, jsonTab, osqueryTab].filter(
+    return [summaryTab, threatIntelTab, tableTab, jsonTab, ...responseActionsTabs].filter(
       (tab: EventViewTab | undefined): tab is EventViewTab => !!tab
     );
-  }, [summaryTab, threatIntelTab, tableTab, jsonTab, osqueryTab]);
+  }, [summaryTab, threatIntelTab, tableTab, jsonTab, responseActionsTabs]);
 
   const selectedTab = useMemo(
     () => tabs.find((tab) => tab.id === selectedTabId) ?? tabs[0],

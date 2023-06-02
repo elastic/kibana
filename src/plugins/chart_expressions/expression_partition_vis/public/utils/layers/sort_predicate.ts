@@ -22,15 +22,12 @@ type SortPredicatePieDonutFn = (visParams: PartitionVisParams) => SortFn;
 type SortPredicatePureFn = () => SortFn;
 
 export const extractUniqTermsMap = (dataTable: Datatable, columnId: string) =>
-  [...new Set(dataTable.rows.map((item) => item[columnId]))].reduce(
-    (acc, item, index) => ({
-      ...acc,
-      [item]: index,
-    }),
-    {}
-  );
+  [...new Set(dataTable.rows.map((item) => item[columnId]))].reduce((acc, item, index) => {
+    acc[item] = index;
+    return acc;
+  }, {});
 
-const sortPredicateSaveSourceOrder: SortPredicatePureFn =
+export const sortPredicateSaveSourceOrder: SortPredicatePureFn =
   () =>
   ([, node1], [, node2]) => {
     const [index1] = node1.inputIndex ?? [];

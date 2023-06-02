@@ -1,0 +1,8 @@
+type: string
+description: >
+  Indicates how often alerts generate actions. Valid values include: `onActionGroupChange`: Actions run when the alert status changes; `onActiveAlert`: Actions run when the alert becomes active and at each check interval while the rule conditions are met; `onThrottleInterval`: Actions run when the alert becomes active and at the interval specified in the throttle property while the rule conditions are met.
+enum:
+  - onActionGroupChange
+  - onActiveAlert
+  - onThrottleInterval
+example: onActiveAlert

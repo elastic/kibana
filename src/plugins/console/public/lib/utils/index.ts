@@ -147,7 +147,8 @@ export const replaceVariables = (
             }
 
             const isStringifiedNumber = !isNaN(parseFloat(value));
-            if (isStringifiedNumber) {
+            // We need to check uuids as well, since they are also numbers.
+            if (isStringifiedNumber && !isUUID(value)) {
               return value;
             }
 
@@ -174,4 +175,11 @@ export const replaceVariables = (
 
     return req;
   });
+};
+
+const isUUID = (val: string) => {
+  return (
+    typeof val === 'string' &&
+    val.match(/[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}/)
+  );
 };

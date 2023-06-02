@@ -6,13 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { IRouter } from '@kbn/core/server';
+import type { IRouter } from '@kbn/core/server';
+import { TELEMETRY_SAVED_OBJECT_TYPE } from '../saved_objects';
+import { v2 } from '../../common/types';
 import {
-  TelemetrySavedObject,
-  TelemetrySavedObjectAttributes,
+  type TelemetrySavedObjectAttributes,
   getTelemetrySavedObject,
   updateTelemetrySavedObject,
-} from '../telemetry_repository';
+} from '../saved_objects';
 
 export function registerTelemetryUserHasSeenNotice(router: IRouter) {
   router.put(
@@ -21,19 +22,29 @@ export function registerTelemetryUserHasSeenNotice(router: IRouter) {
       validate: false,
     },
     async (context, req, res) => {
-      const internalRepository = (await context.core).savedObjects.client;
-      const telemetrySavedObject: TelemetrySavedObject = await getTelemetrySavedObject(
-        internalRepository
-      );
+      const soClient = (await context.core).savedObjects.getClient({
+        includedHiddenTypes: [TELEMETRY_SAVED_OBJECT_TYPE],
+      });
+      const telemetrySavedObject = await getTelemetrySavedObject(soClient);
 
       // update the object with a flag stating that the opt-in notice has been seen
       const updatedAttributes: TelemetrySavedObjectAttributes = {
         ...telemetrySavedObject,
         userHasSeenNotice: true,
       };
-      await updateTelemetrySavedObject(internalRepository, updatedAttributes);
+      await updateTelemetrySavedObject(soClient, updatedAttributes);
 
-      return res.ok({ body: updatedAttributes });
+      const body: v2.Telemetry = {
+        allowChangingOptInStatus: updatedAttributes.allowChangingOptInStatus,
+        enabled: updatedAttributes.enabled,
+        lastReported: updatedAttributes.lastReported,
+        lastVersionChecked: updatedAttributes.lastVersionChecked,
+        reportFailureCount: updatedAttributes.reportFailureCount,
+        reportFailureVersion: updatedAttributes.reportFailureVersion,
+        sendUsageFrom: updatedAttributes.sendUsageFrom,
+        userHasSeenNotice: updatedAttributes.userHasSeenNotice,
+      };
+      return res.ok({ body });
     }
   );
 }

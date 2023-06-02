@@ -15,11 +15,13 @@ export const ActionsLogUsersFilter = memo(
   ({
     isFlyout,
     onChangeUsersFilter,
+    'data-test-subj': dataTestSubj,
   }: {
     isFlyout: boolean;
     onChangeUsersFilter: (selectedUserIds: string[]) => void;
+    'data-test-subj'?: string;
   }) => {
-    const getTestId = useTestIdGenerator('response-actions-list');
+    const getTestId = useTestIdGenerator(dataTestSubj);
     const { users: usersFromUrlParams, setUrlUsersFilters } = useActionHistoryUrlParams();
     const [searchValue, setSearchValue] = useState('');
 

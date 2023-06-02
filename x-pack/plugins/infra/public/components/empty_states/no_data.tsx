@@ -30,7 +30,13 @@ export const NoData: React.FC<NoDataProps> = ({
     titleSize="m"
     body={<p>{bodyText}</p>}
     actions={
-      <EuiButton iconType="refresh" color="primary" fill onClick={onRefetch}>
+      <EuiButton
+        data-test-subj="infraNoDataButton"
+        iconType="refresh"
+        color="primary"
+        fill
+        onClick={onRefetch}
+      >
         {refetchText}
       </EuiButton>
     }

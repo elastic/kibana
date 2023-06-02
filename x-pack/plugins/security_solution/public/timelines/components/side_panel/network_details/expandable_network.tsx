@@ -15,7 +15,7 @@ import { InputsModelId } from '../../../../common/store/inputs/constants';
 import { useInvalidFilterQuery } from '../../../../common/hooks/use_invalid_filter_query';
 import type { FlowTargetSourceDest } from '../../../../../common/search_strategy';
 import { NetworkDetailsLink } from '../../../../common/components/links';
-import { IpOverview } from '../../../../network/components/details';
+import { IpOverview } from '../../../../explore/network/components/details';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { networkToCriteria } from '../../../../common/components/ml/criteria/network_to_criteria';
@@ -25,11 +25,11 @@ import { convertToBuildEsQuery } from '../../../../common/lib/kuery';
 import { inputsSelectors } from '../../../../common/store';
 import { setAbsoluteRangeDatePicker } from '../../../../common/store/inputs/actions';
 import { useSourcererDataView } from '../../../../common/containers/sourcerer';
-import { useNetworkDetails } from '../../../../network/containers/details';
-import { networkModel } from '../../../../network/store';
+import { useNetworkDetails } from '../../../../explore/network/containers/details';
+import { networkModel } from '../../../../explore/network/store';
 import { useAnomaliesTableData } from '../../../../common/components/ml/anomaly/use_anomalies_table_data';
 import { LandingCards } from '../../../../common/components/landing_cards';
-import { useInstalledSecurityJobsIds } from '../../../../common/components/ml/hooks/use_installed_security_jobs';
+import { useInstalledSecurityJobNameById } from '../../../../common/components/ml/hooks/use_installed_security_jobs';
 
 interface ExpandableNetworkProps {
   expandedNetwork: { ip: string; flowTarget: FlowTargetSourceDest };
@@ -116,7 +116,8 @@ export const ExpandableNetworkDetails = ({
   });
 
   useInvalidFilterQuery({ id, filterQuery, kqlError, query, startDate: from, endDate: to });
-  const { jobIds } = useInstalledSecurityJobsIds();
+  const { jobNameById } = useInstalledSecurityJobNameById();
+  const jobIds = useMemo(() => Object.keys(jobNameById), [jobNameById]);
   const [isLoadingAnomaliesData, anomaliesData] = useAnomaliesTableData({
     criteriaFields: networkToCriteria(ip, flowTarget),
     startDate: from,
@@ -143,6 +144,7 @@ export const ExpandableNetworkDetails = ({
       endDate={to}
       narrowDateRange={narrowDateRange}
       indexPatterns={selectedPatterns}
+      jobNameById={jobNameById}
     />
   ) : (
     <LandingCards />

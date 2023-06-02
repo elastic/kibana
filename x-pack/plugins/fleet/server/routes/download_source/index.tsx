@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { FleetAuthzRouter } from '../../services/security';
+
 import { DOWNLOAD_SOURCE_API_ROUTES } from '../../constants';
 import {
   getDownloadSourcesRequestSchema,
@@ -13,7 +15,6 @@ import {
   PostDownloadSourcesRequestSchema,
   DeleteDownloadSourcesRequestSchema,
 } from '../../types';
-import type { FleetAuthzRouter } from '../security';
 
 import {
   getDownloadSourcesHandler,

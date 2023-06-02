@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { type FC } from 'react';
 
 import {
   useEuiTheme,
   EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIcon,
   EuiIconTip,
   EuiProgress,
   EuiText,
@@ -34,21 +35,80 @@ interface ProgressControlProps {
   shouldRerunAnalysis: boolean;
 }
 
-export function ProgressControls({
+export const ProgressControls: FC<ProgressControlProps> = ({
+  children,
   progress,
   progressMessage,
   onRefresh,
   onCancel,
   isRunning,
   shouldRerunAnalysis,
-}: ProgressControlProps) {
+}) => {
   const { euiTheme } = useEuiTheme();
   const runningProgressBarStyles = useAnimatedProgressBarBackground(euiTheme.colors.success);
+  const analysisCompleteStyle = { display: 'none' };
 
   return (
-    <EuiFlexGroup>
+    <EuiFlexGroup alignItems="center">
+      <EuiFlexItem grow={false}>
+        {!isRunning && (
+          <EuiButton
+            data-test-subj={`aiopsRerunAnalysisButton${shouldRerunAnalysis ? ' shouldRerun' : ''}`}
+            size="s"
+            onClick={onRefresh}
+            color={shouldRerunAnalysis ? 'warning' : 'primary'}
+          >
+            <EuiFlexGroup>
+              <EuiFlexItem>
+                <FormattedMessage
+                  id="xpack.aiops.rerunAnalysisButtonTitle"
+                  defaultMessage="Run analysis"
+                />
+              </EuiFlexItem>
+              {shouldRerunAnalysis && (
+                <>
+                  <EuiFlexItem>
+                    <EuiIconTip
+                      aria-label="Warning"
+                      type="warning"
+                      color="warning"
+                      content={i18n.translate('xpack.aiops.rerunAnalysisTooltipContent', {
+                        defaultMessage:
+                          'Analysis data may be out of date due to selection update. Rerun analysis.',
+                      })}
+                    />
+                  </EuiFlexItem>
+                </>
+              )}
+            </EuiFlexGroup>
+          </EuiButton>
+        )}
+        {isRunning && (
+          <EuiButton data-test-subj="aiopsCancelAnalysisButton" size="s" onClick={onCancel}>
+            <FormattedMessage id="xpack.aiops.cancelAnalysisButtonTitle" defaultMessage="Cancel" />
+          </EuiButton>
+        )}
+      </EuiFlexItem>
       <EuiFlexItem>
-        <EuiFlexGroup direction="column" gutterSize="none">
+        {progress === 1 ? (
+          <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <EuiIcon type="checkInCircleFilled" color={euiTheme.colors.success} />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false} data-test-subj="aiopsAnalysisComplete">
+              <small>
+                {i18n.translate('xpack.aiops.analysisCompleteLabel', {
+                  defaultMessage: 'Analysis complete',
+                })}
+              </small>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        ) : null}
+        <EuiFlexGroup
+          direction="column"
+          gutterSize="none"
+          css={progress === 1 ? analysisCompleteStyle : undefined}
+        >
           <EuiFlexItem data-test-subj="aiopProgressTitle">
             <EuiText size="xs" color="subdued">
               <FormattedMessage
@@ -71,45 +131,7 @@ export function ProgressControls({
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        {!isRunning && (
-          <EuiButton
-            data-test-subj={`aiopsRerunAnalysisButton${shouldRerunAnalysis ? ' shouldRerun' : ''}`}
-            size="s"
-            onClick={onRefresh}
-            color={shouldRerunAnalysis ? 'warning' : 'primary'}
-          >
-            <EuiFlexGroup>
-              <EuiFlexItem>
-                <FormattedMessage
-                  id="xpack.aiops.rerunAnalysisButtonTitle"
-                  defaultMessage="Rerun analysis"
-                />
-              </EuiFlexItem>
-              {shouldRerunAnalysis && (
-                <>
-                  <EuiFlexItem>
-                    <EuiIconTip
-                      aria-label="Warning"
-                      type="alert"
-                      color="warning"
-                      content={i18n.translate('xpack.aiops.rerunAnalysisTooltipContent', {
-                        defaultMessage:
-                          'Analysis data may be out of date due to selection update. Rerun analysis.',
-                      })}
-                    />
-                  </EuiFlexItem>
-                </>
-              )}
-            </EuiFlexGroup>
-          </EuiButton>
-        )}
-        {isRunning && (
-          <EuiButton data-test-subj="aiopsCancelAnalysisButton" size="s" onClick={onCancel}>
-            <FormattedMessage id="xpack.aiops.cancelAnalysisButtonTitle" defaultMessage="Cancel" />
-          </EuiButton>
-        )}
-      </EuiFlexItem>
+      {children}
     </EuiFlexGroup>
   );
-}
+};

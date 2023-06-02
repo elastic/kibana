@@ -38,6 +38,8 @@ import { spacesServiceFactory } from './spaces/spaces.stub';
 import { urlForwardingServiceFactory } from './url_forwarding/url_fowarding.stub';
 import { visualizationsServiceFactory } from './visualizations/visualizations.stub';
 import { dashboardSavedObjectServiceFactory } from './dashboard_saved_object/dashboard_saved_object.stub';
+import { customBrandingServiceFactory } from './custom_branding/custom_branding.stub';
+import { savedObjectsManagementServiceFactory } from './saved_objects_management/saved_objects_management_service.stub';
 
 export const providers: PluginServiceProviders<DashboardServices> = {
   dashboardSavedObject: new PluginServiceProvider(dashboardSavedObjectServiceFactory),
@@ -64,6 +66,8 @@ export const providers: PluginServiceProviders<DashboardServices> = {
   urlForwarding: new PluginServiceProvider(urlForwardingServiceFactory),
   usageCollection: new PluginServiceProvider(usageCollectionServiceFactory),
   visualizations: new PluginServiceProvider(visualizationsServiceFactory),
+  customBranding: new PluginServiceProvider(customBrandingServiceFactory),
+  savedObjectsManagement: new PluginServiceProvider(savedObjectsManagementServiceFactory),
 };
 
 export const registry = new PluginServiceRegistry<DashboardServices>(providers);

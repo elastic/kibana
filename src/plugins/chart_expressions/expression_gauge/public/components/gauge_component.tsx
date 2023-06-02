@@ -12,6 +12,7 @@ import type { PaletteOutput } from '@kbn/coloring';
 import { FieldFormat } from '@kbn/field-formats-plugin/common';
 import type { CustomPaletteState } from '@kbn/charts-plugin/public';
 import { EmptyPlaceholder } from '@kbn/charts-plugin/public';
+import { getOverridesFor } from '@kbn/chart-expressions-common';
 import { isVisDimension } from '@kbn/visualizations-plugin/common/utils';
 import {
   GaugeRenderProps,
@@ -167,7 +168,16 @@ function getTicks(
 }
 
 export const GaugeComponent: FC<GaugeRenderProps> = memo(
-  ({ data, args, uiState, formatFactory, paletteService, chartsThemeService, renderComplete }) => {
+  ({
+    data,
+    args,
+    uiState,
+    formatFactory,
+    paletteService,
+    chartsThemeService,
+    renderComplete,
+    overrides,
+  }) => {
     const {
       shape: gaugeType,
       palette,
@@ -180,6 +190,8 @@ export const GaugeComponent: FC<GaugeRenderProps> = memo(
       ticksPosition,
       commonLabel,
     } = args;
+
+    const chartBaseTheme = chartsThemeService.useChartsBaseTheme();
 
     const getColor = useCallback(
       (
@@ -354,10 +366,11 @@ export const GaugeComponent: FC<GaugeRenderProps> = memo(
             noResults={<EmptyPlaceholder icon={icon} renderComplete={onRenderChange} />}
             debugState={window._echDebugStateFlag ?? false}
             theme={[{ background: { color: 'transparent' } }, chartTheme]}
-            baseTheme={chartsThemeService.useChartsBaseTheme()}
+            baseTheme={chartBaseTheme}
             ariaLabel={args.ariaLabel}
             ariaUseDefaultSummary={!args.ariaLabel}
             onRenderChange={onRenderChange}
+            {...getOverridesFor(overrides, 'settings')}
           />
           <Goal
             id="goal"
@@ -394,6 +407,7 @@ export const GaugeComponent: FC<GaugeRenderProps> = memo(
             labelMinor={labelMinor ? `${labelMinor}${minorExtraSpaces}` : ''}
             {...extraTitles}
             {...goalConfig}
+            {...getOverridesFor(overrides, 'gauge')}
           />
         </Chart>
         {commonLabel && <div className="gauge__label">{commonLabel}</div>}

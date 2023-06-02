@@ -19,6 +19,9 @@
     flex: 1 1 100%;
     z-index: 1;
     min-height: 0; // Absolute must for Firefox to scroll contents
+    border-bottom-left-radius: $euiBorderRadius;
+    border-bottom-right-radius: $euiBorderRadius;
+    overflow: hidden;
 
     &[data-error] {
       display: none;
@@ -76,7 +79,7 @@
   }
 }
 
-.embPanel__dragger:not(.embPanel__title) {
+.embPanel--dragHandle:not(.embPanel__title) {
   flex-grow: 1;
 }
 
@@ -106,6 +109,17 @@
   &:focus {
     background-color: $euiFocusBackgroundColor;
   }
+
+}
+
+.embPanel__optionsMenuPopover-notification::after {
+  position: absolute;
+  top: 0;
+  right: 0;
+  content: '•';
+  transform: translate(50%, -50%);
+  color: $euiColorAccent;
+  font-size: $euiSizeL;
 }
 
 .embPanel .embPanel__optionsMenuButton {
@@ -125,17 +139,17 @@
 // EDITING MODE
 
 .embPanel--editing {
-  border-style: dashed !important;
-  border-color: $euiColorMediumShade !important;
+  outline-style: dashed !important;
+  outline-color: $euiColorMediumShade !important;
   transition: all $euiAnimSpeedFast $euiAnimSlightResistance;
-  border-width: $euiBorderWidthThin;
+  outline-width: $euiBorderWidthThin;
 
   &:hover,
   &:focus {
     @include euiSlightShadowHover;
   }
 
-  .embPanel__dragger {
+  .embPanel--dragHandle {
     transition: background-color $euiAnimSpeedFast $euiAnimSlightResistance;
 
     &:hover {

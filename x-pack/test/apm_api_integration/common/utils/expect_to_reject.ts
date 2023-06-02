@@ -6,10 +6,12 @@
  */
 
 export async function expectToReject<T extends Error>(fn: () => Promise<any>): Promise<T> {
+  let res: any;
   try {
-    await fn();
+    res = await fn();
   } catch (e) {
     return e;
   }
-  throw new Error(`Expected fn to throw`);
+
+  throw new Error(`expectToReject resolved: "${JSON.stringify(res)}"`);
 }

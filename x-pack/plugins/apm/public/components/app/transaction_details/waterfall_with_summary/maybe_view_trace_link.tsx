@@ -25,6 +25,7 @@ function FullTraceButton({
 }) {
   return (
     <EuiButton
+      data-test-subj="apmFullTraceButtonViewFullTraceButton"
       fill
       iconType="apmTrace"
       isLoading={isLoading}
@@ -53,6 +54,7 @@ export function MaybeViewTraceLink({
     query: { comparisonEnabled, offset },
   } = useAnyOfApmParams(
     '/services/{serviceName}/transactions/view',
+    '/mobile-services/{serviceName}/transactions/view',
     '/traces/explorer',
     '/dependencies/operation'
   );
@@ -65,9 +67,9 @@ export function MaybeViewTraceLink({
     return <FullTraceButton isLoading={isLoading} />;
   }
 
-  const { rootTransaction } = waterfall;
+  const { rootWaterfallTransaction } = waterfall;
   // the traceroot cannot be found, so we cannot link to it
-  if (!rootTransaction) {
+  if (!rootWaterfallTransaction) {
     return (
       <EuiToolTip
         content={i18n.translate(
@@ -82,7 +84,8 @@ export function MaybeViewTraceLink({
     );
   }
 
-  const isRoot = transaction.transaction.id === rootTransaction.transaction.id;
+  const rootTransaction = rootWaterfallTransaction.doc;
+  const isRoot = transaction.transaction.id === rootWaterfallTransaction.id;
 
   // the user is already viewing the full trace, so don't link to it
   if (isRoot) {
@@ -102,7 +105,7 @@ export function MaybeViewTraceLink({
     // the user is viewing a zoomed in version of the trace. Link to the full trace
   } else {
     const nextEnvironment = getNextEnvironmentUrlParam({
-      requestedEnvironment: rootTransaction?.service.environment,
+      requestedEnvironment: rootTransaction.service.environment,
       currentEnvironmentUrlParam: environment,
     });
 

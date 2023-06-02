@@ -8,20 +8,20 @@ slug: /kibana-dev-docs/api/alerting
 title: "alerting"
 image: https://source.unsplash.com/400x175/?github
 description: API docs for the alerting plugin
-date: 2022-12-05
+date: 2023-06-02
 tags: ['contributor', 'dev', 'apidocs', 'kibana', 'alerting']
 ---
 import alertingObj from './alerting.devdocs.json';
 
 
 
-Contact [Response Ops](https://github.com/orgs/elastic/teams/response-ops) for questions regarding this plugin.
+Contact [@elastic/response-ops](https://github.com/orgs/elastic/teams/response-ops) for questions regarding this plugin.
 
 **Code health stats**
 
 | Public API count  | Any count | Items lacking comments | Missing exports |
 |-------------------|-----------|------------------------|-----------------|
-| 417 | 0 | 408 | 28 |
+| 617 | 1 | 595 | 44 |
 
 ## Client
 
@@ -35,6 +35,9 @@ Contact [Response Ops](https://github.com/orgs/elastic/teams/response-ops) for q
 <DocDefinitionList data={alertingObj.client.misc}/>
 
 ## Server
+
+### Objects
+<DocDefinitionList data={alertingObj.server.objects}/>
 
 ### Functions
 <DocDefinitionList data={alertingObj.server.functions}/>

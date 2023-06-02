@@ -13,10 +13,11 @@ import {
   Query,
 } from '@kbn/es-query';
 import { useCallback, useEffect, useRef } from 'react';
-import { DataViewListItem, DataViewsContract } from '@kbn/data-views-plugin/public';
-import { SavedSearch } from '@kbn/saved-search-plugin/public';
-import type { GetStateReturn } from '../services/discover_state';
-import type { DataDocuments$ } from './use_saved_search';
+import type { DataViewsContract } from '@kbn/data-views-plugin/public';
+import { VIEW_MODE } from '@kbn/saved-search-plugin/public';
+import { useSavedSearchInitial } from '../services/discover_state_provider';
+import type { DiscoverStateContainer } from '../services/discover_state';
+import { getValidViewMode } from '../utils/get_valid_view_mode';
 import { FetchStatus } from '../../types';
 
 const MAX_NUM_OF_COLUMNS = 50;
@@ -26,22 +27,18 @@ const MAX_NUM_OF_COLUMNS = 50;
  * If necessary this is setting displayed columns and selected data view
  */
 export function useTextBasedQueryLanguage({
-  documents$,
   dataViews,
   stateContainer,
-  dataViewList,
-  savedSearch,
 }: {
-  documents$: DataDocuments$;
-  stateContainer: GetStateReturn;
+  stateContainer: DiscoverStateContainer;
   dataViews: DataViewsContract;
-  dataViewList: DataViewListItem[];
-  savedSearch: SavedSearch;
 }) {
   const prev = useRef<{ query: AggregateQuery | Query | undefined; columns: string[] }>({
     columns: [],
     query: undefined,
   });
+  const indexTitle = useRef<string>('');
+  const savedSearch = useSavedSearchInitial();
 
   const cleanup = useCallback(() => {
     if (prev.current.query) {
@@ -54,12 +51,12 @@ export function useTextBasedQueryLanguage({
   }, []);
 
   useEffect(() => {
-    const subscription = documents$.subscribe(async (next) => {
+    const subscription = stateContainer.dataState.data$.documents$.subscribe(async (next) => {
       const { query, recordRawType } = next;
       if (!query || next.fetchStatus === FetchStatus.ERROR) {
         return;
       }
-      const { columns: stateColumns, index } = stateContainer.appStateContainer.getState();
+      const { columns: stateColumns, index, viewMode } = stateContainer.appState.getState();
       let nextColumns: string[] = [];
       const isTextBasedQueryLang =
         recordRawType === 'plain' && isOfAggregateQueryType(query) && 'sql' in query;
@@ -78,30 +75,38 @@ export function useTextBasedQueryLanguage({
             prev.current = { columns: firstRowColumns, query };
             nextColumns = firstRowColumns;
           }
+
           if (firstRowColumns && initialFetch) {
             prev.current = { columns: firstRowColumns, query };
           }
         }
         const indexPatternFromQuery = getIndexPatternFromSQLQuery(query.sql);
-        const dataViewObj = dataViewList.find(({ title }) => title === indexPatternFromQuery);
 
-        if (dataViewObj) {
-          // don't set the columns on initial fetch, to prevent overwriting existing state
-          const addColumnsToState = Boolean(
-            nextColumns.length && (!initialFetch || !stateColumns?.length)
-          );
-          // no need to reset index to state if it hasn't changed
-          const addDataViewToState = Boolean(dataViewObj.id !== index);
-          if (!addColumnsToState && !addDataViewToState) {
-            return;
-          }
+        const dataViewObj = stateContainer.internalState.getState().dataView!;
 
-          const nextState = {
-            ...(addDataViewToState && { index: dataViewObj.id }),
-            ...(addColumnsToState && { columns: nextColumns }),
-          };
-          stateContainer.replaceUrlAppState(nextState);
+        // don't set the columns on initial fetch, to prevent overwriting existing state
+        const addColumnsToState = Boolean(
+          nextColumns.length && (!initialFetch || !stateColumns?.length)
+        );
+        // no need to reset index to state if it hasn't changed
+        const addDataViewToState = Boolean(dataViewObj?.id !== index) || initialFetch;
+        const queryChanged = indexPatternFromQuery !== indexTitle.current;
+        if (!addColumnsToState && !queryChanged) {
+          return;
         }
+
+        if (queryChanged) {
+          indexTitle.current = indexPatternFromQuery;
+        }
+
+        const nextState = {
+          ...(addDataViewToState && { index: dataViewObj.id }),
+          ...(addColumnsToState && { columns: nextColumns }),
+          ...(viewMode === VIEW_MODE.AGGREGATED_LEVEL && {
+            viewMode: getValidViewMode({ viewMode, isTextBasedQueryMode: true }),
+          }),
+        };
+        stateContainer.appState.replaceUrlState(nextState);
       } else {
         // cleanup for a "regular" query
         cleanup();
@@ -112,5 +117,5 @@ export function useTextBasedQueryLanguage({
       cleanup();
       subscription.unsubscribe();
     };
-  }, [documents$, dataViews, stateContainer, dataViewList, savedSearch, cleanup]);
+  }, [dataViews, stateContainer, savedSearch, cleanup]);
 }

@@ -5,44 +5,20 @@
  * 2.0.
  */
 
-import type { ChangeEvent } from 'react';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import {
-  EuiFilterButton,
-  EuiFilterSelectItem,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPanel,
-  EuiPopover,
-  EuiText,
-  EuiFieldSearch,
-  EuiPopoverTitle,
-} from '@elastic/eui';
-import styled from 'styled-components';
+import React, { useEffect, useMemo, useState } from 'react';
+import type { EuiSelectableOption } from '@elastic/eui';
+import { EuiFilterButton, EuiPopover, EuiPopoverTitle, EuiSelectable } from '@elastic/eui';
 import * as i18n from '../../../../../detections/pages/detection_engine/rules/translations';
 import { toggleSelectedGroup } from '../../../../../common/components/ml_popover/jobs_table/filters/toggle_selected_group';
 import { caseInsensitiveSort } from '../helpers';
+
+const TAGS_POPOVER_WIDTH = 274;
 
 interface TagsFilterPopoverProps {
   selectedTags: string[];
   tags: string[];
   onSelectedTagsChanged: (newTags: string[]) => void;
 }
-
-const PopoverContentWrapper = styled.div`
-  width: 275px;
-`;
-
-const ScrollableDiv = styled.div`
-  max-height: 250px;
-  overflow-y: auto;
-`;
-
-const TagOverflowContainer = styled.span`
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-`;
 
 /**
  * Popover for selecting tags to filter on
@@ -60,75 +36,78 @@ const TagsFilterPopoverComponent = ({
     [selectedTags, tags]
   );
   const [isTagPopoverOpen, setIsTagPopoverOpen] = useState(false);
-  const [searchInput, setSearchInput] = useState('');
-  const [filterTags, setFilterTags] = useState(sortedTags);
+  const [selectableOptions, setSelectableOptions] = useState<EuiSelectableOption[]>(() => {
+    const selectedTagsSet = new Set(selectedTags);
 
-  const tagsComponent = useMemo(() => {
-    return filterTags.map((tag, index) => (
-      <EuiFilterSelectItem
-        checked={selectedTags.includes(tag) ? 'on' : undefined}
-        key={`${index}-${tag}`}
-        onClick={() => toggleSelectedGroup(tag, selectedTags, onSelectedTagsChanged)}
-        title={tag}
-      >
-        <TagOverflowContainer>{tag}</TagOverflowContainer>
-      </EuiFilterSelectItem>
-    ));
-  }, [onSelectedTagsChanged, selectedTags, filterTags]);
-
-  const onSearchInputChange = useCallback((event: ChangeEvent<HTMLInputElement>) => {
-    setSearchInput(event.target.value);
-  }, []);
+    return sortedTags.map((label) => ({
+      label,
+      checked: selectedTagsSet.has(label) ? 'on' : undefined,
+    }));
+  });
+  const handleSelectableOptionsChange = (
+    newOptions: EuiSelectableOption[],
+    _: unknown,
+    changedOption: EuiSelectableOption
+  ) => {
+    setSelectableOptions(newOptions);
+    toggleSelectedGroup(changedOption.label, selectedTags, onSelectedTagsChanged);
+  };
 
   useEffect(() => {
-    setFilterTags(
-      sortedTags.filter((tag) => tag.toLowerCase().includes(searchInput.toLowerCase()))
-    );
-  }, [sortedTags, searchInput]);
+    const selectedTagsSet = new Set(selectedTags);
+    const newSelectableOptions: EuiSelectableOption[] = sortedTags.map((label) => ({
+      label,
+      checked: selectedTagsSet.has(label) ? 'on' : undefined,
+    }));
+
+    setSelectableOptions(newSelectableOptions);
+  }, [sortedTags, selectedTags]);
+
+  const triggerButton = (
+    <EuiFilterButton
+      grow
+      iconType="arrowDown"
+      onClick={() => setIsTagPopoverOpen(!isTagPopoverOpen)}
+      numFilters={tags.length}
+      isSelected={isTagPopoverOpen}
+      hasActiveFilters={selectedTags.length > 0}
+      numActiveFilters={selectedTags.length}
+      data-test-subj="tags-filter-popover-button"
+    >
+      {i18n.TAGS}
+    </EuiFilterButton>
+  );
 
   return (
     <EuiPopover
       ownFocus
-      button={
-        <EuiFilterButton
-          grow={true}
-          data-test-subj={'tags-filter-popover-button'}
-          iconType="arrowDown"
-          onClick={() => setIsTagPopoverOpen(!isTagPopoverOpen)}
-          numFilters={tags.length}
-          isSelected={isTagPopoverOpen}
-          hasActiveFilters={selectedTags.length > 0}
-          numActiveFilters={selectedTags.length}
-        >
-          {i18n.TAGS}
-        </EuiFilterButton>
-      }
+      button={triggerButton}
       isOpen={isTagPopoverOpen}
       closePopover={() => setIsTagPopoverOpen(!isTagPopoverOpen)}
       panelPaddingSize="none"
       repositionOnScroll
+      panelProps={{
+        'data-test-subj': 'tags-filter-popover',
+      }}
     >
-      <PopoverContentWrapper>
-        <EuiPopoverTitle>
-          <EuiFieldSearch
-            placeholder="Search tags"
-            value={searchInput}
-            onChange={onSearchInputChange}
-            isClearable
-            aria-label="Rules tag search"
-          />
-        </EuiPopoverTitle>
-        <ScrollableDiv>{tagsComponent}</ScrollableDiv>
-        {filterTags.length === 0 && (
-          <EuiFlexGroup gutterSize="m" justifyContent="spaceAround">
-            <EuiFlexItem grow={true}>
-              <EuiPanel>
-                <EuiText>{i18n.NO_TAGS_AVAILABLE}</EuiText>
-              </EuiPanel>
-            </EuiFlexItem>
-          </EuiFlexGroup>
+      <EuiSelectable
+        searchable
+        searchProps={{
+          placeholder: i18n.SEARCH_TAGS,
+        }}
+        aria-label={i18n.RULES_TAG_SEARCH}
+        options={selectableOptions}
+        onChange={handleSelectableOptionsChange}
+        emptyMessage={i18n.NO_TAGS_AVAILABLE}
+        noMatchesMessage={i18n.NO_TAGS_AVAILABLE}
+      >
+        {(list, search) => (
+          <div style={{ width: TAGS_POPOVER_WIDTH }}>
+            <EuiPopoverTitle>{search}</EuiPopoverTitle>
+            {list}
+          </div>
         )}
-      </PopoverContentWrapper>
+      </EuiSelectable>
     </EuiPopover>
   );
 };

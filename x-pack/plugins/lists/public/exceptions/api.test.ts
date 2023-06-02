@@ -11,6 +11,7 @@ import {
   addExceptionListItem,
   deleteExceptionListById,
   deleteExceptionListItemById,
+  duplicateExceptionList,
   exportExceptionList,
   fetchExceptionListById,
   fetchExceptionListItemById,
@@ -698,6 +699,7 @@ describe('Exceptions Lists API', () => {
       await exportExceptionList({
         http: httpMock,
         id: 'some-id',
+        includeExpiredExceptions: true,
         listId: 'list-id',
         namespaceType: 'single',
         signal: abortCtrl.signal,
@@ -707,6 +709,7 @@ describe('Exceptions Lists API', () => {
         method: 'POST',
         query: {
           id: 'some-id',
+          include_expired_exceptions: true,
           list_id: 'list-id',
           namespace_type: 'single',
         },
@@ -718,11 +721,38 @@ describe('Exceptions Lists API', () => {
       const exceptionResponse = await exportExceptionList({
         http: httpMock,
         id: 'some-id',
+        includeExpiredExceptions: true,
         listId: 'list-id',
         namespaceType: 'single',
         signal: abortCtrl.signal,
       });
       expect(exceptionResponse).toEqual(blob);
+    });
+  });
+
+  describe('#duplicateExceptionList', () => {
+    beforeEach(() => {
+      httpMock.fetch.mockResolvedValue(getExceptionListSchemaMock());
+    });
+
+    test('it invokes "duplicateExceptionList" with expected url and body values', async () => {
+      await duplicateExceptionList({
+        http: httpMock,
+        includeExpiredExceptions: false,
+        listId: 'my_list',
+        namespaceType: 'single',
+        signal: abortCtrl.signal,
+      });
+
+      expect(httpMock.fetch).toHaveBeenCalledWith('/api/exception_lists/_duplicate', {
+        method: 'POST',
+        query: {
+          include_expired_exceptions: false,
+          list_id: 'my_list',
+          namespace_type: 'single',
+        },
+        signal: abortCtrl.signal,
+      });
     });
   });
 });

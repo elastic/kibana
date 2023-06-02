@@ -7,7 +7,7 @@
 
 import React, { ReactElement } from 'react';
 import { i18n } from '@kbn/i18n';
-import { Feature } from 'geojson';
+import { Feature, GeoJsonProperties } from 'geojson';
 import { FileLayer } from '@elastic/ems-client';
 import { ImmutableSourceProperty, SourceEditorArgs } from '../source';
 import { AbstractVectorSource, GeoJsonWithMeta, IVectorSource } from '../vector_source';
@@ -199,7 +199,7 @@ export class EMSFileSource extends AbstractVectorSource implements IEmsFileSourc
     return this._tooltipFields.length > 0;
   }
 
-  async getTooltipProperties(properties: unknown): Promise<ITooltipProperty[]> {
+  async getTooltipProperties(properties: GeoJsonProperties): Promise<ITooltipProperty[]> {
     const promises = this._tooltipFields.map((field) => {
       // @ts-ignore
       const value = properties[field.getName()];

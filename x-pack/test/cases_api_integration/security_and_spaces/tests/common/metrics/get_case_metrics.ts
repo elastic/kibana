@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
-import { createCase, deleteAllCaseItems, getCaseMetrics } from '../../../../common/lib/utils';
+import { createCase, deleteAllCaseItems, getCaseMetrics } from '../../../../common/lib/api';
 import {
   secOnly,
   obsOnly,

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, useEffect, useState } from 'react';
+import React, { FC, useEffect, useMemo, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
@@ -23,21 +23,29 @@ import {
   EuiForm,
   EuiFormRow,
   EuiSelect,
+  EuiSpacer,
+  EuiTabbedContent,
   EuiTitle,
 } from '@elastic/eui';
 
-import { useMlKibana } from '../../../../../contexts/kibana';
+import type { MlUrlConfig } from '@kbn/ml-anomaly-utils';
+import {
+  DATA_FRAME_TASK_STATE,
+  type DataFrameAnalyticsConfig,
+  type UpdateDataFrameAnalyticsConfig,
+} from '@kbn/ml-data-frame-analytics-utils';
+
+import { useMlKibana, useMlApiContext } from '../../../../../contexts/kibana';
 import { ml } from '../../../../../services/ml_api_service';
 import { useToastNotificationService } from '../../../../../services/toast_notification_service';
 import {
   memoryInputValidator,
   MemoryInputValidatorResult,
 } from '../../../../../../../common/util/validators';
-import { DATA_FRAME_TASK_STATE } from '../analytics_list/common';
 import { useRefreshAnalyticsList } from '../../../../common/analytics';
-import { UpdateDataFrameAnalyticsConfig } from '../../../../../../../common/types/data_frame_analytics';
 
 import { EditAction } from './use_edit_action';
+import { CustomUrlsWrapper, isValidCustomUrls } from '../../../../../components/custom_urls';
 
 let mmLValidator: (value: any) => MemoryInputValidatorResult;
 
@@ -54,11 +62,19 @@ export const EditActionFlyout: FC<Required<EditAction>> = ({ closeFlyout, item }
   );
   const [mmlValidationError, setMmlValidationError] = useState<string | undefined>();
   const [maxNumThreads, setMaxNumThreads] = useState<number | undefined>(config.max_num_threads);
+  const [activeTabId, setActiveTabId] = useState<string>('job-details');
+  const [customUrls, setCustomUrls] = useState<MlUrlConfig[]>([]);
+  const [analyticsJob, setAnalyticsJob] = useState<DataFrameAnalyticsConfig | undefined>();
 
   const {
     services: { notifications },
   } = useMlKibana();
   const { refresh } = useRefreshAnalyticsList();
+
+  const mlApiServices = useMlApiContext();
+  const {
+    dataFrameAnalytics: { getDataFrameAnalytics },
+  } = mlApiServices;
 
   const toastNotificationService = useToastNotificationService();
 
@@ -91,16 +107,22 @@ export const EditActionFlyout: FC<Required<EditAction>> = ({ closeFlyout, item }
     }
   }, [modelMemoryLimit]);
 
-  const onSubmit = async () => {
-    const updateConfig: UpdateDataFrameAnalyticsConfig = Object.assign(
-      {
-        allow_lazy_start: allowLazyStart,
-        description,
-      },
-      modelMemoryLimit && { model_memory_limit: modelMemoryLimit },
-      maxNumThreads && { max_num_threads: maxNumThreads }
-    );
+  useEffect(
+    function fetchAnalyticsJob() {
+      getDataFrameAnalytics(jobId).then((resp) => {
+        if (resp.data_frame_analytics.length) {
+          const job = resp.data_frame_analytics[0];
+          setAnalyticsJob(job);
+          if (job._meta?.custom_urls) {
+            setCustomUrls(job._meta.custom_urls);
+          }
+        }
+      });
+    },
+    [jobId, getDataFrameAnalytics]
+  );
 
+  const updateDataFrameAnalytics = async (updateConfig: UpdateDataFrameAnalyticsConfig) => {
     try {
       await ml.dataFrameAnalytics.updateDataFrameAnalytics(jobId, updateConfig);
       notifications.toasts.addSuccess(
@@ -127,6 +149,183 @@ export const EditActionFlyout: FC<Required<EditAction>> = ({ closeFlyout, item }
     }
   };
 
+  const onSubmit = async () => {
+    if (activeTabId === 'job-details') {
+      const updateConfig: UpdateDataFrameAnalyticsConfig = Object.assign(
+        {
+          allow_lazy_start: allowLazyStart,
+          description,
+        },
+        modelMemoryLimit && { model_memory_limit: modelMemoryLimit },
+        maxNumThreads && { max_num_threads: maxNumThreads }
+      );
+      await updateDataFrameAnalytics(updateConfig);
+    } else if (activeTabId === 'custom-urls') {
+      const meta = analyticsJob?._meta ?? {};
+      delete meta.custom_urls;
+      // Only update custom urls and leave anything else in _meta untouched
+      const updateConfig: UpdateDataFrameAnalyticsConfig = {
+        _meta: { ...meta, custom_urls: customUrls },
+      };
+      await updateDataFrameAnalytics(updateConfig);
+    }
+  };
+
+  const jobDetailsContent = (
+    <>
+      <EuiSpacer />
+      <EuiForm>
+        <EuiFormRow
+          label={i18n.translate('xpack.ml.dataframe.analyticsList.editFlyout.allowLazyStartLabel', {
+            defaultMessage: 'Allow lazy start',
+          })}
+        >
+          <EuiSelect
+            aria-label={i18n.translate(
+              'xpack.ml.dataframe.analyticsList.editFlyout.allowLazyStartAriaLabel',
+              {
+                defaultMessage: 'Update allow lazy start.',
+              }
+            )}
+            data-test-subj="mlAnalyticsEditFlyoutAllowLazyStartInput"
+            options={[
+              {
+                value: 'true',
+                text: i18n.translate(
+                  'xpack.ml.dataframe.analyticsList.editFlyout.allowLazyStartTrueValue',
+                  {
+                    defaultMessage: 'True',
+                  }
+                ),
+              },
+              {
+                value: 'false',
+                text: i18n.translate(
+                  'xpack.ml.dataframe.analyticsList.editFlyout.allowLazyStartFalseValue',
+                  {
+                    defaultMessage: 'False',
+                  }
+                ),
+              },
+            ]}
+            value={allowLazyStart}
+            onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
+              setAllowLazyStart(e.target.value)
+            }
+          />
+        </EuiFormRow>
+        <EuiFormRow
+          label={i18n.translate('xpack.ml.dataframe.analyticsList.editFlyout.descriptionLabel', {
+            defaultMessage: 'Description',
+          })}
+        >
+          <EuiFieldText
+            data-test-subj="mlAnalyticsEditFlyoutDescriptionInput"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            aria-label={i18n.translate(
+              'xpack.ml.dataframe.analyticsList.editFlyout.descriptionAriaLabel',
+              {
+                defaultMessage: 'Update the job description.',
+              }
+            )}
+          />
+        </EuiFormRow>
+        <EuiFormRow
+          helpText={
+            state !== DATA_FRAME_TASK_STATE.STOPPED &&
+            i18n.translate('xpack.ml.dataframe.analyticsList.editFlyout.modelMemoryHelpText', {
+              defaultMessage: 'Model memory limit cannot be edited until the job has stopped.',
+            })
+          }
+          label={i18n.translate(
+            'xpack.ml.dataframe.analyticsList.editFlyout.modelMemoryLimitLabel',
+            {
+              defaultMessage: 'Model memory limit',
+            }
+          )}
+          isInvalid={mmlValidationError !== undefined}
+          error={mmlValidationError}
+        >
+          <EuiFieldText
+            data-test-subj="mlAnalyticsEditFlyoutmodelMemoryLimitInput"
+            isInvalid={mmlValidationError !== undefined}
+            readOnly={state !== DATA_FRAME_TASK_STATE.STOPPED}
+            value={modelMemoryLimit}
+            onChange={(e) => setModelMemoryLimit(e.target.value)}
+            aria-label={i18n.translate(
+              'xpack.ml.dataframe.analyticsList.editFlyout.modelMemoryLimitAriaLabel',
+              {
+                defaultMessage: 'Update the model memory limit.',
+              }
+            )}
+          />
+        </EuiFormRow>
+        <EuiFormRow
+          helpText={
+            state !== DATA_FRAME_TASK_STATE.STOPPED &&
+            i18n.translate('xpack.ml.dataframe.analyticsList.editFlyout.maxNumThreadsHelpText', {
+              defaultMessage:
+                'Maximum number of threads cannot be edited until the job has stopped.',
+            })
+          }
+          label={i18n.translate('xpack.ml.dataframe.analyticsList.editFlyout.maxNumThreadsLabel', {
+            defaultMessage: 'Maximum number of threads',
+          })}
+          isInvalid={maxNumThreads === 0}
+          error={
+            maxNumThreads === 0 &&
+            i18n.translate('xpack.ml.dataframe.analyticsList.editFlyout.maxNumThreadsError', {
+              defaultMessage: 'The minimum value is 1.',
+            })
+          }
+        >
+          <EuiFieldNumber
+            aria-label={i18n.translate(
+              'xpack.ml.dataframe.analyticsList.editFlyout.maxNumThreadsAriaLabel',
+              {
+                defaultMessage: 'Update the maximum number of threads to be used by the analysis.',
+              }
+            )}
+            data-test-subj="mlAnalyticsEditFlyoutMaxNumThreadsLimitInput"
+            onChange={(e) => setMaxNumThreads(e.target.value === '' ? undefined : +e.target.value)}
+            step={1}
+            min={1}
+            readOnly={state !== DATA_FRAME_TASK_STATE.STOPPED}
+            value={maxNumThreads}
+          />
+        </EuiFormRow>
+      </EuiForm>
+    </>
+  );
+
+  const tabs = [
+    {
+      id: 'job-details',
+      'data-test-subj': 'mlEditAnalyticsJobFlyout-jobDetails',
+      name: i18n.translate('xpack.ml.dataframe.analyticsList.editJobFlyout.jobDetailsTitle', {
+        defaultMessage: 'Job details',
+      }),
+      content: jobDetailsContent,
+    },
+    {
+      id: 'custom-urls',
+      'data-test-subj': 'mlEditAnalyticsJobFlyout-customUrls',
+      name: i18n.translate('xpack.ml.dataframe.analyticsList.editJobFlyout.customUrlsTitle', {
+        defaultMessage: 'Custom URLs',
+      }),
+      content: (
+        <CustomUrlsWrapper
+          job={analyticsJob as DataFrameAnalyticsConfig}
+          jobCustomUrls={customUrls}
+          setCustomUrls={setCustomUrls}
+        />
+      ),
+    },
+  ];
+
+  const isValidJobCustomUrls = useMemo(() => isValidCustomUrls(customUrls), [customUrls]);
+
   return (
     <EuiFlyout
       onClose={closeFlyout}
@@ -147,137 +346,13 @@ export const EditActionFlyout: FC<Required<EditAction>> = ({ closeFlyout, item }
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
-        <EuiForm>
-          <EuiFormRow
-            label={i18n.translate(
-              'xpack.ml.dataframe.analyticsList.editFlyout.allowLazyStartLabel',
-              {
-                defaultMessage: 'Allow lazy start',
-              }
-            )}
-          >
-            <EuiSelect
-              aria-label={i18n.translate(
-                'xpack.ml.dataframe.analyticsList.editFlyout.allowLazyStartAriaLabel',
-                {
-                  defaultMessage: 'Update allow lazy start.',
-                }
-              )}
-              data-test-subj="mlAnalyticsEditFlyoutAllowLazyStartInput"
-              options={[
-                {
-                  value: 'true',
-                  text: i18n.translate(
-                    'xpack.ml.dataframe.analyticsList.editFlyout.allowLazyStartTrueValue',
-                    {
-                      defaultMessage: 'True',
-                    }
-                  ),
-                },
-                {
-                  value: 'false',
-                  text: i18n.translate(
-                    'xpack.ml.dataframe.analyticsList.editFlyout.allowLazyStartFalseValue',
-                    {
-                      defaultMessage: 'False',
-                    }
-                  ),
-                },
-              ]}
-              value={allowLazyStart}
-              onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
-                setAllowLazyStart(e.target.value)
-              }
-            />
-          </EuiFormRow>
-          <EuiFormRow
-            label={i18n.translate('xpack.ml.dataframe.analyticsList.editFlyout.descriptionLabel', {
-              defaultMessage: 'Description',
-            })}
-          >
-            <EuiFieldText
-              data-test-subj="mlAnalyticsEditFlyoutDescriptionInput"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              aria-label={i18n.translate(
-                'xpack.ml.dataframe.analyticsList.editFlyout.descriptionAriaLabel',
-                {
-                  defaultMessage: 'Update the job description.',
-                }
-              )}
-            />
-          </EuiFormRow>
-          <EuiFormRow
-            helpText={
-              state !== DATA_FRAME_TASK_STATE.STOPPED &&
-              i18n.translate('xpack.ml.dataframe.analyticsList.editFlyout.modelMemoryHelpText', {
-                defaultMessage: 'Model memory limit cannot be edited until the job has stopped.',
-              })
-            }
-            label={i18n.translate(
-              'xpack.ml.dataframe.analyticsList.editFlyout.modelMemoryLimitLabel',
-              {
-                defaultMessage: 'Model memory limit',
-              }
-            )}
-            isInvalid={mmlValidationError !== undefined}
-            error={mmlValidationError}
-          >
-            <EuiFieldText
-              data-test-subj="mlAnalyticsEditFlyoutmodelMemoryLimitInput"
-              isInvalid={mmlValidationError !== undefined}
-              readOnly={state !== DATA_FRAME_TASK_STATE.STOPPED}
-              value={modelMemoryLimit}
-              onChange={(e) => setModelMemoryLimit(e.target.value)}
-              aria-label={i18n.translate(
-                'xpack.ml.dataframe.analyticsList.editFlyout.modelMemoryLimitAriaLabel',
-                {
-                  defaultMessage: 'Update the model memory limit.',
-                }
-              )}
-            />
-          </EuiFormRow>
-          <EuiFormRow
-            helpText={
-              state !== DATA_FRAME_TASK_STATE.STOPPED &&
-              i18n.translate('xpack.ml.dataframe.analyticsList.editFlyout.maxNumThreadsHelpText', {
-                defaultMessage:
-                  'Maximum number of threads cannot be edited until the job has stopped.',
-              })
-            }
-            label={i18n.translate(
-              'xpack.ml.dataframe.analyticsList.editFlyout.maxNumThreadsLabel',
-              {
-                defaultMessage: 'Maximum number of threads',
-              }
-            )}
-            isInvalid={maxNumThreads === 0}
-            error={
-              maxNumThreads === 0 &&
-              i18n.translate('xpack.ml.dataframe.analyticsList.editFlyout.maxNumThreadsError', {
-                defaultMessage: 'The minimum value is 1.',
-              })
-            }
-          >
-            <EuiFieldNumber
-              aria-label={i18n.translate(
-                'xpack.ml.dataframe.analyticsList.editFlyout.maxNumThreadsAriaLabel',
-                {
-                  defaultMessage:
-                    'Update the maximum number of threads to be used by the analysis.',
-                }
-              )}
-              data-test-subj="mlAnalyticsEditFlyoutMaxNumThreadsLimitInput"
-              onChange={(e) =>
-                setMaxNumThreads(e.target.value === '' ? undefined : +e.target.value)
-              }
-              step={1}
-              min={1}
-              readOnly={state !== DATA_FRAME_TASK_STATE.STOPPED}
-              value={maxNumThreads}
-            />
-          </EuiFormRow>
-        </EuiForm>
+        <EuiTabbedContent
+          tabs={tabs}
+          initialSelectedTab={tabs[0]}
+          onTabClick={({ id }) => {
+            setActiveTabId(id);
+          }}
+        />
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">
@@ -293,7 +368,7 @@ export const EditActionFlyout: FC<Required<EditAction>> = ({ closeFlyout, item }
               data-test-subj="mlAnalyticsEditFlyoutUpdateButton"
               onClick={onSubmit}
               fill
-              isDisabled={updateButtonDisabled}
+              isDisabled={updateButtonDisabled || isValidJobCustomUrls === false}
             >
               {i18n.translate('xpack.ml.dataframe.analyticsList.editFlyoutUpdateButtonText', {
                 defaultMessage: 'Update',

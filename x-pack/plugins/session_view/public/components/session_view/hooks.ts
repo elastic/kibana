@@ -28,14 +28,16 @@ import {
 } from '../../../common/constants';
 
 export const useFetchSessionViewProcessEvents = (
+  index: string,
   sessionEntityId: string,
+  sessionStartTime: string,
   jumpToCursor?: string
 ) => {
   const { http } = useKibana<CoreStart>().services;
   const [currentJumpToCursor, setCurrentJumpToCursor] = useState<string>('');
   const cachingKeys = useMemo(
-    () => [QUERY_KEY_PROCESS_EVENTS, sessionEntityId, jumpToCursor],
-    [sessionEntityId, jumpToCursor]
+    () => [QUERY_KEY_PROCESS_EVENTS, index, sessionEntityId, jumpToCursor],
+    [index, sessionEntityId, jumpToCursor]
   );
 
   const query = useInfiniteQuery(
@@ -50,7 +52,9 @@ export const useFetchSessionViewProcessEvents = (
 
       const res = await http.get<ProcessEventResults>(PROCESS_EVENTS_ROUTE, {
         query: {
+          index,
           sessionEntityId,
+          sessionStartTime,
           cursor,
           forward,
         },
@@ -66,7 +70,12 @@ export const useFetchSessionViewProcessEvents = (
         if (isRefetch || lastPage.events.length >= PROCESS_EVENTS_PER_PAGE) {
           const filtered = lastPage.events.filter((event) => {
             const action = event.event?.action;
-            return action && [EventAction.fork, EventAction.exec, EventAction.end].includes(action);
+            return (
+              action &&
+              (action.includes(EventAction.fork) ||
+                action.includes(EventAction.exec) ||
+                action.includes(EventAction.end))
+            );
           });
 
           const cursor = filtered?.[filtered.length - 1]?.['@timestamp'];
@@ -82,7 +91,12 @@ export const useFetchSessionViewProcessEvents = (
       getPreviousPageParam: (firstPage, pages) => {
         const filtered = firstPage.events.filter((event) => {
           const action = event.event?.action;
-          return action && [EventAction.fork, EventAction.exec, EventAction.end].includes(action);
+          return (
+            action &&
+            (action.includes(EventAction.fork) ||
+              action.includes(EventAction.exec) ||
+              action.includes(EventAction.end))
+          );
         });
 
         const atBeginning = pages.length > 1 && filtered.length < PROCESS_EVENTS_PER_PAGE;
@@ -116,6 +130,7 @@ export const useFetchSessionViewProcessEvents = (
 
 export const useFetchSessionViewAlerts = (
   sessionEntityId: string,
+  sessionStartTime: string,
   investigatedAlertId?: string
 ) => {
   const { http } = useKibana<CoreStart>().services;
@@ -129,6 +144,7 @@ export const useFetchSessionViewAlerts = (
       const res = await http.get<ProcessEventResults>(ALERTS_ROUTE, {
         query: {
           sessionEntityId,
+          sessionStartTime,
           investigatedAlertId,
           cursor,
         },
@@ -200,15 +216,21 @@ export const useFetchAlertStatus = (
   return query;
 };
 
-export const useFetchGetTotalIOBytes = (sessionEntityId: string) => {
+export const useFetchGetTotalIOBytes = (
+  index: string,
+  sessionEntityId: string,
+  sessionStartTime: string
+) => {
   const { http } = useKibana<CoreStart>().services;
-  const cachingKeys = [QUERY_KEY_GET_TOTAL_IO_BYTES, sessionEntityId];
+  const cachingKeys = [QUERY_KEY_GET_TOTAL_IO_BYTES, index, sessionEntityId];
   const query = useQuery<{ total: number }, Error>(
     cachingKeys,
     async () => {
       return http.get<{ total: number }>(GET_TOTAL_IO_BYTES_ROUTE, {
         query: {
+          index,
           sessionEntityId,
+          sessionStartTime,
         },
       });
     },

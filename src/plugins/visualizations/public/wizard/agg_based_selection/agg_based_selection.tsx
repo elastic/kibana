@@ -57,12 +57,10 @@ class AggBasedSelection extends React.Component<AggBasedSelectionProps, AggBased
       <>
         <EuiModalHeader>
           <EuiModalHeaderTitle>
-            <h1>
-              <FormattedMessage
-                id="visualizations.newVisWizard.title"
-                defaultMessage="New visualization"
-              />
-            </h1>
+            <FormattedMessage
+              id="visualizations.newVisWizard.title"
+              defaultMessage="New visualization"
+            />
           </EuiModalHeaderTitle>
         </EuiModalHeader>
         <EuiModalBody>
@@ -102,7 +100,7 @@ class AggBasedSelection extends React.Component<AggBasedSelectionProps, AggBased
   private filteredVisTypes(visTypes: TypesStart, query: string): VisTypeListEntry[] {
     const types = visTypes.getByGroup(VisGroups.AGGBASED).filter((type) => {
       // Filter out hidden visualizations and visualizations that are only aggregations based
-      return !type.hidden;
+      return !type.disableCreate;
     });
 
     let entries: VisTypeListEntry[];

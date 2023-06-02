@@ -140,3 +140,24 @@ export const ALERT_SUPPRESSION_TECHNICAL_PREVIEW = i18n.translate(
     defaultMessage: 'Technical Preview',
   }
 );
+
+export const ALERT_SUPPRESSION_PER_RULE_EXECUTION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDescription.alertSuppressionPerRuleExecution',
+  {
+    defaultMessage: 'One rule execution',
+  }
+);
+
+export const ALERT_SUPPRESSION_SUPPRESS_ON_MISSING_FIELDS = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDescription.alertSuppressionSuppressOnMissingFieldsDescription',
+  {
+    defaultMessage: 'Suppress and group alerts for events with missing fields',
+  }
+);
+
+export const ALERT_SUPPRESSION_DO_NOT_SUPPRESS_ON_MISSING_FIELDS = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDescription.alertSuppressionDoNotSuppressOnMissingFieldsDescription',
+  {
+    defaultMessage: 'Do not suppress alerts for events with missing fields',
+  }
+);

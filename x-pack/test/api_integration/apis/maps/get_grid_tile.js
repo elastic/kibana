@@ -8,6 +8,8 @@
 import { VectorTile } from '@mapbox/vector-tile';
 import Protobuf from 'pbf';
 import expect from '@kbn/expect';
+import { getTileUrlParams } from '@kbn/maps-vector-tile-utils';
+import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 
 function findFeature(layer, callbackFn) {
   for (let i = 0; i < layer.length; i++) {
@@ -22,17 +24,57 @@ export default function ({ getService }) {
   const supertest = getService('supertest');
 
   describe('getGridTile', () => {
-    const URL = `/api/maps/mvt/getGridTile/3/2/3.pbf\
-?geometryFieldName=geo.coordinates\
-&hasLabels=false\
-&index=logstash-*\
-&gridPrecision=8\
-&requestBody=(_source:(excludes:!()),aggs:(avg_of_bytes:(avg:(field:bytes))),fields:!((field:%27@timestamp%27,format:date_time),(field:%27relatedContent.article:modified_time%27,format:date_time),(field:%27relatedContent.article:published_time%27,format:date_time),(field:utc_time,format:date_time)),query:(bool:(filter:!((match_all:()),(range:(%27@timestamp%27:(format:strict_date_optional_time,gte:%272015-09-20T00:00:00.000Z%27,lte:%272015-09-20T01:00:00.000Z%27)))),must:!(),must_not:!(),should:!())),runtime_mappings:(),script_fields:(hour_of_day:(script:(lang:painless,source:%27doc[!%27@timestamp!%27].value.getHour()%27))),size:0,stored_fields:!(%27*%27))`;
+    const defaultParams = {
+      geometryFieldName: 'geo.coordinates',
+      hasLabels: false,
+      index: 'logstash-*',
+      gridPrecision: 8,
+      requestBody: {
+        aggs: {
+          avg_of_bytes: {
+            avg: {
+              field: 'bytes',
+            },
+          },
+        },
+        query: {
+          bool: {
+            filter: [
+              {
+                match_all: {},
+              },
+              {
+                range: {
+                  '@timestamp': {
+                    format: 'strict_date_optional_time',
+                    gte: '2015-09-20T00:00:00.000Z',
+                    lte: '2015-09-20T01:00:00.000Z',
+                  },
+                },
+              },
+            ],
+            must: [],
+            must_not: [],
+            should: [],
+          },
+        },
+        runtime_mappings: {
+          hour_of_day: {
+            script: {
+              source: "// !@#$%^&*()_+ %%%\nemit(doc['timestamp'].value.getHour());",
+            },
+            type: 'long',
+          },
+        },
+      },
+      renderAs: 'point',
+    };
 
     it('should return vector tile with expected headers', async () => {
       const resp = await supertest
-        .get(URL + '&renderAs=point')
+        .get('/internal/maps/mvt/getGridTile/3/2/3.pbf?' + getTileUrlParams(defaultParams))
         .set('kbn-xsrf', 'kibana')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
         .responseType('blob')
         .expect(200);
 
@@ -44,8 +86,9 @@ export default function ({ getService }) {
 
     it('should return vector tile containing clusters when renderAs is "point"', async () => {
       const resp = await supertest
-        .get(URL + '&renderAs=point')
+        .get('/internal/maps/mvt/getGridTile/3/2/3.pbf?' + getTileUrlParams(defaultParams))
         .set('kbn-xsrf', 'kibana')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
         .responseType('blob')
         .expect(200);
 
@@ -69,9 +112,14 @@ export default function ({ getService }) {
     });
 
     it('should return vector tile containing clusters with renderAs is "heatmap"', async () => {
+      const tileUrlParams = getTileUrlParams({
+        ...defaultParams,
+        renderAs: 'heatmap',
+      });
       const resp = await supertest
-        .get(URL + '&renderAs=heatmap')
+        .get('/internal/maps/mvt/getGridTile/3/2/3.pbf?' + tileUrlParams)
         .set('kbn-xsrf', 'kibana')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
         .responseType('blob')
         .expect(200);
 
@@ -95,9 +143,14 @@ export default function ({ getService }) {
     });
 
     it('should return vector tile containing grid features when renderAs is "grid"', async () => {
+      const tileUrlParams = getTileUrlParams({
+        ...defaultParams,
+        renderAs: 'grid',
+      });
       const resp = await supertest
-        .get(URL + '&renderAs=grid')
+        .get('/internal/maps/mvt/getGridTile/3/2/3.pbf?' + tileUrlParams)
         .set('kbn-xsrf', 'kibana')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
         .responseType('blob')
         .expect(200);
 
@@ -128,9 +181,14 @@ export default function ({ getService }) {
     });
 
     it('should return vector tile containing hexegon features when renderAs is "hex"', async () => {
+      const tileUrlParams = getTileUrlParams({
+        ...defaultParams,
+        renderAs: 'hex',
+      });
       const resp = await supertest
-        .get(URL + '&renderAs=hex')
+        .get('/internal/maps/mvt/getGridTile/3/2/3.pbf?' + tileUrlParams)
         .set('kbn-xsrf', 'kibana')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
         .responseType('blob')
         .expect(200);
 
@@ -144,28 +202,34 @@ export default function ({ getService }) {
       expect(gridFeature.id).to.be(undefined);
       expect(gridFeature.properties).to.eql({
         _count: 1,
-        _key: '85264a33fffffff',
+        _key: '84264a3ffffffff',
         'avg_of_bytes.value': 9252,
       });
 
       // assert feature geometry is hex
       expect(gridFeature.loadGeometry()).to.eql([
         [
-          { x: 102, y: 669 },
-          { x: 96, y: 676 },
-          { x: 86, y: 674 },
-          { x: 83, y: 664 },
+          { x: 89, y: 710 },
+          { x: 67, y: 696 },
+          { x: 67, y: 669 },
           { x: 89, y: 657 },
-          { x: 99, y: 659 },
-          { x: 102, y: 669 },
+          { x: 112, y: 672 },
+          { x: 111, y: 698 },
+          { x: 89, y: 710 },
         ],
       ]);
     });
 
     it('should return vector tile containing label features when hasLabels is true', async () => {
+      const tileUrlParams = getTileUrlParams({
+        ...defaultParams,
+        hasLabels: 'true',
+        renderAs: 'hex',
+      });
       const resp = await supertest
-        .get(URL.replace('hasLabels=false', 'hasLabels=true') + '&renderAs=hex')
+        .get('/internal/maps/mvt/getGridTile/3/2/3.pbf?' + tileUrlParams)
         .set('kbn-xsrf', 'kibana')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
         .responseType('blob')
         .expect(200);
 
@@ -182,17 +246,18 @@ export default function ({ getService }) {
       expect(labelFeature.id).to.be(undefined);
       expect(labelFeature.properties).to.eql({
         _count: 1,
-        _key: '85264a33fffffff',
+        _key: '84264a3ffffffff',
         'avg_of_bytes.value': 9252,
         _mvt_label_position: true,
       });
-      expect(labelFeature.loadGeometry()).to.eql([[{ x: 93, y: 667 }]]);
+      expect(labelFeature.loadGeometry()).to.eql([[{ x: 89, y: 684 }]]);
     });
 
     it('should return vector tile with meta layer', async () => {
       const resp = await supertest
-        .get(URL + '&renderAs=point')
+        .get('/internal/maps/mvt/getGridTile/3/2/3.pbf?' + getTileUrlParams(defaultParams))
         .set('kbn-xsrf', 'kibana')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
         .responseType('blob')
         .expect(200);
 
@@ -231,9 +296,14 @@ export default function ({ getService }) {
     });
 
     it('should return error when index does not exist', async () => {
+      const tileUrlParams = getTileUrlParams({
+        ...defaultParams,
+        index: 'notRealIndex',
+      });
       await supertest
-        .get(URL.replace('index=logstash-*', 'index=notRealIndex') + '&renderAs=point')
+        .get('/internal/maps/mvt/getGridTile/3/2/3.pbf?' + tileUrlParams)
         .set('kbn-xsrf', 'kibana')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
         .responseType('blob')
         .expect(404);
     });

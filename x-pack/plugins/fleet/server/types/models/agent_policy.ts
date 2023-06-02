@@ -17,6 +17,8 @@ function validateNonEmptyString(val: string) {
   }
 }
 
+const TWO_WEEKS_SECONDS = 1209600;
+
 export const AgentPolicyBaseSchema = {
   id: schema.maybe(schema.string()),
   name: schema.string({ minLength: 1, validate: validateNonEmptyString }),
@@ -27,6 +29,7 @@ export const AgentPolicyBaseSchema = {
   is_default: schema.maybe(schema.boolean()),
   is_default_fleet_server: schema.maybe(schema.boolean()),
   unenroll_timeout: schema.maybe(schema.number({ min: 0 })),
+  inactivity_timeout: schema.number({ min: 0, defaultValue: TWO_WEEKS_SECONDS }),
   monitoring_enabled: schema.maybe(
     schema.arrayOf(
       schema.oneOf([schema.literal(dataTypes.Logs), schema.literal(dataTypes.Metrics)])
@@ -36,6 +39,15 @@ export const AgentPolicyBaseSchema = {
   monitoring_output_id: schema.maybe(schema.nullable(schema.string())),
   download_source_id: schema.maybe(schema.nullable(schema.string())),
   fleet_server_host_id: schema.maybe(schema.nullable(schema.string())),
+  agent_features: schema.maybe(
+    schema.arrayOf(
+      schema.object({
+        name: schema.string(),
+        enabled: schema.boolean(),
+      })
+    )
+  ),
+  is_protected: schema.maybe(schema.boolean()),
 };
 
 export const NewAgentPolicySchema = schema.object({

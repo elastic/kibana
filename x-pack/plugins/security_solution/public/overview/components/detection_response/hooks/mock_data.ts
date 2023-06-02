@@ -47,7 +47,6 @@ export const dataProviderWithAndFilters = [
   {
     and: [
       {
-        and: [],
         enabled: true,
         excluded: false,
         id: 'mock-id',
@@ -80,7 +79,6 @@ export const dataProviderWithOrFilters = [
   {
     and: [
       {
-        and: [],
         enabled: true,
         id: 'mock-id',
         name: 'kibana.alerts.workflow_status',
@@ -109,7 +107,6 @@ export const dataProviderWithOrFilters = [
   {
     and: [
       {
-        and: [],
         enabled: true,
         id: 'mock-id',
         name: 'kibana.alerts.workflow_status',
@@ -138,7 +135,6 @@ export const dataProviderWithOrFilters = [
   {
     and: [
       {
-        and: [],
         enabled: true,
         id: 'mock-id',
         name: 'kibana.alerts.workflow_status',

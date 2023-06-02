@@ -8,13 +8,14 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { EuiButton, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
 import type { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
+import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
+import { TableId } from '@kbn/securitysolution-data-table';
 import { GuidedOnboardingTourStep } from '../../../common/components/guided_onboarding_tour/tour_step';
 import {
   AlertsCasesTourSteps,
   SecurityStepId,
 } from '../../../common/components/guided_onboarding_tour/tour_config';
 import { isActiveTimeline } from '../../../helpers';
-import { TableId } from '../../../../common/types';
 import { useResponderActionItem } from '../endpoint_responder';
 import type { TimelineEventsDetailsItem } from '../../../../common/search_strategy';
 import { TAKE_ACTION } from '../alerts_table/additional_filters_action/translations';
@@ -25,7 +26,6 @@ import { useInvestigateInTimeline } from '../alerts_table/timeline_actions/use_i
 import { useEventFilterAction } from '../alerts_table/timeline_actions/use_event_filter_action';
 import { useHostIsolationAction } from '../host_isolation/use_host_isolation_action';
 import { getFieldValue } from '../host_isolation/helpers';
-import type { Ecs } from '../../../../common/ecs';
 import type { Status } from '../../../../common/detection_engine/schemas/common/schemas';
 import { isAlertFromEndpointAlert } from '../../../common/utils/endpoint_alert_check';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
@@ -234,6 +234,7 @@ export const TakeActionDropdown = React.memo(
       onSuccess: refetchFlyoutData,
       isActiveTimelines: isActiveTimeline(scopeId),
       isInDetections,
+      refetch,
     });
 
     const items: React.ReactElement[] = useMemo(

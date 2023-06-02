@@ -5,25 +5,21 @@
  * 2.0.
  */
 
-import { getActionDetailsById as _getActionDetailsById } from '../../services';
+import { validateActionId as _validateActionId } from '../../services';
 import type { HttpApiTestSetupMock } from '../../mocks';
 import { createHttpApiTestSetupMock } from '../../mocks';
 import type { EndpointActionFileDownloadParams } from '../../../../common/endpoint/schema/actions';
 import { getActionFileInfoRouteHandler, registerActionFileInfoRoute } from './file_info_handler';
 import { ACTION_AGENT_FILE_INFO_ROUTE } from '../../../../common/endpoint/constants';
 import { EndpointAuthorizationError, NotFoundError } from '../../errors';
-import type { ActionDetails } from '../../../../common/endpoint/types';
-import { EndpointActionGenerator } from '../../../../common/endpoint/data_generators/endpoint_action_generator';
-import { getFileInfo as _getFileInfo } from '../../services/actions/action_files';
 import { CustomHttpRequestError } from '../../../utils/custom_http_request_error';
 import { getEndpointAuthzInitialStateMock } from '../../../../common/endpoint/service/authz/mocks';
+import type { FleetFromHostFileClientInterface } from '@kbn/fleet-plugin/server';
 
 jest.mock('../../services');
-jest.mock('../../services/actions/action_files');
 
 describe('Response Action file info API', () => {
-  const getActionDetailsById = _getActionDetailsById as jest.Mock;
-  const getFileInfo = _getFileInfo as jest.Mock;
+  const validateActionIdMock = _validateActionId as jest.Mock;
 
   let apiTestSetup: HttpApiTestSetupMock;
   let httpRequestMock: ReturnType<
@@ -37,7 +33,7 @@ describe('Response Action file info API', () => {
 
     ({ httpHandlerContextMock, httpResponseMock } = apiTestSetup);
     httpRequestMock = apiTestSetup.createRequestMock({
-      params: { action_id: '111', agent_id: '222' },
+      params: { action_id: '321-654', file_id: '123-456-789' },
     });
   });
 
@@ -71,35 +67,19 @@ describe('Response Action file info API', () => {
 
   describe('Route handler', () => {
     let fileInfoHandler: ReturnType<typeof getActionFileInfoRouteHandler>;
-    let esClientMock: ReturnType<HttpApiTestSetupMock['getEsClientMock']>;
-    let action: ActionDetails;
+    let fleetFilesClientMock: jest.Mocked<FleetFromHostFileClientInterface>;
 
-    beforeEach(() => {
-      esClientMock = apiTestSetup.getEsClientMock();
-      action = new EndpointActionGenerator().generateActionDetails({
-        id: '111',
-        agents: ['222'],
-      });
+    beforeEach(async () => {
       fileInfoHandler = getActionFileInfoRouteHandler(apiTestSetup.endpointAppContextMock);
 
-      getActionDetailsById.mockImplementation(async () => {
-        return action;
-      });
+      validateActionIdMock.mockImplementation(async () => {});
 
-      getFileInfo.mockImplementation(async () => {
-        return {
-          created: '2022-10-10T14:57:30.682Z',
-          id: '123',
-          mimeType: 'text/plain',
-          name: 'test.txt',
-          size: 1234,
-          status: 'READY',
-        };
-      });
+      fleetFilesClientMock =
+        (await apiTestSetup.endpointAppContextMock.service.getFleetFromHostFilesClient()) as jest.Mocked<FleetFromHostFileClientInterface>;
     });
 
     it('should error if action ID is invalid', async () => {
-      getActionDetailsById.mockImplementationOnce(async () => {
+      validateActionIdMock.mockImplementationOnce(async () => {
         throw new NotFoundError('not found');
       });
       await fileInfoHandler(httpHandlerContextMock, httpRequestMock, httpResponseMock);
@@ -107,8 +87,9 @@ describe('Response Action file info API', () => {
       expect(httpResponseMock.notFound).toHaveBeenCalled();
     });
 
-    it('should error if agent id is not in the action', async () => {
-      action.agents = ['333'];
+    it('should error if file ID is invalid', async () => {
+      // @ts-expect-error assignment to readonly value
+      httpRequestMock.params.file_id = 'invalid';
       await fileInfoHandler(httpHandlerContextMock, httpRequestMock, httpResponseMock);
 
       expect(httpResponseMock.customError).toHaveBeenCalledWith({
@@ -120,7 +101,7 @@ describe('Response Action file info API', () => {
     it('should retrieve the file info with correct file id', async () => {
       await fileInfoHandler(httpHandlerContextMock, httpRequestMock, httpResponseMock);
 
-      expect(getFileInfo).toHaveBeenCalledWith(esClientMock, expect.anything(), '111.222');
+      expect(fleetFilesClientMock.get).toHaveBeenCalledWith('123-456-789');
     });
 
     it('should respond with expected output', async () => {
@@ -129,11 +110,13 @@ describe('Response Action file info API', () => {
       expect(httpResponseMock.ok).toHaveBeenCalledWith({
         body: {
           data: {
-            created: '2022-10-10T14:57:30.682Z',
-            id: '123',
+            actionId: '321-654',
+            agentId: '111-222',
+            created: '2023-05-12T19:47:33.702Z',
+            id: '123-456-789',
             mimeType: 'text/plain',
-            name: 'test.txt',
-            size: 1234,
+            name: 'foo.txt',
+            size: 45632,
             status: 'READY',
           },
         },

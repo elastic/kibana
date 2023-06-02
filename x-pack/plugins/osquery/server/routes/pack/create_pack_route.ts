@@ -6,7 +6,8 @@
  */
 
 import moment from 'moment-timezone';
-import { has, set, unset, find, some, mapKeys } from 'lodash';
+import { set } from '@kbn/safer-lodash-set';
+import { has, unset, find, some, mapKeys } from 'lodash';
 import { schema } from '@kbn/config-schema';
 import { produce } from 'immer';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common';
@@ -26,7 +27,9 @@ import {
   getInitialPolicies,
 } from './utils';
 import { convertShardsToArray, getInternalSavedObjectsClient } from '../utils';
-import type { PackSavedObjectAttributes } from '../../common/types';
+import type { PackSavedObject } from '../../common/types';
+
+type PackSavedObjectLimited = Omit<PackSavedObject, 'saved_object_id' | 'references'>;
 
 export const createPackRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
   router.post(
@@ -120,7 +123,7 @@ export const createPackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
         type: AGENT_POLICY_SAVED_OBJECT_TYPE,
       }));
 
-      const packSO = await savedObjectsClient.create<PackSavedObjectAttributes>(
+      const packSO = await savedObjectsClient.create<PackSavedObjectLimited>(
         packSavedObjectType,
         {
           name,
@@ -173,7 +176,7 @@ export const createPackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
 
       return response.ok({
         body: {
-          data: packSO,
+          data: { ...packSO.attributes, saved_object_id: packSO.id },
         },
       });
     }

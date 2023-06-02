@@ -1,45 +1,5 @@
 // SASSTODO: This file has several direct EUI overwrites that need to be removed
 .ml-anomalies-table {
-  .ml-icon-severity-critical,
-  .ml-icon-severity-major,
-  .ml-icon-severity-minor,
-  .ml-icon-severity-warning,
-  .ml-icon-severity-unknown {
-    color: inherit;
-    text-shadow: none;
-  }
-
-  // SASSTODO: Should only be three options, logic moved to the JS, where EuiIcon accepts a color
-  .ml-icon-severity-critical {
-    .euiIcon {
-      fill: $mlColorCriticalText;
-    }
-  }
-
-  .ml-icon-severity-major {
-    .euiIcon {
-      fill: $mlColorMajorText;
-    }
-  }
-
-  .ml-icon-severity-minor {
-    .euiIcon {
-      fill: $mlColorMinorText;
-    }
-  }
-
-  .ml-icon-severity-warning {
-    .euiIcon {
-      fill: $mlColorWarningText;
-    }
-  }
-
-  .ml-icon-severity-unknown {
-    .euiIcon {
-      fill: $mlColorUnknownText;
-    }
-  }
-
   tr th:first-child,
   tr td:first-child {
     width: $euiSizeXL;

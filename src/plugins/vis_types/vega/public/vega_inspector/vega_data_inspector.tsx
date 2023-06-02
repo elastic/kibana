@@ -49,7 +49,7 @@ const VegaDataInspector = ({ adapters }: VegaDataInspectorProps) => {
           defaultMessage: `Vega didn't render successfully`,
         })}
         color="danger"
-        iconType="alert"
+        iconType="warning"
       >
         <p>{error}</p>
       </EuiCallOut>

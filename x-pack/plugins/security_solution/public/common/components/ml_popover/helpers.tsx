@@ -45,12 +45,18 @@ export const filterJobs = ({
  * @param jobs to filter
  * @param filterQuery user-provided search string to filter for occurrence in job names/description
  */
-export const searchFilter = (jobs: SecurityJob[], filterQuery?: string): SecurityJob[] =>
-  jobs.filter((job) =>
-    filterQuery == null
+export const searchFilter = (jobs: SecurityJob[], filterQuery?: string): SecurityJob[] => {
+  const lowerCaseFilterQuery = filterQuery?.toLowerCase();
+  return jobs.filter((job) =>
+    lowerCaseFilterQuery == null
       ? true
-      : job.id.includes(filterQuery) || job.description.includes(filterQuery)
+      : job.id.includes(lowerCaseFilterQuery) ||
+        job.customSettings?.security_app_display_name
+          ?.toLowerCase()
+          ?.includes(lowerCaseFilterQuery) ||
+        job.description.toLowerCase().includes(lowerCaseFilterQuery)
   );
+};
 
 /**
  * Given an array of titles this will always return the same string for usage within

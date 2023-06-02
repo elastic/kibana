@@ -1,0 +1,10 @@
+steps:
+  - command: .buildkite/scripts/steps/artifacts/docker_image.sh
+    label: Build default container images
+    agents:
+      queue: n2-16-spot
+    timeout_in_minutes: 60
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 3

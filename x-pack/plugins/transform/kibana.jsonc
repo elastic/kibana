@@ -1,0 +1,47 @@
+{
+  "type": "plugin",
+  "id": "@kbn/transform-plugin",
+  "owner": "@elastic/ml-ui",
+  "description": "This plugin provides access to the transforms features provided by Elastic. Transforms enable you to convert existing Elasticsearch indices into summarized indices, which provide opportunities for new insights and analytics.",
+  "plugin": {
+    "id": "transform",
+    "server": true,
+    "browser": true,
+    "configPath": [
+      "xpack",
+      "transform"
+    ],
+    "requiredPlugins": [
+      "data",
+      "dataViews",
+      "home",
+      "licensing",
+      "management",
+      "features",
+      "share",
+      "triggersActionsUi",
+      "fieldFormats",
+      "unifiedSearch",
+      "charts",
+      "savedObjectsFinder",
+      "savedObjectsManagement"
+    ],
+    "optionalPlugins": [
+      "security",
+      "usageCollection",
+      "spaces",
+      "alerting"
+    ],
+    "requiredBundles": [
+      "unifiedSearch",
+      "esUiShared",
+      "discover",
+      "kibanaUtils",
+      "kibanaReact",
+      "ml"
+    ],
+    "extraPublicDirs": [
+      "common"
+    ]
+  }
+}

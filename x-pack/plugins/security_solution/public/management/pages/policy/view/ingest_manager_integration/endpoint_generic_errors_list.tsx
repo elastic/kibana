@@ -23,7 +23,7 @@ export const EndpointGenericErrorsList = memo<PackageGenericErrorsListProps>(
     const globalEndpointErrors = useMemo(() => {
       const errors: PackageActionFormatter[] = [];
       packageErrors.forEach((unit) => {
-        if (unit.status === 'failed') {
+        if (unit.status === 'FAILED' || unit.status === 'DEGRADED') {
           errors.push(
             new PackageActionFormatter(
               unit,

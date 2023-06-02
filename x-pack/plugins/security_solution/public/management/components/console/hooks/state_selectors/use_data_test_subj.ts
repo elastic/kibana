@@ -7,6 +7,16 @@
 
 import { useConsoleStore } from '../../components/console_state/console_state';
 
-export const useDataTestSubj = (): string | undefined => {
-  return useConsoleStore().state.dataTestSubj;
+/**
+ * Returns the `data-test-subj` that was defined when the `Console` was rendered.
+ * Can optionally set a suffix on that value if one is provided
+ */
+export const useDataTestSubj = (suffix: string = ''): string => {
+  const dataTestSubj = useConsoleStore().state.dataTestSubj;
+
+  if (!dataTestSubj) {
+    return '';
+  }
+
+  return dataTestSubj + (suffix ? `-${suffix}` : '');
 };

@@ -18,7 +18,9 @@ import { ThemeProvider } from 'styled-components';
 import type { Capabilities } from '@kbn/core/public';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
-import { tGridReducer } from '@kbn/timelines-plugin/public';
+import type { Action } from '@kbn/ui-actions-plugin/public';
+import { CellActionsProvider } from '@kbn/cell-actions';
+import { ExpandableFlyoutProvider } from '@kbn/expandable-flyout';
 import { ConsoleManager } from '../../management/components/console';
 import type { State } from '../store';
 import { createStore } from '../store';
@@ -39,6 +41,7 @@ interface Props {
   children?: React.ReactNode;
   store?: Store;
   onDragEnd?: (result: DropResult, provided: ResponderProvided) => void;
+  cellActions?: Action[];
 }
 
 export const kibanaObservable = new BehaviorSubject(createStartServicesMock());
@@ -53,14 +56,9 @@ const { storage } = createSecuritySolutionStorageMock();
 /** A utility for wrapping children in the providers required to run most tests */
 export const TestProvidersComponent: React.FC<Props> = ({
   children,
-  store = createStore(
-    state,
-    SUB_PLUGINS_REDUCER,
-    { dataTable: tGridReducer },
-    kibanaObservable,
-    storage
-  ),
+  store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage),
   onDragEnd = jest.fn(),
+  cellActions = [],
 }) => {
   const queryClient = new QueryClient();
   return (
@@ -69,9 +67,15 @@ export const TestProvidersComponent: React.FC<Props> = ({
         <ReduxStoreProvider store={store}>
           <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
             <QueryClientProvider client={queryClient}>
-              <ConsoleManager>
-                <DragDropContext onDragEnd={onDragEnd}>{children}</DragDropContext>
-              </ConsoleManager>
+              <ExpandableFlyoutProvider>
+                <ConsoleManager>
+                  <CellActionsProvider
+                    getTriggerCompatibleActions={() => Promise.resolve(cellActions)}
+                  >
+                    <DragDropContext onDragEnd={onDragEnd}>{children}</DragDropContext>
+                  </CellActionsProvider>
+                </ConsoleManager>
+              </ExpandableFlyoutProvider>
             </QueryClientProvider>
           </ThemeProvider>
         </ReduxStoreProvider>
@@ -86,14 +90,9 @@ export const TestProvidersComponent: React.FC<Props> = ({
  */
 const TestProvidersWithPrivilegesComponent: React.FC<Props> = ({
   children,
-  store = createStore(
-    state,
-    SUB_PLUGINS_REDUCER,
-    { dataTable: tGridReducer },
-    kibanaObservable,
-    storage
-  ),
+  store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage),
   onDragEnd = jest.fn(),
+  cellActions = [],
 }) => (
   <I18nProvider>
     <MockKibanaContextProvider>
@@ -107,7 +106,9 @@ const TestProvidersWithPrivilegesComponent: React.FC<Props> = ({
               } as unknown as Capabilities
             }
           >
-            <DragDropContext onDragEnd={onDragEnd}>{children}</DragDropContext>
+            <CellActionsProvider getTriggerCompatibleActions={() => Promise.resolve(cellActions)}>
+              <DragDropContext onDragEnd={onDragEnd}>{children}</DragDropContext>
+            </CellActionsProvider>
           </UserPrivilegesProvider>
         </ThemeProvider>
       </ReduxStoreProvider>

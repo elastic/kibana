@@ -50,6 +50,7 @@ interface QueueTimesMetrics {
 type BaseJobTypes =
   | 'csv_searchsource'
   | 'csv_searchsource_immediate'
+  | 'csv_v2'
   | 'PNG'
   | 'PNGV2'
   | 'printable_pdf'
@@ -143,6 +144,10 @@ export interface JobTypes {
     error_codes: ErrorCodesStatsCsv;
   };
   csv_searchsource_immediate: AvailableTotal & {
+    metrics: MetricsStatsCsv;
+    error_codes: ErrorCodesStatsCsv;
+  };
+  csv_v2: AvailableTotal & {
     metrics: MetricsStatsCsv;
     error_codes: ErrorCodesStatsCsv;
   };

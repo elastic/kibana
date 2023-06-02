@@ -28,6 +28,7 @@ export interface ExportPanelShareOpts {
 export interface ReportingSharingData {
   title: string;
   layout: LayoutParams;
+  reportingDisabled?: boolean;
   [key: string]: unknown;
 }
 

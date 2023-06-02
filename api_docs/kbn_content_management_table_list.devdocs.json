@@ -35,7 +35,7 @@
             "section": "def-common.UserContentCommonSchema",
             "text": "UserContentCommonSchema"
           },
-          ">({ tableListTitle, tableListDescription, entityName, entityNamePlural, initialFilter: initialQuery, headingId, initialPageSize, listingLimit, customTableColumn, emptyPrompt, findItems, createItem, editItem, deleteItems, getDetailViewLink, onClickTitle, id, inspector, children, titleColumnName, additionalRightSideActions, withoutPageTemplateWrapper, }: ",
+          ">({ tableListTitle, tableListDescription, entityName, entityNamePlural, initialFilter: initialQuery, headingId, initialPageSize, listingLimit, urlStateEnabled, customTableColumn, emptyPrompt, rowItemActions, findItems, createItem, editItem, showEditActionForItem, deleteItems, getDetailViewLink, onClickTitle, id: listingId, contentEditor, children, titleColumnName, additionalRightSideActions, withoutPageTemplateWrapper, }: ",
           "Props",
           "<T>) => JSX.Element | null"
         ],
@@ -177,7 +177,7 @@
               "CoreStart contract"
             ],
             "signature": [
-              "{ application: { capabilities: { advancedSettings?: { save: boolean; } | undefined; }; getUrlForApp: (app: string, options: { path: string; }) => string; currentAppId$: ",
+              "{ application: { capabilities: { [key: string]: Readonly<Record<string, boolean | Record<string, boolean>>>; }; getUrlForApp: (app: string, options: { path: string; }) => string; currentAppId$: ",
               "Observable",
               "<string | undefined>; navigateToUrl: (url: string) => void | Promise<void>; }; notifications: { toasts: { addDanger: (notifyArgs: { title: ",
               {
@@ -305,11 +305,11 @@
               "Tag",
               ") => void) | undefined; tagRender?: ((tag: ",
               "Tag",
-              ") => JSX.Element) | undefined; }>; SavedObjectSaveModalTagSelector: React.FC<{ initialSelection: string[]; onTagsSelected: (ids: string[]) => void; }>; }; parseSearchQuery: (query: string, options?: { useName?: boolean | undefined; tagField?: string | undefined; } | undefined) => { searchTerm: string; tagReferences: ",
+              ") => JSX.Element) | undefined; }>; SavedObjectSaveModalTagSelector: React.FC<{ initialSelection: string[]; onTagsSelected: (ids: string[]) => void; }>; }; parseSearchQuery: (query: string, options?: { useName?: boolean | undefined; tagField?: string | undefined; } | undefined) => Promise<{ searchTerm: string; tagReferences: ",
               "SavedObjectsFindOptionsReference",
               "[]; tagReferencesToExclude: ",
               "SavedObjectsFindOptionsReference",
-              "[]; valid: boolean; }; getTagList: () => ",
+              "[]; valid: boolean; }>; getTagList: () => ",
               "Tag",
               "[]; getTagIdsFromReferences: (references: ",
               "SavedObjectsReference",
@@ -416,7 +416,23 @@
       }
     ],
     "enums": [],
-    "misc": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/content-management-table-list",
+        "id": "def-common.RowActions",
+        "type": "Type",
+        "tags": [],
+        "label": "RowActions",
+        "description": [],
+        "signature": [
+          "{ delete?: { enabled: boolean; reason?: string | undefined; } | undefined; }"
+        ],
+        "path": "packages/content-management/table_list/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
     "objects": []
   }
 }

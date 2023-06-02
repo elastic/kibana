@@ -8,12 +8,12 @@ import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-ser
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type { Logger } from '@kbn/core/server';
 
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { i18n } from '@kbn/i18n';
 import { RiskScoreEntity } from '../../../../../common/search_strategy';
 import * as savedObjectsToCreate from '../saved_object';
 import type { BulkCreateSavedObjectsResult, SavedObjectTemplate } from '../types';
-import { findOrCreateRiskScoreTag } from './find_or_create_tag';
+import { createRiskScoreTag } from './create_risk_score_tag';
 
 export const bulkCreateSavedObjects = async <T = SavedObjectTemplate>({
   logger,
@@ -31,16 +31,17 @@ export const bulkCreateSavedObjects = async <T = SavedObjectTemplate>({
   const riskScoreEntity =
     savedObjectTemplate === 'userRiskScoreDashboards' ? RiskScoreEntity.user : RiskScoreEntity.host;
 
-  const tagResponse = await findOrCreateRiskScoreTag({
+  const tagResponse = await createRiskScoreTag({
     riskScoreEntity,
     logger,
     savedObjectsClient,
     spaceId,
   });
 
-  const tagResult = tagResponse?.hostRiskScoreDashboards ?? tagResponse?.userRiskScoreDashboards;
+  const riskScoreTagResult =
+    tagResponse?.hostRiskScoreDashboards ?? tagResponse?.userRiskScoreDashboards;
 
-  if (!tagResult?.success) {
+  if (!riskScoreTagResult?.success) {
     return tagResponse;
   }
 
@@ -66,7 +67,7 @@ export const bulkCreateSavedObjects = async <T = SavedObjectTemplate>({
   const idReplaceMappings: Record<string, string> = {};
   mySavedObjects.forEach((so) => {
     if (so.id.startsWith('<REPLACE-WITH-ID')) {
-      idReplaceMappings[so.id] = uuid.v4();
+      idReplaceMappings[so.id] = uuidv4();
     }
   });
   const mySavedObjectsWithRef = mySavedObjects.map((so) => {
@@ -79,7 +80,11 @@ export const bulkCreateSavedObjects = async <T = SavedObjectTemplate>({
       id: idReplaceMappings[so.id] ?? so.id,
       references: [
         ...references,
-        { id: tagResult?.body?.id, name: tagResult?.body?.name, type: tagResult?.body?.type },
+        {
+          id: riskScoreTagResult?.body?.id,
+          name: riskScoreTagResult?.body?.name,
+          type: riskScoreTagResult?.body?.type,
+        },
       ],
     };
   });

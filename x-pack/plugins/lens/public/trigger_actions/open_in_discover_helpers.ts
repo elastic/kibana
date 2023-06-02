@@ -11,7 +11,7 @@ import type { DataViewsService } from '@kbn/data-views-plugin/public';
 import type { LocatorPublic } from '@kbn/share-plugin/public';
 import type { SerializableRecord } from '@kbn/utility-types';
 import type { Embeddable } from '../embeddable';
-import { DOC_TYPE } from '../../common';
+import { DOC_TYPE } from '../../common/constants';
 
 interface DiscoverAppLocatorParams extends SerializableRecord {
   timeRange?: TimeRange;
@@ -64,7 +64,7 @@ async function getDiscoverLocationParams({
     // shouldn't be executed because of the isCompatible check
     throw new Error('Underlying data is not ready');
   }
-  const dataView = await dataViews.get(args.indexPatternId);
+  const dataView = await dataViews.get(args.dataViewSpec.id!);
   let filtersToApply = [...(filters || []), ...args.filters];
   let timeRangeToApply = args.timeRange;
   // if the target data view is time based, attempt to split out a time range from the provided filters

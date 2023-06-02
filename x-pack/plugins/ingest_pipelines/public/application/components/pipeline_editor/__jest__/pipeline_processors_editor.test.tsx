@@ -6,8 +6,14 @@
  */
 
 import { act } from 'react-dom/test-utils';
+import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { setup, SetupResult } from './pipeline_processors_editor.helpers';
 import { Pipeline } from '../../../../../common/types';
+import {
+  extractProcessorDetails,
+  getProcessorTypesAndLabels,
+} from '../components/processor_form/processors/common_fields/processor_type_field';
+import { mapProcessorTypeToDescriptor } from '../components/shared/map_processor_type_to_form';
 
 const testProcessors: Pick<Pipeline, 'processors'> = {
   processors: [
@@ -96,12 +102,35 @@ describe('Pipeline Editor', () => {
       expect(d).toEqual({ test: { if: '1 == 1' } });
     });
 
+    it('Shows inference and redact processors for licenses > platinum', async () => {
+      const basicLicense = licensingMock.createLicense({
+        license: { status: 'active', type: 'basic' },
+      });
+      const platinumLicense = licensingMock.createLicense({
+        license: { status: 'active', type: 'platinum' },
+      });
+
+      // Get the list of processors that are only available for platinum licenses
+      const processorsForPlatinumLicense = extractProcessorDetails(mapProcessorTypeToDescriptor)
+        .filter((processor) => processor.forLicenseAtLeast === 'platinum')
+        .map(({ value, label }) => ({ label, value }));
+
+      // Check that the list of processors for platinum licenses is not included in the list of processors for basic licenses
+      expect(getProcessorTypesAndLabels(basicLicense)).toEqual(
+        expect.not.arrayContaining(processorsForPlatinumLicense)
+      );
+      expect(getProcessorTypesAndLabels(platinumLicense)).toEqual(
+        expect.arrayContaining(processorsForPlatinumLicense)
+      );
+    });
+
     it('edits a processor without removing unknown processor.options', async () => {
       const { actions, exists, form } = testBed;
       // Open the edit processor form for the set processor
       actions.openProcessorEditor('processors>2');
       expect(exists('editProcessorForm')).toBeTruthy();
       form.setInputValue('editProcessorForm.valueFieldInput', 'test44');
+      jest.advanceTimersByTime(0); // advance timers to allow the form to validate
       await actions.submitProcessorForm();
       const [onUpdateResult] = onUpdate.mock.calls[onUpdate.mock.calls.length - 1];
       const {

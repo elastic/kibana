@@ -1,6 +1,6 @@
 get:
   summary: Retrieves a paginated subset of cases.
-  operationId: getCases
+  operationId: findCases
   description: >
     You must have `read` privileges for the **Cases** feature in the
     **Management**, **Observability**, or **Security** section of the Kibana
@@ -25,13 +25,6 @@ get:
         type: string
         default: OR
       example: OR
-    - name: fields
-      in: query
-      description: The fields in the entity to return in the response.
-      schema:
-        type: array
-        items:
-          type: string
     - name: from
       in: query
       description: >
@@ -45,20 +38,8 @@ get:
         type: string
       example: now-1d
     - $ref: '../components/parameters/owner.yaml'
-    - name: page
-      in: query
-      description: The page number to return.
-      schema:
-        type: integer
-        default: 1
-      example: 1
-    - name: perPage
-      in: query
-      description:  The number of rules to return per page.
-      schema:
-        type: integer
-        default: 20
-      example: 20
+    - $ref: '../components/parameters/page_index.yaml'
+    - $ref: '../components/parameters/page_size.yaml'
     - name: reporters
       in: query
       description: Filters the returned cases by the user name of the reporter.
@@ -79,11 +60,11 @@ get:
       description: The fields to perform the simple_query_string parsed query against.
       schema:
         oneOf:
-          - type: string
+          - $ref: '../components/parameters/search_fields.yaml'
           - type: array
             items:
-              type: string
-    - $ref: '../components/parameters/severity.yaml' 
+              $ref: '../components/parameters/search_fields.yaml'
+    - $ref: '../components/parameters/severity.yaml'
     - name: sortField
       in: query
       description: Determines which field is used to sort the results.
@@ -94,27 +75,18 @@ get:
           - updatedAt
         default: createdAt
       example: updatedAt
-    - name: sortOrder 
-      in: query
-      description: Determines the sort order.
-      schema:
-        type: string
-        enum:
-          - asc
-          - desc
-        default: desc
-      example: asc
-    - name: status 
+    - $ref: '../components/parameters/sort_order.yaml'
+    - name: status
       in: query
       description: Filters the returned cases by state.
       schema:
-       type: string
-       enum:
-         - closed
-         - in-progress
-         - open
+        type: string
+        enum:
+          - closed
+          - in-progress
+          - open
       example: open
-    - name: tags 
+    - name: tags
       in: query
       description: Filters the returned cases by tags.
       schema:
@@ -140,7 +112,7 @@ get:
     '200':
       description: Indicates a successful call.
       content:
-         application/json:
+        application/json:
           schema:
             type: object
             properties:
@@ -163,7 +135,13 @@ get:
           examples:
             findCaseResponse:
               $ref: '../components/examples/find_case_response.yaml'
+    '401':
+      description: Authorization information is missing or invalid.
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/4xx_response.yaml'
   servers:
     - url: https://localhost:5601
 servers:
-    - url: https://localhost:5601
+  - url: https://localhost:5601

@@ -1,9 +1,7 @@
 {
-  "extends": "../../../../tsconfig.bazel.json",
+  "extends": "../../../../tsconfig.base.json",
   "compilerOptions": {
-    "declaration": true,
-    "emitDeclarationOnly": true,
-    "outDir": "target_types",
+    "outDir": "target/types",
     "types": [
       "jest",
       "node",
@@ -12,6 +10,13 @@
   },
   "include": [
     "**/*.ts",
-      "**/*.tsx",
+    "**/*.tsx",
+  ],
+  "kbn_references": [
+    "@kbn/logging-mocks",
+    "@kbn/core-logging-browser-internal"
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

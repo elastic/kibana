@@ -13,6 +13,7 @@ import {
 import { AgentConfiguration } from '../../../../common/agent_configuration/configuration_types';
 import { convertConfigSettingsToString } from './convert_settings_to_string';
 import { APMInternalESClient } from '../../../lib/helpers/create_es_client/create_internal_es_client';
+import { APM_AGENT_CONFIGURATION_INDEX } from '../apm_indices/get_apm_indices';
 
 export async function searchConfigurations({
   service,
@@ -47,7 +48,7 @@ export async function searchConfigurations({
     : [];
 
   const params = {
-    index: internalESClient.apmIndices.apmAgentConfigurationIndex,
+    index: APM_AGENT_CONFIGURATION_INDEX,
     body: {
       query: {
         bool: {

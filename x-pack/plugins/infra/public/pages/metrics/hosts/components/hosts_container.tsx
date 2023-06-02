@@ -10,14 +10,15 @@ import { EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { InfraLoadingPanel } from '../../../../components/loading';
 import { useMetricsDataViewContext } from '../hooks/use_data_view';
-import { UnifiedSearchBar } from './unified_search_bar';
-import { HostsTable } from './hosts_table';
+import { UnifiedSearchBar } from './search_bar/unified_search_bar';
+import { HostsContent } from './hosts_content';
+import { ErrorCallout } from './error_callout';
 
 export const HostContainer = () => {
-  const { metricsDataView, isDataViewLoading, hasFailedLoadingDataView } =
-    useMetricsDataViewContext();
+  const { dataView, loading, error, metricAlias, loadDataView } = useMetricsDataViewContext();
 
-  if (isDataViewLoading) {
+  const isLoading = loading || !dataView;
+  if (isLoading && !error) {
     return (
       <InfraLoadingPanel
         height="100%"
@@ -29,11 +30,25 @@ export const HostContainer = () => {
     );
   }
 
-  return hasFailedLoadingDataView || !metricsDataView ? null : (
+  return error ? (
+    <ErrorCallout
+      error={error}
+      titleOverride={i18n.translate('xpack.infra.hostsViewPage.errorOnCreateOrLoadDataviewTitle', {
+        defaultMessage: 'Error creating Data View',
+      })}
+      messageOverride={i18n.translate('xpack.infra.hostsViewPage.errorOnCreateOrLoadDataview', {
+        defaultMessage:
+          'There was an error trying to create a Data View: {metricAlias}. Try reloading the page.',
+        values: { metricAlias },
+      })}
+      onTryAgainClick={loadDataView}
+      hasTryAgainButton
+    />
+  ) : (
     <>
-      <UnifiedSearchBar dataView={metricsDataView} />
+      <UnifiedSearchBar />
       <EuiSpacer />
-      <HostsTable />
+      <HostsContent />
     </>
   );
 };

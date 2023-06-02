@@ -6,21 +6,13 @@
  */
 
 import React from 'react';
-import {
-  EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiText,
-  EuiTitle,
-  EuiLink,
-} from '@elastic/eui';
-import { css } from '@emotion/css';
-import { useHistory } from 'react-router-dom';
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiText, EuiTitle } from '@elastic/eui';
+import { useSyntheticsSettingsContext } from '../../../contexts';
+import { useSelectedLocation } from '../hooks/use_selected_location';
 
 import { ConfigKey } from '../../../../../../common/runtime_types';
 import { MONITOR_HISTORY_ROUTE } from '../../../../../../common/constants';
 import { stringifyUrlParams } from '../../../utils/url_params';
-import { useGetUrlParams } from '../../../hooks';
 
 import { useSelectedMonitor } from '../hooks/use_selected_monitor';
 
@@ -33,9 +25,18 @@ export const MonitorStatusHeader = ({
   periodCaption,
   showViewHistoryButton,
 }: MonitorStatusPanelProps) => {
-  const history = useHistory();
-  const params = useGetUrlParams();
+  const { basePath } = useSyntheticsSettingsContext();
   const { monitor } = useSelectedMonitor();
+  const selectedLocation = useSelectedLocation();
+  const search = stringifyUrlParams({
+    locationId: selectedLocation?.id,
+    dateRangeStart: 'now-24h',
+    dateRangeEnd: 'now',
+  });
+  const viewDetailsUrl = `${basePath}/app/synthetics${MONITOR_HISTORY_ROUTE.replace(
+    ':monitorId',
+    monitor?.[ConfigKey.CONFIG_ID] ?? ''
+  )}${search}`;
 
   const isLast24Hours = from === 'now-24h' && to === 'now';
   const periodCaptionText = !!periodCaption
@@ -48,51 +49,36 @@ export const MonitorStatusHeader = ({
     <EuiFlexGroup
       direction="row"
       alignItems="baseline"
-      css={css`
-        margin-bottom: 0;
-      `}
+      css={{
+        marginBottom: 0,
+      }}
+      wrap={true}
     >
-      <EuiFlexItem grow={false}>
-        <EuiTitle size="xs">
-          <h4>{labels.STATUS_LABEL}</h4>
-        </EuiTitle>
-      </EuiFlexItem>
-      {periodCaptionText ? (
+      <EuiFlexGroup alignItems="center" responsive={false} wrap={false}>
         <EuiFlexItem grow={false}>
-          <EuiText size="xs" color="subdued">
-            {periodCaptionText}
-          </EuiText>
+          <EuiTitle size="xs">
+            <h4>{labels.STATUS_LABEL}</h4>
+          </EuiTitle>
         </EuiFlexItem>
-      ) : null}
-      <EuiFlexItem grow={true} />
+        {periodCaptionText ? (
+          <EuiFlexItem grow={false}>
+            <EuiText size="xs" color="subdued">
+              {periodCaptionText}
+            </EuiText>
+          </EuiFlexItem>
+        ) : null}
+      </EuiFlexGroup>
 
       {showViewHistoryButton ? (
-        <EuiFlexItem grow={false}>
-          <EuiLink
-            href={
-              monitor?.[ConfigKey.CONFIG_ID]
-                ? history.createHref({
-                    pathname: MONITOR_HISTORY_ROUTE.replace(
-                      ':monitorId',
-                      monitor[ConfigKey.CONFIG_ID]
-                    ),
-                    search: stringifyUrlParams(
-                      { ...params, dateRangeStart: 'now-24h', dateRangeEnd: 'now' },
-                      true
-                    ),
-                  })
-                : undefined
-            }
-          >
-            <EuiButtonEmpty
-              data-test-subj="monitorStatusChartViewHistoryButton"
-              size="xs"
-              iconType="list"
-            >
-              {labels.VIEW_HISTORY_LABEL}
-            </EuiButtonEmpty>
-          </EuiLink>
-        </EuiFlexItem>
+        <EuiButtonEmpty
+          css={{ marginLeft: 'auto' }}
+          href={viewDetailsUrl}
+          data-test-subj="monitorStatusChartViewHistoryButton"
+          size="xs"
+          iconType="list"
+        >
+          {labels.VIEW_HISTORY_LABEL}
+        </EuiButtonEmpty>
       ) : null}
     </EuiFlexGroup>
   );

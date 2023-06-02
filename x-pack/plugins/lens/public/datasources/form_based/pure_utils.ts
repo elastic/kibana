@@ -27,8 +27,8 @@ export function hasField(column: BaseIndexPatternColumn): column is FieldBasedIn
 }
 
 export function getFieldType(field: IndexPatternField) {
-  if (field.timeSeriesMetricType) {
-    return field.timeSeriesMetricType;
+  if (field.timeSeriesMetric) {
+    return field.timeSeriesMetric;
   }
   return field.type;
 }

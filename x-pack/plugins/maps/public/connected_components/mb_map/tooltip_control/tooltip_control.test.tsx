@@ -70,6 +70,9 @@ const mockLayer = {
       },
     } as unknown as IVectorSource;
   },
+  getMasks: () => {
+    return [];
+  },
 } as unknown as IVectorLayer;
 
 const mockMbMapHandlers: { [key: string]: (event?: MapMouseEvent) => void } = {};
@@ -101,6 +104,7 @@ const defaultProps = {
   hasLockedTooltips: false,
   filterModeActive: false,
   drawModeActive: false,
+  executionContext: {},
 };
 
 const hoverTooltipState = {

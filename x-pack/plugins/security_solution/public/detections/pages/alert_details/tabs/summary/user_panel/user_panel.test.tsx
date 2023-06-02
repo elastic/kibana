@@ -16,10 +16,10 @@ import type { UserPanelProps } from '.';
 import { UserPanel } from '.';
 import { getTimelineEventData } from '../../../utils/get_timeline_event_data';
 import { RiskSeverity } from '../../../../../../../common/search_strategy';
-import { useRiskScore } from '../../../../../../risk_score/containers';
+import { useRiskScore } from '../../../../../../explore/containers/risk_score';
 import { find } from 'lodash/fp';
 
-jest.mock('../../../../../../risk_score/containers');
+jest.mock('../../../../../../explore/containers/risk_score');
 const mockUseRiskScore = useRiskScore as jest.Mock;
 
 describe('AlertDetailsPage - SummaryTab - UserPanel', () => {

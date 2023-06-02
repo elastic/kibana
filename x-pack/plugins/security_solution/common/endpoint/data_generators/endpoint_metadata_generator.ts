@@ -5,25 +5,114 @@
  * 2.0.
  */
 
+/* eslint-disable max-classes-per-file */
+
 import type { DeepPartial } from 'utility-types';
-import { merge } from 'lodash';
+import { merge, set } from 'lodash';
 import { gte } from 'semver';
 import type { EndpointCapabilities } from '../service/response_actions/constants';
 import { BaseDataGenerator } from './base_data_generator';
-import type { HostMetadataInterface, OSFields } from '../types';
-import { EndpointStatus, HostPolicyResponseActionStatus } from '../types';
+import type { HostMetadataInterface, OSFields, HostInfoInterface } from '../types';
+import { EndpointStatus, HostPolicyResponseActionStatus, HostStatus } from '../types';
+
+export interface GetCustomEndpointMetadataGeneratorOptions {
+  /** Version for agent/endpoint. Defaults to the stack version */
+  version: string;
+  /** OS type for the generated endpoint hosts */
+  os: 'macOS' | 'windows' | 'linux';
+  isolation: boolean;
+}
 
 /**
  * Metadata generator for docs that are sent by the Endpoint running on hosts
  */
 export class EndpointMetadataGenerator extends BaseDataGenerator {
+  /**
+   * Returns a Custom `EndpointMetadataGenerator` subclass that will generate specific
+   * documents based on input arguments
+   */
+  static custom({
+    version,
+    os,
+    isolation,
+  }: Partial<GetCustomEndpointMetadataGeneratorOptions> = {}): typeof EndpointMetadataGenerator {
+    return class extends EndpointMetadataGenerator {
+      generate(overrides: DeepPartial<HostMetadataInterface> = {}): HostMetadataInterface {
+        if (version) {
+          set(overrides, 'agent.version', version);
+        }
+
+        if (os) {
+          switch (os) {
+            case 'linux':
+              set(overrides, 'host.os', EndpointMetadataGenerator.linuxOSFields);
+              break;
+
+            case 'macOS':
+              set(overrides, 'host.os', EndpointMetadataGenerator.macOSFields);
+              break;
+
+            default:
+              set(overrides, 'host.os', EndpointMetadataGenerator.windowsOSFields);
+          }
+        }
+        if (isolation !== undefined) {
+          set(overrides, 'Endpoint.state.isolation', isolation);
+        }
+
+        return super.generate(overrides);
+      }
+    };
+  }
+
+  public static get windowsOSFields(): OSFields {
+    return {
+      name: 'Windows',
+      full: 'Windows 10',
+      version: '10.0',
+      platform: 'Windows',
+      family: 'windows',
+      Ext: {
+        variant: 'Windows Pro',
+      },
+    };
+  }
+
+  public static get linuxOSFields(): OSFields {
+    return {
+      Ext: {
+        variant: 'Debian',
+      },
+      kernel: '4.19.0-21-cloud-amd64 #1 SMP Debian 4.19.249-2 (2022-06-30)',
+      name: 'Linux',
+      family: 'debian',
+      type: 'linux',
+      version: '10.12',
+      platform: 'debian',
+      full: 'Debian 10.12',
+    };
+  }
+
+  public static get macOSFields(): OSFields {
+    return {
+      name: 'macOS',
+      full: 'macOS Monterey',
+      version: '12.6.1',
+      platform: 'macOS',
+      family: 'Darwin',
+      Ext: {
+        variant: 'Darwin',
+      },
+    };
+  }
+
   /** Generate an Endpoint host metadata document */
   generate(overrides: DeepPartial<HostMetadataInterface> = {}): HostMetadataInterface {
     const ts = overrides['@timestamp'] ?? new Date().getTime();
-    const hostName = this.randomHostname();
+    const hostName = overrides?.host?.hostname ?? this.randomHostname();
     const agentVersion = overrides?.agent?.version ?? this.randomVersion();
     const agentId = this.seededUUIDv4();
-    const isIsolated = this.randomBoolean(0.3);
+    const isIsolated = overrides?.Endpoint?.state?.isolation ?? this.randomBoolean(0.3);
     const capabilities: EndpointCapabilities[] = ['isolation'];
 
     // v8.4 introduced additional endpoint capabilities
@@ -33,6 +122,16 @@ export class EndpointMetadataGenerator extends BaseDataGenerator {
 
     if (gte(agentVersion, '8.6.0')) {
       capabilities.push('get_file');
+    }
+
+    // v8.8 introduced execute capability
+    if (gte(agentVersion, '8.8.0')) {
+      capabilities.push('execute');
+    }
+
+    // v8.9 introduced `upload` capability
+    if (gte(agentVersion, '8.9.0')) {
+      capabilities.push('upload_file');
     }
 
     const hostMetadataDoc: HostMetadataInterface = {
@@ -95,18 +194,34 @@ export class EndpointMetadataGenerator extends BaseDataGenerator {
     return merge(hostMetadataDoc, overrides);
   }
 
-  protected randomOsFields(): OSFields {
-    return this.randomChoice([
-      {
-        name: 'Windows',
-        full: 'Windows 10',
-        version: '10.0',
-        platform: 'Windows',
-        family: 'windows',
-        Ext: {
-          variant: 'Windows Pro',
+  /** Generates the complete `HostInfo` as returned by a call to the Endpoint host details api */
+  generateHostInfo(overrides: DeepPartial<HostInfoInterface> = {}): HostInfoInterface {
+    const hostInfo: HostInfoInterface = {
+      metadata: this.generate(),
+      host_status: HostStatus.HEALTHY,
+      policy_info: {
+        endpoint: {
+          id: 'policy-123',
+          revision: 4,
+        },
+        agent: {
+          applied: {
+            id: 'policy-123',
+            revision: 4,
+          },
+          configured: {
+            id: 'policy-123',
+            revision: 4,
+          },
         },
       },
+    };
+    return merge(hostInfo, overrides);
+  }
+
+  protected randomOsFields(): OSFields {
+    return this.randomChoice([
+      EndpointMetadataGenerator.windowsOSFields,
       {
         name: 'Windows',
         full: 'Windows Server 2016',
@@ -137,18 +252,8 @@ export class EndpointMetadataGenerator extends BaseDataGenerator {
           variant: 'Windows Server Release 2',
         },
       },
-      {
-        Ext: {
-          variant: 'Debian',
-        },
-        kernel: '4.19.0-21-cloud-amd64 #1 SMP Debian 4.19.249-2 (2022-06-30)',
-        name: 'Linux',
-        family: 'debian',
-        type: 'linux',
-        version: '10.12',
-        platform: 'debian',
-        full: 'Debian 10.12',
-      },
+      EndpointMetadataGenerator.linuxOSFields,
+      EndpointMetadataGenerator.macOSFields,
     ]);
   }
 }

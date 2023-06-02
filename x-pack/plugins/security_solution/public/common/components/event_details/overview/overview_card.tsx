@@ -6,76 +6,55 @@
  */
 
 import { EuiFlexGroup, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
-import React, { useState } from 'react';
+import React from 'react';
 
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
-import { ActionCell } from '../table/action_cell';
+import {
+  SecurityCellActions,
+  CellActionsMode,
+  SecurityCellActionsTrigger,
+} from '../../cell_actions';
 import type { EnrichedFieldInfo } from '../types';
 
 const ActionWrapper = euiStyled.div`
-  width: 0;
-  transform: translate(6px);
-  transition: transform 50ms ease-in-out;
   margin-left: ${({ theme }) => theme.eui.euiSizeS};
 `;
 
-const OverviewPanel = euiStyled(EuiPanel)<{
-  $isPopoverVisible: boolean;
-}>`
+const OverviewPanel = euiStyled(EuiPanel)`
   &&& {
     background-color: ${({ theme }) => theme.eui.euiColorLightestShade};
     padding: ${({ theme }) => theme.eui.euiSizeS};
     height: 78px;
   }
 
-  & {
-    .hoverActions-active {
-      .timelines__hoverActionButton,
-      .securitySolution__hoverActionButton {
-        opacity: 1;
-      }
+  &:hover {
+    .inlineActions {
+      opacity: 1;
+      width: auto;
+      transform: translate(0);
     }
-
-    &:hover {
-      .timelines__hoverActionButton,
-      .securitySolution__hoverActionButton {
-        opacity: 1;
-      }
-
-      ${ActionWrapper} {
-        width: auto;
-        transform: translate(0);
-      }
-    }
-
-    ${(props) =>
-      props.$isPopoverVisible &&
-      `
-      & ${ActionWrapper} {
-        width: auto;
-        transform: translate(0);
-      }
-    `}
   }
+
+  .inlineActions {
+    opacity: 0;
+    width: 0;
+    transform: translate(6px);
+    transition: transform 50ms ease-in-out;
+
+    &.inlineActions-popoverOpen {
+      opacity: 1;
+      width: auto;
+      transform: translate(0);
+    }
+   }
 `;
 
 interface OverviewCardProps {
-  isPopoverVisible?: boolean; // Prevent the hover actions from collapsing on each other when not directly hovered on
   title: string;
 }
 
-export const OverviewCard: React.FC<OverviewCardProps> = ({
-  title,
-  children,
-  isPopoverVisible = false, // default to false as this behavior is only really necessary in the situation without an overflow
-}) => (
-  <OverviewPanel
-    borderRadius="none"
-    hasShadow={false}
-    hasBorder={false}
-    paddingSize="s"
-    $isPopoverVisible={isPopoverVisible}
-  >
+export const OverviewCard: React.FC<OverviewCardProps> = ({ title, children }) => (
+  <OverviewPanel borderRadius="none" hasShadow={false} hasBorder={false} paddingSize="s">
     <EuiText size="s">{title}</EuiText>
     <EuiSpacer size="s" />
     {children}
@@ -106,25 +85,27 @@ export const OverviewCardWithActions: React.FC<OverviewCardWithActionsProps> = (
   contextId,
   dataTestSubj,
   enrichedFieldInfo,
-}) => {
-  const [isPopoverVisisble, setIsPopoverVisible] = useState(false);
+}) => (
+  <OverviewCard title={title}>
+    <EuiFlexGroup alignItems="center" gutterSize="none">
+      <ClampedContent data-test-subj={dataTestSubj}>{children}</ClampedContent>
 
-  return (
-    <OverviewCard title={title} isPopoverVisible={isPopoverVisisble}>
-      <EuiFlexGroup alignItems="center" gutterSize="none">
-        <ClampedContent data-test-subj={dataTestSubj}>{children}</ClampedContent>
-
-        <ActionWrapper>
-          <ActionCell
-            {...enrichedFieldInfo}
-            contextId={contextId}
-            setIsPopoverVisible={setIsPopoverVisible}
-            applyWidthAndPadding={false}
-          />
-        </ActionWrapper>
-      </EuiFlexGroup>
-    </OverviewCard>
-  );
-};
+      <ActionWrapper>
+        <SecurityCellActions
+          field={{
+            name: enrichedFieldInfo.data.field,
+            value: enrichedFieldInfo?.values,
+            type: enrichedFieldInfo.data.type,
+            aggregatable: enrichedFieldInfo.fieldFromBrowserField?.aggregatable,
+          }}
+          triggerId={SecurityCellActionsTrigger.DETAILS_FLYOUT}
+          mode={CellActionsMode.INLINE}
+          metadata={{ scopeId: contextId }}
+          visibleCellActions={3}
+        />
+      </ActionWrapper>
+    </EuiFlexGroup>
+  </OverviewCard>
+);
 
 OverviewCardWithActions.displayName = 'OverviewCardWithActions';

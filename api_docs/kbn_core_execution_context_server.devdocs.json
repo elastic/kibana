@@ -11,10 +11,18 @@
   "server": {
     "classes": [],
     "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
     "interfaces": [
       {
         "parentPluginId": "@kbn/core-execution-context-server",
-        "id": "def-server.ExecutionContextSetup",
+        "id": "def-common.ExecutionContextSetup",
         "type": "Interface",
         "tags": [],
         "label": "ExecutionContextSetup",
@@ -25,7 +33,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-execution-context-server",
-            "id": "def-server.ExecutionContextSetup.withContext",
+            "id": "def-common.ExecutionContextSetup.withContext",
             "type": "Function",
             "tags": [],
             "label": "withContext",
@@ -49,7 +57,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-execution-context-server",
-                "id": "def-server.ExecutionContextSetup.withContext.$1",
+                "id": "def-common.ExecutionContextSetup.withContext.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "context",
@@ -71,7 +79,7 @@
               },
               {
                 "parentPluginId": "@kbn/core-execution-context-server",
-                "id": "def-server.ExecutionContextSetup.withContext.$2",
+                "id": "def-common.ExecutionContextSetup.withContext.$2",
                 "type": "Function",
                 "tags": [],
                 "label": "fn",
@@ -89,7 +97,7 @@
           },
           {
             "parentPluginId": "@kbn/core-execution-context-server",
-            "id": "def-server.ExecutionContextSetup.getAsLabels",
+            "id": "def-common.ExecutionContextSetup.getAsLabels",
             "type": "Function",
             "tags": [],
             "label": "getAsLabels",
@@ -109,7 +117,7 @@
       },
       {
         "parentPluginId": "@kbn/core-execution-context-server",
-        "id": "def-server.IExecutionContextContainer",
+        "id": "def-common.IExecutionContextContainer",
         "type": "Interface",
         "tags": [],
         "label": "IExecutionContextContainer",
@@ -120,7 +128,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-execution-context-server",
-            "id": "def-server.IExecutionContextContainer.toString",
+            "id": "def-common.IExecutionContextContainer.toString",
             "type": "Function",
             "tags": [],
             "label": "toString",
@@ -136,7 +144,7 @@
           },
           {
             "parentPluginId": "@kbn/core-execution-context-server",
-            "id": "def-server.IExecutionContextContainer.toJSON",
+            "id": "def-common.IExecutionContextContainer.toJSON",
             "type": "Function",
             "tags": [],
             "label": "toJSON",
@@ -166,7 +174,7 @@
     "misc": [
       {
         "parentPluginId": "@kbn/core-execution-context-server",
-        "id": "def-server.ExecutionContextStart",
+        "id": "def-common.ExecutionContextStart",
         "type": "Type",
         "tags": [],
         "label": "ExecutionContextStart",
@@ -174,9 +182,9 @@
         "signature": [
           {
             "pluginId": "@kbn/core-execution-context-server",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreExecutionContextServerPluginApi",
-            "section": "def-server.ExecutionContextSetup",
+            "section": "def-common.ExecutionContextSetup",
             "text": "ExecutionContextSetup"
           }
         ],
@@ -186,14 +194,6 @@
         "initialIsOpen": false
       }
     ],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
     "objects": []
   }
 }

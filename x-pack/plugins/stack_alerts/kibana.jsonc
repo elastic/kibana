@@ -1,0 +1,28 @@
+{
+  "type": "plugin",
+  "id": "@kbn/stack-alerts-plugin",
+  "owner": "@elastic/response-ops",
+  "plugin": {
+    "id": "stackAlerts",
+    "server": true,
+    "browser": true,
+    "configPath": [
+      "xpack",
+      "stack_alerts"
+    ],
+    "requiredPlugins": [
+      "unifiedSearch",
+      "alerting",
+      "features",
+      "triggersActionsUi",
+      "kibanaReact",
+      "savedObjects",
+      "data",
+      "dataViews",
+      "kibanaUtils"
+    ],
+    "requiredBundles": [
+      "esUiShared"
+    ]
+  }
+}

@@ -8,31 +8,28 @@
 import { RuleTypeParams } from '@kbn/alerting-plugin/common';
 import { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
 import { EuiComboBoxOptionOption } from '@elastic/eui';
-import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
-import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
-import type { DataViewsPublicPluginStart, DataView } from '@kbn/data-views-plugin/public';
-import { EXPRESSION_ERRORS } from './constants';
-
-export interface Comparator {
-  text: string;
-  value: string;
-  requiredValues: number;
-}
+import type { DataView } from '@kbn/data-views-plugin/public';
 
 export enum SearchType {
   esQuery = 'esQuery',
   searchSource = 'searchSource',
 }
 
-export interface CommonRuleParams extends RuleTypeParams {
+export interface CommonRuleParams {
   size: number;
   thresholdComparator?: string;
   threshold: number[];
   timeWindowSize: number;
   timeWindowUnit: string;
+  aggType: string;
+  aggField?: string;
+  groupBy?: string;
+  termSize?: number;
+  termField?: string;
   excludeHitsFromPreviousRun: boolean;
 }
+
+export interface CommonEsQueryRuleParams extends RuleTypeParams, CommonRuleParams {}
 
 export interface EsQueryRuleMetaData {
   adHocDataViewList: DataView[];
@@ -40,8 +37,8 @@ export interface EsQueryRuleMetaData {
 }
 
 export type EsQueryRuleParams<T = SearchType> = T extends SearchType.searchSource
-  ? CommonRuleParams & OnlySearchSourceRuleParams
-  : CommonRuleParams & OnlyEsQueryRuleParams;
+  ? CommonEsQueryRuleParams & OnlySearchSourceRuleParams
+  : CommonEsQueryRuleParams & OnlyEsQueryRuleParams;
 
 export interface OnlyEsQueryRuleParams {
   esQuery: string;
@@ -50,20 +47,10 @@ export interface OnlyEsQueryRuleParams {
 }
 
 export interface OnlySearchSourceRuleParams {
+  timeField?: string;
   searchType?: 'searchSource';
   searchConfiguration?: SerializedSearchSourceFields;
   savedQueryId?: string;
 }
 
 export type DataViewOption = EuiComboBoxOptionOption<string>;
-
-export type ExpressionErrors = typeof EXPRESSION_ERRORS;
-
-export type ErrorKey = keyof ExpressionErrors & unknown;
-
-export interface TriggersAndActionsUiDeps {
-  dataViews: DataViewsPublicPluginStart;
-  unifiedSearch: UnifiedSearchPublicPluginStart;
-  data: DataPublicPluginStart;
-  dataViewEditor: DataViewEditorStart;
-}

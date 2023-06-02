@@ -6,22 +6,37 @@
  */
 
 import { suspendedComponentWithProps } from '../../../lib/suspended_component_with_props';
-import { RuleEventLogListTableWithApi } from '../../rule_details/components/rule_event_log_list_table';
+import {
+  RuleEventLogListTableWithApi,
+  RuleEventLogListCommonProps,
+} from '../../rule_details/components/rule_event_log_list_table';
 
 const GLOBAL_EVENT_LOG_LIST_STORAGE_KEY =
   'xpack.triggersActionsUI.globalEventLogList.initialColumns';
 
-export const LogsList = () => {
+export const LogsList = ({
+  setHeaderActions,
+}: {
+  setHeaderActions: RuleEventLogListCommonProps['setHeaderActions'];
+}) => {
   return suspendedComponentWithProps(
     RuleEventLogListTableWithApi,
     'xl'
   )({
     ruleId: '*',
-    refreshToken: 0,
+    refreshToken: {
+      resolve: () => {
+        /* noop */
+      },
+      reject: () => {
+        /* noop */
+      },
+    },
     initialPageSize: 50,
     hasRuleNames: true,
     hasAllSpaceSwitch: true,
     localStorageKey: GLOBAL_EVENT_LOG_LIST_STORAGE_KEY,
+    setHeaderActions,
   });
 };
 

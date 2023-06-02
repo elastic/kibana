@@ -22,7 +22,7 @@ jest.mock('../ml_api_service', () => ({
 
 const dataView = {
   id: 'cloudwatch-*',
-  title: 'cloudwatch-*',
+  getIndexPattern: () => 'cloudwatch-*',
 } as unknown as DataView;
 
 describe('new_job_capabilities_service', () => {

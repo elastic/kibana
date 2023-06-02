@@ -5,6 +5,10 @@
  * 2.0.
  */
 
+import {
+  PostLogstashPipelineRequestParams,
+  PostLogstashPipelineRequestPayload,
+} from '../../../common/http_api/logstash';
 import { LegacyRequest, PipelineVersion } from '../../types';
 import { getIndexPatterns, getLogstashDataset } from '../cluster/get_index_patterns';
 import { createQuery } from '../create_query';
@@ -163,7 +167,11 @@ export function getPipelineStatsAggregation({
   pipelineId,
   version,
 }: {
-  req: LegacyRequest;
+  req: LegacyRequest<
+    PostLogstashPipelineRequestParams,
+    unknown,
+    PostLogstashPipelineRequestPayload
+  >;
   timeseriesInterval: number;
   clusterUuid: string;
   pipelineId: string;
@@ -201,8 +209,8 @@ export function getPipelineStatsAggregation({
     },
   ];
 
-  const start = version.lastSeen - timeseriesInterval * 1000;
-  const end = version.lastSeen;
+  const start = req.payload.timeRange.min - timeseriesInterval * 1000;
+  const end = req.payload.timeRange.max;
 
   const dataset = 'node_stats';
   const type = 'logstash_stats';

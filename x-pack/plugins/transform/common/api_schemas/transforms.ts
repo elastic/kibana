@@ -7,7 +7,7 @@
 
 import { schema, TypeOf } from '@kbn/config-schema';
 
-import type { ES_FIELD_TYPES } from '@kbn/data-plugin/common';
+import type { ES_FIELD_TYPES } from '@kbn/field-types';
 
 import type { Dictionary } from '../types/common';
 import type { PivotAggDict } from '../types/pivot_aggs';
@@ -72,6 +72,8 @@ export const settingsSchema = schema.object({
   docs_per_second: schema.maybe(schema.nullable(schema.number())),
   // Optional value that takes precedence over cluster's setting.
   num_failure_retries: schema.maybe(schema.nullable(schema.number())),
+  // Unattended mode flag
+  unattended: schema.maybe(schema.boolean()),
 });
 
 export const sourceSchema = schema.object({

@@ -5,28 +5,104 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
+import { CONNECTOR_DEFINITIONS } from '../../../../../../common/connectors/connectors';
 
 import { docLinks } from '../../../../shared/doc_links';
+import { CONNECTOR_ICONS } from '../../../../shared/icons/connector_icons';
 
-import { NativeConnector } from './types';
+import { ConnectorClientSideDefinition } from './types';
 
-export const NATIVE_CONNECTORS: NativeConnector[] = [
-  {
+export const CONNECTORS_DICT: Record<string, ConnectorClientSideDefinition> = {
+  azure_blob_storage: {
+    docsUrl: docLinks.connectorsAzureBlobStorage,
+    externalAuthDocsUrl: 'https://learn.microsoft.com/azure/storage/common/authorize-data-access',
+    externalDocsUrl: 'https://learn.microsoft.com/azure/storage/blobs/',
+    icon: CONNECTOR_ICONS.azure_blob_storage,
+  },
+  confluence: {
+    docsUrl: docLinks.connectorsConfluence,
+    externalAuthDocsUrl: '',
+    externalDocsUrl: '',
+    icon: CONNECTOR_ICONS.confluence_cloud,
+  },
+  custom: {
+    docsUrl: docLinks.connectors,
+    externalAuthDocsUrl: '',
+    externalDocsUrl: '',
+    icon: CONNECTOR_ICONS.custom,
+  },
+  google_cloud_storage: {
+    docsUrl: docLinks.connectorsGoogleCloudStorage,
+    externalAuthDocsUrl: 'https://cloud.google.com/storage/docs/authentication',
+    externalDocsUrl: 'https://cloud.google.com/storage/docs',
+    icon: CONNECTOR_ICONS.google_cloud_storage,
+  },
+  jira: {
+    docsUrl: docLinks.connectorsJira,
+    externalAuthDocsUrl: '',
+    externalDocsUrl: '',
+    icon: CONNECTOR_ICONS.jira_cloud,
+  },
+  mongodb: {
     docsUrl: docLinks.connectorsMongoDB,
     externalAuthDocsUrl: 'https://www.mongodb.com/docs/atlas/app-services/authentication/',
     externalDocsUrl: 'https://www.mongodb.com/docs/',
-    name: i18n.translate('xpack.enterpriseSearch.content.nativeConnectors.mongodb.name', {
-      defaultMessage: 'MongoDB',
-    }),
-    serviceType: 'mongodb',
+    icon: CONNECTOR_ICONS.mongodb,
   },
-  {
+  mssql: {
+    docsUrl: docLinks.connectorsMicrosoftSQL,
+    externalAuthDocsUrl:
+      'https://learn.microsoft.com/sql/relational-databases/security/authentication-access/getting-started-with-database-engine-permissions',
+    externalDocsUrl: 'https://learn.microsoft.com/sql/',
+    icon: CONNECTOR_ICONS.microsoft_sql,
+  },
+  mysql: {
     docsUrl: docLinks.connectorsMySQL,
     externalDocsUrl: 'https://dev.mysql.com/doc/',
-    name: i18n.translate('xpack.enterpriseSearch.content.nativeConnectors.mysql.name', {
-      defaultMessage: 'MySQL',
-    }),
-    serviceType: 'mysql',
+    icon: CONNECTOR_ICONS.mysql,
   },
-];
+  network_drive: {
+    docsUrl: docLinks.connectorsNetworkDrive,
+    externalAuthDocsUrl: '',
+    externalDocsUrl: '',
+    icon: CONNECTOR_ICONS.network_drive,
+  },
+  oracle: {
+    docsUrl: docLinks.connectorsOracle,
+    externalAuthDocsUrl:
+      'https://docs.oracle.com/en/database/oracle/oracle-database/19/dbseg/index.html',
+    externalDocsUrl: 'https://docs.oracle.com/database/oracle/oracle-database/',
+    icon: CONNECTOR_ICONS.oracle,
+  },
+  postgresql: {
+    docsUrl: docLinks.connectorsPostgreSQL,
+    externalAuthDocsUrl: 'https://www.postgresql.org/docs/15/auth-methods.html',
+    externalDocsUrl: 'https://www.postgresql.org/docs/',
+    icon: CONNECTOR_ICONS.postgresql,
+  },
+  s3: {
+    docsUrl: docLinks.connectorsS3,
+    externalAuthDocsUrl: 'https://docs.aws.amazon.com/s3/index.html',
+    externalDocsUrl: '',
+    icon: CONNECTOR_ICONS.amazon_s3,
+  },
+  sharepoint: {
+    docsUrl: docLinks.connectorsSharepoint,
+    externalAuthDocsUrl: '',
+    externalDocsUrl: '',
+    icon: CONNECTOR_ICONS.sharepoint_online,
+  },
+};
+
+export const CONNECTORS = CONNECTOR_DEFINITIONS.map((connector) => ({
+  ...connector,
+  ...(connector.serviceType && CONNECTORS_DICT[connector.serviceType]
+    ? CONNECTORS_DICT[connector.serviceType]
+    : CONNECTORS_DICT.custom),
+}));
+
+export const CUSTOM_CONNECTORS = CONNECTORS.filter(({ isNative }) => !isNative);
+
+export const NATIVE_CONNECTORS = CONNECTORS.filter(({ isNative }) => isNative);
+
+export const BETA_CONNECTORS = CONNECTORS.filter(({ isBeta }) => isBeta);

@@ -39,7 +39,7 @@ export const BrushBadge: FC<BrushBadgeProps> = ({
     <div
       css={{
         position: 'absolute',
-        'margin-left': `${marginLeft}px`,
+        marginLeft: `${marginLeft}px`,
       }}
     >
       <EuiToolTip
@@ -57,7 +57,7 @@ export const BrushBadge: FC<BrushBadgeProps> = ({
         }
         position="top"
       >
-        <EuiBadge css={{ width, 'text-align': 'center' }}>{label}</EuiBadge>
+        <EuiBadge css={{ width, textAlign: 'center' }}>{label}</EuiBadge>
       </EuiToolTip>
     </div>
   );

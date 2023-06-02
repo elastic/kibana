@@ -1,0 +1,6 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/repo-file-maps",
+  "owner": "@elastic/kibana-operations",
+  "devOnly": true
+}

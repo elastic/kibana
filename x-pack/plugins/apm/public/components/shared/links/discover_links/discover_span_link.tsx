@@ -7,11 +7,10 @@
 
 import React, { ReactNode } from 'react';
 import { SPAN_ID } from '../../../../../common/es_fields/apm';
-import { Span } from '../../../../../typings/es_schemas/ui/span';
 import { DiscoverLink } from './discover_link';
 
-function getDiscoverQuery(span: Span) {
-  const query = `${SPAN_ID}:"${span.span.id}"`;
+function getDiscoverQuery(spanId: string) {
+  const query = `${SPAN_ID}:"${spanId}"`;
   return {
     _a: {
       interval: 'auto',
@@ -24,11 +23,11 @@ function getDiscoverQuery(span: Span) {
 }
 
 export function DiscoverSpanLink({
-  span,
+  spanId,
   children,
 }: {
-  readonly span: Span;
+  readonly spanId: string;
   children?: ReactNode;
 }) {
-  return <DiscoverLink query={getDiscoverQuery(span)} children={children} />;
+  return <DiscoverLink query={getDiscoverQuery(spanId)} children={children} />;
 }

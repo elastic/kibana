@@ -8,7 +8,7 @@
 
 import SimpleGit from 'simple-git';
 
-import { REPO_ROOT } from '@kbn/utils';
+import { REPO_ROOT } from '@kbn/repo-info';
 import { File } from '../file';
 
 /**

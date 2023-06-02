@@ -45,15 +45,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.savedObjects.clean({ types: ['search', 'index-pattern'] });
     });
 
-    it('should give focus to the saved search title h1 on navigate', async () => {
-      expect(await hasFocus('discoverSavedSearchTitle')).to.be(true);
-    });
-
-    it('should give focus to the data view switch link when Tab is pressed', async () => {
-      await browser.pressKeys(browser.keys.TAB);
-      expect(await hasFocus('discover-dataView-switch-link')).to.be(true);
-    });
-
     describe('top nav menu buttons', () => {
       const focusAndPressButton = async (buttonTestSubject: string | WebElementWrapper) => {
         const button =

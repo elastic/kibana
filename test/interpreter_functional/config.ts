@@ -7,17 +7,10 @@
  */
 
 import path from 'path';
-import fs from 'fs';
-import { FtrConfigProviderContext } from '@kbn/test';
+import { FtrConfigProviderContext, findTestPluginPaths } from '@kbn/test';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const functionalConfig = await readConfigFile(require.resolve('../functional/config.base.js'));
-
-  // Find all folders in ./plugins since we treat all them as plugin folder
-  const allFiles = fs.readdirSync(path.resolve(__dirname, 'plugins'));
-  const plugins = allFiles.filter((file) =>
-    fs.statSync(path.resolve(__dirname, 'plugins', file)).isDirectory()
-  );
 
   return {
     rootTags: ['runOutsideOfCiGroups'],
@@ -40,9 +33,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
 
         // Required to load new platform plugins via `--plugin-path` flag.
         '--env.name=development',
-        ...plugins.map(
-          (pluginDir) => `--plugin-path=${path.resolve(__dirname, 'plugins', pluginDir)}`
-        ),
+        ...findTestPluginPaths(path.resolve(__dirname, 'plugins')),
       ],
     },
   };

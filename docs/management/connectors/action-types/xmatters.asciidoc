@@ -1,10 +1,23 @@
 [[xmatters-action-type]]
-=== xMatters connector and action
+== xMatters connector and action
 ++++
 <titleabbrev>xMatters</titleabbrev>
 ++++
 
 The xMatters connector uses the https://help.xmatters.com/integrations/#cshid=Elastic[xMatters Workflow for Elastic] to send actionable alerts to on-call xMatters resources.
+
+[float]
+[[define-xmatters-ui]]
+=== Create connectors in {kib}
+
+You can create connectors in *{stack-manage-app} > {connectors-ui}*
+or as needed when you're creating a rule. You must choose between basic and URL authentication for the requests.
+
+[role="screenshot"]
+image::management/connectors/images/xmatters-connector-basic.png[xMatters connector with basic authentication]
+
+[role="screenshot"]
+image::management/connectors/images/xmatters-connector-url.png[xMatters connector with url authentication]
 
 [float]
 [[xmatters-connector-configuration]]
@@ -19,39 +32,39 @@ Username:: Username for HTTP Basic Authentication.
 Password:: Password for HTTP Basic Authentication.
 
 [float]
-[[xmatters-connector-networking-configuration]]
-==== Connector networking configuration
+[[preconfigured-xmatters-configuration]]
+=== Create preconfigured connectors
 
-Use the <<action-settings,Action configuration settings>> to customize connector networking configurations, such as proxies, certificates, or TLS settings. You can set configurations that apply to all your connectors or use `xpack.actions.customHostSettings` to set per-host configurations.
-
-[float]
-[[Preconfigured-xmatters-configuration]]
-==== Preconfigured connector type
+If you are running {kib} on-prem, you can define connectors by
+adding `xpack.actions.preconfigured` settings to your `kibana.yml` file.
+For example:
 
 Connector using Basic Authentication
 [source,text]
 --
- my-xmatters:
-   name: preconfigured-xmatters-connector-type
-   actionTypeId: .xmatters
-   config:
-     configUrl: https://test.host
-     usesBasic: true
-   secrets:
-     user: testuser
-     password: passwordkeystorevalue
+xpack.actions.preconfigured:
+  my-xmatters:
+    name: preconfigured-xmatters-connector-type
+    actionTypeId: .xmatters
+    config:
+      configUrl: https://test.host
+      usesBasic: true
+    secrets:
+      user: testuser
+      password: passwordkeystorevalue
 --
 
 Connector using URL Authentication
 [source,text]
 --
- my-xmatters:
-   name: preconfigured-xmatters-connector-type
-   actionTypeId: .xmatters
-   config:
-     usesBasic: false
-   secrets:
-     secretsUrl: https://test.host?apiKey=1234-abcd
+xpack.actions.preconfigured:
+  my-xmatters:
+    name: preconfigured-xmatters-connector-type
+    actionTypeId: .xmatters
+    config:
+      usesBasic: false
+    secrets:
+      secretsUrl: https://test.host?apiKey=1234-abcd
 --
 
 Config defines information for the connector type:
@@ -69,25 +82,14 @@ Secrets defines sensitive information for the connector type:
 `secretsUrl`:: A URL string that corresponds to *URL*. Only used if `usesBasic` is false, indicating the API key is included in the URL.
 
 [float]
-[[define-xmatters-ui]]
-==== Define connector in {stack-manage-app}
+[[xmatters-action-configuration]]
+=== Test connectors
 
-Define xMatters connector properties. Choose between basic and URL authentication for the requests:
-
-[role="screenshot"]
-image::management/connectors/images/xmatters-connector-basic.png[xMatters connector with basic authentication]
-
-[role="screenshot"]
-image::management/connectors/images/xmatters-connector-url.png[xMatters connector with url authentication]
-
-Test xMatters rule parameters:
+You can test connectors with the <<execute-connector-api,run connector API>> or
+as you're creating or editing the connector in {kib}. For example:
 
 [role="screenshot"]
 image::management/connectors/images/xmatters-params-test.png[xMatters params test]
-
-[float]
-[[xmatters-action-configuration]]
-==== Action configuration
 
 xMatters rules have the following properties:
 
@@ -95,8 +97,14 @@ Severity::                                                     Severity of the r
 Tags:: Comma-separated list of tags for the rule as provided by the user in Elastic.
 
 [float]
+[[xmatters-connector-networking-configuration]]
+=== Connector networking configuration
+
+Use the <<action-settings,Action configuration settings>> to customize connector networking configurations, such as proxies, certificates, or TLS settings. You can set configurations that apply to all your connectors or use `xpack.actions.customHostSettings` to set per-host configurations.
+
+[float]
 [[xmatters-benefits]]
-==== Configure xMatters
+=== Configure xMatters
 
 By integrating with xMatters, you can:
 

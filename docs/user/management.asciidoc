@@ -97,6 +97,9 @@ Viewer or Anomaly Explorer to see your {anomaly-detect} results.
 For example, you might create an alert when the maximum total CPU usage on a machine goes
 above a certain percentage.
 
+| <<maintenance-windows,Maintenance windows>>
+| Suppress rule notifications for scheduled periods of time.
+
 |===
 
 [float]
@@ -184,6 +187,8 @@ include::{kib-repo-dir}/management/action-types.asciidoc[]
 
 include::{kib-repo-dir}/management/managing-licenses.asciidoc[]
 
+include::{kib-repo-dir}/management/maintenance-windows/maintenance-windows.asciidoc[]
+
 include::{kib-repo-dir}/management/manage-data-views.asciidoc[]
 
 include::{kib-repo-dir}/management/numeral.asciidoc[]
@@ -199,6 +204,8 @@ include::{kib-repo-dir}/spaces/index.asciidoc[]
 include::{kib-repo-dir}/management/advanced-options.asciidoc[]
 
 include::{kib-repo-dir}/management/managing-tags.asciidoc[]
+
+include::{kib-repo-dir}/management/upgrade-assistant.asciidoc[]
 
 include::{kib-repo-dir}/management/watcher-ui/index.asciidoc[]
 

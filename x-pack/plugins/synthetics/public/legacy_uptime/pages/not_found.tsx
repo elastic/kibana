@@ -37,7 +37,10 @@ export const NotFoundPage = () => {
               </EuiTitle>
             }
             body={
-              <EuiButton href={history.createHref({ pathname: '/' })}>
+              <EuiButton
+                data-test-subj="syntheticsNotFoundPageBackToHomeButton"
+                href={history.createHref({ pathname: '/' })}
+              >
                 <FormattedMessage
                   defaultMessage="Back to home"
                   id="xpack.synthetics.notFountPage.homeLinkText"

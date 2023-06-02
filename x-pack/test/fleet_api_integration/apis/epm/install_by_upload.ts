@@ -8,6 +8,7 @@
 import fs from 'fs';
 import path from 'path';
 import expect from '@kbn/expect';
+import { INGEST_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
@@ -19,6 +20,7 @@ export default function (providerContext: FtrProviderContext) {
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const dockerServers = getService('dockerServers');
+  const esClient = getService('es');
 
   const testPkgArchiveTgz = path.join(
     path.dirname(__filename),
@@ -49,8 +51,14 @@ export default function (providerContext: FtrProviderContext) {
     '../fixtures/direct_upload_packages/apache_invalid_toplevel_mismatch_0.1.4.zip'
   );
 
+  const testPkgArchiveZipNewer = path.join(
+    path.dirname(__filename),
+    '../fixtures/direct_upload_packages/apache-0.1.5.zip'
+  );
+
   const testPkgName = 'apache';
   const testPkgVersion = '0.1.4';
+  const testPkgNewVersion = '0.1.5';
   const server = dockerServers.get('registry');
 
   const deletePackage = async (name: string, version: string) => {
@@ -68,15 +76,76 @@ export default function (providerContext: FtrProviderContext) {
       }
     });
 
-    it('should install a tar archive correctly', async function () {
+    async function uploadPackage() {
       const buf = fs.readFileSync(testPkgArchiveTgz);
-      const res = await supertest
+      return await supertest
         .post(`/api/fleet/epm/packages`)
         .set('kbn-xsrf', 'xxxx')
         .type('application/gzip')
         .send(buf)
         .expect(200);
+    }
+
+    it('should install a tar archive correctly', async function () {
+      const res = await uploadPackage();
       expect(res.body.items.length).to.be(30);
+    });
+
+    it('should upgrade when uploading a newer zip archive', async () => {
+      await uploadPackage();
+
+      const buf = fs.readFileSync(testPkgArchiveZipNewer);
+      const res = await supertest
+        .post(`/api/fleet/epm/packages`)
+        .set('kbn-xsrf', 'xxxx')
+        .type('application/zip')
+        .send(buf)
+        .expect(200);
+      expect(res.body.items.length).to.be(30);
+      expect(res.body.items.some((item: any) => item.id.includes(testPkgNewVersion)));
+
+      await deletePackage(testPkgName, testPkgNewVersion);
+    });
+
+    it('should clean up assets when uninstalling uploaded archive', async () => {
+      await uploadPackage();
+      await deletePackage(testPkgName, testPkgVersion);
+
+      const epmPackageRes = await esClient.search({
+        index: INGEST_SAVED_OBJECT_INDEX,
+        size: 0,
+        rest_total_hits_as_int: true,
+        query: {
+          bool: {
+            filter: [
+              {
+                term: {
+                  'epm-packages.name': testPkgName,
+                },
+              },
+            ],
+          },
+        },
+      });
+      const epmPackageAssetsRes = await esClient.search({
+        index: INGEST_SAVED_OBJECT_INDEX,
+        size: 0,
+        rest_total_hits_as_int: true,
+        query: {
+          bool: {
+            filter: [
+              {
+                term: {
+                  'epm-packages-assets.package_name': testPkgName,
+                },
+              },
+            ],
+          },
+        },
+      });
+
+      expect(epmPackageRes.hits.total).to.equal(0);
+      expect(epmPackageAssetsRes.hits.total).to.equal(0);
     });
 
     it('should install a zip archive correctly and package info should return correctly after validation', async function () {

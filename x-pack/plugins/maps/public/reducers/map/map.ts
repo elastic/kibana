@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { APP_ID } from '../../../common/constants';
 import {
   SET_SELECTED_LAYER,
   UPDATE_LAYER_ORDER,
@@ -46,6 +47,7 @@ import {
   TRACK_MAP_SETTINGS,
   UPDATE_MAP_SETTING,
   UPDATE_EDIT_STATE,
+  SET_EXECUTION_CONTEXT,
 } from '../../actions/map_action_constants';
 
 import { getDefaultMapSettings } from './default_map_settings';
@@ -63,6 +65,7 @@ import { startDataRequest, stopDataRequest, updateSourceDataRequest } from './da
 import { MapState } from './types';
 
 export const DEFAULT_MAP_STATE: MapState = {
+  executionContext: { name: APP_ID },
   ready: false,
   mapInitError: null,
   goto: null,
@@ -322,6 +325,12 @@ export function map(state: MapState = DEFAULT_MAP_STATE, action: Record<string, 
           embeddableSearchContext: action.embeddableSearchContext,
         },
       };
+    case SET_EXECUTION_CONTEXT: {
+      return {
+        ...state,
+        executionContext: action.executionContext,
+      };
+    }
     default:
       return state;
   }

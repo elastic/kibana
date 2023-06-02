@@ -1,0 +1,7 @@
+{
+  "id": "@kbn/box",
+  "type": "shared-common",
+  "description": "test fixture",
+  "devOnly": false,
+  "owner": "@elastic/kibana-operations",
+}

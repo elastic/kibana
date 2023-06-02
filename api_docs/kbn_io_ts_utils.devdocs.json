@@ -21,6 +21,85 @@
     "functions": [
       {
         "parentPluginId": "@kbn/io-ts-utils",
+        "id": "def-common.createLiteralValueFromUndefinedRT",
+        "type": "Function",
+        "tags": [],
+        "label": "createLiteralValueFromUndefinedRT",
+        "description": [],
+        "signature": [
+          "<LiteralValue extends string | number | boolean>(literalValue: LiteralValue) => ",
+          "Type",
+          "<LiteralValue, undefined, unknown>"
+        ],
+        "path": "packages/kbn-io-ts-utils/src/literal_value_from_undefined_rt/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/io-ts-utils",
+            "id": "def-common.createLiteralValueFromUndefinedRT.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "literalValue",
+            "description": [],
+            "signature": [
+              "LiteralValue"
+            ],
+            "path": "packages/kbn-io-ts-utils/src/literal_value_from_undefined_rt/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/io-ts-utils",
+        "id": "def-common.createRouteValidationFunction",
+        "type": "Function",
+        "tags": [],
+        "label": "createRouteValidationFunction",
+        "description": [],
+        "signature": [
+          "<DecodedValue, EncodedValue, InputValue>(runtimeType: ",
+          "Type",
+          "<DecodedValue, EncodedValue, InputValue>) => ",
+          {
+            "pluginId": "@kbn/core-http-server",
+            "scope": "common",
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-common.RouteValidationFunction",
+            "text": "RouteValidationFunction"
+          },
+          "<DecodedValue>"
+        ],
+        "path": "packages/kbn-io-ts-utils/src/route_validation/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/io-ts-utils",
+            "id": "def-common.createRouteValidationFunction.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "runtimeType",
+            "description": [],
+            "signature": [
+              "Type",
+              "<DecodedValue, EncodedValue, InputValue>"
+            ],
+            "path": "packages/kbn-io-ts-utils/src/route_validation/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/io-ts-utils",
         "id": "def-common.deepExactRt",
         "type": "Function",
         "tags": [],
@@ -113,6 +192,171 @@
               "ParseableType"
             ],
             "path": "packages/kbn-io-ts-utils/src/deep_exact_rt/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/io-ts-utils",
+        "id": "def-common.inRangeFromStringRt",
+        "type": "Function",
+        "tags": [],
+        "label": "inRangeFromStringRt",
+        "description": [],
+        "signature": [
+          "(start: number, end: number) => ",
+          "Type",
+          "<",
+          "Branded",
+          "<number, ",
+          {
+            "pluginId": "@kbn/io-ts-utils",
+            "scope": "common",
+            "docId": "kibKbnIoTsUtilsPluginApi",
+            "section": "def-common.InRangeBrand",
+            "text": "InRangeBrand"
+          },
+          ">, unknown, unknown>"
+        ],
+        "path": "packages/kbn-io-ts-utils/src/in_range_rt/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/io-ts-utils",
+            "id": "def-common.inRangeFromStringRt.$1",
+            "type": "number",
+            "tags": [],
+            "label": "start",
+            "description": [],
+            "signature": [
+              "number"
+            ],
+            "path": "packages/kbn-io-ts-utils/src/in_range_rt/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/io-ts-utils",
+            "id": "def-common.inRangeFromStringRt.$2",
+            "type": "number",
+            "tags": [],
+            "label": "end",
+            "description": [],
+            "signature": [
+              "number"
+            ],
+            "path": "packages/kbn-io-ts-utils/src/in_range_rt/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/io-ts-utils",
+        "id": "def-common.inRangeRt",
+        "type": "Function",
+        "tags": [],
+        "label": "inRangeRt",
+        "description": [],
+        "signature": [
+          "(start: number, end: number) => ",
+          "BrandC",
+          "<",
+          "NumberC",
+          ", ",
+          {
+            "pluginId": "@kbn/io-ts-utils",
+            "scope": "common",
+            "docId": "kibKbnIoTsUtilsPluginApi",
+            "section": "def-common.InRangeBrand",
+            "text": "InRangeBrand"
+          },
+          ">"
+        ],
+        "path": "packages/kbn-io-ts-utils/src/in_range_rt/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/io-ts-utils",
+            "id": "def-common.inRangeRt.$1",
+            "type": "number",
+            "tags": [],
+            "label": "start",
+            "description": [],
+            "signature": [
+              "number"
+            ],
+            "path": "packages/kbn-io-ts-utils/src/in_range_rt/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/io-ts-utils",
+            "id": "def-common.inRangeRt.$2",
+            "type": "number",
+            "tags": [],
+            "label": "end",
+            "description": [],
+            "signature": [
+              "number"
+            ],
+            "path": "packages/kbn-io-ts-utils/src/in_range_rt/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/io-ts-utils",
+        "id": "def-common.isGreaterOrEqualRt",
+        "type": "Function",
+        "tags": [],
+        "label": "isGreaterOrEqualRt",
+        "description": [],
+        "signature": [
+          "(value: number) => ",
+          "BrandC",
+          "<",
+          "NumberC",
+          ", ",
+          {
+            "pluginId": "@kbn/io-ts-utils",
+            "scope": "common",
+            "docId": "kibKbnIoTsUtilsPluginApi",
+            "section": "def-common.IsGreaterOrEqualBrand",
+            "text": "IsGreaterOrEqualBrand"
+          },
+          ">"
+        ],
+        "path": "packages/kbn-io-ts-utils/src/is_greater_or_equal/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/io-ts-utils",
+            "id": "def-common.isGreaterOrEqualRt.$1",
+            "type": "number",
+            "tags": [],
+            "label": "value",
+            "description": [],
+            "signature": [
+              "number"
+            ],
+            "path": "packages/kbn-io-ts-utils/src/is_greater_or_equal/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -289,6 +533,78 @@
     "interfaces": [
       {
         "parentPluginId": "@kbn/io-ts-utils",
+        "id": "def-common.InRangeBrand",
+        "type": "Interface",
+        "tags": [],
+        "label": "InRangeBrand",
+        "description": [],
+        "path": "packages/kbn-io-ts-utils/src/in_range_rt/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/io-ts-utils",
+            "id": "def-common.InRangeBrand.InRange",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "InRange",
+            "description": [],
+            "signature": [
+              "typeof ",
+              {
+                "pluginId": "@kbn/io-ts-utils",
+                "scope": "common",
+                "docId": "kibKbnIoTsUtilsPluginApi",
+                "section": "def-common.InRangeBrand",
+                "text": "InRangeBrand"
+              },
+              "[\"InRange\"]"
+            ],
+            "path": "packages/kbn-io-ts-utils/src/in_range_rt/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/io-ts-utils",
+        "id": "def-common.IsGreaterOrEqualBrand",
+        "type": "Interface",
+        "tags": [],
+        "label": "IsGreaterOrEqualBrand",
+        "description": [],
+        "path": "packages/kbn-io-ts-utils/src/is_greater_or_equal/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/io-ts-utils",
+            "id": "def-common.IsGreaterOrEqualBrand.IsGreaterOrEqual",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "IsGreaterOrEqual",
+            "description": [],
+            "signature": [
+              "typeof ",
+              {
+                "pluginId": "@kbn/io-ts-utils",
+                "scope": "common",
+                "docId": "kibKbnIoTsUtilsPluginApi",
+                "section": "def-common.IsGreaterOrEqualBrand",
+                "text": "IsGreaterOrEqualBrand"
+              },
+              "[\"IsGreaterOrEqual\"]"
+            ],
+            "path": "packages/kbn-io-ts-utils/src/is_greater_or_equal/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/io-ts-utils",
         "id": "def-common.NonEmptyStringBrand",
         "type": "Interface",
         "tags": [],
@@ -344,9 +660,120 @@
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/io-ts-utils",
+        "id": "def-common.InRange",
+        "type": "Type",
+        "tags": [],
+        "label": "InRange",
+        "description": [],
+        "signature": [
+          "number & ",
+          "Brand",
+          "<",
+          {
+            "pluginId": "@kbn/io-ts-utils",
+            "scope": "common",
+            "docId": "kibKbnIoTsUtilsPluginApi",
+            "section": "def-common.InRangeBrand",
+            "text": "InRangeBrand"
+          },
+          ">"
+        ],
+        "path": "packages/kbn-io-ts-utils/src/in_range_rt/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/io-ts-utils",
+        "id": "def-common.IsGreaterOrEqual",
+        "type": "Type",
+        "tags": [],
+        "label": "IsGreaterOrEqual",
+        "description": [],
+        "signature": [
+          "number & ",
+          "Brand",
+          "<",
+          {
+            "pluginId": "@kbn/io-ts-utils",
+            "scope": "common",
+            "docId": "kibKbnIoTsUtilsPluginApi",
+            "section": "def-common.IsGreaterOrEqualBrand",
+            "text": "IsGreaterOrEqualBrand"
+          },
+          ">"
+        ],
+        "path": "packages/kbn-io-ts-utils/src/is_greater_or_equal/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/io-ts-utils",
+        "id": "def-common.NonEmptyString",
+        "type": "Type",
+        "tags": [],
+        "label": "NonEmptyString",
+        "description": [],
+        "signature": [
+          "string & ",
+          "Brand",
+          "<",
+          {
+            "pluginId": "@kbn/io-ts-utils",
+            "scope": "common",
+            "docId": "kibKbnIoTsUtilsPluginApi",
+            "section": "def-common.NonEmptyStringBrand",
+            "text": "NonEmptyStringBrand"
+          },
+          ">"
+        ],
+        "path": "packages/kbn-io-ts-utils/src/non_empty_string_rt/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
       }
     ],
     "objects": [
+      {
+        "parentPluginId": "@kbn/io-ts-utils",
+        "id": "def-common.datemathStringRt",
+        "type": "Object",
+        "tags": [],
+        "label": "datemathStringRt",
+        "description": [],
+        "signature": [
+          "Type",
+          "<string, string, unknown>"
+        ],
+        "path": "packages/kbn-io-ts-utils/src/datemath_string_rt/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/io-ts-utils",
+        "id": "def-common.dateRt",
+        "type": "Object",
+        "tags": [],
+        "label": "dateRt",
+        "description": [],
+        "signature": [
+          "BrandC",
+          "<",
+          "StringC",
+          ", ",
+          "DateBrand",
+          ">"
+        ],
+        "path": "packages/kbn-io-ts-utils/src/date_rt/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "@kbn/io-ts-utils",
         "id": "def-common.indexPatternRt",

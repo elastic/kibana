@@ -8,7 +8,7 @@
 import { ApmMlDetectorType } from '@kbn/apm-plugin/common/anomaly_detection/apm_ml_detectors';
 import { ServiceAnomalyTimeseries } from '@kbn/apm-plugin/common/anomaly_detection/service_anomaly_timeseries';
 import { Environment } from '@kbn/apm-plugin/common/environment_rt';
-import { apm, timerange } from '@kbn/apm-synthtrace';
+import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import expect from '@kbn/expect';
 import { last, omit, range } from 'lodash';
 import { ApmApiError } from '../../common/apm_api_supertest';

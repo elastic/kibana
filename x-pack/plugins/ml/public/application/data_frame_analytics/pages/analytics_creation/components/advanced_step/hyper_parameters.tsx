@@ -8,9 +8,9 @@
 import React, { FC, Fragment } from 'react';
 import { EuiFieldNumber, EuiFlexItem, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { ANALYSIS_ADVANCED_FIELDS } from '@kbn/ml-data-frame-analytics-utils';
 import { CreateAnalyticsFormProps } from '../../../analytics_management/hooks/use_create_analytics_form';
 import { AdvancedParamErrors, getNumberValue } from './advanced_step_form';
-import { ANALYSIS_ADVANCED_FIELDS } from '../../../../common/analytics';
 
 const MAX_TREES_LIMIT = 2000;
 
@@ -366,7 +366,7 @@ export const HyperParameters: FC<Props> = ({ actions, state, advancedParamErrors
             'xpack.ml.dataframe.analytics.create.softTreeDepthToleranceText',
             {
               defaultMessage:
-                'Controls how quickly the loss increases when tree depths exceed soft limits. The smaller the value, the faster the loss increases. Must be greater than or equal to 0.01. ',
+                'Control how quickly the loss increases when tree depths exceed soft limits. The smaller the value, the faster the loss increases. Must be greater than or equal to 0.01. ',
             }
           )}
           isInvalid={

@@ -20,3 +20,31 @@ export const ERROR_FETCH_BROWSER_FIELDS = i18n.translate(
     defaultMessage: 'An error has occurred loading browser fields',
   }
 );
+
+export const ADD_TO_EXISTING_CASE = i18n.translate(
+  'xpack.triggersActionsUI.alerts.table.actions.addToCase',
+  {
+    defaultMessage: 'Add to existing case',
+  }
+);
+
+export const ADD_TO_NEW_CASE = i18n.translate(
+  'xpack.triggersActionsUI.alerts.table.actions.addToNewCase',
+  {
+    defaultMessage: 'Add to new case',
+  }
+);
+
+export const NO_ALERTS_ADDED_TO_CASE = i18n.translate(
+  'xpack.triggersActionsUI.alerts.table.actions.noAlertsAddedToCaseTitle',
+  {
+    defaultMessage: 'No alerts added to the case',
+  }
+);
+
+export const ALERTS_ALREADY_ATTACHED_TO_CASE = i18n.translate(
+  'xpack.triggersActionsUI.alerts.table.actions.alertsAlreadyAttachedToCase',
+  {
+    defaultMessage: 'All selected alerts are already attached to the case',
+  }
+);

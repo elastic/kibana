@@ -14,7 +14,7 @@ export function SectionError(props) {
   const { error: errorString, attributes, message } = data;
 
   return (
-    <EuiCallOut title={title} color="danger" iconType="alert" {...rest}>
+    <EuiCallOut title={title} color="danger" iconType="warning" {...rest}>
       <div>{message || errorString}</div>
       {attributes?.error?.root_cause && (
         <Fragment>

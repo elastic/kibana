@@ -8,17 +8,29 @@
 import React, { MouseEvent } from 'react';
 import { FormBasedPrivateState } from './types';
 import { FormBasedLayerPanelProps, LayerPanel } from './layerpanel';
-import { shallowWithIntl as shallow } from '@kbn/test-jest-helpers';
-import { ShallowWrapper } from 'enzyme';
+import { mountWithIntl as mount } from '@kbn/test-jest-helpers';
+import { ReactWrapper } from 'enzyme';
 import { EuiSelectable } from '@elastic/eui';
-import { DataViewsList } from '@kbn/unified-search-plugin/public';
+import { DataViewsList } from '@kbn/unified-search-plugin/public/dataview_picker/dataview_list';
 import { ChangeIndexPattern } from '../../shared_components/dataview_picker/dataview_picker';
 import { getFieldByNameFactory } from './pure_helpers';
 import { TermsIndexPatternColumn } from './operations';
+import { act } from 'react-dom/test-utils';
+import { TriggerButton } from '../../shared_components/dataview_picker/trigger';
+
+jest.mock('@kbn/unified-search-plugin/public', () => {
+  const actual = jest.requireActual('@kbn/unified-search-plugin/public');
+  return {
+    ...actual,
+    DataViewsList: jest.requireActual(
+      '@kbn/unified-search-plugin/public/dataview_picker/dataview_list'
+    ).DataViewsList,
+  };
+});
 
 interface IndexPatternPickerOption {
   label: string;
-  checked?: 'on' | 'off';
+  checked?: 'on' | 'off' | 'mixed';
 }
 
 const fieldsOne = [
@@ -217,18 +229,16 @@ describe('Layer Data Panel', () => {
     };
   });
 
-  function getIndexPatternPickerList(instance: ShallowWrapper) {
+  function getIndexPatternPickerList(instance: ReactWrapper) {
     return instance
       .find(ChangeIndexPattern)
       .first()
-      .dive()
       .find(DataViewsList)
       .first()
-      .dive()
       .find(EuiSelectable);
   }
 
-  function selectIndexPatternPickerOption(instance: ShallowWrapper, selectedLabel: string) {
+  function selectIndexPatternPickerOption(instance: ReactWrapper, selectedLabel: string) {
     const event = {} as MouseEvent;
     const options: IndexPatternPickerOption[] = getIndexPatternPickerOptions(instance).map(
       (option: IndexPatternPickerOption) =>
@@ -236,27 +246,40 @@ describe('Layer Data Panel', () => {
           ? { ...option, checked: 'on' }
           : { ...option, checked: undefined }
     );
-    return getIndexPatternPickerList(instance).prop('onChange')!(options, event);
+    const selectedOption = { label: selectedLabel };
+    return getIndexPatternPickerList(instance).prop('onChange')!(options, event, selectedOption);
   }
 
-  function getIndexPatternPickerOptions(instance: ShallowWrapper) {
+  function getIndexPatternPickerOptions(instance: ReactWrapper) {
     return getIndexPatternPickerList(instance).prop('options');
   }
 
   it('should list all index patterns', () => {
-    const instance = shallow(<LayerPanel {...defaultProps} />);
+    const instance = mount(<LayerPanel {...defaultProps} />);
+
+    act(() => {
+      instance.find(TriggerButton).prop('togglePopover')();
+    });
+    instance.update();
 
     expect(
       getIndexPatternPickerOptions(instance)!.map(
         (option: IndexPatternPickerOption) => option.label
       )
-    ).toEqual(['my-fake-index-pattern', 'my-fake-restricted-pattern', 'my-compatible-pattern']);
+    ).toEqual(['my-compatible-pattern', 'my-fake-index-pattern', 'my-fake-restricted-pattern']);
   });
 
   it('should switch data panel to target index pattern', () => {
-    const instance = shallow(<LayerPanel {...defaultProps} />);
+    const instance = mount(<LayerPanel {...defaultProps} />);
 
-    selectIndexPatternPickerOption(instance, 'my-compatible-pattern');
+    act(() => {
+      instance.find(TriggerButton).prop('togglePopover')();
+    });
+    instance.update();
+
+    act(() => {
+      selectIndexPatternPickerOption(instance, 'my-compatible-pattern');
+    });
 
     expect(defaultProps.onChangeIndexPattern).toHaveBeenCalledWith('3');
   });

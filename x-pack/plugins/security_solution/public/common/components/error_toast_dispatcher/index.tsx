@@ -31,7 +31,7 @@ const ErrorToastDispatcherComponent: React.FC<OwnProps> = ({ toastLifeTimeMs = 5
           toast: {
             color: 'danger',
             id,
-            iconType: 'alert',
+            iconType: 'error',
             title,
             errors: message,
             toastLifeTimeMs,

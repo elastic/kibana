@@ -40,7 +40,6 @@ export class RootRoute implements ServerRoute {
     return (status >= 200 && status <= 299) || status === 302;
   }
 
-  private static readonly POLL_ROUTE = '/';
   private static readonly STATUS_CODE: Record<Status, number> = {
     healthy: 200,
     unhealthy: 503,
@@ -78,13 +77,14 @@ export class RootRoute implements ServerRoute {
   }
 
   private async pollHost(host: string): Promise<HostStatus> {
-    const url = `${host}${RootRoute.POLL_ROUTE}`;
-    this.logger.debug(`Requesting ${url}`);
+    this.logger.debug(`Requesting '${host}'`);
 
     try {
-      const response = await this.fetch(url);
+      const response = await this.fetch(host);
       const status = RootRoute.isHealthy(response) ? 'healthy' : 'unhealthy';
-      this.logger.debug(`${capitalize(status)} response from ${url} with code ${response.status}`);
+      this.logger.debug(
+        `${capitalize(status)} response from '${host}' with code ${response.status}`
+      );
 
       return {
         host,
@@ -95,7 +95,7 @@ export class RootRoute implements ServerRoute {
       this.logger.error(error);
 
       if (error.name === 'AbortError') {
-        this.logger.error(`Request timeout for ${url}`);
+        this.logger.error(`Request timeout for '${host}'`);
 
         return {
           host,
@@ -103,7 +103,7 @@ export class RootRoute implements ServerRoute {
         };
       }
 
-      this.logger.error(`Failed response from ${url}: ${error.message}`);
+      this.logger.error(`Failed response from '${host}': ${error.message}`);
 
       return {
         host,

@@ -53,9 +53,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             );
           });
           it('follower index flyout', async () => {
-            // https://github.com/elastic/kibana/issues/135503
-            // Skipping this snapshot because there is an existing a11y violation.
-            // await a11y.testAppSnapshot();
+            await a11y.testAppSnapshot();
             await testSubjects.click('closeFlyoutButton');
             await retry.waitFor('follower index table to be visible', async () => {
               return await (await find.byCssSelector('table')).isDisplayed();
@@ -86,9 +84,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             );
           });
           it('auto follower index flyout', async () => {
-            // https://github.com/elastic/kibana/issues/135506
-            // Skipping this snapshot because there is an existing a11y violation.
-            // await a11y.testAppSnapshot();
+            await a11y.testAppSnapshot();
             await testSubjects.click('closeFlyoutButton');
             await retry.waitFor('auto follower index table to be visible', async () => {
               return await (await find.byCssSelector('table')).isDisplayed();

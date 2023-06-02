@@ -6,21 +6,28 @@
  */
 
 import { ElasticsearchIndexWithIngestion } from '../../../../../common/types/indices';
-import { createApiLogic } from '../../../shared/api_logic/create_api_logic';
+import { Actions, createApiLogic } from '../../../shared/api_logic/create_api_logic';
 import { HttpLogic } from '../../../shared/http';
 
 export interface FetchIndexApiParams {
   indexName: string;
 }
 
-export type FetchIndexApiResponse = ElasticsearchIndexWithIngestion;
+export type FetchIndexApiResponse = ElasticsearchIndexWithIngestion & {
+  has_in_progress_syncs?: boolean;
+};
 
 export const fetchIndex = async ({
   indexName,
 }: FetchIndexApiParams): Promise<FetchIndexApiResponse> => {
   const route = `/internal/enterprise_search/indices/${indexName}`;
 
-  return await HttpLogic.values.http.get<ElasticsearchIndexWithIngestion>(route);
+  return await HttpLogic.values.http.get<FetchIndexApiResponse>(route);
 };
 
-export const FetchIndexApiLogic = createApiLogic(['fetch_index_api_logic'], fetchIndex);
+export const FetchIndexApiLogic = createApiLogic(['fetch_index_api_logic'], fetchIndex, {
+  clearFlashMessagesOnMakeRequest: false,
+  showErrorFlash: false,
+});
+
+export type FetchIndexActions = Actions<FetchIndexApiParams, FetchIndexApiResponse>;

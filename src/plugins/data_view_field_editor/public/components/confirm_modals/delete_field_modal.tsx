@@ -99,7 +99,12 @@ export function DeleteFieldModal({ fieldsToDelete, closeModal, confirmDelete }: 
       confirmButtonText={confirmButtonText}
       confirmButtonDisabled={confirmContent?.toUpperCase() !== 'REMOVE'}
     >
-      <EuiCallOut color="warning" title={i18nTexts.warningRemovingFields} iconType="alert" size="s">
+      <EuiCallOut
+        color="warning"
+        title={i18nTexts.warningRemovingFields}
+        iconType="warning"
+        size="s"
+      >
         {isMultiple && (
           <>
             <p>{warningMultipleFields}</p>

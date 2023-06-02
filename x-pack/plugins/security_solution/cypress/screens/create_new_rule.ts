@@ -13,20 +13,21 @@ export const ABOUT_EDIT_TAB = '[data-test-subj="edit-rule-about-tab"]';
 
 export const ACTIONS_EDIT_TAB = '[data-test-subj="edit-rule-actions-tab"]';
 
-export const ACTIONS_THROTTLE_INPUT =
-  '[data-test-subj="stepRuleActions"] [data-test-subj="select"]';
-
 export const ADD_FALSE_POSITIVE_BTN =
   '[data-test-subj="detectionEngineStepAboutRuleFalsePositives"] .euiButtonEmpty__text';
 
 export const ADD_REFERENCE_URL_BTN =
   '[data-test-subj="detectionEngineStepAboutRuleReferenceUrls"] .euiButtonEmpty__text';
 
+export const ALERT_SUPPRESSION_FIELDS =
+  '[data-test-subj="alertSuppressionInput"] [data-test-subj="comboBoxInput"]';
+
+export const ALERT_SUPPRESSION_DURATION_OPTIONS =
+  '[data-test-subj="alertSuppressionDuration"] [data-test-subj="groupByDurationOptions"]';
+
 export const ANOMALY_THRESHOLD_INPUT = '[data-test-subj="anomalyThresholdSlider"] .euiFieldNumber';
 
 export const ADVANCED_SETTINGS_BTN = '[data-test-subj="advancedSettings"] .euiAccordion__button';
-
-export const BACK_TO_ALL_RULES_LINK = '[data-test-subj="ruleDetailsBackToAllRules"]';
 
 export const COMBO_BOX_CLEAR_BTN = '[data-test-subj="comboBoxClearButton"]';
 
@@ -91,6 +92,8 @@ export const EQL_QUERY_INPUT = '[data-test-subj="eqlQueryBarTextInput"]';
 
 export const EQL_QUERY_VALIDATION_SPINNER = '[data-test-subj="eql-validation-loading"]';
 
+export const EQL_QUERY_VALIDATION_ERROR = '[data-test-subj="eql-validation-errors-popover-button"]';
+
 export const IMPORT_QUERY_FROM_SAVED_TIMELINE_LINK =
   '[data-test-subj="importQueryFromSavedTimeline"]';
 
@@ -112,6 +115,8 @@ export const LOOK_BACK_TIME_TYPE =
 
 export const MACHINE_LEARNING_DROPDOWN_INPUT =
   '[data-test-subj="mlJobSelect"] [data-test-subj="comboBoxInput"]';
+
+export const MACHINE_LEARNING_DROPDOWN_OPTION = '[data-test-subj="comboBoxOptionsList "] button';
 
 export const MACHINE_LEARNING_TYPE = '[data-test-subj="machineLearningRuleType"]';
 
@@ -144,7 +149,7 @@ export const RISK_OVERRIDE =
 
 export const RULES_CREATION_FORM = '[data-test-subj="stepDefineRule"]';
 
-export const RULES_CREATION_PREVIEW_BUTTON = '[data-test-subj="preview-flyout"]';
+export const RULES_CREATION_PREVIEW_BUTTON = '[data-test-subj="preview-container"]';
 
 export const RULES_CREATION_PREVIEW_REFRESH_BUTTON = '[data-test-subj="previewSubmitButton"]';
 
@@ -228,3 +233,8 @@ export const savedQueryByName = (savedQueryName: string) =>
 
 export const APPLY_SELECTED_SAVED_QUERY_BUTTON =
   '[data-test-subj="saved-query-management-apply-changes-button"]';
+
+export const RULE_INDICES =
+  '[data-test-subj="detectionEngineStepDefineRuleIndices"] [data-test-subj="comboBoxInput"]';
+
+export const ALERTS_INDEX_BUTTON = 'span[title=".alerts-security.alerts-default"] button';

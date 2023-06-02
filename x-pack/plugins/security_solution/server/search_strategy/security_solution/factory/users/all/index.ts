@@ -42,7 +42,6 @@ export const allUsers: SecuritySolutionFactory<UsersQueries.users> = {
     deps?: {
       esClient: IScopedClusterClient;
       spaceId?: string;
-      // endpointContext: EndpointAppContext;
     }
   ): Promise<UsersStrategyResponse> => {
     const { activePage, cursorStart, fakePossibleCount, querySize } = options.pagination;
@@ -117,7 +116,7 @@ async function enhanceEdges(
     : edges;
 }
 
-async function getUserRiskData(
+export async function getUserRiskData(
   esClient: IScopedClusterClient,
   spaceId: string,
   userNames: string[]

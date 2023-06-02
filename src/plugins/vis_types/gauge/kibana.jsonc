@@ -1,0 +1,28 @@
+{
+  "type": "plugin",
+  "id": "@kbn/vis-type-gauge-plugin",
+  "owner": "@elastic/kibana-visualizations",
+  "description": "Contains the gauge chart implementation using the elastic-charts library. The goal is to eventually deprecate the old implementation and keep only this. Until then, the library used is defined by the Legacy charts library advanced setting.",
+  "plugin": {
+    "id": "visTypeGauge",
+    "server": true,
+    "browser": true,
+    "requiredPlugins": [
+      "charts",
+      "data",
+      "expressions",
+      "visualizations",
+      "dataViews"
+    ],
+    "optionalPlugins": [
+      "expressionGauge"
+    ],
+    "requiredBundles": [
+      "visDefaultEditor",
+      "kibanaUtils"
+    ],
+    "extraPublicDirs": [
+      "common"
+    ]
+  }
+}

@@ -6,7 +6,7 @@
 
 Returns all user activity for a case.
 
-deprecated::[8.1.0]
+deprecated::[8.1.0,Use <<cases-api-find-case-activity>> instead.]
 
 [NOTE]
 ====

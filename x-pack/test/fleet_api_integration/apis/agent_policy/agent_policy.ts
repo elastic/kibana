@@ -17,6 +17,7 @@ export default function (providerContext: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
+  const es = getService('es');
 
   describe('fleet_agent_policies', () => {
     skipIfNoDockerRegistry(providerContext);
@@ -58,7 +59,9 @@ export default function (providerContext: FtrProviderContext) {
 
         const { body } = await supertest.get(`/api/fleet/agent_policies/${createdPolicy.id}`);
         expect(body.item.is_managed).to.equal(false);
+        expect(body.item.inactivity_timeout).to.equal(1209600);
         expect(body.item.status).to.be('active');
+        expect(body.item.is_protected).to.equal(false);
       });
 
       it('sets given is_managed value', async () => {
@@ -93,6 +96,67 @@ export default function (providerContext: FtrProviderContext) {
           body: { item: policy2 },
         } = await supertest.get(`/api/fleet/agent_policies/${createdPolicy2.id}`);
         expect(policy2.is_managed).to.equal(false);
+      });
+
+      it('does not allow arbitrary config in agent_features value', async () => {
+        await supertest
+          .post(`/api/fleet/agent_policies`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'test-agent-features',
+            namespace: 'default',
+            agent_features: [
+              {
+                name: 'fqdn',
+                enabled: true,
+                config: "I'm not allowed yet",
+              },
+            ],
+          })
+          .expect(400);
+      });
+
+      it('sets given agent_features value', async () => {
+        const {
+          body: { item: createdPolicy },
+        } = await supertest
+          .post(`/api/fleet/agent_policies`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'test-agent-features',
+            namespace: 'default',
+            agent_features: [
+              {
+                name: 'fqdn',
+                enabled: true,
+              },
+            ],
+          })
+          .expect(200);
+
+        const { body } = await supertest.get(`/api/fleet/agent_policies/${createdPolicy.id}`);
+        expect(body.item.agent_features).to.eql([
+          {
+            name: 'fqdn',
+            enabled: true,
+          },
+        ]);
+
+        const policyDocRes = await es.search({
+          index: '.fleet-policies',
+          query: {
+            term: {
+              policy_id: createdPolicy.id,
+            },
+          },
+        });
+
+        // @ts-expect-error
+        expect(policyDocRes?.hits?.hits[0]?._source?.data?.agent?.features).to.eql({
+          fqdn: {
+            enabled: true,
+          },
+        });
       });
 
       it('should return a 400 with an empty namespace', async () => {
@@ -323,6 +387,7 @@ export default function (providerContext: FtrProviderContext) {
           status: 'active',
           description: 'Test',
           is_managed: false,
+          is_protected: false,
           namespace: 'default',
           monitoring_enabled: ['logs', 'metrics'],
           revision: 1,
@@ -609,6 +674,7 @@ export default function (providerContext: FtrProviderContext) {
             name: 'Updated name',
             description: 'Updated description',
             namespace: 'default',
+            is_protected: true,
           })
           .expect(200);
         createdPolicyIds.push(updatedPolicy.id);
@@ -624,7 +690,9 @@ export default function (providerContext: FtrProviderContext) {
           revision: 2,
           schema_version: FLEET_AGENT_POLICIES_SCHEMA_VERSION,
           updated_by: 'elastic',
+          inactivity_timeout: 1209600,
           package_policies: [],
+          is_protected: true,
         });
       });
 
@@ -787,6 +855,7 @@ export default function (providerContext: FtrProviderContext) {
           updated_by: 'elastic',
           package_policies: [],
           monitoring_enabled: ['logs', 'metrics'],
+          inactivity_timeout: 1209600,
         });
 
         const listResponseAfterUpdate = await fetchPackageList();

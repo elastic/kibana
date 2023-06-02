@@ -26,14 +26,12 @@ const TopNContainer = styled.div`
 `;
 
 const CloseButton = styled(EuiButtonIcon)`
-  z-index: 999999;
   position: absolute;
   right: 4px;
   top: 4px;
 `;
 
 const ViewSelect = styled(EuiSuperSelect)`
-  z-index: 999999;
   width: 170px;
 `;
 
@@ -145,6 +143,7 @@ const TopNComponent: React.FC<Props> = ({
             toggleTopN={toggleTopN}
             scopeId={scopeId}
             to={to}
+            hideQueryToggle
           />
         ) : (
           <SignalsByCategory
@@ -157,6 +156,7 @@ const TopNComponent: React.FC<Props> = ({
             showLegend={showLegend}
             setAbsoluteRangeDatePickerTarget={setAbsoluteRangeDatePickerTarget}
             runtimeMappings={runtimeMappings}
+            hideQueryToggle
           />
         )}
       </TopNContent>

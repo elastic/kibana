@@ -15,7 +15,9 @@ import type { CommandExecutionComponentProps } from '../../types';
 /**
  * Builtin component that handles the output of command's `--help` argument
  */
-export const HelpCommandArgument = memo<CommandExecutionComponentProps>((props) => {
+export const HelpCommandArgument = memo<
+  CommandExecutionComponentProps<{}, { errorMessage?: string }>
+>((props) => {
   const CustomCommandHelp = props.command.commandDefinition.HelpComponent;
 
   useEffect(() => {
@@ -37,7 +39,10 @@ export const HelpCommandArgument = memo<CommandExecutionComponentProps>((props) 
         }
       )}
     >
-      <CommandUsage commandDef={props.command.commandDefinition} />
+      <CommandUsage
+        commandDef={props.command.commandDefinition}
+        errorMessage={props.store.errorMessage}
+      />
     </HelpOutput>
   );
 });

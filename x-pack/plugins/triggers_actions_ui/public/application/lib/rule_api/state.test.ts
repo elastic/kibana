@@ -7,7 +7,7 @@
 
 import { httpServiceMock } from '@kbn/core/public/mocks';
 import { loadRuleState } from './state';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 
 const http = httpServiceMock.createStartContract();
 
@@ -15,7 +15,7 @@ describe('loadRuleState', () => {
   beforeEach(() => jest.resetAllMocks());
 
   test('should call get API with base parameters', async () => {
-    const ruleId = uuid.v4();
+    const ruleId = uuidv4();
     const resolvedValue = {
       alertTypeState: {
         some: 'value',
@@ -40,7 +40,7 @@ describe('loadRuleState', () => {
   });
 
   test('should parse RuleInstances', async () => {
-    const ruleId = uuid.v4();
+    const ruleId = uuidv4();
     const resolvedValue = {
       alertTypeState: {
         some: 'value',
@@ -92,7 +92,7 @@ describe('loadRuleState', () => {
   });
 
   test('should handle empty response from api', async () => {
-    const ruleId = uuid.v4();
+    const ruleId = uuidv4();
     http.get.mockResolvedValueOnce('');
 
     expect(await loadRuleState({ http, ruleId })).toEqual({});

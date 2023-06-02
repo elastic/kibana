@@ -18,12 +18,10 @@ import {
   ServiceStatusLevels,
   CoreStatus,
 } from '@kbn/core/server';
-import type { SavedObjectsBulkDeleteResponse } from '@kbn/core/server';
 import { TaskPollingLifecycle } from './polling_lifecycle';
 import { TaskManagerConfig } from './config';
 import { createInitialMiddleware, addMiddlewareToChain, Middleware } from './lib/middleware';
 import { removeIfExists } from './lib/remove_if_exists';
-import { bulkRemoveIfExist } from './lib/bulk_remove_if_exist';
 import { setupSavedObjects } from './saved_objects';
 import { TaskDefinitionRegistry, TaskTypeDictionary, REMOVED_TYPES } from './task_type_dictionary';
 import { AggregationOpts, FetchResult, SearchOpts, TaskStore } from './task_store';
@@ -61,10 +59,8 @@ export type TaskManagerStartContract = Pick<
   | 'bulkDisable'
   | 'bulkSchedule'
 > &
-  Pick<TaskStore, 'fetch' | 'aggregate' | 'get' | 'remove'> & {
+  Pick<TaskStore, 'fetch' | 'aggregate' | 'get' | 'remove' | 'bulkRemove'> & {
     removeIfExists: TaskStore['remove'];
-  } & {
-    bulkRemoveIfExist: (ids: string[]) => Promise<SavedObjectsBulkDeleteResponse | undefined>;
   } & {
     supportsEphemeralTasks: () => boolean;
     getRegisteredTypes: () => string[];
@@ -131,10 +127,11 @@ export class TaskManagerPlugin
       config: this.config!,
       usageCounter: this.usageCounter!,
       kibanaVersion: this.kibanaVersion,
-      kibanaIndexName: core.savedObjects.getKibanaIndex(),
+      kibanaIndexName: core.savedObjects.getDefaultIndex(),
       getClusterClient: () =>
         startServicesPromise.then(({ elasticsearch }) => elasticsearch.client),
       shouldRunTasks: this.shouldRunBackgroundTasks,
+      docLinks: core.docLinks,
     });
     const monitoredUtilization$ = backgroundTaskUtilizationRoute({
       router,
@@ -144,7 +141,7 @@ export class TaskManagerPlugin
       config: this.config!,
       usageCounter: this.usageCounter!,
       kibanaVersion: this.kibanaVersion,
-      kibanaIndexName: core.savedObjects.getKibanaIndex(),
+      kibanaIndexName: core.savedObjects.getDefaultIndex(),
       getClusterClient: () =>
         startServicesPromise.then(({ elasticsearch }) => elasticsearch.client),
     });
@@ -183,14 +180,16 @@ export class TaskManagerPlugin
       );
     }
 
+    if (this.config.unsafe.authenticate_background_task_utilization === false) {
+      this.logger.warn(`Disabling authentication for background task utilization API`);
+    }
+
     return {
       index: TASK_MANAGER_INDEX,
       addMiddleware: (middleware: Middleware) => {
-        this.assertStillInSetup('add Middleware');
         this.middleware = addMiddlewareToChain(this.middleware, middleware);
       },
       registerTaskDefinitions: (taskDefinition: TaskDefinitionRegistry) => {
-        this.assertStillInSetup('register task definitions');
         this.definitions.registerTaskDefinitions(taskDefinition);
       },
     };
@@ -200,6 +199,7 @@ export class TaskManagerPlugin
     savedObjects,
     elasticsearch,
     executionContext,
+    docLinks,
   }: CoreStart): TaskManagerStartContract {
     const savedObjectsRepository = savedObjects.createInternalRepository(['task']);
 
@@ -273,7 +273,7 @@ export class TaskManagerPlugin
         taskStore.aggregate(opts),
       get: (id: string) => taskStore.get(id),
       remove: (id: string) => taskStore.remove(id),
-      bulkRemoveIfExist: (ids: string[]) => bulkRemoveIfExist(taskStore, ids),
+      bulkRemove: (ids: string[]) => taskStore.bulkRemove(ids),
       removeIfExists: (id: string) => removeIfExists(taskStore, id),
       schedule: (...args) => taskScheduling.schedule(...args),
       bulkSchedule: (...args) => taskScheduling.bulkSchedule(...args),
@@ -287,18 +287,6 @@ export class TaskManagerPlugin
         this.config.ephemeral_tasks.enabled && this.shouldRunBackgroundTasks,
       getRegisteredTypes: () => this.definitions.getAllTypes(),
     };
-  }
-
-  /**
-   * Ensures task manager hasn't started
-   *
-   * @param {string} the name of the operation being executed
-   * @returns void
-   */
-  private assertStillInSetup(operation: string) {
-    if (this.taskPollingLifecycle?.isStarted) {
-      throw new Error(`Cannot ${operation} after the task manager has started`);
-    }
   }
 }
 

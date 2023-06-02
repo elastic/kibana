@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { DecoratorFn } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import type { HttpStart, HttpFetchOptions, HttpHandler } from '@kbn/core/public';
@@ -15,7 +15,7 @@ import {
 } from '../../public/application/sections/rule_details/components/test_helpers';
 
 const getMockRule = () => {
-  const id = uuid.v4();
+  const id = uuidv4();
   return {
     id,
     name: `test rule - ${id}`,
@@ -108,7 +108,8 @@ const mockHealth = {
 };
 
 const mockAggregation = {
-  rule_execution_status: { ok: 0, active: 0, error: 0, pending: 0, unknown: 0, warning: 0 },
+  rule_execution_status: { ok: 5, active: 0, error: 0, pending: 0, unknown: 0, warning: 0 },
+  rule_last_run_outcome: { succeeded: 5, failed: 0, warning: 0 },
   rule_enabled_status: { enabled: 0, disabled: 0 },
   rule_muted_status: { muted: 0, unmuted: 0 },
   rule_snoozed_status: { snoozed: 0 },
@@ -174,7 +175,7 @@ const baseRulesListGetResponse = (path: string) => {
   }
 };
 
-const emptyRulesListGetResponse = (path: string) => {
+const emptyRulesListResponse = (path: string) => {
   if (path === '/internal/alerting/rules/_find') {
     return {
       data: [],
@@ -183,10 +184,12 @@ const emptyRulesListGetResponse = (path: string) => {
       total: 0,
     };
   }
-  return baseRulesListGetResponse(path);
+  if (path === '/internal/alerting/rules/_aggregate') {
+    return mockAggregation;
+  }
 };
 
-const rulesListGetResponse = (path: string) => {
+const rulesListResponse = (path: string) => {
   if (path === '/internal/alerting/rules/_find') {
     return {
       data: [getMockRule(), getMockRule(), getMockRule(), getMockRule()],
@@ -195,10 +198,12 @@ const rulesListGetResponse = (path: string) => {
       total: 4,
     };
   }
-  return baseRulesListGetResponse(path);
+  if (path === '/internal/alerting/rules/_aggregate') {
+    return mockAggregation;
+  }
 };
 
-const rulesListGetPaginatedResponse = (path: string) => {
+const rulesListPaginatedResponse = (path: string) => {
   if (path === '/internal/alerting/rules/_find') {
     return {
       data: Array.from(Array(10), () => getMockRule()),
@@ -207,7 +212,9 @@ const rulesListGetPaginatedResponse = (path: string) => {
       total: 50,
     };
   }
-  return baseRulesListGetResponse(path);
+  if (path === '/internal/alerting/rules/_aggregate') {
+    return mockAggregation;
+  }
 };
 
 const baseEventLogListGetResponse = (path: string) => {
@@ -275,19 +282,32 @@ const paginatedEventLogListGetResponse = (path: string) => {
   return baseEventLogListGetResponse(path);
 };
 
+const rulesSettingsGetResponse = (path: string) => {
+  if (path.endsWith('/settings/_flapping')) {
+    return {
+      enabled: true,
+      look_back_window: 20,
+      status_change_threshold: 4,
+    };
+  }
+};
+
+const rulesSettingsIds = [
+  'app-rulessettingslink--with-all-permission',
+  'app-rulessettingslink--with-read-permission',
+  'app-rulessettingslink--with-no-permission',
+];
+
+const rulesListIds = [
+  'app-ruleslist--empty',
+  'app-ruleslist--with-rules',
+  'app-ruleslist--with-paginated-rules',
+];
+
 export const getHttp = (context: Parameters<DecoratorFn>[1]) => {
   return {
     get: (async (path: string, options: HttpFetchOptions) => {
       const { id } = context;
-      if (id === 'app-ruleslist--empty') {
-        return emptyRulesListGetResponse(path);
-      }
-      if (id === 'app-ruleslist--with-rules') {
-        return rulesListGetResponse(path);
-      }
-      if (id === 'app-ruleslist--with-paginated-rules') {
-        return rulesListGetPaginatedResponse(path);
-      }
       if (id === 'app-ruleeventloglist--empty') {
         return emptyEventLogListGetResponse(path);
       }
@@ -297,9 +317,26 @@ export const getHttp = (context: Parameters<DecoratorFn>[1]) => {
       if (id === 'app-ruleeventloglist--with-paginated-events') {
         return paginatedEventLogListGetResponse(path);
       }
+      if (rulesListIds.includes(id)) {
+        return baseRulesListGetResponse(path);
+      }
+      if (rulesSettingsIds.includes(id)) {
+        return rulesSettingsGetResponse(path);
+      }
     }) as HttpHandler,
     post: (async (path: string, options: HttpFetchOptions) => {
+      const { id } = context;
+      if (id === 'app-ruleslist--empty') {
+        return emptyRulesListResponse(path);
+      }
+      if (id === 'app-ruleslist--with-rules') {
+        return rulesListResponse(path);
+      }
+      if (id === 'app-ruleslist--with-paginated-rules') {
+        return rulesListPaginatedResponse(path);
+      }
       action('POST')(path, options);
+      return Promise.resolve();
     }) as HttpHandler,
   } as unknown as HttpStart;
 };

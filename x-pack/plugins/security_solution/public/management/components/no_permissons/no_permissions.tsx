@@ -13,7 +13,7 @@ export const NoPermissions = memo(() => {
   return (
     <>
       <EuiEmptyPrompt
-        iconType="alert"
+        iconType="warning"
         iconColor="danger"
         titleSize="l"
         data-test-subj="noIngestPermissions"

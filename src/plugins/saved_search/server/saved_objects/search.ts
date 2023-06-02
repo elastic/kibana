@@ -6,8 +6,11 @@
  * Side Public License, v 1.
  */
 
+import { schema } from '@kbn/config-schema';
+import { ANALYTICS_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import { SavedObjectsType } from '@kbn/core/server';
 import { MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
+import { VIEW_MODE } from '../../common';
 import { getAllMigrations } from './search_migrations';
 
 export function getSavedSearchObjectType(
@@ -15,6 +18,7 @@ export function getSavedSearchObjectType(
 ): SavedObjectsType {
   return {
     name: 'search',
+    indexPattern: ANALYTICS_SAVED_OBJECT_INDEX,
     hidden: false,
     namespaceType: 'multiple-isolated',
     convertToMultiNamespaceTypeVersion: '8.0.0',
@@ -33,43 +37,82 @@ export function getSavedSearchObjectType(
       },
     },
     mappings: {
+      dynamic: false,
       properties: {
-        columns: { type: 'keyword', index: false, doc_values: false },
-        description: { type: 'text' },
-        viewMode: { type: 'keyword', index: false, doc_values: false },
-        hideChart: { type: 'boolean', index: false, doc_values: false },
-        isTextBasedQuery: { type: 'boolean', index: false, doc_values: false },
-        usesAdHocDataView: { type: 'boolean', index: false, doc_values: false },
-        hideAggregatedPreview: { type: 'boolean', index: false, doc_values: false },
-        hits: { type: 'integer', index: false, doc_values: false },
-        kibanaSavedObjectMeta: {
-          properties: {
-            searchSourceJSON: { type: 'text', index: false },
-          },
-        },
-        sort: { type: 'keyword', index: false, doc_values: false },
         title: { type: 'text' },
-        grid: { type: 'object', enabled: false },
-        version: { type: 'integer' },
-        rowHeight: { type: 'text' },
-        timeRestore: { type: 'boolean', index: false, doc_values: false },
-        timeRange: {
-          dynamic: false,
-          properties: {
-            from: { type: 'keyword', index: false, doc_values: false },
-            to: { type: 'keyword', index: false, doc_values: false },
-          },
-        },
-        refreshInterval: {
-          dynamic: false,
-          properties: {
-            pause: { type: 'boolean', index: false, doc_values: false },
-            value: { type: 'integer', index: false, doc_values: false },
-          },
-        },
-        rowsPerPage: { type: 'integer', index: false, doc_values: false },
-        breakdownField: { type: 'text' },
+        description: { type: 'text' },
       },
+    },
+    schemas: {
+      '8.8.0': schema.object({
+        // General
+        title: schema.string(),
+        description: schema.string({ defaultValue: '' }),
+
+        // Data grid
+        columns: schema.arrayOf(schema.string(), { defaultValue: [] }),
+        sort: schema.oneOf(
+          [
+            schema.arrayOf(schema.arrayOf(schema.string(), { maxSize: 2 })),
+            schema.arrayOf(schema.string(), { maxSize: 2 }),
+          ],
+          { defaultValue: [] }
+        ),
+        grid: schema.object(
+          {
+            columns: schema.maybe(
+              schema.recordOf(
+                schema.string(),
+                schema.object({
+                  width: schema.maybe(schema.number()),
+                })
+              )
+            ),
+          },
+          { defaultValue: {} }
+        ),
+        rowHeight: schema.maybe(schema.number()),
+        rowsPerPage: schema.maybe(schema.number()),
+
+        // Chart
+        hideChart: schema.boolean({ defaultValue: false }),
+        breakdownField: schema.maybe(schema.string()),
+
+        // Search
+        kibanaSavedObjectMeta: schema.object({
+          searchSourceJSON: schema.string(),
+        }),
+        isTextBasedQuery: schema.boolean({ defaultValue: false }),
+        usesAdHocDataView: schema.maybe(schema.boolean()),
+
+        // Time
+        timeRestore: schema.maybe(schema.boolean()),
+        timeRange: schema.maybe(
+          schema.object({
+            from: schema.string(),
+            to: schema.string(),
+          })
+        ),
+        refreshInterval: schema.maybe(
+          schema.object({
+            pause: schema.boolean(),
+            value: schema.number(),
+          })
+        ),
+
+        // Display
+        viewMode: schema.maybe(
+          schema.oneOf([
+            schema.literal(VIEW_MODE.DOCUMENT_LEVEL),
+            schema.literal(VIEW_MODE.AGGREGATED_LEVEL),
+          ])
+        ),
+        hideAggregatedPreview: schema.maybe(schema.boolean()),
+
+        // Legacy
+        hits: schema.maybe(schema.number()),
+        version: schema.maybe(schema.number()),
+      }),
     },
     migrations: () => getAllMigrations(getSearchSourceMigrations()),
   };

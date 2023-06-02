@@ -33,6 +33,7 @@ export interface Props {
   openLayerTOC: () => void;
   hideAllLayers: () => void;
   showAllLayers: () => void;
+  zoom: number;
 }
 
 function renderExpandButton({
@@ -68,7 +69,7 @@ function renderExpandButton({
       className="mapLayerControl__openLayerTOCButton"
       color="text"
       onClick={onClick}
-      iconType={hasErrors ? 'alert' : 'menuLeft'}
+      iconType={hasErrors ? 'warning' : 'menuLeft'}
       aria-label={expandLabel}
       data-test-subj="mapExpandLayerControlButton"
     />
@@ -85,6 +86,7 @@ export function LayerControl({
   isFlyoutOpen,
   hideAllLayers,
   showAllLayers,
+  zoom,
 }: Props) {
   if (!isLayerTOCOpen) {
     if (isScreenshotMode()) {
@@ -94,7 +96,7 @@ export function LayerControl({
       return layer.hasErrors();
     });
     const isLoading = layerList.some((layer) => {
-      return layer.isLayerLoading() && layer.isVisible();
+      return layer.isVisible() && layer.showAtZoomLevel(zoom) && layer.isLayerLoading();
     });
 
     return (

@@ -1,0 +1,11 @@
+{
+  "indices.downsample": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "{indices}/_downsample/{target_index}"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/xpack-rollup.html"
+  }
+}

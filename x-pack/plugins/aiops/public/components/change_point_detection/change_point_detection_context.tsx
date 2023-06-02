@@ -16,27 +16,38 @@ import React, {
 } from 'react';
 import { type DataViewField } from '@kbn/data-views-plugin/public';
 import { startWith } from 'rxjs';
-import useMount from 'react-use/lib/useMount';
-import type { Query, Filter } from '@kbn/es-query';
+import type { Filter, Query } from '@kbn/es-query';
+import { usePageUrlState } from '@kbn/ml-url-state';
+import { useTimefilter, useTimeRangeUpdates } from '@kbn/ml-date-picker';
+import { ES_FIELD_TYPES } from '@kbn/field-types';
+import { type QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types';
+import { type ChangePointType, DEFAULT_AGG_FUNCTION } from './constants';
 import {
   createMergedEsQuery,
   getEsQueryFromSavedSearch,
 } from '../../application/utils/search_utils';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
-import { useTimefilter, useTimeRangeUpdates } from '../../hooks/use_time_filter';
-import { useChangePointResults } from './use_change_point_agg_request';
 import { type TimeBuckets, TimeBucketsInterval } from '../../../common/time_buckets';
 import { useDataSource } from '../../hooks/use_data_source';
-import { usePageUrlState } from '../../hooks/use_url_state';
 import { useTimeBuckets } from '../../hooks/use_time_buckets';
 
-export interface ChangePointDetectionRequestParams {
+export interface ChangePointDetectionPageUrlState {
+  pageKey: 'changePoint';
+  pageUrlState: ChangePointDetectionRequestParams;
+}
+
+export interface FieldConfig {
   fn: string;
-  splitField: string;
+  splitField?: string;
   metricField: string;
+}
+
+export interface ChangePointDetectionRequestParams {
+  fieldConfigs: FieldConfig[];
   interval: string;
   query: Query;
   filters: Filter[];
+  changePointType?: ChangePointType[];
 }
 
 export const ChangePointDetectionContext = createContext<{
@@ -46,57 +57,41 @@ export const ChangePointDetectionContext = createContext<{
   metricFieldOptions: DataViewField[];
   splitFieldsOptions: DataViewField[];
   updateRequestParams: (update: Partial<ChangePointDetectionRequestParams>) => void;
-  isLoading: boolean;
-  annotations: ChangePointAnnotation[];
   resultFilters: Filter[];
   updateFilters: (update: Filter[]) => void;
   resultQuery: Query;
-  progress: number;
-  pagination: {
-    activePage: number;
-    pageCount: number;
-    updatePagination: (newPage: number) => void;
-  };
+  combinedQuery: QueryDslQueryContainer;
+  selectedChangePoints: Record<number, SelectedChangePoint[]>;
+  setSelectedChangePoints: (update: Record<number, SelectedChangePoint[]>) => void;
 }>({
-  isLoading: false,
   splitFieldsOptions: [],
   metricFieldOptions: [],
   requestParams: {} as ChangePointDetectionRequestParams,
   timeBuckets: {} as TimeBuckets,
   bucketInterval: {} as TimeBucketsInterval,
   updateRequestParams: () => {},
-  annotations: [],
   resultFilters: [],
   updateFilters: () => {},
   resultQuery: { query: '', language: 'kuery' },
-  progress: 0,
-  pagination: {
-    activePage: 0,
-    pageCount: 1,
-    updatePagination: () => {},
-  },
+  combinedQuery: {},
+  selectedChangePoints: {},
+  setSelectedChangePoints: () => {},
 });
 
-export type ChangePointType =
-  | 'dip'
-  | 'spike'
-  | 'distribution_change'
-  | 'step_change'
-  | 'trend_change'
-  | 'stationary'
-  | 'non_stationary'
-  | 'indeterminable';
-
 export interface ChangePointAnnotation {
+  id: string;
   label: string;
   reason: string;
   timestamp: string;
-  group_field: string;
+  group?: {
+    name: string;
+    value: string;
+  };
   type: ChangePointType;
   p_value: number;
 }
 
-const DEFAULT_AGG_FUNCTION = 'min';
+export type SelectedChangePoint = FieldConfig & ChangePointAnnotation;
 
 export const ChangePointDetectionContextProvider: FC = ({ children }) => {
   const { dataView, savedSearch } = useDataSource();
@@ -118,13 +113,16 @@ export const ChangePointDetectionContextProvider: FC = ({ children }) => {
 
   const timefilter = useTimefilter();
   const timeBuckets = useTimeBuckets();
-  const [resultFilters, setResultFilter] = useState<Filter[]>([]);
 
+  const [resultFilters, setResultFilter] = useState<Filter[]>([]);
+  const [selectedChangePoints, setSelectedChangePoints] = useState<
+    Record<number, SelectedChangePoint[]>
+  >({});
   const [bucketInterval, setBucketInterval] = useState<TimeBucketsInterval>();
 
   const timeRange = useTimeRangeUpdates();
 
-  useMount(function updateIntervalOnTimeBoundsChange() {
+  useEffect(function updateIntervalOnTimeBoundsChange() {
     const timeUpdateSubscription = timefilter
       .getTimeUpdate$()
       .pipe(startWith(timefilter.getTime()))
@@ -140,7 +138,8 @@ export const ChangePointDetectionContextProvider: FC = ({ children }) => {
     return () => {
       timeUpdateSubscription.unsubscribe();
     };
-  });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const metricFieldOptions = useMemo<DataViewField[]>(() => {
     return dataView.fields.filter(({ aggregatable, type }) => aggregatable && type === 'number');
@@ -151,13 +150,15 @@ export const ChangePointDetectionContextProvider: FC = ({ children }) => {
       ({ aggregatable, esTypes, displayName }) =>
         aggregatable &&
         esTypes &&
-        esTypes.includes('keyword') &&
+        esTypes.some((el) =>
+          [ES_FIELD_TYPES.KEYWORD, ES_FIELD_TYPES.IP].includes(el as ES_FIELD_TYPES)
+        ) &&
         !['_id', '_index'].includes(displayName)
     );
   }, [dataView]);
 
   const [requestParamsFromUrl, updateRequestParams] =
-    usePageUrlState<ChangePointDetectionRequestParams>('changePoint');
+    usePageUrlState<ChangePointDetectionPageUrlState>('changePoint');
 
   const resultQuery = useMemo<Query>(() => {
     return (
@@ -170,18 +171,17 @@ export const ChangePointDetectionContextProvider: FC = ({ children }) => {
 
   const requestParams = useMemo(() => {
     const params = { ...requestParamsFromUrl };
-    if (!params.fn) {
-      params.fn = DEFAULT_AGG_FUNCTION;
-    }
-    if (!params.metricField && metricFieldOptions.length > 0) {
-      params.metricField = metricFieldOptions[0].name;
-    }
-    if (!params.splitField && splitFieldsOptions.length > 0) {
-      params.splitField = splitFieldsOptions[0].name;
+    if (!params.fieldConfigs) {
+      params.fieldConfigs = [
+        {
+          fn: DEFAULT_AGG_FUNCTION,
+          metricField: metricFieldOptions[0]?.name,
+        },
+      ];
     }
     params.interval = bucketInterval?.expression!;
     return params;
-  }, [requestParamsFromUrl, metricFieldOptions, splitFieldsOptions, bucketInterval]);
+  }, [requestParamsFromUrl, metricFieldOptions, bucketInterval]);
 
   const updateFilters = useCallback(
     (update: Filter[]) => {
@@ -190,7 +190,7 @@ export const ChangePointDetectionContextProvider: FC = ({ children }) => {
     [filterManager]
   );
 
-  useMount(() => {
+  useEffect(() => {
     setResultFilter(filterManager.getFilters());
     const sub = filterManager.getUpdates$().subscribe(() => {
       setResultFilter(filterManager.getFilters());
@@ -198,7 +198,8 @@ export const ChangePointDetectionContextProvider: FC = ({ children }) => {
     return () => {
       sub.unsubscribe();
     };
-  });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(
     function syncFilters() {
@@ -234,29 +235,21 @@ export const ChangePointDetectionContextProvider: FC = ({ children }) => {
     return mergedQuery;
   }, [resultFilters, resultQuery, uiSettings, dataView, timeRange]);
 
-  const {
-    results: annotations,
-    isLoading: annotationsLoading,
-    progress,
-    pagination,
-  } = useChangePointResults(requestParams, combinedQuery);
-
   if (!bucketInterval) return null;
 
   const value = {
-    isLoading: annotationsLoading,
-    progress,
     timeBuckets,
     requestParams,
     updateRequestParams,
     metricFieldOptions,
     splitFieldsOptions,
-    annotations,
     bucketInterval,
     resultFilters,
     updateFilters,
     resultQuery,
-    pagination,
+    combinedQuery,
+    selectedChangePoints,
+    setSelectedChangePoints,
   };
 
   return (

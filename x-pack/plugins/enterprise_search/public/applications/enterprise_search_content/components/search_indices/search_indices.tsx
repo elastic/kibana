@@ -19,6 +19,8 @@ import {
   EuiSwitch,
   EuiSearchBar,
   EuiLink,
+  EuiToolTip,
+  EuiCode,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -49,8 +51,9 @@ export const baseBreadcrumbs = [
 
 export const SearchIndices: React.FC = () => {
   const { fetchIndices, onPaginate, openDeleteModal, setIsFirstRequest } = useActions(IndicesLogic);
-  const { meta, indices, hasNoIndices, isLoading } = useValues(IndicesLogic);
+  const { meta, indices, hasNoIndices, isLoading, searchParams } = useValues(IndicesLogic);
   const [showHiddenIndices, setShowHiddenIndices] = useState(false);
+  const [onlyShowSearchOptimizedIndices, setOnlyShowSearchOptimizedIndices] = useState(false);
   const [searchQuery, setSearchValue] = useState('');
 
   const [calloutDismissed, setCalloutDismissed] = useLocalStorage<boolean>(
@@ -66,11 +69,19 @@ export const SearchIndices: React.FC = () => {
 
   useEffect(() => {
     fetchIndices({
-      meta,
+      from: searchParams.from,
+      onlyShowSearchOptimizedIndices,
       returnHiddenIndices: showHiddenIndices,
       searchQuery,
+      size: searchParams.size,
     });
-  }, [searchQuery, meta.page.current, showHiddenIndices]);
+  }, [
+    searchQuery,
+    searchParams.from,
+    searchParams.size,
+    onlyShowSearchOptimizedIndices,
+    showHiddenIndices,
+  ]);
 
   const pageTitle = isLoading
     ? ''
@@ -95,11 +106,16 @@ export const SearchIndices: React.FC = () => {
             ? []
             : [
                 <EuiLinkTo data-test-subj="create-new-index-button" to={NEW_INDEX_PATH}>
-                  <EuiButton iconType="plusInCircle" color="primary" fill>
+                  <EuiButton
+                    iconType="plusInCircle"
+                    color="primary"
+                    fill
+                    data-test-subj="entSearchContent-searchIndices-createButton"
+                  >
                     {i18n.translate(
                       'xpack.enterpriseSearch.content.searchIndices.create.buttonTitle',
                       {
-                        defaultMessage: 'Create new index',
+                        defaultMessage: 'Create a new index',
                       }
                     )}
                   </EuiButton>
@@ -179,6 +195,30 @@ export const SearchIndices: React.FC = () => {
                         )}
                         onChange={(event) => setShowHiddenIndices(event.target.checked)}
                       />
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <EuiToolTip
+                        content={
+                          <FormattedMessage
+                            id="xpack.enterpriseSearch.content.searchIndices.searchIndices.onlySearchOptimized.tooltipContent"
+                            defaultMessage="Search-optimized indices are prefixed with {code}. They are managed by ingestion mechanisms such as crawlers, connectors or ingestion APIs."
+                            values={{ code: <EuiCode>search-</EuiCode> }}
+                          />
+                        }
+                      >
+                        <EuiSwitch
+                          checked={onlyShowSearchOptimizedIndices}
+                          label={i18n.translate(
+                            'xpack.enterpriseSearch.content.searchIndices.searchIndices.onlySearchOptimized.label',
+                            {
+                              defaultMessage: 'Only show search-optimized indices',
+                            }
+                          )}
+                          onChange={(event) =>
+                            setOnlyShowSearchOptimizedIndices(event.target.checked)
+                          }
+                        />
+                      </EuiToolTip>
                     </EuiFlexItem>
                     <EuiFlexItem className="entSearchIndicesSearchBar">
                       <EuiSearchBar

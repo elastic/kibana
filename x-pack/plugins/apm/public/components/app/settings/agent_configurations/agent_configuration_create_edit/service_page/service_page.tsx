@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import { EuiSpacer, EuiFlexGroup, EuiFlexItem, EuiButton } from '@elastic/eui';
+import {
+  EuiSpacer,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiButton,
+  EuiCallOut,
+} from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { isString } from 'lodash';
@@ -14,12 +20,16 @@ import { AgentConfigurationIntake } from '../../../../../../../common/agent_conf
 import {
   omitAllOption,
   getOptionLabel,
+  ALL_OPTION_VALUE,
 } from '../../../../../../../common/agent_configuration/all_option';
 import { useFetcher, FETCH_STATUS } from '../../../../../../hooks/use_fetcher';
 import { FormRowSelect } from './form_row_select';
 import { LegacyAPMLink } from '../../../../../shared/links/apm/apm_link';
 import { FormRowSuggestionsSelect } from './form_row_suggestions_select';
 import { SERVICE_NAME } from '../../../../../../../common/es_fields/apm';
+import { isOpenTelemetryAgentName } from '../../../../../../../common/agent_name';
+import { AgentName } from '../../../../../../../typings/es_schemas/ui/fields/agent';
+
 interface Props {
   newConfig: AgentConfigurationIntake;
   setNewConfig: React.Dispatch<React.SetStateAction<AgentConfigurationIntake>>;
@@ -31,7 +41,7 @@ export function ServicePage({ newConfig, setNewConfig, onClickNext }: Props) {
     (callApmApi) => {
       if (newConfig.service.name) {
         return callApmApi(
-          'GET /api/apm/settings/agent-configuration/environments',
+          'GET /api/apm/settings/agent-configuration/environments 2023-05-22',
           {
             params: {
               query: { serviceName: omitAllOption(newConfig.service.name) },
@@ -55,7 +65,7 @@ export function ServicePage({ newConfig, setNewConfig, onClickNext }: Props) {
       }
 
       const { agentName } = await callApmApi(
-        'GET /api/apm/settings/agent-configuration/agent_name',
+        'GET /api/apm/settings/agent-configuration/agent_name 2023-05-22',
         {
           params: { query: { serviceName } },
         }
@@ -80,6 +90,26 @@ export function ServicePage({ newConfig, setNewConfig, onClickNext }: Props) {
       value: name,
     })
   );
+
+  const isAgentConfigurationSupported =
+    !newConfig.agent_name ||
+    (newConfig.agent_name &&
+      !isOpenTelemetryAgentName(newConfig.agent_name as AgentName));
+
+  const INCORRECT_SERVICE_NAME_TRANSLATED = i18n.translate(
+    'xpack.apm.settings.agentConfiguration.service.otel.error',
+    {
+      defaultMessage:
+        'Selected service uses an OpenTelemetry agent, which is not supported',
+    }
+  );
+
+  const isAllOptionSelected = newConfig.service.name === ALL_OPTION_VALUE;
+  const isSaveButtonDisabled =
+    !newConfig.service.name ||
+    !newConfig.service.environment ||
+    agentNameStatus === FETCH_STATUS.LOADING ||
+    !isAgentConfigurationSupported;
 
   return (
     <>
@@ -106,7 +136,22 @@ export function ServicePage({ newConfig, setNewConfig, onClickNext }: Props) {
           }));
         }}
         dataTestSubj="serviceNameComboBox"
+        isInvalid={!isAgentConfigurationSupported}
+        error={INCORRECT_SERVICE_NAME_TRANSLATED}
       />
+      {isAllOptionSelected && (
+        <EuiCallOut
+          color="warning"
+          iconType="warning"
+          title={i18n.translate(
+            'xpack.apm.settings.agentConfiguration.all.option.calloutTitle',
+            {
+              defaultMessage:
+                'This configuration change will impact all services, except those that use an OpenTelemetry agent. ',
+            }
+          )}
+        />
+      )}
       {/* Environment options */}
       <FormRowSelect
         title={i18n.translate(
@@ -143,7 +188,10 @@ export function ServicePage({ newConfig, setNewConfig, onClickNext }: Props) {
         {/* Cancel button */}
         <EuiFlexItem grow={false}>
           <LegacyAPMLink path="/settings/agent-configuration">
-            <EuiButtonEmpty color="primary">
+            <EuiButtonEmpty
+              data-test-subj="apmServicePageCancelButton"
+              color="primary"
+            >
               {i18n.translate(
                 'xpack.apm.agentConfig.servicePage.cancelButton',
                 { defaultMessage: 'Cancel' }
@@ -155,15 +203,12 @@ export function ServicePage({ newConfig, setNewConfig, onClickNext }: Props) {
         {/* Next button */}
         <EuiFlexItem grow={false}>
           <EuiButton
+            data-test-subj="apmServicePageNextStepButton"
             type="submit"
             fill
             onClick={onClickNext}
             isLoading={agentNameStatus === FETCH_STATUS.LOADING}
-            isDisabled={
-              !newConfig.service.name ||
-              !newConfig.service.environment ||
-              agentNameStatus === FETCH_STATUS.LOADING
-            }
+            isDisabled={isSaveButtonDisabled}
           >
             {i18n.translate(
               'xpack.apm.agentConfig.saveConfigurationButtonLabel',

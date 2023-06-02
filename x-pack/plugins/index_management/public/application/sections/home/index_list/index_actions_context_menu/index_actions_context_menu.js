@@ -433,7 +433,7 @@ export class IndexActionsContextMenu extends Component {
               {isSystemIndexByName[indexName] ? (
                 <Fragment>
                   {' '}
-                  <EuiBadge iconType="alert" color="hollow">
+                  <EuiBadge iconType="warning" color="hollow">
                     <FormattedMessage
                       id="xpack.idxMgmt.indexActionsMenu.deleteIndex.systemIndexLabel"
                       defaultMessage="System index"
@@ -455,7 +455,7 @@ export class IndexActionsContextMenu extends Component {
             }
           )}
           color="danger"
-          iconType="alert"
+          iconType="warning"
         >
           <p>
             <FormattedMessage
@@ -561,7 +561,7 @@ export class IndexActionsContextMenu extends Component {
               {isSystemIndexByName[indexName] ? (
                 <Fragment>
                   {' '}
-                  <EuiBadge iconType="alert" color="hollow">
+                  <EuiBadge iconType="warning" color="hollow">
                     <FormattedMessage
                       id="xpack.idxMgmt.indexActionsMenu.closeIndex.systemIndexLabel"
                       defaultMessage="System index"
@@ -583,7 +583,7 @@ export class IndexActionsContextMenu extends Component {
             }
           )}
           color="danger"
-          iconType="alert"
+          iconType="warning"
         >
           <p>
             <FormattedMessage

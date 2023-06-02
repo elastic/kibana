@@ -9,12 +9,8 @@
 import Stream, { PassThrough, Readable, Writable, Transform } from 'stream';
 import { createGzip } from 'zlib';
 
-import {
-  createConcatStream,
-  createListStream,
-  createPromiseFromStreams,
-  kibanaPackageJson,
-} from '@kbn/utils';
+import { createConcatStream, createListStream, createPromiseFromStreams } from '@kbn/utils';
+import { kibanaPackageJson } from '@kbn/repo-info';
 
 import { createParseArchiveStreams } from './parse';
 

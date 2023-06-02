@@ -181,48 +181,6 @@ $controlMinWidth: $euiSize * 14;
     }
   }
 
-  .controlFrameFloatingActions {
-    visibility: hidden;
-    opacity: 0;
-
-    // slower transition on hover leave in case the user accidentally stops hover
-    transition: visibility .3s, opacity .3s;
-
-    z-index: 1;
-    position: absolute;
-
-    &--oneLine {
-      right: $euiSizeXS;
-      top: -$euiSizeL;
-      padding: $euiSizeXS;
-      border-radius: $euiBorderRadius;
-      background-color: $euiColorEmptyShade;
-      box-shadow: 0 0 0 1px $euiColorLightShade;
-    }
-
-    &--fatalError {
-      right: $euiSizeXS;
-      top: -$euiSizeL;
-      padding: $euiSizeXS;
-      border-radius: $euiBorderRadius;
-      background-color: $euiColorEmptyShade;
-      box-shadow: 0 0 0 1px $euiColorLightShade;
-    }
-
-    &--twoLine {
-      right: $euiSizeXS;
-      top: -$euiSizeXS;
-    }
-  }
-
-  &:hover {
-    .controlFrameFloatingActions {
-      transition: visibility .1s, opacity .1s;
-      visibility: visible;
-      opacity: 1;
-    }
-  }
-
   &-isDragging {
     .euiFormRow__labelWrapper {
       opacity: 0;
@@ -230,5 +188,21 @@ $controlMinWidth: $euiSize * 14;
     .controlFrame__formControlLayout {
       opacity: 0; // hide dragged control, while control is dragged its replaced with ControlClone component
     }
+  }
+}
+
+.controlFrameFloatingActions {
+  z-index: 1;
+  position: absolute;
+
+  &--oneLine {
+    padding: $euiSizeXS;
+    border-radius: $euiBorderRadius;
+    background-color: $euiColorEmptyShade;
+    box-shadow: 0 0 0 1px $euiColorLightShade;
+  }
+
+  &--twoLine {
+    top: (-$euiSizeXS) !important;
   }
 }

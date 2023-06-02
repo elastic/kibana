@@ -28,11 +28,13 @@ describe('Transform: Transform List Actions', () => {
     expect(actions.map((a: any) => a['data-test-subj'])).toStrictEqual([
       'transformActionDiscover',
       'transformActionCreateAlertRule',
+      'transformActionScheduleNow',
       'transformActionStart',
       'transformActionStop',
       'transformActionEdit',
       'transformActionClone',
       'transformActionDelete',
+      'transformActionReauthorize',
       'transformActionReset',
     ]);
   });

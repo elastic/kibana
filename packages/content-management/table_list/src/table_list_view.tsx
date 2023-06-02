@@ -26,8 +26,8 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
-import { useOpenInspector } from '@kbn/content-management-inspector';
-import type { OpenInspectorParams } from '@kbn/content-management-inspector';
+import { useOpenContentEditor } from '@kbn/content-management-content-editor';
+import type { OpenContentEditorParams } from '@kbn/content-management-content-editor';
 
 import {
   Table,
@@ -38,13 +38,14 @@ import {
 } from './components';
 import { useServices } from './services';
 import type { SavedObjectsReference, SavedObjectsFindOptionsReference } from './services';
-import type { Action } from './actions';
 import { getReducer } from './reducer';
 import type { SortColumnField } from './components';
 import { useTags } from './use_tags';
+import { useInRouterContext, useUrlState } from './use_url_state';
+import { RowActions, TableItemsRowActions } from './types';
 
-interface InspectorConfig
-  extends Pick<OpenInspectorParams, 'isReadonly' | 'onSave' | 'customValidators'> {
+interface ContentEditorConfig
+  extends Pick<OpenContentEditorParams, 'isReadonly' | 'onSave' | 'customValidators'> {
   enabled?: boolean;
 }
 
@@ -59,6 +60,7 @@ export interface Props<T extends UserContentCommonSchema = UserContentCommonSche
   emptyPrompt?: JSX.Element;
   /** Add an additional custom column */
   customTableColumn?: EuiBasicTableColumn<T>;
+  urlStateEnabled?: boolean;
   /**
    * Id of the heading element describing the table. This id will be used as `aria-labelledby` of the wrapper element.
    * If the table is not empty, this component renders its own h1 element using the same id.
@@ -66,6 +68,11 @@ export interface Props<T extends UserContentCommonSchema = UserContentCommonSche
   headingId?: string;
   /** An optional id for the listing. Used to generate unique data-test-subj. Default: "userContent" */
   id?: string;
+  /**
+   * Configuration of the table row item actions. Disable specific action for a table row item.
+   * Currently only the "delete" ite action can be disabled.
+   */
+  rowItemActions?: (obj: T) => RowActions | undefined;
   children?: ReactNode | undefined;
   findItems(
     searchQuery: string,
@@ -80,7 +87,14 @@ export interface Props<T extends UserContentCommonSchema = UserContentCommonSche
   onClickTitle?: (item: T) => void;
   createItem?(): void;
   deleteItems?(items: T[]): Promise<void>;
+  /**
+   * Edit action onClick handler. Edit action not provided when property is not provided
+   */
   editItem?(item: T): void;
+  /**
+   * Handler to set edit action visiblity per item.
+   */
+  showEditActionForItem?(item: T): boolean;
   /**
    * Name for the column containing the "title" value.
    */
@@ -96,7 +110,7 @@ export interface Props<T extends UserContentCommonSchema = UserContentCommonSche
    * @deprecated
    */
   withoutPageTemplateWrapper?: boolean;
-  inspector?: InspectorConfig;
+  contentEditor?: ContentEditorConfig;
 }
 
 export interface State<T extends UserContentCommonSchema = UserContentCommonSchema> {
@@ -131,7 +145,102 @@ export interface UserContentCommonSchema {
   };
 }
 
-const ast = Ast.create([]);
+export interface URLState {
+  s?: string;
+  sort?: {
+    field: SortColumnField;
+    direction: Direction;
+  };
+
+  [key: string]: unknown;
+}
+
+interface URLQueryParams {
+  s?: string;
+  title?: string;
+  sort?: string;
+  sortdir?: string;
+
+  [key: string]: unknown;
+}
+
+/**
+ * Deserializer to convert the URL query params to a sanitized object
+ * we can rely on in this component.
+ *
+ * @param params The URL query params
+ * @returns The URLState sanitized
+ */
+const urlStateDeserializer = (params: URLQueryParams): URLState => {
+  const stateFromURL: URLState = {};
+  const sanitizedParams = { ...params };
+
+  // If we declare 2 or more query params with the same key in the URL
+  // we will receive an array of value back when parsed. It is probably
+  // a mistake from the user so we'll sanitize the data before continuing.
+  ['s', 'title', 'sort', 'sortdir'].forEach((key: string) => {
+    if (Array.isArray(sanitizedParams[key])) {
+      sanitizedParams[key] = (sanitizedParams[key] as string[])[0];
+    }
+  });
+
+  // For backward compability with the Dashboard app we will support both "s" and "title" passed
+  // in the query params. We might want to stop supporting both in a future release (v9.0?)
+  stateFromURL.s = sanitizedParams.s ?? sanitizedParams.title;
+
+  if (sanitizedParams.sort === 'title' || sanitizedParams.sort === 'updatedAt') {
+    const field = sanitizedParams.sort === 'title' ? 'attributes.title' : 'updatedAt';
+
+    stateFromURL.sort = { field, direction: 'asc' };
+
+    if (sanitizedParams.sortdir === 'desc' || sanitizedParams.sortdir === 'asc') {
+      stateFromURL.sort.direction = sanitizedParams.sortdir;
+    }
+  }
+
+  return stateFromURL;
+};
+
+/**
+ * Serializer to convert the updated state of the component into query params in the URL
+ *
+ * @param updated The updated state of our component that we want to persist in the URL
+ * @returns The query params (flatten object) to update the URL
+ */
+const urlStateSerializer = (updated: {
+  s?: string;
+  sort?: { field: 'title' | 'updatedAt'; direction: Direction };
+}) => {
+  const updatedQueryParams: Partial<URLQueryParams> = {};
+
+  if (updated.sort) {
+    updatedQueryParams.sort = updated.sort.field;
+    updatedQueryParams.sortdir = updated.sort.direction;
+  }
+
+  if (updated.s !== undefined) {
+    updatedQueryParams.s = updated.s;
+    updatedQueryParams.title = undefined;
+  }
+
+  if (typeof updatedQueryParams.s === 'string' && updatedQueryParams.s.trim() === '') {
+    updatedQueryParams.s = undefined;
+    updatedQueryParams.title = undefined;
+  }
+
+  return updatedQueryParams;
+};
+
+const tableColumnMetadata = {
+  title: {
+    field: 'attributes.title',
+    name: 'Name, description, tags',
+  },
+  updatedAt: {
+    field: 'updatedAt',
+    name: 'Last updated',
+  },
+} as const;
 
 function TableListViewComp<T extends UserContentCommonSchema>({
   tableListTitle,
@@ -142,16 +251,19 @@ function TableListViewComp<T extends UserContentCommonSchema>({
   headingId,
   initialPageSize,
   listingLimit,
+  urlStateEnabled = true,
   customTableColumn,
   emptyPrompt,
+  rowItemActions,
   findItems,
   createItem,
   editItem,
+  showEditActionForItem,
   deleteItems,
   getDetailViewLink,
   onClickTitle,
-  id = 'userContent',
-  inspector = { enabled: false },
+  id: listingId = 'userContent',
+  contentEditor = { enabled: false },
   children,
   titleColumnName,
   additionalRightSideActions = [],
@@ -169,9 +281,9 @@ function TableListViewComp<T extends UserContentCommonSchema>({
     );
   }
 
-  if (inspector.isReadonly === false && inspector.onSave === undefined) {
+  if (contentEditor.isReadonly === false && contentEditor.onSave === undefined) {
     throw new Error(
-      `[TableListView] A value for [inspector.onSave()] must be provided when [inspector.isReadonly] is false.`
+      `[TableListView] A value for [contentEditor.onSave()] must be provided when [contentEditor.isReadonly] is false.`
     );
   }
 
@@ -185,36 +297,57 @@ function TableListViewComp<T extends UserContentCommonSchema>({
     searchQueryParser,
     notifyError,
     DateFormatterComp,
+    getTagList,
   } = useServices();
+
+  const openContentEditor = useOpenContentEditor();
+
+  const isInRouterContext = useInRouterContext();
+
+  if (!isInRouterContext) {
+    throw new Error(
+      `<TableListView/> requires a React Router context. Ensure your component or React root is being rendered in the context of a <Router>.`
+    );
+  }
+
+  const [urlState, setUrlState] = useUrlState<URLState, URLQueryParams>({
+    queryParamsDeserializer: urlStateDeserializer,
+    queryParamsSerializer: urlStateSerializer,
+  });
 
   const reducer = useMemo(() => {
     return getReducer<T>();
   }, []);
 
-  const [state, dispatch] = useReducer<(state: State<T>, action: Action<T>) => State<T>>(reducer, {
-    items: [],
-    totalItems: 0,
-    hasInitialFetchReturned: false,
-    isFetchingItems: false,
-    isDeletingItems: false,
-    showDeleteModal: false,
-    hasUpdatedAtMetadata: false,
-    selectedIds: [],
-    searchQuery:
-      initialQuery !== undefined
-        ? { text: initialQuery, query: new Query(ast, undefined, initialQuery) }
-        : { text: '', query: new Query(ast, undefined, '') },
-    pagination: {
-      pageIndex: 0,
-      totalItemCount: 0,
-      pageSize: initialPageSize,
-      pageSizeOptions: uniq([10, 20, 50, initialPageSize]).sort(),
-    },
-    tableSort: {
-      field: 'attributes.title' as const,
-      direction: 'asc',
-    },
-  });
+  const initialState = useMemo<State<T>>(
+    () => ({
+      items: [],
+      totalItems: 0,
+      hasInitialFetchReturned: false,
+      isFetchingItems: false,
+      isDeletingItems: false,
+      showDeleteModal: false,
+      hasUpdatedAtMetadata: false,
+      selectedIds: [],
+      searchQuery:
+        initialQuery !== undefined
+          ? { text: initialQuery, query: new Query(Ast.create([]), undefined, initialQuery) }
+          : { text: '', query: new Query(Ast.create([]), undefined, '') },
+      pagination: {
+        pageIndex: 0,
+        totalItemCount: 0,
+        pageSize: initialPageSize,
+        pageSizeOptions: uniq([10, 20, 50, initialPageSize]).sort(),
+      },
+      tableSort: {
+        field: 'attributes.title' as const,
+        direction: 'asc',
+      },
+    }),
+    [initialPageSize, initialQuery]
+  );
+
+  const [state, dispatch] = useReducer(reducer, initialState);
 
   const {
     searchQuery,
@@ -247,11 +380,9 @@ function TableListViewComp<T extends UserContentCommonSchema>({
         searchQuery: searchQueryParsed,
         references,
         referencesToExclude,
-      } = searchQueryParser?.(searchQuery.text) ?? {
-        searchQuery: searchQuery.text,
-        references: undefined,
-        referencesToExclude: undefined,
-      };
+      } = searchQueryParser
+        ? await searchQueryParser(searchQuery.text)
+        : { searchQuery: searchQuery.text, references: undefined, referencesToExclude: undefined };
 
       const response = await findItems(searchQueryParsed, { references, referencesToExclude });
 
@@ -275,14 +406,20 @@ function TableListViewComp<T extends UserContentCommonSchema>({
     }
   }, [searchQueryParser, findItems, searchQuery.text]);
 
-  const openInspector = useOpenInspector();
+  const updateQuery = useCallback(
+    (query: Query) => {
+      if (urlStateEnabled) {
+        setUrlState({ s: query.text });
+        return;
+      }
 
-  const updateQuery = useCallback((query: Query) => {
-    dispatch({
-      type: 'onSearchQueryChange',
-      data: { query, text: query.text },
-    });
-  }, []);
+      dispatch({
+        type: 'onSearchQueryChange',
+        data: { query, text: query.text },
+      });
+    },
+    [urlStateEnabled, setUrlState]
+  );
 
   const {
     addOrRemoveIncludeTagFilter,
@@ -301,7 +438,7 @@ function TableListViewComp<T extends UserContentCommonSchema>({
         return item.references.find(({ id: refId }) => refId === _id) as SavedObjectsReference;
       });
 
-      const close = openInspector({
+      const close = openContentEditor({
         item: {
           id: item.id,
           title: item.attributes.title,
@@ -309,24 +446,24 @@ function TableListViewComp<T extends UserContentCommonSchema>({
           tags,
         },
         entityName,
-        ...inspector,
+        ...contentEditor,
         onSave:
-          inspector.onSave &&
+          contentEditor.onSave &&
           (async (args) => {
-            await inspector.onSave!(args);
+            await contentEditor.onSave!(args);
             await fetchItems();
 
             close();
           }),
       });
     },
-    [getTagIdsFromReferences, openInspector, entityName, inspector, fetchItems]
+    [getTagIdsFromReferences, openContentEditor, entityName, contentEditor, fetchItems]
   );
 
   const tableColumns = useMemo(() => {
     const columns: Array<EuiBasicTableColumn<T>> = [
       {
-        field: 'attributes.title',
+        field: tableColumnMetadata.title.field,
         name:
           titleColumnName ??
           i18n.translate('contentManagement.tableList.mainColumnName', {
@@ -336,7 +473,7 @@ function TableListViewComp<T extends UserContentCommonSchema>({
         render: (field: keyof T, record: T) => {
           return (
             <ItemDetails<T>
-              id={id}
+              id={listingId}
               item={record}
               getDetailViewLink={getDetailViewLink}
               onClickTitle={onClickTitle}
@@ -360,7 +497,7 @@ function TableListViewComp<T extends UserContentCommonSchema>({
 
     if (hasUpdatedAtMetadata) {
       columns.push({
-        field: 'updatedAt',
+        field: tableColumnMetadata.updatedAt.field,
         name: i18n.translate('contentManagement.tableList.lastUpdatedColumnTitle', {
           defaultMessage: 'Last updated',
         }),
@@ -373,7 +510,7 @@ function TableListViewComp<T extends UserContentCommonSchema>({
     }
 
     // Add "Actions" column
-    if (editItem || inspector.enabled !== false) {
+    if (editItem || contentEditor.enabled !== false) {
       const actions: EuiTableActionsColumnType<T>['actions'] = [];
 
       if (editItem) {
@@ -394,25 +531,29 @@ function TableListViewComp<T extends UserContentCommonSchema>({
           ),
           icon: 'pencil',
           type: 'icon',
+          available: (v) => (showEditActionForItem ? showEditActionForItem(v) : true),
           enabled: (v) => !(v as unknown as { error: string })?.error,
           onClick: editItem,
         });
       }
 
-      if (inspector.enabled !== false) {
+      if (contentEditor.enabled !== false) {
         actions.push({
           name: (item) => {
-            return i18n.translate('contentManagement.tableList.listing.table.inspectActionName', {
-              defaultMessage: 'Inspect {itemDescription}',
-              values: {
-                itemDescription: get(item, 'attributes.title'),
-              },
-            });
+            return i18n.translate(
+              'contentManagement.tableList.listing.table.viewDetailsActionName',
+              {
+                defaultMessage: 'View {itemTitle} details',
+                values: {
+                  itemTitle: get(item, 'attributes.title'),
+                },
+              }
+            );
           },
           description: i18n.translate(
-            'contentManagement.tableList.listing.table.inspectActionDescription',
+            'contentManagement.tableList.listing.table.viewDetailsActionDescription',
             {
-              defaultMessage: 'Inspect',
+              defaultMessage: 'View details',
             }
           ),
           icon: 'inspect',
@@ -436,15 +577,16 @@ function TableListViewComp<T extends UserContentCommonSchema>({
     customTableColumn,
     hasUpdatedAtMetadata,
     editItem,
-    id,
+    listingId,
     getDetailViewLink,
     onClickTitle,
     searchQuery.text,
     addOrRemoveIncludeTagFilter,
     addOrRemoveExcludeTagFilter,
     DateFormatterComp,
-    inspector,
+    contentEditor,
     inspectItem,
+    showEditActionForItem,
   ]);
 
   const itemsById = useMemo(() => {
@@ -455,19 +597,100 @@ function TableListViewComp<T extends UserContentCommonSchema>({
     return selectedIds.map((selectedId) => itemsById[selectedId]);
   }, [selectedIds, itemsById]);
 
+  const tableItemsRowActions = useMemo(() => {
+    return items.reduce<TableItemsRowActions>((acc, item) => {
+      return {
+        ...acc,
+        [item.id]: rowItemActions ? rowItemActions(item) : undefined,
+      };
+    }, {});
+  }, [items, rowItemActions]);
+
   // ------------
   // Callbacks
   // ------------
-  const onSortChange = useCallback((field: SortColumnField, direction: Direction) => {
-    dispatch({
-      type: 'onTableSortChange',
-      data: { field, direction },
-    });
-  }, []);
+  const onTableSearchChange = useCallback(
+    (arg: { query: Query | null; queryText: string }) => {
+      const query = arg.query ?? new Query(Ast.create([]), undefined, arg.queryText);
+      updateQuery(query);
+    },
+    [updateQuery]
+  );
 
-  const onTableChange = useCallback((criteria: CriteriaWithPagination<T>) => {
-    dispatch({ type: 'onTableChange', data: criteria });
-  }, []);
+  const updateTableSortAndPagination = useCallback(
+    (data: {
+      sort?: State<T>['tableSort'];
+      page?: {
+        pageIndex: number;
+        pageSize: number;
+      };
+    }) => {
+      if (data.sort && urlStateEnabled) {
+        setUrlState({
+          sort: {
+            field: data.sort.field === 'attributes.title' ? 'title' : data.sort.field,
+            direction: data.sort.direction,
+          },
+        });
+      }
+
+      if (data.page || !urlStateEnabled) {
+        dispatch({
+          type: 'onTableChange',
+          data,
+        });
+      }
+    },
+    [setUrlState, urlStateEnabled]
+  );
+
+  const onSortChange = useCallback(
+    (field: SortColumnField, direction: Direction) => {
+      updateTableSortAndPagination({
+        sort: {
+          field,
+          direction,
+        },
+      });
+    },
+    [updateTableSortAndPagination]
+  );
+
+  const onTableChange = useCallback(
+    (criteria: CriteriaWithPagination<T>) => {
+      const data: {
+        sort?: State<T>['tableSort'];
+        page?: {
+          pageIndex: number;
+          pageSize: number;
+        };
+      } = {};
+
+      if (criteria.sort) {
+        // We need to serialise the field as the <EuiInMemoryTable /> return either (1) the field _name_ (e.g. "Last updated")
+        // when changing the "Rows per page" select value or (2) the field _value_ (e.g. "updatedAt") when clicking the column title
+        let fieldSerialized: unknown = criteria.sort.field;
+        if (fieldSerialized === tableColumnMetadata.title.name) {
+          fieldSerialized = tableColumnMetadata.title.field;
+        } else if (fieldSerialized === tableColumnMetadata.updatedAt.name) {
+          fieldSerialized = tableColumnMetadata.updatedAt.field;
+        }
+
+        data.sort = {
+          field: fieldSerialized as SortColumnField,
+          direction: criteria.sort.direction,
+        };
+      }
+
+      data.page = {
+        pageIndex: criteria.page.index,
+        pageSize: criteria.page.size,
+      };
+
+      updateTableSortAndPagination(data);
+    },
+    [updateTableSortAndPagination]
+  );
 
   const deleteSelectedItems = useCallback(async () => {
     if (isDeletingItems) {
@@ -547,7 +770,7 @@ function TableListViewComp<T extends UserContentCommonSchema>({
             />
           }
           color="danger"
-          iconType="alert"
+          iconType="warning"
         >
           <p>
             <FormattedMessage
@@ -571,6 +794,85 @@ function TableListViewComp<T extends UserContentCommonSchema>({
   useDebounce(fetchItems, 300, [fetchItems]);
 
   useEffect(() => {
+    if (!urlStateEnabled) {
+      return;
+    }
+
+    // Update our Query instance based on the URL "s" text
+    const updateQueryFromURL = async (text: string = '') => {
+      let ast = Ast.create([]);
+      let termMatch = text;
+
+      if (searchQueryParser) {
+        // Parse possible tags in the search text
+        const {
+          references,
+          referencesToExclude,
+          searchQuery: searchTerm,
+        } = await searchQueryParser(text);
+
+        termMatch = searchTerm;
+
+        if (references?.length || referencesToExclude?.length) {
+          const allTags = getTagList();
+
+          if (references?.length) {
+            references.forEach(({ id: refId }) => {
+              const tag = allTags.find(({ id }) => id === refId);
+              if (tag) {
+                ast = ast.addOrFieldValue('tag', tag.name, true, 'eq');
+              }
+            });
+          }
+
+          if (referencesToExclude?.length) {
+            referencesToExclude.forEach(({ id: refId }) => {
+              const tag = allTags.find(({ id }) => id === refId);
+              if (tag) {
+                ast = ast.addOrFieldValue('tag', tag.name, false, 'eq');
+              }
+            });
+          }
+        }
+      }
+
+      if (termMatch.trim() !== '') {
+        ast = ast.addClause({ type: 'term', value: termMatch, match: 'must' });
+      }
+
+      const updatedQuery = new Query(ast, undefined, text);
+
+      dispatch({
+        type: 'onSearchQueryChange',
+        data: {
+          query: updatedQuery,
+          text,
+        },
+      });
+    };
+
+    // Update our State "sort" based on the URL "sort" and "sortdir"
+    const updateSortFromURL = (sort?: URLState['sort']) => {
+      if (!sort) {
+        return;
+      }
+
+      dispatch({
+        type: 'onTableChange',
+        data: {
+          sort: {
+            field: sort.field,
+            direction: sort.direction,
+          },
+        },
+      });
+    };
+
+    updateQueryFromURL(urlState.s);
+    updateSortFromURL(urlState.sort);
+  }, [urlState, searchQueryParser, getTagList, urlStateEnabled]);
+
+  useEffect(() => {
     isMounted.current = true;
 
     return () => {
@@ -578,16 +880,26 @@ function TableListViewComp<T extends UserContentCommonSchema>({
     };
   }, []);
 
+  const PageTemplate = useMemo<typeof KibanaPageTemplate>(() => {
+    return withoutPageTemplateWrapper
+      ? ((({
+          children: _children,
+          'data-test-subj': dataTestSubj,
+        }: {
+          children: React.ReactNode;
+          ['data-test-subj']?: string;
+        }) => (
+          <div data-test-subj={dataTestSubj}>{_children}</div>
+        )) as unknown as typeof KibanaPageTemplate)
+      : KibanaPageTemplate;
+  }, [withoutPageTemplateWrapper]);
+
   // ------------
   // Render
   // ------------
   if (!hasInitialFetchReturned) {
     return null;
   }
-
-  const PageTemplate = withoutPageTemplateWrapper
-    ? (React.Fragment as unknown as typeof KibanaPageTemplate)
-    : KibanaPageTemplate;
 
   if (!showFetchError && hasNoItems) {
     return (
@@ -600,6 +912,12 @@ function TableListViewComp<T extends UserContentCommonSchema>({
       </PageTemplate>
     );
   }
+
+  const testSubjectState = isDeletingItems
+    ? 'table-is-deleting'
+    : hasInitialFetchReturned && !isFetchingItems
+    ? 'table-is-ready'
+    : 'table-is-loading';
 
   return (
     <PageTemplate panelled data-test-subj={pageDataTestSubject}>
@@ -631,39 +949,43 @@ function TableListViewComp<T extends UserContentCommonSchema>({
         {showFetchError && renderFetchError()}
 
         {/* Table of items */}
-        <Table<T>
-          dispatch={dispatch}
-          items={items}
-          isFetchingItems={isFetchingItems}
-          searchQuery={searchQuery}
-          tableColumns={tableColumns}
-          hasUpdatedAtMetadata={hasUpdatedAtMetadata}
-          tableSort={tableSort}
-          pagination={pagination}
-          selectedIds={selectedIds}
-          entityName={entityName}
-          entityNamePlural={entityNamePlural}
-          tagsToTableItemMap={tagsToTableItemMap}
-          deleteItems={deleteItems}
-          tableCaption={tableListTitle}
-          onTableChange={onTableChange}
-          onSortChange={onSortChange}
-          addOrRemoveIncludeTagFilter={addOrRemoveIncludeTagFilter}
-          addOrRemoveExcludeTagFilter={addOrRemoveExcludeTagFilter}
-          clearTagSelection={clearTagSelection}
-        />
-
-        {/* Delete modal */}
-        {showDeleteModal && (
-          <ConfirmDeleteModal<T>
-            isDeletingItems={isDeletingItems}
+        <div data-test-subj={testSubjectState}>
+          <Table<T>
+            dispatch={dispatch}
+            items={items}
+            isFetchingItems={isFetchingItems}
+            searchQuery={searchQuery}
+            tableColumns={tableColumns}
+            hasUpdatedAtMetadata={hasUpdatedAtMetadata}
+            tableSort={tableSort}
+            pagination={pagination}
+            selectedIds={selectedIds}
             entityName={entityName}
             entityNamePlural={entityNamePlural}
-            items={selectedItems}
-            onConfirm={deleteSelectedItems}
-            onCancel={() => dispatch({ type: 'onCancelDeleteItems' })}
+            tagsToTableItemMap={tagsToTableItemMap}
+            deleteItems={deleteItems}
+            tableCaption={tableListTitle}
+            tableItemsRowActions={tableItemsRowActions}
+            onTableChange={onTableChange}
+            onTableSearchChange={onTableSearchChange}
+            onSortChange={onSortChange}
+            addOrRemoveIncludeTagFilter={addOrRemoveIncludeTagFilter}
+            addOrRemoveExcludeTagFilter={addOrRemoveExcludeTagFilter}
+            clearTagSelection={clearTagSelection}
           />
-        )}
+
+          {/* Delete modal */}
+          {showDeleteModal && (
+            <ConfirmDeleteModal<T>
+              isDeletingItems={isDeletingItems}
+              entityName={entityName}
+              entityNamePlural={entityNamePlural}
+              items={selectedItems}
+              onConfirm={deleteSelectedItems}
+              onCancel={() => dispatch({ type: 'onCancelDeleteItems' })}
+            />
+          )}
+        </div>
       </KibanaPageTemplate.Section>
     </PageTemplate>
   );

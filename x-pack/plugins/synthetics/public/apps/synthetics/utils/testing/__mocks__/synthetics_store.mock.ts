@@ -29,11 +29,8 @@ export const mockState: SyntheticsAppState = {
     integrationsPopoverOpen: null,
     searchText: '',
     monitorId: '',
-  },
-  indexStatus: {
-    data: null,
-    error: null,
-    loading: false,
+    refreshInterval: 60,
+    refreshPaused: true,
   },
   serviceLocations: {
     throttling: DEFAULT_THROTTLING,
@@ -72,7 +69,8 @@ export const mockState: SyntheticsAppState = {
       sortField: `${ConfigKey.NAME}.keyword`,
       sortOrder: 'asc',
       tags: undefined,
-      monitorType: undefined,
+      monitorTypes: undefined,
+      projects: undefined,
       locations: undefined,
     },
     monitorUpsertStatuses: {},
@@ -87,6 +85,13 @@ export const mockState: SyntheticsAppState = {
     error: null,
     loading: false,
     loaded: false,
+    monitorFilterOptions: {
+      monitorTypes: [],
+      tags: [],
+      locations: [],
+      projects: [],
+      schedules: [],
+    },
   },
   overview: {
     pageState: {
@@ -103,14 +108,51 @@ export const mockState: SyntheticsAppState = {
     loaded: false,
     loading: false,
     flyoutConfig: null,
-    status: null,
-    statusError: null,
+    groupBy: {
+      field: 'none',
+      order: 'asc',
+    },
   },
   syntheticsEnablement: { loading: false, error: null, enablement: null },
   monitorDetails: getMonitorDetailsMockSlice(),
   browserJourney: getBrowserJourneyMockSlice(),
   networkEvents: {},
   pingStatus: getPingStatusesMockSlice(),
+  agentPolicies: {
+    loading: false,
+    error: null,
+    data: null,
+  },
+  settings: {
+    loading: false,
+    error: null,
+    success: null,
+  },
+  dynamicSettings: {
+    loading: false,
+    locationMonitors: [],
+  },
+  defaultAlerting: {
+    loading: false,
+    error: null,
+    success: null,
+  },
+  elasticsearch: {
+    results: {},
+    loading: {},
+    error: {},
+  },
+  manualTestRuns: {},
+  overviewStatus: {
+    loaded: false,
+    loading: false,
+    status: null,
+    error: null,
+  },
+  globalParams: {
+    addError: null,
+    editError: null,
+  },
 };
 
 function getBrowserJourneyMockSlice() {
@@ -136,6 +178,8 @@ function getBrowserJourneyMockSlice() {
       { hash: '4bae236101175ae7746cb922f4c511083af4fbcd', hitTime: 1658682270849 },
       { hash: 'ec95c047e2e05a27598451fdaa7f24db973eb933', hitTime: 1658682270849 },
     ],
+    journeys: {},
+    journeysLoading: {},
   };
 }
 
@@ -143,6 +187,7 @@ function getMonitorDetailsMockSlice() {
   return {
     lastRun: {
       loading: false,
+      loaded: true,
       data: {
         summary: { up: 1, down: 0 },
         agent: {
@@ -384,7 +429,6 @@ function getMonitorDetailsMockSlice() {
       playwright_options: '',
       __ui: {
         script_source: { is_generated_script: false, file_name: '' },
-        is_zip_url_tls_enabled: false,
         is_tls_enabled: false,
       },
       params: '',
@@ -392,22 +436,21 @@ function getMonitorDetailsMockSlice() {
       'source.inline.script':
         "step('Goto one pixel image', async () => {\\n    await page.goto('data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==');\\n});",
       'source.project.content': '',
-      'source.zip_url.url': '',
-      'source.zip_url.username': '',
-      'source.zip_url.password': '',
-      'source.zip_url.folder': '',
-      'source.zip_url.proxy_url': '',
       urls: 'data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==',
       screenshots: 'on',
       synthetics_args: [],
       'filter_journeys.match': '',
       'filter_journeys.tags': [],
       ignore_https_errors: false,
-      'throttling.is_enabled': true,
-      'throttling.download_speed': '5',
-      'throttling.upload_speed': '3',
-      'throttling.latency': '20',
-      'throttling.config': '5d/3u/20l',
+      throttling: {
+        value: {
+          download: '5',
+          upload: '3',
+          latency: '20',
+        },
+        label: 'Regular 3G',
+        id: 'three_g',
+      },
       'ssl.certificate_authorities': '',
       'ssl.certificate': '',
       'ssl.key': '',

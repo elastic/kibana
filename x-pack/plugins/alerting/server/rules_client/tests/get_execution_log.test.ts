@@ -51,6 +51,8 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   getEventLogClient: jest.fn(),
   kibanaVersion,
   auditLogger,
+  isAuthenticationTypeAPIKey: jest.fn(),
+  getAuthenticationAPIKey: jest.fn(),
 };
 
 beforeEach(() => {
@@ -91,6 +93,7 @@ const BaseRuleSavedObject: SavedObject<RawRule> = {
       error: null,
       warning: null,
     },
+    revision: 0,
   },
   references: [],
 };
@@ -130,7 +133,7 @@ const aggregateResults = {
               numRecoveredAlerts: {
                 value: 0.0,
               },
-              outcomeAndMessage: {
+              outcomeMessageAndMaintenanceWindow: {
                 hits: {
                   total: {
                     value: 1,
@@ -239,7 +242,7 @@ const aggregateResults = {
               numRecoveredAlerts: {
                 value: 5.0,
               },
-              outcomeAndMessage: {
+              outcomeMessageAndMaintenanceWindow: {
                 hits: {
                   total: {
                     value: 1,
@@ -258,6 +261,9 @@ const aggregateResults = {
                         },
                         kibana: {
                           version: '8.2.0',
+                          alert: {
+                            maintenance_window_ids: ['254699b0-dfb2-11ed-bb3d-c91b918d0260'],
+                          },
                           alerting: {
                             outcome: 'success',
                           },
@@ -386,6 +392,7 @@ describe('getExecutionLogForRule()', () => {
           rule_id: 'a348a740-9e2c-11ec-bd64-774ed95c43ef',
           rule_name: 'rule-name',
           space_ids: [],
+          maintenance_window_ids: [],
         },
         {
           id: '41b2755e-765a-4044-9745-b03875d5e79a',
@@ -409,6 +416,7 @@ describe('getExecutionLogForRule()', () => {
           rule_id: 'a348a740-9e2c-11ec-bd64-774ed95c43ef',
           rule_name: 'rule-name',
           space_ids: [],
+          maintenance_window_ids: ['254699b0-dfb2-11ed-bb3d-c91b918d0260'],
         },
       ],
     });
@@ -722,6 +730,7 @@ describe('getGlobalExecutionLogWithAuth()', () => {
           rule_id: 'a348a740-9e2c-11ec-bd64-774ed95c43ef',
           rule_name: 'rule-name',
           space_ids: [],
+          maintenance_window_ids: [],
         },
         {
           id: '41b2755e-765a-4044-9745-b03875d5e79a',
@@ -745,6 +754,7 @@ describe('getGlobalExecutionLogWithAuth()', () => {
           rule_id: 'a348a740-9e2c-11ec-bd64-774ed95c43ef',
           rule_name: 'rule-name',
           space_ids: [],
+          maintenance_window_ids: ['254699b0-dfb2-11ed-bb3d-c91b918d0260'],
         },
       ],
     });

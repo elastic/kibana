@@ -8,8 +8,8 @@
 import { EuiDescribedFormGroup, EuiFormRow, EuiLink, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useMemo } from 'react';
-import { useTrackPageview } from '@kbn/observability-plugin/public';
-import { useLinkProps } from '@kbn/observability-plugin/public';
+import { useTrackPageview } from '@kbn/observability-shared-plugin/public';
+import { useLinkProps } from '@kbn/observability-shared-plugin/public';
 import { LogDataViewReference } from '../../../../common/log_views';
 import { FormElement } from './form_elements';
 import { getFormRowProps } from './form_field_props';
@@ -99,7 +99,10 @@ const DataViewsInlineHelpMessage = React.memo(() => {
       defaultMessage="Data views are shared among apps in the Kibana space and can be managed via the {dataViewsManagementLink}. A single data view can target multiple indices."
       values={{
         dataViewsManagementLink: (
-          <EuiLink {...dataViewsManagementLinkProps}>
+          <EuiLink
+            data-test-subj="infraDataViewsInlineHelpMessageDataViewsManagementScreenLink"
+            {...dataViewsManagementLinkProps}
+          >
             <FormattedMessage
               id="xpack.infra.logSourceConfiguration.dataViewsManagementLinkText"
               defaultMessage="data views management screen"

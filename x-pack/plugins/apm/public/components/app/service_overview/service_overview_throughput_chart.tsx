@@ -20,8 +20,8 @@ import { ApmMlDetectorType } from '../../../../common/anomaly_detection/apm_ml_d
 import { asExactTransactionRate } from '../../../../common/utils/formatters';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { useEnvironmentsContext } from '../../../context/environments_context/use_environments_context';
-import { useApmParams } from '../../../hooks/use_apm_params';
-import { useFetcher } from '../../../hooks/use_fetcher';
+import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
+import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
 import { usePreferredServiceAnomalyTimeseries } from '../../../hooks/use_preferred_service_anomaly_timeseries';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { TimeseriesChartWithContext } from '../../shared/charts/timeseries_chart_with_context';
@@ -30,6 +30,8 @@ import {
   ChartType,
   getTimeSeriesColor,
 } from '../../shared/charts/helper/get_timeseries_color';
+import { usePreferredDataSourceAndBucketSize } from '../../../hooks/use_preferred_data_source_and_bucket_size';
+import { ApmDocumentType } from '../../../../common/document_type';
 
 const INITIAL_STATE = {
   currentPeriod: [],
@@ -47,7 +49,10 @@ export function ServiceOverviewThroughputChart({
 }) {
   const {
     query: { rangeFrom, rangeTo, comparisonEnabled, offset },
-  } = useApmParams('/services/{serviceName}');
+  } = useAnyOfApmParams(
+    '/services/{serviceName}',
+    '/mobile-services/{serviceName}'
+  );
 
   const { environment } = useEnvironmentsContext();
 
@@ -57,13 +62,26 @@ export function ServiceOverviewThroughputChart({
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
-  const { transactionType, serviceName } = useApmServiceContext();
+  const preferred = usePreferredDataSourceAndBucketSize({
+    start,
+    end,
+    numBuckets: 100,
+    kuery,
+    type: ApmDocumentType.ServiceTransactionMetric,
+  });
+
+  const { transactionType, serviceName, transactionTypeStatus } =
+    useApmServiceContext();
 
   const comparisonChartTheme = getComparisonChartTheme();
 
   const { data = INITIAL_STATE, status } = useFetcher(
     (callApmApi) => {
-      if (serviceName && transactionType && start && end) {
+      if (!transactionType && transactionTypeStatus === FETCH_STATUS.SUCCESS) {
+        return Promise.resolve(INITIAL_STATE);
+      }
+
+      if (serviceName && transactionType && start && end && preferred) {
         return callApmApi(
           'GET /internal/apm/services/{serviceName}/throughput',
           {
@@ -82,6 +100,9 @@ export function ServiceOverviewThroughputChart({
                     ? offset
                     : undefined,
                 transactionName,
+                documentType: preferred.source.documentType,
+                rollupInterval: preferred.source.rollupInterval,
+                bucketSizeInSeconds: preferred.bucketSizeInSeconds,
               },
             },
           }
@@ -95,9 +116,11 @@ export function ServiceOverviewThroughputChart({
       start,
       end,
       transactionType,
+      transactionTypeStatus,
       offset,
       transactionName,
       comparisonEnabled,
+      preferred,
     ]
   );
 
@@ -108,7 +131,7 @@ export function ServiceOverviewThroughputChart({
   const previousPeriodLabel = usePreviousPeriodLabel();
   const timeseries = [
     {
-      data: data.currentPeriod,
+      data: data?.currentPeriod ?? [],
       type: 'linemark',
       color: currentPeriodColor,
       title: i18n.translate('xpack.apm.serviceOverview.throughtputChartTitle', {
@@ -118,7 +141,7 @@ export function ServiceOverviewThroughputChart({
     ...(comparisonEnabled
       ? [
           {
-            data: data.previousPeriod,
+            data: data?.previousPeriod ?? [],
             type: 'area',
             color: previousPeriodColor,
             title: previousPeriodLabel,

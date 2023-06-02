@@ -1,0 +1,6 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/ts-type-check-cli",
+  "owner": "@elastic/kibana-operations",
+  "devOnly": true
+}

@@ -200,10 +200,10 @@ export class HeaderHelpMenu extends Component<Props, State> {
     return globalHelpExtensionMenuLinks
       .sort((a, b) => b.priority - a.priority)
       .map((link, index) => {
-        const { linkType, content: text, href, ...rest } = link;
+        const { linkType, content: text, href, external, ...rest } = link;
         return createCustomLink(index, text, true, {
           href,
-          onClick: this.createOnClickHandler(href, navigateToUrl),
+          onClick: external ? undefined : this.createOnClickHandler(href, navigateToUrl),
           ...rest,
         });
       });
@@ -264,7 +264,7 @@ export class HeaderHelpMenu extends Component<Props, State> {
             });
           }
           case 'custom': {
-            const { linkType, content: text, href, ...rest } = link;
+            const { linkType, content: text, href, external, ...rest } = link;
             return createCustomLink(index, text, addSpacer, {
               href,
               onClick: this.createOnClickHandler(href, navigateToUrl),

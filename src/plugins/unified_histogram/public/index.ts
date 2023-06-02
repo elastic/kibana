@@ -8,14 +8,24 @@
 
 import { UnifiedHistogramPublicPlugin } from './plugin';
 
-export type { UnifiedHistogramLayoutProps } from './layout';
-export { UnifiedHistogramLayout } from './layout';
+export type {
+  UnifiedHistogramApi,
+  UnifiedHistogramContainerProps,
+  UnifiedHistogramCreationOptions,
+  UnifiedHistogramState,
+  UnifiedHistogramStateOptions,
+} from './container';
+export {
+  UnifiedHistogramContainer,
+  getChartHidden,
+  getTopPanelHeight,
+  getBreakdownField,
+  setChartHidden,
+  setTopPanelHeight,
+  setBreakdownField,
+} from './container';
 export type {
   UnifiedHistogramServices,
-  UnifiedHistogramRequestContext,
-  UnifiedHistogramHitsContext,
-  UnifiedHistogramChartContext,
-  UnifiedHistogramBreakdownContext,
   UnifiedHistogramChartLoadEvent,
   UnifiedHistogramAdapters,
 } from './types';

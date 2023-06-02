@@ -81,9 +81,9 @@ it(`#setup returns exposed services`, () => {
     features: mockFeaturesSetup,
     getSpacesService: mockGetSpacesService,
     getCurrentUser: jest.fn(),
+    customBranding: mockCoreSetup.customBranding,
   });
 
-  expect(authz.actions.version).toBe('version:some-version');
   expect(authz.applicationName).toBe(application);
 
   expect(authz.checkPrivilegesWithRequest).toBe(mockCheckPrivilegesWithRequest);
@@ -143,6 +143,7 @@ describe('#start', () => {
         .fn()
         .mockReturnValue({ getSpaceId: jest.fn(), namespaceToSpaceId: jest.fn() }),
       getCurrentUser: jest.fn(),
+      customBranding: mockCoreSetup.customBranding,
     });
 
     const featuresStart = featuresPluginMock.createStart();
@@ -215,6 +216,7 @@ it('#stop unsubscribes from license and ES updates.', async () => {
       .fn()
       .mockReturnValue({ getSpaceId: jest.fn(), namespaceToSpaceId: jest.fn() }),
     getCurrentUser: jest.fn(),
+    customBranding: mockCoreSetup.customBranding,
   });
 
   const featuresStart = featuresPluginMock.createStart();

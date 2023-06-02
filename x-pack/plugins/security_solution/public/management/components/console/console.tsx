@@ -27,7 +27,10 @@ const ConsoleWindow = styled.div`
 
   .layout {
     height: 100%;
+    width: 100%;
     min-height: 300px;
+    min-width: 300px;
+    overflow: hidden;
 
     &-hideOverflow {
       overflow: hidden;
@@ -74,6 +77,17 @@ const ConsoleWindow = styled.div`
     &-historyViewport {
       height: 100%;
       overflow-x: hidden;
+      white-space: pre-wrap;
+    }
+
+    // min-width setting is needed for flex items to ensure that overflow works as expected
+    // in the Input area and not cause the entire UI to expand beyond the overall width of
+    // the console. @see https://css-tricks.com/flexbox-truncated-text
+    // To prevent this from being applied to an individual flex item, use the classname of
+    // 'noMinWidth'. For areas of the Console that render components external to the Console,
+    // use className 'noThemeOverrides' to prevent this from impacting those components/
+    .euiFlexItem:not(.noMinWidth):not(.noThemeOverrides .euiFlexItem) {
+      min-width: 0;
     }
   }
 
@@ -105,7 +119,15 @@ const ConsoleWindow = styled.div`
 `;
 
 export const Console = memo<ConsoleProps>(
-  ({ prompt, commands, HelpComponent, TitleComponent, managedKey, ...commonProps }) => {
+  ({
+    prompt,
+    commands,
+    HelpComponent,
+    TitleComponent,
+    storagePrefix,
+    managedKey,
+    ...commonProps
+  }) => {
     const scrollingViewport = useRef<HTMLDivElement | null>(null);
     const inputFocusRef: CommandInputProps['focusRef'] = useRef(null);
     const getTestId = useTestIdGenerator(commonProps['data-test-subj']);
@@ -145,6 +167,7 @@ export const Console = memo<ConsoleProps>(
         managedKey={managedKey}
         HelpComponent={HelpComponent}
         dataTestSubj={commonProps['data-test-subj']}
+        storagePrefix={storagePrefix}
       >
         <ConsoleWindow {...commonProps}>
           <EuiFlexGroup className="layout" gutterSize="none" responsive={false}>

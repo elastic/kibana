@@ -6,6 +6,7 @@
  */
 
 import { KibanaRequest } from '@kbn/core/server';
+import { once } from 'lodash';
 import type { MlClient } from '../ml_client';
 import { mlLog } from '../log';
 import {
@@ -60,24 +61,28 @@ function disableAdminPrivileges(capabilities: MlCapabilities) {
 
 export type HasMlCapabilities = (capabilities: MlCapabilitiesKey[]) => Promise<void>;
 
-export function hasMlCapabilitiesProvider(resolveMlCapabilities: ResolveMlCapabilities) {
-  return (request: KibanaRequest): HasMlCapabilities => {
-    let mlCapabilities: MlCapabilities | null = null;
-    return async (capabilities: MlCapabilitiesKey[]) => {
-      try {
-        mlCapabilities = await resolveMlCapabilities(request);
-      } catch (e) {
-        mlLog.error(e);
-        throw new UnknownMLCapabilitiesError(`Unable to perform ML capabilities check ${e}`);
-      }
+export function hasMlCapabilitiesProvider(
+  resolveMlCapabilities: ResolveMlCapabilities,
+  request: KibanaRequest
+) {
+  let mlCapabilities: MlCapabilities | null = null;
 
-      if (mlCapabilities === null) {
-        throw new MLPrivilegesUninitialized('ML capabilities have not been initialized');
-      }
+  const resolveMlCapabilitiesOnce = once(resolveMlCapabilities);
 
-      if (capabilities.every((c) => mlCapabilities![c] === true) === false) {
-        throw new InsufficientMLCapabilities('Insufficient privileges to access feature');
-      }
-    };
+  return async (capabilities: MlCapabilitiesKey[]) => {
+    try {
+      mlCapabilities = await resolveMlCapabilitiesOnce(request);
+    } catch (e) {
+      mlLog.error(e);
+      throw new UnknownMLCapabilitiesError(`Unable to perform ML capabilities check ${e}`);
+    }
+
+    if (mlCapabilities === null) {
+      throw new MLPrivilegesUninitialized('ML capabilities have not been initialized');
+    }
+
+    if (capabilities.every((c) => mlCapabilities![c] === true) === false) {
+      throw new InsufficientMLCapabilities('Insufficient privileges to access feature');
+    }
   };
 }

@@ -1,0 +1,31 @@
+{
+  "type": "plugin",
+  "id": "@kbn/rollup-plugin",
+  "owner": "@elastic/platform-deployment-management",
+  "plugin": {
+    "id": "rollup",
+    "server": true,
+    "browser": true,
+    "configPath": [
+      "xpack",
+      "rollup"
+    ],
+    "requiredPlugins": [
+      "management",
+      "licensing",
+      "features"
+    ],
+    "optionalPlugins": [
+      "home",
+      "indexManagement",
+      "usageCollection",
+      "visTypeTimeseries"
+    ],
+    "requiredBundles": [
+      "kibanaUtils",
+      "kibanaReact",
+      "esUiShared",
+      "data"
+    ]
+  }
+}

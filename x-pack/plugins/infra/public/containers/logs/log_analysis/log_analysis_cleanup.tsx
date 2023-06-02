@@ -11,40 +11,40 @@ import { callDeleteJobs, callGetJobDeletionTasks, callStopDatafeeds } from './ap
 
 export const cleanUpJobsAndDatafeeds = async <JobType extends string>(
   spaceId: string,
-  sourceId: string,
+  logViewId: string,
   jobTypes: JobType[],
   fetch: HttpHandler
 ) => {
   try {
-    await callStopDatafeeds({ spaceId, sourceId, jobTypes }, fetch);
+    await callStopDatafeeds({ spaceId, logViewId, jobTypes }, fetch);
   } catch (err) {
     // Proceed only if datafeed has been deleted or didn't exist in the first place
-    if (err?.res?.status !== 404) {
+    if (err?.response?.status !== 404) {
       throw err;
     }
   }
 
-  return await deleteJobs(spaceId, sourceId, jobTypes, fetch);
+  return await deleteJobs(spaceId, logViewId, jobTypes, fetch);
 };
 
 const deleteJobs = async <JobType extends string>(
   spaceId: string,
-  sourceId: string,
+  logViewId: string,
   jobTypes: JobType[],
   fetch: HttpHandler
 ) => {
-  const deleteJobsResponse = await callDeleteJobs({ spaceId, sourceId, jobTypes }, fetch);
-  await waitUntilJobsAreDeleted(spaceId, sourceId, jobTypes, fetch);
+  const deleteJobsResponse = await callDeleteJobs({ spaceId, logViewId, jobTypes }, fetch);
+  await waitUntilJobsAreDeleted(spaceId, logViewId, jobTypes, fetch);
   return deleteJobsResponse;
 };
 
 const waitUntilJobsAreDeleted = async <JobType extends string>(
   spaceId: string,
-  sourceId: string,
+  logViewId: string,
   jobTypes: JobType[],
   fetch: HttpHandler
 ) => {
-  const moduleJobIds = jobTypes.map((jobType) => getJobId(spaceId, sourceId, jobType));
+  const moduleJobIds = jobTypes.map((jobType) => getJobId(spaceId, logViewId, jobType));
   while (true) {
     const { jobIds: jobIdsBeingDeleted } = await callGetJobDeletionTasks(fetch);
     const needToWait = jobIdsBeingDeleted.some((jobId) => moduleJobIds.includes(jobId));

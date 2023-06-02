@@ -14,6 +14,7 @@ import {
   DataPublicPluginSetup,
   DataPublicPluginStart,
   DataViewsContract,
+  TimefilterContract,
 } from '@kbn/data-plugin/public';
 import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { ChartsPluginSetup } from '@kbn/charts-plugin/public';
@@ -23,6 +24,7 @@ import {
   DataViewsPublicPluginSetup,
   DataViewsPublicPluginStart,
 } from '@kbn/data-views-plugin/public';
+import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
 import { Document } from '../persistence/saved_object_store';
 import {
   Datasource,
@@ -49,12 +51,15 @@ export interface EditorFrameStartPlugins {
   expressions: ExpressionsStart;
   charts: ChartsPluginSetup;
   dataViews: DataViewsPublicPluginStart;
+  eventAnnotationService: EventAnnotationServiceType;
 }
 
 export interface EditorFramePlugins {
   dataViews: DataViewsContract;
   uiSettings: IUiSettingsClient;
   storage: IStorageWrapper;
+  timefilter: TimefilterContract;
+  eventAnnotationService: EventAnnotationServiceType;
 }
 
 async function collectAsyncDefinitions<T extends { id: string }>(
@@ -116,7 +121,13 @@ export class EditorFrameService {
       const { EditorFrame } = await import('../async_services');
 
       return {
-        EditorFrameContainer: ({ showNoDataPopover, lensInspector, indexPatternService }) => {
+        EditorFrameContainer: ({
+          showNoDataPopover,
+          lensInspector,
+          indexPatternService,
+          getUserMessages,
+          addUserMessages,
+        }) => {
           return (
             <div className="lnsApp__frame">
               <EditorFrame
@@ -125,6 +136,8 @@ export class EditorFrameService {
                 plugins={plugins}
                 lensInspector={lensInspector}
                 showNoDataPopover={showNoDataPopover}
+                getUserMessages={getUserMessages}
+                addUserMessages={addUserMessages}
                 indexPatternService={indexPatternService}
                 datasourceMap={resolvedDatasources}
                 visualizationMap={resolvedVisualizations}

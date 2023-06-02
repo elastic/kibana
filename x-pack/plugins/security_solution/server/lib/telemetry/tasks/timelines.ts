@@ -72,21 +72,8 @@ export function createTelemetryTimelineTaskConfig() {
 
         const endpointAlerts = await receiver.fetchTimelineEndpointAlerts(3);
 
-        const aggregations = endpointAlerts?.aggregations as unknown as {
-          endpoint_alert_count: { value: number };
-        };
-        tlog(logger, `Endpoint alert count: ${aggregations?.endpoint_alert_count}`);
-        sender.getTelemetryUsageCluster()?.incrementCounter({
-          counterName: 'telemetry_endpoint_alert',
-          counterType: 'endpoint_alert_count',
-          incrementBy: aggregations?.endpoint_alert_count.value,
-        });
-
         // No EP Alerts -> Nothing to do
-        if (
-          endpointAlerts.hits.hits?.length === 0 ||
-          endpointAlerts.hits.hits?.length === undefined
-        ) {
+        if (endpointAlerts.length === 0 || endpointAlerts.length === undefined) {
           tlog(logger, 'no endpoint alerts received. exiting telemetry task.');
           await sender.sendOnDemand(TASK_METRICS_CHANNEL, [
             createTaskMetric(taskName, true, startTime),
@@ -96,7 +83,7 @@ export function createTelemetryTimelineTaskConfig() {
 
         // Build process tree for each EP Alert recieved
 
-        for (const alert of endpointAlerts.hits.hits) {
+        for (const alert of endpointAlerts) {
           const eventId = alert._source ? alert._source['event.id'] : 'unknown';
           const alertUUID = alert._source ? alert._source['kibana.alert.uuid'] : 'unknown';
 

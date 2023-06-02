@@ -7,13 +7,9 @@
 
 import deepEqual from 'fast-deep-equal';
 import { ElasticsearchClient } from '@kbn/core/server';
+import { UpdateSLOParams, UpdateSLOResponse, updateSLOResponseSchema } from '@kbn/slo-schema';
 
 import { getSLOTransformId, SLO_INDEX_TEMPLATE_NAME } from '../../assets/constants';
-import {
-  UpdateSLOParams,
-  UpdateSLOResponse,
-  updateSLOResponseSchema,
-} from '../../types/rest_specs';
 import { SLORepository } from './slo_repository';
 import { TransformManager } from './transform_manager';
 import { SLO } from '../../domain/models';
@@ -45,10 +41,23 @@ export class UpdateSLO {
 
   private updateSLO(originalSlo: SLO, params: UpdateSLOParams) {
     let hasBreakingChange = false;
-    const updatedSlo: SLO = Object.assign({}, originalSlo, params, { updated_at: new Date() });
+    const updatedSlo: SLO = Object.assign({}, originalSlo, params, { updatedAt: new Date() });
     validateSLO(updatedSlo);
 
     if (!deepEqual(originalSlo.indicator, updatedSlo.indicator)) {
+      hasBreakingChange = true;
+    }
+
+    if (originalSlo.budgetingMethod !== updatedSlo.budgetingMethod) {
+      hasBreakingChange = true;
+    }
+
+    if (
+      originalSlo.budgetingMethod === 'timeslices' &&
+      updatedSlo.budgetingMethod === 'timeslices' &&
+      (originalSlo.objective.timesliceTarget !== updatedSlo.objective.timesliceTarget ||
+        !deepEqual(originalSlo.objective.timesliceWindow, updatedSlo.objective.timesliceWindow))
+    ) {
       hasBreakingChange = true;
     }
 
@@ -83,17 +92,6 @@ export class UpdateSLO {
   }
 
   private toResponse(slo: SLO): UpdateSLOResponse {
-    return updateSLOResponseSchema.encode({
-      id: slo.id,
-      name: slo.name,
-      description: slo.description,
-      indicator: slo.indicator,
-      budgeting_method: slo.budgeting_method,
-      time_window: slo.time_window,
-      objective: slo.objective,
-      settings: slo.settings,
-      created_at: slo.created_at,
-      updated_at: slo.updated_at,
-    });
+    return updateSLOResponseSchema.encode(slo);
   }
 }

@@ -35,6 +35,12 @@ export const config: PluginConfigDescriptor = {
       enabled: true,
     },
     enableExperimental: true,
+    developer: {
+      maxAgentPoliciesWithInactivityTimeout: true,
+    },
+    internal: {
+      fleetServerStandalone: true,
+    },
   },
   deprecations: ({ renameFromRoot, unused, unusedFromRoot }) => [
     // Unused settings before Fleet server exists
@@ -120,10 +126,17 @@ export const config: PluginConfigDescriptor = {
     fleetServerHosts: PreconfiguredFleetServerHostsSchema,
     proxies: PreconfiguredFleetProxiesSchema,
     agentIdVerificationEnabled: schema.boolean({ defaultValue: true }),
+    setup: schema.maybe(
+      schema.object({
+        agentPolicySchemaUpgradeBatchSize: schema.maybe(schema.number()),
+      })
+    ),
     developer: schema.object({
+      maxAgentPoliciesWithInactivityTimeout: schema.maybe(schema.number()),
       disableRegistryVersionCheck: schema.boolean({ defaultValue: false }),
       allowAgentUpgradeSourceUri: schema.boolean({ defaultValue: false }),
       bundledPackageLocation: schema.string({ defaultValue: DEFAULT_BUNDLED_PACKAGE_LOCATION }),
+      testSecretsIndex: schema.maybe(schema.string()),
     }),
     packageVerification: schema.object({
       gpgKeyPath: schema.string({ defaultValue: DEFAULT_GPG_KEY_PATH }),
@@ -149,6 +162,18 @@ export const config: PluginConfigDescriptor = {
         }
       },
     }),
+
+    internal: schema.maybe(
+      schema.object({
+        disableILMPolicies: schema.boolean({
+          defaultValue: false,
+        }),
+        fleetServerStandalone: schema.boolean({
+          defaultValue: false,
+        }),
+      })
+    ),
+    enabled: schema.boolean({ defaultValue: true }),
   }),
 };
 

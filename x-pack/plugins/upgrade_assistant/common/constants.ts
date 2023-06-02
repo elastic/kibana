@@ -7,9 +7,6 @@
 
 export const API_BASE_PATH = '/api/upgrade_assistant';
 
-// Telemetry constants
-export const UPGRADE_ASSISTANT_TELEMETRY = 'upgrade-assistant-telemetry';
-
 /**
  * This is the repository where Cloud stores its backup snapshots.
  */

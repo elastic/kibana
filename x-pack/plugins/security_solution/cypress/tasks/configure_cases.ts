@@ -32,11 +32,16 @@ export const addServiceNowConnector = (connector: Connector) => {
 export const openAddNewConnectorOption = () => {
   cy.get(MAIN_PAGE).then(($page) => {
     if ($page.find(SERVICE_NOW_CONNECTOR_CARD).length !== 1) {
+      // eslint-disable-next-line cypress/no-unnecessary-waiting
       cy.wait(1000);
-      cy.get(CONNECTORS_DROPDOWN).click({ force: true });
+      cy.get(CONNECTORS_DROPDOWN).click();
       cy.get(ADD_NEW_CONNECTOR_DROPDOWN_BUTTON).click();
     }
   });
+};
+
+export const verifyNewConnectorSelected = (connector: Connector) => {
+  cy.get(CONNECTORS_DROPDOWN).should('have.text', connector.connectorName);
 };
 
 export const selectLastConnectorCreated = (id: string) => {

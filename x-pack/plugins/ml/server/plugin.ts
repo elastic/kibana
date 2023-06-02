@@ -23,6 +23,8 @@ import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import type { PluginStart as DataViewsPluginStart } from '@kbn/data-views-plugin/server';
 import type { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/server';
+import type { HomeServerPluginSetup } from '@kbn/home-plugin/server';
+import { jsonSchemaRoutes } from './routes/json_schema';
 import { notificationsRoutes } from './routes/notifications';
 import type { PluginsSetup, PluginsStart, RouteInitialization } from './types';
 import { PLUGIN_ID } from '../common/constants/app';
@@ -46,6 +48,7 @@ import { jobServiceRoutes } from './routes/job_service';
 import { savedObjectsRoutes } from './routes/saved_objects';
 import { jobValidationRoutes } from './routes/job_validation';
 import { resultsServiceRoutes } from './routes/results_service';
+import { modelManagementRoutes } from './routes/model_management';
 import { systemRoutes } from './routes/system';
 import { MlLicense } from '../common/license';
 import { createSharedServices, SharedServices } from './shared_services';
@@ -65,6 +68,10 @@ import { ML_ALERT_TYPES } from '../common/constants/alerts';
 import { alertingRoutes } from './routes/alerting';
 import { registerCollector } from './usage';
 import { SavedObjectsSyncService } from './saved_objects/sync_task';
+import {
+  CASE_ATTACHMENT_TYPE_ID_ANOMALY_SWIMLANE,
+  CASE_ATTACHMENT_TYPE_ID_ANOMALY_EXPLORER_CHARTS,
+} from '../common/constants/cases';
 
 export type MlPluginSetup = SharedServices;
 export type MlPluginStart = void;
@@ -81,6 +88,7 @@ export class MlServerPlugin
   private savedObjectsStart: SavedObjectsServiceStart | null = null;
   private spacesPlugin: SpacesPluginSetup | undefined;
   private security: SecurityPluginSetup | undefined;
+  private home: HomeServerPluginSetup | null = null;
   private dataViews: DataViewsPluginStart | null = null;
   private isMlReady: Promise<void>;
   private setMlReady: () => void = () => {};
@@ -96,6 +104,7 @@ export class MlServerPlugin
   public setup(coreSetup: CoreSetup<PluginsStart>, plugins: PluginsSetup): MlPluginSetup {
     this.spacesPlugin = plugins.spaces;
     this.security = plugins.security;
+    this.home = plugins.home;
     const { admin, user, apmUser } = getPluginPrivileges();
 
     plugins.features.registerKibanaFeature({
@@ -138,10 +147,6 @@ export class MlServerPlugin
     });
 
     registerKibanaSettings(coreSetup);
-
-    this.mlLicense.setup(plugins.licensing.license$, [
-      (mlLicense: MlLicense) => initSampleDataSets(mlLicense, plugins),
-    ]);
 
     // initialize capabilities switcher to add license filter to ml capabilities
     setupCapabilitiesSwitcher(coreSetup, plugins.licensing.license$, this.log);
@@ -199,7 +204,8 @@ export class MlServerPlugin
         plugins.spaces,
         plugins.security?.authz,
         () => this.isMlReady,
-        () => this.dataViews
+        () => this.dataViews,
+        coreSetup.getStartServices
       ),
       mlLicense: this.mlLicense,
     };
@@ -217,6 +223,7 @@ export class MlServerPlugin
     jobRoutes(routeInit);
     jobServiceRoutes(routeInit);
     managementRoutes(routeInit);
+    modelManagementRoutes(routeInit);
     resultsServiceRoutes(routeInit);
     jobValidationRoutes(routeInit);
     savedObjectsRoutes(routeInit, {
@@ -230,6 +237,7 @@ export class MlServerPlugin
     });
     trainedModelsRoutes(routeInit);
     notificationsRoutes(routeInit);
+    jsonSchemaRoutes(routeInit);
     alertingRoutes(routeInit, sharedServicesProviders);
 
     initMlServerLog({ log: this.log });
@@ -244,7 +252,21 @@ export class MlServerPlugin
     }
 
     if (plugins.usageCollection) {
-      registerCollector(plugins.usageCollection, coreSetup.savedObjects.getKibanaIndex());
+      const getIndexForType = (type: string) =>
+        coreSetup
+          .getStartServices()
+          .then(([coreStart]) => coreStart.savedObjects.getIndexForType(type));
+      registerCollector(plugins.usageCollection, getIndexForType);
+    }
+
+    if (plugins.cases) {
+      plugins.cases.attachmentFramework.registerPersistableState({
+        id: CASE_ATTACHMENT_TYPE_ID_ANOMALY_SWIMLANE,
+      });
+
+      plugins.cases.attachmentFramework.registerPersistableState({
+        id: CASE_ATTACHMENT_TYPE_ID_ANOMALY_EXPLORER_CHARTS,
+      });
     }
 
     return sharedServicesProviders;
@@ -258,17 +280,28 @@ export class MlServerPlugin
     this.savedObjectsStart = coreStart.savedObjects;
     this.dataViews = plugins.dataViews;
 
-    // check whether the job saved objects exist
-    // and create them if needed.
-    const { initializeJobs } = jobSavedObjectsInitializationFactory(
-      coreStart,
-      this.security,
-      this.spacesPlugin !== undefined
-    );
-    initializeJobs().finally(() => {
-      this.setMlReady();
+    this.mlLicense.setup(plugins.licensing.license$, (mlLicense: MlLicense) => {
+      if (mlLicense.isMlEnabled() === false || mlLicense.isFullLicense() === false) {
+        this.savedObjectsSyncService.unscheduleSyncTask(plugins.taskManager);
+        return;
+      }
+
+      if (this.home) {
+        initSampleDataSets(mlLicense, this.home);
+      }
+
+      // check whether the job saved objects exist
+      // and create them if needed.
+      const { initializeJobs } = jobSavedObjectsInitializationFactory(
+        coreStart,
+        this.security,
+        this.spacesPlugin !== undefined
+      );
+      initializeJobs().finally(() => {
+        this.setMlReady();
+      });
+      this.savedObjectsSyncService.scheduleSyncTask(plugins.taskManager, coreStart);
     });
-    this.savedObjectsSyncService.scheduleSyncTask(plugins.taskManager, coreStart);
   }
 
   public stop() {

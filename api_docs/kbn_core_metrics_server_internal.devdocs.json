@@ -11,10 +11,18 @@
   "server": {
     "classes": [],
     "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
     "interfaces": [
       {
         "parentPluginId": "@kbn/core-metrics-server-internal",
-        "id": "def-server.MetricsServiceSetupDeps",
+        "id": "def-common.MetricsServiceSetupDeps",
         "type": "Interface",
         "tags": [],
         "label": "MetricsServiceSetupDeps",
@@ -25,7 +33,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-metrics-server-internal",
-            "id": "def-server.MetricsServiceSetupDeps.http",
+            "id": "def-common.MetricsServiceSetupDeps.http",
             "type": "Object",
             "tags": [],
             "label": "http",
@@ -39,7 +47,7 @@
           },
           {
             "parentPluginId": "@kbn/core-metrics-server-internal",
-            "id": "def-server.MetricsServiceSetupDeps.elasticsearchService",
+            "id": "def-common.MetricsServiceSetupDeps.elasticsearchService",
             "type": "Object",
             "tags": [],
             "label": "elasticsearchService",
@@ -60,7 +68,7 @@
     "objects": [
       {
         "parentPluginId": "@kbn/core-metrics-server-internal",
-        "id": "def-server.opsConfig",
+        "id": "def-common.opsConfig",
         "type": "Object",
         "tags": [],
         "label": "opsConfig",
@@ -71,7 +79,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-metrics-server-internal",
-            "id": "def-server.opsConfig.path",
+            "id": "def-common.opsConfig.path",
             "type": "string",
             "tags": [],
             "label": "path",
@@ -85,7 +93,7 @@
           },
           {
             "parentPluginId": "@kbn/core-metrics-server-internal",
-            "id": "def-server.opsConfig.schema",
+            "id": "def-common.opsConfig.schema",
             "type": "Object",
             "tags": [],
             "label": "schema",
@@ -93,41 +101,41 @@
             "signature": [
               {
                 "pluginId": "@kbn/config-schema",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnConfigSchemaPluginApi",
-                "section": "def-server.ObjectType",
+                "section": "def-common.ObjectType",
                 "text": "ObjectType"
               },
               "<{ interval: ",
               {
                 "pluginId": "@kbn/config-schema",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnConfigSchemaPluginApi",
-                "section": "def-server.Type",
+                "section": "def-common.Type",
                 "text": "Type"
               },
               "<moment.Duration>; cGroupOverrides: ",
               {
                 "pluginId": "@kbn/config-schema",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnConfigSchemaPluginApi",
-                "section": "def-server.ObjectType",
+                "section": "def-common.ObjectType",
                 "text": "ObjectType"
               },
               "<{ cpuPath: ",
               {
                 "pluginId": "@kbn/config-schema",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnConfigSchemaPluginApi",
-                "section": "def-server.Type",
+                "section": "def-common.Type",
                 "text": "Type"
               },
               "<string | undefined>; cpuAcctPath: ",
               {
                 "pluginId": "@kbn/config-schema",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnConfigSchemaPluginApi",
-                "section": "def-server.Type",
+                "section": "def-common.Type",
                 "text": "Type"
               },
               "<string | undefined>; }>; }>"
@@ -140,13 +148,5 @@
         "initialIsOpen": false
       }
     ]
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
   }
 }

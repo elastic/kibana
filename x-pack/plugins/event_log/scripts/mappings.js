@@ -54,12 +54,45 @@ exports.EcsCustomPropertyMappings = {
             type: 'keyword',
             ignore_above: 1024,
           },
+          summary: {
+            properties: {
+              new: {
+                properties: {
+                  count: {
+                    type: 'long',
+                  },
+                },
+              },
+              ongoing: {
+                properties: {
+                  count: {
+                    type: 'long',
+                  },
+                },
+              },
+              recovered: {
+                properties: {
+                  count: {
+                    type: 'long',
+                  },
+                },
+              },
+            },
+          },
         },
       },
       alert: {
         properties: {
           flapping: {
             type: 'boolean',
+          },
+          maintenance_window_ids: {
+            type: 'keyword',
+            ignore_above: 1024,
+          },
+          uuid: {
+            type: 'keyword',
+            ignore_above: 1024,
           },
           rule: {
             properties: {
@@ -144,6 +177,9 @@ exports.EcsCustomPropertyMappings = {
                   },
                 },
               },
+              revision: {
+                type: 'long',
+              },
               rule_type_id: {
                 type: 'keyword',
                 ignore_above: 1024,
@@ -178,6 +214,9 @@ exports.EcsCustomPropertyMappings = {
             type: 'keyword',
             ignore_above: 1024,
           },
+          space_agnostic: {
+            type: 'boolean',
+          },
         },
       },
       space_ids: {
@@ -186,6 +225,30 @@ exports.EcsCustomPropertyMappings = {
       },
       version: {
         type: 'version',
+      },
+      action: {
+        properties: {
+          name: {
+            ignore_above: 1024,
+            type: 'keyword',
+          },
+          id: {
+            type: 'keyword',
+            ignore_above: 1024,
+          },
+          execution: {
+            properties: {
+              source: {
+                ignore_above: 1024,
+                type: 'keyword',
+              },
+              uuid: {
+                ignore_above: 1024,
+                type: 'keyword',
+              },
+            },
+          },
+        },
       },
     },
   },
@@ -218,4 +281,5 @@ exports.EcsEventLogMultiValuedProperties = [
   'event.type',
   'rule.author',
   'kibana.space_ids',
+  'kibana.alert.maintenance_window_ids',
 ];

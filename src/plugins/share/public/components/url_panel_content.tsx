@@ -20,7 +20,6 @@ import {
   EuiRadioGroup,
   EuiSwitch,
   EuiSwitchEvent,
-  EuiToolTip,
 } from '@elastic/eui';
 
 import { format as formatUrl, parse as parseUrl } from 'url';
@@ -29,6 +28,7 @@ import { FormattedMessage, I18nProvider } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import type { Capabilities } from '@kbn/core/public';
 
+import type { LocatorPublic } from '../../common';
 import { UrlParamExtension } from '../types';
 import {
   AnonymousAccessServiceContract,
@@ -42,6 +42,11 @@ export interface UrlPanelContentProps {
   objectId?: string;
   objectType: string;
   shareableUrl?: string;
+  shareableUrlForSavedObject?: string;
+  shareableUrlLocatorParams?: {
+    locator: LocatorPublic<any>;
+    params: any;
+  };
   urlParamExtensions?: UrlParamExtension[];
   anonymousAccess?: AnonymousAccessServiceContract;
   showPublicUrlSwitch?: (anonymousUserCapabilities: Capabilities) => boolean;
@@ -70,6 +75,7 @@ interface State {
   urlParams?: UrlParams;
   anonymousAccessParameters: AnonymousAccessState['accessURLParameters'];
   showPublicUrlSwitch: boolean;
+  showWarningButton: boolean;
 }
 
 export class UrlPanelContent extends Component<UrlPanelContentProps, State> {
@@ -88,6 +94,7 @@ export class UrlPanelContent extends Component<UrlPanelContentProps, State> {
       url: '',
       anonymousAccessParameters: null,
       showPublicUrlSwitch: false,
+      showWarningButton: Boolean(this.props.snapshotShareWarning),
     };
   }
 
@@ -143,6 +150,7 @@ export class UrlPanelContent extends Component<UrlPanelContentProps, State> {
   public render() {
     const shortUrlSwitch = this.renderShortUrlSwitch();
     const publicUrlSwitch = this.renderPublicUrlSwitch();
+    const copyButton = this.renderCopyButton();
 
     const urlRow = (!!shortUrlSwitch || !!publicUrlSwitch) && (
       <EuiFormRow
@@ -156,33 +164,6 @@ export class UrlPanelContent extends Component<UrlPanelContentProps, State> {
       </EuiFormRow>
     );
 
-    const showWarningButton =
-      this.props.snapshotShareWarning &&
-      this.state.exportUrlAs === ExportUrlAsType.EXPORT_URL_AS_SNAPSHOT;
-
-    const copyButton = (copy: () => void) => (
-      <EuiButton
-        fill
-        fullWidth
-        onClick={copy}
-        disabled={this.state.isCreatingShortUrl || this.state.url === ''}
-        data-share-url={this.state.url}
-        data-test-subj="copyShareUrlButton"
-        size="s"
-        iconType={showWarningButton ? 'alert' : undefined}
-        color={showWarningButton ? 'warning' : 'primary'}
-      >
-        {this.props.isEmbedded ? (
-          <FormattedMessage
-            id="share.urlPanel.copyIframeCodeButtonLabel"
-            defaultMessage="Copy iFrame code"
-          />
-        ) : (
-          <FormattedMessage id="share.urlPanel.copyLinkButtonLabel" defaultMessage="Copy link" />
-        )}
-      </EuiButton>
-    );
-
     return (
       <I18nProvider>
         <EuiForm className="kbnShareContextMenu__finalPanel" data-test-subj="shareUrlForm">
@@ -192,23 +173,7 @@ export class UrlPanelContent extends Component<UrlPanelContentProps, State> {
 
           <EuiSpacer size="m" />
 
-          <EuiCopy textToCopy={this.state.url || ''} anchorClassName="eui-displayBlock">
-            {(copy: () => void) => (
-              <>
-                {showWarningButton ? (
-                  <EuiToolTip
-                    position="bottom"
-                    content={this.props.snapshotShareWarning}
-                    display="block"
-                  >
-                    {copyButton(copy)}
-                  </EuiToolTip>
-                ) : (
-                  copyButton(copy)
-                )}
-              </>
-            )}
-          </EuiCopy>
+          {copyButton}
         </EuiForm>
       </I18nProvider>
     );
@@ -242,7 +207,7 @@ export class UrlPanelContent extends Component<UrlPanelContentProps, State> {
       return;
     }
 
-    const url = this.getSnapshotUrl();
+    const url = this.getSnapshotUrl(true);
 
     const parsedUrl = parseUrl(url);
     if (!parsedUrl || !parsedUrl.hash) {
@@ -269,8 +234,14 @@ export class UrlPanelContent extends Component<UrlPanelContentProps, State> {
     return this.updateUrlParams(formattedUrl);
   };
 
-  private getSnapshotUrl = () => {
-    const url = this.props.shareableUrl || window.location.href;
+  private getSnapshotUrl = (forSavedObject?: boolean) => {
+    let url = '';
+    if (forSavedObject && this.props.shareableUrlForSavedObject) {
+      url = this.props.shareableUrlForSavedObject;
+    }
+    if (!url) {
+      url = this.props.shareableUrl || window.location.href;
+    }
     return this.updateUrlParams(url);
   };
 
@@ -349,6 +320,9 @@ export class UrlPanelContent extends Component<UrlPanelContentProps, State> {
   private handleExportUrlAs = (optionId: string) => {
     this.setState(
       {
+        showWarningButton:
+          Boolean(this.props.snapshotShareWarning) &&
+          (optionId as ExportUrlAsType) === ExportUrlAsType.EXPORT_URL_AS_SNAPSHOT,
         exportUrlAs: optionId as ExportUrlAsType,
       },
       this.setUrl
@@ -382,16 +356,23 @@ export class UrlPanelContent extends Component<UrlPanelContentProps, State> {
     });
 
     try {
-      const snapshotUrl = this.getSnapshotUrl();
-      const shortUrl = await this.props.urlService.shortUrls
-        .get(null)
-        .createFromLongUrl(snapshotUrl);
+      const { shareableUrlLocatorParams } = this.props;
+      if (shareableUrlLocatorParams) {
+        const shortUrls = this.props.urlService.shortUrls.get(null);
+        const shortUrl = await shortUrls.createWithLocator(shareableUrlLocatorParams);
+        this.shortUrlCache = await shortUrl.locator.getUrl(shortUrl.params, { absolute: true });
+      } else {
+        const snapshotUrl = this.getSnapshotUrl();
+        const shortUrl = await this.props.urlService.shortUrls
+          .get(null)
+          .createFromLongUrl(snapshotUrl);
+        this.shortUrlCache = shortUrl.url;
+      }
 
       if (!this.mounted) {
         return;
       }
 
-      this.shortUrlCache = shortUrl.url;
       this.setState(
         {
           isCreatingShortUrl: false,
@@ -420,6 +401,37 @@ export class UrlPanelContent extends Component<UrlPanelContentProps, State> {
       );
     }
   };
+
+  private renderCopyButton = () => (
+    <EuiCopy
+      beforeMessage={this.state.showWarningButton ? this.props.snapshotShareWarning : undefined}
+      textToCopy={this.state.url || ''}
+      anchorClassName="eui-displayBlock"
+    >
+      {(copy) => (
+        <EuiButton
+          fill
+          fullWidth
+          onClick={copy}
+          disabled={this.state.isCreatingShortUrl || this.state.url === ''}
+          data-share-url={this.state.url}
+          data-test-subj="copyShareUrlButton"
+          size="s"
+          iconType={this.state.showWarningButton ? 'warning' : undefined}
+          color={this.state.showWarningButton ? 'warning' : 'primary'}
+        >
+          {this.props.isEmbedded ? (
+            <FormattedMessage
+              id="share.urlPanel.copyIframeCodeButtonLabel"
+              defaultMessage="Copy iFrame code"
+            />
+          ) : (
+            <FormattedMessage id="share.urlPanel.copyLinkButtonLabel" defaultMessage="Copy link" />
+          )}
+        </EuiButton>
+      )}
+    </EuiCopy>
+  );
 
   private renderExportUrlAsOptions = () => {
     const snapshotLabel = (
@@ -474,7 +486,7 @@ export class UrlPanelContent extends Component<UrlPanelContentProps, State> {
     const generateLinkAsHelp = this.isNotSaved() ? (
       <FormattedMessage
         id="share.urlPanel.canNotShareAsSavedObjectHelpText"
-        defaultMessage="Can't share as saved object until the {objectType} has been saved."
+        defaultMessage="To share as a saved object, save the {objectType}."
         values={{ objectType: this.props.objectType }}
       />
     ) : undefined;

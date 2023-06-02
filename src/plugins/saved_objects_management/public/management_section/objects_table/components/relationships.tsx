@@ -20,6 +20,7 @@ import {
   EuiToolTip,
   EuiText,
   EuiSpacer,
+  EuiLoadingSpinner,
 } from '@elastic/eui';
 import { SearchFilterConfig } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -27,22 +28,23 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { IBasePath } from '@kbn/core/public';
 import type { SavedObjectManagementTypeInfo } from '../../../../common/types';
 import { getDefaultTitle, getSavedObjectLabel } from '../../../lib';
+import type { v1 } from '../../../../common';
 import {
   SavedObjectWithMetadata,
   SavedObjectRelationKind,
   SavedObjectRelation,
   SavedObjectInvalidRelation,
-  SavedObjectGetRelationshipsResponse,
 } from '../../../types';
 
 export interface RelationshipsProps {
   basePath: IBasePath;
-  getRelationships: (type: string, id: string) => Promise<SavedObjectGetRelationshipsResponse>;
+  getRelationships: (type: string, id: string) => Promise<v1.RelationshipsResponseHTTP>;
   savedObject: SavedObjectWithMetadata;
   close: () => void;
   goInspectObject: (obj: SavedObjectWithMetadata) => void;
   canGoInApp: (obj: SavedObjectWithMetadata) => boolean;
   allowedTypes: SavedObjectManagementTypeInfo[];
+  showPlainSpinner?: boolean;
 }
 
 export interface RelationshipsState {
@@ -192,7 +194,7 @@ export class Relationships extends Component<RelationshipsProps, RelationshipsSt
       <>
         <EuiCallOut
           color="warning"
-          iconType="alert"
+          iconType="warning"
           title={i18n.translate(
             'savedObjectsManagement.objectsTable.relationships.invalidRelationShip',
             {
@@ -215,7 +217,7 @@ export class Relationships extends Component<RelationshipsProps, RelationshipsSt
   }
 
   renderRelationshipsTable() {
-    const { goInspectObject, basePath, savedObject, allowedTypes } = this.props;
+    const { goInspectObject, basePath, savedObject, allowedTypes, showPlainSpinner } = this.props;
     const { relations, isLoading, error } = this.state;
 
     if (error) {
@@ -223,7 +225,7 @@ export class Relationships extends Component<RelationshipsProps, RelationshipsSt
     }
 
     if (isLoading) {
-      return <EuiLoadingElastic size="xl" />;
+      return showPlainSpinner ? <EuiLoadingSpinner size="xl" /> : <EuiLoadingElastic size="xl" />;
     }
 
     const columns = [

@@ -32,7 +32,7 @@ interface MatchParams {
 const ManagedPipelineCallout = () => (
   <EuiCallOut
     color="danger"
-    iconType="alert"
+    iconType="warning"
     data-test-subj="managedPipelineCallout"
     title={
       <FormattedMessage
@@ -115,7 +115,7 @@ export const PipelinesEdit: React.FunctionComponent<RouteComponentProps<MatchPar
         data-test-subj="fetchPipelineError"
       >
         <EuiEmptyPrompt
-          iconType="alert"
+          iconType="warning"
           title={
             <h2>
               <FormattedMessage

@@ -120,6 +120,9 @@ export interface VisInstance {
   savedVis: VisSavedObject;
   savedSearch?: SavedSearch;
   embeddableHandler: VisualizeEmbeddableContract;
+  panelTitle?: string;
+  panelDescription?: string;
+  panelTimeRange?: TimeRange;
 }
 
 export type SavedVisInstance = VisInstance;

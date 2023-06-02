@@ -49,6 +49,7 @@ export const ruleRegistrySearchStrategyProvider = (
       // is different than every other solution so we need to special case
       // those requests.
       let siemRequest = false;
+      let params = {};
       if (request.featureIds.length === 1 && request.featureIds[0] === AlertConsumers.SIEM) {
         siemRequest = true;
       } else if (request.featureIds.includes(AlertConsumers.SIEM)) {
@@ -85,12 +86,11 @@ export const ruleRegistrySearchStrategyProvider = (
             }
             const alertIndexInfo = ruleDataService.findIndexByFeature(featureId, Dataset.alerts);
             if (alertIndexInfo) {
-              return [
-                ...accum,
+              accum.push(
                 featureId === 'siem'
                   ? `${alertIndexInfo.baseName}-${space?.id ?? ''}*`
-                  : `${alertIndexInfo.baseName}*`,
-              ];
+                  : `${alertIndexInfo.baseName}*`
+              );
             }
             return accum;
           }, []);
@@ -123,7 +123,7 @@ export const ruleRegistrySearchStrategyProvider = (
                 }),
           };
           const size = request.pagination ? request.pagination.pageSize : MAX_ALERT_SEARCH_SIZE;
-          const params = {
+          params = {
             allow_no_indices: true,
             index: indices,
             ignore_unavailable: true,
@@ -135,6 +135,7 @@ export const ruleRegistrySearchStrategyProvider = (
               size,
               from: request.pagination ? request.pagination.pageIndex * size : 0,
               query,
+              ...(request.runtimeMappings ? { runtime_mappings: request.runtimeMappings } : {}),
             },
           };
           return (siemRequest ? requestUserEs : internalUserEs).search(
@@ -143,7 +144,7 @@ export const ruleRegistrySearchStrategyProvider = (
             deps
           );
         }),
-        map((response) => {
+        map((response: RuleRegistrySearchResponse) => {
           // Do we have to loop over each hit? Yes.
           // ecs auditLogger requires that we log each alert independently
           if (securityAuditLogger != null) {
@@ -157,6 +158,14 @@ export const ruleRegistrySearchStrategyProvider = (
               );
             });
           }
+
+          try {
+            response.inspect = { dsl: [JSON.stringify(params)] };
+          } catch (error) {
+            logger.error(`Failed to stringify rule registry search strategy params: ${error}`);
+            response.inspect = { dsl: [] };
+          }
+
           return response;
         }),
         catchError((err) => {

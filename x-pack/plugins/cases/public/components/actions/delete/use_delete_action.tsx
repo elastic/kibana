@@ -7,7 +7,7 @@
 
 import React, { useCallback, useState } from 'react';
 import { EuiIcon, EuiTextColor, useEuiTheme } from '@elastic/eui';
-import type { Case } from '../../../../common';
+import type { CasesUI } from '../../../../common';
 import { useDeleteCases } from '../../../containers/use_delete_cases';
 
 import * as i18n from './translations';
@@ -21,13 +21,13 @@ export const useDeleteAction = ({ onAction, onActionSuccess, isDisabled }: UseAc
   const euiTheme = useEuiTheme();
   const { permissions } = useCasesContext();
   const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
-  const [caseToBeDeleted, setCaseToBeDeleted] = useState<Case[]>([]);
+  const [caseToBeDeleted, setCaseToBeDeleted] = useState<CasesUI>([]);
   const canDelete = permissions.delete;
   const isActionDisabled = isDisabled || !canDelete;
 
   const onCloseModal = useCallback(() => setIsModalVisible(false), []);
   const openModal = useCallback(
-    (selectedCases: Case[]) => {
+    (selectedCases: CasesUI) => {
       onAction();
       setIsModalVisible(true);
       setCaseToBeDeleted(selectedCases);
@@ -50,7 +50,7 @@ export const useDeleteAction = ({ onAction, onActionSuccess, isDisabled }: UseAc
 
   const color = isActionDisabled ? euiTheme.euiTheme.colors.disabled : 'danger';
 
-  const getAction = (selectedCases: Case[]) => {
+  const getAction = (selectedCases: CasesUI) => {
     return {
       name: <EuiTextColor color={color}>{getDeleteActionTitle(selectedCases.length)}</EuiTextColor>,
       onClick: () => openModal(selectedCases),

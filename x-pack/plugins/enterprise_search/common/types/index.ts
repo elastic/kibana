@@ -19,6 +19,7 @@ export interface InitialAppData {
   appSearch?: AppSearchAccount;
   configuredLimits?: ConfiguredLimits;
   enterpriseSearchVersion?: string;
+  features?: ProductFeatures;
   kibanaVersion?: string;
   readOnlyMode?: boolean;
   searchOAuth?: SearchOAuth;
@@ -33,6 +34,15 @@ export interface ConfiguredLimits {
 export interface ProductAccess {
   hasAppSearchAccess: boolean;
   hasWorkplaceSearchAccess: boolean;
+}
+
+export interface ProductFeatures {
+  hasConnectors: boolean;
+  hasDefaultIngestPipeline: boolean;
+  hasDocumentLevelSecurityEnabled: boolean;
+  hasIncrementalSyncEnabled: boolean;
+  hasNativeConnectors: boolean;
+  hasWebCrawler: boolean;
 }
 
 export interface SearchOAuth {
@@ -51,4 +61,10 @@ export interface Meta {
   page: MetaPage;
 }
 
+export interface ClientConfigType {
+  canDeployEntSearch: boolean;
+  host?: string;
+}
+
 export type { ElasticsearchIndexWithPrivileges } from './indices';
+export type { KibanaDeps } from './kibana_deps';

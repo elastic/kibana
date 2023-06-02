@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import type {
   CoreSetup,
   Logger,
@@ -13,7 +14,7 @@ import type {
   SavedObjectsType,
 } from '@kbn/core/server';
 import { CASE_SAVED_OBJECT } from '../../common/constants';
-import type { ESCaseAttributes } from '../services/cases/types';
+import type { CasePersistedAttributes } from '../common/types/case';
 import { handleExport } from './import_export/export';
 import { caseMigrations } from './migrations';
 
@@ -22,10 +23,12 @@ export const createCaseSavedObjectType = (
   logger: Logger
 ): SavedObjectsType => ({
   name: CASE_SAVED_OBJECT,
+  indexPattern: ALERTING_CASES_SAVED_OBJECT_INDEX,
   hidden: true,
   namespaceType: 'multiple-isolated',
   convertToMultiNamespaceTypeVersion: '8.0.0',
   mappings: {
+    dynamic: false,
     properties: {
       assignees: {
         properties: {
@@ -138,9 +141,14 @@ export const createCaseSavedObjectType = (
       },
       title: {
         type: 'text',
+        fields: {
+          keyword: {
+            type: 'keyword',
+          },
+        },
       },
       status: {
-        type: 'keyword',
+        type: 'short',
       },
       tags: {
         type: 'keyword',
@@ -172,7 +180,13 @@ export const createCaseSavedObjectType = (
         },
       },
       severity: {
-        type: 'keyword',
+        type: 'short',
+      },
+      total_alerts: {
+        type: 'integer',
+      },
+      total_comments: {
+        type: 'integer',
       },
     },
   },
@@ -181,10 +195,10 @@ export const createCaseSavedObjectType = (
     importableAndExportable: true,
     defaultSearchField: 'title',
     icon: 'casesApp',
-    getTitle: (savedObject: SavedObject<ESCaseAttributes>) => savedObject.attributes.title,
+    getTitle: (savedObject: SavedObject<CasePersistedAttributes>) => savedObject.attributes.title,
     onExport: async (
       context: SavedObjectsExportTransformContext,
-      objects: Array<SavedObject<ESCaseAttributes>>
+      objects: Array<SavedObject<CasePersistedAttributes>>
     ) => handleExport({ context, objects, coreSetup, logger }),
   },
 });

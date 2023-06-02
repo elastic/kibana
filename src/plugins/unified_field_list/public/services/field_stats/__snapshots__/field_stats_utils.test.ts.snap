@@ -1,0 +1,184 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`fieldStatsUtils buildSearchParams() should work correctly for aggregations and a data view time field 1`] = `
+Object {
+  "body": Object {
+    "_source": undefined,
+    "aggs": Object {
+      "sample": Object {
+        "aggs": Object {
+          "sample_count": Object {
+            "value_count": Object {
+              "field": "extension.keyword",
+            },
+          },
+          "top_values": Object {
+            "terms": Object {
+              "field": "extension.keyword",
+              "shard_size": 25,
+              "size": 10,
+            },
+          },
+        },
+        "sampler": Object {
+          "shard_size": 5000,
+        },
+      },
+    },
+    "fields": undefined,
+    "query": Object {
+      "bool": Object {
+        "filter": Array [
+          Object {
+            "range": Object {
+              "timestamp": Object {
+                "format": "strict_date_optional_time",
+                "gte": "2022-12-05T23:00:00.000Z",
+                "lte": "2023-01-05T09:33:05.359Z",
+              },
+            },
+          },
+          Object {
+            "bool": Object {
+              "filter": Array [
+                Object {
+                  "match_phrase": Object {
+                    "geo.src": "US",
+                  },
+                },
+              ],
+              "must": Array [],
+              "must_not": Array [],
+              "should": Array [],
+            },
+          },
+        ],
+      },
+    },
+    "runtime_mappings": Object {
+      "hour_of_day": Object {
+        "script": Object {
+          "source": "emit(doc['timestamp'].value.getHour());",
+        },
+        "type": "long",
+      },
+    },
+  },
+  "index": "kibana_sample_data_logs",
+  "size": 0,
+  "track_total_hits": true,
+}
+`;
+
+exports[`fieldStatsUtils buildSearchParams() should work correctly for aggregations without a data view time field 1`] = `
+Object {
+  "body": Object {
+    "_source": undefined,
+    "aggs": Object {
+      "sample": Object {
+        "aggs": Object {
+          "sample_count": Object {
+            "value_count": Object {
+              "field": "extension.keyword",
+            },
+          },
+          "top_values": Object {
+            "terms": Object {
+              "field": "extension.keyword",
+              "shard_size": 25,
+              "size": 10,
+            },
+          },
+        },
+        "sampler": Object {
+          "shard_size": 5000,
+        },
+      },
+    },
+    "fields": undefined,
+    "query": Object {
+      "bool": Object {
+        "filter": Array [
+          Object {
+            "bool": Object {
+              "filter": Array [
+                Object {
+                  "match_phrase": Object {
+                    "geo.src": "US",
+                  },
+                },
+              ],
+              "must": Array [],
+              "must_not": Array [],
+              "should": Array [],
+            },
+          },
+        ],
+      },
+    },
+    "runtime_mappings": Object {},
+  },
+  "index": "kibana_sample*",
+  "size": 0,
+  "track_total_hits": true,
+}
+`;
+
+exports[`fieldStatsUtils buildSearchParams() should work correctly for fetching field examples 1`] = `
+Object {
+  "body": Object {
+    "_source": false,
+    "aggs": undefined,
+    "fields": Array [
+      Object {
+        "field": "_id",
+      },
+    ],
+    "query": Object {
+      "bool": Object {
+        "filter": Array [
+          Object {
+            "range": Object {
+              "timestamp": Object {
+                "format": "strict_date_optional_time",
+                "gte": "2022-12-05T23:00:00.000Z",
+                "lte": "2023-01-05T09:35:24.109Z",
+              },
+            },
+          },
+          Object {
+            "bool": Object {
+              "filter": Array [
+                Object {
+                  "match_phrase": Object {
+                    "geo.src": "US",
+                  },
+                },
+              ],
+              "must": Array [],
+              "must_not": Array [],
+              "should": Array [],
+            },
+          },
+          Object {
+            "exists": Object {
+              "field": "_id",
+            },
+          },
+        ],
+      },
+    },
+    "runtime_mappings": Object {
+      "hour_of_day": Object {
+        "script": Object {
+          "source": "emit(doc['timestamp'].value.getHour());",
+        },
+        "type": "long",
+      },
+    },
+  },
+  "index": "kibana_sample_data_logs",
+  "size": 100,
+  "track_total_hits": true,
+}
+`;

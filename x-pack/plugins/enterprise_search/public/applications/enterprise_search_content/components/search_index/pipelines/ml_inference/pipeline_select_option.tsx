@@ -7,8 +7,10 @@
 
 import React from 'react';
 
-import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiTextColor, EuiTitle } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiTextColor, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+
+import { MLModelTypeBadge } from '../ml_model_type_badge';
 
 import { MLInferencePipelineOption } from './ml_inference_logic';
 import { EXISTING_PIPELINE_DISABLED_MISSING_SOURCE_FIELD, MODEL_REDACTED_VALUE } from './utils';
@@ -25,7 +27,7 @@ export const PipelineSelectOption: React.FC<PipelineSelectOptionProps> = ({ pipe
         <EuiFlexItem>
           <EuiFlexGroup>
             <EuiFlexItem grow={false}>
-              <EuiIcon type="alert" color="warning" />
+              <EuiIcon type="warning" color="warning" />
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiTextColor color="default">
@@ -51,9 +53,7 @@ export const PipelineSelectOption: React.FC<PipelineSelectOptionProps> = ({ pipe
           </EuiFlexItem>
           {pipeline.modelType.length > 0 && (
             <EuiFlexItem grow={false}>
-              <span>
-                <EuiBadge color="hollow">{pipeline.modelType}</EuiBadge>
-              </span>
+              <MLModelTypeBadge type={pipeline.modelType} />
             </EuiFlexItem>
           )}
         </EuiFlexGroup>

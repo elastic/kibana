@@ -6,6 +6,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import {
+  serviceNameHint,
+  secretTokenHint,
+  serverUrlHint,
+  serviceEnvironmentHint,
+} from './shared_hints';
 
 export const rackVariables = {
   apmServiceName: 'service_name',
@@ -14,44 +20,32 @@ export const rackVariables = {
   apmEnvironment: 'environment',
 };
 
-export const rack = `# config/elastic_apm.yml:
+export const rackHighlightLang = 'rb';
 
-# ${i18n.translate(
-  'xpack.apm.tutorial.rackClient.createConfig.commands.setServiceNameComment',
-  {
-    defaultMessage:
-      'Set the service name - allowed characters: a-z, A-Z, 0-9, -, _ and space',
-  }
-)}
-# ${i18n.translate(
+const rackServiceNameHint = i18n.translate(
   'xpack.apm.tutorial.rackClient.createConfig.commands.defaultsToTheNameOfRackAppClassComment',
   {
     defaultMessage: "Defaults to the name of your Rack app's class.",
   }
-)}
+);
+
+export const rackLineNumbers = {
+  start: 1,
+  highlight: '3, 5, 7, 9',
+  annotations: {
+    3: `${serviceNameHint} ${rackServiceNameHint}`,
+    5: secretTokenHint,
+    7: serverUrlHint,
+    9: serviceEnvironmentHint,
+  },
+};
+
+export const rack = `# config/elastic_apm.yml:
+
 ${rackVariables.apmServiceName}: '{{{apmServiceName}}}'
 
-# ${i18n.translate(
-  'xpack.apm.tutorial.rackClient.createConfig.commands.useIfApmServerRequiresTokenComment',
-  {
-    defaultMessage: 'Use if APM Server requires a token',
-  }
-)}
 ${rackVariables.secretToken}: '{{{secretToken}}}'
 
-# ${i18n.translate(
-  'xpack.apm.tutorial.rackClient.createConfig.commands.setCustomApmServerComment',
-  {
-    defaultMessage: 'Set custom APM Server URL (default: {defaultServerUrl})',
-    values: { defaultServerUrl: 'http://localhost:8200' },
-  }
-)}
 ${rackVariables.apmServerUrl}: '{{{apmServerUrl}}}',
 
-# ${i18n.translate(
-  'xpack.apm.tutorial.rackClient.createConfig.commands.setServiceEnvironment',
-  {
-    defaultMessage: 'Set the service environment',
-  }
-)}
 ${rackVariables.apmEnvironment}: '{{{apmEnvironment}}}'`;

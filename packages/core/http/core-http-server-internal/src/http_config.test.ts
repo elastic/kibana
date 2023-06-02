@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { config, HttpConfig } from './http_config';
 import { cspConfig } from './csp';
 import { ExternalUrlConfig } from './external_url';
@@ -245,7 +245,7 @@ describe('publicBaseUrl', () => {
 
 test('accepts only valid uuids for server.uuid', () => {
   const httpSchema = config.schema;
-  expect(() => httpSchema.validate({ uuid: uuid.v4() })).not.toThrow();
+  expect(() => httpSchema.validate({ uuid: uuidv4() })).not.toThrow();
   expect(() => httpSchema.validate({ uuid: 'not an uuid' })).toThrowErrorMatchingInlineSnapshot(
     `"[uuid]: must be a valid uuid"`
   );

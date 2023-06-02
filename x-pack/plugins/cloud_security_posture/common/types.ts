@@ -4,11 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { type TypeOf } from '@kbn/config-schema';
 import type { PackagePolicy, AgentPolicy } from '@kbn/fleet-plugin/common';
-import type { CspRuleMetadata } from './schemas/csp_rule_metadata';
+import { CspFinding } from './schemas/csp_finding';
+import { SUPPORTED_CLOUDBEAT_INPUTS, SUPPORTED_POLICY_TEMPLATES } from './constants';
+import { CspRuleTemplateMetadata } from './schemas/csp_rule_template_metadata';
+import { CspRuleTemplate } from './schemas';
+import { findCspRuleTemplateRequest } from './schemas/csp_rule_template_api/get_csp_rule_template';
 
 export type Evaluation = 'passed' | 'failed' | 'NA';
+
+export type PostureTypes = 'cspm' | 'kspm' | 'vuln_mgmt' | 'all';
 /** number between 1-100 */
 export type Score = number;
 
@@ -33,10 +39,10 @@ export interface PostureTrend extends Stats {
 
 export interface Cluster {
   meta: {
-    clusterId: string;
-    clusterName?: string;
-    benchmarkName: string;
-    benchmarkId: BenchmarkId;
+    assetIdentifierId: string;
+    cloud: CspFinding['cloud'];
+    benchmark: CspFinding['rule']['benchmark'];
+    cluster: NonNullable<CspFinding['orchestrator']>['cluster'];
     lastUpdate: string;
   };
   stats: Stats;
@@ -57,7 +63,8 @@ export type CspStatusCode =
   | 'unprivileged' // user lacks privileges for the latest findings index
   | 'index-timeout' // index timeout was surpassed since installation
   | 'not-deployed' // no healthy agents were deployed
-  | 'not-installed'; // number of installed csp integrations is 0;
+  | 'not-installed' // number of installed csp integrations is 0;
+  | 'waiting_for_results'; // have healthy agents but no findings at all, assumes data is being indexed for the 1st time
 
 export type IndexStatus =
   | 'not-empty' // Index contains documents
@@ -69,40 +76,52 @@ export interface IndexDetails {
   status: IndexStatus;
 }
 
-interface BaseCspSetupStatus {
-  indicesDetails: IndexDetails[];
-  latestPackageVersion: string;
+export interface BaseCspSetupBothPolicy {
+  status: CspStatusCode;
   installedPackagePolicies: number;
   healthyAgents: number;
+}
+
+export interface BaseCspSetupStatus {
+  indicesDetails: IndexDetails[];
+  latestPackageVersion: string;
+  cspm: BaseCspSetupBothPolicy;
+  kspm: BaseCspSetupBothPolicy;
+  vuln_mgmt: BaseCspSetupBothPolicy;
   isPluginInitialized: boolean;
+  installedPackageVersion?: string | undefined;
 }
 
-interface CspSetupNotInstalledStatus extends BaseCspSetupStatus {
-  status: Extract<CspStatusCode, 'not-installed'>;
-}
-
-interface CspSetupInstalledStatus extends BaseCspSetupStatus {
-  status: Exclude<CspStatusCode, 'not-installed'>;
-  // if installedPackageVersion == undefined but status != 'not-installed' it means the integration was installed in the past and findings were found
-  // status can be `indexed` but return with undefined package information in this case
-  installedPackageVersion: string | undefined;
-}
-
-export type CspSetupStatus = CspSetupInstalledStatus | CspSetupNotInstalledStatus;
-
-export interface CspRulesStatus {
-  all: number;
-  enabled: number;
-  disabled: number;
-}
+export type CspSetupStatus = BaseCspSetupStatus;
 
 export type AgentPolicyStatus = Pick<AgentPolicy, 'id' | 'name'> & { agents: number };
 
 export interface Benchmark {
   package_policy: PackagePolicy;
   agent_policy: AgentPolicyStatus;
-  rules: CspRulesStatus;
+  rules_count: number;
 }
 
-export type BenchmarkId = CspRuleMetadata['benchmark']['id'];
-export type BenchmarkName = CspRuleMetadata['benchmark']['name'];
+export type BenchmarkId = CspRuleTemplateMetadata['benchmark']['id'];
+export type BenchmarkName = CspRuleTemplateMetadata['benchmark']['name'];
+
+// Fleet Integration types
+export type PostureInput = typeof SUPPORTED_CLOUDBEAT_INPUTS[number];
+export type CloudSecurityPolicyTemplate = typeof SUPPORTED_POLICY_TEMPLATES[number];
+export type PosturePolicyTemplate = Extract<CloudSecurityPolicyTemplate, 'kspm' | 'cspm'>;
+
+export interface BenchmarkResponse {
+  items: Benchmark[];
+  total: number;
+  page: number;
+  perPage: number;
+}
+
+export type GetCspRuleTemplateRequest = TypeOf<typeof findCspRuleTemplateRequest>;
+
+export interface GetCspRuleTemplateResponse {
+  items: CspRuleTemplate[];
+  total: number;
+  page: number;
+  perPage: number;
+}

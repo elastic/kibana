@@ -21,6 +21,7 @@ import { ShowAlertTableLink } from './show_alert_table_link';
 import { HoverableUserWithAvatarResolver } from '../../user_profiles/hoverable_user_with_avatar_resolver';
 import { UserActionContentToolbar } from '../content_toolbar';
 import { AlertPropertyActions } from '../property_actions/alert_property_actions';
+import { DELETE_ALERTS_SUCCESS_TITLE } from './translations';
 
 type BuilderArgs = Pick<
   UserActionBuilderArgs,
@@ -63,10 +64,10 @@ const getSingleAlertUserAction = ({
       username: (
         <HoverableUserWithAvatarResolver user={userAction.createdBy} userProfiles={userProfiles} />
       ),
-      className: 'comment-alert',
+      eventColor: 'subdued',
       event: (
         <SingleAlertCommentEvent
-          actionId={userAction.actionId}
+          actionId={userAction.id}
           getRuleDetailsHref={getRuleDetailsHref}
           loadingAlertData={loadingAlertData}
           onRuleDetailsClick={onRuleDetailsClick}
@@ -74,21 +75,21 @@ const getSingleAlertUserAction = ({
           ruleName={ruleName}
         />
       ),
-      'data-test-subj': `user-action-alert-${userAction.type}-${userAction.action}-action-${userAction.actionId}`,
+      'data-test-subj': `user-action-alert-${userAction.type}-${userAction.action}-action-${userAction.id}`,
       timestamp: <UserActionTimestamp createdAt={userAction.createdAt} />,
       timelineAvatar: 'bell',
       actions: (
         <UserActionContentToolbar id={comment.id}>
           <EuiFlexItem grow={false}>
             <UserActionShowAlert
-              id={userAction.actionId}
+              id={userAction.id}
               alertId={alertId}
               index={alertIndex}
               onShowAlertDetails={onShowAlertDetails}
             />
           </EuiFlexItem>
           <AlertPropertyActions
-            onDelete={() => handleDeleteComment(comment.id)}
+            onDelete={() => handleDeleteComment(comment.id, DELETE_ALERTS_SUCCESS_TITLE(1))}
             isLoading={loadingCommentIds.includes(comment.id)}
             totalAlerts={1}
           />
@@ -121,10 +122,10 @@ const getMultipleAlertsUserAction = ({
       username: (
         <HoverableUserWithAvatarResolver user={userAction.createdBy} userProfiles={userProfiles} />
       ),
-      className: 'comment-alert',
+      eventColor: 'subdued',
       event: (
         <MultipleAlertsCommentEvent
-          actionId={userAction.actionId}
+          actionId={userAction.id}
           loadingAlertData={loadingAlertData}
           totalAlerts={totalAlerts}
           ruleId={ruleId}
@@ -133,7 +134,7 @@ const getMultipleAlertsUserAction = ({
           onRuleDetailsClick={onRuleDetailsClick}
         />
       ),
-      'data-test-subj': `user-action-alert-${userAction.type}-${userAction.action}-action-${userAction.actionId}`,
+      'data-test-subj': `user-action-alert-${userAction.type}-${userAction.action}-action-${userAction.id}`,
       timestamp: <UserActionTimestamp createdAt={userAction.createdAt} />,
       timelineAvatar: 'bell',
       actions: (
@@ -142,7 +143,9 @@ const getMultipleAlertsUserAction = ({
             <ShowAlertTableLink />
           </EuiFlexItem>
           <AlertPropertyActions
-            onDelete={() => handleDeleteComment(comment.id)}
+            onDelete={() =>
+              handleDeleteComment(comment.id, DELETE_ALERTS_SUCCESS_TITLE(totalAlerts))
+            }
             isLoading={loadingCommentIds.includes(comment.id)}
             totalAlerts={totalAlerts}
           />

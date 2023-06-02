@@ -5,19 +5,33 @@
  * 2.0.
  */
 
-import React, { useMemo, useCallback } from 'react';
-import { Axis, Chart, niceTimeFormatter, Position, Settings } from '@elastic/charts';
+import React, { ReactElement, useRef } from 'react';
+import {
+  Axis,
+  Chart,
+  LineAnnotation,
+  niceTimeFormatter,
+  Position,
+  RectAnnotation,
+  Settings,
+} from '@elastic/charts';
 import { EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useActiveCursor } from '@kbn/charts-plugin/public';
 import { DataViewBase } from '@kbn/es-query';
 import { first, last } from 'lodash';
 
+import { getChartTheme } from '../../../utils/get_chart_theme';
+import { useIsDarkMode } from '../../../hooks/use_is_dark_mode';
 import { MetricsSourceConfiguration } from '../../../../common/metrics_sources';
 import { Color } from '../../../../common/color_palette';
 import { MetricsExplorerRow, MetricsExplorerAggregation } from '../../../../common/http_api';
 import { MetricExplorerSeriesChart } from '../../../pages/metrics/metrics_explorer/components/series_chart';
-import { MetricExpression } from '../types';
-import { MetricsExplorerChartType } from '../../../pages/metrics/metrics_explorer/hooks/use_metrics_explorer_options';
+import { MetricExpression, TimeRange } from '../types';
+import {
+  MetricsExplorerChartType,
+  MetricsExplorerOptionsMetric,
+} from '../../../pages/metrics/metrics_explorer/hooks/use_metrics_explorer_options';
 import { createFormatterForMetric } from '../../../pages/metrics/metrics_explorer/components/helpers/create_formatter_for_metric';
 import { calculateDomain } from '../../../pages/metrics/metrics_explorer/components/helpers/calculate_domain';
 import { useMetricsExplorerChartData } from '../hooks/use_metrics_explorer_chart_data';
@@ -29,70 +43,85 @@ import {
   NoDataState,
   TIME_LABELS,
   tooltipProps,
-  getChartTheme,
 } from '../../common/criterion_preview_chart/criterion_preview_chart';
 import { ThresholdAnnotations } from '../../common/criterion_preview_chart/threshold_annotations';
+import { CUSTOM_EQUATION } from '../i18n_strings';
 
 interface Props {
   expression: MetricExpression;
   derivedIndexPattern: DataViewBase;
-  source: MetricsSourceConfiguration | null;
+  annotations?: Array<ReactElement<typeof RectAnnotation | typeof LineAnnotation>>;
+  chartType?: MetricsExplorerChartType;
   filterQuery?: string;
   groupBy?: string | string[];
+  hideTitle?: boolean;
+  source?: MetricsSourceConfiguration;
+  timeRange?: TimeRange;
 }
 
 export const ExpressionChart: React.FC<Props> = ({
   expression,
   derivedIndexPattern,
-  source,
+  annotations,
+  chartType = MetricsExplorerChartType.bar,
   filterQuery,
   groupBy,
+  hideTitle = false,
+  source,
+  timeRange,
 }) => {
-  const { loading, data } = useMetricsExplorerChartData(
+  const { charts } = useKibanaContextForPlugin().services;
+  const isDarkMode = useIsDarkMode();
+
+  const { isLoading, data } = useMetricsExplorerChartData(
     expression,
     derivedIndexPattern,
     source,
     filterQuery,
-    groupBy
+    groupBy,
+    timeRange
   );
 
-  const { uiSettings } = useKibanaContextForPlugin().services;
+  const chartRef = useRef(null);
+  const handleCursorUpdate = useActiveCursor(charts.activeCursor, chartRef, {
+    isDateHistogram: true,
+  });
 
-  const metric = {
+  if (isLoading) {
+    return <LoadingState />;
+  }
+
+  if (!data) {
+    return <NoDataState />;
+  }
+
+  const firstSeries = first(first(data.pages)!.series);
+  // Creating a custom series where the ID is changed to 0
+  // so that we can get a proper domain
+  if (!firstSeries || !firstSeries.rows || firstSeries.rows.length === 0) {
+    return <NoDataState />;
+  }
+
+  const firstTimestamp = first(firstSeries.rows)!.timestamp;
+  const lastTimestamp = last(firstSeries.rows)!.timestamp;
+  const metric: MetricsExplorerOptionsMetric = {
     field: expression.metric,
     aggregation: expression.aggType as MetricsExplorerAggregation,
     color: Color.color0,
   };
-  const isDarkMode = uiSettings?.get('theme:darkMode') || false;
-  const dateFormatter = useMemo(() => {
-    const firstSeries = first(data?.series);
-    const firstTimestamp = first(firstSeries?.rows)?.timestamp;
-    const lastTimestamp = last(firstSeries?.rows)?.timestamp;
 
-    if (firstTimestamp == null || lastTimestamp == null) {
-      return (value: number) => `${value}`;
-    }
-
-    return niceTimeFormatter([firstTimestamp, lastTimestamp]);
-  }, [data?.series]);
-
-  /* eslint-disable-next-line react-hooks/exhaustive-deps */
-  const yAxisFormater = useCallback(createFormatterForMetric(metric), [expression]);
-
-  if (loading || !data) {
-    return <LoadingState />;
+  if (metric.aggregation === 'custom') {
+    metric.label = expression.label || CUSTOM_EQUATION;
   }
+
+  const dateFormatter =
+    firstTimestamp == null || lastTimestamp == null
+      ? (value: number) => `${value}`
+      : niceTimeFormatter([firstTimestamp, lastTimestamp]);
 
   const criticalThresholds = expression.threshold.slice().sort();
   const warningThresholds = expression.warningThreshold?.slice().sort() ?? [];
   const thresholds = [...criticalThresholds, ...warningThresholds].sort();
-
-  // Creating a custom series where the ID is changed to 0
-  // so that we can get a proper domian
-  const firstSeries = first(data.series);
-  if (!firstSeries || !firstSeries.rows || firstSeries.rows.length === 0) {
-    return <NoDataState />;
-  }
 
   const series = {
     ...firstSeries,
@@ -105,8 +134,6 @@ export const ExpressionChart: React.FC<Props> = ({
     }),
   };
 
-  const firstTimestamp = first(firstSeries.rows)!.timestamp;
-  const lastTimestamp = last(firstSeries.rows)!.timestamp;
   const dataDomain = calculateDomain(series, [metric], false);
   const domain = {
     max: Math.max(dataDomain.max, last(thresholds) || dataDomain.max) * 1.1, // add 10% headroom.
@@ -123,9 +150,9 @@ export const ExpressionChart: React.FC<Props> = ({
   return (
     <>
       <ChartContainer>
-        <Chart>
+        <Chart ref={chartRef}>
           <MetricExplorerSeriesChart
-            type={MetricsExplorerChartType.bar}
+            type={chartType}
             metric={metric}
             id="0"
             series={series}
@@ -153,35 +180,50 @@ export const ExpressionChart: React.FC<Props> = ({
               domain={domain}
             />
           )}
+          {annotations}
           <Axis
             id={'timestamp'}
             position={Position.Bottom}
             showOverlappingTicks={true}
             tickFormat={dateFormatter}
           />
-          <Axis id={'values'} position={Position.Left} tickFormat={yAxisFormater} domain={domain} />
-          <Settings tooltip={tooltipProps} theme={getChartTheme(isDarkMode)} />
+          <Axis
+            id={'values'}
+            position={Position.Left}
+            tickFormat={createFormatterForMetric(metric)}
+            domain={domain}
+          />
+          <Settings
+            onPointerUpdate={handleCursorUpdate}
+            tooltip={tooltipProps}
+            externalPointerEvents={{
+              tooltip: { visible: true },
+            }}
+            theme={getChartTheme(isDarkMode)}
+          />
         </Chart>
       </ChartContainer>
-      <div style={{ textAlign: 'center' }}>
-        {series.id !== 'ALL' ? (
-          <EuiText size="xs" color="subdued">
-            <FormattedMessage
-              id="xpack.infra.metrics.alerts.dataTimeRangeLabelWithGrouping"
-              defaultMessage="Last {lookback} {timeLabel} of data for {id}"
-              values={{ id: series.id, timeLabel, lookback: timeSize! * 20 }}
-            />
-          </EuiText>
-        ) : (
-          <EuiText size="xs" color="subdued">
-            <FormattedMessage
-              id="xpack.infra.metrics.alerts.dataTimeRangeLabel"
-              defaultMessage="Last {lookback} {timeLabel}"
-              values={{ timeLabel, lookback: timeSize! * 20 }}
-            />
-          </EuiText>
-        )}
-      </div>
+      {!hideTitle && (
+        <div style={{ textAlign: 'center' }}>
+          {series.id !== 'ALL' ? (
+            <EuiText size="xs" color="subdued">
+              <FormattedMessage
+                id="xpack.infra.metrics.alerts.dataTimeRangeLabelWithGrouping"
+                defaultMessage="Last {lookback} {timeLabel} of data for {id}"
+                values={{ id: series.id, timeLabel, lookback: timeSize! * 20 }}
+              />
+            </EuiText>
+          ) : (
+            <EuiText size="xs" color="subdued">
+              <FormattedMessage
+                id="xpack.infra.metrics.alerts.dataTimeRangeLabel"
+                defaultMessage="Last {lookback} {timeLabel}"
+                values={{ timeLabel, lookback: timeSize! * 20 }}
+              />
+            </EuiText>
+          )}
+        </div>
+      )}
     </>
   );
 };

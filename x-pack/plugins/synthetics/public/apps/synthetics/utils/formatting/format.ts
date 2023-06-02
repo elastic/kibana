@@ -25,14 +25,27 @@ export const microsToMillis = (microseconds: number | null): number | null => {
   return Math.floor(microseconds / NUM_MICROSECONDS_IN_MILLISECOND);
 };
 
-export const formatDuration = (durationMicros: number) => {
+export const formatDuration = (durationMicros: number, { noSpace }: { noSpace?: true } = {}) => {
   if (durationMicros < MILLIS_LIMIT) {
+    if (noSpace) {
+      return i18n.translate('xpack.synthetics.overview.durationMsFormattingNoSpace', {
+        values: { millis: microsToMillis(durationMicros) },
+        defaultMessage: '{millis}ms',
+      });
+    }
     return i18n.translate('xpack.synthetics.overview.durationMsFormatting', {
       values: { millis: microsToMillis(durationMicros) },
       defaultMessage: '{millis} ms',
     });
   }
   const seconds = (durationMicros / ONE_SECOND_AS_MICROS).toFixed(0);
+
+  if (noSpace) {
+    return i18n.translate('xpack.synthetics.overview.durationSecondsFormattingNoSpace', {
+      values: { seconds },
+      defaultMessage: '{seconds}s',
+    });
+  }
 
   return i18n.translate('xpack.synthetics.overview.durationSecondsFormatting', {
     values: { seconds },

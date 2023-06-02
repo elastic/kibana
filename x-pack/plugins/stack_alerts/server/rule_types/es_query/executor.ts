@@ -8,14 +8,18 @@ import { sha256 } from 'js-sha256';
 import { i18n } from '@kbn/i18n';
 import { CoreSetup } from '@kbn/core/server';
 import { parseDuration } from '@kbn/alerting-plugin/server';
-import { addMessages, EsQueryRuleActionContext } from './action_context';
-import { ComparatorFns, getHumanReadableComparator } from '../lib';
+import { isGroupAggregation, UngroupedGroupId } from '@kbn/triggers-actions-ui-plugin/common';
+import { ComparatorFns } from '../../../common';
+import {
+  addMessages,
+  EsQueryRuleActionContext,
+  getContextConditionsDescription,
+} from './action_context';
 import { ExecutorOptions, OnlyEsQueryRuleParams, OnlySearchSourceRuleParams } from './types';
 import { ActionGroupId, ConditionMetAlertInstanceId } from './constants';
 import { fetchEsQuery } from './lib/fetch_es_query';
 import { EsQueryRuleParams } from './rule_type_params';
 import { fetchSearchSourceQuery } from './lib/fetch_search_source_query';
-import { Comparator } from '../../../common/comparator_types';
 import { isEsQueryRule } from './util';
 
 export async function executor(core: CoreSetup, options: ExecutorOptions<EsQueryRuleParams>) {
@@ -28,97 +32,136 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
     spaceId,
     logger,
   } = options;
-  const { alertFactory, scopedClusterClient, searchSourceClient } = services;
+  const { alertFactory, scopedClusterClient, searchSourceClient, share, dataViews } = services;
   const currentTimestamp = new Date().toISOString();
   const publicBaseUrl = core.http.basePath.publicBaseUrl ?? '';
-
+  const spacePrefix = spaceId !== 'default' ? `/s/${spaceId}` : '';
   const alertLimit = alertFactory.alertLimit.getValue();
-
   const compareFn = ComparatorFns.get(params.thresholdComparator);
   if (compareFn == null) {
     throw new Error(getInvalidComparatorError(params.thresholdComparator));
   }
-  let latestTimestamp: string | undefined = tryToParseAsDate(state.latestTimestamp);
-
-  // During each rule execution, we run the configured query, get a hit count
-  // (hits.total) and retrieve up to params.size hits. We
-  // evaluate the threshold condition using the value of hits.total. If the threshold
-  // condition is met, the hits are counted toward the query match and we update
-  // the rule state with the timestamp of the latest hit. In the next execution
-  // of the rule, the latestTimestamp will be used to gate the query in order to
+  const isGroupAgg = isGroupAggregation(params.termField);
+  // For ungrouped queries, we run the configured query during each rule run, get a hit count
+  // and retrieve up to params.size hits. We evaluate the threshold condition using the
+  // value of the hit count. If the threshold condition is met, the hits are counted
+  // toward the query match and we update the rule state with the timestamp of the latest hit.
+  // In the next run of the rule, the latestTimestamp will be used to gate the query in order to
   // avoid counting a document multiple times.
-
-  const { numMatches, searchResult, dateStart, dateEnd } = esQueryRule
-    ? await fetchEsQuery(ruleId, name, params as OnlyEsQueryRuleParams, latestTimestamp, {
-        scopedClusterClient,
-        logger,
+  // latestTimestamp will be ignored if set for grouped queries
+  let latestTimestamp: string | undefined = tryToParseAsDate(state.latestTimestamp);
+  const { parsedResults, dateStart, dateEnd, link } = esQueryRule
+    ? await fetchEsQuery({
+        ruleId,
+        name,
+        alertLimit,
+        params: params as OnlyEsQueryRuleParams,
+        timestamp: latestTimestamp,
+        publicBaseUrl,
+        spacePrefix,
+        services: {
+          scopedClusterClient,
+          logger,
+        },
       })
-    : await fetchSearchSourceQuery(ruleId, params as OnlySearchSourceRuleParams, latestTimestamp, {
-        searchSourceClient,
-        logger,
+    : await fetchSearchSourceQuery({
+        ruleId,
+        alertLimit,
+        params: params as OnlySearchSourceRuleParams,
+        latestTimestamp,
+        spacePrefix,
+        services: {
+          share,
+          searchSourceClient,
+          logger,
+          dataViews,
+        },
       });
 
-  // apply the rule condition
-  const conditionMet = compareFn(numMatches, params.threshold);
+  const unmetGroupValues: Record<string, number> = {};
+  for (const result of parsedResults.results) {
+    const alertId = result.group;
+    const value = result.value ?? result.count;
 
-  const base = publicBaseUrl;
-  const spacePrefix = spaceId !== 'default' ? `/s/${spaceId}` : '';
-  const link = esQueryRule
-    ? `${base}${spacePrefix}/app/management/insightsAndAlerting/triggersActions/rule/${ruleId}`
-    : `${base}${spacePrefix}/app/discover#/viewAlert/${ruleId}?from=${dateStart}&to=${dateEnd}&checksum=${getChecksum(
-        params as OnlyEsQueryRuleParams
-      )}`;
-  const baseContext: Omit<EsQueryRuleActionContext, 'conditions'> = {
-    title: name,
-    date: currentTimestamp,
-    value: numMatches,
-    hits: searchResult.hits.hits,
-    link,
-  };
-
-  if (conditionMet) {
+    // group aggregations use the bucket selector agg to compare conditions
+    // within the ES query, so only 'met' results are returned, therefore we don't need
+    // to use the compareFn
+    const met = isGroupAgg ? true : compareFn(value, params.threshold);
+    if (!met) {
+      unmetGroupValues[alertId] = value;
+      continue;
+    }
+    const baseContext: Omit<EsQueryRuleActionContext, 'conditions'> = {
+      title: name,
+      date: currentTimestamp,
+      value,
+      hits: result.hits,
+      link,
+    };
     const baseActiveContext: EsQueryRuleActionContext = {
       ...baseContext,
-      conditions: getContextConditionsDescription(params.thresholdComparator, params.threshold),
+      conditions: getContextConditionsDescription({
+        comparator: params.thresholdComparator,
+        threshold: params.threshold,
+        aggType: params.aggType,
+        aggField: params.aggField,
+        ...(isGroupAgg ? { group: alertId } : {}),
+      }),
     } as EsQueryRuleActionContext;
-
-    const actionContext = addMessages(name, baseActiveContext, params);
-    const alertInstance = alertFactory.create(ConditionMetAlertInstanceId);
-    alertInstance
+    const actionContext = addMessages({
+      ruleName: name,
+      baseContext: baseActiveContext,
+      params,
+      ...(isGroupAgg ? { group: alertId } : {}),
+    });
+    const alert = alertFactory.create(
+      alertId === UngroupedGroupId && !isGroupAgg ? ConditionMetAlertInstanceId : alertId
+    );
+    alert
       // store the params we would need to recreate the query that led to this alert instance
       .replaceState({ latestTimestamp, dateStart, dateEnd })
       .scheduleActions(ActionGroupId, actionContext);
-
-    // update the timestamp based on the current search results
-    const firstValidTimefieldSort = getValidTimefieldSort(
-      searchResult.hits.hits.find((hit) => getValidTimefieldSort(hit.sort))?.sort
-    );
-    if (firstValidTimefieldSort) {
-      latestTimestamp = firstValidTimefieldSort;
+    if (!isGroupAgg) {
+      // update the timestamp based on the current search results
+      const firstValidTimefieldSort = getValidTimefieldSort(
+        result.hits.find((hit) => getValidTimefieldSort(hit.sort))?.sort
+      );
+      if (firstValidTimefieldSort) {
+        latestTimestamp = firstValidTimefieldSort;
+      }
     }
-
-    // we only create one alert if the condition is met, so we would only ever
-    // reach the alert limit if the limit is less than 1
-    alertFactory.alertLimit.setLimitReached(alertLimit < 1);
-  } else {
-    alertFactory.alertLimit.setLimitReached(false);
   }
+
+  alertFactory.alertLimit.setLimitReached(parsedResults.truncated);
 
   const { getRecoveredAlerts } = alertFactory.done();
-  for (const alert of getRecoveredAlerts()) {
+  for (const recoveredAlert of getRecoveredAlerts()) {
+    const alertId = recoveredAlert.getId();
     const baseRecoveryContext: EsQueryRuleActionContext = {
-      ...baseContext,
-      conditions: getContextConditionsDescription(
-        params.thresholdComparator,
-        params.threshold,
-        true
-      ),
+      title: name,
+      date: currentTimestamp,
+      value: unmetGroupValues[alertId] ?? 0,
+      hits: [],
+      link,
+      conditions: getContextConditionsDescription({
+        comparator: params.thresholdComparator,
+        threshold: params.threshold,
+        isRecovered: true,
+        aggType: params.aggType,
+        aggField: params.aggField,
+        ...(isGroupAgg ? { group: alertId } : {}),
+      }),
     } as EsQueryRuleActionContext;
-    const recoveryContext = addMessages(name, baseRecoveryContext, params, true);
-    alert.setContext(recoveryContext);
+    const recoveryContext = addMessages({
+      ruleName: name,
+      baseContext: baseRecoveryContext,
+      params,
+      isRecovered: true,
+      ...(isGroupAgg ? { group: alertId } : {}),
+    });
+    recoveredAlert.setContext(recoveryContext);
   }
-
-  return { latestTimestamp };
+  return { state: { latestTimestamp } };
 }
 
 function getInvalidWindowSizeError(windowValue: string) {
@@ -195,21 +238,6 @@ export function getInvalidComparatorError(comparator: string) {
     defaultMessage: 'invalid thresholdComparator specified: {comparator}',
     values: {
       comparator,
-    },
-  });
-}
-
-export function getContextConditionsDescription(
-  comparator: Comparator,
-  threshold: number[],
-  isRecovered: boolean = false
-) {
-  return i18n.translate('xpack.stackAlerts.esQuery.alertTypeContextConditionsDescription', {
-    defaultMessage: 'Number of matching documents is {negation}{thresholdComparator} {threshold}',
-    values: {
-      thresholdComparator: getHumanReadableComparator(comparator),
-      threshold: threshold.join(' and '),
-      negation: isRecovered ? 'NOT ' : '',
     },
   });
 }

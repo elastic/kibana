@@ -130,7 +130,7 @@ export const TransformStatsBar: FC<TransformStatsBarProps> = ({
               />
             }
             color="warning"
-            iconType="alert"
+            iconType="warning"
           >
             <p>
               <FormattedMessage

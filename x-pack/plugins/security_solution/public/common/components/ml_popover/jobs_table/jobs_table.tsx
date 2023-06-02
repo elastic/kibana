@@ -37,27 +37,33 @@ const truncateThreshold = 200;
 
 interface JobNameProps {
   id: string;
+  name?: string;
   description: string;
   basePath: string;
 }
 
-const JobName = ({ id, description, basePath }: JobNameProps) => {
+const JobName = ({ id, name, description, basePath }: JobNameProps) => {
   const {
     services: { ml },
   } = useKibana();
 
-  const jobUrl = useMlHref(ml, basePath, {
-    page: ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE,
-    pageState: {
-      jobId: id,
+  const jobUrl = useMlHref(
+    ml,
+    basePath,
+    {
+      page: ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE,
+      pageState: {
+        jobId: id,
+      },
     },
-  });
+    [id]
+  );
 
   return (
     <JobNameWrapper>
       <EuiText size="s">
         <EuiLink data-test-subj="jobs-table-link" href={jobUrl} target="_blank">
-          {id}
+          {name ?? id}
         </EuiLink>
       </EuiText>
       <EuiText color="subdued" size="xs">
@@ -75,8 +81,13 @@ const getJobsTableColumns = (
 ) => [
   {
     name: i18n.COLUMN_JOB_NAME,
-    render: ({ id, description }: SecurityJob) => (
-      <JobName id={id} description={description} basePath={basePath} />
+    render: ({ id, description, customSettings }: SecurityJob) => (
+      <JobName
+        id={id}
+        name={customSettings?.security_app_display_name ?? id}
+        description={description}
+        basePath={basePath}
+      />
     ),
   },
   {
@@ -111,7 +122,7 @@ const getJobsTableColumns = (
           onJobStateChange={onJobStateChange}
         />
       ) : (
-        <EuiIcon aria-label="Warning" size="s" type="alert" color="warning" />
+        <EuiIcon aria-label="Warning" size="s" type="warning" color="warning" />
       ),
     align: CENTER_ALIGNMENT,
     width: '80px',
@@ -127,10 +138,16 @@ const getPaginatedItems = (
 export interface JobTableProps {
   isLoading: boolean;
   jobs: SecurityJob[];
+  mlNodesAvailable: boolean;
   onJobStateChange: (job: SecurityJob, latestTimestampMs: number, enable: boolean) => Promise<void>;
 }
 
-export const JobsTableComponent = ({ isLoading, jobs, onJobStateChange }: JobTableProps) => {
+export const JobsTableComponent = ({
+  isLoading,
+  jobs,
+  onJobStateChange,
+  mlNodesAvailable,
+}: JobTableProps) => {
   const [pageIndex, setPageIndex] = useState(0);
   const basePath = useBasePath();
   const pageSize = 5;
@@ -150,7 +167,11 @@ export const JobsTableComponent = ({ isLoading, jobs, onJobStateChange }: JobTab
     <EuiBasicTable
       data-test-subj="jobs-table"
       columns={getJobsTableColumns(isLoading, onJobStateChange, basePath)}
-      items={getPaginatedItems(jobs, pageIndex, pageSize)}
+      items={getPaginatedItems(
+        jobs.map((j) => ({ ...j, isCompatible: mlNodesAvailable ? j.isCompatible : false })),
+        pageIndex,
+        pageSize
+      )}
       loading={isLoading}
       noItemsMessage={<NoItemsMessage basePath={basePath} />}
       pagination={pagination}

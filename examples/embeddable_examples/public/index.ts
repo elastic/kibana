@@ -20,6 +20,10 @@ export { TODO_EMBEDDABLE } from './todo';
 export { BOOK_EMBEDDABLE } from './book';
 
 export { SIMPLE_EMBEDDABLE } from './migrations';
+export {
+  FILTER_DEBUGGER_EMBEDDABLE,
+  FilterDebuggerEmbeddableFactoryDefinition,
+} from './filter_debugger';
 
 import { EmbeddableExamplesPlugin } from './plugin';
 
@@ -27,4 +31,5 @@ export type { SearchableListContainerFactory } from './searchable_list_container
 export { SearchableListContainer, SEARCHABLE_LIST_CONTAINER } from './searchable_list_container';
 export type { MultiTaskTodoEmbeddableFactory } from './multi_task_todo';
 export { MULTI_TASK_TODO_EMBEDDABLE } from './multi_task_todo';
+
 export const plugin = () => new EmbeddableExamplesPlugin();

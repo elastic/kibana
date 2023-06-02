@@ -19,8 +19,8 @@ import { ROLES } from '@kbn/security-solution-plugin/common/test';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   createSignalsIndex,
+  deleteAllRules,
   deleteAllAlerts,
-  deleteSignalsIndex,
   getSimpleRule,
   getSimpleRuleAsNdjson,
   getSimpleRuleOutput,
@@ -98,6 +98,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const log = getService('log');
   const esArchiver = getService('esArchiver');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
+  const es = getService('es');
 
   describe('import_rules', () => {
     describe('importing rules with different roles', () => {
@@ -114,8 +115,8 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       afterEach(async () => {
-        await deleteSignalsIndex(supertest, log);
-        await deleteAllAlerts(supertest, log);
+        await deleteAllAlerts(supertest, log, es);
+        await deleteAllRules(supertest, log);
       });
       it('should successfully import rules without actions when user has no actions privileges', async () => {
         const { body } = await supertestWithoutAuth
@@ -133,6 +134,10 @@ export default ({ getService }: FtrProviderContext): void => {
           exceptions_errors: [],
           exceptions_success: true,
           exceptions_success_count: 0,
+          action_connectors_success: true,
+          action_connectors_success_count: 0,
+          action_connectors_errors: [],
+          action_connectors_warnings: [],
         });
       });
       it('should successfully import rules with actions when user has "read" actions privileges', async () => {
@@ -168,6 +173,10 @@ export default ({ getService }: FtrProviderContext): void => {
           exceptions_errors: [],
           exceptions_success: true,
           exceptions_success_count: 0,
+          action_connectors_success: true,
+          action_connectors_success_count: 0,
+          action_connectors_errors: [],
+          action_connectors_warnings: [],
         });
       });
       it('should not import rules with actions when a user has no actions privileges', async () => {
@@ -202,7 +211,7 @@ export default ({ getService }: FtrProviderContext): void => {
             {
               error: {
                 message:
-                  'You may not have actions privileges required to import rules with actions: Unauthorized to get actions',
+                  'You may not have actions privileges required to import rules with actions: Unable to bulk_create action',
                 status_code: 403,
               },
               rule_id: '(unknown id)',
@@ -218,6 +227,10 @@ export default ({ getService }: FtrProviderContext): void => {
           exceptions_errors: [],
           exceptions_success: true,
           exceptions_success_count: 0,
+          action_connectors_success: true,
+          action_connectors_success_count: 0,
+          action_connectors_errors: [],
+          action_connectors_warnings: [],
         });
       });
     });
@@ -227,8 +240,8 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       afterEach(async () => {
-        await deleteSignalsIndex(supertest, log);
-        await deleteAllAlerts(supertest, log);
+        await deleteAllAlerts(supertest, log, es);
+        await deleteAllRules(supertest, log);
       });
 
       it('should set the response content types to be expected', async () => {
@@ -268,6 +281,10 @@ export default ({ getService }: FtrProviderContext): void => {
           exceptions_errors: [],
           exceptions_success: true,
           exceptions_success_count: 0,
+          action_connectors_success: true,
+          action_connectors_success_count: 0,
+          action_connectors_errors: [],
+          action_connectors_warnings: [],
         });
       });
 
@@ -305,6 +322,10 @@ export default ({ getService }: FtrProviderContext): void => {
           exceptions_errors: [],
           exceptions_success: true,
           exceptions_success_count: 0,
+          action_connectors_success: true,
+          action_connectors_success_count: 0,
+          action_connectors_errors: [],
+          action_connectors_warnings: [],
         });
       });
 
@@ -331,6 +352,10 @@ export default ({ getService }: FtrProviderContext): void => {
           exceptions_errors: [],
           exceptions_success: true,
           exceptions_success_count: 0,
+          action_connectors_success: true,
+          action_connectors_success_count: 0,
+          action_connectors_errors: [],
+          action_connectors_warnings: [],
         });
       });
 
@@ -349,6 +374,10 @@ export default ({ getService }: FtrProviderContext): void => {
           exceptions_errors: [],
           exceptions_success: true,
           exceptions_success_count: 0,
+          action_connectors_success: true,
+          action_connectors_success_count: 0,
+          action_connectors_errors: [],
+          action_connectors_warnings: [],
         });
       });
 
@@ -381,6 +410,10 @@ export default ({ getService }: FtrProviderContext): void => {
           exceptions_errors: [],
           exceptions_success: true,
           exceptions_success_count: 0,
+          action_connectors_success: true,
+          action_connectors_success_count: 0,
+          action_connectors_errors: [],
+          action_connectors_warnings: [],
         });
       });
 
@@ -405,6 +438,10 @@ export default ({ getService }: FtrProviderContext): void => {
           exceptions_errors: [],
           exceptions_success: true,
           exceptions_success_count: 0,
+          action_connectors_success: true,
+          action_connectors_success_count: 0,
+          action_connectors_errors: [],
+          action_connectors_warnings: [],
         });
       });
 
@@ -469,6 +506,10 @@ export default ({ getService }: FtrProviderContext): void => {
           exceptions_errors: [],
           exceptions_success: true,
           exceptions_success_count: 0,
+          action_connectors_success: true,
+          action_connectors_success_count: 0,
+          action_connectors_errors: [],
+          action_connectors_warnings: [],
         });
       });
 
@@ -508,6 +549,10 @@ export default ({ getService }: FtrProviderContext): void => {
           exceptions_errors: [],
           exceptions_success: true,
           exceptions_success_count: 0,
+          action_connectors_success: true,
+          action_connectors_success_count: 0,
+          action_connectors_errors: [],
+          action_connectors_warnings: [],
         });
       });
 
@@ -589,6 +634,18 @@ export default ({ getService }: FtrProviderContext): void => {
           exceptions_errors: [],
           exceptions_success: true,
           exceptions_success_count: 0,
+          action_connectors_success: true,
+          action_connectors_success_count: 0,
+          action_connectors_errors: [
+            {
+              rule_id: 'rule-1',
+              error: {
+                status_code: 404,
+                message: '1 connector is missing. Connector id missing is: 123',
+              },
+            },
+          ],
+          action_connectors_warnings: [],
         });
       });
 
@@ -623,6 +680,10 @@ export default ({ getService }: FtrProviderContext): void => {
           exceptions_errors: [],
           exceptions_success: true,
           exceptions_success_count: 0,
+          action_connectors_success: true,
+          action_connectors_success_count: 0,
+          action_connectors_errors: [],
+          action_connectors_warnings: [],
         });
       });
 
@@ -675,6 +736,10 @@ export default ({ getService }: FtrProviderContext): void => {
           exceptions_errors: [],
           exceptions_success: true,
           exceptions_success_count: 0,
+          action_connectors_success: true,
+          action_connectors_success_count: 0,
+          action_connectors_errors: [],
+          action_connectors_warnings: [],
         });
       });
 
@@ -735,6 +800,10 @@ export default ({ getService }: FtrProviderContext): void => {
           exceptions_errors: [],
           exceptions_success: true,
           exceptions_success_count: 0,
+          action_connectors_success: true,
+          action_connectors_success_count: 0,
+          action_connectors_errors: [],
+          action_connectors_warnings: [],
         });
       });
 
@@ -875,6 +944,10 @@ export default ({ getService }: FtrProviderContext): void => {
             exceptions_errors: [],
             exceptions_success: true,
             exceptions_success_count: 1,
+            action_connectors_success: true,
+            action_connectors_success_count: 0,
+            action_connectors_errors: [],
+            action_connectors_warnings: [],
           });
         });
 
@@ -946,6 +1019,10 @@ export default ({ getService }: FtrProviderContext): void => {
             exceptions_errors: [],
             exceptions_success: true,
             exceptions_success_count: 0,
+            action_connectors_success: true,
+            action_connectors_success_count: 0,
+            action_connectors_errors: [],
+            action_connectors_warnings: [],
           });
         });
 
@@ -1045,6 +1122,10 @@ export default ({ getService }: FtrProviderContext): void => {
             exceptions_errors: [],
             exceptions_success: true,
             exceptions_success_count: 1,
+            action_connectors_success: true,
+            action_connectors_success_count: 0,
+            action_connectors_errors: [],
+            action_connectors_warnings: [],
           });
         });
 
@@ -1175,6 +1256,10 @@ export default ({ getService }: FtrProviderContext): void => {
             exceptions_errors: [],
             exceptions_success: true,
             exceptions_success_count: 1,
+            action_connectors_success: true,
+            action_connectors_success_count: 0,
+            action_connectors_errors: [],
+            action_connectors_warnings: [],
           });
         });
       });

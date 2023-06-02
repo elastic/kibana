@@ -13,9 +13,8 @@ import {
   UPDATE_FILTER_REFERENCES_ACTION,
   UPDATE_FILTER_REFERENCES_TRIGGER,
 } from '@kbn/unified-search-plugin/public';
-import { LayerType } from '../../../../common';
 import { changeIndexPattern, removeDimension } from '../../../state_management/lens_slice';
-import { Visualization } from '../../../types';
+import { AddLayerFunction, Visualization } from '../../../types';
 import { LayerPanel } from './layer_panel';
 import { generateId } from '../../../id_generator';
 import { ConfigPanelWrapperProps } from './types';
@@ -32,8 +31,8 @@ import {
   setToggleFullscreen,
   useLensSelector,
   selectVisualization,
+  registerLibraryAnnotationGroup,
 } from '../../../state_management';
-import { AddLayerButton } from './add_layer';
 import { getRemoveOperation } from '../../../utils';
 
 export const ConfigPanelWrapper = memo(function ConfigPanelWrapper(props: ConfigPanelWrapperProps) {
@@ -218,6 +217,7 @@ export function LayerPanels(
         id: indexPatternId,
         cache: props.framePublicAPI.dataViews.indexPatterns,
       });
+
       dispatchLens(
         changeIndexPattern({
           indexPatternId,
@@ -231,9 +231,9 @@ export function LayerPanels(
     [dispatchLens, props.framePublicAPI.dataViews.indexPatterns, props.indexPatternService]
   );
 
-  const addLayer = (layerType: LayerType) => {
+  const addLayer: AddLayerFunction = (layerType, extraArg, ignoreInitialValues) => {
     const layerId = generateId();
-    dispatchLens(addLayerAction({ layerId, layerType }));
+    dispatchLens(addLayerAction({ layerId, layerType, extraArg, ignoreInitialValues }));
     setNextFocusedLayerId(layerId);
   };
 
@@ -314,14 +314,45 @@ export function LayerPanels(
           )
         );
       })}
-      {!hideAddLayerButton && (
-        <AddLayerButton
-          visualization={activeVisualization}
-          visualizationState={visualization.state}
-          layersMeta={props.framePublicAPI}
-          onAddLayerClick={(layerType) => addLayer(layerType)}
-        />
-      )}
+      {!hideAddLayerButton &&
+        activeVisualization?.getAddLayerButtonComponent?.({
+          supportedLayers: activeVisualization.getSupportedLayers(
+            visualization.state,
+            props.framePublicAPI
+          ),
+          addLayer,
+          ensureIndexPattern: async (specOrId) => {
+            let indexPatternId;
+
+            if (typeof specOrId === 'string') {
+              indexPatternId = specOrId;
+            } else {
+              const dataView = await props.dataViews.create(specOrId);
+
+              if (!dataView.id) {
+                return;
+              }
+
+              indexPatternId = dataView.id;
+            }
+
+            const newIndexPatterns = await indexPatternService.ensureIndexPattern({
+              id: indexPatternId,
+              cache: props.framePublicAPI.dataViews.indexPatterns,
+            });
+
+            dispatchLens(
+              changeIndexPattern({
+                dataViews: { indexPatterns: newIndexPatterns },
+                datasourceIds: Object.keys(datasourceStates),
+                visualizationIds: visualization.activeId ? [visualization.activeId] : [],
+                indexPatternId,
+              })
+            );
+          },
+          registerLibraryAnnotationGroup: (groupInfo) =>
+            dispatchLens(registerLibraryAnnotationGroup(groupInfo)),
+        })}
     </EuiForm>
   );
 }

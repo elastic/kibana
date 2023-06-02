@@ -12,6 +12,11 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { throttle } from 'lodash';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import useObservable from 'react-use/lib/useObservable';
+import {
+  type MlEntityField,
+  type MlEntityFieldOperation,
+  ML_ANOMALY_THRESHOLD,
+} from '@kbn/ml-anomaly-utils';
 import { useEmbeddableExecutionContext } from '../common/use_embeddable_execution_context';
 import { useAnomalyChartsInputResolver } from './use_anomaly_charts_input_resolver';
 import type { IAnomalyChartsEmbeddable } from './anomaly_charts_embeddable';
@@ -20,12 +25,10 @@ import type {
   AnomalyChartsEmbeddableOutput,
   AnomalyChartsEmbeddableServices,
 } from '..';
-import type { EntityField, EntityFieldOperation } from '../../../common/util/anomaly_utils';
 
 import { ExplorerAnomaliesContainer } from '../../application/explorer/explorer_charts/explorer_anomalies_container';
 import { ML_APP_LOCATOR } from '../../../common/constants/locator';
 import { optionValueToThreshold } from '../../application/components/controls/select_severity/select_severity';
-import { ANOMALY_THRESHOLD } from '../../../common';
 import { TimeBuckets } from '../../application/util/time_buckets';
 import { EXPLORER_ENTITY_FIELD_SELECTION_TRIGGER } from '../../ui_actions/triggers';
 import { MlLocatorParams } from '../../../common/types/locator';
@@ -68,10 +71,10 @@ export const EmbeddableAnomalyChartsContainer: FC<EmbeddableAnomalyChartsContain
   const [chartWidth, setChartWidth] = useState<number>(0);
   const [severity, setSeverity] = useState(
     optionValueToThreshold(
-      embeddableContext.getInput().severityThreshold ?? ANOMALY_THRESHOLD.WARNING
+      embeddableContext.getInput().severityThreshold ?? ML_ANOMALY_THRESHOLD.WARNING
     )
   );
-  const [selectedEntities, setSelectedEntities] = useState<EntityField[] | undefined>();
+  const [selectedEntities, setSelectedEntities] = useState<MlEntityField[] | undefined>();
   const [{ uiSettings }, { data: dataServices, share, uiActions, charts: chartsService }] =
     services;
   const { timefilter } = dataServices.query.timefilter;
@@ -151,7 +154,7 @@ export const EmbeddableAnomalyChartsContainer: FC<EmbeddableAnomalyChartsContain
           />
         }
         color="danger"
-        iconType="alert"
+        iconType="warning"
         style={{ width: '100%' }}
       >
         <p>{error.message}</p>
@@ -162,9 +165,9 @@ export const EmbeddableAnomalyChartsContainer: FC<EmbeddableAnomalyChartsContain
   const addEntityFieldFilter = (
     fieldName: string,
     fieldValue: string,
-    operation: EntityFieldOperation
+    operation: MlEntityFieldOperation
   ) => {
-    const entity: EntityField = {
+    const entity: MlEntityField = {
       fieldName,
       fieldValue,
       operation,

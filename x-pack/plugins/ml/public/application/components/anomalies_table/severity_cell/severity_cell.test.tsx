@@ -13,7 +13,7 @@ describe('SeverityCell', () => {
   test('should render a single-bucket marker with rounded severity score', () => {
     const props = {
       score: 75.2,
-      multiBucketImpact: -2,
+      isMultiBucketAnomaly: false,
     };
     const { container } = render(<SeverityCell {...props} />);
     expect(container.textContent).toBe('75');
@@ -24,7 +24,7 @@ describe('SeverityCell', () => {
   test('should render a multi-bucket marker with low severity score', () => {
     const props = {
       score: 0.8,
-      multiBucketImpact: 4,
+      isMultiBucketAnomaly: true,
     };
     const { container } = render(<SeverityCell {...props} />);
     expect(container.textContent).toBe('< 1');

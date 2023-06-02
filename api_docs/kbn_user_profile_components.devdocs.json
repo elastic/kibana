@@ -421,7 +421,7 @@
           },
           " extends Omit<",
           "EuiAvatarProps",
-          ", \"name\" | \"type\" | \"color\" | \"iconColor\" | \"iconType\" | \"iconSize\" | \"initials\" | \"initialsLength\" | \"imageUrl\">"
+          ", \"type\" | \"name\" | \"color\" | \"iconType\" | \"iconColor\" | \"iconSize\" | \"initials\" | \"initialsLength\" | \"imageUrl\">"
         ],
         "path": "packages/kbn-user-profile-components/src/user_avatar.tsx",
         "deprecated": false,
@@ -719,7 +719,7 @@
           },
           "<Option> extends Pick<",
           "EuiSelectableProps",
-          "<{}>, \"height\" | \"errorMessage\" | \"singleSelection\" | \"loadingMessage\" | \"noMatchesMessage\" | \"emptyMessage\">"
+          "<{}>, \"singleSelection\" | \"height\" | \"errorMessage\" | \"loadingMessage\" | \"noMatchesMessage\" | \"emptyMessage\">"
         ],
         "path": "packages/kbn-user-profile-components/src/user_profiles_selectable.tsx",
         "deprecated": false,

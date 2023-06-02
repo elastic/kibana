@@ -9,11 +9,12 @@ import * as t from 'io-ts';
 import Boom from '@hapi/boom';
 import { toBooleanRt } from '@kbn/io-ts-utils';
 import { maxSuggestions } from '@kbn/observability-plugin/common';
+import { SearchHit } from '@kbn/es-types';
 import { createOrUpdateConfiguration } from './create_or_update_configuration';
 import { searchConfigurations } from './search_configurations';
 import { findExactConfiguration } from './find_exact_configuration';
 import { listConfigurations } from './list_configurations';
-import { getEnvironments } from './get_environments';
+import { EnvironmentsResponse, getEnvironments } from './get_environments';
 import { deleteConfiguration } from './delete_configuration';
 import { createApmServerRoute } from '../../apm_routes/create_apm_server_route';
 import { getAgentNameByService } from './get_agent_name_by_service';
@@ -25,21 +26,32 @@ import {
 import { getSearchTransactionsEvents } from '../../../lib/helpers/transactions';
 import { syncAgentConfigsToApmPackagePolicies } from '../../fleet/sync_agent_configs_to_apm_package_policies';
 import { getApmEventClient } from '../../../lib/helpers/get_apm_event_client';
-import { createInternalESClient } from '../../../lib/helpers/create_es_client/create_internal_es_client';
+import { createInternalESClientWithContext } from '../../../lib/helpers/create_es_client/create_internal_es_client';
+import { AgentConfiguration } from '../../../../common/agent_configuration/configuration_types';
+import { ApmFeatureFlags } from '../../../../common/apm_feature_flags';
+
+function throwNotFoundIfAgentConfigNotAvailable(
+  featureFlags: ApmFeatureFlags
+): void {
+  if (!featureFlags.agentConfigurationAvailable) {
+    throw Boom.notFound();
+  }
+}
 
 // get list of configurations
 const agentConfigurationRoute = createApmServerRoute({
-  endpoint: 'GET /api/apm/settings/agent-configuration',
+  endpoint: 'GET /api/apm/settings/agent-configuration 2023-05-22',
   options: { tags: ['access:apm'] },
   handler: async (
     resources
   ): Promise<{
-    configurations: Array<
-      import('./../../../../common/agent_configuration/configuration_types').AgentConfiguration
-    >;
+    configurations: AgentConfiguration[];
   }> => {
+    throwNotFoundIfAgentConfigNotAvailable(resources.featureFlags);
+
     const { context, request, params, config } = resources;
-    const internalESClient = await createInternalESClient({
+
+    const internalESClient = await createInternalESClientWithContext({
       context,
       request,
       debug: params.query._inspect,
@@ -54,21 +66,19 @@ const agentConfigurationRoute = createApmServerRoute({
 
 // get a single configuration
 const getSingleAgentConfigurationRoute = createApmServerRoute({
-  endpoint: 'GET /api/apm/settings/agent-configuration/view',
+  endpoint: 'GET /api/apm/settings/agent-configuration/view 2023-05-22',
   params: t.partial({
     query: serviceRt,
   }),
   options: { tags: ['access:apm'] },
-  handler: async (
-    resources
-  ): Promise<
-    import('./../../../../common/agent_configuration/configuration_types').AgentConfiguration
-  > => {
+  handler: async (resources): Promise<AgentConfiguration> => {
+    throwNotFoundIfAgentConfigNotAvailable(resources.featureFlags);
+
     const { params, logger, context, request, config } = resources;
     const { name, environment, _inspect } = params.query;
     const service = { name, environment };
 
-    const internalESClient = await createInternalESClient({
+    const internalESClient = await createInternalESClientWithContext({
       context,
       request,
       debug: _inspect,
@@ -93,7 +103,7 @@ const getSingleAgentConfigurationRoute = createApmServerRoute({
 
 // delete configuration
 const deleteAgentConfigurationRoute = createApmServerRoute({
-  endpoint: 'DELETE /api/apm/settings/agent-configuration',
+  endpoint: 'DELETE /api/apm/settings/agent-configuration 2023-05-22',
   options: {
     tags: ['access:apm', 'access:apm_write'],
   },
@@ -103,6 +113,8 @@ const deleteAgentConfigurationRoute = createApmServerRoute({
     }),
   }),
   handler: async (resources): Promise<{ result: string }> => {
+    throwNotFoundIfAgentConfigNotAvailable(resources.featureFlags);
+
     const {
       params,
       logger,
@@ -114,7 +126,7 @@ const deleteAgentConfigurationRoute = createApmServerRoute({
     } = resources;
     const { service } = params.body;
 
-    const internalESClient = await createInternalESClient({
+    const internalESClient = await createInternalESClientWithContext({
       context,
       request,
       debug: params.query._inspect,
@@ -143,7 +155,7 @@ const deleteAgentConfigurationRoute = createApmServerRoute({
 
     if (resources.plugins.fleet) {
       await syncAgentConfigsToApmPackagePolicies({
-        core,
+        coreStartPromise: core.start(),
         fleetPluginStart: await resources.plugins.fleet.start(),
         internalESClient,
         telemetryUsageCounter,
@@ -159,7 +171,7 @@ const deleteAgentConfigurationRoute = createApmServerRoute({
 
 // create/update configuration
 const createOrUpdateAgentConfigurationRoute = createApmServerRoute({
-  endpoint: 'PUT /api/apm/settings/agent-configuration',
+  endpoint: 'PUT /api/apm/settings/agent-configuration 2023-05-22',
   options: {
     tags: ['access:apm', 'access:apm_write'],
   },
@@ -168,6 +180,7 @@ const createOrUpdateAgentConfigurationRoute = createApmServerRoute({
     t.type({ body: agentConfigurationIntakeRt }),
   ]),
   handler: async (resources): Promise<void> => {
+    throwNotFoundIfAgentConfigNotAvailable(resources.featureFlags);
     const {
       params,
       logger,
@@ -179,7 +192,7 @@ const createOrUpdateAgentConfigurationRoute = createApmServerRoute({
     } = resources;
     const { body, query } = params;
 
-    const internalESClient = await createInternalESClient({
+    const internalESClient = await createInternalESClientWithContext({
       context,
       request,
       debug: params.query._inspect,
@@ -214,7 +227,7 @@ const createOrUpdateAgentConfigurationRoute = createApmServerRoute({
 
     if (resources.plugins.fleet) {
       await syncAgentConfigsToApmPackagePolicies({
-        core,
+        coreStartPromise: core.start(),
         fleetPluginStart: await resources.plugins.fleet.start(),
         internalESClient,
         telemetryUsageCounter,
@@ -235,21 +248,16 @@ export type AgentConfigSearchParams = t.TypeOf<typeof searchParamsRt>;
 
 // Lookup single configuration (used by APM Server)
 const agentConfigurationSearchRoute = createApmServerRoute({
-  endpoint: 'POST /api/apm/settings/agent-configuration/search',
+  endpoint: 'POST /api/apm/settings/agent-configuration/search 2023-05-22',
   params: t.type({
     body: searchParamsRt,
   }),
   options: { tags: ['access:apm'], disableTelemetry: true },
   handler: async (
     resources
-  ): Promise<
-    | import('@kbn/es-types').SearchHit<
-        import('./../../../../common/agent_configuration/configuration_types').AgentConfiguration,
-        undefined,
-        undefined
-      >
-    | null
-  > => {
+  ): Promise<SearchHit<AgentConfiguration, undefined, undefined> | null> => {
+    throwNotFoundIfAgentConfigNotAvailable(resources.featureFlags);
+
     const { params, logger, context, config, request } = resources;
 
     const {
@@ -258,7 +266,7 @@ const agentConfigurationSearchRoute = createApmServerRoute({
       mark_as_applied_by_agent: markAsAppliedByAgent,
     } = params.body;
 
-    const internalESClient = await createInternalESClient({
+    const internalESClient = await createInternalESClientWithContext({
       context,
       request,
       debug: params.query._inspect,
@@ -311,7 +319,7 @@ const agentConfigurationSearchRoute = createApmServerRoute({
 
 // get environments for service
 const listAgentConfigurationEnvironmentsRoute = createApmServerRoute({
-  endpoint: 'GET /api/apm/settings/agent-configuration/environments',
+  endpoint: 'GET /api/apm/settings/agent-configuration/environments 2023-05-22',
   params: t.partial({
     query: t.partial({ serviceName: t.string }),
   }),
@@ -319,11 +327,13 @@ const listAgentConfigurationEnvironmentsRoute = createApmServerRoute({
   handler: async (
     resources
   ): Promise<{
-    environments: Array<{ name: string; alreadyConfigured: boolean }>;
+    environments: EnvironmentsResponse;
   }> => {
+    throwNotFoundIfAgentConfigNotAvailable(resources.featureFlags);
+
     const { context, request, params, config } = resources;
     const [internalESClient, apmEventClient] = await Promise.all([
-      createInternalESClient({
+      createInternalESClientWithContext({
         context,
         request,
         debug: params.query._inspect,
@@ -358,12 +368,14 @@ const listAgentConfigurationEnvironmentsRoute = createApmServerRoute({
 
 // get agentName for service
 const agentConfigurationAgentNameRoute = createApmServerRoute({
-  endpoint: 'GET /api/apm/settings/agent-configuration/agent_name',
+  endpoint: 'GET /api/apm/settings/agent-configuration/agent_name 2023-05-22',
   params: t.type({
     query: t.type({ serviceName: t.string }),
   }),
   options: { tags: ['access:apm'] },
   handler: async (resources): Promise<{ agentName: string | undefined }> => {
+    throwNotFoundIfAgentConfigNotAvailable(resources.featureFlags);
+
     const apmEventClient = await getApmEventClient(resources);
     const { params } = resources;
     const { serviceName } = params.query;

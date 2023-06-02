@@ -1,0 +1,29 @@
+{
+  "type": "plugin",
+  "id": "@kbn/serverless-search",
+  "owner": "@elastic/enterprise-search-frontend",
+  "description": "Serverless customizations for search.",
+  "plugin": {
+    "id": "serverlessSearch",
+    "server": true,
+    "browser": true,
+    "configPath": ["xpack", "serverless", "search"],
+    "requiredPlugins": [
+      "serverless",
+      "cloud",
+      "management",
+      "security",
+      "share",
+      "devTools",
+      "console",
+      "searchprofiler",
+      "grokdebugger",
+      "painlessLab",
+      "discover",
+      "dashboard",
+      "visualizations"
+    ],
+    "optionalPlugins": [],
+    "requiredBundles": ["kibanaReact"]
+  }
+}

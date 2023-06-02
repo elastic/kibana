@@ -9,26 +9,43 @@ import React from 'react';
 import {
   isJavaAgentName,
   isJRubyAgent,
-  isServerlessAgent,
+  isAWSLambdaAgent,
 } from '../../../../common/agent_name';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { ServerlessMetrics } from './serverless_metrics';
 import { ServiceMetrics } from './service_metrics';
 import { JvmMetricsOverview } from './jvm_metrics_overview';
+import { JsonMetricsDashboard } from './static_dashboard';
+import { hasDashboardFile } from './static_dashboard/helper';
 
 export function Metrics() {
-  const { agentName, runtimeName } = useApmServiceContext();
-  const isServerless = isServerlessAgent(runtimeName);
+  const { agentName, runtimeName, serverlessType } = useApmServiceContext();
+  const isAWSLambda = isAWSLambdaAgent(serverlessType);
 
   if (
-    !isServerless &&
+    !isAWSLambda &&
     (isJavaAgentName(agentName) || isJRubyAgent(agentName, runtimeName))
   ) {
     return <JvmMetricsOverview />;
   }
 
-  if (isServerless) {
+  if (isAWSLambda) {
     return <ServerlessMetrics />;
+  }
+
+  const hasStaticDashboard = hasDashboardFile({
+    agentName,
+    runtimeName,
+    serverlessType,
+  });
+  if (hasStaticDashboard) {
+    return (
+      <JsonMetricsDashboard
+        agentName={agentName}
+        runtimeName={runtimeName}
+        serverlessType={serverlessType}
+      />
+    );
   }
 
   return <ServiceMetrics />;

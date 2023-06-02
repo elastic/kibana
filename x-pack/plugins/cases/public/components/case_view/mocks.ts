@@ -13,7 +13,7 @@ import {
   caseUserActions,
   getAlertUserAction,
 } from '../../containers/mock';
-import type { Case } from '../../containers/types';
+import type { CaseUI } from '../../containers/types';
 import type { CaseViewProps } from './types';
 
 export const alertsHit = [
@@ -63,7 +63,7 @@ export const caseViewProps: CaseViewProps = {
   ],
 };
 
-export const caseData: Case = {
+export const caseData: CaseUI = {
   ...basicCase,
   comments: [...basicCase.comments, alertComment],
   connector: {
@@ -96,18 +96,26 @@ export const defaultUpdateCaseState = {
   isLoading: false,
   isError: false,
   updateKey: null,
-  updateCaseProperty: jest.fn(),
+  mutate: jest.fn(),
 };
 
-export const defaultUseGetCaseUserActions = {
-  data: {
-    caseUserActions: [...caseUserActions, getAlertUserAction()],
-    caseServices: {},
-    hasDataToPush: false,
-    participants: [caseData.createdBy],
-  },
+export const defaultUseFindCaseUserActions = {
+  data: { total: 4, perPage: 10, page: 1, userActions: [...caseUserActions, getAlertUserAction()] },
   refetch: jest.fn(),
   isLoading: false,
   isFetching: false,
   isError: false,
+};
+
+export const defaultInfiniteUseFindCaseUserActions = {
+  data: {
+    pages: [
+      { total: 4, perPage: 10, page: 1, userActions: [...caseUserActions, getAlertUserAction()] },
+    ],
+  },
+  isLoading: false,
+  isFetching: false,
+  isError: false,
+  hasNextPage: false,
+  fetchNextPage: jest.fn(),
 };

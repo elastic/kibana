@@ -12,6 +12,7 @@ import {
   SERVICE_NAME,
   SERVICE_ENVIRONMENT,
   TRANSACTION_TYPE,
+  TRANSACTION_NAME,
 } from '../../../../../common/es_fields/apm';
 import { environmentQuery } from '../../../../../common/utils/environment_query';
 import { AlertParams } from '../../route';
@@ -29,6 +30,11 @@ import { averageOrPercentileAgg } from './average_or_percentile_agg';
 import { APMConfig } from '../../../..';
 import { APMEventClient } from '../../../../lib/helpers/create_es_client/create_apm_event_client';
 
+export type TransactionDurationChartPreviewResponse = Array<{
+  name: string;
+  data: Array<{ x: number; y: number | null }>;
+}>;
+
 export async function getTransactionDurationChartPreview({
   alertParams,
   config,
@@ -37,12 +43,13 @@ export async function getTransactionDurationChartPreview({
   alertParams: AlertParams;
   config: APMConfig;
   apmEventClient: APMEventClient;
-}) {
+}): Promise<TransactionDurationChartPreviewResponse> {
   const {
     aggregationType = AggregationType.Avg,
     environment,
     serviceName,
     transactionType,
+    transactionName,
     interval,
     start,
     end,
@@ -58,6 +65,7 @@ export async function getTransactionDurationChartPreview({
       filter: [
         ...termQuery(SERVICE_NAME, serviceName),
         ...termQuery(TRANSACTION_TYPE, transactionType),
+        ...termQuery(TRANSACTION_NAME, transactionName),
         ...rangeQuery(start, end),
         ...environmentQuery(environment),
         ...getDocumentTypeFilterForTransactions(searchAggregatedTransactions),

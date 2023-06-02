@@ -1,0 +1,23 @@
+{
+  "type": "plugin",
+  "id": "@kbn/alerting-api-integration-test-plugin",
+  "owner": "@elastic/response-ops",
+  "plugin": {
+    "id": "alertingApiIntegrationTestPlugin",
+    "server": true,
+    "browser": false,
+    "requiredPlugins": [
+      "taskManager",
+      "features",
+      "actions",
+      "alerting",
+      "encryptedSavedObjects",
+      "ruleRegistry",
+      "eventLog"
+    ],
+    "optionalPlugins": [
+      "security",
+      "spaces"
+    ]
+  }
+}

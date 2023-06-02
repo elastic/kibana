@@ -17,6 +17,8 @@ import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
 
 import { SavedObjectsUtils, SavedObjectsErrorHelpers } from '@kbn/core/server';
 
+import { updateIndexSettings } from '../elasticsearch/index/update_settings';
+
 import {
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   PACKAGES_SAVED_OBJECT_TYPE,
@@ -38,6 +40,8 @@ import { packagePolicyService, appContextService } from '../..';
 import { deletePackageCache } from '../archive';
 import { deleteIlms } from '../elasticsearch/datastream_ilm/remove';
 import { removeArchiveEntries } from '../archive/storage';
+
+import { auditLoggingService } from '../../audit_logging';
 
 import { getInstallation, kibanaSavedObjectTypes } from '.';
 
@@ -83,6 +87,11 @@ export async function removeInstallation(options: {
 
   // Delete the manager saved object with references to the asset objects
   // could also update with [] or some other state
+  auditLoggingService.writeCustomSoAuditLog({
+    action: 'delete',
+    id: pkgName,
+    savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
+  });
   await savedObjectsClient.delete(PACKAGES_SAVED_OBJECT_TYPE, pkgName);
 
   // delete the index patterns if no packages are installed
@@ -116,6 +125,14 @@ async function deleteKibanaAssets(
     { namespace }
   );
 
+  for (const { saved_object: savedObject } of resolvedObjects) {
+    auditLoggingService.writeCustomSoAuditLog({
+      action: 'get',
+      id: savedObject.id,
+      savedObjectType: savedObject.type,
+    });
+  }
+
   const foundObjects = resolvedObjects.filter(
     ({ saved_object: savedObject }) => savedObject?.error?.statusCode !== 404
   );
@@ -123,11 +140,16 @@ async function deleteKibanaAssets(
   // in the case of a partial install, it is expected that some assets will be not found
   // we filter these out before calling delete
   const assetsToDelete = foundObjects.map(({ saved_object: { id, type } }) => ({ id, type }));
-  const promises = assetsToDelete.map(async ({ id, type }) => {
-    return savedObjectsClient.delete(type, id, { namespace });
-  });
 
-  return Promise.all(promises);
+  for (const asset of assetsToDelete) {
+    auditLoggingService.writeCustomSoAuditLog({
+      action: 'delete',
+      id: asset.id,
+      savedObjectType: asset.type,
+    });
+  }
+
+  return savedObjectsClient.bulkDelete(assetsToDelete, { namespace });
 }
 
 function deleteESAssets(
@@ -143,7 +165,7 @@ function deleteESAssets(
     } else if (assetType === ElasticsearchAssetType.componentTemplate) {
       return deleteComponentTemplate(esClient, id);
     } else if (assetType === ElasticsearchAssetType.transform) {
-      return deleteTransforms(esClient, [id]);
+      return deleteTransforms(esClient, [id], true);
     } else if (assetType === ElasticsearchAssetType.dataStreamIlmPolicy) {
       return deleteIlms(esClient, [id]);
     } else if (assetType === ElasticsearchAssetType.ilmPolicy) {
@@ -164,27 +186,35 @@ async function deleteAssets(
   esClient: ElasticsearchClient
 ) {
   const logger = appContextService.getLogger();
+  // must unset default_pipelines settings in indices first, or pipelines associated with an index cannot not be deleted
   // must delete index templates first, or component templates which reference them cannot be deleted
   // must delete ingestPipelines first, or ml models referenced in them cannot be deleted.
   // separate the assets into Index Templates and other assets.
-  type Tuple = [EsAssetReference[], EsAssetReference[]];
-  const [indexTemplatesAndPipelines, otherAssets] = installedEs.reduce<Tuple>(
-    ([indexAssetTypes, otherAssetTypes], asset) => {
+  type Tuple = [EsAssetReference[], EsAssetReference[], EsAssetReference[]];
+  const [indexTemplatesAndPipelines, indexAssets, otherAssets] = installedEs.reduce<Tuple>(
+    ([indexTemplateAndPipelineTypes, indexAssetTypes, otherAssetTypes], asset) => {
       if (
         asset.type === ElasticsearchAssetType.indexTemplate ||
         asset.type === ElasticsearchAssetType.ingestPipeline
       ) {
+        indexTemplateAndPipelineTypes.push(asset);
+      } else if (asset.type === ElasticsearchAssetType.index) {
         indexAssetTypes.push(asset);
       } else {
         otherAssetTypes.push(asset);
       }
 
-      return [indexAssetTypes, otherAssetTypes];
+      return [indexTemplateAndPipelineTypes, indexAssetTypes, otherAssetTypes];
     },
-    [[], []]
+    [[], [], []]
   );
 
   try {
+    // must first unset any default pipeline associated with any existing indices
+    // by setting empty string
+    await Promise.all(
+      indexAssets.map((asset) => updateIndexSettings(esClient, asset.id, { default_pipeline: '' }))
+    );
     // must delete index templates and pipelines first
     await Promise.all(deleteESAssets(indexTemplatesAndPipelines, esClient));
     // then the other asset types

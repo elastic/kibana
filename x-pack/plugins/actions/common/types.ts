@@ -12,6 +12,7 @@ export {
   CasesConnectorFeatureId,
   UptimeConnectorFeatureId,
   SecurityConnectorFeatureId,
+  GeneralConnectorFeatureId,
 } from './connector_feature_config';
 export interface ActionType {
   id: string;
@@ -32,16 +33,6 @@ export interface ValidatedEmail {
   address: string;
   valid: boolean;
   reason?: InvalidEmailReason;
-}
-
-export interface ActionResult {
-  id: string;
-  actionTypeId: string;
-  name: string;
-  // This will have to remain `any` until we can extend Action Executors with generics
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  config: Record<string, any>;
-  isPreconfigured: boolean;
 }
 
 // the result returned from an action type executor function

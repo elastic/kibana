@@ -1,0 +1,26 @@
+{
+  "type": "plugin",
+  "id": "@kbn/saved-objects-tagging-plugin",
+  "owner": "@elastic/appex-sharedux",
+  "plugin": {
+    "id": "savedObjectsTagging",
+    "server": true,
+    "browser": true,
+    "configPath": [
+      "xpack",
+      "saved_object_tagging"
+    ],
+    "requiredPlugins": [
+      "features",
+      "management",
+      "savedObjectsTaggingOss"
+    ],
+    "optionalPlugins": [
+      "usageCollection",
+      "security"
+    ],
+    "requiredBundles": [
+      "kibanaReact"
+    ]
+  }
+}

@@ -1311,6 +1311,56 @@
       },
       {
         "parentPluginId": "charts",
+        "id": "def-public.MultiClickTriggerEvent",
+        "type": "Interface",
+        "tags": [],
+        "label": "MultiClickTriggerEvent",
+        "description": [],
+        "path": "src/plugins/charts/public/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "charts",
+            "id": "def-public.MultiClickTriggerEvent.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "signature": [
+              "\"multiFilter\""
+            ],
+            "path": "src/plugins/charts/public/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "charts",
+            "id": "def-public.MultiClickTriggerEvent.data",
+            "type": "Object",
+            "tags": [],
+            "label": "data",
+            "description": [],
+            "signature": [
+              "{ data: { table: Pick<",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.Datatable",
+                "text": "Datatable"
+              },
+              ", \"rows\" | \"columns\">; column: number; value: any[]; }; timeFieldName?: string | undefined; negate?: boolean | undefined; }"
+            ],
+            "path": "src/plugins/charts/public/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "charts",
         "id": "def-public.RawColorSchema",
         "type": "Interface",
         "tags": [],
@@ -2239,7 +2289,15 @@
             "Theme",
             ">; readonly darkModeEnabled$: ",
             "Observable",
-            "<boolean>; useDarkMode: () => boolean; useChartsTheme: () => ",
+            "<",
+            {
+              "pluginId": "@kbn/core-theme-browser",
+              "scope": "common",
+              "docId": "kibKbnCoreThemeBrowserPluginApi",
+              "section": "def-common.CoreTheme",
+              "text": "CoreTheme"
+            },
+            ">; useDarkMode: () => boolean; useChartsTheme: () => ",
             "RecursivePartial",
             "<",
             "Theme",
@@ -3322,6 +3380,57 @@
     "misc": [
       {
         "parentPluginId": "charts",
+        "id": "def-common.AllowedSettingsOverrides",
+        "type": "Type",
+        "tags": [],
+        "label": "AllowedSettingsOverrides",
+        "description": [],
+        "signature": [
+          "{ settings?: { tooltip?: ",
+          "TooltipSettings",
+          " | undefined; debug?: boolean | undefined; theme?: ",
+          "MakeOverridesSerializable",
+          "<",
+          "RecursivePartial",
+          "<",
+          "Theme",
+          "> | ",
+          "RecursivePartial",
+          "<",
+          "Theme",
+          ">[] | undefined>; showLegend?: boolean | undefined; legendPosition?: ",
+          "Position",
+          " | ",
+          "LegendPositionConfig",
+          " | undefined; rotation?: ",
+          "Rotation",
+          " | undefined; ariaLabelHeadingLevel?: \"h1\" | \"h2\" | \"h3\" | \"h4\" | \"h5\" | \"h6\" | \"p\" | undefined; ariaUseDefaultSummary?: boolean | undefined; flatLegend?: boolean | undefined; legendMaxDepth?: number | undefined; legendSize?: number | undefined; showLegendExtra?: boolean | undefined; rendering?: ",
+          "Rendering",
+          " | undefined; animateData?: boolean | undefined; externalPointerEvents?: ",
+          "MakeOverridesSerializable",
+          "<",
+          "ExternalPointerEventsSettings",
+          " | undefined>; pointBuffer?: ",
+          "MarkBuffer",
+          " | undefined; resizeDebounce?: number | undefined; pointerUpdateTrigger?: ",
+          "PointerUpdateTrigger",
+          " | undefined; brushAxis?: ",
+          "BrushAxis",
+          " | undefined; minBrushDelta?: number | undefined; allowBrushingLastHistogramBin?: boolean | undefined; ariaLabel?: string | undefined; xDomain?: ",
+          "MakeOverridesSerializable",
+          "<",
+          "CustomXDomain",
+          " | undefined>; ariaDescription?: string | undefined; ariaDescribedBy?: string | undefined; ariaLabelledBy?: string | undefined; ariaTableCaption?: string | undefined; legendAction?: \"ignore\" | undefined; legendStrategy?: ",
+          "LegendStrategy",
+          " | undefined; onLegendItemClick?: \"ignore\" | undefined; customLegend?: \"ignore\" | undefined; onLegendItemMinusClick?: \"ignore\" | undefined; onLegendItemOut?: \"ignore\" | undefined; onLegendItemOver?: \"ignore\" | undefined; onLegendItemPlusClick?: \"ignore\" | undefined; debugState?: boolean | undefined; onProjectionClick?: \"ignore\" | undefined; onElementClick?: \"ignore\" | undefined; onElementOver?: \"ignore\" | undefined; onElementOut?: \"ignore\" | undefined; onBrushEnd?: \"ignore\" | undefined; onProjectionAreaChange?: \"ignore\" | undefined; onAnnotationClick?: \"ignore\" | undefined; pointerUpdateDebounce?: number | undefined; roundHistogramBrushValues?: boolean | undefined; noResults?: React.ReactChild | React.ComponentType<{}> | undefined; legendSort?: \"ignore\" | undefined; } | undefined; }"
+        ],
+        "path": "src/plugins/charts/common/static/overrides/settings.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "charts",
         "id": "def-common.COLOR_MAPPING_SETTING",
         "type": "string",
         "tags": [],
@@ -3491,9 +3600,9 @@
           ", ",
           {
             "pluginId": "@kbn/utility-types",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-server.SerializableRecord",
+            "section": "def-common.SerializableRecord",
             "text": "SerializableRecord"
           },
           ">>"

@@ -16,7 +16,7 @@ import {
 } from '../../screens/entity_analytics';
 import { deleteRiskScore, installLegacyRiskScoreModule } from '../../tasks/api_calls/risk_scores';
 import { findSavedObjects } from '../../tasks/api_calls/risk_scores/saved_objects';
-import { createCustomRuleEnabled } from '../../tasks/api_calls/rules';
+import { createRule } from '../../tasks/api_calls/rules';
 import { cleanKibana } from '../../tasks/common';
 import { login, visit } from '../../tasks/login';
 import {
@@ -39,10 +39,11 @@ describe('Upgrade risk scores', () => {
   before(() => {
     cleanKibana();
     login();
-    createCustomRuleEnabled(getNewRule(), 'rule1');
+    createRule(getNewRule({ rule_id: 'rule1' }));
   });
 
   beforeEach(() => {
+    login();
     deleteRiskScore({ riskScoreEntity: RiskScoreEntity.host, spaceId });
     deleteRiskScore({ riskScoreEntity: RiskScoreEntity.user, spaceId });
     installLegacyRiskScoreModule(RiskScoreEntity.host, spaceId);
@@ -87,11 +88,11 @@ versions.forEach((version) =>
   describe(`handles version ${version} upgrades`, () => {
     before(() => {
       cleanKibana();
-      login();
-      createCustomRuleEnabled(getNewRule(), 'rule1');
     });
 
     beforeEach(() => {
+      login();
+      createRule(getNewRule({ rule_id: 'rule1' }));
       deleteRiskScore({ riskScoreEntity: RiskScoreEntity.host, spaceId });
       deleteRiskScore({ riskScoreEntity: RiskScoreEntity.user, spaceId });
       installLegacyRiskScoreModule(RiskScoreEntity.host, spaceId, version);

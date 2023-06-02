@@ -4,9 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiText, EuiIcon, EuiToolTip, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiText, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { EuiTextProps } from '@elastic/eui/src/components/text/text';
 
 export const defaultDimensionTriggerTooltip = (
   <p>
@@ -23,43 +24,21 @@ export const defaultDimensionTriggerTooltip = (
 export const DimensionTrigger = ({
   id,
   label,
-  isInvalid,
-  hideTooltip,
-  invalidMessage = defaultDimensionTriggerTooltip,
+  color,
+  dataTestSubj,
 }: {
   label: string;
   id: string;
-  isInvalid?: boolean;
-  hideTooltip?: boolean;
-  invalidMessage?: string | JSX.Element;
+  color?: EuiTextProps['color'];
+  dataTestSubj?: string;
 }) => {
-  if (isInvalid) {
-    return (
-      <EuiToolTip content={!hideTooltip ? invalidMessage : null} anchorClassName="eui-displayBlock">
-        <EuiText
-          size="s"
-          color="danger"
-          id={id}
-          className="lnsLayerPanel__triggerText"
-          data-test-subj="lns-dimensionTrigger"
-        >
-          <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-            <EuiFlexItem grow={false}>
-              <EuiIcon size="s" type="alert" />
-            </EuiFlexItem>
-            <EuiFlexItem grow={true}>{label}</EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiText>
-      </EuiToolTip>
-    );
-  }
-
   return (
     <EuiText
       size="s"
       id={id}
+      color={color}
       className="lnsLayerPanel__triggerText"
-      data-test-subj="lns-dimensionTrigger"
+      data-test-subj={dataTestSubj || 'lns-dimensionTrigger'}
     >
       <EuiFlexItem grow={true}>
         <span>

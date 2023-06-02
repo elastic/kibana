@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { loginUsers, suggestUserProfiles } from '../../../../common/lib/user_profiles';
+import { loginUsers, suggestUserProfiles } from '../../../../common/lib/api';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
   superUser,

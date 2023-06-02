@@ -7,6 +7,7 @@
 
 import { EuiText, EuiTextColor } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { TaskRunResult } from '@kbn/reporting-common';
 import moment from 'moment';
 import React from 'react';
 import { JobTypes, JOB_STATUSES } from '../../common/constants';
@@ -17,7 +18,6 @@ import type {
   ReportFields,
   ReportOutput,
   ReportSource,
-  TaskRunResult,
 } from '../../common/types';
 
 const { COMPLETED, FAILED, PENDING, PROCESSING, WARNINGS } = JOB_STATUSES;

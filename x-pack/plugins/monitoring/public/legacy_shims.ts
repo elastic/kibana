@@ -22,6 +22,7 @@ import { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-
 import { TypeRegistry } from '@kbn/triggers-actions-ui-plugin/public/application/type_registry';
 import { ActionTypeModel, RuleTypeModel } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+import type { InfraClientStartExports } from '@kbn/infra-plugin/public';
 import {
   MonitoringStartPluginDependencies,
   LegacyMonitoringStartPluginDependencies,
@@ -52,7 +53,6 @@ export interface IShims {
   toastNotifications: NotificationsStart['toasts'];
   capabilities: ApplicationStart['capabilities'];
   getBasePath: () => string;
-  getInjected: (name: string, defaultValue?: unknown) => unknown;
   breadcrumbs: {
     set: (breadcrumbs: BreadcrumbItem[]) => void;
     update: (breadcrumbs?: BreadcrumbItem[]) => void;
@@ -74,6 +74,7 @@ export interface IShims {
   usageCollection: UsageCollectionSetup;
   kibanaServices: CoreStart & { usageCollection: UsageCollectionSetup };
   appMountParameters: AppMountParameters;
+  infra?: InfraClientStartExports;
 }
 
 export class Legacy {
@@ -86,13 +87,12 @@ export class Legacy {
     triggersActionsUi,
     usageCollection,
     appMountParameters,
+    infra,
   }: LegacyMonitoringStartPluginDependencies) {
     this._shims = {
       toastNotifications: core.notifications.toasts,
       capabilities: core.application.capabilities,
       getBasePath: (): string => core.http.basePath.get(),
-      getInjected: (name: string, defaultValue?: unknown): string | unknown =>
-        core.injectedMetadata.getInjectedVar(name, defaultValue),
       breadcrumbs: {
         set: (breadcrumbs: BreadcrumbItem[]) => this._shims.breadcrumbs.update(breadcrumbs),
         update: (breadcrumbs?: BreadcrumbItem[]) => {
@@ -146,6 +146,7 @@ export class Legacy {
         usageCollection,
       },
       appMountParameters,
+      infra,
     };
   }
 

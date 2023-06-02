@@ -129,11 +129,11 @@ const Tooltip: FC<{ service: ChartTooltipService }> = React.memo(({ service }) =
         {
           name: 'preventOverflow',
           options: {
-            rootBoundary: 'window',
+            rootBoundary: 'viewport',
           },
         },
       ]}
-      placement="right-start"
+      placement="top-start"
       trigger="none"
       tooltipShown={isTooltipShown}
       tooltip={tooltipCallback}

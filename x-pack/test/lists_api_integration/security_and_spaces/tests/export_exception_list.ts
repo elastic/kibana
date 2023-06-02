@@ -47,7 +47,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
         await supertest
           .post(
-            `${EXCEPTION_LIST_URL}/_export?id=${body.id}&list_id=${body.list_id}&namespace_type=single`
+            `${EXCEPTION_LIST_URL}/_export?id=${body.id}&list_id=${body.list_id}&namespace_type=single&include_expired_exceptions=true`
           )
           .set('kbn-xsrf', 'true')
           .expect('Content-Disposition', `attachment; filename="${body.list_id}"`)
@@ -71,7 +71,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
         const { body: exportBody } = await supertest
           .post(
-            `${EXCEPTION_LIST_URL}/_export?id=not_exist&list_id=not_exist&namespace_type=single`
+            `${EXCEPTION_LIST_URL}/_export?id=not_exist&list_id=not_exist&namespace_type=single&include_expired_exceptions=true`
           )
           .set('kbn-xsrf', 'true')
           .expect(400);
@@ -97,7 +97,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
         const { body: exportResult } = await supertest
           .post(
-            `${EXCEPTION_LIST_URL}/_export?id=${body.id}&list_id=${body.list_id}&namespace_type=single`
+            `${EXCEPTION_LIST_URL}/_export?id=${body.id}&list_id=${body.list_id}&namespace_type=single&include_expired_exceptions=true`
           )
           .set('kbn-xsrf', 'true')
           .expect(200)
@@ -140,7 +140,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
         const { body: exportResult } = await supertest
           .post(
-            `${EXCEPTION_LIST_URL}/_export?id=${body.id}&list_id=${body.list_id}&namespace_type=single`
+            `${EXCEPTION_LIST_URL}/_export?id=${body.id}&list_id=${body.list_id}&namespace_type=single&include_expired_exceptions=true`
           )
           .set('kbn-xsrf', 'true')
           .expect(200)
@@ -149,6 +149,42 @@ export default ({ getService }: FtrProviderContext): void => {
         const bodyString = exportResult.toString();
         expect(bodyString.includes('some-list-item-id-2')).to.be(true);
         expect(bodyString.includes('some-list-item-id')).to.be(true);
+      });
+
+      it('should export a single list with no expired exception items', async () => {
+        const { body } = await supertest
+          .post(EXCEPTION_LIST_URL)
+          .set('kbn-xsrf', 'true')
+          .send(getCreateExceptionListMinimalSchemaMock())
+          .expect(200);
+
+        const { body: itemBody } = await supertest
+          .post(EXCEPTION_LIST_ITEM_URL)
+          .set('kbn-xsrf', 'true')
+          .send({
+            ...getCreateExceptionListItemMinimalSchemaMock(),
+            expire_time: new Date().toISOString(),
+          })
+          .expect(200);
+
+        const { body: exportResult } = await supertest
+          .post(
+            `${EXCEPTION_LIST_URL}/_export?id=${body.id}&list_id=${body.list_id}&namespace_type=single&include_expired_exceptions=false`
+          )
+          .set('kbn-xsrf', 'true')
+          .expect(200)
+          .parse(binaryToString);
+
+        const exportedItemsToArray = exportResult.toString().split('\n');
+        const list = JSON.parse(exportedItemsToArray[0]);
+        const item = JSON.parse(exportedItemsToArray[1]);
+
+        expect(removeExceptionListServerGeneratedProperties(list)).to.eql(
+          removeExceptionListServerGeneratedProperties(body)
+        );
+        expect(removeExceptionListItemServerGeneratedProperties(item)).to.not.contain(
+          removeExceptionListItemServerGeneratedProperties(itemBody)
+        );
       });
     });
   });

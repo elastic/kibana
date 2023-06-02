@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getNewRule } from '../../objects/rule';
+import { getNewRule, getSavedQueryRule } from '../../objects/rule';
 
 import {
   DEFINE_CONTINUE_BUTTON,
@@ -24,7 +24,6 @@ import {
 } from '../../screens/rule_details';
 
 import { goToRuleDetails, editFirstRule } from '../../tasks/alerts_detection_rules';
-import { createTimeline } from '../../tasks/api_calls/timelines';
 import { createSavedQuery, deleteSavedQueries } from '../../tasks/api_calls/saved_queries';
 import { cleanKibana, deleteAlertsAndRules } from '../../tasks/common';
 import {
@@ -39,10 +38,9 @@ import {
 import { saveEditedRule } from '../../tasks/edit_rule';
 import { login, visit } from '../../tasks/login';
 import { getDetails } from '../../tasks/rule_details';
-import { createSavedQueryRule, createCustomRule } from '../../tasks/api_calls/rules';
+import { createRule } from '../../tasks/api_calls/rules';
 
 import { RULE_CREATION, SECURITY_DETECTIONS_RULES_URL } from '../../urls/navigation';
-import type { CompleteTimeline } from '../../objects/timeline';
 
 const savedQueryName = 'custom saved query';
 const savedQueryQuery = 'process.name: test';
@@ -51,25 +49,17 @@ const savedQueryFilterKey = 'testAgent.value';
 describe('Custom saved_query rules', () => {
   before(() => {
     cleanKibana();
-    login();
   });
+
   describe('Custom saved_query detection rule creation', () => {
     beforeEach(() => {
+      login();
       deleteAlertsAndRules();
       deleteSavedQueries();
-      const timeline = getNewRule().timeline as CompleteTimeline;
-      createTimeline(timeline).then((response) => {
-        cy.wrap({
-          ...getNewRule(),
-          timeline: {
-            ...timeline,
-            id: response.body.data.persistTimeline.timeline.savedObjectId,
-          },
-        }).as('rule');
-      });
     });
 
     it('Creates saved query rule', function () {
+      const rule = getSavedQueryRule();
       createSavedQuery(savedQueryName, savedQueryQuery, savedQueryFilterKey);
       visit(RULE_CREATION);
 
@@ -85,11 +75,11 @@ describe('Custom saved_query rules', () => {
       getCustomQueryInput().should('have.value', savedQueryQuery).should('be.disabled');
       cy.get(QUERY_BAR).should('contain', savedQueryFilterKey);
 
-      cy.get(DEFINE_CONTINUE_BUTTON).should('exist').click({ force: true });
+      cy.get(DEFINE_CONTINUE_BUTTON).should('exist').click();
       cy.get(DEFINE_CONTINUE_BUTTON).should('not.exist');
 
-      fillAboutRuleAndContinue(this.rule);
-      fillScheduleRuleAndContinue(this.rule);
+      fillAboutRuleAndContinue(rule);
+      fillScheduleRuleAndContinue(rule);
       cy.intercept('POST', '/api/detection_engine/rules').as('savedQueryRule');
       createAndEnableRule();
 
@@ -100,7 +90,7 @@ describe('Custom saved_query rules', () => {
 
       goToRuleDetails();
 
-      cy.get(RULE_NAME_HEADER).should('contain', `${this.rule.name}`);
+      cy.get(RULE_NAME_HEADER).should('contain', `${rule.name}`);
 
       cy.get(DEFINE_RULE_PANEL_PROGRESS).should('not.exist');
 
@@ -112,8 +102,8 @@ describe('Custom saved_query rules', () => {
     context('Non existent saved query', () => {
       const FAILED_TO_LOAD_ERROR = 'Failed to load the saved query';
       beforeEach(() => {
-        createSavedQueryRule({ ...getNewRule(), savedId: 'non-existent' });
-        cy.visit(SECURITY_DETECTIONS_RULES_URL);
+        createRule(getSavedQueryRule({ saved_id: 'non-existent', query: undefined }));
+        visit(SECURITY_DETECTIONS_RULES_URL);
       });
       it('Shows error toast on details page when saved query can not be loaded', function () {
         goToRuleDetails();
@@ -131,9 +121,9 @@ describe('Custom saved_query rules', () => {
     context('Editing', () => {
       it('Allows to update query rule as saved_query rule type', () => {
         createSavedQuery(savedQueryName, savedQueryQuery);
-        createCustomRule(getNewRule());
+        createRule(getNewRule());
 
-        cy.visit(SECURITY_DETECTIONS_RULES_URL);
+        visit(SECURITY_DETECTIONS_RULES_URL);
 
         editFirstRule();
 
@@ -158,10 +148,10 @@ describe('Custom saved_query rules', () => {
         const expectedCustomTestQuery = 'random test query';
         createSavedQuery(savedQueryName, savedQueryQuery).then((response) => {
           cy.log(JSON.stringify(response.body, null, 2));
-          createSavedQueryRule({ ...getNewRule(), savedId: response.body.id });
+          createRule(getSavedQueryRule({ saved_id: response.body.id, query: undefined }));
         });
 
-        cy.visit(SECURITY_DETECTIONS_RULES_URL);
+        visit(SECURITY_DETECTIONS_RULES_URL);
 
         editFirstRule();
 
@@ -185,9 +175,9 @@ describe('Custom saved_query rules', () => {
 
       it('Allows to update saved_query rule with non-existent query by adding custom query', () => {
         const expectedCustomTestQuery = 'random test query';
-        createSavedQueryRule({ ...getNewRule(), savedId: 'non-existent' });
+        createRule(getSavedQueryRule({ saved_id: 'non-existent', query: undefined }));
 
-        cy.visit(SECURITY_DETECTIONS_RULES_URL);
+        visit(SECURITY_DETECTIONS_RULES_URL);
 
         editFirstRule();
 
@@ -208,9 +198,9 @@ describe('Custom saved_query rules', () => {
 
       it('Allows to update saved_query rule with non-existent query by selecting another saved query', () => {
         createSavedQuery(savedQueryName, savedQueryQuery);
-        createSavedQueryRule({ ...getNewRule(), savedId: 'non-existent' });
+        createRule(getSavedQueryRule({ saved_id: 'non-existent', query: undefined }));
 
-        cy.visit(SECURITY_DETECTIONS_RULES_URL);
+        visit(SECURITY_DETECTIONS_RULES_URL);
 
         editFirstRule();
 

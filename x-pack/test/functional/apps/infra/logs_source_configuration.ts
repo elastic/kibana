@@ -33,11 +33,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     describe('Allows indices configuration', () => {
-      const logPosition = {
-        start: DATES.metricsAndLogs.stream.startWithData,
-        end: DATES.metricsAndLogs.stream.endWithData,
+      const logFilter = {
+        timeRange: {
+          from: DATES.metricsAndLogs.stream.startWithData,
+          to: DATES.metricsAndLogs.stream.endWithData,
+        },
       };
-      const formattedLocalStart = new Date(logPosition.start).toLocaleDateString('en-US', {
+      const formattedLocalStart = new Date(logFilter.timeRange.from).toLocaleDateString('en-US', {
         month: 'short',
         day: 'numeric',
         year: 'numeric',
@@ -106,7 +108,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       it('renders the default log columns with their headers', async () => {
-        await logsUi.logStreamPage.navigateTo({ logPosition });
+        await logsUi.logStreamPage.navigateTo({ logFilter });
 
         await retry.try(async () => {
           const columnHeaderLabels = await logsUi.logStreamPage.getColumnHeaderLabels();
@@ -126,7 +128,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       it('records telemetry for logs', async () => {
-        await logsUi.logStreamPage.navigateTo({ logPosition });
+        await logsUi.logStreamPage.navigateTo({ logFilter });
 
         await logsUi.logStreamPage.getStreamEntries();
 
@@ -161,7 +163,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       it('renders the changed log columns with their headers', async () => {
-        await logsUi.logStreamPage.navigateTo({ logPosition });
+        await logsUi.logStreamPage.navigateTo({ logFilter });
 
         await retry.try(async () => {
           const columnHeaderLabels = await logsUi.logStreamPage.getColumnHeaderLabels();

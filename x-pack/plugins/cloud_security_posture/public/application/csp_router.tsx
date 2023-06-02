@@ -7,7 +7,8 @@
 
 import React from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { Redirect, Route, Switch } from 'react-router-dom';
+import { Redirect, Switch } from 'react-router-dom';
+import { Route } from '@kbn/shared-ux-router';
 import { benchmarksNavigation, cloudPosturePages } from '../common/navigation/constants';
 import type { CspSecuritySolutionContext } from '..';
 import { SecuritySolutionContext } from './security_solution_context';
@@ -29,6 +30,10 @@ export const CspRouter = ({ securitySolutionContext }: CspRouterProps) => {
       <Switch>
         <CspRoute {...cloudPosturePages.findings} component={pages.Findings} />
         <CspRoute {...cloudPosturePages.dashboard} component={pages.ComplianceDashboard} />
+        <CspRoute
+          {...cloudPosturePages.vulnerability_dashboard}
+          component={pages.VulnerabilityDashboard}
+        />
 
         <CspRoute {...cloudPosturePages.benchmarks}>
           <Switch>

@@ -37,6 +37,7 @@ export type MetricType = METRIC_TYPES | TSVB_METRIC_TYPES;
 export interface Metric {
   field?: string;
   id: string;
+  gap_policy?: string;
   alias?: string;
   metric_agg?: string;
   numerator?: Query;

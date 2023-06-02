@@ -11,6 +11,8 @@ import { FtrProviderContext } from '../ftr_provider_context';
 
 export function ObservabilityPageProvider({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
+  const textValue = 'Foobar';
+  const PageObjects = getPageObjects(['common', 'header']);
 
   return {
     async clickSolutionNavigationEntry(appId: string, navId: string) {
@@ -44,6 +46,8 @@ export function ObservabilityPageProvider({ getService, getPageObjects }: FtrPro
     },
 
     async expectAddCommentButton() {
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await testSubjects.setValue('add-comment', textValue);
       const button = await testSubjects.find('submit-comment', 20000);
       const disabledAttr = await button.getAttribute('disabled');
       expect(disabledAttr).to.be(null);

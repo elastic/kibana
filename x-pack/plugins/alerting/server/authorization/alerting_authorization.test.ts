@@ -20,10 +20,11 @@ import {
   ReadOperations,
   AlertingAuthorizationEntity,
 } from './alerting_authorization';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { RecoveredActionGroup } from '../../common';
 import { RegistryRuleType } from '../rule_type_registry';
 import { AlertingAuthorizationFilterType } from './alerting_authorization_kuery';
+import { schema } from '@kbn/config-schema';
 
 const ruleTypeRegistry = ruleTypeRegistryMock.create();
 const features: jest.Mocked<FeaturesStartContract> = featuresPluginMock.createStart();
@@ -192,8 +193,13 @@ beforeEach(() => {
     minimumLicenseRequired: 'basic',
     isExportable: true,
     recoveryActionGroup: RecoveredActionGroup,
-    async executor() {},
+    async executor() {
+      return { state: {} };
+    },
     producer: 'myApp',
+    validate: {
+      params: schema.any(),
+    },
   }));
   features.getKibanaFeatures.mockReturnValue([
     myAppFeature,
@@ -208,8 +214,8 @@ describe('AlertingAuthorization', () => {
   describe('constructor', () => {
     test(`fetches the user's current space`, async () => {
       const space = {
-        id: uuid.v4(),
-        name: uuid.v4(),
+        id: uuidv4(),
+        name: uuidv4(),
         disabledFeatures: [],
       };
       getSpace.mockResolvedValue(space);

@@ -12,12 +12,13 @@ import {
   EuiFlexItem,
   EuiScreenReaderOnly,
 } from '@elastic/eui';
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 import { useDispatch } from 'react-redux';
 
 import { appActions } from '../../../../common/store/app';
 import type { Note } from '../../../../common/lib/note';
+import { useCurrentUser } from '../../../../common/lib/kibana';
 import type { AssociateNote, UpdateInternalNewNote } from '../helpers';
 import { updateAndAssociateNode } from '../helpers';
 import * as i18n from '../translations';
@@ -54,22 +55,24 @@ export const AddNote = React.memo<{
   autoFocusDisabled?: boolean;
 }>(({ associateNote, newNote, onCancelAddNote, updateNewNote, autoFocusDisabled = false }) => {
   const dispatch = useDispatch();
-
+  const authenticatedUser = useCurrentUser();
   const updateNote = useCallback(
     (note: Note) => dispatch(appActions.updateNote({ note })),
     [dispatch]
   );
 
-  const handleClick = useCallback(
-    () =>
+  const handleClick = useCallback(() => {
+    const user = authenticatedUser?.username;
+    if (user) {
       updateAndAssociateNode({
         associateNote,
         newNote,
         updateNewNote,
         updateNote,
-      }),
-    [associateNote, newNote, updateNewNote, updateNote]
-  );
+        user,
+      });
+    }
+  }, [associateNote, newNote, updateNewNote, updateNote, authenticatedUser]);
 
   const onKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLDivElement>) => {
@@ -83,6 +86,10 @@ export const AddNote = React.memo<{
     },
     [onCancelAddNote]
   );
+
+  const isAddNoteDisabled = useMemo(() => {
+    return newNote.trim().length === 0;
+  }, [newNote]);
 
   return (
     <AddNotesContainer onKeyDown={onKeyDown} role="dialog">
@@ -105,7 +112,7 @@ export const AddNote = React.memo<{
           <EuiFlexItem grow={false}>
             <EuiButton
               data-test-subj="add-note"
-              isDisabled={newNote.trim().length === 0}
+              isDisabled={isAddNoteDisabled}
               fill={true}
               onClick={handleClick}
             >

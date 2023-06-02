@@ -22,11 +22,7 @@
 
 // Import commands.js using ES2015 syntax:
 import './commands';
-import 'cypress-pipe';
-
-Cypress.Cookies.defaults({
-  preserve: 'sid',
-});
+import 'cypress-real-events/support';
 
 Cypress.on('uncaught:exception', () => {
   return false;

@@ -81,6 +81,7 @@ export const MonitorTags = ({ ping, summary }: Props) => {
   if (tags.length === 0) {
     return summary ? null : (
       <EuiLink
+        data-test-subj="syntheticsMonitorTagsSetTagsLink"
         href={docLinks?.links.heartbeat.base + '/monitor-options.html#monitor-tags'}
         target="_blank"
       >

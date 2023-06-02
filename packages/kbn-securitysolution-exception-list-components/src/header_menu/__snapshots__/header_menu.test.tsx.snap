@@ -172,11 +172,11 @@ Object {
             class="emotion-euiScreenReaderOnly"
             id="generated-id"
           >
-            You are in a dialog. To close this dialog, hit escape.
+            You are in a dialog. Press Escape, or tap/click outside the dialog to close.
           </p>
           <div>
             <div
-              class="euiContextMenuPanel"
+              class="euiContextMenuPanel eui-scrollBar css-zos0rl"
               data-test-subj="MenuPanel"
               tabindex="-1"
             >

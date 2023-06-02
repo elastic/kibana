@@ -27,6 +27,7 @@ export const mockServer = {
   setupCoreConfig: jest.fn(),
   preboot: jest.fn(),
   setup: jest.fn(),
+  start: jest.fn(),
   stop: jest.fn(),
   configService,
 };

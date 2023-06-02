@@ -1,0 +1,40 @@
+{
+  "type": "plugin",
+  "id": "@kbn/enterprise-search-plugin",
+  "owner": "@elastic/enterprise-search-frontend",
+  "description": "Adds dashboards for discovering and managing Enterprise Search products.",
+  "plugin": {
+    "id": "enterpriseSearch",
+    "server": true,
+    "browser": true,
+    "configPath": [
+      "enterpriseSearch"
+    ],
+    "requiredPlugins": [
+      "features",
+      "security",
+      "licensing",
+      "data",
+      "discover",
+      "charts",
+      "infra",
+      "cloud",
+      "esUiShared",
+      "guidedOnboarding",
+      "lens",
+      "embeddable",
+    ],
+    "optionalPlugins": [
+      "customIntegrations",
+      "globalSearch",
+      "home",
+      "ml",
+      "spaces",
+      "usageCollection"
+    ],
+    "requiredBundles": [
+      "kibanaReact",
+      "cloudChat"
+    ]
+  }
+}

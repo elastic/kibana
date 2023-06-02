@@ -26,6 +26,7 @@ import { commentsArray } from '../../common/comment';
 import { entriesArray } from '../../common/entries';
 import { item_id } from '../../common/item_id';
 import { exceptionListItemType } from '../../common/exception_list_item_type';
+import { expireTimeOrUndefined } from '../../common/expire_time';
 
 export const exceptionListItemSchema = t.exact(
   t.type({
@@ -35,6 +36,7 @@ export const exceptionListItemSchema = t.exact(
     created_by,
     description,
     entries: entriesArray,
+    expire_time: expireTimeOrUndefined,
     id,
     item_id,
     list_id,

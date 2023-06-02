@@ -10,10 +10,10 @@ import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 import React, { useCallback, useMemo } from 'react';
 import { find } from 'lodash/fp';
 import type { EuiFlexItemProps } from '@elastic/eui/src/components/flex/flex_item';
-import { useRiskScore } from '../../../../../../risk_score/containers';
+import { useRiskScore } from '../../../../../../explore/containers/risk_score';
 import { RiskScoreEntity } from '../../../../../../../common/search_strategy';
 import { getEmptyTagValue } from '../../../../../../common/components/empty_value';
-import { RiskScore } from '../../../../../../common/components/severity/common';
+import { RiskScore } from '../../../../../../explore/components/risk_score/severity/common';
 import {
   FirstLastSeen,
   FirstLastSeenType,

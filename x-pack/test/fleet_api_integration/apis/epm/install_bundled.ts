@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import fs from 'fs/promises';
 import path from 'path';
 
-import { BUNDLED_PACKAGE_DIR } from '../../config';
+import { BUNDLED_PACKAGE_DIR } from '../../config.base';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
 import { setupFleetAndAgents } from '../agents/services';
@@ -99,6 +99,17 @@ export default function (providerContext: FtrProviderContext) {
           .expect(200);
 
         expect(updateResponse.body._meta.install_source).to.be('bundled');
+      });
+
+      it('should load package archive from bundled package', async () => {
+        await bundlePackage('nginx-1.2.1');
+
+        const response = await supertest
+          .get(`/api/fleet/epm/packages/nginx/1.2.1?full=true`)
+          .expect(200);
+
+        expect(response.body.item.name).to.eql('nginx');
+        expect(response.body.item.version).to.eql('1.2.1');
       });
     });
 

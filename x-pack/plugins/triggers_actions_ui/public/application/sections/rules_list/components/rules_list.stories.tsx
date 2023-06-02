@@ -38,12 +38,6 @@ export default {
         type: 'boolean',
       },
     },
-    showCreateRuleButton: {
-      defaultValue: true,
-      control: {
-        type: 'boolean',
-      },
-    },
     ruleDetailsRoute: {
       control: {
         type: 'text',

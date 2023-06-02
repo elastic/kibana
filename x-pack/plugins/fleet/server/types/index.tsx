@@ -8,11 +8,12 @@
 export type {
   Agent,
   AgentMetadata,
-  AgentSOAttributes,
   AgentStatus,
   AgentType,
   AgentAction,
+  AgentActionType,
   ActionStatus,
+  ActionErrorResult,
   CurrentUpgrade,
   PackagePolicy,
   PackagePolicyInput,
@@ -20,28 +21,23 @@ export type {
   NewPackagePolicy,
   UpdatePackagePolicy,
   DryRunPackagePolicy,
-  PackagePolicySOAttributes,
   FullAgentPolicyInput,
   FullAgentPolicy,
   FullAgentPolicyOutput,
   AgentPolicy,
-  AgentPolicySOAttributes,
   NewAgentPolicy,
   PreconfiguredAgentPolicy,
   AgentPolicyStatus,
   DataStream,
+  ShipperOutput,
   Output,
   NewOutput,
-  OutputSOAttributes,
   OutputType,
   EnrollmentAPIKey,
-  EnrollmentAPIKeySOAttributes,
   NewFleetServerHost,
   FleetServerHost,
-  FleetServerHostSOAttributes,
   NewFleetProxy,
   FleetProxy,
-  FleetProxySOAttributes,
   Installation,
   EpmPackageInstallStatus,
   InstallationStatus,
@@ -70,7 +66,6 @@ export type {
   TemplateMap,
   TemplateMapEntry,
   Settings,
-  SettingsSOAttributes,
   InstallType,
   InstallSource,
   InstallResult,
@@ -87,6 +82,11 @@ export type {
   PackageVerificationStatus,
   BulkInstallPackageInfo,
   PackageAssetReference,
+  ExperimentalDataStreamFeature,
+  Secret,
+  SecretElasticDoc,
+  VarSecretReference,
+  PolicySecretReference,
 } from '../../common/types';
 export { ElasticsearchAssetType, KibanaAssetType, KibanaSavedObjectType } from '../../common/types';
 export { dataTypes } from '../../common/constants';
@@ -111,4 +111,5 @@ export interface PackageVerificationResult {
 export * from './models';
 export * from './rest_spec';
 export * from './extensions';
+export * from './so_attributes';
 export type { FleetRequestHandler, FleetRequestHandlerContext } from './request_context';

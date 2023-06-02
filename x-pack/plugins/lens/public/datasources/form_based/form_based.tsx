@@ -22,9 +22,10 @@ import { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
-import { EuiCallOut, EuiLink } from '@elastic/eui';
+import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import { EuiButton } from '@elastic/eui';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
+import type { DraggingIdentifier } from '@kbn/dom-drag-drop';
 import type {
   DatasourceDimensionEditorProps,
   DatasourceDimensionTriggerProps,
@@ -36,8 +37,10 @@ import type {
   IndexPatternField,
   IndexPattern,
   IndexPatternRef,
-  DatasourceLayerSettingsProps,
   DataSourceInfo,
+  UserMessage,
+  FrameDatasourceAPI,
+  StateSetter,
 } from '../../types';
 import {
   changeIndexPattern,
@@ -50,12 +53,7 @@ import {
   triggerActionOnIndexPatternChange,
 } from './loader';
 import { toExpression } from './to_expression';
-import {
-  FormBasedDimensionTrigger,
-  FormBasedDimensionEditor,
-  getDropProps,
-  onDrop,
-} from './dimension_panel';
+import { FormBasedDimensionEditor, getDropProps, onDrop } from './dimension_panel';
 import { FormBasedDataPanel } from './datapanel';
 import {
   getDatasourceSuggestionsForField,
@@ -70,6 +68,7 @@ import {
   getVisualDefaultsForLayer,
   isColumnInvalid,
   cloneLayer,
+  getNotifiableFeatures,
 } from './utils';
 import { isDraggedDataViewField } from '../../utils';
 import { hasField, normalizeOperationDataType } from './pure_utils';
@@ -94,15 +93,23 @@ import { mergeLayer, mergeLayers } from './state_helpers';
 import type { Datasource, VisualizeEditorContext } from '../../types';
 import { deleteColumn, isReferenced } from './operations';
 import { GeoFieldWorkspacePanel } from '../../editor_frame_service/editor_frame/workspace_panel/geo_field_workspace_panel';
-import type { DraggingIdentifier } from '../../drag_drop';
 import { getStateTimeShiftWarningMessages } from './time_shift_utils';
 import { getPrecisionErrorWarningMessages } from './utils';
 import { DOCUMENT_FIELD_NAME } from '../../../common/constants';
 import { isColumnOfType } from './operations/definitions/helpers';
 import { LayerSettingsPanel } from './layer_settings';
 import { FormBasedLayer } from '../..';
+import { DimensionTrigger } from '../../shared_components/dimension_trigger';
+import { filterAndSortUserMessages } from '../../app_plugin/get_application_user_messages';
 export type { OperationType, GenericIndexPatternColumn } from './operations';
 export { deleteColumn } from './operations';
+
+function wrapOnDot(str?: string) {
+  // u200B is a non-width white-space character, which allows
+  // the browser to efficiently word-wrap right after the dot
+  // without us having to draw a lot of extra DOM elements, etc
+  return str ? str.replace(/\./g, '.\u200B') : '';
+}
 
 export function columnToOperation(
   column: GenericIndexPatternColumn,
@@ -161,7 +168,7 @@ export function getFormBasedDatasource({
   dataViewFieldEditor: IndexPatternFieldEditorStart;
   uiActions: UiActionsStart;
 }) {
-  const uiSettings = core.uiSettings;
+  const { uiSettings, settings } = core;
 
   const DATASOURCE_ID = 'formBased';
 
@@ -261,7 +268,7 @@ export function getFormBasedDatasource({
           ...state,
           layers: {
             ...newLayers,
-            [layerId]: blankLayer(state.currentIndexPatternId, state.layers[layerId].linkToLayers),
+            [layerId]: blankLayer(state.currentIndexPatternId, state.layers[layerId]?.linkToLayers),
           },
         },
       };
@@ -408,7 +415,9 @@ export function getFormBasedDatasource({
       Object.values(state?.layers)?.forEach((l) => {
         const { columns } = l;
         Object.values(columns).forEach((c) => {
-          if ('sourceField' in c) {
+          if (operationDefinitionMap[c.operationType]?.getCurrentFields) {
+            fields.push(...(operationDefinitionMap[c.operationType]?.getCurrentFields?.(c) || []));
+          } else if ('sourceField' in c) {
             fields.push(c.sourceField);
           }
         });
@@ -416,13 +425,10 @@ export function getFormBasedDatasource({
       return fields;
     },
 
-    toExpression: (state, layerId, indexPatterns, searchSessionId) =>
-      toExpression(state, layerId, indexPatterns, uiSettings, searchSessionId),
+    toExpression: (state, layerId, indexPatterns, dateRange, searchSessionId) =>
+      toExpression(state, layerId, indexPatterns, uiSettings, dateRange, searchSessionId),
 
-    renderLayerSettings(
-      domElement: Element,
-      props: DatasourceLayerSettingsProps<FormBasedPrivateState>
-    ) {
+    renderLayerSettings(domElement, props) {
       render(
         <KibanaThemeProvider theme$={core.theme.theme$}>
           <I18nProvider>
@@ -513,17 +519,13 @@ export function getFormBasedDatasource({
       return columnLabelMap;
     },
 
-    isValidColumn: (state, indexPatterns, layerId, columnId) => {
-      const layer = state.layers[layerId];
-
-      return !isColumnInvalid(layer, columnId, indexPatterns[layer.indexPatternId]);
-    },
-
     renderDimensionTrigger: (
       domElement: Element,
       props: DatasourceDimensionTriggerProps<FormBasedPrivateState>
     ) => {
       const columnLabelMap = formBasedDatasource.uniqueLabels(props.state);
+      const uniqueLabel = columnLabelMap[props.columnId];
+      const formattedLabel = wrapOnDot(uniqueLabel);
 
       render(
         <KibanaThemeProvider theme$={core.theme.theme$}>
@@ -533,6 +535,7 @@ export function getFormBasedDatasource({
                 appName: 'lens',
                 storage,
                 uiSettings,
+                settings,
                 data,
                 fieldFormats,
                 savedObjects: core.savedObjects,
@@ -540,7 +543,7 @@ export function getFormBasedDatasource({
                 unifiedSearch,
               }}
             >
-              <FormBasedDimensionTrigger uniqueLabel={columnLabelMap[props.columnId]} {...props} />
+              <DimensionTrigger id={props.columnId} label={formattedLabel} />
             </KibanaContextProvider>
           </I18nProvider>
         </KibanaThemeProvider>,
@@ -562,6 +565,7 @@ export function getFormBasedDatasource({
                 appName: 'lens',
                 storage,
                 uiSettings,
+                settings,
                 data,
                 fieldFormats,
                 savedObjects: core.savedObjects,
@@ -574,12 +578,12 @@ export function getFormBasedDatasource({
                 uiSettings={uiSettings}
                 storage={storage}
                 fieldFormats={fieldFormats}
-                savedObjectsClient={core.savedObjects.client}
                 http={core.http}
                 data={data}
                 unifiedSearch={unifiedSearch}
                 dataViews={dataViews}
                 uniqueLabel={columnLabelMap[props.columnId]}
+                notifications={core.notifications}
                 {...props}
               />
             </KibanaContextProvider>
@@ -596,18 +600,32 @@ export function getFormBasedDatasource({
       const { onChangeIndexPattern, ...otherProps } = props;
       render(
         <KibanaThemeProvider theme$={core.theme.theme$}>
-          <LayerPanel
-            onChangeIndexPattern={(indexPatternId) => {
-              triggerActionOnIndexPatternChange({
-                indexPatternId,
-                state: props.state,
-                layerId: props.layerId,
-                uiActions,
-              });
-              onChangeIndexPattern(indexPatternId, DATASOURCE_ID, props.layerId);
-            }}
-            {...otherProps}
-          />
+          <I18nProvider>
+            <KibanaContextProvider
+              services={{
+                ...core,
+                data,
+                dataViews,
+                fieldFormats,
+                charts,
+                unifiedSearch,
+                share,
+              }}
+            >
+              <LayerPanel
+                onChangeIndexPattern={(indexPatternId) => {
+                  triggerActionOnIndexPatternChange({
+                    indexPatternId,
+                    state: props.state,
+                    layerId: props.layerId,
+                    uiActions,
+                  });
+                  onChangeIndexPattern(indexPatternId, DATASOURCE_ID, props.layerId);
+                }}
+                {...otherProps}
+              />
+            </KibanaContextProvider>
+          </I18nProvider>
         </KibanaThemeProvider>,
         domElement
       );
@@ -813,119 +831,69 @@ export function getFormBasedDatasource({
     getDatasourceSuggestionsForVisualizeField,
     getDatasourceSuggestionsForVisualizeCharts,
 
-    getErrorMessages(state, indexPatterns) {
+    getUserMessages(state, { frame: frameDatasourceAPI, setState, visualizationInfo }) {
       if (!state) {
-        return;
+        return [];
       }
 
-      // Forward the indexpattern as well, as it is required by some operationType checks
-      const layerErrors = Object.entries(state.layers)
-        .filter(([_, layer]) => !!indexPatterns[layer.indexPatternId])
-        .map(([layerId, layer]) =>
-          (
-            getErrorMessages(
-              layer,
-              indexPatterns[layer.indexPatternId],
-              state,
-              layerId,
-              core,
-              data
-            ) ?? []
-          ).map((message) => ({
-            shortMessage: '', // Not displayed currently
-            longMessage: typeof message === 'string' ? message : message.message,
-            fixAction: typeof message === 'object' ? message.fixAction : undefined,
-          }))
-        );
+      const layerErrorMessages = getLayerErrorMessages(
+        state,
+        frameDatasourceAPI,
+        setState,
+        core,
+        data
+      );
 
-      // Single layer case, no need to explain more
-      if (layerErrors.length <= 1) {
-        return layerErrors[0]?.length ? layerErrors[0] : undefined;
-      }
+      const dimensionErrorMessages = getInvalidDimensionErrorMessages(
+        state,
+        layerErrorMessages,
+        (layerId, columnId) => {
+          const layer = state.layers[layerId];
+          return !isColumnInvalid(
+            layer,
+            columnId,
+            frameDatasourceAPI.dataViews.indexPatterns[layer.indexPatternId],
+            frameDatasourceAPI.dateRange
+          );
+        }
+      );
 
-      // For multiple layers we will prepend each error with the layer number
-      const messages = layerErrors.flatMap((errors, index) => {
-        return errors.map((error) => {
-          const { shortMessage, longMessage } = error;
-          return {
-            shortMessage: shortMessage
-              ? i18n.translate('xpack.lens.indexPattern.layerErrorWrapper', {
-                  defaultMessage: 'Layer {position} error: {wrappedMessage}',
-                  values: {
-                    position: index + 1,
-                    wrappedMessage: shortMessage,
-                  },
-                })
-              : '',
-            longMessage: longMessage
-              ? i18n.translate('xpack.lens.indexPattern.layerErrorWrapper', {
-                  defaultMessage: 'Layer {position} error: {wrappedMessage}',
-                  values: {
-                    position: index + 1,
-                    wrappedMessage: longMessage,
-                  },
-                })
-              : '',
+      const warningMessages = [
+        ...[
+          ...(getStateTimeShiftWarningMessages(
+            data.datatableUtilities,
+            state,
+            frameDatasourceAPI
+          ) || []),
+        ].map((longMessage) => {
+          const message: UserMessage = {
+            severity: 'warning',
+            fixableInEditor: true,
+            displayLocations: [{ id: 'toolbar' }],
+            shortMessage: '',
+            longMessage,
           };
-        });
-      });
-      return messages.length ? messages : undefined;
-    },
-    getWarningMessages: (state, frame, adapters, setState) => {
-      return [
-        ...(getStateTimeShiftWarningMessages(data.datatableUtilities, state, frame) || []),
+
+          return message;
+        }),
         ...getPrecisionErrorWarningMessages(
           data.datatableUtilities,
           state,
-          frame,
+          frameDatasourceAPI,
           core.docLinks,
           setState
         ),
       ];
+
+      const infoMessages = getNotifiableFeatures(state, frameDatasourceAPI, visualizationInfo);
+
+      return layerErrorMessages.concat(dimensionErrorMessages, warningMessages, infoMessages);
     },
+
     getSearchWarningMessages: (state, warning, request, response) => {
       return [...getShardFailuresWarningMessages(state, warning, request, response, core.theme)];
     },
-    getDeprecationMessages: () => {
-      const deprecatedMessages: React.ReactNode[] = [];
-      const useFieldExistenceSamplingKey = 'lens:useFieldExistenceSampling';
-      const isUsingSampling = core.uiSettings.get(useFieldExistenceSamplingKey);
 
-      if (isUsingSampling) {
-        deprecatedMessages.push(
-          <EuiCallOut
-            color="warning"
-            iconType="alert"
-            size="s"
-            title={
-              <FormattedMessage
-                id="xpack.lens.indexPattern.useFieldExistenceSamplingBody"
-                defaultMessage="Field existence sampling has been deprecated and will be removed in Kibana {version}. You may disable this feature in {link}."
-                values={{
-                  version: '8.6.0',
-                  link: (
-                    <EuiLink
-                      onClick={() => {
-                        core.application.navigateToApp('management', {
-                          path: `/kibana/settings?query=${useFieldExistenceSamplingKey}`,
-                        });
-                      }}
-                    >
-                      <FormattedMessage
-                        id="xpack.lens.indexPattern.useFieldExistenceSampling.advancedSettings"
-                        defaultMessage="Advanced Settings"
-                      />
-                    </EuiLink>
-                  ),
-                }}
-              />
-            }
-          />
-        );
-      }
-
-      return deprecatedMessages;
-    },
     checkIntegrity: (state, indexPatterns) => {
       const ids = Object.values(state.layers || {}).map(({ indexPatternId }) => indexPatternId);
       return ids.filter((id) => !indexPatterns[id]);
@@ -1021,4 +989,144 @@ function blankLayer(indexPatternId: string, linkToLayers?: string[]): FormBasedL
     columnOrder: [],
     sampling: 1,
   };
+}
+
+function getLayerErrorMessages(
+  state: FormBasedPrivateState,
+  frameDatasourceAPI: FrameDatasourceAPI,
+  setState: StateSetter<FormBasedPrivateState, unknown>,
+  core: CoreStart,
+  data: DataPublicPluginStart
+) {
+  const indexPatterns = frameDatasourceAPI.dataViews.indexPatterns;
+
+  const layerErrors: UserMessage[][] = Object.entries(state.layers)
+    .filter(([_, layer]) => !!indexPatterns[layer.indexPatternId])
+    .map(([layerId, layer]) =>
+      (
+        getErrorMessages(layer, indexPatterns[layer.indexPatternId], state, layerId, core, data) ??
+        []
+      ).map((error) => {
+        const message: UserMessage = {
+          severity: 'error',
+          fixableInEditor: true,
+          displayLocations:
+            typeof error !== 'string' && error.displayLocations
+              ? error.displayLocations
+              : [{ id: 'visualization' }],
+          shortMessage: '',
+          longMessage:
+            typeof error === 'string' ? (
+              error
+            ) : (
+              <>
+                {error.message}
+                {error.fixAction && (
+                  <EuiButton
+                    data-test-subj="errorFixAction"
+                    onClick={async () => {
+                      const newState = await error.fixAction?.newState(frameDatasourceAPI);
+                      if (newState) {
+                        setState(newState);
+                      }
+                    }}
+                  >
+                    {error.fixAction?.label}
+                  </EuiButton>
+                )}
+              </>
+            ),
+        };
+
+        return message;
+      })
+    );
+
+  let errorMessages: UserMessage[];
+  if (layerErrors.length <= 1) {
+    // Single layer case, no need to explain more
+    errorMessages = layerErrors[0]?.length ? layerErrors[0] : [];
+  } else {
+    errorMessages = layerErrors.flatMap((errors, index) => {
+      return errors.map((error) => {
+        // we will prepend each error with the layer number
+        if (error.displayLocations.find((location) => location.id === 'visualization')) {
+          const message: UserMessage = {
+            ...error,
+            shortMessage: i18n.translate('xpack.lens.indexPattern.layerErrorWrapper', {
+              defaultMessage: 'Layer {position} error: {wrappedMessage}',
+              values: {
+                position: index + 1,
+                wrappedMessage: error.shortMessage,
+              },
+            }),
+            longMessage: (
+              <FormattedMessage
+                id="xpack.lens.indexPattern.layerErrorWrapper"
+                defaultMessage="Layer {position} error: {wrappedMessage}"
+                values={{
+                  position: index + 1,
+                  wrappedMessage: <>{error.longMessage}</>,
+                }}
+              />
+            ),
+          };
+
+          return message;
+        }
+
+        return error;
+      });
+    });
+  }
+
+  return errorMessages;
+}
+
+function getInvalidDimensionErrorMessages(
+  state: FormBasedPrivateState,
+  currentErrorMessages: UserMessage[],
+  isValidColumn: (layerId: string, columnId: string) => boolean
+) {
+  // generate messages for invalid columns
+  const columnErrorMessages: UserMessage[] = Object.keys(state.layers)
+    .map((layerId) => {
+      const messages: UserMessage[] = [];
+      for (const columnId of Object.keys(state.layers[layerId].columns)) {
+        if (
+          filterAndSortUserMessages(currentErrorMessages, 'dimensionButton', {
+            dimensionId: columnId,
+          }).length > 0
+        ) {
+          // there is already a more specific user message assigned to this column, so no need
+          // to add the default "is invalid" messaging
+          continue;
+        }
+
+        if (!isValidColumn(layerId, columnId)) {
+          messages.push({
+            severity: 'error',
+            displayLocations: [{ id: 'dimensionButton', dimensionId: columnId }],
+            fixableInEditor: true,
+            shortMessage: '',
+            longMessage: (
+              <p>
+                {i18n.translate('xpack.lens.configure.invalidConfigTooltip', {
+                  defaultMessage: 'Invalid configuration.',
+                })}
+                <br />
+                {i18n.translate('xpack.lens.configure.invalidConfigTooltipClick', {
+                  defaultMessage: 'Click for more details.',
+                })}
+              </p>
+            ),
+          });
+        }
+      }
+
+      return messages;
+    })
+    .flat();
+
+  return columnErrorMessages;
 }

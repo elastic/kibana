@@ -9,20 +9,12 @@
 import Path from 'path';
 
 import Eslint from 'eslint';
-import { REPO_ROOT } from '@kbn/utils';
 import { getRelativeImportReq, getPackageRelativeImportReq } from '@kbn/import-resolver';
 
 import { report } from '../helpers/report';
 import { visitAllImportStatements } from '../helpers/visit_all_import_statements';
 import { getSourcePath } from '../helpers/source';
 import { getImportResolver } from '../get_import_resolver';
-
-// TODO: get rid of all the special cases in here by moving more things to packages
-
-const SETUP_NODE_ENV_DIR = Path.resolve(REPO_ROOT, 'src/setup_node_env');
-const PKGJSON_PATH = Path.resolve(REPO_ROOT, 'package.json');
-const XPACK_PKGJSON_PATH = Path.resolve(REPO_ROOT, 'x-pack/package.json');
-const KBN_PM_SCRIPT = Path.resolve(REPO_ROOT, 'packages/kbn-pm/dist/index.js');
 
 export const UniformImportsRule: Eslint.Rule.RuleModule = {
   meta: {
@@ -48,37 +40,14 @@ export const UniformImportsRule: Eslint.Rule.RuleModule = {
         return;
       }
 
-      const { absolute } = result;
-      // don't mess with imports to the kbn/pm script for now
-      if (absolute === KBN_PM_SCRIPT) {
-        return;
-      }
+      const { pkgId } = result;
 
-      const packageId = resolver.getPackageIdForPath(absolute);
-      if (ownPackageId && !packageId) {
-        // special cases, files that aren't in packages but packages are allowed to import them
-        if (
-          absolute === PKGJSON_PATH ||
-          absolute === XPACK_PKGJSON_PATH ||
-          absolute.startsWith(SETUP_NODE_ENV_DIR)
-        ) {
-          return;
-        }
-
-        if (resolver.isBazelPackage(ownPackageId)) {
-          report(context, {
-            node,
-            message: `Package [${ownPackageId}] can only import other packages`,
-          });
-          return;
-        }
-      }
-
-      if (packageId === ownPackageId || !packageId) {
+      if (pkgId === ownPackageId || !pkgId) {
         const correct = getRelativeImportReq({
           ...result,
           original: req,
           dirname: sourceDirname,
+          sourcePath,
           type,
         });
 
@@ -92,11 +61,11 @@ export const UniformImportsRule: Eslint.Rule.RuleModule = {
         return;
       }
 
-      const packageDir = resolver.getAbsolutePackageDir(packageId);
+      const packageDir = resolver.getAbsolutePackageDir(pkgId);
       if (!packageDir) {
         report(context, {
           node,
-          message: `Unable to determine location of package [${packageId}]`,
+          message: `Unable to determine location of package [${pkgId}]`,
         });
         return;
       }
@@ -104,9 +73,10 @@ export const UniformImportsRule: Eslint.Rule.RuleModule = {
       const correct = getPackageRelativeImportReq({
         ...result,
         packageDir,
-        packageId,
+        pkgId,
         type,
       });
+
       if (req !== correct) {
         report(context, {
           node,

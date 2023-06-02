@@ -25,6 +25,7 @@ import {
 } from '../../../../../common/descriptor_types';
 import { LAYER_TYPE, SOURCE_TYPES } from '../../../../../common/constants';
 import { MvtVectorLayer } from './mvt_vector_layer';
+import { IJoinSource } from '../../../sources/join_sources';
 
 const defaultConfig = {
   urlTemplate: 'https://example.com/{x}/{y}/{z}.pbf',
@@ -101,7 +102,7 @@ describe('getFeatureById', () => {
   });
 });
 
-describe('isInitialDataLoadComplete', () => {
+describe('isLayerLoading', () => {
   const sourceDataRequestDescriptor = {
     data: {},
     dataId: 'source',
@@ -109,7 +110,7 @@ describe('isInitialDataLoadComplete', () => {
     dataRequestMetaAtStart: undefined,
     dataRequestToken: undefined,
   };
-  test('should return false when tile loading has not started', () => {
+  test('should be true when tile loading has not started', () => {
     const layer = new MvtVectorLayer({
       customIcons: [],
       layerDescriptor: {
@@ -124,10 +125,10 @@ describe('isInitialDataLoadComplete', () => {
         },
       } as unknown as IVectorSource,
     });
-    expect(layer.isInitialDataLoadComplete()).toBe(false);
+    expect(layer.isLayerLoading()).toBe(true);
   });
 
-  test('should return false when tiles are loading', () => {
+  test('should be true when tiles are loading', () => {
     const layer = new MvtVectorLayer({
       customIcons: [],
       layerDescriptor: {
@@ -143,10 +144,10 @@ describe('isInitialDataLoadComplete', () => {
         },
       } as unknown as IVectorSource,
     });
-    expect(layer.isInitialDataLoadComplete()).toBe(false);
+    expect(layer.isLayerLoading()).toBe(true);
   });
 
-  test('should return true when tiles are loaded', () => {
+  test('should be false when tiles are loaded', () => {
     const layer = new MvtVectorLayer({
       customIcons: [],
       layerDescriptor: {
@@ -162,10 +163,10 @@ describe('isInitialDataLoadComplete', () => {
         },
       } as unknown as IVectorSource,
     });
-    expect(layer.isInitialDataLoadComplete()).toBe(true);
+    expect(layer.isLayerLoading()).toBe(false);
   });
 
-  test('should return false when tiles are loaded but join is loading', () => {
+  test('should be true when tiles are loaded but join is loading', () => {
     const layer = new MvtVectorLayer({
       customIcons: [],
       joins: [
@@ -175,6 +176,9 @@ describe('isInitialDataLoadComplete', () => {
           },
           getSourceDataRequestId: () => {
             return 'join_source_a0b0da65-5e1a-4967-9dbe-74f24391afe2';
+          },
+          getRightJoinSource: () => {
+            return {} as unknown as IJoinSource;
           },
         } as unknown as InnerJoin,
       ],
@@ -198,10 +202,10 @@ describe('isInitialDataLoadComplete', () => {
         },
       } as unknown as IVectorSource,
     });
-    expect(layer.isInitialDataLoadComplete()).toBe(false);
+    expect(layer.isLayerLoading()).toBe(true);
   });
 
-  test('should return true when tiles are loaded and joins are loaded', () => {
+  test('should be false when tiles are loaded and joins are loaded', () => {
     const layer = new MvtVectorLayer({
       customIcons: [],
       joins: [
@@ -211,6 +215,9 @@ describe('isInitialDataLoadComplete', () => {
           },
           getSourceDataRequestId: () => {
             return 'join_source_a0b0da65-5e1a-4967-9dbe-74f24391afe2';
+          },
+          getRightJoinSource: () => {
+            return {} as unknown as IJoinSource;
           },
         } as unknown as InnerJoin,
       ],
@@ -236,6 +243,6 @@ describe('isInitialDataLoadComplete', () => {
         },
       } as unknown as IVectorSource,
     });
-    expect(layer.isInitialDataLoadComplete()).toBe(true);
+    expect(layer.isLayerLoading()).toBe(false);
   });
 });

@@ -54,6 +54,7 @@ Object {
               >
                 cmd test alert
               </div>
+              
             </div>
           </div>
           <div
@@ -61,7 +62,7 @@ Object {
           >
             <span
               class="euiBadge emotion-EuiInnerText"
-              style="background-color: rgb(121, 170, 217); color: rgb(0, 0, 0);"
+              style="background-color: rgb(0, 119, 204); color: rgb(255, 255, 255);"
               title="open"
             >
               <span
@@ -94,6 +95,9 @@ Object {
               </span>
             </span>
           </div>
+          <div
+            class="euiFlexItem emotion-euiFlexItem-growZero"
+          />
         </div>
       </div>
     </div>
@@ -148,6 +152,7 @@ Object {
             >
               cmd test alert
             </div>
+            
           </div>
         </div>
         <div
@@ -155,7 +160,7 @@ Object {
         >
           <span
             class="euiBadge emotion-EuiInnerText"
-            style="background-color: rgb(121, 170, 217); color: rgb(0, 0, 0);"
+            style="background-color: rgb(0, 119, 204); color: rgb(255, 255, 255);"
             title="open"
           >
             <span
@@ -188,6 +193,9 @@ Object {
             </span>
           </span>
         </div>
+        <div
+          class="euiFlexItem emotion-euiFlexItem-growZero"
+        />
       </div>
     </div>
   </div>,

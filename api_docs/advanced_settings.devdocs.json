@@ -305,9 +305,9 @@
         "signature": [
           "({\n  def,\n  name,\n  value,\n  isCustom,\n  isOverridden,\n}: { def: ",
           {
-            "pluginId": "@kbn/core-ui-settings-common",
+            "pluginId": "@kbn/core-ui-settings-browser",
             "scope": "common",
-            "docId": "kibKbnCoreUiSettingsCommonPluginApi",
+            "docId": "kibKbnCoreUiSettingsBrowserPluginApi",
             "section": "def-common.PublicUiSettingsParams",
             "text": "PublicUiSettingsParams"
           },
@@ -354,9 +354,9 @@
                 "description": [],
                 "signature": [
                   {
-                    "pluginId": "@kbn/core-ui-settings-common",
+                    "pluginId": "@kbn/core-ui-settings-browser",
                     "scope": "common",
-                    "docId": "kibKbnCoreUiSettingsCommonPluginApi",
+                    "docId": "kibKbnCoreUiSettingsBrowserPluginApi",
                     "section": "def-common.PublicUiSettingsParams",
                     "text": "PublicUiSettingsParams"
                   },

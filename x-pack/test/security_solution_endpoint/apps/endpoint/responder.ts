@@ -7,8 +7,9 @@
 
 import { IndexedHostsAndAlertsResponse } from '@kbn/security-solution-plugin/common/endpoint/index_data';
 import { TimelineResponse } from '@kbn/security-solution-plugin/common/types';
+import { type IndexedEndpointRuleAlerts } from '@kbn/security-solution-plugin/common/endpoint/data_loaders/index_endpoint_rule_alerts';
+import { DATE_RANGE_OPTION_TO_TEST_SUBJ_MAP } from '@kbn/security-solution-plugin/common/test';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { DATE_RANGE_OPTION_TO_TEST_SUBJ_MAP } from '../../../security_solution_ftr/page_objects/helpers/super_date_picker';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const pageObjects = getPageObjects([
@@ -25,6 +26,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const timelineTestService = getService('timeline');
   const detectionsTestService = getService('detections');
   const log = getService('log');
+
+  // The Alerts Rule seems to run every 5 minutes when there are no failures. This timeout ensures
+  // that we wait long enough for them to show up.
+  const MAX_WAIT_FOR_ALERTS_TIMEOUT = 60_000 * 6;
 
   const performResponderSanityChecks = async () => {
     // Show the Action log
@@ -76,8 +81,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     );
   };
 
-  // Failing: See https://github.com/elastic/kibana/issues/142148
-  describe.skip('Response Actions Responder', function () {
+  describe('Response Actions Responder', function () {
     let indexedData: IndexedHostsAndAlertsResponse;
     let endpointAgentId: string;
 
@@ -117,9 +121,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/140546
-    describe.skip('from timeline', () => {
+    describe('from timeline', () => {
       let timeline: TimelineResponse;
+      let indexedAlerts: IndexedEndpointRuleAlerts;
 
       before(async () => {
         timeline = await timelineTestService.createTimeline('endpoint responder test');
@@ -142,11 +146,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           timeline.data.persistTimeline.timeline.version
         );
 
+        indexedAlerts = await detectionsTestService.loadEndpointRuleAlerts(endpointAgentId);
+
         await detectionsTestService.waitForAlerts(
           getEndpointAlertsQueryForAgentId(endpointAgentId),
-          // The Alerts rules seems to run every 5 minutes, so we wait here a max
-          // of 6 minutes to ensure it runs and completes and alerts are available.
-          60_000 * 6
+          MAX_WAIT_FOR_ALERTS_TIMEOUT
         );
 
         await pageObjects.timeline.navigateToTimelineList();
@@ -161,6 +165,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             timeline.data.persistTimeline.timeline.savedObjectId
           );
         }
+
+        if (indexedAlerts) {
+          log.info(`Cleaning up loaded alerts for Timeline`);
+          await indexedAlerts.cleanup();
+        }
       });
 
       it('should show Responder from alert in a timeline', async () => {
@@ -168,7 +177,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           timeline.data.persistTimeline.timeline.savedObjectId
         );
         await pageObjects.timeline.setDateRange('Last 1 year');
-        await pageObjects.timeline.waitForEvents(60_000);
+        await pageObjects.timeline.waitForEvents(MAX_WAIT_FOR_ALERTS_TIMEOUT);
 
         // Show event/alert details for the first one in the list
         await pageObjects.timeline.showEventDetails();
@@ -185,13 +194,22 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     describe('from alerts', () => {
+      let indexedAlerts: IndexedEndpointRuleAlerts;
+
       before(async () => {
+        indexedAlerts = await detectionsTestService.loadEndpointRuleAlerts(endpointAgentId);
+
         await detectionsTestService.waitForAlerts(
           getEndpointAlertsQueryForAgentId(endpointAgentId),
-          // The Alerts rules seems to run every 5 minutes, so we wait here a max
-          // of 6 minutes to ensure it runs and completes and alerts are available.
-          60_000 * 6
+          MAX_WAIT_FOR_ALERTS_TIMEOUT
         );
+      });
+
+      after(async () => {
+        if (indexedAlerts) {
+          log.info(`Cleaning up alerts loaded for Alerts page`);
+          await indexedAlerts.cleanup();
+        }
       });
 
       it('should show Responder from alert details under alerts list page', async () => {
@@ -199,7 +217,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await pageObjects.detections.navigateToAlerts(
           `query=(language:kuery,query:'host.hostname: "${hostname}" ')`
         );
-        await pageObjects.detections.waitForListToHaveAlerts();
+        await pageObjects.detections.waitForListToHaveAlerts(MAX_WAIT_FOR_ALERTS_TIMEOUT);
         await pageObjects.detections.openFirstAlertDetailsForHostName(hostname);
         await pageObjects.detections.openResponseConsoleFromAlertDetails();
         await performResponderSanityChecks();

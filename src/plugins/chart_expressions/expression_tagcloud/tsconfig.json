@@ -1,9 +1,7 @@
 {
   "extends": "../../../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "./target/types",
-    "emitDeclarationOnly": true,
-    "declaration": true,
+    "outDir": "target/types",
     "isolatedModules": true
   },
   "include": [
@@ -13,13 +11,23 @@
   ],
   "kbn_references": [
     { "path": "../tsconfig.json" },
-    { "path": "../../../core/tsconfig.json" },
-    { "path": "../../presentation_util/tsconfig.json" },
-    { "path": "../../expressions/tsconfig.json" },
-    { "path": "../../usage_collection/tsconfig.json" },
-    { "path": "../../visualizations/tsconfig.json" },
-    { "path": "../../charts/tsconfig.json" },
-    { "path": "../../field_formats/tsconfig.json" },
-    { "path": "../../kibana_utils/tsconfig.json" },
+    "@kbn/core",
+    "@kbn/presentation-util-plugin",
+    "@kbn/expressions-plugin",
+    "@kbn/usage-collection-plugin",
+    "@kbn/visualizations-plugin",
+    "@kbn/charts-plugin",
+    "@kbn/field-formats-plugin",
+    "@kbn/kibana-utils-plugin",
+    "@kbn/utility-types",
+    "@kbn/coloring",
+    "@kbn/i18n",
+    "@kbn/i18n-react",
+    "@kbn/kibana-react-plugin",
+    "@kbn/analytics",
+    "@kbn/chart-expressions-common",
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

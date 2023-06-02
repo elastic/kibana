@@ -108,6 +108,54 @@
                     "trackAdoption": false
                   }
                 ]
+              },
+              {
+                "parentPluginId": "@kbn/shared-ux-page-analytics-no-data-mocks",
+                "id": "def-common.StorybookMock.serviceArguments.customBranding",
+                "type": "Object",
+                "tags": [],
+                "label": "customBranding",
+                "description": [],
+                "path": "packages/shared-ux/page/analytics_no_data/mocks/src/storybook.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/shared-ux-page-analytics-no-data-mocks",
+                    "id": "def-common.StorybookMock.serviceArguments.customBranding.hasCustomBranding$",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "hasCustomBranding$",
+                    "description": [],
+                    "path": "packages/shared-ux/page/analytics_no_data/mocks/src/storybook.ts",
+                    "deprecated": false,
+                    "trackAdoption": false,
+                    "children": [
+                      {
+                        "parentPluginId": "@kbn/shared-ux-page-analytics-no-data-mocks",
+                        "id": "def-common.StorybookMock.serviceArguments.customBranding.hasCustomBranding$.control",
+                        "type": "string",
+                        "tags": [],
+                        "label": "control",
+                        "description": [],
+                        "path": "packages/shared-ux/page/analytics_no_data/mocks/src/storybook.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/shared-ux-page-analytics-no-data-mocks",
+                        "id": "def-common.StorybookMock.serviceArguments.customBranding.hasCustomBranding$.defaultValue",
+                        "type": "boolean",
+                        "tags": [],
+                        "label": "defaultValue",
+                        "description": [],
+                        "path": "packages/shared-ux/page/analytics_no_data/mocks/src/storybook.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      }
+                    ]
+                  }
+                ]
               }
             ]
           },
@@ -208,6 +256,24 @@
         "type": "Function",
         "tags": [],
         "label": "getServicesMock",
+        "description": [],
+        "signature": [
+          "() => ",
+          "AnalyticsNoDataPageServices"
+        ],
+        "path": "packages/shared-ux/page/analytics_no_data/mocks/src/jest.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-page-analytics-no-data-mocks",
+        "id": "def-common.getServicesMockCustomBranding",
+        "type": "Function",
+        "tags": [],
+        "label": "getServicesMockCustomBranding",
         "description": [],
         "signature": [
           "() => ",

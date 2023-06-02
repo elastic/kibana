@@ -24,6 +24,45 @@ export const GetPackagesRequestSchema = {
   }),
 };
 
+export const GetInstalledPackagesRequestSchema = {
+  query: schema.object({
+    dataStreamType: schema.maybe(
+      schema.oneOf([
+        schema.literal('logs'),
+        schema.literal('metrics'),
+        schema.literal('traces'),
+        schema.literal('synthetics'),
+        schema.literal('profiling'),
+      ])
+    ),
+    nameQuery: schema.maybe(schema.string()),
+    searchAfter: schema.maybe(schema.arrayOf(schema.oneOf([schema.string(), schema.number()]))),
+    perPage: schema.number({ defaultValue: 30 }),
+    sortOrder: schema.oneOf([schema.literal('asc'), schema.literal('desc')], {
+      defaultValue: 'asc',
+    }),
+  }),
+};
+
+export const GetDataStreamsRequestSchema = {
+  query: schema.object({
+    type: schema.maybe(
+      schema.oneOf([
+        schema.literal('logs'),
+        schema.literal('metrics'),
+        schema.literal('traces'),
+        schema.literal('synthetics'),
+        schema.literal('profiling'),
+      ])
+    ),
+    datasetQuery: schema.maybe(schema.string()),
+    sortOrder: schema.oneOf([schema.literal('asc'), schema.literal('desc')], {
+      defaultValue: 'asc',
+    }),
+    uncategorisedOnly: schema.boolean({ defaultValue: false }),
+  }),
+};
+
 export const GetLimitedPackagesRequestSchema = {
   query: schema.object({
     prerelease: schema.maybe(schema.boolean()),
@@ -91,6 +130,9 @@ export const InstallPackageFromRegistryRequestSchema = {
     pkgName: schema.string(),
     pkgVersion: schema.maybe(schema.string()),
   }),
+  query: schema.object({
+    prerelease: schema.maybe(schema.boolean()),
+  }),
   body: schema.nullable(
     schema.object({
       force: schema.boolean({ defaultValue: false }),
@@ -99,9 +141,25 @@ export const InstallPackageFromRegistryRequestSchema = {
   ),
 };
 
+export const ReauthorizeTransformRequestSchema = {
+  params: schema.object({
+    pkgName: schema.string(),
+    pkgVersion: schema.maybe(schema.string()),
+  }),
+  query: schema.object({
+    prerelease: schema.maybe(schema.boolean()),
+  }),
+  body: schema.object({
+    transforms: schema.arrayOf(schema.object({ transformId: schema.string() })),
+  }),
+};
+
 export const InstallPackageFromRegistryRequestSchemaDeprecated = {
   params: schema.object({
     pkgkey: schema.string(),
+  }),
+  query: schema.object({
+    prerelease: schema.maybe(schema.boolean()),
   }),
   body: schema.nullable(
     schema.object({
@@ -110,12 +168,19 @@ export const InstallPackageFromRegistryRequestSchemaDeprecated = {
   ),
 };
 
-export const BulkUpgradePackagesFromRegistryRequestSchema = {
+export const BulkInstallPackagesFromRegistryRequestSchema = {
   query: schema.object({
     prerelease: schema.maybe(schema.boolean()),
   }),
   body: schema.object({
-    packages: schema.arrayOf(schema.string(), { minSize: 1 }),
+    packages: schema.arrayOf(
+      schema.oneOf([
+        schema.string(),
+        schema.object({ name: schema.string(), version: schema.string() }),
+      ]),
+      { minSize: 1 }
+    ),
+    force: schema.boolean({ defaultValue: false }),
   }),
 };
 

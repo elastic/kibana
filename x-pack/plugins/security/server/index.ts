@@ -26,11 +26,13 @@ export type {
   InvalidateAPIKeysParams,
   InvalidateAPIKeyResult,
   GrantAPIKeyResult,
+  ValidateAPIKeyParams,
   AuthenticationServiceStart,
 } from './authentication';
+export { HTTPAuthorizationHeader } from './authentication';
 export type { CheckPrivilegesPayload, CasesSupportedOperations } from './authorization';
 export type AuthorizationServiceSetup = SecurityPluginStart['authz'];
-export type { AuditLogger, AuditEvent } from './audit';
+export type { AuditLogger, AuditEvent, AuditHttp, AuditKibana, AuditRequest } from './audit';
 export type { SecurityPluginSetup, SecurityPluginStart };
 export type { AuthenticatedUser } from '../common/model';
 export { ROUTE_TAG_CAN_REDIRECT } from './routes/tags';
@@ -50,6 +52,8 @@ export const config: PluginConfigDescriptor<TypeOf<typeof ConfigSchema>> = {
     loginAssistanceMessage: true,
     showInsecureClusterWarning: true,
     sameSiteCookies: true,
+    showNavLinks: true,
+    ui: true,
   },
 };
 export const plugin: PluginInitializer<

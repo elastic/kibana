@@ -14,55 +14,57 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { AnalyticsCollection } from '../../../../../common/types/analytics';
+import { EuiEmptyPrompt } from '@elastic/eui';
 
-import { AnalyticsCollectionIntegrate } from './analytics_collection_integrate';
-import { AnalyticsCollectionSettings } from './analytics_collection_settings';
+import { AnalyticsCollection } from '../../../../../common/types/analytics';
+import { EnterpriseSearchAnalyticsPageTemplate } from '../layout/page_template';
+
+import { AnalyticsCollectionIntegrateView } from './analytics_collection_integrate/analytics_collection_integrate_view';
 
 import { AnalyticsCollectionView } from './analytics_collection_view';
 
 const mockValues = {
   analyticsCollection: {
-    event_retention_day_length: 180,
-    id: '1',
-    name: 'Analytics Collection 1',
+    events_datastream: 'analytics-events-example',
+    name: 'Analytics-Collection-1',
   } as AnalyticsCollection,
 };
 
 const mockActions = {
   fetchAnalyticsCollection: jest.fn(),
+  fetchAnalyticsCollectionDataViewId: jest.fn(),
+  setTimeRange: jest.fn(),
 };
 
-describe('AnalyticsOverview', () => {
+describe('AnalyticsView', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
-    mockUseParams.mockReturnValue({ name: '1', section: 'settings' });
+    mockUseParams.mockReturnValue({ name: '1' });
   });
 
-  describe('empty state', () => {
-    it('renders when analytics collection is empty on inital query', () => {
-      setMockValues({
-        ...mockValues,
-        analyticsCollection: null,
-      });
-      setMockActions(mockActions);
-      const wrapper = shallow(<AnalyticsCollectionView />);
-
-      expect(mockActions.fetchAnalyticsCollection).toHaveBeenCalled();
-
-      expect(wrapper.find(AnalyticsCollectionSettings)).toHaveLength(0);
-      expect(wrapper.find(AnalyticsCollectionIntegrate)).toHaveLength(0);
+  it('renders when analytics collection is empty on initial query', () => {
+    setMockValues({
+      ...mockValues,
+      analyticsCollection: null,
     });
+    setMockActions(mockActions);
+    const wrapper = shallow(<AnalyticsCollectionView />);
 
-    it('renders with Data', async () => {
-      setMockValues(mockValues);
-      setMockActions(mockActions);
+    expect(mockActions.fetchAnalyticsCollection).toHaveBeenCalled();
 
-      const wrapper = shallow(<AnalyticsCollectionView />);
+    expect(wrapper.find(AnalyticsCollectionIntegrateView)).toHaveLength(0);
+    expect(wrapper.find(EnterpriseSearchAnalyticsPageTemplate)).toHaveLength(1);
+  });
 
-      expect(wrapper.find(AnalyticsCollectionSettings)).toHaveLength(1);
-      expect(mockActions.fetchAnalyticsCollection).toHaveBeenCalled();
-    });
+  it('render deleted state for deleted analytics collection', async () => {
+    setMockValues({ ...mockValues, analyticsCollection: null });
+    setMockActions(mockActions);
+
+    const wrapper = shallow(<AnalyticsCollectionView />);
+
+    expect(wrapper?.find(EnterpriseSearchAnalyticsPageTemplate).find(EuiEmptyPrompt)).toHaveLength(
+      1
+    );
   });
 });

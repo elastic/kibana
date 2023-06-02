@@ -6,7 +6,7 @@
  */
 
 import { ALERT_FLYOUT } from '../../screens/alerts_details';
-import { createCustomRuleEnabled } from '../../tasks/api_calls/rules';
+import { createRule } from '../../tasks/api_calls/rules';
 import { cleanKibana } from '../../tasks/common';
 import { waitForAlertsToPopulate } from '../../tasks/create_new_rule';
 import { login, visitWithoutDateRange } from '../../tasks/login';
@@ -21,14 +21,14 @@ import {
 import { USER_COLUMN } from '../../screens/alerts';
 
 describe('user details flyout', () => {
-  before(() => {
+  beforeEach(() => {
     cleanKibana();
     login();
   });
 
   it('shows user detail flyout from alert table', () => {
     visitWithoutDateRange(ALERTS_URL);
-    createCustomRuleEnabled({ ...getNewRule(), customQuery: 'user.name:*' });
+    createRule(getNewRule({ query: 'user.name:*' }));
     refreshPage();
     waitForAlertsToPopulate();
 

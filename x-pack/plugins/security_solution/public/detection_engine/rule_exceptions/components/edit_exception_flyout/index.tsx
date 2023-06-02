@@ -19,7 +19,7 @@ import {
   EuiTitle,
   EuiFlyout,
   EuiFlyoutFooter,
-  EuiLoadingContent,
+  EuiSkeletonText,
 } from '@elastic/eui';
 
 import type {
@@ -33,6 +33,8 @@ import {
 
 import type { ExceptionsBuilderReturnExceptionItem } from '@kbn/securitysolution-list-utils';
 
+import type { Moment } from 'moment';
+import moment from 'moment';
 import {
   isEqlRule,
   isNewTermsRule,
@@ -56,6 +58,7 @@ import { createExceptionItemsReducer } from './reducer';
 import { useEditExceptionItems } from './use_edit_exception';
 
 import * as i18n from './translations';
+import { ExceptionsExpireTime } from '../flyout_components/expire_time';
 
 interface EditExceptionFlyoutProps {
   list: ExceptionListSchema;
@@ -119,6 +122,8 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
       disableBulkClose,
       bulkCloseIndex,
       entryErrorExists,
+      expireTime,
+      expireErrorExists,
     },
     dispatch,
   ] = useReducer(createExceptionItemsReducer(), {
@@ -129,6 +134,8 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
     disableBulkClose: true,
     bulkCloseIndex: undefined,
     entryErrorExists: false,
+    expireTime: itemToEdit.expire_time !== undefined ? moment(itemToEdit.expire_time) : undefined,
+    expireErrorExists: false,
   });
 
   const allowLargeValueLists = useMemo((): boolean => {
@@ -231,6 +238,26 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
     [dispatch]
   );
 
+  const setExpireTime = useCallback(
+    (exceptionExpireTime: Moment | undefined): void => {
+      dispatch({
+        type: 'setExpireTime',
+        expireTime: exceptionExpireTime,
+      });
+    },
+    [dispatch]
+  );
+
+  const setExpireError = useCallback(
+    (errorExists: boolean): void => {
+      dispatch({
+        type: 'setExpireError',
+        errorExists,
+      });
+    },
+    [dispatch]
+  );
+
   const handleCloseFlyout = useCallback((): void => {
     onCancel(false);
   }, [onCancel]);
@@ -251,6 +278,7 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
         commentToAdd: newComment,
         listType,
         selectedOs: itemToEdit.os_types,
+        expireTime,
         items: exceptionItems,
       });
 
@@ -292,6 +320,7 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
     onConfirm,
     bulkCloseIndex,
     onCancel,
+    expireTime,
   ]);
 
   const editExceptionMessage = useMemo(
@@ -308,8 +337,9 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
       isClosingAlerts ||
       exceptionItems.every((item) => item.entries.length === 0) ||
       isLoading ||
-      entryErrorExists,
-    [isLoading, entryErrorExists, exceptionItems, isSubmitting, isClosingAlerts]
+      entryErrorExists ||
+      expireErrorExists,
+    [isLoading, entryErrorExists, exceptionItems, isSubmitting, isClosingAlerts, expireErrorExists]
   );
 
   return (
@@ -320,7 +350,7 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
         </EuiTitle>
         <EuiSpacer size="m" />
       </FlyoutHeader>
-      {isLoading && <EuiLoadingContent data-test-subj="loadingEditExceptionFlyout" lines={4} />}
+      {isLoading && <EuiSkeletonText data-test-subj="loadingEditExceptionFlyout" lines={4} />}
       <FlyoutBodySection className="builder-section">
         <ExceptionsFlyoutMeta
           exceptionItemName={exceptionItemName}
@@ -370,6 +400,16 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
           newCommentValue={newComment}
           newCommentOnChange={setComment}
         />
+        {listType !== ExceptionListTypeEnum.ENDPOINT && (
+          <>
+            <EuiHorizontalRule />
+            <ExceptionsExpireTime
+              expireTime={expireTime}
+              setExpireTime={setExpireTime}
+              setExpireError={setExpireError}
+            />
+          </>
+        )}
         {showAlertCloseOptions && (
           <>
             <EuiHorizontalRule />

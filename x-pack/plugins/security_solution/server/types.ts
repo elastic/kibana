@@ -6,29 +6,26 @@
  */
 
 import type {
-  IRouter,
-  CustomRequestHandlerContext,
   CoreRequestHandlerContext,
+  CustomRequestHandlerContext,
+  IRouter,
   KibanaRequest,
 } from '@kbn/core/server';
 import type { ActionsApiRequestHandlerContext } from '@kbn/actions-plugin/server';
 import type { AlertingApiRequestHandlerContext } from '@kbn/alerting-plugin/server';
 import type { FleetRequestHandlerContext } from '@kbn/fleet-plugin/server';
 import type { LicensingApiRequestHandlerContext } from '@kbn/licensing-plugin/server';
-import type { ListsApiRequestHandlerContext, ExceptionListClient } from '@kbn/lists-plugin/server';
-import type { IRuleDataService, AlertsClient } from '@kbn/rule-registry-plugin/server';
+import type { ExceptionListClient, ListsApiRequestHandlerContext } from '@kbn/lists-plugin/server';
+import type { AlertsClient, IRuleDataService } from '@kbn/rule-registry-plugin/server';
 
+import type { Readable } from 'stream';
 import type { Immutable } from '../common/endpoint/types';
-import type { CreateQueryRuleAdditionalOptions } from './lib/detection_engine/rule_types/types';
 import { AppClient } from './client';
 import type { ConfigType } from './config';
 import type { IRuleExecutionLogForRoutes } from './lib/detection_engine/rule_monitoring';
 import type { FrameworkRequest } from './lib/framework';
 import type { EndpointAuthz } from '../common/endpoint/types/authz';
-import type {
-  EndpointInternalFleetServicesInterface,
-  EndpointScopedFleetServicesInterface,
-} from './endpoint/services/fleet';
+import type { EndpointInternalFleetServicesInterface } from './endpoint/services/fleet';
 
 export { AppClient };
 
@@ -44,8 +41,6 @@ export interface SecuritySolutionApiRequestHandlerContext {
   getRacClient: (req: KibanaRequest) => Promise<AlertsClient>;
   getExceptionListClient: () => ExceptionListClient | null;
   getInternalFleetServices: () => EndpointInternalFleetServicesInterface;
-  getScopedFleetServices: (req: KibanaRequest) => EndpointScopedFleetServicesInterface;
-  getQueryRuleAdditionalOptions: CreateQueryRuleAdditionalOptions;
 }
 
 export type SecuritySolutionRequestHandlerContext = CustomRequestHandlerContext<{
@@ -58,3 +53,13 @@ export type SecuritySolutionRequestHandlerContext = CustomRequestHandlerContext<
 }>;
 
 export type SecuritySolutionPluginRouter = IRouter<SecuritySolutionRequestHandlerContext>;
+
+/**
+ * Readable returned by Hapi when `stream` is used to defined a property and/or route payload
+ */
+export interface HapiReadableStream extends Readable {
+  hapi: {
+    filename: string;
+    headers: Record<string, string>;
+  };
+}

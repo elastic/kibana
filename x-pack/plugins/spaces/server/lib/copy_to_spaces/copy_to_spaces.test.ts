@@ -288,7 +288,7 @@ describe('copySavedObjectsToSpaces', () => {
   });
 
   it(`doesn't stop copy if some spaces fail`, async () => {
-    const { savedObjects } = setup({
+    const { savedObjects, savedObjectsImporter } = setup({
       objects: mockExportResults,
     });
 
@@ -335,6 +335,34 @@ describe('copySavedObjectsToSpaces', () => {
         },
       }
     `);
+
+    expect(savedObjectsImporter.import).toHaveBeenCalledTimes(3);
+    expect(savedObjectsImporter.import).toHaveBeenCalledWith(
+      expect.objectContaining({ compatibilityMode: undefined })
+    );
+  });
+
+  it(`properly forwards compatibility mode setting`, async () => {
+    const { savedObjects, savedObjectsImporter } = setup({
+      objects: mockExportResults,
+    });
+
+    const request = httpServerMock.createKibanaRequest();
+
+    const copySavedObjectsToSpaces = copySavedObjectsToSpacesFactory(savedObjects, request);
+
+    await copySavedObjectsToSpaces('sourceSpace', ['marketing'], {
+      includeReferences: true,
+      overwrite: true,
+      objects: [{ type: 'dashboard', id: 'my-dashboard' }],
+      createNewCopies: false,
+      compatibilityMode: true,
+    });
+
+    expect(savedObjectsImporter.import).toHaveBeenCalledTimes(1);
+    expect(savedObjectsImporter.import).toHaveBeenCalledWith(
+      expect.objectContaining({ compatibilityMode: true })
+    );
   });
 
   it(`handles stream read errors`, async () => {

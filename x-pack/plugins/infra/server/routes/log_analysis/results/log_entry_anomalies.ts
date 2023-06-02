@@ -31,7 +31,7 @@ export const initGetLogEntryAnomaliesRoute = ({ framework }: InfraBackendLibs) =
     framework.router.handleLegacyErrors(async (requestContext, request, response) => {
       const {
         data: {
-          sourceId,
+          logView,
           timeRange: { startTime, endTime },
           sort: sortParam,
           pagination: paginationParam,
@@ -51,7 +51,7 @@ export const initGetLogEntryAnomaliesRoute = ({ framework }: InfraBackendLibs) =
           timing,
         } = await getLogEntryAnomalies(
           infraMlContext,
-          sourceId,
+          logView,
           startTime,
           endTime,
           sort,

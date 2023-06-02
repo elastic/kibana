@@ -12,6 +12,7 @@ import type {
   ExitFullScreenButtonProps as Props,
   ExitFullScreenButtonServices,
 } from '@kbn/shared-ux-button-exit-full-screen-types';
+import { of } from 'rxjs';
 
 type PropArguments = Pick<Props, 'toggleChrome'>;
 
@@ -51,6 +52,7 @@ export class StorybookMock extends AbstractStorybookMock<
       setIsFullscreen: (isFullscreen: boolean) => {
         action('setIsFullscreen')(isFullscreen);
       },
+      customBranding$: of({}),
     };
   }
 }

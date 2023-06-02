@@ -17,7 +17,15 @@ export const plugin = (initializerContext: PluginInitializerContext) => {
 export const configSchema = schema.object({
   accessCheckTimeout: schema.number({ defaultValue: 5000 }),
   accessCheckTimeoutWarning: schema.number({ defaultValue: 300 }),
+  canDeployEntSearch: schema.boolean({ defaultValue: true }),
   customHeaders: schema.maybe(schema.object({}, { unknowns: 'allow' })),
+  enabled: schema.boolean({ defaultValue: true }),
+  hasConnectors: schema.boolean({ defaultValue: true }),
+  hasDefaultIngestPipeline: schema.boolean({ defaultValue: true }),
+  hasDocumentLevelSecurityEnabled: schema.boolean({ defaultValue: true }),
+  hasIncrementalSyncEnabled: schema.boolean({ defaultValue: true }),
+  hasNativeConnectors: schema.boolean({ defaultValue: true }),
+  hasWebCrawler: schema.boolean({ defaultValue: true }),
   host: schema.maybe(schema.string()),
   ssl: schema.object({
     certificateAuthorities: schema.maybe(
@@ -34,6 +42,7 @@ export type ConfigType = TypeOf<typeof configSchema>;
 
 export const config: PluginConfigDescriptor<ConfigType> = {
   exposeToBrowser: {
+    canDeployEntSearch: true,
     host: true,
   },
   schema: configSchema,
@@ -43,5 +52,3 @@ export const CURRENT_CONNECTORS_INDEX = '.elastic-connectors-v1';
 export const CONNECTORS_JOBS_INDEX = '.elastic-connectors-sync-jobs';
 export const CONNECTORS_VERSION = 1;
 export const CRAWLERS_INDEX = '.ent-search-actastic-crawler2_configurations_v2';
-export const ANALYTICS_COLLECTIONS_INDEX = '.elastic-analytics-collections';
-export const ANALYTICS_VERSION = '1';

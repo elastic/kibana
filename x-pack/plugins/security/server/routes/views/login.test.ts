@@ -166,6 +166,7 @@ describe('Login view routes', () => {
         allowRbac: false,
         allowRoleDocumentLevelSecurity: true,
         allowRoleFieldLevelSecurity: false,
+        allowRoleRemoteIndexPrivileges: false,
         layout: 'error-es-unavailable',
         showLinks: false,
         showRoleMappingsManagement: true,

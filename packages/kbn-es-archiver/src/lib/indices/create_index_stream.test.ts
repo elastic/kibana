@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { mockDeleteKibanaIndices } from './create_index_stream.test.mock';
+import { mockdeleteSavedObjectIndices } from './create_index_stream.test.mock';
 
 import sinon from 'sinon';
 import Chance from 'chance';
@@ -28,7 +28,7 @@ const chance = new Chance();
 const log = createStubLogger();
 
 beforeEach(() => {
-  mockDeleteKibanaIndices.mockClear();
+  mockdeleteSavedObjectIndices.mockClear();
 });
 
 describe('esArchiver: createCreateIndexStream()', () => {
@@ -187,7 +187,7 @@ describe('esArchiver: createCreateIndexStream()', () => {
     });
   });
 
-  describe('deleteKibanaIndices', () => {
+  describe('deleteSavedObjectIndices', () => {
     function doTest(...indices: string[]) {
       return createPromiseFromStreams([
         createListStream(indices.map((index) => createStubIndexRecord(index))),
@@ -199,15 +199,15 @@ describe('esArchiver: createCreateIndexStream()', () => {
     it('does not delete Kibana indices for indexes that do not start with .kibana', async () => {
       await doTest('.foo');
 
-      expect(mockDeleteKibanaIndices).not.toHaveBeenCalled();
+      expect(mockdeleteSavedObjectIndices).not.toHaveBeenCalled();
     });
 
     it('deletes Kibana indices at most once for indices that start with .kibana', async () => {
       // If we are loading the main Kibana index, we should delete all Kibana indices for backwards compatibility reasons.
       await doTest('.kibana_7.16.0_001', '.kibana_task_manager_7.16.0_001');
 
-      expect(mockDeleteKibanaIndices).toHaveBeenCalledTimes(1);
-      expect(mockDeleteKibanaIndices).toHaveBeenCalledWith(
+      expect(mockdeleteSavedObjectIndices).toHaveBeenCalledTimes(1);
+      expect(mockdeleteSavedObjectIndices).toHaveBeenCalledWith(
         expect.not.objectContaining({ onlyTaskManager: true })
       );
     });
@@ -216,8 +216,8 @@ describe('esArchiver: createCreateIndexStream()', () => {
       // If we are loading the Kibana task manager index, we should only delete that index, not any other Kibana indices.
       await doTest('.kibana_task_manager_7.16.0_001', '.kibana_task_manager_7.16.0_002');
 
-      expect(mockDeleteKibanaIndices).toHaveBeenCalledTimes(1);
-      expect(mockDeleteKibanaIndices).toHaveBeenCalledWith(
+      expect(mockdeleteSavedObjectIndices).toHaveBeenCalledTimes(1);
+      expect(mockdeleteSavedObjectIndices).toHaveBeenCalledWith(
         expect.objectContaining({ onlyTaskManager: true })
       );
     });
@@ -227,12 +227,12 @@ describe('esArchiver: createCreateIndexStream()', () => {
       // So, we first delete only the Kibana task manager indices, then we wind up deleting all Kibana indices.
       await doTest('.kibana_task_manager_7.16.0_001', '.kibana_7.16.0_001');
 
-      expect(mockDeleteKibanaIndices).toHaveBeenCalledTimes(2);
-      expect(mockDeleteKibanaIndices).toHaveBeenNthCalledWith(
+      expect(mockdeleteSavedObjectIndices).toHaveBeenCalledTimes(2);
+      expect(mockdeleteSavedObjectIndices).toHaveBeenNthCalledWith(
         1,
         expect.objectContaining({ onlyTaskManager: true })
       );
-      expect(mockDeleteKibanaIndices).toHaveBeenNthCalledWith(
+      expect(mockdeleteSavedObjectIndices).toHaveBeenNthCalledWith(
         2,
         expect.not.objectContaining({ onlyTaskManager: true })
       );

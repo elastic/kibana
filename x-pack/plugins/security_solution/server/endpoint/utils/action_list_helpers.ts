@@ -36,6 +36,8 @@ export const getActions = async ({
   startDate,
   userIds,
   unExpiredOnly,
+  withAutomatedActions,
+  alertId,
 }: Omit<GetActionDetailsListParam, 'logger'>): Promise<{
   actionIds: string[];
   actionRequests: TransportResult<estypes.SearchResponse<LogsEndpointAction>, unknown>;
@@ -48,6 +50,10 @@ export const getActions = async ({
         'data.command': commands,
       },
     });
+  }
+
+  if (alertId?.length) {
+    additionalFilters.push({ terms: { 'data.alert_id': alertId } });
   }
 
   if (elasticAgentIds?.length) {
@@ -75,6 +81,17 @@ export const getActions = async ({
     },
   ];
 
+  const mustNot: SearchRequest =
+    withAutomatedActions === false
+      ? {
+          must_not: {
+            exists: {
+              field: 'data.alert_id',
+            },
+          },
+        }
+      : {};
+
   if (userIds?.length) {
     const userIdsKql = userIds.map((userId) => `user_id:${userId}`).join(' or ');
     const mustClause = toElasticsearchQuery(fromKueryExpression(userIdsKql));
@@ -87,7 +104,10 @@ export const getActions = async ({
     from,
     body: {
       query: {
-        bool: { must },
+        bool: {
+          must,
+          ...mustNot,
+        },
       },
       sort: [
         {

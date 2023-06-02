@@ -19,6 +19,7 @@ const NODE_TLS_REJECT_UNAUTHORIZED = '1';
 
 export const esArchiverLoad = (folder: string) => {
   const path = Path.join(ES_ARCHIVE_DIR, folder);
+  cy.log(`exec esArchiverLoad`, path);
   cy.exec(
     `node ../../../scripts/es_archiver load "${path}" --config "${CONFIG_PATH}" --es-url "${ES_URL}" --kibana-url "${KIBANA_URL}"`,
     { env: { NODE_TLS_REJECT_UNAUTHORIZED } }
@@ -27,6 +28,7 @@ export const esArchiverLoad = (folder: string) => {
 
 export const esArchiverUnload = (folder: string) => {
   const path = Path.join(ES_ARCHIVE_DIR, folder);
+  cy.log(`exec esArchiverUnload`, path);
   cy.exec(
     `node ../../../scripts/es_archiver unload "${path}" --config "${CONFIG_PATH}" --es-url "${ES_URL}" --kibana-url "${KIBANA_URL}"`,
     { env: { NODE_TLS_REJECT_UNAUTHORIZED } }
@@ -34,6 +36,7 @@ export const esArchiverUnload = (folder: string) => {
 };
 
 export const esArchiverResetKibana = () => {
+  cy.log(`exec esArchiverResetKibana`);
   cy.exec(
     `node ../../../scripts/es_archiver empty-kibana-index --config "${CONFIG_PATH}" --es-url "${ES_URL}" --kibana-url "${KIBANA_URL}"`,
     { env: { NODE_TLS_REJECT_UNAUTHORIZED }, failOnNonZeroExit: false }

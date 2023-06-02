@@ -1,0 +1,224 @@
+{
+  "id": "serverless",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": [],
+    "setup": {
+      "parentPluginId": "serverless",
+      "id": "def-public.ServerlessPluginSetup",
+      "type": "Interface",
+      "tags": [],
+      "label": "ServerlessPluginSetup",
+      "description": [],
+      "path": "x-pack/plugins/serverless/public/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [],
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    },
+    "start": {
+      "parentPluginId": "serverless",
+      "id": "def-public.ServerlessPluginStart",
+      "type": "Interface",
+      "tags": [],
+      "label": "ServerlessPluginStart",
+      "description": [],
+      "path": "x-pack/plugins/serverless/public/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [
+        {
+          "parentPluginId": "serverless",
+          "id": "def-public.ServerlessPluginStart.setSideNavComponent",
+          "type": "Function",
+          "tags": [],
+          "label": "setSideNavComponent",
+          "description": [],
+          "signature": [
+            "(navigation: ",
+            {
+              "pluginId": "@kbn/core-chrome-browser",
+              "scope": "common",
+              "docId": "kibKbnCoreChromeBrowserPluginApi",
+              "section": "def-common.SideNavComponent",
+              "text": "SideNavComponent"
+            },
+            ") => void"
+          ],
+          "path": "x-pack/plugins/serverless/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [
+            {
+              "parentPluginId": "serverless",
+              "id": "def-public.ServerlessPluginStart.setSideNavComponent.$1",
+              "type": "CompoundType",
+              "tags": [],
+              "label": "navigation",
+              "description": [],
+              "signature": [
+                {
+                  "pluginId": "@kbn/core-chrome-browser",
+                  "scope": "common",
+                  "docId": "kibKbnCoreChromeBrowserPluginApi",
+                  "section": "def-common.SideNavComponent",
+                  "text": "SideNavComponent"
+                }
+              ],
+              "path": "x-pack/plugins/serverless/public/types.ts",
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            }
+          ],
+          "returnComment": []
+        },
+        {
+          "parentPluginId": "serverless",
+          "id": "def-public.ServerlessPluginStart.setNavigation",
+          "type": "Function",
+          "tags": [],
+          "label": "setNavigation",
+          "description": [],
+          "signature": [
+            "(projectNavigation: ",
+            {
+              "pluginId": "@kbn/core-chrome-browser",
+              "scope": "common",
+              "docId": "kibKbnCoreChromeBrowserPluginApi",
+              "section": "def-common.ChromeProjectNavigation",
+              "text": "ChromeProjectNavigation"
+            },
+            ") => void"
+          ],
+          "path": "x-pack/plugins/serverless/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [
+            {
+              "parentPluginId": "serverless",
+              "id": "def-public.ServerlessPluginStart.setNavigation.$1",
+              "type": "Object",
+              "tags": [],
+              "label": "projectNavigation",
+              "description": [],
+              "signature": [
+                {
+                  "pluginId": "@kbn/core-chrome-browser",
+                  "scope": "common",
+                  "docId": "kibKbnCoreChromeBrowserPluginApi",
+                  "section": "def-common.ChromeProjectNavigation",
+                  "text": "ChromeProjectNavigation"
+                }
+              ],
+              "path": "x-pack/plugins/serverless/public/types.ts",
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            }
+          ],
+          "returnComment": []
+        }
+      ],
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": [],
+    "setup": {
+      "parentPluginId": "serverless",
+      "id": "def-server.ServerlessPluginSetup",
+      "type": "Interface",
+      "tags": [],
+      "label": "ServerlessPluginSetup",
+      "description": [],
+      "path": "x-pack/plugins/serverless/server/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [],
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    },
+    "start": {
+      "parentPluginId": "serverless",
+      "id": "def-server.ServerlessPluginStart",
+      "type": "Interface",
+      "tags": [],
+      "label": "ServerlessPluginStart",
+      "description": [],
+      "path": "x-pack/plugins/serverless/server/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [],
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "serverless",
+        "id": "def-common.API_SWITCH_PROJECT",
+        "type": "string",
+        "tags": [],
+        "label": "API_SWITCH_PROJECT",
+        "description": [
+          "Internal API route responsible for switching between project configurations."
+        ],
+        "signature": [
+          "\"/internal/serverless/switch_project\""
+        ],
+        "path": "x-pack/plugins/serverless/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "serverless",
+        "id": "def-common.PLUGIN_ID",
+        "type": "string",
+        "tags": [],
+        "label": "PLUGIN_ID",
+        "description": [],
+        "signature": [
+          "\"serverless\""
+        ],
+        "path": "x-pack/plugins/serverless/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "serverless",
+        "id": "def-common.PLUGIN_NAME",
+        "type": "string",
+        "tags": [],
+        "label": "PLUGIN_NAME",
+        "description": [],
+        "signature": [
+          "\"serverless\""
+        ],
+        "path": "x-pack/plugins/serverless/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

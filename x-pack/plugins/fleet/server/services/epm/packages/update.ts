@@ -14,6 +14,8 @@ import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../constants';
 import type { Installation, UpdatePackageRequestSchema } from '../../../types';
 import { FleetError } from '../../../errors';
 
+import { auditLoggingService } from '../../audit_logging';
+
 import { getInstallationObject, getPackageInfo } from './get';
 
 export async function updatePackage(
@@ -29,6 +31,12 @@ export async function updatePackage(
   if (!installedPackage) {
     throw new FleetError(`package ${pkgName} is not installed`);
   }
+
+  auditLoggingService.writeCustomSoAuditLog({
+    action: 'update',
+    id: installedPackage.id,
+    savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
+  });
 
   await savedObjectsClient.update<Installation>(PACKAGES_SAVED_OBJECT_TYPE, installedPackage.id, {
     keep_policies_up_to_date: keepPoliciesUpToDate ?? false,
@@ -48,9 +56,15 @@ export async function updateDatastreamExperimentalFeatures(
   pkgName: string,
   dataStreamFeatureMapping: Array<{
     data_stream: string;
-    features: Record<ExperimentalIndexingFeature, boolean>;
+    features: Partial<Record<ExperimentalIndexingFeature, boolean>>;
   }>
 ) {
+  auditLoggingService.writeCustomSoAuditLog({
+    action: 'update',
+    id: pkgName,
+    savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
+  });
+
   await savedObjectsClient.update<Installation>(
     PACKAGES_SAVED_OBJECT_TYPE,
     pkgName,

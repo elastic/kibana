@@ -7,6 +7,7 @@
 
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
+// eslint-disable-next-line no-restricted-imports
 import { Router, Switch, Route, Redirect, withRouter } from 'react-router-dom';
 
 import { UIM_APP_LOAD } from '../../common';

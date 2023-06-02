@@ -17,13 +17,13 @@ export const PROFILING_FEATURE = {
   }),
   order: 1200,
   category: DEFAULT_APP_CATEGORIES.observability,
-  app: ['kibana'],
-  catalogue: [],
+  app: [PROFILING_SERVER_FEATURE_ID, 'ux', 'kibana'],
+  catalogue: [PROFILING_SERVER_FEATURE_ID],
   // see x-pack/plugins/features/common/feature_kibana_privileges.ts
   privileges: {
     all: {
-      app: ['kibana'],
-      catalogue: [],
+      app: [PROFILING_SERVER_FEATURE_ID, 'ux', 'kibana'],
+      catalogue: [PROFILING_SERVER_FEATURE_ID],
       savedObject: {
         all: [],
         read: [],
@@ -31,13 +31,13 @@ export const PROFILING_FEATURE = {
       ui: ['show'],
     },
     read: {
-      app: ['kibana'],
-      catalogue: [],
+      app: [PROFILING_SERVER_FEATURE_ID, 'ux', 'kibana'],
+      catalogue: [PROFILING_SERVER_FEATURE_ID],
       savedObject: {
         all: [],
         read: [],
       },
-      ui: [],
+      ui: ['show'],
     },
   },
 };

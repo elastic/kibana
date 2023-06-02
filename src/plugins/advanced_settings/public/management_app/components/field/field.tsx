@@ -449,7 +449,7 @@ export class Field extends PureComponent<FieldProps> {
         {unsavedChanges ? (
           <EuiIconTip
             anchorClassName="mgtAdvancedSettings__fieldTitleUnsavedIcon"
-            type={isInvalid ? 'alert' : 'dot'}
+            type={isInvalid ? 'warning' : 'dot'}
             color={isInvalid ? 'danger' : 'warning'}
             aria-label={unsavedIconLabel}
             content={unsavedIconLabel}

@@ -4,16 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { HTTPFields, MonitorFields } from '@kbn/synthetics-plugin/common/runtime_types';
 import { API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { getFixtureJson } from '../uptime/rest/helper/get_fixture_json';
+import { getFixtureJson } from './helper/get_fixture_json';
 import { PrivateLocationTestService } from './services/private_location_test_service';
+import { SyntheticsMonitorTestService } from './services/synthetics_monitor_test_service';
 
 export default function ({ getService }: FtrProviderContext) {
-  describe('[DELETE] /internal/uptime/service/monitors', function () {
+  describe('DeleteMonitorRoute', function () {
     this.tags('skipCloud');
 
     const supertest = getService('supertest');
@@ -22,6 +23,7 @@ export default function ({ getService }: FtrProviderContext) {
     const kibanaServer = getService('kibanaServer');
 
     const testPrivateLocations = new PrivateLocationTestService(getService);
+    const monitorTestService = new SyntheticsMonitorTestService(getService);
 
     let _httpMonitorJson: HTTPFields;
     let httpMonitorJson: HTTPFields;
@@ -39,12 +41,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     before(async () => {
       _httpMonitorJson = getFixtureJson('http_monitor');
-      await supertest.post('/api/fleet/setup').set('kbn-xsrf', 'true').send().expect(200);
-      await supertest
-        .post('/api/fleet/epm/packages/synthetics/0.10.3')
-        .set('kbn-xsrf', 'true')
-        .send({ force: true })
-        .expect(200);
+      await testPrivateLocations.installSyntheticsPackage();
 
       const testPolicyName = 'Fleet test server policy' + Date.now();
       const apiResponse = await testPrivateLocations.addFleetPolicy(testPolicyName);
@@ -101,7 +98,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('handles private location errors and does not delete the monitor if integration policy is unable to be deleted', async () => {
-      const name = `Monitor with a private location ${uuid.v4()}`;
+      const name = `Monitor with a private location ${uuidv4()}`;
       const newMonitor = {
         name,
         type: 'http',
@@ -118,8 +115,8 @@ export default function ({ getService }: FtrProviderContext) {
       const username = 'admin';
       const roleName = `synthetics_admin`;
       const password = `${username}-password`;
-      const SPACE_ID = `test-space-${uuid.v4()}`;
-      const SPACE_NAME = `test-space-name ${uuid.v4()}`;
+      const SPACE_ID = `test-space-${uuidv4()}`;
+      const SPACE_NAME = `test-space-name ${uuidv4()}`;
       let monitorId = '';
 
       try {
@@ -149,10 +146,7 @@ export default function ({ getService }: FtrProviderContext) {
           .set('kbn-xsrf', 'true')
           .expect(500);
 
-        const response = await supertest
-          .get(`${API_URLS.SYNTHETICS_MONITORS}/${monitorId}`)
-          .set('kbn-xsrf', 'true')
-          .expect(200);
+        const response = await monitorTestService.getMonitor(monitorId);
 
         // ensure monitor was not deleted
         expect(response.body.attributes.urls).eql(newMonitor.urls);

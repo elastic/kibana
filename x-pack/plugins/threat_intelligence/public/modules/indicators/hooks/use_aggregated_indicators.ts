@@ -9,14 +9,17 @@ import { useQuery } from '@tanstack/react-query';
 import { Filter, Query, TimeRange } from '@kbn/es-query';
 import { useMemo, useState } from 'react';
 import { TimeRangeBounds } from '@kbn/data-plugin/common';
-import { useInspector, useKibana } from '../../../hooks';
+import { EuiComboBoxOptionOption } from '@elastic/eui';
+import { useKibana } from '../../../hooks/use_kibana';
+import { useInspector } from '../../../hooks/use_inspector';
 import { RawIndicatorFieldId } from '../../../../common/types/indicator';
-import { useSourcererDataView } from '.';
+import { useSourcererDataView } from './use_sourcerer_data_view';
 import {
   ChartSeries,
   createFetchAggregatedIndicators,
   FetchAggregatedIndicatorsParams,
 } from '../services/fetch_aggregated_indicators';
+import { useDateFormat, useTimeZone } from '../../../hooks/use_kibana_ui_settings';
 
 export interface UseAggregatedIndicatorsParam {
   /**
@@ -41,7 +44,7 @@ export interface UseAggregatedIndicatorsValue {
    * aggregated indicators.
    * @param field the selected Indicator field
    */
-  onFieldChange: (field: string) => void;
+  onFieldChange: (field: EuiComboBoxOptionOption<string>) => void;
   /**
    * The min and max times returned by the aggregated Indicators query.
    */
@@ -49,16 +52,20 @@ export interface UseAggregatedIndicatorsValue {
   /**
    * Indicator field used to query the aggregated Indicators.
    */
-  selectedField: string;
+  selectedField: EuiComboBoxOptionOption<string>;
 
   /** Is initial load in progress? */
   isLoading?: boolean;
 
   /** Is data update in progress? */
   isFetching?: boolean;
+
+  query: { refetch: VoidFunction; id: string; loading: boolean };
 }
 
 const DEFAULT_FIELD = RawIndicatorFieldId.Feed;
+
+const QUERY_ID = 'indicatorsBarchart';
 
 export const useAggregatedIndicators = ({
   timeRange,
@@ -70,12 +77,17 @@ export const useAggregatedIndicators = ({
       data: { search: searchService, query: queryService },
     },
   } = useKibana();
+  const userTimeZone = useTimeZone();
+  const userFormat = useDateFormat();
 
   const { selectedPatterns } = useSourcererDataView();
 
   const { inspectorAdapters } = useInspector();
 
-  const [field, setField] = useState<string>(DEFAULT_FIELD);
+  const [field, setField] = useState<EuiComboBoxOptionOption<string>>({
+    label: DEFAULT_FIELD,
+    value: 'string',
+  });
 
   const aggregatedIndicatorsQuery = useMemo(
     () =>
@@ -83,13 +95,15 @@ export const useAggregatedIndicators = ({
         queryService,
         searchService,
         inspectorAdapter: inspectorAdapters.requests,
+        userTimeZone,
+        userFormat,
       }),
-    [inspectorAdapters, queryService, searchService]
+    [inspectorAdapters.requests, queryService, searchService, userFormat, userTimeZone]
   );
 
-  const { data, isLoading, isFetching } = useQuery(
+  const { data, isLoading, isFetching, refetch } = useQuery(
     [
-      'indicatorsBarchart',
+      QUERY_ID,
       {
         filters,
         field,
@@ -113,6 +127,11 @@ export const useAggregatedIndicators = ({
     [queryService.timefilter.timefilter, timeRange]
   );
 
+  const query = useMemo(
+    () => ({ refetch, id: QUERY_ID, loading: isLoading }),
+    [isLoading, refetch]
+  );
+
   return {
     dateRange,
     series: data || [],
@@ -120,5 +139,6 @@ export const useAggregatedIndicators = ({
     selectedField: field,
     isLoading,
     isFetching,
+    query,
   };
 };

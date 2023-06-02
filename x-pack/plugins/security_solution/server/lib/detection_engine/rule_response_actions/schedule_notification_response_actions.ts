@@ -5,42 +5,74 @@
  * 2.0.
  */
 
-import { map, uniq } from 'lodash';
-import type { RuleResponseAction } from '../../../../common/detection_engine/rule_response_actions/schemas';
-import { RESPONSE_ACTION_TYPES } from '../../../../common/detection_engine/rule_response_actions/schemas';
+import { reduce, each, uniq } from 'lodash';
+import type { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
+import { ALERT_RULE_NAME, ALERT_RULE_UUID } from '@kbn/rule-data-utils';
+import type { EndpointAppContextService } from '../../../endpoint/endpoint_app_context_services';
 import type { SetupPlugins } from '../../../plugin_contract';
+import { RESPONSE_ACTION_TYPES } from '../../../../common/detection_engine/rule_response_actions/schemas';
+import { osqueryResponseAction } from './osquery_response_action';
+import { endpointResponseAction } from './endpoint_response_action';
+import type { AlertsWithAgentType } from './types';
+import type { ScheduleNotificationActions } from '../rule_types/types';
 
-interface ScheduleNotificationActions {
-  signals: unknown[];
-  responseActions: RuleResponseAction[];
+type Alerts = Array<ParsedTechnicalFields & { agent?: { id: string; name: string } }>;
+
+interface ScheduleNotificationResponseActionsService {
+  endpointAppContextService: EndpointAppContextService;
+  osqueryCreateActionService?: SetupPlugins['osquery']['createActionService'];
 }
 
-interface IAlert {
-  agent: {
-    id: string;
+export const getScheduleNotificationResponseActionsService =
+  ({
+    osqueryCreateActionService,
+    endpointAppContextService,
+  }: ScheduleNotificationResponseActionsService) =>
+  ({ signals, responseActions }: ScheduleNotificationActions) => {
+    const filteredAlerts = (signals as Alerts).filter((alert) => alert.agent?.id);
+
+    const { alerts, agentIds, alertIds, hosts }: AlertsWithAgentType = reduce(
+      filteredAlerts,
+      (acc, alert) => {
+        const agentId = alert.agent?.id;
+        if (agentId !== undefined) {
+          return {
+            alerts: [...acc.alerts, alert],
+            agentIds: uniq([...acc.agentIds, agentId]),
+            alertIds: [...acc.alertIds, (alert as unknown as { _id: string })._id],
+            hosts: {
+              ...acc.hosts,
+              [agentId]: {
+                name: alert.agent?.name || '',
+              },
+            },
+          };
+        }
+        return acc;
+      },
+      { alerts: [], agentIds: [], alertIds: [], hosts: {} } as AlertsWithAgentType
+    );
+
+    each(responseActions, (responseAction) => {
+      if (
+        responseAction.actionTypeId === RESPONSE_ACTION_TYPES.OSQUERY &&
+        osqueryCreateActionService
+      ) {
+        osqueryResponseAction(responseAction, osqueryCreateActionService, {
+          alerts,
+          alertIds,
+          agentIds,
+        });
+      }
+      if (responseAction.actionTypeId === RESPONSE_ACTION_TYPES.ENDPOINT) {
+        endpointResponseAction(responseAction, endpointAppContextService, {
+          alerts,
+          alertIds,
+          agentIds,
+          hosts,
+          ruleId: alerts[0][ALERT_RULE_UUID],
+          ruleName: alerts[0][ALERT_RULE_NAME],
+        });
+      }
+    });
   };
-}
-
-export const scheduleNotificationResponseActions = (
-  { signals, responseActions }: ScheduleNotificationActions,
-  osqueryCreateAction?: SetupPlugins['osquery']['osqueryCreateAction']
-) => {
-  const filteredAlerts = (signals as IAlert[]).filter((alert) => alert.agent?.id);
-  const agentIds = uniq(filteredAlerts.map((alert: IAlert) => alert.agent?.id));
-  const alertIds = map(filteredAlerts, '_id');
-
-  responseActions.forEach((responseAction) => {
-    if (responseAction.actionTypeId === RESPONSE_ACTION_TYPES.OSQUERY && osqueryCreateAction) {
-      const { savedQueryId, packId, queries, ecsMapping, ...rest } = responseAction.params;
-
-      return osqueryCreateAction({
-        ...rest,
-        queries,
-        ecs_mapping: ecsMapping,
-        saved_query_id: savedQueryId,
-        agent_ids: agentIds,
-        alert_ids: alertIds,
-      });
-    }
-  });
-};

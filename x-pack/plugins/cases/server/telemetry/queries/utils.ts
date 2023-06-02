@@ -16,12 +16,20 @@ import {
 import type {
   CaseAggregationResult,
   Buckets,
-  CasesTelemetry,
   MaxBucketOnCaseAggregation,
   SolutionTelemetry,
+  AttachmentFramework,
+  AttachmentAggregationResult,
+  BucketsWithMaxOnCase,
+  AttachmentStats,
+  FileAttachmentStats,
+  FileAttachmentAggregationResults,
+  FileAttachmentAggsResult,
+  AttachmentFrameworkAggsResult,
 } from '../types';
 import { buildFilter } from '../../client/utils';
-import type { OWNERS } from '../constants';
+import type { Owner } from '../../../common/constants/types';
+import { FILE_ATTACHMENT_TYPE } from '../../../common/api';
 
 export const getCountsAggregationQuery = (savedObjectType: string) => ({
   counts: {
@@ -154,22 +162,39 @@ export const getBucketFromAggregation = ({
   aggs?: Record<string, unknown>;
 }): Buckets['buckets'] => (get(aggs, `${key}.buckets`) ?? []) as Buckets['buckets'];
 
-export const getSolutionValues = (
-  aggregations: CaseAggregationResult | undefined,
-  owner: typeof OWNERS[number]
-): SolutionTelemetry => {
+export const getSolutionValues = ({
+  caseAggregations,
+  attachmentAggregations,
+  filesAggregations,
+  owner,
+}: {
+  caseAggregations?: CaseAggregationResult;
+  attachmentAggregations?: AttachmentAggregationResult;
+  filesAggregations?: FileAttachmentAggregationResults;
+  owner: Owner;
+}): SolutionTelemetry => {
   const aggregationsBuckets = getAggregationsBuckets({
-    aggs: aggregations,
+    aggs: caseAggregations,
     keys: ['totalsByOwner', 'securitySolution.counts', 'observability.counts', 'cases.counts'],
   });
 
+  const totalCasesForOwner = findValueInBuckets(aggregationsBuckets.totalsByOwner, owner);
+  const attachmentsAggsForOwner = attachmentAggregations?.[owner];
+  const fileAttachmentsForOwner = filesAggregations?.[owner];
+
   return {
-    total: findValueInBuckets(aggregationsBuckets.totalsByOwner, owner),
+    total: totalCasesForOwner,
     ...getCountsFromBuckets(aggregationsBuckets[`${owner}.counts`]),
+    ...getAttachmentsFrameworkStats({
+      attachmentAggregations: attachmentsAggsForOwner,
+      filesAggregations: fileAttachmentsForOwner,
+      totalCasesForOwner,
+    }),
     assignees: {
-      total: aggregations?.[owner].totalAssignees.value ?? 0,
-      totalWithZero: aggregations?.[owner].assigneeFilters.buckets.zero.doc_count ?? 0,
-      totalWithAtLeastOne: aggregations?.[owner].assigneeFilters.buckets.atLeastOne.doc_count ?? 0,
+      total: caseAggregations?.[owner].totalAssignees.value ?? 0,
+      totalWithZero: caseAggregations?.[owner].assigneeFilters.buckets.zero.doc_count ?? 0,
+      totalWithAtLeastOne:
+        caseAggregations?.[owner].assigneeFilters.buckets.atLeastOne.doc_count ?? 0,
     },
   };
 };
@@ -183,14 +208,113 @@ export const getAggregationsBuckets = ({
 }: {
   keys: string[];
   aggs?: Record<string, unknown>;
-}): Record<string, Buckets['buckets']> =>
-  keys.reduce(
-    (acc, key) => ({
-      ...acc,
-      [key]: getBucketFromAggregation({ aggs, key }),
-    }),
-    {}
-  );
+}) =>
+  keys.reduce<Record<string, Buckets['buckets']>>((acc, key) => {
+    acc[key] = getBucketFromAggregation({ aggs, key });
+    return acc;
+  }, {});
+
+export const getAttachmentsFrameworkStats = ({
+  attachmentAggregations,
+  filesAggregations,
+  totalCasesForOwner,
+}: {
+  attachmentAggregations?: AttachmentFrameworkAggsResult;
+  filesAggregations?: FileAttachmentAggsResult;
+  totalCasesForOwner: number;
+}): AttachmentFramework => {
+  if (!attachmentAggregations) {
+    return emptyAttachmentFramework();
+  }
+
+  const averageFileSize = getAverageFileSize(filesAggregations);
+  const topMimeTypes = filesAggregations?.topMimeTypes;
+
+  return {
+    attachmentFramework: {
+      externalAttachments: getAttachmentRegistryStats(
+        attachmentAggregations.externalReferenceTypes,
+        totalCasesForOwner
+      ),
+      persistableAttachments: getAttachmentRegistryStats(
+        attachmentAggregations.persistableReferenceTypes,
+        totalCasesForOwner
+      ),
+      files: getFileAttachmentStats({
+        registryResults: attachmentAggregations.externalReferenceTypes,
+        averageFileSize,
+        totalCasesForOwner,
+        topMimeTypes,
+      }),
+    },
+  };
+};
+
+const getAverageFileSize = (filesAggregations?: FileAttachmentAggsResult) => {
+  if (filesAggregations?.averageSize?.value == null) {
+    return 0;
+  }
+
+  return Math.round(filesAggregations.averageSize.value);
+};
+
+const getAttachmentRegistryStats = (
+  registryResults: BucketsWithMaxOnCase,
+  totalCasesForOwner: number
+): AttachmentStats[] => {
+  const stats: AttachmentStats[] = [];
+
+  for (const bucket of registryResults.buckets) {
+    const commonFields = {
+      average: calculateTypePerCaseAverage(bucket.doc_count, totalCasesForOwner),
+      maxOnACase: bucket.references.cases.max.value,
+      total: bucket.doc_count,
+    };
+
+    stats.push({
+      type: bucket.key,
+      ...commonFields,
+    });
+  }
+
+  return stats;
+};
+
+const calculateTypePerCaseAverage = (typeDocCount: number | undefined, totalCases: number) => {
+  if (typeDocCount == null || totalCases === 0) {
+    return 0;
+  }
+
+  return Math.round(typeDocCount / totalCases);
+};
+
+const getFileAttachmentStats = ({
+  registryResults,
+  averageFileSize,
+  totalCasesForOwner,
+  topMimeTypes,
+}: {
+  registryResults: BucketsWithMaxOnCase;
+  averageFileSize?: number;
+  totalCasesForOwner: number;
+  topMimeTypes?: Buckets<string>;
+}): FileAttachmentStats => {
+  const fileBucket = registryResults.buckets.find((bucket) => bucket.key === FILE_ATTACHMENT_TYPE);
+
+  const mimeTypes =
+    topMimeTypes?.buckets.map((mimeType) => ({
+      count: mimeType.doc_count,
+      name: mimeType.key,
+    })) ?? [];
+
+  return {
+    averageSize: averageFileSize ?? 0,
+    average: calculateTypePerCaseAverage(fileBucket?.doc_count, totalCasesForOwner),
+    maxOnACase: fileBucket?.references.cases.max.value ?? 0,
+    total: fileBucket?.doc_count ?? 0,
+    topMimeTypes: mimeTypes,
+  };
+};
 
 export const getOnlyAlertsCommentsFilter = () =>
   buildFilter({
@@ -208,81 +332,18 @@ export const getOnlyConnectorsFilter = () =>
     type: CASE_USER_ACTION_SAVED_OBJECT,
   });
 
-export const getTelemetryDataEmptyState = (): CasesTelemetry => ({
-  cases: {
-    all: {
-      assignees: {
-        total: 0,
-        totalWithZero: 0,
-        totalWithAtLeastOne: 0,
-      },
-      total: 0,
-      monthly: 0,
-      weekly: 0,
-      daily: 0,
-      status: {
-        open: 0,
-        inProgress: 0,
-        closed: 0,
-      },
-      syncAlertsOn: 0,
-      syncAlertsOff: 0,
-      totalUsers: 0,
-      totalParticipants: 0,
-      totalTags: 0,
-      totalWithAlerts: 0,
-      totalWithConnectors: 0,
-      latestDates: {
-        createdAt: null,
-        updatedAt: null,
-        closedAt: null,
-      },
-    },
-    sec: {
-      total: 0,
-      monthly: 0,
-      weekly: 0,
-      daily: 0,
-      assignees: { total: 0, totalWithAtLeastOne: 0, totalWithZero: 0 },
-    },
-    obs: {
-      total: 0,
-      monthly: 0,
-      weekly: 0,
-      daily: 0,
-      assignees: { total: 0, totalWithAtLeastOne: 0, totalWithZero: 0 },
-    },
-    main: {
-      total: 0,
-      monthly: 0,
-      weekly: 0,
-      daily: 0,
-      assignees: { total: 0, totalWithAtLeastOne: 0, totalWithZero: 0 },
-    },
+const emptyAttachmentFramework = (): AttachmentFramework => ({
+  attachmentFramework: {
+    persistableAttachments: [],
+    externalAttachments: [],
+    files: emptyFileAttachment(),
   },
-  userActions: { all: { total: 0, monthly: 0, weekly: 0, daily: 0, maxOnACase: 0 } },
-  comments: { all: { total: 0, monthly: 0, weekly: 0, daily: 0, maxOnACase: 0 } },
-  alerts: { all: { total: 0, monthly: 0, weekly: 0, daily: 0, maxOnACase: 0 } },
-  connectors: {
-    all: {
-      all: { totalAttached: 0 },
-      itsm: { totalAttached: 0 },
-      sir: { totalAttached: 0 },
-      jira: { totalAttached: 0 },
-      resilient: { totalAttached: 0 },
-      swimlane: { totalAttached: 0 },
-      maxAttachedToACase: 0,
-    },
-  },
-  pushes: {
-    all: { total: 0, maxOnACase: 0 },
-  },
-  configuration: {
-    all: {
-      closure: {
-        manually: 0,
-        automatic: 0,
-      },
-    },
-  },
+});
+
+const emptyFileAttachment = (): FileAttachmentStats => ({
+  average: 0,
+  averageSize: 0,
+  maxOnACase: 0,
+  total: 0,
+  topMimeTypes: [],
 });

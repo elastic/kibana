@@ -25,12 +25,7 @@ import {
   FormBasedDimensionEditorProps,
 } from './dimension_panel';
 import { mountWithIntl as mount, shallowWithIntl as shallow } from '@kbn/test-jest-helpers';
-import {
-  IUiSettingsClient,
-  SavedObjectsClientContract,
-  HttpSetup,
-  CoreStart,
-} from '@kbn/core/public';
+import { IUiSettingsClient, HttpSetup, CoreStart, NotificationsStart } from '@kbn/core/public';
 import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { useExistingFieldsReader } from '@kbn/unified-field-list-plugin/public/hooks/use_existing_fields';
 import { generateId } from '../../../id_generator';
@@ -122,6 +117,15 @@ const fields = [
     searchable: true,
     exists: true,
   },
+  // Added to test issue#148062 about the use of Object method names as fields name
+  ...Object.getOwnPropertyNames(Object.getPrototypeOf({})).map((name) => ({
+    name,
+    displayName: name,
+    type: 'string',
+    aggregatable: true,
+    searchable: true,
+    exists: true,
+  })),
   documentField,
 ];
 
@@ -218,11 +222,11 @@ describe('FormBasedDimensionEditor', () => {
       filterOperations: () => true,
       storage: {} as IStorageWrapper,
       uiSettings: {} as IUiSettingsClient,
-      savedObjectsClient: {} as SavedObjectsClientContract,
       http: {} as HttpSetup,
       fieldFormats: fieldFormatsServiceMock.createStartContract(),
       unifiedSearch: unifiedSearchPluginMock.createStartContract(),
       dataViews: dataViewPluginMocks.createStartContract(),
+      notifications: {} as NotificationsStart,
       data: {
         fieldFormats: {
           getType: jest.fn().mockReturnValue({
@@ -330,7 +334,7 @@ describe('FormBasedDimensionEditor', () => {
       .filter('[data-test-subj="indexPattern-dimension-field"]')
       .prop('options');
 
-    expect(options).toHaveLength(2);
+    expect(options).toHaveLength(3);
 
     expect(options![0].label).toEqual('Records');
     expect(options![1].options!.map(({ label }) => label)).toEqual([
@@ -339,6 +343,11 @@ describe('FormBasedDimensionEditor', () => {
       'memory',
       'source',
     ]);
+
+    // these fields are generated to test the issue #148062 about fields that are using JS Object method names
+    expect(options![2].options!.map(({ label }) => label)).toEqual(
+      Object.getOwnPropertyNames(Object.getPrototypeOf({})).sort()
+    );
   });
 
   it('should hide fields that have no data', () => {
@@ -1558,6 +1567,23 @@ describe('FormBasedDimensionEditor', () => {
     it('should report a generic error for invalid shift string', () => {
       const props = getProps({
         timeShift: '5 months',
+      });
+      wrapper = mount(<FormBasedDimensionEditorComponent {...props} />);
+
+      expect(wrapper.find(TimeShift).find(EuiComboBox).prop('isInvalid')).toBeTruthy();
+
+      expect(
+        wrapper
+          .find(TimeShift)
+          .find('[data-test-subj="indexPattern-dimension-time-shift-row"]')
+          .first()
+          .prop('error')
+      ).toBe('Time shift value is not valid.');
+    });
+
+    it('should mark absolute time shift as invalid', () => {
+      const props = getProps({
+        timeShift: 'startAt(2022-11-02T00:00:00.000Z)',
       });
       wrapper = mount(<FormBasedDimensionEditorComponent {...props} />);
 

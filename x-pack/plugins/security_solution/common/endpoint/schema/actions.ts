@@ -15,11 +15,36 @@ import {
 
 const BaseActionRequestSchema = {
   /** A list of endpoint IDs whose hosts will be isolated (Fleet Agent IDs will be retrieved for these) */
-  endpoint_ids: schema.arrayOf(schema.string(), { minSize: 1 }),
+  endpoint_ids: schema.arrayOf(schema.string({ minLength: 1 }), {
+    minSize: 1,
+    validate: (endpointIds) => {
+      if (endpointIds.map((v) => v.trim()).some((v) => !v.length)) {
+        return 'endpoint_ids cannot contain empty strings';
+      }
+    },
+  }),
   /** If defined, any case associated with the given IDs will be updated */
-  alert_ids: schema.maybe(schema.arrayOf(schema.string())),
+  alert_ids: schema.maybe(
+    schema.arrayOf(schema.string({ minLength: 1 }), {
+      minSize: 1,
+      validate: (alertIds) => {
+        if (alertIds.map((v) => v.trim()).some((v) => !v.length)) {
+          return 'alert_ids cannot contain empty strings';
+        }
+      },
+    })
+  ),
   /** Case IDs to be updated */
-  case_ids: schema.maybe(schema.arrayOf(schema.string())),
+  case_ids: schema.maybe(
+    schema.arrayOf(schema.string({ minLength: 1 }), {
+      minSize: 1,
+      validate: (caseIds) => {
+        if (caseIds.map((v) => v.trim()).some((v) => !v.length)) {
+          return 'case_ids cannot contain empty strings';
+        }
+      },
+    })
+  ),
   comment: schema.maybe(schema.string()),
   parameters: schema.maybe(schema.object({})),
 };
@@ -39,11 +64,6 @@ export const KillOrSuspendProcessRequestSchema = {
     ]),
   }),
 };
-
-export const ResponseActionBodySchema = schema.oneOf([
-  NoParametersRequestSchema.body,
-  KillOrSuspendProcessRequestSchema.body,
-]);
 
 export const EndpointActionLogRequestSchema = {
   query: schema.object({
@@ -111,6 +131,47 @@ export const EndpointActionListRequestSchema = {
         schema.string({ minLength: 1 }),
       ])
     ),
+    withOutputs: schema.maybe(
+      schema.oneOf([
+        schema.arrayOf(schema.string({ minLength: 1 }), {
+          minSize: 1,
+          validate: (actionIds) => {
+            if (actionIds.map((v) => v.trim()).some((v) => !v.length)) {
+              return 'actionIds cannot contain empty strings';
+            }
+          },
+        }),
+        schema.string({
+          minLength: 1,
+          validate: (actionId) => {
+            if (!actionId.trim().length) {
+              return 'actionId cannot be an empty string';
+            }
+          },
+        }),
+      ])
+    ),
+    withAutomatedActions: schema.boolean({ defaultValue: true }),
+    alertId: schema.maybe(
+      schema.oneOf([
+        schema.arrayOf(schema.string({ minLength: 1 }), {
+          minSize: 1,
+          validate: (alertIds) => {
+            if (alertIds.map((v) => v.trim()).some((v) => !v.length)) {
+              return 'alertIds cannot contain empty strings';
+            }
+          },
+        }),
+        schema.string({
+          minLength: 1,
+          validate: (alertId) => {
+            if (!alertId.trim().length) {
+              return 'alertId cannot be an empty string';
+            }
+          },
+        }),
+      ])
+    ),
   }),
 };
 
@@ -132,7 +193,7 @@ export type ResponseActionGetFileRequestBody = TypeOf<typeof EndpointActionGetFi
 export const EndpointActionFileDownloadSchema = {
   params: schema.object({
     action_id: schema.string({ minLength: 1 }),
-    agent_id: schema.string({ minLength: 1 }),
+    file_id: schema.string({ minLength: 1 }),
   }),
 };
 
@@ -144,8 +205,60 @@ export type EndpointActionFileDownloadParams = TypeOf<
 export const EndpointActionFileInfoSchema = {
   params: schema.object({
     action_id: schema.string({ minLength: 1 }),
-    agent_id: schema.string({ minLength: 1 }),
+    file_id: schema.string({ minLength: 1 }),
   }),
 };
 
 export type EndpointActionFileInfoParams = TypeOf<typeof EndpointActionFileInfoSchema.params>;
+
+export const ExecuteActionRequestSchema = {
+  body: schema.object({
+    ...BaseActionRequestSchema,
+    parameters: schema.object({
+      command: schema.string({
+        minLength: 1,
+        validate: (value) => {
+          if (!value.trim().length) {
+            return 'command cannot be an empty string';
+          }
+        },
+      }),
+      /**
+       * The max timeout value before the command is killed. Number represents milliseconds
+       */
+      timeout: schema.maybe(schema.number({ min: 1 })),
+    }),
+  }),
+};
+
+export type ExecuteActionRequestBody = TypeOf<typeof ExecuteActionRequestSchema.body>;
+
+export const ResponseActionBodySchema = schema.oneOf([
+  NoParametersRequestSchema.body,
+  KillOrSuspendProcessRequestSchema.body,
+  EndpointActionGetFileSchema.body,
+  ExecuteActionRequestSchema.body,
+]);
+
+export const UploadActionRequestSchema = {
+  body: schema.object({
+    ...BaseActionRequestSchema,
+
+    parameters: schema.object({
+      overwrite: schema.maybe(schema.boolean({ defaultValue: false })),
+    }),
+
+    file: schema.stream(),
+  }),
+};
+
+/** Type used by the server's API for `upload` action */
+export type UploadActionApiRequestBody = TypeOf<typeof UploadActionRequestSchema.body>;
+
+/**
+ * Type used on the UI side. The `file` definition is different on the UI side, thus the
+ * need for a separate type.
+ */
+export type UploadActionUIRequestBody = Omit<UploadActionApiRequestBody, 'file'> & {
+  file: File;
+};

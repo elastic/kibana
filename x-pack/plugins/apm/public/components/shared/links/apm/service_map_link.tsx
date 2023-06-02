@@ -22,5 +22,7 @@ interface ServiceMapLinkProps extends APMLinkExtendProps {
 
 export function ServiceMapLink({ serviceName, ...rest }: ServiceMapLinkProps) {
   const href = useServiceMapHref(serviceName);
-  return <EuiLink href={href} {...rest} />;
+  return (
+    <EuiLink data-test-subj="apmServiceMapLinkLink" href={href} {...rest} />
+  );
 }

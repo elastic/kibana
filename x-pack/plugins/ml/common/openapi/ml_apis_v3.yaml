@@ -10,7 +10,7 @@ tags:
   - name: ml
     description: Machine learning
 servers:
-  - url: https://localhost:5601/
+  - url: https://localhost:5601
 paths:
   /s/{spaceId}/api/ml/saved_objects/sync:
     get:
@@ -30,10 +30,16 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/mlSyncResponse'
+                $ref: '#/components/schemas/mlSync200Response'
               examples:
                 syncExample:
                   $ref: '#/components/examples/mlSyncExample'
+        '401':
+          description: Authorization information is missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/mlSync4xxResponse'
 components:
  parameters:
   spaceParam:
@@ -131,9 +137,9 @@ components:
       properties:
         success:
           $ref: '#/components/schemas/mlSyncResponseSuccess'
-    mlSyncResponse:
+    mlSync200Response:
       type: object
-      title: Sync API response
+      title: Successful sync API response
       properties:
         datafeedsAdded:
           type: object
@@ -149,21 +155,32 @@ components:
           $ref: '#/components/schemas/mlSyncResponseSavedObjectsCreated'
         savedObjectsDeleted:
           $ref: '#/components/schemas/mlSyncResponseSavedObjectsDeleted'
+    mlSync4xxResponse:
+      type: object
+      title: Unsuccessful sync API response
+      properties:
+        error:
+          type: string
+          example: Unauthorized
+        message:
+          type: string 
+        statusCode:
+          type: integer
+          example: 401
  examples:
    mlSyncExample:
      summary: Two anomaly detection jobs required synchronization in this example.
      value:
        {
          "savedObjectsCreated": {
-           "anomaly_detector": {
+           "anomaly-detector": {
              "myjob1": { "success":true },
-             "myjob2":{ "success":true }
+             "myjob2": { "success":true }
            }
           },
           "savedObjectsDeleted": {},
-          "datafeedsAdded":{},
-          "datafeedsRemoved":{}
+          "datafeedsAdded": {},
+          "datafeedsRemoved": {}
         }
 security:
   - basicAuth: [ ]
-  - ApiKeyAuth: [ ]

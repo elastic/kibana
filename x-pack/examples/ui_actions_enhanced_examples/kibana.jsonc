@@ -1,0 +1,29 @@
+{
+  "type": "plugin",
+  "id": "@kbn/ui-actions-enhanced-examples-plugin",
+  "owner": "@elastic/appex-sharedux",
+  "plugin": {
+    "id": "uiActionsEnhancedExamples",
+    "server": false,
+    "browser": true,
+    "configPath": [
+      "ui_actions_enhanced_examples"
+    ],
+    "requiredPlugins": [
+      "uiActions",
+      "uiActionsEnhanced",
+      "data",
+      "discover",
+      "dashboard",
+      "dashboardEnhanced",
+      "developerExamples",
+      "unifiedSearch"
+    ],
+    "requiredBundles": [
+      "dashboardEnhanced",
+      "embeddable",
+      "kibanaUtils",
+      "kibanaReact"
+    ]
+  }
+}

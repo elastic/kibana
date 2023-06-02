@@ -12,7 +12,6 @@ import {
   elasticsearchServiceMock,
   httpServerMock,
   httpServiceMock,
-  loggingSystemMock,
   savedObjectsClientMock,
 } from '@kbn/core/server/mocks';
 import { ActionStatusRequestSchema } from '../../../../common/endpoint/schema/actions';
@@ -21,16 +20,15 @@ import {
   ENDPOINT_ACTION_RESPONSES_INDEX_PATTERN,
   ENDPOINT_ACTIONS_INDEX,
 } from '../../../../common/endpoint/constants';
-import { parseExperimentalConfigValue } from '../../../../common/experimental_features';
-import { createMockConfig } from '../../../lib/detection_engine/routes/__mocks__';
 import { EndpointAppContextService } from '../../endpoint_app_context_services';
 import {
+  createMockEndpointAppContext,
   createMockEndpointAppContextServiceSetupContract,
   createMockEndpointAppContextServiceStartContract,
   createRouteHandlerContext,
 } from '../../mocks';
 import { registerActionStatusRoutes } from './status';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { ACTION_RESPONSE_INDICES } from '../../services/actions/constants';
 import type {
   LogsEndpointAction,
@@ -66,12 +64,13 @@ describe('Endpoint Pending Action Summary API', () => {
     endpointAppContextService.setup(createMockEndpointAppContextServiceSetupContract());
     endpointAppContextService.start(createMockEndpointAppContextServiceStartContract());
 
+    const endpointContextMock = createMockEndpointAppContext();
+
     registerActionStatusRoutes(routerMock, {
-      logFactory: loggingSystemMock.create(),
+      ...endpointContextMock,
       service: endpointAppContextService,
-      config: () => Promise.resolve(createMockConfig()),
       experimentalFeatures: {
-        ...parseExperimentalConfigValue(createMockConfig().enableExperimental),
+        ...endpointContextMock.experimentalFeatures,
         pendingActionResponsesWithAck,
       },
     });
@@ -142,17 +141,17 @@ describe('Endpoint Pending Action Summary API', () => {
 
     it('should accept a single agent ID', () => {
       expect(() => {
-        ActionStatusRequestSchema.query.validate({ agent_ids: uuid.v4() });
+        ActionStatusRequestSchema.query.validate({ agent_ids: uuidv4() });
       }).not.toThrow();
     });
 
     it('should accept multiple agent IDs', () => {
       expect(() => {
-        ActionStatusRequestSchema.query.validate({ agent_ids: [uuid.v4(), uuid.v4()] });
+        ActionStatusRequestSchema.query.validate({ agent_ids: [uuidv4(), uuidv4()] });
       }).not.toThrow();
     });
     it('should limit the maximum number of agent IDs', () => {
-      const tooManyCooks = new Array(200).fill(uuid.v4()); // all the same ID string
+      const tooManyCooks = new Array(200).fill(uuidv4()); // all the same ID string
       expect(() => {
         ActionStatusRequestSchema.query.validate({ agent_ids: tooManyCooks });
       }).toThrow();

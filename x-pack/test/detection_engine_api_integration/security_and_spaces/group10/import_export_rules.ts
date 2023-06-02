@@ -17,8 +17,8 @@ import {
   binaryToString,
   createRule,
   createSignalsIndex,
+  deleteAllRules,
   deleteAllAlerts,
-  deleteSignalsIndex,
   getSimpleRule,
 } from '../../utils';
 import { deleteAllExceptions } from '../../../lists_api_integration/utils';
@@ -32,6 +32,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const log = getService('log');
+  const es = getService('es');
 
   describe('import_export_rules_flow', () => {
     beforeEach(async () => {
@@ -42,8 +43,8 @@ export default ({ getService }: FtrProviderContext): void => {
     afterEach(async () => {
       await deleteUserAndRole(getService, ROLES.soc_manager);
       await deleteAllExceptions(supertest, log);
-      await deleteSignalsIndex(supertest, log);
-      await deleteAllAlerts(supertest, log);
+      await deleteAllAlerts(supertest, log, es);
+      await deleteAllRules(supertest, log);
     });
 
     it('should be able to reimport a rule referencing an exception list with existing comments', async () => {

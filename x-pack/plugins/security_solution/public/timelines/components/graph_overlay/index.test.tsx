@@ -21,12 +21,12 @@ import {
   SUB_PLUGINS_REDUCER,
   TestProviders,
 } from '../../../common/mock';
-import { TableId, TimelineId } from '../../../../common/types/timeline';
+import { TimelineId } from '../../../../common/types/timeline';
 import { GraphOverlay } from '.';
 import { createStore } from '../../../common/store';
 import { useStateSyncingActions } from '../../../resolver/view/use_state_syncing_actions';
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
-import { tGridReducer } from '@kbn/timelines-plugin/public';
+import { TableId } from '@kbn/securitysolution-data-table';
 
 jest.mock('../../../common/containers/use_full_screen', () => ({
   useGlobalFullScreen: jest.fn(),
@@ -135,7 +135,6 @@ describe('GraphOverlay', () => {
               },
             },
             SUB_PLUGINS_REDUCER,
-            { dataTable: tGridReducer },
             kibanaObservable,
             storage
           )}
@@ -219,7 +218,6 @@ describe('GraphOverlay', () => {
               },
             },
             SUB_PLUGINS_REDUCER,
-            { dataTable: tGridReducer },
             kibanaObservable,
             storage
           )}
@@ -255,14 +253,15 @@ describe('GraphOverlay', () => {
                   [timelineId]: {
                     ...mockGlobalState.timeline.timelineById[timelineId],
                     sessionViewConfig: {
+                      processIndex: 'logs-endpoint.events.process*',
                       sessionEntityId: 'testId',
+                      sessionStartTime: '2021-10-14T08:05:34.853Z',
                     },
                   },
                 },
               },
             },
             SUB_PLUGINS_REDUCER,
-            { dataTable: tGridReducer },
             kibanaObservable,
             storage
           )}
@@ -304,7 +303,6 @@ describe('GraphOverlay', () => {
               },
             },
             SUB_PLUGINS_REDUCER,
-            { dataTable: tGridReducer },
             kibanaObservable,
             storage
           )}

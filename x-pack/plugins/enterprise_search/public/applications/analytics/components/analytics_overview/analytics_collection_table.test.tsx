@@ -11,39 +11,63 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { EuiBasicTable } from '@elastic/eui';
+import { EuiButtonGroup, EuiSuperDatePicker } from '@elastic/eui';
 
 import { AnalyticsCollection } from '../../../../../common/types/analytics';
 
-import { EuiLinkTo } from '../../../shared/react_router_helpers';
+import { AnalyticsCollectionCardWithLens } from './analytics_collection_card/analytics_collection_card';
+import { AnalyticsCollectionNotFound } from './analytics_collection_not_found';
 
 import { AnalyticsCollectionTable } from './analytics_collection_table';
 
 describe('AnalyticsCollectionTable', () => {
   const analyticsCollections: AnalyticsCollection[] = [
     {
-      event_retention_day_length: 180,
       events_datastream: 'analytics-events-example',
-      id: 'example',
       name: 'example',
     },
+    {
+      events_datastream: 'analytics-events-example2',
+      name: 'example2',
+    },
   ];
+  const props = {
+    collections: analyticsCollections,
+    isSearching: false,
+    onSearch: jest.fn(),
+  };
 
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  it('renders and provides navigation to the view detail pages', () => {
-    const wrapper = shallow(
-      <AnalyticsCollectionTable collections={analyticsCollections} isLoading={false} />
-    );
+  it('renders cards', () => {
+    const wrapper = shallow(<AnalyticsCollectionTable {...props} />);
+    const collectionCards = wrapper.find(AnalyticsCollectionCardWithLens);
 
-    expect(wrapper.find(EuiBasicTable)).toHaveLength(1);
+    expect(collectionCards).toHaveLength(analyticsCollections.length);
+    expect(collectionCards.at(1).prop('collection')).toMatchObject(analyticsCollections[1]);
+  });
 
-    const rows = wrapper.find(EuiBasicTable).prop('items');
-    expect(rows).toHaveLength(1);
-    expect(rows[0]).toMatchObject(analyticsCollections[0]);
+  it('renders filters', () => {
+    const buttonGroup = shallow(<AnalyticsCollectionTable {...props} />).find(EuiButtonGroup);
 
-    expect(wrapper.dive().find(EuiLinkTo).first().prop('to')).toBe('/collections/example/events');
+    expect(buttonGroup).toHaveLength(1);
+    expect(buttonGroup.prop('options')).toHaveLength(4);
+    expect(buttonGroup.prop('idSelected')).toEqual('Searches');
+  });
+
+  it('renders datePick', () => {
+    const datePicker = shallow(<AnalyticsCollectionTable {...props} />).find(EuiSuperDatePicker);
+
+    expect(datePicker).toHaveLength(1);
+    expect(datePicker.prop('start')).toEqual('now-7d');
+    expect(datePicker.prop('end')).toEqual('now');
+  });
+
+  it('renders not found page', () => {
+    const wrapper = shallow(<AnalyticsCollectionTable {...props} collections={[]} />);
+
+    expect(wrapper.find(AnalyticsCollectionNotFound)).toHaveLength(1);
   });
 });

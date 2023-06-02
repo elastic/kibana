@@ -22,9 +22,12 @@ import type {
 } from '@kbn/unified-search-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { parseTimeShift } from '@kbn/data-plugin/common';
+import moment from 'moment';
+import { nonNullable } from '../../../../../../utils';
+import { DateRange } from '../../../../../../../common/types';
 import type { IndexPattern } from '../../../../../../types';
 import { memoizedGetAvailableOperationsByMetadata } from '../../../operations';
-import { tinymathFunctions, groupArgsByType, unquotedStringRegex, nonNullable } from '../util';
+import { tinymathFunctions, groupArgsByType, unquotedStringRegex } from '../util';
 import type { GenericOperationDefinition } from '../..';
 import { getFunctionSignatureLabel, getHelpTextContent } from './formula_help';
 import { hasFunctionFieldArgument } from '../validation';
@@ -146,6 +149,7 @@ export async function suggest({
   dataViews,
   unifiedSearch,
   dateHistogramInterval,
+  dateRange,
 }: {
   expression: string;
   zeroIndexedOffset: number;
@@ -155,6 +159,7 @@ export async function suggest({
   unifiedSearch: UnifiedSearchPublicPluginStart;
   dataViews: DataViewsPublicPluginStart;
   dateHistogramInterval?: number;
+  dateRange: DateRange;
 }): Promise<LensMathSuggestions> {
   const text =
     expression.substr(0, zeroIndexedOffset) + MARKER + expression.substr(zeroIndexedOffset);
@@ -177,6 +182,7 @@ export async function suggest({
         dataViews,
         indexPattern,
         dateHistogramInterval,
+        dateRange,
       });
     } else if (tokenInfo?.parent) {
       return getArgumentSuggestions(
@@ -362,32 +368,55 @@ function getArgumentSuggestions(
   return { list: [], type: SUGGESTION_TYPE.FIELD };
 }
 
+const anchoredAbsoluteTimeShiftRegexp = /^(start|end)At\(/;
+
+function computeAbsSuggestion(dateRange: DateRange, prefix: string, value: string) {
+  const refDate = prefix.startsWith('s') ? dateRange.fromDate : dateRange.toDate;
+  return moment(refDate).subtract(parseTimeShift(value), 'ms').toISOString();
+}
+
 export async function getNamedArgumentSuggestions({
   ast,
   unifiedSearch,
   dataViews,
   indexPattern,
   dateHistogramInterval,
+  dateRange,
 }: {
   ast: TinymathNamedArgument;
   indexPattern: IndexPattern;
   unifiedSearch: UnifiedSearchPublicPluginStart;
   dataViews: DataViewsPublicPluginStart;
   dateHistogramInterval?: number;
+  dateRange: DateRange;
 }) {
   if (ast.name === 'shift') {
+    const validTimeShiftOptions = timeShiftOptions
+      .filter(({ value }) => {
+        if (dateHistogramInterval == null) return true;
+        const parsedValue = parseTimeShift(value);
+        return (
+          parsedValue === 'previous' ||
+          parsedValue === 'invalid' ||
+          Number.isInteger(parsedValue.asMilliseconds() / dateHistogramInterval)
+        );
+      })
+      .map(({ value }) => value);
+    const absShift = ast.value.split(MARKER)[0];
+    // Translate the relative time shifts into absolute ones
+    if (anchoredAbsoluteTimeShiftRegexp.test(absShift)) {
+      return {
+        list: validTimeShiftOptions.map(
+          (value) => `${computeAbsSuggestion(dateRange, absShift, value)})`
+        ),
+        type: SUGGESTION_TYPE.SHIFTS,
+      };
+    }
+    const extraAbsSuggestions = ['startAt', 'endAt'].map(
+      (prefix) => `${prefix}(${computeAbsSuggestion(dateRange, prefix, validTimeShiftOptions[0])})`
+    );
     return {
-      list: timeShiftOptions
-        .filter(({ value }) => {
-          if (typeof dateHistogramInterval === 'undefined') return true;
-          const parsedValue = parseTimeShift(value);
-          return (
-            parsedValue !== 'previous' &&
-            (parsedValue === 'invalid' ||
-              Number.isInteger(parsedValue.asMilliseconds() / dateHistogramInterval))
-          );
-        })
-        .map(({ value }) => value),
+      list: validTimeShiftOptions.concat(extraAbsSuggestions),
       type: SUGGESTION_TYPE.SHIFTS,
     };
   }

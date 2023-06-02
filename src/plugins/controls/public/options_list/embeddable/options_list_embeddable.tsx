@@ -6,15 +6,14 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import ReactDOM from 'react-dom';
 import { batch } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
 import { isEmpty, isEqual } from 'lodash';
 import { merge, Subject, Subscription } from 'rxjs';
+import React, { createContext, useContext } from 'react';
 import { debounceTime, map, distinctUntilChanged, skip } from 'rxjs/operators';
 
-import { i18n } from '@kbn/i18n';
 import {
   Filter,
   compareFilters,
@@ -23,24 +22,24 @@ import {
   COMPARE_ALL_OPTIONS,
   buildExistsFilter,
 } from '@kbn/es-query';
-import { ReduxEmbeddableTools, ReduxEmbeddablePackage } from '@kbn/presentation-util-plugin/public';
-import { DataView } from '@kbn/data-views-plugin/public';
+import { i18n } from '@kbn/i18n';
+import { DataView, FieldSpec } from '@kbn/data-views-plugin/public';
 import { Embeddable, IContainer } from '@kbn/embeddable-plugin/public';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { ReduxEmbeddableTools, ReduxToolsPackage } from '@kbn/presentation-util-plugin/public';
 
-import { OptionsListReduxState } from '../types';
-import { pluginServices } from '../../services';
 import {
   ControlInput,
   ControlOutput,
-  OptionsListEmbeddableInput,
   OPTIONS_LIST_CONTROL,
+  OptionsListEmbeddableInput,
 } from '../..';
-import { getDefaultComponentState, optionsListReducers } from '../options_list_reducers';
+import { pluginServices } from '../../services';
+import { MIN_OPTIONS_LIST_REQUEST_SIZE, OptionsListReduxState } from '../types';
 import { OptionsListControl } from '../components/options_list_control';
 import { ControlsDataViewsService } from '../../services/data_views/types';
 import { ControlsOptionsListService } from '../../services/options_list/types';
-import { OptionsListField } from '../../../common/options_list/types';
+import { getDefaultComponentState, optionsListReducers } from '../options_list_reducers';
 
 const diffDataFetchProps = (
   last?: OptionsListDataFetchProps,
@@ -63,6 +62,20 @@ interface OptionsListDataFetchProps {
   filters?: ControlInput['filters'];
 }
 
+export const OptionsListEmbeddableContext = createContext<OptionsListEmbeddable | null>(null);
+export const useOptionsList = (): OptionsListEmbeddable => {
+  const optionsList = useContext<OptionsListEmbeddable | null>(OptionsListEmbeddableContext);
+  if (optionsList == null) {
+    throw new Error('useOptionsList must be used inside OptionsListEmbeddableContext.');
+  }
+  return optionsList!;
+};
+
+type OptionsListReduxEmbeddableTools = ReduxEmbeddableTools<
+  OptionsListReduxState,
+  typeof optionsListReducers
+>;
+
 export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput, ControlOutput> {
   public readonly type = OPTIONS_LIST_CONTROL;
   public deferEmbeddableLoad = true;
@@ -76,17 +89,21 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
 
   // Internal data fetching state for this input control.
   private typeaheadSubject: Subject<string> = new Subject<string>();
+  private loadMoreSubject: Subject<number> = new Subject<number>();
   private abortController?: AbortController;
   private dataView?: DataView;
-  private field?: OptionsListField;
+  private field?: FieldSpec;
 
-  private reduxEmbeddableTools: ReduxEmbeddableTools<
-    OptionsListReduxState,
-    typeof optionsListReducers
-  >;
+  // state management
+  public select: OptionsListReduxEmbeddableTools['select'];
+  public getState: OptionsListReduxEmbeddableTools['getState'];
+  public dispatch: OptionsListReduxEmbeddableTools['dispatch'];
+  public onStateChange: OptionsListReduxEmbeddableTools['onStateChange'];
+
+  private cleanupStateTools: () => void;
 
   constructor(
-    reduxEmbeddablePackage: ReduxEmbeddablePackage,
+    reduxToolsPackage: ReduxToolsPackage,
     input: OptionsListEmbeddableInput,
     output: ControlOutput,
     parent?: IContainer
@@ -98,9 +115,10 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
       pluginServices.getServices());
 
     this.typeaheadSubject = new Subject<string>();
+    this.loadMoreSubject = new Subject<number>();
 
     // build redux embeddable tools
-    this.reduxEmbeddableTools = reduxEmbeddablePackage.createTools<
+    const reduxEmbeddableTools = reduxToolsPackage.createReduxEmbeddableTools<
       OptionsListReduxState,
       typeof optionsListReducers
     >({
@@ -109,12 +127,23 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
       initialComponentState: getDefaultComponentState(),
     });
 
+    this.select = reduxEmbeddableTools.select;
+    this.getState = reduxEmbeddableTools.getState;
+    this.dispatch = reduxEmbeddableTools.dispatch;
+    this.cleanupStateTools = reduxEmbeddableTools.cleanup;
+    this.onStateChange = reduxEmbeddableTools.onStateChange;
+
     this.initialize();
   }
 
   private initialize = async () => {
     const { selectedOptions: initialSelectedOptions } = this.getInput();
     if (!initialSelectedOptions) this.setInitializationFinished();
+
+    this.dispatch.setAllowExpensiveQueries(
+      await this.optionsListService.getAllowExpensiveQueries()
+    );
+
     this.runOptionsListQuery().then(async () => {
       if (initialSelectedOptions) {
         await this.buildFilter();
@@ -144,12 +173,21 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
 
     // debounce typeahead pipe to slow down search string related queries
     const typeaheadPipe = this.typeaheadSubject.pipe(debounceTime(100));
+    const loadMorePipe = this.loadMoreSubject.pipe(debounceTime(100));
 
     // fetch available options when input changes or when search string has changed
     this.subscriptions.add(
       merge(dataFetchPipe, typeaheadPipe)
         .pipe(skip(1)) // Skip the first input update because options list query will be run by initialize.
-        .subscribe(this.runOptionsListQuery)
+        .subscribe(() => {
+          this.runOptionsListQuery();
+        })
+    );
+    // fetch more options when reaching the bottom of the available options
+    this.subscriptions.add(
+      loadMorePipe.subscribe((size) => {
+        this.runOptionsListQuery(size);
+      })
     );
 
     /**
@@ -166,19 +204,10 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
           )
         )
         .subscribe(async ({ selectedOptions: newSelectedOptions }) => {
-          const {
-            actions: {
-              clearValidAndInvalidSelections,
-              setValidAndInvalidSelections,
-              publishFilters,
-            },
-            dispatch,
-          } = this.reduxEmbeddableTools;
-
           if (!newSelectedOptions || isEmpty(newSelectedOptions)) {
-            dispatch(clearValidAndInvalidSelections({}));
+            this.dispatch.clearValidAndInvalidSelections({});
           } else {
-            const { invalidSelections } = this.reduxEmbeddableTools.getState().componentState ?? {};
+            const { invalidSelections } = this.getState().componentState ?? {};
             const newValidSelections: string[] = [];
             const newInvalidSelections: string[] = [];
             for (const selectedOption of newSelectedOptions) {
@@ -188,32 +217,24 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
               }
               newValidSelections.push(selectedOption);
             }
-            dispatch(
-              setValidAndInvalidSelections({
-                validSelections: newValidSelections,
-                invalidSelections: newInvalidSelections,
-              })
-            );
+            this.dispatch.setValidAndInvalidSelections({
+              validSelections: newValidSelections,
+              invalidSelections: newInvalidSelections,
+            });
           }
           const newFilters = await this.buildFilter();
-          dispatch(publishFilters(newFilters));
+          this.dispatch.publishFilters(newFilters);
         })
     );
   };
 
   private getCurrentDataViewAndField = async (): Promise<{
     dataView?: DataView;
-    field?: OptionsListField;
+    field?: FieldSpec;
   }> => {
     const {
-      dispatch,
-      getState,
-      actions: { setField, setDataViewId },
-    } = this.reduxEmbeddableTools;
-
-    const {
-      explicitInput: { dataViewId, fieldName, parentFieldName, childFieldName },
-    } = getState();
+      explicitInput: { dataViewId, fieldName },
+    } = this.getState();
 
     if (!this.dataView || this.dataView.id !== dataViewId) {
       try {
@@ -226,10 +247,10 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
             })
           );
       } catch (e) {
-        this.onFatalError(e);
+        this.dispatch.setErrorMessage(e.message);
       }
 
-      dispatch(setDataViewId(this.dataView?.id));
+      this.dispatch.setDataViewId(this.dataView?.id);
     }
 
     if (this.dataView && (!this.field || this.field.name !== fieldName)) {
@@ -244,50 +265,30 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
           );
         }
 
-        // pair up keyword / text fields for case insensitive search
-        const childField =
-          (childFieldName && this.dataView.getFieldByName(childFieldName)) || undefined;
-        const parentField =
-          (parentFieldName && this.dataView.getFieldByName(parentFieldName)) || undefined;
-        const textFieldName = childField?.esTypes?.includes('text')
-          ? childField.name
-          : parentField?.esTypes?.includes('text')
-          ? parentField.name
-          : undefined;
-
-        const optionsListField: OptionsListField = originalField.toSpec();
-        optionsListField.textFieldName = textFieldName;
-
-        this.field = optionsListField;
+        this.field = originalField.toSpec();
       } catch (e) {
-        this.onFatalError(e);
+        this.dispatch.setErrorMessage(e.message);
       }
-      dispatch(setField(this.field));
+      this.dispatch.setField(this.field);
     }
 
     return { dataView: this.dataView, field: this.field! };
   };
 
-  private runOptionsListQuery = async () => {
-    const {
-      dispatch,
-      getState,
-      actions: { setLoading, publishFilters, setSearchString, updateQueryResults },
-    } = this.reduxEmbeddableTools;
-
+  private runOptionsListQuery = async (size: number = MIN_OPTIONS_LIST_REQUEST_SIZE) => {
     const previousFieldName = this.field?.name;
     const { dataView, field } = await this.getCurrentDataViewAndField();
     if (!dataView || !field) return;
 
     if (previousFieldName && field.name !== previousFieldName) {
-      dispatch(setSearchString(''));
+      this.dispatch.setSearchString('');
     }
 
     const {
-      componentState: { searchString },
+      componentState: { searchString, allowExpensiveQueries },
       explicitInput: { selectedOptions, runPastTimeout, existsSelected, sort },
-    } = getState();
-    dispatch(setLoading(true));
+    } = this.getState();
+    this.dispatch.setLoading(true);
     if (searchString.valid) {
       // need to get filters, query, ignoreParentSettings, and timeRange from input for inheritance
       const {
@@ -307,34 +308,45 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
               mode: 'absolute' as 'absolute',
             }
           : globalTimeRange;
-      const { suggestions, invalidSelections, totalCardinality } =
-        await this.optionsListService.runOptionsListRequest(
-          {
-            sort,
-            field,
-            query,
-            filters,
-            dataView,
-            timeRange,
-            searchString: searchString.value,
-            runPastTimeout,
-            selectedOptions,
-          },
-          this.abortController.signal
-        );
+
+      const response = await this.optionsListService.runOptionsListRequest(
+        {
+          sort,
+          size,
+          field,
+          query,
+          filters,
+          dataView,
+          timeRange,
+          runPastTimeout,
+          selectedOptions,
+          allowExpensiveQueries,
+          searchString: searchString.value,
+        },
+        this.abortController.signal
+      );
+      if (this.optionsListService.optionsListResponseWasFailure(response)) {
+        if (response.error === 'aborted') {
+          // This prevents an aborted request (which can happen, for example, when a user types a search string too quickly)
+          // from prematurely setting loading to `false` and updating the suggestions to show "No results"
+          return;
+        }
+        this.dispatch.setErrorMessage(response.error.message);
+        return;
+      }
+
+      const { suggestions, invalidSelections, totalCardinality } = response;
       if (
         (!selectedOptions && !existsSelected) ||
         isEmpty(invalidSelections) ||
         ignoreParentSettings?.ignoreValidations
       ) {
-        dispatch(
-          updateQueryResults({
-            availableOptions: suggestions,
-            invalidSelections: undefined,
-            validSelections: selectedOptions,
-            totalCardinality,
-          })
-        );
+        this.dispatch.updateQueryResults({
+          availableOptions: suggestions,
+          invalidSelections: undefined,
+          validSelections: selectedOptions,
+          totalCardinality,
+        });
       } else {
         const valid: string[] = [];
         const invalid: string[] = [];
@@ -342,38 +354,35 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
           if (invalidSelections?.includes(selectedOption)) invalid.push(selectedOption);
           else valid.push(selectedOption);
         }
-        dispatch(
-          updateQueryResults({
-            availableOptions: suggestions,
-            invalidSelections: invalid,
-            validSelections: valid,
-            totalCardinality,
-          })
-        );
+        this.dispatch.updateQueryResults({
+          availableOptions: suggestions,
+          invalidSelections: invalid,
+          validSelections: valid,
+          totalCardinality,
+        });
       }
 
       // publish filter
       const newFilters = await this.buildFilter();
       batch(() => {
-        dispatch(setLoading(false));
-        dispatch(publishFilters(newFilters));
+        this.dispatch.setErrorMessage(undefined);
+        this.dispatch.setLoading(false);
+        this.dispatch.publishFilters(newFilters);
       });
     } else {
       batch(() => {
-        dispatch(
-          updateQueryResults({
-            availableOptions: [],
-          })
-        );
-        dispatch(setLoading(false));
+        this.dispatch.setErrorMessage(undefined);
+        this.dispatch.updateQueryResults({
+          availableOptions: [],
+        });
+        this.dispatch.setLoading(false);
       });
     }
   };
 
   private buildFilter = async () => {
-    const { getState } = this.reduxEmbeddableTools;
-    const { validSelections } = getState().componentState ?? {};
-    const { existsSelected } = getState().explicitInput ?? {};
+    const { validSelections } = this.getState().componentState ?? {};
+    const { existsSelected } = this.getState().explicitInput ?? {};
     const { exclude } = this.getInput();
 
     if ((!validSelections || isEmpty(validSelections)) && !existsSelected) {
@@ -400,27 +409,33 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
   };
 
   reload = () => {
+    // clear cache when reload is requested
+    this.optionsListService.clearOptionsListCache();
     this.runOptionsListQuery();
   };
 
   public destroy = () => {
     super.destroy();
+    this.cleanupStateTools();
     this.abortController?.abort();
     this.subscriptions.unsubscribe();
-    this.reduxEmbeddableTools.cleanup();
+    if (this.node) ReactDOM.unmountComponentAtNode(this.node);
   };
 
   public render = (node: HTMLElement) => {
     if (this.node) {
       ReactDOM.unmountComponentAtNode(this.node);
     }
-    const { Wrapper: OptionsListReduxWrapper } = this.reduxEmbeddableTools;
     this.node = node;
+
     ReactDOM.render(
       <KibanaThemeProvider theme$={pluginServices.getServices().theme.theme$}>
-        <OptionsListReduxWrapper>
-          <OptionsListControl typeaheadSubject={this.typeaheadSubject} />
-        </OptionsListReduxWrapper>
+        <OptionsListEmbeddableContext.Provider value={this}>
+          <OptionsListControl
+            typeaheadSubject={this.typeaheadSubject}
+            loadMoreSubject={this.loadMoreSubject}
+          />
+        </OptionsListEmbeddableContext.Provider>
       </KibanaThemeProvider>,
       node
     );

@@ -28,11 +28,13 @@ import {
   ActionGroup,
   validateDurationSchema,
   parseDuration,
+  RuleAlertData,
 } from '../common';
 import { ILicenseState } from './lib/license_state';
 import { getRuleTypeFeatureUsageName } from './lib/get_rule_type_feature_usage_name';
 import { InMemoryMetrics } from './monitoring';
 import { AlertingRulesConfig } from '.';
+import { AlertsService } from './alerts_service/alerts_service';
 
 export interface ConstructorOptions {
   logger: Logger;
@@ -42,6 +44,7 @@ export interface ConstructorOptions {
   licensing: LicensingPluginSetup;
   minimumScheduleInterval: AlertingRulesConfig['minimumScheduleInterval'];
   inMemoryMetrics: InMemoryMetrics;
+  alertsService: AlertsService | null;
 }
 
 export interface RegistryRuleType
@@ -90,7 +93,8 @@ export type NormalizedRuleType<
   InstanceState extends AlertInstanceState,
   InstanceContext extends AlertInstanceContext,
   ActionGroupIds extends string,
-  RecoveryActionGroupId extends string
+  RecoveryActionGroupId extends string,
+  AlertData extends RuleAlertData
 > = {
   actionGroups: Array<ActionGroup<ActionGroupIds | RecoveryActionGroupId>>;
 } & Omit<
@@ -101,7 +105,8 @@ export type NormalizedRuleType<
     InstanceState,
     InstanceContext,
     ActionGroupIds,
-    RecoveryActionGroupId
+    RecoveryActionGroupId,
+    AlertData
   >,
   'recoveryActionGroup' | 'actionGroups'
 > &
@@ -114,7 +119,8 @@ export type NormalizedRuleType<
         InstanceState,
         InstanceContext,
         ActionGroupIds,
-        RecoveryActionGroupId
+        RecoveryActionGroupId,
+        AlertData
       >
     >,
     'recoveryActionGroup'
@@ -127,7 +133,8 @@ export type UntypedNormalizedRuleType = NormalizedRuleType<
   AlertInstanceState,
   AlertInstanceContext,
   string,
-  string
+  string,
+  RuleAlertData
 >;
 
 export class RuleTypeRegistry {
@@ -139,6 +146,7 @@ export class RuleTypeRegistry {
   private readonly minimumScheduleInterval: AlertingRulesConfig['minimumScheduleInterval'];
   private readonly licensing: LicensingPluginSetup;
   private readonly inMemoryMetrics: InMemoryMetrics;
+  private readonly alertsService: AlertsService | null;
 
   constructor({
     logger,
@@ -148,6 +156,7 @@ export class RuleTypeRegistry {
     licensing,
     minimumScheduleInterval,
     inMemoryMetrics,
+    alertsService,
   }: ConstructorOptions) {
     this.logger = logger;
     this.taskManager = taskManager;
@@ -156,6 +165,7 @@ export class RuleTypeRegistry {
     this.licensing = licensing;
     this.minimumScheduleInterval = minimumScheduleInterval;
     this.inMemoryMetrics = inMemoryMetrics;
+    this.alertsService = alertsService;
   }
 
   public has(id: string) {
@@ -173,7 +183,8 @@ export class RuleTypeRegistry {
     InstanceState extends AlertInstanceState,
     InstanceContext extends AlertInstanceContext,
     ActionGroupIds extends string,
-    RecoveryActionGroupId extends string
+    RecoveryActionGroupId extends string,
+    AlertData extends RuleAlertData
   >(
     ruleType: RuleType<
       Params,
@@ -182,7 +193,8 @@ export class RuleTypeRegistry {
       InstanceState,
       InstanceContext,
       ActionGroupIds,
-      RecoveryActionGroupId
+      RecoveryActionGroupId,
+      AlertData
     >
   ) {
     if (this.has(ruleType.id)) {
@@ -253,7 +265,8 @@ export class RuleTypeRegistry {
       InstanceState,
       InstanceContext,
       ActionGroupIds,
-      RecoveryActionGroupId
+      RecoveryActionGroupId,
+      AlertData
     >(ruleType);
 
     this.ruleTypes.set(
@@ -273,10 +286,16 @@ export class RuleTypeRegistry {
             InstanceState,
             InstanceContext,
             ActionGroupIds,
-            RecoveryActionGroupId | RecoveredActionGroupId
+            RecoveryActionGroupId | RecoveredActionGroupId,
+            AlertData
           >(normalizedRuleType, context, this.inMemoryMetrics),
       },
     });
+
+    if (this.alertsService && ruleType.alerts) {
+      this.alertsService.register(ruleType.alerts);
+    }
+
     // No need to notify usage on basic alert types
     if (ruleType.minimumLicenseRequired !== 'basic') {
       this.licensing.featureUsage.register(
@@ -293,7 +312,8 @@ export class RuleTypeRegistry {
     InstanceState extends AlertInstanceState = AlertInstanceState,
     InstanceContext extends AlertInstanceContext = AlertInstanceContext,
     ActionGroupIds extends string = string,
-    RecoveryActionGroupId extends string = string
+    RecoveryActionGroupId extends string = string,
+    AlertData extends RuleAlertData = RuleAlertData
   >(
     id: string
   ): NormalizedRuleType<
@@ -303,7 +323,8 @@ export class RuleTypeRegistry {
     InstanceState,
     InstanceContext,
     ActionGroupIds,
-    RecoveryActionGroupId
+    RecoveryActionGroupId,
+    AlertData
   > {
     if (!this.has(id)) {
       throw Boom.badRequest(
@@ -327,7 +348,8 @@ export class RuleTypeRegistry {
       InstanceState,
       InstanceContext,
       ActionGroupIds,
-      RecoveryActionGroupId
+      RecoveryActionGroupId,
+      AlertData
     >;
   }
 
@@ -348,6 +370,8 @@ export class RuleTypeRegistry {
             ruleTaskTimeout,
             defaultScheduleInterval,
             doesSetRecoveryContext,
+            alerts,
+            getSummarizedAlerts,
           },
         ]: [string, UntypedNormalizedRuleType]) => ({
           id,
@@ -367,6 +391,8 @@ export class RuleTypeRegistry {
             name,
             minimumLicenseRequired
           ).isValid,
+          hasGetSummarizedAlerts: !!getSummarizedAlerts,
+          ...(alerts ? { alerts } : {}),
         })
       )
     );
@@ -392,7 +418,8 @@ function augmentActionGroupsWithReserved<
   InstanceState extends AlertInstanceState,
   InstanceContext extends AlertInstanceContext,
   ActionGroupIds extends string,
-  RecoveryActionGroupId extends string
+  RecoveryActionGroupId extends string,
+  AlertData extends RuleAlertData
 >(
   ruleType: RuleType<
     Params,
@@ -401,7 +428,8 @@ function augmentActionGroupsWithReserved<
     InstanceState,
     InstanceContext,
     ActionGroupIds,
-    RecoveryActionGroupId
+    RecoveryActionGroupId,
+    AlertData
   >
 ): NormalizedRuleType<
   Params,
@@ -410,7 +438,8 @@ function augmentActionGroupsWithReserved<
   InstanceState,
   InstanceContext,
   ActionGroupIds,
-  RecoveredActionGroupId | RecoveryActionGroupId
+  RecoveredActionGroupId | RecoveryActionGroupId,
+  AlertData
 > {
   const reservedActionGroups = getBuiltinActionGroups(ruleType.recoveryActionGroup);
   const { id, actionGroups, recoveryActionGroup } = ruleType;

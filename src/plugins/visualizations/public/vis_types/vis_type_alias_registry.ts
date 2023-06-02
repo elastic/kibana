@@ -30,7 +30,7 @@ export interface VisualizationListItem {
 export interface VisualizationsAppExtension {
   docTypes: string[];
   searchFields?: string[];
-  toListItem: (savedObject: SimpleSavedObject) => VisualizationListItem;
+  toListItem: (savedObject: SimpleSavedObject<any>) => VisualizationListItem;
 }
 
 export interface VisTypeAlias {
@@ -44,6 +44,14 @@ export interface VisTypeAlias {
   note?: string;
   getSupportedTriggers?: () => string[];
   stage: VisualizationStage;
+  /*
+   * Set to true to hide visualization type in create UIs.
+   */
+  disableCreate?: boolean;
+  /*
+   * Set to true to hide edit links for visualization type in UIs.
+   */
+  disableEdit?: boolean;
   isDeprecated?: boolean;
 
   appExtensions?: {

@@ -20,8 +20,8 @@ import { renderHook } from '@testing-library/react-hooks';
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
 import { defaultColumnHeaderType } from '../timeline/body/column_headers/default_headers';
 import { DEFAULT_COLUMN_MIN_WIDTH } from '../timeline/body/constants';
-import type { BrowserFieldItem } from '@kbn/timelines-plugin/common/types';
 import { EuiInMemoryTable } from '@elastic/eui';
+import type { BrowserFieldItem } from '@kbn/triggers-actions-ui-plugin/public/types';
 
 let mockIndexPatternFieldEditor: Start;
 jest.mock('../../../common/lib/kibana');

@@ -9,7 +9,7 @@ import { TimeRange } from '../../../common/http_api/shared';
 import { ElasticsearchResponse } from '../../../common/types/es';
 import { Globals } from '../../static_globals';
 import { Cluster, LegacyRequest } from '../../types';
-import { getLegacyIndexPattern } from '../cluster/get_index_patterns';
+import { getIndexPatterns } from '../cluster/get_index_patterns';
 import { EnterpriseSearchMetric } from '../metrics';
 import { createEnterpriseSearchQuery } from './create_enterprise_search_query';
 import {
@@ -37,8 +37,8 @@ export function getEnterpriseSearchForClusters(
   const config = req.server.config;
   const maxBucketSize = config.ui.max_bucket_size;
 
-  const indexPatterns = getLegacyIndexPattern({
-    moduleType: 'enterprise_search',
+  const indexPatterns = getIndexPatterns({
+    moduleType: 'enterprisesearch',
     ccs,
     config: Globals.app.config,
   });

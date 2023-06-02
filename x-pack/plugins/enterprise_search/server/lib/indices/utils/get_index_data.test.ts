@@ -14,7 +14,7 @@ import { IScopedClusterClient } from '@kbn/core/server';
 
 import { TotalIndexData } from '../fetch_indices';
 
-import { getIndexData, getIndexDataMapper } from './get_index_data';
+import { getIndexDataMapper, getSearchIndexData } from './get_index_data';
 
 import * as mapIndexStatsModule from './map_index_stats';
 
@@ -34,7 +34,7 @@ describe('getIndexData util function', () => {
       return mockSingleIndexWithAliasesResponse;
     });
 
-    const indexData = await getIndexData(
+    const indexData = await getSearchIndexData(
       mockClient as unknown as IScopedClusterClient,
       '*',
       ['open'],
@@ -63,7 +63,7 @@ describe('getIndexData util function', () => {
       return mockSingleIndexWithAliasesResponse;
     });
 
-    const indexData = await getIndexData(
+    const indexData = await getSearchIndexData(
       mockClient as unknown as IScopedClusterClient,
       '*',
       ['open'],
@@ -92,7 +92,7 @@ describe('getIndexData util function', () => {
       return mockMultiIndexResponse;
     });
 
-    const indexData = await getIndexData(
+    const indexData = await getSearchIndexData(
       mockClient as unknown as IScopedClusterClient,
       '*',
       ['hidden', 'all'],
@@ -135,7 +135,7 @@ describe('getIndexData util function', () => {
       return mockMultiIndexResponse;
     });
 
-    const indexData = await getIndexData(
+    const indexData = await getSearchIndexData(
       mockClient as unknown as IScopedClusterClient,
       '*',
       ['hidden', 'all'],
@@ -195,7 +195,7 @@ describe('getIndexData util function', () => {
       return mockMultiIndexResponse;
     });
 
-    const indexData = await getIndexData(
+    const indexData = await getSearchIndexData(
       mockClient as unknown as IScopedClusterClient,
       '*',
       ['hidden', 'all'],

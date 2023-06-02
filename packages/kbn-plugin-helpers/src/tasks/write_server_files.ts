@@ -10,9 +10,10 @@ import { pipeline } from 'stream';
 import { promisify } from 'util';
 
 import vfs from 'vinyl-fs';
-import { transformFileWithBabel, transformFileStream } from '@kbn/dev-utils';
+import { transformFileStream } from '@kbn/dev-utils';
+import { transformFileWithBabel } from './transform_file_with_babel';
 
-import { BuildContext } from '../build_context';
+import { TaskContext } from '../task_context';
 
 const asyncPipeline = promisify(pipeline);
 
@@ -23,7 +24,7 @@ export async function writeServerFiles({
   sourceDir,
   buildDir,
   kibanaVersion,
-}: BuildContext) {
+}: TaskContext) {
   log.info('copying server source into the build and converting with babel');
 
   // copy source files and apply some babel transformations in the process

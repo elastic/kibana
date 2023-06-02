@@ -12,7 +12,6 @@ import { i18n } from '@kbn/i18n';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import type { HostInfo, PendingActionsResponse } from '../../../../../common/endpoint/types';
 import type { EndpointCommandDefinitionMeta } from '../types';
-import type { EndpointHostIsolationStatusProps } from '../../../../common/components/endpoint/host_isolation';
 import { useGetEndpointPendingActionsSummary } from '../../../hooks/response_actions/use_get_endpoint_pending_actions_summary';
 import { FormattedDate } from '../../../../common/components/formatted_date';
 import { useGetEndpointDetails } from '../../../hooks';
@@ -53,12 +52,10 @@ export const EndpointStatusActionResult = memo<
     queryKey: [queryKey, endpointId],
   });
 
-  const pendingIsolationActions = useMemo<
-    Pick<
-      Required<EndpointHostIsolationStatusProps['pendingActions']>,
-      'pendingIsolate' | 'pendingUnIsolate'
-    >
-  >(() => {
+  const pendingIsolationActions = useMemo<{
+    pendingIsolate: number;
+    pendingUnIsolate: number;
+  }>(() => {
     if (endpointPendingActions?.data.length) {
       const pendingActions = endpointPendingActions.data[0].pending_actions;
 
@@ -168,6 +165,16 @@ export const EndpointStatusActionResult = memo<
       {
         title: (
           <ConsoleCodeBlock>
+            {i18n.translate('xpack.securitySolution.endpointResponseActions.status.platform', {
+              defaultMessage: 'Platform',
+            })}
+          </ConsoleCodeBlock>
+        ),
+        description: <ConsoleCodeBlock>{endpointDetails.metadata.host.os.full}</ConsoleCodeBlock>,
+      },
+      {
+        title: (
+          <ConsoleCodeBlock>
             {i18n.translate('xpack.securitySolution.endpointResponseActions.status.version', {
               defaultMessage: 'Version',
             })}
@@ -192,6 +199,37 @@ export const EndpointStatusActionResult = memo<
       {
         title: (
           <ConsoleCodeBlock>
+            {i18n.translate(
+              'xpack.securitySolution.endpointResponseActions.status.appliedPolicyVersion',
+              {
+                defaultMessage: 'Policy version',
+              }
+            )}
+          </ConsoleCodeBlock>
+        ),
+        description: (
+          <ConsoleCodeBlock>
+            {`v${endpointDetails.metadata.Endpoint.policy.applied.endpoint_policy_version}`}
+          </ConsoleCodeBlock>
+        ),
+      },
+      {
+        title: (
+          <ConsoleCodeBlock>
+            {i18n.translate('xpack.securitySolution.endpointResponseActions.status.policyName', {
+              defaultMessage: 'Policy name',
+            })}
+          </ConsoleCodeBlock>
+        ),
+        description: (
+          <ConsoleCodeBlock>
+            {endpointDetails.metadata.Endpoint.policy.applied.name}
+          </ConsoleCodeBlock>
+        ),
+      },
+      {
+        title: (
+          <ConsoleCodeBlock>
             {i18n.translate('xpack.securitySolution.endpointResponseActions.status.lastActive', {
               defaultMessage: 'Last active',
             })}
@@ -205,7 +243,6 @@ export const EndpointStatusActionResult = memo<
                 { defaultMessage: 'Last active' }
               )}
               value={endpointDetails.metadata['@timestamp']}
-              className="eui-textTruncate"
             />
           </ConsoleCodeBlock>
         ),

@@ -341,6 +341,21 @@ describe('action_form', () => {
         setActionParamsProperty={(key: string, value: any, index: number) =>
           (initialAlert.actions[index] = { ...initialAlert.actions[index], [key]: value })
         }
+        setActionFrequencyProperty={(key: string, value: any, index: number) =>
+          (initialAlert.actions[index] = {
+            ...initialAlert.actions[index],
+            frequency: { ...initialAlert.actions[index].frequency!, [key]: value },
+          })
+        }
+        setActionAlertsFilterProperty={(key: string, value: any, index: number) =>
+          (initialAlert.actions[index] = {
+            ...initialAlert.actions[index],
+            alertsFilter: {
+              ...initialAlert.actions[index].alertsFilter,
+              [key]: value,
+            },
+          })
+        }
         actionTypeRegistry={actionTypeRegistry}
         setHasActionsWithBrokenConnector={setHasActionsWithBrokenConnector}
       />

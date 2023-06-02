@@ -6,11 +6,11 @@
  */
 
 import expect from '@kbn/expect';
-import { DataFrameAnalyticsConfig } from '@kbn/ml-plugin/public/application/data_frame_analytics/common';
+import type { DataFrameAnalyticsConfig } from '@kbn/ml-data-frame-analytics-utils';
 import { DeepPartial } from '@kbn/ml-plugin/common/types/common';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { USER } from '../../../../functional/services/ml/security_common';
-import { COMMON_REQUEST_HEADERS } from '../../../../functional/services/ml/common_api';
+import { getCommonRequestHeader } from '../../../../functional/services/ml/common_api';
 
 export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
@@ -111,8 +111,7 @@ export default ({ getService }: FtrProviderContext) => {
     }
   }
 
-  // Failing: See https://github.com/elastic/kibana/issues/116056
-  describe.skip('POST data_frame/_evaluate', () => {
+  describe('POST data_frame/_evaluate', () => {
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/bm_classification');
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/egs_regression');
@@ -121,16 +120,21 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     after(async () => {
+      for (const testConfig of testJobConfigs) {
+        await ml.api.deleteDataFrameAnalyticsJobES(testConfig.config.id!);
+      }
+
       await ml.api.cleanMlIndices();
+      await ml.api.syncSavedObjects();
     });
 
     testJobConfigs.forEach((testConfig) => {
       describe(`EvaluateDataFrameAnalytics ${testConfig.jobType}`, async () => {
         it(`should evaluate ${testConfig.jobType} analytics job`, async () => {
           const { body, status } = await supertest
-            .post(`/api/ml/data_frame/_evaluate`)
+            .post(`/internal/ml/data_frame/_evaluate`)
             .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
-            .set(COMMON_REQUEST_HEADERS)
+            .set(getCommonRequestHeader('1'))
             .send(testConfig.eval);
           ml.api.assertResponseStatusCode(200, status, body);
 
@@ -151,9 +155,9 @@ export default ({ getService }: FtrProviderContext) => {
 
         it(`should evaluate ${testConfig.jobType} job for the user with only view permission`, async () => {
           const { body, status } = await supertest
-            .post(`/api/ml/data_frame/_evaluate`)
+            .post(`/internal/ml/data_frame/_evaluate`)
             .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
-            .set(COMMON_REQUEST_HEADERS)
+            .set(getCommonRequestHeader('1'))
             .send(testConfig.eval);
           ml.api.assertResponseStatusCode(200, status, body);
 
@@ -174,9 +178,9 @@ export default ({ getService }: FtrProviderContext) => {
 
         it(`should not allow unauthorized user to evaluate ${testConfig.jobType} job`, async () => {
           const { body, status } = await supertest
-            .post(`/api/ml/data_frame/_evaluate`)
+            .post(`/internal/ml/data_frame/_evaluate`)
             .auth(USER.ML_UNAUTHORIZED, ml.securityCommon.getPasswordForUser(USER.ML_UNAUTHORIZED))
-            .set(COMMON_REQUEST_HEADERS)
+            .set(getCommonRequestHeader('1'))
             .send(testConfig.eval);
           ml.api.assertResponseStatusCode(403, status, body);
 

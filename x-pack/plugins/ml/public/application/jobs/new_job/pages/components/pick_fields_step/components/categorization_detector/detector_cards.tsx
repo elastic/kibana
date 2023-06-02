@@ -29,7 +29,7 @@ export const CountCard: FC<CardProps> = ({ onClick, isSelected }) => (
         <>
           <FormattedMessage
             id="xpack.ml.newJob.wizard.pickFieldsStep.categorizationDetectorSelect.countCard.description"
-            defaultMessage="Look for anomalies in the event rate of a particular category."
+            defaultMessage="Look for anomalies in the event rate of a category."
           />
         </>
       }

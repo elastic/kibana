@@ -10,6 +10,7 @@
  */
 import { Subject } from 'rxjs';
 import { omit, defaults, get } from 'lodash';
+import { SavedObjectError } from '@kbn/core-saved-objects-common';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { SavedObjectsBulkDeleteResponse } from '@kbn/core/server';
@@ -75,7 +76,11 @@ export interface FetchResult {
 
 export type BulkUpdateResult = Result<
   ConcreteTaskInstance,
-  { entity: ConcreteTaskInstance; error: Error }
+  { type: string; id: string; error: SavedObjectError }
+>;
+
+export type BulkGetResult = Array<
+  Result<ConcreteTaskInstance, { type: string; id: string; error: SavedObjectError }>
 >;
 
 export interface UpdateByQueryResult {
@@ -94,6 +99,7 @@ export class TaskStore {
   public readonly errors$ = new Subject<Error>();
 
   private esClient: ElasticsearchClient;
+  private esClientWithoutRetries: ElasticsearchClient;
   private definitions: TaskTypeDictionary;
   private savedObjectsRepository: ISavedObjectsRepository;
   private serializer: ISavedObjectsSerializer;
@@ -116,6 +122,11 @@ export class TaskStore {
     this.serializer = opts.serializer;
     this.savedObjectsRepository = opts.savedObjectsRepository;
     this.adHocTaskCounter = opts.adHocTaskCounter;
+    this.esClientWithoutRetries = opts.esClient.child({
+      // Timeouts are retried and make requests timeout after (requestTimeout * (1 + maxRetries))
+      // The poller doesn't need retry logic because it will try again at the next polling cycle
+      maxRetries: 0,
+    });
   }
 
   /**
@@ -252,14 +263,14 @@ export class TaskStore {
       return attrsById;
     }, new Map());
 
-    let updatedSavedObjects: Array<SavedObjectsUpdateResponse | Error>;
+    let updatedSavedObjects: Array<SavedObjectsUpdateResponse<SerializedConcreteTaskInstance>>;
     try {
       ({ saved_objects: updatedSavedObjects } =
         await this.savedObjectsRepository.bulkUpdate<SerializedConcreteTaskInstance>(
           docs.map((doc) => ({
             type: 'task',
             id: doc.id,
-            options: { version: doc.version },
+            version: doc.version,
             attributes: attributesByDocId.get(doc.id)!,
           })),
           {
@@ -271,9 +282,14 @@ export class TaskStore {
       throw e;
     }
 
-    return updatedSavedObjects.map<BulkUpdateResult>((updatedSavedObject, index) =>
-      isSavedObjectsUpdateResponse(updatedSavedObject)
-        ? asOk(
+    return updatedSavedObjects.map((updatedSavedObject) => {
+      return updatedSavedObject.error !== undefined
+        ? asErr({
+            type: 'task',
+            id: updatedSavedObject.id,
+            error: updatedSavedObject.error,
+          })
+        : asOk(
             savedObjectToConcreteTaskInstance({
               ...updatedSavedObject,
               attributes: defaults(
@@ -281,15 +297,8 @@ export class TaskStore {
                 attributesByDocId.get(updatedSavedObject.id)!
               ),
             })
-          )
-        : asErr({
-            // The SavedObjectsRepository maintains the order of the docs
-            // so we can rely on the index in the `docs` to match an error
-            // on the same index in the `bulkUpdate` result
-            entity: docs[index],
-            error: updatedSavedObject,
-          })
-    );
+          );
+    });
   }
 
   /**
@@ -341,6 +350,30 @@ export class TaskStore {
   }
 
   /**
+   * Gets tasks by ids
+   *
+   * @param {Array<string>} ids
+   * @returns {Promise<ConcreteTaskInstance[]>}
+   */
+  public async bulkGet(ids: string[]): Promise<BulkGetResult> {
+    let result;
+    try {
+      result = await this.savedObjectsRepository.bulkGet<SerializedConcreteTaskInstance>(
+        ids.map((id) => ({ type: 'task', id }))
+      );
+    } catch (e) {
+      this.errors$.next(e);
+      throw e;
+    }
+    return result.saved_objects.map((task) => {
+      if (task.error) {
+        return asErr({ id: task.id, type: task.type, error: task.error });
+      }
+      return asOk(savedObjectToConcreteTaskInstance(task));
+    });
+  }
+
+  /**
    * Gets task lifecycle step by id
    *
    * @param {string} id
@@ -364,7 +397,7 @@ export class TaskStore {
     try {
       const {
         hits: { hits: tasks },
-      } = await this.esClient.search<SavedObjectsRawDoc['_source']>({
+      } = await this.esClientWithoutRetries.search<SavedObjectsRawDoc['_source']>({
         index: this.index,
         ignore_unavailable: true,
         body: {
@@ -420,7 +453,7 @@ export class TaskStore {
     const { query } = ensureQueryOnlyReturnsTaskObjects(opts);
     try {
       const // eslint-disable-next-line @typescript-eslint/naming-convention
-        { total, updated, version_conflicts } = await this.esClient.updateByQuery({
+        { total, updated, version_conflicts } = await this.esClientWithoutRetries.updateByQuery({
           index: this.index,
           ignore_unavailable: true,
           refresh: true,
@@ -534,10 +567,4 @@ function ensureAggregationOnlyReturnsTaskObjects(opts: AggregationOpts): Aggrega
     ...opts,
     query,
   };
-}
-
-function isSavedObjectsUpdateResponse(
-  result: SavedObjectsUpdateResponse | Error
-): result is SavedObjectsUpdateResponse {
-  return result && typeof (result as SavedObjectsUpdateResponse).id === 'string';
 }

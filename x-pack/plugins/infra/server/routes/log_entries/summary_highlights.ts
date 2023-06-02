@@ -39,11 +39,11 @@ export const initLogEntriesSummaryHighlightsRoute = ({
         logEntriesSummaryHighlightsRequestRT.decode(request.body),
         fold(throwErrors(Boom.badRequest), identity)
       );
-      const { sourceId, startTimestamp, endTimestamp, bucketSize, query, highlightTerms } = payload;
+      const { logView, startTimestamp, endTimestamp, bucketSize, query, highlightTerms } = payload;
 
       const bucketsPerHighlightTerm = await logEntries.getLogSummaryHighlightBucketsBetween(
         requestContext,
-        sourceId,
+        logView,
         startTimestamp,
         endTimestamp,
         bucketSize,

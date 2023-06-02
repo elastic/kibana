@@ -8,7 +8,8 @@
 import React from 'react';
 import type { ReactWrapper } from 'enzyme';
 import { mount } from 'enzyme';
-import { act } from '@testing-library/react';
+import { act, waitFor } from '@testing-library/react';
+
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiComboBox } from '@elastic/eui';
 
@@ -29,22 +30,21 @@ import {
   useGetFieldsByIssueTypeResponse,
 } from './mock';
 import { CreateCase } from '.';
-import { useGetConnectors } from '../../containers/configure/use_connectors';
+import { useGetSupportedActionConnectors } from '../../containers/configure/use_get_supported_action_connectors';
 import { useGetTags } from '../../containers/use_get_tags';
 
 jest.mock('../../containers/api');
 jest.mock('../../containers/user_profiles/api');
 jest.mock('../../containers/use_get_tags');
-jest.mock('../../containers/configure/use_connectors');
+jest.mock('../../containers/configure/use_get_supported_action_connectors');
 jest.mock('../../containers/configure/use_configure');
 jest.mock('../connectors/resilient/use_get_incident_types');
 jest.mock('../connectors/resilient/use_get_severity');
 jest.mock('../connectors/jira/use_get_issue_types');
 jest.mock('../connectors/jira/use_get_fields_by_issue_type');
-jest.mock('../connectors/jira/use_get_single_issue');
 jest.mock('../connectors/jira/use_get_issues');
 
-const useGetConnectorsMock = useGetConnectors as jest.Mock;
+const useGetConnectorsMock = useGetSupportedActionConnectors as jest.Mock;
 const useCaseConfigureMock = useCaseConfigure as jest.Mock;
 const useGetTagsMock = useGetTags as jest.Mock;
 const useGetIncidentTypesMock = useGetIncidentTypes as jest.Mock;
@@ -105,16 +105,66 @@ describe('CreateCase case', () => {
     });
   });
 
-  it('should call cancel on cancel click', async () => {
+  it('should open modal on cancel click', async () => {
     const wrapper = mount(
       <TestProviders>
         <CreateCase {...defaultProps} />
       </TestProviders>
     );
-    await act(async () => {
-      wrapper.find(`[data-test-subj="create-case-cancel"]`).first().simulate('click');
+
+    wrapper.find(`[data-test-subj="create-case-cancel"]`).first().simulate('click');
+
+    await waitFor(() => {
+      expect(
+        wrapper.find(`[data-test-subj="cancel-creation-confirmation-modal"]`).exists()
+      ).toBeTruthy();
     });
-    expect(defaultProps.onCancel).toHaveBeenCalled();
+  });
+
+  it('should confirm cancelation on modal confirm click', async () => {
+    const wrapper = mount(
+      <TestProviders>
+        <CreateCase {...defaultProps} />
+      </TestProviders>
+    );
+
+    wrapper.find(`[data-test-subj="create-case-cancel"]`).first().simulate('click');
+
+    await waitFor(() => {
+      expect(
+        wrapper.find(`[data-test-subj="cancel-creation-confirmation-modal"]`).exists()
+      ).toBeTruthy();
+    });
+
+    wrapper.find(`button[data-test-subj="confirmModalConfirmButton"]`).simulate('click');
+
+    await waitFor(() => {
+      expect(defaultProps.onCancel).toHaveBeenCalled();
+    });
+  });
+
+  it('should close modal on modal cancel click', async () => {
+    const wrapper = mount(
+      <TestProviders>
+        <CreateCase {...defaultProps} />
+      </TestProviders>
+    );
+
+    wrapper.find(`[data-test-subj="create-case-cancel"]`).first().simulate('click');
+
+    await waitFor(() => {
+      expect(
+        wrapper.find(`[data-test-subj="cancel-creation-confirmation-modal"]`).exists()
+      ).toBeTruthy();
+    });
+
+    wrapper.find(`button[data-test-subj="confirmModalCancelButton"]`).simulate('click');
+
+    await waitFor(() => {
+      expect(
+        wrapper.find(`[data-test-subj="cancel-creation-confirmation-modal"]`).exists()
+      ).toBeFalsy();
+    });
   });
 
   it('should redirect to new case when posting the case', async () => {
@@ -128,6 +178,7 @@ describe('CreateCase case', () => {
       fillForm(wrapper);
       wrapper.find(`button[data-test-subj="create-case-submit"]`).first().simulate('click');
     });
+
     expect(defaultProps.onSuccess).toHaveBeenCalled();
   });
 });

@@ -16,6 +16,11 @@ import {
 } from '../../../common/utils/environment_query';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 
+export interface ServiceNodeMetadataResponse {
+  host: string | number;
+  containerId: string | number;
+}
+
 export async function getServiceNodeMetadata({
   kuery,
   serviceName,
@@ -32,7 +37,7 @@ export async function getServiceNodeMetadata({
   start: number;
   end: number;
   environment: string;
-}) {
+}): Promise<ServiceNodeMetadataResponse> {
   const params = {
     apm: {
       events: [ProcessorEvent.metric],

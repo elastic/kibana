@@ -5,22 +5,27 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiAccordion, EuiDescribedFormGroup, EuiPanel, EuiSpacer } from '@elastic/eui';
 import { useFormContext, FieldError } from 'react-hook-form';
+import styled from 'styled-components';
 import { FORM_CONFIG } from '../form/form_config';
 import { Field } from '../form/field';
 import { ConfigKey, FormMonitorType } from '../types';
 
-export const AdvancedConfig = () => {
+export const AdvancedConfig = ({ readOnly }: { readOnly: boolean }) => {
   const {
     watch,
     formState: { errors },
   } = useFormContext();
   const [type]: [FormMonitorType] = watch([ConfigKey.FORM_MONITOR_TYPE]);
 
-  return FORM_CONFIG[type]?.advanced ? (
+  const formConfig = useMemo(() => {
+    return FORM_CONFIG(readOnly)[type];
+  }, [readOnly, type]);
+
+  return formConfig?.advanced ? (
     <EuiPanel hasBorder>
       <EuiAccordion
         id="syntheticsAdvancedPanel"
@@ -29,13 +34,16 @@ export const AdvancedConfig = () => {
         })}
       >
         <EuiSpacer />
-        {FORM_CONFIG[type].advanced?.map((configGroup) => {
+        {formConfig.advanced?.map((configGroup) => {
           return (
-            <EuiDescribedFormGroup
+            <DescripedFormGroup
               description={configGroup.description}
               title={<h4>{configGroup.title}</h4>}
               fullWidth
               key={configGroup.title}
+              descriptionFlexItemProps={{ style: { minWidth: 208 } }}
+              fieldFlexItemProps={{ style: { minWidth: 208 } }}
+              style={{ flexWrap: 'wrap' }}
             >
               {configGroup.components.map((field) => {
                 return (
@@ -46,10 +54,16 @@ export const AdvancedConfig = () => {
                   />
                 );
               })}
-            </EuiDescribedFormGroup>
+            </DescripedFormGroup>
           );
         })}
       </EuiAccordion>
     </EuiPanel>
   ) : null;
 };
+
+const DescripedFormGroup = styled(EuiDescribedFormGroup)`
+  > div.euiFlexGroup {
+    flex-wrap: wrap;
+  }
+`;

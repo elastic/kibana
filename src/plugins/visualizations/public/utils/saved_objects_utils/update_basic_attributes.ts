@@ -6,15 +6,13 @@
  * Side Public License, v 1.
  */
 
-import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-browser';
 import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import type { OverlayStart } from '@kbn/core-overlays-browser';
-import type { SerializableRecord } from '@kbn/utility-types';
 
 import { extractReferences } from '../saved_visualization_references';
+import { visualizationsClient } from '../../content_management';
 
 interface UpdateBasicSoAttributesDependencies {
-  savedObjectsClient: SavedObjectsClientContract;
   savedObjectsTagging?: SavedObjectsTaggingApi;
   overlays: OverlayStart;
 }
@@ -29,10 +27,10 @@ export const updateBasicSoAttributes = async (
   },
   dependencies: UpdateBasicSoAttributesDependencies
 ) => {
-  const so = await dependencies.savedObjectsClient.get<SerializableRecord>(type, soId);
+  const so = await visualizationsClient.get(soId);
   const extractedReferences = extractReferences({
-    attributes: so.attributes,
-    references: so.references,
+    attributes: so.item.attributes,
+    references: so.item.references,
   });
 
   let { references } = extractedReferences;
@@ -50,9 +48,14 @@ export const updateBasicSoAttributes = async (
     );
   }
 
-  return await dependencies.savedObjectsClient.create(type, attributes, {
+  return await visualizationsClient.update({
     id: soId,
-    overwrite: true,
-    references,
+    data: {
+      ...attributes,
+    },
+    options: {
+      overwrite: true,
+      references,
+    },
   });
 };

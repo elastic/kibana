@@ -6,23 +6,30 @@
  */
 
 import { before, after, expect, journey, step } from '@elastic/synthetics';
+import { RetryService } from '@kbn/ftr-common-functional-services';
+import { recordVideo } from '../../helpers/record_video';
 import {
   addTestMonitor,
   cleanTestMonitors,
   enableMonitorManagedViaApi,
 } from './services/add_monitor';
-import { syntheticsAppPageProvider } from '../../page_objects/synthetics_app';
+import { syntheticsAppPageProvider } from '../../page_objects/synthetics/synthetics_app';
 
-journey('Overview Scrolling', async ({ page, params }) => {
+journey('OverviewScrolling', async ({ page, params }) => {
+  recordVideo(page);
+
   const syntheticsApp = syntheticsAppPageProvider({ page, kibanaUrl: params.kibanaUrl });
+  const retry: RetryService = params.getService('retry');
 
   before(async () => {
     await enableMonitorManagedViaApi(params.kibanaUrl);
     await cleanTestMonitors(params);
 
+    const allPromises = [];
     for (let i = 0; i < 100; i++) {
-      await addTestMonitor(params.kibanaUrl, `test monitor ${i}`);
+      allPromises.push(addTestMonitor(params.kibanaUrl, `test monitor ${i}`));
     }
+    await Promise.all(allPromises);
 
     await syntheticsApp.waitForLoadingToFinish();
   });
@@ -42,20 +49,18 @@ journey('Overview Scrolling', async ({ page, params }) => {
   });
 
   step('scroll until you see showing all monitors', async () => {
-    let showingAllMonitorsNode;
-
     const gridItems = await page.locator(`[data-test-subj="syntheticsOverviewGridItem"]`);
     await page.waitForSelector(`text="test monitor 0"`);
     let count = await gridItems.count();
 
     expect(count <= 32).toBe(true);
 
-    while (!showingAllMonitorsNode) {
-      await page.mouse.wheel(0, 100);
-      showingAllMonitorsNode = await page.$(`text="Showing all monitors"`);
-    }
-
-    expect(await showingAllMonitorsNode.isVisible()).toBe(true);
+    await retry.tryForTime(90 * 1000, async () => {
+      await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
+      const showingAllMonitorsNode = await page.$(`text="Showing all monitors"`);
+      expect(showingAllMonitorsNode).toBeTruthy();
+      expect(await showingAllMonitorsNode?.isVisible()).toBe(true);
+    });
 
     count = await gridItems.count();
     expect(count).toBe(100);

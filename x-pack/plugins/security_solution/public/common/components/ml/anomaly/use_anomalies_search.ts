@@ -6,15 +6,13 @@
  */
 
 import { useState, useEffect, useMemo } from 'react';
-import { filter, head, orderBy, pipe, has } from 'lodash/fp';
+import { has, sortBy } from 'lodash/fp';
 
 import { DEFAULT_ANOMALY_SCORE } from '../../../../../common/constants';
 import * as i18n from './translations';
 import { useUiSetting$ } from '../../../lib/kibana';
 import { useAppToasts } from '../../../hooks/use_app_toasts';
-import { notableAnomaliesSearch } from '../api/anomalies_search';
-import type { NotableAnomaliesJobId } from '../../../../overview/components/entity_analytics/anomalies/config';
-import { NOTABLE_ANOMALIES_IDS } from '../../../../overview/components/entity_analytics/anomalies/config';
+import { anomaliesSearch } from '../api/anomalies_search';
 import { getAggregatedAnomaliesQuery } from '../../../../overview/components/entity_analytics/anomalies/query';
 import type { inputsModel } from '../../../store';
 import { useSecurityJobs } from '../../ml_popover/hooks/use_security_jobs';
@@ -26,28 +24,28 @@ export enum AnomalyEntity {
 }
 
 export interface AnomaliesCount {
-  name: NotableAnomaliesJobId;
+  name: string;
   count: number;
   entity: AnomalyEntity;
   job?: SecurityJob;
 }
 
-interface UseNotableAnomaliesSearchProps {
+interface UseAggregatedAnomaliesByJobProps {
   skip: boolean;
   from: string;
   to: string;
 }
 
-export const useNotableAnomaliesSearch = ({
+export const useAggregatedAnomaliesByJob = ({
   skip,
   from,
   to,
-}: UseNotableAnomaliesSearchProps): {
+}: UseAggregatedAnomaliesByJobProps): {
   isLoading: boolean;
   data: AnomaliesCount[];
   refetch: inputsModel.Refetch;
 } => {
-  const [data, setData] = useState<AnomaliesCount[]>(formatResultData([], []));
+  const [data, setData] = useState<AnomaliesCount[]>([]);
 
   const {
     loading: jobsLoading,
@@ -60,23 +58,17 @@ export const useNotableAnomaliesSearch = ({
   const { addError } = useAppToasts();
   const [anomalyScoreThreshold] = useUiSetting$<number>(DEFAULT_ANOMALY_SCORE);
 
-  const { notableAnomaliesJobs, query } = useMemo(() => {
-    const newNotableAnomaliesJobs = securityJobs.filter(({ id }) =>
-      NOTABLE_ANOMALIES_IDS.some((notableJobId) => matchJobId(id, notableJobId))
-    );
-
-    const newQuery = getAggregatedAnomaliesQuery({
-      jobIds: newNotableAnomaliesJobs.map(({ id }) => id),
-      anomalyScoreThreshold,
-      from,
-      to,
-    });
-
-    return {
-      query: newQuery,
-      notableAnomaliesJobs: newNotableAnomaliesJobs,
-    };
-  }, [securityJobs, anomalyScoreThreshold, from, to]);
+  const { query } = useMemo(
+    () => ({
+      query: getAggregatedAnomaliesQuery({
+        jobIds: securityJobs.map(({ id }) => id),
+        anomalyScoreThreshold,
+        from,
+        to,
+      }),
+    }),
+    [securityJobs, anomalyScoreThreshold, from, to]
+  );
 
   useEffect(() => {
     let isSubscribed = true;
@@ -85,16 +77,16 @@ export const useNotableAnomaliesSearch = ({
     async function fetchAnomaliesSearch() {
       if (!isSubscribed) return;
 
-      if (skip || !isMlUser || notableAnomaliesJobs.length === 0) {
+      if (skip || !isMlUser || securityJobs.length === 0) {
         setLoading(false);
         return;
       }
 
       setLoading(true);
       try {
-        const response = await notableAnomaliesSearch(
+        const response = await anomaliesSearch(
           {
-            jobIds: notableAnomaliesJobs.filter((job) => job.isInstalled).map(({ id }) => id),
+            jobIds: securityJobs.filter((job) => job.isInstalled).map(({ id }) => id),
             query,
           },
           abortCtrl.signal
@@ -103,7 +95,7 @@ export const useNotableAnomaliesSearch = ({
         if (isSubscribed) {
           setLoading(false);
           const buckets = response.aggregations?.number_of_anomalies.buckets ?? [];
-          setData(formatResultData(buckets, notableAnomaliesJobs));
+          setData(formatResultData(buckets, securityJobs));
         }
       } catch (error) {
         if (isSubscribed && error.name !== 'AbortError') {
@@ -119,7 +111,7 @@ export const useNotableAnomaliesSearch = ({
       isSubscribed = false;
       abortCtrl.abort();
     };
-  }, [skip, isMlUser, addError, query, notableAnomaliesJobs, refetchJobs]);
+  }, [skip, isMlUser, addError, query, securityJobs, refetchJobs]);
 
   return { isLoading: loading || jobsLoading, data, refetch: refetchJobs };
 };
@@ -129,35 +121,19 @@ function formatResultData(
     key: string;
     doc_count: number;
   }>,
-  notableAnomaliesJobs: SecurityJob[]
+  anomaliesJobs: SecurityJob[]
 ): AnomaliesCount[] {
-  return NOTABLE_ANOMALIES_IDS.map((notableJobId) => {
-    const job = findJobWithId(notableJobId)(notableAnomaliesJobs);
+  const unsortedAnomalies: AnomaliesCount[] = anomaliesJobs.map((job) => {
     const bucket = buckets.find(({ key }) => key === job?.id);
     const hasUserName = has("entity.hits.hits[0]._source['user.name']", bucket);
 
     return {
-      name: notableJobId,
+      name: job?.customSettings?.security_app_display_name ?? job.id,
       count: bucket?.doc_count ?? 0,
       entity: hasUserName ? AnomalyEntity.User : AnomalyEntity.Host,
       job,
     };
   });
+
+  return sortBy(['name'], unsortedAnomalies);
 }
-
-/**
- * ML module allows users to add a prefix to the job id.
- * So we need to match jobs that end with the notableJobId.
- */
-const matchJobId = (jobId: string, notableJobId: NotableAnomaliesJobId) =>
-  jobId.endsWith(notableJobId);
-
-/**
- * When multiple jobs match a notable job id, it returns the most recent one.
- */
-const findJobWithId = (notableJobId: NotableAnomaliesJobId) =>
-  pipe<SecurityJob[][], SecurityJob[], SecurityJob[], SecurityJob | undefined>(
-    filter<SecurityJob>(({ id }) => matchJobId(id, notableJobId)),
-    orderBy<SecurityJob>('latestTimestampSortValue', 'desc'),
-    head
-  );

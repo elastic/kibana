@@ -92,6 +92,10 @@ async function _getInstalledPackages(dev: boolean, options: Options) {
   const result = [];
 
   for (const [pkgAndVersion, moduleInfo] of Object.entries(lcResult)) {
+    if (pkgAndVersion.startsWith('@kbn/')) {
+      continue;
+    }
+
     const installedPackage = readModuleInfo(pkgAndVersion, moduleInfo, dev, options);
     if (installedPackage) {
       result.push(installedPackage);

@@ -6,148 +6,62 @@
  */
 
 import React from 'react';
-import { mount } from 'enzyme';
-import { UserActionMarkdown } from './markdown_form';
-import type { AppMockRenderer } from '../../common/mock';
-import { createAppMockRenderer, TestProviders } from '../../common/mock';
-import { waitFor } from '@testing-library/react';
+import { waitFor, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+
+import type { AppMockRenderer } from '../../common/mock';
+import { createAppMockRenderer } from '../../common/mock';
+import { UserActionMarkdown } from './markdown_form';
+
+jest.mock('../../common/lib/kibana');
+jest.mock('../../common/navigation/hooks');
+
 const onChangeEditable = jest.fn();
 const onSaveContent = jest.fn();
 
-const newValue = 'Hello from Tehas';
 const hyperlink = `[hyperlink](http://elastic.co)`;
+const draftStorageKey = `cases.testAppId.caseId.markdown-id.markdownEditor`;
 const defaultProps = {
   content: `A link to a timeline ${hyperlink}`,
   id: 'markdown-id',
+  caseId: 'caseId',
   isEditable: true,
+  draftStorageKey,
   onChangeEditable,
   onSaveContent,
 };
 
 describe('UserActionMarkdown ', () => {
+  let appMockRenderer: AppMockRenderer;
   beforeEach(() => {
     jest.clearAllMocks();
+    appMockRenderer = createAppMockRenderer();
+  });
+
+  afterEach(() => {
+    sessionStorage.removeItem(draftStorageKey);
   });
 
   it('Renders markdown correctly when not in edit mode', async () => {
-    const wrapper = mount(
-      <TestProviders>
-        <UserActionMarkdown {...{ ...defaultProps, isEditable: false }} />
-      </TestProviders>
-    );
+    appMockRenderer.render(<UserActionMarkdown {...{ ...defaultProps, isEditable: false }} />);
 
-    expect(wrapper.find(`[data-test-subj="markdown-link"]`).first().text()).toContain('hyperlink');
+    expect(screen.getByTestId('scrollable-markdown')).toBeInTheDocument();
+    expect(screen.getByTestId('markdown-link')).toBeInTheDocument();
+    expect(screen.queryByTestId('editable-save-markdown')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('editable-cancel-markdown')).not.toBeInTheDocument();
   });
 
-  it('Save button click calls onSaveContent and onChangeEditable when text area value changed', async () => {
-    const wrapper = mount(
-      <TestProviders>
-        <UserActionMarkdown {...defaultProps} />
-      </TestProviders>
-    );
+  it('Renders markdown correctly when in edit mode', async () => {
+    appMockRenderer.render(<UserActionMarkdown {...{ ...defaultProps, isEditable: true }} />);
 
-    wrapper
-      .find(`.euiMarkdownEditorTextArea`)
-      .first()
-      .simulate('change', {
-        target: { value: newValue },
-      });
-
-    wrapper.find(`button[data-test-subj="user-action-save-markdown"]`).first().simulate('click');
-
-    await waitFor(() => {
-      expect(onSaveContent).toHaveBeenCalledWith(newValue);
-      expect(onChangeEditable).toHaveBeenCalledWith(defaultProps.id);
-    });
-  });
-  it('Does not call onSaveContent if no change from current text', async () => {
-    const wrapper = mount(
-      <TestProviders>
-        <UserActionMarkdown {...defaultProps} />
-      </TestProviders>
-    );
-
-    wrapper.find(`button[data-test-subj="user-action-save-markdown"]`).first().simulate('click');
-
-    await waitFor(() => {
-      expect(onChangeEditable).toHaveBeenCalledWith(defaultProps.id);
-    });
-    expect(onSaveContent).not.toHaveBeenCalled();
-  });
-  it('Cancel button click calls only onChangeEditable', async () => {
-    const wrapper = mount(
-      <TestProviders>
-        <UserActionMarkdown {...defaultProps} />
-      </TestProviders>
-    );
-    wrapper.find(`[data-test-subj="user-action-cancel-markdown"]`).first().simulate('click');
-
-    await waitFor(() => {
-      expect(onSaveContent).not.toHaveBeenCalled();
-      expect(onChangeEditable).toHaveBeenCalledWith(defaultProps.id);
-    });
+    expect(screen.getByTestId('editable-save-markdown')).toBeInTheDocument();
+    expect(screen.getByTestId('editable-cancel-markdown')).toBeInTheDocument();
   });
 
   describe('useForm stale state bug', () => {
-    let appMockRenderer: AppMockRenderer;
     const oldContent = defaultProps.content;
     const appendContent = ' appended content';
     const newContent = defaultProps.content + appendContent;
-
-    beforeEach(() => {
-      appMockRenderer = createAppMockRenderer();
-    });
-
-    it('creates a stale state if a key is not passed to the component', async () => {
-      const TestComponent = () => {
-        const [isEditable, setIsEditable] = React.useState(true);
-        const [saveContent, setSaveContent] = React.useState(defaultProps.content);
-        return (
-          <div>
-            <UserActionMarkdown
-              // note that this is not passing the key
-              {...defaultProps}
-              content={saveContent}
-              onSaveContent={setSaveContent}
-              isEditable={isEditable}
-            />
-            <button
-              type="button"
-              data-test-subj="test-button"
-              onClick={() => {
-                setIsEditable(!isEditable);
-              }}
-            />
-          </div>
-        );
-      };
-
-      const result = appMockRenderer.render(<TestComponent />);
-
-      expect(result.getByTestId('user-action-markdown-form')).toBeTruthy();
-
-      // append some content and save
-      userEvent.type(result.container.querySelector('textarea')!, appendContent);
-      userEvent.click(result.getByTestId('user-action-save-markdown'));
-
-      // wait for the state to update
-      await waitFor(() => {
-        expect(onChangeEditable).toHaveBeenCalledWith(defaultProps.id);
-      });
-
-      // toggle to non-edit state
-      userEvent.click(result.getByTestId('test-button'));
-      expect(result.getByTestId('user-action-markdown')).toBeTruthy();
-
-      // toggle to edit state again
-      userEvent.click(result.getByTestId('test-button'));
-
-      // the text area holds a stale value
-      // this is the wrong behaviour. The textarea holds the old content
-      expect(result.container.querySelector('textarea')!.value).toEqual(oldContent);
-      expect(result.container.querySelector('textarea')!.value).not.toEqual(newContent);
-    });
 
     it("doesn't create a stale state if a key is passed to the component", async () => {
       const TestComponent = () => {
@@ -174,11 +88,11 @@ describe('UserActionMarkdown ', () => {
         );
       };
       const result = appMockRenderer.render(<TestComponent />);
-      expect(result.getByTestId('user-action-markdown-form')).toBeTruthy();
+      expect(result.getByTestId('editable-markdown-form')).toBeTruthy();
 
       // append content and save
       userEvent.type(result.container.querySelector('textarea')!, appendContent);
-      userEvent.click(result.getByTestId('user-action-save-markdown'));
+      userEvent.click(result.getByTestId('editable-save-markdown'));
 
       // wait for the state to update
       await waitFor(() => {
@@ -187,7 +101,7 @@ describe('UserActionMarkdown ', () => {
 
       // toggle to non-edit state
       userEvent.click(result.getByTestId('test-button'));
-      expect(result.getByTestId('user-action-markdown')).toBeTruthy();
+      expect(result.getByTestId('scrollable-markdown')).toBeTruthy();
 
       // toggle to edit state again
       userEvent.click(result.getByTestId('test-button'));

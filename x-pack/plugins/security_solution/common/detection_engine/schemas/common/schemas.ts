@@ -59,6 +59,7 @@ export const status_code = PositiveInteger;
 export const message = t.string;
 export const perPage = PositiveInteger;
 export const total = PositiveInteger;
+export const revision = PositiveInteger;
 export const success = t.boolean;
 export const success_count = PositiveInteger;
 

@@ -9,7 +9,7 @@ import { getNewRule } from '../../../objects/rule';
 
 import { RULE_STATUS } from '../../../screens/create_new_rule';
 
-import { createCustomRule } from '../../../tasks/api_calls/rules';
+import { createRule } from '../../../tasks/api_calls/rules';
 import { goToRuleDetails } from '../../../tasks/alerts_detection_rules';
 import {
   esArchiverLoad,
@@ -30,13 +30,16 @@ import {
   addExceptionEntryOperatorValue,
   addExceptionFlyoutItemName,
   closeExceptionBuilderFlyout,
+  searchExceptionEntryFieldWithPrefix,
+  selectCurrentEntryField,
+  showFieldConflictsWarningTooltipWithMessage,
+  showMappingConflictsWarningMessage,
 } from '../../../tasks/exceptions';
 import {
   ADD_AND_BTN,
   ADD_OR_BTN,
   ADD_NESTED_BTN,
   ENTRY_DELETE_BTN,
-  FIELD_INPUT,
   LOADING_SPINNER,
   EXCEPTION_ITEM_CONTAINER,
   EXCEPTION_FIELD_LIST,
@@ -46,6 +49,7 @@ import {
   CONFIRM_BTN,
   VALUES_INPUT,
   EXCEPTION_FLYOUT_TITLE,
+  FIELD_INPUT_PARENT,
 } from '../../../screens/exceptions';
 
 import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../../urls/navigation';
@@ -70,21 +74,30 @@ describe('Exceptions flyout', () => {
     // mappings to conduct tests, avoiding loading large
     // amounts of data like in auditbeat_exceptions
     esArchiverLoad('exceptions');
-    login();
+    esArchiverLoad('conflicts_1');
+    esArchiverLoad('conflicts_2');
     createExceptionList(getExceptionList(), getExceptionList().list_id).then((response) =>
-      createCustomRule({
-        ...getNewRule(),
-        dataSource: { index: ['exceptions-*'], type: 'indexPatterns' },
-        exceptionLists: [
-          {
-            id: response.body.id,
-            list_id: getExceptionList().list_id,
-            type: getExceptionList().type,
-            namespace_type: getExceptionList().namespace_type,
-          },
-        ],
-      })
+      createRule(
+        getNewRule({
+          index: ['auditbeat-*', 'exceptions-*', 'conflicts-*'],
+          enabled: false,
+          exceptions_list: [
+            {
+              id: response.body.id,
+              list_id: getExceptionList().list_id,
+              type: getExceptionList().type,
+              namespace_type: getExceptionList().namespace_type,
+            },
+          ],
+        })
+      )
     );
+    login();
+    visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
+  });
+
+  beforeEach(() => {
+    login();
     visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
     goToRuleDetails();
     cy.get(RULE_STATUS).should('have.text', '—');
@@ -119,8 +132,6 @@ describe('Exceptions flyout', () => {
     // add value again and button should be enabled again
     addExceptionEntryFieldMatchAnyValue('test', 0);
     cy.get(CONFIRM_BTN).should('be.enabled');
-
-    closeExceptionBuilderFlyout();
   });
 
   it('Validates custom fields correctly', () => {
@@ -134,8 +145,6 @@ describe('Exceptions flyout', () => {
     addExceptionEntryFieldValue('blooberty', 0);
     addExceptionEntryFieldValueValue('blah', 0);
     cy.get(CONFIRM_BTN).should('be.enabled');
-
-    closeExceptionBuilderFlyout();
   });
 
   it('Does not overwrite values and-ed together', () => {
@@ -154,10 +163,9 @@ describe('Exceptions flyout', () => {
 
     // delete second item, invalid values 'a' and 'c' should remain
     cy.get(ENTRY_DELETE_BTN).eq(1).click();
-    cy.get(FIELD_INPUT).eq(0).should('have.text', 'agent.name');
-    cy.get(FIELD_INPUT).eq(1).should('have.text', 'c');
-
-    closeExceptionBuilderFlyout();
+    cy.get(LOADING_SPINNER).should('not.exist');
+    cy.get(FIELD_INPUT_PARENT).eq(0).should('have.text', 'agent.name');
+    cy.get(FIELD_INPUT_PARENT).eq(1).should('have.text', 'c');
   });
 
   it('Does not overwrite values or-ed together', () => {
@@ -184,37 +192,35 @@ describe('Exceptions flyout', () => {
     cy.get(ENTRY_DELETE_BTN).eq(3).click();
     cy.get(EXCEPTION_ITEM_CONTAINER)
       .eq(0)
-      .find(FIELD_INPUT)
+      .find(FIELD_INPUT_PARENT)
       .eq(0)
       .should('have.text', 'agent.name');
     cy.get(EXCEPTION_ITEM_CONTAINER)
       .eq(0)
-      .find(FIELD_INPUT)
+      .find(FIELD_INPUT_PARENT)
       .eq(1)
       .should('have.text', 'user.id.keyword');
     cy.get(EXCEPTION_ITEM_CONTAINER)
       .eq(1)
-      .find(FIELD_INPUT)
+      .find(FIELD_INPUT_PARENT)
       .eq(0)
       .should('have.text', 'user.first');
-    cy.get(EXCEPTION_ITEM_CONTAINER).eq(1).find(FIELD_INPUT).eq(1).should('have.text', 'e');
+    cy.get(EXCEPTION_ITEM_CONTAINER).eq(1).find(FIELD_INPUT_PARENT).eq(1).should('have.text', 'e');
 
     // delete remaining entries in exception item 2
     cy.get(ENTRY_DELETE_BTN).eq(2).click();
     cy.get(ENTRY_DELETE_BTN).eq(2).click();
     cy.get(EXCEPTION_ITEM_CONTAINER)
       .eq(0)
-      .find(FIELD_INPUT)
+      .find(FIELD_INPUT_PARENT)
       .eq(0)
       .should('have.text', 'agent.name');
     cy.get(EXCEPTION_ITEM_CONTAINER)
       .eq(0)
-      .find(FIELD_INPUT)
+      .find(FIELD_INPUT_PARENT)
       .eq(1)
       .should('have.text', 'user.id.keyword');
     cy.get(EXCEPTION_ITEM_CONTAINER).eq(1).should('not.exist');
-
-    closeExceptionBuilderFlyout();
   });
 
   it('Does not overwrite values of nested entry items', () => {
@@ -230,32 +236,41 @@ describe('Exceptions flyout', () => {
     cy.get(ADD_OR_BTN).click();
     addExceptionEntryFieldValueOfItemX('agent.name', 1, 0);
     cy.get(ADD_NESTED_BTN).click();
-    addExceptionEntryFieldValueOfItemX('user.id{downarrow}{enter}', 1, 1);
+    addExceptionEntryFieldValueOfItemX('process.elf.sections.name{enter}', 1, 1);
     cy.get(ADD_AND_BTN).click();
-    addExceptionEntryFieldValueOfItemX('last{downarrow}{enter}', 1, 3);
+    addExceptionEntryFieldValueOfItemX('name{enter}', 1, 3);
     // This button will now read `Add non-nested button`
     cy.get(ADD_NESTED_BTN).scrollIntoView();
-    cy.get(ADD_NESTED_BTN).focus().click();
+    cy.get(ADD_NESTED_BTN).focus();
+    cy.get(ADD_NESTED_BTN).click();
     addExceptionEntryFieldValueOfItemX('@timestamp', 1, 4);
 
     // should have only deleted `user.id`
     cy.get(ENTRY_DELETE_BTN).eq(4).click();
     cy.get(EXCEPTION_ITEM_CONTAINER)
       .eq(0)
-      .find(FIELD_INPUT)
+      .find(FIELD_INPUT_PARENT)
       .eq(0)
       .should('have.text', 'agent.name');
-    cy.get(EXCEPTION_ITEM_CONTAINER).eq(0).find(FIELD_INPUT).eq(1).should('have.text', 'b');
+    cy.get(EXCEPTION_ITEM_CONTAINER).eq(0).find(FIELD_INPUT_PARENT).eq(1).should('have.text', 'b');
     cy.get(EXCEPTION_ITEM_CONTAINER)
       .eq(1)
-      .find(FIELD_INPUT)
+      .find(FIELD_INPUT_PARENT)
       .eq(0)
       .should('have.text', 'agent.name');
-    cy.get(EXCEPTION_ITEM_CONTAINER).eq(1).find(FIELD_INPUT).eq(1).should('have.text', 'user');
-    cy.get(EXCEPTION_ITEM_CONTAINER).eq(1).find(FIELD_INPUT).eq(2).should('have.text', 'last');
     cy.get(EXCEPTION_ITEM_CONTAINER)
       .eq(1)
-      .find(FIELD_INPUT)
+      .find(FIELD_INPUT_PARENT)
+      .eq(1)
+      .should('have.text', 'process.elf.sections');
+    cy.get(EXCEPTION_ITEM_CONTAINER)
+      .eq(1)
+      .find(FIELD_INPUT_PARENT)
+      .eq(2)
+      .should('have.text', 'name');
+    cy.get(EXCEPTION_ITEM_CONTAINER)
+      .eq(1)
+      .find(FIELD_INPUT_PARENT)
       .eq(3)
       .should('have.text', '@timestamp');
 
@@ -263,32 +278,64 @@ describe('Exceptions flyout', () => {
     cy.get(ENTRY_DELETE_BTN).eq(4).click();
     cy.get(EXCEPTION_ITEM_CONTAINER)
       .eq(0)
-      .find(FIELD_INPUT)
+      .find(FIELD_INPUT_PARENT)
       .eq(0)
       .should('have.text', 'agent.name');
-    cy.get(EXCEPTION_ITEM_CONTAINER).eq(0).find(FIELD_INPUT).eq(1).should('have.text', 'b');
+    cy.get(EXCEPTION_ITEM_CONTAINER).eq(0).find(FIELD_INPUT_PARENT).eq(1).should('have.text', 'b');
     cy.get(EXCEPTION_ITEM_CONTAINER)
       .eq(1)
-      .find(FIELD_INPUT)
+      .find(FIELD_INPUT_PARENT)
       .eq(0)
       .should('have.text', 'agent.name');
     cy.get(EXCEPTION_ITEM_CONTAINER)
       .eq(1)
-      .find(FIELD_INPUT)
+      .find(FIELD_INPUT_PARENT)
       .eq(1)
       .should('have.text', '@timestamp');
-
-    closeExceptionBuilderFlyout();
   });
 
   it('Contains custom index fields', () => {
     // open add exception modal
     openExceptionFlyoutFromEmptyViewerPrompt();
 
-    cy.get(FIELD_INPUT).eq(0).click({ force: true });
+    searchExceptionEntryFieldWithPrefix('unique');
     cy.get(EXCEPTION_FIELD_LIST).contains('unique_value.test');
+  });
 
-    closeExceptionBuilderFlyout();
+  it('Validates auto-suggested fields correctly', () => {
+    // open add exception modal
+    openExceptionFlyoutFromEmptyViewerPrompt();
+
+    // add exception item name
+    addExceptionFlyoutItemName('My item name');
+
+    // add an entry with a value and submit button should enable
+    addExceptionEntryFieldValue('agent.type', 0);
+    cy.get(VALUES_INPUT).eq(0).type(`{enter}`);
+    cy.get(VALUES_INPUT).eq(0).type(`{downarrow}{enter}`);
+    cy.get(CONFIRM_BTN).should('be.enabled');
+  });
+
+  it.skip('Warns users about mapping conflicts on problematic field selection', async () => {
+    // open add exception modal
+    openExceptionFlyoutFromEmptyViewerPrompt();
+
+    // find 'doc_id' field which has mapping conflicts accross different indices
+    searchExceptionEntryFieldWithPrefix('doc_id');
+
+    const warningMessage =
+      'This field is defined as different types across the following indices or is unmapped. This can cause unexpected query results.boolean: conflicts-0002long: conflicts-0001';
+
+    // hovering field should show warning tooltip
+    showFieldConflictsWarningTooltipWithMessage(warningMessage);
+
+    // select problematic field
+    selectCurrentEntryField();
+
+    // check that we show warning after the field selection in form of accordion component
+    // underneath the field component and clicking on which reveals the extended warning message
+    // with conflicts details
+    showMappingConflictsWarningMessage(warningMessage);
   });
 
   // TODO - Add back in error states into modal

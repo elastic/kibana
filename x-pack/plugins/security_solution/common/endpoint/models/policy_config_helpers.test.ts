@@ -73,6 +73,7 @@ describe('Policy Config helpers', () => {
       const defaultPolicy: PolicyConfig = policyFactory();
 
       const windowsEvents: typeof defaultPolicy.windows.events = {
+        credential_access: false,
         dll_and_driver_load: false,
         dns: false,
         file: false,
@@ -118,8 +119,10 @@ describe('Policy Config helpers', () => {
 // This constant makes sure that if the type `PolicyConfig` is ever modified,
 // the logic for disabling protections is also modified due to type check.
 export const eventsOnlyPolicy: PolicyConfig = {
+  meta: { license: '', cloud: false },
   windows: {
     events: {
+      credential_access: true,
       dll_and_driver_load: true,
       dns: true,
       file: true,
@@ -153,6 +156,9 @@ export const eventsOnlyPolicy: PolicyConfig = {
       memory_protection: { message: '', enabled: false },
     },
     logging: { file: 'info' },
+    advanced: {
+      capture_env_vars: 'DYLD_INSERT_LIBRARIES,DYLD_FRAMEWORK_PATH,DYLD_LIBRARY_PATH,LD_PRELOAD',
+    },
   },
   linux: {
     events: {
@@ -171,5 +177,8 @@ export const eventsOnlyPolicy: PolicyConfig = {
       memory_protection: { message: '', enabled: false },
     },
     logging: { file: 'info' },
+    advanced: {
+      capture_env_vars: 'LD_PRELOAD,LD_LIBRARY_PATH',
+    },
   },
 };

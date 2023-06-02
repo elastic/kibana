@@ -123,6 +123,7 @@ const basicTimeline: TimelineModel = {
   pinnedEventsSaveObject: {},
   queryFields: [],
   savedObjectId: null,
+  selectAll: false,
   selectedEventIds: {},
   sessionViewConfig: null,
   show: true,

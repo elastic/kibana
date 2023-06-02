@@ -145,10 +145,11 @@ export class CoreUsageStatsClient implements ICoreUsageStatsClient {
   }
 
   public async incrementSavedObjectsImport(options: IncrementSavedObjectsImportOptions) {
-    const { createNewCopies, overwrite } = options;
+    const { createNewCopies, overwrite, compatibilityMode } = options;
     const counterFieldNames = [
       `createNewCopiesEnabled.${createNewCopies ? 'yes' : 'no'}`,
       ...(!createNewCopies ? [`overwriteEnabled.${overwrite ? 'yes' : 'no'}`] : []), // the overwrite option is ignored when createNewCopies is true
+      ...(!createNewCopies ? [`compatibilityModeEnabled.${compatibilityMode ? 'yes' : 'no'}`] : []), // the compatibilityMode option is ignored when createNewCopies is true
     ];
     await this.updateUsageStats(counterFieldNames, IMPORT_STATS_PREFIX, options);
   }
@@ -156,8 +157,11 @@ export class CoreUsageStatsClient implements ICoreUsageStatsClient {
   public async incrementSavedObjectsResolveImportErrors(
     options: IncrementSavedObjectsResolveImportErrorsOptions
   ) {
-    const { createNewCopies } = options;
-    const counterFieldNames = [`createNewCopiesEnabled.${createNewCopies ? 'yes' : 'no'}`];
+    const { createNewCopies, compatibilityMode } = options;
+    const counterFieldNames = [
+      `createNewCopiesEnabled.${createNewCopies ? 'yes' : 'no'}`,
+      ...(!createNewCopies ? [`compatibilityModeEnabled.${compatibilityMode ? 'yes' : 'no'}`] : []), // the compatibilityMode option is ignored when createNewCopies is true
+    ];
     await this.updateUsageStats(counterFieldNames, RESOLVE_IMPORT_STATS_PREFIX, options);
   }
 
@@ -241,7 +245,9 @@ function getFieldsForCounter(prefix: string) {
 }
 
 function getIsKibanaRequest({ headers }: KibanaRequest) {
-  // The presence of these two request headers gives us a good indication that this is a first-party request from the Kibana client.
+  // The presence of these request headers gives us a good indication that this is a first-party request from the Kibana client.
   // We can't be 100% certain, but this is a reasonable attempt.
-  return headers && headers['kbn-version'] && headers.referer;
+  return (
+    headers && headers['kbn-version'] && headers.referer && headers['x-elastic-internal-origin']
+  );
 }

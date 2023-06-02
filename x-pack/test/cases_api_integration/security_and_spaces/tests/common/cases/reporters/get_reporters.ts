@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 
 import { defaultUser, getPostCaseRequest } from '../../../../../common/lib/mock';
-import { createCase, deleteCasesByESQuery, getReporters } from '../../../../../common/lib/utils';
+import { createCase, deleteCasesByESQuery, getReporters } from '../../../../../common/lib/api';
 import {
   secOnly,
   obsOnly,

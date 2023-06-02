@@ -29,7 +29,7 @@ type StatusReducerAction =
   | { type: 'startedSetup' }
   | {
       type: 'finishedSetup';
-      sourceId: string;
+      logViewId: string;
       spaceId: string;
       jobSetupResults: SetupMlModuleResponsePayload['jobs'];
       jobSummaries: FetchJobStatusResponsePayload;
@@ -40,7 +40,7 @@ type StatusReducerAction =
   | {
       type: 'fetchedJobStatuses';
       spaceId: string;
-      sourceId: string;
+      logViewId: string;
       payload: FetchJobStatusResponsePayload;
     }
   | { type: 'failedFetchingJobStatuses' }
@@ -84,13 +84,13 @@ const createStatusReducer =
         };
       }
       case 'finishedSetup': {
-        const { datafeedSetupResults, jobSetupResults, jobSummaries, spaceId, sourceId } = action;
+        const { datafeedSetupResults, jobSetupResults, jobSummaries, spaceId, logViewId } = action;
         const nextJobStatus = jobTypes.reduce(
           (accumulatedJobStatus, jobType) => ({
             ...accumulatedJobStatus,
             [jobType]:
-              hasSuccessfullyCreatedJob(getJobId(spaceId, sourceId, jobType))(jobSetupResults) &&
-              hasSuccessfullyStartedDatafeed(getDatafeedId(spaceId, sourceId, jobType))(
+              hasSuccessfullyCreatedJob(getJobId(spaceId, logViewId, jobType))(jobSetupResults) &&
+              hasSuccessfullyStartedDatafeed(getDatafeedId(spaceId, logViewId, jobType))(
                 datafeedSetupResults
               )
                 ? 'started'
@@ -142,13 +142,13 @@ const createStatusReducer =
         };
       }
       case 'fetchedJobStatuses': {
-        const { payload: jobSummaries, spaceId, sourceId } = action;
+        const { payload: jobSummaries, spaceId, logViewId } = action;
         const { setupStatus } = state;
 
         const nextJobStatus = jobTypes.reduce(
           (accumulatedJobStatus, jobType) => ({
             ...accumulatedJobStatus,
-            [jobType]: getJobStatus(getJobId(spaceId, sourceId, jobType))(jobSummaries),
+            [jobType]: getJobStatus(getJobId(spaceId, logViewId, jobType))(jobSummaries),
           }),
           {} as Record<JobType, JobStatus>
         );

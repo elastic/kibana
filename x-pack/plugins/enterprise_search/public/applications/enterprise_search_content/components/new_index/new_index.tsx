@@ -7,200 +7,92 @@
 
 import React, { useState } from 'react';
 
-import { useLocation } from 'react-router-dom';
+import { useValues } from 'kea';
 
-import {
-  EuiBadge,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPanel,
-  EuiSpacer,
-  EuiText,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { TECHNICAL_PREVIEW_LABEL } from '../../../shared/constants';
-import { parseQueryParams } from '../../../shared/query_params';
-import { EuiLinkTo } from '../../../shared/react_router_helpers';
+import { INGESTION_METHOD_IDS } from '../../../../../common/constants';
 
+import { ProductFeatures } from '../../../../../common/types';
+
+import { generateEncodedPath } from '../../../shared/encode_path_params';
+import { KibanaLogic } from '../../../shared/kibana/kibana_logic';
+
+import { EuiLinkTo } from '../../../shared/react_router_helpers';
+import { NEW_INDEX_METHOD_PATH, NEW_INDEX_SELECT_CONNECTOR_PATH } from '../../routes';
 import { EnterpriseSearchContentPageTemplate } from '../layout/page_template';
 import { baseBreadcrumbs } from '../search_indices';
 
-import { ButtonGroup, ButtonGroupOption } from './button_group';
-import { SearchIndexEmptyState } from './empty_state';
-import { MethodApi } from './method_api/method_api';
-import { MethodConnector } from './method_connector/method_connector';
-import { MethodCrawler } from './method_crawler/method_crawler';
+import { NewIndexCard } from './new_index_card';
 
-export enum IngestionMethodId {
-  api = 'api',
-  connector = 'connector',
-  crawler = 'crawler',
-  native_connector = 'native_connector',
-}
-
-const technicalPreviewBadge = (
-  <EuiBadge iconType="beaker">
-    <EuiText size="xs">{TECHNICAL_PREVIEW_LABEL}</EuiText>
-  </EuiBadge>
-);
-
-const METHOD_BUTTON_GROUP_OPTIONS: ButtonGroupOption[] = [
-  {
-    description: i18n.translate(
-      'xpack.enterpriseSearch.content.newIndex.buttonGroup.crawler.description',
-      {
-        defaultMessage: 'Discover, extract, index, and sync all of your website content',
-      }
-    ),
-    footer: i18n.translate('xpack.enterpriseSearch.content.newIndex.buttonGroup.crawler.footer', {
-      defaultMessage: 'No development required',
-    }),
-    icon: 'globe',
-    id: IngestionMethodId.crawler,
-    label: i18n.translate('xpack.enterpriseSearch.content.newIndex.buttonGroup.crawler.label', {
-      defaultMessage: 'Use the web crawler',
-    }),
-  },
-  {
-    badge: technicalPreviewBadge,
-    description: i18n.translate(
-      'xpack.enterpriseSearch.content.newIndex.buttonGroup.nativeConnector.description',
-      {
-        defaultMessage:
-          'Configure a connector to extract, index, and sync all of your content from supported data sources ',
-      }
-    ),
-    footer: i18n.translate(
-      'xpack.enterpriseSearch.content.newIndex.buttonGroup.nativeConnector.footer',
-      {
-        defaultMessage: 'No development required',
-      }
-    ),
-    icon: 'visVega',
-    id: IngestionMethodId.native_connector,
-    label: i18n.translate(
-      'xpack.enterpriseSearch.content.newIndex.buttonGroup.nativeConnector.label',
-      {
-        defaultMessage: 'Use a connector',
-      }
-    ),
-  },
-  {
-    description: i18n.translate(
-      'xpack.enterpriseSearch.content.newIndex.buttonGroup.api.description',
-      {
-        defaultMessage: 'Add documents programmatically by connecting with the API',
-      }
-    ),
-    footer: i18n.translate('xpack.enterpriseSearch.content.newIndex.buttonGroup.api.footer', {
-      defaultMessage: 'Some development required',
-    }),
-    icon: 'visVega',
-    id: IngestionMethodId.api,
-    label: i18n.translate('xpack.enterpriseSearch.content.newIndex.buttonGroup.api.label', {
-      defaultMessage: 'Use the API',
-    }),
-  },
-  {
-    badge: technicalPreviewBadge,
-    description: i18n.translate(
-      'xpack.enterpriseSearch.content.newIndex.buttonGroup.connector.description',
-      {
-        defaultMessage:
-          'Use the connector framework to quickly build connectors for custom data sources',
-      }
-    ),
-    footer: i18n.translate('xpack.enterpriseSearch.content.newIndex.buttonGroup.connector.footer', {
-      defaultMessage: 'Development required',
-    }),
-    icon: 'package',
-    id: IngestionMethodId.connector,
-    label: i18n.translate('xpack.enterpriseSearch.content.newIndex.buttonGroup.connector.label', {
-      defaultMessage: 'Build a connector',
-    }),
-  },
-];
+const getAvailableMethodOptions = (productFeatures: ProductFeatures): INGESTION_METHOD_IDS[] => {
+  return [
+    ...(productFeatures.hasWebCrawler ? [INGESTION_METHOD_IDS.CRAWLER] : []),
+    ...(productFeatures.hasConnectors ? [INGESTION_METHOD_IDS.CONNECTOR] : []),
+    INGESTION_METHOD_IDS.API,
+  ];
+};
 
 export const NewIndex: React.FC = () => {
-  const { search } = useLocation();
-  const { method: methodParam } = parseQueryParams(search);
+  const { capabilities, productFeatures } = useValues(KibanaLogic);
+  const availableIngestionMethodOptions = getAvailableMethodOptions(productFeatures);
 
-  const initialSelectedMethod =
-    METHOD_BUTTON_GROUP_OPTIONS.find((option) => option.id === methodParam) ??
-    METHOD_BUTTON_GROUP_OPTIONS[0];
-
-  const [selectedMethod, setSelectedMethod] = useState<ButtonGroupOption>(initialSelectedMethod);
-
+  const [selectedMethod, setSelectedMethod] = useState<string>('');
   return (
     <EnterpriseSearchContentPageTemplate
       pageChrome={[
         ...baseBreadcrumbs,
         i18n.translate('xpack.enterpriseSearch.content.newIndex.breadcrumb', {
-          defaultMessage: 'New search index',
+          defaultMessage: 'New ingestion method',
         }),
       ]}
       pageViewTelemetry="New Index"
       isLoading={false}
       pageHeader={{
+        description: i18n.translate('xpack.enterpriseSearch.content.newIndex.pageDescription', {
+          defaultMessage:
+            'Create a search optimized Elasticsearch index to store your content. Start by selecting an ingestion method.',
+        }),
         pageTitle: i18n.translate('xpack.enterpriseSearch.content.newIndex.pageTitle', {
-          defaultMessage: 'New search index',
+          defaultMessage: 'Select an ingestion method',
         }),
       }}
     >
-      <EuiFlexGroup>
-        <EuiFlexItem grow={false} style={{ maxWidth: '24rem' }}>
-          <EuiPanel hasShadow={false} paddingSize="m" grow={false} color="subdued">
-            <EuiTitle size="s">
-              <h2>
-                {i18n.translate('xpack.enterpriseSearch.content.newIndex.selectSearchIndex.title', {
-                  defaultMessage: 'Select an ingestion method',
+      <EuiFlexGroup direction="column">
+        <>
+          <EuiFlexItem>
+            <EuiFlexGroup>
+              {availableIngestionMethodOptions.map((type) => (
+                <EuiFlexItem key={type}>
+                  <NewIndexCard
+                    type={type}
+                    onSelect={() => {
+                      setSelectedMethod(type);
+                      if (type === INGESTION_METHOD_IDS.CONNECTOR) {
+                        KibanaLogic.values.navigateToUrl(NEW_INDEX_SELECT_CONNECTOR_PATH);
+                      } else {
+                        KibanaLogic.values.navigateToUrl(
+                          generateEncodedPath(NEW_INDEX_METHOD_PATH, { type })
+                        );
+                      }
+                    }}
+                    isSelected={selectedMethod === type}
+                  />
+                </EuiFlexItem>
+              ))}
+            </EuiFlexGroup>
+          </EuiFlexItem>
+          {capabilities.navLinks.integrations && (
+            <EuiFlexItem>
+              <EuiLinkTo to="/app/integrations" shouldNotCreateHref>
+                {i18n.translate('xpack.enterpriseSearch.content.newIndex.viewIntegrationsLink', {
+                  defaultMessage: 'View additional integrations',
                 })}
-              </h2>
-            </EuiTitle>
-            <EuiSpacer size="s" />
-            <EuiText size="s">
-              <p>
-                {i18n.translate(
-                  'xpack.enterpriseSearch.content.newIndex.selectSearchIndex.description',
-                  {
-                    defaultMessage:
-                      'Create a search optimized Elasticsearch index by selecting an ingestion method for your use case.',
-                  }
-                )}
-              </p>
-            </EuiText>
-            <EuiSpacer size="m" />
-            <ButtonGroup
-              options={METHOD_BUTTON_GROUP_OPTIONS}
-              selected={selectedMethod}
-              onChange={setSelectedMethod}
-            />
-            <EuiSpacer size="xxl" />
-            <EuiLinkTo to="/app/integrations" shouldNotCreateHref>
-              {i18n.translate('xpack.enterpriseSearch.content.newIndex.viewIntegrationsLink', {
-                defaultMessage: 'View additional integrations',
-              })}
-            </EuiLinkTo>
-          </EuiPanel>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          {selectedMethod ? (
-            <>
-              {selectedMethod.id === IngestionMethodId.crawler && <MethodCrawler />}
-              {selectedMethod.id === IngestionMethodId.api && <MethodApi />}
-              {selectedMethod.id === IngestionMethodId.connector && (
-                <MethodConnector isNative={false} />
-              )}
-              {selectedMethod.id === IngestionMethodId.native_connector && (
-                <MethodConnector isNative />
-              )}
-            </>
-          ) : (
-            <SearchIndexEmptyState />
+              </EuiLinkTo>
+            </EuiFlexItem>
           )}
-        </EuiFlexItem>
+        </>
       </EuiFlexGroup>
     </EnterpriseSearchContentPageTemplate>
   );

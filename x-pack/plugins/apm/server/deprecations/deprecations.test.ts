@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { kibanaPackageJson } from '@kbn/utils';
+import { kibanaPackageJson } from '@kbn/repo-info';
 
 import { GetDeprecationsContext } from '@kbn/core/server';
 import { CloudSetup } from '@kbn/cloud-plugin/server';

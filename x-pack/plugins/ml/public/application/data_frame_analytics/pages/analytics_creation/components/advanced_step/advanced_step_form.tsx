@@ -23,14 +23,14 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { HyperParameters } from './hyper_parameters';
-import { CreateAnalyticsStepProps } from '../../../analytics_management/hooks/use_create_analytics_form';
-import { getModelMemoryLimitErrors } from '../../../analytics_management/hooks/use_create_analytics_form/reducer';
 import {
   ANALYSIS_CONFIG_TYPE,
   NUM_TOP_FEATURE_IMPORTANCE_VALUES_MIN,
   ANALYSIS_ADVANCED_FIELDS,
-} from '../../../../common/analytics';
+} from '@kbn/ml-data-frame-analytics-utils';
+import { HyperParameters } from './hyper_parameters';
+import { CreateAnalyticsStepProps } from '../../../analytics_management/hooks/use_create_analytics_form';
+import { getModelMemoryLimitErrors } from '../../../analytics_management/hooks/use_create_analytics_form/reducer';
 import { useMlKibana } from '../../../../../contexts/kibana';
 import { DEFAULT_MODEL_MEMORY_LIMIT } from '../../../analytics_management/hooks/use_create_analytics_form/state';
 import { ANALYTICS_STEPS } from '../../page';
@@ -264,7 +264,7 @@ export const AdvancedStepForm: FC<CreateAnalyticsStepProps> = ({
             'xpack.ml.dataframe.analytics.create.computeFeatureInfluenceLabelHelpText',
             {
               defaultMessage:
-                'Specifies whether the feature influence calculation is enabled. Defaults to true.',
+                'Specify whether the feature influence calculation is enabled. Defaults to true.',
             }
           )}
         >
@@ -399,7 +399,7 @@ export const AdvancedStepForm: FC<CreateAnalyticsStepProps> = ({
             'xpack.ml.dataframe.analytics.create.predictionFieldNameHelpText',
             {
               defaultMessage:
-                'Defines the name of the prediction field in the results. Defaults to <dependent_variable>_prediction.',
+                'Define the name of the prediction field in the results. The default is <dependent_variable>_prediction.',
             }
           )}
         >

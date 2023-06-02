@@ -20,44 +20,38 @@ import {
   type SavedQuery,
   type ISearchSource,
 } from '@kbn/data-plugin/public';
+import {
+  BUCKET_SELECTOR_FIELD,
+  buildAggregation,
+  FieldOption,
+  isCountAggregation,
+  isGroupAggregation,
+  parseAggregationResults,
+} from '@kbn/triggers-actions-ui-plugin/public/common';
+import { getComparatorScript } from '../../../../common';
+import { Comparator } from '../../../../common/comparator_types';
 import { STACK_ALERTS_FEATURE_ID } from '../../../../common';
 import { CommonRuleParams, EsQueryRuleMetaData, EsQueryRuleParams, SearchType } from '../types';
 import { DEFAULT_VALUES } from '../constants';
 import { DataViewSelectPopover } from '../../components/data_view_select_popover';
 import { RuleCommonExpressions } from '../rule_common_expressions';
-import { totalHitsToNumber } from '../test_query_row';
+import { useTriggerUiActionServices, convertFieldSpecToFieldOption } from '../util';
 import { hasExpressionValidationErrors } from '../validation';
-import { useTriggerUiActionServices } from '../util';
 
 const HIDDEN_FILTER_PANEL_OPTIONS: SearchBarProps['hiddenFilterPanelOptions'] = [
   'pinFilter',
   'disableFilter',
 ];
 
-interface LocalState {
+interface LocalState extends CommonRuleParams {
   index?: DataView;
   filter: Filter[];
   query: Query;
-  thresholdComparator: CommonRuleParams['thresholdComparator'];
-  threshold: CommonRuleParams['threshold'];
-  timeWindowSize: CommonRuleParams['timeWindowSize'];
-  timeWindowUnit: CommonRuleParams['timeWindowUnit'];
-  size: CommonRuleParams['size'];
-  excludeHitsFromPreviousRun: CommonRuleParams['excludeHitsFromPreviousRun'];
 }
 
 interface LocalStateAction {
-  type:
-    | SearchSourceParamsAction['type']
-    | (
-        | 'threshold'
-        | 'thresholdComparator'
-        | 'timeWindowSize'
-        | 'timeWindowUnit'
-        | 'size'
-        | 'excludeHitsFromPreviousRun'
-      );
-  payload: SearchSourceParamsAction['payload'] | (number[] | number | string | boolean);
+  type: SearchSourceParamsAction['type'] | keyof CommonRuleParams;
+  payload: SearchSourceParamsAction['payload'] | (number[] | number | string | boolean | undefined);
 }
 
 type LocalStateReducer = (prevState: LocalState, action: LocalStateAction) => LocalState;
@@ -94,6 +88,10 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
       if (isSearchSourceParam(action)) {
         searchSource.setParent(undefined).setField(action.type, action.payload);
         setParam('searchConfiguration', searchSource.getSerializedFields());
+
+        if (action.type === 'index') {
+          setParam('timeField', searchSource.getField('index')?.timeFieldName);
+        }
       } else {
         setParam(action.type, action.payload);
       }
@@ -107,18 +105,28 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
       thresholdComparator: ruleParams.thresholdComparator ?? DEFAULT_VALUES.THRESHOLD_COMPARATOR,
       timeWindowSize: ruleParams.timeWindowSize ?? DEFAULT_VALUES.TIME_WINDOW_SIZE,
       timeWindowUnit: ruleParams.timeWindowUnit ?? DEFAULT_VALUES.TIME_WINDOW_UNIT,
+      aggType: ruleParams.aggType ?? DEFAULT_VALUES.AGGREGATION_TYPE,
+      aggField: ruleParams.aggField,
+      groupBy: ruleParams.groupBy ?? DEFAULT_VALUES.GROUP_BY,
+      termSize: ruleParams.termSize ?? DEFAULT_VALUES.TERM_SIZE,
+      termField: ruleParams.termField,
       size: ruleParams.size ?? DEFAULT_VALUES.SIZE,
       excludeHitsFromPreviousRun:
         ruleParams.excludeHitsFromPreviousRun ?? DEFAULT_VALUES.EXCLUDE_PREVIOUS_HITS,
     }
   );
+
   const { index: dataView, query, filter: filters } = ruleConfiguration;
   const dataViews = useMemo(() => (dataView ? [dataView] : []), [dataView]);
 
-  const onSelectDataView = useCallback(
-    (newDataView: DataView) => dispatch({ type: 'index', payload: newDataView }),
-    []
+  const [esFields, setEsFields] = useState<FieldOption[]>(
+    dataView ? convertFieldSpecToFieldOption(dataView.fields.map((field) => field.toSpec())) : []
   );
+
+  const onSelectDataView = useCallback((newDataView: DataView) => {
+    setEsFields(convertFieldSpecToFieldOption(newDataView.fields.map((field) => field.toSpec())));
+    dispatch({ type: 'index', payload: newDataView });
+  }, []);
 
   const onUpdateFilters = useCallback((newFilters) => {
     dispatch({ type: 'filter', payload: mapAndFlattenFilters(newFilters) });
@@ -175,6 +183,33 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
     []
   );
 
+  const onChangeSelectedAggField = useCallback(
+    (selectedAggField?: string) => dispatch({ type: 'aggField', payload: selectedAggField }),
+    []
+  );
+
+  const onChangeSelectedAggType = useCallback(
+    (selectedAggType: string) => dispatch({ type: 'aggType', payload: selectedAggType }),
+    []
+  );
+
+  const onChangeSelectedGroupBy = useCallback(
+    (selectedGroupBy?: string) =>
+      selectedGroupBy && dispatch({ type: 'groupBy', payload: selectedGroupBy }),
+    []
+  );
+
+  const onChangeSelectedTermField = useCallback(
+    (selectedTermField?: string) => dispatch({ type: 'termField', payload: selectedTermField }),
+    []
+  );
+
+  const onChangeSelectedTermSize = useCallback(
+    (selectedTermSize?: number) =>
+      selectedTermSize && dispatch({ type: 'termSize', payload: selectedTermSize }),
+    []
+  );
+
   const onChangeSelectedThreshold = useCallback(
     (selectedThresholds?: number[]) =>
       selectedThresholds && dispatch({ type: 'threshold', payload: selectedThresholds }),
@@ -203,8 +238,34 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
       'filter',
       timeFilter ? [timeFilter, ...ruleConfiguration.filter] : ruleConfiguration.filter
     );
+    testSearchSource.setField(
+      'aggs',
+      buildAggregation({
+        aggType: ruleParams.aggType,
+        aggField: ruleParams.aggField,
+        termField: ruleParams.termField,
+        termSize: ruleParams.termSize,
+        condition: {
+          conditionScript: getComparatorScript(
+            (ruleParams.thresholdComparator ?? DEFAULT_VALUES.THRESHOLD_COMPARATOR) as Comparator,
+            ruleParams.threshold,
+            BUCKET_SELECTOR_FIELD
+          ),
+        },
+      })
+    );
     return testSearchSource;
-  }, [searchSource, timeWindow, ruleConfiguration]);
+  }, [
+    searchSource,
+    timeWindow,
+    ruleConfiguration,
+    ruleParams.aggType,
+    ruleParams.aggField,
+    ruleParams.termField,
+    ruleParams.termSize,
+    ruleParams.threshold,
+    ruleParams.thresholdComparator,
+  ]);
 
   const onCopyQuery = useCallback(() => {
     const testSearchSource = createTestSearchSource();
@@ -212,10 +273,16 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
   }, [createTestSearchSource]);
 
   const onTestFetch = useCallback(async () => {
+    const isGroupAgg = isGroupAggregation(ruleParams.termField);
+    const isCountAgg = isCountAggregation(ruleParams.aggType);
     const testSearchSource = createTestSearchSource();
     const { rawResponse } = await lastValueFrom(testSearchSource.fetch$());
-    return { nrOfDocs: totalHitsToNumber(rawResponse.hits.total), timeWindow };
-  }, [timeWindow, createTestSearchSource]);
+    return {
+      testResults: parseAggregationResults({ isCountAgg, isGroupAgg, esResult: rawResponse }),
+      isGrouped: isGroupAgg,
+      timeWindow,
+    };
+  }, [timeWindow, createTestSearchSource, ruleParams.aggType, ruleParams.termField]);
 
   return (
     <Fragment>
@@ -227,16 +294,13 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
           />
         </h5>
       </EuiTitle>
-
       <EuiSpacer size="s" />
-
       <DataViewSelectPopover
         dataView={dataView}
         metadata={props.metadata}
         onSelectDataView={onSelectDataView}
         onChangeMetaData={props.onChangeMetaData}
       />
-
       {Boolean(dataView?.id) && (
         <>
           <EuiSpacer size="s" />
@@ -284,19 +348,29 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
         timeWindowSize={ruleConfiguration.timeWindowSize}
         timeWindowUnit={ruleConfiguration.timeWindowUnit}
         size={ruleConfiguration.size}
+        esFields={esFields}
+        aggType={ruleConfiguration.aggType}
+        aggField={ruleConfiguration.aggField}
+        groupBy={ruleConfiguration.groupBy}
+        termSize={ruleConfiguration.termSize}
+        termField={ruleConfiguration.termField}
+        onChangeSelectedAggField={onChangeSelectedAggField}
+        onChangeSelectedAggType={onChangeSelectedAggType}
+        onChangeSelectedGroupBy={onChangeSelectedGroupBy}
+        onChangeSelectedTermField={onChangeSelectedTermField}
+        onChangeSelectedTermSize={onChangeSelectedTermSize}
         onChangeThreshold={onChangeSelectedThreshold}
         onChangeThresholdComparator={onChangeSelectedThresholdComparator}
         onChangeWindowSize={onChangeWindowSize}
         onChangeWindowUnit={onChangeWindowUnit}
         onChangeSizeValue={onChangeSizeValue}
         errors={errors}
-        hasValidationErrors={hasExpressionValidationErrors(ruleParams) || !dataView}
+        hasValidationErrors={hasExpressionValidationErrors(props.ruleParams)}
         onTestFetch={onTestFetch}
         onCopyQuery={onCopyQuery}
         excludeHitsFromPreviousRun={ruleConfiguration.excludeHitsFromPreviousRun}
         onChangeExcludeHitsFromPreviousRun={onChangeExcludeHitsFromPreviousRun}
       />
-
       <EuiSpacer />
     </Fragment>
   );

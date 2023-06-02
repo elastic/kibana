@@ -157,7 +157,7 @@ export class NewVectorLayerEditor extends Component<RenderWizardArguments, State
               defaultMessage: 'Missing index privileges',
             })}
             color="danger"
-            iconType="alert"
+            iconType="warning"
           >
             <p>{this.state.createIndexError}</p>
           </EuiCallOut>
@@ -169,7 +169,7 @@ export class NewVectorLayerEditor extends Component<RenderWizardArguments, State
             defaultMessage: 'Unable to create index',
           })}
           color="danger"
-          iconType="alert"
+          iconType="warning"
         >
           <p>{this.state.createIndexError}</p>
         </EuiCallOut>

@@ -1,0 +1,3530 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "Alerting",
+    "description": "OpenAPI schema for alerting endpoints",
+    "version": "0.1",
+    "contact": {
+      "name": "Alerting Team"
+    },
+    "license": {
+      "name": "Elastic License 2.0",
+      "url": "https://www.elastic.co/licensing/elastic-license"
+    }
+  },
+  "tags": [
+    {
+      "name": "alerting",
+      "description": "Alerting APIs enable you to create and manage rules and alerts."
+    }
+  ],
+  "servers": [
+    {
+      "url": "http://localhost:5601",
+      "description": "local"
+    }
+  ],
+  "paths": {
+    "/s/{spaceId}/api/alerting/rule/{ruleId}": {
+      "get": {
+        "summary": "Retrieves a rule by its identifier.",
+        "operationId": "getRule",
+        "description": "You must have `read` privileges for the appropriate Kibana features, depending on the `consumer` and `rule_type_id` of the rules you're seeking. For example, the **Management > Stack Rules** feature, **Analytics > Discover** and **Machine Learning** features, **Observability** features, or **Security** features. To get rules associated with the **Stack Monitoring** feature, use the `monitoring_user` built-in role.\n",
+        "tags": [
+          "alerting"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/rule_id"
+          },
+          {
+            "$ref": "#/components/parameters/space_id"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Indicates a successful call.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/rule_response_properties"
+                },
+                "examples": {
+                  "getRuleResponse": {
+                    "$ref": "#/components/examples/get_rule_response"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authorization information is missing or invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/401_response"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Object is not found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/404_response"
+                }
+              }
+            }
+          }
+        },
+        "servers": [
+          {
+            "url": "https://localhost:5601"
+          }
+        ]
+      },
+      "delete": {
+        "summary": "Deletes a rule.",
+        "operationId": "deleteRule",
+        "description": "You must have `all` privileges for the appropriate Kibana features, depending on the `consumer` and `rule_type_id` of the rule you're deleting. For example, the **Management** > **Stack Rules** feature, **Analytics** > **Discover** or **Machine Learning** features, **Observability**, or **Security** features. WARNING: After you delete a rule, you cannot recover it.\n",
+        "tags": [
+          "alerting"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/kbn_xsrf"
+          },
+          {
+            "$ref": "#/components/parameters/rule_id"
+          },
+          {
+            "$ref": "#/components/parameters/space_id"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Indicates a successful call."
+          },
+          "401": {
+            "description": "Authorization information is missing or invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/401_response"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Object is not found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/404_response"
+                }
+              }
+            }
+          }
+        },
+        "servers": [
+          {
+            "url": "https://localhost:5601"
+          }
+        ]
+      },
+      "post": {
+        "summary": "Creates a rule.",
+        "operationId": "createRule",
+        "description": "You must have `all` privileges for the appropriate Kibana features, depending on the `consumer` and `rule_type_id` of the rule you're creating. For example, you must have privileges for the **Management > Stack rules** feature, **Analytics > Discover** and **Machine Learning** features, **Observability** features, or **Security** features.  If the rule has actions, you must also have `read` privileges for the **Management > Actions and Connectors** feature. NOTE: This API supports only token-based authentication. When you create a rule, it identifies which roles you have at that point in time. Thereafter, when the rule performs queries, it uses those security privileges. If a user with different privileges updates the rule, its behavior might change.\n",
+        "tags": [
+          "alerting"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/kbn_xsrf"
+          },
+          {
+            "$ref": "#/components/parameters/space_id"
+          },
+          {
+            "in": "path",
+            "name": "ruleId",
+            "description": "An UUID v1 or v4 identifier for the rule. If you omit this parameter, an identifier is randomly generated.\n",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "ac4e6b90-6be7-11eb-ba0d-9b1c1f912d74"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/create_rule_request"
+              },
+              "examples": {
+                "createCaseRequest": {
+                  "$ref": "#/components/examples/create_rule_request"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Indicates a successful call.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/rule_response_properties"
+                },
+                "examples": {
+                  "createRuleResponse": {
+                    "$ref": "#/components/examples/create_rule_response"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authorization information is missing or invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/401_response"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Object is not found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/404_response"
+                }
+              }
+            }
+          }
+        },
+        "servers": [
+          {
+            "url": "https://localhost:5601"
+          }
+        ]
+      },
+      "put": {
+        "summary": "Updates the attributes for a rule.",
+        "operationId": "updateRule",
+        "description": "You must have `all` privileges for the appropriate Kibana features, depending on the `consumer` and `rule_type_id` of the rule you're updating. For example, you must have privileges for the **Management > Stack rules** feature, **Analytics > Discover** and **Machine Learning** features, **Observability** features, or **Security** features.  If the rule has actions, you must also have `read` privileges for the **Management > Actions and Connectors** feature. NOTE: This API supports only token-based authentication. When you update a rule, it identifies which roles you have at that point in time. Thereafter, when the rule performs queries, it uses those security privileges. If you have different privileges than the user that created or most recently updated the rule, you might change its behavior. Though some properties are optional, when you update the rule the existing property values are overwritten with default values. Therefore, it is recommended to explicitly set all property values.\n",
+        "tags": [
+          "alerting"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/kbn_xsrf"
+          },
+          {
+            "$ref": "#/components/parameters/rule_id"
+          },
+          {
+            "$ref": "#/components/parameters/space_id"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/update_rule_request"
+              },
+              "examples": {
+                "updateCaseRequest": {
+                  "$ref": "#/components/examples/update_rule_request"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Indicates a successful call.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/rule_response_properties"
+                },
+                "examples": {
+                  "updateRuleResponse": {
+                    "$ref": "#/components/examples/update_rule_response"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authorization information is missing or invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/401_response"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Object is not found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/404_response"
+                }
+              }
+            }
+          }
+        },
+        "servers": [
+          {
+            "url": "https://localhost:5601"
+          }
+        ]
+      },
+      "servers": [
+        {
+          "url": "https://localhost:5601"
+        }
+      ]
+    },
+    "/s/{spaceId}/api/alerting/rule/{ruleId}/_disable": {
+      "post": {
+        "summary": "Disables a rule.",
+        "operationId": "disableRule",
+        "description": "You must have `all` privileges for the appropriate Kibana features, depending on the `consumer` and `rule_type_id` of the rule. For example, the **Management > Stack Rules** feature, **Analytics > Discover** and **Machine Learning** features, **Observability**, and **Security** features.\n",
+        "tags": [
+          "alerting"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/kbn_xsrf"
+          },
+          {
+            "$ref": "#/components/parameters/rule_id"
+          },
+          {
+            "$ref": "#/components/parameters/space_id"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Indicates a successful call."
+          },
+          "401": {
+            "description": "Authorization information is missing or invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/401_response"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Object is not found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/404_response"
+                }
+              }
+            }
+          }
+        },
+        "servers": [
+          {
+            "url": "https://localhost:5601"
+          }
+        ]
+      },
+      "servers": [
+        {
+          "url": "https://localhost:5601"
+        }
+      ]
+    },
+    "/s/{spaceId}/api/alerting/rule/{ruleId}/_enable": {
+      "post": {
+        "summary": "Enables a rule.",
+        "operationId": "enableRule",
+        "description": "This API supports token-based authentication only. You must have `all` privileges for the appropriate Kibana features, depending on the `consumer` and `rule_type_id` of the rule. For example, the **Management > Stack Rules** feature, **Analytics > Discover** and **Machine Learning** features, **Observability**, and **Security** features.\n",
+        "tags": [
+          "alerting"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/kbn_xsrf"
+          },
+          {
+            "$ref": "#/components/parameters/rule_id"
+          },
+          {
+            "$ref": "#/components/parameters/space_id"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Indicates a successful call."
+          },
+          "401": {
+            "description": "Authorization information is missing or invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/401_response"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Object is not found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/401_response"
+                }
+              }
+            }
+          }
+        },
+        "servers": [
+          {
+            "url": "https://localhost:5601"
+          }
+        ]
+      },
+      "servers": [
+        {
+          "url": "https://localhost:5601"
+        }
+      ]
+    },
+    "/s/{spaceId}/api/alerting/rules/_find": {
+      "get": {
+        "summary": "Retrieves information about rules.",
+        "operationId": "findRules",
+        "description": "You must have `read` privileges for the appropriate Kibana features, depending on the `consumer` and `rule_type_id` of the rules you're seeking. For example, you must have privileges for the **Management > Stack rules** feature, **Analytics > Discover** and **Machine Learning** features, **Observability** features, or **Security** features. To find rules associated with the **Stack Monitoring** feature, use the `monitoring_user` built-in role.\n",
+        "tags": [
+          "alerting"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/space_id"
+          },
+          {
+            "name": "default_search_operator",
+            "in": "query",
+            "description": "The default operator to use for the simple_query_string.",
+            "schema": {
+              "type": "string",
+              "default": "OR"
+            },
+            "example": "OR"
+          },
+          {
+            "name": "fields",
+            "in": "query",
+            "description": "The fields to return in the `attributes` key of the response.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "name": "filter",
+            "in": "query",
+            "description": "A KQL string that you filter with an attribute from your saved object. It should look like `savedObjectType.attributes.title: \"myTitle\"`. However, if you used a direct attribute of a saved object, such as `updatedAt`, you must define your filter, for example, `savedObjectType.updatedAt > 2018-12-22`.\n",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "has_reference",
+            "in": "query",
+            "description": "Filters the rules that have a relation with the reference objects with a specific type and identifier.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "type": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "The page number to return.",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            },
+            "example": 1
+          },
+          {
+            "name": "per_page",
+            "in": "query",
+            "description": "The number of rules to return per page.",
+            "schema": {
+              "type": "integer",
+              "default": 20
+            },
+            "example": 20
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "description": "An Elasticsearch simple_query_string query that filters the objects in the response.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "search_fields",
+            "in": "query",
+            "description": "The fields to perform the simple_query_string parsed query against.",
+            "schema": {
+              "oneOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "name": "sort_field",
+            "in": "query",
+            "description": "Determines which field is used to sort the results. The field must exist in the `attributes` key of the response.\n",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sort_order",
+            "in": "query",
+            "description": "Determines the sort order.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "asc",
+                "desc"
+              ],
+              "default": "desc"
+            },
+            "example": "asc"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Indicates a successful call.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/rule_response_properties"
+                      }
+                    },
+                    "page": {
+                      "type": "integer"
+                    },
+                    "per_page": {
+                      "type": "integer"
+                    },
+                    "total": {
+                      "type": "integer"
+                    }
+                  }
+                },
+                "examples": {
+                  "findRulesResponse": {
+                    "$ref": "#/components/examples/find_rules_response"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authorization information is missing or invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/401_response"
+                }
+              }
+            }
+          }
+        },
+        "servers": [
+          {
+            "url": "https://localhost:5601"
+          }
+        ]
+      },
+      "servers": [
+        {
+          "url": "https://localhost:5601"
+        }
+      ]
+    },
+    "/s/{spaceId}/api/alerting/_health": {
+      "get": {
+        "summary": "Retrieves the health status of the alerting framework.",
+        "operationId": "getAlertingHealth",
+        "description": "You must have `read` privileges for the **Management > Stack Rules** feature or for at least one of the **Analytics > Discover**, **Analytics > Machine Learning**, **Observability**, or **Security** features.\n",
+        "tags": [
+          "alerting"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/space_id"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Indicates a successful call.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "alerting_framework_health": {
+                      "type": "object",
+                      "description": "Three substates identify the health of the alerting framework: `decryption_health`, `execution_health`, and `read_health`.\n",
+                      "properties": {
+                        "decryption_health": {
+                          "type": "object",
+                          "description": "The timestamp and status of the rule decryption.",
+                          "properties": {
+                            "status": {
+                              "type": "string",
+                              "example": "ok",
+                              "enum": [
+                                "error",
+                                "ok",
+                                "warn"
+                              ]
+                            },
+                            "timestamp": {
+                              "type": "string",
+                              "format": "date-time",
+                              "example": "2023-01-13T01:28:00.280Z"
+                            }
+                          }
+                        },
+                        "execution_health": {
+                          "type": "object",
+                          "description": "The timestamp and status of the rule run.",
+                          "properties": {
+                            "status": {
+                              "type": "string",
+                              "example": "ok",
+                              "enum": [
+                                "error",
+                                "ok",
+                                "warn"
+                              ]
+                            },
+                            "timestamp": {
+                              "type": "string",
+                              "format": "date-time",
+                              "example": "2023-01-13T01:28:00.280Z"
+                            }
+                          }
+                        },
+                        "read_health": {
+                          "type": "object",
+                          "description": "The timestamp and status of the rule reading events.",
+                          "properties": {
+                            "status": {
+                              "type": "string",
+                              "example": "ok",
+                              "enum": [
+                                "error",
+                                "ok",
+                                "warn"
+                              ]
+                            },
+                            "timestamp": {
+                              "type": "string",
+                              "format": "date-time",
+                              "example": "2023-01-13T01:28:00.280Z"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "has_permanent_encryption_key": {
+                      "type": "boolean",
+                      "description": "If `false`, the encrypted saved object plugin does not have a permanent encryption key.",
+                      "example": true
+                    },
+                    "is_sufficiently_secure": {
+                      "type": "boolean",
+                      "description": "If `false`, security is enabled but TLS is not.",
+                      "example": true
+                    }
+                  }
+                },
+                "examples": {
+                  "getAlertingHealthResponse": {
+                    "$ref": "#/components/examples/get_health_response"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authorization information is missing or invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/401_response"
+                }
+              }
+            }
+          }
+        }
+      },
+      "servers": [
+        {
+          "url": "https://localhost:5601"
+        }
+      ]
+    },
+    "/s/{spaceId}/api/alerting/rule_types": {
+      "get": {
+        "summary": "Retrieves a list of rule types.",
+        "operationId": "getRuleTypes",
+        "description": "If you have `read` privileges for one or more Kibana features, the API response contains information about the appropriate rule types. For example, there are rule types associated with the **Management > Stack Rules** feature, **Analytics > Discover** and **Machine Learning** features, **Observability** features, and **Security** features. To get rule types associated with the **Stack Monitoring** feature, use the `monitoring_user` built-in role.\n",
+        "tags": [
+          "alerting"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/space_id"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Indicates a successful call.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "action_groups": {
+                        "description": "An explicit list of groups for which the rule type can schedule actions, each with the action group's unique ID and human readable name. Rule actions validation uses this configuration to ensure that groups are valid.\n",
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "string"
+                            },
+                            "name": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      },
+                      "action_variables": {
+                        "description": "A list of action variables that the rule type makes available via context and state in action parameter templates, and a short human readable description. When you create a rule in Kibana, it uses this information to prompt you for these variables in action parameter editors.\n",
+                        "type": "object",
+                        "properties": {
+                          "context": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "name": {
+                                  "type": "string"
+                                },
+                                "description": {
+                                  "type": "string"
+                                },
+                                "useWithTripleBracesInTemplates": {
+                                  "type": "boolean"
+                                }
+                              }
+                            }
+                          },
+                          "params": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "description": {
+                                  "type": "string"
+                                },
+                                "name": {
+                                  "type": "string"
+                                }
+                              }
+                            }
+                          },
+                          "state": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "description": {
+                                  "type": "string"
+                                },
+                                "name": {
+                                  "type": "string"
+                                }
+                              }
+                            }
+                          }
+                        }
+                      },
+                      "authorized_consumers": {
+                        "description": "The list of the plugins IDs that have access to the rule type.",
+                        "type": "object",
+                        "properties": {
+                          "alerts": {
+                            "type": "object",
+                            "properties": {
+                              "all": {
+                                "type": "boolean"
+                              },
+                              "read": {
+                                "type": "boolean"
+                              }
+                            }
+                          },
+                          "apm": {
+                            "type": "object",
+                            "properties": {
+                              "all": {
+                                "type": "boolean"
+                              },
+                              "read": {
+                                "type": "boolean"
+                              }
+                            }
+                          },
+                          "discover": {
+                            "type": "object",
+                            "properties": {
+                              "all": {
+                                "type": "boolean"
+                              },
+                              "read": {
+                                "type": "boolean"
+                              }
+                            }
+                          },
+                          "infrastructure": {
+                            "type": "object",
+                            "properties": {
+                              "all": {
+                                "type": "boolean"
+                              },
+                              "read": {
+                                "type": "boolean"
+                              }
+                            }
+                          },
+                          "logs": {
+                            "type": "object",
+                            "properties": {
+                              "all": {
+                                "type": "boolean"
+                              },
+                              "read": {
+                                "type": "boolean"
+                              }
+                            }
+                          },
+                          "ml": {
+                            "type": "object",
+                            "properties": {
+                              "all": {
+                                "type": "boolean"
+                              },
+                              "read": {
+                                "type": "boolean"
+                              }
+                            }
+                          },
+                          "monitoring": {
+                            "type": "object",
+                            "properties": {
+                              "all": {
+                                "type": "boolean"
+                              },
+                              "read": {
+                                "type": "boolean"
+                              }
+                            }
+                          },
+                          "siem": {
+                            "type": "object",
+                            "properties": {
+                              "all": {
+                                "type": "boolean"
+                              },
+                              "read": {
+                                "type": "boolean"
+                              }
+                            }
+                          },
+                          "stackAlerts": {
+                            "type": "object",
+                            "properties": {
+                              "all": {
+                                "type": "boolean"
+                              },
+                              "read": {
+                                "type": "boolean"
+                              }
+                            }
+                          },
+                          "uptime": {
+                            "type": "object",
+                            "properties": {
+                              "all": {
+                                "type": "boolean"
+                              },
+                              "read": {
+                                "type": "boolean"
+                              }
+                            }
+                          }
+                        }
+                      },
+                      "default_action_group_id": {
+                        "description": "The default identifier for the rule type group.",
+                        "type": "string"
+                      },
+                      "does_set_recovery_context": {
+                        "description": "Indicates whether the rule passes context variables to its recovery action.",
+                        "type": "boolean"
+                      },
+                      "enabled_in_license": {
+                        "description": "Indicates whether the rule type is enabled or disabled based on the subscription.",
+                        "type": "boolean"
+                      },
+                      "id": {
+                        "description": "The unique identifier for the rule type.",
+                        "type": "string"
+                      },
+                      "is_exportable": {
+                        "description": "Indicates whether the rule type is exportable in **Stack Management > Saved Objects**.",
+                        "type": "boolean"
+                      },
+                      "minimum_license_required": {
+                        "description": "The subscriptions required to use the rule type.",
+                        "type": "string",
+                        "example": "basic"
+                      },
+                      "name": {
+                        "description": "The descriptive name of the rule type.",
+                        "type": "string"
+                      },
+                      "producer": {
+                        "description": "An identifier for the application that produces this rule type.",
+                        "type": "string",
+                        "example": "stackAlerts"
+                      },
+                      "recovery_action_group": {
+                        "description": "An action group to use when an alert goes from an active state to an inactive one.",
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "name": {
+                            "type": "string"
+                          }
+                        }
+                      },
+                      "rule_task_timeout": {
+                        "type": "string",
+                        "example": "5m"
+                      }
+                    }
+                  }
+                },
+                "examples": {
+                  "getRuleTypesResponse": {
+                    "$ref": "#/components/examples/get_rule_types_response"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authorization information is missing or invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/401_response"
+                }
+              }
+            }
+          }
+        }
+      },
+      "servers": [
+        {
+          "url": "https://localhost:5601"
+        }
+      ]
+    },
+    "/s/{spaceId}/api/alerting/rule/{ruleId}/_mute_all": {
+      "post": {
+        "summary": "Mutes all alerts.",
+        "operationId": "muteAllAlerts",
+        "description": "This API snoozes the notifications for the rule indefinitely. The rule checks continue to occur but alerts will not trigger any actions. You must have `all` privileges for the appropriate Kibana features, depending on the `consumer` and `rule_type_id` of the rule. For example, the **Management > Stack Rules** feature, **Analytics > Discover** and **Machine Learning** features, **Observability**, and **Security** features. If the rule has actions, you must also have `read` privileges for the **Management > Actions and Connectors** feature.\n",
+        "tags": [
+          "alerting"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/kbn_xsrf"
+          },
+          {
+            "$ref": "#/components/parameters/rule_id"
+          },
+          {
+            "$ref": "#/components/parameters/space_id"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Indicates a successful call."
+          },
+          "401": {
+            "description": "Authorization information is missing or invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/401_response"
+                }
+              }
+            }
+          }
+        },
+        "servers": [
+          {
+            "url": "https://localhost:5601"
+          }
+        ]
+      },
+      "servers": [
+        {
+          "url": "https://localhost:5601"
+        }
+      ]
+    },
+    "/s/{spaceId}/api/alerting/rule/{ruleId}/_unmute_all": {
+      "post": {
+        "summary": "Unmutes all alerts.",
+        "operationId": "unmuteAllAlerts",
+        "description": "If the rule has its notifications snoozed indefinitely, this API cancels the snooze. You must have `all` privileges for the appropriate Kibana features, depending on the `consumer` and `rule_type_id` of the rule. For example, the **Management > Stack Rules** feature, **Analytics > Discover** and **Machine Learning** features, **Observability**, and **Security** features. If the rule has actions, you must also have `read` privileges for the **Management > Actions and Connectors** feature.\n",
+        "tags": [
+          "alerting"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/kbn_xsrf"
+          },
+          {
+            "$ref": "#/components/parameters/rule_id"
+          },
+          {
+            "$ref": "#/components/parameters/space_id"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Indicates a successful call."
+          },
+          "401": {
+            "description": "Authorization information is missing or invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/401_response"
+                }
+              }
+            }
+          }
+        },
+        "servers": [
+          {
+            "url": "https://localhost:5601"
+          }
+        ]
+      },
+      "servers": [
+        {
+          "url": "https://localhost:5601"
+        }
+      ]
+    },
+    "/s/{spaceId}/api/alerting/rule/{ruleId}/alert/{alertId}/_mute": {
+      "post": {
+        "summary": "Mutes an alert.",
+        "operationId": "muteAlert",
+        "description": "You must have `all` privileges for the appropriate Kibana features, depending on the `consumer` and `rule_type_id` of the rule. For example, the **Management > Stack Rules** feature, **Analytics > Discover** and **Machine Learning** features, **Observability**, and **Security** features. If the rule has actions, you must also have `read` privileges for the **Management > Actions and Connectors** feature.\n",
+        "tags": [
+          "alerting"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/kbn_xsrf"
+          },
+          {
+            "$ref": "#/components/parameters/alert_id"
+          },
+          {
+            "$ref": "#/components/parameters/rule_id"
+          },
+          {
+            "$ref": "#/components/parameters/space_id"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Indicates a successful call."
+          },
+          "401": {
+            "description": "Authorization information is missing or invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/401_response"
+                }
+              }
+            }
+          }
+        },
+        "servers": [
+          {
+            "url": "https://localhost:5601"
+          }
+        ]
+      },
+      "servers": [
+        {
+          "url": "https://localhost:5601"
+        }
+      ]
+    },
+    "/s/{spaceId}/api/alerting/rule/{ruleId}/alert/{alertId}/_unmute": {
+      "post": {
+        "summary": "Unmutes an alert.",
+        "operationId": "unmuteAlert",
+        "description": "You must have `all` privileges for the appropriate Kibana features, depending on the `consumer` and `rule_type_id` of the rule. For example, the **Management > Stack Rules** feature, **Analytics > Discover** and **Machine Learning** features, **Observability**, and **Security** features. If the rule has actions, you must also have `read` privileges for the **Management > Actions and Connectors** feature.\n",
+        "tags": [
+          "alerting"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/kbn_xsrf"
+          },
+          {
+            "$ref": "#/components/parameters/alert_id"
+          },
+          {
+            "$ref": "#/components/parameters/rule_id"
+          },
+          {
+            "$ref": "#/components/parameters/space_id"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Indicates a successful call."
+          },
+          "401": {
+            "description": "Authorization information is missing or invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/401_response"
+                }
+              }
+            }
+          }
+        },
+        "servers": [
+          {
+            "url": "https://localhost:5601"
+          }
+        ]
+      },
+      "servers": [
+        {
+          "url": "https://localhost:5601"
+        }
+      ]
+    },
+    "/s/{spaceId}/api/alerts/alert/{alertId}": {
+      "delete": {
+        "summary": "Permanently removes an alert.",
+        "operationId": "legaryDeleteAlert",
+        "deprecated": true,
+        "description": "Deprecated in 7.13.0. Use the delete rule API instead. WARNING: After you delete an alert, you cannot recover it.\n",
+        "tags": [
+          "alerting"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/kbn_xsrf"
+          },
+          {
+            "$ref": "#/components/parameters/space_id"
+          },
+          {
+            "in": "path",
+            "name": "alertId",
+            "description": "The identifier for the alert.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "41893910-6bca-11eb-9e0d-85d233e3ee35"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Indicates a successful call."
+          },
+          "401": {
+            "description": "Authorization information is missing or invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/401_response"
+                }
+              }
+            }
+          }
+        },
+        "servers": [
+          {
+            "url": "https://localhost:5601"
+          }
+        ]
+      },
+      "get": {
+        "summary": "Retrieves an alert by its identifier.",
+        "operationId": "legacyGetAlert",
+        "deprecated": true,
+        "description": "Deprecated in 7.13.0. Use the get rule API instead.",
+        "tags": [
+          "alerting"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/space_id"
+          },
+          {
+            "in": "path",
+            "name": "alertId",
+            "description": "The identifier for the alert.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "41893910-6bca-11eb-9e0d-85d233e3ee35"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Indicates a successful call.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/alert_response_properties"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authorization information is missing or invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/401_response"
+                }
+              }
+            }
+          }
+        },
+        "servers": [
+          {
+            "url": "https://localhost:5601"
+          }
+        ]
+      },
+      "post": {
+        "summary": "Create an alert.",
+        "operationId": "legacyCreateAlert",
+        "deprecated": true,
+        "description": "Deprecated in 7.13.0. Use the create rule API instead.",
+        "tags": [
+          "alerting"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/kbn_xsrf"
+          },
+          {
+            "in": "path",
+            "name": "alertId",
+            "description": "An UUID v1 or v4 identifier for the alert. If this parameter is omitted, the identifier is randomly generated.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "41893910-6bca-11eb-9e0d-85d233e3ee35"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/space_id"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "title": "Legacy create alert request properties",
+                "type": "object",
+                "required": [
+                  "alertTypeId",
+                  "consumer",
+                  "name",
+                  "notifyWhen",
+                  "params",
+                  "schedule"
+                ],
+                "properties": {
+                  "actions": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "required": [
+                        "actionTypeId",
+                        "group",
+                        "id",
+                        "params"
+                      ],
+                      "properties": {
+                        "actionTypeId": {
+                          "type": "string",
+                          "description": "The identifier for the action type."
+                        },
+                        "group": {
+                          "type": "string",
+                          "description": "Grouping actions is recommended for escalations for different types of alert instances. If you don't need this functionality, set it to `default`.\n"
+                        },
+                        "id": {
+                          "type": "string",
+                          "description": "The ID of the action saved object to execute."
+                        },
+                        "params": {
+                          "type": "object",
+                          "description": "The map to the `params` that the action type will receive. `params` are handled as Mustache templates and passed a default set of context.\n"
+                        }
+                      }
+                    }
+                  },
+                  "alertTypeId": {
+                    "type": "string",
+                    "description": "The ID of the alert type that you want to call when the alert is scheduled to run."
+                  },
+                  "consumer": {
+                    "type": "string",
+                    "description": "The name of the application that owns the alert. This name has to match the Kibana feature name, as that dictates the required role-based access control privileges."
+                  },
+                  "enabled": {
+                    "type": "boolean",
+                    "description": "Indicates if you want to run the alert on an interval basis after it is created."
+                  },
+                  "name": {
+                    "type": "string",
+                    "description": "A name to reference and search."
+                  },
+                  "notifyWhen": {
+                    "type": "string",
+                    "description": "The condition for throttling the notification.",
+                    "enum": [
+                      "onActionGroupChange",
+                      "onActiveAlert",
+                      "onThrottleInterval"
+                    ]
+                  },
+                  "params": {
+                    "type": "object",
+                    "description": "The parameters to pass to the alert type executor `params` value. This will also validate against the alert type params validator, if defined."
+                  },
+                  "schedule": {
+                    "type": "object",
+                    "description": "The schedule specifying when this alert should be run. A schedule is structured such that the key specifies the format you wish to use and its value specifies the schedule.\n",
+                    "properties": {
+                      "interval": {
+                        "type": "string",
+                        "description": "The interval format specifies the interval in seconds, minutes, hours or days at which the alert should execute.",
+                        "example": "10s"
+                      }
+                    }
+                  },
+                  "tags": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "A list of keywords to reference and search."
+                  },
+                  "throttle": {
+                    "type": "string",
+                    "description": "How often this alert should fire the same actions. This will prevent the alert from sending out the same notification over and over. For example, if an alert with a schedule of 1 minute stays in a triggered state for 90 minutes, setting a throttle of `10m` or `1h` will prevent it from sending 90 notifications during this period.\n"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Indicates a successful call.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/alert_response_properties"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authorization information is missing or invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/401_response"
+                }
+              }
+            }
+          }
+        },
+        "servers": [
+          {
+            "url": "https://localhost:5601"
+          }
+        ]
+      },
+      "put": {
+        "summary": "Updates the attributes for an alert.",
+        "operationId": "legacyUpdateAlert",
+        "deprecated": true,
+        "description": "Deprecated in 7.13.0. Use the update rule API instead.",
+        "tags": [
+          "alerting"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/kbn_xsrf"
+          },
+          {
+            "$ref": "#/components/parameters/space_id"
+          },
+          {
+            "in": "path",
+            "name": "alertId",
+            "description": "The identifier for the alert.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "41893910-6bca-11eb-9e0d-85d233e3ee35"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "title": "Legacy update alert request properties",
+                "type": "object",
+                "required": [
+                  "name",
+                  "notifyWhen",
+                  "params",
+                  "schedule"
+                ],
+                "properties": {
+                  "actions": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "required": [
+                        "actionTypeId",
+                        "group",
+                        "id",
+                        "params"
+                      ],
+                      "properties": {
+                        "actionTypeId": {
+                          "type": "string",
+                          "description": "The identifier for the action type."
+                        },
+                        "group": {
+                          "type": "string",
+                          "description": "Grouping actions is recommended for escalations for different types of alert instances. If you don't need this functionality, set it to `default`.\n"
+                        },
+                        "id": {
+                          "type": "string",
+                          "description": "The ID of the action saved object to execute."
+                        },
+                        "params": {
+                          "type": "object",
+                          "description": "The map to the `params` that the action type will receive. `params` are handled as Mustache templates and passed a default set of context.\n"
+                        }
+                      }
+                    }
+                  },
+                  "name": {
+                    "type": "string",
+                    "description": "A name to reference and search."
+                  },
+                  "notifyWhen": {
+                    "type": "string",
+                    "description": "The condition for throttling the notification.",
+                    "enum": [
+                      "onActionGroupChange",
+                      "onActiveAlert",
+                      "onThrottleInterval"
+                    ]
+                  },
+                  "params": {
+                    "type": "object",
+                    "description": "The parameters to pass to the alert type executor `params` value. This will also validate against the alert type params validator, if defined."
+                  },
+                  "schedule": {
+                    "type": "object",
+                    "description": "The schedule specifying when this alert should be run. A schedule is structured such that the key specifies the format you wish to use and its value specifies the schedule.\n",
+                    "properties": {
+                      "interval": {
+                        "type": "string",
+                        "description": "The interval format specifies the interval in seconds, minutes, hours or days at which the alert should execute.",
+                        "example": "1d"
+                      }
+                    }
+                  },
+                  "tags": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "A list of keywords to reference and search."
+                  },
+                  "throttle": {
+                    "type": "string",
+                    "description": "How often this alert should fire the same actions. This will prevent the alert from sending out the same notification over and over. For example, if an alert with a schedule of 1 minute stays in a triggered state for 90 minutes, setting a throttle of `10m` or `1h` will prevent it from sending 90 notifications during this period.\n"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Indicates a successful call.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/alert_response_properties"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authorization information is missing or invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/401_response"
+                }
+              }
+            }
+          }
+        },
+        "servers": [
+          {
+            "url": "https://localhost:5601"
+          }
+        ]
+      },
+      "servers": [
+        {
+          "url": "https://localhost:5601"
+        }
+      ]
+    },
+    "/s/{spaceId}/api/alerts/alert/{alertId}/_disable": {
+      "post": {
+        "summary": "Disables an alert.",
+        "operationId": "legacyDisableAlert",
+        "deprecated": true,
+        "description": "Deprecated in 7.13.0. Use the disable rule API instead.",
+        "tags": [
+          "alerting"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/kbn_xsrf"
+          },
+          {
+            "$ref": "#/components/parameters/space_id"
+          },
+          {
+            "in": "path",
+            "name": "alertId",
+            "description": "The identifier for the alert.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "41893910-6bca-11eb-9e0d-85d233e3ee35"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Indicates a successful call."
+          },
+          "401": {
+            "description": "Authorization information is missing or invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/401_response"
+                }
+              }
+            }
+          }
+        },
+        "servers": [
+          {
+            "url": "https://localhost:5601"
+          }
+        ]
+      },
+      "servers": [
+        {
+          "url": "https://localhost:5601"
+        }
+      ]
+    },
+    "/s/{spaceId}/api/alerts/alert/{alertId}/_enable": {
+      "post": {
+        "summary": "Enables an alert.",
+        "operationId": "legacyEnableAlert",
+        "deprecated": true,
+        "description": "Deprecated in 7.13.0. Use the enable rule API instead.",
+        "tags": [
+          "alerting"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/kbn_xsrf"
+          },
+          {
+            "$ref": "#/components/parameters/space_id"
+          },
+          {
+            "in": "path",
+            "name": "alertId",
+            "description": "The identifier for the alert.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "41893910-6bca-11eb-9e0d-85d233e3ee35"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Indicates a successful call."
+          },
+          "401": {
+            "description": "Authorization information is missing or invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/401_response"
+                }
+              }
+            }
+          }
+        },
+        "servers": [
+          {
+            "url": "https://localhost:5601"
+          }
+        ]
+      },
+      "servers": [
+        {
+          "url": "https://localhost:5601"
+        }
+      ]
+    },
+    "/s/{spaceId}/api/alerts/alert/{alertId}/_mute_all": {
+      "post": {
+        "summary": "Mutes all alert instances.",
+        "operationId": "legacyMuteAllAlertInstances",
+        "deprecated": true,
+        "description": "Deprecated in 7.13.0. Use the mute all alerts API instead.",
+        "tags": [
+          "alerting"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/kbn_xsrf"
+          },
+          {
+            "$ref": "#/components/parameters/space_id"
+          },
+          {
+            "in": "path",
+            "name": "alertId",
+            "description": "The identifier for the alert.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "41893910-6bca-11eb-9e0d-85d233e3ee35"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Indicates a successful call."
+          },
+          "401": {
+            "description": "Authorization information is missing or invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/401_response"
+                }
+              }
+            }
+          }
+        },
+        "servers": [
+          {
+            "url": "https://localhost:5601"
+          }
+        ]
+      },
+      "servers": [
+        {
+          "url": "https://localhost:5601"
+        }
+      ]
+    },
+    "/s/{spaceId}/api/alerts/alert/{alertId}/_unmute_all": {
+      "post": {
+        "summary": "Unmutes all alert instances.",
+        "operationId": "legacyUnmuteAllAlertInstances",
+        "deprecated": true,
+        "description": "Deprecated in 7.13.0. Use the unmute all alerts API instead.",
+        "tags": [
+          "alerting"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/kbn_xsrf"
+          },
+          {
+            "$ref": "#/components/parameters/space_id"
+          },
+          {
+            "in": "path",
+            "name": "alertId",
+            "description": "The identifier for the alert.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "41893910-6bca-11eb-9e0d-85d233e3ee35"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Indicates a successful call."
+          },
+          "401": {
+            "description": "Authorization information is missing or invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/401_response"
+                }
+              }
+            }
+          }
+        },
+        "servers": [
+          {
+            "url": "https://localhost:5601"
+          }
+        ]
+      },
+      "servers": [
+        {
+          "url": "https://localhost:5601"
+        }
+      ]
+    },
+    "/s/{spaceId}/api/alerts/alerts/_find": {
+      "get": {
+        "summary": "Retrieves a paginated set of alerts.",
+        "operationId": "legacyFindAlerts",
+        "deprecated": true,
+        "description": "Deprecated in 7.13.0. Use the find rules API instead. NOTE: Alert `params` are stored as a flattened field type and analyzed as keywords. As alerts change in Kibana, the results on each page of the response also change. Use the find API for traditional paginated results, but avoid using it to export large amounts of data.\n",
+        "tags": [
+          "alerting"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/space_id"
+          },
+          {
+            "name": "default_search_operator",
+            "in": "query",
+            "description": "The default operator to use for the `simple_query_string`.",
+            "schema": {
+              "type": "string",
+              "default": "OR"
+            },
+            "example": "OR"
+          },
+          {
+            "name": "fields",
+            "in": "query",
+            "description": "The fields to return in the `attributes` key of the response.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "name": "filter",
+            "in": "query",
+            "description": "A KQL string that you filter with an attribute from your saved object. It should look like `savedObjectType.attributes.title: \"myTitle\"`. However, if you used a direct attribute of a saved object, such as `updatedAt`, you must define your filter, for example, `savedObjectType.updatedAt > 2018-12-22`.\n",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "has_reference",
+            "in": "query",
+            "description": "Filters the rules that have a relation with the reference objects with a specific type and identifier.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "type": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "The page number to return.",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            },
+            "example": 1
+          },
+          {
+            "name": "per_page",
+            "in": "query",
+            "description": "The number of alerts to return per page.",
+            "schema": {
+              "type": "integer",
+              "default": 20
+            },
+            "example": 20
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "description": "An Elasticsearch `simple_query_string` query that filters the alerts in the response.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "search_fields",
+            "in": "query",
+            "description": "The fields to perform the `simple_query_string` parsed query against.",
+            "schema": {
+              "oneOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "name": "sort_field",
+            "in": "query",
+            "description": "Determines which field is used to sort the results. The field must exist in the `attributes` key of the response.\n",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sort_order",
+            "in": "query",
+            "description": "Determines the sort order.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "asc",
+                "desc"
+              ],
+              "default": "desc"
+            },
+            "example": "asc"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Indicates a successful call.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/alert_response_properties"
+                      }
+                    },
+                    "page": {
+                      "type": "integer"
+                    },
+                    "perPage": {
+                      "type": "integer"
+                    },
+                    "total": {
+                      "type": "integer"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authorization information is missing or invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/401_response"
+                }
+              }
+            }
+          }
+        },
+        "servers": [
+          {
+            "url": "https://localhost:5601"
+          }
+        ]
+      },
+      "servers": [
+        {
+          "url": "https://localhost:5601"
+        }
+      ]
+    },
+    "/s/{spaceId}/api/alerts/alerts/_health": {
+      "get": {
+        "summary": "Retrieves the health status of the alerting framework.",
+        "operationId": "legacyGetAlertingHealth",
+        "deprecated": true,
+        "description": "Deprecated in 7.13.0. Use the get alerting framework health API instead.",
+        "tags": [
+          "alerting"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/space_id"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Indicates a successful call.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "alertingFrameworkHealth": {
+                      "type": "object",
+                      "description": "Three substates identify the health of the alerting framework: `decryptionHealth`, `executionHealth`, and `readHealth`.\n",
+                      "properties": {
+                        "decryptionHealth": {
+                          "type": "object",
+                          "description": "The timestamp and status of the alert decryption.",
+                          "properties": {
+                            "status": {
+                              "type": "string",
+                              "example": "ok",
+                              "enum": [
+                                "error",
+                                "ok",
+                                "warn"
+                              ]
+                            },
+                            "timestamp": {
+                              "type": "string",
+                              "format": "date-time",
+                              "example": "2023-01-13T01:28:00.280Z"
+                            }
+                          }
+                        },
+                        "executionHealth": {
+                          "type": "object",
+                          "description": "The timestamp and status of the alert execution.",
+                          "properties": {
+                            "status": {
+                              "type": "string",
+                              "example": "ok",
+                              "enum": [
+                                "error",
+                                "ok",
+                                "warn"
+                              ]
+                            },
+                            "timestamp": {
+                              "type": "string",
+                              "format": "date-time",
+                              "example": "2023-01-13T01:28:00.280Z"
+                            }
+                          }
+                        },
+                        "readHealth": {
+                          "type": "object",
+                          "description": "The timestamp and status of the alert reading events.",
+                          "properties": {
+                            "status": {
+                              "type": "string",
+                              "example": "ok",
+                              "enum": [
+                                "error",
+                                "ok",
+                                "warn"
+                              ]
+                            },
+                            "timestamp": {
+                              "type": "string",
+                              "format": "date-time",
+                              "example": "2023-01-13T01:28:00.280Z"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "hasPermanentEncryptionKey": {
+                      "type": "boolean",
+                      "description": "If `false`, the encrypted saved object plugin does not have a permanent encryption key.",
+                      "example": true
+                    },
+                    "isSufficientlySecure": {
+                      "type": "boolean",
+                      "description": "If `false`, security is enabled but TLS is not.",
+                      "example": true
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authorization information is missing or invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/401_response"
+                }
+              }
+            }
+          }
+        }
+      },
+      "servers": [
+        {
+          "url": "https://localhost:5601"
+        }
+      ]
+    },
+    "/s/{spaceId}/api/alerts/alerts/list_alert_types": {
+      "get": {
+        "summary": "Retrieves a list of alert types.",
+        "operationId": "legacyGetAlertTypes",
+        "deprecated": true,
+        "description": "Deprecated in 7.13.0. Use the get rule types API instead.",
+        "tags": [
+          "alerting"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/space_id"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Indicates a successful call.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "actionGroups": {
+                        "description": "An explicit list of groups for which the alert type can schedule actions, each with the action group's unique ID and human readable name. Alert actions validation uses this configuration to ensure that groups are valid.\n",
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "string"
+                            },
+                            "name": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      },
+                      "actionVariables": {
+                        "description": "A list of action variables that the alert type makes available via context and state in action parameter templates, and a short human readable description. The Alert UI will use this information to prompt users for these variables in action parameter editors.\n",
+                        "type": "object",
+                        "properties": {
+                          "context": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "name": {
+                                  "type": "string"
+                                },
+                                "description": {
+                                  "type": "string"
+                                }
+                              }
+                            }
+                          },
+                          "params": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "description": {
+                                  "type": "string"
+                                },
+                                "name": {
+                                  "type": "string"
+                                }
+                              }
+                            }
+                          },
+                          "state": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "description": {
+                                  "type": "string"
+                                },
+                                "name": {
+                                  "type": "string"
+                                }
+                              }
+                            }
+                          }
+                        }
+                      },
+                      "authorizedConsumers": {
+                        "description": "The list of the plugins IDs that have access to the alert type.",
+                        "type": "object"
+                      },
+                      "defaultActionGroupId": {
+                        "description": "The default identifier for the alert type group.",
+                        "type": "string"
+                      },
+                      "enabledInLicense": {
+                        "description": "Indicates whether the rule type is enabled based on the subscription.",
+                        "type": "boolean"
+                      },
+                      "id": {
+                        "description": "The unique identifier for the alert type.",
+                        "type": "string"
+                      },
+                      "isExportable": {
+                        "description": "Indicates whether the alert type is exportable in Saved Objects Management UI.",
+                        "type": "boolean"
+                      },
+                      "minimumLicenseRequired": {
+                        "description": "The subscriptions required to use the alert type.",
+                        "type": "string"
+                      },
+                      "name": {
+                        "description": "The descriptive name of the alert type.",
+                        "type": "string"
+                      },
+                      "producer": {
+                        "description": "An identifier for the application that produces this alert type.",
+                        "type": "string"
+                      },
+                      "recoveryActionGroup": {
+                        "description": "An action group to use when an alert instance goes from an active state to an inactive one. If it is not specified, the default recovered action group is used.\n",
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "name": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authorization information is missing or invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/401_response"
+                }
+              }
+            }
+          }
+        }
+      },
+      "servers": [
+        {
+          "url": "https://localhost:5601"
+        }
+      ]
+    },
+    "/s/{spaceId}/api/alerts/alert/{alertId}/alert_instance/{alertInstanceId}/_mute": {
+      "post": {
+        "summary": "Mutes an alert instance.",
+        "operationId": "legacyMuteAlertInstance",
+        "deprecated": true,
+        "description": "Deprecated in 7.13.0. Use the mute alert API instead.",
+        "tags": [
+          "alerting"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/kbn_xsrf"
+          },
+          {
+            "$ref": "#/components/parameters/space_id"
+          },
+          {
+            "in": "path",
+            "name": "alertId",
+            "description": "An identifier for the alert.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "41893910-6bca-11eb-9e0d-85d233e3ee35"
+            }
+          },
+          {
+            "in": "path",
+            "name": "alertInstanceId",
+            "description": "An identifier for the alert instance.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "dceeb5d0-6b41-11eb-802b-85b0c1bc8ba2"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Indicates a successful call."
+          },
+          "401": {
+            "description": "Authorization information is missing or invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/401_response"
+                }
+              }
+            }
+          }
+        },
+        "servers": [
+          {
+            "url": "https://localhost:5601"
+          }
+        ]
+      },
+      "servers": [
+        {
+          "url": "https://localhost:5601"
+        }
+      ]
+    },
+    "/s/{spaceId}/api/alerts/alert/{alertId}/alert_instance/{alertInstanceId}/_unmute": {
+      "post": {
+        "summary": "Unmutes an alert instance.",
+        "operationId": "legacyUnmuteAlertInstance",
+        "deprecated": true,
+        "description": "Deprecated in 7.13.0. Use the unmute alert API instead.",
+        "tags": [
+          "alerting"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/kbn_xsrf"
+          },
+          {
+            "$ref": "#/components/parameters/space_id"
+          },
+          {
+            "in": "path",
+            "name": "alertId",
+            "description": "An identifier for the alert.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "41893910-6bca-11eb-9e0d-85d233e3ee35"
+            }
+          },
+          {
+            "in": "path",
+            "name": "alertInstanceId",
+            "description": "An identifier for the alert instance.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "dceeb5d0-6b41-11eb-802b-85b0c1bc8ba2"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Indicates a successful call."
+          },
+          "401": {
+            "description": "Authorization information is missing or invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/401_response"
+                }
+              }
+            }
+          }
+        },
+        "servers": [
+          {
+            "url": "https://localhost:5601"
+          }
+        ]
+      },
+      "servers": [
+        {
+          "url": "https://localhost:5601"
+        }
+      ]
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "basicAuth": {
+        "type": "http",
+        "scheme": "basic"
+      },
+      "apiKeyAuth": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "ApiKey"
+      }
+    },
+    "parameters": {
+      "rule_id": {
+        "in": "path",
+        "name": "ruleId",
+        "description": "An identifier for the rule.",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "example": "ac4e6b90-6be7-11eb-ba0d-9b1c1f912d74"
+        }
+      },
+      "space_id": {
+        "in": "path",
+        "name": "spaceId",
+        "description": "An identifier for the space. If `/s/` and the identifier are omitted from the path, the default space is used.",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "example": "default"
+        }
+      },
+      "kbn_xsrf": {
+        "schema": {
+          "type": "string"
+        },
+        "in": "header",
+        "name": "kbn-xsrf",
+        "description": "Cross-site request forgery protection",
+        "required": true
+      },
+      "alert_id": {
+        "in": "path",
+        "name": "alertId",
+        "description": "An identifier for the alert. The identifier is generated by the rule and might be any arbitrary string.",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "example": "ac4e6b90-6be7-11eb-ba0d-9b1c1f912d74"
+        }
+      }
+    },
+    "schemas": {
+      "notify_when": {
+        "type": "string",
+        "description": "Indicates how often alerts generate actions. Valid values include: `onActionGroupChange`: Actions run when the alert status changes; `onActiveAlert`: Actions run when the alert becomes active and at each check interval while the rule conditions are met; `onThrottleInterval`: Actions run when the alert becomes active and at the interval specified in the throttle property while the rule conditions are met.\n",
+        "enum": [
+          "onActionGroupChange",
+          "onActiveAlert",
+          "onThrottleInterval"
+        ],
+        "example": "onActiveAlert"
+      },
+      "throttle": {
+        "type": "string",
+        "description": "The throttle interval, which defines how often an alert generates repeated actions. It is applicable only if `notify_when` is set to `onThrottleInterval`. It is specified in seconds, minutes, hours, or days.",
+        "nullable": true,
+        "default": null,
+        "example": "10m"
+      },
+      "actions": {
+        "type": "array",
+        "default": [],
+        "required": [
+          "group",
+          "id",
+          "params"
+        ],
+        "nullable": true,
+        "items": {
+          "type": "object",
+          "properties": {
+            "connector_type_id": {
+              "type": "string",
+              "description": "The type of connector. This property appears in responses but cannot be set in requests.",
+              "example": ".server-log",
+              "readOnly": true
+            },
+            "frequency": {
+              "type": "object",
+              "description": "The parameters that affect how often actions are generated. NOTE: You cannot specify these parameters when `notify_when` or `throttle` are defined at the rule level.\n",
+              "required": [
+                "notify_when",
+                "summary"
+              ],
+              "properties": {
+                "notify_when": {
+                  "$ref": "#/components/schemas/notify_when"
+                },
+                "summary": {
+                  "type": "boolean",
+                  "description": "Indicates whether the action is a summary."
+                },
+                "throttle": {
+                  "$ref": "#/components/schemas/throttle"
+                }
+              }
+            },
+            "group": {
+              "type": "string",
+              "description": "The group name for the actions. If you don't need to group actions, set to `default`.",
+              "example": "default"
+            },
+            "id": {
+              "type": "string",
+              "description": "The identifier for the connector saved object.",
+              "example": "9dca3e00-74f5-11ed-9801-35303b735aef"
+            },
+            "params": {
+              "type": "object",
+              "description": "The parameters for the action, which are sent to the connector. The `params` are handled as Mustache templates and passed a default set of context.",
+              "additionalProperties": true
+            },
+            "uuid": {
+              "type": "string",
+              "description": "A universally unique identifier (UUID) for the action.",
+              "example": "1c7a1280-f28c-4e06-96b2-e4e5f05d1d61"
+            }
+          }
+        }
+      },
+      "schedule": {
+        "type": "object",
+        "description": "The check interval, which specifies how frequently the rule conditions are checked. The interval is specified in seconds, minutes, hours, or days.",
+        "properties": {
+          "interval": {
+            "type": "string",
+            "example": "1m"
+          }
+        }
+      },
+      "tags": {
+        "type": "array",
+        "description": "The tags for the rule.",
+        "items": {
+          "type": "string"
+        },
+        "default": []
+      },
+      "rule_response_properties": {
+        "title": "Rule response properties",
+        "type": "object",
+        "required": [
+          "actions",
+          "api_key_owner",
+          "consumer",
+          "created_at",
+          "created_by",
+          "enabled",
+          "execution_status",
+          "id",
+          "mute_all",
+          "muted_alert_ids",
+          "name",
+          "params",
+          "rule_type_id",
+          "schedule",
+          "tags",
+          "throttle",
+          "updated_at",
+          "updated_by"
+        ],
+        "properties": {
+          "actions": {
+            "$ref": "#/components/schemas/actions"
+          },
+          "api_key_created_by_user": {
+            "type": "boolean",
+            "description": "Indicates whether the API key that is associated with the rule was created by the user.",
+            "example": false
+          },
+          "api_key_owner": {
+            "type": "string",
+            "description": "The owner of the API key that is associated with the rule and used to run background tasks.\n",
+            "nullable": true,
+            "example": "elastic"
+          },
+          "consumer": {
+            "type": "string",
+            "description": "The application or feature that owns the rule. For example, `alerts`, `apm`, `discover`, `infrastructure`, `logs`, `metrics`, `ml`, `monitoring`, `securitySolution`, `siem`, `stackAlerts`, or `uptime`.",
+            "example": "alerts"
+          },
+          "created_at": {
+            "type": "string",
+            "description": "The date and time that the rule was created.",
+            "format": "date-time",
+            "example": "2022-12-05T23:36:58.284Z"
+          },
+          "created_by": {
+            "type": "string",
+            "description": "The identifier for the user that created the rule.",
+            "nullable": true,
+            "example": "elastic"
+          },
+          "enabled": {
+            "type": "boolean",
+            "description": "Indicates whether the rule is currently enabled.",
+            "example": true
+          },
+          "execution_status": {
+            "type": "object",
+            "properties": {
+              "last_duration": {
+                "type": "integer",
+                "example": 55
+              },
+              "last_execution_date": {
+                "type": "string",
+                "format": "date-time",
+                "example": "2022-12-06T00:13:43.890Z"
+              },
+              "status": {
+                "type": "string",
+                "example": "ok"
+              }
+            }
+          },
+          "id": {
+            "type": "string",
+            "description": "The identifier for the rule.",
+            "example": "b530fed0-74f5-11ed-9801-35303b735aef"
+          },
+          "last_run": {
+            "type": "object",
+            "properties": {
+              "alerts_count": {
+                "type": "object",
+                "properties": {
+                  "active": {
+                    "type": "integer"
+                  },
+                  "ignored": {
+                    "type": "integer"
+                  },
+                  "new": {
+                    "type": "integer"
+                  },
+                  "recovered": {
+                    "type": "integer"
+                  }
+                }
+              },
+              "outcome": {
+                "type": "string",
+                "example": "succeeded"
+              },
+              "outcome_msg": {
+                "type": "string",
+                "nullable": true,
+                "example": null
+              },
+              "warning": {
+                "type": "string",
+                "nullable": true,
+                "example": null
+              }
+            }
+          },
+          "muted_alert_ids": {
+            "type": "array",
+            "nullable": true,
+            "items": {
+              "type": "string"
+            }
+          },
+          "mute_all": {
+            "type": "boolean",
+            "example": false
+          },
+          "name": {
+            "type": "string",
+            "description": "The name of the rule.",
+            "example": "cluster_health_rule"
+          },
+          "next_run": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "example": "2022-12-06T00:14:43.818Z"
+          },
+          "notify_when": {
+            "$ref": "#/components/schemas/notify_when"
+          },
+          "params": {
+            "type": "object",
+            "description": "The parameters for the rule.",
+            "additionalProperties": true
+          },
+          "revision": {
+            "type": "integer",
+            "description": "The rule revision number."
+          },
+          "rule_type_id": {
+            "type": "string",
+            "description": "The identifier for the type of rule. For example, `.es-query`, `.index-threshold`, `logs.alert.document.count`, `monitoring_alert_cluster_health`, `siem.thresholdRule`, or `xpack.ml.anomaly_detection_alert`.\n",
+            "example": "monitoring_alert_cluster_health"
+          },
+          "running": {
+            "type": "boolean",
+            "description": "Indicates whether the rule is running."
+          },
+          "schedule": {
+            "$ref": "#/components/schemas/schedule"
+          },
+          "scheduled_task_id": {
+            "type": "string",
+            "example": "b530fed0-74f5-11ed-9801-35303b735aef"
+          },
+          "tags": {
+            "$ref": "#/components/schemas/tags"
+          },
+          "throttle": {
+            "$ref": "#/components/schemas/throttle"
+          },
+          "updated_at": {
+            "type": "string",
+            "description": "The date and time that the rule was updated most recently.",
+            "example": "2022-12-05T23:36:58.284Z"
+          },
+          "updated_by": {
+            "type": "string",
+            "description": "The identifier for the user that updated this rule most recently.",
+            "nullable": true,
+            "example": "elastic"
+          }
+        }
+      },
+      "401_response": {
+        "type": "object",
+        "title": "Unsuccessful rule API response",
+        "properties": {
+          "error": {
+            "type": "string",
+            "example": "Unauthorized",
+            "enum": [
+              "Unauthorized"
+            ]
+          },
+          "message": {
+            "type": "string"
+          },
+          "statusCode": {
+            "type": "integer",
+            "example": 401,
+            "enum": [
+              401
+            ]
+          }
+        }
+      },
+      "404_response": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "type": "string",
+            "example": "Not Found",
+            "enum": [
+              "Not Found"
+            ]
+          },
+          "message": {
+            "type": "string",
+            "example": "Saved object [alert/caaad6d0-920c-11ed-b36a-874bd1548a00] not found"
+          },
+          "statusCode": {
+            "type": "integer",
+            "example": 404,
+            "enum": [
+              404
+            ]
+          }
+        }
+      },
+      "update_rule_request": {
+        "title": "Update rule request",
+        "description": "The update rule API request body varies depending on the type of rule and actions.",
+        "type": "object",
+        "required": [
+          "name",
+          "params",
+          "schedule"
+        ],
+        "properties": {
+          "actions": {
+            "$ref": "#/components/schemas/actions"
+          },
+          "name": {
+            "type": "string",
+            "description": "The name of the rule.",
+            "example": "cluster_health_rule"
+          },
+          "notify_when": {
+            "$ref": "#/components/schemas/notify_when"
+          },
+          "params": {
+            "type": "object",
+            "description": "The parameters for the rule.",
+            "additionalProperties": true
+          },
+          "schedule": {
+            "$ref": "#/components/schemas/schedule"
+          },
+          "tags": {
+            "$ref": "#/components/schemas/tags"
+          },
+          "throttle": {
+            "$ref": "#/components/schemas/throttle"
+          }
+        }
+      },
+      "create_rule_request": {
+        "title": "Create rule request",
+        "description": "The create rule API request body varies depending on the type of rule and actions.",
+        "type": "object",
+        "required": [
+          "consumer",
+          "name",
+          "params",
+          "rule_type_id",
+          "schedule"
+        ],
+        "properties": {
+          "actions": {
+            "$ref": "#/components/schemas/actions"
+          },
+          "consumer": {
+            "type": "string",
+            "description": "The name of the application or feature that owns the rule. For example: `alerts`, `apm`, `discover`, `infrastructure`, `logs`, `metrics`, `ml`, `monitoring`, `securitySolution`, `siem`, `stackAlerts`, or `uptime`.\n"
+          },
+          "enabled": {
+            "type": "boolean",
+            "description": "Indicates whether you want to run the rule on an interval basis after it is created."
+          },
+          "name": {
+            "type": "string",
+            "description": "The name of the rule. While this name does not have to be unique, a distinctive name can help you identify a rule.",
+            "example": "cluster_health_rule"
+          },
+          "notify_when": {
+            "$ref": "#/components/schemas/notify_when"
+          },
+          "params": {
+            "type": "object",
+            "description": "The parameters for the rule.",
+            "additionalProperties": true
+          },
+          "rule_type_id": {
+            "type": "string",
+            "description": "The ID of the rule type that you want to call when the rule is scheduled to run. For example, `.es-query`, `.index-threshold`, `logs.alert.document.count`, `monitoring_alert_cluster_health`, `siem.thresholdRule`, or `xpack.ml.anomaly_detection_alert`.\n"
+          },
+          "schedule": {
+            "$ref": "#/components/schemas/schedule"
+          },
+          "tags": {
+            "$ref": "#/components/schemas/tags"
+          },
+          "throttle": {
+            "$ref": "#/components/schemas/throttle"
+          }
+        }
+      },
+      "alert_response_properties": {
+        "title": "Legacy alert response properties",
+        "type": "object",
+        "properties": {
+          "actions": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          },
+          "alertTypeId": {
+            "type": "string",
+            "example": ".index-threshold"
+          },
+          "apiKeyOwner": {
+            "type": "string",
+            "nullable": true,
+            "example": "elastic"
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "The date and time that the alert was created.",
+            "format": "date-time",
+            "example": "2022-12-05T23:36:58.284Z"
+          },
+          "createdBy": {
+            "type": "string",
+            "description": "The identifier for the user that created the alert.",
+            "example": "elastic"
+          },
+          "enabled": {
+            "type": "boolean",
+            "description": "Indicates whether the alert is currently enabled.",
+            "example": true
+          },
+          "executionStatus": {
+            "type": "object",
+            "properties": {
+              "lastExecutionDate": {
+                "type": "string",
+                "format": "date-time",
+                "example": "2022-12-06T00:13:43.890Z"
+              },
+              "status": {
+                "type": "string",
+                "example": "ok"
+              }
+            }
+          },
+          "id": {
+            "type": "string",
+            "description": "The identifier for the alert.",
+            "example": "b530fed0-74f5-11ed-9801-35303b735aef"
+          },
+          "muteAll": {
+            "type": "boolean",
+            "example": false
+          },
+          "mutedInstanceIds": {
+            "type": "array",
+            "nullable": true,
+            "items": {
+              "type": "string"
+            }
+          },
+          "name": {
+            "type": "string",
+            "description": "The name of the alert.",
+            "example": "my alert"
+          },
+          "notifyWhen": {
+            "type": "string",
+            "example": "onActionGroupChange"
+          },
+          "params": {
+            "type": "object",
+            "additionalProperties": true
+          },
+          "schedule": {
+            "type": "object",
+            "properties": {
+              "interval": {
+                "type": "string"
+              }
+            }
+          },
+          "scheduledTaskId": {
+            "type": "string",
+            "example": "b530fed0-74f5-11ed-9801-35303b735aef"
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "throttle": {
+            "type": "string",
+            "nullable": true
+          },
+          "updatedAt": {
+            "type": "string",
+            "example": "2022-12-05T23:36:58.284Z"
+          },
+          "updatedBy": {
+            "type": "string",
+            "description": "The identifier for the user that updated this alert most recently.",
+            "nullable": true,
+            "example": "elastic"
+          }
+        }
+      }
+    },
+    "examples": {
+      "get_rule_response": {
+        "summary": "The get rule API returns a JSON object that contains details about the rule.",
+        "value": {
+          "id": "31697a40-7b36-11ed-aa79-f742c05329b2",
+          "consumer": "alerts",
+          "tags": [
+            "cpu"
+          ],
+          "name": "my alert",
+          "enabled": true,
+          "throttle": null,
+          "schedule": {
+            "interval": "1m"
+          },
+          "params": {
+            "aggType": "avg",
+            "termSize": 6,
+            "thresholdComparator": ">",
+            "timeWindowSize": 5,
+            "timeWindowUnit": "m",
+            "groupBy": "top",
+            "threshold": [
+              1000
+            ],
+            "index": [
+              "test-index"
+            ],
+            "timeField": "@timestamp",
+            "aggField": "sheet.version",
+            "termField": "name.keyword"
+          },
+          "revision": 1,
+          "rule_type_id": ".index-threshold",
+          "created_by": "elastic",
+          "updated_by": "elastic",
+          "created_at": "2022-12-13T22:33:41.163Z",
+          "updated_at": "2022-12-13T22:33:41.163Z",
+          "api_key_owner": "elastic",
+          "notify_when": "onActionGroupChange",
+          "muted_alert_ids": [],
+          "mute_all": false,
+          "scheduled_task_id": "31697a40-7b36-11ed-aa79-f742c05329b2",
+          "execution_status": {
+            "status": "ok",
+            "last_execution_date": "2022-12-13T22:33:44.388Z",
+            "last_duration": 83
+          },
+          "actions": [
+            {
+              "group": "threshold met",
+              "id": "1007a0c0-7a6e-11ed-89d5-abec321c0def",
+              "uuid": "1c7a1280-f28c-4e06-96b2-e4e5f05d1d61",
+              "params": {
+                "level": "info",
+                "message": "alert {{alertName}} is active for group {{context.group}}:\n\n- Value: {{context.value}}\n- Conditions Met: {{context.conditions}} over {{params.timeWindowSize}}{{params.timeWindowUnit}}\n- Timestamp: {{context.date}",
+                "connector_type_id": ".server-log"
+              }
+            }
+          ],
+          "last_run": {
+            "alerts_count": {
+              "new": 0,
+              "ignored": 0,
+              "recovered": 0,
+              "active": 0
+            },
+            "outcome_msg": null,
+            "warning": null,
+            "outcome": "succeeded"
+          },
+          "next_run": "2022-12-13T22:34:44.314Z",
+          "api_key_created_by_user": false
+        }
+      },
+      "update_rule_request": {
+        "summary": "Update an index threshold rule.",
+        "value": {
+          "actions": [
+            {
+              "frequency": {
+                "summary": false,
+                "notify_when": "onActionGroupChange"
+              },
+              "group": "threshold met",
+              "id": "96b668d0-a1b6-11ed-afdf-d39a49596974",
+              "params": {
+                "level": "info",
+                "message": "alert {{alertName}} is active for group {{context.group}}:\n\n- Value: {{context.value}}\n- Conditions Met: {{context.conditions}} over {{params.timeWindowSize}}{{params.timeWindowUnit}}\n- Timestamp: {{context.date}}"
+              }
+            }
+          ],
+          "params": {
+            "aggField": "sheet.version",
+            "aggType": "avg",
+            "index": [
+              ".test-index"
+            ],
+            "groupBy": "top",
+            "termField": "name.keyword",
+            "termSize": 6,
+            "threshold": [
+              1000
+            ],
+            "thresholdComparator": ">",
+            "timeField": "@timestamp",
+            "timeWindowSize": 5,
+            "timeWindowUnit": "m"
+          },
+          "name": "new name",
+          "schedule": {
+            "interval": "1m"
+          },
+          "tags": [],
+          "throttle": null
+        }
+      },
+      "update_rule_response": {
+        "summary": "The update rule API returns a JSON object that contains details about the rule.",
+        "value": {
+          "id": "ac4e6b90-6be7-11eb-ba0d-9b1c1f912d74",
+          "consumer": "alerts",
+          "tags": [],
+          "name": "new name",
+          "enabled": true,
+          "throttle": null,
+          "revision": 1,
+          "running": false,
+          "schedule": {
+            "interval": "10m"
+          },
+          "params": {
+            "index": [
+              ".updated-index"
+            ],
+            "timeField": "@timestamp",
+            "groupBy": "top",
+            "aggType": "avg",
+            "timeWindowSize": 5,
+            "timeWindowUnit": "m",
+            "thresholdComparator": ">",
+            "threshold": [
+              1000
+            ],
+            "aggField": "sheet.version",
+            "termField": "name.keyword",
+            "termSize": 6
+          },
+          "api_key_owner": "elastic",
+          "created_by": "elastic",
+          "updated_by": "elastic",
+          "rule_type_id": ".index-threshold",
+          "scheduled_task_id": "4c5eda00-e74f-11ec-b72f-5b18752ff9ea",
+          "created_at": "2023-01-31T23:03:33.127Z",
+          "updated_at": "2023-01-31T23:55:27.314Z",
+          "mute_all": false,
+          "muted_alert_ids": [],
+          "execution_status": {
+            "status": "ok",
+            "last_execution_date": "2023-01-31T23:48:42.499Z",
+            "last_duration": 52
+          },
+          "actions": [
+            {
+              "group": "threshold met",
+              "params": {
+                "level": "info",
+                "message": "alert {{alertName}} is active for group {{context.group}}:\n\n- Value: {{context.value}}\n- Conditions Met: {{context.conditions}} over {{params.timeWindowSize}}{{params.timeWindowUnit}}\n- Timestamp: {{context.date}"
+              },
+              "id": "96b668d0-a1b6-11ed-afdf-d39a49596974",
+              "uuid": "07aef2a0-9eed-4ef9-94ec-39ba58eb609d",
+              "connector_type_id": ".server-log",
+              "frequency": {
+                "summary": false,
+                "throttle": null,
+                "notify_when": "onActionGroupChange"
+              }
+            }
+          ],
+          "last_run": {
+            "alerts_count": {
+              "new": 0,
+              "ignored": 0,
+              "recovered": 0,
+              "active": 0
+            },
+            "outcome_msg": null,
+            "warning": null,
+            "outcome": "succeeded"
+          },
+          "next_run": "2023-01-31T23:49:42.432Z",
+          "api_key_created_by_user": false
+        }
+      },
+      "create_rule_request": {
+        "summary": "Create an index threshold rule.",
+        "value": {
+          "actions": [
+            {
+              "id": "dceeb5d0-6b41-11eb-802b-85b0c1bc8ba2",
+              "frequency": {
+                "notify_when": "onActionGroupChange",
+                "summary": false
+              },
+              "group": "threshold met",
+              "params": {
+                "level": "info",
+                "message": "alert '{{alertName}}' is active for group '{{context.group}}':\n\n- Value: {{context.value}}\n- Conditions Met: {{context.conditions}} over {{params.timeWindowSize}}{{params.timeWindowUnit}}\n- Timestamp: {{context.date}}"
+              }
+            }
+          ],
+          "consumer": "alerts",
+          "name": "my rule",
+          "params": {
+            "aggType": "avg",
+            "termSize": 6,
+            "thresholdComparator": ">",
+            "timeWindowSize": 5,
+            "timeWindowUnit": "m",
+            "groupBy": "top",
+            "threshold": [
+              1000
+            ],
+            "index": [
+              ".test-index"
+            ],
+            "timeField": "@timestamp",
+            "aggField": "sheet.version",
+            "termField": "name.keyword"
+          },
+          "rule_type_id": ".index-threshold",
+          "schedule": {
+            "interval": "1m"
+          },
+          "tags": [
+            "cpu"
+          ]
+        }
+      },
+      "create_rule_response": {
+        "summary": "The create rule API returns a JSON object that contains details about the rule.",
+        "value": {
+          "actions": [
+            {
+              "group": "threshold met",
+              "id": "dceeb5d0-6b41-11eb-802b-85b0c1bc8ba2",
+              "uuid": "07aef2a0-9eed-4ef9-94ec-39ba58eb609d",
+              "frequency": {
+                "notify_when": "onActionGroupChange",
+                "summary": false,
+                "throttle": null
+              },
+              "params": {
+                "level": "info",
+                "message": "alert {{alertName}} is active for group {{context.group} :\n\n- Value: {{context.value}}\n- Conditions Met: {{context.conditions}} over {{params.timeWindowSize}}{{params.timeWindowUnit}}\n- Timestamp: {{context.date}}"
+              }
+            }
+          ],
+          "api_key_created_by_user": false,
+          "api_key_owner": "elastic",
+          "consumer": "alerts",
+          "created_at": "2022-06-08T17:20:31.632Z",
+          "created_by": "elastic",
+          "enabled": true,
+          "execution_status": {
+            "last_execution_date": "2022-06-08T17:20:31.632Z",
+            "status": "pending"
+          },
+          "id": "41893910-6bca-11eb-9e0d-85d233e3ee35",
+          "muted_alert_ids": [],
+          "mute_all": false,
+          "name": "my rule",
+          "notify_when": "onActionGroupChange",
+          "params": {
+            "aggType": "avg",
+            "termSize": 6,
+            "thresholdComparator": ">",
+            "timeWindowSize": 5,
+            "timeWindowUnit": "m",
+            "groupBy": "top",
+            "threshold": [
+              1000
+            ],
+            "index": [
+              ".test-index"
+            ],
+            "timeField": "@timestamp",
+            "aggField": "sheet.version",
+            "termField": "name.keyword"
+          },
+          "revision": 0,
+          "rule_type_id": ".index-threshold",
+          "running": false,
+          "schedule": {
+            "interval": "1m"
+          },
+          "scheduled_task_id": "425b0800-6bca-11eb-9e0d-85d233e3ee35",
+          "tags": [
+            "cpu"
+          ],
+          "throttle": null,
+          "updated_at": "2022-06-08T17:20:31.632Z",
+          "updated_by": "elastic"
+        }
+      },
+      "find_rules_response": {
+        "summary": "Retrieve information about a rule.",
+        "value": {
+          "page": 1,
+          "total": 1,
+          "per_page": 10,
+          "data": [
+            {
+              "id": "3583a470-74f6-11ed-9801-35303b735aef",
+              "consumer": "alerts",
+              "tags": [
+                "cpu"
+              ],
+              "name": "my alert",
+              "enabled": true,
+              "throttle": null,
+              "schedule": {
+                "interval": "1m"
+              },
+              "params": {
+                "aggType": "avg",
+                "termSize": 6,
+                "thresholdComparator": ">",
+                "timeWindowSize": 5,
+                "timeWindowUnit": "m",
+                "groupBy": "top",
+                "threshold": [
+                  1000
+                ],
+                "index": [
+                  "test-index"
+                ],
+                "timeField": "@timestamp",
+                "aggField": "sheet.version",
+                "termField": "name.keyword"
+              },
+              "revision": 1,
+              "rule_type_id": ".index-threshold",
+              "created_by": "elastic",
+              "updated_by": "elastic",
+              "created_at": "2022-12-05T23:40:33.132Z",
+              "updated_at": "2022-12-05T23:40:33.132Z",
+              "api_key_owner": "elastic",
+              "notify_when": "onActionGroupChange",
+              "mute_all": false,
+              "muted_alert_ids": [],
+              "scheduled_task_id": "3583a470-74f6-11ed-9801-35303b735aef",
+              "execution_status": {
+                "status": "ok",
+                "last_execution_date": "2022-12-06T01:44:23.983Z",
+                "last_duration": 48
+              },
+              "actions": [
+                {
+                  "id": "9dca3e00-74f5-11ed-9801-35303b735aef",
+                  "group": "threshold met",
+                  "uuid": "1c7a1280-f28c-4e06-96b2-e4e5f05d1d61",
+                  "params": {
+                    "level": "info",
+                    "message": "alert {{alertName}} is active for group {{context.group}}:\n\n- Value: {{context.value}}\n- Conditions Met: {{context.conditions}} over {{params.timeWindowSize}}{{params.timeWindowUnit}}\n- Timestamp: {{context.date}}",
+                    "connector_type_id": ".server-log"
+                  }
+                }
+              ],
+              "last_run": {
+                "alerts_count": {
+                  "new": 0,
+                  "ignored": 0,
+                  "recovered": 0,
+                  "active": 0
+                },
+                "outcome_msg": null,
+                "warning": null,
+                "outcome": "succeeded"
+              },
+              "next_run": "2022-12-06T01:45:23.912Z",
+              "api_key_created_by_user": false
+            }
+          ]
+        }
+      },
+      "get_health_response": {
+        "summary": "Retrieve information about the health of the alerting framework.",
+        "value": {
+          "is_sufficiently_secure": true,
+          "has_permanent_encryption_key": true,
+          "alerting_framework_health": {
+            "decryption_health": {
+              "status": "ok",
+              "timestamp": "2023-01-13T01:28:00.280Z"
+            },
+            "execution_health": {
+              "status": "ok",
+              "timestamp": "2023-01-13T01:28:00.280Z"
+            },
+            "read_health": {
+              "status": "ok",
+              "timestamp": "2023-01-13T01:28:00.280Z"
+            }
+          }
+        }
+      },
+      "get_rule_types_response": {
+        "summary": "Retrieve rule types associated with Kibana machine learning features",
+        "value": [
+          {
+            "id": "xpack.ml.anomaly_detection_alert",
+            "action_groups": [
+              {
+                "id": "anomaly_score_match",
+                "name": "Anomaly score matched the condition"
+              },
+              {
+                "id": "recovered",
+                "name": "Recovered"
+              }
+            ],
+            "action_variables": {
+              "context": [
+                {
+                  "name": "timestamp",
+                  "description": "The bucket timestamp of the anomaly"
+                },
+                {
+                  "name": "timestampIso8601",
+                  "description": "The bucket time of the anomaly in ISO8601 format"
+                },
+                {
+                  "name": "jobIds",
+                  "description": "List of job IDs that triggered the alert"
+                },
+                {
+                  "name": "message",
+                  "description": "Alert info message"
+                },
+                {
+                  "name": "isInterim",
+                  "description": "Indicate if top hits contain interim results"
+                },
+                {
+                  "name": "score",
+                  "description": "Anomaly score at the time of the notification action"
+                },
+                {
+                  "name": "topRecords",
+                  "description": "Top records"
+                },
+                {
+                  "name": "topInfluencers",
+                  "description": "Top influencers"
+                },
+                {
+                  "name": "anomalyExplorerUrl",
+                  "description": "URL to open in the Anomaly Explorer",
+                  "useWithTripleBracesInTemplates": true
+                }
+              ],
+              "params": [],
+              "state": []
+            },
+            "authorized_consumers": {
+              "alerts": {
+                "all": true,
+                "read": true
+              },
+              "ml": {
+                "all": true,
+                "read": true
+              }
+            },
+            "default_action_group_id": "anomaly_score_match",
+            "does_set_recovery_context": true,
+            "enabled_in_license": true,
+            "is_exportable": true,
+            "minimum_license_required": "platinum",
+            "name": "Anomaly detection alert",
+            "producer": "ml",
+            "recovery_action_group": {
+              "id": "recovered",
+              "name": "Recovered"
+            },
+            "rule_task_timeout": "5m"
+          },
+          {
+            "id": "xpack.ml.anomaly_detection_jobs_health",
+            "action_groups": [
+              {
+                "id": "anomaly_detection_realtime_issue",
+                "name": "Issue detected"
+              },
+              {
+                "id": "recovered",
+                "name": "Recovered"
+              }
+            ],
+            "action_variables": {
+              "context": [
+                {
+                  "name": "results",
+                  "description": "Results of the rule execution"
+                },
+                {
+                  "name": "message",
+                  "description": "Alert info message"
+                }
+              ],
+              "params": [],
+              "state": []
+            },
+            "authorized_consumers": {
+              "alerts": {
+                "all": true,
+                "read": true
+              },
+              "ml": {
+                "all": true,
+                "read": true
+              }
+            },
+            "default_action_group_id": "anomaly_detection_realtime_issue",
+            "does_set_recovery_context": true,
+            "enabled_in_license": true,
+            "is_exportable": true,
+            "minimum_license_required": "platinum",
+            "name": "Anomaly detection jobs health",
+            "producer": "ml",
+            "recovery_action_group": {
+              "id": "recovered",
+              "name": "Recovered"
+            },
+            "rule_task_timeout": "5m"
+          }
+        ]
+      }
+    }
+  },
+  "security": [
+    {
+      "basicAuth": []
+    },
+    {
+      "apiKeyAuth": []
+    }
+  ]
+}

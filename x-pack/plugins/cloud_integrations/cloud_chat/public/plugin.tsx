@@ -15,6 +15,7 @@ import { ReplaySubject } from 'rxjs';
 import type { GetChatUserDataResponseBody } from '../common/types';
 import { GET_CHAT_USER_DATA_ROUTE_PATH } from '../common/constants';
 import { ChatConfig, ServicesProvider } from './services';
+import { isTodayInDateWindow } from '../common/util';
 
 interface CloudChatSetupDeps {
   cloud: CloudSetup;
@@ -27,6 +28,7 @@ interface SetupChatDeps extends CloudChatSetupDeps {
 
 interface CloudChatConfig {
   chatURL?: string;
+  trialBuffer: number;
 }
 
 export class CloudChatPlugin implements Plugin {
@@ -57,7 +59,16 @@ export class CloudChatPlugin implements Plugin {
   public stop() {}
 
   private async setupChat({ cloud, http, security }: SetupChatDeps) {
-    if (!cloud.isCloudEnabled || !security || !this.config.chatURL) {
+    const { isCloudEnabled, trialEndDate } = cloud;
+    const { chatURL, trialBuffer } = this.config;
+
+    if (
+      !security ||
+      !isCloudEnabled ||
+      !chatURL ||
+      !trialEndDate ||
+      !isTodayInDateWindow(trialEndDate, trialBuffer)
+    ) {
       return;
     }
 
@@ -73,7 +84,7 @@ export class CloudChatPlugin implements Plugin {
       }
 
       this.chatConfig$.next({
-        chatURL: this.config.chatURL,
+        chatURL,
         user: {
           email,
           id,
@@ -82,7 +93,10 @@ export class CloudChatPlugin implements Plugin {
       });
     } catch (e) {
       // eslint-disable-next-line no-console
-      console.debug(`[cloud.chat] Could not retrieve chat config: ${e.res.status} ${e.message}`, e);
+      console.debug(
+        `[cloud.chat] Could not retrieve chat config: ${e.response.status} ${e.message}`,
+        e
+      );
     }
   }
 }

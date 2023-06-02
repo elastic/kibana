@@ -8,12 +8,13 @@
 import type { HttpFetchOptions, HttpStart } from '@kbn/core/public';
 import type {
   GetAgentStatusResponse,
-  GetAgentsResponse,
-  GetPackagesResponse,
   GetAgentPoliciesRequest,
   GetAgentPoliciesResponse,
   GetPackagePoliciesResponse,
+  GetInfoResponse,
 } from '@kbn/fleet-plugin/common';
+import { epmRouteService } from '@kbn/fleet-plugin/common';
+
 import type { NewPolicyData } from '../../../../common/endpoint/types';
 import type { GetPolicyResponse, UpdatePolicyResponse } from '../../pages/policy/types';
 
@@ -132,36 +133,14 @@ export const sendGetFleetAgentStatusForPolicy = (
 };
 
 /**
- * Get a status summary for all Agents that are currently assigned to a given agent policy
- *
- * @param http
- * @param options
- */
-export const sendGetFleetAgentsWithEndpoint = (
-  http: HttpStart,
-  options: Exclude<HttpFetchOptions, 'query'> = {}
-): Promise<GetAgentsResponse> => {
-  return http.get(INGEST_API_FLEET_AGENTS, {
-    ...options,
-    query: {
-      page: 1,
-      perPage: 1,
-      kuery: 'packages : "endpoint"',
-    },
-  });
-};
-
-/**
  * Get Endpoint Security Package information
  */
 export const sendGetEndpointSecurityPackage = async (
   http: HttpStart
-): Promise<GetPackagesResponse['items'][0]> => {
-  const options = { query: { category: 'security' } };
-  const securityPackages = await http.get<GetPackagesResponse>(INGEST_API_EPM_PACKAGES, options);
-  const endpointPackageInfo = securityPackages.items.find(
-    (epmPackage) => epmPackage.name === 'endpoint'
-  );
+): Promise<GetInfoResponse['item']> => {
+  const path = epmRouteService.getInfoPath('endpoint');
+  const endpointPackageResponse = await http.get<GetInfoResponse>(path);
+  const endpointPackageInfo = endpointPackageResponse.item;
   if (!endpointPackageInfo) {
     throw new Error('Endpoint package was not found.');
   }

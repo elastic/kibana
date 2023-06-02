@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { useParams } from 'react-router-dom';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiSkeletonRectangle } from '@elastic/eui';
 import { useJourneySteps } from '../monitor_details/hooks/use_journey_steps';
 
 export const StepTitle = () => {
@@ -17,9 +17,9 @@ export const StepTitle = () => {
 
   const currentStep = data?.steps.find((step) => step.synthetics.step?.index === Number(stepIndex));
 
-  return (
-    <EuiFlexGroup gutterSize="xs">
-      <EuiFlexItem grow>{currentStep?.synthetics?.step?.name}</EuiFlexItem>
-    </EuiFlexGroup>
-  );
+  if (!currentStep) {
+    return <EuiSkeletonRectangle height="45px" width="100%" />;
+  }
+
+  return <>{`${currentStep?.synthetics?.step?.index}. ${currentStep?.synthetics?.step?.name}`}</>;
 };

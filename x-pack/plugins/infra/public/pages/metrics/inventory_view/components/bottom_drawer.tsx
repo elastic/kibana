@@ -5,11 +5,14 @@
  * 2.0.
  */
 
-import React, { useCallback, useState, useEffect } from 'react';
+import React, { useCallback, useState, useEffect, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty, EuiPanel } from '@elastic/eui';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
-import { useUiTracker } from '@kbn/observability-plugin/public';
+import { useUiTracker } from '@kbn/observability-shared-plugin/public';
+import useLocalStorage from 'react-use/lib/useLocalStorage';
+import { InventoryItemType } from '../../../../../common/inventory_models/types';
+import { TryItButton } from '../../../../components/try_it_button';
 import { useWaffleOptionsContext } from '../hooks/use_waffle_options';
 import { InfraFormatter } from '../../../../lib/lib';
 import { Timeline } from './timeline/timeline';
@@ -21,14 +24,42 @@ const hideHistory = i18n.translate('xpack.infra.hideHistory', {
   defaultMessage: 'Hide history',
 });
 
-const TRANSITION_MS = 300;
-
-export const BottomDrawer: React.FC<{
-  measureRef: (instance: HTMLElement | null) => void;
+interface Props {
   interval: string;
   formatter: InfraFormatter;
-  width: number;
-}> = ({ measureRef, width, interval, formatter, children }) => {
+  view: string;
+  nodeType: InventoryItemType;
+}
+
+const LOCAL_STORAGE_KEY = 'inventoryUI:k8sDashboardClicked';
+const KubernetesButton = () => {
+  const [clicked, setClicked] = useLocalStorage<boolean>(LOCAL_STORAGE_KEY, false);
+  const clickedRef = useRef<boolean | undefined>(clicked);
+  return (
+    <TryItButton
+      color={clickedRef.current ? 'primary' : 'accent'}
+      label={i18n.translate('xpack.infra.bottomDrawer.kubernetesDashboardsLink', {
+        defaultMessage: 'Kubernetes dashboards',
+      })}
+      data-test-subj="inventory-kubernetesDashboard-link"
+      link={{
+        app: 'dashboards',
+        hash: '/list',
+        search: {
+          _g: '()',
+          s: 'kubernetes tag:(Managed)',
+        },
+      }}
+      onClick={() => {
+        if (!clickedRef.current) {
+          setClicked(true);
+        }
+      }}
+      hideBadge={clickedRef.current}
+    />
+  );
+};
+export const BottomDrawer = ({ interval, formatter, view, nodeType }: Props) => {
   const { timelineOpen, changeTimelineOpen } = useWaffleOptionsContext();
 
   const [isOpen, setIsOpen] = useState(Boolean(timelineOpen));
@@ -44,45 +75,61 @@ export const BottomDrawer: React.FC<{
     changeTimelineOpen(!isOpen);
   }, [isOpen, trackDrawerOpen, changeTimelineOpen]);
 
+  if (view === 'table') {
+    return nodeType === 'pod' ? (
+      <BottomPanel hasBorder={false} hasShadow={false} borderRadius="none" paddingSize="s">
+        <KubernetesButton />
+      </BottomPanel>
+    ) : null;
+  }
+
   return (
-    <BottomActionContainer ref={isOpen ? measureRef : null} isOpen={isOpen} outerWidth={width}>
-      <BottomActionTopBar ref={isOpen ? null : measureRef}>
-        <EuiFlexItem grow={false}>
-          <ShowHideButton
-            aria-expanded={isOpen}
-            iconType={isOpen ? 'arrowDown' : 'arrowRight'}
-            onClick={onClick}
-            data-test-subj="toggleTimelineButton"
-          >
-            {isOpen ? hideHistory : showHistory}
-          </ShowHideButton>
-        </EuiFlexItem>
-      </BottomActionTopBar>
-      <EuiFlexGroup style={{ marginTop: 0 }}>
+    <BottomActionContainer>
+      <StickyPanel borderRadius="none" paddingSize="s">
+        <EuiFlexGroup responsive={false} justifyContent="flexStart" alignItems="center">
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              aria-expanded={isOpen}
+              iconType={isOpen ? 'arrowDown' : 'arrowRight'}
+              onClick={onClick}
+              data-test-subj="toggleTimelineButton"
+            >
+              {isOpen ? hideHistory : showHistory}
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+          {nodeType === 'pod' && (
+            <EuiFlexItem grow={false}>
+              <KubernetesButton />
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
+      </StickyPanel>
+      <EuiFlexGroup
+        style={{
+          maxHeight: isOpen ? '224px' : 0,
+          transition: 'max-height 0.15s ease',
+          overflow: 'hidden',
+        }}
+      >
         <Timeline isVisible={isOpen} interval={interval} yAxisFormatter={formatter} />
       </EuiFlexGroup>
     </BottomActionContainer>
   );
 };
 
-const BottomActionContainer = euiStyled.div<{ isOpen: boolean; outerWidth: number }>`
-  padding: ${(props) => props.theme.eui.euiSizeM} 0;
-  position: fixed;
+const BottomActionContainer = euiStyled.div`
+  position: sticky;
   bottom: 0;
-  right: 0;
-  transition: transform ${TRANSITION_MS}ms;
-  transform: translateY(${(props) => (props.isOpen ? 0 : '224px')});
-  width: ${(props) => props.outerWidth + 34}px;
+  left: 0;
+  background: ${(props) => props.theme.eui.euiColorGhost};
+  width: calc(100% + ${(props) => props.theme.eui.euiSizeL} * 2);
+  margin-left: -${(props) => props.theme.eui.euiSizeL};
 `; // Additional width comes from the padding on the EuiPageBody and inner nodes container
 
-const BottomActionTopBar = euiStyled(EuiFlexGroup).attrs({
-  justifyContent: 'spaceBetween',
-  alignItems: 'center',
-})`
- margin-bottom: 0;
- height: 48px;
+const BottomPanel = euiStyled(EuiPanel)`
+  padding: ${(props) => props.theme.eui.euiSizeL} 0;
 `;
 
-const ShowHideButton = euiStyled(EuiButtonEmpty).attrs({ size: 's' })`
-  width: 140px;
+const StickyPanel = euiStyled(EuiPanel)`
+  padding: 0 ${(props) => props.theme.eui.euiSizeL};
 `;

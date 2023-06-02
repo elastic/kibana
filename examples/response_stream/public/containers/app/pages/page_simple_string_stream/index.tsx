@@ -34,7 +34,7 @@ export const PageSimpleStringStream: FC = () => {
   const { dispatch, errors, start, cancel, data, isRunning } = useFetchStream<
     ApiSimpleStringStream,
     typeof basePath
-  >(`${basePath}/internal/response_stream/simple_string_stream`, {
+  >(`${basePath}/internal/response_stream/simple_string_stream`, '1', {
     compressResponse,
     timeout: 500,
   });
@@ -83,7 +83,7 @@ export const PageSimpleStringStream: FC = () => {
         <p>{data}</p>
       </EuiText>
       {errors.length > 0 && (
-        <EuiCallOut title="Sorry, there was an error" color="danger" iconType="alert">
+        <EuiCallOut title="Sorry, there was an error" color="danger" iconType="warning">
           {errors.length === 1 ? (
             <p>{errors[0]}</p>
           ) : (

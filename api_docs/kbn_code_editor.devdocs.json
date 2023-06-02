@@ -1,0 +1,65 @@
+{
+  "id": "@kbn/code-editor",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/code-editor",
+        "id": "def-common.CodeEditor",
+        "type": "Function",
+        "tags": [],
+        "label": "CodeEditor",
+        "description": [],
+        "signature": [
+          "({ languageId, value, onChange, width, options, overrideEditorWillMount, editorDidMount, editorWillMount, useDarkTheme, transparentBackground, suggestionProvider, signatureProvider, hoverProvider, placeholder, languageConfiguration, \"aria-label\": ariaLabel, isCopyable, allowFullScreen, }: React.PropsWithChildren<",
+          "Props",
+          ">) => JSX.Element"
+        ],
+        "path": "packages/shared-ux/code_editor/impl/code_editor.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/code-editor",
+            "id": "def-common.CodeEditor.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "{\n  languageId,\n  value,\n  onChange,\n  width,\n  options,\n  overrideEditorWillMount,\n  editorDidMount,\n  editorWillMount,\n  useDarkTheme,\n  transparentBackground,\n  suggestionProvider,\n  signatureProvider,\n  hoverProvider,\n  placeholder,\n  languageConfiguration,\n  'aria-label': ariaLabel = i18n.translate('sharedUXPackages.codeEditor.ariaLabel', {\n    defaultMessage: 'Code Editor',\n  }),\n  isCopyable = false,\n  allowFullScreen = false,\n}",
+            "description": [],
+            "signature": [
+              "React.PropsWithChildren<",
+              "Props",
+              ">"
+            ],
+            "path": "packages/shared-ux/code_editor/impl/code_editor.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

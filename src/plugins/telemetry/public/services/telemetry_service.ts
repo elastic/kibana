@@ -7,16 +7,19 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { CoreStart } from '@kbn/core/public';
-import { TelemetryPluginConfig } from '../plugin';
+import type { CoreSetup, CoreStart } from '@kbn/core/public';
+import type { TelemetryPluginConfig } from '../plugin';
 import { getTelemetryChannelEndpoint } from '../../common/telemetry_config/get_telemetry_channel_endpoint';
-import type { UnencryptedTelemetryPayload, EncryptedTelemetryPayload } from '../../common/types';
+import type {
+  UnencryptedTelemetryPayload,
+  EncryptedTelemetryPayload,
+} from '../../common/types/latest';
 import { PAYLOAD_CONTENT_ENCODING } from '../../common/constants';
 
 interface TelemetryServiceConstructor {
   config: TelemetryPluginConfig;
   http: CoreStart['http'];
-  notifications: CoreStart['notifications'];
+  notifications: CoreSetup['notifications'];
   isScreenshotMode: boolean;
   currentKibanaVersion: string;
   reportOptInStatusChange?: boolean;
@@ -29,7 +32,7 @@ interface TelemetryServiceConstructor {
 export class TelemetryService {
   private readonly http: CoreStart['http'];
   private readonly reportOptInStatusChange: boolean;
-  private readonly notifications: CoreStart['notifications'];
+  private readonly notifications: CoreSetup['notifications'];
   private readonly defaultConfig: TelemetryPluginConfig;
   private readonly isScreenshotMode: boolean;
   private updatedConfig?: TelemetryPluginConfig;
@@ -107,15 +110,19 @@ export class TelemetryService {
   };
 
   /**
-   * Returns if an user should be shown the notice about Opt-In/Out telemetry.
-   * The decision is made based on whether any user has already dismissed the message or
-   * the user can't actually change the settings (in which case, there's no point on bothering them)
+   * Returns whether a user should be shown the notice about Opt-In/Out telemetry.
+   * The decision is made based on:
+   * 1. The config hidePrivacyStatement is unset
+   * 2. The user has enough privileges to change the settings
+   * 3. At least one of the following:
+   *   * It is opted-in, and the user has already been notified at any given point in the deployment's life.
+   *   * It is opted-out, and the user has been notified for this version (excluding patch updates)
    */
   public getUserShouldSeeOptInNotice(): boolean {
     return (
       (!this.config.hidePrivacyStatement &&
-        this.config.telemetryNotifyUserAboutOptInDefault &&
-        this.config.userCanChangeSettings) ??
+        this.config.userCanChangeSettings &&
+        (this.config.telemetryNotifyUserAboutOptInDefault || this.config.optIn === null)) ??
       false
     );
   }

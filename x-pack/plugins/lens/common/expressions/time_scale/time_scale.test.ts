@@ -14,6 +14,7 @@ import { functionWrapper } from '@kbn/expressions-plugin/common/expression_funct
 
 import { getTimeScale } from './time_scale';
 import type { TimeScaleArgs } from './types';
+import { getTimeBounds } from './time_scale_fn';
 
 describe('time_scale', () => {
   let timeScaleWrapped: (
@@ -502,5 +503,20 @@ describe('time_scale', () => {
     await new Promise((r) => setTimeout(r, 0));
     // should resolve now without another async dependency
     expect(timeScaleResolved).toHaveBeenCalled();
+  });
+
+  it('getTimeBounds should not alter the default moment timezone', () => {
+    // configuring an exotic timezone
+    moment.tz.setDefault('Pacific/Honolulu');
+    // @ts-ignore
+    expect(moment.defaultZone?.name).toBe('Pacific/Honolulu');
+
+    getTimeBounds(
+      { from: '2023-04-01T00:00:00.000+02:00', to: '2023-04-02T00:00:00.000+02:00' },
+      'Europe/Lisbon',
+      () => new Date('2023-04-01T00:00:00.000Z')
+    );
+    // @ts-ignore
+    expect(moment.defaultZone?.name).toBe('Pacific/Honolulu');
   });
 });

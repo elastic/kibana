@@ -1,0 +1,23 @@
+{
+  "type": "plugin",
+  "id": "@kbn/data-view-field-editor-plugin",
+  "owner": "@elastic/kibana-data-discovery",
+  "description": "Reusable data view field editor across Kibana",
+  "plugin": {
+    "id": "dataViewFieldEditor",
+    "server": true,
+    "browser": true,
+    "requiredPlugins": [
+      "data",
+      "fieldFormats",
+      "dataViews"
+    ],
+    "optionalPlugins": [
+      "usageCollection"
+    ],
+    "requiredBundles": [
+      "kibanaReact",
+      "esUiShared"
+    ]
+  }
+}

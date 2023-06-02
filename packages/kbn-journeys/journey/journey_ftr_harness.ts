@@ -16,7 +16,7 @@ import playwright, { ChromiumBrowser, Page, BrowserContext, CDPSession, Request 
 import { asyncMap, asyncForEach } from '@kbn/std';
 import { ToolingLog } from '@kbn/tooling-log';
 import { Config } from '@kbn/test';
-import { EsArchiver, KibanaServer } from '@kbn/ftr-common-functional-services';
+import { EsArchiver, KibanaServer, Es, RetryService } from '@kbn/ftr-common-functional-services';
 
 import { Auth } from '../services/auth';
 import { getInputDelays } from '../services/input_delays';
@@ -34,6 +34,8 @@ export class JourneyFtrHarness {
     private readonly config: Config,
     private readonly esArchiver: EsArchiver,
     private readonly kibanaServer: KibanaServer,
+    private readonly es: Es,
+    private readonly retry: RetryService,
     private readonly auth: Auth,
     private readonly journeyConfig: JourneyConfig<any>
   ) {
@@ -97,10 +99,11 @@ export class JourneyFtrHarness {
 
   private async setupBrowserAndPage() {
     const browser = await this.getBrowserInstance();
-    this.context = await browser.newContext({ bypassCSP: true });
+    const browserContextArgs = this.auth.isCloud() ? {} : { bypassCSP: true };
+    this.context = await browser.newContext(browserContextArgs);
 
     if (this.journeyConfig.shouldAutoLogin()) {
-      const cookie = await this.auth.login({ username: 'elastic', password: 'changeme' });
+      const cookie = await this.auth.login();
       await this.context.addCookies([cookie]);
     }
 
@@ -117,8 +120,12 @@ export class JourneyFtrHarness {
   }
 
   private async onSetup() {
+    // We start browser and init page in the first place
+    await this.setupBrowserAndPage();
+    // We allow opt-in beforeSteps hook to manage Kibana/ES state
+    await this.journeyConfig.getBeforeStepsFn(this.getCtx());
+    // Loading test data
     await Promise.all([
-      this.setupBrowserAndPage(),
       asyncForEach(this.journeyConfig.getEsArchives(), async (esArchive) => {
         await this.esArchiver.load(esArchive);
       }),
@@ -365,6 +372,9 @@ export class JourneyFtrHarness {
         )
       ),
       kibanaServer: this.kibanaServer,
+      es: this.es,
+      retry: this.retry,
+      auth: this.auth,
     });
 
     return this.#_ctx;

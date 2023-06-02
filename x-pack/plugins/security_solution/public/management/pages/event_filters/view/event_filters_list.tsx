@@ -114,6 +114,12 @@ const EVENT_FILTERS_PAGE_LABELS: ArtifactListPageProps['labels'] = {
       defaultMessage: '"{itemName}" has been removed from event filters list.',
       values: { itemName },
     }),
+  emptyStateTitleNoEntries: i18n.translate(
+    'xpack.securitySolution.eventFilters.emptyStateTitleNoEntries',
+    {
+      defaultMessage: 'There are no event filters to display.',
+    }
+  ),
   emptyStateTitle: i18n.translate('xpack.securitySolution.eventFilters.emptyStateTitle', {
     defaultMessage: 'Add your first event filter',
   }),

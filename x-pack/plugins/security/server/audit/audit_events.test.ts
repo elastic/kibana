@@ -7,19 +7,21 @@
 
 import { URL } from 'url';
 
-import { AuditAction } from '@kbn/core-saved-objects-server';
 import { httpServerMock } from '@kbn/core/server/mocks';
 
 import { mockAuthenticatedUser } from '../../common/model/authenticated_user.mock';
 import { AuthenticationResult } from '../authentication';
+import { AuditAction } from '../saved_objects/saved_objects_security_extension';
 import {
   httpRequestEvent,
   savedObjectEvent,
+  sessionCleanupConcurrentLimitEvent,
   sessionCleanupEvent,
   SpaceAuditAction,
   spaceAuditEvent,
   userLoginEvent,
   userLogoutEvent,
+  userSessionConcurrentLimitLogoutEvent,
 } from './audit_events';
 
 describe('#savedObjectEvent', () => {
@@ -50,6 +52,8 @@ describe('#savedObjectEvent', () => {
             "id": "SAVED_OBJECT_ID",
             "type": "dashboard",
           },
+          "unauthorized_spaces": undefined,
+          "unauthorized_types": undefined,
         },
         "message": "User is creating dashboard [id=SAVED_OBJECT_ID]",
       }
@@ -82,6 +86,8 @@ describe('#savedObjectEvent', () => {
             "id": "SAVED_OBJECT_ID",
             "type": "dashboard",
           },
+          "unauthorized_spaces": undefined,
+          "unauthorized_types": undefined,
         },
         "message": "User has created dashboard [id=SAVED_OBJECT_ID]",
       }
@@ -118,6 +124,8 @@ describe('#savedObjectEvent', () => {
             "id": "SAVED_OBJECT_ID",
             "type": "dashboard",
           },
+          "unauthorized_spaces": undefined,
+          "unauthorized_types": undefined,
         },
         "message": "Failed attempt to create dashboard [id=SAVED_OBJECT_ID]",
       }
@@ -225,8 +233,95 @@ describe('#savedObjectEvent', () => {
             "id": "SAVED_OBJECT_ID",
             "type": "dashboard",
           },
+          "unauthorized_spaces": undefined,
+          "unauthorized_types": undefined,
         },
         "message": "User has removed references to dashboard [id=SAVED_OBJECT_ID]",
+      }
+    `);
+  });
+
+  test('can create event with `add_to_spaces` and `delete_from_spaces`', () => {
+    expect(
+      savedObjectEvent({
+        action: AuditAction.UPDATE_OBJECTS_SPACES,
+        savedObject: { type: 'dashboard', id: 'SAVED_OBJECT_ID' },
+        addToSpaces: ['space1', 'space3', 'space5'],
+        deleteFromSpaces: ['space2', 'space4', 'space6'],
+      })
+    ).toMatchInlineSnapshot(`
+      Object {
+        "error": undefined,
+        "event": Object {
+          "action": "saved_object_update_objects_spaces",
+          "category": Array [
+            "database",
+          ],
+          "outcome": "success",
+          "type": Array [
+            "change",
+          ],
+        },
+        "kibana": Object {
+          "add_to_spaces": Array [
+            "space1",
+            "space3",
+            "space5",
+          ],
+          "delete_from_spaces": Array [
+            "space2",
+            "space4",
+            "space6",
+          ],
+          "saved_object": Object {
+            "id": "SAVED_OBJECT_ID",
+            "type": "dashboard",
+          },
+          "unauthorized_spaces": undefined,
+          "unauthorized_types": undefined,
+        },
+        "message": "User has updated spaces of dashboard [id=SAVED_OBJECT_ID]",
+      }
+    `);
+  });
+
+  test('can create event with `requested_spaces` and `requested_types`', () => {
+    expect(
+      savedObjectEvent({
+        action: AuditAction.FIND,
+        savedObject: undefined,
+        unauthorizedSpaces: ['space1', 'space2', 'space3'],
+        unauthorizedTypes: ['x', 'y', 'z'],
+      })
+    ).toMatchInlineSnapshot(`
+      Object {
+        "error": undefined,
+        "event": Object {
+          "action": "saved_object_find",
+          "category": Array [
+            "database",
+          ],
+          "outcome": "success",
+          "type": Array [
+            "access",
+          ],
+        },
+        "kibana": Object {
+          "add_to_spaces": undefined,
+          "delete_from_spaces": undefined,
+          "saved_object": undefined,
+          "unauthorized_spaces": Array [
+            "space1",
+            "space2",
+            "space3",
+          ],
+          "unauthorized_types": Array [
+            "x",
+            "y",
+            "z",
+          ],
+        },
+        "message": "User has accessed saved objects",
       }
     `);
   });
@@ -360,6 +455,63 @@ describe('#userLogoutEvent', () => {
   });
 });
 
+describe('#userSessionConcurrentLimitLogoutEvent', () => {
+  test('creates event with `unknown` outcome', () => {
+    expect(
+      userSessionConcurrentLimitLogoutEvent({
+        username: 'elastic',
+        provider: { name: 'basic1', type: 'basic' },
+        userProfileId: 'uid',
+      })
+    ).toMatchInlineSnapshot(`
+      Object {
+        "event": Object {
+          "action": "user_logout",
+          "category": Array [
+            "authentication",
+          ],
+          "outcome": "unknown",
+        },
+        "kibana": Object {
+          "authentication_provider": "basic1",
+          "authentication_type": "basic",
+        },
+        "message": "User [elastic] is logging out due to exceeded concurrent sessions limit for basic provider [name=basic1]",
+        "user": Object {
+          "id": "uid",
+          "name": "elastic",
+        },
+      }
+    `);
+
+    expect(
+      userSessionConcurrentLimitLogoutEvent({
+        username: 'elastic',
+        provider: { name: 'basic1', type: 'basic' },
+      })
+    ).toMatchInlineSnapshot(`
+      Object {
+        "event": Object {
+          "action": "user_logout",
+          "category": Array [
+            "authentication",
+          ],
+          "outcome": "unknown",
+        },
+        "kibana": Object {
+          "authentication_provider": "basic1",
+          "authentication_type": "basic",
+        },
+        "message": "User [elastic] is logging out due to exceeded concurrent sessions limit for basic provider [name=basic1]",
+        "user": Object {
+          "id": undefined,
+          "name": "elastic",
+        },
+      }
+    `);
+  });
+});
+
 describe('#sessionCleanupEvent', () => {
   test('creates event with `unknown` outcome', () => {
     expect(
@@ -383,6 +535,37 @@ describe('#sessionCleanupEvent', () => {
           "session_id": "sid",
         },
         "message": "Removing invalid or expired session for user [hash=abcdef]",
+        "user": Object {
+          "hash": "abcdef",
+        },
+      }
+    `);
+  });
+});
+
+describe('#sessionCleanupConcurrentLimitEvent', () => {
+  test('creates event with `unknown` outcome', () => {
+    expect(
+      sessionCleanupConcurrentLimitEvent({
+        usernameHash: 'abcdef',
+        sessionId: 'sid',
+        provider: { name: 'basic1', type: 'basic' },
+      })
+    ).toMatchInlineSnapshot(`
+      Object {
+        "event": Object {
+          "action": "session_cleanup",
+          "category": Array [
+            "authentication",
+          ],
+          "outcome": "unknown",
+        },
+        "kibana": Object {
+          "authentication_provider": "basic1",
+          "authentication_type": "basic",
+          "session_id": "sid",
+        },
+        "message": "Removing session for user [hash=abcdef] due to exceeded concurrent sessions limit",
         "user": Object {
           "hash": "abcdef",
         },

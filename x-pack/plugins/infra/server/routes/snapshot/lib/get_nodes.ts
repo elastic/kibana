@@ -41,7 +41,6 @@ const transformAndQueryData = async ({
   const snapshotResponse = transformMetricsApiResponseToSnapshotResponse(
     metricsApiRequest,
     snapshotRequest,
-    source,
     metricsApiResponse
   );
   return copyMissingMetrics(snapshotResponse);

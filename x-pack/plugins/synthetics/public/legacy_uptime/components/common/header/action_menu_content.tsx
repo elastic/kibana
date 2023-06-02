@@ -11,13 +11,13 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useHistory, useRouteMatch } from 'react-router-dom';
 import { useSelector } from 'react-redux';
-import { createExploratoryViewUrl } from '@kbn/observability-plugin/public';
+import { createExploratoryViewUrl } from '@kbn/exploratory-view-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { stringifyUrlParams } from '../../../lib/helper/url_params/stringify_url_params';
 import { useUptimeSettingsContext } from '../../../contexts/uptime_settings_context';
 import { useGetUrlParams } from '../../../hooks';
 import { ToggleAlertFlyoutButton } from '../../overview/alerts/alerts_containers';
 import { MONITOR_ROUTE, SETTINGS_ROUTE } from '../../../../../common/constants';
-import { stringifyUrlParams } from '../../../../apps/synthetics/utils/url_params/stringify_url_params';
 import { InspectorHeaderLink } from './inspector_header_link';
 import { monitorStatusSelector } from '../../../state/selectors';
 import { ManageMonitorsBtn } from './manage_monitors_btn';
@@ -52,7 +52,7 @@ export function ActionMenuContent(): React.ReactElement {
       reportType: 'kpi-over-time',
       allSeries: [
         {
-          dataType: 'synthetics',
+          dataType: 'uptime',
           seriesType: 'area',
           selectedMetricField: 'monitor.duration.us',
           time: { from: dateRangeStart, to: dateRangeEnd },

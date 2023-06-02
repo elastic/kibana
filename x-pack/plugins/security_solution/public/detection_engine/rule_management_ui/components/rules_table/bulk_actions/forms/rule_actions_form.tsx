@@ -13,6 +13,7 @@ import type {
   ActionTypeRegistryContract,
 } from '@kbn/triggers-actions-ui-plugin/public';
 
+import { transformAlertToNormalizedRuleAction } from '../../../../../../../common/detection_engine/transform_actions';
 import type { FormSchema } from '../../../../../../shared_imports';
 import {
   useForm,
@@ -23,45 +24,37 @@ import {
   Field,
 } from '../../../../../../shared_imports';
 import { BulkActionEditType } from '../../../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
-import type {
-  BulkActionEditPayload,
-  ThrottleForBulkActions,
-} from '../../../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
-import { NOTIFICATION_THROTTLE_RULE } from '../../../../../../../common/constants';
+import type { BulkActionEditPayload } from '../../../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
 
 import { BulkEditFormWrapper } from './bulk_edit_form_wrapper';
 import { bulkAddRuleActions as i18n } from '../translations';
 
 import { useKibana } from '../../../../../../common/lib/kibana';
 
-import {
-  ThrottleSelectField,
-  THROTTLE_OPTIONS_FOR_BULK_RULE_ACTIONS,
-} from '../../../../../../detections/components/rules/throttle_select_field';
 import { getAllActionMessageParams } from '../../../../../../detections/pages/detection_engine/rules/helpers';
 
 import { RuleActionsField } from '../../../../../../detections/components/rules/rule_actions_field';
-import { validateRuleActionsField } from '../../../../../../detections/containers/detection_engine/rules/validate_rule_actions_field';
+import { debouncedValidateRuleActionsField } from '../../../../../../detections/containers/detection_engine/rules/validate_rule_actions_field';
 
 const CommonUseField = getUseField({ component: Field });
 
+type BulkActionsRuleAction = RuleAction & Required<Pick<RuleAction, 'frequency'>>;
+
 export interface RuleActionsFormData {
-  throttle: ThrottleForBulkActions;
-  actions: RuleAction[];
+  actions: BulkActionsRuleAction[];
   overwrite: boolean;
 }
 
 const getFormSchema = (
   actionTypeRegistry: ActionTypeRegistryContract
 ): FormSchema<RuleActionsFormData> => ({
-  throttle: {
-    label: i18n.THROTTLE_LABEL,
-    helpText: i18n.THROTTLE_HELP_TEXT,
-  },
   actions: {
     validations: [
       {
-        validator: validateRuleActionsField(actionTypeRegistry),
+        // Debounced validator not explicitly necessary here as the `RuleActionsFormData` form doesn't exhibit the same
+        // behavior as the `ActionsStepRule` form outlined in https://github.com/elastic/kibana/issues/142217, however
+        // additional renders are prevented so using for consistency
+        validator: debouncedValidateRuleActionsField(actionTypeRegistry),
       },
     ],
   },
@@ -72,7 +65,6 @@ const getFormSchema = (
 });
 
 const defaultFormData: RuleActionsFormData = {
-  throttle: NOTIFICATION_THROTTLE_RULE,
   actions: [],
   overwrite: false,
 };
@@ -105,7 +97,7 @@ const RuleActionsFormComponent = ({ rulesCount, onClose, onConfirm }: RuleAction
       return;
     }
 
-    const { actions = [], throttle: throttleToSubmit, overwrite: overwriteValue } = data;
+    const { actions = [], overwrite: overwriteValue } = data;
     const editAction = overwriteValue
       ? BulkActionEditType.set_rule_actions
       : BulkActionEditType.add_rule_actions;
@@ -113,23 +105,10 @@ const RuleActionsFormComponent = ({ rulesCount, onClose, onConfirm }: RuleAction
     onConfirm({
       type: editAction,
       value: {
-        actions: actions.map(({ actionTypeId, ...action }) => action),
-        throttle: throttleToSubmit,
+        actions: actions.map(transformAlertToNormalizedRuleAction),
       },
     });
   }, [form, onConfirm]);
-
-  const throttleFieldComponentProps = useMemo(
-    () => ({
-      idAria: 'bulkEditRulesRuleActionThrottle',
-      'data-test-subj': 'bulkEditRulesRuleActionThrottle',
-      hasNoInitialSelection: false,
-      euiFieldProps: {
-        options: THROTTLE_OPTIONS_FOR_BULK_RULE_ACTIONS,
-      },
-    }),
-    []
-  );
 
   const messageVariables = useMemo(() => getAllActionMessageParams(), []);
 
@@ -153,22 +132,9 @@ const RuleActionsFormComponent = ({ rulesCount, onClose, onConfirm }: RuleAction
         }
       >
         <ul>
-          <li>
-            <FormattedMessage
-              id="xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.edit.addRuleActions.actionFrequencyDetail"
-              defaultMessage="The actions frequency you select below is applied to all actions (both new and existing) for all selected rules."
-            />
-          </li>
           <li>{i18n.RULE_VARIABLES_DETAIL}</li>
         </ul>
       </EuiCallOut>
-      <EuiSpacer size="m" />
-
-      <UseField
-        path="throttle"
-        component={ThrottleSelectField}
-        componentProps={throttleFieldComponentProps}
-      />
       <EuiSpacer size="m" />
 
       <UseField
@@ -176,6 +142,7 @@ const RuleActionsFormComponent = ({ rulesCount, onClose, onConfirm }: RuleAction
         component={RuleActionsField}
         componentProps={{
           messageVariables,
+          summaryMessageVariables: messageVariables,
         }}
       />
       <EuiSpacer size="m" />

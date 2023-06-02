@@ -14,10 +14,18 @@
     "interfaces": [],
     "enums": [],
     "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
     "objects": [
       {
         "parentPluginId": "@kbn/core-overlays-browser-mocks",
-        "id": "def-server.overlayServiceMock",
+        "id": "def-common.overlayServiceMock",
         "type": "Object",
         "tags": [],
         "label": "overlayServiceMock",
@@ -28,7 +36,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-overlays-browser-mocks",
-            "id": "def-server.overlayServiceMock.create",
+            "id": "def-common.overlayServiceMock.create",
             "type": "Function",
             "tags": [],
             "label": "create",
@@ -37,9 +45,9 @@
               "() => jest.Mocked<",
               {
                 "pluginId": "@kbn/utility-types",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-server.PublicMethodsOf",
+                "section": "def-common.PublicMethodsOf",
                 "text": "PublicMethodsOf"
               },
               "<",
@@ -54,7 +62,7 @@
           },
           {
             "parentPluginId": "@kbn/core-overlays-browser-mocks",
-            "id": "def-server.overlayServiceMock.createStartContract",
+            "id": "def-common.overlayServiceMock.createStartContract",
             "type": "Function",
             "tags": [],
             "label": "createStartContract",
@@ -63,9 +71,9 @@
               "() => ",
               {
                 "pluginId": "@kbn/utility-types-jest",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnUtilityTypesJestPluginApi",
-                "section": "def-server.DeeplyMockedKeys",
+                "section": "def-common.DeeplyMockedKeys",
                 "text": "DeeplyMockedKeys"
               },
               "<",
@@ -88,13 +96,5 @@
         "initialIsOpen": false
       }
     ]
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
   }
 }

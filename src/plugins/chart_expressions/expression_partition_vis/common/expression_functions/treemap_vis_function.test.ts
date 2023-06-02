@@ -16,7 +16,7 @@ import {
 import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
 import { Datatable } from '@kbn/expressions-plugin/common/expression_types/specs';
 import { treemapVisFunction } from './treemap_vis_function';
-import { PARTITION_LABELS_VALUE } from '../constants';
+import { PARTITION_LABELS_VALUE, PARTITION_VIS_RENDERER_NAME } from '../constants';
 import { ExecutionContext } from '@kbn/expressions-plugin/common';
 
 describe('interpreter/functions#treemapVis', () => {
@@ -149,5 +149,24 @@ describe('interpreter/functions#treemapVis', () => {
     await fn(context, visConfig, handlers);
 
     expect(loggedTable!).toMatchSnapshot();
+  });
+
+  it('should pass over overrides from variables', async () => {
+    const overrides = {
+      settings: {
+        onBrushEnd: 'ignore',
+      },
+    };
+    const handlers = {
+      variables: { overrides },
+      getExecutionContext: jest.fn(),
+    } as unknown as ExecutionContext;
+    const result = await fn(context, visConfig, handlers);
+
+    expect(result).toEqual({
+      type: 'render',
+      as: PARTITION_VIS_RENDERER_NAME,
+      value: expect.objectContaining({ overrides }),
+    });
   });
 });

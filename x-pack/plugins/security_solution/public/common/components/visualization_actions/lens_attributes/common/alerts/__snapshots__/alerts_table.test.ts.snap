@@ -1,0 +1,463 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`getAlertsTableLensAttributes should render with extra options - breakdownField 1`] = `
+Object {
+  "description": "",
+  "references": Array [
+    Object {
+      "id": "security-solution-my-test",
+      "name": "indexpattern-datasource-layer-mockLayerId",
+      "type": "index-pattern",
+    },
+  ],
+  "state": Object {
+    "adHocDataViews": Object {},
+    "datasourceStates": Object {
+      "formBased": Object {
+        "layers": Object {
+          "mockLayerId": Object {
+            "columnOrder": Array [
+              "mockTopValuesOfStackByFieldColumnId",
+              "mockTopValuesOfBreakdownFieldColumnId",
+              "mockCountColumnId",
+            ],
+            "columns": Object {
+              "mockCountColumnId": Object {
+                "dataType": "number",
+                "isBucketed": false,
+                "label": "Count of agent.type",
+                "operationType": "count",
+                "params": Object {
+                  "emptyAsNull": true,
+                },
+                "scale": "ratio",
+                "sourceField": "agent.type",
+              },
+              "mockTopValuesOfBreakdownFieldColumnId": Object {
+                "dataType": "string",
+                "isBucketed": true,
+                "label": "Top values of agent.type",
+                "operationType": "terms",
+                "params": Object {
+                  "exclude": Array [],
+                  "excludeIsRegex": false,
+                  "include": Array [],
+                  "includeIsRegex": false,
+                  "missingBucket": false,
+                  "orderBy": Object {
+                    "columnId": "mockCountColumnId",
+                    "type": "column",
+                  },
+                  "orderDirection": "desc",
+                  "otherBucket": true,
+                  "parentFormat": Object {
+                    "id": "terms",
+                  },
+                  "size": 1000,
+                },
+                "scale": "ordinal",
+                "sourceField": "agent.type",
+              },
+              "mockTopValuesOfStackByFieldColumnId": Object {
+                "dataType": "string",
+                "isBucketed": true,
+                "label": "Top values of event.category",
+                "operationType": "terms",
+                "params": Object {
+                  "exclude": Array [],
+                  "excludeIsRegex": false,
+                  "include": Array [],
+                  "includeIsRegex": false,
+                  "missingBucket": false,
+                  "orderBy": Object {
+                    "columnId": "mockCountColumnId",
+                    "type": "column",
+                  },
+                  "orderDirection": "desc",
+                  "otherBucket": true,
+                  "parentFormat": Object {
+                    "id": "terms",
+                  },
+                  "size": 1000,
+                },
+                "scale": "ordinal",
+                "sourceField": "event.category",
+              },
+            },
+            "incompleteColumns": Object {},
+            "sampling": 1,
+          },
+        },
+      },
+      "textBased": Object {
+        "layers": Object {},
+      },
+    },
+    "filters": Array [
+      Object {
+        "meta": Object {
+          "alias": null,
+          "disabled": false,
+          "key": "_index",
+          "negate": false,
+          "params": Array [
+            "signal-index",
+          ],
+          "type": "phrases",
+        },
+        "query": Object {
+          "bool": Object {
+            "minimum_should_match": 1,
+            "should": Array [
+              Object {
+                "match_phrase": Object {
+                  "_index": "signal-index",
+                },
+              },
+            ],
+          },
+        },
+      },
+      Object {
+        "meta": Object {
+          "alias": null,
+          "disabled": false,
+          "key": "host.id",
+          "negate": false,
+          "params": Object {
+            "query": "123",
+          },
+          "type": "phrase",
+        },
+        "query": Object {
+          "match_phrase": Object {
+            "host.id": "123",
+          },
+        },
+      },
+    ],
+    "internalReferences": Array [],
+    "query": Object {
+      "language": "kql",
+      "query": "host.name: *",
+    },
+    "visualization": Object {
+      "columns": Array [
+        Object {
+          "columnId": "mockTopValuesOfStackByFieldColumnId",
+          "isTransposed": false,
+          "width": 362,
+        },
+        Object {
+          "columnId": "mockCountColumnId",
+          "isTransposed": false,
+        },
+        Object {
+          "columnId": "mockTopValuesOfBreakdownFieldColumnId",
+          "isTransposed": false,
+        },
+      ],
+      "layerId": "mockLayerId",
+      "layerType": "data",
+    },
+  },
+  "title": "Alerts",
+  "visualizationType": "lnsDatatable",
+}
+`;
+
+exports[`getAlertsTableLensAttributes should render with extra options - filters 1`] = `
+Object {
+  "description": "",
+  "references": Array [
+    Object {
+      "id": "security-solution-my-test",
+      "name": "indexpattern-datasource-layer-mockLayerId",
+      "type": "index-pattern",
+    },
+  ],
+  "state": Object {
+    "adHocDataViews": Object {},
+    "datasourceStates": Object {
+      "formBased": Object {
+        "layers": Object {
+          "mockLayerId": Object {
+            "columnOrder": Array [
+              "mockTopValuesOfStackByFieldColumnId",
+              "mockCountColumnId",
+            ],
+            "columns": Object {
+              "mockCountColumnId": Object {
+                "dataType": "number",
+                "isBucketed": false,
+                "label": "Count of event.category",
+                "operationType": "count",
+                "params": Object {
+                  "emptyAsNull": true,
+                },
+                "scale": "ratio",
+                "sourceField": "event.category",
+              },
+              "mockTopValuesOfStackByFieldColumnId": Object {
+                "dataType": "string",
+                "isBucketed": true,
+                "label": "Top values of event.category",
+                "operationType": "terms",
+                "params": Object {
+                  "exclude": Array [],
+                  "excludeIsRegex": false,
+                  "include": Array [],
+                  "includeIsRegex": false,
+                  "missingBucket": false,
+                  "orderBy": Object {
+                    "columnId": "mockCountColumnId",
+                    "type": "column",
+                  },
+                  "orderDirection": "desc",
+                  "otherBucket": true,
+                  "parentFormat": Object {
+                    "id": "terms",
+                  },
+                  "size": 1000,
+                },
+                "scale": "ordinal",
+                "sourceField": "event.category",
+              },
+            },
+            "incompleteColumns": Object {},
+            "sampling": 1,
+          },
+        },
+      },
+      "textBased": Object {
+        "layers": Object {},
+      },
+    },
+    "filters": Array [
+      Object {
+        "meta": Object {
+          "alias": null,
+          "disabled": false,
+          "key": "_index",
+          "negate": false,
+          "params": Array [
+            ".alerts-security.alerts-default",
+          ],
+          "type": "phrases",
+        },
+        "query": Object {
+          "bool": Object {
+            "minimum_should_match": 1,
+            "should": Array [
+              Object {
+                "match_phrase": Object {
+                  "_index": ".alerts-security.alerts-default",
+                },
+              },
+            ],
+          },
+        },
+      },
+      Object {
+        "meta": Object {
+          "alias": null,
+          "disabled": false,
+          "key": "_index",
+          "negate": false,
+          "params": Array [
+            "signal-index",
+          ],
+          "type": "phrases",
+        },
+        "query": Object {
+          "bool": Object {
+            "minimum_should_match": 1,
+            "should": Array [
+              Object {
+                "match_phrase": Object {
+                  "_index": "signal-index",
+                },
+              },
+            ],
+          },
+        },
+      },
+      Object {
+        "meta": Object {
+          "alias": null,
+          "disabled": false,
+          "key": "host.id",
+          "negate": false,
+          "params": Object {
+            "query": "123",
+          },
+          "type": "phrase",
+        },
+        "query": Object {
+          "match_phrase": Object {
+            "host.id": "123",
+          },
+        },
+      },
+    ],
+    "internalReferences": Array [],
+    "query": Object {
+      "language": "kql",
+      "query": "host.name: *",
+    },
+    "visualization": Object {
+      "columns": Array [
+        Object {
+          "columnId": "mockTopValuesOfStackByFieldColumnId",
+          "isTransposed": false,
+          "width": 362,
+        },
+        Object {
+          "columnId": "mockCountColumnId",
+          "isTransposed": false,
+        },
+      ],
+      "layerId": "mockLayerId",
+      "layerType": "data",
+    },
+  },
+  "title": "Alerts",
+  "visualizationType": "lnsDatatable",
+}
+`;
+
+exports[`getAlertsTableLensAttributes should render without extra options 1`] = `
+Object {
+  "description": "",
+  "references": Array [
+    Object {
+      "id": "security-solution-my-test",
+      "name": "indexpattern-datasource-layer-mockLayerId",
+      "type": "index-pattern",
+    },
+  ],
+  "state": Object {
+    "adHocDataViews": Object {},
+    "datasourceStates": Object {
+      "formBased": Object {
+        "layers": Object {
+          "mockLayerId": Object {
+            "columnOrder": Array [
+              "mockTopValuesOfStackByFieldColumnId",
+              "mockCountColumnId",
+            ],
+            "columns": Object {
+              "mockCountColumnId": Object {
+                "dataType": "number",
+                "isBucketed": false,
+                "label": "Count of event.category",
+                "operationType": "count",
+                "params": Object {
+                  "emptyAsNull": true,
+                },
+                "scale": "ratio",
+                "sourceField": "event.category",
+              },
+              "mockTopValuesOfStackByFieldColumnId": Object {
+                "dataType": "string",
+                "isBucketed": true,
+                "label": "Top values of event.category",
+                "operationType": "terms",
+                "params": Object {
+                  "exclude": Array [],
+                  "excludeIsRegex": false,
+                  "include": Array [],
+                  "includeIsRegex": false,
+                  "missingBucket": false,
+                  "orderBy": Object {
+                    "columnId": "mockCountColumnId",
+                    "type": "column",
+                  },
+                  "orderDirection": "desc",
+                  "otherBucket": true,
+                  "parentFormat": Object {
+                    "id": "terms",
+                  },
+                  "size": 1000,
+                },
+                "scale": "ordinal",
+                "sourceField": "event.category",
+              },
+            },
+            "incompleteColumns": Object {},
+            "sampling": 1,
+          },
+        },
+      },
+      "textBased": Object {
+        "layers": Object {},
+      },
+    },
+    "filters": Array [
+      Object {
+        "meta": Object {
+          "alias": null,
+          "disabled": false,
+          "key": "_index",
+          "negate": false,
+          "params": Array [
+            "signal-index",
+          ],
+          "type": "phrases",
+        },
+        "query": Object {
+          "bool": Object {
+            "minimum_should_match": 1,
+            "should": Array [
+              Object {
+                "match_phrase": Object {
+                  "_index": "signal-index",
+                },
+              },
+            ],
+          },
+        },
+      },
+      Object {
+        "meta": Object {
+          "alias": null,
+          "disabled": false,
+          "key": "host.id",
+          "negate": false,
+          "params": Object {
+            "query": "123",
+          },
+          "type": "phrase",
+        },
+        "query": Object {
+          "match_phrase": Object {
+            "host.id": "123",
+          },
+        },
+      },
+    ],
+    "internalReferences": Array [],
+    "query": Object {
+      "language": "kql",
+      "query": "host.name: *",
+    },
+    "visualization": Object {
+      "columns": Array [
+        Object {
+          "columnId": "mockTopValuesOfStackByFieldColumnId",
+          "isTransposed": false,
+          "width": 362,
+        },
+        Object {
+          "columnId": "mockCountColumnId",
+          "isTransposed": false,
+        },
+      ],
+      "layerId": "mockLayerId",
+      "layerType": "data",
+    },
+  },
+  "title": "Alerts",
+  "visualizationType": "lnsDatatable",
+}
+`;

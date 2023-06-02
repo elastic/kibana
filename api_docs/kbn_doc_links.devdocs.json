@@ -300,7 +300,7 @@
             "label": "enterpriseSearch",
             "description": [],
             "signature": [
-              "{ readonly apiKeys: string; readonly bulkApi: string; readonly configuration: string; readonly connectors: string; readonly connectorsMongoDB: string; readonly connectorsMySQL: string; readonly connectorsWorkplaceSearch: string; readonly crawlerManaging: string; readonly crawlerOverview: string; readonly deployTrainedModels: string; readonly documentLevelSecurity: string; readonly ingestPipelines: string; readonly languageAnalyzers: string; readonly languageClients: string; readonly licenseManagement: string; readonly machineLearningStart: string; readonly mailService: string; readonly start: string; readonly syncRules: string; readonly troubleshootSetup: string; readonly usersAccess: string; }"
+              "{ readonly apiKeys: string; readonly behavioralAnalytics: string; readonly behavioralAnalyticsCORS: string; readonly behavioralAnalyticsEvents: string; readonly buildConnector: string; readonly bulkApi: string; readonly configuration: string; readonly connectors: string; readonly connectorsAzureBlobStorage: string; readonly connectorsClients: string; readonly connectorsConfluence: string; readonly connectorsGoogleCloudStorage: string; readonly connectorsJira: string; readonly connectorsMicrosoftSQL: string; readonly connectorsMongoDB: string; readonly connectorsMySQL: string; readonly connectorsNative: string; readonly connectorsNetworkDrive: string; readonly connectorsOracle: string; readonly connectorsPostgreSQL: string; readonly connectorsS3: string; readonly connectorsSharepoint: string; readonly connectorsWorkplaceSearch: string; readonly crawlerExtractionRules: string; readonly crawlerManaging: string; readonly crawlerOverview: string; readonly deployTrainedModels: string; readonly documentLevelSecurity: string; readonly elser: string; readonly engines: string; readonly indexApi: string; readonly ingestionApis: string; readonly ingestPipelines: string; readonly languageAnalyzers: string; readonly languageClients: string; readonly licenseManagement: string; readonly machineLearningStart: string; readonly mailService: string; readonly mlDocumentEnrichment: string; readonly searchApplications: string; readonly searchTemplates: string; readonly start: string; readonly syncRules: string; readonly troubleshootSetup: string; readonly usersAccess: string; }"
             ],
             "path": "packages/kbn-doc-links/src/types.ts",
             "deprecated": false,
@@ -398,7 +398,7 @@
             "label": "aggs",
             "description": [],
             "signature": [
-              "{ readonly composite: string; readonly composite_missing_bucket: string; readonly date_histogram: string; readonly date_range: string; readonly date_format_pattern: string; readonly filter: string; readonly filters: string; readonly geohash_grid: string; readonly histogram: string; readonly ip_range: string; readonly range: string; readonly significant_terms: string; readonly terms: string; readonly terms_doc_count_error: string; readonly rare_terms: string; readonly avg: string; readonly avg_bucket: string; readonly max_bucket: string; readonly min_bucket: string; readonly sum_bucket: string; readonly cardinality: string; readonly count: string; readonly cumulative_sum: string; readonly derivative: string; readonly geo_bounds: string; readonly geo_centroid: string; readonly max: string; readonly median: string; readonly min: string; readonly moving_avg: string; readonly percentile_ranks: string; readonly serial_diff: string; readonly std_dev: string; readonly sum: string; readonly top_hits: string; }"
+              "{ readonly composite: string; readonly composite_missing_bucket: string; readonly date_histogram: string; readonly date_range: string; readonly date_format_pattern: string; readonly filter: string; readonly filters: string; readonly geohash_grid: string; readonly histogram: string; readonly ip_range: string; readonly range: string; readonly significant_terms: string; readonly terms: string; readonly terms_doc_count_error: string; readonly rare_terms: string; readonly avg: string; readonly avg_bucket: string; readonly max_bucket: string; readonly min_bucket: string; readonly sum_bucket: string; readonly cardinality: string; readonly count: string; readonly cumulative_sum: string; readonly derivative: string; readonly geo_bounds: string; readonly geo_centroid: string; readonly max: string; readonly median: string; readonly min: string; readonly moving_avg: string; readonly percentile_ranks: string; readonly serial_diff: string; readonly std_dev: string; readonly sum: string; readonly top_hits: string; readonly change_point: string; }"
             ],
             "path": "packages/kbn-doc-links/src/types.ts",
             "deprecated": false,
@@ -532,7 +532,7 @@
             "label": "siem",
             "description": [],
             "signature": [
-              "{ readonly privileges: string; readonly guide: string; readonly gettingStarted: string; readonly ml: string; readonly ruleChangeLog: string; readonly detectionsReq: string; readonly networkMap: string; readonly troubleshootGaps: string; readonly ruleApiOverview: string; }"
+              "{ readonly privileges: string; readonly guide: string; readonly gettingStarted: string; readonly ml: string; readonly ruleChangeLog: string; readonly detectionsReq: string; readonly networkMap: string; readonly troubleshootGaps: string; readonly ruleApiOverview: string; readonly configureAlertSuppression: string; }"
             ],
             "path": "packages/kbn-doc-links/src/types.ts",
             "deprecated": false,
@@ -546,7 +546,7 @@
             "label": "securitySolution",
             "description": [],
             "signature": [
-              "{ readonly trustedApps: string; readonly eventFilters: string; readonly blocklist: string; readonly endpointArtifacts: string; readonly policyResponseTroubleshooting: { full_disk_access: string; macos_system_ext: string; linux_deadlock: string; }; readonly packageActionTroubleshooting: { es_connection: string; }; readonly threatIntelInt: string; readonly responseActions: string; readonly configureEndpointIntegrationPolicy: string; readonly exceptions: { value_lists: string; }; readonly privileges: string; }"
+              "{ readonly trustedApps: string; readonly eventFilters: string; readonly blocklist: string; readonly endpointArtifacts: string; readonly policyResponseTroubleshooting: { full_disk_access: string; macos_system_ext: string; linux_deadlock: string; }; readonly packageActionTroubleshooting: { es_connection: string; }; readonly threatIntelInt: string; readonly responseActions: string; readonly configureEndpointIntegrationPolicy: string; readonly exceptions: { value_lists: string; }; readonly privileges: string; readonly manageDetectionRules: string; }"
             ],
             "path": "packages/kbn-doc-links/src/types.ts",
             "deprecated": false,
@@ -644,7 +644,7 @@
             "label": "apis",
             "description": [],
             "signature": [
-              "{ readonly bulkIndexAlias: string; readonly byteSizeUnits: string; readonly createAutoFollowPattern: string; readonly createFollower: string; readonly createIndex: string; readonly createSnapshotLifecyclePolicy: string; readonly createRoleMapping: string; readonly createRoleMappingTemplates: string; readonly createRollupJobsRequest: string; readonly createApiKey: string; readonly createPipeline: string; readonly createTransformRequest: string; readonly cronExpressions: string; readonly executeWatchActionModes: string; readonly indexExists: string; readonly multiSearch: string; readonly openIndex: string; readonly putComponentTemplate: string; readonly painlessExecute: string; readonly painlessExecuteAPIContexts: string; readonly putComponentTemplateMetadata: string; readonly putSnapshotLifecyclePolicy: string; readonly putIndexTemplateV1: string; readonly putWatch: string; readonly searchPreference: string; readonly simulatePipeline: string; readonly timeUnits: string; readonly unfreezeIndex: string; readonly updateTransform: string; }"
+              "{ readonly bulkIndexAlias: string; readonly byteSizeUnits: string; readonly createAutoFollowPattern: string; readonly createFollower: string; readonly createIndex: string; readonly createSnapshotLifecyclePolicy: string; readonly createRoleMapping: string; readonly createRoleMappingTemplates: string; readonly createRollupJobsRequest: string; readonly createApiKey: string; readonly createPipeline: string; readonly createTransformRequest: string; readonly cronExpressions: string; readonly executeWatchActionModes: string; readonly indexExists: string; readonly multiSearch: string; readonly openIndex: string; readonly putComponentTemplate: string; readonly painlessExecute: string; readonly painlessExecuteAPIContexts: string; readonly putComponentTemplateMetadata: string; readonly putSnapshotLifecyclePolicy: string; readonly putIndexTemplateV1: string; readonly putWatch: string; readonly restApis: string; readonly searchPreference: string; readonly securityApis: string; readonly simulatePipeline: string; readonly timeUnits: string; readonly unfreezeIndex: string; readonly updateTransform: string; }"
             ],
             "path": "packages/kbn-doc-links/src/types.ts",
             "deprecated": false,
@@ -658,7 +658,7 @@
             "label": "observability",
             "description": [],
             "signature": [
-              "{ readonly guide: string; readonly infrastructureThreshold: string; readonly logsThreshold: string; readonly metricsThreshold: string; readonly monitorStatus: string; readonly monitorUptime: string; readonly tlsCertificate: string; readonly uptimeDurationAnomaly: string; readonly monitorLogs: string; readonly analyzeMetrics: string; readonly monitorUptimeSynthetics: string; readonly userExperience: string; readonly createAlerts: string; readonly syntheticsCommandReference: string; readonly syntheticsProjectMonitors: string; }"
+              "{ readonly guide: string; readonly infrastructureThreshold: string; readonly logsThreshold: string; readonly metricsThreshold: string; readonly monitorStatus: string; readonly monitorUptime: string; readonly tlsCertificate: string; readonly uptimeDurationAnomaly: string; readonly monitorLogs: string; readonly analyzeMetrics: string; readonly monitorUptimeSynthetics: string; readonly userExperience: string; readonly createAlerts: string; readonly syntheticsCommandReference: string; readonly syntheticsProjectMonitors: string; readonly syntheticsMigrateFromIntegration: string; }"
             ],
             "path": "packages/kbn-doc-links/src/types.ts",
             "deprecated": false,
@@ -672,7 +672,21 @@
             "label": "alerting",
             "description": [],
             "signature": [
-              "{ [x: string]: string; }"
+              "{ readonly guide: string; readonly actionTypes: string; readonly apmRules: string; readonly emailAction: string; readonly emailActionConfig: string; readonly emailExchangeClientSecretConfig: string; readonly emailExchangeClientIdConfig: string; readonly generalSettings: string; readonly indexAction: string; readonly esQuery: string; readonly indexThreshold: string; readonly maintenanceWindows: string; readonly pagerDutyAction: string; readonly preconfiguredConnectors: string; readonly preconfiguredAlertHistoryConnector: string; readonly serviceNowAction: string; readonly serviceNowSIRAction: string; readonly setupPrerequisites: string; readonly slackAction: string; readonly slackApiAction: string; readonly teamsAction: string; readonly connectors: string; }"
+            ],
+            "path": "packages/kbn-doc-links/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/doc-links",
+            "id": "def-common.DocLinks.taskManager",
+            "type": "Object",
+            "tags": [],
+            "label": "taskManager",
+            "description": [],
+            "signature": [
+              "{ readonly healthMonitoring: string; }"
             ],
             "path": "packages/kbn-doc-links/src/types.ts",
             "deprecated": false,
@@ -686,7 +700,7 @@
             "label": "maps",
             "description": [],
             "signature": [
-              "{ readonly guide: string; readonly importGeospatialPrivileges: string; readonly gdalTutorial: string; readonly termJoinsExample: string; }"
+              "{ readonly connectToEms: string; readonly guide: string; readonly importGeospatialPrivileges: string; readonly gdalTutorial: string; readonly termJoinsExample: string; }"
             ],
             "path": "packages/kbn-doc-links/src/types.ts",
             "deprecated": false,
@@ -826,7 +840,7 @@
             "label": "fleet",
             "description": [],
             "signature": [
-              "{ readonly beatsAgentComparison: string; readonly guide: string; readonly fleetServer: string; readonly fleetServerAddFleetServer: string; readonly settings: string; readonly settingsFleetServerHostSettings: string; readonly settingsFleetServerProxySettings: string; readonly troubleshooting: string; readonly elasticAgent: string; readonly datastreams: string; readonly datastreamsILM: string; readonly datastreamsNamingScheme: string; readonly installElasticAgent: string; readonly installElasticAgentStandalone: string; readonly packageSignatures: string; readonly upgradeElasticAgent: string; readonly learnMoreBlog: string; readonly apiKeysLearnMore: string; readonly onPremRegistry: string; readonly secureLogstash: string; readonly agentPolicy: string; }"
+              "{ readonly beatsAgentComparison: string; readonly guide: string; readonly fleetServer: string; readonly fleetServerAddFleetServer: string; readonly settings: string; readonly settingsFleetServerHostSettings: string; readonly settingsFleetServerProxySettings: string; readonly troubleshooting: string; readonly elasticAgent: string; readonly datastreams: string; readonly datastreamsILM: string; readonly datastreamsNamingScheme: string; readonly datastreamsManualRollover: string; readonly installElasticAgent: string; readonly installElasticAgentStandalone: string; readonly packageSignatures: string; readonly upgradeElasticAgent: string; readonly learnMoreBlog: string; readonly apiKeysLearnMore: string; readonly onPremRegistry: string; readonly secureLogstash: string; readonly agentPolicy: string; readonly api: string; readonly uninstallAgent: string; }"
             ],
             "path": "packages/kbn-doc-links/src/types.ts",
             "deprecated": false,
@@ -854,7 +868,7 @@
             "label": "clients",
             "description": [],
             "signature": [
-              "{ readonly guide: string; readonly goIndex: string; readonly goOverview: string; readonly javaBasicAuthentication: string; readonly javaIndex: string; readonly javaInstallation: string; readonly javaIntroduction: string; readonly javaRestLow: string; readonly jsClientConnecting: string; readonly jsIntro: string; readonly netGuide: string; readonly netIntroduction: string; readonly netNest: string; readonly netSingleNode: string; readonly perlGuide: string; readonly phpGuide: string; readonly phpConnecting: string; readonly phpInstallation: string; readonly phpOverview: string; readonly pythonAuthentication: string; readonly pythonGuide: string; readonly pythonOverview: string; readonly rubyAuthentication: string; readonly rubyOverview: string; readonly rustGuide: string; readonly rustOverview: string; }"
+              "{ readonly guide: string; readonly goIndex: string; readonly goOverview: string; readonly javaBasicAuthentication: string; readonly javaIndex: string; readonly javaInstallation: string; readonly javaIntroduction: string; readonly javaRestLow: string; readonly jsAdvancedConfig: string; readonly jsApiReference: string; readonly jsBasicConfig: string; readonly jsClientConnecting: string; readonly jsIntro: string; readonly netGuide: string; readonly netIntroduction: string; readonly netNest: string; readonly netSingleNode: string; readonly phpGuide: string; readonly phpConnecting: string; readonly phpInstallation: string; readonly phpOverview: string; readonly pythonAuthentication: string; readonly pythonGuide: string; readonly pythonOverview: string; readonly rubyAuthentication: string; readonly rubyAdvancedConfig: string; readonly rubyBasicConfig: string; readonly rubyExamples: string; readonly rubyOverview: string; readonly rustGuide: string; readonly rustOverview: string; }"
             ],
             "path": "packages/kbn-doc-links/src/types.ts",
             "deprecated": false,
@@ -911,6 +925,34 @@
             "description": [],
             "signature": [
               "{ readonly appSearch: string; readonly elasticsearch: string; }"
+            ],
+            "path": "packages/kbn-doc-links/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/doc-links",
+            "id": "def-common.DocLinks.serverlessSearch",
+            "type": "Object",
+            "tags": [],
+            "label": "serverlessSearch",
+            "description": [],
+            "signature": [
+              "{ readonly integrations: string; }"
+            ],
+            "path": "packages/kbn-doc-links/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/doc-links",
+            "id": "def-common.DocLinks.synthetics",
+            "type": "Object",
+            "tags": [],
+            "label": "synthetics",
+            "description": [],
+            "signature": [
+              "{ readonly featureRoles: string; }"
             ],
             "path": "packages/kbn-doc-links/src/types.ts",
             "deprecated": false,

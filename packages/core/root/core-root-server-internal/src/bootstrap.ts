@@ -7,9 +7,16 @@
  */
 
 import chalk from 'chalk';
+import { firstValueFrom } from 'rxjs';
+import { getPackages } from '@kbn/repo-packages';
 import { CliArgs, Env, RawConfigService } from '@kbn/config';
 import { CriticalError } from '@kbn/core-base-server-internal';
+import { resolve } from 'path';
+import { getConfigDirectory } from '@kbn/utils';
+import { statSync } from 'fs';
+import { VALID_SERVERLESS_PROJECT_TYPES } from './root/serverless_config';
 import { Root } from './root';
+import { MIGRATION_EXCEPTION_CODE } from './constants';
 
 interface BootstrapArgs {
   configs: string[];
@@ -34,15 +41,41 @@ export async function bootstrap({ configs, cliArgs, applyConfigOverrides }: Boot
   // and as `REPO_ROOT` is initialized on the fly when importing `dev-utils` and requires
   // the `fs` package, it causes failures. This is why we use a dynamic `require` here.
   // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const { REPO_ROOT } = require('@kbn/utils');
+  const { REPO_ROOT } = require('@kbn/repo-info');
 
-  const env = Env.createDefault(REPO_ROOT, {
+  let env = Env.createDefault(REPO_ROOT, {
     configs,
     cliArgs,
+    repoPackages: getPackages(REPO_ROOT),
   });
 
-  const rawConfigService = new RawConfigService(env.configs, applyConfigOverrides);
+  let rawConfigService = new RawConfigService(env.configs, applyConfigOverrides);
   rawConfigService.loadConfig();
+
+  // Hack to load the extra serverless config files if `serverless: {projectType}` is found in it.
+  const rawConfig = await firstValueFrom(rawConfigService.getConfig$());
+  const serverlessProjectType = rawConfig?.serverless;
+  if (
+    typeof serverlessProjectType === 'string' &&
+    VALID_SERVERLESS_PROJECT_TYPES.includes(serverlessProjectType)
+  ) {
+    const extendedConfigs = [
+      ...['serverless.yml', `serverless.${serverlessProjectType}.yml`]
+        .map((name) => resolve(getConfigDirectory(), name))
+        .filter(configFileExists),
+      ...configs,
+    ];
+
+    env = Env.createDefault(REPO_ROOT, {
+      configs: extendedConfigs,
+      cliArgs: { ...cliArgs, serverless: true },
+      repoPackages: getPackages(REPO_ROOT),
+    });
+
+    rawConfigService.stop();
+    rawConfigService = new RawConfigService(env.configs, applyConfigOverrides);
+    rawConfigService.loadConfig();
+  }
 
   const root = new Root(rawConfigService, env, onRootShutdown);
 
@@ -112,14 +145,28 @@ export async function bootstrap({ configs, cliArgs, applyConfigOverrides }: Boot
 
 function onRootShutdown(reason?: any) {
   if (reason !== undefined) {
-    // There is a chance that logger wasn't configured properly and error that
-    // that forced root to shut down could go unnoticed. To prevent this we always
-    // mirror such fatal errors in standard output with `console.error`.
-    // eslint-disable-next-line no-console
-    console.error(`\n${chalk.white.bgRed(' FATAL ')} ${reason}\n`);
+    if (reason.code !== MIGRATION_EXCEPTION_CODE) {
+      // There is a chance that logger wasn't configured properly and error that
+      // that forced root to shut down could go unnoticed. To prevent this we always
+      // mirror such fatal errors in standard output with `console.error`.
+      // eslint-disable-next-line no-console
+      console.error(`\n${chalk.white.bgRed(' FATAL ')} ${reason}\n`);
+    }
 
     process.exit(reason instanceof CriticalError ? reason.processExitCode : 1);
   }
 
   process.exit(0);
+}
+
+function configFileExists(path: string) {
+  try {
+    return statSync(path).isFile();
+  } catch (err) {
+    if (err.code === 'ENOENT') {
+      return false;
+    }
+
+    throw err;
+  }
 }

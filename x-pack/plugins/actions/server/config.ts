@@ -16,6 +16,9 @@ export enum EnabledActionTypes {
   Any = '*',
 }
 
+const MAX_MAX_ATTEMPTS = 10;
+const MIN_MAX_ATTEMPTS = 1;
+
 const preconfiguredActionSchema = schema.object({
   name: schema.string({ minLength: 1 }),
   actionTypeId: schema.string({ minLength: 1 }),
@@ -55,6 +58,11 @@ const customHostSettingsSchema = schema.object({
 });
 
 export type CustomHostSettings = TypeOf<typeof customHostSettingsSchema>;
+
+const connectorTypeSchema = schema.object({
+  id: schema.string(),
+  maxAttempts: schema.maybe(schema.number({ min: MIN_MAX_ATTEMPTS, max: MAX_MAX_ATTEMPTS })),
+});
 
 export const configSchema = schema.object({
   allowedHosts: schema.arrayOf(
@@ -105,18 +113,19 @@ export const configSchema = schema.object({
   maxResponseContentLength: schema.byteSize({ defaultValue: '1mb' }),
   responseTimeout: schema.duration({ defaultValue: '60s' }),
   customHostSettings: schema.maybe(schema.arrayOf(customHostSettingsSchema)),
-  cleanupFailedExecutionsTask: schema.object({
-    enabled: schema.boolean({ defaultValue: true }),
-    cleanupInterval: schema.duration({ defaultValue: '5m' }),
-    idleInterval: schema.duration({ defaultValue: '1h' }),
-    pageSize: schema.number({ defaultValue: 100 }),
-  }),
   microsoftGraphApiUrl: schema.maybe(schema.string()),
   email: schema.maybe(
     schema.object({
       domain_allowlist: schema.arrayOf(schema.string()),
     })
   ),
+  run: schema.maybe(
+    schema.object({
+      maxAttempts: schema.maybe(schema.number({ min: MIN_MAX_ATTEMPTS, max: MAX_MAX_ATTEMPTS })),
+      connectorTypeOverrides: schema.maybe(schema.arrayOf(connectorTypeSchema)),
+    })
+  ),
+  enableFooterInEmail: schema.boolean({ defaultValue: true }),
 });
 
 export type ActionsConfig = TypeOf<typeof configSchema>;

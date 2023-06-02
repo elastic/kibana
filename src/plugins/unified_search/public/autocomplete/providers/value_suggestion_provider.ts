@@ -12,7 +12,7 @@ import { memoize } from 'lodash';
 import { UI_SETTINGS, ValueSuggestionsMethod } from '@kbn/data-plugin/common';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import type { TimefilterSetup } from '@kbn/data-plugin/public';
-import { AutocompleteUsageCollector } from '../collectors';
+import type { AutocompleteUsageCollector } from '../collectors';
 
 export type ValueSuggestionsGetFn = (args: ValueSuggestionsGetFnArgs) => Promise<any[]>;
 
@@ -65,7 +65,7 @@ export const setupValueSuggestionProvider = (
     ) => {
       usageCollector?.trackRequest();
       return core.http
-        .fetch<T>(`/api/kibana/suggestions/values/${index}`, {
+        .fetch<T>(`/internal/kibana/suggestions/values/${index}`, {
           method: 'POST',
           body: JSON.stringify({
             query,
@@ -75,6 +75,7 @@ export const setupValueSuggestionProvider = (
             method,
           }),
           signal,
+          version: '1',
         })
         .then((r) => {
           usageCollector?.trackResult();
@@ -107,7 +108,7 @@ export const setupValueSuggestionProvider = (
     } else if (
       !shouldSuggestValues ||
       !field.aggregatable ||
-      field.type !== 'string' ||
+      (field.type !== 'string' && field.type !== 'ip') ||
       isVersionFieldType // suggestions don't work for version fields
     ) {
       return [];

@@ -22,6 +22,7 @@ import {
   getOpenTooltips,
   getHasLockedTooltips,
   getGeoFieldNames,
+  getExecutionContext,
 } from '../../../selectors/map_selectors';
 import { getDrawMode } from '../../../selectors/ui_selectors';
 import { DRAW_MODE } from '../../../../common/constants';
@@ -36,6 +37,7 @@ function mapStateToProps(state: MapStoreState) {
       getDrawMode(state) === DRAW_MODE.DRAW_SHAPES || getDrawMode(state) === DRAW_MODE.DRAW_POINTS,
     openTooltips: getOpenTooltips(state),
     geoFieldNames: getGeoFieldNames(state),
+    executionContext: getExecutionContext(state),
   };
 }
 

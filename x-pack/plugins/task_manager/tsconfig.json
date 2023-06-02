@@ -1,9 +1,7 @@
 {
   "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "./target/types",
-    "emitDeclarationOnly": true,
-    "declaration": true,
+    "outDir": "target/types",
   },
   "include": [
     "server/**/*",
@@ -11,8 +9,19 @@
     "server/**/*.json",
   ],
   "kbn_references": [
-    { "path": "../../../src/core/tsconfig.json" },
-    { "path": "../../../src/plugins/kibana_utils/tsconfig.json" },
-    { "path": "../../../src/plugins/usage_collection/tsconfig.json" },
+    "@kbn/alerting-state-types",
+    "@kbn/core",
+    "@kbn/usage-collection-plugin",
+    "@kbn/config-schema",
+    "@kbn/config",
+    "@kbn/utility-types",
+    "@kbn/safer-lodash-set",
+    "@kbn/es-types",
+    "@kbn/apm-utils",
+    "@kbn/core-saved-objects-common",
+    "@kbn/core-saved-objects-utils-server"
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

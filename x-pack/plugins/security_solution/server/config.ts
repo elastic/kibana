@@ -26,7 +26,7 @@ export const configSchema = schema.object({
 
   /**
    * This is used within the merge strategies:
-   * server/lib/detection_engine/signals/source_fields_merging
+   * server/lib/detection_engine/rule_types/utils/source_fields_merging
    *
    * For determining which strategy for merging "fields" and "_source" together to get
    * runtime fields, constant keywords, etc...
@@ -44,7 +44,7 @@ export const configSchema = schema.object({
 
   /**
    * This is used within the merge strategies:
-   * server/lib/detection_engine/signals/source_fields_merging
+   * server/lib/detection_engine/rule_types/utils/source_fields_merging
    *
    * For determining if we need to ignore particular "fields" and not merge them with "_source" such as
    * runtime fields, constant keywords, etc...
@@ -111,10 +111,26 @@ export const configSchema = schema.object({
   packagerTaskInterval: schema.string({ defaultValue: '60s' }),
 
   /**
-   * Detection prebuilt rules
+   * For internal use. Specify which version of the Detection Rules fleet package to install
+   * when upgrading rules. If not provided, the latest compatible package will be installed,
+   * or if running from a dev environment or -SNAPSHOT build, the latest pre-release package
+   * will be used (if fleet is available or not within an airgapped environment).
+   *
+   * Note: This is for `upgrade only`, which occurs by means of the `useUpgradeSecurityPackages`
+   * hook when navigating to a Security Solution page. The package version specified in
+   * `fleet_packages.json` in project root will always be installed first on Kibana start if
+   * the package is not already installed.
    */
-  prebuiltRulesFromFileSystem: schema.boolean({ defaultValue: true }),
-  prebuiltRulesFromSavedObjects: schema.boolean({ defaultValue: true }),
+  prebuiltRulesPackageVersion: schema.maybe(schema.string()),
+  enabled: schema.boolean({ defaultValue: true }),
+
+  /**
+   * The Max number of Bytes allowed for the `upload` endpoint response action
+   */
+  maxUploadResponseActionFileBytes: schema.number({
+    defaultValue: 26214400, // 25MB,
+    max: 104857600, // 100MB,
+  }),
 });
 
 export type ConfigSchema = TypeOf<typeof configSchema>;

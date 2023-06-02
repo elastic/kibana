@@ -5,19 +5,86 @@
  * 2.0.
  */
 
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 
+import { RESPONSE_ACTION_API_COMMANDS_NAMES } from '../service/response_actions/constants';
 import {
   EndpointActionListRequestSchema,
   NoParametersRequestSchema,
   KillOrSuspendProcessRequestSchema,
+  ExecuteActionRequestSchema,
+  UploadActionRequestSchema,
 } from './actions';
+import { createHapiReadableStreamMock } from '../../../server/endpoint/services/actions/mocks';
+import type { HapiReadableStream } from '../../../server/types';
 
 describe('actions schemas', () => {
   describe('Endpoint action list API Schema', () => {
     it('should work without any query keys ', () => {
       expect(() => {
         EndpointActionListRequestSchema.query.validate({}); // no agent_ids provided
+      }).not.toThrow();
+    });
+
+    it.each([true, false])('should accept withAutomatedActions param', (value) => {
+      expect(() => {
+        EndpointActionListRequestSchema.query.validate({ withAutomatedActions: value });
+      }).not.toThrow();
+    });
+
+    it('should require at least 1 alert ID', () => {
+      expect(() => {
+        EndpointActionListRequestSchema.query.validate({ alertId: [] });
+      }).toThrow();
+    });
+
+    it('should accept an alert ID if not in an array', () => {
+      expect(() => {
+        EndpointActionListRequestSchema.query.validate({ alertId: uuidv4() });
+      }).not.toThrow();
+    });
+
+    it('should not accept an alert ID if empty string', () => {
+      expect(() => {
+        EndpointActionListRequestSchema.query.validate({ alertId: '' });
+      }).toThrow();
+    });
+
+    it('should accept an alert ID in an array', () => {
+      expect(() => {
+        EndpointActionListRequestSchema.query.validate({ alertId: [uuidv4()] });
+      }).not.toThrow();
+    });
+
+    it('should not accept an alert ID if empty string in an array', () => {
+      expect(() => {
+        EndpointActionListRequestSchema.query.validate({ alertId: [''] });
+      }).toThrow();
+    });
+
+    it('should accept multiple alert IDs in an array', () => {
+      expect(() => {
+        EndpointActionListRequestSchema.query.validate({
+          alertId: [uuidv4(), uuidv4(), uuidv4()],
+        });
+      }).not.toThrow();
+    });
+
+    it('should not accept multiple alert IDs in an array if one is an empty string', () => {
+      expect(() => {
+        EndpointActionListRequestSchema.query.validate({
+          alertId: [uuidv4(), '', uuidv4()],
+        });
+      }).toThrow();
+    });
+
+    it('should not limit multiple alert IDs', () => {
+      expect(() => {
+        EndpointActionListRequestSchema.query.validate({
+          agentIds: Array(255)
+            .fill(1)
+            .map(() => uuidv4()),
+        });
       }).not.toThrow();
     });
 
@@ -29,20 +96,20 @@ describe('actions schemas', () => {
 
     it('should accept an agent ID if not in an array', () => {
       expect(() => {
-        EndpointActionListRequestSchema.query.validate({ agentIds: uuid.v4() });
+        EndpointActionListRequestSchema.query.validate({ agentIds: uuidv4() });
       }).not.toThrow();
     });
 
     it('should accept an agent ID in an array', () => {
       expect(() => {
-        EndpointActionListRequestSchema.query.validate({ agentIds: [uuid.v4()] });
+        EndpointActionListRequestSchema.query.validate({ agentIds: [uuidv4()] });
       }).not.toThrow();
     });
 
     it('should accept multiple agent IDs in an array', () => {
       expect(() => {
         EndpointActionListRequestSchema.query.validate({
-          agentIds: [uuid.v4(), uuid.v4(), uuid.v4()],
+          agentIds: [uuidv4(), uuidv4(), uuidv4()],
         });
       }).not.toThrow();
     });
@@ -52,7 +119,7 @@ describe('actions schemas', () => {
         EndpointActionListRequestSchema.query.validate({
           agentIds: Array(255)
             .fill(1)
-            .map(() => uuid.v4()),
+            .map(() => uuidv4()),
         });
       }).not.toThrow();
     });
@@ -122,7 +189,7 @@ describe('actions schemas', () => {
       }).not.toThrow();
     });
 
-    it.each(['isolate', 'unisolate', 'kill-process', 'suspend-process', 'running-processes'])(
+    it.each(RESPONSE_ACTION_API_COMMANDS_NAMES)(
       'should work with commands query params with %s action',
       (command) => {
         expect(() => {
@@ -232,12 +299,91 @@ describe('actions schemas', () => {
         });
       }).not.toThrow();
     });
+
+    it('should not work with only spaces for a string in `withOutputs` list', () => {
+      expect(() => {
+        EndpointActionListRequestSchema.query.validate({
+          startDate: 'now-1d', // yesterday
+          endDate: 'now', // today
+          statuses: ['failed', 'pending', 'successful'],
+          withOutputs: '  ',
+        });
+      }).toThrow();
+    });
+
+    it('should not work with empty string in `withOutputs` list', () => {
+      expect(() => {
+        EndpointActionListRequestSchema.query.validate({
+          startDate: 'now-1d', // yesterday
+          endDate: 'now', // today
+          statuses: ['failed', 'pending', 'successful'],
+          withOutputs: '',
+        });
+      }).toThrow();
+    });
+
+    it('should not work with empty strings in `withOutputs` list', () => {
+      expect(() => {
+        EndpointActionListRequestSchema.query.validate({
+          startDate: 'now-1d', // yesterday
+          endDate: 'now', // today
+          statuses: ['failed', 'pending', 'successful'],
+          withOutputs: ['action-id-1', '  ', 'action-id-2'],
+        });
+      }).toThrow();
+    });
+
+    it('should work with a single action id in `withOutputs` list', () => {
+      expect(() => {
+        EndpointActionListRequestSchema.query.validate({
+          startDate: 'now-1d', // yesterday
+          endDate: 'now', // today
+          statuses: ['failed', 'pending', 'successful'],
+          withOutputs: 'action-id-1',
+        });
+      }).not.toThrow();
+    });
+
+    it('should work with multiple `withOutputs` filter', () => {
+      expect(() => {
+        EndpointActionListRequestSchema.query.validate({
+          startDate: 'now-1d', // yesterday
+          endDate: 'now', // today
+          statuses: ['failed', 'pending', 'successful'],
+          withOutputs: ['action-id-1', 'action-id-2'],
+        });
+      }).not.toThrow();
+    });
   });
 
   describe('NoParametersRequestSchema', () => {
-    it('should require at least 1 Endpoint ID', () => {
+    it('should not accept when no endpoint_ids', () => {
       expect(() => {
         NoParametersRequestSchema.body.validate({});
+      }).toThrow();
+    });
+
+    it('should require at least 1 endpoint id', () => {
+      expect(() => {
+        NoParametersRequestSchema.body.validate({
+          endpoint_ids: [],
+        });
+      }).toThrow();
+    });
+
+    it('should not accept empty endpoint id', () => {
+      expect(() => {
+        NoParametersRequestSchema.body.validate({
+          endpoint_ids: [''],
+        });
+      }).toThrow();
+    });
+
+    it('should not accept any empty endpoint_ids in the array', () => {
+      expect(() => {
+        NoParametersRequestSchema.body.validate({
+          endpoint_ids: ['x', ' ', 'y'],
+        });
       }).toThrow();
     });
 
@@ -258,6 +404,15 @@ describe('actions schemas', () => {
       }).not.toThrow();
     });
 
+    it('should not accept empty alert IDs', () => {
+      expect(() => {
+        NoParametersRequestSchema.body.validate({
+          endpoint_ids: ['ABC-XYZ-000'],
+          alert_ids: [' '],
+        });
+      }).toThrow();
+    });
+
     it('should accept alert IDs', () => {
       expect(() => {
         NoParametersRequestSchema.body.validate({
@@ -265,6 +420,15 @@ describe('actions schemas', () => {
           alert_ids: ['0000000-000-00'],
         });
       }).not.toThrow();
+    });
+
+    it('should not accept empty case IDs', () => {
+      expect(() => {
+        NoParametersRequestSchema.body.validate({
+          endpoint_ids: ['ABC-XYZ-000'],
+          case_ids: [' '],
+        });
+      }).toThrow();
     });
 
     it('should accept case IDs', () => {
@@ -278,9 +442,33 @@ describe('actions schemas', () => {
   });
 
   describe('KillOrSuspendProcessRequestSchema', () => {
-    it('should require at least 1 Endpoint ID', () => {
+    it('should not accept when no endpoint_ids', () => {
       expect(() => {
-        NoParametersRequestSchema.body.validate({});
+        KillOrSuspendProcessRequestSchema.body.validate({});
+      }).toThrow();
+    });
+
+    it('should not accept empty endpoint_ids array', () => {
+      expect(() => {
+        KillOrSuspendProcessRequestSchema.body.validate({
+          endpoint_ids: [],
+        });
+      }).toThrow();
+    });
+
+    it('should not accept empty string as endpoint id', () => {
+      expect(() => {
+        KillOrSuspendProcessRequestSchema.body.validate({
+          endpoint_ids: [' '],
+        });
+      }).toThrow();
+    });
+
+    it('should not accept any empty string in endpoint_ids array', () => {
+      expect(() => {
+        KillOrSuspendProcessRequestSchema.body.validate({
+          endpoint_ids: ['x', ' ', 'y'],
+        });
       }).toThrow();
     });
 
@@ -338,6 +526,172 @@ describe('actions schemas', () => {
           },
         });
       }).not.toThrow();
+    });
+  });
+
+  describe('ExecuteActionRequestSchema', () => {
+    it('should not accept when no endpoint_ids', () => {
+      expect(() => {
+        NoParametersRequestSchema.body.validate({});
+      }).toThrow();
+    });
+
+    it('should not accept empty endpoint_ids array', () => {
+      expect(() => {
+        NoParametersRequestSchema.body.validate({
+          endpoint_ids: [],
+        });
+      }).toThrow();
+    });
+
+    it('should not accept empty string as endpoint id', () => {
+      expect(() => {
+        NoParametersRequestSchema.body.validate({
+          endpoint_ids: [' '],
+        });
+      }).toThrow();
+    });
+
+    it('should not accept any empty string in endpoint_ids array', () => {
+      expect(() => {
+        NoParametersRequestSchema.body.validate({
+          endpoint_ids: ['x', ' ', 'y'],
+        });
+      }).toThrow();
+    });
+
+    it('should not accept an empty command with a valid endpoint_id', () => {
+      expect(() => {
+        NoParametersRequestSchema.body.validate({
+          endpoint_ids: ['endpoint_id'],
+          parameters: {
+            command: '  ',
+          },
+        });
+      }).toThrow();
+    });
+
+    it('should not accept optional negative integers for timeout with at least one endpoint_id and a command parameter', () => {
+      expect(() => {
+        ExecuteActionRequestSchema.body.validate({
+          endpoint_ids: ['endpoint_id'],
+          parameters: {
+            command: 'ls -al',
+            timeout: -1,
+          },
+        });
+      }).toThrow();
+    });
+
+    it('should not accept optional invalid timeout with at least one endpoint_id and a command parameter', () => {
+      expect(() => {
+        ExecuteActionRequestSchema.body.validate({
+          endpoint_ids: ['endpoint_id'],
+          parameters: {
+            command: 'ls -al',
+            timeout: '',
+          },
+        });
+      }).toThrow();
+    });
+
+    it('should accept at least one valid endpoint id and a command', () => {
+      expect(() => {
+        ExecuteActionRequestSchema.body.validate({
+          endpoint_ids: ['endpoint_id'],
+          parameters: {
+            command: 'ls -al',
+          },
+        });
+      }).not.toThrow();
+    });
+
+    it('should accept at least one endpoint_id and a command parameter', () => {
+      expect(() => {
+        ExecuteActionRequestSchema.body.validate({
+          endpoint_ids: ['endpoint_id'],
+          parameters: {
+            command: 'ls -al',
+          },
+        });
+      }).not.toThrow();
+    });
+
+    it('should also accept a valid timeout with at least one endpoint_id and a command parameter', () => {
+      expect(() => {
+        ExecuteActionRequestSchema.body.validate({
+          endpoint_ids: ['endpoint_id'],
+          parameters: {
+            command: 'ls -al',
+            timeout: 1000,
+          },
+        });
+      }).not.toThrow();
+    });
+
+    it('should also accept an optional comment', () => {
+      expect(() => {
+        ExecuteActionRequestSchema.body.validate({
+          endpoint_ids: ['endpoint_id'],
+          parameters: {
+            command: 'ls -al',
+            timeout: 1000,
+          },
+          comment: 'a user comment',
+        });
+      }).not.toThrow();
+    });
+  });
+
+  describe(`UploadActionRequestSchema`, () => {
+    let fileStream: HapiReadableStream;
+
+    beforeEach(() => {
+      fileStream = createHapiReadableStreamMock();
+    });
+
+    it('should not error if `override` parameter is not defined', () => {
+      expect(() => {
+        UploadActionRequestSchema.body.validate({
+          endpoint_ids: ['endpoint_id'],
+          file: fileStream,
+        });
+      }).not.toThrow();
+    });
+
+    it('should allow `overwrite` parameter', () => {
+      expect(() => {
+        UploadActionRequestSchema.body.validate({
+          endpoint_ids: ['endpoint_id'],
+          parameters: {
+            overwrite: true,
+          },
+          file: fileStream,
+        });
+      }).not.toThrow();
+    });
+
+    it('should error if `file` is not defined', () => {
+      expect(() => {
+        UploadActionRequestSchema.body.validate({
+          endpoint_ids: ['endpoint_id'],
+          parameters: {
+            overwrite: true,
+          },
+        });
+      }).toThrow('[file]: expected value of type [Stream] but got [undefined]');
+    });
+
+    it('should error if `file` is not a Stream', () => {
+      expect(() => {
+        UploadActionRequestSchema.body.validate({
+          endpoint_ids: ['endpoint_id'],
+          parameters: {
+            overwrite: true,
+          },
+          file: {},
+        });
+      }).toThrow('[file]: expected value of type [Stream] but got [Object]');
     });
   });
 });

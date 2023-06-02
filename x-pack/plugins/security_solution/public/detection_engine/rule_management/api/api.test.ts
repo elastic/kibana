@@ -31,11 +31,11 @@ import {
   createPrepackagedRules,
   importRules,
   exportRules,
-  fetchTags,
   getPrePackagedRulesStatus,
   previewRule,
   findRuleExceptionReferences,
   performBulkAction,
+  fetchRulesSnoozeSettings,
 } from './api';
 
 const abortCtrl = new AbortController();
@@ -288,7 +288,7 @@ describe('Detections Rules API', () => {
           tags: ['hello', 'world'],
         },
         sortingOptions: {
-          field: 'updated_at',
+          field: 'updatedAt',
           order: 'desc',
         },
         signal: abortCtrl.signal,
@@ -494,6 +494,7 @@ describe('Detections Rules API', () => {
         },
         query: {
           overwrite: false,
+          overwrite_action_connectors: false,
           overwrite_exceptions: false,
         },
       });
@@ -511,6 +512,7 @@ describe('Detections Rules API', () => {
         query: {
           overwrite: true,
           overwrite_exceptions: false,
+          overwrite_action_connectors: false,
         },
       });
     });
@@ -524,6 +526,10 @@ describe('Detections Rules API', () => {
         exceptions_errors: [],
         exceptions_success: true,
         exceptions_success_count: 0,
+        action_connectors_success: true,
+        action_connectors_success_count: 0,
+        action_connectors_errors: [],
+        action_connectors_warnings: [],
       });
       const resp = await importRules({ fileToImport, signal: abortCtrl.signal });
       expect(resp).toEqual({
@@ -534,6 +540,10 @@ describe('Detections Rules API', () => {
         exceptions_errors: [],
         exceptions_success: true,
         exceptions_success_count: 0,
+        action_connectors_success: true,
+        action_connectors_success_count: 0,
+        action_connectors_errors: [],
+        action_connectors_warnings: [],
       });
     });
   });
@@ -627,26 +637,6 @@ describe('Detections Rules API', () => {
         signal: abortCtrl.signal,
       });
       expect(resp).toEqual(blob);
-    });
-  });
-
-  describe('fetchTags', () => {
-    beforeEach(() => {
-      fetchMock.mockClear();
-      fetchMock.mockResolvedValue(['some', 'tags']);
-    });
-
-    test('check parameter url when fetching tags', async () => {
-      await fetchTags({ signal: abortCtrl.signal });
-      expect(fetchMock).toHaveBeenCalledWith('/api/detection_engine/tags', {
-        signal: abortCtrl.signal,
-        method: 'GET',
-      });
-    });
-
-    test('happy path', async () => {
-      const resp = await fetchTags({ signal: abortCtrl.signal });
-      expect(resp).toEqual(['some', 'tags']);
     });
   });
 
@@ -795,6 +785,90 @@ describe('Detections Rules API', () => {
       });
 
       expect(result).toBe(fetchMockResult);
+    });
+  });
+
+  describe('fetchRulesSnoozeSettings', () => {
+    beforeEach(() => {
+      fetchMock.mockClear();
+      fetchMock.mockResolvedValue({
+        data: [],
+      });
+    });
+
+    test('requests snooze settings of multiple rules by their IDs', () => {
+      fetchRulesSnoozeSettings({ ids: ['id1', 'id2'] });
+
+      expect(fetchMock).toHaveBeenCalledWith(
+        expect.any(String),
+        expect.objectContaining({
+          query: expect.objectContaining({
+            filter: 'alert.id:"alert:id1" or alert.id:"alert:id2"',
+          }),
+        })
+      );
+    });
+
+    test('requests the same number of rules as the number of ids provided', () => {
+      fetchRulesSnoozeSettings({ ids: ['id1', 'id2'] });
+
+      expect(fetchMock).toHaveBeenCalledWith(
+        expect.any(String),
+        expect.objectContaining({
+          query: expect.objectContaining({
+            per_page: 2,
+          }),
+        })
+      );
+    });
+
+    test('requests only snooze settings fields', () => {
+      fetchRulesSnoozeSettings({ ids: ['id1', 'id2'] });
+
+      expect(fetchMock).toHaveBeenCalledWith(
+        expect.any(String),
+        expect.objectContaining({
+          query: expect.objectContaining({
+            fields: JSON.stringify([
+              'muteAll',
+              'activeSnoozes',
+              'isSnoozedUntil',
+              'snoozeSchedule',
+            ]),
+          }),
+        })
+      );
+    });
+
+    test('returns mapped data', async () => {
+      fetchMock.mockResolvedValue({
+        data: [
+          {
+            id: '1',
+            mute_all: false,
+          },
+          {
+            id: '2',
+            mute_all: false,
+            active_snoozes: [],
+            is_snoozed_until: '2023-04-24T19:31:46.765Z',
+          },
+        ],
+      });
+
+      const result = await fetchRulesSnoozeSettings({ ids: ['1', '2'] });
+
+      expect(result).toEqual({
+        '1': {
+          muteAll: false,
+          activeSnoozes: [],
+        },
+        '2': {
+          muteAll: false,
+          activeSnoozes: [],
+          isSnoozedUntil: new Date('2023-04-24T19:31:46.765Z'),
+        },
+      });
     });
   });
 });

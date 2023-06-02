@@ -90,7 +90,7 @@ export class JobListUi extends Component {
       <EuiPageContent verticalPosition="center" horizontalPosition="center" color="danger">
         <EuiEmptyPrompt
           data-test-subj="jobListNoPermission"
-          iconType="alert"
+          iconType="warning"
           title={<h1>{title}</h1>}
           body={
             <p>
@@ -118,7 +118,7 @@ export class JobListUi extends Component {
       <EuiPageContent verticalPosition="center" horizontalPosition="center" color="danger">
         <EuiEmptyPrompt
           data-test-subj="jobListError"
-          iconType="alert"
+          iconType="warning"
           title={<h1>{title}</h1>}
           body={
             <p>

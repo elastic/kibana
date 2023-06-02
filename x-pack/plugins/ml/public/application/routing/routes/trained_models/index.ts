@@ -6,4 +6,3 @@
  */
 
 export * from './models_list';
-export * from './nodes_list';

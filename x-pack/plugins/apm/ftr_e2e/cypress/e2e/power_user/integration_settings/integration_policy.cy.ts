@@ -5,12 +5,6 @@
  * 2.0.
  */
 
-const integrationsPoliciesPath = '/app/integrations/detail/apm/policies';
-const policyName = 'apm-integration';
-const description = 'integration description';
-const host = 'myhost:8200';
-const url = 'http://myhost:8200';
-
 const policyFormFields = [
   {
     selector: 'packagePolicyNameInput',
@@ -31,24 +25,6 @@ const policyFormFields = [
     selector: 'packagePolicyUrlInput',
     value: 'http://myhost:8200',
     required: true,
-  },
-];
-
-const apisToIntercept = [
-  {
-    endpoint: 'api/fleet/agent_policies*',
-    name: 'fleetAgentPolicies',
-    method: 'POST',
-  },
-  {
-    endpoint: 'api/fleet/agent_status*',
-    name: 'fleetAgentStatus',
-    method: 'GET',
-  },
-  {
-    endpoint: 'api/fleet/package_policies',
-    name: 'fleetPackagePolicies',
-    method: 'POST',
   },
 ];
 

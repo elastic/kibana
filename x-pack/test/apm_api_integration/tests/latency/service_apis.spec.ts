@@ -4,11 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { apm, timerange } from '@kbn/apm-synthtrace';
+import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import expect from '@kbn/expect';
 import { meanBy, sumBy } from 'lodash';
 import { LatencyAggregationType } from '@kbn/apm-plugin/common/latency_aggregation_types';
 import { isFiniteNumber } from '@kbn/apm-plugin/common/utils/is_finite_number';
+import { ApmDocumentType } from '@kbn/apm-plugin/common/document_type';
+import { RollupInterval } from '@kbn/apm-plugin/common/rollup';
+import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
@@ -23,9 +26,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   async function getLatencyValues({
     processorEvent,
     latencyAggregationType = LatencyAggregationType.avg,
+    useDurationSummary = false,
   }: {
     processorEvent: 'transaction' | 'metric';
     latencyAggregationType?: LatencyAggregationType;
+    useDurationSummary?: boolean;
   }) {
     const commonQuery = {
       start: new Date(start).toISOString(),
@@ -45,6 +50,15 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             ...commonQuery,
             kuery: `service.name : "${serviceName}" and processor.event : "${processorEvent}"`,
             probability: 1,
+            ...(processorEvent === ProcessorEvent.metric
+              ? {
+                  documentType: ApmDocumentType.TransactionMetric,
+                  rollupInterval: RollupInterval.OneMinute,
+                }
+              : {
+                  documentType: ApmDocumentType.TransactionEvent,
+                  rollupInterval: RollupInterval.None,
+                }),
           },
         },
       }),
@@ -57,6 +71,16 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             kuery: `processor.event : "${processorEvent}"`,
             latencyAggregationType,
             transactionType: 'request',
+            bucketSizeInSeconds: 60,
+            ...(processorEvent === ProcessorEvent.metric
+              ? {
+                  documentType: ApmDocumentType.TransactionMetric,
+                  rollupInterval: RollupInterval.OneMinute,
+                }
+              : {
+                  documentType: ApmDocumentType.TransactionEvent,
+                  rollupInterval: RollupInterval.None,
+                }),
           },
         },
       }),
@@ -69,6 +93,16 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             kuery: `processor.event : "${processorEvent}"`,
             transactionType: 'request',
             latencyAggregationType: 'avg' as LatencyAggregationType,
+            useDurationSummary,
+            ...(processorEvent === ProcessorEvent.metric
+              ? {
+                  documentType: ApmDocumentType.TransactionMetric,
+                  rollupInterval: RollupInterval.OneMinute,
+                }
+              : {
+                  documentType: ApmDocumentType.TransactionEvent,
+                  rollupInterval: RollupInterval.None,
+                }),
           },
         },
       }),
@@ -158,7 +192,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         before(async () => {
           [latencyTransactionValues, latencyMetricValues] = await Promise.all([
             getLatencyValues({ processorEvent: 'transaction' }),
-            getLatencyValues({ processorEvent: 'metric' }),
+            getLatencyValues({ processorEvent: 'metric', useDurationSummary: true }),
           ]);
         });
 

@@ -13,7 +13,6 @@ import { EuiButton, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { KibanaLogic } from '../../../../../shared/kibana/kibana_logic';
-import { LicensingLogic } from '../../../../../shared/licensing';
 import { IndexViewLogic } from '../../index_view_logic';
 import { PipelinesLogic } from '../pipelines_logic';
 
@@ -26,15 +25,13 @@ export const AddMLInferencePipelineButton: React.FC<AddMLInferencePipelineButton
   const { capabilities } = useValues(KibanaLogic);
   const { ingestionMethod } = useValues(IndexViewLogic);
   const { canUseMlInferencePipeline, hasIndexIngestionPipeline } = useValues(PipelinesLogic);
-  const { hasPlatinumLicense } = useValues(LicensingLogic);
-  const hasMLPermissions = capabilities?.ml?.canAccessML ?? false;
-
-  if (!hasMLPermissions || !hasPlatinumLicense) {
+  const hasMLPermissions = capabilities?.ml?.canGetTrainedModels ?? false;
+  if (!hasMLPermissions) {
     return (
       <EuiToolTip
         content={i18n.translate(
           'xpack.enterpriseSearch.content.indices.pipelines.mlInference.addButton.mlPermissions.disabledTooltip',
-          { defaultMessage: 'You do not have permission to Machine Learning on this cluster.' }
+          { defaultMessage: 'You do not have permission to use Machine Learning on this cluster.' }
         )}
       >
         <AddButton ingestionMethod={ingestionMethod} disabled />
@@ -80,10 +77,11 @@ const AddButton: React.FC<{
   onClick?: () => void;
 }> = ({ disabled, ingestionMethod, onClick }) => (
   <EuiButton
+    fullWidth
     data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-addInferencePipeline`}
-    color="success"
+    color={disabled ? undefined : 'success'}
     disabled={disabled}
-    iconType="plusInCircle"
+    iconType={disabled ? 'lock' : 'plusInCircle'}
     onClick={onClick}
   >
     {i18n.translate('xpack.enterpriseSearch.content.indices.pipelines.mlInference.addButtonLabel', {

@@ -7,12 +7,17 @@
  */
 
 import { Position } from '@elastic/charts';
+import type { AllowedSettingsOverrides } from '@kbn/charts-plugin/common';
 import type { PaletteOutput } from '@kbn/coloring';
-import { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common';
-import { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
-import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
+import type { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common';
+import type { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
+import type { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
 import type { LegendSize } from '@kbn/visualizations-plugin/public';
-import { ChartTypes, ExpressionValuePartitionLabels } from './expression_functions';
+import {
+  type AllowedPartitionOverrides,
+  ChartTypes,
+  type ExpressionValuePartitionLabels,
+} from './expression_functions';
 
 export enum EmptySizeRatios {
   SMALL = 0.3,
@@ -107,12 +112,13 @@ export interface WaffleVisConfig extends Omit<VisCommonConfig, 'buckets'> {
   showValuesInLegend: boolean;
 }
 
-export interface RenderValue {
+export interface PartitionChartProps {
   visData: Datatable;
   visType: ChartTypes;
   visConfig: PartitionVisParams;
   syncColors: boolean;
   canNavigateToLens?: boolean;
+  overrides?: AllowedPartitionOverrides & AllowedSettingsOverrides;
 }
 
 export enum LabelPositions {

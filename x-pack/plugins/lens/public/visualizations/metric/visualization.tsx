@@ -16,15 +16,15 @@ import { LayoutDirection } from '@elastic/charts';
 import { euiLightVars, euiThemeVars } from '@kbn/ui-theme';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { IconChartMetric } from '@kbn/chart-icons';
+import { AccessorConfig } from '@kbn/visualization-ui-components/public';
 import { CollapseFunction } from '../../../common/expressions';
-import type { LayerType } from '../../../common';
+import type { LayerType } from '../../../common/types';
 import { layerTypes } from '../../../common/layer_types';
 import type { FormBasedPersistedState } from '../../datasources/form_based/types';
 import { getSuggestions } from './suggestions';
 import {
   Visualization,
   OperationMetadata,
-  AccessorConfig,
   VisualizationConfigProps,
   VisualizationDimensionGroupConfig,
   Suggestion,
@@ -35,6 +35,7 @@ import { Toolbar } from './toolbar';
 import { generateId } from '../../id_generator';
 import { FormatSelectorOptions } from '../../datasources/form_based/dimension_panel/format_selector';
 import { toExpression } from './to_expression';
+import { nonNullable } from '../../utils';
 
 export const DEFAULT_MAX_COLUMNS = 3;
 
@@ -61,6 +62,7 @@ export interface MetricVisualizationState {
   progressDirection?: LayoutDirection;
   showBar?: boolean;
   color?: string;
+  icon?: string;
   palette?: PaletteOutput<CustomPaletteParams>;
   maxCols?: number;
 
@@ -98,16 +100,16 @@ const getMetricLayerConfiguration = (
     const hasDynamicColoring = !!props.state.palette;
     return hasDynamicColoring
       ? {
-          triggerIcon: 'colorBy',
+          triggerIconType: 'colorBy',
           palette: stops.map(({ color }) => color),
         }
       : hasStaticColoring
       ? {
-          triggerIcon: 'color',
+          triggerIconType: 'color',
           color: props.state.color,
         }
       : {
-          triggerIcon: 'color',
+          triggerIconType: 'color',
           color: getDefaultColor(props.state),
         };
   };
@@ -209,7 +211,7 @@ const getMetricLayerConfiguration = (
           ? [
               {
                 columnId: props.state.breakdownByAccessor,
-                triggerIcon: props.state.collapseFn ? ('aggregate' as const) : undefined,
+                triggerIconType: props.state.collapseFn ? ('aggregate' as const) : undefined,
               },
             ]
           : [],
@@ -418,7 +420,6 @@ export const getMetricVisualization = ({
             ]
           : undefined,
         disabled: true,
-        canAddViaMenu: true,
       },
       {
         type: layerTypes.METRIC_TRENDLINE,
@@ -429,7 +430,6 @@ export const getMetricVisualization = ({
           { groupId: GROUP_ID.TREND_TIME, columnId: generateId(), autoTimeField: true },
         ],
         disabled: Boolean(state?.trendlineLayerId),
-        canAddViaMenu: true,
       },
     ];
   },
@@ -634,14 +634,9 @@ export const getMetricVisualization = ({
     );
   },
 
-  getErrorMessages(state) {
-    // Is it possible to break it?
-    return undefined;
-  },
-
   getDisplayOptions() {
     return {
-      noPanelTitle: true,
+      noPanelTitle: false,
       noPadding: true,
     };
   },
@@ -670,7 +665,7 @@ export const getMetricVisualization = ({
     return suggestion;
   },
 
-  getVisualizationInfo(state: MetricVisualizationState) {
+  getVisualizationInfo(state) {
     const dimensions = [];
     if (state.metricAccessor) {
       dimensions.push({
@@ -710,6 +705,10 @@ export const getMetricVisualization = ({
       });
     }
 
+    const stops = state.palette?.params?.stops || [];
+    const hasStaticColoring = !!state.color;
+    const hasDynamicColoring = !!state.palette;
+
     return {
       layers: [
         {
@@ -718,6 +717,12 @@ export const getMetricVisualization = ({
           chartType: 'metric',
           ...this.getDescription(state),
           dimensions,
+          palette: (hasDynamicColoring
+            ? stops.map(({ color }) => color)
+            : hasStaticColoring
+            ? [state.color]
+            : [getDefaultColor(state)]
+          ).filter(nonNullable),
         },
       ],
     };

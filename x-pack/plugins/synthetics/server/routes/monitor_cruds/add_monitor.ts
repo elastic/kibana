@@ -13,8 +13,9 @@ import {
   SavedObjectsErrorHelpers,
 } from '@kbn/core/server';
 import { isValidNamespace } from '@kbn/fleet-plugin/common';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { syntheticsMonitorType } from '../../../common/types/saved_objects';
 import { getSyntheticsPrivateLocations } from '../../legacy_uptime/lib/saved_objects/private_locations';
-import { SyntheticsMonitorClient } from '../../synthetics_service/synthetics_monitor/synthetics_monitor_client';
 import {
   ConfigKey,
   MonitorFields,
@@ -23,18 +24,18 @@ import {
   PrivateLocation,
 } from '../../../common/runtime_types';
 import { formatKibanaNamespace } from '../../../common/formatters';
-import { SyntheticsRestApiRouteFactory } from '../../legacy_uptime/routes/types';
+import { RouteContext, SyntheticsRestApiRouteFactory } from '../../legacy_uptime/routes/types';
 import { API_URLS } from '../../../common/constants';
 import {
   DEFAULT_FIELDS,
   DEFAULT_NAMESPACE_STRING,
 } from '../../../common/constants/monitor_defaults';
-import { syntheticsMonitorType } from '../../legacy_uptime/lib/saved_objects/synthetics_monitor';
 import { validateMonitor } from './monitor_validation';
 import { sendTelemetryEvents, formatTelemetryEvent } from '../telemetry/monitor_upgrade_sender';
 import { formatSecrets } from '../../synthetics_service/utils/secrets';
 import type { UptimeServerSetup } from '../../legacy_uptime/lib/adapters/framework';
 import { deleteMonitor } from './delete_monitor';
+import { StatusAlertService } from '../default_alerts/status_alert_service';
 
 export const addSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'POST',
@@ -46,17 +47,11 @@ export const addSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
       preserve_namespace: schema.maybe(schema.boolean()),
     }),
   },
-  handler: async ({
-    request,
-    response,
-    savedObjectsClient,
-    server,
-    syntheticsMonitorClient,
-  }): Promise<any> => {
+  writeAccess: true,
+  handler: async (routeContext): Promise<any> => {
+    const { context, request, response, savedObjectsClient, server } = routeContext;
     // usually id is auto generated, but this is useful for testing
     const { id } = request.query;
-
-    const spaceId = server.spaces.spacesService.getSpaceId(request);
 
     const monitor: SyntheticsMonitor = request.body as SyntheticsMonitor;
     const monitorType = monitor[ConfigKey.MONITOR_TYPE];
@@ -72,17 +67,18 @@ export const addSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
       return response.badRequest({ body: { message, attributes: { details, ...payload } } });
     }
 
-    const privateLocations: PrivateLocation[] = await getSyntheticsPrivateLocations(
-      savedObjectsClient
+    const normalizedMonitor = validationResult.decodedMonitor;
+
+    const privateLocations: PrivateLocation[] = await getPrivateLocations(
+      savedObjectsClient,
+      normalizedMonitor
     );
 
     try {
+      const spaceId = server.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
       const { errors, newMonitor } = await syncNewMonitor({
-        normalizedMonitor: validationResult.decodedMonitor,
-        server,
-        syntheticsMonitorClient,
-        savedObjectsClient,
-        request,
+        normalizedMonitor,
+        routeContext,
         id,
         privateLocations,
         spaceId,
@@ -98,6 +94,20 @@ export const addSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
         });
       }
 
+      try {
+        // we do this async, so we don't block the user, error handling will be done on the UI via separate api
+        const statusAlertService = new StatusAlertService(context, server, savedObjectsClient);
+        statusAlertService.createDefaultAlertIfNotExist().then(() => {
+          server.logger.debug(
+            `Successfully created default alert for monitor: ${newMonitor.attributes.name}`
+          );
+        });
+      } catch (e) {
+        server.logger.error(
+          `Error creating default alert: ${e} for monitor: ${newMonitor.attributes.name}`
+        );
+      }
+
       return response.ok({ body: newMonitor });
     } catch (getErr) {
       server.logger.error(getErr);
@@ -106,7 +116,7 @@ export const addSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
       }
 
       return response.customError({
-        body: { message: 'Unable to create monitor' },
+        body: { message: getErr.message },
         statusCode: 500,
       });
     }
@@ -141,23 +151,18 @@ export const createNewSavedObjectMonitor = async ({
 
 export const syncNewMonitor = async ({
   id,
-  server,
-  syntheticsMonitorClient,
-  savedObjectsClient,
-  request,
   normalizedMonitor,
   privateLocations,
   spaceId,
+  routeContext,
 }: {
   id?: string;
   normalizedMonitor: SyntheticsMonitor;
-  server: UptimeServerSetup;
-  syntheticsMonitorClient: SyntheticsMonitorClient;
-  savedObjectsClient: SavedObjectsClientContract;
-  request: KibanaRequest;
+  routeContext: RouteContext;
   privateLocations: PrivateLocation[];
   spaceId: string;
 }) => {
+  const { savedObjectsClient, server, syntheticsMonitorClient, request } = routeContext;
   const newMonitorId = id ?? uuidV4();
   const { preserve_namespace: preserveNamespace } = request.query as Record<
     string,
@@ -189,10 +194,18 @@ export const syncNewMonitor = async ({
       spaceId
     );
 
-    const [monitorSavedObjectN, { syncErrors }] = await Promise.all([
+    const [monitorSavedObjectN, [packagePolicyResult, syncErrors]] = await Promise.all([
       newMonitorPromise,
       syncErrorsPromise,
-    ]);
+    ]).catch((e) => {
+      server.logger.error(e);
+      throw e;
+    });
+
+    if (packagePolicyResult && (packagePolicyResult?.failed?.length ?? []) > 0) {
+      const failed = packagePolicyResult.failed.map((f) => f.error);
+      throw new Error(failed.join(', '));
+    }
 
     monitorSavedObject = monitorSavedObjectN;
 
@@ -209,27 +222,65 @@ export const syncNewMonitor = async ({
 
     return { errors: syncErrors, newMonitor: monitorSavedObject };
   } catch (e) {
-    if (monitorSavedObject?.id) {
-      await deleteMonitor({
-        savedObjectsClient,
-        server,
-        monitorId: newMonitorId,
-        syntheticsMonitorClient,
-        request,
-      });
-    }
+    server.logger.error(
+      `Unable to create Synthetics monitor ${monitorWithNamespace[ConfigKey.NAME]}`
+    );
+    await deleteMonitorIfCreated({
+      newMonitorId,
+      routeContext,
+    });
+
     server.logger.error(e);
 
     throw e;
   }
 };
 
-export const getMonitorNamespace = (
+export const deleteMonitorIfCreated = async ({
+  newMonitorId,
+  routeContext,
+}: {
+  routeContext: RouteContext;
+  newMonitorId: string;
+}) => {
+  const { server, savedObjectsClient } = routeContext;
+  try {
+    const encryptedMonitor = await savedObjectsClient.get<EncryptedSyntheticsMonitor>(
+      syntheticsMonitorType,
+      newMonitorId
+    );
+    if (encryptedMonitor) {
+      await savedObjectsClient.delete(syntheticsMonitorType, newMonitorId);
+
+      await deleteMonitor({
+        routeContext,
+        monitorId: newMonitorId,
+      });
+    }
+  } catch (e) {
+    // ignore errors here
+    server.logger.error(e);
+  }
+};
+
+const getPrivateLocations = async (
+  soClient: SavedObjectsClientContract,
+  normalizedMonitor: SyntheticsMonitor
+) => {
+  const { locations } = normalizedMonitor;
+  const hasPrivateLocation = locations.filter((location) => !location.isServiceManaged);
+  if (hasPrivateLocation.length === 0) {
+    return [];
+  }
+  return await getSyntheticsPrivateLocations(soClient);
+};
+
+const getMonitorNamespace = (
   server: UptimeServerSetup,
   request: KibanaRequest,
   configuredNamespace: string
 ) => {
-  const spaceId = server.spaces.spacesService.getSpaceId(request);
+  const spaceId = server.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
   const kibanaNamespace = formatKibanaNamespace(spaceId);
   const namespace =
     configuredNamespace === DEFAULT_NAMESPACE_STRING ? kibanaNamespace : configuredNamespace;

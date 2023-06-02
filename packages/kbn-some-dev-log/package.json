@@ -2,7 +2,5 @@
   "name": "@kbn/some-dev-log",
   "private": true,
   "version": "1.0.0",
-  "main": "./target_node/index.js",
-  "license": "SSPL-1.0 OR Elastic License 2.0",
-  "types": "./target_types/index.d.ts"
+  "license": "SSPL-1.0 OR Elastic License 2.0"
 }

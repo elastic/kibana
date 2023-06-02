@@ -36,6 +36,11 @@ export async function termsAggSuggestions(
     field = indexPattern && getFieldByName(fieldName, indexPattern);
   }
 
+  // Terms agg doesn't support IP with "exclude"/"include" parameter
+  if (field?.type === 'ip') {
+    return [];
+  }
+
   const body = await getBody(autocompleteSearchOptions, field ?? fieldName, query, filters);
 
   const result = await esClient.search(

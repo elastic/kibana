@@ -29,7 +29,7 @@
           "\nPredefined `EuiEmptyPrompt` for 404 pages."
         ],
         "signature": [
-          "({ actions }: NotFoundProps) => JSX.Element"
+          "({ actions, title, body }: NotFoundProps) => JSX.Element"
         ],
         "path": "packages/shared-ux/prompt/not_found/src/not_found_prompt.tsx",
         "deprecated": false,
@@ -40,7 +40,7 @@
             "id": "def-common.NotFoundPrompt.$1",
             "type": "Object",
             "tags": [],
-            "label": "{ actions }",
+            "label": "{ actions, title, body }",
             "description": [],
             "signature": [
               "NotFoundProps"

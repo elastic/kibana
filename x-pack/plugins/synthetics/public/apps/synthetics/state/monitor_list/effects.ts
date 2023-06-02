@@ -6,32 +6,67 @@
  */
 
 import { PayloadAction } from '@reduxjs/toolkit';
-import { call, put, takeEvery, takeLeading, select } from 'redux-saga/effects';
+import { call, put, takeEvery, select, takeLatest, debounce } from 'redux-saga/effects';
+import { SavedObject } from '@kbn/core-saved-objects-common';
+import { quietFetchOverviewStatusAction } from '../overview_status';
+import { enableDefaultAlertingAction } from '../alert_rules';
+import { ConfigKey, SyntheticsMonitor } from '../../../../../common/runtime_types';
 import { kibanaService } from '../../../../utils/kibana_service';
 import { MonitorOverviewPageState } from '../overview';
 import { quietFetchOverviewAction } from '../overview/actions';
 import { selectOverviewState } from '../overview/selectors';
-import { fetchEffectFactory } from '../utils/fetch_effect';
+import { fetchEffectFactory, sendErrorToast, sendSuccessToast } from '../utils/fetch_effect';
 import { serializeHttpFetchError } from '../utils/http_error';
 import {
   clearMonitorUpsertStatus,
+  enableMonitorAlertAction,
   fetchMonitorListAction,
   fetchUpsertFailureAction,
   fetchUpsertMonitorAction,
   fetchUpsertSuccessAction,
-  UpsertMonitorRequest,
+  quietFetchMonitorListAction,
+  fetchMonitorFiltersAction,
 } from './actions';
-import { fetchMonitorManagementList, fetchUpsertMonitor } from './api';
+import { fetchMonitorManagementList, fetchUpsertMonitor, fetchMonitorFilters } from './api';
 import { toastTitle } from './toast_title';
+import { UpsertMonitorRequest } from './models';
 
 export function* fetchMonitorListEffect() {
-  yield takeLeading(
-    fetchMonitorListAction.get,
+  yield debounce(
+    300, // Only take the latest while ignoring any intermediate triggers
+    [fetchMonitorListAction.get, quietFetchMonitorListAction],
     fetchEffectFactory(
       fetchMonitorManagementList,
       fetchMonitorListAction.success,
       fetchMonitorListAction.fail
     )
+  );
+}
+
+export function* enableMonitorAlertEffect() {
+  yield takeEvery(
+    enableMonitorAlertAction.get,
+    function* (action: PayloadAction<UpsertMonitorRequest>): Generator {
+      try {
+        const response = yield call(fetchUpsertMonitor, action.payload);
+        yield put(enableMonitorAlertAction.success(response as SavedObject<SyntheticsMonitor>));
+        sendSuccessToast(action.payload.success);
+        if (
+          (response as SavedObject<SyntheticsMonitor>).attributes[ConfigKey.ALERT_CONFIG]?.status
+            ?.enabled
+        ) {
+          yield put(enableDefaultAlertingAction.get());
+        }
+      } catch (error) {
+        sendErrorToast(action.payload.error, error);
+        yield put(
+          enableMonitorAlertAction.fail({
+            configId: action.payload.configId,
+            error: serializeHttpFetchError(error, action.payload),
+          })
+        );
+      }
+    }
   );
 }
 
@@ -57,18 +92,24 @@ export function* upsertMonitorEffect() {
           toastLifeTimeMs: action.payload.error.lifetimeMs,
         });
         yield put(
-          fetchUpsertFailureAction({ id: action.payload.id, error: serializeHttpFetchError(error) })
+          fetchUpsertFailureAction({
+            configId: action.payload.configId,
+            error: serializeHttpFetchError(error, action.payload),
+          })
         );
       } finally {
         if (action.payload.shouldQuietFetchAfterSuccess !== false) {
           const monitorState = yield select(selectOverviewState);
           if (hasPageState(monitorState)) {
+            yield put(quietFetchOverviewAction.get(monitorState.pageState));
             yield put(
-              quietFetchOverviewAction.get(monitorState.pageState as MonitorOverviewPageState)
+              quietFetchOverviewStatusAction.get({
+                pageState: monitorState.pageState,
+              })
             );
           }
         }
-        yield put(clearMonitorUpsertStatus(action.payload.id));
+        yield put(clearMonitorUpsertStatus(action.payload.configId));
       }
     }
   );
@@ -76,4 +117,15 @@ export function* upsertMonitorEffect() {
 
 function hasPageState(value: any): value is { pageState: MonitorOverviewPageState } {
   return Object.keys(value).includes('pageState');
+}
+
+export function* fetchMonitorFiltersEffect() {
+  yield takeLatest(
+    fetchMonitorFiltersAction.get,
+    fetchEffectFactory(
+      fetchMonitorFilters,
+      fetchMonitorFiltersAction.success,
+      fetchMonitorFiltersAction.fail
+    )
+  );
 }

@@ -6,33 +6,31 @@
  * Side Public License, v 1.
  */
 
-import { loadDataView, getFallbackDataViewId } from './resolve_data_view';
-import { dataViewsMock } from '../../../__mocks__/data_views';
+import { loadDataView } from './resolve_data_view';
 import { dataViewMock } from '../../../__mocks__/data_view';
-import { configMock } from '../../../__mocks__/config';
+import { discoverServiceMock as services } from '../../../__mocks__/services';
 
 describe('Resolve data view tests', () => {
   test('returns valid data for an existing data view', async () => {
-    const dataViewId = 'the-data-view-id';
-    const result = await loadDataView(dataViewsMock, configMock, dataViewId);
+    const id = 'the-data-view-id';
+    const result = await loadDataView({
+      id,
+      services,
+      dataViewList: [],
+    });
     expect(result.loaded).toEqual(dataViewMock);
+    expect(result.stateVal).toEqual(id);
     expect(result.stateValFound).toEqual(true);
-    expect(result.stateVal).toEqual(dataViewId);
   });
   test('returns fallback data for an invalid data view', async () => {
-    const dataViewId = 'invalid-id';
-    const result = await loadDataView(dataViewsMock, configMock, dataViewId);
+    const id = 'invalid-id';
+    const result = await loadDataView({
+      id,
+      services,
+      dataViewList: [],
+    });
     expect(result.loaded).toEqual(dataViewMock);
     expect(result.stateValFound).toBe(false);
-    expect(result.stateVal).toBe(dataViewId);
-  });
-  test('getFallbackDataViewId with an empty dataViews array', async () => {
-    const result = await getFallbackDataViewId([], '');
-    expect(result).toBe('');
-  });
-  test('getFallbackDataViewId with an dataViews array', async () => {
-    const list = await dataViewsMock.getIdsWithTitle();
-    const result = await getFallbackDataViewId(list, '');
-    expect(result).toBe('the-data-view-id');
+    expect(result.stateVal).toBe(id);
   });
 });

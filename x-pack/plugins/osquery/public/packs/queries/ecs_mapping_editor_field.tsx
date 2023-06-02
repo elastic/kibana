@@ -48,8 +48,8 @@ import {
   convertECSMappingToArray,
   convertECSMappingToObject,
 } from '../../../common/schemas/common/utils';
-import ECSSchema from '../../common/schemas/ecs/v8.5.0.json';
-import osquerySchema from '../../common/schemas/osquery/v5.5.1.json';
+import ECSSchema from '../../common/schemas/ecs/v8.7.0.json';
+import osquerySchema from '../../common/schemas/osquery/v5.7.0.json';
 
 import { FieldIcon } from '../../common/lib/kibana';
 import { OsqueryIcon } from '../../components/osquery_icon';
@@ -513,6 +513,7 @@ const OsqueryColumnFieldComponent: React.FC<OsqueryColumnFieldProps> = ({
       <StyledEuiSuperSelect
         disabled={euiFieldProps.isDisabled}
         options={OSQUERY_COLUMN_VALUE_TYPE_OPTIONS}
+        data-test-subj={`osquery-result-type-select-${index}`}
         valueOfSelected={resultTypeField.value || OSQUERY_COLUMN_VALUE_TYPE_OPTIONS[0].value}
         // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
         popoverProps={{
@@ -523,7 +524,7 @@ const OsqueryColumnFieldComponent: React.FC<OsqueryColumnFieldProps> = ({
         onChange={onTypeChange}
       />
     ),
-    [euiFieldProps.isDisabled, onTypeChange, resultTypeField.value]
+    [euiFieldProps.isDisabled, index, onTypeChange, resultTypeField.value]
   );
 
   useEffect(() => {

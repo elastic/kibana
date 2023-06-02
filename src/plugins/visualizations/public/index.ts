@@ -46,7 +46,6 @@ export type {
   VisualizationStage,
 } from './vis_types/vis_type_alias_registry';
 export {
-  VISUALIZE_ENABLE_LABS_SETTING,
   SAVED_OBJECTS_LIMIT_SETTING,
   SAVED_OBJECTS_PER_PAGE_SETTING,
   LegendSize,
@@ -69,8 +68,10 @@ export type { IEditorController, EditorRenderProps } from './visualize_app/types
 export {
   VISUALIZE_EDITOR_TRIGGER,
   AGG_BASED_VISUALIZATION_TRIGGER,
+  DASHBOARD_VISUALIZATION_PANEL_TRIGGER,
   ACTION_CONVERT_TO_LENS,
   ACTION_CONVERT_AGG_BASED_TO_LENS,
+  ACTION_CONVERT_DASHBOARD_PANEL_TO_LENS,
 } from './triggers';
 
 export const convertToLensModule = import('./convert_to_lens');

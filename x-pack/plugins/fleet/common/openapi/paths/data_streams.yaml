@@ -1,6 +1,7 @@
 get:
-  summary: Data streams - List
-  tags: []
+  summary: List data streams
+  tags:
+    - Data streams
   responses:
     '200':
       description: OK
@@ -13,5 +14,7 @@ get:
                 type: array
                 items:
                   $ref: ../components/schemas/data_stream.yaml
+    '400':
+      $ref: ../components/responses/error.yaml
   operationId: data-streams-list
 parameters: []

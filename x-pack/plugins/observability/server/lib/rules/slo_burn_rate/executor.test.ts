@@ -5,8 +5,13 @@
  * 2.0.
  */
 
-import uuid from 'uuid';
-import { IUiSettingsClient, SavedObjectsClientContract } from '@kbn/core/server';
+import { v4 as uuidv4 } from 'uuid';
+import {
+  IBasePath,
+  IUiSettingsClient,
+  SavedObjectsClientContract,
+  SavedObjectsFindResponse,
+} from '@kbn/core/server';
 import {
   ElasticsearchClientMock,
   elasticsearchServiceMock,
@@ -19,22 +24,33 @@ import { ISearchStartSearchSource } from '@kbn/data-plugin/public';
 import { MockedLogger } from '@kbn/logging-mocks';
 import { SanitizedRuleConfig } from '@kbn/alerting-plugin/common';
 import { Alert, RuleExecutorServices } from '@kbn/alerting-plugin/server';
+import { DEFAULT_FLAPPING_SETTINGS } from '@kbn/alerting-plugin/common/rules_settings';
 import {
   ALERT_EVALUATION_THRESHOLD,
   ALERT_EVALUATION_VALUE,
   ALERT_REASON,
 } from '@kbn/rule-data-utils';
+import { getRuleExecutor } from './executor';
+import { createSLO } from '../../../services/slo/fixtures/slo';
+import { SLO, StoredSLO } from '../../../domain/models';
+import { SharePluginStart } from '@kbn/share-plugin/server';
+import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import {
-  BurnRateAlertContext,
   BurnRateAlertState,
+  BurnRateAlertContext,
   BurnRateAllowedActionGroups,
   BurnRateRuleParams,
-  FIRED_ACTION,
   AlertStates,
-  getRuleExecutor,
-} from './executor';
-import { aStoredSLO, createSLO } from '../../../services/slo/fixtures/slo';
-import { SLO } from '../../../domain/models';
+} from './types';
+import { SLO_ID_FIELD, SLO_REVISION_FIELD } from '../../../../common/field_names/infra_metrics';
+import { SLONotFound } from '../../../errors';
+import { SO_SLO_TYPE } from '../../../saved_objects';
+import { sloSchema } from '@kbn/slo-schema';
+import {
+  ALERT_ACTION,
+  ALERT_ACTION_ID,
+  HIGH_PRIORITY_ACTION_ID,
+} from '../../../../common/constants';
 
 const commonEsResponse = {
   took: 100,
@@ -50,14 +66,26 @@ const commonEsResponse = {
   },
 };
 
-const BURN_RATE_THRESHOLD = 2;
-const BURN_RATE_ABOVE_THRESHOLD = BURN_RATE_THRESHOLD + 0.01;
-const BURN_RATE_BELOW_THRESHOLD = BURN_RATE_THRESHOLD - 0.01;
+function createFindResponse(sloList: SLO[]): SavedObjectsFindResponse<StoredSLO> {
+  return {
+    page: 1,
+    per_page: 25,
+    total: sloList.length,
+    saved_objects: sloList.map((slo) => ({
+      id: slo.id,
+      attributes: sloSchema.encode(slo),
+      type: SO_SLO_TYPE,
+      references: [],
+      score: 1,
+    })),
+  };
+}
 
 describe('BurnRateRuleExecutor', () => {
   let esClientMock: ElasticsearchClientMock;
   let soClientMock: jest.Mocked<SavedObjectsClientContract>;
   let loggerMock: jest.Mocked<MockedLogger>;
+  const basePathMock = { publicBaseUrl: 'https://kibana.dev' } as IBasePath;
   let alertWithLifecycleMock: jest.MockedFn<LifecycleAlertService>;
   let alertFactoryMock: jest.Mocked<
     PublicAlertFactory<BurnRateAlertState, BurnRateAlertContext, BurnRateAllowedActionGroups>
@@ -93,171 +121,262 @@ describe('BurnRateRuleExecutor', () => {
       getAlertStartedDate: jest.fn(),
       getAlertUuid: jest.fn(),
       getAlertByAlertUuid: jest.fn(),
+      share: {} as SharePluginStart,
+      dataViews: dataViewPluginMocks.createStartContract(),
     };
   });
 
-  it('does not schedule an alert when both windows burn rates are below the threshold', async () => {
-    const slo = createSLO({ objective: { target: 0.9 } });
-    soClientMock.get.mockResolvedValue(aStoredSLO(slo));
-    esClientMock.search.mockResolvedValue(
-      generateEsResponse(slo, BURN_RATE_BELOW_THRESHOLD, BURN_RATE_BELOW_THRESHOLD)
-    );
-    alertFactoryMock.done.mockReturnValueOnce({ getRecoveredAlerts: () => [] });
+  describe('multi-window', () => {
+    it('throws when the slo is not found', async () => {
+      soClientMock.find.mockRejectedValue(new SLONotFound('SLO [non-existent] not found'));
+      const executor = getRuleExecutor({ basePath: basePathMock });
 
-    const executor = getRuleExecutor();
-    await executor({
-      params: someRuleParams({ sloId: slo.id, threshold: BURN_RATE_THRESHOLD }),
-      startedAt: new Date(),
-      services: servicesMock,
-      executionId: 'irrelevant',
-      logger: loggerMock,
-      previousStartedAt: null,
-      rule: {} as SanitizedRuleConfig,
-      spaceId: 'irrelevant',
-      state: {},
+      await expect(
+        executor({
+          params: someRuleParamsWithWindows({ sloId: 'non-existent' }),
+          startedAt: new Date(),
+          services: servicesMock,
+          executionId: 'irrelevant',
+          logger: loggerMock,
+          previousStartedAt: null,
+          rule: {} as SanitizedRuleConfig,
+          spaceId: 'irrelevant',
+          state: {},
+          flappingSettings: DEFAULT_FLAPPING_SETTINGS,
+        })
+      ).rejects.toThrowError();
     });
 
-    expect(alertWithLifecycleMock).not.toBeCalled();
-  });
+    it('returns early when the slo is disabled', async () => {
+      const slo = createSLO({ objective: { target: 0.9 }, enabled: false });
+      soClientMock.find.mockResolvedValueOnce(createFindResponse([slo]));
+      const executor = getRuleExecutor({ basePath: basePathMock });
 
-  it('does not schedule an alert when the long window burn rate is below the threshold', async () => {
-    const slo = createSLO({ objective: { target: 0.9 } });
-    soClientMock.get.mockResolvedValue(aStoredSLO(slo));
-    esClientMock.search.mockResolvedValue(
-      generateEsResponse(slo, BURN_RATE_ABOVE_THRESHOLD, BURN_RATE_BELOW_THRESHOLD)
-    );
-    alertFactoryMock.done.mockReturnValueOnce({ getRecoveredAlerts: () => [] });
+      const result = await executor({
+        params: someRuleParamsWithWindows({ sloId: slo.id }),
+        startedAt: new Date(),
+        services: servicesMock,
+        executionId: 'irrelevant',
+        logger: loggerMock,
+        previousStartedAt: null,
+        rule: {} as SanitizedRuleConfig,
+        spaceId: 'irrelevant',
+        state: {},
+        flappingSettings: DEFAULT_FLAPPING_SETTINGS,
+      });
 
-    const executor = getRuleExecutor();
-    await executor({
-      params: someRuleParams({ sloId: slo.id, threshold: BURN_RATE_THRESHOLD }),
-      startedAt: new Date(),
-      services: servicesMock,
-      executionId: 'irrelevant',
-      logger: loggerMock,
-      previousStartedAt: null,
-      rule: {} as SanitizedRuleConfig,
-      spaceId: 'irrelevant',
-      state: {},
+      expect(esClientMock.search).not.toHaveBeenCalled();
+      expect(alertWithLifecycleMock).not.toHaveBeenCalled();
+      expect(alertFactoryMock.done).not.toHaveBeenCalled();
+      expect(result).toEqual({ state: {} });
     });
 
-    expect(alertWithLifecycleMock).not.toBeCalled();
-  });
+    it('does not schedule an alert when long windows burn rates are below the threshold', async () => {
+      const slo = createSLO({ objective: { target: 0.9 } });
+      soClientMock.find.mockResolvedValueOnce(createFindResponse([slo]));
+      esClientMock.search.mockResolvedValueOnce(generateEsResponse(slo, 2.1, 1.9));
+      esClientMock.search.mockResolvedValueOnce(generateEsResponse(slo, 1.1, 0.9));
+      alertFactoryMock.done.mockReturnValueOnce({ getRecoveredAlerts: () => [] });
 
-  it('does not schedule an alert when the short window burn rate is below the threshold', async () => {
-    const slo = createSLO({ objective: { target: 0.9 } });
-    soClientMock.get.mockResolvedValue(aStoredSLO(slo));
-    esClientMock.search.mockResolvedValue(
-      generateEsResponse(slo, BURN_RATE_BELOW_THRESHOLD, BURN_RATE_ABOVE_THRESHOLD)
-    );
-    alertFactoryMock.done.mockReturnValueOnce({ getRecoveredAlerts: () => [] });
+      const executor = getRuleExecutor({ basePath: basePathMock });
+      await executor({
+        params: someRuleParamsWithWindows({ sloId: slo.id }),
+        startedAt: new Date(),
+        services: servicesMock,
+        executionId: 'irrelevant',
+        logger: loggerMock,
+        previousStartedAt: null,
+        rule: {} as SanitizedRuleConfig,
+        spaceId: 'irrelevant',
+        state: {},
+        flappingSettings: DEFAULT_FLAPPING_SETTINGS,
+      });
 
-    const executor = getRuleExecutor();
-    await executor({
-      params: someRuleParams({ sloId: slo.id, threshold: BURN_RATE_THRESHOLD }),
-      startedAt: new Date(),
-      services: servicesMock,
-      executionId: 'irrelevant',
-      logger: loggerMock,
-      previousStartedAt: null,
-      rule: {} as SanitizedRuleConfig,
-      spaceId: 'irrelevant',
-      state: {},
+      expect(alertWithLifecycleMock).not.toBeCalled();
     });
 
-    expect(alertWithLifecycleMock).not.toBeCalled();
-  });
+    it('does not schedule an alert when the short window burn rate is below the threshold', async () => {
+      const slo = createSLO({ objective: { target: 0.9 } });
+      soClientMock.find.mockResolvedValueOnce(createFindResponse([slo]));
+      esClientMock.search.mockResolvedValue(generateEsResponse(slo, 1.9, 2.1));
+      esClientMock.search.mockResolvedValue(generateEsResponse(slo, 0.9, 1.1));
+      alertFactoryMock.done.mockReturnValueOnce({ getRecoveredAlerts: () => [] });
 
-  it('schedules an alert when both windows burn rate have reached the threshold', async () => {
-    const slo = createSLO({ objective: { target: 0.9 } });
-    soClientMock.get.mockResolvedValue(aStoredSLO(slo));
-    esClientMock.search.mockResolvedValue(
-      generateEsResponse(slo, BURN_RATE_THRESHOLD, BURN_RATE_THRESHOLD)
-    );
-    const alertMock: Partial<Alert> = {
-      scheduleActions: jest.fn(),
-      replaceState: jest.fn(),
-    };
-    alertWithLifecycleMock.mockImplementation(() => alertMock as any);
-    alertFactoryMock.done.mockReturnValueOnce({ getRecoveredAlerts: () => [] });
+      const executor = getRuleExecutor({ basePath: basePathMock });
+      await executor({
+        params: someRuleParamsWithWindows({ sloId: slo.id }),
+        startedAt: new Date(),
+        services: servicesMock,
+        executionId: 'irrelevant',
+        logger: loggerMock,
+        previousStartedAt: null,
+        rule: {} as SanitizedRuleConfig,
+        spaceId: 'irrelevant',
+        state: {},
+        flappingSettings: DEFAULT_FLAPPING_SETTINGS,
+      });
 
-    const executor = getRuleExecutor();
-    await executor({
-      params: someRuleParams({ sloId: slo.id, threshold: BURN_RATE_THRESHOLD }),
-      startedAt: new Date(),
-      services: servicesMock,
-      executionId: 'irrelevant',
-      logger: loggerMock,
-      previousStartedAt: null,
-      rule: {} as SanitizedRuleConfig,
-      spaceId: 'irrelevant',
-      state: {},
+      expect(alertWithLifecycleMock).not.toBeCalled();
     });
 
-    expect(alertWithLifecycleMock).toBeCalledWith({
-      id: `alert-${slo.id}-${slo.revision}`,
-      fields: {
-        [ALERT_REASON]:
-          'The burn rate for the past 1h is 2 and for the past 5m is 2. Alert when above 2 for both windows',
-        [ALERT_EVALUATION_THRESHOLD]: 2,
-        [ALERT_EVALUATION_VALUE]: 2,
-      },
+    it('schedules an alert when both windows of first window definition burn rate have reached the threshold', async () => {
+      const slo = createSLO({ objective: { target: 0.9 } });
+      soClientMock.find.mockResolvedValueOnce(createFindResponse([slo]));
+      esClientMock.search.mockResolvedValue(generateEsResponse(slo, 2, 2));
+      esClientMock.search.mockResolvedValue(generateEsResponse(slo, 2, 2));
+      const alertMock: Partial<Alert> = {
+        scheduleActions: jest.fn(),
+        replaceState: jest.fn(),
+      };
+      alertWithLifecycleMock.mockImplementation(() => alertMock as any);
+      alertFactoryMock.done.mockReturnValueOnce({ getRecoveredAlerts: () => [] });
+
+      const executor = getRuleExecutor({ basePath: basePathMock });
+      await executor({
+        params: someRuleParamsWithWindows({ sloId: slo.id }),
+        startedAt: new Date(),
+        services: servicesMock,
+        executionId: 'irrelevant',
+        logger: loggerMock,
+        previousStartedAt: null,
+        rule: {} as SanitizedRuleConfig,
+        spaceId: 'irrelevant',
+        state: {},
+        flappingSettings: DEFAULT_FLAPPING_SETTINGS,
+      });
+
+      expect(alertWithLifecycleMock).toBeCalledWith({
+        id: `alert-${slo.id}-${slo.revision}`,
+        fields: {
+          [ALERT_REASON]:
+            'The burn rate for the past 1h is 2 and for the past 5m is 2. Alert when above 2 for both windows',
+          [ALERT_EVALUATION_THRESHOLD]: 2,
+          [ALERT_EVALUATION_VALUE]: 2,
+          [SLO_ID_FIELD]: slo.id,
+          [SLO_REVISION_FIELD]: slo.revision,
+        },
+      });
+      expect(alertMock.scheduleActions).toBeCalledWith(
+        ALERT_ACTION.id,
+        expect.objectContaining({
+          longWindow: { burnRate: 2, duration: '1h' },
+          shortWindow: { burnRate: 2, duration: '5m' },
+          burnRateThreshold: 2,
+          reason:
+            'The burn rate for the past 1h is 2 and for the past 5m is 2. Alert when above 2 for both windows',
+        })
+      );
+      expect(alertMock.replaceState).toBeCalledWith({ alertState: AlertStates.ALERT });
     });
-    expect(alertMock.scheduleActions).toBeCalledWith(
-      FIRED_ACTION.id,
-      expect.objectContaining({
-        longWindow: { burnRate: 2, duration: '1h' },
-        shortWindow: { burnRate: 2, duration: '5m' },
-        threshold: 2,
-        reason:
-          'The burn rate for the past 1h is 2 and for the past 5m is 2. Alert when above 2 for both windows',
-      })
-    );
-    expect(alertMock.replaceState).toBeCalledWith({ alertState: AlertStates.ALERT });
-  });
 
-  it('sets the context on the recovered alerts', async () => {
-    const slo = createSLO({ objective: { target: 0.9 } });
-    soClientMock.get.mockResolvedValue(aStoredSLO(slo));
-    esClientMock.search.mockResolvedValue(
-      generateEsResponse(slo, BURN_RATE_BELOW_THRESHOLD, BURN_RATE_ABOVE_THRESHOLD)
-    );
-    const alertMock: Partial<Alert> = {
-      setContext: jest.fn(),
-    };
-    alertFactoryMock.done.mockReturnValueOnce({ getRecoveredAlerts: () => [alertMock] as any });
+    it('schedules an alert when both windows of second window definition burn rate have reached the threshold', async () => {
+      const slo = createSLO({ objective: { target: 0.9 } });
+      soClientMock.find.mockResolvedValueOnce(createFindResponse([slo]));
+      esClientMock.search.mockResolvedValue(generateEsResponse(slo, 1.5, 1.5));
+      esClientMock.search.mockResolvedValue(generateEsResponse(slo, 1.5, 1.5));
+      const alertMock: Partial<Alert> = {
+        scheduleActions: jest.fn(),
+        replaceState: jest.fn(),
+      };
+      alertWithLifecycleMock.mockImplementation(() => alertMock as any);
+      alertFactoryMock.done.mockReturnValueOnce({ getRecoveredAlerts: () => [] });
 
-    const executor = getRuleExecutor();
+      const executor = getRuleExecutor({ basePath: basePathMock });
+      await executor({
+        params: someRuleParamsWithWindows({ sloId: slo.id }),
+        startedAt: new Date(),
+        services: servicesMock,
+        executionId: 'irrelevant',
+        logger: loggerMock,
+        previousStartedAt: null,
+        rule: {} as SanitizedRuleConfig,
+        spaceId: 'irrelevant',
+        state: {},
+        flappingSettings: DEFAULT_FLAPPING_SETTINGS,
+      });
 
-    await executor({
-      params: someRuleParams({ sloId: slo.id, threshold: BURN_RATE_THRESHOLD }),
-      startedAt: new Date(),
-      services: servicesMock,
-      executionId: 'irrelevant',
-      logger: loggerMock,
-      previousStartedAt: null,
-      rule: {} as SanitizedRuleConfig,
-      spaceId: 'irrelevant',
-      state: {},
+      expect(alertWithLifecycleMock).toBeCalledWith({
+        id: `alert-${slo.id}-${slo.revision}`,
+        fields: {
+          [ALERT_REASON]:
+            'The burn rate for the past 6h is 1.5 and for the past 30m is 1.5. Alert when above 1 for both windows',
+          [ALERT_EVALUATION_THRESHOLD]: 1,
+          [ALERT_EVALUATION_VALUE]: 1.5,
+          [SLO_ID_FIELD]: slo.id,
+          [SLO_REVISION_FIELD]: slo.revision,
+        },
+      });
+      expect(alertMock.scheduleActions).toBeCalledWith(
+        HIGH_PRIORITY_ACTION_ID,
+        expect.objectContaining({
+          longWindow: { burnRate: 1.5, duration: '6h' },
+          shortWindow: { burnRate: 1.5, duration: '30m' },
+          burnRateThreshold: 1,
+          reason:
+            'The burn rate for the past 6h is 1.5 and for the past 30m is 1.5. Alert when above 1 for both windows',
+        })
+      );
+      expect(alertMock.replaceState).toBeCalledWith({ alertState: AlertStates.ALERT });
     });
 
-    expect(alertWithLifecycleMock).not.toBeCalled();
-    expect(alertMock.setContext).toBeCalledWith(
-      expect.objectContaining({
-        longWindow: { burnRate: 2.01, duration: '1h' },
-        shortWindow: { burnRate: 1.99, duration: '5m' },
-        threshold: 2,
-      })
-    );
+    it('sets the context on the recovered alerts using the last window', async () => {
+      const slo = createSLO({ objective: { target: 0.9 } });
+      soClientMock.find.mockResolvedValueOnce(createFindResponse([slo]));
+      esClientMock.search.mockResolvedValue(generateEsResponse(slo, 0.9, 0.9));
+      esClientMock.search.mockResolvedValue(generateEsResponse(slo, 0.9, 0.9));
+      const alertMock: Partial<Alert> = {
+        setContext: jest.fn(),
+      };
+      alertFactoryMock.done.mockReturnValueOnce({ getRecoveredAlerts: () => [alertMock] as any });
+
+      const executor = getRuleExecutor({ basePath: basePathMock });
+
+      await executor({
+        params: someRuleParamsWithWindows({ sloId: slo.id }),
+        startedAt: new Date(),
+        services: servicesMock,
+        executionId: 'irrelevant',
+        logger: loggerMock,
+        previousStartedAt: null,
+        rule: {} as SanitizedRuleConfig,
+        spaceId: 'irrelevant',
+        state: {},
+        flappingSettings: DEFAULT_FLAPPING_SETTINGS,
+      });
+
+      expect(alertWithLifecycleMock).not.toBeCalled();
+      expect(alertMock.setContext).toBeCalledWith(
+        expect.objectContaining({
+          longWindow: { burnRate: 0.9, duration: '6h' },
+          shortWindow: { burnRate: 0.9, duration: '30m' },
+          burnRateThreshold: 1,
+        })
+      );
+    });
   });
 });
 
-function someRuleParams(params: Partial<BurnRateRuleParams> = {}): BurnRateRuleParams {
+function someRuleParamsWithWindows(params: Partial<BurnRateRuleParams> = {}): BurnRateRuleParams {
   return {
-    sloId: uuid(),
-    threshold: 2,
-    longWindow: { duration: 1, unit: 'h' },
-    shortWindow: { duration: 5, unit: 'm' },
+    sloId: uuidv4(),
+    windows: [
+      {
+        id: uuidv4(),
+        burnRateThreshold: 2,
+        maxBurnRateThreshold: 720,
+        longWindow: { value: 1, unit: 'h' },
+        shortWindow: { value: 5, unit: 'm' },
+        actionGroup: ALERT_ACTION_ID,
+      },
+      {
+        id: uuidv4(),
+        burnRateThreshold: 1,
+        maxBurnRateThreshold: 720,
+        longWindow: { value: 6, unit: 'h' },
+        shortWindow: { value: 30, unit: 'm' },
+        actionGroup: HIGH_PRIORITY_ACTION_ID,
+      },
+    ],
     ...params,
   };
 }

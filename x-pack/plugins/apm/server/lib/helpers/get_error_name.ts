@@ -9,7 +9,11 @@ import { NOT_AVAILABLE_LABEL } from '../../../common/i18n';
 import { Maybe } from '../../../typings/common';
 import { APMError } from '../../../typings/es_schemas/ui/apm_error';
 
-export function getErrorName({ error }: { error: Maybe<APMError['error']> }) {
+export function getErrorName({
+  error,
+}: {
+  error: Maybe<APMError['error']>;
+}): string {
   return (
     error?.log?.message || error?.exception?.[0]?.message || NOT_AVAILABLE_LABEL
   );

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { schema } from '@kbn/config-schema';
 import { ActionType } from '../types';
 import { ensureSufficientLicense } from './ensure_sufficient_license';
 
@@ -13,6 +14,11 @@ const sampleActionType: ActionType = {
   name: 'test',
   minimumLicenseRequired: 'basic',
   supportedFeatureIds: ['alerting'],
+  validate: {
+    config: { schema: schema.object({}) },
+    secrets: { schema: schema.object({}) },
+    params: { schema: schema.object({}) },
+  },
   async executor({ actionId }) {
     return { status: 'ok', actionId };
   },

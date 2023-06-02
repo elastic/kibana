@@ -73,6 +73,7 @@ export const useEngineNav = () => {
     hasSchemaConflicts,
     hasUnconfirmedSchemaFields,
     engine,
+    hasIncompleteFields,
   } = useValues(EngineLogic);
 
   if (!isEngineRoute) return undefined;
@@ -156,7 +157,7 @@ export const useEngineNav = () => {
         <>
           {hasSchemaErrors && (
             <EuiIcon
-              type="alert"
+              type="warning"
               color="danger"
               className="appSearchNavIcon"
               title={i18n.translate('xpack.enterpriseSearch.appSearch.engine.schema.errors', {
@@ -179,13 +180,27 @@ export const useEngineNav = () => {
           )}
           {hasSchemaConflicts && (
             <EuiIcon
-              type="alert"
+              type="warning"
               color="warning"
               className="appSearchNavIcon"
               title={i18n.translate('xpack.enterpriseSearch.appSearch.engine.schema.conflicts', {
                 defaultMessage: 'Schema conflicts',
               })}
               data-test-subj="EngineNavSchemaConflicts"
+            />
+          )}
+          {hasIncompleteFields && (
+            <EuiIcon
+              type="warning"
+              color="warning"
+              className="appSearchNavIcon"
+              title={i18n.translate(
+                'xpack.enterpriseSearch.appSearch.engine.schema.hasIncompleteFields',
+                {
+                  defaultMessage: 'Precision tuning is not enabled on all fields',
+                }
+              )}
+              data-test-subj="EngineNavPrecisionTuningWarning"
             />
           )}
         </>
@@ -227,7 +242,7 @@ export const useEngineNav = () => {
         <>
           {invalidBoosts && (
             <EuiIcon
-              type="alert"
+              type="warning"
               color="warning"
               className="appSearchNavIcon"
               title={i18n.translate(
@@ -239,7 +254,7 @@ export const useEngineNav = () => {
           )}
           {unsearchedUnconfirmedFields && (
             <EuiIcon
-              type="alert"
+              type="warning"
               color="warning"
               className="appSearchNavIcon"
               title={i18n.translate(

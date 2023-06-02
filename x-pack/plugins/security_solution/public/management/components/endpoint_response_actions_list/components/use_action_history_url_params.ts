@@ -14,6 +14,7 @@ import {
   type ResponseActionStatus,
 } from '../../../../../common/endpoint/service/response_actions/constants';
 import { useUrlParams } from '../../../hooks/use_url_params';
+import { DEFAULT_DATE_RANGE_OPTIONS } from './hooks';
 
 interface UrlParamsActionsLogFilters {
   commands: string;
@@ -22,25 +23,38 @@ interface UrlParamsActionsLogFilters {
   startDate: string;
   endDate: string;
   users: string;
+  withOutputs: string;
+  withAutomatedActions: boolean;
 }
 
 interface ActionsLogFiltersFromUrlParams {
   commands?: ConsoleResponseActionCommands[];
   hosts?: string[];
+  withOutputs?: string[];
   statuses?: ResponseActionStatus[];
   startDate?: string;
   endDate?: string;
+  withAutomatedActions?: boolean;
   setUrlActionsFilters: (commands: UrlParamsActionsLogFilters['commands']) => void;
   setUrlDateRangeFilters: ({ startDate, endDate }: { startDate: string; endDate: string }) => void;
   setUrlHostsFilters: (agentIds: UrlParamsActionsLogFilters['hosts']) => void;
   setUrlStatusesFilters: (statuses: UrlParamsActionsLogFilters['statuses']) => void;
   setUrlUsersFilters: (users: UrlParamsActionsLogFilters['users']) => void;
+  setUrlWithOutputs: (outputs: UrlParamsActionsLogFilters['withOutputs']) => void;
+  setUrlWithAutomatedActions: (outputs: UrlParamsActionsLogFilters['withAutomatedActions']) => void;
   users?: string[];
 }
 
 type FiltersFromUrl = Pick<
   ActionsLogFiltersFromUrlParams,
-  'commands' | 'hosts' | 'statuses' | 'users' | 'startDate' | 'endDate'
+  | 'commands'
+  | 'hosts'
+  | 'withOutputs'
+  | 'statuses'
+  | 'users'
+  | 'startDate'
+  | 'endDate'
+  | 'withAutomatedActions'
 >;
 
 export const actionsLogFiltersFromUrlParams = (
@@ -50,9 +64,11 @@ export const actionsLogFiltersFromUrlParams = (
     commands: [],
     hosts: [],
     statuses: [],
-    startDate: 'now-24h/h',
-    endDate: 'now',
+    startDate: DEFAULT_DATE_RANGE_OPTIONS.startDate,
+    endDate: DEFAULT_DATE_RANGE_OPTIONS.endDate,
     users: [],
+    withOutputs: [],
+    withAutomatedActions: undefined,
   };
 
   const urlCommands = urlParams.commands
@@ -71,6 +87,10 @@ export const actionsLogFiltersFromUrlParams = (
     : [];
 
   const urlHosts = urlParams.hosts ? String(urlParams.hosts).split(',').sort() : [];
+
+  const urlWithOutputs = urlParams.withOutputs
+    ? String(urlParams.withOutputs).split(',').sort()
+    : [];
 
   const urlStatuses = urlParams.statuses
     ? (String(urlParams.statuses).split(',') as ResponseActionStatus[]).reduce<
@@ -91,6 +111,8 @@ export const actionsLogFiltersFromUrlParams = (
   actionsLogFilters.startDate = urlParams.startDate ? String(urlParams.startDate) : undefined;
   actionsLogFilters.endDate = urlParams.endDate ? String(urlParams.endDate) : undefined;
   actionsLogFilters.users = urlUsers.length ? urlUsers : undefined;
+  actionsLogFilters.withOutputs = urlWithOutputs.length ? urlWithOutputs : undefined;
+  actionsLogFilters.withAutomatedActions = urlParams.withAutomatedActions ? true : undefined;
 
   return actionsLogFilters;
 };
@@ -127,6 +149,19 @@ export const useActionHistoryUrlParams = (): ActionsLogFiltersFromUrlParams => {
         search: toUrlParams({
           ...urlParams,
           hosts: agentIds.length ? agentIds : undefined,
+        }),
+      });
+    },
+    [history, location, toUrlParams, urlParams]
+  );
+
+  const setUrlWithOutputs = useCallback(
+    (actionIds: string) => {
+      history.push({
+        ...location,
+        search: toUrlParams({
+          ...urlParams,
+          withOutputs: actionIds.length ? actionIds : undefined,
         }),
       });
     },
@@ -173,6 +208,19 @@ export const useActionHistoryUrlParams = (): ActionsLogFiltersFromUrlParams => {
     [history, location, toUrlParams, urlParams]
   );
 
+  const setUrlWithAutomatedActions = useCallback(
+    (rule: boolean) => {
+      history.push({
+        ...location,
+        search: toUrlParams({
+          ...urlParams,
+          withAutomatedActions: rule ? 'true' : undefined,
+        }),
+      });
+    },
+    [history, location, toUrlParams, urlParams]
+  );
+
   useEffect(() => {
     setActionsLogFilters((prevState) => {
       return {
@@ -187,7 +235,9 @@ export const useActionHistoryUrlParams = (): ActionsLogFiltersFromUrlParams => {
     setUrlActionsFilters,
     setUrlDateRangeFilters,
     setUrlHostsFilters,
+    setUrlWithOutputs,
     setUrlStatusesFilters,
     setUrlUsersFilters,
+    setUrlWithAutomatedActions,
   };
 };

@@ -1,0 +1,13 @@
+title: Update email connector request
+type: object
+required:
+  - config
+  - name
+properties:
+  config:
+    $ref: 'config_properties_email.yaml'  
+  name:
+    type: string
+    description: The display name for the connector.
+  secrets:
+    $ref: 'secrets_properties_email.yaml' 

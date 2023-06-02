@@ -7,10 +7,9 @@
 
 import React, { useMemo } from 'react';
 import { niceTimeFormatter, TooltipValue } from '@elastic/charts';
-import { Theme, LIGHT_THEME, DARK_THEME } from '@elastic/charts';
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
-import { EuiText } from '@elastic/eui';
+import { EuiLoadingChart, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { sum, min as getMin, max as getMax } from 'lodash';
 import { formatNumber } from '../../../../common/formatters/number';
@@ -72,11 +71,6 @@ export const getDomain = (series: Series, stacked: boolean = false) => {
   return { yMin: min || 0, yMax: max || 0, xMin: minTimestamp, xMax: maxTimestamp };
 };
 
-// TODO use the EUI charts theme see src/plugins/charts/public/services/theme/README.md
-export const getChartTheme = (isDarkMode: boolean): Theme => {
-  return isDarkMode ? DARK_THEME : LIGHT_THEME;
-};
-
 export const EmptyContainer: React.FC = ({ children }) => (
   <div
     style={{
@@ -119,7 +113,7 @@ export const LoadingState = () => {
   return (
     <EmptyContainer>
       <EuiText color="subdued" data-test-subj="loadingData">
-        <FormattedMessage id="xpack.infra.alerts.charts.loadingMessage" defaultMessage="Loading" />
+        <EuiLoadingChart size="m" />
       </EuiText>
     </EmptyContainer>
   );

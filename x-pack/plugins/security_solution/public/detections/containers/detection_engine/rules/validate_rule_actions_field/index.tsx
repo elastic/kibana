@@ -6,3 +6,4 @@
  */
 
 export { validateRuleActionsField } from './validate_rule_actions_field';
+export { debouncedValidateRuleActionsField } from './validate_rule_actions_field';

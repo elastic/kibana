@@ -1,0 +1,11 @@
+{
+  "ml.put_trained_model_vocabulary": {
+    "methods": [
+      "PUT"
+    ],
+    "patterns": [
+      "_ml/trained_models/{model_id}/vocabulary"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/put-trained-model-vocabulary.html"
+  }
+}

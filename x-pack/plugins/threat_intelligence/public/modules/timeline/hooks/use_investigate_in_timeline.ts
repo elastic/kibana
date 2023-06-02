@@ -8,9 +8,10 @@
 import { useContext } from 'react';
 import moment from 'moment';
 import { DataProvider } from '@kbn/timelines-plugin/common';
-import { generateDataProvider } from '../utils';
+import { generateDataProvider } from '../utils/data_provider';
 import { SecuritySolutionContext } from '../../../containers/security_solution_context';
-import { fieldAndValueValid, getIndicatorFieldAndValue, unwrapValue } from '../../indicators';
+import { fieldAndValueValid, getIndicatorFieldAndValue } from '../../indicators/utils/field_value';
+import { unwrapValue } from '../../indicators/utils/unwrap_value';
 import {
   Indicator,
   IndicatorFieldEventEnrichmentMap,
@@ -52,8 +53,13 @@ export const useInvestigateInTimeline = ({
     generateDataProvider(e, value as string)
   );
 
-  const to = unwrapValue(indicator, RawIndicatorFieldId.TimeStamp) as string;
-  const from = moment(to).subtract(10, 'm').toISOString();
+  const indicatorTimestamp: string = unwrapValue(
+    indicator,
+    RawIndicatorFieldId.TimeStamp
+  ) as string;
+
+  const from = moment(indicatorTimestamp).subtract(7, 'd').toISOString();
+  const to = moment(indicatorTimestamp).add(7, 'd').toISOString();
 
   if (!to || !from) {
     return {} as unknown as UseInvestigateInTimelineValue;

@@ -8,15 +8,21 @@
 
 import { Datum, PartitionLayer } from '@elastic/charts';
 import type { PaletteRegistry } from '@kbn/coloring';
+import { i18n } from '@kbn/i18n';
 import { FieldFormat } from '@kbn/field-formats-plugin/common';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { Datatable, DatatableRow } from '@kbn/expressions-plugin/public';
+import { getDistinctSeries } from '..';
 import { BucketColumns, ChartTypes, PartitionVisParams } from '../../../common/types';
-import { sortPredicateByType } from './sort_predicate';
+import { sortPredicateByType, sortPredicateSaveSourceOrder } from './sort_predicate';
 import { byDataColorPaletteMap, getColor } from './get_color';
 import { getNodeLabel } from './get_node_labels';
 
-const EMPTY_SLICE = Symbol('empty_slice');
+// This is particularly useful in case of a text based languages where
+// it's no possible to use a missingBucketLabel
+const emptySliceLabel = i18n.translate('expressionPartitionVis.emptySlice', {
+  defaultMessage: '(empty)',
+});
 
 export const getLayers = (
   chartType: ChartTypes,
@@ -52,27 +58,33 @@ export const getLayers = (
     );
   }
 
-  const sortPredicate = sortPredicateByType(chartType, visParams, visData, columns);
+  const sortPredicateForType = sortPredicateByType(chartType, visParams, visData, columns);
+
+  const distinctSeries = getDistinctSeries(rows, columns);
+
   return columns.map((col, layerIndex) => {
     return {
-      groupByRollup: (d: Datum) => (col.id ? d[col.id] ?? EMPTY_SLICE : col.name),
-      showAccessor: (d: Datum) => d !== EMPTY_SLICE,
+      groupByRollup: (d: Datum) => (col.id ? d[col.id] ?? emptySliceLabel : col.name),
+      showAccessor: (d: Datum) => true,
       nodeLabel: (d: unknown) => getNodeLabel(d, col, formatters, formatter.deserialize),
       fillLabel:
         layerIndex === 0 && chartType === ChartTypes.MOSAIC
           ? { ...fillLabel, minFontSize: 14, maxFontSize: 14, clipText: true }
           : fillLabel,
-      sortPredicate,
+      sortPredicate: col.meta?.sourceParams?.consolidatedMetricsColumn
+        ? sortPredicateSaveSourceOrder()
+        : sortPredicateForType,
       shape: {
-        fillColor: (d) =>
+        fillColor: (key, sortIndex, node) =>
           getColor(
             chartType,
-            d,
+            key,
+            node,
             layerIndex,
             isSplitChart,
             overwriteColors,
-            columns,
-            rows,
+            distinctSeries,
+            { columnsLength: columns.length, rowsLength: rows.length },
             visParams,
             palettes,
             byDataPalette,

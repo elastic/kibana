@@ -12,16 +12,16 @@ import {
   isOfAggregateQueryType,
   getAggregateQueryMode,
 } from '@kbn/es-query';
-import { RecordRawType } from '../hooks/use_saved_search';
+import { RecordRawType } from '../services/discover_data_state_container';
 
 export function getRawRecordType(query?: Query | AggregateQuery) {
-  if (query && isOfAggregateQueryType(query) && getAggregateQueryMode(query) === 'sql') {
+  if (
+    query &&
+    isOfAggregateQueryType(query) &&
+    (getAggregateQueryMode(query) === 'sql' || getAggregateQueryMode(query) === 'esql')
+  ) {
     return RecordRawType.PLAIN;
   }
 
   return RecordRawType.DOCUMENT;
-}
-
-export function isPlainRecord(query?: Query | AggregateQuery): query is AggregateQuery {
-  return getRawRecordType(query) === RecordRawType.PLAIN;
 }

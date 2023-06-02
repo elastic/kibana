@@ -26,7 +26,12 @@ export const MonitorUrl = ({ monitorUrl }: Props) => {
         })}
       </EuiDescriptionListTitle>
       <EuiDescriptionListDescription>
-        <EuiLink href={monitorUrl} target="_blank" external>
+        <EuiLink
+          data-test-subj="syntheticsMonitorUrlLink"
+          href={monitorUrl}
+          target="_blank"
+          external
+        >
           {monitorUrl}
         </EuiLink>
       </EuiDescriptionListDescription>

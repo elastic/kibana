@@ -11,7 +11,7 @@ import { ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
 import { DETECTION_ENGINE_QUERY_SIGNALS_URL } from '@kbn/security-solution-plugin/common/constants';
 import {
   CaseSeverity,
-  CasesResponse,
+  Cases,
   CaseStatuses,
   CommentType,
   ConnectorTypes,
@@ -30,20 +30,20 @@ import {
   createCase,
   createComment,
   updateCase,
-  getCaseUserActions,
   removeServerGeneratedPropertiesFromCase,
-  removeServerGeneratedPropertiesFromUserAction,
   findCases,
   superUserSpace1Auth,
   delay,
   calculateDuration,
-} from '../../../../common/lib/utils';
+  getCaseUserActions,
+  removeServerGeneratedPropertiesFromUserAction,
+} from '../../../../common/lib/api';
 import {
   createSignalsIndex,
-  deleteSignalsIndex,
   deleteAllAlerts,
+  deleteAllRules,
   getRuleForSignalTesting,
-  waitForRuleSuccessOrStatus,
+  waitForRuleSuccess,
   waitForSignalsToBePresent,
   getSignalsByIds,
   createRule,
@@ -391,7 +391,7 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       });
 
-      it('406s when excess data sent', async () => {
+      it('400s when excess data sent', async () => {
         const postedCase = await createCase(supertest, postCaseReq);
         await updateCase({
           supertest,
@@ -405,7 +405,7 @@ export default ({ getService }: FtrProviderContext): void => {
               },
             ],
           },
-          expectedHttpCode: 406,
+          expectedHttpCode: 400,
         });
       });
 
@@ -597,7 +597,7 @@ export default ({ getService }: FtrProviderContext): void => {
           );
 
           // does NOT updates alert status when the status is updated and syncAlerts=false
-          const updatedIndWithStatus: CasesResponse = (await setStatus({
+          const updatedIndWithStatus: Cases = (await setStatus({
             supertest,
             cases: [
               {
@@ -611,7 +611,7 @@ export default ({ getService }: FtrProviderContext): void => {
                 status: CaseStatuses['in-progress'],
               },
             ],
-          })) as CasesResponse;
+          })) as Cases;
 
           await es.indices.refresh({ index: defaultSignalsIndex });
 
@@ -730,7 +730,7 @@ export default ({ getService }: FtrProviderContext): void => {
             signals.get(signalsIndex2)?.get(signalIDInSecondIndex)?._source?.signal?.status
           ).to.be(CaseStatuses.open);
 
-          const updatedIndWithStatus: CasesResponse = (await setStatus({
+          const updatedIndWithStatus: Cases = (await setStatus({
             supertest,
             cases: [
               {
@@ -739,7 +739,7 @@ export default ({ getService }: FtrProviderContext): void => {
                 status: CaseStatuses.closed,
               },
             ],
-          })) as CasesResponse;
+          })) as Cases;
 
           await es.indices.refresh({ index: defaultSignalsIndex });
           await es.indices.refresh({ index: signalsIndex2 });
@@ -794,17 +794,20 @@ export default ({ getService }: FtrProviderContext): void => {
         });
 
         afterEach(async () => {
-          await deleteSignalsIndex(supertest, log);
-          await deleteAllAlerts(supertest, log);
+          await deleteAllAlerts(supertest, log, es);
+          await deleteAllRules(supertest, log);
           await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/hosts');
         });
 
         it('updates alert status when the status is updated and syncAlerts=true', async () => {
-          const rule = getRuleForSignalTesting(['auditbeat-*']);
+          const rule = {
+            ...getRuleForSignalTesting(['auditbeat-*']),
+            query: 'process.executable: "/usr/bin/sudo"',
+          };
           const postedCase = await createCase(supertest, postCaseReq);
 
           const { id } = await createRule(supertest, log, rule);
-          await waitForRuleSuccessOrStatus(supertest, log, id);
+          await waitForRuleSuccess({ supertest, log, id });
           await waitForSignalsToBePresent(supertest, log, 1, [id]);
           const signals = await getSignalsByIds(supertest, log, [id]);
 
@@ -856,7 +859,10 @@ export default ({ getService }: FtrProviderContext): void => {
         });
 
         it('does NOT updates alert status when the status is updated and syncAlerts=false', async () => {
-          const rule = getRuleForSignalTesting(['auditbeat-*']);
+          const rule = {
+            ...getRuleForSignalTesting(['auditbeat-*']),
+            query: 'process.executable: "/usr/bin/sudo"',
+          };
 
           const postedCase = await createCase(supertest, {
             ...postCaseReq,
@@ -864,7 +870,7 @@ export default ({ getService }: FtrProviderContext): void => {
           });
 
           const { id } = await createRule(supertest, log, rule);
-          await waitForRuleSuccessOrStatus(supertest, log, id);
+          await waitForRuleSuccess({ supertest, log, id });
           await waitForSignalsToBePresent(supertest, log, 1, [id]);
           const signals = await getSignalsByIds(supertest, log, [id]);
 
@@ -909,7 +915,10 @@ export default ({ getService }: FtrProviderContext): void => {
         });
 
         it('it updates alert status when syncAlerts is turned on', async () => {
-          const rule = getRuleForSignalTesting(['auditbeat-*']);
+          const rule = {
+            ...getRuleForSignalTesting(['auditbeat-*']),
+            query: 'process.executable: "/usr/bin/sudo"',
+          };
 
           const postedCase = await createCase(supertest, {
             ...postCaseReq,
@@ -917,7 +926,7 @@ export default ({ getService }: FtrProviderContext): void => {
           });
 
           const { id } = await createRule(supertest, log, rule);
-          await waitForRuleSuccessOrStatus(supertest, log, id);
+          await waitForRuleSuccess({ supertest, log, id });
           await waitForSignalsToBePresent(supertest, log, 1, [id]);
           const signals = await getSignalsByIds(supertest, log, [id]);
 
@@ -982,11 +991,14 @@ export default ({ getService }: FtrProviderContext): void => {
         });
 
         it('it does NOT updates alert status when syncAlerts is turned off', async () => {
-          const rule = getRuleForSignalTesting(['auditbeat-*']);
+          const rule = {
+            ...getRuleForSignalTesting(['auditbeat-*']),
+            query: 'process.executable: "/usr/bin/sudo"',
+          };
 
           const postedCase = await createCase(supertest, postCaseReq);
           const { id } = await createRule(supertest, log, rule);
-          await waitForRuleSuccessOrStatus(supertest, log, id);
+          await waitForRuleSuccess({ supertest, log, id });
           await waitForSignalsToBePresent(supertest, log, 1, [id]);
           const signals = await getSignalsByIds(supertest, log, [id]);
 

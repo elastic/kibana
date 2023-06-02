@@ -8,13 +8,19 @@
 import { ApmPluginRequestHandlerContext } from '../typings';
 import { APMPluginStartDependencies } from '../../types';
 
+export interface AgentKeysPrivilegesResponse {
+  areApiKeysEnabled: boolean;
+  isAdmin: boolean;
+  canManage: boolean;
+}
+
 export async function getAgentKeysPrivileges({
   context,
   securityPluginStart,
 }: {
   context: ApmPluginRequestHandlerContext;
   securityPluginStart: NonNullable<APMPluginStartDependencies['security']>;
-}) {
+}): Promise<AgentKeysPrivilegesResponse> {
   const esClient = (await context.core).elasticsearch.client;
   const [securityHasPrivilegesResponse, areApiKeysEnabled] = await Promise.all([
     esClient.asCurrentUser.security.hasPrivileges({

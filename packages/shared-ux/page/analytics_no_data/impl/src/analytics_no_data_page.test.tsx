@@ -9,7 +9,10 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { getAnalyticsNoDataPageServicesMock } from '@kbn/shared-ux-page-analytics-no-data-mocks';
+import {
+  getAnalyticsNoDataPageServicesMock,
+  getAnalyticsNoDataPageServicesMockWithCustomBranding,
+} from '@kbn/shared-ux-page-analytics-no-data-mocks';
 
 import { AnalyticsNoDataPageProvider } from './services';
 import { AnalyticsNoDataPage as Component } from './analytics_no_data_page.component';
@@ -19,6 +22,7 @@ describe('AnalyticsNoDataPage', () => {
   const onDataViewCreated = jest.fn();
 
   const services = getAnalyticsNoDataPageServicesMock();
+  const servicesWithCustomBranding = getAnalyticsNoDataPageServicesMockWithCustomBranding();
 
   afterAll(() => {
     jest.resetAllMocks();
@@ -37,5 +41,16 @@ describe('AnalyticsNoDataPage', () => {
     expect(component.find(Component).props().kibanaGuideDocLink).toBe(services.kibanaGuideDocLink);
     expect(component.find(Component).props().onDataViewCreated).toBe(onDataViewCreated);
     expect(component.find(Component).props().allowAdHocDataView).toBe(true);
+  });
+
+  it('passes correct boolean value to showPlainSpinner', () => {
+    const component = mountWithIntl(
+      <AnalyticsNoDataPageProvider {...servicesWithCustomBranding}>
+        <AnalyticsNoDataPage onDataViewCreated={onDataViewCreated} allowAdHocDataView={true} />
+      </AnalyticsNoDataPageProvider>
+    );
+
+    expect(component.find(Component).length).toBe(1);
+    expect(component.find(Component).props().showPlainSpinner).toBe(true);
   });
 });

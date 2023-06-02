@@ -1,5 +1,5 @@
 {
-  "name": "core_http",
+  "name": "@kbn/core-http-plugin",
   "version": "1.0.0",
   "main": "target/test/plugin_functional/plugins/core_http",
   "kibana": {

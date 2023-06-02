@@ -16,13 +16,13 @@ import {
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { NavigationPanel } from './navigation_panel';
 import { SpatialFiltersPanel } from './spatial_filters_panel';
 import { DisplayPanel } from './display_panel';
 import { CustomIconsPanel } from './custom_icons_panel';
 import { CustomIcon, MapCenter, MapSettings } from '../../../common/descriptor_types';
+import { panelStrings } from '../panel_strings';
 
 export interface Props {
   cancelChanges: () => void;
@@ -49,24 +49,12 @@ export function MapSettingsPanel({
   deleteCustomIcon,
   zoom,
 }: Props) {
-  // TODO move common text like Cancel and Close to common i18n translation
-  const closeBtnLabel = hasMapSettingsChanges
-    ? i18n.translate('xpack.maps.mapSettingsPanel.cancelLabel', {
-        defaultMessage: 'Cancel',
-      })
-    : i18n.translate('xpack.maps.mapSettingsPanel.closeLabel', {
-        defaultMessage: 'Close',
-      });
-
   return (
     <EuiFlexGroup direction="column" gutterSize="none">
       <EuiFlyoutHeader hasBorder className="mapLayerPanel__header">
         <EuiTitle size="s">
           <h2>
-            <FormattedMessage
-              id="xpack.maps.mapSettingsPanel.title"
-              defaultMessage="Map settings"
-            />
+            <FormattedMessage id="xpack.maps.mapSettingsPanel.title" defaultMessage="Settings" />
           </h2>
         </EuiTitle>
       </EuiFlyoutHeader>
@@ -100,7 +88,7 @@ export function MapSettingsPanel({
               flush="left"
               data-test-subj="layerPanelCancelButton"
             >
-              {closeBtnLabel}
+              {hasMapSettingsChanges ? panelStrings.discardChanges : panelStrings.close}
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem>
@@ -114,10 +102,7 @@ export function MapSettingsPanel({
               fill
               data-test-subj="mapSettingSubmitButton"
             >
-              <FormattedMessage
-                id="xpack.maps.mapSettingsPanel.keepChangesButtonLabel"
-                defaultMessage="Keep changes"
-              />
+              {panelStrings.keepChanges}
             </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>

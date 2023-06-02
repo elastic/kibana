@@ -6,10 +6,12 @@
  * Side Public License, v 1.
  */
 
+import React from 'react';
+import { UseEuiTheme, EuiThemeComputed } from '@elastic/eui';
 import { registerTestBed, TestBed } from '@kbn/test-jest-helpers';
+import { coreMock } from '@kbn/core/public/mocks';
 import type { FilterEditorProps } from '.';
 import { FilterEditor } from '.';
-import React from 'react';
 
 jest.mock('@kbn/kibana-react-plugin/public', () => {
   const original = jest.requireActual('@kbn/kibana-react-plugin/public');
@@ -34,6 +36,11 @@ describe('<FilterEditor />', () => {
 
     beforeEach(async () => {
       const defaultProps: Omit<FilterEditorProps, 'intl'> = {
+        theme: {
+          euiTheme: {} as unknown as EuiThemeComputed<{}>,
+          colorMode: 'DARK',
+          modifications: [],
+        } as UseEuiTheme<{}>,
         filter: {
           meta: {
             type: 'phase',
@@ -42,6 +49,7 @@ describe('<FilterEditor />', () => {
         indexPatterns: [],
         onCancel: jest.fn(),
         onSubmit: jest.fn(),
+        docLinks: coreMock.createStart().docLinks,
       };
       testBed = await registerTestBed(FilterEditor, { defaultProps })();
     });

@@ -1,0 +1,18 @@
+{
+  "type": "plugin",
+  "id": "@kbn/expression-error-plugin",
+  "owner": "@elastic/kibana-presentation",
+  "description": "Adds 'error' renderer to expressions",
+  "plugin": {
+    "id": "expressionError",
+    "server": false,
+    "browser": true,
+    "requiredPlugins": [
+      "expressions",
+      "presentationUtil"
+    ],
+    "requiredBundles": [
+      "kibanaReact"
+    ]
+  }
+}

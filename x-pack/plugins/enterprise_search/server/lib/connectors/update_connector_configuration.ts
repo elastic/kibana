@@ -6,6 +6,7 @@
  */
 
 import { IScopedClusterClient } from '@kbn/core/server';
+
 import { i18n } from '@kbn/i18n';
 
 import { CONNECTORS_INDEX } from '../..';
@@ -15,33 +16,49 @@ import {
   ConnectorDocument,
   ConnectorStatus,
 } from '../../../common/types/connectors';
+import { isNotNullish } from '../../../common/utils/is_not_nullish';
+
+import { fetchConnectorById } from './fetch_connectors';
 
 export const updateConnectorConfiguration = async (
   client: IScopedClusterClient,
   connectorId: string,
-  configuration: ConnectorConfiguration
+  configuration: Record<string, string | number | boolean>
 ) => {
-  const connectorResult = await client.asCurrentUser.get<ConnectorDocument>({
-    id: connectorId,
-    index: CONNECTORS_INDEX,
-  });
-  const connector = connectorResult._source;
+  const connectorResult = await fetchConnectorById(client, connectorId);
+  const connector = connectorResult?.value;
   if (connector) {
     const status =
       connector.status === ConnectorStatus.NEEDS_CONFIGURATION
         ? ConnectorStatus.CONFIGURED
         : connector.status;
-    const result = await client.asCurrentUser.index<ConnectorDocument>({
-      document: { ...connector, configuration, status },
+    const updatedConfig = Object.keys(connector.configuration)
+      .map((key) =>
+        connector.configuration[key]
+          ? {
+              ...connector.configuration[key]!, // ugly but needed because typescript refuses to believe this is defined
+              key,
+              value: configuration[key] ?? connector.configuration[key]?.value ?? '',
+            }
+          : undefined
+      )
+      .filter(isNotNullish)
+      .reduce((prev: ConnectorConfiguration, curr) => {
+        const { key, ...config } = curr;
+        return { ...prev, [curr.key]: config };
+      }, {});
+    await client.asCurrentUser.update<ConnectorDocument>({
+      doc: { configuration: updatedConfig, status },
       id: connectorId,
+      if_primary_term: connectorResult?.primaryTerm,
+      if_seq_no: connectorResult?.seqNo,
       index: CONNECTORS_INDEX,
     });
-    await client.asCurrentUser.indices.refresh({ index: CONNECTORS_INDEX });
-    return result;
+    return updatedConfig;
   } else {
     throw new Error(
       i18n.translate('xpack.enterpriseSearch.server.connectors.configuration.error', {
-        defaultMessage: 'Could not find document',
+        defaultMessage: 'Could not find connector',
       })
     );
   }

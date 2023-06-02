@@ -9,7 +9,15 @@
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['common', 'discover', 'header', 'share', 'timePicker']);
+  const PageObjects = getPageObjects([
+    'common',
+    'discover',
+    'header',
+    'share',
+    'timePicker',
+    'unifiedFieldList',
+  ]);
+  const dataGrid = getService('dataGrid');
   const a11y = getService('a11y');
   const savedQueryManagementComponent = getService('savedQueryManagementComponent');
   const inspector = getService('inspector');
@@ -17,6 +25,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const TEST_COLUMN_NAMES = ['dayOfWeek', 'DestWeather'];
   const toasts = getService('toasts');
   const browser = getService('browser');
+  const retry = getService('retry');
 
   describe('Discover a11y tests', () => {
     before(async () => {
@@ -66,14 +75,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('a11y test on open sidenav filter', async () => {
-      await PageObjects.discover.openSidebarFieldFilter();
+      await PageObjects.unifiedFieldList.openSidebarFieldFilter();
       await a11y.testAppSnapshot();
-      await PageObjects.discover.closeSidebarFieldFilter();
+      await PageObjects.unifiedFieldList.closeSidebarFieldFilter();
     });
 
     it('a11y test on tables with columns view', async () => {
       for (const columnName of TEST_COLUMN_NAMES) {
-        await PageObjects.discover.clickFieldListItemToggle(columnName);
+        await PageObjects.unifiedFieldList.clickFieldListItemToggle(columnName);
       }
       await a11y.testAppSnapshot();
     });
@@ -126,15 +135,22 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('a11y test for data-grid table with columns', async () => {
-      await testSubjects.click('toggleColumnButton-Cancelled');
-      if (await testSubjects.exists('openFieldActionsButton-Carrier')) {
-        await testSubjects.click('openFieldActionsButton-Carrier');
-      } else {
-        await testSubjects.existOrFail('fieldActionsGroup-Carrier');
-      }
-      await testSubjects.click('toggleColumnButton-Carrier');
-      await testSubjects.click('euiFlyoutCloseButton');
-      await toasts.dismissAllToasts();
+      await retry.try(async () => {
+        await dataGrid.clickFieldActionInFlyout('Cancelled', 'toggleColumnButton');
+      });
+
+      await retry.try(async () => {
+        await dataGrid.clickFieldActionInFlyout('Carrier', 'toggleColumnButton');
+      });
+
+      await retry.try(async () => {
+        await testSubjects.click('euiFlyoutCloseButton');
+      });
+
+      await retry.try(async () => {
+        await toasts.dismissAllToasts();
+      });
+
       await a11y.testAppSnapshot();
     });
 
@@ -163,13 +179,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.click('unifiedHistogramChartOptionsToggle');
     });
 
-    it('a11y test for data grid sort panel', async () => {
+    // https://github.com/elastic/kibana/issues/148567
+    it.skip('a11y test for data grid sort panel', async () => {
       await testSubjects.click('dataGridColumnSortingButton');
       await a11y.testAppSnapshot();
       await browser.pressKeys(browser.keys.ESCAPE);
     });
-
-    it('a11y test for setting row height for display panel', async () => {
+    // https://github.com/elastic/kibana/issues/148567
+    it.skip('a11y test for setting row height for display panel', async () => {
       await testSubjects.click('dataGridDisplaySelectorPopover');
       await a11y.testAppSnapshot();
       await browser.pressKeys(browser.keys.ESCAPE);

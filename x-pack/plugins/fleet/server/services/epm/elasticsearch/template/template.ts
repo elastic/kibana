@@ -6,7 +6,10 @@
  */
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import type { IndicesIndexSettings } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type {
+  IndicesIndexSettings,
+  MappingTypeMapping,
+} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import type { Field, Fields } from '../../fields/field';
 import type {
@@ -14,6 +17,7 @@ import type {
   IndexTemplateEntry,
   IndexTemplate,
   IndexTemplateMappings,
+  RegistryElasticsearch,
 } from '../../../../types';
 import { appContextService } from '../../..';
 import { getRegistryDataStreamAssetBaseName } from '../../../../../common/services';
@@ -62,20 +66,29 @@ export function getTemplate({
   composedOfTemplates,
   templatePriority,
   hidden,
+  registryElasticsearch,
+  mappings,
+  isIndexModeTimeSeries,
 }: {
   templateIndexPattern: string;
   packageName: string;
   composedOfTemplates: string[];
   templatePriority: number;
+  mappings: IndexTemplateMappings;
   hidden?: boolean;
+  registryElasticsearch?: RegistryElasticsearch | undefined;
+  isIndexModeTimeSeries?: boolean;
 }): IndexTemplate {
-  const template = getBaseTemplate(
+  const template = getBaseTemplate({
     templateIndexPattern,
     packageName,
     composedOfTemplates,
     templatePriority,
-    hidden
-  );
+    registryElasticsearch,
+    hidden,
+    mappings,
+    isIndexModeTimeSeries,
+  });
   if (template.template.settings.index.final_pipeline) {
     throw new Error(`Error template for ${templateIndexPattern} contains a final_pipeline`);
   }
@@ -292,6 +305,18 @@ function _generateMappings(
             fieldProps.type = 'alias';
             fieldProps.path = field.path;
             break;
+          case 'date':
+            const dateMappings = generateDateMapping(field);
+            fieldProps = { ...fieldProps, ...dateMappings, type: 'date' };
+            break;
+          case 'aggregate_metric_double':
+            fieldProps = {
+              ...fieldProps,
+              metrics: field.metrics,
+              default_metric: field.default_metric,
+              type: 'aggregate_metric_double',
+            };
+            break;
           default:
             fieldProps.type = type;
         }
@@ -304,11 +329,17 @@ function _generateMappings(
               break;
             default: {
               const meta = {};
-              if ('metric_type' in field) Reflect.set(meta, 'metric_type', field.metric_type);
               if ('unit' in field) Reflect.set(meta, 'unit', field.unit);
               fieldProps.meta = meta;
             }
           }
+        }
+
+        if ('metric_type' in field) {
+          fieldProps.time_series_metric = field.metric_type;
+        }
+        if (field.dimension) {
+          fieldProps.time_series_dimension = field.dimension;
         }
 
         props[field.name] = fieldProps;
@@ -387,6 +418,19 @@ function generateWildcardMapping(field: Field): IndexTemplateMapping {
   if (field.ignore_above) {
     mapping.ignore_above = field.ignore_above;
   }
+  return mapping;
+}
+
+function generateDateMapping(field: Field): IndexTemplateMapping {
+  const mapping: IndexTemplateMapping = {};
+  if (field.date_format) {
+    mapping.format = field.date_format;
+  }
+
+  if (field.name === '@timestamp') {
+    mapping.ignore_malformed = false;
+  }
+
   return mapping;
 }
 
@@ -470,27 +514,48 @@ const flattenFieldsToNameAndType = (
   return newFields;
 };
 
-function getBaseTemplate(
-  templateIndexPattern: string,
-  packageName: string,
-  composedOfTemplates: string[],
-  templatePriority: number,
-  hidden?: boolean
-): IndexTemplate {
+function getBaseTemplate({
+  templateIndexPattern,
+  packageName,
+  composedOfTemplates,
+  templatePriority,
+  hidden,
+  registryElasticsearch,
+  mappings,
+  isIndexModeTimeSeries,
+}: {
+  templateIndexPattern: string;
+  packageName: string;
+  composedOfTemplates: string[];
+  templatePriority: number;
+  hidden?: boolean;
+  registryElasticsearch: RegistryElasticsearch | undefined;
+  mappings: IndexTemplateMappings;
+  isIndexModeTimeSeries?: boolean;
+}): IndexTemplate {
   const _meta = getESAssetMetadata({ packageName });
+
+  let settingsIndex = {};
+  if (isIndexModeTimeSeries) {
+    settingsIndex = {
+      mode: 'time_series',
+    };
+  }
 
   return {
     priority: templatePriority,
     index_patterns: [templateIndexPattern],
     template: {
       settings: {
-        index: {},
+        index: settingsIndex,
       },
       mappings: {
         _meta,
       },
     },
-    data_stream: { hidden },
+    data_stream: {
+      hidden: registryElasticsearch?.['index_template.data_stream']?.hidden || hidden,
+    },
     composed_of: composedOfTemplates,
     _meta,
   };
@@ -540,6 +605,7 @@ const getDataStreams = async (
 
   const body = await esClient.indices.getDataStream({
     name: indexTemplate.index_patterns.join(','),
+    expand_wildcards: ['open', 'hidden'],
   });
 
   const dataStreams = body.data_streams;
@@ -585,7 +651,20 @@ const updateExistingDataStream = async ({
   esClient: ElasticsearchClient;
   logger: Logger;
 }) => {
+  const existingDs = await esClient.indices.get({
+    index: dataStreamName,
+  });
+
+  const existingDsConfig = Object.values(existingDs);
+  const currentBackingIndexConfig = existingDsConfig.at(-1);
+
+  const currentIndexMode = currentBackingIndexConfig?.settings?.index?.mode;
+  // @ts-expect-error Property 'mode' does not exist on type 'MappingSourceField'
+  const currentSourceType = currentBackingIndexConfig.mappings?._source?.mode;
+
   let settings: IndicesIndexSettings;
+  let mappings: MappingTypeMapping;
+
   try {
     const simulateResult = await retryTransientEsErrors(() =>
       esClient.indices.simulateTemplate({
@@ -594,7 +673,8 @@ const updateExistingDataStream = async ({
     );
 
     settings = simulateResult.template.settings;
-    const mappings = simulateResult.template.mappings;
+    mappings = simulateResult.template.mappings;
+
     // for now, remove from object so as not to update stream or data stream properties of the index until type and name
     // are added in https://github.com/elastic/kibana/issues/66551.  namespace value we will continue
     // to skip updating and assume the value in the index mapping is correct
@@ -602,6 +682,8 @@ const updateExistingDataStream = async ({
       delete mappings.properties.stream;
       delete mappings.properties.data_stream;
     }
+
+    logger.debug(`Updating mappings for ${dataStreamName}`);
     await retryTransientEsErrors(
       () =>
         esClient.indices.putMapping({
@@ -611,16 +693,34 @@ const updateExistingDataStream = async ({
         }),
       { logger }
     );
-    // if update fails, rollover data stream
+
+    // if update fails, rollover data stream and bail out
   } catch (err) {
+    logger.error(`Mappings update for ${dataStreamName} failed`);
+    logger.error(err);
+
     await rolloverDataStream(dataStreamName, esClient);
     return;
   }
+
+  // Trigger a rollover if the index mode or source type has changed
+  if (currentIndexMode !== settings?.index?.mode || currentSourceType !== mappings?._source?.mode) {
+    logger.info(
+      `Index mode or source type has changed for ${dataStreamName}, triggering a rollover`
+    );
+    await rolloverDataStream(dataStreamName, esClient);
+  }
+
   // update settings after mappings was successful to ensure
   // pointing to the new pipeline is safe
   // for now, only update the pipeline
-  if (!settings?.index?.default_pipeline) return;
+  if (!settings?.index?.default_pipeline) {
+    return;
+  }
+
   try {
+    logger.debug(`Updating settings for ${dataStreamName}`);
+
     await retryTransientEsErrors(
       () =>
         esClient.indices.putSettings({

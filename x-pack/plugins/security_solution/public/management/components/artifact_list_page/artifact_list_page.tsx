@@ -315,6 +315,7 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
         {!doesDataExist ? (
           <NoDataEmptyState
             onAdd={handleOpenCreateFlyoutClick}
+            titleNoEntriesLabel={labels.emptyStateTitleNoEntries}
             titleLabel={labels.emptyStateTitle}
             aboutInfo={labels.emptyStateInfo}
             primaryButtonLabel={labels.emptyStatePrimaryButtonLabel}

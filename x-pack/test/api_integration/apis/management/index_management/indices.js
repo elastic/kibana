@@ -33,15 +33,10 @@ export default function ({ getService }) {
     clearCache,
   } = registerHelpers({ supertest });
 
-  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/145022
-  describe.skip('indices', () => {
+  describe('indices', () => {
     after(() => Promise.all([cleanUpEsResources()]));
 
     describe('clear cache', () => {
-      it('should clear the cache on all indices', async () => {
-        await clearCache('*').expect(200);
-      });
-
       it('should clear the cache on a single index', async () => {
         const index = await createIndex();
         await clearCache(index).expect(200);

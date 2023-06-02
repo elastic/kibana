@@ -88,7 +88,7 @@ export default function canvasLensTest({ getService, getPageObjects }: FtrProvid
 
       it('edits lens by-value embeddable', async () => {
         const originalEmbeddableCount = await PageObjects.canvas.getEmbeddableCount();
-        await dashboardPanelActions.toggleContextMenu();
+        await dashboardPanelActions.openContextMenu();
         await dashboardPanelActions.clickEdit();
         await PageObjects.lens.saveAndReturn();
         await retry.try(async () => {

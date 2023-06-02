@@ -68,7 +68,10 @@ export function EmptyBanner() {
           defaultMessage:
             "We will map out connected services and external requests if we can detect them. Please make sure you're running the latest version of the APM agent.",
         })}{' '}
-        <EuiLink href={docLinks.links.apm.supportedServiceMaps}>
+        <EuiLink
+          data-test-subj="apmEmptyBannerLearnMoreInTheDocsLink"
+          href={docLinks.links.apm.supportedServiceMaps}
+        >
           {i18n.translate('xpack.apm.serviceMap.emptyBanner.docsLink', {
             defaultMessage: 'Learn more in the docs',
           })}

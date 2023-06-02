@@ -56,8 +56,7 @@ describe('MlAdminJobDescription', () => {
     userEvent.click(screen.getByTestId('job-switch'));
     expect(enableDatafeedSpy).toHaveBeenCalledWith(
       securityJobNotStarted,
-      securityJobNotStarted.latestTimestampMs,
-      true
+      securityJobNotStarted.latestTimestampMs
     );
 
     await waitFor(() => {
@@ -103,7 +102,9 @@ describe('MlAdminJobDescription', () => {
     const linkElement = screen.getByTestId('machineLearningJobLink');
 
     expect(linkElement).toHaveAttribute('href', expect.any(String));
-    expect(linkElement).toHaveTextContent(securityJobNotStarted.id);
+    expect(linkElement).toHaveTextContent(
+      securityJobNotStarted.customSettings?.security_app_display_name!
+    );
 
     // audit icon
     expect(screen.getByTestId('mlJobAuditIcon')).toBeInTheDocument();

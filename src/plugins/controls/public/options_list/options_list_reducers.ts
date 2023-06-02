@@ -9,13 +9,18 @@ import { PayloadAction } from '@reduxjs/toolkit';
 import { WritableDraft } from 'immer/dist/types/types-external';
 
 import { Filter } from '@kbn/es-query';
+import { FieldSpec } from '@kbn/data-views-plugin/common';
 
 import { OptionsListReduxState, OptionsListComponentState } from './types';
-import { OptionsListField } from '../../common/options_list/types';
 import { getIpRangeQuery } from '../../common/options_list/ip_search';
-import { DEFAULT_SORT, SortingType } from '../../common/options_list/suggestions_sorting';
+import {
+  OPTIONS_LIST_DEFAULT_SORT,
+  OptionsListSortingType,
+} from '../../common/options_list/suggestions_sorting';
 
 export const getDefaultComponentState = (): OptionsListReduxState['componentState'] => ({
+  popoverOpen: false,
+  allowExpensiveQueries: true,
   searchString: { value: '', valid: true },
 });
 
@@ -29,20 +34,6 @@ export const optionsListReducers = {
       state.explicitInput.selectedOptions = newSelections;
     }
   },
-  deselectOptions: (
-    state: WritableDraft<OptionsListReduxState>,
-    action: PayloadAction<string[]>
-  ) => {
-    for (const optionToDeselect of action.payload) {
-      if (!state.explicitInput.selectedOptions) return;
-      const itemIndex = state.explicitInput.selectedOptions.indexOf(optionToDeselect);
-      if (itemIndex !== -1) {
-        const newSelections = [...state.explicitInput.selectedOptions];
-        newSelections.splice(itemIndex, 1);
-        state.explicitInput.selectedOptions = newSelections;
-      }
-    }
-  },
   setSearchString: (state: WritableDraft<OptionsListReduxState>, action: PayloadAction<string>) => {
     state.componentState.searchString.value = action.payload;
     if (
@@ -52,11 +43,23 @@ export const optionsListReducers = {
       state.componentState.searchString.valid = getIpRangeQuery(action.payload).validSearch;
     }
   },
+  setAllowExpensiveQueries: (
+    state: WritableDraft<OptionsListReduxState>,
+    action: PayloadAction<boolean>
+  ) => {
+    state.componentState.allowExpensiveQueries = action.payload;
+  },
+  setPopoverOpen: (state: WritableDraft<OptionsListReduxState>, action: PayloadAction<boolean>) => {
+    state.componentState.popoverOpen = action.payload;
+  },
   setSort: (
     state: WritableDraft<OptionsListReduxState>,
-    action: PayloadAction<Partial<SortingType>>
+    action: PayloadAction<Partial<OptionsListSortingType>>
   ) => {
-    state.explicitInput.sort = { ...(state.explicitInput.sort ?? DEFAULT_SORT), ...action.payload };
+    state.explicitInput.sort = {
+      ...(state.explicitInput.sort ?? OPTIONS_LIST_DEFAULT_SORT),
+      ...action.payload,
+    };
   },
   selectExists: (state: WritableDraft<OptionsListReduxState>, action: PayloadAction<boolean>) => {
     if (action.payload) {
@@ -76,6 +79,7 @@ export const optionsListReducers = {
     action: PayloadAction<string>
   ) => {
     state.explicitInput.selectedOptions = [action.payload];
+    if (state.explicitInput.existsSelected) state.explicitInput.existsSelected = false;
   },
   clearSelections: (state: WritableDraft<OptionsListReduxState>) => {
     if (state.explicitInput.existsSelected) state.explicitInput.existsSelected = false;
@@ -90,18 +94,27 @@ export const optionsListReducers = {
   },
   setValidAndInvalidSelections: (
     state: WritableDraft<OptionsListReduxState>,
-    action: PayloadAction<{ validSelections: string[]; invalidSelections: string[] }>
+    action: PayloadAction<{
+      validSelections: string[];
+      invalidSelections: string[];
+    }>
   ) => {
     const { invalidSelections, validSelections } = action.payload;
     state.componentState.invalidSelections = invalidSelections;
     state.componentState.validSelections = validSelections;
+  },
+  setErrorMessage: (
+    state: WritableDraft<OptionsListReduxState>,
+    action: PayloadAction<string | undefined>
+  ) => {
+    state.componentState.error = action.payload;
   },
   setLoading: (state: WritableDraft<OptionsListReduxState>, action: PayloadAction<boolean>) => {
     state.output.loading = action.payload;
   },
   setField: (
     state: WritableDraft<OptionsListReduxState>,
-    action: PayloadAction<OptionsListField | undefined>
+    action: PayloadAction<FieldSpec | undefined>
   ) => {
     state.componentState.field = action.payload;
   },
@@ -114,7 +127,10 @@ export const optionsListReducers = {
       >
     >
   ) => {
-    state.componentState = { ...(state.componentState ?? {}), ...action.payload };
+    state.componentState = {
+      ...(state.componentState ?? {}),
+      ...action.payload,
+    };
   },
   publishFilters: (
     state: WritableDraft<OptionsListReduxState>,

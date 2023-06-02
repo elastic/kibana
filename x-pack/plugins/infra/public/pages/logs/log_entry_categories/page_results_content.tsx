@@ -14,7 +14,7 @@ import useInterval from 'react-use/lib/useInterval';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { MLJobsAwaitingNodeWarning, ML_PAGES, useMlHref } from '@kbn/ml-plugin/public';
-import { useTrackPageview } from '@kbn/observability-plugin/public';
+import { useTrackPageview } from '@kbn/observability-shared-plugin/public';
 import { TimeRange } from '../../../../common/time/time_range';
 import { CategoryJobNoticesSection } from '../../../components/logging/log_analysis_job_status';
 import { AnalyzeInMlButton } from '../../../components/logging/log_analysis_results';
@@ -25,7 +25,7 @@ import { useLogEntryCategoriesModuleContext } from '../../../containers/logs/log
 import { ViewLogInContextProvider } from '../../../containers/logs/view_log_in_context';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 import { useLogViewContext } from '../../../hooks/use_log_view';
-import { LogsPageTemplate } from '../page_template';
+import { LogsPageTemplate } from '../shared/page_template';
 import { PageViewLogInContext } from '../stream/page_view_log_in_context';
 import { TopCategoriesSection } from './sections/top_categories';
 import { useLogEntryCategoriesResults } from './use_log_entry_categories_results';
@@ -64,7 +64,7 @@ export const LogEntryCategoriesResultsContent: React.FunctionComponent<
     hasStoppedJobs,
     jobIds,
     categoryQualityWarnings,
-    sourceConfiguration: { sourceId },
+    sourceConfiguration: { sourceId: logViewId },
   } = useLogEntryCategoriesModuleContext();
 
   const {
@@ -109,7 +109,7 @@ export const LogEntryCategoriesResultsContent: React.FunctionComponent<
     endTime: categoryQueryTimeRange.timeRange.endTime,
     filteredDatasets: categoryQueryDatasets,
     onGetTopLogEntryCategoriesError: showLoadDataErrorNotification,
-    sourceId,
+    logViewReference: { type: 'log-view-reference', logViewId },
     startTime: categoryQueryTimeRange.timeRange.startTime,
   });
 
@@ -206,7 +206,7 @@ export const LogEntryCategoriesResultsContent: React.FunctionComponent<
 
   return (
     <ViewLogInContextProvider
-      sourceId={sourceId}
+      logViewReference={{ type: 'log-view-reference', logViewId }}
       startTimestamp={categoryQueryTimeRange.timeRange.startTime}
       endTimestamp={categoryQueryTimeRange.timeRange.endTime}
     >
@@ -265,7 +265,7 @@ export const LogEntryCategoriesResultsContent: React.FunctionComponent<
             <TopCategoriesSection
               isLoadingTopCategories={isLoadingTopLogEntryCategories}
               jobId={jobIds['log-entry-categories-count']}
-              sourceId={sourceId}
+              logViewReference={{ type: 'log-view-reference', logViewId }}
               timeRange={categoryQueryTimeRange.timeRange}
               topCategories={topLogEntryCategories}
               sortOptions={sortOptions}

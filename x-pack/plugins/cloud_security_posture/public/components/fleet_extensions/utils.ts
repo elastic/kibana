@@ -4,84 +4,198 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { NewPackagePolicy, NewPackagePolicyInput } from '@kbn/fleet-plugin/common';
+import type {
+  NewPackagePolicy,
+  NewPackagePolicyInput,
+  PackageInfo,
+  PackagePolicyConfigRecordEntry,
+  RegistryPolicyTemplate,
+  RegistryVarsEntry,
+} from '@kbn/fleet-plugin/common';
+import merge from 'lodash/merge';
 import {
   CLOUDBEAT_AWS,
   CLOUDBEAT_EKS,
   CLOUDBEAT_VANILLA,
-  CLOUDBEAT_INTEGRATION,
+  CLOUDBEAT_GCP,
+  CLOUDBEAT_AZURE,
+  CLOUDBEAT_VULN_MGMT_AWS,
   SUPPORTED_POLICY_TEMPLATES,
-  POLICY_TEMPLATE,
+  SUPPORTED_CLOUDBEAT_INPUTS,
+  CSPM_POLICY_TEMPLATE,
+  KSPM_POLICY_TEMPLATE,
+  VULN_MGMT_POLICY_TEMPLATE,
 } from '../../../common/constants';
+import { DEFAULT_AWS_VARS_GROUP } from './aws_credentials_form';
+import type { PostureInput, CloudSecurityPolicyTemplate } from '../../../common/types';
+import { cloudPostureIntegrations } from '../../common/constants';
 
-export const isEksInput = (input: NewPackagePolicyInput) => input.type === CLOUDBEAT_EKS;
-export const inputsWithVars = [CLOUDBEAT_EKS, CLOUDBEAT_AWS];
-const defaultInputType: Record<POLICY_TEMPLATE, CLOUDBEAT_INTEGRATION> = {
-  kspm: CLOUDBEAT_VANILLA,
-  cspm: CLOUDBEAT_AWS,
+// Posture policies only support the default namespace
+export const POSTURE_NAMESPACE = 'default';
+
+type PosturePolicyInput =
+  | { type: typeof CLOUDBEAT_AZURE; policy_template: typeof CSPM_POLICY_TEMPLATE }
+  | { type: typeof CLOUDBEAT_GCP; policy_template: typeof CSPM_POLICY_TEMPLATE }
+  | { type: typeof CLOUDBEAT_AWS; policy_template: typeof CSPM_POLICY_TEMPLATE }
+  | { type: typeof CLOUDBEAT_VANILLA; policy_template: typeof KSPM_POLICY_TEMPLATE }
+  | { type: typeof CLOUDBEAT_EKS; policy_template: typeof KSPM_POLICY_TEMPLATE }
+  | { type: typeof CLOUDBEAT_VULN_MGMT_AWS; policy_template: typeof VULN_MGMT_POLICY_TEMPLATE };
+
+// Extend NewPackagePolicyInput with known string literals for input type and policy template
+export type NewPackagePolicyPostureInput = NewPackagePolicyInput & PosturePolicyInput;
+
+export const isPostureInput = (
+  input: NewPackagePolicyInput
+): input is NewPackagePolicyPostureInput =>
+  SUPPORTED_POLICY_TEMPLATES.includes(input.policy_template as CloudSecurityPolicyTemplate) &&
+  SUPPORTED_CLOUDBEAT_INPUTS.includes(input.type as PostureInput);
+
+const getPostureType = (policyTemplateInput: PostureInput) => {
+  switch (policyTemplateInput) {
+    case CLOUDBEAT_AWS:
+    case CLOUDBEAT_AZURE:
+    case CLOUDBEAT_GCP:
+      return 'cspm';
+    case CLOUDBEAT_VANILLA:
+    case CLOUDBEAT_EKS:
+      return 'kspm';
+    case CLOUDBEAT_VULN_MGMT_AWS:
+      return 'vuln_mgmt';
+    default:
+      return 'n/a';
+  }
 };
-export const getEnabledInputType = (inputs: NewPackagePolicy['inputs']): CLOUDBEAT_INTEGRATION => {
-  const enabledInput = getEnabledInput(inputs);
 
-  if (enabledInput) return enabledInput.type as CLOUDBEAT_INTEGRATION;
-
-  const policyTemplate = inputs[0].policy_template as POLICY_TEMPLATE | undefined;
-
-  if (policyTemplate && SUPPORTED_POLICY_TEMPLATES.includes(policyTemplate))
-    return defaultInputType[policyTemplate];
-
-  throw new Error('unsupported policy template');
+const getDeploymentType = (policyTemplateInput: PostureInput) => {
+  switch (policyTemplateInput) {
+    case CLOUDBEAT_AWS:
+    case CLOUDBEAT_VULN_MGMT_AWS:
+      return 'aws';
+    case CLOUDBEAT_AZURE:
+      return 'azure';
+    case CLOUDBEAT_GCP:
+      return 'gcp';
+    case CLOUDBEAT_VANILLA:
+      return 'self_managed';
+    case CLOUDBEAT_EKS:
+      return 'eks';
+    default:
+      return 'n/a';
+  }
 };
 
-export const getEnabledInput = (
-  inputs: NewPackagePolicy['inputs']
-): NewPackagePolicyInput | undefined => inputs.find((input) => input.enabled);
-
-export const getUpdatedDeploymentType = (
-  newPolicy: NewPackagePolicy,
-  inputType: CLOUDBEAT_INTEGRATION
-) => ({
-  isValid: true, // TODO: add validations
-  updatedPolicy: {
-    ...newPolicy,
-    inputs: newPolicy.inputs.map((item) => ({
-      ...item,
-      enabled: item.type === inputType,
-      streams: item.streams.map((stream) => ({
-        ...stream,
-        enabled: item.type === inputType,
-      })),
-    })),
-  },
-});
-
-export const getUpdatedEksVar = (newPolicy: NewPackagePolicy, key: string, value: string) => ({
-  isValid: true, // TODO: add validations
-  updatedPolicy: {
-    ...newPolicy,
-    inputs: newPolicy.inputs.map((item) =>
-      inputsWithVars.includes(item.type) ? getUpdatedStreamVars(item, key, value) : item
-    ),
-  },
-});
-
-// TODO: remove access to first stream
-const getUpdatedStreamVars = (item: NewPackagePolicyInput, key: string, value: string) => {
-  if (!item.streams[0]) return item;
+const getPostureInput = (
+  input: NewPackagePolicyInput,
+  inputType: PostureInput,
+  inputVars?: Record<string, PackagePolicyConfigRecordEntry>
+) => {
+  const isInputEnabled = input.type === inputType;
 
   return {
-    ...item,
-    streams: [
-      {
-        ...item.streams[0],
-        vars: {
-          ...item.streams[0]?.vars,
-          [key]: {
-            ...item.streams[0]?.vars?.[key],
-            value,
-          },
-        },
-      },
-    ],
+    ...input,
+    enabled: isInputEnabled,
+    streams: input.streams.map((stream) => ({
+      ...stream,
+      enabled: isInputEnabled,
+      // Merge new vars with existing vars
+      ...(isInputEnabled &&
+        stream.vars &&
+        inputVars && {
+          vars: merge({}, stream.vars, inputVars),
+        }),
+    })),
   };
+};
+
+/**
+ * Get a new object with the updated policy input and vars
+ */
+export const getPosturePolicy = (
+  newPolicy: NewPackagePolicy,
+  inputType: PostureInput,
+  inputVars?: Record<string, PackagePolicyConfigRecordEntry>
+): NewPackagePolicy => ({
+  ...newPolicy,
+  namespace: POSTURE_NAMESPACE,
+  // Enable new policy input and disable all others
+  inputs: newPolicy.inputs.map((item) => getPostureInput(item, inputType, inputVars)),
+  // Set hidden policy vars
+  vars: merge({}, newPolicy.vars, {
+    deployment: { value: getDeploymentType(inputType) },
+    posture: { value: getPostureType(inputType) },
+  }),
+});
+
+type RegistryPolicyTemplateWithInputs = RegistryPolicyTemplate & {
+  inputs: Array<{
+    vars?: RegistryVarsEntry[];
+  }>;
+};
+// type guard for checking inputs
+export const hasPolicyTemplateInputs = (
+  policyTemplate: RegistryPolicyTemplate
+): policyTemplate is RegistryPolicyTemplateWithInputs => {
+  return policyTemplate.hasOwnProperty('inputs');
+};
+
+export const getVulnMgmtCloudFormationDefaultValue = (packageInfo: PackageInfo): string => {
+  if (!packageInfo.policy_templates) return '';
+
+  const vulnMgmtPolicyTemplate = packageInfo.policy_templates.find(
+    (p) => p.name === VULN_MGMT_POLICY_TEMPLATE
+  );
+  if (!vulnMgmtPolicyTemplate) return '';
+
+  const vulnMgmtInputs =
+    hasPolicyTemplateInputs(vulnMgmtPolicyTemplate) && vulnMgmtPolicyTemplate.inputs;
+
+  if (!vulnMgmtInputs) return '';
+
+  const cloudFormationTemplate = vulnMgmtInputs.reduce((acc, input): string => {
+    if (!input.vars) return acc;
+    const template = input.vars.find((v) => v.name === 'cloud_formation_template')?.default;
+    return template ? String(template) : acc;
+  }, '');
+
+  return cloudFormationTemplate;
+};
+
+/**
+ * Input vars that are hidden from the user
+ */
+export const getPostureInputHiddenVars = (inputType: PostureInput) => {
+  switch (inputType) {
+    case 'cloudbeat/cis_aws':
+    case 'cloudbeat/cis_eks':
+      return { 'aws.credentials.type': { value: DEFAULT_AWS_VARS_GROUP } };
+    default:
+      return undefined;
+  }
+};
+
+export const getPolicyTemplateInputOptions = (policyTemplate: CloudSecurityPolicyTemplate) =>
+  cloudPostureIntegrations[policyTemplate].options.map((o) => ({
+    tooltip: o.tooltip,
+    value: o.type,
+    id: o.type,
+    label: o.name,
+    icon: o.icon,
+    disabled: o.disabled,
+  }));
+
+export const getMaxPackageName = (
+  packageName: string,
+  packagePolicies?: Array<{ name: string }>
+) => {
+  // Retrieve highest number appended to package policy name and increment it by one
+  const pkgPoliciesNamePattern = new RegExp(`${packageName}-(\\d+)`);
+
+  const maxPkgPolicyName = Math.max(
+    ...(packagePolicies ?? [])
+      .filter((ds) => Boolean(ds.name.match(pkgPoliciesNamePattern)))
+      .map((ds) => parseInt(ds.name.match(pkgPoliciesNamePattern)![1], 10)),
+    0
+  );
+
+  return `${packageName}-${maxPkgPolicyName + 1}`;
 };

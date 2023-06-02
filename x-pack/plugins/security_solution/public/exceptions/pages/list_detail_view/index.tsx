@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import type { FC } from 'react';
 
 import {
@@ -12,7 +12,9 @@ import {
   ExceptionListHeader,
   ViewerStatus,
 } from '@kbn/securitysolution-exception-list-components';
-import { EuiLoadingContent } from '@elastic/eui';
+import { EuiSkeletonText } from '@elastic/eui';
+import { useParams } from 'react-router-dom';
+import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import { SecurityPageName } from '../../../../common/constants';
 import { SpyRoute } from '../../../common/utils/route/spy_routes';
 import { ReferenceErrorModal } from '../../../detections/components/value_lists_management_flyout/reference_error_modal';
@@ -23,8 +25,13 @@ import { AutoDownload } from '../../../common/components/auto_download/auto_down
 import { ListWithSearch, ManageRules, ListDetailsLinkAnchor } from '../../components';
 import { useListDetailsView } from '../../hooks';
 import * as i18n from '../../translations';
+import type { CheckExceptionTtlActionTypes } from '../../components/expired_exceptions_list_items_modal';
+import { IncludeExpiredExceptionsModal } from '../../components/expired_exceptions_list_items_modal';
 
 export const ListsDetailViewComponent: FC = () => {
+  const { detailName: exceptionListId } = useParams<{
+    detailName: string;
+  }>();
   const {
     isLoading,
     invalidListId,
@@ -34,6 +41,7 @@ export const ListsDetailViewComponent: FC = () => {
     listId,
     linkedRules,
     exportedList,
+    handleOnDownload,
     viewerStatus,
     listName,
     listDescription,
@@ -45,6 +53,7 @@ export const ListsDetailViewComponent: FC = () => {
     refreshExceptions,
     disableManageButton,
     onEditListDetails,
+    onDuplicateList,
     onExportList,
     onManageRules,
     onSaveManageRules,
@@ -53,13 +62,40 @@ export const ListsDetailViewComponent: FC = () => {
     handleDelete,
     handleCloseReferenceErrorModal,
     handleReferenceDelete,
-  } = useListDetailsView();
+  } = useListDetailsView(exceptionListId);
+
+  const [showIncludeExpiredExceptionItemsModal, setShowIncludeExpiredExceptionItemsModal] =
+    useState<CheckExceptionTtlActionTypes | null>(null);
+
+  const onModalClose = useCallback(
+    () => setShowIncludeExpiredExceptionItemsModal(null),
+    [setShowIncludeExpiredExceptionItemsModal]
+  );
+
+  const onModalOpen = useCallback(
+    (actionType: CheckExceptionTtlActionTypes) => {
+      setShowIncludeExpiredExceptionItemsModal(actionType);
+    },
+    [setShowIncludeExpiredExceptionItemsModal]
+  );
+
+  const handleExportList = useCallback(() => {
+    if (list?.type === ExceptionListTypeEnum.ENDPOINT) {
+      onExportList(true);
+    } else {
+      onModalOpen('export');
+    }
+  }, [onModalOpen, list, onExportList]);
+
+  const handleDuplicateList = useCallback(() => {
+    onModalOpen('duplicate');
+  }, [onModalOpen]);
 
   const detailsViewContent = useMemo(() => {
     if (viewerStatus === ViewerStatus.ERROR)
       return <EmptyViewerState isReadOnly={isReadOnly} viewerStatus={viewerStatus} />;
 
-    if (isLoading) return <EuiLoadingContent lines={4} data-test-subj="loading" />;
+    if (isLoading) return <EuiSkeletonText lines={4} data-test-subj="loading" />;
 
     if (invalidListId || !listName || !list) return <NotFoundPage />;
     return (
@@ -75,12 +111,14 @@ export const ListsDetailViewComponent: FC = () => {
           backOptions={headerBackOptions}
           securityLinkAnchorComponent={ListDetailsLinkAnchor}
           onEditListDetails={onEditListDetails}
-          onExportList={onExportList}
+          onExportList={handleExportList}
           onDeleteList={handleDelete}
           onManageRules={onManageRules}
+          onDuplicateList={handleDuplicateList}
+          dataTestSubj="exceptionListManagement"
         />
 
-        <AutoDownload blob={exportedList} name={listId} />
+        <AutoDownload blob={exportedList} name={`${listId}.ndjson`} onDownload={handleOnDownload} />
         <ListWithSearch list={list} refreshExceptions={refreshExceptions} isReadOnly={isReadOnly} />
         <ReferenceErrorModal
           cancelText={i18n.REFERENCE_MODAL_CANCEL_BUTTON}
@@ -103,37 +141,52 @@ export const ListsDetailViewComponent: FC = () => {
             onRuleSelectionChange={onRuleSelectionChange}
           />
         ) : null}
+        {showIncludeExpiredExceptionItemsModal && (
+          <IncludeExpiredExceptionsModal
+            onModalConfirm={
+              showIncludeExpiredExceptionItemsModal === 'export' ? onExportList : onDuplicateList
+            }
+            handleCloseModal={onModalClose}
+            action={showIncludeExpiredExceptionItemsModal}
+          />
+        )}
       </>
     );
   }, [
-    canUserEditList,
-    disableManageButton,
-    exportedList,
-    headerBackOptions,
-    invalidListId,
-    isLoading,
+    viewerStatus,
     isReadOnly,
-    linkedRules,
+    isLoading,
+    invalidListId,
+    listName,
     list,
     listDescription,
     listId,
-    listName,
+    linkedRules,
+    canUserEditList,
+    headerBackOptions,
+    onEditListDetails,
+    handleExportList,
+    handleDelete,
+    onManageRules,
+    handleDuplicateList,
+    exportedList,
+    handleOnDownload,
+    refreshExceptions,
     referenceModalState.contentText,
     referenceModalState.rulesReferences,
-    refreshExceptions,
-    showManageButtonLoader,
-    showManageRulesFlyout,
-    showReferenceErrorModal,
-    viewerStatus,
-    onCancelManageRules,
-    onEditListDetails,
-    onExportList,
-    onManageRules,
-    onRuleSelectionChange,
-    onSaveManageRules,
     handleCloseReferenceErrorModal,
-    handleDelete,
     handleReferenceDelete,
+    showReferenceErrorModal,
+    showManageRulesFlyout,
+    showManageButtonLoader,
+    disableManageButton,
+    onSaveManageRules,
+    onCancelManageRules,
+    onRuleSelectionChange,
+    showIncludeExpiredExceptionItemsModal,
+    onExportList,
+    onDuplicateList,
+    onModalClose,
   ]);
   return (
     <>

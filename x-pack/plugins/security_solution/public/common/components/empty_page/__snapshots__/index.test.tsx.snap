@@ -34,9 +34,11 @@ exports[`EmptyPage component renders actions with descriptions 1`] = `
   }
   iconType="logoSecurity"
   title={
-    <h2>
-      My Super Title
-    </h2>
+    <EuiText>
+      <h2>
+        My Super Title
+      </h2>
+    </EuiText>
   }
 />
 `;
@@ -68,9 +70,11 @@ exports[`EmptyPage component renders actions without descriptions 1`] = `
   }
   iconType="logoSecurity"
   title={
-    <h2>
-      My Super Title
-    </h2>
+    <EuiText>
+      <h2>
+        My Super Title
+      </h2>
+    </EuiText>
   }
 />
 `;

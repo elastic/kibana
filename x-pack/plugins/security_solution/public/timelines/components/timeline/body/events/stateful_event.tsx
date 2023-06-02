@@ -8,16 +8,12 @@
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
-
-import type { SetEventsDeleted, SetEventsLoading } from '@kbn/timelines-plugin/common';
-import { StatefulEventContext } from '@kbn/timelines-plugin/public';
+import { isEventBuildingBlockType } from '@kbn/securitysolution-data-table';
 import { useDeepEqualSelector } from '../../../../../common/hooks/use_selector';
 import type {
   ColumnHeaderOptions,
   CellValueElementProps,
-  ControlColumnProps,
   RowRenderer,
-  TimelineExpandedDetailType,
 } from '../../../../../../common/types/timeline';
 import { TimelineId, TimelineTabs } from '../../../../../../common/types/timeline';
 import type {
@@ -27,7 +23,7 @@ import type {
 import type { OnRowSelected } from '../../events';
 import { STATEFUL_EVENT_CSS_CLASS_NAME } from '../../helpers';
 import { EventsTrGroup, EventsTrSupplement, EventsTrSupplementContainer } from '../../styles';
-import { isEventBuildingBlockType, getEventType, isEvenEqlSequence } from '../helpers';
+import { getEventType, isEvenEqlSequence } from '../helpers';
 import { NoteCards } from '../../../notes/note_cards';
 import { useEventDetailsWidthContext } from '../../../../../common/components/events_viewer/event_details_width_context';
 import { EventColumnView } from './event_column_view';
@@ -41,6 +37,13 @@ import { StatefulRowRenderer } from './stateful_row_renderer';
 import { NOTES_BUTTON_CLASS_NAME } from '../../properties/helpers';
 import { timelineDefaults } from '../../../../store/timeline/defaults';
 import { useGetMappedNonEcsValue } from '../data_driven_columns';
+import { StatefulEventContext } from '../../../../../common/components/events_viewer/stateful_event_context';
+import type {
+  ControlColumnProps,
+  ExpandedDetailType,
+  SetEventsDeleted,
+  SetEventsLoading,
+} from '../../../../../../common/types';
 
 interface Props {
   actionsColumnWidth: number;
@@ -188,7 +191,7 @@ const StatefulEventComponent: React.FC<Props> = ({
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const indexName = event._index!;
 
-    const updatedExpandedDetail: TimelineExpandedDetailType = {
+    const updatedExpandedDetail: ExpandedDetailType = {
       panelView: 'eventDetail',
       params: {
         eventId,

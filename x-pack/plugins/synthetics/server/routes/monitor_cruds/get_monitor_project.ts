@@ -5,10 +5,10 @@
  * 2.0.
  */
 import { schema } from '@kbn/config-schema';
+import { syntheticsMonitorType } from '../../../common/types/saved_objects';
 import { ConfigKey } from '../../../common/runtime_types';
 import { SyntheticsRestApiRouteFactory } from '../../legacy_uptime/routes/types';
 import { API_URLS } from '../../../common/constants';
-import { syntheticsMonitorType } from '../../legacy_uptime/lib/saved_objects/synthetics_monitor';
 import { getMonitors } from '../common';
 
 const querySchema = schema.object({
@@ -25,13 +25,12 @@ export const getSyntheticsProjectMonitorsRoute: SyntheticsRestApiRouteFactory = 
     }),
     query: querySchema,
   },
-  handler: async ({
-    request,
-    response,
-    server: { logger },
-    savedObjectsClient,
-    syntheticsMonitorClient,
-  }): Promise<any> => {
+  handler: async (routeContext): Promise<any> => {
+    const {
+      request,
+      server: { logger },
+    } = routeContext;
+
     const { projectName } = request.params;
     const { per_page: perPage = 500, search_after: searchAfter } = request.query;
     const decodedProjectName = decodeURI(projectName);
@@ -40,15 +39,22 @@ export const getSyntheticsProjectMonitorsRoute: SyntheticsRestApiRouteFactory = 
     try {
       const { saved_objects: monitors, total } = await getMonitors(
         {
-          filter: `${syntheticsMonitorType}.attributes.${ConfigKey.PROJECT_ID}: "${decodedProjectName}"`,
-          fields: [ConfigKey.JOURNEY_ID, ConfigKey.CONFIG_HASH],
-          perPage,
-          sortField: ConfigKey.JOURNEY_ID,
-          sortOrder: 'asc',
-          searchAfter: decodedSearchAfter ? [...decodedSearchAfter.split(',')] : undefined,
+          ...routeContext,
+          request: {
+            ...request,
+            query: {
+              ...request.query,
+              filter: `${syntheticsMonitorType}.attributes.${ConfigKey.PROJECT_ID}: "${decodedProjectName}"`,
+              perPage,
+              sortField: ConfigKey.JOURNEY_ID,
+              sortOrder: 'asc',
+              searchAfter: decodedSearchAfter ? [...decodedSearchAfter.split(',')] : undefined,
+            },
+          },
         },
-        syntheticsMonitorClient.syntheticsService,
-        savedObjectsClient
+        {
+          fields: [ConfigKey.JOURNEY_ID, ConfigKey.CONFIG_HASH],
+        }
       );
       const projectMonitors = monitors.map((monitor) => ({
         journey_id: monitor.attributes[ConfigKey.JOURNEY_ID],

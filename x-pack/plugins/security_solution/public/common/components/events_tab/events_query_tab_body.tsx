@@ -10,11 +10,9 @@ import { useDispatch } from 'react-redux';
 
 import { EuiCheckbox } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
-import type { EntityType } from '@kbn/timelines-plugin/common';
-
-import type { BulkActionsProp } from '@kbn/timelines-plugin/common/types';
-import { dataTableActions } from '../../store/data_table';
-import type { TableId } from '../../../../common/types/timeline';
+import { dataTableActions } from '@kbn/securitysolution-data-table';
+import type { TableId } from '@kbn/securitysolution-data-table';
+import type { CustomBulkAction } from '../../../../common/types';
 import { RowRendererId } from '../../../../common/types/timeline';
 import { StatefulEventsViewer } from '../events_viewer';
 import { eventsDefaultModel } from '../events_viewer/default_model';
@@ -33,11 +31,10 @@ import { DefaultCellRenderer } from '../../../timelines/components/timeline/cell
 import { SourcererScopeName } from '../../store/sourcerer/model';
 import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
 import { DEFAULT_COLUMN_MIN_WIDTH } from '../../../timelines/components/timeline/body/constants';
-import { defaultCellActions } from '../../lib/cell_actions/default_cell_actions';
 import type { GlobalTimeArgs } from '../../containers/use_global_time';
-import type { QueryTabBodyProps as UserQueryTabBodyProps } from '../../../users/pages/navigation/types';
-import type { QueryTabBodyProps as HostQueryTabBodyProps } from '../../../hosts/pages/navigation/types';
-import type { QueryTabBodyProps as NetworkQueryTabBodyProps } from '../../../network/pages/navigation/types';
+import type { QueryTabBodyProps as UserQueryTabBodyProps } from '../../../explore/users/pages/navigation/types';
+import type { QueryTabBodyProps as HostQueryTabBodyProps } from '../../../explore/hosts/pages/navigation/types';
+import type { QueryTabBodyProps as NetworkQueryTabBodyProps } from '../../../explore/network/pages/navigation/types';
 import { useLicense } from '../../hooks/use_license';
 
 import { useUiSetting$ } from '../../lib/kibana';
@@ -48,6 +45,8 @@ import {
   useGetInitialUrlParamValue,
   useReplaceUrlParams,
 } from '../../utils/global_query_string/helpers';
+import type { BulkActionsProp } from '../toolbar/bulk_actions/types';
+import { SecurityCellActionsTrigger } from '../cell_actions';
 
 export const ALERTS_EVENTS_HISTOGRAM_ID = 'alertsOrEventsHistogramQuery';
 
@@ -100,7 +99,7 @@ const EventsQueryTabBodyComponent: React.FC<EventsQueryTabBodyComponentProps> = 
 
   useEffect(() => {
     dispatch(
-      dataTableActions.initializeTGridSettings({
+      dataTableActions.initializeDataTableSettings({
         id: tableId,
         defaultColumns: eventsDefaultModel.columns.map((c) =>
           !tGridEnabled && c.initialWidth == null
@@ -159,7 +158,7 @@ const EventsQueryTabBodyComponent: React.FC<EventsQueryTabBodyComponentProps> = 
     from: startDate,
     to: endDate,
     scopeId: SourcererScopeName.default,
-  });
+  }) as CustomBulkAction;
 
   const bulkActions = useMemo<BulkActionsProp | boolean>(() => {
     return {
@@ -184,16 +183,15 @@ const EventsQueryTabBodyComponent: React.FC<EventsQueryTabBodyComponentProps> = 
       )}
       <StatefulEventsViewer
         additionalFilters={toggleExternalAlertsCheckbox}
-        defaultCellActions={defaultCellActions}
+        cellActionsTriggerId={SecurityCellActionsTrigger.DEFAULT}
         start={startDate}
         end={endDate}
-        entityType={'events' as EntityType}
         leadingControlColumns={leadingControlColumns}
         renderCellValue={DefaultCellRenderer}
         rowRenderers={defaultRowRenderers}
-        scopeId={SourcererScopeName.default}
+        sourcererScope={SourcererScopeName.default}
         tableId={tableId}
-        unit={showExternalAlerts ? i18n.ALERTS_UNIT : i18n.EVENTS_UNIT}
+        unit={showExternalAlerts ? i18n.EXTERNAL_ALERTS_UNIT : i18n.EVENTS_UNIT}
         defaultModel={defaultModel}
         pageFilters={composedPageFilters}
         bulkActions={bulkActions}
@@ -213,7 +211,7 @@ const useExternalAlertsInitialUrlState = () => {
 
   const getInitialUrlParamValue = useGetInitialUrlParamValue<boolean>(EXTERNAL_ALERTS_URL_PARAM);
 
-  const { decodedParam: showExternalAlertsInitialUrlState } = useMemo(
+  const showExternalAlertsInitialUrlState = useMemo(
     () => getInitialUrlParamValue(),
     [getInitialUrlParamValue]
   );
@@ -221,12 +219,9 @@ const useExternalAlertsInitialUrlState = () => {
   useEffect(() => {
     // Only called on component unmount
     return () => {
-      replaceUrlParams([
-        {
-          key: EXTERNAL_ALERTS_URL_PARAM,
-          value: null,
-        },
-      ]);
+      replaceUrlParams({
+        [EXTERNAL_ALERTS_URL_PARAM]: null,
+      });
     };
   }, [replaceUrlParams]);
 
@@ -239,11 +234,8 @@ const useExternalAlertsInitialUrlState = () => {
 const useSyncExternalAlertsUrlState = (showExternalAlerts: boolean) => {
   const replaceUrlParams = useReplaceUrlParams();
   useEffect(() => {
-    replaceUrlParams([
-      {
-        key: EXTERNAL_ALERTS_URL_PARAM,
-        value: showExternalAlerts ? 'true' : null,
-      },
-    ]);
+    replaceUrlParams({
+      [EXTERNAL_ALERTS_URL_PARAM]: showExternalAlerts ? true : null,
+    });
   }, [showExternalAlerts, replaceUrlParams]);
 };

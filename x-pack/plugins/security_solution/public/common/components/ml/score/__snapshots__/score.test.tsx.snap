@@ -1,0 +1,37 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`draggable_score renders correctly against snapshot 1`] = `
+<CellActions
+  field={
+    Object {
+      "aggregatable": true,
+      "name": "process.name",
+      "type": "keyword",
+      "value": "du",
+    }
+  }
+  mode="hover-down"
+  triggerId="security-default-cellActions"
+  visibleCellActions={5}
+>
+  17
+</CellActions>
+`;
+
+exports[`draggable_score renders correctly against snapshot when the index is not included 1`] = `
+<CellActions
+  field={
+    Object {
+      "aggregatable": true,
+      "name": "process.name",
+      "type": "keyword",
+      "value": "du",
+    }
+  }
+  mode="hover-down"
+  triggerId="security-default-cellActions"
+  visibleCellActions={5}
+>
+  17
+</CellActions>
+`;

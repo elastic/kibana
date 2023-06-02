@@ -36,9 +36,18 @@ export interface FleetConfigType {
   packageVerification?: {
     gpgKeyPath?: string;
   };
+  setup?: {
+    agentPolicySchemaUpgradeBatchSize?: number;
+  };
   developer?: {
+    maxAgentPoliciesWithInactivityTimeout?: number;
     disableRegistryVersionCheck?: boolean;
     bundledPackageLocation?: string;
+    testSecretsIndex?: string;
+  };
+  internal?: {
+    disableILMPolicies: boolean;
+    fleetServerStandalone: boolean;
   };
 }
 

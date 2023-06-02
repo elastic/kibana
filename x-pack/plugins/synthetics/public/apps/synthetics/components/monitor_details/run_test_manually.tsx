@@ -5,15 +5,63 @@
  * 2.0.
  */
 
-import { EuiButton } from '@elastic/eui';
+import { EuiButton, EuiToolTip } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
+import { useDispatch, useSelector } from 'react-redux';
+import {
+  TEST_NOW_ARIA_LABEL,
+  TEST_SCHEDULED_LABEL,
+  PRIVATE_AVAILABLE_LABEL,
+} from '../monitor_add_edit/form/run_test_btn';
+import { useSelectedMonitor } from './hooks/use_selected_monitor';
+import {
+  manualTestMonitorAction,
+  manualTestRunInProgressSelector,
+} from '../../state/manual_test_runs';
+import { useGetUrlParams } from '../../hooks/use_url_params';
 
 export const RunTestManually = () => {
+  const dispatch = useDispatch();
+
+  const { monitor } = useSelectedMonitor();
+
+  const hasPublicLocation = monitor?.locations.some((loc) => loc.isServiceManaged);
+
+  const { locationId } = useGetUrlParams();
+
+  const isSelectedLocationPrivate = monitor?.locations.some(
+    (loc) => loc.isServiceManaged === false && loc.id === locationId
+  );
+
+  const testInProgress = useSelector(manualTestRunInProgressSelector(monitor?.config_id));
+
+  const content =
+    !hasPublicLocation || isSelectedLocationPrivate
+      ? PRIVATE_AVAILABLE_LABEL
+      : testInProgress
+      ? TEST_SCHEDULED_LABEL
+      : TEST_NOW_ARIA_LABEL;
+
   return (
-    <EuiButton fill={true} iconType="beaker" isDisabled={true}>
-      {RUN_TEST_LABEL}
-    </EuiButton>
+    <EuiToolTip content={content} key={content}>
+      <EuiButton
+        data-test-subj="syntheticsRunTestManuallyButton"
+        color="success"
+        iconType="beaker"
+        isDisabled={!hasPublicLocation || isSelectedLocationPrivate}
+        isLoading={!Boolean(monitor) || testInProgress}
+        onClick={() => {
+          if (monitor) {
+            dispatch(
+              manualTestMonitorAction.get({ configId: monitor.config_id, name: monitor.name })
+            );
+          }
+        }}
+      >
+        {RUN_TEST_LABEL}
+      </EuiButton>
+    </EuiToolTip>
   );
 };
 

@@ -17,14 +17,24 @@ import {
 import { IndexPatternsFetcher } from '../fetcher';
 import type { DataViewsServerPluginStart, DataViewsServerPluginStartDependencies } from '../types';
 
-const parseMetaFields = (metaFields: string | string[]) => {
-  let parsedFields: string[] = [];
-  if (typeof metaFields === 'string') {
-    parsedFields = JSON.parse(metaFields);
-  } else {
-    parsedFields = metaFields;
+/**
+ * Accepts one of the following:
+ * 1. An array of field names
+ * 2. A JSON-stringified array of field names
+ * 3. A single field name (not comma-separated)
+ * @returns an array of field names
+ * @param fields
+ */
+export const parseFields = (fields: string | string[]): string[] => {
+  if (Array.isArray(fields)) return fields;
+  try {
+    return JSON.parse(fields);
+  } catch (e) {
+    if (!fields.includes(',')) return [fields];
+    throw new Error(
+      'metaFields should be an array of field names, a JSON-stringified array of field names, or a single field name'
+    );
   }
-  return parsedFields;
 };
 
 const path = '/api/index_patterns/_fields_for_wildcard';
@@ -32,10 +42,12 @@ const path = '/api/index_patterns/_fields_for_wildcard';
 type IBody = { index_filter?: estypes.QueryDslQueryContainer } | undefined;
 interface IQuery {
   pattern: string;
-  meta_fields: string[];
+  meta_fields: string | string[];
   type?: string;
   rollup_index?: string;
   allow_no_index?: boolean;
+  include_unmapped?: boolean;
+  fields?: string[];
 }
 
 const validate: RouteValidatorFullConfig<{}, IQuery, IBody> = {
@@ -47,6 +59,8 @@ const validate: RouteValidatorFullConfig<{}, IQuery, IBody> = {
     type: schema.maybe(schema.string()),
     rollup_index: schema.maybe(schema.string()),
     allow_no_index: schema.maybe(schema.boolean()),
+    include_unmapped: schema.maybe(schema.boolean()),
+    fields: schema.maybe(schema.oneOf([schema.string(), schema.arrayOf(schema.string())])),
   }),
   // not available to get request
   body: schema.maybe(schema.object({ index_filter: schema.any() })),
@@ -60,14 +74,17 @@ const handler: RequestHandler<{}, IQuery, IBody> = async (context, request, resp
     type,
     rollup_index: rollupIndex,
     allow_no_index: allowNoIndex,
+    include_unmapped: includeUnmapped,
   } = request.query;
 
   // not available to get request
-  const filter = request.body?.index_filter;
+  const indexFilter = request.body?.index_filter;
 
   let parsedFields: string[] = [];
+  let parsedMetaFields: string[] = [];
   try {
-    parsedFields = parseMetaFields(metaFields);
+    parsedMetaFields = parseFields(metaFields);
+    parsedFields = parseFields(request.query.fields ?? []);
   } catch (error) {
     return response.badRequest();
   }
@@ -75,13 +92,15 @@ const handler: RequestHandler<{}, IQuery, IBody> = async (context, request, resp
   try {
     const { fields, indices } = await indexPatterns.getFieldsForWildcard({
       pattern,
-      metaFields: parsedFields,
+      metaFields: parsedMetaFields,
       type,
       rollupIndex,
       fieldCapsOptions: {
         allow_no_indices: allowNoIndex || false,
+        includeUnmapped,
       },
-      filter,
+      indexFilter,
+      ...(parsedFields.length > 0 ? { fields: parsedFields } : {}),
     });
 
     return response.ok({

@@ -4,10 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+export const TIMESTAMP = 'timestamp.us';
 export const AGENT = 'agent';
 export const AGENT_NAME = 'agent.name';
 export const AGENT_VERSION = 'agent.version';
+export const AGENT_ACTIVATION_METHOD = 'agent.activation_method';
 
 export const DESTINATION_ADDRESS = 'destination.address';
 
@@ -21,6 +22,8 @@ export const CLOUD_INSTANCE_ID = 'cloud.instance.id';
 export const CLOUD_INSTANCE_NAME = 'cloud.instance.name';
 export const CLOUD_SERVICE_NAME = 'cloud.service.name';
 
+export const EVENT_SUCCESS_COUNT = 'event.success_count';
+
 export const SERVICE = 'service';
 export const SERVICE_NAME = 'service.name';
 export const SERVICE_ENVIRONMENT = 'service.environment';
@@ -32,6 +35,9 @@ export const SERVICE_RUNTIME_NAME = 'service.runtime.name';
 export const SERVICE_RUNTIME_VERSION = 'service.runtime.version';
 export const SERVICE_NODE_NAME = 'service.node.name';
 export const SERVICE_VERSION = 'service.version';
+export const SERVICE_TARGET_TYPE = 'service.target.type';
+export const SERVICE_OVERFLOW_COUNT =
+  'service_transaction.aggregation.overflow_count';
 
 export const URL_FULL = 'url.full';
 export const HTTP_REQUEST_METHOD = 'http.request.method';
@@ -55,6 +61,8 @@ export const TRANSACTION_SAMPLED = 'transaction.sampled';
 export const TRANSACTION_PAGE_URL = 'transaction.page.url';
 export const TRANSACTION_FAILURE_COUNT = 'transaction.failure_count';
 export const TRANSACTION_SUCCESS_COUNT = 'transaction.success_count';
+export const TRANSACTION_OVERFLOW_COUNT =
+  'transaction.aggregation.overflow_count';
 // for transaction metrics
 export const TRANSACTION_ROOT = 'transaction.root';
 
@@ -81,6 +89,13 @@ export const SPAN_LINKS = 'span.links';
 export const SPAN_LINKS_TRACE_ID = 'span.links.trace.id';
 export const SPAN_LINKS_SPAN_ID = 'span.links.span.id';
 
+export const SPAN_COMPOSITE_COUNT = 'span.composite.count';
+export const SPAN_COMPOSITE_SUM = 'span.composite.sum.us';
+export const SPAN_COMPOSITE_COMPRESSION_STRATEGY =
+  'span.composite.compression_strategy';
+
+export const SPAN_SYNC = 'span.sync';
+
 // Parent ID for a transaction or span
 export const PARENT_ID = 'parent.id';
 
@@ -89,10 +104,12 @@ export const ERROR_GROUP_ID = 'error.grouping_key';
 export const ERROR_CULPRIT = 'error.culprit';
 export const ERROR_LOG_LEVEL = 'error.log.level';
 export const ERROR_LOG_MESSAGE = 'error.log.message';
+export const ERROR_EXCEPTION = 'error.exception';
 export const ERROR_EXC_MESSAGE = 'error.exception.message'; // only to be used in es queries, since error.exception is now an array
 export const ERROR_EXC_HANDLED = 'error.exception.handled'; // only to be used in es queries, since error.exception is now an array
 export const ERROR_EXC_TYPE = 'error.exception.type';
 export const ERROR_PAGE_URL = 'error.page.url';
+export const ERROR_TYPE = 'error.type';
 
 // METRICS
 export const METRIC_SYSTEM_FREE_MEMORY = 'system.memory.actual.free';
@@ -116,8 +133,12 @@ export const METRIC_JAVA_GC_COUNT = 'jvm.gc.count';
 export const METRIC_JAVA_GC_TIME = 'jvm.gc.time';
 
 export const METRICSET_NAME = 'metricset.name';
+export const METRICSET_INTERVAL = 'metricset.interval';
 
 export const LABEL_NAME = 'labels.name';
+export const LABEL_GC = 'labels.gc';
+export const LABEL_TYPE = 'labels.type';
+export const LABEL_TELEMETRY_AUTO_VERSION = 'labels.telemetry_auto_version';
 
 export const HOST = 'host';
 export const HOST_HOSTNAME = 'host.hostname'; // Do not use. Please use `HOST_NAME` instead.
@@ -134,8 +155,6 @@ export const KUBERNETES = 'kubernetes';
 export const KUBERNETES_POD_NAME = 'kubernetes.pod.name';
 export const KUBERNETES_POD_UID = 'kubernetes.pod.uid';
 
-export const CLIENT_GEO_COUNTRY_ISO_CODE = 'client.geo.country_iso_code';
-
 export const FAAS_ID = 'faas.id';
 export const FAAS_NAME = 'faas.name';
 export const FAAS_COLDSTART = 'faas.coldstart';
@@ -144,10 +163,43 @@ export const FAAS_DURATION = 'faas.duration';
 export const FAAS_COLDSTART_DURATION = 'faas.coldstart_duration';
 export const FAAS_BILLED_DURATION = 'faas.billed_duration';
 
+// OpenTelemetry Metrics
+export const METRIC_OTEL_SYSTEM_CPU_UTILIZATION = 'system.cpu.utilization';
+export const METRIC_OTEL_SYSTEM_MEMORY_UTILIZATION =
+  'system.memory.utilization';
+
+export const METRIC_OTEL_JVM_PROCESS_CPU_PERCENT =
+  'process.runtime.jvm.cpu.utilization';
+export const METRIC_OTEL_JVM_PROCESS_MEMORY_USAGE =
+  'process.runtime.jvm.memory.usage';
+export const METRIC_OTEL_JVM_PROCESS_MEMORY_COMMITTED =
+  'process.runtime.jvm.memory.committed';
+export const METRIC_OTEL_JVM_PROCESS_MEMORY_LIMIT =
+  'process.runtime.jvm.memory.limit';
+export const METRIC_OTEL_JVM_PROCESS_THREADS_COUNT =
+  'process.runtime.jvm.threads.count';
+export const METRIC_OTEL_JVM_SYSTEM_CPU_PERCENT =
+  'process.runtime.jvm.system.cpu.utilization';
+export const METRIC_OTEL_JVM_GC_DURATION = 'process.runtime.jvm.gc.duration';
+export const VALUE_OTEL_JVM_PROCESS_MEMORY_HEAP = 'heap';
+export const VALUE_OTEL_JVM_PROCESS_MEMORY_NON_HEAP = 'non_heap';
+
 // Metadata
 export const TIER = '_tier';
 export const INDEX = '_index';
 
 // Mobile
 export const NETWORK_CONNECTION_TYPE = 'network.connection.type';
-export const DEVICE_MODEL_NAME = 'device.model.name';
+export const DEVICE_MODEL_IDENTIFIER = 'device.model.identifier';
+export const SESSION_ID = 'session.id';
+export const APP_LAUNCH_TIME = 'application.launch.time';
+export const EVENT_NAME = 'event.name';
+
+// Location
+export const CLIENT_GEO_COUNTRY_ISO_CODE = 'client.geo.country_iso_code';
+export const CLIENT_GEO_REGION_ISO_CODE = 'client.geo.region_iso_code';
+export const CLIENT_GEO_COUNTRY_NAME = 'client.geo.country_name';
+export const CLIENT_GEO_CITY_NAME = 'client.geo.city_name';
+export const CLIENT_GEO_REGION_NAME = 'client.geo.region_name';
+
+export const CHILD_ID = 'child.id';

@@ -9,7 +9,6 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { Adapters } from '@kbn/inspector-plugin/public';
 import {
-  checkForDuplicateTitle,
   SavedObjectSaveModalOrigin,
   OnSaveProps,
   showSaveModal,
@@ -18,20 +17,19 @@ import {
   LazySavedObjectSaveModalDashboard,
   withSuspense,
 } from '@kbn/presentation-util-plugin/public';
+import { ScopedHistory } from '@kbn/core/public';
 import {
   getNavigateToApp,
   getMapsCapabilities,
   getIsAllowByValueEmbeddables,
   getInspector,
-  getCoreI18n,
-  getSavedObjectsClient,
   getCoreOverlays,
   getSavedObjectsTagging,
   getPresentationUtilContext,
 } from '../../kibana_services';
-import { MAP_SAVED_OBJECT_TYPE } from '../../../common/constants';
+import { MAP_EMBEDDABLE_NAME } from '../../../common/constants';
 import { SavedMap } from './saved_map';
-import { getMapEmbeddableDisplayName } from '../../../common/i18n_getters';
+import { checkForDuplicateTitle } from '../../content_management';
 
 const SavedObjectSaveModalDashboard = withSuspense(LazySavedObjectSaveModalDashboard);
 
@@ -42,6 +40,7 @@ export function getTopNavConfig({
   enableFullScreen,
   openMapSettings,
   inspectorAdapters,
+  history,
 }: {
   savedMap: SavedMap;
   isOpenSettingsDisabled: boolean;
@@ -49,6 +48,7 @@ export function getTopNavConfig({
   enableFullScreen: () => void;
   openMapSettings: () => void;
   inspectorAdapters: Adapters;
+  history: ScopedHistory;
 }) {
   const topNavConfigs = [];
 
@@ -56,7 +56,7 @@ export function getTopNavConfig({
     {
       id: 'mapSettings',
       label: i18n.translate('xpack.maps.topNav.openSettingsButtonLabel', {
-        defaultMessage: `Map settings`,
+        defaultMessage: `Settings`,
       }),
       description: i18n.translate('xpack.maps.topNav.openSettingsDescription', {
         defaultMessage: `Open map settings`,
@@ -161,6 +161,7 @@ export function getTopNavConfig({
           <savedObjectsTagging.ui.components.SavedObjectSaveModalTagSelector
             initialSelection={selectedTags}
             onTagsSelected={onTagsSelected}
+            markOptional
           />
         ) : undefined;
 
@@ -178,13 +179,11 @@ export function getTopNavConfig({
                   title: props.newTitle,
                   copyOnSave: props.newCopyOnSave,
                   lastSavedTitle: savedMap.getSavedObjectId() ? savedMap.getTitle() : '',
-                  getEsType: () => MAP_SAVED_OBJECT_TYPE,
-                  getDisplayName: getMapEmbeddableDisplayName,
+                  isTitleDuplicateConfirmed: props.isTitleDuplicateConfirmed,
+                  getDisplayName: () => MAP_EMBEDDABLE_NAME,
+                  onTitleDuplicate: props.onTitleDuplicate,
                 },
-                props.isTitleDuplicateConfirmed,
-                props.onTitleDuplicate,
                 {
-                  savedObjectsClient: getSavedObjectsClient(),
                   overlays: getCoreOverlays(),
                 }
               );
@@ -197,6 +196,7 @@ export function getTopNavConfig({
               ...props,
               newTags: selectedTags,
               saveByReference: props.addToLibrary,
+              history,
             });
             // showSaveModal wrapper requires onSave to return an object with an id to close the modal after successful save
             return { id: 'id' };
@@ -245,7 +245,7 @@ export function getTopNavConfig({
           );
         }
 
-        showSaveModal(saveModal, getCoreI18n().Context, PresentationUtilContext);
+        showSaveModal(saveModal, PresentationUtilContext);
       },
     });
 
@@ -266,6 +266,7 @@ export function getTopNavConfig({
             returnToOrigin: true,
             onTitleDuplicate: () => {},
             saveByReference: !savedMap.isByValue(),
+            history,
           });
         },
         testId: 'mapSaveAndReturnButton',

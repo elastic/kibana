@@ -1048,4 +1048,242 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       }
     ),
   },
+  {
+    key: 'linux.advanced.host_isolation.allowed',
+    first_supported_version: '8.6.1',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.host_isolation.allowed',
+      {
+        defaultMessage:
+          'A value of false disallows host isolation activity on Linux endpoints, regardless of whether host isolation is supported. Note that if a host is currently not isolated, it will refuse to isolate, and likewise, a host will refuse to release if it is currently isolated. A value of true will allow Linux endpoints to isolate if supported. Default: true',
+      }
+    ),
+  },
+  {
+    key: 'mac.advanced.capture_env_vars',
+    first_supported_version: '8.7',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.capture_env_vars',
+      {
+        defaultMessage:
+          'The list of environment variables to capture (up to five), separated by commas.',
+      }
+    ),
+  },
+  {
+    key: 'linux.advanced.events.disable_fd_kprobes',
+    first_supported_version: '8.8',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.events.disable_fd_kprobes',
+      {
+        defaultMessage:
+          'When only process events are being collected, this option will disable file descriptor tracking probes. This can be used to reduce Endpoint processing at the expense of missing fchdir based working directory changes. This only applies if the capture_mode is kprobe or if auto resolves tracefs (kprobe) probes. ebpf based event collection ignores this setting. Default is false.',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.events.callstacks.emit_in_events',
+    first_supported_version: '8.8',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.callstacks.emit_in_events',
+      {
+        defaultMessage:
+          'If set, callstacks will be included in regular events where they are collected. Otherwise, they are only included in events that trigger behavioral protection rules. Note that setting this may significantly increase data volumes. Default: false',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.events.callstacks.process',
+    first_supported_version: '8.8',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.callstacks.process',
+      {
+        defaultMessage: 'Collect callstacks during process events?  Default: true',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.events.callstacks.image_load',
+    first_supported_version: '8.8',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.callstacks.image_load',
+      {
+        defaultMessage: 'Collect callstacks during image/library load events?  Default: true',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.events.callstacks.file',
+    first_supported_version: '8.8',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.callstacks.file',
+      {
+        defaultMessage: 'Collect callstacks during file events?  Default: true',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.events.callstacks.registry',
+    first_supported_version: '8.8',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.callstacks.registry',
+      {
+        defaultMessage: 'Collect callstacks during registry events?  Default: true',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.artifacts.global.proxy_url',
+    first_supported_version: '8.8',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.artifacts.global.proxy_url',
+      {
+        defaultMessage:
+          'Proxy server to use when downloading global artifact manifests. Default: none',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.artifacts.global.proxy_disable',
+    first_supported_version: '8.8',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.artifacts.global.proxy_disable',
+      {
+        defaultMessage:
+          'If the proxy setting should be used when downloading global artifact manifests. Default: false',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.artifacts.user.proxy_url',
+    first_supported_version: '8.8',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.artifacts.user.proxy_url',
+      {
+        defaultMessage:
+          'Proxy server to use when downloading user artifact manifests. Default: none',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.artifacts.user.proxy_disable',
+    first_supported_version: '8.8',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.artifacts.user.proxy_disable',
+      {
+        defaultMessage:
+          'If the proxy setting should be used when downloading user artifact manifests. Default: false',
+      }
+    ),
+  },
+  {
+    key: 'mac.advanced.artifacts.global.proxy_url',
+    first_supported_version: '8.8',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.artifacts.global.proxy_url',
+      {
+        defaultMessage:
+          'Proxy server to use when downloading global artifact manifests. Default: none',
+      }
+    ),
+  },
+  {
+    key: 'mac.advanced.artifacts.global.proxy_disable',
+    first_supported_version: '8.8',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.artifacts.global.proxy_disable',
+      {
+        defaultMessage:
+          'If the proxy setting should be used when downloading global artifact manifests. Default: false',
+      }
+    ),
+  },
+  {
+    key: 'mac.advanced.artifacts.user.proxy_url',
+    first_supported_version: '8.8',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.artifacts.user.proxy_url',
+      {
+        defaultMessage:
+          'Proxy server to use when downloading user artifact manifests. Default: none',
+      }
+    ),
+  },
+  {
+    key: 'mac.advanced.artifacts.user.proxy_disable',
+    first_supported_version: '8.8',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.artifacts.user.proxy_disable',
+      {
+        defaultMessage:
+          'If the proxy setting should be used when downloading user artifact manifests. Default: false',
+      }
+    ),
+  },
+  {
+    key: 'linux.advanced.artifacts.global.proxy_url',
+    first_supported_version: '8.8',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.artifacts.global.proxy_url',
+      {
+        defaultMessage:
+          'Proxy server to use when downloading global artifact manifests. Default: none',
+      }
+    ),
+  },
+  {
+    key: 'linux.advanced.artifacts.global.proxy_disable',
+    first_supported_version: '8.8',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.artifacts.global.proxy_disable',
+      {
+        defaultMessage:
+          'If the proxy setting should be used when downloading global artifact manifests. Default: false',
+      }
+    ),
+  },
+  {
+    key: 'linux.advanced.artifacts.user.proxy_url',
+    first_supported_version: '8.8',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.artifacts.user.proxy_url',
+      {
+        defaultMessage:
+          'Proxy server to use when downloading user artifact manifests. Default: none',
+      }
+    ),
+  },
+  {
+    key: 'linux.advanced.artifacts.user.proxy_disable',
+    first_supported_version: '8.8',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.artifacts.user.proxy_disable',
+      {
+        defaultMessage:
+          'If the proxy setting should be used when downloading user artifact manifests. Default: false',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.events.api',
+    first_supported_version: '8.8',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.api',
+      {
+        defaultMessage:
+          'Controls whether API events are enabled. Set to false to disable API event collection. Default: true',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.alerts.rollback.self_healing.registry_enabled',
+    first_supported_version: '8.8',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.alerts.rollback.self_healing.registry_enabled',
+      {
+        defaultMessage:
+          'Enables self-healing of registry based malware artifacts. Requires rollback.self_healing.enabled to also be enabled. Default: true',
+      }
+    ),
+  },
 ];

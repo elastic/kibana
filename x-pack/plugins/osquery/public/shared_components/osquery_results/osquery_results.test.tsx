@@ -10,14 +10,14 @@ import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { render } from '@testing-library/react';
 import { QueryClientProvider } from '@tanstack/react-query';
 
-import { OsqueryActionResults } from '.';
+import { OsqueryActionResults } from './osquery_results';
 import { queryClient } from '../../query_client';
 import { useKibana } from '../../common/lib/kibana';
-import * as useAllLiveQueries from '../../actions/use_all_live_queries';
 import * as useLiveQueryDetails from '../../actions/use_live_query_details';
 import { PERMISSION_DENIED } from '../osquery_action/translations';
 import * as privileges from '../../action_results/use_action_privileges';
 import { defaultLiveQueryDetails, DETAILS_QUERY, getMockedKibanaConfig } from './test_utils';
+import type { OsqueryActionResultsProps } from './types';
 
 jest.mock('../../common/lib/kibana');
 
@@ -31,11 +31,20 @@ const enablePrivileges = () => {
   }));
 };
 
-const defaultProps = {
-  agentIds: ['agent1'],
+const defaultProps: OsqueryActionResultsProps = {
   ruleName: ['Test-rule'],
-  ruleActions: [{ action_type_id: 'action1' }, { action_type_id: 'action2' }],
-  alertId: 'test-alert-id',
+  actionItems: [
+    {
+      _id: 'test',
+      _index: 'test',
+      fields: {
+        action_id: ['testActionId'],
+        'queries.action_id': ['queriesActionId'],
+        'queries.query': [DETAILS_QUERY],
+        '@timestamp': ['2022-09-08T18:16:30.256Z'],
+      },
+    },
+  ],
   ecsData: {
     _id: 'test',
   },
@@ -43,6 +52,7 @@ const defaultProps = {
 
 const defaultPermissions = {
   osquery: {
+    read: true,
     runSavedQueries: false,
     readSavedQueries: false,
   },
@@ -66,33 +76,12 @@ const renderWithContext = (Element: React.ReactElement) =>
 describe('Osquery Results', () => {
   beforeAll(() => {
     mockKibana();
-    // @ts-expect-error update types
-    jest.spyOn(useAllLiveQueries, 'useAllLiveQueries').mockImplementation(() => ({
-      data: {
-        data: {
-          items: [
-            {
-              fields: {
-                action_id: ['sfdsfds'],
-                'queries.action_id': ['dsadas'],
-                'queries.query': [DETAILS_QUERY],
-                '@timestamp': ['2022-09-08T18:16:30.256Z'],
-              },
-            },
-          ],
-        },
-      },
-    }));
 
     jest
       .spyOn(useLiveQueryDetails, 'useLiveQueryDetails')
       .mockImplementation(() => defaultLiveQueryDetails);
   });
 
-  it('should validate permissions', async () => {
-    const { queryByText } = renderWithContext(<OsqueryActionResults {...defaultProps} />);
-    expect(queryByText(PERMISSION_DENIED)).toBeInTheDocument();
-  });
   it('return results table', async () => {
     enablePrivileges();
     const { getByText, queryByText, getByTestId } = renderWithContext(

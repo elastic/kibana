@@ -7,7 +7,8 @@
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import React from 'react';
-import { ReportTypes } from '@kbn/observability-plugin/public';
+import { ReportTypes } from '@kbn/exploratory-view-plugin/public';
+import { i18n } from '@kbn/i18n';
 import { ClientPluginsStart } from '../../../../../plugin';
 import { useMonitorQueryId } from '../hooks/use_monitor_query_id';
 import { useSelectedLocation } from '../hooks/use_selected_location';
@@ -18,9 +19,9 @@ interface MonitorCompleteCountProps {
 }
 
 export const MonitorCompleteCount = (props: MonitorCompleteCountProps) => {
-  const { observability } = useKibana<ClientPluginsStart>().services;
-
-  const { ExploratoryViewEmbeddable } = observability;
+  const {
+    exploratoryView: { ExploratoryViewEmbeddable },
+  } = useKibana<ClientPluginsStart>().services;
 
   const monitorId = useMonitorQueryId();
   const selectedLocation = useSelectedLocation();
@@ -31,6 +32,7 @@ export const MonitorCompleteCount = (props: MonitorCompleteCountProps) => {
 
   return (
     <ExploratoryViewEmbeddable
+      id="monitorSuccessfulCount"
       align="left"
       reportType={ReportTypes.SINGLE_METRIC}
       attributes={[
@@ -41,10 +43,17 @@ export const MonitorCompleteCount = (props: MonitorCompleteCountProps) => {
             'observer.geo.name': [selectedLocation.label],
           },
           dataType: 'synthetics',
-          selectedMetricField: 'monitor_complete',
-          name: 'synthetics-series-1',
+          selectedMetricField: 'monitor_successful',
+          name: SUCCESSFUL_LABEL,
         },
       ]}
     />
   );
 };
+
+export const SUCCESSFUL_LABEL = i18n.translate(
+  'xpack.synthetics.monitorDetails.summary.successful',
+  {
+    defaultMessage: 'Successful',
+  }
+);

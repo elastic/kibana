@@ -220,7 +220,7 @@ const getItems = (conflictDescriptions: IndexedFieldItem['conflictDescriptions']
 };
 
 export const renderFieldName = (field: IndexedFieldItem, timeFieldName?: string) => (
-  <span>
+  <span data-test-subj={`field-name-${field.name}`}>
     {field.name}
     {field.info && field.info.length ? (
       <span>
@@ -297,12 +297,10 @@ export const getConflictModalContent = ({
   <>
     <EuiModalHeader>
       <EuiModalHeaderTitle>
-        <h1>
-          <FormattedMessage
-            id="indexPatternManagement.editIndexPattern.fields.conflictModal.title"
-            defaultMessage="This field has a type conflict"
-          />
-        </h1>
+        <FormattedMessage
+          id="indexPatternManagement.editIndexPattern.fields.conflictModal.title"
+          defaultMessage="This field has a type conflict"
+        />
       </EuiModalHeaderTitle>
     </EuiModalHeader>
     <EuiModalBody>
@@ -359,7 +357,7 @@ const getConflictBtn = (
     <span>
       <EuiBadge
         color="warning"
-        iconType="alert"
+        iconType="warning"
         onClick={onClick}
         iconOnClick={onClick}
         iconOnClickAriaLabel={conflictDetailIconAria}

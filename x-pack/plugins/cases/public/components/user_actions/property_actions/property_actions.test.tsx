@@ -11,6 +11,7 @@ import userEvent from '@testing-library/user-event';
 import type { AppMockRenderer } from '../../../common/mock';
 import { createAppMockRenderer } from '../../../common/mock';
 import { UserActionPropertyActions } from './property_actions';
+import { AttachmentActionType } from '../../../client/attachment_framework/types';
 
 describe('UserActionPropertyActions', () => {
   let appMock: AppMockRenderer;
@@ -20,6 +21,7 @@ describe('UserActionPropertyActions', () => {
     isLoading: false,
     propertyActions: [
       {
+        type: AttachmentActionType.BUTTON as const,
         iconType: 'pencil',
         label: 'Edit',
         onClick,
@@ -36,19 +38,19 @@ describe('UserActionPropertyActions', () => {
     const result = appMock.render(<UserActionPropertyActions {...props} isLoading={true} />);
 
     expect(result.getByTestId('user-action-title-loading')).toBeInTheDocument();
-    expect(result.queryByTestId('property-actions')).not.toBeInTheDocument();
+    expect(result.queryByTestId('property-actions-user-action')).not.toBeInTheDocument();
   });
 
   it('renders the property actions', async () => {
     const result = appMock.render(<UserActionPropertyActions {...props} isLoading={false} />);
 
-    expect(result.getByTestId('property-actions')).toBeInTheDocument();
+    expect(result.getByTestId('property-actions-user-action')).toBeInTheDocument();
 
-    userEvent.click(result.getByTestId('property-actions-ellipses'));
+    userEvent.click(result.getByTestId('property-actions-user-action-ellipses'));
     await waitForEuiPopoverOpen();
 
-    expect(result.getByTestId('property-actions-group').children.length).toBe(1);
-    expect(result.queryByTestId('property-actions-pencil')).toBeInTheDocument();
+    expect(result.getByTestId('property-actions-user-action-group').children.length).toBe(1);
+    expect(result.queryByTestId('property-actions-user-action-pencil')).toBeInTheDocument();
   });
 
   it('does not render if properties are empty', async () => {
@@ -56,7 +58,7 @@ describe('UserActionPropertyActions', () => {
       <UserActionPropertyActions {...props} isLoading={false} propertyActions={[]} />
     );
 
-    expect(result.queryByTestId('property-actions')).not.toBeInTheDocument();
+    expect(result.queryByTestId('property-actions-user-action')).not.toBeInTheDocument();
     expect(result.queryByTestId('user-action-title-loading')).not.toBeInTheDocument();
   });
 });

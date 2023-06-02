@@ -6,100 +6,178 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React, { MouseEvent, useMemo, useState } from 'react';
-import { EuiBasicTable, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
-import { useHistory } from 'react-router-dom';
-import { useKibanaDateFormat } from '../../../../../hooks/use_kibana_date_format';
-import { Ping } from '../../../../../../common/runtime_types';
+import React, { MouseEvent, useMemo } from 'react';
+import {
+  EuiSpacer,
+  EuiText,
+  EuiInMemoryTable,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiBadge,
+  useIsWithinMinBreakpoint,
+} from '@elastic/eui';
+import { useHistory, useParams } from 'react-router-dom';
+import moment from 'moment';
+import { ErrorDetailsLink } from '../../common/links/error_details_link';
+import { useSelectedLocation } from '../hooks/use_selected_location';
+import { Ping, PingState } from '../../../../../../common/runtime_types';
 import { useErrorFailedStep } from '../hooks/use_error_failed_step';
+import { isActiveState } from '../hooks/use_monitor_errors';
+import { useMonitorLatestPing } from '../hooks/use_monitor_latest_ping';
 import {
   formatTestDuration,
   formatTestRunAt,
+  useDateFormatForTest,
 } from '../../../utils/monitor_test_result/test_time_formats';
-import { useMonitorErrors } from '../hooks/use_monitor_errors';
-import { useSyntheticsSettingsContext } from '../../../contexts';
 
-export const ErrorsList = () => {
-  const [pageIndex, setPageIndex] = useState(0);
-  const [pageSize, setPageSize] = useState(10);
-  const [sortField, setSortField] = useState('@timestamp');
-  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
+export function isErrorActive(item: PingState, lastErrorId?: string, latestPingStatus?: string) {
+  // if the error is the most recent, `isActiveState`, and the monitor
+  // is not yet back up, label the error as active
+  return isActiveState(item) && lastErrorId === item.state.id && latestPingStatus !== 'up';
+}
 
-  const { errorStates, loading } = useMonitorErrors();
-
-  const items = errorStates.slice(pageIndex * pageSize, pageIndex * pageSize + pageSize);
+export const ErrorsList = ({
+  errorStates,
+  loading,
+  location,
+}: {
+  errorStates: PingState[];
+  loading: boolean;
+  location: ReturnType<typeof useSelectedLocation>;
+}) => {
+  const { monitorId: configId } = useParams<{ monitorId: string }>();
 
   const checkGroups = useMemo(() => {
-    const currentPage = errorStates.slice(pageIndex * pageSize, pageIndex * pageSize + pageSize);
-
-    return currentPage.map((error) => error.monitor.check_group!);
-  }, [errorStates, pageIndex, pageSize]);
+    return errorStates.map((error) => error.monitor.check_group!);
+  }, [errorStates]);
 
   const { failedSteps } = useErrorFailedStep(checkGroups);
 
   const isBrowserType = errorStates[0]?.monitor.type === 'browser';
 
-  const { basePath } = useSyntheticsSettingsContext();
-
   const history = useHistory();
 
-  const format = useKibanaDateFormat();
+  const format = useDateFormatForTest();
+
+  const selectedLocation = location;
+
+  const { latestPing } = useMonitorLatestPing({
+    monitorId: configId,
+    locationLabel: selectedLocation?.label,
+  });
+
+  const lastErrorTestRun = errorStates?.sort((a, b) => {
+    return moment(b.state.started_at).valueOf() - moment(a.state.started_at).valueOf();
+  })?.[0];
+
+  const isTabletOrGreater = useIsWithinMinBreakpoint('s');
 
   const columns = [
     {
-      field: '@timestamp',
+      field: 'item.state.started_at',
       name: TIMESTAMP_LABEL,
-      sortable: true,
-      render: (value: string, item: Ping) => {
-        return (
-          <EuiLink href={`${basePath}/app/synthetics/error-details/${item.state?.id}`}>
-            {formatTestRunAt(item.state!.started_at, format)}
-          </EuiLink>
+      sortable: (a: PingState) => {
+        return moment(a.state.started_at).valueOf();
+      },
+      render: (_value: string, item: PingState) => {
+        const link = (
+          <ErrorDetailsLink
+            configId={configId}
+            stateId={item.state?.id!}
+            label={formatTestRunAt(item.state!.started_at, format)}
+            locationId={selectedLocation?.id}
+          />
         );
+        if (isErrorActive(item, lastErrorTestRun?.state.id, latestPing?.monitor.status)) {
+          return (
+            <EuiFlexGroup gutterSize="m" alignItems="center" wrap={true}>
+              <EuiFlexItem grow={false} className="eui-textNoWrap">
+                {link}
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiBadge iconType="clock" iconSide="right" css={{ maxWidth: 'max-content' }}>
+                  {ACTIVE_LABEL}
+                </EuiBadge>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          );
+        }
+        return link;
+      },
+      mobileOptions: {
+        header: false,
       },
     },
+    ...(isBrowserType
+      ? [
+          {
+            field: 'monitor.check_group',
+            name: FAILED_STEP_LABEL,
+            truncateText: true,
+            sortable: (a: PingState) => {
+              const failedStep = failedSteps.find(
+                (step) => step.monitor.check_group === a.monitor.check_group
+              );
+              if (!failedStep) {
+                return a.monitor.check_group;
+              }
+              return failedStep.synthetics?.step?.name;
+            },
+            render: (value: string, item: PingState) => {
+              const failedStep = failedSteps.find((step) => step.monitor.check_group === value);
+              if (!failedStep) {
+                return <>--</>;
+              }
+              return (
+                <EuiText size="s">
+                  {failedStep.synthetics?.step?.index}. {failedStep.synthetics?.step?.name}
+                </EuiText>
+              );
+            },
+          },
+        ]
+      : []),
     {
-      field: 'monitor.check_group',
-      name: !isBrowserType ? ERROR_MESSAGE_LABEL : FAILED_STEP_LABEL,
-      truncateText: true,
-      render: (value: string, item: Ping) => {
-        if (!isBrowserType) {
-          return <EuiText size="s">{item.error?.message ?? '--'}</EuiText>;
-        }
-        const failedStep = failedSteps.find((step) => step.monitor.check_group === value);
-        if (!failedStep) {
-          return <>--</>;
-        }
-        return (
-          <EuiText size="s">
-            {failedStep.synthetics?.step?.index}. {failedStep.synthetics?.step?.name}
-          </EuiText>
-        );
-      },
+      field: 'error.message',
+      name: ERROR_MESSAGE_LABEL,
     },
     {
       field: 'state.duration_ms',
       name: ERROR_DURATION_LABEL,
       align: 'right' as const,
-      render: (value: number) => <EuiText>{formatTestDuration(value, true)}</EuiText>,
+      sortable: true,
+      render: (value: string, item: PingState) => {
+        const isActive = isActiveState(item);
+        let activeDuration = 0;
+        if (item.monitor.timespan) {
+          const diff = moment(item.monitor.timespan.lt).diff(
+            moment(item.monitor.timespan.gte),
+            'millisecond'
+          );
+          if (isActive) {
+            const currentDiff = moment().diff(item['@timestamp']);
+
+            activeDuration = currentDiff < diff ? currentDiff : diff;
+          } else {
+            activeDuration = diff;
+          }
+        }
+        return (
+          <EuiText size="s">{formatTestDuration(Number(value) + activeDuration, true)}</EuiText>
+        );
+      },
     },
   ];
-
-  const pagination = {
-    pageIndex,
-    pageSize,
-    totalItemCount: errorStates.length,
-    pageSizeOptions: [3, 5, 8],
-  };
 
   const getRowProps = (item: Ping) => {
     const { state } = item;
     if (state?.id) {
       return {
-        height: '85px',
         'data-test-subj': `row-${state.id}`,
         onClick: (evt: MouseEvent) => {
-          history.push(`/error-details/${state.id}`);
+          history.push(
+            `/monitor/${configId}/errors/${state.id}?locationId=${selectedLocation?.id}`
+          );
         },
       };
     }
@@ -108,32 +186,38 @@ export const ErrorsList = () => {
   return (
     <div>
       <EuiSpacer />
-      <EuiBasicTable
+      <EuiInMemoryTable
+        css={{ overflowX: isTabletOrGreater ? 'auto' : undefined }}
+        tableLayout="auto"
         tableCaption={ERRORS_LIST_LABEL}
         loading={loading}
-        items={items}
+        items={errorStates}
         columns={columns}
-        pagination={pagination}
+        rowProps={getRowProps}
+        pagination={{ pageSizeOptions: [5, 10, 20, 50, 100] }}
         sorting={{
           sort: {
-            field: sortField as keyof Ping,
-            direction: sortDirection,
+            field: 'item.state.started_at',
+            direction: 'desc',
           },
         }}
-        onChange={({ page = {}, sort = {} }) => {
-          const { index: pIndex, size: pSize } = page;
-
-          const { field: sField, direction: sDirection } = sort;
-
-          setPageIndex(pIndex!);
-          setPageSize(pSize!);
-          setSortField(sField!);
-          setSortDirection(sDirection!);
-        }}
-        rowProps={getRowProps}
       />
     </div>
   );
+};
+
+export const getErrorDetailsUrl = ({
+  basePath,
+  configId,
+  stateId,
+  locationId,
+}: {
+  stateId: string;
+  basePath: string;
+  configId: string;
+  locationId?: string;
+}) => {
+  return `${basePath}/app/synthetics/monitor/${configId}/errors/${stateId}?locationId=${locationId}`;
 };
 
 const ERRORS_LIST_LABEL = i18n.translate('xpack.synthetics.errorsList.label', {
@@ -154,4 +238,8 @@ const FAILED_STEP_LABEL = i18n.translate('xpack.synthetics.failedStep.label', {
 
 const TIMESTAMP_LABEL = i18n.translate('xpack.synthetics.timestamp.label', {
   defaultMessage: '@timestamp',
+});
+
+const ACTIVE_LABEL = i18n.translate('xpack.synthetics.active.label', {
+  defaultMessage: 'Active',
 });

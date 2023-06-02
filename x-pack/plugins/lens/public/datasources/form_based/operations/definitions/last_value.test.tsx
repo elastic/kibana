@@ -10,7 +10,7 @@ import { shallow, ShallowWrapper } from 'enzyme';
 import { EuiComboBox, EuiFormRow } from '@elastic/eui';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
-import { IUiSettingsClient, SavedObjectsClientContract, HttpSetup } from '@kbn/core/public';
+import { IUiSettingsClient, HttpSetup } from '@kbn/core/public';
 import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
@@ -18,7 +18,6 @@ import { createMockedIndexPattern } from '../../mocks';
 import { LastValueIndexPatternColumn } from './last_value';
 import { lastValueOperation } from '.';
 import type { FormBasedLayer } from '../../types';
-import type { IndexPattern } from '../../../../types';
 import { TermsIndexPatternColumn } from './terms';
 import { EuiSwitch, EuiSwitchEvent } from '@elastic/eui';
 import { buildExpression, parseExpression } from '@kbn/expressions-plugin/common';
@@ -28,17 +27,15 @@ const uiSettingsMock = {} as IUiSettingsClient;
 const defaultProps = {
   storage: {} as IStorageWrapper,
   uiSettings: uiSettingsMock,
-  savedObjectsClient: {} as SavedObjectsClientContract,
   dateRange: { fromDate: 'now-1d', toDate: 'now' },
   fieldFormats: fieldFormatsServiceMock.createStartContract(),
   unifiedSearch: unifiedSearchPluginMock.createStartContract(),
   dataViews: dataViewPluginMocks.createStartContract(),
   data: dataPluginMock.createStartContract(),
   http: {} as HttpSetup,
-  indexPattern: {
-    ...createMockedIndexPattern(),
+  indexPattern: createMockedIndexPattern({
     hasRestrictions: false,
-  } as IndexPattern,
+  }),
   operationDefinitionMap: {},
   isFullscreen: false,
   toggleFullscreen: jest.fn(),
@@ -87,7 +84,7 @@ describe('last_value', () => {
       const esAggsFn = lastValueOperation.toEsAggsFn(
         { ...lastValueColumn, params: { ...lastValueColumn.params } },
         'col1',
-        {} as IndexPattern,
+        createMockedIndexPattern(),
         layer,
         uiSettingsMock,
         []
@@ -110,7 +107,7 @@ describe('last_value', () => {
       const esAggsFn = lastValueOperation.toEsAggsFn(
         { ...lastValueColumn, params: { ...lastValueColumn.params, showArrayValues: true } },
         'col1',
-        {} as IndexPattern,
+        createMockedIndexPattern(),
         layer,
         uiSettingsMock,
         []
@@ -290,6 +287,44 @@ describe('last_value', () => {
         ).params.showArrayValues
       ).toBeTruthy();
     });
+
+    it('should set show array values if field is runtime and not of type number', () => {
+      const oldColumn: LastValueIndexPatternColumn = {
+        operationType: 'last_value',
+        sourceField: 'bytes',
+        label: 'Last value of bytes',
+        isBucketed: false,
+        dataType: 'number',
+        params: {
+          sortField: 'datefield',
+          showArrayValues: false,
+        },
+      };
+      const indexPattern = createMockedIndexPattern();
+      const field = indexPattern.fields.find((i) => i.name === 'runtime-keyword')!;
+
+      expect(
+        lastValueOperation.onFieldChange(oldColumn, field).params.showArrayValues
+      ).toBeTruthy();
+    });
+
+    it('should not set show array values if field is runtime and of type number', () => {
+      const oldColumn: LastValueIndexPatternColumn = {
+        operationType: 'last_value',
+        sourceField: 'bytes',
+        label: 'Last value of bytes',
+        isBucketed: false,
+        dataType: 'number',
+        params: {
+          sortField: 'datefield',
+          showArrayValues: false,
+        },
+      };
+      const indexPattern = createMockedIndexPattern();
+      const field = indexPattern.fields.find((i) => i.name === 'runtime-number')!;
+
+      expect(lastValueOperation.onFieldChange(oldColumn, field).params.showArrayValues).toBeFalsy();
+    });
   });
 
   describe('getPossibleOperationForField', () => {
@@ -359,6 +394,23 @@ describe('last_value', () => {
           type: 'string',
         })
       ).toEqual({ dataType: 'string', isBucketed: false, scale: 'ordinal' });
+    });
+
+    it('should return operation with the right type also for tsdb counter types', () => {
+      expect(
+        lastValueOperation.getPossibleOperationForField({
+          aggregatable: true,
+          searchable: true,
+          name: 'test',
+          displayName: 'test',
+          type: 'number',
+          timeSeriesMetric: 'counter',
+        })
+      ).toEqual({
+        dataType: 'number',
+        isBucketed: false,
+        scale: 'ratio',
+      });
     });
   });
 
@@ -480,11 +532,19 @@ describe('last_value', () => {
       );
     });
 
-    it('should set showArrayValues if field is scripted or comes from existing params', () => {
+    it('should set showArrayValues if field is scripted, non-numeric runtime or comes from existing params', () => {
       const indexPattern = createMockedIndexPattern();
 
       const scriptedField = indexPattern.fields.find((field) => field.scripted);
-      const nonScriptedField = indexPattern.fields.find((field) => !field.scripted);
+      const runtimeKeywordField = indexPattern.fields.find(
+        (field) => field.runtime && field.type !== 'number'
+      );
+      const runtimeNumericField = indexPattern.fields.find(
+        (field) => field.runtime && field.type === 'number'
+      );
+      const nonScriptedField = indexPattern.fields.find(
+        (field) => !field.scripted && !field.runtime
+      );
 
       const localLayer = {
         columns: {
@@ -507,6 +567,22 @@ describe('last_value', () => {
           field: scriptedField!,
         }).params.showArrayValues
       ).toBeTruthy();
+
+      expect(
+        lastValueOperation.buildColumn({
+          indexPattern,
+          layer: localLayer,
+          field: runtimeKeywordField!,
+        }).params.showArrayValues
+      ).toBeTruthy();
+
+      expect(
+        lastValueOperation.buildColumn({
+          indexPattern,
+          layer: localLayer,
+          field: runtimeNumericField!,
+        }).params.showArrayValues
+      ).toBeFalsy();
 
       expect(
         lastValueOperation.buildColumn(
@@ -820,10 +896,8 @@ describe('last_value', () => {
   });
 
   describe('getErrorMessage', () => {
-    let indexPattern: IndexPattern;
     let errorLayer: FormBasedLayer;
     beforeEach(() => {
-      indexPattern = createMockedIndexPattern();
       errorLayer = {
         columns: {
           col1: {
@@ -841,9 +915,9 @@ describe('last_value', () => {
       };
     });
     it('returns undefined if sourceField exists and sortField is of type date ', () => {
-      expect(lastValueOperation.getErrorMessage!(errorLayer, 'col1', indexPattern)).toEqual(
-        undefined
-      );
+      expect(
+        lastValueOperation.getErrorMessage!(errorLayer, 'col1', createMockedIndexPattern())
+      ).toEqual(undefined);
     });
     it('shows error message if the sourceField does not exist in index pattern', () => {
       errorLayer = {
@@ -855,9 +929,42 @@ describe('last_value', () => {
           } as LastValueIndexPatternColumn,
         },
       };
-      expect(lastValueOperation.getErrorMessage!(errorLayer, 'col1', indexPattern)).toEqual([
-        'Field notExisting was not found',
-      ]);
+      expect(lastValueOperation.getErrorMessage!(errorLayer, 'col1', createMockedIndexPattern()))
+        .toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "displayLocations": Array [
+              Object {
+                "id": "toolbar",
+              },
+              Object {
+                "dimensionId": "col1",
+                "id": "dimensionButton",
+              },
+              Object {
+                "id": "embeddableBadge",
+              },
+            ],
+            "message": <FormattedMessage
+              defaultMessage="{count, plural, one {Field} other {Fields}} {missingFields} {count, plural, one {was} other {were}} not found."
+              id="xpack.lens.indexPattern.fieldsNotFound"
+              values={
+                Object {
+                  "count": 1,
+                  "missingFields": <React.Fragment>
+                    <React.Fragment>
+                      <strong>
+                        notExisting
+                      </strong>
+                      
+                    </React.Fragment>
+                  </React.Fragment>,
+                }
+              }
+            />,
+          },
+        ]
+      `);
     });
 
     it('shows error message if the sortField does not exist in index pattern', () => {
@@ -873,11 +980,59 @@ describe('last_value', () => {
           } as LastValueIndexPatternColumn,
         },
       };
-      expect(lastValueOperation.getErrorMessage!(errorLayer, 'col1', indexPattern)).toEqual([
-        'Field notExisting was not found',
-      ]);
+      expect(lastValueOperation.getErrorMessage!(errorLayer, 'col1', createMockedIndexPattern()))
+        .toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "displayLocations": Array [
+              Object {
+                "id": "toolbar",
+              },
+              Object {
+                "dimensionId": "col1",
+                "id": "dimensionButton",
+              },
+              Object {
+                "id": "embeddableBadge",
+              },
+            ],
+            "message": <FormattedMessage
+              defaultMessage="Sort field {sortField} was not found."
+              id="xpack.lens.indexPattern.lastValue.sortFieldNotFound"
+              values={
+                Object {
+                  "sortField": <strong>
+                    notExisting
+                  </strong>,
+                }
+              }
+            />,
+          },
+        ]
+      `);
     });
+
+    it('shows both messages if neither field exists in index pattern', () => {
+      errorLayer = {
+        ...errorLayer,
+        columns: {
+          col1: {
+            ...errorLayer.columns.col1,
+            sourceField: 'notExisting1',
+            params: {
+              ...(errorLayer.columns.col1 as LastValueIndexPatternColumn).params,
+              sortField: 'notExisting2',
+            },
+          } as LastValueIndexPatternColumn,
+        },
+      };
+      expect(
+        lastValueOperation.getErrorMessage!(errorLayer, 'col1', createMockedIndexPattern())
+      ).toHaveLength(2);
+    });
+
     it('shows error message if the sourceField is of unsupported type', () => {
+      const indexPattern = createMockedIndexPattern();
       indexPattern.getFieldByName('start_date')!.type = 'unsupported_type';
       errorLayer = {
         ...errorLayer,
@@ -905,9 +1060,9 @@ describe('last_value', () => {
           } as LastValueIndexPatternColumn,
         },
       };
-      expect(lastValueOperation.getErrorMessage!(errorLayer, 'col1', indexPattern)).toEqual([
-        'Field bytes is not a date field and cannot be used for sorting',
-      ]);
+      expect(
+        lastValueOperation.getErrorMessage!(errorLayer, 'col1', createMockedIndexPattern())
+      ).toEqual(['Field bytes is not a date field and cannot be used for sorting']);
     });
   });
 

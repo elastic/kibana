@@ -11,7 +11,7 @@ import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButtonEmpty, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 
-import { RuleTableItem } from '../../../../types';
+import { RuleTableItem, BulkEditActions, UpdateRulesToBulkEditProps } from '../../../../types';
 import {
   withBulkRuleOperations,
   ComponentOpts as BulkOperationsComponentOpts,
@@ -25,28 +25,13 @@ export type ComponentOpts = {
   getFilter: () => KueryNode | null;
   onPerformingAction?: () => void;
   onActionPerformed?: () => void;
-  isDeletingRules?: boolean;
+  bulkEditAction?: BulkEditActions;
   isEnablingRules?: boolean;
   isDisablingRules?: boolean;
-  isSnoozingRules?: boolean;
-  isUnsnoozingRules?: boolean;
-  isSchedulingRules?: boolean;
-  isUnschedulingRules?: boolean;
-  isUpdatingRuleAPIKeys?: boolean;
-  setRulesToDelete: React.Dispatch<React.SetStateAction<string[]>>;
-  setRulesToDeleteFilter: React.Dispatch<React.SetStateAction<KueryNode | null | undefined>>;
-  setRulesToUpdateAPIKey: React.Dispatch<React.SetStateAction<string[]>>;
-  setRulesToSnooze: React.Dispatch<React.SetStateAction<RuleTableItem[]>>;
-  setRulesToUnsnooze: React.Dispatch<React.SetStateAction<RuleTableItem[]>>;
-  setRulesToSchedule: React.Dispatch<React.SetStateAction<RuleTableItem[]>>;
-  setRulesToUnschedule: React.Dispatch<React.SetStateAction<RuleTableItem[]>>;
-  setRulesToSnoozeFilter: React.Dispatch<React.SetStateAction<KueryNode | null | undefined>>;
-  setRulesToUnsnoozeFilter: React.Dispatch<React.SetStateAction<KueryNode | null | undefined>>;
-  setRulesToScheduleFilter: React.Dispatch<React.SetStateAction<KueryNode | null | undefined>>;
-  setRulesToUnscheduleFilter: React.Dispatch<React.SetStateAction<KueryNode | null | undefined>>;
-  setRulesToUpdateAPIKeyFilter: React.Dispatch<React.SetStateAction<KueryNode | null | undefined>>;
+  isBulkEditing?: boolean;
   onDisable: () => Promise<void>;
   onEnable: () => Promise<void>;
+  updateRulesToBulkEdit: (props: UpdateRulesToBulkEditProps) => void;
 } & BulkOperationsComponentOpts;
 
 export const RuleQuickEditButtons: React.FunctionComponent<ComponentOpts> = ({
@@ -55,26 +40,11 @@ export const RuleQuickEditButtons: React.FunctionComponent<ComponentOpts> = ({
   getFilter,
   onPerformingAction = noop,
   onActionPerformed = noop,
-  isDeletingRules = false,
+  bulkEditAction,
   isEnablingRules = false,
   isDisablingRules = false,
-  isSnoozingRules = false,
-  isUnsnoozingRules = false,
-  isSchedulingRules = false,
-  isUnschedulingRules = false,
-  isUpdatingRuleAPIKeys = false,
-  setRulesToDelete,
-  setRulesToDeleteFilter,
-  setRulesToUpdateAPIKey,
-  setRulesToSnooze,
-  setRulesToUnsnooze,
-  setRulesToSchedule,
-  setRulesToUnschedule,
-  setRulesToSnoozeFilter,
-  setRulesToUnsnoozeFilter,
-  setRulesToScheduleFilter,
-  setRulesToUnscheduleFilter,
-  setRulesToUpdateAPIKeyFilter,
+  isBulkEditing = false,
+  updateRulesToBulkEdit,
   onEnable,
   onDisable,
 }: ComponentOpts) => {
@@ -82,15 +52,7 @@ export const RuleQuickEditButtons: React.FunctionComponent<ComponentOpts> = ({
     notifications: { toasts },
   } = useKibana().services;
 
-  const isPerformingAction =
-    isEnablingRules ||
-    isDisablingRules ||
-    isDeletingRules ||
-    isSnoozingRules ||
-    isUnsnoozingRules ||
-    isSchedulingRules ||
-    isUnschedulingRules ||
-    isUpdatingRuleAPIKeys;
+  const isPerformingAction = isEnablingRules || isDisablingRules || isBulkEditing;
 
   const hasDisabledByLicenseRuleTypes = useMemo(() => {
     if (isAllSelected) {
@@ -103,9 +65,15 @@ export const RuleQuickEditButtons: React.FunctionComponent<ComponentOpts> = ({
     onPerformingAction();
     try {
       if (isAllSelected) {
-        setRulesToDeleteFilter(getFilter());
+        updateRulesToBulkEdit({
+          action: 'delete',
+          filter: getFilter(),
+        });
       } else {
-        setRulesToDelete(selectedItems.map((selected) => selected.id));
+        updateRulesToBulkEdit({
+          action: 'delete',
+          rules: selectedItems,
+        });
       }
     } catch (e) {
       toasts.addDanger({
@@ -125,9 +93,15 @@ export const RuleQuickEditButtons: React.FunctionComponent<ComponentOpts> = ({
     onPerformingAction();
     try {
       if (isAllSelected) {
-        setRulesToUpdateAPIKeyFilter(getFilter());
+        updateRulesToBulkEdit({
+          action: 'updateApiKey',
+          filter: getFilter(),
+        });
       } else {
-        setRulesToUpdateAPIKey(selectedItems.map((selected: any) => selected.id));
+        updateRulesToBulkEdit({
+          action: 'updateApiKey',
+          rules: selectedItems,
+        });
       }
     } catch (e) {
       toasts.addDanger({
@@ -147,9 +121,15 @@ export const RuleQuickEditButtons: React.FunctionComponent<ComponentOpts> = ({
     onPerformingAction();
     try {
       if (isAllSelected) {
-        setRulesToSnoozeFilter(getFilter());
+        updateRulesToBulkEdit({
+          action: 'snooze',
+          filter: getFilter(),
+        });
       } else {
-        setRulesToSnooze(selectedItems);
+        updateRulesToBulkEdit({
+          action: 'snooze',
+          rules: selectedItems,
+        });
       }
     } catch (e) {
       toasts.addDanger({
@@ -169,9 +149,15 @@ export const RuleQuickEditButtons: React.FunctionComponent<ComponentOpts> = ({
     onPerformingAction();
     try {
       if (isAllSelected) {
-        setRulesToUnsnoozeFilter(getFilter());
+        updateRulesToBulkEdit({
+          action: 'unsnooze',
+          filter: getFilter(),
+        });
       } else {
-        setRulesToUnsnooze(selectedItems);
+        updateRulesToBulkEdit({
+          action: 'unsnooze',
+          rules: selectedItems,
+        });
       }
     } catch (e) {
       toasts.addDanger({
@@ -191,9 +177,15 @@ export const RuleQuickEditButtons: React.FunctionComponent<ComponentOpts> = ({
     onPerformingAction();
     try {
       if (isAllSelected) {
-        setRulesToScheduleFilter(getFilter());
+        updateRulesToBulkEdit({
+          action: 'schedule',
+          filter: getFilter(),
+        });
       } else {
-        setRulesToSchedule(selectedItems);
+        updateRulesToBulkEdit({
+          action: 'schedule',
+          rules: selectedItems,
+        });
       }
     } catch (e) {
       toasts.addDanger({
@@ -213,9 +205,15 @@ export const RuleQuickEditButtons: React.FunctionComponent<ComponentOpts> = ({
     onPerformingAction();
     try {
       if (isAllSelected) {
-        setRulesToUnscheduleFilter(getFilter());
+        updateRulesToBulkEdit({
+          action: 'unschedule',
+          filter: getFilter(),
+        });
       } else {
-        setRulesToUnschedule(selectedItems);
+        updateRulesToBulkEdit({
+          action: 'unschedule',
+          rules: selectedItems,
+        });
       }
     } catch (e) {
       toasts.addDanger({
@@ -241,7 +239,7 @@ export const RuleQuickEditButtons: React.FunctionComponent<ComponentOpts> = ({
       <EuiFlexItem>
         <EuiButtonEmpty
           onClick={onSnoozeAllClick}
-          isLoading={isSnoozingRules}
+          isLoading={isBulkEditing && bulkEditAction === 'snooze'}
           isDisabled={isPerformingAction || hasDisabledByLicenseRuleTypes}
           data-test-subj="bulkSnooze"
         >
@@ -254,7 +252,7 @@ export const RuleQuickEditButtons: React.FunctionComponent<ComponentOpts> = ({
       <EuiFlexItem>
         <EuiButtonEmpty
           onClick={onUnsnoozeAllClick}
-          isLoading={isUnsnoozingRules}
+          isLoading={isBulkEditing && bulkEditAction === 'unsnooze'}
           isDisabled={isPerformingAction || hasDisabledByLicenseRuleTypes}
           data-test-subj="bulkUnsnooze"
         >
@@ -267,7 +265,7 @@ export const RuleQuickEditButtons: React.FunctionComponent<ComponentOpts> = ({
       <EuiFlexItem>
         <EuiButtonEmpty
           onClick={onScheduleAllClick}
-          isLoading={isSchedulingRules}
+          isLoading={isBulkEditing && bulkEditAction === 'schedule'}
           isDisabled={isPerformingAction || hasDisabledByLicenseRuleTypes}
           data-test-subj="bulkSnoozeSchedule"
         >
@@ -280,7 +278,7 @@ export const RuleQuickEditButtons: React.FunctionComponent<ComponentOpts> = ({
       <EuiFlexItem>
         <EuiButtonEmpty
           onClick={onUnscheduleAllClick}
-          isLoading={isUnschedulingRules}
+          isLoading={isBulkEditing && bulkEditAction === 'unschedule'}
           isDisabled={isPerformingAction || hasDisabledByLicenseRuleTypes}
           data-test-subj="bulkRemoveSnoozeSchedule"
         >
@@ -319,7 +317,7 @@ export const RuleQuickEditButtons: React.FunctionComponent<ComponentOpts> = ({
       <EuiFlexItem>
         <EuiButtonEmpty
           onClick={updateAPIKeysClick}
-          isLoading={isUpdatingRuleAPIKeys}
+          isLoading={isBulkEditing && bulkEditAction === 'updateApiKey'}
           isDisabled={isPerformingAction}
           data-test-subj="updateAPIKeys"
         >
@@ -332,7 +330,7 @@ export const RuleQuickEditButtons: React.FunctionComponent<ComponentOpts> = ({
       <EuiFlexItem>
         <EuiButtonEmpty
           onClick={deleteSelectedItems}
-          isLoading={isDeletingRules}
+          isLoading={isBulkEditing && bulkEditAction === 'delete'}
           iconType="trash"
           color="danger"
           isDisabled={isPerformingAction || hasDisabledByLicenseRuleTypes}

@@ -1,7 +1,5 @@
 {
   "type": "shared-common",
   "id": "@kbn/apm-config-loader",
-  "owner": ["@elastic/kibana-core", "@vigneshshanmugam"],
-  "runtimeDeps": [],
-  "typeDeps": []
+  "owner": ["@elastic/kibana-core", "@vigneshshanmugam"]
 }

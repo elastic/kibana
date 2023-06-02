@@ -40,7 +40,7 @@ export const IntegrationLink = ({
       </EuiFlexItem>
     </EuiFlexGroup>
   ) : (
-    <EuiLink aria-label={ariaLabel} href={href}>
+    <EuiLink data-test-subj="syntheticsIntegrationLinkLink" aria-label={ariaLabel} href={href}>
       <EuiFlexGroup responsive={false}>
         <EuiFlexItem grow={false}>
           <EuiToolTip content={tooltipContent} position="top">

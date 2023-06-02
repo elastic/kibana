@@ -80,15 +80,18 @@ export function CreateAgentKeyFlyout({ onCancel, onSuccess, onError }: Props) {
         privileges.push(PrivilegeType.AGENT_CONFIG);
       }
 
-      const { agentKey } = await callApmApi('POST /api/apm/agent_keys', {
-        signal: null,
-        params: {
-          body: {
-            name,
-            privileges,
+      const { agentKey } = await callApmApi(
+        'POST /api/apm/agent_keys 2023-05-22',
+        {
+          signal: null,
+          params: {
+            body: {
+              name,
+              privileges,
+            },
           },
-        },
-      });
+        }
+      );
 
       onSuccess(agentKey);
     } catch (error) {
@@ -133,6 +136,7 @@ export function CreateAgentKeyFlyout({ onCancel, onSuccess, onError }: Props) {
             error={formError}
           >
             <EuiFieldText
+              data-test-subj="apmCreateAgentKeyFlyoutFieldText"
               name="name"
               placeholder={i18n.translate(
                 'xpack.apm.settings.agentKeys.createKeyFlyout.namePlaceholder',
@@ -208,7 +212,10 @@ export function CreateAgentKeyFlyout({ onCancel, onSuccess, onError }: Props) {
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty onClick={onCancel}>
+            <EuiButtonEmpty
+              data-test-subj="apmCreateAgentKeyFlyoutCancelButton"
+              onClick={onCancel}
+            >
               {i18n.translate(
                 'xpack.apm.settings.agentKeys.createKeyFlyout.cancelButton',
                 {
@@ -219,6 +226,7 @@ export function CreateAgentKeyFlyout({ onCancel, onSuccess, onError }: Props) {
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButton
+              data-test-subj="apmCreateAgentKeyFlyoutButton"
               fill={true}
               onClick={createAgentKey}
               type="submit"

@@ -32,7 +32,7 @@ export function ElasticDocsLink({ section, path, children, ...rest }: Props) {
   return typeof children === 'function' ? (
     children(href)
   ) : (
-    <EuiLink href={href} {...rest}>
+    <EuiLink data-test-subj="apmElasticDocsLinkLink" href={href} {...rest}>
       {children}
     </EuiLink>
   );

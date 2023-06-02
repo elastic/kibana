@@ -19,11 +19,11 @@ import {
   createRule,
   createRuleWithExceptionEntries,
   createSignalsIndex,
+  deleteAllRules,
   deleteAllAlerts,
-  deleteSignalsIndex,
   getRuleForSignalTesting,
   getSignalsById,
-  waitForRuleSuccessOrStatus,
+  waitForRuleSuccess,
   waitForSignalsToBePresent,
 } from '../../utils';
 
@@ -72,6 +72,7 @@ export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
   const log = getService('log');
+  const es = getService('es');
 
   describe('Rule exception operators for endpoints', () => {
     before(async () => {
@@ -94,8 +95,8 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     afterEach(async () => {
-      await deleteSignalsIndex(supertest, log);
-      await deleteAllAlerts(supertest, log);
+      await deleteAllAlerts(supertest, log, es);
+      await deleteAllRules(supertest, log);
       await deleteAllExceptions(supertest, log);
       await deleteListsIndex(supertest, log);
     });
@@ -104,7 +105,7 @@ export default ({ getService }: FtrProviderContext) => {
       it('should find all the "hosts" from a "agent" index when no exceptions are set on the rule', async () => {
         const rule = getRuleForSignalTesting(['agent']);
         const { id } = await createRule(supertest, log, rule);
-        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForRuleSuccess({ supertest, log, id });
         await waitForSignalsToBePresent(supertest, log, 4, [id]);
         const hits = await getHostHits(supertest, log, id);
         expect(hits).to.eql([
@@ -126,7 +127,7 @@ export default ({ getService }: FtrProviderContext) => {
       it('should find all the "hosts" from a "endpoint_without_host_type" index when no exceptions are set on the rule', async () => {
         const rule = getRuleForSignalTesting(['endpoint_without_host_type']);
         const { id } = await createRule(supertest, log, rule);
-        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForRuleSuccess({ supertest, log, id });
         await waitForSignalsToBePresent(supertest, log, 4, [id]);
         const hits = await getHostHits(supertest, log, id);
         expect(hits).to.eql([
@@ -169,7 +170,7 @@ export default ({ getService }: FtrProviderContext) => {
               },
             ]
           );
-          await waitForRuleSuccessOrStatus(supertest, log, id);
+          await waitForRuleSuccess({ supertest, log, id });
           await waitForSignalsToBePresent(supertest, log, 3, [id]);
           const hits = await getHostHits(supertest, log, id);
           expect(hits).to.eql([
@@ -206,7 +207,7 @@ export default ({ getService }: FtrProviderContext) => {
               },
             ]
           );
-          await waitForRuleSuccessOrStatus(supertest, log, id);
+          await waitForRuleSuccess({ supertest, log, id });
           await waitForSignalsToBePresent(supertest, log, 3, [id]);
           const hits = await getHostHits(supertest, log, id);
           expect(hits).to.eql([
@@ -254,7 +255,7 @@ export default ({ getService }: FtrProviderContext) => {
               },
             ]
           );
-          await waitForRuleSuccessOrStatus(supertest, log, id);
+          await waitForRuleSuccess({ supertest, log, id });
           await waitForSignalsToBePresent(supertest, log, 2, [id]);
           const hits = await getHostHits(supertest, log, id);
           expect(hits).to.eql([
@@ -299,7 +300,7 @@ export default ({ getService }: FtrProviderContext) => {
               },
             ]
           );
-          await waitForRuleSuccessOrStatus(supertest, log, id);
+          await waitForRuleSuccess({ supertest, log, id });
           await waitForSignalsToBePresent(supertest, log, 2, [id]);
           const hits = await getHostHits(supertest, log, id);
           expect(hits).to.eql([
@@ -335,7 +336,7 @@ export default ({ getService }: FtrProviderContext) => {
               },
             ]
           );
-          await waitForRuleSuccessOrStatus(supertest, log, id);
+          await waitForRuleSuccess({ supertest, log, id });
           await waitForSignalsToBePresent(supertest, log, 3, [id]);
           const hits = await getHostHits(supertest, log, id);
           expect(hits).to.eql([
@@ -372,7 +373,7 @@ export default ({ getService }: FtrProviderContext) => {
               },
             ]
           );
-          await waitForRuleSuccessOrStatus(supertest, log, id);
+          await waitForRuleSuccess({ supertest, log, id });
           await waitForSignalsToBePresent(supertest, log, 3, [id]);
           const hits = await getHostHits(supertest, log, id);
           expect(hits).to.eql([
@@ -420,7 +421,7 @@ export default ({ getService }: FtrProviderContext) => {
               },
             ]
           );
-          await waitForRuleSuccessOrStatus(supertest, log, id);
+          await waitForRuleSuccess({ supertest, log, id });
           await waitForSignalsToBePresent(supertest, log, 2, [id]);
           const hits = await getHostHits(supertest, log, id);
           expect(hits).to.eql([
@@ -465,7 +466,7 @@ export default ({ getService }: FtrProviderContext) => {
               },
             ]
           );
-          await waitForRuleSuccessOrStatus(supertest, log, id);
+          await waitForRuleSuccess({ supertest, log, id });
           await waitForSignalsToBePresent(supertest, log, 2, [id]);
           const hits = await getHostHits(supertest, log, id);
           expect(hits).to.eql([
@@ -501,7 +502,7 @@ export default ({ getService }: FtrProviderContext) => {
               },
             ]
           );
-          await waitForRuleSuccessOrStatus(supertest, log, id);
+          await waitForRuleSuccess({ supertest, log, id });
           await waitForSignalsToBePresent(supertest, log, 6, [id]);
           const hits = await getHostHits(supertest, log, id);
           expect(hits).to.eql([
@@ -547,7 +548,7 @@ export default ({ getService }: FtrProviderContext) => {
               },
             ]
           );
-          await waitForRuleSuccessOrStatus(supertest, log, id);
+          await waitForRuleSuccess({ supertest, log, id });
           await waitForSignalsToBePresent(supertest, log, 6, [id]);
           const hits = await getHostHits(supertest, log, id);
           expect(hits).to.eql([
@@ -604,7 +605,7 @@ export default ({ getService }: FtrProviderContext) => {
               },
             ]
           );
-          await waitForRuleSuccessOrStatus(supertest, log, id);
+          await waitForRuleSuccess({ supertest, log, id });
           await waitForSignalsToBePresent(supertest, log, 4, [id]);
           const hits = await getHostHits(supertest, log, id);
           expect(hits).to.eql([
@@ -655,7 +656,7 @@ export default ({ getService }: FtrProviderContext) => {
               },
             ]
           );
-          await waitForRuleSuccessOrStatus(supertest, log, id);
+          await waitForRuleSuccess({ supertest, log, id });
           await waitForSignalsToBePresent(supertest, log, 4, [id]);
           const hits = await getHostHits(supertest, log, id);
           expect(hits).to.eql([
@@ -707,7 +708,7 @@ export default ({ getService }: FtrProviderContext) => {
             },
           ]
         );
-        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForRuleSuccess({ supertest, log, id });
         await waitForSignalsToBePresent(supertest, log, 1, [id]);
         const hits = await getHostHits(supertest, log, id);
         expect(hits).to.eql([
@@ -747,7 +748,7 @@ export default ({ getService }: FtrProviderContext) => {
             },
           ]
         );
-        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForRuleSuccess({ supertest, log, id });
         await waitForSignalsToBePresent(supertest, log, 1, [id]);
         const hits = await getHostHits(supertest, log, id);
         expect(hits).to.eql([
@@ -780,7 +781,7 @@ export default ({ getService }: FtrProviderContext) => {
             },
           ]
         );
-        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForRuleSuccess({ supertest, log, id });
         await waitForSignalsToBePresent(supertest, log, 3, [id]);
         const hits = await getHostHits(supertest, log, id);
         expect(hits).to.eql([
@@ -817,7 +818,7 @@ export default ({ getService }: FtrProviderContext) => {
             },
           ]
         );
-        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForRuleSuccess({ supertest, log, id });
         await waitForSignalsToBePresent(supertest, log, 2, [id]);
         const hits = await getHostHits(supertest, log, id);
         expect(hits).to.eql([
@@ -851,7 +852,7 @@ export default ({ getService }: FtrProviderContext) => {
             },
           ]
         );
-        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForRuleSuccess({ supertest, log, id });
         await waitForSignalsToBePresent(supertest, log, 2, [id]);
         const hits = await getHostHits(supertest, log, id);
         expect(hits).to.eql([
@@ -885,7 +886,7 @@ export default ({ getService }: FtrProviderContext) => {
             },
           ]
         );
-        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForRuleSuccess({ supertest, log, id });
         await waitForSignalsToBePresent(supertest, log, 4, [id]);
         const hits = await getHostHits(supertest, log, id);
         expect(hits).to.eql([

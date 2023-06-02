@@ -11,7 +11,7 @@ import { EuiProgress } from '@elastic/eui';
 import type { Filter, Query } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
 import React, { useEffect, useMemo } from 'react';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 
 import { useGlobalTime } from '../../containers/use_global_time';
 import { AlertsTreemap, DEFAULT_MIN_CHART_HEIGHT } from '../alerts_treemap';
@@ -80,10 +80,10 @@ const AlertsTreemapPanelComponent: React.FC<Props> = ({
   stackByWidth,
   title,
 }: Props) => {
-  const { to, from, deleteQuery, setQuery } = useGlobalTime(false);
+  const { to, from, deleteQuery, setQuery } = useGlobalTime();
 
   // create a unique, but stable (across re-renders) query id
-  const uniqueQueryId = useMemo(() => `${ALERTS_TREEMAP_ID}-${uuid.v4()}`, []);
+  const uniqueQueryId = useMemo(() => `${ALERTS_TREEMAP_ID}-${uuidv4()}`, []);
 
   const additionalFilters = useMemo(() => {
     try {

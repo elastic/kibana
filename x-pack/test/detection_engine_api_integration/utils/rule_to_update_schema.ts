@@ -20,6 +20,7 @@ const propertiesToRemove = [
   'created_by',
   'related_integrations',
   'required_fields',
+  'revision',
   'setup',
   'execution_summary',
 ];

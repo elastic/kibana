@@ -20,14 +20,22 @@ import {
   SAMPLE_ROWS_PER_PAGE_SETTING,
   SORT_DEFAULT_ORDER_SETTING,
   HIDE_ANNOUNCEMENTS,
+  SEARCH_ON_PAGE_LOAD_SETTING,
 } from '../../common';
-import { UI_SETTINGS, calculateBounds } from '@kbn/data-plugin/public';
+import {
+  UI_SETTINGS,
+  calculateBounds,
+  SearchSource,
+  IKibanaSearchResponse,
+} from '@kbn/data-plugin/public';
 import { TopNavMenu } from '@kbn/navigation-plugin/public';
 import { FORMATS_UI_SETTINGS } from '@kbn/field-formats-plugin/common';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 import { LocalStorageMock } from './local_storage_mock';
 import { createDiscoverDataViewsMock } from './data_views';
+import { SearchSourceDependencies } from '@kbn/data-plugin/common';
+import { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 
 export function createDiscoverServicesMock(): DiscoverServices {
   const dataPlugin = dataPluginMock.createStartContract();
@@ -43,12 +51,45 @@ export function createDiscoverServicesMock(): DiscoverServices {
   dataPlugin.query.timefilter.timefilter.getTime = jest.fn(() => {
     return { from: 'now-15m', to: 'now' };
   });
+  dataPlugin.query.timefilter.timefilter.getRefreshInterval = jest.fn(() => {
+    return { pause: true, value: 1000 };
+  });
+
   dataPlugin.query.timefilter.timefilter.calculateBounds = jest.fn(calculateBounds);
   dataPlugin.query.getState = jest.fn(() => ({
     query: { query: '', language: 'lucene' },
     filters: [],
+    time: {
+      from: 'now-15m',
+      to: 'now',
+    },
   }));
   dataPlugin.dataViews = createDiscoverDataViewsMock();
+  expressionsPlugin.run = jest.fn(() =>
+    of({
+      partial: false,
+      result: {
+        rows: [],
+      },
+    })
+  ) as unknown as typeof expressionsPlugin.run;
+  dataPlugin.search.searchSource.createEmpty = jest.fn(() => {
+    const deps = {
+      getConfig: jest.fn(),
+    } as unknown as SearchSourceDependencies;
+    const searchSource = new SearchSource({}, deps);
+    searchSource.fetch$ = jest.fn().mockReturnValue(of({ rawResponse: { hits: { total: 2 } } }));
+    searchSource.createChild = jest.fn((options = {}) => {
+      const childSearchSource = new SearchSource({}, deps);
+      childSearchSource.setParent(searchSource, options);
+      childSearchSource.fetch$ = <T>() =>
+        of({ rawResponse: { hits: { hits: [] } } } as unknown as IKibanaSearchResponse<
+          SearchResponse<T>
+        >);
+      return childSearchSource;
+    });
+    return searchSource;
+  });
 
   return {
     core: coreMock.createStart(),
@@ -102,6 +143,8 @@ export function createDiscoverServicesMock(): DiscoverServices {
           return 50;
         } else if (key === HIDE_ANNOUNCEMENTS) {
           return false;
+        } else if (key === SEARCH_ON_PAGE_LOAD_SETTING) {
+          return true;
         }
       }),
       isDefault: (key: string) => {
@@ -141,10 +184,22 @@ export function createDiscoverServicesMock(): DiscoverServices {
       addSuccess: jest.fn(),
     },
     expressions: expressionsPlugin,
-    savedObjectsTagging: {},
+    savedObjectsTagging: {
+      ui: {
+        getTagIdsFromReferences: jest.fn().mockResolvedValue([]),
+        updateTagsReferences: jest.fn(),
+      },
+    },
     dataViews: dataPlugin.dataViews,
     timefilter: dataPlugin.query.timefilter.timefilter,
-    lens: { EmbeddableComponent: jest.fn(() => null) },
+    lens: {
+      EmbeddableComponent: jest.fn(() => null),
+      stateHelperApi: jest.fn(() => {
+        return {
+          suggestions: jest.fn(),
+        };
+      }),
+    },
     locator: {
       useUrl: jest.fn(() => ''),
       navigate: jest.fn(),

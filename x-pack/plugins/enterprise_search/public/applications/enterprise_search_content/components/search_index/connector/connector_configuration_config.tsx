@@ -30,8 +30,8 @@ export const ConnectorConfigurationConfig: React.FC = ({ children }) => {
   const { configView, isEditing } = useValues(ConnectorConfigurationLogic);
   const { setIsEditing } = useActions(ConnectorConfigurationLogic);
 
-  const displayList = configView.map(({ label, value }) => ({
-    description: value ?? '--',
+  const displayList = configView.map(({ label, sensitive, value }) => ({
+    description: sensitive && !!value ? '********' : value || '--',
     title: label,
   }));
 
@@ -45,12 +45,13 @@ export const ConnectorConfigurationConfig: React.FC = ({ children }) => {
           displayList.length > 0 && (
             <EuiFlexGroup direction="column">
               <EuiFlexItem>
-                <EuiDescriptionList listItems={displayList} />
+                <EuiDescriptionList listItems={displayList} className="eui-textBreakWord" />
               </EuiFlexItem>
               <EuiFlexItem>
                 <EuiFlexGroup>
                   <EuiFlexItem grow={false}>
                     <EuiButton
+                      data-test-subj="entSearchContent-connector-configuration-editConfiguration"
                       data-telemetry-id="entSearchContent-connector-overview-configuration-editConfiguration"
                       onClick={() => setIsEditing(!isEditing)}
                     >

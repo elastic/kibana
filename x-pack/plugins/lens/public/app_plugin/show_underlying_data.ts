@@ -20,9 +20,15 @@ import { i18n } from '@kbn/i18n';
 import { RecursiveReadonly } from '@kbn/utility-types';
 import { Capabilities } from '@kbn/core/public';
 import { partition } from 'lodash';
+import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { showMemoizedErrorNotification } from '../lens_ui_errors';
 import { TableInspectorAdapter } from '../editor_frame_service/types';
 import { Datasource, DatasourcePublicAPI, IndexPatternMap } from '../types';
+import { Visualization } from '..';
+
+function getLayerType(visualization: Visualization, state: unknown, layerId: string) {
+  return visualization.getLayerType(layerId, state) || LayerTypes.DATA;
+}
 
 /**
  * Joins a series of queries.
@@ -59,9 +65,32 @@ interface LayerMetaInfo {
   >;
 }
 
+const sortByDateFieldsFirst = (
+  datasourceAPI: DatasourcePublicAPI,
+  fields: string[],
+  indexPatterns: IndexPatternMap
+) => {
+  const dataViewId = datasourceAPI.getSourceId();
+  if (!dataViewId) return;
+
+  // for usability reasons we want to order the date fields first
+  // the fields order responds to the columns order in Discover
+  const dateFieldsFirst = fields.reduce((acc: string[], fieldName) => {
+    const field = indexPatterns[dataViewId]?.getFieldByName(fieldName);
+    if (field?.type === 'date') {
+      return [fieldName, ...acc];
+    }
+    return [...acc, fieldName];
+  }, []);
+
+  return dateFieldsFirst;
+};
+
 export function getLayerMetaInfo(
   currentDatasource: Datasource | undefined,
   datasourceState: unknown,
+  activeVisualization: Visualization | undefined,
+  visualizationState: unknown,
   activeData: TableInspectorAdapter | undefined,
   indexPatterns: IndexPatternMap,
   timeRange: TimeRange | undefined,
@@ -73,8 +102,15 @@ export function getLayerMetaInfo(
   const isVisible = Boolean(capabilities.navLinks?.discover && capabilities.discover?.show);
   // If Multiple tables, return
   // If there are time shifts, return
-  const [datatable, ...otherTables] = Object.values(activeData || {});
-  if (!datatable || !currentDatasource || !datasourceState) {
+  // If dataViews have not loaded yet, return
+  const datatables = Object.values(activeData || {});
+  if (
+    !datatables.length ||
+    !currentDatasource ||
+    !datasourceState ||
+    !activeVisualization ||
+    !Object.keys(indexPatterns).length
+  ) {
     return {
       meta: undefined,
       error: i18n.translate('xpack.lens.app.showUnderlyingDataNoData', {
@@ -83,21 +119,25 @@ export function getLayerMetaInfo(
       isVisible,
     };
   }
-  if (otherTables.length) {
-    return {
-      meta: undefined,
-      error: i18n.translate('xpack.lens.app.showUnderlyingDataMultipleLayers', {
-        defaultMessage: 'Cannot show underlying data for visualizations with multiple layers',
-      }),
-      isVisible,
-    };
-  }
   let datasourceAPI: DatasourcePublicAPI;
 
   try {
-    const [firstLayerId] = currentDatasource.getLayers(datasourceState);
+    const layerIds = currentDatasource.getLayers(datasourceState);
+    const dataLayerIds = layerIds.filter(
+      (layerId) =>
+        getLayerType(activeVisualization, visualizationState, layerId) === LayerTypes.DATA
+    );
+    if (dataLayerIds.length > 1) {
+      return {
+        meta: undefined,
+        error: i18n.translate('xpack.lens.app.showUnderlyingDataMultipleLayers', {
+          defaultMessage: 'Cannot show underlying data for visualizations with multiple layers',
+        }),
+        isVisible,
+      };
+    }
     datasourceAPI = currentDatasource.getPublicAPI({
-      layerId: firstLayerId,
+      layerId: dataLayerIds[0],
       state: datasourceState,
       indexPatterns,
     });
@@ -137,10 +177,12 @@ export function getLayerMetaInfo(
   }
 
   const uniqueFields = [...new Set(columnsWithNoTimeShifts.map(({ fields }) => fields).flat())];
+  const dateFieldsFirst = sortByDateFieldsFirst(datasourceAPI, uniqueFields, indexPatterns);
+
   return {
     meta: {
       id: datasourceAPI.getSourceId()!,
-      columns: uniqueFields,
+      columns: dateFieldsFirst ?? uniqueFields,
       filters: filtersOrError,
     },
     error: undefined,

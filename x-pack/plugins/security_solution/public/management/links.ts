@@ -13,7 +13,6 @@ import { checkArtifactHasData } from './services/exceptions_list/check_artifact_
 import {
   calculateEndpointAuthz,
   getEndpointAuthzInitialState,
-  calculatePermissionsFromCapabilities,
 } from '../../common/endpoint/service/authz';
 import {
   BLOCKLIST_PATH,
@@ -50,6 +49,7 @@ import {
   manageCategories as cloudSecurityPostureCategories,
   manageLinks as cloudSecurityPostureLinks,
 } from '../cloud_security_posture/links';
+import { manageLinks as cloudDefendLinks } from '../cloud_defend/links';
 import { IconActionHistory } from './icons/action_history';
 import { IconBlocklist } from './icons/blocklist';
 import { IconEndpoints } from './icons/endpoints';
@@ -130,7 +130,8 @@ export const links: LinkItem = {
       id: SecurityPageName.exceptions,
       title: EXCEPTIONS,
       description: i18n.translate('xpack.securitySolution.appLinks.exceptionsDescription', {
-        defaultMessage: 'Create and manage exceptions to prevent the creation of unwanted alerts.',
+        defaultMessage:
+          'Create and manage shared exception lists to prevent the creation of unwanted alerts.',
       }),
       landingIcon: IconExceptionLists,
       path: EXCEPTIONS_PATH,
@@ -226,6 +227,7 @@ export const links: LinkItem = {
       hideTimeline: true,
     },
     cloudSecurityPostureLinks,
+    cloudDefendLinks,
   ],
 };
 
@@ -242,7 +244,6 @@ export const getManagementFilteredLinks = async (
 
   const { endpointRbacEnabled, endpointRbacV1Enabled } = ExperimentalFeaturesService.get();
   const isEndpointRbacEnabled = endpointRbacEnabled || endpointRbacV1Enabled;
-  const endpointPermissions = calculatePermissionsFromCapabilities(core.application.capabilities);
 
   const linksToExclude: SecurityPageName[] = [];
 
@@ -258,6 +259,7 @@ export const getManagementFilteredLinks = async (
   // may see failed HTTP requests in the browser console. This is the reason that
   // `hasKibanaPrivilege()` is used below.
   if (
+    currentUser &&
     !isPlatinumPlus &&
     fleetAuthz &&
     hasKibanaPrivilege(
@@ -278,17 +280,18 @@ export const getManagementFilteredLinks = async (
     canReadEndpointList,
     canReadTrustedApplications,
     canReadEventFilters,
+    canReadBlocklist,
     canReadPolicyManagement,
-  } = fleetAuthz
-    ? calculateEndpointAuthz(
-        licenseService,
-        fleetAuthz,
-        currentUser.roles,
-        isEndpointRbacEnabled,
-        endpointPermissions,
-        hasHostIsolationExceptions
-      )
-    : getEndpointAuthzInitialState();
+  } =
+    fleetAuthz && currentUser
+      ? calculateEndpointAuthz(
+          licenseService,
+          fleetAuthz,
+          currentUser.roles,
+          isEndpointRbacEnabled,
+          hasHostIsolationExceptions
+        )
+      : getEndpointAuthzInitialState();
 
   if (!canReadEndpointList) {
     linksToExclude.push(SecurityPageName.endpoints);
@@ -312,6 +315,10 @@ export const getManagementFilteredLinks = async (
 
   if (!canReadEventFilters) {
     linksToExclude.push(SecurityPageName.eventFilters);
+  }
+
+  if (!canReadBlocklist) {
+    linksToExclude.push(SecurityPageName.blocklist);
   }
 
   return excludeLinks(linksToExclude);

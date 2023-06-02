@@ -6,6 +6,7 @@
  */
 
 import { useEffect, useMemo, useState } from 'react';
+import { isEmpty } from 'lodash';
 import { useIsMounted } from '@kbn/securitysolution-hook-utils';
 import { checkArtifactHasData } from '../../../../management/services/exceptions_list/check_artifact_has_data';
 import { HostIsolationExceptionsApiClient } from '../../../../management/pages/host_isolation_exceptions/host_isolation_exceptions_api_client';
@@ -19,7 +20,6 @@ import type {
 import {
   calculateEndpointAuthz,
   getEndpointAuthzInitialState,
-  calculatePermissionsFromCapabilities,
 } from '../../../../../common/endpoint/service/authz';
 import { useSecuritySolutionStartDependencies } from './security_solution_start_dependencies';
 import { useIsExperimentalFeatureEnabled } from '../../../hooks/use_experimental_features';
@@ -35,7 +35,8 @@ export const useEndpointPrivileges = (): Immutable<EndpointPrivileges> => {
   const http = useHttp();
   const user = useCurrentUser();
 
-  const fleetServicesFromUseKibana = useKibana().services.fleet;
+  const kibanaServices = useKibana().services;
+  const fleetServicesFromUseKibana = kibanaServices.fleet;
   // The `fleetServicesFromPluginStart` will be defined when this hooks called from a component
   // that is being rendered under the Fleet context (UI extensions). The `fleetServicesFromUseKibana`
   // above will be `undefined` in this case.
@@ -56,22 +57,17 @@ export const useEndpointPrivileges = (): Immutable<EndpointPrivileges> => {
   const [hasHostIsolationExceptionsItems, setHasHostIsolationExceptionsItems] =
     useState<boolean>(false);
 
-  const securitySolutionPermissions = calculatePermissionsFromCapabilities(
-    useKibana().services.application.capabilities
-  );
-
   const privileges = useMemo(() => {
     const loading = !userRolesCheckDone || !user || !checkHostIsolationExceptionsDone;
 
     const privilegeList: EndpointPrivileges = Object.freeze({
       loading,
-      ...(!loading && fleetAuthz
+      ...(!loading && fleetAuthz && !isEmpty(user)
         ? calculateEndpointAuthz(
             licenseService,
             fleetAuthz,
             userRoles,
             isEndpointRbacEnabled || isEndpointRbacV1Enabled,
-            securitySolutionPermissions,
             hasHostIsolationExceptionsItems
           )
         : getEndpointAuthzInitialState()),
@@ -87,7 +83,6 @@ export const useEndpointPrivileges = (): Immutable<EndpointPrivileges> => {
     userRoles,
     isEndpointRbacEnabled,
     isEndpointRbacV1Enabled,
-    securitySolutionPermissions,
     hasHostIsolationExceptionsItems,
   ]);
 

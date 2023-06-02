@@ -7,7 +7,7 @@
 
 import sinon from 'sinon';
 import moment from 'moment';
-import set from 'lodash/set';
+import set from '@kbn/safer-lodash-set/set';
 import cloneDeep from 'lodash/cloneDeep';
 
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
@@ -31,7 +31,7 @@ import {
   mockTimelineData,
 } from '../../../common/mock';
 import type { CreateTimeline, UpdateTimelineLoading } from './types';
-import type { Ecs } from '../../../../common/ecs';
+import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import type { DataProvider } from '../../../../common/types/timeline';
 import {
   TimelineId,
@@ -78,6 +78,7 @@ export const getExceptionListItemSchemaMock = (
   created_by: USER,
   description: DESCRIPTION,
   entries: ENTRIES,
+  expire_time: undefined,
   id: '1',
   item_id: 'endpoint_list_item',
   list_id: 'endpoint_list_id',
@@ -439,6 +440,7 @@ describe('alert actions', () => {
             queryFields: [],
             resolveTimelineConfig: undefined,
             savedObjectId: null,
+            selectAll: false,
             selectedEventIds: {},
             sessionViewConfig: null,
             show: true,
@@ -457,7 +459,9 @@ describe('alert actions', () => {
             version: null,
           },
           to: '2018-11-05T19:03:25.937Z',
+          resolveTimelineConfig: undefined,
           ruleNote: '# this is some markdown documentation',
+          ruleAuthor: ['elastic'],
         };
 
         expect(mockGetExceptionFilter).not.toHaveBeenCalled();
@@ -506,6 +510,7 @@ describe('alert actions', () => {
         const defaultTimelinePropsWithoutNote = { ...defaultTimelineProps };
 
         delete defaultTimelinePropsWithoutNote.ruleNote;
+        delete defaultTimelinePropsWithoutNote.ruleAuthor;
 
         expect(updateTimelineIsLoading).toHaveBeenCalledWith({
           id: TimelineId.active,
@@ -1009,9 +1014,9 @@ describe('alert actions', () => {
       });
 
       test('it uses ecs.Data.timestamp if one is provided', () => {
-        const ecsDataMock: Ecs = {
+        const ecsDataMock = {
           ...mockEcsDataWithAlert,
-          timestamp: '2020-03-20T17:59:46.349Z',
+          '@timestamp': '2020-03-20T17:59:46.349Z',
         };
         const result = determineToAndFrom({ ecs: ecsDataMock });
 
@@ -1020,7 +1025,8 @@ describe('alert actions', () => {
       });
 
       test('it uses current time timestamp if ecsData.timestamp is not provided', () => {
-        const { timestamp, ...ecsDataMock } = mockEcsDataWithAlert;
+        // @ts-ignore // TODO remove when EcsSecurityExtension has been cleaned https://github.com/elastic/kibana/issues/156879
+        const { '@timestamp': timestamp, ...ecsDataMock } = mockEcsDataWithAlert;
         const result = determineToAndFrom({ ecs: ecsDataMock });
 
         expect(result.from).toEqual('2020-03-01T17:54:46.349Z');
@@ -1121,6 +1127,7 @@ describe('alert actions', () => {
         };
 
         delete timelineProps.ruleNote;
+        delete timelineProps.ruleAuthor;
 
         await sendAlertToTimelineAction({
           createTimeline,

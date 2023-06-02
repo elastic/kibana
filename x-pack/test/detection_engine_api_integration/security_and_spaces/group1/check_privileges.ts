@@ -8,17 +8,16 @@
 import expect from '@kbn/expect';
 import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
 import { ROLES } from '@kbn/security-solution-plugin/common/test';
-import { RuleExecutionStatus } from '@kbn/security-solution-plugin/common/detection_engine/rule_monitoring';
 import { ThresholdRuleCreateProps } from '@kbn/security-solution-plugin/common/detection_engine/rule_schema';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   createSignalsIndex,
-  deleteSignalsIndex,
-  deleteAllAlerts,
-  waitForRuleSuccessOrStatus,
+  deleteAllRules,
+  waitForRulePartialFailure,
   getRuleForSignalTesting,
   createRuleWithAuth,
   getThresholdRuleForSignalTesting,
+  deleteAllAlerts,
 } from '../../utils';
 import { createUserAndRole, deleteUserAndRole } from '../../../common/services/security_solution';
 
@@ -28,6 +27,7 @@ export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const log = getService('log');
+  const es = getService('es');
 
   describe('check_privileges', () => {
     before(async () => {
@@ -39,15 +39,15 @@ export default ({ getService }: FtrProviderContext) => {
     after(async () => {
       await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/hosts');
       await esArchiver.unload('x-pack/test/functional/es_archives/security_solution/alias');
-      await deleteSignalsIndex(supertest, log);
+      await deleteAllAlerts(supertest, log, es);
     });
 
     beforeEach(async () => {
-      await deleteAllAlerts(supertest, log);
+      await deleteAllRules(supertest, log);
     });
 
     afterEach(async () => {
-      await deleteAllAlerts(supertest, log);
+      await deleteAllRules(supertest, log);
     });
 
     describe('should set status to partial failure when user has no access', () => {
@@ -59,18 +59,20 @@ export default ({ getService }: FtrProviderContext) => {
       ];
       indexTestCases.forEach((index) => {
         it(`for KQL rule with index param: ${index}`, async () => {
-          const rule = getRuleForSignalTesting(index);
+          const rule = {
+            ...getRuleForSignalTesting(index),
+            query: 'process.executable: "/usr/bin/sudo"',
+          };
           await createUserAndRole(getService, ROLES.detections_admin);
           const { id } = await createRuleWithAuth(supertestWithoutAuth, rule, {
             user: ROLES.detections_admin,
             pass: 'changeme',
           });
-          await waitForRuleSuccessOrStatus(
+          await waitForRulePartialFailure({
             supertest,
             log,
             id,
-            RuleExecutionStatus['partial failure']
-          );
+          });
           const { body } = await supertest
             .get(DETECTION_ENGINE_RULES_URL)
             .set('kbn-xsrf', 'true')
@@ -84,7 +86,13 @@ export default ({ getService }: FtrProviderContext) => {
 
           await deleteUserAndRole(getService, ROLES.detections_admin);
         });
+      });
 
+      const thresholdIndexTestCases = [
+        ['host_alias', 'auditbeat-8.0.0'],
+        ['host_alias*', 'auditbeat-*'],
+      ];
+      thresholdIndexTestCases.forEach((index) => {
         it(`for threshold rule with index param: ${index}`, async () => {
           const rule: ThresholdRuleCreateProps = {
             ...getThresholdRuleForSignalTesting(index),
@@ -98,12 +106,11 @@ export default ({ getService }: FtrProviderContext) => {
             user: ROLES.detections_admin,
             pass: 'changeme',
           });
-          await waitForRuleSuccessOrStatus(
+          await waitForRulePartialFailure({
             supertest,
             log,
             id,
-            RuleExecutionStatus['partial failure']
-          );
+          });
           const { body } = await supertest
             .get(DETECTION_ENGINE_RULES_URL)
             .set('kbn-xsrf', 'true')

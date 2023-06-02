@@ -27,8 +27,8 @@ export enum DataProviderType {
 export interface QueryMatch {
   field: string;
   displayField?: string;
-  value: string | number | Array<string | number>;
-  displayValue?: string | number;
+  value: string | number | boolean | Array<string | number | boolean>;
+  displayValue?: string | number | boolean;
   operator: QueryOperator;
 }
 

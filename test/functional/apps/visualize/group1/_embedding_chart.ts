@@ -62,7 +62,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should allow to filter in embedded mode', async () => {
-        await filterBar.addFilter('@timestamp', 'is between', '2015-09-21', '2015-09-23');
+        await filterBar.addFilter({
+          field: '@timestamp',
+          operation: 'is between',
+          value: { from: '2015-09-21', to: '2015-09-23' },
+        });
         await PageObjects.header.waitUntilLoadingHasFinished();
         await renderable.waitForRender();
 

@@ -181,6 +181,7 @@ export {
   SEARCH_SESSIONS_MANAGEMENT_ID,
   waitUntilNextSessionCompletes$,
   isEsError,
+  getSearchErrorOverrideDisplay,
   SearchSource,
   SearchSessionState,
   SortDirection,

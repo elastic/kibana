@@ -14,13 +14,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
   const endpointTestResources = getService('endpointTestResources');
-  const policyTestResources = getService('policyTestResources');
 
   describe('When on the Trusted Apps list', function () {
     let indexedData: IndexedHostsAndAlertsResponse;
     before(async () => {
-      const endpointPackage = await policyTestResources.getEndpointPackage();
-      await endpointTestResources.setMetadataTransformFrequency('1s', endpointPackage.version);
       indexedData = await endpointTestResources.loadEndpointData();
       await browser.refresh();
       await pageObjects.trustedApps.navigateToTrustedAppsList();
@@ -38,7 +35,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       // Add it
       await testSubjects.click('trustedAppsListPage-emptyState-addButton');
+      await testSubjects.click('trustedApps-form-nameTextField');
       await testSubjects.setValue('trustedApps-form-nameTextField', 'Windows Defender');
+      await testSubjects.click('trustedApps-form-conditionsBuilder-group1-entry0-value');
       await testSubjects.setValue('trustedApps-form-conditionsBuilder-group1-entry0-value', SHA256);
       await testSubjects.click('trustedAppsListPage-flyout-submitButton');
       expect(

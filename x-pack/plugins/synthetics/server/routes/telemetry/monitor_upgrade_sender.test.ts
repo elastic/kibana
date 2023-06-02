@@ -117,7 +117,6 @@ describe('monitor upgrade telemetry helpers', () => {
     [ConfigKey.MONITOR_SOURCE_TYPE, SourceType.PROJECT, 'project', false, false],
     [ConfigKey.SOURCE_INLINE, 'test', 'recorder', true, true],
     [ConfigKey.SOURCE_INLINE, 'test', 'inline', false, true],
-    [ConfigKey.SOURCE_ZIP_URL, 'test', 'zip', false, false],
   ])(
     'handles formatting scriptType for browser monitors',
     (config, value, scriptType, isRecorder, isInlineScript) => {

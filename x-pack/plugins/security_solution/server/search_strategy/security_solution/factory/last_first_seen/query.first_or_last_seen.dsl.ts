@@ -6,14 +6,16 @@
  */
 
 import type { FirstLastSeenRequestOptions } from '../../../../../common/search_strategy/security_solution/first_last_seen';
+import { createQueryFilterClauses } from '../../../../utils/build_query';
 
 export const buildFirstOrLastSeenQuery = ({
   field,
   value,
   defaultIndex,
   order,
+  filterQuery,
 }: FirstLastSeenRequestOptions) => {
-  const filter = [{ term: { [field]: value } }];
+  const filter = [...createQueryFilterClauses(filterQuery), { term: { [field]: value } }];
 
   const dslQuery = {
     allow_no_indices: true,

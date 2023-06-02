@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Ecs } from '../../../common/ecs';
+import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 
 // these "mocks" are used by browser bundles so they were moved out of the mocks and are
 // re-exported here for convenience and internal bwc

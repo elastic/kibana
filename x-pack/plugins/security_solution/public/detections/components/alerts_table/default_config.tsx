@@ -12,8 +12,8 @@ import {
 } from '@kbn/rule-data-utils';
 
 import type { Filter } from '@kbn/es-query';
-import type { SubsetTGridModel } from '@kbn/timelines-plugin/public';
-import { tableDefaults } from '../../../common/store/data_table/defaults';
+import { tableDefaults } from '@kbn/securitysolution-data-table';
+import type { SubsetDataTableModel } from '@kbn/securitysolution-data-table';
 import type { Status } from '../../../../common/detection_engine/schemas/common/schemas';
 import {
   getColumns,
@@ -152,13 +152,13 @@ export const buildThreatMatchFilter = (showOnlyThreatIndicatorAlerts: boolean): 
       ]
     : [];
 
-export const getAlertsDefaultModel = (license?: LicenseService): SubsetTGridModel => ({
+export const getAlertsDefaultModel = (license?: LicenseService): SubsetDataTableModel => ({
   ...tableDefaults,
   columns: getColumns(license),
   showCheckboxes: true,
 });
 
-export const getAlertsPreviewDefaultModel = (license?: LicenseService): SubsetTGridModel => ({
+export const getAlertsPreviewDefaultModel = (license?: LicenseService): SubsetDataTableModel => ({
   ...getAlertsDefaultModel(license),
   columns: getColumns(license),
   defaultColumns: getRulePreviewColumns(license),
@@ -170,6 +170,7 @@ export const getAlertsPreviewDefaultModel = (license?: LicenseService): SubsetTG
       sortDirection: 'desc',
     },
   ],
+  showCheckboxes: false,
 });
 
 export const requiredFieldsForActions = [

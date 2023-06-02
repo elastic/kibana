@@ -1,0 +1,25 @@
+{
+  "type": "plugin",
+  "id": "@kbn/portable-dashboards-example",
+  "owner": "@elastic/kibana-presentation",
+  "description": "Example plugin for portable dashboards",
+  "plugin": {
+    "id": "portableDashboardExamples",
+    "server": false,
+    "browser": true,
+    "version": "1.0.0",
+    "kibanaVersion": "kibana",
+    "ui": true,
+    "requiredPlugins": [
+      "data",
+      "controls",
+      "dashboard",
+      "embeddable",
+      "navigation",
+      "savedObjects",
+      "unifiedSearch",
+      "developerExamples",
+      "embeddableExamples"
+    ]
+  }
+}

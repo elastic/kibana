@@ -21,8 +21,15 @@ export interface SavedObjectsIncrementCounterOptions<Attributes = unknown>
    * already exist. Existing fields will be left as-is and won't be incremented.
    */
   initialize?: boolean;
-  /** {@link SavedObjectsMigrationVersion} */
+  /**
+   * {@link SavedObjectsMigrationVersion}
+   * @deprecated
+   */
   migrationVersion?: SavedObjectsMigrationVersion;
+  /**
+   * A semver value that is used when migrating documents between Kibana versions.
+   */
+  typeMigrationVersion?: string;
   /**
    * (default='wait_for') The Elasticsearch refresh setting for this
    * operation. See {@link MutatingOperationRefreshSetting}
@@ -32,6 +39,16 @@ export interface SavedObjectsIncrementCounterOptions<Attributes = unknown>
    * Attributes to use when upserting the document if it doesn't exist.
    */
   upsertAttributes?: Attributes;
+  /**
+   * Flag indicating if a saved object is managed by Kibana (default=false).
+   * Only used when upserting a saved object. If the saved object already
+   * exist this option has no effect.
+   *
+   * This can be leveraged by applications to e.g. prevent edits to a managed
+   * saved object. Instead, users can be guided to create a copy first and
+   * make their edits to the copy.
+   */
+  managed?: boolean;
 }
 
 /**

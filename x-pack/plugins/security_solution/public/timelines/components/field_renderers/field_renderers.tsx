@@ -8,10 +8,15 @@
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiPopover } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { getOr } from 'lodash/fp';
-import React, { useCallback, Fragment, useMemo, useState } from 'react';
+import React, { useCallback, Fragment, useMemo, useState, useContext } from 'react';
 import styled from 'styled-components';
 
-import type { HostEcs } from '../../../../common/ecs/host';
+import type { HostEcs } from '@kbn/securitysolution-ecs';
+import {
+  SecurityCellActions,
+  CellActionsMode,
+  SecurityCellActionsTrigger,
+} from '../../../common/components/cell_actions';
 import type {
   AutonomousSystem,
   FlowTarget,
@@ -24,10 +29,8 @@ import { defaultToEmptyTag, getEmptyTagValue } from '../../../common/components/
 import { FormattedRelativePreferenceDate } from '../../../common/components/formatted_date';
 import { HostDetailsLink, ReputationLink, WhoIsLink } from '../../../common/components/links';
 import { Spacer } from '../../../common/components/page';
-import * as i18n from '../../../network/components/details/translations';
-import type { QueryOperator } from '../../../../common/types';
-import { IS_OPERATOR } from '../../../../common/types';
-import { DraggableWrapper } from '../../../common/components/drag_and_drop/draggable_wrapper';
+import * as i18n from '../../../explore/network/components/details/translations';
+import { TimelineContext } from '../timeline';
 
 const DraggableContainerFlexGroup = styled(EuiFlexGroup)`
   flex-grow: unset;
@@ -270,8 +273,8 @@ export const DefaultFieldRenderer = React.memo(DefaultFieldRendererComponent);
 DefaultFieldRenderer.displayName = 'DefaultFieldRenderer';
 
 interface DefaultFieldRendererOverflowProps {
-  attrName?: string;
-  fieldType?: string;
+  attrName: string;
+  fieldType: string;
   rowItems: string[];
   idPrefix: string;
   isAggregatable?: boolean;
@@ -281,63 +284,55 @@ interface DefaultFieldRendererOverflowProps {
 }
 
 interface MoreContainerProps {
-  attrName?: string;
-  dragDisplayValue?: string;
-  fieldType?: string;
+  fieldName: string;
+  fieldType: string;
+  values: string[];
   idPrefix: string;
   isAggregatable?: boolean;
   moreMaxHeight: string;
   overflowIndexStart: number;
   render?: (item: string) => React.ReactNode;
-  rowItems: string[];
 }
 
-/** A container (with overflow) for showing "More" items in a popover */
 export const MoreContainer = React.memo<MoreContainerProps>(
   ({
-    attrName,
-    dragDisplayValue,
+    fieldName,
     fieldType,
     idPrefix,
     isAggregatable,
     moreMaxHeight,
     overflowIndexStart,
     render,
-    rowItems,
+    values,
   }) => {
+    const { timelineId } = useContext(TimelineContext);
+
     const moreItemsWithHoverActions = useMemo(
       () =>
-        rowItems.slice(overflowIndexStart).reduce<React.ReactElement[]>((acc, rowItem, index) => {
-          const id = escapeDataProviderId(`${idPrefix}-${attrName}-${rowItem}-${index}`);
-          const dataProvider =
-            typeof rowItem === 'string' && attrName != null
-              ? {
-                  and: [],
-                  enabled: true,
-                  id,
-                  name: rowItem,
-                  excluded: false,
-                  kqlQuery: '',
-                  queryMatch: {
-                    field: attrName,
-                    value: rowItem,
-                    displayValue: dragDisplayValue ?? rowItem,
-                    operator: IS_OPERATOR as QueryOperator,
-                  },
-                }
-              : undefined;
+        values.slice(overflowIndexStart).reduce<React.ReactElement[]>((acc, value, index) => {
+          const id = escapeDataProviderId(`${idPrefix}-${fieldName}-${value}-${index}`);
 
-          if (dataProvider != null) {
+          if (typeof value === 'string' && fieldName != null) {
             acc.push(
-              <EuiFlexItem key={`${idPrefix}-${id}`}>
-                <DraggableWrapper
-                  dataProvider={dataProvider}
-                  isDraggable={false}
-                  render={() => (render && render(rowItem)) ?? defaultToEmptyTag(rowItem)}
-                  scopeId={undefined}
-                  fieldType={fieldType}
-                  isAggregatable={isAggregatable}
-                />
+              <EuiFlexItem key={id}>
+                <SecurityCellActions
+                  key={id}
+                  mode={CellActionsMode.HOVER_DOWN}
+                  visibleCellActions={5}
+                  showActionTooltips
+                  triggerId={SecurityCellActionsTrigger.DEFAULT}
+                  field={{
+                    name: fieldName,
+                    value,
+                    type: fieldType,
+                    aggregatable: isAggregatable,
+                  }}
+                  metadata={{
+                    scopeId: timelineId ?? undefined,
+                  }}
+                >
+                  <>{render ? render(value) : defaultToEmptyTag(value)}</>
+                </SecurityCellActions>
               </EuiFlexItem>
             );
           }
@@ -345,27 +340,15 @@ export const MoreContainer = React.memo<MoreContainerProps>(
           return acc;
         }, []),
       [
-        attrName,
-        dragDisplayValue,
+        fieldName,
         fieldType,
         idPrefix,
-        isAggregatable,
         overflowIndexStart,
         render,
-        rowItems,
+        values,
+        timelineId,
+        isAggregatable,
       ]
-    );
-
-    const moreItems = useMemo(
-      () =>
-        rowItems.slice(overflowIndexStart).map((rowItem, index) => {
-          return (
-            <EuiFlexItem grow={1} key={`${rowItem}-${index}`}>
-              {(render && render(rowItem)) ?? defaultToEmptyTag(rowItem)}
-            </EuiFlexItem>
-          );
-        }),
-      [overflowIndexStart, render, rowItems]
     );
 
     return (
@@ -378,7 +361,7 @@ export const MoreContainer = React.memo<MoreContainerProps>(
         }}
       >
         <EuiFlexGroup gutterSize="s" direction="column" data-test-subj="overflow-items">
-          {attrName != null ? moreItemsWithHoverActions : moreItems}
+          {moreItemsWithHoverActions}
         </EuiFlexGroup>
       </div>
     );
@@ -431,10 +414,10 @@ export const DefaultFieldRendererOverflow = React.memo<DefaultFieldRendererOverf
             panelClassName="withHoverActions__popover"
           >
             <MoreContainer
-              attrName={attrName}
+              fieldName={attrName}
               idPrefix={idPrefix}
               render={render}
-              rowItems={rowItems}
+              values={rowItems}
               moreMaxHeight={moreMaxHeight}
               overflowIndexStart={overflowIndexStart}
               fieldType={fieldType}

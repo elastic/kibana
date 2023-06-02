@@ -5,8 +5,9 @@ parameters:
     in: path
     required: true
 get:
-  summary: Agent - Info
-  tags: []
+  summary: Get agent by ID
+  tags:
+    - Agents
   responses:
     '200':
       description: OK
@@ -19,10 +20,15 @@ get:
                 $ref: ../components/schemas/agent.yaml
             required:
               - item
+    '400':
+      $ref: ../components/responses/error.yaml
   operationId: get-agent
+  parameters:
+    - $ref: ../components/parameters/with_metrics.yaml
 put:
-  summary: Agent - Update
-  tags: []
+  summary: Update agent by ID
+  tags:
+    - Agents
   responses:
     '200':
       description: OK
@@ -35,6 +41,8 @@ put:
                 $ref: ../components/schemas/agent.yaml
             required:
               - item
+    '400':
+      $ref: ../components/responses/error.yaml
   operationId: update-agent
   parameters:
     - $ref: ../components/headers/kbn_xsrf.yaml
@@ -45,15 +53,16 @@ put:
         schema:
           type: object
           properties:
-              user_provided_metadata:
-                type: object  
-              tags:
-                type: array
-                items:
-                  type: string  
+            user_provided_metadata:
+              type: object
+            tags:
+              type: array
+              items:
+                type: string
 delete:
-  summary: Agent - Delete
-  tags: []
+  summary: Delete agent by ID
+  tags:
+    - Agents
   responses:
     '200':
       description: OK
@@ -68,6 +77,8 @@ delete:
                   - deleted
             required:
               - action
+    '400':
+      $ref: ../components/responses/error.yaml
   operationId: delete-agent
   parameters:
     - $ref: ../components/headers/kbn_xsrf.yaml

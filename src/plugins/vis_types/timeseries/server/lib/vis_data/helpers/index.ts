@@ -17,11 +17,7 @@ export { getLastMetric } from './get_last_metric';
 export { getSplits } from './get_splits';
 export { isAggSupported } from './check_aggs';
 
-// @ts-expect-error no typed yet
 export { bucketTransform } from './bucket_transform';
-// @ts-expect-error no typed yet
 export { getAggValue } from './get_agg_value';
-// @ts-expect-error no typed yet
 export { getDefaultDecoration } from './get_default_decoration';
-// @ts-expect-error no typed yet
 export { getSiblingAggValue } from './get_sibling_agg_value';

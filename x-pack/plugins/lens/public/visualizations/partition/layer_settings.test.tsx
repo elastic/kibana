@@ -25,12 +25,15 @@ describe('layer settings', () => {
     });
 
     const layerId = 'layer-id';
-    const props: VisualizationLayerSettingsProps<PieVisualizationState> = {
+    const props: VisualizationLayerSettingsProps<PieVisualizationState> & {
+      section: 'data' | 'appearance';
+    } = {
       setState: jest.fn(),
       layerId,
       state: getState(false),
       frame: {} as FramePublicAPI,
       panelRef: {} as React.MutableRefObject<HTMLDivElement | null>,
+      section: 'data',
     };
 
     it('toggles multiple metrics', () => {
@@ -89,6 +92,10 @@ describe('layer settings', () => {
           <LayerSettings {...props} state={{ ...getState(false), shape: 'mosaic' }} />
         ).isEmptyRender()
       ).toBeTruthy();
+    });
+
+    test('should not render anything for the appearance section', () => {
+      expect(shallow(<LayerSettings {...props} section="appearance" />).isEmptyRender());
     });
   });
 });

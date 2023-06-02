@@ -7,12 +7,17 @@
 import { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
 import { SavedObjectsType } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
-import { secretKeys } from '../../../../common/constants/monitor_management';
+import { syntheticsMonitorType } from '../../../../common/types/saved_objects';
+import {
+  secretKeys,
+  ConfigKey,
+  LegacyConfigKey,
+} from '../../../../common/constants/monitor_management';
 import { monitorMigrations } from './migrations/monitors';
 
-export const syntheticsMonitorType = 'synthetics-monitor';
+const legacyConfigKeys = Object.values(LegacyConfigKey);
 
-export const SYNTHETICS_MONITOR_ENCRYPTED_TYPE = {
+export const LEGACY_SYNTHETICS_MONITOR_ENCRYPTED_TYPE = {
   type: syntheticsMonitorType,
   attributesToEncrypt: new Set([
     'secrets',
@@ -26,6 +31,25 @@ export const SYNTHETICS_MONITOR_ENCRYPTED_TYPE = {
   ]),
 };
 
+export const SYNTHETICS_MONITOR_ENCRYPTED_TYPE = {
+  type: syntheticsMonitorType,
+  attributesToEncrypt: new Set([
+    'secrets',
+    /* adding secretKeys to the list of attributes to encrypt ensures
+     * that secrets are never stored on the resulting saved object,
+     * even in the presence of developer error.
+     *
+     * In practice, all secrets should be stored as a single JSON
+     * payload on the `secrets` key. This ensures performant decryption. */
+    ...secretKeys,
+  ]),
+  attributesToExcludeFromAAD: new Set([
+    ConfigKey.ALERT_CONFIG,
+    ConfigKey.METADATA,
+    ...legacyConfigKeys,
+  ]),
+};
+
 export const getSyntheticsMonitorSavedObjectType = (
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup
 ): SavedObjectsType => {
@@ -35,6 +59,7 @@ export const getSyntheticsMonitorSavedObjectType = (
     namespaceType: 'single',
     migrations: {
       '8.6.0': monitorMigrations['8.6.0'](encryptedSavedObjects),
+      '8.8.0': monitorMigrations['8.8.0'](encryptedSavedObjects),
     },
     mappings: {
       dynamic: false,
@@ -132,6 +157,24 @@ export const getSyntheticsMonitorSavedObjectType = (
         },
         enabled: {
           type: 'boolean',
+        },
+        alert: {
+          properties: {
+            status: {
+              properties: {
+                enabled: {
+                  type: 'boolean',
+                },
+              },
+            },
+          },
+        },
+        throttling: {
+          properties: {
+            label: {
+              type: 'keyword',
+            },
+          },
         },
       },
     },

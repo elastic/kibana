@@ -6,7 +6,7 @@
  */
 
 import { getColorAssignments } from './color_assignment';
-import type { FormatFactory } from '../../../common';
+import type { FormatFactory } from '../../../common/types';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { XYDataLayerConfig } from './types';
 import { Datatable } from '@kbn/expressions-plugin/common';

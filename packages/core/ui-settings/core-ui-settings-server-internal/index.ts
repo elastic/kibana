@@ -10,6 +10,7 @@ export {
   uiSettingsConfig,
   UiSettingsClient,
   UiSettingsService,
+  UiSettingsGlobalClient,
   CoreUiSettingsRouteHandlerContext,
 } from './src';
 export type {

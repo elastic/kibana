@@ -15,6 +15,7 @@ import {
 import { indexFleetEndpointPolicy } from '../../../common/endpoint/data_loaders/index_fleet_endpoint_policy';
 import { setupFleetForEndpoint } from '../../../common/endpoint/data_loaders/setup_fleet_for_endpoint';
 import type { GetPolicyListResponse } from '../../../public/management/pages/policy/types';
+import { getEndpointPackageInfo } from '../../../common/endpoint/utils/package';
 
 const fetchEndpointPolicies = (
   kbnClient: KbnClient
@@ -35,7 +36,8 @@ export const randomPolicyIdGenerator: (
   log: ToolingLog
 ) => Promise<() => string> = async (kbn, log) => {
   log.info('Setting up fleet');
-  const fleetResponse = await setupFleetForEndpoint(kbn);
+  await setupFleetForEndpoint(kbn);
+  const endpointPackage = await getEndpointPackageInfo(kbn);
 
   log.info('Generarting test policies...');
   const randomN = (max: number): number => Math.floor(Math.random() * max);
@@ -50,7 +52,7 @@ export const randomPolicyIdGenerator: (
           await indexFleetEndpointPolicy(
             kbn,
             `Policy for exceptions assignment ${i + 1}`,
-            fleetResponse.endpointPackage.version
+            endpointPackage.version
           )
         ).integrationPolicies[0].id
       );

@@ -20,7 +20,7 @@ export const AppNotFound = () => (
     <EuiPageBody>
       <EuiPageContent verticalPosition="center" horizontalPosition="center">
         <EuiEmptyPrompt
-          iconType="alert"
+          iconType="warning"
           iconColor="danger"
           title={
             <h2>

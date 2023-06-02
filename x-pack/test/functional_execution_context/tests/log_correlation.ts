@@ -6,7 +6,7 @@
  */
 import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../ftr_provider_context';
-import { assertLogContains } from '../test_utils';
+import { assertLogContains, forceSyncLogFile } from '../test_utils';
 
 export default function ({ getService }: FtrProviderContext) {
   const retry = getService('retry');
@@ -24,12 +24,14 @@ export default function ({ getService }: FtrProviderContext) {
 
       expect(response2.body.traceId).not.to.be(response1.body.traceId);
 
+      await forceSyncLogFile();
+
       let responseTraceId: string | undefined;
       await assertLogContains({
         description: 'traceId included in the http logs',
         predicate: (record) => {
           // we don't check trace.id value since trace.id in the test plugin and Kibana are different on CI.
-          // because different 'elastic-apm-node' instaces are imported
+          // because different 'elastic-apm-node' instances are imported
           if (
             record.log?.logger === 'http.server.response' &&
             record.url?.path === '/emit_log_with_trace_id'

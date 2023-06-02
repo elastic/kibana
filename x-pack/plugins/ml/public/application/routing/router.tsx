@@ -17,12 +17,15 @@ import type {
 } from '@kbn/core/public';
 import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 
-import { EuiLoadingContent } from '@elastic/eui';
+import { EuiSkeletonText } from '@elastic/eui';
+import { UrlStateProvider } from '@kbn/ml-url-state';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { SavedObjectsClientContract } from '@kbn/core/public';
 import { MlNotificationsContextProvider } from '../contexts/ml/ml_notifications_context';
 import { MlContext, MlContextValue } from '../contexts/ml';
-import { UrlStateProvider } from '../util/url_state';
 
 import { MlPage } from '../components/ml_page';
+import { MlPages } from '../../locator';
 
 // custom RouteProps making location non-optional
 interface MlRouteProps extends RouteProps {
@@ -64,13 +67,17 @@ export interface PageDependencies {
   dataViewsContract: DataViewsContract;
   setBreadcrumbs: ChromeStart['setBreadcrumbs'];
   redirectToMlAccessDeniedPage: () => Promise<void>;
+  getSavedSearchDeps: {
+    search: DataPublicPluginStart['search'];
+    savedObjectsClient: SavedObjectsClientContract;
+  };
 }
 
 export const PageLoader: FC<{ context: MlContextValue }> = ({ context, children }) => {
-  return context === null ? (
-    <EuiLoadingContent lines={10} />
-  ) : (
-    <MlContext.Provider value={context}>{children}</MlContext.Provider>
+  return (
+    <EuiSkeletonText lines={10} isLoading={context === null}>
+      <MlContext.Provider value={context}>{children}</MlContext.Provider>
+    </EuiSkeletonText>
   );
 };
 
@@ -91,3 +98,7 @@ export const MlRouter: FC<{
     </UrlStateProvider>
   </Router>
 );
+
+export function createPath(page: MlPages, additionalPrefix?: string) {
+  return `/${page}${additionalPrefix ? `${additionalPrefix}` : ''}`;
+}

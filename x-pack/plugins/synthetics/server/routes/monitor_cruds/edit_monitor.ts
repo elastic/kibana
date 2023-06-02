@@ -6,15 +6,11 @@
  */
 import { mergeWith } from 'lodash';
 import { schema } from '@kbn/config-schema';
-import {
-  SavedObjectsUpdateResponse,
-  SavedObject,
-  SavedObjectsClientContract,
-  KibanaRequest,
-} from '@kbn/core/server';
+import { SavedObjectsUpdateResponse, SavedObject } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { syntheticsMonitorType } from '../../../common/types/saved_objects';
 import { getSyntheticsPrivateLocations } from '../../legacy_uptime/lib/saved_objects/private_locations';
-import { SyntheticsMonitorClient } from '../../synthetics_service/synthetics_monitor/synthetics_monitor_client';
 import {
   MonitorFields,
   EncryptedSyntheticsMonitor,
@@ -22,9 +18,8 @@ import {
   SyntheticsMonitor,
   ConfigKey,
 } from '../../../common/runtime_types';
-import { SyntheticsRestApiRouteFactory } from '../../legacy_uptime/routes/types';
+import { RouteContext, SyntheticsRestApiRouteFactory } from '../../legacy_uptime/routes/types';
 import { API_URLS } from '../../../common/constants';
-import { syntheticsMonitorType } from '../../legacy_uptime/lib/saved_objects/synthetics_monitor';
 import { validateMonitor } from './monitor_validation';
 import { getMonitorNotFoundResponse } from '../synthetics_service/service_errors';
 import {
@@ -32,7 +27,6 @@ import {
   formatTelemetryUpdateEvent,
 } from '../telemetry/monitor_upgrade_sender';
 import { formatSecrets, normalizeSecrets } from '../../synthetics_service/utils/secrets';
-import type { UptimeServerSetup } from '../../legacy_uptime/lib/adapters/framework';
 
 // Simplify return promise type and type it with runtime_types
 export const editSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
@@ -44,21 +38,16 @@ export const editSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => (
     }),
     body: schema.any(),
   },
-  handler: async ({
-    request,
-    response,
-    savedObjectsClient,
-    server,
-    syntheticsMonitorClient,
-  }): Promise<any> => {
+  handler: async (routeContext): Promise<any> => {
+    const { request, response, savedObjectsClient, server } = routeContext;
     const { encryptedSavedObjects, logger } = server;
     const encryptedSavedObjectsClient = encryptedSavedObjects.getClient();
     const monitor = request.body as SyntheticsMonitor;
     const { monitorId } = request.params;
 
-    const spaceId = server.spaces.spacesService.getSpaceId(request);
-
     try {
+      const spaceId = server.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
+
       const previousMonitor: SavedObject<EncryptedSyntheticsMonitor> = await savedObjectsClient.get(
         syntheticsMonitorType,
         monitorId
@@ -95,21 +84,35 @@ export const editSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => (
         revision: (previousMonitor.attributes[ConfigKey.REVISION] || 0) + 1,
       };
 
-      const { errors, editedMonitor: editedMonitorSavedObject } = await syncEditedMonitor({
-        server,
+      const {
+        publicSyncErrors,
+        failedPolicyUpdates,
+        editedMonitor: editedMonitorSavedObject,
+      } = await syncEditedMonitor({
+        routeContext,
         previousMonitor,
         decryptedPreviousMonitor,
-        syntheticsMonitorClient,
-        savedObjectsClient,
-        request,
         normalizedMonitor: monitorWithRevision,
         spaceId,
       });
 
+      if (failedPolicyUpdates && failedPolicyUpdates.length > 0) {
+        const hasError = failedPolicyUpdates.find((update) => update.error);
+        await rollbackUpdate({
+          routeContext,
+          configId: monitorId,
+          attributes: decryptedPreviousMonitor.attributes,
+        });
+        throw hasError?.error;
+      }
+
       // Return service sync errors in OK response
-      if (errors && errors.length > 0) {
+      if (publicSyncErrors && publicSyncErrors.length > 0) {
         return response.ok({
-          body: { message: 'error pushing monitor to the service', attributes: { errors } },
+          body: {
+            message: 'error pushing monitor to the service',
+            attributes: { errors: publicSyncErrors },
+          },
         });
       }
 
@@ -120,30 +123,45 @@ export const editSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => (
       }
       logger.error(updateErr);
 
-      throw updateErr;
+      return response.customError({
+        body: { message: updateErr.message },
+        statusCode: 500,
+      });
     }
   },
 });
+
+const rollbackUpdate = async ({
+  routeContext,
+  configId,
+  attributes,
+}: {
+  attributes: SyntheticsMonitorWithSecrets;
+  configId: string;
+  routeContext: RouteContext;
+}) => {
+  const { savedObjectsClient, server } = routeContext;
+  try {
+    await savedObjectsClient.update<MonitorFields>(syntheticsMonitorType, configId, attributes);
+  } catch (e) {
+    server.logger.error(`Unable to rollback Synthetics monitors edit ${e.message} `);
+  }
+};
 
 export const syncEditedMonitor = async ({
   normalizedMonitor,
   previousMonitor,
   decryptedPreviousMonitor,
-  server,
-  syntheticsMonitorClient,
-  savedObjectsClient,
-  request,
   spaceId,
+  routeContext,
 }: {
   normalizedMonitor: SyntheticsMonitor;
   previousMonitor: SavedObject<EncryptedSyntheticsMonitor>;
   decryptedPreviousMonitor: SavedObject<SyntheticsMonitorWithSecrets>;
-  server: UptimeServerSetup;
-  syntheticsMonitorClient: SyntheticsMonitorClient;
-  savedObjectsClient: SavedObjectsClientContract;
-  request: KibanaRequest;
+  routeContext: RouteContext;
   spaceId: string;
 }) => {
+  const { server, savedObjectsClient, syntheticsMonitorClient } = routeContext;
   try {
     const monitorWithId = {
       ...normalizedMonitor,
@@ -162,17 +180,25 @@ export const syncEditedMonitor = async ({
     const allPrivateLocations = await getSyntheticsPrivateLocations(savedObjectsClient);
 
     const editSyncPromise = syntheticsMonitorClient.editMonitors(
-      [{ monitor: monitorWithId as MonitorFields, id: previousMonitor.id, previousMonitor }],
-      request,
-      savedObjectsClient,
+      [
+        {
+          monitor: monitorWithId as MonitorFields,
+          id: previousMonitor.id,
+          previousMonitor,
+          decryptedPreviousMonitor,
+        },
+      ],
+      routeContext,
       allPrivateLocations,
       spaceId
     );
 
-    const [editedMonitorSavedObject, errors] = await Promise.all([
-      editedSOPromise,
-      editSyncPromise,
-    ]);
+    const [editedMonitorSavedObject, { publicSyncErrors, failedPolicyUpdates }] = await Promise.all(
+      [editedSOPromise, editSyncPromise]
+    ).catch((e) => {
+      server.logger.error(e);
+      throw e;
+    });
 
     sendTelemetryEvents(
       server.logger,
@@ -182,20 +208,24 @@ export const syncEditedMonitor = async ({
         previousMonitor,
         server.stackVersion,
         Boolean((normalizedMonitor as MonitorFields)[ConfigKey.SOURCE_INLINE]),
-        errors
+        publicSyncErrors
       )
     );
 
-    return { errors, editedMonitor: editedMonitorSavedObject };
+    return {
+      failedPolicyUpdates,
+      publicSyncErrors,
+      editedMonitor: editedMonitorSavedObject,
+    };
   } catch (e) {
     server.logger.error(
       `Unable to update Synthetics monitor ${decryptedPreviousMonitor.attributes[ConfigKey.NAME]}`
     );
-    await savedObjectsClient.update<MonitorFields>(
-      syntheticsMonitorType,
-      previousMonitor.id,
-      decryptedPreviousMonitor.attributes
-    );
+    await rollbackUpdate({
+      routeContext,
+      configId: previousMonitor.id,
+      attributes: decryptedPreviousMonitor.attributes,
+    });
 
     throw e;
   }

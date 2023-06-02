@@ -7,21 +7,22 @@
 
 import { isEmpty } from 'lodash';
 import Boom from '@hapi/boom';
-import { pipe } from 'fp-ts/lib/pipeable';
-import { fold } from 'fp-ts/lib/Either';
-import { identity } from 'fp-ts/lib/function';
 
 import type { CasesFindResponse, CasesFindRequest } from '../../../common/api';
-import { CasesFindRequestRt, throwErrors, CasesFindResponseRt, excess } from '../../../common/api';
+import {
+  CasesFindRequestRt,
+  decodeWithExcessOrThrow,
+  CasesFindResponseRt,
+} from '../../../common/api';
 
 import { createCaseError } from '../../common/error';
 import { asArray, transformCases } from '../../common/utils';
-import { constructQueryOptions } from '../utils';
-import { includeFieldsRequiredForAuthentication } from '../../authorization/utils';
+import { constructQueryOptions, constructSearch } from '../utils';
 import { Operations } from '../../authorization';
 import type { CasesClientArgs } from '..';
 import { LICENSING_CASE_ASSIGNMENT_FEATURE } from '../../common/constants';
 import type { CasesFindQueryParams } from '../types';
+import { decodeOrThrow } from '../../../common/api/runtime_types';
 
 /**
  * Retrieves a case and optionally its comments.
@@ -36,15 +37,12 @@ export const find = async (
     services: { caseService, licensingService },
     authorization,
     logger,
+    savedObjectsSerializer,
+    spaceId,
   } = clientArgs;
 
   try {
-    const fields = asArray(params.fields);
-
-    const queryParams = pipe(
-      excess(CasesFindRequestRt).decode({ ...params, fields }),
-      fold(throwErrors(Boom.badRequest), identity)
-    );
+    const queryParams = decodeWithExcessOrThrow(CasesFindRequestRt)(params);
 
     const { filter: authorizationFilter, ensureSavedObjectsAreAuthorized } =
       await authorization.getAuthorizationFilter(Operations.findCases);
@@ -85,13 +83,15 @@ export const find = async (
 
     const caseQueryOptions = constructQueryOptions({ ...queryArgs, authorizationFilter });
 
+    const caseSearch = constructSearch(queryParams.search, spaceId, savedObjectsSerializer);
+
     const [cases, statusStats] = await Promise.all([
       caseService.findCasesGroupedByID({
         caseOptions: {
           ...queryParams,
           ...caseQueryOptions,
+          ...caseSearch,
           searchFields: asArray(queryParams.searchFields),
-          fields: includeFieldsRequiredForAuthentication(fields),
         },
       }),
       caseService.getCaseStatusStats({
@@ -101,17 +101,17 @@ export const find = async (
 
     ensureSavedObjectsAreAuthorized([...cases.casesMap.values()]);
 
-    return CasesFindResponseRt.encode(
-      transformCases({
-        casesMap: cases.casesMap,
-        page: cases.page,
-        perPage: cases.perPage,
-        total: cases.total,
-        countOpenCases: statusStats.open,
-        countInProgressCases: statusStats['in-progress'],
-        countClosedCases: statusStats.closed,
-      })
-    );
+    const res = transformCases({
+      casesMap: cases.casesMap,
+      page: cases.page,
+      perPage: cases.perPage,
+      total: cases.total,
+      countOpenCases: statusStats.open,
+      countInProgressCases: statusStats['in-progress'],
+      countClosedCases: statusStats.closed,
+    });
+
+    return decodeOrThrow(CasesFindResponseRt)(res);
   } catch (error) {
     throw createCaseError({
       message: `Failed to find cases: ${JSON.stringify(params)}: ${error}`,

@@ -46,7 +46,7 @@ interface AlignerStyles {
   backgroundImage?: string;
 }
 
-function RevealImageComponent({
+export function RevealImageComponent({
   onLoaded,
   parentNode,
   percent,
@@ -152,7 +152,3 @@ function RevealImageComponent({
     </div>
   );
 }
-
-// default export required for React.Lazy
-// eslint-disable-next-line import/no-default-export
-export { RevealImageComponent as default };

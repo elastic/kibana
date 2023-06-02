@@ -20,10 +20,26 @@ const createEncryptionExtension = (): jest.Mocked<ISavedObjectsEncryptionExtensi
 });
 
 const createSecurityExtension = (): jest.Mocked<ISavedObjectsSecurityExtension> => ({
-  checkAuthorization: jest.fn(),
-  enforceAuthorization: jest.fn(),
-  addAuditEvent: jest.fn(),
+  authorizeCreate: jest.fn(),
+  authorizeBulkCreate: jest.fn(),
+  authorizeUpdate: jest.fn(),
+  authorizeBulkUpdate: jest.fn(),
+  authorizeDelete: jest.fn(),
+  authorizeBulkDelete: jest.fn(),
+  authorizeGet: jest.fn(),
+  authorizeBulkGet: jest.fn(),
+  authorizeCheckConflicts: jest.fn(),
+  authorizeRemoveReferences: jest.fn(),
+  authorizeOpenPointInTime: jest.fn(),
+  auditClosePointInTime: jest.fn(),
+  authorizeFind: jest.fn(),
+  getFindRedactTypeMap: jest.fn(),
+  authorizeAndRedactMultiNamespaceReferences: jest.fn(),
+  authorizeAndRedactInternalBulkResolve: jest.fn(),
   redactNamespaces: jest.fn(),
+  authorizeUpdateSpaces: jest.fn(),
+  authorizeDisableLegacyUrlAliases: jest.fn(),
+  auditObjectsForSpaceDeletion: jest.fn(),
 });
 
 const createSpacesExtension = (): jest.Mocked<ISavedObjectsSpacesExtension> => ({

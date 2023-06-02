@@ -7,11 +7,12 @@
 
 import type { IRouter } from '@kbn/core/server';
 import unified from 'unified';
-import markdown from 'remark-parse';
+import markdown from 'remark-parse-no-trim';
 import { some, filter } from 'lodash';
 import deepEqual from 'fast-deep-equal';
-
 import type { ECSMappingOrUndefined } from '@kbn/osquery-io-ts-types';
+import { PARAMETER_NOT_FOUND } from '../../../common/translations/errors';
+import { replaceParamsQuery } from '../../../common/utils/replace_params_query';
 import { createLiveQueryRequestBodySchema } from '../../../common/schemas/routes/live_query';
 import type { CreateLiveQueryRequestBodySchema } from '../../../common/schemas/routes/live_query';
 import { buildRouteValidation } from '../../utils/build_validation/route_validation';
@@ -43,15 +44,17 @@ export const createLiveQueryRoute = (router: IRouter, osqueryContext: OsqueryApp
         (runSavedQueries && (request.body.saved_query_id || request.body.pack_id))
       );
 
+      const client = await osqueryContext.service
+        .getRuleRegistryService()
+        ?.getRacClientWithRequest(request);
+
+      const alertData = request.body.alert_ids?.length
+        ? await client?.get({ id: request.body.alert_ids[0] })
+        : undefined;
+
       if (isInvalid) {
         if (request.body.alert_ids?.length) {
           try {
-            const client = await osqueryContext.service
-              .getRuleRegistryService()
-              ?.getRacClientWithRequest(request);
-
-            const alertData = await client?.get({ id: request.body.alert_ids[0] });
-
             if (alertData?.['kibana.alert.rule.note']) {
               const parsedAlertInvestigationGuide = unified()
                 .use([[markdown, {}], OsqueryParser])
@@ -66,9 +69,17 @@ export const createLiveQueryRoute = (router: IRouter, osqueryContext: OsqueryApp
                 osqueryQueries,
                 (payload: {
                   configuration: { query: string; ecs_mapping: ECSMappingOrUndefined };
-                }) =>
-                  payload?.configuration?.query === request.body.query &&
-                  deepEqual(payload?.configuration?.ecs_mapping, request.body.ecs_mapping)
+                }) => {
+                  const { result: replacedConfigurationQuery } = replaceParamsQuery(
+                    payload.configuration.query,
+                    alertData
+                  );
+
+                  return (
+                    replacedConfigurationQuery === request.body.query &&
+                    deepEqual(payload.configuration.ecs_mapping, request.body.ecs_mapping)
+                  );
+                }
               );
 
               if (!requestQueryExistsInTheInvestigationGuide) throw new Error();
@@ -83,19 +94,28 @@ export const createLiveQueryRoute = (router: IRouter, osqueryContext: OsqueryApp
 
       try {
         const currentUser = await osqueryContext.security.authc.getCurrentUser(request)?.username;
-        const { response: osqueryAction } = await createActionHandler(
+        const { response: osqueryAction, fleetActionsCount } = await createActionHandler(
           osqueryContext,
           request.body,
-          soClient,
-          { currentUser }
+          {
+            soClient,
+            metadata: { currentUser },
+            alertData,
+          }
         );
+        if (!fleetActionsCount) {
+          return response.badRequest({
+            body: PARAMETER_NOT_FOUND,
+          });
+        }
 
         return response.ok({
           body: { data: osqueryAction },
         });
       } catch (error) {
-        // TODO validate for 400 (when agents are not found for selection)
-        // return response.badRequest({ body: new Error('No agents found for selection') });
+        if (error.statusCode === 400) {
+          return response.badRequest({ body: error });
+        }
 
         return response.customError({
           statusCode: 500,

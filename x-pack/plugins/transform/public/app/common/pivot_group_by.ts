@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { KBN_FIELD_TYPES } from '@kbn/data-plugin/common';
+import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { AggName } from '../../../common/types/aggregations';
 import { Dictionary } from '../../../common/types/common';
@@ -27,13 +27,16 @@ export type PivotSupportedGroupByAggsWithInterval =
 
 export const pivotGroupByFieldSupport = {
   [KBN_FIELD_TYPES.ATTACHMENT]: [],
-  [KBN_FIELD_TYPES.BOOLEAN]: [],
+  [KBN_FIELD_TYPES.BOOLEAN]: [PIVOT_SUPPORTED_GROUP_BY_AGGS.TERMS],
   [KBN_FIELD_TYPES.DATE]: [PIVOT_SUPPORTED_GROUP_BY_AGGS.DATE_HISTOGRAM],
   [KBN_FIELD_TYPES.GEO_POINT]: [],
   [KBN_FIELD_TYPES.GEO_SHAPE]: [],
   [KBN_FIELD_TYPES.IP]: [PIVOT_SUPPORTED_GROUP_BY_AGGS.TERMS],
   [KBN_FIELD_TYPES.MURMUR3]: [],
-  [KBN_FIELD_TYPES.NUMBER]: [PIVOT_SUPPORTED_GROUP_BY_AGGS.HISTOGRAM],
+  [KBN_FIELD_TYPES.NUMBER]: [
+    PIVOT_SUPPORTED_GROUP_BY_AGGS.HISTOGRAM,
+    PIVOT_SUPPORTED_GROUP_BY_AGGS.TERMS,
+  ],
   [KBN_FIELD_TYPES.STRING]: [PIVOT_SUPPORTED_GROUP_BY_AGGS.TERMS],
   [KBN_FIELD_TYPES._SOURCE]: [],
   [KBN_FIELD_TYPES.UNKNOWN]: [],
@@ -56,6 +59,7 @@ interface GroupByDateHistogram extends GroupByConfigBase {
   field: EsFieldName;
   calendar_interval: string;
   missing_bucket?: boolean;
+  time_zone?: string;
 }
 
 interface GroupByHistogram extends GroupByConfigBase {

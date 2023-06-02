@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { processFieldsMap } from '../../../../../../common/ecs/ecs_fields';
+import { processFieldsMap } from '@kbn/securitysolution-ecs';
 
 import type {
   HostsUncommonProcessesEdges,

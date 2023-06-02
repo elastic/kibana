@@ -25,7 +25,7 @@ import {
   removeServerGeneratedPropertiesFromCase,
   removeServerGeneratedPropertiesFromSavedObject,
   extractWarningValueFromWarningHeader,
-} from '../../../../common/lib/utils';
+} from '../../../../common/lib/api';
 import {
   secOnly,
   obsOnly,

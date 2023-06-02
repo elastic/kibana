@@ -43,4 +43,5 @@ export interface IndexPatternRef {
   id: string;
   title: string;
   timeField?: string;
+  name?: string;
 }

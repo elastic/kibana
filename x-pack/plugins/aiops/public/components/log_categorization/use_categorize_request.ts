@@ -6,28 +6,45 @@
  */
 
 import { cloneDeep, get } from 'lodash';
-import { useRef, useCallback } from 'react';
+import { useRef, useCallback, useMemo } from 'react';
 import { isCompleteResponse, isErrorResponse } from '@kbn/data-plugin/public';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 
+import { createRandomSamplerWrapper } from '@kbn/ml-random-sampler-utils';
+import { estypes } from '@elastic/elasticsearch';
+import { useStorage } from '@kbn/ml-local-storage';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
+import { RandomSampler } from './sampling_menu';
+import {
+  type AiOpsKey,
+  type AiOpsStorageMapped,
+  AIOPS_RANDOM_SAMPLING_MODE_PREFERENCE,
+  AIOPS_RANDOM_SAMPLING_PROBABILITY_PREFERENCE,
+} from '../../types/storage';
+import { RANDOM_SAMPLER_OPTION, DEFAULT_PROBABILITY } from './sampling_menu/random_sampler';
 
 const CATEGORY_LIMIT = 1000;
 const EXAMPLE_LIMIT = 1;
 
-interface CatResponse {
-  rawResponse: {
-    aggregations: {
-      categories: {
-        buckets: Array<{
-          key: string;
-          doc_count: number;
-          hit: { hits: { hits: Array<{ _source: { message: string } }> } };
-          sparkline: { buckets: Array<{ key_as_string: string; key: number; doc_count: number }> };
-        }>;
+interface CategoriesAgg {
+  categories: {
+    buckets: Array<{
+      key: string;
+      doc_count: number;
+      hit: { hits: { hits: Array<{ _source: { message: string } }> } };
+      sparkline: {
+        buckets: Array<{ key_as_string: string; key: number; doc_count: number }>;
       };
-    };
+    }>;
   };
+}
+
+interface CategoriesSampleAgg {
+  sample: CategoriesAgg;
+}
+
+interface CatResponse {
+  rawResponse: estypes.SearchResponseBody<unknown, CategoriesAgg | CategoriesSampleAgg>;
 }
 
 export interface Category {
@@ -45,9 +62,31 @@ export type EventRate = Array<{
 export type SparkLinesPerCategory = Record<string, Record<number, number>>;
 
 export function useCategorizeRequest() {
+  const [randomSamplerMode, setRandomSamplerMode] = useStorage<
+    AiOpsKey,
+    AiOpsStorageMapped<typeof AIOPS_RANDOM_SAMPLING_MODE_PREFERENCE>
+  >(AIOPS_RANDOM_SAMPLING_MODE_PREFERENCE, RANDOM_SAMPLER_OPTION.ON_AUTOMATIC);
+
+  const [randomSamplerProbability, setRandomSamplerProbability] = useStorage<
+    AiOpsKey,
+    AiOpsStorageMapped<typeof AIOPS_RANDOM_SAMPLING_PROBABILITY_PREFERENCE>
+  >(AIOPS_RANDOM_SAMPLING_PROBABILITY_PREFERENCE, DEFAULT_PROBABILITY);
+
   const { data } = useAiopsAppContext();
 
   const abortController = useRef(new AbortController());
+
+  const randomSampler = useMemo(
+    () =>
+      new RandomSampler(
+        randomSamplerMode,
+        setRandomSamplerMode,
+        randomSamplerProbability,
+        setRandomSamplerProbability
+      ),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
+  );
 
   const runCategorizeRequest = useCallback(
     (
@@ -59,16 +98,18 @@ export function useCategorizeRequest() {
       query: QueryDslQueryContainer,
       intervalMs?: number
     ): Promise<{ categories: Category[]; sparkLinesPerCategory: SparkLinesPerCategory }> => {
+      const { wrap, unwrap } = randomSampler.createRandomSamplerWrapper();
+
       return new Promise((resolve, reject) => {
         data.search
           .search<ReturnType<typeof createCategoryRequest>, CatResponse>(
-            createCategoryRequest(index, field, timeField, from, to, query, intervalMs),
+            createCategoryRequest(index, field, timeField, from, to, query, wrap, intervalMs),
             { abortSignal: abortController.current.signal }
           )
           .subscribe({
             next: (result) => {
               if (isCompleteResponse(result)) {
-                resolve(processCategoryResults(result, field));
+                resolve(processCategoryResults(result, field, unwrap));
               } else if (isErrorResponse(result)) {
                 reject(result);
               } else {
@@ -86,7 +127,7 @@ export function useCategorizeRequest() {
           });
       });
     },
-    [data.search]
+    [data.search, randomSampler]
   );
 
   const cancelRequest = useCallback(() => {
@@ -94,7 +135,7 @@ export function useCategorizeRequest() {
     abortController.current = new AbortController();
   }, []);
 
-  return { runCategorizeRequest, cancelRequest };
+  return { runCategorizeRequest, cancelRequest, randomSampler };
 }
 
 function createCategoryRequest(
@@ -104,6 +145,7 @@ function createCategoryRequest(
   from: number | undefined,
   to: number | undefined,
   queryIn: QueryDslQueryContainer,
+  wrap: ReturnType<typeof createRandomSamplerWrapper>['wrap'],
   intervalMs?: number
 ) {
   const query = cloneDeep(queryIn);
@@ -134,52 +176,64 @@ function createCategoryRequest(
       },
     },
   });
+
+  const aggs = {
+    categories: {
+      categorize_text: {
+        field,
+        size: CATEGORY_LIMIT,
+      },
+      aggs: {
+        hit: {
+          top_hits: {
+            size: EXAMPLE_LIMIT,
+            sort: [timeField],
+            _source: field,
+          },
+        },
+        ...(intervalMs
+          ? {
+              sparkline: {
+                date_histogram: {
+                  field: timeField,
+                  fixed_interval: `${intervalMs}ms`,
+                },
+              },
+            }
+          : {}),
+      },
+    },
+  };
+
   return {
     params: {
       index,
       size: 0,
       body: {
         query,
-        aggs: {
-          categories: {
-            categorize_text: {
-              field,
-              size: CATEGORY_LIMIT,
-            },
-            aggs: {
-              hit: {
-                top_hits: {
-                  size: EXAMPLE_LIMIT,
-                  sort: [timeField],
-                  _source: field,
-                },
-              },
-              ...(intervalMs
-                ? {
-                    sparkline: {
-                      date_histogram: {
-                        field: timeField,
-                        fixed_interval: `${intervalMs}ms`,
-                      },
-                    },
-                  }
-                : {}),
-            },
-          },
-        },
+        aggs: wrap(aggs),
       },
     },
   };
 }
 
-function processCategoryResults(result: CatResponse, field: string) {
+function processCategoryResults(
+  result: CatResponse,
+  field: string,
+  unwrap: ReturnType<typeof createRandomSamplerWrapper>['unwrap']
+) {
   const sparkLinesPerCategory: SparkLinesPerCategory = {};
-
-  if (result.rawResponse.aggregations === undefined) {
+  const { aggregations } = result.rawResponse;
+  if (aggregations === undefined) {
     throw new Error('processCategoryResults failed, did not return aggregations.');
   }
+  const {
+    categories: { buckets },
+  } = unwrap(
+    aggregations as unknown as Record<string, estypes.AggregationsAggregate>
+  ) as CategoriesAgg;
 
-  const categories: Category[] = result.rawResponse.aggregations.categories.buckets.map((b) => {
+  const categories: Category[] = buckets.map((b) => {
     sparkLinesPerCategory[b.key] =
       b.sparkline === undefined
         ? {}

@@ -26,8 +26,7 @@ export default function createDisableAlertTests({ getService }: FtrProviderConte
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
 
-  // Failing: See https://github.com/elastic/kibana/issues/141849
-  describe.skip('disable', () => {
+  describe('disable', () => {
     const objectRemover = new ObjectRemover(supertest);
 
     after(() => objectRemover.removeAll());

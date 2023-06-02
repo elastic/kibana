@@ -13,14 +13,12 @@ import {
   SavedObjectsClient,
   SavedObjectsClientContract,
 } from '@kbn/core/server';
-import { mappingFromFieldMap } from '@kbn/rule-registry-plugin/common/mapping_from_field_map';
-import { experimentalRuleFieldMap } from '@kbn/rule-registry-plugin/common/assets/field_maps/experimental_rule_field_map';
+import { mappingFromFieldMap } from '@kbn/alerting-plugin/common';
 import { Dataset } from '@kbn/rule-registry-plugin/server';
 import { SyntheticsMonitorClient } from './synthetics_service/synthetics_monitor/synthetics_monitor_client';
 import { initSyntheticsServer } from './server';
 import { initUptimeServer } from './legacy_uptime/uptime_server';
 import { uptimeFeature } from './feature';
-import { uptimeRuleFieldMap } from '../common/rules/uptime_rule_field_map';
 import {
   KibanaTelemetryAdapter,
   UptimeCorePluginsSetup,
@@ -35,6 +33,8 @@ import {
 import { UptimeConfig } from '../common/config';
 import { SyntheticsService } from './synthetics_service/synthetics_service';
 import { syntheticsServiceApiKey } from './legacy_uptime/lib/saved_objects/service_api_key';
+import { SYNTHETICS_RULE_TYPES_ALERT_CONTEXT } from '../common/constants/synthetics_alerts';
+import { uptimeRuleTypeFieldMap } from './legacy_uptime/lib/alerts/common';
 
 export type UptimeRuleRegistry = ReturnType<Plugin['setup']>['ruleRegistry'];
 
@@ -63,16 +63,13 @@ export class Plugin implements PluginType {
 
     const ruleDataClient = ruleDataService.initializeIndex({
       feature: 'uptime',
-      registrationContext: 'observability.uptime',
+      registrationContext: SYNTHETICS_RULE_TYPES_ALERT_CONTEXT,
       dataset: Dataset.alerts,
       componentTemplateRefs: [],
       componentTemplates: [
         {
           name: 'mappings',
-          mappings: mappingFromFieldMap(
-            { ...uptimeRuleFieldMap, ...experimentalRuleFieldMap },
-            'strict'
-          ),
+          mappings: mappingFromFieldMap(uptimeRuleTypeFieldMap, 'strict'),
         },
       ],
     });
@@ -86,7 +83,6 @@ export class Plugin implements PluginType {
       logger: this.logger,
       telemetry: this.telemetryEventsSender,
       isDev: this.initContext.env.mode.dev,
-      spaces: plugins.spaces,
     } as UptimeServerSetup;
 
     this.syntheticsService = new SyntheticsService(this.server);
@@ -101,7 +97,7 @@ export class Plugin implements PluginType {
 
     initUptimeServer(this.server, plugins, ruleDataClient, this.logger);
 
-    initSyntheticsServer(this.server, this.syntheticsMonitorClient, plugins);
+    initSyntheticsServer(this.server, this.syntheticsMonitorClient, plugins, ruleDataClient);
 
     registerUptimeSavedObjects(core.savedObjects, plugins.encryptedSavedObjects);
 
@@ -126,6 +122,7 @@ export class Plugin implements PluginType {
       this.server.fleet = pluginsStart.fleet;
       this.server.encryptedSavedObjects = pluginsStart.encryptedSavedObjects;
       this.server.savedObjectsClient = this.savedObjectsClient;
+      this.server.spaces = pluginsStart.spaces;
     }
 
     this.syntheticsService?.start(pluginsStart.taskManager);

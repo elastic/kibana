@@ -15,7 +15,6 @@ import {
   getGlobalAutocompleteComponents,
   getTopLevelUrlCompleteComponents,
   getUnmatchedEndpointComponents,
-  // @ts-ignore
 } from '../kb/kb';
 
 import { createTokenIterator } from '../../application/factories';
@@ -24,10 +23,8 @@ import type RowParser from '../row_parser';
 
 import * as utils from '../utils';
 
-// @ts-ignore
 import { populateContext } from './engine';
 import type { AutoCompleteContext, DataAutoCompleteRulesOneOf, ResultTerm } from './types';
-// @ts-ignore
 import { URL_PATH_END_MARKER } from './components';
 
 let lastEvaluatedToken: Token | null = null;
@@ -593,7 +590,10 @@ export default function ({
         return null;
     }
 
-    if (!context.autoCompleteSet) {
+    const isMappingsFetchingInProgress =
+      context.autoCompleteType === 'body' && !!context.asyncResultsState?.isLoading;
+
+    if (!context.autoCompleteSet && !isMappingsFetchingInProgress) {
       return null; // nothing to do..
     }
 
@@ -1123,80 +1123,112 @@ export default function ({
     }
   }
 
+  /**
+   * Extracts terms from the autocomplete set.
+   * @param context
+   */
+  function getTerms(context: AutoCompleteContext, autoCompleteSet: ResultTerm[]) {
+    const terms = _.map(
+      autoCompleteSet.filter((term) => Boolean(term) && term.name != null),
+      function (term) {
+        if (typeof term !== 'object') {
+          term = {
+            name: term,
+          };
+        } else {
+          term = _.clone(term);
+        }
+        const defaults: {
+          value?: string;
+          meta: string;
+          score: number;
+          context: AutoCompleteContext;
+          completer?: { insertMatch: (v: unknown) => void };
+        } = {
+          value: term.name,
+          meta: 'API',
+          score: 0,
+          context,
+        };
+        // we only need our custom insertMatch behavior for the body
+        if (context.autoCompleteType === 'body') {
+          defaults.completer = {
+            insertMatch() {
+              return applyTerm(term);
+            },
+          };
+        }
+        return _.defaults(term, defaults);
+      }
+    );
+
+    terms.sort(function (
+      t1: { score: number; name?: string },
+      t2: { score: number; name?: string }
+    ) {
+      /* score sorts from high to low */
+      if (t1.score > t2.score) {
+        return -1;
+      }
+      if (t1.score < t2.score) {
+        return 1;
+      }
+      /* names sort from low to high */
+      if (t1.name! < t2.name!) {
+        return -1;
+      }
+      if (t1.name === t2.name) {
+        return 0;
+      }
+      return 1;
+    });
+
+    return terms;
+  }
+
+  function getSuggestions(terms: ResultTerm[]) {
+    return _.map(terms, function (t, i) {
+      t.insertValue = t.insertValue || t.value;
+      t.value = '' + t.value; // normalize to strings
+      t.score = -i;
+      return t;
+    });
+  }
+
   function getCompletions(
     position: Position,
     prefix: string,
-    callback: (e: Error | null, result: ResultTerm[] | null) => void
+    callback: (e: Error | null, result: ResultTerm[] | null) => void,
+    annotationControls: {
+      setAnnotation: (text: string) => void;
+      removeAnnotation: () => void;
+    }
   ) {
     try {
       const context = getAutoCompleteContext(editor, position);
+
       if (!context) {
         callback(null, []);
       } else {
-        const terms = _.map(
-          context.autoCompleteSet!.filter((term) => Boolean(term) && term.name != null),
-          function (term) {
-            if (typeof term !== 'object') {
-              term = {
-                name: term,
-              };
-            } else {
-              term = _.clone(term);
-            }
-            const defaults: {
-              value?: string;
-              meta: string;
-              score: number;
-              context: AutoCompleteContext;
-              completer?: { insertMatch: (v: unknown) => void };
-            } = {
-              value: term.name,
-              meta: 'API',
-              score: 0,
-              context,
-            };
-            // we only need our custom insertMatch behavior for the body
-            if (context.autoCompleteType === 'body') {
-              defaults.completer = {
-                insertMatch() {
-                  return applyTerm(term);
-                },
-              };
-            }
-            return _.defaults(term, defaults);
-          }
-        );
+        if (!context.asyncResultsState?.isLoading) {
+          const terms = getTerms(context, context.autoCompleteSet!);
+          const suggestions = getSuggestions(terms);
+          callback(null, suggestions);
+        }
 
-        terms.sort(function (
-          t1: { score: number; name?: string },
-          t2: { score: number; name?: string }
-        ) {
-          /* score sorts from high to low */
-          if (t1.score > t2.score) {
-            return -1;
-          }
-          if (t1.score < t2.score) {
-            return 1;
-          }
-          /* names sort from low to high */
-          if (t1.name! < t2.name!) {
-            return -1;
-          }
-          if (t1.name === t2.name) {
-            return 0;
-          }
-          return 1;
-        });
+        if (context.asyncResultsState) {
+          annotationControls.setAnnotation(
+            i18n.translate('console.autocomplete.fieldsFetchingAnnotation', {
+              defaultMessage: 'Fields fetching is in progress',
+            })
+          );
 
-        callback(
-          null,
-          _.map(terms, function (t, i) {
-            t.insertValue = t.insertValue || t.value;
-            t.value = '' + t.value; // normalize to strings
-            t.score = -i;
-            return t;
-          })
-        );
+          context.asyncResultsState.results.then((r) => {
+            const asyncSuggestions = getSuggestions(getTerms(context, r));
+            callback(null, asyncSuggestions);
+            annotationControls.removeAnnotation();
+          });
+        }
       }
     } catch (e) {
       // eslint-disable-next-line no-console
@@ -1216,8 +1248,12 @@ export default function ({
         _editSession: unknown,
         pos: Position,
         prefix: string,
-        callback: (e: Error | null, result: ResultTerm[] | null) => void
-      ) => getCompletions(pos, prefix, callback),
+        callback: (e: Error | null, result: ResultTerm[] | null) => void,
+        annotationControls: {
+          setAnnotation: (text: string) => void;
+          removeAnnotation: () => void;
+        }
+      ) => getCompletions(pos, prefix, callback, annotationControls),
       addReplacementInfoToContext,
       addChangeListener: () => editor.on('changeSelection', editorChangeListener),
       removeChangeListener: () => editor.off('changeSelection', editorChangeListener),

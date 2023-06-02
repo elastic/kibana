@@ -12,7 +12,7 @@
  */
 
 import apm from 'elastic-apm-node';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { withSpan } from '@kbn/apm-utils';
 import { identity } from 'lodash';
 import { Logger, ExecutionContextStart } from '@kbn/core/server';
@@ -107,7 +107,7 @@ export class EphemeralTaskManagerRunner implements TaskRunner {
     this.beforeMarkRunning = beforeMarkRunning;
     this.onTaskEvent = onTaskEvent;
     this.executionContext = executionContext;
-    this.uuid = uuid.v4();
+    this.uuid = uuidv4();
   }
 
   /**
@@ -181,6 +181,14 @@ export class EphemeralTaskManagerRunner implements TaskRunner {
     return this.expiration < new Date();
   }
 
+  /**
+   * Returns true whenever the task is ad hoc and has ran out of attempts. When true before
+   * running a task, the task should be deleted instead of ran.
+   */
+  public get isAdHocTaskAndOutOfAttempts() {
+    return false;
+  }
+
   public get isEphemeral() {
     return true;
   }
@@ -251,6 +259,11 @@ export class EphemeralTaskManagerRunner implements TaskRunner {
       return processedResult;
     }
   }
+
+  /**
+   * Used by the non-ephemeral task runner
+   */
+  public async removeTask(): Promise<void> {}
 
   /**
    * Noop for Ephemeral tasks

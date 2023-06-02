@@ -7,7 +7,7 @@
 
 import type { Moment } from 'moment';
 import type { ESSearchResponse } from '@kbn/es-types';
-import type { SignalSource } from '../../signals/types';
+import type { SignalSource } from '../types';
 
 export type RecentTermsAggResult = ESSearchResponse<
   SignalSource,

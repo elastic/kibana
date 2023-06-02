@@ -7,7 +7,16 @@
 
 import { actionTypeRegistryMock } from '@kbn/triggers-actions-ui-plugin/public/application/action_type_registry.mock';
 import { triggersActionsUiMock } from '@kbn/triggers-actions-ui-plugin/public/mocks';
-import { connectorDeprecationValidator, getConnectorIcon, isDeprecatedConnector } from './utils';
+import {
+  connectorDeprecationValidator,
+  convertEmptyValuesToNull,
+  getConnectorIcon,
+  getConnectorsFormDeserializer,
+  getConnectorsFormSerializer,
+  isDeprecatedConnector,
+  isEmptyValue,
+  removeItemFromSessionStorage,
+} from './utils';
 
 describe('Utils', () => {
   const connector = {
@@ -83,6 +92,124 @@ describe('Utils', () => {
       expect(
         isDeprecatedConnector({ ...connector, isDeprecated: false, isPreconfigured: true })
       ).toBe(false);
+    });
+  });
+
+  describe('removeItemFromSessionStorage', () => {
+    const sessionKey = 'testKey';
+    const sessionValue = 'test value';
+
+    afterEach(() => {
+      sessionStorage.removeItem(sessionKey);
+    });
+
+    it('successfully removes key from session storage', () => {
+      sessionStorage.setItem(sessionKey, sessionValue);
+
+      expect(sessionStorage.getItem(sessionKey)).toBe(sessionValue);
+
+      removeItemFromSessionStorage(sessionKey);
+
+      expect(sessionStorage.getItem(sessionKey)).toBe(null);
+    });
+
+    it('is null if key is not in session storage', () => {
+      removeItemFromSessionStorage(sessionKey);
+
+      expect(sessionStorage.getItem(sessionKey)).toBe(null);
+    });
+  });
+
+  describe('getConnectorsFormSerializer', () => {
+    it('converts empty values to null', () => {
+      const res = getConnectorsFormSerializer({
+        // @ts-expect-error: expects real connector fields.
+        fields: { foo: null, bar: undefined, baz: [], qux: '', quux: {} },
+      });
+
+      expect(res).toEqual({ fields: { foo: null, bar: null, baz: null, qux: null, quux: null } });
+    });
+
+    it('does not converts non-empty values to null', () => {
+      const fields = {
+        foo: 1,
+        bar: 'test',
+        baz: true,
+        qux: false,
+        quux: { test: 'test', foo: null, bar: undefined },
+        test: [null, 'test', 1, true, false, {}, '', undefined],
+      };
+
+      const res = getConnectorsFormSerializer({
+        // @ts-expect-error: expects real connector fields.
+        fields,
+      });
+
+      expect(res).toEqual({ fields });
+    });
+  });
+
+  describe('getConnectorsFormDeserializer', () => {
+    it('converts null values to undefined', () => {
+      const res = getConnectorsFormDeserializer({
+        // @ts-expect-error: expects real connector fields.
+        fields: { foo: null, bar: undefined, baz: [], qux: '', quux: {} },
+      });
+
+      expect(res).toEqual({
+        fields: { foo: undefined, bar: undefined, baz: [], qux: '', quux: {} },
+      });
+    });
+  });
+
+  describe('convertEmptyValuesToNull', () => {
+    it('converts empty values to null', () => {
+      const res = convertEmptyValuesToNull({
+        foo: null,
+        bar: undefined,
+        baz: [],
+        qux: '',
+        quux: {},
+      });
+
+      expect(res).toEqual({ foo: null, bar: null, baz: null, qux: null, quux: null });
+    });
+
+    it('does not converts non-empty values to null', () => {
+      const fields = {
+        foo: 1,
+        bar: 'test',
+        baz: true,
+        qux: false,
+        quux: { test: 'test', foo: null, bar: undefined },
+        test: [null, 'test', 1, true, false, {}, '', undefined],
+      };
+
+      const res = convertEmptyValuesToNull(fields);
+
+      expect(res).toEqual(fields);
+    });
+
+    it.each([null, undefined])('returns null if the value is %s', (value) => {
+      const res = convertEmptyValuesToNull(value);
+      expect(res).toEqual(null);
+    });
+  });
+
+  describe('isEmptyValue', () => {
+    it.each([null, undefined, [], '', {}])('returns true for value: %s', (value) => {
+      expect(isEmptyValue(value)).toBe(true);
+    });
+
+    it.each([
+      1,
+      'test',
+      true,
+      false,
+      { test: 'test', foo: null, bar: undefined },
+      [null, 'test', 1, true, false, {}, '', undefined],
+    ])('returns false for value: %s', (value) => {
+      expect(isEmptyValue(value)).toBe(false);
     });
   });
 });

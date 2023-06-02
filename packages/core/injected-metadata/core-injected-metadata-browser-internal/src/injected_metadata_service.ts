@@ -95,6 +95,10 @@ export class InjectedMetadataService {
       getElasticsearchInfo: () => {
         return this.state.clusterInfo;
       },
+
+      getCustomBranding: () => {
+        return this.state.customBranding;
+      },
     };
   }
 }

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-export { type ChangePointDetectionAppStateProps } from './change_point_detetion_root';
+export { type ChangePointDetectionAppStateProps } from './change_point_detection_root';
 
-import { ChangePointDetectionAppState } from './change_point_detetion_root';
+import { ChangePointDetectionAppState } from './change_point_detection_root';
 
 // required for dynamic import using React.lazy()
 // eslint-disable-next-line import/no-default-export

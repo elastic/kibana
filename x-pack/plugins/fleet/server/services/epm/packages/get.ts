@@ -4,17 +4,30 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import pMap from 'p-map';
 import type { SavedObjectsClientContract, SavedObjectsFindOptions } from '@kbn/core/server';
 import semverGte from 'semver/functions/gte';
 import type { Logger } from '@kbn/core/server';
+import { withSpan } from '@kbn/apm-utils';
+
+import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
+
+import { nodeBuilder } from '@kbn/es-query';
+
+import { buildNode as buildFunctionNode } from '@kbn/es-query/src/kuery/node_types/function';
+import { buildNode as buildWildcardNode } from '@kbn/es-query/src/kuery/node_types/wildcard';
 
 import {
   installationStatuses,
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+  SO_SEARCH_LIMIT,
 } from '../../../../common/constants';
 import { isPackageLimited } from '../../../../common/services';
-import type { PackageUsageStats, PackagePolicySOAttributes } from '../../../../common/types';
+import type {
+  PackageUsageStats,
+  Installable,
+  PackageDataStreamTypes,
+} from '../../../../common/types';
 import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../constants';
 import type {
   ArchivePackage,
@@ -22,13 +35,20 @@ import type {
   EpmPackageAdditions,
   GetCategoriesRequest,
 } from '../../../../common/types';
-import type { Installation, PackageInfo } from '../../../types';
-import { FleetError, PackageFailedVerificationError, PackageNotFoundError } from '../../../errors';
+import type { Installation, PackageInfo, PackagePolicySOAttributes } from '../../../types';
+import {
+  FleetError,
+  PackageFailedVerificationError,
+  PackageNotFoundError,
+  RegistryResponseError,
+} from '../../../errors';
 import { appContextService } from '../..';
 import * as Registry from '../registry';
 import { getEsPackage } from '../archive/storage';
 import { getArchivePackage } from '../archive';
 import { normalizeKuery } from '../../saved_object';
+
+import { auditLoggingService } from '../../audit_logging';
 
 import { createInstallableFrom } from '.';
 
@@ -63,6 +83,36 @@ export async function getPackages(
   });
   // get the installed packages
   const packageSavedObjects = await getPackageSavedObjects(savedObjectsClient);
+  const MAX_PKGS_TO_LOAD_TITLE = 10;
+
+  const packagesNotInRegistry = packageSavedObjects.saved_objects.filter(
+    (pkg) => !registryItems.some((item) => item.name === pkg.id)
+  );
+
+  const uploadedPackagesNotInRegistry = await pMap(
+    packagesNotInRegistry.entries(),
+    async ([i, pkg]) => {
+      // fetching info of uploaded packages to populate title, description
+      // limit to 10 for performance
+      if (i < MAX_PKGS_TO_LOAD_TITLE) {
+        const packageInfo = await withSpan({ name: 'get-package-info', type: 'package' }, () =>
+          getPackageInfo({
+            savedObjectsClient,
+            pkgName: pkg.id,
+            pkgVersion: pkg.attributes.version,
+          })
+        );
+        return createInstallableFrom({ ...packageInfo, id: pkg.id }, pkg);
+      } else {
+        return createInstallableFrom(
+          { ...pkg.attributes, title: nameAsTitle(pkg.id), id: pkg.id },
+          pkg
+        );
+      }
+    },
+    { concurrency: 10 }
+  );
+
   const packageList = registryItems
     .map((item) =>
       createInstallableFrom(
@@ -70,7 +120,16 @@ export async function getPackages(
         packageSavedObjects.saved_objects.find(({ id }) => id === item.name)
       )
     )
+    .concat(uploadedPackagesNotInRegistry as Installable<any>)
     .sort(sortByName);
+
+  for (const pkg of packageList) {
+    auditLoggingService.writeCustomSoAuditLog({
+      action: 'get',
+      id: pkg.id,
+      savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
+    });
+  }
 
   if (!excludeInstallStatus) {
     return packageList;
@@ -88,6 +147,48 @@ export async function getPackages(
   });
 
   return packageListWithoutStatus;
+}
+
+interface GetInstalledPackagesOptions {
+  savedObjectsClient: SavedObjectsClientContract;
+  dataStreamType?: PackageDataStreamTypes;
+  nameQuery?: string;
+  searchAfter?: SortResults;
+  perPage: number;
+  sortOrder: 'asc' | 'desc';
+}
+export async function getInstalledPackages(options: GetInstalledPackagesOptions) {
+  const { savedObjectsClient, ...otherOptions } = options;
+  const { dataStreamType } = otherOptions;
+
+  const packageSavedObjects = await getInstalledPackageSavedObjects(
+    savedObjectsClient,
+    otherOptions
+  );
+
+  const integrations = packageSavedObjects.saved_objects.map((integrationSavedObject) => {
+    const {
+      name,
+      version,
+      install_status: installStatus,
+      es_index_patterns: esIndexPatterns,
+    } = integrationSavedObject.attributes;
+
+    const dataStreams = getInstalledPackageSavedObjectDataStreams(esIndexPatterns, dataStreamType);
+
+    return {
+      name,
+      version,
+      status: installStatus,
+      dataStreams,
+    };
+  });
+
+  return {
+    items: integrations,
+    total: packageSavedObjects.total,
+    searchAfter: packageSavedObjects.saved_objects.at(-1)?.sort, // Enable ability to use searchAfter in subsequent queries
+  };
 }
 
 // Get package names for packages which cannot have more than one package policy on an agent policy
@@ -112,17 +213,112 @@ export async function getLimitedPackages(options: {
       });
     })
   );
-  return installedPackagesInfo.filter(isPackageLimited).map((pkgInfo) => pkgInfo.name);
+
+  const packages = installedPackagesInfo.filter(isPackageLimited).map((pkgInfo) => pkgInfo.name);
+
+  for (const pkg of installedPackages) {
+    auditLoggingService.writeCustomSoAuditLog({
+      action: 'find',
+      id: pkg.id,
+      savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
+    });
+  }
+
+  return packages;
 }
 
 export async function getPackageSavedObjects(
   savedObjectsClient: SavedObjectsClientContract,
   options?: Omit<SavedObjectsFindOptions, 'type'>
 ) {
-  return savedObjectsClient.find<Installation>({
+  const result = await savedObjectsClient.find<Installation>({
     ...(options || {}),
     type: PACKAGES_SAVED_OBJECT_TYPE,
+    perPage: SO_SEARCH_LIMIT,
   });
+
+  for (const savedObject of result.saved_objects) {
+    auditLoggingService.writeCustomSoAuditLog({
+      action: 'find',
+      id: savedObject.id,
+      savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
+    });
+  }
+
+  return result;
+}
+
+export async function getInstalledPackageSavedObjects(
+  savedObjectsClient: SavedObjectsClientContract,
+  options: Omit<GetInstalledPackagesOptions, 'savedObjectsClient'>
+) {
+  const { searchAfter, sortOrder, perPage, nameQuery, dataStreamType } = options;
+
+  const result = await savedObjectsClient.find<Installation>({
+    type: PACKAGES_SAVED_OBJECT_TYPE,
+    // Pagination
+    perPage,
+    ...(searchAfter && { searchAfter }),
+    // Sort
+    sortField: 'name',
+    sortOrder,
+    // Name filter
+    ...(nameQuery && { searchFields: ['name'] }),
+    ...(nameQuery && { search: `${nameQuery}* | ${nameQuery}` }),
+    filter: nodeBuilder.and([
+      // Filter to installed packages only
+      nodeBuilder.is(
+        `${PACKAGES_SAVED_OBJECT_TYPE}.attributes.install_status`,
+        installationStatuses.Installed
+      ),
+      // Filter for a "queryable" marker
+      buildFunctionNode(
+        'nested',
+        `${PACKAGES_SAVED_OBJECT_TYPE}.attributes.installed_es`,
+        nodeBuilder.is('type', 'index_template')
+      ),
+      // "Type" filter
+      ...(dataStreamType
+        ? [
+            buildFunctionNode(
+              'nested',
+              `${PACKAGES_SAVED_OBJECT_TYPE}.attributes.installed_es`,
+              nodeBuilder.is('id', buildWildcardNode(`${dataStreamType}-*`))
+            ),
+          ]
+        : []),
+    ]),
+  });
+
+  for (const savedObject of result.saved_objects) {
+    auditLoggingService.writeCustomSoAuditLog({
+      action: 'find',
+      id: savedObject.id,
+      savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
+    });
+  }
+
+  return result;
+}
+
+function getInstalledPackageSavedObjectDataStreams(
+  indexPatterns: Record<string, string>,
+  dataStreamType?: string
+) {
+  return Object.entries(indexPatterns)
+    .map(([key, value]) => {
+      return {
+        name: value,
+        title: key,
+      };
+    })
+    .filter((stream) => {
+      if (!dataStreamType) {
+        return true;
+      } else {
+        return stream.name.startsWith(`${dataStreamType}-`);
+      }
+    });
 }
 
 export const getInstallations = getPackageSavedObjects;
@@ -224,6 +420,14 @@ export const getPackageUsageStats = async ({
       filter,
     });
 
+    for (const packagePolicy of packagePolicies.saved_objects) {
+      auditLoggingService.writeCustomSoAuditLog({
+        action: 'find',
+        id: packagePolicy.id,
+        savedObjectType: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+      });
+    }
+
     for (let index = 0, total = packagePolicies.saved_objects.length; index < total; index++) {
       agentPolicyCount.add(packagePolicies.saved_objects[index].attributes.policy_id);
     }
@@ -305,8 +509,16 @@ export async function getPackageFromSource(options: {
     if (res) {
       logger.debug(`retrieved package ${pkgName}-${pkgVersion} from cache`);
     } else {
-      res = await Registry.getPackage(pkgName, pkgVersion, { ignoreUnverified });
-      logger.debug(`retrieved package ${pkgName}-${pkgVersion} from registry`);
+      try {
+        res = await Registry.getPackage(pkgName, pkgVersion, { ignoreUnverified });
+        logger.debug(`retrieved package ${pkgName}-${pkgVersion} from registry`);
+      } catch (err) {
+        if (err instanceof RegistryResponseError && err.status === 404) {
+          res = await Registry.getBundledArchive(pkgName, pkgVersion);
+        } else {
+          throw err;
+        }
+      }
     }
   }
   if (!res) {
@@ -324,10 +536,24 @@ export async function getInstallationObject(options: {
   logger?: Logger;
 }) {
   const { savedObjectsClient, pkgName, logger } = options;
-  return savedObjectsClient.get<Installation>(PACKAGES_SAVED_OBJECT_TYPE, pkgName).catch((e) => {
-    logger?.error(e);
-    return undefined;
+  const installation = await savedObjectsClient
+    .get<Installation>(PACKAGES_SAVED_OBJECT_TYPE, pkgName)
+    .catch((e) => {
+      logger?.error(e);
+      return undefined;
+    });
+
+  if (!installation) {
+    return;
+  }
+
+  auditLoggingService.writeCustomSoAuditLog({
+    action: 'find',
+    id: installation.id,
+    savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
   });
+
+  return installation;
 }
 
 export async function getInstallationObjects(options: {
@@ -339,7 +565,17 @@ export async function getInstallationObjects(options: {
     pkgNames.map((pkgName) => ({ id: pkgName, type: PACKAGES_SAVED_OBJECT_TYPE }))
   );
 
-  return res.saved_objects.filter((so) => so?.attributes);
+  const installations = res.saved_objects.filter((so) => so?.attributes);
+
+  for (const installation of installations) {
+    auditLoggingService.writeCustomSoAuditLog({
+      action: 'find',
+      id: installation.id,
+      savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
+    });
+  }
+
+  return installations;
 }
 
 export async function getInstallation(options: {

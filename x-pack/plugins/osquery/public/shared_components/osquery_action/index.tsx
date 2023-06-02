@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiLoadingContent, EuiEmptyPrompt, EuiCode } from '@elastic/eui';
+import { EuiSkeletonText, EuiEmptyPrompt, EuiCode } from '@elastic/eui';
 import React from 'react';
 
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -21,6 +21,7 @@ export interface OsqueryActionProps {
   defaultValues?: {};
   formType: 'steps' | 'simple';
   hideAgentsField?: boolean;
+  onSuccess?: () => void;
 }
 
 const OsqueryActionComponent: React.FC<OsqueryActionProps> = ({
@@ -28,6 +29,7 @@ const OsqueryActionComponent: React.FC<OsqueryActionProps> = ({
   formType = 'simple',
   defaultValues,
   hideAgentsField,
+  onSuccess,
 }) => {
   const permissions = useKibana().services.application.capabilities.osquery;
 
@@ -64,11 +66,11 @@ const OsqueryActionComponent: React.FC<OsqueryActionProps> = ({
   }
 
   if (agentId && isLoading) {
-    return <EuiLoadingContent lines={10} />;
+    return <EuiSkeletonText lines={10} />;
   }
 
   if (agentId && !policyFetched && policyLoading) {
-    return <EuiLoadingContent lines={10} />;
+    return <EuiSkeletonText lines={10} />;
   }
 
   if (agentId && !osqueryAvailable) {
@@ -91,6 +93,7 @@ const OsqueryActionComponent: React.FC<OsqueryActionProps> = ({
       formType={formType}
       agentId={agentId}
       hideAgentsField={hideAgentsField}
+      onSuccess={onSuccess}
       {...defaultValues}
     />
   );

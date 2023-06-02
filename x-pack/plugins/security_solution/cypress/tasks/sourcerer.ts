@@ -7,11 +7,10 @@
 
 import { HOSTS_STAT, SOURCERER } from '../screens/sourcerer';
 import { HOSTS_URL } from '../urls/navigation';
-import { waitForPage } from './login';
+import { visit, waitForPage } from './login';
 import { openTimelineUsingToggle } from './security_main';
 import { DEFAULT_ALERTS_INDEX } from '../../common/constants';
-import { createCustomRuleEnabled } from './api_calls/rules';
-import { getNewRule } from '../objects/rule';
+import { rootRequest } from './common';
 
 export const openSourcerer = (sourcererScope?: string) => {
   if (sourcererScope != null && sourcererScope === 'timeline') {
@@ -21,6 +20,12 @@ export const openSourcerer = (sourcererScope?: string) => {
   cy.get(SOURCERER.trigger).should('be.visible');
   cy.get(SOURCERER.trigger).click();
   cy.get(SOURCERER.wrapper).should('be.visible');
+};
+
+export const selectDataView = (dataView: string, sourcererScope?: string) => {
+  openSourcerer(sourcererScope);
+  openDataViewSelection();
+  cy.get(SOURCERER.selectListOption).contains(dataView).click();
 };
 
 const openTimelineSourcerer = () => {
@@ -92,7 +97,7 @@ export const resetSourcerer = () => {
 export const clickAlertCheckbox = () => cy.get(SOURCERER.alertCheckbox).check({ force: true });
 
 export const addIndexToDefault = (index: string) => {
-  cy.visit(`/app/management/kibana/settings?query=category:(securitySolution)`);
+  visit(`/app/management/kibana/settings?query=category:(securitySolution)`);
   cy.get(SOURCERER.siemDefaultIndexInput)
     .invoke('val')
     .then((patterns) => {
@@ -109,28 +114,7 @@ export const addIndexToDefault = (index: string) => {
     });
 };
 
-export const deleteAlertsIndex = () => {
-  const alertsIndexUrl = `${Cypress.env(
-    'ELASTICSEARCH_URL'
-  )}/.internal.alerts-security.alerts-default-000001`;
-
-  cy.request({
-    url: alertsIndexUrl,
-    method: 'GET',
-    headers: { 'kbn-xsrf': 'cypress-creds' },
-    failOnStatusCode: false,
-  }).then((response) => {
-    if (response.status === 200) {
-      cy.request({
-        url: alertsIndexUrl,
-        method: 'DELETE',
-        headers: { 'kbn-xsrf': 'cypress-creds' },
-      });
-    }
-  });
-};
-
-const refreshUntilAlertsIndexExists = async () => {
+export const refreshUntilAlertsIndexExists = async () => {
   cy.waitUntil(
     () => {
       cy.reload();
@@ -147,7 +131,13 @@ const refreshUntilAlertsIndexExists = async () => {
   );
 };
 
-export const waitForAlertsIndexToExist = () => {
-  createCustomRuleEnabled(getNewRule(), '1', '100m', 100);
-  refreshUntilAlertsIndexExists();
+export const deleteRuntimeField = (dataView: string, fieldName: string) => {
+  const deleteRuntimeFieldPath = `/api/data_views/data_view/${dataView}/runtime_field/${fieldName}`;
+
+  rootRequest({
+    url: deleteRuntimeFieldPath,
+    method: 'DELETE',
+    headers: { 'kbn-xsrf': 'cypress-creds' },
+    failOnStatusCode: false,
+  });
 };

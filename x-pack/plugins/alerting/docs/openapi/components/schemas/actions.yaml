@@ -1,0 +1,47 @@
+type: array
+default: []
+required:
+  - group
+  - id
+  - params
+nullable: true
+items:
+  type: object
+  properties:
+    connector_type_id:
+      type: string
+      description: The type of connector. This property appears in responses but cannot be set in requests.
+      example: .server-log
+      readOnly: true
+    frequency:
+      type: object
+      description: >
+        The parameters that affect how often actions are generated.
+        NOTE: You cannot specify these parameters when `notify_when` or `throttle` are defined at the rule level.
+      required:
+        - notify_when
+        - summary
+      properties:
+        notify_when:
+          $ref: 'notify_when.yaml'
+        summary:
+          type: boolean
+          description: Indicates whether the action is a summary.
+        throttle:
+          $ref: 'throttle.yaml'
+    group:
+      type: string
+      description: The group name for the actions. If you don't need to group actions, set to `default`.
+      example: default
+    id:
+      type: string
+      description: The identifier for the connector saved object.
+      example: 9dca3e00-74f5-11ed-9801-35303b735aef
+    params:
+      type: object
+      description: The parameters for the action, which are sent to the connector. The `params` are handled as Mustache templates and passed a default set of context.
+      additionalProperties: true
+    uuid:
+      type: string
+      description: A universally unique identifier (UUID) for the action.
+      example: 1c7a1280-f28c-4e06-96b2-e4e5f05d1d61

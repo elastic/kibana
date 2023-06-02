@@ -1,0 +1,69 @@
+type: object
+required:
+  - action
+  - comment_id
+  - created_at
+  - created_by
+  - id
+  - owner
+  - payload
+  - type
+  - version
+properties:
+  action:
+    $ref: 'actions.yaml'
+  comment_id:
+    type: string
+    nullable: true
+    example: 578608d0-03b1-11ed-920c-974bfa104448
+  created_at:
+    type: string
+    format: date-time
+    example: 2022-05-13T09:16:17.416Z
+  created_by:
+    type: object
+    properties:
+      $ref: 'user_properties.yaml'
+    required:
+      - email
+      - full_name
+      - username
+  id:
+    type: string
+    example: 22fd3e30-03b1-11ed-920c-974bfa104448
+  owner:
+    $ref: 'owners.yaml'
+  payload:
+    oneOf:
+      - $ref: 'payload_alert_comment.yaml'
+      - $ref: 'payload_assignees.yaml'
+      - $ref: 'payload_connector.yaml'
+      - $ref: 'payload_create_case.yaml'
+      - $ref: 'payload_delete.yaml'
+      - $ref: 'payload_description.yaml'
+      - $ref: 'payload_pushed.yaml'
+      - $ref: 'payload_settings.yaml'
+      - $ref: 'payload_severity.yaml'
+      - $ref: 'payload_status.yaml'
+      - $ref: 'payload_tags.yaml'
+      - $ref: 'payload_title.yaml'
+      - $ref: 'payload_user_comment.yaml'
+  version:
+    type: string
+    example: WzM1ODg4LDFd
+  type:
+    type: string
+    description: The type of action.
+    enum:
+      - assignees
+      - create_case
+      - comment
+      - connector
+      - description
+      - pushed
+      - tags
+      - title
+      - status
+      - settings
+      - severity
+    example: create_case

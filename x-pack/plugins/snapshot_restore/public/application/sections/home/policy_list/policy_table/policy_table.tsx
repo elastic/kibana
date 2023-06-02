@@ -127,7 +127,7 @@ export const PolicyTable: React.FunctionComponent<Props> = ({
                     }
                   )}
                 >
-                  <EuiIcon type="alert" color="danger" />
+                  <EuiIcon type="warning" color="danger" />
                 </EuiToolTip>
               </EuiFlexItem>
               <EuiFlexItem grow={1}>

@@ -17,12 +17,13 @@ import {
   alertStateActionVariableDescription,
   cloudActionVariableDescription,
   containerActionVariableDescription,
-  groupActionVariableDescription,
   groupByKeysActionVariableDescription,
   hostActionVariableDescription,
   labelsActionVariableDescription,
   metricActionVariableDescription,
   orchestratorActionVariableDescription,
+  originalAlertStateActionVariableDescription,
+  originalAlertStateWasActionVariableDescription,
   reasonActionVariableDescription,
   tagsActionVariableDescription,
   thresholdActionVariableDescription,
@@ -30,17 +31,14 @@ import {
   valueActionVariableDescription,
   viewInAppUrlActionVariableDescription,
 } from '../common/messages';
-import {
-  getAlertDetailsPageEnabledForApp,
-  oneOfLiterals,
-  validateIsStringElasticsearchJSONFilter,
-} from '../common/utils';
+import { oneOfLiterals, validateIsStringElasticsearchJSONFilter } from '../common/utils';
 import {
   createMetricThresholdExecutor,
   FIRED_ACTIONS,
   WARNING_ACTIONS,
   NO_DATA_ACTIONS,
 } from './metric_threshold_executor';
+import { MetricsRulesTypeAlertDefinition } from '../register_rule_types';
 
 type MetricThresholdAllowedActionGroups = ActionGroupIdsOf<
   typeof FIRED_ACTIONS | typeof WARNING_ACTIONS | typeof NO_DATA_ACTIONS
@@ -53,8 +51,6 @@ export async function registerMetricThresholdRuleType(
   alertingPlugin: PluginSetupContract,
   libs: InfraBackendLibs
 ) {
-  const config = libs.getAlertDetailsConfig();
-
   const baseCriterion = {
     threshold: schema.arrayOf(schema.number()),
     comparator: oneOfLiterals(Object.values(Comparator)),
@@ -68,13 +64,51 @@ export async function registerMetricThresholdRuleType(
     ...baseCriterion,
     metric: schema.string(),
     aggType: oneOfLiterals(METRIC_EXPLORER_AGGREGATIONS),
+    customMetrics: schema.never(),
+    equation: schema.never(),
+    label: schema.never(),
   });
 
   const countCriterion = schema.object({
     ...baseCriterion,
     aggType: schema.literal('count'),
     metric: schema.never(),
+    customMetrics: schema.never(),
+    equation: schema.never(),
+    label: schema.never(),
   });
+
+  const customCriterion = schema.object({
+    ...baseCriterion,
+    aggType: schema.literal('custom'),
+    metric: schema.never(),
+    customMetrics: schema.arrayOf(
+      schema.oneOf([
+        schema.object({
+          name: schema.string(),
+          aggType: oneOfLiterals(['avg', 'sum', 'max', 'min', 'cardinality']),
+          field: schema.string(),
+          filter: schema.never(),
+        }),
+        schema.object({
+          name: schema.string(),
+          aggType: schema.literal('count'),
+          filter: schema.maybe(schema.string()),
+          field: schema.never(),
+        }),
+      ])
+    ),
+    equation: schema.maybe(schema.string()),
+    label: schema.maybe(schema.string()),
+  });
+
+  const groupActionVariableDescription = i18n.translate(
+    'xpack.infra.metrics.alerting.groupActionVariableDescription',
+    {
+      defaultMessage:
+        'Name of the group(s) reporting data. For accessing each group key, use context.groupByKeys.',
+    }
+  );
 
   alertingPlugin.registerType({
     id: METRIC_THRESHOLD_ALERT_TYPE_ID,
@@ -84,7 +118,9 @@ export async function registerMetricThresholdRuleType(
     validate: {
       params: schema.object(
         {
-          criteria: schema.arrayOf(schema.oneOf([countCriterion, nonCountCriterion])),
+          criteria: schema.arrayOf(
+            schema.oneOf([countCriterion, nonCountCriterion, customCriterion])
+          ),
           groupBy: schema.maybe(schema.oneOf([schema.string(), schema.arrayOf(schema.string())])),
           filterQuery: schema.maybe(
             schema.string({
@@ -108,25 +144,45 @@ export async function registerMetricThresholdRuleType(
       context: [
         { name: 'group', description: groupActionVariableDescription },
         { name: 'groupByKeys', description: groupByKeysActionVariableDescription },
-        ...(getAlertDetailsPageEnabledForApp(config, 'metrics')
-          ? [{ name: 'alertDetailsUrl', description: alertDetailUrlActionVariableDescription }]
-          : []),
+        {
+          name: 'alertDetailsUrl',
+          description: alertDetailUrlActionVariableDescription,
+          usesPublicBaseUrl: true,
+        },
         { name: 'alertState', description: alertStateActionVariableDescription },
         { name: 'reason', description: reasonActionVariableDescription },
         { name: 'timestamp', description: timestampActionVariableDescription },
         { name: 'value', description: valueActionVariableDescription },
         { name: 'metric', description: metricActionVariableDescription },
         { name: 'threshold', description: thresholdActionVariableDescription },
-        { name: 'viewInAppUrl', description: viewInAppUrlActionVariableDescription },
+        {
+          name: 'viewInAppUrl',
+          description: viewInAppUrlActionVariableDescription,
+          usesPublicBaseUrl: true,
+        },
         { name: 'cloud', description: cloudActionVariableDescription },
         { name: 'host', description: hostActionVariableDescription },
         { name: 'container', description: containerActionVariableDescription },
         { name: 'orchestrator', description: orchestratorActionVariableDescription },
         { name: 'labels', description: labelsActionVariableDescription },
         { name: 'tags', description: tagsActionVariableDescription },
+        { name: 'originalAlertState', description: originalAlertStateActionVariableDescription },
+        {
+          name: 'originalAlertStateWasALERT',
+          description: originalAlertStateWasActionVariableDescription,
+        },
+        {
+          name: 'originalAlertStateWasWARNING',
+          description: originalAlertStateWasActionVariableDescription,
+        },
+        {
+          name: 'originalAlertStateWasNO_DATA',
+          description: originalAlertStateWasActionVariableDescription,
+        },
       ],
     },
     producer: 'infrastructure',
     getSummarizedAlerts: libs.metricsRules.createGetSummarizedAlerts(),
+    alerts: MetricsRulesTypeAlertDefinition,
   });
 }

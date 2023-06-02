@@ -7,13 +7,13 @@
 
 import type {
   Capabilities,
+  CoreStart,
   HttpSetup,
   IUiSettingsClient,
   ThemeServiceStart,
 } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { RecursiveReadonly } from '@kbn/utility-types';
-import { Ast } from '@kbn/interpreter';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { DataPublicPluginStart, FilterManager, TimefilterContract } from '@kbn/data-plugin/public';
 import type { DataViewsContract } from '@kbn/data-views-plugin/public';
@@ -30,14 +30,15 @@ import type { LensByReferenceInput, LensEmbeddableInput } from './embeddable';
 import type { Document } from '../persistence/saved_object_store';
 import type { LensAttributeService } from '../lens_attribute_service';
 import { DOC_TYPE } from '../../common/constants';
-import type { ErrorMessage } from '../editor_frame_service/types';
 import { extract, inject } from '../../common/embeddable_factory';
 import type { DatasourceMap, VisualizationMap } from '../types';
+import type { DocumentToExpressionReturnType } from '../editor_frame_service/editor_frame';
 
 export interface LensEmbeddableStartServices {
   data: DataPublicPluginStart;
   timefilter: TimefilterContract;
   coreHttp: HttpSetup;
+  coreStart: CoreStart;
   inspector: InspectorStart;
   attributeService: LensAttributeService;
   capabilities: RecursiveReadonly<Capabilities>;
@@ -45,9 +46,7 @@ export interface LensEmbeddableStartServices {
   dataViews: DataViewsContract;
   uiActions?: UiActionsStart;
   usageCollection?: UsageCollectionSetup;
-  documentToExpression: (
-    doc: Document
-  ) => Promise<{ ast: Ast | null; errors: ErrorMessage[] | undefined }>;
+  documentToExpression: (doc: Document) => Promise<DocumentToExpressionReturnType>;
   injectFilterReferences: FilterManager['inject'];
   visualizationMap: VisualizationMap;
   datasourceMap: DatasourceMap;
@@ -106,6 +105,7 @@ export class EmbeddableFactory implements EmbeddableFactoryDefinition {
         datasourceMap,
         uiActions,
         coreHttp,
+        coreStart,
         attributeService,
         dataViews,
         capabilities,
@@ -136,9 +136,11 @@ export class EmbeddableFactory implements EmbeddableFactoryDefinition {
           capabilities: {
             canSaveDashboards: Boolean(capabilities.dashboard?.showWriteControls),
             canSaveVisualizations: Boolean(capabilities.visualize.save),
+            canOpenVisualizations: Boolean(capabilities.visualize.show),
             navLinks: capabilities.navLinks,
             discover: capabilities.discover,
           },
+          coreStart,
           usageCollection,
           theme,
           spaces,

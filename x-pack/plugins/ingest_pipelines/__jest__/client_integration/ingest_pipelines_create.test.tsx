@@ -8,6 +8,7 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 
+import '@kbn/es-ui-shared-plugin/public/components/code_editor/jest_mock';
 import { setupEnvironment, pageHelpers } from './helpers';
 import { API_BASE_PATH } from '../../common/constants';
 import { PipelinesCreateTestBed } from './helpers/pipelines_create.helpers';
@@ -15,6 +16,23 @@ import { PipelinesCreateTestBed } from './helpers/pipelines_create.helpers';
 import { nestedProcessorsErrorFixture } from './fixtures';
 
 const { setup } = pageHelpers.pipelinesCreate;
+
+jest.mock('@kbn/kibana-react-plugin/public', () => {
+  const original = jest.requireActual('@kbn/kibana-react-plugin/public');
+  return {
+    ...original,
+    // Mocking CodeEditor, which uses React Monaco under the hood
+    CodeEditor: (props: any) => (
+      <input
+        data-test-subj={props['data-test-subj'] || 'mockCodeEditor'}
+        data-currentvalue={props.value}
+        onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+          props.onChange(e.currentTarget.getAttribute('data-currentvalue'));
+        }}
+      />
+    ),
+  };
+});
 
 jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');
@@ -68,6 +86,21 @@ describe('<PipelinesCreate />', () => {
       actions.toggleVersionSwitch();
 
       expect(exists('versionField')).toBe(true);
+    });
+
+    test('should toggle the _meta field', async () => {
+      const { exists, component, actions } = testBed;
+
+      // Meta editor should be hidden by default
+      expect(exists('metaEditor')).toBe(false);
+
+      await act(async () => {
+        actions.toggleMetaSwitch();
+      });
+
+      component.update();
+
+      expect(exists('metaEditor')).toBe(true);
     });
 
     test('should show the request flyout', async () => {
@@ -134,7 +167,19 @@ describe('<PipelinesCreate />', () => {
       });
 
       test('should send the correct payload', async () => {
-        const { actions } = testBed;
+        const { component, actions } = testBed;
+
+        await act(async () => {
+          actions.toggleMetaSwitch();
+        });
+        component.update();
+        const metaData = {
+          field1: 'hello',
+          field2: 10,
+        };
+        await act(async () => {
+          actions.setMetaField(metaData);
+        });
 
         await actions.clickSubmitButton();
 
@@ -144,6 +189,7 @@ describe('<PipelinesCreate />', () => {
             body: JSON.stringify({
               name: 'my_pipeline',
               description: 'pipeline description',
+              _meta: metaData,
               processors: [],
             }),
           })

@@ -12,34 +12,27 @@ import { useMemo } from 'react';
 import { EuiDataGridCellValueElementProps, EuiDataGridStyle } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-
 import { CoreSetup } from '@kbn/core/public';
-
-import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/data-plugin/public';
-
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
-
-import { DEFAULT_RESULTS_FIELD } from '../../../../common/constants/data_frame_analytics';
-import { extractErrorMessage } from '../../../../common/util/errors';
-import {
-  FeatureImportance,
-  FeatureImportanceClassName,
-  TopClasses,
-} from '../../../../common/types/feature_importance';
+import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
+import { getNestedProperty } from '@kbn/ml-nested-property';
+import { isCounterTimeSeriesMetric } from '@kbn/ml-agg-utils';
+import { extractErrorMessage } from '@kbn/ml-error-utils';
 
 import {
+  type FeatureImportance,
+  type FeatureImportanceClassName,
+  type TopClasses,
   BASIC_NUMERICAL_TYPES,
+  DEFAULT_RESULTS_FIELD,
   EXTENDED_NUMERICAL_TYPES,
-} from '../../data_frame_analytics/common/fields';
-
-import {
   FEATURE_IMPORTANCE,
   FEATURE_INFLUENCE,
   OUTLIER_SCORE,
   TOP_CLASSES,
-} from '../../data_frame_analytics/common/constants';
+} from '@kbn/ml-data-frame-analytics-utils';
+
 import { formatHumanReadableDateTimeSeconds } from '../../../../common/util/date_utils';
-import { getNestedProperty } from '../../util/object_utils';
 import { mlFieldFormatService } from '../../services/field_format_service';
 
 import { DataGridItem, IndexPagination, RenderCellValue } from './types';
@@ -47,7 +40,7 @@ import { RuntimeMappings } from '../../../../common/types/fields';
 import { isRuntimeMappings } from '../../../../common/util/runtime_field_utils';
 
 export const INIT_MAX_COLUMNS = 10;
-export const COLUMN_CHART_DEFAULT_VISIBILITY_ROWS_THRESHOLED = 10000;
+export const COLUMN_CHART_DEFAULT_VISIBILITY_ROWS_THRESHOLD = 10000;
 
 export const euiDataGridStyle: EuiDataGridStyle = {
   border: 'all',
@@ -219,8 +212,9 @@ export const getDataGridSchemaFromKibanaFieldType = (
   // Built-in values are ['boolean', 'currency', 'datetime', 'numeric', 'json']
   // To fall back to the default string schema it needs to be undefined.
   let schema;
+  if (!field) return;
 
-  switch (field?.type) {
+  switch (field.type) {
     case KBN_FIELD_TYPES.BOOLEAN:
       schema = 'boolean';
       break;
@@ -239,7 +233,12 @@ export const getDataGridSchemaFromKibanaFieldType = (
       break;
   }
 
-  if (schema === undefined && field?.aggregatable === false) {
+  if (
+    (schema === undefined && field.aggregatable === false) ||
+    isCounterTimeSeriesMetric(field) ||
+    (schema === 'numeric' &&
+      field?.esTypes?.some((d) => d === ES_FIELD_TYPES.AGGREGATE_METRIC_DOUBLE))
+  ) {
     return NON_AGGREGATABLE;
   }
 

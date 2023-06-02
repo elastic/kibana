@@ -28,6 +28,7 @@ export interface UpdateAndPickupMappingsParams {
   client: ElasticsearchClient;
   index: string;
   mappings: IndexMapping;
+  batchSize: number;
 }
 /**
  * Updates an index's mappings and runs an pickupUpdatedMappings task so that the mapping
@@ -37,6 +38,7 @@ export const updateAndPickupMappings = ({
   client,
   index,
   mappings,
+  batchSize,
 }: UpdateAndPickupMappingsParams): TaskEither.TaskEither<
   RetryableEsClientError,
   UpdateAndPickupMappingsResponse
@@ -45,13 +47,11 @@ export const updateAndPickupMappings = ({
     RetryableEsClientError,
     'update_mappings_succeeded'
   > = () => {
-    // ._meta property will be updated on a later step
-    const { _meta, ...mappingsWithoutMeta } = mappings;
     return client.indices
       .putMapping({
         index,
         timeout: DEFAULT_TIMEOUT,
-        ...mappingsWithoutMeta,
+        ...mappings,
       })
       .then(() => {
         // Ignore `acknowledged: false`. When the coordinating node accepts
@@ -76,7 +76,7 @@ export const updateAndPickupMappings = ({
   return pipe(
     putMappingTask,
     TaskEither.chain((res) => {
-      return pickupUpdatedMappings(client, index);
+      return pickupUpdatedMappings(client, index, batchSize);
     })
   );
 };

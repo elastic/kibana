@@ -5,7 +5,6 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import { FtrService } from '../../ftr_provider_context';
 
 export class DashboardAddPanelService extends FtrService {
@@ -15,6 +14,8 @@ export class DashboardAddPanelService extends FtrService {
   private readonly flyout = this.ctx.getService('flyout');
   private readonly common = this.ctx.getPageObject('common');
   private readonly header = this.ctx.getPageObject('header');
+  private readonly savedObjectsFinder = this.ctx.getService('savedObjectsFinder');
+  private readonly browser = this.ctx.getService('browser');
 
   async clickOpenAddPanel() {
     this.log.debug('DashboardAddPanel.clickOpenAddPanel');
@@ -25,9 +26,16 @@ export class DashboardAddPanelService extends FtrService {
 
   async clickCreateNewLink() {
     this.log.debug('DashboardAddPanel.clickAddNewPanelButton');
-    await this.testSubjects.click('dashboardAddNewPanelButton');
-    // Give some time for the animation to complete
-    await this.common.sleep(500);
+    await this.retry.try(async () => {
+      // prevent query bar auto suggest from blocking button
+      await this.browser.pressKeys(this.browser.keys.ESCAPE);
+      await this.testSubjects.click('dashboardAddNewPanelButton');
+      await this.testSubjects.waitForDeleted('dashboardAddNewPanelButton');
+      await this.header.waitUntilLoadingHasFinished();
+      await this.testSubjects.existOrFail('lnsApp', {
+        timeout: 5000,
+      });
+    });
   }
 
   async clickQuickButton(visType: string) {
@@ -72,35 +80,21 @@ export class DashboardAddPanelService extends FtrService {
     await this.testSubjects.click(`createNew-${type}`);
   }
 
-  async toggleFilterPopover() {
-    this.log.debug('DashboardAddPanel.toggleFilter');
-    await this.testSubjects.click('savedObjectFinderFilterButton');
-  }
-
-  async toggleFilter(type: string) {
-    this.log.debug(`DashboardAddPanel.addToFilter(${type})`);
-    await this.waitForListLoading();
-    await this.toggleFilterPopover();
-    await this.testSubjects.click(`savedObjectFinderFilter-${type}`);
-    await this.toggleFilterPopover();
-  }
-
   async addEveryEmbeddableOnCurrentPage() {
     this.log.debug('addEveryEmbeddableOnCurrentPage');
-    const itemList = await this.testSubjects.find('savedObjectFinderItemList');
+    const itemList = await this.testSubjects.find('savedObjectsFinderTable');
     const embeddableList: string[] = [];
     await this.retry.try(async () => {
-      const embeddableRows = await itemList.findAllByCssSelector('li');
+      const embeddableListBody = await itemList.findByTagName('tbody');
+      const embeddableRows = await embeddableListBody.findAllByCssSelector('tr');
       for (let i = 0; i < embeddableRows.length; i++) {
-        const name = await embeddableRows[i].getVisibleText();
-
+        const { name, button } = await this.savedObjectsFinder.getRowAtIndex(embeddableRows, i);
         if (embeddableList.includes(name)) {
           // already added this one
           continue;
         }
-
-        await embeddableRows[i].click();
-        await this.common.closeToast();
+        await button.click();
+        await this.common.closeToastIfExists();
         embeddableList.push(name);
       }
     });
@@ -112,12 +106,17 @@ export class DashboardAddPanelService extends FtrService {
     // Clear all toasts that could hide pagination controls
     await this.common.clearAllToasts();
 
-    const isNext = await this.testSubjects.exists('pagination-button-next');
+    const addPanel = await this.testSubjects.find('dashboardAddPanel');
+
+    const isNext = await this.testSubjects.descendantExists('pagination-button-next', addPanel);
     if (!isNext) {
       return false;
     }
 
-    const pagerNextButton = await this.testSubjects.find('pagination-button-next');
+    const pagerNextButton = await this.testSubjects.findDescendant(
+      'pagination-button-next',
+      addPanel
+    );
 
     const isDisabled = await pagerNextButton.getAttribute('disabled');
     if (isDisabled != null) {
@@ -149,21 +148,21 @@ export class DashboardAddPanelService extends FtrService {
     }
   }
 
-  async waitForListLoading() {
-    await this.testSubjects.waitForDeleted('savedObjectFinderLoadingIndicator');
-  }
-
   async closeAddPanel() {
     await this.flyout.ensureClosed('dashboardAddPanel');
+  }
+
+  async filterEmbeddableNames(name: string) {
+    await this.savedObjectsFinder.filterEmbeddableNames(name);
   }
 
   async addEveryVisualization(filter: string) {
     this.log.debug('DashboardAddPanel.addEveryVisualization');
     await this.ensureAddPanelIsShowing();
-    await this.toggleFilter('visualization');
     if (filter) {
       await this.filterEmbeddableNames(filter.replace('-', ' '));
     }
+    await this.savedObjectsFinder.waitForFilter('Visualization', 'search');
     let morePages = true;
     const vizList: string[][] = [];
     while (morePages) {
@@ -177,11 +176,11 @@ export class DashboardAddPanelService extends FtrService {
   async addEverySavedSearch(filter: string) {
     this.log.debug('DashboardAddPanel.addEverySavedSearch');
     await this.ensureAddPanelIsShowing();
-    await this.toggleFilter('search');
     const searchList = [];
     if (filter) {
       await this.filterEmbeddableNames(filter.replace('-', ' '));
     }
+    await this.savedObjectsFinder.waitForFilter('Saved search', 'visualization');
     let morePages = true;
     while (morePages) {
       searchList.push(await this.addEveryEmbeddableOnCurrentPage());
@@ -212,7 +211,8 @@ export class DashboardAddPanelService extends FtrService {
   }
 
   async addVisualization(vizName: string) {
-    return this.addEmbeddable(vizName, 'visualization');
+    this.log.debug(`DashboardAddPanel.addVisualization, ${vizName}`);
+    return this.addEmbeddable(vizName, 'Visualization');
   }
 
   async addEmbeddable(embeddableName: string, embeddableType: string) {
@@ -220,25 +220,18 @@ export class DashboardAddPanelService extends FtrService {
       `DashboardAddPanel.addEmbeddable, name: ${embeddableName}, type: ${embeddableType}`
     );
     await this.ensureAddPanelIsShowing();
-    await this.toggleFilter(embeddableType);
-    await this.filterEmbeddableNames(`"${embeddableName.replace('-', ' ')}"`);
+    await this.savedObjectsFinder.toggleFilter(embeddableType);
+    await this.savedObjectsFinder.filterEmbeddableNames(`"${embeddableName.replace('-', ' ')}"`);
     await this.testSubjects.click(`savedObjectTitle${embeddableName.split(' ').join('-')}`);
     await this.testSubjects.exists('addObjectToDashboardSuccess');
     await this.closeAddPanel();
     return embeddableName;
   }
 
-  async filterEmbeddableNames(name: string) {
-    // The search input field may be disabled while the table is loading so wait for it
-    await this.waitForListLoading();
-    await this.testSubjects.setValue('savedObjectFinderSearchInput', name);
-    await this.waitForListLoading();
-  }
-
   async panelAddLinkExists(name: string) {
     this.log.debug(`DashboardAddPanel.panelAddLinkExists(${name})`);
     await this.ensureAddPanelIsShowing();
-    await this.filterEmbeddableNames(`"${name}"`);
+    await this.savedObjectsFinder.filterEmbeddableNames(`"${name}"`);
     return await this.testSubjects.exists(`savedObjectTitle${name.split(' ').join('-')}`);
   }
 }

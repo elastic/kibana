@@ -50,6 +50,8 @@ export * from './percentile_ranks_fn';
 export * from './percentile_ranks';
 export * from './percentiles_fn';
 export * from './percentiles';
+export * from './rate_fn';
+export * from './rate';
 export * from './single_percentile_rank_fn';
 export * from './single_percentile_rank';
 export * from './serial_diff_fn';

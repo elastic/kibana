@@ -10,18 +10,29 @@ import { EuiPageHeaderProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { SYNTHETICS_SETTINGS_ROUTE } from '../../../../../common/constants';
 
+export type SettingsTabId =
+  | 'data-retention'
+  | 'params'
+  | 'alerting'
+  | 'private-locations'
+  | 'api-keys';
+
 export const getSettingsPageHeader = (
   history: ReturnType<typeof useHistory>,
   syntheticsPath: string
 ): EuiPageHeaderProps => {
   // Not a component, but it doesn't matter. Hooks are just functions
-  const match = useRouteMatch<{ tabId: string }>(SYNTHETICS_SETTINGS_ROUTE); // eslint-disable-line react-hooks/rules-of-hooks
+  const match = useRouteMatch<{ tabId: SettingsTabId }>(SYNTHETICS_SETTINGS_ROUTE); // eslint-disable-line react-hooks/rules-of-hooks
 
   if (!match) {
     return {};
   }
 
   const { tabId } = match.params;
+
+  const replaceTab = (newTabId: SettingsTabId) => {
+    return `${syntheticsPath}${SYNTHETICS_SETTINGS_ROUTE.replace(':tabId', newTabId)}`;
+  };
 
   return {
     pageTitle: i18n.translate('xpack.synthetics.settingsRoute.pageHeaderTitle', {
@@ -33,15 +44,36 @@ export const getSettingsPageHeader = (
         label: i18n.translate('xpack.synthetics.settingsTabs.alerting', {
           defaultMessage: 'Alerting',
         }),
-        isSelected: tabId === 'alerting' || !tabId,
-        href: `${syntheticsPath}${SYNTHETICS_SETTINGS_ROUTE.replace(':tabId', 'alerting')}`,
+        isSelected: tabId === 'alerting',
+        href: replaceTab('alerting'),
+      },
+      {
+        label: i18n.translate('xpack.synthetics.settingsTabs.privateLocations', {
+          defaultMessage: 'Private Locations',
+        }),
+        isSelected: tabId === 'private-locations',
+        href: replaceTab('private-locations'),
+      },
+      {
+        label: i18n.translate('xpack.synthetics.settingsTabs.params', {
+          defaultMessage: 'Global Parameters',
+        }),
+        isSelected: tabId === 'params' || !tabId,
+        href: replaceTab('params'),
       },
       {
         label: i18n.translate('xpack.synthetics.settingsTabs.dataRetention', {
-          defaultMessage: 'Data retention',
+          defaultMessage: 'Data Retention',
         }),
         isSelected: tabId === 'data-retention',
-        href: `${syntheticsPath}${SYNTHETICS_SETTINGS_ROUTE.replace(':tabId', 'data-retention')}`,
+        href: replaceTab('data-retention'),
+      },
+      {
+        label: i18n.translate('xpack.synthetics.settingsTabs.apiKeys', {
+          defaultMessage: 'Project API Keys',
+        }),
+        isSelected: tabId === 'api-keys',
+        href: replaceTab('api-keys'),
       },
     ],
   };

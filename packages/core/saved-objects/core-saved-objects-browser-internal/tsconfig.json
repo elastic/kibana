@@ -1,9 +1,7 @@
 {
-  "extends": "../../../../tsconfig.bazel.json",
+  "extends": "../../../../tsconfig.base.json",
   "compilerOptions": {
-    "declaration": true,
-    "emitDeclarationOnly": true,
-    "outDir": "target_types",
+    "outDir": "target/types",
     "types": [
       "jest",
       "node"
@@ -11,5 +9,18 @@
   },
   "include": [
     "**/*.ts"
+  ],
+  "kbn_references": [
+    "@kbn/safer-lodash-set",
+    "@kbn/core-base-browser-internal",
+    "@kbn/core-http-browser",
+    "@kbn/core-saved-objects-common",
+    "@kbn/core-saved-objects-browser",
+    "@kbn/core-saved-objects-api-server",
+    "@kbn/core-saved-objects-api-browser",
+    "@kbn/core-http-browser-mocks",
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

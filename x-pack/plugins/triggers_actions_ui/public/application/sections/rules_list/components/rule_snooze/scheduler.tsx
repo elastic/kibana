@@ -9,7 +9,8 @@ import React, { useState, useCallback, useMemo } from 'react';
 import moment, { Moment } from 'moment';
 import { i18n } from '@kbn/i18n';
 import { useUiSetting } from '@kbn/kibana-react-plugin/public';
-import uuid from 'uuid';
+import { TIMEZONE_OPTIONS as UI_TIMEZONE_OPTIONS } from '@kbn/core-ui-settings-common';
+import { v4 as uuidv4 } from 'uuid';
 import {
   EuiDatePicker,
   EuiDatePickerRange,
@@ -47,7 +48,7 @@ export interface ComponentOpts extends PanelOpts {
   hasTitle: boolean;
 }
 
-const TIMEZONE_OPTIONS = moment.tz?.names().map((n) => ({ label: n })) ?? [{ label: 'UTC' }];
+const TIMEZONE_OPTIONS = UI_TIMEZONE_OPTIONS.map((n) => ({ label: n })) ?? [{ label: 'UTC' }];
 
 const useDefaultTimzezone = () => {
   const kibanaTz: string = useUiSetting('dateFormat:tz');
@@ -145,9 +146,21 @@ const RuleSnoozeSchedulerPanel: React.FunctionComponent<PanelOpts> = ({
           ...(initialSchedule.rRule.until ? { until: moment(initialSchedule.rRule.until) } : {}),
         } as RecurrenceSchedule);
 
+    // Ensure intitial datetimes are displayed in the initial timezone
+    const startMoment = moment(initialSchedule.rRule.dtstart).tz(initialSchedule.rRule.tzid);
+    const dtstartOffsetToKibanaTz = moment()
+      .tz(defaultTz)
+      .year(startMoment.year())
+      .month(startMoment.month())
+      .date(startMoment.date())
+      .hour(startMoment.hour())
+      .minute(startMoment.minute())
+      .second(startMoment.second())
+      .millisecond(startMoment.millisecond())
+      .toISOString();
     return {
-      startDT: moment(initialSchedule.rRule.dtstart),
-      endDT: moment(initialSchedule.rRule.dtstart).add(initialSchedule.duration, 'ms'),
+      startDT: moment(dtstartOffsetToKibanaTz),
+      endDT: moment(dtstartOffsetToKibanaTz).add(initialSchedule.duration, 'ms'),
       isRecurring,
       recurrenceSchedule,
       selectedTimezone: [{ label: initialSchedule.rRule.tzid }],
@@ -217,6 +230,19 @@ const RuleSnoozeSchedulerPanel: React.FunctionComponent<PanelOpts> = ({
 
   const onClickSaveSchedule = useCallback(() => {
     if (!startDT || !endDT) return;
+
+    const tzid = selectedTimezone[0].label ?? defaultTz;
+    // Convert the dtstart from Kibana timezone to the selected timezone
+    const dtstart = moment()
+      .tz(tzid)
+      .year(startDT.year())
+      .month(startDT.month())
+      .date(startDT.date())
+      .hour(startDT.hour())
+      .minute(startDT.minute())
+      .second(startDT.second())
+      .toISOString();
+
     const recurrence =
       isRecurring && recurrenceSchedule
         ? recurrenceSchedule
@@ -224,10 +250,10 @@ const RuleSnoozeSchedulerPanel: React.FunctionComponent<PanelOpts> = ({
             count: 1,
           };
     onSaveSchedule({
-      id: initialSchedule?.id ?? uuid.v4(),
+      id: initialSchedule?.id ?? uuidv4(),
       rRule: {
-        dtstart: startDT.toISOString(),
-        tzid: selectedTimezone[0].label ?? defaultTz,
+        dtstart,
+        tzid,
         ...recurrence,
       },
       duration: endDT.valueOf() - startDT.valueOf(),
@@ -329,8 +355,8 @@ const RuleSnoozeSchedulerPanel: React.FunctionComponent<PanelOpts> = ({
       <EuiSpacer size="m" />
       <EuiSwitch
         compressed
-        label={i18n.translate('xpack.triggersActionsUI.ruleSnoozeScheduler.reucrringSwitch', {
-          defaultMessage: 'Make recurring',
+        label={i18n.translate('xpack.triggersActionsUI.ruleSnoozeScheduler.repeatSwitch', {
+          defaultMessage: 'Repeat',
         })}
         onChange={() => setIsRecurring(!isRecurring)}
         checked={isRecurring}
@@ -362,7 +388,16 @@ const RuleSnoozeSchedulerPanel: React.FunctionComponent<PanelOpts> = ({
       {(initialSchedule || showDelete) && (
         <>
           {!inPopover && <EuiSpacer size="s" />}
-          <EuiPopoverFooter>
+          <EuiPopoverFooter
+            paddingSize="m"
+            style={
+              /* FIXME https://github.com/elastic/eui/issues/6695 */
+              {
+                marginBlock: '16px -16px',
+                marginInline: '-16px',
+              }
+            }
+          >
             {!inPopover && <EuiSpacer size="s" />}
             <EuiFlexGroup>
               <EuiFlexItem grow>

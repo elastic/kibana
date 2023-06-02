@@ -1,7 +1,8 @@
 {
   "transform.update_transform": {
     "url_params": {
-      "defer_validation": "__flag__"
+      "defer_validation": "__flag__",
+      "timeout": ""
     },
     "methods": [
       "POST"

@@ -9,7 +9,7 @@ import React from 'react';
 import { fireEvent, waitFor } from '@testing-library/react';
 import { render } from '../../../utils/testing/rtl_helpers';
 import { HeaderField, contentTypes } from './header_field';
-import { Mode } from '../types';
+import { CodeEditorMode } from '../types';
 
 describe('<HeaderField />', () => {
   const onChange = jest.fn();
@@ -95,14 +95,14 @@ describe('<HeaderField />', () => {
   });
 
   it('handles content mode', async () => {
-    const contentMode: Mode = Mode.PLAINTEXT;
+    const contentMode: CodeEditorMode = CodeEditorMode.PLAINTEXT;
     render(
       <HeaderField defaultValue={defaultValue} onChange={onChange} contentMode={contentMode} />
     );
 
     await waitFor(() => {
       expect(onChange).toBeCalledWith({
-        'Content-Type': contentTypes[Mode.PLAINTEXT],
+        'Content-Type': contentTypes[CodeEditorMode.PLAINTEXT],
       });
     });
   });

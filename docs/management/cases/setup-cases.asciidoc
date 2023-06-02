@@ -40,3 +40,8 @@ least once, which creates a user profile.
 |=== 
 
 For more details, refer to <<kibana-privileges>>.
+
+NOTE: If you are using an on-premises {kib} deployment and you want the email
+notifications and the external incident management systems to contain
+links back to {kib}, you must configure the 
+<<server-publicBaseUrl,`server.publicBaseUrl`>> setting.

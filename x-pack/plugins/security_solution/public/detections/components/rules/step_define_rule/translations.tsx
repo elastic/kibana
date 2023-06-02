@@ -149,3 +149,24 @@ export const RULE_PREVIEW_TITLE = i18n.translate(
     defaultMessage: 'Rule Preview',
   }
 );
+
+export const ALERT_SUPPRESSION_MISSING_FIELDS_FORM_ROW_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.alertSuppressionMissingFieldsLabel',
+  {
+    defaultMessage: 'If a suppression field is missing',
+  }
+);
+
+export const ALERT_SUPPRESSION_MISSING_FIELDS_SUPPRESS_OPTION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.alertSuppressionMissingFieldsSuppressLabel',
+  {
+    defaultMessage: 'Suppress and group alerts for events with missing fields',
+  }
+);
+
+export const ALERT_SUPPRESSION_MISSING_FIELDS_DO_NOT_SUPPRESS_OPTION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.alertSuppressionMissingFieldsDoNotSuppressLabel',
+  {
+    defaultMessage: 'Do not suppress alerts for events with missing fields',
+  }
+);

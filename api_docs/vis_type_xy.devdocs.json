@@ -132,7 +132,7 @@
             "label": "position",
             "description": [],
             "signature": [
-              "\"top\" | \"bottom\" | \"left\" | \"right\""
+              "\"top\" | \"left\" | \"right\" | \"bottom\""
             ],
             "path": "src/plugins/vis_types/xy/public/types/param.ts",
             "deprecated": false,
@@ -782,20 +782,6 @@
         "label": "AxisType",
         "description": [],
         "path": "src/plugins/vis_types/xy/public/types/constants.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "visTypeXy",
-        "id": "def-public.ChartType",
-        "type": "Enum",
-        "tags": [],
-        "label": "ChartType",
-        "description": [
-          "\nType of charts able to render"
-        ],
-        "path": "src/plugins/vis_types/xy/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

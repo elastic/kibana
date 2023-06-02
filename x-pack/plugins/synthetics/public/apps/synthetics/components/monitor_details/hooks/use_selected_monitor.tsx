@@ -15,18 +15,26 @@ import {
   selectEncryptedSyntheticsSavedMonitors,
   selectMonitorListState,
   selectorMonitorDetailsState,
+  selectorError,
+  selectRefreshInterval,
 } from '../../../state';
 
-export const useSelectedMonitor = () => {
-  const { monitorId } = useParams<{ monitorId: string }>();
+export const useSelectedMonitor = (monId?: string) => {
+  let monitorId = monId;
+  const { monitorId: urlMonitorId } = useParams<{ monitorId: string }>();
+  if (!monitorId) {
+    monitorId = urlMonitorId;
+  }
   const monitorsList = useSelector(selectEncryptedSyntheticsSavedMonitors);
   const { loading: monitorListLoading } = useSelector(selectMonitorListState);
+  const refreshInterval = useSelector(selectRefreshInterval);
 
   const monitorFromList = useMemo(
     () => monitorsList.find((monitor) => monitor[ConfigKey.CONFIG_ID] === monitorId) ?? null,
     [monitorId, monitorsList]
   );
-  const { lastRefresh, refreshInterval } = useSyntheticsRefreshContext();
+  const error = useSelector(selectorError);
+  const { lastRefresh } = useSyntheticsRefreshContext();
   const { syntheticsMonitor, syntheticsMonitorLoading, syntheticsMonitorDispatchedAt } =
     useSelector(selectorMonitorDetailsState);
   const dispatch = useDispatch();
@@ -41,18 +49,24 @@ export const useSelectedMonitor = () => {
     ? monitorFromList
     : null;
 
+  const isMonitorMissing =
+    error?.body.statusCode === 404 &&
+    (error.getPayload as { monitorId: string })?.monitorId === monitorId;
+
   useEffect(() => {
-    if (monitorId && !availableMonitor && !syntheticsMonitorLoading) {
+    if (monitorId && !availableMonitor && !syntheticsMonitorLoading && !isMonitorMissing) {
       dispatch(getMonitorAction.get({ monitorId }));
     }
-  }, [dispatch, monitorId, availableMonitor, syntheticsMonitorLoading]);
+  }, [dispatch, monitorId, availableMonitor, syntheticsMonitorLoading, isMonitorMissing]);
 
   useEffect(() => {
     // Only perform periodic refresh if the last dispatch was earlier enough
     if (
+      monitorId &&
       !syntheticsMonitorLoading &&
       !monitorListLoading &&
-      Date.now() - syntheticsMonitorDispatchedAt > refreshInterval
+      syntheticsMonitorDispatchedAt > 0 &&
+      Date.now() - syntheticsMonitorDispatchedAt > refreshInterval * 1000
     ) {
       dispatch(getMonitorAction.get({ monitorId }));
     }
@@ -69,5 +83,7 @@ export const useSelectedMonitor = () => {
   return {
     monitor: availableMonitor,
     loading: syntheticsMonitorLoading || monitorListLoading,
+    error,
+    isMonitorMissing,
   };
 };

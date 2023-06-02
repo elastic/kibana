@@ -24,12 +24,13 @@ import {
 import { IExecutionErrors } from '@kbn/alerting-plugin/common';
 import { useKibana } from '../../../../common/lib/kibana';
 
-import { RefineSearchPrompt } from '../refine_search_prompt';
+import { RefineSearchPrompt } from '../../common/components/refine_search_prompt';
 import {
   ComponentOpts as RuleApis,
   withBulkRuleOperations,
 } from '../../common/components/with_bulk_rule_api_operations';
-import { RuleEventLogListCellRenderer } from './rule_event_log_list_cell_renderer';
+import { EventLogListCellRenderer } from '../../common/components/event_log';
+import { RefreshToken } from './types';
 
 const getParsedDate = (date: string) => {
   if (date.includes('now')) {
@@ -62,7 +63,7 @@ const MAX_RESULTS = 1000;
 export type RuleErrorLogProps = {
   ruleId: string;
   runId?: string;
-  refreshToken?: number;
+  refreshToken?: RefreshToken;
   spaceId?: string;
   logFromDifferentSpace?: boolean;
   requestRefresh?: () => Promise<void>;
@@ -203,7 +204,7 @@ export const RuleErrorLog = (props: RuleErrorLogProps) => {
           }
         ),
         render: (date: string) => (
-          <RuleEventLogListCellRenderer columnId="timestamp" value={date} dateFormat={dateFormat} />
+          <EventLogListCellRenderer columnId="timestamp" value={date} dateFormat={dateFormat} />
         ),
         sortable: true,
         width: '250px',

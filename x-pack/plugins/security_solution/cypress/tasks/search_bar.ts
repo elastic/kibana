@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { FILTER_BADGE, FILTER_BADGE_DELETE } from '../screens/alerts';
 import type { SearchBarFilter } from '../objects/filter';
 
 import {
@@ -14,7 +15,6 @@ import {
   ADD_FILTER_FORM_FIELD_INPUT,
   ADD_FILTER_FORM_OPERATOR_OPTION_IS,
   ADD_FILTER_FORM_OPERATOR_FIELD,
-  ADD_FILTER_FORM_FIELD_OPTION,
   ADD_FILTER_FORM_FILTER_VALUE_INPUT,
   GLOBAL_KQL_INPUT,
 } from '../screens/search_bar';
@@ -35,12 +35,24 @@ export const fillKqlQueryBar = (query: string) => {
   cy.get(GLOBAL_KQL_INPUT).type(query);
 };
 
+export const clearKqlQueryBar = () => {
+  cy.get(GLOBAL_KQL_INPUT).should('be.visible');
+  cy.get(GLOBAL_KQL_INPUT).clear();
+  // clicks outside of the input to close the autocomplete
+  cy.get('body').click(0, 0);
+};
+
+export const removeKqlFilter = () => {
+  cy.get(FILTER_BADGE).then((el) => {
+    el.click();
+    cy.get(FILTER_BADGE_DELETE).click();
+  });
+};
+
 export const fillAddFilterForm = ({ key, value, operator }: SearchBarFilter) => {
   cy.get(ADD_FILTER_FORM_FIELD_INPUT).should('exist');
   cy.get(ADD_FILTER_FORM_FIELD_INPUT).should('be.visible');
-  cy.get(ADD_FILTER_FORM_FIELD_INPUT).type(`${key}{downarrow}`);
-  cy.get(ADD_FILTER_FORM_FIELD_INPUT).click();
-  cy.get(ADD_FILTER_FORM_FIELD_OPTION(key)).click({ force: true });
+  cy.get(ADD_FILTER_FORM_FIELD_INPUT).type(`${key}{downarrow}{enter}`);
   if (!operator) {
     cy.get(ADD_FILTER_FORM_OPERATOR_FIELD).click();
     cy.get(ADD_FILTER_FORM_OPERATOR_OPTION_IS).click();

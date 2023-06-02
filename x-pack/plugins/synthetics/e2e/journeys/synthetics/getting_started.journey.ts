@@ -6,10 +6,13 @@
  */
 
 import { journey, step, expect, before, Page } from '@elastic/synthetics';
-import { syntheticsAppPageProvider } from '../../page_objects/synthetics_app';
+import { recordVideo } from '../../helpers/record_video';
+import { syntheticsAppPageProvider } from '../../page_objects/synthetics/synthetics_app';
 import { cleanTestMonitors } from './services/add_monitor';
 
 journey(`Getting Started Page`, async ({ page, params }: { page: Page; params: any }) => {
+  recordVideo(page);
+
   const syntheticsApp = syntheticsAppPageProvider({ page, kibanaUrl: params.kibanaUrl });
 
   const createBasicMonitor = async () => {
@@ -39,6 +42,7 @@ journey(`Getting Started Page`, async ({ page, params }: { page: Page; params: a
   });
 
   step('shows validation error on submit', async () => {
+    await page.locator('.euiSideNavItem').locator('text=Synthetics').click();
     await page.click('text=Create monitor');
 
     expect(await page.isVisible('text=URL is required')).toBeTruthy();

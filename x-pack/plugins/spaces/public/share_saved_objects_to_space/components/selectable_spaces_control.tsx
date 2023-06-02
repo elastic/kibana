@@ -92,7 +92,7 @@ const APPEND_FEATURE_IS_DISABLED = (
       defaultMessage: 'This feature is disabled in this space.',
     })}
     position="left"
-    type="alert"
+    type="warning"
     color="warning"
   />
 );

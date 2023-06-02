@@ -32,7 +32,6 @@ describe('Hover actions', () => {
 
   before(() => {
     esArchiverLoad('network');
-    login();
   });
 
   after(() => {
@@ -40,7 +39,8 @@ describe('Hover actions', () => {
   });
 
   beforeEach(() => {
-    visit(NETWORK_URL, onBeforeLoadCallback);
+    login();
+    visit(NETWORK_URL, { onBeforeLoad: onBeforeLoadCallback });
     openHoverActions();
     mouseoverOnToOverflowItem();
   });

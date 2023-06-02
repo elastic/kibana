@@ -8,7 +8,7 @@
 import { CoreSetup } from '@kbn/core/public';
 import { ManagementAppMountParams } from '@kbn/management-plugin/public';
 
-import { StartDependencies } from '../types';
+import { StartDependencies, ILicense } from '../types';
 import {
   documentationService,
   uiMetricService,
@@ -18,11 +18,15 @@ import {
 } from './services';
 import { renderApp } from '.';
 
+export interface AppParams extends ManagementAppMountParams {
+  license: ILicense | null;
+}
+
 export async function mountManagementSection(
   { http, getStartServices, notifications }: CoreSetup<StartDependencies>,
-  params: ManagementAppMountParams
+  params: AppParams
 ) {
-  const { element, setBreadcrumbs, history, theme$ } = params;
+  const { element, setBreadcrumbs, history, theme$, license } = params;
   const [coreStart, depsStart] = await getStartServices();
   const {
     docLinks,
@@ -43,10 +47,12 @@ export async function mountManagementSection(
     notifications,
     history,
     uiSettings: coreStart.uiSettings,
+    settings: coreStart.settings,
     share: depsStart.share,
     fileUpload: depsStart.fileUpload,
     application,
     executionContext,
+    license,
   };
 
   return renderApp(element, I18nContext, services, { http }, { theme$ });

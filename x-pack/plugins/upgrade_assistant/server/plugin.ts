@@ -30,9 +30,9 @@ import { versionService } from './lib/version';
 import { createReindexWorker } from './routes/reindex_indices';
 import { registerRoutes } from './routes/register_routes';
 import {
-  telemetrySavedObjectType,
   reindexOperationSavedObjectType,
   mlSavedObjectType,
+  hiddenTypes,
 } from './saved_object_types';
 import { handleEsError } from './shared_imports';
 import { RouteDependencies } from './types';
@@ -88,7 +88,6 @@ export class UpgradeAssistantServerPlugin implements Plugin {
     this.licensing = licensing;
 
     savedObjects.registerType(reindexOperationSavedObjectType);
-    savedObjects.registerType(telemetrySavedObjectType);
     savedObjects.registerType(mlSavedObjectType);
 
     features.registerElasticsearchFeature({
@@ -106,7 +105,7 @@ export class UpgradeAssistantServerPlugin implements Plugin {
 
     // We need to initialize the deprecation logs plugin so that we can
     // navigate from this app to the observability app using a source_id.
-    infra?.defineInternalSourceConfiguration(DEPRECATION_LOGS_SOURCE_ID, {
+    infra?.logViews.defineInternalLogView(DEPRECATION_LOGS_SOURCE_ID, {
       name: 'deprecationLogs',
       description: 'deprecation logs',
       logIndices: {
@@ -174,7 +173,7 @@ export class UpgradeAssistantServerPlugin implements Plugin {
       elasticsearchService: elasticsearch,
       logger: this.logger,
       savedObjects: new SavedObjectsClient(
-        this.savedObjectsServiceStart.createInternalRepository()
+        this.savedObjectsServiceStart.createInternalRepository(hiddenTypes)
       ),
       security: this.securityPluginStart,
     });

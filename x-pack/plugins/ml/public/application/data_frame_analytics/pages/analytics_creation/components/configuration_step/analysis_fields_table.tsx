@@ -12,7 +12,13 @@ import { isEqual } from 'lodash';
 import { LEFT_ALIGNMENT, SortableProperties } from '@elastic/eui/lib/services';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { FieldSelectionItem } from '../../../../../../../common/types/data_frame_analytics';
+import { ES_FIELD_TYPES } from '@kbn/field-types';
+import { FieldSelectionItem } from '@kbn/ml-data-frame-analytics-utils';
+import { useFieldStatsTrigger } from '../../../../../components/field_stats_flyout/use_field_stats_trigger';
+import {
+  FieldForStats,
+  FieldStatsInfoButton,
+} from '../../../../../components/field_stats_flyout/field_stats_info_button';
 // @ts-ignore could not find declaration file
 import { CustomSelectionTable } from '../../../../../components/custom_selection_table';
 
@@ -22,62 +28,6 @@ const minimumFieldsMessage = i18n.translate(
     defaultMessage: 'At least one field must be selected.',
   }
 );
-
-const columns = [
-  {
-    id: 'checkbox',
-    isCheckbox: true,
-    textOnly: false,
-    width: '32px',
-  },
-  {
-    label: i18n.translate(
-      'xpack.ml.dataframe.analytics.create.analysisFieldsTable.fieldNameColumn',
-      {
-        defaultMessage: 'Field name',
-      }
-    ),
-    id: 'name',
-    isSortable: true,
-    alignment: LEFT_ALIGNMENT,
-  },
-  {
-    id: 'mapping_types',
-    label: i18n.translate('xpack.ml.dataframe.analytics.create.analyticsTable.mappingColumn', {
-      defaultMessage: 'Mapping',
-    }),
-    isSortable: false,
-    alignment: LEFT_ALIGNMENT,
-  },
-  {
-    label: i18n.translate('xpack.ml.dataframe.analytics.create.analyticsTable.isIncludedColumn', {
-      defaultMessage: 'Is included',
-    }),
-    id: 'is_included',
-    alignment: LEFT_ALIGNMENT,
-    isSortable: true,
-    // eslint-disable-next-line @typescript-eslint/naming-convention
-    render: ({ is_included }: { is_included: boolean }) => (is_included ? 'Yes' : 'No'),
-  },
-  {
-    label: i18n.translate('xpack.ml.dataframe.analytics.create.analyticsTable.isRequiredColumn', {
-      defaultMessage: 'Is required',
-    }),
-    id: 'is_required',
-    alignment: LEFT_ALIGNMENT,
-    isSortable: true,
-    // eslint-disable-next-line @typescript-eslint/naming-convention
-    render: ({ is_required }: { is_required: boolean }) => (is_required ? 'Yes' : 'No'),
-  },
-  {
-    label: i18n.translate('xpack.ml.dataframe.analytics.create.analyticsTable.reasonColumn', {
-      defaultMessage: 'Reason',
-    }),
-    id: 'reason',
-    alignment: LEFT_ALIGNMENT,
-    isSortable: false,
-  },
-];
 
 const checkboxDisabledCheck = (item: FieldSelectionItem) =>
   item.is_required === true || (item.reason && item.reason.includes('unsupported type'));
@@ -109,6 +59,89 @@ export const AnalysisFieldsTable: FC<{
       pageIndex: number;
       itemsPerPage: number;
     }>({ pageIndex: 0, itemsPerPage: 5 });
+
+    const { handleFieldStatsButtonClick } = useFieldStatsTrigger();
+
+    const columns = [
+      {
+        id: 'checkbox',
+        isCheckbox: true,
+        textOnly: false,
+        width: '32px',
+      },
+      {
+        label: i18n.translate(
+          'xpack.ml.dataframe.analytics.create.analysisFieldsTable.fieldNameColumn',
+          {
+            defaultMessage: 'Field name',
+          }
+        ),
+        id: 'name',
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        render: ({ name, mapping_types }: { name: string; mapping_types: string[] }) => {
+          const field: FieldForStats = {
+            id: name,
+            type: (Array.isArray(mapping_types) && mapping_types.length > 0
+              ? mapping_types[0]
+              : 'number') as ES_FIELD_TYPES,
+          };
+          return (
+            <>
+              <FieldStatsInfoButton
+                field={field}
+                label={name}
+                onButtonClick={handleFieldStatsButtonClick}
+              />
+            </>
+          );
+        },
+
+        isSortable: true,
+        alignment: LEFT_ALIGNMENT,
+      },
+      {
+        id: 'mapping_types',
+        label: i18n.translate('xpack.ml.dataframe.analytics.create.analyticsTable.mappingColumn', {
+          defaultMessage: 'Mapping',
+        }),
+        isSortable: false,
+        alignment: LEFT_ALIGNMENT,
+      },
+      {
+        label: i18n.translate(
+          'xpack.ml.dataframe.analytics.create.analyticsTable.isIncludedColumn',
+          {
+            defaultMessage: 'Is included',
+          }
+        ),
+        id: 'is_included',
+        alignment: LEFT_ALIGNMENT,
+        isSortable: true,
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        render: ({ is_included }: { is_included: boolean }) => (is_included ? 'Yes' : 'No'),
+      },
+      {
+        label: i18n.translate(
+          'xpack.ml.dataframe.analytics.create.analyticsTable.isRequiredColumn',
+          {
+            defaultMessage: 'Is required',
+          }
+        ),
+        id: 'is_required',
+        alignment: LEFT_ALIGNMENT,
+        isSortable: true,
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        render: ({ is_required }: { is_required: boolean }) => (is_required ? 'Yes' : 'No'),
+      },
+      {
+        label: i18n.translate('xpack.ml.dataframe.analytics.create.analyticsTable.reasonColumn', {
+          defaultMessage: 'Reason',
+        }),
+        id: 'reason',
+        alignment: LEFT_ALIGNMENT,
+        isSortable: false,
+      },
+    ];
 
     useEffect(() => {
       if (includes.length === 0 && tableItems.length > 0) {

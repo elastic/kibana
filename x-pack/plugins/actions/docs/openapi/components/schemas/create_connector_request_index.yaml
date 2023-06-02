@@ -1,0 +1,20 @@
+title: Create index connector request
+description: The index connector indexes a document into Elasticsearch.
+type: object
+required:
+  - config
+  - connector_type_id
+  - name
+properties:
+  config:
+    $ref: 'config_properties_index.yaml'  
+  connector_type_id:
+    type: string
+    description: The type of connector.
+    enum:
+      - .index
+    example: .index
+  name:
+    type: string
+    description: The display name for the connector.
+    example: my-connector

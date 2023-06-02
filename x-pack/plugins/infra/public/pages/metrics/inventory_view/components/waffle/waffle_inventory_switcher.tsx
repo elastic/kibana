@@ -124,6 +124,7 @@ export const WaffleInventorySwitcher: React.FC = () => {
       data-test-subj={'openInventorySwitcher'}
       onClick={openPopover}
       label={i18n.translate('xpack.infra.waffle.showLabel', { defaultMessage: 'Show' })}
+      showKubernetesInfo={true}
     >
       {selectedText}
     </DropdownButton>

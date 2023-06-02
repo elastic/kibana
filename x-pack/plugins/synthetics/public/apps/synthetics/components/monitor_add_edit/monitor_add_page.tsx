@@ -6,36 +6,41 @@
  */
 
 import React, { useEffect } from 'react';
-import { EuiLoadingSpinner } from '@elastic/eui';
-import { useDispatch } from 'react-redux';
-import { useTrackPageview } from '@kbn/observability-plugin/public';
+import { useDispatch, useSelector } from 'react-redux';
+import { useTrackPageview } from '@kbn/observability-shared-plugin/public';
 
-import { getServiceLocations } from '../../state';
+import { getServiceLocations, selectServiceLocationsState } from '../../state';
 import { ServiceAllowedWrapper } from '../common/wrappers/service_allowed_wrapper';
 
 import { useKibanaSpace } from './hooks';
 import { MonitorSteps } from './steps';
 import { MonitorForm } from './form';
+import { LocationsLoadingError } from './locations_loading_error';
 import { ADD_MONITOR_STEPS } from './steps/step_config';
 import { useMonitorAddEditBreadcrumbs } from './use_breadcrumbs';
+import { LoadingState } from '../monitors_page/overview/overview/monitor_detail_flyout';
 
-const MonitorAddPage = () => {
+export const MonitorAddPage = () => {
   useTrackPageview({ app: 'synthetics', path: 'add-monitor' });
-  const { space, loading, error } = useKibanaSpace();
+  const { space } = useKibanaSpace();
   useTrackPageview({ app: 'synthetics', path: 'add-monitor', delay: 15000 });
   useMonitorAddEditBreadcrumbs();
   const dispatch = useDispatch();
-
   useEffect(() => {
     dispatch(getServiceLocations());
   }, [dispatch]);
+  const { locationsLoaded, error: locationsError } = useSelector(selectServiceLocationsState);
 
-  return !loading && !error ? (
+  if (locationsError) {
+    return <LocationsLoadingError />;
+  }
+
+  return locationsLoaded ? (
     <MonitorForm space={space?.id}>
       <MonitorSteps stepMap={ADD_MONITOR_STEPS} />
     </MonitorForm>
   ) : (
-    <EuiLoadingSpinner />
+    <LoadingState />
   );
 };
 

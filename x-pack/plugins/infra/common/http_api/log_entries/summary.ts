@@ -6,11 +6,12 @@
  */
 
 import * as rt from 'io-ts';
+import { logViewReferenceRT } from '../../log_views';
 
 export const LOG_ENTRIES_SUMMARY_PATH = '/api/log_entries/summary';
 
 export const logEntriesSummaryRequestRT = rt.type({
-  sourceId: rt.string,
+  logView: logViewReferenceRT,
   startTimestamp: rt.number,
   endTimestamp: rt.number,
   bucketSize: rt.number,

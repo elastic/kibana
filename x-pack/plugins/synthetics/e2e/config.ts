@@ -6,13 +6,14 @@
  */
 
 import { FtrConfigProviderContext } from '@kbn/test';
-
 import { CA_CERT_PATH } from '@kbn/dev-utils';
+import { argv } from './helpers/parse_args_params';
 import { readKibanaConfig } from './tasks/read_kibana_config';
-
 const MANIFEST_KEY = 'xpack.uptime.service.manifestUrl';
 const SERVICE_PASSWORD = 'xpack.uptime.service.password';
 const SERVICE_USERNAME = 'xpack.uptime.service.username';
+
+const { watch } = argv;
 
 async function config({ readConfigFile }: FtrConfigProviderContext) {
   const kibanaCommonTestsConfig = await readConfigFile(
@@ -43,7 +44,9 @@ async function config({ readConfigFile }: FtrConfigProviderContext) {
 
     kbnTestServer: {
       ...xpackFunctionalTestsConfig.get('kbnTestServer'),
-      sourceArgs: [...xpackFunctionalTestsConfig.get('kbnTestServer.sourceArgs'), '--no-watch'],
+      sourceArgs: watch
+        ? []
+        : [...xpackFunctionalTestsConfig.get('kbnTestServer.sourceArgs'), '--no-watch'],
       serverArgs: [
         ...xpackFunctionalTestsConfig.get('kbnTestServer.serverArgs'),
         '--csp.strict=false',

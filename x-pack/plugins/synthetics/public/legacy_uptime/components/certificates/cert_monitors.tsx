@@ -21,7 +21,7 @@ export const CertMonitors: React.FC<Props> = ({ monitors }) => {
         <span key={mon.id}>
           {ind > 0 && ', '}
           <EuiToolTip content={mon.url}>
-            <MonitorPageLink monitorId={mon.id!} linkParameters={''}>
+            <MonitorPageLink monitorId={mon.id!} configId={mon.configId} linkParameters={''}>
               {mon.name || mon.id}
             </MonitorPageLink>
           </EuiToolTip>

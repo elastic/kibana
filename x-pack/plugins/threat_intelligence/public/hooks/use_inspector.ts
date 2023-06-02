@@ -7,13 +7,9 @@
 
 import { useCallback, useContext, useEffect, useState } from 'react';
 import { InspectorSession } from '@kbn/inspector-plugin/public';
-import { i18n } from '@kbn/i18n';
-import { useKibana } from '.';
+import { useKibana } from './use_kibana';
 import { InspectorContext } from '../containers/inspector';
-
-const INSPECTOR_FLYOUT_TITLE = i18n.translate('xpack.threatIntelligence.inspectorFlyoutTitle', {
-  defaultMessage: 'Indicators search requests',
-});
+import { INSPECTOR_FLYOUT_TITLE } from './translations';
 
 /**
  *

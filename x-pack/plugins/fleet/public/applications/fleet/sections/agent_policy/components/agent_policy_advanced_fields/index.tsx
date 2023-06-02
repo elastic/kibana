@@ -19,20 +19,32 @@ import {
   EuiFieldText,
   EuiSuperSelect,
   EuiToolTip,
+  EuiRadioGroup,
+  EuiText,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiBetaBadge,
+  EuiBadge,
+  EuiSwitch,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
-import { dataTypes } from '../../../../../../../common/constants';
+import {
+  AGENT_POLICY_SAVED_OBJECT_TYPE,
+  dataTypes,
+  DEFAULT_MAX_AGENT_POLICIES_WITH_INACTIVITY_TIMEOUT,
+} from '../../../../../../../common/constants';
 import type { NewAgentPolicy, AgentPolicy } from '../../../../types';
-import { useStartServices } from '../../../../hooks';
+import { useStartServices, useConfig, useGetAgentPolicies, useLicense } from '../../../../hooks';
 
 import { AgentPolicyPackageBadge } from '../../../../components';
+import { UninstallCommandFlyout } from '../../../../../../components';
 
 import { AgentPolicyDeleteProvider } from '../agent_policy_delete_provider';
 import type { ValidationResults } from '../agent_policy_validation';
 
-import { policyHasFleetServer } from '../../../../services';
+import { ExperimentalFeaturesService, policyHasFleetServer } from '../../../../services';
 
 import {
   useOutputOptions,
@@ -57,12 +69,27 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
   onDelete = () => {},
 }) => {
   const { docLinks } = useStartServices();
+  const config = useConfig();
+  const maxAgentPoliciesWithInactivityTimeout =
+    config.developer?.maxAgentPoliciesWithInactivityTimeout ??
+    DEFAULT_MAX_AGENT_POLICIES_WITH_INACTIVITY_TIMEOUT;
   const [touchedFields, setTouchedFields] = useState<{ [key: string]: boolean }>({});
   const {
     dataOutputOptions,
     monitoringOutputOptions,
     isLoading: isLoadingOptions,
   } = useOutputOptions(agentPolicy);
+
+  const { data: agentPoliciesData } = useGetAgentPolicies({
+    page: 1,
+    perPage: 0,
+    kuery: `${AGENT_POLICY_SAVED_OBJECT_TYPE}.inactivity_timeout:*`,
+  });
+
+  const totalAgentPoliciesWithInactivityTimeout = agentPoliciesData?.total ?? 0;
+  const tooManyAgentPoliciesForInactivityTimeout =
+    maxAgentPoliciesWithInactivityTimeout !== undefined &&
+    totalAgentPoliciesWithInactivityTimeout > (maxAgentPoliciesWithInactivityTimeout ?? 0);
   const { dataDownloadSourceOptions, isLoading: isLoadingDownloadSources } =
     useDownloadSourcesOptions(agentPolicy);
 
@@ -75,6 +102,10 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
   const hasManagedPackagePolicy =
     'package_policies' in agentPolicy &&
     agentPolicy?.package_policies?.some((packagePolicy) => packagePolicy.is_managed);
+
+  const { agentTamperProtectionEnabled } = ExperimentalFeaturesService.get();
+  const licenseService = useLicense();
+  const [isUninstallCommandFlyoutOpen, setIsUninstallCommandFlyoutOpen] = useState(false);
 
   return (
     <>
@@ -94,6 +125,13 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
           />
         }
       >
+        {isUninstallCommandFlyoutOpen && (
+          <UninstallCommandFlyout
+            target="agent"
+            policyId={agentPolicy.id}
+            onClose={() => setIsUninstallCommandFlyoutOpen(false)}
+          />
+        )}
         <EuiFormRow
           fullWidth
           key="description"
@@ -260,43 +298,105 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
           }}
         />
       </EuiDescribedFormGroup>
+      {agentTamperProtectionEnabled && licenseService.isPlatinum() && (
+        <EuiDescribedFormGroup
+          title={
+            <h4>
+              <FormattedMessage
+                id="xpack.fleet.agentPolicyForm.tamperingLabel"
+                defaultMessage="Agent tamper protection"
+              />
+            </h4>
+          }
+          description={
+            <FormattedMessage
+              id="xpack.fleet.agentPolicyForm.tamperingDescription"
+              defaultMessage="Prevent agents from being uninstalled locally. When enabled, agents can only be uninstalled using an authorization token in the uninstall command. Click { linkName } for the full command."
+              values={{ linkName: <strong>Get uninstall command</strong> }}
+            />
+          }
+        >
+          <EuiSwitch
+            label={i18n.translate('xpack.fleet.agentPolicyForm.tamperingSwitchLabel', {
+              defaultMessage: 'Prevent agent tampering',
+            })}
+            checked={agentPolicy.is_protected ?? false}
+            onChange={(e) => {
+              updateAgentPolicy({ is_protected: e.target.checked });
+            }}
+            data-test-subj="tamperProtectionSwitch"
+          />
+          <EuiSpacer size="s" />
+          <EuiLink
+            onClick={() => {
+              setIsUninstallCommandFlyoutOpen(true);
+            }}
+            disabled={agentPolicy.is_protected === false}
+            data-test-subj="uninstallCommandLink"
+          >
+            {i18n.translate('xpack.fleet.agentPolicyForm.tamperingUninstallLink', {
+              defaultMessage: 'Get uninstall command',
+            })}
+          </EuiLink>
+        </EuiDescribedFormGroup>
+      )}
       <EuiDescribedFormGroup
         title={
           <h4>
             <FormattedMessage
-              id="xpack.fleet.agentPolicyForm.unenrollmentTimeoutLabel"
-              defaultMessage="Unenrollment timeout"
+              id="xpack.fleet.agentPolicyForm.inactivityTimeoutLabel"
+              defaultMessage="Inactivity timeout"
             />
+            {tooManyAgentPoliciesForInactivityTimeout && (
+              <>
+                &nbsp;
+                <EuiToolTip
+                  content={
+                    <FormattedMessage
+                      id="xpack.fleet.agentPolicyForm.inactivityTimeoutTooltip"
+                      defaultMessage="The maximum of 750 agent policies with an inactivity timeout has been exceeded. Remove inactivity timeouts or agent policies to allow agents to become inactive again."
+                    />
+                  }
+                >
+                  <EuiBadge color="warning">
+                    <FormattedMessage
+                      id="xpack.fleet.agentPolicyForm.inactivityTimeoutBadge"
+                      defaultMessage="Warning"
+                    />
+                  </EuiBadge>
+                </EuiToolTip>
+              </>
+            )}
           </h4>
         }
         description={
           <FormattedMessage
-            id="xpack.fleet.agentPolicyForm.unenrollmentTimeoutDescription"
-            defaultMessage="An optional timeout in seconds. If provided, an agent will automatically unenroll after being gone for this period of time."
+            id="xpack.fleet.agentPolicyForm.inactivityTimeoutDescription"
+            defaultMessage="An optional timeout in seconds. If provided, an agent will automatically change to inactive status and be filtered out of the agents list. A maximum of 750 agent policies can have an inactivity timeout."
           />
         }
       >
         <EuiFormRow
           fullWidth
           error={
-            touchedFields.unenroll_timeout && validation.unenroll_timeout
-              ? validation.unenroll_timeout
+            touchedFields.inactivity_timeout && validation.inactivity_timeout
+              ? validation.inactivity_timeout
               : null
           }
-          isInvalid={Boolean(touchedFields.unenroll_timeout && validation.unenroll_timeout)}
+          isInvalid={Boolean(touchedFields.inactivity_timeout && validation.inactivity_timeout)}
         >
           <EuiFieldNumber
             fullWidth
             disabled={agentPolicy.is_managed === true}
-            value={agentPolicy.unenroll_timeout || ''}
+            value={agentPolicy.inactivity_timeout || ''}
             min={0}
             onChange={(e) => {
               updateAgentPolicy({
-                unenroll_timeout: e.target.value ? Number(e.target.value) : 0,
+                inactivity_timeout: e.target.value ? Number(e.target.value) : 0,
               });
             }}
-            isInvalid={Boolean(touchedFields.unenroll_timeout && validation.unenroll_timeout)}
-            onBlur={() => setTouchedFields({ ...touchedFields, unenroll_timeout: true })}
+            isInvalid={Boolean(touchedFields.inactivity_timeout && validation.inactivity_timeout)}
+            onBlur={() => setTouchedFields({ ...touchedFields, inactivity_timeout: true })}
           />
         </EuiFormRow>
       </EuiDescribedFormGroup>
@@ -454,6 +554,146 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
             }}
             options={dataDownloadSourceOptions}
             data-test-subj="agentPolicyForm.downloadSource.select"
+          />
+        </EuiFormRow>
+      </EuiDescribedFormGroup>
+      <EuiDescribedFormGroup
+        title={
+          <h4>
+            <FormattedMessage
+              id="xpack.fleet.agentPolicyForm.unenrollmentTimeoutLabel"
+              defaultMessage="Unenrollment timeout"
+            />
+            &nbsp;
+            <EuiToolTip
+              content={i18n.translate('xpack.fleet.agentPolicyForm.unenrollmentTimeoutTooltip', {
+                defaultMessage:
+                  'This setting is deprecated and will be removed in a future release. Consider using inactivity timeout instead',
+              })}
+            >
+              <EuiBetaBadge
+                label={i18n.translate(
+                  'xpack.fleet.agentPolicyForm.unenrollmentTimeoutDeprecatedLabel',
+                  { defaultMessage: 'Deprecated' }
+                )}
+                size="s"
+              />
+            </EuiToolTip>
+          </h4>
+        }
+        description={
+          <FormattedMessage
+            id="xpack.fleet.agentPolicyForm.unenrollmentTimeoutDescription"
+            defaultMessage="An optional timeout in seconds. If provided, and fleet server is below version 8.7.0, an agent will automatically unenroll after being gone for this period of time."
+          />
+        }
+      >
+        <EuiFormRow
+          fullWidth
+          error={
+            touchedFields.unenroll_timeout && validation.unenroll_timeout
+              ? validation.unenroll_timeout
+              : null
+          }
+          isInvalid={Boolean(touchedFields.unenroll_timeout && validation.unenroll_timeout)}
+        >
+          <EuiFieldNumber
+            fullWidth
+            disabled={agentPolicy.is_managed === true}
+            value={agentPolicy.unenroll_timeout || ''}
+            min={0}
+            onChange={(e) => {
+              updateAgentPolicy({
+                unenroll_timeout: e.target.value ? Number(e.target.value) : 0,
+              });
+            }}
+            isInvalid={Boolean(touchedFields.unenroll_timeout && validation.unenroll_timeout)}
+            onBlur={() => setTouchedFields({ ...touchedFields, unenroll_timeout: true })}
+          />
+        </EuiFormRow>
+      </EuiDescribedFormGroup>
+      <EuiDescribedFormGroup
+        title={
+          <h4>
+            <FormattedMessage
+              id="xpack.fleet.agentPolicyForm.hostnameFormatLabel"
+              defaultMessage="Host name format"
+            />
+            &nbsp;
+            <EuiBetaBadge label="beta" size="s" color="accent" />
+          </h4>
+        }
+        description={
+          <FormattedMessage
+            id="xpack.fleet.agentPolicyForm.hostnameFormatLabelDescription"
+            defaultMessage="Select how you would like agent domain names to be displayed."
+          />
+        }
+      >
+        <EuiFormRow fullWidth>
+          <EuiRadioGroup
+            options={[
+              {
+                id: 'hostname',
+                label: (
+                  <>
+                    <EuiFlexGroup gutterSize="xs" direction="column">
+                      <EuiFlexItem grow={false}>
+                        <EuiText size="s">
+                          <b>
+                            <FormattedMessage
+                              id="xpack.fleet.agentPolicyForm.hostnameFormatOptionHostname"
+                              defaultMessage="Hostname"
+                            />
+                          </b>
+                        </EuiText>
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        <EuiText size="s" color="subdued">
+                          <FormattedMessage
+                            id="xpack.fleet.agentPolicyForm.hostnameFormatOptionHostnameExample"
+                            defaultMessage="ex: My-Laptop"
+                          />
+                        </EuiText>
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                    <EuiSpacer size="s" />
+                  </>
+                ),
+              },
+              {
+                id: 'fqdn',
+                label: (
+                  <EuiFlexGroup gutterSize="xs" direction="column">
+                    <EuiFlexItem grow={false}>
+                      <EuiText size="s">
+                        <b>
+                          <FormattedMessage
+                            id="xpack.fleet.agentPolicyForm.hostnameFormatOptionFqdn"
+                            defaultMessage="Fully Qualified Domain Name (FQDN)"
+                          />
+                        </b>
+                      </EuiText>
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <EuiText size="s" color="subdued">
+                        <FormattedMessage
+                          id="xpack.fleet.agentPolicyForm.hostnameFormatOptionFqdnExample"
+                          defaultMessage="ex: My-Laptop.admin.acme.co"
+                        />
+                      </EuiText>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                ),
+              },
+            ]}
+            idSelected={agentPolicy.agent_features?.length ? 'fqdn' : 'hostname'}
+            onChange={(id: string) => {
+              updateAgentPolicy({
+                agent_features: id === 'hostname' ? [] : [{ name: 'fqdn', enabled: true }],
+              });
+            }}
+            name="radio group"
           />
         </EuiFormRow>
       </EuiDescribedFormGroup>

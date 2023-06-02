@@ -30,7 +30,7 @@ export function createMockVisualization(id = 'testVis'): jest.Mocked<Visualizati
     switchVisualizationType: jest.fn((_, x) => x),
     getSuggestions: jest.fn((_options) => []),
     getRenderEventCounters: jest.fn((_state) => []),
-    initialize: jest.fn((_frame, _state?) => ({ newState: 'newState' })),
+    initialize: jest.fn((_addNewLayer, _state) => ({ newState: 'newState' })),
     getConfiguration: jest.fn((props) => ({
       groups: [
         {
@@ -49,7 +49,6 @@ export function createMockVisualization(id = 'testVis'): jest.Mocked<Visualizati
 
     setDimension: jest.fn(),
     removeDimension: jest.fn(),
-    getErrorMessages: jest.fn((_state) => undefined),
     renderDimensionEditor: jest.fn(),
   };
 }

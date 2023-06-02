@@ -29,6 +29,7 @@ import {
   SmallMultiples,
   VerticalAlignment,
   XYChartSeriesIdentifier,
+  Tooltip,
 } from '@elastic/charts';
 import { Datatable } from '@kbn/expressions-plugin/common';
 import { EmptyPlaceholder } from '@kbn/charts-plugin/public';
@@ -58,8 +59,11 @@ import { ExtendedDataLayerConfig, XYProps, AnnotationLayerConfigResult } from '.
 import { DataLayers } from './data_layers';
 import { SplitChart } from './split_chart';
 import { LegendSize } from '@kbn/visualizations-plugin/common';
+import type { LayerCellValueActions } from '../types';
 
 const onClickValue = jest.fn();
+const onClickMultiValue = jest.fn();
+const layerCellValueActions: LayerCellValueActions = [];
 const onSelectRange = jest.fn();
 
 describe('XYChart component', () => {
@@ -114,6 +118,8 @@ describe('XYChart component', () => {
       paletteService,
       minInterval: 50,
       onClickValue,
+      onClickMultiValue,
+      layerCellValueActions,
       onSelectRange,
       syncColors: false,
       syncTooltips: false,
@@ -759,7 +765,7 @@ describe('XYChart component', () => {
       <XYChart {...defaultProps} args={{ ...args, ...markSizeRatioArg }} />
     );
     expect(component.find(Settings).at(0).prop('theme')).toEqual(
-      expect.objectContaining(markSizeRatioArg)
+      expect.arrayContaining([expect.objectContaining(markSizeRatioArg)])
     );
   });
 
@@ -1097,6 +1103,161 @@ describe('XYChart component', () => {
       />
     );
     expect(wrapper.find(Settings).at(0).prop('allowBrushingLastHistogramBin')).toEqual(true);
+  });
+
+  test('should not render tooltip header if no x axis', () => {
+    const { args, data } = sampleArgs();
+    const component = shallow(
+      <XYChart
+        {...defaultProps}
+        args={{
+          ...args,
+          layers: [
+            {
+              layerId: 'first',
+              type: 'dataLayer',
+              layerType: LayerTypes.DATA,
+              seriesType: 'line',
+              isHorizontal: false,
+              isStacked: false,
+              isPercentage: false,
+              showLines: true,
+              xAccessor: undefined,
+              accessors: ['a', 'b'],
+              columnToLabel: '{"a": "Label A", "b": "Label B", "d": "Label D"}',
+              xScaleType: 'ordinal',
+              isHistogram: false,
+              palette: mockPaletteOutput,
+              table: data,
+            },
+          ],
+          detailedTooltip: false,
+        }}
+      />
+    );
+    const tooltip = component.find(Tooltip);
+    const headerFormatter = tooltip.prop('headerFormatter');
+    expect(headerFormatter).toBeUndefined();
+  });
+
+  test('should not have tooltip actions for the detailed tooltip', () => {
+    const { args, data } = sampleArgs();
+
+    const wrapper = mountWithIntl(
+      <XYChart
+        {...defaultProps}
+        args={{
+          ...args,
+          detailedTooltip: true,
+          layers: [
+            {
+              layerId: 'first',
+              type: 'dataLayer',
+              layerType: LayerTypes.DATA,
+              isHistogram: true,
+              seriesType: 'bar',
+              isStacked: true,
+              isHorizontal: false,
+              isPercentage: false,
+              showLines: true,
+              xAccessor: 'b',
+              xScaleType: 'time',
+              splitAccessors: ['b'],
+              accessors: ['d'],
+              columnToLabel: '{"a": "Label A", "b": "Label B", "d": "Label D"}',
+              palette: mockPaletteOutput,
+              table: data,
+            },
+          ],
+        }}
+      />
+    );
+
+    const tooltip = wrapper.find(Tooltip);
+    const actions = tooltip.prop('actions');
+    expect(actions).toBeUndefined();
+  });
+
+  test('should not have tooltip actions for no split accessor', () => {
+    const { args, data } = sampleArgs();
+
+    const wrapper = mountWithIntl(
+      <XYChart
+        {...defaultProps}
+        args={{
+          ...args,
+          layers: [
+            {
+              layerId: 'first',
+              type: 'dataLayer',
+              layerType: LayerTypes.DATA,
+              isHistogram: true,
+              seriesType: 'bar',
+              isStacked: true,
+              isHorizontal: false,
+              isPercentage: false,
+              showLines: true,
+              xAccessor: 'b',
+              xScaleType: 'time',
+              splitAccessors: undefined,
+              accessors: ['d'],
+              columnToLabel: '{"a": "Label A", "b": "Label B", "d": "Label D"}',
+              palette: mockPaletteOutput,
+              table: data,
+            },
+          ],
+        }}
+      />
+    );
+
+    const tooltip = wrapper.find(Tooltip);
+    const actions = tooltip.prop('actions');
+    expect(actions).toBeUndefined();
+  });
+
+  test('should have tooltip actions for split accessor and default tooltip', () => {
+    const { args, data } = sampleArgs();
+
+    const wrapper = mountWithIntl(
+      <XYChart
+        {...defaultProps}
+        args={{
+          ...args,
+          layers: [
+            {
+              layerId: 'first',
+              type: 'dataLayer',
+              layerType: LayerTypes.DATA,
+              isHistogram: true,
+              seriesType: 'bar',
+              isStacked: true,
+              isHorizontal: false,
+              isPercentage: false,
+              showLines: true,
+              xAccessor: 'b',
+              xScaleType: 'time',
+              splitAccessors: ['d'],
+              accessors: ['d'],
+              columnToLabel: '{"a": "Label A", "b": "Label B", "d": "Label D"}',
+              palette: mockPaletteOutput,
+              table: data,
+            },
+          ],
+        }}
+      />
+    );
+
+    const tooltip = wrapper.find(Tooltip);
+    const actions = tooltip.prop('actions');
+    expect(actions?.length).toBe(1);
+    expect(actions).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          onSelect: expect.any(Function),
+          disabled: expect.any(Function),
+        }),
+      ])
+    );
   });
 
   test('onElementClick returns correct context data', () => {
@@ -3281,14 +3442,11 @@ describe('XYChart component', () => {
           }}
         />
       );
-      const settings = component.find(Settings);
-      const tooltip = settings.prop('tooltip');
-      expect(tooltip).toEqual(
-        expect.objectContaining({
-          headerFormatter: undefined,
-          customTooltip: expect.any(Function),
-        })
-      );
+      const tooltip = component.find(Tooltip);
+      const customTooltip = tooltip.prop('customTooltip');
+      expect(customTooltip).not.toBeUndefined();
+      const headerFormatter = tooltip.prop('headerFormatter');
+      expect(headerFormatter).toBeUndefined();
     });
 
     it('should render default tooltip, if detailed tooltip is hidden', () => {
@@ -3303,14 +3461,91 @@ describe('XYChart component', () => {
           }}
         />
       );
-      const settings = component.find(Settings);
-      const tooltip = settings.prop('tooltip');
-      expect(tooltip).toEqual(
-        expect.objectContaining({
-          headerFormatter: expect.any(Function),
-          customTooltip: undefined,
-        })
+      const tooltip = component.find(Tooltip);
+      const customTooltip = tooltip.prop('customTooltip');
+      expect(customTooltip).toBeUndefined();
+      const headerFormatter = tooltip.prop('headerFormatter');
+      expect(headerFormatter).not.toBeUndefined();
+    });
+  });
+
+  describe('overrides', () => {
+    it('should work for settings component', () => {
+      const { args } = sampleArgs();
+
+      const component = shallow(
+        <XYChart
+          {...defaultProps}
+          args={{
+            ...args,
+            layers: [{ ...(args.layers[0] as DataLayerConfig), seriesType: 'line' }],
+          }}
+          overrides={{ settings: { onBrushEnd: 'ignore', ariaUseDefaultSummary: true } }}
+        />
       );
+
+      const settingsComponent = component.find(Settings);
+      expect(settingsComponent.prop('onBrushEnd')).toBeUndefined();
+      expect(settingsComponent.prop('ariaUseDefaultSummary')).toEqual(true);
+    });
+
+    it('should work for all axes components', () => {
+      const args = createArgsWithLayers();
+      const layer = args.layers[0] as DataLayerConfig;
+
+      const component = shallow(
+        <XYChart
+          {...defaultProps}
+          args={{
+            ...args,
+            layers: [
+              {
+                ...layer,
+                accessors: ['a', 'b'],
+                decorations: [
+                  {
+                    type: 'dataDecorationConfig',
+                    forAccessor: 'a',
+                    axisId: '1',
+                  },
+                  {
+                    type: 'dataDecorationConfig',
+                    forAccessor: 'b',
+                    axisId: '2',
+                  },
+                ],
+                table: dataWithoutFormats,
+              },
+            ],
+            yAxisConfigs: [
+              {
+                type: 'yAxisConfig',
+                id: '1',
+                position: 'left',
+              },
+              {
+                type: 'yAxisConfig',
+                id: '2',
+                position: 'right',
+              },
+            ],
+          }}
+          overrides={{
+            settings: { onBrushEnd: 'ignore', ariaUseDefaultSummary: true },
+            axisX: { showOverlappingTicks: true },
+            axisLeft: { showOverlappingTicks: true },
+            axisRight: { showOverlappingTicks: true },
+          }}
+        />
+      );
+
+      const axes = component.find(Axis);
+      expect(axes).toHaveLength(3);
+      if (Array.isArray(axes)) {
+        for (const axis of axes) {
+          expect(axis.prop('showOverlappingTicks').toEqual(true));
+        }
+      }
     });
   });
 });

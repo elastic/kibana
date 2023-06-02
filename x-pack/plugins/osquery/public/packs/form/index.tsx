@@ -145,7 +145,7 @@ const PackFormComponent: React.FC<PackFormProps> = ({
     async (values: PackFormData) => {
       const serializer = ({
         shards: _,
-        policy_ids: payloadPolicyIds,
+        policy_ids: payloadAgentPolicyIds,
         queries,
         ...restPayload
       }: PackFormData) => {
@@ -158,7 +158,7 @@ const PackFormComponent: React.FC<PackFormProps> = ({
               })
             ) as string[])
           : [];
-        const policies = [...payloadPolicyIds, ...mappedShards];
+        const policies = [...payloadAgentPolicyIds, ...mappedShards];
 
         return {
           ...restPayload,
@@ -169,15 +169,15 @@ const PackFormComponent: React.FC<PackFormProps> = ({
       };
 
       try {
-        if (editMode && defaultValue?.id) {
-          await updateAsync({ id: defaultValue?.id, ...serializer(values) });
+        if (editMode && defaultValue?.saved_object_id) {
+          await updateAsync({ id: defaultValue?.saved_object_id, ...serializer(values) });
         } else {
           await createAsync(serializer(values));
         }
         // eslint-disable-next-line no-empty
       } catch (e) {}
     },
-    [createAsync, defaultValue?.id, editMode, getShards, shards, updateAsync]
+    [createAsync, defaultValue?.saved_object_id, editMode, getShards, shards, updateAsync]
   );
 
   const handleSubmitForm = useMemo(() => handleSubmit(onSubmit), [handleSubmit, onSubmit]);

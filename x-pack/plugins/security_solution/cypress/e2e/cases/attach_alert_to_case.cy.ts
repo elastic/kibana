@@ -9,7 +9,7 @@ import { getNewRule } from '../../objects/rule';
 import { ROLES } from '../../../common/test';
 
 import { expandFirstAlertActions } from '../../tasks/alerts';
-import { createCustomRuleEnabled } from '../../tasks/api_calls/rules';
+import { createRule } from '../../tasks/api_calls/rules';
 import { cleanKibana } from '../../tasks/common';
 import { waitForAlertsToPopulate } from '../../tasks/create_new_rule';
 import { login, visit, waitForPageWithoutDateRange } from '../../tasks/login';
@@ -19,6 +19,7 @@ import { ATTACH_ALERT_TO_CASE_BUTTON, ATTACH_TO_NEW_CASE_BUTTON } from '../../sc
 import { LOADING_INDICATOR } from '../../screens/security_header';
 
 const loadDetectionsPage = (role: ROLES) => {
+  login(role);
   waitForPageWithoutDateRange(ALERTS_URL, role);
   waitForAlertsToPopulate();
 };
@@ -28,14 +29,13 @@ describe('Alerts timeline', () => {
     // First we login as a privileged user to create alerts.
     cleanKibana();
     login();
-    createCustomRuleEnabled(getNewRule());
+    createRule(getNewRule());
     visit(ALERTS_URL);
     waitForAlertsToPopulate();
   });
 
   context('Privileges: read only', () => {
     beforeEach(() => {
-      login(ROLES.reader);
       loadDetectionsPage(ROLES.reader);
     });
 
@@ -54,7 +54,6 @@ describe('Alerts timeline', () => {
 
   context('Privileges: can crud', () => {
     beforeEach(() => {
-      login(ROLES.platform_engineer);
       loadDetectionsPage(ROLES.platform_engineer);
       cy.get(LOADING_INDICATOR).should('not.exist'); // on CI, waitForPageToBeLoaded fails because the loading icon can't be found
     });

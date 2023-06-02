@@ -23,13 +23,17 @@ import type { NamespaceType } from '@kbn/securitysolution-io-ts-list-types';
 import { HeaderMenu } from '@kbn/securitysolution-exception-list-components';
 import styled from 'styled-components';
 import { euiThemeVars } from '@kbn/ui-theme';
+import type { Rule } from '../../../detection_engine/rule_management/logic/types';
 import { EditExceptionFlyout } from '../../../detection_engine/rule_exceptions/components/edit_exception_flyout';
 import { AddExceptionFlyout } from '../../../detection_engine/rule_exceptions/components/add_exception_flyout';
 import type { ExceptionListInfo } from '../../hooks/use_all_exception_lists';
 import { TitleBadge } from '../title_badge';
 import * as i18n from '../../translations';
 import { ListExceptionItems } from '../list_exception_items';
+import { useListDetailsView } from '../../hooks';
 import { useExceptionsListCard } from '../../hooks/use_exceptions_list.card';
+import { ManageRules } from '../manage_rules';
+import { IncludeExpiredExceptionsModal } from '../expired_exceptions_list_items_modal';
 
 interface ExceptionsListCardProps {
   exceptionsList: ExceptionListInfo;
@@ -44,11 +48,26 @@ interface ExceptionsListCardProps {
   }) => () => Promise<void>;
   handleExport: ({
     id,
+    includeExpiredExceptions,
     listId,
+    name,
     namespaceType,
   }: {
     id: string;
+    includeExpiredExceptions: boolean;
     listId: string;
+    name: string;
+    namespaceType: NamespaceType;
+  }) => () => Promise<void>;
+  handleDuplicate: ({
+    includeExpiredExceptions,
+    listId,
+    name,
+    namespaceType,
+  }: {
+    includeExpiredExceptions: boolean;
+    listId: string;
+    name: string;
     namespaceType: NamespaceType;
   }) => () => Promise<void>;
   readOnly: boolean;
@@ -67,9 +86,21 @@ const ExceptionPanel = styled(EuiPanel)`
 `;
 const ListHeaderContainer = styled(EuiFlexGroup)`
   padding: ${euiThemeVars.euiSizeS};
+  text-align: initial;
 `;
 export const ExceptionsListCard = memo<ExceptionsListCardProps>(
-  ({ exceptionsList, handleDelete, handleExport, readOnly }) => {
+  ({ exceptionsList, handleDelete, handleExport, handleDuplicate, readOnly }) => {
+    const {
+      linkedRules,
+      showManageRulesFlyout,
+      showManageButtonLoader,
+      disableManageButton,
+      onManageRules,
+      onSaveManageRules,
+      onCancelManageRules,
+      onRuleSelectionChange,
+    } = useListDetailsView(exceptionsList.list_id);
+
     const {
       listId,
       listName,
@@ -82,7 +113,6 @@ export const ExceptionsListCard = memo<ExceptionsListCardProps>(
       toggleAccordion,
       openAccordionId,
       menuActionItems,
-      listRulesCount,
       listDescription,
       exceptionItemsCount,
       onEditExceptionItem,
@@ -100,10 +130,15 @@ export const ExceptionsListCard = memo<ExceptionsListCardProps>(
       emptyViewerTitle,
       emptyViewerBody,
       emptyViewerButtonText,
+      handleCancelExpiredExceptionsModal,
+      handleConfirmExpiredExceptionsModal,
+      showIncludeExpiredExceptionsModal,
     } = useExceptionsListCard({
       exceptionsList,
       handleExport,
       handleDelete,
+      handleDuplicate,
+      handleManageRules: onManageRules,
     });
 
     return (
@@ -160,8 +195,11 @@ export const ExceptionsListCard = memo<ExceptionsListCardProps>(
                         <EuiFlexItem>
                           <TitleBadge title={i18n.EXCEPTIONS} badgeString={exceptionItemsCount} />
                         </EuiFlexItem>
-                        <EuiFlexItem>
-                          <TitleBadge title={i18n.RULES} badgeString={listRulesCount} />
+                        <EuiFlexItem data-test-subj="exceptionListCardLinkedRulesBadge">
+                          <TitleBadge
+                            title={i18n.RULES}
+                            badgeString={linkedRules.length.toString()}
+                          />
                         </EuiFlexItem>
                         <EuiFlexItem>
                           <HeaderMenu
@@ -175,6 +213,7 @@ export const ExceptionsListCard = memo<ExceptionsListCardProps>(
                   </ListHeaderContainer>
                 </EuiPanel>
               }
+              data-test-subj={`exceptionsManagementListCard-${listId}`}
             >
               <ExceptionPanel hasBorder>
                 <ListExceptionItems
@@ -219,6 +258,23 @@ export const ExceptionsListCard = memo<ExceptionsListCardProps>(
             onCancel={handleCancelExceptionItemFlyout}
             onConfirm={handleConfirmExceptionFlyout}
             data-test-subj="editExceptionItemFlyoutInSharedLists"
+          />
+        ) : null}
+        {showManageRulesFlyout ? (
+          <ManageRules
+            linkedRules={linkedRules as Rule[]}
+            showButtonLoader={showManageButtonLoader}
+            saveIsDisabled={disableManageButton}
+            onSave={onSaveManageRules}
+            onCancel={onCancelManageRules}
+            onRuleSelectionChange={onRuleSelectionChange}
+          />
+        ) : null}
+        {showIncludeExpiredExceptionsModal ? (
+          <IncludeExpiredExceptionsModal
+            handleCloseModal={handleCancelExpiredExceptionsModal}
+            onModalConfirm={handleConfirmExpiredExceptionsModal}
+            action={showIncludeExpiredExceptionsModal}
           />
         ) : null}
       </EuiFlexGroup>

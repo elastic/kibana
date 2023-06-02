@@ -20,7 +20,11 @@ describe('addConnectorApiLogic', () => {
     it('calls correct api', async () => {
       const promise = Promise.resolve({ id: 'unique id', index_name: 'indexName' });
       http.post.mockReturnValue(promise);
-      const result = addConnector({ indexName: 'indexName', isNative: false, language: 'en' });
+      const result = addConnector({
+        indexName: 'indexName',
+        isNative: false,
+        language: 'en',
+      });
       await nextTick();
       expect(http.post).toHaveBeenCalledWith('/internal/enterprise_search/connectors', {
         body: JSON.stringify({ index_name: 'indexName', is_native: false, language: 'en' }),

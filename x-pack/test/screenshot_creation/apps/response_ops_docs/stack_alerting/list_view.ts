@@ -6,43 +6,65 @@
  */
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
+import { indexThresholdRuleName } from '.';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const commonScreenshots = getService('commonScreenshots');
   const screenshotDirectories = ['response_ops_docs', 'stack_alerting'];
   const pageObjects = getPageObjects(['common', 'header']);
-  const actions = getService('actions');
+  const testSubjects = getService('testSubjects');
 
   describe('list view', function () {
-    let serverLogConnectorId: string;
-
-    before(async () => {
-      const connectorName = `server-log-connector`;
-      ({ id: serverLogConnectorId } = await createServerLogConnector(connectorName));
+    it('rules list screenshot', async () => {
+      await pageObjects.common.navigateToApp('triggersActions');
+      await pageObjects.header.waitUntilLoadingHasFinished();
+      await commonScreenshots.takeScreenshot('rules-ui', screenshotDirectories, 1400, 1024);
     });
 
-    after(async () => {
-      await actions.api.deleteConnector(serverLogConnectorId);
+    it('rule status screenshot', async () => {
+      await pageObjects.common.navigateToApp('triggersActions');
+      await pageObjects.header.waitUntilLoadingHasFinished();
+      const actionsDropdown = await testSubjects.find('statusDropdown');
+      await actionsDropdown.click();
+      await testSubjects.find('ruleStatusMenu');
+      await commonScreenshots.takeScreenshot(
+        'individual-enable-disable',
+        screenshotDirectories,
+        1400,
+        1024
+      );
     });
 
-    it('connectors list screenshot', async () => {
-      await pageObjects.common.navigateToApp('connectors');
+    it('rule snooze screenshot', async () => {
+      await pageObjects.common.navigateToApp('triggersActions');
+      await pageObjects.header.waitUntilLoadingHasFinished();
+      const snoozeBadge = await testSubjects.find('rulesListNotifyBadge-unsnoozed');
+      await snoozeBadge.click();
+      await commonScreenshots.takeScreenshot('snooze-panel', screenshotDirectories, 1400, 1024);
+    });
+
+    it('rule detail screenshots', async () => {
+      await pageObjects.common.navigateToApp('triggersActions');
+      await pageObjects.header.waitUntilLoadingHasFinished();
+      await testSubjects.setValue('ruleSearchField', indexThresholdRuleName);
+      const rulesList = await testSubjects.find('rulesList');
+      const alertRule = await rulesList.findByCssSelector(`[title="${indexThresholdRuleName}"]`);
+      await alertRule.click();
       await pageObjects.header.waitUntilLoadingHasFinished();
       await commonScreenshots.takeScreenshot(
-        'connector-listing',
+        'rule-details-alerts-active',
+        screenshotDirectories,
+        1400,
+        1024
+      );
+      const actionsButton = await testSubjects.find('ruleActionsButton');
+      await actionsButton.click();
+      await commonScreenshots.takeScreenshot(
+        'rule-details-disabling',
         screenshotDirectories,
         1400,
         1024
       );
     });
   });
-
-  const createServerLogConnector = async (name: string) => {
-    return actions.api.createConnector({
-      name,
-      config: {},
-      secrets: {},
-      connectorTypeId: '.server-log',
-    });
-  };
 }

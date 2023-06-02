@@ -21,7 +21,7 @@ import { LogQueryFields } from '../../lib/metrics/types';
 const escapeHatch = schema.object({}, { unknowns: 'allow' });
 
 export const initSnapshotRoute = (libs: InfraBackendLibs) => {
-  const { framework, handleEsError } = libs;
+  const { framework } = libs;
 
   framework.registerRoute(
     {
@@ -43,7 +43,10 @@ export const initSnapshotRoute = (libs: InfraBackendLibs) => {
       const [, , { logViews }] = await libs.getStartServices();
       const logQueryFields: LogQueryFields | undefined = await logViews
         .getScopedClient(request)
-        .getResolvedLogView(snapshotRequest.sourceId)
+        .getResolvedLogView({
+          type: 'log-view-reference',
+          logViewId: snapshotRequest.sourceId,
+        })
         .then(
           ({ indices }) => ({ indexPattern: indices }),
           () => undefined
@@ -64,7 +67,19 @@ export const initSnapshotRoute = (libs: InfraBackendLibs) => {
           body: SnapshotNodeResponseRT.encode(snapshotResponse),
         });
       } catch (err) {
-        return handleEsError({ error: err, response });
+        if (Boom.isBoom(err)) {
+          return response.customError({
+            statusCode: err.output.statusCode,
+            body: { message: err.output.payload.message },
+          });
+        }
+
+        return response.customError({
+          statusCode: err.statusCode ?? err,
+          body: {
+            message: err.message ?? 'An unexpected error occurred',
+          },
+        });
       }
     }
   );

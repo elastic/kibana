@@ -10,8 +10,16 @@ import {
   ConfigKey,
   DataStream,
   FormMonitorType,
+  ProjectMonitor,
+  ThrottlingConfig,
 } from '../../../../common/runtime_types';
-import { DEFAULT_FIELDS } from '../../../../common/constants/monitor_defaults';
+import {
+  PROFILE_VALUES_ENUM,
+  DEFAULT_FIELDS,
+  PROFILES_MAP,
+  PROFILE_VALUES,
+  CUSTOM_LABEL,
+} from '../../../../common/constants/monitor_defaults';
 import {
   NormalizedProjectProps,
   NormalizerResult,
@@ -29,7 +37,7 @@ export const getNormalizeBrowserFields = ({
 }: NormalizedProjectProps): NormalizerResult<BrowserFields> => {
   const defaultFields = DEFAULT_FIELDS[DataStream.BROWSER];
 
-  const commonFields = getNormalizeCommonFields({
+  const { errors, normalizedFields: commonFields } = getNormalizeCommonFields({
     locations,
     privateLocations,
     monitor,
@@ -38,33 +46,21 @@ export const getNormalizeBrowserFields = ({
     version,
   });
 
+  const throttling = normalizeThrottling(monitor.throttling);
+
   const normalizedFields = {
     ...commonFields,
     [ConfigKey.MONITOR_TYPE]: DataStream.BROWSER,
     [ConfigKey.FORM_MONITOR_TYPE]: FormMonitorType.MULTISTEP,
     [ConfigKey.SOURCE_PROJECT_CONTENT]:
       monitor.content || defaultFields[ConfigKey.SOURCE_PROJECT_CONTENT],
-    [ConfigKey.THROTTLING_CONFIG]: monitor.throttling
-      ? `${monitor.throttling.download}d/${monitor.throttling.upload}u/${monitor.throttling.latency}l`
-      : defaultFields[ConfigKey.THROTTLING_CONFIG],
-    [ConfigKey.DOWNLOAD_SPEED]: `${
-      monitor.throttling?.download || defaultFields[ConfigKey.DOWNLOAD_SPEED]
-    }`,
-    [ConfigKey.UPLOAD_SPEED]: `${
-      monitor.throttling?.upload || defaultFields[ConfigKey.UPLOAD_SPEED]
-    }`,
-    [ConfigKey.IS_THROTTLING_ENABLED]:
-      Boolean(monitor.throttling) ?? defaultFields[ConfigKey.IS_THROTTLING_ENABLED],
-    [ConfigKey.LATENCY]: `${monitor.throttling?.latency || defaultFields[ConfigKey.LATENCY]}`,
+    [ConfigKey.THROTTLING_CONFIG]: throttling,
     [ConfigKey.IGNORE_HTTPS_ERRORS]:
       monitor.ignoreHTTPSErrors || defaultFields[ConfigKey.IGNORE_HTTPS_ERRORS],
     [ConfigKey.SCREENSHOTS]: monitor.screenshot || defaultFields[ConfigKey.SCREENSHOTS],
     [ConfigKey.PLAYWRIGHT_OPTIONS]: Object.keys(monitor.playwrightOptions || {}).length
       ? JSON.stringify(monitor.playwrightOptions)
       : defaultFields[ConfigKey.PLAYWRIGHT_OPTIONS],
-    [ConfigKey.PARAMS]: Object.keys(monitor.params || {}).length
-      ? JSON.stringify(monitor.params)
-      : defaultFields[ConfigKey.PARAMS],
     [ConfigKey.JOURNEY_FILTERS_MATCH]:
       monitor.filter?.match || defaultFields[ConfigKey.JOURNEY_FILTERS_MATCH],
     [ConfigKey.TIMEOUT]: monitor.timeout
@@ -77,6 +73,43 @@ export const getNormalizeBrowserFields = ({
       ...normalizedFields,
     },
     unsupportedKeys: [],
-    errors: [],
+    errors,
   };
+};
+
+export const normalizeThrottling = (
+  monitorThrottling: ProjectMonitor['throttling']
+): ThrottlingConfig => {
+  const defaultFields = DEFAULT_FIELDS[DataStream.BROWSER];
+
+  let throttling = defaultFields[ConfigKey.THROTTLING_CONFIG];
+  if (typeof monitorThrottling === 'boolean' && !monitorThrottling) {
+    throttling = PROFILES_MAP[PROFILE_VALUES_ENUM.NO_THROTTLING];
+  }
+  if (typeof monitorThrottling === 'object') {
+    const { download, upload, latency } = monitorThrottling;
+    const matchedProfile = PROFILE_VALUES.find(({ value }) => {
+      return (
+        Number(value?.download) === download &&
+        Number(value?.upload) === upload &&
+        Number(value?.latency) === latency
+      );
+    });
+
+    if (matchedProfile) {
+      return matchedProfile;
+    } else {
+      return {
+        id: PROFILE_VALUES_ENUM.CUSTOM,
+        label: CUSTOM_LABEL,
+        value: {
+          download: String(download),
+          upload: String(upload),
+          latency: String(latency),
+        },
+      };
+    }
+  }
+
+  return throttling;
 };

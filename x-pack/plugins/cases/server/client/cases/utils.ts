@@ -8,20 +8,22 @@
 import { uniqBy, isEmpty } from 'lodash';
 import type { UserProfile } from '@kbn/security-plugin/common';
 import type { IBasePath } from '@kbn/core-http-browser';
+import type { SecurityPluginStart } from '@kbn/security-plugin/server';
+import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import { CASE_VIEW_PAGE_TABS } from '../../../common/types';
 import { isPushedUserAction } from '../../../common/utils/user_actions';
 import type {
   ActionConnector,
   CaseFullExternalService,
-  CaseResponse,
-  CaseUserActionsResponse,
-  CommentResponse,
+  Case,
+  Comment,
   User,
   CaseAttributes,
   CaseAssignees,
-  ConnectorMappingsAttributes,
   CaseField,
   ThirdPartyField,
+  CaseUserActionsDeprecatedResponse,
+  ConnectorMappings,
 } from '../../../common/api';
 import { CommentType, ActionTypes, CaseStatuses } from '../../../common/api';
 import type { CasesClientGetAlertsResponse } from '../alerts/types';
@@ -32,8 +34,8 @@ import { getCaseViewPath } from '../../common/utils';
 import * as i18n from './translations';
 
 interface CreateIncidentArgs {
-  theCase: CaseResponse;
-  userActions: CaseUserActionsResponse;
+  theCase: Case;
+  userActions: CaseUserActionsDeprecatedResponse;
   connector: ActionConnector;
   alerts: CasesClientGetAlertsResponse;
   casesConnectors: CasesConnectorsMap;
@@ -54,7 +56,7 @@ type LatestPushInfo = { index: number; pushedInfo: CaseFullExternalService } | n
 
 export const getLatestPushInfo = (
   connectorId: string,
-  userActions: CaseUserActionsResponse
+  userActions: CaseUserActionsDeprecatedResponse
 ): LatestPushInfo => {
   for (const [index, action] of [...userActions].reverse().entries()) {
     if (isPushedUserAction(action) && connectorId === action.payload.externalService.connector_id) {
@@ -75,7 +77,7 @@ export const getLatestPushInfo = (
   return null;
 };
 
-const getCommentContent = (comment: CommentResponse): string => {
+const getCommentContent = (comment: Comment): string => {
   if (comment.type === CommentType.user) {
     return comment.comment;
   } else if (comment.type === CommentType.alert) {
@@ -104,7 +106,7 @@ interface CountAlertsInfo {
 }
 
 const getAlertsInfo = (
-  comments: CaseResponse['comments']
+  comments: Case['comments']
 ): { totalAlerts: number; hasUnpushedAlertComments: boolean } => {
   const countingInfo = { totalComments: 0, pushed: 0, totalAlerts: 0 };
 
@@ -127,7 +129,7 @@ const getAlertsInfo = (
 };
 
 const addAlertMessage = (params: {
-  theCase: CaseResponse;
+  theCase: Case;
   externalServiceComments: ExternalServiceComment[];
   spaceId: string;
   publicBaseUrl?: IBasePath['publicBaseUrl'];
@@ -208,12 +210,14 @@ export const createIncident = async ({
 };
 
 export const mapCaseFieldsToExternalSystemFields = (
-  caseFields: Record<Exclude<CaseField, 'comments'>, unknown>,
-  mapping: ConnectorMappingsAttributes[]
+  caseFields: Record<Exclude<CaseField, 'comments' | 'tags'>, unknown>,
+  mapping: ConnectorMappings
 ): Record<ThirdPartyField, unknown> => {
   const mappedCaseFields: Record<ThirdPartyField, unknown> = {};
 
-  for (const caseFieldKey of Object.keys(caseFields) as Array<Exclude<CaseField, 'comments'>>) {
+  for (const caseFieldKey of Object.keys(caseFields) as Array<
+    Exclude<CaseField, 'comments' | 'tags'>
+  >) {
     const mapDefinition = mapping.find(
       (mappingEntry) => mappingEntry.source === caseFieldKey && mappingEntry.target !== 'not_mapped'
     );
@@ -234,9 +238,9 @@ export const formatComments = ({
   userProfiles,
   publicBaseUrl,
 }: {
-  theCase: CaseResponse;
+  theCase: Case;
   latestPushInfo: LatestPushInfo;
-  userActions: CaseUserActionsResponse;
+  userActions: CaseUserActionsDeprecatedResponse;
   spaceId: string;
   userProfiles?: Map<string, UserProfile>;
   publicBaseUrl?: IBasePath['publicBaseUrl'];
@@ -271,7 +275,7 @@ export const formatComments = ({
 };
 
 export const addKibanaInformationToDescription = (
-  theCase: CaseResponse,
+  theCase: Case,
   spaceId: string,
   userProfiles?: Map<string, UserProfile>,
   publicBaseUrl?: IBasePath['publicBaseUrl']
@@ -303,7 +307,7 @@ export const addKibanaInformationToDescription = (
 };
 
 const addKibanaInformationToComments = (
-  comments: CaseResponse['comments'] = [],
+  comments: Case['comments'] = [],
   userProfiles?: Map<string, UserProfile>
 ): ExternalServiceComment[] =>
   comments.map((theComment) => {
@@ -324,7 +328,7 @@ const addKibanaInformationToComments = (
   });
 
 export const getEntity = (
-  entity: { createdBy: CaseResponse['created_by']; updatedBy: CaseResponse['updated_by'] },
+  entity: { createdBy: Case['created_by']; updatedBy: Case['updated_by'] },
   userProfiles?: Map<string, UserProfile>
 ): string => {
   return (
@@ -427,4 +431,25 @@ export const getDurationForUpdate = ({
       duration: null,
     };
   }
+};
+
+export const getUserProfiles = async (
+  securityStartPlugin: SecurityPluginStart,
+  uids: Set<string>,
+  dataPath?: string
+): Promise<Map<string, UserProfileWithAvatar>> => {
+  if (uids.size <= 0) {
+    return new Map();
+  }
+
+  const userProfiles =
+    (await securityStartPlugin.userProfiles.bulkGet({
+      uids,
+      dataPath,
+    })) ?? [];
+
+  return userProfiles.reduce<Map<string, UserProfileWithAvatar>>((acc, profile) => {
+    acc.set(profile.uid, profile);
+    return acc;
+  }, new Map());
 };

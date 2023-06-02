@@ -7,8 +7,6 @@
  */
 
 import React, { PureComponent } from 'react';
-import { i18n } from '@kbn/i18n';
-
 import classNames from 'classnames';
 import { METRIC_TYPE } from '@kbn/analytics';
 
@@ -26,6 +24,7 @@ import {
   PopoverAnchorPosition,
   toSentenceCase,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { compact, debounce, isEmpty, isEqual, isFunction, partition } from 'lodash';
 import { CoreStart, DocLinksStart, Toast } from '@kbn/core/public';
@@ -37,6 +36,7 @@ import { getFieldSubtypeNested, KIBANA_USER_QUERY_LANGUAGE_KEY } from '@kbn/data
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
+import { buildQueryFromFilters, Filter } from '@kbn/es-query';
 import { matchPairs } from './match_pairs';
 import { toUser } from './to_user';
 import { fromUser } from './from_user';
@@ -49,6 +49,36 @@ import { FilterButtonGroup } from '../filter_bar/filter_button_group/filter_butt
 import { AutocompleteService, QuerySuggestion, QuerySuggestionTypes } from '../autocomplete';
 import { getTheme } from '../services';
 import './query_string_input.scss';
+
+export const strings = {
+  getSearchInputPlaceholderForText: () =>
+    i18n.translate('unifiedSearch.query.queryBar.searchInputPlaceholderForText', {
+      defaultMessage: 'Filter your data',
+    }),
+  getSearchInputPlaceholder: (language: string) =>
+    i18n.translate('unifiedSearch.query.queryBar.searchInputPlaceholder', {
+      defaultMessage: 'Filter your data using {language} syntax',
+      values: { language },
+    }),
+  getQueryBarComboboxAriaLabel: (pageType: string) =>
+    i18n.translate('unifiedSearch.query.queryBar.comboboxAriaLabel', {
+      defaultMessage: 'Search and filter the {pageType} page',
+      values: { pageType },
+    }),
+  getQueryBarSearchInputAriaLabel: (pageType: string) =>
+    i18n.translate('unifiedSearch.query.queryBar.searchInputAriaLabel', {
+      defaultMessage: 'Start typing to search and filter the {pageType} page',
+      values: { pageType },
+    }),
+  getQueryBarClearInputLabel: () =>
+    i18n.translate('unifiedSearch.query.queryBar.clearInputLabel', {
+      defaultMessage: 'Clear input',
+    }),
+  getKQLNestedQuerySyntaxInfoTitle: () =>
+    i18n.translate('unifiedSearch.query.queryBar.KQLNestedQuerySyntaxInfoTitle', {
+      defaultMessage: 'KQL nested query syntax',
+    }),
+};
 
 export interface QueryStringInputDependencies {
   unifiedSearch: {
@@ -108,6 +138,11 @@ export interface QueryStringInputProps {
    * Override whether autocomplete suggestions are restricted by time range.
    */
   timeRangeForSuggestionsOverride?: boolean;
+
+  /**
+   * Add additional filters used for suggestions
+   */
+  filtersForSuggestions?: Filter[];
 }
 
 interface State {
@@ -250,6 +285,8 @@ export default class QueryStringInputUI extends PureComponent<QueryStringInputPr
           selectionEnd,
           signal: this.abortController.signal,
           useTimeRange: this.props.timeRangeForSuggestionsOverride,
+          boolFilter: buildQueryFromFilters(this.props.filtersForSuggestions, undefined).filter,
+          method: this.props.filtersForSuggestions?.length ? 'terms_agg' : undefined,
         })) || [];
       return [...suggestions, ...recentSearchSuggestions];
     } catch (e) {
@@ -484,9 +521,7 @@ export default class QueryStringInputUI extends PureComponent<QueryStringInputPr
 
       if (notifications && docLinks) {
         const toast = notifications.toasts.add({
-          title: i18n.translate('unifiedSearch.query.queryBar.KQLNestedQuerySyntaxInfoTitle', {
-            defaultMessage: 'KQL nested query syntax',
-          }),
+          title: strings.getKQLNestedQuerySyntaxInfoTitle(),
           text: toMountPoint(
             <div>
               <p>
@@ -707,22 +742,13 @@ export default class QueryStringInputUI extends PureComponent<QueryStringInputPr
   };
 
   getSearchInputPlaceholder = () => {
-    let placeholder = '';
     if (!this.props.query.language || this.props.query.language === 'text') {
-      placeholder = i18n.translate('unifiedSearch.query.queryBar.searchInputPlaceholderForText', {
-        defaultMessage: 'Filter your data',
-      });
-    } else {
-      const language =
-        this.props.query.language === 'kuery' ? 'KQL' : toSentenceCase(this.props.query.language);
-
-      placeholder = i18n.translate('unifiedSearch.query.queryBar.searchInputPlaceholder', {
-        defaultMessage: 'Filter your data using {language} syntax',
-        values: { language },
-      });
+      return strings.getSearchInputPlaceholderForText();
     }
+    const language =
+      this.props.query.language === 'kuery' ? 'KQL' : toSentenceCase(this.props.query.language);
 
-    return placeholder;
+    return strings.getSearchInputPlaceholder(language);
   };
 
   public render() {
@@ -766,10 +792,7 @@ export default class QueryStringInputUI extends PureComponent<QueryStringInputPr
           <div
             {...ariaCombobox}
             style={{ position: 'relative', width: '100%' }}
-            aria-label={i18n.translate('unifiedSearch.query.queryBar.comboboxAriaLabel', {
-              defaultMessage: 'Search and filter the {pageType} page',
-              values: { pageType: this.props.appName },
-            })}
+            aria-label={strings.getQueryBarComboboxAriaLabel(this.props.appName)}
             aria-haspopup="true"
             aria-expanded={this.state.isSuggestionsVisible}
             data-skip-axe="aria-required-children"
@@ -795,10 +818,7 @@ export default class QueryStringInputUI extends PureComponent<QueryStringInputPr
                 inputRef={this.assignInputRef}
                 autoComplete="off"
                 spellCheck={false}
-                aria-label={i18n.translate('unifiedSearch.query.queryBar.searchInputAriaLabel', {
-                  defaultMessage: 'Start typing to search and filter the {pageType} page',
-                  values: { pageType: this.props.appName },
-                })}
+                aria-label={strings.getQueryBarSearchInputAriaLabel(this.props.appName)}
                 aria-autocomplete="list"
                 aria-controls={this.state.isSuggestionsVisible ? 'kbnTypeahead__items' : undefined}
                 aria-activedescendant={
@@ -812,8 +832,9 @@ export default class QueryStringInputUI extends PureComponent<QueryStringInputPr
               >
                 {this.forwardNewValueIfNeeded(this.getQueryString())}
               </EuiTextArea>
+              {/* EUI TODO: This will need to be fixed before the Emotion conversion */}
               {this.props.iconType ? (
-                <div className="euiFormControlLayoutIcons">
+                <div className="euiFormControlLayoutIcons euiFormControlLayoutIcons--absolute euiFormControlLayoutIcons--left">
                   <EuiIcon
                     className="euiFormControlLayoutCustomIcon__icon"
                     aria-hidden="true"
@@ -822,13 +843,11 @@ export default class QueryStringInputUI extends PureComponent<QueryStringInputPr
                 </div>
               ) : null}
               {this.props.isClearable && !this.props.isDisabled && this.props.query.query ? (
-                <div className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right">
+                <div className="euiFormControlLayoutIcons euiFormControlLayoutIcons--absolute euiFormControlLayoutIcons--right">
                   <button
                     type="button"
                     className="euiFormControlLayoutClearButton"
-                    title={i18n.translate('unifiedSearch.query.queryBar.clearInputLabel', {
-                      defaultMessage: 'Clear input',
-                    })}
+                    title={strings.getQueryBarClearInputLabel()}
                     onClick={() => {
                       this.onQueryStringChange('');
                       if (this.props.autoSubmit) {

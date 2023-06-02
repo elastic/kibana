@@ -24,7 +24,7 @@ exports[`<Settings /> can navigate Autoplay Settings 1`] = `
         class="emotion-euiScreenReaderOnly"
         id="generated-id"
       >
-        You are in a dialog. To close this dialog, hit escape.
+        You are in a dialog. Press Escape, or tap/click outside the dialog to close.
       </p>
       <div>
         <div
@@ -125,7 +125,7 @@ exports[`<Settings /> can navigate Autoplay Settings 2`] = `
         class="emotion-euiScreenReaderOnly"
         id="generated-id"
       >
-        You are in a dialog. To close this dialog, hit escape.
+        You are in a dialog. Press Escape, or tap/click outside the dialog to close.
       </p>
       <div>
         <div
@@ -296,7 +296,6 @@ exports[`<Settings /> can navigate Autoplay Settings 2`] = `
                             >
                               <input
                                 aria-describedby="generated-id-help-0"
-                                aria-invalid="false"
                                 class="euiFieldText euiFieldText--compressed"
                                 id="generated-id"
                                 type="text"
@@ -378,7 +377,7 @@ exports[`<Settings /> can navigate Toolbar Settings, closes when activated 1`] =
         class="emotion-euiScreenReaderOnly"
         id="generated-id"
       >
-        You are in a dialog. To close this dialog, hit escape.
+        You are in a dialog. Press Escape, or tap/click outside the dialog to close.
       </p>
       <div>
         <div
@@ -479,7 +478,7 @@ exports[`<Settings /> can navigate Toolbar Settings, closes when activated 2`] =
         class="emotion-euiScreenReaderOnly"
         id="generated-id"
       >
-        You are in a dialog. To close this dialog, hit escape.
+        You are in a dialog. Press Escape, or tap/click outside the dialog to close.
       </p>
       <div>
         <div
@@ -665,7 +664,7 @@ exports[`<Settings /> can navigate Toolbar Settings, closes when activated 3`] =
         class="emotion-euiScreenReaderOnly"
         id="generated-id"
       >
-        You are in a dialog. To close this dialog, hit escape.
+        You are in a dialog. Press Escape, or tap/click outside the dialog to close.
       </p>
       <div>
         <div

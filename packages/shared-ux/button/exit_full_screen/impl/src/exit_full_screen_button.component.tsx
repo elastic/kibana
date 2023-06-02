@@ -12,6 +12,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
+  EuiImage,
   useEuiTheme,
   makeHighContrastColor,
 } from '@elastic/eui';
@@ -37,7 +38,7 @@ const description = i18n.translate(
 /**
  * A presentational component that renders a button designed to exit "full screen" mode.
  */
-export const ExitFullScreenButton = ({ onClick, className }: Props) => {
+export const ExitFullScreenButton = ({ onClick, className, customLogo }: Props) => {
   const { euiTheme } = useEuiTheme();
   const { colors, size, border } = euiTheme;
 
@@ -63,7 +64,11 @@ export const ExitFullScreenButton = ({ onClick, className }: Props) => {
       >
         <EuiFlexGroup component="span" responsive={false} alignItems="center" gutterSize="s">
           <EuiFlexItem component="span" grow={false}>
-            <EuiIcon type="logoElastic" size="m" />
+            {customLogo ? (
+              <EuiImage src={customLogo} size={16} alt="customLogo" />
+            ) : (
+              <EuiIcon type="logoElastic" size="m" />
+            )}
           </EuiFlexItem>
           <EuiFlexItem component="span" grow={false} data-test-subj="exitFullScreenModeText">
             {text}

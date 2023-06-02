@@ -9,6 +9,7 @@ import { Client } from '@elastic/elasticsearch';
 import { ToolingLog } from '@kbn/tooling-log';
 import { KbnClient } from '@kbn/test';
 import type { StatusResponse } from '@kbn/core-status-common-internal';
+import { getLocalhostRealIp, isLocalhost } from './localhost_services';
 import { createSecuritySuperuser } from './security_user_services';
 
 export interface RuntimeServices {
@@ -19,11 +20,31 @@ export interface RuntimeServices {
     username: string;
     password: string;
   }>;
+  localhostRealIp: string;
+  kibana: {
+    url: string;
+    hostname: string;
+    port: string;
+    isLocalhost: boolean;
+  };
+  elastic: {
+    url: string;
+    hostname: string;
+    port: string;
+    isLocalhost: boolean;
+  };
+  fleetServer: {
+    url: string;
+    hostname: string;
+    port: string;
+    isLocalhost: boolean;
+  };
 }
 
 interface CreateRuntimeServicesOptions {
   kibanaUrl: string;
   elasticsearchUrl: string;
+  fleetServerUrl: string | undefined;
   username: string;
   password: string;
   log?: ToolingLog;
@@ -33,6 +54,7 @@ interface CreateRuntimeServicesOptions {
 export const createRuntimeServices = async ({
   kibanaUrl,
   elasticsearchUrl,
+  fleetServerUrl = 'https://localhost:8220',
   username: _username,
   password: _password,
   log = new ToolingLog(),
@@ -58,18 +80,45 @@ export const createRuntimeServices = async ({
     }
   }
 
+  const kbnURL = new URL(kibanaUrl);
+  const esURL = new URL(elasticsearchUrl);
+  const fleetURL = new URL(fleetServerUrl);
+
   return {
     kbnClient: createKbnClient({ log, url: kibanaUrl, username, password }),
     esClient: createEsClient({ log, url: elasticsearchUrl, username, password }),
     log,
+    localhostRealIp: await getLocalhostRealIp(),
     user: {
       username,
       password,
     },
+    kibana: {
+      url: kibanaUrl,
+      hostname: kbnURL.hostname,
+      port: kbnURL.port,
+      isLocalhost: isLocalhost(kbnURL.hostname),
+    },
+    fleetServer: {
+      url: fleetServerUrl,
+      hostname: fleetURL.hostname,
+      port: fleetURL.port,
+      isLocalhost: isLocalhost(fleetURL.hostname),
+    },
+    elastic: {
+      url: elasticsearchUrl,
+      hostname: esURL.hostname,
+      port: esURL.port,
+      isLocalhost: isLocalhost(esURL.hostname),
+    },
   };
 };
 
-const buildUrlWithCredentials = (url: string, username: string, password: string): string => {
+export const buildUrlWithCredentials = (
+  url: string,
+  username: string,
+  password: string
+): string => {
   const newUrl = new URL(url);
 
   newUrl.username = username;

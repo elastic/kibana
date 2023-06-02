@@ -5,8 +5,13 @@
  * 2.0.
  */
 
-import type { PopoverAnchorPosition } from '@elastic/eui';
-import { EuiHeaderSectionItemButton, EuiLoadingSpinner, EuiPopover } from '@elastic/eui';
+import type { PopoverAnchorPosition, WithEuiThemeProps } from '@elastic/eui';
+import {
+  EuiHeaderSectionItemButton,
+  EuiLoadingSpinner,
+  EuiPopover,
+  withEuiTheme,
+} from '@elastic/eui';
 import React, { Component, lazy, Suspense } from 'react';
 import type { Subscription } from 'rxjs';
 
@@ -31,6 +36,7 @@ interface Props {
   navigateToApp: ApplicationStart['navigateToApp'];
   navigateToUrl: ApplicationStart['navigateToUrl'];
   serverBasePath: string;
+  theme: WithEuiThemeProps['theme'];
 }
 
 interface State {
@@ -42,7 +48,7 @@ interface State {
 
 const popoutContentId = 'headerSpacesMenuContent';
 
-export class NavControlPopover extends Component<Props, State> {
+class NavControlPopoverUI extends Component<Props, State> {
   private activeSpace$?: Subscription;
 
   constructor(props: Props) {
@@ -73,6 +79,7 @@ export class NavControlPopover extends Component<Props, State> {
 
   public render() {
     const button = this.getActiveSpaceButton();
+    const { theme } = this.props;
 
     let element: React.ReactNode;
     if (this.state.loading || this.state.spaces.length < 2) {
@@ -110,6 +117,7 @@ export class NavControlPopover extends Component<Props, State> {
         panelPaddingSize="none"
         repositionOnScroll
         ownFocus
+        zIndex={Number(theme.euiTheme.levels.navigation) + 1} // it needs to sit above the collapsible nav menu
       >
         {element}
       </EuiPopover>
@@ -135,15 +143,19 @@ export class NavControlPopover extends Component<Props, State> {
     });
   }
 
+  private getAlignedLoadingSpinner() {
+    return <EuiLoadingSpinner size="m" className="eui-alignMiddle" />;
+  }
+
   private getActiveSpaceButton = () => {
     const { activeSpace } = this.state;
 
     if (!activeSpace) {
-      return this.getButton(<EuiLoadingSpinner size="m" />, 'loading spaces navigation');
+      return this.getButton(this.getAlignedLoadingSpinner(), 'loading spaces navigation');
     }
 
     return this.getButton(
-      <Suspense fallback={<EuiLoadingSpinner size="m" />}>
+      <Suspense fallback={this.getAlignedLoadingSpinner()}>
         <LazySpaceAvatar space={activeSpace} size={'s'} />
       </Suspense>,
       (activeSpace as Space).name
@@ -195,3 +207,5 @@ export class NavControlPopover extends Component<Props, State> {
     });
   };
 }
+
+export const NavControlPopover = withEuiTheme(NavControlPopoverUI);

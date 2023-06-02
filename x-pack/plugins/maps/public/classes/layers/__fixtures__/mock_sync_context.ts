@@ -34,6 +34,7 @@ export class MockSyncContext implements DataRequestContext {
       },
       zoom: 0,
       isReadOnly: false,
+      executionContext: {},
       ...dataFilters,
     };
 

@@ -495,7 +495,7 @@ Array [
           >
             <span
               color="danger"
-              data-euiicon-type="alert"
+              data-euiicon-type="warning"
               size="m"
             >
               
@@ -550,7 +550,7 @@ Array [
           >
             <span
               color="danger"
-              data-euiicon-type="alert"
+              data-euiicon-type="warning"
               size="m"
             >
               
@@ -605,7 +605,7 @@ Array [
           >
             <span
               color="danger"
-              data-euiicon-type="alert"
+              data-euiicon-type="warning"
               size="m"
             >
               
@@ -660,7 +660,7 @@ Array [
           >
             <span
               color="danger"
-              data-euiicon-type="alert"
+              data-euiicon-type="warning"
               size="m"
             >
               
@@ -715,7 +715,7 @@ Array [
           >
             <span
               color="danger"
-              data-euiicon-type="alert"
+              data-euiicon-type="warning"
               size="m"
             >
               
@@ -770,7 +770,7 @@ Array [
           >
             <span
               color="danger"
-              data-euiicon-type="alert"
+              data-euiicon-type="warning"
               size="m"
             >
               
@@ -825,7 +825,7 @@ Array [
           >
             <span
               color="danger"
-              data-euiicon-type="alert"
+              data-euiicon-type="warning"
               size="m"
             >
               

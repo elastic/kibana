@@ -25,7 +25,7 @@ export const SectionError: React.FunctionComponent<Props> = ({
   return (
     <EuiPageContent verticalPosition="center" horizontalPosition="center" color="danger">
       <EuiEmptyPrompt
-        iconType="alert"
+        iconType="warning"
         title={<h2>{title}</h2>}
         body={
           <p>

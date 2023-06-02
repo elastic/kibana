@@ -21,11 +21,12 @@ import {
   EuiTitle,
   EuiHorizontalRule,
 } from '@elastic/eui';
-import { RuleStatusDropdown, RulesListNotifyBadge } from '../..';
+import { RuleStatusDropdown } from '../..';
 import {
   ComponentOpts as RuleApis,
   withBulkRuleOperations,
 } from '../../common/components/with_bulk_rule_api_operations';
+import { RulesListNotifyBadge } from '../../rules_list/components/notify_badge';
 
 export interface RuleStatusPanelProps {
   rule: any;
@@ -37,14 +38,18 @@ export interface RuleStatusPanelProps {
 
 type ComponentOpts = Pick<
   RuleApis,
-  'disableRule' | 'enableRule' | 'snoozeRule' | 'unsnoozeRule' | 'loadExecutionLogAggregations'
+  | 'bulkDisableRules'
+  | 'bulkEnableRules'
+  | 'snoozeRule'
+  | 'unsnoozeRule'
+  | 'loadExecutionLogAggregations'
 > &
   RuleStatusPanelProps;
 
 export const RuleStatusPanel: React.FC<ComponentOpts> = ({
   rule,
-  disableRule,
-  enableRule,
+  bulkEnableRules,
+  bulkDisableRules,
   snoozeRule,
   unsnoozeRule,
   requestRefresh,
@@ -53,12 +58,8 @@ export const RuleStatusPanel: React.FC<ComponentOpts> = ({
   statusMessage,
   loadExecutionLogAggregations,
 }) => {
-  const [isSnoozeLoading, setIsSnoozeLoading] = useState(false);
-  const [isSnoozeOpen, setIsSnoozeOpen] = useState(false);
   const [lastNumberOfExecutions, setLastNumberOfExecutions] = useState<number | null>(null);
 
-  const openSnooze = useCallback(() => setIsSnoozeOpen(true), [setIsSnoozeOpen]);
-  const closeSnooze = useCallback(() => setIsSnoozeOpen(false), [setIsSnoozeOpen]);
   const onSnoozeRule = useCallback(
     (snoozeSchedule) => snoozeRule(rule, snoozeSchedule),
     [rule, snoozeRule]
@@ -117,8 +118,12 @@ export const RuleStatusPanel: React.FC<ComponentOpts> = ({
           </EuiFlexItem>
           <EuiFlexItem>
             <RuleStatusDropdown
-              disableRule={async () => await disableRule(rule)}
-              enableRule={async () => await enableRule(rule)}
+              disableRule={async () => {
+                await bulkDisableRules({ ids: [rule.id] });
+              }}
+              enableRule={async () => {
+                await bulkEnableRules({ ids: [rule.id] });
+              }}
               snoozeRule={async () => {}}
               unsnoozeRule={async () => {}}
               rule={rule}
@@ -178,12 +183,9 @@ export const RuleStatusPanel: React.FC<ComponentOpts> = ({
       <EuiHorizontalRule margin="none" />
       <EuiPanel hasShadow={false}>
         <RulesListNotifyBadge
-          rule={{ ...rule, isEditable }}
-          isOpen={isSnoozeOpen}
-          isLoading={isSnoozeLoading}
-          onLoading={setIsSnoozeLoading}
-          onClick={openSnooze}
-          onClose={closeSnooze}
+          snoozeSettings={rule}
+          loading={!rule}
+          disabled={!isEditable}
           onRuleChanged={requestRefresh}
           snoozeRule={onSnoozeRule}
           unsnoozeRule={onUnsnoozeRule}

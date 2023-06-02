@@ -36,6 +36,7 @@ import { MachineLearningJobWizardCommonProvider } from './job_wizard_common';
 import { MachineLearningJobWizardCategorizationProvider } from './job_wizard_categorization';
 import { MachineLearningJobWizardMultiMetricProvider } from './job_wizard_multi_metric';
 import { MachineLearningJobWizardPopulationProvider } from './job_wizard_population';
+import { MachineLearningJobWizardGeoProvider } from './job_wizard_geo';
 import { MachineLearningLensVisualizationsProvider } from './lens_visualizations';
 import { MachineLearningNavigationProvider } from './navigation';
 import { MachineLearningOverviewPageProvider } from './overview_page';
@@ -61,11 +62,13 @@ import { MachineLearningCasesProvider } from './cases';
 import { AnomalyChartsProvider } from './anomaly_charts';
 import { NotificationsProvider } from './notifications';
 import { MlTableServiceProvider } from './common_table_service';
+import { MachineLearningFieldStatsFlyoutProvider } from './field_stats_flyout';
 
 export function MachineLearningProvider(context: FtrProviderContext) {
   const commonAPI = MachineLearningCommonAPIProvider(context);
   const commonUI = MachineLearningCommonUIProvider(context);
   const commonDataGrid = MachineLearningCommonDataGridProvider(context);
+  const commonFieldStatsFlyout = MachineLearningFieldStatsFlyoutProvider(context, commonUI);
 
   const anomaliesTable = MachineLearningAnomaliesTableProvider(context);
   const anomalyCharts = AnomalyChartsProvider(context);
@@ -84,7 +87,8 @@ export function MachineLearningProvider(context: FtrProviderContext) {
   const dataFrameAnalyticsCreation = MachineLearningDataFrameAnalyticsCreationProvider(
     context,
     commonUI,
-    api
+    api,
+    commonFieldStatsFlyout
   );
   const dataFrameAnalyticsEdit = MachineLearningDataFrameAnalyticsEditProvider(context, commonUI);
   const dataFrameAnalyticsResults = MachineLearningDataFrameAnalyticsResultsProvider(
@@ -111,10 +115,26 @@ export function MachineLearningProvider(context: FtrProviderContext) {
   const jobTable = MachineLearningJobTableProvider(context, commonUI, customUrls);
   const jobTypeSelection = MachineLearningJobTypeSelectionProvider(context);
   const jobWizardAdvanced = MachineLearningJobWizardAdvancedProvider(context, commonUI);
-  const jobWizardCategorization = MachineLearningJobWizardCategorizationProvider(context);
-  const jobWizardCommon = MachineLearningJobWizardCommonProvider(context, commonUI, customUrls);
-  const jobWizardMultiMetric = MachineLearningJobWizardMultiMetricProvider(context);
-  const jobWizardPopulation = MachineLearningJobWizardPopulationProvider(context);
+  const jobWizardCategorization = MachineLearningJobWizardCategorizationProvider(
+    context,
+    commonFieldStatsFlyout
+  );
+  const jobWizardCommon = MachineLearningJobWizardCommonProvider(
+    context,
+    commonUI,
+    customUrls,
+    commonFieldStatsFlyout
+  );
+  const jobWizardGeo = MachineLearningJobWizardGeoProvider(context);
+  const jobWizardMultiMetric = MachineLearningJobWizardMultiMetricProvider(
+    context,
+    commonFieldStatsFlyout
+  );
+  const jobWizardPopulation = MachineLearningJobWizardPopulationProvider(
+    context,
+    commonFieldStatsFlyout
+  );
+
   const lensVisualizations = MachineLearningLensVisualizationsProvider(context, commonUI);
   const navigation = MachineLearningNavigationProvider(context);
   const overviewPage = MachineLearningOverviewPageProvider(context);
@@ -147,6 +167,7 @@ export function MachineLearningProvider(context: FtrProviderContext) {
     commonAPI,
     commonConfig,
     commonDataGrid,
+    commonFieldStatsFlyout,
     commonUI,
     customUrls,
     dashboardJobSelectionTable,
@@ -172,6 +193,7 @@ export function MachineLearningProvider(context: FtrProviderContext) {
     jobWizardAdvanced,
     jobWizardCategorization,
     jobWizardCommon,
+    jobWizardGeo,
     jobWizardMultiMetric,
     jobWizardPopulation,
     lensVisualizations,

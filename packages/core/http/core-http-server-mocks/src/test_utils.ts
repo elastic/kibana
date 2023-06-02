@@ -8,7 +8,7 @@
 
 import { BehaviorSubject } from 'rxjs';
 import moment from 'moment';
-import { REPO_ROOT } from '@kbn/utils';
+import { REPO_ROOT } from '@kbn/repo-info';
 import { ByteSizeValue } from '@kbn/config-schema';
 import { Env } from '@kbn/config';
 import { getEnvOptions, configServiceMock } from '@kbn/config-mocks';
@@ -50,6 +50,7 @@ const createConfigService = () => {
         shutdownTimeout: moment.duration(30, 'seconds'),
         keepaliveTimeout: 120_000,
         socketTimeout: 120_000,
+        restrictInternalApis: false,
       } as any);
     }
     if (path === 'externalUrl') {

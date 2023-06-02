@@ -24,6 +24,7 @@ describe('parseTechnicalFields', () => {
       'kibana.alert.rule.rule_type_id': ['metrics.alert.threshold'],
       'event.action': ['active'],
       'kibana.alert.rule.name': ['Uptime'],
+      'kibana.alert.rule.revision': 0,
       'kibana.alert.uuid': ['f31f5726-3c47-4c88-bc42-4e1fbde17e34'],
       'kibana.space_ids': ['default'],
       'kibana.version': ['8.1.0'],
@@ -102,6 +103,7 @@ describe('parseTechnicalFields', () => {
       'kibana.alert.rule.category': ['Metric threshold'],
       'kibana.alert.rule.rule_type_id': ['metrics.alert.threshold'],
       'kibana.alert.rule.name': ['Uptime'],
+      'kibana.alert.rule.revision': 0,
       'kibana.alert.uuid': ['f31f5726-3c47-4c88-bc42-4e1fbde17e34'],
       'kibana.space_ids': ['default'],
     };

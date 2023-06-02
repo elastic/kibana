@@ -22,6 +22,12 @@ function toReactRouterPath(path: string) {
   return path.replace(/(?:{([^\/]+)})/g, ':$1');
 }
 
+export class NotFoundRouteException extends Error {
+  constructor(message: string) {
+    super(message);
+  }
+}
+
 export function createRouter<TRoutes extends RouteMap>(routes: TRoutes): Router<TRoutes> {
   const routesByReactRouterConfig = new Map<ReactRouterConfig, Route>();
   const reactRouterConfigsByRoute = new Map<Route, ReactRouterConfig>();
@@ -108,6 +114,11 @@ export function createRouter<TRoutes extends RouteMap>(routes: TRoutes): Router<
         errorMessage = `None of ${paths.join(', ')} match current path ${location.pathname}`;
       }
       throw new Error(errorMessage);
+    }
+
+    const hasExactMatch = matches.some((match) => match.match.isExact);
+    if (!hasExactMatch) {
+      throw new NotFoundRouteException('No route was matched');
     }
 
     return matches.slice(0, matchIndex + 1).map((matchedRoute) => {

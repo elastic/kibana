@@ -5,11 +5,16 @@
  * 2.0.
  */
 
-import { CoreSetup, Plugin, CoreStart } from '@kbn/core/public';
+import { i18n } from '@kbn/i18n';
+import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
+import { ManagementAppMountParams, ManagementSetup } from '@kbn/management-plugin/public';
+import { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 
 import { AlertNavigationRegistry, AlertNavigationHandler } from './alert_navigation_registry';
-import { loadRule, loadRuleType } from './alert_api';
-import { Rule, RuleNavigation } from '../common';
+import { loadRule, loadRuleType } from './services/alert_api';
+import { ENABLE_MAINTENANCE_WINDOWS, Rule } from '../common';
+import { MAINTENANCE_WINDOWS_APP_ID } from './config';
 
 export interface PluginSetupContract {
   /**
@@ -26,6 +31,8 @@ export interface PluginSetupContract {
    * @param handler The navigation handler should return either a relative URL, or a state object. This information can be used,
    * in conjunction with the consumer id, to navigate the user to a custom URL to view a rule's details.
    * @throws an error if the given applicationId and ruleType combination has already been registered.
+   *
+   * @deprecated use "getViewInAppRelativeUrl" on the server side rule type instead.
    */
   registerNavigation: (
     applicationId: string,
@@ -42,17 +49,35 @@ export interface PluginSetupContract {
    * @param applicationId The application id that the user should be navigated to, to view a particular rule in a custom way.
    * @param handler The navigation handler should return either a relative URL, or a state object. This information can be used,
    * in conjunction with the consumer id, to navigate the user to a custom URL to view a rule's details.
+   *
+   * @deprecated use "getViewInAppRelativeUrl" on the server side rule type instead.
    */
   registerDefaultNavigation: (applicationId: string, handler: AlertNavigationHandler) => void;
 }
 export interface PluginStartContract {
-  getNavigation: (ruleId: Rule['id']) => Promise<RuleNavigation | undefined>;
+  getNavigation: (ruleId: Rule['id']) => Promise<string | undefined>;
+}
+export interface AlertingPluginSetup {
+  management: ManagementSetup;
 }
 
-export class AlertingPublicPlugin implements Plugin<PluginSetupContract, PluginStartContract> {
+export interface AlertingPluginStart {
+  licensing: LicensingPluginStart;
+  spaces: SpacesPluginStart;
+}
+
+export class AlertingPublicPlugin
+  implements
+    Plugin<PluginSetupContract, PluginStartContract, AlertingPluginSetup, AlertingPluginStart>
+{
   private alertNavigationRegistry?: AlertNavigationRegistry;
-  public setup(core: CoreSetup) {
+
+  constructor(private readonly initContext: PluginInitializerContext) {}
+
+  public setup(core: CoreSetup, plugins: AlertingPluginSetup) {
     this.alertNavigationRegistry = new AlertNavigationRegistry();
+
+    const kibanaVersion = this.initContext.env.packageInfo.version;
 
     const registerNavigation = async (
       applicationId: string,
@@ -66,6 +91,31 @@ export class AlertingPublicPlugin implements Plugin<PluginSetupContract, PluginS
       applicationId: string,
       handler: AlertNavigationHandler
     ) => this.alertNavigationRegistry!.registerDefault(applicationId, handler);
+
+    if (ENABLE_MAINTENANCE_WINDOWS) {
+      plugins.management.sections.section.insightsAndAlerting.registerApp({
+        id: MAINTENANCE_WINDOWS_APP_ID,
+        title: i18n.translate('xpack.alerting.management.section.title', {
+          defaultMessage: 'Maintenance Windows',
+        }),
+        async mount(params: ManagementAppMountParams) {
+          const { renderApp } = await import('./application/maintenance_windows');
+
+          const [coreStart, pluginsStart] = (await core.getStartServices()) as [
+            CoreStart,
+            AlertingPluginStart,
+            unknown
+          ];
+
+          return renderApp({
+            core: coreStart,
+            plugins: pluginsStart,
+            mountParams: params,
+            kibanaVersion,
+          });
+        },
+      });
+    }
 
     return {
       registerNavigation,
@@ -89,8 +139,11 @@ export class AlertingPublicPlugin implements Plugin<PluginSetupContract, PluginS
 
         if (this.alertNavigationRegistry!.has(rule.consumer, ruleType)) {
           const navigationHandler = this.alertNavigationRegistry!.get(rule.consumer, ruleType);
-          const state = navigationHandler(rule);
-          return typeof state === 'string' ? { path: state } : { state };
+          return navigationHandler(rule);
+        }
+
+        if (rule.viewInAppRelativeUrl) {
+          return rule.viewInAppRelativeUrl;
         }
       },
     };

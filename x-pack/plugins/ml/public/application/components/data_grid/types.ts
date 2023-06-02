@@ -15,12 +15,11 @@ import {
   EuiDataGridColumn,
 } from '@elastic/eui';
 
+import type { TimeRange as TimeRangeMs } from '@kbn/ml-date-picker';
+import { FeatureImportanceBaseline, INDEX_STATUS } from '@kbn/ml-data-frame-analytics-utils';
+
 import { Dictionary } from '../../../../common/types/common';
 import { ChartData } from '../../../../common/types/field_histograms';
-
-import { INDEX_STATUS } from '../../data_frame_analytics/common/analytics';
-
-import { FeatureImportanceBaseline } from '../../../../common/types/feature_importance';
 
 export type ColumnId = string;
 export type DataGridItem = Record<string, any>;
@@ -28,6 +27,11 @@ export type DataGridItem = Record<string, any>;
 // `undefined` is used to indicate a non-initialized state.
 export type ChartsVisible = boolean | undefined;
 export type RowCountRelation = estypes.SearchTotalHitsRelation | undefined;
+
+export interface RowCountInfo {
+  rowCount: number;
+  rowCountRelation: RowCountRelation;
+}
 
 export type IndexPagination = Pick<EuiDataGridPaginationProps, 'pageIndex' | 'pageSize'>;
 
@@ -83,6 +87,7 @@ export interface UseIndexDataReturnType
   > {
   renderCellValue: RenderCellValue;
   indexPatternFields?: string[];
+  timeRangeMs?: TimeRangeMs;
 }
 
 export interface UseDataGridReturnType {
@@ -105,8 +110,7 @@ export interface UseDataGridReturnType {
   setErrorMessage: Dispatch<SetStateAction<string>>;
   setNoDataMessage: Dispatch<SetStateAction<string>>;
   setPagination: Dispatch<SetStateAction<IndexPagination>>;
-  setRowCount: Dispatch<SetStateAction<number>>;
-  setRowCountRelation: Dispatch<SetStateAction<RowCountRelation>>;
+  setRowCountInfo: Dispatch<SetStateAction<RowCountInfo>>;
   setSortingColumns: Dispatch<SetStateAction<EuiDataGridSorting['columns']>>;
   setStatus: Dispatch<SetStateAction<INDEX_STATUS>>;
   setTableItems: Dispatch<SetStateAction<DataGridItem[]>>;

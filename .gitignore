@@ -42,6 +42,14 @@ __tmp__
 /x-pack/test/*/screenshots/visual_regression_gallery.html
 /x-pack/test/functional/apps/*/*/reporting/reports/failure
 
+# Ignore the same artifacts in x-pack/test_serverless
+/x-pack/test_serverless/*/failure_debug
+/x-pack/test_serverless/*/screenshots/diff
+/x-pack/test_serverless/*/screenshots/failure
+/x-pack/test_serverless/*/screenshots/session
+/x-pack/test_serverless/*/screenshots/visual_regression_gallery.html
+/x-pack/test_serverless/functional/apps/*/*/reporting/reports/failure
+
 /html_docs
 .eslintcache
 /plugins/
@@ -50,8 +58,14 @@ disabledPlugins
 webpackstats.json
 /config/*
 !/config/kibana.yml
+!/config/README.md
+!/config/serverless.yml
+!/config/serverless.es.yml
+!/config/serverless.oblt.yml
+!/config/serverless.security.yml
 !/config/node.options
 coverage
+!/test/common/fixtures/plugins/coverage
 selenium
 .babel_register_cache.json
 .webpack.babelcache
@@ -94,8 +108,7 @@ report.asciidoc
 
 # Automatically generated and user-modifiable
 /tsconfig.refs.json
-tsconfig.base.type_check.json
-tsconfig.type_check.json
+*.type_check.json
 
 # Yarn local mirror content
 .yarn-local-mirror
@@ -111,5 +124,9 @@ elastic-agent-*
 fleet-server-*
 elastic-agent.yml
 fleet-server.yml
-/packages/kbn-synthetic-package-map/synthetic-packages.json
-
+/packages/*/package-map.json
+/packages/*/config-paths.json
+/packages/kbn-synthetic-package-map/
+**/.synthetics/
+**/.journeys/
+x-pack/test/security_api_integration/plugins/audit_log/audit.log

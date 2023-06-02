@@ -33,7 +33,6 @@ import type { TimelineUrl } from '../../timelines/store/timeline/model';
 import { timelineDefaults } from '../../timelines/store/timeline/defaults';
 import { URL_PARAM_KEY } from '../../common/hooks/use_url_state';
 import { InputsModelId } from '../../common/store/inputs/constants';
-import { tGridReducer } from '@kbn/timelines-plugin/public';
 
 jest.mock('../../common/store/inputs/actions');
 
@@ -135,6 +134,60 @@ jest.mock('../../common/lib/kibana', () => {
         ...original.useKibana().services,
         data: {
           ...original.useKibana().services.data,
+          dataViews: {
+            get: jest
+              .fn()
+              .mockImplementation(
+                async (dataViewId: string, displayErrors?: boolean, refreshFields = false) =>
+                  Promise.resolve({
+                    id: dataViewId,
+                    matchedIndices: refreshFields
+                      ? ['hello', 'world', 'refreshed']
+                      : ['hello', 'world'],
+                    fields: [
+                      {
+                        name: 'bytes',
+                        type: 'number',
+                        esTypes: ['long'],
+                        aggregatable: true,
+                        searchable: true,
+                        count: 10,
+                        readFromDocValues: true,
+                        scripted: false,
+                        isMapped: true,
+                      },
+                      {
+                        name: 'ssl',
+                        type: 'boolean',
+                        esTypes: ['boolean'],
+                        aggregatable: true,
+                        searchable: true,
+                        count: 20,
+                        readFromDocValues: true,
+                        scripted: false,
+                        isMapped: true,
+                      },
+                      {
+                        name: '@timestamp',
+                        type: 'date',
+                        esTypes: ['date'],
+                        aggregatable: true,
+                        searchable: true,
+                        count: 30,
+                        readFromDocValues: true,
+                        scripted: false,
+                        isMapped: true,
+                      },
+                    ],
+                    getIndexPattern: () => 'hello*,world*,refreshed*',
+                    getRuntimeMappings: () => ({
+                      myfield: {
+                        type: 'keyword',
+                      },
+                    }),
+                  })
+              ),
+          },
           query: {
             ...original.useKibana().services.data.query,
             filterManager: mockedFilterManager,
@@ -299,13 +352,7 @@ describe('HomePage', () => {
         },
       };
 
-      const mockStore = createStore(
-        mockstate,
-        SUB_PLUGINS_REDUCER,
-        { dataTable: tGridReducer },
-        kibanaObservable,
-        storage
-      );
+      const mockStore = createStore(mockstate, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
 
       render(
         <TestProviders store={mockStore}>
@@ -459,13 +506,7 @@ describe('HomePage', () => {
       };
 
       const { storage } = createSecuritySolutionStorageMock();
-      const mockStore = createStore(
-        mockstate,
-        SUB_PLUGINS_REDUCER,
-        { dataTable: tGridReducer },
-        kibanaObservable,
-        storage
-      );
+      const mockStore = createStore(mockstate, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
 
       const TestComponent = () => (
         <TestProviders store={mockStore}>
@@ -522,13 +563,7 @@ describe('HomePage', () => {
       };
 
       const { storage } = createSecuritySolutionStorageMock();
-      const mockStore = createStore(
-        mockstate,
-        SUB_PLUGINS_REDUCER,
-        { dataTable: tGridReducer },
-        kibanaObservable,
-        storage
-      );
+      const mockStore = createStore(mockstate, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
 
       const TestComponent = () => (
         <TestProviders store={mockStore}>
@@ -588,13 +623,7 @@ describe('HomePage', () => {
 
     it('it removes empty timeline state from URL', async () => {
       const { storage } = createSecuritySolutionStorageMock();
-      const store = createStore(
-        mockGlobalState,
-        SUB_PLUGINS_REDUCER,
-        { dataTable: tGridReducer },
-        kibanaObservable,
-        storage
-      );
+      const store = createStore(mockGlobalState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
 
       mockUseInitializeUrlParam(URL_PARAM_KEY.timeline, {
         id: 'testSavedTimelineId',
@@ -621,13 +650,7 @@ describe('HomePage', () => {
 
     it('it updates URL when timeline store changes', async () => {
       const { storage } = createSecuritySolutionStorageMock();
-      const store = createStore(
-        mockGlobalState,
-        SUB_PLUGINS_REDUCER,
-        { dataTable: tGridReducer },
-        kibanaObservable,
-        storage
-      );
+      const store = createStore(mockGlobalState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
       const savedObjectId = 'testTimelineId';
 
       mockUseInitializeUrlParam(URL_PARAM_KEY.timeline, {

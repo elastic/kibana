@@ -232,7 +232,7 @@ export const getLegacyMetricVisualization = ({
             ? [
                 {
                   columnId: props.state.accessor,
-                  triggerIcon: hasColoring ? 'colorBy' : undefined,
+                  triggerIconType: hasColoring ? 'colorBy' : undefined,
                   palette: hasColoring ? stops.map(({ color }) => color) : undefined,
                 },
               ]
@@ -312,11 +312,6 @@ export const getLegacyMetricVisualization = ({
     );
   },
 
-  getErrorMessages(state) {
-    // Is it possible to break it?
-    return undefined;
-  },
-
   getVisualizationInfo(state: LegacyMetricState) {
     const dimensions = [];
     if (state.accessor) {
@@ -329,6 +324,9 @@ export const getLegacyMetricVisualization = ({
       });
     }
 
+    const hasColoring = state.palette != null;
+    const stops = state.palette?.params?.stops || [];
+
     return {
       layers: [
         {
@@ -337,6 +335,7 @@ export const getLegacyMetricVisualization = ({
           chartType: 'metric',
           ...this.getDescription(state),
           dimensions,
+          palette: hasColoring ? stops.map(({ color }) => color) : undefined,
         },
       ],
     };

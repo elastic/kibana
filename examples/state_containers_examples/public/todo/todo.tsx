@@ -7,7 +7,8 @@
  */
 
 import React, { useEffect, useMemo } from 'react';
-import { Link, Route, Router, Switch, useLocation } from 'react-router-dom';
+import { Link, Router, Switch, useLocation } from 'react-router-dom';
+import { Route } from '@kbn/shared-ux-router';
 import { History } from 'history';
 import {
   EuiButton,

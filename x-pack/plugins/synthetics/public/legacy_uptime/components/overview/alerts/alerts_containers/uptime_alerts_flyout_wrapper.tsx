@@ -13,9 +13,7 @@ import { selectAlertFlyoutVisibility, selectAlertFlyoutType } from '../../../../
 
 export const UptimeAlertsFlyoutWrapper: React.FC = () => {
   const dispatch = useDispatch();
-  const setAddFlyoutVisibility = (value: React.SetStateAction<boolean>) =>
-    // @ts-ignore the value here is a boolean, and it works with the action creator function
-    dispatch(setAlertFlyoutVisible(value));
+  const setAddFlyoutVisibility = (value: boolean) => dispatch(setAlertFlyoutVisible(value));
 
   const alertFlyoutVisible = useSelector(selectAlertFlyoutVisibility);
   const alertTypeId = useSelector(selectAlertFlyoutType);

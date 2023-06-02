@@ -7,13 +7,12 @@ Currently with Cypress you can develop `functional` tests and coming soon `CCS` 
 If you are still having doubts, questions or queries, please feel free to ping our Cypress champions:
 
 - Functional Tests:
-  - Gloria Hornero and Patryk Kopycinsky 
-  
+  - Gloria Hornero and Patryk Kopycinsky
 - CCS Tests:
   - Technical questions around the https://github.com/elastic/integration-test repo:
-     - Domenico Andreoli
+    - Domenico Andreoli
   - Doubts regarding testing CCS and Cypress best practices:
-     - Gloria Hornero   
+    - Gloria Hornero
 
 ## Table of Contents
 
@@ -36,7 +35,7 @@ If you are still having doubts, questions or queries, please feel free to ping o
 ## How to add a new Cypress test
 
 Before considering adding a new Cypress tests, please make sure you have added unit and API tests first. Note that, the aim of Cypress
- is to test that the user interface operates as expected, hence, you should not be using this tool to test REST API or data contracts.
+is to test that the user interface operates as expected, hence, you should not be using this tool to test REST API or data contracts.
 
 First take a look to the [**Development Best Practices**](#development-best-practices) section.
 Then check check [**Folder structure**](#folder-structure) section to know where is the best place to put your test, [**Test data**](#test-data) section if you need to create any type
@@ -64,12 +63,12 @@ A headless browser is a browser simulation program that does not have a user int
 
 This is the configuration used by CI. It uses the FTR to spawn both a Kibana instance (http://localhost:5620) and an Elasticsearch instance (http://localhost:9220) with a preloaded minimum set of data (see preceding "Test data" section), and then executes cypress against this stack. You can find this configuration in `x-pack/test/security_solution_cypress`
 
-Tests run on buildkite PR pipeline is parallelized(current value = 4 parallel jobs). It can be configured in [.buildkite/pipelines/pull_request/security_solution.yml](https://github.com/elastic/kibana/blob/main/.buildkite/pipelines/pull_request/security_solution.yml) with property `parallelism` 
+Tests run on buildkite PR pipeline is parallelized(current value = 4 parallel jobs). It can be configured in [.buildkite/pipelines/pull_request/security_solution.yml](https://github.com/elastic/kibana/blob/main/.buildkite/pipelines/pull_request/security_solution.yml) with property `parallelism`
 
 ```yml
     ...
     agents:
-      queue: ci-group-6
+      queue: n2-4-spot
     depends_on: build
     timeout_in_minutes: 120
     parallelism: 4
@@ -88,7 +87,7 @@ This configuration is driven by [elastic/integration-test](https://github.com/el
 The two clusters are named `admin` and `data` and are reachable as follows:
 
 |       | Elasticsearch          | Kibana                 |
-|-------|------------------------|------------------------|
+| ----- | ---------------------- | ---------------------- |
 | admin | https://localhost:9200 | https://localhost:5601 |
 | data  | https://localhost:9210 | https://localhost:5602 |
 
@@ -108,8 +107,8 @@ Read [integration-test#readme](https://github.com/elastic/integration-test#readm
 
 There is no way to just set up the test environment without also executing tests at least once. On the other hand it's time consuming to go throught the whole CI procedure to just iterate over the tests therefore the following instructions support the two use cases:
 
-* reproduce e2e the CI execution locally, ie. for debugging a CI failure
-* use the CI script to easily setup the environment for tests development/debugging
+- reproduce e2e the CI execution locally, ie. for debugging a CI failure
+- use the CI script to easily setup the environment for tests development/debugging
 
 The missing use case, application TDD, requires a different solution that runs from the checked out repositories instead of the pre-built packages and it's yet to be developed.
 
@@ -140,15 +139,15 @@ It remembers which VM the first round was executed on, you don't need to specify
 In case your tests are cleaning after themselves and therefore result idempotent, you can skip the restoration to `phase2` and directly run the Cypress command line. See [CCS Custom Target + Headless](#ccs-custom-target--headless) further below for details but ensure you'll define the `CYPRESS_*` following the correspondence:
 
 | Cypress command line           | [integration-test/provision/ubuntu16_tar_ccs_cypress.sh](https://github.com/elastic/integration-test/blob/master/provision/ubuntu16_tar_ccs_cypress.sh) |
-|--------------------------------|----------------------------------|
-| CYPRESS_BASE_URL               | TEST_KIBANA_URL                  |
-| CYPRESS_ELASTICSEARCH_URL      | TEST_ES_URL                      |
-| CYPRESS_CCS_KIBANA_URL         | TEST_KIBANA_URLDATA              |
-| CYPRESS_CCS_ELASTICSEARCH_URL  | TEST_ES_URLDATA                  |
-| CYPRESS_CCS_REMOTE_NAME        | TEST_CCS_REMOTE_NAME             |
-| CYPRESS_ELASTICSEARCH_USERNAME | ELASTICSEARCH_USERNAME           |
-| CYPRESS_ELASTICSEARCH_PASSWORD | ELASTICSEARCH_PASSWORD           |
-| TEST_CA_CERT_PATH              | integration-test/certs/ca/ca.crt |
+| ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| CYPRESS_BASE_URL               | TEST_KIBANA_URL                                                                                                                                         |
+| CYPRESS_ELASTICSEARCH_URL      | TEST_ES_URL                                                                                                                                             |
+| CYPRESS_CCS_KIBANA_URL         | TEST_KIBANA_URLDATA                                                                                                                                     |
+| CYPRESS_CCS_ELASTICSEARCH_URL  | TEST_ES_URLDATA                                                                                                                                         |
+| CYPRESS_CCS_REMOTE_NAME        | TEST_CCS_REMOTE_NAME                                                                                                                                    |
+| CYPRESS_ELASTICSEARCH_USERNAME | ELASTICSEARCH_USERNAME                                                                                                                                  |
+| CYPRESS_ELASTICSEARCH_PASSWORD | ELASTICSEARCH_PASSWORD                                                                                                                                  |
+| TEST_CA_CERT_PATH              | integration-test/certs/ca/ca.crt                                                                                                                        |
 
 Note: `TEST_CA_CERT_PATH` above is truly without `CYPRESS_` prefix.
 
@@ -245,10 +244,11 @@ CYPRESS_BASE_URL=http(s)://<username>:<password>@<kbnUrl> CYPRESS_ELASTICSEARCH_
 This test execution requires two clusters configured for CCS. See [Search across clusters](https://www.elastic.co/guide/en/elasticsearch/reference/current/modules-cross-cluster-search.html) for instructions on how to prepare such setup.
 
 The instructions below assume:
-* Search cluster is on server1
-* Remote cluster is on server2
-* Remote cluster is accessible from the search cluster with name `remote`
-* Security and TLS are enabled
+
+- Search cluster is on server1
+- Remote cluster is on server2
+- Remote cluster is accessible from the search cluster with name `remote`
+- Security and TLS are enabled
 
 ```shell
 # bootstrap Kibana from the project root
@@ -271,10 +271,11 @@ Similar sequence, just ending with `yarn cypress:open:ccs`, can be used for inte
 Appending `--browser firefox` to the `yarn cypress:run:ccs` command above will run the tests on Firefox instead of Chrome.
 
 ## Debugging your test
+
 In order to be able to debug any Cypress test you need to open Cypress on visual mode. [Here](https://docs.cypress.io/guides/guides/debugging)
 you can find an extended guide about how to proceed.
 
-If you are debugging a flaky test, a good tip is to insert a `cy.wait(<some long milliseconds>)` around async parts of the tes code base, such as network calls which can make an indeterministic test, deterministically fail locally. 
+If you are debugging a flaky test, a good tip is to insert a `cy.wait(<some long milliseconds>)` around async parts of the tes code base, such as network calls which can make an indeterministic test, deterministically fail locally.
 
 ## Folder Structure
 
@@ -414,18 +415,27 @@ export const unmappedCCSRule: CustomRule = {
 Similar approach should be used in defining all index patterns, rules, and queries to be applied on remote data.
 
 ## Development Best Practices
+
 Below you will a set of best practices that should be followed when writing Cypress tests.
 
+### Avoid forced actions
+
+Cypress action commands like `click()`, `type()` and etc allow to pass `force` flag which is set to `false` by default. Avoid passing the `force` flag as it leads to swallowing some UI bugs. If it's impossible to perform an action without forcing it make sure to add an explanation comment and create a ticket to don't forget to fix it later on. The same is applicable to adding an extra `click()` before `type()` command. `type()` clicks an input once and types after so an extra `click()` usually means there is a problem.
+
 ### Write easy to maintain tests
+
 Consider to extract all the elements you need to interact with to the `screens` folder. In this way in case the locator changes, we just need to update the value in one place.
 
 ### Write easy to read tests
+
 Consider to extract all the tasks a user should perfom into the `tasks` folder. In this way is going to be easier to undertsand what are we trying to mimic from the user perspective. Also in case there is change on the way the user has to perform the action, we just need to update the value in one place.
 
 ### Make sure your test fails
+
 Before open a PR with a new test, please first make sure that the test fails. If you never see your test fail you don’t know if your test is actually testing the right thing, or testing anything at all.
 
 ### Minimize the use of es_archive
+
 When possible, create all the data that you need for executing the tests using the application APIS or the UI.
 
 ### Speed up test execution time
@@ -436,14 +446,12 @@ taken into consideration until another solution is implemented:
 - Group the tests that are similar in different contexts.
 - For every context login only once, clean the state between tests if needed without re-loading the page.
 - All tests in a spec file must be order-independent.
-- Clean up the state and data just when needed using `cleanKibana` function.  Executing this function takes a lot of time, so consider if you really need to clean the data before the execution. I.e: If you are just checking that a modal can be opened, you may not need to clean the data.
+- Clean up the state and data just when needed using `cleanKibana` function. Executing this function takes a lot of time, so consider if you really need to clean the data before the execution. I.e: If you are just checking that a modal can be opened, you may not need to clean the data.
 
 Remember that minimizing the number of times the web page is loaded, we minimize as well the execution time.
 
-### Cypress-pipe
-It is very common in the code to don't have click handlers regitered. In this specific case, please use [Cypress pipe](https://www.cypress.io/blog/2019/01/22/when-can-the-test-click/). 
-
 ### CCS test specific
+
 When testing CCS we want to put our focus in making sure that our `Source` instance is receiving properly the data that comes from the `Remote` instances, as well as the data is displayed as we expect on the `Source`.
 
 For that reason and in order to make our test more stable, use the API to execute all the actions needed before the assertions, and use Cypress to assert that the UI is displaying all the expected things.

@@ -11,8 +11,11 @@ import { lastValueFrom } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import type { ToastsStart } from '@kbn/core/public';
 import { stringHash } from '@kbn/ml-string-hash';
+import { createRandomSamplerWrapper } from '@kbn/ml-random-sampler-utils';
+import { extractErrorProperties } from '@kbn/ml-error-utils';
 
-import { extractErrorProperties } from '../application/utils/error_utils';
+import { RANDOM_SAMPLER_SEED } from '../../common/constants';
+
 import {
   DocumentCountStats,
   getDocumentCountStatsRequest,
@@ -23,6 +26,7 @@ import {
 import { useAiopsAppContext } from './use_aiops_app_context';
 
 export interface DocumentStats {
+  sampleProbability: number;
   totalCount: number;
   documentCountStats?: DocumentCountStats;
   documentCountStatsCompare?: DocumentCountStats;
@@ -67,6 +71,7 @@ export function useDocumentCountStats<TParams extends DocumentStatsSearchStrateg
   const abortCtrl = useRef(new AbortController());
 
   const [documentStats, setDocumentStats] = useState<DocumentStats>({
+    sampleProbability: 1,
     totalCount: 0,
   });
 
@@ -87,19 +92,48 @@ export function useDocumentCountStats<TParams extends DocumentStatsSearchStrateg
     try {
       abortCtrl.current = new AbortController();
 
+      const totalHitsParams = {
+        ...searchParams,
+        selectedSignificantTerm: undefined,
+        trackTotalHits: true,
+      };
+
+      const totalHitsResp = await lastValueFrom(
+        data.search.search(
+          {
+            params: getDocumentCountStatsRequest(totalHitsParams, undefined, true),
+          },
+          { abortSignal: abortCtrl.current.signal }
+        )
+      );
+      const totalHitsStats = processDocumentCountStats(totalHitsResp?.rawResponse, searchParams);
+      const totalCount = totalHitsStats?.totalCount ?? 0;
+
+      const randomSamplerWrapper = createRandomSamplerWrapper({
+        totalNumDocs: totalCount,
+        seed: RANDOM_SAMPLER_SEED,
+      });
+
       const resp = await lastValueFrom(
         data.search.search(
           {
-            params: getDocumentCountStatsRequest(searchParams),
+            params: getDocumentCountStatsRequest(
+              { ...searchParams, trackTotalHits: false },
+              randomSamplerWrapper
+            ),
           },
           { abortSignal: abortCtrl.current.signal }
         )
       );
 
-      const documentCountStats = processDocumentCountStats(resp?.rawResponse, searchParams);
-      const totalCount = documentCountStats?.totalCount ?? 0;
+      const documentCountStats = processDocumentCountStats(
+        resp?.rawResponse,
+        searchParams,
+        randomSamplerWrapper
+      );
 
       const newStats: DocumentStats = {
+        sampleProbability: randomSamplerWrapper.probability,
         documentCountStats,
         totalCount,
       };
@@ -108,7 +142,10 @@ export function useDocumentCountStats<TParams extends DocumentStatsSearchStrateg
         const respCompare = await lastValueFrom(
           data.search.search(
             {
-              params: getDocumentCountStatsRequest(searchParamsCompare),
+              params: getDocumentCountStatsRequest(
+                { ...searchParamsCompare, trackTotalHits: false },
+                randomSamplerWrapper
+              ),
             },
             { abortSignal: abortCtrl.current.signal }
           )
@@ -116,12 +153,12 @@ export function useDocumentCountStats<TParams extends DocumentStatsSearchStrateg
 
         const documentCountStatsCompare = processDocumentCountStats(
           respCompare?.rawResponse,
-          searchParamsCompare
+          searchParamsCompare,
+          randomSamplerWrapper
         );
-        const totalCountCompare = documentCountStatsCompare?.totalCount ?? 0;
 
         newStats.documentCountStatsCompare = documentCountStatsCompare;
-        newStats.totalCount = totalCount + totalCountCompare;
+        newStats.totalCount = totalCount;
       }
 
       setDocumentStats(newStats);

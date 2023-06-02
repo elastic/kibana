@@ -12,6 +12,7 @@ import type {
   FullAgentPolicy,
   PackagePolicy,
   Output,
+  ShipperOutput,
   FullAgentPolicyOutput,
   FleetProxy,
   FleetServerHost,
@@ -23,6 +24,7 @@ import { DEFAULT_OUTPUT } from '../../constants';
 
 import { getPackageInfo } from '../epm/packages';
 import { pkgToPkgKey, splitPkgKey } from '../epm/registry';
+import { appContextService } from '../app_context';
 
 import { getMonitoringPermissions } from './monitoring_permissions';
 import { storedPackagePoliciesToAgentInputs } from '.';
@@ -104,6 +106,9 @@ export async function getFullAgentPolicy(
       packageInfoCache,
       getOutputIdForAgentPolicy(dataOutput)
     ),
+    secret_references: (agentPolicy?.package_policies || []).flatMap(
+      (policy) => policy.secret_references || []
+    ),
     revision: agentPolicy.revision,
     agent: {
       download: {
@@ -119,6 +124,19 @@ export async function getFullAgentPolicy(
               metrics: agentPolicy.monitoring_enabled.includes(dataTypes.Metrics),
             }
           : { enabled: false, logs: false, metrics: false },
+      features: (agentPolicy.agent_features || []).reduce((acc, { name, ...featureConfig }) => {
+        acc[name] = featureConfig;
+        return acc;
+      }, {} as NonNullable<FullAgentPolicy['agent']>['features']),
+      protection: {
+        enabled: agentPolicy.is_protected,
+        uninstall_token_hash: '',
+        signing_key: '',
+      },
+    },
+    signed: {
+      data: '',
+      signature: '',
     },
   };
 
@@ -168,6 +186,36 @@ export async function getFullAgentPolicy(
   if (!standalone && fleetServerHosts) {
     fullAgentPolicy.fleet = generateFleetConfig(fleetServerHosts, proxies);
   }
+
+  // populate protection and signed properties
+  const messageSigningService = appContextService.getMessageSigningService();
+  if (messageSigningService && fullAgentPolicy.agent) {
+    const publicKey = await messageSigningService.getPublicKey();
+    const tokenHash =
+      (await appContextService
+        .getUninstallTokenService()
+        ?.getHashedTokenForPolicyId(fullAgentPolicy.id)) ?? '';
+
+    fullAgentPolicy.agent.protection = {
+      enabled: agentPolicy.is_protected,
+      uninstall_token_hash: tokenHash,
+      signing_key: publicKey,
+    };
+
+    const dataToSign = {
+      id: fullAgentPolicy.id,
+      agent: {
+        protection: fullAgentPolicy.agent.protection,
+      },
+    };
+
+    const { data: signedData, signature } = await messageSigningService.sign(dataToSign);
+    fullAgentPolicy.signed = {
+      data: signedData.toString('base64'),
+      signature,
+    };
+  }
+
   return fullAgentPolicy;
 }
 
@@ -186,11 +234,19 @@ export function generateFleetConfig(
     if (fleetServerHostproxy.proxy_headers) {
       config.proxy_headers = fleetServerHostproxy.proxy_headers;
     }
-    if (fleetServerHostproxy.certificate_authorities) {
+    if (
+      fleetServerHostproxy.certificate_authorities ||
+      fleetServerHostproxy.certificate ||
+      fleetServerHostproxy.certificate_key
+    ) {
       config.ssl = {
-        certificate_authorities: [fleetServerHostproxy.certificate_authorities],
         renegotiation: 'never',
         verification_mode: '',
+        ...(fleetServerHostproxy.certificate_authorities && {
+          certificate_authorities: [fleetServerHostproxy.certificate_authorities],
+        }),
+        ...(fleetServerHostproxy.certificate && { certificate: fleetServerHostproxy.certificate }),
+        ...(fleetServerHostproxy.certificate_key && { key: fleetServerHostproxy.certificate_key }),
       };
     }
   }
@@ -203,12 +259,44 @@ export function transformOutputToFullPolicyOutput(
   standalone = false
 ): FullAgentPolicyOutput {
   // eslint-disable-next-line @typescript-eslint/naming-convention
-  const { config_yaml, type, hosts, ca_sha256, ca_trusted_fingerprint, ssl } = output;
+  const { config_yaml, type, hosts, ca_sha256, ca_trusted_fingerprint, ssl, shipper } = output;
+
   const configJs = config_yaml ? safeLoad(config_yaml) : {};
+
+  // build logic to read config_yaml and transform it with the new shipper data
+  const isShipperDisabled = !configJs?.shipper || configJs?.shipper?.enabled === false;
+  let shipperDiskQueueData = {};
+  let generalShipperData;
+
+  if (shipper) {
+    if (!isShipperDisabled) {
+      shipperDiskQueueData = buildShipperQueueData(shipper);
+    }
+    /* eslint-disable @typescript-eslint/naming-convention */
+    const {
+      loadbalance,
+      compression_level,
+      queue_flush_timeout,
+      max_batch_bytes,
+      mem_queue_events,
+    } = shipper;
+    /* eslint-enable @typescript-eslint/naming-convention */
+
+    generalShipperData = {
+      loadbalance,
+      compression_level,
+      queue_flush_timeout,
+      max_batch_bytes,
+      mem_queue_events,
+    };
+  }
+
   const newOutput: FullAgentPolicyOutput = {
     ...configJs,
+    ...shipperDiskQueueData,
     type,
     hosts,
+    ...(!isShipperDisabled ? generalShipperData : {}),
     ...(ca_sha256 ? { ca_sha256 } : {}),
     ...(ssl ? { ssl } : {}),
     ...(ca_trusted_fingerprint ? { 'ssl.ca_trusted_fingerprint': ca_trusted_fingerprint } : {}),
@@ -262,3 +350,27 @@ function getOutputIdForAgentPolicy(output: Output) {
 
   return output.id;
 }
+
+/* eslint-disable @typescript-eslint/naming-convention */
+function buildShipperQueueData(shipper: ShipperOutput) {
+  const {
+    disk_queue_enabled,
+    disk_queue_path,
+    disk_queue_max_size,
+    disk_queue_compression_enabled,
+  } = shipper;
+  if (!disk_queue_enabled) return {};
+
+  return {
+    shipper: {
+      queue: {
+        disk: {
+          path: disk_queue_path,
+          max_size: disk_queue_max_size,
+          use_compression: disk_queue_compression_enabled,
+        },
+      },
+    },
+  };
+}
+/* eslint-enable @typescript-eslint/naming-convention */

@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { useFetcher } from '@kbn/observability-plugin/public';
+import { useFetcher } from '@kbn/observability-shared-plugin/public';
 import { formatBytes } from '../../step_details_page/hooks/use_object_metrics';
 import { getIlmPolicies, getIndicesData } from './api';
 
@@ -16,23 +16,42 @@ const policyLabels = [
     label: i18n.translate('xpack.synthetics.settingsRoute.allChecks', {
       defaultMessage: 'All Checks',
     }),
+    indexTemplate: 'synthetics',
   },
   {
     name: 'synthetics-synthetics.browser-default_policy',
     label: i18n.translate('xpack.synthetics.settingsRoute.browserChecks', {
       defaultMessage: 'Browser Checks',
     }),
+    indexTemplate: 'synthetics-browser',
   },
   {
     name: 'synthetics-synthetics.browser_network-default_policy',
     label: i18n.translate('xpack.synthetics.settingsRoute.browserNetworkRequests', {
       defaultMessage: 'Browser Network Requests',
     }),
+    indexTemplate: 'synthetics-browser.network',
   },
-  { name: 'synthetics-synthetics.browser_screenshot-default_policy', label: 'Browser Screenshots' },
-  { name: 'synthetics-synthetics.http-default_policy', label: 'HTTP Pings' },
-  { name: 'synthetics-synthetics.icmp-default_policy', label: 'ICMP Pings' },
-  { name: 'synthetics-synthetics.tcp-default_policy', label: 'TCP Pings' },
+  {
+    name: 'synthetics-synthetics.browser_screenshot-default_policy',
+    label: 'Browser Screenshots',
+    indexTemplate: 'synthetics-browser.screenshot',
+  },
+  {
+    name: 'synthetics-synthetics.http-default_policy',
+    label: 'HTTP Pings',
+    indexTemplate: 'synthetics-http',
+  },
+  {
+    name: 'synthetics-synthetics.icmp-default_policy',
+    label: 'ICMP Pings',
+    indexTemplate: 'synthetics-icmp',
+  },
+  {
+    name: 'synthetics-synthetics.tcp-default_policy',
+    label: 'TCP Pings',
+    indexTemplate: 'synthetics-tcp',
+  },
 ];
 
 export const useGetIlmPolicies = () => {
@@ -44,11 +63,16 @@ export const useGetIlmPolicies = () => {
     return getIndicesData();
   }, []);
 
-  const syntheticsILMPolicies = data?.filter(({ name }) => name.includes('synthetics')) ?? [];
+  const syntheticsILMPolicies =
+    data?.filter(({ indexTemplates }) =>
+      indexTemplates?.some((indTemp) => indTemp.includes('synthetics'))
+    ) ?? [];
 
   return {
-    data: policyLabels.map(({ name, label }) => {
-      const policy = syntheticsILMPolicies.find((p) => p.name === name);
+    data: policyLabels.map(({ name, label, indexTemplate }) => {
+      const policy = syntheticsILMPolicies.find((p) =>
+        p.indexTemplates?.some((indTemp) => indTemp.includes(indexTemplate))
+      );
       const policyIndices = sizeData?.data?.filter((d) => policy?.indices?.includes(d.index!));
 
       let totalSize =
@@ -82,7 +106,7 @@ export const useGetIlmPolicies = () => {
 
 const formatAge = (age?: string) => {
   if (!age) {
-    return '';
+    return '--';
   }
   const [value] = age.split('d');
   return i18n.translate('xpack.synthetics.settingsRoute.table.retentionPeriodValue', {

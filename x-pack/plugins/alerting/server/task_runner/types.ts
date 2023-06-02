@@ -9,6 +9,7 @@ import { KibanaRequest, Logger } from '@kbn/core/server';
 import { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import { PublicMethodsOf } from '@kbn/utility-types';
 import { ActionsClient } from '@kbn/actions-plugin/server/actions_client';
+import { Alert } from '../alert';
 import { TaskRunnerContext } from './task_runner_factory';
 import {
   AlertInstanceContext,
@@ -19,9 +20,11 @@ import {
   RuleTaskState,
   SanitizedRule,
   RuleTypeState,
+  RuleAction,
+  RuleAlertData,
 } from '../../common';
 import { NormalizedRuleType } from '../rule_type_registry';
-import { RawRule, RulesClientApi } from '../types';
+import { RawRule, RulesClientApi, CombinedSummarizedAlerts } from '../types';
 import { RuleRunMetrics, RuleRunMetricsStore } from '../lib/rule_run_metrics_store';
 import { AlertingEventLogger } from '../lib/alerting_event_logger/alerting_event_logger';
 
@@ -62,7 +65,8 @@ export interface ExecutionHandlerOptions<
   State extends AlertInstanceState,
   Context extends AlertInstanceContext,
   ActionGroupIds extends string,
-  RecoveryActionGroupId extends string
+  RecoveryActionGroupId extends string,
+  AlertData extends RuleAlertData
 > {
   ruleType: NormalizedRuleType<
     Params,
@@ -71,7 +75,8 @@ export interface ExecutionHandlerOptions<
     State,
     Context,
     ActionGroupIds,
-    RecoveryActionGroupId
+    RecoveryActionGroupId,
+    AlertData
   >;
   logger: Logger;
   alertingEventLogger: PublicMethodsOf<AlertingEventLogger>;
@@ -83,5 +88,18 @@ export interface ExecutionHandlerOptions<
   ruleConsumer: string;
   executionId: string;
   ruleLabel: string;
+  previousStartedAt: Date | null;
   actionsClient: PublicMethodsOf<ActionsClient>;
+  maintenanceWindowIds?: string[];
+}
+
+export interface Executable<
+  State extends AlertInstanceState,
+  Context extends AlertInstanceContext,
+  ActionGroupIds extends string,
+  RecoveryActionGroupId extends string
+> {
+  action: RuleAction;
+  alert?: Alert<State, Context, ActionGroupIds | RecoveryActionGroupId>;
+  summarizedAlerts?: CombinedSummarizedAlerts;
 }

@@ -8,10 +8,14 @@
 import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { ECSMapping } from '@kbn/osquery-io-ts-types';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useForm as useHookForm, FormProvider } from 'react-hook-form';
 import { isEmpty, find, pickBy } from 'lodash';
 
+import {
+  containsDynamicQuery,
+  replaceParamsQuery,
+} from '../../../common/utils/replace_params_query';
 import { PLUGIN_NAME as OSQUERY_PLUGIN_NAME } from '../../../common';
 import { QueryPackSelectable } from './query_pack_selectable';
 import type { SavedQuerySOFormData } from '../../saved_queries/form/use_saved_query_form';
@@ -26,6 +30,7 @@ import { LiveQueryQueryField } from './live_query_query_field';
 import { AgentsTableField } from './agents_table_field';
 import { savedQueryDataSerializer } from '../../saved_queries/form/use_saved_query_form';
 import { PackFieldWrapper } from '../../shared_components/osquery_response_action_type/pack_field_wrapper';
+import { AlertAttachmentContext } from '../../common/contexts';
 
 export interface LiveQueryFormFields {
   alertIds?: string[];
@@ -66,6 +71,8 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
   enabled = true,
   hideAgentsField = false,
 }) => {
+  const alertAttachmentContext = useContext(AlertAttachmentContext);
+
   const { application, appName } = useKibana().services;
   const permissions = application.capabilities.osquery;
   const canRunPacks = useMemo(
@@ -75,16 +82,8 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
   );
 
   const hooksForm = useHookForm<LiveQueryFormFields>();
-  const {
-    handleSubmit,
-    watch,
-    setValue,
-    resetField,
-    clearErrors,
-    getFieldState,
-    register,
-    formState: { isSubmitting },
-  } = hooksForm;
+  const { handleSubmit, watch, setValue, resetField, clearErrors, getFieldState, register } =
+    hooksForm;
 
   const canRunSingleQuery = useMemo(
     () =>
@@ -138,13 +137,19 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
 
   const onSubmit = useCallback(
     async (values: LiveQueryFormFields) => {
+      // Temporary, frontend solution for params substitution. To be removed once alert_ids refactored in create_live_query_route
+      const query =
+        values.query && containsDynamicQuery(values.query) && alertAttachmentContext
+          ? replaceParamsQuery(values.query, alertAttachmentContext).result
+          : values.query;
+
       const serializedData = pickBy(
         {
           agentSelection: values.agentSelection,
           saved_query_id: values.savedQueryId,
-          query: values.query,
+          query,
           alert_ids: values.alertIds,
-          pack_id: values?.packId?.length ? values?.packId[0] : undefined,
+          pack_id: queryType === 'pack' && values?.packId?.length ? values?.packId[0] : undefined,
           ecs_mapping: values.ecs_mapping,
         },
         (value) => !isEmpty(value)
@@ -152,7 +157,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
 
       await mutateAsync(serializedData);
     },
-    [mutateAsync]
+    [alertAttachmentContext, mutateAsync, queryType]
   );
 
   const serializedData: SavedQuerySOFormData = useMemo(
@@ -183,7 +188,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
             <EuiButton
               id="submit-button"
               disabled={!enabled}
-              isLoading={isSubmitting}
+              isLoading={isLoading}
               onClick={handleSubmit(onSubmit)}
             >
               <FormattedMessage
@@ -202,7 +207,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
       resultsStatus,
       handleShowSaveQueryFlyout,
       enabled,
-      isSubmitting,
+      isLoading,
       handleSubmit,
       onSubmit,
     ]
@@ -245,7 +250,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
         setValue('queryType', 'pack');
 
         if (!isPackDataFetched) return;
-        const selectedPackOption = find(packsData?.data, ['id', defaultValue.packId]);
+        const selectedPackOption = find(packsData?.data, ['saved_object_id', defaultValue.packId]);
         if (selectedPackOption) {
           setValue('packId', [defaultValue.packId]);
         }

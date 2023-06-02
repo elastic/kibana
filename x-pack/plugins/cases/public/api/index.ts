@@ -6,9 +6,16 @@
  */
 
 import type { HttpStart } from '@kbn/core/public';
-import type { Cases, CasesStatus, CasesMetrics } from '../../common/ui';
-import { CASE_FIND_URL, CASE_METRICS_URL, CASE_STATUS_URL } from '../../common/constants';
+import type { CasesStatus, CasesMetrics, CasesFindResponseUI } from '../../common/ui';
+import {
+  CASE_FIND_URL,
+  CASE_METRICS_URL,
+  CASE_STATUS_URL,
+  INTERNAL_BULK_GET_CASES_URL,
+} from '../../common/constants';
 import type {
+  CasesBulkGetRequest,
+  CasesBulkGetResponse,
   CasesFindRequest,
   CasesFindResponse,
   CasesMetricsRequest,
@@ -18,6 +25,7 @@ import type {
 } from '../../common/api';
 import { convertAllCasesToCamel, convertToCamelCase } from './utils';
 import {
+  decodeCasesBulkGetResponse,
   decodeCasesFindResponse,
   decodeCasesMetricsResponse,
   decodeCasesStatusResponse,
@@ -32,7 +40,7 @@ export const getCases = async ({
   http,
   signal,
   query,
-}: HTTPService & { query: CasesFindRequest }): Promise<Cases> => {
+}: HTTPService & { query: CasesFindRequest }): Promise<CasesFindResponseUI> => {
   const res = await http.get<CasesFindResponse>(CASE_FIND_URL, { query, signal });
   return convertAllCasesToCamel(decodeCasesFindResponse(res));
 };
@@ -57,4 +65,17 @@ export const getCasesMetrics = async ({
 }: HTTPService & { query: CasesMetricsRequest }): Promise<CasesMetrics> => {
   const res = await http.get<CasesMetricsResponse>(CASE_METRICS_URL, { signal, query });
   return convertToCamelCase(decodeCasesMetricsResponse(res));
+};
+
+export const bulkGetCases = async ({
+  http,
+  signal,
+  params,
+}: HTTPService & { params: CasesBulkGetRequest }): Promise<CasesBulkGetResponse> => {
+  const res = await http.post<CasesBulkGetResponse>(INTERNAL_BULK_GET_CASES_URL, {
+    body: JSON.stringify({ ...params }),
+    signal,
+  });
+
+  return decodeCasesBulkGetResponse(res);
 };

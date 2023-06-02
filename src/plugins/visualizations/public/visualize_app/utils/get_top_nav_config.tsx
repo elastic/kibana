@@ -15,7 +15,6 @@ import { parse } from 'query-string';
 
 import { Capabilities } from '@kbn/core/public';
 import { TopNavMenuData } from '@kbn/navigation-plugin/public';
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import {
   showSaveModal,
   SavedObjectSaveModalOrigin,
@@ -118,8 +117,6 @@ export const getTopNavConfig = (
     savedObjectsTagging,
     presentationUtil,
     getKibanaVersion,
-    savedObjects,
-    theme,
   }: VisualizeServices
 ) => {
   const { vis, embeddableHandler } = visInstance;
@@ -146,7 +143,6 @@ export const getTopNavConfig = (
 
     try {
       const id = await saveVisualization(savedVis, saveOptions, {
-        savedObjectsClient: savedObjects.client,
         overlays,
         savedObjectsTagging,
       });
@@ -310,10 +306,14 @@ export const getTopNavConfig = (
               );
               const updatedWithMeta = {
                 ...navigateToLensConfig,
-                savedObjectId: visInstance.vis.id,
                 embeddableId,
                 vizEditorOriginatingAppUrl: getVizEditorOriginatingAppUrl(history),
                 originatingApp,
+                title: visInstance?.panelTitle || vis.title,
+                visTypeTitle: vis.type.title,
+                description: visInstance?.panelDescription || vis.description,
+                panelTimeRange: visInstance?.panelTimeRange,
+                isEmbeddable: Boolean(originatingApp),
               };
               if (navigateToLensConfig) {
                 hideLensBadge();
@@ -544,6 +544,7 @@ export const getTopNavConfig = (
                     onTagsSelected={(newSelection) => {
                       selectedTags = newSelection;
                     }}
+                    markOptional
                   />
                 );
               }
@@ -599,18 +600,7 @@ export const getTopNavConfig = (
                 );
               }
 
-              const WrapperComponent = ({ children }: { children?: React.ReactNode }) => {
-                const ContextProvider = !originatingApp
-                  ? presentationUtil.ContextProvider
-                  : React.Fragment;
-                return (
-                  <KibanaThemeProvider theme$={theme.theme$}>
-                    <ContextProvider>{children}</ContextProvider>
-                  </KibanaThemeProvider>
-                );
-              };
-
-              showSaveModal(saveModal, I18nContext, WrapperComponent);
+              showSaveModal(saveModal, presentationUtil.ContextProvider);
             },
           },
         ]

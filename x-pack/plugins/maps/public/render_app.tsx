@@ -7,16 +7,12 @@
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { Router, Switch, Route, Redirect, RouteComponentProps } from 'react-router-dom';
+import { Router, Switch, Redirect, RouteComponentProps } from 'react-router-dom';
+import { Route } from '@kbn/shared-ux-router';
 import { i18n } from '@kbn/i18n';
 import type { CoreStart, AppMountParameters } from '@kbn/core/public';
 import { ExitFullScreenButtonKibanaProvider } from '@kbn/shared-ux-button-exit-full-screen';
 import { KibanaThemeProvider, toMountPoint } from '@kbn/kibana-react-plugin/public';
-import {
-  createKbnUrlStateStorage,
-  withNotifyOnErrors,
-  IKbnUrlStateStorage,
-} from '@kbn/kibana-utils-plugin/public';
 import { FormattedRelative } from '@kbn/i18n-react';
 import type { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
 import { TableListViewKibanaProvider } from '@kbn/content-management-table-list';
@@ -24,7 +20,6 @@ import {
   getCoreChrome,
   getCoreI18n,
   getMapsCapabilities,
-  getToasts,
   getEmbeddableService,
   getDocLinks,
   getCore,
@@ -33,9 +28,6 @@ import { ListPage, MapPage } from './routes';
 import { MapByValueInput, MapByReferenceInput } from './embeddable/types';
 import { APP_ID } from '../common/constants';
 import { registerLayerWizards } from './classes/layers/wizards/load_layer_wizards';
-
-export let goToSpecifiedPath: (path: string) => void;
-export let kbnUrlStateStorage: IKbnUrlStateStorage;
 
 function setAppChrome() {
   if (!getMapsCapabilities().save) {
@@ -80,13 +72,6 @@ export async function renderApp(
     AppUsageTracker: React.FC;
   }
 ) {
-  goToSpecifiedPath = (path) => history.push(path);
-  kbnUrlStateStorage = createKbnUrlStateStorage({
-    useHash: false,
-    history,
-    ...withNotifyOnErrors(getToasts()),
-  });
-
   const stateTransfer = getEmbeddableService().getStateTransfer();
 
   registerLayerWizards();
@@ -101,8 +86,7 @@ export async function renderApp(
       mapEmbeddableInput = {
         savedObjectId: routeProps.match.params.savedMapId,
       } as MapByReferenceInput;
-    }
-    if (valueInput) {
+    } else if (valueInput) {
       mapEmbeddableInput = valueInput as MapByValueInput;
     }
 
@@ -149,7 +133,7 @@ export async function renderApp(
                       const newPath = hash.substr(1);
                       return <Redirect to={newPath} />;
                     } else if (pathname === '/' || pathname === '') {
-                      return <ListPage stateTransfer={stateTransfer} />;
+                      return <ListPage history={history} stateTransfer={stateTransfer} />;
                     } else {
                       return <Redirect to="/" />;
                     }

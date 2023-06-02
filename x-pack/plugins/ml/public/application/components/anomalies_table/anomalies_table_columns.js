@@ -27,7 +27,7 @@ import { InfluencersCell } from './influencers_cell';
 import { LinksMenu } from './links_menu';
 import { checkPermission } from '../../capabilities/check_capabilities';
 import { mlFieldFormatService } from '../../services/field_format_service';
-import { isRuleSupported } from '../../../../common/util/anomaly_utils';
+import { isRuleSupported, isMultiBucketAnomaly } from '@kbn/ml-anomaly-utils';
 import { formatValue } from '../../formatters/format_value';
 import { INFLUENCERS_LIMIT, ANOMALIES_TABLE_TABS } from './anomalies_table_constants';
 import { SeverityCell } from './severity_cell';
@@ -133,7 +133,7 @@ export function getColumns(
         </EuiToolTip>
       ),
       render: (score, item) => (
-        <SeverityCell score={score} multiBucketImpact={item.source.multi_bucket_impact} />
+        <SeverityCell score={score} isMultiBucketAnomaly={isMultiBucketAnomaly(item.source)} />
       ),
       sortable: true,
     },
@@ -219,6 +219,7 @@ export function getColumns(
         return formatValue(item.actual, item.source.function, fieldFormat, item.source);
       },
       sortable: true,
+      className: 'eui-textBreakNormal',
     });
   }
 
@@ -248,6 +249,7 @@ export function getColumns(
         return formatValue(item.typical, item.source.function, fieldFormat, item.source);
       },
       sortable: true,
+      className: 'eui-textBreakNormal',
     });
 
     // Assume that if we are showing typical, there will be an actual too,

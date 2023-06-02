@@ -7,6 +7,20 @@
 import { getFailedTransactionRate } from '../../lib/transaction_groups/get_failed_transaction_rate';
 import { offsetPreviousPeriodCoordinates } from '../../../common/utils/offset_previous_period_coordinate';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
+import { Coordinate } from '../../../typings/timeseries';
+import { ApmServiceTransactionDocumentType } from '../../../common/document_type';
+import { RollupInterval } from '../../../common/rollup';
+
+export interface FailedTransactionRateResponse {
+  currentPeriod: {
+    timeseries: Coordinate[];
+    average: number | null;
+  };
+  previousPeriod: {
+    timeseries: Coordinate[];
+    average: number | null;
+  };
+}
 
 export async function getFailedTransactionRatePeriods({
   environment,
@@ -15,10 +29,12 @@ export async function getFailedTransactionRatePeriods({
   transactionType,
   transactionName,
   apmEventClient,
-  searchAggregatedTransactions,
   start,
   end,
   offset,
+  documentType,
+  rollupInterval,
+  bucketSizeInSeconds,
 }: {
   environment: string;
   kuery: string;
@@ -26,11 +42,13 @@ export async function getFailedTransactionRatePeriods({
   transactionType: string;
   transactionName?: string;
   apmEventClient: APMEventClient;
-  searchAggregatedTransactions: boolean;
   start: number;
   end: number;
   offset?: string;
-}) {
+  documentType: ApmServiceTransactionDocumentType;
+  rollupInterval: RollupInterval;
+  bucketSizeInSeconds: number;
+}): Promise<FailedTransactionRateResponse> {
   const commonProps = {
     environment,
     kuery,
@@ -38,7 +56,9 @@ export async function getFailedTransactionRatePeriods({
     transactionTypes: [transactionType],
     transactionName,
     apmEventClient,
-    searchAggregatedTransactions,
+    documentType,
+    rollupInterval,
+    bucketSizeInSeconds,
   };
 
   const currentPeriodPromise = getFailedTransactionRate({

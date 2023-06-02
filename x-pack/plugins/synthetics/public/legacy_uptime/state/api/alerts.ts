@@ -5,17 +5,23 @@
  * 2.0.
  */
 
-import type { ActionType, AsApiContract, Rule } from '@kbn/triggers-actions-ui-plugin/public';
+import {
+  ActionType,
+  AsApiContract,
+  Rule,
+  transformRule,
+} from '@kbn/triggers-actions-ui-plugin/public';
 import { RuleTypeParams } from '@kbn/alerting-plugin/common';
-import { CLIENT_ALERT_TYPES } from '../../../../common/constants/alerts';
+import { MonitorStatusTranslations } from '../../../../common/rules/legacy_uptime/translations';
+import { ActionConnector } from '../../../../common/rules/types';
+import { CLIENT_ALERT_TYPES, MONITOR_STATUS } from '../../../../common/constants/uptime_alerts';
 import { apiService } from './utils';
-import { ActionConnector } from '../alerts/alerts';
 
 import { AlertsResult, MonitorIdParam } from '../actions/types';
 import { API_URLS } from '../../../../common/constants';
 import { AtomicStatusCheckParams } from '../../../../common/runtime_types/alerts';
 
-import { populateAlertActions, RuleAction } from './alert_actions';
+import { populateAlertActions, RuleAction } from '../../../../common/rules/alert_actions';
 import { Ping } from '../../../../common/runtime_types/ping';
 import { DefaultEmail } from '../../../../common/runtime_types';
 
@@ -62,6 +68,7 @@ type NewMonitorStatusAlert = Omit<
   | 'muteAll'
   | 'mutedInstanceIds'
   | 'executionStatus'
+  | 'revision'
   | 'ruleTypeId'
   | 'notifyWhen'
   | 'actions'
@@ -79,8 +86,15 @@ export const createAlert = async ({
 }: NewAlertParams): Promise<Rule> => {
   const actions: RuleAction[] = populateAlertActions({
     defaultActions,
-    selectedMonitor,
     defaultEmail,
+    groupId: MONITOR_STATUS.id,
+    translations: {
+      defaultActionMessage: MonitorStatusTranslations.defaultActionMessage,
+      defaultRecoveryMessage: MonitorStatusTranslations.defaultRecoveryMessage,
+      defaultSubjectMessage: MonitorStatusTranslations.defaultSubjectMessage,
+      defaultRecoverySubjectMessage: MonitorStatusTranslations.defaultRecoverySubjectMessage,
+    },
+    isLegacy: true,
   });
 
   const data: NewMonitorStatusAlert = {
@@ -134,17 +148,12 @@ export const fetchAnomalyAlertRecords = async ({
     sort_order: 'asc',
   };
   const rawRules = await apiService.get<{
-    data: Array<Rule<NewAlertParams> & { rule_type_id: string }>;
+    data: Array<AsApiContract<Rule>>;
   }>(API_URLS.RULES_FIND, data);
-  const monitorRule = rawRules.data.find(
-    (rule) => rule.params.monitorId === monitorId
-  ) as Rule<NewAlertParams> & { rule_type_id: string };
-  if (monitorRule) {
-    return {
-      ...monitorRule,
-      ruleTypeId: monitorRule.rule_type_id,
-    };
-  }
+  const monitorRule = rawRules.data.find((rule) => rule.params.monitorId === monitorId);
+  if (!monitorRule) return undefined;
+
+  return transformRule(monitorRule) as Rule<NewAlertParams>;
 };
 
 export const disableAlertById = async ({ alertId }: { alertId: string }) => {

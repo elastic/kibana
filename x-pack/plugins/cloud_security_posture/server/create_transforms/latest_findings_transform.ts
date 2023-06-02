@@ -12,7 +12,7 @@ import {
 } from '../../common/constants';
 
 export const latestFindingsTransform: TransformPutTransformRequest = {
-  transform_id: 'cloud_security_posture.findings_latest-default-8.4.0',
+  transform_id: 'cloud_security_posture.findings_latest-default-8.8.0',
   description: 'Defines findings transformation to view only the latest finding per resource',
   source: {
     index: FINDINGS_INDEX_PATTERN,
@@ -30,7 +30,7 @@ export const latestFindingsTransform: TransformPutTransformRequest = {
   retention_policy: {
     time: {
       field: '@timestamp',
-      max_age: '5h',
+      max_age: '26h',
     },
   },
   latest: {

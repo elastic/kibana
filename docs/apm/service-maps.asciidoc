@@ -55,19 +55,20 @@ By default, all instrumented services and connections are shown.
 Whether you're onboarding a new engineer, or just trying to grasp the big picture,
 drag things around, zoom in and out, and begin to visualize how your services are connected.
 
+Customize what the service map displays using either the query bar or the environment selector.
+The query bar enables you to use <<advanced-queries,advanced queries>> to customize the service map based on your needs.
+The environment selector allows you to narrow displayed results to a specific environment.
+This can be useful if you have two or more services, in separate environments, but with the same name.
+Use the environment drop-down to only see the data you're interested in, like `dev` or `production`.
+
 If there's a specific service that interests you, select that service to highlight its connections.
 Clicking **Focus map** will refocus the map on that specific service and lock the connection highlighting.
 From here, select **Service Details**, or click on the **Transaction** tab to jump to the Transaction overview
 for the selected service.
 You can also use the tabs at the top of the page to easily jump to the **Errors** or **Metrics** overview.
 
-Filter out your maps by picking the environment from the environment drop-down filter.
-This can be useful if you have two or more services, in separate environments, but with the same name.
-Use the environment drop-down to only see the data you're interested in, like `dev` or `production`.
-Additional filters are not currently available for service maps.
-
 [role="screenshot"]
-image::apm/images/service-maps-java.png[Example view of service maps with Java highlighted in the APM app in Kibana]
+image::apm/images/service-maps-java.png[Example view of service maps in the APM app in Kibana]
 
 [float]
 [[service-map-anomaly-detection]]
@@ -95,16 +96,16 @@ To learn how to create a machine learning job, see <<machine-learning-integratio
 
 Nodes appear on the map in one of two shapes:
 
-* **Circle**: Instrumented services. Interior icons are based on the language of the agent used.
+* **Circle**: Instrumented services. Interior icons are based on the language of the APM agent used.
 * **Diamond**: Databases, external, and messaging. Interior icons represent the generic type,
 with specific icons for known entities, like Elasticsearch.
 Type and subtype are based on `span.type`, and `span.subtype`.
 
 [float]
 [[service-maps-supported]]
-=== Supported APM Agents
+=== Supported APM agents
 
-Service maps are supported for the following Agent versions:
+Service maps are supported for the following APM agent versions:
 
 [horizontal]
 Go agent:: ≥ v1.7.0
@@ -112,7 +113,7 @@ iOS agent:: _Not yet supported_
 Java agent:: ≥ v1.13.0
 .NET agent:: ≥ v1.3.0
 Node.js agent:: ≥ v3.6.0
-PHP agent:: _Not yet supported_
+PHP agent:: ≥ v1.2.0
 Python agent:: ≥ v5.5.0
 Ruby agent:: ≥ v3.6.0
 Real User Monitoring (RUM) agent:: ≥ v4.7.0

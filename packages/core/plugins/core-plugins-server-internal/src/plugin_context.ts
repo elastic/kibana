@@ -10,7 +10,7 @@ import { shareReplay } from 'rxjs/operators';
 import type { CoreContext } from '@kbn/core-base-server-internal';
 import type { PluginOpaqueId } from '@kbn/core-base-common';
 import type { NodeInfo } from '@kbn/core-node-server';
-import type { IRouter, IContextProvider } from '@kbn/core-http-server';
+import type { IContextProvider, IRouter } from '@kbn/core-http-server';
 import { PluginInitializerContext, PluginManifest } from '@kbn/core-plugins-server';
 import { CorePreboot, CoreSetup, CoreStart } from '@kbn/core-lifecycle-server';
 import type { RequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
@@ -78,6 +78,7 @@ export function createPluginInitializerContext({
       roles: {
         backgroundTasks: nodeInfo.roles.backgroundTasks,
         ui: nodeInfo.roles.ui,
+        migrator: nodeInfo.roles.migrator,
       },
     },
 
@@ -194,6 +195,12 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>(
       registerProvider: deps.capabilities.registerProvider,
       registerSwitcher: deps.capabilities.registerSwitcher,
     },
+    customBranding: {
+      register: (fetchFn) => {
+        deps.customBranding.register(plugin.name, fetchFn);
+      },
+      getBrandingFor: deps.customBranding.getBrandingFor,
+    },
     docLinks: deps.docLinks,
     elasticsearch: {
       legacy: deps.elasticsearch.legacy,
@@ -238,7 +245,8 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>(
       setSecurityExtension: deps.savedObjects.setSecurityExtension,
       setSpacesExtension: deps.savedObjects.setSpacesExtension,
       registerType: deps.savedObjects.registerType,
-      getKibanaIndex: deps.savedObjects.getKibanaIndex,
+      getDefaultIndex: deps.savedObjects.getDefaultIndex,
+      getAllIndices: deps.savedObjects.getAllIndices,
     },
     status: {
       core$: deps.status.core$,
@@ -250,6 +258,10 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>(
     },
     uiSettings: {
       register: deps.uiSettings.register,
+      registerGlobal: deps.uiSettings.registerGlobal,
+    },
+    userSettings: {
+      setUserProfileSettings: deps.userSettings.setUserProfileSettings,
     },
     getStartServices: () => plugin.startDependencies,
     deprecations: deps.deprecations.getRegistry(plugin.name),
@@ -285,6 +297,7 @@ export function createPluginStartContext<TPlugin, TPluginDependencies>(
     capabilities: {
       resolveCapabilities: deps.capabilities.resolveCapabilities,
     },
+    customBranding: deps.customBranding,
     docLinks: deps.docLinks,
     elasticsearch: {
       client: deps.elasticsearch.client,
@@ -304,6 +317,10 @@ export function createPluginStartContext<TPlugin, TPluginDependencies>(
       createExporter: deps.savedObjects.createExporter,
       createImporter: deps.savedObjects.createImporter,
       getTypeRegistry: deps.savedObjects.getTypeRegistry,
+      getDefaultIndex: deps.savedObjects.getDefaultIndex,
+      getIndexForType: deps.savedObjects.getIndexForType,
+      getIndicesForTypes: deps.savedObjects.getIndicesForTypes,
+      getAllIndices: deps.savedObjects.getAllIndices,
     },
     metrics: {
       collectionInterval: deps.metrics.collectionInterval,
@@ -311,6 +328,7 @@ export function createPluginStartContext<TPlugin, TPluginDependencies>(
     },
     uiSettings: {
       asScopedToClient: deps.uiSettings.asScopedToClient,
+      globalAsScopedToClient: deps.uiSettings.globalAsScopedToClient,
     },
     coreUsageData: deps.coreUsageData,
   };

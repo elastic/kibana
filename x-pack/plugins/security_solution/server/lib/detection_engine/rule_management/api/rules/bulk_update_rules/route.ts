@@ -28,8 +28,6 @@ import {
   createBulkErrorObject,
 } from '../../../../routes/utils';
 import { updateRules } from '../../../logic/crud/update_rules';
-// eslint-disable-next-line no-restricted-imports
-import { legacyMigrate } from '../../../logic/rule_actions/legacy_action_migration';
 import { readRules } from '../../../logic/crud/read_rules';
 import { getDeprecatedBulkEndpointHeader, logDeprecatedBulkEndpoint } from '../../deprecation';
 import { validateRuleDefaultExceptionList } from '../../../logic/exceptions/validate_rule_default_exception_list';
@@ -61,7 +59,6 @@ export const bulkUpdateRulesRoute = (
       const ctx = await context.resolve(['core', 'securitySolution', 'alerting', 'licensing']);
 
       const rulesClient = ctx.alerting.getRulesClient();
-      const ruleExecutionLog = ctx.securitySolution.getRuleExecutionLog();
       const savedObjectsClient = ctx.core.savedObjects.client;
 
       const mlAuthz = buildMlAuthz({
@@ -100,23 +97,17 @@ export const bulkUpdateRulesRoute = (
             await validateRuleDefaultExceptionList({
               exceptionsList: payloadRule.exceptions_list,
               rulesClient,
+              ruleRuleId: payloadRule.rule_id,
               ruleId: payloadRule.id,
-            });
-
-            const migratedRule = await legacyMigrate({
-              rulesClient,
-              savedObjectsClient,
-              rule: existingRule,
             });
 
             const rule = await updateRules({
               rulesClient,
-              existingRule: migratedRule,
+              existingRule,
               ruleUpdate: payloadRule,
             });
             if (rule != null) {
-              const ruleExecutionSummary = await ruleExecutionLog.getExecutionSummary(rule.id);
-              return transformValidateBulkError(rule.id, rule, ruleExecutionSummary);
+              return transformValidateBulkError(rule.id, rule);
             } else {
               return getIdBulkError({ id: payloadRule.id, ruleId: payloadRule.rule_id });
             }

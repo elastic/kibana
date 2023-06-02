@@ -48,7 +48,7 @@ function registerNavigation(alerting: AlertingSetup) {
     PLUGIN_ID,
     ES_QUERY_ALERT_TYPE,
     (alert: SanitizedRule<EsQueryRuleParams<SearchType.searchSource>>) => {
-      return `#/viewAlert/${alert.id}`;
+      return `/app/discover#/viewAlert/${alert.id}`;
     }
   );
 }

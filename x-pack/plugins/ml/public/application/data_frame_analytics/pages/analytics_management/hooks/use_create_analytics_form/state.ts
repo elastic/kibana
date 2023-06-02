@@ -5,22 +5,25 @@
  * 2.0.
  */
 
+import {
+  getAnalysisType,
+  isClassificationAnalysis,
+  ANALYSIS_CONFIG_TYPE,
+  type DataFrameAnalyticsMeta,
+  type DataFrameAnalyticsConfig,
+  type DataFrameAnalyticsId,
+  type DataFrameAnalysisConfigType,
+  type FeatureProcessor,
+} from '@kbn/ml-data-frame-analytics-utils';
 import { RuntimeMappings } from '../../../../../../../common/types/fields';
 import { DeepPartial, DeepReadonly } from '../../../../../../../common/types/common';
 import { checkPermission } from '../../../../../capabilities/check_capabilities';
 import { mlNodesAvailable } from '../../../../../ml_nodes_check';
 import { isRuntimeMappings } from '../../../../../../../common/util/runtime_field_utils';
 
-import { defaultSearchQuery, getAnalysisType } from '../../../../common/analytics';
+import { defaultSearchQuery } from '../../../../common/analytics';
 import { CloneDataFrameAnalyticsConfig } from '../../components/action_clone';
-import {
-  DataFrameAnalyticsConfig,
-  DataFrameAnalyticsId,
-  DataFrameAnalysisConfigType,
-  FeatureProcessor,
-} from '../../../../../../../common/types/data_frame_analytics';
-import { isClassificationAnalysis } from '../../../../../../../common/util/analytics_utils';
-import { ANALYSIS_CONFIG_TYPE } from '../../../../../../../common/constants/data_frame_analytics';
+
 export enum DEFAULT_MODEL_MEMORY_LIMIT {
   regression = '100mb',
   outlier_detection = '50mb',
@@ -87,6 +90,7 @@ export interface State {
     maxNumThreads: undefined | number;
     maxOptimizationRoundsPerHyperparameter: undefined | number;
     maxTrees: undefined | number;
+    _meta: undefined | DataFrameAnalyticsMeta;
     method: undefined | string;
     modelMemoryLimit: string | undefined;
     modelMemoryLimitUnitValid: boolean;
@@ -112,6 +116,7 @@ export interface State {
     sourceIndexContainsNumericalFields: boolean;
     sourceIndexFieldsCheckFailed: boolean;
     standardizationEnabled: undefined | string;
+    timeFieldName: undefined | string;
     trainingPercent: number;
     useEstimatedMml: boolean;
   };
@@ -171,6 +176,7 @@ export const getInitialState = (): State => ({
     maxNumThreads: DEFAULT_MAX_NUM_THREADS,
     maxOptimizationRoundsPerHyperparameter: undefined,
     maxTrees: undefined,
+    _meta: undefined,
     method: undefined,
     modelMemoryLimit: undefined,
     modelMemoryLimitUnitValid: true,
@@ -196,6 +202,7 @@ export const getInitialState = (): State => ({
     sourceIndexContainsNumericalFields: true,
     sourceIndexFieldsCheckFailed: false,
     standardizationEnabled: 'true',
+    timeFieldName: undefined,
     trainingPercent: 80,
     useEstimatedMml: true,
   },
@@ -221,6 +228,7 @@ export const getJobConfigFromFormState = (
 ): DeepPartial<DataFrameAnalyticsConfig> => {
   const jobConfig: DeepPartial<DataFrameAnalyticsConfig> = {
     description: formState.description,
+    _meta: formState._meta,
     source: {
       // If a Kibana data view name includes commas, we need to split
       // the into an array of indices to be in the correct format for
@@ -363,6 +371,7 @@ export function getFormStateFromJobConfig(
   const resultState: Partial<State['form']> = {
     jobType,
     description: analyticsJobConfig.description ?? '',
+    _meta: analyticsJobConfig._meta ?? {},
     resultsField: analyticsJobConfig.dest.results_field,
     sourceIndex: Array.isArray(analyticsJobConfig.source.index)
       ? analyticsJobConfig.source.index.join(',')

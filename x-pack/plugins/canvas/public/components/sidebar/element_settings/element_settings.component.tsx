@@ -55,6 +55,7 @@ export const ElementSettings: FunctionComponent<Props> = ({ element }) => {
           <WorkpadFilters element={element} />
         </div>
       ),
+      'data-test-subj': 'canvasSidebarFiltersTab',
     };
 
     return [
@@ -68,6 +69,7 @@ export const ElementSettings: FunctionComponent<Props> = ({ element }) => {
             </div>
           </div>
         ),
+        'data-test-subj': 'canvasSidebarDisplayTab',
       },
       {
         id: 'data',
@@ -77,6 +79,7 @@ export const ElementSettings: FunctionComponent<Props> = ({ element }) => {
             <Datasource />
           </div>
         ),
+        'data-test-subj': 'canvasSidebarDataTab',
       },
       ...(filtersTab ? [filtersTab] : []),
     ];
@@ -93,6 +96,7 @@ export const ElementSettings: FunctionComponent<Props> = ({ element }) => {
       key={tab.id}
       onClick={() => onSelectedTabChanged(tab.id)}
       isSelected={tab.id === selectedTab}
+      data-test-subj={tab['data-test-subj']}
     >
       {tab.name}
     </EuiTab>

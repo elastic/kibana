@@ -26,11 +26,11 @@ Set to `false` to disable Console. *Default: `true`*
 Add sources for the https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/script-src[Content Security Policy `script-src` directive].
 
 `csp.disableUnsafeEval`::
-experimental[] Set this to `true` to remove the https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/script-src#unsafe_eval_expressions[`unsafe-eval`] source expression from the `script-src` directive. *Default: `false`*
+deprecated:[8.7.0,Use `csp.script_src: ['unsafe-eval']` instead if you wish to enable `unsafe-eval`. This config option will have no effect in a future version.] Set this to `false` to add the https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/script-src#unsafe_eval_expressions[`unsafe-eval`] source expression to the `script-src` directive. *Default: `true`*
 +
-By enabling `csp.disableUnsafeEval`, Kibana will use a custom version of the Handlebars template library which doesn't support https://handlebarsjs.com/guide/partials.html#inline-partials[inline partials].
+When `csp.disableUnsafeEval` is set to `true`, Kibana will use a custom version of the Handlebars template library.
 Handlebars is used in various locations in the Kibana frontend where custom templates can be supplied by the user when for instance setting up a visualisation.
-If you experience any issues rendering Handlebars templates after turning on `csp.disableUnsafeEval`, or if you rely on inline partials, please revert this setting to `false` and https://github.com/elastic/kibana/issues/new/choose[open an issue] in the Kibana GitHub repository.
+If you experience any issues rendering Handlebars templates, please set this setting to `false` and https://github.com/elastic/kibana/issues/new/choose[open an issue] in the Kibana GitHub repository.
 
 `csp.worker_src`::
 Add sources for the https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/worker-src[Content Security Policy `worker-src` directive].
@@ -229,9 +229,6 @@ If your {es} is protected with basic authentication, this token provides the cre
 that the {kib} server uses to perform maintenance on the {kib} index at startup. This setting
 is an alternative to `elasticsearch.username` and `elasticsearch.password`.
 
-`interpreter.enableInVisualize`::
-Enables use of interpreter in Visualize. *Default: `true`*
-
 `unifiedSearch.autocomplete.valueSuggestions.timeout` {ess-icon}::
 Time in milliseconds to wait for autocomplete suggestions from {es}.
 This value must be a whole number greater than zero. *Default: `"1000"`*
@@ -325,6 +322,10 @@ experimental[] Indicates which roles to configure the {kib} process with, which 
 run {kib} in different modes. Valid options are `background_tasks` and `ui`,
 or `*` to select all roles. *Default: `*`*
 
+`notifications.connectors.default.email`::
+Specifies the name of the connector that is used to send email notifications.
+In {ecloud}, the default value is `elastic-cloud-email`.
+
 [[path-data]] `path.data`::
 The path where {kib} stores persistent data
 not saved in {es}. *Default: `data`*
@@ -388,7 +389,7 @@ This setting may not be used when <<server-compression, `server.compression.enab
 
 `server.compression.brotli.enabled`::
 Set to `true` to enable brotli (br) compression format.
-Note: browsers not supporting brotli compression will fallback to using gzip instead. 
+Note: browsers not supporting brotli compression will fallback to using gzip instead.
 This setting may not be used when <<server-compression, `server.compression.enabled`>> is set to `false`. *Default: `false`*
 
 [[server-securityResponseHeaders-strictTransportSecurity]] `server.securityResponseHeaders.strictTransportSecurity`::
@@ -412,11 +413,15 @@ experimental[] Controls whether the https://developer.mozilla.org/en-US/docs/Web
 is used in all responses to the client from the {kib} server, and specifies what value is used. Allowed values are any text value or `null`.
 To disable, set to `null`. *Default:* `null`
 
-[[server-securityResponseHeaders-disableEmbedding]]`server.securityResponseHeaders.disableEmbedding`:: 
+[[server-securityResponseHeaders-disableEmbedding]]`server.securityResponseHeaders.disableEmbedding`::
 Controls whether the https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy[`Content-Security-Policy`] and
 https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Frame-Options[`X-Frame-Options`] headers are configured to disable embedding
 {kib} in other webpages using iframes. When set to `true`, secure headers are used to disable embedding, which adds the `frame-ancestors:
 'self'` directive to the `Content-Security-Policy` response header and adds the `X-Frame-Options: SAMEORIGIN` response header. *Default:* `false`
+
+[[server-securityResponseHeaders-crossOriginOpenerPolicy]] `server.securityResponseHeaders.crossOriginOpenerPolicy`::
+Controls whether the https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cross-Origin-Opener-Policy[`Cross-Origin-Opener-Policy`] header is used in all
+responses to the client from the {kib} server, and specifies what value is used. Allowed values are `unsafe-none`, `same-origin-allow-popups`, `same-origin`, or `null`. To disable, set to `null`. *Default:* `"same-origin"`
 
 `server.customResponseHeaders` {ess-icon}::
 Header names and values to send on all responses to the client from the {kib} server. *Default: `{}`*
@@ -551,14 +556,13 @@ setting this to `true` enables unauthenticated users to access the {kib}
 server status API and status page. *Default: `false`*
 
 [[telemetry-allowChangingOptInStatus]] `telemetry.allowChangingOptInStatus`::
-When `true`, users are able to change the telemetry setting at a later time in
-<<advanced-options, Advanced Settings>>.  When `false`, users cannot change the opt-in status through *Advanced Settings*, and
+When `false`, users cannot change the opt-in status through <<advanced-options, Advanced Settings>>, and
 {kib} only looks at the value of <<settings-telemetry-optIn, `telemetry.optIn`>> to determine whether to send telemetry data or not. *Default: `true`*.
 
 [[settings-telemetry-optIn]] `telemetry.optIn`::
+Set to `false` to stop sending any telemetry data to Elastic.
 Reporting your cluster statistics helps
-us improve your user experience. Your data is never shared with anyone.
-Set to `true` to allow telemetry data to be sent to Elastic.
+us improve your user experience.
 When `false`, the telemetry data is never sent to Elastic. +
 +
 This setting can be changed at any time in <<advanced-options, Advanced Settings>>.
@@ -577,7 +581,7 @@ Set this value to false to disable the Cross-Cluster Replication UI.
 [[settings-explore-data-in-context]] `xpack.discoverEnhanced.actions.exploreDataInContextMenu.enabled`::
 Enables the *Explore underlying data* option that allows you to open *Discover* from a dashboard panel and view the panel data. *Default: `false`*
 +
-When you create visualizations using the *Lens* drag-and-drop editor, you can use the toolbar to open and explore your data in *Discover*. For more information, check out <<explore-lens-data-in-discover, Explore the data in Discover>>. 
+When you create visualizations using the *Lens* drag-and-drop editor, you can use the toolbar to open and explore your data in *Discover*. For more information, check out <<explore-lens-data-in-discover, Explore the data in Discover>>.
 
 [[settings-explore-data-in-chart]] `xpack.discoverEnhanced.actions.exploreDataInChart.enabled`::
 Enables you to view the underlying documents in a data series from a dashboard panel. *Default: `false`*
@@ -611,9 +615,10 @@ Set this value to false to disable the Upgrade Assistant UI. *Default: true*
 Set this value to change the {kib} interface language.
 Valid locales are: `en`, `zh-CN`, `ja-JP`. *Default: `en`*
 
-include::{kib-repo-dir}/settings/alert-action-settings.asciidoc[]
+include::{kib-repo-dir}/settings/alert-action-settings.asciidoc[leveloffset=+1]
 include::{kib-repo-dir}/settings/apm-settings.asciidoc[]
 include::{kib-repo-dir}/settings/banners-settings.asciidoc[]
+include::{kib-repo-dir}/settings/cases-settings.asciidoc[leveloffset=+1]
 include::{kib-repo-dir}/settings/enterprise-search-settings.asciidoc[]
 include::{kib-repo-dir}/settings/fleet-settings.asciidoc[]
 include::{kib-repo-dir}/settings/i18n-settings.asciidoc[]

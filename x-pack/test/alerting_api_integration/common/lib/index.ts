@@ -7,7 +7,6 @@
 
 export { ObjectRemover } from './object_remover';
 export { getUrlPrefix } from './space_test_utils';
-export { ES_TEST_INDEX_NAME, ESTestIndexTool } from './es_test_index_tool';
 export { getTestRuleData } from './get_test_rule_data';
 export {
   AlertUtils,
@@ -20,3 +19,4 @@ export * from './test_assertions';
 export { checkAAD } from './check_aad';
 export { getEventLog } from './get_event_log';
 export { createWaitForExecutionCount } from './wait_for_execution_count';
+export { resetRulesSettings } from './reset_rules_settings';

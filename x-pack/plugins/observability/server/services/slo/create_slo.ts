@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import uuid from 'uuid';
+import { v1 as uuidv1 } from 'uuid';
+
+import { CreateSLOParams, CreateSLOResponse } from '@kbn/slo-schema';
 
 import { Duration, DurationUnit, SLO } from '../../domain/models';
 import { ResourceInstaller } from './resource_installer';
 import { SLORepository } from './slo_repository';
 import { TransformManager } from './transform_manager';
-import { CreateSLOParams, CreateSLOResponse } from '../../types/rest_specs';
 import { validateSLO } from '../../domain/services';
 
 export class CreateSLO {
@@ -26,7 +27,7 @@ export class CreateSLO {
     validateSLO(slo);
 
     await this.resourceInstaller.ensureCommonResourcesInstalled();
-    await this.repository.save(slo);
+    await this.repository.save(slo, { throwOnConflict: true });
 
     let sloTransformId;
     try {
@@ -54,15 +55,16 @@ export class CreateSLO {
     const now = new Date();
     return {
       ...params,
-      id: uuid.v1(),
+      id: params.id ?? uuidv1(),
       settings: {
-        timestamp_field: params.settings?.timestamp_field ?? '@timestamp',
-        sync_delay: params.settings?.sync_delay ?? new Duration(1, DurationUnit.Minute),
+        syncDelay: params.settings?.syncDelay ?? new Duration(1, DurationUnit.Minute),
         frequency: params.settings?.frequency ?? new Duration(1, DurationUnit.Minute),
       },
       revision: 1,
-      created_at: now,
-      updated_at: now,
+      enabled: true,
+      tags: params.tags ?? [],
+      createdAt: now,
+      updatedAt: now,
     };
   }
 

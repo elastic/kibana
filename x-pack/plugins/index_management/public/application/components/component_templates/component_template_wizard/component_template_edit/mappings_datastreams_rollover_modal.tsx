@@ -82,7 +82,7 @@ export const MappingsDatastreamRolloverModal: React.FunctionComponent<Props> = (
               />
             }
             color="danger"
-            iconType="alert"
+            iconType="warning"
             data-test-subj="applyMappingsRolloverError"
           >
             <div>{error.message}</div>

@@ -48,30 +48,36 @@ export const SortMenu = ({ sortOptions, orderOptions, sortField }: Props) => {
   };
 
   const button = (
-    <EuiButtonEmpty size="xs" iconType="arrowDown" iconSide="right" onClick={onButtonClick}>
+    <EuiButtonEmpty
+      data-test-subj="syntheticsSortMenuButton"
+      size="xs"
+      iconType="arrowDown"
+      iconSide="right"
+      onClick={onButtonClick}
+    >
       {sortField}
     </EuiButtonEmpty>
   );
 
   const items = [
-    <EuiPanel paddingSize="s" hasShadow={false}>
+    <EuiPanel paddingSize="s" hasShadow={false} key="sort_by_title">
       <EuiText size="xs">
         <h4>{SORT_BY_TITLE}</h4>
       </EuiText>
     </EuiPanel>,
     ...sortOptions.map((option) => (
-      <ContextMenuItem option={option} onClosePopover={closePopover} />
+      <ContextMenuItem option={option} onClosePopover={closePopover} key={option.value} />
     )),
     <EuiHorizontalRule key="hr" margin="none" />,
 
-    <EuiPanel paddingSize="s" hasShadow={false}>
+    <EuiPanel paddingSize="s" hasShadow={false} key="order_by_title">
       <EuiText size="xs">
         <h4>{ORDER_BY_TITLE}</h4>
       </EuiText>
     </EuiPanel>,
 
     ...orderOptions.map((option) => (
-      <ContextMenuItem option={option} onClosePopover={closePopover} />
+      <ContextMenuItem option={option} onClosePopover={closePopover} key={option.value} />
     )),
   ];
 
@@ -122,6 +128,9 @@ const SORT_BY_TITLE = i18n.translate('xpack.synthetics.overview.sortPopover.sort
   defaultMessage: 'Sort by',
 });
 
-const ORDER_BY_TITLE = i18n.translate('xpack.synthetics.overview.sortPopover.orderBy.title', {
-  defaultMessage: 'Order',
-});
+export const ORDER_BY_TITLE = i18n.translate(
+  'xpack.synthetics.overview.sortPopover.orderBy.title',
+  {
+    defaultMessage: 'Order',
+  }
+);

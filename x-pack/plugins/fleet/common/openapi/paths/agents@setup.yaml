@@ -1,6 +1,7 @@
 get:
-  summary: Agents setup - Info
-  tags: []
+  summary: Get agent setup info
+  tags:
+    - Agents
   responses:
     '200':
       description: OK
@@ -8,11 +9,15 @@ get:
         application/json:
           schema:
             $ref: ../components/schemas/fleet_status_response.yaml
+    '400':
+      $ref: ../components/responses/error.yaml
   operationId: get-agents-setup-status
   security:
     - basicAuth: []
 post:
-  summary: Agents setup - Create
+  summary: Initiate agent setup
+  tags:
+    - Agents
   operationId: setup-agents
   responses:
     '200':
@@ -21,6 +26,8 @@ post:
         application/json:
           schema:
             $ref: ../components/schemas/fleet_setup_response.yaml
+    '400':
+      $ref: ../components/responses/error.yaml
   requestBody:
     content:
       application/json:

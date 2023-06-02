@@ -14,7 +14,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   );
   const xPackAPITestsConfig = await readConfigFile(require.resolve('../api_integration/config.ts'));
 
-  const auditLogPath = resolve(__dirname, './fixtures/audit/anonymous.log');
+  const auditLogPath = resolve(__dirname, './plugins/audit_log/anonymous.log');
 
   return {
     testFiles: [require.resolve('./tests/anonymous')],

@@ -32,7 +32,7 @@ export const UptimeEditAlertFlyoutComponent = ({
 
   const EditAlertFlyout = useMemo(
     () =>
-      triggersActionsUi.getEditAlertFlyout({
+      triggersActionsUi.getEditRuleFlyout({
         initialRule: initialAlert,
         onClose: () => {
           setAlertFlyoutVisibility(false);

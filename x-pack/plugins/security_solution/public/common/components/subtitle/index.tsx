@@ -10,8 +10,6 @@ import styled, { css } from 'styled-components';
 
 const Wrapper = styled.div`
   ${({ theme }) => css`
-    margin-top: ${theme.eui.euiSizeS};
-
     .siemSubtitle__item {
       color: ${theme.eui.euiTextSubduedColor};
       font-size: ${theme.eui.euiFontSizeXS};

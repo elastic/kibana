@@ -8,9 +8,10 @@
 import { useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 
-import { KBN_FIELD_TYPES } from '@kbn/data-plugin/common';
+import { KBN_FIELD_TYPES } from '@kbn/field-types';
+import { isDefined } from '@kbn/ml-is-defined';
 import { AggName } from '../../../../../../../common/types/aggregations';
-import { dictionaryToArray, isDefined } from '../../../../../../../common/types/common';
+import { dictionaryToArray } from '../../../../../../../common/types/common';
 
 import { useToastNotifications } from '../../../../../app_dependencies';
 import {

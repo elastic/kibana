@@ -8,7 +8,7 @@
 import { DataViewsService } from '@kbn/data-views-plugin/public';
 import type { IEmbeddable } from '@kbn/embeddable-plugin/public';
 import { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
-import { DOC_TYPE } from '../../common';
+import { DOC_TYPE } from '../../common/constants';
 import { Embeddable } from '../embeddable';
 import { createOpenInDiscoverAction } from './open_in_discover_action';
 import type { DiscoverAppLocator } from './open_in_discover_helpers';
@@ -93,7 +93,7 @@ describe('open in discover action', () => {
 
   it('navigates to discover when executed', async () => {
     const viewUnderlyingDataArgs = {
-      indexPatternId: 'index-pattern-id',
+      dataViewSpec: { id: 'index-pattern-id' },
       timeRange: {},
       filters: [],
       query: undefined,
@@ -114,7 +114,12 @@ describe('open in discover action', () => {
 
     await createOpenInDiscoverAction(
       locator,
-      { get: () => ({ isTimeBased: () => true }) } as unknown as DataViewsService,
+      {
+        get: () => ({
+          isTimeBased: () => true,
+          toSpec: () => ({ id: 'index-pattern-id' }),
+        }),
+      } as unknown as DataViewsService,
       true
     ).execute({
       embeddable,

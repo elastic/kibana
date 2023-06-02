@@ -11,7 +11,7 @@ import {
   convertToLensModule,
   getDataViewByIndexPatternId,
 } from '@kbn/visualizations-plugin/public';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { getDataViewsStart } from '../services';
 import { getConfiguration } from './configurations';
 import { ConvertHeatmapToLensVisualization } from './types';
@@ -59,7 +59,7 @@ export const convertToLens: ConvertHeatmapToLensVisualization = async (vis, time
   const xColumn = layerConfig.columns.find(({ isBucketed, isSplit }) => isBucketed && !isSplit);
   const xAxisColumn =
     xColumn ??
-    convertToFiltersColumn(uuid(), { filters: [{ input: { language: 'lucene', query: '*' } }] })!;
+    convertToFiltersColumn(uuidv4(), { filters: [{ input: { language: 'lucene', query: '*' } }] })!;
 
   if (xColumn?.columnId !== xAxisColumn?.columnId) {
     layerConfig.buckets.all.push(xAxisColumn.columnId);
@@ -71,7 +71,7 @@ export const convertToLens: ConvertHeatmapToLensVisualization = async (vis, time
     return null;
   }
 
-  const layerId = uuid();
+  const layerId = uuidv4();
 
   const indexPatternId = dataView.id!;
   const configuration = await getConfiguration(layerId, vis, {

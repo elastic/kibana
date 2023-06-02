@@ -55,13 +55,28 @@ You can request to overwrite any objects that already exist in the target space 
   (Optional, boolean) Creates new copies of saved objects, regenerates each object ID, and resets the origin. When used, potential conflict
   errors are avoided. The default value is `true`.
 +
-NOTE: This cannot be used with the `overwrite` option.
+NOTE: This option cannot be used with the `overwrite` and `compatibilityMode` options.
 
 `overwrite`::
   (Optional, boolean) When set to `true`, all conflicts are automatically overridden. When a saved object with a matching `type` and `id`
   exists in the target space, that version is replaced with the version from the source space. The default value is `false`.
 +
-NOTE: This cannot be used with the `createNewCopies` option.
+NOTE: This option cannot be used with the `createNewCopies` option.
+
+`compatibilityMode`::
+  (Optional, boolean) Applies various adjustments to the saved objects that are being copied to maintain compatibility between different {kib}
+  versions. Use this option only if you encounter issues with copied saved objects.
++
+NOTE: This option cannot be used with the `createNewCopies` option.
+
+[[spaces-api-copy-saved-objects-response-codes]]
+==== Response codes
+
+`200`::
+    Indicates a successful call.
+
+`404`::
+    Indicates that the request failed because one or more of the objects specified could not be found. A list of the unresolved objects are included in the 404 response attributes.
 
 [role="child_attributes"]
 [[spaces-api-copy-saved-objects-response-body]]

@@ -6,13 +6,25 @@
  */
 import * as rt from 'io-ts';
 import { TimeUnitChar } from '@kbn/observability-plugin/common/utils/formatters/duration';
+import { ML_ANOMALY_THRESHOLD } from '@kbn/ml-anomaly-utils/anomaly_threshold';
 import { SnapshotCustomMetricInput } from '../../http_api';
-import { ANOMALY_THRESHOLD } from '../../infra_ml';
 import { InventoryItemType, SnapshotMetricType } from '../../inventory_models/types';
 
 export const METRIC_THRESHOLD_ALERT_TYPE_ID = 'metrics.alert.threshold';
 export const METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID = 'metrics.alert.inventory.threshold';
 export const METRIC_ANOMALY_ALERT_TYPE_ID = 'metrics.alert.anomaly';
+
+export enum InfraRuleType {
+  MetricThreshold = 'metrics.alert.threshold',
+  InventoryThreshold = 'metrics.alert.inventory.threshold',
+  Anomaly = 'metrics.alert.anomaly',
+}
+
+export interface InfraRuleTypeParams {
+  [InfraRuleType.MetricThreshold]: MetricThresholdParams;
+  [InfraRuleType.InventoryThreshold]: InventoryMetricConditions;
+  [InfraRuleType.Anomaly]: MetricAnomalyParams;
+}
 
 export enum Comparator {
   GT = '>',
@@ -33,6 +45,7 @@ export enum Aggregators {
   CARDINALITY = 'cardinality',
   P95 = 'p95',
   P99 = 'p99',
+  CUSTOM = 'custom',
 }
 
 export enum AlertStates {
@@ -60,7 +73,7 @@ export interface MetricAnomalyParams {
   alertInterval?: string;
   sourceId?: string;
   spaceId?: string;
-  threshold: Exclude<ANOMALY_THRESHOLD, ANOMALY_THRESHOLD.LOW>;
+  threshold: Exclude<ML_ANOMALY_THRESHOLD, ML_ANOMALY_THRESHOLD.LOW>;
   influencerFilter: rt.TypeOf<typeof metricAnomalyInfluencerFilterRT> | undefined;
 }
 
@@ -87,6 +100,15 @@ export interface InventoryMetricThresholdParams {
   alertOnNoData?: boolean;
 }
 
+export interface MetricThresholdParams {
+  criteria: MetricExpressionParams[];
+  filterQuery?: string;
+  filterQueryText?: string;
+  sourceId?: string;
+  alertOnNoData?: boolean;
+  alertOnGroupDisappear?: boolean;
+}
+
 interface BaseMetricExpressionParams {
   timeSize: number;
   timeUnit: TimeUnitChar;
@@ -98,16 +120,37 @@ interface BaseMetricExpressionParams {
 }
 
 export interface NonCountMetricExpressionParams extends BaseMetricExpressionParams {
-  aggType: Exclude<Aggregators, Aggregators.COUNT>;
+  aggType: Exclude<Aggregators, [Aggregators.COUNT, Aggregators.CUSTOM]>;
   metric: string;
 }
 
 export interface CountMetricExpressionParams extends BaseMetricExpressionParams {
   aggType: Aggregators.COUNT;
-  metric: never;
 }
 
-export type MetricExpressionParams = NonCountMetricExpressionParams | CountMetricExpressionParams;
+export type CustomMetricAggTypes = Exclude<
+  Aggregators,
+  Aggregators.CUSTOM | Aggregators.RATE | Aggregators.P95 | Aggregators.P99
+>;
+
+export interface MetricExpressionCustomMetric {
+  name: string;
+  aggType: CustomMetricAggTypes;
+  field?: string;
+  filter?: string;
+}
+
+export interface CustomMetricExpressionParams extends BaseMetricExpressionParams {
+  aggType: Aggregators.CUSTOM;
+  customMetrics: MetricExpressionCustomMetric[];
+  equation?: string;
+  label?: string;
+}
+
+export type MetricExpressionParams =
+  | NonCountMetricExpressionParams
+  | CountMetricExpressionParams
+  | CustomMetricExpressionParams;
 
 export const QUERY_INVALID: unique symbol = Symbol('QUERY_INVALID');
 

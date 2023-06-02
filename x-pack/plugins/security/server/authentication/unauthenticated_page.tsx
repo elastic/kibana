@@ -10,6 +10,7 @@ import { EuiButton } from '@elastic/eui/lib/components/button';
 import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 
+import type { CustomBranding } from '@kbn/core-custom-branding-common';
 import type { IBasePath } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -20,21 +21,22 @@ interface Props {
   originalURL: string;
   buildNumber: number;
   basePath: IBasePath;
+  customBranding: CustomBranding;
 }
 
-export function UnauthenticatedPage({ basePath, originalURL, buildNumber }: Props) {
+export function UnauthenticatedPage({ basePath, originalURL, buildNumber, customBranding }: Props) {
   return (
     <PromptPage
       buildNumber={buildNumber}
       basePath={basePath}
       title={i18n.translate('xpack.security.unauthenticated.pageTitle', {
-        defaultMessage: "We couldn't log you in",
+        defaultMessage: 'We hit an authentication error',
       })}
       body={
         <p>
           <FormattedMessage
             id="xpack.security.unauthenticated.errorDescription"
-            defaultMessage="We hit an authentication error. Please check your credentials and try again. If you still can't log in, contact your system administrator."
+            defaultMessage="Try logging in again, and if the problem persists, contact your system administrator."
           />
         </p>
       }
@@ -46,6 +48,7 @@ export function UnauthenticatedPage({ basePath, originalURL, buildNumber }: Prop
           />
         </EuiButton>,
       ]}
+      customBranding={customBranding}
     />
   );
 }

@@ -25,7 +25,15 @@ import {
 } from '@kbn/data-plugin/public';
 
 import { estypes } from '@elastic/elasticsearch';
-import type { FramePublicAPI, IndexPattern, StateSetter } from '../../types';
+import { isQueryValid } from '@kbn/visualization-ui-components/public';
+import type { DateRange } from '../../../common/types';
+import type {
+  FramePublicAPI,
+  IndexPattern,
+  StateSetter,
+  UserMessage,
+  VisualizationInfo,
+} from '../../types';
 import { renewIDs } from '../../utils';
 import type { FormBasedLayer, FormBasedPersistedState, FormBasedPrivateState } from './types';
 import type { ReferenceBasedIndexPatternColumn } from './operations/definitions/column_types';
@@ -40,6 +48,8 @@ import {
   RangeIndexPatternColumn,
   FormulaIndexPatternColumn,
   DateHistogramIndexPatternColumn,
+  MaxIndexPatternColumn,
+  MinIndexPatternColumn,
 } from './operations';
 
 import { getInvalidFieldMessage, isColumnOfType } from './operations/definitions/helpers';
@@ -49,12 +59,49 @@ import { mergeLayer } from './state_helpers';
 import { supportsRarityRanking } from './operations/definitions/terms';
 import { DEFAULT_MAX_DOC_COUNT } from './operations/definitions/terms/constants';
 import { getOriginalId } from '../../../common/expressions/datatable/transpose_helpers';
-import { isQueryValid } from '../../shared_components';
+import { ReducedSamplingSectionEntries } from './info_badges';
+
+function isMinOrMaxColumn(
+  column?: GenericIndexPatternColumn
+): column is MaxIndexPatternColumn | MinIndexPatternColumn {
+  if (!column) {
+    return false;
+  }
+  return (
+    isColumnOfType<MaxIndexPatternColumn>('max', column) ||
+    isColumnOfType<MinIndexPatternColumn>('min', column)
+  );
+}
+
+function isReferenceColumn(
+  column: GenericIndexPatternColumn
+): column is ReferenceBasedIndexPatternColumn {
+  return 'references' in column;
+}
+
+export function isSamplingValueEnabled(layer: FormBasedLayer) {
+  // Do not use columnOrder here as it needs to check also inside formulas columns
+  return !Object.values(layer.columns).some(
+    (column) =>
+      isMinOrMaxColumn(column) ||
+      (isReferenceColumn(column) && isMinOrMaxColumn(layer.columns[column.references[0]]))
+  );
+}
+
+/**
+ * Centralized logic to get the actual random sampling value for a layer
+ * @param layer
+ * @returns
+ */
+export function getSamplingValue(layer: FormBasedLayer) {
+  return isSamplingValueEnabled(layer) ? layer.sampling ?? 1 : 1;
+}
 
 export function isColumnInvalid(
   layer: FormBasedLayer,
   columnId: string,
-  indexPattern: IndexPattern
+  indexPattern: IndexPattern,
+  dateRange: DateRange | undefined
 ) {
   const column: GenericIndexPatternColumn | undefined = layer.columns[columnId];
   if (!column || !indexPattern) return;
@@ -64,12 +111,20 @@ export function isColumnInvalid(
   const referencesHaveErrors =
     true &&
     'references' in column &&
-    Boolean(getReferencesErrors(layer, column, indexPattern).filter(Boolean).length);
+    Boolean(getReferencesErrors(layer, column, indexPattern, dateRange).filter(Boolean).length);
 
   const operationErrorMessages =
     operationDefinition &&
-    operationDefinition.getErrorMessage?.(layer, columnId, indexPattern, operationDefinitionMap);
+    operationDefinition.getErrorMessage?.(
+      layer,
+      columnId,
+      indexPattern,
+      dateRange,
+      operationDefinitionMap
+    );
 
+  // it looks like this is just a back-stop since we prevent
+  // invalid filters from being set at the UI level
   const filterHasError = column.filter ? !isQueryValid(column.filter, indexPattern) : false;
 
   return (
@@ -82,7 +137,8 @@ export function isColumnInvalid(
 function getReferencesErrors(
   layer: FormBasedLayer,
   column: ReferenceBasedIndexPatternColumn,
-  indexPattern: IndexPattern
+  indexPattern: IndexPattern,
+  dateRange: DateRange | undefined
 ) {
   return column.references?.map((referenceId: string) => {
     const referencedOperation = layer.columns[referenceId]?.operationType;
@@ -91,34 +147,98 @@ function getReferencesErrors(
       layer,
       referenceId,
       indexPattern,
+      dateRange,
       operationDefinitionMap
     );
   });
 }
 
 export function fieldIsInvalid(
-  column: GenericIndexPatternColumn | undefined,
+  layer: FormBasedLayer,
+  columnId: string,
   indexPattern: IndexPattern
 ) {
+  const column = layer.columns[columnId];
+
   if (!column || !hasField(column)) {
     return false;
   }
-  return !!getInvalidFieldMessage(column, indexPattern)?.length;
+  return !!getInvalidFieldMessage(layer, columnId, indexPattern)?.length;
 }
 
 const accuracyModeDisabledWarning = (
   columnName: string,
-  docLink: string,
+  columnId: string,
   enableAccuracyMode: () => void
-) => (
-  <>
+): UserMessage => ({
+  severity: 'warning',
+  displayLocations: [{ id: 'toolbar' }, { id: 'dimensionButton', dimensionId: columnId }],
+  fixableInEditor: true,
+  shortMessage: i18n.translate(
+    'xpack.lens.indexPattern.precisionErrorWarning.accuracyDisabled.shortMessage',
+    {
+      defaultMessage:
+        'This might be an approximation. For more precise results, you can enable accuracy mode, but it increases the load on the Elasticsearch cluster.',
+    }
+  ),
+  longMessage: (
+    <>
+      <FormattedMessage
+        id="xpack.lens.indexPattern.precisionErrorWarning.accuracyDisabled"
+        defaultMessage="{name} might be an approximation. You can enable accuracy mode for more precise results, but note that it increases the load on the Elasticsearch cluster."
+        values={{
+          name: <strong>{columnName}</strong>,
+        }}
+      />
+      <EuiSpacer size="s" />
+      <EuiLink data-test-subj="lnsPrecisionWarningEnableAccuracy" onClick={enableAccuracyMode}>
+        {i18n.translate('xpack.lens.indexPattern.enableAccuracyMode', {
+          defaultMessage: 'Enable accuracy mode',
+        })}
+      </EuiLink>
+    </>
+  ),
+});
+
+const accuracyModeEnabledWarning = (
+  columnName: string,
+  columnId: string,
+  docLink: string
+): UserMessage => ({
+  severity: 'warning',
+  displayLocations: [{ id: 'toolbar' }, { id: 'dimensionButton', dimensionId: columnId }],
+  fixableInEditor: true,
+  shortMessage: i18n.translate(
+    'xpack.lens.indexPattern.precisionErrorWarning.accuracyEnabled.shortMessage',
+    {
+      defaultMessage:
+        'This might be an approximation. For more precise results, use Filters or increase the number of Top Values.',
+    }
+  ),
+  longMessage: (
     <FormattedMessage
-      id="xpack.lens.indexPattern.precisionErrorWarning.accuracyDisabled"
-      defaultMessage="{name} might be an approximation. You can enable accuracy mode for more precise results, but note that it increases the load on the Elasticsearch cluster. {learnMoreLink}"
+      id="xpack.lens.indexPattern.precisionErrorWarning.accuracyEnabled"
+      defaultMessage="{name} might be an approximation. For more precise results, try increasing the number of {topValues} or using {filters} instead. {learnMoreLink}"
       values={{
         name: <strong>{columnName}</strong>,
+        topValues: (
+          <strong>
+            <FormattedMessage
+              id="xpack.lens.indexPattern.precisionErrorWarning.topValues"
+              defaultMessage="Top Values"
+            />
+          </strong>
+        ),
+        filters: (
+          <strong>
+            <FormattedMessage
+              id="xpack.lens.indexPattern.precisionErrorWarning.filters"
+              defaultMessage="Filters"
+            />
+          </strong>
+        ),
         learnMoreLink: (
-          <EuiLink href={docLink} color="text" target="_blank" external={true}>
+          <EuiLink href={docLink} target="_blank" external={true}>
             <FormattedMessage
               defaultMessage="Learn more."
               id="xpack.lens.indexPattern.precisionErrorWarning.link"
@@ -127,48 +247,8 @@ const accuracyModeDisabledWarning = (
         ),
       }}
     />
-    <EuiSpacer size="s" />
-    <EuiLink data-test-subj="lnsPrecisionWarningEnableAccuracy" onClick={enableAccuracyMode}>
-      {i18n.translate('xpack.lens.indexPattern.enableAccuracyMode', {
-        defaultMessage: 'Enable accuracy mode',
-      })}
-    </EuiLink>
-  </>
-);
-
-const accuracyModeEnabledWarning = (columnName: string, docLink: string) => (
-  <FormattedMessage
-    id="xpack.lens.indexPattern.precisionErrorWarning.accuracyEnabled"
-    defaultMessage="{name} might be an approximation. For more precise results, try increasing the number of {topValues} or using {filters} instead. {learnMoreLink}"
-    values={{
-      name: <strong>{columnName}</strong>,
-      topValues: (
-        <strong>
-          <FormattedMessage
-            id="xpack.lens.indexPattern.precisionErrorWarning.topValues"
-            defaultMessage="top values"
-          />
-        </strong>
-      ),
-      filters: (
-        <strong>
-          <FormattedMessage
-            id="xpack.lens.indexPattern.precisionErrorWarning.filters"
-            defaultMessage="filters"
-          />
-        </strong>
-      ),
-      learnMoreLink: (
-        <EuiLink href={docLink} color="text" target="_blank" external={true}>
-          <FormattedMessage
-            defaultMessage="Learn more."
-            id="xpack.lens.indexPattern.precisionErrorWarning.link"
-          />
-        </EuiLink>
-      ),
-    }}
-  />
-);
+  ),
+});
 
 export function getShardFailuresWarningMessages(
   state: FormBasedPersistedState,
@@ -176,7 +256,7 @@ export function getShardFailuresWarningMessages(
   request: SearchRequest,
   response: estypes.SearchResponse,
   theme: ThemeServiceStart
-): Array<string | React.ReactNode> {
+): UserMessage[] {
   if (state) {
     if (warning.type === 'shard_failure') {
       switch (warning.reason.type) {
@@ -195,38 +275,55 @@ export function getShardFailuresWarningMessages(
                   ].includes(col.operationType)
                 )
                 .map((col) => col.label)
-            ).map((label) =>
-              i18n.translate('xpack.lens.indexPattern.tsdbRollupWarning', {
-                defaultMessage:
-                  '{label} uses a function that is unsupported by rolled up data. Select a different function or change the time range.',
-                values: {
-                  label,
-                },
-              })
+            ).map(
+              (label) =>
+                ({
+                  uniqueId: `unsupported_aggregation_on_downsampled_index--${label}`,
+                  severity: 'warning',
+                  fixableInEditor: true,
+                  displayLocations: [{ id: 'toolbar' }, { id: 'embeddableBadge' }],
+                  shortMessage: '',
+                  longMessage: i18n.translate('xpack.lens.indexPattern.tsdbRollupWarning', {
+                    defaultMessage:
+                      '{label} uses a function that is unsupported by rolled up data. Select a different function or change the time range.',
+                    values: {
+                      label,
+                    },
+                  }),
+                } as UserMessage)
             )
           );
         default:
           return [
-            <>
-              <EuiText size="s">
-                <strong>{warning.message}</strong>
-                <p>{warning.text}</p>
-              </EuiText>
-              <EuiSpacer size="s" />
-              {warning.text ? (
-                <ShardFailureOpenModalButton
-                  theme={theme}
-                  title={warning.message}
-                  size="m"
-                  getRequestMeta={() => ({
-                    request: request as ShardFailureRequest,
-                    response,
-                  })}
-                  color="primary"
-                  isButtonEmpty={true}
-                />
-              ) : null}
-            </>,
+            {
+              uniqueId: `shard_failure`,
+              severity: 'warning',
+              fixableInEditor: true,
+              displayLocations: [{ id: 'toolbar' }, { id: 'embeddableBadge' }],
+              shortMessage: '',
+              longMessage: (
+                <>
+                  <EuiText size="s">
+                    <strong>{warning.message}</strong>
+                    <p>{warning.text}</p>
+                  </EuiText>
+                  <EuiSpacer size="s" />
+                  {warning.text ? (
+                    <ShardFailureOpenModalButton
+                      theme={theme}
+                      title={warning.message}
+                      size="m"
+                      getRequestMeta={() => ({
+                        request: request as ShardFailureRequest,
+                        response,
+                      })}
+                      color="primary"
+                      isButtonEmpty={true}
+                    />
+                  ) : null}
+                </>
+              ),
+            } as UserMessage,
           ];
       }
     }
@@ -241,7 +338,7 @@ export function getPrecisionErrorWarningMessages(
   docLinks: DocLinksStart,
   setState: StateSetter<FormBasedPrivateState>
 ) {
-  const warningMessages: React.ReactNode[] = [];
+  const warningMessages: UserMessage[] = [];
 
   if (state && activeData) {
     Object.entries(activeData)
@@ -283,55 +380,12 @@ export function getPrecisionErrorWarningMessages(
           ) {
             warningMessages.push(
               currentColumn.params.accuracyMode
-                ? accuracyModeEnabledWarning(column.name, docLinks.links.aggs.terms_doc_count_error)
-                : accuracyModeDisabledWarning(
+                ? accuracyModeEnabledWarning(
                     column.name,
-                    docLinks.links.aggs.terms_doc_count_error,
-                    () => {
-                      setState((prevState) =>
-                        mergeLayer({
-                          state: prevState,
-                          layerId,
-                          newLayer: updateDefaultLabels(
-                            updateColumnParam({
-                              layer: currentLayer,
-                              columnId: column.id,
-                              paramName: 'accuracyMode',
-                              value: true,
-                            }),
-                            indexPattern
-                          ),
-                        })
-                      );
-                    }
+                    column.id,
+                    docLinks.links.aggs.terms_doc_count_error
                   )
-            );
-          } else {
-            warningMessages.push(
-              <>
-                <FormattedMessage
-                  id="xpack.lens.indexPattern.ascendingCountPrecisionErrorWarning"
-                  defaultMessage="{name} for this visualization may be approximate due to how the data is indexed. Try sorting by rarity instead of ascending count of records. To learn more about this limit, {link}."
-                  values={{
-                    name: <strong>{column.name}</strong>,
-                    link: (
-                      <EuiLink
-                        href={docLinks.links.aggs.rare_terms}
-                        color="text"
-                        target="_blank"
-                        external={true}
-                      >
-                        <FormattedMessage
-                          defaultMessage="visit the documentation"
-                          id="xpack.lens.indexPattern.ascendingCountPrecisionErrorWarning.link"
-                        />
-                      </EuiLink>
-                    ),
-                  }}
-                />
-                <EuiSpacer size="s" />
-                <EuiLink
-                  onClick={() => {
+                : accuracyModeDisabledWarning(column.name, column.id, () => {
                     setState((prevState) =>
                       mergeLayer({
                         state: prevState,
@@ -340,24 +394,81 @@ export function getPrecisionErrorWarningMessages(
                           updateColumnParam({
                             layer: currentLayer,
                             columnId: column.id,
-                            paramName: 'orderBy',
-                            value: {
-                              type: 'rare',
-                              maxDocCount: DEFAULT_MAX_DOC_COUNT,
-                            },
+                            paramName: 'accuracyMode',
+                            value: true,
                           }),
                           indexPattern
                         ),
                       })
                     );
-                  }}
-                >
-                  {i18n.translate('xpack.lens.indexPattern.switchToRare', {
-                    defaultMessage: 'Rank by rarity',
-                  })}
-                </EuiLink>
-              </>
+                  })
             );
+          } else {
+            warningMessages.push({
+              severity: 'warning',
+              displayLocations: [
+                { id: 'toolbar' },
+                { id: 'dimensionButton', dimensionId: column.id },
+              ],
+              shortMessage: i18n.translate(
+                'xpack.lens.indexPattern.precisionErrorWarning.ascendingCountPrecisionErrorWarning.shortMessage',
+                {
+                  defaultMessage:
+                    'This may be approximate depending on how the data is indexed. For more precise results, sort by rarity.',
+                }
+              ),
+              longMessage: (
+                <>
+                  <FormattedMessage
+                    id="xpack.lens.indexPattern.ascendingCountPrecisionErrorWarning"
+                    defaultMessage="{name} for this visualization may be approximate due to how the data is indexed. Try sorting by rarity instead of ascending count of records. To learn more about this limit, {link}."
+                    values={{
+                      name: <strong>{column.name}</strong>,
+                      link: (
+                        <EuiLink
+                          href={docLinks.links.aggs.rare_terms}
+                          target="_blank"
+                          external={true}
+                        >
+                          <FormattedMessage
+                            defaultMessage="visit the documentation"
+                            id="xpack.lens.indexPattern.ascendingCountPrecisionErrorWarning.link"
+                          />
+                        </EuiLink>
+                      ),
+                    }}
+                  />
+                  <EuiSpacer size="s" />
+                  <EuiLink
+                    onClick={() => {
+                      setState((prevState) =>
+                        mergeLayer({
+                          state: prevState,
+                          layerId,
+                          newLayer: updateDefaultLabels(
+                            updateColumnParam({
+                              layer: currentLayer,
+                              columnId: column.id,
+                              paramName: 'orderBy',
+                              value: {
+                                type: 'rare',
+                                maxDocCount: DEFAULT_MAX_DOC_COUNT,
+                              },
+                            }),
+                            indexPattern
+                          ),
+                        })
+                      );
+                    }}
+                  >
+                    {i18n.translate('xpack.lens.indexPattern.switchToRare', {
+                      defaultMessage: 'Rank by rarity',
+                    })}
+                  </EuiLink>
+                </>
+              ),
+              fixableInEditor: true,
+            });
           }
         }
       });
@@ -381,6 +492,40 @@ export function getVisualDefaultsForLayer(layer: FormBasedLayer) {
     },
     {}
   );
+}
+
+export function getNotifiableFeatures(
+  state: FormBasedPrivateState,
+  frame: FramePublicAPI,
+  visualizationInfo?: VisualizationInfo
+): UserMessage[] {
+  if (!visualizationInfo) {
+    return [];
+  }
+  const layersWithCustomSamplingValues = Object.entries(state.layers).filter(
+    ([, layer]) => getSamplingValue(layer) !== 1
+  );
+  if (!layersWithCustomSamplingValues.length) {
+    return [];
+  }
+  return [
+    {
+      uniqueId: 'random_sampling_info',
+      severity: 'info',
+      fixableInEditor: false,
+      shortMessage: i18n.translate('xpack.lens.indexPattern.samplingPerLayer', {
+        defaultMessage: 'Sampling probability by layer',
+      }),
+      longMessage: (
+        <ReducedSamplingSectionEntries
+          layers={layersWithCustomSamplingValues}
+          dataViews={frame.dataViews}
+          visualizationInfo={visualizationInfo}
+        />
+      ),
+      displayLocations: [{ id: 'embeddableBadge' }],
+    },
+  ];
 }
 
 /**

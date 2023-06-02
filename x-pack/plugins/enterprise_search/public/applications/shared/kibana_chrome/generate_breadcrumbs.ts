@@ -136,3 +136,6 @@ export const useSearchExperiencesBreadcrumbs = (breadcrumbs: Breadcrumbs = []) =
     { text: SEARCH_EXPERIENCES_PLUGIN.NAV_TITLE, path: '/' },
     ...breadcrumbs,
   ]);
+
+export const useEnterpriseSearchEnginesBreadcrumbs = (breadcrumbs: Breadcrumbs = []) =>
+  useEnterpriseSearchBreadcrumbs(breadcrumbs);

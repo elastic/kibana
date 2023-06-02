@@ -70,6 +70,13 @@ export const OSQUERY_VIEW = i18n.translate('xpack.securitySolution.eventDetails.
   defaultMessage: 'Osquery Results',
 });
 
+export const RESPONSE_ACTIONS_VIEW = i18n.translate(
+  'xpack.securitySolution.eventDetails.responseActionsView',
+  {
+    defaultMessage: 'Response Results',
+  }
+);
+
 export const FIELD = i18n.translate('xpack.securitySolution.eventDetails.field', {
   defaultMessage: 'Field',
 });
@@ -106,6 +113,13 @@ export const AGENT_STATUS = i18n.translate('xpack.securitySolution.detections.al
   defaultMessage: 'Agent status',
 });
 
+export const QUARANTINED_FILE_PATH = i18n.translate(
+  'xpack.securitySolution.detections.alerts.quarantinedFilePath',
+  {
+    defaultMessage: 'Quarantined file path',
+  }
+);
+
 export const RULE_TYPE = i18n.translate('xpack.securitySolution.detections.alerts.ruleType', {
   defaultMessage: 'Rule type',
 });
@@ -134,4 +148,18 @@ export const ALERT_REASON = i18n.translate('xpack.securitySolution.eventDetails.
 
 export const VIEW_ALL_FIELDS = i18n.translate('xpack.securitySolution.eventDetails.viewAllFields', {
   defaultMessage: 'View all fields in table',
+});
+
+export const ENDPOINT_COMMANDS = Object.freeze({
+  isolated: i18n.translate('xpack.securitySolution.eventDetails.responseActions.endpoint.isolate', {
+    defaultMessage: 'isolated the host',
+  }),
+  released: i18n.translate('xpack.securitySolution.eventDetails.responseActions.endpoint.release', {
+    defaultMessage: 'released the host',
+  }),
+  generic: (command: string) =>
+    i18n.translate('xpack.securitySolution.eventDetails.responseActions.endpoint.generic', {
+      values: { command },
+      defaultMessage: 'executed command {command}',
+    }),
 });

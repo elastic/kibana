@@ -613,6 +613,36 @@
       ],
       "lifecycle": "setup",
       "initialIsOpen": true
+    },
+    "start": {
+      "parentPluginId": "cloud",
+      "id": "def-server.CloudStart",
+      "type": "Interface",
+      "tags": [],
+      "label": "CloudStart",
+      "description": [
+        "\nStart contract"
+      ],
+      "path": "x-pack/plugins/cloud/server/plugin.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [
+        {
+          "parentPluginId": "cloud",
+          "id": "def-server.CloudStart.isCloudEnabled",
+          "type": "boolean",
+          "tags": [],
+          "label": "isCloudEnabled",
+          "description": [
+            "\n`true` when running on Elastic Cloud."
+          ],
+          "path": "x-pack/plugins/cloud/server/plugin.ts",
+          "deprecated": false,
+          "trackAdoption": false
+        }
+      ],
+      "lifecycle": "start",
+      "initialIsOpen": true
     }
   },
   "common": {

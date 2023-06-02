@@ -20,12 +20,11 @@ import { estypes } from '@elastic/elasticsearch';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { SavedObjectsBulkUpdateObject } from '@kbn/core-saved-objects-api-server';
 import { SavedObjectsSerializer } from '@kbn/core-saved-objects-base-server-internal';
-import { SavedObject } from '@kbn/core-saved-objects-common';
 import {
   ISavedObjectsSecurityExtension,
-  AuditAction,
   SavedObjectsRawDocSource,
   AuthorizationTypeEntry,
+  SavedObject,
 } from '@kbn/core-saved-objects-server';
 import { kibanaMigratorMock } from '../mocks';
 import {
@@ -36,26 +35,18 @@ import {
   mockTimestamp,
   checkAuthError,
   getSuccess,
-  setupCheckUnauthorized,
-  setupEnforceFailure,
   enforceError,
-  setupCheckAuthorized,
   setupRedactPassthrough,
   MULTI_NAMESPACE_CUSTOM_INDEX_TYPE,
-  setsAreEqual,
-  typeMapsAreEqual,
   authMap,
-  setupEnforceSuccess,
   updateSuccess,
   deleteSuccess,
   removeReferencesToSuccess,
-  REMOVE_REFS_COUNT,
   checkConflictsSuccess,
   findSuccess,
   mockTimestampFields,
   mockVersion,
   NAMESPACE_AGNOSTIC_TYPE,
-  setupCheckPartiallyAuthorized,
   bulkGetSuccess,
   expectBulkGetResult,
   bulkCreateSuccess,
@@ -65,12 +56,14 @@ import {
   expectUpdateResult,
   bulkDeleteSuccess,
   createBulkDeleteSuccessStatus,
-  namespaceMapsAreEqual,
+  REMOVE_REFS_COUNT,
+  setupGetFindRedactTypeMap,
+  generateIndexPatternSearchResults,
+  setupAuthorizeFunc,
+  setupAuthorizeFind,
 } from '../test_helpers/repository.test.common';
 import { savedObjectsExtensionsMock } from '../mocks/saved_objects_extensions.mock';
-
-// BEWARE: The SavedObjectClient depends on the implementation details of the SavedObjectsRepository
-// so any breaking changes to this repository are considered breaking changes to the SavedObjectsClient.
+import { arrayMapsAreEqual } from '@kbn/core-saved-objects-utils-server';
 
 describe('SavedObjectsRepository Security Extension', () => {
   let client: ReturnType<typeof elasticsearchClientMock.createElasticsearchClient>;
@@ -121,53 +114,58 @@ describe('SavedObjectsRepository Security Extension', () => {
 
     // create a mock saved objects encryption extension
     mockSecurityExt = savedObjectsExtensionsMock.createSecurityExtension();
-
     mockGetCurrentTime.mockReturnValue(mockTimestamp);
-    mockGetSearchDsl.mockClear();
-
     repository = instantiateRepository();
+    setupGetFindRedactTypeMap(mockSecurityExt);
   });
 
   afterEach(() => {
-    mockSecurityExt.checkAuthorization.mockClear();
     mockSecurityExt.redactNamespaces.mockClear();
+    mockGetSearchDsl.mockClear();
   });
 
   describe('#get', () => {
-    test(`propagates decorated error when checkAuthorization rejects promise`, async () => {
-      mockSecurityExt.checkAuthorization.mockRejectedValueOnce(checkAuthError);
+    test(`propagates decorated error when authorizeGet rejects promise`, async () => {
+      mockSecurityExt.authorizeGet.mockRejectedValueOnce(checkAuthError);
       await expect(
         getSuccess(client, repository, registry, type, id, { namespace })
       ).rejects.toThrow(checkAuthError);
-      expect(mockSecurityExt.checkAuthorization).toHaveBeenCalledTimes(1);
-      expect(mockSecurityExt.enforceAuthorization).not.toHaveBeenCalled();
+      expect(mockSecurityExt.authorizeGet).toHaveBeenCalledTimes(1);
     });
 
     test(`propagates decorated error when unauthorized`, async () => {
-      setupCheckUnauthorized(mockSecurityExt);
-      setupEnforceFailure(mockSecurityExt);
+      setupAuthorizeFunc(mockSecurityExt.authorizeGet, 'unauthorized');
 
       await expect(
         getSuccess(client, repository, registry, type, id, { namespace })
       ).rejects.toThrow(enforceError);
 
-      expect(mockSecurityExt.checkAuthorization).toHaveBeenCalledTimes(1);
-      expect(mockSecurityExt.enforceAuthorization).toHaveBeenCalledTimes(1);
+      expect(mockSecurityExt.authorizeGet).toHaveBeenCalledTimes(1);
     });
 
-    test(`returns result when authorized`, async () => {
-      setupCheckAuthorized(mockSecurityExt);
+    test(`returns result when partially authorized`, async () => {
+      setupAuthorizeFunc(mockSecurityExt.authorizeGet, 'partially_authorized');
       setupRedactPassthrough(mockSecurityExt);
 
       const result = await getSuccess(client, repository, registry, type, id, { namespace });
 
-      expect(mockSecurityExt.checkAuthorization).toHaveBeenCalledTimes(1);
-      expect(mockSecurityExt.enforceAuthorization).toHaveBeenCalledTimes(1);
+      expect(mockSecurityExt.authorizeGet).toHaveBeenCalledTimes(1);
       expect(client.get).toHaveBeenCalledTimes(1);
       expect(result).toEqual(expect.objectContaining({ type, id, namespaces: [namespace] }));
     });
 
-    test(`calls checkAuthorization with type, actions, and namespaces`, async () => {
+    test(`returns result when fully authorized`, async () => {
+      setupAuthorizeFunc(mockSecurityExt.authorizeGet, 'fully_authorized');
+      setupRedactPassthrough(mockSecurityExt);
+
+      const result = await getSuccess(client, repository, registry, type, id, { namespace });
+
+      expect(mockSecurityExt.authorizeGet).toHaveBeenCalledTimes(1);
+      expect(client.get).toHaveBeenCalledTimes(1);
+      expect(result).toEqual(expect.objectContaining({ type, id, namespaces: [namespace] }));
+    });
+
+    test(`calls authorizeGet with correct parameters`, async () => {
       await getSuccess(
         client,
         repository,
@@ -181,53 +179,25 @@ describe('SavedObjectsRepository Security Extension', () => {
         multiNamespaceObjNamespaces // all of the object's namespaces from preflight check are added to the auth check call
       );
 
-      expect(mockSecurityExt.checkAuthorization).toHaveBeenCalledTimes(1);
-      const expectedActions = new Set(['get']);
-      const expectedSpaces = new Set(multiNamespaceObjNamespaces);
-      const expectedTypes = new Set([MULTI_NAMESPACE_CUSTOM_INDEX_TYPE]);
-
-      const {
-        actions: actualActions,
-        spaces: actualSpaces,
-        types: actualTypes,
-      } = mockSecurityExt.checkAuthorization.mock.calls[0][0];
-
-      expect(setsAreEqual(actualActions, expectedActions)).toBeTruthy();
-      expect(setsAreEqual(actualSpaces, expectedSpaces)).toBeTruthy();
-      expect(setsAreEqual(actualTypes, expectedTypes)).toBeTruthy();
-    });
-
-    test(`calls enforceAuthorization with action, type map, and auth map`, async () => {
-      setupCheckAuthorized(mockSecurityExt);
-
-      await getSuccess(client, repository, registry, type, id, { namespace });
-
-      expect(mockSecurityExt.checkAuthorization).toHaveBeenCalledTimes(1);
-      expect(mockSecurityExt.enforceAuthorization).toHaveBeenCalledTimes(1);
-      expect(mockSecurityExt.enforceAuthorization).toHaveBeenCalledWith(
-        expect.objectContaining({
-          action: 'get',
-        })
-      );
-
-      const expectedTypesAndSpaces = new Map([[type, new Set([namespace])]]);
-
-      const { typesAndSpaces: actualTypesAndSpaces, typeMap: actualTypeMap } =
-        mockSecurityExt.enforceAuthorization.mock.calls[0][0];
-
-      expect(typeMapsAreEqual(actualTypesAndSpaces, expectedTypesAndSpaces)).toBeTruthy();
-      expect(actualTypeMap).toBe(authMap);
+      expect(mockSecurityExt.authorizeGet).toHaveBeenCalledTimes(1);
+      expect(mockSecurityExt.authorizeGet).toHaveBeenCalledWith({
+        namespace,
+        object: {
+          existingNamespaces: multiNamespaceObjNamespaces,
+          id,
+          type: MULTI_NAMESPACE_CUSTOM_INDEX_TYPE,
+        },
+        objectNotFound: false,
+      });
     });
 
     test(`calls redactNamespaces with authorization map`, async () => {
-      setupCheckAuthorized(mockSecurityExt);
+      setupAuthorizeFunc(mockSecurityExt.authorizeGet, 'fully_authorized');
       setupRedactPassthrough(mockSecurityExt);
 
       await getSuccess(client, repository, registry, type, id, { namespace });
 
-      expect(mockSecurityExt.checkAuthorization).toHaveBeenCalledTimes(1);
-      expect(mockSecurityExt.enforceAuthorization).toHaveBeenCalledTimes(1);
-
+      expect(mockSecurityExt.authorizeGet).toHaveBeenCalledTimes(1);
       expect(mockSecurityExt.redactNamespaces).toHaveBeenCalledTimes(1);
       expect(mockSecurityExt.redactNamespaces).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -236,77 +206,57 @@ describe('SavedObjectsRepository Security Extension', () => {
         })
       );
     });
-
-    test(`adds audit event when successful`, async () => {
-      setupCheckAuthorized(mockSecurityExt);
-      setupRedactPassthrough(mockSecurityExt);
-      setupEnforceSuccess(mockSecurityExt);
-
-      await getSuccess(client, repository, registry, type, id, { namespace });
-
-      expect(mockSecurityExt.addAuditEvent).toHaveBeenCalledTimes(1);
-      expect(mockSecurityExt.addAuditEvent).toHaveBeenCalledWith({
-        action: AuditAction.GET,
-        savedObject: { type, id },
-      });
-    });
-
-    test(`adds audit event when not successful`, async () => {
-      setupCheckUnauthorized(mockSecurityExt);
-      setupEnforceFailure(mockSecurityExt);
-
-      await expect(
-        getSuccess(client, repository, registry, type, id, { namespace })
-      ).rejects.toThrow(enforceError);
-
-      expect(mockSecurityExt.addAuditEvent).toHaveBeenCalledTimes(1);
-      expect(mockSecurityExt.addAuditEvent).toHaveBeenCalledWith({
-        action: AuditAction.GET,
-        savedObject: { type, id },
-        error: enforceError,
-      });
-    });
   });
 
   describe('#update', () => {
-    test(`propagates decorated error when checkAuthorization rejects promise`, async () => {
-      mockSecurityExt.checkAuthorization.mockRejectedValueOnce(checkAuthError);
+    test(`propagates decorated error when authorizeUpdate rejects promise`, async () => {
+      mockSecurityExt.authorizeUpdate.mockRejectedValueOnce(checkAuthError);
       await expect(
         updateSuccess(client, repository, registry, type, id, attributes, { namespace })
       ).rejects.toThrow(checkAuthError);
-      expect(mockSecurityExt.checkAuthorization).toHaveBeenCalledTimes(1);
-      expect(mockSecurityExt.enforceAuthorization).not.toHaveBeenCalled();
+      expect(mockSecurityExt.authorizeUpdate).toHaveBeenCalledTimes(1);
     });
 
     test(`propagates decorated error when unauthorized`, async () => {
-      setupCheckUnauthorized(mockSecurityExt);
-      setupEnforceFailure(mockSecurityExt);
-
+      setupAuthorizeFunc(mockSecurityExt.authorizeUpdate, 'unauthorized');
       await expect(
         updateSuccess(client, repository, registry, type, id, attributes, { namespace })
       ).rejects.toThrow(enforceError);
 
-      expect(mockSecurityExt.checkAuthorization).toHaveBeenCalledTimes(1);
-      expect(mockSecurityExt.enforceAuthorization).toHaveBeenCalledTimes(1);
+      expect(mockSecurityExt.authorizeUpdate).toHaveBeenCalledTimes(1);
     });
 
-    test(`returns result when authorized`, async () => {
-      setupCheckAuthorized(mockSecurityExt);
+    test(`returns result when partially authorized`, async () => {
+      setupAuthorizeFunc(mockSecurityExt.authorizeUpdate, 'partially_authorized');
       setupRedactPassthrough(mockSecurityExt);
 
       const result = await updateSuccess(client, repository, registry, type, id, attributes, {
         namespace,
       });
 
-      expect(mockSecurityExt.checkAuthorization).toHaveBeenCalledTimes(1);
-      expect(mockSecurityExt.enforceAuthorization).toHaveBeenCalledTimes(1);
+      expect(mockSecurityExt.authorizeUpdate).toHaveBeenCalledTimes(1);
       expect(client.update).toHaveBeenCalledTimes(1);
       expect(result).toEqual(
         expect.objectContaining({ id, type, attributes, namespaces: [namespace] })
       );
     });
 
-    test(`calls checkAuthorization with type, actions, and namespaces`, async () => {
+    test(`returns result when fully authorized`, async () => {
+      setupAuthorizeFunc(mockSecurityExt.authorizeUpdate, 'fully_authorized');
+      setupRedactPassthrough(mockSecurityExt);
+
+      const result = await updateSuccess(client, repository, registry, type, id, attributes, {
+        namespace,
+      });
+
+      expect(mockSecurityExt.authorizeUpdate).toHaveBeenCalledTimes(1);
+      expect(client.update).toHaveBeenCalledTimes(1);
+      expect(result).toEqual(
+        expect.objectContaining({ id, type, attributes, namespaces: [namespace] })
+      );
+    });
+
+    test(`calls authorizeUpdate with correct parameters`, async () => {
       await updateSuccess(
         client,
         repository,
@@ -321,67 +271,28 @@ describe('SavedObjectsRepository Security Extension', () => {
         multiNamespaceObjNamespaces // all of the object's namespaces from preflight check are added to the auth check call
       );
 
-      expect(mockSecurityExt.checkAuthorization).toHaveBeenCalledTimes(1);
+      expect(mockSecurityExt.authorizeUpdate).toHaveBeenCalledTimes(1);
+      const expectedNamespace = namespace;
+      const expectedObject = {
+        type: 'multiNamespaceTypeCustomIndex',
+        id: expect.objectContaining(/index-pattern:[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}/),
+        existingNamespaces: multiNamespaceObjNamespaces,
+      };
 
-      const expectedActions = new Set(['update']);
-      const expectedSpaces = new Set(multiNamespaceObjNamespaces);
-      const expectedTypes = new Set([MULTI_NAMESPACE_CUSTOM_INDEX_TYPE]);
+      const { namespace: actualNamespace, object: actualObject } =
+        mockSecurityExt.authorizeUpdate.mock.calls[0][0];
 
-      const {
-        actions: actualActions,
-        spaces: actualSpaces,
-        types: actualTypes,
-      } = mockSecurityExt.checkAuthorization.mock.calls[0][0];
-
-      expect(setsAreEqual(actualActions, expectedActions)).toBeTruthy();
-      expect(setsAreEqual(actualSpaces, expectedSpaces)).toBeTruthy();
-      expect(setsAreEqual(actualTypes, expectedTypes)).toBeTruthy();
-    });
-
-    test(`calls enforceAuthorization with action, type map, and auth map`, async () => {
-      mockSecurityExt.checkAuthorization.mockResolvedValue({
-        status: 'fully_authorized',
-        typeMap: authMap,
-      });
-
-      await updateSuccess(
-        client,
-        repository,
-        registry,
-        type,
-        id,
-        attributes,
-        { namespace },
-        undefined,
-        multiNamespaceObjNamespaces
-      );
-
-      expect(mockSecurityExt.checkAuthorization).toHaveBeenCalledTimes(1);
-      expect(mockSecurityExt.enforceAuthorization).toHaveBeenCalledTimes(1);
-      expect(mockSecurityExt.enforceAuthorization).toHaveBeenCalledWith(
-        expect.objectContaining({
-          action: 'update',
-        })
-      );
-
-      const expectedTypesAndSpaces = new Map([[type, new Set([namespace])]]);
-
-      const { typesAndSpaces: actualTypesAndSpaces, typeMap: actualTypeMap } =
-        mockSecurityExt.enforceAuthorization.mock.calls[0][0];
-
-      expect(typeMapsAreEqual(actualTypesAndSpaces, expectedTypesAndSpaces)).toBeTruthy();
-      expect(actualTypeMap).toBe(authMap);
+      expect(actualNamespace).toEqual(expectedNamespace);
+      expect(actualObject).toEqual(expectedObject);
     });
 
     test(`calls redactNamespaces with authorization map`, async () => {
-      setupCheckAuthorized(mockSecurityExt);
+      setupAuthorizeFunc(mockSecurityExt.authorizeUpdate, 'fully_authorized');
       setupRedactPassthrough(mockSecurityExt);
 
       await updateSuccess(client, repository, registry, type, id, attributes, { namespace });
 
-      expect(mockSecurityExt.checkAuthorization).toHaveBeenCalledTimes(1);
-      expect(mockSecurityExt.enforceAuthorization).toHaveBeenCalledTimes(1);
-
+      expect(mockSecurityExt.authorizeUpdate).toHaveBeenCalledTimes(1);
       expect(mockSecurityExt.redactNamespaces).toHaveBeenCalledTimes(1);
       expect(mockSecurityExt.redactNamespaces).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -390,71 +301,35 @@ describe('SavedObjectsRepository Security Extension', () => {
         })
       );
     });
-
-    test(`adds audit event when successful`, async () => {
-      setupCheckAuthorized(mockSecurityExt);
-      setupRedactPassthrough(mockSecurityExt);
-      setupEnforceSuccess(mockSecurityExt);
-
-      await updateSuccess(client, repository, registry, type, id, attributes, { namespace });
-
-      expect(mockSecurityExt.addAuditEvent).toHaveBeenCalledTimes(1);
-      expect(mockSecurityExt.addAuditEvent).toHaveBeenCalledWith({
-        action: AuditAction.UPDATE,
-        savedObject: { type, id },
-        error: undefined,
-        outcome: 'unknown',
-      });
-    });
-    test(`adds audit event when not successful`, async () => {
-      setupCheckUnauthorized(mockSecurityExt);
-      setupEnforceFailure(mockSecurityExt);
-
-      await expect(
-        updateSuccess(client, repository, registry, type, id, { namespace })
-      ).rejects.toThrow(enforceError);
-
-      expect(mockSecurityExt.addAuditEvent).toHaveBeenCalledTimes(1);
-      expect(mockSecurityExt.addAuditEvent).toHaveBeenCalledWith({
-        action: AuditAction.UPDATE,
-        savedObject: { type, id },
-        error: enforceError,
-      });
-    });
   });
 
   describe('#create', () => {
-    test(`propagates decorated error when checkAuthorization rejects promise`, async () => {
-      mockSecurityExt.checkAuthorization.mockRejectedValueOnce(checkAuthError);
+    test(`propagates decorated error when authorizeCreate rejects promise`, async () => {
+      mockSecurityExt.authorizeCreate.mockRejectedValueOnce(checkAuthError);
       await expect(repository.create(type, attributes, { namespace })).rejects.toThrow(
         checkAuthError
       );
-      expect(mockSecurityExt.checkAuthorization).toHaveBeenCalledTimes(1);
-      expect(mockSecurityExt.enforceAuthorization).not.toHaveBeenCalled();
+      expect(mockSecurityExt.authorizeCreate).toHaveBeenCalledTimes(1);
     });
 
     test(`propagates decorated error when unauthorized`, async () => {
-      setupCheckUnauthorized(mockSecurityExt);
-      setupEnforceFailure(mockSecurityExt);
-
+      setupAuthorizeFunc(mockSecurityExt.authorizeCreate, 'unauthorized');
       await expect(repository.create(type, attributes, { namespace })).rejects.toThrow(
         enforceError
       );
 
-      expect(mockSecurityExt.checkAuthorization).toHaveBeenCalledTimes(1);
-      expect(mockSecurityExt.enforceAuthorization).toHaveBeenCalledTimes(1);
+      expect(mockSecurityExt.authorizeCreate).toHaveBeenCalledTimes(1);
     });
 
-    test(`returns result when authorized`, async () => {
-      setupCheckAuthorized(mockSecurityExt);
+    test(`returns result when partially authorized`, async () => {
+      setupAuthorizeFunc(mockSecurityExt.authorizeCreate, 'partially_authorized');
       setupRedactPassthrough(mockSecurityExt);
 
       const result = await repository.create(type, attributes, {
         namespace,
       });
 
-      expect(mockSecurityExt.checkAuthorization).toHaveBeenCalledTimes(1);
-      expect(mockSecurityExt.enforceAuthorization).toHaveBeenCalledTimes(1);
+      expect(mockSecurityExt.authorizeCreate).toHaveBeenCalledTimes(1);
       expect(client.create).toHaveBeenCalledTimes(1);
       expect(result).toEqual(
         expect.objectContaining({
@@ -466,84 +341,75 @@ describe('SavedObjectsRepository Security Extension', () => {
       );
     });
 
-    test(`calls checkAuthorization with type, actions, and namespace`, async () => {
-      await repository.create(MULTI_NAMESPACE_CUSTOM_INDEX_TYPE, attributes, {
+    test(`returns result when fully authorized`, async () => {
+      setupAuthorizeFunc(mockSecurityExt.authorizeCreate as jest.Mock, 'fully_authorized');
+      setupRedactPassthrough(mockSecurityExt);
+
+      const result = await repository.create(type, attributes, {
         namespace,
       });
 
-      expect(mockSecurityExt.checkAuthorization).toHaveBeenCalledTimes(1);
-      const expectedActions = new Set(['create']);
-      const expectedSpaces = new Set([namespace]);
-      const expectedTypes = new Set([MULTI_NAMESPACE_CUSTOM_INDEX_TYPE]);
-
-      const {
-        actions: actualActions,
-        spaces: actualSpaces,
-        types: actualTypes,
-      } = mockSecurityExt.checkAuthorization.mock.calls[0][0];
-
-      expect(setsAreEqual(actualActions, expectedActions)).toBeTruthy();
-      expect(setsAreEqual(actualSpaces, expectedSpaces)).toBeTruthy();
-      expect(setsAreEqual(actualTypes, expectedTypes)).toBeTruthy();
-    });
-
-    test(`calls checkAuthorization with type, actions, namespace, and initial namespaces`, async () => {
-      await repository.create(MULTI_NAMESPACE_CUSTOM_INDEX_TYPE, attributes, {
-        namespace,
-        initialNamespaces: multiNamespaceObjNamespaces,
-      });
-
-      expect(mockSecurityExt.checkAuthorization).toHaveBeenCalledTimes(1);
-      const expectedActions = new Set(['create']);
-      const expectedSpaces = new Set(multiNamespaceObjNamespaces);
-      const expectedTypes = new Set([MULTI_NAMESPACE_CUSTOM_INDEX_TYPE]);
-
-      const {
-        actions: actualActions,
-        spaces: actualSpaces,
-        types: actualTypes,
-      } = mockSecurityExt.checkAuthorization.mock.calls[0][0];
-
-      expect(setsAreEqual(actualActions, expectedActions)).toBeTruthy();
-      expect(setsAreEqual(actualSpaces, expectedSpaces)).toBeTruthy();
-      expect(setsAreEqual(actualTypes, expectedTypes)).toBeTruthy();
-    });
-
-    test(`calls enforceAuthorization with action, type map, and auth map`, async () => {
-      setupCheckAuthorized(mockSecurityExt);
-
-      await repository.create(MULTI_NAMESPACE_CUSTOM_INDEX_TYPE, attributes, {
-        namespace,
-        initialNamespaces: multiNamespaceObjNamespaces,
-      });
-
-      expect(mockSecurityExt.checkAuthorization).toHaveBeenCalledTimes(1);
-      expect(mockSecurityExt.enforceAuthorization).toHaveBeenCalledTimes(1);
-      expect(mockSecurityExt.enforceAuthorization).toHaveBeenCalledWith(
+      expect(mockSecurityExt.authorizeCreate).toHaveBeenCalledTimes(1);
+      expect(client.create).toHaveBeenCalledTimes(1);
+      expect(result).toEqual(
         expect.objectContaining({
-          action: 'create',
+          id: expect.objectContaining(/index-pattern:[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}/),
+          type,
+          attributes,
+          namespaces: [namespace],
         })
       );
+    });
 
-      const expectedTypesAndSpaces = new Map([
-        [MULTI_NAMESPACE_CUSTOM_INDEX_TYPE, new Set(multiNamespaceObjNamespaces)],
-      ]);
+    test(`calls authorizeCreate with correct parameters`, async () => {
+      await repository.create(MULTI_NAMESPACE_CUSTOM_INDEX_TYPE, attributes, {
+        namespace,
+      });
 
-      const { typesAndSpaces: actualTypesAndSpaces, typeMap: actualTypeMap } =
-        mockSecurityExt.enforceAuthorization.mock.calls[0][0];
+      expect(mockSecurityExt.authorizeCreate).toHaveBeenCalledTimes(1);
+      const expectedNamespace = namespace;
+      const expectedObject = {
+        type: 'multiNamespaceTypeCustomIndex',
+        id: expect.objectContaining(/index-pattern:[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}/),
+        initialNamespaces: undefined,
+        existingNamespaces: [],
+      };
+      const { namespace: actualNamespace, object: actualObject } =
+        mockSecurityExt.authorizeCreate.mock.calls[0][0];
 
-      expect(typeMapsAreEqual(actualTypesAndSpaces, expectedTypesAndSpaces)).toBeTruthy();
-      expect(actualTypeMap).toBe(authMap);
+      expect(actualNamespace).toEqual(expectedNamespace);
+      expect(actualObject).toEqual(expectedObject);
+    });
+
+    test(`calls authorizeCreate with initial namespaces`, async () => {
+      await repository.create(MULTI_NAMESPACE_CUSTOM_INDEX_TYPE, attributes, {
+        namespace,
+        initialNamespaces: multiNamespaceObjNamespaces,
+      });
+
+      expect(mockSecurityExt.authorizeCreate).toHaveBeenCalledTimes(1);
+      const expectedNamespace = namespace;
+      const expectedObject = {
+        type: 'multiNamespaceTypeCustomIndex',
+        id: expect.objectContaining(/index-pattern:[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}/),
+        initialNamespaces: multiNamespaceObjNamespaces,
+        existingNamespaces: [],
+      };
+
+      const { namespace: actualNamespace, object: actualObject } =
+        mockSecurityExt.authorizeCreate.mock.calls[0][0];
+
+      expect(actualNamespace).toEqual(expectedNamespace);
+      expect(actualObject).toEqual(expectedObject);
     });
 
     test(`calls redactNamespaces with authorization map`, async () => {
-      setupCheckAuthorized(mockSecurityExt);
+      setupAuthorizeFunc(mockSecurityExt.authorizeCreate as jest.Mock, 'fully_authorized');
       setupRedactPassthrough(mockSecurityExt);
 
       await repository.create(type, attributes, { namespace });
 
-      expect(mockSecurityExt.checkAuthorization).toHaveBeenCalledTimes(1);
-      expect(mockSecurityExt.enforceAuthorization).toHaveBeenCalledTimes(1);
+      expect(mockSecurityExt.authorizeCreate).toHaveBeenCalledTimes(1);
 
       expect(mockSecurityExt.redactNamespaces).toHaveBeenCalledTimes(1);
       expect(mockSecurityExt.redactNamespaces).toHaveBeenCalledWith(
@@ -557,44 +423,6 @@ describe('SavedObjectsRepository Security Extension', () => {
         })
       );
     });
-
-    test(`adds audit event when successful`, async () => {
-      setupCheckAuthorized(mockSecurityExt);
-      setupEnforceSuccess(mockSecurityExt);
-      setupRedactPassthrough(mockSecurityExt);
-
-      await repository.create(type, attributes, { namespace });
-
-      expect(mockSecurityExt.addAuditEvent).toHaveBeenCalledTimes(1);
-      expect(mockSecurityExt.addAuditEvent).toHaveBeenCalledWith({
-        action: AuditAction.CREATE,
-        savedObject: {
-          type,
-          id: expect.objectContaining(/index-pattern:[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}/),
-        },
-        error: undefined,
-        outcome: 'unknown',
-      });
-    });
-
-    test(`adds audit event when not successful`, async () => {
-      setupCheckUnauthorized(mockSecurityExt);
-      setupEnforceFailure(mockSecurityExt);
-
-      await expect(repository.create(type, attributes, { namespace })).rejects.toThrow(
-        enforceError
-      );
-
-      expect(mockSecurityExt.addAuditEvent).toHaveBeenCalledTimes(1);
-      expect(mockSecurityExt.addAuditEvent).toHaveBeenCalledWith({
-        action: AuditAction.CREATE,
-        savedObject: {
-          type,
-          id: expect.objectContaining(/index-pattern:[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}/),
-        },
-        error: enforceError,
-      });
-    });
   });
 
   describe('#delete', () => {
@@ -606,225 +434,115 @@ describe('SavedObjectsRepository Security Extension', () => {
       mockDeleteLegacyUrlAliases.mockClear();
     });
 
-    test(`propagates decorated error when checkAuthorization rejects promise`, async () => {
-      mockSecurityExt.checkAuthorization.mockRejectedValueOnce(checkAuthError);
+    test(`propagates decorated error when authorizeDelete rejects promise`, async () => {
+      mockSecurityExt.authorizeDelete.mockRejectedValueOnce(checkAuthError);
       await expect(
         deleteSuccess(client, repository, registry, type, id, { namespace })
       ).rejects.toThrow(checkAuthError);
-      expect(mockSecurityExt.checkAuthorization).toHaveBeenCalledTimes(1);
-      expect(mockSecurityExt.enforceAuthorization).not.toHaveBeenCalled();
+      expect(mockSecurityExt.authorizeDelete).toHaveBeenCalledTimes(1);
     });
 
     test(`propagates decorated error when unauthorized`, async () => {
-      setupCheckUnauthorized(mockSecurityExt);
-      setupEnforceFailure(mockSecurityExt);
+      setupAuthorizeFunc(mockSecurityExt.authorizeDelete, 'unauthorized');
 
       await expect(
         deleteSuccess(client, repository, registry, type, id, { namespace })
       ).rejects.toThrow(enforceError);
 
-      expect(mockSecurityExt.checkAuthorization).toHaveBeenCalledTimes(1);
-      expect(mockSecurityExt.enforceAuthorization).toHaveBeenCalledTimes(1);
+      expect(mockSecurityExt.authorizeDelete).toHaveBeenCalledTimes(1);
     });
 
-    test(`returns empty object result when authorized`, async () => {
-      setupCheckAuthorized(mockSecurityExt);
+    test(`returns empty object result when partially authorized`, async () => {
+      setupAuthorizeFunc(mockSecurityExt.authorizeDelete, 'partially_authorized');
       setupRedactPassthrough(mockSecurityExt);
 
       const result = await deleteSuccess(client, repository, registry, type, id, {
         namespace,
       });
 
-      expect(mockSecurityExt.checkAuthorization).toHaveBeenCalledTimes(1);
-      expect(mockSecurityExt.enforceAuthorization).toHaveBeenCalledTimes(1);
+      expect(mockSecurityExt.authorizeDelete).toHaveBeenCalledTimes(1);
       expect(client.delete).toHaveBeenCalledTimes(1);
       expect(result).toEqual({});
     });
 
-    test(`calls checkAuthorization with type, actions, and namespaces`, async () => {
-      await deleteSuccess(client, repository, registry, MULTI_NAMESPACE_CUSTOM_INDEX_TYPE, id, {
+    test(`returns empty object result when fully authorized`, async () => {
+      setupAuthorizeFunc(mockSecurityExt.authorizeDelete, 'fully_authorized');
+      setupRedactPassthrough(mockSecurityExt);
+
+      const result = await deleteSuccess(client, repository, registry, type, id, {
+        namespace,
+      });
+
+      expect(mockSecurityExt.authorizeDelete).toHaveBeenCalledTimes(1);
+      expect(client.delete).toHaveBeenCalledTimes(1);
+      expect(result).toEqual({});
+    });
+
+    test(`calls authorizeDelete with correct parameters`, async () => {
+      await deleteSuccess(client, repository, registry, type, id, {
         namespace,
         force: true,
       });
 
-      expect(mockSecurityExt.checkAuthorization).toHaveBeenCalledTimes(1);
-      const expectedActions = new Set(['delete']);
-      const expectedSpaces = new Set([namespace]);
-      const expectedTypes = new Set([MULTI_NAMESPACE_CUSTOM_INDEX_TYPE]);
-
-      const {
-        actions: actualActions,
-        spaces: actualSpaces,
-        types: actualTypes,
-      } = mockSecurityExt.checkAuthorization.mock.calls[0][0];
-
-      expect(setsAreEqual(actualActions, expectedActions)).toBeTruthy();
-      expect(setsAreEqual(actualSpaces, expectedSpaces)).toBeTruthy();
-      expect(setsAreEqual(actualTypes, expectedTypes)).toBeTruthy();
-    });
-
-    test(`calls enforceAuthorization with action, type map, and auth map`, async () => {
-      setupCheckAuthorized(mockSecurityExt);
-
-      await deleteSuccess(client, repository, registry, MULTI_NAMESPACE_CUSTOM_INDEX_TYPE, id, {
+      expect(mockSecurityExt.authorizeDelete).toHaveBeenCalledTimes(1);
+      expect(mockSecurityExt.authorizeDelete).toHaveBeenCalledWith({
         namespace,
-      });
-
-      expect(mockSecurityExt.checkAuthorization).toHaveBeenCalledTimes(1);
-      expect(mockSecurityExt.enforceAuthorization).toHaveBeenCalledTimes(1);
-      expect(mockSecurityExt.enforceAuthorization).toHaveBeenCalledWith(
-        expect.objectContaining({
-          action: 'delete',
-        })
-      );
-      const expectedTypesAndSpaces = new Map([
-        [MULTI_NAMESPACE_CUSTOM_INDEX_TYPE, new Set([namespace])],
-      ]);
-
-      const { typesAndSpaces: actualTypesAndSpaces, typeMap: actualTypeMap } =
-        mockSecurityExt.enforceAuthorization.mock.calls[0][0];
-
-      expect(typeMapsAreEqual(actualTypesAndSpaces, expectedTypesAndSpaces)).toBeTruthy();
-      expect(actualTypeMap).toBe(authMap);
-    });
-
-    test(`adds audit event when successful`, async () => {
-      setupCheckAuthorized(mockSecurityExt);
-      setupRedactPassthrough(mockSecurityExt);
-      setupEnforceSuccess(mockSecurityExt);
-
-      await deleteSuccess(client, repository, registry, type, id, { namespace });
-
-      expect(mockSecurityExt.addAuditEvent).toHaveBeenCalledTimes(1);
-      expect(mockSecurityExt.addAuditEvent).toHaveBeenCalledWith({
-        action: AuditAction.DELETE,
-        savedObject: { type, id },
-        error: undefined,
-        outcome: 'unknown',
-      });
-    });
-
-    test(`adds audit event when not successful`, async () => {
-      setupCheckUnauthorized(mockSecurityExt);
-      setupEnforceFailure(mockSecurityExt);
-
-      await expect(
-        deleteSuccess(client, repository, registry, type, id, { namespace })
-      ).rejects.toThrow(enforceError);
-
-      expect(mockSecurityExt.addAuditEvent).toHaveBeenCalledTimes(1);
-      expect(mockSecurityExt.addAuditEvent).toHaveBeenCalledWith({
-        action: AuditAction.DELETE,
-        savedObject: { type, id },
-        error: enforceError,
+        object: { type, id },
       });
     });
   });
 
   describe('#removeReferencesTo', () => {
-    test(`propagates decorated error when checkAuthorization rejects promise`, async () => {
-      mockSecurityExt.checkAuthorization.mockRejectedValueOnce(checkAuthError);
+    test(`propagates decorated error when authorizeRemoveReferences rejects promise`, async () => {
+      mockSecurityExt.authorizeRemoveReferences.mockRejectedValueOnce(checkAuthError);
       await expect(
         removeReferencesToSuccess(client, repository, type, id, { namespace })
       ).rejects.toThrow(checkAuthError);
-      expect(mockSecurityExt.checkAuthorization).toHaveBeenCalledTimes(1);
-      expect(mockSecurityExt.enforceAuthorization).not.toHaveBeenCalled();
+      expect(mockSecurityExt.authorizeRemoveReferences).toHaveBeenCalledTimes(1);
     });
 
     test(`propagates decorated error when unauthorized`, async () => {
-      setupCheckUnauthorized(mockSecurityExt);
-      setupEnforceFailure(mockSecurityExt);
+      setupAuthorizeFunc(mockSecurityExt.authorizeRemoveReferences, 'unauthorized');
 
       await expect(
         removeReferencesToSuccess(client, repository, type, id, { namespace })
       ).rejects.toThrow(enforceError);
 
-      expect(mockSecurityExt.checkAuthorization).toHaveBeenCalledTimes(1);
-      expect(mockSecurityExt.enforceAuthorization).toHaveBeenCalledTimes(1);
+      expect(mockSecurityExt.authorizeRemoveReferences).toHaveBeenCalledTimes(1);
     });
 
-    test(`returns result when authorized`, async () => {
-      setupCheckAuthorized(mockSecurityExt);
+    test(`returns result when partially authorized`, async () => {
+      setupAuthorizeFunc(mockSecurityExt.authorizeRemoveReferences, 'partially_authorized');
       setupRedactPassthrough(mockSecurityExt);
 
       const result = await removeReferencesToSuccess(client, repository, type, id, { namespace });
 
-      expect(mockSecurityExt.checkAuthorization).toHaveBeenCalledTimes(1);
-      expect(mockSecurityExt.enforceAuthorization).toHaveBeenCalledTimes(1);
+      expect(mockSecurityExt.authorizeRemoveReferences).toHaveBeenCalledTimes(1);
       expect(client.updateByQuery).toHaveBeenCalledTimes(1);
       expect(result).toEqual(expect.objectContaining({ updated: REMOVE_REFS_COUNT }));
     });
 
-    test(`calls checkAuthorization with type, actions, and namespaces`, async () => {
-      await removeReferencesToSuccess(client, repository, type, id, { namespace });
-
-      expect(mockSecurityExt.checkAuthorization).toHaveBeenCalledTimes(1);
-      const expectedActions = new Set(['delete']);
-      const expectedSpaces = new Set([namespace]);
-      const expectedTypes = new Set([type]);
-
-      const {
-        actions: actualActions,
-        spaces: actualSpaces,
-        types: actualTypes,
-      } = mockSecurityExt.checkAuthorization.mock.calls[0][0];
-
-      expect(setsAreEqual(actualActions, expectedActions)).toBeTruthy();
-      expect(setsAreEqual(actualSpaces, expectedSpaces)).toBeTruthy();
-      expect(setsAreEqual(actualTypes, expectedTypes)).toBeTruthy();
-    });
-
-    test(`calls enforceAuthorization with type/namespace map`, async () => {
-      setupCheckAuthorized(mockSecurityExt);
-
-      await removeReferencesToSuccess(client, repository, type, id, { namespace });
-
-      expect(mockSecurityExt.checkAuthorization).toHaveBeenCalledTimes(1);
-      expect(mockSecurityExt.enforceAuthorization).toHaveBeenCalledTimes(1);
-      expect(mockSecurityExt.enforceAuthorization).toHaveBeenCalledWith(
-        expect.objectContaining({
-          action: 'delete',
-        })
-      );
-
-      const expectedTypesAndSpaces = new Map([[type, new Set([namespace])]]);
-
-      const { typesAndSpaces: actualTypesAndSpaces, typeMap: actualTypeMap } =
-        mockSecurityExt.enforceAuthorization.mock.calls[0][0];
-
-      expect(typeMapsAreEqual(actualTypesAndSpaces, expectedTypesAndSpaces)).toBeTruthy();
-      expect(actualTypeMap).toBe(authMap);
-    });
-
-    test(`adds audit event when successful`, async () => {
-      setupCheckAuthorized(mockSecurityExt);
+    test(`returns result when fully authorized`, async () => {
+      setupAuthorizeFunc(mockSecurityExt.authorizeRemoveReferences, 'fully_authorized');
       setupRedactPassthrough(mockSecurityExt);
-      setupEnforceSuccess(mockSecurityExt);
 
-      await removeReferencesToSuccess(client, repository, type, id, { namespace });
+      const result = await removeReferencesToSuccess(client, repository, type, id, { namespace });
 
-      expect(mockSecurityExt.addAuditEvent).toHaveBeenCalledTimes(1);
-      expect(mockSecurityExt.addAuditEvent).toHaveBeenCalledWith({
-        action: AuditAction.REMOVE_REFERENCES,
-        savedObject: { type, id },
-        error: undefined,
-        outcome: 'unknown',
-      });
+      expect(mockSecurityExt.authorizeRemoveReferences).toHaveBeenCalledTimes(1);
+      expect(client.updateByQuery).toHaveBeenCalledTimes(1);
+      expect(result).toEqual(expect.objectContaining({ updated: REMOVE_REFS_COUNT }));
     });
 
-    test(`adds audit event when not successful`, async () => {
-      setupCheckUnauthorized(mockSecurityExt);
-      setupEnforceFailure(mockSecurityExt);
+    test(`calls authorizeRemoveReferences with correct parameters`, async () => {
+      await removeReferencesToSuccess(client, repository, type, id, { namespace });
 
-      await expect(
-        removeReferencesToSuccess(client, repository, type, id, { namespace })
-      ).rejects.toThrow(enforceError);
-
-      expect(mockSecurityExt.addAuditEvent).toHaveBeenCalledTimes(1);
-      expect(mockSecurityExt.addAuditEvent).toHaveBeenCalledWith({
-        action: AuditAction.REMOVE_REFERENCES,
-        savedObject: { type, id },
-        error: enforceError,
+      expect(mockSecurityExt.authorizeRemoveReferences).toHaveBeenCalledTimes(1);
+      expect(mockSecurityExt.authorizeRemoveReferences).toHaveBeenCalledWith({
+        namespace,
+        object: {
+          id,
+          type,
+        },
       });
     });
   });
@@ -833,175 +551,128 @@ describe('SavedObjectsRepository Security Extension', () => {
     const obj1 = { type, id: 'one' };
     const obj2 = { type, id: 'two' };
 
-    test(`propagates decorated error when checkAuthorization rejects promise`, async () => {
-      mockSecurityExt.checkAuthorization.mockRejectedValueOnce(checkAuthError);
+    const expectedResult = {
+      errors: [
+        {
+          error: {
+            error: 'Conflict',
+            message: `Saved object [${obj1.type}/${obj1.id}] conflict`,
+            statusCode: 409,
+          },
+          id: obj1.id,
+          type: obj1.type,
+        },
+        {
+          error: {
+            error: 'Conflict',
+            message: `Saved object [${obj2.type}/${obj2.id}] conflict`,
+            statusCode: 409,
+          },
+          id: obj2.id,
+          type: obj2.type,
+        },
+      ],
+    };
+
+    test(`propagates decorated error when authorizeCheckConflicts rejects promise`, async () => {
+      mockSecurityExt.authorizeCheckConflicts.mockRejectedValueOnce(checkAuthError);
       await expect(
         checkConflictsSuccess(client, repository, registry, [obj1, obj2], { namespace })
       ).rejects.toThrow(checkAuthError);
-      expect(mockSecurityExt.checkAuthorization).toHaveBeenCalledTimes(1);
-      expect(mockSecurityExt.enforceAuthorization).not.toHaveBeenCalled();
+      expect(mockSecurityExt.authorizeCheckConflicts).toHaveBeenCalledTimes(1);
     });
 
     test(`propagates decorated error when unauthorized`, async () => {
-      setupCheckUnauthorized(mockSecurityExt);
-      setupEnforceFailure(mockSecurityExt);
+      setupAuthorizeFunc(mockSecurityExt.authorizeCheckConflicts, 'unauthorized');
 
       await expect(
         checkConflictsSuccess(client, repository, registry, [obj1, obj2], { namespace })
       ).rejects.toThrow(enforceError);
 
-      expect(mockSecurityExt.checkAuthorization).toHaveBeenCalledTimes(1);
-      expect(mockSecurityExt.enforceAuthorization).toHaveBeenCalledTimes(1);
+      expect(mockSecurityExt.authorizeCheckConflicts).toHaveBeenCalledTimes(1);
     });
 
-    test(`returns result when authorized`, async () => {
-      setupCheckAuthorized(mockSecurityExt);
+    test(`returns result when partially authorized`, async () => {
+      setupAuthorizeFunc(mockSecurityExt.authorizeCheckConflicts, 'partially_authorized');
       setupRedactPassthrough(mockSecurityExt);
 
       const result = await checkConflictsSuccess(client, repository, registry, [obj1, obj2], {
         namespace,
       });
 
-      expect(mockSecurityExt.checkAuthorization).toHaveBeenCalledTimes(1);
-      expect(mockSecurityExt.enforceAuthorization).toHaveBeenCalledTimes(1);
+      expect(mockSecurityExt.authorizeCheckConflicts).toHaveBeenCalledTimes(1);
       expect(client.mget).toHaveBeenCalledTimes(1);
-      // Default mock mget makes each object found
-      expect(result).toEqual(
-        expect.objectContaining({
-          errors: [
-            {
-              error: {
-                error: 'Conflict',
-                message: `Saved object [${obj1.type}/${obj1.id}] conflict`,
-                statusCode: 409,
-              },
-              id: obj1.id,
-              type: obj1.type,
-            },
-            {
-              error: {
-                error: 'Conflict',
-                message: `Saved object [${obj2.type}/${obj2.id}] conflict`,
-                statusCode: 409,
-              },
-              id: obj2.id,
-              type: obj2.type,
-            },
-          ],
-        })
-      );
+      expect(result).toEqual(expectedResult);
     });
 
-    test(`calls checkAuthorization with type, actions, and namespaces`, async () => {
-      await checkConflictsSuccess(client, repository, registry, [obj1, obj2], { namespace });
+    test(`returns result when fully authorized`, async () => {
+      setupAuthorizeFunc(mockSecurityExt.authorizeCheckConflicts, 'fully_authorized');
+      setupRedactPassthrough(mockSecurityExt);
 
-      expect(mockSecurityExt.checkAuthorization).toHaveBeenCalledTimes(1);
-      const expectedActions = new Set(['bulk_create']);
-      const expectedSpaces = new Set([namespace]);
-      const expectedTypes = new Set([type]);
+      const result = await checkConflictsSuccess(client, repository, registry, [obj1, obj2], {
+        namespace,
+      });
 
-      const {
-        actions: actualActions,
-        spaces: actualSpaces,
-        types: actualTypes,
-      } = mockSecurityExt.checkAuthorization.mock.calls[0][0];
-
-      expect(setsAreEqual(actualActions, expectedActions)).toBeTruthy();
-      expect(setsAreEqual(actualSpaces, expectedSpaces)).toBeTruthy();
-      expect(setsAreEqual(actualTypes, expectedTypes)).toBeTruthy();
+      expect(mockSecurityExt.authorizeCheckConflicts).toHaveBeenCalledTimes(1);
+      expect(client.mget).toHaveBeenCalledTimes(1);
+      expect(result).toEqual(expectedResult);
     });
 
-    test(`calls enforceAuthorization with type/namespace map`, async () => {
-      setupCheckAuthorized(mockSecurityExt);
-
+    test(`calls authorizeCheckConflicts with correct parameters`, async () => {
       await checkConflictsSuccess(client, repository, registry, [obj1, obj2], { namespace });
 
-      expect(mockSecurityExt.checkAuthorization).toHaveBeenCalledTimes(1);
-      expect(mockSecurityExt.enforceAuthorization).toHaveBeenCalledTimes(1);
-      expect(mockSecurityExt.enforceAuthorization).toHaveBeenCalledWith(
-        expect.objectContaining({
-          action: 'bulk_create',
-        })
-      );
-      const expectedTypesAndSpaces = new Map([[type, new Set([namespace])]]);
-
-      const { typesAndSpaces: actualTypesAndSpaces, typeMap: actualTypeMap } =
-        mockSecurityExt.enforceAuthorization.mock.calls[0][0];
-
-      expect(typeMapsAreEqual(actualTypesAndSpaces, expectedTypesAndSpaces)).toBeTruthy();
-      expect(actualTypeMap).toBe(authMap);
+      expect(mockSecurityExt.authorizeCheckConflicts).toHaveBeenCalledTimes(1);
+      expect(mockSecurityExt.authorizeCheckConflicts).toHaveBeenCalledWith({
+        namespace,
+        objects: [obj1, obj2],
+      });
     });
   });
 
   describe('#openPointInTimeForType', () => {
-    test(`propagates decorated error when checkAuthorization rejects promise`, async () => {
-      mockSecurityExt.checkAuthorization.mockRejectedValueOnce(checkAuthError);
+    test(`propagates decorated error when authorizeOpenPointInTime rejects promise`, async () => {
+      mockSecurityExt.authorizeOpenPointInTime.mockRejectedValueOnce(checkAuthError);
       await expect(repository.openPointInTimeForType(type)).rejects.toThrow(checkAuthError);
-      expect(mockSecurityExt.checkAuthorization).toHaveBeenCalledTimes(1);
-      expect(mockSecurityExt.enforceAuthorization).not.toHaveBeenCalled();
+      expect(mockSecurityExt.authorizeOpenPointInTime).toHaveBeenCalledTimes(1);
     });
 
-    test(`returns result when authorized`, async () => {
-      setupCheckAuthorized(mockSecurityExt);
+    test(`returns result when partially authorized`, async () => {
+      setupAuthorizeFunc(mockSecurityExt.authorizeOpenPointInTime, 'partially_authorized');
 
       client.openPointInTime.mockResponseOnce({ id });
       const result = await repository.openPointInTimeForType(type);
 
-      expect(mockSecurityExt.checkAuthorization).toHaveBeenCalledTimes(1);
-      expect(mockSecurityExt.enforceAuthorization).not.toHaveBeenCalled();
+      expect(mockSecurityExt.authorizeOpenPointInTime).toHaveBeenCalledTimes(1);
       expect(client.openPointInTime).toHaveBeenCalledTimes(1);
       expect(result).toEqual(expect.objectContaining({ id }));
     });
 
-    test(`adds audit event when successful`, async () => {
-      setupCheckAuthorized(mockSecurityExt);
+    test(`returns result when fully authorized`, async () => {
+      setupAuthorizeFunc(mockSecurityExt.authorizeOpenPointInTime, 'fully_authorized');
 
       client.openPointInTime.mockResponseOnce({ id });
-      await repository.openPointInTimeForType(type);
+      const result = await repository.openPointInTimeForType(type);
 
-      expect(mockSecurityExt.addAuditEvent).toHaveBeenCalledTimes(1);
-      expect(mockSecurityExt.addAuditEvent).toHaveBeenCalledWith({
-        action: AuditAction.OPEN_POINT_IN_TIME,
-        outcome: 'unknown',
-      });
+      expect(mockSecurityExt.authorizeOpenPointInTime).toHaveBeenCalledTimes(1);
+      expect(client.openPointInTime).toHaveBeenCalledTimes(1);
+      expect(result).toEqual(expect.objectContaining({ id }));
     });
 
     test(`throws an error when unauthorized`, async () => {
-      setupCheckUnauthorized(mockSecurityExt);
+      setupAuthorizeFunc(mockSecurityExt.authorizeOpenPointInTime, 'unauthorized');
       await expect(repository.openPointInTimeForType(type)).rejects.toThrowError();
     });
 
-    test(`adds audit event when unauthorized`, async () => {
-      setupCheckUnauthorized(mockSecurityExt);
-
-      await expect(repository.openPointInTimeForType(type)).rejects.toThrowError();
-
-      expect(mockSecurityExt.addAuditEvent).toHaveBeenCalledTimes(1);
-      expect(mockSecurityExt.addAuditEvent).toHaveBeenCalledWith({
-        action: AuditAction.OPEN_POINT_IN_TIME,
-        error: new Error('User is unauthorized for any requested types/spaces.'),
-      });
-    });
-
-    test(`calls checkAuthorization with type, actions, and namespaces`, async () => {
-      setupCheckAuthorized(mockSecurityExt);
+    test(`calls authorizeOpenPointInTime with correct parameters`, async () => {
+      setupAuthorizeFunc(mockSecurityExt.authorizeOpenPointInTime, 'fully_authorized');
       client.openPointInTime.mockResponseOnce({ id });
-      await repository.openPointInTimeForType(type, { namespaces: [namespace] });
-
-      expect(mockSecurityExt.checkAuthorization).toHaveBeenCalledTimes(1);
-      const expectedActions = new Set(['open_point_in_time']);
-      const expectedSpaces = new Set([namespace]);
-      const expectedTypes = new Set([type]);
-
-      const {
-        actions: actualActions,
-        spaces: actualSpaces,
-        types: actualTypes,
-      } = mockSecurityExt.checkAuthorization.mock.calls[0][0];
-
-      expect(setsAreEqual(actualActions, expectedActions)).toBeTruthy();
-      expect(setsAreEqual(actualSpaces, expectedSpaces)).toBeTruthy();
-      expect(setsAreEqual(actualTypes, expectedTypes)).toBeTruthy();
+      const namespaces = [namespace, 'x', 'y', 'z'];
+      await repository.openPointInTimeForType(type, { namespaces });
+      expect(mockSecurityExt.authorizeOpenPointInTime).toHaveBeenCalledTimes(1);
+      expect(mockSecurityExt.authorizeOpenPointInTime).toHaveBeenCalledWith({
+        namespaces: new Set(namespaces),
+        types: new Set([type]),
+      });
     });
   });
 
@@ -1014,31 +685,32 @@ describe('SavedObjectsRepository Security Extension', () => {
       expect(result).toEqual(expectedResult);
     });
 
-    test(`adds audit event`, async () => {
+    test(`calls auditClosePointInTime`, async () => {
       await repository.closePointInTime(id);
-
-      expect(mockSecurityExt.addAuditEvent).toHaveBeenCalledTimes(1);
-      expect(mockSecurityExt.addAuditEvent).toHaveBeenCalledWith({
-        action: AuditAction.CLOSE_POINT_IN_TIME,
-        outcome: 'unknown',
-      });
+      expect(mockSecurityExt.auditClosePointInTime).toHaveBeenCalledTimes(1);
+      expect(mockSecurityExt.auditClosePointInTime).toHaveBeenCalledWith();
     });
   });
 
   describe('#find', () => {
-    test(`propagates decorated error when checkAuthorization rejects promise`, async () => {
-      mockSecurityExt.checkAuthorization.mockRejectedValueOnce(checkAuthError);
+    test(`propagates decorated error when authorizeFind rejects promise`, async () => {
+      mockSecurityExt.authorizeFind.mockRejectedValueOnce(checkAuthError);
       await expect(findSuccess(client, repository, { type })).rejects.toThrow(checkAuthError);
-      expect(mockSecurityExt.checkAuthorization).toHaveBeenCalledTimes(1);
-      expect(mockSecurityExt.enforceAuthorization).not.toHaveBeenCalled();
+      expect(mockSecurityExt.authorizeFind).toHaveBeenCalledTimes(1);
     });
 
-    test(`returns empty result when unauthorized`, async () => {
-      setupCheckUnauthorized(mockSecurityExt);
+    test(`propagates decorated error when getFindRedactTypeMap rejects promise`, async () => {
+      mockSecurityExt.getFindRedactTypeMap.mockRejectedValueOnce(checkAuthError);
+      await expect(findSuccess(client, repository, { type })).rejects.toThrow(checkAuthError);
+      expect(mockSecurityExt.getFindRedactTypeMap).toHaveBeenCalledTimes(1);
+    });
+
+    test(`returns empty result when preauthorization is unauthorized`, async () => {
+      setupAuthorizeFind(mockSecurityExt, 'unauthorized');
 
       const result = await repository.find({ type });
 
-      expect(mockSecurityExt.checkAuthorization).toHaveBeenCalledTimes(1);
+      expect(mockSecurityExt.authorizeFind).toHaveBeenCalledTimes(1);
       expect(result).toEqual(
         expect.objectContaining({
           saved_objects: [],
@@ -1047,18 +719,48 @@ describe('SavedObjectsRepository Security Extension', () => {
       );
     });
 
+    test(`returns result when getFindRedactTypeMap is unauthorized`, async () => {
+      setupAuthorizeFind(mockSecurityExt, 'fully_authorized');
+      setupRedactPassthrough(mockSecurityExt);
+
+      const generatedResults = generateIndexPatternSearchResults(namespace);
+      client.search.mockResponseOnce(generatedResults);
+      const result = await repository.find({ type });
+
+      expect(mockSecurityExt.authorizeFind).toHaveBeenCalledTimes(1);
+      expect(mockSecurityExt.getFindRedactTypeMap).toHaveBeenCalledTimes(1);
+      expect(result.total).toBe(4);
+      expect(result.saved_objects).toHaveLength(4);
+      generatedResults.hits.hits.forEach((doc, i) => {
+        expect(result.saved_objects[i]).toEqual({
+          id: doc._id.replace(/(foo-namespace\:)?(index-pattern|config|globalType)\:/, ''),
+          type: doc._source!.type,
+          originId: doc._source!.originId,
+          ...mockTimestampFields,
+          version: mockVersion,
+          score: doc._score,
+          attributes: doc._source![doc._source!.type],
+          references: [],
+          namespaces: doc._source!.type === NAMESPACE_AGNOSTIC_TYPE ? undefined : [namespace],
+          coreMigrationVersion: expect.any(String),
+          typeMigrationVersion: expect.any(String),
+          managed: expect.any(Boolean),
+        });
+      });
+    });
+
     test(`calls es search with only authorized spaces when partially authorized`, async () => {
       // Setup partial authorization with the specific type and space of the current test definition
       const authRecord: Record<string, AuthorizationTypeEntry> = {
         find: { authorizedSpaces: [namespace] },
       };
-      mockSecurityExt.checkAuthorization.mockResolvedValue({
+      mockSecurityExt.authorizeFind.mockResolvedValue({
         status: 'partially_authorized',
         typeMap: Object.freeze(new Map([[type, authRecord]])),
       });
 
       await findSuccess(client, repository, { type, namespaces: [namespace, 'ns-1'] });
-      expect(mockGetSearchDsl.mock.calls[0].length).toBe(3); // Find success verifies this is called once, this shouyld always pass
+      expect(mockGetSearchDsl.mock.calls[0].length).toBe(3); // Find success verifies this is called once, this should always pass
       const {
         typeToNamespacesMap: actualMap,
       }: { typeToNamespacesMap: Map<string, string[] | undefined> } =
@@ -1067,11 +769,11 @@ describe('SavedObjectsRepository Security Extension', () => {
       expect(actualMap).toBeDefined();
       const expectedMap = new Map<string, string[] | undefined>();
       expectedMap.set(type, [namespace]);
-      expect(namespaceMapsAreEqual(actualMap, expectedMap)).toBeTruthy();
+      expect(arrayMapsAreEqual(actualMap, expectedMap)).toBeTruthy();
     });
 
     test(`returns result of es find when fully authorized`, async () => {
-      setupCheckAuthorized(mockSecurityExt);
+      setupAuthorizeFind(mockSecurityExt, 'fully_authorized');
       setupRedactPassthrough(mockSecurityExt);
 
       const { result, generatedResults } = await findSuccess(
@@ -1096,12 +798,15 @@ describe('SavedObjectsRepository Security Extension', () => {
           attributes: doc._source![doc._source!.type],
           references: [],
           namespaces: doc._source!.type === NAMESPACE_AGNOSTIC_TYPE ? undefined : [namespace],
+          coreMigrationVersion: expect.any(String),
+          typeMigrationVersion: expect.any(String),
+          managed: expect.any(Boolean),
         });
       });
     });
 
     test(`uses the authorization map when partially authorized`, async () => {
-      setupCheckPartiallyAuthorized(mockSecurityExt);
+      setupAuthorizeFind(mockSecurityExt, 'partially_authorized');
       setupRedactPassthrough(mockSecurityExt);
 
       await findSuccess(
@@ -1111,18 +816,21 @@ describe('SavedObjectsRepository Security Extension', () => {
         namespace
       );
 
-      // make sure the authorized map gets passed to the es client call
-      expect(mockGetSearchDsl).toHaveBeenCalledWith(
-        expect.objectContaining({}),
-        expect.objectContaining({}),
-        expect.objectContaining({
-          typeToNamespacesMap: authMap,
-        })
-      );
+      expect(mockGetSearchDsl.mock.calls[0].length).toBe(3); // Find success verifies this is called once, this should always pass
+      const {
+        typeToNamespacesMap: actualMap,
+      }: { typeToNamespacesMap: Map<string, string[] | undefined> } =
+        mockGetSearchDsl.mock.calls[0][2];
+
+      expect(actualMap).not.toBeUndefined();
+      const expectedMap = new Map<string, string[] | undefined>();
+      expectedMap.set('foo', ['bar']); // this is what is hard-coded in authMap
+
+      expect(arrayMapsAreEqual(actualMap, expectedMap)).toBeTruthy();
     });
 
     test(`returns result of es find when partially authorized`, async () => {
-      setupCheckPartiallyAuthorized(mockSecurityExt);
+      setupAuthorizeFind(mockSecurityExt, 'partially_authorized');
       setupRedactPassthrough(mockSecurityExt);
 
       const { result, generatedResults } = await findSuccess(
@@ -1147,33 +855,52 @@ describe('SavedObjectsRepository Security Extension', () => {
           attributes: doc._source![doc._source!.type],
           references: [],
           namespaces: doc._source!.type === NAMESPACE_AGNOSTIC_TYPE ? undefined : [namespace],
+          coreMigrationVersion: expect.any(String),
+          typeMigrationVersion: expect.any(String),
+          managed: expect.any(Boolean),
         });
       });
     });
 
-    test(`calls checkAuthorization with type, actions, and namespaces`, async () => {
-      setupCheckPartiallyAuthorized(mockSecurityExt);
+    test(`calls authorizeFind with correct parameters`, async () => {
+      setupAuthorizeFind(mockSecurityExt, 'partially_authorized');
       setupRedactPassthrough(mockSecurityExt);
-      await findSuccess(client, repository, { type, namespaces: [namespace] });
+      await findSuccess(client, repository, { type, namespaces: [namespace] }, 'ns-2');
 
-      expect(mockSecurityExt.checkAuthorization).toHaveBeenCalledTimes(2);
-      const expectedActions = new Set(['find']);
-      const expectedSpaces = new Set([namespace]);
-      const expectedTypes = new Set([type]);
+      expect(mockSecurityExt.authorizeFind).toHaveBeenCalledTimes(1);
+      expect(mockSecurityExt.authorizeFind).toHaveBeenCalledWith({
+        namespaces: new Set([namespace]),
+        types: new Set(['index-pattern']),
+      });
+    });
 
-      const {
-        actions: actualActions,
-        spaces: actualSpaces,
-        types: actualTypes,
-      } = mockSecurityExt.checkAuthorization.mock.calls[0][0];
+    test(`calls GetFindRedactTypeMap with correct parameters`, async () => {
+      setupAuthorizeFind(mockSecurityExt, 'partially_authorized');
+      setupRedactPassthrough(mockSecurityExt);
+      const { generatedResults } = await findSuccess(
+        client,
+        repository,
+        { type, namespaces: [namespace] },
+        'ns-2'
+      );
 
-      expect(setsAreEqual(actualActions, expectedActions)).toBeTruthy();
-      expect(setsAreEqual(actualSpaces, expectedSpaces)).toBeTruthy();
-      expect(setsAreEqual(actualTypes, expectedTypes)).toBeTruthy();
+      expect(mockSecurityExt.authorizeFind).toHaveBeenCalledTimes(1);
+      expect(mockSecurityExt.getFindRedactTypeMap).toHaveBeenCalledTimes(1);
+      expect(mockSecurityExt.getFindRedactTypeMap).toHaveBeenCalledWith({
+        previouslyCheckedNamespaces: new Set([namespace]),
+        objects: generatedResults.hits.hits.map((obj) => {
+          return {
+            type: obj._source?.type,
+            id: obj._id.slice(obj._id.lastIndexOf(':') + 1), // find removes the space/type from the ID in the original raw doc
+            existingNamespaces:
+              obj._source?.namespaces ?? obj._source?.namespace ? [obj._source?.namespace] : [],
+          };
+        }),
+      });
     });
 
     test(`calls redactNamespaces with authorization map`, async () => {
-      setupCheckAuthorized(mockSecurityExt);
+      setupAuthorizeFind(mockSecurityExt, 'fully_authorized');
       setupRedactPassthrough(mockSecurityExt);
 
       const { generatedResults } = await findSuccess(client, repository, {
@@ -1189,44 +916,6 @@ describe('SavedObjectsRepository Security Extension', () => {
           typeMap: authMap,
         })
       );
-    });
-
-    test(`adds audit per object event when successful`, async () => {
-      setupCheckAuthorized(mockSecurityExt);
-      setupRedactPassthrough(mockSecurityExt);
-
-      const { generatedResults } = await findSuccess(client, repository, {
-        type,
-        namespaces: [namespace],
-      });
-
-      expect(mockSecurityExt.addAuditEvent).toHaveBeenCalledTimes(
-        generatedResults.hits.hits.length
-      );
-
-      generatedResults.hits.hits.forEach((doc, i) => {
-        expect(mockSecurityExt.addAuditEvent.mock.calls[i]).toEqual([
-          {
-            action: AuditAction.FIND,
-            savedObject: {
-              type: doc._source!.type,
-              id: doc._id.replace(/(foo-namespace\:)?(index-pattern|config|globalType)\:/, ''),
-            },
-          },
-        ]);
-      });
-    });
-
-    test(`adds audit event when not successful`, async () => {
-      setupCheckUnauthorized(mockSecurityExt);
-
-      await repository.find({ type });
-
-      expect(mockSecurityExt.addAuditEvent).toHaveBeenCalledTimes(1);
-      expect(mockSecurityExt.addAuditEvent).toHaveBeenCalledWith({
-        action: AuditAction.FIND,
-        error: new Error('User is unauthorized for any requested types/spaces.'),
-      });
     });
   });
 
@@ -1259,44 +948,43 @@ describe('SavedObjectsRepository Security Extension', () => {
       namespaces: [namespace],
     };
 
-    test(`propagates decorated error when checkAuthorization rejects promise`, async () => {
-      mockSecurityExt.checkAuthorization.mockRejectedValueOnce(checkAuthError);
+    const expectedAuthObjects = [
+      {
+        error: true,
+        existingNamespaces: ['default'],
+        objectNamespaces: ['ns-1', 'ns-2', namespace],
+        id: '6.0.0-alpha1',
+        type: 'multiNamespaceTypeCustomIndex',
+      },
+      {
+        error: false,
+        existingNamespaces: [],
+        objectNamespaces: ['ns-3'],
+        id: 'logstash-*',
+        type: 'index-pattern',
+      },
+    ];
+
+    test(`propagates decorated error when authorizeBulkGet rejects promise`, async () => {
+      mockSecurityExt.authorizeBulkGet.mockRejectedValueOnce(checkAuthError);
       await expect(
         bulkGetSuccess(client, repository, registry, [obj1, obj2], { namespace })
       ).rejects.toThrow(checkAuthError);
-      expect(mockSecurityExt.checkAuthorization).toHaveBeenCalledTimes(1);
-      expect(mockSecurityExt.enforceAuthorization).not.toHaveBeenCalled();
+      expect(mockSecurityExt.authorizeBulkGet).toHaveBeenCalledTimes(1);
     });
 
     test(`propagates decorated error when unauthorized`, async () => {
-      setupCheckUnauthorized(mockSecurityExt);
-      setupEnforceFailure(mockSecurityExt);
+      setupAuthorizeFunc(mockSecurityExt.authorizeBulkGet, 'unauthorized');
 
       await expect(
         bulkGetSuccess(client, repository, registry, [obj1, obj2], { namespace })
       ).rejects.toThrow(enforceError);
 
-      expect(mockSecurityExt.checkAuthorization).toHaveBeenCalledTimes(1);
-      expect(mockSecurityExt.enforceAuthorization).toHaveBeenCalledTimes(1);
-      expect(mockSecurityExt.enforceAuthorization).toHaveBeenCalledWith(
-        expect.objectContaining({
-          action: 'bulk_get',
-        })
-      );
-
-      const expectedTypesAndSpaces = new Map([
-        [obj1.type, new Set([namespace])],
-        [obj2.type, new Set([namespace])],
-      ]);
-
-      const { typesAndSpaces: actualTypesAndSpaces } =
-        mockSecurityExt.enforceAuthorization.mock.calls[0][0];
-
-      expect(typeMapsAreEqual(actualTypesAndSpaces, expectedTypesAndSpaces)).toBeTruthy();
+      expect(mockSecurityExt.authorizeBulkGet).toHaveBeenCalledTimes(1);
     });
 
-    test(`returns result when authorized`, async () => {
-      setupCheckAuthorized(mockSecurityExt);
+    test(`returns result when partially authorized`, async () => {
+      setupAuthorizeFunc(mockSecurityExt.authorizeBulkGet, 'partially_authorized');
       setupRedactPassthrough(mockSecurityExt);
 
       const { result, mockResponse } = await bulkGetSuccess(
@@ -1307,8 +995,7 @@ describe('SavedObjectsRepository Security Extension', () => {
         { namespace }
       );
 
-      expect(mockSecurityExt.checkAuthorization).toHaveBeenCalledTimes(1);
-      expect(mockSecurityExt.enforceAuthorization).toHaveBeenCalledTimes(1);
+      expect(mockSecurityExt.authorizeBulkGet).toHaveBeenCalledTimes(1);
       expect(client.mget).toHaveBeenCalledTimes(1);
       expect(result).toEqual({
         saved_objects: [
@@ -1324,81 +1011,95 @@ describe('SavedObjectsRepository Security Extension', () => {
       });
     });
 
-    test(`calls checkAuthorization with type, actions, namespace, and object namespaces`, async () => {
-      const objA = {
-        ...obj1,
-        type: MULTI_NAMESPACE_CUSTOM_INDEX_TYPE, // replace the type to a mult-namespace type for this test to be thorough
-        namespaces: multiNamespaceObjNamespaces, // include multiple spaces
-      };
-      const objB = { ...obj2, namespaces: ['ns-3'] }; // use a different namespace than the options namespace;
-      const optionsNamespace = 'ns-4';
+    test(`returns result when fully authorized`, async () => {
+      setupAuthorizeFunc(mockSecurityExt.authorizeBulkGet, 'fully_authorized');
+      setupRedactPassthrough(mockSecurityExt);
 
-      await bulkGetSuccess(client, repository, registry, [objA, objB], {
-        namespace: optionsNamespace,
-      });
-
-      expect(mockSecurityExt.checkAuthorization).toHaveBeenCalledTimes(1);
-      const expectedActions = new Set(['bulk_get']);
-      const expectedSpaces = new Set([optionsNamespace, ...objA.namespaces, ...objB.namespaces]);
-      const expectedTypes = new Set([objA.type, objB.type]);
-
-      const {
-        actions: actualActions,
-        spaces: actualSpaces,
-        types: actualTypes,
-      } = mockSecurityExt.checkAuthorization.mock.calls[0][0];
-
-      expect(setsAreEqual(actualActions, expectedActions)).toBeTruthy();
-      expect(setsAreEqual(actualSpaces, expectedSpaces)).toBeTruthy();
-      expect(setsAreEqual(actualTypes, expectedTypes)).toBeTruthy();
-    });
-
-    test(`calls enforceAuthorization with action, type map, and auth map`, async () => {
-      const objA = {
-        ...obj1,
-        type: MULTI_NAMESPACE_CUSTOM_INDEX_TYPE, // replace the type to a mult-namespace type for this test to be thorough
-        namespaces: multiNamespaceObjNamespaces, // include multiple spaces
-      };
-      const objB = { ...obj2, namespaces: ['ns-3'] }; // use a different namespace than the options namespace;
-      const optionsNamespace = 'ns-4';
-
-      setupCheckAuthorized(mockSecurityExt);
-
-      await bulkGetSuccess(client, repository, registry, [objA, objB], {
-        namespace: optionsNamespace,
-      });
-
-      expect(mockSecurityExt.checkAuthorization).toHaveBeenCalledTimes(1);
-      expect(mockSecurityExt.enforceAuthorization).toHaveBeenCalledTimes(1);
-      expect(mockSecurityExt.enforceAuthorization).toHaveBeenCalledWith(
-        expect.objectContaining({
-          action: 'bulk_get',
-        })
+      const { result, mockResponse } = await bulkGetSuccess(
+        client,
+        repository,
+        registry,
+        [obj1, obj2],
+        { namespace }
       );
 
-      const expectedTypesAndSpaces = new Map([
-        [objA.type, new Set([optionsNamespace, ...objA.namespaces])],
-        [objB.type, new Set([optionsNamespace, ...objB.namespaces])],
-      ]);
+      expect(mockSecurityExt.authorizeBulkGet).toHaveBeenCalledTimes(1);
+      expect(client.mget).toHaveBeenCalledTimes(1);
+      expect(result).toEqual({
+        saved_objects: [
+          expectBulkGetResult(
+            obj1,
+            mockResponse.docs[0] as estypes.GetGetResult<SavedObjectsRawDocSource>
+          ),
+          expectBulkGetResult(
+            obj2,
+            mockResponse.docs[1] as estypes.GetGetResult<SavedObjectsRawDocSource>
+          ),
+        ],
+      });
+    });
 
-      const { typesAndSpaces: actualTypesAndSpaces, typeMap: actualTypeMap } =
-        mockSecurityExt.enforceAuthorization.mock.calls[0][0];
+    test(`calls authorizeBulkGet with correct parameters in default space`, async () => {
+      const objA = {
+        ...obj1,
+        type: MULTI_NAMESPACE_CUSTOM_INDEX_TYPE, // replace the type to a mult-namespace type for this test to be thorough
+        namespaces: multiNamespaceObjNamespaces, // include multiple spaces
+      };
+      const objB = { ...obj2, namespaces: ['ns-3'] }; // use a different namespace than the options namespace;
 
-      expect(typeMapsAreEqual(actualTypesAndSpaces, expectedTypesAndSpaces)).toBeTruthy();
-      expect(actualTypeMap).toBe(authMap); // ToDo? reference comparison ok, object is frozen
+      await bulkGetSuccess(client, repository, registry, [objA, objB]);
+
+      expect(mockSecurityExt.authorizeBulkGet).toHaveBeenCalledTimes(1);
+      expect(mockSecurityExt.authorizeBulkGet).toHaveBeenCalledWith({
+        namespace: undefined,
+        objects: expectedAuthObjects,
+      });
+    });
+
+    test(`calls authorize with correct parameters in non-default space`, async () => {
+      const objA = {
+        ...obj1,
+        type: MULTI_NAMESPACE_CUSTOM_INDEX_TYPE, // replace the type to a mult-namespace type for this test to be thorough
+        namespaces: multiNamespaceObjNamespaces, // include multiple spaces
+      };
+      const objB = { ...obj2, namespaces: ['ns-3'] }; // use a different namespace than the options namespace;
+      const optionsNamespace = 'ns-4';
+
+      await bulkGetSuccess(client, repository, registry, [objA, objB], {
+        namespace: optionsNamespace,
+      });
+
+      expect(mockSecurityExt.authorizeBulkGet).toHaveBeenCalledTimes(1);
+      expect(mockSecurityExt.authorizeBulkGet).toHaveBeenCalledWith({
+        namespace: optionsNamespace,
+        objects: [
+          {
+            error: true,
+            existingNamespaces: [optionsNamespace],
+            objectNamespaces: objA.namespaces,
+            id: objA.id,
+            type: objA.type,
+          },
+          {
+            error: false,
+            existingNamespaces: [],
+            objectNamespaces: objB.namespaces,
+            id: objB.id,
+            type: objB.type,
+          },
+        ],
+      });
     });
 
     test(`calls redactNamespaces with authorization map`, async () => {
-      setupCheckAuthorized(mockSecurityExt);
+      setupAuthorizeFunc(mockSecurityExt.authorizeBulkGet, 'partially_authorized');
       setupRedactPassthrough(mockSecurityExt);
 
       const objects = [obj1, obj2];
 
       await bulkGetSuccess(client, repository, registry, objects, { namespace });
 
-      expect(mockSecurityExt.checkAuthorization).toHaveBeenCalledTimes(1);
-      expect(mockSecurityExt.enforceAuthorization).toHaveBeenCalledTimes(1);
-
+      expect(mockSecurityExt.authorizeBulkGet).toHaveBeenCalledTimes(1);
       expect(mockSecurityExt.redactNamespaces).toHaveBeenCalledTimes(2);
 
       objects.forEach((obj, i) => {
@@ -1411,42 +1112,6 @@ describe('SavedObjectsRepository Security Extension', () => {
           })
         );
         expect(typeMap).toBe(authMap);
-      });
-    });
-
-    test(`adds audit event per object when successful`, async () => {
-      setupCheckAuthorized(mockSecurityExt);
-      setupRedactPassthrough(mockSecurityExt);
-      setupEnforceSuccess(mockSecurityExt);
-
-      const objects = [obj1, obj2];
-      await bulkGetSuccess(client, repository, registry, objects, { namespace });
-
-      expect(mockSecurityExt.addAuditEvent).toHaveBeenCalledTimes(objects.length);
-      objects.forEach((obj) => {
-        expect(mockSecurityExt.addAuditEvent).toHaveBeenCalledWith({
-          action: AuditAction.GET,
-          savedObject: { type: obj.type, id: obj.id },
-        });
-      });
-    });
-
-    test(`adds audit event per object when not successful`, async () => {
-      setupCheckAuthorized(mockSecurityExt);
-      setupEnforceFailure(mockSecurityExt);
-
-      const objects = [obj1, obj2];
-      await expect(
-        bulkGetSuccess(client, repository, registry, objects, { namespace })
-      ).rejects.toThrow(enforceError);
-
-      expect(mockSecurityExt.addAuditEvent).toHaveBeenCalledTimes(objects.length);
-      objects.forEach((obj) => {
-        expect(mockSecurityExt.addAuditEvent).toHaveBeenCalledWith({
-          action: AuditAction.GET,
-          savedObject: { type: obj.type, id: obj.id },
-          error: enforceError,
-        });
       });
     });
   });
@@ -1473,66 +1138,84 @@ describe('SavedObjectsRepository Security Extension', () => {
       references: [{ name: 'ref_0', type: 'test', id: '2' }],
     };
 
-    test(`propagates decorated error when checkAuthorization rejects promise`, async () => {
-      mockSecurityExt.checkAuthorization.mockRejectedValueOnce(checkAuthError);
+    test(`propagates decorated error when authorizeCreate rejects promise`, async () => {
+      mockSecurityExt.authorizeBulkCreate.mockRejectedValueOnce(checkAuthError);
       await expect(bulkCreateSuccess(client, repository, [obj1, obj2])).rejects.toThrow(
         checkAuthError
       );
-      expect(mockSecurityExt.checkAuthorization).toHaveBeenCalledTimes(1);
-      expect(mockSecurityExt.enforceAuthorization).not.toHaveBeenCalled();
+      expect(mockSecurityExt.authorizeBulkCreate).toHaveBeenCalledTimes(1);
     });
 
     test(`propagates decorated error when unauthorized`, async () => {
-      setupCheckUnauthorized(mockSecurityExt);
-      setupEnforceFailure(mockSecurityExt);
+      setupAuthorizeFunc(mockSecurityExt.authorizeBulkCreate as jest.Mock, 'unauthorized');
 
       await expect(
         bulkCreateSuccess(client, repository, [obj1, obj2], { namespace })
       ).rejects.toThrow(enforceError);
 
-      expect(mockSecurityExt.checkAuthorization).toHaveBeenCalledTimes(1);
-      expect(mockSecurityExt.enforceAuthorization).toHaveBeenCalledTimes(1);
+      expect(mockSecurityExt.authorizeBulkCreate).toHaveBeenCalledTimes(1);
     });
 
-    test(`returns result when authorized`, async () => {
-      setupCheckAuthorized(mockSecurityExt);
+    test(`returns result when partially authorized`, async () => {
+      setupAuthorizeFunc(mockSecurityExt.authorizeBulkCreate as jest.Mock, 'partially_authorized');
       setupRedactPassthrough(mockSecurityExt);
 
       const objects = [obj1, obj2];
       const result = await bulkCreateSuccess(client, repository, objects);
 
-      expect(mockSecurityExt.checkAuthorization).toHaveBeenCalledTimes(1);
-      expect(mockSecurityExt.enforceAuthorization).toHaveBeenCalledTimes(1);
+      expect(mockSecurityExt.authorizeBulkCreate).toHaveBeenCalledTimes(1);
       expect(client.bulk).toHaveBeenCalledTimes(1);
       expect(result).toEqual({
         saved_objects: objects.map((obj) => expectCreateResult(obj)),
       });
     });
 
-    test(`calls checkAuthorization with type, actions, and namespace`, async () => {
-      setupCheckAuthorized(mockSecurityExt);
+    test(`returns result when fully authorized`, async () => {
+      setupAuthorizeFunc(mockSecurityExt.authorizeBulkCreate as jest.Mock, 'fully_authorized');
+      setupRedactPassthrough(mockSecurityExt);
+
+      const objects = [obj1, obj2];
+      const result = await bulkCreateSuccess(client, repository, objects);
+
+      expect(mockSecurityExt.authorizeBulkCreate).toHaveBeenCalledTimes(1);
+      expect(client.bulk).toHaveBeenCalledTimes(1);
+      expect(result).toEqual({
+        saved_objects: objects.map((obj) => expectCreateResult(obj)),
+      });
+    });
+
+    test(`calls authorizeCreate with correct parameters`, async () => {
+      setupAuthorizeFunc(mockSecurityExt.authorizeBulkCreate as jest.Mock, 'fully_authorized');
 
       await bulkCreateSuccess(client, repository, [obj1, obj2], {
         namespace,
       });
 
-      expect(mockSecurityExt.checkAuthorization).toHaveBeenCalledTimes(1);
-      const expectedActions = new Set(['bulk_create']);
-      const expectedSpaces = new Set([namespace]);
-      const expectedTypes = new Set([obj1.type, obj2.type]);
+      expect(mockSecurityExt.authorizeBulkCreate).toHaveBeenCalledTimes(1);
+      const expectedNamespace = namespace;
+      const expectedObjects = [
+        {
+          type: obj1.type,
+          id: expect.objectContaining(/index-pattern:[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}/),
+          initialNamespaces: undefined,
+          existingNamespaces: [],
+        },
+        {
+          type: obj2.type,
+          id: expect.objectContaining(/index-pattern:[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}/),
+          initialNamespaces: undefined,
+          existingNamespaces: [],
+        },
+      ];
 
-      const {
-        actions: actualActions,
-        spaces: actualSpaces,
-        types: actualTypes,
-      } = mockSecurityExt.checkAuthorization.mock.calls[0][0];
+      const { namespace: actualNamespace, objects: actualObjects } =
+        mockSecurityExt.authorizeBulkCreate.mock.calls[0][0];
 
-      expect(setsAreEqual(actualActions, expectedActions)).toBeTruthy();
-      expect(setsAreEqual(actualSpaces, expectedSpaces)).toBeTruthy();
-      expect(setsAreEqual(actualTypes, expectedTypes)).toBeTruthy();
+      expect(expectedNamespace).toEqual(actualNamespace);
+      expect(expectedObjects).toEqual(actualObjects);
     });
 
-    test(`calls checkAuthorization with type, actions, namespace, and initial namespaces`, async () => {
+    test(`calls authorizeCreate with initial spaces for one type`, async () => {
       const objA = {
         ...obj1,
         type: MULTI_NAMESPACE_TYPE,
@@ -1545,34 +1228,37 @@ describe('SavedObjectsRepository Security Extension', () => {
       };
       const optionsNamespace = 'ns-5';
 
-      setupCheckAuthorized(mockSecurityExt);
+      setupAuthorizeFunc(mockSecurityExt.authorizeBulkCreate as jest.Mock, 'fully_authorized');
 
       await bulkCreateSuccess(client, repository, [objA, objB], {
         namespace: optionsNamespace,
       });
 
-      expect(mockSecurityExt.checkAuthorization).toHaveBeenCalledTimes(1);
+      expect(mockSecurityExt.authorizeBulkCreate).toHaveBeenCalledTimes(1);
+      const expectedNamespace = optionsNamespace;
+      const expectedObjects = [
+        {
+          type: objA.type,
+          id: expect.objectContaining(/index-pattern:[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}/),
+          initialNamespaces: objA.initialNamespaces,
+          existingNamespaces: [],
+        },
+        {
+          type: objB.type,
+          id: expect.objectContaining(/index-pattern:[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}/),
+          initialNamespaces: objB.initialNamespaces,
+          existingNamespaces: [],
+        },
+      ];
 
-      const expectedActions = new Set(['bulk_create']);
-      const expectedSpaces = new Set([
-        optionsNamespace,
-        ...objA.initialNamespaces,
-        ...objB.initialNamespaces,
-      ]);
-      const expectedTypes = new Set([objA.type, objB.type]);
+      const { namespace: actualNamespace, objects: actualObjects } =
+        mockSecurityExt.authorizeBulkCreate.mock.calls[0][0];
 
-      const {
-        actions: actualActions,
-        spaces: actualSpaces,
-        types: actualTypes,
-      } = mockSecurityExt.checkAuthorization.mock.calls[0][0];
-
-      expect(setsAreEqual(actualActions, expectedActions)).toBeTruthy();
-      expect(setsAreEqual(actualSpaces, expectedSpaces)).toBeTruthy();
-      expect(setsAreEqual(actualTypes, expectedTypes)).toBeTruthy();
+      expect(expectedNamespace).toEqual(actualNamespace);
+      expect(expectedObjects).toEqual(actualObjects);
     });
 
-    test(`calls enforceAuthorization with action, type map, and auth map`, async () => {
+    test(`calls authorizeCreate with initial spaces for multiple types`, async () => {
       const objA = {
         ...obj1,
         type: MULTI_NAMESPACE_TYPE,
@@ -1585,41 +1271,45 @@ describe('SavedObjectsRepository Security Extension', () => {
       };
       const optionsNamespace = 'ns-5';
 
-      setupCheckAuthorized(mockSecurityExt);
+      setupAuthorizeFunc(mockSecurityExt.authorizeBulkCreate as jest.Mock, 'fully_authorized');
 
       await bulkCreateSuccess(client, repository, [objA, objB], {
         namespace: optionsNamespace,
       });
 
-      expect(mockSecurityExt.checkAuthorization).toHaveBeenCalledTimes(1);
-      expect(mockSecurityExt.enforceAuthorization).toHaveBeenCalledTimes(1);
-      expect(mockSecurityExt.enforceAuthorization).toHaveBeenCalledWith(
-        expect.objectContaining({
-          action: 'bulk_create',
-        })
-      );
-      const expectedTypesAndSpaces = new Map([
-        [objA.type, new Set([optionsNamespace, ...objA.initialNamespaces])],
-        [objB.type, new Set([optionsNamespace, ...objB.initialNamespaces])],
-      ]);
+      expect(mockSecurityExt.authorizeBulkCreate).toHaveBeenCalledTimes(1);
 
-      const { typesAndSpaces: actualTypesAndSpaces, typeMap: actualTypeMap } =
-        mockSecurityExt.enforceAuthorization.mock.calls[0][0];
+      const expectedNamespace = optionsNamespace;
+      const expectedObjects = [
+        {
+          type: objA.type,
+          id: expect.objectContaining(/index-pattern:[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}/),
+          initialNamespaces: objA.initialNamespaces,
+          existingNamespaces: [],
+        },
+        {
+          type: objB.type,
+          id: expect.objectContaining(/index-pattern:[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}/),
+          initialNamespaces: objB.initialNamespaces,
+          existingNamespaces: [],
+        },
+      ];
 
-      expect(typeMapsAreEqual(actualTypesAndSpaces, expectedTypesAndSpaces)).toBeTruthy();
-      expect(actualTypeMap).toBe(authMap);
+      const { namespace: actualNamespace, objects: actualObjects } =
+        mockSecurityExt.authorizeBulkCreate.mock.calls[0][0];
+
+      expect(expectedNamespace).toEqual(actualNamespace);
+      expect(expectedObjects).toEqual(actualObjects);
     });
 
     test(`calls redactNamespaces with authorization map`, async () => {
-      setupCheckAuthorized(mockSecurityExt);
+      setupAuthorizeFunc(mockSecurityExt.authorizeBulkCreate as jest.Mock, 'fully_authorized');
       setupRedactPassthrough(mockSecurityExt);
 
       const objects = [obj1, obj2];
       await bulkCreateSuccess(client, repository, [obj1, obj2], { namespace });
 
-      expect(mockSecurityExt.checkAuthorization).toHaveBeenCalledTimes(1);
-      expect(mockSecurityExt.enforceAuthorization).toHaveBeenCalledTimes(1);
-
+      expect(mockSecurityExt.authorizeBulkCreate).toHaveBeenCalledTimes(1);
       expect(mockSecurityExt.redactNamespaces).toHaveBeenCalledTimes(2);
 
       objects.forEach((obj, i) => {
@@ -1632,42 +1322,6 @@ describe('SavedObjectsRepository Security Extension', () => {
           })
         );
         expect(typeMap).toBe(authMap);
-      });
-    });
-
-    test(`adds audit event per object when successful`, async () => {
-      setupCheckAuthorized(mockSecurityExt);
-      setupEnforceSuccess(mockSecurityExt);
-
-      const objects = [obj1, obj2];
-      await bulkCreateSuccess(client, repository, objects, { namespace });
-
-      expect(mockSecurityExt.addAuditEvent).toHaveBeenCalledTimes(objects.length);
-      objects.forEach((obj) => {
-        expect(mockSecurityExt.addAuditEvent).toHaveBeenCalledWith({
-          action: AuditAction.CREATE,
-          savedObject: { type: obj.type, id: obj.id },
-          outcome: 'unknown',
-        });
-      });
-    });
-
-    test(`adds audit event per object when not successful`, async () => {
-      setupCheckAuthorized(mockSecurityExt);
-      setupEnforceFailure(mockSecurityExt);
-
-      const objects = [obj1, obj2];
-      await expect(bulkCreateSuccess(client, repository, objects, { namespace })).rejects.toThrow(
-        enforceError
-      );
-
-      expect(mockSecurityExt.addAuditEvent).toHaveBeenCalledTimes(objects.length);
-      objects.forEach((obj) => {
-        expect(mockSecurityExt.addAuditEvent).toHaveBeenCalledWith({
-          action: AuditAction.CREATE,
-          savedObject: { type: obj.type, id: obj.id },
-          error: enforceError,
-        });
       });
     });
   });
@@ -1684,66 +1338,82 @@ describe('SavedObjectsRepository Security Extension', () => {
       attributes: { title: 'Test Two' },
     };
 
-    test(`propagates decorated error when checkAuthorization rejects promise`, async () => {
-      mockSecurityExt.checkAuthorization.mockRejectedValueOnce(checkAuthError);
+    test(`propagates decorated error when authorizeUpdate rejects promise`, async () => {
+      mockSecurityExt.authorizeBulkUpdate.mockRejectedValueOnce(checkAuthError);
       await expect(bulkUpdateSuccess(client, repository, registry, [obj1, obj2])).rejects.toThrow(
         checkAuthError
       );
-      expect(mockSecurityExt.checkAuthorization).toHaveBeenCalledTimes(1);
-      expect(mockSecurityExt.enforceAuthorization).not.toHaveBeenCalled();
+      expect(mockSecurityExt.authorizeBulkUpdate).toHaveBeenCalledTimes(1);
     });
 
     test(`propagates decorated error when unauthorized`, async () => {
-      setupCheckUnauthorized(mockSecurityExt);
-      setupEnforceFailure(mockSecurityExt);
+      setupAuthorizeFunc(mockSecurityExt.authorizeBulkUpdate, 'unauthorized');
 
       await expect(bulkUpdateSuccess(client, repository, registry, [obj1, obj2])).rejects.toThrow(
         enforceError
       );
 
-      expect(mockSecurityExt.checkAuthorization).toHaveBeenCalledTimes(1);
-      expect(mockSecurityExt.enforceAuthorization).toHaveBeenCalledTimes(1);
+      expect(mockSecurityExt.authorizeBulkUpdate).toHaveBeenCalledTimes(1);
     });
 
-    test(`returns result when authorized`, async () => {
-      setupCheckAuthorized(mockSecurityExt);
+    test(`returns result when partially authorized`, async () => {
+      setupAuthorizeFunc(mockSecurityExt.authorizeUpdate, 'partially_authorized');
       setupRedactPassthrough(mockSecurityExt);
 
       const objects = [obj1, obj2];
       const result = await bulkUpdateSuccess(client, repository, registry, objects);
 
-      expect(mockSecurityExt.checkAuthorization).toHaveBeenCalledTimes(1);
-      expect(mockSecurityExt.enforceAuthorization).toHaveBeenCalledTimes(1);
+      expect(mockSecurityExt.authorizeBulkUpdate).toHaveBeenCalledTimes(1);
       expect(client.bulk).toHaveBeenCalledTimes(1);
       expect(result).toEqual({
         saved_objects: objects.map((obj) => expectUpdateResult(obj)),
       });
     });
 
-    test(`calls checkAuthorization with type, actions, and namespace`, async () => {
-      setupCheckAuthorized(mockSecurityExt);
+    test(`returns result when fully authorized`, async () => {
+      setupAuthorizeFunc(mockSecurityExt.authorizeUpdate, 'fully_authorized');
+      setupRedactPassthrough(mockSecurityExt);
+
+      const objects = [obj1, obj2];
+      const result = await bulkUpdateSuccess(client, repository, registry, objects);
+
+      expect(mockSecurityExt.authorizeBulkUpdate).toHaveBeenCalledTimes(1);
+      expect(client.bulk).toHaveBeenCalledTimes(1);
+      expect(result).toEqual({
+        saved_objects: objects.map((obj) => expectUpdateResult(obj)),
+      });
+    });
+
+    test(`calls authorizeBulkUpdate with correct parameters`, async () => {
+      setupAuthorizeFunc(mockSecurityExt.authorizeUpdate, 'fully_authorized');
 
       await bulkUpdateSuccess(client, repository, registry, [obj1, obj2], {
         namespace,
       });
 
-      expect(mockSecurityExt.checkAuthorization).toHaveBeenCalledTimes(1);
-      const expectedActions = new Set(['bulk_update']);
-      const expectedSpaces = new Set([namespace]);
-      const expectedTypes = new Set([obj1.type, obj2.type]);
+      expect(mockSecurityExt.authorizeBulkUpdate).toHaveBeenCalledTimes(1);
+      const expectedNamespace = namespace;
+      const expectedObjects = [
+        {
+          type: obj1.type,
+          id: expect.objectContaining(/index-pattern:[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}/),
+          existingNamespaces: [],
+        },
+        {
+          type: obj2.type,
+          id: expect.objectContaining(/index-pattern:[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}/),
+          existingNamespaces: [],
+        },
+      ];
 
-      const {
-        actions: actualActions,
-        spaces: actualSpaces,
-        types: actualTypes,
-      } = mockSecurityExt.checkAuthorization.mock.calls[0][0];
+      const { namespace: actualNamespace, objects: actualObjects } =
+        mockSecurityExt.authorizeBulkUpdate.mock.calls[0][0];
 
-      expect(setsAreEqual(actualActions, expectedActions)).toBeTruthy();
-      expect(setsAreEqual(actualSpaces, expectedSpaces)).toBeTruthy();
-      expect(setsAreEqual(actualTypes, expectedTypes)).toBeTruthy();
+      expect(actualNamespace).toEqual(expectedNamespace);
+      expect(actualObjects).toEqual(expectedObjects);
     });
 
-    test(`calls checkAuthorization with type, actions, namespace, and object namespaces`, async () => {
+    test(`calls authorizeBulkUpdate with object spaces`, async () => {
       const objA = {
         ...obj1,
         namespace: 'ns-1', // object namespace
@@ -1753,73 +1423,44 @@ describe('SavedObjectsRepository Security Extension', () => {
         namespace: 'ns-2', // object namespace
       };
 
-      setupCheckAuthorized(mockSecurityExt);
+      setupAuthorizeFunc(mockSecurityExt.authorizeUpdate, 'fully_authorized');
 
       await bulkUpdateSuccess(client, repository, registry, [objA, objB], {
         namespace,
       });
 
-      expect(mockSecurityExt.checkAuthorization).toHaveBeenCalledTimes(1);
-      const expectedActions = new Set(['bulk_update']);
-      const expectedSpaces = new Set([namespace, objA.namespace, objB.namespace]);
-      const expectedTypes = new Set([objA.type, objB.type]);
+      expect(mockSecurityExt.authorizeBulkUpdate).toHaveBeenCalledTimes(1);
+      const expectedNamespace = namespace;
+      const expectedObjects = [
+        {
+          type: obj1.type,
+          id: expect.objectContaining(/index-pattern:[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}/),
+          objectNamespace: 'ns-1',
+          existingNamespaces: [],
+        },
+        {
+          type: obj2.type,
+          id: expect.objectContaining(/index-pattern:[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}/),
+          objectNamespace: 'ns-2',
+          existingNamespaces: [],
+        },
+      ];
 
-      const {
-        actions: actualActions,
-        spaces: actualSpaces,
-        types: actualTypes,
-      } = mockSecurityExt.checkAuthorization.mock.calls[0][0];
+      const { namespace: actualNamespace, objects: actualObjects } =
+        mockSecurityExt.authorizeBulkUpdate.mock.calls[0][0];
 
-      expect(setsAreEqual(actualActions, expectedActions)).toBeTruthy();
-      expect(setsAreEqual(actualSpaces, expectedSpaces)).toBeTruthy();
-      expect(setsAreEqual(actualTypes, expectedTypes)).toBeTruthy();
-    });
-
-    test(`calls enforceAuthorization with action, type map, and auth map`, async () => {
-      const objA = {
-        ...obj1,
-        namespace: 'ns-1', // object namespace
-      };
-      const objB = {
-        ...obj2,
-        namespace: 'ns-2', // object namespace
-      };
-
-      setupCheckAuthorized(mockSecurityExt);
-
-      await bulkUpdateSuccess(client, repository, registry, [objA, objB], {
-        namespace,
-      });
-
-      expect(mockSecurityExt.checkAuthorization).toHaveBeenCalledTimes(1);
-      expect(mockSecurityExt.enforceAuthorization).toHaveBeenCalledTimes(1);
-      expect(mockSecurityExt.enforceAuthorization).toHaveBeenCalledWith(
-        expect.objectContaining({
-          action: 'bulk_update',
-        })
-      );
-
-      const expectedTypesAndSpaces = new Map([
-        [objA.type, new Set([namespace, objA.namespace])],
-        [objB.type, new Set([namespace, objB.namespace])],
-      ]);
-
-      const { typesAndSpaces: actualTypesAndSpaces, typeMap: actualTypeMap } =
-        mockSecurityExt.enforceAuthorization.mock.calls[0][0];
-
-      expect(typeMapsAreEqual(actualTypesAndSpaces, expectedTypesAndSpaces)).toBeTruthy();
-      expect(actualTypeMap).toBe(authMap);
+      expect(actualNamespace).toEqual(expectedNamespace);
+      expect(actualObjects).toEqual(expectedObjects);
     });
 
     test(`calls redactNamespaces with authorization map`, async () => {
-      setupCheckAuthorized(mockSecurityExt);
+      setupAuthorizeFunc(mockSecurityExt.authorizeBulkUpdate, 'fully_authorized');
       setupRedactPassthrough(mockSecurityExt);
 
       const objects = [obj1, obj2];
       await bulkUpdateSuccess(client, repository, registry, objects, { namespace });
 
-      expect(mockSecurityExt.checkAuthorization).toHaveBeenCalledTimes(1);
-      expect(mockSecurityExt.enforceAuthorization).toHaveBeenCalledTimes(1);
+      expect(mockSecurityExt.authorizeBulkUpdate).toHaveBeenCalledTimes(1);
       expect(mockSecurityExt.redactNamespaces).toHaveBeenCalledTimes(2);
 
       objects.forEach((obj, i) => {
@@ -1832,42 +1473,6 @@ describe('SavedObjectsRepository Security Extension', () => {
           })
         );
         expect(typeMap).toBe(authMap);
-      });
-    });
-
-    test(`adds audit event per object when successful`, async () => {
-      setupCheckAuthorized(mockSecurityExt);
-      setupEnforceSuccess(mockSecurityExt);
-
-      const objects = [obj1, obj2];
-      await bulkUpdateSuccess(client, repository, registry, objects, { namespace });
-
-      expect(mockSecurityExt.addAuditEvent).toHaveBeenCalledTimes(objects.length);
-      objects.forEach((obj) => {
-        expect(mockSecurityExt.addAuditEvent).toHaveBeenCalledWith({
-          action: AuditAction.UPDATE,
-          savedObject: { type: obj.type, id: obj.id },
-          outcome: 'unknown',
-        });
-      });
-    });
-
-    test(`adds audit event per object when not successful`, async () => {
-      setupCheckAuthorized(mockSecurityExt);
-      setupEnforceFailure(mockSecurityExt);
-
-      const objects = [obj1, obj2];
-      await expect(
-        bulkUpdateSuccess(client, repository, registry, objects, { namespace })
-      ).rejects.toThrow(enforceError);
-
-      expect(mockSecurityExt.addAuditEvent).toHaveBeenCalledTimes(objects.length);
-      objects.forEach((obj) => {
-        expect(mockSecurityExt.addAuditEvent).toHaveBeenCalledWith({
-          action: AuditAction.UPDATE,
-          savedObject: { type: obj.type, id: obj.id },
-          error: enforceError,
-        });
       });
     });
   });
@@ -1906,30 +1511,26 @@ describe('SavedObjectsRepository Security Extension', () => {
       ],
     };
 
-    test(`propagates decorated error when checkAuthorization rejects promise`, async () => {
-      mockSecurityExt.checkAuthorization.mockRejectedValueOnce(checkAuthError);
+    test(`propagates decorated error when authorizeBulkDelete rejects promise`, async () => {
+      mockSecurityExt.authorizeBulkDelete.mockRejectedValueOnce(checkAuthError);
       await expect(
         bulkDeleteSuccess(client, repository, registry, testObjs, options)
       ).rejects.toThrow(checkAuthError);
-      expect(mockSecurityExt.checkAuthorization).toHaveBeenCalledTimes(1);
-      expect(mockSecurityExt.enforceAuthorization).not.toHaveBeenCalled();
+      expect(mockSecurityExt.authorizeBulkDelete).toHaveBeenCalledTimes(1);
     });
 
     test(`propagates decorated error when unauthorized`, async () => {
-      setupCheckUnauthorized(mockSecurityExt);
-      setupEnforceFailure(mockSecurityExt);
+      setupAuthorizeFunc(mockSecurityExt.authorizeBulkDelete, 'unauthorized');
 
       await expect(
         bulkDeleteSuccess(client, repository, registry, testObjs, options)
       ).rejects.toThrow(enforceError);
 
-      expect(mockSecurityExt.checkAuthorization).toHaveBeenCalledTimes(1);
-      expect(mockSecurityExt.enforceAuthorization).toHaveBeenCalledTimes(1);
+      expect(mockSecurityExt.authorizeBulkDelete).toHaveBeenCalledTimes(1);
     });
 
-    test(`returns result when authorized`, async () => {
-      setupCheckAuthorized(mockSecurityExt);
-      setupEnforceSuccess(mockSecurityExt);
+    test(`returns result when partially authorized`, async () => {
+      setupAuthorizeFunc(mockSecurityExt.authorizeBulkDelete, 'partially_authorized');
       setupRedactPassthrough(mockSecurityExt);
 
       const result = await bulkDeleteSuccess(
@@ -1941,93 +1542,44 @@ describe('SavedObjectsRepository Security Extension', () => {
         internalOptions
       );
 
-      expect(mockSecurityExt.checkAuthorization).toHaveBeenCalledTimes(1);
-      expect(mockSecurityExt.enforceAuthorization).toHaveBeenCalledTimes(1);
+      expect(mockSecurityExt.authorizeBulkDelete).toHaveBeenCalledTimes(1);
       expect(client.bulk).toHaveBeenCalledTimes(1);
       expect(result).toEqual({
         statuses: testObjs.map((obj) => createBulkDeleteSuccessStatus(obj)),
       });
     });
 
-    test(`calls checkAuthorization with type, actions, and namespaces`, async () => {
-      setupCheckAuthorized(mockSecurityExt);
+    test(`returns result when fully authorized`, async () => {
+      setupAuthorizeFunc(mockSecurityExt.authorizeBulkDelete, 'fully_authorized');
+      setupRedactPassthrough(mockSecurityExt);
 
-      await bulkDeleteSuccess(client, repository, registry, testObjs, options, internalOptions);
-
-      expect(mockSecurityExt.checkAuthorization).toHaveBeenCalledTimes(1);
-      const expectedActions = new Set(['bulk_delete']);
-      const expectedSpaces = new Set(internalOptions.mockMGetResponseObjects[1].initialNamespaces);
-      const expectedTypes = new Set([obj1.type, obj2.type]);
-
-      const {
-        actions: actualActions,
-        spaces: actualSpaces,
-        types: actualTypes,
-      } = mockSecurityExt.checkAuthorization.mock.calls[0][0];
-
-      expect(setsAreEqual(actualActions, expectedActions)).toBeTruthy();
-      expect(setsAreEqual(actualSpaces, expectedSpaces)).toBeTruthy();
-      expect(setsAreEqual(actualTypes, expectedTypes)).toBeTruthy();
-    });
-
-    test(`calls enforceAuthorization with action, type map, and auth map`, async () => {
-      setupCheckAuthorized(mockSecurityExt);
-
-      await bulkDeleteSuccess(client, repository, registry, testObjs, options, internalOptions);
-
-      expect(mockSecurityExt.checkAuthorization).toHaveBeenCalledTimes(1);
-      expect(mockSecurityExt.enforceAuthorization).toHaveBeenCalledTimes(1);
-      expect(mockSecurityExt.enforceAuthorization).toHaveBeenCalledWith(
-        expect.objectContaining({
-          action: 'bulk_delete',
-        })
+      const result = await bulkDeleteSuccess(
+        client,
+        repository,
+        registry,
+        testObjs,
+        options,
+        internalOptions
       );
 
-      const expectedTypesAndSpaces = new Map([
-        [obj1.type, new Set([namespace])],
-        [obj2.type, new Set([namespace])], // only need authz in current space
-      ]);
-
-      const { typesAndSpaces: actualTypesAndSpaces, typeMap: actualTypeMap } =
-        mockSecurityExt.enforceAuthorization.mock.calls[0][0];
-
-      expect(typeMapsAreEqual(actualTypesAndSpaces, expectedTypesAndSpaces)).toBeTruthy();
-      expect(actualTypeMap).toBe(authMap);
-    });
-
-    test(`adds audit event per object when successful`, async () => {
-      setupCheckAuthorized(mockSecurityExt);
-      setupEnforceSuccess(mockSecurityExt);
-
-      const objects = [obj1, obj2];
-      await bulkDeleteSuccess(client, repository, registry, objects, options);
-
-      expect(mockSecurityExt.addAuditEvent).toHaveBeenCalledTimes(objects.length);
-      objects.forEach((obj) => {
-        expect(mockSecurityExt.addAuditEvent).toHaveBeenCalledWith({
-          action: AuditAction.DELETE,
-          savedObject: { type: obj.type, id: obj.id },
-          outcome: 'unknown',
-        });
+      expect(mockSecurityExt.authorizeBulkDelete).toHaveBeenCalledTimes(1);
+      expect(client.bulk).toHaveBeenCalledTimes(1);
+      expect(result).toEqual({
+        statuses: testObjs.map((obj) => createBulkDeleteSuccessStatus(obj)),
       });
     });
 
-    test(`adds audit event per object when not successful`, async () => {
-      setupCheckAuthorized(mockSecurityExt);
-      setupEnforceFailure(mockSecurityExt);
+    test(`calls authorizeBulkDelete with correct actions, types, spaces, and enforce map`, async () => {
+      setupAuthorizeFunc(mockSecurityExt.authorizeBulkDelete, 'fully_authorized');
+      await bulkDeleteSuccess(client, repository, registry, testObjs, options, internalOptions);
 
-      const objects = [obj1, obj2];
-      await expect(
-        bulkDeleteSuccess(client, repository, registry, objects, options)
-      ).rejects.toThrow(enforceError);
-
-      expect(mockSecurityExt.addAuditEvent).toHaveBeenCalledTimes(objects.length);
-      objects.forEach((obj) => {
-        expect(mockSecurityExt.addAuditEvent).toHaveBeenCalledWith({
-          action: AuditAction.DELETE,
-          savedObject: { type: obj.type, id: obj.id },
-          error: enforceError,
-        });
+      expect(mockSecurityExt.authorizeBulkDelete).toHaveBeenCalledTimes(1);
+      expect(mockSecurityExt.authorizeBulkDelete).toHaveBeenCalledWith({
+        namespace,
+        objects: [
+          { type: obj1.type, id: obj1.id, existingNamespaces: [] },
+          { type: obj2.type, id: obj2.id, existingNamespaces: ['foo-namespace', 'NS-1', 'NS-2'] },
+        ],
       });
     });
   });

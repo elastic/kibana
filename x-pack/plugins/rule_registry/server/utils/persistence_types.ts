@@ -18,6 +18,7 @@ import { WithoutReservedActionGroups } from '@kbn/alerting-plugin/common';
 import { IRuleDataClient } from '../rule_data_client';
 import { BulkResponseErrorAggregation } from './utils';
 import { AlertWithCommonFieldsLatest } from '../../common/schemas';
+import { SuppressionFieldsLatest } from '../../common/schemas';
 
 export type PersistenceAlertService = <T>(
   alerts: Array<{
@@ -40,6 +41,19 @@ export type PersistenceAlertService = <T>(
   >
 ) => Promise<PersistenceAlertServiceResult<T>>;
 
+export type SuppressedAlertService = <T extends SuppressionFieldsLatest>(
+  alerts: Array<{
+    _id: string;
+    _source: T;
+  }>,
+  suppressionWindow: string,
+  enrichAlerts?: (
+    alerts: Array<{ _id: string; _source: T }>,
+    params: { spaceId: string }
+  ) => Promise<Array<{ _id: string; _source: T }>>,
+  currentTimeOverride?: Date
+) => Promise<Omit<PersistenceAlertServiceResult<T>, 'alertsWereTruncated'>>;
+
 export interface PersistenceAlertServiceResult<T> {
   createdAlerts: Array<AlertWithCommonFieldsLatest<T> & { _id: string; _index: string }>;
   errors: BulkResponseErrorAggregation;
@@ -48,6 +62,7 @@ export interface PersistenceAlertServiceResult<T> {
 
 export interface PersistenceServices {
   alertWithPersistence: PersistenceAlertService;
+  alertWithSuppression: SuppressedAlertService;
 }
 
 export type PersistenceAlertType<
@@ -69,17 +84,13 @@ export type PersistenceAlertType<
     > & {
       services: PersistenceServices;
     }
-  ) => Promise<TState | void>;
+  ) => Promise<{ state: TState }>;
 };
 
 export type CreatePersistenceRuleTypeWrapper = (options: {
   ruleDataClient: IRuleDataClient;
   logger: Logger;
-}) => <
-  TParams extends RuleTypeParams,
-  TState extends RuleTypeState,
-  TInstanceContext extends AlertInstanceContext = {},
-  TActionGroupIds extends string = never
->(
-  type: PersistenceAlertType<TParams, TState, TInstanceContext, TActionGroupIds>
-) => RuleType<TParams, TParams, TState, AlertInstanceState, TInstanceContext, TActionGroupIds>;
+  formatAlert?: (alert: unknown) => unknown;
+}) => <TParams extends RuleTypeParams, TState extends RuleTypeState>(
+  type: PersistenceAlertType<TParams, TState, AlertInstanceContext, 'default'>
+) => RuleType<TParams, TParams, TState, AlertInstanceState, AlertInstanceContext, 'default'>;

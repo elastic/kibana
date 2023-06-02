@@ -11,10 +11,10 @@ export default function ({ loadTestFile }: FtrProviderContext) {
   describe('dashboard', function () {
     loadTestFile(require.resolve('./sync_colors'));
     loadTestFile(require.resolve('./_async_dashboard'));
-    loadTestFile(require.resolve('./dashboard_tagging'));
     loadTestFile(require.resolve('./dashboard_lens_by_value'));
     loadTestFile(require.resolve('./dashboard_maps_by_value'));
     loadTestFile(require.resolve('./panel_titles'));
+    loadTestFile(require.resolve('./panel_time_range'));
 
     loadTestFile(require.resolve('./migration_smoke_tests/lens_migration_smoke_test'));
     loadTestFile(require.resolve('./migration_smoke_tests/controls_migration_smoke_test'));

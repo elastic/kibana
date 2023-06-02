@@ -82,7 +82,7 @@ export class RangeControl extends PureComponent<RangeControlProps, RangeControlS
 
   renderControl() {
     if (!this.props.control.isEnabled()) {
-      return <ValidatedDualRange disabled showInput />;
+      return <ValidatedDualRange disabled showInput min={0} max={100} />;
     }
 
     const decimalPlaces = _.get(this.props, 'control.options.decimalPlaces', 0);

@@ -1,6 +1,7 @@
 {
   "mget": {
     "url_params": {
+      "force_synthetic_source": "__flag__",
       "stored_fields": [],
       "preference": "random",
       "realtime": "__flag__",

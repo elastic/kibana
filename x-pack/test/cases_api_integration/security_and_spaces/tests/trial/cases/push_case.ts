@@ -11,6 +11,7 @@ import http from 'http';
 
 import expect from '@kbn/expect';
 import { CaseConnector, CaseStatuses, CommentType, User } from '@kbn/cases-plugin/common/api';
+import { RecordingServiceNowSimulator } from '@kbn/actions-simulators-plugin/server/servicenow_simulation';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import { ObjectRemover as ActionsRemover } from '../../../../../alerting_api_integration/common/lib';
 
@@ -34,20 +35,22 @@ import {
   updateCase,
   deleteAllCaseItems,
   superUserSpace1Auth,
-  createCaseWithConnector,
-  createConnector,
-  getServiceNowConnector,
   getConnectorMappingsFromES,
   getCase,
-  getServiceNowSimulationServer,
   createConfiguration,
   getSignalsWithES,
   delay,
   calculateDuration,
-  getRecordingServiceNowSimulatorServer,
   getComment,
   bulkCreateAttachments,
-} from '../../../../common/lib/utils';
+  loginUsers,
+  setupSuperUserProfile,
+  getServiceNowConnector,
+  createCaseWithConnector,
+  getRecordingServiceNowSimulatorServer,
+  getServiceNowSimulationServer,
+  createConnector,
+} from '../../../../common/lib/api';
 import {
   globalRead,
   noKibanaPrivileges,
@@ -57,8 +60,7 @@ import {
   secOnlyRead,
   superUser,
 } from '../../../../common/lib/authentication/users';
-import { RecordingServiceNowSimulator } from '../../../../../alerting_api_integration/common/fixtures/plugins/actions_simulators/server/servicenow_simulation';
-import { loginUsers, setupSuperUserProfile } from '../../../../common/lib/user_profiles';
+import { arraysToEqual } from '../../../../common/lib/validation';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
@@ -216,6 +218,14 @@ export default ({ getService }: FtrProviderContext): void => {
           Boolean(request.work_notes)
         );
 
+        const allWorkNotes = allCommentRequests.map((request) => request.work_notes);
+        const expectedNotes = [
+          'This is a cool comment\n\nAdded by elastic.',
+          'Isolated host host-name with comment: comment text\n\nAdded by elastic.',
+          'Released host host-name with comment: comment text\n\nAdded by elastic.',
+          `Elastic Alerts attached to the case: 3\n\nFor more details, view the alerts in Kibana\nAlerts URL: https://localhost:5601/app/management/insightsAndAlerting/cases/${patchedCase.id}/?tabId=alerts`,
+        ];
+
         /**
          * For each of these comments a request is made:
          * postCommentUserReq, postCommentActionsReq, postCommentActionsReleaseReq, and a comment with the
@@ -224,23 +234,9 @@ export default ({ getService }: FtrProviderContext): void => {
          */
         expect(allCommentRequests.length).be(4);
 
-        // User comment: postCommentUserReq
-        expect(allCommentRequests[0].work_notes).eql('This is a cool comment\n\nAdded by elastic.');
-
-        // Isolate host comment: postCommentActionsReq
-        expect(allCommentRequests[1].work_notes).eql(
-          'Isolated host host-name with comment: comment text\n\nAdded by elastic.'
-        );
-
-        // Unisolate host comment: postCommentActionsReleaseReq
-        expect(allCommentRequests[2].work_notes).eql(
-          'Released host host-name with comment: comment text\n\nAdded by elastic.'
-        );
-
-        // Total alerts
-        expect(allCommentRequests[3].work_notes).eql(
-          `Elastic Alerts attached to the case: 3\n\nFor more details, view the alerts in Kibana\nAlerts URL: https://localhost:5601/app/management/insightsAndAlerting/cases/${patchedCase.id}/?tabId=alerts`
-        );
+        // since we're using a bulk create we can't guarantee the ordering so we'll check that the values exist but not
+        // there specific order in the results
+        expect(arraysToEqual(allWorkNotes, expectedNotes)).to.be(true);
       });
 
       it('should format the totalAlerts with spaceId correctly', async () => {
@@ -654,6 +650,8 @@ export default ({ getService }: FtrProviderContext): void => {
             },
           });
 
+          await es.indices.refresh({ index: defaultSignalsIndex });
+
           await createComment({
             supertest,
             caseId: postedCase.id,
@@ -665,6 +663,8 @@ export default ({ getService }: FtrProviderContext): void => {
               owner: 'securitySolutionFixture',
             },
           });
+
+          await es.indices.refresh({ index: defaultSignalsIndex });
 
           await pushCase({
             supertest,

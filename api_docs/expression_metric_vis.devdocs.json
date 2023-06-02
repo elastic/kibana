@@ -464,6 +464,20 @@
           },
           {
             "parentPluginId": "expressionMetricVis",
+            "id": "def-common.MetricArguments.icon",
+            "type": "string",
+            "tags": [],
+            "label": "icon",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/chart_expressions/expression_metric/common/types/expression_functions.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "expressionMetricVis",
             "id": "def-common.MetricArguments.palette",
             "type": "Object",
             "tags": [],
@@ -682,6 +696,20 @@
           },
           {
             "parentPluginId": "expressionMetricVis",
+            "id": "def-common.MetricVisParam.icon",
+            "type": "string",
+            "tags": [],
+            "label": "icon",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/chart_expressions/expression_metric/common/types/expression_renderers.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "expressionMetricVis",
             "id": "def-common.MetricVisParam.palette",
             "type": "Object",
             "tags": [],
@@ -831,6 +859,56 @@
             "path": "src/plugins/chart_expressions/expression_metric/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "expressionMetricVis",
+            "id": "def-common.MetricVisRenderConfig.overrides",
+            "type": "Object",
+            "tags": [],
+            "label": "overrides",
+            "description": [],
+            "signature": [
+              "Partial<Record<\"settings\", { tooltip?: ",
+              "TooltipSettings",
+              " | undefined; debug?: boolean | undefined; theme?: ",
+              "MakeOverridesSerializable",
+              "<",
+              "RecursivePartial",
+              "<",
+              "Theme",
+              "> | ",
+              "RecursivePartial",
+              "<",
+              "Theme",
+              ">[] | undefined>; showLegend?: boolean | undefined; legendPosition?: ",
+              "Position",
+              " | ",
+              "LegendPositionConfig",
+              " | undefined; rotation?: ",
+              "Rotation",
+              " | undefined; ariaLabelHeadingLevel?: \"h1\" | \"h2\" | \"h3\" | \"h4\" | \"h5\" | \"h6\" | \"p\" | undefined; ariaUseDefaultSummary?: boolean | undefined; flatLegend?: boolean | undefined; legendMaxDepth?: number | undefined; legendSize?: number | undefined; showLegendExtra?: boolean | undefined; rendering?: ",
+              "Rendering",
+              " | undefined; animateData?: boolean | undefined; externalPointerEvents?: ",
+              "MakeOverridesSerializable",
+              "<",
+              "ExternalPointerEventsSettings",
+              " | undefined>; pointBuffer?: ",
+              "MarkBuffer",
+              " | undefined; resizeDebounce?: number | undefined; pointerUpdateTrigger?: ",
+              "PointerUpdateTrigger",
+              " | undefined; brushAxis?: ",
+              "BrushAxis",
+              " | undefined; minBrushDelta?: number | undefined; allowBrushingLastHistogramBin?: boolean | undefined; ariaLabel?: string | undefined; xDomain?: ",
+              "MakeOverridesSerializable",
+              "<",
+              "CustomXDomain",
+              " | undefined>; ariaDescription?: string | undefined; ariaDescribedBy?: string | undefined; ariaLabelledBy?: string | undefined; ariaTableCaption?: string | undefined; legendAction?: \"ignore\" | undefined; legendStrategy?: ",
+              "LegendStrategy",
+              " | undefined; onLegendItemClick?: \"ignore\" | undefined; customLegend?: \"ignore\" | undefined; onLegendItemMinusClick?: \"ignore\" | undefined; onLegendItemOut?: \"ignore\" | undefined; onLegendItemOver?: \"ignore\" | undefined; onLegendItemPlusClick?: \"ignore\" | undefined; debugState?: boolean | undefined; onProjectionClick?: \"ignore\" | undefined; onElementClick?: \"ignore\" | undefined; onElementOver?: \"ignore\" | undefined; onElementOut?: \"ignore\" | undefined; onBrushEnd?: \"ignore\" | undefined; onProjectionAreaChange?: \"ignore\" | undefined; onAnnotationClick?: \"ignore\" | undefined; pointerUpdateDebounce?: number | undefined; roundHistogramBrushValues?: boolean | undefined; noResults?: React.ReactChild | React.ComponentType<{}> | undefined; legendSort?: \"ignore\" | undefined; }>> | undefined"
+            ],
+            "path": "src/plugins/chart_expressions/expression_metric/common/types/expression_functions.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -928,6 +1006,21 @@
     ],
     "enums": [],
     "misc": [
+      {
+        "parentPluginId": "expressionMetricVis",
+        "id": "def-common.AvailableMetricIcon",
+        "type": "Type",
+        "tags": [],
+        "label": "AvailableMetricIcon",
+        "description": [],
+        "signature": [
+          "\"alert\" | \"temperature\" | \"asterisk\" | \"bell\" | \"bolt\" | \"bug\" | \"compute\" | \"editorComment\" | \"empty\" | \"flag\" | \"globe\" | \"heart\" | \"mapMarker\" | \"pin\" | \"sortDown\" | \"sortUp\" | \"starEmpty\" | \"tag\""
+        ],
+        "path": "src/plugins/chart_expressions/expression_metric/common/types/expression_functions.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "expressionMetricVis",
         "id": "def-common.EXPRESSION_METRIC_NAME",
@@ -1045,9 +1138,9 @@
           ", ",
           {
             "pluginId": "@kbn/utility-types",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-server.SerializableRecord",
+            "section": "def-common.SerializableRecord",
             "text": "SerializableRecord"
           },
           ">>"
@@ -1133,9 +1226,9 @@
           ", ",
           {
             "pluginId": "@kbn/utility-types",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-server.SerializableRecord",
+            "section": "def-common.SerializableRecord",
             "text": "SerializableRecord"
           },
           ">>"

@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { login } from '../../tasks/login';
+import { ROLE, login } from '../../tasks/login';
 import { navigateTo } from '../../tasks/navigation';
-import { ROLES } from '../../test';
 import {
   checkResults,
   selectAllAgents,
@@ -15,44 +14,57 @@ import {
   inputQuery,
   typeInECSFieldInput,
   typeInOsqueryFieldInput,
+  checkActionItemsInResults,
 } from '../../tasks/live_query';
-import { ArchiverMethod, runKbnArchiverScript } from '../../tasks/archiver';
+import { getSavedQueriesComplexTest } from '../../tasks/saved_queries';
+import { loadPack, loadSavedQuery, cleanupSavedQuery, cleanupPack } from '../../tasks/api_fixtures';
 
 describe('T2 Analyst - READ + Write Live/Saved + runSavedQueries ', () => {
   const SAVED_QUERY_ID = 'Saved-Query-Id';
-  // const randomNumber = getRandomInt();
-  //
-  // const NEW_SAVED_QUERY_ID = `Saved-Query-Id-${randomNumber}`;
-  // const NEW_SAVED_QUERY_DESCRIPTION = `Test saved query description ${randomNumber}`;
-  beforeEach(() => {
-    login(ROLES.t2_analyst);
-    navigateTo('/app/osquery');
-  });
+
+  let savedQueryName: string;
+  let savedQueryId: string;
+  let packName: string;
+  let packId: string;
+
   before(() => {
-    runKbnArchiverScript(ArchiverMethod.LOAD, 'saved_query');
+    loadPack().then((data) => {
+      packId = data.saved_object_id;
+      packName = data.name;
+    });
+    loadSavedQuery().then((data) => {
+      savedQueryId = data.saved_object_id;
+      savedQueryName = data.id;
+    });
+  });
+
+  beforeEach(() => {
+    login(ROLE.t2_analyst);
+    navigateTo('/app/osquery');
   });
 
   after(() => {
-    runKbnArchiverScript(ArchiverMethod.UNLOAD, 'saved_query');
+    cleanupSavedQuery(savedQueryId);
+    cleanupPack(packId);
   });
 
-  // TODO unskip after FF
-  // getSavedQueriesComplexTest(NEW_SAVED_QUERY_ID, NEW_SAVED_QUERY_DESCRIPTION);
+  getSavedQueriesComplexTest();
 
   it('should not be able to add nor edit packs', () => {
-    const PACK_NAME = 'removing-pack';
-
     navigateTo('/app/osquery/packs');
     cy.waitForReact(1000);
+    cy.getBySel('tablePaginationPopoverButton').click();
+    cy.getBySel('tablePagination-50-rows').click();
     cy.contains('Add pack').should('be.disabled');
     cy.react('ActiveStateSwitchComponent', {
-      props: { item: { attributes: { name: PACK_NAME } } },
+      props: { item: { name: packName } },
     })
       .find('button')
       .should('be.disabled');
-    cy.contains(PACK_NAME).click();
-    cy.contains(`${PACK_NAME} details`);
+    cy.contains(packName).click();
+    cy.contains(`${packName} details`);
     cy.contains('Edit').should('be.disabled');
+    // TODO: fix
     cy.react('CustomItemAction', {
       props: { index: 0, item: { id: SAVED_QUERY_ID } },
       options: { timeout: 3000 },
@@ -67,13 +79,17 @@ describe('T2 Analyst - READ + Write Live/Saved + runSavedQueries ', () => {
     const cmd = Cypress.platform === 'darwin' ? '{meta}{enter}' : '{ctrl}{enter}';
     cy.contains('New live query').click();
     selectAllAgents();
-    inputQuery('select * from uptime; ');
+    inputQuery('select * from uptime;');
     cy.wait(500);
     // checking submit by clicking cmd+enter
     inputQuery(cmd);
     checkResults();
-    cy.contains('View in Discover').should('not.exist');
-    cy.contains('View in Lens').should('not.exist');
+    checkActionItemsInResults({
+      lens: false,
+      discover: false,
+      cases: true,
+      timeline: false,
+    });
     cy.react('EuiDataGridHeaderCellWrapper', {
       props: { id: 'osquery.days.number', index: 1 },
     }).should('exist');
@@ -84,6 +100,7 @@ describe('T2 Analyst - READ + Write Live/Saved + runSavedQueries ', () => {
     cy.react('EuiAccordionClass', { props: { buttonContent: 'Advanced' } })
       .last()
       .click();
+
     typeInECSFieldInput('message{downArrow}{enter}');
     typeInOsqueryFieldInput('days{downArrow}{enter}');
     submitQuery();
@@ -100,23 +117,24 @@ describe('T2 Analyst - READ + Write Live/Saved + runSavedQueries ', () => {
       });
     });
   });
+
   it('to click the edit button and edit pack', () => {
     navigateTo('/app/osquery/saved_queries');
-    cy.getBySel('pagination-button-next').click();
-
     cy.react('CustomItemAction', {
-      props: { index: 1, item: { attributes: { id: SAVED_QUERY_ID } } },
+      props: { index: 1, item: { id: savedQueryName } },
     }).click();
     cy.contains('Custom key/value pairs.').should('exist');
     cy.contains('Hours of uptime').should('exist');
-    cy.get('[data-test-subj="ECSMappingEditorForm"]').within(() => {
-      cy.react('EuiButtonIcon', { props: { iconType: 'trash' } }).click();
-    });
+    cy.get('[data-test-subj="ECSMappingEditorForm"]')
+      .first()
+      .within(() => {
+        cy.react('EuiButtonIcon', { props: { iconType: 'trash' } }).click();
+      });
     cy.react('EuiButton').contains('Update query').click();
     cy.wait(5000);
 
     cy.react('CustomItemAction', {
-      props: { index: 1, item: { attributes: { id: SAVED_QUERY_ID } } },
+      props: { index: 1, item: { id: savedQueryName } },
     }).click();
     cy.contains('Custom key/value pairs').should('not.exist');
     cy.contains('Hours of uptime').should('not.exist');

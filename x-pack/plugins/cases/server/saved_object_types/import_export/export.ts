@@ -12,7 +12,10 @@ import type {
   SavedObjectsClientContract,
   SavedObjectsExportTransformContext,
 } from '@kbn/core/server';
-import type { CaseUserActionAttributes, CommentAttributes } from '../../../common/api';
+import type {
+  CaseUserActionAttributesWithoutConnectorId,
+  CommentAttributesWithoutRefs,
+} from '../../../common/api';
 import {
   CASE_COMMENT_SAVED_OBJECT,
   CASE_SAVED_OBJECT,
@@ -22,7 +25,7 @@ import {
 } from '../../../common/constants';
 import { defaultSortField } from '../../common/utils';
 import { createCaseError } from '../../common/error';
-import type { ESCaseAttributes } from '../../services/cases/types';
+import type { CasePersistedAttributes } from '../../common/types/case';
 
 export async function handleExport({
   context,
@@ -31,10 +34,18 @@ export async function handleExport({
   logger,
 }: {
   context: SavedObjectsExportTransformContext;
-  objects: Array<SavedObject<ESCaseAttributes>>;
+  objects: Array<SavedObject<CasePersistedAttributes>>;
   coreSetup: CoreSetup;
   logger: Logger;
-}): Promise<Array<SavedObject<ESCaseAttributes | CommentAttributes | CaseUserActionAttributes>>> {
+}): Promise<
+  Array<
+    SavedObject<
+      | CasePersistedAttributes
+      | CommentAttributesWithoutRefs
+      | CaseUserActionAttributesWithoutConnectorId
+    >
+  >
+> {
   try {
     if (objects.length <= 0) {
       return [];
@@ -64,15 +75,17 @@ export async function handleExport({
 async function getAttachmentsAndUserActionsForCases(
   savedObjectsClient: SavedObjectsClientContract,
   caseIds: string[]
-): Promise<Array<SavedObject<CommentAttributes | CaseUserActionAttributes>>> {
+): Promise<
+  Array<SavedObject<CommentAttributesWithoutRefs | CaseUserActionAttributesWithoutConnectorId>>
+> {
   const [attachments, userActions] = await Promise.all([
-    getAssociatedObjects<CommentAttributes>({
+    getAssociatedObjects<CommentAttributesWithoutRefs>({
       savedObjectsClient,
       caseIds,
       sortField: defaultSortField,
       type: CASE_COMMENT_SAVED_OBJECT,
     }),
-    getAssociatedObjects<CaseUserActionAttributes>({
+    getAssociatedObjects<CaseUserActionAttributesWithoutConnectorId>({
       savedObjectsClient,
       caseIds,
       sortField: defaultSortField,

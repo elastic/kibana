@@ -6,8 +6,7 @@
  */
 
 import React, { FC, useEffect, useState } from 'react';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
+
 import {
   EuiButtonEmpty,
   EuiFlexGroup,
@@ -16,22 +15,24 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import { useMlKibana } from '../../../../../contexts/kibana';
-import { SavedSearchQuery } from '../../../../../contexts/ml';
+
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
-  getValuesFromResponse,
   getDependentVar,
   getPredictionFieldName,
-  loadEvalData,
-  loadDocsCount,
-  Eval,
-  DataFrameAnalyticsConfig,
-} from '../../../../common';
-import { DataFrameTaskStateType } from '../../../analytics_management/components/analytics_list/common';
+  type DataFrameAnalyticsConfig,
+  type DataFrameTaskStateType,
+  ANALYSIS_CONFIG_TYPE,
+} from '@kbn/ml-data-frame-analytics-utils';
+
+import { useMlKibana } from '../../../../../contexts/kibana';
+import { SavedSearchQuery } from '../../../../../contexts/ml';
+
+import { getValuesFromResponse, loadEvalData, loadDocsCount, Eval } from '../../../../common';
 import {
   isResultsSearchBoolQuery,
   isRegressionEvaluateResponse,
-  ANALYSIS_CONFIG_TYPE,
   REGRESSION_STATS,
   EMPTY_STAT,
 } from '../../../../common/analytics';
@@ -237,15 +238,16 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) 
             target="_blank"
             iconType="help"
             iconSide="left"
+            size="xs"
             color="primary"
             href={docLink}
           >
-            {i18n.translate(
-              'xpack.ml.dataframe.analytics.regressionExploration.regressionDocsLink',
-              {
-                defaultMessage: 'Regression evaluation docs ',
-              }
-            )}
+            <EuiText size="xs" color="primary">
+              <FormattedMessage
+                id="xpack.ml.dataframe.analytics.regressionExploration.regressionDocsLink"
+                defaultMessage="Regression evaluation docs "
+              />
+            </EuiText>
           </EuiButtonEmpty>
         }
         headerItems={

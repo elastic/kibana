@@ -58,8 +58,6 @@ export const hasNewMLJobSelector = ({ ml }: AppState) => ml.createJob;
 export const isMLJobCreatingSelector = ({ ml }: AppState) => ml.createJob.loading;
 
 export const isMLJobDeletingSelector = ({ ml }: AppState) => ml.deleteJob.loading;
-export const isAnomalyAlertDeletingSelector = ({ alerts }: AppState) =>
-  alerts.alertDeletion.loading;
 
 export const isMLJobDeletedSelector = ({ ml }: AppState) => ml.deleteJob;
 
@@ -76,9 +74,6 @@ export const indexStatusSelector = ({ indexStatus }: AppState) => indexStatus.in
 
 export const monitorListSelector = ({ monitorList }: AppState) => monitorList;
 
-export const monitorManagementListSelector = ({ monitorManagementList }: AppState) =>
-  monitorManagementList;
-
 export const esKuerySelector = ({ ui: { esKuery } }: AppState) => esKuery;
 
 export const searchTextSelector = ({ ui: { searchText } }: AppState) => searchText;
@@ -92,8 +87,3 @@ export const journeySelector = ({ journeys }: AppState) => journeys;
 export const networkEventsSelector = ({ networkEvents }: AppState) => networkEvents;
 
 export const syntheticsSelector = ({ synthetics }: AppState) => synthetics;
-
-export const uptimeWriteSelector = (state: AppState) => state;
-
-export const syntheticsServiceAllowedSelector = (state: AppState) =>
-  state.monitorManagementList.syntheticsService;

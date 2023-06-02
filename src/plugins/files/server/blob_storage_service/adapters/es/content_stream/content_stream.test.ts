@@ -7,12 +7,14 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import { set } from 'lodash';
+import { set } from '@kbn/safer-lodash-set';
 import { Readable } from 'stream';
 import { encode } from 'cbor-x';
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { ContentStream, ContentStreamEncoding, ContentStreamParameters } from './content_stream';
 import type { GetResponse } from '@elastic/elasticsearch/lib/api/types';
+import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { FileDocument } from '../../../../file_client/file_metadata_client/adapters/es_index';
 
 describe('ContentStream', () => {
   let client: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
@@ -30,135 +32,207 @@ describe('ContentStream', () => {
       encoding: 'base64' as ContentStreamEncoding,
       size: 1,
     } as ContentStreamParameters,
+    indexIsAlias = false,
   } = {}) => {
-    return new ContentStream(client, id, index, logger, params);
+    return new ContentStream(client, id, index, logger, params, indexIsAlias);
   };
 
   beforeEach(() => {
     client = elasticsearchServiceMock.createClusterClient().asInternalUser;
     logger = loggingSystemMock.createLogger();
-    client.get.mockResponse(toReadable(set({}, '_source.data', Buffer.from('some content'))));
+    client.get.mockResponse(
+      toReadable(set({ found: true }, '_source.data', Buffer.from('some content')))
+    );
   });
 
   describe('read', () => {
-    beforeEach(() => {
-      stream = getContentStream({ params: { size: 1 } });
-    });
+    describe('with `indexIsAlias` set to `true`', () => {
+      let searchResponse: estypes.SearchResponse<FileDocument<{}>>;
 
-    it('should perform a search using index and the document id', async () => {
-      await new Promise((resolve) => stream.once('data', resolve));
+      beforeEach(() => {
+        searchResponse = {
+          took: 3,
+          timed_out: false,
+          _shards: {
+            total: 2,
+            successful: 2,
+            skipped: 0,
+            failed: 0,
+          },
+          hits: {
+            total: {
+              value: 1,
+              relation: 'eq',
+            },
+            max_score: 0,
+            hits: [
+              {
+                _index: 'foo',
+                _id: '123',
+                _score: 1.0,
+              },
+            ],
+          },
+        };
 
-      expect(client.get).toHaveBeenCalledTimes(1);
-
-      const [[request]] = client.get.mock.calls;
-      expect(request).toHaveProperty('index', 'somewhere');
-      expect(request).toHaveProperty('id', 'something.0');
-    });
-
-    it('should read the document contents', async () => {
-      const data = await new Promise((resolve) => stream.once('data', resolve));
-      expect(data).toEqual(Buffer.from('some content'));
-    });
-
-    it('should be an empty stream on empty response', async () => {
-      client.get.mockResponseOnce(toReadable());
-      const onData = jest.fn();
-
-      stream.on('data', onData);
-      await new Promise((resolve) => stream.once('end', resolve));
-
-      expect(onData).not.toHaveBeenCalled();
-    });
-
-    it('should emit an error event', async () => {
-      client.get.mockRejectedValueOnce('some error');
-
-      stream.read();
-      const error = await new Promise((resolve) => stream.once('error', resolve));
-
-      expect(error).toBe('some error');
-    });
-
-    it('should decode base64 encoded content', async () => {
-      client.get.mockResponseOnce(
-        toReadable(set({}, '_source.data', Buffer.from('encoded content')))
-      );
-      const data = await new Promise((resolve) => stream.once('data', resolve));
-
-      expect(data).toEqual(Buffer.from('encoded content'));
-    });
-
-    it('should compound content from multiple chunks', async () => {
-      const [one, two, three] = ['12', '34', '56'].map(Buffer.from);
-      client.get.mockResponseOnce(toReadable(set({}, '_source.data', one)));
-      client.get.mockResponseOnce(toReadable(set({}, '_source.data', two)));
-      client.get.mockResponseOnce(toReadable(set({}, '_source.data', three)));
-
-      stream = getContentStream({
-        params: { size: 6 },
+        client.search.mockResolvedValue(searchResponse);
       });
 
-      let data = '';
-      for await (const chunk of stream) {
-        data += chunk;
-      }
+      it('should use es.search() to find chunk index', async () => {
+        stream = getContentStream({ params: { size: 1 }, indexIsAlias: true });
+        const data = await new Promise((resolve) => stream.once('data', resolve));
 
-      expect(data).toEqual('123456');
-      expect(client.get).toHaveBeenCalledTimes(3);
+        expect(client.search).toHaveBeenCalledWith({
+          body: {
+            _source: false,
+            query: {
+              term: {
+                _id: 'something.0',
+              },
+            },
+            size: 1,
+          },
+          index: 'somewhere',
+        });
+        expect(data).toEqual(Buffer.from('some content'));
+      });
 
-      const [[request1], [request2], [request3]] = client.get.mock.calls;
+      it('should throw if chunk is not found', async () => {
+        searchResponse.hits.hits = [];
+        stream = getContentStream({ params: { size: 1 }, indexIsAlias: true });
 
-      expect(request1).toHaveProperty('index', 'somewhere');
-      expect(request1).toHaveProperty('id', 'something.0');
-      expect(request2).toHaveProperty('index', 'somewhere');
-      expect(request2).toHaveProperty('id', 'something.1');
-      expect(request3).toHaveProperty('index', 'somewhere');
-      expect(request3).toHaveProperty('id', 'something.2');
+        const readPromise = new Promise((resolve, reject) => {
+          stream.once('data', resolve);
+          stream.once('error', reject);
+        });
+
+        await expect(readPromise).rejects.toHaveProperty(
+          'message',
+          'Unable to determine index for file chunk id [something.0] in index (alias) [somewhere]'
+        );
+      });
     });
 
-    it('should stop reading on empty chunk', async () => {
-      const [one, two, three] = ['12', '34', ''].map(Buffer.from);
-      client.get.mockResponseOnce(toReadable(set({}, '_source.data', one)));
-      client.get.mockResponseOnce(toReadable(set({}, '_source.data', two)));
-      client.get.mockResponseOnce(toReadable(set({}, '_source.data', three)));
-      stream = getContentStream({ params: { size: 12 } });
-      let data = '';
-      for await (const chunk of stream) {
-        data += chunk;
-      }
+    describe('with `indexIsAlias` set to `false`', () => {
+      beforeEach(() => {
+        stream = getContentStream({ params: { size: 1 } });
+      });
 
-      expect(data).toEqual('1234');
-      expect(client.get).toHaveBeenCalledTimes(3);
-    });
+      it('should perform a search using index and the document id', async () => {
+        await new Promise((resolve) => stream.once('data', resolve));
 
-    it('should read while chunks are present when there is no size', async () => {
-      const [one, two] = ['12', '34'].map(Buffer.from);
-      client.get.mockResponseOnce(toReadable(set({}, '_source.data', one)));
-      client.get.mockResponseOnce(toReadable(set({}, '_source.data', two)));
-      client.get.mockResponseOnce(toReadable({}));
-      stream = getContentStream({ params: { size: undefined } });
-      let data = '';
-      for await (const chunk of stream) {
-        data += chunk;
-      }
+        expect(client.get).toHaveBeenCalledTimes(1);
 
-      expect(data).toEqual('1234');
-      expect(client.get).toHaveBeenCalledTimes(3);
-    });
+        const [[request]] = client.get.mock.calls;
+        expect(request).toHaveProperty('index', 'somewhere');
+        expect(request).toHaveProperty('id', 'something.0');
+      });
 
-    it('should decode every chunk separately', async () => {
-      const [one, two, three, four] = ['12', '34', '56', ''].map(Buffer.from);
-      client.get.mockResponseOnce(toReadable(set({}, '_source.data', one)));
-      client.get.mockResponseOnce(toReadable(set({}, '_source.data', two)));
-      client.get.mockResponseOnce(toReadable(set({}, '_source.data', three)));
-      client.get.mockResponseOnce(toReadable(set({}, '_source.data', four)));
-      stream = getContentStream({ params: { size: 12 } });
-      let data = '';
-      for await (const chunk of stream) {
-        data += chunk;
-      }
+      it('should read the document contents', async () => {
+        const data = await new Promise((resolve) => stream.once('data', resolve));
+        expect(data).toEqual(Buffer.from('some content'));
+      });
 
-      expect(data).toEqual('123456');
+      it('should be an empty stream on empty response', async () => {
+        client.get.mockResponseOnce(toReadable());
+        const onData = jest.fn();
+
+        stream.on('data', onData);
+        await new Promise((resolve) => stream.once('end', resolve));
+
+        expect(onData).not.toHaveBeenCalled();
+      });
+
+      it('should emit an error event', async () => {
+        client.get.mockRejectedValueOnce('some error');
+
+        stream.read();
+        const error = await new Promise((resolve) => stream.once('error', resolve));
+
+        expect(error).toBe('some error');
+      });
+
+      it('should decode base64 encoded content', async () => {
+        client.get.mockResponseOnce(
+          toReadable(set({ found: true }, '_source.data', Buffer.from('encoded content')))
+        );
+        const data = await new Promise((resolve) => stream.once('data', resolve));
+
+        expect(data).toEqual(Buffer.from('encoded content'));
+      });
+
+      it('should compound content from multiple chunks', async () => {
+        const [one, two, three] = ['12', '34', '56'].map(Buffer.from);
+        client.get.mockResponseOnce(toReadable(set({ found: true }, '_source.data', one)));
+        client.get.mockResponseOnce(toReadable(set({ found: true }, '_source.data', two)));
+        client.get.mockResponseOnce(toReadable(set({ found: true }, '_source.data', three)));
+
+        stream = getContentStream({
+          params: { size: 6 },
+        });
+
+        let data = '';
+        for await (const chunk of stream) {
+          data += chunk;
+        }
+
+        expect(data).toEqual('123456');
+        expect(client.get).toHaveBeenCalledTimes(3);
+
+        const [[request1], [request2], [request3]] = client.get.mock.calls;
+
+        expect(request1).toHaveProperty('index', 'somewhere');
+        expect(request1).toHaveProperty('id', 'something.0');
+        expect(request2).toHaveProperty('index', 'somewhere');
+        expect(request2).toHaveProperty('id', 'something.1');
+        expect(request3).toHaveProperty('index', 'somewhere');
+        expect(request3).toHaveProperty('id', 'something.2');
+      });
+
+      it('should stop reading on empty chunk', async () => {
+        const [one, two, three] = ['12', '34', ''].map(Buffer.from);
+        client.get.mockResponseOnce(toReadable(set({ found: true }, '_source.data', one)));
+        client.get.mockResponseOnce(toReadable(set({ found: true }, '_source.data', two)));
+        client.get.mockResponseOnce(toReadable(set({ found: true }, '_source.data', three)));
+        stream = getContentStream({ params: { size: 12 } });
+        let data = '';
+        for await (const chunk of stream) {
+          data += chunk;
+        }
+
+        expect(data).toEqual('1234');
+        expect(client.get).toHaveBeenCalledTimes(3);
+      });
+
+      it('should read while chunks are present when there is no size', async () => {
+        const [one, two] = ['12', '34'].map(Buffer.from);
+        client.get.mockResponseOnce(toReadable(set({ found: true }, '_source.data', one)));
+        client.get.mockResponseOnce(toReadable(set({ found: true }, '_source.data', two)));
+        client.get.mockResponseOnce(toReadable({ found: true }));
+        stream = getContentStream({ params: { size: undefined } });
+        let data = '';
+        for await (const chunk of stream) {
+          data += chunk;
+        }
+
+        expect(data).toEqual('1234');
+        expect(client.get).toHaveBeenCalledTimes(3);
+      });
+
+      it('should decode every chunk separately', async () => {
+        const [one, two, three, four] = ['12', '34', '56', ''].map(Buffer.from);
+        client.get.mockResponseOnce(toReadable(set({ found: true }, '_source.data', one)));
+        client.get.mockResponseOnce(toReadable(set({ found: true }, '_source.data', two)));
+        client.get.mockResponseOnce(toReadable(set({ found: true }, '_source.data', three)));
+        client.get.mockResponseOnce(toReadable(set({ found: true }, '_source.data', four)));
+        stream = getContentStream({ params: { size: 12 } });
+        let data = '';
+        for await (const chunk of stream) {
+          data += chunk;
+        }
+
+        expect(data).toEqual('123456');
+      });
     });
   });
 

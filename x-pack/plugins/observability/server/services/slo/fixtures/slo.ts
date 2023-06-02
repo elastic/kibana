@@ -6,11 +6,11 @@
  */
 
 import { cloneDeep } from 'lodash';
-import uuid from 'uuid';
-import { SavedObject } from '@kbn/core-saved-objects-common';
+import { v1 as uuidv1 } from 'uuid';
+import { SavedObject } from '@kbn/core-saved-objects-server';
+import { sloSchema, CreateSLOParams } from '@kbn/slo-schema';
 
 import { SO_SLO_TYPE } from '../../../saved_objects';
-import { sloSchema } from '../../../types/schema';
 import {
   APMTransactionDurationIndicator,
   APMTransactionErrorRateIndicator,
@@ -18,24 +18,24 @@ import {
   DurationUnit,
   Indicator,
   KQLCustomIndicator,
+  MetricCustomIndicator,
   SLO,
   StoredSLO,
 } from '../../../domain/models';
-import { CreateSLOParams } from '../../../types/rest_specs';
 import { Paginated } from '../slo_repository';
-import { sevenDays } from './duration';
+import { oneWeek, twoMinute } from './duration';
 import { sevenDaysRolling } from './time_window';
 
 export const createAPMTransactionErrorRateIndicator = (
   params: Partial<APMTransactionErrorRateIndicator['params']> = {}
 ): Indicator => ({
-  type: 'sli.apm.transaction_error_rate',
+  type: 'sli.apm.transactionErrorRate',
   params: {
     environment: 'irrelevant',
     service: 'irrelevant',
-    transaction_name: 'irrelevant',
-    transaction_type: 'irrelevant',
-    good_status_codes: ['2xx', '3xx', '4xx'],
+    transactionName: 'irrelevant',
+    transactionType: 'irrelevant',
+    index: 'metrics-apm*',
     ...params,
   },
 });
@@ -43,13 +43,14 @@ export const createAPMTransactionErrorRateIndicator = (
 export const createAPMTransactionDurationIndicator = (
   params: Partial<APMTransactionDurationIndicator['params']> = {}
 ): Indicator => ({
-  type: 'sli.apm.transaction_duration',
+  type: 'sli.apm.transactionDuration',
   params: {
     environment: 'irrelevant',
     service: 'irrelevant',
-    transaction_name: 'irrelevant',
-    transaction_type: 'irrelevant',
-    'threshold.us': 500000,
+    transactionName: 'irrelevant',
+    transactionType: 'irrelevant',
+    threshold: 500,
+    index: 'metrics-apm*',
     ...params,
   },
 });
@@ -63,28 +64,64 @@ export const createKQLCustomIndicator = (
     filter: 'labels.groupId: group-3',
     good: 'latency < 300',
     total: '',
+    timestampField: 'log_timestamp',
     ...params,
   },
 });
 
-const defaultSLO: Omit<SLO, 'id' | 'revision' | 'created_at' | 'updated_at'> = {
+export const createMetricCustomIndicator = (
+  params: Partial<MetricCustomIndicator['params']> = {}
+): Indicator => ({
+  type: 'sli.metric.custom',
+  params: {
+    index: 'my-index*',
+    filter: 'labels.groupId: group-3',
+    good: {
+      metrics: [
+        { name: 'A', aggregation: 'sum', field: 'total' },
+        { name: 'B', aggregation: 'sum', field: 'processed' },
+      ],
+      equation: 'A - B',
+    },
+    total: {
+      metrics: [{ name: 'A', aggregation: 'sum', field: 'total' }],
+      equation: 'A',
+    },
+    timestampField: 'log_timestamp',
+    ...params,
+  },
+});
+
+const defaultSLO: Omit<SLO, 'id' | 'revision' | 'createdAt' | 'updatedAt'> = {
   name: 'irrelevant',
   description: 'irrelevant',
-  time_window: sevenDaysRolling(),
-  budgeting_method: 'occurrences',
+  timeWindow: sevenDaysRolling(),
+  budgetingMethod: 'occurrences',
   objective: {
     target: 0.999,
   },
   indicator: createAPMTransactionDurationIndicator(),
   settings: {
-    timestamp_field: '@timestamp',
-    sync_delay: new Duration(1, DurationUnit.Minute),
+    syncDelay: new Duration(1, DurationUnit.Minute),
     frequency: new Duration(1, DurationUnit.Minute),
   },
+  tags: ['critical', 'k8s'],
+  enabled: true,
+};
+
+const defaultCreateSloParams: CreateSLOParams = {
+  name: 'irrelevant',
+  description: 'irrelevant',
+  timeWindow: sevenDaysRolling(),
+  budgetingMethod: 'occurrences',
+  objective: {
+    target: 0.99,
+  },
+  indicator: createAPMTransactionDurationIndicator(),
 };
 
 export const createSLOParams = (params: Partial<CreateSLOParams> = {}): CreateSLOParams => ({
-  ...defaultSLO,
+  ...defaultCreateSloParams,
   ...params,
 });
 
@@ -101,19 +138,31 @@ export const createSLO = (params: Partial<SLO> = {}): SLO => {
   const now = new Date();
   return cloneDeep({
     ...defaultSLO,
-    id: uuid.v1(),
+    id: uuidv1(),
     revision: 1,
-    created_at: now,
-    updated_at: now,
+    createdAt: now,
+    updatedAt: now,
+    ...params,
+  });
+};
+
+export const createSLOWithTimeslicesBudgetingMethod = (params: Partial<SLO> = {}): SLO => {
+  return createSLO({
+    budgetingMethod: 'timeslices',
+    objective: {
+      target: 0.98,
+      timesliceTarget: 0.95,
+      timesliceWindow: twoMinute(),
+    },
     ...params,
   });
 };
 
 export const createSLOWithCalendarTimeWindow = (params: Partial<SLO> = {}): SLO => {
   return createSLO({
-    time_window: {
-      duration: sevenDays(),
-      calendar: { start_time: new Date('2022-10-01T00:00:00.000Z') },
+    timeWindow: {
+      duration: oneWeek(),
+      isCalendar: true,
     },
     ...params,
   });

@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { set, uniq, cloneDeep } from 'lodash';
+import { set } from '@kbn/safer-lodash-set';
+import { uniq, cloneDeep } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment-timezone';
 import type { Serializable } from '@kbn/utility-types';
@@ -13,10 +14,14 @@ import type { TimefilterContract } from '@kbn/data-plugin/public';
 import type { IUiSettingsClient, SavedObjectReference } from '@kbn/core/public';
 import type { DataView, DataViewsContract } from '@kbn/data-views-plugin/public';
 import type { DatatableUtilitiesService } from '@kbn/data-plugin/common';
-import { BrushTriggerEvent, ClickTriggerEvent } from '@kbn/charts-plugin/public';
+import {
+  BrushTriggerEvent,
+  ClickTriggerEvent,
+  MultiClickTriggerEvent,
+} from '@kbn/charts-plugin/public';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { ISearchStart } from '@kbn/data-plugin/public';
-import React from 'react';
+import type { DraggingIdentifier } from '@kbn/dom-drag-drop';
 import type { Document } from './persistence/saved_object_store';
 import {
   Datasource,
@@ -27,10 +32,10 @@ import {
   DraggedField,
   DragDropOperation,
   isOperation,
+  UserMessage,
 } from './types';
 import type { DatasourceStates, VisualizationState } from './state_management';
 import type { IndexPatternServiceAPI } from './data_views_service/service';
-import type { DraggingIdentifier } from './drag_drop';
 
 export function getVisualizeGeoFieldMessage(fieldType: string) {
   return i18n.translate('xpack.lens.visualizeGeoFieldMessage', {
@@ -67,6 +72,13 @@ export function getActiveDatasourceIdFromDoc(doc?: Document) {
 
   const [firstDatasourceFromDoc] = Object.keys(doc.state.datasourceStates);
   return firstDatasourceFromDoc || null;
+}
+
+export function getActiveVisualizationIdFromDoc(doc?: Document) {
+  if (!doc) {
+    return null;
+  }
+  return doc.visualizationType || null;
 }
 
 export const getInitialDatasourceId = (datasourceMap: DatasourceMap, doc?: Document) => {
@@ -113,6 +125,30 @@ export async function refreshIndexPatternsList({
   });
 }
 
+export function extractReferencesFromState({
+  activeDatasources,
+  datasourceStates,
+  visualizationState,
+  activeVisualization,
+}: {
+  activeDatasources: Record<string, Datasource>;
+  datasourceStates: DatasourceStates;
+  visualizationState: unknown;
+  activeVisualization?: Visualization;
+}): SavedObjectReference[] {
+  const references: SavedObjectReference[] = [];
+  Object.entries(activeDatasources).forEach(([id, datasource]) => {
+    const { savedObjectReferences } = datasource.getPersistableState(datasourceStates[id].state);
+    references.push(...savedObjectReferences);
+  });
+
+  if (activeVisualization?.getPersistableState) {
+    const { savedObjectReferences } = activeVisualization.getPersistableState(visualizationState);
+    references.push(...savedObjectReferences);
+  }
+  return references;
+}
+
 export function getIndexPatternsIds({
   activeDatasources,
   datasourceStates,
@@ -124,19 +160,22 @@ export function getIndexPatternsIds({
   visualizationState: unknown;
   activeVisualization?: Visualization;
 }): string[] {
-  let currentIndexPatternId: string | undefined;
-  const references: SavedObjectReference[] = [];
-  Object.entries(activeDatasources).forEach(([id, datasource]) => {
-    const { savedObjectReferences } = datasource.getPersistableState(datasourceStates[id].state);
-    const indexPatternId = datasource.getUsedDataView(datasourceStates[id].state);
-    currentIndexPatternId = indexPatternId;
-    references.push(...savedObjectReferences);
+  const references: SavedObjectReference[] = extractReferencesFromState({
+    activeDatasources,
+    datasourceStates,
+    visualizationState,
+    activeVisualization,
   });
 
-  if (activeVisualization?.getPersistableState) {
-    const { savedObjectReferences } = activeVisualization.getPersistableState(visualizationState);
-    references.push(...savedObjectReferences);
-  }
+  const currentIndexPatternId: string | undefined = Object.entries(activeDatasources).reduce<
+    string | undefined
+  >((currentId, [id, datasource]) => {
+    if (currentId == null) {
+      return datasource.getUsedDataView(datasourceStates[id].state);
+    }
+    return currentId;
+  }, undefined);
+
   const referencesIds = references
     .filter(({ type }) => type === 'index-pattern')
     .map(({ id }) => id);
@@ -176,7 +215,7 @@ export function getRemoveOperation(
 
 export function inferTimeField(
   datatableUtilities: DatatableUtilitiesService,
-  context: BrushTriggerEvent['data'] | ClickTriggerEvent['data']
+  context: BrushTriggerEvent['data'] | ClickTriggerEvent['data'] | MultiClickTriggerEvent['data']
 ) {
   const tablesAndColumns =
     'table' in context
@@ -185,17 +224,19 @@ export function inferTimeField(
       ? context.data
       : // if it's a negated filter, never respect bound time field
         [];
-  return tablesAndColumns
-    .map(({ table, column }) => {
-      const tableColumn = table.columns[column];
-      const hasTimeRange = Boolean(
-        tableColumn && datatableUtilities.getDateHistogramMeta(tableColumn)?.timeRange
-      );
-      if (hasTimeRange) {
-        return tableColumn.meta.field;
-      }
-    })
-    .find(Boolean);
+  return !Array.isArray(tablesAndColumns)
+    ? [tablesAndColumns]
+    : tablesAndColumns
+        .map(({ table, column }) => {
+          const tableColumn = table.columns[column];
+          const hasTimeRange = Boolean(
+            tableColumn && datatableUtilities.getDateHistogramMeta(tableColumn)?.timeRange
+          );
+          if (hasTimeRange) {
+            return tableColumn.meta.field;
+          }
+        })
+        .find(Boolean);
 }
 
 export function renewIDs<T = unknown>(
@@ -296,8 +337,8 @@ export const getSearchWarningMessages = (
   deps: {
     searchService: ISearchStart;
   }
-) => {
-  const warningsMap: Map<string, Array<string | React.ReactNode>> = new Map();
+): UserMessage[] => {
+  const warningsMap: Map<string, UserMessage[]> = new Map();
 
   deps.searchService.showWarnings(adapter, (warning, meta) => {
     const { request, response, requestId } = meta;
@@ -321,3 +362,7 @@ export const getSearchWarningMessages = (
 
   return [...warningsMap.values()].flat();
 };
+
+export function nonNullable<T>(v: T): v is NonNullable<T> {
+  return v != null;
+}

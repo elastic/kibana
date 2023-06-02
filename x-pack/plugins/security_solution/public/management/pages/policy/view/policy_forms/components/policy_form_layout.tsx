@@ -14,7 +14,6 @@ import {
   EuiLoadingSpinner,
   EuiBottomBar,
   EuiSpacer,
-  EuiThemeProvider,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -23,8 +22,7 @@ import { useLocation } from 'react-router-dom';
 import type { ApplicationStart } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { useIsExperimentalFeatureEnabled } from '../../../../../../common/hooks/use_experimental_features';
-import { useUserPrivileges } from '../../../../../../common/components/user_privileges';
-import { usePolicyDetailsSelector } from '../../policy_hooks';
+import { useShowEditableFormFields, usePolicyDetailsSelector } from '../../policy_hooks';
 import {
   policyDetails,
   agentStatusSummary,
@@ -52,7 +50,7 @@ export const PolicyFormLayout = React.memo(() => {
   } = useKibana();
   const toasts = useToasts();
   const { state: locationRouteState } = useLocation<PolicyDetailsRouteState>();
-  const { canWritePolicyManagement } = useUserPrivileges().endpointPrivileges;
+  const showEditableFormFields = useShowEditableFormFields();
 
   // Store values
   const policyItem = usePolicyDetailsSelector(policyDetails);
@@ -168,20 +166,18 @@ export const PolicyFormLayout = React.memo(() => {
       <EuiBottomBar paddingSize="s">
         <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
           <EuiFlexItem grow={false}>
-            <EuiThemeProvider colorMode="dark">
-              <EuiButtonEmpty
-                color="text"
-                onClick={handleCancelOnClick}
-                data-test-subj="policyDetailsCancelButton"
-              >
-                <FormattedMessage
-                  id="xpack.securitySolution.endpoint.policy.details.cancel"
-                  defaultMessage="Cancel"
-                />
-              </EuiButtonEmpty>
-            </EuiThemeProvider>
+            <EuiButtonEmpty
+              color="text"
+              onClick={handleCancelOnClick}
+              data-test-subj="policyDetailsCancelButton"
+            >
+              <FormattedMessage
+                id="xpack.securitySolution.endpoint.policy.details.cancel"
+                defaultMessage="Cancel"
+              />
+            </EuiButtonEmpty>
           </EuiFlexItem>
-          {canWritePolicyManagement && (
+          {showEditableFormFields && (
             <EuiFlexItem grow={false}>
               <EuiButton
                 fill={true}

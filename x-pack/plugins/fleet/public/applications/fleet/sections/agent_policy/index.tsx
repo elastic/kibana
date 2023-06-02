@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import { Router, Switch, Route, useHistory } from 'react-router-dom';
+import { Router, Switch, useHistory } from 'react-router-dom';
+import { Route } from '@kbn/shared-ux-router';
 
 import { FLEET_ROUTING_PATHS } from '../../constants';
 import { useBreadcrumbs } from '../../hooks';

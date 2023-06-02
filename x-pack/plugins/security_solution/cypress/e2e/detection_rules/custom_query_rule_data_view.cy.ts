@@ -5,18 +5,16 @@
  * 2.0.
  */
 
-import { formatMitreAttackDescription } from '../../helpers/rules';
-import type { Mitre } from '../../objects/rule';
+import { formatMitreAttackDescription, getHumanizedDuration } from '../../helpers/rules';
 import { getDataViewRule } from '../../objects/rule';
-import type { CompleteTimeline } from '../../objects/timeline';
-import { ALERT_GRID_CELL, NUMBER_OF_ALERTS } from '../../screens/alerts';
+import { ALERTS_COUNT, ALERT_GRID_CELL } from '../../screens/alerts';
 
 import {
   CUSTOM_RULES_BTN,
   RISK_SCORE,
   RULE_NAME,
   RULES_ROW,
-  RULES_TABLE,
+  RULES_MANAGEMENT_TABLE,
   RULE_SWITCH,
   SEVERITY,
 } from '../../screens/alerts_detection_rules';
@@ -53,7 +51,6 @@ import {
 } from '../../screens/rule_details';
 
 import { goToRuleDetails } from '../../tasks/alerts_detection_rules';
-import { createTimeline } from '../../tasks/api_calls/timelines';
 import { postDataView } from '../../tasks/common';
 import {
   createAndEnableRule,
@@ -72,62 +69,49 @@ import { getDetails } from '../../tasks/rule_details';
 import { RULE_CREATION } from '../../urls/navigation';
 
 describe('Custom query rules', () => {
-  before(() => {
-    login();
-  });
-
   describe('Custom detection rules creation with data views', () => {
     const rule = getDataViewRule();
-    const expectedUrls = rule.referenceUrls?.join('');
-    const expectedFalsePositives = rule.falsePositivesExamples?.join('');
+    const expectedUrls = rule.references?.join('');
+    const expectedFalsePositives = rule.false_positives?.join('');
     const expectedTags = rule.tags?.join('');
-    const mitreAttack = rule.mitre as Mitre[];
-    const expectedMitre = formatMitreAttackDescription(mitreAttack);
+    const mitreAttack = rule.threat;
+    const expectedMitre = formatMitreAttackDescription(mitreAttack ?? []);
     const expectedNumberOfRules = 1;
 
     beforeEach(() => {
-      /* We don't call cleanKibana method on the before hook, instead we call esArchiverReseKibana on the before each. This is because we 
+      /* We don't call cleanKibana method on the before hook, instead we call esArchiverReseKibana on the before each. This is because we
       are creating a data view we'll use after and cleanKibana does not delete all the data views created, esArchiverReseKibana does.
-      We don't use esArchiverReseKibana in all the tests because is a time-consuming method and we don't need to perform an exhaustive 
+      We don't use esArchiverReseKibana in all the tests because is a time-consuming method and we don't need to perform an exhaustive
       cleaning in all the other tests. */
-      const timeline = rule.timeline as CompleteTimeline;
       esArchiverResetKibana();
-      createTimeline(timeline).then((response) => {
-        cy.wrap({
-          ...rule,
-          timeline: {
-            ...timeline,
-            id: response.body.data.persistTimeline.timeline.savedObjectId,
-          },
-        }).as('rule');
-      });
-      if (rule.dataSource.type === 'dataView') {
-        postDataView(rule.dataSource.dataView);
+      if (rule.data_view_id != null) {
+        postDataView(rule.data_view_id);
       }
+      login();
     });
 
     it('Creates and enables a new rule', function () {
       visit(RULE_CREATION);
-      fillDefineCustomRuleAndContinue(this.rule);
-      fillAboutRuleAndContinue(this.rule);
-      fillScheduleRuleAndContinue(this.rule);
+      fillDefineCustomRuleAndContinue(rule);
+      fillAboutRuleAndContinue(rule);
+      fillScheduleRuleAndContinue(rule);
       createAndEnableRule();
 
       cy.get(CUSTOM_RULES_BTN).should('have.text', 'Custom rules (1)');
 
-      cy.get(RULES_TABLE).find(RULES_ROW).should('have.length', expectedNumberOfRules);
-      cy.get(RULE_NAME).should('have.text', this.rule.name);
-      cy.get(RISK_SCORE).should('have.text', this.rule.riskScore);
-      cy.get(SEVERITY).should('have.text', this.rule.severity);
+      cy.get(RULES_MANAGEMENT_TABLE).find(RULES_ROW).should('have.length', expectedNumberOfRules);
+      cy.get(RULE_NAME).should('have.text', rule.name);
+      cy.get(RISK_SCORE).should('have.text', rule.risk_score);
+      cy.get(SEVERITY).should('have.text', 'High');
       cy.get(RULE_SWITCH).should('have.attr', 'aria-checked', 'true');
 
       goToRuleDetails();
 
-      cy.get(RULE_NAME_HEADER).should('contain', `${this.rule.name}`);
-      cy.get(ABOUT_RULE_DESCRIPTION).should('have.text', this.rule.description);
+      cy.get(RULE_NAME_HEADER).should('contain', `${rule.name}`);
+      cy.get(ABOUT_RULE_DESCRIPTION).should('have.text', rule.description);
       cy.get(ABOUT_DETAILS).within(() => {
-        getDetails(SEVERITY_DETAILS).should('have.text', this.rule.severity);
-        getDetails(RISK_SCORE_DETAILS).should('have.text', this.rule.riskScore);
+        getDetails(SEVERITY_DETAILS).should('have.text', 'High');
+        getDetails(RISK_SCORE_DETAILS).should('have.text', rule.risk_score);
         getDetails(REFERENCE_URLS_DETAILS).should((details) => {
           expect(removeExternalLinkText(details.text())).equal(expectedUrls);
         });
@@ -137,50 +121,49 @@ describe('Custom query rules', () => {
         });
         getDetails(TAGS_DETAILS).should('have.text', expectedTags);
       });
-      cy.get(INVESTIGATION_NOTES_TOGGLE).click({ force: true });
+      cy.get(INVESTIGATION_NOTES_TOGGLE).click();
       cy.get(ABOUT_INVESTIGATION_NOTES).should('have.text', INVESTIGATION_NOTES_MARKDOWN);
       cy.get(DEFINITION_DETAILS).within(() => {
-        getDetails(DATA_VIEW_DETAILS).should('have.text', this.rule.dataSource.dataView);
-        getDetails(CUSTOM_QUERY_DETAILS).should('have.text', this.rule.customQuery);
+        getDetails(DATA_VIEW_DETAILS).should('have.text', rule.data_view_id);
+        getDetails(CUSTOM_QUERY_DETAILS).should('have.text', rule.query);
         getDetails(RULE_TYPE_DETAILS).should('have.text', 'Query');
         getDetails(TIMELINE_TEMPLATE_DETAILS).should('have.text', 'None');
       });
       cy.get(DEFINITION_DETAILS).should('not.contain', INDEX_PATTERNS_DETAILS);
       cy.get(SCHEDULE_DETAILS).within(() => {
-        getDetails(RUNS_EVERY_DETAILS).should(
-          'have.text',
-          `${getDataViewRule().runsEvery?.interval}${getDataViewRule().runsEvery?.type}`
+        getDetails(RUNS_EVERY_DETAILS).should('have.text', `${rule.interval}`);
+        const humanizedDuration = getHumanizedDuration(
+          rule.from ?? 'now-6m',
+          rule.interval ?? '5m'
         );
-        getDetails(ADDITIONAL_LOOK_BACK_DETAILS).should(
-          'have.text',
-          `${getDataViewRule().lookBack?.interval}${getDataViewRule().lookBack?.type}`
-        );
+        getDetails(ADDITIONAL_LOOK_BACK_DETAILS).should('have.text', `${humanizedDuration}`);
       });
 
       waitForTheRuleToBeExecuted();
       waitForAlertsToPopulate();
 
-      cy.get(NUMBER_OF_ALERTS)
+      cy.get(ALERTS_COUNT)
         .invoke('text')
         .should('match', /^[1-9].+$/);
-      cy.get(ALERT_GRID_CELL).contains(this.rule.name);
+      cy.get(ALERT_GRID_CELL).contains(rule.name);
     });
+
     it('Creates and edits a new rule with a data view', function () {
       visit(RULE_CREATION);
-      fillDefineCustomRuleAndContinue(this.rule);
-      cy.get(RULE_NAME_INPUT).clear({ force: true }).type(this.rule.name, { force: true });
-      cy.get(RULE_DESCRIPTION_INPUT)
-        .clear({ force: true })
-        .type(this.rule.description, { force: true });
+      fillDefineCustomRuleAndContinue(rule);
+      cy.get(RULE_NAME_INPUT).clear();
+      cy.get(RULE_NAME_INPUT).type(rule.name);
+      cy.get(RULE_DESCRIPTION_INPUT).clear();
+      cy.get(RULE_DESCRIPTION_INPUT).type(rule.description);
 
-      cy.get(ABOUT_CONTINUE_BTN).should('exist').click({ force: true });
+      cy.get(ABOUT_CONTINUE_BTN).should('exist').click();
 
-      fillScheduleRuleAndContinue(this.rule);
+      fillScheduleRuleAndContinue(rule);
       createRuleWithoutEnabling();
 
       goToRuleDetails();
 
-      cy.get(EDIT_RULE_SETTINGS_LINK).click({ force: true });
+      cy.get(EDIT_RULE_SETTINGS_LINK).click();
 
       cy.get(RULE_NAME_HEADER).should('contain', 'Edit rule settings');
     });

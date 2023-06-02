@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-jest.mock('../../routes/security');
+jest.mock('../security');
 
 import type { MockedLogger } from '@kbn/logging-mocks';
 
@@ -26,6 +26,7 @@ import * as epmPackagesGet from './packages/get';
 import * as epmPackagesInstall from './packages/install';
 import * as epmRegistry from './registry';
 import * as epmTransformsInstall from './elasticsearch/transform/install';
+import * as epmArchiveParse from './archive/parse';
 
 const testKeys = [
   'getInstallation',
@@ -33,6 +34,7 @@ const testKeys = [
   'fetchFindLatestPackage',
   'getPackage',
   'reinstallEsAssets',
+  'readBundledPackage',
 ];
 
 function getTest(
@@ -129,7 +131,21 @@ function getTest(
         method: mocks.packageClient.reinstallEsAssets.bind(mocks.packageClient),
         args: [pkg, paths],
         spy: jest.spyOn(epmTransformsInstall, 'installTransforms'),
-        spyArgs: [pkg, paths, mocks.esClient, mocks.soClient, mocks.logger],
+        spyArgs: [
+          {
+            installablePackage: pkg,
+            paths,
+            esClient: mocks.esClient,
+            savedObjectsClient: mocks.soClient,
+            logger: mocks.logger,
+            // package reinstall means we need to force transforms to reinstall
+            force: true,
+            // Undefined es references
+            esReferences: undefined,
+            // Undefined secondary authorization
+            authorizationHeader: undefined,
+          },
+        ],
         spyResponse: {
           installedTransforms: [
             {
@@ -142,6 +158,23 @@ function getTest(
             name: 'package name',
           },
         ],
+      };
+      break;
+    case testKeys[5]:
+      const bundledPackage = { name: 'package name', version: '8.0.0', buffer: Buffer.from([]) };
+      test = {
+        method: mocks.packageClient.readBundledPackage.bind(mocks.packageClient),
+        args: [bundledPackage],
+        spy: jest.spyOn(epmArchiveParse, 'generatePackageInfoFromArchiveBuffer'),
+        spyArgs: [bundledPackage.buffer, 'application/zip'],
+        spyResponse: {
+          packageInfo: { name: 'readBundledPackage test' },
+          paths: ['/some/test/path'],
+        },
+        expectedReturnValue: {
+          packageInfo: { name: 'readBundledPackage test' },
+          paths: ['/some/test/path'],
+        },
       };
       break;
     default:

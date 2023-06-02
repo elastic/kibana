@@ -20,6 +20,7 @@ import {
   ComponentOpts as RuleApis,
   withBulkRuleOperations,
 } from '../../common/components/with_bulk_rule_api_operations';
+import { RefreshToken } from './types';
 
 export const DEFAULT_NUMBER_OF_EXECUTIONS = 60;
 
@@ -29,7 +30,7 @@ type RuleExecutionSummaryAndChartProps = {
   ruleSummary?: RuleSummary;
   numberOfExecutions?: number;
   isLoadingRuleSummary?: boolean;
-  refreshToken?: number;
+  refreshToken?: RefreshToken;
   onChangeDuration?: (duration: number) => void;
   requestRefresh?: () => Promise<void>;
   fetchRuleSummary?: boolean;
@@ -163,7 +164,7 @@ export const RuleExecutionSummaryAndChart = (props: RuleExecutionSummaryAndChart
                     <EuiIconTip
                       data-test-subj="ruleDurationWarning"
                       anchorClassName="ruleDurationWarningIcon"
-                      type="alert"
+                      type="warning"
                       color="warning"
                       content={i18n.translate(
                         'xpack.triggersActionsUI.sections.ruleDetails.alertsList.ruleTypeExcessDurationMessage',

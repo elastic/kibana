@@ -16,6 +16,7 @@ interface VisualizeSaveModalArgs {
   redirectToOrigin?: boolean;
   addToDashboard?: boolean;
   dashboardId?: string;
+  description?: string;
 }
 
 type DashboardPickerOption =
@@ -59,7 +60,6 @@ export class VisualizePageObject extends FtrService {
     await this.kibanaServer.uiSettings.replace({
       defaultIndex: this.defaultIndexString,
       [FORMATS_UI_SETTINGS.FORMAT_BYTES_DEFAULT_PATTERN]: '0,0.[000]b',
-      'visualization:visualize:legacyPieChartsLibrary': !isNewLibrary,
       'visualization:visualize:legacyHeatmapChartsLibrary': !isNewLibrary,
       'histogram:maxBars': 100,
     });
@@ -394,9 +394,19 @@ export class VisualizePageObject extends FtrService {
 
   public async setSaveModalValues(
     vizName: string,
-    { saveAsNew, redirectToOrigin, addToDashboard, dashboardId }: VisualizeSaveModalArgs = {}
+    {
+      saveAsNew,
+      redirectToOrigin,
+      addToDashboard,
+      dashboardId,
+      description,
+    }: VisualizeSaveModalArgs = {}
   ) {
     await this.testSubjects.setValue('savedObjectTitle', vizName);
+
+    if (description) {
+      await this.testSubjects.setValue('viewDescription', description);
+    }
 
     const saveAsNewCheckboxExists = await this.testSubjects.exists('saveAsNewCheckbox');
     if (saveAsNewCheckboxExists) {

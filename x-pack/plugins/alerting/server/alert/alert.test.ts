@@ -8,6 +8,8 @@
 import sinon from 'sinon';
 import { Alert } from './alert';
 import { AlertInstanceState, AlertInstanceContext, DefaultActionGroupId } from '../../common';
+import { alertWithAnyUUID } from '../test_utils';
+import { CombinedSummarizedAlerts } from '../types';
 
 let clock: sinon.SinonFakeTimers;
 
@@ -49,7 +51,26 @@ describe('isThrottled', () => {
     });
     clock.tick(30000);
     alert.scheduleActions('default');
-    expect(alert.isThrottled('1m')).toEqual(true);
+    expect(alert.isThrottled({ throttle: '1m' })).toEqual(true);
+  });
+
+  test(`should use actionHash if it was used in a legacy action`, () => {
+    const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('1', {
+      meta: {
+        lastScheduledActions: {
+          date: new Date(),
+          group: 'default',
+          actions: {
+            'slack:alert:1h': { date: new Date() },
+          },
+        },
+      },
+    });
+    clock.tick(30000);
+    alert.scheduleActions('default');
+    expect(
+      alert.isThrottled({ throttle: '1m', actionHash: 'slack:alert:1h', uuid: '111-222' })
+    ).toEqual(true);
   });
 
   test(`shouldn't throttle when group didn't change and throttle period expired`, () => {
@@ -63,7 +84,7 @@ describe('isThrottled', () => {
     });
     clock.tick(30000);
     alert.scheduleActions('default');
-    expect(alert.isThrottled('15s')).toEqual(false);
+    expect(alert.isThrottled({ throttle: '15s' })).toEqual(false);
   });
 
   test(`shouldn't throttle when group changes`, () => {
@@ -77,7 +98,60 @@ describe('isThrottled', () => {
     });
     clock.tick(5000);
     alert.scheduleActions('other-group');
-    expect(alert.isThrottled('1m')).toEqual(false);
+    expect(alert.isThrottled({ throttle: '1m' })).toEqual(false);
+  });
+
+  test(`throttle a specific action`, () => {
+    const alert = new Alert<never, never, 'default' | 'other-group'>('1', {
+      meta: {
+        lastScheduledActions: {
+          date: new Date(),
+          group: 'default',
+          actions: {
+            '111-111': { date: new Date() },
+          },
+        },
+      },
+    });
+    clock.tick(5000);
+    alert.scheduleActions('other-group');
+    expect(alert.isThrottled({ throttle: '1m', uuid: '111-111' })).toEqual(false);
+  });
+
+  test(`shouldn't throttle a specific action when group didn't change and throttle period expired`, () => {
+    const alert = new Alert<never, never, 'default' | 'other-group'>('1', {
+      meta: {
+        lastScheduledActions: {
+          date: new Date('2020-01-01'),
+          group: 'default',
+          actions: {
+            '111-111': { date: new Date() },
+          },
+        },
+      },
+    });
+    clock.tick(30000);
+    alert.scheduleActions('default');
+    expect(alert.isThrottled({ throttle: '15s', uuid: '111-111', actionHash: 'slack:1h' })).toEqual(
+      false
+    );
+  });
+
+  test(`shouldn't throttle a specific action when group changes`, () => {
+    const alert = new Alert<never, never, 'default' | 'other-group'>('1', {
+      meta: {
+        lastScheduledActions: {
+          date: new Date(),
+          group: 'default',
+          actions: {
+            '111-111': { date: new Date() },
+          },
+        },
+      },
+    });
+    clock.tick(5000);
+    alert.scheduleActions('other-group');
+    expect(alert.isThrottled({ throttle: '1m', uuid: '111-111' })).toEqual(false);
   });
 });
 
@@ -159,6 +233,23 @@ describe('getState()', () => {
   });
 });
 
+describe('getUUID()', () => {
+  test('returns a UUID for a new alert', () => {
+    const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('1');
+    const uuid = alert.getUuid();
+    expect(uuid).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/);
+  });
+
+  test('returns same uuid from previous run of alert', () => {
+    const uuid = 'previous-uuid';
+    const meta = { uuid };
+    const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('1', {
+      meta,
+    });
+    expect(alert.getUuid()).toEqual(uuid);
+  });
+});
+
 describe('scheduleActions()', () => {
   test('makes hasScheduledActions() return true', () => {
     const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('1', {
@@ -185,7 +276,7 @@ describe('scheduleActions()', () => {
       },
     });
     alert.replaceState({ otherField: true }).scheduleActions('default', { field: true });
-    expect(alert.isThrottled('1m')).toEqual(true);
+    expect(alert.isThrottled({ throttle: '1m' })).toEqual(true);
   });
 
   test('make isThrottled() return false when throttled expired', () => {
@@ -200,7 +291,7 @@ describe('scheduleActions()', () => {
     });
     clock.tick(120000);
     alert.replaceState({ otherField: true }).scheduleActions('default', { field: true });
-    expect(alert.isThrottled('1m')).toEqual(false);
+    expect(alert.isThrottled({ throttle: '1m' })).toEqual(false);
   });
 
   test('makes getScheduledActionOptions() return given options', () => {
@@ -248,11 +339,67 @@ describe('updateLastScheduledActions()', () => {
     expect(alert.toJSON()).toEqual({
       state: {},
       meta: {
+        uuid: expect.any(String),
         lastScheduledActions: {
           date: new Date().toISOString(),
           group: 'default',
         },
         flappingHistory: [],
+        maintenanceWindowIds: [],
+      },
+    });
+  });
+
+  test('replaces previous lastScheduledActions with a scheduled action', () => {
+    const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('1', {
+      meta: {},
+    });
+    alert.updateLastScheduledActions('default', 'actionId1', '111-111');
+    expect(alert.toJSON()).toEqual({
+      state: {},
+      meta: {
+        flappingHistory: [],
+        maintenanceWindowIds: [],
+        uuid: expect.any(String),
+        lastScheduledActions: {
+          date: new Date().toISOString(),
+          group: 'default',
+          actions: {
+            '111-111': { date: new Date().toISOString() },
+          },
+        },
+      },
+    });
+  });
+
+  test('removes the objects with an old actionHash', () => {
+    const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('1', {
+      meta: {
+        flappingHistory: [],
+        maintenanceWindowIds: [],
+        lastScheduledActions: {
+          date: new Date(),
+          group: 'default',
+          actions: {
+            'slack:alert:1h': { date: new Date() },
+          },
+        },
+      },
+    });
+    alert.updateLastScheduledActions('default', 'slack:alert:1h', '111-111');
+    expect(alert.toJSON()).toEqual({
+      state: {},
+      meta: {
+        flappingHistory: [],
+        maintenanceWindowIds: [],
+        uuid: expect.any(String),
+        lastScheduledActions: {
+          date: new Date().toISOString(),
+          group: 'default',
+          actions: {
+            '111-111': { date: new Date().toISOString() },
+          },
+        },
       },
     });
   });
@@ -342,13 +489,28 @@ describe('toJSON', () => {
             group: 'default',
           },
           flappingHistory: [false, true],
+          maintenanceWindowIds: [],
           flapping: false,
+          pendingRecoveredCount: 2,
         },
       }
     );
-    expect(JSON.stringify(alertInstance)).toEqual(
-      '{"state":{"foo":true},"meta":{"lastScheduledActions":{"date":"1970-01-01T00:00:00.000Z","group":"default"},"flappingHistory":[false,true],"flapping":false}}'
-    );
+
+    expect(alertInstance).toMatchObject({
+      state: {
+        foo: true,
+      },
+      meta: {
+        lastScheduledActions: {
+          date: expect.any(Date),
+          group: 'default',
+        },
+        uuid: expect.any(String),
+        flappingHistory: [false, true],
+        flapping: false,
+        pendingRecoveredCount: 2,
+      },
+    });
   });
 });
 
@@ -362,6 +524,7 @@ describe('toRaw', () => {
           group: 'default',
         },
         flappingHistory: [false, true, true],
+        pendingRecoveredCount: 2,
       },
     };
     const alertInstance = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>(
@@ -391,6 +554,8 @@ describe('toRaw', () => {
       meta: {
         flappingHistory: [false, true, true],
         flapping: false,
+        maintenanceWindowIds: [],
+        uuid: expect.any(String),
       },
     });
   });
@@ -406,12 +571,14 @@ describe('setFlappingHistory', () => {
     );
     alertInstance.setFlappingHistory([false]);
     expect(alertInstance.getFlappingHistory()).toEqual([false]);
-    expect(alertInstance.toRaw()).toMatchInlineSnapshot(`
+    expect(alertWithAnyUUID(alertInstance.toRaw())).toMatchInlineSnapshot(`
       Object {
         "meta": Object {
           "flappingHistory": Array [
             false,
           ],
+          "maintenanceWindowIds": Array [],
+          "uuid": Any<String>,
         },
         "state": Object {},
       }
@@ -438,11 +605,13 @@ describe('setFlapping', () => {
     );
     alertInstance.setFlapping(false);
     expect(alertInstance.getFlapping()).toEqual(false);
-    expect(alertInstance.toRaw()).toMatchInlineSnapshot(`
+    expect(alertWithAnyUUID(alertInstance.toRaw())).toMatchInlineSnapshot(`
       Object {
         "meta": Object {
           "flapping": false,
           "flappingHistory": Array [],
+          "maintenanceWindowIds": Array [],
+          "uuid": Any<String>,
         },
         "state": Object {},
       }
@@ -456,5 +625,105 @@ describe('getFlapping', () => {
       meta: { flapping: true },
     });
     expect(alert.getFlapping()).toEqual(true);
+  });
+});
+
+describe('incrementPendingRecoveredCount', () => {
+  test('correctly increments pendingRecoveredCount', () => {
+    const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('1', {
+      meta: { pendingRecoveredCount: 3 },
+    });
+    alert.incrementPendingRecoveredCount();
+    expect(alert.getPendingRecoveredCount()).toEqual(4);
+  });
+
+  test('correctly increments pendingRecoveredCount when it is not already defined', () => {
+    const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('1');
+    alert.incrementPendingRecoveredCount();
+    expect(alert.getPendingRecoveredCount()).toEqual(1);
+  });
+});
+
+describe('getPendingRecoveredCount', () => {
+  test('returns pendingRecoveredCount', () => {
+    const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('1', {
+      meta: { pendingRecoveredCount: 3 },
+    });
+    expect(alert.getPendingRecoveredCount()).toEqual(3);
+  });
+
+  test('defines and returns pendingRecoveredCount when it is not already defined', () => {
+    const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('1');
+    expect(alert.getPendingRecoveredCount()).toEqual(0);
+  });
+});
+
+describe('resetPendingRecoveredCount', () => {
+  test('resets pendingRecoveredCount to 0', () => {
+    const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('1', {
+      meta: { pendingRecoveredCount: 3 },
+    });
+    alert.resetPendingRecoveredCount();
+    expect(alert.getPendingRecoveredCount()).toEqual(0);
+  });
+});
+
+describe('isFilteredOut', () => {
+  const summarizedAlerts: CombinedSummarizedAlerts = {
+    all: {
+      count: 1,
+      data: [
+        {
+          _id: '1',
+          _index: '.alerts',
+          '@timestamp': '',
+          kibana: {
+            alert: {
+              instance: { id: 'a' },
+              rule: {
+                category: 'category',
+                consumer: 'consumer',
+                name: 'name',
+                producer: 'producer',
+                revision: 0,
+                rule_type_id: 'rule_type_id',
+                uuid: 'uuid',
+              },
+              status: 'status',
+              uuid: '1',
+            },
+            space_ids: ['default'],
+          },
+        },
+      ],
+    },
+    new: { count: 0, data: [] },
+    ongoing: { count: 0, data: [] },
+    recovered: { count: 0, data: [] },
+  };
+
+  test('returns false if summarizedAlerts is null', () => {
+    const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('1', {
+      meta: { pendingRecoveredCount: 3, uuid: '1' },
+    });
+    expect(alert.isFilteredOut(null)).toBe(false);
+  });
+  test('returns false if the alert with same ID is in summarizedAlerts', () => {
+    const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('1', {
+      meta: { pendingRecoveredCount: 3, uuid: 'no' },
+    });
+    expect(alert.isFilteredOut(summarizedAlerts)).toBe(false);
+  });
+  test('returns false if the alert with same UUID is in summarizedAlerts', () => {
+    const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('2', {
+      meta: { pendingRecoveredCount: 3, uuid: '1' },
+    });
+    expect(alert.isFilteredOut(summarizedAlerts)).toBe(false);
+  });
+  test('returns true if the alert with same UUID or ID is not in summarizedAlerts', () => {
+    const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('2', {
+      meta: { pendingRecoveredCount: 3, uuid: '3' },
+    });
+    expect(alert.isFilteredOut(summarizedAlerts)).toBe(true);
   });
 });

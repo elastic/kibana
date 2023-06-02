@@ -36,9 +36,9 @@ import { DescriptionListStyled, OverviewWrapper } from '../../../common/componen
 import * as i18n from './translations';
 import { EndpointOverview } from './endpoint_overview';
 import { OverviewDescriptionList } from '../../../common/components/overview_description_list';
-import { useRiskScore } from '../../../risk_score/containers';
-import { RiskScore } from '../../../common/components/severity/common';
-import { RiskScoreHeaderTitle } from '../../../risk_score/components/risk_score_onboarding/risk_score_header_title';
+import { useRiskScore } from '../../../explore/containers/risk_score';
+import { RiskScore } from '../../../explore/components/risk_score/severity/common';
+import { RiskScoreHeaderTitle } from '../../../explore/components/risk_score/risk_score_onboarding/risk_score_header_title';
 
 interface HostSummaryProps {
   contextID?: string; // used to provide unique draggable context when viewing in the side panel
@@ -54,6 +54,7 @@ interface HostSummaryProps {
   endDate: string;
   narrowDateRange: NarrowDateRange;
   hostName: string;
+  jobNameById: Record<string, string | undefined>;
 }
 
 const HostRiskOverviewWrapper = styled(EuiFlexGroup)`
@@ -76,6 +77,7 @@ export const HostOverview = React.memo<HostSummaryProps>(
     narrowDateRange,
     startDate,
     hostName,
+    jobNameById,
   }) => {
     const capabilities = useMlCapabilities();
     const userPermissions = hasMlUserPermissions(capabilities);
@@ -198,6 +200,7 @@ export const HostOverview = React.memo<HostSummaryProps>(
                     endDate={endDate}
                     isLoading={isLoadingAnomaliesData}
                     narrowDateRange={narrowDateRange}
+                    jobNameById={jobNameById}
                   />
                 ),
               },
@@ -211,6 +214,7 @@ export const HostOverview = React.memo<HostSummaryProps>(
         narrowDateRange,
         startDate,
         userPermissions,
+        jobNameById,
       ]
     );
 

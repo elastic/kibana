@@ -23,6 +23,7 @@ jest.mock('./app_context', () => {
     },
   };
 });
+jest.mock('./audit_logging');
 
 describe('upgradeManagedPackagePolicies', () => {
   afterEach(() => {

@@ -12,7 +12,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { useTrackPageview } from '@kbn/observability-plugin/public';
+import { useTrackPageview } from '@kbn/observability-shared-plugin/public';
 import { useBreadcrumbs } from '../hooks/use_breadcrumbs';
 
 export const MappingErrorPage = () => {
@@ -61,6 +61,7 @@ export const MappingErrorPage = () => {
                 values={{
                   docsLink: (
                     <EuiLink
+                      data-test-subj="syntheticsMappingErrorPageDocsLink"
                       href={`${docLinks.ELASTIC_WEBSITE_URL}guide/en/observability/${docLinks.DOC_LINK_VERSION}/troubleshoot-uptime-mapping-issues.html`}
                       target="_blank"
                     >

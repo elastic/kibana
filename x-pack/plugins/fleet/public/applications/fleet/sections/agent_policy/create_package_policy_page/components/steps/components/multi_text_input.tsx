@@ -25,6 +25,7 @@ interface Props {
   errors?: Array<{ message: string; index?: number }>;
   isInvalid?: boolean;
   isDisabled?: boolean;
+  'data-test-subj'?: string;
 }
 
 interface RowProps {
@@ -69,6 +70,7 @@ const Row: FunctionComponent<RowProps> = ({
           autoFocus={autoFocus}
           disabled={isDisabled}
           onBlur={onBlur}
+          data-test-subj={`multiTextInputRow-${index}`}
         />
       </EuiFlexItem>
       {showDeleteButton && (
@@ -99,6 +101,7 @@ export const MultiTextInput: FunctionComponent<Props> = ({
   isInvalid,
   isDisabled,
   errors,
+  'data-test-subj': dataTestSubj,
 }) => {
   const [autoFocus, setAutoFocus] = useState(false);
   const [rows, setRows] = useState(() => defaultValue(value));
@@ -139,7 +142,7 @@ export const MultiTextInput: FunctionComponent<Props> = ({
 
   return (
     <>
-      <EuiFlexGroup gutterSize="s" direction="column">
+      <EuiFlexGroup gutterSize="s" direction="column" data-test-subj={dataTestSubj}>
         {rows.map((row, idx) => (
           <EuiFlexItem key={idx}>
             <Row

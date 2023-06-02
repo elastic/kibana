@@ -23,7 +23,9 @@ interface EventNonEcsData {
 
 type CommentRequestAlertTypeWithoutOwner = Omit<CommentRequestAlertType, 'owner'>;
 
-export const groupAlertsByRule = (items: Event[]): CaseAttachmentsWithoutOwner => {
+export type GroupAlertsByRule = (items: Event[]) => CaseAttachmentsWithoutOwner;
+
+export const groupAlertsByRule: GroupAlertsByRule = (items) => {
   const attachmentsByRule = items.reduce<Record<string, CommentRequestAlertTypeWithoutOwner>>(
     (acc, item) => {
       const rule = getRuleIdFromEvent(item);

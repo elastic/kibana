@@ -1,6 +1,7 @@
 post:
-  summary: Generate service tokens
-  tags: []
+  summary: Create service token
+  tags:
+    - Service tokens
   responses:
     '200':
       description: OK
@@ -13,6 +14,8 @@ post:
                 type: string
               value:
                 type: string
+    '400':
+      $ref: ../components/responses/error.yaml
   operationId: generate-service-token
   parameters:
     - $ref: ../components/headers/kbn_xsrf.yaml

@@ -23,7 +23,6 @@ import { useLogsDataView } from '../common/hooks/use_logs_data_view';
 
 interface ViewResultsInLensActionProps {
   actionId?: string;
-  agentIds?: string[];
   buttonType: ViewResultsActionButtonType;
   endDate?: string;
   startDate?: string;
@@ -32,7 +31,6 @@ interface ViewResultsInLensActionProps {
 
 const ViewResultsInLensActionComponent: React.FC<ViewResultsInLensActionProps> = ({
   actionId,
-  agentIds,
   buttonType,
   endDate,
   startDate,
@@ -55,7 +53,7 @@ const ViewResultsInLensActionComponent: React.FC<ViewResultsInLensActionProps> =
               to: endDate ?? 'now',
               mode: mode ?? (startDate || endDate) ? 'absolute' : 'relative',
             },
-            attributes: getLensAttributes(logsDataView, actionId, agentIds),
+            attributes: getLensAttributes(logsDataView, actionId),
           },
           {
             openInNewTab: true,
@@ -64,7 +62,7 @@ const ViewResultsInLensActionComponent: React.FC<ViewResultsInLensActionProps> =
         );
       }
     },
-    [actionId, agentIds, endDate, lensService, logsDataView, mode, startDate]
+    [actionId, endDate, lensService, logsDataView, mode, startDate]
   );
 
   const isDisabled = useMemo(() => !actionId || !logsDataView, [actionId, logsDataView]);

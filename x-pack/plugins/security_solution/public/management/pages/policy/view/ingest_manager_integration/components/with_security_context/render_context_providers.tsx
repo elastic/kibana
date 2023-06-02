@@ -9,11 +9,13 @@ import type { PropsWithChildren } from 'react';
 import React, { memo } from 'react';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 import type { Store } from 'redux';
+import { UserPrivilegesProvider } from '../../../../../../../common/components/user_privileges/user_privileges_context';
 import type { SecuritySolutionQueryClient } from '../../../../../../../common/containers/query_client/query_client_provider';
 import { ReactQueryClientProvider } from '../../../../../../../common/containers/query_client/query_client_provider';
 import { SecuritySolutionStartDependenciesContext } from '../../../../../../../common/components/user_privileges/endpoint/security_solution_start_dependencies';
 import { CurrentLicense } from '../../../../../../../common/components/current_license';
 import type { StartPlugins } from '../../../../../../../types';
+import { useKibana } from '../../../../../../../common/lib/kibana';
 
 export type RenderContextProvidersProps = PropsWithChildren<{
   store: Store;
@@ -23,11 +25,16 @@ export type RenderContextProvidersProps = PropsWithChildren<{
 
 export const RenderContextProviders = memo<RenderContextProvidersProps>(
   ({ store, depsStart, queryClient, children }) => {
+    const {
+      application: { capabilities },
+    } = useKibana().services;
     return (
       <ReduxStoreProvider store={store}>
         <ReactQueryClientProvider queryClient={queryClient}>
           <SecuritySolutionStartDependenciesContext.Provider value={depsStart}>
-            <CurrentLicense>{children}</CurrentLicense>
+            <UserPrivilegesProvider kibanaCapabilities={capabilities}>
+              <CurrentLicense>{children}</CurrentLicense>
+            </UserPrivilegesProvider>
           </SecuritySolutionStartDependenciesContext.Provider>
         </ReactQueryClientProvider>
       </ReduxStoreProvider>

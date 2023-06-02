@@ -45,6 +45,12 @@ paths:
               examples:
                 createCaseResponse:
                   $ref: '#/components/examples/create_case_response'
+        '401':
+          description: Authorization information is missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/4xx_response'
       servers:
         - url: https://localhost:5601
     delete:
@@ -67,6 +73,12 @@ paths:
       responses:
         '204':
           description: Indicates a successful call.
+        '401':
+          description: Authorization information is missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/4xx_response'
       servers:
         - url: https://localhost:5601
     patch:
@@ -99,6 +111,12 @@ paths:
               examples:
                 updateCaseResponse:
                   $ref: '#/components/examples/update_case_response'
+        '401':
+          description: Authorization information is missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/4xx_response'
       servers:
         - url: https://localhost:5601
     servers:
@@ -106,7 +124,7 @@ paths:
   /s/{spaceId}/api/cases/_find:
     get:
       summary: Retrieves a paginated subset of cases.
-      operationId: getCases
+      operationId: findCases
       description: |
         You must have `read` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the cases you're seeking.
       tags:
@@ -129,13 +147,6 @@ paths:
             type: string
             default: OR
           example: OR
-        - name: fields
-          in: query
-          description: The fields in the entity to return in the response.
-          schema:
-            type: array
-            items:
-              type: string
         - name: from
           in: query
           description: |
@@ -144,20 +155,8 @@ paths:
             type: string
           example: now-1d
         - $ref: '#/components/parameters/owner'
-        - name: page
-          in: query
-          description: The page number to return.
-          schema:
-            type: integer
-            default: 1
-          example: 1
-        - name: perPage
-          in: query
-          description: The number of rules to return per page.
-          schema:
-            type: integer
-            default: 20
-          example: 20
+        - $ref: '#/components/parameters/page_index'
+        - $ref: '#/components/parameters/page_size'
         - name: reporters
           in: query
           description: Filters the returned cases by the user name of the reporter.
@@ -178,10 +177,10 @@ paths:
           description: The fields to perform the simple_query_string parsed query against.
           schema:
             oneOf:
-              - type: string
+              - $ref: '#/components/schemas/search_fields'
               - type: array
                 items:
-                  type: string
+                  $ref: '#/components/schemas/search_fields'
         - $ref: '#/components/parameters/severity'
         - name: sortField
           in: query
@@ -193,16 +192,7 @@ paths:
               - updatedAt
             default: createdAt
           example: updatedAt
-        - name: sortOrder
-          in: query
-          description: Determines the sort order.
-          schema:
-            type: string
-            enum:
-              - asc
-              - desc
-            default: desc
-          example: asc
+        - $ref: '#/components/parameters/sort_order'
         - name: status
           in: query
           description: Filters the returned cases by state.
@@ -257,6 +247,12 @@ paths:
               examples:
                 findCaseResponse:
                   $ref: '#/components/examples/find_case_response'
+        '401':
+          description: Authorization information is missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/4xx_response'
       servers:
         - url: https://localhost:5601
     servers:
@@ -293,6 +289,12 @@ paths:
                 example:
                   - id: 06116b80-e1c3-11ec-be9b-9b1838238ee6
                     title: security_case
+        '401':
+          description: Authorization information is missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/4xx_response'
       servers:
         - url: https://localhost:5601
     servers:
@@ -409,6 +411,12 @@ paths:
                     version:
                       type: string
                       example: WzIwNzMsMV0=
+        '401':
+          description: Authorization information is missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/4xx_response'
       servers:
         - url: https://localhost:5601
     post:
@@ -573,6 +581,12 @@ paths:
               examples:
                 setCaseConfigResponse:
                   $ref: '#/components/examples/set_case_configuration_response'
+        '401':
+          description: Authorization information is missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/4xx_response'
       servers:
         - url: https://localhost:5601
     servers:
@@ -728,6 +742,12 @@ paths:
                     version:
                       type: string
                       example: WzIwNzMsMV0=
+        '401':
+          description: Authorization information is missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/4xx_response'
       servers:
         - url: https://localhost:5601
     servers:
@@ -735,7 +755,7 @@ paths:
   /s/{spaceId}/api/cases/configure/connectors/_find:
     get:
       summary: Retrieves information about connectors.
-      operationId: getCaseConnectors
+      operationId: findCaseConnectors
       description: |
         In particular, only the connectors that are supported for use in cases are returned. You must have `read` privileges for the **Actions and Connectors** feature in the **Management** section of the Kibana feature privileges.
       tags:
@@ -777,6 +797,12 @@ paths:
               examples:
                 findConnectorResponse:
                   $ref: '#/components/examples/find_connector_response'
+        '401':
+          description: Authorization information is missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/4xx_response'
       servers:
         - url: https://localhost:5601
     servers:
@@ -820,6 +846,12 @@ paths:
               examples:
                 getReportersResponse:
                   $ref: '#/components/examples/get_reporters_response'
+        '401':
+          description: Authorization information is missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/4xx_response'
       servers:
         - url: https://localhost:5601
     servers:
@@ -829,7 +861,7 @@ paths:
       summary: Returns the number of cases that are open, closed, and in progress.
       operationId: getCaseStatus
       description: |
-        You must have `read` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the cases you're seeking.
+        Deprecated in 8.1.0. This API is deprecated and will be removed in a future release; use the find cases API instead. You must have `read` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the cases you're seeking.
       deprecated: true
       tags:
         - cases
@@ -853,6 +885,12 @@ paths:
               examples:
                 getStatusResponse:
                   $ref: '#/components/examples/get_status_response'
+        '401':
+          description: Authorization information is missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/4xx_response'
       servers:
         - url: https://localhost:5601
     servers:
@@ -888,6 +926,12 @@ paths:
               examples:
                 getTagsResponse:
                   $ref: '#/components/examples/get_tags_response'
+        '401':
+          description: Authorization information is missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/4xx_response'
       servers:
         - url: https://localhost:5601
     servers:
@@ -905,7 +949,7 @@ paths:
         - $ref: '#/components/parameters/space_id'
         - in: query
           name: includeComments
-          description: Determines whether case comments are returned.
+          description: Deprecated in 8.1.0. This parameter is deprecated and will be removed in a future release. It determines whether case comments are returned.
           deprecated: true
           schema:
             type: boolean
@@ -920,6 +964,12 @@ paths:
               examples:
                 getCaseResponse:
                   $ref: '#/components/examples/get_case_response'
+        '401':
+          description: Authorization information is missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/4xx_response'
       servers:
         - url: https://localhost:5601
     servers:
@@ -948,6 +998,12 @@ paths:
               examples:
                 getCaseAlertsResponse:
                   $ref: '#/components/examples/get_case_alerts_response'
+        '401':
+          description: Authorization information is missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/4xx_response'
       servers:
         - url: https://localhost:5601
     servers:
@@ -983,6 +1039,12 @@ paths:
               examples:
                 createCaseCommentResponse:
                   $ref: '#/components/examples/add_comment_response'
+        '401':
+          description: Authorization information is missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/4xx_response'
       servers:
         - url: https://localhost:5601
     delete:
@@ -999,6 +1061,12 @@ paths:
       responses:
         '204':
           description: Indicates a successful call.
+        '401':
+          description: Authorization information is missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/4xx_response'
       servers:
         - url: https://localhost:5601
     patch:
@@ -1031,13 +1099,19 @@ paths:
               examples:
                 updateCaseCommentResponse:
                   $ref: '#/components/examples/update_comment_response'
+        '401':
+          description: Authorization information is missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/4xx_response'
       servers:
         - url: https://localhost:5601
     get:
       summary: Retrieves all the comments from a case.
       operationId: getAllCaseComments
       description: |
-        You must have `read` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the cases with the comments you're seeking.
+        Deprecated in 8.1.0. This API is deprecated and will be removed in a future release; instead, use the get case comment API, which requires a comment identifier in the path. You must have `read` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the cases with the comments you're seeking.
       deprecated: true
       tags:
         - cases
@@ -1051,6 +1125,43 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/case_response_properties'
+        '401':
+          description: Authorization information is missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/4xx_response'
+      servers:
+        - url: https://localhost:5601
+    servers:
+      - url: https://localhost:5601
+  /s/{spaceId}/api/cases/{caseId}/comments/_find:
+    get:
+      summary: Retrieves all the user comments from a case.
+      operationId: findCaseComments
+      description: |
+        You must have `read` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the cases with the comments you're seeking.
+      tags:
+        - cases
+      parameters:
+        - $ref: '#/components/parameters/case_id'
+        - $ref: '#/components/parameters/page_index'
+        - $ref: '#/components/parameters/page_size'
+        - $ref: '#/components/parameters/sort_order'
+        - $ref: '#/components/parameters/space_id'
+      responses:
+        '200':
+          description: Indicates a successful call.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/case_response_properties'
+        '401':
+          description: Authorization information is missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/4xx_response'
       servers:
         - url: https://localhost:5601
     servers:
@@ -1071,6 +1182,12 @@ paths:
       responses:
         '204':
           description: Indicates a successful call.
+        '401':
+          description: Authorization information is missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/4xx_response'
       servers:
         - url: https://localhost:5601
     get:
@@ -1096,6 +1213,12 @@ paths:
               examples:
                 getCaseCommentResponse:
                   $ref: '#/components/examples/get_comment_response'
+        '401':
+          description: Authorization information is missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/4xx_response'
       servers:
         - url: https://localhost:5601
     servers:
@@ -1129,6 +1252,12 @@ paths:
               examples:
                 pushCaseResponse:
                   $ref: '#/components/examples/push_case_response'
+        '401':
+          description: Authorization information is missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/4xx_response'
       servers:
         - url: https://localhost:5601
     servers:
@@ -1137,7 +1266,7 @@ paths:
     get:
       summary: Returns all user activity for a case.
       description: |
-        You must have `read` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the case you're seeking.
+        Deprecated in 8.1.0. This API is deprecated and will be removed in a future release; use the find user actions API instead. You must have `read` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the case you're seeking.
       deprecated: true
       operationId: getCaseActivity
       tags:
@@ -1157,6 +1286,82 @@ paths:
               examples:
                 getCaseActivityResponse:
                   $ref: '#/components/examples/get_case_activity_response'
+        '401':
+          description: Authorization information is missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/4xx_response'
+      servers:
+        - url: https://localhost:5601
+    servers:
+      - url: https://localhost:5601
+  /s/{spaceId}/api/cases/{caseId}/user_actions/_find:
+    get:
+      summary: Finds user activity for a case.
+      description: |
+        You must have `read` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the case you're seeking.
+      operationId: findCaseActivity
+      tags:
+        - cases
+      parameters:
+        - $ref: '#/components/parameters/case_id'
+        - $ref: '#/components/parameters/space_id'
+        - $ref: '#/components/parameters/page_index'
+          example: '1'
+        - $ref: '#/components/parameters/page_size'
+        - $ref: '#/components/parameters/sort_order'
+        - name: types
+          in: query
+          description: Determines the types of user actions to return.
+          schema:
+            type: array
+            items:
+              type: string
+              enum:
+                - action
+                - alert
+                - assignees
+                - attachment
+                - comment
+                - connector
+                - create_case
+                - description
+                - pushed
+                - settings
+                - severity
+                - status
+                - tags
+                - title
+                - user
+          example: create_case
+      responses:
+        '200':
+          description: Indicates a successful call.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  page:
+                    type: integer
+                  perPage:
+                    type: integer
+                  total:
+                    type: integer
+                  userActions:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/user_actions_find_response_properties'
+              examples:
+                findCaseActivityResponse:
+                  $ref: '#/components/examples/find_case_activity_response'
+        '401':
+          description: Authorization information is missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/4xx_response'
       servers:
         - url: https://localhost:5601
     servers:
@@ -1176,6 +1381,7 @@ components:
         type: string
       in: header
       name: kbn-xsrf
+      description: Cross-site request forgery protection
       required: true
     space_id:
       in: path
@@ -1197,6 +1403,22 @@ components:
             items:
               $ref: '#/components/schemas/owners'
       example: cases
+    page_index:
+      in: query
+      name: page
+      description: The page number to return.
+      required: false
+      schema:
+        type: integer
+        default: 1
+    page_size:
+      in: query
+      name: perPage
+      description: The number of items to return.
+      required: false
+      schema:
+        type: integer
+        default: 20
     severity:
       in: query
       name: severity
@@ -1208,6 +1430,17 @@ components:
           - high
           - low
           - medium
+    sort_order:
+      in: query
+      name: sortOrder
+      description: Determines the sort order.
+      required: false
+      schema:
+        type: string
+        enum:
+          - asc
+          - desc
+        default: desc
     alert_id:
       in: path
       name: alertId
@@ -2004,6 +2237,18 @@ components:
         version:
           type: string
           example: WzUzMiwxXQ==
+    4xx_response:
+      type: object
+      title: Unsuccessful cases API response
+      properties:
+        error:
+          type: string
+          example: Unauthorized
+        message:
+          type: string
+        statusCode:
+          type: integer
+          example: 401
     update_case_request:
       title: Update case request
       description: The update case API request body varies depending on the type of connector.
@@ -2054,6 +2299,35 @@ components:
               version:
                 description: The current version of the case. To determine this value, use the get case or find cases APIs.
                 type: string
+    search_fields:
+      type: string
+      description: The fields to perform the `simple_query_string` parsed query against.
+      enum:
+        - closed_by.username
+        - closed_by.full_name
+        - closed_by.email
+        - closed_by.profile_uid
+        - created_by.username
+        - created_by.full_name
+        - created_by.email
+        - created_by.profile_uid
+        - description
+        - connector.name
+        - connector.type
+        - external_service.pushed_by.username
+        - external_service.pushed_by.full_name
+        - external_service.pushed_by.email
+        - external_service.pushed_by.profile_uid
+        - external_service.connector_name
+        - external_service.external_id
+        - external_service.external_title
+        - external_service.external_url
+        - title
+        - title.keyword
+        - updated_by.username
+        - updated_by.full_name
+        - updated_by.email
+        - updated_by.profile_uid
     closure_types:
       type: string
       description: Indicates whether a case is automatically closed when it is pushed to external systems (`close-by-pushing`) or not automatically closed (`close-by-user`).
@@ -2614,6 +2888,90 @@ components:
             - $ref: '#/components/schemas/payload_user_comment'
         type:
           $ref: '#/components/schemas/action_types'
+    user_actions_find_response_properties:
+      type: object
+      required:
+        - action
+        - comment_id
+        - created_at
+        - created_by
+        - id
+        - owner
+        - payload
+        - type
+        - version
+      properties:
+        action:
+          $ref: '#/components/schemas/actions'
+        comment_id:
+          type: string
+          nullable: true
+          example: 578608d0-03b1-11ed-920c-974bfa104448
+        created_at:
+          type: string
+          format: date-time
+          example: '2022-05-13T09:16:17.416Z'
+        created_by:
+          type: object
+          properties:
+            email:
+              type: string
+              example: null
+              nullable: true
+            full_name:
+              type: string
+              example: null
+              nullable: true
+            username:
+              type: string
+              example: elastic
+              nullable: true
+            profile_uid:
+              type: string
+              example: u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0
+          required:
+            - email
+            - full_name
+            - username
+        id:
+          type: string
+          example: 22fd3e30-03b1-11ed-920c-974bfa104448
+        owner:
+          $ref: '#/components/schemas/owners'
+        payload:
+          oneOf:
+            - $ref: '#/components/schemas/payload_alert_comment'
+            - $ref: '#/components/schemas/payload_assignees'
+            - $ref: '#/components/schemas/payload_connector'
+            - $ref: '#/components/schemas/payload_create_case'
+            - $ref: '#/components/schemas/payload_delete'
+            - $ref: '#/components/schemas/payload_description'
+            - $ref: '#/components/schemas/payload_pushed'
+            - $ref: '#/components/schemas/payload_settings'
+            - $ref: '#/components/schemas/payload_severity'
+            - $ref: '#/components/schemas/payload_status'
+            - $ref: '#/components/schemas/payload_tags'
+            - $ref: '#/components/schemas/payload_title'
+            - $ref: '#/components/schemas/payload_user_comment'
+        version:
+          type: string
+          example: WzM1ODg4LDFd
+        type:
+          type: string
+          description: The type of action.
+          enum:
+            - assignees
+            - create_case
+            - comment
+            - connector
+            - description
+            - pushed
+            - tags
+            - title
+            - status
+            - settings
+            - severity
+          example: create_case
   examples:
     create_case_request:
       summary: Create a security case that uses a Jira connector.
@@ -3171,6 +3529,71 @@ components:
           owner: cases
           payload: null
           type: delete_case
+    find_case_activity_response:
+      summary: Retrieves all activity for a case
+      value:
+        page: 1
+        perPage: 20
+        total: 4
+        userActions:
+          - id: b4cd0770-07c9-11ed-a5fd-47154cb8767e
+            action: create
+            comment_id: 578608d0-03b1-11ed-920c-974bfa104448
+            created_at: '2022-07-20T01:17:22.150Z'
+            created_by:
+              username: elastic
+              email: null
+              full_name: null
+            owner: cases
+            payload:
+              assignees: null
+              connector:
+                name: none
+                type: .none
+                fields: null
+                id: none
+              description: test
+              tags:
+                - mine
+              title: test-case
+              owner: cases
+              settings:
+                syncAlerts: false
+              severity: low
+              status: open
+              type: create_case
+            version: WzM1ODg4LDFd
+            type: comment
+          - id: 57af14a0-03b1-11ed-920c-974bfa104448
+            action: create
+            comment_id: 578608d0-03b1-11ed-920c-974bfa104448
+            created_at: '2022-07-14T20:12:53.354Z'
+            created_by:
+              username: elastic
+              email: null
+              full_name: null
+            owner: cases
+            payload:
+              comment: A new comment
+              owner: cases
+              type: user
+            version: WzM1ODg4LDFa
+            type: comment
+          - id: 573c6980-6123-11ed-aa41-81a0a61fe447
+            action: add
+            comment_id: null
+            created_at: '2022-07-20T01:10:28.238Z'
+            created_by:
+              username: elastic
+              email: null
+              full_name: null
+              profile_uid: u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0
+            owner: cases
+            payload:
+              assignees:
+                uid: u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0
+            version: WzM1ODg4LDFb
+            type: assignees
 security:
   - basicAuth: []
   - apiKeyAuth: []

@@ -10,3 +10,27 @@ date: 2022-02-09
 Sometimes the user tries to go to a page that doesn't exist, because the URL is broken or because they try to load a resource that does not exist. For those cases we want to show a standard 404 error.
 
 The default call to action is a "Go back" button that simulates the browser's "Back" behaviour. Consumers can specify their own CTA's with the `actions` prop.
+
+The NotFoundPrompt component also has the prop `actions` that takes in an array of components. 
+For example: 
+
+```jsx
+    <EuiPageTemplate>
+      <EuiPageTemplate.Section alignment="center">
+        <NotFoundPrompt
+          actions={
+            [
+              <EuiButton fill color="primary" onClick={onClickHandler}>
+                Go home
+              </EuiButton>,
+              <EuiButton iconType="search">
+                Go to discover
+              </EuiButton>
+            ]
+          }
+          title="Customizable Title"
+          body="Customizable Body"
+        />
+      </EuiPageTemplate.Section>
+    </EuiPageTemplate>
+```

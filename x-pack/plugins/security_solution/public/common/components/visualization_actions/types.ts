@@ -5,14 +5,41 @@
  * 2.0.
  */
 
-import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
+import type {
+  DatatableVisualizationState,
+  FieldBasedIndexPatternColumn,
+  FormBasedPersistedState,
+  TypedLensByValueInput,
+} from '@kbn/lens-plugin/public';
+import type { DataViewSpec } from '@kbn/data-views-plugin/common';
+import type { Action } from '@kbn/ui-actions-plugin/public';
+import type { Filter, Query } from '@kbn/es-query';
+
 import type { InputsModelId } from '../../store/inputs/constants';
+import type { SourcererScopeName } from '../../store/sourcerer/model';
+import type { Status } from '../../../../common/detection_engine/schemas/common';
 
 export type LensAttributes = TypedLensByValueInput['attributes'];
-export type GetLensAttributes = (stackByField?: string) => LensAttributes;
+export type GetLensAttributes = (
+  stackByField?: string,
+  extraOptions?: ExtraOptions
+) => LensAttributes;
+
+export interface UseLensAttributesProps {
+  applyGlobalQueriesAndFilters?: boolean;
+  extraOptions?: ExtraOptions;
+  getLensAttributes?: GetLensAttributes;
+  lensAttributes?: LensAttributes | null;
+  scopeId?: SourcererScopeName;
+  stackByField?: string;
+  title?: string;
+}
 
 export interface VisualizationActionsProps {
+  applyGlobalQueriesAndFilters?: boolean;
   className?: string;
+  extraActions?: Action[];
+  extraOptions?: ExtraOptions;
   getLensAttributes?: GetLensAttributes;
   inputId?: InputsModelId.global | InputsModelId.timeline;
   inspectIndex?: number;
@@ -21,20 +48,37 @@ export interface VisualizationActionsProps {
   lensAttributes?: LensAttributes | null;
   onCloseInspect?: () => void;
   queryId: string;
+  scopeId?: SourcererScopeName;
   stackByField?: string;
   timerange: { from: string; to: string };
   title: React.ReactNode;
+  withDefaultActions?: boolean;
 }
 
+export interface EmbeddableData {
+  requests: string[];
+  responses: string[];
+  isLoading: boolean;
+}
+
+export type OnEmbeddableLoaded = (data: EmbeddableData) => void;
+
 export interface LensEmbeddableComponentProps {
+  applyGlobalQueriesAndFilters?: boolean;
+  extraActions?: Action[];
+  extraOptions?: ExtraOptions;
   getLensAttributes?: GetLensAttributes;
-  height?: string;
+  height?: number; // px
   id: string;
   inputsModelId?: InputsModelId.global | InputsModelId.timeline;
-  inspectTitle?: string;
-  lensAttributes: LensAttributes;
+  inspectTitle?: React.ReactNode;
+  lensAttributes?: LensAttributes;
+  onLoad?: OnEmbeddableLoaded;
+  scopeId?: SourcererScopeName;
   stackByField?: string;
   timerange: { from: string; to: string };
+  width?: string | number;
+  withActions?: boolean;
 }
 
 export enum RequestStatus {
@@ -73,4 +117,73 @@ export interface RequestStatistic {
 export interface Response {
   json?: { rawResponse?: object };
   time?: number;
+}
+
+export interface ExtraOptions {
+  breakdownField?: string;
+  filters?: Filter[];
+  ruleId?: string;
+  spaceId?: string;
+  status?: Status;
+  dnsIsPtrIncluded?: boolean;
+}
+
+export interface VisualizationEmbeddableProps extends LensEmbeddableComponentProps {
+  donutTextWrapperClassName?: string;
+  inputId?: InputsModelId.global | InputsModelId.timeline;
+  isDonut?: boolean;
+  label?: string;
+}
+
+export interface VisualizationResponse<Hit = {}, Aggregations = {} | undefined> {
+  took: number;
+  _shards: {
+    total: number;
+    successful: number;
+    skipped: number;
+    failed: number;
+  };
+  aggregations?: Aggregations;
+  hits: {
+    total: number;
+    hits: Hit[];
+  };
+}
+
+export interface SavedObjectReference {
+  id: string;
+  name: string;
+  type: string;
+}
+
+export interface LensDataTableAttributes<TVisType, TVisState> {
+  description?: string;
+  references: SavedObjectReference[];
+  visualizationType: TVisType;
+  state: {
+    query: Query;
+    globalPalette?: {
+      activePaletteId: string;
+      state?: unknown;
+    };
+    filters: Filter[];
+    adHocDataViews?: Record<string, DataViewSpec>;
+    internalReferences?: SavedObjectReference[];
+    datasourceStates: {
+      formBased: FormBasedPersistedState;
+    };
+    visualization: TVisState;
+  };
+  title: string;
+}
+
+export interface LensDataTableEmbeddable {
+  attributes: LensDataTableAttributes<'lnsDatatable', DatatableVisualizationState>;
+  id: string;
+  timeRange: { from: string; to: string; fromStr: string; toStr: string };
+}
+
+export interface LensEmbeddableDataTableColumn extends FieldBasedIndexPatternColumn {
+  operationType: string;
+  params?: unknown;
 }

@@ -9,7 +9,8 @@ import { setMockValues } from '../../../../../__mocks__/kea_logic';
 import React from 'react';
 
 import { shallow, ShallowWrapper } from 'enzyme';
-import { set } from 'lodash/fp';
+
+import { set } from '@kbn/safer-lodash-set/fp';
 
 import { AccordionList } from '../../../../../shared/accordion_list/accordion_list';
 

@@ -53,7 +53,11 @@ export function BottomBarActions({
         <EuiFlexItem grow={false}>
           <EuiFlexGroup justifyContent="flexEnd">
             <EuiFlexItem grow={false}>
-              <EuiButtonEmpty color="ghost" onClick={onDiscardChanges}>
+              <EuiButtonEmpty
+                data-test-subj="apmBottomBarActionsDiscardChangesButton"
+                color="ghost"
+                onClick={onDiscardChanges}
+              >
                 {i18n.translate(
                   'xpack.apm.bottomBarActions.discardChangesButton',
                   {
@@ -64,6 +68,7 @@ export function BottomBarActions({
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiButton
+                data-test-subj="apmBottomBarActionsButton"
                 onClick={onSave}
                 fill
                 isLoading={isLoading}

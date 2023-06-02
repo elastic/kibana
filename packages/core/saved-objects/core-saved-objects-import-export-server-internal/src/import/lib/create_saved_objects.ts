@@ -6,9 +6,14 @@
  * Side Public License, v 1.
  */
 
-import type { SavedObject, SavedObjectsImportFailure } from '@kbn/core-saved-objects-common';
+import type { SavedObjectsImportFailure } from '@kbn/core-saved-objects-common';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
-import type { CreatedObject } from '@kbn/core-saved-objects-server';
+import type { CreatedObject, SavedObject } from '@kbn/core-saved-objects-server';
+import {
+  LEGACY_URL_ALIAS_TYPE,
+  LegacyUrlAlias,
+} from '@kbn/core-saved-objects-base-server-internal';
+import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
 import { extractErrors } from './extract_errors';
 import type { ImportStateMap } from './types';
 
@@ -20,6 +25,19 @@ export interface CreateSavedObjectsParams<T> {
   namespace?: string;
   overwrite?: boolean;
   refresh?: boolean | 'wait_for';
+  /**
+   * If true, Kibana will apply various adjustments to the data that's being imported to maintain compatibility between
+   * different Kibana versions (e.g. generate legacy URL aliases for all imported objects that have to change IDs).
+   */
+  compatibilityMode?: boolean;
+  /**
+   * If true, create the object as managed.
+   *
+   * This can be leveraged by applications to e.g. prevent edits to a managed
+   * saved object. Instead, users can be guided to create a copy first and
+   * make their edits to the copy.
+   */
+  managed?: boolean;
 }
 
 export interface CreateSavedObjectsResult<T> {
@@ -39,6 +57,8 @@ export const createSavedObjects = async <T>({
   namespace,
   overwrite,
   refresh,
+  compatibilityMode,
+  managed,
 }: CreateSavedObjectsParams<T>): Promise<CreateSavedObjectsResult<T>> => {
   // filter out any objects that resulted in errors
   const errorSet = accumulatedErrors.reduce(
@@ -85,12 +105,21 @@ export const createSavedObjects = async <T>({
         ...(!importStateValue.omitOriginId && { originId: originId ?? object.id }),
       };
     }
-    return { ...object, ...(references && { references }), ...(originId && { originId }) };
+    return {
+      ...object,
+      ...(references && { references }),
+      ...(originId && { originId }),
+      ...{ managed: managed ?? object.managed ?? false },
+    };
   });
 
   const resolvableErrors = ['conflict', 'ambiguous_conflict', 'missing_references'];
-  let expectedResults = objectsToCreate;
-  if (!accumulatedErrors.some(({ error: { type } }) => resolvableErrors.includes(type))) {
+  const hasResolvableErrors = accumulatedErrors.some(({ error: { type } }) =>
+    resolvableErrors.includes(type)
+  );
+
+  let expectedResults: Array<SavedObject<T>> = objectsToCreate;
+  if (!hasResolvableErrors) {
     const bulkCreateResponse = await savedObjectsClient.bulkCreate(objectsToCreate, {
       namespace,
       overwrite,
@@ -99,16 +128,60 @@ export const createSavedObjects = async <T>({
     expectedResults = bulkCreateResponse.saved_objects;
   }
 
-  // remap results to reflect the object IDs that were submitted for import
-  // this ensures that consumers understand the results
-  const remappedResults = expectedResults.map<CreatedObject<T>>((result) => {
+  // Namespace to use as the target namespace for the legacy URLs we create when in compatibility mode. If the namespace
+  // is specified explicitly we should use it instead of the namespace the saved objects client is scoped to. In certain
+  // scenarios (e.g. copying to a default space) both current namespace and namespace from the parameter aren't defined.
+  const legacyUrlTargetNamespace = SavedObjectsUtils.namespaceIdToString(
+    namespace ?? savedObjectsClient.getCurrentNamespace()
+  );
+
+  // Remap results to reflect the object IDs that were submitted for import this ensures that consumers understand the
+  // results, and collect legacy URL aliases if in compatibility mode.
+  const remappedResults: Array<CreatedObject<T>> = [];
+  const legacyUrlAliases = new Map<string, SavedObject<LegacyUrlAlias>>();
+  for (const result of expectedResults) {
     const { id } = objectIdMap.get(`${result.type}:${result.id}`)!;
     // also, include a `destinationId` field if the object create attempt was made with a different ID
-    return { ...result, id, ...(id !== result.id && { destinationId: result.id }) };
-  });
+    remappedResults.push({ ...result, id, ...(id !== result.id && { destinationId: result.id }) });
 
+    // Indicates that object has been successfully imported.
+    const objectSuccessfullyImported = !hasResolvableErrors && !result.error;
+
+    // Indicates that the object has changed ID at some point with the original ID retained as the origin ID, so that
+    // legacy URL alias is required to retrieve the object using its original ID.
+    const objectRequiresLegacyUrlAlias = !!result.originId && result.originId !== result.id;
+    if (compatibilityMode && objectRequiresLegacyUrlAlias && objectSuccessfullyImported) {
+      const legacyUrlAliasId = `${legacyUrlTargetNamespace}:${result.type}:${result.originId}`;
+      legacyUrlAliases.set(legacyUrlAliasId, {
+        id: legacyUrlAliasId,
+        type: LEGACY_URL_ALIAS_TYPE,
+        references: [],
+        attributes: {
+          // We can safely force `originId` here since it's enforced by `objectRequiresLegacyUrlAlias`.
+          sourceId: result.originId!,
+          targetNamespace: legacyUrlTargetNamespace,
+          targetType: result.type,
+          targetId: result.id,
+          purpose: 'savedObjectImport',
+        },
+        ...{ managed: managed ?? false }, // we can safey create each doc with the given managed flag, even if it's set as the default, bulkCreate would "override" this otherwise.
+      });
+    }
+  }
+
+  // Create legacy URL aliases if needed.
+  const legacyUrlAliasResults =
+    legacyUrlAliases.size > 0
+      ? (
+          await savedObjectsClient.bulkCreate([...legacyUrlAliases.values()], {
+            namespace,
+            overwrite,
+            refresh,
+          })
+        ).saved_objects
+      : [];
   return {
     createdObjects: remappedResults.filter((obj) => !obj.error),
-    errors: extractErrors(remappedResults, objects),
+    errors: extractErrors(remappedResults, objects, legacyUrlAliasResults, legacyUrlAliases),
   };
 };

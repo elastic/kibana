@@ -99,6 +99,7 @@ function pluginInitializerContextMock<T>(config: T = {} as T) {
         buildNum: 100,
         buildSha: 'buildSha',
         dist: false,
+        buildDate: new Date('2023-05-15T23:12:09.000Z'),
       },
       instanceUuid: 'instance-uuid',
       configs: ['/some/path/to/config/kibana.yml'],
@@ -124,6 +125,7 @@ function createCoreRequestHandlerContextMock() {
     },
     uiSettings: {
       client: uiSettingsServiceMock.createClient(),
+      globalClient: uiSettingsServiceMock.createClient(),
     },
     deprecations: {
       client: deprecationsServiceMock.createClient(),

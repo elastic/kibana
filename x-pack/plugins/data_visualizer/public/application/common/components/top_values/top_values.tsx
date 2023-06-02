@@ -20,10 +20,11 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import classNames from 'classnames';
 import { i18n } from '@kbn/i18n';
 import { DataViewField } from '@kbn/data-views-plugin/public';
-import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/data-plugin/common';
+import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
 import { css } from '@emotion/react';
+import { roundToDecimalPlace } from '@kbn/ml-number-utils';
 import { useDataVisualizerKibana } from '../../../kibana_context';
-import { roundToDecimalPlace, kibanaFieldFormat } from '../utils';
+import { kibanaFieldFormat } from '../utils';
 import { ExpandedRowFieldHeader } from '../stats_table/components/expanded_row_field_header';
 import { FieldVisStats } from '../../../../../common/types';
 import { ExpandedRowPanel } from '../stats_table/components/field_data_expanded_row/expanded_row_panel';
@@ -54,6 +55,7 @@ export const TopValues: FC<Props> = ({ stats, fieldFormat, barColor, compressed,
   if (stats === undefined || !stats.topValues) return null;
   const { topValues, fieldName, sampleCount } = stats;
 
+  if (topValues?.length === 0) return null;
   const totalDocuments = stats.totalDocuments ?? sampleCount ?? 0;
   const topValuesOtherCountPercent =
     1 - (topValues ? topValues.reduce((acc, bucket) => acc + bucket.percent, 0) : 0);

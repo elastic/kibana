@@ -23,11 +23,12 @@ export interface IRuleDataClient {
 }
 
 export interface IRuleDataReader {
-  search<TSearchRequest extends ESSearchRequest>(
+  search<
+    TSearchRequest extends ESSearchRequest,
+    TAlertDoc = Partial<ParsedTechnicalFields & ParsedExperimentalFields>
+  >(
     request: TSearchRequest
-  ): Promise<
-    ESSearchResponse<Partial<ParsedTechnicalFields & ParsedExperimentalFields>, TSearchRequest>
-  >;
+  ): Promise<ESSearchResponse<TAlertDoc, TSearchRequest>>;
 
   getDynamicIndexPattern(target?: string): Promise<{
     title: string;

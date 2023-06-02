@@ -24,7 +24,7 @@ const getLabelTitle = (userAction: UserActionResponse<StatusUserAction>) => {
       <EuiFlexGroup
         gutterSize="s"
         alignItems="center"
-        data-test-subj={`${userAction.actionId}-user-action-status-title`}
+        data-test-subj={`${userAction.id}-user-action-status-title`}
         responsive={false}
       >
         <EuiFlexItem grow={false}>{i18n.MARKED_CASE_AS}</EuiFlexItem>

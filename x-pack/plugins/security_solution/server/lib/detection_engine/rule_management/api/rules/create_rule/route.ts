@@ -22,7 +22,7 @@ import { buildSiemResponse } from '../../../../routes/utils';
 import { createRules } from '../../../logic/crud/create_rules';
 import { checkDefaultRuleExceptionListReferences } from '../../../logic/exceptions/check_for_default_rule_exception_list';
 import { validateRuleDefaultExceptionList } from '../../../logic/exceptions/validate_rule_default_exception_list';
-import { transformValidate } from '../../../utils/validate';
+import { transformValidate, validateResponseActionsPermissions } from '../../../utils/validate';
 
 export const createRuleRoute = (
   router: SecuritySolutionPluginRouter,
@@ -55,7 +55,6 @@ export const createRuleRoute = (
         ]);
 
         const rulesClient = ctx.alerting.getRulesClient();
-        const ruleExecutionLog = ctx.securitySolution.getRuleExecutionLog();
         const savedObjectsClient = ctx.core.savedObjects.client;
         const exceptionsClient = ctx.lists?.getExceptionListClient();
 
@@ -90,17 +89,18 @@ export const createRuleRoute = (
         await validateRuleDefaultExceptionList({
           exceptionsList: request.body.exceptions_list,
           rulesClient,
+          ruleRuleId: undefined,
           ruleId: undefined,
         });
+
+        await validateResponseActionsPermissions(ctx.securitySolution, request.body);
 
         const createdRule = await createRules({
           rulesClient,
           params: request.body,
         });
 
-        const ruleExecutionSummary = await ruleExecutionLog.getExecutionSummary(createdRule.id);
-
-        const [validated, errors] = transformValidate(createdRule, ruleExecutionSummary);
+        const [validated, errors] = transformValidate(createdRule);
         if (errors != null) {
           return siemResponse.error({ statusCode: 500, body: errors });
         } else {

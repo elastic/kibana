@@ -42,6 +42,7 @@ const timeframeMapSchema: MakeSchemaFrom<TimeframeMap> = {
 const agentSchema: MakeSchemaFrom<APMUsage>['agents'][ElasticAgentName] = {
   agent: {
     version: { type: 'array', items: { type: 'keyword' } },
+    activation_method: { type: 'array', items: { type: 'keyword' } },
   },
   service: {
     framework: {
@@ -98,6 +99,7 @@ const apmPerAgentSchema: Pick<
     'opentelemetry/php': long,
     'opentelemetry/python': long,
     'opentelemetry/ruby': long,
+    'opentelemetry/rust': long,
     'opentelemetry/swift': long,
     'opentelemetry/webjs': long,
   },
@@ -134,6 +136,7 @@ export const apmPerServiceSchema: MakeSchemaFrom<APMPerService> = {
   agent: {
     name: keyword,
     version: keyword,
+    activation_method: keyword,
   },
   service: {
     language: {
@@ -193,7 +196,6 @@ export const apmSchema: MakeSchemaFrom<APMUsage> = {
     span: timeframeMapSchema,
     error: timeframeMapSchema,
     metric: timeframeMapSchema,
-    sourcemap: timeframeMapSchema,
     onboarding: timeframeMapSchema,
     agent_configuration: timeframeMapAllSchema,
     max_transaction_groups_per_service: timeframeMapSchema,
@@ -221,7 +223,6 @@ export const apmSchema: MakeSchemaFrom<APMUsage> = {
     transaction: { ms: long },
     error: { ms: long },
     metric: { ms: long },
-    sourcemap: { ms: long },
     onboarding: { ms: long },
   },
   integrations: { ml: { all_jobs_count: long } },

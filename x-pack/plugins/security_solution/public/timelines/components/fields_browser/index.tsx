@@ -9,10 +9,10 @@ import type { MutableRefObject } from 'react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { DataViewField, DataView } from '@kbn/data-views-plugin/common';
 import type {
-  ColumnHeaderOptions,
   CreateFieldComponent,
   GetFieldTableColumns,
-} from '@kbn/timelines-plugin/common/types';
+} from '@kbn/triggers-actions-ui-plugin/public/types';
+import type { ColumnHeaderOptions } from '../../../../common/types';
 import { useDataView } from '../../../common/containers/source/use_data_view';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { useKibana } from '../../../common/lib/kibana';
@@ -63,10 +63,12 @@ export const useFieldBrowserOptions: UseFieldBrowserOptions = ({
     scopeIdSelector(state, sourcererScope)
   );
   useEffect(() => {
+    const fetchAndSetDataView = async (dataViewId: string) => {
+      const aDatView = await dataViews.get(dataViewId);
+      setDataView(aDatView);
+    };
     if (selectedDataViewId != null && !missingPatterns.length) {
-      dataViews.get(selectedDataViewId).then((dataViewResponse) => {
-        setDataView(dataViewResponse);
-      });
+      fetchAndSetDataView(selectedDataViewId);
     }
   }, [selectedDataViewId, missingPatterns, dataViews]);
 
@@ -170,8 +172,12 @@ export const useFieldBrowserOptions: UseFieldBrowserOptions = ({
     openDeleteFieldModal,
   });
 
-  return {
-    createFieldButton,
-    getFieldTableColumns,
-  };
+  const memoized = useMemo(
+    () => ({
+      createFieldButton,
+      getFieldTableColumns,
+    }),
+    [createFieldButton, getFieldTableColumns]
+  );
+  return memoized;
 };

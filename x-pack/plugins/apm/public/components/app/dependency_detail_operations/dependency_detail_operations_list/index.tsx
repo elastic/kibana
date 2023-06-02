@@ -76,7 +76,7 @@ export function DependencyDetailOperationsList() {
   });
 
   const { searchServiceDestinationMetrics } =
-    useSearchServiceDestinationMetrics({ rangeFrom, rangeTo, kuery });
+    useSearchServiceDestinationMetrics({ start, end, kuery });
 
   const primaryStatsFetch = useFetcher(
     (callApmApi) => {

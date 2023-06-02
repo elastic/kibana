@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 
 import type { Output } from '../../../../types';
 import type { useConfirmModal } from '../../hooks/use_confirm_modal';
@@ -30,35 +31,60 @@ const ConfirmDescription: React.FunctionComponent<ConfirmDescriptionProps> = ({
   agentCount,
   agentPolicyCount,
 }) => (
-  <FormattedMessage
-    id="xpack.fleet.settings.updateOutput.confirmModalText"
-    defaultMessage="This action will update {outputName} output. It will update {policies} and {agents}. This action can not be undone. Are you sure you wish to continue?"
-    values={{
-      outputName: <strong>{output.name}</strong>,
-      agents: (
-        <strong>
+  <>
+    <FormattedMessage
+      data-test-subj="settings.outputModal"
+      id="xpack.fleet.settings.updateOutput.confirmModalText"
+      defaultMessage="This action will update {outputName} output. It will update {policies} and {agents}. This action can not be undone. Are you sure you wish to continue?"
+      values={{
+        outputName: <strong>{output.name}</strong>,
+        agents: (
+          <strong>
+            <FormattedMessage
+              id="xpack.fleet.settings.updateOutput.agentsCount"
+              defaultMessage="{agentCount, plural, one {# agent} other {# agents}}"
+              values={{
+                agentCount,
+              }}
+            />
+          </strong>
+        ),
+        policies: (
+          <strong>
+            <FormattedMessage
+              id="xpack.fleet.settings.updateOutput.agentPolicyCount"
+              defaultMessage="{agentPolicyCount, plural, one {# agent policy} other {# agent policies}}"
+              values={{
+                agentPolicyCount,
+              }}
+            />
+          </strong>
+        ),
+      }}
+    />
+
+    {output.type === 'logstash' ? (
+      <>
+        <EuiSpacer size="s" />
+        <EuiCallOut
+          iconType="warning"
+          color="warning"
+          size="m"
+          title={
+            <FormattedMessage
+              id="xpack.fleet.settings.updateOutput.warningTitle"
+              defaultMessage="Logstash output for agent integration is not supported for fleet server."
+            />
+          }
+        >
           <FormattedMessage
-            id="xpack.fleet.settings.updateOutput.agentsCount"
-            defaultMessage="{agentCount, plural, one {# agent} other {# agents}}"
-            values={{
-              agentCount,
-            }}
+            id="xpack.fleet.settings.updateOutput.warningMessage"
+            defaultMessage="Fleet server policies will keep using the existing ES output."
           />
-        </strong>
-      ),
-      policies: (
-        <strong>
-          <FormattedMessage
-            id="xpack.fleet.settings.updateOutput.agentPolicyCount"
-            defaultMessage="{agentPolicyCount, plural, one {# agent policy} other {# agent policies}}"
-            values={{
-              agentPolicyCount,
-            }}
-          />
-        </strong>
-      ),
-    }}
-  />
+        </EuiCallOut>{' '}
+      </>
+    ) : null}
+  </>
 );
 
 export async function confirmUpdate(

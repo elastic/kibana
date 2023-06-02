@@ -6,7 +6,6 @@
  */
 
 import React, { useMemo } from 'react';
-import { css } from '@emotion/css';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText, useEuiTheme } from '@elastic/eui';
 import * as labels from './labels';
 import { DANGER_VIZ_COLOR, getSkippedVizColor, SUCCESS_VIZ_COLOR } from './monitor_status_data';
@@ -25,11 +24,11 @@ export const MonitorStatusLegend = ({ brushable }: { brushable: boolean }) => {
       iconType?: string;
     }) => (
       <EuiFlexItem
-        css={css`
-          display: flex;
-          flex-direction: row;
-          gap: 2px;
-        `}
+        css={{
+          display: 'flex',
+          flexDirection: 'row',
+          gap: 2,
+        }}
         grow={false}
       >
         <EuiIcon type={iconType} color={color} />
@@ -46,7 +45,7 @@ export const MonitorStatusLegend = ({ brushable }: { brushable: boolean }) => {
       {/*
         // Hiding error for now until @elastic/chart's Heatmap chart supports annotations
         // `getErrorVizColor` can be imported from './monitor_status_data'
-        <LegendItem color={getErrorVizColor(euiTheme)} label={labels.ERROR_LABEL} iconType="alert" />
+        <LegendItem color={getErrorVizColor(euiTheme)} label={labels.ERROR_LABEL} iconType="warning" />
       */}
 
       {brushable ? (

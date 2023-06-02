@@ -13,7 +13,13 @@ export const CREATE_NEW_RULE_BTN = '[data-test-subj="create-new-rule"]';
 
 export const COLLAPSED_ACTION_BTN = '[data-test-subj="euiCollapsedItemActionsButton"]';
 
+export const ELASTIC_RULES_BTN = '[data-test-subj="showElasticRulesFilterButton"]';
+
 export const CUSTOM_RULES_BTN = '[data-test-subj="showCustomRulesFilterButton"]';
+
+export const ENABLED_RULES_BTN = '[data-test-subj="showEnabledRulesFilterButton"]';
+
+export const DISABLED_RULES_BTN = '[data-test-subj="showDisabledRulesFilterButton"]';
 
 export const DELETE_RULE_ACTION_BTN = '[data-test-subj="deleteRuleAction"]';
 
@@ -32,7 +38,14 @@ export const DELETE_RULE_BULK_BTN = '[data-test-subj="deleteRuleBulk"]';
 
 export const DUPLICATE_RULE_BULK_BTN = '[data-test-subj="duplicateRuleBulk"]';
 
-export const ELASTIC_RULES_BTN = '[data-test-subj="showElasticRulesFilterButton"]';
+export const DUPLICATE_WITH_EXCEPTIONS_OPTION = '[data-test-subj="withExceptions"] label';
+
+export const DUPLICATE_WITH_EXCEPTIONS_WITHOUT_EXPIRED_OPTION =
+  '[data-test-subj="withExceptionsExcludeExpiredExceptions"] label';
+
+export const DUPLICATE_WITHOUT_EXCEPTIONS_OPTION = '[data-test-subj="withoutExceptions"] label';
+
+export const RULE_SEARCH_FIELD = '[data-test-subj="ruleSearchField"]';
 
 export const EXPORT_ACTION_BTN = '[data-test-subj="exportRuleAction"]';
 
@@ -65,27 +78,23 @@ export const RULE_CHECKBOX = '.euiTableRow .euiCheckbox__input';
 
 export const RULE_NAME = '[data-test-subj="ruleName"]';
 
+export const RULE_LAST_RUN = '[data-test-subj="ruleLastRun"]';
+
 export const RULE_SWITCH = '[data-test-subj="ruleSwitch"]';
 
 export const RULE_SWITCH_LOADER = '[data-test-subj="ruleSwitchLoader"]';
 
-export const RULES_TABLE = '[data-test-subj="rules-table"]';
+export const RULES_MANAGEMENT_TAB = '[data-test-subj="navigation-management"]';
+
+export const RULES_MONITORING_TAB = '[data-test-subj="navigation-monitoring"]';
+
+export const RULES_MANAGEMENT_TABLE = '[data-test-subj="rules-management-table"]';
+
+export const RULES_MONITORING_TABLE = '[data-test-subj="rules-monitoring-table"]';
 
 export const RULES_ROW = '.euiTableRow';
 
-export const RULES_MONITORING_TABLE = '[data-test-subj="allRulesTableTab-monitoring"]';
-
 export const SEVERITY = '[data-test-subj="severity"]';
-
-export const SORT_RULES_BTN = '[data-test-subj="tableHeaderSortButton"]';
-
-export const PAGINATION_POPOVER_BTN = '[data-test-subj="tablePaginationPopoverButton"]';
-
-export const rowsPerPageSelector = (count: number) =>
-  `[data-test-subj="tablePagination-${count}-rows"]`;
-
-export const pageSelector = (pageNumber: number) =>
-  `[data-test-subj="pagination-button-${pageNumber - 1}"]`;
 
 export const SELECT_ALL_RULES_BTN = '[data-test-subj="selectAllRules"]';
 
@@ -121,10 +130,13 @@ export const TOASTER_BODY = '[data-test-subj="globalToastList"] [data-test-subj=
 
 export const TOASTER_ERROR_BTN = '[data-test-subj="errorToastBtn"]';
 
-export const RULE_IMPORT_OVERWRITE_CHECKBOX = '[id="import-data-modal-checkbox-label"]';
+export const RULE_IMPORT_OVERWRITE_CHECKBOX = '[id="importDataModalCheckboxLabel"]';
 
 export const RULE_IMPORT_OVERWRITE_EXCEPTIONS_CHECKBOX =
-  '[id="import-data-modal-exceptions-checkbox-label"]';
+  '[id="importDataModalExceptionsCheckboxLabel"]';
+
+export const RULE_IMPORT_OVERWRITE_CONNECTORS_CHECKBOX =
+  '[id="importDataModalActionConnectorsCheckbox"]';
 
 export const RULES_TAGS_POPOVER_BTN = '[data-test-subj="tagsDisplayPopoverButton"]';
 
@@ -132,9 +144,15 @@ export const RULES_TAGS_POPOVER_WRAPPER = '[data-test-subj="tagsDisplayPopoverWr
 
 export const RULES_TAGS_FILTER_BTN = '[data-test-subj="tags-filter-popover-button"]';
 
+export const RULES_TAGS_FILTER_POPOVER = '[data-test-subj="tags-filter-popover"]';
+
+export const RULES_SELECTED_TAG = '.euiSelectableListItem[aria-checked="true"]';
+
 export const SELECTED_RULES_NUMBER_LABEL = '[data-test-subj="selectedRules"]';
 
 export const REFRESH_SETTINGS_POPOVER = '[data-test-subj="refreshSettings-popover"]';
+
+export const REFRESH_RULES_TABLE_BUTTON = '[data-test-subj="refreshRulesAction-linkIcon"]';
 
 export const REFRESH_SETTINGS_SWITCH = '[data-test-subj="refreshSettingsSwitch"]';
 

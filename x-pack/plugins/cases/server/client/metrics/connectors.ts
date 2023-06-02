@@ -18,7 +18,6 @@ export class Connectors extends SingleCaseBaseHandler {
 
   public async compute(): Promise<SingleCaseMetricsResponse> {
     const {
-      unsecuredSavedObjectsClient,
       authorization,
       services: { userActionService },
       logger,
@@ -29,7 +28,6 @@ export class Connectors extends SingleCaseBaseHandler {
     );
 
     const uniqueConnectors = await userActionService.getUniqueConnectors({
-      unsecuredSavedObjectsClient,
       caseId: this.caseId,
       filter: authorizationFilter,
     });

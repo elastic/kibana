@@ -6,7 +6,7 @@
  */
 
 import { of, Subject } from 'rxjs';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { httpServiceMock } from '@kbn/core/server/mocks';
 import { mockHandlerArguments } from './_mock_handler_arguments';
 import { sleep } from '../test_utils';
@@ -37,13 +37,13 @@ describe('backgroundTaskUtilizationRoute', () => {
     jest.resetAllMocks();
   });
 
-  it('registers the route', async () => {
+  it('registers internal and public route', async () => {
     const router = httpServiceMock.createRouter();
     backgroundTaskUtilizationRoute({
       router,
       monitoringStats$: of(),
       logger,
-      taskManagerId: uuid.v4(),
+      taskManagerId: uuidv4(),
       config: getTaskManagerConfig(),
       kibanaVersion: '8.0',
       kibanaIndexName: '.kibana',
@@ -51,11 +51,47 @@ describe('backgroundTaskUtilizationRoute', () => {
       usageCounter: mockUsageCounter,
     });
 
-    const [config] = router.get.mock.calls[0];
+    const [config1] = router.get.mock.calls[0];
 
-    expect(config.path).toMatchInlineSnapshot(
+    expect(config1.path).toMatchInlineSnapshot(
       `"/internal/task_manager/_background_task_utilization"`
     );
+    expect(config1.options?.authRequired).toEqual(true);
+
+    const [config2] = router.get.mock.calls[1];
+
+    expect(config2.path).toMatchInlineSnapshot(`"/api/task_manager/_background_task_utilization"`);
+    expect(config2.options?.authRequired).toEqual(true);
+  });
+
+  it(`sets "authRequired" to false when config.unsafe.authenticate_background_task_utilization is set to false`, async () => {
+    const router = httpServiceMock.createRouter();
+    backgroundTaskUtilizationRoute({
+      router,
+      monitoringStats$: of(),
+      logger,
+      taskManagerId: uuidv4(),
+      config: {
+        ...getTaskManagerConfig(),
+        unsafe: { exclude_task_types: [], authenticate_background_task_utilization: false },
+      },
+      kibanaVersion: '8.0',
+      kibanaIndexName: '.kibana',
+      getClusterClient: () => Promise.resolve(elasticsearchServiceMock.createClusterClient()),
+      usageCounter: mockUsageCounter,
+    });
+
+    const [config1] = router.get.mock.calls[0];
+
+    expect(config1.path).toMatchInlineSnapshot(
+      `"/internal/task_manager/_background_task_utilization"`
+    );
+    expect(config1.options?.authRequired).toEqual(true);
+
+    const [config2] = router.get.mock.calls[1];
+
+    expect(config2.path).toMatchInlineSnapshot(`"/api/task_manager/_background_task_utilization"`);
+    expect(config2.options?.authRequired).toEqual(false);
   });
 
   it('checks user privileges and increments usage counter when API is accessed', async () => {
@@ -67,7 +103,7 @@ describe('backgroundTaskUtilizationRoute', () => {
       router,
       monitoringStats$: of(),
       logger,
-      taskManagerId: uuid.v4(),
+      taskManagerId: uuidv4(),
       config: getTaskManagerConfig(),
       kibanaVersion: '8.0',
       kibanaIndexName: 'foo',
@@ -107,7 +143,7 @@ describe('backgroundTaskUtilizationRoute', () => {
       router,
       monitoringStats$: of(),
       logger,
-      taskManagerId: uuid.v4(),
+      taskManagerId: uuidv4(),
       config: getTaskManagerConfig(),
       kibanaVersion: '8.0',
       kibanaIndexName: 'foo',
@@ -153,7 +189,7 @@ describe('backgroundTaskUtilizationRoute', () => {
       router,
       monitoringStats$: of(),
       logger,
-      taskManagerId: uuid.v4(),
+      taskManagerId: uuidv4(),
       config: getTaskManagerConfig(),
       kibanaVersion: '8.0',
       kibanaIndexName: 'foo',
@@ -167,10 +203,38 @@ describe('backgroundTaskUtilizationRoute', () => {
     expect(mockScopedClusterClient.asCurrentUser.security.hasPrivileges).not.toHaveBeenCalled();
   });
 
+  it(`skips checking user privileges for public API if config.unsafe.authenticate_background_task_utilization is set to false`, async () => {
+    const { mockClusterClient, mockScopedClusterClient } = createMockClusterClient({
+      has_all_requested: false,
+    } as SecurityHasPrivilegesResponse);
+    const router = httpServiceMock.createRouter();
+    backgroundTaskUtilizationRoute({
+      router,
+      monitoringStats$: of(),
+      logger,
+      taskManagerId: uuidv4(),
+      config: {
+        ...getTaskManagerConfig(),
+        unsafe: { exclude_task_types: [], authenticate_background_task_utilization: false },
+      },
+      kibanaVersion: '8.0',
+      kibanaIndexName: 'foo',
+      getClusterClient: () => Promise.resolve(mockClusterClient),
+      usageCounter: mockUsageCounter,
+    });
+
+    const [, handler] = router.get.mock.calls[1];
+    const [context, req, res] = mockHandlerArguments({}, {}, ['ok']);
+    await handler(context, req, res);
+
+    expect(mockScopedClusterClient.asCurrentUser.security.hasPrivileges).not.toHaveBeenCalled();
+    expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
+  });
+
   it(`logs an error if the utilization stats are null`, async () => {
     const router = httpServiceMock.createRouter();
     const stats$ = new Subject<MonitoringStats>();
-    const id = uuid.v4();
+    const id = uuidv4();
     backgroundTaskUtilizationRoute({
       router,
       monitoringStats$: stats$,

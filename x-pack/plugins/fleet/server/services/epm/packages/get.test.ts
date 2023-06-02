@@ -5,35 +5,48 @@
  * 2.0.
  */
 
-jest.mock('../registry');
-
 import type { SavedObjectsClientContract, SavedObjectsFindResult } from '@kbn/core/server';
 
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 
 import { PACKAGES_SAVED_OBJECT_TYPE, PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../../../common';
-import type { PackagePolicySOAttributes, RegistryPackage } from '../../../../common/types';
-
-import * as Registry from '../registry';
+import type { RegistryPackage } from '../../../../common/types';
+import type { PackagePolicySOAttributes } from '../../../types';
 
 import { createAppContextStartContractMock } from '../../../mocks';
 import { appContextService } from '../../app_context';
-
 import { PackageNotFoundError } from '../../../errors';
 
 import { getSettings } from '../../settings';
+import { auditLoggingService } from '../../audit_logging';
 
-import { getPackageInfo, getPackageUsageStats } from './get';
+import * as Registry from '../registry';
 
-const MockRegistry = Registry as jest.Mocked<typeof Registry>;
+import { getInstalledPackages, getPackageInfo, getPackages, getPackageUsageStats } from './get';
 
+jest.mock('../registry');
 jest.mock('../../settings');
+jest.mock('../../audit_logging');
+
+const MockRegistry = jest.mocked(Registry);
+
+const mockedAuditLoggingService = auditLoggingService as jest.Mocked<typeof auditLoggingService>;
 
 const mockGetSettings = getSettings as jest.Mock;
 mockGetSettings.mockResolvedValue({ prerelease_integrations_enabled: true });
 
 describe('When using EPM `get` services', () => {
+  beforeEach(() => {
+    const mockContract = createAppContextStartContractMock();
+    appContextService.start(mockContract);
+  });
+
+  afterEach(() => {
+    appContextService.stop();
+    jest.clearAllMocks();
+  });
+
   describe('and invoking getPackageUsageStats()', () => {
     let soClient: jest.Mocked<SavedObjectsClientContract>;
 
@@ -182,6 +195,313 @@ describe('When using EPM `get` services', () => {
         await getPackageUsageStats({ savedObjectsClient: soClient, pkgName: 'system' })
       ).toEqual({
         agent_policy_count: 3,
+      });
+    });
+  });
+
+  describe('getPackages', () => {
+    beforeEach(() => {
+      MockRegistry.fetchList.mockResolvedValue([
+        {
+          name: 'nginx',
+          version: '1.0.0',
+          title: 'Nginx',
+        } as any,
+      ]);
+      MockRegistry.fetchFindLatestPackageOrUndefined.mockResolvedValue(undefined);
+      MockRegistry.fetchInfo.mockResolvedValue({} as any);
+      MockRegistry.pkgToPkgKey.mockImplementation(({ name, version }) => `${name}-${version}`);
+    });
+
+    it('should return installed package that is not in registry with package info', async () => {
+      const soClient = savedObjectsClientMock.create();
+      soClient.find.mockResolvedValue({
+        saved_objects: [
+          {
+            id: 'elasticsearch',
+            attributes: {
+              name: 'elasticsearch',
+              version: '0.0.1',
+              install_source: 'upload',
+              install_version: '0.0.1',
+            },
+          },
+        ],
+      } as any);
+      soClient.get.mockImplementation((type) => {
+        if (type === 'epm-packages-assets') {
+          return Promise.resolve({
+            attributes: {
+              data_utf8: `
+name: elasticsearch
+version: 0.0.1
+title: Elastic
+description: Elasticsearch description`,
+            },
+          } as any);
+        } else {
+          return Promise.resolve({
+            id: 'elasticsearch',
+            attributes: {
+              name: 'elasticsearch',
+              version: '0.0.1',
+              install_source: 'upload',
+              package_assets: [],
+              data_utf8: `
+            name: elasticsearch
+            version: 0.0.1
+            title: Elastic
+            description: Elasticsearch description`,
+            },
+          });
+        }
+      });
+      soClient.bulkGet.mockResolvedValue({
+        saved_objects: [
+          {
+            id: 'test',
+            references: [],
+            type: 'epm-package-assets',
+            attributes: {
+              asset_path: 'elasticsearch-0.0.1/manifest.yml',
+              data_utf8: `
+name: elasticsearch
+version: 0.0.1
+title: Elastic
+description: Elasticsearch description
+format_version: 0.0.1
+owner: elastic`,
+            },
+          },
+        ],
+      });
+      await getPackages({
+        savedObjectsClient: soClient,
+      });
+      await expect(
+        getPackages({
+          savedObjectsClient: soClient,
+        })
+      ).resolves.toMatchObject([
+        {
+          id: 'elasticsearch',
+          name: 'elasticsearch',
+          version: '0.0.1',
+          title: 'Elastic',
+          description: 'Elasticsearch description',
+          savedObject: {
+            id: 'elasticsearch',
+            attributes: {
+              name: 'elasticsearch',
+              version: '0.0.1',
+              install_source: 'upload',
+            },
+          },
+        },
+        { id: 'nginx', name: 'nginx', title: 'Nginx', version: '1.0.0' },
+      ]);
+    });
+
+    it('should call audit logger', async () => {
+      const soClient = savedObjectsClientMock.create();
+
+      soClient.find.mockResolvedValue({
+        saved_objects: [
+          {
+            id: 'elasticsearch',
+            attributes: {
+              name: 'elasticsearch',
+              version: '0.0.1',
+              install_source: 'upload',
+              install_version: '0.0.1',
+            },
+            score: 0,
+            type: PACKAGES_SAVED_OBJECT_TYPE,
+            references: [],
+          },
+        ],
+        total: 1,
+        per_page: 10,
+        page: 1,
+      });
+
+      soClient.get.mockResolvedValue({
+        id: 'elasticsearch',
+        attributes: {},
+        references: [],
+        type: PACKAGES_SAVED_OBJECT_TYPE,
+      });
+
+      await getPackages({ savedObjectsClient: soClient });
+
+      expect(mockedAuditLoggingService.writeCustomSoAuditLog).toHaveBeenCalledWith({
+        action: 'get',
+        id: 'elasticsearch',
+        savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
+      });
+    });
+  });
+
+  describe('getInstalledPackages', () => {
+    it('Passes the correct parameters to the SavedObjects client', async () => {
+      const soClient = savedObjectsClientMock.create();
+
+      soClient.find.mockResolvedValue({
+        saved_objects: [
+          {
+            type: 'epm-packages',
+            id: 'elastic_agent',
+            attributes: {
+              es_index_patterns: {
+                apm_server_logs: 'logs-elastic_agent.apm_server-*',
+                apm_server_metrics: 'metrics-elastic_agent.apm_server-*',
+              },
+              name: 'elastic_agent',
+              version: '1.7.0',
+              install_status: 'installed',
+            },
+            references: [],
+          },
+        ],
+      } as any);
+
+      await getInstalledPackages({
+        savedObjectsClient: soClient,
+        dataStreamType: 'logs',
+        nameQuery: 'nginx',
+        searchAfter: ['system'],
+        perPage: 10,
+        sortOrder: 'asc',
+      });
+      expect(soClient.find).toHaveBeenCalledWith({
+        filter: {
+          arguments: [
+            {
+              arguments: [
+                {
+                  isQuoted: false,
+                  type: 'literal',
+                  value: 'epm-packages.attributes.install_status',
+                },
+                {
+                  isQuoted: false,
+                  type: 'literal',
+                  value: 'installed',
+                },
+              ],
+              function: 'is',
+              type: 'function',
+            },
+            {
+              arguments: [
+                {
+                  isQuoted: false,
+                  type: 'literal',
+                  value: 'epm-packages.attributes.installed_es',
+                },
+                {
+                  arguments: [
+                    {
+                      isQuoted: false,
+                      type: 'literal',
+                      value: 'type',
+                    },
+                    {
+                      isQuoted: false,
+                      type: 'literal',
+                      value: 'index_template',
+                    },
+                  ],
+                  function: 'is',
+                  type: 'function',
+                },
+              ],
+              function: 'nested',
+              type: 'function',
+            },
+            {
+              arguments: [
+                {
+                  isQuoted: false,
+                  type: 'literal',
+                  value: 'epm-packages.attributes.installed_es',
+                },
+                {
+                  arguments: [
+                    {
+                      isQuoted: false,
+                      type: 'literal',
+                      value: 'id',
+                    },
+                    {
+                      type: 'wildcard',
+                      value: 'logs-@kuery-wildcard@',
+                    },
+                  ],
+                  function: 'is',
+                  type: 'function',
+                },
+              ],
+              function: 'nested',
+              type: 'function',
+            },
+          ],
+          function: 'and',
+          type: 'function',
+        },
+        perPage: 10,
+        search: 'nginx* | nginx',
+        searchAfter: ['system'],
+        searchFields: ['name'],
+        sortField: 'name',
+        sortOrder: 'asc',
+        type: 'epm-packages',
+      });
+    });
+    it('Formats items correctly', async () => {
+      const soClient = savedObjectsClientMock.create();
+
+      soClient.find.mockResolvedValue({
+        total: 5,
+        saved_objects: [
+          {
+            type: 'epm-packages',
+            id: 'elastic_agent',
+            attributes: {
+              es_index_patterns: {
+                apm_server_logs: 'logs-elastic_agent.apm_server-*',
+                apm_server_metrics: 'metrics-elastic_agent.apm_server-*',
+              },
+              name: 'elastic_agent',
+              version: '1.7.0',
+              install_status: 'installed',
+            },
+            references: [],
+            sort: ['elastic_agent'],
+          },
+        ],
+      } as any);
+
+      const results = await getInstalledPackages({
+        savedObjectsClient: soClient,
+        dataStreamType: 'logs',
+        nameQuery: 'nginx',
+        searchAfter: ['system'],
+        perPage: 10,
+        sortOrder: 'asc',
+      });
+
+      expect(results).toEqual({
+        items: [
+          {
+            dataStreams: [{ name: 'logs-elastic_agent.apm_server-*', title: 'apm_server_logs' }],
+            name: 'elastic_agent',
+            status: 'installed',
+            version: '1.7.0',
+          },
+        ],
+        searchAfter: ['elastic_agent'],
+        total: 5,
       });
     });
   });

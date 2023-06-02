@@ -14,7 +14,7 @@ export const AlertDetailsErrorPage = memo(({ eventId }: { eventId: string }) => 
     <EuiEmptyPrompt
       color="danger"
       data-test-subj="alert-details-page-error"
-      iconType="alert"
+      iconType="warning"
       title={<h2>{ERROR_PAGE_TITLE}</h2>}
       body={
         <div>

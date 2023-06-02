@@ -10,11 +10,14 @@ import { schema } from '@kbn/config-schema';
 import { Logger, LogMeta } from '@kbn/logging';
 import type { ElasticsearchClient, IBasePath } from '@kbn/core/server';
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
-import { ObservabilityConfig } from '@kbn/observability-plugin/server';
 import { ALERT_RULE_PARAMETERS, TIMESTAMP } from '@kbn/rule-data-utils';
-import { parseTechnicalFields } from '@kbn/rule-registry-plugin/common/parse_technical_fields';
+import {
+  ParsedTechnicalFields,
+  parseTechnicalFields,
+} from '@kbn/rule-registry-plugin/common/parse_technical_fields';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { set } from '@kbn/safer-lodash-set';
+import { ParsedExperimentalFields } from '@kbn/rule-registry-plugin/common/parse_experimental_fields';
 import { LINK_TO_METRICS_EXPLORER } from '../../../../common/alerting/metrics';
 import { getInventoryViewInAppUrl } from '../../../../common/alerting/metrics/alert_link';
 import {
@@ -106,15 +109,6 @@ export const createScopedLogger = (
   };
 };
 
-export const getAlertDetailsPageEnabledForApp = (
-  config: ObservabilityConfig['unsafe']['alertDetails'] | null,
-  appName: keyof ObservabilityConfig['unsafe']['alertDetails']
-): boolean => {
-  if (!config) return false;
-
-  return config[appName].enabled;
-};
-
 export const getViewInInventoryAppUrl = ({
   basePath,
   criteria,
@@ -148,12 +142,6 @@ export const getViewInInventoryAppUrl = ({
 
 export const getViewInMetricsAppUrl = (basePath: IBasePath, spaceId: string) =>
   addSpaceIdToPath(basePath.publicBaseUrl, spaceId, LINK_TO_METRICS_EXPLORER);
-
-export const getAlertDetailsUrl = (
-  basePath: IBasePath,
-  spaceId: string,
-  alertUuid: string | null
-) => addSpaceIdToPath(basePath.publicBaseUrl, spaceId, `/app/observability/alerts/${alertUuid}`);
 
 export const KUBERNETES_POD_UID = 'kubernetes.pod.uid';
 export const NUMBER_OF_DOCUMENTS = 10;
@@ -222,33 +210,21 @@ export const shouldTermsAggOnContainer = (groupBy: string | string[] | undefined
 export const flattenAdditionalContext = (
   additionalContext: AdditionalContext | undefined | null
 ): AdditionalContext => {
-  let flattenedContext: AdditionalContext = {};
-  if (additionalContext) {
-    Object.keys(additionalContext).forEach((context: string) => {
-      if (additionalContext[context]) {
-        flattenedContext = {
-          ...flattenedContext,
-          ...flattenObject(additionalContext[context], [context + '.']),
-        };
-      }
-    });
-  }
-  return flattenedContext;
+  return additionalContext ? flattenObject(additionalContext) : {};
 };
 
 export const getContextForRecoveredAlerts = (
-  alertHits: AdditionalContext | undefined | null
+  alertHitSource: Partial<ParsedTechnicalFields & ParsedExperimentalFields> | undefined | null
 ): AdditionalContext => {
-  const alertHitsSource =
-    alertHits && alertHits.length > 0 ? unflattenObject(alertHits[0]._source) : undefined;
+  const alert = alertHitSource ? unflattenObject(alertHitSource) : undefined;
 
   return {
-    cloud: alertHitsSource?.[ALERT_CONTEXT_CLOUD],
-    host: alertHitsSource?.[ALERT_CONTEXT_HOST],
-    orchestrator: alertHitsSource?.[ALERT_CONTEXT_ORCHESTRATOR],
-    container: alertHitsSource?.[ALERT_CONTEXT_CONTAINER],
-    labels: alertHitsSource?.[ALERT_CONTEXT_LABELS],
-    tags: alertHitsSource?.[ALERT_CONTEXT_TAGS],
+    cloud: alert?.[ALERT_CONTEXT_CLOUD],
+    host: alert?.[ALERT_CONTEXT_HOST],
+    orchestrator: alert?.[ALERT_CONTEXT_ORCHESTRATOR],
+    container: alert?.[ALERT_CONTEXT_CONTAINER],
+    labels: alert?.[ALERT_CONTEXT_LABELS],
+    tags: alert?.[ALERT_CONTEXT_TAGS],
   };
 };
 
@@ -258,39 +234,24 @@ export const unflattenObject = <T extends object = AdditionalContext>(object: ob
     return acc;
   }, {} as T);
 
-/**
- * Wrap the key with [] if it is a key from an Array
- * @param key The object key
- * @param isArrayItem Flag to indicate if it is the key of an Array
- */
-const renderKey = (key: string, isArrayItem: boolean): string => (isArrayItem ? `[${key}]` : key);
+export const flattenObject = (obj: AdditionalContext, prefix: string = ''): AdditionalContext =>
+  Object.keys(obj).reduce<AdditionalContext>((acc, key) => {
+    const nextValue = obj[key];
 
-export const flattenObject = (
-  obj: AdditionalContext,
-  prefix: string[] = [],
-  isArrayItem = false
-): AdditionalContext =>
-  Object.keys(obj).reduce<AdditionalContext>((acc, k) => {
-    const nextValue = obj[k];
-
-    if (typeof nextValue === 'object' && nextValue !== null) {
-      const isNextValueArray = Array.isArray(nextValue);
-      const dotSuffix = isNextValueArray ? '' : '.';
-
-      if (Object.keys(nextValue).length > 0) {
-        return {
-          ...acc,
-          ...flattenObject(
-            nextValue,
-            [...prefix, `${renderKey(k, isArrayItem)}${dotSuffix}`],
-            isNextValueArray
-          ),
-        };
+    if (nextValue) {
+      if (typeof nextValue === 'object' && !Array.isArray(nextValue)) {
+        const dotSuffix = '.';
+        if (Object.keys(nextValue).length > 0) {
+          return {
+            ...acc,
+            ...flattenObject(nextValue, `${prefix}${key}${dotSuffix}`),
+          };
+        }
       }
-    }
 
-    const fullPath = `${prefix.join('')}${renderKey(k, isArrayItem)}`;
-    acc[fullPath] = nextValue;
+      const fullPath = `${prefix}${key}`;
+      acc[fullPath] = nextValue;
+    }
 
     return acc;
   }, {});

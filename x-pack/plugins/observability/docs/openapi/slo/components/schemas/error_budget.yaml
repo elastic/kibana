@@ -1,0 +1,19 @@
+title: Error budget definition
+type: object
+properties:
+  initial:
+    type: number
+    description: The initial error budget, as 1 - objective
+    example: 0.02
+  consumed:
+    type: number
+    description: The error budget consummed, as a percentage of the initial value.
+    example: 0.80
+  remaining: 
+    type: number
+    description: The error budget remaining, as a percentage of the initial value.
+    example: 0.20
+  isEstimated:
+    type: boolean
+    description: Only for SLO defined with occurrences budgeting method and calendar aligned time window.
+    example: true

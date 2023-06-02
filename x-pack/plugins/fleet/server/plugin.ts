@@ -8,7 +8,7 @@
 import type { Observable } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
 import { take, filter } from 'rxjs/operators';
-
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { i18n } from '@kbn/i18n';
 import type {
   CoreSetup,
@@ -35,7 +35,11 @@ import type {
   EncryptedSavedObjectsPluginStart,
   EncryptedSavedObjectsPluginSetup,
 } from '@kbn/encrypted-saved-objects-plugin/server';
-import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
+import type {
+  AuditLogger,
+  SecurityPluginSetup,
+  SecurityPluginStart,
+} from '@kbn/security-plugin/server';
 import type { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type {
   TaskManagerSetupContract,
@@ -54,8 +58,27 @@ import type { FleetConfigType } from '../common/types';
 import type { FleetAuthz } from '../common';
 import type { ExperimentalFeatures } from '../common/experimental_features';
 
-import { INTEGRATIONS_PLUGIN_ID } from '../common';
+import {
+  MESSAGE_SIGNING_KEYS_SAVED_OBJECT_TYPE,
+  INTEGRATIONS_PLUGIN_ID,
+  UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
+  getFileMetadataIndexName,
+  getFileDataIndexName,
+} from '../common';
 import { parseExperimentalConfigValue } from '../common/experimental_features';
+
+import { FleetFromHostFilesClient } from './services/files/client_from_host';
+
+import type { FleetFromHostFileClientInterface } from './services/files/types';
+
+import type { MessageSigningServiceInterface } from './services/security';
+import {
+  getRouteRequiredAuthz,
+  makeRouterWithFleetAuthz,
+  calculateRouteAuthz,
+  getAuthzFromRequest,
+  MessageSigningService,
+} from './services/security';
 
 import {
   PLUGIN_ID,
@@ -93,7 +116,6 @@ import {
   fetchAgentsUsage,
   fetchFleetUsage,
 } from './collectors/register';
-import { getAuthzFromRequest, makeRouterWithFleetAuthz } from './routes/security';
 import { FleetArtifactsClient } from './services/artifacts';
 import type { FleetRouter } from './types/request_context';
 import { TelemetryEventsSender } from './telemetry/sender';
@@ -103,6 +125,13 @@ import type { PackagePolicyService } from './services/package_policy_service';
 import { PackagePolicyServiceImpl } from './services/package_policy';
 import { registerFleetUsageLogger, startFleetUsageLogger } from './services/fleet_usage_logger';
 import { CheckDeletedFilesTask } from './tasks/check_deleted_files_task';
+import { getRequestStore } from './services/request_store';
+import {
+  UninstallTokenService,
+  type UninstallTokenServiceInterface,
+} from './services/security/uninstall_token_service';
+import type { FleetToHostFileClientInterface } from './services/files/types';
+import { FleetToHostFilesClient } from './services/files/client_to_host';
 
 export interface FleetSetupDeps {
   security: SecurityPluginSetup;
@@ -110,7 +139,7 @@ export interface FleetSetupDeps {
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup;
   cloud?: CloudSetup;
   usageCollection?: UsageCollectionSetup;
-  spaces: SpacesPluginStart;
+  spaces?: SpacesPluginStart;
   telemetry?: TelemetryPluginSetup;
   taskManager: TaskManagerSetupContract;
 }
@@ -145,6 +174,9 @@ export interface FleetAppContext {
   httpSetup?: HttpServiceSetup;
   telemetryEventsSender: TelemetryEventsSender;
   bulkActionsResolver: BulkActionsResolver;
+  messageSigningService: MessageSigningServiceInterface;
+  auditLogger?: AuditLogger;
+  uninstallTokenService: UninstallTokenServiceInterface;
 }
 
 export type FleetSetupContract = void;
@@ -192,6 +224,38 @@ export interface FleetStartContract {
    * @param packageName
    */
   createArtifactsClient: (packageName: string) => FleetArtifactsClient;
+
+  /**
+   * Create a Fleet Files client instance
+   * @param packageName
+   * @param type
+   * @param maxSizeBytes
+   */
+  createFilesClient: Readonly<{
+    /**
+     * Client to interact with files that will be sent to a host.
+     * @param packageName
+     * @param maxSizeBytes
+     */
+    toHost: (
+      /** The integration package name */
+      packageName: string,
+      /** Max file size allow to be created (in bytes) */
+      maxSizeBytes?: number
+    ) => FleetToHostFileClientInterface;
+
+    /**
+     * Client to interact with files that were sent from the host
+     * @param packageName
+     */
+    fromHost: (
+      /** The integration package name */
+      packageName: string
+    ) => FleetFromHostFileClientInterface;
+  }>;
+
+  messageSigningService: MessageSigningServiceInterface;
+  uninstallTokenService: UninstallTokenServiceInterface;
 }
 
 export class FleetPlugin
@@ -242,7 +306,7 @@ export class FleetPlugin
 
     core.status.set(this.fleetStatus$.asObservable());
 
-    registerSavedObjects(core.savedObjects, deps.encryptedSavedObjects);
+    registerSavedObjects(core.savedObjects);
     registerEncryptedSavedObjects(deps.encryptedSavedObjects);
 
     // Register feature
@@ -337,38 +401,56 @@ export class FleetPlugin
       PLUGIN_ID,
       async (context, request) => {
         const plugin = this;
-        const esClient = (await context.core).elasticsearch.client;
+        const coreContext = await context.core;
+        const authz = await getAuthzFromRequest(request);
+        const esClient = coreContext.elasticsearch.client;
+        const soClient = coreContext.savedObjects.getClient();
+        const routeRequiredAuthz = getRouteRequiredAuthz(request.route.method, request.route.path);
+        const routeAuthz = routeRequiredAuthz
+          ? calculateRouteAuthz(authz, routeRequiredAuthz)
+          : undefined;
 
-        return {
-          get agentClient() {
-            const agentService = plugin.setupAgentService(esClient.asInternalUser);
+        const getInternalSoClient = (): SavedObjectsClientContract =>
+          appContextService
+            .getSavedObjects()
+            .getScopedClient(request, { excludedExtensions: [SECURITY_EXTENSION_ID] });
 
-            return {
-              asCurrentUser: agentService.asScoped(request),
-              asInternalUser: agentService.asInternalUser,
-            };
-          },
-          get packagePolicyService() {
-            const service = plugin.setupPackagePolicyService();
+        const requestStore = getRequestStore();
 
-            return {
-              asCurrentUser: service.asScoped(request),
-              asInternalUser: service.asInternalUser,
-            };
-          },
-          authz: await getAuthzFromRequest(request),
-          epm: {
-            // Use a lazy getter to avoid constructing this client when not used by a request handler
-            get internalSoClient() {
-              return appContextService
-                .getSavedObjects()
-                .getScopedClient(request, { excludedExtensions: [SECURITY_EXTENSION_ID] });
+        return requestStore.run(request, () => {
+          return {
+            get agentClient() {
+              const agentService = plugin.setupAgentService(esClient.asInternalUser, soClient);
+
+              return {
+                asCurrentUser: agentService.asScoped(request),
+                asInternalUser: agentService.asInternalUser,
+              };
             },
-          },
-          get spaceId() {
-            return deps.spaces.spacesService.getSpaceId(request);
-          },
-        };
+            get packagePolicyService() {
+              const service = plugin.setupPackagePolicyService();
+
+              return {
+                asCurrentUser: service.asScoped(request),
+                asInternalUser: service.asInternalUser,
+              };
+            },
+            authz,
+            get internalSoClient() {
+              // Use a lazy getter to avoid constructing this client when not used by a request handler
+              return getInternalSoClient();
+            },
+            get spaceId() {
+              return deps.spaces?.spacesService?.getSpaceId(request) ?? DEFAULT_SPACE_ID;
+            },
+
+            get limitedToPackages() {
+              if (routeAuthz && routeAuthz.granted) {
+                return routeAuthz.scopeDataToPackages;
+              }
+            },
+          };
+        });
       }
     );
 
@@ -384,10 +466,11 @@ export class FleetPlugin
     // Only some endpoints require superuser so we pass a raw IRouter here
 
     // For all the routes we enforce the user to have role superuser
-    const { router: fleetAuthzRouter, onPostAuthHandler: fleetAuthzOnPostAuthHandler } =
-      makeRouterWithFleetAuthz(router);
+    const fleetAuthzRouter = makeRouterWithFleetAuthz(
+      router,
+      this.initializerContext.logger.get('fleet_authz_router')
+    );
 
-    core.http.registerOnPostAuth(fleetAuthzOnPostAuthHandler);
     registerRoutes(fleetAuthzRouter, config);
 
     this.telemetryEventsSender.setup(deps.telemetry);
@@ -400,6 +483,17 @@ export class FleetPlugin
   }
 
   public start(core: CoreStart, plugins: FleetStartDeps): FleetStartContract {
+    const messageSigningService = new MessageSigningService(
+      plugins.encryptedSavedObjects.getClient({
+        includedHiddenTypes: [MESSAGE_SIGNING_KEYS_SAVED_OBJECT_TYPE],
+      })
+    );
+    const uninstallTokenService = new UninstallTokenService(
+      plugins.encryptedSavedObjects.getClient({
+        includedHiddenTypes: [UNINSTALL_TOKENS_SAVED_OBJECT_TYPE],
+      })
+    );
+
     appContextService.start({
       elasticsearch: core.elasticsearch,
       data: plugins.data,
@@ -422,6 +516,8 @@ export class FleetPlugin
       logger: this.logger,
       telemetryEventsSender: this.telemetryEventsSender,
       bulkActionsResolver: this.bulkActionsResolver!,
+      messageSigningService,
+      uninstallTokenService,
     });
     licenseService.start(plugins.licensing.license$);
 
@@ -480,6 +576,7 @@ export class FleetPlugin
       }
     })();
 
+    const internalSoClient = new SavedObjectsClient(core.savedObjects.createInternalRepository());
     return {
       authz: {
         fromRequest: getAuthzFromRequest,
@@ -488,9 +585,12 @@ export class FleetPlugin
       esIndexPatternService: new ESIndexPatternSavedObjectService(),
       packageService: this.setupPackageService(
         core.elasticsearch.client.asInternalUser,
-        new SavedObjectsClient(core.savedObjects.createInternalRepository())
+        internalSoClient
       ),
-      agentService: this.setupAgentService(core.elasticsearch.client.asInternalUser),
+      agentService: this.setupAgentService(
+        core.elasticsearch.client.asInternalUser,
+        internalSoClient
+      ),
       agentPolicyService: {
         get: agentPolicyService.get,
         list: agentPolicyService.list,
@@ -504,6 +604,29 @@ export class FleetPlugin
       createArtifactsClient(packageName: string) {
         return new FleetArtifactsClient(core.elasticsearch.client.asInternalUser, packageName);
       },
+      createFilesClient: Object.freeze({
+        fromHost: (packageName) => {
+          return new FleetFromHostFilesClient(
+            core.elasticsearch.client.asInternalUser,
+            this.initializerContext.logger.get('fleetFiles', packageName),
+            getFileMetadataIndexName(packageName),
+            getFileDataIndexName(packageName)
+          );
+        },
+
+        toHost: (packageName, maxFileBytes) => {
+          return new FleetToHostFilesClient(
+            core.elasticsearch.client.asInternalUser,
+            this.initializerContext.logger.get('fleetFiles', packageName),
+            // FIXME:PT define once we have new index patterns (defend workflows team issue #6553)
+            getFileMetadataIndexName(packageName),
+            getFileDataIndexName(packageName),
+            maxFileBytes
+          );
+        },
+      }),
+      messageSigningService,
+      uninstallTokenService,
     };
   }
 
@@ -514,12 +637,15 @@ export class FleetPlugin
     this.fleetStatus$.complete();
   }
 
-  private setupAgentService(internalEsClient: ElasticsearchClient): AgentService {
+  private setupAgentService(
+    internalEsClient: ElasticsearchClient,
+    internalSoClient: SavedObjectsClientContract
+  ): AgentService {
     if (this.agentService) {
       return this.agentService;
     }
 
-    this.agentService = new AgentServiceImpl(internalEsClient);
+    this.agentService = new AgentServiceImpl(internalEsClient, internalSoClient);
     return this.agentService;
   }
 

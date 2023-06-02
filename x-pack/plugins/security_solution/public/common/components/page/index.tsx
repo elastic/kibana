@@ -35,69 +35,21 @@ export const FULL_SCREEN_CONTENT_OVERRIDES_CSS_STYLESHEET = () => css`
   }
 `;
 
-/**
- * Stylesheet with Eui class overrides in order to address display issues caused when
- * the Timeline overlay is opened. These are normally adjustments to ensure that the
- * z-index of other EUI components continues to work with the z-index used by timeline
- * overlay.
- */
-export const TIMELINE_OVERRIDES_CSS_STYLESHEET = () => css`
-  .euiPopover__panel[data-popover-open] {
-    z-index: 9900 !important;
-    min-width: 24px;
-  }
-  .euiPopover__panel[data-popover-open].sourcererPopoverPanel {
-    // needs to appear under modal
-    z-index: 5900 !important;
-  }
-  .euiToolTip {
-    z-index: 9950 !important;
-  }
-  /*
-      overrides the default styling of euiComboBoxOptionsList because it's implemented
-      as a popover, so it's not selectable as a child of the styled component
-   */
-  .euiComboBoxOptionsList {
-    z-index: 9999;
-  }
-
-  /* ensure elastic charts tooltips appear above open euiPopovers */
-  .echTooltip {
-    z-index: 9950;
-  }
-`;
-
 /*
   SIDE EFFECT: the following `createGlobalStyle` overrides default styling in angular code that was not theme-friendly
   and `EuiPopover`, `EuiToolTip` global styles
 */
-export const AppGlobalStyle = createGlobalStyle<{ theme: { eui: { euiColorPrimary: string } } }>`
-
-  ${TIMELINE_OVERRIDES_CSS_STYLESHEET}
-
-  .euiDataGridRowCell .euiDataGridRowCell__expandActions .euiDataGridRowCell__actionButtonIcon {
-    display: none;
-
-    &:first-child,
-    &:nth-child(2),
-    &:nth-child(3),
-    &:last-child {
-      display: inline-flex;
-    }
-
-  }
-
+export const AppGlobalStyle = createGlobalStyle<{
+  theme: { eui: { euiColorPrimary: string; euiColorLightShade: string; euiSizeS: string } };
+}>`
   /*
     overrides the default styling of EuiDataGrid expand popover footer to
     make it a column of actions instead of the default actions row
   */
-
   .euiDataGridRowCell__popover {
-
     max-width: 815px !important;
     max-height: none !important;
     overflow: hidden;
-
 
     .expandable-top-value-button {
       &.euiButtonEmpty--primary:enabled:focus,
@@ -106,27 +58,22 @@ export const AppGlobalStyle = createGlobalStyle<{ theme: { eui: { euiColorPrimar
       }
     }
 
-
     &.euiPopover__panel[data-popover-open] {
       padding: 8px 0;
       min-width: 65px;
     }
 
-
     .euiPopoverFooter {
       border: 0;
-      margin-top: 0 !important;
+      margin-top: 0;
       .euiFlexGroup {
         flex-direction: column;
       }
     }
 
-    // Hide EUI's 'Filter in' and 'Filter out' footer buttons - replaced with our own buttons
-    .euiPopoverFooter:nth-child(2) {
-      .euiFlexItem:first-child,
-      .euiFlexItem:nth-child(2) {
-          display: none;
-      }
+    .euiText + .euiPopoverFooter {
+      border-top: 1px solid ${({ theme }) => theme.eui.euiColorLightShade};
+      margin-top: ${({ theme }) => theme.eui.euiSizeS};
     }
   }
 

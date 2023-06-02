@@ -7,13 +7,12 @@
 
 import { render } from '@testing-library/react';
 import React from 'react';
-import { TableId } from '../../../../common/types';
-import { HostsType } from '../../../hosts/store/model';
+import { TableId, dataTableActions } from '@kbn/securitysolution-data-table';
+import { HostsType } from '../../../explore/hosts/store/model';
 import { TestProviders } from '../../mock';
 import type { EventsQueryTabBodyComponentProps } from './events_query_tab_body';
 import { EventsQueryTabBody, ALERTS_EVENTS_HISTOGRAM_ID } from './events_query_tab_body';
 import { useGlobalFullScreen } from '../../containers/use_full_screen';
-import * as tGridActions from '@kbn/timelines-plugin/public/store/t_grid/actions';
 import { licenseService } from '../../hooks/use_license';
 import { mockHistory } from '../../mock/router';
 
@@ -47,9 +46,13 @@ jest.mock('../../lib/kibana', () => {
   };
 });
 
+jest.mock('../visualization_actions/actions');
+jest.mock('../visualization_actions/lens_embeddable');
+
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
   useHistory: () => mockHistory,
+  useLocation: jest.fn().mockReturnValue({ pathname: '/test' }),
 }));
 
 const FakeStatefulEventsViewer = ({ additionalFilters }: { additionalFilters: JSX.Element }) => (
@@ -172,7 +175,7 @@ describe('EventsQueryTabBody', () => {
   });
 
   it('initializes t-grid', () => {
-    const spy = jest.spyOn(tGridActions, 'initializeTGridSettings');
+    const spy = jest.spyOn(dataTableActions, 'initializeDataTableSettings');
     render(
       <TestProviders>
         <EventsQueryTabBody {...commonProps} />

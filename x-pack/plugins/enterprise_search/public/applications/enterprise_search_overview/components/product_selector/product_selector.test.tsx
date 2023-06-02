@@ -28,7 +28,7 @@ const props = {
 
 describe('ProductSelector', () => {
   it('renders the overview page, product cards, & setup guide CTAs with no host set', () => {
-    setMockValues({ config: { host: '' } });
+    setMockValues({ config: { canDeployEntSearch: true, host: '' } });
     const wrapper = shallow(<ProductSelector {...props} />);
 
     expect(wrapper.find(ProductCard)).toHaveLength(3);
@@ -36,14 +36,14 @@ describe('ProductSelector', () => {
   });
 
   it('renders the trial callout', () => {
-    setMockValues({ config: { host: 'localhost' } });
+    setMockValues({ config: { canDeployEntSearch: true, host: 'localhost' } });
     const wrapper = shallow(<ProductSelector {...props} />);
 
     expect(wrapper.find(TrialCallout)).toHaveLength(1);
   });
 
   it('passes correct URL when Workplace Search user is not an admin', () => {
-    setMockValues({ config: { host: '' } });
+    setMockValues({ config: { canDeployEntSearch: true, host: '' } });
     const wrapper = shallow(<ProductSelector {...props} isWorkplaceSearchAdmin={false} />);
 
     expect(wrapper.find(ProductCard).last().prop('url')).toEqual(
@@ -53,7 +53,7 @@ describe('ProductSelector', () => {
 
   describe('access checks when host is set', () => {
     beforeEach(() => {
-      setMockValues({ config: { host: 'localhost' } });
+      setMockValues({ config: { canDeployEntSearch: true, host: 'localhost' } });
     });
 
     it('does not render the App Search card if the user does not have access to AS', () => {

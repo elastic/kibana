@@ -11,6 +11,7 @@ import type { ControlInput } from '../types';
 export const TIME_SLIDER_CONTROL = 'timeSlider';
 
 export interface TimeSliderControlEmbeddableInput extends ControlInput {
+  isAnchored?: boolean;
   // Encode value as percentage of time range to support relative time ranges.
   timesliceStartAsPercentageOfTimeRange?: number;
   timesliceEndAsPercentageOfTimeRange?: number;

@@ -8,6 +8,7 @@ import { getSecuritySolutionLink } from '@kbn/cloud-security-posture-plugin/publ
 import { i18n } from '@kbn/i18n';
 import { SecurityPageName, SERVER_APP_ID } from '../../common/constants';
 import cloudSecurityPostureDashboardImage from '../common/images/cloud_security_posture_dashboard_page.png';
+import cloudNativeVulnerabilityManagementDashboardImage from '../common/images/cloud_native_vulnerability_management_dashboard_page.png';
 import type { LinkCategories, LinkItem } from '../common/links/types';
 import { IconExceptionLists } from '../management/icons/exception_lists';
 
@@ -34,6 +35,17 @@ export const dashboardLinks: LinkItem = {
   ...commonLinkProperties,
 };
 
+export const vulnerabilityDashboardLink: LinkItem = {
+  isBeta: true,
+  ...getSecuritySolutionLink<SecurityPageName>('vulnerability_dashboard'),
+  description: i18n.translate('xpack.securitySolution.appLinks.vulnerabilityDashboardDescription', {
+    defaultMessage:
+      'Cloud Native Vulnerability Management (CNVM) allows you to identify vulnerabilities in your cloud workloads.',
+  }),
+  landingImage: cloudNativeVulnerabilityManagementDashboardImage,
+  ...commonLinkProperties,
+};
+
 export const manageLinks: LinkItem = {
   ...getSecuritySolutionLink<SecurityPageName>('benchmarks'),
   description: i18n.translate(
@@ -49,8 +61,11 @@ export const manageLinks: LinkItem = {
 export const manageCategories: LinkCategories = [
   {
     label: i18n.translate('xpack.securitySolution.appLinks.category.cloudSecurityPosture', {
-      defaultMessage: 'CLOUD SECURITY POSTURE',
+      defaultMessage: 'CLOUD SECURITY',
     }),
-    linkIds: [SecurityPageName.cloudSecurityPostureBenchmarks],
+    linkIds: [
+      SecurityPageName.cloudSecurityPostureBenchmarks,
+      SecurityPageName.cloudDefendPolicies,
+    ],
   },
 ];

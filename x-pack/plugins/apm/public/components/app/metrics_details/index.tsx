@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import { isServerlessAgent } from '../../../../common/agent_name';
+import { isAWSLambdaAgent } from '../../../../common/agent_name';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { ServerlessMetricsDetails } from './serverless_metrics_details';
@@ -15,9 +15,9 @@ export function MetricsDetails() {
   const {
     path: { id },
   } = useApmParams('/services/{serviceName}/metrics/{id}');
-  const { runtimeName } = useApmServiceContext();
+  const { serverlessType } = useApmServiceContext();
 
-  if (isServerlessAgent(runtimeName)) {
+  if (isAWSLambdaAgent(serverlessType)) {
     return <ServerlessMetricsDetails serverlessId={id} />;
   }
 

@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { apm, timerange } from '@kbn/apm-synthtrace';
+import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import expect from '@kbn/expect';
 import { first, last } from 'lodash';
 import moment from 'moment';
@@ -13,6 +13,8 @@ import {
   APIReturnType,
 } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
 import { RecursivePartial } from '@kbn/apm-plugin/typings/common';
+import { ApmDocumentType } from '@kbn/apm-plugin/common/document_type';
+import { RollupInterval } from '@kbn/apm-plugin/common/rollup';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 
 type ErrorRate =
@@ -42,6 +44,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           transactionType: 'request',
           environment: 'ENVIRONMENT_ALL',
           kuery: '',
+          documentType: ApmDocumentType.TransactionMetric,
+          rollupInterval: RollupInterval.OneMinute,
+          bucketSizeInSeconds: 60,
           ...overrides?.query,
         },
       },
@@ -84,44 +89,57 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         successRate: 50,
         failureRate: 50,
       },
+      secondTransaction: {
+        name: 'GET /pear 🍎 ',
+        successRate: 25,
+        failureRate: 75,
+      },
     };
     before(async () => {
       const serviceGoProdInstance = apm
         .service({ name: 'opbeans-go', environment: 'production', agentName: 'go' })
         .instance('instance-a');
 
-      const { firstTransaction } = config;
+      const { firstTransaction, secondTransaction } = config;
 
-      const documents = timerange(start, end)
-        .ratePerMinute(firstTransaction.successRate)
-        .generator((timestamp) =>
-          serviceGoProdInstance
-            .transaction({ transactionName: firstTransaction.name })
-            .timestamp(timestamp)
-            .duration(1000)
-            .success()
-        )
-        .merge(
-          timerange(start, end)
-            .ratePerMinute(firstTransaction.failureRate)
-            .generator((timestamp) =>
-              serviceGoProdInstance
-                .transaction({ transactionName: firstTransaction.name })
-                .errors(
-                  serviceGoProdInstance
-                    .error({
-                      message: 'Error 1',
-                      type: firstTransaction.name,
-                      groupingName: 'Error test',
-                    })
-                    .timestamp(timestamp)
-                )
-                .duration(1000)
-                .timestamp(timestamp)
-                .failure()
-            )
-        );
-
+      const documents = [
+        timerange(start, end)
+          .ratePerMinute(firstTransaction.successRate)
+          .generator((timestamp) =>
+            serviceGoProdInstance
+              .transaction({ transactionName: firstTransaction.name })
+              .timestamp(timestamp)
+              .duration(1000)
+              .success()
+          ),
+        timerange(start, end)
+          .ratePerMinute(firstTransaction.failureRate)
+          .generator((timestamp) =>
+            serviceGoProdInstance
+              .transaction({ transactionName: firstTransaction.name })
+              .duration(1000)
+              .timestamp(timestamp)
+              .failure()
+          ),
+        timerange(start, end)
+          .ratePerMinute(secondTransaction.successRate)
+          .generator((timestamp) =>
+            serviceGoProdInstance
+              .transaction({ transactionName: secondTransaction.name })
+              .timestamp(timestamp)
+              .duration(1000)
+              .success()
+          ),
+        timerange(start, end)
+          .ratePerMinute(secondTransaction.failureRate)
+          .generator((timestamp) =>
+            serviceGoProdInstance
+              .transaction({ transactionName: secondTransaction.name })
+              .duration(1000)
+              .timestamp(timestamp)
+              .failure()
+          ),
+      ];
       await synthtraceEsClient.index(documents);
     });
 
@@ -174,17 +192,17 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
     });
 
-    describe('returns the transaction error rate with comparison data', () => {
+    describe('returns the transaction error rate with comparison data per transaction name', () => {
       let errorRateResponse: ErrorRate;
 
       before(async () => {
-        const response = await fetchErrorCharts({
-          query: {
-            transactionName: config.firstTransaction.name,
-            start: moment(end).subtract(7, 'minutes').toISOString(),
-            offset: '7m',
-          },
-        });
+        const query = {
+          transactionName: config.firstTransaction.name,
+          start: moment(end).subtract(7, 'minutes').toISOString(),
+          offset: '7m',
+        };
+
+        const response = await fetchErrorCharts({ query });
 
         errorRateResponse = response.body;
       });
@@ -244,6 +262,38 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         expect(errorRateResponse.currentPeriod.timeseries.map(({ x }) => x)).to.be.eql(
           errorRateResponse.previousPeriod.timeseries.map(({ x }) => x)
         );
+      });
+    });
+
+    describe('returns the same error rate for tx metrics and service tx metrics ', () => {
+      let txMetricsErrorRateResponse: ErrorRate;
+      let serviceTxMetricsErrorRateResponse: ErrorRate;
+
+      before(async () => {
+        const [txMetricsResponse, serviceTxMetricsResponse] = await Promise.all([
+          fetchErrorCharts(),
+          fetchErrorCharts({
+            query: { documentType: ApmDocumentType.ServiceTransactionMetric },
+          }),
+        ]);
+
+        txMetricsErrorRateResponse = txMetricsResponse.body;
+        serviceTxMetricsErrorRateResponse = serviceTxMetricsResponse.body;
+      });
+
+      describe('has the correct calculation for average', () => {
+        const expectedFailureRate =
+          (config.firstTransaction.failureRate + config.secondTransaction.failureRate) / 2 / 100;
+
+        it('for tx metrics', () => {
+          expect(txMetricsErrorRateResponse.currentPeriod.average).to.eql(expectedFailureRate);
+        });
+
+        it('for service tx metrics', () => {
+          expect(serviceTxMetricsErrorRateResponse.currentPeriod.average).to.eql(
+            expectedFailureRate
+          );
+        });
       });
     });
   });

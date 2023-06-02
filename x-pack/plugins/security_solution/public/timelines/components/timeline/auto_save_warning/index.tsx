@@ -58,7 +58,7 @@ const AutoSaveWarningMsgComponent = () => {
       id: 'AutoSaveWarningMsg',
       title: i18n.TITLE,
       color: 'warning',
-      iconType: 'alert',
+      iconType: 'warning',
       toastLifeTimeMs: 10000,
       text: TextComponent,
     };

@@ -141,7 +141,7 @@ exports[`Canvas Shareable Workpad API Placed successfully with default propertie
                 <a
                   class="euiLink emotion-euiLink-primary"
                   href="https://www.elastic.co"
-                  rel=""
+                  rel="noreferrer"
                   title="Powered by Elastic.co"
                 >
                   <span
@@ -415,7 +415,7 @@ exports[`Canvas Shareable Workpad API Placed successfully with height specified 
                 <a
                   class="euiLink emotion-euiLink-primary"
                   href="https://www.elastic.co"
-                  rel=""
+                  rel="noreferrer"
                   title="Powered by Elastic.co"
                 >
                   <span
@@ -689,7 +689,7 @@ exports[`Canvas Shareable Workpad API Placed successfully with page specified 2`
                 <a
                   class="euiLink emotion-euiLink-primary"
                   href="https://www.elastic.co"
-                  rel=""
+                  rel="noreferrer"
                   title="Powered by Elastic.co"
                 >
                   <span
@@ -964,7 +964,7 @@ exports[`Canvas Shareable Workpad API Placed successfully with width and height 
                 <a
                   class="euiLink emotion-euiLink-primary"
                   href="https://www.elastic.co"
-                  rel=""
+                  rel="noreferrer"
                   title="Powered by Elastic.co"
                 >
                   <span
@@ -1238,7 +1238,7 @@ exports[`Canvas Shareable Workpad API Placed successfully with width specified 2
                 <a
                   class="euiLink emotion-euiLink-primary"
                   href="https://www.elastic.co"
-                  rel=""
+                  rel="noreferrer"
                   title="Powered by Elastic.co"
                 >
                   <span

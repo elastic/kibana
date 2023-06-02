@@ -6,75 +6,46 @@
  */
 import { BrowserFields, ConfigKey } from '../../runtime_types/monitor_management';
 
+import { Formatter, commonFormatters } from '../common/formatters';
 import {
-  Formatter,
-  commonFormatters,
-  objectToJsonFormatter,
   arrayToJsonFormatter,
+  objectToJsonFormatter,
   stringToJsonFormatter,
-} from '../common/formatters';
-import {
-  tlsValueToYamlFormatter,
-  tlsValueToStringFormatter,
-  tlsArrayToYamlFormatter,
-} from '../tls/formatters';
+} from '../formatting_utils';
+import { DEFAULT_THROTTLING_VALUE } from '../../constants/monitor_defaults';
+
 import { tlsFormatters } from '../tls/formatters';
 
 export type BrowserFormatMap = Record<keyof BrowserFields, Formatter>;
 
-const throttlingFormatter: Formatter = (fields) => {
-  if (!fields[ConfigKey.IS_THROTTLING_ENABLED]) return 'false';
+export const throttlingFormatter: Formatter = (fields) => {
+  const throttling = fields[ConfigKey.THROTTLING_CONFIG];
 
-  const getThrottlingValue = (v: string | undefined, suffix: 'd' | 'u' | 'l') =>
-    v !== '' && v !== undefined ? `${v}${suffix}` : null;
+  if (!throttling || throttling?.id === 'no-throttling' || !throttling?.value) {
+    return 'false';
+  }
 
-  return [
-    getThrottlingValue(fields[ConfigKey.DOWNLOAD_SPEED], 'd'),
-    getThrottlingValue(fields[ConfigKey.UPLOAD_SPEED], 'u'),
-    getThrottlingValue(fields[ConfigKey.LATENCY], 'l'),
-  ]
-    .filter((v) => v !== null)
-    .join('/');
+  return JSON.stringify({
+    download: Number(throttling?.value?.download || DEFAULT_THROTTLING_VALUE.download),
+    upload: Number(throttling?.value?.upload || DEFAULT_THROTTLING_VALUE.upload),
+    latency: Number(throttling?.value?.latency || DEFAULT_THROTTLING_VALUE),
+  });
 };
 
 export const browserFormatters: BrowserFormatMap = {
-  [ConfigKey.METADATA]: (fields) => objectToJsonFormatter(fields[ConfigKey.METADATA]),
-  [ConfigKey.URLS]: null,
-  [ConfigKey.PORT]: null,
-  [ConfigKey.SOURCE_ZIP_URL]: null,
-  [ConfigKey.SOURCE_ZIP_USERNAME]: null,
-  [ConfigKey.SOURCE_ZIP_PASSWORD]: null,
-  [ConfigKey.SOURCE_ZIP_FOLDER]: null,
-  [ConfigKey.SOURCE_ZIP_PROXY_URL]: null,
   [ConfigKey.SOURCE_PROJECT_CONTENT]: null,
-  [ConfigKey.SOURCE_INLINE]: (fields) => stringToJsonFormatter(fields[ConfigKey.SOURCE_INLINE]),
-  [ConfigKey.PARAMS]: null,
   [ConfigKey.SCREENSHOTS]: null,
-  [ConfigKey.IS_THROTTLING_ENABLED]: null,
-  [ConfigKey.DOWNLOAD_SPEED]: null,
-  [ConfigKey.UPLOAD_SPEED]: null,
-  [ConfigKey.LATENCY]: null,
-  [ConfigKey.SYNTHETICS_ARGS]: (fields) => arrayToJsonFormatter(fields[ConfigKey.SYNTHETICS_ARGS]),
-  [ConfigKey.ZIP_URL_TLS_CERTIFICATE_AUTHORITIES]: (fields) =>
-    tlsValueToYamlFormatter(fields[ConfigKey.ZIP_URL_TLS_CERTIFICATE_AUTHORITIES]),
-  [ConfigKey.ZIP_URL_TLS_CERTIFICATE]: (fields) =>
-    tlsValueToYamlFormatter(fields[ConfigKey.ZIP_URL_TLS_CERTIFICATE]),
-  [ConfigKey.ZIP_URL_TLS_KEY]: (fields) =>
-    tlsValueToYamlFormatter(fields[ConfigKey.ZIP_URL_TLS_KEY]),
-  [ConfigKey.ZIP_URL_TLS_KEY_PASSPHRASE]: (fields) =>
-    tlsValueToStringFormatter(fields[ConfigKey.ZIP_URL_TLS_KEY_PASSPHRASE]),
-  [ConfigKey.ZIP_URL_TLS_VERIFICATION_MODE]: (fields) =>
-    tlsValueToStringFormatter(fields[ConfigKey.ZIP_URL_TLS_VERIFICATION_MODE]),
-  [ConfigKey.ZIP_URL_TLS_VERSION]: (fields) =>
-    tlsArrayToYamlFormatter(fields[ConfigKey.ZIP_URL_TLS_VERSION]),
-  [ConfigKey.JOURNEY_FILTERS_MATCH]: (fields) =>
-    stringToJsonFormatter(fields[ConfigKey.JOURNEY_FILTERS_MATCH]),
-  [ConfigKey.JOURNEY_FILTERS_TAGS]: (fields) =>
-    arrayToJsonFormatter(fields[ConfigKey.JOURNEY_FILTERS_TAGS]),
-  [ConfigKey.THROTTLING_CONFIG]: throttlingFormatter,
   [ConfigKey.IGNORE_HTTPS_ERRORS]: null,
   [ConfigKey.PLAYWRIGHT_OPTIONS]: null,
   [ConfigKey.TEXT_ASSERTION]: null,
+  [ConfigKey.PORT]: null,
+  [ConfigKey.URLS]: null,
+  [ConfigKey.METADATA]: objectToJsonFormatter,
+  [ConfigKey.SOURCE_INLINE]: stringToJsonFormatter,
+  [ConfigKey.SYNTHETICS_ARGS]: arrayToJsonFormatter,
+  [ConfigKey.JOURNEY_FILTERS_MATCH]: stringToJsonFormatter,
+  [ConfigKey.JOURNEY_FILTERS_TAGS]: arrayToJsonFormatter,
+  [ConfigKey.THROTTLING_CONFIG]: throttlingFormatter,
   ...commonFormatters,
   ...tlsFormatters,
 };

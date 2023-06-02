@@ -11,7 +11,6 @@ import {
   ChromeStart,
   CoreStart,
   PluginInitializerContext,
-  SavedObjectsClientContract,
   ToastsStart,
   OverlayStart,
   AppMountParameters,
@@ -32,9 +31,10 @@ import { TableListViewKibanaProvider } from '@kbn/content-management-table-list'
 
 import './index.scss';
 import('./font_awesome');
-import { SavedObjectsStart } from '@kbn/saved-objects-plugin/public';
 import { SpacesApi } from '@kbn/spaces-plugin/public';
 import { KibanaThemeProvider, toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
+import { ContentClient } from '@kbn/content-management-plugin/public';
 import { GraphSavePolicy } from './types';
 import { graphRouter } from './router';
 import { checkLicense } from '../common/check_license';
@@ -59,19 +59,19 @@ export interface GraphDependencies {
   indexPatterns: DataViewsContract;
   data: ReturnType<DataPlugin['start']>;
   unifiedSearch: UnifiedSearchPublicPluginStart;
-  savedObjectsClient: SavedObjectsClientContract;
+  contentClient: ContentClient;
   addBasePath: (url: string) => string;
   getBasePath: () => string;
   storage: Storage;
   canEditDrillDownUrls: boolean;
   graphSavePolicy: GraphSavePolicy;
   overlays: OverlayStart;
-  savedObjects: SavedObjectsStart;
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
   uiSettings: IUiSettingsClient;
   history: ScopedHistory<unknown>;
   spaces?: SpacesApi;
   inspect: InspectorPublicPluginStart;
+  savedObjectsManagement: SavedObjectsManagementPluginStart;
 }
 
 export type GraphServices = Omit<GraphDependencies, 'element' | 'history'>;

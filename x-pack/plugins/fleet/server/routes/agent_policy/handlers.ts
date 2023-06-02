@@ -6,9 +6,16 @@
  */
 
 import type { TypeOf } from '@kbn/config-schema';
-import type { RequestHandler, ResponseHeaders, ElasticsearchClient } from '@kbn/core/server';
+import type {
+  RequestHandler,
+  ResponseHeaders,
+  ElasticsearchClient,
+  SavedObjectsClientContract,
+} from '@kbn/core/server';
 import pMap from 'p-map';
 import { safeDump } from 'js-yaml';
+
+import { HTTPAuthorizationHeader } from '../../../common/http_authorization_header';
 
 import { fullAgentPolicyToYaml } from '../../../common/services';
 import { appContextService, agentPolicyService } from '../../services';
@@ -46,12 +53,13 @@ import { createAgentPolicyWithPackages } from '../../services/agent_policy_creat
 
 async function populateAssignedAgentsCount(
   esClient: ElasticsearchClient,
+  soClient: SavedObjectsClientContract,
   agentPolicies: AgentPolicy[]
 ) {
   await pMap(
     agentPolicies,
     (agentPolicy: GetAgentPoliciesResponseItem) =>
-      getAgentsByKuery(esClient, {
+      getAgentsByKuery(esClient, soClient, {
         showInactive: false,
         perPage: 0,
         page: 1,
@@ -67,9 +75,9 @@ export const getAgentPoliciesHandler: FleetRequestHandler<
 > = async (context, request, response) => {
   const coreContext = await context.core;
   const fleetContext = await context.fleet;
-  const soClient = fleetContext.epm.internalSoClient;
+  const soClient = fleetContext.internalSoClient;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
-  const { full: withPackagePolicies = false, ...restOfQuery } = request.query;
+  const { full: withPackagePolicies = false, noAgentCount = false, ...restOfQuery } = request.query;
   try {
     const { items, total, page, perPage } = await agentPolicyService.list(soClient, {
       withPackagePolicies,
@@ -82,9 +90,11 @@ export const getAgentPoliciesHandler: FleetRequestHandler<
       page,
       perPage,
     };
-
-    await populateAssignedAgentsCount(esClient, items);
-
+    if (!noAgentCount) {
+      await populateAssignedAgentsCount(esClient, soClient, items);
+    } else {
+      items.forEach((item) => (item.agents = 0));
+    }
     return response.ok({ body });
   } catch (error) {
     return defaultFleetErrorHandler({ error, response });
@@ -98,7 +108,7 @@ export const bulkGetAgentPoliciesHandler: FleetRequestHandler<
 > = async (context, request, response) => {
   const coreContext = await context.core;
   const fleetContext = await context.fleet;
-  const soClient = fleetContext.epm.internalSoClient;
+  const soClient = fleetContext.internalSoClient;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
   const { full: withPackagePolicies = false, ignoreMissing = false, ids } = request.body;
   try {
@@ -110,7 +120,7 @@ export const bulkGetAgentPoliciesHandler: FleetRequestHandler<
       items,
     };
 
-    await populateAssignedAgentsCount(esClient, items);
+    await populateAssignedAgentsCount(esClient, soClient, items);
 
     return response.ok({ body });
   } catch (error) {
@@ -130,10 +140,12 @@ export const getOneAgentPolicyHandler: RequestHandler<
   TypeOf<typeof GetOneAgentPolicyRequestSchema.params>
 > = async (context, request, response) => {
   const coreContext = await context.core;
+  const esClient = coreContext.elasticsearch.client.asInternalUser;
   const soClient = coreContext.savedObjects.client;
   try {
     const agentPolicy = await agentPolicyService.get(soClient, request.params.agentPolicyId);
     if (agentPolicy) {
+      await populateAssignedAgentsCount(esClient, soClient, [agentPolicy]);
       const body: GetOneAgentPolicyResponse = {
         item: agentPolicy,
       };
@@ -158,13 +170,15 @@ export const createAgentPolicyHandler: FleetRequestHandler<
 > = async (context, request, response) => {
   const coreContext = await context.core;
   const fleetContext = await context.fleet;
-  const soClient = fleetContext.epm.internalSoClient;
+  const soClient = fleetContext.internalSoClient;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
   const user = (await appContextService.getSecurity()?.authc.getCurrentUser(request)) || undefined;
   const withSysMonitoring = request.query.sys_monitoring ?? false;
   const monitoringEnabled = request.body.monitoring_enabled;
   const { has_fleet_server: hasFleetServer, ...newPolicy } = request.body;
   const spaceId = fleetContext.spaceId;
+  const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request, user?.username);
+
   try {
     const body: CreateAgentPolicyResponse = {
       item: await createAgentPolicyWithPackages({
@@ -176,6 +190,7 @@ export const createAgentPolicyHandler: FleetRequestHandler<
         monitoringEnabled,
         spaceId,
         user,
+        authorizationHeader,
       }),
     };
 
@@ -198,6 +213,7 @@ export const updateAgentPolicyHandler: FleetRequestHandler<
   const esClient = coreContext.elasticsearch.client.asInternalUser;
   const user = await appContextService.getSecurity()?.authc.getCurrentUser(request);
   const { force, ...data } = request.body;
+
   const spaceId = fleetContext.spaceId;
   try {
     const agentPolicy = await agentPolicyService.update(
@@ -257,11 +273,15 @@ export const deleteAgentPoliciesHandler: RequestHandler<
   const coreContext = await context.core;
   const soClient = coreContext.savedObjects.client;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
+  const user = await appContextService.getSecurity()?.authc.getCurrentUser(request);
   try {
     const body: DeleteAgentPolicyResponse = await agentPolicyService.delete(
       soClient,
       esClient,
-      request.body.agentPolicyId
+      request.body.agentPolicyId,
+      {
+        user: user || undefined,
+      }
     );
     return response.ok({
       body,
@@ -276,7 +296,7 @@ export const getFullAgentPolicy: FleetRequestHandler<
   TypeOf<typeof GetFullAgentPolicyRequestSchema.query>
 > = async (context, request, response) => {
   const fleetContext = await context.fleet;
-  const soClient = fleetContext.epm.internalSoClient;
+  const soClient = fleetContext.internalSoClient;
 
   if (request.query.kubernetes === true) {
     try {
@@ -332,7 +352,7 @@ export const downloadFullAgentPolicy: FleetRequestHandler<
   TypeOf<typeof GetFullAgentPolicyRequestSchema.query>
 > = async (context, request, response) => {
   const fleetContext = await context.fleet;
-  const soClient = fleetContext.epm.internalSoClient;
+  const soClient = fleetContext.internalSoClient;
   const {
     params: { agentPolicyId },
   } = request;
@@ -348,7 +368,7 @@ export const downloadFullAgentPolicy: FleetRequestHandler<
         const body = fullAgentConfigMap;
         const headers: ResponseHeaders = {
           'content-type': 'text/x-yaml',
-          'content-disposition': `attachment; filename="elastic-agent-standalone-kubernetes.yaml"`,
+          'content-disposition': `attachment; filename="elastic-agent-standalone-kubernetes.yml"`,
         };
         return response.ok({
           body,
@@ -428,7 +448,7 @@ export const downloadK8sManifest: FleetRequestHandler<
       const body = fullAgentManifest;
       const headers: ResponseHeaders = {
         'content-type': 'text/x-yaml',
-        'content-disposition': `attachment; filename="elastic-agent-managed-kubernetes.yaml"`,
+        'content-disposition': `attachment; filename="elastic-agent-managed-kubernetes.yml"`,
       };
       return response.ok({
         body,

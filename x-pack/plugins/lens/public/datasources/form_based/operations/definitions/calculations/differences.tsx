@@ -17,8 +17,7 @@ import {
   checkForDataLayerType,
 } from './utils';
 import { OperationDefinition } from '..';
-import { getFormatFromPreviousColumn, getFilter, combineErrorMessages } from '../helpers';
-import { getDisallowedPreviousShiftMessage } from '../../../time_shift_utils';
+import { getFormatFromPreviousColumn, getFilter } from '../helpers';
 
 const OPERATION_NAME = 'differences';
 
@@ -93,16 +92,13 @@ export const derivativeOperation: OperationDefinition<
     return hasDateField(newIndexPattern);
   },
   getErrorMessage: (layer: FormBasedLayer, columnId: string) => {
-    return combineErrorMessages([
-      getErrorsForDateReference(
-        layer,
-        columnId,
-        i18n.translate('xpack.lens.indexPattern.derivative', {
-          defaultMessage: 'Differences',
-        })
-      ),
-      getDisallowedPreviousShiftMessage(layer, columnId),
-    ]);
+    return getErrorsForDateReference(
+      layer,
+      columnId,
+      i18n.translate('xpack.lens.indexPattern.derivative', {
+        defaultMessage: 'Differences',
+      })
+    );
   },
   getDisabledStatus(indexPattern, layer, layerType) {
     const opName = i18n.translate('xpack.lens.indexPattern.derivative', {

@@ -9,7 +9,7 @@
 import execa from 'execa';
 import fs from 'fs';
 import { join } from 'path';
-import { REPO_ROOT } from '@kbn/utils';
+import { REPO_ROOT } from '@kbn/repo-info';
 import { getBuildNumber } from './get_build_number';
 
 interface Options {
@@ -38,5 +38,6 @@ export async function getVersionInfo({ isRelease, versionQualifier, pkg }: Optio
     buildSha,
     buildVersion,
     buildNumber: await getBuildNumber(),
+    buildDate: new Date().toISOString(),
   };
 }

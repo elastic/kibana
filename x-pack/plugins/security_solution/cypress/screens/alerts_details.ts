@@ -42,6 +42,9 @@ export const OVERVIEW_SEVERITY = '[data-test-subj="eventDetails"] [data-test-sub
 
 export const OVERVIEW_STATUS = '[data-test-subj="eventDetails"] [data-test-subj="alertStatus"]';
 
+export const EVENT_DETAILS_ALERT_STATUS_POPOVER =
+  '[data-test-subj="event-details-alertStatusPopover"]';
+
 const SUMMARY_VIEW = '[data-test-subj="summary-view"]';
 
 export const TABLE_CELL = '.euiTableRowCell';
@@ -50,7 +53,7 @@ export const CELL_EXPAND_VALUE = '[data-test-subj="euiDataGridCellExpandButton"]
 
 export const CELL_EXPANSION_POPOVER = '[data-test-subj="euiDataGridExpansionPopover"]';
 
-export const USER_DETAILS_LINK = '[data-test-subj="data-grid-user-details"]';
+export const USER_DETAILS_LINK = '[data-test-subj="users-link-anchor"]';
 
 export const TABLE_TAB = '[data-test-subj="tableTab"]';
 
@@ -68,8 +71,6 @@ export const UPDATE_ENRICHMENT_RANGE_BUTTON = '[data-test-subj="enrichment-butto
 
 export const OVERVIEW_TAB = '[data-test-subj="overviewTab"]';
 
-export const SUMMARY_VIEW_PREVALENCE_CELL = `${SUMMARY_VIEW} [data-test-subj='alert-prevalence']`;
-
 export const SUMMARY_VIEW_INVESTIGATE_IN_TIMELINE_BUTTON = `${SUMMARY_VIEW} [aria-label='Investigate in timeline']`;
 
 export const INSIGHTS_RELATED_ALERTS_BY_SESSION = `[data-test-subj='related-alerts-by-session']`;
@@ -83,3 +84,5 @@ export const INSIGHTS_INVESTIGATE_ANCESTRY_ALERTS_IN_TIMELINE_BUTTON = `[data-te
 export const ENRICHED_DATA_ROW = `[data-test-subj='EnrichedDataRow']`;
 
 export const OPEN_ALERT_DETAILS_PAGE = `[data-test-subj="open-alert-details-page"]`;
+
+export const COPY_ALERT_FLYOUT_LINK = `[data-test-subj="copy-alert-flyout-link"]`;

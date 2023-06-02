@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import {
   StaticValueParams,
   StaticValueColumn as BaseStaticValueColumn,
@@ -47,7 +47,7 @@ export const convertToStaticValueColumn = (
 };
 
 export const createStaticValueColumn = (staticValue: number): BaseStaticValueColumn => ({
-  columnId: uuid(),
+  columnId: uuidv4(),
   operationType: 'static_value',
   references: [],
   dataType: 'number',

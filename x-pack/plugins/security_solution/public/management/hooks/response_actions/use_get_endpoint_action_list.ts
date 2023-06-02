@@ -10,7 +10,7 @@ import type { IHttpFetchError } from '@kbn/core-http-browser';
 import { useQuery } from '@tanstack/react-query';
 import type { EndpointActionListRequestQuery } from '../../../../common/endpoint/schema/actions';
 import { useHttp } from '../../../common/lib/kibana';
-import { ENDPOINTS_ACTION_LIST_ROUTE } from '../../../../common/endpoint/constants';
+import { BASE_ENDPOINT_ACTION_ROUTE } from '../../../../common/endpoint/constants';
 import type { ActionListApiResponse } from '../../../../common/endpoint/types';
 
 interface ErrorType {
@@ -35,8 +35,9 @@ export const useGetEndpointActionList = (
   return useQuery<ActionListApiResponse, IHttpFetchError<ErrorType>>({
     queryKey: ['get-action-list', query],
     ...options,
+    keepPreviousData: true,
     queryFn: async () => {
-      return http.get<ActionListApiResponse>(ENDPOINTS_ACTION_LIST_ROUTE, {
+      return http.get<ActionListApiResponse>(BASE_ENDPOINT_ACTION_ROUTE, {
         query: {
           agentIds: query.agentIds,
           commands: query.commands,
@@ -46,6 +47,9 @@ export const useGetEndpointActionList = (
           startDate: query.startDate,
           statuses: query.statuses,
           userIds,
+          withOutputs: query.withOutputs,
+          withAutomatedActions: query.withAutomatedActions,
+          alertId: query.alertId,
         },
       });
     },

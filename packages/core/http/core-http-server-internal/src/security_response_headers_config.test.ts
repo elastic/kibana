@@ -18,6 +18,7 @@ describe('parseRawSecurityResponseHeadersConfig', () => {
     expect(result.disableEmbedding).toBe(false);
     expect(result.securityResponseHeaders).toMatchInlineSnapshot(`
       Object {
+        "Cross-Origin-Opener-Policy": "same-origin",
         "Referrer-Policy": "no-referrer-when-downgrade",
         "X-Content-Type-Options": "nosniff",
       }
@@ -94,6 +95,23 @@ describe('parseRawSecurityResponseHeadersConfig', () => {
         `"SAMEORIGIN"`
       );
       expect(result.disableEmbedding).toBe(true);
+    });
+  });
+
+  describe('crossOriginOpenerPolicy', () => {
+    it('a custom value results in the expected Cross-Origin-Opener-Policy header', () => {
+      const crossOriginOpenerPolicy = 'same-origin-allow-popups';
+      const config = schema.validate({ crossOriginOpenerPolicy });
+      const result = parse(config);
+      expect(result.securityResponseHeaders['Cross-Origin-Opener-Policy']).toEqual(
+        crossOriginOpenerPolicy
+      );
+    });
+
+    it('a null value removes the Cross-Origin-Opener-Policy header', () => {
+      const config = schema.validate({ crossOriginOpenerPolicy: null });
+      const result = parse(config);
+      expect(result.securityResponseHeaders['Cross-Origin-Opener-Policy']).toBeUndefined();
     });
   });
 });

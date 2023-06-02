@@ -6,6 +6,7 @@
  */
 
 import { Position } from '@elastic/charts';
+import { IconChartHeatmap } from '@kbn/chart-icons';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { getSuggestions } from './suggestions';
 import type { HeatmapVisualizationState } from './types';
@@ -298,7 +299,8 @@ describe('heatmap suggestions', () => {
           },
           title: 'Heat map',
           hide: true,
-          previewIcon: 'empty',
+          incomplete: false,
+          previewIcon: IconChartHeatmap,
           score: 0.3,
         },
       ]);
@@ -351,7 +353,8 @@ describe('heatmap suggestions', () => {
           },
           title: 'Heat map',
           hide: true,
-          previewIcon: 'empty',
+          incomplete: true,
+          previewIcon: IconChartHeatmap,
           score: 0,
         },
       ]);
@@ -404,7 +407,8 @@ describe('heatmap suggestions', () => {
           },
           title: 'Heat map',
           hide: true,
-          previewIcon: 'empty',
+          incomplete: true,
+          previewIcon: IconChartHeatmap,
           score: 0.3,
         },
       ]);
@@ -468,7 +472,8 @@ describe('heatmap suggestions', () => {
           },
           title: 'Heat map',
           hide: true,
-          previewIcon: 'empty',
+          incomplete: false,
+          previewIcon: IconChartHeatmap,
           score: 0.3,
         },
       ]);
@@ -534,7 +539,8 @@ describe('heatmap suggestions', () => {
           },
           title: 'Heat map',
           hide: false,
-          previewIcon: 'empty',
+          incomplete: false,
+          previewIcon: IconChartHeatmap,
           score: 0.6,
         },
       ]);
@@ -608,7 +614,8 @@ describe('heatmap suggestions', () => {
           },
           title: 'Heat map',
           hide: false,
-          previewIcon: 'empty',
+          incomplete: false,
+          previewIcon: IconChartHeatmap,
           score: 0.3,
         },
       ]);
@@ -682,7 +689,8 @@ describe('heatmap suggestions', () => {
           },
           title: 'Heat map',
           hide: false,
-          previewIcon: 'empty',
+          incomplete: false,
+          previewIcon: IconChartHeatmap,
           score: 0.9,
         },
       ]);

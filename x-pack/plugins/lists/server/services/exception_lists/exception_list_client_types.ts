@@ -19,8 +19,10 @@ import type {
   EntriesArray,
   ExceptionListItemType,
   ExceptionListItemTypeOrUndefined,
+  ExceptionListSchema,
   ExceptionListType,
   ExceptionListTypeOrUndefined,
+  ExpireTimeOrUndefined,
   ExportExceptionDetails,
   FilterOrUndefined,
   FoundExceptionListItemSchema,
@@ -242,6 +244,8 @@ export interface CreateExceptionListItemOptions {
   comments: CreateCommentsArray;
   /** an array with the exception list item entries */
   entries: EntriesArray;
+  /** an optional datetime string with an expiration time */
+  expireTime: ExpireTimeOrUndefined;
   /** the "item_id" of the exception list item */
   itemId: ItemId;
   /** the "list_id" of the parent exception list */
@@ -292,10 +296,12 @@ export interface CreateEndpointListItemOptions {
  * {@link ExceptionListClient.duplicateExceptionListAndItems}
  */
 export interface DuplicateExceptionListOptions {
-  /** The single list id to do the search against */
-  listId: ListId;
+  /** The list to be duplicated */
+  list: ExceptionListSchema;
   /** saved object namespace (single | agnostic) */
   namespaceType: NamespaceType;
+  /** determines whether exception items with an expired TTL are included in duplication */
+  includeExpiredExceptions: boolean;
 }
 
 /**
@@ -309,6 +315,8 @@ export interface UpdateExceptionListItemOptions {
   comments: UpdateCommentsArray;
   /** item exception entries logic */
   entries: EntriesArray;
+  /** an optional datetime string with an expiration time */
+  expireTime: ExpireTimeOrUndefined;
   /** the "id" of the exception list item */
   id: IdOrUndefined;
   /** the "item_id" of the exception list item */
@@ -490,6 +498,8 @@ export interface ExportExceptionListAndItemsOptions {
   id: IdOrUndefined;
   /** saved object namespace (single | agnostic) */
   namespaceType: NamespaceType;
+  /** whether or not to include expired exceptions */
+  includeExpiredExceptions: boolean;
 }
 
 /**

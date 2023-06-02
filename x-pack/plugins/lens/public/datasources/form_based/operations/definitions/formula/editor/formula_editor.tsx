@@ -53,9 +53,10 @@ import { LANGUAGE_ID } from './math_tokenization';
 import './formula.scss';
 import { FormulaIndexPatternColumn } from '../formula';
 import { insertOrReplaceFormulaColumn } from '../parse';
-import { filterByVisibleOperation, nonNullable } from '../util';
+import { filterByVisibleOperation } from '../util';
 import { getColumnTimeShiftWarnings, getDateHistogramInterval } from '../../../../time_shift_utils';
 import { getDocumentationSections } from './formula_help';
+import { nonNullable } from '../../../../../../utils';
 
 function tableHasData(
   activeData: ParamEditorProps<FormulaIndexPatternColumn>['activeData'],
@@ -107,6 +108,7 @@ export function FormulaEditor({
   setIsCloseable,
   dateHistogramInterval,
   hasData,
+  dateRange,
 }: Omit<ParamEditorProps<FormulaIndexPatternColumn>, 'activeData'> & {
   dateHistogramInterval: ReturnType<typeof getDateHistogramInterval>;
   hasData: boolean;
@@ -189,6 +191,7 @@ export function FormulaEditor({
             {
               indexPattern,
               operations: operationDefinitionMap,
+              dateRange,
             }
           ).layer
       );
@@ -218,6 +221,7 @@ export function FormulaEditor({
               {
                 indexPattern,
                 operations: operationDefinitionMap,
+                dateRange,
               }
             ).layer
           );
@@ -237,7 +241,8 @@ export function FormulaEditor({
           layer,
           indexPattern,
           visibleOperationsMap,
-          currentColumn
+          currentColumn,
+          dateRange
         );
         if (validationErrors.length) {
           errors = validationErrors;
@@ -267,6 +272,7 @@ export function FormulaEditor({
                 {
                   indexPattern,
                   operations: operationDefinitionMap,
+                  dateRange,
                 }
               ).layer
             );
@@ -332,6 +338,7 @@ export function FormulaEditor({
           {
             indexPattern,
             operations: operationDefinitionMap,
+            dateRange,
           }
         );
 
@@ -348,6 +355,7 @@ export function FormulaEditor({
                   newLayer,
                   id,
                   indexPattern,
+                  dateRange,
                   visibleOperationsMap
                 );
                 if (messages) {
@@ -367,14 +375,16 @@ export function FormulaEditor({
                 const startPosition = offsetToRowColumn(text, locations[id].min);
                 const endPosition = offsetToRowColumn(text, locations[id].max);
                 newWarnings.push(
-                  ...getColumnTimeShiftWarnings(dateHistogramInterval, column).map((message) => ({
-                    message,
-                    startColumn: startPosition.column + 1,
-                    startLineNumber: startPosition.lineNumber,
-                    endColumn: endPosition.column + 1,
-                    endLineNumber: endPosition.lineNumber,
-                    severity: monaco.MarkerSeverity.Warning,
-                  }))
+                  ...getColumnTimeShiftWarnings(dateHistogramInterval, column.timeShift).map(
+                    (message) => ({
+                      message,
+                      startColumn: startPosition.column + 1,
+                      startLineNumber: startPosition.lineNumber,
+                      endColumn: endPosition.column + 1,
+                      endLineNumber: endPosition.lineNumber,
+                      severity: monaco.MarkerSeverity.Warning,
+                    })
+                  )
                 );
               }
             }
@@ -442,6 +452,7 @@ export function FormulaEditor({
             unifiedSearch,
             dataViews,
             dateHistogramInterval: baseIntervalRef.current,
+            dateRange,
           });
         }
       } else {
@@ -454,6 +465,7 @@ export function FormulaEditor({
           unifiedSearch,
           dataViews,
           dateHistogramInterval: baseIntervalRef.current,
+          dateRange,
         });
       }
 
@@ -469,7 +481,7 @@ export function FormulaEditor({
         ),
       };
     },
-    [indexPattern, visibleOperationsMap, unifiedSearch, dataViews, baseIntervalRef]
+    [indexPattern, visibleOperationsMap, unifiedSearch, dataViews, baseIntervalRef, dateRange]
   );
 
   const provideSignatureHelp = useCallback(
@@ -850,7 +862,7 @@ export function FormulaEditor({
                       buttonProps={{
                         color: 'text',
                         className: 'lnsFormula__editorHelp lnsFormula__editorHelp--overlay',
-                        'data-test-subj': 'unifiedTextLangEditor-documentation',
+                        'data-test-subj': 'TextBasedLangEditor-documentation',
                         'aria-label': i18n.translate(
                           'xpack.lens.formula.editorHelpInlineShowToolTip',
                           {
@@ -872,7 +884,7 @@ export function FormulaEditor({
                         <EuiButtonEmpty
                           color={errorCount ? 'danger' : 'warning'}
                           className="lnsFormula__editorError"
-                          iconType="alert"
+                          iconType="warning"
                           size="xs"
                           flush="right"
                           onClick={() => {
@@ -896,18 +908,24 @@ export function FormulaEditor({
                         </EuiButtonEmpty>
                       }
                     >
-                      {warnings.map(({ message, severity }, index) => (
-                        <div key={index} className="lnsFormula__warningText">
-                          <EuiText
-                            size="s"
-                            color={
-                              severity === monaco.MarkerSeverity.Warning ? 'warning' : 'danger'
-                            }
-                          >
-                            {message}
-                          </EuiText>
-                        </div>
-                      ))}
+                      <div
+                        css={css`
+                          max-width: 400px;
+                        `}
+                      >
+                        {warnings.map(({ message, severity }, index) => (
+                          <div key={index} className="lnsFormula__warningText">
+                            <EuiText
+                              size="s"
+                              color={
+                                severity === monaco.MarkerSeverity.Warning ? 'warning' : 'danger'
+                              }
+                            >
+                              {message}
+                            </EuiText>
+                          </div>
+                        ))}
+                      </div>
                     </EuiPopover>
                   </EuiFlexItem>
                 ) : null}

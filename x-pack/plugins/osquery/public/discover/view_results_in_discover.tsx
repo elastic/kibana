@@ -15,7 +15,6 @@ import { ViewResultsActionButtonType } from '../live_queries/form/pack_queries_s
 
 interface ViewResultsInDiscoverActionProps {
   actionId?: string;
-  agentIds?: string[];
   buttonType: ViewResultsActionButtonType;
   endDate?: string;
   startDate?: string;
@@ -24,7 +23,6 @@ interface ViewResultsInDiscoverActionProps {
 
 const ViewResultsInDiscoverActionComponent: React.FC<ViewResultsInDiscoverActionProps> = ({
   actionId,
-  agentIds,
   buttonType,
   endDate,
   startDate,
@@ -39,15 +37,6 @@ const ViewResultsInDiscoverActionComponent: React.FC<ViewResultsInDiscoverAction
   useEffect(() => {
     const getDiscoverUrl = async () => {
       if (!locator || !logsDataView) return;
-
-      const agentIdsQuery = agentIds?.length
-        ? {
-            bool: {
-              minimum_should_match: 1,
-              should: agentIds.map((agentId) => ({ match_phrase: { 'agent.id': agentId } })),
-            },
-          }
-        : null;
 
       const newUrl = await locator.getUrl({
         indexPatternId: logsDataView.id,
@@ -65,23 +54,6 @@ const ViewResultsInDiscoverActionComponent: React.FC<ViewResultsInDiscoverAction
             query: { match_phrase: { action_id: actionId } },
             $state: { store: FilterStateStore.APP_STATE },
           },
-          ...(agentIdsQuery
-            ? [
-                {
-                  $state: { store: FilterStateStore.APP_STATE },
-                  meta: {
-                    alias: 'agent IDs',
-                    disabled: false,
-                    index: logsDataView.id,
-                    key: 'query',
-                    negate: false,
-                    type: 'custom',
-                    value: JSON.stringify(agentIdsQuery),
-                  },
-                  query: agentIdsQuery,
-                },
-              ]
-            : []),
         ],
         refreshInterval: {
           pause: true,
@@ -104,7 +76,7 @@ const ViewResultsInDiscoverActionComponent: React.FC<ViewResultsInDiscoverAction
     };
 
     getDiscoverUrl();
-  }, [actionId, agentIds, endDate, startDate, locator, logsDataView]);
+  }, [actionId, endDate, startDate, locator, logsDataView]);
 
   if (!discoverPermissions.show) {
     return null;

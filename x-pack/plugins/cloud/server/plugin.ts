@@ -11,7 +11,7 @@ import { registerCloudDeploymentMetadataAnalyticsContext } from '../common/regis
 import type { CloudConfigType } from './config';
 import { registerCloudUsageCollector } from './collectors';
 import { getIsCloudEnabled } from '../common/is_cloud_enabled';
-import { parseDeploymentIdFromDeploymentUrl } from './utils';
+import { parseDeploymentIdFromDeploymentUrl } from '../common/parse_deployment_id_from_deployment_url';
 import { readInstanceSizeMb } from './env';
 
 interface PluginsSetup {
@@ -55,7 +55,17 @@ export interface CloudSetup {
   };
 }
 
-export class CloudPlugin implements Plugin<CloudSetup> {
+/**
+ * Start contract
+ */
+export interface CloudStart {
+  /**
+   * `true` when running on Elastic Cloud.
+   */
+  isCloudEnabled: boolean;
+}
+
+export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
   private readonly config: CloudConfigType;
 
   constructor(private readonly context: PluginInitializerContext) {
@@ -85,5 +95,9 @@ export class CloudPlugin implements Plugin<CloudSetup> {
     };
   }
 
-  public start() {}
+  public start() {
+    return {
+      isCloudEnabled: getIsCloudEnabled(this.config.id),
+    };
+  }
 }

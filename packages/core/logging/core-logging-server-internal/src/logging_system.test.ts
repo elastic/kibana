@@ -8,7 +8,7 @@
 
 import { mockStreamWrite, mockGetFlattenedObject } from './logging_system.test.mocks';
 
-const dynamicProps = { process: { pid: expect.any(Number) } };
+const dynamicProps = { process: { pid: expect.any(Number) }, ecs: { version: EcsVersion } };
 
 const timestamp = new Date(Date.UTC(2012, 1, 1, 14, 33, 22, 11));
 let mockConsoleLog: jest.SpyInstance;
@@ -17,6 +17,7 @@ import { createWriteStream } from 'fs';
 const mockCreateWriteStream = createWriteStream as unknown as jest.Mock<typeof createWriteStream>;
 
 import { LoggingSystem, config } from '..';
+import { EcsVersion } from '@kbn/ecs';
 
 let system: LoggingSystem;
 beforeEach(() => {

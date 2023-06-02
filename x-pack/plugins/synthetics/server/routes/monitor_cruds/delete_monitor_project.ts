@@ -6,10 +6,10 @@
  */
 import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
+import { syntheticsMonitorType } from '../../../common/types/saved_objects';
 import { ConfigKey } from '../../../common/runtime_types';
 import { SyntheticsRestApiRouteFactory } from '../../legacy_uptime/routes/types';
 import { API_URLS } from '../../../common/constants';
-import { syntheticsMonitorType } from '../../legacy_uptime/lib/saved_objects/synthetics_monitor';
 import { getMonitors, getKqlFilter } from '../common';
 import { INSUFFICIENT_FLEET_PERMISSIONS } from '../../synthetics_service/project_monitor/project_monitor_formatter';
 import { deleteMonitorBulk } from './bulk_cruds/delete_monitor_bulk';
@@ -25,13 +25,8 @@ export const deleteSyntheticsMonitorProjectRoute: SyntheticsRestApiRouteFactory 
       projectName: schema.string(),
     }),
   },
-  handler: async ({
-    request,
-    response,
-    savedObjectsClient,
-    server,
-    syntheticsMonitorClient,
-  }): Promise<any> => {
+  handler: async (routeContext): Promise<any> => {
+    const { request, response, savedObjectsClient, server, syntheticsMonitorClient } = routeContext;
     const { projectName } = request.params;
     const { monitors: monitorsToDelete } = request.body;
     const decodedProjectName = decodeURI(projectName);
@@ -43,19 +38,22 @@ export const deleteSyntheticsMonitorProjectRoute: SyntheticsRestApiRouteFactory 
       });
     }
 
+    const deleteFilter = `${syntheticsMonitorType}.attributes.${
+      ConfigKey.PROJECT_ID
+    }: "${decodedProjectName}" AND ${getKqlFilter({
+      field: 'journey_id',
+      values: monitorsToDelete.map((id: string) => `${id}`),
+    })}`;
+
     const { saved_objects: monitors } = await getMonitors(
       {
-        filter: `${syntheticsMonitorType}.attributes.${
-          ConfigKey.PROJECT_ID
-        }: "${decodedProjectName}" AND ${getKqlFilter({
-          field: 'journey_id',
-          values: monitorsToDelete.map((id: string) => `${id}`),
-        })}`,
-        fields: [],
-        perPage: 500,
+        ...routeContext,
+        request: {
+          ...request,
+          query: { ...request.query, filter: deleteFilter, perPage: 500 },
+        },
       },
-      syntheticsMonitorClient.syntheticsService,
-      savedObjectsClient
+      { fields: [] }
     );
 
     const {

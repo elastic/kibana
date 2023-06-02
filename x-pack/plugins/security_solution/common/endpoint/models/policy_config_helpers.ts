@@ -31,29 +31,29 @@ export const disableProtections = (policy: PolicyConfig): PolicyConfig => {
 };
 
 const disableCommonProtections = (policy: PolicyConfig) => {
-  let policyOutput = policy;
-
-  for (const key in policyOutput) {
-    if (Object.prototype.hasOwnProperty.call(policyOutput, key)) {
-      const os = key as keyof PolicyConfig;
-
-      policyOutput = {
-        ...policyOutput,
-        [os]: {
-          ...policyOutput[os],
-          ...getDisabledCommonProtectionsForOS(policyOutput, os),
-          popup: {
-            ...policyOutput[os].popup,
-            ...getDisabledCommonPopupsForOS(policyOutput, os),
-          },
-        },
-      };
+  return Object.keys(policy).reduce<PolicyConfig>((acc, item) => {
+    const os = item as keyof PolicyConfig;
+    if (os === 'meta') {
+      return acc;
     }
-  }
-  return policyOutput;
+    return {
+      ...acc,
+      [os]: {
+        ...policy[os],
+        ...getDisabledCommonProtectionsForOS(policy, os),
+        popup: {
+          ...policy[os].popup,
+          ...getDisabledCommonPopupsForOS(policy, os),
+        },
+      },
+    };
+  }, policy);
 };
 
-const getDisabledCommonProtectionsForOS = (policy: PolicyConfig, os: keyof PolicyConfig) => ({
+const getDisabledCommonProtectionsForOS = (
+  policy: PolicyConfig,
+  os: keyof Omit<PolicyConfig, 'meta'>
+) => ({
   behavior_protection: {
     ...policy[os].behavior_protection,
     mode: ProtectionModes.off,
@@ -69,7 +69,10 @@ const getDisabledCommonProtectionsForOS = (policy: PolicyConfig, os: keyof Polic
   },
 });
 
-const getDisabledCommonPopupsForOS = (policy: PolicyConfig, os: keyof PolicyConfig) => ({
+const getDisabledCommonPopupsForOS = (
+  policy: PolicyConfig,
+  os: keyof Omit<PolicyConfig, 'meta'>
+) => ({
   behavior_protection: {
     ...policy[os].popup.behavior_protection,
     enabled: false,

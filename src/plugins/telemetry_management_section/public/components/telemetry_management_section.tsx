@@ -7,7 +7,15 @@
  */
 
 import React, { Component, Fragment } from 'react';
-import { EuiCallOut, EuiForm, EuiLink, EuiSpacer, EuiSplitPanel, EuiTitle } from '@elastic/eui';
+import {
+  EuiCallOut,
+  EuiForm,
+  EuiLink,
+  EuiLoadingSpinner,
+  EuiSpacer,
+  EuiSplitPanel,
+  EuiTitle,
+} from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -19,7 +27,21 @@ import { OptInExampleFlyout } from './opt_in_example_flyout';
 
 type TelemetryService = TelemetryPluginSetup['telemetryService'];
 
-const SEARCH_TERMS = ['telemetry', 'usage', 'data', 'usage data'];
+const SEARCH_TERMS: string[] = [
+  'telemetry',
+  'usage data', // Keeping this term for BWC
+  'usage collection',
+  i18n.translate('telemetry.telemetryConstant', {
+    defaultMessage: 'telemetry',
+  }),
+  i18n.translate('telemetry.usageCollectionConstant', {
+    defaultMessage: 'usage collection',
+  }),
+].flatMap((term) => {
+  // Automatically lower-case and split by space the terms from above
+  const lowerCased = term.toLowerCase();
+  return [lowerCased, ...lowerCased.split(' ')];
+});
 
 interface Props {
   telemetryService: TelemetryService;
@@ -92,10 +114,12 @@ export class TelemetryManagementSection extends Component<Props, State> {
       <Fragment>
         {showExample && (
           <TrackApplicationView viewId="optInExampleFlyout">
-            <OptInExampleFlyout
-              fetchExample={telemetryService.fetchExample}
-              onClose={this.toggleExample}
-            />
+            <React.Suspense fallback={<EuiLoadingSpinner />}>
+              <OptInExampleFlyout
+                fetchExample={telemetryService.fetchExample}
+                onClose={this.toggleExample}
+              />
+            </React.Suspense>
           </TrackApplicationView>
         )}
         <EuiSplitPanel.Outer hasBorder>
@@ -103,7 +127,10 @@ export class TelemetryManagementSection extends Component<Props, State> {
             <EuiSplitPanel.Inner color="subdued">
               <EuiTitle>
                 <h2>
-                  <FormattedMessage id="telemetry.usageDataTitle" defaultMessage="Usage Data" />
+                  <FormattedMessage
+                    id="telemetry.usageDataTitle"
+                    defaultMessage="Usage collection"
+                  />
                 </h2>
               </EuiTitle>
             </EuiSplitPanel.Inner>
@@ -116,13 +143,13 @@ export class TelemetryManagementSection extends Component<Props, State> {
                   type: 'boolean',
                   name: 'telemetry:enabled',
                   displayName: i18n.translate('telemetry.provideUsageDataTitle', {
-                    defaultMessage: 'Provide usage data',
+                    defaultMessage: 'Share usage with Elastic',
                   }),
                   value: enabled,
                   description: this.renderDescription(),
                   defVal: true,
                   ariaName: i18n.translate('telemetry.provideUsageDataAriaName', {
-                    defaultMessage: 'Provide usage data',
+                    defaultMessage: 'Share usage with Elastic',
                   }),
                   requiresPageReload: false,
                   category: [],
@@ -194,8 +221,9 @@ export class TelemetryManagementSection extends Component<Props, State> {
         <p>
           <FormattedMessage
             id="telemetry.telemetryConfigAndLinkDescription"
-            defaultMessage="Enabling data usage collection helps us manage and improve our products and services.
-            See our {privacyStatementLink} for more details."
+            defaultMessage="Enabling usage collection (also known as Telemetry) allows us to learn
+            what our users are most interested in, so we can improve our products and services.
+            Refer to our {privacyStatementLink}."
             values={{
               privacyStatementLink: (
                 <EuiLink href={docLinks.legal.privacyStatement} target="_blank">
@@ -239,10 +267,10 @@ export class TelemetryManagementSection extends Component<Props, State> {
             toasts.addSuccess(
               newOptInValue
                 ? i18n.translate('telemetry.optInSuccessOn', {
-                    defaultMessage: 'Usage data collection turned on.',
+                    defaultMessage: 'Sharing usage with Elastic is enabled.',
                   })
                 : i18n.translate('telemetry.optInSuccessOff', {
-                    defaultMessage: 'Usage data collection turned off.',
+                    defaultMessage: 'No longer sharing usage with Elastic.',
                   })
             );
             resolve(true);

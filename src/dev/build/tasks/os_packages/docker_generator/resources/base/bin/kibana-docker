@@ -87,7 +87,6 @@ kibana_vars=(
     i18n.locale
     interactiveSetup.enabled
     interactiveSetup.connectionCheck.interval
-    interpreter.enableInVisualize
     kibana.autocompleteTerminateAfter
     kibana.autocompleteTimeout
     kibana.index
@@ -101,6 +100,7 @@ kibana_vars=(
     logging.root
     logging.root.appenders
     logging.root.level
+    map.emsUrl
     map.includeElasticMapsService
     map.tilemap.options.attribution
     map.tilemap.options.maxZoom
@@ -139,6 +139,7 @@ kibana_vars=(
     regionmap
     savedObjects.maxImportExportSize
     savedObjects.maxImportPayloadBytes
+    savedObjects.allowHttpApiAccess
     security.showInsecureClusterWarning
     server.basePath
     server.compression.enabled
@@ -160,11 +161,13 @@ kibana_vars=(
     server.requestId.allowFromAnyIp
     server.requestId.ipAllowlist
     server.rewriteBasePath
+    server.restrictInternalApis
     server.securityResponseHeaders.disableEmbedding
     server.securityResponseHeaders.permissionsPolicy
     server.securityResponseHeaders.referrerPolicy
     server.securityResponseHeaders.strictTransportSecurity
     server.securityResponseHeaders.xContentTypeOptions
+    server.securityResponseHeaders.crossOriginOpenerPolicy
     server.shutdownTimeout
     server.socketTimeout
     server.ssl.cert
@@ -202,6 +205,7 @@ kibana_vars=(
     xpack.actions.allowedHosts
     xpack.actions.customHostSettings
     xpack.actions.email.domain_allowlist
+    xpack.actions.enableFooterInEmail
     xpack.actions.enabledActionTypes
     xpack.actions.maxResponseContentLength
     xpack.actions.preconfigured
@@ -249,6 +253,8 @@ kibana_vars=(
     xpack.banners.placement
     xpack.banners.textColor
     xpack.banners.textContent
+    xpack.cases.files.allowedMimeTypes
+    xpack.cases.files.maxSize
     xpack.code.disk.thresholdEnabled
     xpack.code.disk.watermarkLow
     xpack.code.indexRepoFrequencyMs
@@ -298,8 +304,6 @@ kibana_vars=(
     xpack.ingestManager.fleet.tlsCheckDisabled
     xpack.ingestManager.registryUrl
     xpack.observability.annotations.index
-    xpack.observability.unsafe.slo.enabled
-    xpack.observability.unsafe.alertDetails.apm.enabled
     xpack.observability.unsafe.alertDetails.metrics.enabled
     xpack.observability.unsafe.alertDetails.logs.enabled
     xpack.observability.unsafe.alertDetails.uptime.enabled
@@ -380,6 +384,7 @@ kibana_vars=(
     xpack.security.sameSiteCookies
     xpack.security.secureCookies
     xpack.security.session.cleanupInterval
+    xpack.security.session.concurrentSessions.maxSessions
     xpack.security.session.idleTimeout
     xpack.security.session.lifespan
     xpack.security.sessionTimeout
@@ -392,11 +397,9 @@ kibana_vars=(
     xpack.securitySolution.maxTimelineImportExportSize
     xpack.securitySolution.maxTimelineImportPayloadBytes
     xpack.securitySolution.packagerTaskInterval
-    xpack.securitySolution.prebuiltRulesFromFileSystem
-    xpack.securitySolution.prebuiltRulesFromSavedObjects
+    xpack.securitySolution.prebuiltRulesPackageVersion
     xpack.spaces.maxSpaces
     xpack.task_manager.max_attempts
-    xpack.task_manager.max_poll_inactivity_cycles
     xpack.task_manager.max_workers
     xpack.task_manager.monitored_aggregated_stats_refresh_rate
     xpack.task_manager.monitored_stats_required_freshness
@@ -409,7 +412,9 @@ kibana_vars=(
     xpack.task_manager.version_conflict_threshold
     xpack.task_manager.event_loop_delay.monitor
     xpack.task_manager.event_loop_delay.warn_threshold
+    xpack.task_manager.worker_utilization_running_average_window
     xpack.uptime.index
+    serverless
 )
 
 longopts=''

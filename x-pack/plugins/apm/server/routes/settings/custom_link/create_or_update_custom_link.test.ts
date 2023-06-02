@@ -8,18 +8,12 @@
 import { mockNow } from '../../../utils/test_helpers';
 import { CustomLink } from '../../../../common/custom_link/custom_link_types';
 import { createOrUpdateCustomLink } from './create_or_update_custom_link';
-import { ApmIndicesConfig } from '../apm_indices/get_apm_indices';
 import { APMInternalESClient } from '../../../lib/helpers/create_es_client/create_internal_es_client';
 
 describe('Create or Update Custom link', () => {
   const internalClientIndexMock = jest.fn();
 
-  const mockIndices = {
-    apmCustomLinkIndex: 'apmCustomLinkIndex',
-  } as unknown as ApmIndicesConfig;
-
   const mockInternalESClient = {
-    apmIndices: mockIndices,
     index: internalClientIndexMock,
   } as unknown as APMInternalESClient;
 
@@ -48,7 +42,7 @@ describe('Create or Update Custom link', () => {
       'create_or_update_custom_link',
       {
         refresh: true,
-        index: 'apmCustomLinkIndex',
+        index: '.apm-custom-link',
         body: {
           '@timestamp': 1570737000000,
           label: 'foo',
@@ -69,7 +63,7 @@ describe('Create or Update Custom link', () => {
       'create_or_update_custom_link',
       {
         refresh: true,
-        index: 'apmCustomLinkIndex',
+        index: '.apm-custom-link',
         id: 'bar',
         body: {
           '@timestamp': 1570737000000,

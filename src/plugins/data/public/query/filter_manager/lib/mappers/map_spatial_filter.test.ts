@@ -7,117 +7,31 @@
  */
 
 import { mapSpatialFilter } from './map_spatial_filter';
+import { mapFilter } from '../map_filter';
 import { FilterMeta, Filter, FILTERS } from '@kbn/es-query';
 
-describe('mapSpatialFilter()', () => {
-  test('should return the key for matching multi polygon filter', async () => {
+describe('mapSpatialFilter', () => {
+  test('should set meta type field', async () => {
     const filter = {
       meta: {
-        key: 'location',
-        alias: 'my spatial filter',
         type: FILTERS.SPATIAL_FILTER,
       } as FilterMeta,
-      query: {
-        bool: {
-          should: [
-            {
-              geo_polygon: {
-                geoCoordinates: { points: [] },
-              },
-            },
-          ],
-        },
-      },
+      query: {},
     } as Filter;
     const result = mapSpatialFilter(filter);
 
-    expect(result).toHaveProperty('key', 'location');
-    expect(result).toHaveProperty('value', '');
     expect(result).toHaveProperty('type', FILTERS.SPATIAL_FILTER);
-  });
-
-  test('should return the key for matching polygon filter', async () => {
-    const filter = {
-      meta: {
-        key: 'location',
-        alias: 'my spatial filter',
-        type: FILTERS.SPATIAL_FILTER,
-      } as FilterMeta,
-      geo_polygon: {
-        geoCoordinates: { points: [] },
-      },
-    } as Filter;
-    const result = mapSpatialFilter(filter);
-
-    expect(result).toHaveProperty('key', 'location');
-    expect(result).toHaveProperty('value', '');
-    expect(result).toHaveProperty('type', FILTERS.SPATIAL_FILTER);
-  });
-
-  test('should return the key for matching multi field filter', async () => {
-    const filter = {
-      meta: {
-        alias: 'my spatial filter',
-        isMultiIndex: true,
-        type: FILTERS.SPATIAL_FILTER,
-      } as FilterMeta,
-      query: {
-        bool: {
-          should: [
-            {
-              bool: {
-                must: [
-                  {
-                    exists: {
-                      field: 'geo.coordinates',
-                    },
-                  },
-                  {
-                    geo_distance: {
-                      distance: '1000km',
-                      'geo.coordinates': [120, 30],
-                    },
-                  },
-                ],
-              },
-            },
-            {
-              bool: {
-                must: [
-                  {
-                    exists: {
-                      field: 'location',
-                    },
-                  },
-                  {
-                    geo_distance: {
-                      distance: '1000km',
-                      location: [120, 30],
-                    },
-                  },
-                ],
-              },
-            },
-          ],
-        },
-      },
-    } as Filter;
-    const result = mapSpatialFilter(filter);
-
-    expect(result).toHaveProperty('key', 'query');
-    expect(result).toHaveProperty('value', '');
-    expect(result).toHaveProperty('type', FILTERS.SPATIAL_FILTER);
+    expect(result).toHaveProperty('key', undefined);
+    expect(result).toHaveProperty('value', undefined);
   });
 
   test('should return undefined for none matching', async () => {
     const filter = {
       meta: {
         key: 'location',
-        alias: 'my spatial filter',
+        alias: 'my non-spatial filter',
       } as FilterMeta,
-      geo_polygon: {
-        geoCoordinates: { points: [] },
-      },
+      query: {},
     } as Filter;
 
     try {
@@ -125,5 +39,19 @@ describe('mapSpatialFilter()', () => {
     } catch (e) {
       expect(e).toBe(filter);
     }
+  });
+});
+
+describe('mapFilter', () => {
+  test('should set key and value properties to undefined', async () => {
+    const before = {
+      meta: { type: FILTERS.SPATIAL_FILTER } as FilterMeta,
+      query: {},
+    } as Filter;
+    const after = mapFilter(before);
+
+    expect(after).toHaveProperty('meta');
+    expect(after.meta).toHaveProperty('key', undefined);
+    expect(after.meta).toHaveProperty('value', undefined);
   });
 });

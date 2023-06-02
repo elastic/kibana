@@ -28,6 +28,7 @@ function mockProps() {
     breadcrumbsAppendExtension$: new BehaviorSubject(undefined),
     homeHref: '/',
     isVisible$: new BehaviorSubject(true),
+    customBranding$: new BehaviorSubject({}),
     kibanaDocLink: '/docs',
     navLinks$: new BehaviorSubject([]),
     customNavLink$: new BehaviorSubject(undefined),

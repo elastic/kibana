@@ -26,7 +26,6 @@ import {
 import { EuiFlexItem } from '@elastic/eui';
 import { EuiFlexGroup } from '@elastic/eui';
 import { EuiIcon } from '@elastic/eui';
-import { useUiSetting } from '@kbn/kibana-react-plugin/public';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { toMetricOpt } from '../../../../../../common/snapshot_metric_i18n';
 import { MetricsExplorerAggregation } from '../../../../../../common/http_api';
@@ -43,6 +42,7 @@ import { calculateDomain } from '../../../metrics_explorer/components/helpers/ca
 import { InfraFormatter } from '../../../../../lib/lib';
 import { useMetricsHostsAnomaliesResults } from '../../hooks/use_metrics_hosts_anomalies';
 import { useMetricsK8sAnomaliesResults } from '../../hooks/use_metrics_k8s_anomalies';
+import { useIsDarkMode } from '../../../../../hooks/use_is_dark_mode';
 
 interface Props {
   interval: string;
@@ -122,7 +122,7 @@ export const Timeline: React.FC<Props> = ({ interval, yAxisFormatter, isVisible 
     return niceTimeFormatter([firstTimestamp, lastTimestamp]);
   }, [timeseries]);
 
-  const isDarkMode = useUiSetting<boolean>('theme:darkMode');
+  const isDarkMode = useIsDarkMode();
   const tooltipProps = {
     headerFormatter: (tooltipValue: TooltipValue) =>
       moment(tooltipValue.value).format('Y-MM-DD HH:mm:ss.SSS'),
@@ -185,7 +185,7 @@ export const Timeline: React.FC<Props> = ({ interval, yAxisFormatter, isVisible 
           iconType="visArea"
           title={<h4>{error ? errorTitle : noHistoryDataTitle}</h4>}
           actions={
-            <EuiButton color="primary" fill onClick={reload}>
+            <EuiButton data-test-subj="infraTimelineButton" color="primary" fill onClick={reload}>
               {error ? retryButtonLabel : checkNewDataButtonLabel}
             </EuiButton>
           }

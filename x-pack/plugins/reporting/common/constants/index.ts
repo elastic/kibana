@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { CONTENT_TYPE_CSV } from '@kbn/generate-csv/src/constants';
 import * as reportTypes from './report_types';
 import * as jobTypes from './job_types';
 
@@ -19,11 +20,6 @@ export const REPORTING_SYSTEM_INDEX = '.reporting';
 export const JOB_COMPLETION_NOTIFICATIONS_SESSION_KEY =
   'xpack.reporting.jobCompletionNotifications';
 
-export const CONTENT_TYPE_CSV = 'text/csv';
-export const CSV_REPORTING_ACTION = 'downloadCsvReport';
-export const CSV_BOM_CHARS = '\ufeff';
-export const CSV_FORMULA_CHARS = ['=', '+', '-', '@'];
-
 export const ALLOWED_JOB_CONTENT_TYPES = [
   'application/json',
   'application/pdf',
@@ -31,12 +27,6 @@ export const ALLOWED_JOB_CONTENT_TYPES = [
   'image/png',
   'text/plain',
 ];
-
-export const UI_SETTINGS_SEARCH_INCLUDE_FROZEN = 'search:includeFrozen';
-export const UI_SETTINGS_CUSTOM_PDF_LOGO = 'xpackReporting:customPdfLogo';
-export const UI_SETTINGS_CSV_SEPARATOR = 'csv:separator';
-export const UI_SETTINGS_CSV_QUOTE_VALUES = 'csv:quoteValues';
-export const UI_SETTINGS_DATEFORMAT_TZ = 'dateFormat:tz';
 
 // Re-export type definitions here for convenience.
 export * from './report_types';
@@ -86,6 +76,7 @@ export const ILM_POLICY_NAME = 'kibana-reporting';
 
 // Usage counter types
 export const API_USAGE_COUNTER_TYPE = 'reportingApi';
+export const API_USAGE_ERROR_TYPE = 'reportingApiError';
 
 // Management UI route
 export const REPORTING_MANAGEMENT_HOME = '/app/management/insightsAndAlerting/reporting';

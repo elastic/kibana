@@ -22,13 +22,19 @@ export type AgentStatus =
   | 'error'
   | 'online'
   | 'inactive'
-  | 'warning'
   | 'enrolling'
   | 'unenrolling'
+  | 'unenrolled'
   | 'updating'
   | 'degraded';
 
-export type SimplifiedAgentStatus = 'healthy' | 'unhealthy' | 'updating' | 'offline' | 'inactive';
+export type SimplifiedAgentStatus =
+  | 'healthy'
+  | 'unhealthy'
+  | 'updating'
+  | 'offline'
+  | 'inactive'
+  | 'unenrolled';
 
 export type AgentActionType =
   | 'UNENROLL'
@@ -38,7 +44,9 @@ export type AgentActionType =
   | 'CANCEL'
   | 'FORCE_UNENROLL'
   | 'UPDATE_TAGS'
-  | 'REQUEST_DIAGNOSTICS';
+  | 'REQUEST_DIAGNOSTICS'
+  | 'POLICY_CHANGE'
+  | 'INPUT_ACTION';
 
 type FleetServerAgentComponentStatusTuple = typeof FleetServerAgentComponentStatuses;
 export type FleetServerAgentComponentStatus = FleetServerAgentComponentStatusTuple[number];
@@ -54,6 +62,7 @@ export interface NewAgentAction {
   expiration?: string;
   start_time?: string;
   minimum_execution_duration?: number;
+  rollout_duration_seconds?: number;
   source_uri?: string;
   total?: number;
 }
@@ -70,6 +79,8 @@ export interface AgentAction extends NewAgentAction {
 export interface AgentMetadata {
   [x: string]: any;
 }
+
+// SO definition for this type is declared in server/types/interfaces
 interface AgentBase {
   type: AgentType;
   active: boolean;
@@ -92,6 +103,11 @@ interface AgentBase {
   components?: FleetServerAgentComponent[];
 }
 
+export interface AgentMetrics {
+  cpu_avg?: number;
+  memory_size_byte_avg?: number;
+}
+
 export interface Agent extends AgentBase {
   id: string;
   access_api_key?: string;
@@ -107,10 +123,7 @@ export interface Agent extends AgentBase {
   status?: AgentStatus;
   packages: string[];
   sort?: Array<number | string | null>;
-}
-
-export interface AgentSOAttributes extends AgentBase {
-  packages?: string[];
+  metrics?: AgentMetrics;
 }
 
 export interface CurrentUpgrade {
@@ -120,6 +133,13 @@ export interface CurrentUpgrade {
   nbAgentsAck: number;
   version: string;
   startTime?: string;
+}
+
+export interface ActionErrorResult {
+  agentId: string;
+  error: string;
+  timestamp: string;
+  hostname?: string;
 }
 
 export interface ActionStatus {
@@ -132,15 +152,19 @@ export interface ActionStatus {
   nbAgentsFailed: number;
   version?: string;
   startTime?: string;
-  type?: string;
+  type: AgentActionType;
   // how many agents were actioned by the user
   nbAgentsActioned: number;
-  status: 'COMPLETE' | 'EXPIRED' | 'CANCELLED' | 'FAILED' | 'IN_PROGRESS';
+  status: 'COMPLETE' | 'EXPIRED' | 'CANCELLED' | 'FAILED' | 'IN_PROGRESS' | 'ROLLOUT_PASSED';
   expiration?: string;
   completionTime?: string;
   cancellationTime?: string;
   newPolicyId?: string;
   creationTime: string;
+  hasRolloutPeriod?: boolean;
+  latestErrors?: ActionErrorResult[];
+  revision?: number;
+  policyId?: string;
 }
 
 export interface AgentDiagnostics {
@@ -148,11 +172,15 @@ export interface AgentDiagnostics {
   name: string;
   createTime: string;
   filePath: string;
-  status: 'READY' | 'AWAITING_UPLOAD' | 'DELETED' | 'IN_PROGRESS';
+  status: 'READY' | 'AWAITING_UPLOAD' | 'DELETED' | 'IN_PROGRESS' | 'FAILED';
   actionId: string;
+  error?: string;
 }
 
 // Generated from FleetServer schema.json
+/**
+ * Fleet Server agent component unit
+ */
 export interface FleetServerAgentComponentUnit {
   id: string;
   type: 'input' | 'output';
@@ -163,7 +191,10 @@ export interface FleetServerAgentComponentUnit {
   };
 }
 
-interface FleetServerAgentComponent {
+/**
+ * Fleet server agent component
+ */
+export interface FleetServerAgentComponent {
   id: string;
   type: string;
   status: FleetServerAgentComponentStatus;
@@ -346,9 +377,15 @@ export interface FleetServerAgentAction {
   start_time?: string;
 
   /**
+   * @deprecated
    * Minimun execution duration in seconds, used for progressive rollout of the action.
    */
   minimum_execution_duration?: number;
+
+  /**
+   * Rollout duration in seconds, used for progressive rollout of the action.
+   */
+  rollout_duration_seconds?: number;
 
   /**
    * The opaque payload.
@@ -356,7 +393,10 @@ export interface FleetServerAgentAction {
   data?: {
     [k: string]: unknown;
   };
-
   total?: number;
+
+  /** Trace id */
+  traceparent?: string | null;
+
   [k: string]: unknown;
 }

@@ -6,7 +6,7 @@
  */
 
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
-import { isDefined } from './is_defined';
+import { isDefined } from '@kbn/ml-is-defined';
 import { GeoPointExample, LatLongExample } from '../../../../common/types/field_request_config';
 
 export function isGeoPointExample(arg: unknown): arg is GeoPointExample {

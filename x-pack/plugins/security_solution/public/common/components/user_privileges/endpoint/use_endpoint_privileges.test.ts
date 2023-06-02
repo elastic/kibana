@@ -10,7 +10,7 @@ import { act, renderHook } from '@testing-library/react-hooks';
 
 import { securityMock } from '@kbn/security-plugin/public/mocks';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
-import { createFleetAuthzMock } from '@kbn/fleet-plugin/common';
+import { createFleetAuthzMock } from '@kbn/fleet-plugin/common/mocks';
 
 import type { EndpointPrivileges } from '../../../../../common/endpoint/types';
 import { useCurrentUser, useKibana, useHttp as _useHttp } from '../../../lib/kibana';
@@ -93,6 +93,13 @@ describe('When using useEndpointPrivileges hook', () => {
     rerender();
 
     expect(result.current).toEqual(getEndpointPrivilegesInitialStateMock());
+  });
+
+  it('should return initial state when no user authz', async () => {
+    (useCurrentUser as jest.Mock).mockReturnValue({});
+
+    render();
+    expect(result.current).toEqual({ ...getEndpointPrivilegesInitialState(), loading: false });
   });
 
   it.each([

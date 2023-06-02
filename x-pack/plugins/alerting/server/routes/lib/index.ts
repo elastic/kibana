@@ -18,7 +18,12 @@ export type {
 } from './rewrite_request_case';
 export { verifyAccessAndContext } from './verify_access_and_context';
 export { countUsageOfPredefinedIds } from './count_usage_of_predefined_ids';
-export { rewriteActions } from './rewrite_actions';
+export { rewriteActionsReq, rewriteActionsRes } from './rewrite_actions';
 export { actionsSchema } from './actions_schema';
 export { rewriteRule, rewriteRuleLastRun } from './rewrite_rule';
 export { rewriteNamespaces } from './rewrite_namespaces';
+export { rRuleSchema } from './rrule_schema';
+export {
+  rewriteMaintenanceWindowRes,
+  rewritePartialMaintenanceBodyRes,
+} from './rewrite_maintenance_window';

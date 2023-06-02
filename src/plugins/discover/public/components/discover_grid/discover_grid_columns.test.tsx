@@ -21,9 +21,15 @@ describe('Discover grid columns', function () {
       showTimeCol: false,
       defaultColumns: false,
       isSortEnabled: true,
+      isPlainRecord: false,
       valueToStringConverter: discoverGridContextMock.valueToStringConverter,
       rowsCount: 100,
-      services: discoverServiceMock,
+      services: {
+        uiSettings: discoverServiceMock.uiSettings,
+        toastNotifications: discoverServiceMock.toastNotifications,
+      },
+      hasEditDataViewPermission: () =>
+        discoverServiceMock.dataViewFieldEditor.userPermissions.editIndexPattern(),
       onFilter: () => {},
     });
     expect(actual).toMatchInlineSnapshot(`
@@ -68,6 +74,7 @@ describe('Discover grid columns', function () {
             "showMoveRight": true,
           },
           "cellActions": Array [
+            [Function],
             [Function],
             [Function],
           ],
@@ -115,7 +122,9 @@ describe('Discover grid columns', function () {
             "showMoveLeft": true,
             "showMoveRight": true,
           },
-          "cellActions": undefined,
+          "cellActions": Array [
+            [Function],
+          ],
           "displayAsText": "message",
           "id": "message",
           "isSortable": false,
@@ -132,9 +141,15 @@ describe('Discover grid columns', function () {
       showTimeCol: false,
       defaultColumns: true,
       isSortEnabled: true,
+      isPlainRecord: false,
       valueToStringConverter: discoverGridContextMock.valueToStringConverter,
       rowsCount: 100,
-      services: discoverServiceMock,
+      services: {
+        uiSettings: discoverServiceMock.uiSettings,
+        toastNotifications: discoverServiceMock.toastNotifications,
+      },
+      hasEditDataViewPermission: () =>
+        discoverServiceMock.dataViewFieldEditor.userPermissions.editIndexPattern(),
       onFilter: () => {},
     });
     expect(actual).toMatchInlineSnapshot(`
@@ -176,6 +191,7 @@ describe('Discover grid columns', function () {
             "showMoveRight": false,
           },
           "cellActions": Array [
+            [Function],
             [Function],
             [Function],
           ],
@@ -220,7 +236,9 @@ describe('Discover grid columns', function () {
             "showMoveLeft": false,
             "showMoveRight": false,
           },
-          "cellActions": undefined,
+          "cellActions": Array [
+            [Function],
+          ],
           "displayAsText": "message",
           "id": "message",
           "isSortable": false,
@@ -237,9 +255,15 @@ describe('Discover grid columns', function () {
       showTimeCol: true,
       defaultColumns: false,
       isSortEnabled: true,
+      isPlainRecord: false,
       valueToStringConverter: discoverGridContextMock.valueToStringConverter,
       rowsCount: 100,
-      services: discoverServiceMock,
+      services: {
+        uiSettings: discoverServiceMock.uiSettings,
+        toastNotifications: discoverServiceMock.toastNotifications,
+      },
+      hasEditDataViewPermission: () =>
+        discoverServiceMock.dataViewFieldEditor.userPermissions.editIndexPattern(),
       onFilter: () => {},
     });
     expect(actual).toMatchInlineSnapshot(`
@@ -281,6 +305,7 @@ describe('Discover grid columns', function () {
             "showMoveRight": true,
           },
           "cellActions": Array [
+            [Function],
             [Function],
             [Function],
           ],
@@ -350,6 +375,7 @@ describe('Discover grid columns', function () {
           "cellActions": Array [
             [Function],
             [Function],
+            [Function],
           ],
           "displayAsText": "extension",
           "id": "extension",
@@ -395,10 +421,198 @@ describe('Discover grid columns', function () {
             "showMoveLeft": true,
             "showMoveRight": true,
           },
-          "cellActions": undefined,
+          "cellActions": Array [
+            [Function],
+          ],
           "displayAsText": "message",
           "id": "message",
           "isSortable": false,
+          "schema": "string",
+        },
+      ]
+    `);
+  });
+
+  it('returns eui grid with inmemory sorting', async () => {
+    const actual = getEuiGridColumns({
+      columns: ['extension', 'message'],
+      settings: {},
+      dataView: dataViewWithTimefieldMock,
+      showTimeCol: true,
+      defaultColumns: false,
+      isSortEnabled: true,
+      isPlainRecord: true,
+      valueToStringConverter: discoverGridContextMock.valueToStringConverter,
+      rowsCount: 100,
+      services: {
+        uiSettings: discoverServiceMock.uiSettings,
+        toastNotifications: discoverServiceMock.toastNotifications,
+      },
+      hasEditDataViewPermission: () =>
+        discoverServiceMock.dataViewFieldEditor.userPermissions.editIndexPattern(),
+      onFilter: () => {},
+    });
+    expect(actual).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "actions": Object {
+            "additional": Array [
+              Object {
+                "data-test-subj": "gridCopyColumnNameToClipBoardButton",
+                "iconProps": Object {
+                  "size": "m",
+                },
+                "iconType": "copyClipboard",
+                "label": <FormattedMessage
+                  defaultMessage="Copy name"
+                  id="discover.grid.copyColumnNameToClipBoardButton"
+                  values={Object {}}
+                />,
+                "onClick": [Function],
+                "size": "xs",
+              },
+              Object {
+                "data-test-subj": "gridCopyColumnValuesToClipBoardButton",
+                "iconProps": Object {
+                  "size": "m",
+                },
+                "iconType": "copyClipboard",
+                "label": <FormattedMessage
+                  defaultMessage="Copy column"
+                  id="discover.grid.copyColumnValuesToClipBoardButton"
+                  values={Object {}}
+                />,
+                "onClick": [Function],
+                "size": "xs",
+              },
+            ],
+            "showHide": false,
+            "showMoveLeft": true,
+            "showMoveRight": true,
+          },
+          "cellActions": Array [
+            [Function],
+            [Function],
+            [Function],
+          ],
+          "display": <div
+            aria-label="timestamp - this field represents the time that events occurred."
+          >
+            <EuiToolTip
+              content="This field represents the time that events occurred."
+              delay="regular"
+              display="inlineBlock"
+              position="top"
+            >
+              <React.Fragment>
+                timestamp
+                 
+                <EuiIcon
+                  type="clock"
+                />
+              </React.Fragment>
+            </EuiToolTip>
+          </div>,
+          "displayAsText": "timestamp",
+          "id": "timestamp",
+          "initialWidth": 210,
+          "isSortable": true,
+          "schema": "datetime",
+        },
+        Object {
+          "actions": Object {
+            "additional": Array [
+              Object {
+                "data-test-subj": "gridCopyColumnNameToClipBoardButton",
+                "iconProps": Object {
+                  "size": "m",
+                },
+                "iconType": "copyClipboard",
+                "label": <FormattedMessage
+                  defaultMessage="Copy name"
+                  id="discover.grid.copyColumnNameToClipBoardButton"
+                  values={Object {}}
+                />,
+                "onClick": [Function],
+                "size": "xs",
+              },
+              Object {
+                "data-test-subj": "gridCopyColumnValuesToClipBoardButton",
+                "iconProps": Object {
+                  "size": "m",
+                },
+                "iconType": "copyClipboard",
+                "label": <FormattedMessage
+                  defaultMessage="Copy column"
+                  id="discover.grid.copyColumnValuesToClipBoardButton"
+                  values={Object {}}
+                />,
+                "onClick": [Function],
+                "size": "xs",
+              },
+            ],
+            "showHide": Object {
+              "iconType": "cross",
+              "label": "Remove column",
+            },
+            "showMoveLeft": true,
+            "showMoveRight": true,
+          },
+          "cellActions": Array [
+            [Function],
+            [Function],
+            [Function],
+          ],
+          "displayAsText": "extension",
+          "id": "extension",
+          "isSortable": true,
+          "schema": "string",
+        },
+        Object {
+          "actions": Object {
+            "additional": Array [
+              Object {
+                "data-test-subj": "gridCopyColumnNameToClipBoardButton",
+                "iconProps": Object {
+                  "size": "m",
+                },
+                "iconType": "copyClipboard",
+                "label": <FormattedMessage
+                  defaultMessage="Copy name"
+                  id="discover.grid.copyColumnNameToClipBoardButton"
+                  values={Object {}}
+                />,
+                "onClick": [Function],
+                "size": "xs",
+              },
+              Object {
+                "data-test-subj": "gridCopyColumnValuesToClipBoardButton",
+                "iconProps": Object {
+                  "size": "m",
+                },
+                "iconType": "copyClipboard",
+                "label": <FormattedMessage
+                  defaultMessage="Copy column"
+                  id="discover.grid.copyColumnValuesToClipBoardButton"
+                  values={Object {}}
+                />,
+                "onClick": [Function],
+                "size": "xs",
+              },
+            ],
+            "showHide": Object {
+              "iconType": "cross",
+              "label": "Remove column",
+            },
+            "showMoveLeft": true,
+            "showMoveRight": true,
+          },
+          "cellActions": Array [
+            [Function],
+          ],
+          "displayAsText": "message",
+          "id": "message",
+          "isSortable": true,
           "schema": "string",
         },
       ]

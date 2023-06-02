@@ -6,7 +6,7 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { ES_FIELD_TYPES } from '@kbn/data-plugin/common';
+import { ES_FIELD_TYPES } from '@kbn/field-types';
 import {
   ML_JOB_AGGREGATION,
   KIBANA_AGGREGATION,
@@ -25,7 +25,8 @@ export interface Field {
   id: FieldId;
   name: string;
   type: ES_FIELD_TYPES;
-  aggregatable?: boolean;
+  aggregatable: boolean;
+  counter: boolean;
   aggIds?: AggId[];
   aggs?: Aggregation[];
   runtimeField?: estypes.MappingRuntimeField;
@@ -95,6 +96,7 @@ export const mlCategory: Field = {
   name: MLCATEGORY,
   type: ES_FIELD_TYPES.KEYWORD,
   aggregatable: false,
+  counter: false,
 };
 
 export type RollupFields = Record<FieldId, [Record<'agg', ES_AGGREGATION>]>;

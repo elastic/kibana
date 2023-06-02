@@ -23,11 +23,15 @@ import { BehaviorSubject } from 'rxjs';
 import { dataPluginMock } from '../../mocks';
 import { UI_SETTINGS } from '../../../common';
 
-jest.mock('./utils', () => ({
-  createRequestHash: jest.fn().mockImplementation((input) => {
-    return Promise.resolve(JSON.stringify(input));
-  }),
-}));
+jest.mock('./utils', () => {
+  const originalModule = jest.requireActual('./utils');
+  return {
+    ...originalModule,
+    createRequestHash: jest.fn().mockImplementation((input) => {
+      return Promise.resolve(JSON.stringify(input));
+    }),
+  };
+});
 
 jest.mock('../errors/search_session_incomplete_warning', () => ({
   SearchSessionIncompleteWarning: jest.fn(),

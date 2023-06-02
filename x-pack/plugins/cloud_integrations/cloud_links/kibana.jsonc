@@ -1,0 +1,16 @@
+{
+  "type": "plugin",
+  "id": "@kbn/cloud-links-plugin",
+  "owner": "@elastic/kibana-core",
+  "description": "Adds the links to the Elastic Cloud console",
+  "plugin": {
+    "id": "cloudLinks",
+    "server": false,
+    "browser": true,
+    "optionalPlugins": [
+      "cloud",
+      "security",
+      "guidedOnboarding"
+    ]
+  }
+}

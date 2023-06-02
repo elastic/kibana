@@ -26,9 +26,13 @@ describe('Users stats and tables', () => {
     esArchiverLoad('users');
 
     esArchiverLoad('risk_users');
+  });
+
+  beforeEach(() => {
     login();
     visit(USERS_URL);
   });
+
   after(() => {
     esArchiverUnload('users');
     esArchiverUnload('risk_users');

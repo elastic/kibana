@@ -117,7 +117,6 @@ export class ComboBoxService extends FtrService {
    * @param value option text
    */
   public async setCustom(comboBoxSelector: string, value: string): Promise<void> {
-    this.log.debug(`comboBox.setCustom, comboBoxSelector: ${comboBoxSelector}, value: ${value}`);
     const comboBoxElement = await this.testSubjects.find(comboBoxSelector);
     await this.setFilterValue(comboBoxElement, value);
     await this.common.pressEnterKey();
@@ -322,5 +321,13 @@ export class ComboBoxService extends FtrService {
     const comboBoxElement = comboBoxElements[comboBoxElements.length - 1];
     const input = await comboBoxElement.findByTagName('input');
     await input.clearValueWithKeyboard();
+  }
+
+  public async isDisabled(comboBoxElement: WebElementWrapper): Promise<boolean> {
+    this.log.debug(`comboBox.isDisabled`);
+    const toggleListButton = await comboBoxElement.findByTestSubject('comboBoxToggleListButton');
+    const isDisabled = await toggleListButton.getAttribute('disabled');
+    this.log.debug(`isDisabled:${isDisabled}`);
+    return isDisabled?.toLowerCase() === 'true';
   }
 }

@@ -7,11 +7,13 @@
 
 import type { Observable } from 'rxjs';
 import type { CoreStart, CoreTheme } from '@kbn/core/public';
+import { ClientPluginsStart } from '../../plugin';
 import { apiService } from '../api_service/api_service';
 
 class KibanaService {
   private static instance: KibanaService;
   private _core!: CoreStart;
+  private _startPlugins!: ClientPluginsStart;
   private _theme!: Observable<CoreTheme>;
 
   public get core() {
@@ -21,6 +23,14 @@ class KibanaService {
   public set core(coreStart: CoreStart) {
     this._core = coreStart;
     apiService.http = this._core.http;
+  }
+
+  public get startPlugins() {
+    return this._startPlugins;
+  }
+
+  public set startPlugins(startPlugins: ClientPluginsStart) {
+    this._startPlugins = startPlugins;
   }
 
   public get theme() {

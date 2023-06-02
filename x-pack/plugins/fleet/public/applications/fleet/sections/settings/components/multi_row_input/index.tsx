@@ -42,6 +42,7 @@ export interface MultiRowInputProps {
   placeholder?: string;
   multiline?: boolean;
   sortable?: boolean;
+  isUrl?: boolean;
 }
 
 interface SortableTextFieldProps {
@@ -256,6 +257,7 @@ export const MultiRowInput: FunctionComponent<MultiRowInputProps> = ({
   placeholder,
   multiline = false,
   sortable = true,
+  isUrl,
 }) => {
   const [autoFocus, setAutoFocus] = useState(false);
   const value = useMemo(() => {
@@ -380,7 +382,14 @@ export const MultiRowInput: FunctionComponent<MultiRowInputProps> = ({
           iconType="plusInCircle"
           onClick={addRowHandler}
         >
-          <FormattedMessage id="xpack.fleet.multiRowInput.addRow" defaultMessage="Add row" />
+          {isUrl ? (
+            <FormattedMessage
+              id="xpack.fleet.multiRowInput.addAnotherUrl"
+              defaultMessage="Add another URL"
+            />
+          ) : (
+            <FormattedMessage id="xpack.fleet.multiRowInput.addRow" defaultMessage="Add row" />
+          )}
         </EuiButtonEmpty>
       </>
     </EuiFormRow>

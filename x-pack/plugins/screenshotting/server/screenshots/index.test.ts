@@ -57,6 +57,7 @@ describe('Screenshot Observable Pipeline', () => {
       buildSha: 'screenshot-dfdfed0a',
       dist: false,
       version: '5000.0.0',
+      buildDate: new Date('2023-05-15T23:12:09.000Z'),
     };
     options = {
       browserTimezone: 'UTC',
@@ -190,6 +191,24 @@ describe('Screenshot Observable Pipeline', () => {
 
       expect(result).toHaveProperty('results');
       expect(result.results).toMatchSnapshot();
+    });
+
+    it("initial page is create with layout's width and deviceScaleFactor", async () => {
+      const result = await lastValueFrom(
+        screenshots.getScreenshots(options as PngScreenshotOptions)
+      );
+
+      expect(driverFactory.createPage).toBeCalledWith(
+        expect.objectContaining({
+          defaultViewport: {
+            width: layout.width,
+            deviceScaleFactor: layout.getBrowserZoom(),
+          },
+        }), // config with layout
+        expect.anything() // logger
+      );
+
+      expect(result).toHaveProperty('results');
     });
   });
 

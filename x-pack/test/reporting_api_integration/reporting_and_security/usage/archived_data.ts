@@ -16,7 +16,8 @@ export default function ({ getService }: FtrProviderContext) {
   describe('from archive data', () => {
     it('generated from 6.2', async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/reporting/bwc/6_2');
-      const usage = await usageAPI.getUsageStats();
+      const [{ stats }] = await usageAPI.getTelemetryStats({ unencrypted: true });
+      const usage = stats.stack_stats.kibana.plugins.reporting;
 
       reportingAPI.expectRecentJobTypeTotalStats(usage, 'printable_pdf', 0);
       reportingAPI.expectAllTimeJobTypeTotalStats(usage, 'printable_pdf', 7);
@@ -36,7 +37,8 @@ export default function ({ getService }: FtrProviderContext) {
 
     it('generated from 6.3', async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/reporting/bwc/6_3');
-      const usage = await usageAPI.getUsageStats();
+      const [{ stats }] = await usageAPI.getTelemetryStats({ unencrypted: true });
+      const usage = stats.stack_stats.kibana.plugins.reporting;
 
       reportingAPI.expectRecentJobTypeTotalStats(usage, 'printable_pdf', 0);
       reportingAPI.expectRecentPdfAppStats(usage, 'visualization', 0);

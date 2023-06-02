@@ -35,7 +35,7 @@ experimental[] Create saved queries.
 
 `version`:: (Optional, string) Uses the Osquery versions greater than or equal to the specified version string.
 
-`internal`:: (Optional, string) An interval, in seconds, to run the query.
+`interval`:: (Optional, integer) An interval, in seconds, to run the query.
 
 `ecs_mapping`:: (Optional, object) Maps Osquery results columns or static values to ECS fields.
 

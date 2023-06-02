@@ -6,7 +6,14 @@
  */
 
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
-import { Rule, RuleTypeParams, RecoveredActionGroup, RuleMonitoring } from '../../common';
+import {
+  Rule,
+  RuleTypeParams,
+  RecoveredActionGroup,
+  RuleMonitoring,
+  RuleLastRunOutcomeOrderMap,
+  RuleLastRunOutcomes,
+} from '../../common';
 import { getDefaultMonitoring } from '../lib/monitoring';
 import { UntypedNormalizedRuleType } from '../rule_type_registry';
 import { EVENT_LOG_ACTIONS } from '../plugin';
@@ -43,6 +50,7 @@ export const RULE_ACTIONS = [
     params: {
       foo: true,
     },
+    uuid: '111-111',
   },
   {
     actionTypeId: 'action',
@@ -51,6 +59,7 @@ export const RULE_ACTIONS = [
     params: {
       isResolved: true,
     },
+    uuid: '222-222',
   },
 ];
 
@@ -74,7 +83,7 @@ export const generateSavedObjectParams = ({
   error?: null | { reason: string; message: string };
   warning?: null | { reason: string; message: string };
   status?: string;
-  outcome?: string;
+  outcome?: RuleLastRunOutcomes;
   nextRun?: string | null;
   successRatio?: number;
   history?: RuleMonitoring['run']['history'];
@@ -92,6 +101,7 @@ export const generateSavedObjectParams = ({
         last_run: {
           timestamp: '1970-01-01T00:00:00.000Z',
           metrics: {
+            duration: 0,
             gap_duration_s: null,
             total_alerts_created: null,
             total_alerts_detected: null,
@@ -110,7 +120,9 @@ export const generateSavedObjectParams = ({
     },
     lastRun: {
       outcome,
-      outcomeMsg: error?.message || warning?.message || null,
+      outcomeOrder: RuleLastRunOutcomeOrderMap[outcome],
+      outcomeMsg:
+        (error?.message && [error?.message]) || (warning?.message && [warning?.message]) || null,
       warning: error?.reason || warning?.reason || null,
       alertsCount: {
         active: 0,
@@ -121,13 +133,17 @@ export const generateSavedObjectParams = ({
       },
     },
     nextRun,
+    running: false,
   },
   { refresh: false, namespace: undefined },
 ];
 
 export const GENERIC_ERROR_MESSAGE = 'GENERIC ERROR MESSAGE';
 
+export const getSummarizedAlertsMock = jest.fn();
+
 export const ruleType: jest.Mocked<UntypedNormalizedRuleType> = {
+  getSummarizedAlerts: getSummarizedAlertsMock,
   id: RULE_TYPE_ID,
   name: 'My test rule',
   actionGroups: [{ id: 'default', name: 'Default' }, RecoveredActionGroup],
@@ -139,6 +155,10 @@ export const ruleType: jest.Mocked<UntypedNormalizedRuleType> = {
   producer: 'alerts',
   cancelAlertsOnRuleTimeout: true,
   ruleTaskTimeout: '5m',
+  autoRecoverAlerts: true,
+  validate: {
+    params: { validate: (params) => params },
+  },
 };
 
 export const mockRunNowResponse = {
@@ -176,6 +196,7 @@ export const mockedRuleTypeSavedObject: Rule<RuleTypeParams> = {
       params: {
         foo: true,
       },
+      uuid: '111-111',
     },
     {
       group: RecoveredActionGroup.id,
@@ -184,6 +205,7 @@ export const mockedRuleTypeSavedObject: Rule<RuleTypeParams> = {
       params: {
         isResolved: true,
       },
+      uuid: '222-222',
     },
   ],
   executionStatus: {
@@ -191,6 +213,7 @@ export const mockedRuleTypeSavedObject: Rule<RuleTypeParams> = {
     lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
   },
   monitoring: getDefaultMonitoring('2020-08-20T19:23:38Z'),
+  revision: 0,
 };
 
 export const mockTaskInstance = () => ({
@@ -213,7 +236,13 @@ export const mockTaskInstance = () => ({
   ownerId: null,
 });
 
-export const generateAlertOpts = ({ action, group, state, id }: GeneratorParams = {}) => {
+export const generateAlertOpts = ({
+  action,
+  group,
+  state,
+  id,
+  maintenanceWindowIds,
+}: GeneratorParams = {}) => {
   id = id ?? '1';
   let message: string = '';
   switch (action) {
@@ -230,10 +259,12 @@ export const generateAlertOpts = ({ action, group, state, id }: GeneratorParams 
   return {
     action,
     id,
+    uuid: expect.any(String),
     message,
     state,
     ...(group ? { group } : {}),
     flapping: false,
+    ...(maintenanceWindowIds ? { maintenanceWindowIds } : {}),
   };
 };
 
@@ -251,6 +282,7 @@ export const generateRunnerResult = ({
   interval = '10s',
   alertInstances = {},
   alertRecoveredInstances = {},
+  summaryActions = {},
 }: GeneratorParams = {}) => {
   return {
     monitoring: {
@@ -262,6 +294,7 @@ export const generateRunnerResult = ({
         history: history.map((success) => ({ success, timestamp: 0 })),
         last_run: {
           metrics: {
+            duration: 0,
             gap_duration_s: null,
             total_alerts_created: null,
             total_alerts_detected: null,
@@ -278,19 +311,31 @@ export const generateRunnerResult = ({
     state: {
       ...(state && { alertInstances }),
       ...(state && { alertRecoveredInstances }),
-      ...(state && { alertTypeState: undefined }),
+      ...(state && { alertTypeState: {} }),
       ...(state && { previousStartedAt: new Date('1970-01-01T00:00:00.000Z') }),
+      ...(state && { summaryActions }),
     },
   };
 };
 
-export const generateEnqueueFunctionInput = (isArray: boolean = false) => {
+export const generateEnqueueFunctionInput = ({
+  id = '1',
+  isBulk = false,
+  isResolved,
+  foo,
+}: {
+  id: string;
+  isBulk?: boolean;
+  isResolved?: boolean;
+  foo?: boolean;
+}) => {
   const input = {
     apiKey: 'MTIzOmFiYw==',
     executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
-    id: '1',
+    id,
     params: {
-      foo: true,
+      ...(isResolved !== undefined ? { isResolved } : {}),
+      ...(foo !== undefined ? { foo } : {}),
     },
     consumer: 'bar',
     relatedSavedObjects: [
@@ -310,20 +355,27 @@ export const generateEnqueueFunctionInput = (isArray: boolean = false) => {
     },
     spaceId: 'default',
   };
-  return isArray ? [input] : input;
+  return isBulk ? [input] : input;
 };
 
 export const generateAlertInstance = (
-  { id, duration, start, flappingHistory }: GeneratorParams = { id: 1, flappingHistory: [false] }
+  { id, duration, start, flappingHistory, actions }: GeneratorParams = {
+    id: 1,
+    flappingHistory: [false],
+  }
 ) => ({
   [String(id)]: {
     meta: {
+      uuid: expect.any(String),
       lastScheduledActions: {
         date: new Date(DATE_1970),
         group: 'default',
+        ...(actions && { actions }),
       },
       flappingHistory,
       flapping: false,
+      maintenanceWindowIds: [],
+      pendingRecoveredCount: 0,
     },
     state: {
       bar: false,
@@ -332,3 +384,37 @@ export const generateAlertInstance = (
     },
   },
 });
+
+export const mockAAD = {
+  '@timestamp': '2022-12-07T15:38:43.472Z',
+  event: {
+    kind: 'signal',
+    action: 'active',
+  },
+  kibana: {
+    version: '8.7.0',
+    space_ids: ['default'],
+    alert: {
+      instance: { id: '*' },
+      uuid: '2d3e8fe5-3e8b-4361-916e-9eaab0bf2084',
+      status: 'active',
+      workflow_status: 'open',
+      reason: 'system.cpu is 90% in the last 1 min for all hosts. Alert when > 50%.',
+      time_range: { gte: '2022-01-01T12:00:00.000Z' },
+      start: '2022-12-07T15:23:13.488Z',
+      duration: { us: 100000 },
+      flapping: false,
+      rule: {
+        category: 'Metric threshold',
+        consumer: 'alerts',
+        execution: { uuid: 'c35db7cc-5bf7-46ea-b43f-b251613a5b72' },
+        name: 'test-rule',
+        producer: 'infrastructure',
+        revision: 0,
+        rule_type_id: 'metrics.alert.threshold',
+        uuid: '0de91960-7643-11ed-b719-bb9db8582cb6',
+        tags: [],
+      },
+    },
+  },
+};

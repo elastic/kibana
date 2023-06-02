@@ -6,6 +6,7 @@
  */
 
 import type {
+  CustomBrandingSetup,
   ElasticsearchServiceSetup,
   HttpServiceSetup,
   HttpServiceStart,
@@ -37,6 +38,7 @@ import { renderUnauthenticatedPage } from './unauthenticated_page';
 
 interface AuthenticationServiceSetupParams {
   http: Pick<HttpServiceSetup, 'basePath' | 'csp' | 'registerAuth' | 'registerOnPreResponse'>;
+  customBranding: CustomBrandingSetup;
   elasticsearch: Pick<ElasticsearchServiceSetup, 'setUnauthorizedErrorHandler'>;
   config: ConfigType;
   license: SecurityLicense;
@@ -62,6 +64,7 @@ export interface InternalAuthenticationServiceStart extends AuthenticationServic
     APIKeys,
     | 'areAPIKeysEnabled'
     | 'create'
+    | 'update'
     | 'invalidate'
     | 'validate'
     | 'grantAsInternalUser'
@@ -96,7 +99,14 @@ export class AuthenticationService {
 
   constructor(private readonly logger: Logger) {}
 
-  setup({ config, http, license, buildNumber, elasticsearch }: AuthenticationServiceSetupParams) {
+  setup({
+    config,
+    http,
+    license,
+    buildNumber,
+    elasticsearch,
+    customBranding,
+  }: AuthenticationServiceSetupParams) {
     this.license = license;
 
     // If we cannot automatically authenticate users we should redirect them straight to the login
@@ -200,8 +210,16 @@ export class AuthenticationService {
         ? this.authenticator.getRequestOriginalURL(request)
         : `${http.basePath.get(request)}/`;
       if (!isLoginPageAvailable) {
+        const customBrandingValue = await customBranding.getBrandingFor(request, {
+          unauthenticated: true,
+        });
         return toolkit.render({
-          body: renderUnauthenticatedPage({ buildNumber, basePath: http.basePath, originalURL }),
+          body: renderUnauthenticatedPage({
+            buildNumber,
+            basePath: http.basePath,
+            originalURL,
+            customBranding: customBrandingValue,
+          }),
           headers: { 'Content-Security-Policy': http.csp.header },
         });
       }
@@ -354,6 +372,7 @@ export class AuthenticationService {
       apiKeys: {
         areAPIKeysEnabled: apiKeys.areAPIKeysEnabled.bind(apiKeys),
         create: apiKeys.create.bind(apiKeys),
+        update: apiKeys.update.bind(apiKeys),
         grantAsInternalUser: apiKeys.grantAsInternalUser.bind(apiKeys),
         invalidate: apiKeys.invalidate.bind(apiKeys),
         validate: apiKeys.validate.bind(apiKeys),

@@ -1,0 +1,14 @@
+{
+  "type": "plugin",
+  "id": "@kbn/stack-management-usage-test-plugin",
+  "owner": "@elastic/platform-deployment-management",
+  "plugin": {
+    "id": "stackManagementUsageTest",
+    "server": false,
+    "browser": true,
+    "configPath": [
+      "xpack",
+      "stackManagementUsageTest"
+    ]
+  }
+}

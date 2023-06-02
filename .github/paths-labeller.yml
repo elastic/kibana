@@ -10,6 +10,10 @@
     - "src/plugins/bfetch/**/*.*"
   - "Team:apm":
     - "x-pack/plugins/apm/**/*.*"
+    - "x-pack/test/apm_api_integration/**/*.*"
+    - "packages/kbn-apm-synthtrace/**/*.*"
+    - "packages/kbn-apm-synthtrace-client/**/*.*"
+    - "packages/kbn-apm-utils/**/*.*"
   - "Team:Fleet":
     - "x-pack/plugins/fleet/**/*.*"
     - "x-pack/test/fleet_api_integration/**/*.*"

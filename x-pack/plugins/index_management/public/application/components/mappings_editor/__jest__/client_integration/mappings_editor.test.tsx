@@ -175,10 +175,10 @@ describe('Mappings editor: core', () => {
 
       // Update the dynamic templates editor value
       const updatedValueTemplates = [{ after: 'bar' }];
-      await act(async () => {
-        updateJsonEditor('dynamicTemplatesEditor', updatedValueTemplates);
-      });
-      component.update();
+      // await act(async () => {
+      updateJsonEditor('dynamicTemplatesEditor', updatedValueTemplates);
+      // });
+      // component.update();
 
       templatesValue = getJsonEditorValue('dynamicTemplatesEditor');
       expect(templatesValue).toEqual(updatedValueTemplates);
@@ -374,6 +374,7 @@ describe('Mappings editor: core', () => {
        */
       await act(async () => {
         find('addFieldButton').simulate('click');
+        jest.advanceTimersByTime(0); // advance timers to allow the form to validate
       });
       component.update();
 
@@ -418,6 +419,7 @@ describe('Mappings editor: core', () => {
       // Disbable dynamic mappings
       await act(async () => {
         form.toggleEuiSwitch('advancedConfiguration.dynamicMappingsToggle.input');
+        jest.advanceTimersByTime(0); // advance timers to allow the form to validate
       });
 
       ({ data } = await getMappingsEditorData(component));

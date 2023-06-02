@@ -75,7 +75,7 @@ const ListWithSearchComponent: FC<ListWithSearchComponentProps> = ({
         <EmptyViewerState
           isReadOnly={isReadOnly}
           viewerStatus={viewerStatus as ViewerStatus}
-          onCreateExceptionListItem={onAddExceptionClick}
+          onEmptyButtonStateClick={onAddExceptionClick}
           title={i18n.EXCEPTION_LIST_EMPTY_VIEWER_TITLE}
           body={i18n.EXCEPTION_LIST_EMPTY_VIEWER_BODY(listName)}
           buttonText={i18n.EXCEPTION_LIST_EMPTY_VIEWER_BUTTON}

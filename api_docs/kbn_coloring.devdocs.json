@@ -191,6 +191,87 @@
       },
       {
         "parentPluginId": "@kbn/coloring",
+        "id": "def-common.enforceColorContrast",
+        "type": "Function",
+        "tags": [],
+        "label": "enforceColorContrast",
+        "description": [],
+        "signature": [
+          "(color: string, backgroundColor: string) => boolean"
+        ],
+        "path": "packages/kbn-coloring/src/color_manipulation/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/coloring",
+            "id": "def-common.enforceColorContrast.$1",
+            "type": "string",
+            "tags": [],
+            "label": "color",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "packages/kbn-coloring/src/color_manipulation/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/coloring",
+            "id": "def-common.enforceColorContrast.$2",
+            "type": "string",
+            "tags": [],
+            "label": "backgroundColor",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "packages/kbn-coloring/src/color_manipulation/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/coloring",
+        "id": "def-common.getColorAlpha",
+        "type": "Function",
+        "tags": [],
+        "label": "getColorAlpha",
+        "description": [],
+        "signature": [
+          "(color?: string | null | undefined) => number"
+        ],
+        "path": "packages/kbn-coloring/src/color_manipulation/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/coloring",
+            "id": "def-common.getColorAlpha.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "color",
+            "description": [],
+            "signature": [
+              "string | null | undefined"
+            ],
+            "path": "packages/kbn-coloring/src/color_manipulation/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/coloring",
         "id": "def-common.getDataMinMax",
         "type": "Function",
         "tags": [],
@@ -537,6 +618,88 @@
               "number"
             ],
             "path": "packages/kbn-coloring/src/palettes/utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/coloring",
+        "id": "def-common.isValidColor",
+        "type": "Function",
+        "tags": [],
+        "label": "isValidColor",
+        "description": [],
+        "signature": [
+          "(colorString: string | undefined) => boolean"
+        ],
+        "path": "packages/kbn-coloring/src/color_manipulation/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/coloring",
+            "id": "def-common.isValidColor.$1",
+            "type": "string",
+            "tags": [],
+            "label": "colorString",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-coloring/src/color_manipulation/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/coloring",
+        "id": "def-common.makeColorWithAlpha",
+        "type": "Function",
+        "tags": [],
+        "label": "makeColorWithAlpha",
+        "description": [],
+        "signature": [
+          "(color: string, newAlpha: number) => ",
+          "Color"
+        ],
+        "path": "packages/kbn-coloring/src/color_manipulation/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/coloring",
+            "id": "def-common.makeColorWithAlpha.$1",
+            "type": "string",
+            "tags": [],
+            "label": "color",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "packages/kbn-coloring/src/color_manipulation/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/coloring",
+            "id": "def-common.makeColorWithAlpha.$2",
+            "type": "number",
+            "tags": [],
+            "label": "newAlpha",
+            "description": [],
+            "signature": [
+              "number"
+            ],
+            "path": "packages/kbn-coloring/src/color_manipulation/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1553,7 +1716,7 @@
             "label": "type",
             "description": [],
             "signature": [
-              "\"palette\" | \"system_palette\""
+              "\"system_palette\" | \"palette\""
             ],
             "path": "packages/kbn-coloring/src/palettes/types.ts",
             "deprecated": false,
@@ -1851,7 +2014,7 @@
         "label": "PaletteContinuity",
         "description": [],
         "signature": [
-          "\"above\" | \"below\" | \"none\" | \"all\""
+          "\"none\" | \"all\" | \"above\" | \"below\""
         ],
         "path": "packages/kbn-coloring/src/palettes/types.ts",
         "deprecated": false,
@@ -1866,7 +2029,7 @@
         "label": "RequiredPaletteParamTypes",
         "description": [],
         "signature": [
-          "{ name: string; rangeMin: number; reverse: boolean; rangeType: \"number\" | \"percent\"; continuity: ",
+          "{ reverse: boolean; name: string; rangeType: \"number\" | \"percent\"; continuity: ",
           {
             "pluginId": "@kbn/coloring",
             "scope": "common",
@@ -1874,7 +2037,7 @@
             "section": "def-common.PaletteContinuity",
             "text": "PaletteContinuity"
           },
-          "; progression: \"fixed\"; rangeMax: number; stops: ",
+          "; progression: \"fixed\"; rangeMin: number; rangeMax: number; stops: ",
           {
             "pluginId": "@kbn/coloring",
             "scope": "common",

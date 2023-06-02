@@ -9,6 +9,8 @@
 import { memoize } from 'lodash';
 
 import dateMath from '@kbn/datemath';
+import { CoreStart } from '@kbn/core/public';
+import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import { buildEsQuery, type TimeRange } from '@kbn/es-query';
 import { KibanaPluginServiceFactory } from '@kbn/presentation-util-plugin/public';
 
@@ -16,7 +18,7 @@ import {
   OptionsListRequest,
   OptionsListResponse,
   OptionsListRequestBody,
-  OptionsListField,
+  OptionsListFailureResponse,
 } from '../../../common/options_list/types';
 import { ControlsHTTPService } from '../http/types';
 import { ControlsDataService } from '../data/types';
@@ -24,10 +26,12 @@ import { ControlsPluginStartDeps } from '../../types';
 import { ControlsOptionsListService } from './types';
 
 class OptionsListService implements ControlsOptionsListService {
+  private core: CoreStart;
   private data: ControlsDataService;
   private http: ControlsHTTPService;
 
-  constructor(requiredServices: OptionsListServiceRequiredServices) {
+  constructor(core: CoreStart, requiredServices: OptionsListServiceRequiredServices) {
+    this.core = core;
     ({ data: this.data, http: this.http } = requiredServices);
   }
 
@@ -38,6 +42,7 @@ class OptionsListService implements ControlsOptionsListService {
 
   private optionsListCacheResolver = (request: OptionsListRequest) => {
     const {
+      size,
       sort,
       query,
       filters,
@@ -59,6 +64,7 @@ class OptionsListService implements ControlsOptionsListService {
       dataViewTitle,
       searchString,
       fieldName,
+      size,
     ].join('|');
   };
 
@@ -66,14 +72,12 @@ class OptionsListService implements ControlsOptionsListService {
     async (request: OptionsListRequest, abortSignal: AbortSignal) => {
       const index = request.dataView.title;
       const requestBody = this.getRequestBody(request);
-      return await this.http.fetch<OptionsListResponse>(
-        `/api/kibana/controls/optionsList/${index}`,
-        {
-          body: JSON.stringify(requestBody),
-          signal: abortSignal,
-          method: 'POST',
-        }
-      );
+      return await this.http.fetch<OptionsListResponse>(`/internal/controls/optionsList/${index}`, {
+        version: '1',
+        body: JSON.stringify(requestBody),
+        signal: abortSignal,
+        method: 'POST',
+      });
     },
     this.optionsListCacheResolver
   );
@@ -83,26 +87,54 @@ class OptionsListService implements ControlsOptionsListService {
     const { query, filters, dataView, timeRange, field, ...passThroughProps } = request;
     const timeFilter = timeRange ? timeService.createFilter(dataView, timeRange) : undefined;
     const filtersToUse = [...(filters ?? []), ...(timeFilter ? [timeFilter] : [])];
-    const esFilters = [buildEsQuery(dataView, query ?? [], filtersToUse ?? [])];
+    const config = getEsQueryConfig(this.core.uiSettings);
+    const esFilters = [buildEsQuery(dataView, query ?? [], filtersToUse ?? [], config)];
 
     return {
       ...passThroughProps,
       filters: esFilters,
       fieldName: field.name,
       fieldSpec: field,
-      textFieldName: (field as OptionsListField).textFieldName,
       runtimeFieldMap: dataView.toSpec().runtimeFieldMap,
     };
+  };
+
+  private cachedAllowExpensiveQueries = memoize(async () => {
+    const { allowExpensiveQueries } = await this.http.get<{
+      allowExpensiveQueries: boolean;
+    }>('/internal/controls/optionsList/getExpensiveQueriesSetting', {
+      version: '1',
+    });
+    return allowExpensiveQueries;
+  });
+
+  public getAllowExpensiveQueries = async (): Promise<boolean> => {
+    try {
+      return await this.cachedAllowExpensiveQueries();
+    } catch (error) {
+      return false;
+    }
+  };
+
+  public optionsListResponseWasFailure = (
+    response: OptionsListResponse
+  ): response is OptionsListFailureResponse => {
+    return (response as OptionsListFailureResponse).error !== undefined;
   };
 
   public runOptionsListRequest = async (request: OptionsListRequest, abortSignal: AbortSignal) => {
     try {
       return await this.cachedOptionsListRequest(request, abortSignal);
-    } catch (error) {
+    } catch (error: any) {
       // Remove rejected results from memoize cache
       this.cachedOptionsListRequest.cache.delete(this.optionsListCacheResolver(request));
-      return {} as OptionsListResponse;
+      if (error.name === 'AbortError') return { error: 'aborted' } as OptionsListFailureResponse;
+      return { error } as OptionsListFailureResponse;
     }
+  };
+
+  public clearOptionsListCache = () => {
+    this.cachedOptionsListRequest.cache = new memoize.Cache();
   };
 }
 
@@ -118,5 +150,5 @@ export type OptionsListServiceFactory = KibanaPluginServiceFactory<
 >;
 
 export const optionsListServiceFactory: OptionsListServiceFactory = (core, requiredServices) => {
-  return new OptionsListService(requiredServices);
+  return new OptionsListService(core.coreStart, requiredServices);
 };

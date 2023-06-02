@@ -6,6 +6,7 @@
  */
 
 import type { ISearchRequestParams } from '@kbn/data-plugin/common';
+import { hostFieldsMap } from '@kbn/securitysolution-ecs';
 import type {
   Direction,
   HostsRequestOptions,
@@ -15,7 +16,6 @@ import { HostsFields } from '../../../../../../common/search_strategy';
 import { createQueryFilterClauses, reduceFields } from '../../../../../utils/build_query';
 import { assertUnreachable } from '../../../../../../common/utility_types';
 import { HOSTS_FIELDS } from './helpers';
-import { hostFieldsMap } from '../../../../../../common/ecs/ecs_fields';
 
 export const buildHostsQuery = ({
   defaultIndex,

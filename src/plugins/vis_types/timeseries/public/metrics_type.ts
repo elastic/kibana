@@ -7,7 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import uuid from 'uuid/v4';
+import { v4 as uuidv4 } from 'uuid';
 import type { DataViewsContract, DataView } from '@kbn/data-views-plugin/public';
 import {
   Vis,
@@ -23,7 +23,7 @@ import {
   extractIndexPatternValues,
   isStringTypeIndexPattern,
 } from '../common/index_patterns_utils';
-import { TSVB_DEFAULT_COLOR, UI_SETTINGS } from '../common/constants';
+import { TSVB_DEFAULT_COLOR, UI_SETTINGS, VIS_TYPE } from '../common/constants';
 import { toExpressionAst } from './to_ast';
 import { getDataViewsStart, getUISettings } from './services';
 import type { TimeseriesVisDefaultParams, TimeseriesVisParams } from './types';
@@ -99,7 +99,7 @@ async function getUsedIndexPatterns(params: VisParams): Promise<DataView[]> {
 export const metricsVisDefinition: VisTypeDefinition<
   TimeseriesVisParams | TimeseriesVisDefaultParams
 > = {
-  name: 'metrics',
+  name: VIS_TYPE,
   title: i18n.translate('visTypeTimeseries.kbnVisTypes.metricsTitle', { defaultMessage: 'TSVB' }),
   description: i18n.translate('visTypeTimeseries.kbnVisTypes.metricsDescription', {
     defaultMessage: 'Perform advanced analysis of your time series data.',
@@ -108,11 +108,11 @@ export const metricsVisDefinition: VisTypeDefinition<
   group: VisGroups.PROMOTED,
   visConfig: {
     defaults: {
-      id: () => uuid(),
+      id: () => uuidv4(),
       type: PANEL_TYPES.TIMESERIES,
       series: [
         {
-          id: () => uuid(),
+          id: () => uuidv4(),
           color: TSVB_DEFAULT_COLOR,
           split_mode: 'everything',
           palette: {
@@ -121,7 +121,7 @@ export const metricsVisDefinition: VisTypeDefinition<
           },
           metrics: [
             {
-              id: () => uuid(),
+              id: () => uuidv4(),
               type: 'count',
             },
           ],

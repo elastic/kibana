@@ -9,7 +9,7 @@ import type { History } from 'history';
 import type { FC } from 'react';
 import React, { memo, useEffect } from 'react';
 import { Router, Switch } from 'react-router-dom';
-import { Route } from '@kbn/kibana-react-plugin/public';
+import { Route } from '@kbn/shared-ux-router';
 import { useDispatch } from 'react-redux';
 import type { AppLeaveHandler, AppMountParameters } from '@kbn/core/public';
 

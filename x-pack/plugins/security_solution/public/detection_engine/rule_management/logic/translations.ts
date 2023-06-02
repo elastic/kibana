@@ -14,6 +14,13 @@ export const RULE_AND_TIMELINE_FETCH_FAILURE = i18n.translate(
   }
 );
 
+export const RULE_MANAGEMENT_FILTERS_FETCH_FAILURE = i18n.translate(
+  'xpack.securitySolution.containers.detectionEngine.ruleManagementFiltersFetchFailure',
+  {
+    defaultMessage: 'Failed to fetch rule filters',
+  }
+);
+
 export const RULE_ADD_FAILURE = i18n.translate(
   'xpack.securitySolution.containers.detectionEngine.addRuleFailDescription',
   {
@@ -46,12 +53,5 @@ export const TIMELINE_PREPACKAGED_SUCCESS = i18n.translate(
   'xpack.securitySolution.containers.detectionEngine.createPrePackagedTimelineSuccesDescription',
   {
     defaultMessage: 'Installed pre-packaged timeline templates from elastic',
-  }
-);
-
-export const TAG_FETCH_FAILURE = i18n.translate(
-  'xpack.securitySolution.containers.detectionEngine.tagFetchFailDescription',
-  {
-    defaultMessage: 'Failed to fetch Tags',
   }
 );

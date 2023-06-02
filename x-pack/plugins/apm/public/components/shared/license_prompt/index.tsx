@@ -49,7 +49,11 @@ export function LicensePrompt({
       titleElement="h2"
       description={<EuiTextColor color="subdued">{text}</EuiTextColor>}
       footer={
-        <EuiButton fill={true} href={licensePageUrl}>
+        <EuiButton
+          data-test-subj="apmLicensePromptStartTrialButton"
+          fill={true}
+          href={licensePageUrl}
+        >
           {i18n.translate('xpack.apm.license.button', {
             defaultMessage: 'Start trial',
           })}

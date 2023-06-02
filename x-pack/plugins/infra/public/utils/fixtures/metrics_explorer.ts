@@ -15,6 +15,7 @@ import {
   MetricsExplorerChartType,
   MetricsExplorerYAxisMode,
   MetricsExplorerChartOptions,
+  MetricsExplorerTimestampsRT,
 } from '../../pages/metrics/metrics_explorer/hooks/use_metrics_explorer_options';
 
 export const options: MetricsExplorerOptions = {
@@ -52,6 +53,12 @@ export const derivedIndexPattern = { title: 'metricbeat-*', fields: [] };
 export const timeRange: MetricsExplorerTimeOptions = {
   from: 'now-1h',
   to: 'now',
+  interval: '>=10s',
+};
+
+export const timestamps: MetricsExplorerTimestampsRT = {
+  fromTimestamp: 1678376367166,
+  toTimestamp: 1678379973620,
   interval: '>=10s',
 };
 

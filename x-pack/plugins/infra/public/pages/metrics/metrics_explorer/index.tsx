@@ -7,31 +7,33 @@
 
 import { EuiErrorBoundary } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useEffect } from 'react';
-import { useTrackPageview } from '@kbn/observability-plugin/public';
+import React, { useEffect, useState } from 'react';
+import { useTrackPageview } from '@kbn/observability-shared-plugin/public';
+import { SourceLoadingPage } from '../../../components/source_loading_page';
+import { useMetricsExplorerViews } from '../../../hooks/use_metrics_explorer_views';
 import { MetricsSourceConfigurationProperties } from '../../../../common/metrics_sources';
 import { useMetricsBreadcrumbs } from '../../../hooks/use_metrics_breadcrumbs';
-import { NoData } from '../../../components/empty_states';
+import { NoData, NoRemoteCluster } from '../../../components/empty_states';
 import { MetricsExplorerCharts } from './components/charts';
 import { MetricsExplorerToolbar } from './components/toolbar';
 import { useMetricsExplorerState } from './hooks/use_metric_explorer_state';
 import { useSourceContext } from '../../../containers/metrics_source';
-import { useSavedViewContext } from '../../../containers/saved_view/saved_view';
 import { MetricsPageTemplate } from '../page_template';
 import { metricsExplorerTitle } from '../../../translations';
-import { SavedViewsToolbarControls } from '../../../components/saved_views/toolbar_control';
 import { DerivedIndexPattern } from '../../../containers/metrics_source';
+import { SavedViews } from './components/saved_views';
 interface MetricsExplorerPageProps {
   source: MetricsSourceConfigurationProperties;
   derivedIndexPattern: DerivedIndexPattern;
 }
 
 export const MetricsExplorerPage = ({ source, derivedIndexPattern }: MetricsExplorerPageProps) => {
+  const [enabled, setEnabled] = useState(false);
   const {
-    loading,
+    isLoading,
     error,
     data,
-    currentTimerange,
+    timeRange,
     options,
     chartOptions,
     setChartOptions,
@@ -40,17 +42,18 @@ export const MetricsExplorerPage = ({ source, derivedIndexPattern }: MetricsExpl
     handleFilterQuerySubmit,
     handleGroupByChange,
     handleTimeChange,
-    handleRefresh,
     handleLoadMore,
     onViewStateChange,
-    loadData,
-  } = useMetricsExplorerState(source, derivedIndexPattern, false);
-  const { currentView, shouldLoadDefault } = useSavedViewContext();
+    refresh,
+  } = useMetricsExplorerState(source, derivedIndexPattern, enabled);
+  const { currentView } = useMetricsExplorerViews();
+  const { source: sourceContext, metricIndicesExist } = useSourceContext();
 
   useTrackPageview({ app: 'infra_metrics', path: 'metrics_explorer' });
   useTrackPageview({ app: 'infra_metrics', path: 'metrics_explorer', delay: 15000 });
 
-  const { metricIndicesExist } = useSourceContext();
+  const { remoteClustersExist } = sourceContext?.status ?? {};
+
   useEffect(() => {
     if (currentView) {
       onViewStateChange(currentView);
@@ -58,12 +61,11 @@ export const MetricsExplorerPage = ({ source, derivedIndexPattern }: MetricsExpl
   }, [currentView, onViewStateChange]);
 
   useEffect(() => {
-    if (currentView != null || !shouldLoadDefault) {
-      // load metrics explorer data after default view loaded, unless we're not loading a view
-      loadData();
+    if (currentView != null) {
+      // load metrics explorer data after default view loaded, unless we're not isLoading a view
+      setEnabled(true);
     }
-    /* eslint-disable-next-line react-hooks/exhaustive-deps */
-  }, [loadData, shouldLoadDefault]);
+  }, [currentView]);
 
   useMetricsBreadcrumbs([
     {
@@ -71,29 +73,33 @@ export const MetricsExplorerPage = ({ source, derivedIndexPattern }: MetricsExpl
     },
   ]);
 
+  const viewState = {
+    options,
+    chartOptions,
+    currentTimerange: timeRange,
+  };
+
+  if (isLoading && !sourceContext) return <SourceLoadingPage />;
+
+  if (!remoteClustersExist) {
+    return <NoRemoteCluster />;
+  }
+
   return (
     <EuiErrorBoundary>
       <MetricsPageTemplate
         hasData={metricIndicesExist}
         pageHeader={{
           pageTitle: metricsExplorerTitle,
-          rightSideItems: [
-            <SavedViewsToolbarControls
-              viewState={{
-                options,
-                chartOptions,
-                currentTimerange,
-              }}
-            />,
-          ],
+          rightSideItems: [<SavedViews viewState={viewState} />],
         }}
       >
         <MetricsExplorerToolbar
           derivedIndexPattern={derivedIndexPattern}
-          timeRange={currentTimerange}
+          timeRange={timeRange}
           options={options}
           chartOptions={chartOptions}
-          onRefresh={handleRefresh}
+          onRefresh={refresh}
           onTimeChange={handleTimeChange}
           onGroupByChange={handleGroupByChange}
           onFilterQuerySubmit={handleFilterQuerySubmit}
@@ -108,20 +114,20 @@ export const MetricsExplorerPage = ({ source, derivedIndexPattern }: MetricsExpl
               defaultMessage: 'It looks like the request failed with "{message}"',
               values: { message: error.message },
             })}
-            onRefetch={handleRefresh}
+            onRefetch={refresh}
             refetchText="Try Again"
           />
         ) : (
           <MetricsExplorerCharts
-            timeRange={currentTimerange}
-            loading={loading}
+            timeRange={timeRange}
+            isLoading={isLoading}
             data={data}
             source={source}
             options={options}
             chartOptions={chartOptions}
             onLoadMore={handleLoadMore}
             onFilter={handleFilterQuerySubmit}
-            onRefetch={handleRefresh}
+            onRefetch={refresh}
             onTimeChange={handleTimeChange}
           />
         )}

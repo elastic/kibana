@@ -11,6 +11,7 @@ import { EmbeddablePanelError } from '../panel/embeddable_panel_error';
 import { Embeddable } from './embeddable';
 import { EmbeddableInput, EmbeddableOutput, IEmbeddable } from './i_embeddable';
 import { IContainer } from '../containers';
+import './error_embeddable.scss';
 
 export const ERROR_EMBEDDABLE_TYPE = 'error';
 

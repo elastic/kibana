@@ -1,0 +1,5 @@
+test: {
+  "aaa['__proto__.hello']": "Hello",
+  "aaa['__proto__.nested.there']": "There",
+  "aaa['__proto__.nested.here']": "This JS syntax is apparently valid for our parser"
+}

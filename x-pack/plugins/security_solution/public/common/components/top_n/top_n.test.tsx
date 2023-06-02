@@ -18,11 +18,14 @@ import type { Props as TopNProps } from './top_n';
 import { TopN } from './top_n';
 import { InputsModelId } from '../../store/inputs/constants';
 
+jest.mock('../visualization_actions/visualization_embeddable');
+
 jest.mock('react-router-dom', () => {
   const original = jest.requireActual('react-router-dom');
 
   return {
     ...original,
+    useLocation: jest.fn().mockReturnValue({ pathname: '' }),
     useHistory: () => ({
       useHistory: jest.fn(),
     }),
@@ -31,14 +34,12 @@ jest.mock('react-router-dom', () => {
 
 jest.mock('../../lib/kibana');
 jest.mock('../link_to');
-jest.mock('../visualization_actions', () => ({
-  VisualizationActions: jest.fn(() => <div data-test-subj="mock-viz-actions" />),
-}));
+jest.mock('../visualization_actions/actions');
 
 jest.mock('uuid', () => {
   return {
-    v1: jest.fn(() => 'uuid.v1()'),
-    v4: jest.fn(() => 'uuid.v4()'),
+    v1: jest.fn(() => 'uuidv1()'),
+    v4: jest.fn(() => 'uuidv4()'),
   };
 });
 

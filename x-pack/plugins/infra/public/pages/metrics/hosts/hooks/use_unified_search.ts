@@ -4,108 +4,192 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import createContainer from 'constate';
-import { useCallback, useState } from 'react';
-import { buildEsQuery, Filter, Query, TimeRange } from '@kbn/es-query';
-import type { SavedQuery } from '@kbn/data-plugin/public';
-import { debounce } from 'lodash';
-import type { InfraClientStartDeps } from '../../../../types';
+import { useCallback, useEffect, useState } from 'react';
+import DateMath from '@kbn/datemath';
+import { buildEsQuery, fromKueryExpression, type Query } from '@kbn/es-query';
+import { map, skip, startWith } from 'rxjs/operators';
+import { combineLatest } from 'rxjs';
+import deepEqual from 'fast-deep-equal';
+import useEffectOnce from 'react-use/lib/useEffectOnce';
+import { useKibanaQuerySettings } from '../../../../utils/use_kibana_query_settings';
+import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
+import { telemetryTimeRangeFormatter } from '../../../../../common/formatters/telemetry_time_range';
 import { useMetricsDataViewContext } from './use_data_view';
-import { useSyncKibanaTimeFilterTime } from '../../../../hooks/use_kibana_timefilter_time';
-import { useHostsUrlState, INITIAL_DATE_RANGE } from './use_hosts_url_state';
+import {
+  HostsSearchPayload,
+  useHostsUrlState,
+  type HostsState,
+  type StringDateRangeTimestamp,
+} from './use_unified_search_url_state';
 
-export const useUnifiedSearch = () => {
-  const [panelFilters, setPanelFilters] = useState<Filter[] | null>(null);
-
-  const { state, dispatch, getRangeInTimestamp, getTime } = useHostsUrlState();
-  const { metricsDataView } = useMetricsDataViewContext();
-  const { services } = useKibana<InfraClientStartDeps>();
-  const {
-    data: { query: queryManager },
-  } = services;
-
-  useSyncKibanaTimeFilterTime(INITIAL_DATE_RANGE, {
-    from: state.dateRange.from,
-    to: state.dateRange.to,
-  });
-
-  const { filterManager } = queryManager;
-
-  const onSubmit = useCallback(
-    (query?: Query, dateRange?: TimeRange, filters?: Filter[]) => {
-      if (query || dateRange || filters) {
-        const newDateRange = dateRange ?? getTime();
-
-        if (filters) {
-          filterManager.setFilters(filters);
-        }
-        dispatch({
-          type: 'setQuery',
-          payload: {
-            query,
-            filters: filters ? filterManager.getFilters() : undefined,
-            dateRange: newDateRange,
-            dateRangeTimestamp: getRangeInTimestamp(newDateRange),
-          },
-        });
-      }
-    },
-    [getTime, dispatch, filterManager, getRangeInTimestamp]
-  );
-
-  // This won't prevent onSubmit from being fired twice when `clear filters` is clicked,
-  // that happens because both onQuerySubmit and onFiltersUpdated are internally triggered on same event by SearchBar.
-  // This just delays potential duplicate onSubmit calls
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const debounceOnSubmit = useCallback(debounce(onSubmit, 100), [onSubmit]);
-
-  const saveQuery = useCallback(
-    (newSavedQuery: SavedQuery) => {
-      const savedQueryFilters = newSavedQuery.attributes.filters ?? [];
-      const globalFilters = filterManager.getGlobalFilters();
-
-      const query = newSavedQuery.attributes.query;
-
-      dispatch({
-        type: 'setQuery',
-        payload: {
-          query,
-          filters: [...savedQueryFilters, ...globalFilters],
-        },
-      });
-    },
-    [filterManager, dispatch]
-  );
-
-  const clearSavedQuery = useCallback(() => {
-    dispatch({
-      type: 'setFilter',
-      payload: filterManager.getGlobalFilters(),
-    });
-  }, [filterManager, dispatch]);
-
-  const buildQuery = useCallback(() => {
-    if (!metricsDataView) {
-      return null;
-    }
-    if (Array.isArray(panelFilters) && panelFilters.length > 0) {
-      return buildEsQuery(metricsDataView, state.query, [...state.filters, ...panelFilters]);
-    }
-    return buildEsQuery(metricsDataView, state.query, [...state.filters]);
-  }, [metricsDataView, panelFilters, state.filters, state.query]);
+const buildQuerySubmittedPayload = (
+  hostState: HostsState & { parsedDateRange: StringDateRangeTimestamp }
+) => {
+  const { panelFilters, filters, parsedDateRange, query: queryObj, limit } = hostState;
 
   return {
-    dateRangeTimestamp: state.dateRangeTimestamp,
+    control_filters: panelFilters.map((filter) => JSON.stringify(filter)),
+    filters: filters.map((filter) => JSON.stringify(filter)),
+    interval: telemetryTimeRangeFormatter(parsedDateRange.to - parsedDateRange.from),
+    query: queryObj.query,
+    limit,
+  };
+};
+
+const DEFAULT_FROM_IN_MILLISECONDS = 15 * 60000;
+
+const getDefaultTimestamps = () => {
+  const now = Date.now();
+
+  return {
+    from: new Date(now - DEFAULT_FROM_IN_MILLISECONDS).toISOString(),
+    to: new Date(now).toISOString(),
+  };
+};
+
+export const useUnifiedSearch = () => {
+  const [error, setError] = useState<Error | null>(null);
+  const [searchCriteria, setSearch] = useHostsUrlState();
+  const { dataView } = useMetricsDataViewContext();
+  const { services } = useKibanaContextForPlugin();
+  const kibanaQuerySettings = useKibanaQuerySettings();
+
+  const {
+    data: {
+      query: {
+        filterManager: filterManagerService,
+        queryString: queryStringService,
+        timefilter: timeFilterService,
+      },
+    },
+    telemetry,
+  } = services;
+
+  const validateQuery = useCallback(
+    (query: Query) => {
+      fromKueryExpression(query.query, kibanaQuerySettings);
+    },
+    [kibanaQuerySettings]
+  );
+
+  const onSubmit = useCallback(
+    (params?: HostsSearchPayload) => {
+      try {
+        setError(null);
+        /* 
+        / Validates the Search Bar input values before persisting them in the state.
+        / Since the search can be triggered by components that are unaware of the Unified Search state (e.g Controls and Host Limit),
+        / this will always validates the query bar value, regardless of whether it's been sent in the current event or not.
+        */
+        validateQuery(params?.query ?? (queryStringService.getQuery() as Query));
+        setSearch(params ?? {});
+      } catch (err) {
+        /* 
+        / Persists in the state the params so they can be used in case the query bar is fixed by the user.
+        / This is needed because the Unified Search observables are unnaware of the other componets in the search bar.
+        / Invalid query isn't persisted because it breaks the Control component
+        */
+        const { query, ...validParams } = params ?? {};
+        setSearch(validParams ?? {});
+        setError(err);
+      }
+    },
+    [queryStringService, setSearch, validateQuery]
+  );
+
+  const getParsedDateRange = useCallback(() => {
+    const defaults = getDefaultTimestamps();
+
+    const from = DateMath.parse(searchCriteria.dateRange.from)?.toISOString() ?? defaults.from;
+    const to =
+      DateMath.parse(searchCriteria.dateRange.to, { roundUp: true })?.toISOString() ?? defaults.to;
+
+    return { from, to };
+  }, [searchCriteria.dateRange]);
+
+  const getDateRangeAsTimestamp = useCallback(() => {
+    const parsedDate = getParsedDateRange();
+
+    const from = new Date(parsedDate.from).getTime();
+    const to = new Date(parsedDate.to).getTime();
+
+    return { from, to };
+  }, [getParsedDateRange]);
+
+  const buildQuery = useCallback(() => {
+    return buildEsQuery(
+      dataView,
+      searchCriteria.query,
+      [...searchCriteria.filters, ...searchCriteria.panelFilters],
+      kibanaQuerySettings
+    );
+  }, [
+    dataView,
+    searchCriteria.query,
+    searchCriteria.filters,
+    searchCriteria.panelFilters,
+    kibanaQuerySettings,
+  ]);
+
+  useEffectOnce(() => {
+    // Sync filtersService from the URL state
+    if (!deepEqual(filterManagerService.getFilters(), searchCriteria.filters)) {
+      filterManagerService.setFilters(searchCriteria.filters);
+    }
+    // Sync queryService from the URL state
+    if (!deepEqual(queryStringService.getQuery(), searchCriteria.query)) {
+      queryStringService.setQuery(searchCriteria.query);
+    }
+
+    try {
+      // Validates the "query" object from the URL state
+      if (searchCriteria.query) {
+        validateQuery(searchCriteria.query);
+      }
+    } catch (err) {
+      setError(err);
+    }
+  });
+
+  useEffect(() => {
+    const filters$ = filterManagerService.getUpdates$().pipe(
+      startWith(undefined),
+      map(() => filterManagerService.getFilters())
+    );
+
+    const query$ = queryStringService.getUpdates$().pipe(
+      startWith(undefined),
+      map(() => queryStringService.getQuery() as Query)
+    );
+
+    const subscription = combineLatest({
+      filters: filters$,
+      query: query$,
+    })
+      .pipe(skip(1))
+      .subscribe(onSubmit);
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [filterManagerService, onSubmit, queryStringService, timeFilterService.timefilter]);
+
+  // Track telemetry event on query/filter/date changes
+  useEffect(() => {
+    const parsedDateRange = getDateRangeAsTimestamp();
+    telemetry.reportHostsViewQuerySubmitted(
+      buildQuerySubmittedPayload({ ...searchCriteria, parsedDateRange })
+    );
+  }, [getDateRangeAsTimestamp, searchCriteria, telemetry]);
+
+  return {
+    error,
     buildQuery,
-    onSubmit: debounceOnSubmit,
-    saveQuery,
-    clearSavedQuery,
-    unifiedSearchQuery: state.query,
-    unifiedSearchDateRange: getTime(),
-    unifiedSearchFilters: state.filters,
-    setPanelFilters,
-    panelFilters,
+    onSubmit,
+    getParsedDateRange,
+    getDateRangeAsTimestamp,
+    searchCriteria,
   };
 };
 

@@ -8,9 +8,10 @@
 import { cloneDeep } from 'lodash';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { IScopedClusterClient } from '@kbn/core/server';
-import { ES_FIELD_TYPES } from '@kbn/data-plugin/common';
+import { ES_FIELD_TYPES } from '@kbn/field-types';
 import type { DataViewsService } from '@kbn/data-views-plugin/common';
-import type { Field, FieldId, NewJobCaps, RollupFields } from '../../../../common/types/fields';
+import { TIME_SERIES_METRIC_TYPES } from '@kbn/ml-agg-utils';
+import type { Field, NewJobCaps, RollupFields } from '../../../../common/types/fields';
 import { combineFieldsAndAggs } from '../../../../common/util/fields_utils';
 import { rollupServiceProvider } from './rollup';
 import { aggregations, mlOnlyAggregations } from '../../../../common/constants/aggregation_types';
@@ -62,7 +63,7 @@ class FieldsService {
     this._dataViewsService = dataViewsService;
   }
 
-  private async loadFieldCaps(): Promise<any> {
+  private async loadFieldCaps() {
     return await this._mlClusterClient.asCurrentUser.fieldCaps(
       {
         index: this._indexPattern,
@@ -77,7 +78,7 @@ class FieldsService {
     const fieldCaps = await this.loadFieldCaps();
     const fields: Field[] = [];
     if (fieldCaps && fieldCaps.fields) {
-      Object.keys(fieldCaps.fields).forEach((k: FieldId) => {
+      Object.keys(fieldCaps.fields).forEach((k) => {
         const fc = fieldCaps.fields[k];
         const firstKey = Object.keys(fc)[0];
         if (firstKey !== undefined) {
@@ -90,8 +91,9 @@ class FieldsService {
             fields.push({
               id: k,
               name: k,
-              type: field.type,
-              aggregatable: field.aggregatable,
+              type: field.type as ES_FIELD_TYPES,
+              aggregatable: this.isFieldAggregatable(field),
+              counter: this.isCounterField(field),
               aggs: [],
             });
           }
@@ -99,6 +101,16 @@ class FieldsService {
       });
     }
     return fields.sort((a, b) => a.id.localeCompare(b.id));
+  }
+
+  private isCounterField(field: estypes.FieldCapsFieldCapability) {
+    return field.time_series_metric === TIME_SERIES_METRIC_TYPES.COUNTER;
+  }
+  // check to see whether the field is aggregatable
+  // If it is a counter field from a time series data stream, we cannot currently
+  // support any aggregations and so it cannot be used as a field_name in a detector.
+  private isFieldAggregatable(field: estypes.FieldCapsFieldCapability) {
+    return field.aggregatable && this.isCounterField(field) === false;
   }
 
   // public function to load fields from _field_caps and create a list
@@ -150,9 +162,9 @@ function combineAllRollupFields(
         rollupFields[fieldName] = conf.fields[fieldName];
       } else {
         const aggs = conf.fields[fieldName];
-        // @ts-expect-error fix type. our RollupFields type is better
         aggs.forEach((agg) => {
           if (rollupFields[fieldName].find((f) => f.agg === agg.agg) === null) {
+            // @ts-expect-error TODO: fix after elasticsearch-js bump
             rollupFields[fieldName].push(agg);
           }
         });

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { set } from 'lodash';
+import { set } from '@kbn/safer-lodash-set';
 import { ActionsCompletion } from '../types';
 import { ActionsConfigMap } from './get_actions_config_map';
 import { SearchMetrics } from './types';

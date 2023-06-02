@@ -34,7 +34,12 @@ export const kpiUniqueIpsBarLensAttributes: LensAttributes = {
                 label: 'Filters',
                 operationType: 'filters',
                 params: {
-                  filters: [{ input: { language: 'kuery', query: '' }, label: SOURCE_CHART_LABEL }],
+                  filters: [
+                    {
+                      input: { language: 'kuery', query: 'source.ip: *' },
+                      label: SOURCE_CHART_LABEL,
+                    },
+                  ],
                 },
                 scale: 'ordinal',
               },
@@ -62,7 +67,9 @@ export const kpiUniqueIpsBarLensAttributes: LensAttributes = {
                 label: DESTINATION_CHART_LABEL,
                 operationType: 'filters',
                 params: {
-                  filters: [{ input: { language: 'kuery', query: '' }, label: 'Dest.' }],
+                  filters: [
+                    { input: { language: 'kuery', query: 'destination.ip: *' }, label: 'Dest.' },
+                  ],
                 },
                 scale: 'ordinal',
               },
@@ -105,7 +112,7 @@ export const kpiUniqueIpsBarLensAttributes: LensAttributes = {
       yRightExtent: { mode: 'full' },
     },
   },
-  title: '[Host] Unique IPs - bar',
+  title: '[Host] Unique IPs - bar chart',
   visualizationType: 'lnsXY',
   references: [
     {

@@ -6,188 +6,37 @@
  */
 
 import React from 'react';
-import Chance from 'chance';
+
 import { coreMock } from '@kbn/core/public/mocks';
-import { render } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { TestProvider } from '../../test/test_provider';
 import { ComplianceDashboard } from '.';
 import { useCspSetupStatusApi } from '../../common/api/use_setup_status_api';
+import { useLicenseManagementLocatorApi } from '../../common/api/use_license_management_locator_api';
 import { useSubscriptionStatus } from '../../common/hooks/use_subscription_status';
-import { useComplianceDashboardDataApi } from '../../common/api/use_compliance_dashboard_data_api';
-import { DASHBOARD_CONTAINER } from './test_subjects';
+import { useKspmStatsApi, useCspmStatsApi } from '../../common/api/use_stats_api';
+import {
+  CLOUD_DASHBOARD_CONTAINER,
+  DASHBOARD_CONTAINER,
+  KUBERNETES_DASHBOARD_CONTAINER,
+  KUBERNETES_DASHBOARD_TAB,
+  CLOUD_DASHBOARD_TAB,
+} from './test_subjects';
+import { mockDashboardData } from './mock';
 import { createReactQueryResponse } from '../../test/fixtures/react_query';
 import { NO_FINDINGS_STATUS_TEST_SUBJ } from '../../components/test_subjects';
-import { useCISIntegrationPoliciesLink } from '../../common/navigation/use_navigate_to_cis_integration_policies';
-import { useCISIntegrationLink } from '../../common/navigation/use_navigate_to_cis_integration';
 import { expectIdsInDoc } from '../../test/utils';
-import { ComplianceDashboardData } from '../../../common/types';
+import {
+  CSPM_INTEGRATION_NOT_INSTALLED_TEST_SUBJECT,
+  KSPM_INTEGRATION_NOT_INSTALLED_TEST_SUBJECT,
+} from '../../components/cloud_posture_page';
 
 jest.mock('../../common/api/use_setup_status_api');
-jest.mock('../../common/api/use_compliance_dashboard_data_api');
+jest.mock('../../common/api/use_stats_api');
+jest.mock('../../common/api/use_license_management_locator_api');
 jest.mock('../../common/hooks/use_subscription_status');
 jest.mock('../../common/navigation/use_navigate_to_cis_integration_policies');
-jest.mock('../../common/navigation/use_navigate_to_cis_integration');
-const chance = new Chance();
-
-export const mockDashboardData: ComplianceDashboardData = {
-  stats: {
-    totalFailed: 17,
-    totalPassed: 155,
-    totalFindings: 172,
-    postureScore: 90.1,
-    resourcesEvaluated: 162,
-  },
-  groupedFindingsEvaluation: [
-    {
-      name: 'RBAC and Service Accounts',
-      totalFindings: 104,
-      totalFailed: 0,
-      totalPassed: 104,
-      postureScore: 100,
-    },
-    {
-      name: 'API Server',
-      totalFindings: 27,
-      totalFailed: 11,
-      totalPassed: 16,
-      postureScore: 59.2,
-    },
-    {
-      name: 'Master Node Configuration Files',
-      totalFindings: 17,
-      totalFailed: 1,
-      totalPassed: 16,
-      postureScore: 94.1,
-    },
-    {
-      name: 'Kubelet',
-      totalFindings: 11,
-      totalFailed: 4,
-      totalPassed: 7,
-      postureScore: 63.6,
-    },
-    {
-      name: 'etcd',
-      totalFindings: 6,
-      totalFailed: 0,
-      totalPassed: 6,
-      postureScore: 100,
-    },
-    {
-      name: 'Worker Node Configuration Files',
-      totalFindings: 5,
-      totalFailed: 0,
-      totalPassed: 5,
-      postureScore: 100,
-    },
-    {
-      name: 'Scheduler',
-      totalFindings: 2,
-      totalFailed: 1,
-      totalPassed: 1,
-      postureScore: 50.0,
-    },
-  ],
-  clusters: [
-    {
-      meta: {
-        clusterId: '8f9c5b98-cc02-4827-8c82-316e2cc25870',
-        benchmarkName: 'CIS Kubernetes V1.20',
-        lastUpdate: '2022-11-07T13:14:34.990Z',
-        benchmarkId: 'cis_k8s',
-      },
-      stats: {
-        totalFailed: 17,
-        totalPassed: 155,
-        totalFindings: 172,
-        postureScore: 90.1,
-      },
-      groupedFindingsEvaluation: [
-        {
-          name: 'RBAC and Service Accounts',
-          totalFindings: 104,
-          totalFailed: 0,
-          totalPassed: 104,
-          postureScore: 100,
-        },
-        {
-          name: 'API Server',
-          totalFindings: 27,
-          totalFailed: 11,
-          totalPassed: 16,
-          postureScore: 59.2,
-        },
-        {
-          name: 'Master Node Configuration Files',
-          totalFindings: 17,
-          totalFailed: 1,
-          totalPassed: 16,
-          postureScore: 94.1,
-        },
-        {
-          name: 'Kubelet',
-          totalFindings: 11,
-          totalFailed: 4,
-          totalPassed: 7,
-          postureScore: 63.6,
-        },
-        {
-          name: 'etcd',
-          totalFindings: 6,
-          totalFailed: 0,
-          totalPassed: 6,
-          postureScore: 100,
-        },
-        {
-          name: 'Worker Node Configuration Files',
-          totalFindings: 5,
-          totalFailed: 0,
-          totalPassed: 5,
-          postureScore: 100,
-        },
-        {
-          name: 'Scheduler',
-          totalFindings: 2,
-          totalFailed: 1,
-          totalPassed: 1,
-          postureScore: 50.0,
-        },
-      ],
-      trend: [
-        {
-          timestamp: '2022-05-22T11:03:00.000Z',
-          totalFindings: 172,
-          totalFailed: 17,
-          totalPassed: 155,
-          postureScore: 90.1,
-        },
-        {
-          timestamp: '2022-05-22T10:25:00.000Z',
-          totalFindings: 172,
-          totalFailed: 17,
-          totalPassed: 155,
-          postureScore: 90.1,
-        },
-      ],
-    },
-  ],
-  trend: [
-    {
-      timestamp: '2022-05-22T11:03:00.000Z',
-      totalFindings: 172,
-      totalFailed: 17,
-      totalPassed: 155,
-      postureScore: 90.1,
-    },
-    {
-      timestamp: '2022-05-22T10:25:00.000Z',
-      totalFindings: 172,
-      totalFailed: 17,
-      totalPassed: 155,
-      postureScore: 90.1,
-    },
-  ],
-};
+jest.mock('../../common/navigation/use_csp_integration_link');
 
 describe('<ComplianceDashboard />', () => {
   beforeEach(() => {
@@ -195,7 +44,7 @@ describe('<ComplianceDashboard />', () => {
     (useCspSetupStatusApi as jest.Mock).mockImplementation(() =>
       createReactQueryResponse({
         status: 'success',
-        data: { status: 'indexed' },
+        data: { status: 'indexed', installedPackageVersion: '1.2.13' },
       })
     );
 
@@ -203,6 +52,23 @@ describe('<ComplianceDashboard />', () => {
       createReactQueryResponse({
         status: 'success',
         data: true,
+      })
+    );
+
+    (useCspmStatsApi as jest.Mock).mockImplementation(() =>
+      createReactQueryResponse({
+        status: 'success',
+      })
+    );
+    (useKspmStatsApi as jest.Mock).mockImplementation(() =>
+      createReactQueryResponse({
+        status: 'success',
+      })
+    );
+
+    (useLicenseManagementLocatorApi as jest.Mock).mockImplementation(() =>
+      createReactQueryResponse({
+        status: 'success',
       })
     );
   });
@@ -233,18 +99,33 @@ describe('<ComplianceDashboard />', () => {
     (useCspSetupStatusApi as jest.Mock).mockImplementation(() =>
       createReactQueryResponse({
         status: 'success',
-        data: { status: 'not-deployed' },
+        data: {
+          kspm: { status: 'not-deployed', healthyAgents: 0, installedPackagePolicies: 1 },
+          cspm: { status: 'not-deployed', healthyAgents: 0, installedPackagePolicies: 1 },
+          installedPackageVersion: '1.2.13',
+          indicesDetails: [
+            { index: 'logs-cloud_security_posture.findings_latest-default', status: 'empty' },
+            { index: 'logs-cloud_security_posture.findings-default*', status: 'empty' },
+          ],
+        },
       })
     );
-    (useCISIntegrationPoliciesLink as jest.Mock).mockImplementation(() => chance.url());
-    (useCISIntegrationLink as jest.Mock).mockImplementation(() => chance.url());
+    (useKspmStatsApi as jest.Mock).mockImplementation(() => ({
+      isSuccess: true,
+      isLoading: false,
+      data: { stats: { totalFindings: 0 } },
+    }));
+    (useCspmStatsApi as jest.Mock).mockImplementation(() => ({
+      isSuccess: true,
+      isLoading: false,
+      data: { stats: { totalFindings: 0 } },
+    }));
 
     renderComplianceDashboardPage();
 
     expectIdsInDoc({
       be: [NO_FINDINGS_STATUS_TEST_SUBJ.NO_AGENTS_DEPLOYED],
       notToBe: [
-        DASHBOARD_CONTAINER,
         NO_FINDINGS_STATUS_TEST_SUBJ.INDEXING,
         NO_FINDINGS_STATUS_TEST_SUBJ.INDEX_TIMEOUT,
         NO_FINDINGS_STATUS_TEST_SUBJ.UNPRIVILEGED,
@@ -256,17 +137,33 @@ describe('<ComplianceDashboard />', () => {
     (useCspSetupStatusApi as jest.Mock).mockImplementation(() =>
       createReactQueryResponse({
         status: 'success',
-        data: { status: 'indexing' },
+        data: {
+          kspm: { status: 'indexing', healthyAgents: 1, installedPackagePolicies: 1 },
+          cspm: { status: 'indexing', healthyAgents: 1, installedPackagePolicies: 1 },
+          installedPackageVersion: '1.2.13',
+          indicesDetails: [
+            { index: 'logs-cloud_security_posture.findings_latest-default', status: 'empty' },
+            { index: 'logs-cloud_security_posture.findings-default*', status: 'empty' },
+          ],
+        },
       })
     );
-    (useCISIntegrationLink as jest.Mock).mockImplementation(() => chance.url());
+    (useKspmStatsApi as jest.Mock).mockImplementation(() => ({
+      isSuccess: true,
+      isLoading: false,
+      data: { stats: { totalFindings: 1 } },
+    }));
+    (useCspmStatsApi as jest.Mock).mockImplementation(() => ({
+      isSuccess: true,
+      isLoading: false,
+      data: { stats: { totalFindings: 1 } },
+    }));
 
     renderComplianceDashboardPage();
 
     expectIdsInDoc({
       be: [NO_FINDINGS_STATUS_TEST_SUBJ.INDEXING],
       notToBe: [
-        DASHBOARD_CONTAINER,
         NO_FINDINGS_STATUS_TEST_SUBJ.NO_AGENTS_DEPLOYED,
         NO_FINDINGS_STATUS_TEST_SUBJ.INDEX_TIMEOUT,
         NO_FINDINGS_STATUS_TEST_SUBJ.UNPRIVILEGED,
@@ -278,17 +175,33 @@ describe('<ComplianceDashboard />', () => {
     (useCspSetupStatusApi as jest.Mock).mockImplementation(() =>
       createReactQueryResponse({
         status: 'success',
-        data: { status: 'index-timeout' },
+        data: {
+          kspm: { status: 'index-timeout', healthyAgents: 1, installedPackagePolicies: 1 },
+          cspm: { status: 'index-timeout', healthyAgents: 1, installedPackagePolicies: 1 },
+          installedPackageVersion: '1.2.13',
+          indicesDetails: [
+            { index: 'logs-cloud_security_posture.findings_latest-default', status: 'empty' },
+            { index: 'logs-cloud_security_posture.findings-default*', status: 'empty' },
+          ],
+        },
       })
     );
-    (useCISIntegrationLink as jest.Mock).mockImplementation(() => chance.url());
+    (useKspmStatsApi as jest.Mock).mockImplementation(() => ({
+      isSuccess: true,
+      isLoading: false,
+      data: { stats: { totalFindings: 0 } },
+    }));
+    (useCspmStatsApi as jest.Mock).mockImplementation(() => ({
+      isSuccess: true,
+      isLoading: false,
+      data: { stats: { totalFindings: 0 } },
+    }));
 
     renderComplianceDashboardPage();
 
     expectIdsInDoc({
       be: [NO_FINDINGS_STATUS_TEST_SUBJ.INDEX_TIMEOUT],
       notToBe: [
-        DASHBOARD_CONTAINER,
         NO_FINDINGS_STATUS_TEST_SUBJ.NO_AGENTS_DEPLOYED,
         NO_FINDINGS_STATUS_TEST_SUBJ.INDEXING,
         NO_FINDINGS_STATUS_TEST_SUBJ.UNPRIVILEGED,
@@ -300,17 +213,33 @@ describe('<ComplianceDashboard />', () => {
     (useCspSetupStatusApi as jest.Mock).mockImplementation(() =>
       createReactQueryResponse({
         status: 'success',
-        data: { status: 'unprivileged' },
+        data: {
+          kspm: { status: 'unprivileged', healthyAgents: 1, installedPackagePolicies: 1 },
+          cspm: { status: 'unprivileged', healthyAgents: 1, installedPackagePolicies: 1 },
+          installedPackageVersion: '1.2.13',
+          indicesDetails: [
+            { index: 'logs-cloud_security_posture.findings_latest-default', status: 'empty' },
+            { index: 'logs-cloud_security_posture.findings-default*', status: 'empty' },
+          ],
+        },
       })
     );
-    (useCISIntegrationLink as jest.Mock).mockImplementation(() => chance.url());
+    (useKspmStatsApi as jest.Mock).mockImplementation(() => ({
+      isSuccess: true,
+      isLoading: false,
+      data: { stats: { totalFindings: 0 } },
+    }));
+    (useCspmStatsApi as jest.Mock).mockImplementation(() => ({
+      isSuccess: true,
+      isLoading: false,
+      data: { stats: { totalFindings: 0 } },
+    }));
 
     renderComplianceDashboardPage();
 
     expectIdsInDoc({
       be: [NO_FINDINGS_STATUS_TEST_SUBJ.UNPRIVILEGED],
       notToBe: [
-        DASHBOARD_CONTAINER,
         NO_FINDINGS_STATUS_TEST_SUBJ.NO_AGENTS_DEPLOYED,
         NO_FINDINGS_STATUS_TEST_SUBJ.INDEXING,
         NO_FINDINGS_STATUS_TEST_SUBJ.INDEX_TIMEOUT,
@@ -319,7 +248,26 @@ describe('<ComplianceDashboard />', () => {
   });
 
   it('shows dashboard when there are findings in latest findings index', () => {
-    (useComplianceDashboardDataApi as jest.Mock).mockImplementation(() => ({
+    (useCspSetupStatusApi as jest.Mock).mockImplementation(() =>
+      createReactQueryResponse({
+        status: 'success',
+        data: {
+          kspm: { status: 'indexed' },
+          cspm: { status: 'indexed' },
+          installedPackageVersion: '1.2.13',
+          indicesDetails: [
+            { index: 'logs-cloud_security_posture.findings_latest-default', status: 'not-empty' },
+            { index: 'logs-cloud_security_posture.findings-default*', status: 'not-empty' },
+          ],
+        },
+      })
+    );
+    (useKspmStatsApi as jest.Mock).mockImplementation(() => ({
+      isSuccess: true,
+      isLoading: false,
+      data: mockDashboardData,
+    }));
+    (useCspmStatsApi as jest.Mock).mockImplementation(() => ({
       isSuccess: true,
       isLoading: false,
       data: mockDashboardData,
@@ -330,6 +278,328 @@ describe('<ComplianceDashboard />', () => {
     expectIdsInDoc({
       be: [DASHBOARD_CONTAINER],
       notToBe: [
+        NO_FINDINGS_STATUS_TEST_SUBJ.INDEX_TIMEOUT,
+        NO_FINDINGS_STATUS_TEST_SUBJ.NO_AGENTS_DEPLOYED,
+        NO_FINDINGS_STATUS_TEST_SUBJ.INDEXING,
+        NO_FINDINGS_STATUS_TEST_SUBJ.UNPRIVILEGED,
+      ],
+    });
+  });
+
+  it('Show Kubernetes dashboard if there are KSPM findings', () => {
+    (useCspSetupStatusApi as jest.Mock).mockImplementation(() =>
+      createReactQueryResponse({
+        status: 'success',
+        data: {
+          kspm: { status: 'indexed' },
+          cspm: { status: 'not-installed' },
+          installedPackageVersion: '1.2.13',
+          indicesDetails: [
+            { index: 'logs-cloud_security_posture.findings_latest-default', status: 'not-empty' },
+            { index: 'logs-cloud_security_posture.findings-default*', status: 'not-empty' },
+          ],
+        },
+      })
+    );
+    (useKspmStatsApi as jest.Mock).mockImplementation(() => ({
+      isSuccess: true,
+      isLoading: false,
+      data: mockDashboardData,
+    }));
+    (useCspmStatsApi as jest.Mock).mockImplementation(() => ({
+      isSuccess: true,
+      isLoading: false,
+      data: undefined,
+    }));
+
+    renderComplianceDashboardPage();
+
+    expectIdsInDoc({
+      be: [KUBERNETES_DASHBOARD_CONTAINER],
+      notToBe: [
+        CLOUD_DASHBOARD_CONTAINER,
+        NO_FINDINGS_STATUS_TEST_SUBJ.INDEX_TIMEOUT,
+        NO_FINDINGS_STATUS_TEST_SUBJ.NO_AGENTS_DEPLOYED,
+        NO_FINDINGS_STATUS_TEST_SUBJ.INDEXING,
+        NO_FINDINGS_STATUS_TEST_SUBJ.UNPRIVILEGED,
+      ],
+    });
+  });
+
+  it('Show Cloud dashboard if there are CSPM findings', () => {
+    (useCspSetupStatusApi as jest.Mock).mockImplementation(() =>
+      createReactQueryResponse({
+        status: 'success',
+        data: {
+          cspm: { status: 'indexed' },
+          installedPackageVersion: '1.2.13',
+          indicesDetails: [
+            { index: 'logs-cloud_security_posture.findings_latest-default', status: 'not-empty' },
+            { index: 'logs-cloud_security_posture.findings-default*', status: 'not-empty' },
+          ],
+        },
+      })
+    );
+    (useKspmStatsApi as jest.Mock).mockImplementation(() => ({
+      isSuccess: true,
+      isLoading: false,
+      data: undefined,
+    }));
+    (useCspmStatsApi as jest.Mock).mockImplementation(() => ({
+      isSuccess: true,
+      isLoading: false,
+      data: mockDashboardData,
+    }));
+
+    renderComplianceDashboardPage();
+
+    expectIdsInDoc({
+      be: [CLOUD_DASHBOARD_CONTAINER],
+      notToBe: [
+        KUBERNETES_DASHBOARD_CONTAINER,
+        NO_FINDINGS_STATUS_TEST_SUBJ.INDEX_TIMEOUT,
+        NO_FINDINGS_STATUS_TEST_SUBJ.NO_AGENTS_DEPLOYED,
+        NO_FINDINGS_STATUS_TEST_SUBJ.INDEXING,
+        NO_FINDINGS_STATUS_TEST_SUBJ.UNPRIVILEGED,
+      ],
+    });
+  });
+
+  it('Show Cloud dashboard "no findings prompt" if the CSPM integration is installed without findings', () => {
+    (useCspSetupStatusApi as jest.Mock).mockImplementation(() =>
+      createReactQueryResponse({
+        status: 'success',
+        data: {
+          cspm: { status: 'indexed', healthyAgents: 0, installedPackagePolicies: 1 },
+          installedPackageVersion: '1.2.13',
+          indicesDetails: [
+            { index: 'logs-cloud_security_posture.findings_latest-default', status: 'not-empty' },
+            { index: 'logs-cloud_security_posture.findings-default*', status: 'not-empty' },
+          ],
+        },
+      })
+    );
+    (useKspmStatsApi as jest.Mock).mockImplementation(() => ({
+      isSuccess: true,
+      isLoading: false,
+      data: { stats: { totalFindings: 0 } },
+    }));
+    (useCspmStatsApi as jest.Mock).mockImplementation(() => ({
+      isSuccess: true,
+      isLoading: false,
+      data: { stats: { totalFindings: 0 } },
+    }));
+
+    renderComplianceDashboardPage();
+
+    expectIdsInDoc({
+      be: [CLOUD_DASHBOARD_CONTAINER, NO_FINDINGS_STATUS_TEST_SUBJ.NO_FINDINGS],
+      notToBe: [
+        KUBERNETES_DASHBOARD_CONTAINER,
+        NO_FINDINGS_STATUS_TEST_SUBJ.INDEX_TIMEOUT,
+        NO_FINDINGS_STATUS_TEST_SUBJ.NO_AGENTS_DEPLOYED,
+        NO_FINDINGS_STATUS_TEST_SUBJ.INDEXING,
+        NO_FINDINGS_STATUS_TEST_SUBJ.UNPRIVILEGED,
+      ],
+    });
+  });
+
+  it('Show Kubernetes dashboard "no findings prompt" if the KSPM integration is installed without findings', () => {
+    (useCspSetupStatusApi as jest.Mock).mockImplementation(() =>
+      createReactQueryResponse({
+        status: 'success',
+        data: {
+          kspm: { status: 'indexed', healthyAgents: 0, installedPackagePolicies: 1 },
+          cspm: { status: 'not-installed' },
+          installedPackageVersion: '1.2.13',
+          indicesDetails: [
+            { index: 'logs-cloud_security_posture.findings_latest-default', status: 'empty' },
+            { index: 'logs-cloud_security_posture.findings-default*', status: 'empty' },
+          ],
+        },
+      })
+    );
+    (useKspmStatsApi as jest.Mock).mockImplementation(() => ({
+      isSuccess: true,
+      isLoading: false,
+      data: { stats: { totalFindings: 0 } },
+    }));
+    (useCspmStatsApi as jest.Mock).mockImplementation(() => ({
+      isSuccess: true,
+      isLoading: false,
+      data: { stats: { totalFindings: 0 } },
+    }));
+
+    renderComplianceDashboardPage();
+
+    expectIdsInDoc({
+      be: [KUBERNETES_DASHBOARD_CONTAINER, NO_FINDINGS_STATUS_TEST_SUBJ.NO_FINDINGS],
+      notToBe: [
+        CLOUD_DASHBOARD_CONTAINER,
+        NO_FINDINGS_STATUS_TEST_SUBJ.INDEX_TIMEOUT,
+        NO_FINDINGS_STATUS_TEST_SUBJ.NO_AGENTS_DEPLOYED,
+        NO_FINDINGS_STATUS_TEST_SUBJ.INDEXING,
+        NO_FINDINGS_STATUS_TEST_SUBJ.UNPRIVILEGED,
+      ],
+    });
+  });
+
+  it('Prefer Cloud dashboard if both integration are installed', () => {
+    (useCspSetupStatusApi as jest.Mock).mockImplementation(() =>
+      createReactQueryResponse({
+        status: 'success',
+        data: {
+          cspm: { status: 'indexed' },
+          kspm: { status: 'indexed' },
+          installedPackageVersion: '1.2.13',
+          indicesDetails: [
+            { index: 'logs-cloud_security_posture.findings_latest-default', status: 'not-empty' },
+            { index: 'logs-cloud_security_posture.findings-default*', status: 'not-empty' },
+          ],
+        },
+      })
+    );
+    (useKspmStatsApi as jest.Mock).mockImplementation(() => ({
+      isSuccess: true,
+      isLoading: false,
+      data: { stats: { totalFindings: 0 } },
+    }));
+    (useCspmStatsApi as jest.Mock).mockImplementation(() => ({
+      isSuccess: true,
+      isLoading: false,
+      data: { stats: { totalFindings: 0 } },
+    }));
+
+    renderComplianceDashboardPage();
+
+    expectIdsInDoc({
+      be: [CLOUD_DASHBOARD_CONTAINER, NO_FINDINGS_STATUS_TEST_SUBJ.NO_FINDINGS],
+      notToBe: [
+        KUBERNETES_DASHBOARD_CONTAINER,
+        NO_FINDINGS_STATUS_TEST_SUBJ.INDEX_TIMEOUT,
+        NO_FINDINGS_STATUS_TEST_SUBJ.NO_AGENTS_DEPLOYED,
+        NO_FINDINGS_STATUS_TEST_SUBJ.INDEXING,
+        NO_FINDINGS_STATUS_TEST_SUBJ.UNPRIVILEGED,
+      ],
+    });
+  });
+
+  it('Prefer Cloud dashboard if both integration have findings', () => {
+    (useCspSetupStatusApi as jest.Mock).mockImplementation(() =>
+      createReactQueryResponse({
+        status: 'success',
+        data: {
+          cspm: { status: 'indexed' },
+          kspm: { status: 'indexed' },
+          installedPackageVersion: '1.2.13',
+          indicesDetails: [
+            { index: 'logs-cloud_security_posture.findings_latest-default', status: 'not-empty' },
+            { index: 'logs-cloud_security_posture.findings-default*', status: 'not-empty' },
+          ],
+        },
+      })
+    );
+    (useKspmStatsApi as jest.Mock).mockImplementation(() => ({
+      isSuccess: true,
+      isLoading: false,
+      data: mockDashboardData,
+    }));
+    (useCspmStatsApi as jest.Mock).mockImplementation(() => ({
+      isSuccess: true,
+      isLoading: false,
+      data: mockDashboardData,
+    }));
+
+    renderComplianceDashboardPage();
+
+    expectIdsInDoc({
+      be: [CLOUD_DASHBOARD_CONTAINER],
+      notToBe: [
+        KUBERNETES_DASHBOARD_CONTAINER,
+        NO_FINDINGS_STATUS_TEST_SUBJ.INDEX_TIMEOUT,
+        NO_FINDINGS_STATUS_TEST_SUBJ.NO_AGENTS_DEPLOYED,
+        NO_FINDINGS_STATUS_TEST_SUBJ.INDEXING,
+        NO_FINDINGS_STATUS_TEST_SUBJ.UNPRIVILEGED,
+      ],
+    });
+  });
+
+  it('Show CSPM installation prompt if CSPM is not installed and KSPM is installed ,NO AGENT', () => {
+    (useCspSetupStatusApi as jest.Mock).mockImplementation(() =>
+      createReactQueryResponse({
+        status: 'success',
+        data: {
+          kspm: { status: 'not-deployed', healthyAgents: 0, installedPackagePolicies: 1 },
+          cspm: { status: 'not-installed' },
+          installedPackageVersion: '1.2.13',
+          indicesDetails: [
+            { index: 'logs-cloud_security_posture.findings_latest-default', status: 'empty' },
+            { index: 'logs-cloud_security_posture.findings-default*', status: 'empty' },
+          ],
+        },
+      })
+    );
+    (useKspmStatsApi as jest.Mock).mockImplementation(() => ({
+      isSuccess: true,
+      isLoading: false,
+      data: { stats: { totalFindings: 0 } },
+    }));
+    (useCspmStatsApi as jest.Mock).mockImplementation(() => ({
+      isSuccess: true,
+      isLoading: false,
+      data: { stats: { totalFindings: 0 } },
+    }));
+
+    renderComplianceDashboardPage();
+
+    screen.getByTestId(CLOUD_DASHBOARD_TAB).click();
+
+    expectIdsInDoc({
+      be: [CSPM_INTEGRATION_NOT_INSTALLED_TEST_SUBJECT],
+      notToBe: [
+        KUBERNETES_DASHBOARD_CONTAINER,
+        NO_FINDINGS_STATUS_TEST_SUBJ.INDEX_TIMEOUT,
+        NO_FINDINGS_STATUS_TEST_SUBJ.NO_AGENTS_DEPLOYED,
+        NO_FINDINGS_STATUS_TEST_SUBJ.INDEXING,
+        NO_FINDINGS_STATUS_TEST_SUBJ.UNPRIVILEGED,
+      ],
+    });
+  });
+
+  it('Show KSPM installation prompt if KSPM is not installed and CSPM is installed , NO AGENT', () => {
+    (useCspSetupStatusApi as jest.Mock).mockImplementation(() =>
+      createReactQueryResponse({
+        status: 'success',
+        data: {
+          cspm: { status: 'not-deployed' },
+          kspm: { status: 'not-installed' },
+          installedPackageVersion: '1.2.13',
+          indicesDetails: [
+            { index: 'logs-cloud_security_posture.findings_latest-default', status: 'empty' },
+            { index: 'logs-cloud_security_posture.findings-default*', status: 'empty' },
+          ],
+        },
+      })
+    );
+    (useCspmStatsApi as jest.Mock).mockImplementation(() => ({
+      isSuccess: true,
+      isLoading: false,
+      data: { stats: { totalFindings: 0 } },
+    }));
+    (useKspmStatsApi as jest.Mock).mockImplementation(() => ({
+      isSuccess: true,
+      isLoading: false,
+      data: { stats: { totalFindings: 0 } },
+    }));
+
+    renderComplianceDashboardPage();
+
+    screen.getByTestId(KUBERNETES_DASHBOARD_TAB).click();
+
+    expectIdsInDoc({
+      be: [KSPM_INTEGRATION_NOT_INSTALLED_TEST_SUBJECT],
+      notToBe: [
+        CLOUD_DASHBOARD_CONTAINER,
         NO_FINDINGS_STATUS_TEST_SUBJ.INDEX_TIMEOUT,
         NO_FINDINGS_STATUS_TEST_SUBJ.NO_AGENTS_DEPLOYED,
         NO_FINDINGS_STATUS_TEST_SUBJ.INDEXING,

@@ -6,8 +6,8 @@
  */
 
 import type {
-  CasesConfigurePatch,
-  CasesConfigureRequest,
+  ConfigurationPatchRequest,
+  ConfigurationRequest,
   ActionConnector,
   ActionTypeConnector,
 } from '../../../../common/api';
@@ -17,19 +17,20 @@ import type { CaseConfigure } from '../types';
 import { caseConfigurationCamelCaseResponseMock } from '../mock';
 import { actionTypesMock, connectorsMock } from '../../../common/mock/connectors';
 
-export const fetchConnectors = async ({ signal }: ApiProps): Promise<ActionConnector[]> =>
-  Promise.resolve(connectorsMock);
+export const getSupportedActionConnectors = async ({
+  signal,
+}: ApiProps): Promise<ActionConnector[]> => Promise.resolve(connectorsMock);
 
 export const getCaseConfigure = async ({ signal }: ApiProps): Promise<CaseConfigure> =>
   Promise.resolve(caseConfigurationCamelCaseResponseMock);
 
 export const postCaseConfigure = async (
-  caseConfiguration: CasesConfigureRequest,
+  caseConfiguration: ConfigurationRequest,
   signal: AbortSignal
 ): Promise<CaseConfigure> => Promise.resolve(caseConfigurationCamelCaseResponseMock);
 
 export const patchCaseConfigure = async (
-  caseConfiguration: CasesConfigurePatch,
+  caseConfiguration: ConfigurationPatchRequest,
   signal: AbortSignal
 ): Promise<CaseConfigure> => Promise.resolve(caseConfigurationCamelCaseResponseMock);
 

@@ -18,6 +18,9 @@ export {
   FLEET_KUBERNETES_PACKAGE,
   FLEET_CLOUD_SECURITY_POSTURE_PACKAGE,
   FLEET_CLOUD_SECURITY_POSTURE_KSPM_POLICY_TEMPLATE,
+  FLEET_CLOUD_SECURITY_POSTURE_CSPM_POLICY_TEMPLATE,
+  FLEET_CLOUD_SECURITY_POSTURE_CNVM_POLICY_TEMPLATE,
+  FLEET_CLOUD_DEFEND_PACKAGE,
   FLEET_ENDPOINT_PACKAGE,
   // Saved object type
   AGENT_POLICY_SAVED_OBJECT_TYPE,
@@ -26,6 +29,8 @@ export {
   OUTPUT_SAVED_OBJECT_TYPE,
   PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE,
   ASSETS_SAVED_OBJECT_TYPE,
+  MESSAGE_SIGNING_KEYS_SAVED_OBJECT_TYPE,
+  UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
   // Fleet server index
   FLEET_SERVER_SERVERS_INDEX,
   FLEET_SERVER_ARTIFACTS_INDEX,
@@ -51,6 +56,8 @@ export {
   // Statuses
   // Authz
   ENDPOINT_PRIVILEGES,
+  // dashboards ids
+  DASHBOARD_LOCATORS_IDS,
 } from './constants';
 export {
   // Route services
@@ -71,8 +78,6 @@ export {
 } from './services';
 
 export type { FleetAuthz } from './authz';
-// eslint-disable-next-line @kbn/imports/no_boundary_crossing
-export { createFleetAuthzMock } from './mocks';
 export type {
   // Request/Response
   GetOneAgentResponse,
@@ -95,7 +100,7 @@ export type {
   GetAgentPoliciesRequest,
   GetAgentPoliciesResponse,
   GetAgentPoliciesResponseItem,
-  DeletePackagePoliciesResponse,
+  PostDeletePackagePoliciesResponse,
   GetPackagesResponse,
   BulkInstallPackagesResponse,
   FleetErrorResponse,
@@ -147,6 +152,7 @@ export type {
   KibanaAssetReference,
   KibanaSavedObjectType,
   EsAssetReference,
+  AssetsGroupedByServiceByType,
   KibanaAssetTypeToParts,
   KibanaAssetParts,
   KibanaAssetType,

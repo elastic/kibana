@@ -99,7 +99,7 @@ export interface EventAnnotationConfig {
   label: string;
   color?: string;
   isHidden?: boolean;
-  icon?: string;
+  icon?: (() => JSX.Element) | string;
   type: 'query';
   key: {
     type: 'point_in_time';

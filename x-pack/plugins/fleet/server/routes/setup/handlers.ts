@@ -19,10 +19,12 @@ export const getFleetStatusHandler: FleetRequestHandler = async (context, reques
       .getSecurity()
       .authc.apiKeys.areAPIKeysEnabled();
     const coreContext = await context.core;
-    const isFleetServerSetup = await hasFleetServers(
+    const isFleetServerMissing = !(await hasFleetServers(
       coreContext.elasticsearch.client.asInternalUser
-    );
+    ));
 
+    const isFleetServerStandalone =
+      appContextService.getConfig()?.internal?.fleetServerStandalone ?? false;
     const missingRequirements: GetFleetStatusResponse['missing_requirements'] = [];
     const missingOptionalFeatures: GetFleetStatusResponse['missing_optional_features'] = [];
 
@@ -30,7 +32,7 @@ export const getFleetStatusHandler: FleetRequestHandler = async (context, reques
       missingRequirements.push('api_keys');
     }
 
-    if (!isFleetServerSetup) {
+    if (!isFleetServerStandalone && isFleetServerMissing) {
       missingRequirements.push('fleet_server');
     }
 
@@ -60,7 +62,7 @@ export const getFleetStatusHandler: FleetRequestHandler = async (context, reques
 
 export const fleetSetupHandler: FleetRequestHandler = async (context, request, response) => {
   try {
-    const soClient = (await context.fleet).epm.internalSoClient;
+    const soClient = (await context.fleet).internalSoClient;
     const esClient = (await context.core).elasticsearch.client.asInternalUser;
     const setupStatus = await setupFleet(soClient, esClient);
     const body: PostFleetSetupResponse = {

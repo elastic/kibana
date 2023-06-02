@@ -7,6 +7,7 @@
 
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 
+import type { SecondaryAuthorizationHeader } from '../../../../../common/types/models/transform_api_key';
 import { ElasticsearchAssetType } from '../../../../types';
 import type { EsAssetReference } from '../../../../types';
 import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../../../common/constants';
@@ -21,7 +22,12 @@ export const stopTransforms = async (transformIds: string[], esClient: Elasticse
   }
 };
 
-export const deleteTransforms = async (esClient: ElasticsearchClient, transformIds: string[]) => {
+export const deleteTransforms = async (
+  esClient: ElasticsearchClient,
+  transformIds: string[],
+  deleteDestinationIndices = false,
+  secondaryAuth?: SecondaryAuthorizationHeader
+) => {
   const logger = appContextService.getLogger();
   if (transformIds.length) {
     logger.info(`Deleting currently installed transform ids ${transformIds}`);
@@ -37,10 +43,10 @@ export const deleteTransforms = async (esClient: ElasticsearchClient, transformI
       await stopTransforms([transformId], esClient);
       await esClient.transform.deleteTransform(
         { force: true, transform_id: transformId },
-        { ignore: [404] }
+        { ...(secondaryAuth ? secondaryAuth : {}), ignore: [404] }
       );
       logger.info(`Deleted: ${transformId}`);
-      if (transformResponse?.transforms) {
+      if (deleteDestinationIndices && transformResponse?.transforms) {
         // expect this to be 1
         for (const transform of transformResponse.transforms) {
           await esClient.transport.request(

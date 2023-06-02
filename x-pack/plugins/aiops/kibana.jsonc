@@ -1,0 +1,27 @@
+{
+  "type": "plugin",
+  "id": "@kbn/aiops-plugin",
+  "owner": "@elastic/ml-ui",
+  "description": "AIOps plugin maintained by ML team.",
+  "plugin": {
+    "id": "aiops",
+    "server": true,
+    "browser": true,
+    "requiredPlugins": [
+      "charts",
+      "data",
+      "lens",
+      "licensing",
+      "uiActions",
+      "unifiedFieldList",
+    ],
+    "requiredBundles": [
+      "fieldFormats",
+      "kibanaReact",
+      "kibanaUtils"
+    ],
+    "extraPublicDirs": [
+      "common"
+    ]
+  }
+}

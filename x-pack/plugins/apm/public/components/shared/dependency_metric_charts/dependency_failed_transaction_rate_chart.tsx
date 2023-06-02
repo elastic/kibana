@@ -43,7 +43,7 @@ export function DependencyFailedTransactionRateChart({
   const comparisonChartTheme = getComparisonChartTheme();
 
   const { isTimeRangeMetadataLoading, searchServiceDestinationMetrics } =
-    useSearchServiceDestinationMetrics({ rangeFrom, rangeTo, kuery });
+    useSearchServiceDestinationMetrics({ start, end, kuery });
 
   const { data, status } = useFetcher(
     (callApmApi) => {

@@ -22,8 +22,6 @@ export function registerSearchRoute(router: DataPluginRouter): void {
           id: schema.maybe(schema.string()),
         }),
 
-        query: schema.object({}, { unknowns: 'allow' }),
-
         body: schema.object(
           {
             legacyHitsTotal: schema.maybe(schema.boolean()),
@@ -78,8 +76,6 @@ export function registerSearchRoute(router: DataPluginRouter): void {
           strategy: schema.string(),
           id: schema.string(),
         }),
-
-        query: schema.object({}, { unknowns: 'allow' }),
       },
     },
     async (context, request, res) => {

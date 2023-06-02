@@ -7,6 +7,7 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { Lifecycle } from '@hapi/hapi';
+import { SharePluginSetup } from '@kbn/share-plugin/server';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { JsonArray, JsonValue } from '@kbn/utility-types';
 import { RouteConfig, RouteMethod } from '@kbn/core/server';
@@ -31,6 +32,7 @@ export interface InfraServerPluginSetupDeps {
   features: FeaturesPluginSetup;
   ruleRegistry: RuleRegistryPluginSetupContract;
   observability: ObservabilityPluginSetup;
+  share: SharePluginSetup;
   spaces: SpacesPluginSetup;
   usageCollection: UsageCollectionSetup;
   visTypeTimeseries: VisTypeTimeseriesSetup;
@@ -50,7 +52,7 @@ export interface CallWithRequestParams extends estypes.RequestBase {
   allow_no_indices?: boolean;
   size?: number;
   terminate_after?: number;
-  fields?: string | string[];
+  fields?: estypes.Fields;
   path?: string;
   query?: string | object;
   track_total_hits?: boolean | number;
@@ -90,11 +92,6 @@ export interface InfraDatabaseSearchResponse<Hit = {}, Aggregations = undefined>
 
 export interface InfraDatabaseMultiResponse<Hit, Aggregation> extends InfraDatabaseResponse {
   responses: Array<InfraDatabaseSearchResponse<Hit, Aggregation>>;
-}
-
-export interface InfraDatabaseFieldCapsResponse extends InfraDatabaseResponse {
-  indices: string[];
-  fields: InfraFieldsResponse;
 }
 
 export interface InfraDatabaseGetIndicesAliasResponse {

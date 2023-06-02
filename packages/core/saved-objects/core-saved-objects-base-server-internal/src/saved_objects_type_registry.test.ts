@@ -139,6 +139,67 @@ describe('SavedObjectTypeRegistry', () => {
       }).not.toThrow();
     });
 
+    it('throws when `hidden` is true and `hiddenFromHttpApis` is false', () => {
+      expect(() => {
+        registry.registerType(
+          createType({
+            name: 'typeHiddenA',
+            hidden: true,
+            hiddenFromHttpApis: false,
+          })
+        );
+      }).toThrowErrorMatchingInlineSnapshot(
+        `"Type typeHiddenA: 'hiddenFromHttpApis' cannot be 'false' when specifying 'hidden' as 'true'"`
+      );
+
+      expect(() => {
+        registry.registerType(
+          createType({
+            name: 'typeHiddenA',
+            hidden: true,
+            hiddenFromHttpApis: true,
+          })
+        );
+      }).not.toThrow();
+
+      expect(() => {
+        registry.registerType(
+          createType({
+            name: 'typeHiddenA2',
+            hidden: true,
+          })
+        );
+      }).not.toThrow();
+
+      expect(() => {
+        registry.registerType(
+          createType({
+            name: 'typeVisibleA',
+            hidden: false,
+          })
+        );
+      }).not.toThrow();
+
+      expect(() => {
+        registry.registerType(
+          createType({
+            name: 'typeVisibleA1',
+            hidden: false,
+            hiddenFromHttpApis: false,
+          })
+        );
+      }).not.toThrow();
+
+      expect(() => {
+        registry.registerType(
+          createType({
+            name: 'typeVisibleA2',
+            hidden: false,
+            hiddenFromHttpApis: true,
+          })
+        );
+      }).not.toThrow();
+    });
     // TODO: same test with 'onImport'
   });
 
@@ -380,6 +441,22 @@ describe('SavedObjectTypeRegistry', () => {
       registry.registerType(createType({ name: 'typeB', hidden: false }));
 
       expect(registry.isHidden('unknownType')).toEqual(false);
+    });
+  });
+
+  describe('#isHiddenFromHttpApis', () => {
+    it('returns correct value for the type', () => {
+      registry.registerType(createType({ name: 'typeA', hiddenFromHttpApis: true }));
+      registry.registerType(createType({ name: 'typeB', hiddenFromHttpApis: false }));
+
+      expect(registry.isHiddenFromHttpApis('typeA')).toEqual(true);
+      expect(registry.isHiddenFromHttpApis('typeB')).toEqual(false);
+    });
+    it('returns true when the type is not registered', () => {
+      registry.registerType(createType({ name: 'typeA', hiddenFromHttpApis: false }));
+      registry.registerType(createType({ name: 'typeB', hiddenFromHttpApis: true }));
+
+      expect(registry.isHiddenFromHttpApis('unknownType')).toEqual(false);
     });
   });
 

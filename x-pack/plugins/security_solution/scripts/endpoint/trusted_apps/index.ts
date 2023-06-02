@@ -33,7 +33,7 @@ export const cli = async () => {
     string: ['kibana'],
     default: {
       count: 10,
-      kibana: 'http://elastic:changeme@localhost:5601',
+      kibana: 'http://elastic:changeme@127.0.0.1:5601',
     },
   };
   const options: RunOptions = minimist<RunOptions>(process.argv.slice(2), cliDefaults);
@@ -70,7 +70,7 @@ interface RunOptions {
 }
 export const run: (options?: RunOptions) => Promise<TrustedApp[]> = async ({
   count = 10,
-  kibana = 'http://elastic:changeme@localhost:5601',
+  kibana = 'http://elastic:changeme@127.0.0.1:5601',
   logger = defaultLogger,
 }: RunOptions = {}) => {
   const kbnClient = new KbnClient({

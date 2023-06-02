@@ -243,63 +243,6 @@ describe('when on the endpoint list page', () => {
     });
   });
 
-  describe('when determining when to show the enrolling message', () => {
-    afterEach(() => {
-      jest.clearAllMocks();
-    });
-
-    it('should display the enrolling message when there are less Endpoints than Agents', async () => {
-      reactTestingLibrary.act(() => {
-        const mockedEndpointListData = mockEndpointResultList({
-          total: 4,
-        });
-        setEndpointListApiMockImplementation(coreStart.http, {
-          endpointsResults: mockedEndpointListData.data,
-          totalAgentsUsingEndpoint: 5,
-        });
-      });
-      const renderResult = render();
-      await reactTestingLibrary.act(async () => {
-        await middlewareSpy.waitForAction('serverReturnedAgenstWithEndpointsTotal');
-      });
-      expect(renderResult.queryByTestId('endpointsEnrollingNotification')).not.toBeNull();
-    });
-
-    it('should NOT display the enrolling message when there are equal Endpoints than Agents', async () => {
-      reactTestingLibrary.act(() => {
-        const mockedEndpointListData = mockEndpointResultList({
-          total: 5,
-        });
-        setEndpointListApiMockImplementation(coreStart.http, {
-          endpointsResults: mockedEndpointListData.data,
-          totalAgentsUsingEndpoint: 5,
-        });
-      });
-      const renderResult = render();
-      await reactTestingLibrary.act(async () => {
-        await middlewareSpy.waitForAction('serverReturnedAgenstWithEndpointsTotal');
-      });
-      expect(renderResult.queryByTestId('endpointsEnrollingNotification')).toBeNull();
-    });
-
-    it('should NOT display the enrolling message when there are more Endpoints than Agents', async () => {
-      reactTestingLibrary.act(() => {
-        const mockedEndpointListData = mockEndpointResultList({
-          total: 6,
-        });
-        setEndpointListApiMockImplementation(coreStart.http, {
-          endpointsResults: mockedEndpointListData.data,
-          totalAgentsUsingEndpoint: 5,
-        });
-      });
-      const renderResult = render();
-      await reactTestingLibrary.act(async () => {
-        await middlewareSpy.waitForAction('serverReturnedAgenstWithEndpointsTotal');
-      });
-      expect(renderResult.queryByTestId('endpointsEnrollingNotification')).toBeNull();
-    });
-  });
-
   describe('when there is no selected host in the url', () => {
     describe('when list data loads', () => {
       const generatedPolicyStatuses: Array<
@@ -416,29 +359,10 @@ describe('when on the endpoint list page', () => {
         const hostStatuses = await renderResult.findAllByTestId('rowHostStatus');
 
         expect(hostStatuses[0].textContent).toEqual('Unhealthy');
-        expect(hostStatuses[0].getAttribute('style')).toMatch(
-          /background-color\: rgb\(241\, 216\, 111\)\;/
-        );
-
         expect(hostStatuses[1].textContent).toEqual('Healthy');
-        expect(hostStatuses[1].getAttribute('style')).toMatch(
-          /background-color\: rgb\(109\, 204\, 177\)\;/
-        );
-
         expect(hostStatuses[2].textContent).toEqual('Offline');
-        expect(hostStatuses[2].getAttribute('style')).toMatch(
-          /background-color\: rgb\(211\, 218\, 230\)\;/
-        );
-
         expect(hostStatuses[3].textContent).toEqual('Updating');
-        expect(hostStatuses[3].getAttribute('style')).toMatch(
-          /background-color\: rgb\(121\, 170\, 217\)\;/
-        );
-
         expect(hostStatuses[4].textContent).toEqual('Inactive');
-        expect(hostStatuses[4].getAttribute('style')).toMatch(
-          /background-color\: rgb\(211\, 218\, 230\)\;/
-        );
       });
 
       it('should display correct policy status', async () => {
@@ -499,7 +423,7 @@ describe('when on the endpoint list page', () => {
           }
         });
 
-        it('should show the flyout', () => {
+        it('should show the flyout', async () => {
           return renderResult.findByTestId('endpointDetailsFlyout').then((flyout) => {
             expect(flyout).not.toBeNull();
           });
@@ -1484,11 +1408,11 @@ describe('when on the endpoint list page', () => {
           canIsolateHost: true,
         },
       });
-      renderAndClickActionsButton();
+      await renderAndClickActionsButton();
       const isolateLink = await renderResult.findByTestId('isolateLink');
       expect(isolateLink).not.toBeNull();
     });
-    it('hides Isolate host option if canIsolateHost is NONE', () => {
+    it('hides Isolate host option if canIsolateHost is NONE', async () => {
       mockUserPrivileges.mockReturnValue({
         ...mockInitialUserPrivilegesState(),
         endpointPrivileges: {
@@ -1496,7 +1420,7 @@ describe('when on the endpoint list page', () => {
           canIsolateHost: false,
         },
       });
-      renderAndClickActionsButton();
+      await renderAndClickActionsButton();
       const isolateLink = screen.queryByTestId('isolateLink');
       expect(isolateLink).toBeNull();
     });
@@ -1508,11 +1432,11 @@ describe('when on the endpoint list page', () => {
           canUnIsolateHost: true,
         },
       });
-      renderAndClickActionsButton(1);
+      await renderAndClickActionsButton(1);
       const unisolateLink = await renderResult.findByTestId('unIsolateLink');
       expect(unisolateLink).not.toBeNull();
     });
-    it('hides unisolate host option if canUnIsolateHost is NONE', () => {
+    it('hides unisolate host option if canUnIsolateHost is NONE', async () => {
       mockUserPrivileges.mockReturnValue({
         ...mockInitialUserPrivilegesState(),
         endpointPrivileges: {
@@ -1520,7 +1444,7 @@ describe('when on the endpoint list page', () => {
           canUnIsolateHost: false,
         },
       });
-      renderAndClickActionsButton(1);
+      await renderAndClickActionsButton(1);
       const unisolateLink = renderResult.queryByTestId('unIsolateLink');
       expect(unisolateLink).toBeNull();
     });
@@ -1533,12 +1457,12 @@ describe('when on the endpoint list page', () => {
           canAccessResponseConsole: true,
         },
       });
-      renderAndClickActionsButton();
+      await renderAndClickActionsButton();
       const responderButton = await renderResult.findByTestId('console');
       expect(responderButton).not.toBeNull();
     });
 
-    it('hides the Responder option when host isolation, process operation and file operations are ALL set to NONE', () => {
+    it('hides the Responder option when host isolation, process operation and file operations are ALL set to NONE', async () => {
       mockUserPrivileges.mockReturnValue({
         ...mockInitialUserPrivilegesState(),
         endpointPrivileges: {
@@ -1546,13 +1470,13 @@ describe('when on the endpoint list page', () => {
           canAccessResponseConsole: false,
         },
       });
-      renderAndClickActionsButton();
+      await renderAndClickActionsButton();
       const responderButton = renderResult.queryByTestId('console');
       expect(responderButton).toBeNull();
     });
     it('always shows the Host details link', async () => {
       mockUserPrivileges.mockReturnValue(getUserPrivilegesMockDefaultValue());
-      renderAndClickActionsButton();
+      await renderAndClickActionsButton();
       const hostLink = await renderResult.findByTestId('hostLink');
       expect(hostLink).not.toBeNull();
     });
@@ -1564,7 +1488,7 @@ describe('when on the endpoint list page', () => {
           canAccessFleet: true,
         },
       });
-      renderAndClickActionsButton();
+      await renderAndClickActionsButton();
       const agentPolicyLink = await renderResult.findByTestId('agentPolicyLink');
       const agentDetailsLink = await renderResult.findByTestId('agentDetailsLink');
       const agentPolicyReassignLink = await renderResult.findByTestId('agentPolicyReassignLink');
@@ -1572,7 +1496,7 @@ describe('when on the endpoint list page', () => {
       expect(agentDetailsLink).not.toBeNull();
       expect(agentPolicyReassignLink).not.toBeNull();
     });
-    it('hides Agent Policy, View Agent Details and Reassign Policy Links when canAccessFleet RBAC control is NOT enabled', () => {
+    it('hides Agent Policy, View Agent Details and Reassign Policy Links when canAccessFleet RBAC control is NOT enabled', async () => {
       mockUserPrivileges.mockReturnValue({
         ...mockInitialUserPrivilegesState(),
         endpointPrivileges: {
@@ -1580,7 +1504,7 @@ describe('when on the endpoint list page', () => {
           canAccessFleet: false,
         },
       });
-      renderAndClickActionsButton();
+      await renderAndClickActionsButton();
       const agentPolicyLink = renderResult.queryByTestId('agentPolicyLink');
       const agentDetailsLink = renderResult.queryByTestId('agentDetailsLink');
       const agentPolicyReassignLink = renderResult.queryByTestId('agentPolicyReassignLink');

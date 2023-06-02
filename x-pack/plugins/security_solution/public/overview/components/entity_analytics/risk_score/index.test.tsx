@@ -5,15 +5,32 @@
  * 2.0.
  */
 
-import { render, fireEvent } from '@testing-library/react';
+import { render, fireEvent, waitFor } from '@testing-library/react';
 import React from 'react';
 import { TestProviders } from '../../../../common/mock';
 import { EntityAnalyticsRiskScores } from '.';
-import type { UserRiskScore } from '../../../../../common/search_strategy';
 import { RiskScoreEntity, RiskSeverity } from '../../../../../common/search_strategy';
-import type { SeverityCount } from '../../../../common/components/severity/types';
-import { useRiskScore, useRiskScoreKpi } from '../../../../risk_score/containers';
-import { openAlertsFilter } from '../../detection_response/utils';
+import type { SeverityCount } from '../../../../explore/components/risk_score/severity/types';
+import { useRiskScore, useRiskScoreKpi } from '../../../../explore/containers/risk_score';
+import { useKibana as mockUseKibana } from '../../../../common/lib/kibana/__mocks__';
+import { createTelemetryServiceMock } from '../../../../common/lib/telemetry/telemetry_service.mock';
+
+const mockedTelemetry = createTelemetryServiceMock();
+const mockedUseKibana = mockUseKibana();
+jest.mock('../../../../common/lib/kibana', () => {
+  const original = jest.requireActual('../../../../common/lib/kibana');
+
+  return {
+    ...original,
+    useKibana: () => ({
+      ...mockedUseKibana,
+      services: {
+        ...mockedUseKibana.services,
+        telemetry: mockedTelemetry,
+      },
+    }),
+  };
+});
 
 const mockSeverityCount: SeverityCount = {
   [RiskSeverity.low]: 1,
@@ -41,14 +58,12 @@ const defaultProps = {
 };
 const mockUseRiskScore = useRiskScore as jest.Mock;
 const mockUseRiskScoreKpi = useRiskScoreKpi as jest.Mock;
-jest.mock('../../../../risk_score/containers');
+jest.mock('../../../../explore/containers/risk_score');
 
-const mockOpenTimelineWithFilters = jest.fn();
-jest.mock('../../detection_response/hooks/use_navigate_to_timeline', () => {
+const mockOpenAlertsPageWithFilters = jest.fn();
+jest.mock('../../../../common/hooks/use_navigate_to_alerts_page_with_filters', () => {
   return {
-    useNavigateToTimeline: () => ({
-      openTimelineWithFilters: mockOpenTimelineWithFilters,
-    }),
+    useNavigateToAlertsPageWithFilters: () => mockOpenAlertsPageWithFilters,
   };
 });
 
@@ -130,17 +145,17 @@ describe.each([RiskScoreEntity.host, RiskScoreEntity.user])(
       expect(queryByTestId('entity_analytics_content')).not.toBeInTheDocument();
     });
 
-    it('renders alerts count', () => {
+    it('renders alerts count', async () => {
       mockUseQueryToggle.mockReturnValue({ toggleStatus: true, setToggleStatus: jest.fn() });
       mockUseRiskScoreKpi.mockReturnValue({
         severityCount: mockSeverityCount,
         loading: false,
       });
       const alertsCount = 999;
-      const data: UserRiskScore[] = [
+      const data = [
         {
           '@timestamp': '1234567899',
-          user: {
+          [riskEntity]: {
             name: 'testUsermame',
             risk: {
               rule_risks: [],
@@ -160,10 +175,12 @@ describe.each([RiskScoreEntity.host, RiskScoreEntity.user])(
         </TestProviders>
       );
 
-      expect(queryByTestId('risk-score-alerts')).toHaveTextContent(alertsCount.toString());
+      await waitFor(() => {
+        expect(queryByTestId('risk-score-alerts')).toHaveTextContent(alertsCount.toString());
+      });
     });
 
-    it('navigates to timeline with filters when alerts count is clicked', () => {
+    it('navigates to alerts page with filters when alerts count is clicked', async () => {
       mockUseQueryToggle.mockReturnValue({ toggleStatus: true, setToggleStatus: jest.fn() });
       mockUseRiskScoreKpi.mockReturnValue({
         severityCount: mockSeverityCount,
@@ -195,15 +212,15 @@ describe.each([RiskScoreEntity.host, RiskScoreEntity.user])(
 
       fireEvent.click(getByTestId('risk-score-alerts'));
 
-      expect(mockOpenTimelineWithFilters.mock.calls[0][0]).toEqual([
-        [
+      await waitFor(() => {
+        expect(mockOpenAlertsPageWithFilters.mock.calls[0][0]).toEqual([
           {
-            field: riskEntity === RiskScoreEntity.host ? 'host.name' : 'user.name',
-            value: name,
+            title: riskEntity === RiskScoreEntity.host ? 'Host' : 'User',
+            fieldName: riskEntity === RiskScoreEntity.host ? 'host.name' : 'user.name',
+            selectedOptions: [name],
           },
-          openAlertsFilter,
-        ],
-      ]);
+        ]);
+      });
     });
   }
 );

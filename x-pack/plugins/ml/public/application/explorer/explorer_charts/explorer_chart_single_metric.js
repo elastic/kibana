@@ -24,8 +24,7 @@ import {
   getFormattedSeverityScore,
   getSeverityColor,
   getSeverityWithLow,
-  getMultiBucketImpactLabel,
-} from '../../../../common/util/anomaly_utils';
+} from '@kbn/ml-anomaly-utils';
 import {
   LINE_CHART_ANOMALY_RADIUS,
   MULTI_BUCKET_SYMBOL_SIZE,
@@ -36,6 +35,7 @@ import {
   removeLabelOverlap,
   showMultiBucketAnomalyMarker,
   showMultiBucketAnomalyTooltip,
+  getMultiBucketImpactTooltipValue,
 } from '../../util/chart_utils';
 import { LoadingIndicator } from '../../components/loading_indicator/loading_indicator';
 import { mlFieldFormatService } from '../../services/field_format_service';
@@ -53,7 +53,7 @@ export class ExplorerChartSingleMetric extends React.Component {
     timeBuckets: PropTypes.object.isRequired,
     onPointerUpdate: PropTypes.func.isRequired,
     chartTheme: PropTypes.object.isRequired,
-    cursor: PropTypes.object.isRequired,
+    cursor: PropTypes.object,
   };
 
   componentDidMount() {
@@ -461,6 +461,7 @@ export class ExplorerChartSingleMetric extends React.Component {
 
       if (marker.anomalyScore !== undefined) {
         const score = parseInt(marker.anomalyScore);
+
         tooltipData.push({
           label: i18n.translate('xpack.ml.explorer.singleMetricChart.anomalyScoreLabel', {
             defaultMessage: 'anomaly score',
@@ -478,7 +479,7 @@ export class ExplorerChartSingleMetric extends React.Component {
             label: i18n.translate('xpack.ml.explorer.singleMetricChart.multiBucketImpactLabel', {
               defaultMessage: 'multi-bucket impact',
             }),
-            value: getMultiBucketImpactLabel(marker.multiBucketImpact),
+            value: getMultiBucketImpactTooltipValue(marker),
             seriesIdentifier: {
               key: seriesKey,
             },

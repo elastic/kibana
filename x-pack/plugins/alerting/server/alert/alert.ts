@@ -5,7 +5,9 @@
  * 2.0.
  */
 
+import { v4 as uuidV4 } from 'uuid';
 import { isEmpty } from 'lodash';
+import { AlertHit, CombinedSummarizedAlerts } from '../types';
 import {
   AlertInstanceMeta,
   AlertInstanceState,
@@ -13,6 +15,7 @@ import {
   rawAlertInstance,
   AlertInstanceContext,
   DefaultActionGroupId,
+  LastScheduledActions,
 } from '../../common';
 
 import { parseDuration } from '../lib';
@@ -33,7 +36,13 @@ export type PublicAlert<
   ActionGroupIds extends string = DefaultActionGroupId
 > = Pick<
   Alert<State, Context, ActionGroupIds>,
-  'getState' | 'replaceState' | 'scheduleActions' | 'setContext' | 'getContext' | 'hasContext'
+  | 'getContext'
+  | 'getState'
+  | 'getUuid'
+  | 'hasContext'
+  | 'replaceState'
+  | 'scheduleActions'
+  | 'setContext'
 >;
 
 export class Alert<
@@ -52,7 +61,8 @@ export class Alert<
     this.state = (state || {}) as State;
     this.context = {} as Context;
     this.meta = meta;
-
+    this.meta.uuid = meta.uuid ?? uuidV4();
+    this.meta.maintenanceWindowIds = meta.maintenanceWindowIds ?? [];
     if (!this.meta.flappingHistory) {
       this.meta.flappingHistory = [];
     }
@@ -62,11 +72,23 @@ export class Alert<
     return this.id;
   }
 
+  getUuid() {
+    return this.meta.uuid!;
+  }
+
   hasScheduledActions() {
     return this.scheduledExecutionOptions !== undefined;
   }
 
-  isThrottled(throttle: string | null) {
+  isThrottled({
+    throttle,
+    actionHash,
+    uuid,
+  }: {
+    throttle: string | null;
+    actionHash?: string;
+    uuid?: string;
+  }) {
     if (this.scheduledExecutionOptions === undefined) {
       return false;
     }
@@ -76,10 +98,20 @@ export class Alert<
       this.scheduledActionGroupIsUnchanged(
         this.meta.lastScheduledActions,
         this.scheduledExecutionOptions
-      ) &&
-      this.meta.lastScheduledActions.date.getTime() + throttleMills > Date.now()
+      )
     ) {
-      return true;
+      if (uuid && actionHash) {
+        if (this.meta.lastScheduledActions.actions) {
+          const actionInState =
+            this.meta.lastScheduledActions.actions[uuid] ||
+            this.meta.lastScheduledActions.actions[actionHash]; // actionHash must be removed once all the hash identifiers removed from the task state
+          const lastTriggerDate = actionInState?.date;
+          return !!(lastTriggerDate && lastTriggerDate.getTime() + throttleMills > Date.now());
+        }
+        return false;
+      } else {
+        return this.meta.lastScheduledActions.date.getTime() + throttleMills > Date.now();
+      }
     }
     return false;
   }
@@ -161,8 +193,26 @@ export class Alert<
     return this;
   }
 
-  updateLastScheduledActions(group: ActionGroupIds) {
-    this.meta.lastScheduledActions = { group, date: new Date() };
+  updateLastScheduledActions(group: ActionGroupIds, actionHash?: string | null, uuid?: string) {
+    if (!this.meta.lastScheduledActions) {
+      this.meta.lastScheduledActions = {} as LastScheduledActions;
+    }
+    const date = new Date();
+    this.meta.lastScheduledActions.group = group;
+    this.meta.lastScheduledActions.date = date;
+
+    if (this.meta.lastScheduledActions.group !== group) {
+      this.meta.lastScheduledActions.actions = {};
+    } else if (uuid) {
+      if (!this.meta.lastScheduledActions.actions) {
+        this.meta.lastScheduledActions.actions = {};
+      }
+      // remove deprecated actionHash
+      if (!!actionHash && this.meta.lastScheduledActions.actions[actionHash]) {
+        delete this.meta.lastScheduledActions.actions[actionHash];
+      }
+      this.meta.lastScheduledActions.actions[uuid] = { date };
+    }
   }
 
   /**
@@ -175,11 +225,13 @@ export class Alert<
   toRaw(recovered: boolean = false): RawAlertInstance {
     return recovered
       ? {
-          // for a recovered alert, we only care to track the flappingHistory
-          // and the flapping flag
+          // for a recovered alert, we only care to track the flappingHistory,
+          // the flapping flag, and the UUID
           meta: {
+            maintenanceWindowIds: this.meta.maintenanceWindowIds,
             flappingHistory: this.meta.flappingHistory,
             flapping: this.meta.flapping,
+            uuid: this.meta.uuid,
           },
         }
       : {
@@ -202,5 +254,54 @@ export class Alert<
 
   getFlapping() {
     return this.meta.flapping || false;
+  }
+
+  incrementPendingRecoveredCount() {
+    if (!this.meta.pendingRecoveredCount) {
+      this.meta.pendingRecoveredCount = 0;
+    }
+    this.meta.pendingRecoveredCount++;
+  }
+
+  getPendingRecoveredCount() {
+    return this.meta.pendingRecoveredCount || 0;
+  }
+
+  resetPendingRecoveredCount() {
+    this.meta.pendingRecoveredCount = 0;
+  }
+
+  /**
+   * Checks whether this alert exists in the given alert summary
+   */
+  isFilteredOut(summarizedAlerts: CombinedSummarizedAlerts | null) {
+    if (summarizedAlerts === null) {
+      return false;
+    }
+
+    // We check the alert UUID against both the alert ID and the UUID here
+    // The framework generates a UUID for each new reported alert.
+    // For lifecycle rule types, this UUID is written out in the ALERT_UUID field
+    // so we can compare ALERT_UUID to getUuid()
+    // For persistence rule types, the executor generates its own UUID which is a SHA
+    // of the alert data and stores it in the ALERT_UUID and uses it as the alert ID
+    // before reporting the alert back to the framework. The framework then generates
+    // another UUID that is never persisted. For these alerts, we want to compare
+    // ALERT_UUID to getId()
+    //
+    // Related issue: https://github.com/elastic/kibana/issues/144862
+
+    return !summarizedAlerts.all.data.some(
+      (alert: AlertHit) =>
+        alert?.kibana?.alert?.uuid === this.getId() || alert?.kibana?.alert?.uuid === this.getUuid()
+    );
+  }
+
+  setMaintenanceWindowIds(maintenanceWindowIds: string[] = []) {
+    this.meta.maintenanceWindowIds = maintenanceWindowIds;
+  }
+
+  getMaintenanceWindowIds() {
+    return this.meta.maintenanceWindowIds ?? [];
   }
 }

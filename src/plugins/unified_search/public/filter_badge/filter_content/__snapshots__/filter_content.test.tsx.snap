@@ -1,0 +1,81 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`alias 1`] = `
+<div>
+  <span
+    class="globalFilterLabel__value emotion-euiTextColor-success"
+  >
+     geo.coordinates in US
+  </span>
+</div>
+`;
+
+exports[`alias with error status 1`] = `
+<div>
+  <span
+    class="emotion-euiTextColor-danger"
+  >
+    NOT 
+  </span>
+  machine.os
+  :
+  <span
+    class="globalFilterLabel__value emotion-euiTextColor-success"
+  >
+     Error
+  </span>
+</div>
+`;
+
+exports[`alias with warning status 1`] = `
+<div>
+  <span
+    class="emotion-euiTextColor-danger"
+  >
+    NOT 
+  </span>
+  machine.os
+  :
+  <span
+    class="globalFilterLabel__value emotion-euiTextColor-success"
+  >
+     Warning
+  </span>
+</div>
+`;
+
+exports[`error 1`] = `
+<div>
+  machine.os
+  :
+  <span
+    class="globalFilterLabel__value emotion-euiTextColor-success"
+  >
+     Error
+  </span>
+</div>
+`;
+
+exports[`field custom label 1`] = `
+<div>
+  test label
+  :
+  <span
+    class="globalFilterLabel__value emotion-euiTextColor-success"
+  >
+     ios
+  </span>
+</div>
+`;
+
+exports[`warning 1`] = `
+<div>
+  machine.os
+  :
+  <span
+    class="globalFilterLabel__value emotion-euiTextColor-success"
+  >
+     Warning
+  </span>
+</div>
+`;

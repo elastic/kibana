@@ -65,6 +65,7 @@ describe('fetchIndex lib function', () => {
   const result = {
     aliases: [],
     count: 100,
+    has_in_progress_syncs: false,
     health: 'green',
     hidden: false,
     name: 'index_name',
@@ -114,7 +115,11 @@ describe('fetchIndex lib function', () => {
 
     await expect(
       fetchIndex(mockClient as unknown as IScopedClusterClient, 'index_name')
-    ).resolves.toEqual({ ...result, connector: { doc: 'doc', service_type: 'some-service-type' } });
+    ).resolves.toEqual({
+      ...result,
+      connector: { doc: 'doc', service_type: 'some-service-type' },
+      has_in_progress_syncs: true,
+    });
   });
 
   it('should return data and stats for index and crawler if crawler is present', async () => {
@@ -144,6 +149,7 @@ describe('fetchIndex lib function', () => {
   });
 
   it('should return data and stats for index and crawler if a crawler registered as a connector is present', async () => {
+    mockClient.asCurrentUser.count.mockReturnValue({ count: 0 });
     mockClient.asCurrentUser.indices.get.mockImplementation(() =>
       Promise.resolve({
         index_name: { aliases: [], data: 'full index' },
@@ -167,6 +173,7 @@ describe('fetchIndex lib function', () => {
     ).resolves.toEqual({
       ...result,
       connector: { doc: 'doc', service_type: ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE },
+      count: 0,
       crawler: { id: '1234' },
     });
   });

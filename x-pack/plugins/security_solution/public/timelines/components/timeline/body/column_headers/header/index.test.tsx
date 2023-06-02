@@ -10,7 +10,6 @@ import React from 'react';
 
 import { timelineActions } from '../../../../../store/timeline';
 import { TestProviders } from '../../../../../../common/mock';
-import type { ColumnHeaderType } from '../../../../../store/timeline/model';
 import type { Sort } from '../../sort';
 import { CloseButton } from '../actions';
 import { defaultHeaders } from '../default_headers';
@@ -19,6 +18,7 @@ import { HeaderComponent } from '.';
 import { getNewSortDirectionOnClick, getNextSortDirection, getSortDirection } from './helpers';
 import { Direction } from '../../../../../../../common/search_strategy';
 import { useDeepEqualSelector } from '../../../../../../common/hooks/use_selector';
+import type { ColumnHeaderType } from '../../../../../../../common/types';
 import { TimelineId } from '../../../../../../../common/types';
 
 const mockDispatch = jest.fn();

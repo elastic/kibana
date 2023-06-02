@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-function stubWebWorker() {
+export function stubWebWorker() {
   if (!window.Worker) {
     // @ts-ignore we aren't honoring the real Worker spec here
     window.Worker = function Worker() {
@@ -18,8 +18,3 @@ function stubWebWorker() {
     };
   }
 }
-
-stubWebWorker();
-
-// Add an export to avoid TS complaining "stub_web_worker.ts" is not a module.
-export { stubWebWorker };

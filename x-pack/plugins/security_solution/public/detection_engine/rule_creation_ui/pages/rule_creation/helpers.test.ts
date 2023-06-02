@@ -797,91 +797,6 @@ describe('helpers', () => {
         meta: {
           kibana_siem_app_url: 'http://localhost:5601/app/siem',
         },
-        throttle: 'no_actions',
-      };
-
-      expect(result).toEqual(expected);
-    });
-
-    test('returns proper throttle value for no_actions', () => {
-      const mockStepData: ActionsStepRule = {
-        ...mockData,
-        throttle: 'no_actions',
-      };
-      const result = formatActionsStepData(mockStepData);
-      const expected: ActionsStepRuleJson = {
-        actions: [],
-        enabled: false,
-        meta: {
-          kibana_siem_app_url: mockStepData.kibanaSiemAppUrl,
-        },
-        throttle: 'no_actions',
-      };
-
-      expect(result).toEqual(expected);
-    });
-
-    test('returns proper throttle value for rule', () => {
-      const mockStepData: ActionsStepRule = {
-        ...mockData,
-        throttle: 'rule',
-        actions: [
-          {
-            group: 'default',
-            id: 'id',
-            actionTypeId: 'actionTypeId',
-            params: {},
-          },
-        ],
-      };
-      const result = formatActionsStepData(mockStepData);
-      const expected: ActionsStepRuleJson = {
-        actions: [
-          {
-            group: mockStepData.actions[0].group,
-            id: mockStepData.actions[0].id,
-            action_type_id: mockStepData.actions[0].actionTypeId,
-            params: mockStepData.actions[0].params,
-          },
-        ],
-        enabled: false,
-        meta: {
-          kibana_siem_app_url: mockStepData.kibanaSiemAppUrl,
-        },
-        throttle: 'rule',
-      };
-
-      expect(result).toEqual(expected);
-    });
-
-    test('returns proper throttle value for interval', () => {
-      const mockStepData: ActionsStepRule = {
-        ...mockData,
-        throttle: '1d',
-        actions: [
-          {
-            group: 'default',
-            id: 'id',
-            actionTypeId: 'actionTypeId',
-            params: {},
-          },
-        ],
-      };
-      const result = formatActionsStepData(mockStepData);
-      const expected: ActionsStepRuleJson = {
-        actions: [
-          {
-            group: mockStepData.actions[0].group,
-            id: mockStepData.actions[0].id,
-            action_type_id: mockStepData.actions[0].actionTypeId,
-            params: mockStepData.actions[0].params,
-          },
-        ],
-        enabled: false,
-        meta: {
-          kibana_siem_app_url: mockStepData.kibanaSiemAppUrl,
-        },
-        throttle: mockStepData.throttle,
       };
 
       expect(result).toEqual(expected);
@@ -913,7 +828,6 @@ describe('helpers', () => {
         meta: {
           kibana_siem_app_url: mockStepData.kibanaSiemAppUrl,
         },
-        throttle: 'no_actions',
       };
 
       expect(result).toEqual(expected);

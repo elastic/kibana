@@ -118,6 +118,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await browser.refresh();
       const alert = await browser.getAlert();
       await alert?.accept();
+
+      await elasticChart.setNewChartUiDebugFlag(true);
+
       await PageObjects.dashboard.gotoDashboardLandingPage();
       await PageObjects.dashboard.clickNewDashboard();
       await PageObjects.dashboard.addVisualizations([PIE_CHART_VIS_NAME]);
@@ -126,7 +129,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         '2015-09-19 06:31:44.000',
         '2015-09-23 18:31:44.000'
       );
-      await elasticChart.setNewChartUiDebugFlag(true);
+      await PageObjects.dashboard.waitForRenderComplete();
       await pieChart.expectPieSliceCount(10);
     });
   });

@@ -62,7 +62,7 @@ export interface VisualizeEmbeddableConfiguration {
   indexPatterns?: DataView[];
   editPath: string;
   editUrl: string;
-  capabilities: { visualizeSave: boolean; dashboardSave: boolean };
+  capabilities: { visualizeSave: boolean; dashboardSave: boolean; visualizeOpen: boolean };
   deps: VisualizeEmbeddableFactoryDeps;
 }
 
@@ -126,6 +126,7 @@ export class VisualizeEmbeddable
     VisualizeByValueInput,
     VisualizeByReferenceInput
   >;
+  private expressionVariables: Record<string, unknown> | undefined;
   private readonly expressionVariablesSubject = new ReplaySubject<
     Record<string, unknown> | undefined
   >(1);
@@ -145,6 +146,7 @@ export class VisualizeEmbeddable
       initialInput,
       {
         defaultTitle: vis.title,
+        defaultDescription: vis.description,
         editPath,
         editApp: 'visualize',
         editUrl,
@@ -168,8 +170,12 @@ export class VisualizeEmbeddable
     this.attributeService = attributeService;
 
     if (this.attributeService) {
+      const readOnly = Boolean(vis.type.disableEdit);
       const isByValue = !this.inputIsRefType(initialInput);
-      const editable = capabilities.visualizeSave || (isByValue && capabilities.dashboardSave);
+      const editable = readOnly
+        ? false
+        : capabilities.visualizeSave ||
+          (isByValue && capabilities.dashboardSave && capabilities.visualizeOpen);
       this.updateOutput({ ...this.getOutput(), editable });
     }
 
@@ -193,10 +199,6 @@ export class VisualizeEmbeddable
 
   public reportsEmbeddableLoad() {
     return true;
-  }
-
-  public getDescription() {
-    return this.vis.description;
   }
 
   public getVis() {
@@ -470,22 +472,6 @@ export class VisualizeEmbeddable
 
     this.subscriptions.push(
       this.handler.events$.subscribe(async (event) => {
-        // maps hack, remove once esaggs function is cleaned up and ready to accept variables
-        if (event.name === 'bounds') {
-          const agg = this.vis.data.aggs!.aggs.find((a: any) => {
-            return get(a, 'type.dslName') === 'geohash_grid';
-          });
-          if (
-            (agg && agg.params.precision !== event.data.precision) ||
-            (agg && !_.isEqual(agg.params.boundingBox, event.data.boundingBox))
-          ) {
-            agg.params.boundingBox = event.data.boundingBox;
-            agg.params.precision = event.data.precision;
-            this.reload();
-          }
-          return;
-        }
-
         if (!this.input.disableTriggers) {
           const triggerId = get(VIS_EVENT_TO_TRIGGER, event.name, VIS_EVENT_TO_TRIGGER.filter);
           let context;
@@ -584,12 +570,12 @@ export class VisualizeEmbeddable
   private async updateHandler() {
     const context = this.getExecutionContext();
 
-    const expressionVariables = await this.vis.type.getExpressionVariables?.(
+    this.expressionVariables = await this.vis.type.getExpressionVariables?.(
       this.vis,
       this.timefilter
     );
 
-    this.expressionVariablesSubject.next(expressionVariables);
+    this.expressionVariablesSubject.next(this.expressionVariables);
 
     const expressionParams: IExpressionLoaderParams = {
       searchContext: {
@@ -600,7 +586,7 @@ export class VisualizeEmbeddable
       },
       variables: {
         embeddableTitle: this.getTitle(),
-        ...expressionVariables,
+        ...this.expressionVariables,
       },
       searchSessionId: this.input.searchSessionId,
       syncColors: this.input.syncColors,
@@ -651,6 +637,10 @@ export class VisualizeEmbeddable
     return this.expressionVariablesSubject.asObservable();
   }
 
+  public getExpressionVariables() {
+    return this.expressionVariables;
+  }
+
   inputIsRefType = (input: VisualizeInput): input is VisualizeByReferenceInput => {
     if (!this.attributeService) {
       throw new Error('AttributeService must be defined for getInputAsRefType');
@@ -670,10 +660,8 @@ export class VisualizeEmbeddable
   };
 
   getInputAsRefType = async (): Promise<VisualizeByReferenceInput> => {
-    const { savedObjectsClient, data, spaces, savedObjectsTaggingOss } = await this.deps.start()
-      .plugins;
+    const { data, spaces, savedObjectsTaggingOss } = await this.deps.start().plugins;
     const savedVis = await getSavedVisualization({
-      savedObjectsClient,
       search: data.search,
       dataViews: data.dataViews,
       spaces,

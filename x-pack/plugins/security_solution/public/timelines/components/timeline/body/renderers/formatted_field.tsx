@@ -12,6 +12,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { isNumber, isEmpty } from 'lodash/fp';
 import React from 'react';
 
+import { EndpointAgentStatusById } from '../../../../../common/components/endpoint/endpoint_agent_status';
 import { INDICATOR_REFERENCE } from '../../../../../../common/cti/constants';
 import { DefaultDraggable } from '../../../../../common/components/draggables';
 import { Bytes, BYTES_FORMAT } from './bytes';
@@ -19,8 +20,8 @@ import { Duration, EVENT_DURATION_FIELD_NAME } from '../../../duration';
 import { getOrEmptyTagFromValue } from '../../../../../common/components/empty_value';
 import { FormattedDate } from '../../../../../common/components/formatted_date';
 import { FormattedIp } from '../../../formatted_ip';
-import { Port } from '../../../../../network/components/port';
-import { PORT_NAMES } from '../../../../../network/components/port/helpers';
+import { Port } from '../../../../../explore/network/components/port';
+import { PORT_NAMES } from '../../../../../explore/network/components/port/helpers';
 import { TruncatableText } from '../../../../../common/components/truncatable_text';
 import {
   DATE_FIELD_TYPE,
@@ -40,7 +41,6 @@ import {
 import { RenderRuleName, renderEventModule, renderUrl } from './formatted_field_helpers';
 import { RuleStatus } from './rule_status';
 import { HostName } from './host_name';
-import { AgentStatuses } from './agent_statuses';
 import { UserName } from './user_name';
 
 // simple black-list to prevent dragging and dropping fields such as message name
@@ -240,14 +240,9 @@ const FormattedFieldValueComponent: React.FC<{
     );
   } else if (fieldName === AGENT_STATUS_FIELD_NAME) {
     return (
-      <AgentStatuses
-        contextId={contextId}
-        eventId={eventId}
-        fieldName={fieldName}
-        fieldType={fieldType}
-        isAggregatable={isAggregatable}
-        isDraggable={isDraggable}
-        value={typeof value === 'string' ? value : ''}
+      <EndpointAgentStatusById
+        endpointAgentId={String(value ?? '')}
+        data-test-subj="endpointHostAgentStatus"
       />
     );
   } else if (

@@ -14,6 +14,7 @@ import type {
   SelectedDataView,
   SourcererDataView,
   SourcererUrlState,
+  RunTimeMappings,
 } from '../../store/sourcerer/model';
 import { SourcererScopeName } from '../../store/sourcerer/model';
 import { useUserInfo } from '../../../detections/components/user_info';
@@ -26,22 +27,27 @@ import {
   OVERVIEW_PATH,
   RULES_PATH,
   CASES_PATH,
+  DATA_QUALITY_PATH,
 } from '../../../../common/constants';
 import { TimelineId } from '../../../../common/types';
 import { useDeepEqualSelector } from '../../hooks/use_selector';
 import { checkIfIndicesExist, getScopePatternListSelection } from '../../store/sourcerer/helpers';
 import { useAppToasts } from '../../hooks/use_app_toasts';
-import { postSourcererDataView } from './api';
-import { useDataView } from '../source/use_data_view';
+import { createSourcererDataView } from './create_sourcerer_data_view';
+import { getDataViewStateFromIndexFields, useDataView } from '../source/use_data_view';
 import { useFetchIndex } from '../source';
 import { useInitializeUrlParam, useUpdateUrlParam } from '../../utils/global_query_string';
 import { URL_PARAM_KEY } from '../../hooks/use_url_state';
 import { sortWithExcludesAtEnd } from '../../../../common/utils/sourcerer';
+import { useKibana } from '../../lib/kibana';
 
 export const useInitSourcerer = (
   scopeId: SourcererScopeName.default | SourcererScopeName.detections = SourcererScopeName.default
 ) => {
   const dispatch = useDispatch();
+  const {
+    data: { dataViews },
+  } = useKibana().services;
   const abortCtrl = useRef(new AbortController());
   const initialTimelineSourcerer = useRef(true);
   const initialDetectionSourcerer = useRef(true);
@@ -229,6 +235,7 @@ export const useInitSourcerer = (
     signalIndexName,
     signalIndexNameSourcerer,
   ]);
+  const { dataViewId } = useSourcererDataView(scopeId);
 
   const updateSourcererDataView = useCallback(
     (newSignalsIndex: string) => {
@@ -236,28 +243,35 @@ export const useInitSourcerer = (
         abortCtrl.current = new AbortController();
 
         dispatch(sourcererActions.setSourcererScopeLoading({ loading: true }));
+
         try {
-          const response = await postSourcererDataView({
+          const response = await createSourcererDataView({
             body: { patternList: newPatternList },
             signal: abortCtrl.current.signal,
+            dataViewService: dataViews,
+            dataViewId,
           });
 
-          if (response.defaultDataView.patternList.includes(newSignalsIndex)) {
+          if (response?.defaultDataView.patternList.includes(newSignalsIndex)) {
             // first time signals is defined and validated in the sourcerer
             // redo indexFieldsSearch
             indexFieldsSearch({ dataViewId: response.defaultDataView.id });
+            dispatch(sourcererActions.setSourcererDataViews(response));
           }
-          dispatch(sourcererActions.setSourcererDataViews(response));
           dispatch(sourcererActions.setSourcererScopeLoading({ loading: false }));
         } catch (err) {
-          addError(err, {
-            title: i18n.translate('xpack.securitySolution.sourcerer.error.title', {
-              defaultMessage: 'Error updating Security Data View',
-            }),
-            toastMessage: i18n.translate('xpack.securitySolution.sourcerer.error.toastMessage', {
-              defaultMessage: 'Refresh the page',
-            }),
-          });
+          if (err.name === 'AbortError') {
+            // the fetch was canceled, we don't need to do anything about it
+          } else {
+            addError(err, {
+              title: i18n.translate('xpack.securitySolution.sourcerer.error.title', {
+                defaultMessage: 'Error updating Security Data View',
+              }),
+              toastMessage: i18n.translate('xpack.securitySolution.sourcerer.error.toastMessage', {
+                defaultMessage: 'Refresh the page',
+              }),
+            });
+          }
           dispatch(sourcererActions.setSourcererScopeLoading({ loading: false }));
         }
       };
@@ -267,7 +281,7 @@ export const useInitSourcerer = (
         asyncSearch([...defaultDataView.title.split(','), newSignalsIndex]);
       }
     },
-    [defaultDataView.title, dispatch, indexFieldsSearch, addError]
+    [defaultDataView.title, dispatch, dataViews, dataViewId, indexFieldsSearch, addError]
   );
 
   const onSignalIndexUpdated = useCallback(() => {
@@ -381,15 +395,17 @@ export const useSourcererDataView = (
   const legacyDataView: Omit<SourcererDataView, 'id'> & { id: string | null } = useMemo(
     () => ({
       ...fetchIndexReturn,
-      runtimeMappings: {},
-      title: '',
-      id: selectedDataView?.id ?? null,
+      dataView: fetchIndexReturn.dataView,
+      runtimeMappings: (fetchIndexReturn.dataView?.runtimeFieldMap as RunTimeMappings) ?? {},
+      title: fetchIndexReturn.dataView?.title ?? '',
+      id: fetchIndexReturn.dataView?.id ?? null,
       loading: indexPatternsLoading,
       patternList: fetchIndexReturn.indexes,
       indexFields: fetchIndexReturn.indexPatterns
         .fields as SelectedDataView['indexPattern']['fields'],
+      fields: fetchIndexReturn.dataView?.fields,
     }),
-    [fetchIndexReturn, indexPatternsLoading, selectedDataView]
+    [fetchIndexReturn, indexPatternsLoading]
   );
 
   useEffect(() => {
@@ -419,13 +435,23 @@ export const useSourcererDataView = (
     [loading, scopeId, signalIndexName, sourcererDataView.loading, sourcererDataView.patternList]
   );
 
+  const browserFields = useCallback(() => {
+    const { browserFields: dataViewBrowserFields } = getDataViewStateFromIndexFields(
+      sourcererDataView.patternList.join(','),
+      sourcererDataView.fields,
+      false
+    );
+    return dataViewBrowserFields;
+  }, [sourcererDataView.fields, sourcererDataView.patternList]);
+
   return useMemo(
     () => ({
-      browserFields: sourcererDataView.browserFields,
+      browserFields: browserFields(),
       dataViewId: sourcererDataView.id,
       indexPattern: {
         fields: sourcererDataView.indexFields,
         title: selectedPatterns.join(','),
+        getName: () => selectedPatterns.join(','),
       },
       indicesExist,
       loading: loading || sourcererDataView.loading,
@@ -436,8 +462,16 @@ export const useSourcererDataView = (
       selectedPatterns,
       // if we have to do an update to data view, tell us which patterns are active
       ...(legacyPatterns.length > 0 ? { activePatterns: sourcererDataView.patternList } : {}),
+      sourcererDataView: sourcererDataView.dataView,
     }),
-    [sourcererDataView, selectedPatterns, indicesExist, loading, legacyPatterns.length]
+    [
+      browserFields,
+      sourcererDataView,
+      selectedPatterns,
+      indicesExist,
+      loading,
+      legacyPatterns.length,
+    ]
   );
 };
 
@@ -455,6 +489,7 @@ export const getScopeFromPath = (
 
 export const sourcererPaths = [
   ALERTS_PATH,
+  DATA_QUALITY_PATH,
   `${RULES_PATH}/id/:id`,
   HOSTS_PATH,
   USERS_PATH,

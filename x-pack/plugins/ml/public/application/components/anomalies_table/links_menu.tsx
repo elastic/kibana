@@ -7,7 +7,7 @@
 
 import { cloneDeep } from 'lodash';
 import moment from 'moment';
-import rison, { RisonValue } from '@kbn/rison';
+import rison from '@kbn/rison';
 import React, { FC, useEffect, useMemo, useState } from 'react';
 import { APP_ID as MAPS_APP_ID } from '@kbn/maps-plugin/common';
 import {
@@ -22,6 +22,13 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { MAPS_APP_LOCATOR } from '@kbn/maps-plugin/public';
+import {
+  isCategorizationAnomaly,
+  isRuleSupported,
+  type MlCustomUrlAnomalyRecordDoc,
+  type MlKibanaUrlConfig,
+  type MlAnomaliesTableRecord,
+} from '@kbn/ml-anomaly-utils';
 import { mlJobService } from '../../services/job_service';
 import { getDataViewIdFromName } from '../../util/index_utils';
 import { getInitialAnomaliesLayers, getInitialSourceIndexFieldLayers } from '../../../maps/util';
@@ -41,27 +48,21 @@ import {
   getDateFormatTz,
   SourceIndicesWithGeoFields,
 } from '../../explorer/explorer_utils';
-import { isCategorizationAnomaly, isRuleSupported } from '../../../../common/util/anomaly_utils';
 import { checkPermission } from '../../capabilities/check_capabilities';
-import type {
-  CustomUrlAnomalyRecordDoc,
-  KibanaUrlConfig,
-} from '../../../../common/types/custom_urls';
 import type { TimeRangeBounds } from '../../util/time_buckets';
 import { useMlKibana } from '../../contexts/kibana';
 // @ts-ignore
 import { getFieldTypeFromMapping } from '../../services/mapping_service';
-import type { AnomaliesTableRecord } from '../../../../common/types/anomalies';
 import { getQueryStringForInfluencers } from './get_query_string_for_influencers';
 import { getFiltersForDSLQuery } from '../../../../common/util/job_utils';
 interface LinksMenuProps {
-  anomaly: AnomaliesTableRecord;
+  anomaly: MlAnomaliesTableRecord;
   bounds: TimeRangeBounds;
   showMapsLink: boolean;
   showViewSeriesLink: boolean;
   isAggregatedData: boolean;
   interval: 'day' | 'hour' | 'second';
-  showRuleEditorFlyout: (anomaly: AnomaliesTableRecord) => void;
+  showRuleEditorFlyout: (anomaly: MlAnomaliesTableRecord) => void;
   onItemClick: () => void;
   sourceIndicesWithGeoFields: SourceIndicesWithGeoFields;
 }
@@ -83,7 +84,7 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
     return mlJobService.getJob(props.anomaly.jobId);
   }, [props.anomaly.jobId]);
 
-  const getAnomaliesMapsLink = async (anomaly: AnomaliesTableRecord) => {
+  const getAnomaliesMapsLink = async (anomaly: MlAnomaliesTableRecord) => {
     const index = job.datafeed_config.indices[0];
     const dataViewId = await getDataViewIdFromName(index);
 
@@ -121,7 +122,7 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
   };
 
   const getAnomalySourceMapsLink = async (
-    anomaly: AnomaliesTableRecord,
+    anomaly: MlAnomaliesTableRecord,
     sourceIndicesWithGeoFields: SourceIndicesWithGeoFields
   ) => {
     const index = job.datafeed_config.indices[0];
@@ -227,16 +228,18 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
         // Start from the previous hour.
         earliestMoment.subtract(1, 'h');
       }
-      let latestMoment = moment(record.timestamp).add(record.bucket_span, 's');
+
+      const latestMoment = moment(record.timestamp).add(record.bucket_span, 's');
       if (props.isAggregatedData === true) {
-        latestMoment = moment(record.timestamp).endOf(interval);
         if (interval === 'hour') {
           // Show to the end of the next hour.
-          latestMoment.add(1, 'h'); // e.g. 2016-02-08T18:59:59.999Z
+          latestMoment.add(1, 'h');
         }
+        latestMoment.subtract(1, 'ms').endOf(interval); // e.g. 2016-02-08T18:59:59.999Z
       }
+
       const from = timeFormatter(earliestMoment.unix() * 1000); // e.g. 2016-02-08T16:00:00.000Z
-      const to = timeFormatter(latestMoment.unix() * 1000);
+      const to = timeFormatter(latestMoment.unix() * 1000); // e.g. 2016-02-08T18:59:59.000Z
 
       let kqlQuery = '';
 
@@ -285,7 +288,7 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [JSON.stringify(props.anomaly)]);
 
-  const openCustomUrl = (customUrl: KibanaUrlConfig) => {
+  const openCustomUrl = (customUrl: MlKibanaUrlConfig) => {
     const { anomaly, interval, isAggregatedData } = props;
 
     // eslint-disable-next-line no-console
@@ -293,7 +296,7 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
 
     // If url_value contains $earliest$ and $latest$ tokens, add in times to the source record.
     // Create a copy of the record as we are adding properties into it.
-    const record = cloneDeep(anomaly.source) as CustomUrlAnomalyRecordDoc;
+    const record = cloneDeep(anomaly.source) as MlCustomUrlAnomalyRecordDoc;
     const timestamp = record.timestamp;
     const configuredUrlValue = customUrl.url_value;
     const timeRangeInterval =
@@ -315,16 +318,16 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
     }
 
     if (configuredUrlValue.includes('$latest$')) {
-      let latestMoment = moment(timestamp).add(record.bucket_span, 's');
+      const latestMoment = moment(timestamp).add(record.bucket_span, 's');
       if (timeRangeInterval !== null) {
         latestMoment.add(timeRangeInterval);
       } else {
         if (isAggregatedData === true) {
-          latestMoment = moment(timestamp).endOf(interval);
           if (interval === 'hour') {
             // Show to the end of the next hour.
             latestMoment.add(1, 'h'); // e.g. 2016-02-08T18:59:59.999Z
           }
+          latestMoment.subtract(1, 'ms').endOf(interval); // e.g. 2016-02-08T18:59:59.999Z
         }
       }
       record.latest = latestMoment.toISOString();
@@ -374,7 +377,7 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
     } else {
       // Replace any tokens in the configured url_value with values from the source record,
       // and then open link in a new tab/window.
-      const urlPath = getUrlForRecord(customUrl, record as CustomUrlAnomalyRecordDoc);
+      const urlPath = getUrlForRecord(customUrl, record as MlCustomUrlAnomalyRecordDoc);
       openCustomUrlWindow(urlPath, customUrl, basePath);
     }
   };
@@ -561,13 +564,15 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
             },
           });
 
-          const appStateProps: RisonValue = {
+          const appStateProps = {
             index: dataViewId,
             filters: getFiltersForDSLQuery(job.datafeed_config.query, dataViewId, job.job_id),
+            ...(query !== null
+              ? {
+                  query,
+                }
+              : {}),
           };
-          if (query !== null) {
-            appStateProps.query = query;
-          }
           const _a = rison.encode(appStateProps);
 
           // Need to encode the _a parameter as it will contain characters such as '+' if using the regex.

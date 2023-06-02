@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import { Switch, Route, useRouteMatch } from 'react-router-dom';
+import { Switch, useRouteMatch } from 'react-router-dom';
+import { Route } from '@kbn/shared-ux-router';
 
 import { LiveQueriesPage } from './list';
 import { NewLiveQueryPage } from './new';

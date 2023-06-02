@@ -22,8 +22,14 @@ import { IndexPatternFieldEditorPlugin } from './plugin';
 
 export type {
   Field,
+  // @deprecated use DataViewFieldEditorSetup instead
   PluginSetup as IndexPatternFieldEditorSetup,
+  // @deprecated use DataViewFieldEditorStart instead
   PluginStart as IndexPatternFieldEditorStart,
+} from './types';
+export type {
+  PluginSetup as DataViewFieldEditorSetup,
+  PluginStart as DataViewFieldEditorStart,
 } from './types';
 export { DefaultFormatEditor } from './components/field_format_editor/editors/default/default';
 export type {

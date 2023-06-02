@@ -6,27 +6,33 @@
  */
 
 import React from 'react';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { action } from '@storybook/addon-actions';
 import { DecoratorFn } from '@storybook/react';
 import { EMPTY, of } from 'rxjs';
 import { I18nProvider } from '@kbn/i18n-react';
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaThemeProvider, KibanaServices } from '@kbn/kibana-react-plugin/public';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import type { NotificationsStart, ApplicationStart } from '@kbn/core/public';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { KibanaContextProvider } from '../public/common/lib/kibana';
 import { ExperimentalFeaturesService } from '../public/common/experimental_features_service';
 import { getHttp } from './context/http';
 import { getRuleTypeRegistry } from './context/rule_type_registry';
 import { getActionTypeRegistry } from './context/action_type_registry';
+import { getDefaultServicesApplication } from './context/application';
 
 interface StorybookContextDecoratorProps {
   context: Parameters<DecoratorFn>[1];
+  servicesApplicationOverride?: Partial<ApplicationStart>;
+  servicesOverride?: Partial<KibanaServices>;
 }
+
+const queryClient = new QueryClient();
 
 const handler = (type: string, ...rest: any[]) => {
   action(`${type} Toast`)(rest);
-  return { id: uuid() };
+  return { id: uuidv4() };
 };
 
 const notifications: NotificationsStart = {
@@ -40,43 +46,11 @@ const notifications: NotificationsStart = {
     remove: () => {},
     get$: () => of([]),
   },
-};
-
-const applications = new Map();
-
-const application: ApplicationStart = {
-  currentAppId$: of('fleet'),
-  navigateToUrl: async (url: string) => {
-    action(`Navigate to: ${url}`);
-  },
-  navigateToApp: async (app: string) => {
-    action(`Navigate to: ${app}`);
-  },
-  getUrlForApp: (url: string) => url,
-  capabilities: {
-    actions: {
-      show: true,
-      save: true,
-      execute: true,
-      delete: true,
-    },
-    catalogue: {},
-    management: {},
-    navLinks: {},
-    fleet: {
-      read: true,
-      all: true,
-    },
-    fleetv2: {
-      read: true,
-      all: true,
-    },
-  },
-  applications$: of(applications),
+  showErrorDialog: () => {},
 };
 
 export const StorybookContextDecorator: React.FC<StorybookContextDecoratorProps> = (props) => {
-  const { children, context } = props;
+  const { children, context, servicesApplicationOverride, servicesOverride } = props;
   const { globals } = context;
   const { euiTheme } = globals;
 
@@ -110,13 +84,14 @@ export const StorybookContextDecorator: React.FC<StorybookContextDecoratorProps>
                   }
                 },
               },
-              application,
+              application: getDefaultServicesApplication(servicesApplicationOverride),
               http: getHttp(context),
               actionTypeRegistry: getActionTypeRegistry(),
               ruleTypeRegistry: getRuleTypeRegistry(),
+              ...servicesOverride,
             }}
           >
-            {children}
+            <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
           </KibanaContextProvider>
         </KibanaThemeProvider>
       </EuiThemeProvider>

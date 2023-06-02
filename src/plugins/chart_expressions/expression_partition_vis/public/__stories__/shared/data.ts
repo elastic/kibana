@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { RenderValue } from '../../../common/types';
+import { PartitionChartProps } from '../../../common/types';
 
-export const data: RenderValue['visData'] = {
+export const data: PartitionChartProps['visData'] = {
   type: 'datatable',
   columns: [
     {

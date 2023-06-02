@@ -28,3 +28,15 @@ export class SavedObjectReferenceResolutionError extends Error {
     this.name = 'SavedObjectReferenceResolutionError';
   }
 }
+
+export class NoSuchRemoteClusterError extends Error {
+  constructor(message?: string) {
+    super(message || 'The configured remote cluster is missing or not reachable.');
+    Object.setPrototypeOf(this, new.target.prototype);
+    this.name = 'NoSuchRemoteClusterError';
+  }
+}
+
+export const isNoSuchRemoteClusterMessage = (message: string) => {
+  return message.includes('no_such_remote_cluster_exception');
+};

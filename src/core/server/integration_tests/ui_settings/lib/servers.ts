@@ -18,6 +18,7 @@ import {
   type TestUtils,
   type HttpMethod,
 } from '@kbn/core-test-helpers-kbn-server';
+import { schema } from '@kbn/config-schema';
 import type { SavedObjectsClientContract, IUiSettingsClient } from '../../..';
 
 let servers: TestUtils;
@@ -28,6 +29,7 @@ interface AllServices {
   savedObjectsClient: SavedObjectsClientContract;
   esClient: Client;
   uiSettings: IUiSettingsClient;
+  uiSettingsGlobal: IUiSettingsClient;
   supertest: (method: HttpMethod, path: string) => supertest.Test;
 }
 
@@ -48,6 +50,19 @@ export async function startServers() {
   });
   esServer = await servers.startES();
   kbn = await servers.startKibana();
+  // register global settings
+  kbn.coreSetup.uiSettings.registerGlobal({
+    foo: {
+      value: 'bar',
+      schema: schema.string(),
+    },
+  });
+  kbn.coreSetup.uiSettings.registerGlobal({
+    defaultIndex: {
+      value: 'something',
+      schema: schema.string(),
+    },
+  });
 }
 
 export function getServices() {
@@ -62,12 +77,13 @@ export function getServices() {
   );
 
   const uiSettings = kbn.coreStart.uiSettings.asScopedToClient(savedObjectsClient);
-
+  const uiSettingsGlobal = kbn.coreStart.uiSettings.globalAsScopedToClient(savedObjectsClient);
   services = {
     supertest: (method: HttpMethod, path: string) => getSupertest(kbn.root, method, path),
     esClient,
     savedObjectsClient,
     uiSettings,
+    uiSettingsGlobal,
   };
 
   return services;

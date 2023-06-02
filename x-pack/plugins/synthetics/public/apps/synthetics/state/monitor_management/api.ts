@@ -12,7 +12,7 @@ import {
   SyntheticsMonitor,
   SyntheticsMonitorWithId,
 } from '../../../../../common/runtime_types';
-import { API_URLS } from '../../../../../common/constants';
+import { API_URLS, SYNTHETICS_API_URLS } from '../../../../../common/constants';
 import { DecryptedSyntheticsMonitorSavedObject } from '../../../../../common/types';
 
 export const createMonitorAPI = async ({
@@ -33,10 +33,28 @@ export const updateMonitorAPI = async ({
   return await apiService.put(`${API_URLS.SYNTHETICS_MONITORS}/${id}`, monitor);
 };
 
-export const getMonitorAPI = async ({
+export const getDecryptedMonitorAPI = async ({
   id,
 }: {
   id: string;
 }): Promise<DecryptedSyntheticsMonitorSavedObject> => {
-  return await apiService.get(`${API_URLS.SYNTHETICS_MONITORS}/${id}`);
+  return await apiService.get(API_URLS.GET_SYNTHETICS_MONITOR.replace('{monitorId}', id), {
+    decrypted: true,
+  });
+};
+
+export const fetchServiceAPIKey = async (): Promise<{
+  apiKey: { encoded: string };
+}> => {
+  return await apiService.get(API_URLS.SYNTHETICS_APIKEY);
+};
+
+export const deletePackagePolicy = async (
+  packagePolicyId: string
+): Promise<{
+  apiKey: { encoded: string };
+}> => {
+  return await apiService.delete(
+    SYNTHETICS_API_URLS.DELETE_PACKAGE_POLICY.replace('{packagePolicyId}', packagePolicyId)
+  );
 };

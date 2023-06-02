@@ -11,42 +11,38 @@ import type { SavedObjectsFindResponse } from '@kbn/core/server';
 
 import type { UserProfile } from '@kbn/security-plugin/common';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
+import { asSavedObjectExecutionSource } from '@kbn/actions-plugin/server';
 import type {
   ActionConnector,
-  CaseResponse,
+  Case,
   ExternalServiceResponse,
-  CasesConfigureAttributes,
+  ConfigurationAttributes,
   CommentRequestAlertType,
   CommentAttributes,
 } from '../../../common/api';
-import {
-  CaseResponseRt,
-  CaseStatuses,
-  ActionTypes,
-  OWNER_FIELD,
-  CommentType,
-} from '../../../common/api';
-import { CASE_COMMENT_SAVED_OBJECT } from '../../../common/constants';
+import { CaseRt, CaseStatuses, ActionTypes, OWNER_FIELD, CommentType } from '../../../common/api';
+import { CASE_COMMENT_SAVED_OBJECT, CASE_SAVED_OBJECT } from '../../../common/constants';
 
-import { createIncident, getDurationInSeconds } from './utils';
+import { createIncident, getDurationInSeconds, getUserProfiles } from './utils';
 import { createCaseError } from '../../common/error';
 import {
-  createAlertUpdateRequest,
+  createAlertUpdateStatusRequest,
   flattenCaseSavedObject,
   getAlertInfoFromComments,
 } from '../../common/utils';
-import type { CasesClient, CasesClientArgs, CasesClientInternal } from '..';
+import type { CasesClient, CasesClientArgs } from '..';
 import { Operations } from '../../authorization';
 import { casesConnectors } from '../../connectors';
 import { getAlerts } from '../alerts/get';
 import { buildFilter } from '../utils';
 import type { ICaseResponse } from '../typedoc_interfaces';
+import { decodeOrThrow } from '../../../common/api/runtime_types';
 
 /**
  * Returns true if the case should be closed based on the configuration settings.
  */
 function shouldCloseByPush(
-  configureSettings: SavedObjectsFindResponse<CasesConfigureAttributes>
+  configureSettings: SavedObjectsFindResponse<ConfigurationAttributes>
 ): boolean {
   return (
     configureSettings.total > 0 &&
@@ -68,7 +64,7 @@ const changeAlertsStatusToClose = async (
 
   const alerts = alertAttachments.saved_objects
     .map((attachment) =>
-      createAlertUpdateRequest({
+      createAlertUpdateStatusRequest({
         comment: attachment.attributes,
         status: CaseStatuses.closed,
       })
@@ -100,9 +96,8 @@ export interface PushParams {
 export const push = async (
   { connectorId, caseId }: PushParams,
   clientArgs: CasesClientArgs,
-  casesClient: CasesClient,
-  casesClientInternal: CasesClientInternal
-): Promise<CaseResponse> => {
+  casesClient: CasesClient
+): Promise<Case> => {
   const {
     unsecuredSavedObjectsClient,
     services: {
@@ -164,6 +159,7 @@ export const push = async (
         subAction: 'pushToService',
         subActionParams: externalServiceIncident,
       },
+      source: asSavedObjectExecutionSource({ id: caseId, type: CASE_SAVED_OBJECT }),
     });
 
     if (pushRes.status === 'error') {
@@ -241,7 +237,6 @@ export const push = async (
       }),
 
       attachmentService.bulkUpdate({
-        unsecuredSavedObjectsClient,
         comments: comments.saved_objects
           .filter((comment) => comment.attributes.pushed_at == null)
           .map((comment) => ({
@@ -257,9 +252,8 @@ export const push = async (
     ]);
 
     if (shouldMarkAsClosed) {
-      await userActionService.createUserAction({
+      await userActionService.creator.createUserAction({
         type: ActionTypes.status,
-        unsecuredSavedObjectsClient,
         payload: { status: CaseStatuses.closed },
         user,
         caseId,
@@ -272,9 +266,8 @@ export const push = async (
       }
     }
 
-    await userActionService.createUserAction({
+    await userActionService.creator.createUserAction({
       type: ActionTypes.pushed,
-      unsecuredSavedObjectsClient,
       payload: { externalService },
       user,
       caseId,
@@ -282,30 +275,29 @@ export const push = async (
     });
 
     /* End of update case with push information */
+    const res = flattenCaseSavedObject({
+      savedObject: {
+        ...myCase,
+        ...updatedCase,
+        attributes: { ...myCase.attributes, ...updatedCase?.attributes },
+        references: myCase.references,
+      },
+      comments: comments.saved_objects.map((origComment) => {
+        const updatedComment = updatedComments.saved_objects.find((c) => c.id === origComment.id);
+        return {
+          ...origComment,
+          ...updatedComment,
+          attributes: {
+            ...origComment.attributes,
+            ...updatedComment?.attributes,
+          } as CommentAttributes,
+          version: updatedComment?.version ?? origComment.version,
+          references: origComment?.references ?? [],
+        };
+      }),
+    });
 
-    return CaseResponseRt.encode(
-      flattenCaseSavedObject({
-        savedObject: {
-          ...myCase,
-          ...updatedCase,
-          attributes: { ...myCase.attributes, ...updatedCase?.attributes },
-          references: myCase.references,
-        },
-        comments: comments.saved_objects.map((origComment) => {
-          const updatedComment = updatedComments.saved_objects.find((c) => c.id === origComment.id);
-          return {
-            ...origComment,
-            ...updatedComment,
-            attributes: {
-              ...origComment.attributes,
-              ...updatedComment?.attributes,
-            } as CommentAttributes,
-            version: updatedComment?.version ?? origComment.version,
-            references: origComment?.references ?? [],
-          };
-        }),
-      })
-    );
+    return decodeOrThrow(CaseRt)(res);
   } catch (error) {
     throw createCaseError({ message: `Failed to push case: ${error}`, error, logger });
   }
@@ -320,17 +312,11 @@ const getProfiles = async (
     ...(caseInfo.created_by?.profile_uid != null ? [caseInfo.created_by.profile_uid] : []),
   ]);
 
-  if (uids.size <= 0) {
+  const userProfiles = await getUserProfiles(securityStartPlugin, uids);
+
+  if (userProfiles.size <= 0) {
     return;
   }
 
-  const userProfiles =
-    (await securityStartPlugin.userProfiles.bulkGet({
-      uids,
-    })) ?? [];
-
-  return userProfiles.reduce<Map<string, UserProfile>>((acc, profile) => {
-    acc.set(profile.uid, profile);
-    return acc;
-  }, new Map());
+  return userProfiles;
 };

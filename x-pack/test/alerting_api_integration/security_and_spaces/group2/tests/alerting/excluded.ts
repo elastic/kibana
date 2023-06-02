@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integration-helpers';
 import { UserAtSpaceScenarios } from '../../../scenarios';
 import {
   getTestRuleData,
@@ -13,7 +14,6 @@ import {
   ObjectRemover,
   getEventLog,
   AlertUtils,
-  ES_TEST_INDEX_NAME,
 } from '../../../../common/lib';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 

@@ -21,6 +21,7 @@ export const authenticationLensAttributes: LensAttributes = {
       legend: {
         isVisible: true,
         position: 'right',
+        legendSize: 'xlarge',
       },
       valueLabels: 'hide',
       preferredSeriesType: 'bar_stacked',

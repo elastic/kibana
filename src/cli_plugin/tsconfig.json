@@ -1,9 +1,7 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "./target/types",
-    "emitDeclarationOnly": true,
-    "declaration": true,
+    "outDir": "target/types",
   },
   "include": [
     "install/**/*",
@@ -14,5 +12,11 @@
   ],
   "kbn_references": [
     { "path": "../cli/tsconfig.json" },
+    "@kbn/utils",
+    "@kbn/repo-info",
+    "@kbn/jest-serializers",
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

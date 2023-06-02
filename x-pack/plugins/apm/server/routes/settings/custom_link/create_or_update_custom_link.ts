@@ -14,6 +14,7 @@ import {
   APMIndexDocumentParams,
   APMInternalESClient,
 } from '../../../lib/helpers/create_es_client/create_internal_es_client';
+import { APM_CUSTOM_LINK_INDEX } from '../apm_indices/get_apm_indices';
 
 export function createOrUpdateCustomLink({
   customLinkId,
@@ -26,7 +27,7 @@ export function createOrUpdateCustomLink({
 }) {
   const params: APMIndexDocumentParams<CustomLinkES> = {
     refresh: true,
-    index: internalESClient.apmIndices.apmCustomLinkIndex,
+    index: APM_CUSTOM_LINK_INDEX,
     body: {
       '@timestamp': Date.now(),
       ...toESFormat(customLink),

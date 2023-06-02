@@ -8,6 +8,5 @@
 export interface SectionDescriptor {
   key: string;
   label: string;
-  required?: boolean;
   properties: Array<{ field: string; value: string[] | number[] }>;
 }

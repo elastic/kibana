@@ -272,7 +272,7 @@ export const EsDeprecationsTable: React.FunctionComponent<Props> = ({
           <EuiSpacer size="l" />
 
           <EuiCallOut
-            iconType="alert"
+            iconType="warning"
             color="danger"
             title={`Invalid search: ${searchError.message}`}
           />

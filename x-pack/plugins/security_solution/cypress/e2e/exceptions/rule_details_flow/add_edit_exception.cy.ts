@@ -8,10 +8,13 @@
 import { getException, getExceptionList } from '../../../objects/exception';
 import { getNewRule } from '../../../objects/rule';
 
-import { ALERTS_COUNT, EMPTY_ALERT_TABLE, NUMBER_OF_ALERTS } from '../../../screens/alerts';
-import { createCustomRule, createCustomRuleEnabled } from '../../../tasks/api_calls/rules';
+import { ALERTS_COUNT, EMPTY_ALERT_TABLE } from '../../../screens/alerts';
+import { createRule } from '../../../tasks/api_calls/rules';
 import { goToRuleDetails } from '../../../tasks/alerts_detection_rules';
-import { goToClosedAlerts, goToOpenedAlerts } from '../../../tasks/alerts';
+import {
+  goToClosedAlertsOnRuleDetailsPage,
+  goToOpenedAlertsOnRuleDetailsPage,
+} from '../../../tasks/alerts';
 import {
   esArchiverLoad,
   esArchiverUnload,
@@ -49,10 +52,10 @@ import {
   CONFIRM_BTN,
   ADD_TO_SHARED_LIST_RADIO_INPUT,
   EXCEPTION_ITEM_CONTAINER,
-  FIELD_INPUT,
   VALUES_MATCH_ANY_INPUT,
   EXCEPTION_CARD_ITEM_NAME,
   EXCEPTION_CARD_ITEM_CONDITIONS,
+  FIELD_INPUT_PARENT,
 } from '../../../screens/exceptions';
 import {
   createExceptionList,
@@ -83,12 +86,11 @@ describe('Add/edit exception from rule details', () => {
       deleteExceptionList(exceptionList.list_id, exceptionList.namespace_type);
       // create rule with exceptions
       createExceptionList(exceptionList, exceptionList.list_id).then((response) => {
-        createCustomRule(
-          {
-            ...getNewRule(),
-            customQuery: 'agent.name:*',
-            dataSource: { index: ['exceptions*'], type: 'indexPatterns' },
-            exceptionLists: [
+        createRule(
+          getNewRule({
+            query: 'agent.name:*',
+            index: ['exceptions*'],
+            exceptions_list: [
               {
                 id: response.body.id,
                 list_id: exceptionList.list_id,
@@ -96,8 +98,8 @@ describe('Add/edit exception from rule details', () => {
                 namespace_type: exceptionList.namespace_type,
               },
             ],
-          },
-          '2'
+            rule_id: '2',
+          })
         );
         createExceptionListItem(exceptionList.list_id, {
           list_id: exceptionList.list_id,
@@ -118,6 +120,7 @@ describe('Add/edit exception from rule details', () => {
         });
       });
 
+      login();
       visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
       goToRuleDetails();
       goToExceptionsTab();
@@ -142,7 +145,7 @@ describe('Add/edit exception from rule details', () => {
       // check that the existing item's field is being populated
       cy.get(EXCEPTION_ITEM_CONTAINER)
         .eq(0)
-        .find(FIELD_INPUT)
+        .find(FIELD_INPUT_PARENT)
         .eq(0)
         .should('have.text', ITEM_FIELD);
       cy.get(VALUES_MATCH_ANY_INPUT).should('have.text', 'foo');
@@ -248,15 +251,15 @@ describe('Add/edit exception from rule details', () => {
   describe('rule without existing exceptions', () => {
     beforeEach(() => {
       deleteAlertsAndRules();
-      createCustomRuleEnabled(
-        {
-          ...getNewRule(),
-          customQuery: 'agent.name:*',
-          dataSource: { index: ['exceptions*'], type: 'indexPatterns' },
-        },
-        'rule_testing',
-        '1s'
+      createRule(
+        getNewRule({
+          query: 'agent.name:*',
+          index: ['exceptions*'],
+          interval: '10s',
+          rule_id: 'rule_testing',
+        })
       );
+      login();
       visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
       goToRuleDetails();
       goToExceptionsTab();
@@ -308,9 +311,9 @@ describe('Add/edit exception from rule details', () => {
       cy.get(EMPTY_ALERT_TABLE).should('exist');
 
       // Closed alert should appear in table
-      goToClosedAlerts();
+      goToClosedAlertsOnRuleDetailsPage();
       cy.get(ALERTS_COUNT).should('exist');
-      cy.get(NUMBER_OF_ALERTS).should('have.text', `${NUMBER_OF_AUDITBEAT_EXCEPTIONS_ALERTS}`);
+      cy.get(ALERTS_COUNT).should('have.text', `${NUMBER_OF_AUDITBEAT_EXCEPTIONS_ALERTS}`);
 
       // Remove the exception and load an event that would have matched that exception
       // to show that said exception now starts to show up again
@@ -325,12 +328,13 @@ describe('Add/edit exception from rule details', () => {
 
       // now that there are no more exceptions, the docs should match and populate alerts
       goToAlertsTab();
-      goToOpenedAlerts();
+      waitForAlertsToPopulate();
+      goToOpenedAlertsOnRuleDetailsPage();
       waitForTheRuleToBeExecuted();
       waitForAlertsToPopulate();
 
       cy.get(ALERTS_COUNT).should('exist');
-      cy.get(NUMBER_OF_ALERTS).should('have.text', '2 alerts');
+      cy.get(ALERTS_COUNT).should('have.text', '2 alerts');
     });
   });
 });

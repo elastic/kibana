@@ -13,25 +13,21 @@ import type {
   ResponseActionGetFileParameters,
 } from '../../../../common/endpoint/types';
 import React from 'react';
-import type { ResponseActionFileDownloadLinkProps } from './response_action_file_download_link';
 import { EndpointActionGenerator } from '../../../../common/endpoint/data_generators/endpoint_action_generator';
 import {
   FILE_NO_LONGER_AVAILABLE_MESSAGE,
+  FILE_TRUNCATED_MESSAGE,
+  FILE_DELETED_MESSAGE,
+  FILE_PASSCODE_INFO_MESSAGE,
   ResponseActionFileDownloadLink,
+  type ResponseActionFileDownloadLinkProps,
 } from './response_action_file_download_link';
 import { responseActionsHttpMocks } from '../../mocks/response_actions_http_mocks';
-import { useUserPrivileges as _useUserPrivileges } from '../../../common/components/user_privileges';
 import { getDeferred } from '../../mocks/utils';
 import { waitFor } from '@testing-library/react';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 
-jest.mock('../../../common/components/user_privileges');
-
 describe('When using the `ResponseActionFileDownloadLink` component', () => {
-  const useUserPrivilegesMock = _useUserPrivileges as jest.Mock<
-    ReturnType<typeof _useUserPrivileges>
-  >;
-
   let render: () => ReturnType<AppContextTestRender['render']>;
   let renderResult: ReturnType<AppContextTestRender['render']>;
   let renderProps: ResponseActionFileDownloadLinkProps;
@@ -48,6 +44,8 @@ describe('When using the `ResponseActionFileDownloadLink` component', () => {
         ResponseActionGetFileParameters
       >({ command: 'get-file' }),
       'data-test-subj': 'test',
+      canAccessFileDownloadLink: true,
+      isTruncatedFile: false,
     };
 
     render = () => {
@@ -64,10 +62,10 @@ describe('When using the `ResponseActionFileDownloadLink` component', () => {
 
     expect(renderResult.getByTestId('test-downloadButton')).not.toBeNull();
     expect(renderResult.getByTestId('test-passcodeMessage')).toHaveTextContent(
-      '(ZIP file passcode: elastic)'
+      FILE_PASSCODE_INFO_MESSAGE
     );
     expect(renderResult.getByTestId('test-fileDeleteMessage')).toHaveTextContent(
-      'Files are periodically deleted to clear storage space. Download and save file locally if needed.'
+      FILE_DELETED_MESSAGE
     );
   });
 
@@ -96,7 +94,7 @@ describe('When using the `ResponseActionFileDownloadLink` component', () => {
 
     await waitFor(() => {
       expect(apiMocks.responseProvider.fileInfo).toHaveBeenCalledWith({
-        path: '/api/endpoint/action/123/agent-a/file',
+        path: '/api/endpoint/action/123/file/123.agent-a',
       });
     });
 
@@ -116,6 +114,20 @@ describe('When using the `ResponseActionFileDownloadLink` component', () => {
     await waitFor(() => {
       expect(renderResult.getByTestId('test-fileNoLongerAvailable')).toHaveTextContent(
         FILE_NO_LONGER_AVAILABLE_MESSAGE
+      );
+    });
+  });
+
+  it('should show file is truncated if execute file output is truncated', async () => {
+    renderProps.isTruncatedFile = true;
+    render();
+    await waitFor(() => {
+      expect(apiMocks.responseProvider.fileInfo).toHaveBeenCalled();
+    });
+
+    await waitFor(() => {
+      expect(renderResult.getByTestId('test-fileTruncatedMessage')).toHaveTextContent(
+        FILE_TRUNCATED_MESSAGE
       );
     });
   });
@@ -152,18 +164,8 @@ describe('When using the `ResponseActionFileDownloadLink` component', () => {
     });
   });
 
-  it('should show nothing if user does not have authz', () => {
-    const privileges = useUserPrivilegesMock();
-
-    useUserPrivilegesMock.mockImplementationOnce(() => {
-      return {
-        ...privileges,
-        endpointPrivileges: {
-          ...privileges.endpointPrivileges,
-          canWriteFileOperations: false,
-        },
-      };
-    });
+  it('should show nothing if user does not have permission', () => {
+    renderProps.canAccessFileDownloadLink = false;
 
     render();
 

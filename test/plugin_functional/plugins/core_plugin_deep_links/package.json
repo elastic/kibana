@@ -1,5 +1,5 @@
 {
-  "name": "core_plugin_deep_links",
+  "name": "@kbn/core-plugin-deep-links-plugin",
   "version": "1.0.0",
   "main": "target/test/plugin_functional/plugins/core_plugin_deep_links",
   "kibana": {

@@ -1,0 +1,17 @@
+{
+  "type": "plugin",
+  "id": "@kbn/screenshotting-example-plugin",
+  "owner": "@elastic/appex-sharedux",
+  "description": "An example integration with the screenshotting plugin.",
+  "plugin": {
+    "id": "screenshottingExample",
+    "server": true,
+    "browser": true,
+    "requiredPlugins": [
+      "screenshotting",
+      "developerExamples",
+      "kibanaReact",
+      "navigation"
+    ]
+  }
+}

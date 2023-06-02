@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import React, { useEffect, useCallback, useMemo } from 'react';
 import {
   EuiFlexGroup,
@@ -16,6 +15,7 @@ import {
   EuiToolTip,
   EuiPanel,
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { ALERT_ICONS } from '../../../common/constants';
 import {
   ProcessEvent,
@@ -47,7 +47,6 @@ export const ProcessTreeAlert = ({
   const styles = useStyles({ isInvestigated, isSelected });
 
   const { event } = alert;
-
   const { uuid, rule, workflow_status: status } = alert.kibana?.alert || {};
   const category = event?.category?.[0];
   const alertIconType = useMemo(() => {
@@ -80,6 +79,7 @@ export const ProcessTreeAlert = ({
   const processEventAlertCategory = category ?? ProcessEventAlertCategory.process;
   const alertCategoryDetailDisplayText = getAlertCategoryDisplayText(alert, category);
   const alertIconTooltipContent = getAlertIconTooltipContent(processEventAlertCategory);
+  const eventType = Array.isArray(event?.type) ? event?.type?.[0] : event?.type;
 
   return (
     <div key={uuid} css={styles.alert} data-id={uuid}>
@@ -138,6 +138,13 @@ export const ProcessTreeAlert = ({
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiBadge css={styles.actionBadge}>{event?.action}</EuiBadge>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          {eventType === 'denied' && (
+            <EuiBadge css={styles.actionBadge} color="danger">
+              <FormattedMessage id="xpack.sessionView.blockedBadge" defaultMessage="Blocked" />
+            </EuiBadge>
+          )}
         </EuiFlexItem>
       </EuiFlexGroup>
     </div>

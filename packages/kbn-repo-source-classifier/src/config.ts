@@ -19,6 +19,7 @@ export const RANDOM_TEST_FILE_NAMES = new Set([
   'enzyme_helpers',
   'fixtures',
   'testbed',
+  'jest.config',
 ]);
 
 // tags are found in filenames after a `.`, like `name.tag.ts`

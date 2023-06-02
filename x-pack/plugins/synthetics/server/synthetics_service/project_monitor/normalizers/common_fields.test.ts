@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { flattenAndFormatObject } from './common_fields';
+import {
+  flattenAndFormatObject,
+  getNormalizeCommonFields,
+  NormalizedProjectProps,
+} from './common_fields';
 
 describe('normalizeYamlConfig', () => {
   it('does not continue flattening when encountering an array', () => {
@@ -61,6 +65,136 @@ describe('normalizeYamlConfig', () => {
     expect(flattenAndFormatObject(nestedObject, '', supportedKeys)).toEqual({
       'a.nested.key': 'value1',
       'b.nested.key': 'value2',
+    });
+  });
+});
+
+describe('getNormalizeCommonFields', () => {
+  it.each([true, false, undefined, null])(
+    'handles configuring monitor alert config when defined',
+    (statusEnabled) => {
+      const locations = [
+        {
+          label: 'US North America',
+          id: 'us_central',
+          isServiceManaged: true,
+        },
+      ];
+      const config = {
+        locations,
+        privateLocations: [],
+        projectId: 'test-projectId',
+        monitor: {
+          name: 'A monitor',
+          id: 'test-id',
+          type: 'http',
+          urls: 'https://elastic.co',
+          locations: ['us_central'],
+          schedule: 3,
+          alert: {
+            status: {
+              enabled: statusEnabled,
+            },
+          },
+        },
+        namespace: 'test-namespace',
+        version: '8.7.0',
+      };
+      const normalizedFields = getNormalizeCommonFields(config as NormalizedProjectProps); // typecasting to allow testing of invalid user configs
+      expect(normalizedFields).toEqual({
+        errors: [],
+        normalizedFields: {
+          alert: {
+            status: {
+              enabled: statusEnabled ?? true,
+            },
+          },
+          custom_heartbeat_id: 'test-id-test-projectId-test-namespace',
+          enabled: true,
+          hash: '',
+          journey_id: 'test-id',
+          locations: [
+            {
+              geo: undefined,
+              id: 'us_central',
+              isServiceManaged: true,
+              label: 'US North America',
+            },
+          ],
+          name: 'A monitor',
+          namespace: 'test_namespace',
+          origin: 'project',
+          original_space: 'test-namespace',
+          project_id: 'test-projectId',
+          schedule: {
+            number: '3',
+            unit: 'm',
+          },
+          tags: [],
+          timeout: '16',
+          params: '',
+        },
+      });
+    }
+  );
+
+  it('handles configuring monitor alert config when alert config is not defined', () => {
+    const locations = [
+      {
+        label: 'US North America',
+        id: 'us_central',
+        isServiceManaged: true,
+      },
+    ];
+    const config = {
+      locations,
+      privateLocations: [],
+      projectId: 'test-projectId',
+      monitor: {
+        name: 'A monitor',
+        id: 'test-id',
+        type: 'http',
+        urls: 'https://elastic.co',
+        locations: ['us_central'],
+        schedule: 3,
+      },
+      namespace: 'test-namespace',
+      version: '8.7.0',
+    };
+    const normalizedFields = getNormalizeCommonFields(config as NormalizedProjectProps); // typecasting to allow testing of invalid user configs
+    expect(normalizedFields).toEqual({
+      errors: [],
+      normalizedFields: {
+        alert: {
+          status: {
+            enabled: true,
+          },
+        },
+        custom_heartbeat_id: 'test-id-test-projectId-test-namespace',
+        enabled: true,
+        hash: '',
+        journey_id: 'test-id',
+        locations: [
+          {
+            geo: undefined,
+            id: 'us_central',
+            isServiceManaged: true,
+            label: 'US North America',
+          },
+        ],
+        name: 'A monitor',
+        namespace: 'test_namespace',
+        origin: 'project',
+        original_space: 'test-namespace',
+        project_id: 'test-projectId',
+        schedule: {
+          number: '3',
+          unit: 'm',
+        },
+        tags: [],
+        timeout: '16',
+        params: '',
+      },
     });
   });
 });

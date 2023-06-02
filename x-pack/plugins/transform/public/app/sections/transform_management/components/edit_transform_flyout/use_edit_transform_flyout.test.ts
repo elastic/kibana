@@ -196,24 +196,33 @@ describe('Transform: formReducerFactory()', () => {
     const reducer = formReducerFactory(transformConfigMock);
 
     const state1 = reducer(getDefaultState(transformConfigMock), {
-      field: 'description',
-      value: 'the-updated-description',
+      name: 'form_field',
+      payload: {
+        field: 'description',
+        value: 'the-updated-description',
+      },
     });
 
     expect(state1.isFormTouched).toBe(true);
     expect(state1.isFormValid).toBe(true);
 
     const state2 = reducer(state1, {
-      field: 'description',
-      value: transformConfigMock.description as string,
+      name: 'form_field',
+      payload: {
+        field: 'description',
+        value: transformConfigMock.description as string,
+      },
     });
 
     expect(state2.isFormTouched).toBe(false);
     expect(state2.isFormValid).toBe(true);
 
     const state3 = reducer(state2, {
-      field: 'frequency',
-      value: 'the-invalid-value',
+      name: 'form_field',
+      payload: {
+        field: 'frequency',
+        value: 'the-invalid-value',
+      },
     });
 
     expect(state3.isFormTouched).toBe(true);

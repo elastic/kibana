@@ -25,11 +25,13 @@ import {
   EuiContextMenu,
   EuiButton,
   EuiBadge,
+  EuiCodeBlock,
 } from '@elastic/eui';
 
 import { Pipeline } from '../../../../common/types';
 
 import { PipelineDetailsJsonBlock } from './details_json_block';
+import { stringifyJson } from '../../lib/utils';
 
 export interface Props {
   pipeline: Pipeline;
@@ -183,6 +185,21 @@ export const PipelineDetailsFlyout: FunctionComponent<Props> = ({
               </EuiDescriptionListTitle>
               <EuiDescriptionListDescription>
                 <PipelineDetailsJsonBlock json={pipeline.on_failure} />
+              </EuiDescriptionListDescription>
+            </>
+          )}
+
+          {/* Metadata (optional) */}
+          {pipeline._meta && (
+            <>
+              <EuiDescriptionListTitle data-test-subj="metaTitle">
+                <FormattedMessage
+                  id="xpack.ingestPipelines.list.pipelineDetails.metaDescriptionListTitle"
+                  defaultMessage="Metadata"
+                />
+              </EuiDescriptionListTitle>
+              <EuiDescriptionListDescription>
+                <EuiCodeBlock language="json">{stringifyJson(pipeline._meta, false)}</EuiCodeBlock>
               </EuiDescriptionListDescription>
             </>
           )}

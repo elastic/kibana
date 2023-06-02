@@ -66,6 +66,7 @@ export const StepImageCaption: React.FC<StepImageCaptionProps> = ({
           <EuiFlexGroup alignItems="center" justifyContent="center">
             <EuiFlexItem grow={true}>
               <EuiButtonEmpty
+                data-test-subj="syntheticsStepImageCaptionButton"
                 css={{ marginLeft: isSmall ? 0 : 'auto' }}
                 disabled={stepNumber === 1}
                 onClick={(evt: MouseEvent<HTMLButtonElement>) => {
@@ -84,6 +85,7 @@ export const StepImageCaption: React.FC<StepImageCaptionProps> = ({
             </EuiFlexItem>
             <EuiFlexItem grow={true}>
               <EuiButtonEmpty
+                data-test-subj="syntheticsStepImageCaptionButton"
                 css={{ marginRight: isSmall ? 0 : 'auto' }}
                 disabled={stepNumber === maxSteps}
                 onClick={(evt: MouseEvent<HTMLButtonElement>) => {

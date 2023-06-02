@@ -10,14 +10,15 @@ optionally collect metrics about {kib}.
 
 [IMPORTANT]
 =========================
-{metricbeat} is the recommended method for collecting and shipping monitoring
-data to a monitoring cluster.
+{agent} and {metricbeat} are the recommended methods for collecting and shipping
+monitoring data to a monitoring cluster.
 
 If you have previously configured legacy collection methods, you should migrate
-to using {metricbeat} collection methods. Use either {metricbeat} collection or
-legacy collection methods; do not use both.
+to using {agent} or {metricbeat} collection. Do not use legacy collection
+alongside other collection methods.
 
-For the recommended method, refer to <<monitoring-metricbeat>>.
+For more information, refer to <<monitoring-elastic-agent>> and
+<<monitoring-metricbeat>>.
 =========================
 
 The following method involves sending the metrics to the production cluster,

@@ -24,7 +24,6 @@ export enum ProfilingESField {
   StackframeFunctionName = 'Stackframe.function.name',
   StackframeLineNumber = 'Stackframe.line.number',
   StackframeFunctionOffset = 'Stackframe.function.offset',
-  StackframeSourceType = 'Stackframe.source.type',
   ExecutableBuildID = 'Executable.build.id',
   ExecutableFileName = 'Executable.file.name',
 }
@@ -83,7 +82,6 @@ export type ProfilingStackFrame = DedotObject<{
   [ProfilingESField.StackframeFunctionName]: string;
   [ProfilingESField.StackframeLineNumber]: number;
   [ProfilingESField.StackframeFunctionOffset]: number;
-  [ProfilingESField.StackframeSourceType]: number;
 }>;
 
 export type ProfilingExecutable = DedotObject<{

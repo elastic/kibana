@@ -11,7 +11,7 @@ import Path from 'path';
 
 import { createFailError } from '@kbn/dev-cli-errors';
 import { run } from '@kbn/dev-cli-runner';
-import { REPO_ROOT } from '@kbn/utils';
+import { REPO_ROOT } from '@kbn/repo-info';
 
 const FLAGS_FILE = 'packages/kbn-test/src/jest/jest_flags.json';
 

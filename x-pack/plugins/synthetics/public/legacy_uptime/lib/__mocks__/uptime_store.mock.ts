@@ -6,7 +6,6 @@
  */
 
 import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../../common/constants';
-import { DEFAULT_THROTTLING } from '../../../../common/runtime_types';
 import { AppState } from '../../state';
 
 /**
@@ -60,34 +59,6 @@ export const mockState: AppState = {
       summaries: [],
     },
     loading: false,
-    refreshedMonitorIds: [],
-  },
-  monitorManagementList: {
-    throttling: DEFAULT_THROTTLING,
-    list: {
-      page: 1,
-      perPage: 10,
-      total: null,
-      monitors: [],
-      syncErrors: null,
-      absoluteTotal: 0,
-    },
-    locations: [],
-    loading: {
-      monitorList: false,
-      serviceLocations: false,
-      enablement: false,
-    },
-    error: {
-      monitorList: null,
-      serviceLocations: null,
-      enablement: null,
-    },
-    enablement: null,
-    syntheticsService: {
-      loading: false,
-      signupUrl: null,
-    },
   },
   ml: {
     mlJob: {
@@ -127,6 +98,4 @@ export const mockState: AppState = {
     cacheSize: 0,
     hitCount: [],
   },
-  testNowRuns: {},
-  agentPolicies: { loading: false, data: null, error: null },
 };

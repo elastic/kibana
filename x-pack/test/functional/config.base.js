@@ -14,7 +14,7 @@ import { pageObjects } from './page_objects';
 // This hash comes from the latest successful build of the Production Distribution of the Package Registry, for
 // example: https://internal-ci.elastic.co/blue/organizations/jenkins/package_storage%2Findexing-job/detail/main/1884/pipeline/147.
 // It should be updated any time there is a new package published.
-export const dockerImage = 'docker.elastic.co/package-registry/distribution:production';
+export const dockerImage = 'docker.elastic.co/package-registry/distribution:lite';
 
 // the default export of config files must be a config provider
 // that returns an object with the projects config values
@@ -54,7 +54,7 @@ export default async function ({ readConfigFile }) {
         '--xpack.encryptedSavedObjects.encryptionKey="DkdXazszSCYexXqz4YktBGHCRkV6hyNK"',
         '--xpack.discoverEnhanced.actions.exploreDataInContextMenu.enabled=true',
         '--savedObjects.maxImportPayloadBytes=10485760', // for OSS test management/_import_objects,
-        '--uiSettings.overrides.observability:enableNewSyntheticsView=true', // for OSS test management/_import_objects,
+        '--savedObjects.allowHttpApiAccess=false', // override default to not allow hiddenFromHttpApis saved objects access to the http APIs see https://github.com/elastic/dev/issues/2200
       ],
     },
     uiSettings: {
@@ -177,6 +177,9 @@ export default async function ({ readConfigFile }) {
       },
       triggersActions: {
         pathname: '/app/management/insightsAndAlerting/triggersActions',
+      },
+      maintenanceWindows: {
+        pathname: '/app/management/insightsAndAlerting/maintenanceWindows',
       },
     },
 
@@ -461,7 +464,7 @@ export default async function ({ readConfigFile }) {
           elasticsearch: {
             indices: [
               {
-                names: ['rollup-*'],
+                names: ['rollup-*', 'regular-index*'],
                 privileges: ['read', 'view_index_metadata'],
               },
             ],
@@ -633,6 +636,45 @@ export default async function ({ readConfigFile }) {
             },
           ],
           elasticsearch: {
+            indices: [
+              {
+                names: ['*'],
+                privileges: ['all'],
+              },
+            ],
+          },
+        },
+
+        slo_all: {
+          kibana: [
+            {
+              feature: {
+                slo: ['all'],
+              },
+              spaces: ['*'],
+            },
+          ],
+          elasticsearch: {
+            cluster: ['all'],
+            indices: [
+              {
+                names: ['*'],
+                privileges: ['all'],
+              },
+            ],
+          },
+        },
+        slo_read_only: {
+          kibana: [
+            {
+              feature: {
+                slo: ['read'],
+              },
+              spaces: ['*'],
+            },
+          ],
+          elasticsearch: {
+            cluster: ['all'],
             indices: [
               {
                 names: ['*'],

@@ -28,19 +28,28 @@ export const Template: FunctionComponent<Props> = ({
     i18n,
     bootstrapScriptUrl,
     strictCsp,
+    customBranding,
   },
 }) => {
+  const title = customBranding.pageTitle ?? 'Elastic';
+  const favIcon = customBranding.faviconSVG ?? `${uiPublicUrl}/favicons/favicon.svg`;
+  const favIconPng = customBranding.faviconPNG ?? `${uiPublicUrl}/favicons/favicon.png`;
+  const logo = customBranding.logo ? (
+    <img src={customBranding.logo} width="64" height="64" alt="logo" />
+  ) : (
+    <Logo />
+  );
   return (
     <html lang={locale}>
       <head>
         <meta charSet="utf-8" />
         <meta httpEquiv="X-UA-Compatible" content="IE=edge,chrome=1" />
         <meta name="viewport" content="width=device-width" />
-        <title>Elastic</title>
+        <title>{title}</title>
         <Fonts url={uiPublicUrl} />
         {/* The alternate icon is a fallback for Safari which does not yet support SVG favicons */}
-        <link rel="alternate icon" type="image/png" href={`${uiPublicUrl}/favicons/favicon.png`} />
-        <link rel="icon" type="image/svg+xml" href={`${uiPublicUrl}/favicons/favicon.svg`} />
+        <link rel="alternate icon" type="image/png" href={favIconPng} />
+        <link rel="icon" type="image/svg+xml" href={favIcon} />
         <meta name="theme-color" content="#ffffff" />
         <meta name="color-scheme" content="light dark" />
         {/* Inject EUI reset and global styles before all other component styles */}
@@ -63,7 +72,7 @@ export const Template: FunctionComponent<Props> = ({
           data-test-subj="kbnLoadingMessage"
         >
           <div className="kbnLoaderWrap">
-            <Logo />
+            {logo}
             <div
               className="kbnWelcomeText"
               data-error-message={i18n('core.ui.welcomeErrorMessage', {
@@ -71,14 +80,16 @@ export const Template: FunctionComponent<Props> = ({
                   'Elastic did not load properly. Check the server output for more information.',
               })}
             >
-              {i18n('core.ui.welcomeMessage', { defaultMessage: 'Loading Elastic' })}
+              {i18n('core.ui.welcomeMessage', {
+                defaultMessage: 'Loading Elastic',
+              })}
             </div>
             <div className="kbnProgress" />
           </div>
         </div>
 
         <div className="kbnWelcomeView" id="kbn_legacy_browser_error" style={{ display: 'none' }}>
-          <Logo />
+          {logo}
 
           <h2 className="kbnWelcomeTitle">
             {i18n('core.ui.legacyBrowserTitle', {

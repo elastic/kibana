@@ -17,4 +17,17 @@ export const NO_FINDINGS_STATUS_TEST_SUBJ = {
   INDEXING: 'status-api-indexing',
   INDEX_TIMEOUT: 'status-api-index-timeout',
   UNPRIVILEGED: 'status-api-unprivileged',
+  NO_FINDINGS: 'no-findings-found',
 };
+
+export const EMPTY_STATE_TEST_SUBJ = 'csp:empty-state';
+export const NO_VULNERABILITIES_STATUS_TEST_SUBJ = {
+  SCANNING_VULNERABILITIES: 'scanning-vulnerabilities-empty-prompt',
+  NOT_INSTALLED: 'cnvm-integration-not-installed',
+  NOT_DEPLOYED: 'agent-not-deployed-vuln-mgmt',
+  UNPRIVILEGED: 'status-api-vuln-mgmt-unprivileged',
+  NO_VULNERABILITIES: 'no-vulnerabilities-vuln-mgmt-found',
+  INDEX_TIMEOUT: 'vulnerabilities-timeout',
+};
+
+export const VULNERABILITIES_CONTAINER_TEST_SUBJ = 'vulnerabilities_container';

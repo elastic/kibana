@@ -14,13 +14,13 @@ import {
 
 const THREAT_INTEL_PATH = '/app/security/threat_intelligence/';
 
-before(() => {
-  login();
-});
-
-describe('Empty Page', () => {
-  it('should render the empty page with link to docs and integrations', () => {
+describe('Empty Page', { testIsolation: false }, () => {
+  before(() => {
+    login();
     cy.visit(THREAT_INTEL_PATH);
+  });
+
+  it('should render the empty page with link to docs and integrations', () => {
     cy.get(EMPTY_PAGE_BODY).should('be.visible');
     cy.get(EMPTY_PAGE_DOCS_LINK).should('be.visible');
     cy.get(EMPTY_PAGE_INTEGRATIONS_LINK).should('be.visible');

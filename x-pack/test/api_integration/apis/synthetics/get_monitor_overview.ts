@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { SimpleSavedObject } from '@kbn/core/public';
 import {
   ConfigKey,
@@ -14,11 +14,10 @@ import {
 import { SYNTHETICS_API_URLS, API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { getFixtureJson } from '../uptime/rest/helper/get_fixture_json';
+import { getFixtureJson } from './helper/get_fixture_json';
 
 export default function ({ getService }: FtrProviderContext) {
-  // Failing: See https://github.com/elastic/kibana/issues/146014
-  describe.skip('GetMonitorsOverview', function () {
+  describe('GetMonitorsOverview', function () {
     this.tags('skipCloud');
 
     const supertest = getService('supertest');
@@ -28,8 +27,8 @@ export default function ({ getService }: FtrProviderContext) {
     const username = 'admin';
     const roleName = `synthetics_admin`;
     const password = `${username}-password`;
-    const SPACE_ID = `test-space-${uuid.v4()}`;
-    const SPACE_NAME = `test-space-name ${uuid.v4()}`;
+    const SPACE_ID = `test-space-${uuidv4()}`;
+    const SPACE_NAME = `test-space-name ${uuidv4()}`;
 
     let _monitors: MonitorFields[];
     let monitors: MonitorFields[];
@@ -56,7 +55,7 @@ export default function ({ getService }: FtrProviderContext) {
     };
 
     before(async () => {
-      await supertest.post(API_URLS.SYNTHETICS_ENABLEMENT).set('kbn-xsrf', 'true').expect(200);
+      await supertest.put(API_URLS.SYNTHETICS_ENABLEMENT).set('kbn-xsrf', 'true').expect(200);
       await kibanaServer.spaces.create({ id: SPACE_ID, name: SPACE_NAME });
       await security.role.create(roleName, {
         kibana: [
@@ -170,9 +169,9 @@ export default function ({ getService }: FtrProviderContext) {
         );
         savedMonitors = savedResponse;
 
-        const apiResponse = await supertest.get(
-          `/s/${SPACE_ID}${SYNTHETICS_API_URLS.SYNTHETICS_OVERVIEW}`
-        );
+        const apiResponse = await supertest
+          .get(`/s/${SPACE_ID}${SYNTHETICS_API_URLS.SYNTHETICS_OVERVIEW}`)
+          .query({ sortField: 'status' });
         expect(apiResponse.body.monitors).eql([
           {
             id: savedMonitors[0].attributes[ConfigKey.MONITOR_QUERY_ID],
@@ -180,7 +179,7 @@ export default function ({ getService }: FtrProviderContext) {
             name: 'test monitor a',
             location: {
               id: 'eu-west-01',
-              label: 'Europe West',
+              label: 'Europe East',
               geo: {
                 lat: 33.2343132435,
                 lon: 73.2342343434,
@@ -189,6 +188,9 @@ export default function ({ getService }: FtrProviderContext) {
               isServiceManaged: true,
             },
             isEnabled: true,
+            isStatusAlertEnabled: true,
+            tags: ['tag1', 'tag2'],
+            type: 'http',
           },
           {
             id: savedMonitors[0].attributes[ConfigKey.MONITOR_QUERY_ID],
@@ -205,6 +207,9 @@ export default function ({ getService }: FtrProviderContext) {
               isServiceManaged: true,
             },
             isEnabled: true,
+            isStatusAlertEnabled: true,
+            tags: ['tag1', 'tag2'],
+            type: 'http',
           },
           {
             id: savedMonitors[1].attributes[ConfigKey.MONITOR_QUERY_ID],
@@ -212,7 +217,7 @@ export default function ({ getService }: FtrProviderContext) {
             name: 'test monitor b',
             location: {
               id: 'eu-west-01',
-              label: 'Europe West',
+              label: 'Europe East',
               geo: {
                 lat: 33.2343132435,
                 lon: 73.2342343434,
@@ -221,6 +226,9 @@ export default function ({ getService }: FtrProviderContext) {
               isServiceManaged: true,
             },
             isEnabled: true,
+            isStatusAlertEnabled: true,
+            tags: ['tag1', 'tag2'],
+            type: 'http',
           },
           {
             id: savedMonitors[1].attributes[ConfigKey.MONITOR_QUERY_ID],
@@ -237,6 +245,9 @@ export default function ({ getService }: FtrProviderContext) {
               isServiceManaged: true,
             },
             isEnabled: true,
+            isStatusAlertEnabled: true,
+            tags: ['tag1', 'tag2'],
+            type: 'http',
           },
         ]);
         expect(savedMonitors[1].attributes[ConfigKey.MONITOR_QUERY_ID]).eql(customHeartbeatId);

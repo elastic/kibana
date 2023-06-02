@@ -10,6 +10,7 @@ import { cloneDeep } from 'lodash';
 import { AlertInstanceContext, AlertInstanceState } from '../types';
 import { Alert, PublicAlert } from './alert';
 import { processAlerts } from '../lib';
+import { DISABLE_FLAPPING_SETTINGS } from '../../common/rules_settings';
 
 export interface AlertFactory<
   State extends AlertInstanceState,
@@ -52,6 +53,7 @@ export interface CreateAlertFactoryOpts<
   alerts: Record<string, Alert<State, Context>>;
   logger: Logger;
   maxAlerts: number;
+  autoRecoverAlerts: boolean;
   canSetRecoveryContext?: boolean;
 }
 
@@ -63,6 +65,7 @@ export function createAlertFactory<
   alerts,
   logger,
   maxAlerts,
+  autoRecoverAlerts,
   canSetRecoveryContext = false,
 }: CreateAlertFactoryOpts<State, Context>): AlertFactory<State, Context, ActionGroupIds> {
   // Keep track of which alerts we started with so we can determine which have recovered
@@ -128,6 +131,12 @@ export function createAlertFactory<
             );
             return [];
           }
+          if (!autoRecoverAlerts) {
+            logger.debug(
+              `Set autoRecoverAlerts to true on rule type to get access to recovered alerts.`
+            );
+            return [];
+          }
 
           const { currentRecoveredAlerts } = processAlerts<
             State,
@@ -140,8 +149,11 @@ export function createAlertFactory<
             previouslyRecoveredAlerts: {},
             hasReachedAlertLimit,
             alertLimit: maxAlerts,
-            // setFlapping is false, as we only want to use this function to get the recovered alerts
-            setFlapping: false,
+            autoRecoverAlerts,
+            // flappingSettings.enabled is false, as we only want to use this function to get the recovered alerts
+            flappingSettings: DISABLE_FLAPPING_SETTINGS,
+            // no maintenance window IDs are passed as we only want to use this function to get recovered alerts
+            maintenanceWindowIds: [],
           });
           return Object.keys(currentRecoveredAlerts ?? {}).map(
             (alertId: string) => currentRecoveredAlerts[alertId]

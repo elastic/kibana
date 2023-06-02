@@ -12,7 +12,6 @@ import { createMemoryHistory } from 'history';
 import type { RenderOptions, RenderResult } from '@testing-library/react';
 import { render as reactRender } from '@testing-library/react';
 import type { Action, Reducer, Store } from 'redux';
-import type { AppDeepLink } from '@kbn/core/public';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { coreMock } from '@kbn/core/public/mocks';
 import { PLUGIN_ID } from '@kbn/fleet-plugin/common';
@@ -24,7 +23,9 @@ import type {
 } from '@testing-library/react-hooks/src/types/react';
 import type { UseBaseQueryResult } from '@tanstack/react-query';
 import ReactDOM from 'react-dom';
-import { tGridReducer } from '@kbn/timelines-plugin/public';
+import type { AppLinkItems } from '../../links/types';
+import { ExperimentalFeaturesService } from '../../experimental_features_service';
+import { applyIntersectionObserverMock } from '../intersection_observer_mock';
 import { ConsoleManager } from '../../../management/components/console';
 import type { StartPlugins, StartServices } from '../../../types';
 import { depsStartMock } from './dependencies_start_mock';
@@ -40,8 +41,9 @@ import { SUB_PLUGINS_REDUCER, mockGlobalState, createSecuritySolutionStorageMock
 import type { ExperimentalFeatures } from '../../../../common/experimental_features';
 import { APP_UI_ID, APP_PATH } from '../../../../common/constants';
 import { KibanaContextProvider, KibanaServices } from '../../lib/kibana';
-import { getDeepLinks } from '../../../app/deep_links';
-import { fleetGetPackageListHttpMock } from '../../../management/mocks';
+import { links } from '../../links/app_links';
+import { fleetGetPackageHttpMock } from '../../../management/mocks';
+import { allowedExperimentalValues } from '../../../../common/experimental_features';
 
 const REAL_REACT_DOM_CREATE_PORTAL = ReactDOM.createPortal;
 
@@ -155,6 +157,11 @@ export interface AppContextTestRender {
    * @param flags
    */
   setExperimentalFlag: (flags: Partial<ExperimentalFeatures>) => void;
+
+  /**
+   * The React Query client (setup to support jest testing)
+   */
+  queryClient: QueryClient;
 }
 
 // Defined a private custom reducer that reacts to an action that enables us to update the
@@ -205,14 +212,10 @@ export const createAppRootMockRenderer = (): AppContextTestRender => {
     app: experimentalFeaturesReducer,
   };
 
-  const store = createStore(
-    mockGlobalState,
-    storeReducer,
-    { dataTable: tGridReducer },
-    kibanaObservable,
-    storage,
-    [...managementMiddlewareFactory(coreStart, depsStart), middlewareSpy.actionSpyMiddleware]
-  );
+  const store = createStore(mockGlobalState, storeReducer, kibanaObservable, storage, [
+    ...managementMiddlewareFactory(coreStart, depsStart),
+    middlewareSpy.actionSpyMiddleware,
+  ]);
 
   const queryClient = new QueryClient({
     defaultOptions: {
@@ -244,6 +247,8 @@ export const createAppRootMockRenderer = (): AppContextTestRender => {
   );
 
   const render: UiRender = (ui, options) => {
+    applyIntersectionObserverMock();
+
     return reactRender(ui, {
       wrapper: AppWrapper,
       ...options,
@@ -279,7 +284,16 @@ export const createAppRootMockRenderer = (): AppContextTestRender => {
     return hookResult.current;
   };
 
+  ExperimentalFeaturesService.init({ experimentalFeatures: allowedExperimentalValues });
+
   const setExperimentalFlag: AppContextTestRender['setExperimentalFlag'] = (flags) => {
+    ExperimentalFeaturesService.init({
+      experimentalFeatures: {
+        ...allowedExperimentalValues,
+        ...flags,
+      },
+    });
+
     store.dispatch({
       type: UpdateExperimentalFeaturesTestActionType,
       payload: flags,
@@ -292,6 +306,7 @@ export const createAppRootMockRenderer = (): AppContextTestRender => {
   const globalKibanaServicesParams = {
     ...startServices,
     kibanaVersion: '8.0.0',
+    kibanaBranch: 'main',
   };
 
   if (jest.isMockFunction(KibanaServices.get)) {
@@ -315,6 +330,7 @@ export const createAppRootMockRenderer = (): AppContextTestRender => {
     renderHook,
     renderReactQueryHook,
     setExperimentalFlag,
+    queryClient,
   };
 };
 
@@ -323,7 +339,7 @@ const createCoreStartMock = (
 ): ReturnType<typeof coreMock.createStart> => {
   const coreStart = coreMock.createStart({ basePath: '/mock' });
 
-  const deepLinkPaths = getDeepLinkPaths(getDeepLinks(mockGlobalState.app.enableExperimental));
+  const linkPaths = getLinksPaths(links);
 
   // Mock the certain APP Ids returned by `application.getUrlForApp()`
   coreStart.application.getUrlForApp.mockImplementation((appId, { deepLinkId, path } = {}) => {
@@ -331,9 +347,9 @@ const createCoreStartMock = (
       case PLUGIN_ID:
         return '/app/fleet';
       case APP_UI_ID:
-        return `${APP_PATH}${
-          deepLinkId && deepLinkPaths[deepLinkId] ? deepLinkPaths[deepLinkId] : ''
-        }${path ?? ''}`;
+        return `${APP_PATH}${deepLinkId && linkPaths[deepLinkId] ? linkPaths[deepLinkId] : ''}${
+          path ?? ''
+        }`;
       default:
         return `${appId} not mocked!`;
     }
@@ -342,7 +358,7 @@ const createCoreStartMock = (
   coreStart.application.navigateToApp.mockImplementation((appId, { deepLinkId, path } = {}) => {
     if (appId === APP_UI_ID) {
       history.push(
-        `${deepLinkId && deepLinkPaths[deepLinkId] ? deepLinkPaths[deepLinkId] : ''}${path ?? ''}`
+        `${deepLinkId && linkPaths[deepLinkId] ? linkPaths[deepLinkId] : ''}${path ?? ''}`
       );
     }
     return Promise.resolve();
@@ -356,13 +372,13 @@ const createCoreStartMock = (
   return coreStart;
 };
 
-const getDeepLinkPaths = (deepLinks: AppDeepLink[]): Record<string, string> => {
-  return deepLinks.reduce((result: Record<string, string>, deepLink) => {
-    if (deepLink.path) {
-      result[deepLink.id] = deepLink.path;
+const getLinksPaths = (appLinks: AppLinkItems): Record<string, string> => {
+  return appLinks.reduce((result: Record<string, string>, link) => {
+    if (link.path) {
+      result[link.id] = link.path;
     }
-    if (deepLink.deepLinks) {
-      return { ...result, ...getDeepLinkPaths(deepLink.deepLinks) };
+    if (link.links) {
+      return { ...result, ...getLinksPaths(link.links) };
     }
     return result;
   }, {});
@@ -372,5 +388,5 @@ const applyDefaultCoreHttpMocks = (http: AppContextTestRender['coreStart']['http
   // Need to mock getting the endpoint package from the fleet API because it is used as soon
   // as the store middleware for Endpoint list is initialized, thus mocking it here would avoid
   // unnecessary errors being output to the console
-  fleetGetPackageListHttpMock(http, { ignoreUnMockedApiRouteErrors: true });
+  fleetGetPackageHttpMock(http, { ignoreUnMockedApiRouteErrors: true });
 };

@@ -23,7 +23,9 @@ import {
   SavedObjectsManagementColumnServiceStart,
 } from './services';
 
-import { SavedObjectManagementTypeInfo, SavedObjectGetRelationshipsResponse } from './types';
+import type { v1 } from '../common';
+
+import { SavedObjectManagementTypeInfo } from './types';
 import {
   getAllowedTypes,
   getRelationships,
@@ -46,7 +48,7 @@ export interface SavedObjectsManagementPluginStart {
     type: string,
     id: string,
     savedObjectTypes: string[]
-  ) => Promise<SavedObjectGetRelationshipsResponse>;
+  ) => Promise<v1.RelationshipsResponseHTTP>;
   getSavedObjectLabel: typeof getSavedObjectLabel;
   getDefaultTitle: typeof getDefaultTitle;
   parseQuery: typeof parseQuery;

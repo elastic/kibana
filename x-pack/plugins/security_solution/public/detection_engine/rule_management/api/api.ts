@@ -5,19 +5,22 @@
  * 2.0.
  */
 
-import { camelCase } from 'lodash';
 import type {
   CreateRuleExceptionListItemSchema,
   ExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
-
+import { INTERNAL_ALERTING_API_FIND_RULES_PATH } from '@kbn/alerting-plugin/common';
+import type { BulkInstallPackagesResponse } from '@kbn/fleet-plugin/common';
+import { epmRouteService } from '@kbn/fleet-plugin/common';
+import type { InstallPackageResponse } from '@kbn/fleet-plugin/common/types';
+import type { RuleManagementFiltersResponse } from '../../../../common/detection_engine/rule_management/api/rules/filters/response_schema';
+import { RULE_MANAGEMENT_FILTERS_URL } from '../../../../common/detection_engine/rule_management/api/urls';
 import type { BulkActionsDryRunErrCode } from '../../../../common/constants';
 import {
   DETECTION_ENGINE_RULES_BULK_ACTION,
   DETECTION_ENGINE_RULES_PREVIEW,
   DETECTION_ENGINE_RULES_URL,
   DETECTION_ENGINE_RULES_URL_FIND,
-  DETECTION_ENGINE_TAGS_URL,
 } from '../../../../common/constants';
 
 import {
@@ -33,7 +36,6 @@ import type {
   BulkActionDuplicatePayload,
 } from '../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
 import { BulkActionType } from '../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
-
 import type {
   RuleResponse,
   PreviewResponse,
@@ -45,6 +47,7 @@ import type {
   CreateRulesProps,
   ExportDocumentsProps,
   FetchRuleProps,
+  FetchRuleSnoozingProps,
   FetchRulesProps,
   FetchRulesResponse,
   FindRulesReferencedByExceptionsProps,
@@ -54,6 +57,8 @@ import type {
   PrePackagedRulesStatusResponse,
   PreviewRulesProps,
   Rule,
+  RulesSnoozeSettingsBatchResponse,
+  RulesSnoozeSettingsMap,
   UpdateRulesProps,
 } from '../logic/types';
 import { convertRulesFilterToKQL } from '../logic/utils';
@@ -152,15 +157,10 @@ export const fetchRules = async ({
 }: FetchRulesProps): Promise<FetchRulesResponse> => {
   const filterString = convertRulesFilterToKQL(filterOptions);
 
-  // Sort field is camel cased because we use that in our mapping, but display snake case on the front end
-  const getFieldNameForSortField = (field: string) => {
-    return field === 'name' ? `${field}.keyword` : camelCase(field);
-  };
-
   const query = {
     page: pagination.page,
     per_page: pagination.perPage,
-    sort_field: getFieldNameForSortField(sortingOptions.field),
+    sort_field: sortingOptions.field,
     sort_order: sortingOptions.order,
     ...(filterString !== '' ? { filter: filterString } : {}),
   };
@@ -187,8 +187,48 @@ export const fetchRuleById = async ({ id, signal }: FetchRuleProps): Promise<Rul
     signal,
   });
 
+/**
+ * Fetch rule snooze settings for each provided ruleId
+ *
+ * @param ids Rule IDs (not rule_id)
+ * @param signal to cancel request
+ *
+ * @returns An error if response is not OK
+ */
+export const fetchRulesSnoozeSettings = async ({
+  ids,
+  signal,
+}: FetchRuleSnoozingProps): Promise<RulesSnoozeSettingsMap> => {
+  const response = await KibanaServices.get().http.fetch<RulesSnoozeSettingsBatchResponse>(
+    INTERNAL_ALERTING_API_FIND_RULES_PATH,
+    {
+      method: 'GET',
+      query: {
+        filter: ids.map((x) => `alert.id:"alert:${x}"`).join(' or '),
+        fields: JSON.stringify(['muteAll', 'activeSnoozes', 'isSnoozedUntil', 'snoozeSchedule']),
+        per_page: ids.length,
+      },
+      signal,
+    }
+  );
+
+  return response.data?.reduce((result, { id, ...snoozeSettings }) => {
+    result[id] = {
+      muteAll: snoozeSettings.mute_all ?? false,
+      activeSnoozes: snoozeSettings.active_snoozes ?? [],
+      isSnoozedUntil: snoozeSettings.is_snoozed_until
+        ? new Date(snoozeSettings.is_snoozed_until)
+        : undefined,
+      snoozeSchedule: snoozeSettings.snooze_schedule,
+    };
+
+    return result;
+  }, {} as RulesSnoozeSettingsMap);
+};
+
 export interface BulkActionSummary {
   failed: number;
+  skipped: number;
   succeeded: number;
   total: number;
 }
@@ -197,6 +237,7 @@ export interface BulkActionResult {
   updated: Rule[];
   created: Rule[];
   deleted: Rule[];
+  skipped: Rule[];
 }
 
 export interface BulkActionAggregatedError {
@@ -339,6 +380,7 @@ export const importRules = async ({
   fileToImport,
   overwrite = false,
   overwriteExceptions = false,
+  overwriteActionConnectors = false,
   signal,
 }: ImportDataProps): Promise<ImportDataResponse> => {
   const formData = new FormData();
@@ -349,7 +391,11 @@ export const importRules = async ({
     {
       method: 'POST',
       headers: { 'Content-Type': undefined },
-      query: { overwrite, overwrite_exceptions: overwriteExceptions },
+      query: {
+        overwrite,
+        overwrite_exceptions: overwriteExceptions,
+        overwrite_action_connectors: overwriteActionConnectors,
+      },
       body: formData,
       signal,
     }
@@ -388,17 +434,19 @@ export const exportRules = async ({
   });
 };
 
-export type FetchTagsResponse = string[];
-
 /**
- * Fetch all unique Tags used by Rules
+ * Fetch rule filters related information like installed rules count, tags and etc
  *
  * @param signal to cancel request
  *
  * @throws An error if response is not OK
  */
-export const fetchTags = async ({ signal }: { signal?: AbortSignal }): Promise<FetchTagsResponse> =>
-  KibanaServices.get().http.fetch<FetchTagsResponse>(DETECTION_ENGINE_TAGS_URL, {
+export const fetchRuleManagementFilters = async ({
+  signal,
+}: {
+  signal?: AbortSignal;
+}): Promise<RuleManagementFiltersResponse> =>
+  KibanaServices.get().http.fetch<RuleManagementFiltersResponse>(RULE_MANAGEMENT_FILTERS_URL, {
     method: 'GET',
     signal,
   });
@@ -478,3 +526,61 @@ export const addRuleExceptions = async ({
       signal,
     }
   );
+
+export interface InstallFleetPackageProps {
+  packageName: string;
+  packageVersion: string;
+  prerelease?: boolean;
+  force?: boolean;
+}
+
+/**
+ * Install a Fleet package from the registry
+ *
+ * @param packageName Name of the package to install
+ * @param packageVersion Version of the package to install
+ * @param prerelease Whether to install a prerelease version of the package
+ * @param force Whether to force install the package. If false, the package will only be installed if it is not already installed
+ *
+ * @returns The response from the Fleet API
+ */
+export const installFleetPackage = ({
+  packageName,
+  packageVersion,
+  prerelease = false,
+  force = true,
+}: InstallFleetPackageProps): Promise<InstallPackageResponse> => {
+  return KibanaServices.get().http.post<InstallPackageResponse>(
+    epmRouteService.getInstallPath(packageName, packageVersion),
+    {
+      query: { prerelease },
+      body: JSON.stringify({ force }),
+    }
+  );
+};
+
+export interface BulkInstallFleetPackagesProps {
+  packages: string[];
+  prerelease?: boolean;
+}
+
+/**
+ * Install multiple Fleet packages from the registry
+ *
+ * @param packages Array of package names to install
+ * @param prerelease Whether to install prerelease versions of the packages
+ *
+ * @returns The response from the Fleet API
+ */
+export const bulkInstallFleetPackages = ({
+  packages,
+  prerelease = false,
+}: BulkInstallFleetPackagesProps): Promise<BulkInstallPackagesResponse> => {
+  return KibanaServices.get().http.post<BulkInstallPackagesResponse>(
+    epmRouteService.getBulkInstallPath(),
+    {
+      query: { prerelease },
+      body: JSON.stringify({ packages }),
+    }
+  );
+};

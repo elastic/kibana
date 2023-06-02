@@ -6,13 +6,18 @@
  */
 
 import { CollectorFetchContext, UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
-import type { Logger } from '@kbn/core/server';
+import type { CoreStart, Logger } from '@kbn/core/server';
+import { CspServerPluginStart, CspServerPluginStartDeps } from '../../../types';
 import { getIndicesStats } from './indices_stats_collector';
+import { getResourcesStats } from './resources_stats_collector';
 import { cspmUsageSchema } from './schema';
 import { CspmUsage } from './types';
+import { getAccountsStats } from './accounts_stats_collector';
+import { getRulesStats } from './rules_stats_collector';
 
 export function registerCspmUsageCollector(
   logger: Logger,
+  coreServices: Promise<[CoreStart, CspServerPluginStartDeps, CspServerPluginStart]>,
   usageCollection?: UsageCollectionSetup
 ): void {
   // usageCollection is an optional dependency, so make sure to return if it is not registered
@@ -23,11 +28,28 @@ export function registerCspmUsageCollector(
   // Create usage collector
   const cspmUsageCollector = usageCollection.makeUsageCollector<CspmUsage>({
     type: 'cloud_security_posture',
-    isReady: () => true,
+    isReady: async () => {
+      await coreServices;
+      return true;
+    },
     fetch: async (collectorFetchContext: CollectorFetchContext) => {
-      const indicesStats = await getIndicesStats(collectorFetchContext.esClient, logger);
+      const [indicesStats, accountsStats, resourcesStats, rulesStats] = await Promise.all([
+        getIndicesStats(
+          collectorFetchContext.esClient,
+          collectorFetchContext.soClient,
+          coreServices,
+          logger
+        ),
+        getAccountsStats(collectorFetchContext.esClient, logger),
+        getResourcesStats(collectorFetchContext.esClient, logger),
+        getRulesStats(collectorFetchContext.esClient, logger),
+      ]);
+
       return {
         indices: indicesStats,
+        accounts_stats: accountsStats,
+        resources_stats: resourcesStats,
+        rules_stats: rulesStats,
       };
     },
     schema: cspmUsageSchema,

@@ -13,15 +13,13 @@ import {
   elasticsearchServiceMock,
   httpServerMock,
   httpServiceMock,
-  loggingSystemMock,
   savedObjectsClientMock,
 } from '@kbn/core/server/mocks';
 import type { EndpointActionListRequestQuery } from '../../../../common/endpoint/schema/actions';
-import { ENDPOINTS_ACTION_LIST_ROUTE } from '../../../../common/endpoint/constants';
-import { parseExperimentalConfigValue } from '../../../../common/experimental_features';
-import { createMockConfig } from '../../../lib/detection_engine/routes/__mocks__';
+import { BASE_ENDPOINT_ACTION_ROUTE } from '../../../../common/endpoint/constants';
 import { EndpointAppContextService } from '../../endpoint_app_context_services';
 import {
+  createMockEndpointAppContext,
   createMockEndpointAppContextServiceSetupContract,
   createMockEndpointAppContextServiceStartContract,
   createRouteHandlerContext,
@@ -54,12 +52,7 @@ describe('Action List Handler', () => {
     endpointAppContextService.start(createMockEndpointAppContextServiceStartContract());
     mockDoesLogsEndpointActionsIndexExist.mockResolvedValue(true);
 
-    registerActionListRoutes(routerMock, {
-      logFactory: loggingSystemMock.create(),
-      service: endpointAppContextService,
-      config: () => Promise.resolve(createMockConfig()),
-      experimentalFeatures: parseExperimentalConfigValue(createMockConfig().enableExperimental),
-    });
+    registerActionListRoutes(routerMock, createMockEndpointAppContext());
 
     actionListHandler = async (
       query?: EndpointActionListRequestQuery
@@ -77,7 +70,7 @@ describe('Action List Handler', () => {
           SecuritySolutionRequestHandlerContext
         >
       ] = routerMock.get.mock.calls.find(([{ path }]) =>
-        path.startsWith(ENDPOINTS_ACTION_LIST_ROUTE)
+        path.startsWith(BASE_ENDPOINT_ACTION_ROUTE)
       )!;
       await routeHandler(
         coreMock.createCustomRequestHandlerContext(
@@ -96,21 +89,22 @@ describe('Action List Handler', () => {
   });
 
   describe('Internals', () => {
+    const defaultParams = { pageSize: 10, page: 1, withAutomatedActions: true };
     it('should return `notFound` when actions index does not exist', async () => {
       mockDoesLogsEndpointActionsIndexExist.mockResolvedValue(false);
-      await actionListHandler({ pageSize: 10, page: 1 });
+      await actionListHandler(defaultParams);
       expect(mockResponse.notFound).toHaveBeenCalledWith({
         body: 'index_not_found_exception',
       });
     });
 
     it('should return `ok` when actions index exists', async () => {
-      await actionListHandler({ pageSize: 10, page: 1 });
+      await actionListHandler(defaultParams);
       expect(mockResponse.ok).toHaveBeenCalled();
     });
 
     it('should call `getActionListByStatus` when statuses filter values are provided', async () => {
-      await actionListHandler({ pageSize: 10, page: 1, statuses: ['failed', 'pending'] });
+      await actionListHandler({ ...defaultParams, statuses: ['failed', 'pending'] });
       expect(mockGetActionListByStatus).toBeCalledWith(
         expect.objectContaining({ statuses: ['failed', 'pending'] })
       );
@@ -118,13 +112,16 @@ describe('Action List Handler', () => {
 
     it('should correctly format the request when calling `getActionListByStatus`', async () => {
       await actionListHandler({
+        withOutputs: 'actionX',
         agentIds: 'agentX',
         commands: 'running-processes',
         statuses: 'failed',
         userIds: 'userX',
+        withAutomatedActions: false,
       });
       expect(mockGetActionListByStatus).toBeCalledWith(
         expect.objectContaining({
+          withOutputs: ['actionX'],
           elasticAgentIds: ['agentX'],
           commands: ['running-processes'],
           statuses: ['failed'],
@@ -135,8 +132,7 @@ describe('Action List Handler', () => {
 
     it('should call `getActionList` when statuses filter values are not provided', async () => {
       await actionListHandler({
-        pageSize: 10,
-        page: 1,
+        ...defaultParams,
         commands: ['isolate', 'kill-process'],
         userIds: ['userX', 'userY'],
       });
@@ -150,8 +146,7 @@ describe('Action List Handler', () => {
 
     it('should correctly format the request when calling `getActionList`', async () => {
       await actionListHandler({
-        page: 1,
-        pageSize: 10,
+        ...defaultParams,
         agentIds: 'agentX',
         commands: 'isolate',
         userIds: 'userX',

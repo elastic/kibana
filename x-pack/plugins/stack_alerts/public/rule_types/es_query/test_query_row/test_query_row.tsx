@@ -16,10 +16,15 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { ParsedAggregationResults } from '@kbn/triggers-actions-ui-plugin/common';
 import { useTestQuery } from './use_test_query';
 
 export interface TestQueryRowProps {
-  fetch: () => Promise<{ nrOfDocs: number; timeWindow: string }>;
+  fetch: () => Promise<{
+    testResults: ParsedAggregationResults;
+    isGrouped: boolean;
+    timeWindow: string;
+  }>;
   copyQuery?: () => string;
   hasValidationErrors: boolean;
 }

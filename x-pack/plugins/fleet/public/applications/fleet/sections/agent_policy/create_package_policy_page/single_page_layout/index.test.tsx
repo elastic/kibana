@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { Route, useHistory } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
+import { Route } from '@kbn/shared-ux-router';
 import React from 'react';
 import { fireEvent, act, waitFor } from '@testing-library/react';
 
@@ -20,7 +21,7 @@ import {
   sendGetAgentStatus,
   useIntraAppState,
   useStartServices,
-  useGetPackageInfoByKey,
+  useGetPackageInfoByKeyQuery,
 } from '../../../../hooks';
 
 jest.mock('../../../../hooks', () => {
@@ -42,7 +43,10 @@ jest.mock('../../../../hooks', () => {
     sendGetOneAgentPolicy: jest.fn().mockResolvedValue({
       data: { item: { id: 'agent-policy-1', name: 'Agent policy 1', namespace: 'default' } },
     }),
-    useGetPackageInfoByKey: jest.fn(),
+    useGetPackageInfoByKeyQuery: jest.fn(),
+    sendGetSettings: jest.fn().mockResolvedValue({
+      data: { item: {} },
+    }),
     sendCreatePackagePolicy: jest
       .fn()
       .mockResolvedValue({ data: { item: { id: 'policy-1', inputs: [] } } }),
@@ -109,7 +113,11 @@ describe('when on the package policy create page', () => {
   const render = (queryParamsPolicyId?: string) =>
     (renderResult = testRenderer.render(
       <Route path={FLEET_ROUTING_PATHS.add_integration_to_policy}>
-        <CreatePackagePolicySinglePage from="package" queryParamsPolicyId={queryParamsPolicyId} />
+        <CreatePackagePolicySinglePage
+          from="package"
+          queryParamsPolicyId={queryParamsPolicyId}
+          prerelease={false}
+        />
       </Route>
     ));
   let mockPackageInfo: any;
@@ -125,7 +133,6 @@ describe('when on the package policy create page', () => {
           name: 'nginx',
           title: 'Nginx',
           version: '1.3.0',
-          release: 'ga',
           description: 'Collect logs and metrics from Nginx HTTP servers with Elastic Agent.',
           policy_templates: [
             {
@@ -147,7 +154,6 @@ describe('when on the package policy create page', () => {
               type: 'logs',
               dataset: 'nginx.access',
               title: 'Nginx access logs',
-              release: 'experimental',
               ingest_pipeline: 'default',
               streams: [
                 {
@@ -181,7 +187,7 @@ describe('when on the package policy create page', () => {
       isLoading: false,
     };
 
-    (useGetPackageInfoByKey as jest.Mock).mockReturnValue(mockPackageInfo);
+    (useGetPackageInfoByKeyQuery as jest.Mock).mockReturnValue(mockPackageInfo);
   });
 
   describe('and Route state is provided via Fleet HashRouter', () => {
@@ -239,7 +245,6 @@ describe('when on the package policy create page', () => {
                 dataset: 'nginx.access',
                 type: 'logs',
               },
-              release: 'experimental',
               enabled: true,
               vars: {
                 paths: {
@@ -303,6 +308,15 @@ describe('when on the package policy create page', () => {
           fireEvent.click(renderResult.getByText(/Save and continue/).closest('button')!);
         });
 
+        await waitFor(
+          async () => {
+            expect(
+              await renderResult.findByText(/Add Elastic Agent to your hosts/)
+            ).toBeInTheDocument();
+          },
+          { timeout: 10000 }
+        );
+
         await act(async () => {
           fireEvent.click(
             renderResult.getByText(/Add Elastic Agent to your hosts/).closest('button')!
@@ -351,7 +365,7 @@ describe('when on the package policy create page', () => {
     });
 
     test('should create agent policy without sys monitoring when new hosts is selected for system integration', async () => {
-      (useGetPackageInfoByKey as jest.Mock).mockReturnValue({
+      (useGetPackageInfoByKeyQuery as jest.Mock).mockReturnValue({
         ...mockPackageInfo,
         data: {
           item: {
@@ -379,6 +393,7 @@ describe('when on the package policy create page', () => {
           monitoring_enabled: ['logs', 'metrics'],
           name: 'Agent policy 2',
           namespace: 'default',
+          inactivity_timeout: 1209600,
         },
         { withSysMonitoring: false }
       );
@@ -409,6 +424,7 @@ describe('when on the package policy create page', () => {
             monitoring_enabled: ['logs', 'metrics'],
             name: 'Agent policy 2',
             namespace: 'default',
+            inactivity_timeout: 1209600,
           },
           { withSysMonitoring: true }
         );
@@ -537,7 +553,6 @@ describe('when on the package policy create page', () => {
                 streams: [
                   {
                     ...newPackagePolicy.inputs[0].streams[0],
-                    release: 'experimental',
                     vars: {
                       paths: {
                         type: 'text',

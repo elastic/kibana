@@ -121,7 +121,9 @@ describe('indexpattern_datasource utils', () => {
 
         expect(warningMessages).toHaveLength(1);
 
-        const instance = mountWithIntl(<div>{warningMessages[0]!}</div>);
+        expect({ ...warningMessages[0], longMessage: '' }).toMatchSnapshot();
+
+        const instance = mountWithIntl(<div>{warningMessages[0].longMessage}</div>);
 
         const enableAccuracyButton = instance.find(enableAccuracyButtonSelector);
 
@@ -146,7 +148,9 @@ describe('indexpattern_datasource utils', () => {
 
         expect(warningMessages).toHaveLength(1);
 
-        const instance = shallow(<div>{warningMessages[0]!}</div>);
+        expect({ ...warningMessages[0], longMessage: '' }).toMatchSnapshot();
+
+        const instance = shallow(<div>{warningMessages[0].longMessage}</div>);
 
         expect(instance.exists(enableAccuracyButtonSelector)).toBeFalsy();
 
@@ -185,7 +189,8 @@ describe('indexpattern_datasource utils', () => {
       );
 
       expect(warnings).toHaveLength(1);
-      const DummyComponent = () => <>{warnings[0]}</>;
+      expect({ ...warnings[0], longMessage: '' }).toMatchSnapshot();
+      const DummyComponent = () => <>{warnings[0].longMessage}</>;
       const warningUi = shallow(<DummyComponent />);
       warningUi.find(EuiLink).simulate('click');
       const stateSetter = setState.mock.calls[0][0];

@@ -9,7 +9,6 @@ import { renderHook } from '@testing-library/react-hooks';
 import { useDeepEqualSelector } from './use_selector';
 import { useKibana } from '../lib/kibana';
 import { useResolveConflict } from './use_resolve_conflict';
-import * as urlHelpers from '../utils/global_query_string/helpers';
 
 jest.mock('react-router-dom', () => {
   const original = jest.requireActual('react-router-dom');
@@ -127,9 +126,6 @@ describe('useResolveConflict', () => {
 
     describe('rison is unable to be decoded', () => {
       it('should use timeline values from redux to create the otherObjectPath', async () => {
-        jest.spyOn(urlHelpers, 'decodeRisonUrlState').mockImplementation(() => {
-          throw new Error('Unable to decode');
-        });
         (useLocation as jest.Mock).mockReturnValue({
           pathname: 'my/cool/path',
           search: '?foo=bar',

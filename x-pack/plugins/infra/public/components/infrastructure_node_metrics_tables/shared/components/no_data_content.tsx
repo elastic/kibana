@@ -18,7 +18,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useLinkProps } from '@kbn/observability-plugin/public';
+import { useLinkProps } from '@kbn/observability-shared-plugin/public';
 import React from 'react';
 import {
   noMetricIndicesPromptDescription,
@@ -53,7 +53,12 @@ export const MetricsTableNoIndicesContent = () => {
       title={<h2>{noMetricIndicesPromptTitle}</h2>}
       body={<p>{noMetricIndicesPromptDescription}</p>}
       actions={
-        <EuiButton color="primary" fill {...integrationsLinkProps}>
+        <EuiButton
+          data-test-subj="infraMetricsTableNoIndicesContentButton"
+          color="primary"
+          fill
+          {...integrationsLinkProps}
+        >
           {noMetricIndicesPromptPrimaryActionTitle}
         </EuiButton>
       }

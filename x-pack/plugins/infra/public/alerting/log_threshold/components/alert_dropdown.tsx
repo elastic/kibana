@@ -9,6 +9,7 @@ import React, { useState, useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiPopover, EuiContextMenuItem, EuiContextMenuPanel, EuiHeaderLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useLogViewContext } from '../../../hooks/use_log_view';
 import { AlertFlyout } from './alert_flyout';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 
@@ -26,6 +27,20 @@ const readOnlyUserTooltipTitle = i18n.translate(
   }
 );
 
+const inlineLogViewTooltipTitle = i18n.translate(
+  'xpack.infra.logs.alertDropdown.inlineLogViewCreateAlertTitle',
+  {
+    defaultMessage: 'Inline Log View',
+  }
+);
+
+const inlineLogViewTooltipContent = i18n.translate(
+  'xpack.infra.logs.alertDropdown.inlineLogViewCreateAlertContent',
+  {
+    defaultMessage: 'Creating alerts is not supported with inline Log Views',
+  }
+);
+
 export const AlertDropdown = () => {
   const {
     services: {
@@ -33,7 +48,9 @@ export const AlertDropdown = () => {
       observability,
     },
   } = useKibanaContextForPlugin();
-  const canCreateAlerts = capabilities?.logs?.save ?? false;
+  const { isPersistedLogView } = useLogViewContext();
+  const readOnly = !capabilities?.logs?.save;
+  const canCreateAlerts = (!readOnly && isPersistedLogView) ?? false;
   const [popoverOpen, setPopoverOpen] = useState(false);
   const [flyoutVisible, setFlyoutVisible] = useState(false);
 
@@ -61,8 +78,20 @@ export const AlertDropdown = () => {
         icon="bell"
         key="createLink"
         onClick={openFlyout}
-        toolTipContent={!canCreateAlerts ? readOnlyUserTooltipContent : undefined}
-        toolTipTitle={!canCreateAlerts ? readOnlyUserTooltipTitle : undefined}
+        toolTipContent={
+          !canCreateAlerts
+            ? readOnly
+              ? readOnlyUserTooltipContent
+              : inlineLogViewTooltipContent
+            : undefined
+        }
+        toolTipTitle={
+          !canCreateAlerts
+            ? readOnly
+              ? readOnlyUserTooltipTitle
+              : inlineLogViewTooltipTitle
+            : undefined
+        }
       >
         <FormattedMessage
           id="xpack.infra.alerting.logs.createAlertButton"
@@ -76,7 +105,7 @@ export const AlertDropdown = () => {
         />
       </EuiContextMenuItem>,
     ];
-  }, [manageRulesLinkProps, canCreateAlerts, openFlyout]);
+  }, [canCreateAlerts, openFlyout, readOnly, manageRulesLinkProps]);
 
   return (
     <>
@@ -104,3 +133,7 @@ export const AlertDropdown = () => {
     </>
   );
 };
+
+// Allow for lazy loading
+// eslint-disable-next-line import/no-default-export
+export default AlertDropdown;

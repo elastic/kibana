@@ -6,9 +6,20 @@
  */
 
 import React from 'react';
-import { EuiPanel, EuiFlexGroup, EuiFlexItem, EuiImage, EuiText, EuiTitle } from '@elastic/eui';
+import {
+  EuiPanel,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiImage,
+  EuiText,
+  EuiTitle,
+  EuiDataGridToolBarAdditionalControlsOptions,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { GetInspectQuery } from '../../../types';
 import icon from './assets/illustration_product_no_results_magnifying_glass.svg';
+import { InspectButton } from './toolbar/components/inspect';
+import { ALERTS_TABLE_TITLE } from './translations';
 
 const heights = {
   tall: 490,
@@ -19,9 +30,22 @@ const panelStyle = {
   maxWidth: 500,
 };
 
-export const EmptyState: React.FC<{ height?: keyof typeof heights }> = ({ height = 'tall' }) => {
+export const EmptyState: React.FC<{
+  height?: keyof typeof heights;
+  controls?: EuiDataGridToolBarAdditionalControlsOptions;
+  getInspectQuery: GetInspectQuery;
+  showInpectButton?: boolean;
+}> = ({ height = 'tall', controls, getInspectQuery, showInpectButton }) => {
   return (
     <EuiPanel color="subdued" data-test-subj="alertsStateTableEmptyState">
+      <EuiFlexGroup alignItems="flexEnd" justifyContent="flexEnd">
+        {showInpectButton && (
+          <EuiFlexItem grow={false}>
+            <InspectButton getInspectQuery={getInspectQuery} inspectTitle={ALERTS_TABLE_TITLE} />
+          </EuiFlexItem>
+        )}
+        {controls?.right && <EuiFlexItem grow={false}>{controls.right}</EuiFlexItem>}
+      </EuiFlexGroup>
       <EuiFlexGroup style={{ height: heights[height] }} alignItems="center" justifyContent="center">
         <EuiFlexItem grow={false}>
           <EuiPanel hasBorder={true} style={panelStyle}>
@@ -45,7 +69,7 @@ export const EmptyState: React.FC<{ height?: keyof typeof heights }> = ({ height
                 </EuiText>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiImage size="200" alt="" url={icon} />
+                <EuiImage style={{ width: 200, height: 148 }} size="200" alt="" url={icon} />
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiPanel>

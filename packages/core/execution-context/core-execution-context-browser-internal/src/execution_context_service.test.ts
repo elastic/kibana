@@ -87,6 +87,7 @@ describe('ExecutionContextService', () => {
       `
       Object {
         "name": "app2",
+        "type": "application",
         "url": "/",
       }
     `
@@ -244,6 +245,7 @@ describe('ExecutionContextService', () => {
     execContext.clear();
     expect(sub).toHaveBeenCalledWith({
       name: 'app1',
+      type: 'application',
       url: '/',
     });
 

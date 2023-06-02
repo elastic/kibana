@@ -17,22 +17,22 @@ const INITIAL_STATE = { annotations: [] };
 
 export function AnnotationsContextProvider({
   children,
+  serviceName,
   environment,
   start,
   end,
-  serviceName,
 }: {
   children: React.ReactNode;
+  serviceName: string;
   environment: string;
   start: string;
   end: string;
-  serviceName?: string;
 }) {
   const { data = INITIAL_STATE } = useFetcher(
     (callApmApi) => {
       if (start && end && serviceName) {
         return callApmApi(
-          'GET /api/apm/services/{serviceName}/annotation/search',
+          'GET /api/apm/services/{serviceName}/annotation/search 2023-05-22',
           {
             params: {
               path: {

@@ -6,7 +6,7 @@
  */
 
 import { uniq } from 'lodash';
-import { InfraTimerangeInput } from '../../../../common/http_api';
+import { MetricsAPITimerange } from '../../../../common/http_api';
 import { ESSearchClient } from '../../../lib/metrics/types';
 import { calculateMetricInterval } from '../../../utils/calculate_metric_interval';
 import { getMetricsAggregations, InfraSnapshotRequestOptions } from './get_metrics_aggregations';
@@ -16,6 +16,7 @@ import {
 } from '../../../../common/inventory_models/types';
 import { getDatasetForField } from '../../metrics_explorer/lib/get_dataset_for_field';
 
+const DEFAULT_LOOKBACK_SIZE = 5;
 const createInterval = async (client: ESSearchClient, options: InfraSnapshotRequestOptions) => {
   const { timerange } = options;
   const aggregations = getMetricsAggregations(options);
@@ -37,7 +38,7 @@ const createInterval = async (client: ESSearchClient, options: InfraSnapshotRequ
 export const createTimeRangeWithInterval = async (
   client: ESSearchClient,
   options: InfraSnapshotRequestOptions
-): Promise<InfraTimerangeInput> => {
+): Promise<MetricsAPITimerange> => {
   const { timerange } = options;
   if (timerange.forceInterval) {
     return {
@@ -53,8 +54,12 @@ export const createTimeRangeWithInterval = async (
       to: timerange.to,
     };
   }
+
   const calculatedInterval = await createInterval(client, options);
-  const lookbackSize = Math.max(timerange.lookbackSize || 5, 5);
+  const lookbackSize = Math.max(
+    timerange.lookbackSize ?? DEFAULT_LOOKBACK_SIZE,
+    DEFAULT_LOOKBACK_SIZE
+  );
   return {
     interval: `${calculatedInterval}s`,
     from: timerange.to - calculatedInterval * lookbackSize * 1000, // We need at least 5 buckets worth of data

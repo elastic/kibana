@@ -8,10 +8,8 @@
 import { EuiHeaderLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import {
-  useInspectorContext,
-  enableInspectEsQueries,
-} from '@kbn/observability-plugin/public';
+import { enableInspectEsQueries } from '@kbn/observability-plugin/public';
+import { useInspectorContext } from '@kbn/observability-shared-plugin/public';
 import { useKibanaServices } from '../../../../hooks/use_kibana_services';
 
 export function UxInspectorHeaderLink() {

@@ -30,7 +30,7 @@ import semverCoerce from 'semver/functions/coerce';
 import { createStateContainerReactHelpers } from '@kbn/kibana-utils-plugin/public';
 import { RedirectAppLinks } from '@kbn/kibana-react-plugin/public';
 import type { TimeRange } from '@kbn/es-query';
-import { LogStream } from '@kbn/infra-plugin/public';
+import { LogStream, type LogStreamProps } from '@kbn/infra-plugin/public';
 
 import type { Agent, AgentPolicy } from '../../../../../types';
 import { useLink, useStartServices } from '../../../../../hooks';
@@ -49,6 +49,11 @@ const WrapperFlexGroup = styled(EuiFlexGroup)`
 const DatePickerFlexItem = styled(EuiFlexItem)`
   max-width: 312px;
 `;
+
+const LOG_VIEW_SETTINGS: LogStreamProps['logView'] = {
+  type: 'log-view-reference',
+  logViewId: 'default',
+};
 
 export interface AgentLogsProps {
   agent: Agent;
@@ -348,9 +353,9 @@ export const AgentLogsUI: React.FunctionComponent<AgentLogsProps> = memo(
           </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiPanel paddingSize="none" panelRef={logsPanelRef}>
+          <EuiPanel paddingSize="none" panelRef={logsPanelRef} grow={false}>
             <LogStream
-              logView={{ type: 'log-view-reference', logViewId: 'default' }}
+              logView={LOG_VIEW_SETTINGS}
               height={logPanelHeight}
               startTimestamp={dateRangeTimestamps.start}
               endTimestamp={dateRangeTimestamps.end}

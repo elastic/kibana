@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { HttpStart, SavedObjectsFindOptionsReference } from '@kbn/core/public';
+import type { HttpStart, SavedObjectsFindOptionsReference } from '@kbn/core/public';
 
 export async function fetchExportByTypeAndSearch({
   http,

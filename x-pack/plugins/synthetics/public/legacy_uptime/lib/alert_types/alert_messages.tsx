@@ -13,7 +13,7 @@ import type { CoreTheme } from '@kbn/core/public';
 import { EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
 import { RedirectAppLinks, toMountPoint } from '@kbn/kibana-react-plugin/public';
 import type { Rule } from '@kbn/triggers-actions-ui-plugin/public';
-import { ActionConnector } from '../../state/alerts/alerts';
+import { ActionConnector } from '../../../../common/rules/types';
 import { kibanaService } from '../../state/kibana_service';
 import { getUrlForAlert } from './common';
 
@@ -42,7 +42,7 @@ export const simpleAlertEnabled = (
           />
         </EuiText>
         <EuiSpacer size="xs" />
-        <EuiLink href={alertUrl}>
+        <EuiLink data-test-subj="syntheticsSimpleAlertEnabledEditAlertLink" href={alertUrl}>
           {i18n.translate('xpack.synthetics.enableAlert.editAlert', {
             defaultMessage: 'Edit alert',
           })}

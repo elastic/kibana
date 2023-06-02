@@ -41,7 +41,7 @@ import {
 } from '../../mocks';
 import { inspectorPluginMock } from '@kbn/inspector-plugin/public/mocks';
 import { ReactExpressionRendererType } from '@kbn/expressions-plugin/public';
-import { DragDrop } from '../../drag_drop';
+import { DragDrop } from '@kbn/dom-drag-drop';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { expressionsPluginMock } from '@kbn/expressions-plugin/public/mocks';
@@ -51,6 +51,7 @@ import { getLensInspectorService } from '../../lens_inspector_service';
 import { toExpression } from '@kbn/interpreter';
 import { createIndexPatternServiceMock } from '../../mocks/data_views_service_mock';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
+import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
 
 function generateSuggestion(state = {}): DatasourceSuggestion {
   return {
@@ -94,11 +95,14 @@ function getDefaultProps() {
       expressions: expressionsPluginMock.createStartContract(),
       charts: chartPluginMock.createStartContract(),
       dataViews: wrapDataViewsContract(),
+      eventAnnotationService: {} as EventAnnotationServiceType,
     },
     palettes: chartPluginMock.createPaletteRegistry(),
     lensInspector: getLensInspectorService(inspectorPluginMock.createStartContract()),
     showNoDataPopover: jest.fn(),
     indexPatternService: createIndexPatternServiceMock(),
+    getUserMessages: () => [],
+    addUserMessages: () => () => {},
   };
   return defaultProps;
 }

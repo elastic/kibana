@@ -16,7 +16,6 @@ export const createSavedObjectsMigrationLoggerMock =
     const mock = {
       debug: jest.fn(),
       info: jest.fn(),
-      warning: jest.fn(),
       warn: jest.fn(),
       error: jest.fn(),
     };

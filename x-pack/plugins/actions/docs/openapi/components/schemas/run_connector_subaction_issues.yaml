@@ -1,0 +1,20 @@
+title: The issues subaction
+type: object
+required:
+  - subAction
+  - subActionParams
+description: The `issues` subaction for Jira connectors.
+properties:
+  subAction:
+    type: string
+    description: The action to test.
+    enum:
+      - issues
+  subActionParams:
+    type: object
+    required:
+      - title
+    properties:
+      title:
+        type: string
+        description: The title of the Jira issue.

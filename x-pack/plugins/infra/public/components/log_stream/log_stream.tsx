@@ -13,7 +13,7 @@ import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { noop } from 'lodash';
 import { LogEntryCursor } from '../../../common/log_entry';
-import { defaultLogViewsStaticConfig } from '../../../common/log_views';
+import { defaultLogViewsStaticConfig, LogViewReference } from '../../../common/log_views';
 import { BuiltEsQuery, useLogStream } from '../../containers/logs/log_stream';
 import { useLogView } from '../../hooks/use_log_view';
 import { LogViewsClient } from '../../services/log_views';
@@ -63,14 +63,8 @@ type LogColumnDefinition =
 export interface LogStreamProps extends LogStreamContentProps {
   height?: string | number;
 }
-
-interface LogView {
-  type: 'log-view-reference';
-  logViewId: string;
-}
-
 interface LogStreamContentProps {
-  logView: LogView;
+  logView: LogViewReference;
   startTimestamp: number;
   endTimestamp: number;
   query?: string | Query | BuiltEsQuery;
@@ -120,7 +114,7 @@ Read more at https://github.com/elastic/kibana/blob/main/src/plugins/kibana_reac
     );
   }
 
-  const { openLogEntryFlyout } = useLogEntryFlyout(logView.logViewId);
+  const { openLogEntryFlyout } = useLogEntryFlyout(logView);
 
   const kibanaQuerySettings = useKibanaQuerySettings();
 
@@ -135,9 +129,8 @@ Read more at https://github.com/elastic/kibana/blob/main/src/plugins/kibana_reac
     load: loadLogView,
     resolvedLogView,
   } = useLogView({
-    logViewId: logView.logViewId,
+    initialLogViewReference: logView,
     logViews,
-    fetch: http.fetch,
   });
 
   const parsedQuery = useMemo<BuiltEsQuery | undefined>(() => {
@@ -167,7 +160,7 @@ Read more at https://github.com/elastic/kibana/blob/main/src/plugins/kibana_reac
     isLoadingMore,
     isReloading: isLoadingEntries,
   } = useLogStream({
-    sourceId: logView.logViewId,
+    logViewReference: logView,
     startTimestamp,
     endTimestamp,
     query: parsedQuery,

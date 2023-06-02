@@ -6,45 +6,105 @@
  */
 
 import React, { useEffect } from 'react';
-import { EuiLoadingSpinner } from '@elastic/eui';
 import { useParams } from 'react-router-dom';
-import { useDispatch } from 'react-redux';
-import { useTrackPageview, useFetcher } from '@kbn/observability-plugin/public';
-import { ConfigKey } from '../../../../../common/runtime_types';
-import { getServiceLocations } from '../../state';
+import { useDispatch, useSelector } from 'react-redux';
+import { EuiEmptyPrompt } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { useTrackPageview, useFetcher } from '@kbn/observability-shared-plugin/public';
+import { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
+import { EditMonitorNotFound } from './edit_monitor_not_found';
+import { LoadingState } from '../monitors_page/overview/overview/monitor_detail_flyout';
+import { ConfigKey, SourceType } from '../../../../../common/runtime_types';
+import { getServiceLocations, selectServiceLocationsState } from '../../state';
 import { ServiceAllowedWrapper } from '../common/wrappers/service_allowed_wrapper';
+import { AlertingCallout } from '../common/alerting_callout/alerting_callout';
 import { MonitorSteps } from './steps';
 import { MonitorForm } from './form';
+import { LocationsLoadingError } from './locations_loading_error';
 import { MonitorDetailsLinkPortal } from './monitor_details_portal';
 import { useMonitorAddEditBreadcrumbs } from './use_breadcrumbs';
-import { getMonitorAPI } from '../../state/monitor_management/api';
+import { getDecryptedMonitorAPI } from '../../state/monitor_management/api';
 import { EDIT_MONITOR_STEPS } from './steps/step_config';
+import { useMonitorNotFound } from './hooks/use_monitor_not_found';
 
-const MonitorEditPage: React.FC = () => {
+export const MonitorEditPage: React.FC = () => {
   useTrackPageview({ app: 'synthetics', path: 'edit-monitor' });
   useTrackPageview({ app: 'synthetics', path: 'edit-monitor', delay: 15000 });
   const { monitorId } = useParams<{ monitorId: string }>();
   useMonitorAddEditBreadcrumbs(true);
   const dispatch = useDispatch();
+  const { locationsLoaded, error: locationsError } = useSelector(selectServiceLocationsState);
 
   useEffect(() => {
-    dispatch(getServiceLocations());
-  }, [dispatch]);
+    if (!locationsLoaded) {
+      dispatch(getServiceLocations());
+    }
+  }, [locationsLoaded, dispatch]);
 
   const { data, loading, error } = useFetcher(() => {
-    return getMonitorAPI({ id: monitorId });
+    return getDecryptedMonitorAPI({ id: monitorId });
   }, []);
 
-  return data && !loading && !error ? (
-    <MonitorForm defaultValues={data?.attributes}>
-      <MonitorSteps stepMap={EDIT_MONITOR_STEPS} isEditFlow={true} />
-      <MonitorDetailsLinkPortal
-        configId={data?.attributes[ConfigKey.CONFIG_ID]}
-        name={data?.attributes.name}
+  const monitorNotFoundError = useMonitorNotFound(
+    error as IHttpFetchError<ResponseErrorBody>,
+    data?.id
+  );
+
+  if (monitorNotFoundError) {
+    return <EditMonitorNotFound />;
+  }
+
+  const isReadOnly = data?.attributes[ConfigKey.MONITOR_SOURCE_TYPE] === SourceType.PROJECT;
+  const projectId = data?.attributes[ConfigKey.PROJECT_ID];
+
+  if (locationsError) {
+    return <LocationsLoadingError />;
+  }
+
+  if (error) {
+    return (
+      <EuiEmptyPrompt
+        iconType="warning"
+        color="danger"
+        title={
+          <h3>
+            {i18n.translate('xpack.synthetics.monitorEditPage.error.label', {
+              defaultMessage: 'Unable to load monitor configuration',
+            })}
+          </h3>
+        }
+        body={
+          <p>
+            {i18n.translate('xpack.synthetics.monitorEditPage.error.content', {
+              defaultMessage: 'There was an error loading your monitor. Please try again later.',
+            })}
+          </p>
+        }
       />
-    </MonitorForm>
+    );
+  }
+
+  return data && locationsLoaded && !loading && !error ? (
+    <>
+      <AlertingCallout
+        isAlertingEnabled={data.attributes[ConfigKey.ALERT_CONFIG]?.status?.enabled}
+      />
+      <MonitorForm defaultValues={data?.attributes} readOnly={isReadOnly}>
+        <MonitorSteps
+          stepMap={EDIT_MONITOR_STEPS(isReadOnly)}
+          isEditFlow={true}
+          readOnly={isReadOnly}
+          projectId={projectId}
+        />
+        <MonitorDetailsLinkPortal
+          configId={data?.attributes[ConfigKey.CONFIG_ID]}
+          name={data?.attributes.name}
+          updateUrl={false}
+        />
+      </MonitorForm>
+    </>
   ) : (
-    <EuiLoadingSpinner />
+    <LoadingState />
   );
 };
 

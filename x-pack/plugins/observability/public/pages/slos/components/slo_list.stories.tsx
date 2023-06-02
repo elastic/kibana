@@ -8,17 +8,21 @@
 import React from 'react';
 import { ComponentStory } from '@storybook/react';
 
-import { SloList as Component } from './slo_list';
+import { KibanaReactStorybookDecorator } from '../../../utils/kibana_react.storybook_decorator';
+import { SloList as Component, Props } from './slo_list';
 
 export default {
   component: Component,
-  title: 'app/SLOs/SloList',
+  title: 'app/SLO/ListPage/SloList',
   argTypes: {},
+  decorators: [KibanaReactStorybookDecorator],
 };
 
-const Template: ComponentStory<typeof Component> = () => <Component />;
+const Template: ComponentStory<typeof Component> = (props: Props) => <Component {...props} />;
 
-const defaultProps = {};
+const defaultProps = {
+  autoRefresh: true,
+};
 
 export const SloList = Template.bind({});
 SloList.args = defaultProps;

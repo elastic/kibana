@@ -10,7 +10,7 @@ import Path from 'path';
 import Fs from 'fs';
 
 import execa from 'execa';
-import { REPO_ROOT } from '@kbn/utils';
+import { REPO_ROOT } from '@kbn/repo-info';
 import { createStripAnsiSerializer, createReplaceSerializer } from '@kbn/jest-serializers';
 import extract from 'extract-zip';
 import del from 'del';
@@ -69,13 +69,13 @@ it('builds a generated plugin into a viable archive', async () => {
   expect(filterLogs(buildProc.all)).toMatchInlineSnapshot(`
     " info deleting the build and target directories
      info running @kbn/optimizer
-     │ info initialized, 0 bundles cached
-     │ info starting worker [1 bundle]
-     │ succ 1 bundles compiled successfully after <time>
+     │ succ browser bundle created at plugins/foo_test_plugin/build/kibana/fooTestPlugin/target/public
+     │ info stopping @kbn/optimizer
      info copying assets from \`public/assets\` to build
      info copying server source into the build and converting with babel
      info running yarn to install dependencies
-     info compressing plugin into [fooTestPlugin-7.5.0.zip]"
+     info compressing plugin into [fooTestPlugin-7.5.0.zip]
+     succ plugin archive created"
   `);
 
   await extract(PLUGIN_ARCHIVE, { dir: TMP_DIR });
