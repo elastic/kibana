@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { CurveType } from "@elastic/charts";
-import { $Keys } from "utility-types";
+import { CurveType } from '@elastic/charts';
+import { $Keys } from 'utility-types';
 
 export const OperationsWithSourceField = {
   FILTERS: 'filters',
