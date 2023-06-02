@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup } from '@elastic/eui';
 import { ApmIntegrationPackageStatus } from './apm_integration_package_status';
 import { IndexTemplatesStatus } from './index_templates_status';
 import { FieldMappingStatus } from './indicies_status';
@@ -15,18 +15,10 @@ import { DataStreamsStatus } from './data_streams_status';
 export function DiagnosticsSummary() {
   return (
     <EuiFlexGroup direction="column">
-      <EuiFlexItem>
-        <ApmIntegrationPackageStatus />
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <IndexTemplatesStatus />
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <DataStreamsStatus />
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <FieldMappingStatus />
-      </EuiFlexItem>
+      <ApmIntegrationPackageStatus />
+      <IndexTemplatesStatus />
+      <DataStreamsStatus />
+      <FieldMappingStatus />
     </EuiFlexGroup>
   );
 }

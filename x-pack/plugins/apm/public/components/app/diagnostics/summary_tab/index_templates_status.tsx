@@ -5,41 +5,31 @@
  * 2.0.
  */
 import React from 'react';
-import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
+import { EuiLink } from '@elastic/eui';
+import { FETCH_STATUS } from '@kbn/observability-shared-plugin/public';
 import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { useApmRouter } from '../../../../hooks/use_apm_router';
 import { useDiagnosticsContext } from '../context/use_diagnostics';
+import { TabStatus } from './tab_status';
 
 type DiagnosticsBundle = APIReturnType<'GET /internal/apm/diagnostics'>;
 
 export function IndexTemplatesStatus() {
   const router = useApmRouter();
-  const { diagnosticsBundle } = useDiagnosticsContext();
+  const { diagnosticsBundle, status } = useDiagnosticsContext();
+  const isLoading = status === FETCH_STATUS.LOADING;
   const tabStatus = getIndexTemplateStatus(diagnosticsBundle);
 
   return (
-    <EuiFlexGroup>
-      <EuiFlexItem grow={1}>
-        <EuiFlexGroup justifyContent="flexEnd">
-          <EuiFlexItem grow={false}>
-            {tabStatus ? (
-              <EuiBadge color="green">OK</EuiBadge>
-            ) : (
-              <EuiBadge color="warning">Warning</EuiBadge>
-            )}
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlexItem>
-      <EuiFlexItem grow={10}>
-        Index templates
-        <EuiLink
-          data-test-subj="apmIndexTemplatesStatusSeeDetailsLink"
-          href={router.link('/diagnostics/index-templates')}
-        >
-          See details
-        </EuiLink>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <TabStatus isLoading={isLoading} isOk={tabStatus}>
+      Index templates
+      <EuiLink
+        data-test-subj="apmIndexTemplatesStatusSeeDetailsLink"
+        href={router.link('/diagnostics/index-templates')}
+      >
+        See details
+      </EuiLink>
+    </TabStatus>
   );
 }
 

@@ -6,12 +6,13 @@
  */
 
 import React from 'react';
-import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
+import { EuiLink } from '@elastic/eui';
 import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { useApmRouter } from '../../../../hooks/use_apm_router';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { useDiagnosticsContext } from '../context/use_diagnostics';
 import { getIndexTemplateState } from '../data_stream_tab';
+import { TabStatus } from './tab_status';
 
 type DiagnosticsBundle = APIReturnType<'GET /internal/apm/diagnostics'>;
 
@@ -22,31 +23,15 @@ export function DataStreamsStatus() {
   const tabStatus = getDataStreamTabStatus(diagnosticsBundle);
 
   return (
-    <EuiFlexGroup>
-      <EuiFlexItem grow={1}>
-        <EuiFlexGroup justifyContent="flexEnd">
-          <EuiFlexItem grow={false}>
-            {isLoading ? (
-              <EuiBadge color="default">-</EuiBadge>
-            ) : tabStatus ? (
-              <EuiBadge color="green">OK</EuiBadge>
-            ) : (
-              <EuiBadge color="warning">Warning</EuiBadge>
-            )}
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlexItem>
-
-      <EuiFlexItem grow={10}>
-        Data streams
-        <EuiLink
-          data-test-subj="apmDataStreamsStatusSeeDetailsLink"
-          href={router.link('/diagnostics/data-streams')}
-        >
-          See details
-        </EuiLink>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <TabStatus isLoading={isLoading} isOk={tabStatus}>
+      Data streams
+      <EuiLink
+        data-test-subj="apmDataStreamsStatusSeeDetailsLink"
+        href={router.link('/diagnostics/data-streams')}
+      >
+        See details
+      </EuiLink>
+    </TabStatus>
   );
 }
 
