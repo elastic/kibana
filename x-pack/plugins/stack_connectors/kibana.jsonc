@@ -8,7 +8,7 @@
     "browser": true,
     "configPath": [
       "xpack",
-      "stack_connectors"
+      "stackConnectors"
     ],
     "requiredPlugins": [
       "actions",

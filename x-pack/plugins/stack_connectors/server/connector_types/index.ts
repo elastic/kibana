@@ -7,6 +7,7 @@
 
 import { PluginSetupContract as ActionsPluginSetupContract } from '@kbn/actions-plugin/server';
 
+import { ExperimentalFeatures } from '../../common/experimental_features';
 import { getConnectorType as getCasesWebhookConnectorType } from './cases_webhook';
 import { getConnectorType as getJiraConnectorType } from './jira';
 import { getConnectorType as getResilientConnectorType } from './resilient';
@@ -75,9 +76,11 @@ export { getConnectorType as getSwimlaneConnectorType } from './swimlane';
 export function registerConnectorTypes({
   actions,
   publicBaseUrl,
+  experimentalFeatures,
 }: {
   actions: ActionsPluginSetupContract;
   publicBaseUrl?: string;
+  experimentalFeatures: ExperimentalFeatures;
 }) {
   actions.registerType(getEmailConnectorType({ publicBaseUrl }));
   actions.registerType(getIndexConnectorType());
@@ -99,5 +102,9 @@ export function registerConnectorTypes({
 
   actions.registerSubActionConnectorType(getOpsgenieConnectorType());
   actions.registerSubActionConnectorType(getTinesConnectorType());
-  actions.registerSubActionConnectorType(getGenerativeAiConnectorType());
+  console.log('experimentalFeatures', experimentalFeatures);
+  if (experimentalFeatures.genAiEnabled ?? false) {
+    console.log('GEN AI ENABLED DAWG');
+    actions.registerSubActionConnectorType(getGenerativeAiConnectorType());
+  }
 }
