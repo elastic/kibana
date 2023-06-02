@@ -12,15 +12,16 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export type { FtrProviderContext } from '../../../ftr_provider_context';
 
-export async function SecuritySolutionServerlessVisualTestRunner({
-  getService,
-}: FtrProviderContext) {
+export async function SecuritySolutionCypressTestRunner(
+  { getService }: FtrProviderContext,
+  command: string
+) {
   const log = getService('log');
 
   await withProcRunner(log, async (procs) => {
     await procs.run('cypress', {
       cmd: 'yarn',
-      args: ['cypress:open'],
+      args: [command],
       cwd: resolve(__dirname),
       env: {
         ...process.env,
@@ -30,20 +31,10 @@ export async function SecuritySolutionServerlessVisualTestRunner({
   });
 }
 
-export async function SecuritySolutionServerlessHeadlessTestRunner({
-  getService,
-}: FtrProviderContext) {
-  const log = getService('log');
+export async function SecuritySolutionServerlessVisualTestRunner(context: FtrProviderContext) {
+  return SecuritySolutionCypressTestRunner(context, 'cypress:open');
+}
 
-  await withProcRunner(log, async (procs) => {
-    await procs.run('cypress', {
-      cmd: 'yarn',
-      args: ['cypress:run'],
-      cwd: resolve(__dirname),
-      env: {
-        ...process.env,
-      },
-      wait: true,
-    });
-  });
+export async function SecuritySolutionServerlessHeadlessTestRunner(context: FtrProviderContext) {
+  return SecuritySolutionCypressTestRunner(context, 'cypress:run');
 }
