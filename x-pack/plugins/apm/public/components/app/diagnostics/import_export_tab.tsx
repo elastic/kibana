@@ -53,6 +53,10 @@ function ExportCard() {
             data-test-subj="apmDiagnosticsImportExportGoForItButton"
             aria-label="Export diagnostics report"
             onClick={() => {
+              if (!diagnosticsBundle) {
+                return;
+              }
+
               const blob = new Blob(
                 [JSON.stringify(diagnosticsBundle, null, 2)],
                 {
@@ -61,9 +65,10 @@ function ExportCard() {
               );
               const fileURL = URL.createObjectURL(blob);
 
+              const { kibanaVersion } = diagnosticsBundle;
               const link = document.createElement('a');
               link.href = fileURL;
-              link.download = 'diagnostics.json';
+              link.download = `apm-diagnostics-${kibanaVersion}-${Date.now()}.json`;
               link.click();
             }}
           >

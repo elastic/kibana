@@ -32,6 +32,7 @@ export async function getIndicesAndIngestPipelines({
       '*.data_stream',
       '*.settings.index.provided_name',
     ],
+    ignore_unavailable: true,
   });
 
   const pipelineIds = compact(

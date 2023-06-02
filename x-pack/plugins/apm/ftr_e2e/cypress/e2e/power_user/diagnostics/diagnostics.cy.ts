@@ -45,7 +45,7 @@ describe('Diagnostics', () => {
       cy.loginAs({ username: 'elastic', password: 'changeme' });
       cy.visitKibana('/app/apm/diagnostics/import-export');
       cy.get('#file-picker').selectFile(
-        './cypress/e2e/power_user/diagnostics/diagnostics.json'
+        './cypress/e2e/power_user/diagnostics/apm-diagnostics-8.9.0-1685708312530.json'
       );
     });
 
@@ -95,7 +95,7 @@ describe('Diagnostics', () => {
 
     it('can display data streams tab', () => {
       cy.get('[href="/app/apm/diagnostics/data-streams"]').click();
-      cy.get('.euiTableRow').should('have.length', 10);
+      cy.get('.euiTableRow').should('have.length', 17);
     });
 
     it('can display indices tab', () => {

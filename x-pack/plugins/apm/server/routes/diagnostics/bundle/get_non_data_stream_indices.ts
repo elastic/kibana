@@ -23,10 +23,11 @@ export async function getNonDataStreamIndices({
     apmIndices.transaction,
   ]);
 
-  // fetch non-data stream indices
+  // TODO: indices already retrieved by `getIndicesAndIngestPipelines`
   const nonDataStreamIndicesResponse = await esClient.indices.get({
     index: apmIndexPatterns,
     filter_path: ['*.data_stream', '*.settings.index.uuid'],
+    ignore_unavailable: true,
   });
 
   const nonDataStreamIndices = Object.entries(nonDataStreamIndicesResponse)

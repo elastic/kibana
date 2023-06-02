@@ -27,6 +27,8 @@ export async function getDataStreams({
   const { data_streams: dataStreams } = await esClient.indices.getDataStream({
     name: apmIndexPatterns,
     filter_path: ['data_streams.name', 'data_streams.template'],
+    // @ts-expect-error
+    ignore_unavailable: true,
   });
 
   return dataStreams ?? [];
