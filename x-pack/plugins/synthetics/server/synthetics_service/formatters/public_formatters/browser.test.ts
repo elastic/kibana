@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { ConfigKey } from '../../runtime_types';
-import { throttlingFormatter } from './formatters';
+import { ConfigKey } from '../../../../common/runtime_types';
+import { throttlingFormatter } from './browser';
 
 describe('formatters', () => {
   describe('throttling formatter', () => {
@@ -26,7 +26,7 @@ describe('formatters', () => {
           },
           ConfigKey.THROTTLING_CONFIG
         )
-      ).toEqual('false');
+      ).toEqual(false);
     });
 
     it('formats for default throttling', () => {
@@ -45,7 +45,7 @@ describe('formatters', () => {
           },
           ConfigKey.THROTTLING_CONFIG
         )
-      ).toEqual(JSON.stringify({ download: 5, upload: 3, latency: 20 }));
+      ).toEqual({ download: 5, upload: 3, latency: 20 });
     });
 
     it('formats for custom throttling', () => {
@@ -64,7 +64,7 @@ describe('formatters', () => {
           },
           ConfigKey.THROTTLING_CONFIG
         )
-      ).toEqual(JSON.stringify({ download: 1.25, upload: 0.75, latency: 150 }));
+      ).toEqual({ download: 1.25, upload: 0.75, latency: 150 });
     });
   });
 });

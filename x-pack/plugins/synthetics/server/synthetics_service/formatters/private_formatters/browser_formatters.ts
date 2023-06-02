@@ -4,17 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { BrowserFields, ConfigKey } from '../../runtime_types/monitor_management';
 
-import { Formatter, commonFormatters } from '../common/formatters';
+import { DEFAULT_THROTTLING_VALUE } from '../../../../common/constants/monitor_defaults';
+import { Formatter, commonFormatters } from './common_formatters';
 import {
   arrayToJsonFormatter,
   objectToJsonFormatter,
   stringToJsonFormatter,
-} from '../formatting_utils';
-import { DEFAULT_THROTTLING_VALUE } from '../../constants/monitor_defaults';
+} from './formatting_utils';
 
-import { tlsFormatters } from '../tls/formatters';
+import { tlsFormatters } from './tls_formatters';
+import { BrowserFields, ConfigKey } from '../../../../common/runtime_types';
 
 export type BrowserFormatMap = Record<keyof BrowserFields, Formatter>;
 
@@ -37,9 +37,9 @@ export const browserFormatters: BrowserFormatMap = {
   [ConfigKey.SCREENSHOTS]: null,
   [ConfigKey.IGNORE_HTTPS_ERRORS]: null,
   [ConfigKey.PLAYWRIGHT_OPTIONS]: null,
-  [ConfigKey.TEXT_ASSERTION]: null,
-  [ConfigKey.PORT]: null,
-  [ConfigKey.URLS]: null,
+  [ConfigKey.TEXT_ASSERTION]: stringToJsonFormatter,
+  [ConfigKey.PORT]: stringToJsonFormatter,
+  [ConfigKey.URLS]: stringToJsonFormatter,
   [ConfigKey.METADATA]: objectToJsonFormatter,
   [ConfigKey.SOURCE_INLINE]: stringToJsonFormatter,
   [ConfigKey.SYNTHETICS_ARGS]: arrayToJsonFormatter,

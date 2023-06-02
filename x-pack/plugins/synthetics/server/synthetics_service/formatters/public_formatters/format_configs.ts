@@ -7,17 +7,17 @@
 
 import { isEmpty, isNil, omitBy } from 'lodash';
 import { Logger } from '@kbn/logging';
-import { PARAMS_KEYS_TO_SKIP } from '../../../common/formatters/format_synthetics_policy';
-import { replaceStringWithParams } from '../../../common/formatters/formatting_utils';
+import { replaceStringWithParams } from '../formatting_utils';
+import { PARAMS_KEYS_TO_SKIP } from '../common';
 import {
   BrowserFields,
   ConfigKey,
+  HeartbeatConfig,
   MonitorFields,
   SyntheticsMonitor,
-  HeartbeatConfig,
   TLSFields,
-} from '../../../common/runtime_types';
-import { formatters } from '.';
+} from '../../../../common/runtime_types';
+import { publicFormatters } from '.';
 
 const UI_KEYS_TO_SKIP = [
   ConfigKey.JOURNEY_ID,
@@ -52,8 +52,8 @@ export const formatMonitorConfigFields = (
         return;
       }
 
-      if (!!formatters[key]) {
-        const formatter = formatters[key];
+      if (!!publicFormatters[key]) {
+        const formatter = publicFormatters[key];
         if (typeof formatter === 'function') {
           formattedMonitor[key] = formatter(config, key);
         } else {

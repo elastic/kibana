@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { ConfigKey } from '../../runtime_types';
+import { ConfigKey } from '../../../../common/runtime_types';
 import {
   secondsToCronFormatter,
   arrayToJsonFormatter,
   objectToJsonFormatter,
   stringToJsonFormatter,
-} from '../formatting_utils';
+} from './formatting_utils';
 
 describe('formatters', () => {
   describe('cronToSecondsNormalizer', () => {

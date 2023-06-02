@@ -4,9 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { ConfigKey, DataStream } from '../runtime_types';
+import { ConfigKey, DataStream } from '../../../../common/runtime_types';
 import { formatSyntheticsPolicy } from './format_synthetics_policy';
-import { PROFILE_VALUES_ENUM, PROFILES_MAP } from '../constants/monitor_defaults';
+import { PROFILE_VALUES_ENUM, PROFILES_MAP } from '../../../../common/constants/monitor_defaults';
 
 const gParams = { proxyUrl: 'https://proxy.com' };
 describe('formatSyntheticsPolicy', () => {
@@ -354,7 +354,7 @@ describe('formatSyntheticsPolicy', () => {
                 },
                 id: {
                   type: 'text',
-                  value: '00bb3ceb-a242-4c7a-8405-8da963661374',
+                  value: '"00bb3ceb-a242-4c7a-8405-8da963661374"',
                 },
                 ignore_https_errors: {
                   type: 'bool',
@@ -372,7 +372,7 @@ describe('formatSyntheticsPolicy', () => {
                 },
                 name: {
                   type: 'text',
-                  value: 'Test HTTP Monitor 03',
+                  value: '"Test HTTP Monitor 03"',
                 },
                 origin: {
                   type: 'text',
@@ -401,7 +401,7 @@ describe('formatSyntheticsPolicy', () => {
                 },
                 'service.name': {
                   type: 'text',
-                  value: '',
+                  value: '"Local Service"',
                 },
                 'source.inline.script': {
                   type: 'yaml',
@@ -532,7 +532,7 @@ describe('formatSyntheticsPolicy', () => {
                 },
                 id: {
                   type: 'text',
-                  value: '51ccd9d9-fc3f-4718-ba9d-b6ef80e73fc5',
+                  value: '"51ccd9d9-fc3f-4718-ba9d-b6ef80e73fc5"',
                 },
                 location_name: {
                   type: 'text',
@@ -550,7 +550,7 @@ describe('formatSyntheticsPolicy', () => {
                 },
                 name: {
                   type: 'text',
-                  value: 'Test Monitor',
+                  value: '"Test Monitor"',
                 },
                 origin: {
                   type: 'text',
@@ -558,11 +558,11 @@ describe('formatSyntheticsPolicy', () => {
                 },
                 password: {
                   type: 'password',
-                  value: 'changeme',
+                  value: '"changeme"',
                 },
                 proxy_url: {
                   type: 'text',
-                  value: 'https://proxy.com',
+                  value: '"https://proxy.com"',
                 },
                 'response.include_body': {
                   type: 'text',
@@ -582,7 +582,7 @@ describe('formatSyntheticsPolicy', () => {
                 },
                 'service.name': {
                   type: 'text',
-                  value: 'LocalService',
+                  value: '"LocalService"',
                 },
                 'ssl.certificate': {
                   type: 'yaml',
@@ -622,11 +622,11 @@ describe('formatSyntheticsPolicy', () => {
                 },
                 urls: {
                   type: 'text',
-                  value: 'https://www.google.com',
+                  value: '"https://www.google.com"',
                 },
                 username: {
                   type: 'text',
-                  value: '',
+                  value: '"admin"',
                 },
               },
             },
@@ -1110,7 +1110,7 @@ const browserConfig: any = {
   enabled: true,
   alert: { status: { enabled: true } },
   schedule: { number: '3', unit: 'm' },
-  'service.name': '',
+  'service.name': 'Local Service',
   config_id: '00bb3ceb-a242-4c7a-8405-8da963661374',
   tags: ['cookie-test', 'browser'],
   timeout: '16',
@@ -1198,7 +1198,7 @@ const httpPolicy: any = {
   'check.request.body': { type: 'text', value: '' },
   'check.request.headers': {},
   'check.request.method': 'GET',
-  username: '',
+  username: 'admin',
   'ssl.certificate_authorities': '',
   'ssl.certificate': '',
   'ssl.key': '',

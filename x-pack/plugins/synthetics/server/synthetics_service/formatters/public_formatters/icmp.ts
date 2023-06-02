@@ -5,12 +5,16 @@
  * 2.0.
  */
 
-import { icmpFormatters as basicICMPFormatters } from '../../../common/formatters/icmp/formatters';
+import { ConfigKey, ICMPFields } from '../../../../common/runtime_types';
+import { secondsToCronFormatter } from '../formatting_utils';
 import { Formatter, commonFormatters } from './common';
-import { ICMPFields } from '../../../common/runtime_types/monitor_management';
 
 export type ICMPFormatMap = Record<keyof ICMPFields, Formatter>;
 export const icmpFormatters: ICMPFormatMap = {
   ...commonFormatters,
-  ...basicICMPFormatters,
+  [ConfigKey.HOSTS]: null,
+  [ConfigKey.WAIT]: secondsToCronFormatter,
+  [ConfigKey.MODE]: null,
+  [ConfigKey.IPV4]: null,
+  [ConfigKey.IPV6]: null,
 };
