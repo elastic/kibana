@@ -8,7 +8,7 @@
 
 import { set as lodashSet } from '@kbn/safer-lodash-set';
 import _ from 'lodash';
-import { statSync, existsSync, writeFileSync } from 'fs';
+import { statSync, existsSync, writeFileSync, readFileSync } from 'fs';
 import { resolve } from 'path';
 import url from 'url';
 
@@ -33,7 +33,8 @@ function getServerlessModeFromOpts(opts) {
   }
 
   if (opts.serverless === true) {
-    return 'es';
+    // Defaulting to read the project-switcher's settings in `serverless.recent.dev.yml`
+    return null;
   }
 
   if (VALID_SERVERLESS_PROJECT_MODE.includes(opts.serverless)) {
@@ -125,11 +126,22 @@ function resolveConfig(fileName) {
 
 /**
  * @param {string} fileName
+ * @param {object} opts
  */
-function writeProjectSwitcherConfig(fileName) {
+function writeProjectSwitcherConfig(fileName, opts) {
   const path = resolve(getConfigDirectory(), fileName);
-  if (!existsSync(path)) {
-    writeFileSync(path, `xpack.serverless.plugin.developer.projectSwitcher.enabled: true\n`);
+  const configAlreadyExists = existsSync(path);
+
+  const preserveExistingConfig = opts.serverless === true;
+  const serverlessMode = getServerlessModeFromOpts(opts) || 'es';
+
+  if (configAlreadyExists && preserveExistingConfig) {
+    return;
+  } else {
+    const content = `xpack.serverless.plugin.developer.projectSwitcher.enabled: true\nserverless: ${serverlessMode}\n`;
+    if (!configAlreadyExists || readFileSync(path).toString() !== content) {
+      writeFileSync(path, content);
+    }
   }
 }
 
@@ -303,11 +315,13 @@ export default function (program) {
 
     let configs = [cliConfigs, envConfigs, [defaultConfig]].find(isNotEmpty);
 
-    const unknownOptions = this.getUnknownOptions();
-
-    // .dev. configs are "pushed" so that they override all other config files
     if (opts.dev && opts.devConfig !== false) {
       configs.push(resolveConfig('kibana.dev.yml'));
+    }
+
+    if (opts.dev && opts.serverless) {
+      writeProjectSwitcherConfig('serverless.recent.dev.yml', opts);
+      configs.push(resolveConfig('serverless.recent.dev.yml'));
     }
 
     // Filtering out all config paths that didn't exist
@@ -318,16 +332,15 @@ export default function (program) {
       configs.unshift(resolveConfig(`serverless.${serverlessMode}.yml`));
       configs.unshift(resolveConfig('serverless.yml'));
 
-      if (opts.dev) {
+      if (opts.dev && opts.devConfig !== false) {
         configs.push(resolveConfig('serverless.dev.yml'));
-
-        writeProjectSwitcherConfig('serverless.recent.dev.yml');
-        configs.push(resolveConfig('serverless.recent.dev.yml'));
+        configs.push(resolveConfig(`serverless.${serverlessMode}.dev.yml`));
       }
     }
 
     configs = configs.filter(Boolean);
 
+    const unknownOptions = this.getUnknownOptions();
     const cliArgs = {
       dev: !!opts.dev,
       envName: unknownOptions.env ? unknownOptions.env.name : undefined,
