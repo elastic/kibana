@@ -23,7 +23,11 @@ export function ApmIntegrationPackageStatus() {
   const packageVersion = diagnosticsBundle?.fleetPackageInfo.version;
 
   return (
-    <TabStatus isLoading={isLoading} isOk={isInstalled}>
+    <TabStatus
+      isLoading={isLoading}
+      isOk={isInstalled}
+      data-test-subj="integrationPackageStatus"
+    >
       {isLoading
         ? '...'
         : isInstalled
@@ -32,7 +36,7 @@ export function ApmIntegrationPackageStatus() {
 
       {!isImported ? (
         <EuiLink
-          data-test-subj="apmDiagnosticsSummaryFasLink"
+          data-test-subj="apmApmIntegrationPackageStatusGoToApmIntegrationLink"
           href={basePath.prepend('/app/integrations/detail/apm/overview')}
         >
           Go to APM Integration

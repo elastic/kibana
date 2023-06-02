@@ -7,21 +7,26 @@
 
 import React from 'react';
 import { EuiBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+
 export function TabStatus({
   isLoading,
   isOk,
   children,
+  ...props
 }: {
   isLoading: boolean;
   isOk?: boolean;
   children: React.ReactNode;
-}) {
+} & React.ComponentProps<typeof EuiFlexItem>) {
   return (
-    <EuiFlexItem>
+    <EuiFlexItem {...props}>
       <EuiFlexGroup>
         <EuiFlexItem grow={1}>
           <EuiFlexGroup justifyContent="flexEnd">
-            <EuiFlexItem grow={false}>
+            <EuiFlexItem
+              grow={false}
+              data-test-subj={`${props['data-test-subj']}_Badge`}
+            >
               {isLoading ? (
                 <EuiBadge color="default">-</EuiBadge>
               ) : isOk ? (
@@ -32,7 +37,12 @@ export function TabStatus({
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
-        <EuiFlexItem grow={10}>{children}</EuiFlexItem>
+        <EuiFlexItem
+          grow={10}
+          data-test-subj={`${props['data-test-subj']}_Content`}
+        >
+          {children}
+        </EuiFlexItem>
       </EuiFlexGroup>
     </EuiFlexItem>
   );

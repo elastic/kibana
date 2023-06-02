@@ -21,7 +21,11 @@ export function IndexTemplatesStatus() {
   const tabStatus = getIndexTemplateStatus(diagnosticsBundle);
 
   return (
-    <TabStatus isLoading={isLoading} isOk={tabStatus}>
+    <TabStatus
+      isLoading={isLoading}
+      isOk={tabStatus}
+      data-test-subj="indexTemplatesStatus"
+    >
       Index templates
       <EuiLink
         data-test-subj="apmIndexTemplatesStatusSeeDetailsLink"

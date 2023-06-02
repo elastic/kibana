@@ -24,9 +24,33 @@ describe('Diagnostics', () => {
     it('can display summary tab', () => {
       cy.get('[href="/app/apm/diagnostics"]').click();
 
-      cy.get('[data-test-subj="apmDiagnosticsSummaryApmIntegration"]').should(
+      // integration package
+      cy.get('[data-test-subj="integrationPackageStatus_Badge"]').should(
+        'have.text',
+        'OK'
+      );
+
+      cy.get('[data-test-subj="integrationPackageStatus_Content"]').should(
         'have.text',
         'APM integration (8.9.0-preview-1685091758)'
+      );
+
+      // data stream
+      cy.get('[data-test-subj="dataStreamsStatus_Badge"]').should(
+        'have.text',
+        'OK'
+      );
+
+      // Index template
+      cy.get('[data-test-subj="indexTemplatesStatus_Badge"]').should(
+        'have.text',
+        'OK'
+      );
+
+      // Index template
+      cy.get('[data-test-subj="fieldMappingStatus_Badge"]').should(
+        'have.text',
+        'Warning'
       );
     });
 
