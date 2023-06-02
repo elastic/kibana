@@ -31,7 +31,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           endpoint: 'GET /internal/apm/diagnostics',
         });
         expect(status).to.be(200);
-        expect(body.dataStreams).to.eql(undefined);
+        expect(body.dataStreams).to.eql([]);
       });
 
       it('returns zero non-data stream indices`', async () => {
