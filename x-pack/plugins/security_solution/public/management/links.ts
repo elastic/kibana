@@ -60,7 +60,6 @@ import { IconHostIsolation } from './icons/host_isolation';
 import { IconSiemRules } from './icons/siem_rules';
 import { IconTrustedApplications } from './icons/trusted_applications';
 import { HostIsolationExceptionsApiClient } from './pages/host_isolation_exceptions/host_isolation_exceptions_api_client';
-import { ExperimentalFeaturesService } from '../common/experimental_features_service';
 
 const categories = [
   {
@@ -240,14 +239,8 @@ export const getManagementFilteredLinks = async (
   plugins: StartPlugins
 ): Promise<LinkItem> => {
   const fleetAuthz = plugins.fleet?.authz;
-
-  const { endpointRbacEnabled, endpointRbacV1Enabled } = ExperimentalFeaturesService.get();
-  const isEndpointRbacEnabled = endpointRbacEnabled || endpointRbacV1Enabled;
-
   const linksToExclude: SecurityPageName[] = [];
-
   const currentUser = await plugins.security.authc.getCurrentUser();
-
   const isPlatinumPlus = licenseService.isPlatinumPlus();
   let hasHostIsolationExceptions: boolean = isPlatinumPlus;
 
@@ -263,7 +256,7 @@ export const getManagementFilteredLinks = async (
     fleetAuthz &&
     hasKibanaPrivilege(
       fleetAuthz,
-      isEndpointRbacEnabled,
+      true,
       currentUser.roles.includes('superuser'),
       'readHostIsolationExceptions'
     )
@@ -287,7 +280,7 @@ export const getManagementFilteredLinks = async (
           licenseService,
           fleetAuthz,
           currentUser.roles,
-          isEndpointRbacEnabled,
+          true,
           hasHostIsolationExceptions
         )
       : getEndpointAuthzInitialState();

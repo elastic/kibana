@@ -139,26 +139,18 @@ export const getSecurityBaseKibanaFeature = (
 });
 
 function getSubFeatures(experimentalFeatures: ExperimentalFeatures) {
-  const subFeatures: SubFeatureConfig[] = [];
+  const subFeatures: SubFeatureConfig[] = [
+    endpointListSubFeature,
+    trustedApplicationsSubFeature,
+    hostIsolationExceptionsSubFeature,
+    blocklistSubFeature,
+    eventFiltersSubFeature,
+    policyManagementSubFeature,
+    responseActionsHistorySubFeature,
+    hostIsolationSubFeature,
+    processOperationsSubFeature,
+  ];
 
-  if (experimentalFeatures.endpointRbacEnabled) {
-    subFeatures.push(
-      endpointListSubFeature,
-      trustedApplicationsSubFeature,
-      hostIsolationExceptionsSubFeature,
-      blocklistSubFeature,
-      eventFiltersSubFeature,
-      policyManagementSubFeature
-    );
-  }
-
-  if (experimentalFeatures.endpointRbacEnabled || experimentalFeatures.endpointRbacV1Enabled) {
-    subFeatures.push(
-      responseActionsHistorySubFeature,
-      hostIsolationSubFeature,
-      processOperationsSubFeature
-    );
-  }
   if (experimentalFeatures.responseActionGetFileEnabled) {
     subFeatures.push(fileOperationsSubFeature);
   }
