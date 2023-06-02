@@ -423,7 +423,6 @@
     "controls.controlGroup.manageControl.displaySettings.growSwitchTitle": "扩大宽度以适应可用空间",
     "controls.controlGroup.manageControl.saveChangesTitle": "保存并关闭",
     "controls.controlGroup.manageControl.dataSource.selectDataViewMessage": "请选择数据视图",
-    "controls.controlGroup.manageControl.dataSource.selectFieldMessage": "请选择字段",
     "controls.controlGroup.manageControl.displaySettings.titleInputTitle": "标签",
     "controls.controlGroup.manageControl.displaySettings.widthInputTitle": "最小宽度",
     "controls.controlGroup.management.addControl": "添加控件",

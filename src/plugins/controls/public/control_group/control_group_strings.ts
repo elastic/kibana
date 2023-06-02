@@ -58,9 +58,9 @@ export const ControlGroupStrings = {
         i18n.translate('controls.controlGroup.manageControl.dataSource.dataViewTitle', {
           defaultMessage: 'Data view',
         }),
-      getSelectFieldMessage: () =>
-        i18n.translate('controls.controlGroup.manageControl.dataSource.selectFieldMessage', {
-          defaultMessage: 'Please select a field',
+      noControlTypeMessage: () =>
+        i18n.translate('controls.controlGroup.manageControl.dataSource.noControlTypeMessage', {
+          defaultMessage: 'No field selected yet',
         }),
       getFieldTitle: () =>
         i18n.translate('controls.controlGroup.manageControl.dataSource.fieldTitle', {
@@ -78,7 +78,7 @@ export const ControlGroupStrings = {
         }),
       getFormGroupDescription: () =>
         i18n.translate('controls.controlGroup.manageControl.displaySettings.formGroupDescription', {
-          defaultMessage: 'Change how the control will appear on your dashboard.',
+          defaultMessage: 'Change how the control appears on your dashboard.',
         }),
       getTitleInputTitle: () =>
         i18n.translate('controls.controlGroup.manageControl.displaySettings.titleInputTitle', {
