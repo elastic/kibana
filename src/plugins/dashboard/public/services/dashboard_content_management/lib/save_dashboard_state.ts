@@ -15,7 +15,6 @@ import {
   controlGroupInputToRawControlGroupAttributes,
 } from '@kbn/controls-plugin/common';
 import { isFilterPinned } from '@kbn/es-query';
-import { SOWithMetadataPartial } from '@kbn/content-management-utils';
 import { extractSearchSourceReferences, RefreshInterval } from '@kbn/data-plugin/public';
 
 import {
@@ -179,23 +178,14 @@ export const saveDashboardState = async ({
    */
   const idToSaveTo = saveOptions.saveAsCopy ? undefined : lastSavedId;
   try {
-    let result: { item: SOWithMetadataPartial<DashboardAttributes> };
-    if (idToSaveTo) {
-      result = await contentManagement.client.update<
-        DashboardCrudTypes['UpdateIn'],
-        DashboardCrudTypes['UpdateOut']
-      >({
-        id: idToSaveTo,
-        data: attributes,
-        options: { references },
-        contentTypeId: DASHBOARD_CONTENT_ID,
-      });
-    } else {
-      result = await contentManagement.client.create<
-        DashboardCrudTypes['CreateIn'],
-        DashboardCrudTypes['CreateOut']
-      >({ contentTypeId: DASHBOARD_CONTENT_ID, data: attributes, options: { references } });
-    }
+    const result = await contentManagement.client.create<
+      DashboardCrudTypes['CreateIn'],
+      DashboardCrudTypes['CreateOut']
+    >({
+      contentTypeId: DASHBOARD_CONTENT_ID,
+      data: attributes,
+      options: { id: idToSaveTo, references, overwrite: true },
+    });
     const newId = result.item.id;
 
     if (newId) {

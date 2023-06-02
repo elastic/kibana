@@ -20,7 +20,7 @@ import { DashboardContentType } from '../types';
 export type DashboardCrudTypes = ContentManagementCrudTypes<
   DashboardContentType,
   DashboardAttributes,
-  Pick<SavedObjectCreateOptions, 'references'>,
+  Pick<SavedObjectCreateOptions, 'id' | 'references' | 'overwrite'>,
   Pick<SavedObjectUpdateOptions, 'references'>,
   {
     /** Flag to indicate to only search the text on the "title" field */

@@ -21,7 +21,7 @@ const searchArgsToSOFindOptions = (
   return {
     type: contentTypeId,
     searchFields: options?.onlyTitle ? ['title'] : ['title^3', 'description'],
-    fields: ['description', 'title'],
+    fields: ['description', 'title', 'timeRestore'],
     search: query.text,
     perPage: query.limit,
     page: query.cursor ? +query.cursor : undefined,

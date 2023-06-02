@@ -41,10 +41,10 @@ const dashboardAttributesSchema = schema.object(
     // Dashboard Content
     controlGroupInput: schema.maybe(
       schema.object({
-        panelsJSON: schema.string(),
-        controlStyle: schema.string(),
-        chainingSystem: schema.string(),
-        ignoreParentSettingsJSON: schema.string(),
+        panelsJSON: schema.maybe(schema.string()),
+        controlStyle: schema.maybe(schema.string()),
+        chainingSystem: schema.maybe(schema.string()),
+        ignoreParentSettingsJSON: schema.maybe(schema.string()),
       })
     ),
     panelsJSON: schema.string({ defaultValue: '[]' }),
@@ -69,6 +69,8 @@ const searchOptionsSchema = schema.maybe(
 );
 
 const createOptionsSchema = schema.object({
+  id: schema.maybe(createOptionsSchemas.id),
+  overwrite: schema.maybe(createOptionsSchemas.overwrite),
   references: schema.maybe(createOptionsSchemas.references),
 });
 
