@@ -6,5 +6,8 @@
  * Side Public License, v 1.
  */
 
-export { AnnotationEditorControls } from './annotation_editor_controls';
+import { lazy } from 'react';
+
+export const AnnotationEditorControls = lazy(() => import('./annotation_editor_controls'));
+
 export { annotationsIconSet } from './icon_set';

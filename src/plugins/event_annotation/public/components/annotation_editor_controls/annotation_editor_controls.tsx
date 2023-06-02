@@ -46,7 +46,7 @@ import { TooltipSection } from './tooltip_annotation_panel';
 import { ConfigPanelManualAnnotation } from './manual_annotation_panel';
 import { ConfigPanelQueryAnnotation } from './query_annotation_panel';
 
-export const AnnotationEditorControls = ({
+const AnnotationEditorControls = ({
   annotation: currentAnnotation,
   onAnnotationChange,
   dataView,
@@ -377,3 +377,6 @@ const ConfigPanelGenericSwitch = ({
     />
   </EuiFormRow>
 );
+
+// eslint-disable-next-line import/no-default-export
+export default AnnotationEditorControls;
