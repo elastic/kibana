@@ -15,9 +15,11 @@ import {
 import { LifecycleRuleExecutor } from '@kbn/rule-registry-plugin/server';
 import { ExecutorType } from '@kbn/alerting-plugin/server';
 import { IBasePath } from '@kbn/core/server';
+import { LocatorPublic } from '@kbn/share-plugin/common';
 
 import { memoize, last } from 'lodash';
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/server';
+import { AlertsLocatorParams, getAlertUrl } from '../../../../common';
 import { SLO_ID_FIELD, SLO_REVISION_FIELD } from '../../../../common/field_names/infra_metrics';
 import { Duration, SLO, toDurationUnit } from '../../../domain/models';
 import { DefaultSLIClient, KibanaSavedObjectsSLORepository } from '../../../services/slo';
@@ -85,8 +87,10 @@ async function evaluate(slo: SLO, summaryClient: DefaultSLIClient, params: BurnR
 
 export const getRuleExecutor = ({
   basePath,
+  alertsLocator,
 }: {
   basePath: IBasePath;
+  alertsLocator?: LocatorPublic<AlertsLocatorParams>;
 }): LifecycleRuleExecutor<
   BurnRateRuleParams,
   BurnRateRuleTypeState,
@@ -113,6 +117,8 @@ export const getRuleExecutor = ({
       savedObjectsClient: soClient,
       scopedClusterClient: esClient,
       alertFactory,
+      getAlertStartedDate,
+      getAlertUuid,
     } = services;
 
     const sloRepository = new KibanaSavedObjectsSLORepository(soClient);
@@ -150,9 +156,21 @@ export const getRuleExecutor = ({
           windowDef
         );
 
+        const alertId = `alert-${slo.id}-${slo.revision}`;
+        const indexedStartedAt = getAlertStartedDate(alertId) ?? startedAt.toISOString();
+        const alertUuid = getAlertUuid(alertId);
+        const alertDetailsUrl = await getAlertUrl(
+          alertUuid,
+          spaceId,
+          indexedStartedAt,
+          alertsLocator,
+          basePath.publicBaseUrl
+        );
+
         const context = {
-          longWindow: { burnRate: longWindowBurnRate, duration: longWindowDuration.format() },
+          alertDetailsUrl,
           reason,
+          longWindow: { burnRate: longWindowBurnRate, duration: longWindowDuration.format() },
           shortWindow: { burnRate: shortWindowBurnRate, duration: shortWindowDuration.format() },
           burnRateThreshold: windowDef.burnRateThreshold,
           timestamp: startedAt.toISOString(),
@@ -162,7 +180,7 @@ export const getRuleExecutor = ({
         };
 
         const alert = alertWithLifecycle({
-          id: `alert-${slo.id}-${slo.revision}`,
+          id: alertId,
           fields: {
             [ALERT_REASON]: reason,
             [ALERT_EVALUATION_THRESHOLD]: windowDef.burnRateThreshold,
@@ -179,12 +197,23 @@ export const getRuleExecutor = ({
       const { getRecoveredAlerts } = alertFactory.done();
       const recoveredAlerts = getRecoveredAlerts();
       for (const recoveredAlert of recoveredAlerts) {
+        const alertId = `alert-${slo.id}-${slo.revision}`;
+        const indexedStartedAt = getAlertStartedDate(alertId) ?? startedAt.toISOString();
+        const alertUuid = getAlertUuid(alertId);
+        const alertDetailsUrl = await getAlertUrl(
+          alertUuid,
+          spaceId,
+          indexedStartedAt,
+          alertsLocator,
+          basePath.publicBaseUrl
+        );
         const context = {
           longWindow: { burnRate: longWindowBurnRate, duration: longWindowDuration.format() },
           shortWindow: { burnRate: shortWindowBurnRate, duration: shortWindowDuration.format() },
           burnRateThreshold: windowDef.burnRateThreshold,
           timestamp: startedAt.toISOString(),
           viewInAppUrl,
+          alertDetailsUrl,
           sloId: slo.id,
           sloName: slo.name,
         };
