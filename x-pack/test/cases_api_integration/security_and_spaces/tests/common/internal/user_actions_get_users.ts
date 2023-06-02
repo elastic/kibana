@@ -462,7 +462,7 @@ export default ({ getService }: FtrProviderContext): void => {
           expect(res.reporter.avatar).to.eql({});
         });
 
-        it('does not throw if the avatar data are not a string', async () => {
+        it('does not return any avatar data if they are not a string', async () => {
           await updateUserProfileAvatar({
             supertest,
             req: {
