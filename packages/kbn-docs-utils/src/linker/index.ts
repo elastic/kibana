@@ -91,6 +91,12 @@ export const docLinker = async (
     '!**/bundle.yaml',
   ]);
 
+  const partialYamlFiles = yamlFiles.filter((file) => {
+    const data = fs.readFileSync(path.resolve(file), 'utf8');
+    const lines = data.split('\n');
+    return lines[0].trim() === '# @kbn-doc-linker partial';
+  });
+
   entryPointFiles.forEach((entryPointFile: string) => {
     if (!entryPointFile.endsWith('entrypoint.yaml')) return;
 
@@ -101,48 +107,44 @@ export const docLinker = async (
       ref,
       config: new Config(BASIC_CONFIG),
       dereference: false,
-    })
-      .then((result) => {
-        result.problems.forEach((problem) => {
-          if (problem.message !== "Can't resolve $ref") return;
+    }).then((result) => {
+      result.problems.forEach((problem) => {
+        if (problem.message !== "Can't resolve $ref") return;
 
-          problem.location.forEach((location) => {
-            if (!location.pointer) return;
+        problem.location.forEach((location) => {
+          if (!location.pointer) return;
 
-            const definitionPath = getDefinition(location);
-            if (!definitionPath || !definitionPath.$ref) return;
+          const definitionPath = getDefinition(location);
+          if (!definitionPath || !definitionPath.$ref) return;
 
-            const missingDefinition = definitionPath.$ref.split('/').slice(-1)[0];
+          const missingDefinition = definitionPath.$ref.split('/').slice(-1)[0];
 
-            const found = yamlFiles.some((file: string) => {
-              if (!file.endsWith(`${missingDefinition}.yaml`)) return false;
+          const found = partialYamlFiles.some((file: string) => {
+            if (!file.endsWith(`${missingDefinition}.yaml`)) return false;
 
-              const relativePath = path.relative(path.dirname(location.source.absoluteRef), file);
+            const relativePath = path.relative(path.dirname(location.source.absoluteRef), file);
 
-              const spec = loadYamlFile(location.source.absoluteRef);
-              const definition = getValueFromPath(spec, location.pointer);
-              if (definition && definition.$ref) {
-                log.info(
-                  `Replacing ${definition.$ref} to ${relativePath} in ${location.source.absoluteRef}`
-                );
-                replaceRef(spec, definition.$ref, relativePath);
+            const spec = loadYamlFile(location.source.absoluteRef);
+            const definition = getValueFromPath(spec, location.pointer);
+            if (definition && definition.$ref) {
+              log.info(
+                `Replacing ${definition.$ref} to ${relativePath} in ${location.source.absoluteRef}`
+              );
+              replaceRef(spec, definition.$ref, relativePath);
 
-                const yamlContent = yaml.safeDump(spec);
-                fs.writeFileSync(location.source.absoluteRef, yamlContent, 'utf8');
-              }
-
-              return true;
-            });
-
-            if (!found) {
-              log.error('Unknown error, run @readcly/cli for details');
-              process.exit(1);
+              const yamlContent = yaml.safeDump(spec);
+              fs.writeFileSync(location.source.absoluteRef, yamlContent, 'utf8');
             }
+
+            return true;
           });
+
+          if (!found) {
+            log.error('Unknown error, run @readcly/cli for details');
+            process.exit(1);
+          }
         });
-      })
-      .catch((error) => {
-        log.info('catched it', error);
       });
+    });
   });
 };
