@@ -33,9 +33,9 @@ import type {
 import { i18n } from '@kbn/i18n';
 import {
   BrowserFields,
-  CellValueElementProps,
+  DeprecatedCellValueElementProps,
   ColumnHeaderOptions,
-  RowRenderer,
+  DeprecatedRowRenderer,
   TimelineItem,
 } from '@kbn/timelines-plugin/common';
 import { useDataGridColumnsCellActions } from '@kbn/cell-actions';
@@ -84,8 +84,8 @@ interface BaseDataTableProps {
   id: string;
   leadingControlColumns: EuiDataGridControlColumn[];
   loadPage: (newActivePage: number) => void;
-  renderCellValue: (props: CellValueElementProps) => React.ReactNode;
-  rowRenderers: RowRenderer[];
+  renderCellValue: (props: DeprecatedCellValueElementProps) => React.ReactNode;
+  rowRenderers: DeprecatedRowRenderer[];
   hasCrudPermissions?: boolean;
   unitCountText: string;
   pagination: EuiDataGridPaginationProps;

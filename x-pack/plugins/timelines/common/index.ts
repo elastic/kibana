@@ -17,12 +17,12 @@
 export { DELETED_SECURITY_SOLUTION_DATA_VIEW } from './constants';
 
 export type {
-  CellValueElementProps,
+  DeprecatedCellValueElementProps,
   DataProvidersAnd,
   DataProvider,
   QueryOperator,
   QueryMatch,
-  RowRenderer,
+  DeprecatedRowRenderer,
   ColumnHeaderOptions,
 } from './types';
 

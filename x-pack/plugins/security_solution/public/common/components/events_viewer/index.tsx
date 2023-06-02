@@ -23,7 +23,12 @@ import type { ConnectedProps } from 'react-redux';
 import { connect, useDispatch, useSelector } from 'react-redux';
 import { ThemeContext } from 'styled-components';
 import type { Filter } from '@kbn/es-query';
-import type { Direction, EntityType } from '@kbn/timelines-plugin/common';
+import type {
+  DeprecatedCellValueElementProps,
+  DeprecatedRowRenderer,
+  Direction,
+  EntityType,
+} from '@kbn/timelines-plugin/common';
 import { isEmpty } from 'lodash';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import type { EuiTheme } from '@kbn/kibana-react-plugin/common';
@@ -581,8 +586,14 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
                             data={nonDeletedEvents}
                             id={tableId}
                             loadPage={loadPage}
-                            renderCellValue={renderCellValue}
-                            rowRenderers={rowRenderers}
+                            // TODO: migrate away from deprecated type
+                            renderCellValue={
+                              renderCellValue as (
+                                props: DeprecatedCellValueElementProps
+                              ) => React.ReactNode
+                            }
+                            // TODO: migrate away from deprecated type
+                            rowRenderers={rowRenderers as unknown as DeprecatedRowRenderer[]}
                             totalItems={totalCountMinusDeleted}
                             bulkActions={bulkActions}
                             fieldBrowserOptions={fieldBrowserOptions}

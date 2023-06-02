@@ -13,7 +13,7 @@ import { DeprecatedRowRendererId } from '..';
  * Use the one from `plugins/security_solution/common/types/timeline`.
  * @deprecated
  */
-export interface RowRenderer {
+export interface DeprecatedRowRenderer {
   id: DeprecatedRowRendererId;
   isInstance: (data: Ecs) => boolean;
   renderRow: ({
