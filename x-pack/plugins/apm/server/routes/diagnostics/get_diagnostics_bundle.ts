@@ -10,7 +10,7 @@ import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { ApmIndicesConfig } from '../settings/apm_indices/get_apm_indices';
 import { getDataStreams } from './bundle/get_data_streams';
 import { getNonDataStreamIndices } from './bundle/get_non_data_stream_indices';
-import { getApmIndexTemplateNames } from './get_apm_index_template_prefixes';
+import { getApmIndexTemplateNames } from './get_apm_index_template_names';
 import { getElasticsearchVersion } from './get_elasticsearch_version';
 import { getIndexTemplatesByIndexPattern } from './bundle/get_index_templates_by_index_pattern';
 import { getExistingApmIndexTemplates } from './bundle/get_existing_index_templates';
@@ -77,20 +77,17 @@ function getApmIndexTemplates(
   apmIndexTemplateNames: string[],
   existingIndexTemplates: IndicesGetIndexTemplateIndexTemplateItem[]
 ) {
-  const standardIndexTemplates = apmIndexTemplateNames.map(
-    (indexTemplatePrefix) => {
-      const matchingTemplate = existingIndexTemplates.find(
-        ({ name }) => name === indexTemplatePrefix
-      );
+  const standardIndexTemplates = apmIndexTemplateNames.map((templateName) => {
+    const matchingTemplate = existingIndexTemplates.find(
+      ({ name }) => name === templateName
+    );
 
-      return {
-        prefix: indexTemplatePrefix,
-        name: matchingTemplate?.name,
-        exists: Boolean(matchingTemplate),
-        isNonStandard: false,
-      };
-    }
-  );
+    return {
+      name: templateName,
+      exists: Boolean(matchingTemplate),
+      isNonStandard: false,
+    };
+  });
 
   const nonStandardIndexTemplates = existingIndexTemplates
     .filter(

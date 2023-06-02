@@ -45,8 +45,7 @@ const getDiagnosticsRoute = createApmServerRoute({
       ingestPipelines: IngestGetPipelineResponse;
     };
     apmIndexTemplates: Array<{
-      prefix?: string;
-      name?: string;
+      name: string;
       isNonStandard: boolean;
       exists: boolean;
     }>;

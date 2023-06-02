@@ -11,7 +11,7 @@ import {
   IngestGetPipelineResponse,
 } from '@elastic/elasticsearch/lib/api/types';
 import { SERVICE_NAME } from '../../../../common/es_fields/apm';
-import { getApmIndexTemplateNames } from '../get_apm_index_template_prefixes';
+import { getApmIndexTemplateNames } from '../get_apm_index_template_names';
 
 export function getIndicesStates({
   indices,

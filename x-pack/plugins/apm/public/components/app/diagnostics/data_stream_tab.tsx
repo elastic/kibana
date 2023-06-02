@@ -76,6 +76,6 @@ export function getIndexTemplateState(
   templateName: string
 ) {
   return diagnosticsBundle.apmIndexTemplates.find(
-    ({ prefix }) => templateName === prefix
+    ({ name }) => templateName === name
   );
 }

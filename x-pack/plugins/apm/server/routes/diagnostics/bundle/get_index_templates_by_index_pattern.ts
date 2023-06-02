@@ -11,7 +11,7 @@ import { orderBy } from 'lodash';
 import { ApmIndicesConfig } from '../../settings/apm_indices/get_apm_indices';
 import { getApmIndexPatterns } from './get_indices';
 import { getIndexTemplate } from './get_index_template';
-import { getApmIndexTemplateNames } from '../get_apm_index_template_prefixes';
+import { getApmIndexTemplateNames } from '../get_apm_index_template_names';
 
 export async function getIndexTemplatesByIndexPattern({
   esClient,
@@ -79,10 +79,10 @@ async function getTemplatePriority(
 
 function getIsNonStandardIndexTemplate(templateName: string) {
   const apmIndexTemplateNames = getApmIndexTemplateNames();
-  const stackIndexTemplatePrefixes = ['logs', 'metrics'];
+  const stackIndexTemplateNames = ['logs', 'metrics'];
   const isNonStandard = [
     ...apmIndexTemplateNames,
-    ...stackIndexTemplatePrefixes,
+    ...stackIndexTemplateNames,
   ].every((apmIndexTemplateName) => {
     const notMatch = templateName !== apmIndexTemplateName;
     return notMatch;

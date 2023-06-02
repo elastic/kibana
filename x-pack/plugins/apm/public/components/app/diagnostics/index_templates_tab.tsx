@@ -32,9 +32,7 @@ export function DiagnosticsIndexTemplates() {
     {
       name: 'Index template name',
       field: 'name',
-      render: (_, item) => {
-        return item.name || item.prefix;
-      },
+      render: (_, { name }) => name,
       truncateText: true,
     },
     {
