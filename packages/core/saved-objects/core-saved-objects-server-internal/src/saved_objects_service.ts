@@ -272,6 +272,8 @@ export class SavedObjectsService
         setTimeout(res, 10_000);
       });
 
+      throw new Error('!!!!!FAKE FAILURE!!!!!');
+
       // Running migrations only if we got compatible nodes.
       // It may happen that the observable completes due to Kibana shutting down
       // and the promise above fulfils as undefined. We shouldn't trigger migrations at that point.
