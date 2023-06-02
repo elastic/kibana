@@ -37,7 +37,7 @@ const getContextWrapper: (context: WorkpadRoutingContextType) => FC =
 describe('useRefreshHelper', () => {
   beforeEach(() => {
     jest.resetAllMocks();
-    jest.useFakeTimers('legacy');
+    jest.useFakeTimers({ legacyFakeTimers: true });
   });
 
   test('starts a timer to refresh', () => {

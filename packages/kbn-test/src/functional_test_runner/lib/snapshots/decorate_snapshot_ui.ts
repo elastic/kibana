@@ -203,7 +203,7 @@ export function expectSnapshot(received: any) {
 
 function expectToMatchSnapshot(snapshotContext: SnapshotContext, received: any) {
   const matcher = toMatchSnapshot.bind(snapshotContext as any);
-  const result = matcher(received);
+  const result = matcher(received) as any;
 
   if (!result.pass) {
     throw new Error(result.message());
@@ -217,7 +217,8 @@ function expectToMatchInlineSnapshot(
 ) {
   const matcher = toMatchInlineSnapshot.bind(snapshotContext as any);
 
-  const result = arguments.length === 2 ? matcher(received) : matcher(received, _actual);
+  // @ts-expect-error
+  const result = arguments.length === 2 ? matcher(received) : (matcher(received, _actual) as any);
 
   if (!result.pass) {
     throw new Error(result.message());

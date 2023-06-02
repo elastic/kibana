@@ -24,7 +24,7 @@ describe('<FollowerIndicesList />', () => {
   let httpRequestsMockHelpers;
 
   beforeAll(() => {
-    jest.useFakeTimers('legacy');
+    jest.useFakeTimers({ legacyFakeTimers: true });
     ({ httpRequestsMockHelpers } = setupEnvironment());
   });
 

@@ -16,7 +16,7 @@ import { coreMock } from 'src/core/public/mocks';
 import { HttpSetup } from 'kibana/public';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 
-jest.useFakeTimers('legacy');
+jest.useFakeTimers({ legacyFakeTimers: true });
 
 const createMockStorage = () => {
   let lastData = { events: {}, suggestionEvents: {} };

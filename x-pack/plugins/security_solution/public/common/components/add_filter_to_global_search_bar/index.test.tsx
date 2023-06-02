@@ -39,7 +39,7 @@ describe('AddFilterToGlobalSearchBar Component', () => {
   let store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
 
   beforeEach(() => {
-    jest.useFakeTimers('legacy');
+    jest.useFakeTimers({ legacyFakeTimers: true });
     store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
     mockAddFilters.mockClear();
   });
@@ -148,7 +148,7 @@ describe('AddFilterToGlobalSearchBar Component', () => {
     await waitFor(() => {
       wrapper.find('[data-test-subj="withHoverActionsButton"]').simulate('mouseenter');
       wrapper.update();
-      jest.runAllTimers();
+      jest.advanceTimersByTime(500);
       wrapper.update();
 
       wrapper
