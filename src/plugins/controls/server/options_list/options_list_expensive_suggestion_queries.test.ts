@@ -200,7 +200,7 @@ describe('options list expensive queries', () => {
                 "wildcard": Object {
                   "coolTestField.keyword": Object {
                     "case_insensitive": true,
-                    "value": ".c\\\\?o&o[l\\\\**",
+                    "value": "*.c\\\\?o&o[l\\\\**",
                   },
                 },
               },
