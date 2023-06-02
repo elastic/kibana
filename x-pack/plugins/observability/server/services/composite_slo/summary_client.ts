@@ -8,13 +8,17 @@
 import { MsearchMultisearchBody } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ElasticsearchClient } from '@kbn/core/server';
 import {
+  calendarAlignedTimeWindowSchema,
+  Duration,
   occurrencesBudgetingMethodSchema,
   rollingTimeWindowSchema,
   timeslicesBudgetingMethodSchema,
+  toMomentUnitOfTime,
 } from '@kbn/slo-schema';
+import moment from 'moment';
 import { SLO_DESTINATION_INDEX_NAME } from '../../assets/constants';
 import { CompositeSLO, CompositeSLOId, DateRange, Summary } from '../../domain/models';
-import { computeErrorBudget, computeSLI, computeSummaryStatus } from '../../domain/services';
+import { computeSLI, computeSummaryStatus, toErrorBudget } from '../../domain/services';
 import { toDateRange } from '../../domain/services/date_range';
 
 export interface SummaryClient {
@@ -51,36 +55,76 @@ export class DefaultSummaryClient implements SummaryClient {
       const { aggregations = {} } = result.responses[i];
       const buckets = aggregations?.bySloId?.buckets ?? [];
 
-      let goodEvents = 0;
-      let totalEvents = 0;
-      let totalWeights = 0;
-      for (const bucket of buckets) {
-        const sourceSloId = bucket.key;
-        const sourceSloGoodEvents = bucket.good.value;
-        const sourceSloTotalEvents = bucket.total.value;
-        const sourceSloWeight = compositeSlo.sources.find(
-          (source) => source.id === sourceSloId
-        )!.weight; // used to build the query, therefore exists
+      if (
+        calendarAlignedTimeWindowSchema.is(compositeSlo.timeWindow) &&
+        timeslicesBudgetingMethodSchema.is(compositeSlo.budgetingMethod)
+      ) {
+        let sliValue = 0;
+        let totalWeights = 0;
+        let maxSloTotalSlices = 0;
+        for (const bucket of buckets) {
+          const sourceSloId = bucket.key;
+          const sourceSloGoodSlices = bucket.good.value;
+          const sourceSloTotalSlices = bucket.total.value;
+          maxSloTotalSlices =
+            sourceSloTotalSlices > maxSloTotalSlices ? sourceSloTotalSlices : maxSloTotalSlices;
+          const sourceSloSliValue = computeSLI({
+            good: sourceSloGoodSlices,
+            total: sourceSloTotalSlices,
+          });
+          const sourceSloWeight = compositeSlo.sources.find(
+            (source) => source.id === sourceSloId
+          )!.weight; // used to build the query, therefore exists
 
-        goodEvents += sourceSloGoodEvents * sourceSloWeight;
-        totalEvents += sourceSloTotalEvents * sourceSloWeight;
-        totalWeights += sourceSloWeight;
+          totalWeights += sourceSloWeight;
+          sliValue += sourceSloSliValue < 0 ? 0 : sourceSloWeight * sourceSloSliValue;
+        }
+        sliValue /= totalWeights === 0 ? 1 : totalWeights;
+
+        const totalSlicesInCalendar = computeTotalSlicesFromDateRange(
+          dateRangeByCompositeSlo[compositeSlo.id],
+          compositeSlo.objective.timesliceWindow!
+        );
+        const initialErrorBudget = 1 - compositeSlo.objective.target;
+        const errorBudgetConsumed =
+          ((1 - sliValue) / initialErrorBudget) * (maxSloTotalSlices / totalSlicesInCalendar);
+
+        const errorBudget = toErrorBudget(initialErrorBudget, errorBudgetConsumed);
+        summaryByCompositeSlo[compositeSlo.id] = {
+          sliValue,
+          errorBudget,
+          status: computeSummaryStatus(compositeSlo, sliValue, errorBudget),
+        };
+      } else {
+        let sliValue = 0;
+        let totalWeights = 0;
+        for (const bucket of buckets) {
+          const sourceSloId = bucket.key;
+          const sourceSloGood = bucket.good.value;
+          const sourceSloTotal = bucket.total.value;
+          const sourceSloSliValue = computeSLI({ good: sourceSloGood, total: sourceSloTotal });
+          const sourceSloWeight = compositeSlo.sources.find(
+            (source) => source.id === sourceSloId
+          )!.weight; // used to build the query, therefore exists
+
+          totalWeights += sourceSloWeight;
+          sliValue += sourceSloSliValue < 0 ? 0 : sourceSloWeight * sourceSloSliValue;
+        }
+        sliValue /= totalWeights === 0 ? 1 : totalWeights;
+
+        const initialErrorBudget = 1 - compositeSlo.objective.target;
+        const errorBudgetConsumed = (1 - sliValue) / initialErrorBudget;
+        const errorBudget = toErrorBudget(
+          initialErrorBudget,
+          errorBudgetConsumed,
+          calendarAlignedTimeWindowSchema.is(compositeSlo.timeWindow)
+        );
+        summaryByCompositeSlo[compositeSlo.id] = {
+          sliValue,
+          errorBudget,
+          status: computeSummaryStatus(compositeSlo, sliValue, errorBudget),
+        };
       }
-
-      const weightedGoodEvents = goodEvents > 0 ? goodEvents / totalWeights : 0;
-      const weightedTotalEvents = totalEvents > 0 ? totalEvents / totalWeights : 0;
-
-      const sliValue = computeSLI({ good: weightedGoodEvents, total: weightedTotalEvents });
-      const errorBudget = computeErrorBudget(compositeSlo, {
-        dateRange: dateRangeByCompositeSlo[compositeSlo.id],
-        good: weightedGoodEvents,
-        total: weightedTotalEvents,
-      });
-      summaryByCompositeSlo[compositeSlo.id] = {
-        sliValue,
-        errorBudget,
-        status: computeSummaryStatus(compositeSlo, sliValue, errorBudget),
-      };
     }
 
     return summaryByCompositeSlo;
@@ -144,4 +188,12 @@ function generateSearchQuery(
       },
     }),
   };
+}
+
+function computeTotalSlicesFromDateRange(dateRange: DateRange, timesliceWindow: Duration) {
+  const dateRangeDurationInUnit = moment(dateRange.to).diff(
+    dateRange.from,
+    toMomentUnitOfTime(timesliceWindow.unit)
+  );
+  return Math.ceil(dateRangeDurationInUnit / timesliceWindow!.value);
 }
