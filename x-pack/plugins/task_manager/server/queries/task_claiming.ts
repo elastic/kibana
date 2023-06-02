@@ -346,6 +346,8 @@ export class TaskClaiming {
       size,
       sort: SortByRunAtAndRetryAt,
       seq_no_primary_term: true,
+      // TODO: Uncomment
+      // drop_invalid_tasks: true,
     });
 
     return docs;

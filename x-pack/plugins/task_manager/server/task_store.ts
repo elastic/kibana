@@ -54,6 +54,7 @@ export interface SearchOpts {
   sort?: estypes.Sort;
   query?: estypes.QueryDslQueryContainer;
   seq_no_primary_term?: boolean;
+  drop_invalid_tasks?: boolean;
 }
 
 export interface AggregationOpts {
@@ -442,7 +443,17 @@ export class TaskStore {
           .map((doc) => this.serializer.rawToSavedObject(doc))
           .map((doc) => omit(doc, 'namespace') as SavedObject<SerializedConcreteTaskInstance>)
           .map((doc) => savedObjectToConcreteTaskInstance(doc))
-          .map((doc) => this.taskValidator.getValidatedTaskInstance(doc, 'read')),
+          .map((doc) => {
+            try {
+              return this.taskValidator.getValidatedTaskInstance(doc, 'read');
+            } catch (e) {
+              if (opts.drop_invalid_tasks) {
+                return null;
+              }
+              throw e;
+            }
+          })
+          .filter((doc): doc is ConcreteTaskInstance => !!doc),
       };
     } catch (e) {
       this.errors$.next(e);
