@@ -39,6 +39,7 @@ import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import { CasesUiStart } from '@kbn/cases-plugin/public';
 import { DiscoverStart } from '@kbn/discover-plugin/public';
 import { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import { FieldFormatsSetup, FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { UnwrapPromise } from '../common/utility_types';
 import type {
   SourceProviderProps,
@@ -83,6 +84,7 @@ export interface InfraClientSetupDeps {
   embeddable: EmbeddableSetup;
   share: SharePluginSetup;
   lens: LensPublicStart;
+  fieldFormats: FieldFormatsSetup;
 }
 
 export interface InfraClientStartDeps {
@@ -105,6 +107,7 @@ export interface InfraClientStartDeps {
   unifiedSearch: UnifiedSearchPublicPluginStart;
   usageCollection: UsageCollectionStart;
   telemetry: ITelemetryClient;
+  fieldFormats: FieldFormatsStart;
 }
 
 export type InfraClientCoreSetup = CoreSetup<InfraClientStartDeps, InfraClientStartExports>;

@@ -38,6 +38,7 @@ import { CriterionPreview } from '../expression_editor/criterion_preview_chart';
 import { AlertDetailsAppSectionProps } from './types';
 import { Threshold } from '../../../common/components/threshold';
 import LogsRatioChart from './components/logs_ratio_chart';
+import { ExplainLogRateSpikes } from './components/explain_log_rate_spikes';
 
 const LogsHistoryChart = React.lazy(() => import('./components/logs_history_chart'));
 const formatThreshold = (threshold: number) => String(threshold);
@@ -248,11 +249,16 @@ const AlertDetailsAppSection = ({
     );
   };
 
+  const getExplainLogRateSpikesSection = () => {
+    return <ExplainLogRateSpikes rule={rule} alert={alert} />;
+  };
+
   return (
     <EuiFlexGroup direction="column" data-test-subj="logsThresholdAlertDetailsPage">
       {getLogRatioChart()}
       {getLogCountChart()}
       {getLogsHistoryChart()}
+      {getExplainLogRateSpikesSection()}
     </EuiFlexGroup>
   );
 };
