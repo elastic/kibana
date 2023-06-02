@@ -11,7 +11,7 @@ echo "--- Run scripts/type_check to ensure that all build available"
 
 if is_pr_with_label "ci:link-docs"; then
   echo "--- Link API Docs"
-  node --max-old-space-size=12000 scripts/build_api_docs link
+  node --max-old-space-size=12000 scripts/build_api_docs --link
 
   check_for_changed_files "scripts/build_api_docs link" true
 fi
