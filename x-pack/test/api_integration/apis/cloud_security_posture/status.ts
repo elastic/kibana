@@ -8,6 +8,8 @@ import expect from '@kbn/expect';
 import Chance from 'chance';
 import type { CspSetupStatus } from '@kbn/cloud-security-posture-plugin/common/types';
 import type { SuperTest, Test } from 'supertest';
+import { setupFleetAndAgents } from '../../../fleet_api_integration/apis/agents/services';
+import { generateAgent } from '../../../fleet_api_integration/helpers';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { deleteIndex, addIndex } from './helper';
 
@@ -20,7 +22,8 @@ const INDEX_ARRAY = [FINDINGS_INDEX, FINDINGS_LATEST_INDEX, VULN_LATEST_INDEX, V
 const UNPRIVILEGED_ROLE = 'unprivileged_test_role';
 const UNPRIVILEGED_USERNAME = 'unprivileged_test_user';
 
-export default function ({ getService }: FtrProviderContext) {
+export default function (providerContext: FtrProviderContext) {
+  const { getService } = providerContext;
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const es = getService('es');
@@ -231,12 +234,6 @@ export default function ({ getService }: FtrProviderContext) {
           'cspm'
         );
 
-        //         const { body: res2 } = await supertest
-        //         .post('/_transform/logs-cloud_security_posture.findings_latest-default/_stop')
-        //         .set('kbn-xsrf', 'xxxx')
-        //         .expect(200);
-        // console.log(res2)
-
         const { body: res }: { body: CspSetupStatus } = await supertest
           .get(`/internal/cloud_security_posture/status`)
           .set('kbn-xsrf', 'xxxx')
@@ -262,6 +259,133 @@ export default function ({ getService }: FtrProviderContext) {
 
         expect(res.vuln_mgmt.status).to.be('indexed');
       });
+    });
+
+    describe('status = waiting_for_result test', () => {
+      setupFleetAndAgents(providerContext);
+
+      beforeEach(async () => {
+        await kibanaServer.savedObjects.cleanStandardList();
+        await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
+        const getPkRes = await supertest
+          .get(`/api/fleet/epm/packages/fleet_server`)
+          .set('kbn-xsrf', 'xxxx')
+          .expect(200);
+        const pkgVersion = getPkRes.body.item.version;
+        await supertest
+          .post(`/api/fleet/epm/packages/fleet_server/${pkgVersion}`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({ force: true })
+          .expect(200);
+
+        const { body: agentPolicyResponse } = await supertest
+          .post(`/api/fleet/agent_policies`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'Test policy a1',
+            namespace: 'default',
+          });
+
+        agentPolicyId = agentPolicyResponse.item.id;
+
+        await supertest
+          .post(`/api/fleet/fleet_server_hosts`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            id: 'test-default-a1',
+            name: 'Default',
+            is_default: true,
+            host_urls: ['https://test.com:8080', 'https://test.com:8081'],
+          })
+          .expect(200);
+        await generateAgent(providerContext, 'healthy', `Agent policy test 2`, agentPolicyId);
+      });
+
+      afterEach(async () => {
+        await kibanaServer.savedObjects.cleanStandardList();
+        await esArchiver.unload('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
+      });
+
+      it(`Kspm should return waiting_for_results`, async () => {
+        await createPackagePolicy(
+          supertest,
+          agentPolicyId,
+          'kspm',
+          'cloudbeat/cis_k8s',
+          'vanilla',
+          'kspm'
+        );
+        const { body: res }: { body: CspSetupStatus } = await supertest
+          .get(`/internal/cloud_security_posture/status`)
+          .set('kbn-xsrf', 'xxxx')
+          .expect(200);
+        expect(res.kspm.status).to.be('waiting_for_results');
+      });
+
+      it(`cspm should return waiting_for_results`, async () => {
+        await createPackagePolicy(
+          supertest,
+          agentPolicyId,
+          'cspm',
+          'cloudbeat/cis_aws',
+          'aws',
+          'cspm'
+        );
+        const { body: res }: { body: CspSetupStatus } = await supertest
+          .get(`/internal/cloud_security_posture/status`)
+          .set('kbn-xsrf', 'xxxx')
+          .expect(200);
+        expect(res.cspm.status).to.be('waiting_for_results');
+      });
+
+      it(`Cnvm should return waiting_for_results`, async () => {
+        await createPackagePolicy(
+          supertest,
+          agentPolicyId,
+          'vuln_mgmt',
+          'cloudbeat/vuln_mgmt_aws',
+          'aws',
+          'vuln_mgmt'
+        );
+        const { body: res }: { body: CspSetupStatus } = await supertest
+          .get(`/internal/cloud_security_posture/status`)
+          .set('kbn-xsrf', 'xxxx')
+          .expect(200);
+        console.log(res);
+        expect(res.vuln_mgmt.status).to.be('waiting_for_results');
+      });
+
+      // it(`TEST`, async () => {
+      //   const previousInstallDate = new Date(Date.now() - 6000000).toISOString();
+      //   await createPackagePolicy(
+      //     supertest,
+      //     agentPolicyId,
+      //     'vuln_mgmt',
+      //     'cloudbeat/vuln_mgmt_aws',
+      //     'aws',
+      //     'vuln_mgmt'
+      //   );
+      //   await kibanaServer.savedObjects.update({
+      //     id: 'test-default-a1',
+      //     type: PACKAGES_SAVED_OBJECT_TYPE,
+      //     attributes: {
+      //       install_status: 'installing',
+      //       install_started_at: previousInstallDate,
+      //     },
+      //   });
+      //   await supertest.post(`/api/fleet/setup`).set('kbn-xsrf', 'xxx').expect(200);
+      //   const packageAfterSetup = await kibanaServer.savedObjects.get({
+      //     type: PACKAGES_SAVED_OBJECT_TYPE,
+      //     id: pkgName,
+      //   });
+      //   const installStartedAfterSetup = packageAfterSetup.attributes.install_started_at;
+      //   const { body: res }: { body: CspSetupStatus } = await supertest
+      //     .get(`/internal/cloud_security_posture/status`)
+      //     .set('kbn-xsrf', 'xxxx')
+      //     .expect(200);
+      //   console.log(res);
+      //   expect(res.vuln_mgmt.status).to.be('waiting_for_results');
+      // });
     });
 
     describe('status = unprivileged test', () => {
