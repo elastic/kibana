@@ -7,6 +7,7 @@
 
 import { merge } from 'lodash';
 import { ElasticsearchClient } from '@kbn/core/server';
+import { fetchFindLatestPackageOrThrow } from '@kbn/fleet-plugin/server/services/epm/registry';
 import { getApmPolicy } from './get_apm_policy';
 import { ProfilingSetupOptions } from './types';
 import { SetupState } from '../../../common/setup';
@@ -125,13 +126,15 @@ export async function createCollectorPackagePolicy({
   soClient,
   packagePolicyClient,
 }: ProfilingSetupOptions) {
+  const packageName = 'profiler_collector';
+  const { version } = await fetchFindLatestPackageOrThrow(packageName, { prerelease: true });
   const packagePolicy = {
     policy_id: CLOUD_AGENT_POLICY_ID,
     enabled: true,
     package: {
-      name: 'profiler_collector',
+      name: packageName,
       title: 'Universal Profiling Collector',
-      version: '8.9.0-preview',
+      version,
     },
     name: COLLECTOR_PACKAGE_POLICY_NAME,
     namespace: 'default',
@@ -167,13 +170,15 @@ export async function createSymbolizerPackagePolicy({
   soClient,
   packagePolicyClient,
 }: ProfilingSetupOptions) {
+  const packageName = 'profiler_symbolizer';
+  const { version } = await fetchFindLatestPackageOrThrow(packageName, { prerelease: true });
   const packagePolicy = {
     policy_id: CLOUD_AGENT_POLICY_ID,
     enabled: true,
     package: {
-      name: 'profiler_symbolizer',
+      name: packageName,
       title: 'Universal Profiling Symbolizer',
-      version: '8.8.0-preview',
+      version,
     },
     name: SYMBOLIZER_PACKAGE_POLICY_NAME,
     namespace: 'default',
