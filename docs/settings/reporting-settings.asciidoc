@@ -247,7 +247,7 @@ With Security enabled, Reporting has two forms of access control: each user can 
 The `xpack.reporting.roles` settings are for a deprecated system of access control in Reporting. Turning off this feature allows API Keys to generate reports, and allows reporting access through {kib} application privileges. We recommend you explicitly turn off reporting's deprecated access control feature by adding `xpack.reporting.roles.enabled: false` in kibana.yml. This will enable you to create custom roles that provide application privileges for reporting, as described in <<grant-user-access, granting users access to reporting>>.
 ============================================================================
 
-[[xpack-reporting-roles-enabled]] `xpack.reporting.roles.enabled`{ess-icon}::
+[[xpack-reporting-roles-enabled]] `xpack.reporting.roles.enabled` {ess-icon}::
 deprecated:[7.14.0,The default for this setting will be `false` in an upcoming version of {kib}.] Sets access control to a set of assigned reporting roles, specified by `xpack.reporting.roles.allow`. Defaults to `true`.
 
 `xpack.reporting.roles.allow`::
