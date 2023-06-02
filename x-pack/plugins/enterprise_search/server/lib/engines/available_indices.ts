@@ -11,21 +11,19 @@ export const availableIndices = async (
   client: IScopedClusterClient,
   indices: string[]
 ): Promise<string[]> => {
-  const closedIndicesList = await client.asCurrentUser.indices.get({
-    expand_wildcards: ['closed'],
-    features: ['aliases', 'settings'],
-    filter_path: ['*.settings.index.verified_before_close'],
-    index: '*',
-  });
   const availableIndicesList = await client.asCurrentUser.indices.get({
     expand_wildcards: ['all'],
     features: ['aliases', 'settings'],
-    filter_path: ['*.aliases'],
+    filter_path: ['*.aliases', '*.settings.index.verified_before_close'],
     index: '*',
   });
+
   return indices.filter(
     (index) =>
       Object.keys(availableIndicesList).includes(index) &&
-      !Object.keys(closedIndicesList).includes(index)
+      !(
+        availableIndicesList[index].settings?.index?.verified_before_close === true ||
+        availableIndicesList[index].settings?.index?.verified_before_close === 'true'
+      )
   );
 };

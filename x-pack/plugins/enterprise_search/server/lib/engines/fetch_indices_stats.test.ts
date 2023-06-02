@@ -20,9 +20,6 @@ describe('fetchIndicesStats lib function', () => {
   };
   const indices = ['test-index-name-1'];
 
-  const getClosedIndexResponse = {
-    'test-index-name-2': { settings: { index: { verified_before_close: 'true' } } },
-  };
   const getAllAvailableIndexResponse = {
     'test-index-name-1': { aliases: { test_alias_name: {} } },
   };
@@ -61,7 +58,6 @@ describe('fetchIndicesStats lib function', () => {
   });
 
   it('should return hydrated indices for all available and open indices', async () => {
-    mockClient.asCurrentUser.indices.get.mockResolvedValueOnce(() => {}); // no closed indices
     mockClient.asCurrentUser.indices.get.mockResolvedValueOnce(getAllAvailableIndexResponse);
     mockClient.asCurrentUser.indices.stats.mockResolvedValueOnce(indexStats);
     await expect(
@@ -70,10 +66,13 @@ describe('fetchIndicesStats lib function', () => {
   });
 
   it('should return count : null, health: unknown for closed index ', async () => {
-    mockClient.asCurrentUser.indices.get.mockImplementationOnce(() => getClosedIndexResponse); // one closed index - test-index-name-2
     mockClient.asCurrentUser.indices.get.mockImplementationOnce(() =>
       Object.assign(getAllAvailableIndexResponse, {
-        'test-index-name-2': { aliases: { test_alias_name: {} } },
+        // test-index-name-2 is the closed index here
+        'test-index-name-2': {
+          aliases: { test_alias_name: {} },
+          settings: { index: { verified_before_close: 'true' } },
+        },
       })
     );
 
@@ -94,7 +93,6 @@ describe('fetchIndicesStats lib function', () => {
     ]);
   });
   it('should return count : null, health: unknown for deleted index ', async () => {
-    mockClient.asCurrentUser.indices.get.mockImplementationOnce(() => true); // no closed indices
     mockClient.asCurrentUser.indices.get.mockImplementationOnce(() => getAllAvailableIndexResponse);
     mockClient.asCurrentUser.indices.stats.mockImplementationOnce(() => indexStats);
 

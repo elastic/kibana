@@ -50,7 +50,6 @@ describe('engines field_capabilities', () => {
         'index-001': { aliases: { unit_test_engine: {} } },
       };
 
-      mockClient.asCurrentUser.indices.get.mockResolvedValueOnce(() => {});
       mockClient.asCurrentUser.indices.get.mockResolvedValueOnce(getAllAvailableIndexResponse);
       mockClient.asCurrentUser.fieldCaps.mockResolvedValueOnce(fieldCapsResponse);
 
