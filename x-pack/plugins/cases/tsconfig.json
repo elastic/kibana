@@ -66,6 +66,7 @@
     "@kbn/ui-actions-plugin",
     "@kbn/core-lifecycle-browser",
     "@kbn/core-saved-objects-api-server-mocks",
+    "@kbn/core-theme-browser",
   ],
   "exclude": [
     "target/**/*",

@@ -33,7 +33,9 @@ describe('Cases connector incident fields', () => {
     cleanKibana();
     login();
   });
+
   beforeEach(() => {
+    login();
     cy.intercept('GET', '/api/cases/configure/connectors/_find', getMockConnectorsResponse());
     cy.intercept('POST', `/api/actions/connector/${getConnectorIds().sn}/_execute`, (req) => {
       const response =
