@@ -12,17 +12,22 @@ import type { AppFeatureKibanaConfig, AppFeaturesConfig } from './types';
 import {
   getSecurityAppFeaturesConfig,
   getSecurityBaseKibanaFeature,
+  getSecurityBaseKibanaSubFeatureIds,
 } from './security_kibana_features';
 import {
   getCasesBaseKibanaFeature,
   getCasesAppFeaturesConfig,
+  getCasesBaseKibanaSubFeatureIds,
 } from './security_cases_kibana_features';
 import { AppFeaturesConfigMerger } from './app_features_config_merger';
+import { casesSubFeaturesMap } from './security_cases_kibana_sub_features';
+import { securitySubFeaturesMap } from './security_kibana_sub_features';
 
 type AppFeaturesMap = Map<AppFeatureKey, boolean>;
 
 export class AppFeatures {
-  private merger: AppFeaturesConfigMerger;
+  private securityFeatureConfigMerger: AppFeaturesConfigMerger;
+  private casesFeatureConfigMerger: AppFeaturesConfigMerger;
   private appFeatures?: AppFeaturesMap;
   private featuresSetup?: FeaturesPluginSetup;
 
@@ -30,7 +35,11 @@ export class AppFeatures {
     private readonly logger: Logger,
     private readonly experimentalFeatures: ExperimentalFeatures
   ) {
-    this.merger = new AppFeaturesConfigMerger(this.logger);
+    this.securityFeatureConfigMerger = new AppFeaturesConfigMerger(
+      this.logger,
+      securitySubFeaturesMap
+    );
+    this.casesFeatureConfigMerger = new AppFeaturesConfigMerger(this.logger, casesSubFeaturesMap);
   }
 
   public init(featuresSetup: FeaturesPluginSetup) {
@@ -59,25 +68,31 @@ export class AppFeatures {
       );
     }
     // register main security Kibana features
-    const securityBaseKibanaFeature = getSecurityBaseKibanaFeature(this.experimentalFeatures);
+    const securityBaseKibanaFeature = getSecurityBaseKibanaFeature();
+    const securityBaseKibanaSubFeatureIds = getSecurityBaseKibanaSubFeatureIds(
+      this.experimentalFeatures
+    );
     const enabledSecurityAppFeaturesConfigs = this.getEnabledAppFeaturesConfigs(
       getSecurityAppFeaturesConfig()
     );
     this.featuresSetup.registerKibanaFeature(
-      this.merger.mergeAppFeatureConfigs(
+      this.securityFeatureConfigMerger.mergeAppFeatureConfigs(
         securityBaseKibanaFeature,
+        securityBaseKibanaSubFeatureIds,
         enabledSecurityAppFeaturesConfigs
       )
     );
 
     // register security cases Kibana features
     const securityCasesBaseKibanaFeature = getCasesBaseKibanaFeature();
+    const securityCasesBaseKibanaSubFeatureIds = getCasesBaseKibanaSubFeatureIds();
     const enabledCasesAppFeaturesConfigs = this.getEnabledAppFeaturesConfigs(
       getCasesAppFeaturesConfig()
     );
     this.featuresSetup.registerKibanaFeature(
-      this.merger.mergeAppFeatureConfigs(
+      this.casesFeatureConfigMerger.mergeAppFeatureConfigs(
         securityCasesBaseKibanaFeature,
+        securityCasesBaseKibanaSubFeatureIds,
         enabledCasesAppFeaturesConfigs
       )
     );

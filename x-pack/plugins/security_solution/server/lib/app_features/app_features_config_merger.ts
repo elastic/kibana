@@ -7,11 +7,18 @@
 
 import { cloneDeep, mergeWith, isArray, uniq } from 'lodash';
 import type { Logger } from '@kbn/core/server';
-import type { KibanaFeatureConfig } from '@kbn/features-plugin/common';
-import type { AppFeatureKibanaConfig, SubFeaturesPrivileges } from './types';
+import type { KibanaFeatureConfig, SubFeatureConfig } from '@kbn/features-plugin/common';
+import type {
+  AppFeatureKibanaConfig,
+  BaseKibanaFeatureConfig,
+  SubFeaturesPrivileges,
+} from './types';
 
-export class AppFeaturesConfigMerger {
-  constructor(private readonly logger: Logger) {}
+export class AppFeaturesConfigMerger<T extends string = string> {
+  constructor(
+    private readonly logger: Logger,
+    private readonly subFeaturesMap: Map<T, SubFeatureConfig>
+  ) {}
 
   /**
    * Merges `appFeaturesConfigs` into `kibanaFeatureConfig`.
@@ -20,24 +27,44 @@ export class AppFeaturesConfigMerger {
    * @returns mergedKibanaFeatureConfig the merged KibanaFeatureConfig
    * */
   public mergeAppFeatureConfigs(
-    kibanaFeatureConfig: KibanaFeatureConfig,
+    kibanaFeatureConfig: BaseKibanaFeatureConfig,
+    kibanaSubFeatureIds: T[],
     appFeaturesConfigs: AppFeatureKibanaConfig[]
   ): KibanaFeatureConfig {
-    const mergedKibanaFeatureConfig = cloneDeep(kibanaFeatureConfig);
+    const mergedKibanaFeatureConfig = cloneDeep(kibanaFeatureConfig) as KibanaFeatureConfig;
     const subFeaturesPrivilegesToMerge: SubFeaturesPrivileges[] = [];
+    const enabledSubFeaturesIndexed = Object.fromEntries(
+      kibanaSubFeatureIds.map((id) => [id, true])
+    );
 
     appFeaturesConfigs.forEach((appFeatureConfig) => {
-      const { subFeaturesPrivileges, ...appFeatureConfigToMerge } = cloneDeep(appFeatureConfig);
+      const { subFeaturesPrivileges, subFeatureIds, ...appFeatureConfigToMerge } =
+        cloneDeep(appFeatureConfig);
+
+      subFeatureIds?.forEach((subFeatureId) => {
+        enabledSubFeaturesIndexed[subFeatureId] = true;
+      });
+
       if (subFeaturesPrivileges) {
         subFeaturesPrivilegesToMerge.push(...subFeaturesPrivileges);
       }
       mergeWith(mergedKibanaFeatureConfig, appFeatureConfigToMerge, featureConfigMerger);
     });
 
-    // add subFeaturePrivileges at the end to make sure all enabled subFeatures are merged
-    subFeaturesPrivilegesToMerge.forEach((subFeaturesPrivileges) => {
-      this.mergeSubFeaturesPrivileges(mergedKibanaFeatureConfig.subFeatures, subFeaturesPrivileges);
+    // generate sub features configs from enabled sub feature ids, preserving map order
+    const subFeatures: SubFeatureConfig[] = [];
+    this.subFeaturesMap.forEach((subFeature, id) => {
+      if (enabledSubFeaturesIndexed[id]) {
+        subFeatures.push(cloneDeep(subFeature));
+      }
     });
+
+    // add extra privileges to subFeatures
+    subFeaturesPrivilegesToMerge.forEach((subFeaturesPrivileges) => {
+      this.mergeSubFeaturesPrivileges(subFeatures, subFeaturesPrivileges);
+    });
+
+    mergedKibanaFeatureConfig.subFeatures = subFeatures;
 
     return mergedKibanaFeatureConfig;
   }
@@ -49,13 +76,9 @@ export class AppFeaturesConfigMerger {
    * @returns void
    * */
   private mergeSubFeaturesPrivileges(
-    subFeatures: KibanaFeatureConfig['subFeatures'],
+    subFeatures: SubFeatureConfig[],
     subFeaturesPrivileges: SubFeaturesPrivileges
   ): void {
-    if (!subFeatures) {
-      this.logger.warn('Trying to merge subFeaturesPrivileges but no subFeatures found');
-      return;
-    }
     const merged = subFeatures.find(({ privilegeGroups }) =>
       privilegeGroups.some(({ privileges }) => {
         const subFeaturePrivilegeToUpdate = privileges.find(
