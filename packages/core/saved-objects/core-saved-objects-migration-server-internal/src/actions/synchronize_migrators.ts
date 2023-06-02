@@ -8,20 +8,31 @@
 
 import * as Either from 'fp-ts/lib/Either';
 import * as TaskEither from 'fp-ts/lib/TaskEither';
-import type { Defer } from '../kibana_migrator_utils';
+import type { WaitGroup } from '../kibana_migrator_utils';
 
 export interface SyncFailed {
   type: 'sync_failed';
   error: Error;
 }
 
-export function synchronizeMigrators(
-  defer: Defer<void>
-): TaskEither.TaskEither<SyncFailed, 'synchronized_successfully'> {
+export interface SynchronizeMigratorsParams<T, U> {
+  waitGroup: WaitGroup<T>;
+  thenHook?: (res: any) => Either.Right<U>;
+  payload?: T;
+}
+
+export function synchronizeMigrators<T, U>({
+  waitGroup,
+  payload,
+  thenHook = () =>
+    Either.right(
+      'synchronized_successfully' as const
+    ) as Either.Right<'synchronized_successfully'> as unknown as Either.Right<U>,
+}: SynchronizeMigratorsParams<T, U>): TaskEither.TaskEither<SyncFailed, U> {
   return () => {
-    defer.resolve();
-    return defer.promise
-      .then(() => Either.right('synchronized_successfully' as const))
+    waitGroup.resolve(payload);
+    return waitGroup.promise
+      .then((res) => (thenHook ? thenHook(res) : res))
       .catch((error) => Either.left({ type: 'sync_failed' as const, error }));
   };
 }

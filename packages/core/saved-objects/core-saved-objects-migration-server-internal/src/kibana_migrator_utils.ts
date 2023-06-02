@@ -15,8 +15,8 @@ import { TypeStatus, type TypeStatusDetails } from './kibana_migrator_constants'
 
 // even though this utility class is present in @kbn/kibana-utils-plugin, we can't easily import it from Core
 // aka. one does not simply reuse code
-export class Defer<T> {
-  public resolve!: (data: T) => void;
+class Defer<T> {
+  public resolve!: (data?: T) => void;
   public reject!: (error: any) => void;
   public promise: Promise<any> = new Promise<any>((resolve, reject) => {
     (this as any).resolve = resolve;
@@ -24,12 +24,26 @@ export class Defer<T> {
   });
 }
 
-export const defer = () => new Defer<void>();
+export type WaitGroup<T> = Defer<T>;
 
-export function createMultiPromiseDefer(indices: string[]): Record<string, Defer<void>> {
-  const defers: Array<Defer<void>> = indices.map(defer);
-  const all = Promise.all(defers.map(({ promise }) => promise));
-  return indices.reduce<Record<string, Defer<any>>>((acc, indexName, i) => {
+export function waitGroup<T>(): WaitGroup<T> {
+  return new Defer<T>();
+}
+
+export function createWaitGroupMap<T, U>(
+  keys: string[],
+  thenHook: (res: T[]) => U = (res) => res as unknown as U
+): Record<string, WaitGroup<T>> {
+  if (!keys?.length) {
+    return {};
+  }
+
+  const defers: Array<WaitGroup<T>> = keys.map(() => waitGroup<T>());
+
+  // every member of the WaitGroup will wait for all members to resolve
+  const all = Promise.all(defers.map(({ promise }) => promise)).then(thenHook);
+
+  return keys.reduce<Record<string, WaitGroup<T>>>((acc, indexName, i) => {
     const { resolve, reject } = defers[i];
     acc[indexName] = { resolve, reject, promise: all };
     return acc;
