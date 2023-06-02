@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Conversation } from '@kbn/elastic-assistant';
+import { Conversation } from '../../assistant_context/types';
 
 /**
  * Removes all presentation data from the conversation

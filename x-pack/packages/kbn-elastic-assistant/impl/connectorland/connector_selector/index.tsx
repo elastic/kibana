@@ -12,7 +12,7 @@ import {
   ActionConnector,
   ActionTypeRegistryContract,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import { Conversation } from '@kbn/elastic-assistant';
+
 import { HttpSetup } from '@kbn/core-http-browser';
 import { ActionConnectorProps } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { ConnectorAddModal } from '@kbn/triggers-actions-ui-plugin/public/common/constants';
@@ -21,6 +21,7 @@ import {
   OpenAiProviderType,
 } from '@kbn/stack-connectors-plugin/public/common';
 import { css } from '@emotion/react';
+import { Conversation } from '../../assistant_context/types';
 import { useLoadConnectors } from '../use_load_connectors';
 import { useConversation } from '../../assistant/use_conversation';
 import * as i18n from '../translations';
