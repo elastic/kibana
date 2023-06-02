@@ -109,7 +109,7 @@ export const allowedExperimentalValues = Object.freeze({
   securityFlyoutEnabled: false,
 
   /**
-   * Enables the Elastic Security Assistant
+   * Enables the Elastic Security Assistant and generative AI connector (.gen-ai)
    */
   assistantEnabled: false,
 
@@ -134,8 +134,6 @@ export const allowedExperimentalValues = Object.freeze({
    *
    **/
   newUserDetailsFlyout: false,
-  /* enables the Security Assistant and generative AI connector (.gen-ai) */
-  assistantEnabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;
