@@ -1790,7 +1790,7 @@ describe('migrations v2 model', () => {
 
       test('READY_TO_REINDEX_SYNC -> FATAL if the synchronization between migrators fails', () => {
         const res: ResponseType<'READY_TO_REINDEX_SYNC'> = Either.left({
-          type: 'sync_failed',
+          type: 'synchronization_failed',
           error: new Error('Other migrators failed to reach the synchronization point'),
         });
         const newState = model(state, res);
@@ -2051,7 +2051,7 @@ describe('migrations v2 model', () => {
       });
       test('DONE_REINDEXING_SYNC -> FATAL if the synchronization between migrators fails', () => {
         const res: ResponseType<'DONE_REINDEXING_SYNC'> = Either.left({
-          type: 'sync_failed',
+          type: 'synchronization_failed',
           error: new Error('Other migrators failed to reach the synchronization point'),
         });
         const newState = model(state, res);

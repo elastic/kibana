@@ -813,12 +813,18 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         return { ...stateP, controlState: 'DONE_REINDEXING_SYNC' };
       }
     } else if (Either.isLeft(res)) {
-      return {
-        ...stateP,
-        controlState: 'FATAL',
-        reason: 'An error occurred whilst waiting for other migrators to get to this step.',
-        throwDelayMillis: 1000, // another migrator has failed for a reason, let it take Kibana down and log its problem
-      };
+      const left = res.left;
+
+      if (isTypeof(left, 'synchronization_failed')) {
+        return {
+          ...stateP,
+          controlState: 'FATAL',
+          reason: 'An error occurred whilst waiting for other migrators to get to this step.',
+          throwDelayMillis: 1000, // another migrator has failed for a reason, let it take Kibana down and log its problem
+        };
+      } else {
+        throwBadResponse(stateP, left);
+      }
     } else {
       return throwBadResponse(stateP, res as never);
     }
@@ -954,12 +960,18 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         sourceIndexMappings: Option.none,
       };
     } else if (Either.isLeft(res)) {
-      return {
-        ...stateP,
-        controlState: 'FATAL',
-        reason: 'An error occurred whilst waiting for other migrators to get to this step.',
-        throwDelayMillis: 1000, // another migrator has failed for a reason, let it take Kibana down and log its problem
-      };
+      const left = res.left;
+
+      if (isTypeof(left, 'synchronization_failed')) {
+        return {
+          ...stateP,
+          controlState: 'FATAL',
+          reason: 'An error occurred whilst waiting for other migrators to get to this step.',
+          throwDelayMillis: 1000, // another migrator has failed for a reason, let it take Kibana down and log its problem
+        };
+      } else {
+        throwBadResponse(stateP, left);
+      }
     } else {
       return throwBadResponse(stateP, res as never);
     }
@@ -1488,7 +1500,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
       }
       return {
         ...stateP,
-        controlState: 'MARK_VERSION_INDEX_READY',
+        controlState: 'CHECK_VERSION_INDEX_READY_ACTIONS',
       };
     } else if (Either.isLeft(res)) {
       const left = res.left;
@@ -1546,6 +1558,13 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         // cause it to occur (this error is only relevant to the LEGACY_DELETE
         // step).
         throwBadResponse(stateP, left as never);
+      } else if (isTypeof(left, 'synchronization_failed')) {
+        return {
+          ...stateP,
+          controlState: 'FATAL',
+          reason: 'An error occurred whilst waiting for other migrators to get to this step.',
+          throwDelayMillis: 1000, // another migrator has failed for a reason, let it take Kibana down and log its problem
+        };
       } else {
         throwBadResponse(stateP, left);
       }

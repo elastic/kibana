@@ -86,14 +86,14 @@ describe('synchronizeMigrators', () => {
           {
             _tag: 'Left',
             left: {
-              type: 'sync_failed',
+              type: 'synchronization_failed',
               error: 'Oops. The cases migrator failed unexpectedly.',
             },
           },
           {
             _tag: 'Left',
             left: {
-              type: 'sync_failed',
+              type: 'synchronization_failed',
               error: 'Oops. The cases migrator failed unexpectedly.',
             },
           },
@@ -125,14 +125,14 @@ describe('synchronizeMigrators', () => {
           {
             _tag: 'Left',
             left: {
-              type: 'sync_failed',
+              type: 'synchronization_failed',
               error: 'Oops. The cases migrator failed unexpectedly.',
             },
           },
           {
             _tag: 'Left',
             left: {
-              type: 'sync_failed',
+              type: 'synchronization_failed',
               error: 'Oops. The cases migrator failed unexpectedly.',
             },
           },
