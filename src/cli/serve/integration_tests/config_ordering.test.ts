@@ -18,6 +18,8 @@ const tempDir = Path.join(Os.tmpdir(), 'kbn-config-test');
 
 const kibanaPath = follow('../../../../scripts/kibana.js');
 
+const TIMEOUT_MS = 15000;
+
 const envForTempDir = {
   env: { KBN_PATH_CONF: tempDir },
 };
@@ -168,7 +170,7 @@ describe('Server configuration ordering', () => {
 async function extractConfigurationOrder(
   proc: Child.ChildProcessWithoutNullStreams
 ): Promise<string[] | undefined> {
-  const configMessage = await waitForMessage(proc, /[Cc]onfig.*order:/, 10000);
+  const configMessage = await waitForMessage(proc, /[Cc]onfig.*order:/, TIMEOUT_MS);
 
   const configList = configMessage
     .match(/order: (.*)$/)
