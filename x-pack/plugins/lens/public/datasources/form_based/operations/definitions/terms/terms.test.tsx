@@ -2180,6 +2180,7 @@ describe('terms', () => {
         'column$$$col2',
         'alphabetical',
         'rare',
+        'significant',
         'custom',
       ]);
     });

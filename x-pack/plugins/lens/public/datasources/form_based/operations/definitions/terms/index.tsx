@@ -477,7 +477,7 @@ export const termsOperation: OperationDefinition<
         const mainField = indexPattern.getFieldByName(sourcefield);
         if (
           (!supportsRarityRanking(mainField) && newParams.orderBy.type === 'rare') ||
-          (!supportsSignificantRanking(field) && newParams.orderBy.type === 'significant')
+          (!supportsSignificantRanking(mainField) && newParams.orderBy.type === 'significant')
         ) {
           newParams.orderBy = { type: 'alphabetical' };
         }
