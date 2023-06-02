@@ -363,7 +363,8 @@ docker.elastic.co/observability/profiling-agent:${hostAgentVersion} /root/pf-hos
             <>
               <EuiText>
                 {i18n.translate('xpack.profiling.tabs.elasticAgentIntegrarion.step1.hint', {
-                  defaultMessage: 'These credentials are needed to set up Universal Profiling',
+                  defaultMessage:
+                    "You'll need these credentials to set up Universal Profiling. Please save them in a secure location, as they will be required in the subsequent step.",
                 })}
               </EuiText>
               <EuiSpacer />
