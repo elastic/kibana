@@ -64,8 +64,10 @@ export const TestProvidersComponent: React.FC<Props> = ({
   cellActions = [],
 }) => {
   const queryClient = new QueryClient();
-  const http = httpServiceMock.createStartContract({ basePath: '/test' });
   const actionTypeRegistry = actionTypeRegistryMock.create();
+  const mockGetInitialConversations = jest.fn(() => ({}));
+  const mockGetComments = jest.fn(() => []);
+  const mockHttp = httpServiceMock.createStartContract({ basePath: '/test' });
 
   return (
     <I18nProvider>
@@ -75,10 +77,10 @@ export const TestProvidersComponent: React.FC<Props> = ({
             <AssistantProvider
               actionTypeRegistry={actionTypeRegistry}
               augmentMessageCodeBlocks={jest.fn()}
-              getComments={jest.fn()}
-              getInitialConversations={jest.fn()}
-              http={http}
+              getComments={mockGetComments}
+              getInitialConversations={mockGetInitialConversations}
               setConversations={jest.fn()}
+              http={mockHttp}
             >
               <QueryClientProvider client={queryClient}>
                 <ExpandableFlyoutProvider>
@@ -109,8 +111,10 @@ const TestProvidersWithPrivilegesComponent: React.FC<Props> = ({
   onDragEnd = jest.fn(),
   cellActions = [],
 }) => {
-  const http = httpServiceMock.createStartContract({ basePath: '/test' });
   const actionTypeRegistry = actionTypeRegistryMock.create();
+  const mockGetInitialConversations = jest.fn(() => ({}));
+  const mockGetComments = jest.fn(() => []);
+  const mockHttp = httpServiceMock.createStartContract({ basePath: '/test' });
 
   return (
     <I18nProvider>
@@ -120,10 +124,10 @@ const TestProvidersWithPrivilegesComponent: React.FC<Props> = ({
             <AssistantProvider
               actionTypeRegistry={actionTypeRegistry}
               augmentMessageCodeBlocks={jest.fn()}
-              getComments={jest.fn()}
-              getInitialConversations={jest.fn()}
-              http={http}
+              getComments={mockGetComments}
+              getInitialConversations={mockGetInitialConversations}
               setConversations={jest.fn()}
+              http={mockHttp}
             >
               <UserPrivilegesProvider
                 kibanaCapabilities={

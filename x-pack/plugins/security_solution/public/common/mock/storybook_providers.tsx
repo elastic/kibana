@@ -55,8 +55,10 @@ const KibanaReactContext = createKibanaReactContext(coreMock);
  */
 export const StorybookProviders: React.FC = ({ children }) => {
   const store = createStore(mockGlobalState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
-  const http = httpServiceMock.createStartContract({ basePath: '/test' });
   const actionTypeRegistry = actionTypeRegistryMock.create();
+  const mockGetInitialConversations = jest.fn(() => ({}));
+  const mockGetComments = jest.fn(() => []);
+  const mockHttp = httpServiceMock.createStartContract({ basePath: '/test' });
 
   return (
     <I18nProvider>
@@ -67,10 +69,10 @@ export const StorybookProviders: React.FC = ({ children }) => {
               <AssistantProvider
                 actionTypeRegistry={actionTypeRegistry}
                 augmentMessageCodeBlocks={jest.fn()}
-                getComments={jest.fn()}
-                getInitialConversations={jest.fn()}
-                http={http}
+                getComments={mockGetComments}
+                getInitialConversations={mockGetInitialConversations}
                 setConversations={jest.fn()}
+                http={mockHttp}
               >
                 {children}
               </AssistantProvider>
