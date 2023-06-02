@@ -125,11 +125,26 @@ export default function (providerContext: FtrProviderContext) {
         await cleanSavedObjects();
       });
 
-      it('should return token for filtered policy if found', async () => {
+      it('should return token for full policyID if found', async () => {
         const response = await supertest
           .get(UNINSTALL_TOKEN_ROUTES.LIST_PATTERN)
           .query({
             policyId: policyIds[3],
+          })
+          .expect(200);
+
+        const body: GetUninstallTokensResponse = response.body;
+        expect(body.total).to.equal(1);
+        expect(body.page).to.equal(1);
+        expect(body.perPage).to.equal(20);
+        expect(Object.keys(body.items)).to.eql([policyIds[3]]);
+      });
+
+      it('should return token for partial policyID if found', async () => {
+        const response = await supertest
+          .get(UNINSTALL_TOKEN_ROUTES.LIST_PATTERN)
+          .query({
+            policyId: policyIds[3].slice(4, 11),
           })
           .expect(200);
 

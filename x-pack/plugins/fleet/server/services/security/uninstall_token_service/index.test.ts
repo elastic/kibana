@@ -199,7 +199,7 @@ describe('UninstallTokenService', () => {
         const so = getDefaultSO();
         const so2 = getDefaultSO2();
 
-        const tokensMap = await uninstallTokenService.getAllTokens();
+        const tokensMap = (await uninstallTokenService.getAllTokens()).items;
         expect(tokensMap).toEqual({
           [so.attributes.policy_id]: { token: so.attributes.token, created_at: 'yesterday' },
           [so2.attributes.policy_id]: { token: so2.attributes.token },
@@ -446,7 +446,7 @@ describe('UninstallTokenService', () => {
         const so = getDefaultSO(false);
         const so2 = getDefaultSO2(false);
 
-        const tokensMap = await uninstallTokenService.getAllTokens();
+        const tokensMap = (await uninstallTokenService.getAllTokens()).items;
         expect(tokensMap).toEqual({
           [so.attributes.policy_id]: { token: so.attributes.token_plain, created_at: 'yesterday' },
           [so2.attributes.policy_id]: { token: so2.attributes.token_plain },

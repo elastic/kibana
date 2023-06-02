@@ -9,7 +9,7 @@ import { schema } from '@kbn/config-schema';
 export const GetUninstallTokensRequestSchema = {
   query: schema.object({
     policyId: schema.maybe(schema.string()),
-    perPage: schema.maybe(schema.number({ defaultValue: 20, min: 1 })),
+    perPage: schema.maybe(schema.number({ defaultValue: 20, min: 5 })),
     page: schema.maybe(schema.number({ defaultValue: 1, min: 1 })),
   }),
 };
