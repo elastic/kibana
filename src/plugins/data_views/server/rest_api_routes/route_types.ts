@@ -144,3 +144,23 @@ export interface IndexPatternsRuntimeResponseType {
 export interface RuntimeResponseType {
   body: DataViewsRuntimeResponseType | IndexPatternsRuntimeResponseType;
 }
+
+export interface FieldSubTypeRestResponse {
+  multi?: { parent: string };
+  nested?: { path: string };
+}
+
+export interface FieldDescriptorRestResponse {
+  aggregatable: boolean;
+  name: string;
+  readFromDocValues: boolean;
+  searchable: boolean;
+  type: string;
+  esTypes: string[];
+  subType?: FieldSubTypeRestResponse;
+  metadata_field?: boolean;
+  fixedInterval?: string[];
+  timeZone?: string[];
+  timeSeriesMetric?: 'histogram' | 'summary' | 'counter' | 'gauge';
+  timeSeriesDimension?: boolean;
+}

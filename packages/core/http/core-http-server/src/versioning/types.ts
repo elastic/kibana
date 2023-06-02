@@ -165,7 +165,7 @@ export interface VersionedRouteResponseValidation {
  * Versioned route validation
  * @experimental
  */
-interface FullValidationConfig<P, Q, B> {
+export interface FullValidationConfig<P, Q, B> {
   /**
    * Validation to run against route inputs: params, query and body
    * @experimental

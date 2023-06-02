@@ -8,6 +8,7 @@
 
 import { IRouter, RequestHandlerContext } from '@kbn/core/server';
 import type { VersionedRoute } from '@kbn/core-http-server';
+import { schema } from '@kbn/config-schema';
 import { getDataViews, hasUserDataView } from '../../has_user_data_view';
 
 type Handler = Parameters<VersionedRoute<any, RequestHandlerContext>['addVersion']>[1];
@@ -27,7 +28,7 @@ export const handler: Handler = async (ctx: RequestHandlerContext, req, res) => 
     },
     dataViews
   );
-  const response = {
+  const response: { hasDataView: boolean; hasUserDataView: boolean } = {
     hasDataView: dataViews.total > 0,
     hasUserDataView: hasUserDataViewResult,
   };
@@ -40,5 +41,20 @@ export const registerHasDataViewsRoute = (router: IRouter): void => {
       path: '/internal/data_views/has_data_views',
       access: 'internal',
     })
-    .addVersion({ version: '1', validate: {} }, handler);
+    .addVersion(
+      {
+        version: '1',
+        validate: {
+          response: {
+            200: {
+              body: schema.object({
+                hasDataView: schema.boolean(),
+                hasUserDataView: schema.boolean(),
+              }),
+            },
+          },
+        },
+      },
+      handler
+    );
 };

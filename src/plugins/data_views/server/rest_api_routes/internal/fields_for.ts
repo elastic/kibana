@@ -8,17 +8,14 @@
 
 import { estypes } from '@elastic/elasticsearch';
 import { schema } from '@kbn/config-schema';
-import {
-  IRouter,
-  RequestHandler,
-  RouteValidatorFullConfig,
-  StartServicesAccessor,
-} from '@kbn/core/server';
+import { IRouter, RequestHandler, StartServicesAccessor } from '@kbn/core/server';
+import { FullValidationConfig } from '@kbn/core-http-server';
 import { IndexPatternsFetcher } from '../../fetcher';
 import type {
   DataViewsServerPluginStart,
   DataViewsServerPluginStartDependencies,
 } from '../../types';
+import type { FieldDescriptorRestResponse } from '../route_types';
 
 /**
  * Accepts one of the following:
@@ -67,11 +64,46 @@ const querySchema = schema.object({
   fields: schema.maybe(schema.oneOf([schema.string(), schema.arrayOf(schema.string())])),
 });
 
-const validate: { request: RouteValidatorFullConfig<{}, IQuery, IBody> } = {
+const fieldSubTypeSchema = schema.object({
+  multi: schema.maybe(schema.object({ parent: schema.string() })),
+  nested: schema.maybe(schema.object({ path: schema.string() })),
+});
+
+const FieldDescriptorSchema = schema.object({
+  aggregatable: schema.boolean(),
+  name: schema.string(),
+  readFromDocValues: schema.boolean(),
+  searchable: schema.boolean(),
+  type: schema.string(),
+  esTypes: schema.maybe(schema.arrayOf(schema.string())),
+  subType: fieldSubTypeSchema,
+  metadata_field: schema.maybe(schema.boolean()),
+  fixedInterval: schema.maybe(schema.arrayOf(schema.string())),
+  timeZone: schema.maybe(schema.arrayOf(schema.string())),
+  timeSeriesMetric: schema.maybe(
+    schema.oneOf([
+      schema.literal('histogram'),
+      schema.literal('summary'),
+      schema.literal('counter'),
+      schema.literal('gauge'),
+    ])
+  ),
+  timeSeriesDimension: schema.maybe(schema.boolean()),
+});
+
+const validate: FullValidationConfig<any, any, any> = {
   request: {
     query: querySchema,
     // not available to get request
     body: schema.maybe(schema.object({ index_filter: schema.any() })),
+  },
+  response: {
+    200: {
+      body: schema.object({
+        fields: schema.arrayOf(FieldDescriptorSchema),
+        indices: schema.arrayOf(schema.string()),
+      }),
+    },
   },
 };
 
@@ -113,8 +145,10 @@ const handler: RequestHandler<{}, IQuery, IBody> = async (context, request, resp
       ...(parsedFields.length > 0 ? { fields: parsedFields } : {}),
     });
 
+    const body: { fields: FieldDescriptorRestResponse[]; indices: string[] } = { fields, indices };
+
     return response.ok({
-      body: { fields, indices },
+      body,
       headers: {
         'content-type': 'application/json',
       },
