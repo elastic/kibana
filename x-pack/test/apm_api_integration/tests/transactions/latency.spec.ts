@@ -128,7 +128,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
 
       describe('95th percentile latency type', () => {
-        it('returns average duration and timeseries', async () => {
+        it('returns p95 duration and timeseries', async () => {
           const response = await fetchLatencyCharts({
             query: { latencyAggregationType: LatencyAggregationType.p95 },
           });
@@ -143,10 +143,47 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
 
       describe('99th percentile latency type', () => {
+        it('returns p99 duration and timeseries', async () => {
+          const response = await fetchLatencyCharts({
+            query: {
+              latencyAggregationType: LatencyAggregationType.p99,
+            },
+          });
+
+          expect(response.status).to.be(200);
+          const latencyChartReturn = response.body as LatencyChartReturnType;
+
+          expect(latencyChartReturn.currentPeriod.overallAvgDuration).to.be(
+            expectedLatencyAvgValueMs
+          );
+          expect(latencyChartReturn.currentPeriod.latencyTimeseries.length).to.be.eql(15);
+        });
+      });
+
+      describe('95th percentile latency type for service tx metrics', () => {
+        it('returns average duration and timeseries', async () => {
+          const response = await fetchLatencyCharts({
+            query: {
+              latencyAggregationType: LatencyAggregationType.p95,
+              documentType: ApmDocumentType.ServiceTransactionMetric,
+            },
+          });
+
+          expect(response.status).to.be(200);
+          const latencyChartReturn = response.body as LatencyChartReturnType;
+          expect(latencyChartReturn.currentPeriod.overallAvgDuration).to.be(
+            expectedLatencyAvgValueMs
+          );
+          expect(latencyChartReturn.currentPeriod.latencyTimeseries.length).to.be.eql(15);
+        });
+      });
+
+      describe('99th percentile latency type for service tx metrics', () => {
         it('returns average duration and timeseries', async () => {
           const response = await fetchLatencyCharts({
             query: {
               latencyAggregationType: LatencyAggregationType.p99,
+              documentType: ApmDocumentType.ServiceTransactionMetric,
             },
           });
 
