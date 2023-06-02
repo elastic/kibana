@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-export const VULNERABILITY_SEVERITY_FIELD = 'vulnerability.severity';
 import { i18n } from '@kbn/i18n';
 
 export const severitySchemaConfig = {
@@ -42,3 +41,19 @@ export const severitySortScript = (direction: string) => ({
     order: direction,
   },
 });
+
+/**
+ * Generates Painless sorting in case-insensitive manner
+ */
+export const getCaseInsensitiveSortScript = (field: string, direction: string) => {
+  return {
+    _script: {
+      type: 'string',
+      order: direction,
+      script: {
+        source: `doc["${field}"].value.toLowerCase()`,
+        lang: 'painless',
+      },
+    },
+  };
+};

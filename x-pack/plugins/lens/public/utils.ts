@@ -175,6 +175,7 @@ export function getIndexPatternsIds({
     }
     return currentId;
   }, undefined);
+
   const referencesIds = references
     .filter(({ type }) => type === 'index-pattern')
     .map(({ id }) => id);

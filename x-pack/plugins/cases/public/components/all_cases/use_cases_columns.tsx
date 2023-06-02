@@ -16,8 +16,6 @@ import {
   EuiBadge,
   EuiButton,
   EuiLink,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiIcon,
   EuiHealth,
   EuiToolTip,
@@ -50,10 +48,6 @@ type CasesColumns =
   | EuiTableActionsColumnType<CaseUI>
   | EuiTableComputedColumnType<CaseUI>
   | EuiTableFieldDataColumnType<CaseUI>;
-
-const MediumShadeText = styled.p`
-  color: ${({ theme }) => theme.eui.euiColorMediumShade};
-`;
 
 const LINE_CLAMP = 3;
 const LineClampedEuiBadgeGroup = euiStyled(EuiBadgeGroup)`
@@ -124,16 +118,8 @@ export const useCasesColumns = ({
               <TruncatedText text={theCase.title} />
             </CaseDetailsLink>
           );
-          return theCase.status !== CaseStatuses.closed ? (
-            caseDetailsLinkComponent
-          ) : (
-            <EuiFlexGroup direction="column" gutterSize="none">
-              <EuiFlexItem>{caseDetailsLinkComponent}</EuiFlexItem>
-              <EuiFlexItem>
-                <MediumShadeText>{i18n.CLOSED}</MediumShadeText>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          );
+
+          return caseDetailsLinkComponent;
         }
         return getEmptyTagValue();
       },

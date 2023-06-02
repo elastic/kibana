@@ -102,6 +102,7 @@ export const FieldFilterPopover: FC<FieldFilterPopoverProps> = ({
           iconType="arrowDown"
           iconSide="right"
           iconSize="s"
+          color="text"
         >
           <FormattedMessage
             id="xpack.aiops.explainLogRateSpikesPage.fieldFilterButtonLabel"
