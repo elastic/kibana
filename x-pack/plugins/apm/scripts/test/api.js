@@ -27,6 +27,11 @@ const { argv } = yargs(process.argv.slice(2))
     type: 'boolean',
     description: 'Only start ES and Kibana',
   })
+  .option('serverless', {
+    default: false,
+    type: 'boolean',
+    description: 'Only start stateless ES and Kibana',
+  })
   .option('runner', {
     default: false,
     type: 'boolean',
@@ -70,13 +75,14 @@ const {
   basic,
   trial,
   server,
+  serverless,
   runner,
   grep,
   grepFiles,
   inspect,
   updateSnapshots,
 } = argv;
-
+let configPath;
 if (trial === false && basic === false) {
   throw new Error('Please specify either --trial or --basic');
 }
@@ -92,13 +98,19 @@ if (server) {
   ftrScript = 'functional_test_runner';
 }
 
+if (server) {
+  configPath = `../../../../test/apm_api_integration/${license}/config.ts`;
+} else if (serverless) {
+  configPath = `../../../../test_serverless/api_integration/test_suites/observability/apm/config/index.ts`;
+}
+
 const cmd = [
   'node',
   ...(inspect ? ['--inspect-brk'] : []),
   `../../../../../scripts/${ftrScript}`,
   ...(grep ? [`--grep "${grep}"`] : []),
   ...(updateSnapshots ? [`--updateSnapshots`] : []),
-  `--config ../../../../test/apm_api_integration/${license}/config.ts`,
+  `--config ${configPath}`,
 ].join(' ');
 
 console.log(`Running: "${cmd}"`);

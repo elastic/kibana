@@ -48,9 +48,9 @@ export async function cypressTestRunner({ getService }: FtrProviderContext) {
     target: kibanaUrl,
   });
 
-  const packageVersion = await kibanaClient.fetchLatestApmPackageVersion();
+  // const packageVersion = await kibanaClient.fetchLatestApmPackageVersion();
 
-  await kibanaClient.installApmPackage(packageVersion);
+  // await kibanaClient.installApmPackage(packageVersion);
 
   const kibanaUrlWithoutAuth = Url.format({
     protocol: config.get('servers.kibana.protocol'),

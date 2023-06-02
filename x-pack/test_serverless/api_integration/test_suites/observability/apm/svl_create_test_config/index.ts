@@ -8,9 +8,11 @@
 import { FtrConfigProviderContext } from '@kbn/test';
 import { ApmUsername } from '@kbn/apm-plugin/server/test_helpers/create_apm_users/authentication';
 import { getApmApiClient } from '@kbn/apm-plugin/server/test_helpers/apm_api_client/get_apm_api_client';
-import { UrlObject } from 'url';
+import { UrlObject, format } from 'url';
 import { CreateTestConfigOptions } from '../../../../../shared/types';
 import { services } from '../../../../services';
+import { bootstrapApmSynthtrace } from '../../../../../../test/apm_api_integration/common/bootstrap_apm_synthtrace';
+import { InheritedFtrProviderContext } from '../../../../../apm_api_integration/common/ftr_provider_context';
 
 interface ApmFtrConfig extends CreateTestConfigOptions {
   kibanaConfig?: Record<string, any>;
@@ -29,6 +31,7 @@ export function createTestConfig(options: ApmFtrConfig) {
     const serverArgs = svlSharedConfig.get('kbnTestServer.serverArgs');
 
     const kibanaServer = servers.kibana as UrlObject;
+    const kibanaServerUrl = format(kibanaServer);
 
     return {
       testFiles,
@@ -43,8 +46,14 @@ export function createTestConfig(options: ApmFtrConfig) {
             }),
           };
         },
+        synthtraceEsClient: (context: InheritedFtrProviderContext) => {
+          return bootstrapApmSynthtrace(context, kibanaServerUrl);
+        },
       },
-      esTestCluster,
+      esTestCluster: {
+        ...esTestCluster,
+        serverArgs: [...esTestCluster.serverArgs, 'xpack.security.enabled=true'],
+      },
       kbnTestServer: {
         ...kbnTestServer,
         serverArgs: [
