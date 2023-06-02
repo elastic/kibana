@@ -151,7 +151,7 @@ export class TaskRunnerFactory {
           );
           return {
             state: taskInstance.state,
-            schedule: { interval: '1s' },
+            runAt: taskInstance.runAt,
           };
         }
 

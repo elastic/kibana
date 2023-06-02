@@ -30,8 +30,9 @@ import { AlertingEventLogger } from '../lib/alerting_event_logger/alerting_event
 
 export interface RuleTaskRunResult {
   state: RuleTaskState;
-  monitoring: RuleMonitoring | undefined;
-  schedule: IntervalSchedule | undefined;
+  monitoring?: RuleMonitoring | undefined;
+  schedule?: IntervalSchedule | undefined;
+  runAt?: Date;
 }
 
 // This is the state of the alerting task after rule execution, which includes run metrics plus the task state

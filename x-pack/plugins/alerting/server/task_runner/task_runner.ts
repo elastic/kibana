@@ -712,6 +712,7 @@ export class TaskRunner<
       startedAt,
       state: originalState,
       schedule: taskSchedule,
+      runAt: originalRunAt,
     } = this.taskInstance;
 
     this.ruleRunning.start(ruleId, this.context.spaceIdToNamespace(spaceId));
@@ -754,8 +755,7 @@ export class TaskRunner<
         this.logger.debug(`Task Runner has skipped executing ${ruleId} as it has invalid params.`);
         return {
           state: originalState,
-          schedule: { interval: '1s' },
-          monitoring: this.ruleMonitoring.getMonitoring(),
+          runAt: originalRunAt,
         };
       }
       stateWithMetrics = asErr(err);
