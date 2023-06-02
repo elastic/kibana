@@ -1,6 +1,7 @@
 title: Create rule request
 description: >-
-  The create rule API request body varies depending on the type of rule and actions.
+  The create rule API request body varies depending on the type of rule and
+  actions.
 type: object
 required:
   - consumer
@@ -10,7 +11,7 @@ required:
   - schedule
 properties:
   actions:
-    $ref: 'actions.yaml'
+    $ref: actions.yaml
   consumer:
     type: string
     description: >
@@ -19,28 +20,34 @@ properties:
       `monitoring`, `securitySolution`, `siem`, `stackAlerts`, or `uptime`.
   enabled:
     type: boolean
-    description: Indicates whether you want to run the rule on an interval basis after it is created.
+    description: >-
+      Indicates whether you want to run the rule on an interval basis after it
+      is created.
   name:
     type: string
-    description: The name of the rule. While this name does not have to be unique, a distinctive name can help you identify a rule.
+    description: >-
+      The name of the rule. While this name does not have to be unique, a
+      distinctive name can help you identify a rule.
     example: cluster_health_rule
   notify_when:
-    $ref: 'notify_when.yaml'
+    $ref: notify_when.yaml
   params:
     type: object
     description: The parameters for the rule.
     additionalProperties: true
     oneOf:
-      - $ref: "#/components/schemas/params_property_apm_anomaly"
+      - $ref: >-
+          ../../../../../apm/server/routes/alerts/rule_types/docs/params_property_apm_anomaly.yaml
   rule_type_id:
     type: string
     description: >
-      The ID of the rule type that you want to call when the rule is scheduled to run.
-      For example, `.es-query`, `.index-threshold`, `logs.alert.document.count`,
-      `monitoring_alert_cluster_health`, `siem.thresholdRule`, or `xpack.ml.anomaly_detection_alert`.
+      The ID of the rule type that you want to call when the rule is scheduled
+      to run. For example, `.es-query`, `.index-threshold`,
+      `logs.alert.document.count`, `monitoring_alert_cluster_health`,
+      `siem.thresholdRule`, or `xpack.ml.anomaly_detection_alert`.
   schedule:
-    $ref: 'schedule.yaml'
+    $ref: schedule.yaml
   tags:
-    $ref: 'tags.yaml'
+    $ref: tags.yaml
   throttle:
-    $ref: 'throttle.yaml'
+    $ref: throttle.yaml
