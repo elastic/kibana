@@ -27,6 +27,7 @@
     "@kbn/test-jest-helpers",
     "@kbn/securitysolution-io-ts-utils",
     "@kbn/safer-lodash-set",
+    "@kbn/core-plugins-server",
   ],
   "exclude": [
     "target/**/*",
