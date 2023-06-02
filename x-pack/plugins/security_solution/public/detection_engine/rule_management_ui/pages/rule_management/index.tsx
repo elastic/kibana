@@ -25,7 +25,6 @@ import { SpyRoute } from '../../../../common/utils/route/spy_routes';
 import { MissingPrivilegesCallOut } from '../../../../detections/components/callouts/missing_privileges_callout';
 import { MlJobCompatibilityCallout } from '../../../../detections/components/callouts/ml_job_compatibility_callout';
 import { NeedAdminForUpdateRulesCallOut } from '../../../../detections/components/callouts/need_admin_for_update_callout';
-import { LoadPrePackagedRules } from '../../../../detections/components/rules/pre_packaged_rules/load_prepackaged_rules';
 import { LoadPrePackagedRulesButton } from '../../../../detections/components/rules/pre_packaged_rules/load_prepackaged_rules_button';
 import { ValueListsFlyout } from '../../../../detections/components/value_lists_management_flyout';
 import { useUserData } from '../../../../detections/components/user_info';
@@ -49,7 +48,7 @@ import {
   NEW_PREBUILT_RULES_AVAILABLE_CALLOUT_TITLE,
   UPDATE_RULES_CALLOUT_TITLE,
 } from '../../components/mini_callout/translations';
-import { useInvalidateFetchPrebuiltRulesStatusQueryNew } from '../../../rule_management/api/hooks/prebuilt_rules/use_fetch_prebuilt_rules_status_query';
+import { useInvalidateFetchPrebuiltRulesStatusQuery } from '../../../rule_management/api/hooks/prebuilt_rules/use_fetch_prebuilt_rules_status_query';
 import { AllRulesTabs } from '../../components/rules_table/rules_table_toolbar';
 
 const RulesPageComponent: React.FC = () => {
@@ -58,7 +57,7 @@ const RulesPageComponent: React.FC = () => {
   const { navigateToApp } = useKibana().services.application;
   const invalidateFindRulesQuery = useInvalidateFindRulesQuery();
   const invalidateFetchRuleManagementFilters = useInvalidateFetchRuleManagementFiltersQuery();
-  const invalidateRuleStatuses = useInvalidateFetchPrebuiltRulesStatusQueryNew();
+  const invalidateRuleStatuses = useInvalidateFetchPrebuiltRulesStatusQuery();
   const invalidateRules = useCallback(() => {
     invalidateFindRulesQuery();
     invalidateFetchRuleManagementFilters();
@@ -66,7 +65,7 @@ const RulesPageComponent: React.FC = () => {
 
   const { data: prebuiltRulesStatus } = usePrebuiltRulesStatus();
 
-  const rulesToInstallCount = prebuiltRulesStatus?.num_prebuilt_rules_installed ?? 0;
+  const rulesToInstallCount = prebuiltRulesStatus?.num_prebuilt_rules_to_install ?? 0;
   const rulesToUpgradeCount = prebuiltRulesStatus?.num_prebuilt_rules_to_upgrade ?? 0;
 
   // Check against rulesInstalledCount since we don't want to show banners if we're showing the empty prompt
@@ -152,9 +151,7 @@ const RulesPageComponent: React.FC = () => {
           <SuperHeader>
             <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap={true}>
               <EuiFlexItem grow={false}>
-                <LoadPrePackagedRules>
-                  {(renderProps) => <LoadPrePackagedRulesButton {...renderProps} />}
-                </LoadPrePackagedRules>
+                <LoadPrePackagedRulesButton />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiToolTip position="top" content={i18n.UPLOAD_VALUE_LISTS_TOOLTIP}>

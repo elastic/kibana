@@ -17,18 +17,12 @@ import { usePrebuiltRulesStatus } from '../../../../detection_engine/rule_manage
 // TODO: Still need to load timeline templates
 
 interface LoadPrePackagedRulesButtonProps {
-  isDisabled: boolean;
-  isLoading: boolean;
-  onClick: () => Promise<void>;
   'data-test-subj'?: string;
   fill?: boolean;
   showBadge?: boolean;
 }
 
 export const LoadPrePackagedRulesButton = ({
-  isDisabled,
-  isLoading,
-  onClick,
   'data-test-subj': dataTestSubj = 'loadPrebuiltRulesBtn',
   fill,
   showBadge = true,
@@ -48,8 +42,6 @@ export const LoadPrePackagedRulesButton = ({
       id={INSTALL_PREBUILT_RULES_ANCHOR}
       fill={fill}
       iconType="plusInCircle"
-      isLoading={isLoading}
-      isDisabled={isDisabled}
       color={'primary'}
       onClick={onClickLink}
       data-test-subj={dataTestSubj}

@@ -37,7 +37,7 @@ export const useFetchPrebuiltRulesStatusQuery = (
  *
  * @returns A rules cache invalidation callback
  */
-export const useInvalidateFetchPrebuiltRulesStatusQueryNew = () => {
+export const useInvalidateFetchPrebuiltRulesStatusQuery = () => {
   const queryClient = useQueryClient();
 
   return useCallback(() => {

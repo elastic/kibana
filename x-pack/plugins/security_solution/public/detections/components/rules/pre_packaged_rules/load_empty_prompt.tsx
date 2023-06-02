@@ -8,7 +8,6 @@
 import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { memo } from 'react';
 import styled from 'styled-components';
-import { LoadPrePackagedRules } from './load_prepackaged_rules';
 import { LoadPrePackagedRulesButton } from './load_prepackaged_rules_button';
 import * as i18n from './translations';
 
@@ -27,16 +26,11 @@ const PrePackagedRulesPromptComponent = () => {
       actions={
         <EuiFlexGroup justifyContent="center">
           <EuiFlexItem grow={false}>
-            <LoadPrePackagedRules>
-              {(renderProps) => (
-                <LoadPrePackagedRulesButton
-                  fill={true}
-                  data-test-subj="load-prebuilt-rules"
-                  showBadge={false}
-                  {...renderProps}
-                />
-              )}
-            </LoadPrePackagedRules>
+            <LoadPrePackagedRulesButton
+              fill={true}
+              data-test-subj="load-prebuilt-rules"
+              showBadge={false}
+            />
           </EuiFlexItem>
         </EuiFlexGroup>
       }

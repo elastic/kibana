@@ -33,7 +33,6 @@ import {
   PERFORM_RULE_INSTALLATION_URL,
   PERFORM_RULE_UPGRADE_URL,
   PREBUILT_RULES_STATUS_URL,
-  PREBUILT_RULES_URL,
   REVIEW_RULE_INSTALLATION_URL,
   REVIEW_RULE_UPGRADE_URL,
 } from '../../../../common/detection_engine/prebuilt_rules';
@@ -357,26 +356,6 @@ export interface CreatePrepackagedRulesResponse {
   timelines_installed: number;
   timelines_updated: number;
 }
-
-/**
- * Create Prepackaged Rules
- *
- * @param signal AbortSignal for cancelling request
- *
- * @throws An error if response is not OK
- */
-export const createPrepackagedRules = async (): Promise<CreatePrepackagedRulesResponse> => {
-  const result = await KibanaServices.get().http.fetch<{
-    rules_installed: number;
-    rules_updated: number;
-    timelines_installed: number;
-    timelines_updated: number;
-  }>(PREBUILT_RULES_URL, {
-    method: 'PUT',
-  });
-
-  return result;
-};
 
 /**
  * Imports rules in the same format as exported via the _export API
