@@ -6,6 +6,40 @@
  */
 
 describe('Diagnostics', () => {
+  describe('when no data is loaded', () => {
+    beforeEach(() => {
+      cy.loginAs({ username: 'elastic', password: 'changeme' });
+    });
+
+    it('can display summary tab', () => {
+      cy.visitKibana('/app/apm/diagnostics');
+
+      // integration package
+      cy.get('[data-test-subj="integrationPackageStatus_Badge"]').should(
+        'have.text',
+        'OK'
+      );
+
+      // data stream
+      cy.get('[data-test-subj="dataStreamsStatus_Badge"]').should(
+        'have.text',
+        'OK'
+      );
+
+      // Index template
+      cy.get('[data-test-subj="indexTemplatesStatus_Badge"]').should(
+        'have.text',
+        'OK'
+      );
+
+      // Index template
+      cy.get('[data-test-subj="fieldMappingStatus_Badge"]').should(
+        'have.text',
+        'OK'
+      );
+    });
+  });
+
   describe('when importing a file', () => {
     beforeEach(() => {
       cy.loginAs({ username: 'elastic', password: 'changeme' });
