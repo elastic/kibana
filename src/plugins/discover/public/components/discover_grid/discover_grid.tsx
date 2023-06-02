@@ -443,17 +443,33 @@ export const DiscoverGrid = ({
   );
 
   const getCellValue = useCallback<UseDataGridColumnsCellActionsProps['getCellValue']>(
-    (fieldName, rowIndex) => {
-      const pageRowIndex = rowIndex % displayedRows.length;
-      return displayedRows[pageRowIndex].flattened[fieldName] as CellActionValue;
+    (fieldName, rowIndex): CellActionValue => {
+      const value = displayedRows[rowIndex % displayedRows.length].flattened[fieldName] as
+        | CellActionValue
+        | number
+        | number[];
+      if (value == null) {
+        return value;
+      }
+      if (Array.isArray(value)) {
+        return value.map((val) => val.toString());
+      }
+      return value.toString();
     },
     [displayedRows]
   );
 
-  const fields = useMemo<UseDataGridColumnsCellActionsProps['fields']>(
+  const cellActionsFields = useMemo<UseDataGridColumnsCellActionsProps['fields']>(
     () =>
-      cellActionsTriggerId
+      cellActionsTriggerId && !isPlainRecord
         ? visibleColumns.map((columnName) => {
+            if (columnName === '_source') {
+              // disable custom actions on _source column
+              return {
+                name: '',
+                type: '',
+              };
+            }
             const field = dataView.getFieldByName(columnName)?.spec;
             return {
               name: columnName,
@@ -462,11 +478,11 @@ export const DiscoverGrid = ({
             };
           })
         : undefined,
-    [visibleColumns, cellActionsTriggerId, dataView]
+    [cellActionsTriggerId, isPlainRecord, visibleColumns, dataView]
   );
 
   const columnsCellActions = useDataGridColumnsCellActions({
-    fields,
+    fields: cellActionsFields,
     getCellValue,
     triggerId: cellActionsTriggerId,
     dataGridRef,
