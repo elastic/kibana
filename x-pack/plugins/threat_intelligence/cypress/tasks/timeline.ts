@@ -54,6 +54,8 @@ export const closeTimeline = () => {
  */
 export const addToTimelineFromFlyoutOverviewTabTable = () => {
   cy.get(FLYOUT_TABLE_MORE_ACTIONS_BUTTON).first().click({ force: true });
+  // eslint-disable-next-line cypress/no-unnecessary-waiting
+  cy.wait(2000);
   cy.get(FLYOUT_OVERVIEW_TAB_TABLE_ROW_TIMELINE_BUTTON).should('exist').first().click();
 };
 
@@ -62,6 +64,8 @@ export const addToTimelineFromFlyoutOverviewTabTable = () => {
  */
 export const addToTimelineFromFlyoutOverviewTabBlock = () => {
   cy.get(FLYOUT_BLOCK_MORE_ACTIONS_BUTTON).first().click({ force: true });
+  // eslint-disable-next-line cypress/no-unnecessary-waiting
+  cy.wait(2000);
   cy.get(FLYOUT_OVERVIEW_TAB_BLOCKS_TIMELINE_BUTTON).should('exist').first().click();
 };
 

@@ -40,6 +40,8 @@ describe('Timeline', () => {
 
   it('should add entry in timeline when clicking in the barchart legend', () => {
     openBarchartPopoverMenu();
+    // eslint-disable-next-line cypress/no-unnecessary-waiting
+    cy.wait(2000);
     addToTimelineFromBarchartLegend();
     openTimeline();
 
