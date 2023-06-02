@@ -23,12 +23,10 @@ import { AppFeaturesConfigMerger } from './app_features_config_merger';
 import { casesSubFeaturesMap } from './security_cases_kibana_sub_features';
 import { securitySubFeaturesMap } from './security_kibana_sub_features';
 
-type AppFeaturesMap = Map<AppFeatureKey, boolean>;
-
 export class AppFeatures {
   private securityFeatureConfigMerger: AppFeaturesConfigMerger;
   private casesFeatureConfigMerger: AppFeaturesConfigMerger;
-  private appFeatures?: AppFeaturesMap;
+  private appFeatures?: Set<AppFeatureKey>;
   private featuresSetup?: FeaturesPluginSetup;
 
   constructor(
@@ -50,7 +48,7 @@ export class AppFeatures {
     if (this.appFeatures) {
       throw new Error('AppFeatures has already been initialized');
     }
-    this.appFeatures = new Map(Object.entries(appFeatureKeys) as Array<[AppFeatureKey, boolean]>);
+    this.appFeatures = new Set(appFeatureKeys);
     this.registerEnabledKibanaFeatures();
   }
 
@@ -58,7 +56,7 @@ export class AppFeatures {
     if (!this.appFeatures) {
       throw new Error('AppFeatures has not been initialized');
     }
-    return this.appFeatures.get(appFeatureKey) ?? false;
+    return this.appFeatures.has(appFeatureKey);
   }
 
   private registerEnabledKibanaFeatures() {

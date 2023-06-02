@@ -82,9 +82,7 @@ describe('AppFeatures', () => {
       getKibanaFeatures: jest.fn(),
     } as unknown as PluginSetupContract;
 
-    const appFeatureKeys = {
-      'test-base-feature': true,
-    } as unknown as AppFeatureKeys;
+    const appFeatureKeys = ['test-base-feature'] as unknown as AppFeatureKeys;
 
     const appFeatures = new AppFeatures(
       {} as unknown as Logger,
@@ -105,9 +103,7 @@ describe('AppFeatures', () => {
       registerKibanaFeature: jest.fn(),
     } as unknown as PluginSetupContract;
 
-    const appFeatureKeys = {
-      'test-cases-feature': true,
-    } as unknown as AppFeatureKeys;
+    const appFeatureKeys = ['test-cases-feature'] as unknown as AppFeatureKeys;
 
     const appFeatures = new AppFeatures(
       {} as unknown as Logger,
