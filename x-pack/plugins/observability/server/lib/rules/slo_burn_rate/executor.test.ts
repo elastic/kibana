@@ -249,7 +249,7 @@ describe('BurnRateRuleExecutor', () => {
         id: `alert-${slo.id}-${slo.revision}`,
         fields: {
           [ALERT_REASON]:
-            'The burn rate for the past 1h is 2 and for the past 5m is 2. Alert when above 2 for both windows',
+            'CRITICAL: The burn rate for the past 1h is 2 and for the past 5m is 2. Alert when above 2 for both windows',
           [ALERT_EVALUATION_THRESHOLD]: 2,
           [ALERT_EVALUATION_VALUE]: 2,
           [SLO_ID_FIELD]: slo.id,
@@ -263,7 +263,7 @@ describe('BurnRateRuleExecutor', () => {
           shortWindow: { burnRate: 2, duration: '5m' },
           burnRateThreshold: 2,
           reason:
-            'The burn rate for the past 1h is 2 and for the past 5m is 2. Alert when above 2 for both windows',
+            'CRITICAL: The burn rate for the past 1h is 2 and for the past 5m is 2. Alert when above 2 for both windows',
         })
       );
       expect(alertMock.replaceState).toBeCalledWith({ alertState: AlertStates.ALERT });
@@ -299,7 +299,7 @@ describe('BurnRateRuleExecutor', () => {
         id: `alert-${slo.id}-${slo.revision}`,
         fields: {
           [ALERT_REASON]:
-            'The burn rate for the past 6h is 1.5 and for the past 30m is 1.5. Alert when above 1 for both windows',
+            'HIGH: The burn rate for the past 6h is 1.5 and for the past 30m is 1.5. Alert when above 1 for both windows',
           [ALERT_EVALUATION_THRESHOLD]: 1,
           [ALERT_EVALUATION_VALUE]: 1.5,
           [SLO_ID_FIELD]: slo.id,
@@ -313,7 +313,7 @@ describe('BurnRateRuleExecutor', () => {
           shortWindow: { burnRate: 1.5, duration: '30m' },
           burnRateThreshold: 1,
           reason:
-            'The burn rate for the past 6h is 1.5 and for the past 30m is 1.5. Alert when above 1 for both windows',
+            'HIGH: The burn rate for the past 6h is 1.5 and for the past 30m is 1.5. Alert when above 1 for both windows',
         })
       );
       expect(alertMock.replaceState).toBeCalledWith({ alertState: AlertStates.ALERT });
