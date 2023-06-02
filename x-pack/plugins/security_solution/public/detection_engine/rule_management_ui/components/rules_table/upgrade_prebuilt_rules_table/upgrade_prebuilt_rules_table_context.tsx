@@ -234,6 +234,3 @@ export const useUpgradePrebuiltRulesTableContext = (): UpgradePrebuiltRulesConte
 
   return rulesTableContext;
 };
-
-export const useUpgradePrebuiltRulesTableContextOptional =
-  (): UpgradePrebuiltRulesContextType | null => useContext(UpgradePrebuiltRulesTableContext);

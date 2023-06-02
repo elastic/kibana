@@ -230,6 +230,3 @@ export const useAddPrebuiltRulesTableContext = (): AddPrebuiltRulesContextType =
 
   return rulesTableContext;
 };
-
-export const useAddPrebuiltRulesTableContextOptional = (): AddPrebuiltRulesContextType | null =>
-  useContext(AddPrebuiltRulesTableContext);
