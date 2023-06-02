@@ -6,12 +6,13 @@
  */
 
 import React, { type FC, useMemo, useCallback } from 'react';
-import { type Criteria, EuiBasicTable, formatDate } from '@elastic/eui';
+import { type Criteria, EuiBasicTable, formatDate, EuiEmptyPrompt } from '@elastic/eui';
 
 import { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
 import { isRight } from 'fp-ts/lib/Either';
 import { SeverityBadge } from '../../../../detections/components/rules/severity_badge';
 import { usePaginatedAlerts } from './use_paginated_alerts';
+import { ERROR_MESSAGE, ERROR_TITLE } from '../../../shared/translations';
 
 export const TIMESTAMP_DATE_FORMAT = 'MMM D, YYYY @ HH:mm:ss.SSS';
 
@@ -50,9 +51,10 @@ export const columns = [
 
 export interface AlertsTableProps {
   alertIds: string[];
+  'data-test-subj'?: string;
 }
 
-export const AlertsTable: FC<AlertsTableProps> = ({ alertIds }) => {
+export const AlertsTable: FC<AlertsTableProps> = ({ alertIds, 'data-test-subj': testSubject }) => {
   const { setPagination, setSorting, data, loading, paginationConfig, sorting, error } =
     usePaginatedAlerts(alertIds);
 
@@ -82,7 +84,15 @@ export const AlertsTable: FC<AlertsTableProps> = ({ alertIds }) => {
   }, [data]);
 
   if (error) {
-    return <div>{'handle errors'}</div>;
+    return (
+      <EuiEmptyPrompt
+        iconType="error"
+        color="danger"
+        title={<h2>{ERROR_TITLE('alert data')}</h2>}
+        body={<p>{ERROR_MESSAGE('alert data')}</p>}
+        data-test-subj={`${testSubject}Error`}
+      />
+    );
   }
 
   return (

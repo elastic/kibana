@@ -35,3 +35,14 @@ export const THREAT_INTELLIGENCE_DETAILS_SPINNER_TEST_ID =
   `${PREFIX}ThreatIntelligenceDetailsLoadingSpinner` as const;
 
 export const INVESTIGATION_TEST_ID = `${PREFIX}Investigation` as const;
+
+export const CORRELATIONS_DETAILS_ERROR_TEST_ID = `${CORRELATIONS_DETAILS_TEST_ID}Error` as const;
+
+export const CORRELATIONS_DETAILS_BY_ANCESTRY =
+  `${CORRELATIONS_DETAILS_TEST_ID}AlertsByAncestryTable` as const;
+
+export const CORRELATIONS_DETAILS_BY_SOURCE =
+  `${CORRELATIONS_DETAILS_TEST_ID}AlertsBySourceTable` as const;
+
+export const CORRELATIONS_DETAILS_BY_SESSION =
+  `${CORRELATIONS_DETAILS_TEST_ID}AlertsBySessionTable` as const;

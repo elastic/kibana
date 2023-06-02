@@ -59,7 +59,7 @@ export interface UseCorrelationsResult {
   /**
    * Data ready to be consumed by the InsightsSummaryPanel component
    */
-  data: readonly InsightsSummaryPanelData[];
+  data: InsightsSummaryPanelData[];
   /**
    * Data length
    */

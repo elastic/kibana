@@ -82,15 +82,17 @@ describe('CorrelationsDetails', () => {
     expect(screen.getByRole('progressbar')).toBeInTheDocument();
   });
 
-  it('renders null when there is an error', () => {
+  it('renders error message when there is an error', () => {
     jest
       .mocked(useTimelineEventsDetails)
       .mockReturnValue([false, null, undefined, null, async () => {}]);
     jest.mocked(useCorrelations).mockReturnValue({ ...mockUseCorrelationsResult, error: true });
 
-    const { container } = renderCorrelationDetails();
+    renderCorrelationDetails();
 
-    expect(container.firstChild).toBeNull();
+    expect(
+      screen.getByText('There was an error displaying Correlation Details view')
+    ).toBeInTheDocument();
   });
 
   it('renders alerts tables when data is loaded', () => {

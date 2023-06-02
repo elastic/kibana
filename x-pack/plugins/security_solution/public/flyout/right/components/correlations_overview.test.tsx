@@ -143,6 +143,7 @@ describe('<ThreatIntelligenceOverview />', () => {
       params: {
         id: panelContextValue.eventId,
         indexName: panelContextValue.indexName,
+        scopeId: 'scopeId',
       },
     });
   });

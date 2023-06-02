@@ -9,7 +9,7 @@ import { useMemo, useReducer } from 'react';
 
 const PAGE_SIZES = [5, 10, 20] as const;
 
-interface PaginationState {
+export interface PaginationState {
   pageIndex: number;
   pageSize: number;
 }

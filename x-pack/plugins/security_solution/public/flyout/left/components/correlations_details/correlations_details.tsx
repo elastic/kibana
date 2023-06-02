@@ -6,7 +6,13 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiSpacer } from '@elastic/eui';
+import {
+  EuiEmptyPrompt,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLoadingSpinner,
+  EuiSpacer,
+} from '@elastic/eui';
 import { useTimelineEventsDetails } from '../../../../timelines/containers/details';
 import { useSourcererDataView } from '../../../../common/containers/sourcerer';
 
@@ -17,6 +23,13 @@ import { SecurityPageName } from '../../../../../common';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 import { EntityPanel } from '../../../right/components/entity_panel';
 import { AlertsTable } from './alerts_table';
+import { ERROR_MESSAGE, ERROR_TITLE } from '../../../shared/translations';
+import {
+  CORRELATIONS_DETAILS_BY_ANCESTRY,
+  CORRELATIONS_DETAILS_BY_SESSION,
+  CORRELATIONS_DETAILS_BY_SOURCE,
+  CORRELATIONS_DETAILS_ERROR_TEST_ID,
+} from '../test_ids';
 
 export const CORRELATIONS_TAB_ID = 'correlations-details';
 
@@ -69,8 +82,15 @@ export const CorrelationsDetails: React.FC = () => {
   }
 
   if (correlationsError) {
-    // TODO: handle errors
-    return null;
+    return (
+      <EuiEmptyPrompt
+        iconType="error"
+        color="danger"
+        title={<h2>{ERROR_TITLE('Correlation Details')}</h2>}
+        body={<p>{ERROR_MESSAGE('Correlation Details view')}</p>}
+        data-test-subj={CORRELATIONS_DETAILS_ERROR_TEST_ID}
+      />
+    );
   }
 
   return (
@@ -81,7 +101,10 @@ export const CorrelationsDetails: React.FC = () => {
         expandable={true}
         expanded={true}
       >
-        <AlertsTable alertIds={ancestryAlertsIds} />
+        <AlertsTable
+          alertIds={ancestryAlertsIds}
+          data-test-subj={CORRELATIONS_DETAILS_BY_ANCESTRY}
+        />
       </EntityPanel>
 
       <EuiSpacer />
@@ -92,7 +115,10 @@ export const CorrelationsDetails: React.FC = () => {
         expandable={true}
         expanded={true}
       >
-        <AlertsTable alertIds={sameSourceAlertsIds} />
+        <AlertsTable
+          alertIds={sameSourceAlertsIds}
+          data-test-subj={CORRELATIONS_DETAILS_BY_SOURCE}
+        />
       </EntityPanel>
 
       <EuiSpacer />
@@ -103,7 +129,10 @@ export const CorrelationsDetails: React.FC = () => {
         expandable={true}
         expanded={false}
       >
-        <AlertsTable alertIds={alertsBySessionIds} />
+        <AlertsTable
+          data-test-subj={CORRELATIONS_DETAILS_BY_SESSION}
+          alertIds={alertsBySessionIds}
+        />
       </EntityPanel>
     </>
   );
