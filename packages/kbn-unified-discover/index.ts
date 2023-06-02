@@ -6,19 +6,4 @@
  * Side Public License, v 1.
  */
 
-export {
-  buildDataTableRecord,
-  buildDataTableRecordList,
-  formatHit,
-  formatFieldValue,
-  getShouldShowFieldHandler,
-  getDocId,
-} from './src';
-export type {
-  DataTableRecord,
-  EsHitRecord,
-  DiscoverServices,
-  HistoryLocationState,
-} from './src/types';
-
-export * from './src/constants';
+export * from './src';

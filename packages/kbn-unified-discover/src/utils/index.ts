@@ -5,7 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-export * from './utils';
-export * from './types';
-export * from './constants';
+export { formatHit } from './format_hit';
+export { formatFieldValue } from './format_value';
+export { getDocId } from './get_doc_id';
+export { getShouldShowFieldHandler } from './get_should_show_field_handler';
+export { buildDataTableRecord, buildDataTableRecordList } from './build_data_record';
