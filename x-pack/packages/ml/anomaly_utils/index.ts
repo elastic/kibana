@@ -62,8 +62,6 @@ export {
 
 export type { InfluencersFilterQuery } from './es_client';
 
-export { getFieldFormatFromIndexPattern } from './field_format_utils';
-
 export {
   type MlJobFieldType,
   DOC_COUNT,

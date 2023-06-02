@@ -18,7 +18,6 @@ import type { FieldFormat } from '@kbn/field-formats-plugin/common';
 import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
 import { getNestedProperty } from '@kbn/ml-nested-property';
 import { isCounterTimeSeriesMetric } from '@kbn/ml-agg-utils';
-import { getFieldFormatFromIndexPattern } from '@kbn/ml-anomaly-utils';
 import { formatHumanReadableDateTimeSeconds } from '@kbn/ml-date-utils';
 import {
   type FeatureImportance,
@@ -34,6 +33,7 @@ import {
 } from '@kbn/ml-data-frame-analytics-utils';
 import { extractErrorMessage, type ErrorType } from '@kbn/ml-error-utils';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
+import { getFieldFormatFromIndexPattern } from './get_field_format_from_index_pattern';
 
 import type { DataGridItem, IndexPagination, RenderCellValue } from './types';
 
