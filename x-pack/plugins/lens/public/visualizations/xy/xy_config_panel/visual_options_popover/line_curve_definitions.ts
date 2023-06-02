@@ -9,13 +9,13 @@ import type { XYCurveType } from '@kbn/expression-xy-plugin/common';
 import { XYCurveTypes } from '@kbn/expression-xy-plugin/public';
 import { i18n } from '@kbn/i18n';
 
-export interface lineCurveDefinitions {
+export interface LineCurveDefinitions {
   type: Extract<XYCurveType, 'LINEAR' | 'CURVE_MONOTONE_X' | 'CURVE_STEP_AFTER'>;
   title: string;
   description?: string;
 }
 
-export const lineCurveDefinitions: lineCurveDefinitions[] = [
+export const lineCurveDefinitions: LineCurveDefinitions[] = [
   {
     type: XYCurveTypes.LINEAR,
     title: i18n.translate('xpack.lens.lineCurve.linear', {
