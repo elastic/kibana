@@ -12,7 +12,7 @@ import { useInvalidateFetchPrebuiltRulesStatusQuery } from '../use_fetch_prebuil
 import { useInvalidateFindRulesQuery } from '../use_find_rules_query';
 import { useInvalidateFetchRuleManagementFiltersQuery } from '../use_fetch_rule_management_filters_query';
 import { useInvalidateFetchRulesSnoozeSettingsQuery } from '../use_fetch_rules_snooze_settings';
-import { useInvalidateFetchPrebuiltRulesInstallReviewQuery } from './use_fetch_prebuilt_rules_install_review_query';
+import { useInvalidateFetchPrebuiltRulesUpgradeReviewQuery } from './use_fetch_prebuilt_rules_upgrade_review_query';
 import { performUpgradeAllRules } from '../../api';
 import { useInvalidateFetchPrebuiltRulesStatusQueryNew } from './use_fetch_prebuilt_rules_status_query_new';
 
@@ -25,8 +25,8 @@ export const usePerformAllRulesUpgradeMutation = (
   const invalidateFetchRulesSnoozeSettings = useInvalidateFetchRulesSnoozeSettingsQuery();
   const invalidatePrePackagedRulesStatus = useInvalidateFetchPrebuiltRulesStatusQuery();
   const invalidateFetchRuleManagementFilters = useInvalidateFetchRuleManagementFiltersQuery();
-  const invalidateFetchPrebuiltRulesInstallReview =
-    useInvalidateFetchPrebuiltRulesInstallReviewQuery();
+  const invalidateFetchPrebuiltRulesUpgradeReview =
+    useInvalidateFetchPrebuiltRulesUpgradeReviewQuery();
   const invalidateRuleStatus = useInvalidateFetchPrebuiltRulesStatusQueryNew();
 
   return useMutation<PerformRuleUpgradeResponseBody, Error>(() => performUpgradeAllRules(), {
@@ -38,7 +38,7 @@ export const usePerformAllRulesUpgradeMutation = (
       invalidateFetchRulesSnoozeSettings();
       invalidateFetchRuleManagementFilters();
 
-      invalidateFetchPrebuiltRulesInstallReview();
+      invalidateFetchPrebuiltRulesUpgradeReview();
       invalidateRuleStatus();
 
       if (options?.onSettled) {

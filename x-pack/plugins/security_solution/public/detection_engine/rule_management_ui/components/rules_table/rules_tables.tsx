@@ -67,7 +67,6 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
   const {
     state: {
       rules,
-      rulesToUpgrade,
       filterOptions,
       isPreflightInProgress,
       isAllSelected,
@@ -80,14 +79,7 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
       selectedRuleIds,
       sortingOptions,
     },
-    actions: {
-      setFilterOptions,
-      setIsAllSelected,
-      setPage,
-      setPerPage,
-      setSelectedRuleIds,
-      setSortingOptions,
-    },
+    actions: { setIsAllSelected, setPage, setPerPage, setSelectedRuleIds, setSortingOptions },
   } = rulesTableContext;
 
   const [isDeleteConfirmationVisible, showDeleteConfirmation, hideDeleteConfirmation] =

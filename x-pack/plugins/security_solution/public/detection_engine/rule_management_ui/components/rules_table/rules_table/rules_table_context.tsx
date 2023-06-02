@@ -15,7 +15,6 @@ import React, {
   useRef,
   useState,
 } from 'react';
-import { usePrebuiltRulesUpgradeReview } from '../../../../rule_management/logic/prebuilt_rules/use_prebuilt_rules_upgrade_review';
 import { usePrebuiltRulesInstallReview } from '../../../../rule_management/logic/prebuilt_rules/use_prebuilt_rules_install_review';
 import { useFetchRulesSnoozeSettings } from '../../../../rule_management/api/hooks/use_fetch_rules_snooze_settings';
 import { DEFAULT_RULES_TABLE_REFRESH_SETTING } from '../../../../../../common/constants';
@@ -41,7 +40,6 @@ import {
 import { RuleSource } from './rules_table_saved_state';
 import { useRulesTableSavedState } from './use_rules_table_saved_state';
 import type { RuleInstallationInfoForReview } from '../../../../../../common/detection_engine/prebuilt_rules/api/review_rule_installation/response_schema';
-import type { RuleUpgradeInfoForReview } from '../../../../../../common/detection_engine/prebuilt_rules/api/review_rule_upgrade/response_schema';
 
 interface RulesSnoozeSettings {
   /**
@@ -64,7 +62,9 @@ export interface RulesTableState {
    * Rules to display (sorted and paginated in case of in-memory)
    */
   rules: Rule[];
-  rulesToUpgrade: RuleUpgradeInfoForReview[];
+  /**
+   * Rules available for installation
+   */
   rulesToInstall: RuleInstallationInfoForReview[];
   /**
    * Currently selected table filter
@@ -301,11 +301,7 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
       keepPreviousData: true, // Use this option so that the state doesn't jump between "success" and "loading" on page change
     }
   );
-  const {
-    data: { rules: rulesToUpgrade = [] } = {
-      rules: [],
-    },
-  } = usePrebuiltRulesUpgradeReview();
+
   const {
     data: { rules: rulesToInstall = [] } = {
       rules: [],
@@ -366,7 +362,6 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
     return {
       state: {
         rules,
-        rulesToUpgrade,
         rulesToInstall,
         rulesSnoozeSettings: {
           data: rulesSnoozeSettingsMap ?? {},
@@ -403,7 +398,6 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
     };
   }, [
     rules,
-    rulesToUpgrade,
     rulesToInstall,
     rulesSnoozeSettingsMap,
     isSnoozeSettingsLoading,

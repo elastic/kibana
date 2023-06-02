@@ -39,8 +39,8 @@ export const usePerformSpecificRulesUpgradeMutation = (
   const invalidateRuleStatus = useInvalidateFetchPrebuiltRulesStatusQueryNew();
 
   return useMutation<PerformRuleUpgradeResponseBody, Error, UpgradeSpecificRulesRequest['rules']>(
-    (rulesToInstall: UpgradeSpecificRulesRequest['rules']) => {
-      return performUpgradeSpecificRules(rulesToInstall);
+    (rulesToUpgrade: UpgradeSpecificRulesRequest['rules']) => {
+      return performUpgradeSpecificRules(rulesToUpgrade);
     },
     {
       ...options,

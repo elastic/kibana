@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { EuiBasicTableColumn, EuiTableActionsColumnType } from '@elastic/eui';
+import type { EuiBasicTableColumn } from '@elastic/eui';
 import { EuiButtonEmpty, EuiBadge, EuiText, EuiLoadingSpinner } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import type { usePerformInstallSpecificRules } from '../../../../rule_management/logic/prebuilt_rules/use_perform_rule_install';
@@ -18,9 +18,7 @@ import * as i18n from '../../../../../detections/pages/detection_engine/rules/tr
 import type { Rule } from '../../../../rule_management/logic';
 import type { RuleInstallationInfoForReview } from '../../../../../../common/detection_engine/prebuilt_rules/api/review_rule_installation/response_schema';
 
-export type TableColumn =
-  | EuiBasicTableColumn<RuleInstallationInfoForReview>
-  | EuiTableActionsColumnType<RuleInstallationInfoForReview>;
+export type TableColumn = EuiBasicTableColumn<RuleInstallationInfoForReview>;
 
 interface ColumnsProps {
   installSpecificRules: ReturnType<typeof usePerformInstallSpecificRules>['mutateAsync'];
@@ -111,12 +109,12 @@ const createInstallButtonColumn = (
         disabled={isRuleInstalling}
         onClick={() => installRowRule(value, item)}
       >
-        {i18n.INSTALL_RULE_BUTTON}
-        {isRuleInstalling ? <EuiLoadingSpinner size="s" /> : undefined}
+        {isRuleInstalling ? <EuiLoadingSpinner size="s" /> : i18n.INSTALL_RULE_BUTTON}
       </EuiButtonEmpty>
     );
   },
   width: '10%',
+  align: 'center',
 });
 
 export const useAddPrebuiltRulesTableColumns = ({

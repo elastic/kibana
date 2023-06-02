@@ -19,9 +19,7 @@ import {
 } from '../../../../rule_management/logic/prebuilt_rules/use_perform_rule_upgrade';
 import { usePrebuiltRulesUpgradeReview } from '../../../../rule_management/logic/prebuilt_rules/use_prebuilt_rules_upgrade_review';
 import type { RuleUpgradeInfoForReview } from '../../../../../../common/detection_engine/prebuilt_rules/api/review_rule_upgrade/response_schema';
-import { DEFAULT_RULES_TABLE_REFRESH_SETTING } from '../../../../../../common/constants';
 import { invariant } from '../../../../../../common/utils/invariant';
-import { useUiSetting$ } from '../../../../../common/lib/kibana';
 import type { InMemoryPaginationOptions } from '../../../../rule_management/logic';
 import { RULES_TABLE_INITIAL_PAGE_SIZE, RULES_TABLE_PAGE_SIZE_OPTIONS } from '../constants';
 import { hasUserCRUDPermission } from '../../../../../common/utils/privileges';
@@ -104,11 +102,6 @@ interface UpgradePrebuiltRulesTableContextProviderProps {
 export const UpgradePrebuiltRulesTableContextProvider = ({
   children,
 }: UpgradePrebuiltRulesTableContextProviderProps) => {
-  const [autoRefreshSettings] = useUiSetting$<{
-    on: boolean;
-    value: number;
-    idleTimeout: number;
-  }>(DEFAULT_RULES_TABLE_REFRESH_SETTING);
   const [pagination, setPagination] = useState<{ pageIndex: number }>({ pageIndex: 0 });
   const [selectedRules, setSelectedRules] = useState<RuleUpgradeInfoForReview[]>([]);
 
@@ -136,7 +129,7 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
     isLoading,
     isRefetching,
   } = usePrebuiltRulesUpgradeReview({
-    refetchInterval: autoRefreshSettings.value,
+    refetchInterval: false, // Disable automatic refetching since request is expensive
     keepPreviousData: true, // Use this option so that the state doesn't jump between "success" and "loading" on page change
   });
 
@@ -150,6 +143,7 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
   const rulesColumns = useUpgradePrebuiltRulesTableColumns({
     upgradeSpecificRules,
     hasCRUDPermissions: hasPermissions,
+    isRuleUpgrading: isUpgradeAllRulesLoading || isUpgradeSpecificRulesLoading,
   });
 
   const actions = useMemo(

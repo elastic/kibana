@@ -655,13 +655,6 @@ export const reviewRuleInstall = async ({
     signal,
   });
 
-/**
- * Perform prebuilt rules install (new rules)
- *
- * @param signal AbortSignal for cancelling request
- *
- * @throws An error if response is not OK
- */
 export const performInstallAllRules = async (): Promise<PerformRuleInstallationResponseBody> =>
   KibanaServices.get().http.fetch(PERFORM_RULE_INSTALLATION_URL, {
     method: 'POST',
@@ -681,13 +674,6 @@ export const performInstallSpecificRules = async (
     }),
   });
 
-/**
- * Perform prebuilt rules upgrade
- *
- * @param signal AbortSignal for cancelling request
- *
- * @throws An error if response is not OK
- */
 export const performUpgradeAllRules = async (): Promise<PerformRuleUpgradeResponseBody> =>
   KibanaServices.get().http.fetch(PERFORM_RULE_UPGRADE_URL, {
     method: 'POST',
@@ -705,6 +691,6 @@ export const performUpgradeSpecificRules = async (
     body: JSON.stringify({
       mode: 'SPECIFIC_RULES',
       rules,
-      pick_version: 'TARGET', // Setting 'TARGET' only for Milestone 2
+      pick_version: 'TARGET', // Setting fixed 'TARGET' temporarily for Milestone 2
     }),
   });

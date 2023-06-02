@@ -18,9 +18,7 @@ import {
   usePerformInstallSpecificRules,
 } from '../../../../rule_management/logic/prebuilt_rules/use_perform_rule_install';
 import { usePrebuiltRulesInstallReview } from '../../../../rule_management/logic/prebuilt_rules/use_prebuilt_rules_install_review';
-import { DEFAULT_RULES_TABLE_REFRESH_SETTING } from '../../../../../../common/constants';
 import { invariant } from '../../../../../../common/utils/invariant';
-import { useUiSetting$ } from '../../../../../common/lib/kibana';
 import type { InMemoryPaginationOptions } from '../../../../rule_management/logic';
 import { RULES_TABLE_INITIAL_PAGE_SIZE, RULES_TABLE_PAGE_SIZE_OPTIONS } from '../constants';
 import type { RuleInstallationInfoForReview } from '../../../../../../common/detection_engine/prebuilt_rules/api/review_rule_installation/response_schema';
@@ -99,11 +97,6 @@ interface AddPrebuiltRulesTableContextProviderProps {
 export const AddPrebuiltRulesTableContextProvider = ({
   children,
 }: AddPrebuiltRulesTableContextProviderProps) => {
-  const [autoRefreshSettings] = useUiSetting$<{
-    on: boolean;
-    value: number;
-    idleTimeout: number;
-  }>(DEFAULT_RULES_TABLE_REFRESH_SETTING);
   const [pagination, setPagination] = useState<{ pageIndex: number }>({ pageIndex: 0 });
   const [selectedRules, setSelectedRules] = useState<RuleInstallationInfoForReview[]>([]);
 
@@ -133,7 +126,7 @@ export const AddPrebuiltRulesTableContextProvider = ({
     isLoading,
     isRefetching,
   } = usePrebuiltRulesInstallReview({
-    refetchInterval: autoRefreshSettings.value,
+    refetchInterval: 60000, // Refetch available rules for installation every minute
     keepPreviousData: true, // Use this option so that the state doesn't jump between "success" and "loading" on page change
   });
 

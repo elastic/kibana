@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { EuiBasicTableColumn, EuiTableActionsColumnType } from '@elastic/eui';
-import { EuiButtonEmpty, EuiBadge, EuiText } from '@elastic/eui';
+import type { EuiBasicTableColumn } from '@elastic/eui';
+import { EuiButtonEmpty, EuiBadge, EuiText, EuiLoadingSpinner } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import type { usePerformUpgradeSpecificRules } from '../../../../rule_management/logic/prebuilt_rules/use_perform_rule_upgrade';
 import type { RuleUpgradeInfoForReview } from '../../../../../../common/detection_engine/prebuilt_rules/api/review_rule_upgrade/response_schema';
@@ -18,13 +18,12 @@ import { SeverityBadge } from '../../../../../detections/components/rules/severi
 import * as i18n from '../../../../../detections/pages/detection_engine/rules/translations';
 import type { Rule } from '../../../../rule_management/logic';
 
-export type TableColumn =
-  | EuiBasicTableColumn<RuleUpgradeInfoForReview>
-  | EuiTableActionsColumnType<RuleUpgradeInfoForReview>;
+export type TableColumn = EuiBasicTableColumn<RuleUpgradeInfoForReview>;
 
 interface ColumnsProps {
   upgradeSpecificRules: ReturnType<typeof usePerformUpgradeSpecificRules>['mutateAsync'];
   hasCRUDPermissions: boolean;
+  isRuleUpgrading: boolean;
 }
 
 const useRuleNameColumn = (): TableColumn => {
@@ -94,22 +93,27 @@ type UpgradeRowRule = (
   item: RuleUpgradeInfoForReview
 ) => void;
 
-const createUpgradelButtonColumn = (upgradeRowRule: UpgradeRowRule): TableColumn => ({
+const createUpgradelButtonColumn = (
+  upgradeRowRule: UpgradeRowRule,
+  isRuleUpgrading: boolean
+): TableColumn => ({
   field: 'rule_id',
   name: '',
   render: (value: RuleUpgradeInfoForReview['rule_id'], item: RuleUpgradeInfoForReview) => {
     return (
       <EuiButtonEmpty size="s" onClick={() => upgradeRowRule(value, item)}>
-        {i18n.UPGRADE_RULE_BUTTON}
+        {isRuleUpgrading ? <EuiLoadingSpinner size="s" /> : i18n.UPGRADE_RULE_BUTTON}
       </EuiButtonEmpty>
     );
   },
   width: '10%',
+  align: 'center',
 });
 
 export const useUpgradePrebuiltRulesTableColumns = ({
   upgradeSpecificRules,
   hasCRUDPermissions,
+  isRuleUpgrading,
 }: ColumnsProps): TableColumn[] => {
   const ruleNameColumn = useRuleNameColumn();
   const [showRelatedIntegrations] = useUiSetting$<boolean>(SHOW_RELATED_INTEGRATIONS_SETTING);
@@ -153,8 +157,8 @@ export const useUpgradePrebuiltRulesTableColumns = ({
         truncateText: true,
         width: '12%',
       },
-      ...(hasCRUDPermissions ? [createUpgradelButtonColumn(upgradeRowRule)] : []),
+      ...(hasCRUDPermissions ? [createUpgradelButtonColumn(upgradeRowRule, isRuleUpgrading)] : []),
     ],
-    [hasCRUDPermissions, ruleNameColumn, showRelatedIntegrations, upgradeRowRule]
+    [hasCRUDPermissions, isRuleUpgrading, ruleNameColumn, showRelatedIntegrations, upgradeRowRule]
   );
 };

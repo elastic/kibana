@@ -9,6 +9,7 @@ import React, { useMemo } from 'react';
 import { TabNavigation } from '../../../../common/components/navigation/tab_navigation';
 import * as i18n from '../../../../detections/pages/detection_engine/rules/translations';
 import { useRulesTableContext } from './rules_table/rules_table_context';
+import { usePrebuiltRulesStatus } from '../../../rule_management/logic/prebuilt_rules/use_prebuilt_rules_status';
 
 export enum AllRulesTabs {
   installed = 'installed',
@@ -20,11 +21,12 @@ export const RulesTableToolbar = React.memo(() => {
   const {
     state: {
       pagination: { total: installedTotal },
-      rulesToUpgrade,
     },
   } = useRulesTableContext();
 
-  const updateTotal = rulesToUpgrade.length;
+  const { data: prebuiltRulesStatus } = usePrebuiltRulesStatus();
+
+  const updateTotal = prebuiltRulesStatus?.num_prebuilt_rules_to_upgrade ?? 0;
 
   const ruleTabs = useMemo(
     () => ({
