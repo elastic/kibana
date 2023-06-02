@@ -54,13 +54,16 @@ describe('breadcrumbs', () => {
     `);
   });
 
-  test('should return list of breadcrumbs home / custom', async () => {
+  test('should skip the default navigation from project navigation when absolute: true is used', async () => {
     const { projectNavigation } = setup();
 
-    projectNavigation.setProjectBreadcrumbs([
-      { text: 'custom1', href: '/custom1' },
-      { text: 'custom2', href: '/custom1/custom2' },
-    ]);
+    projectNavigation.setProjectBreadcrumbs(
+      [
+        { text: 'custom1', href: '/custom1' },
+        { text: 'custom2', href: '/custom1/custom2' },
+      ],
+      { absolute: true }
+    );
 
     // TODO: add projectNavigation.setProjectNavigation() to test the part of breadcrumbs extracted from the nav tree
 

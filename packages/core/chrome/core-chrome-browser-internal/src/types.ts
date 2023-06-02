@@ -57,7 +57,7 @@ export interface InternalChromeStart extends ChromeStart {
      * Set project breadcrumbs
      *
      * @param breadcrumbs
-     * @param params.absolute If true, the breadcrumbs will be set as absolute, otherwise they will be appended to the default ones. false by default.
+     * @param params.absolute If true, If true, the breadcrumbs will replace the defaults, otherwise they will be appended to the default ones. false by default.
      *
      * @remarks Has no effect if the chrome style is not `project` or if setNavigation was not called
      */
