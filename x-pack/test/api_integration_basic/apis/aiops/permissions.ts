@@ -48,6 +48,7 @@ export default ({ getService }: FtrProviderContext) => {
         headers: {
           'Content-Type': 'application/json',
           'kbn-xsrf': 'stream',
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
         },
         body: JSON.stringify(requestBody),
       });
