@@ -86,7 +86,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         const retryErrorMessage = `[${left.type}] Incompatible Elasticsearch cluster settings detected. Remove the persistent and transient Elasticsearch cluster setting 'cluster.routing.allocation.enable' or set it to a value of 'all' to allow migrations to proceed. Refer to ${stateP.migrationDocLinks.routingAllocationDisabled} for more information on how to resolve the issue.`;
         return delayRetryState(stateP, retryErrorMessage, stateP.retryAttempts);
       } else {
-        return throwBadResponse(stateP, left);
+        throwBadResponse(stateP, left);
       }
     } else if (Either.isRight(res)) {
       // cluster routing allocation is enabled and we can continue with the migration as normal
@@ -266,7 +266,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         };
       }
     } else {
-      return throwBadResponse(stateP, res);
+      throwBadResponse(stateP, res);
     }
   } else if (stateP.controlState === 'WAIT_FOR_MIGRATION_COMPLETION') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
@@ -314,14 +314,14 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
       // If the write block failed because the index doesn't exist, it means
       // another instance already completed the legacy pre-migration. Proceed
       // to the next step.
-      if (isTypeof(res.left, 'index_not_found_exception')) {
+      const left = res.left;
+      if (isTypeof(left, 'index_not_found_exception')) {
         return { ...stateP, controlState: 'LEGACY_CREATE_REINDEX_TARGET' };
       } else {
-        // @ts-expect-error TS doesn't correctly narrow this type to never
-        return throwBadResponse(stateP, res);
+        throwBadResponse(stateP, left);
       }
     } else {
-      return throwBadResponse(stateP, res);
+      throwBadResponse(stateP, res);
     }
   } else if (stateP.controlState === 'LEGACY_CREATE_REINDEX_TARGET') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
@@ -343,7 +343,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
           reason: `${CLUSTER_SHARD_LIMIT_EXCEEDED_REASON} See ${stateP.migrationDocLinks.clusterShardLimitExceeded}`,
         };
       } else {
-        return throwBadResponse(stateP, left);
+        throwBadResponse(stateP, left);
       }
     } else if (Either.isRight(res)) {
       return {
@@ -476,10 +476,10 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         const retryErrorMessage = `${left.message} Refer to ${stateP.migrationDocLinks.repeatedTimeoutRequests} for information on how to resolve the issue.`;
         return delayRetryState(stateP, retryErrorMessage, stateP.retryAttempts);
       } else {
-        return throwBadResponse(stateP, left);
+        throwBadResponse(stateP, left);
       }
     } else {
-      return throwBadResponse(stateP, res);
+      throwBadResponse(stateP, res);
     }
   } else if (stateP.controlState === 'UPDATE_SOURCE_MAPPINGS_PROPERTIES') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
@@ -723,13 +723,11 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         ...stateP,
         controlState: 'CALCULATE_EXCLUDE_FILTERS',
       };
-    } else if (isTypeof(res.left, 'index_not_found_exception')) {
+    } else {
       // We don't handle the following errors as the migration algorithm
       // will never cause them to occur:
       // - index_not_found_exception
-      return throwBadResponse(stateP, res.left as never);
-    } else {
-      return throwBadResponse(stateP, res.left);
+      throwBadResponse(stateP, res.left as never);
     }
   } else if (stateP.controlState === 'CALCULATE_EXCLUDE_FILTERS') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
@@ -753,7 +751,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         ],
       };
     } else {
-      return throwBadResponse(stateP, res);
+      throwBadResponse(stateP, res);
     }
   } else if (stateP.controlState === 'CREATE_REINDEX_TEMP') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
@@ -788,7 +786,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
           reason: `${CLUSTER_SHARD_LIMIT_EXCEEDED_REASON} See ${stateP.migrationDocLinks.clusterShardLimitExceeded}`,
         };
       } else {
-        return throwBadResponse(stateP, left);
+        throwBadResponse(stateP, left);
       }
     } else {
       // If the createIndex action receives an 'resource_already_exists_exception'
@@ -826,7 +824,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         throwBadResponse(stateP, left);
       }
     } else {
-      return throwBadResponse(stateP, res as never);
+      throwBadResponse(stateP, res as never);
     }
   } else if (stateP.controlState === 'REINDEX_SOURCE_TO_TEMP_OPEN_PIT') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
@@ -973,7 +971,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         throwBadResponse(stateP, left);
       }
     } else {
-      return throwBadResponse(stateP, res as never);
+      throwBadResponse(stateP, res as never);
     }
   } else if (stateP.controlState === 'REINDEX_SOURCE_TO_TEMP_TRANSFORM') {
     // We follow a similar control flow as for
@@ -1519,7 +1517,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
           reason: `${CLUSTER_SHARD_LIMIT_EXCEEDED_REASON} See ${stateP.migrationDocLinks.clusterShardLimitExceeded}`,
         };
       } else {
-        return throwBadResponse(stateP, left);
+        throwBadResponse(stateP, left);
       }
     } else {
       // If the createIndex action receives an 'resource_already_exists_exception'
@@ -1618,6 +1616,6 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
     // The state-action machine will never call the model in the terminating states
     throwBadControlState(stateP as never);
   } else {
-    return throwBadControlState(stateP);
+    throwBadControlState(stateP);
   }
 };
