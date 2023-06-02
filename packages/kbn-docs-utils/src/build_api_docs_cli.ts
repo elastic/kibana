@@ -51,7 +51,7 @@ async function endTransactionWithFailure(transaction: Transaction | null) {
 }
 
 export function linkDocumentation() {
-  run(({ log, flags }) => docLinker({ sourceDir: './x-pack/plugins' }, { log, flags }));
+  run(({ log }) => docLinker({ sourceDir: './x-pack/plugins' }, { log }));
 }
 
 export function runBuildApiDocsCli() {

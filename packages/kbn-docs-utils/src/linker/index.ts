@@ -82,7 +82,7 @@ function replaceRef(obj: OpenAPISpec, oldRef: string, newRef: string): void {
 
 export const docLinker = async (
   { sourceDir = './openapi' }: { sourceDir: string },
-  { log, flags }: { log: ToolingLog }
+  { log }: { log: ToolingLog }
 ) => {
   const entryPointFiles = await globby([`${sourceDir}/**/entrypoint.yaml`]);
   const yamlFiles = await globby([
@@ -90,8 +90,6 @@ export const docLinker = async (
     '!**/entrypoint.yaml',
     '!**/bundle.yaml',
   ]);
-
-  log.info(JSON.stringify(flags, null, 2));
 
   entryPointFiles.forEach((entryPointFile: string) => {
     if (!entryPointFile.endsWith('entrypoint.yaml')) return;
