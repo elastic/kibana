@@ -4010,6 +4010,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/elastic-assistant@link:x-pack/packages/kbn-elastic-assistant":
+  version "0.0.0"
+  uid ""
+
 "@kbn/elasticsearch-client-plugin@link:test/plugin_functional/plugins/elasticsearch_client_plugin":
   version "0.0.0"
   uid ""

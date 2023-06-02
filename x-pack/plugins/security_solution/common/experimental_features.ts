@@ -109,6 +109,11 @@ export const allowedExperimentalValues = Object.freeze({
   securityFlyoutEnabled: false,
 
   /**
+   * Enables the Elastic Security Assistant
+   */
+  assistantEnabled: false,
+
+  /**
    * Keep DEPRECATED experimental flags that are documented to prevent failed upgrades.
    * https://www.elastic.co/guide/en/security/current/user-risk-score.html
    * https://www.elastic.co/guide/en/security/current/host-risk-score.html
