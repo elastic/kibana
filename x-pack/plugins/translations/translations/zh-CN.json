@@ -482,7 +482,6 @@
     "controls.optionsList.popover.includeLabel": "包括",
     "controls.optionsList.popover.invalidSelectionScreenReaderText": "选择无效。",
     "controls.optionsList.popover.loadingMore": "正在加载更多选项......",
-    "controls.optionsList.popover.searchPlaceholder": "搜索",
     "controls.optionsList.popover.selectedOptionsTitle": "仅显示选定选项",
     "controls.optionsList.popover.selectionsEmpty": "您未选择任何内容",
     "controls.optionsList.popover.sortBy.alphabetical": "按字母顺序",
