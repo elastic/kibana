@@ -21,7 +21,7 @@ import { getTimelineQuerySchema } from '../../../schemas/timelines';
 import { getTimelineTemplateOrNull, getTimelineOrNull } from '../../../saved_object/timelines';
 import type {
   TimelineSavedObject,
-  ResolvedTimelineWithOutcomeSavedObjectResponse,
+  ResolvedTimelineWithOutcomeSavedObject,
 } from '../../../../../../common/types/timeline/api';
 
 export const getTimelineRoute = (
@@ -45,7 +45,7 @@ export const getTimelineRoute = (
         const query = request.query ?? {};
         const { template_timeline_id: templateTimelineId, id } = query;
 
-        let res: TimelineSavedObject | ResolvedTimelineWithOutcomeSavedObjectResponse | null = null;
+        let res: TimelineSavedObject | ResolvedTimelineWithOutcomeSavedObject | null = null;
 
         if (templateTimelineId != null && id == null) {
           res = await getTimelineTemplateOrNull(frameworkRequest, templateTimelineId);

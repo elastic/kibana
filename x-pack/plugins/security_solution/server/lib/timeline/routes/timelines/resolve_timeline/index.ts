@@ -21,7 +21,7 @@ import { getTimelineQuerySchema } from '../../../schemas/timelines';
 import { getTimelineTemplateOrNull, resolveTimelineOrNull } from '../../../saved_object/timelines';
 import type {
   SavedTimeline,
-  ResolvedTimelineWithOutcomeSavedObjectResponse,
+  ResolvedTimelineWithOutcomeSavedObject,
 } from '../../../../../../common/types/timeline/api';
 
 export const resolveTimelineRoute = (
@@ -45,7 +45,7 @@ export const resolveTimelineRoute = (
         const query = request.query ?? {};
         const { template_timeline_id: templateTimelineId, id } = query;
 
-        let res: SavedTimeline | ResolvedTimelineWithOutcomeSavedObjectResponse | null = null;
+        let res: SavedTimeline | ResolvedTimelineWithOutcomeSavedObject | null = null;
 
         if (templateTimelineId != null && id == null) {
           // Template timelineId is not a SO id, so it does not need to be updated to use resolve

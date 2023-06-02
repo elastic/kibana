@@ -352,7 +352,7 @@ export const ResolvedTimelineSavedObjectToReturnObjectRuntimeType = runtimeTypes
   }),
 ]);
 
-export type ResolvedTimelineWithOutcomeSavedObjectResponse = runtimeTypes.TypeOf<
+export type ResolvedTimelineWithOutcomeSavedObject = runtimeTypes.TypeOf<
   typeof ResolvedTimelineSavedObjectToReturnObjectRuntimeType
 >;
 

@@ -28,7 +28,7 @@ import type {
   TimelineResult,
   TimelineTypeLiteralWithNull,
   TimelineStatusLiteralWithNull,
-  ResolvedTimelineWithOutcomeSavedObjectResponse,
+  ResolvedTimelineWithOutcomeSavedObject,
   TimelineSavedObject,
   SavedTimeline,
   TimelineWithoutExternalRefs,
@@ -87,11 +87,11 @@ export const getTimelineOrNull = async (
 export const resolveTimelineOrNull = async (
   frameworkRequest: FrameworkRequest,
   savedObjectId: string
-): Promise<ResolvedTimelineWithOutcomeSavedObjectResponse | null> => {
+): Promise<ResolvedTimelineWithOutcomeSavedObject | null> => {
   try {
     const resolvedSavedTimeline = await resolveSavedTimeline(frameworkRequest, savedObjectId);
 
-    const response: ResolvedTimelineWithOutcomeSavedObjectResponse = {
+    const response: ResolvedTimelineWithOutcomeSavedObject = {
       alias_purpose: resolvedSavedTimeline.alias_purpose,
       alias_target_id: resolvedSavedTimeline.alias_target_id,
       outcome: resolvedSavedTimeline.outcome,
@@ -319,18 +319,21 @@ export const getAllTimeline = async (
     type: timelineSavedObjectType,
     perPage: 1,
     page: 1,
+    filter: getTimelineTypeFilter(TimelineType.default, TimelineStatus.active),
   };
 
   const templateTimelineOptions = {
     type: timelineSavedObjectType,
     perPage: 1,
     page: 1,
+    filter: getTimelineTypeFilter(TimelineType.template, null),
   };
 
   const customTemplateTimelineOptions = {
     type: timelineSavedObjectType,
     perPage: 1,
     page: 1,
+    filter: getTimelineTypeFilter(TimelineType.template, TimelineStatus.active),
   };
 
   const favoriteTimelineOptions = {
@@ -405,7 +408,7 @@ export const persistFavorite = async (
         ...savedTimeline
       } = await getBasicSavedTimeline(request, timelineId);
       timelineId = savedObjectId; // eslint-disable-line no-param-reassign
-      timeline = savedTimeline as Partial<SavedTimeline>;
+      timeline = savedTimeline;
     }
 
     const userFavoriteTimeline = {
