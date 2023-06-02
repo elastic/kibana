@@ -35,11 +35,11 @@ import { i18n } from '@kbn/i18n';
 import { ChartsPluginStart, useActiveCursor } from '@kbn/charts-plugin/public';
 import { css } from '@emotion/react';
 import {
-  formatHumanReadableDateTime,
   getFormattedSeverityScore,
   ML_ANOMALY_THRESHOLD,
   ML_SEVERITY_COLORS,
 } from '@kbn/ml-anomaly-utils';
+import { formatHumanReadableDateTime } from '@kbn/ml-date-utils';
 import { useIsDarkTheme } from '@kbn/ml-kibana-theme';
 import { SwimLanePagination } from './swimlane_pagination';
 import { AppStateSelectedCells, OverallSwimlaneData, ViewBySwimLaneData } from './explorer_utils';

@@ -18,11 +18,8 @@ import d3 from 'd3';
 import moment from 'moment';
 
 import { i18n } from '@kbn/i18n';
-import {
-  getFormattedSeverityScore,
-  getSeverityWithLow,
-  formatHumanReadableDateTimeSeconds,
-} from '@kbn/ml-anomaly-utils';
+import { getFormattedSeverityScore, getSeverityWithLow } from '@kbn/ml-anomaly-utils';
+import { formatHumanReadableDateTimeSeconds } from '@kbn/ml-date-utils';
 
 import { formatValue } from '../../../formatters/format_value';
 import {

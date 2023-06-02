@@ -33,5 +33,7 @@
     "@kbn/ml-date-picker",
     "@kbn/field-formats-plugin",
     "@kbn/ml-anomaly-utils",
+    "@kbn/ml-query-utils",
+    "@kbn/ml-date-utils",
   ]
 }

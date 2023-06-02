@@ -480,6 +480,7 @@
     "@kbn/ml-data-frame-analytics-utils": "link:x-pack/packages/ml/data_frame_analytics_utils",
     "@kbn/ml-data-grid": "link:x-pack/packages/ml/data_grid",
     "@kbn/ml-date-picker": "link:x-pack/packages/ml/date_picker",
+    "@kbn/ml-date-utils": "link:x-pack/packages/ml/date_utils",
     "@kbn/ml-error-utils": "link:x-pack/packages/ml/error_utils",
     "@kbn/ml-is-defined": "link:x-pack/packages/ml/is_defined",
     "@kbn/ml-is-populated-object": "link:x-pack/packages/ml/is_populated_object",

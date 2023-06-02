@@ -922,6 +922,8 @@
       "@kbn/ml-data-grid/*": ["x-pack/packages/ml/data_grid/*"],
       "@kbn/ml-date-picker": ["x-pack/packages/ml/date_picker"],
       "@kbn/ml-date-picker/*": ["x-pack/packages/ml/date_picker/*"],
+      "@kbn/ml-date-utils": ["x-pack/packages/ml/date_utils"],
+      "@kbn/ml-date-utils/*": ["x-pack/packages/ml/date_utils/*"],
       "@kbn/ml-error-utils": ["x-pack/packages/ml/error_utils"],
       "@kbn/ml-error-utils/*": ["x-pack/packages/ml/error_utils/*"],
       "@kbn/ml-is-defined": ["x-pack/packages/ml/is_defined"],

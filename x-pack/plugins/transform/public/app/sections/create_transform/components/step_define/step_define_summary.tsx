@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 
 import { EuiBadge, EuiCodeBlock, EuiForm, EuiFormRow, EuiSpacer, EuiText } from '@elastic/eui';
 
-import { formatHumanReadableDateTimeSeconds } from '@kbn/ml-anomaly-utils';
+import { formatHumanReadableDateTimeSeconds } from '@kbn/ml-date-utils';
 import { DataGrid } from '@kbn/ml-data-grid';
 
 import { useToastNotifications } from '../../../../app_dependencies';

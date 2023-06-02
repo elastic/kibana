@@ -19,11 +19,11 @@ import moment from 'moment';
 
 import { i18n } from '@kbn/i18n';
 import {
-  formatHumanReadableDateTime,
   getFormattedSeverityScore,
   getSeverityColor,
   getSeverityWithLow,
 } from '@kbn/ml-anomaly-utils';
+import { formatHumanReadableDateTime } from '@kbn/ml-date-utils';
 
 import { formatValue } from '../../formatters/format_value';
 import {

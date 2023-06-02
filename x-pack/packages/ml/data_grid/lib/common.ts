@@ -18,10 +18,8 @@ import type { FieldFormat } from '@kbn/field-formats-plugin/common';
 import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
 import { getNestedProperty } from '@kbn/ml-nested-property';
 import { isCounterTimeSeriesMetric } from '@kbn/ml-agg-utils';
-import {
-  formatHumanReadableDateTimeSeconds,
-  getFieldFormatFromIndexPattern,
-} from '@kbn/ml-anomaly-utils';
+import { getFieldFormatFromIndexPattern } from '@kbn/ml-anomaly-utils';
+import { formatHumanReadableDateTimeSeconds } from '@kbn/ml-date-utils';
 import {
   type FeatureImportance,
   type FeatureImportanceClassName,

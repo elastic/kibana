@@ -12,14 +12,12 @@ import { get } from 'lodash';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { ML_JOB_AGGREGATION, isRuleSupported, isMultiBucketAnomaly } from '@kbn/ml-anomaly-utils';
 import {
-  ML_JOB_AGGREGATION,
   formatHumanReadableDate,
   formatHumanReadableDateTime,
   formatHumanReadableDateTimeSeconds,
-  isRuleSupported,
-  isMultiBucketAnomaly,
-} from '@kbn/ml-anomaly-utils';
+} from '@kbn/ml-date-utils';
 
 import { DescriptionCell } from './description_cell';
 import { DetectorCell } from './detector_cell';

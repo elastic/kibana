@@ -4591,6 +4591,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/ml-date-utils@link:x-pack/packages/ml/date_utils":
+  version "0.0.0"
+  uid ""
+
 "@kbn/ml-error-utils@link:x-pack/packages/ml/error_utils":
   version "0.0.0"
   uid ""

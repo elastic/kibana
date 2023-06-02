@@ -95,5 +95,6 @@
     "@kbn/ml-data-grid",
     "@kbn/ml-kibana-theme",
     "@kbn/ml-runtime-field-utils",
+    "@kbn/ml-date-utils",
   ],
 }

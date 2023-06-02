@@ -13,7 +13,7 @@ import { EuiButtonEmpty, EuiTabbedContent } from '@elastic/eui';
 
 import { Optional } from '@kbn/utility-types';
 import { i18n } from '@kbn/i18n';
-import { formatHumanReadableDateTimeSeconds } from '@kbn/ml-anomaly-utils';
+import { formatHumanReadableDateTimeSeconds } from '@kbn/ml-date-utils';
 import { stringHash } from '@kbn/ml-string-hash';
 import { isDefined } from '@kbn/ml-is-defined';
 

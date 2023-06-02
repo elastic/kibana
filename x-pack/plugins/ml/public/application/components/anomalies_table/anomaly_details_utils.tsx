@@ -19,7 +19,6 @@ import {
   EuiLink,
 } from '@elastic/eui';
 import {
-  formatHumanReadableDateTimeSeconds,
   getAnomalyScoreExplanationImpactValue,
   getSeverityColor,
   showActualForFunction,
@@ -28,6 +27,7 @@ import {
   type MlAnomalyRecordDoc,
   ML_JOB_AGGREGATION,
 } from '@kbn/ml-anomaly-utils';
+import { formatHumanReadableDateTimeSeconds } from '@kbn/ml-date-utils';
 import { EntityCell, EntityCellFilter } from '../entity_cell';
 import { formatValue } from '../../formatters/format_value';
 import { useMlKibana } from '../../contexts/kibana';

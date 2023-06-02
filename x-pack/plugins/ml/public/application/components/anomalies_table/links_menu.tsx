@@ -23,14 +23,13 @@ import { i18n } from '@kbn/i18n';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { MAPS_APP_LOCATOR } from '@kbn/maps-plugin/public';
 import {
-  formatHumanReadableDateTimeSeconds,
   isCategorizationAnomaly,
   isRuleSupported,
-  timeFormatter,
   type MlCustomUrlAnomalyRecordDoc,
   type MlKibanaUrlConfig,
   type MlAnomaliesTableRecord,
 } from '@kbn/ml-anomaly-utils';
+import { formatHumanReadableDateTimeSeconds, timeFormatter } from '@kbn/ml-date-utils';
 import { mlJobService } from '../../services/job_service';
 import { getDataViewIdFromName } from '../../util/index_utils';
 import { getInitialAnomaliesLayers, getInitialSourceIndexFieldLayers } from '../../../maps/util';

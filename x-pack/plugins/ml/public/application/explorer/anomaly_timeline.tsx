@@ -27,7 +27,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import useDebounce from 'react-use/lib/useDebounce';
 import useObservable from 'react-use/lib/useObservable';
 import type { Query } from '@kbn/es-query';
-import { formatHumanReadableDateTime } from '@kbn/ml-anomaly-utils';
+import { formatHumanReadableDateTime } from '@kbn/ml-date-utils';
 import { isDefined } from '@kbn/ml-is-defined';
 import { useTimeRangeUpdates } from '@kbn/ml-date-picker';
 import { SEARCH_QUERY_LANGUAGE } from '../../../common/constants/search';

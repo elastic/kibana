@@ -11,7 +11,7 @@ import moment from 'moment-timezone';
 import { EuiProgress, EuiTabbedContent } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-import { formatHumanReadableDateTimeSeconds } from '@kbn/ml-anomaly-utils';
+import { formatHumanReadableDateTimeSeconds } from '@kbn/ml-date-utils';
 import { getAnalysisType } from '@kbn/ml-data-frame-analytics-utils';
 
 import { DataFrameAnalyticsListRow } from './common';

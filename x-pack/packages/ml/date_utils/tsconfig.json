@@ -16,10 +16,7 @@
     "target/**/*"
   ],
   "kbn_references": [
-    "@kbn/i18n",
-    "@kbn/ml-is-populated-object",
-    "@kbn/field-types",
-    "@kbn/data-views-plugin",
-    "@kbn/field-formats-plugin",
+    "@kbn/datemath",
+    "@kbn/es-query",
   ]
 }

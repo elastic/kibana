@@ -27,7 +27,7 @@ import {
   EuiPortal,
   EuiTitle,
 } from '@elastic/eui';
-import { formatHumanReadableDateTimeSeconds } from '@kbn/ml-anomaly-utils';
+import { formatHumanReadableDateTimeSeconds } from '@kbn/ml-date-utils';
 import { JOB_MAP_NODE_TYPES } from '@kbn/ml-data-frame-analytics-utils';
 import { CytoscapeContext } from './cytoscape';
 import { ML_PAGES } from '../../../../../../common/constants/locator';
