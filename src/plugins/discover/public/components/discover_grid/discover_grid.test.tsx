@@ -271,4 +271,27 @@ describe('DiscoverGrid', () => {
       );
     });
   });
+
+  describe('sorting', () => {
+    it('should enable in memory sorting with plain records', async () => {
+      const component = await getComponent({
+        ...getProps(),
+        columns: ['message'],
+        isPlainRecord: true,
+      });
+
+      expect(
+        (
+          findTestSubject(component, 'docTable')
+            .find('EuiDataGridInMemoryRenderer')
+            .first()
+            .props() as Record<string, string>
+        ).inMemory
+      ).toMatchInlineSnapshot(`
+        Object {
+          "level": "sorting",
+        }
+      `);
+    });
+  });
 });

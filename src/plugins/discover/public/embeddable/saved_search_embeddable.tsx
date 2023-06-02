@@ -259,7 +259,7 @@ export class SavedSearchEmbeddable
         this.searchProps!.isLoading = false;
         this.searchProps!.isPlainRecord = true;
         this.searchProps!.showTimeCol = false;
-        this.searchProps!.isSortEnabled = false;
+        this.searchProps!.isSortEnabled = true;
         return;
       }
 

@@ -71,6 +71,7 @@ function buildEuiGridColumn({
   dataView,
   defaultColumns,
   isSortEnabled,
+  isPlainRecord,
   toastNotifications,
   hasEditDataViewPermission,
   valueToStringConverter,
@@ -84,6 +85,7 @@ function buildEuiGridColumn({
   dataView: DataView;
   defaultColumns: boolean;
   isSortEnabled: boolean;
+  isPlainRecord?: boolean;
   toastNotifications: ToastsStart;
   hasEditDataViewPermission: () => boolean;
   valueToStringConverter: ValueToStringConverter;
@@ -114,7 +116,7 @@ function buildEuiGridColumn({
   const column: EuiDataGridColumn = {
     id: columnName,
     schema: getSchemaByKbnType(dataViewField?.type),
-    isSortable: isSortEnabled && dataViewField?.sortable === true,
+    isSortable: isSortEnabled && (isPlainRecord || dataViewField?.sortable === true),
     displayAsText: columnDisplayName,
     actions: {
       showHide:
@@ -184,26 +186,28 @@ function buildEuiGridColumn({
 }
 
 export function getEuiGridColumns({
-  visibleColumns,
+  columns,
   columnsCellActions,
   rowsCount,
   settings,
   dataView,
   defaultColumns,
   isSortEnabled,
+  isPlainRecord,
   services,
   hasEditDataViewPermission,
   valueToStringConverter,
   onFilter,
   editField,
 }: {
-  visibleColumns: string[];
+  columns: string[];
   columnsCellActions?: EuiDataGridColumnCellAction[][];
   rowsCount: number;
   settings: DiscoverGridSettings | undefined;
   dataView: DataView;
   defaultColumns: boolean;
   isSortEnabled: boolean;
+  isPlainRecord?: boolean;
   services: {
     uiSettings: IUiSettingsClient;
     toastNotifications: ToastsStart;
@@ -215,7 +219,7 @@ export function getEuiGridColumns({
 }) {
   const getColWidth = (column: string) => settings?.columns?.[column]?.width ?? 0;
 
-  return visibleColumns.map((column, columnIndex) =>
+  return columns.map((column, columnIndex) =>
     buildEuiGridColumn({
       columnName: column,
       columnCellActions: columnsCellActions?.[columnIndex],
@@ -223,6 +227,7 @@ export function getEuiGridColumns({
       dataView,
       defaultColumns,
       isSortEnabled,
+      isPlainRecord,
       toastNotifications: services.toastNotifications,
       hasEditDataViewPermission,
       valueToStringConverter,

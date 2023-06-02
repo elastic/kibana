@@ -255,7 +255,7 @@ function DiscoverDocumentsComponent({
                 useNewFieldsApi={useNewFieldsApi}
                 rowHeightState={rowHeight}
                 onUpdateRowHeight={onUpdateRowHeight}
-                isSortEnabled={!isPlainRecord}
+                isSortEnabled={true}
                 isPlainRecord={isPlainRecord}
                 query={query}
                 rowsPerPageState={rowsPerPage}

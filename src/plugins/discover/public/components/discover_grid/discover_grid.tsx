@@ -372,13 +372,18 @@ export const DiscoverGrid = ({
    */
   const sortingColumns = useMemo(() => sort.map(([id, direction]) => ({ id, direction })), [sort]);
 
+  const [inmemorySortingColumns, setInmemorySortingColumns] = useState([]);
   const onTableSort = useCallback(
     (sortingColumnsData) => {
-      if (isSortEnabled && onSort) {
-        onSort(sortingColumnsData.map(({ id, direction }: SortObj) => [id, direction]));
+      if (isSortEnabled) {
+        if (isPlainRecord) {
+          setInmemorySortingColumns(sortingColumnsData);
+        } else if (onSort) {
+          onSort(sortingColumnsData.map(({ id, direction }: SortObj) => [id, direction]));
+        }
       }
     },
-    [onSort, isSortEnabled]
+    [onSort, isSortEnabled, isPlainRecord, setInmemorySortingColumns]
   );
 
   const showMultiFields = services.uiSettings.get(SHOW_MULTIFIELDS);
@@ -491,13 +496,14 @@ export const DiscoverGrid = ({
   const euiGridColumns = useMemo(
     () =>
       getEuiGridColumns({
-        visibleColumns,
+        columns: visibleColumns,
         columnsCellActions,
         rowsCount: displayedRows.length,
         settings,
         dataView,
         defaultColumns,
         isSortEnabled,
+        isPlainRecord,
         services: {
           uiSettings,
           toastNotifications,
@@ -516,6 +522,7 @@ export const DiscoverGrid = ({
       settings,
       defaultColumns,
       isSortEnabled,
+      isPlainRecord,
       uiSettings,
       toastNotifications,
       dataViewFieldEditor,
@@ -540,10 +547,13 @@ export const DiscoverGrid = ({
   );
   const sorting = useMemo(() => {
     if (isSortEnabled) {
-      return { columns: sortingColumns, onSort: onTableSort };
+      return {
+        columns: isPlainRecord ? inmemorySortingColumns : sortingColumns,
+        onSort: onTableSort,
+      };
     }
     return { columns: sortingColumns, onSort: () => {} };
-  }, [sortingColumns, onTableSort, isSortEnabled]);
+  }, [isSortEnabled, sortingColumns, isPlainRecord, inmemorySortingColumns, onTableSort]);
 
   const canSetExpandedDoc = Boolean(setExpandedDoc && DocumentView);
 
@@ -680,6 +690,7 @@ export const DiscoverGrid = ({
             sorting={sorting as EuiDataGridSorting}
             toolbarVisibility={toolbarVisibility}
             rowHeightsOptions={rowHeightsOptions}
+            inMemory={isPlainRecord ? { level: 'sorting' } : undefined}
             gridStyle={GRID_STYLE}
           />
         </div>
