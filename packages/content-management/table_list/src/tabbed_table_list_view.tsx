@@ -17,7 +17,7 @@ import type {
 } from './table_list_view';
 
 export type TableListTabParentProps<T extends UserContentCommonSchema = UserContentCommonSchema> =
-  Pick<TableListProps<T>, 'onFetchSuccess'>;
+  Pick<TableListProps<T>, 'onFetchSuccess' | 'setPageDataTestSubject'>;
 
 export interface TableListTab<T extends UserContentCommonSchema = UserContentCommonSchema> {
   title: string;
@@ -42,6 +42,7 @@ export const TabbedTableListView = ({
   changeActiveTab,
 }: TabbedTableListViewProps) => {
   const [hasInitialFetchReturned, setHasInitialFetchReturned] = useState(false);
+  const [pageDataTestSubject, setPageDataTestSubject] = useState<string>();
 
   const getActiveTab = useCallback(
     () => tabs.find((tab) => tab.id === activeTabId) ?? tabs[0],
@@ -58,6 +59,7 @@ export const TabbedTableListView = ({
             setHasInitialFetchReturned(true);
           }
         },
+        setPageDataTestSubject,
       });
       setTableList(newTableList);
     }
@@ -66,7 +68,7 @@ export const TabbedTableListView = ({
   }, [hasInitialFetchReturned, activeTabId, tabs, getActiveTab]);
 
   return (
-    <KibanaPageTemplate panelled>
+    <KibanaPageTemplate panelled data-test-subj={pageDataTestSubject}>
       <KibanaPageTemplate.Header
         pageTitle={<span id={headingId}>{title}</span>}
         description={description}

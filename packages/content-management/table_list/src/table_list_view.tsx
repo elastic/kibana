@@ -144,7 +144,12 @@ export type TableListProps<T extends UserContentCommonSchema = UserContentCommon
   | 'titleColumnName'
   | 'withoutPageTemplateWrapper'
   | 'showEditActionForItem'
-> & { onFetchSuccess: () => void; tableCaption: string; refreshListBouncer?: boolean };
+> & {
+  tableCaption: string;
+  refreshListBouncer?: boolean;
+  onFetchSuccess: () => void;
+  setPageDataTestSubject: (subject: string) => void;
+};
 
 export interface State<T extends UserContentCommonSchema = UserContentCommonSchema> {
   items: T[];
@@ -298,9 +303,12 @@ function TableListComp<T extends UserContentCommonSchema>({
   contentEditor = { enabled: false },
   titleColumnName,
   withoutPageTemplateWrapper,
-  onFetchSuccess: onInitialFetchReturned,
+  onFetchSuccess,
   refreshListBouncer,
+  setPageDataTestSubject,
 }: TableListProps<T>) {
+  setPageDataTestSubject(`${entityName}LandingPage`);
+
   if (!getDetailViewLink && !onClickTitle) {
     throw new Error(
       `[TableListView] One o["getDetailViewLink" or "onClickTitle"] prop must be provided.`
@@ -398,7 +406,6 @@ function TableListComp<T extends UserContentCommonSchema>({
 
   const hasQuery = searchQuery.text !== '';
   const hasNoItems = !isFetchingItems && items.length === 0 && !hasQuery;
-  const pageDataTestSubject = `${entityName}LandingPage`;
   const showFetchError = Boolean(fetchError);
   const showLimitError = !showFetchError && totalItems > listingLimit;
 
@@ -429,6 +436,8 @@ function TableListComp<T extends UserContentCommonSchema>({
             response,
           },
         });
+
+        onFetchSuccess();
       }
     } catch (err) {
       dispatch({
@@ -436,7 +445,7 @@ function TableListComp<T extends UserContentCommonSchema>({
         data: err,
       });
     }
-  }, [searchQueryParser, findItems, searchQuery.text]);
+  }, [searchQueryParser, searchQuery.text, findItems, onFetchSuccess]);
 
   useEffect(() => {
     fetchItems();
@@ -939,7 +948,7 @@ function TableListComp<T extends UserContentCommonSchema>({
 
   if (!showFetchError && hasNoItems) {
     return (
-      <PageTemplate panelled isEmptyState={true} data-test-subj={pageDataTestSubject}>
+      <PageTemplate panelled isEmptyState={true}>
         <KibanaPageTemplate.Section
           aria-labelledby={hasInitialFetchReturned ? headingId : undefined}
         >
@@ -1046,9 +1055,8 @@ export const TableListView = <T extends UserContentCommonSchema>({
     ? (React.Fragment as unknown as typeof KibanaPageTemplate)
     : KibanaPageTemplate;
 
-  const pageDataTestSubject = `${entityName}LandingPage`;
-
   const [hasInitialFetchReturned, setHasInitialFetchReturned] = useState(false);
+  const [pageDataTestSubject, setPageDataTestSubject] = useState<string>();
 
   return (
     <PageTemplate panelled data-test-subj={pageDataTestSubject}>
@@ -1089,6 +1097,7 @@ export const TableListView = <T extends UserContentCommonSchema>({
               setHasInitialFetchReturned(true);
             }
           }}
+          setPageDataTestSubject={setPageDataTestSubject}
         />
       </KibanaPageTemplate.Section>
     </PageTemplate>
