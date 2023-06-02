@@ -30,6 +30,7 @@ export interface RenderAppProps extends AppMountParameters {
   store: Store<State, Action>;
   subPluginRoutes: RouteProps[];
   usageCollection?: UsageCollectionSetup;
+  isDev: boolean;
 }
 
 import type { State, SubPluginsInitReducer } from '../common/store';

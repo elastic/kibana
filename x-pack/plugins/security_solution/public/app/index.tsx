@@ -24,6 +24,7 @@ export const renderApp = ({
   usageCollection,
   subPluginRoutes,
   theme$,
+  isDev,
 }: RenderAppProps): (() => void) => {
   const ApplicationUsageTrackingProvider =
     usageCollection?.components.ApplicationUsageTrackingProvider ?? React.Fragment;
@@ -35,6 +36,7 @@ export const renderApp = ({
       setHeaderActionMenu={setHeaderActionMenu}
       store={store}
       theme$={theme$}
+      isDev={isDev}
     >
       <ApplicationUsageTrackingProvider>
         <Switch>

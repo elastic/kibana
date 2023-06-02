@@ -83,6 +83,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
   private upsellingService: UpsellingService;
   private isSidebarEnabled$: BehaviorSubject<boolean>;
   private getStartedComponent?: GetStartedComponent;
+  private isDev: boolean = false;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.config = this.initializerContext.config.get<SecuritySolutionUiConfigType>();
@@ -93,6 +94,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     this.isSidebarEnabled$ = new BehaviorSubject<boolean>(true);
     this.upsellingService = new UpsellingService();
     this.telemetry = new TelemetryService();
+    this.isDev = initializerContext.env.mode.dev;
   }
   private appUpdater$ = new Subject<AppUpdater>();
 
@@ -210,6 +212,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
             coreStart.application.capabilities,
             services
           ),
+          isDev: this.isDev,
         });
       },
     });

@@ -7,7 +7,7 @@
 
 import type { History } from 'history';
 import type { FC } from 'react';
-import React, { memo } from 'react';
+import React, { memo, StrictMode } from 'react';
 import type { Store, Action } from 'redux';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 
@@ -100,6 +100,7 @@ interface SecurityAppComponentProps {
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
   store: Store<State, Action>;
   theme$: AppMountParameters['theme$'];
+  isDev: boolean;
 }
 
 const SecurityAppComponent: React.FC<SecurityAppComponentProps> = ({
@@ -110,23 +111,49 @@ const SecurityAppComponent: React.FC<SecurityAppComponentProps> = ({
   setHeaderActionMenu,
   store,
   theme$,
-}) => (
-  <KibanaContextProvider
-    services={{
-      appName: APP_NAME,
-      ...services,
-    }}
-  >
-    <StartApp
-      history={history}
-      onAppLeave={onAppLeave}
-      setHeaderActionMenu={setHeaderActionMenu}
-      store={store}
-      theme$={theme$}
-    >
-      {children}
-    </StartApp>
-  </KibanaContextProvider>
-);
+  isDev,
+}) => {
+  if (isDev) {
+    return (
+      <StrictMode>
+        <KibanaContextProvider
+          services={{
+            appName: APP_NAME,
+            ...services,
+          }}
+        >
+          <StartApp
+            history={history}
+            onAppLeave={onAppLeave}
+            setHeaderActionMenu={setHeaderActionMenu}
+            store={store}
+            theme$={theme$}
+          >
+            {children}
+          </StartApp>
+        </KibanaContextProvider>
+      </StrictMode>
+    );
+  } else {
+    return (
+      <KibanaContextProvider
+        services={{
+          appName: APP_NAME,
+          ...services,
+        }}
+      >
+        <StartApp
+          history={history}
+          onAppLeave={onAppLeave}
+          setHeaderActionMenu={setHeaderActionMenu}
+          store={store}
+          theme$={theme$}
+        >
+          {children}
+        </StartApp>
+      </KibanaContextProvider>
+    );
+  }
+};
 
 export const SecurityApp = memo(SecurityAppComponent);
