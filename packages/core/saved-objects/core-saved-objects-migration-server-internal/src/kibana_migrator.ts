@@ -18,7 +18,6 @@ import type { Logger } from '@kbn/logging';
 import type { DocLinksServiceStart } from '@kbn/core-doc-links-server';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import {
-  MAIN_SAVED_OBJECT_INDEX,
   type SavedObjectUnsanitizedDoc,
   type SavedObjectsRawDoc,
   type ISavedObjectTypeRegistry,
@@ -29,6 +28,7 @@ import {
   type SavedObjectsTypeMappingDefinitions,
   type SavedObjectsMigrationConfigType,
   type IKibanaMigrator,
+  type MigrateDocumentOptions,
   type KibanaMigratorStatus,
   type MigrationResult,
   type IndexTypesMap,
@@ -196,7 +196,7 @@ export class KibanaMigrator implements IKibanaMigrator {
     // compare indexTypesMap with the one present (or not) in the .kibana index meta
     // and check if some SO types have been moved to different indices
     const indicesWithMovingTypes = await getIndicesInvolvedInRelocation({
-      mainIndex: MAIN_SAVED_OBJECT_INDEX,
+      mainIndex: this.kibanaIndex,
       client: this.client,
       indexTypesMap,
       logger: this.log,
@@ -266,7 +266,10 @@ export class KibanaMigrator implements IKibanaMigrator {
     return this.activeMappings;
   }
 
-  public migrateDocument(doc: SavedObjectUnsanitizedDoc): SavedObjectUnsanitizedDoc {
-    return this.documentMigrator.migrate(doc);
+  public migrateDocument(
+    doc: SavedObjectUnsanitizedDoc,
+    { allowDowngrade = false }: MigrateDocumentOptions = {}
+  ): SavedObjectUnsanitizedDoc {
+    return this.documentMigrator.migrate(doc, { allowDowngrade });
   }
 }

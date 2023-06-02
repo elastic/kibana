@@ -148,6 +148,96 @@ export const mathCommandDefinition: AutocompleteCommandDefinition[] = [
     sortText: 'C',
   },
   {
+    label: 'to_boolean',
+    insertText: 'to_boolean',
+    kind: 1,
+    detail: i18n.translate('monaco.esql.autocomplete.toBooleanDoc', {
+      defaultMessage: 'Converts to boolean.',
+    }),
+    documentation: {
+      value: buildDocumentation('substring(grouped[T]): aggregated[T]', [
+        `from index where field="value""
+        | EVAL bool = to_boolean(field)`,
+      ]),
+    },
+    sortText: 'C',
+  },
+  {
+    label: 'to_datetime',
+    insertText: 'to_datetime',
+    kind: 1,
+    detail: i18n.translate('monaco.esql.autocomplete.toDateTimeDoc', {
+      defaultMessage: 'Converts to date.',
+    }),
+    documentation: {
+      value: buildDocumentation('substring(grouped[T]): aggregated[T]', [
+        `from index where field="value""
+        | EVAL datetime = to_datetime(field)`,
+      ]),
+    },
+    sortText: 'C',
+  },
+  {
+    label: 'to_double',
+    insertText: 'to_double',
+    kind: 1,
+    detail: i18n.translate('monaco.esql.autocomplete.toDoubleDoc', {
+      defaultMessage: 'Converts to double.',
+    }),
+    documentation: {
+      value: buildDocumentation('substring(grouped[T]): aggregated[T]', [
+        `from index where field="value""
+        | EVAL double = to_double(field)`,
+      ]),
+    },
+    sortText: 'C',
+  },
+  {
+    label: 'to_integer',
+    insertText: 'to_integer',
+    kind: 1,
+    detail: i18n.translate('monaco.esql.autocomplete.toIntegerDoc', {
+      defaultMessage: 'Converts to integer.',
+    }),
+    documentation: {
+      value: buildDocumentation('substring(grouped[T]): aggregated[T]', [
+        `from index where field="value""
+        | EVAL int = to_integer(field)`,
+      ]),
+    },
+    sortText: 'C',
+  },
+  {
+    label: 'to_long',
+    insertText: 'to_long',
+    kind: 1,
+    detail: i18n.translate('monaco.esql.autocomplete.toLongDoc', {
+      defaultMessage: 'Converts to long.',
+    }),
+    documentation: {
+      value: buildDocumentation('substring(grouped[T]): aggregated[T]', [
+        `from index where field="value""
+        | EVAL long = to_long(field)`,
+      ]),
+    },
+    sortText: 'C',
+  },
+  {
+    label: 'to_ip',
+    insertText: 'to_ip',
+    kind: 1,
+    detail: i18n.translate('monaco.esql.autocomplete.toIpDoc', {
+      defaultMessage: 'Converts to ip.',
+    }),
+    documentation: {
+      value: buildDocumentation('substring(grouped[T]): aggregated[T]', [
+        `from index where field="value""
+        | EVAL ip = to_ip(field)`,
+      ]),
+    },
+    sortText: 'C',
+  },
+  {
     label: 'date_format',
     insertText: 'date_format',
     kind: 1,
@@ -171,6 +261,20 @@ export const mathCommandDefinition: AutocompleteCommandDefinition[] = [
     documentation: {
       value: buildDocumentation('substring(grouped[T]): aggregated[T]', [
         'from index where field="value" | eval year_hired = DATE_TRUNC(hire_date, 1 year)',
+      ]),
+    },
+    sortText: 'C',
+  },
+  {
+    label: 'date_parse',
+    insertText: 'date_parse',
+    kind: 1,
+    detail: i18n.translate('monaco.esql.autocomplete.dateParseDoc', {
+      defaultMessage: `Parse dates from strings.`,
+    }),
+    documentation: {
+      value: buildDocumentation('substring(grouped[T]): aggregated[T]', [
+        `from index where field="value" | eval year_hired = date_parse(hire_date, yyyy-MM-dd'T'HH:mm:ss.SSS'Z')`,
       ]),
     },
     sortText: 'C',

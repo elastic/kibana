@@ -20,6 +20,8 @@ import type {
 } from './model_version';
 
 /**
+ * Definition of a type of savedObject.
+ *
  * @public
  */
 export interface SavedObjectsType<Attributes = any> {
@@ -142,9 +144,9 @@ export interface SavedObjectsType<Attributes = any> {
    * Model versioning is decoupled from Kibana versioning, and isolated between types.
    * Model versions are identified by a single numeric value, starting at `1` and without gaps.
    *
-   * Please refer to {@link SavedObjectsModelVersion} for details on the API's usages.
+   * Please refer to {@link SavedObjectsModelVersion} for more details on the model version API.
    *
-   * A **valid** versioning would be:
+   * @example A **valid** versioning would be:
    *
    * ```ts
    * {
@@ -158,7 +160,7 @@ export interface SavedObjectsType<Attributes = any> {
    * }
    * ```
    *
-   * A **invalid** versioning would be:
+   * @example An **invalid** versioning would be:
    *
    * ```ts
    * {
@@ -171,8 +173,6 @@ export interface SavedObjectsType<Attributes = any> {
    *   }
    * }
    * ```
-   *
-   * @alpha experimental and subject to change.
    */
   modelVersions?: SavedObjectsModelVersionMap | SavedObjectsModelVersionMapProvider;
 
@@ -184,9 +184,9 @@ export interface SavedObjectsType<Attributes = any> {
    * When specified, the type will switch from using the {@link SavedObjectsType.migrations | legacy migration API}
    * to use the {@link SavedObjectsType.modelVersions | modelVersion API} after the specified version.
    *
-   * When opted in, it will no longer be possible to use the legacy migration API after the specified version.
+   * Once opted in, it will no longer be possible to use the legacy migration API after the specified version.
    *
-   * A **valid** usage example would be:
+   * @example A **valid** usage example would be:
    *
    * ```ts
    * {
@@ -203,7 +203,7 @@ export interface SavedObjectsType<Attributes = any> {
    * }
    * ```
    *
-   * An **invalid** usage example would be:
+   * @example An **invalid** usage example would be:
    *
    * ```ts
    * {
@@ -224,8 +224,8 @@ export interface SavedObjectsType<Attributes = any> {
    * Please refer to the {@link SavedObjectsType.modelVersions | modelVersion API} for more documentation on
    * the new API.
    *
-   * @remarks All types will be forced to switch to use the new API in a later version. This switch is
-   *          allowing types owners to switch their types before the milestone.
+   * @remarks All types will be forced to switch to use the new API during `8.10.0`. This switch is
+   *          allowing types owners to switch their types before the milestone (and for testing purposes).
    */
   switchToModelVersionAt?: string;
 }

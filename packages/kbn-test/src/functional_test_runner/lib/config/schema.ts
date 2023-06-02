@@ -192,6 +192,7 @@ export const schema = Joi.object()
         elasticsearch: urlPartsSchema({
           requiredKeys: ['port'],
         }),
+        fleetserver: urlPartsSchema(),
       })
       .default(),
 

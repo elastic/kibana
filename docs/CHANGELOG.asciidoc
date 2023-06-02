@@ -45,8 +45,6 @@ Review important information about the {kib} 8.x releases.
 [[release-notes-8.8.0]]
 == {kib} 8.8.0
 
-coming::[8.8.0]
-
 Review the following information about the {kib} 8.8.0 release.
 
 [float]
@@ -479,8 +477,6 @@ Uptime::
 
 [[release-notes-8.7.1]]
 == {kib} 8.7.1
-
-coming::[8.7.1]
 
 Review the following information about the {kib} 8.7.1 release.
 
@@ -1089,6 +1085,18 @@ For each {kibana-ref}/xpack-spaces.html[space], complete the following to change
 . Open the main menu, then click *Stack Management > Advanced Settings*.
 . Scroll or search for *histogram:maxBars*.
 . Enter `100`, then click *Save changes*.
+====
+
+[discrete]
+[[breaking-158338]]
+.CSV reports use PIT instead of Scroll
+[%collapsible]
+====
+*Details* +
+CSV reports now use PIT instead of Scroll. Previously generated CSV reports that used an index alias with alias-only privileges, but without privileges on the alias referenced-indices will no longer generate. For more information, refer to {kibana-pull}158338[#158338].
+
+*Impact* +
+To generate CSV reports, grant `read` privileges to the underlying indices.
 ====
 
 To review the breaking changes in previous versions, refer to the following:

@@ -168,4 +168,18 @@ export const processingCommandsDefinitions: AutocompleteCommandDefinition[] = [
     },
     sortText: 'B',
   },
+  {
+    label: 'mv_expand',
+    insertText: 'mv_expand',
+    kind: 1,
+    detail: i18n.translate('monaco.esql.autocomplete.mvExpandDoc', {
+      defaultMessage: 'Expands multivalued fields into one row per value, duplicating other fields',
+    }),
+    documentation: {
+      value: buildDocumentation('mv_expand field', [
+        'ROW a=[1,2,3], b="b", j=["a","b"] | MV_EXPAND a',
+      ]),
+    },
+    sortText: 'B',
+  },
 ];

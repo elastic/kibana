@@ -37,6 +37,11 @@ processingCommand
     | sortCommand
     | statsCommand
     | whereCommand
+    | mvExpandCommand
+    ;
+
+mvExpandCommand
+    : MV_EXPAND qualifiedNames
     ;
 
 whereCommand

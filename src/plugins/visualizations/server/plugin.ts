@@ -19,13 +19,13 @@ import { ContentManagementServerSetup } from '@kbn/content-management-plugin/ser
 import { capabilitiesProvider } from './capabilities_provider';
 import { VisualizationsStorage } from './content_management';
 
-import type { VisualizationsPluginSetup, VisualizationsPluginStart } from './types';
+import type { VisualizationsServerSetup, VisualizationsServerStart } from './types';
 import { makeVisualizeEmbeddableFactory } from './embeddable/make_visualize_embeddable_factory';
-import { getVisualizationSavedObjectType } from './saved_objects';
+import { getVisualizationSavedObjectType, registerReadOnlyVisType } from './saved_objects';
 import { CONTENT_ID, LATEST_VERSION } from '../common/content_management';
 
 export class VisualizationsPlugin
-  implements Plugin<VisualizationsPluginSetup, VisualizationsPluginStart>
+  implements Plugin<VisualizationsServerSetup, VisualizationsServerStart>
 {
   private readonly logger: Logger;
 
@@ -61,7 +61,7 @@ export class VisualizationsPlugin
       },
     });
 
-    return {};
+    return { registerReadOnlyVisType };
   }
 
   public start(core: CoreStart) {

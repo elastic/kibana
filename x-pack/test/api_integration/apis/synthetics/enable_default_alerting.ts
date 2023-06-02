@@ -10,13 +10,15 @@ import { ConfigKey, HTTPFields } from '@kbn/synthetics-plugin/common/runtime_typ
 import { API_URLS, SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 
 import { secretKeys } from '@kbn/synthetics-plugin/common/constants/monitor_management';
+import { syntheticsMonitorType } from '@kbn/synthetics-plugin/common/types/saved_objects';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { getFixtureJson } from '../uptime/rest/helper/get_fixture_json';
+import { getFixtureJson } from './helper/get_fixture_json';
 import { Spaces } from '../../../alerting_api_integration/spaces_only/scenarios';
 import { ObjectRemover } from '../../../alerting_api_integration/common/lib';
 
 export default function ({ getService }: FtrProviderContext) {
-  describe('EnableDefaultAlerting', function () {
+  // FLAKY: https://github.com/elastic/kibana/issues/158408
+  describe.skip('EnableDefaultAlerting', function () {
     this.tags('skipCloud');
 
     const supertest = getService('supertest');
@@ -30,7 +32,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     after(async () => {
       await objectRemover.removeAll();
-      await kibanaServer.savedObjects.clean({ types: ['synthetics-monitor', 'synthetic-monitor'] });
+      await kibanaServer.savedObjects.clean({ types: [syntheticsMonitorType] });
     });
 
     before(() => {
@@ -39,7 +41,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     beforeEach(async () => {
       httpMonitorJson = _httpMonitorJson;
-      await kibanaServer.savedObjects.clean({ types: ['synthetics-monitor', 'synthetic-monitor'] });
+      await kibanaServer.savedObjects.clean({ types: [syntheticsMonitorType] });
     });
 
     afterEach(async () => {
