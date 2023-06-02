@@ -122,13 +122,3 @@ export const TRAINING_PERCENT_MIN = 1;
  * Maximum training percent
  */
 export const TRAINING_PERCENT_MAX = 100;
-
-/**
- * Enum for index status
- */
-export enum INDEX_STATUS {
-  UNUSED,
-  LOADING,
-  LOADED,
-  ERROR,
-}

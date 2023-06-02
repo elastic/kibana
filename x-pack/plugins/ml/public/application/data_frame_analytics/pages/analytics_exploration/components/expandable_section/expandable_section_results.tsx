@@ -31,13 +31,13 @@ import {
   DataGrid,
   RowCountRelation,
   UseIndexDataReturnType,
+  INDEX_STATUS,
 } from '@kbn/ml-data-grid';
 import {
   getAnalysisType,
   isClassificationAnalysis,
   isRegressionAnalysis,
   type DataFrameAnalyticsConfig,
-  INDEX_STATUS,
 } from '@kbn/ml-data-frame-analytics-utils';
 
 import { SEARCH_QUERY_LANGUAGE } from '../../../../../../../common/constants/search';

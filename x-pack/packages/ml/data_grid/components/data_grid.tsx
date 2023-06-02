@@ -31,9 +31,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { CoreSetup } from '@kbn/core/public';
 import { DEFAULT_SAMPLER_SHARD_SIZE } from '@kbn/ml-agg-utils';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
-import { INDEX_STATUS } from '@kbn/ml-data-frame-analytics-utils';
 
-import { euiDataGridStyle, euiDataGridToolbarSettings } from '../lib/common';
+import { euiDataGridStyle, euiDataGridToolbarSettings, INDEX_STATUS } from '../lib/common';
 import { UseIndexDataReturnType } from '../lib/types';
 
 // TODO Fix row hovering + bar highlighting

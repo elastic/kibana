@@ -23,9 +23,9 @@ import {
   getProcessedFields,
   type EsSorting,
   type UseIndexDataReturnType,
+  INDEX_STATUS,
 } from '@kbn/ml-data-grid';
 import type { TimeRange as TimeRangeMs } from '@kbn/ml-date-picker';
-import { INDEX_STATUS } from '@kbn/ml-data-frame-analytics-utils';
 
 import {
   isEsSearchResponse,

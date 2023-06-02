@@ -16,8 +16,9 @@ import {
 } from '@elastic/eui';
 
 import type { TimeRange as TimeRangeMs } from '@kbn/ml-date-picker';
-import { FeatureImportanceBaseline, INDEX_STATUS } from '@kbn/ml-data-frame-analytics-utils';
+import { FeatureImportanceBaseline } from '@kbn/ml-data-frame-analytics-utils';
 
+import { INDEX_STATUS } from './common';
 import { ChartData } from './field_histograms';
 
 interface Dictionary<TValue> {

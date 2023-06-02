@@ -17,6 +17,7 @@ export {
   multiColumnSortFactory,
   showDataGridColumnChartErrorMessageToast,
   useRenderCellValue,
+  INDEX_STATUS,
   INIT_MAX_COLUMNS,
   type FieldTypes,
   type MultiColumnSorter,

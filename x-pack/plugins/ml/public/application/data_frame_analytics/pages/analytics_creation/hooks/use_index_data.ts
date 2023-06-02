@@ -21,7 +21,6 @@ import {
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import type { TimeRange as TimeRangeMs } from '@kbn/ml-date-picker';
 import { extractErrorMessage } from '@kbn/ml-error-utils';
-import { INDEX_STATUS } from '@kbn/ml-data-frame-analytics-utils';
 import {
   getFieldType,
   getDataGridSchemaFromKibanaFieldType,
@@ -33,6 +32,7 @@ import {
   EsSorting,
   UseIndexDataReturnType,
   getProcessedFields,
+  INDEX_STATUS,
 } from '@kbn/ml-data-grid';
 
 import { DataLoader } from '../../../../datavisualizer/index_based/data_loader';

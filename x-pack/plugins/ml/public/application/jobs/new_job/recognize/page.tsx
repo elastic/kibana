@@ -21,7 +21,7 @@ import { isEqual, merge } from 'lodash';
 import moment from 'moment';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { addExcludeFrozenToQuery } from '@kbn/ml-query-utils';
-import { TIME_FORMAT } from '@kbn/ml-anomaly-utils';
+import { TIME_FORMAT } from '@kbn/ml-date-utils';
 import { type RuntimeMappings } from '@kbn/ml-runtime-field-utils';
 import { useMlKibana, useMlLocator } from '../../../contexts/kibana';
 import { useMlContext } from '../../../contexts/ml';

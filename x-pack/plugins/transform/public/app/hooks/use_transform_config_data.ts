@@ -18,7 +18,6 @@ import { difference } from 'lodash';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { formatHumanReadableDateTimeSeconds } from '@kbn/ml-date-utils';
 import { ES_CLIENT_TOTAL_HITS_RELATION } from '@kbn/ml-query-utils';
-import { INDEX_STATUS } from '@kbn/ml-data-frame-analytics-utils';
 import {
   getDataGridSchemaFromESFieldType,
   multiColumnSortFactory,
@@ -26,6 +25,7 @@ import {
   useDataGrid,
   type RenderCellValue,
   type UseIndexDataReturnType,
+  INDEX_STATUS,
 } from '@kbn/ml-data-grid';
 
 import type { PreviewMappingsProperties } from '../../../common/api_schemas/transforms';

@@ -48,6 +48,16 @@ export const INIT_MAX_COLUMNS = 10;
 export const COLUMN_CHART_DEFAULT_VISIBILITY_ROWS_THRESHOLD = 10000;
 
 /**
+ * Enum for index status
+ */
+export enum INDEX_STATUS {
+  UNUSED,
+  LOADING,
+  LOADED,
+  ERROR,
+}
+
+/**
  * Style configuration for the EuiDataGrid component.
  */
 export const euiDataGridStyle: EuiDataGridStyle = {
