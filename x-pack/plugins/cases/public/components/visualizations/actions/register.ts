@@ -9,7 +9,7 @@ import { CONTEXT_MENU_TRIGGER } from '@kbn/embeddable-plugin/public';
 
 import { createAddToNewCaseLensAction } from './add_to_new_case';
 import { createAddToExistingCaseLensAction } from './add_to_existing_case';
-import type { CaseUIActionProps } from './types';
+import type { CasesUIActionProps } from './types';
 
 export const registerUIActions = ({
   core,
@@ -17,7 +17,7 @@ export const registerUIActions = ({
   caseContextProps,
   history,
   storage,
-}: CaseUIActionProps) => {
+}: CasesUIActionProps) => {
   registerLensActions({ core, plugins, caseContextProps, history, storage });
 };
 
@@ -27,7 +27,7 @@ const registerLensActions = ({
   caseContextProps,
   history,
   storage,
-}: CaseUIActionProps) => {
+}: CasesUIActionProps) => {
   const addToNewCaseAction = createAddToNewCaseLensAction({
     core,
     plugins,

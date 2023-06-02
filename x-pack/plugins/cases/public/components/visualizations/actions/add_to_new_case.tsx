@@ -12,10 +12,9 @@ import { isErrorEmbeddable } from '@kbn/embeddable-plugin/public';
 
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { getCaseOwnerByAppId } from '../../../../common/utils/owner';
-import { CommentType } from '../../../../common';
-import { hasInput, isLensEmbeddable } from './utils';
+import { hasInput, isLensEmbeddable, getLensCaseAttachment } from './utils';
 
-import type { ActionContext, CaseUIActionProps, DashboardVisualizationEmbeddable } from './types';
+import type { ActionContext, CasesUIActionProps, DashboardVisualizationEmbeddable } from './types';
 import { ADD_TO_CASE_SUCCESS, ADD_TO_NEW_CASE_DISPLAYNAME } from './translations';
 import { useCasesAddToNewCaseFlyout } from '../../create/flyout/use_cases_add_to_new_case_flyout';
 import { ActionWrapper } from './action_wrapper';
@@ -39,15 +38,7 @@ const AddToNewCaseFlyoutWrapper: React.FC<Props> = ({ embeddable, onClose, onSuc
   });
 
   const attachments = useMemo(
-    () => [
-      {
-        comment: `!{lens${JSON.stringify({
-          timeRange,
-          attributes,
-        })}}`,
-        type: CommentType.user as const,
-      },
-    ],
+    () => [getLensCaseAttachment({ attributes, timeRange })],
     [attributes, timeRange]
   );
 
@@ -66,7 +57,7 @@ export const createAddToNewCaseLensAction = ({
   storage,
   history,
   caseContextProps,
-}: CaseUIActionProps) => {
+}: CasesUIActionProps) => {
   const { application: applicationService, theme } = core;
 
   let currentAppId: string | undefined;

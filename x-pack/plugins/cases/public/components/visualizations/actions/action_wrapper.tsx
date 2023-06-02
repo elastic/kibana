@@ -12,7 +12,7 @@ import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 
 import { useIsDarkTheme } from '../../../common/use_is_dark_theme';
 import { SECURITY_SOLUTION_OWNER } from '../../../../common';
-import type { CaseUIActionProps } from './types';
+import type { CasesUIActionProps } from './types';
 import { KibanaContextProvider, useKibana } from '../../../common/lib/kibana';
 import CasesProvider from '../../cases_context';
 import { getCaseOwnerByAppId } from '../../../../common/utils/owner';
@@ -21,7 +21,7 @@ import { canUseCases } from '../../../client/helpers/can_use_cases';
 export const DEFAULT_DARK_MODE = 'theme:darkMode' as const;
 
 interface Props {
-  caseContextProps: CaseUIActionProps['caseContextProps'];
+  caseContextProps: CasesUIActionProps['caseContextProps'];
   currentAppId?: string;
 }
 
@@ -56,7 +56,9 @@ const ActionWrapperWithContext: React.FC<PropsWithChildren<Props>> = ({
 
 ActionWrapperWithContext.displayName = 'ActionWrapperWithContext';
 
-type ActionWrapperComponentProps = PropsWithChildren<CaseUIActionProps & { currentAppId?: string }>;
+type ActionWrapperComponentProps = PropsWithChildren<
+  CasesUIActionProps & { currentAppId?: string }
+>;
 
 const ActionWrapperComponent: React.FC<ActionWrapperComponentProps> = ({
   core,

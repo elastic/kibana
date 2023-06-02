@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { TimeRange } from '@kbn/data-plugin/common';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import type { IEmbeddable } from '@kbn/embeddable-plugin/public';
 import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
@@ -22,7 +23,7 @@ export type CasesUIActionContextProps = Pick<
   | 'getFilesClient'
 >;
 
-export interface CaseUIActionProps {
+export interface CasesUIActionProps {
   core: CoreStart;
   plugins: CasesPluginStart;
   caseContextProps: CasesUIActionContextProps;
@@ -30,11 +31,13 @@ export interface CaseUIActionProps {
   storage: Storage;
 }
 
-export type DashboardVisualizationEmbeddable = IEmbeddable<{
+export interface EmbeddableInput {
   attributes: TypedLensByValueInput['attributes'];
   id: string;
-  timeRange: { from: string; to: string; fromStr: string; toStr: string };
-}>;
+  timeRange: TimeRange;
+}
+
+export type DashboardVisualizationEmbeddable = IEmbeddable<EmbeddableInput>;
 
 export type ActionContext = ActionExecutionContext<{
   embeddable: DashboardVisualizationEmbeddable;

@@ -8,7 +8,6 @@
 import { render } from '@testing-library/react';
 import React from 'react';
 import { SECURITY_SOLUTION_OWNER } from '../../../../common';
-import { getCaseOwnerByAppId } from '../../../../common/utils/owner';
 import { canUseCases } from '../../../client/helpers/can_use_cases';
 import CasesProvider from '../../cases_context';
 import { ActionWrapper } from './action_wrapper';
@@ -28,10 +27,6 @@ jest.mock('../../../client/helpers/can_use_cases', () => {
 
 const mockCasePermissions = jest.fn().mockReturnValue({ create: true, update: true });
 
-jest.mock('../../../../common/utils/owner', () => ({
-  getCaseOwnerByAppId: jest.fn().mockReturnValue('securitySolution'),
-}));
-
 describe('ActionWrapper', () => {
   const props = { ...getMockCaseUiActionProps(), currentAppId: 'securitySolutionUI' };
 
@@ -40,7 +35,7 @@ describe('ActionWrapper', () => {
     (canUseCases as jest.Mock).mockReturnValue(mockCasePermissions);
   });
 
-  test('it reads cases permissions', () => {
+  it('reads cases permissions', () => {
     render(
       <ActionWrapper {...props}>
         <div />
@@ -49,7 +44,7 @@ describe('ActionWrapper', () => {
     expect(mockCasePermissions).toHaveBeenCalledWith([SECURITY_SOLUTION_OWNER]);
   });
 
-  test('it renders CasesProvider with correct props', () => {
+  it('renders CasesProvider with correct props for Security solution', () => {
     render(
       <ActionWrapper {...props}>
         <div />
@@ -73,11 +68,82 @@ describe('ActionWrapper', () => {
     `);
   });
 
-  test('should check permission with undefined if owner is not found', () => {
-    (getCaseOwnerByAppId as jest.Mock).mockReturnValue(undefined);
-
+  it('renders CasesProvider with correct props for stack management', () => {
     render(
-      <ActionWrapper {...props}>
+      <ActionWrapper {...props} currentAppId="management">
+        <div />
+      </ActionWrapper>
+    );
+
+    expect((CasesProvider as jest.Mock).mock.calls[0][0].value).toMatchInlineSnapshot(`
+      Object {
+        "features": Object {
+          "alerts": Object {
+            "sync": false,
+          },
+        },
+        "owner": Array [
+          "cases",
+        ],
+        "permissions": Object {
+          "create": true,
+          "update": true,
+        },
+      }
+    `);
+  });
+
+  it('renders CasesProvider with correct props for observability', () => {
+    render(
+      <ActionWrapper {...props} currentAppId="observability-overview">
+        <div />
+      </ActionWrapper>
+    );
+
+    expect((CasesProvider as jest.Mock).mock.calls[0][0].value).toMatchInlineSnapshot(`
+      Object {
+        "features": Object {
+          "alerts": Object {
+            "sync": false,
+          },
+        },
+        "owner": Array [
+          "observability",
+        ],
+        "permissions": Object {
+          "create": true,
+          "update": true,
+        },
+      }
+    `);
+  });
+
+  it('renders CasesProvider with correct props for an application without cases', () => {
+    render(
+      <ActionWrapper {...props} currentAppId="dashboard">
+        <div />
+      </ActionWrapper>
+    );
+
+    expect((CasesProvider as jest.Mock).mock.calls[0][0].value).toMatchInlineSnapshot(`
+      Object {
+        "features": Object {
+          "alerts": Object {
+            "sync": false,
+          },
+        },
+        "owner": Array [],
+        "permissions": Object {
+          "create": true,
+          "update": true,
+        },
+      }
+    `);
+  });
+
+  it('should check permission with undefined if owner is not found', () => {
+    render(
+      <ActionWrapper {...props} currentAppId="dashboard">
         <div />
       </ActionWrapper>
     );

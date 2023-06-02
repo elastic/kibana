@@ -13,10 +13,9 @@ import { isErrorEmbeddable } from '@kbn/embeddable-plugin/public';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 
 import type { CaseUI } from '../../../../common';
-import { CommentType } from '../../../../common';
-import { isLensEmbeddable, hasInput } from './utils';
+import { isLensEmbeddable, hasInput, getLensCaseAttachment } from './utils';
 
-import type { ActionContext, CaseUIActionProps, DashboardVisualizationEmbeddable } from './types';
+import type { ActionContext, CasesUIActionProps, DashboardVisualizationEmbeddable } from './types';
 import { useCasesAddToExistingCaseModal } from '../../all_cases/selector_modal/use_cases_add_to_existing_case_modal';
 import { ADD_TO_EXISTING_CASE_DISPLAYNAME } from './translations';
 import { ActionWrapper } from './action_wrapper';
@@ -41,15 +40,7 @@ const AddExistingCaseModalWrapper: React.FC<Props> = ({ embeddable, onClose, onS
   const attachments = useMemo(() => {
     const { attributes, timeRange } = embeddable.getInput();
 
-    return [
-      {
-        comment: `!{lens${JSON.stringify({
-          timeRange,
-          attributes,
-        })}}`,
-        type: CommentType.user as const,
-      },
-    ];
+    return [getLensCaseAttachment({ attributes, timeRange })];
   }, [embeddable]);
   useEffect(() => {
     modal.open({ getAttachments: () => attachments });
@@ -66,7 +57,7 @@ export const createAddToExistingCaseLensAction = ({
   storage,
   history,
   caseContextProps,
-}: CaseUIActionProps) => {
+}: CasesUIActionProps) => {
   const { application: applicationService, theme } = core;
 
   let currentAppId: string | undefined;

@@ -8,7 +8,7 @@ import type { CoreTheme, PublicAppInfo } from '@kbn/core/public';
 import { BehaviorSubject, of } from 'rxjs';
 import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import { createBrowserHistory } from 'history';
-import type { CaseUIActionProps } from './types';
+import type { CasesUIActionProps } from './types';
 
 const mockTheme: CoreTheme = {
   darkMode: false,
@@ -90,7 +90,7 @@ export const getMockCaseUiActionProps = () => {
     storage,
     history,
     caseContextProps,
-  } as unknown as CaseUIActionProps;
+  } as unknown as CasesUIActionProps;
 
   return caseUiActionProps;
 };
