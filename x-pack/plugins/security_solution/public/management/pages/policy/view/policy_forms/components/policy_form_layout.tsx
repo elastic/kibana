@@ -14,7 +14,6 @@ import {
   EuiLoadingSpinner,
   EuiBottomBar,
   EuiSpacer,
-  EuiThemeProvider,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -167,18 +166,16 @@ export const PolicyFormLayout = React.memo(() => {
       <EuiBottomBar paddingSize="s">
         <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
           <EuiFlexItem grow={false}>
-            <EuiThemeProvider colorMode="dark">
-              <EuiButtonEmpty
-                color="text"
-                onClick={handleCancelOnClick}
-                data-test-subj="policyDetailsCancelButton"
-              >
-                <FormattedMessage
-                  id="xpack.securitySolution.endpoint.policy.details.cancel"
-                  defaultMessage="Cancel"
-                />
-              </EuiButtonEmpty>
-            </EuiThemeProvider>
+            <EuiButtonEmpty
+              color="text"
+              onClick={handleCancelOnClick}
+              data-test-subj="policyDetailsCancelButton"
+            >
+              <FormattedMessage
+                id="xpack.securitySolution.endpoint.policy.details.cancel"
+                defaultMessage="Cancel"
+              />
+            </EuiButtonEmpty>
           </EuiFlexItem>
           {showEditableFormFields && (
             <EuiFlexItem grow={false}>
