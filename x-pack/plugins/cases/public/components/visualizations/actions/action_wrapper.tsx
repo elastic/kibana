@@ -10,6 +10,7 @@ import React from 'react';
 import { Router } from 'react-router-dom';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 
+import { useIsDarkTheme } from '../../../common/use_is_dark_theme';
 import { SECURITY_SOLUTION_OWNER } from '../../../../common';
 import type { CaseUIActionProps } from './types';
 import { KibanaContextProvider, useKibana } from '../../../common/lib/kibana';
@@ -30,6 +31,7 @@ const ActionWrapperWithContext: React.FC<PropsWithChildren<Props>> = ({
   currentAppId,
 }) => {
   const { application } = useKibana().services;
+  const isDarkTheme = useIsDarkTheme();
 
   const owner = getCaseOwnerByAppId(currentAppId);
   const casePermissions = canUseCases(application.capabilities)(owner ? [owner] : undefined);
@@ -37,16 +39,18 @@ const ActionWrapperWithContext: React.FC<PropsWithChildren<Props>> = ({
   const syncAlerts = owner === SECURITY_SOLUTION_OWNER;
 
   return (
-    <CasesProvider
-      value={{
-        ...caseContextProps,
-        owner: owner ? [owner] : [],
-        permissions: casePermissions,
-        features: { alerts: { sync: syncAlerts } },
-      }}
-    >
-      {children}
-    </CasesProvider>
+    <EuiThemeProvider darkMode={isDarkTheme}>
+      <CasesProvider
+        value={{
+          ...caseContextProps,
+          owner: owner ? [owner] : [],
+          permissions: casePermissions,
+          features: { alerts: { sync: syncAlerts } },
+        }}
+      >
+        {children}
+      </CasesProvider>
+    </EuiThemeProvider>
   );
 };
 
@@ -71,13 +75,11 @@ const ActionWrapperComponent: React.FC<ActionWrapperComponentProps> = ({
         storage,
       }}
     >
-      <EuiThemeProvider darkMode={core.uiSettings.get(DEFAULT_DARK_MODE)}>
-        <Router history={history}>
-          <ActionWrapperWithContext caseContextProps={caseContextProps} currentAppId={currentAppId}>
-            {children}
-          </ActionWrapperWithContext>
-        </Router>
-      </EuiThemeProvider>
+      <Router history={history}>
+        <ActionWrapperWithContext caseContextProps={caseContextProps} currentAppId={currentAppId}>
+          {children}
+        </ActionWrapperWithContext>
+      </Router>
     </KibanaContextProvider>
   );
 };
