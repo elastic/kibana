@@ -13,7 +13,7 @@ import { OptionsListRequestBody, OptionsListSuggestions } from '../../common/opt
 import { getIpRangeQuery, type IpRangeQuery } from '../../common/options_list/ip_search';
 import { EsBucket, OptionsListSuggestionAggregationBuilder } from './types';
 import {
-  getEscapedQuery,
+  getEscapedRegexQuery,
   getIpBuckets,
   getSortType,
 } from './options_list_suggestion_query_helpers';
@@ -44,7 +44,7 @@ const cheapSuggestionAggSubtypes: { [key: string]: OptionsListSuggestionAggregat
       suggestions: {
         terms: {
           field: fieldName,
-          include: `${getEscapedQuery(searchString)}.*`,
+          include: `${getEscapedRegexQuery(searchString)}.*`,
           shard_size: 10,
           order: getSortType(sort),
         },
@@ -180,7 +180,7 @@ const cheapSuggestionAggSubtypes: { [key: string]: OptionsListSuggestionAggregat
             suggestions: {
               terms: {
                 field: fieldName,
-                include: `${getEscapedQuery(searchString)}.*`,
+                include: `${getEscapedRegexQuery(searchString)}.*`,
                 shard_size: 10,
                 order: getSortType(sort),
               },

@@ -13,7 +13,7 @@ import { OptionsListRequestBody, OptionsListSuggestions } from '../../common/opt
 import { getIpRangeQuery, type IpRangeQuery } from '../../common/options_list/ip_search';
 import { EsBucket, OptionsListSuggestionAggregationBuilder } from './types';
 import {
-  getEscapedQuery,
+  getEscapedWildcardQuery,
   getIpBuckets,
   getSortType,
 } from './options_list_suggestion_query_helpers';
@@ -69,7 +69,7 @@ const expensiveSuggestionAggSubtypes: { [key: string]: OptionsListSuggestionAggr
                 [fieldName]: {
                   value:
                     searchTechnique === 'wildcard'
-                      ? `*${getEscapedQuery(searchString)}*`
+                      ? `*${getEscapedWildcardQuery(searchString)}*`
                       : searchString,
                   case_insensitive: true,
                 },

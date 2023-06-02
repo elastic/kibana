@@ -165,7 +165,7 @@ describe('options list expensive queries', () => {
       test('test keyword field, with wildcard search and search string that needs to be escaped', () => {
         const optionsListRequestBodyMock: OptionsListRequestBody = {
           size: 10,
-          searchString: '.c+oo~l*',
+          searchString: '.c?o&o[l*',
           searchTechnique: 'wildcard',
           allowExpensiveQueries: true,
           fieldName: 'coolTestField.keyword',
@@ -200,7 +200,7 @@ describe('options list expensive queries', () => {
                 "wildcard": Object {
                   "coolTestField.keyword": Object {
                     "case_insensitive": true,
-                    "value": "*\\\\.c\\\\+oo\\\\~l\\\\**",
+                    "value": ".c\\\\?o&o[l\\\\**",
                   },
                 },
               },
