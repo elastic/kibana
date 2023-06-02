@@ -6,9 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { Subscription } from 'rxjs';
 import { BehaviorSubject, Subject } from 'rxjs';
-import { combineLatestWith } from 'rxjs/operators';
 import type * as H from 'history';
 import type {
   AppMountParameters,
@@ -35,17 +33,10 @@ import { initTelemetry, TelemetryService } from './common/lib/telemetry';
 import { KibanaServices } from './common/lib/kibana/services';
 import { SOLUTION_NAME } from './common/translations';
 
-import {
-  APP_ID,
-  APP_UI_ID,
-  APP_PATH,
-  APP_ICON_SOLUTION,
-  ENABLE_GROUPED_NAVIGATION,
-} from '../common/constants';
+import { APP_ID, APP_UI_ID, APP_PATH, APP_ICON_SOLUTION } from '../common/constants';
 
-import { getDeepLinks, registerDeepLinksUpdater } from './app/deep_links';
-import type { LinksPermissions } from './common/links';
-import { updateAppLinks } from './common/links';
+import { updateAppLinks, type LinksPermissions } from './common/links';
+import { registerDeepLinksUpdater } from './common/links/deep_links';
 import { navLinks$ } from './common/links/nav_links';
 import { licenseService } from './common/hooks/use_license';
 import type { SecuritySolutionUiConfigType } from './common/types';
@@ -59,6 +50,7 @@ import { getLazyEndpointPolicyResponseExtension } from './management/pages/polic
 import { getLazyEndpointGenericErrorsListExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_generic_errors_list';
 import type { ExperimentalFeatures } from '../common/experimental_features';
 import { parseExperimentalConfigValue } from '../common/experimental_features';
+import { UpsellingService } from './common/lib/upsellings';
 import { LazyEndpointCustomAssetsExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_custom_assets_extension';
 
 import type { SecurityAppStore } from './common/store/types';
@@ -88,6 +80,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
   private telemetry: TelemetryService;
 
   readonly experimentalFeatures: ExperimentalFeatures;
+  private upsellingService: UpsellingService;
   private isSidebarEnabled$: BehaviorSubject<boolean>;
   private getStartedComponent?: GetStartedComponent;
 
@@ -98,6 +91,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     this.kibanaBranch = initializerContext.env.packageInfo.branch;
     this.prebuiltRulesPackageVersion = this.config.prebuiltRulesPackageVersion;
     this.isSidebarEnabled$ = new BehaviorSubject<boolean>(true);
+    this.upsellingService = new UpsellingService();
     this.telemetry = new TelemetryService();
   }
   private appUpdater$ = new Subject<AppUpdater>();
@@ -174,6 +168,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         savedObjectsManagement: startPluginsDeps.savedObjectsManagement,
         isSidebarEnabled$: this.isSidebarEnabled$,
         getStartedComponent: this.getStartedComponent,
+        upselling: this.upsellingService,
         telemetry: this.telemetry.start(),
       };
       return services;
@@ -212,7 +207,8 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
           usageCollection: plugins.usageCollection,
           subPluginRoutes: getSubPluginRoutesByCapabilities(
             subPlugins,
-            coreStart.application.capabilities
+            coreStart.application.capabilities,
+            services
           ),
         });
       },
@@ -248,6 +244,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         );
         return resolverPluginSetup();
       },
+      upselling: this.upsellingService,
     };
   }
 
@@ -493,38 +490,19 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
    */
   async registerAppLinks(core: CoreStart, plugins: StartPlugins) {
     const { links, getFilteredLinks } = await this.lazyApplicationLinks();
-
     const { license$ } = plugins.licensing;
-    const newNavEnabled$ = core.uiSettings.get$<boolean>(ENABLE_GROUPED_NAVIGATION, true);
 
-    let appLinksSubscription: Subscription | null = null;
-    license$.pipe(combineLatestWith(newNavEnabled$)).subscribe(async ([license, newNavEnabled]) => {
+    registerDeepLinksUpdater(this.appUpdater$);
+
+    license$.subscribe(async (license) => {
       const linksPermissions: LinksPermissions = {
         experimentalFeatures: this.experimentalFeatures,
+        upselling: this.upsellingService,
         capabilities: core.application.capabilities,
       };
 
       if (license.type !== undefined) {
         linksPermissions.license = license;
-      }
-
-      if (appLinksSubscription) {
-        appLinksSubscription.unsubscribe();
-        appLinksSubscription = null;
-      }
-
-      if (newNavEnabled) {
-        appLinksSubscription = registerDeepLinksUpdater(this.appUpdater$);
-      } else {
-        // old nav links update
-        this.appUpdater$.next(() => ({
-          navLinkStatus: AppNavLinkStatus.hidden,
-          deepLinks: getDeepLinks(
-            this.experimentalFeatures,
-            license.type,
-            core.application.capabilities
-          ),
-        }));
       }
 
       // set initial links to not block rendering
