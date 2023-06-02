@@ -26,7 +26,6 @@ import {
   GEN_AI_CONNECTOR_ID,
   OpenAiProviderType,
 } from '@kbn/stack-connectors-plugin/public/common';
-import useEvent from 'react-use/lib/useEvent';
 import { ActionConnectorProps } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { BASE_CONVERSATIONS, Conversation, Message } from '../../..';
 import { useLoadActionTypes } from '../use_load_action_types';
@@ -115,25 +114,6 @@ export const ConnectorSetup: React.FC<ConnectorSetupProps> = React.memo<Connecto
         : 0
     );
 
-    // Register keyboard listener to show the add connector modal when SPACE is pressed
-    // Ideally this would be done by focusing the button once rendered, but can't seem to get focus to the EuiCard via refs/tabindex
-    const onKeyDown = useCallback(
-      (event: KeyboardEvent) => {
-        if (event.key === ' ' && !isConnectorModalVisible) {
-          // Skip intro still going
-          if (!showAddConnectorButton) {
-            setCurrentMessageIndex(MESSAGE_INDEX_BEFORE_CONNECTOR);
-            event.preventDefault();
-          } else {
-            setIsConnectorModalVisible(true);
-            event.preventDefault();
-          }
-        }
-      },
-      [isConnectorModalVisible, showAddConnectorButton]
-    );
-    useEvent('keydown', onKeyDown);
-
     // Once streaming of previous message is complete, proceed to next message
     const onHandleMessageStreamingComplete = useCallback(() => {
       const timeoutId = setTimeout(
@@ -150,6 +130,11 @@ export const ConnectorSetup: React.FC<ConnectorSetupProps> = React.memo<Connecto
       onSetupComplete?.();
       setConversation({ conversation: clearPresentationData(conversation) });
     }, [conversation, onSetupComplete, setConversation]);
+
+    // Show button to add connector after last message has finished streaming
+    const handleSkipSetup = useCallback(() => {
+      setCurrentMessageIndex(MESSAGE_INDEX_BEFORE_CONNECTOR);
+    }, [setCurrentMessageIndex]);
 
     // Create EuiCommentProps[] from conversation messages
     const commentBody = useCallback(
@@ -226,7 +211,11 @@ export const ConnectorSetup: React.FC<ConnectorSetupProps> = React.memo<Connecto
         {!showAddConnectorButton && (
           <SkipEuiText color="subdued" size={'xs'}>
             <EuiTextAlign textAlign="center">
-              <EuiBadge color="hollow" isDisabled={true}>
+              <EuiBadge
+                color="hollow"
+                onClick={handleSkipSetup}
+                onClickAriaLabel={i18n.CONNECTOR_SETUP_SKIP}
+              >
                 {i18n.CONNECTOR_SETUP_SKIP}
               </EuiBadge>
             </EuiTextAlign>

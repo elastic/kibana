@@ -27,6 +27,6 @@ export const WELCOME_GENERAL_3 = i18n.translate(
   'xpack.elasticAssistant.securityAssistant.content.prompts.welcome.welcomeGeneral3Prompt',
   {
     defaultMessage:
-      'Go ahead and click the add connector button below, or just press the `space-bar` for that quick action! 💨',
+      'Go ahead and click the add connector button below to continue the conversation!',
   }
 );

@@ -97,6 +97,6 @@ export const CONNECTOR_SETUP_TIMESTAMP_AT = i18n.translate(
 export const CONNECTOR_SETUP_SKIP = i18n.translate(
   'xpack.elasticAssistant.assistant.connectors.setup.skipTitle',
   {
-    defaultMessage: "Press 'space' to skip...",
+    defaultMessage: 'Click to skip...',
   }
 );
