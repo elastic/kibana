@@ -22,7 +22,9 @@ import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
 import { PLUGIN_ID } from '../../../common';
 import { useKibanaServices } from '../hooks/use_kibana';
+import { consoleDefinition } from './languages/console';
 import { LanguageDefinition, LanguageDefinitionSnippetArguments } from './languages/types';
+import { TryInConsoleButton } from './try_in_console_button';
 import './code_box.scss';
 
 interface CodeBoxProps {
@@ -36,7 +38,7 @@ interface CodeBoxProps {
 }
 
 const getCodeSnippet = (
-  language: LanguageDefinition,
+  language: Partial<LanguageDefinition>,
   key: keyof LanguageDefinition,
   args: LanguageDefinitionSnippetArguments
 ): string => {
@@ -85,12 +87,13 @@ export const CodeBox: React.FC<CodeBoxProps> = ({
     </EuiThemeProvider>
   );
   const codeSnippet = getCodeSnippet(selectedLanguage, code, codeArgs);
+  const showTryInConsole = code in consoleDefinition;
 
   return (
     <EuiThemeProvider colorMode="dark">
       <EuiPanel paddingSize="xs" className="serverlessSearchCodeBlockControlsPanel">
-        <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-          <EuiFlexItem grow={false}>
+        <EuiFlexGroup alignItems="center">
+          <EuiFlexItem>
             <EuiThemeProvider colorMode="light">
               <EuiPopover
                 button={button}
@@ -114,6 +117,11 @@ export const CodeBox: React.FC<CodeBoxProps> = ({
               )}
             </EuiCopy>
           </EuiFlexItem>
+          {showTryInConsole && (
+            <EuiFlexItem grow={false}>
+              <TryInConsoleButton request={getCodeSnippet(consoleDefinition, code, codeArgs)} />
+            </EuiFlexItem>
+          )}
         </EuiFlexGroup>
         <EuiHorizontalRule margin="none" />
         <EuiCodeBlock

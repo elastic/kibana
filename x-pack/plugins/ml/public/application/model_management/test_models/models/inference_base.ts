@@ -335,7 +335,7 @@ export abstract class InferenceBase<TInferResponse> {
   }
 
   private getDefaultInferenceConfig(): estypes.MlInferenceConfigUpdateContainer[keyof estypes.MlInferenceConfigUpdateContainer] {
-    return this.model.inference_config[
+    return this.model.inference_config![
       this.inferenceType as keyof estypes.MlInferenceConfigUpdateContainer
     ];
   }

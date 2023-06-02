@@ -53,7 +53,7 @@ export const NLP_DISPLAY_TITLES: Record<string, string | undefined> = {
 
 export const isSupportedMLModel = (model: TrainedModelConfigResponse): boolean => {
   return (
-    Object.keys(model.inference_config).some((key) => NLP_CONFIG_KEYS.includes(key)) ||
+    Object.keys(model.inference_config || {}).some((key) => NLP_CONFIG_KEYS.includes(key)) ||
     model.model_type === TRAINED_MODEL_TYPE.LANG_IDENT
   );
 };
@@ -83,7 +83,8 @@ export const getMLType = (modelTypes: string[]): string => {
 
 export const getModelDisplayTitle = (type: string): string | undefined => NLP_DISPLAY_TITLES[type];
 
-export const isTextExpansionModel = (model: TrainedModel) => model.inference_config.text_expansion;
+export const isTextExpansionModel = (model: TrainedModel): boolean =>
+  Boolean(model.inference_config?.text_expansion);
 
 /**
  * Sort function for displaying a list of models. Promotes text_expansion models and sorts the rest by model ID.

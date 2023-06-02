@@ -16,6 +16,7 @@
   "kbn_references": [
     "@kbn/logging",
     "@kbn/core-http-server",
+    "@kbn/core-http-common",
   ],
   "exclude": [
     "target/**/*",
