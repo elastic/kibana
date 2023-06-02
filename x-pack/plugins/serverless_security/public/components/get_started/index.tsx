@@ -8,7 +8,7 @@
 import React from 'react';
 
 import { CoreStart } from '@kbn/core/public';
-import type { GetStartedComponentProps, GetStartedComponent } from './types';
+import type { GetStartedComponent } from './types';
 import { GetStarted } from './get_started';
 import { KibanaServicesProvider } from '../../services';
 import { ServerlessSecurityPluginStartDependencies } from '../../types';
@@ -17,7 +17,7 @@ export const getSecurityGetStartedComponent = (
   core: CoreStart,
   pluginsStart: ServerlessSecurityPluginStartDependencies
 ): GetStartedComponent => {
-  return (_props?: GetStartedComponentProps) => (
+  return () => (
     <KibanaServicesProvider core={core} pluginsStart={pluginsStart}>
       <GetStarted />
     </KibanaServicesProvider>

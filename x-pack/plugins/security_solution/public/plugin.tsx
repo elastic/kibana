@@ -29,7 +29,6 @@ import type {
   SubPlugins,
   StartedSubPlugins,
   StartPluginsDependencies,
-  GetStartedComponent,
 } from './types';
 import { initTelemetry, TelemetryService } from './common/lib/telemetry';
 import { KibanaServices } from './common/lib/kibana/services';
@@ -89,7 +88,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
   readonly experimentalFeatures: ExperimentalFeatures;
   private isSidebarEnabled$: BehaviorSubject<boolean>;
-  private getStartedComponent?: GetStartedComponent;
+  private getStartedComponent$: BehaviorSubject<React.ComponentType | null>;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.config = this.initializerContext.config.get<SecuritySolutionUiConfigType>();
@@ -98,6 +97,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     this.kibanaBranch = initializerContext.env.packageInfo.branch;
     this.prebuiltRulesPackageVersion = this.config.prebuiltRulesPackageVersion;
     this.isSidebarEnabled$ = new BehaviorSubject<boolean>(true);
+    this.getStartedComponent$ = new BehaviorSubject<React.ComponentType | null>(null);
     this.telemetry = new TelemetryService();
   }
   private appUpdater$ = new Subject<AppUpdater>();
@@ -173,7 +173,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         },
         savedObjectsManagement: startPluginsDeps.savedObjectsManagement,
         isSidebarEnabled$: this.isSidebarEnabled$,
-        getStartedComponent: this.getStartedComponent,
+        getStartedComponent$: this.getStartedComponent$,
         telemetry: this.telemetry.start(),
       };
       return services;
@@ -316,8 +316,8 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       getNavLinks$: () => navLinks$,
       setIsSidebarEnabled: (isSidebarEnabled: boolean) =>
         this.isSidebarEnabled$.next(isSidebarEnabled),
-      setGetStartedPage: (getStartedComponent: GetStartedComponent) => {
-        this.getStartedComponent = getStartedComponent;
+      setGetStartedPage: (getStartedComponent) => {
+        this.getStartedComponent$.next(getStartedComponent);
       },
     };
   }
