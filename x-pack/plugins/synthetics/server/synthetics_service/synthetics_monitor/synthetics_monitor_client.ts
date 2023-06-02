@@ -417,7 +417,7 @@ const hideParamsHelper = (params?: string) => {
   // replace all values with '***'
   const newParams = Object.create(null);
   Object.keys(parsedParams).forEach((key) => {
-    newParams[key] = '********';
+    newParams[key] = '"********"';
   });
 
   return JSON.stringify(newParams);

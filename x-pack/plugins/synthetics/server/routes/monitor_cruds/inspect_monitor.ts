@@ -119,8 +119,13 @@ const formatCode = (code: string) => {
     updated = updated.replace(pattern, replacement);
   });
 
-  return updated.replace(
-    /var import_synthetics\d* = require\("@elastic\/synthetics"\);/,
-    "import { step, journey, monitor, expect } from '@elastic/synthetics';"
-  );
+  return updated
+    .replace(
+      /var import_synthetics\d* = require\("@elastic\/synthetics"\);/,
+      "import { step, journey, monitor, expect } from '@elastic/synthetics';"
+    )
+    .replace(
+      /var import_synthetics = require\("@elastic\/synthetics"\);/,
+      "import { step, journey, monitor, expect } from '@elastic/synthetics';"
+    );
 };

@@ -8,14 +8,11 @@
 import { MonitorFields } from '@kbn/synthetics-plugin/common/runtime_types';
 import { API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import expect from '@kbn/expect';
+import { syntheticsParamType } from '@kbn/synthetics-plugin/common/types/saved_objects';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { getFixtureJson } from './helper/get_fixture_json';
 import { SyntheticsMonitorTestService } from './services/synthetics_monitor_test_service';
 import { PrivateLocationTestService } from './services/private_location_test_service';
-import {
-  syntheticsMonitorType,
-  syntheticsParamType,
-} from '@kbn/synthetics-plugin/common/types/saved_objects';
 
 export default function ({ getService }: FtrProviderContext) {
   describe('inspectSyntheticsMonitor', function () {
@@ -133,8 +130,8 @@ export default function ({ getService }: FtrProviderContext) {
                       namespace: 'default',
                       origin: 'project',
                       params: {
-                        username: '********',
-                        password: '********',
+                        username: '"********"',
+                        password: '"********"',
                       },
                       playwright_options: { headless: true, chromiumSandbox: false },
                       'source.project.content':

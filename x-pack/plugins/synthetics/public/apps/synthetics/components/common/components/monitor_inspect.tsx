@@ -90,7 +90,13 @@ const MonitorInspect = () => {
           <EuiSpacer size="m" />
           {!loading && data ? (
             <>
-              <EuiCodeBlock language="json" fontSize="m" paddingSize="m" lineNumbers>
+              <EuiCodeBlock
+                language="json"
+                fontSize="m"
+                paddingSize="m"
+                lineNumbers
+                isCopyable={true}
+              >
                 {formatContent(data.result)}
               </EuiCodeBlock>
               {data.decodedCode && <MonitorCode code={data.decodedCode} />}
@@ -141,7 +147,7 @@ const MonitorCode = ({ code }: { code: string }) => (
       <h2 id="flyoutTitle">{SOURCE_CODE_LABEL}</h2>
     </EuiTitle>
     <EuiSpacer size="s" />
-    <EuiCodeBlock language="javascript" fontSize="m" paddingSize="m" lineNumbers>
+    <EuiCodeBlock language="javascript" fontSize="m" paddingSize="m" lineNumbers isCopyable={true}>
       {code}
     </EuiCodeBlock>
   </>
