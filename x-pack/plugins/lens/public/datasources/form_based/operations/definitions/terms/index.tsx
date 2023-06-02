@@ -1091,8 +1091,7 @@ The top values of a specified field ranked by the chosen metric.
                 disabled={currentColumn.params.orderBy.type === 'rare'}
                 data-test-subj="indexPattern-accuracy-mode"
                 checked={Boolean(
-                  currentColumn.params.accuracyMode &&
-                    currentColumn.params.orderBy.type !== 'rare'
+                  currentColumn.params.accuracyMode && currentColumn.params.orderBy.type !== 'rare'
                 )}
                 onChange={(e: EuiSwitchEvent) =>
                   paramEditorUpdater(
