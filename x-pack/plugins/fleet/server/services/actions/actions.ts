@@ -45,10 +45,7 @@ export const createAction = async (
       message: `User created Fleet action [id=${action.action_id}]`,
     });
 
-    return {
-      id: body.action_id,
-      created_at: body['@timestamp'],
-    };
+    return body;
   } catch (createActionError) {
     throw new FleetActionsError(
       `Error creating action: ${createActionError.message}`,

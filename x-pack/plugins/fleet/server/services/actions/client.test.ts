@@ -42,8 +42,8 @@ describe('actions', () => {
     it('should create an action', async () => {
       const action = { action_id: '1', input_type: 'foo' };
       expect(await fleetActionsClient.createAction(action)).toEqual({
-        id: '1',
-        created_at: expect.any(String),
+        ...action,
+        '@timestamp': expect.any(String),
       });
       expect(mockedAuditLoggingService.writeCustomAuditLog).toHaveBeenCalledWith({
         message: `User created Fleet action [id=1]`,
@@ -181,7 +181,7 @@ describe('actions', () => {
     });
   });
 
-  describe('getActionResultsByIds', () => {
+  describe('getActionResultsByIds()', () => {
     it('should get action results by action ids', async () => {
       const actions = [
         { action_id: 'action-id-1', agents: ['agent-1'], input_type: 'foo' },
@@ -218,7 +218,7 @@ describe('actions', () => {
     });
   });
 
-  describe('getActionResultsWithKuery', () => {
+  describe('getActionResultsWithKuery()', () => {
     it('should get action results with kuery', async () => {
       const actions = [
         { action_id: 'action-id-21', agents: ['agent-1'], input_type: 'foo' },
