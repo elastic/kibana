@@ -138,16 +138,6 @@ describe('Saved Objects type validator', () => {
       });
       validator.validate(data);
       expect(getCalledVersion()).toEqual('3.0.0');
-
-      // jest.clearAllMocks();
-
-      // data = createMockObject({
-      //   migrationVersion: {
-      //     [type]: '3.2.0',
-      //   },
-      // });
-      // validator.validate(data);
-      // expect(getCalledVersion()).toEqual('3.0.0');
     });
 
     it('should use the correct schema for documents with migrationVersion higher than default', () => {
