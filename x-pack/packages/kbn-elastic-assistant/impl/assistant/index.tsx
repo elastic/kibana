@@ -137,8 +137,8 @@ const AssistantComponent: React.FC<Props> = ({
   }, [augmentMessageCodeBlocks, currentConversation]);
 
   const isSendingDisabled = useMemo(() => {
-    return isWelcomeSetup || promptTextPreview.trim().length === 0 || showMissingConnectorCallout;
-  }, [showMissingConnectorCallout, isWelcomeSetup, promptTextPreview]);
+    return isWelcomeSetup || showMissingConnectorCallout;
+  }, [showMissingConnectorCallout, isWelcomeSetup]);
 
   // Fixes initial render not showing buttons as code block controls are added to the DOM really late
   useEffect(() => {
@@ -400,7 +400,6 @@ const AssistantComponent: React.FC<Props> = ({
               handlePromptChange={setPromptTextPreview}
               value={isWelcomeSetup ? '' : suggestedUserPrompt ?? ''}
               isDisabled={isWelcomeSetup}
-              isSendingDisabled={isSendingDisabled}
             />
           </EuiFlexItem>
 

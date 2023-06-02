@@ -15,7 +15,6 @@ import * as i18n from './translations';
 export interface Props extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
   handlePromptChange?: (value: string) => void;
   isDisabled?: boolean;
-  isSendingDisabled?: boolean;
   onPromptSubmit: (value: string) => void;
   value: string;
 }
@@ -26,17 +25,7 @@ const StyledTextArea = styled(EuiTextArea)`
 `;
 
 export const PromptTextArea = forwardRef<HTMLTextAreaElement, Props>(
-  (
-    {
-      isDisabled = false,
-      isSendingDisabled = false,
-      value,
-      onPromptSubmit,
-      handlePromptChange,
-      ...props
-    },
-    ref
-  ) => {
+  ({ isDisabled = false, value, onPromptSubmit, handlePromptChange, ...props }, ref) => {
     const [currentValue, setCurrentValue] = React.useState(value);
 
     const onChangeCallback = useCallback(
@@ -51,34 +40,20 @@ export const PromptTextArea = forwardRef<HTMLTextAreaElement, Props>(
 
     const onKeyDown = useCallback(
       (event) => {
-        if (
-          event.key === 'Enter' &&
-          !event.shiftKey &&
-          currentValue.trim().length > 0 &&
-          !isSendingDisabled
-        ) {
+        if (event.key === 'Enter' && !event.shiftKey && currentValue.trim().length > 0) {
           event.preventDefault();
           onPromptSubmit(event.target.value?.trim());
           setCurrentValue('');
-        } else if (
-          event.key === 'Enter' &&
-          !event.shiftKey &&
-          currentValue.trim().length === 0 &&
-          isSendingDisabled
-        ) {
+        } else if (event.key === 'Enter' && !event.shiftKey && currentValue.trim().length === 0) {
           event.preventDefault();
           event.stopPropagation();
         }
       },
-      [currentValue, isSendingDisabled, onPromptSubmit]
+      [currentValue, onPromptSubmit]
     );
 
     useEffect(() => {
       setCurrentValue(value);
-      // TODO: Future bug either way :)
-      // if (handlePromptChange) {
-      //   handlePromptChange(value);
-      // }
     }, [value]);
 
     return (
