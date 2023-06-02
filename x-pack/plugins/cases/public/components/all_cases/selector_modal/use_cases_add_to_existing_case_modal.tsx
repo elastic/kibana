@@ -106,13 +106,13 @@ export const useCasesAddToExistingCaseModal = (props: AddToExistingCaseModalProp
       }
     },
     [
-      props,
-      closeModal,
-      createNewCaseFlyout,
-      startTransaction,
       appId,
-      createAttachments,
       casesToasts,
+      closeModal,
+      createAttachments,
+      createNewCaseFlyout,
+      props,
+      startTransaction,
     ]
   );
 
@@ -130,11 +130,11 @@ export const useCasesAddToExistingCaseModal = (props: AddToExistingCaseModalProp
           onRowClick: (theCase?: CaseUI) => {
             handleOnRowClick(theCase, getAttachments);
           },
-          onClose: () => {
+          onClose: (theCase?: CaseUI, isCreateCase?: boolean) => {
             closeModal();
 
             if (props.onClose) {
-              return props.onClose();
+              return props.onClose(theCase, isCreateCase);
             }
           },
         },

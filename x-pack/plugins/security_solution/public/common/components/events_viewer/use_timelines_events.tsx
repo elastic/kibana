@@ -27,8 +27,8 @@ import type {
   TimelineRequestSortField,
   TimelineStrategyResponseType,
 } from '@kbn/timelines-plugin/common/search_strategy';
-import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
 import { dataTableActions, Direction, TableId } from '@kbn/securitysolution-data-table';
+import type { RunTimeMappings } from '../../store/sourcerer/model';
 import { TimelineEventsQueries } from '../../../../common/search_strategy';
 import type { KueryFilterQueryKind } from '../../../../common/types';
 import type { ESQuery } from '../../../../common/typed_json';
@@ -77,7 +77,7 @@ export interface UseTimelineEventsProps {
   indexNames: string[];
   language?: KueryFilterQueryKind;
   limit: number;
-  runtimeMappings: MappingRuntimeFields;
+  runtimeMappings: RunTimeMappings;
   skip?: boolean;
   sort?: TimelineRequestSortField[];
   startDate: string;
@@ -321,7 +321,7 @@ export const useTimelineEventsHandler = ({
         querySize: prevRequest?.pagination.querySize ?? 0,
         sort: prevRequest?.sort ?? initSortDefault,
         timerange: prevRequest?.timerange ?? {},
-        runtimeMappings: prevRequest?.runtimeMappings ?? {},
+        runtimeMappings: (prevRequest?.runtimeMappings ?? {}) as RunTimeMappings,
         filterStatus: prevRequest?.filterStatus,
       };
 
