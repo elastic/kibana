@@ -15,6 +15,7 @@ const retryResponseStatuses = [
   403, // AuthenticationException
   408, // RequestTimeout
   410, // Gone
+  429, // TooManyRequests -> ES circuit breaker
 ];
 
 export interface RetryableEsClientError {

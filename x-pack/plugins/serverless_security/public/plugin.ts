@@ -5,14 +5,17 @@
  * 2.0.
  */
 
-import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
+import { getSecurityGetStartedComponent } from './components/get_started';
 import { getSecuritySideNavComponent } from './components/side_navigation';
 import {
   ServerlessSecurityPluginSetup,
   ServerlessSecurityPluginStart,
   ServerlessSecurityPluginSetupDependencies,
   ServerlessSecurityPluginStartDependencies,
+  ServerlessSecurityPublicConfig,
 } from './types';
+import { registerUpsellings } from './components/upselling';
 
 export class ServerlessSecurityPlugin
   implements
@@ -23,10 +26,17 @@ export class ServerlessSecurityPlugin
       ServerlessSecurityPluginStartDependencies
     >
 {
+  private config: ServerlessSecurityPublicConfig;
+
+  constructor(private readonly initializerContext: PluginInitializerContext) {
+    this.config = this.initializerContext.config.get<ServerlessSecurityPublicConfig>();
+  }
+
   public setup(
     _core: CoreSetup,
-    _setupDeps: ServerlessSecurityPluginSetupDependencies
+    setupDeps: ServerlessSecurityPluginSetupDependencies
   ): ServerlessSecurityPluginSetup {
+    registerUpsellings(setupDeps.securitySolution.upselling, this.config.productLineIds);
     return {};
   }
 
@@ -37,6 +47,7 @@ export class ServerlessSecurityPlugin
     const { securitySolution, serverless } = startDeps;
 
     securitySolution.setIsSidebarEnabled(false);
+    securitySolution.setGetStartedPage(getSecurityGetStartedComponent(core, startDeps));
     serverless.setSideNavComponent(getSecuritySideNavComponent(core, startDeps));
 
     return {};
