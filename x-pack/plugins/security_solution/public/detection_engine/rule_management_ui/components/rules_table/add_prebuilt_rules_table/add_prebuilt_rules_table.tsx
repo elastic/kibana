@@ -5,13 +5,7 @@
  * 2.0.
  */
 
-import {
-  EuiEmptyPrompt,
-  EuiInMemoryTable,
-  EuiSkeletonLoading,
-  EuiLoadingSpinner,
-  EuiProgress,
-} from '@elastic/eui';
+import { EuiEmptyPrompt, EuiInMemoryTable, EuiSkeletonLoading, EuiProgress } from '@elastic/eui';
 import React from 'react';
 
 import * as i18n from '../../../../../detections/pages/detection_engine/rules/translations';
@@ -49,7 +43,6 @@ export const AddPrebuiltRulesTable = React.memo(() => {
   } = addRulesTableContext;
 
   const isTableEmpty = rules.length === 0;
-  const shouldShowRulesTable = !isLoading && !isTableEmpty;
 
   const tableProps = {
     'data-test-subj': 'add-prebuilt-rules-table',
@@ -58,6 +51,8 @@ export const AddPrebuiltRulesTable = React.memo(() => {
 
   const shouldShowLinearProgress = (isFetched && isRefetching) || isUpgradingSecurityPackages;
   const shouldShowLoadingOverlay = !isFetched && isRefetching;
+
+  const shouldShowRulesTable = isFetched && !isTableEmpty;
 
   return (
     <>
@@ -70,13 +65,18 @@ export const AddPrebuiltRulesTable = React.memo(() => {
         />
       )}
       <EuiSkeletonLoading
-        isLoading={shouldShowLoadingOverlay && !shouldShowRulesTable}
+        isLoading={isLoading || shouldShowLoadingOverlay}
         loadingContent={
-          <EuiLoadingSpinner data-test-subj="loadingRulesInfoPanelAllRulesTable" size="xl" />
+          <EuiProgress
+            data-test-subj="loadingRulesInfoProgress"
+            size="xs"
+            position="absolute"
+            color="accent"
+          />
         }
         loadedContent={
           <>
-            {!isTableEmpty ? (
+            {shouldShowRulesTable ? (
               <EuiInMemoryTable
                 items={rules}
                 sorting={true}

@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiButton } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiButton, EuiLoadingSpinner } from '@elastic/eui';
 import * as i18n from './translations';
 import { useUpgradePrebuiltRulesTableContext } from './upgrade_prebuilt_rules_table_context';
 
@@ -43,7 +43,10 @@ export const UpgradePrebuiltRulesTableButtons = () => {
             onClick={upgradeSelectedRules}
             disabled={isUpgradeSpecificRulesLoading || isRuleUpgrading}
           >
-            {i18n.UPGRADE_SELECTED_RULES(numberOfSelectedRules)}
+            <>
+              {i18n.UPGRADE_SELECTED_RULES(numberOfSelectedRules)}
+              {isRuleUpgrading ? <EuiLoadingSpinner size="s" /> : undefined}
+            </>
           </EuiButton>
         </EuiFlexItem>
       ) : null}
@@ -55,6 +58,7 @@ export const UpgradePrebuiltRulesTableButtons = () => {
           disabled={!isRulesAvailableForUpgrade || isRuleUpgrading}
         >
           {i18n.UPGRADE_ALL}
+          {isRuleUpgrading ? <EuiLoadingSpinner size="s" /> : undefined}
         </EuiButton>
       </EuiFlexItem>
     </EuiFlexGroup>

@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiButton } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiButton, EuiLoadingSpinner } from '@elastic/eui';
 import * as i18n from './translations';
 import { useAddPrebuiltRulesTableContext } from './add_prebuilt_rules_table_context';
 
@@ -38,6 +38,7 @@ export const AddPrebuiltRulesHeaderButtons = () => {
         <EuiFlexItem grow={false}>
           <EuiButton onClick={installSelectedRules} disabled={isRuleInstalling}>
             {i18n.INSTALL_SELECTED_RULES(numberOfSelectedRules)}
+            {isRuleInstalling ? <EuiLoadingSpinner size="s" /> : undefined}
           </EuiButton>
         </EuiFlexItem>
       ) : null}
@@ -49,6 +50,7 @@ export const AddPrebuiltRulesHeaderButtons = () => {
           disabled={!isRulesAvailableForInstall || isRuleInstalling}
         >
           {i18n.INSTALL_ALL}
+          {isRuleInstalling ? <EuiLoadingSpinner size="s" /> : undefined}
         </EuiButton>
       </EuiFlexItem>
     </EuiFlexGroup>

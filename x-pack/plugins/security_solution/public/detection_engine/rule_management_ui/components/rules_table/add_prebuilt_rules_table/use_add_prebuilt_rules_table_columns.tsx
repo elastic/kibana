@@ -6,7 +6,7 @@
  */
 
 import type { EuiBasicTableColumn, EuiTableActionsColumnType } from '@elastic/eui';
-import { EuiButtonEmpty, EuiBadge, EuiText } from '@elastic/eui';
+import { EuiButtonEmpty, EuiBadge, EuiText, EuiLoadingSpinner } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import type { usePerformInstallSpecificRules } from '../../../../rule_management/logic/prebuilt_rules/use_perform_rule_install';
 import { SHOW_RELATED_INTEGRATIONS_SETTING } from '../../../../../../common/constants';
@@ -112,6 +112,7 @@ const createInstallButtonColumn = (
         onClick={() => installRowRule(value, item)}
       >
         {i18n.INSTALL_RULE_BUTTON}
+        {isRuleInstalling ? <EuiLoadingSpinner size="s" /> : undefined}
       </EuiButtonEmpty>
     );
   },
