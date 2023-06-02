@@ -80,7 +80,7 @@ export async function bootstrap({ configs, cliArgs, applyConfigOverrides }: Boot
   const root = new Root(rawConfigService, env, onRootShutdown);
   const cliLogger = root.logger.get('cli');
 
-  cliLogger.info('Kibana configurations evaluated in this order: ' + env.configs.join(', '));
+  cliLogger.debug('Kibana configurations evaluated in this order: ' + env.configs.join(', '));
 
   process.on('SIGHUP', () => reloadConfiguration());
 

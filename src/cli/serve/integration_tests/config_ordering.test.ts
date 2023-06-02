@@ -17,7 +17,12 @@ import { filter, map, take, timeout } from 'rxjs/operators';
 const tempDir = Path.join(Os.tmpdir(), 'kbn-config-test');
 
 const kibanaPath = follow('../../../../scripts/kibana.js');
-const configsPath = follow('../../../../config');
+
+const TIMEOUT_MS = 15000;
+
+const envForTempDir = {
+  env: { KBN_PATH_CONF: tempDir },
+};
 
 const TestFiles = {
   fileList: [] as string[],
@@ -65,16 +70,27 @@ describe('Server configuration ordering', () => {
   });
 
   it('loads default config set without any options', async function () {
-    kibanaProcess = Child.spawn(process.execPath, [kibanaPath]);
+    TestFiles.createEmptyConfigFiles(['kibana.yml']);
 
+    kibanaProcess = Child.spawn(process.execPath, [kibanaPath, '--verbose'], envForTempDir);
     const configList = await extractConfigurationOrder(kibanaProcess);
 
     expect(configList).toEqual(['kibana.yml']);
   });
 
   it('loads serverless configs when --serverless is set', async () => {
-    kibanaProcess = Child.spawn(process.execPath, [kibanaPath, '--serverless', 'oblt']);
+    TestFiles.createEmptyConfigFiles([
+      'serverless.yml',
+      'serverless.oblt.yml',
+      'kibana.yml',
+      'serverless.recent.yml',
+    ]);
 
+    kibanaProcess = Child.spawn(
+      process.execPath,
+      [kibanaPath, '--verbose', '--serverless', 'oblt'],
+      envForTempDir
+    );
     const configList = await extractConfigurationOrder(kibanaProcess);
 
     expect(configList).toEqual([
@@ -86,16 +102,19 @@ describe('Server configuration ordering', () => {
   });
 
   it('prefers --config options over default', async () => {
-    const [configPath] = TestFiles.createEmptyConfigFiles(['potato.yml']);
-
-    kibanaProcess = Child.spawn(process.execPath, [
-      kibanaPath,
-      '--serverless',
-      'oblt',
-      '--config',
-      configPath,
+    const [configPath] = TestFiles.createEmptyConfigFiles([
+      'potato.yml',
+      'serverless.yml',
+      'serverless.oblt.yml',
+      'kibana.yml',
+      'serverless.recent.yml',
     ]);
 
+    kibanaProcess = Child.spawn(
+      process.execPath,
+      [kibanaPath, '--verbose', '--serverless', 'oblt', '--config', configPath],
+      envForTempDir
+    );
     const configList = await extractConfigurationOrder(kibanaProcess);
 
     expect(configList).toEqual([
@@ -106,18 +125,20 @@ describe('Server configuration ordering', () => {
     ]);
   });
 
-  it('adds dev configs to the queue', async () => {
-    TestFiles.createEmptyConfigFiles(
-      [
-        'kibana.dev.yml',
-        'serverless.dev.yml',
-        // 'serverless.es.dev.yml' // Shouldn't this be loaded? It's mentioned in the README, but wasn't in the code
-      ],
-      configsPath
+  it('defaults to "es" if --serverless and --dev are there', async () => {
+    TestFiles.createEmptyConfigFiles([
+      'serverless.yml',
+      'serverless.es.yml',
+      'kibana.yml',
+      'kibana.dev.yml',
+      'serverless.dev.yml',
+    ]);
+
+    kibanaProcess = Child.spawn(
+      process.execPath,
+      [kibanaPath, '--verbose', '--serverless', '--dev'],
+      envForTempDir
     );
-
-    kibanaProcess = Child.spawn(process.execPath, [kibanaPath, '--serverless', 'es', '--dev']);
-
     const configList = await extractConfigurationOrder(kibanaProcess);
 
     expect(configList).toEqual([
@@ -127,8 +148,33 @@ describe('Server configuration ordering', () => {
       'serverless.recent.yml',
       'kibana.dev.yml',
       'serverless.dev.yml',
-      'serverless.recent.dev.yml',
-      // 'serverless.es.dev.yml', // Shouldn't this be loaded? It's mentioned in the README, but wasn't in the code
+    ]);
+  });
+
+  it('adds dev configs to the stack', async () => {
+    TestFiles.createEmptyConfigFiles([
+      'serverless.yml',
+      'serverless.security.yml',
+      'kibana.yml',
+      'kibana.dev.yml',
+      'serverless.dev.yml',
+    ]);
+
+    kibanaProcess = Child.spawn(
+      process.execPath,
+      [kibanaPath, '--verbose', '--serverless', 'security', '--dev'],
+      envForTempDir
+    );
+
+    const configList = await extractConfigurationOrder(kibanaProcess);
+
+    expect(configList).toEqual([
+      'serverless.yml',
+      'serverless.security.yml',
+      'kibana.yml',
+      'serverless.recent.yml',
+      'kibana.dev.yml',
+      'serverless.dev.yml',
     ]);
   });
 });
@@ -136,7 +182,7 @@ describe('Server configuration ordering', () => {
 async function extractConfigurationOrder(
   proc: Child.ChildProcessWithoutNullStreams
 ): Promise<string[] | undefined> {
-  const configMessage = await waitForMessage(proc, /[Cc]onfig.*order:/, 5000);
+  const configMessage = await waitForMessage(proc, /[Cc]onfig.*order:/, TIMEOUT_MS);
 
   const configList = configMessage
     .match(/order: (.*)$/)
@@ -172,7 +218,10 @@ async function waitForMessage(
     Rx.race(trackedExpression$, error$).pipe(
       timeout({
         first: timeoutMs,
-        with: () => Rx.throwError(() => new Error("Config options didn't appear in logs for 5s")),
+        with: () =>
+          Rx.throwError(
+            () => new Error(`Config options didn't appear in logs for ${timeoutMs / 1000}s...`)
+          ),
       })
     )
   );
