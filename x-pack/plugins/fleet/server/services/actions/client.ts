@@ -26,7 +26,7 @@ export class FleetActionsClient implements FleetActionsClientInterface {
     }
   }
 
-  private _verifyPackageName(action: FleetAction) {
+  private _verifyPackageName(action: Partial<FleetAction>) {
     if (action.input_type !== this.packageName) {
       throw new FleetActionsClientError(
         `Action package name mismatch. Expected "${this.packageName}" got "${action.input_type}"`
@@ -36,7 +36,7 @@ export class FleetActionsClient implements FleetActionsClientInterface {
     return action;
   }
 
-  async createAction(action: FleetAction): Promise<ReturnType<typeof createAction>> {
+  async createAction(action: Partial<FleetAction>): Promise<ReturnType<typeof createAction>> {
     try {
       const verifiedAction = this._verifyPackageName(action);
 
@@ -46,7 +46,9 @@ export class FleetActionsClient implements FleetActionsClientInterface {
     }
   }
 
-  async bulkCreateActions(actions: FleetAction[]): Promise<ReturnType<typeof bulkCreateActions>> {
+  async bulkCreateActions(
+    actions: Array<Partial<FleetAction>>
+  ): Promise<ReturnType<typeof bulkCreateActions>> {
     try {
       actions.map((action) => this._verifyPackageName(action));
 

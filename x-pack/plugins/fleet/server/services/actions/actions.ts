@@ -22,7 +22,7 @@ import type { FleetAction, FleetActionResponse } from './types';
 export const createAction = async (
   esClient: ElasticsearchClient,
   action: Partial<FleetAction>
-): Promise<{ id: string; created_at: string }> => {
+): Promise<Partial<FleetAction>> => {
   try {
     const body = {
       ...action,
