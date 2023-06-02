@@ -64,6 +64,7 @@
     "@kbn/saved-objects-management-plugin",
     "@kbn/utility-types-jest",
     "@kbn/core-saved-objects-api-server-mocks",
+    "@kbn/core-theme-browser",
   ],
   "exclude": [
     "target/**/*",
