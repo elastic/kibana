@@ -233,14 +233,19 @@ during `create` and `bulkCreate` operations.
 **note:** *Implementing this schema is optional, but still recommended, as otherwise there will be no validating when 
            importing objects*
 
-///////////////// <====
-
 ## Use-case examples
+
+These are example of the migration scenario currently supported (out of the box) by the system.
+
+**note:** *more complex scenarios (e.g field mutation by copy/sync) could already be implemented, but without
+          the proper tooling exposed from Core, most of the work related to sync and compatibility would have to be
+          implemented in the domain layer of the type owners, which is why we're not documenting them yet.*
 
 ### Adding a non-indexed field without default value
 
 We are currently in model version 1, and our type has 2 indexed fields defined: `foo` and `bar`.
-the definition of the type at version 1 looks like:
+
+The definition of the type at version 1 would look like:
 
 ```ts
 const myType: SavedObjectsType = {
@@ -248,12 +253,14 @@ const myType: SavedObjectsType = {
   namespaceType: 'single',
   switchToModelVersionAt: '8.10.0',
   modelVersions: {
+    // initial (and current) model version
     1: {
       changes: [],
       schemas: {
+        // FC schema defining the known fields (indexed or not) for this version
         forwardCompatibility: schema.object(
           { foo: schema.string(), bar: schema.string() },
-          { unknowns: 'ignore' }
+          { unknowns: 'ignore' } // note the `unknown: ignore` which is how we're evicting the unknown fields
         ),
       },
     },
@@ -267,24 +274,24 @@ const myType: SavedObjectsType = {
 };
 ```
 
-then, we want to introduce a new `dolly` field that is not indexed, and that we don't need to populate with a default value.
+From here, say we want to introduce a new `dolly` field that is not indexed, and that we don't need to populate with a default value.
 
-In that case, all we need to do is to introduce a new model version, and the only thing to do will be to update the 
-`forwardCompatibility` schema to include the new field.
+To achieve that, we need to introduce a new model version, with the only thing to do will be to define the 
+new `forwardCompatibility` schema to include this new field.
 
 The added model version would look like:
 
 ```ts
 // the new model version adding the `dolly` field
 let modelVersion2: SavedObjectsModelVersion = {
-  // no mapping addition, no data backfill, so changes are actually empty
+  // not an indexed field, no data backfill, so changes are actually empty
   changes: [],
   schemas: {
     // the only addition in this model version: taking the new field into account
     // for the forwardCompatibility schema
     forwardCompatibility: schema.object(
       { foo: schema.string(), bar: schema.string(), dolly: schema.string() },
-      { unknowns: 'ignore' }
+      { unknowns: 'ignore' } // note the `unknown: ignore` which is how we're evicting the unknown fields
     ),
   },
 };
@@ -326,7 +333,7 @@ const myType: SavedObjectsType = {
 };
 ```
 
-### Adding a indexed field without default value
+### Adding an indexed field without default value
 
 This scenario is fairly close to the previous one. The difference being that working with an indexed field means
 adding a `mappings_addition` change and to also update the root mappings accordingly.  
@@ -342,7 +349,7 @@ The new version definition would look like:
 
 ```ts
 let modelVersion2: SavedObjectsModelVersion = {
-  // no mapping addition, no data backfill, so changes are actually empty
+  // add a change defining the mapping for the new field
   changes: [
     {
       type: 'mappings_addition',
@@ -352,8 +359,7 @@ let modelVersion2: SavedObjectsModelVersion = {
     },
   ],
   schemas: {
-    // the only addition in this model version: taking the new field into account
-    // for the forwardCompatibility schema
+    // adding the new field to the forwardCompatibility schema
     forwardCompatibility: schema.object(
       { foo: schema.string(), bar: schema.string(), dolly: schema.string() },
       { unknowns: 'ignore' }
@@ -427,16 +433,15 @@ const myType: SavedObjectsType = {
 
 ### Adding an indexed field with a default value
 
-Slightly different scenario where we'd like to populate the newly introduced field with a default value.
+Now a slightly different scenario where we'd like to populate the newly introduced field with a default value.
 
-Note: `data_backfill` should **only** be used to populate newly introduced fields
-
-Note: if the field was non-indexed, we would just not use the `mappings_addition` change or update the mappings (as done in example 1)
+In that case, we'd need to add an additional `data_backfill` change to populate the new field's value
+(in addition to the `mappings_addition` one):
 
 ```ts
 let modelVersion2: SavedObjectsModelVersion = {
   changes: [
-    // setting the `dolly` field default value.
+    // setting the `dolly` field's default value.
     {
       type: 'data_backfill',
       transform: (document) => {
@@ -462,6 +467,7 @@ let modelVersion2: SavedObjectsModelVersion = {
 };
 ```
 
+The full type definition would look like:
 
 ```ts
 const myType: SavedObjectsType = {
@@ -487,7 +493,6 @@ const myType: SavedObjectsType = {
       },
     },
     2: {
-      // no mapping addition, no data backfill, so changes are actually empty
       changes: [
         {
           type: 'data_backfill',
@@ -504,7 +509,6 @@ const myType: SavedObjectsType = {
         },
       ],
       schemas: {
-        // define `dolly` as an know field in the schema
         forwardCompatibility: schema.object(
           { foo: schema.string(), bar: schema.string(), dolly: schema.string() },
           { unknowns: 'ignore' }
@@ -521,3 +525,5 @@ const myType: SavedObjectsType = {
   },
 };
 ```
+
+**Note:**  *if the field was non-indexed, we would just not use the `mappings_addition` change or update the mappings (as done in example 1)*
