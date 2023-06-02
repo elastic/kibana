@@ -13,6 +13,7 @@ import {
   APM_SERVER_SCHEMA_SAVED_OBJECT_ID,
   APM_SERVER_SCHEMA_SAVED_OBJECT_TYPE,
 } from '../../../common/apm_saved_object_constants';
+import { ApmFeatureFlags } from '../../../common/apm_feature_flags';
 import { createInternalESClientWithContext } from '../../lib/helpers/create_es_client/create_internal_es_client';
 import { getInternalSavedObjectsClient } from '../../lib/helpers/get_internal_saved_objects_client';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
@@ -29,6 +30,14 @@ import {
   runMigrationCheck,
   RunMigrationCheckResponse,
 } from './run_migration_check';
+
+function throwNotFoundIfApmSchemaNotAvailable(
+  featureFlags: ApmFeatureFlags
+): void {
+  if (!featureFlags.schemaAvailable) {
+    throw Boom.notFound();
+  }
+}
 
 const hasFleetDataRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/fleet/has_apm_policies',
@@ -68,6 +77,7 @@ const saveApmServerSchemaRoute = createApmServerRoute({
     }),
   }),
   handler: async (resources): Promise<void> => {
+    throwNotFoundIfApmSchemaNotAvailable(resources.featureFlags);
     const { params, logger, core } = resources;
     const coreStart = await core.start();
     const savedObjectsClient = await getInternalSavedObjectsClient(coreStart);
@@ -87,6 +97,7 @@ const getUnsupportedApmServerSchemaRoute = createApmServerRoute({
   handler: async (
     resources
   ): Promise<{ unsupported: UnsupportedApmServerSchema }> => {
+    throwNotFoundIfApmSchemaNotAvailable(resources.featureFlags);
     const { context } = resources;
     const savedObjectsClient = (await context.core).savedObjects.client;
     return {
