@@ -55,12 +55,16 @@ const MiniCalloutComponent: React.FC<MiniCalloutProps> = ({
   const calloutTitle = (
     <div
       css={css`
-        display: inline-block;
         width: 97%;
         margin-left: ${euiTheme.size.s};
       `}
     >
-      <EuiFlexGroup justifyContent="spaceBetween">
+      <EuiFlexGroup
+        justifyContent="spaceBetween"
+        css={css`
+          display: flex;
+        `}
+      >
         <EuiFlexItem>
           <EuiFlexGroup gutterSize="none">
             <EuiTextColor
@@ -91,8 +95,10 @@ const MiniCalloutComponent: React.FC<MiniCalloutProps> = ({
 
   return (
     <EuiCallOut size="s" color={color} data-test-subj="mini-callout">
-      {iconType && <EuiIcon type={iconType} color={color} />}
-      {calloutTitle}
+      <div style={{ display: 'flex' }}>
+        {iconType && <EuiIcon type={iconType} color={color} />}
+        {calloutTitle}
+      </div>
     </EuiCallOut>
   );
 };

@@ -15,7 +15,7 @@ import { useInvalidateFetchRulesSnoozeSettingsQuery } from '../use_fetch_rules_s
 import { useInvalidateFetchPrebuiltRulesInstallReviewQuery } from './use_fetch_prebuilt_rules_install_review_query';
 import type { InstallSpecificRulesRequest } from '../../../../../../common/detection_engine/prebuilt_rules/api/perform_rule_installation/perform_rule_installation_request_schema';
 import { performInstallSpecificRules } from '../../api';
-import { useInvalidateFetchPrebuiltRulesStatusQueryNew } from './use_fetch_prebuilt_rules_status_query_new';
+import { useInvalidateFetchPrebuiltRulesStatusQueryNew } from './use_fetch_prebuilt_rules_status_query';
 
 export const PERFORM_SPECIFIC_RULES_INSTALLATION_KEY = [
   'POST',

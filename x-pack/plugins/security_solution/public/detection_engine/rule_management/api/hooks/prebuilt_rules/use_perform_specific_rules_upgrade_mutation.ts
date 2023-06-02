@@ -14,7 +14,7 @@ import { useInvalidateFetchRuleManagementFiltersQuery } from '../use_fetch_rule_
 import { useInvalidateFetchRulesSnoozeSettingsQuery } from '../use_fetch_rules_snooze_settings';
 import type { UpgradeSpecificRulesRequest } from '../../../../../../common/detection_engine/prebuilt_rules/api/perform_rule_upgrade/perform_rule_upgrade_request_schema';
 import { performUpgradeSpecificRules } from '../../api';
-import { useInvalidateFetchPrebuiltRulesStatusQueryNew } from './use_fetch_prebuilt_rules_status_query_new';
+import { useInvalidateFetchPrebuiltRulesStatusQueryNew } from './use_fetch_prebuilt_rules_status_query';
 import { useInvalidateFetchPrebuiltRulesUpgradeReviewQuery } from './use_fetch_prebuilt_rules_upgrade_review_query';
 
 export const PERFORM_SPECIFIC_RULES_UPGRADE_KEY = [

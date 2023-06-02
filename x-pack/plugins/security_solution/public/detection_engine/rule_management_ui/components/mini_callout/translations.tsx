@@ -15,7 +15,7 @@ export const DISMISS = i18n.translate('xpack.securitySolution.detectionEngine.ru
   defaultMessage: 'Dismiss',
 });
 
-export const NEW_PREBUILT_RULES_CALLOUT_TITLE = i18n.translate(
+export const NEW_PREBUILT_RULES_AVAILABLE_CALLOUT_TITLE = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.newPrebuiltRulesCalloutTitle',
   {
     defaultMessage:

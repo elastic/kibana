@@ -31,8 +31,8 @@ export const useFetchPrebuiltRulesInstallReviewQuery = (
 };
 
 /**
- * We should use this hook to invalidate the prebuilt rules to upgrade cache. For
- * example, rule mutations that affect rule set size, like upgrading a rule,
+ * We should use this hook to invalidate the prebuilt rules to install cache. For
+ * example, rule mutations that affect rule set size, like installing a rule,
  * should lead to cache invalidation.
  *
  * @returns A rules cache invalidation callback

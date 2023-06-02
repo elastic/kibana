@@ -228,6 +228,9 @@ export interface FetchRulesProps {
 export type RulesSnoozeSettingsMap = Record<string, RuleSnoozeSettings>;
 
 interface RuleSnoozeSettingsResponse {
+  /**
+   * Rule's SO id
+   */
   id: string;
   mute_all: boolean;
   snooze_schedule?: RuleSnooze;

@@ -14,7 +14,7 @@ import { DETECTION_ENGINE_RULES_BULK_ACTION } from '../../../../../common/consta
 import { useInvalidateFindRulesQuery, useUpdateRulesCache } from './use_find_rules_query';
 import { useInvalidateFetchRuleByIdQuery } from './use_fetch_rule_by_id_query';
 import { useInvalidateFetchRuleManagementFiltersQuery } from './use_fetch_rule_management_filters_query';
-import { useInvalidateFetchPrebuiltRulesStatusQueryNew } from './prebuilt_rules/use_fetch_prebuilt_rules_status_query_new';
+import { useInvalidateFetchPrebuiltRulesStatusQueryNew } from './prebuilt_rules/use_fetch_prebuilt_rules_status_query';
 import { useInvalidateFetchPrebuiltRulesUpgradeReviewQuery } from './prebuilt_rules/use_fetch_prebuilt_rules_upgrade_review_query';
 import { useInvalidateFetchPrebuiltRulesInstallReviewQuery } from './prebuilt_rules/use_fetch_prebuilt_rules_install_review_query';
 

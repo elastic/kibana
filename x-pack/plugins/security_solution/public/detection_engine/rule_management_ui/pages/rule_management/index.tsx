@@ -46,10 +46,10 @@ import { usePrebuiltRulesStatus } from '../../../rule_management/logic/prebuilt_
 import { MaintenanceWindowCallout } from '../../components/maintenance_window_callout/maintenance_window_callout';
 import { SuperHeader } from './super_header';
 import {
-  NEW_PREBUILT_RULES_CALLOUT_TITLE,
+  NEW_PREBUILT_RULES_AVAILABLE_CALLOUT_TITLE,
   UPDATE_RULES_CALLOUT_TITLE,
 } from '../../components/mini_callout/translations';
-import { useInvalidateFetchPrebuiltRulesStatusQueryNew } from '../../../rule_management/api/hooks/prebuilt_rules/use_fetch_prebuilt_rules_status_query_new';
+import { useInvalidateFetchPrebuiltRulesStatusQueryNew } from '../../../rule_management/api/hooks/prebuilt_rules/use_fetch_prebuilt_rules_status_query';
 import { AllRulesTabs } from '../../components/rules_table/rules_table_toolbar';
 
 const RulesPageComponent: React.FC = () => {
@@ -209,7 +209,7 @@ const RulesPageComponent: React.FC = () => {
               color="success"
               data-test-subj="prebuilt-rules-new-callout"
               iconType={'iInCircle'}
-              title={NEW_PREBUILT_RULES_CALLOUT_TITLE}
+              title={NEW_PREBUILT_RULES_AVAILABLE_CALLOUT_TITLE}
             />
           )}
           <MaintenanceWindowCallout />

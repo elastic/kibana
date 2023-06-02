@@ -14,7 +14,7 @@ import { TestProviders } from '../../../../common/mock';
 import { useRulesTableContextMock } from '../rules_table/rules_table/__mocks__/rules_table_context';
 import { useRulesTableContext } from '../rules_table/rules_table/rules_table_context';
 
-jest.mock('./rules_table/rules_table_context');
+jest.mock('../rules_table/rules_table/rules_table_context');
 
 describe('RulesTableUtilityBar', () => {
   it('renders RulesTableUtilityBar total rules and selected rules', () => {

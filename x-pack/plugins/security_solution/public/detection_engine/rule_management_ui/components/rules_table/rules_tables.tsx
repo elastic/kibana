@@ -219,24 +219,20 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
   const shouldShowRulesTable = !isLoading && !isTableEmpty;
 
   let tableProps;
-  let currentRules;
   switch (selectedTab) {
     case AllRulesTabs.installed:
-      currentRules = rules;
       tableProps = {
         'data-test-subj': 'rules-management-table',
         columns: rulesColumns,
       };
       break;
     case AllRulesTabs.monitoring:
-      currentRules = rules;
       tableProps = {
         'data-test-subj': 'rules-monitoring-table',
         columns: monitoringColumns,
       };
       break;
     default:
-      currentRules = rules;
       tableProps = {
         'data-test-subj': 'rules-management-table',
         columns: rulesColumns,
@@ -310,7 +306,7 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
           />
           <EuiBasicTable
             itemId="id"
-            items={currentRules}
+            items={rules}
             isSelectable={isTableSelectable}
             noItemsMessage={NO_ITEMS_MESSAGE}
             onChange={tableOnChangeCallback}

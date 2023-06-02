@@ -14,7 +14,7 @@ import { useInvalidateFetchRuleManagementFiltersQuery } from '../use_fetch_rule_
 import { useInvalidateFetchRulesSnoozeSettingsQuery } from '../use_fetch_rules_snooze_settings';
 import { useInvalidateFetchPrebuiltRulesInstallReviewQuery } from './use_fetch_prebuilt_rules_install_review_query';
 import { performInstallAllRules } from '../../api';
-import { useInvalidateFetchPrebuiltRulesStatusQueryNew } from './use_fetch_prebuilt_rules_status_query_new';
+import { useInvalidateFetchPrebuiltRulesStatusQueryNew } from './use_fetch_prebuilt_rules_status_query';
 
 export const PERFORM_ALL_RULES_INSTALLATION_KEY = [
   'POST',
