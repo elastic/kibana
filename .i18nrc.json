@@ -114,7 +114,10 @@
     "visualizationUiComponents": "src/plugins/visualization_ui_components",
     "unifiedSearch": "src/plugins/unified_search",
     "unifiedFieldList": "src/plugins/unified_field_list",
-    "unifiedHistogram": "src/plugins/unified_histogram"
+    "unifiedHistogram": "src/plugins/unified_histogram",
+    "unifiedDocViewer-plugin": "src/plugins/unified_doc_viewer",
+    "unifiedDocViewer-package": "packages/kbn-unified_doc_viewer",
+    "unifiedDiscover": "packages/kbn-unified_discover/src"
   },
   "translations": []
 }

@@ -78,7 +78,7 @@ export function formatHit(
       : [
           ...pairs.slice(0, maxEntries),
           [
-            i18n.translate('discover.utils.formatHit.moreFields', {
+            i18n.translate('unifiedDiscover.utils.formatHit.moreFields', {
               defaultMessage: 'and {count} more {count, plural, one {field} other {fields}}',
               values: { count: pairs.length - maxEntries },
             }),
