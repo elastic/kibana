@@ -12,51 +12,56 @@ The main purpose of this API is to address two problems of the old migration sys
 
 This API also intend to address minor DX issues of the old migration system, by having a more explicit definition of saved Objects "versions".
 
-### What are model versions trying to solve?
+## What are model versions trying to solve?
 
-As explained in the previous section, 
+As explained in the previous section, the API is solving issues of the previous migration system regarding managed deployments:
 
-### 1. SO type version was tightly coupled to stack versioning
+### 1. SO type versioning was tightly coupled to stack versioning
 
-With the previous migration system, migrations were defined per stack version. If that was sufficient for
-on-prem distributions, as there was no way to upgrade Kibana to another else than a fixed stack version,
-it isn't the case for our managed offering, where we're planning on delivering more often, decoupling
-distribution and upgrade from the stack versions we know today.
+With the previous migration system, migrations were defined per stack version, meaning that the "granularity" for defining
+migrations was the stack version. You couldn't for example, add 2 consecutive migrations on `8.6.0` (to be executed at different points in time).
 
-This requirement introduces a lot of problems, limitations and edge case regarding 'incremental releases' within a
-given stack version that the previous migration system wasn't conceive to support.
+It was fine for on-prem distributions, given there is no way to upgrade Kibana to something else than a "fixed" stack version.
+
+For our managed offering however, where we're planning on decoupling deployments and upgrades from stack versions 
+(deploying more often, so more than once per stack release), it would have been an issue, as it wouldn't have been possible
+to add a new migration in-between 2 stack versions.
+
+<img src="mv_img_1.png" alt="multiple migration per stack version schema">
+
+Because of this, we needed a way to decouple SO versioning from the stack versioning.
 
 ### 2. The current migrations API is unsafe for the zero-downtime and backward-compatible requirements
 
-Until now, upgrading Kibana was done with downtime: the current upgrade process requires to shut down all the existing
-nodes before deploying the new version, to avoid any risk of data or API incompatibility. That way, there is always
-a single version of Kibana running at a given time.
+On traditional deployments (on-prem/non-managed cloud), upgrading Kibana is done with downtime. 
+The upgrade process requires to shut down all the nodes of the prior version before deploying the new one. 
+That way, there is always a single version of Kibana running at a given time, which avoids all risks of data incompatibility
+between version (e.g the new version introduces a migration that changes the shape of the document in a way that breaks compatibility
+with the previous version)
 
-For serverless, we need to be able to upgrade Kibana without interruption of service, meaning that the old and new
-version of Kibana will have to cohabitate for a time. This leads to a lot of problems and subtlety in term of what
-can, or cannot, be done in term of data transformation during an upgrade, and, long story short, the existing
-migration API (which basically allows to do any kind of 1-1 document transformation) was way too permissive and
-unsafe given our serverless requirements. 
+For serverless however, the same process can't be used, as we need to be able to upgrade Kibana without interruption of service.
+Which means that the old and new version of Kibana will have to cohabitate for a time.
 
-## What does this API looks like
+This leads to a lot of constraints regarding what can, or cannot, be done with data transformations (migrations) during an upgrade. 
+And, unsurprisingly, the existing migration API (which allows to register any kind of *(doc) => doc* transformations) was way too permissive and
+unsafe given our backward compatibility requirements. 
 
-When registering a savedObject type, a new [modelVersions](https://github.com/elastic/kibana/blob/9a6a2ccdff619f827b31c40dd9ed30cb27203da7/packages/core/saved-objects/core-saved-objects-server/src/saved_objects_type.ts#L138-L177)
+## Defining model versions
 
-This attribute is a [SavedObjectsModelVersionMap](https://github.com/elastic/kibana/blob/9a6a2ccdff619f827b31c40dd9ed30cb27203da7/packages/core/saved-objects/core-saved-objects-server/src/model_version/model_version.ts#L60-L77)
-which is a map of [SavedObjectsModelVersion](https://github.com/elastic/kibana/blob/9a6a2ccdff619f827b31c40dd9ed30cb27203da7/packages/core/saved-objects/core-saved-objects-server/src/model_version/model_version.ts#L12-L20)
+As for old migrations, model versions are bound to a given [savedObject type](https://github.com/elastic/kibana/blob/9b330e493216e8dde3166451e4714966f63f5ab7/packages/core/saved-objects/core-saved-objects-server/src/saved_objects_type.ts#L22-L27)
 
-This map follows a similar `version => model` format as the old migration map, however there are differences:
+When registering a SO type, a new [modelVersions](https://github.com/elastic/kibana/blob/9a6a2ccdff619f827b31c40dd9ed30cb27203da7/packages/core/saved-objects/core-saved-objects-server/src/saved_objects_type.ts#L138-L177)
+property is available. This attribute is a map of [SavedObjectsModelVersion](https://github.com/elastic/kibana/blob/9a6a2ccdff619f827b31c40dd9ed30cb27203da7/packages/core/saved-objects/core-saved-objects-server/src/model_version/model_version.ts#L12-L20)
+which is the top-level type/container to define model versions.
 
-### 1. Versions are now plain numbers
+This map follows a similar `{ [version number] => version definition }` format as the old migration map, however 
+a given SO type's model version is now identified by a single integer.
 
-A given SO type's model version is now identified by a single integer. The first version being number 1, and then normally
-incremented by one for each new version. 
+The first version must be numbered as version 1, incrementing by one for each new version.
 
 That way:
 - SO type versions are decoupled from stack versioning
-- SO type versions is independent between types (e.g dashboard version has no relation with maps version)
-
-#### Versioning examples
+- SO type versions are independent between types
 
 *a **valid** version numbering:*
 ```ts
@@ -64,8 +69,8 @@ const myType: SavedObjectsType = {
   name: 'test',
   switchToModelVersionAt: '8.10.0',
   modelVersions: {
-    1: modelVersion1,
-    2: modelVersion2,
+    1: modelVersion1, // valid: start with version 1
+    2: modelVersion2, // valid: no gap between versions
   },
   // ...other mandatory properties
 };
@@ -77,72 +82,19 @@ const myType: SavedObjectsType = {
   name: 'test',
   switchToModelVersionAt: '8.10.0',
   modelVersions: {
-    2: modelVersion2, // <== invalid: first version should be 1
-    3: modelVersion3,
+    2: modelVersion2, // invalid: first version should be 1
+    4: modelVersion3, // invalid: skipped version 3
   },
   // ...other mandatory properties
 };
 ```
 
-*another **invalid** version numbering:*
-```ts
-const myType: SavedObjectsType = {
-  name: 'test',
-  switchToModelVersionAt: '8.10.0',
-  modelVersions: {
-    1: modelVersion1, 
-    3: modelVersion3, // <== invalid: skipped version 2
-  },
-  // ...other mandatory properties
-};
-```
-
-### 2. model versions define more than just a migration function
+## Structure of a model version
 
 [Model versions](https://github.com/elastic/kibana/blob/9b330e493216e8dde3166451e4714966f63f5ab7/packages/core/saved-objects/core-saved-objects-server/src/model_version/model_version.ts#L12-L20)
-are not just a function as the previous migrations were, but a object defining all the info related to the version.
+are not just functions as the previous migrations were, but structured objects describing how the version behaves and what changed since the last one.
 
-It's currently composed of:
-
-- [`changes`](https://github.com/elastic/kibana/blob/9b330e493216e8dde3166451e4714966f63f5ab7/packages/core/saved-objects/core-saved-objects-server/src/model_version/model_version.ts#L21-L51)
-
-The list of changes applied during this version. This is the part that replaces the old migration system, and allows
-to define when a version adds new mapping, mutates the documents, or other type-related changes.
-
-The current types of changes are:
-
-#### mappings_addition
-#### mappings_deprecation
-#### data_backfill
-
-- [`schemas`](https://github.com/elastic/kibana/blob/9b330e493216e8dde3166451e4714966f63f5ab7/packages/core/saved-objects/core-saved-objects-server/src/model_version/schemas.ts#L11-L16)
-
-The schemas associated with this version. Schemas are used to validate or convert the shape of SO documents are various
-stages of their lifecycle.
-
-The currently available schemas are:
-
-#### forwardCompatibility
-
-This is a new concept introduced by model versions. This schema is used for inter-version compatibility.
-
-When retrieving a savedObject document from an index, if the version of the document is higher than the latest version
-known of the Kibana instance, the document will go through the `forwardCompatibility` schema of the associated model version.
-
-These conversion mechanism shouldn't assert the data itself, and only strip unknown fields to convert the document to 
-the **shape** of the document at the given version.
-
-### create
-
-This is a direct replacement for [the old SavedObjectType.schemas](https://github.com/elastic/kibana/blob/9b330e493216e8dde3166451e4714966f63f5ab7/packages/core/saved-objects/core-saved-objects-server/src/saved_objects_type.ts#L75-L82)
-definition, which is now directly included in the version definition.
-
-As a refresher the `create` schema is a `@kbn/config-schema` Object schema, and is used to validate the properties of the document
-during `create` and `bulkCreate` operations.
-
-#### example of version definition
-
-A model version registration looks like this:
+*A base example of what a model version can look like:*
 
 ```ts
 const myType: SavedObjectsType = {
@@ -171,6 +123,117 @@ const myType: SavedObjectsType = {
   // ...other mandatory properties
 };
 ```
+
+
+It's currently composed of two main properties:
+
+### changes
+
+[link to the TS doc for `changes`](https://github.com/elastic/kibana/blob/9b330e493216e8dde3166451e4714966f63f5ab7/packages/core/saved-objects/core-saved-objects-server/src/model_version/model_version.ts#L21-L51)
+
+Describes the list of changes applied during this version. 
+
+This is the part that replaces the old migration system, and allows defining when a version adds new mapping, 
+mutates the documents, or other type-related changes.
+
+The current types of changes are:
+
+#### - mappings_addition
+
+Used to define new mappings introduced in a given version.
+
+*Usage example:*
+
+```ts
+const change: SavedObjectsModelMappingsAdditionChange = {
+  type: 'mappings_addition',
+  addedMappings: {
+    newField: { type: 'text' },
+    existingNestedField: {
+      properties: {
+        newNestedProp: { type: 'keyword' },
+      },
+    },
+  },
+};
+```
+
+**note:** *When adding mappings, the root `type.mappings` must also be updated accordingly (as it was done previously).*
+
+#### - mappings_deprecation
+
+Used to flag mappings as no longer being used and ready to be removed.
+
+*Usage example:*
+
+```ts
+let change: SavedObjectsModelMappingsDeprecationChange = {
+  type: 'mappings_deprecation',
+  deprecatedMappings: ['someDeprecatedField', 'someNested.deprecatedField'],
+};
+```
+
+**note:** *It is currently not possible to remove fields from an existing index's mapping (without reindexing into another index),
+          so the mappings flagged with this change type won't be deleted for now, but this should still be used to allow
+          our system to clean the mappings once upstream (ES) unblock us.*
+
+#### - data_backfill
+
+Used to populate fields (indexed or not) added in the same version
+
+*Usage example:*
+
+```ts
+let change: SavedObjectsModelDataBackfillChange = {
+  type: 'data_backfill',
+  transform: (document) => {
+    document.attributes.someAddedField = 'defaultValue';
+    return { document };
+  },
+};
+```
+
+**note:** *Even if no check is performed to ensure it, this type of model change should only be used to 
+           backfill newly introduced fields.*
+
+### schemas
+
+[link to the TS doc for `schemas`](https://github.com/elastic/kibana/blob/9b330e493216e8dde3166451e4714966f63f5ab7/packages/core/saved-objects/core-saved-objects-server/src/model_version/schemas.ts#L11-L16)
+
+The schemas associated with this version. Schemas are used to validate or convert SO documents at various
+stages of their lifecycle.
+
+The currently available schemas are:
+
+#### forwardCompatibility
+
+This is a new concept introduced by model versions. This schema is used for inter-version compatibility.
+
+When retrieving a savedObject document from an index, if the version of the document is higher than the latest version
+known of the Kibana instance, the document will go through the `forwardCompatibility` schema of the associated model version.
+
+These conversion mechanism shouldn't assert the data itself, and only strip unknown fields to convert the document to 
+the **shape** of the document at the given version.
+
+Basically, this schema should keep all the known fields of a given version, and remove all the unknown fields, without throwing.
+
+Usage examples are available in the `use-case examples` section below.
+
+**note:** *Even if highly recommended, implementing this schema is not strictly required. Type owners can manage unknown fields
+          and inter-version compatibility themselves in their service layer instead.*
+
+#### create
+
+This is a direct replacement for [the old SavedObjectType.schemas](https://github.com/elastic/kibana/blob/9b330e493216e8dde3166451e4714966f63f5ab7/packages/core/saved-objects/core-saved-objects-server/src/saved_objects_type.ts#L75-L82)
+definition, now directly included in the model version definition.
+
+As a refresher the `create` schema is a `@kbn/config-schema` object-type schema, and is used to validate the properties of the document
+during `create` and `bulkCreate` operations.
+
+**note:** *Implementing this schema is optional, but still recommended, as otherwise there will be no validating when 
+           importing objects*
+
+///////////////// <====
 
 ## Use-case examples
 
