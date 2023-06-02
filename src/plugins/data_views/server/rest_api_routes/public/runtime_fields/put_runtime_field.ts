@@ -27,6 +27,7 @@ import {
 } from '../../../constants';
 import { responseFormatter } from './response_formatter';
 import { RuntimeResponseType } from '../../route_types';
+import { runtimeResponseSchema } from '../../schema';
 
 interface PutRuntimeFieldArgs {
   dataViewsService: DataViewsService;
@@ -93,6 +94,11 @@ const putRuntimeFieldRouteFactory =
               }),
               runtimeField: runtimeFieldSchema,
             }),
+          },
+          response: {
+            200: {
+              body: runtimeResponseSchema,
+            },
           },
         },
       },

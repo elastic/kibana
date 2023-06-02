@@ -16,6 +16,7 @@ import type {
 } from '../../../types';
 import { INITIAL_REST_VERSION } from '../../../constants';
 import { serializedFieldFormatSchema } from '../../../../common/schemas';
+import { FieldSpecRestResponse } from '../../route_types';
 
 export const registerGetScriptedFieldRoute = (
   router: IRouter,
@@ -79,8 +80,7 @@ export const registerGetScriptedFieldRoute = (
             throw new Error('Only scripted fields can be retrieved.');
           }
 
-          // todo set type
-          const body = {
+          const body: { field: FieldSpecRestResponse } = {
             field: field.toSpec(),
           };
 

@@ -83,7 +83,7 @@ export type DataViewFieldBaseRestResponse = {
   esTypes?: string[];
 };
 
-export type FieldSpec = DataViewFieldBaseRestResponse & {
+export type FieldSpecRestResponse = DataViewFieldBaseRestResponse & {
   count?: number;
   conflictDescriptions?: Record<string, string[]>;
   format?: SerializedFieldFormatRestResponse;
@@ -103,7 +103,7 @@ export type FieldSpec = DataViewFieldBaseRestResponse & {
   parentName?: string;
 };
 
-export type DataViewFieldMap = Record<string, FieldSpec>;
+export type DataViewFieldMap = Record<string, FieldSpecRestResponse>;
 
 export type DataViewSpecRestResponse = {
   id?: string;
@@ -133,12 +133,12 @@ export interface DataViewListItemRestResponse {
 
 export interface DataViewsRuntimeResponseType {
   data_view: DataViewSpecRestResponse;
-  fields: FieldSpec[];
+  fields: FieldSpecRestResponse[];
 }
 
 export interface IndexPatternsRuntimeResponseType {
   index_pattern: DataViewSpecRestResponse;
-  field: FieldSpec;
+  field: FieldSpecRestResponse;
 }
 
 export interface RuntimeResponseType {
