@@ -6,12 +6,12 @@
  */
 
 import React, { useCallback } from 'react';
-import { EuiButtonEmpty } from '@elastic/eui';
+import { EuiButtonEmpty, EuiFlexGroup, EuiPanel } from '@elastic/eui';
 import { useExpandableFlyoutContext } from '@kbn/expandable-flyout';
+import { InsightsSummaryRow } from './insights_summary_row';
 import { useCorrelations } from '../hooks/use_correlations';
 import { INSIGHTS_CORRELATIONS_TEST_ID } from './test_ids';
 import { InsightsSubSection } from './insights_subsection';
-import { InsightsSummaryPanel } from './insights_summary_panel';
 import { useRightPanelContext } from '../context';
 import { CORRELATIONS_TEXT, CORRELATIONS_TITLE, VIEW_ALL } from './translations';
 import { LeftPanelKey, LeftPanelInsightsTabPath } from '../../left';
@@ -52,7 +52,18 @@ export const CorrelationsOverview: React.FC = () => {
       title={CORRELATIONS_TITLE}
       data-test-subj={INSIGHTS_CORRELATIONS_TEST_ID}
     >
-      <InsightsSummaryPanel data={data} data-test-subj={INSIGHTS_CORRELATIONS_TEST_ID} />
+      <EuiPanel hasShadow={false} hasBorder={true} paddingSize="s">
+        <EuiFlexGroup direction="column" gutterSize="none">
+          {data.map((d) => (
+            <InsightsSummaryRow
+              icon={d.icon}
+              value={d.value}
+              text={d.text}
+              data-test-subj={INSIGHTS_CORRELATIONS_TEST_ID}
+            />
+          ))}
+        </EuiFlexGroup>
+      </EuiPanel>
       <EuiButtonEmpty
         onClick={goToCorrelationsTab}
         iconType="arrowStart"

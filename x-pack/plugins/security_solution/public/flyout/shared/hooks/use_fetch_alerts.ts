@@ -15,15 +15,27 @@ import { type AlertsQueryParams, createFindAlerts } from '../services/find_alert
 export type UseAlertsQueryParams = AlertsQueryParams;
 
 export interface UseAlertsQueryResult {
+  /**
+   * Was there an console.error
+   */
   error: boolean;
+  /**
+   * Is fetch in progress
+   */
   loading: boolean;
+  /**
+   * Total records, for pagination
+   */
   totalItemCount: number;
+  /**
+   * Individual records returend from ruinning the query
+   */
   data: SearchResponse<Record<string, unknown>>['hits']['hits'];
 }
+
 /**
  * Returns alerts based on provided ids with support for pagination. Uses react-query internally.
  */
-
 export const useFetchAlerts = ({
   alertIds,
   from,

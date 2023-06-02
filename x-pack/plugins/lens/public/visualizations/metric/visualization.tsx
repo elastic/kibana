@@ -420,7 +420,6 @@ export const getMetricVisualization = ({
             ]
           : undefined,
         disabled: true,
-        canAddViaMenu: true,
       },
       {
         type: layerTypes.METRIC_TRENDLINE,
@@ -431,7 +430,6 @@ export const getMetricVisualization = ({
           { groupId: GROUP_ID.TREND_TIME, columnId: generateId(), autoTimeField: true },
         ],
         disabled: Boolean(state?.trendlineLayerId),
-        canAddViaMenu: true,
       },
     ];
   },

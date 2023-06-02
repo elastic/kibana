@@ -15,6 +15,9 @@ describe('risk tab', () => {
   before(() => {
     cleanKibana();
     esArchiverLoad('risk_hosts');
+  });
+
+  beforeEach(() => {
     login();
   });
 

@@ -18,18 +18,24 @@ export enum Languages {
   CURL = 'curl',
 }
 
+export interface LanguageDefinitionSnippetArguments {
+  url: string;
+  apiKey: string;
+}
+
+type CodeSnippet = string | ((args: LanguageDefinitionSnippetArguments) => string);
 export interface LanguageDefinition {
   advancedConfig?: string;
   apiReference?: string;
   basicConfig?: string;
-  configureClient: string;
+  configureClient: CodeSnippet;
   docLink: string;
   iconType: string;
   id: Languages;
-  ingestData: string;
+  ingestData: CodeSnippet;
   installClient: string;
   languageStyling?: string;
   name: string;
-  buildSearchQuery: string;
-  testConnection: string;
+  buildSearchQuery: CodeSnippet;
+  testConnection: CodeSnippet;
 }

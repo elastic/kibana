@@ -20,7 +20,7 @@ const paginationReducer = (_state: PaginationState, action: PaginationState): Pa
   return action;
 };
 
-interface SortingState {
+export interface SortingState {
   enableAllColumns: boolean;
   sort: {
     field: string;
@@ -42,6 +42,9 @@ const sortingReducer = (state: SortingState, action: SortingState['sort']): Sort
   };
 };
 
+/**
+ * useSorting exposes resusable sorting logic that can be used with eui tables
+ */
 export const useSorting = () => {
   const [sorting, setSorting] = useReducer(sortingReducer, initialSorting);
 
@@ -56,6 +59,10 @@ export const useSorting = () => {
   return { sorting, setSorting, sortConfig };
 };
 
+/**
+ * use pagination adds reusable logic that can be applied to
+ * eui tables
+ */
 export const usePagination = () => {
   const [pagination, setPagination] = useReducer(paginationReducer, initialPagination);
 

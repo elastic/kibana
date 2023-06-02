@@ -10,7 +10,6 @@ import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { useEffect, useMemo, useReducer } from 'react';
 import type { CasesByAlertId } from '@kbn/cases-plugin/common/api';
 import { useFetchRelatedAlertsBySameSourceEvent } from './use_fetch_related_alerts_by_same_source_event';
-import type { InsightsSummaryPanelData } from '../components/insights_summary_panel';
 import { useShowRelatedCases } from './use_show_related_cases';
 import { useFetchRelatedCases } from './use_fetch_related_cases';
 import {
@@ -28,6 +27,12 @@ import { useFetchRelatedAlertsByAncestry } from './use_fetch_related_alerts_by_a
 import { useShowRelatedAlertsBySameSourceEvent } from './use_show_related_alerts_by_same_source_event';
 import { useShowRelatedAlertsBySession } from './use_show_related_alerts_by_session';
 import { useFetchRelatedAlertsBySession } from './use_fetch_related_alerts_by_session';
+
+export interface InsightsSummaryPanelData {
+  icon: string;
+  value: number;
+  text: string;
+}
 
 export interface UseCorrelationsParams {
   /**
@@ -80,7 +85,7 @@ export const useCorrelations = ({
   dataAsNestedObject,
   dataFormattedForFieldBrowser,
   scopeId,
-}: UseCorrelationsParams): Readonly<UseCorrelationsResult> => {
+}: UseCorrelationsParams): UseCorrelationsResult => {
   const [data, updateInsightsSummaryPanel] = useReducer(
     (
       currentEntries: InsightsSummaryPanelData[],

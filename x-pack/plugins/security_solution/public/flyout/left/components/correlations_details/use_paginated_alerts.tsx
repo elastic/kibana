@@ -9,6 +9,9 @@ import { useMemo } from 'react';
 import { useFetchAlerts } from '../../../shared/hooks/use_fetch_alerts';
 import { usePagination, useSorting } from './use_pagination_and_sorting';
 
+/**
+ * Adds pagination and sorting state to useFetchAlerts. It is used in alerts table local to correlation details
+ */
 export const usePaginatedAlerts = (alertIds: string[]) => {
   const { setPagination, pagination, pageSizeOptions } = usePagination();
   const { sorting, sortConfig, setSorting } = useSorting();

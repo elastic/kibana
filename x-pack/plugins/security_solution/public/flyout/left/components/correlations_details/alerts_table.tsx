@@ -54,6 +54,9 @@ export interface AlertsTableProps {
   'data-test-subj'?: string;
 }
 
+/**
+ * Renders paginated alert array based on the provided alertIds
+ */
 export const AlertsTable: FC<AlertsTableProps> = ({ alertIds, 'data-test-subj': testSubject }) => {
   const { setPagination, setSorting, data, loading, paginationConfig, sorting, error } =
     usePaginatedAlerts(alertIds);

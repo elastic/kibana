@@ -9,10 +9,12 @@
 import { errors } from '@elastic/elasticsearch';
 import type { IndicesGetMappingResponse } from '@elastic/elasticsearch/lib/api/types';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
-import type { IndexTypesMap } from '@kbn/core-saved-objects-base-server-internal';
+import {
+  DEFAULT_INDEX_TYPES_MAP,
+  type IndexTypesMap,
+} from '@kbn/core-saved-objects-base-server-internal';
 import { MAIN_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import { loggerMock } from '@kbn/logging-mocks';
-import { DEFAULT_INDEX_TYPES_MAP } from './kibana_migrator_constants';
 import {
   calculateTypeStatuses,
   createMultiPromiseDefer,

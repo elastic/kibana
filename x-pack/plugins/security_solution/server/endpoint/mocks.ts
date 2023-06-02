@@ -35,7 +35,8 @@ import {
   createMockAgentService,
   createMockPackageService,
   createMessageSigningServiceMock,
-  createFleetFilesClientMock,
+  createFleetFromHostFilesClientMock,
+  createFleetToHostFilesClientMock,
 } from '@kbn/fleet-plugin/server/mocks';
 import { createFleetAuthzMock } from '@kbn/fleet-plugin/common/mocks';
 import type { RequestFixtureOptions } from '@kbn/core-http-router-server-mocks';
@@ -94,7 +95,8 @@ export const createMockEndpointAppContextService = (
 ): jest.Mocked<EndpointAppContextService> => {
   const mockEndpointMetadataContext = createEndpointMetadataServiceTestContextMock();
   const casesClientMock = createCasesClientMock();
-  const fleetFilesClientMock = createFleetFilesClientMock();
+  const fleetFromHostFilesClientMock = createFleetFromHostFilesClientMock();
+  const fleetToHostFilesClientMock = createFleetToHostFilesClientMock();
 
   return {
     start: jest.fn(),
@@ -108,7 +110,8 @@ export const createMockEndpointAppContextService = (
     getEndpointAuthz: jest.fn(async (_) => getEndpointAuthzInitialStateMock()),
     getCasesClient: jest.fn().mockReturnValue(casesClientMock),
     getActionCreateService: jest.fn().mockReturnValue(createActionCreateServiceMock()),
-    getFleetFilesClient: jest.fn(async (_) => fleetFilesClientMock),
+    getFleetFromHostFilesClient: jest.fn(async () => fleetFromHostFilesClientMock),
+    getFleetToHostFilesClient: jest.fn(async () => fleetToHostFilesClientMock),
     setup: jest.fn(),
     getLicenseService: jest.fn(),
     getFeatureUsageService: jest.fn(),
@@ -182,7 +185,10 @@ export const createMockEndpointAppContextServiceStartContract =
       endpointFleetServicesFactory,
       logger,
       fleetAuthzService: createFleetAuthzServiceMock(),
-      createFleetFilesClient: jest.fn((..._) => createFleetFilesClientMock()),
+      createFleetFilesClient: {
+        fromHost: jest.fn((..._) => createFleetFromHostFilesClientMock()),
+        toHost: jest.fn((..._) => createFleetToHostFilesClientMock()),
+      },
       manifestManager: getManifestManagerMock(),
       security,
       alerting: alertsMock.createStart(),

@@ -11,6 +11,7 @@ import moment from 'moment-timezone';
 import { EuiProgress, EuiTabbedContent } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
+import { getAnalysisType } from '@kbn/ml-data-frame-analytics-utils';
 
 import { formatHumanReadableDateTimeSeconds } from '../../../../../../../common/util/date_utils';
 
@@ -19,7 +20,6 @@ import { ExpandedRowDetailsPane, SectionConfig } from './expanded_row_details_pa
 import { ExpandedRowJsonPane } from './expanded_row_json_pane';
 
 import { getDataFrameAnalyticsProgressPhase } from './common';
-import { getAnalysisType } from '../../../../common/analytics';
 import { ExpandedRowMessagesPane } from './expanded_row_messages_pane';
 
 function getItemDescription(value: any) {

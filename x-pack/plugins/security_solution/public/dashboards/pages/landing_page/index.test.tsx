@@ -10,7 +10,7 @@ import React from 'react';
 import { SecurityPageName } from '../../../app/types';
 import { TestProviders } from '../../../common/mock';
 import { DashboardsLandingPage } from '.';
-import type { NavLinkItem } from '../../../common/components/navigation/types';
+import type { NavigationLink } from '../../../common/links';
 import { useCapabilities } from '../../../common/lib/kibana';
 import * as telemetry from '../../../common/lib/telemetry';
 
@@ -28,7 +28,7 @@ const spyTrack = jest.spyOn(telemetry, 'track');
 const OVERVIEW_ITEM_LABEL = 'Overview';
 const DETECTION_RESPONSE_ITEM_LABEL = 'Detection & Response';
 
-const APP_DASHBOARD_LINKS: NavLinkItem = {
+const APP_DASHBOARD_LINKS: NavigationLink = {
   id: SecurityPageName.dashboards,
   title: 'Dashboards',
   links: [
