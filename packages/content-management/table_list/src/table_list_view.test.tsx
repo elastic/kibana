@@ -1185,6 +1185,7 @@ describe('TableList', () => {
     onFetchSuccess: jest.fn(),
     tableCaption: 'test title',
     getDetailViewLink: () => '',
+    setPageDataTestSubject: () => {},
   };
 
   const setup = registerTestBed<string, TableListProps>(WithServices<TableListProps>(TableList), {
@@ -1236,5 +1237,26 @@ describe('TableList', () => {
     const metadata = table.getMetaData('itemsInMemTable');
 
     expect(metadata.tableCellsValues[0][0]).toBe('Updated title');
+  });
+
+  it('reports successful fetches', async () => {
+    const onFetchSuccess = jest.fn();
+
+    act(() => {
+      setup({ onFetchSuccess });
+    });
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    expect(onFetchSuccess).toHaveBeenCalled();
+  });
+
+  it('reports the page data test subject', async () => {
+    const setPageDataTestSubject = jest.fn();
+
+    act(() => {
+      setup({ setPageDataTestSubject });
+    });
+
+    expect(setPageDataTestSubject).toHaveBeenCalledWith('testLandingPage');
   });
 });

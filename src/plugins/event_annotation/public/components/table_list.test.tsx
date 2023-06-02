@@ -71,7 +71,7 @@ describe('annotation list view', () => {
           save: true,
         }}
         parentProps={{
-          onFetchSuccess: () => {},
+          onInitialFetchSuccess: () => {},
         }}
         dataViews={[
           {
