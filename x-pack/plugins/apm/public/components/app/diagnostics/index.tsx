@@ -159,7 +159,7 @@ function RefreshButton() {
   return (
     <EuiButton
       isDisabled={isImported}
-      data-test-subj="apmDiagnosticsTemplateAddSomethingButton"
+      data-test-subj="apmDiagnosticsTemplateRefreshButton"
       fill
       onClick={refetch}
     >
