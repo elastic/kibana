@@ -134,7 +134,6 @@ export const SendToTimelineButton: React.FunctionComponent<SendToTimelineButtonP
                 key: 'query',
                 value: dataProviders[0].kqlQuery,
               },
-              // TODO: Now you be careful parsing json directly from the robots, mmmkay?
               query: JSON.parse(dataProviders[0].kqlQuery),
             };
             dispatch(setFilters({ id: TimelineId.active, filters: [filter] }));

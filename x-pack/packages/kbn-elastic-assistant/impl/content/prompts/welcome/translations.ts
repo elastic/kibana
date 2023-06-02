@@ -11,7 +11,7 @@ export const WELCOME_GENERAL = i18n.translate(
   'xpack.elasticAssistant.securityAssistant.content.prompts.welcome.welcomeGeneralPrompt',
   {
     defaultMessage:
-      'Welcome to your Elastic Assistant! I am your [100% open-code](https://github.com/elastic/kibana/pull/156933) portal into your Elastic Life. In time, I will be able to answer questions and provide assistance over all your information in Elastic, and oh-so much more. Till then, I hope this early preview will open your minds to the possibilities of what we can create when we work together, in the open. Cheers!',
+      'Welcome to your Elastic Assistant! I am your 100% open-code portal into your Elastic life. In time, I will be able to answer questions and provide assistance across all your information in Elastic, and oh-so much more. Till then, I hope this early preview will open your mind to the possibilities of what we can create when we work together, in the open. Cheers!',
   }
 );
 
@@ -19,7 +19,7 @@ export const WELCOME_GENERAL_2 = i18n.translate(
   'xpack.elasticAssistant.securityAssistant.content.prompts.welcome.welcomeGeneral2Prompt',
   {
     defaultMessage:
-      "So first things first, we'll need to set up a `Generative AI Connector` to get this chat experience going! With the `Generative AI Connector` you'll be able to configure access to either an [`Azure OpenAI Service`](https://azure.microsoft.com/en-us/products/cognitive-services/openai-service) or [`OpenAI API`](https://platform.openai.com/) account, but you better believe you'll be able to [deploy _your own_ models within your Elastic Cloud instance](https://www.elastic.co/blog/may-2023-launch-announcement) and use those here in the future... 😉",
+      "First things first, we'll need to set up a Generative AI Connector to get this chat experience going! With the Generative AI Connector, you'll be able to configure access to either an Azure OpenAI Service or OpenAI API account, but you better believe you'll be able to deploy your own models within your Elastic Cloud instance and use those here in the future... 😉",
   }
 );
 

@@ -171,6 +171,7 @@ const ActiveTimelineTab = memo<ActiveTimelineTabProps>(
     timelineType,
     showTimeline,
   }) => {
+    const isAssistantEnabled = useIsExperimentalFeatureEnabled('assistantEnabled');
     const getTab = useCallback(
       (tab: TimelineTabs) => {
         switch (tab) {
@@ -239,23 +240,25 @@ const ActiveTimelineTab = memo<ActiveTimelineTabProps>(
         >
           {isGraphOrNotesTabs && getTab(activeTimelineTab)}
         </HideShowContainer>
-        <HideShowContainer
-          $isVisible={activeTimelineTab === TimelineTabs.securityAssistant}
-          isOverflowYScroll={activeTimelineTab === TimelineTabs.securityAssistant}
-          data-test-subj={`timeline-tab-content-security-assistant`}
-          css={css`
-            overflow: hidden !important;
-          `}
-        >
-          <AssistantTab
-            renderCellValue={renderCellValue}
-            rowRenderers={rowRenderers}
-            timelineId={timelineId}
-            shouldRefocusPrompt={
-              showTimeline && activeTimelineTab === TimelineTabs.securityAssistant
-            }
-          />
-        </HideShowContainer>
+        {isAssistantEnabled && (
+          <HideShowContainer
+            $isVisible={activeTimelineTab === TimelineTabs.securityAssistant}
+            isOverflowYScroll={activeTimelineTab === TimelineTabs.securityAssistant}
+            data-test-subj={`timeline-tab-content-security-assistant`}
+            css={css`
+              overflow: hidden !important;
+            `}
+          >
+            <AssistantTab
+              renderCellValue={renderCellValue}
+              rowRenderers={rowRenderers}
+              timelineId={timelineId}
+              shouldRefocusPrompt={
+                showTimeline && activeTimelineTab === TimelineTabs.securityAssistant
+              }
+            />
+          </HideShowContainer>
+        )}
       </>
     );
   }

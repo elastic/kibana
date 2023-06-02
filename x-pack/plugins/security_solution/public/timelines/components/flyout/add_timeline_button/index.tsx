@@ -14,10 +14,6 @@ import type { ActionTimelineToShow } from '../../open_timeline/types';
 import * as i18n from '../../timeline/properties/translations';
 import { NewTimeline } from '../../timeline/properties/helpers';
 import { NewTemplateTimeline } from '../../timeline/properties/new_template_timeline';
-import {
-  CREATE_RULE_FROM_TIMELINE,
-  CREATE_RULE_FROM_TIMELINE_CORRELATION,
-} from '../../open_timeline/translations';
 
 interface AddTimelineButtonComponentProps {
   timelineId: string;
@@ -83,20 +79,6 @@ const AddTimelineButtonComponent: React.FC<AddTimelineButtonComponentProps> = ({
                 closeGearMenu={onClosePopover}
                 timelineId={timelineId}
                 title={i18n.NEW_TEMPLATE_TIMELINE}
-              />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <NewTemplateTimeline
-                closeGearMenu={onClosePopover}
-                timelineId={timelineId}
-                title={CREATE_RULE_FROM_TIMELINE}
-              />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <NewTemplateTimeline
-                closeGearMenu={onClosePopover}
-                timelineId={timelineId}
-                title={CREATE_RULE_FROM_TIMELINE_CORRELATION}
               />
             </EuiFlexItem>
 
