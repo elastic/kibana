@@ -30,6 +30,8 @@ export enum FlyoutTabIds {
   ANOMALIES = 'anomalies',
   OSQUERY = 'osquery',
   LOGS = 'logs',
+  LINK_TO_APM = 'linkToApm',
+  LINK_TO_UPTIME = 'linkToUptime',
 }
 
 export type TabIds = `${FlyoutTabIds}`;
@@ -50,6 +52,9 @@ export interface TabState {
     region?: string;
     customMetrics?: SnapshotCustomMetricInput[];
   };
+  linkToApm?: {
+    onCreateRuleClick?: () => void;
+  };
 }
 
 export interface FlyoutProps {
@@ -69,6 +74,8 @@ export interface Tab {
   'data-test-subj': string;
 }
 
+export type LinkOptions = 'linkToAlertRule' | 'linkToNodeDetails';
+
 export interface AssetDetailsProps {
   node: HostNodeRow;
   nodeType: InventoryItemType;
@@ -82,7 +89,8 @@ export interface AssetDetailsProps {
   overrides?: TabState;
   renderMode?: RenderMode;
   onTabsStateChange?: TabsStateChangeFn;
-  links?: Array<'uptime' | 'apmServices'>;
+  openAlertFlyout(): void;
+  links?: LinkOptions[];
 }
 
 export type TabsStateChangeFn = (state: TabState & { activeTabId?: TabIds }) => void;

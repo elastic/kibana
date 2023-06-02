@@ -5,48 +5,45 @@
  * 2.0.
  */
 import React from 'react';
-import { stringify } from 'querystring';
-import { encode } from '@kbn/rison';
 import { css } from '@emotion/react';
-import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
-import { EuiIcon, EuiLink, useEuiTheme } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
+import { EuiIcon, useEuiTheme, EuiTab } from '@elastic/eui';
+import { useLinkProps } from '@kbn/observability-shared-plugin/public';
+import type { Tab } from '../types';
 
-export interface LinkToApmServicesProps {
-  hostName: string;
+export interface LinkToApmServicesProps extends Tab {
+  nodeName: string;
   apmField: string;
 }
 
-export const LinkToApmServices = ({ hostName, apmField }: LinkToApmServicesProps) => {
-  const { services } = useKibanaContextForPlugin();
-  const { http } = services;
+export const LinkToApmServices = ({
+  nodeName,
+  apmField,
+  name,
+  ...props
+}: LinkToApmServicesProps) => {
   const { euiTheme } = useEuiTheme();
 
-  const queryString = new URLSearchParams(
-    encode(
-      stringify({
-        kuery: `${apmField}:"${hostName}"`,
-      })
-    )
-  );
-
-  const linkToApmServices = http.basePath.prepend(`/app/apm/services?${queryString}`);
+  const apmTracesMenuItemLinkProps = useLinkProps({
+    app: 'apm',
+    hash: 'services',
+    search: {
+      kuery: `${apmField}:"${nodeName}"`,
+    },
+  });
 
   return (
-    <RedirectAppLinks coreStart={services}>
-      <EuiLink href={linkToApmServices} data-test-subj="hostsView-flyout-apm-services-link">
-        <EuiIcon
-          type="popout"
-          css={css`
-            margin-right: ${euiTheme.size.xs};
-          `}
-        />
-        <FormattedMessage
-          id="xpack.infra.hostsViewPage.flyout.apmServicesLinkLabel"
-          defaultMessage="APM Services"
-        />
-      </EuiLink>
-    </RedirectAppLinks>
+    <EuiTab
+      {...props}
+      {...apmTracesMenuItemLinkProps}
+      data-test-subj="hostsView-flyout-apm-services-link"
+    >
+      <EuiIcon
+        type="popout"
+        css={css`
+          margin-right: ${euiTheme.size.xs};
+        `}
+      />
+      {name}
+    </EuiTab>
   );
 };

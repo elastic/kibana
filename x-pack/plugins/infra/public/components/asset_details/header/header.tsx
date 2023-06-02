@@ -17,19 +17,27 @@ import {
   useEuiMinBreakpoint,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import type { AssetDetailsProps, TabIds } from '../types';
-import { LinkToApmServices } from '../links/link_to_apm_services';
-import { LinkToUptime } from '../links/link_to_uptime';
+import { AssetDetailsProps, FlyoutTabIds, LinkOptions, Tab, TabIds } from '../types';
+import { LinkToApmServices, LinkToUptime, LinkToAlertsRule, LinkToNodeDetails } from '../links';
 import { useTabSwitcherContext } from '../hooks/use_tab_switcher';
 
 type Props = Pick<
   AssetDetailsProps,
-  'node' | 'nodeType' | 'links' | 'tabs' | 'onTabsStateChange'
+  'currentTimeRange' | 'overrides' | 'node' | 'nodeType' | 'links' | 'tabs' | 'onTabsStateChange'
 > & {
   compact: boolean;
 };
 
-export const Header = ({ nodeType, node, tabs, links, compact, onTabsStateChange }: Props) => {
+export const Header = ({
+  nodeType,
+  node,
+  tabs,
+  links,
+  compact,
+  currentTimeRange,
+  overrides,
+  onTabsStateChange,
+}: Props) => {
   const { euiTheme } = useEuiTheme();
   const { showTab, activeTabId } = useTabSwitcherContext();
 
@@ -41,27 +49,48 @@ export const Header = ({ nodeType, node, tabs, links, compact, onTabsStateChange
     showTab(tabId);
   };
 
-  const tabEntries = tabs.map((tab) => (
-    <EuiTab
-      {...tab}
-      key={tab.id}
-      onClick={() => onTabClick(tab.id)}
-      isSelected={tab.id === activeTabId}
-    >
-      {tab.name}
-    </EuiTab>
-  ));
-
-  const linkComponent = {
-    apmServices: <LinkToApmServices hostName={node.name} apmField={'host.hostname'} />,
-    uptime: <LinkToUptime nodeType={nodeType} node={node} />,
+  const tabLinkComponents = {
+    [FlyoutTabIds.LINK_TO_APM]: (tab: Tab) => (
+      <LinkToApmServices nodeName={node.name} apmField={'host.hostname'} {...tab} />
+    ),
+    [FlyoutTabIds.LINK_TO_UPTIME]: (tab: Tab) => (
+      <LinkToUptime nodeName={node.name} nodeType={nodeType} nodeIp={node.ip} {...tab} />
+    ),
   };
+
+  const topCornerLinkComponents: Record<LinkOptions, JSX.Element> = {
+    linkToNodeDetails: (
+      <LinkToNodeDetails nodeId={node.id} nodeType={nodeType} currentTime={currentTimeRange.to} />
+    ),
+    linkToAlertRule: <LinkToAlertsRule onClick={overrides?.linkToApm?.onCreateRuleClick} />,
+  };
+
+  const tabEntries = tabs.map(({ name, ...tab }) => {
+    if (Object.keys(tabLinkComponents).includes(tab.id)) {
+      return (
+        <React.Fragment key={tab.id}>
+          {tabLinkComponents[tab.id as keyof typeof tabLinkComponents]({ name, ...tab })}
+        </React.Fragment>
+      );
+    }
+
+    return (
+      <EuiTab
+        {...tab}
+        key={tab.id}
+        onClick={() => onTabClick(tab.id)}
+        isSelected={tab.id === activeTabId}
+      >
+        {name}
+      </EuiTab>
+    );
+  });
 
   return (
     <>
       <EuiFlexGroup gutterSize="m" justifyContent="spaceBetween" direction="row">
         <EuiFlexItem
-          grow={false}
+          grow
           css={css`
             overflow: hidden;
             & h4 {
@@ -96,7 +125,7 @@ export const Header = ({ nodeType, node, tabs, links, compact, onTabsStateChange
           >
             {links?.map((link, index) => (
               <EuiFlexItem key={index} grow={false}>
-                {linkComponent[link]}
+                {topCornerLinkComponents[link]}
               </EuiFlexItem>
             ))}
           </EuiFlexGroup>

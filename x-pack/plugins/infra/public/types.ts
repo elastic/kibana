@@ -95,7 +95,7 @@ export interface InfraClientStartDeps {
   ml: MlPluginStart;
   observability: ObservabilityPublicStart;
   observabilityShared: ObservabilitySharedPluginStart;
-  osquery?: unknown; // OsqueryPluginStart - can't be imported due to cyclick dependency;
+  osquery?: unknown; // OsqueryPluginStart - can't be imported due to cyclic dependency;
   share: SharePluginStart;
   spaces: SpacesPluginStart;
   storage: IStorageWrapper;

@@ -24,7 +24,7 @@ interface ContentTemplateProps {
 
 const ContentTemplate = ({ header, body, renderMode }: ContentTemplateProps) => {
   return renderMode.showInFlyout ? (
-    <EuiFlyout onClose={renderMode.closeFlyout} ownFocus={false}>
+    <EuiFlyout onClose={renderMode.closeFlyout} ownFocus={false} size="l">
       <EuiFlyoutHeader hasBorder>{header}</EuiFlyoutHeader>
       <EuiFlyoutBody>{body}</EuiFlyoutBody>
     </EuiFlyout>
@@ -58,9 +58,11 @@ export const AssetDetails = ({
           <Header
             node={node}
             nodeType={nodeType}
+            currentTimeRange={currentTimeRange}
             compact={renderMode.showInFlyout}
             tabs={tabs}
             links={links}
+            overrides={overrides}
             onTabsStateChange={onTabsStateChange}
           />
         }
