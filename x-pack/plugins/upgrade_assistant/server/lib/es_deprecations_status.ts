@@ -15,17 +15,48 @@ import {
   convertFeaturesToIndicesArray,
 } from './es_system_indices_migration';
 
+
+export async function getHealthIndicators(dataClient: IScopedClusterClient): Promise<EnrichedDeprecationInfo[]> {
+  const healthIndicators = await dataClient.asCurrentUser.healthReport();
+console.log('healthIndicators.indicators.shards_capacity:', healthIndicators.indicators.shards_capacity);
+  return [
+    healthIndicators.indicators.disk,
+    //@ts-ignore
+    healthIndicators.indicators.shards_capacity,
+  ].filter(({ status }) => {
+    return status !== 'green';
+  }).flatMap(({
+    status,
+    symptom,
+    details,
+    diagnosis,
+  }) => {
+    return diagnosis.map(({ cause, action, help_url }) => ({
+      type: 'healthIndicator',
+      details,
+      message: cause,
+      url: help_url,
+      isCritical: true,
+      resolveDuringUpgrade: false,
+      correctiveAction: { type: 'healthIndicator', action },
+    }));
+  })
+}
+
 export async function getESUpgradeStatus(
   dataClient: IScopedClusterClient,
   featureSet: FeatureSet
 ): Promise<ESUpgradeStatus> {
-  const deprecations = await dataClient.asCurrentUser.migration.deprecations();
 
   const getCombinedDeprecations = async () => {
+    const healthIndicators = await getHealthIndicators(dataClient);
+    const deprecations = await dataClient.asCurrentUser.migration.deprecations();
     const indices = await getCombinedIndexInfos(deprecations, dataClient);
     const systemIndices = await getESSystemIndicesMigrationStatus(dataClient.asCurrentUser);
     const systemIndicesList = convertFeaturesToIndicesArray(systemIndices.features);
-    return Object.keys(deprecations).reduce((combinedDeprecations, deprecationType) => {
+
+
+    const enrichedDeprecations = Object.keys(deprecations).reduce((combinedDeprecations, deprecationType) => {
       if (deprecationType === 'index_settings') {
         // We need to exclude all index related deprecations for system indices since
         // they are resolved separately through the system indices upgrade section in
@@ -94,6 +125,14 @@ export async function getESUpgradeStatus(
 
       return combinedDeprecations;
     }, [] as EnrichedDeprecationInfo[]);
+
+    console.log('healthIndicators::', healthIndicators);
+
+    const enrichedHealthIndicators = healthIndicators.filter(({ status }) => {
+      return status !== 'green';
+    }) as EnrichedDeprecationInfo[];
+
+    return [...enrichedHealthIndicators, ...enrichedDeprecations];
   };
 
   const combinedDeprecations = await getCombinedDeprecations();

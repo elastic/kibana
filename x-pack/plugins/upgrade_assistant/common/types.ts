@@ -205,12 +205,18 @@ export interface ClusterSettingAction {
   deprecatedSettings: string[];
 }
 
+export interface HealthIndicatorAction {
+  type: 'healthIndicator';
+  deprecatedSettings: string[];
+}
+
 export interface EnrichedDeprecationInfo
   extends Omit<estypes.MigrationDeprecationsDeprecation, 'level'> {
-  type: keyof estypes.MigrationDeprecationsResponse;
+  type: keyof estypes.MigrationDeprecationsResponse | 'health_indicator';
   isCritical: boolean;
+  status?: estypes.HealthReportIndicatorHealthStatus; 
   index?: string;
-  correctiveAction?: ReindexAction | MlAction | IndexSettingAction | ClusterSettingAction;
+  correctiveAction?: ReindexAction | MlAction | IndexSettingAction | ClusterSettingAction | HealthIndicatorAction;
   resolveDuringUpgrade: boolean;
 }
 
