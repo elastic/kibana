@@ -64,6 +64,12 @@ export const aggSignificantTerms = (): FunctionDefinition => ({
         defaultMessage: 'Max number of buckets to retrieve',
       }),
     },
+    shardSize: {
+      types: ['number'],
+      help: i18n.translate('data.search.aggs.buckets.significantTerms.shardSize.help', {
+        defaultMessage: 'Number of terms provided by each shard and returned to coordinating node',
+      }),
+    },
     exclude: {
       types: ['string'],
       help: i18n.translate('data.search.aggs.buckets.significantTerms.exclude.help', {

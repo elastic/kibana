@@ -1088,10 +1088,7 @@ The top values of a specified field ranked by the chosen metric.
                   </EuiText>
                 }
                 compressed
-                disabled={
-                  currentColumn.params.orderBy.type === 'rare' ||
-                  currentColumn.params.orderBy.type === 'significant'
-                }
+                disabled={currentColumn.params.orderBy.type === 'rare'}
                 data-test-subj="indexPattern-accuracy-mode"
                 checked={Boolean(
                   currentColumn.params.accuracyMode &&

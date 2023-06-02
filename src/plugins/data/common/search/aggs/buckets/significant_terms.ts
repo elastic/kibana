@@ -22,6 +22,7 @@ const significantTermsTitle = i18n.translate('data.search.aggs.buckets.significa
 export interface AggParamsSignificantTerms extends BaseAggParams {
   field: string;
   size?: number;
+  shardSize?: number;
   exclude?: string;
   include?: string;
 }
@@ -51,6 +52,12 @@ export const getSignificantTermsBucketAgg = () =>
       {
         name: 'size',
         default: '',
+      },
+      {
+        name: 'shardSize',
+        write: (aggConfig, output) => {
+          output.params.shard_size = aggConfig.params.shardSize;
+        },
       },
       {
         name: 'exclude',
