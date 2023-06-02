@@ -42,10 +42,10 @@ describe('Export rules', () => {
 
   before(() => {
     cleanKibana();
-    login();
   });
 
   beforeEach(() => {
+    login();
     // Make sure persisted rules table state is cleared
     resetRulesTableState();
     deleteAlertsAndRules();

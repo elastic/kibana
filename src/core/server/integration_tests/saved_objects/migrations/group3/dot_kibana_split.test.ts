@@ -13,6 +13,7 @@ import {
   type SavedObjectsType,
   MAIN_SAVED_OBJECT_INDEX,
 } from '@kbn/core-saved-objects-server';
+import { DEFAULT_INDEX_TYPES_MAP } from '@kbn/core-saved-objects-base-server-internal';
 import {
   clearLog,
   startElasticsearch,
@@ -80,6 +81,7 @@ describe('split .kibana index into multiple system indices', () => {
           types: updatedTypeRegistry.getAllTypes(),
           kibanaIndex: '.kibana',
           logFilePath,
+          defaultIndexTypesMap: DEFAULT_INDEX_TYPES_MAP,
         });
 
       const { runMigrations, client } = await migratorTestKitFactory();
@@ -201,6 +203,7 @@ describe('split .kibana index into multiple system indices', () => {
             "enterprise_search_telemetry",
             "epm-packages",
             "epm-packages-assets",
+            "event-annotation-group",
             "event_loop_delays_daily",
             "exception-list",
             "exception-list-agnostic",

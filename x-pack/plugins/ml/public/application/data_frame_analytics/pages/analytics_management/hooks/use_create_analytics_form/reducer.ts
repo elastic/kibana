@@ -13,7 +13,20 @@ import numeral from '@elastic/numeral';
 
 import { indexPatterns } from '@kbn/data-plugin/public';
 import { XJson } from '@kbn/es-ui-shared-plugin/public';
+import {
+  getNumTopFeatureImportanceValues,
+  ANALYSIS_CONFIG_TYPE,
+} from '@kbn/ml-data-frame-analytics-utils';
 
+import {
+  getDependentVar,
+  getTrainingPercent,
+  isRegressionAnalysis,
+  isClassificationAnalysis,
+  NUM_TOP_FEATURE_IMPORTANCE_VALUES_MIN,
+  TRAINING_PERCENT_MIN,
+  TRAINING_PERCENT_MAX,
+} from '@kbn/ml-data-frame-analytics-utils';
 import { isValidIndexName } from '../../../../../../../common/util/es_utils';
 
 import { Action, ACTION } from './actions';
@@ -37,17 +50,6 @@ import {
   JOB_ID_MAX_LENGTH,
   ALLOWED_DATA_UNITS,
 } from '../../../../../../../common/constants/validation';
-import { ANALYSIS_CONFIG_TYPE } from '../../../../../../../common/constants/data_frame_analytics';
-import {
-  getDependentVar,
-  getNumTopFeatureImportanceValues,
-  getTrainingPercent,
-  isRegressionAnalysis,
-  isClassificationAnalysis,
-  NUM_TOP_FEATURE_IMPORTANCE_VALUES_MIN,
-  TRAINING_PERCENT_MIN,
-  TRAINING_PERCENT_MAX,
-} from '../../../../common/analytics';
 import { isAdvancedConfig } from '../../components/action_clone/clone_action_name';
 
 const { collapseLiteralStrings } = XJson;
