@@ -32,7 +32,7 @@ export const createCustomizationService = (): DiscoverCustomizationService => {
   const customizations = new Map<DiscoverCustomizationId, CustomizationEntry>();
 
   return {
-    set: (customization) => {
+    set: (customization: DiscoverCustomization) => {
       const entry = customizations.get(customization.id);
       customizations.set(customization.id, {
         customization,
@@ -54,7 +54,7 @@ export const createCustomizationService = (): DiscoverCustomizationService => {
       );
     },
 
-    enable: (id) => {
+    enable: (id: DiscoverCustomizationId) => {
       const entry = customizations.get(id);
       if (entry && !entry.enabled) {
         entry.enabled = true;
@@ -62,7 +62,7 @@ export const createCustomizationService = (): DiscoverCustomizationService => {
       }
     },
 
-    disable: (id) => {
+    disable: (id: DiscoverCustomizationId) => {
       const entry = customizations.get(id);
       if (entry && entry.enabled) {
         entry.enabled = false;
