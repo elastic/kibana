@@ -126,6 +126,7 @@
     "@kbn/maps-vector-tile-utils",
     "@kbn/server-route-repository",
     "@kbn/core-http-common",
-    "@kbn/slo-schema"
+    "@kbn/slo-schema",
+    "@kbn/lens-plugin"
   ]
 }
