@@ -23,11 +23,10 @@ export type {
   QueryOperator,
   QueryMatch,
   RowRenderer,
-  TimelineType,
   ColumnHeaderOptions,
 } from './types';
 
-export { IS_OPERATOR, EXISTS_OPERATOR, DataProviderType } from './types';
+export { IS_OPERATOR, EXISTS_OPERATOR } from './types';
 
 export type {
   BeatFields,

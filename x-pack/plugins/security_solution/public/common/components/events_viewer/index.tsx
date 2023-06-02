@@ -23,7 +23,7 @@ import type { ConnectedProps } from 'react-redux';
 import { connect, useDispatch, useSelector } from 'react-redux';
 import { ThemeContext } from 'styled-components';
 import type { Filter } from '@kbn/es-query';
-import type { Direction, EntityType, RowRenderer } from '@kbn/timelines-plugin/common';
+import type { Direction, EntityType } from '@kbn/timelines-plugin/common';
 import { isEmpty } from 'lodash';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import type { EuiTheme } from '@kbn/kibana-react-plugin/common';
@@ -37,6 +37,7 @@ import type {
   SetEventsDeleted,
   SetEventsLoading,
 } from '../../../../common/types';
+import type { RowRenderer } from '../../../../common/types/timeline';
 import { InputsModelId } from '../../store/inputs/constants';
 import type { State } from '../../store';
 import { inputsActions } from '../../store/actions';
