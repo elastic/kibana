@@ -37,6 +37,13 @@ export interface UpdateAliasesParams {
   aliasActions: AliasAction[];
   timeout?: string;
 }
+
+/** @internal */
+export type UpdateAliasesReturnType = TaskEither.TaskEither<
+  IndexNotFound | AliasNotFound | RemoveIndexNotAConcreteIndex | RetryableEsClientError,
+  'update_aliases_succeeded'
+>;
+
 /**
  * Calls the Update index alias API `_alias` with the provided alias actions.
  */
@@ -45,11 +52,9 @@ export const updateAliases =
     client,
     aliasActions,
     timeout = DEFAULT_TIMEOUT,
-  }: UpdateAliasesParams): TaskEither.TaskEither<
-    IndexNotFound | AliasNotFound | RemoveIndexNotAConcreteIndex | RetryableEsClientError,
-    'update_aliases_succeeded'
-  > =>
+  }: UpdateAliasesParams): UpdateAliasesReturnType =>
   () => {
+    if (!aliasActions || !aliasActions.length) throw Error('updating NO aliases!');
     return client.indices
       .updateAliases({
         actions: aliasActions,

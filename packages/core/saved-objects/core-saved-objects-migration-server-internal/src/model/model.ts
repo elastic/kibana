@@ -1458,7 +1458,9 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
       // index.
       return {
         ...stateP,
-        controlState: 'MARK_VERSION_INDEX_READY',
+        controlState: stateP.mustRelocateDocuments
+          ? 'MARK_VERSION_INDEX_READY_SYNC'
+          : 'MARK_VERSION_INDEX_READY',
         versionIndexReadyActions: stateP.versionIndexReadyActions,
       };
     } else {
@@ -1474,6 +1476,16 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
   } else if (stateP.controlState === 'CREATE_NEW_TARGET') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
     if (Either.isRight(res)) {
+      if (res.right === 'index_already_exists') {
+        // We were supposed to be on a "fresh deployment" state (we did not find any aliases)
+        // but the target index already exists. Assume it can be from a previous upgrade attempt that:
+        // - managed to clone ..._reindex_temp into target
+        // - but did NOT finish the process (aka did not get to update the index aliases)
+        return {
+          ...stateP,
+          controlState: 'OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT',
+        };
+      }
       return {
         ...stateP,
         controlState: 'MARK_VERSION_INDEX_READY',
@@ -1503,7 +1515,10 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
       // left responses to handle here.
       throwBadResponse(stateP, res);
     }
-  } else if (stateP.controlState === 'MARK_VERSION_INDEX_READY') {
+  } else if (
+    stateP.controlState === 'MARK_VERSION_INDEX_READY' ||
+    stateP.controlState === 'MARK_VERSION_INDEX_READY_SYNC'
+  ) {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
     if (Either.isRight(res)) {
       return { ...stateP, controlState: 'DONE' };

@@ -376,8 +376,8 @@ describe('split .kibana index into multiple system indices', () => {
             `[${index}] UPDATE_TARGET_MAPPINGS_PROPERTIES -> UPDATE_TARGET_MAPPINGS_PROPERTIES_WAIT_FOR_TASK.`,
             `[${index}] UPDATE_TARGET_MAPPINGS_PROPERTIES_WAIT_FOR_TASK -> UPDATE_TARGET_MAPPINGS_META.`,
             `[${index}] UPDATE_TARGET_MAPPINGS_META -> CHECK_VERSION_INDEX_READY_ACTIONS.`,
-            `[${index}] CHECK_VERSION_INDEX_READY_ACTIONS -> MARK_VERSION_INDEX_READY.`,
-            `[${index}] MARK_VERSION_INDEX_READY -> DONE.`,
+            `[${index}] CHECK_VERSION_INDEX_READY_ACTIONS -> MARK_VERSION_INDEX_READY_SYNC.`,
+            `[${index}] MARK_VERSION_INDEX_READY_SYNC -> DONE.`,
             `[${index}] Migration completed after`,
           ],
           { ordered: true }
@@ -395,7 +395,6 @@ describe('split .kibana index into multiple system indices', () => {
       const { runMigrations } = await migratorTestKitFactory();
       await clearLog(logFilePath);
       await runMigrations();
-
       const logs = await parseLogFile(logFilePath);
       expect(logs).not.toContainLogEntries(['REINDEX', 'CREATE', 'UPDATE_TARGET_MAPPINGS']);
     });

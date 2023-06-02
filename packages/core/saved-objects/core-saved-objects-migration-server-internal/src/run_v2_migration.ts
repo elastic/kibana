@@ -24,12 +24,14 @@ import Semver from 'semver';
 import type { DocumentMigrator } from './document_migrator';
 import { buildActiveMappings, createIndexMap } from './core';
 import {
-  createMultiPromiseDefer,
+  createWaitGroupMap,
   getIndicesInvolvedInRelocation,
   indexMapToIndexTypesMap,
 } from './kibana_migrator_utils';
 import { runResilientMigrator } from './run_resilient_migrator';
 import { migrateRawDocsSafely } from './core/migrate_raw_docs';
+import type { AliasAction } from './actions/update_aliases';
+import { updateAliases } from './actions';
 
 export interface RunV2MigrationOpts {
   /** The current Kibana version */
@@ -93,13 +95,21 @@ export const runV2Migration = async (options: RunV2MigrationOpts): Promise<Migra
     defaultIndexTypesMap: options.defaultIndexTypesMap,
   });
 
-  // we create 2 synchronization objects (2 synchronization points) for each of the
+  // we create synchronization objects (synchronization points) for each of the
   // migrators involved in relocations, aka each of the migrators that will:
   // A) reindex some documents TO other indices
   // B) receive some documents FROM other indices
   // C) both
-  const readyToReindexDefers = createMultiPromiseDefer(indicesWithMovingTypes);
-  const doneReindexingDefers = createMultiPromiseDefer(indicesWithMovingTypes);
+  const readyToReindexWaitGroupMap = createWaitGroupMap(indicesWithMovingTypes);
+  const doneReindexingWaitGroupMap = createWaitGroupMap(indicesWithMovingTypes);
+  const updateAliasesWaitGroupMap = createWaitGroupMap<AliasAction[], Promise<any>>(
+    indicesWithMovingTypes,
+    (allAliasActions) =>
+      updateAliases({
+        client: options.elasticsearchClient,
+        aliasActions: allAliasActions.flat(),
+      })()
+  );
 
   // build a list of all migrators that must be started
   const migratorIndices = new Set(Object.keys(indexMap));
@@ -110,10 +120,11 @@ export const runV2Migration = async (options: RunV2MigrationOpts): Promise<Migra
   const migrators = Array.from(migratorIndices).map((indexName, i) => {
     return {
       migrate: (): Promise<MigrationResult> => {
-        const readyToReindex = readyToReindexDefers[indexName];
-        const doneReindexing = doneReindexingDefers[indexName];
+        const readyToReindex = readyToReindexWaitGroupMap[indexName];
+        const doneReindexing = doneReindexingWaitGroupMap[indexName];
+        const updateRelocationAliases = updateAliasesWaitGroupMap[indexName];
         // check if this migrator's index is involved in some document redistribution
-        const mustRelocateDocuments = !!readyToReindex;
+        const mustRelocateDocuments = indicesWithMovingTypes.includes(indexName);
 
         return runResilientMigrator({
           client: options.elasticsearchClient,
@@ -127,6 +138,7 @@ export const runV2Migration = async (options: RunV2MigrationOpts): Promise<Migra
           preMigrationScript: indexMap[indexName]?.script,
           readyToReindex,
           doneReindexing,
+          updateRelocationAliases,
           transformRawDocs: (rawDocs: SavedObjectsRawDoc[]) =>
             migrateRawDocsSafely({
               serializer: options.serializer,
