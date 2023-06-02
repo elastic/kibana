@@ -65,10 +65,10 @@ export const mockAttributes = {
 
 export const mockTimeRange = { from: '', to: '', fromStr: '', toStr: '' };
 
-export const getMockCurrentAppId$ = () => new BehaviorSubject<string>('testAppId');
+export const getMockCurrentAppId$ = () => new BehaviorSubject<string>('securitySolutionUI');
 export const getMockApplications$ = () =>
   new BehaviorSubject<Map<string, PublicAppInfo>>(
-    new Map([['testAppId', { category: { label: 'Test' } } as unknown as PublicAppInfo]])
+    new Map([['securitySolutionUI', { category: { label: 'Test' } } as unknown as PublicAppInfo]])
   );
 
 export const getMockCaseUiActionProps = () => {

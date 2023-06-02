@@ -27,17 +27,10 @@ import { useKibana } from '../../../common/lib/kibana';
 import { CommentType } from '../../../../common';
 import { waitFor } from '@testing-library/dom';
 import { canUseCases } from '../../../client/helpers/can_use_cases';
+import { getCaseOwnerByAppId } from '../../../../common/utils/owner';
 
 const element = document.createElement('div');
 document.body.appendChild(element);
-
-jest.mock('./utils', () => {
-  const actual = jest.requireActual('./utils');
-  return {
-    ...actual,
-    getCasePermissions: jest.fn(),
-  };
-});
 
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
   toMountPoint: jest.fn(),
@@ -68,6 +61,12 @@ jest.mock('react-dom', () => {
   const original = jest.requireActual('react-dom');
   return { ...original, unmountComponentAtNode: jest.fn() };
 });
+
+jest.mock('./action_wrapper');
+
+jest.mock('../../../../common/utils/owner', () => ({
+  getCaseOwnerByAppId: jest.fn().mockReturnValue('securitySolution'),
+}));
 
 describe('createAddToNewCaseLensAction', () => {
   const mockEmbeddable = new MockEmbeddable(LENS_EMBEDDABLE_TYPE, {
@@ -103,7 +102,7 @@ describe('createAddToNewCaseLensAction', () => {
     });
 
     (canUseCases as jest.Mock).mockReturnValue(
-      mockCasePermissions.mockReturnValue({ create: true })
+      mockCasePermissions.mockReturnValue({ create: true, update: true })
     );
 
     (toMountPoint as jest.Mock).mockImplementation((node) => {
@@ -145,12 +144,18 @@ describe('createAddToNewCaseLensAction', () => {
     });
 
     it('should return false if no permission', async () => {
-      mockCasePermissions.mockReturnValue({ create: false });
+      mockCasePermissions.mockReturnValue({ create: false, update: false });
+      expect(await action.isCompatible(context)).toEqual(false);
+    });
+
+    it('should return true if is lens embeddable', async () => {
       expect(await action.isCompatible(context)).toEqual(true);
     });
 
-    it('should return true if lens embeddable', async () => {
-      expect(await action.isCompatible(context)).toEqual(true);
+    it('should check permission with undefined if owner is not found', async () => {
+      (getCaseOwnerByAppId as jest.Mock).mockReturnValue(undefined);
+      await action.isCompatible(context);
+      expect(mockCasePermissions).toBeCalledWith(undefined);
     });
   });
 
