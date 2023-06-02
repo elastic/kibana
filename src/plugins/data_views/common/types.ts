@@ -521,34 +521,6 @@ export type DataViewSpec = {
   name?: string;
 };
 
-// Duplicate of above, but for REST responses
-// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
-export type DataViewSpecRestResponse = {
-  id?: string;
-  version?: string;
-  title?: string;
-  timeFieldName?: string;
-  sourceFilters?: SourceFilter[];
-  fields?: DataViewFieldMap;
-  typeMeta?: TypeMeta;
-  type?: string;
-  fieldFormats?: Record<string, SerializedFieldFormat>;
-  runtimeFieldMap?: Record<string, RuntimeFieldSpec>;
-  fieldAttrs?: FieldAttrs;
-  allowNoIndex?: boolean;
-  namespaces?: string[];
-  name?: string;
-};
-
-export interface DataViewListItemRestResponse {
-  id: string;
-  namespaces?: string[];
-  title: string;
-  type?: string;
-  typeMeta?: TypeMeta;
-  name?: string;
-}
-
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type SourceFilter = {
   value: string;
