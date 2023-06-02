@@ -7,10 +7,4 @@
  */
 
 require('../src/setup_node_env');
-var docUtils = require('@kbn/docs-utils');
-
-if (process.argv.includes('--link')) {
-  docUtils.linkDocumentation();
-} else {
-  docUtils.runBuildApiDocsCli();
-}
+require('@kbn/docs-utils').runBuildApiDocsCli();

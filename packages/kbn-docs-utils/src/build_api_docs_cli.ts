@@ -50,13 +50,14 @@ async function endTransactionWithFailure(transaction: Transaction | null) {
   }
 }
 
-export function linkDocumentation() {
-  run(({ log }) => docLinker({ sourceDir: './x-pack/plugins' }, { log }));
-}
-
 export function runBuildApiDocsCli() {
   run(
     async ({ log, flags }) => {
+      if (flags.link) {
+        await docLinker({ sourceDir: './x-pack/plugins' }, { log });
+        return;
+      }
+
       const transaction = apm.startTransaction('build-api-docs', 'kibana-cli');
       const spanSetup = transaction?.startSpan('build_api_docs.setup', 'setup');
 
