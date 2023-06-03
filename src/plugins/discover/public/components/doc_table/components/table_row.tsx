@@ -31,8 +31,10 @@ export interface TableRowProps {
   columns: string[];
   filter: DocViewFilterFn;
   filters?: Filter[];
+  isPlainRecord?: boolean;
   savedSearchId?: string;
   row: DataTableRecord;
+  rows: DataTableRecord[];
   dataView: DataView;
   useNewFieldsApi: boolean;
   shouldShowFieldHandler: ShouldShowFieldInTableHandler;
@@ -43,10 +45,12 @@ export interface TableRowProps {
 
 export const TableRow = ({
   filters,
+  isPlainRecord,
   columns,
   filter,
   savedSearchId,
   row,
+  rows,
   dataView,
   useNewFieldsApi,
   shouldShowFieldHandler,
@@ -212,6 +216,7 @@ export const TableRow = ({
             columns={columns}
             filters={filters}
             savedSearchId={savedSearchId}
+            isPlainRecord={isPlainRecord}
           >
             <DocViewer
               columns={columns}
@@ -220,6 +225,7 @@ export const TableRow = ({
               dataView={dataView}
               onAddColumn={onAddColumn}
               onRemoveColumn={onRemoveColumn}
+              textBasedHits={isPlainRecord ? rows : undefined}
             />
           </TableRowDetails>
         )}
