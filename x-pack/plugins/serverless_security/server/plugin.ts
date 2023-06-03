@@ -38,9 +38,7 @@ export class ServerlessSecurityPlugin
     const shouldRegister = pluginsSetup.essSecurity == null;
 
     if (shouldRegister) {
-      pluginsSetup.securitySolution.setAppFeatures(
-        getProductAppFeatures(this.config.productLineIds)
-      );
+      pluginsSetup.securitySolution.setAppFeatures(getProductAppFeatures(this.config.productTypes));
     }
 
     return {};
