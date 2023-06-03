@@ -10,10 +10,13 @@ import { HttpStart } from '@kbn/core/public';
 import { SavedQuery } from './types';
 import type { SavedQueryAttributes } from '../../../common';
 
+const version = '1';
+
 export const createSavedQueryService = (http: HttpStart) => {
   const createQuery = async (attributes: SavedQueryAttributes, { overwrite = false } = {}) => {
     const savedQuery = await http.post<SavedQuery>('/api/saved_query/_create', {
       body: JSON.stringify(attributes),
+      version,
     });
     return savedQuery;
   };
@@ -21,6 +24,7 @@ export const createSavedQueryService = (http: HttpStart) => {
   const updateQuery = async (id: string, attributes: SavedQueryAttributes) => {
     const savedQuery = await http.put<SavedQuery>(`/api/saved_query/${id}`, {
       body: JSON.stringify(attributes),
+      version,
     });
     return savedQuery;
   };
@@ -28,7 +32,8 @@ export const createSavedQueryService = (http: HttpStart) => {
   // we have to tell the saved objects client how many to fetch, otherwise it defaults to fetching 20 per page
   const getAllSavedQueries = async (): Promise<SavedQuery[]> => {
     const { savedQueries } = await http.post<{ savedQueries: SavedQuery[] }>(
-      '/api/saved_query/_all'
+      '/api/saved_query/_all',
+      { version }
     );
     return savedQueries;
   };
@@ -44,21 +49,22 @@ export const createSavedQueryService = (http: HttpStart) => {
       total: number;
     }>('/api/saved_query/_find', {
       body: JSON.stringify({ page, perPage, search }),
+      version,
     });
 
     return { total, queries };
   };
 
   const getSavedQuery = (id: string): Promise<SavedQuery> => {
-    return http.get<SavedQuery>(`/api/saved_query/${id}`);
+    return http.get<SavedQuery>(`/api/saved_query/${id}`, { version });
   };
 
   const deleteSavedQuery = (id: string) => {
-    return http.delete<{}>(`/api/saved_query/${id}`);
+    return http.delete<{}>(`/api/saved_query/${id}`, { version });
   };
 
   const getSavedQueryCount = async (): Promise<number> => {
-    return http.get<number>('/api/saved_query/_count');
+    return http.get<number>('/api/saved_query/_count', { version });
   };
 
   return {
