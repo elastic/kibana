@@ -22,6 +22,8 @@ const {
   getSavedQueryCount,
 } = createSavedQueryService(http);
 
+const version = '1';
+
 const savedQueryAttributes: SavedQueryAttributes = {
   title: 'foo',
   description: 'bar',
@@ -45,6 +47,7 @@ describe('saved query service', () => {
       expect(http.post).toBeCalled();
       expect(http.post).toHaveBeenCalledWith('/api/saved_query/_create', {
         body: '{"title":"foo","description":"bar","query":{"language":"kuery","query":"response:200"},"filters":[]}',
+        version,
       });
     });
   });
@@ -55,6 +58,7 @@ describe('saved query service', () => {
       expect(http.put).toBeCalled();
       expect(http.put).toHaveBeenCalledWith('/api/saved_query/foo', {
         body: '{"title":"foo","description":"bar","query":{"language":"kuery","query":"response:200"},"filters":[]}',
+        version,
       });
     });
   });
@@ -67,7 +71,7 @@ describe('saved query service', () => {
       });
       const result = await getAllSavedQueries();
       expect(http.post).toBeCalled();
-      expect(http.post).toHaveBeenCalledWith('/api/saved_query/_all');
+      expect(http.post).toHaveBeenCalledWith('/api/saved_query/_all', { version });
       expect(result).toEqual([{ attributes: savedQueryAttributes }]);
     });
   });
@@ -82,6 +86,7 @@ describe('saved query service', () => {
       expect(http.post).toBeCalled();
       expect(http.post).toHaveBeenCalledWith('/api/saved_query/_find', {
         body: '{"page":1,"perPage":50,"search":""}',
+        version,
       });
       expect(result).toEqual({
         queries: [{ attributes: savedQueryAttributes }],
@@ -94,7 +99,7 @@ describe('saved query service', () => {
     it('should get the given ID', async () => {
       await getSavedQuery('my_id');
       expect(http.get).toBeCalled();
-      expect(http.get).toHaveBeenCalledWith('/api/saved_query/my_id');
+      expect(http.get).toHaveBeenCalledWith('/api/saved_query/my_id', { version });
     });
   });
 
@@ -102,7 +107,7 @@ describe('saved query service', () => {
     it('should delete the given ID', async () => {
       await deleteSavedQuery('my_id');
       expect(http.delete).toBeCalled();
-      expect(http.delete).toHaveBeenCalledWith('/api/saved_query/my_id');
+      expect(http.delete).toHaveBeenCalledWith('/api/saved_query/my_id', { version });
     });
   });
 
@@ -110,7 +115,7 @@ describe('saved query service', () => {
     it('should get the total', async () => {
       await getSavedQueryCount();
       expect(http.get).toBeCalled();
-      expect(http.get).toHaveBeenCalledWith('/api/saved_query/_count');
+      expect(http.get).toHaveBeenCalledWith('/api/saved_query/_count', { version });
     });
   });
 });
