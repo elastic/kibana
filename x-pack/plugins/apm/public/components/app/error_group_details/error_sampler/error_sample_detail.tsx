@@ -151,6 +151,7 @@ export function ErrorSampleDetails({
   const promptParams = useMemo(() => {
     return {
       serviceName: error.service.name,
+      languageName: error.service.language?.name ?? '',
       runtimeName: error.service.runtime?.name ?? '',
       runtimeVersion: error.service.runtime?.version ?? '',
       transactionName: transaction?.transaction.name ?? '',

@@ -6,7 +6,6 @@
  */
 import * as t from 'io-ts';
 import {
-  ChatCompletionRequestMessageRoleEnum,
   type ChatCompletionRequestMessage,
   type CreateChatCompletionResponse,
   type CreateChatCompletionResponseChoicesInner,
@@ -26,13 +25,13 @@ export enum OpenAIPromptId {
 const PERF_GPT_SYSTEM_MESSAGE = {
   content: `You are perf-gpt, a helpful assistant for performance analysis and optimisation
     of software. Answer as concisely as possible.`,
-  role: ChatCompletionRequestMessageRoleEnum.System,
+  role: 'system' as const,
 };
 
 const APM_GPT_SYSTEM_MESSAGE = {
   content: `You are apm-gpt, a helpful assistant for performance analysis, optimisation and
     root cause analysis of software. Answer as concisely as possible.`,
-  role: ChatCompletionRequestMessageRoleEnum.System,
+  role: 'system' as const,
 };
 
 function prompt<TParams extends t.Type<any, any, any>>({
@@ -87,7 +86,7 @@ export const openAiPrompts = {
         1. Insert first suggestion
         2. Insert second suggestion
         etc.`,
-          role: ChatCompletionRequestMessageRoleEnum.User,
+          role: 'user',
         },
       ];
     },
@@ -114,7 +113,7 @@ export const openAiPrompts = {
             Library use-cases: Provide a concise description of what the library is typically used for.
             Function description: Provide a concise, technical, description of what the function does.
             `,
-          role: ChatCompletionRequestMessageRoleEnum.User,
+          role: 'user',
         },
       ];
     },
@@ -123,6 +122,7 @@ export const openAiPrompts = {
     params: t.intersection([
       t.type({
         serviceName: t.string,
+        languageName: t.string,
         runtimeName: t.string,
         runtimeVersion: t.string,
         transactionName: t.string,
@@ -135,6 +135,7 @@ export const openAiPrompts = {
     ]),
     messages: ({
       serviceName,
+      languageName,
       runtimeName,
       runtimeVersion,
       transactionName,
@@ -148,7 +149,7 @@ export const openAiPrompts = {
 
           Your task is to describe what the error means and what it could be caused by.
 
-          The error occurred on a service called ${serviceName}, which is a ${runtimeName} service. The
+          The error occurred on a service called ${serviceName}, which is a ${runtimeName} service written in ${languageName}. The
           runtime version is ${runtimeVersion}.
 
           The request it occurred for is called ${transactionName}.
@@ -167,7 +168,7 @@ export const openAiPrompts = {
               : ''
           }
           `,
-          role: ChatCompletionRequestMessageRoleEnum.User,
+          role: 'user',
         },
       ];
     },
