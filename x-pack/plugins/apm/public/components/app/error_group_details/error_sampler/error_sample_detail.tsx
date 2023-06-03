@@ -23,14 +23,14 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import { OpenAIPromptId } from '@kbn/observability-plugin/common';
+import { CoPilotPrompt, useCoPilot } from '@kbn/observability-plugin/public';
 import { ObservabilityTriggerId } from '@kbn/observability-shared-plugin/common';
 import { getContextMenuItemsFromActions } from '@kbn/observability-shared-plugin/public';
 import { first } from 'lodash';
 import React, { useEffect, useMemo, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import useAsync from 'react-use/lib/useAsync';
-import { CoPilotPrompt, useCoPilot } from '@kbn/observability-plugin/public';
-import { OpenAIPromptId } from '@kbn/observability-plugin/common';
 import { ERROR_GROUP_ID } from '../../../../../common/es_fields/apm';
 import { TraceSearchType } from '../../../../../common/trace_explorer';
 import { APMError } from '../../../../../typings/es_schemas/ui/apm_error';
@@ -53,6 +53,7 @@ import { TimestampTooltip } from '../../../shared/timestamp_tooltip';
 import { TransactionTab } from '../../transaction_details/waterfall_with_summary/transaction_tabs';
 import {
   ErrorTab,
+  ErrorTabKey,
   exceptionStacktraceTab,
   getTabs,
   logStacktraceTab,
@@ -111,6 +112,9 @@ export function ErrorSampleDetails({
 
   const { kuery } = query;
 
+  const [logStacktrace, setLogStacktrace] = useState('');
+  const [exceptionStacktrace, setExceptionStacktrace] = useState('');
+
   const loadingErrorSamplesData = isPending(errorSamplesFetchStatus);
   const loadingErrorData = isPending(errorFetchStatus);
   const isLoading = loadingErrorSamplesData || loadingErrorData;
@@ -150,22 +154,10 @@ export function ErrorSampleDetails({
       runtimeName: error.service.runtime?.name ?? '',
       runtimeVersion: error.service.runtime?.version ?? '',
       transactionName: transaction?.transaction.name ?? '',
-      exceptionMessage: error.error.exception?.[0].message ?? '',
-      errorStackTrace:
-        error.error.exception
-          ?.map((exception) => {
-            return `${exception.message ?? ''}
-          ${exception.stacktrace
-            ?.map(
-              (frame) =>
-                `at ${frame.classname}.${frame.function}(${frame.filename}:${frame.line})`
-            )
-            .join('\n')}
-        `;
-          })
-          .join('\n\n') ?? '',
+      logStacktrace,
+      exceptionStacktrace,
     };
-  }, [error, transaction]);
+  }, [error, transaction, logStacktrace, exceptionStacktrace]);
 
   if (!error && errorSampleIds?.length === 0 && isSucceded) {
     return (
@@ -411,6 +403,26 @@ export function ErrorSampleDetails({
       ) : (
         <TabContent error={error} currentTab={currentTab} />
       )}
+      <div
+        ref={(next) => {
+          setLogStacktrace(next?.innerText ?? '');
+        }}
+        style={{ display: 'none' }}
+      >
+        {error.error.log?.message && (
+          <TabContent error={error} currentTab={logStacktraceTab} />
+        )}
+      </div>
+      <div
+        ref={(next) => {
+          setExceptionStacktrace(next?.innerText ?? '');
+        }}
+        style={{ display: 'none' }}
+      >
+        {error.error.exception?.length && (
+          <TabContent error={error} currentTab={exceptionStacktraceTab} />
+        )}
+      </div>
     </EuiPanel>
   );
 }
@@ -427,11 +439,11 @@ function TabContent({
   const logStackframes = error?.error.log?.stacktrace;
 
   switch (currentTab.key) {
-    case logStacktraceTab.key:
+    case ErrorTabKey.LogStackTrace:
       return (
         <Stacktrace stackframes={logStackframes} codeLanguage={codeLanguage} />
       );
-    case exceptionStacktraceTab.key:
+    case ErrorTabKey.ExceptionStacktrace:
       return (
         <ExceptionStacktrace
           codeLanguage={codeLanguage}

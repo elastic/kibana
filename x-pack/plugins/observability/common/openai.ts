@@ -126,8 +126,8 @@ export const openAiPrompts = {
         runtimeName: t.string,
         runtimeVersion: t.string,
         transactionName: t.string,
-        exceptionMessage: t.string,
-        errorStackTrace: t.string,
+        logStacktrace: t.string,
+        exceptionStacktrace: t.string,
       }),
       t.partial({
         spanName: t.string,
@@ -138,8 +138,8 @@ export const openAiPrompts = {
       runtimeName,
       runtimeVersion,
       transactionName,
-      exceptionMessage,
-      errorStackTrace,
+      logStacktrace,
+      exceptionStacktrace,
     }) => {
       return [
         APM_GPT_SYSTEM_MESSAGE,
@@ -153,9 +153,19 @@ export const openAiPrompts = {
 
           The request it occurred for is called ${transactionName}.
 
-          The exception message is ${exceptionMessage}, and here's the stack trace:
+          ${
+            logStacktrace
+              ? `The log stacktrace:
+          ${logStacktrace}`
+              : ''
+          }
 
-          ${errorStackTrace}
+          ${
+            exceptionStacktrace
+              ? `The exception stacktrace:
+          ${exceptionStacktrace}`
+              : ''
+          }
           `,
           role: ChatCompletionRequestMessageRoleEnum.User,
         },
