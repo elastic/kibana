@@ -46,7 +46,6 @@ export interface ActionTypeExecutorResult<Data> {
   serviceMessage?: string;
   data?: Data;
   retry?: null | boolean | Date;
-  reason?: string;
 }
 
 export type ActionTypeExecutorRawResult<Data> = ActionTypeExecutorResult<Data> & {

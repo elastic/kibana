@@ -66,7 +66,7 @@ import { IExecutionStatusAndMetrics } from '../lib/rule_execution_status';
 import { RuleRunMetricsStore } from '../lib/rule_run_metrics_store';
 import { wrapSearchSourceClient } from '../lib/wrap_search_source_client';
 import { AlertingEventLogger } from '../lib/alerting_event_logger/alerting_event_logger';
-import { loadRule } from './rule_loader';
+import { getRuleAttributes, loadRule } from './rule_loader';
 import { TaskRunnerTimer, TaskRunnerTimerSpan } from './task_runner_timer';
 import { RuleMonitoringService } from '../monitoring/rule_monitoring_service';
 import { ILastRun, lastRunFromState, lastRunToRaw } from '../lib/last_run_status';
@@ -592,27 +592,14 @@ export class TaskRunner<
       ...(namespace ? { namespace } : {}),
     });
 
-    let ruleData;
-
-    try {
-      ruleData = await loadRule<Params>({
-        paramValidator: this.ruleType.validate.params,
-        ruleId,
-        spaceId,
-        context: this.context,
-        ruleTypeRegistry: this.ruleTypeRegistry,
-        alertingEventLogger: this.alertingEventLogger,
-      });
-    } catch (err) {
-      if (!this.shouldSkipRun(err)) {
-        this.alertingEventLogger.start();
-      }
-      throw err;
-    }
-
-    this.alertingEventLogger.start();
-
-    return ruleData;
+    return await loadRule<Params>({
+      paramValidator: this.ruleType.validate.params,
+      ruleId,
+      spaceId,
+      context: this.context,
+      ruleTypeRegistry: this.ruleTypeRegistry,
+      alertingEventLogger: this.alertingEventLogger,
+    });
   }
 
   private async processRunResults({
@@ -753,21 +740,11 @@ export class TaskRunner<
 
       // fetch the rule again to ensure we return the correct schedule as it may have
       // changed during the task execution
-      schedule = asOk(
-        (
-          await loadRule<Params>({
-            paramValidator: this.ruleType.validate.params,
-            ruleId,
-            spaceId,
-            context: this.context,
-            ruleTypeRegistry: this.ruleTypeRegistry,
-            alertingEventLogger: this.alertingEventLogger,
-          })
-        ).rule.schedule
-      );
+      const attributes = await getRuleAttributes<Params>(this.context, ruleId, spaceId);
+      schedule = asOk(attributes.rule.schedule);
     } catch (err) {
       if (this.shouldSkipRun(err)) {
-        this.logger.debug(
+        this.logger.info(
           `Task Runner has skipped executing the Rule (${ruleId}) as it has invalid params.`
         );
         return {

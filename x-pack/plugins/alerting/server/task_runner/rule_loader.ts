@@ -60,20 +60,20 @@ export async function loadRule<Params extends RuleTypeParams>(params: LoadRulePa
     );
   }
 
-  alertingEventLogger.setRuleName(rule.name);
-
-  try {
-    ruleTypeRegistry.ensureRuleTypeEnabled(rule.alertTypeId);
-  } catch (err) {
-    throw new ErrorWithReason(RuleExecutionStatusErrorReasons.License, err);
-  }
-
   let validatedParams: Params;
   try {
     validatedParams = validateRuleTypeParams<Params>(rule.params, paramValidator);
     rawRuleSchema.validate(rawRule);
   } catch (err) {
     throw new ErrorWithReason(RuleExecutionStatusErrorReasons.Validate, err);
+  }
+  alertingEventLogger.start();
+  alertingEventLogger.setRuleName(rule.name);
+
+  try {
+    ruleTypeRegistry.ensureRuleTypeEnabled(rule.alertTypeId);
+  } catch (err) {
+    throw new ErrorWithReason(RuleExecutionStatusErrorReasons.License, err);
   }
 
   if (rule.monitoring) {
