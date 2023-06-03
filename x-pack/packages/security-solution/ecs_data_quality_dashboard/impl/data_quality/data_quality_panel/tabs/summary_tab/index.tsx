@@ -42,6 +42,7 @@ interface Props {
   };
   ilmPhase: IlmPhase | undefined;
   indexName: string;
+  isAssistantEnabled: boolean;
   onAddToNewCase: (markdownComments: string[]) => void;
   partitionedFieldMetadata: PartitionedFieldMetadata;
   pattern: string;
@@ -60,6 +61,7 @@ const SummaryTabComponent: React.FC<Props> = ({
   getGroupByFieldsOnClick,
   ilmPhase,
   indexName,
+  isAssistantEnabled,
   onAddToNewCase,
   partitionedFieldMetadata,
   pattern,
@@ -77,6 +79,7 @@ const SummaryTabComponent: React.FC<Props> = ({
       docsCount={docsCount}
       ilmPhase={ilmPhase}
       indexName={indexName}
+      isAssistantEnabled={isAssistantEnabled}
       onAddToNewCase={onAddToNewCase}
       partitionedFieldMetadata={partitionedFieldMetadata}
       pattern={pattern}

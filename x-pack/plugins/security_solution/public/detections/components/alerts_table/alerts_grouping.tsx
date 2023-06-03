@@ -6,21 +6,21 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
 import { useDispatch } from 'react-redux';
 import type { Filter, Query } from '@kbn/es-query';
 import { isNoneGroup, useGrouping } from '@kbn/securitysolution-grouping';
 import { isEmpty, isEqual } from 'lodash/fp';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { TableIdLiteral } from '@kbn/securitysolution-data-table';
-import { getDefaultGroupingOptions } from '../../../common/utils/alerts';
 import { groupIdSelector } from '../../../common/store/grouping/selectors';
+import { getDefaultGroupingOptions } from '../../../common/utils/alerts';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { updateGroups } from '../../../common/store/grouping/actions';
 import type { Status } from '../../../../common/detection_engine/schemas/common';
 import { defaultUnit } from '../../../common/components/toolbar/unit';
 import { useSourcererDataView } from '../../../common/containers/sourcerer';
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
+import type { RunTimeMappings } from '../../../common/store/sourcerer/model';
 import { renderGroupPanel, getStats } from './grouping_settings';
 import { useKibana } from '../../../common/lib/kibana';
 import { GroupedSubLevel } from './alerts_sub_grouping';
@@ -36,7 +36,7 @@ export interface AlertsTableComponentProps {
   hasIndexWrite: boolean;
   loading: boolean;
   renderChildComponent: (groupingFilters: Filter[]) => React.ReactElement;
-  runtimeMappings: MappingRuntimeFields;
+  runtimeMappings: RunTimeMappings;
   signalIndexName: string | null;
   tableId: TableIdLiteral;
   to: string;

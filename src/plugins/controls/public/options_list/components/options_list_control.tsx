@@ -19,6 +19,7 @@ import { OptionsListPopover } from './options_list_popover';
 import { useOptionsList } from '../embeddable/options_list_embeddable';
 
 import './options_list.scss';
+import { ControlError } from '../../control_group/component/control_error_component';
 
 export const OptionsListControl = ({
   typeaheadSubject,
@@ -31,6 +32,7 @@ export const OptionsListControl = ({
   const optionsList = useOptionsList();
   const dimensions = useResizeObserver(resizeRef.current);
 
+  const error = optionsList.select((state) => state.componentState.error);
   const isPopoverOpen = optionsList.select((state) => state.componentState.popoverOpen);
   const validSelections = optionsList.select((state) => state.componentState.validSelections);
   const invalidSelections = optionsList.select((state) => state.componentState.invalidSelections);
@@ -143,7 +145,9 @@ export const OptionsListControl = ({
     </div>
   );
 
-  return (
+  return error ? (
+    <ControlError error={error} />
+  ) : (
     <EuiFilterGroup
       className={classNames('optionsList--filterGroup', {
         'optionsList--filterGroupSingle': controlStyle !== 'twoLine',
