@@ -82,7 +82,6 @@ export class KibanaMigrator implements IKibanaMigrator {
     logger,
     docLinks,
     waitForMigrationCompletion,
-    nodeRoles,
   }: KibanaMigratorOptions) {
     this.client = client;
     this.kibanaIndex = kibanaIndex;
