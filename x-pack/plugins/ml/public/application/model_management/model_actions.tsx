@@ -448,11 +448,15 @@ export function useModelActions({
         onClick: (model) => {
           onModelsDeleteRequest([model]);
         },
-        available: (item) =>
-          canDeleteTrainedModels &&
-          !isBuiltInModel(item) &&
-          !item.putModelConfig &&
-          (Object.keys(item.pipelines ?? {}).length === 0 || canManageIngestPipelines),
+        available: (item) => {
+          const hasZeroPipelines = Object.keys(item.pipelines ?? {}).length === 0;
+          return (
+            canDeleteTrainedModels &&
+            !isBuiltInModel(item) &&
+            !item.putModelConfig &&
+            (hasZeroPipelines || canManageIngestPipelines)
+          );
+        },
         enabled: (item) => {
           return item.state !== MODEL_STATE.STARTED;
         },
