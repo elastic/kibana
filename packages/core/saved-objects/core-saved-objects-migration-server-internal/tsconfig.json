@@ -31,7 +31,6 @@
     "@kbn/logging-mocks",
     "@kbn/core-saved-objects-base-server-mocks",
     "@kbn/core-elasticsearch-server-internal",
-    "@kbn/core-node-server",
   ],
   "exclude": [
     "target/**/*",
