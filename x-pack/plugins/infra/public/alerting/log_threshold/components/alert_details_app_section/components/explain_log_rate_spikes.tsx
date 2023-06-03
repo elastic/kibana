@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, useEffect, useMemo, useState } from 'react';
+import React, { FC, useEffect, useState } from 'react';
 import { pick } from 'lodash';
 import moment from 'moment';
 
@@ -26,8 +26,6 @@ import {
   ruleParamsRT,
 } from '../../../../../../common/alerting/logs/log_threshold';
 import { DEFAULT_LOG_VIEW } from '../../../../../observability_logs/log_view_state/src/defaults';
-import { LogViewsClient } from '../../../../../services/log_views';
-import { defaultLogViewsStaticConfig } from '../../../../../../common/log_views';
 import { getESQuery } from '../query';
 import { decodeOrThrow } from '../../../../../../common/runtime_types';
 
@@ -41,23 +39,18 @@ export const ExplainLogRateSpikes: FC<AlertDetailsExplainLogRateSpikesSectionPro
   alert,
 }) => {
   const { services } = useKibanaContextForPlugin();
-  const { dataViews: dataViewsService, http, data, logViews, fieldFormats } = services;
+  const { dataViews, logViews } = services;
   const [dataView, setDataView] = useState<DataView | undefined>();
   const [esSearchQuery, setEsSearchQuery] = useState<QueryDslQueryContainer | undefined>();
-
-  const logViewsClient = useMemo(
-    () => new LogViewsClient(data.dataViews, http, data.search.search, defaultLogViewsStaticConfig),
-    [data.dataViews, data.search.search, http]
-  );
 
   useEffect(() => {
     async function getDataView() {
       const { indices, timestampField, runtimeMappings, dataViewReference } =
-        await logViewsClient.getResolvedLogView(DEFAULT_LOG_VIEW);
+        await logViews.client.getResolvedLogView(DEFAULT_LOG_VIEW);
       const dataViewId = dataViewReference.id;
 
       if (dataViewId) {
-        const logDataView = await dataViewsService.get(dataViewId);
+        const logDataView = await dataViews.get(dataViewId);
         setDataView(logDataView);
 
         const esSearchRequest = getESQuery(
@@ -77,7 +70,7 @@ export const ExplainLogRateSpikes: FC<AlertDetailsExplainLogRateSpikesSectionPro
     }
 
     getDataView();
-  }, [rule, dataViewsService, alert.start, logViewsClient]);
+  }, [rule, alert, dataViews, logViews]);
 
   const timeRange = { min: moment(alert.start).subtract(20, 'minutes'), max: moment(new Date()) };
 
