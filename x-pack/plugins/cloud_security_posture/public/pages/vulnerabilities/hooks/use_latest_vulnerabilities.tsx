@@ -8,20 +8,27 @@ import { useQuery } from '@tanstack/react-query';
 import { lastValueFrom } from 'rxjs';
 import type { IKibanaSearchRequest, IKibanaSearchResponse } from '@kbn/data-plugin/common';
 import { number } from 'io-ts';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import {
+  SearchRequest,
+  SearchResponse,
+  AggregationsMultiBucketAggregateBase,
+  AggregationsStringRareTermsBucketKeys,
+  Sort,
+} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { LATEST_VULNERABILITIES_INDEX_PATTERN } from '../../../../common/constants';
 import { useKibana } from '../../../common/hooks/use_kibana';
 import { showErrorToast } from '../../../common/utils/show_error_toast';
 import { FindingsBaseEsQuery } from '../../../common/types';
-type LatestFindingsRequest = IKibanaSearchRequest<estypes.SearchRequest>;
-type LatestFindingsResponse = IKibanaSearchResponse<estypes.SearchResponse<any, FindingsAggs>>;
+import { getVulnerabilityFilter } from '../utils';
+type LatestFindingsRequest = IKibanaSearchRequest<SearchRequest>;
+type LatestFindingsResponse = IKibanaSearchResponse<SearchResponse<any, FindingsAggs>>;
 
 interface FindingsAggs {
-  count: estypes.AggregationsMultiBucketAggregateBase<estypes.AggregationsStringRareTermsBucketKeys>;
+  count: AggregationsMultiBucketAggregateBase<AggregationsStringRareTermsBucketKeys>;
 }
 
 interface VulnerabilitiesQuery extends FindingsBaseEsQuery {
-  sort: estypes.Sort;
+  sort: Sort;
   enabled: boolean;
   pageIndex: number;
   pageSize: number;
@@ -33,18 +40,7 @@ export const getFindingsQuery = ({ query, sort, pageIndex, pageSize }: Vulnerabi
     ...query,
     bool: {
       ...query?.bool,
-      filter: [
-        ...(query?.bool?.filter || []),
-        { exists: { field: 'vulnerability.score.base' } },
-        { exists: { field: 'vulnerability.score.version' } },
-        { exists: { field: 'vulnerability.severity' } },
-        { exists: { field: 'resource.name' } },
-        { match_phrase: { 'vulnerability.enumeration': 'CVE' } },
-      ],
-      must_not: [
-        ...(query?.bool?.must_not || []),
-        { match_phrase: { 'vulnerability.severity': 'UNKNOWN' } },
-      ],
+      filter: [...(query?.bool?.filter || []), ...getVulnerabilityFilter()],
     },
   },
   from: pageIndex * pageSize,
