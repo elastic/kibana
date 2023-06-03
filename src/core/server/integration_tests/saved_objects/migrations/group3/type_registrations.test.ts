@@ -123,6 +123,7 @@ const previouslyRegisteredTypes = [
   'telemetry',
   'timelion-sheet',
   'tsvb-validation-telemetry',
+  'threshold-explorer-view',
   'ui-counter',
   'ui-metric',
   'upgrade-assistant-ml-upgrade-operation',
