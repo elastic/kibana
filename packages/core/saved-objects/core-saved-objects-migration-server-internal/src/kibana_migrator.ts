@@ -46,7 +46,6 @@ export interface KibanaMigratorOptions {
   logger: Logger;
   docLinks: DocLinksServiceStart;
   waitForMigrationCompletion: boolean;
-  nodeRoles: NodeRoles;
 }
 
 /**

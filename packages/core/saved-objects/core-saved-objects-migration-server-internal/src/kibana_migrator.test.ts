@@ -308,6 +308,5 @@ const mockOptions = (algorithm: 'v2' | 'zdt' = 'v2') => {
     },
     client: mockedClient,
     docLinks: docLinksServiceMock.createSetupContract(),
-    nodeRoles: { backgroundTasks: true, ui: true, migrator: true },
   };
 };
