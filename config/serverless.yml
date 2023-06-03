@@ -1,8 +1,12 @@
+interactiveSetup.enabled: false
 newsfeed.enabled: false
 xpack.security.showNavLinks: false
 xpack.serverless.plugin.enabled: true
-xpack.fleet.enableExperimental: ['fleetServerStandalone']
+xpack.fleet.internal.fleetServerStandalone: true
 xpack.fleet.internal.disableILMPolicies: true
+
+# Ess plugins
+xpack.ess.security.enabled: false
 
 # Management team plugins
 xpack.upgrade_assistant.enabled: false
@@ -18,6 +22,7 @@ xpack.license_management.enabled: false
 #xpack.canvas.enabled: false #only disabable in dev-mode
 xpack.reporting.enabled: false
 xpack.cloud_integrations.data_migration.enabled: false
+data.search.sessions.enabled: false
 
 # Enforce restring access to internal APIs see https://github.com/elastic/kibana/issues/151940
 # server.restrictInternalApis: true

@@ -468,7 +468,7 @@ describe('indicator match', () => {
           });
           getDetails(TAGS_DETAILS).should('have.text', expectedTags);
         });
-        cy.get(INVESTIGATION_NOTES_TOGGLE).click({ force: true });
+        cy.get(INVESTIGATION_NOTES_TOGGLE).click();
         cy.get(ABOUT_INVESTIGATION_NOTES).should('have.text', INVESTIGATION_NOTES_MARKDOWN);
 
         cy.get(DEFINITION_DETAILS).within(() => {
