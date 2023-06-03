@@ -175,7 +175,7 @@ export const openAiPrompts = {
   }),
 };
 
-type PromptMap = typeof openAiPrompts;
+export type PromptMap = typeof openAiPrompts;
 
 export type PromptParamsOf<TPromptId extends OpenAIPromptId> = t.OutputOf<
   {

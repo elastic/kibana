@@ -5,77 +5,47 @@
  * 2.0.
  */
 import Boom from '@hapi/boom';
+import { ServerRoute } from '@kbn/server-route-repository';
 import * as t from 'io-ts';
+import { map } from 'lodash';
 import { CreateChatCompletionResponse } from 'openai';
 import { Readable } from 'stream';
-import { OpenAIPromptId, openAiPrompts } from '../../../common/openai';
+import { openAiPrompts, PromptMap } from '../../../common/openai';
 import { createObservabilityServerRoute } from '../create_observability_server_route';
+import { ObservabilityRouteCreateOptions, ObservabilityRouteHandlerResources } from '../types';
 
-const promptExplainFunctionRoute = createObservabilityServerRoute({
-  endpoint: `POST /internal/observability/copilot/prompts/${OpenAIPromptId.ProfilingExplainFunction}`,
-  params: t.type({
-    body: openAiPrompts[OpenAIPromptId.ProfilingExplainFunction].params,
-  }),
-  options: {
-    tags: [],
-  },
-  handler: async (resources): Promise<CreateChatCompletionResponse | Readable> => {
-    const client = resources.dependencies.getOpenAIClient();
+const promptRoutes: {
+  [TPromptId in keyof PromptMap as `POST /internal/observability/copilot/prompts/${TPromptId}`]: ServerRoute<
+    `POST /internal/observability/copilot/prompts/${TPromptId}`,
+    t.TypeC<{ body: PromptMap[TPromptId]['params'] }>,
+    ObservabilityRouteHandlerResources,
+    unknown,
+    ObservabilityRouteCreateOptions
+  >;
+} = Object.assign(
+  {},
+  ...map(openAiPrompts, (prompt, promptId) => {
+    return createObservabilityServerRoute({
+      endpoint: `POST /internal/observability/copilot/prompts/${promptId}`,
+      params: t.type({
+        body: prompt.params,
+      }),
+      options: {
+        tags: [],
+      },
+      handler: async (resources): Promise<CreateChatCompletionResponse | Readable> => {
+        const client = resources.dependencies.getOpenAIClient();
 
-    if (!client) {
-      throw Boom.notImplemented();
-    }
+        if (!client) {
+          throw Boom.notImplemented();
+        }
 
-    return client.chatCompletion.create(
-      openAiPrompts[OpenAIPromptId.ProfilingExplainFunction].messages(resources.params.body)
-    );
-  },
-});
-
-const promptOptimizeFunctionRoute = createObservabilityServerRoute({
-  endpoint: `POST /internal/observability/copilot/prompts/${OpenAIPromptId.ProfilingOptimizeFunction}`,
-  params: t.type({
-    body: openAiPrompts[OpenAIPromptId.ProfilingOptimizeFunction].params,
-  }),
-  options: {
-    tags: [],
-  },
-  handler: async (resources): Promise<CreateChatCompletionResponse | Readable> => {
-    const client = resources.dependencies.getOpenAIClient();
-
-    if (!client) {
-      throw Boom.notImplemented();
-    }
-
-    return client.chatCompletion.create(
-      openAiPrompts[OpenAIPromptId.ProfilingOptimizeFunction].messages(resources.params.body)
-    );
-  },
-});
-
-const promptExplainErrorRoute = createObservabilityServerRoute({
-  endpoint: `POST /internal/observability/copilot/prompts/${OpenAIPromptId.ApmExplainError}`,
-  params: t.type({
-    body: openAiPrompts[OpenAIPromptId.ApmExplainError].params,
-  }),
-  options: {
-    tags: [],
-  },
-  handler: async (resources): Promise<CreateChatCompletionResponse | Readable> => {
-    const client = resources.dependencies.getOpenAIClient();
-
-    if (!client) {
-      throw Boom.notImplemented();
-    }
-
-    return client.chatCompletion.create(
-      openAiPrompts[OpenAIPromptId.ApmExplainError].messages(resources.params.body)
-    );
-  },
-});
+        return client.chatCompletion.create(prompt.messages(resources.params.body as any));
+      },
+    });
+  })
+);
 
 export const observabilityCoPilotRouteRepository = {
-  ...promptExplainFunctionRoute,
-  ...promptOptimizeFunctionRoute,
-  ...promptExplainErrorRoute,
+  ...promptRoutes,
 };
