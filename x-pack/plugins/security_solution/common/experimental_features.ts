@@ -109,6 +109,11 @@ export const allowedExperimentalValues = Object.freeze({
   securityFlyoutEnabled: false,
 
   /**
+   * Enables the Elastic Security Assistant and generative AI connector (.gen-ai)
+   */
+  assistantEnabled: false,
+
+  /**
    * Keep DEPRECATED experimental flags that are documented to prevent failed upgrades.
    * https://www.elastic.co/guide/en/security/current/user-risk-score.html
    * https://www.elastic.co/guide/en/security/current/host-risk-score.html
@@ -129,8 +134,6 @@ export const allowedExperimentalValues = Object.freeze({
    *
    **/
   newUserDetailsFlyout: false,
-  /* enables the Security Assistant and generative AI connector (.gen-ai) */
-  assistantEnabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;
