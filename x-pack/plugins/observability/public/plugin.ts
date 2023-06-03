@@ -76,8 +76,8 @@ export interface ConfigSchema {
       };
     };
   };
-  coPilot: {
-    enabled: boolean;
+  coPilot?: {
+    enabled?: boolean;
   };
 }
 export type ObservabilityPublicSetup = ReturnType<Plugin['setup']>;
@@ -319,7 +319,7 @@ export class Plugin
     );
 
     const coPilotService = createCoPilotService({
-      enabled: config.coPilot.enabled,
+      enabled: !!config.coPilot?.enabled,
       http: coreSetup.http,
     });
 
