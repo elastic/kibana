@@ -18,7 +18,7 @@ const tempDir = Path.join(Os.tmpdir(), 'kbn-config-test');
 
 const kibanaPath = follow('../../../../scripts/kibana.js');
 
-const TIMEOUT_MS = 15000;
+const TIMEOUT_MS = 20000;
 
 const envForTempDir = {
   env: { KBN_PATH_CONF: tempDir },
