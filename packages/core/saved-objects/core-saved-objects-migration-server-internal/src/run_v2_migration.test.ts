@@ -256,7 +256,6 @@ const mockOptions = (kibanaVersion = '8.2.3'): RunV2MigrationOpts => {
       retryAttempts: 20,
       zdt: {
         metaPickupSyncDelaySec: 120,
-        runOnNonMigratorNodes: true,
       },
     },
     elasticsearchClient: mockedClient,
