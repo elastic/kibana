@@ -39,7 +39,6 @@ export const useSearchItems = (defaultSavedObjectId: string | undefined) => {
     }
 
     try {
-      // todo this can now throw on saved object conflict - is that okay?
       fetchedSavedSearch = await appDeps.savedSearch.get(id);
     } catch (e) {
       // Just let fetchedSavedSearch stay undefined in case it doesn't exist.

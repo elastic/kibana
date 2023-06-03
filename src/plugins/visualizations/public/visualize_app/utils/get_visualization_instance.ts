@@ -40,8 +40,7 @@ const createVisualizeEmbeddableAndLinkSavedSearch = async (
   if (vis.data.savedSearchId) {
     try {
       savedSearch = vis.data.savedSearchId
-        ? // todo this can now throw on saved object conflict - is this okay?
-          await savedSearchApi.get(vis.data.savedSearchId)
+        ? await savedSearchApi.get(vis.data.savedSearchId)
         : await savedSearchApi.getNew();
     } catch (e) {
       // skip this catch block

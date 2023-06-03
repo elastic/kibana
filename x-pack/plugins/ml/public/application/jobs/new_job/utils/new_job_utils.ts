@@ -18,7 +18,7 @@ import {
 import { Filter } from '@kbn/es-query';
 import { IUiSettingsClient } from '@kbn/core/public';
 import { getEsQueryConfig } from '@kbn/data-plugin/public';
-import { SavedSearch } from '@kbn/saved-search-plugin/public';
+import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { SEARCH_QUERY_LANGUAGE } from '../../../../../common/constants/search';
 import { getQueryFromSavedSearchObject } from '../../../util/index_utils';
 
