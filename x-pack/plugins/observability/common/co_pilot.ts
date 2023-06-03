@@ -20,6 +20,8 @@ export enum CoPilotPromptId {
   ProfilingExplainFunction = 'profilingExplainFunction',
   ProfilingOptimizeFunction = 'profilingOptimizeFunction',
   ApmExplainError = 'apmExplainError',
+  LogsExplainMessage = 'logsExplainMessage',
+  LogsFindSimilar = 'logsFindSimilar',
 }
 
 const PERF_GPT_SYSTEM_MESSAGE = {
@@ -31,6 +33,12 @@ const PERF_GPT_SYSTEM_MESSAGE = {
 const APM_GPT_SYSTEM_MESSAGE = {
   content: `You are apm-gpt, a helpful assistant for performance analysis, optimisation and
     root cause analysis of software. Answer as concisely as possible.`,
+  role: 'system' as const,
+};
+
+const LOGS_SYSTEM_MESSAGE = {
+  content: `You logsapm-gpt, a helpful assistant for logs-based observability. Answer as
+    concisely as possible.`,
   role: 'system' as const,
 };
 
@@ -46,6 +54,15 @@ function prompt<TParams extends t.Type<any, any, any>>({
     messages,
   };
 }
+
+const logEntryRt = t.type({
+  fields: t.array(
+    t.type({
+      field: t.string,
+      value: t.array(t.any),
+    })
+  ),
+});
 
 export const coPilotPrompts = {
   [CoPilotPromptId.ProfilingOptimizeFunction]: prompt({
@@ -168,6 +185,37 @@ export const coPilotPrompts = {
               : ''
           }
           `,
+          role: 'user',
+        },
+      ];
+    },
+  }),
+  [CoPilotPromptId.LogsExplainMessage]: prompt({
+    params: t.type({
+      logEntry: logEntryRt,
+    }),
+    messages: ({ logEntry }) => {
+      return [
+        LOGS_SYSTEM_MESSAGE,
+        {
+          content: `I'm looking at a log entry. Can you explain me what the log message means? Where it could be coming from, whether it is expected and whether it is an issue. Here's the context, serialized: ${JSON.stringify(
+            logEntry
+          )} `,
+          role: 'user',
+        },
+      ];
+    },
+  }),
+  [CoPilotPromptId.LogsFindSimilar]: prompt({
+    params: t.type({
+      logEntry: logEntryRt,
+    }),
+    messages: ({ logEntry }) => {
+      const message = logEntry.fields.find((field) => field.field === 'message')?.value[0];
+      return [
+        LOGS_SYSTEM_MESSAGE,
+        {
+          content: `I'm looking at a log entry. Can you construct a Kibana KQL query that I can enter in the search bar that gives me similar log entries, based on the \`message\` field: ${message}`,
           role: 'user',
         },
       ];

@@ -18,11 +18,13 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { Query } from '@kbn/es-query';
-import React, { useCallback, useEffect, useRef } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import { OverlayRef } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { useCoPilot, CoPilotPrompt } from '@kbn/observability-plugin/public';
+import { CoPilotPromptId } from '@kbn/observability-plugin/common';
 import { LogViewReference } from '../../../../common/log_views';
 import { TimeKey } from '../../../../common/time';
 import { useLogEntry } from '../../../containers/logs/log_entry';
@@ -109,6 +111,16 @@ export const LogEntryFlyout = ({
     }
   }, [fetchLogEntry, logViewReference, logEntryId]);
 
+  const explainLogMessageParams = useMemo(() => {
+    return logEntry ? { logEntry: { fields: logEntry.fields } } : undefined;
+  }, [logEntry]);
+
+  const similarLogMessageParams = useMemo(() => {
+    return logEntry ? { logEntry: { fields: logEntry.fields } } : undefined;
+  }, [logEntry]);
+
+  const coPilotService = useCoPilot();
+
   return (
     <EuiFlyout onClose={onCloseFlyout} size="m">
       <EuiFlyoutHeader hasBorder>
@@ -157,19 +169,43 @@ export const LogEntryFlyout = ({
           </div>
         </CenteredEuiFlyoutBody>
       ) : logEntry ? (
-        <EuiFlyoutBody
-          banner={
-            (logEntryErrors?.length ?? 0) > 0 ? (
-              <DataSearchErrorCallout
-                title={loadingErrorCalloutTitle}
-                errors={logEntryErrors ?? []}
-                onRetry={fetchLogEntry}
+        <EuiFlexGroup direction="column" gutterSize="m">
+          {coPilotService.isEnabled() && explainLogMessageParams ? (
+            <EuiFlexItem grow={false}>
+              <CoPilotPrompt
+                coPilot={coPilotService}
+                title={explainLogMessageTitle}
+                params={explainLogMessageParams}
+                promptId={CoPilotPromptId.LogsExplainMessage}
               />
-            ) : undefined
-          }
-        >
-          <LogEntryFieldsTable logEntry={logEntry} onSetFieldFilter={onSetFieldFilter} />
-        </EuiFlyoutBody>
+            </EuiFlexItem>
+          ) : null}
+          {coPilotService.isEnabled() && similarLogMessageParams ? (
+            <EuiFlexItem grow={false}>
+              <CoPilotPrompt
+                coPilot={coPilotService}
+                title={similarLogMessagesTitle}
+                params={similarLogMessageParams}
+                promptId={CoPilotPromptId.LogsFindSimilar}
+              />
+            </EuiFlexItem>
+          ) : null}
+          <EuiFlexItem grow={false}>
+            <EuiFlyoutBody
+              banner={
+                (logEntryErrors?.length ?? 0) > 0 ? (
+                  <DataSearchErrorCallout
+                    title={loadingErrorCalloutTitle}
+                    errors={logEntryErrors ?? []}
+                    onRetry={fetchLogEntry}
+                  />
+                ) : undefined
+              }
+            >
+              <LogEntryFieldsTable logEntry={logEntry} onSetFieldFilter={onSetFieldFilter} />
+            </EuiFlyoutBody>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       ) : (
         <CenteredEuiFlyoutBody>
           <div style={{ width: '75%' }}>
@@ -184,6 +220,14 @@ export const LogEntryFlyout = ({
     </EuiFlyout>
   );
 };
+
+const explainLogMessageTitle = i18n.translate('xpack.infra.logFlyout.explainLogMessageTitle', {
+  defaultMessage: "What's this message?",
+});
+
+const similarLogMessagesTitle = i18n.translate('xpack.infra.logFlyout.similarLogMessagesTitle', {
+  defaultMessage: 'How do I find similar log messages?',
+});
 
 const loadingProgressMessage = i18n.translate('xpack.infra.logFlyout.loadingMessage', {
   defaultMessage: 'Searching log entry in shards',
