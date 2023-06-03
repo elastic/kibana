@@ -67,6 +67,11 @@ export function registerSavedQueryRoutes({ http }: CoreSetup): void {
           params: SAVED_QUERY_ID_CONFIG,
           body: SAVED_QUERY_ATTRS_CONFIG,
         },
+        response: {
+          200: {
+            body: responseCreateSchema,
+          },
+        },
       },
     },
     async (context, request, response) => {
@@ -89,6 +94,11 @@ export function registerSavedQueryRoutes({ http }: CoreSetup): void {
         request: {
           params: SAVED_QUERY_ID_CONFIG,
         },
+        response: {
+          200: {
+            body: responseCreateSchema,
+          },
+        },
       },
     },
     async (context, request, response) => {
@@ -109,6 +119,11 @@ export function registerSavedQueryRoutes({ http }: CoreSetup): void {
       version: '1',
       validate: {
         request: {},
+        response: {
+          200: {
+            body: schema.number(),
+          },
+        },
       },
     },
     async (context, request, response) => {
@@ -134,6 +149,14 @@ export function registerSavedQueryRoutes({ http }: CoreSetup): void {
             page: schema.number({ defaultValue: 1 }),
           }),
         },
+        response: {
+          200: {
+            body: schema.object({
+              total: schema.number(),
+              queries: schema.arrayOf(responseCreateSchema),
+            }),
+          },
+        },
       },
     },
     async (context, request, response) => {
@@ -153,6 +176,14 @@ export function registerSavedQueryRoutes({ http }: CoreSetup): void {
       version: '1',
       validate: {
         request: {},
+        response: {
+          200: {
+            body: schema.object({
+              total: schema.number(),
+              queries: schema.arrayOf(responseCreateSchema),
+            }),
+          },
+        },
       },
     },
     async (context, request, response) => {
@@ -174,14 +205,19 @@ export function registerSavedQueryRoutes({ http }: CoreSetup): void {
         request: {
           params: SAVED_QUERY_ID_CONFIG,
         },
+        response: {
+          200: {
+            body: schema.never(),
+          },
+        },
       },
     },
     async (context, request, response) => {
       const { id } = request.params;
       try {
         const savedQuery = await context.savedQuery;
-        const body = await savedQuery.delete(id);
-        return response.ok({ body });
+        await savedQuery.delete(id);
+        return response.ok();
       } catch (e) {
         // TODO: Handle properly
         return response.customError(e);
