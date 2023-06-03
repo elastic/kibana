@@ -87,6 +87,7 @@ export class DiscoverCustomizationExamplesPlugin implements Plugin {
               label: 'Options',
               iconType: 'arrowDown',
               iconSide: 'right',
+              testId: 'customOptionsButton',
               run: (anchorElement: HTMLElement) => {
                 if (isOptionsOpen) {
                   closeOptionsPopover();
@@ -129,6 +130,7 @@ export class DiscoverCustomizationExamplesPlugin implements Plugin {
                           ],
                         },
                       ]}
+                      data-test-subj="customOptionsPopover"
                     />
                   </EuiWrappingPopover>
                 );
@@ -143,6 +145,7 @@ export class DiscoverCustomizationExamplesPlugin implements Plugin {
               id: 'documentExplorer',
               label: 'Document explorer',
               iconType: 'discoverApp',
+              testId: 'documentExplorerButton',
               run: () => {
                 discover.locator?.navigate({});
               },
@@ -158,12 +161,16 @@ export class DiscoverCustomizationExamplesPlugin implements Plugin {
           const [isPopoverOpen, setIsPopoverOpen] = useState(false);
           const togglePopover = () => setIsPopoverOpen((open) => !open);
           const closePopover = () => setIsPopoverOpen(false);
-          const [savedSearches, setSavedSearches] = useState<SimpleSavedObject[]>([]);
+          const [savedSearches, setSavedSearches] = useState<
+            Array<SimpleSavedObject<{ title: string }>>
+          >([]);
 
           useEffect(() => {
-            core.savedObjects.client.find({ type: 'search' }).then((response) => {
-              setSavedSearches(response.savedObjects);
-            });
+            core.savedObjects.client
+              .find<{ title: string }>({ type: 'search' })
+              .then((response) => {
+                setSavedSearches(response.savedObjects);
+              });
           }, []);
 
           const currentSavedSearch = useObservable(
@@ -174,7 +181,12 @@ export class DiscoverCustomizationExamplesPlugin implements Plugin {
           return (
             <EuiPopover
               button={
-                <EuiButton iconType="arrowDown" iconSide="right" onClick={togglePopover}>
+                <EuiButton
+                  iconType="arrowDown"
+                  iconSide="right"
+                  onClick={togglePopover}
+                  data-test-subj="logsViewSelectorButton"
+                >
                   {currentSavedSearch.title ?? 'None selected'}
                 </EuiButton>
               }
@@ -193,6 +205,10 @@ export class DiscoverCustomizationExamplesPlugin implements Plugin {
                       name: savedSearch.get('title'),
                       onClick: () => stateContainer.actions.onOpenSavedSearch(savedSearch.id),
                       icon: savedSearch.id === currentSavedSearch.id ? 'check' : 'empty',
+                      'data-test-subj': `logsViewSelectorOption-${savedSearch.attributes.title.replace(
+                        /[^a-zA-Z0-9]/g,
+                        ''
+                      )}`,
                     })),
                   },
                 ]}
