@@ -12,24 +12,29 @@ import { reportServerError } from '@kbn/kibana-utils-plugin/server';
 import { DataPluginRouter } from '../types';
 
 const STORE_SEARCH_SESSIONS_ROLE_TAG = `access:store_search_session`;
+const access = 'internal';
+const options = {
+  tags: [STORE_SEARCH_SESSIONS_ROLE_TAG],
+};
+const pathPrefix = '/internal/session';
+const version = '1';
 
 export function registerSessionRoutes(router: DataPluginRouter, logger: Logger): void {
-  router.post(
+  router.versioned.post({ path: pathPrefix, access, options }).addVersion(
     {
-      path: '/internal/session',
+      version,
       validate: {
-        body: schema.object({
-          sessionId: schema.string(),
-          name: schema.string(),
-          appId: schema.string(),
-          expires: schema.maybe(schema.string()),
-          locatorId: schema.string(),
-          initialState: schema.maybe(schema.object({}, { unknowns: 'allow' })),
-          restoreState: schema.maybe(schema.object({}, { unknowns: 'allow' })),
-        }),
-      },
-      options: {
-        tags: [STORE_SEARCH_SESSIONS_ROLE_TAG],
+        request: {
+          body: schema.object({
+            sessionId: schema.string(),
+            name: schema.string(),
+            appId: schema.string(),
+            expires: schema.maybe(schema.string()),
+            locatorId: schema.string(),
+            initialState: schema.maybe(schema.object({}, { unknowns: 'allow' })),
+            restoreState: schema.maybe(schema.object({}, { unknowns: 'allow' })),
+          }),
+        },
       },
     },
     async (context, request, res) => {
@@ -57,16 +62,15 @@ export function registerSessionRoutes(router: DataPluginRouter, logger: Logger):
     }
   );
 
-  router.get(
+  router.versioned.get({ path: `${pathPrefix}/{id}`, access, options }).addVersion(
     {
-      path: '/internal/session/{id}',
+      version,
       validate: {
-        params: schema.object({
-          id: schema.string(),
-        }),
-      },
-      options: {
-        tags: [STORE_SEARCH_SESSIONS_ROLE_TAG],
+        request: {
+          params: schema.object({
+            id: schema.string(),
+          }),
+        },
       },
     },
     async (context, request, res) => {
@@ -86,16 +90,15 @@ export function registerSessionRoutes(router: DataPluginRouter, logger: Logger):
     }
   );
 
-  router.get(
+  router.versioned.get({ path: `${pathPrefix}/{id}/status`, access, options }).addVersion(
     {
-      path: '/internal/session/{id}/status',
+      version,
       validate: {
-        params: schema.object({
-          id: schema.string(),
-        }),
-      },
-      options: {
-        tags: [STORE_SEARCH_SESSIONS_ROLE_TAG],
+        request: {
+          params: schema.object({
+            id: schema.string(),
+          }),
+        },
       },
     },
     async (context, request, res) => {
@@ -115,22 +118,21 @@ export function registerSessionRoutes(router: DataPluginRouter, logger: Logger):
     }
   );
 
-  router.post(
+  router.versioned.post({ path: `${pathPrefix}/_find`, access, options }).addVersion(
     {
-      path: '/internal/session/_find',
+      version,
       validate: {
-        body: schema.object({
-          page: schema.maybe(schema.number()),
-          perPage: schema.maybe(schema.number()),
-          sortField: schema.maybe(schema.string()),
-          sortOrder: schema.maybe(schema.oneOf([schema.literal('desc'), schema.literal('asc')])),
-          filter: schema.maybe(schema.string()),
-          searchFields: schema.maybe(schema.arrayOf(schema.string())),
-          search: schema.maybe(schema.string()),
-        }),
-      },
-      options: {
-        tags: [STORE_SEARCH_SESSIONS_ROLE_TAG],
+        request: {
+          body: schema.object({
+            page: schema.maybe(schema.number()),
+            perPage: schema.maybe(schema.number()),
+            sortField: schema.maybe(schema.string()),
+            sortOrder: schema.maybe(schema.oneOf([schema.literal('desc'), schema.literal('asc')])),
+            filter: schema.maybe(schema.string()),
+            searchFields: schema.maybe(schema.arrayOf(schema.string())),
+            search: schema.maybe(schema.string()),
+          }),
+        },
       },
     },
     async (context, request, res) => {
@@ -157,16 +159,15 @@ export function registerSessionRoutes(router: DataPluginRouter, logger: Logger):
     }
   );
 
-  router.delete(
+  router.versioned.delete({ path: `${pathPrefix}/{id}`, access, options }).addVersion(
     {
-      path: '/internal/session/{id}',
+      version,
       validate: {
-        params: schema.object({
-          id: schema.string(),
-        }),
-      },
-      options: {
-        tags: [STORE_SEARCH_SESSIONS_ROLE_TAG],
+        request: {
+          params: schema.object({
+            id: schema.string(),
+          }),
+        },
       },
     },
     async (context, request, res) => {
@@ -184,16 +185,15 @@ export function registerSessionRoutes(router: DataPluginRouter, logger: Logger):
     }
   );
 
-  router.post(
+  router.versioned.post({ path: `${pathPrefix}/{id}/cancel`, access, options }).addVersion(
     {
-      path: '/internal/session/{id}/cancel',
+      version,
       validate: {
-        params: schema.object({
-          id: schema.string(),
-        }),
-      },
-      options: {
-        tags: [STORE_SEARCH_SESSIONS_ROLE_TAG],
+        request: {
+          params: schema.object({
+            id: schema.string(),
+          }),
+        },
       },
     },
     async (context, request, res) => {
@@ -211,20 +211,19 @@ export function registerSessionRoutes(router: DataPluginRouter, logger: Logger):
     }
   );
 
-  router.put(
+  router.versioned.put({ path: `${pathPrefix}/{id}`, access, options }).addVersion(
     {
-      path: '/internal/session/{id}',
+      version,
       validate: {
-        params: schema.object({
-          id: schema.string(),
-        }),
-        body: schema.object({
-          name: schema.maybe(schema.string()),
-          expires: schema.maybe(schema.string()),
-        }),
-      },
-      options: {
-        tags: [STORE_SEARCH_SESSIONS_ROLE_TAG],
+        request: {
+          params: schema.object({
+            id: schema.string(),
+          }),
+          body: schema.object({
+            name: schema.maybe(schema.string()),
+            expires: schema.maybe(schema.string()),
+          }),
+        },
       },
     },
     async (context, request, res) => {
@@ -244,19 +243,18 @@ export function registerSessionRoutes(router: DataPluginRouter, logger: Logger):
     }
   );
 
-  router.post(
+  router.versioned.post({ path: `${pathPrefix}/{id}/_extend`, access, options }).addVersion(
     {
-      path: '/internal/session/{id}/_extend',
+      version,
       validate: {
-        params: schema.object({
-          id: schema.string(),
-        }),
-        body: schema.object({
-          expires: schema.string(),
-        }),
-      },
-      options: {
-        tags: [STORE_SEARCH_SESSIONS_ROLE_TAG],
+        request: {
+          params: schema.object({
+            id: schema.string(),
+          }),
+          body: schema.object({
+            expires: schema.string(),
+          }),
+        },
       },
     },
     async (context, request, res) => {
