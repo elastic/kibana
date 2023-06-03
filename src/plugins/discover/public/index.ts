@@ -17,13 +17,3 @@ export function plugin(initializerContext: PluginInitializerContext) {
 export type { ISearchEmbeddable, SearchInput } from './embeddable';
 export { SEARCH_EMBEDDABLE_TYPE } from './embeddable';
 export { loadSharingDataHelpers } from './utils';
-
-// re-export types and static functions to give other plugins time to migrate away
-export {
-  type SavedSearch,
-  getSavedSearch,
-  getSavedSearchFullPathUrl,
-  getSavedSearchUrl,
-  getSavedSearchUrlConflictMessage,
-  throwErrorOnSavedSearchUrlConflict,
-} from '@kbn/saved-search-plugin/public';
