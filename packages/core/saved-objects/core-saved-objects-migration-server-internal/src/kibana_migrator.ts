@@ -12,7 +12,6 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
-import type { NodeRoles } from '@kbn/core-node-server';
 import type { Logger } from '@kbn/logging';
 import type { DocLinksServiceStart } from '@kbn/core-doc-links-server';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
