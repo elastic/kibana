@@ -25,18 +25,19 @@ import {
   KibanaShuttingDownError,
   TaskRunResult,
 } from '@kbn/reporting-common';
+import { url } from 'inspector';
 import { mapToReportingError } from '../../../common/errors/map_to_reporting_error';
-import { getContentStream } from '..';
+import { ExportTypesRegistry, getContentStream } from '..';
 import type { ReportingCore } from '../..';
 import { durationToNumber, numberToDuration } from '../../../common/schema_utils';
 import type { ReportOutput } from '../../../common/types';
 import type { ReportingConfigType } from '../../config';
-import type { BasePayload, ExportTypeDefinition, RunTaskFn } from '../../types';
 import type { ReportDocument, ReportingStore } from '../store';
 import { Report, SavedReport } from '../store';
 import type { ReportFailedFields, ReportProcessingFields } from '../store/store';
 import { ReportingTask, ReportingTaskStatus, REPORTING_EXECUTE_TYPE, ReportTaskParams } from '.';
 import { errorLogger } from './error_logger';
+import { TaskPayloadPDFV2 } from '../../export_types/printable_pdf_v2';
 
 type CompletedReportOutput = Omit<ReportOutput, 'content'>;
 
@@ -45,10 +46,6 @@ interface ReportingExecuteTaskInstance {
   taskType: string;
   params: ReportTaskParams;
   runAt?: Date;
-}
-
-interface TaskExecutor extends Pick<ExportTypeDefinition, 'jobContentEncoding'> {
-  jobExecutor: RunTaskFn<BasePayload>;
 }
 
 function isOutput(output: CompletedReportOutput | Error): output is CompletedReportOutput {
@@ -78,9 +75,9 @@ async function finishedWithNoPendingCallbacks(stream: Writable) {
 export class ExecuteReportTask implements ReportingTask {
   public TYPE = REPORTING_EXECUTE_TYPE;
 
+  private exportTypesRegistry: ExportTypesRegistry;
   private logger: Logger;
   private taskManagerStart?: TaskManagerStartContract;
-  private taskExecutors?: Map<string, TaskExecutor>;
   private kibanaId?: string;
   private kibanaName?: string;
   private store?: ReportingStore;
@@ -91,6 +88,7 @@ export class ExecuteReportTask implements ReportingTask {
     logger: Logger
   ) {
     this.logger = logger.get('runTask');
+    this.exportTypesRegistry = this.reporting.getExportTypesRegistry();
   }
 
   /*
@@ -100,21 +98,6 @@ export class ExecuteReportTask implements ReportingTask {
     this.taskManagerStart = taskManager;
 
     const { reporting } = this;
-
-    const exportTypesRegistry = reporting.getExportTypesRegistry();
-    const executors = new Map<string, TaskExecutor>();
-    for (const exportType of exportTypesRegistry.getAll()) {
-      const exportTypeLogger = this.logger.get(exportType.jobType);
-      const jobExecutor = exportType.runTaskFnFactory(reporting, exportTypeLogger);
-      // The task will run the function with the job type as a param.
-      // This allows us to retrieve the specific export type runFn when called to run an export
-      executors.set(exportType.jobType, {
-        jobExecutor,
-        jobContentEncoding: exportType.jobContentEncoding,
-      });
-    }
-
-    this.taskExecutors = executors;
 
     const { uuid, name } = reporting.getServerInfo();
     this.kibanaId = uuid;
@@ -141,7 +124,10 @@ export class ExecuteReportTask implements ReportingTask {
   }
 
   private getJobContentEncoding(jobType: string) {
-    return this.taskExecutors?.get(jobType)?.jobContentEncoding;
+    const exportType = this.exportTypesRegistry.get(
+      ({ jobType: _jobType }) => _jobType === jobType
+    );
+    return exportType.jobContentEncoding;
   }
 
   public async _claimJob(task: ReportTaskParams): Promise<SavedReport> {
@@ -262,21 +248,20 @@ export class ExecuteReportTask implements ReportingTask {
     cancellationToken: CancellationToken,
     stream: Writable
   ): Promise<TaskRunResult> {
-    if (!this.taskExecutors) {
-      throw new Error(`Task run function factories have not been called yet!`);
-    }
+    const exportType = this.exportTypesRegistry.get(({ jobType }) => jobType === task.jobtype);
 
-    // get the run_task function
-    const runner = this.taskExecutors.get(task.jobtype);
-    if (!runner) {
-      throw new Error(`No defined task runner function for ${task.jobtype}!`);
-    }
+    const payload = {
+      forceNow: new Date().toISOString(),
+      locatorParams: [url],
+      layout: task.meta.layout,
+      ...task.payload,
+    } as unknown as TaskPayloadPDFV2;
 
     // run the report
     // if workerFn doesn't finish before timeout, call the cancellationToken and throw an error
     const queueTimeout = durationToNumber(this.config.queue.timeout);
     return Rx.lastValueFrom(
-      Rx.from(runner.jobExecutor(task.id, task.payload, cancellationToken, stream)).pipe(
+      Rx.from(exportType.runTask(payload, task.id, cancellationToken, stream)).pipe(
         timeout(queueTimeout)
       ) // throw an error if a value is not emitted before timeout
     );
@@ -383,14 +368,12 @@ export class ExecuteReportTask implements ReportingTask {
                 encoding: jobContentEncoding === 'base64' ? 'base64' : 'raw',
               }
             );
-
             eventLog.logExecutionStart();
 
             const output = await Promise.race<TaskRunResult>([
               this._performJob(task, cancellationToken, stream),
               this.throwIfKibanaShutsDown(),
             ]);
-
             stream.end();
 
             await finishedWithNoPendingCallbacks(stream);

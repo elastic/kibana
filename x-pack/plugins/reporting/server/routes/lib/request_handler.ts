@@ -53,28 +53,14 @@ export class RequestHandler {
       throw new Error(`Export type ${exportTypeId} does not exist in the registry!`);
     }
 
-    if (!exportType.createJobFnFactory) {
-      throw new Error(`Export type ${exportTypeId} is not an async job type!`);
-    }
-
-    const [createJob, store] = await Promise.all([
-      exportType.createJobFnFactory(reporting, logger.get(exportType.id)),
-      reporting.getStore(),
-    ]);
-
-    if (!createJob) {
-      throw new Error(`Export type ${exportTypeId} is not an async job type!`);
-    }
+    const store = await reporting.getStore();
 
     // 1. ensure the incoming params have a version field (should be set by the UI)
     jobParams.version = checkParamsVersion(jobParams, logger);
-
     // 2. encrypt request headers for the running report job to authenticate itself with Kibana
-    // 3. call the export type's createJobFn to create the job payload
-    const [headers, job] = await Promise.all([
-      this.encryptHeaders(),
-      createJob(jobParams, context, this.req),
-    ]);
+    const headers = await this.encryptHeaders();
+
+    const job = exportType.createJob(jobParams, context, this.req);
 
     const payload = {
       ...job,
