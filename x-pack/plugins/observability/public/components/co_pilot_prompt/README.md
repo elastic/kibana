@@ -6,10 +6,10 @@ CoPilotPrompt is a React component that allows for interaction with OpenAI-compa
 
 ### Step 1: Define a Prompt
 
-Firstly, define a prompt in `x-pack/plugins/observability/common/openai.ts`.
+Firstly, define a prompt in `x-pack/plugins/observability/common/co_pilot.ts`.
 
 ```typescript
-[OpenAIPromptId.ProfilingExplainFunction]: prompt({
+[CoPilotPromptId.ProfilingExplainFunction]: prompt({
   params: t.type({
     library: t.string,
     functionName: t.string,
@@ -40,6 +40,22 @@ Firstly, define a prompt in `x-pack/plugins/observability/common/openai.ts`.
 
 Here, the key is a prompt ID, `params` define the expected inputs, and `PERF_GPT_SYSTEM_MESSAGE` is used to instruct ChatGPT's role.
 
+### Step 2: Wrap your app in CoPilotContextProvider
+
+Next, we need to make the CoPilot service available through context, so we can use it in our components. Wrap your app in the CoPilotContextProvider, by calling `getCoPilotService()` from the Observability plugin setup contract:
+
+```typescript
+function renderMyApp(pluginsSetup) {
+  const coPilotService = pluginsSetup.observability.getCoPilotService();
+
+  return (
+    <CoPilotContextProvider value={coPilotService}>
+      <MyApp />
+    </CoPilotContextProvider>
+  );
+}
+```
+
 ### Step 2: Retrieve the CoPilot Service
 
 You can use the `useCoPilot` hook from `@kbn/observability-plugin/public` to retrieve the co-pilot service.
@@ -48,7 +64,7 @@ You can use the `useCoPilot` hook from `@kbn/observability-plugin/public` to ret
 const coPilot = useCoPilot();
 ```
 
-Note: `useCoPilot` will return undefined if the co-pilot service is not available. You can then render the `CoPilotPrompt` component conditionally.
+Note: `useCoPilot.isEnabled()` will return undefined if co-pilot has not been enabled. You can use this to render the `CoPilotPrompt` component conditionally.
 
 ### Step 3: Use the CoPilotPrompt Component
 
@@ -56,10 +72,10 @@ Finally, you can use the `CoPilotPrompt` component like so:
 
 ```jsx
 {
-  coPilot && (
+  coPilot.isEnabled() && (
     <CoPilotPrompt
       coPilot={coPilot}
-      promptId={OpenAIPromptId.ProfilingExplainFunction}
+      promptId={CoPilotPromptId.ProfilingExplainFunction}
       params={promptParams}
       title={i18n.translate('xpack.profiling.frameInformationWindow.explainFunction', {
         defaultMessage: 'Explain function',

@@ -85,4 +85,4 @@ export {
   SYNTHETICS_WAIT_TIMINGS,
 } from './field_names/synthetics';
 
-export { OpenAIPromptId, openAiPrompts } from './openai';
+export { CoPilotPromptId, coPilotPrompts } from './co_pilot';

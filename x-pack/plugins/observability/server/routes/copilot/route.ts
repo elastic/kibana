@@ -10,21 +10,21 @@ import * as t from 'io-ts';
 import { map } from 'lodash';
 import { CreateChatCompletionResponse } from 'openai';
 import { Readable } from 'stream';
-import { openAiPrompts, PromptMap } from '../../../common/openai';
+import { CoPilotPromptMap, coPilotPrompts } from '../../../common/co_pilot';
 import { createObservabilityServerRoute } from '../create_observability_server_route';
 import { ObservabilityRouteCreateOptions, ObservabilityRouteHandlerResources } from '../types';
 
 const promptRoutes: {
-  [TPromptId in keyof PromptMap as `POST /internal/observability/copilot/prompts/${TPromptId}`]: ServerRoute<
+  [TPromptId in keyof CoPilotPromptMap as `POST /internal/observability/copilot/prompts/${TPromptId}`]: ServerRoute<
     `POST /internal/observability/copilot/prompts/${TPromptId}`,
-    t.TypeC<{ body: PromptMap[TPromptId]['params'] }>,
+    t.TypeC<{ body: CoPilotPromptMap[TPromptId]['params'] }>,
     ObservabilityRouteHandlerResources,
     unknown,
     ObservabilityRouteCreateOptions
   >;
 } = Object.assign(
   {},
-  ...map(openAiPrompts, (prompt, promptId) => {
+  ...map(coPilotPrompts, (prompt, promptId) => {
     return createObservabilityServerRoute({
       endpoint: `POST /internal/observability/copilot/prompts/${promptId}`,
       params: t.type({

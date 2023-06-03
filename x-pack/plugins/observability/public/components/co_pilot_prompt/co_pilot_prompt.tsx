@@ -20,9 +20,10 @@ import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useMemo, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
-import { Observable, catchError, of } from 'rxjs';
-import { OpenAIPromptId, PromptParamsOf } from '../../../common/openai';
-import { CoPilotService, PromptObservableState } from '../../hooks/use_co_pilot';
+import { catchError, Observable, of } from 'rxjs';
+import { CoPilotPromptId } from '../../../common';
+import { PromptParamsOf } from '../../../common/co_pilot';
+import { CoPilotService, PromptObservableState } from '../../typings/co_pilot';
 
 const cursorCss = css`
   @keyframes blink {
@@ -45,7 +46,7 @@ const cursorCss = css`
   background: rgba(0, 0, 0, 0.25);
 `;
 
-export interface CoPilotPromptProps<TPromptId extends OpenAIPromptId> {
+export interface CoPilotPromptProps<TPromptId extends CoPilotPromptId> {
   title: string;
   promptId: TPromptId;
   coPilot: CoPilotService;
@@ -53,7 +54,7 @@ export interface CoPilotPromptProps<TPromptId extends OpenAIPromptId> {
 }
 
 // eslint-disable-next-line import/no-default-export
-export default function CoPilotPrompt<TPromptId extends OpenAIPromptId>({
+export default function CoPilotPrompt<TPromptId extends CoPilotPromptId>({
   title,
   coPilot,
   promptId,

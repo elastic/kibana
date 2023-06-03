@@ -16,7 +16,7 @@ export enum OpenAIProvider {
   AzureOpenAI = 'azureOpenAI',
 }
 
-export enum OpenAIPromptId {
+export enum CoPilotPromptId {
   ProfilingExplainFunction = 'profilingExplainFunction',
   ProfilingOptimizeFunction = 'profilingOptimizeFunction',
   ApmExplainError = 'apmExplainError',
@@ -47,8 +47,8 @@ function prompt<TParams extends t.Type<any, any, any>>({
   };
 }
 
-export const openAiPrompts = {
-  [OpenAIPromptId.ProfilingOptimizeFunction]: prompt({
+export const coPilotPrompts = {
+  [CoPilotPromptId.ProfilingOptimizeFunction]: prompt({
     params: t.type({
       library: t.string,
       functionName: t.string,
@@ -91,7 +91,7 @@ export const openAiPrompts = {
       ];
     },
   }),
-  [OpenAIPromptId.ProfilingExplainFunction]: prompt({
+  [CoPilotPromptId.ProfilingExplainFunction]: prompt({
     params: t.type({
       library: t.string,
       functionName: t.string,
@@ -118,7 +118,7 @@ export const openAiPrompts = {
       ];
     },
   }),
-  [OpenAIPromptId.ApmExplainError]: prompt({
+  [CoPilotPromptId.ApmExplainError]: prompt({
     params: t.intersection([
       t.type({
         serviceName: t.string,
@@ -175,11 +175,11 @@ export const openAiPrompts = {
   }),
 };
 
-export type PromptMap = typeof openAiPrompts;
+export type CoPilotPromptMap = typeof coPilotPrompts;
 
-export type PromptParamsOf<TPromptId extends OpenAIPromptId> = t.OutputOf<
+export type PromptParamsOf<TPromptId extends CoPilotPromptId> = t.OutputOf<
   {
-    [TKey in keyof PromptMap]: PromptMap[TKey];
+    [TKey in keyof CoPilotPromptMap]: CoPilotPromptMap[TKey];
   }[TPromptId]['params']
 >;
 

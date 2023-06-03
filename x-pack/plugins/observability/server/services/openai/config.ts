@@ -23,6 +23,7 @@ export const azureOpenAIConfig = schema.object({
 });
 
 export const observabilityCoPilotConfig = schema.object({
+  enabled: schema.boolean({ defaultValue: false }),
   provider: schema.oneOf([openAIConfig, azureOpenAIConfig]),
 });
 

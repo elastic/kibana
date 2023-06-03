@@ -49,6 +49,9 @@ const configSchema = schema.object({
 export const config: PluginConfigDescriptor = {
   exposeToBrowser: {
     unsafe: true,
+    coPilot: {
+      enabled: true,
+    },
   },
   schema: configSchema,
 };

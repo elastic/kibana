@@ -60,6 +60,7 @@ import {
 } from './rules/create_observability_rule_type_registry';
 import { createUseRulesLink } from './hooks/create_use_rules_link';
 import { registerObservabilityRuleTypes } from './rules/register_observability_rule_types';
+import { createCoPilotService } from './context/co_pilot_context/create_co_pilot_service';
 
 export interface ConfigSchema {
   unsafe: {
@@ -74,6 +75,9 @@ export interface ConfigSchema {
         enabled: boolean;
       };
     };
+  };
+  coPilot: {
+    enabled: boolean;
   };
 }
 export type ObservabilityPublicSetup = ReturnType<Plugin['setup']>;
@@ -314,6 +318,11 @@ export class Plugin
       )
     );
 
+    const coPilotService = createCoPilotService({
+      enabled: config.coPilot.enabled,
+      http: coreSetup.http,
+    });
+
     return {
       dashboard: { register: registerDataHandler },
       observabilityRuleTypeRegistry: this.observabilityRuleTypeRegistry,
@@ -321,6 +330,7 @@ export class Plugin
       rulesLocator,
       ruleDetailsLocator,
       sloDetailsLocator,
+      getCoPilotService: () => coPilotService,
     };
   }
 

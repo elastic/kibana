@@ -8,7 +8,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiText, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useCoPilot, CoPilotPrompt } from '@kbn/observability-plugin/public';
 import React, { useMemo } from 'react';
-import { OpenAIPromptId } from '@kbn/observability-plugin/common';
+import { CoPilotPromptId } from '@kbn/observability-plugin/common';
 import { FrameSymbolStatus, getFrameSymbolStatus } from '../../../common/profiling';
 import { FrameInformationPanel } from './frame_information_panel';
 import { getImpactRows } from './get_impact_rows';
@@ -97,12 +97,12 @@ export function FrameInformationWindow({ frame, totalSamples, totalSeconds }: Pr
         <EuiFlexItem>
           <KeyValueList rows={informationRows} />
         </EuiFlexItem>
-        {coPilotService && promptParams ? (
+        {coPilotService.isEnabled() && promptParams ? (
           <>
             <EuiFlexItem>
               <CoPilotPrompt
                 coPilot={coPilotService}
-                promptId={OpenAIPromptId.ProfilingExplainFunction}
+                promptId={CoPilotPromptId.ProfilingExplainFunction}
                 params={promptParams}
                 title={i18n.translate('xpack.profiling.frameInformationWindow.explainFunction', {
                   defaultMessage: 'Explain function',
@@ -112,7 +112,7 @@ export function FrameInformationWindow({ frame, totalSamples, totalSeconds }: Pr
             <EuiFlexItem>
               <CoPilotPrompt
                 coPilot={coPilotService}
-                promptId={OpenAIPromptId.ProfilingOptimizeFunction}
+                promptId={CoPilotPromptId.ProfilingOptimizeFunction}
                 params={promptParams}
                 title={i18n.translate('xpack.profiling.frameInformationWindow.optimizeFunction', {
                   defaultMessage: 'Optimize function',

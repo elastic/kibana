@@ -23,7 +23,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
-import { OpenAIPromptId } from '@kbn/observability-plugin/common';
+import { CoPilotPromptId } from '@kbn/observability-plugin/common';
 import { CoPilotPrompt, useCoPilot } from '@kbn/observability-plugin/public';
 import { ObservabilityTriggerId } from '@kbn/observability-shared-plugin/common';
 import { getContextMenuItemsFromActions } from '@kbn/observability-shared-plugin/public';
@@ -360,7 +360,7 @@ export function ErrorSampleDetails({
         <SampleSummary error={error} />
       )}
 
-      {coPilot && promptParams ? (
+      {coPilot.isEnabled() && promptParams ? (
         <>
           <EuiFlexItem>
             <CoPilotPrompt
@@ -369,7 +369,7 @@ export function ErrorSampleDetails({
                 'xpack.apm.errorGroupDetails.explainErrorTitle',
                 { defaultMessage: "What's this error?" }
               )}
-              promptId={OpenAIPromptId.ApmExplainError}
+              promptId={CoPilotPromptId.ApmExplainError}
               params={promptParams}
             />
           </EuiFlexItem>
