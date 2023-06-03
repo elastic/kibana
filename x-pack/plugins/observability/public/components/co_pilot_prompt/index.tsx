@@ -18,9 +18,9 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
-import { Observable } from 'rxjs';
+import { Observable, catchError, of } from 'rxjs';
 import { OpenAIPromptId, PromptParamsOf } from '../../../common/openai';
 import { CoPilotService, PromptObservableState } from '../../hooks/use_co_pilot';
 
@@ -64,22 +64,41 @@ export function CoPilotPrompt<TPromptId extends OpenAIPromptId>({
 
   const conversation$ = useMemo(() => {
     return hasOpened
-      ? coPilot.prompt(promptId, params)
+      ? coPilot
+          .prompt(promptId, params)
+          .pipe(
+            catchError((err) => of({ loading: false, error: err, message: String(err.message) }))
+          )
       : new Observable<PromptObservableState>(() => {});
   }, [params, promptId, coPilot, hasOpened]);
 
   const conversation = useObservable(conversation$);
 
+  useEffect(() => {}, [conversation$]);
+
   const content = conversation?.message ?? '';
 
-  const isLoading = !!conversation?.loading;
+  let state: 'init' | 'loading' | 'streaming' | 'error' | 'complete' = 'init';
 
-  const isStreaming = isLoading && !!content;
+  if (conversation?.loading) {
+    state = content ? 'streaming' : 'loading';
+  } else if (conversation && 'error' in conversation && conversation.error) {
+    state = 'error';
+  } else if (content) {
+    state = 'complete';
+  }
 
-  const cursor = isLoading ? <span className={cursorCss} /> : <></>;
+  let inner: React.ReactElement;
 
-  const inner =
-    isLoading && !isStreaming ? (
+  if (state === 'complete' || state === 'streaming') {
+    inner = (
+      <p style={{ whiteSpace: 'pre-wrap', lineHeight: 1.5 }}>
+        {content}
+        {state === 'streaming' ? <span className={cursorCss} /> : <></>}
+      </p>
+    );
+  } else if (state === 'init' || state === 'loading') {
+    inner = (
       <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
         <EuiFlexItem grow={false}>
           <EuiLoadingSpinner size="s" />
@@ -92,12 +111,20 @@ export function CoPilotPrompt<TPromptId extends OpenAIPromptId>({
           </EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>
-    ) : (
-      <p style={{ whiteSpace: 'pre-wrap', lineHeight: 1.5 }}>
-        {content}
-        {cursor}
-      </p>
     );
+  } else {
+    /* if (state === 'error') {*/
+    inner = (
+      <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
+        <EuiFlexItem grow={false}>
+          <EuiIcon color="danger" type="warning" />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiText size="s">{content}</EuiText>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  }
 
   const tooltipContent = i18n.translate('xpack.observability.coPilotPrompt.askCoPilot', {
     defaultMessage: 'Ask Observability Co-Pilot for assistence',
