@@ -48,7 +48,7 @@ export function useCoPilot() {
             .post(`/internal/observability/copilot/prompts/${promptId}`, {
               body: JSON.stringify(params),
               asResponse: true,
-              awaitResponse: false,
+              rawResponse: true,
             })
             .then((response) => {
               const status = response.response?.status;

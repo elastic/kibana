@@ -91,7 +91,7 @@ export class Fetch {
         );
         const initialResponse = this.fetchResponse(interceptedOptions);
 
-        if (interceptedOptions.awaitResponse === false) {
+        if (interceptedOptions.rawResponse === false) {
           resolve((await initialResponse) as HttpResponse<TResponseBody>);
         }
 
@@ -121,8 +121,6 @@ export class Fetch {
     const context = this.params.executionContext.withGlobalContext(options.context);
     const { version } = options;
 
-    const awaitResponse = options.awaitResponse ?? true;
-
     // Merge and destructure options out that are not applicable to the Fetch API.
     const {
       query,
@@ -139,7 +137,6 @@ export class Fetch {
       // however we can't pass it to `fetch` as it will send an `Content-Type: Undefined` header
       headers: removedUndefined({
         'Content-Type': 'application/json',
-        'Accept-Encoding': awaitResponse ? undefined : 'identity',
         ...options.headers,
         'kbn-version': this.params.kibanaVersion,
         [ELASTIC_HTTP_VERSION_HEADER]: version,
@@ -170,7 +167,8 @@ export class Fetch {
 
     try {
       response = await window.fetch(request);
-      if (fetchOptions.awaitResponse === false) {
+
+      if (fetchOptions.rawResponse) {
         return {
           fetchOptions,
           request,
