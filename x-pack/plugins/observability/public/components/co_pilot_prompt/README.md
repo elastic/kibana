@@ -93,7 +93,7 @@ A `CoPilotService` instance. This is required for establishing connection with t
 
 ### promptId
 
-A unique identifier for the prompt. This should match one of the keys you defined in `x-pack/plugins/observability/common/openai.ts`.
+A unique identifier for the prompt. This should match one of the keys you defined in `x-pack/plugins/observability/common/co_pilot.ts`.
 
 ### params
 
