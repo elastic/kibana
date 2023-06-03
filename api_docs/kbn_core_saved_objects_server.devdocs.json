@@ -5832,6 +5832,90 @@
                 "path": "x-pack/plugins/fleet/server/services/epm/kibana/assets/install.ts"
               },
               {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/host_risk_score_dashboards.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/host_risk_score_dashboards.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/host_risk_score_dashboards.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/host_risk_score_dashboards.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/host_risk_score_dashboards.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/host_risk_score_dashboards.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/host_risk_score_dashboards.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/host_risk_score_dashboards.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/host_risk_score_dashboards.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/host_risk_score_dashboards.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
+              },
+              {
                 "plugin": "graph",
                 "path": "x-pack/plugins/graph/server/sample_data/logs.ts"
               },
@@ -5846,90 +5930,6 @@
               {
                 "plugin": "lists",
                 "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.mock.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/host_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/host_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/host_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/host_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/host_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/host_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/host_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/host_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/host_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/host_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
               },
               {
                 "plugin": "alerting",
@@ -8113,7 +8113,7 @@
         "tags": [],
         "label": "SavedObjectsModelMappingsDeprecationChange",
         "description": [
-          "\nA {@link SavedObjectsModelChange | model change} flagging mappings as being deprecated.\nDeprecated mappings should no longer be used and will eventually be deleted later."
+          "\nA {@link SavedObjectsModelChange | model change} flagging mappings as being no longer used.\n"
         ],
         "path": "packages/core/saved-objects/core-saved-objects-server/src/model_version/model_change.ts",
         "deprecated": false,
@@ -8172,7 +8172,7 @@
             "tags": [],
             "label": "changes",
             "description": [
-              "\nThe list of {@link SavedObjectsModelChange | changes} associated with this version."
+              "\nThe list of changes associated with this version.\n\nModel version changes are defined via low-level components, allowing to use composition\nto describe the list of changes bound to a given version. Composition also allows to more\neasily merge changes from multiple source when needed.\n"
             ],
             "signature": [
               {
@@ -8258,7 +8258,7 @@
         "tags": [],
         "label": "SavedObjectsModelVersionSchemaDefinitions",
         "description": [
-          "\nThe schemas associated with this model version.\n"
+          "\nThe validation and conversion schemas associated with this model version.\n"
         ],
         "path": "packages/core/saved-objects/core-saved-objects-server/src/model_version/schemas.ts",
         "deprecated": false,
@@ -10049,7 +10049,9 @@
         "type": "Interface",
         "tags": [],
         "label": "SavedObjectsType",
-        "description": [],
+        "description": [
+          "\nDefinition of a type of savedObject.\n"
+        ],
         "signature": [
           {
             "pluginId": "@kbn/core-saved-objects-server",
@@ -10368,16 +10370,8 @@
                 "path": "x-pack/plugins/canvas/server/saved_objects/custom_element.ts"
               },
               {
-                "plugin": "graph",
-                "path": "x-pack/plugins/graph/server/saved_objects/graph_workspace.ts"
-              },
-              {
                 "plugin": "lists",
                 "path": "x-pack/plugins/lists/server/saved_objects/exception_list.ts"
-              },
-              {
-                "plugin": "maps",
-                "path": "x-pack/plugins/maps/server/saved_objects/setup_saved_objects.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -10394,6 +10388,14 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_actions_legacy/logic/rule_actions/legacy_saved_object_mappings.ts"
+              },
+              {
+                "plugin": "graph",
+                "path": "x-pack/plugins/graph/server/saved_objects/graph_workspace.ts"
+              },
+              {
+                "plugin": "maps",
+                "path": "x-pack/plugins/maps/server/saved_objects/setup_saved_objects.ts"
               },
               {
                 "plugin": "dashboard",
@@ -10528,12 +10530,10 @@
             "parentPluginId": "@kbn/core-saved-objects-server",
             "id": "def-common.SavedObjectsType.modelVersions",
             "type": "CompoundType",
-            "tags": [
-              "alpha"
-            ],
+            "tags": [],
             "label": "modelVersions",
             "description": [
-              "\nA map of model versions associated with this type.\n\nModel versions supersede the {@link SavedObjectsType.migrations | migrations} (and {@link SavedObjectsType.schemas | schemas}) APIs\nby exposing an unified way of describing the changes of shape or data of the type.\n\nModel versioning is decoupled from Kibana versioning, and isolated between types.\nModel versions are identified by a single numeric value, starting at `1` and without gaps.\n\nPlease refer to {@link SavedObjectsModelVersion} for details on the API's usages.\n\nA **valid** versioning would be:\n\n```ts\n{\n  name: 'foo',\n  // other mandatory attributes...\n  modelVersions: {\n    '1': modelVersion1,\n    '2': modelVersion2,\n    '3': modelVersion3,\n  }\n}\n```\n\nA **invalid** versioning would be:\n\n```ts\n{\n  name: 'foo',\n  // other mandatory attributes...\n  modelVersions: {\n    '1': modelVersion1,\n    '3': modelVersion3, // ERROR, no model version 2\n    '3.1': modelVersion31, // ERROR, model version is a single numeric value\n  }\n}\n```\n"
+              "\nA map of model versions associated with this type.\n\nModel versions supersede the {@link SavedObjectsType.migrations | migrations} (and {@link SavedObjectsType.schemas | schemas}) APIs\nby exposing an unified way of describing the changes of shape or data of the type.\n\nModel versioning is decoupled from Kibana versioning, and isolated between types.\nModel versions are identified by a single numeric value, starting at `1` and without gaps.\n\nPlease refer to {@link SavedObjectsModelVersion} for more details on the model version API.\n"
             ],
             "signature": [
               {
@@ -10564,7 +10564,7 @@
             "tags": [],
             "label": "switchToModelVersionAt",
             "description": [
-              "\nAllows to opt-in to the new model version API.\n\nMust be a valid semver version (with the patch version being necessarily 0)\n\nWhen specified, the type will switch from using the {@link SavedObjectsType.migrations | legacy migration API}\nto use the {@link SavedObjectsType.modelVersions | modelVersion API} after the specified version.\n\nWhen opted in, it will no longer be possible to use the legacy migration API after the specified version.\n\nA **valid** usage example would be:\n\n```ts\n{\n  name: 'foo',\n  // other mandatory attributes...\n  switchToModelVersionAt: '8.8.0',\n  migrations: {\n    '8.1.0': migrateTo810,\n    '8.7.0': migrateTo870,\n  },\n  modelVersions: {\n    '1': modelVersion1\n  }\n}\n```\n\nAn **invalid** usage example would be:\n\n```ts\n{\n  name: 'foo',\n  // other mandatory attributes...\n  switchToModelVersionAt: '8.9.0',\n  migrations: {\n    '8.1.0': migrateTo8_1,\n    '8.9.0': migrateTo8_9, // error: migration registered for the switch version\n    '8.10.0': migrateTo8_10, // error: migration registered for after the switch version\n  },\n  modelVersions: {\n    '1': modelVersion1\n  }\n}\n```\n\nPlease refer to the {@link SavedObjectsType.modelVersions | modelVersion API} for more documentation on\nthe new API.\n"
+              "\nAllows to opt-in to the new model version API.\n\nMust be a valid semver version (with the patch version being necessarily 0)\n\nWhen specified, the type will switch from using the {@link SavedObjectsType.migrations | legacy migration API}\nto use the {@link SavedObjectsType.modelVersions | modelVersion API} after the specified version.\n\nOnce opted in, it will no longer be possible to use the legacy migration API after the specified version.\n"
             ],
             "signature": [
               "string | undefined"
@@ -11526,7 +11526,7 @@
         "tags": [],
         "label": "SavedObjectModelVersionForwardCompatibilityFn",
         "description": [
-          "\nPlain javascript function alternative for {@link SavedObjectModelVersionForwardCompatibilitySchema}"
+          "\nPlain javascript function alternative for {@link SavedObjectModelVersionForwardCompatibilitySchema}\n"
         ],
         "signature": [
           "(attributes: InAttrs) => OutAttrs"
@@ -11555,12 +11555,12 @@
       },
       {
         "parentPluginId": "@kbn/core-saved-objects-server",
-        "id": "def-common.SavedObjectModelVersionForwardCompatibilitySchema",
+        "id": "def-common.SavedObjectModelVersionForwardCompatibilityObjectSchema",
         "type": "Type",
         "tags": [],
-        "label": "SavedObjectModelVersionForwardCompatibilitySchema",
+        "label": "SavedObjectModelVersionForwardCompatibilityObjectSchema",
         "description": [
-          "\nSchema used when retrieving a document of a higher version to convert them to the older version.\n\nThese schemas can be defined in multiple ways:\n- A `@kbn/config-schema`'s Object schema, that will receive the document's attributes\n- An arbitrary function that will receive the document's attributes as parameter and should return the converted attributes\n"
+          "\nObject-schema (from `@kbn/config-schema`) alternative for {@link SavedObjectModelVersionForwardCompatibilitySchema}\n"
         ],
         "signature": [
           {
@@ -11570,7 +11570,31 @@
             "section": "def-common.ObjectType",
             "text": "ObjectType"
           },
-          "<any> | ",
+          "<any>"
+        ],
+        "path": "packages/core/saved-objects/core-saved-objects-server/src/model_version/schemas.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-server",
+        "id": "def-common.SavedObjectModelVersionForwardCompatibilitySchema",
+        "type": "Type",
+        "tags": [],
+        "label": "SavedObjectModelVersionForwardCompatibilitySchema",
+        "description": [
+          "\nSchema used when retrieving a document of a higher version to convert them to the older version.\n\nThese schemas can be defined in multiple ways:\n- A `@kbn/config-schema`'s Object schema, that will receive the document's attributes\n- An arbitrary function that will receive the document's attributes as parameter and should return the converted attributes\n"
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/core-saved-objects-server",
+            "scope": "common",
+            "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+            "section": "def-common.SavedObjectModelVersionForwardCompatibilityObjectSchema",
+            "text": "SavedObjectModelVersionForwardCompatibilityObjectSchema"
+          },
+          " | ",
           {
             "pluginId": "@kbn/core-saved-objects-server",
             "scope": "common",

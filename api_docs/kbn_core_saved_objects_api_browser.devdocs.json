@@ -1067,30 +1067,6 @@
             "path": "src/plugins/event_annotation/public/event_annotation_service/service.tsx"
           },
           {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/public/datasources/form_based/dimension_panel/reference_editor.tsx"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/public/datasources/form_based/dimension_panel/reference_editor.tsx"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/public/datasources/form_based/dimension_panel/dimension_panel.tsx"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/public/datasources/form_based/dimension_panel/dimension_panel.tsx"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/public/datasources/form_based/operations/definitions/index.ts"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/public/datasources/form_based/operations/definitions/index.ts"
-          },
-          {
             "plugin": "ml",
             "path": "x-pack/plugins/ml/public/application/util/dependency_cache.ts"
           },
