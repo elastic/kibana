@@ -77,7 +77,6 @@ export default function processEventsTests({ getService }: FtrProviderContext) {
             index: MOCK_INDEX,
             sessionEntityId: MOCK_SESSION_ENTITY_ID,
             sessionStartTime: MOCK_SESSION_START_TIME,
-            pageSize: MOCK_PAGE_SIZE, // overriding to test pagination, as we only have 419 records of mock data
           });
         expect(response.status).to.be(400);
       });
