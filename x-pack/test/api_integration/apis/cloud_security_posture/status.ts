@@ -351,41 +351,137 @@ export default function (providerContext: FtrProviderContext) {
           .get(`/internal/cloud_security_posture/status`)
           .set('kbn-xsrf', 'xxxx')
           .expect(200);
-        console.log(res);
         expect(res.vuln_mgmt.status).to.be('waiting_for_results');
       });
+    });
 
-      // it(`TEST`, async () => {
-      //   const previousInstallDate = new Date(Date.now() - 6000000).toISOString();
-      //   await createPackagePolicy(
-      //     supertest,
-      //     agentPolicyId,
-      //     'vuln_mgmt',
-      //     'cloudbeat/vuln_mgmt_aws',
-      //     'aws',
-      //     'vuln_mgmt'
-      //   );
-      //   await kibanaServer.savedObjects.update({
-      //     id: 'test-default-a1',
-      //     type: PACKAGES_SAVED_OBJECT_TYPE,
-      //     attributes: {
-      //       install_status: 'installing',
-      //       install_started_at: previousInstallDate,
-      //     },
-      //   });
-      //   await supertest.post(`/api/fleet/setup`).set('kbn-xsrf', 'xxx').expect(200);
-      //   const packageAfterSetup = await kibanaServer.savedObjects.get({
-      //     type: PACKAGES_SAVED_OBJECT_TYPE,
-      //     id: pkgName,
-      //   });
-      //   const installStartedAfterSetup = packageAfterSetup.attributes.install_started_at;
-      //   const { body: res }: { body: CspSetupStatus } = await supertest
-      //     .get(`/internal/cloud_security_posture/status`)
-      //     .set('kbn-xsrf', 'xxxx')
-      //     .expect(200);
-      //   console.log(res);
-      //   expect(res.vuln_mgmt.status).to.be('waiting_for_results');
-      // });
+    describe('status = index_timeout test', () => {
+      setupFleetAndAgents(providerContext);
+
+      beforeEach(async () => {
+        await kibanaServer.savedObjects.cleanStandardList();
+        await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
+        const getPkRes = await supertest
+          .get(`/api/fleet/epm/packages/fleet_server`)
+          .set('kbn-xsrf', 'xxxx')
+          .expect(200);
+        const pkgVersion = getPkRes.body.item.version;
+        await supertest
+          .post(`/api/fleet/epm/packages/fleet_server/${pkgVersion}`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({ force: true })
+          .expect(200);
+
+        const { body: agentPolicyResponse } = await supertest
+          .post(`/api/fleet/agent_policies`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'Test policy a1',
+            namespace: 'default',
+          });
+
+        agentPolicyId = agentPolicyResponse.item.id;
+
+        await supertest
+          .post(`/api/fleet/fleet_server_hosts`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            id: 'test-default-a1',
+            name: 'Default',
+            is_default: false,
+            host_urls: ['https://test.com:8080', 'https://test.com:8081'],
+          })
+          .expect(200);
+        await generateAgent(providerContext, 'healthy', `Agent policy test 2`, agentPolicyId);
+
+        await deleteIndex(es, INDEX_ARRAY);
+      });
+
+      afterEach(async () => {
+        await kibanaServer.savedObjects.cleanStandardList();
+        await esArchiver.unload('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
+      });
+
+      it(`kspm should return index-timeout if nothing shows up after 10 minutes`, async () => {
+        const previousInstallDate = new Date(Date.now() - 600000).toISOString();
+        await createPackagePolicy(
+          supertest,
+          agentPolicyId,
+          'kspm',
+          'cloudbeat/cis_k8s',
+          'vanilla',
+          'kspm'
+        );
+
+        await kibanaServer.savedObjects.update({
+          id: 'cloud_security_posture',
+          type: 'epm-packages',
+          attributes: {
+            install_started_at: previousInstallDate,
+          },
+        });
+
+        const { body: res }: { body: CspSetupStatus } = await supertest
+          .get(`/internal/cloud_security_posture/status`)
+          .set('kbn-xsrf', 'xxxx')
+          .expect(200);
+
+        expect(res.kspm.status).to.be('index-timeout');
+      });
+
+      it(`cspm should return index-timeout if nothing shows up after 10 minutes`, async () => {
+        const previousInstallDate = new Date(Date.now() - 600000).toISOString();
+        await createPackagePolicy(
+          supertest,
+          agentPolicyId,
+          'cspm',
+          'cloudbeat/cis_aws',
+          'aws',
+          'cspm'
+        );
+
+        await kibanaServer.savedObjects.update({
+          id: 'cloud_security_posture',
+          type: 'epm-packages',
+          attributes: {
+            install_started_at: previousInstallDate,
+          },
+        });
+
+        const { body: res }: { body: CspSetupStatus } = await supertest
+          .get(`/internal/cloud_security_posture/status`)
+          .set('kbn-xsrf', 'xxxx')
+          .expect(200);
+
+        expect(res.cspm.status).to.be('index-timeout');
+      });
+
+      it(`vuln_mgmt should return index-timeout if nothing shows up after 10 minutes`, async () => {
+        const previousInstallDate = new Date(Date.now() - 21600000).toISOString();
+        await createPackagePolicy(
+          supertest,
+          agentPolicyId,
+          'vuln_mgmt',
+          'cloudbeat/vuln_mgmt_aws',
+          'aws',
+          'vuln_mgmt'
+        );
+
+        await kibanaServer.savedObjects.update({
+          id: 'cloud_security_posture',
+          type: 'epm-packages',
+          attributes: {
+            install_started_at: previousInstallDate,
+          },
+        });
+
+        const { body: res }: { body: CspSetupStatus } = await supertest
+          .get(`/internal/cloud_security_posture/status`)
+          .set('kbn-xsrf', 'xxxx')
+          .expect(200);
+
+        expect(res.vuln_mgmt.status).to.be('index-timeout');
+      });
     });
 
     describe('status = unprivileged test', () => {
