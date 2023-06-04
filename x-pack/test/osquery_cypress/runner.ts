@@ -40,7 +40,7 @@ async function setupFleetAgent({ getService }: FtrProviderContext) {
   });
 
   const fleetManager = new FleetManager(kbnClient, log);
-  const agentManager = new AgentManager(kbnClient, log);
+  const agentManager = new AgentManager(kbnClient, config.get('servers.fleetserver.port'), log);
 
   await fleetManager.setup();
   await agentManager.setup();

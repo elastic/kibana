@@ -310,7 +310,7 @@ export const cli = () => {
               config,
               installDir: options?.installDir,
               extraKbnOpts:
-                options?.installDir || options?.ci
+                options?.installDir || options?.ci || isOpen
                   ? []
                   : ['--dev', '--no-dev-config', '--no-dev-credentials'],
               onEarlyExit,
