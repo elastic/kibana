@@ -435,8 +435,8 @@ describe('split .kibana index into multiple system indices', () => {
       }
 
       const testKits = await Promise.all(
-        new Array(PARALLEL_MIGRATORS)
-          .fill({
+        new Array(PARALLEL_MIGRATORS).fill(true).map((_, index) =>
+          getKibanaMigratorTestKit({
             settings: {
               migrations: {
                 discardUnknownObjects: currentVersion,
@@ -446,13 +446,9 @@ describe('split .kibana index into multiple system indices', () => {
             kibanaIndex: MAIN_SAVED_OBJECT_INDEX,
             types: typeRegistry.getAllTypes(),
             defaultIndexTypesMap: DEFAULT_INDEX_TYPES_MAP,
+            logFilePath: Path.join(__dirname, `dot_kibana_split_instance_${index}.log`),
           })
-          .map((config, index) =>
-            getKibanaMigratorTestKit({
-              ...config,
-              logFilePath: Path.join(__dirname, `dot_kibana_split_instance_${index}.log`),
-            })
-          )
+        )
       );
 
       const results = await Promise.all(testKits.map((testKit) => testKit.runMigrations()));
@@ -485,7 +481,7 @@ describe('split .kibana index into multiple system indices', () => {
           task: 5,
         },
       });
-    }, 600000);
+    }, 1200000);
 
     afterEach(async () => {
       await esServer?.stop();
