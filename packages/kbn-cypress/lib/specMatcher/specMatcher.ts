@@ -109,6 +109,7 @@ async function getFilesByGlob(projectRoot: string, glob: GlobPattern, globOption
     // globby can't work with backwards slashes
     // https://github.com/sindresorhus/globby/issues/179
     debug('updating glob patterns to POSIX');
+    // eslint-disable-next-line guard-for-in
     for (const i in globs) {
       const cur = globs[i];
 

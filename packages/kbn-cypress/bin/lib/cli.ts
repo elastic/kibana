@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+// eslint-disable-next-line import/no-extraneous-dependencies
 import Debug from 'debug';
 import { CurrentsRunParameters, TestingType } from '../../types';
 import { sanitizeAndConvertNestedArgs } from './parser';

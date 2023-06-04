@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
+/* eslint-disable no-console */
+
 import chalk from 'chalk';
 import util from 'util';
 

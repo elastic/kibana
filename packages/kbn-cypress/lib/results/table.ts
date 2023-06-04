@@ -27,15 +27,15 @@ export const summaryTable = (r: CypressCommandLine.CypressRunResult) => {
     ? 'All specs passed!'
     : 'No specs executed';
 
-  const data = r.runs.map((r) => [
-    r.stats.failures + r.stats.skipped > 0 ? failureIcon : successIcon,
-    r.spec.relativeToCommonRoot,
-    gray(prettyMS(r.stats.duration)),
-    white(r.stats.tests ?? 0),
-    r.stats.passes ? green(r.stats.passes) : gray('-'),
-    r.stats.failures ? red(r.stats.failures) : gray('-'),
-    r.stats.pending ? cyan(r.stats.pending) : gray('-'),
-    r.stats.skipped ? red(r.stats.skipped) : gray('-'),
+  const data = r.runs.map((run) => [
+    run.stats.failures + run.stats.skipped > 0 ? failureIcon : successIcon,
+    run.spec.relativeToCommonRoot,
+    gray(prettyMS(run.stats.duration)),
+    white(run.stats.tests ?? 0),
+    run.stats.passes ? green(run.stats.passes) : gray('-'),
+    run.stats.failures ? red(run.stats.failures) : gray('-'),
+    run.stats.pending ? cyan(run.stats.pending) : gray('-'),
+    run.stats.skipped ? red(run.stats.skipped) : gray('-'),
   ]);
 
   return table(
