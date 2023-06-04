@@ -28,22 +28,3 @@ describe('getSecuritySolutionLink', () => {
     expect(link.title).toEqual(cloudPosturePages[cspPage].name);
   });
 });
-
-describe('getSecuritySolutionNavTab', () => {
-  it('gets the correct nav tab properties', () => {
-    const cspPage = chance.pickone<CspPage>([
-      'dashboard',
-      'findings',
-      'benchmarks',
-      'vulnerability_dashboard',
-    ]);
-    const basePath = chance.word();
-
-    const navTab = getSecuritySolutionNavTab(cspPage, basePath);
-
-    expect(navTab.id).toEqual(cloudPosturePages[cspPage].id);
-    expect(navTab.name).toEqual(cloudPosturePages[cspPage].name);
-    expect(navTab.href).toEqual(`${basePath}${cloudPosturePages[cspPage].path}`);
-    expect(navTab.disabled).toEqual(!!cloudPosturePages[cspPage].disabled);
-  });
-});
