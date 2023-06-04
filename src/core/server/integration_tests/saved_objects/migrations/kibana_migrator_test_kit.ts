@@ -156,23 +156,23 @@ export const getKibanaMigratorTestKit = async ({
     return new Proxy(rawClient, {
       get(target, prop, receiver) {
         if (!failAfterStep || !hasRun || hasComplete) {
-          return Reflect.get(...arguments);
+          return Reflect.get(target, prop, receiver);
         }
         if (reachedTargetFailureStep) {
-          throw new Error('SIMULATING ERROR');
+          throw new Error('SIMULATING ES CONNECTION ERROR');
         }
 
         switch (prop) {
           case 'child': {
-            return new Proxy(Reflect.get(...arguments), {
-              apply(target, thisArg, argumentsList) {
+            return new Proxy(Reflect.get(target, prop, receiver), {
+              apply(_target, _thisArg, argumentsList) {
                 const childClient = rawClient.child(argumentsList[0]);
                 return proxyClient(childClient);
               },
             });
           }
           default: {
-            return Reflect.get(...arguments);
+            return Reflect.get(target, prop, receiver);
           }
         }
       },
