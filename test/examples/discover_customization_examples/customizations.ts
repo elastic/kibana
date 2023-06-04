@@ -17,12 +17,8 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
   const PageObjects = getPageObjects(['common', 'timePicker', 'header']);
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
-  const comboBox = getService('comboBox');
-  const retry = getService('retry');
   const testSubjects = getService('testSubjects');
-  const filterBar = getService('filterBar');
   const browser = getService('browser');
-  const dataViewTitle = 'logstash-2015.09.22';
   const defaultSettings = { defaultIndex: 'logstash-*' };
 
   describe('Customizations', () => {
