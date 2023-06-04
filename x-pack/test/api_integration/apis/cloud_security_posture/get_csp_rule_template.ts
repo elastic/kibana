@@ -5,7 +5,6 @@
  * 2.0.
  */
 import expect from '@kbn/expect';
-import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import type { GetCspRuleTemplateResponse } from '@kbn/cloud-security-posture-plugin/common/types';
 import type { SuperTest, Test } from 'supertest';
 import { CspRuleTemplate } from '@kbn/cloud-security-posture-plugin/common/schemas';
@@ -51,7 +50,6 @@ export default function ({ getService }: FtrProviderContext) {
 
       const { body }: { body: { message: string } } = await supertest
         .get(`/internal/cloud_security_posture/rules/_find`)
-        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
         .set('kbn-xsrf', 'xxxx')
         .expect(500);
 
@@ -72,7 +70,6 @@ export default function ({ getService }: FtrProviderContext) {
 
       const { body }: { body: { message: string } } = await supertest
         .get(`/internal/cloud_security_posture/rules/_find`)
-        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
         .set('kbn-xsrf', 'xxxx')
         .query({
           packagePolicyId: 'your-package-policy-id',
@@ -88,7 +85,6 @@ export default function ({ getService }: FtrProviderContext) {
     it(`Should return 404 status code when the package policy ID does not exist`, async () => {
       const { body }: { body: { statusCode: number; error: string } } = await supertest
         .get(`/internal/cloud_security_posture/rules/_find`)
-        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
         .set('kbn-xsrf', 'xxxx')
         .query({
           packagePolicyId: 'non-existing-packagePolicy-id',
@@ -111,7 +107,6 @@ export default function ({ getService }: FtrProviderContext) {
 
       const { body }: { body: GetCspRuleTemplateResponse } = await supertest
         .get(`/internal/cloud_security_posture/rules/_find`)
-        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
         .set('kbn-xsrf', 'xxxx')
         .query({
           benchmarkId: 'cis_k8s',
@@ -139,7 +134,6 @@ export default function ({ getService }: FtrProviderContext) {
 
       const { body }: { body: GetCspRuleTemplateResponse } = await supertest
         .get(`/internal/cloud_security_posture/rules/_find`)
-        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
         .set('kbn-xsrf', 'xxxx')
         .query({
           benchmarkId: 'cis_k8s',
@@ -172,7 +166,6 @@ export default function ({ getService }: FtrProviderContext) {
 
       const { body }: { body: GetCspRuleTemplateResponse } = await supertest
         .get(`/internal/cloud_security_posture/rules/_find`)
-        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
         .set('kbn-xsrf', 'xxxx')
         .query({
           benchmarkId: 'cis_k8s',
@@ -205,7 +198,6 @@ export default function ({ getService }: FtrProviderContext) {
 
       const { body }: { body: GetCspRuleTemplateResponse } = await supertest
         .get(`/internal/cloud_security_posture/rules/_find`)
-        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
         .set('kbn-xsrf', 'xxxx')
         .query({
           benchmarkId: 'cis_k8s',
