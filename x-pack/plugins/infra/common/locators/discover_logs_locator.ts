@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/public';
+import type { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/public';
 import type { LogsLocatorDependencies, LogsLocatorParams } from './logs_locator';
 import { LOGS_LOCATOR_ID } from './logs_locator';
 
@@ -19,6 +19,9 @@ export class DiscoverLogsLocatorDefinition implements LocatorDefinition<LogsLoca
   public readonly getLocation = async (params: LogsLocatorParams) => {
     const { getLocationToDiscover } = await import('./helpers');
 
-    return getLocationToDiscover({ core: this.deps.core, ...params });
+    return getLocationToDiscover({
+      core: this.deps.core,
+      ...params,
+    });
   };
 }

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { DEFAULT_LOG_VIEW } from '../../../common/log_views';
 import {
   getLogViewRequestParamsRT,
   getLogViewResponsePayloadRT,
@@ -35,7 +36,7 @@ export const initGetLogViewRoute = ({
       const logViewsClient = logViews.getScopedClient(request);
 
       try {
-        const logView = await logViewsClient.getLogView(logViewId);
+        const logView = await logViewsClient.getLogView({ ...DEFAULT_LOG_VIEW, logViewId });
 
         return response.ok({
           body: getLogViewResponsePayloadRT.encode({

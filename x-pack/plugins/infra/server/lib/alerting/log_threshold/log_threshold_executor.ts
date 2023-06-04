@@ -31,6 +31,9 @@ import { asyncForEach } from '@kbn/std';
 import { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
 import { ParsedExperimentalFields } from '@kbn/rule-registry-plugin/common/parse_experimental_fields';
 import { ecsFieldMap } from '@kbn/rule-registry-plugin/common/assets/field_maps/ecs_field_map';
+import type { SerializableRecord } from '@kbn/utility-types';
+import type { ResolvedLogView } from '../../../../common/log_views';
+import type { InfraLocators } from '../../../../common/locators';
 import { getChartGroupNames } from '../../../../common/utils/get_chart_group_names';
 import {
   RuleParams,
@@ -54,7 +57,6 @@ import {
   ExecutionTimeRange,
 } from '../../../../common/alerting/logs/log_threshold';
 import { decodeOrThrow } from '../../../../common/runtime_types';
-import { getLogsAppAlertUrl } from '../../../../common/formatters/alert_link';
 import { getIntervalInSeconds } from '../../../../common/utils/get_interval_in_seconds';
 import { InfraBackendLibs } from '../../infra_types';
 import {
@@ -91,7 +93,7 @@ export type LogThresholdAlertFactory = (
   threshold: number,
   actions?: Array<{ actionGroup: LogThresholdActionGroups; context: AlertContext }>,
   rootLevelContext?: AdditionalContext
-) => LogThresholdAlert;
+) => Promise<LogThresholdAlert>;
 export type LogThresholdAlertLimit = RuleExecutorServices<
   LogThresholdAlertState,
   LogThresholdAlertContext,
@@ -130,83 +132,83 @@ export const createLogThresholdExecutor = (libs: InfraBackendLibs) =>
       getAlertUuid,
       getAlertByAlertUuid,
     } = services;
-    const { basePath, alertsLocator } = libs;
+    const { basePath, alertsLocator, infraLocators } = libs;
 
-    const alertFactory: LogThresholdAlertFactory = (
-      id,
-      reason,
-      value,
-      threshold,
-      actions,
-      rootLevelContext
-    ) => {
-      const alertContext =
-        actions != null
-          ? actions.reduce((next, action) => Object.assign(next, action.context), {})
-          : {};
+    const alertFactory =
+      (resolvedLogView: ResolvedLogView): LogThresholdAlertFactory =>
+      async (id, reason, value, threshold, actions, rootLevelContext) => {
+        const alertContext =
+          actions != null
+            ? actions.reduce((next, action) => Object.assign(next, action.context), {})
+            : {};
 
-      const alert = alertWithLifecycle({
-        id,
-        fields: {
-          [ALERT_EVALUATION_THRESHOLD]: threshold,
-          [ALERT_EVALUATION_VALUE]: value,
-          [ALERT_REASON]: reason,
-          [ALERT_CONTEXT]: alertContext,
-          ...flattenAdditionalContext(rootLevelContext),
-        },
-      });
-
-      if (actions && actions.length > 0) {
-        const indexedStartedAt = getAlertStartedDate(id) ?? startedAt.toISOString();
-        const relativeViewInAppUrl = getLogsAppAlertUrl(new Date(indexedStartedAt).getTime());
-
-        const viewInAppUrl = addSpaceIdToPath(
-          basePath.publicBaseUrl,
-          spaceId,
-          relativeViewInAppUrl
-        );
-
-        const sharedContext = {
-          timestamp: startedAt.toISOString(),
-          viewInAppUrl,
-        };
-
-        asyncForEach(actions, async (actionSet) => {
-          const { actionGroup, context } = actionSet;
-
-          const alertInstanceId = (context.group || id) as string;
-
-          const alertUuid = getAlertUuid(alertInstanceId);
-
-          alert.scheduleActions(actionGroup, {
-            ...sharedContext,
-            ...context,
-            alertDetailsUrl: await getAlertUrl(
-              alertUuid,
-              spaceId,
-              indexedStartedAt,
-              libs.alertsLocator,
-              libs.basePath.publicBaseUrl
-            ),
-          });
+        const alert = alertWithLifecycle({
+          id,
+          fields: {
+            [ALERT_EVALUATION_THRESHOLD]: threshold,
+            [ALERT_EVALUATION_VALUE]: value,
+            [ALERT_REASON]: reason,
+            [ALERT_CONTEXT]: alertContext,
+            ...flattenAdditionalContext(rootLevelContext),
+          },
         });
-      }
 
-      alert.replaceState({
-        alertState: AlertStates.ALERT,
-      });
+        if (actions && actions.length > 0) {
+          const indexedStartedAt = getAlertStartedDate(id) ?? startedAt.toISOString();
+          const relativeViewInAppUrl = await infraLocators.logsLocator.getUrl({
+            resolvedLogView: resolvedLogView as ResolvedLogView & SerializableRecord,
+            time: new Date(indexedStartedAt).getTime(),
+          });
 
-      return alert;
-    };
+          const viewInAppUrl = addSpaceIdToPath(
+            basePath.publicBaseUrl,
+            spaceId,
+            relativeViewInAppUrl
+          );
+
+          const sharedContext = {
+            timestamp: startedAt.toISOString(),
+            viewInAppUrl,
+          };
+
+          asyncForEach(actions, async (actionSet) => {
+            const { actionGroup, context } = actionSet;
+
+            const alertInstanceId = (context.group || id) as string;
+
+            const alertUuid = getAlertUuid(alertInstanceId);
+
+            alert.scheduleActions(actionGroup, {
+              ...sharedContext,
+              ...context,
+              alertDetailsUrl: await getAlertUrl(
+                alertUuid,
+                spaceId,
+                indexedStartedAt,
+                libs.alertsLocator,
+                libs.basePath.publicBaseUrl
+              ),
+            });
+          });
+        }
+
+        alert.replaceState({
+          alertState: AlertStates.ALERT,
+        });
+
+        return alert;
+      };
 
     const [, , { logViews }] = await libs.getStartServices();
 
     try {
       const validatedParams = decodeOrThrow(ruleParamsRT)(params);
 
-      const { indices, timestampField, runtimeMappings } = await logViews
+      const resolvedLogView = await logViews
         .getClient(savedObjectsClient, scopedClusterClient.asCurrentUser)
         .getResolvedLogView(validatedParams.logView);
+
+      const { indices, timestampField, runtimeMappings } = resolvedLogView;
 
       if (!isRatioRuleParams(validatedParams)) {
         await executeAlert(
@@ -215,7 +217,7 @@ export const createLogThresholdExecutor = (libs: InfraBackendLibs) =>
           indices,
           runtimeMappings,
           scopedClusterClient.asCurrentUser,
-          alertFactory,
+          alertFactory(resolvedLogView),
           alertLimit,
           startedAt.valueOf()
         );
@@ -226,7 +228,7 @@ export const createLogThresholdExecutor = (libs: InfraBackendLibs) =>
           indices,
           runtimeMappings,
           scopedClusterClient.asCurrentUser,
-          alertFactory,
+          alertFactory(resolvedLogView),
           alertLimit,
           startedAt.valueOf()
         );
@@ -244,6 +246,8 @@ export const createLogThresholdExecutor = (libs: InfraBackendLibs) =>
         validatedParams,
         getAlertByAlertUuid,
         alertsLocator,
+        resolvedLogView,
+        infraLocators,
       });
     } catch (e) {
       throw new Error(e);
@@ -336,7 +340,7 @@ export async function executeRatioAlert(
       getGroupedResults(numeratorQuery, esClient),
       getGroupedResults(denominatorQuery, esClient),
     ]);
-    processGroupByRatioResults(
+    await processGroupByRatioResults(
       numeratorGroupedResults,
       denominatorGroupedResults,
       ruleParams,
@@ -348,7 +352,7 @@ export async function executeRatioAlert(
       getUngroupedResults(numeratorQuery, esClient),
       getUngroupedResults(denominatorQuery, esClient),
     ]);
-    processUngroupedRatioResults(
+    await processUngroupedRatioResults(
       numeratorUngroupedResults,
       denominatorUngroupedResults,
       ruleParams,
@@ -431,7 +435,7 @@ export const processUngroupedResults = (
   }
 };
 
-export const processUngroupedRatioResults = (
+export const processUngroupedRatioResults = async (
   numeratorResults: UngroupedSearchQueryResponse,
   denominatorResults: UngroupedSearchQueryResponse,
   params: RatioRuleParams,
@@ -468,7 +472,7 @@ export const processUngroupedRatioResults = (
         },
       },
     ];
-    alertFactory(
+    await alertFactory(
       UNGROUPED_FACTORY_KEY,
       reasonMessage,
       ratio,
@@ -585,7 +589,7 @@ export const processGroupByResults = (
   alertLimit.setLimitReached(remainingAlertCount <= 0);
 };
 
-export const processGroupByRatioResults = (
+export const processGroupByRatioResults = async (
   numeratorResults: GroupedSearchQueryResponse['aggregations']['groups']['buckets'],
   denominatorResults: GroupedSearchQueryResponse['aggregations']['groups']['buckets'],
   params: RatioRuleParams,
@@ -646,7 +650,7 @@ export const processGroupByRatioResults = (
           },
         },
       ];
-      alertFactory(
+      await alertFactory(
         numeratorGroup.name,
         reasonMessage,
         ratio,
@@ -1008,6 +1012,8 @@ const processRecoveredAlerts = async ({
   validatedParams,
   getAlertByAlertUuid,
   alertsLocator,
+  resolvedLogView,
+  infraLocators,
 }: {
   basePath: IBasePath;
   getAlertStartedDate: (alertId: string) => string | null;
@@ -1020,6 +1026,8 @@ const processRecoveredAlerts = async ({
     alertUuid: string
   ) => Promise<Partial<ParsedTechnicalFields & ParsedExperimentalFields> | null> | null;
   alertsLocator?: LocatorPublic<AlertsLocatorParams>;
+  resolvedLogView: ResolvedLogView;
+  infraLocators: InfraLocators;
 }) => {
   const groupByKeysObjectForRecovered = getGroupByObject(
     validatedParams.groupBy,
@@ -1029,7 +1037,10 @@ const processRecoveredAlerts = async ({
   for (const alert of recoveredAlerts) {
     const recoveredAlertId = alert.getId();
     const indexedStartedAt = getAlertStartedDate(recoveredAlertId) ?? startedAt.toISOString();
-    const relativeViewInAppUrl = getLogsAppAlertUrl(new Date(indexedStartedAt).getTime());
+    const relativeViewInAppUrl = await infraLocators.logsLocator.getUrl({
+      resolvedLogView: resolvedLogView as ResolvedLogView & SerializableRecord,
+      time: new Date(indexedStartedAt).getTime(),
+    });
     const alertUuid = getAlertUuid(recoveredAlertId);
     const alertHits = alertUuid ? await getAlertByAlertUuid(alertUuid) : undefined;
     const additionalContext = getContextForRecoveredAlerts(alertHits);

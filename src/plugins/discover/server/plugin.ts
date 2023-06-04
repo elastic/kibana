@@ -11,16 +11,28 @@ import type { PluginSetup as DataPluginSetup } from '@kbn/data-plugin/server';
 import type { HomeServerPluginSetup } from '@kbn/home-plugin/server';
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/common';
 import type { SharePluginSetup } from '@kbn/share-plugin/server';
-import type { DiscoverServerPluginStart, DiscoverServerPluginStartDeps } from '.';
-import { DiscoverAppLocatorDefinition } from '../common/locator';
+import type {
+  DiscoverServerPluginSetup,
+  DiscoverServerPluginStart,
+  DiscoverServerPluginStartDeps,
+} from '.';
+import { DiscoverAppLocator, DiscoverAppLocatorDefinition } from '../common/locator';
 import { capabilitiesProvider } from './capabilities_provider';
 import { initializeLocatorServices } from './locator';
 import { registerSampleData } from './sample_data';
 import { getUiSettings } from './ui_settings';
 
 export class DiscoverServerPlugin
-  implements Plugin<object, DiscoverServerPluginStart, object, DiscoverServerPluginStartDeps>
+  implements
+    Plugin<
+      DiscoverServerPluginSetup,
+      DiscoverServerPluginStart,
+      object,
+      DiscoverServerPluginStartDeps
+    >
 {
+  private locator?: DiscoverAppLocator;
+
   public setup(
     core: CoreSetup,
     plugins: {
@@ -37,12 +49,12 @@ export class DiscoverServerPlugin
     }
 
     if (plugins.share) {
-      plugins.share.url.locators.create(
+      this.locator = plugins.share.url.locators.create(
         new DiscoverAppLocatorDefinition({ useHash: false, setStateToKbnUrl })
       );
     }
 
-    return {};
+    return { locator: this.locator };
   }
 
   public start(core: CoreStart, deps: DiscoverServerPluginStartDeps) {

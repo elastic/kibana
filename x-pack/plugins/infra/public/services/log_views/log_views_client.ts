@@ -18,6 +18,7 @@ import {
 import {
   FetchLogViewError,
   FetchLogViewStatusError,
+  ILogViewsClient,
   LogView,
   LogViewAttributes,
   logViewAttributesRT,
@@ -29,7 +30,6 @@ import {
   resolveLogView,
 } from '../../../common/log_views';
 import { decodeOrThrow } from '../../../common/runtime_types';
-import { ILogViewsClient } from './types';
 
 export class LogViewsClient implements ILogViewsClient {
   constructor(

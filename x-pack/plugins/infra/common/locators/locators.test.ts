@@ -11,10 +11,9 @@ import { NodeLogsLocatorDefinition } from './node_logs_locator';
 import type { LogsLocatorParams } from './logs_locator';
 import type { NodeLogsLocatorParams } from './node_logs_locator';
 import { coreMock } from '@kbn/core/public/mocks';
-import { findInventoryFields } from '../../common/inventory_models';
+import { findInventoryFields } from '../inventory_models';
 import moment from 'moment';
-import { DEFAULT_LOG_VIEW } from '../observability_logs/log_view_state';
-import type { LogViewReference } from '../../common/log_views';
+import { DEFAULT_LOG_VIEW, LogViewReference } from '../log_views';
 
 const setupLogsLocator = async () => {
   const deps: LogsLocatorDependencies = {

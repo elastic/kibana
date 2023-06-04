@@ -8,8 +8,13 @@
 
 import { KibanaRequest } from '@kbn/core/server';
 import { DataPluginStart } from '@kbn/data-plugin/server/plugin';
+import type { DiscoverAppLocator } from '../common';
 import { ColumnsFromLocatorFn, SearchSourceFromLocatorFn, TitleFromLocatorFn } from './locator';
 import { DiscoverServerPlugin } from './plugin';
+
+export interface DiscoverServerPluginSetup {
+  readonly locator: undefined | DiscoverAppLocator;
+}
 
 export interface DiscoverServerPluginStartDeps {
   data: DataPluginStart;

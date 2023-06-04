@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/public';
-import type { SerializableRecord } from '@kbn/utility-types';
-import type { LogViewReference } from '../../common/log_views';
-import type { TimeRange } from '../../common/time';
-import type { InfraClientCoreSetup } from '../types';
+import type { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/public';
+import { SerializableRecord } from '@kbn/utility-types';
+import type { InfraPluginCoreSetup } from '../../server/types';
+import type { LogViewReference, ResolvedLogView } from '../log_views';
+import type { TimeRange } from '../time';
+import type { InfraClientCoreSetup } from '../../public/types';
 
 export const LOGS_LOCATOR_ID = 'LOGS_LOCATOR';
 
@@ -22,12 +23,13 @@ export interface LogsLocatorParams extends SerializableRecord {
   timeRange?: TimeRange;
   filter?: string;
   logView?: LogViewReference;
+  resolvedLogView?: ResolvedLogView & SerializableRecord;
 }
 
 export type LogsLocator = LocatorPublic<LogsLocatorParams>;
 
 export interface LogsLocatorDependencies {
-  core: InfraClientCoreSetup;
+  core: InfraClientCoreSetup | InfraPluginCoreSetup;
 }
 
 export class LogsLocatorDefinition implements LocatorDefinition<LogsLocatorParams> {

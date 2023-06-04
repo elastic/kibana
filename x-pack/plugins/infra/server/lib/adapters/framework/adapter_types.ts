@@ -18,6 +18,7 @@ import {
 import { PluginStart as DataViewsPluginStart } from '@kbn/data-views-plugin/server';
 import { HomeServerPluginSetup } from '@kbn/home-plugin/server';
 import { VisTypeTimeseriesSetup } from '@kbn/vis-type-timeseries-plugin/server';
+import type { DiscoverServerPluginSetup } from '@kbn/discover-plugin/server';
 import { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
 import { PluginSetupContract as AlertingPluginContract } from '@kbn/alerting-plugin/server';
@@ -42,6 +43,7 @@ export interface InfraServerPluginSetupDeps {
 export interface InfraServerPluginStartDeps {
   data: DataPluginStart;
   dataViews: DataViewsPluginStart;
+  discover: DiscoverServerPluginSetup;
 }
 
 export interface CallWithRequestParams extends estypes.RequestBase {

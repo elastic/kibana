@@ -24,6 +24,13 @@ import {
   LOGS_FEATURE_ID,
   METRICS_FEATURE_ID,
 } from '../common/constants';
+import {
+  DiscoverLogsLocatorDefinition,
+  DiscoverNodeLogsLocatorDefinition,
+  InfraLocators,
+  LogsLocatorDefinition,
+  NodeLogsLocatorDefinition,
+} from '../common/locators';
 import { defaultLogViewsStaticConfig } from '../common/log_views';
 import { publicConfigKeys } from '../common/plugin_config_types';
 import { configDeprecations, getInfraDeprecationsFactory } from './deprecations';
@@ -133,6 +140,8 @@ export class InfraServerPlugin
   private inventoryViews: InventoryViewsService;
   private logViews: LogViewsService;
   private metricsExplorerViews: MetricsExplorerViewsService;
+  private locators?: InfraLocators;
+  private appTarget: string;
 
   constructor(context: PluginInitializerContext<InfraConfig>) {
     this.config = context.config.get();
@@ -154,6 +163,7 @@ export class InfraServerPlugin
     this.metricsExplorerViews = new MetricsExplorerViewsService(
       this.logger.get('metricsExplorerViews')
     );
+    this.appTarget = this.config.logs.app_target;
   }
 
   setup(core: InfraPluginCoreSetup, plugins: InfraServerPluginSetupDeps) {
@@ -191,6 +201,24 @@ export class InfraServerPlugin
       metrics: new InfraMetricsDomain(new KibanaMetricsAdapter(framework)),
     };
 
+    // Register Locators
+    let logsLocator = plugins.share.url.locators.create(new LogsLocatorDefinition({ core }));
+    let nodeLogsLocator = plugins.share.url.locators.create(
+      new NodeLogsLocatorDefinition({ core })
+    );
+
+    if (this.appTarget === DISCOVER_APP_TARGET) {
+      logsLocator = plugins.share.url.locators.create(new DiscoverLogsLocatorDefinition({ core }));
+      nodeLogsLocator = plugins.share.url.locators.create(
+        new DiscoverNodeLogsLocatorDefinition({ core })
+      );
+    }
+
+    this.locators = {
+      logsLocator,
+      nodeLogsLocator,
+    };
+
     this.libs = {
       configuration: this.config,
       framework,
@@ -205,6 +233,7 @@ export class InfraServerPlugin
       logger: this.logger,
       basePath: core.http.basePath,
       alertsLocator: plugins.share.url.locators.get(alertsLocatorID),
+      infraLocators: this.locators,
     };
 
     plugins.features.registerKibanaFeature(METRICS_FEATURE);
@@ -254,6 +283,7 @@ export class InfraServerPlugin
       inventoryViews,
       logViews,
       metricsExplorerViews,
+      locators: this.locators,
     } as InfraPluginSetup;
   }
 

@@ -7,7 +7,9 @@
 
 import { i18n } from '@kbn/i18n';
 import { ObservabilityRuleTypeModel } from '@kbn/observability-plugin/public';
+import type { LocatorPublic } from '@kbn/share-plugin/public';
 import { lazy } from 'react';
+import type { LogsLocatorParams } from '../../../common/locators';
 import {
   LOG_DOCUMENT_COUNT_RULE_TYPE_ID,
   PartialRuleParams,
@@ -18,7 +20,8 @@ import { formatRuleData } from './rule_data_formatters';
 import { validateExpression } from './validation';
 
 export function createLogThresholdRuleType(
-  core: InfraClientCoreSetup
+  core: InfraClientCoreSetup,
+  logsLocator: LocatorPublic<LogsLocatorParams>
 ): ObservabilityRuleTypeModel<PartialRuleParams> {
   const ruleParamsExpression = createLazyComponentWithKibanaContext(
     core,
@@ -44,6 +47,6 @@ export function createLogThresholdRuleType(
       }
     ),
     requiresAppContext: false,
-    format: formatRuleData,
+    format: formatRuleData(logsLocator),
   };
 }

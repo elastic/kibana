@@ -6,6 +6,8 @@
  */
 
 import * as rt from 'io-ts';
+import { minimalTimeKeyRT } from '../time';
+import type { ResolvedLogView } from './resolved_log_view';
 
 export interface LogViewsStaticConfig {
   messageFields: string[];
@@ -120,3 +122,81 @@ export const inlineLogViewReferenceRT = rt.type({
 export const logViewReferenceRT = rt.union([persistedLogViewReferenceRT, inlineLogViewReferenceRT]);
 
 export type LogViewReference = rt.TypeOf<typeof logViewReferenceRT>;
+
+export type FilterStateInUrl = rt.TypeOf<typeof filterStateInUrlRT>;
+
+export const filterMeta = rt.partial({
+  alias: rt.union([rt.string, rt.null]),
+  disabled: rt.boolean,
+  negate: rt.boolean,
+  controlledBy: rt.string,
+  group: rt.string,
+  index: rt.string,
+  isMultiIndex: rt.boolean,
+  type: rt.string,
+  key: rt.string,
+  params: rt.any,
+  value: rt.any,
+});
+
+export const filter = rt.intersection([
+  rt.type({
+    meta: filterMeta,
+  }),
+  rt.partial({
+    query: rt.UnknownRecord,
+  }),
+]);
+
+export const filterStateInUrlRT = rt.partial({
+  query: rt.union([
+    rt.strict({
+      language: rt.string,
+      query: rt.union([rt.string, rt.record(rt.string, rt.unknown)]),
+    }),
+    rt.strict({
+      sql: rt.string,
+    }),
+    rt.strict({
+      esql: rt.string,
+    }),
+  ]),
+  filters: rt.array(filter),
+  timeRange: rt.strict({
+    from: rt.string,
+    to: rt.string,
+  }),
+  refreshInterval: rt.strict({
+    pause: rt.boolean,
+    value: rt.number,
+  }),
+});
+
+export const legacyFilterStateInUrlRT = rt.union([
+  rt.strict({
+    language: rt.string,
+    query: rt.union([rt.string, rt.record(rt.string, rt.unknown)]),
+  }),
+  rt.strict({
+    sql: rt.string,
+  }),
+  rt.strict({
+    esql: rt.string,
+  }),
+]);
+
+export const positionStateInUrlRT = rt.partial({
+  position: rt.union([rt.partial(minimalTimeKeyRT.props), rt.null]),
+});
+
+export type PositionStateInUrl = rt.TypeOf<typeof positionStateInUrlRT>;
+
+export interface ILogViewsClient {
+  getLogView(logViewReference: LogViewReference): Promise<LogView>;
+  getResolvedLogView(logViewReference: LogViewReference): Promise<ResolvedLogView>;
+  putLogView(
+    logViewReference: LogViewReference,
+    logViewAttributes: Partial<LogViewAttributes>
+  ): Promise<LogView>;
+  resolveLogView(logViewId: string, logViewAttributes: LogViewAttributes): Promise<ResolvedLogView>;
+}

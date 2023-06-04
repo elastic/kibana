@@ -48,7 +48,7 @@ import { InventoryViewsServiceStart } from './services/inventory_views';
 import { LogViewsServiceStart } from './services/log_views';
 import { MetricsExplorerViewsServiceStart } from './services/metrics_explorer_views';
 import { ITelemetryClient } from './services/telemetry';
-import { InfraLocators } from './locators';
+import { InfraLocators } from '../common/locators';
 
 // Our own setup and start contract values
 export interface InfraClientSetupExports {
