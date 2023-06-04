@@ -152,7 +152,6 @@ export const getKibanaMigratorTestKit = async ({
   const loggingConf = await firstValueFrom(configService.atPath<LoggingConfigType>('logging'));
   loggingSystem.upgrade(loggingConf);
 
-  console.log('creating ES client with failAfterStep: ', failAfterStep);
   const proxyClient = (rawClient: Client): Client => {
     return new Proxy(rawClient, {
       get(target, prop, receiver) {
@@ -163,33 +162,12 @@ export const getKibanaMigratorTestKit = async ({
           throw new Error('SIMULATING ERROR');
         }
 
-        console.log('prop::', prop);
-        console.log('stateStatus::', controlState);
-
         switch (prop) {
           case 'child': {
             return new Proxy(Reflect.get(...arguments), {
               apply(target, thisArg, argumentsList) {
                 const childClient = rawClient.child(argumentsList[0]);
-                console.log('reflected proxy child');
                 return proxyClient(childClient);
-              },
-            });
-          }
-          case 'indices': {
-            return new Proxy(Reflect.get(...arguments), {
-              get(target, prop, receiver) {
-                console.log('INSIDE CHILD!', hasComplete, prop);
-                if (!hasRun || hasComplete) {
-                  return Reflect.get(...arguments);
-                }
-
-                if (prop === 'putMapping') {
-                  console.log('putMapping called');
-                  return Reflect.get(...arguments);
-                }
-
-                return Reflect.get(...arguments);
               },
             });
           }
@@ -226,7 +204,6 @@ export const getKibanaMigratorTestKit = async ({
     stateStatus.subscribe((result) => {
       controlState = result?.controlState;
       if (controlState === failAfterStep) {
-        console.log(`>>>> reachedTargetFailureStep true at ${failAfterStep} <<<<`);
         reachedTargetFailureStep = true;
       }
     });
