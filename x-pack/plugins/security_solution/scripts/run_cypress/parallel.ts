@@ -324,7 +324,9 @@ export const cli = () => {
               EsVersion.getDefault()
             );
 
-            const customEnv = await functionalTestRunner.run(abortCtrl.signal);
+            const customEnv = await pRetry(() => functionalTestRunner.run(abortCtrl.signal), {
+              retries: 1,
+            });
 
             if (isOpen) {
               await cypress.open({
@@ -365,7 +367,7 @@ export const cli = () => {
           });
           return result;
         },
-        { concurrency: !isOpen ? 3 : 1 }
+        { concurrency: !isOpen ? 2 : 1 }
       ).then((results) => {
         renderSummaryTable(results as CypressCommandLine.CypressRunResult[]);
         const hasFailedTests = _.some(
