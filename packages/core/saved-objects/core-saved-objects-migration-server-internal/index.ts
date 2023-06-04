@@ -47,6 +47,7 @@ export type {
   ReindexResponse,
   UpdateByQueryResponse,
   UpdateAndPickupMappingsResponse,
+  EsResponseTooLargeError,
 } from './src/actions';
 export {
   isClusterShardLimitExceeded,

@@ -226,6 +226,7 @@ export const nextActionMap = (
         query: state.outdatedDocumentsQuery,
         batchSize: state.batchSize,
         searchAfter: state.lastHitSortValue,
+        maxResponseSizeBytes: state.maxReadBatchSizeBytes,
       }),
     OUTDATED_DOCUMENTS_SEARCH_CLOSE_PIT: (state: OutdatedDocumentsSearchClosePit) =>
       Actions.closePit({ client, pitId: state.pitId }),

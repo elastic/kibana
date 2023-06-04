@@ -471,9 +471,9 @@ describe('retries', () => {
   test('createIlmPolicyIfNotExists with 1 retry', async () => {
     esContext.esAdapter.doesIlmPolicyExist.mockRejectedValueOnce(new Error('retry 1'));
 
-    const timeStart = Date.now();
+    const timeStart = performance.now();
     await initializeEs(esContext);
-    const timeElapsed = Date.now() - timeStart;
+    const timeElapsed = performance.now() - timeStart;
 
     expect(timeElapsed).toBeGreaterThanOrEqual(MOCK_RETRY_DELAY);
 
@@ -491,9 +491,9 @@ describe('retries', () => {
     esContext.esAdapter.doesIndexTemplateExist.mockRejectedValueOnce(new Error('retry 2a'));
     esContext.esAdapter.doesIndexTemplateExist.mockRejectedValueOnce(new Error('retry 2b'));
 
-    const timeStart = Date.now();
+    const timeStart = performance.now();
     await initializeEs(esContext);
-    const timeElapsed = Date.now() - timeStart;
+    const timeElapsed = performance.now() - timeStart;
 
     expect(timeElapsed).toBeGreaterThanOrEqual(MOCK_RETRY_DELAY * (1 + 2));
 
@@ -517,9 +517,9 @@ describe('retries', () => {
     // make sure it only tries 5 times - this one should not be reported
     esContext.esAdapter.doesAliasExist.mockRejectedValueOnce(new Error('retry 5f'));
 
-    const timeStart = Date.now();
+    const timeStart = performance.now();
     await initializeEs(esContext);
-    const timeElapsed = Date.now() - timeStart;
+    const timeElapsed = performance.now() - timeStart;
 
     expect(timeElapsed).toBeGreaterThanOrEqual(MOCK_RETRY_DELAY * (1 + 2 + 4 + 8));
 

@@ -30,10 +30,17 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { CoreSetup } from '@kbn/core/public';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
+import {
+  type DataFrameAnalysisConfigType,
+  type FeatureImportanceBaseline,
+  type FeatureImportance,
+  type TopClasses,
+  ANALYSIS_CONFIG_TYPE,
+  DEFAULT_RESULTS_FIELD,
+  INDEX_STATUS,
+} from '@kbn/ml-data-frame-analytics-utils';
 
 import { DEFAULT_SAMPLER_SHARD_SIZE } from '../../../../common/constants/field_histograms';
-
-import { ANALYSIS_CONFIG_TYPE, INDEX_STATUS } from '../../data_frame_analytics/common';
 
 import {
   euiDataGridStyle,
@@ -43,13 +50,6 @@ import {
 } from './common';
 import { UseIndexDataReturnType } from './types';
 import { DecisionPathPopover } from '../../data_frame_analytics/pages/analytics_exploration/components/feature_importance/decision_path_popover';
-import {
-  FeatureImportanceBaseline,
-  FeatureImportance,
-  TopClasses,
-} from '../../../../common/types/feature_importance';
-import { DEFAULT_RESULTS_FIELD } from '../../../../common/constants/data_frame_analytics';
-import { DataFrameAnalysisConfigType } from '../../../../common/types/data_frame_analytics';
 
 // TODO Fix row hovering + bar highlighting
 // import { hoveredRow$ } from './column_chart';
