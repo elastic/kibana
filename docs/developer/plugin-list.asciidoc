@@ -534,6 +534,10 @@ security and spaces filtering.
 |This plugin provides Kibana user interfaces for managing the Enterprise Search solution and its products, App Search and Workplace Search.
 
 
+|{kib-repo}blob/{branch}/x-pack/plugins/ess_security/README.md[essSecurity]
+|This plugin contains the ESS/on-prem deployments (non-serverless) customizations for Security Solution.
+
+
 |{kib-repo}blob/{branch}/x-pack/plugins/event_log/README.md[eventLog]
 |The event log plugin provides a persistent history of alerting and action
 activities.
