@@ -22,7 +22,7 @@ export class AgentManager extends Manager {
   private fleetServerPort: string;
   private agentContainerId?: string;
 
-  constructor(kbnClient: KbnClient, fleetSererPort: string, log: ToolingLog) {
+  constructor(kbnClient: KbnClient, fleetServerPort: string, log: ToolingLog) {
     super();
     this.log = log;
     this.fleetServerPort = fleetServerPort;
