@@ -63,11 +63,9 @@ export const cli = () => {
 
       const cypressConfigFile = await import(require.resolve(`../../${argv.configFile}`));
       const spec: string | undefined = argv?.spec as string;
-      const files = retrieveIntegrations(
-        spec ? (spec.includes(',') ? spec.split(',') : [spec]) : cypressConfigFile?.e2e?.specPattern
-      );
+      const files = retrieveIntegrations(spec ? [spec] : cypressConfigFile?.e2e?.specPattern);
 
-      if (!files.length) {
+      if (!files?.length) {
         throw new Error('No files found');
       }
 
@@ -367,7 +365,7 @@ export const cli = () => {
           });
           return result;
         },
-        { concurrency: !isOpen ? 2 : 1 }
+        { concurrency: argv.concurrency || !isOpen ? 3 : 1 }
       ).then((results) => {
         renderSummaryTable(results as CypressCommandLine.CypressRunResult[]);
         const hasFailedTests = _.some(
