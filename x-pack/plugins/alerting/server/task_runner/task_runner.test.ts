@@ -3113,10 +3113,12 @@ describe('Task Runner', () => {
     expect(logger.debug).toHaveBeenLastCalledWith(
       'Task Runner has skipped executing the Rule (1) as it has invalid params.'
     );
-    expect(alertingEventLogger.start).not.toHaveBeenCalled();
-    expect(alertingEventLogger.logAlert).not.toHaveBeenCalled();
-    expect(alertingEventLogger.logAction).not.toHaveBeenCalled();
-    expect(alertingEventLogger.done).not.toHaveBeenCalled();
+
+    testAlertingEventLogCalls({
+      status: 'skip',
+      setRuleName: false,
+      executionStatus: 'not-reached',
+    });
   });
   encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedRawRuleSO);
 
@@ -3154,13 +3156,17 @@ describe('Task Runner', () => {
     hasReachedAlertLimit?: boolean;
   }) {
     expect(alertingEventLogger.initialize).toHaveBeenCalledWith(ruleContext);
-    expect(alertingEventLogger.start).toHaveBeenCalled();
+    if (status !== 'skip') {
+      expect(alertingEventLogger.start).toHaveBeenCalled();
+    }
     if (setRuleName) {
       expect(alertingEventLogger.setRuleName).toHaveBeenCalledWith(mockedRuleTypeSavedObject.name);
     } else {
       expect(alertingEventLogger.setRuleName).not.toHaveBeenCalled();
     }
-    expect(alertingEventLogger.getStartAndDuration).toHaveBeenCalled();
+    if (status !== 'skip') {
+      expect(alertingEventLogger.getStartAndDuration).toHaveBeenCalled();
+    }
     if (maintenanceWindowIds?.length) {
       expect(alertingEventLogger.setMaintenanceWindowIds).toHaveBeenCalledWith(
         maintenanceWindowIds
@@ -3219,6 +3225,8 @@ describe('Task Runner', () => {
           trigger_actions_duration_ms: 0,
         },
       });
+    } else if (status === 'skip') {
+      expect(alertingEventLogger.done).not.toHaveBeenCalled();
     } else {
       expect(alertingEventLogger.done).toHaveBeenCalledWith({
         metrics: {

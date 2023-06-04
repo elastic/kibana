@@ -555,7 +555,7 @@ export class TaskRunner<
   /**
    * Initialize event logger, load and validate the rule
    */
-  private async prepareToRun() {
+  private async prepareToRun(runDate: Date) {
     const {
       params: { alertId: ruleId, spaceId, consumer },
     } = this.taskInstance;
@@ -592,14 +592,23 @@ export class TaskRunner<
       ...(namespace ? { namespace } : {}),
     });
 
-    return await loadRule<Params>({
-      paramValidator: this.ruleType.validate.params,
-      ruleId,
-      spaceId,
-      context: this.context,
-      ruleTypeRegistry: this.ruleTypeRegistry,
-      alertingEventLogger: this.alertingEventLogger,
-    });
+    try {
+      const ruleData = await loadRule<Params>({
+        paramValidator: this.ruleType.validate.params,
+        ruleId,
+        spaceId,
+        context: this.context,
+        ruleTypeRegistry: this.ruleTypeRegistry,
+      });
+      this.alertingEventLogger.start(runDate);
+      this.alertingEventLogger.setRuleName(ruleData.rule.name);
+      return ruleData;
+    } catch (err) {
+      if (!this.shouldSkipRun(err)) {
+        this.alertingEventLogger.start(runDate);
+      }
+      throw err;
+    }
   }
 
   private async processRunResults({
@@ -731,7 +740,7 @@ export class TaskRunner<
     try {
       const preparedResult = await this.timer.runWithTimer(
         TaskRunnerTimerSpan.PrepareRule,
-        async () => this.prepareToRun()
+        async () => this.prepareToRun(runDate)
       );
 
       this.ruleMonitoring.setMonitoring(preparedResult.rule.monitoring);
@@ -744,7 +753,7 @@ export class TaskRunner<
       schedule = asOk(attributes.rule.schedule);
     } catch (err) {
       if (this.shouldSkipRun(err)) {
-        this.logger.info(
+        this.logger.debug(
           `Task Runner has skipped executing the Rule (${ruleId}) as it has invalid params.`
         );
         return {

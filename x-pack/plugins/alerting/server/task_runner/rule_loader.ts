@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { PublicMethodsOf } from '@kbn/utility-types';
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/server';
 import { CoreKibanaRequest, FakeRawRequest, Headers } from '@kbn/core/server';
 import { TaskRunnerContext } from './task_runner_factory';
@@ -19,7 +18,6 @@ import {
   RulesClientApi,
 } from '../types';
 import { MONITORING_HISTORY_LIMIT, RuleTypeParams } from '../../common';
-import { AlertingEventLogger } from '../lib/alerting_event_logger/alerting_event_logger';
 import { rawRuleSchema } from '../raw_rule_schema';
 
 export interface LoadRuleParams<Params extends RuleTypeParams> {
@@ -28,12 +26,10 @@ export interface LoadRuleParams<Params extends RuleTypeParams> {
   spaceId: string;
   context: TaskRunnerContext;
   ruleTypeRegistry: RuleTypeRegistry;
-  alertingEventLogger: PublicMethodsOf<AlertingEventLogger>;
 }
 
 export async function loadRule<Params extends RuleTypeParams>(params: LoadRuleParams<Params>) {
-  const { paramValidator, ruleId, spaceId, context, ruleTypeRegistry, alertingEventLogger } =
-    params;
+  const { paramValidator, ruleId, spaceId, context, ruleTypeRegistry } = params;
   let enabled: boolean;
   let apiKey: string | null;
   let rule: SanitizedRule<Params>;
@@ -60,20 +56,18 @@ export async function loadRule<Params extends RuleTypeParams>(params: LoadRulePa
     );
   }
 
+  try {
+    ruleTypeRegistry.ensureRuleTypeEnabled(rule.alertTypeId);
+  } catch (err) {
+    throw new ErrorWithReason(RuleExecutionStatusErrorReasons.License, err);
+  }
+
   let validatedParams: Params;
   try {
     validatedParams = validateRuleTypeParams<Params>(rule.params, paramValidator);
     rawRuleSchema.validate(rawRule);
   } catch (err) {
     throw new ErrorWithReason(RuleExecutionStatusErrorReasons.Validate, err);
-  }
-  alertingEventLogger.start();
-  alertingEventLogger.setRuleName(rule.name);
-
-  try {
-    ruleTypeRegistry.ensureRuleTypeEnabled(rule.alertTypeId);
-  } catch (err) {
-    throw new ErrorWithReason(RuleExecutionStatusErrorReasons.License, err);
   }
 
   if (rule.monitoring) {
