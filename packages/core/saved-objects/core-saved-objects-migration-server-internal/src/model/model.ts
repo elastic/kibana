@@ -46,6 +46,7 @@ import {
   increaseBatchSize,
   hasLaterVersionAlias,
   aliasVersion,
+  REINDEX_TEMP_SUFFIX,
 } from './helpers';
 import { buildTempIndexMap, createBatches } from './create_batches';
 import type { MigrationLog } from '../types';
@@ -1541,7 +1542,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         // migration from the same source.
         return { ...stateP, controlState: 'MARK_VERSION_INDEX_READY_CONFLICT' };
       } else if (isTypeof(left, 'index_not_found_exception')) {
-        if (left.index === stateP.tempIndex) {
+        if (left.index.endsWith(REINDEX_TEMP_SUFFIX)) {
           // another instance has already completed the migration and deleted
           // the temporary index
           return { ...stateP, controlState: 'MARK_VERSION_INDEX_READY_CONFLICT' };
