@@ -1,0 +1,55 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
+ */
+
+import { schema } from '@kbn/config-schema';
+
+const searchSessionRequestInfoSchema = schema.object({
+  id: schema.string(),
+  strategy: schema.string(),
+});
+
+const serializeableSchema = schema.mapOf(schema.string(), schema.any());
+
+const searchSessionAttrSchema = schema.object({
+  sessionId: schema.string(),
+  name: schema.maybe(schema.string()),
+  appId: schema.maybe(schema.string()),
+  created: schema.string(),
+  expires: schema.string(),
+  locatorId: schema.maybe(schema.string()),
+  initialState: schema.maybe(serializeableSchema),
+  restoreState: schema.maybe(serializeableSchema),
+  idMapping: schema.mapOf(schema.string(), searchSessionRequestInfoSchema),
+  realmType: schema.maybe(schema.string()),
+  realmName: schema.maybe(schema.string()),
+  username: schema.maybe(schema.string()),
+  version: schema.string(),
+  isCanceled: schema.maybe(schema.boolean()),
+});
+
+export const searchSessionSchema = schema.object({
+  id: schema.string(),
+  attributes: searchSessionAttrSchema,
+});
+
+export const searchSessionStatusSchema = schema.object({
+  status: schema.oneOf([
+    schema.literal('in_progress'),
+    schema.literal('error'),
+    schema.literal('complete'),
+    schema.literal('cancelled'),
+    schema.literal('expired'),
+  ]),
+  errors: schema.maybe(schema.arrayOf(schema.string())),
+});
+
+export const searchSessionsFindSchema = schema.object({
+  total: schema.number(),
+  saved_objects: schema.arrayOf(searchSessionSchema),
+  statuses: schema.recordOf(schema.string(), searchSessionStatusSchema),
+});

@@ -10,6 +10,16 @@ import { schema } from '@kbn/config-schema';
 import { Logger } from '@kbn/core/server';
 import { reportServerError } from '@kbn/kibana-utils-plugin/server';
 import { DataPluginRouter } from '../types';
+import {
+  SearchSessionRestResponse,
+  SearchSessionStatusRestResponse,
+  SearchSessionsFindRestResponse,
+} from './response_types';
+import {
+  searchSessionSchema,
+  searchSessionStatusSchema,
+  searchSessionsFindSchema,
+} from './response_schema';
 
 const STORE_SEARCH_SESSIONS_ROLE_TAG = `access:store_search_session`;
 const access = 'internal';
@@ -35,6 +45,11 @@ export function registerSessionRoutes(router: DataPluginRouter, logger: Logger):
             restoreState: schema.maybe(schema.object({}, { unknowns: 'allow' })),
           }),
         },
+        response: {
+          200: {
+            body: schema.maybe(searchSessionSchema),
+          },
+        },
       },
     },
     async (context, request, res) => {
@@ -43,14 +58,17 @@ export function registerSessionRoutes(router: DataPluginRouter, logger: Logger):
 
       try {
         const searchContext = await context.search;
-        const response = await searchContext.saveSession(sessionId, {
-          name,
-          appId,
-          expires,
-          locatorId,
-          initialState,
-          restoreState,
-        });
+        const response: SearchSessionRestResponse | undefined = await searchContext.saveSession(
+          sessionId,
+          {
+            name,
+            appId,
+            expires,
+            locatorId,
+            initialState,
+            restoreState,
+          }
+        );
 
         return res.ok({
           body: response,
@@ -71,13 +89,18 @@ export function registerSessionRoutes(router: DataPluginRouter, logger: Logger):
             id: schema.string(),
           }),
         },
+        response: {
+          200: {
+            body: searchSessionSchema,
+          },
+        },
       },
     },
     async (context, request, res) => {
       const { id } = request.params;
       try {
         const searchContext = await context.search;
-        const response = await searchContext!.getSession(id);
+        const response: SearchSessionRestResponse = await searchContext!.getSession(id);
 
         return res.ok({
           body: response,
@@ -99,13 +122,18 @@ export function registerSessionRoutes(router: DataPluginRouter, logger: Logger):
             id: schema.string(),
           }),
         },
+        response: {
+          200: {
+            body: searchSessionStatusSchema,
+          },
+        },
       },
     },
     async (context, request, res) => {
       const { id } = request.params;
       try {
         const searchContext = await context.search;
-        const response = await searchContext!.getSessionStatus(id);
+        const response: SearchSessionStatusRestResponse = await searchContext!.getSessionStatus(id);
 
         return res.ok({
           body: response,
@@ -133,13 +161,18 @@ export function registerSessionRoutes(router: DataPluginRouter, logger: Logger):
             search: schema.maybe(schema.string()),
           }),
         },
+        response: {
+          200: {
+            body: searchSessionsFindSchema,
+          },
+        },
       },
     },
     async (context, request, res) => {
       const { page, perPage, sortField, sortOrder, filter, searchFields, search } = request.body;
       try {
         const searchContext = await context.search;
-        const response = await searchContext!.findSessions({
+        const response: SearchSessionsFindRestResponse = await searchContext!.findSessions({
           page,
           perPage,
           sortField,
@@ -168,6 +201,11 @@ export function registerSessionRoutes(router: DataPluginRouter, logger: Logger):
             id: schema.string(),
           }),
         },
+        response: {
+          200: {
+            body: schema.never(),
+          },
+        },
       },
     },
     async (context, request, res) => {
@@ -193,6 +231,11 @@ export function registerSessionRoutes(router: DataPluginRouter, logger: Logger):
           params: schema.object({
             id: schema.string(),
           }),
+        },
+        response: {
+          200: {
+            body: schema.never(),
+          },
         },
       },
     },
@@ -224,6 +267,12 @@ export function registerSessionRoutes(router: DataPluginRouter, logger: Logger):
             expires: schema.maybe(schema.string()),
           }),
         },
+        response: {
+          200: {
+            // todo
+            body: schema.any(),
+          },
+        },
       },
     },
     async (context, request, res) => {
@@ -254,6 +303,12 @@ export function registerSessionRoutes(router: DataPluginRouter, logger: Logger):
           body: schema.object({
             expires: schema.string(),
           }),
+        },
+        response: {
+          200: {
+            // todo
+            body: schema.any(),
+          },
         },
       },
     },
