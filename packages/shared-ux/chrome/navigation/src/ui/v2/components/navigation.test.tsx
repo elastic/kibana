@@ -14,46 +14,42 @@ import type { ChromeNavLink } from '@kbn/core-chrome-browser';
 import { getServicesMock } from '../../../../mocks/src/jest';
 import { NavigationProvider } from '../../../services';
 import { Navigation } from './navigation';
+import { defaultNavigationTree } from '../default_navigation.test.helpers';
 
 describe('<Navigation />', () => {
   const services = getServicesMock();
 
   describe('builds the navigation tree', () => {
-    test('should read the title from props, children or deeplink', async () => {
-      const navLinks$: Observable<ChromeNavLink[]> = of([
-        {
-          id: 'item3',
-          title: 'Title from deeplink!',
-          baseUrl: '',
-          url: '',
-          href: '',
-        },
-      ]);
-
+    test('render reference UI and build the navigation tree', async () => {
       const onProjectNavigationChange = jest.fn();
 
-      render(
-        <NavigationProvider
-          {...services}
-          navLinks$={navLinks$}
-          onProjectNavigationChange={onProjectNavigationChange}
-        >
-          <Navigation>
-            <Navigation.Item id="item1">Title in children</Navigation.Item>
-            <Navigation.Item id="item2" title="Title in props" />
-            {/* Title will be read from the deeplink */}
-            <Navigation.Item id="item3-a" link="item3" />
-            {/* Title will be read from the props */}
-            <Navigation.Item id="item3-b" link="item3" title="Override the deeplink with props" />
-            {/* Title will be read from the children */}
-            <Navigation.Item id="item3-c" link="item3">
-              Override the deeplink with children
-            </Navigation.Item>
-            {/* Should not appear */}
-            <Navigation.Item link="disabled" title="Should NOT be there" />
+      const { findByTestId } = render(
+        <NavigationProvider {...services} onProjectNavigationChange={onProjectNavigationChange}>
+          <Navigation homeRef="https://elastic.co">
+            <Navigation.Group id="group1">
+              <Navigation.Item id="item1" title="Item 1" />
+              <Navigation.Item id="item2" title="Item 2" />
+              <Navigation.Group id="group1A" title="Group1A">
+                <Navigation.Item id="item1" title="Group 1A Item 1" />
+                <Navigation.Group id="group1A_1" title="Group1A_1">
+                  <Navigation.Item id="item1" title="Group 1A_1 Item 1" />
+                </Navigation.Group>
+              </Navigation.Group>
+            </Navigation.Group>
           </Navigation>
         </NavigationProvider>
       );
+
+      expect(await findByTestId('nav-item-group1.item1')).toBeVisible();
+      expect(await findByTestId('nav-item-group1.item2')).toBeVisible();
+      expect(await findByTestId('nav-item-group1.group1A')).toBeVisible();
+      expect(await findByTestId('nav-item-group1.group1A.item1')).toBeVisible();
+      expect(await findByTestId('nav-item-group1.group1A.group1A_1')).toBeVisible();
+
+      // Click the last group to expand and show the last depth
+      (await findByTestId('nav-item-group1.group1A.group1A_1')).click();
+
+      expect(await findByTestId('nav-item-group1.group1A.group1A_1.item1')).toBeVisible();
 
       expect(onProjectNavigationChange).toHaveBeenCalled();
       const lastCall =
@@ -61,57 +57,58 @@ describe('<Navigation />', () => {
       const [navTree] = lastCall;
 
       expect(navTree).toEqual({
+        homeRef: 'https://elastic.co',
         navigationTree: [
           {
-            id: 'item1',
-            title: 'Title in children',
-          },
-          {
-            id: 'item2',
-            title: 'Title in props',
-          },
-          {
-            id: 'item3-a',
-            title: 'Title from deeplink!',
-            deepLink: {
-              id: 'item3',
-              title: 'Title from deeplink!',
-              baseUrl: '',
-              url: '',
-              href: '',
-            },
-          },
-          {
-            id: 'item3-b',
-            title: 'Override the deeplink with props',
-            deepLink: {
-              id: 'item3',
-              title: 'Title from deeplink!',
-              baseUrl: '',
-              url: '',
-              href: '',
-            },
-          },
-          {
-            id: 'item3-c',
-            title: 'Override the deeplink with children',
-            deepLink: {
-              id: 'item3',
-              title: 'Title from deeplink!',
-              baseUrl: '',
-              url: '',
-              href: '',
-            },
+            id: 'group1',
+            path: ['group1'],
+            title: '',
+            children: [
+              {
+                id: 'item1',
+                title: 'Item 1',
+                path: ['group1', 'item1'],
+              },
+              {
+                id: 'item2',
+                title: 'Item 2',
+                path: ['group1', 'item2'],
+              },
+              {
+                id: 'group1A',
+                title: 'Group1A',
+                path: ['group1', 'group1A'],
+                children: [
+                  {
+                    id: 'item1',
+                    title: 'Group 1A Item 1',
+                    path: ['group1', 'group1A', 'item1'],
+                  },
+                  {
+                    id: 'group1A_1',
+                    title: 'Group1A_1',
+                    path: ['group1', 'group1A', 'group1A_1'],
+                    children: [
+                      {
+                        id: 'item1',
+                        title: 'Group 1A_1 Item 1',
+                        path: ['group1', 'group1A', 'group1A_1', 'item1'],
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
           },
         ],
       });
     });
 
-    test('should render any level of depth', async () => {
+    test('should read the title from props, children or deeplink', async () => {
       const navLinks$: Observable<ChromeNavLink[]> = of([
         {
-          id: 'item3',
-          title: 'Title from deeplink!',
+          id: 'item1',
+          title: 'Title from deeplink',
           baseUrl: '',
           url: '',
           href: '',
@@ -126,13 +123,14 @@ describe('<Navigation />', () => {
           navLinks$={navLinks$}
           onProjectNavigationChange={onProjectNavigationChange}
         >
-          <Navigation>
-            <Navigation.Group id="item1" title="Item 1">
-              <Navigation.Group id="item1" title="Item 1">
-                {/* Will read the title from the deeplink */}
-                <Navigation.Group link="item3">
-                  <Navigation.Item id="item1" title="Item 1" />
-                </Navigation.Group>
+          <Navigation homeRef="https://elastic.co">
+            <Navigation.Group id="root">
+              <Navigation.Group id="group1">
+                {/* Title from deeplink */}
+                <Navigation.Item id="item1" link="item1" />
+                <Navigation.Item id="item2" link="item1" title="Overwrite deeplink title" />
+                <Navigation.Item id="item3" title="Title in props" />
+                <Navigation.Item id="item4">Title in children</Navigation.Item>
               </Navigation.Group>
             </Navigation.Group>
           </Navigation>
@@ -145,31 +143,51 @@ describe('<Navigation />', () => {
       const [navTree] = lastCall;
 
       expect(navTree).toEqual({
+        homeRef: 'https://elastic.co',
         navigationTree: [
           {
-            id: 'item1',
-            title: 'Item 1',
+            id: 'root',
+            path: ['root'],
+            title: '',
             children: [
               {
-                id: 'item1',
-                title: 'Item 1',
+                id: 'group1',
+                path: ['root', 'group1'],
+                title: '',
                 children: [
                   {
-                    id: 'item3',
-                    title: 'Title from deeplink!',
+                    id: 'item1',
+                    path: ['root', 'group1', 'item1'],
+                    title: 'Title from deeplink',
                     deepLink: {
+                      id: 'item1',
+                      title: 'Title from deeplink',
                       baseUrl: '',
-                      href: '',
-                      id: 'item3',
-                      title: 'Title from deeplink!',
                       url: '',
+                      href: '',
                     },
-                    children: [
-                      {
-                        id: 'item1',
-                        title: 'Item 1',
-                      },
-                    ],
+                  },
+                  {
+                    id: 'item2',
+                    title: 'Overwrite deeplink title',
+                    path: ['root', 'group1', 'item2'],
+                    deepLink: {
+                      id: 'item1',
+                      title: 'Title from deeplink',
+                      baseUrl: '',
+                      url: '',
+                      href: '',
+                    },
+                  },
+                  {
+                    id: 'item3',
+                    title: 'Title in props',
+                    path: ['root', 'group1', 'item3'],
+                  },
+                  {
+                    id: 'item4',
+                    path: ['root', 'group1', 'item4'],
+                    title: 'Title in children',
                   },
                 ],
               },
@@ -179,9 +197,236 @@ describe('<Navigation />', () => {
       });
     });
 
-    test.skip('does not render in the UI the nodes that points to unexisting deeplinks', async () => {
-      // TODO: This test will be added when we'll have the UI and be able to add
-      // data-test-subj to all the nodes with their paths
+    test('should filter out unknown deeplinks', async () => {
+      const navLinks$: Observable<ChromeNavLink[]> = of([
+        {
+          id: 'item1',
+          title: 'Title from deeplink',
+          baseUrl: '',
+          url: '',
+          href: '',
+        },
+      ]);
+
+      const onProjectNavigationChange = jest.fn();
+
+      const { findByTestId } = render(
+        <NavigationProvider
+          {...services}
+          navLinks$={navLinks$}
+          onProjectNavigationChange={onProjectNavigationChange}
+        >
+          <Navigation homeRef="https://elastic.co">
+            <Navigation.Group id="root">
+              <Navigation.Group id="group1">
+                {/* Title from deeplink */}
+                <Navigation.Item id="item1" link="item1" />
+                {/* Should not appear */}
+                <Navigation.Item id="unknownLink" link="unknown" title="Should NOT be there" />
+              </Navigation.Group>
+            </Navigation.Group>
+          </Navigation>
+        </NavigationProvider>
+      );
+
+      expect(await findByTestId('nav-item-root.group1.item1')).toBeVisible();
+      expect(await findByTestId('nav-item-root.group1.item1')).toBeVisible();
+
+      expect(onProjectNavigationChange).toHaveBeenCalled();
+      const lastCall =
+        onProjectNavigationChange.mock.calls[onProjectNavigationChange.mock.calls.length - 1];
+      const [navTree] = lastCall;
+
+      expect(navTree).toEqual({
+        homeRef: 'https://elastic.co',
+        navigationTree: [
+          {
+            id: 'root',
+            path: ['root'],
+            title: '',
+            children: [
+              {
+                id: 'group1',
+                path: ['root', 'group1'],
+                title: '',
+                children: [
+                  {
+                    id: 'item1',
+                    path: ['root', 'group1', 'item1'],
+                    title: 'Title from deeplink',
+                    deepLink: {
+                      id: 'item1',
+                      title: 'Title from deeplink',
+                      baseUrl: '',
+                      url: '',
+                      href: '',
+                    },
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      });
+    });
+
+    test('should render custom react element', async () => {
+      const navLinks$: Observable<ChromeNavLink[]> = of([
+        {
+          id: 'item1',
+          title: 'Title from deeplink',
+          baseUrl: '',
+          url: '',
+          href: '',
+        },
+      ]);
+
+      const onProjectNavigationChange = jest.fn();
+
+      const { findByTestId } = render(
+        <NavigationProvider
+          {...services}
+          navLinks$={navLinks$}
+          onProjectNavigationChange={onProjectNavigationChange}
+        >
+          <Navigation homeRef="https://elastic.co">
+            <Navigation.Group id="root">
+              <Navigation.Group id="group1">
+                <Navigation.Item link="item1">
+                  <div data-test-subj="my-custom-element">Custom element</div>
+                </Navigation.Item>
+                <Navigation.Item id="item2" title="Children prop">
+                  {(navNode) => <div data-test-subj="my-other-custom-element">{navNode.title}</div>}
+                </Navigation.Item>
+              </Navigation.Group>
+            </Navigation.Group>
+          </Navigation>
+        </NavigationProvider>
+      );
+
+      expect(await findByTestId('my-custom-element')).toBeVisible();
+      expect(await findByTestId('my-other-custom-element')).toBeVisible();
+      expect(await (await findByTestId('my-other-custom-element')).textContent).toBe(
+        'Children prop'
+      );
+
+      expect(onProjectNavigationChange).toHaveBeenCalled();
+      const lastCall =
+        onProjectNavigationChange.mock.calls[onProjectNavigationChange.mock.calls.length - 1];
+      const [navTree] = lastCall;
+
+      expect(navTree).toEqual({
+        homeRef: 'https://elastic.co',
+        navigationTree: [
+          {
+            id: 'root',
+            path: ['root'],
+            title: '',
+            children: [
+              {
+                id: 'group1',
+                path: ['root', 'group1'],
+                title: '',
+                children: [
+                  {
+                    id: 'item1',
+                    path: ['root', 'group1', 'item1'],
+                    title: 'Title from deeplink',
+                    renderItem: expect.any(Function),
+                    deepLink: {
+                      id: 'item1',
+                      title: 'Title from deeplink',
+                      baseUrl: '',
+                      url: '',
+                      href: '',
+                    },
+                  },
+                  {
+                    id: 'item2',
+                    path: ['root', 'group1', 'item2'],
+                    title: 'Children prop',
+                    renderItem: expect.any(Function),
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      });
+    });
+
+    test('should render group preset (analytics, ml...)', async () => {
+      const onProjectNavigationChange = jest.fn();
+
+      render(
+        <NavigationProvider {...services} onProjectNavigationChange={onProjectNavigationChange}>
+          <Navigation homeRef="https://elastic.co">
+            <Navigation.Group preset="analytics" />
+            <Navigation.Group preset="ml" />
+            <Navigation.Group preset="devtools" />
+            <Navigation.Group preset="management" />
+          </Navigation>
+        </NavigationProvider>
+      );
+
+      expect(onProjectNavigationChange).toHaveBeenCalled();
+      const lastCall =
+        onProjectNavigationChange.mock.calls[onProjectNavigationChange.mock.calls.length - 1];
+      const [navTree] = lastCall;
+
+      expect(navTree).toEqual({
+        homeRef: 'https://elastic.co',
+        navigationTree: defaultNavigationTree.map(({ type, ...rest }) => rest),
+      });
+    });
+
+    test('should render cloud link', async () => {
+      const onProjectNavigationChange = jest.fn();
+
+      const { findByTestId } = render(
+        <NavigationProvider {...services} onProjectNavigationChange={onProjectNavigationChange}>
+          <Navigation homeRef="https://elastic.co">
+            <Navigation.Group id="root">
+              <Navigation.Group id="group1">
+                <Navigation.CloudLink preset="deployments" />
+                <Navigation.CloudLink preset="projects" />
+                <Navigation.CloudLink href="https://foo.com" icon="myIcon" title="Custom link" />
+              </Navigation.Group>
+            </Navigation.Group>
+          </Navigation>
+        </NavigationProvider>
+      );
+
+      expect(await findByTestId('nav-header-link-to-projects')).toBeVisible();
+      expect(await findByTestId('nav-header-link-to-deployments')).toBeVisible();
+      expect(await findByTestId('nav-header-link-to-cloud')).toBeVisible();
+      expect(await (await findByTestId('nav-header-link-to-cloud')).textContent).toBe(
+        'Custom link'
+      );
+    });
+
+    test('should render recently accessed items', async () => {
+      const recentlyAccessed$ = of([
+        { label: 'This is an example', link: '/app/example/39859', id: '39850' },
+        { label: 'Another example', link: '/app/example/5235', id: '5235' },
+      ]);
+
+      const { findByTestId } = render(
+        <NavigationProvider {...services} recentlyAccessed$={recentlyAccessed$}>
+          <Navigation homeRef="https://elastic.co">
+            <Navigation.Group id="root">
+              <Navigation.Group id="group1">
+                <Navigation.RecentlyAccessed />
+              </Navigation.Group>
+            </Navigation.Group>
+          </Navigation>
+        </NavigationProvider>
+      );
+
+      expect(await findByTestId('nav-bucket-recentlyAccessed')).toBeVisible();
+      expect(await (await findByTestId('nav-bucket-recentlyAccessed')).textContent).toBe(
+        'RecentThis is an exampleAnother example'
+      );
     });
   });
 });

@@ -5,7 +5,13 @@
  * 2.0.
  */
 import React, { useCallback } from 'react';
-import { EuiSpacer, EuiButtonEmpty, type EuiDescriptionListProps } from '@elastic/eui';
+import {
+  EuiSpacer,
+  EuiButtonEmpty,
+  type EuiDescriptionListProps,
+  EuiFlexGroup,
+  EuiFlexItem,
+} from '@elastic/eui';
 import { Link, useParams } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { generatePath } from 'react-router-dom';
@@ -190,25 +196,33 @@ export const ResourceFindings = ({ dataView }: FindingsBaseProps) => {
         }}
         loading={resourceFindings.isFetching}
       />
-      <PageTitle>
-        <BackToResourcesButton />
-        <PageTitleText
-          title={
-            <CloudPosturePageTitle
-              title={i18n.translate(
-                'xpack.csp.findings.resourceFindings.resourceFindingsPageTitle',
-                {
-                  defaultMessage: '{resourceName} {hyphen} Findings',
-                  values: {
-                    resourceName: resourceFindings.data?.resourceName,
-                    hyphen: resourceFindings.data?.resourceName ? '-' : '',
-                  },
-                }
-              )}
+      <EuiSpacer size="m" />
+      <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+        <EuiFlexItem grow={false}>
+          <PageTitle>
+            <PageTitleText
+              title={
+                <CloudPosturePageTitle
+                  title={i18n.translate(
+                    'xpack.csp.findings.resourceFindings.resourceFindingsPageTitle',
+                    {
+                      defaultMessage: '{resourceName} {hyphen} Findings',
+                      values: {
+                        resourceName: resourceFindings.data?.resourceName,
+                        hyphen: resourceFindings.data?.resourceName ? '-' : '',
+                      },
+                    }
+                  )}
+                />
+              }
             />
-          }
-        />
-      </PageTitle>
+          </PageTitle>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <BackToResourcesButton />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer />
       {resourceFindings.data && (
         <CspInlineDescriptionList
           listItems={getResourceFindingSharedValues({

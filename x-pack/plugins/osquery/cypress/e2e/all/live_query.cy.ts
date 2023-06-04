@@ -63,16 +63,16 @@ describe('ALL - Live Query', () => {
         },
       },
     }).then((pack) => {
-      packId = pack.id;
-      packName = pack.attributes.name;
+      packId = pack.saved_object_id;
+      packName = pack.name;
     });
     loadSavedQuery({
       interval: '3600',
       query: 'select * from uptime;',
       ecs_mapping: {},
     }).then((savedQuery) => {
-      savedQueryId = savedQuery.id;
-      savedQueryName = savedQuery.attributes.name;
+      savedQueryId = savedQuery.saved_object_id;
+      savedQueryName = savedQuery.name;
     });
     loadCase('securitySolution').then((caseInfo) => {
       caseId = caseInfo.id;

@@ -6,7 +6,7 @@
  */
 
 import { cloudPosturePages } from './constants';
-import { getSecuritySolutionLink, getSecuritySolutionNavTab } from './security_solution_links';
+import { getSecuritySolutionLink } from './security_solution_links';
 import { Chance } from 'chance';
 import type { CspPage } from './types';
 
