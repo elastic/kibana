@@ -101,7 +101,7 @@ export async function getIndicesInvolvedInRelocation({
   defaultIndexTypesMap: IndexTypesMap;
   logger: Logger;
 }): Promise<string[]> {
-  const indicesWithMovingTypesSet = new Set<string>();
+  const indicesWithRelocatingTypesSet = new Set<string>();
 
   const currentIndexTypesMap = await getCurrentIndexTypesMap({
     client,
@@ -120,11 +120,11 @@ export async function getIndicesInvolvedInRelocation({
   Object.values(typeIndexDistribution)
     .filter(({ status }) => status === TypeStatus.Moved)
     .forEach(({ currentIndex, targetIndex }) => {
-      indicesWithMovingTypesSet.add(currentIndex!);
-      indicesWithMovingTypesSet.add(targetIndex!);
+      indicesWithRelocatingTypesSet.add(currentIndex!);
+      indicesWithRelocatingTypesSet.add(targetIndex!);
     });
 
-  return Array.from(indicesWithMovingTypesSet);
+  return Array.from(indicesWithRelocatingTypesSet);
 }
 
 export function indexMapToIndexTypesMap(indexMap: IndexMap): IndexTypesMap {

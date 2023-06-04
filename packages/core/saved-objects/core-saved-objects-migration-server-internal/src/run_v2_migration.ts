@@ -76,7 +76,7 @@ export const runV2Migration = async (options: RunV2MigrationOpts): Promise<Migra
       options.logger.debug(`migrationVersion: ${migrationVersion} saved object type: ${type}`);
     });
 
-  // build a indexTypesMap from the info present in tye typeRegistry, e.g.:
+  // build a indexTypesMap from the info present in the typeRegistry, e.g.:
   // {
   //   '.kibana': ['typeA', 'typeB', ...]
   //   '.kibana_task_manager': ['task', ...]
@@ -87,7 +87,7 @@ export const runV2Migration = async (options: RunV2MigrationOpts): Promise<Migra
 
   // compare indexTypesMap with the one present (or not) in the .kibana index meta
   // and check if some SO types have been moved to different indices
-  const indicesWithMovingTypes = await getIndicesInvolvedInRelocation({
+  const indicesWithRelocatingTypes = await getIndicesInvolvedInRelocation({
     mainIndex: options.kibanaIndexPrefix,
     client: options.elasticsearchClient,
     indexTypesMap,
@@ -100,10 +100,10 @@ export const runV2Migration = async (options: RunV2MigrationOpts): Promise<Migra
   // A) reindex some documents TO other indices
   // B) receive some documents FROM other indices
   // C) both
-  const readyToReindexWaitGroupMap = createWaitGroupMap(indicesWithMovingTypes);
-  const doneReindexingWaitGroupMap = createWaitGroupMap(indicesWithMovingTypes);
+  const readyToReindexWaitGroupMap = createWaitGroupMap(indicesWithRelocatingTypes);
+  const doneReindexingWaitGroupMap = createWaitGroupMap(indicesWithRelocatingTypes);
   const updateAliasesWaitGroupMap = createWaitGroupMap<AliasAction[], Promise<any>>(
-    indicesWithMovingTypes,
+    indicesWithRelocatingTypes,
     (allAliasActions) =>
       updateAliases({
         client: options.elasticsearchClient,
@@ -113,9 +113,9 @@ export const runV2Migration = async (options: RunV2MigrationOpts): Promise<Migra
 
   // build a list of all migrators that must be started
   const migratorIndices = new Set(Object.keys(indexMap));
-  // indices involved in a relocation might no longer be present in current mappings
+  // the types in indices involved in relocation might not have mappings in the current mappings anymore
   // but if their SOs must be relocated to another index, we still need a migrator to do the job
-  indicesWithMovingTypes.forEach((index) => migratorIndices.add(index));
+  indicesWithRelocatingTypes.forEach((index) => migratorIndices.add(index));
 
   const migrators = Array.from(migratorIndices).map((indexName, i) => {
     return {
@@ -124,7 +124,7 @@ export const runV2Migration = async (options: RunV2MigrationOpts): Promise<Migra
         const doneReindexing = doneReindexingWaitGroupMap[indexName];
         const updateRelocationAliases = updateAliasesWaitGroupMap[indexName];
         // check if this migrator's index is involved in some document redistribution
-        const mustRelocateDocuments = indicesWithMovingTypes.includes(indexName);
+        const mustRelocateDocuments = indicesWithRelocatingTypes.includes(indexName);
 
         return runResilientMigrator({
           client: options.elasticsearchClient,
