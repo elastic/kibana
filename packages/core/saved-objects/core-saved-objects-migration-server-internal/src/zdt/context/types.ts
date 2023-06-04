@@ -17,8 +17,8 @@ import type {
   SavedObjectsMigrationConfigType,
 } from '@kbn/core-saved-objects-base-server-internal';
 import type { DocLinks } from '@kbn/doc-links';
-import { VersionedTransformer } from '../../document_migrator';
 import type { BehaviorSubject } from 'rxjs';
+import { VersionedTransformer } from '../../document_migrator';
 import type { State } from '../state';
 
 /**

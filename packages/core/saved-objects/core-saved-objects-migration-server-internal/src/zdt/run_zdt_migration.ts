@@ -11,7 +11,6 @@ import type { DocLinksServiceStart } from '@kbn/core-doc-links-server';
 import type { NodeRoles } from '@kbn/core-node-server';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { BehaviorSubject } from 'rxjs';
-import type { State } from './state';
 
 import type {
   ISavedObjectTypeRegistry,
@@ -21,6 +20,7 @@ import {
   type SavedObjectsMigrationConfigType,
   type MigrationResult,
 } from '@kbn/core-saved-objects-base-server-internal';
+import type { State } from './state';
 import type { VersionedTransformer } from '../document_migrator';
 import { buildMigratorConfigs } from './utils';
 import { migrateIndex } from './migrate_index';

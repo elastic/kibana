@@ -8,7 +8,6 @@
 
 import type { Logger } from '@kbn/logging';
 import { BehaviorSubject } from 'rxjs';
-import type { State } from './state';
 import type { DocLinksServiceStart } from '@kbn/core-doc-links-server';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type {
@@ -23,6 +22,7 @@ import type {
   SavedObjectsTypeMappingDefinitions,
 } from '@kbn/core-saved-objects-base-server-internal';
 import Semver from 'semver';
+import type { State } from './state';
 import type { DocumentMigrator } from './document_migrator';
 import { buildActiveMappings, createIndexMap } from './core';
 import {
@@ -32,7 +32,6 @@ import {
 } from './kibana_migrator_utils';
 import { runResilientMigrator } from './run_resilient_migrator';
 import { migrateRawDocsSafely } from './core/migrate_raw_docs';
-
 
 export interface RunV2MigrationOpts {
   /** The current Kibana version */
