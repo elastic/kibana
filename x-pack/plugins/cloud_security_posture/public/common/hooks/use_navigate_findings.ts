@@ -68,3 +68,6 @@ export const useNavigateFindings = () => useNavigate(findingsNavigation.findings
 
 export const useNavigateFindingsByResource = () =>
   useNavigate(findingsNavigation.findings_by_resource.path);
+
+export const useNavigateVulnerabilities = () =>
+  useNavigate(findingsNavigation.vulnerabilities.path);
