@@ -38,7 +38,7 @@ export function getCurrentsConfig(projectRoot?: string): CurrentsConfig {
   }
   const defaultConfig: CurrentsConfig = {
     e2e: {
-      batchSize: 3,
+      batchSize: 1,
     },
     component: {
       batchSize: 5,

@@ -6,10 +6,9 @@
  */
 
 module.exports = {
-  projectId: 'Fjmie9',
-  recordKey: 'dUqqlw5islPJL5PB',
-  cloudServiceUrl: 'https://cy.currents.dev', // Sorry Cypress users - the director service URL
-  e2e: {
-    batchSize: 1, // orchestration batch size for e2e tests (Currents only, read below)
-  },
+  projectId: 'security_solution',
+  recordKey: 'xxx',
+  // projectId: 'Fjmie9',
+  // recordKey: 'dUqqlw5islPJL5PB',
+  cloudServiceUrl: 'https://cypress-director.herokuapp.com', // Sorry Cypress users - the director service URL
 };
