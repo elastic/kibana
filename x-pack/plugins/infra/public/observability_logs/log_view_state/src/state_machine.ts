@@ -7,7 +7,7 @@
 
 import { catchError, from, map, of, throwError } from 'rxjs';
 import { createMachine, actions, assign } from 'xstate';
-import { ILogViewsClient } from '../../../services/log_views';
+import type { ILogViewsPublicClient } from '../../../services/log_views';
 import { NotificationChannel } from '../../xstate_helpers';
 import { LogViewNotificationEvent, logViewNotificationEventSelectors } from './notifications';
 import {
@@ -295,7 +295,7 @@ export const createPureLogViewStateMachine = (initialContext: LogViewContextWith
 
 export interface LogViewStateMachineDependencies {
   initialContext: LogViewContextWithReference;
-  logViews: ILogViewsClient;
+  logViews: ILogViewsPublicClient;
   notificationChannel?: NotificationChannel<LogViewContext, LogViewEvent, LogViewNotificationEvent>;
   initializeFromUrl?: InitializeFromUrl;
   updateContextInUrl?: UpdateContextInUrl;

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { createLocatorMock } from '../common/locators/locators.mock';
 import { createInventoryViewsServiceStartMock } from './services/inventory_views/inventory_views_service.mock';
 import {
   createLogViewsServiceSetupMock,
@@ -17,6 +18,7 @@ const createInfraSetupMock = () => {
   const infraSetupMock: jest.Mocked<InfraPluginSetup> = {
     defineInternalSourceConfiguration: jest.fn(),
     logViews: createLogViewsServiceSetupMock(),
+    locators: createLocatorMock(),
   };
 
   return infraSetupMock;

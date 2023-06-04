@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { IBasePath } from '@kbn/core/public';
 import moment from 'moment';
-import type { InfraLocators } from '@kbn/infra-plugin/public/locators';
+import type { InfraLocators } from '@kbn/infra-plugin/common/locators';
 import { APIReturnType } from '../../../../../services/rest/create_call_apm_api';
 import { getInfraHref } from '../../../../shared/links/infra_link';
 import {
