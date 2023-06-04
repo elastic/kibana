@@ -64,7 +64,7 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
     () =>
       jobCreatorFactory(jobType)(
         mlContext.currentDataView,
-        mlContext.deprecatedSavedSearchObj,
+        mlContext.selectedSavedSearch,
         mlContext.combinedQuery
       ),
     // eslint-disable-next-line react-hooks/exhaustive-deps
